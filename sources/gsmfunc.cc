@@ -2,10 +2,11 @@
 // FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
 //                     companion to GSM
 //
-// $Id$
+// @(#)gsmfunc.cc	2.7 8/16/97
 //
 
 #include <assert.h>
+#include <ctype.h>
 
 #include "gsmfunc.h"
 
@@ -500,6 +501,11 @@ void FuncDescObj::SetFuncInfo(int funcindex, FuncInfoType funcinfo)
       _RefCountTable(funcinfo.FuncInstr)++;
 }
 
+void FuncDescObj::SetFuncInfo(int funcindex, const gString& s)
+{
+  SetFuncInfo(funcindex, s, 0);
+}
+
 void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
                               Portion* (*funcptr)(Portion**)  )
 {
@@ -507,156 +513,224 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   // Here we will parse the gString and call the above SetFuncInfo function.
   char ch = ' ';
   int index=0, length=s.length();
-  int numbers=0, bools=0;
+  int numArgs=0;
+  bool done = false;
+  gList<gString> specList;
+  gList<gString> nameList;
+  gList<int>     listList;
   
+    // Move ch to the first variable name (most likely x)
   while (ch != '[' && index<=length)  
     ch=s[index++];
   ch=s[index++];
 
-  // We are now at the first variable name (most likely "X")
-
-  while (ch != '>' && index<=length)  
-    ch=s[index++];
+  gString name = ch;
   ch=s[index++];
+  while (isalpha(ch)) { name += ch; ch = s[index++]; }
+  nameList.Append(name);
 
-  // ch now holds the first letter of the type of the first variable
 
-  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)
+  while (!done)
   {
-    while (ch != 'R' && index<=length)  
+      // Move ch so that it holds the first character of the type;
+    while (ch != '>' && ch != ']' && index<=length)  
       ch=s[index++];
-    numbers++;
-  }
-  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)
-  {
-    while (ch != 'N' && index<=length)  
-      ch=s[index++];
-    bools++;
-  }
-
-  while (ch != '>' && index<=length)  
-    ch=s[index++];
-  ch=s[index++];
-  
-  // ch now holds the first letter of the type of the second variable
-
-
-  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)
-  {
-    while (ch != 'R' && index<=length)  
-      ch=s[index++];
-    numbers++;
-  }
-  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)
-  {
-    while (ch != 'N' && index<=length)  
-      ch=s[index++];
-    bools++;
-  }
-
-
-    // Move ch till ch holds the first char of the return type.
-  while (ch != ':' && index<=length)  
-    ch=s[index++];
-  ch=s[index++];
-  ch=s[index++];
-  
-    // Output, for bugging purposes
-  /*gout << "Nums: " << numbers << "   Bools: " << bools << "\n\n";*/
-
-    // Make proper function call to SetFuncInfo based on return and arguments.
-  if (ch == 'N' /*&& ch++ == 'U' && ch++=='M'*/)  // If return type is number
-  {
-    while (ch != 'R' && index<=length)  
-      ch=s[index++];
-    if (numbers == 1)
-    {
-      ParamInfoType x_Number[] =
-      {
-        ParamInfoType("x", porNUMBER)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, x_Number));
-    }
-    else if (numbers == 2)
-    {
-      ParamInfoType xy_Number[] =
-      {
-        ParamInfoType("x", porNUMBER),
-        ParamInfoType("y", porNUMBER)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, xy_Number));
-    }
-    else if (bools == 2)
-    {
-      ParamInfoType xy_Bool[] =
-      {
-        ParamInfoType("x", porBOOL),
-        ParamInfoType("y", porBOOL)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porNUMBER, 2, xy_Bool));
-    }
+    if (ch == ']')
+      done = true;
     else
     {
-      gout << "Invalid call to SetFuncInfo.\n\n";
-      assert(0);
-    }
-  }
-  else if (ch == 'B' /*&& ch++ == 'O' && ch++=='O'*/)  // If return type is bool
-  {
-    while (ch != 'N' && index<=length)  
       ch=s[index++];
-    if (numbers == 1)
-    {
-      ParamInfoType x_Number[] =
+  
+        // Word gets the word, which is the type of variable.
+      gString word = ch;
+      int     listNum = 0;
+      ch=s[index++];
+      while (isalpha(ch)) { word += ch; ch = s[index++]; }
+      numArgs++;
+  
+        // Check to see if it is a list
+      if (word == "LIST")
       {
-        ParamInfoType("x", porNUMBER)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, x_Number));
-    }
-    else if (numbers == 2)
-    {
-      ParamInfoType xy_Number[] =
-      {
-        ParamInfoType("x", porNUMBER),
-        ParamInfoType("y", porNUMBER)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, xy_Number));
-    }
-    else if (bools == 2)
-    {
-      ParamInfoType xy_Bool[] =
-      {
-        ParamInfoType("x", porBOOL),
-        ParamInfoType("y", porBOOL)
-      };
-      SetFuncInfo(funcindex, FuncInfoType(funcptr, porBOOL, 2, xy_Bool));
-    }
-    else
-    {
-      gout << "Invalid call to SetFuncInfo.\n\n";
-      assert(0);
-    }
-  }
-  else  // If return type is crap
-  {
-    gout << "Invalid call to SetFuncInfo.\n\n";
-    assert(0);
-  }
+        /*numArgs++;*/
+        while (word == "LIST")
+        {
+          // increment counter, and while it is a list, keep incrementing.
+          listNum++;
+          ch=s[index++];  // move ch past left parenthesis
     
-  if (numbers == 1)
-    return;
-  else if (numbers == 2)
-    return;
-  else if (bools == 2)
-    return;
+            // Word gets the word, which is the type of variable.
+          word = ch;
+          int     listNum = 0;
+          ch=s[index++];
+          while (isalpha(ch)) { word += ch; ch = s[index++]; }
+    
+        }
+      }
+
+      specList.Append(word);
+      listList.Append(listNum);
+  
+      /*gout << "Word: " << word << "\n";*/
+
+        // Move ch past the right parentheses, if applicable
+      while (ch == ')') {  ch=s[index++];  }
+
+      if (ch == ',')  // If there will be another variable
+      {
+        // Move ch to the first letter of the next variable name 
+        ch=s[index++];
+        ch=s[index++];
+    
+        gString name = ch;
+        ch=s[index++];
+        while (isalpha(ch)) { name += ch; ch = s[index++]; }
+        nameList.Append(name);
+      }
+      else
+        done = true;
+
+    }
+  }  // while not done
+
+    // Move ch to point to first char of return type
+  while (ch != ':' && index<=length)
+    ch=s[index++];
+  ch=s[index++];
+  ch=s[index++];
+  
+    // Word gets the word, which is the type of variable.
+  gString word = ch;
+  ch=s[index++];
+  while (isalpha(ch)) { word += ch; ch = s[index++]; }
+  
+    // Bunch of prints for debugging purposes.
+  /*gout << "\nReturn Type: " << word << "\n";*/
+  /*gout << "SpecList: \n";*/
+  /*specList.Dump(gout);*/
+  /*gout << "NameList: \n";*/
+  /*nameList.Dump(gout);*/
+  /*gout << "ListList: \n";*/
+  /*listList.Dump(gout);*/
+  /*int sl = specList.Length();*/
+  /*gout << "Length: " << sl << "\n";*/
+  /*gout << "NumArgs: " << numArgs << "\n";*/
+  /*gout << "\n\n";*/
+
+  
+
+  if (numArgs == 1) 
+  {
+      ParamInfoType pit[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit));
+  } else if (numArgs == 2) 
+  {
+      ParamInfoType pit2[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit2));
+  } else if (numArgs == 3) 
+  {
+      ParamInfoType pit3[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit3));
+  } else if (numArgs == 4) 
+  {
+      ParamInfoType pit4[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit4));
+  } else if (numArgs == 5) 
+  {
+      ParamInfoType pit5[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4])),
+        ParamInfoType(nameList[5], ToSpec(specList[5]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit5));
+  } else if (numArgs == 6) 
+  {
+      ParamInfoType pit6[] =
+      {
+        ParamInfoType(nameList[1], ToSpec(specList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4])),
+        ParamInfoType(nameList[5], ToSpec(specList[5])),
+        ParamInfoType(nameList[6], ToSpec(specList[6]))
+      };
+      SetFuncInfo(funcindex, 
+                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit6));
+  } else
+  {
+      gout << "Hey, too many/few arguments.\n";
+      assert(0);
+  } 
+
+}
+
+
+  // Replaces strings with their enumerated types.
+PortionSpec ToSpec(gString &str)
+{
+  gout << "ToSpec called with " << str << " for string\n";
+  if (str == "NUMBER")
+    return porNUMBER;
+  else if (str == "BOOLEAN")
+    return porBOOL;
+  else if (str == "INTEGER")
+    return porINTEGER;
+  else if (str == "TEXT")
+    return porTEXT;
+  else if (str == "EFG")
+    return porEFG;
+  else if (str == "EFPLAYER")
+    return porEFPLAYER;
+  else if (str == "EFOUTCOME")
+    return porEFOUTCOME;
+  else if (str == "NODE")
+    return porNODE;
+  else if (str == "INFOSET")
+    return porINFOSET;
+  else if (str == "BEHAV")
+    return porBEHAV;
+  else if (str == "NFG")
+    return porNFG;
+  else if (str == "NFPLAYER")
+    return porNFPLAYER;
+  else if (str == "NFOUTCOME")
+    return porNFOUTCOME;
+  else if (str == "MIXED")
+    return porMIXED;
+  else if (str == "STRATEGY")
+    return porSTRATEGY;
+  else if (str == "ACTION")
+    return porACTION;
   else
   {
-    gout << "Invalid call to SetFuncInfo.\n\n";
+    gout << "ERROR: incorrect type, " << str << ", in function definition\n\n";
     assert(0);
   }
-
-  gout << "Nums: " << numbers << "   Bools: " << bools << "\n\n";
-  
 }
 
 void FuncDescObj::SetParamInfo(int funcindex, int index, 
