@@ -58,7 +58,7 @@ efgfile:           header  { path.Push(E->RootNode()); }
                    body    { E->Reindex();  return 0; }
        ;
 
-header:            NAME  { E->SetTitle(last_name); }  playerlist
+header:            NAME  { E->SetTitle(last_name); }  playerlist commentopt
       ;
 
 playerlist:        LBRACE RBRACE
@@ -70,6 +70,10 @@ players:           player
 
 player:            NAME   { E->NewPlayer()->SetName(last_name); }
       ;
+
+commentopt:        
+          |        NAME   { E->SetComment(last_name); }
+          ;
 
 body:              node
     |              body node
@@ -210,11 +214,15 @@ outcome_name:      NAME
 		     else if (!outcome)   outc_name = last_name; }
 
 payofflist:        payoff
-          |        payofflist payoff
+          |        payofflist commaopt payoff
           ;
 
 payoff:            NUMBER  { values.Append(last_number); }   
       ;
+
+commaopt:          
+        |          ','
+        ;
 
 %%
 

@@ -488,12 +488,13 @@ void Efg::WriteEfgFile(gOutput &f, Node *n) const
       f << n->outcome->GetNumber() << " \"" <<
 	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	{
-	  gPoly<gNumber> t=n->outcome->payoffs[pl];
-	  f << t << ' ';
-	}
-      f << "}\n";
+      for (int pl = 1; pl <= NumPlayers(); pl++)  {
+	f << n->outcome->payoffs[pl];
+	if (pl < NumPlayers())
+	  f << ", ";
+	else
+	  f << " }\n";
+      }
     }
     else
       f << "0\n";
@@ -510,9 +511,13 @@ void Efg::WriteEfgFile(gOutput &f, Node *n) const
       f << n->outcome->GetNumber() << " \"" <<
 	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << n->outcome->payoffs[pl] << ' ';
-      f << "}\n";
+      for (int pl = 1; pl <= NumPlayers(); pl++)  {
+	f << n->outcome->payoffs[pl];
+	if (pl < NumPlayers())
+	  f << ", ";
+	else
+	  f << " }\n";
+      }
     }
     else
       f << "0\n";
@@ -528,9 +533,13 @@ void Efg::WriteEfgFile(gOutput &f, Node *n) const
       f << n->outcome->GetNumber() << " \"" <<
 	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
-      for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << n->outcome->payoffs[pl] << ' ';
-      f << "}\n";
+      for (int pl = 1; pl <= NumPlayers(); pl++)  {
+	f << n->outcome->payoffs[pl];
+        if (pl < NumPlayers()) 
+          f << ", ";
+        else
+          f << " }\n";
+      }
     }
     else
       f << "0\n";
@@ -546,7 +555,8 @@ void Efg::WriteEfgFile(gOutput &f) const
   f << " \"" << EscapeQuotes(title) << "\" { ";
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << EscapeQuotes(players[i]->name) << "\" ";
-  f << "}\n\n";
+  f << "}\n";
+  f << "\"" << EscapeQuotes(comment) << "\"\n\n";
 
   WriteEfgFile(f, root);
 }
