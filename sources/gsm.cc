@@ -79,9 +79,18 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
 
 GSM::~GSM()
 {
+  int i;
+
+  for( i = _CallFuncStack->Depth(); i > 0; i-- )
+  {
+    _ErrorMessage( _StdErr, 47 );
+    CallFunction();
+  }
+  assert( _CallFuncStack->Depth() == 0 );
+  delete _CallFuncStack;
+
   Flush();
   delete _FuncTable;
-
 
   delete _DefaultNfgShadow->ShadowOf();
   delete _DefaultNfgShadow;
@@ -93,11 +102,10 @@ GSM::~GSM()
   delete _OUTPUT;
   delete _NULL;
 
-
   assert( _RefTableStack->Depth() == 1 );
   delete _RefTableStack->Pop();
   delete _RefTableStack;
-  delete _CallFuncStack;
+
   assert( _StackStack->Depth() == 1 );
   delete _StackStack->Pop();
   delete _StackStack;
@@ -1555,6 +1563,9 @@ void GSM::_ErrorMessage
     break;
   case 46:
     s << "  Attempted to assign to a read-only variable \"" << str1 << "\"\n";
+    break;
+  case 47:
+    s << "  Mismatched InitCallFunction() and CallFunction() calls\n";
     break;
   default:
     s << "  General error\n";
