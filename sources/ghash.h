@@ -45,6 +45,7 @@ template <class K, class T> class HashTable
   int  IsDefined  ( K key ) const;
   void Define     ( K key, T value );
   T    Remove     ( K key );
+  void Remove     ( T value );
   T    operator() ( K key ) const;
   T&   operator() ( K key );
   const gList<K>* Key() const;

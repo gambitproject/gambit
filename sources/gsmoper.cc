@@ -20,6 +20,7 @@
 #include "behavsol.h"
 
 #include "nfg.h"
+#include "efg.h"
 
 extern GSM* _gsm;
 
@@ -2514,6 +2515,10 @@ Portion* GSM_Clear(Portion**)
 
 
 
+
+
+
+
 #include <sys/types.h>
 #ifndef __BORLANDC__
 #include <sys/time.h>
@@ -3311,6 +3316,10 @@ void Init_gsmoper(GSM* gsm)
   FuncObj = new FuncDescObj("Clear", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Clear, porBOOL, 0));
   gsm->AddFunction(FuncObj);
+
+
+
+
 
 
   FuncObj = new FuncDescObj("Assign", 1);

@@ -11,7 +11,7 @@
 
 #include "gambitio.h"
 #include "gstring.h"
-//#include "gsmincl.h"
+#include "gsmincl.h"
 //#include "gsmfunc.h"
 
 //class NewInstr;
@@ -26,6 +26,8 @@ class FuncInfoType;
 
 class gString;
 class gRational;
+
+class BaseEfg;
 
 template <class T> class gList;
 template <class T> class gStack;
@@ -172,6 +174,11 @@ public:
   Portion* Help(gString text, bool udf, bool bif);
   Portion* HelpVars(gString text);
   Portion* UnAssignExt( void );
+
+  void InvalidateGameProfile( void* game, bool IsEfg );
+  void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
+  void UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data );
+
 };
 
 

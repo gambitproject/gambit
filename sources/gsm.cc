@@ -2254,6 +2254,10 @@ void GSM::Clear(void)
 
 
 
+
+
+
+
 Portion* GSM::Help(gString funcname, bool udf, bool bif)
 {
   int i;
@@ -2446,6 +2450,157 @@ Portion* GSM::HelpVars(gString varname)
     result = new ErrorPortion("No match found");      
   return result;
 }
+
+
+
+
+
+//-------------------------
+// InvalidateGameProfile
+//-------------------------
+
+void GSM::InvalidateGameProfile( void* game, bool IsEfg )
+{
+  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+  gList<Portion*> varslist;
+  int i = 0;
+  int j = 0;
+  
+  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+    for(j=1; j<=vars[i].Length(); j++)
+      varslist.Append(vars[i][j]);
+
+  for( i = 1; i <= varslist.Length(); i++ )
+  {
+    if( varslist[i]->Game() == game && varslist[i]->GameIsEfg() == IsEfg )
+    {
+      if( !IsEfg && varslist[i]->Spec() == porMIXED )
+      {
+	switch( ((BaseNfg*) game)->Type() )
+	{
+	case DOUBLE:
+	  ((MixedSolution<double>*) ((MixedPortion*) 
+				     varslist[i])->Value())->Invalidate();
+	  break;
+	case RATIONAL:
+	  ((MixedSolution<gRational>*) ((MixedPortion*) 
+					varslist[i])->Value())->Invalidate();
+	  break;
+	default:
+	  assert( 0 );
+	}
+      }
+      else if( IsEfg && varslist[i]->Spec() == porBEHAV )
+      {
+	switch( ((BaseEfg*) game)->Type() )
+	{
+	case DOUBLE:
+	  ((BehavSolution<double>*) ((BehavPortion*) 
+				     varslist[i])->Value())->Invalidate();
+	  break;
+	case RATIONAL:
+	  ((BehavSolution<gRational>*) ((BehavPortion*) 
+					varslist[i])->Value())->Invalidate();
+	  break;
+	default:
+	  assert( 0 );
+	}
+      }
+    }
+  }
+}
+
+
+
+//------------------------
+// UnAssignGameElement
+//------------------------
+
+void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
+{
+  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+  gList<Portion*> varslist;
+  int i = 0;
+  int j = 0;
+  
+  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+    for(j=1; j<=vars[i].Length(); j++)
+      varslist.Append(vars[i][j]);
+
+  for( i = 1; i <= varslist.Length(); i++ )
+  {
+    if( varslist[i]->Game() == game )
+    {
+      assert( varslist[i]->GameIsEfg() == IsEfg );
+      if( varslist[i]->Spec() == spec )
+      {
+	assert( spec.ListDepth == 0 );
+	_RefTableStack->Peek()->Remove( varslist[i] );
+      }
+    }
+  }
+}
+
+
+//---------------------
+// UnAssignEfgElement
+//---------------------
+
+void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
+{
+  const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+  gList<Portion*> varslist;
+  int i = 0;
+  int j = 0;
+  
+  assert( spec.Type == porEF_SUPPORT ||
+	  spec.Type == porPLAYER_EFG ||
+	  spec.Type == porINFOSET ||
+	  spec.Type == porNODE ||
+	  spec.Type == porACTION );
+  
+  for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+    for(j=1; j<=vars[i].Length(); j++)
+      varslist.Append(vars[i][j]);
+
+  for( i = 1; i <= varslist.Length(); i++ )
+  {
+    if( varslist[i]->Game() == game )
+    {
+      assert( varslist[i]->GameIsEfg() );
+      if( varslist[i]->Spec() == spec )
+      {
+	assert( spec.ListDepth == 0 );
+	switch( spec.Type )
+	{
+	case porEF_SUPPORT:
+	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  break;
+	case porPLAYER_EFG:	
+	  if( ((EfPlayerPortion*) varslist[i])->Value() == data )
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  break;
+	case porINFOSET:
+	  if( ((InfosetPortion*) varslist[i])->Value() == data )
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  break;
+	case porNODE:
+	  if( ((NodePortion*) varslist[i])->Value() == data )
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  break;
+	case porACTION:
+	  if( ((ActionPortion*) varslist[i])->Value() == data )
+	    _RefTableStack->Peek()->Remove( varslist[i] );
+	  break;
+	default:
+	  assert( 0 );
+	}
+      }
+    }
+  }
+}
+
 
 
 
