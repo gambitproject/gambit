@@ -1128,6 +1128,11 @@ gNumber Efg::GetChanceProb(Infoset *infoset, int act) const
     return (gNumber) 0;
 }
 
+gNumber Efg::GetChanceProb(Action *a) const
+{
+  return GetChanceProbs(a->BelongsTo())[a->GetNumber()];
+}
+
 gArray<gNumber> Efg::GetChanceProbs(Infoset *infoset) const
 {
   if (infoset->IsChanceInfoset())

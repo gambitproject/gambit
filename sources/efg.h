@@ -153,6 +153,7 @@ protected:
 
     void SetChanceProb(Infoset *, int, const gNumber &);
     gNumber GetChanceProb(Infoset *, int) const;
+    gNumber GetChanceProb(Action *) const;
     gArray<gNumber> GetChanceProbs(Infoset *) const;
 
     void SetPayoff(EFOutcome *, int pl, const gNumber &value);
