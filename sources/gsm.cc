@@ -713,7 +713,7 @@ bool GSM::Subscript ( void )
   Portion* real_list;
   Portion* element;
   Portion* shadow;
-  bool     result = false;
+  bool     result = true;
 
   assert( _Stack->Depth() >= 2 );
   p2 = _Stack->Pop();
