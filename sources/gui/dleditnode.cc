@@ -87,7 +87,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
 				       "This is the root node of the tree"),
 		      0, wxALL | wxCENTER, 5);
   }
-  else if (p_node.GetGame().IsLegalSubgame(p_node)) {
+  else if (p_node.IsSubgameRoot()) {
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       "This is the root of a proper subgame"),
 		      0, wxALL | wxCENTER, 5);

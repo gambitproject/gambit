@@ -39,7 +39,7 @@ gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   BFS<T> cbfs((T) 0);
   
   if (p_support.GetGame().NumPlayers() != 2 ||
-      !IsConstSum(p_support.GetGame())) {
+      !p_support.GetGame().IsConstSum()) {
     return gList<MixedSolution>();
   }
   

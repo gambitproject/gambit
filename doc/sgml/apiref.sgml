@@ -50,28 +50,7 @@ information and plans.
 
 &apirefefg;
 
-<sect1 id="apiref.nfg">
-<title>Normal form games</title>
-
-<para>
-</para>
-
-&bifcomment;
-&bifcompressnfg;
-&bifisconstsum;
-&bifloadnfg;
-&bifname;
-&bifnewnfg;
-&bifnewoutcome;
-&bifoutcome;
-&bifoutcomes;
-&bifplayers;
-&bifsavenfg;
-&bifsetcomment;
-&bifsetname;
-&bifsetoutcome;
-
-</sect1>
+&apirefnfg;
 
 &apirefplayer;
 

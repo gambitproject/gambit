@@ -72,29 +72,6 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   return N;
 }
 
-bool IsConstSum(const gbtNfgGame &nfg)
-{
-  int pl, index;
-  gNumber cvalue = (gNumber) 0;
-
-  if (nfg.NumOutcomes() == 0)  return true;
-
-  for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-    cvalue += nfg.GetOutcome(1).GetPayoff(nfg.GetPlayer(pl));
-
-  for (index = 2; index <= nfg.NumOutcomes(); index++)  {
-    gNumber thisvalue = (gNumber) 0;
-
-    for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-      thisvalue += nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(pl));
-
-    if (thisvalue > cvalue || thisvalue < cvalue)
-      return false;
-  }
-  
-  return true;
-}
-
 gNumber MinPayoff(const gbtNfgGame &nfg, int player)
 {
   int index, p, p1, p2;

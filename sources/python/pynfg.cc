@@ -70,6 +70,16 @@ PyTypeObject Nfgtype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+nfg_getcomment(nfgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("s", (char *) self->m_nfg->GetComment());
+}
+
+static PyObject *
 nfg_getlabel(nfgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -113,6 +123,28 @@ nfg_getplayer(nfgobject *self, PyObject *args)
   nfplayerobject *player = newnfplayerobject();
   *player->m_nfplayer = self->m_nfg->GetPlayer(index);
   return (PyObject *) player;
+}
+
+static PyObject *
+nfg_isconstsum(nfgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", self->m_nfg->IsConstSum());
+}
+
+static PyObject *
+nfg_newoutcome(nfgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nfoutcomeobject *outcome = newnfoutcomeobject();
+  *outcome->m_nfoutcome = self->m_nfg->NewOutcome();
+  return (PyObject *) outcome;
 }
 
 static PyObject *
@@ -178,9 +210,12 @@ nfg_writenfg(nfgobject *self, PyObject *args)
 }
 
 static struct PyMethodDef nfg_methods[] = {
+  { "GetComment", (PyCFunction) nfg_getcomment, 1 },
   { "GetLabel", (PyCFunction) nfg_getlabel, 1 },
   { "GetOutcome", (PyCFunction) nfg_getoutcome, 1 },
   { "GetPlayer", (PyCFunction) nfg_getplayer, 1 },
+  { "IsConstSum", (PyCFunction) nfg_isconstsum, 1 },
+  { "NewOutcome", (PyCFunction) nfg_newoutcome, 1 },
   { "NumOutcomes", (PyCFunction) nfg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) nfg_numplayers, 1 },
   { "SetLabel", (PyCFunction) nfg_setlabel, 1 }, 

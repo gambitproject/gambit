@@ -162,7 +162,7 @@ static Portion *GSM_Game_NfOutcome(GSM &, Portion **param)
 
 static Portion *GSM_IsConstSum(GSM &, Portion **param)
 {
-  return new BoolPortion(IsConstSum(AsNfg(param[0])));
+  return new BoolPortion(AsNfg(param[0]).IsConstSum());
 }
 
 //-----------

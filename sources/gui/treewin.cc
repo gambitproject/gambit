@@ -225,17 +225,17 @@ void TreeWindow::OnUpdate(gbtGameView *)
 
   m_nodeMenu->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor) &&
+		      cursor.IsSubgameRoot() &&
 		      !cursor.GetParent().IsNull()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
 		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor)));
+		      cursor.IsSubgameRoot()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
 		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor)));
+		      cursor.IsSubgameRoot()));
   m_nodeMenu->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-			m_doc->GetEfg().IsLegalSubgame(cursor) &&
+			cursor.IsSubgameRoot() &&
 			cursor.GetSubgameRoot() == cursor) ?
 		       "Unmark subgame" : "Mark subgame");
   Refresh();

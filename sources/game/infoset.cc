@@ -371,6 +371,22 @@ gbtEfgPlayer gbtEfgInfoset::GetPlayer(void) const
   }
 }
 
+void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
+{
+  if (IsNull() || p_player.IsNull()) {
+    throw gbtEfgNullObject();
+  }
+  if (GetPlayer().IsChance() || p_player.IsChance()) {
+    throw gbtEfgException();
+  }
+  
+  if (GetPlayer() == p_player) {
+    return;
+  }
+
+  rep->m_player->m_efg->SetPlayer(rep, p_player.rep);
+}
+
 bool gbtEfgInfoset::IsChanceInfoset(void) const
 {
   return (rep && rep->m_player->m_id == 0);
@@ -397,6 +413,34 @@ bool gbtEfgInfoset::Precedes(gbtEfgNode p_node) const
     }
   }
   return false;
+}
+
+void gbtEfgInfoset::Reveal(gbtEfgPlayer p_who)
+{
+  if (IsNull() || p_who.IsNull()) {
+    return;
+  }
+
+  rep->m_player->m_efg->Reveal(rep, p_who.rep);
+}
+
+void gbtEfgInfoset::MergeInfoset(gbtEfgInfoset p_from)
+{
+  if (IsNull() || p_from.IsNull()) {
+    throw gbtEfgNullObject();
+  }
+
+  if (rep == p_from.rep ||
+      rep->m_actions.Length() != p_from.rep->m_actions.Length())  {
+    return;
+  }
+
+  // FIXME: Can't bridge subgames
+  if (rep->m_members[1]->m_gameroot != p_from.rep->m_members[1]->m_gameroot) {
+    return;
+  }
+
+  rep->m_player->m_efg->MergeInfoset(rep, p_from.rep);
 }
 
 gbtEfgAction gbtEfgInfoset::InsertAction(int where)

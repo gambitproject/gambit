@@ -116,6 +116,8 @@ struct gbt_efg_node_rep {
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
   gbt_efg_node_rep *GetPriorSibling(void);
   gbt_efg_node_rep *GetNextSibling(void);
+
+  void MarkSubtree(bool p_mark);
 };
 
 struct gbt_efg_game_rep {
@@ -145,8 +147,18 @@ struct gbt_efg_game_rep {
 
   gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,
 				  int p_id, int p_actions);
+  void JoinInfoset(gbt_efg_infoset_rep *, gbt_efg_node_rep *); 
+  gbt_efg_infoset_rep *LeaveInfoset(gbt_efg_node_rep *);
+  void MergeInfoset(gbt_efg_infoset_rep *, gbt_efg_infoset_rep *);
+  void Reveal(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
+  void SetPlayer(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
 
   void DeleteOutcome(gbt_efg_outcome_rep *p_outcome);
+
+  // Utility routines for subgames
+  void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
 };
 
 #endif  // EFGINT_H

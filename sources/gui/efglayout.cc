@@ -557,7 +557,7 @@ int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node,
   entry->SetBranchLength(prefs.BranchLength());
 
   if (prefs.SubgameStyle() == GBT_SUBGAME_ARC &&
-      p_node.GetGame().IsLegalSubgame(p_node)) {
+      p_node.IsSubgameRoot()) {
     entry->SetSubgameRoot(true);
     entry->SetSubgameMarked(p_node.GetSubgameRoot() == p_node);
   }

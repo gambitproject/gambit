@@ -620,7 +620,7 @@ static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
   const gbtNfgSupport &support = AsNfgSupport(param[0]);
   gbtNfgGame nfg = support.GetGame();
 
-  if (nfg.NumPlayers() != 2 || !IsConstSum(nfg)) {
+  if (nfg.NumPlayers() != 2 || !nfg.IsConstSum()) {
     throw gclRuntimeError("Only valid for two-person zero-sum games");
   }
 

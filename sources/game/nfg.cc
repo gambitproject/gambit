@@ -303,6 +303,32 @@ void gbtNfgGame::BreakLink(void)
 // gbtNfgGame: Member Functions
 //-------------------------------
 
+bool gbtNfgGame::IsConstSum(void) const
+{
+  int pl, index;
+  gNumber cvalue = (gNumber) 0;
+
+  if (NumOutcomes() == 0)  return true;
+
+  for (pl = 1; pl <= NumPlayers(); pl++) {
+    cvalue += GetOutcome(1).GetPayoff(GetPlayer(pl));
+  }
+
+  for (index = 2; index <= NumOutcomes(); index++)  {
+    gNumber thisvalue = (gNumber) 0;
+
+    for (pl = 1; pl <= NumPlayers(); pl++) {
+      thisvalue += GetOutcome(index).GetPayoff(GetPlayer(pl));
+    }       
+
+    if (thisvalue > cvalue || thisvalue < cvalue) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 long gbtNfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 

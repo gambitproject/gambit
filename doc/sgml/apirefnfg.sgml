@@ -1,0 +1,212 @@
+<sect1 id="apiref.nfg">
+<title>Normal form games</title>
+
+<para>
+</para>
+
+<sect2 id="apiref.nfg.compressnfg">
+<title>CompressNfg (GCL only)</title>
+<indexterm><primary>CompressNfg (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+CompressNfg[support->NFSUPPORT] =: NFG 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>CompressNfg</function> creates a copy of the 
+normal form game on which <parameter>support</parameter> is
+defined, where all strategies not present in <parameter>support</parameter>
+have been removed.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nfg.getcomment">
+<title>GetComment</title>
+<indexterm><primary>GetComment</primary></indexterm>
+<indexterm><primary>Comment (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtNfgGame::GetComment(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Comment[nfg->NFG] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetComment</function> (<function>Comment</function> in the GCL)
+returns the comment associated with the game
+<parameter>nfg</parameter>.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nfg.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtNfgGame::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->NFG*] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the game.  
+The empty string is returned if the game object is null.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nfg.isconstsum">
+<title>IsConstSum</title>
+<indexterm><primary>IsConstSum</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtNfgGame::IsConstSum(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+IsConstSum[nfg->NFG] =: BOOLEAN 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsConstSum</function>
+returns <literal>True</literal> (nonzero) when the normal form game 
+is constant sum and <literal>False</literal> (zero) otherwise.
+</para>
+</sect2>
+
+<sect2 id="apiref.nfg.newoutcome">
+<title>NewOutcome</title>
+<indexterm><primary>NewOutcome</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtNfgOutcome gbtNfgGame::NewOutcome(void)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+NewOutcome[nfg->NFG] =: NFOUTCOME 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NewOutcome</function>
+defines a new outcome in the normal form game <parameter>nfg</parameter>.
+The new
+outcome specifies payoffs of zero for all players.  Returns the newly
+created outcome.
+</para>
+</sect2>
+
+<sect2 id="apiref.nfg.readnfg">
+<title>ReadNfg</title>
+<indexterm><primary>ReadNfg</primary></indexterm>
+<indexterm><primary>LoadNfg (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++ usage</title>
+<para>
+<synopsis>
+gbtNfgGame ::ReadNfg(gInput &amp;p_file)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Python usage</title>
+<para>
+<synopsis>
+nfg = gambit.ReadNfg(filename)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LoadNfg[file->TEXT] =: NFG 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>ReadNfg</function> (<function>LoadNfg</function> in the GCL)
+reads a normal form game from the file <parameter>file</parameter>.
+C++ users should pass a stream represented by a <type>gInput</type> object;
+Python and GCL users should pass the filename of the file to be read.
+An error occurs if the file cannot be opened, or if the file does
+not contain a valid normal form savefile.
+</para>
+
+</sect2>
+
+&bifnewnfg;
+&bifoutcome;
+&bifplayers;
+&bifsavenfg;
+&bifsetcomment;
+&bifsetname;
+&bifsetoutcome;
+
+</sect1>
+

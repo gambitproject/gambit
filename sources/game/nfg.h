@@ -76,6 +76,7 @@ public:
   void SetComment(const gText &);
   const gText &GetComment(void) const;
 
+  bool IsConstSum(void) const;
   long RevisionNumber(void) const;
 
   void WriteNfgFile(gOutput &, int) const;
@@ -100,7 +101,6 @@ public:
 
     // defined in nfgutils.cc
   friend void RandomNfg(gbtNfgGame);
-  friend bool IsConstSum(const gbtNfgGame &);
   friend gNumber MinPayoff(const gbtNfgGame &, int pl = 0);
   friend gNumber MaxPayoff(const gbtNfgGame &, int pl = 0);
 

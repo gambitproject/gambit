@@ -77,7 +77,7 @@ gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
     if (p_support.GetGame().NumPlayers() == 2) {
-      if (IsConstSum(p_support.GetGame())) {
+      if (p_support.GetGame().IsConstSum()) {
 	gbtNfgNashLp<double> algorithm;
 	return algorithm.Solve(support, p_status);
       }
@@ -1399,7 +1399,7 @@ int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
     id = m_algorithmTree->AppendItem(custom, "LcpSolve");
     m_algorithms.Define(id, panel = new panelNfgLcp(this));
 
-    if (IsConstSum(p_nfg)) {
+    if (p_nfg.IsConstSum()) {
       id = m_algorithmTree->AppendItem(custom, "LpSolve");
       m_algorithms.Define(id, panel = new panelNfgLp(this));
     }

@@ -80,6 +80,17 @@ gbt_efg_node_rep *gbt_efg_node_rep::GetPriorSibling(void)
   }
 }
 
+//
+// MarkSubtree: sets the Node::mark flag on all children of node
+//
+void gbt_efg_node_rep::MarkSubtree(bool p_mark)
+{
+  m_mark = p_mark;
+  for (int i = 1; i <= m_children.Length(); i++) {
+    m_children[i]->MarkSubtree(p_mark);
+  }
+}
+
 gbtEfgNode::gbtEfgNode(void)
   : rep(0)
 { }
@@ -321,6 +332,16 @@ bool gbtEfgNode::IsPredecessorOf(const gbtEfgNode &p_node) const
   return (n == rep);
 }
 
+bool gbtEfgNode::IsSubgameRoot(void) const
+{
+  if (IsNull() || NumChildren() == 0) {
+    return false;
+  }
+
+  rep->m_efg->MarkTree(rep, rep);
+  return rep->m_efg->CheckTree(rep, rep);
+}
+
 gbtEfgNode gbtEfgNode::InsertMove(gbtEfgInfoset p_infoset)
 {
   if (IsNull() || p_infoset.IsNull()) {
@@ -361,6 +382,40 @@ void gbtEfgNode::DeleteTree(void)
   }
 
   rep->m_efg->DeleteTree(rep);
+}
+
+void gbtEfgNode::JoinInfoset(gbtEfgInfoset p_infoset)
+{
+  if (IsNull() || p_infoset.IsNull())  {
+    throw gbtEfgNullObject();
+  }
+
+  // FIXME: can't bridge subgames
+  if (p_infoset.rep->m_members.Length() > 0 &&
+      rep->m_gameroot != p_infoset.rep->m_members[1]->m_gameroot) {
+    return;
+  }
+  
+  if (!rep->m_infoset ||
+      rep->m_infoset == p_infoset.rep ||
+      p_infoset.rep->m_actions.Length() != rep->m_children.Length())  {
+    return;
+  }
+
+  rep->m_efg->JoinInfoset(p_infoset.rep, rep);
+}
+
+gbtEfgInfoset gbtEfgNode::LeaveInfoset(void)
+{
+  if (IsNull())  {
+    throw gbtEfgNullObject();
+  }
+
+  if (!rep->m_infoset) {
+    return 0;
+  }
+
+  return rep->m_efg->LeaveInfoset(rep);
 }
 
 gOutput &operator<<(gOutput &p_stream, const gbtEfgNode &)

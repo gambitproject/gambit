@@ -570,7 +570,7 @@ static Portion *GSM_MergeInfosets(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset s1 = AsEfgInfoset(param[0]);
   gbtEfgInfoset s2 = AsEfgInfoset(param[1]);
-  s1.GetGame().MergeInfoset(s1, s2);
+  s1.MergeInfoset(s2);
   return new InfosetPortion(s1);
 }
 
@@ -580,10 +580,8 @@ static Portion *GSM_MergeInfosets(GSM &gsm, Portion **param)
 
 static Portion *GSM_MoveToInfoset(GSM &gsm, Portion **param)
 {
-  gbtEfgNode n = AsEfgNode(param[0]);
-  gbtEfgInfoset s = AsEfgInfoset(param[1]);
-  s.GetGame().JoinInfoset(s, n);
-  return new NodePortion(n);
+  AsEfgNode(param[0]).JoinInfoset(AsEfgInfoset(param[1]));
+  return new NodePortion(AsEfgNode(param[0]));
 }
 
 //-------------
@@ -909,14 +907,14 @@ static Portion *GSM_RemoveBasisNode(GSM &, Portion **param)
 
 static Portion *GSM_Reveal(GSM &gsm, Portion **param)
 {
-  gbtEfgInfoset s = AsEfgInfoset(param[0]);
+  gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
   ListPortion *players = (ListPortion *) param[1];
 
   for (int i = 1; i <= players->Length(); i++) {
-    s.GetGame().Reveal(s, AsEfgPlayer((*players)[i]));
+    infoset.Reveal(AsEfgPlayer((*players)[i]));
   }
 
-  return new InfosetPortion(s);
+  return new InfosetPortion(infoset);
 }
 
 //-------------

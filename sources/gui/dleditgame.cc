@@ -104,7 +104,7 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format("Constant-sum game: %s",
-						     (IsConstSum(m_doc->GetNfg())) ?
+						     (m_doc->GetNfg().IsConstSum()) ?
 						     "YES" : "NO")),
 		   0, wxALL, 5);
   }

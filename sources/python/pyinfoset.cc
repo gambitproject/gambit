@@ -208,6 +208,24 @@ PyTypeObject Infosettype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+infoset_getaction(infosetobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_infoset->NumActions()) {
+    return NULL;
+  }
+  
+  actionobject *action = newactionobject();
+  *action->m_action = self->m_infoset->GetAction(index);
+  return (PyObject *) action;
+}
+
+static PyObject *
 infoset_getlabel(infosetobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -244,6 +262,7 @@ infoset_setlabel(infosetobject *self, PyObject *args)
 }
 
 static struct PyMethodDef infoset_methods[] = {
+  { "GetAction", (PyCFunction) infoset_getaction, 1 },
   { "GetLabel", (PyCFunction) infoset_getlabel, 1 },
   { "GetPlayer", (PyCFunction) infoset_getplayer, 1 }, 
   { "SetLabel", (PyCFunction) infoset_setlabel, 1 },

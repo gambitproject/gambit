@@ -215,15 +215,15 @@ void EfgShow::OnUpdate(gbtGameView *)
 		  !cursor.GetInfoset().IsNull());
 
   menuBar->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor) &&
+		  (!cursor.IsNull() && cursor.IsSubgameRoot() &&
 		   !cursor.GetParent().IsNull()));
   menuBar->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor)));
+		  (!cursor.IsNull() && cursor.IsSubgameRoot()));
   menuBar->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_doc->GetEfg().IsLegalSubgame(cursor)));
+		  (!cursor.IsNull() && cursor.IsSubgameRoot()));
   menuBar->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-		     m_doc->GetEfg().IsLegalSubgame(cursor) &&
+		     cursor.IsSubgameRoot() &&
 		     cursor.GetSubgameRoot() == cursor) ?
 		    "Unmark &subgame" : "Mark &subgame");
 
@@ -738,8 +738,7 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
     try {
       for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
 	if (dialog.IsPlayerSelected(pl)) {
-	  m_doc->GetEfg().Reveal(m_doc->GetCursor().GetInfoset(),
-			       m_doc->GetEfg().GetPlayer(pl));
+	  m_doc->GetCursor().GetInfoset().Reveal(m_doc->GetEfg().GetPlayer(pl));
 	}
       }
       m_doc->OnTreeChanged(true, true);
@@ -793,7 +792,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
       m_doc->GetCursor().SetOutcome(0);
     }
 
-    if (m_doc->GetEfg().IsLegalSubgame(m_doc->GetCursor()) &&
+    if (m_doc->GetCursor().IsSubgameRoot() &&
 	!m_doc->GetCursor().GetParent().IsNull()) {
       if (dialog.MarkedSubgame()) {
 	m_doc->GetEfg().MarkSubgame(m_doc->GetCursor());
@@ -806,10 +805,10 @@ void EfgShow::OnEditNode(wxCommandEvent &)
     if (m_doc->GetCursor().NumChildren() > 0 &&
 	dialog.GetInfoset() != m_doc->GetCursor().GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
-	m_doc->GetEfg().LeaveInfoset(m_doc->GetCursor());
+	m_doc->GetCursor().LeaveInfoset();
       }
       else {
-	m_doc->GetEfg().JoinInfoset(dialog.GetInfoset(), m_doc->GetCursor());
+	m_doc->GetCursor().JoinInfoset(dialog.GetInfoset());
       }
       m_doc->OnTreeChanged(true, true);
     }
@@ -827,8 +826,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
     
     if (!infoset.IsChanceInfoset() && 
 	dialog.GetPlayer() != infoset.GetPlayer().GetId()) {
-      m_doc->GetEfg().SwitchPlayer(infoset,
-				 m_doc->GetEfg().GetPlayer(dialog.GetPlayer()));
+      infoset.SetPlayer(m_doc->GetEfg().GetPlayer(dialog.GetPlayer()));
     }
 
     for (int act = 1; act <= infoset.NumActions(); act++) {

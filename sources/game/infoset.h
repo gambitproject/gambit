@@ -92,8 +92,10 @@ public:
   void SetLabel(const gText &);
 
   bool IsChanceInfoset(void) const;
-  gbtEfgPlayer GetPlayer(void) const;
 
+  gbtEfgPlayer GetPlayer(void) const;
+  void SetPlayer(gbtEfgPlayer);
+  
   void SetChanceProb(int act, const gNumber &value);
   gNumber GetChanceProb(int act) const;
 
@@ -107,6 +109,9 @@ public:
   int NumMembers(void) const;
 
   bool Precedes(gbtEfgNode) const;
+
+  void MergeInfoset(gbtEfgInfoset from);
+  void Reveal(gbtEfgPlayer);
 
   bool GetFlag(void) const;
   void SetFlag(bool);

@@ -164,7 +164,8 @@ Comment[efg->EFG] =: TEXT
 </formalpara>
 
 <para>
-<function>Comment</function> returns the comment associated with the game
+<function>GetComment</function> (<function>Comment</function> in the GCL)
+returns the comment associated with the game
 <parameter>efg</parameter>.
 </para>
 

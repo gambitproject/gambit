@@ -55,7 +55,7 @@ LSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
 {
   for (int i = 1; i <= n.NumChildren(); i++)
     LSRDoChild(e, n.GetChild(i), list);
-  if (n.GetGame().IsLegalSubgame(n))
+  if (n.IsSubgameRoot())
     list.Append(n);
 }
 
@@ -142,7 +142,7 @@ HasSubgames(const gbtEfgGame & e, gbtEfgNode n)
 {
   gList < gbtEfgNode > list;
   LegalSubgameRoots(e, n, list);
-  if (n.GetGame().IsLegalSubgame(n))
+  if (n.IsSubgameRoot())
     return list.Length() > 1;
   return list.Length() > 0;
 }

@@ -87,8 +87,6 @@ protected:
 
   void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *,
 		   gbt_efg_node_rep *);
-  void MarkSubtree(gbt_efg_node_rep *);
-  void UnmarkSubtree(gbt_efg_node_rep *);
 
   gbtEfgOutcome NewOutcome(int index);
 
@@ -102,12 +100,6 @@ protected:
   void InfosetProbs(gbt_efg_node_rep *n, gNumber,
 		    const gPVector<int> &, gPVector<gNumber> &) const;
     
-    
-  // These are used in identification of subgames
-  void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
-  bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
-  void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
-
 
 public:
   gbtEfgGame(void);
@@ -157,12 +149,7 @@ public:
   // EDITING OPERATIONS
   bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
-  gbtEfgInfoset JoinInfoset(gbtEfgInfoset, gbtEfgNode);
-  gbtEfgInfoset LeaveInfoset(gbtEfgNode);
-  gbtEfgInfoset MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from);
 
-  gbtEfgInfoset SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p);
-  
   gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
   gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
 
@@ -170,11 +157,8 @@ public:
   gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
   gbtEfgInfoset DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a);
 
-  void Reveal(gbtEfgInfoset, gbtEfgPlayer);
-
   void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
 
-  bool IsLegalSubgame(const gbtEfgNode &);
   void MarkSubgames(void);
   bool MarkSubgame(gbtEfgNode);
   void UnmarkSubgame(gbtEfgNode);

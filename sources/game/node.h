@@ -80,6 +80,7 @@ public:
   gbtEfgPlayer GetPlayer(void) const;
 
   gbtEfgNode GetSubgameRoot(void) const;
+  bool IsSubgameRoot(void) const;
 
   gbtEfgOutcome GetOutcome(void) const;
   void SetOutcome(const gbtEfgOutcome &);
@@ -87,6 +88,9 @@ public:
   gbtEfgNode InsertMove(gbtEfgInfoset);
   void DeleteMove(gbtEfgNode p_keep);
   void DeleteTree(void);
+
+  void JoinInfoset(gbtEfgInfoset);
+  gbtEfgInfoset LeaveInfoset(void);
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgNode &);
