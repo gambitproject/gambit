@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
-#include "basic.h"
+#include "gmisc.h"
 #include "gambitio.h"
 #include "gstring.h"
 #include "rational.h"
@@ -194,7 +194,7 @@ E7:           E8
   ;
 
 E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
-  |           INTEGER       { emit(new Push<gInteger>(ival)); }
+  |           INTEGER       { emit(new Push<long>(ival.as_long())); }
   |           FLOAT         { emit(new Push<double>(dval)); }
   |           RATCONST      { emit(new Push<gRational>(rval)); }
   |           TEXT          { emit(new Push<gString>(tval)); }
