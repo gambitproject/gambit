@@ -5,8 +5,6 @@
 //#
 
 #include "tableau.h"
-//#include "normal.h"
-#include "normiter.h"
 
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
