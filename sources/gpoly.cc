@@ -11,6 +11,62 @@
 #include "rational.h"
 #include "gnumber.h"
 
+double gPoly<double>::String_Coeff(double nega)
+{
+  double doub;
+  gText Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * FromText(Coeff,doub));  
+}
+
+#ifdef GDOUBLE
+gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
+{
+  double doub;
+  gText Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * (gDouble)FromText(Coeff,doub));  
+}
+#endif   // GDOUBLE
+
+gRational gPoly<gRational>::String_Coeff(gRational nega)
+{
+  gRational rat;
+  gText Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * FromText(Coeff,rat));  
+}
+
+
+gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
+{
+  gNumber num;
+  gText Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+
+  if (Coeff == "") return (nega);
+  else return (nega * gNumber(FromText(Coeff, num)));  
+}
+
 template class gPoly<gRational>;
 template gPoly<gRational> operator*(const gRational val, const gPoly<gRational> &poly);
 template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRational val);
@@ -85,62 +141,6 @@ long gPoly<long>::String_Coeff(long nega)
   else return (nega * atol(Coeff.stradr()));  
 }
 */
-
-double gPoly<double>::String_Coeff(double nega)
-{
-  double doub;
-  gText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * FromText(Coeff,doub));  
-}
-
-#ifdef GDOUBLE
-gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
-{
-  double doub;
-  gText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * (gDouble)FromText(Coeff,doub));  
-}
-#endif   // GDOUBLE
-
-gRational gPoly<gRational>::String_Coeff(gRational nega)
-{
-  gRational rat;
-  gText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * FromText(Coeff,rat));  
-}
-
-
-gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
-{
-  gNumber num;
-  gText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-
-  if (Coeff == "") return (nega);
-  else return (nega * gNumber(FromText(Coeff, num)));  
-}
 
 gText ToText(const gPoly<gNumber> &p)
 {
