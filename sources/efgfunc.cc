@@ -1197,7 +1197,124 @@ Portion *GSM_Behav_EfgRational(Portion **param)
 }
 
 
+//---------------------- SetComponent -------------------//
 
+
+Portion *GSM_SetComponent_BehavFloat(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p3;
+  int PlayerNum = 0;
+  int InfosetNum = 0;
+  
+  BehavProfile<double>* P = 
+    (BehavProfile<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  Efg<double>& E = * P->BelongsTo();
+  gArray< EFPlayer* > player = E.PlayerList();
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    for( j = 1; j <= E.PlayerList()[ i ]->NumInfosets(); j++ )
+    {
+      if( ( (InfosetPortion*) param[ 1 ] )->Value() ==
+	 E.PlayerList()[ i ]->InfosetList()[ j ] )
+      {
+	PlayerNum = i;
+	InfosetNum = j;
+	break;
+      }
+    }
+  }
+  
+  if( !InfosetNum )
+    return new ErrorPortion( "No such infoset found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != 
+     E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions() )
+    return new ErrorPortion( "Mismatching number of actions" );
+  
+  for( k = 1; 
+      k <= E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions();
+      k++ )
+  {
+    p3 = ( (ListPortion*) param[ 2 ] )->Subscript( k );
+    if( p3->Type() == porLIST )
+    {
+      delete p3;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p3->Type() == porFLOAT );
+    (*P)( PlayerNum, InfosetNum, k ) = ( (FloatPortion*) p3 )->Value();
+
+    delete p3;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
+
+Portion *GSM_SetComponent_BehavRational(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p3;
+  int PlayerNum = 0;
+  int InfosetNum = 0;
+  
+  BehavProfile<gRational>* P = 
+    (BehavProfile<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  Efg<gRational>& E = * P->BelongsTo();
+  gArray< EFPlayer* > player = E.PlayerList();
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    for( j = 1; j <= E.PlayerList()[ i ]->NumInfosets(); j++ )
+    {
+      if( ( (InfosetPortion*) param[ 1 ] )->Value() ==
+	 E.PlayerList()[ i ]->InfosetList()[ j ] )
+      {
+	PlayerNum = i;
+	InfosetNum = j;
+	break;
+      }
+    }
+  }
+  
+  if( !InfosetNum )
+    return new ErrorPortion( "No such infoset found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != 
+     E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions() )
+    return new ErrorPortion( "Mismatching number of actions" );
+  
+  for( k = 1; 
+      k <= E.PlayerList()[PlayerNum]->InfosetList()[InfosetNum]->NumActions();
+      k++ )
+  {
+    p3 = ( (ListPortion*) param[ 2 ] )->Subscript( k );
+    if( p3->Type() == porLIST )
+    {
+      delete p3;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p3->Type() == porRATIONAL );
+    (*P)( PlayerNum, InfosetNum, k ) = ( (RationalPortion*) p3 )->Value();
+
+    delete p3;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
+
+
+
+//--------------------------------------------------------------//
 
 void Init_efgfunc(GSM *gsm)
 {
@@ -1681,6 +1798,31 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
 			1, "list", porLIST | porRATIONAL );
   gsm->AddFunction(FuncObj);
+
+  //--------------------- SetComponent -------------------//
+  
+  FuncObj = new FuncDescObj( "SetComponent" );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_BehavFloat, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
+			0, "behav", porBEHAV_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
+			1, "infoset", porINFOSET );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
+			2, "list", porLIST | porFLOAT );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_BehavRational, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
+			0, "behav", porBEHAV_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
+			1, "infoset", porINFOSET );
+  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
+			2, "list", porLIST | porRATIONAL );
+
+  gsm->AddFunction( FuncObj );
+
 }
 
 

@@ -1272,6 +1272,101 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
 }
 
 
+//----------------------- SetComponent ---------------------------//
+
+Portion *GSM_SetComponent_MixedFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p2;
+  int PlayerNum = 0;
+
+  MixedProfile<double>* P = 
+    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  Nfg<double>& N = * P->BelongsTo();
+  gArray< NFPlayer* > player = N.PlayerList();
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
+    {
+      PlayerNum = i;
+      break;
+    }
+  }
+  
+  if( !PlayerNum )
+    return new ErrorPortion( "No such player found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
+    return new ErrorPortion( "Mismatching number of strategies" );
+
+  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
+  {
+    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
+    if( p2->Type() == porLIST )
+    {
+      delete p2;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p2->Type() == porFLOAT );
+    (*P)( PlayerNum, j ) = ( (FloatPortion*) p2 )->Value();
+
+    delete p2;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
+
+Portion *GSM_SetComponent_MixedRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p2;
+  int PlayerNum = 0;
+
+  MixedProfile<gRational>* P = 
+    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  Nfg<gRational>& N = * P->BelongsTo();
+  gArray< NFPlayer* > player = N.PlayerList();
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    if( ( (NfPlayerPortion*) param[ 1 ] )->Value() == player[ i ] )
+    {
+      PlayerNum = i;
+      break;
+    }
+  }
+  
+  if( !PlayerNum )
+    return new ErrorPortion( "No such player found" );
+
+  if( ( (ListPortion*) param[ 2 ] )->Length() != N.NumStrats( PlayerNum ) )
+    return new ErrorPortion( "Mismatching number of strategies" );
+
+  for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
+  {
+    p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
+    if( p2->Type() == porLIST )
+    {
+      delete p2;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+
+    assert( p2->Type() == porRATIONAL );
+    (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
+
+    delete p2;
+  }
+
+  return param[ 0 ]->RefCopy();
+}
+
+
+
 
 
 
@@ -1617,6 +1712,29 @@ void Init_nfgfunc(GSM *gsm)
 			1, "list", porLIST | porRATIONAL);
   gsm->AddFunction( FuncObj );
 
+  
+  //--------------------- SetComponet -------------------------//
+  FuncObj = new FuncDescObj( "SetComponent" );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_MixedFloat, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			0, "mixed", porMIXED_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			1, "player", porPLAYER_NFG );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
+			2, "list", porLIST | porFLOAT );
+
+  FuncObj->SetFuncInfo( GSM_SetComponent_MixedRational, 3 );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			0, "mixed", porMIXED_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			1, "player", porPLAYER_NFG );
+  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
+			2, "list", porLIST | porRATIONAL );
+
+  gsm->AddFunction( FuncObj );
 }
 
 
