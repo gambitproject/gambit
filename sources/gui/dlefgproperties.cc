@@ -19,13 +19,14 @@
 class panelEfgGeneral : public wxPanel {
 private:
   FullEfg &m_efg;
-  wxTextCtrl *m_title;
+  wxTextCtrl *m_title, *m_comment;
 
 public:
-  panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg);
+  panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
 };
 
-panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg)
+panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg,
+				 const wxString &p_filename)
   : wxPanel(p_parent, -1), m_efg(p_efg)
 {
   SetAutoLayout(true);
@@ -37,10 +38,18 @@ panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg)
 		  0, wxALL | wxCENTER, 5);
   m_title = new wxTextCtrl(this, -1, (const char *) m_efg.GetTitle());
   titleSizer->Add(m_title, 1, wxALL | wxCENTER | wxEXPAND, 5);
-  topSizer->Add(titleSizer, 0, wxALL, 0);
+  topSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
 
+  wxBoxSizer *commentSizer = new wxBoxSizer(wxHORIZONTAL);
+  commentSizer->Add(new wxStaticText(this, wxID_STATIC, "Comment"),
+		    0, wxALL | wxCENTER, 5);
+  m_comment = new wxTextCtrl(this, -1, (const char *) m_efg.GetComment(),
+			     wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+  commentSizer->Add(m_comment, 1, wxALL | wxCENTER | wxEXPAND, 5);
+  topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
+			     
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "Filename:"),
+				 wxString("Filename: ") + p_filename),
 		0, wxALL, 5);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
@@ -59,8 +68,8 @@ panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg)
 		0, wxALL, 5);
 
   SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
+  //  topSizer->Fit(this);
+  //  topSizer->SetSizeHints(this);
 
   Layout();
 }
@@ -86,24 +95,26 @@ panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, FullEfg &p_efg)
   topSizer->Add(m_playerGrid, 0, wxALL, 5);
 
   SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
+  // topSizer->Fit(this);
+  // topSizer->SetSizeHints(this);
 
   Layout();
   m_playerGrid->AdjustScrollbars();
 }
 
-dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg)
+dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
+					 const wxString &p_filename)
   : wxDialog(p_parent, -1, "Extensive form properties"), m_efg(p_efg)
 {
   SetAutoLayout(true);
 
-  wxNotebook *notebook = new wxNotebook(this, -1);
-  m_generalPanel = new panelEfgGeneral(notebook, m_efg);
+  wxNotebook *notebook = new wxNotebook(this, -1, wxDefaultPosition,
+					wxSize(300, 300));
+  (void) new wxNotebookSizer(notebook);
+  m_generalPanel = new panelEfgGeneral(notebook, m_efg, p_filename);
   notebook->AddPage(m_generalPanel, "General");
   m_playersPanel = new panelEfgPlayers(notebook, m_efg);
   notebook->AddPage(m_playersPanel, "Players");
-  wxNotebookSizer *notebookSizer = new wxNotebookSizer(notebook);
 
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
   okButton->SetDefault();

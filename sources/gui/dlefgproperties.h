@@ -20,7 +20,7 @@ private:
   panelEfgPlayers *m_playersPanel;
 
 public:
-  dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg);
+  dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
 
 };
 

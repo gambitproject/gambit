@@ -1572,7 +1572,7 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 
 void EfgShow::OnEditProperties(wxCommandEvent &)
 {
-  dialogEfgProperties dialog(this, m_efg);
+  dialogEfgProperties dialog(this, m_efg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
 
   }
