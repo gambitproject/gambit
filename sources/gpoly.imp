@@ -970,12 +970,15 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
 template<class T>  
 gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given) 
 {
-  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
   gList<gMono<T> > list = given.MonomialList();
   gDouble maxcoeff = (gDouble)0;
   for (int i =1; i <= list.Length(); i++) {
     maxcoeff = gmax(maxcoeff,abs((gDouble)list[i].Coef()));
   }
+
+  if (maxcoeff < 0.000000001) return TogDouble(given);
+
+  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
   for (int i =1; i <= list.Length(); i++) {
     gDouble nextcoef = (gDouble)list[i].Coef()/maxcoeff;
     gPoly<gDouble> next(given.GetSpace(),
