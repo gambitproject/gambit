@@ -17,6 +17,8 @@
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
+#include "pelqhull.h"
+#include "pelclass.h"
 
 /*
     The (optimistically named) class described in this file is a method
@@ -64,6 +66,13 @@ template <class T> class QuikSolv {
   // Supporting routines for the constructors
 
   gRectArray<bool> Eq_i_Uses_j()                                         const;
+
+  // Get Roots Using Pelican
+
+  bool AllRealRootsFromPelican(const gPolyList<gDouble> &, 
+			             gList<gVector<gDouble> > &)         const;
+  bool PelicanRoots(const gRectangle<T> &, 
+		          gList<gVector<gDouble> > &)                    const;
 
   // Check whether roots are impossible
 
