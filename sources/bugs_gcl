@@ -7,9 +7,7 @@ Bug C5: Incorrect solutions, and crashing with large integers:
   46 mill:/home/mill/rdm/gambit/test newgcl
   Include["gclini.gcl"]
   Include["stdudfs.gcl"]
-  GCL1:= << p:={ { { 343519405, 57518365 }, { 905196150, 857537702 } },{ { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
-  { { { 343519405, 57518365 }, { 905196150, 857537702 } },
-    { { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
+  GCL1:= p:={ { { 343519405, 57518365 }, { 905196150, 857537702 } },{ { 500889218, 1982990232 }, { 83903549, 1493083335 } } }
   GCL2:= << n:=Nfg[p]
   (Nfg) ""
   GCL3:= << AllNash[n]
@@ -33,6 +31,25 @@ in ~rdm/gambit/nfg/osborne.nfg
   gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
   A segmentation fault has occurred
 
+Note (RDM, 9/6/98) In this same section should be noted problems
+solving "stengel.nfg" in Float.  This used to crash.  Since changing
+to automatic Refactoring of Tableau, it doesn't crash, but finds 261
+solutions many of which are *not* Nash equilibria.  On the other hand,
+if you first divide all payoffs by a large number (like 1000000), to
+get them in lower range, then it computes correctly.  So this problem
+is related to the zero tolerance in the Tableau code, and should be
+able to be "fixed" by proper scaling of the tableau before
+computation.  However, this also points to an inherent limitation in
+the Float code: There is no way to prevent this kind of problem from
+occurring if there are legitimate entries in the normal form which
+differ sufficiently greatly in magnitude.  Therefore we need to do two
+things: 
+
+1.  Make sure and check that all solutions returned are indeed Nash
+equilibria.
+
+2. Detect and warn the user when there may be a problem with floating
+point calculations.
 
 
 //------------------------------
@@ -161,6 +178,27 @@ LcpSolve[EFG], Behav[NFG], and so forth.  The fix is to improve
 BehavProfile<T> and BehavSolution to be smart enough to realize when
 action probabilities at certain information sets are not specified.
 (This bug affects the GUI as well, of course.)
+
+//-----------------------------
+
+Bug C27:  LpSolve failing when stopAfter > 1
+
+Include["gclini.gcl"]
+Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+GCL1:= << n:=LoadNfg["../nfg/zero.nfg"]
+(Nfg) "Two person 2 x 2 game with all zero payoffs"
+GCL2:= << LpSolve[n]
+{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 } }
+GCL3:= << LpSolve[n,stopAfter->2]
+
+c: { 0.000000 0.000000 1.000000 }
+uc: { 0.000000 0.000000 0.000000 }
+col: 1 cost: 0.000000 label: 3 x: 1.000000
+col: 2 cost: 0.000000 label: -2 x: In function LpSolve[], in file "/home/mill/rdm/gambit/bin/stdudfs.gcl" at line 461:
+In function LpSolve[], in file "console" at line 3:
+EXCEPTION: Bad index in gArray
+GCL4:= << Quit
+
 
 //---------------  These are not bugs but suggested improvements ------------
 
