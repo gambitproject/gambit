@@ -194,7 +194,7 @@ void Portion::SetGame(void* game, bool efg)
     if(_Game)
     {
       _gsm->GameRefCount(_Game)--;
-      gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
+      //gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
       if(_gsm->GameRefCount(_Game) == 0)
       {
 	if(!_GameIsEfg)
@@ -211,7 +211,7 @@ void Portion::SetGame(void* game, bool efg)
     if(_Game)
     {
       _gsm->GameRefCount(_Game)++;
-      gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
+      //gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
     }
   }
 }
