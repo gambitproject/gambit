@@ -21,7 +21,6 @@
 
 #include "nfgconst.h"
 
-#include "dlliap.h"
 #include "dlpolenum.h"
 #include "dlqregrid.h"
 
@@ -351,81 +350,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   }
 }
 
-
-//=======================================================================
-//                       dialogLiap: Member functions
-//=======================================================================
-
-dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LiapSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-}
-
-dialogLiap::~dialogLiap()
-{
-  if (GetReturnCode() == wxID_OK) {
-    wxConfig config("Gambit");
-    config.Write("Solutions/Liap-nTries", (long) NumTries());
-    config.Write("Solutions/Liap-accuracy", (long) Accuracy());
-  }
-}
-
-void dialogLiap::AlgorithmFields(void)
-{
-  wxConfig config("Gambit");
-
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  StopAfterField();
-
-  long nTries = 0;
-  config.Read("Solutions/Liap-nTries", &nTries);
-  m_nTriesValue = (char *) ToText(nTries);
-
-  wxBoxSizer *nTriesSizer = new wxBoxSizer(wxHORIZONTAL);
-  nTriesSizer->Add(new wxStaticText(this, -1, "# Tries"),
-		   0, wxALL | wxCENTER, 5);
-  m_nTries = new wxTextCtrl(this, -1, "",
-			    wxDefaultPosition, wxDefaultSize, 0,
-			    gIntegerValidator(&m_nTriesValue, 0),
-			    "# Tries");
-  nTriesSizer->Add(m_nTries, 0, wxALL, 5);
-  m_algorithmBox->Add(nTriesSizer, 0, wxALL, 5);
-
-  long accuracy = 4;
-  config.Read("Solutions/Liap-accuracy", &accuracy);
-  m_accuracyValue = (char *) ToText(accuracy);
-
-  wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
-  accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
-		     0, wxALL | wxCENTER, 5);
-  m_accuracy = new wxTextCtrl(this, -1, "",
-			      wxDefaultPosition, wxDefaultSize, 0,
-			      gIntegerValidator(&m_accuracyValue, 1),
-			      "Accuracy");
-  accuracySizer->Add(m_accuracy, 0, wxALL, 5);
-  m_algorithmBox->Add(accuracySizer, 0, wxALL, 5);
-
-  long startOption = 0;
-  config.Read("Solutions/Liap-startOption", &startOption);
-  wxString startOptions[] = { "Default", "Selected" };
-  m_startOption = new wxRadioBox(this, -1, "Start",
-				 wxDefaultPosition, wxDefaultSize,
-				 2, startOptions, 0, wxRA_SPECIFY_ROWS);
-  if (startOption >= 0 && startOption <= 1)
-    m_startOption->SetSelection(startOption);
-  m_algorithmBox->Add(m_startOption, 0, wxALL, 5);
-}
-
-int dialogLiap::StopAfter(void) const
-{
-  if (m_findAll->GetValue())
-    return 0;
-  else
-    return ToNumber(m_stopAfter->GetValue().c_str());
-}
 
 //=======================================================================
 //                    dialogPolEnum: Member functions

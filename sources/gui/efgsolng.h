@@ -31,37 +31,6 @@ public:
   bool MarkSubgames(void) const { return m_markSubgames; }
 };
 
-//--------
-// Liap 
-//--------
-
-class guiefgLiapEfg : public guiEfgSolution {
-private:
-  double m_accuracy;
-  int m_nTries, m_stopAfter, m_startOption;
-
-public:
-  guiefgLiapEfg(EfgShow *);
-  guiefgLiapEfg(EfgShow *, int p_stopAfter, int p_nTries);
-  virtual ~guiefgLiapEfg()  { }
-
-  virtual gList<BehavSolution> Solve(const EFSupport &) const;
-  virtual bool SolveSetup(void);
-};
-
-class guiefgLiapNfg : public guiEfgSolution {
-private:
-  double m_accuracy;
-  int m_nTries, m_startOption, m_stopAfter;
-
-public:
-  guiefgLiapNfg(EfgShow *);
-  virtual ~guiefgLiapNfg()  { }
-
-  virtual gList<BehavSolution> Solve(const EFSupport &) const;
-  virtual bool SolveSetup(void);
-};
-
 //-----------
 // Simpdiv
 //-----------
