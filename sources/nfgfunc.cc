@@ -131,7 +131,7 @@ Portion *GSM_RemoveStrategy(Portion **param)
   
   S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
 
-  Portion* por = new StrategyValPortion(s);
+  Portion* por = new NfSupportValPortion(S);
   por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
