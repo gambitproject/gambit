@@ -15,7 +15,7 @@
 #include "polenum.h" 
 #include "nfgensup.h"
 
-int AllNashSolve(const Nfg &, const PolEnumParams &, 
+int AllNashSolve(const NFSupport &, const PolEnumParams &, 
 		 gList<MixedSolution> &, long &nevals, double &time,
 		 gList<const NFSupport> &singular_supports);
 

@@ -13,8 +13,8 @@
 class AllNashSolveModule  {
 private:
   const Nfg &NF;
-  const NFSupport fullsupport;
-  gList<const NFSupport> possiblenashsupports;
+  const NFSupport supersupport;
+  gList<const NFSupport> possiblenashsubsupports;
   PolEnumParams params;
   long count,nevals;
   double time;
@@ -23,6 +23,7 @@ private:
 
 public:
   AllNashSolveModule(const Nfg &, const PolEnumParams &p);
+  AllNashSolveModule(const NFSupport &, const PolEnumParams &p);
 
   void NashEnum(void);
   
@@ -41,31 +42,45 @@ public:
 
 AllNashSolveModule::AllNashSolveModule(const Nfg &N, const PolEnumParams &p)
   : NF(N), 
-    fullsupport(N), 
-    possiblenashsupports(), 
+    supersupport(N), 
+    possiblenashsubsupports(), 
     params(p), 
     count(0), nevals(0),
     solutions(),
     singular_supports()
 { 
-  possiblenashsupports += PossibleNashSubsupports(fullsupport,params.status);
+  possiblenashsubsupports += PossibleNashSubsupports(supersupport,params.status);
+}
+
+AllNashSolveModule::AllNashSolveModule(const NFSupport &S, 
+				       const PolEnumParams &p)
+  : NF(S.Game()), 
+    supersupport(S), 
+    possiblenashsubsupports(), 
+    params(p), 
+    count(0), nevals(0),
+    solutions(),
+    singular_supports()
+{ 
+  possiblenashsubsupports += 
+    PossibleNashSubsupports(supersupport,params.status);
 }
 
 
 void AllNashSolveModule::NashEnum(void)
 {
-  for (int i = 1; i <= possiblenashsupports.Length(); i++) {
+  for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
     long newevals = 0;
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
     bool is_singular = false;
-    PolEnum(possiblenashsupports[i], params, newsolns, newevals, newtime,
+    PolEnum(possiblenashsubsupports[i], params, newsolns, newevals, newtime,
 	    is_singular);
     for (int j = 1; j <= newsolns.Length(); j++)
       if (newsolns[j].IsNash()) 
 	solutions += newsolns[j];
     if (is_singular) 
-      singular_supports += possiblenashsupports[i];
+      singular_supports += possiblenashsubsupports[i];
     nevals += newevals;
     time += newtime;
   }
@@ -97,11 +112,11 @@ AllNashSolveModule::GetSingularSupports(void) const
   return singular_supports;
 }
 
-int AllNashSolve(const Nfg &N, const PolEnumParams &params,
+int AllNashSolve(const NFSupport &S, const PolEnumParams &params,
 		 gList<MixedSolution> &solutions, long &nevals, double &time,
 		 gList<const NFSupport> &singular_supports)
 {
-  AllNashSolveModule module(N, params);
+  AllNashSolveModule module(S, params);
   module.NashEnum();
   nevals = module.NumEvals();
   time = module.Time();

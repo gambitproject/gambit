@@ -935,8 +935,7 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
 
 static Portion *GSM_AllNashSolve_Nfg(Portion **param)
 {
-  Nfg &N = *((NfgPortion*) param[0])->Value();
-  NFSupport* S = new NFSupport(N);
+  const NFSupport &S = *((NfSupportPortion*) param[0])->Value();
   PolEnumParams params;
   params.stopAfter = ((NumberPortion *) param[1])->Value();
   params.tracefile = &((OutputPortion *) param[4])->Value();
@@ -948,8 +947,7 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
   try {
     long nevals = 0;
     double time = 0.0;
-    AllNashSolve(S->Game(), params, solutions, nevals, time, 
-		 singular_supports);
+    AllNashSolve(S, params, solutions, nevals, time, singular_supports);
 
     ((NumberPortion *) param[2])->SetValue(nevals);
     ((NumberPortion *) param[3])->SetValue(time);
@@ -1628,7 +1626,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new gclFunction("AllNashSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, gclParameter("nfg", porNFG));
+  FuncObj->SetParamInfo(0, 0, gclParameter("supersupport", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
   FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
@@ -1640,7 +1638,7 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("singularsupps", 
+  FuncObj->SetParamInfo(0, 6, gclParameter("singularsubsupps", 
 					   PortionSpec(porNFSUPPORT,1),
 					   new NfSupport_ListPortion(), 
 					   BYREF));
