@@ -1,8 +1,6 @@
-\documentstyle[12pt,widetext]{manual}
+\documentstyle[widetext]{article}
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
-
-\pagestyle{plain}
 \begin{document}
 
 \title{Gambit Command Language}
@@ -1827,8 +1825,11 @@ found.
 *  sset:  The number of the strategy set in which strategies for the
 specified player will be counted.  If not given the last (smallest) 
 strategy set is used.
+
 \ed
 \ed
+
+\item
 
 \begin{verbatim}
 OutcomeOf[n->NODE] =: INTEGER
@@ -1853,8 +1854,10 @@ a value of zero is returned.
 
 \item
 - Optional parameters:  None.
+\ed
 
 \item
+
 \begin{verbatim}
 ParentOf[n->NODE] =: NODE
 \end{verbatim}
@@ -1876,6 +1879,7 @@ node.
 \item
 - Optional parameters:  None.
 \ed
+
 \item
 \begin{verbatim}
 PlayerOf[n->NODE] =: INTEGER
@@ -1898,6 +1902,7 @@ found.
 
 \item
 - Optional parameters:  None.
+\ed
 
 \item
 \begin{verbatim}
@@ -2137,7 +2142,6 @@ valid filename.
 \item
 - Optional parameters:  None.
 \ed
-\ed
 
 \item
 
@@ -2347,7 +2351,8 @@ assigned a title.
 
 \item
 
-\begin{verbatim}SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
+\begin{verbatim}
+SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
 \end{verbatim}
 
 \bd
@@ -2474,10 +2479,11 @@ output off.  By default, output is directed to the screen.
 *  nevals:  XXXX .
 \item
 *  time:  Returns the elapsed time for the operation.
-
+\ed
 \ed
 
 \item
+
 \begin{verbatim}
 StartWatch[] =: INTEGER
 \end{verbatim}
@@ -2556,12 +2562,12 @@ file.
 \item
 *  N:  The problem in normal form which is to be written to the
 indicated file.
+
 \item
 *  file:  The name of the file to which the normal form problem is
 to be written.
 \ed
 \ed
-
 \end{itemize}
 \end{document}
 
