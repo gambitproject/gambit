@@ -662,11 +662,7 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
   }
   else {
     n->m_label = m->m_label;
-
-    if (m->m_gameroot == m) {
-      n->m_gameroot = n;
-    }
-
+    n->m_gameroot = 0;
     if (m->m_outcome) {
       n->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
     }
