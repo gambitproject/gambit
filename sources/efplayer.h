@@ -9,22 +9,22 @@
 
 class gRational;
 
-class Player   {
-  friend class BaseExtForm;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+class EFPlayer   {
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
   private:
     int number;
     gString name;
-    BaseExtForm *E;
+    BaseEfg *E;
     
     gBlock<Infoset *> infosets;
 
-    Player(BaseExtForm *e, int n) : number(n), E(e)  { }
-    ~Player();
+    EFPlayer(BaseEfg *e, int n) : number(n), E(e)  { }
+    ~EFPlayer();
 
   public:
-    BaseExtForm *BelongsTo(void) const   { return E; }
+    BaseEfg *BelongsTo(void) const   { return E; }
   
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }

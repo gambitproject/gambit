@@ -1,22 +1,22 @@
 //#
-//# FILE: extform.h -- Declaration of extensive form data type
+//# FILE: efg.h -- Declaration of extensive form data type
 //#
 //# $Id$
 //#
 
-#ifndef EXTFORM_H
-#define EXTFORM_H
+#ifndef EFG_H
+#define EFG_H
 
 #include "gstring.h"
 #include "gblock.h"
 
 class Outcome;
-class Player;
+class EFPlayer;
 class Infoset;
 class Node;
 class Action;
 
-class BaseExtForm     {
+class BaseEfg     {
   
   private:
     // this is used to track memory leakage; #define MEMCHECK to use it
@@ -25,25 +25,25 @@ class BaseExtForm     {
   friend class EfgFileReader;
   protected:
     gString title;
-    gBlock<Player *> players;
+    gBlock<EFPlayer *> players;
     gBlock<Outcome *> outcomes;
     Node *root;
-    Player *chance;
+    EFPlayer *chance;
 
     gBlock<Node *> dead_nodes;
     gBlock<Infoset *> dead_infosets;
     gBlock<Outcome *> dead_outcomes;
 
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
-    BaseExtForm(void);
-    BaseExtForm(const BaseExtForm &);
+    BaseEfg(void);
+    BaseEfg(const BaseEfg &);
 
     void CopySubtree(Node *, Node *, Node *);
 
     void DisplayTree(gOutput &, Node *) const;
     void WriteEfgFile(gOutput &, Node *) const;
 
-    virtual Infoset *CreateInfoset(int n, Player *pl, int br) = 0;
+    virtual Infoset *CreateInfoset(int n, EFPlayer *pl, int br) = 0;
     virtual Node *CreateNode(Node *parent) = 0;
 
     void ScrapNode(Node *);
@@ -51,15 +51,15 @@ class BaseExtForm     {
     void ScrapOutcome(Outcome *);
 
 // These are auxiliary functions used by the .efg file reader code
-    Infoset *GetInfosetByIndex(Player *p, int index) const;
-    Infoset *CreateInfosetByIndex(Player *p, int index, int br);
+    Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
+    Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
     Outcome *GetOutcomeByIndex(int index) const;
     virtual Outcome *CreateOutcomeByIndex(int index) = 0;
     void Reindex(void);
 
   public:
        //# DESTRUCTOR
-    virtual ~BaseExtForm();
+    virtual ~BaseEfg();
 
        //# TITLE ACCESS AND MANIPULATION
     void SetTitle(const gString &s);
@@ -79,9 +79,9 @@ class BaseExtForm     {
        //# DATA ACCESS -- PLAYERS
     int NumPlayers(void) const;
 
-    Player *GetChance(void) const;
-    Player *NewPlayer(void);
-    const gArray<Player *> &PlayerList(void) const  { return players; }
+    EFPlayer *GetChance(void) const;
+    EFPlayer *NewPlayer(void);
+    const gArray<EFPlayer *> &PlayerList(void) const  { return players; }
 
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
@@ -89,18 +89,18 @@ class BaseExtForm     {
     void DeleteOutcome(Outcome *c);  
  
        //# EDITING OPERATIONS
-    Infoset *AppendNode(Node *n, Player *p, int br);
+    Infoset *AppendNode(Node *n, EFPlayer *p, int br);
     Infoset *AppendNode(Node *n, Infoset *s);
     Node *DeleteNode(Node *n, Node *keep);
-    Infoset *InsertNode(Node *n, Player *p, int br);
+    Infoset *InsertNode(Node *n, EFPlayer *p, int br);
     Infoset *InsertNode(Node *n, Infoset *s);
 
-    virtual Infoset *CreateInfoset(Player *pl, int br) = 0;
+    virtual Infoset *CreateInfoset(EFPlayer *pl, int br) = 0;
     Infoset *JoinInfoset(Infoset *s, Node *n);
     Infoset *LeaveInfoset(Node *n);
     Infoset *MergeInfoset(Infoset *to, Infoset *from);
 
-    Infoset *SwitchPlayer(Infoset *s, Player *p);
+    Infoset *SwitchPlayer(Infoset *s, EFPlayer *p);
 
     Node *CopyTree(Node *src, Node *dest);
     Node *MoveTree(Node *src, Node *dest);
@@ -115,9 +115,9 @@ class BaseExtForm     {
 template <class T> class OutcomeVector;
 #include "behav.h"
 
-template <class T> class ExtForm : public BaseExtForm   {
+template <class T> class Efg : public BaseEfg   {
   private:
-    ExtForm<T> &operator=(const ExtForm<T> &);
+    Efg<T> &operator=(const Efg<T> &);
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
@@ -125,7 +125,7 @@ template <class T> class ExtForm : public BaseExtForm   {
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
 		    gPVector<T> &, gDPVector<T> &) const;
 
-    Infoset *CreateInfoset(int n, Player *pl, int br);
+    Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);
     Outcome *CreateOutcomeByIndex(int index);
 
@@ -134,9 +134,9 @@ template <class T> class ExtForm : public BaseExtForm   {
 
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
-    ExtForm(void);
-    ExtForm(const ExtForm<T> &);
-    virtual ~ExtForm(); 
+    Efg(void);
+    Efg(const Efg<T> &);
+    virtual ~Efg(); 
 
 	//# DATA ACCESS -- GENERAL INFORMATION
     DataType Type(void) const;
@@ -144,7 +144,7 @@ template <class T> class ExtForm : public BaseExtForm   {
         //# DATA ACCESS -- OUTCOMES
     OutcomeVector<T> *NewOutcome(void);
 
-    Infoset *CreateInfoset(Player *pl, int br);
+    Infoset *CreateInfoset(EFPlayer *pl, int br);
 
         //# COMPUTING VALUES OF PROFILES
 //    gDPVector<T> *NewBehavProfile(void) const;
@@ -159,15 +159,15 @@ template <class T> class ExtForm : public BaseExtForm   {
 		    gPVector<T> &probs) const;
 };
 
-#include "player.h"
+#include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
 #include "outcome.h"
 
 // These functions are provided in readefg.y/readefg.cc
-template <class T> int ReadEfgFile(gInput &, ExtForm<T> *&);
+template <class T> int ReadEfgFile(gInput &, Efg<T> *&);
 void EfgFileType(gInput &f, bool &valid, DataType &type);
 
-#endif   //# EXTFORM_H
+#endif   //# EFG_H
 
 

@@ -10,16 +10,16 @@
 #include "rational.h"
 #include "gvector.h"
 
-#include "player.h"
+#include "efplayer.h"
 
 class Node;
 
 template <class T> class ChanceInfoset;
 
 class Action   {
-  friend class BaseExtForm;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
   friend class Infoset;
   friend class ChanceInfoset<double>;
   friend class ChanceInfoset<gRational>;
@@ -35,22 +35,22 @@ class Action   {
 };
 
 class Infoset   {
-  friend class BaseExtForm;
-  friend class Player;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+  friend class BaseEfg;
+  friend class EFPlayer;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
 
   protected:
     bool valid;
-    BaseExtForm *E;
+    BaseEfg *E;
     int number;
     gString name;
-    Player *player;
+    EFPlayer *player;
     gBlock<Action *> actions;
     gBlock<Node *> members;
     
-    Infoset(BaseExtForm *e, int n, Player *p, int br)
-      : valid(true), E(e), number(n), player(p), actions(br) 
+    Infoset(BaseEfg *e, int n, EFPlayer *p, int br)
+      : valid(true), E(e), number(n), player(p), actions(br), flag(0) 
       { while (br)  { actions[br] = new Action(ToString(br)); br--; } }
     virtual ~Infoset()  
       { for (int i = 1; i <= actions.Length(); i++)  delete actions[i]; }
@@ -63,12 +63,14 @@ class Infoset   {
       }
 
   public:
+    int flag, whichbranch;
+
     bool IsValid(void) const             { return valid; }
-    BaseExtForm *BelongsTo(void) const   { return E; }
+    BaseEfg *BelongsTo(void) const   { return E; }
 
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
-    Player *GetPlayer(void) const    { return player; }
+    EFPlayer *GetPlayer(void) const    { return player; }
 
     void SetName(const gString &s)    { name = s; }
     const gString &GetName(void) const   { return name; }
@@ -100,14 +102,14 @@ class Infoset   {
 };
 
 template <class T> class ChanceInfoset : public Infoset  {
-  friend class BaseExtForm;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
 
   private:
     gBlock<T> probs;
 
-    ChanceInfoset(BaseExtForm *E, int n, Player *p, int br)
+    ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
       : Infoset(E, n, p, br), probs(br)
       { probs[1] = (T) 1.0;
 	for (int i = 2; i <= br; probs[i++] = (T) 0.0);
@@ -120,6 +122,7 @@ template <class T> class ChanceInfoset : public Infoset  {
 	  f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
 	f << "}";
       }
+
   public:
     void InsertAction(int where)
       { actions.Insert(new Action(""), where);

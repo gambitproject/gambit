@@ -7,7 +7,7 @@
 #ifndef ELIAP_H
 #define ELIAP_H
 
-#include "extform.h"
+#include "efg.h"
 #include "liap.h"
 #include "glist.h"
 #include "rational.h"
@@ -21,15 +21,15 @@ public:
 
 template <class T> class EFLiapModule : public LiapModule<T>  {
   private:
-    const ExtForm<T> &E;
+    const Efg<T> &E;
     gList<BehavProfile<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
     void AddSolution(const LiapFunc<T> *const);
 
   public:
-    EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p); 
-    EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p, gDPVector<T> &s); 
+    EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p); 
+    EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p, gDPVector<T> &s); 
     virtual ~EFLiapModule();
     const gList<BehavProfile<T> > &GetSolutions(void) const;
 };

@@ -5,7 +5,7 @@
 //#
 
 #include "rational.h"
-#include "extform.h"
+#include "efg.h"
 #include "glist.h"
 #include "glistit.h"
 
@@ -13,7 +13,7 @@
 #define TEMPLATE template
 #elif defined __BORLANDC__
 class BehavProfile<gRational>;
-class ExtForm<gRational>;
+class Efg<gRational>;
 class gList<Node *>;
 class gListIter<Node *>;
 
@@ -21,9 +21,9 @@ class gListIter<Node *>;
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-#include "extform.imp"
-TEMPLATE class ExtForm<double>;
-DataType ExtForm<double>::Type(void) const    { return DOUBLE; }
+#include "efg.imp"
+TEMPLATE class Efg<double>;
+DataType Efg<double>::Type(void) const    { return DOUBLE; }
 
 TEMPLATE class TypedNode<double>;
 TEMPLATE class ChanceInfoset<double>;
@@ -36,7 +36,7 @@ TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 #include "readefg.imp"
 
 TEMPLATE class EfgFile<double>;
-TEMPLATE int ReadEfgFile(gInput &, ExtForm<double> *&);
+TEMPLATE int ReadEfgFile(gInput &, Efg<double> *&);
 
 #include "glist.imp"
 

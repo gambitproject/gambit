@@ -11,20 +11,20 @@
 #include "gblock.h"
 
 class Node    {
-  friend class BaseExtForm;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
   
   protected:
     bool valid;
-    BaseExtForm *E;
+    BaseEfg *E;
     gString name;
     Infoset *infoset;
     Node *parent;
     Outcome *outcome;
     gBlock<Node *> children;
 
-    Node(BaseExtForm *e, Node *p)
+    Node(BaseEfg *e, Node *p)
       : valid(true), E(e), infoset(0), parent(p), outcome(0)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
@@ -34,13 +34,14 @@ class Node    {
   public:
     // these are temporarily here for nfgefg
     double nval, bval;
+    Node *whichbranch, *ptr;
 
     bool IsValid(void) const     { return valid; }
-    BaseExtForm *BelongsTo(void) const   { return E; }
+    BaseEfg *BelongsTo(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
     Infoset *GetInfoset(void) const   { return infoset; }
-    Player *GetPlayer(void) const
+    EFPlayer *GetPlayer(void) const
       { if (!infoset)   return 0;
 	else  return infoset->GetPlayer(); }
 

@@ -10,14 +10,14 @@
 #include "gmisc.h"
 #include "gstring.h"
 
-class BaseExtForm;
+class BaseEfg;
 
 class BaseBehavProfile   {
   protected:
-    const BaseExtForm *E;
+    const BaseEfg *E;
     bool truncated;
 
-    BaseBehavProfile(const BaseExtForm &, bool trunc);
+    BaseBehavProfile(const BaseEfg &, bool trunc);
     BaseBehavProfile(const BaseBehavProfile &);
     BaseBehavProfile &operator=(const BaseBehavProfile &);
 
@@ -37,14 +37,14 @@ class BaseBehavProfile   {
 
 #include "gdpvect.h"
 
-template <class T> class ExtForm;
+template <class T> class Efg;
 class Infoset;
 
 template <class T> class BehavProfile
   : public BaseBehavProfile, public gDPVector<T>  {
   public:
-    BehavProfile(const ExtForm<T> &, bool truncated = false);
-    BehavProfile(const ExtForm<T> &, const gDPVector<T> &);
+    BehavProfile(const Efg<T> &, bool truncated = false);
+    BehavProfile(const Efg<T> &, const gDPVector<T> &);
     BehavProfile(const BehavProfile<T> &);
     ~BehavProfile();
 
@@ -55,7 +55,7 @@ template <class T> class BehavProfile
 
     T Payoff(int pl) const;
 
-    ExtForm<T> *BelongsTo(void) const   { return (ExtForm<T> *) E; }
+    Efg<T> *BelongsTo(void) const   { return (Efg<T> *) E; }
 
     const T &GetValue(Infoset *s, int act) const;
 };

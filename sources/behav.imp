@@ -1,11 +1,11 @@
 //#
-//# FILE: extform.imp -- Implementation of templated extensive form members
+//# FILE: efg.imp -- Implementation of templated extensive form members
 //#
 //# $Id$
 //#
 
-#include "extform.h"
-#include "player.h"
+#include "efg.h"
+#include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
 #include "outcome.h"
@@ -31,13 +31,13 @@ template <class T> class TypedNode : public Node    {
   public:
     gVector<T> *scratch;
 
-    TypedNode(BaseExtForm *E, Node *parent, int pl);
+    TypedNode(BaseEfg *E, Node *parent, int pl);
     virtual ~TypedNode();
 
     void Resize(int pl);
 };
 
-template <class T> TypedNode<T>::TypedNode(BaseExtForm *E, Node *p, int pl) 
+template <class T> TypedNode<T>::TypedNode(BaseEfg *E, Node *p, int pl) 
   : Node(E, p), scratch(new gVector<T>(pl))   { }
 
 template <class T> TypedNode<T>::~TypedNode()   { delete scratch; }
@@ -52,20 +52,20 @@ template <class T> void TypedNode<T>::Resize(int pl)
 
 
 //------------------------------------------------------------------------
-//      ExtForm<T>: Constructor, destructors, constructive operators
+//      Efg<T>: Constructor, destructors, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> ExtForm<T>::ExtForm(void)
+template <class T> Efg<T>::Efg(void)
 { (root = new TypedNode<T>(this, 0, 0))->name = "ROOT"; }
 
-template <class T> void ExtForm<T>::CopySubtree(Node *n, Node *m)
+template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 {
   n->name = m->name;
   if (m->outcome)
     n->outcome = outcomes[m->outcome->number];
 
   if (m->infoset)   {
-    Player *p;
+    EFPlayer *p;
     if (m->infoset->player->number)
       p = players[m->infoset->player->number];
     else 
@@ -78,8 +78,8 @@ template <class T> void ExtForm<T>::CopySubtree(Node *n, Node *m)
   }
 }
 
-template <class T> ExtForm<T>::ExtForm(const ExtForm<T> &E)
-  : BaseExtForm(E)
+template <class T> Efg<T>::Efg(const Efg<T> &E)
+  : BaseEfg(E)
 {
   int i;
 
@@ -103,14 +103,14 @@ template <class T> ExtForm<T>::ExtForm(const ExtForm<T> &E)
   CopySubtree(root, E.root);
 }
 
-template <class T> ExtForm<T>::~ExtForm()
+template <class T> Efg<T>::~Efg()
 { }
 
 //------------------------------------------------------------------------
-//            ExtForm<T>: Private and protected member functions
+//            Efg<T>: Private and protected member functions
 //------------------------------------------------------------------------
 
-template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
+template <class T> Infoset *Efg<T>::CreateInfoset(int n, EFPlayer *p, int br)
 {
   Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(this, n, p, br) :
                new Infoset(this, n, p, br);
@@ -118,16 +118,16 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
   return s;
 }
 
-template <class T> Node *ExtForm<T>::CreateNode(Node *parent)
+template <class T> Node *Efg<T>::CreateNode(Node *parent)
 { return new TypedNode<T>(this, parent, players.Length()); }
 
-template <class T> Infoset *ExtForm<T>::CreateInfoset(Player *p, int br)
+template <class T> Infoset *Efg<T>::CreateInfoset(EFPlayer *p, int br)
 {
   assert(p && p->BelongsTo() == this);
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
-template <class T> Outcome *ExtForm<T>::CreateOutcomeByIndex(int index)
+template <class T> Outcome *Efg<T>::CreateOutcomeByIndex(int index)
 {
   OutcomeVector<T> *ret = NewOutcome();
   ret->number = index;
@@ -135,10 +135,10 @@ template <class T> Outcome *ExtForm<T>::CreateOutcomeByIndex(int index)
 }
 
 //------------------------------------------------------------------------
-//                 ExtForm<T>: Operations on outcomes
+//                 Efg<T>: Operations on outcomes
 //------------------------------------------------------------------------
 
-template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
+template <class T> OutcomeVector<T> *Efg<T>::NewOutcome(void)
 {
   OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
 					       players.Length());
@@ -148,13 +148,13 @@ template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
 }
 
 //------------------------------------------------------------------------
-//                   ExtForm<T>: Payoff computation
+//                   Efg<T>: Payoff computation
 //------------------------------------------------------------------------
 
 #include "gdpvect.h"
 
 template <class T>
-void ExtForm<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
+void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 			gVector<T> &payoff) const
 {
   if (n->outcome)
@@ -172,14 +172,14 @@ void ExtForm<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 }
 
 template <class T>
-void ExtForm<T>::Payoff(const gPVector<int> &profile, gVector<T> &payoff) const
+void Efg<T>::Payoff(const gPVector<int> &profile, gVector<T> &payoff) const
 {
   ((gVector<T> &) payoff).operator=((T) 0);
   Payoff(root, (T) 1.0, profile, payoff);
 }
 
 template <class T>
-void ExtForm<T>::Payoff(Node *n, T prob, int pl, T &value,
+void Efg<T>::Payoff(Node *n, T prob, int pl, T &value,
 			const BehavProfile<T> &profile) const
 {
   if (n->outcome)
@@ -209,7 +209,7 @@ void ExtForm<T>::Payoff(Node *n, T prob, int pl, T &value,
 }
 
 template <class T>
-T ExtForm<T>::Payoff(int pl, const BehavProfile<T> &profile) const
+T Efg<T>::Payoff(int pl, const BehavProfile<T> &profile) const
 {
   T value = (T) 0.0;
   Payoff(root, (T) 1.0, pl, value, profile);
@@ -217,7 +217,7 @@ T ExtForm<T>::Payoff(int pl, const BehavProfile<T> &profile) const
 }
 
 template <class T>
-void ExtForm<T>::CondPayoff(Node *n, T prob,
+void Efg<T>::CondPayoff(Node *n, T prob,
 			    const BehavProfile<T> &profile,
 			    gPVector<T> &probs,
 			    gDPVector<T> &payoff) const
@@ -265,7 +265,7 @@ void ExtForm<T>::CondPayoff(Node *n, T prob,
 }
 
 
-template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
+template <class T> void Efg<T>::CondPayoff(const BehavProfile<T> &profile,
 					       gDPVector<T> &payoff,
 					       gPVector<T> &probs) const
 {
@@ -282,7 +282,7 @@ template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
 	payoff(i, j, k) /= probs(i, j);
 }
 
-template <class T> int ExtForm<T>::ProfileLength(bool trunc) const
+template <class T> int Efg<T>::ProfileLength(bool trunc) const
 {
   int sum = 0;
 
@@ -293,7 +293,7 @@ template <class T> int ExtForm<T>::ProfileLength(bool trunc) const
   return sum;
 }
 
-template <class T> gPVector<int> ExtForm<T>::Dimensionality(bool trunc) const
+template <class T> gPVector<int> Efg<T>::Dimensionality(bool trunc) const
 {
   gArray<int> foo(players.Length());
   for (int i = 1; i <= players.Length(); i++)
@@ -307,7 +307,7 @@ template <class T> gPVector<int> ExtForm<T>::Dimensionality(bool trunc) const
   return bar;
 }  
 
-template <class T> void ExtForm<T>::Centroid(BehavProfile<T> &profile) const
+template <class T> void Efg<T>::Centroid(BehavProfile<T> &profile) const
 {
   T center;
 
@@ -324,14 +324,14 @@ template <class T> void ExtForm<T>::Centroid(BehavProfile<T> &profile) const
 //                    BehavProfile<T> member functions
 //---------------------------------------------------------------------------
 
-template <class T> BehavProfile<T>::BehavProfile(const ExtForm<T> &EF,
+template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
 						 bool trunc)
   : BaseBehavProfile(EF, trunc), gDPVector<T>(EF.Dimensionality(trunc))
 {
   EF.Centroid(*this);
 }
 
-template <class T> BehavProfile<T>::BehavProfile(const ExtForm<T> &EF,
+template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
 						 const gDPVector<T> &profile)
   : BaseBehavProfile(EF, false), gDPVector<T>(profile)
 { }
@@ -351,7 +351,7 @@ BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
 }
 
 template <class T> T BehavProfile<T>::Payoff(int pl) const
-{ return ((ExtForm<T> *) E)->Payoff(pl, *this); }
+{ return ((Efg<T> *) E)->Payoff(pl, *this); }
 
 #include <assert.h>
 

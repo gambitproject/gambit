@@ -1,11 +1,11 @@
 //#
-//# FILE: extform.cc -- Implementation of extensive form data type
+//# FILE: efg.cc -- Implementation of extensive form data type
 //#
 //# $Id$
 //#
 
 class Node;
-class Player;
+class EFPlayer;
 class Infoset;
 class Action;
 class Outcome;
@@ -27,8 +27,8 @@ class gBlock<gRational>;
 #include "garray.imp"
 #include "gblock.imp"
 
-TEMPLATE class gArray<Player *>;
-TEMPLATE class gBlock<Player *>;
+TEMPLATE class gArray<EFPlayer *>;
+TEMPLATE class gBlock<EFPlayer *>;
 
 TEMPLATE class gArray<Infoset *>;
 TEMPLATE class gBlock<Infoset *>;
@@ -44,22 +44,22 @@ TEMPLATE class gBlock<Outcome *>;
 
 #pragma -Jgx
 
-#include "extform.h"
+#include "efg.h"
 #include <assert.h>
 
-Player::~Player()
+EFPlayer::~EFPlayer()
 {
   while (infosets.Length())   delete infosets.Remove(1);
 }
 
-bool Player::IsInfosetDefined(const gString &s) const
+bool EFPlayer::IsInfosetDefined(const gString &s) const
 {
   for (int i = 1; i <= infosets.Length(); i++)
     if (infosets[i]->name == s)   return true;
   return false;
 }
 
-Infoset *Player::GetInfoset(const gString &name) const
+Infoset *EFPlayer::GetInfoset(const gString &name) const
 {
   for (int i = 1; i <= infosets.Length(); i++)
     if (infosets[i]->name == name)   return infosets[i];
@@ -71,22 +71,22 @@ Infoset *Player::GetInfoset(const gString &name) const
 //------------------------------------------------------------------------
 
 #ifdef MEMCHECK
-int BaseExtForm::_NumObj = 0;
+int BaseEfg::_NumObj = 0;
 #endif // MEMCHECK
 
-BaseExtForm::BaseExtForm(void) : title("UNTITLED"), chance(new Player(this, 0))
+BaseEfg::BaseEfg(void) : title("UNTITLED"), chance(new EFPlayer(this, 0))
 {
 #ifdef MEMCHECK
   _NumObj++;
-  gout << "--- BaseExtForm Ctor: " << _NumObj << "\n";
+  gout << "--- BaseEfg Ctor: " << _NumObj << "\n";
 #endif // MEMCHECK
 }
 
-BaseExtForm::BaseExtForm(const BaseExtForm &E)
-  : title(E.title), players(E.players.Length()), chance(new Player(this, 0))
+BaseEfg::BaseEfg(const BaseEfg &E)
+  : title(E.title), players(E.players.Length()), chance(new EFPlayer(this, 0))
 {
   for (int i = 1; i <= players.Length(); i++)  {
-    (players[i] = new Player(this, i))->name = E.players[i]->name;
+    (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
     for (int j = 1; j <= E.players[i]->infosets.Length(); j++)   {
       Infoset *s = new Infoset(this, j, players[i],
 			       E.players[i]->infosets[j]->actions.Length());
@@ -99,11 +99,11 @@ BaseExtForm::BaseExtForm(const BaseExtForm &E)
 
 #ifdef MEMCHECK
   _NumObj++;
-  gout << "--- BaseExtForm Ctor: " << _NumObj << "\n";
+  gout << "--- BaseEfg Ctor: " << _NumObj << "\n";
 #endif // MEMCHECK
 }
 
-BaseExtForm::~BaseExtForm()
+BaseEfg::~BaseEfg()
 {
   delete root;
   delete chance;
@@ -118,53 +118,53 @@ BaseExtForm::~BaseExtForm()
 
 #ifdef MEMCHECK
   _NumObj--;
-  gout << "--- BaseExtForm Dtor: " << _NumObj << "\n";
+  gout << "--- BaseEfg Dtor: " << _NumObj << "\n";
 #endif // MEMCHECK
 }
 
 //------------------------------------------------------------------------
-//                  BaseExtForm: Private member functions
+//                  BaseEfg: Private member functions
 //------------------------------------------------------------------------
 
-void BaseExtForm::ScrapNode(Node *n)
+void BaseEfg::ScrapNode(Node *n)
 {
   n->children.Flush();
   n->valid = false;
   dead_nodes.Append(n);
 }
 
-void BaseExtForm::ScrapInfoset(Infoset *s)
+void BaseEfg::ScrapInfoset(Infoset *s)
 {
   s->members.Flush();
   s->valid = false;
   dead_infosets.Append(s);
 }
 
-void BaseExtForm::ScrapOutcome(Outcome *c)
+void BaseEfg::ScrapOutcome(Outcome *c)
 {
   dead_outcomes.Append(c);
 }
 
-Infoset *BaseExtForm::GetInfosetByIndex(Player *p, int index) const
+Infoset *BaseEfg::GetInfosetByIndex(EFPlayer *p, int index) const
 {
   for (int i = 1; i <= p->infosets.Length(); i++)
     if (p->infosets[i]->number == index)   return p->infosets[i];
   return 0;
 }
 
-Outcome *BaseExtForm::GetOutcomeByIndex(int index) const
+Outcome *BaseEfg::GetOutcomeByIndex(int index) const
 {
   for (int i = 1; i <= outcomes.Length(); i++)
     if (outcomes[i]->number == index)   return outcomes[i];
   return 0;
 }
 
-void BaseExtForm::Reindex(void)
+void BaseEfg::Reindex(void)
 {
   int i;
 
   for (i = 1; i <= players.Length(); i++)  {
-    Player *p = players[i];
+    EFPlayer *p = players[i];
     for (int j = 1; j <= p->infosets.Length(); j++)
       p->infosets[j]->number = j;
   }
@@ -174,32 +174,32 @@ void BaseExtForm::Reindex(void)
 }
 
 //------------------------------------------------------------------------
-//               BaseExtForm: Title access and manipulation
+//               BaseEfg: Title access and manipulation
 //------------------------------------------------------------------------
 
-void BaseExtForm::SetTitle(const gString &s)
+void BaseEfg::SetTitle(const gString &s)
 { title = s; }
 
-const gString &BaseExtForm::GetTitle(void) const
+const gString &BaseEfg::GetTitle(void) const
 { return title; }
 
 //------------------------------------------------------------------------
-//                    BaseExtForm: Writing data files
+//                    BaseEfg: Writing data files
 //------------------------------------------------------------------------
 
-void BaseExtForm::DisplayTree(gOutput &f, Node *n) const
+void BaseEfg::DisplayTree(gOutput &f, Node *n) const
 {
   f << "{ " << n << ' ';
   for (int i = 1; i <= n->children.Length(); DisplayTree(f, n->children[i++]));
   f << "} ";
 }
 
-void BaseExtForm::DisplayTree(gOutput &f) const
+void BaseEfg::DisplayTree(gOutput &f) const
 {
   DisplayTree(f, root);
 }
 
-void BaseExtForm::WriteEfgFile(gOutput &f, Node *n) const
+void BaseEfg::WriteEfgFile(gOutput &f, Node *n) const
 {
   if (n->children.Length() == 0)   {
     f << "t \"" << n->name << "\" ";
@@ -244,7 +244,7 @@ void BaseExtForm::WriteEfgFile(gOutput &f, Node *n) const
     WriteEfgFile(f, n->children[i]);
 }
 
-void BaseExtForm::WriteEfgFile(gOutput &f) const
+void BaseEfg::WriteEfgFile(gOutput &f) const
 {
   f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
   f << " \"" << title << "\" { ";
@@ -260,25 +260,25 @@ void BaseExtForm::WriteEfgFile(gOutput &f) const
 //                    ExtForm<T>: General data access
 //------------------------------------------------------------------------
 
-int BaseExtForm::NumPlayers(void) const
+int BaseEfg::NumPlayers(void) const
 { return players.Length(); }
 
-int BaseExtForm::NumOutcomes(void) const
+int BaseEfg::NumOutcomes(void) const
 { return outcomes.Length(); }
 
-void BaseExtForm::DeleteOutcome(Outcome *outc)
+void BaseEfg::DeleteOutcome(Outcome *outc)
 {
   root->DeleteOutcome(outc);
   ScrapOutcome(outc);
 }
 
-Node *BaseExtForm::RootNode(void) const
+Node *BaseEfg::RootNode(void) const
 { return root; }
 
-bool BaseExtForm::IsSuccessor(const Node *n, const Node *from) const
+bool BaseEfg::IsSuccessor(const Node *n, const Node *from) const
 { return IsPredecessor(from, n); }
 
-bool BaseExtForm::IsPredecessor(const Node *n, const Node *of) const
+bool BaseEfg::IsPredecessor(const Node *n, const Node *of) const
 { 
   while (n && n != of)    n = n->parent;
 
@@ -289,14 +289,14 @@ bool BaseExtForm::IsPredecessor(const Node *n, const Node *of) const
 //                    ExtForm<T>: Operations on players
 //------------------------------------------------------------------------
 
-Player *BaseExtForm::GetChance(void) const
+EFPlayer *BaseEfg::GetChance(void) const
 {
   return chance;
 }
 
-Player *BaseExtForm::NewPlayer(void)
+EFPlayer *BaseEfg::NewPlayer(void)
 {
-  Player *ret = new Player(this, players.Length() + 1);
+  EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
   players.Append(ret);
   root->Resize(players.Length());
   for (int i = 1; i <= outcomes.Length(); i++)
@@ -304,7 +304,7 @@ Player *BaseExtForm::NewPlayer(void)
   return ret;
 }
 
-Infoset *BaseExtForm::AppendNode(Node *n, Player *p, int count)
+Infoset *BaseEfg::AppendNode(Node *n, EFPlayer *p, int count)
 {
   assert(n && p && count > 0);
 
@@ -318,7 +318,7 @@ Infoset *BaseExtForm::AppendNode(Node *n, Player *p, int count)
   return n->infoset;
 }  
 
-Infoset *BaseExtForm::AppendNode(Node *n, Infoset *s)
+Infoset *BaseEfg::AppendNode(Node *n, Infoset *s)
 {
   assert(n && s);
   
@@ -332,7 +332,7 @@ Infoset *BaseExtForm::AppendNode(Node *n, Infoset *s)
   return s;
 }
   
-Node *BaseExtForm::DeleteNode(Node *n, Node *keep)
+Node *BaseEfg::DeleteNode(Node *n, Node *keep)
 {
   assert(n && keep);
 
@@ -351,7 +351,7 @@ Node *BaseExtForm::DeleteNode(Node *n, Node *keep)
   return keep;
 }
 
-Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
+Infoset *BaseEfg::InsertNode(Node *n, EFPlayer *p, int count)
 {
   assert(n && p && count > 0);
 
@@ -370,7 +370,7 @@ Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
   return m->infoset;
 }
 
-Infoset *BaseExtForm::InsertNode(Node *n, Infoset *s)
+Infoset *BaseEfg::InsertNode(Node *n, Infoset *s)
 {
   assert(n && s);
   
@@ -390,7 +390,7 @@ Infoset *BaseExtForm::InsertNode(Node *n, Infoset *s)
   return m->infoset;
 }
 
-Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
+Infoset *BaseEfg::JoinInfoset(Infoset *s, Node *n)
 {
   assert(n && s);
 
@@ -399,7 +399,7 @@ Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
   if (s->actions.Length() != n->children.Length())  return n->infoset;
 
   Infoset *t = n->infoset;
-  Player *p = n->infoset->player;
+  EFPlayer *p = n->infoset->player;
 
   t->members.Remove(t->members.Find(n));
   if (t->members.Length() == 0)
@@ -411,7 +411,7 @@ Infoset *BaseExtForm::JoinInfoset(Infoset *s, Node *n)
   return s;
 }
 
-Infoset *BaseExtForm::LeaveInfoset(Node *n)
+Infoset *BaseEfg::LeaveInfoset(Node *n)
 {
   assert(n);
 
@@ -420,7 +420,7 @@ Infoset *BaseExtForm::LeaveInfoset(Node *n)
   Infoset *s = n->infoset;
   if (s->members.Length() == 1)   return s;
 
-  Player *p = s->player;
+  EFPlayer *p = s->player;
   s->members.Remove(s->members.Find(n));
   n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
 			     n->children.Length());
@@ -432,7 +432,7 @@ Infoset *BaseExtForm::LeaveInfoset(Node *n)
   return n->infoset;
 }
 
-Infoset *BaseExtForm::MergeInfoset(Infoset *to, Infoset *from)
+Infoset *BaseEfg::MergeInfoset(Infoset *to, Infoset *from)
 {
   assert(to && from);
 
@@ -446,7 +446,7 @@ Infoset *BaseExtForm::MergeInfoset(Infoset *to, Infoset *from)
   return to;
 }
 
-Infoset *BaseExtForm::SwitchPlayer(Infoset *s, Player *p)
+Infoset *BaseEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
 {
   assert(s && p);
   
@@ -459,7 +459,7 @@ Infoset *BaseExtForm::SwitchPlayer(Infoset *s, Player *p)
   return s;
 }
 
-void BaseExtForm::CopySubtree(Node *src, Node *dest, Node *stop)
+void BaseEfg::CopySubtree(Node *src, Node *dest, Node *stop)
 {
   if (src == stop)   return;
 
@@ -473,7 +473,7 @@ void BaseExtForm::CopySubtree(Node *src, Node *dest, Node *stop)
   dest->outcome = src->outcome;
 }
 
-Node *BaseExtForm::CopyTree(Node *src, Node *dest)
+Node *BaseEfg::CopyTree(Node *src, Node *dest)
 {
   assert(src && dest);
   if (src == dest || dest->children.Length())   return src;
@@ -483,7 +483,7 @@ Node *BaseExtForm::CopyTree(Node *src, Node *dest)
   return dest;
 }
 
-Node *BaseExtForm::MoveTree(Node *src, Node *dest)
+Node *BaseEfg::MoveTree(Node *src, Node *dest)
 {
   assert(src && dest);
   if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
@@ -503,7 +503,7 @@ Node *BaseExtForm::MoveTree(Node *src, Node *dest)
   return dest;
 }
 
-Node *BaseExtForm::DeleteTree(Node *n)
+Node *BaseEfg::DeleteTree(Node *n)
 {
   assert(n);
 
@@ -527,7 +527,7 @@ Node *BaseExtForm::DeleteTree(Node *n)
   return n;
 }
 
-Infoset *BaseExtForm::AppendAction(Infoset *s)
+Infoset *BaseEfg::AppendAction(Infoset *s)
 {
   assert(s);
   s->InsertAction(s->NumActions() + 1);
@@ -536,7 +536,7 @@ Infoset *BaseExtForm::AppendAction(Infoset *s)
   return s;
 }
 
-Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a)
+Infoset *BaseEfg::InsertAction(Infoset *s, Action *a)
 {
   assert(a && s);
   for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
@@ -549,7 +549,7 @@ Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a)
   return s;
 }
 
-Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
+Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
 {
   assert(a && s);
   for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
@@ -569,7 +569,7 @@ Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
 //                    BaseBehavProfile member functions
 //---------------------------------------------------------------------------
 
-BaseBehavProfile::BaseBehavProfile(const BaseExtForm &EF, bool trunc)
+BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc)
   : E(&EF), truncated(trunc)  { }
 
 BaseBehavProfile::BaseBehavProfile(const BaseBehavProfile &p)

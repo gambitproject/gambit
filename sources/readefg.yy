@@ -8,7 +8,7 @@
 #include "rational.h"
 #include "ggrstack.h"
 #include "glist.h"
-#include "extform.h"
+#include "efg.h"
 
 %}
 
@@ -17,11 +17,11 @@
 %define MEMBERS    gInput &infile; \
                    gString last_name;  gRational last_rational;  \
                    int last_int, iset_idx; \
-                   BaseExtForm *& E; \
+                   BaseEfg *& E; \
                    gGrowableStack<Node *> path; \
                    gList<gString> actions; \
                    gList<gRational> values; \
-                   Player *player; Infoset *infoset; Outcome *outcome; \
+                   EFPlayer *player; Infoset *infoset; Outcome *outcome; \
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    virtual Outcome *NewOutcome(void) = 0; \
@@ -35,7 +35,7 @@
 					     const gList<gRational> &) = 0;
 
 
-%define CONSTRUCTOR_PARAM    gInput &f, BaseExtForm *& e
+%define CONSTRUCTOR_PARAM    gInput &f, BaseEfg *& e
 
 %define CONSTRUCTOR_INIT     : infile(f), E(e), path(32)
 

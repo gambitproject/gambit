@@ -10,7 +10,7 @@
 
 template <class T> class EfgFile : public EfgFileReader    {
   public:
-    EfgFile(gInput &, ExtForm<T> *&);
+    EfgFile(gInput &, Efg<T> *&);
     virtual ~EfgFile();
 
     int Parse(void);
@@ -22,7 +22,7 @@ template <class T> class EfgFile : public EfgFileReader    {
     bool CheckOutcome(Outcome *, const gList<gRational> &);
 };
 
-template <class T> EfgFile<T>::EfgFile(gInput &f, ExtForm<T> *& E)
+template <class T> EfgFile<T>::EfgFile(gInput &f, Efg<T> *& E)
   : EfgFileReader(f, E)
 { }
 
@@ -31,7 +31,7 @@ template <class T> EfgFile<T>::~EfgFile()
 
 template <class T> Outcome *EfgFile<T>::NewOutcome(void)
 {
-  return ((ExtForm<T> &) *E).NewOutcome();
+  return ((Efg<T> &) *E).NewOutcome();
 }
 
 template <class T> void EfgFile<T>::SetOutcome(Outcome *c,
@@ -52,7 +52,7 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
 						     const gList<gRational> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (((ChanceInfoset<T> &) *s).GetActionProb(i) !=(T) p[i])  return false;
+    if (((ChanceInfoset<T> &) *s).GetActionProb(i) != (T) p[i])  return false;
   return true;
 }
 
@@ -79,11 +79,11 @@ template <class T> int EfgFile<T>::Parse(void)
   return yyparse();
 }
 
-template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
+template <class T> int ReadEfgFile(gInput &f, Efg<T> *& E)
 {
   assert(!E);
 
-  E = new ExtForm<T>;
+  E = new Efg<T>;
 
   EfgFile<T> R(f, E);
   

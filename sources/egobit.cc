@@ -11,7 +11,7 @@
 #include "gmatrix.h"
 
 #include "behav.h"
-#include "player.h"
+#include "efplayer.h"
 #include "infoset.h"
 
 //-------------------------------------------------------------------------
@@ -38,14 +38,14 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
     gPVector<T> probs;
     BehavProfile<T> p, pp, cpay;
     gMatrix<T> xi;
-    const ExtForm<T> &E;
+    const Efg<T> &E;
     
     // Inherited virtual function from gBFunctMin
     T Value(const gVector<T> &x);
 
   public:
-    EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P);
-    EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
+    EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P);
+    EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
 	      const BehavProfile<T> &s);
     virtual ~EFGobitFunc();
 
@@ -60,7 +60,7 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 //-------------------------------------------------------------------------
 
 template <class T>
-EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
+EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P)
   :gBFunctMin<T>(EF.ProfileLength(true)),
                  probs(EF.Dimensionality().Lengths()),
 		 p(EF, true), pp(EF, true), cpay(EF),
@@ -71,7 +71,7 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
 }
 
 template <class T>
-EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
+EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
 			    const BehavProfile<T> &s)
   :gBFunctMin<T>(EF.ProfileLength(true)),
 		 probs(EF.Dimensionality().Lengths()),
@@ -106,7 +106,7 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
   E.CondPayoff(p, cpay, probs);
 
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    Player *player = E.PlayerList()[pl];
+    EFPlayer *player = E.PlayerList()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       prob = (T) 0;
       psum = (T) 0;
@@ -197,12 +197,12 @@ template <class T> void EFGobitFunc<T>::Output(gOutput &f, int format) const
 //------------------------------------------------------------------------
 
 template <class T>
-EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p)
+EFGobitModule<T>::EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p)
   : GobitModule<T>(p), E(EF)
 { }
 
 template <class T>
-EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p,
+EFGobitModule<T>::EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p,
 				gDPVector<T> &s)
   : GobitModule<T>(p,s), E(EF)
 { }

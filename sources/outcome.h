@@ -8,20 +8,20 @@
 #define OUTCOME_H
 
 class Outcome   {
-  friend class BaseExtForm;
-  friend class ExtForm<double>;
-  friend class ExtForm<gRational>;
+  friend class BaseEfg;
+  friend class Efg<double>;
+  friend class Efg<gRational>;
 
   protected:
     int number;
     gString name;
-    BaseExtForm *E;
+    BaseEfg *E;
 
-    Outcome(BaseExtForm *e, int n) : number(n), E(e)   { }
+    Outcome(BaseEfg *e, int n) : number(n), E(e)   { }
     virtual ~Outcome()   { }
   
   public:
-    BaseExtForm *BelongsTo(void) const   { return E; }
+    BaseEfg *BelongsTo(void) const   { return E; }
 
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
@@ -33,12 +33,12 @@ class Outcome   {
 #include "gvector.h"
 
 template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
-  friend class ExtForm<T>;
+  friend class Efg<T>;
 
   private:
-    OutcomeVector(BaseExtForm *E, int n, int pl)
+    OutcomeVector(BaseEfg *E, int n, int pl)
       : Outcome(E, n), gVector<T>(pl)  { }
-    OutcomeVector(BaseExtForm *E, const OutcomeVector<T> &v)
+    OutcomeVector(BaseEfg *E, const OutcomeVector<T> &v)
       : Outcome(E, v.number), gVector<T>(v)   { name = v.name; }
     ~OutcomeVector()    { }
 

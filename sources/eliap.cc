@@ -15,7 +15,7 @@
 #include "rational.h"
 
 #include "behav.h"
-#include "player.h"
+#include "efplayer.h"
 #include "infoset.h"
 
 //-------------------------------------------------------------------------
@@ -33,7 +33,7 @@ template <class T>
 class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
   private:
     int niters, nevals;
-    const ExtForm<T> &E;
+    const Efg<T> &E;
     BehavProfile<T> p, pp;
     gDPVector<T> cpay;
     gMatrix<T> xi;
@@ -41,8 +41,8 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
     T Value(const gVector<T> &x);
 
   public:
-    EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P); 
-    EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
+    EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P); 
+    EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P,
 	     const BehavProfile<T> &s); 
     virtual ~EFLiapFunc();
 
@@ -61,7 +61,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 //----------------------------------------------------------------------
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
     xi(p.Length(), p.Length())
@@ -71,7 +71,7 @@ EFLiapFunc<T>::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
 }
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P,
 			  const BehavProfile<T> &s)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
@@ -115,7 +115,7 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
   T sum, tmp;
 
   for (int i = 1; i <= E.NumPlayers(); i++) {
-    Player *player = E.PlayerList()[i];
+    EFPlayer *player = E.PlayerList()[i];
     for(int j=1;j<=player->NumInfosets();j++) {
       sum = (T) 0;
       Infoset *s = player->InfosetList()[j];
@@ -150,7 +150,7 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 //  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
   
   for(int i = 1; i <= E.NumPlayers(); i++) {
-    Player *player = E.PlayerList()[i];
+    EFPlayer *player = E.PlayerList()[i];
     for(int j=1;j<=player->NumInfosets();j++) {
       avg = sum = (T) 0;
       Infoset *s = player->InfosetList()[j];
@@ -179,12 +179,12 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 //------------------------------------------------------------------------
 
 template <class T> EFLiapModule<T>
-::EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p)
+::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p)
   : LiapModule<T>(p), E(E)
 { }
 
 template <class T> EFLiapModule<T>
-::EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p,gDPVector<T> &s)
+::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p,gDPVector<T> &s)
   : LiapModule<T>(p, s), E(E)
 { }
 
