@@ -341,14 +341,9 @@ Portion *GSM_NewNfg(Portion **param)
 {
   ListPortion *dim = ((ListPortion *) param[0]);
   gArray<int> d(dim->Length());
-  Portion* p;
   
   for (int i = 1; i <= dim->Length(); i++)
-  {
-    p = dim->Subscript(i);
-    d[i] = ((IntPortion *) p)->Value();
-    delete p;
-  }
+    d[i] = ((IntPortion *) (*dim)[i])->Value();
 
   BaseNfg* N;
   if( !( (BoolPortion*) param[ 1 ] )->Value() )
@@ -358,6 +353,119 @@ Portion *GSM_NewNfg(Portion **param)
   return new NfgValPortion(N);
 }
 
+
+Portion* GSM_NewNfg_List(Portion** param)
+{
+  int dim = param[0]->Spec().ListDepth - 1;
+  int players = 0;
+  gArray<int> dmax(dim);
+  Portion* list = param[0];
+
+  if(dim == 0)
+    return new ErrorPortion("Bad payoff dimensiontality");
+  while(dim > 0)
+  {
+    assert(list->Spec().ListDepth > 1);
+    dmax[dim] = ((ListPortion*) list)->Length();
+    list = (*((ListPortion*) list))[1];
+    dim--;
+  }
+  assert(list->Spec().ListDepth > 0);
+  players = dmax.Length();
+  // gout << "players: " << players << '\n';
+  // gout << "dmax: " << dmax << '\n';
+  
+
+  // create new Nfg and call SetPayoff()
+  Nfg<double>* nfg = new Nfg<double>(dmax);
+  int length = dmax.Length();
+  gArray<int> d(length);
+  int ci;
+  int pl;
+
+  for(ci=1; ci<=length; ci++)
+    d[ci] = 1;
+  d[length] = 0;
+
+  while(d != dmax)
+  {
+    // increment indices
+    ci = length;
+    d[ci]++;
+    while(d[ci] > dmax[ci])
+    {
+      d[ci] = 1;
+      ci--;
+      if(ci == 0)
+	break;
+      d[ci]++;
+    }
+
+    // begin valid index region
+    // now extract the list with the payoffs at each position
+    list = param[0];
+    ci = length;
+    while(ci > 0)
+    {
+      assert(list->Spec().ListDepth > 1);
+      if(((ListPortion*) list)->Length() != dmax[ci])
+      {
+	delete nfg;
+	return new ErrorPortion("Bad payoff dimensionality");
+      }      
+      list = (*((ListPortion*) list))[d[ci]];
+      ci--;
+    }
+    assert(list->Spec().ListDepth == 1);
+    // gout << "SetPayoff[n, " << d << ", " << list << "]\n";
+
+    if(((ListPortion*) list)->Length() != players)
+    {
+      delete nfg;
+      return new ErrorPortion("Bad payoff dimensionality");
+    }
+    
+    // now we have the list; call SetPayoff() for each player
+    for(pl=1; pl<=players; pl++)
+      nfg->SetPayoff(pl, d, 
+		     ((FloatPortion*) (*((ListPortion*) list))[pl])->Value());
+      
+    // end valid index region
+  }
+  
+  return new NfgValPortion(nfg);
+}
+
+/*
+Portion* GSM_SetPayoff_NfgFloat( Portion** param )
+{
+  int i;
+  Portion* p;
+  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
+  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
+  
+  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
+  
+  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  {
+    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
+    assert( p->Spec().Type == porINTEGER );
+    Solution[ i ] = ( (IntPortion*) p )->Value();
+    delete p;
+  }
+  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  {
+    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
+    assert( p->Spec().Type == porFLOAT );
+    nfg->SetPayoff( i, Solution, ( (FloatPortion*) p )->Value() );
+    delete p;
+  }
+  return param[ 1 ]->ValCopy();
+}
+*/
 
 //--------------
 // NewSupport
@@ -750,6 +858,14 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
 					    new BoolValPortion(false)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("NewNfgList", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg_List, porNFG, 1, 0, 
+				       NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("payoffs", 
+					    PortionSpec(porFLOAT,1)));
   gsm->AddFunction(FuncObj);
 
 
