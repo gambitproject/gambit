@@ -57,8 +57,6 @@ public:
 template <class T> class Tableau : public BaseTableau<T>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
-  void reintden() const;  // Reintegrates the denominator for output
-  void unintden() const;  // Undoes this
   long npivots;
 protected:
   // We no longer need these, since there should be no tolerance for integers
@@ -75,10 +73,10 @@ protected:
   // Similarly, this is for the LU decompostion
   gVector<T> solution;
 
-  gMatrix <T> Tabdat;  // This caries the full tableau
+  gMatrix <gInteger> Tabdat;  // This caries the full tableau
   // This may require a change in implementation, because it may be unweildly
   // to carry this around
-  gVector<T> Coeff;
+  gVector<gInteger> Coeff;
   gVector<int> nonbasic;
 
   gInteger totdenom;  // This carries the denominator for Q data or 1 for Z

@@ -30,18 +30,29 @@ gInteger find_lcd(const gVector<gRational> &vec)
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
     basis(A),B(basis), solution(A.MinRow(), A.MaxRow()),
-    Tabdat(A), Coeff(b), nonbasic(A.MinCol(),A.MaxCol()),denom(1)
+    Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
+    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1)
 {
-  gout << "\nMY CODE\n";
+  //   gout << "\nMY CODE\n";
 
   int j;
   for(j=A.MinCol();j<=A.MaxCol();j++) 
     nonbasic[j] = j;
 
-  totdenom = lcm(find_lcd(Tabdat),find_lcd(Coeff));
-  Tabdat*=totdenom;
-  Coeff*=totdenom;
-  solution = Coeff;
+  totdenom = lcm(find_lcd(A),find_lcd(b));
+  for (int i = b.First();i<=b.Last();i++) {
+    gRational x = b[i]*(gRational)totdenom;
+    assert(x.denominator() == 1);
+    Coeff[i] = x.numerator();
+  }
+  for (int i = A.MinRow();i<=A.MaxRow();i++) 
+    for (int j = A.MinCol();j<=A.MaxCol();j++) {
+      gRational x = A(i,j)*(gRational)totdenom;
+      assert(x.denominator() == 1);
+      Tabdat(i,j) = x.numerator();
+    }
+  for (int i = b.First();i<=b.Last();i++) 
+    solution[i] = (gRational)Coeff[i];
 }
 
 
@@ -66,9 +77,9 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   assert( ValidIndex(in_col) );
   int outlabel = Label(outrow);
 
-  gout << "\noutrow:" << outrow;
-  gout << " outlabel: " << outlabel;
-  gout << " inlabel: " << in_col;
+  // gout << "\noutrow:" << outrow;
+  // gout << " outlabel: " << outlabel;
+  // gout << " inlabel: " << in_col;
 
   // BigDump(gout);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
@@ -125,7 +136,9 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   basis.Pivot(outrow,in_col);
   nonbasic[col] = outlabel;
   
-  solution = Coeff*(gRational)sign(denom*totdenom);
+  for (i = solution.First();i<=solution.Last();i++) 
+    solution[i] = (gRational)(Coeff[i]*sign(denom*totdenom));
+
   // BigDump(gout);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
   // gout << " product: " << denom*totdenom;
@@ -139,6 +152,7 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
   // gout << "\nTableau<gRational>::SolveColumn  " << MinRow() << " " << MaxRow(); 
   // gout << " col: " << in_col;
   int col;
+  gVector<gInteger> tempcol(out.First(),out.Last());
   
   if(Member(in_col)) {
     out = (gRational)0;
@@ -146,8 +160,10 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
   }
   else {
     col = remap(in_col);
-    Tabdat.GetColumn(col,out);
-    out *= sign(denom*totdenom);
+    Tabdat.GetColumn(col,tempcol);
+    for(int i=tempcol.First();i<=tempcol.Last();i++)
+      out[i] = (gRational)(tempcol[i]) * (gRational)(sign(denom*totdenom));
+    //    out *= sign(denom*totdenom);
   }
 }
 

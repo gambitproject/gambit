@@ -6,6 +6,8 @@
 
 #include "rational.h"
 #include "tableau.imp"
+#include "gmatrix.imp"
+#include "grarray.imp"
 
 template class BaseTableau<double>;
 template class BaseTableau<gRational>;
@@ -15,6 +17,9 @@ template class Tableau<gRational>;
 
 template class LPTableau<double>;
 template class LPTableau<gRational>;
+
+template class gMatrix<gInteger>;
+template class gRectArray<gInteger>;
 
 /*
 template gOutput & operator<< {gOutput&, const Basis<double>&);

@@ -16,7 +16,8 @@
 Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
     basis(A),  B(basis), solution(A.MinRow(),A.MaxRow()),
-    Tabdat(A), Coeff(b), nonbasic(A.MinCol(),A.MaxCol()),denom(1) 
+    Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
+    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1) 
 {
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
@@ -142,11 +143,11 @@ void Tableau<double>::Pivot(int outrow,int col)
 {
   assert( RowIndex(outrow) );
   assert( ValidIndex(col) );
+
   int outlabel = Label(outrow);
-  
-  gout << "\noutrow:" << outrow;
-  gout << " outlabel: " << outlabel;
-  gout << " inlabel: " << col;
+  // gout << "\noutrow:" << outrow;
+  // gout << " outlabel: " << outlabel;
+  // gout << " inlabel: " << col;
   // BigDump(gout);
   basis.Pivot(outrow,col);
   
