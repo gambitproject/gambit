@@ -246,7 +246,7 @@ bool MixedProfileGrid1::Inc(void)
 
 GridParams::GridParams(gStatus &st)
 	: minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), tol1(.01),tol2(0.01),
-		powLam(1), trace(0), tracefile(&gnull), pxifile(&gnull),
+		powLam(1), trace(0), fullGraph(false), tracefile(&gnull), pxifile(&gnull),
 		status(st)
 { }
 
@@ -260,6 +260,8 @@ private:
   gVector<double> tmp; // scratch
   double lam;
   int static_player;
+  gList<MixedSolution> solutions;
+
   
   gVector<double> UpdateFunc(const MixedProfile<double> &P,int pl,double lam);
   bool CheckEqu(MixedProfile<double> P,double lam,int cur_grid);
@@ -272,6 +274,7 @@ public:
   GridSolveModule(const NFSupport &, const GridParams &);
   virtual ~GridSolveModule();
   void GridSolve(void);
+  gList<MixedSolution> &GetSolutions(void);
 };
 
 // Output header
@@ -353,7 +356,7 @@ bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam,int cur_grid)
 {
   P.SetRow(static_player,UpdateFunc(P,static_player,lam));
   
-  int pl;
+  int pl, i;
   double obj_func=0.0;
   double tol=(cur_grid==0) ? params.tol1 : params.tol2;
   for (pl=1;pl<=N.NumPlayers();pl++)
@@ -368,6 +371,9 @@ bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam,int cur_grid)
   if (params.multi_grid==0 || cur_grid==MAX_GRID) {
     OutputResult(*params.pxifile,P,lam,obj_func); // Output it to file
     if (params.trace>0) OutputResult(*params.tracefile,P,lam,obj_func);
+    if(!params.fullGraph) solutions.Flush();
+    i = solutions.Append(MixedSolution(P,algorithmNfg_QREALL));
+    solutions[i].SetQre(lam, obj_func);  // use Liap value instead of obj_func here?
   }
     // now redo the search on a finer grid around this point
   else {
@@ -419,13 +425,16 @@ void GridSolveModule::GridSolve(void)
   
 }
 
-
+gList<MixedSolution> & GridSolveModule::GetSolutions(void) { return solutions;}
 
 int GridSolve(const NFSupport &support, const GridParams &params,
-              gList<MixedSolution> &/*solutions*/)
+              gList<MixedSolution> &solutions)
 {
   GridSolveModule module(support, params);
   module.GridSolve();
-  //  solutions = module.GetSolutions();
+  solutions = module.GetSolutions();
   return 1;
 }
+
+
+

@@ -245,11 +245,11 @@ static Portion *GSM_QreGrid_Support(Portion **param)
   GP.maxLam = ((NumberPortion *) param[3])->Value();
   GP.delLam = ((NumberPortion *) param[4])->Value();
   GP.powLam = ((NumberPortion *) param[5])->Value();
-  GP.delp1 = ((NumberPortion *) param[6])->Value();
-  GP.tol1 = ((NumberPortion *) param[7])->Value();
-
-  GP.delp2 = ((NumberPortion *) param[8])->Value();
-  GP.tol2 = ((NumberPortion *) param[9])->Value();
+  GP.fullGraph = ((BoolPortion *) param[6])->Value();
+  GP.delp1 = ((NumberPortion *) param[7])->Value();
+  GP.tol1 = ((NumberPortion *) param[8])->Value();
+  GP.delp2 = ((NumberPortion *) param[9])->Value();
+  GP.tol2 = ((NumberPortion *) param[10])->Value();
 
   GP.multi_grid = 0;
   if (GP.delp2 > 0.0 && GP.tol2 > 0.0)
@@ -563,9 +563,19 @@ Portion* GSM_Lcp_ListNumber(Portion** param)
     gMatrix<double> *a = ListToMatrix_Float((ListPortion*) param[0]);
     gVector<double> *b = ListToVector_Float((ListPortion*) param[1]);
 
-    LTableau<double> *tab = new LTableau<double>(*a, *b);
+    gMatrix<double> aa(1,a->NumRows(),0,a->NumColumns());
+
+    int i,j;
+    for (i = 1;i<=a->NumRows();i++) {
+      for (j = 1;j<=a->NumColumns();j++)
+	aa(i,j) = (*a)(a->MinRow()-1+i,a->MinCol()-1+j);
+      aa(i,0) = 1;
+    }
+    aa(a->NumRows(),0) = 0;
+
+    LTableau<double> *tab = new LTableau<double>(aa, *b);
     tab->LemkePath(0);
-    gVector<double> vector;
+    gVector<double> vector(*b);
     tab->BasisVector(vector);
     Portion *result = ArrayToList(vector);
     delete tab;
@@ -1170,7 +1180,7 @@ void Init_algfunc(GSM *gsm)
 				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
-					    new BoolPortion(false)));
+					    new BoolPortion(true)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
   FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
@@ -1225,7 +1235,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("QreGridSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_QreGrid_Support, 
-				       PortionSpec(porMIXED, 1), 14));
+				       PortionSpec(porMIXED, 1), 15));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
 					    new TextPortion("")));
@@ -1237,22 +1247,24 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0.02)));
   FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porINTEGER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("delp1", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 7, gclParameter("delp1", porNUMBER,
 					    new NumberPortion(.1)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("tol1", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("tol1", porNUMBER,
 					    new NumberPortion(.1)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("delp2", porNUMBER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("delp2", porNUMBER,
 					    new NumberPortion(.01)));
-  FuncObj->SetParamInfo(0, 9, gclParameter("tol2", porNUMBER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("tol2", porNUMBER,
 					    new NumberPortion(.01)));
-  FuncObj->SetParamInfo(0, 10, gclParameter("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 11, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 12, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 13, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull),
 					     BYREF));
-  FuncObj->SetParamInfo(0, 13, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 14, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
