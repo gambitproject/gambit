@@ -10,7 +10,7 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
-#pragma option -Jgx
+#pragma option -Jgd
 #define TEMPLATE
 #endif 
 
