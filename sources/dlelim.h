@@ -33,7 +33,7 @@ public:
   bool Compress(void) const { return m_compressBox->GetValue(); }
 
   bool FindAll(void) const { return m_allBox->GetValue(); }
-  bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 0); }
+  bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
   bool DomMixed(void) const { return (m_domMethodBox->GetSelection() == 1); }
   gPrecision Precision(void) const
     { return (m_domPrecisionBox->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }

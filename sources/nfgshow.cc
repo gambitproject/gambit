@@ -1088,8 +1088,9 @@ void NfgShow::SupportEdit(void)
     try {
       *cur_sup = dialog.Support();
       cur_sup->SetName(dialog.Name());
-      ChangeSolution(0);
       SetPlayers(pl1, pl2);
+      ChangeSolution(0);
+      UpdateVals();
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), spread);
@@ -1108,8 +1109,8 @@ void NfgShow::SupportDelete(void)
       delete supports.Remove(dialog.Selected());
       if (!supports.Find(cur_sup)) {
 	cur_sup = supports[1];
-	ChangeSolution(0);
 	SetPlayers(pl1, pl2);
+	ChangeSolution(0);
       }
     }
     catch (gException &E) {
@@ -1125,8 +1126,8 @@ void NfgShow::SupportSelect(void)
   if (dialog.Completed() == wxOK) {
     try {
       cur_sup = supports[dialog.Selected()];
-      ChangeSolution(0); 
       SetPlayers(pl1, pl2);
+      ChangeSolution(0); 
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), spread);
@@ -1945,6 +1946,7 @@ void NormalSpread::OnMenuCommand(int id)
       else {
 	MakeDomDisp();
       }
+      parent->SetPlayers(pl1, pl2);
       parent->UpdateVals();
       Redraw();
       break;
