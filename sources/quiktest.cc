@@ -36,7 +36,7 @@ int main()
   gz = "1 - 5n4"; pz = gz;
 */
 
-/* simple test of root solving */
+/* simple test of root solving 
   gw = "2 - 9n1 + 9n1^2"; pw = gw;
   gx = "2 - 9n2 + 9n2^2"; px = gx;
   gy = "2 - 9n3 + 9n3^2"; py = gy;
@@ -44,6 +44,12 @@ int main()
 
   ga = "2n3 - 1";         pa = ga;
   gb = "2n4 - 1";         pb = gb;
+*/
+
+/* simple test of ARootExists */
+  gw = "13 - 6n1 + 1n1^2 - 1n2"; pw = gw;
+  gx = "13 - 6n1 + 1n1^2 - 1n3"; px = gx;
+  gy = "13 - 6n1 + 1n1^2 - 1n4"; py = gy;
 /**/
 
 /* 3x2x2 game form 
@@ -138,9 +144,9 @@ int main()
   test_bss1 += pw;
   test_bss1 += px;
   test_bss1 += py;
-  test_bss1 += pz;
-  test_bss1 += pa;
-  test_bss1 += pb;
+//  test_bss1 += pz;
+//  test_bss1 += pa;
+//  test_bss1 += pb;
 
   gWatch timer;
 
@@ -169,19 +175,24 @@ int main()
   gout << "The QuikSolv computation of potential singularity took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 */
+
   gout << "Starting computation ... \n";
-  if (quickie.FindRoots(Cube,100000))
-    gout << "\nThe first test system is\n" 
-	 << quickie.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie.RootList();
+  gVector<gDouble> sample(4);
+  for (int i = 1; i <= 4; i++) sample[i] = (gDouble)0;
+
+  gout << "\nThe first test system is\n" 
+    << quickie.UnderlyingEquations(); 
+  if (quickie.ARootExists(Cube,sample))
+    gout << "It has the following root in [-4,4]^4: "
+	 << sample << "\n";
   else
-    gout << "The system\n" << quickie.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n";
+    gout  << "It has no root in [-4,4]^4.\n";
 
   timer.Stop();
   gout << "The QuikSolv computation of roots using FindRootsRec took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
+
+  exit(0);
 
 
   timer.Start();
