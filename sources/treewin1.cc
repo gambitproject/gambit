@@ -1469,7 +1469,7 @@ void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 //***********************************************************************
 //                      DISPLAY-ZOOM WINDOW MENU HANDLER
 //***********************************************************************
-Bool TreeWindow::display_zoom_win(void)
+void TreeWindow::display_zoom_win(void)
 {
   if (!zoom_window) {
     zoom_window = new TreeZoomWindow(pframe, this, node_list, 
@@ -1479,13 +1479,16 @@ Bool TreeWindow::display_zoom_win(void)
 				     (const Node *&) cursor,
 				     (const Node *&) subgame_node, 
 				     draw_settings, GetNodeEntry(cursor));
-    return TRUE;
   }
-  else {
-    delete zoom_window->GetParent();
-    zoom_window = 0;
-    return FALSE;
-  }
+}
+
+void TreeWindow::delete_zoom_win(void)
+{
+  // We don't delete this because this is called from zoom_window's
+  // parent frame... would be bad :)
+  // The virtual destructors should result in the window being deleted
+  // by the system upon closing, so there ought to be no memory leakage
+  zoom_window = 0;
 }
 
 //***********************************************************************

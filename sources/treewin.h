@@ -266,7 +266,8 @@ public:
     void display_set_zoom(float z=-1);
     void display_zoom_fit(void);
     float display_get_zoom(void);
-    Bool display_zoom_win(void);
+    void display_zoom_win(void);
+    void delete_zoom_win(void);
     
     void  file_save(void);
     void  output(void);

@@ -765,6 +765,26 @@ TreeRender::~TreeRender(void)
 //                   TreeZoomWindow: Member functions
 //----------------------------------------------------------------------
 
+class TreeZoomFrame : public wxFrame {
+private:
+  TreeWindow *m_parent;
+
+public:
+  TreeZoomFrame(wxFrame *p_frame, TreeWindow *p_parent);
+  
+  Bool OnClose(void);
+};
+
+TreeZoomFrame::TreeZoomFrame(wxFrame *p_frame, TreeWindow *p_parent)
+  : wxFrame(p_frame, "Zoom Window", -1, -1, 250, 250), m_parent(p_parent)
+{ }
+
+Bool TreeZoomFrame::OnClose(void)
+{
+  m_parent->delete_zoom_win();
+  return TRUE;
+}
+
 TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
                                const gList<NodeEntry *> &node_list_,
                                const Infoset * &hilight_infoset_,
@@ -774,7 +794,7 @@ TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
                                const Node *&subgame_node_,
                                const TreeDrawSettings &draw_settings_,
                                const NodeEntry *cursor_entry)
-    : TreeRender(new wxFrame(frame, "Zoom Window", -1, -1, 250, 250), parent,
+    : TreeRender(new TreeZoomFrame(frame, parent), parent,
                  node_list_, hilight_infoset_, hilight_infoset1_,
                  mark_node_, cursor_, subgame_node_, draw_settings_)
 {
