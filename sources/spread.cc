@@ -545,26 +545,26 @@ void SpreadSheetC::OnEvent(wxMouseEvent &ev)
 // Keyboard message handler
 void SpreadSheetC::OnChar(wxKeyEvent &ev)
 {
-    // Allow the default behavior to be overriden
+    // Allow the default behavior to be overriden.
     if (top_frame->OnCharNew(ev)) 
         return;
 
     int ch = ev.KeyCode();
 
-	// Ignore shift key.
-	// Note: this will not affect the use of the shift key e.g. in
-	// changing the case of a character.
-	if (ch == WXK_SHIFT)
-		return;
+    // Ignore shift key.
+    // Note: this will not affect the use of the shift key e.g. in
+    // changing the case of a character.
+    if (ch == WXK_SHIFT)
+        return;
 
-    // Cursor keys to move the hilight
+    // Cursor keys to move the highlight.
     if (IsCursor(ev) || IsEnter(ev))
     {
         ProcessCursor(ch);
         return;
     }
 
-    // F2 on the last row to add a row
+    // F2 on the last row adds a row.
     if (ch == WXK_F2)
     {
         if (data_settings->Change(S_CAN_GROW_ROW) && cell.row == sheet->GetRows()) 
@@ -573,7 +573,7 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
         return;
     }
 
-    // F3 on the last column to add a column
+    // F3 on the last column adds a column.
     if (ch == WXK_F3)
     {
         if (data_settings->Change(S_CAN_GROW_COL) && cell.col == sheet->GetCols()) 
@@ -582,7 +582,7 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
         return;
     }
 
-    // Otherwise, if editing is enabled, just process the key
+    // Otherwise, if editing is enabled, just process the key.
     {
         if (top_frame->Editable())
         {
@@ -594,7 +594,31 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
                 if (cell.editing == FALSE)
                 {
                     cell.editing = TRUE;
-                    cell.str = "";
+
+                    // Preserve the previously-existing color of the cell if any.
+                    if (cell.str.Left(3) == "\\C{")
+                    {
+                        gText prefix = "\\C{";
+                        // Append the color number.
+                        for (int k = 3; k < cell.str.Length(); k++)
+                        {
+                            if (cell.str[k] != '}')
+                            {
+                                prefix += cell.str[k];
+                            }
+                            else // We found the color delimiter "}".
+                            {
+                                prefix += "}";
+                                break;
+                            }
+                        }
+
+                        cell.str = prefix;
+                    }
+                    else
+                    {
+                        cell.str = "";
+                    }
                 } // this implements 'overwrite'
 
                 cell.str += ch;
