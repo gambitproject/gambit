@@ -824,42 +824,44 @@ bool GSM::Add ( void )
 { 
   Portion* p1;
   Portion* p2;
+  Portion* p;
   bool result = false;
 
   p2 = _Pop();
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER)
-      ((IntPortion*) p1)->Value() += ((IntPortion*) p2)->Value();
-    else if(p1->Type()==porFLOAT)
-      ((FloatPortion*) p1)->Value() += ((FloatPortion*) p2)->Value();
-    else if(p1->Type()==porRATIONAL)
-      ((RationalPortion*) p1)->Value() += ((RationalPortion*) p2)->Value();
-    else if(p1->Type()==porMIXED_FLOAT)
-      (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) += 
+    if(p->Type()==porINTEGER)
+      ((IntPortion*) p)->Value() += ((IntPortion*) p2)->Value();
+    else if(p->Type()==porFLOAT)
+      ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
+    else if(p->Type()==porRATIONAL)
+      ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
+    else if(p->Type()==porMIXED_FLOAT)
+      (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-    else if(p1->Type()==porMIXED_RATIONAL)
-      (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) += 
+    else if(p->Type()==porMIXED_RATIONAL)
+      (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) += 
 	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-    else if(p1->Type()==porBEHAV_FLOAT)
-      (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) += 
+    else if(p->Type()==porBEHAV_FLOAT)
+      (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) += 
 	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-    else if(p1->Type()==porBEHAV_RATIONAL)
-      (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) += 
+    else if(p->Type()==porBEHAV_RATIONAL)
+      (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) += 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Plus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Plus" ); }
   return result;
 }
 
@@ -867,42 +869,44 @@ bool GSM::Subtract ( void )
 { 
   Portion* p1;
   Portion* p2;
+  Portion* p;
   bool result = false;
 
   p2 = _Pop();
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER)
-      ((IntPortion*) p1)->Value() -= ((IntPortion*) p2)->Value();
-    else if(p1->Type()==porFLOAT)
-      ((FloatPortion*) p1)->Value() -= ((FloatPortion*) p2)->Value();
-    else if(p1->Type()==porRATIONAL)
-      ((RationalPortion*) p1)->Value() -= ((RationalPortion*) p2)->Value();
-    else if(p1->Type()==porMIXED_FLOAT)
-      (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) -= 
+    if(p->Type()==porINTEGER)
+      ((IntPortion*) p)->Value() -= ((IntPortion*) p2)->Value();
+    else if(p->Type()==porFLOAT)
+      ((FloatPortion*) p)->Value() -= ((FloatPortion*) p2)->Value();
+    else if(p->Type()==porRATIONAL)
+      ((RationalPortion*) p)->Value() -= ((RationalPortion*) p2)->Value();
+    else if(p->Type()==porMIXED_FLOAT)
+      (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) -= 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-    else if(p1->Type()==porMIXED_RATIONAL)
-      (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) -= 
+    else if(p->Type()==porMIXED_RATIONAL)
+      (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) -= 
 	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-    else if(p1->Type()==porBEHAV_FLOAT)
-      (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) -= 
+    else if(p->Type()==porBEHAV_FLOAT)
+      (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) -= 
 	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-    else if(p1->Type()==porBEHAV_RATIONAL)
-      (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) -= 
+    else if(p->Type()==porBEHAV_RATIONAL)
+      (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) -= 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Minus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Minus" ); }
   return result;
 }
 
@@ -910,30 +914,32 @@ bool GSM::Multiply ( void )
 { 
   Portion* p1;
   Portion* p2;
+  Portion* p;
   bool result = false;
 
   p2 = _Pop();
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
-
+  p = p1->ValCopy();
+  
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER)
-      ((IntPortion*) p1)->Value() *= ((IntPortion*) p2)->Value();
-    else if(p1->Type()==porFLOAT)
-      ((FloatPortion*) p1)->Value() *= ((FloatPortion*) p2)->Value();
-    else if(p1->Type()==porRATIONAL)
-      ((RationalPortion*) p1)->Value() *= ((RationalPortion*) p2)->Value();
+    if(p->Type()==porINTEGER)
+      ((IntPortion*) p)->Value() *= ((IntPortion*) p2)->Value();
+    else if(p->Type()==porFLOAT)
+      ((FloatPortion*) p)->Value() *= ((FloatPortion*) p2)->Value();
+    else if(p->Type()==porRATIONAL)
+      ((RationalPortion*) p)->Value() *= ((RationalPortion*) p2)->Value();
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Times" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Times" ); }
   return result;
 }
 
@@ -952,53 +958,55 @@ bool GSM::Divide ( void )
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
     {
+      delete p;
       p = new RationalValPortion(((IntPortion*) p1)->Value());
-      delete p1; 
-      p1 = p;
-      ((RationalPortion*) p1)->Value() /= ((IntPortion*) p2)->Value();
+      ((RationalPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     }
-    else if(p1->Type()==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
-      ((FloatPortion*) p1)->Value() /= ((FloatPortion*) p2)->Value();
-    else if(p1->Type()==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
-      ((RationalPortion*) p1)->Value() /= ((RationalPortion*) p2)->Value();
+    else if(p->Type()==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
+      ((FloatPortion*) p)->Value() /= ((FloatPortion*) p2)->Value();
+    else if(p->Type()==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
+      ((RationalPortion*) p)->Value() /= ((RationalPortion*) p2)->Value();
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Divide" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Divide" ); }
   return result;
 }
 
 bool GSM::Negate( void )
 {
   Portion* p1;
+  Portion* p;
   bool result = true;
 
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
-  if(p1->Type()==porINTEGER)
-    ((IntPortion*) p1)->Value() = -(((IntPortion*) p1)->Value());
-  else if(p1->Type()==porFLOAT)
-    ((FloatPortion*) p1)->Value() = -(((FloatPortion*) p1)->Value());
-  else if(p1->Type()==porRATIONAL)
-    ((RationalPortion*) p1)->Value() = -(((RationalPortion*) p1)->Value());
+  if(p->Type()==porINTEGER)
+    ((IntPortion*) p)->Value() = -(((IntPortion*) p1)->Value());
+  else if(p->Type()==porFLOAT)
+    ((FloatPortion*) p)->Value() = -(((FloatPortion*) p1)->Value());
+  else if(p->Type()==porRATIONAL)
+    ((RationalPortion*) p)->Value() = -(((RationalPortion*) p1)->Value());
   else
     result = false;
 
   if(result)
-    _Push(p1);
+  { delete p1; _Push(p); }
   else
-  { _Push(p1); result = _UnaryOperation( "Negate" ); }
+  { delete p; _Push(p1); result = _UnaryOperation( "Negate" ); }
   return result;
 }
 
@@ -1013,26 +1021,29 @@ bool GSM::IntegerDivide ( void )
 { 
   Portion* p1;
   Portion* p2;
+  Portion* p;
   bool result = false;
 
   p2 = _Pop();
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
-      ((IntPortion*) p1)->Value() /= ((IntPortion*) p2)->Value();
+    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+      ((IntPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "IntegerDivide" ); }
+  { delete p; _Push(p1); _Push(p2); 
+    result = _BinaryOperation( "IntegerDivide" ); }
   return result;
 }
 
@@ -1040,26 +1051,28 @@ bool GSM::Modulus ( void )
 {
   Portion* p1;
   Portion* p2;
+  Portion* p;
   bool result = false;
 
   p2 = _Pop();
   p2 = _ResolveRef(p2);
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
+  p = p1->ValCopy();
 
   if(p1->Type()==p2->Type())
   {
     result = true;
-    if(p1->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
-      ((IntPortion*) p1)->Value() %= ((IntPortion*) p2)->Value();
+    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+      ((IntPortion*) p)->Value() %= ((IntPortion*) p2)->Value();
     else
       result = false;
   }
 
   if(result)
-  { delete p2; _Push(p1); }
+  { delete p2; delete p1; _Push(p); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Modulus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Modulus" ); }
   return result;
 }
 
@@ -1310,18 +1323,19 @@ bool GSM::OR ( void )
 bool GSM::NOT ( void )
 {
   Portion* p1;
+  bool b;
   bool result = true;
 
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
   if(p1->Type()==porBOOL)
-    ((BoolPortion*) p1)->Value() = !((BoolPortion*) p1)->Value();
+    b = !((BoolPortion*) p1)->Value();
   else
     result = false;
 
   if(result)
-    _Push(p1);
+  { delete p1; _Push(new BoolValPortion(b)); }
   else
   { _Push(p1); result = _UnaryOperation( "Not" ); }
   return result;
