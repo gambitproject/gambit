@@ -9,6 +9,8 @@
 #include "wxio.h"
 #include "algdlgs.h"
 
+#include "nfgconst.h"
+
 // Need this function since the default wxGetResource takes a char **value,
 // and replaces it with a newly created string (while deleting the old one).
 // This is NOT what we want.
@@ -25,8 +27,6 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
   
   return ok;
 }
-
-#define SOLN_SECT           "Soln-Defaults"
 
 //========================================================================
 //            dialogAlgorithm: Member function definitions
@@ -154,12 +154,12 @@ void dialogAlgorithm::SubgameFields(void)
   wxGetResource("Soln-Defaults", "Efg-Interactive-Solns", &select,
 		"gambit.ini");
 
-  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving",
-				  mark);
+  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
+  m_markSubgames->SetValue(mark);
   NewLine();
   m_selectSolutions = new wxCheckBox(this, 0,
-				     "Interactively select subgame solutions",
-				     select);
+				     "Interactively select subgame solutions");
+  m_selectSolutions->SetValue(select);
   NewLine();
 }
 
@@ -173,6 +173,7 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
+  okButton->SetDefault();
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
@@ -235,8 +236,10 @@ dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 
 dialogEnumPure::~dialogEnumPure()
 {
-  wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
-		  "gambit.ini");
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
+		    "gambit.ini");
+  }
 }
 
 void dialogEnumPure::AlgorithmFields(void)
@@ -274,5 +277,92 @@ int dialogEnumPure::StopAfter(void) const
     return 0;
   else
     return m_stopAfter->GetInteger(); 
+}
+
+//=======================================================================
+//                   dialogEnumMixed: Member functions
+//=======================================================================
+
+#include "dlenummixed.h"
+
+dialogEnumMixed::dialogEnumMixed(wxWindow *p_parent, bool p_subgames)
+  : dialogAlgorithm("EnumMixedSolve Parameters", true, p_parent,
+		    ENUMMIXED_HELP)
+{
+  MakeCommonFields(true, p_subgames, true);
+  Go();
+}
+
+dialogEnumMixed::~dialogEnumMixed()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
+		    "gambit.ini");
+    wxWriteResource("Algorithm Params", "Precision",
+		    m_precision->GetSelection(), "gambit.ini");
+  }
+}
+
+void dialogEnumMixed::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  NewLine();
+
+  int stopAfter = 0;
+  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, "gambit.ini");
+  
+  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
+  m_findAll->SetClientData((char *) this);
+
+  m_stopAfter = new wxIntegerItem(this, "Stop after",
+				  (stopAfter > 0) ? stopAfter : 1,
+				  -1, -1, 100, -1);
+
+  if (stopAfter == 0) {
+    m_findAll->SetValue(true);
+    m_stopAfter->Enable(FALSE);
+  }
+
+  NewLine();
+
+  int precision = 0;
+  wxGetResource("Algorithm Params", "Precision", &precision, "gambit.ini");
+
+  char *precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
+  if (precision == 0 || precision == 1)
+    m_precision->SetSelection(precision);;
+
+  NewLine();
+}
+
+void dialogEnumMixed::OnAll(void)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
+int dialogEnumMixed::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}
+
+wxEnumStatus::wxEnumStatus(wxFrame *p_parent)
+  : wxStatus(p_parent, "EnumMixedSolve"), pass(0)
+{ }
+
+void wxEnumStatus::SetProgress(double p_value)
+{
+  if (p_value > -.5)  {
+    // actually, as long as its not -1.0, but floating point ==
+    gauge->SetValue((int) ((p_value + pass) / 3.0 *100.0));
+  }
+  else {
+    pass++;
+  }
+  wxYield();
 }
 

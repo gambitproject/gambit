@@ -691,51 +691,7 @@ bool guiefgEnumPureEfg::SolveSetup(void)
 //                          EnumMixedSolve
 //========================================================================
 
-#include "enumprm.h"
-
-EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
-					     bool p_subgames,
-					     bool p_vianfg)
-  : dialogAlgorithm("EnumMixedSolve Params", p_vianfg, p_parent,
-		    ENUMMIXED_HELP)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
-}
-
-EnumSolveParamsDialog::~EnumSolveParamsDialog()
-{
-}
-
-void EnumSolveParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm parameters:");
-  NewLine();
-
-  m_stopAfter = new wxText(this, 0, "Stop after");
-  NewLine();
-  char *precisionChoices[] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-  NewLine();
-}
-
-
-wxEnumStatus::wxEnumStatus(wxFrame *p_parent)
-  : wxStatus(p_parent, "EnumMixedSolve"), pass(0)
-{ }
-
-void wxEnumStatus::SetProgress(double p_value)
-{
-  if (p_value > -.5)  {
-    // actually, as long as its not -1.0, but floating point ==
-    gauge->SetValue((int) ((p_value + pass) / 3.0 *100.0));
-  }
-  else {
-    pass++;
-  }
-  wxYield();
-}
+#include "dlenummixed.h"
 
 //---------------------
 // EnumMixed on nfg
@@ -787,7 +743,7 @@ gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
 
 bool guiefgEnumMixedNfg::SolveSetup(void)
 {
-  EnumSolveParamsDialog dialog(m_parent->Frame(), true); 
+  dialogEnumMixed dialog(m_parent->Frame(), true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

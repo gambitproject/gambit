@@ -102,14 +102,15 @@ public:
   virtual bool SolveSetup(void);
 };
 
-class NfgEnumG : public NfgSolutionG  {
+class guinfgEnumMixed : public NfgSolutionG  {
 private:
   int m_stopAfter;
   gPrecision m_precision;
 
 public:
-  NfgEnumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgEnumG()   { }
+  guinfgEnumMixed(const NFSupport &, NfgShowInterface *);
+  virtual ~guinfgEnumMixed()   { }
+
   virtual gList<MixedSolution> Solve(void) const;
   virtual bool SolveSetup(void);
 };

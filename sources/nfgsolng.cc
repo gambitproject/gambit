@@ -15,9 +15,6 @@
 #include "nfgconst.h"
 #include "gfunc.h"
 
-// sections in the defaults file(s)
-#define     SOLN_SECT               "Soln-Defaults"
-
 //=========================================================================
 //                     NfgSolutionG: Member functions
 //=========================================================================
@@ -72,15 +69,15 @@ bool guinfgEnumPure::SolveSetup(void)
 // EnumMixed
 //------------
 
+#include "dlenummixed.h"
 #include "enum.h"
-#include "enumprm.h"
 
-NfgEnumG::NfgEnumG(const Nfg &p_nfg, const NFSupport &p_support,
-		   NfgShowInterface *p_parent)
-  : NfgSolutionG(p_nfg, p_support, p_parent)
+guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
+				 NfgShowInterface *p_parent)
+  : NfgSolutionG(p_support.Game(), p_support, p_parent)
 { }
 
-gList<MixedSolution> NfgEnumG::Solve(void) const
+gList<MixedSolution> guinfgEnumMixed::Solve(void) const
 {
   wxEnumStatus status(parent->Frame());
 
@@ -97,9 +94,9 @@ gList<MixedSolution> NfgEnumG::Solve(void) const
   return solns;
 }
 
-bool NfgEnumG::SolveSetup(void)
+bool guinfgEnumMixed::SolveSetup(void)
 {
-  EnumSolveParamsDialog dialog(parent->Frame());
+  dialogEnumMixed dialog(parent->Frame());
 
   if (dialog.Completed() == wxOK) {
     m_stopAfter = dialog.StopAfter();

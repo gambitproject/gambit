@@ -465,7 +465,7 @@ void NfgShow::Solve(int id)
     solver = new guinfgEnumPure(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_ENUMMIXED:
-    solver = new NfgEnumG(nf, *sup, this);
+    solver = new guinfgEnumMixed(*sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LCP:      
     solver = new guinfgLcp(nf, *sup, this);
@@ -558,7 +558,7 @@ void NfgShow::SolveStandard(void)
     solver = new guinfgEnumPure(*sup, this);
     break;
   case NFG_ENUMMIXED_SOLUTION:
-    solver = new NfgEnumG(nf, *sup, this);
+    solver = new guinfgEnumMixed(*sup, this);
     break;
   case NFG_LCP_SOLUTION:
     solver = new guinfgLcp(nf, *sup, this);
