@@ -13,11 +13,11 @@
 
 #WXWINDIR  = /home/mill/gambit/wxwin
 WXWINDIR  = /home/mill/gambit/wxwin-new
-GUI       = none
+GUI       = motif
 GMAKEFILE = Makefile2.generic
 #FTPDIR    = /home/mill/ftp/pub/gambit/ver96
 FTPDIR    = /users/ftp/pub/gambit/ver96
-SRCDIR    = ./gambit0.96/sources
+SRCDIR    = ./sources
 
 all:
 	@echo Specify a target: gcl, gui, src.
@@ -61,12 +61,13 @@ gambit:
 	make -f $(GMAKEFILE) gui GUI=$(GUI) SYSNAME=$(SYSNAME); \
 	mv gui_$(GUI)_$(SYSNAME) ../bin/gambit_$(GUI)_$(SYSNAME); \
 	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
-	cp $(WXWINDIR)/bin/wxhelp_$(GUI)_$(SYSNAME) ../bin; \
+	cp $(WXWINDIR)/bin/wxhelp_$(SYSNAME)_$(GUI) ../bin/wxhelp_$(GUI)_$(SYSNAME); \
+	cp $(WXWINDIR)/bin/gambit.xlp ../bin/gambit.xlp; \
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
 	cp ./gambit_setup ./gui-init ../misc
-	cp ./gambit_setup ../..
+	cp ./gambit_setup ..
 
 	@echo
 	@echo ------------------------
@@ -74,22 +75,23 @@ gambit:
 	@echo ------------------------
 	@echo
 
-	cd ../..; \
+	cd ..; \
 	if [ -f gambit_$(GUI)_$(SYSNAME).zip ]; \
 	then rm gambit_$(GUI)_$(SYSNAME).zip; fi; \
 	zip gambit_$(GUI)_$(SYSNAME).zip \
-	  ./gambit0.96/bin/gcl_$(SYSNAME) \
-	  ./gambit0.96/bin/*.gcl \
-	  ./gambit0.96/bin/gcl.man \
-	  ./gambit0.96/bin/gambit_$(GUI)_$(SYSNAME) \
-	  ./gambit0.96/bin/wxhelp_$(GUI)_$(SYSNAME) \
-	  ./gambit0.96/efg/*.efg \
-	  ./gambit0.96/nfg/*.nfg \
-	  ./gambit0.96/gcl/*.gcl \
-	  ./gambit0.96/misc/* \
+	  ./bin/gcl_$(SYSNAME) \
+	  ./bin/*.gcl \
+	  ./bin/gcl.man \
+	  ./bin/gambit_$(GUI)_$(SYSNAME) \
+	  ./bin/wxhelp_$(GUI)_$(SYSNAME) \
+	  ./bin/gambit.xlp \
+	  ./efg/*.efg \
+	  ./nfg/*.nfg \
+	  ./gcl/*.gcl \
+	  ./misc/* \
 	  ./gambit_setup
 
-	mv ../../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
+	mv ../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 
 src:
 	@echo
@@ -100,14 +102,14 @@ src:
 
 	@# FIXME: Have to figure out what to do about bison++ ...
 
-	cd ../..; \
+	cd ..; \
 	zip gambsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
 	$(SRCDIR)/*.yy $(SRCDIR)/Makefile.generic  $(SRCDIR)/gambit.ini \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
 	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
 	$(SRCDIR)/make.filelist 
 
-	mv ../../gambsrc.zip $(FTPDIR)
+	mv ../gambsrc.zip $(FTPDIR)
 
 wxwin:
 	@echo
@@ -116,9 +118,11 @@ wxwin:
 	@echo ------------------------------------------------------
 	@echo
 
-	cd $(WXWINDIR) ; \
+	cd $(WXWINDIR) ; cd ..; \
 	zip wx_$(GUI)_$(SYSNAME).zip \
-	  ./include/base/* ./include/x/* ./lib/libwx_$(GUI)_$(SYSNAME).a; \
+	  wxwin-new/include/base/* \
+	  wxwin-new/include/x/* \
+	  wxwin-new/lib/libwx_$(GUI)_$(SYSNAME).a; \
 	mv wx_$(GUI)_$(SYSNAME).zip $(FTPDIR)
 
 doc:
@@ -144,13 +148,13 @@ pxi:
 	strip ../bin/pxi_$(GUI)_$(SYSNAME); \
 	cd ../distrib
 
-	cd ../..; \
+	cd ..; \
 	if [ -f pxi_$(GUI)_$(SYSNAME).zip ]; \
 	then rm pxi_$(GUI)_$(SYSNAME).zip; fi; \
 	zip pxi_$(GUI)_$(SYSNAME).zip \
-	  ./gambit0.96/bin/pxi_$(GUI)_$(SYSNAME) 
+	  ./bin/pxi_$(GUI)_$(SYSNAME) 
 
-	mv ../../pxi_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
+	mv ../pxi_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 
 
 
