@@ -1,6 +1,7 @@
 //#
 //# FILE: wxio.cc -- Implementation of more complicated I/O functions
 //#
+// $Id$
 
 #ifdef __GNUG__
 #pragma implementation "wxio.h"

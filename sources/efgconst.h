@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// @(#)efgconst.h	1.2 8/7/95
+// $Id$
 //
 
 #ifndef EFGCONST_H
@@ -54,7 +54,7 @@
 #define SOLVE_REMOVE						1503
 #define SOLVE_SOLVE_NORMAL			1504
 #define SOLVE_FEATURES					1505
-
+#define SOLVE_SUPPORTS					1510
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601
@@ -81,8 +81,8 @@
 #define EFG_INSPECT_HELP		"Extensive Solutions Inspect"
 #define EFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
 #define EFG_SOLVE_OPTIONS_HELP	"Extensive Form Solution Options"
-
-
+#define EFG_MAKE_SUPPORT_HELP "Creating EF Supports"
+#define EFG_SUPPORTS_HELP			"Examining EF Supports"
 // Different type-dependent values that need to be displayable in the
 // tree window.  These are accessed through the BaseTreeWindow->
 // TreeWindow->ExtensiveShow.  Also used in NodeInspect window.
