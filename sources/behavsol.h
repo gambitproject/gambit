@@ -42,7 +42,6 @@ public:
   int IsSubgamePerfect(); // Is it Subgame Perfect? Y/N/DK
   void SetIsSequential(int);
   int IsSequential(); // Is it Sequential? Y/N/DK
-  EFSupport Support() const; // Support of Profile
 
   void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg

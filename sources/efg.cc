@@ -940,23 +940,24 @@ void BaseEfg::UnmarkSubgames(Node *n)
 
 //========================================================================
 
-#include "behav.h"
 //--------------------------------------------------------------------------
 //                    BaseBehavProfile member functions
 //--------------------------------------------------------------------------
 
+#include "behav.h"
+
 BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc)
-  : E(&EF), truncated(trunc), behavsupport(EF)  { }
+  : E(&EF), truncated(trunc), support(EF)  { }
 
 BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc,
 				   const EFSupport &s)
-  : E(&EF), truncated(trunc), behavsupport(s) 
-{ 
-  behavsupport.SetupSupport();
+  : E(&EF), truncated(trunc), support(s) 
+{
+  assert(support.IsValid());
 }
 
 BaseBehavProfile::BaseBehavProfile(const BaseBehavProfile &p)
-  : E(p.E), truncated(p.truncated), behavsupport(p.behavsupport)   { }
+  : E(p.E), truncated(p.truncated), support(p.support)   { }
 
 BaseBehavProfile::~BaseBehavProfile()   { }
 
@@ -964,7 +965,7 @@ BaseBehavProfile &BaseBehavProfile::operator=(const BaseBehavProfile &p)
 {
   E = p.E;
   truncated = p.truncated;
-  behavsupport = p.behavsupport;
+  support = p.support;
   return *this;
 }
 
@@ -988,8 +989,8 @@ const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const
   return E->PlayerList()[p]->InfosetList()[iset]->GetActionName(act);
 }
 
-EFSupport &BaseBehavProfile::GetEFSupport(void) 
+const EFSupport &BaseBehavProfile::GetEFSupport(void) const
 {
-  return (behavsupport);
+  return support;
 }
 

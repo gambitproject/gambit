@@ -134,9 +134,6 @@ template <class T> void BehavSolution<T>::SetIsSequential(int i)
 template <class T> int BehavSolution<T>::IsSequential()
 { EvalEquilibria(); return _IsSequential; }
 
-template <class T> EFSupport BehavSolution<T>::Support() const
-{ return behavsupport; }
-
 template <class T> void BehavSolution<T>::SetGobit(T lambda, T value)
 {
   _GobitLambda = lambda;
@@ -181,7 +178,7 @@ template <class T> void BehavSolution<T>::Dump(gOutput& f) const
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsSubgamePerfect:"; DisplayTriState(f, _IsSubgamePerfect);
   f << " IsSequential:"; DisplayTriState(f, _IsSequential);
-  f << " Support:" << Support();
+  f << " Support:" << GetEFSupport();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
   f << " LiapValue:" << _LiapValue;

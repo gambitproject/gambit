@@ -1,8 +1,8 @@
-//#
-//# FILE: efstrat.h -- Supports and stuff for the extensive form games
-//#
-//# $Id$
-//#
+//
+// FILE: efstrat.h -- Supports and stuff for the extensive form games
+//
+// $Id$
+//
 
 #ifndef EFSTRAT_H
 #define EFSTRAT_H
@@ -11,21 +11,16 @@
 #include "gblock.h"
 #include "efg.h"
 #include "gpvector.h"
-//#include "infoset.h"
 
 class Action;
 class EFPlayer;
 
-class EFActionArrays{
+class EFActionArrays   {
   friend class EFActionSet;
 protected:
-  gBlock <Action *> acts;
-  gArray <Action *> ori;
-public:
-  //----------------------------------------
-  // Constructors, Destructors, Operators
-  //----------------------------------------
+  gBlock<Action *> acts;
 
+public:
   EFActionArrays ( const gArray <Action *> &a);
   EFActionArrays ( const EFActionArrays &a);
   virtual ~EFActionArrays();
@@ -57,10 +52,6 @@ public:
   // Member Functions
   //--------------------
 
-  // Function used in setting up the support when initializing the behavior
-  // profile from a support;
-  void SetupActionSet();
-
   // Append an action to an infoset;
   void AddAction(int iset, Action *);
 
@@ -76,7 +67,8 @@ public:
   bool RemoveAction(int iset, Action *);
 
   // Get a garray of the actions in an Infoset
-  const gArray<Action *> GetSetofActions(int iset) const;
+  const gArray<Action *> &ActionList(int iset) const
+     { return infosets[iset]->acts; }
   
   // Get an Action
   Action *GetAction(int iset, int index);
@@ -96,8 +88,8 @@ public:
   // return the EFPlayer of the EFActionSet
   EFPlayer &GetPlayer(void) const;
 
-  // checks for a valid EFActionSet, fails assertion if not
-  void ActionSetValid(void);
+  // checks for a valid EFActionSet
+  bool IsValid(void) const;
 
 };
 
@@ -129,24 +121,15 @@ public:
   // Members
   //-------------
 
-  // Used When Initializing a BehavProfile by a Support;
-  void SetupSupport();
-
-  // EFActionsSet operations
-  void SetEFActionSet(int pl, EFActionSet *s);
-  EFActionSet *GetEFActionSet(int pl) const { return sets[pl]; }
-
   // Return the number of players, infosets, actions in a support 
-  int NumPlayers(void) const;
-  int NumInfosets(int pl) const;
   int NumActions(int pl, int iset) const;
-
-  // Return the EFPlayer for the player at position pl.
-  EFPlayer &GetPlayer(int pl);
 
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
-  int IsActionInSupport(int pl, int iset, Action *);
+  int Contains(Action *) const;
+
+  const gArray<Action *> &ActionList(int pl, int iset) const
+    { return sets[pl]->ActionList(iset); }
 
   // Returns the original position of the action before any changes were made
   // in the support.
@@ -162,8 +145,8 @@ public:
   const BaseEfg &BelongsTo(void) const;
 
   // Checks to see that every infoset in the support has at least one
-  // action in it.  Fails an assertion if it doesn't.
-  void ValidSupport(void);
+  // action in it.
+  bool IsValid(void) const;
 
   // Returns a gPVector representing the Dimensionality of the support.
   gPVector<int> Dimensionality(bool trunc) const;

@@ -43,7 +43,7 @@ Portion *GSM_Actions(Portion **param)
 // AddAction
 //--------------
 
-Portion* GSM_AddAction( Portion** param )
+Portion *GSM_AddAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
   Infoset *infoset = ((InfosetPortion *) param[1])->Value();
@@ -51,11 +51,7 @@ Portion* GSM_AddAction( Portion** param )
 
   if (&support->BelongsTo() != infoset->BelongsTo())
     return new ErrorPortion("Support and infoset must be from same game");
-  
-  int i;
-  for (i = 1; i <= infoset->NumActions(); i++)
-    if (infoset->GetActionList()[i] == action)  break;
-  if (i > infoset->NumActions())
+  if (action->BelongsTo() != infoset)
     return new ErrorPortion("Action must belong to infoset");
 
   support->AddAction(infoset->GetPlayer()->GetNumber(),
@@ -412,7 +408,7 @@ Portion *GSM_JoinInfoset(Portion **param)
 // LastAction
 //--------------
 
-Portion* GSM_LastAction( Portion** param )
+Portion *GSM_LastAction( Portion** param )
 {
   Node *n = ((NodePortion *) param[0])->Value();
   Action* a = LastAction( n );
@@ -925,7 +921,7 @@ Portion *GSM_Parent(Portion **param)
 // Payoff
 //-----------
 
-Portion *GSM_PayoffFloat(Portion **param)
+Portion *GSM_Payoff_Float(Portion **param)
 {
   OutcomeVector<double> *c = 
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
@@ -936,7 +932,7 @@ Portion *GSM_PayoffFloat(Portion **param)
   return por;
 }
 
-Portion *GSM_PayoffRational(Portion **param)
+Portion *GSM_Payoff_Rational(Portion **param)
 {
   OutcomeVector<gRational> *c = 
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
@@ -977,7 +973,7 @@ Portion *GSM_Player_Node(Portion **param)
 // Players
 //------------
 
-Portion *GSM_PlayersEfg(Portion **param)
+Portion *GSM_Players_Efg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
@@ -1065,27 +1061,21 @@ Portion *GSM_Rational_Efg(Portion **param)
 // RemoveAction
 //-----------------
 
-Portion* GSM_RemoveAction( Portion** param )
+Portion *GSM_RemoveAction(Portion **param)
 {  
-  int pl;
-  int iset;
-  bool result = false;
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
   Infoset *infoset = ((InfosetPortion *) param[1])->Value();
   Action *action = ((ActionPortion *) param[2])->Value();
 
-  for( pl = 1; pl <= support->NumPlayers(); pl++ )
-    for( iset = 1; iset <= support->NumInfosets( pl ); iset++ )
-      if( support->GetPlayer( pl ).InfosetList()[ iset ] == infoset )
-      {
-	result = support->RemoveAction( pl, iset, action );
-	break;
-      }
+  if (&support->BelongsTo() != infoset->BelongsTo())
+    return new ErrorPortion("Support and infoset must be from same game");
+  if (action->BelongsTo() != infoset)
+    return new ErrorPortion("Action must belong to infoset");
 
-  if( !result )
-    return new ErrorPortion( "Action not in the given Support and Infoset");
-  else
-    return param[0]->RefCopy();
+  support->RemoveAction(infoset->GetPlayer()->GetNumber(),
+			infoset->GetNumber(), action);
+
+  return param[0]->RefCopy();
 }
 
 
@@ -1223,7 +1213,7 @@ Portion *GSM_SetName_Efg(Portion **param)
 // SetPayoff
 //----------------
 
-Portion *GSM_SetPayoffFloat(Portion **param)
+Portion *GSM_SetPayoff_Float(Portion **param)
 {
   OutcomeVector<double> *c = 
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
@@ -1241,7 +1231,7 @@ Portion *GSM_SetPayoffFloat(Portion **param)
   return por;
 }
 
-Portion *GSM_SetPayoffRational(Portion **param)
+Portion *GSM_SetPayoff_Rational(Portion **param)
 {
   OutcomeVector<gRational> *c = 
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
@@ -1664,11 +1654,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Payoff");
-  FuncObj->SetFuncInfo(GSM_PayoffFloat, 1);
-  FuncObj->SetParamInfo(GSM_PayoffFloat, 0, "outcome", porOUTCOME_FLOAT);
+  FuncObj->SetFuncInfo(GSM_Payoff_Float, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_Float, 0, "outcome", porOUTCOME_FLOAT);
 
-  FuncObj->SetFuncInfo(GSM_PayoffRational, 1);
-  FuncObj->SetParamInfo(GSM_PayoffRational, 0, "outcome", porOUTCOME_RATIONAL);
+  FuncObj->SetFuncInfo(GSM_Payoff_Rational, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_Rational, 0, "outcome", porOUTCOME_RATIONAL);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Player");
@@ -1680,8 +1670,8 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Players");
-  FuncObj->SetFuncInfo(GSM_PlayersEfg, 1);
-  FuncObj->SetParamInfo(GSM_PlayersEfg, 0, "efg", porEFG,
+  FuncObj->SetFuncInfo(GSM_Players_Efg, 1);
+  FuncObj->SetParamInfo(GSM_Players_Efg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -1763,14 +1753,14 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetPayoff");
-  FuncObj->SetFuncInfo(GSM_SetPayoffFloat, 2);
-  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 0, "outcome", porOUTCOME_FLOAT);
-  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 1, "payoff", porLIST | porFLOAT);
+  FuncObj->SetFuncInfo(GSM_SetPayoff_Float, 2);
+  FuncObj->SetParamInfo(GSM_SetPayoff_Float, 0, "outcome", porOUTCOME_FLOAT);
+  FuncObj->SetParamInfo(GSM_SetPayoff_Float, 1, "payoff", porLIST | porFLOAT);
 
-  FuncObj->SetFuncInfo(GSM_SetPayoffRational, 2);
-  FuncObj->SetParamInfo(GSM_SetPayoffRational, 0, "outcome",
+  FuncObj->SetFuncInfo(GSM_SetPayoff_Rational, 2);
+  FuncObj->SetParamInfo(GSM_SetPayoff_Rational, 0, "outcome",
 			porOUTCOME_RATIONAL);
-  FuncObj->SetParamInfo(GSM_SetPayoffRational, 1, "payoff",
+  FuncObj->SetParamInfo(GSM_SetPayoff_Rational, 1, "payoff",
 			porLIST | porRATIONAL);
   gsm->AddFunction(FuncObj);
 

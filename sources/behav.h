@@ -17,7 +17,7 @@ class BaseBehavProfile   {
   protected:
     const BaseEfg *E;
     bool truncated;
-    EFSupport behavsupport;
+    EFSupport support;
     BaseBehavProfile(const BaseEfg &, bool trunc);
     BaseBehavProfile(const BaseBehavProfile &);
     BaseBehavProfile(const BaseEfg &, bool trunc, const EFSupport &);
@@ -30,7 +30,7 @@ class BaseBehavProfile   {
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
     bool IsTruncated(void) const    { return truncated; }
-    EFSupport &GetEFSupport(void) ;
+    const EFSupport &GetEFSupport(void) const;
     const gString &GetPlayerName(int p) const;
     const gString &GetInfosetName(int p, int iset) const;
     const gString &GetActionName(int p, int iset, int act) const;

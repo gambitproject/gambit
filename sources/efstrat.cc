@@ -1,8 +1,8 @@
-//#
-//# FILE: efstrat.cc -- Implementation of supports for the extensive form
-//#
-//# $Id$
-//#
+//
+// FILE: efstrat.cc -- Implementation of supports for the extensive form
+//
+// $Id$
+//
 
 //#include "efstrat.h"
 #include "efg.h"
@@ -13,14 +13,14 @@
 // ---------------------------------------------------
 
 EFActionArrays::EFActionArrays ( const gArray <Action *> &a )
-: acts(a.Length()), ori(a)
+  : acts(a.Length())
 {
   for (int j = 1; j <= (a.Length()); j++)
     acts[j] = a[j];
 }
 
 EFActionArrays::EFActionArrays ( const EFActionArrays &a)
-: acts(a.acts), ori(a.ori)
+  : acts(a.acts)
 { }
 
 EFActionArrays::~EFActionArrays ()
@@ -28,27 +28,23 @@ EFActionArrays::~EFActionArrays ()
 
 EFActionArrays &EFActionArrays::operator=( const EFActionArrays &a)
 {
-  if (this != &a) {
-    acts = a.acts; 
-    ori = a.ori;
-  }
-  return (*this);
+  acts = a.acts; 
+  return *this;
 }
 
 #ifdef __BORLANDC__
 bool operator==(const gArray<Action *> &a, const gArray<Action *> &b)
 {
-	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
-	for (int i = a.mindex; i <= a.maxdex; i++)
-		if (a[i] != b[i])   return false;
-	return true;
+  if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+  for (int i = a.mindex; i <= a.maxdex; i++)
+    if (a[i] != b[i])   return false;
+  return true;
 }
 #endif
 
 bool EFActionArrays::operator==(const EFActionArrays &a)
 {
-	if ( (acts == a.acts) && (ori == a.ori)) return (true);
-	else return (false);
+  return (acts == a.acts);
 }
 
 //--------------------------------------------------
@@ -56,7 +52,7 @@ bool EFActionArrays::operator==(const EFActionArrays &a)
 //--------------------------------------------------
 
 EFActionSet::EFActionSet( EFPlayer &p )
-: infosets(p.NumInfosets())
+  : infosets(p.NumInfosets())
 {
   efp = &p;
   for (int i = 1; i <= p.NumInfosets(); i++){
@@ -107,18 +103,10 @@ bool EFActionSet::operator==(const EFActionSet &s)
 // EFActionSet: Member functions 
 //------------------------------------------
 
-// sets every ori array equal to the correspoding acts array
-// (ie make the ori array match the new behavProfile created)
-void EFActionSet::SetupActionSet()
-{
-  for (int i = 1; i<=infosets.Length(); i++) 
-    infosets[i]->ori = infosets[i]->acts;
-}
-
 // Append an action to a particular infoset;
 void EFActionSet::AddAction(int iset, Action *s) 
 { 
-
+  
   infosets[iset]->acts.Append(s); 
 }
 
@@ -144,11 +132,6 @@ bool EFActionSet::RemoveAction(int  iset, Action *s )
   if (t>0) infosets[iset]->acts.Remove(t); 
   return (t>0); 
 } 
-
-const gArray<Action *> EFActionSet::GetSetofActions(int iset) const
-{
-  return (infosets[iset]->acts);
-}
 
 // Get an action
 Action *EFActionSet::GetAction(int iset, int index)
@@ -184,24 +167,21 @@ int EFActionSet::IsActionInActionSet( int iset, Action *a)
 int EFActionSet::OriNumber ( int iset, Action *a)
 {
   int i;
-  for (i = 1; i <= infosets[iset]->ori.Length() && 
-       (infosets[iset]->ori)[i] != a; i++);
-  if (i > infosets[iset]->ori.Length()) return 0;
+  for (i = 1; i <= infosets[iset]->acts.Length() && 
+       (infosets[iset]->acts)[i] != a; i++);
+  if (i > infosets[iset]->acts.Length()) return 0;
   else return i;
 }
 
-// checks for a valid EFActionSet, fails assertion if not
-void EFActionSet::ActionSetValid(void)
+// checks for a valid EFActionSet
+bool EFActionSet::IsValid(void) const
 {
-// I changed this line because I think this is more correct.
-// The number of infosets for a player need not be nonzero
-// (in fact, it's very convenient at times to have "inactive" players) - Ted
-
-//  assert(infosets.Length() > 0);
-  assert(infosets.Length() == efp->NumInfosets());
+  if (infosets.Length() != efp->NumInfosets())   return false;
 
   for (int i = 1; i <= infosets.Length(); i++)
-    assert(infosets[i]->acts.Length() > 0);
+    if (infosets[i]->acts.Length() == 0)   return false;
+
+  return true;
 }
 
 //--------------------------------------------------
@@ -254,41 +234,23 @@ bool EFSupport::operator==(const EFSupport &s)
 // EFSupport: Member Functions 
 //-----------------------------
 
-void EFSupport::SetupSupport(void)
-{
-
-  for (int i = 1; i <= sets.Length(); i++)
-    sets[i]->SetupActionSet();
-}
-  
-int EFSupport::NumPlayers(void) const
-{
-  return sets.Length();
-}
-
-int EFSupport::NumInfosets(int pl) const 
-{
-  return sets[pl]->NumInfosets();
-}
-
 int EFSupport::NumActions(int pl, int iset) const
 {
   return sets[pl]->NumActions(iset);
-}
-
-void EFSupport::SetEFActionSet( int pl, EFActionSet *s )
-{
-  assert (s->GetPlayer().BelongsTo() == befg);
-  sets[pl] = s;
 }
 
 const BaseEfg &EFSupport::BelongsTo(void) const
 {
   return (*befg);
 }
-int EFSupport::IsActionInSupport(int pl, int iset, Action *a)
+
+int EFSupport::Contains(Action *a) const
 {
-  assert (pl <= sets.Length() && pl >= 1);
+  if (a->BelongsTo()->BelongsTo() != befg)   return 0;
+
+  int pl = a->BelongsTo()->GetPlayer()->GetNumber();
+  int iset = a->BelongsTo()->GetNumber();
+
   return sets[pl]->IsActionInActionSet(iset, a);
 }
 
@@ -298,11 +260,13 @@ int EFSupport::OriNumber( int pl, int iset, Action *a)
   return sets[pl]->OriNumber(iset ,a);
 }
 
-void EFSupport::ValidSupport(void)
+bool EFSupport::IsValid(void) const
 {
-  assert(sets.Length() > 0);
-  for ( int i = 1; i <= sets.Length(); i++)
-    sets[i]->ActionSetValid();
+  if (sets.Length() == 0)   return false;
+  for (int i = 1; i <= sets.Length(); i++)
+    if (!sets[i]->IsValid())  return false;
+
+  return true;
 }
 
 gPVector<int> EFSupport::Dimensionality(bool trunc) const
@@ -310,11 +274,11 @@ gPVector<int> EFSupport::Dimensionality(bool trunc) const
   gArray<int> foo(befg->NumPlayers());
   int i;
   for (i = 1; i <= befg->NumPlayers(); i++)
-    foo[i] = NumInfosets(i);
+    foo[i] = sets[i]->GetPlayer().NumInfosets();
 
   gPVector<int> bar(foo);
   for (i = 1; i <= befg->NumPlayers(); i++)
-    for (int j = 1; j <= NumInfosets(i); j++)
+    for (int j = 1; j <= sets[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumActions(i,j) -((trunc) ? 1 : 0);
 
   return bar;
@@ -340,11 +304,6 @@ void EFSupport::AddAction( int i, int j, Action *s, int k)
   sets[i]->AddAction(j,s,k);
 }
 
-EFPlayer &EFSupport::GetPlayer( int pl )
-{
-  return sets[pl]->GetPlayer();
-}
-
 void EFSupport::Dump(gOutput& s) const
 {
   int numplayers;
@@ -353,7 +312,7 @@ void EFSupport::Dump(gOutput& s) const
   int k;
 
   s << "{ ";
-  numplayers = NumPlayers();
+  numplayers = befg->NumPlayers();
   for( i = 1; i <= numplayers; i++ )
   {
     EFPlayer& player = sets[i]->GetPlayer();

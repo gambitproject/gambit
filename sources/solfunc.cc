@@ -901,21 +901,11 @@ Portion *GSM_SetComponent_BehavRational(Portion **param)
 // Support
 //---------------
 
-Portion* GSM_Support_BehavFloat(Portion** param)
+Portion* GSM_Support_Behav(Portion** param)
 {
-  BehavSolution<double> *P = 
-    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
-  return new EfSupportValPortion(new EFSupport(P->Support()));
+  BaseBehavProfile *P = ((BehavPortion*) param[0])->Value();
+  return new EfSupportValPortion(new EFSupport(P->GetEFSupport()));
 }
-
-Portion* GSM_Support_BehavRational(Portion** param)
-{
-  BehavSolution<gRational> *P = 
-    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
-  return new EfSupportValPortion(new EFSupport(P->Support()));
-}
-
-
 
 
 
@@ -1104,11 +1094,8 @@ void Init_solfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Support");
-  FuncObj->SetFuncInfo(GSM_Support_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_Support_BehavFloat, 0, "strategy",
-			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_Support_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_Support_BehavRational, 0, "strategy",
-			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_Support_Behav, 1);
+  FuncObj->SetParamInfo(GSM_Support_Behav, 0, "strategy",
+			porBEHAV, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 }
