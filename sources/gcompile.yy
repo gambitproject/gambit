@@ -1,5 +1,11 @@
 
 %{
+//#
+//# FILE: gcompile.y -- yaccer/compiler for the GCL
+//#
+//# $Id$
+//#
+
 #include <stdlib.h>
 #include <ctype.h>
 #include "basic.h"
@@ -75,6 +81,7 @@
 
 %token IF
 %token WHILE
+%token FOR
 %token QUIT
 
 %token BOOLEAN
@@ -86,7 +93,7 @@
 
 %%
 
-program:      statements   { if (!quit)  emit(new Display); }
+program:      statements   { emit(new Display); }
 
 statements:   statement
           |   statements SEMI statement
@@ -95,7 +102,8 @@ statement:
          |    expression
          |    conditional
          |    whileloop
-         |    QUIT     { quit = true; }
+         |    forloop
+         |    QUIT     { quit = true; emit(new Quit); }
 
 conditional:  IF LBRACK expression COMMA 
               { emit(new NOT); emit(0);
@@ -120,6 +128,18 @@ whileloop:    WHILE LBRACK { labels.Push(program.Length() + 1); }
 		emit(new Goto(labels.Pop()));
 		emit(new NOP);
 	      }
+
+forloop:      FOR LBRACK exprlist COMMA  { labels.Push(program.Length() + 1); }
+              expression COMMA   { emit(new NOT);  emit(0);
+				   labels.Push(program.Length()); }
+              exprlist COMMA statements RBRACK
+                   { program[labels.Pop()] = new IfGoto(program.Length() + 2);
+		     emit(new Goto(labels.Pop()));
+		     emit(new NOP);
+		   }
+
+exprlist:     expression  { emit(new Pop); }
+        |     exprlist SEMI expression  { emit(new Pop); }
 
 expression:   E0
           |   NAME ASSIGN  { emit(new PushRef(tval)); } expression { emit(new Assign()); }
@@ -245,7 +265,7 @@ int GCLCompiler::yylex(void)
       }
       else  {
 	ungetchar(d);
-	return '/';
+	return SLASH;
       }
     }
     else
@@ -276,6 +296,7 @@ int GCLCompiler::yylex(void)
     else if (s == "MOD")    return PERCENT;
     else if (s == "If")     return IF;
     else if (s == "While")  return WHILE;
+    else if (s == "For")    return FOR;
     else if (s == "Quit")   return QUIT;
     else  { tval = s; return NAME; }
   }
