@@ -1,6 +1,9 @@
-// File: efgsolng.cc -- definition of the class dealing with the GUI part of the
+//
+// FILE: efgsolng.cc -- definition of the class dealing with the GUI part of the
 // extensive form solutions.
+//
 // $Id$
+//
 
 #include "wx.h"
 #include "wx_form.h"
@@ -84,7 +87,7 @@ if (solns.Length()==0)
 }
 int num_isets=0;
 for (int i=1;i<=ef.NumPlayers();i++)
-	num_isets+=ef.PlayerList()[i]->NumInfosets();
+	num_isets+=ef.Players()[i]->NumInfosets();
 
 if (num_isets)	parent->PickSolutions(ef,solns);
 
@@ -106,7 +109,7 @@ void BaseBySubgameG<T>::BaseViewNormal(const Nfg<T> &N, NFSupport *&sup)
   for (int i=1;i<=N.NumPlayers();i++) players[i]=i;
   NFSupport *temp_sup=sup,*temp_sup1=0;
   if (DS.FindAll())  {
-    if (temp_sup->BelongsTo().Type() == DOUBLE)   {
+    if (temp_sup->BelongsTo().PayoffTable()->Type() == DOUBLE)   {
       while ((temp_sup=ComputeDominated((Nfg<double> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 	{if (temp_sup1) delete temp_sup1; temp_sup1=temp_sup;}
       if (temp_sup1) sup=temp_sup1;
@@ -118,7 +121,7 @@ void BaseBySubgameG<T>::BaseViewNormal(const Nfg<T> &N, NFSupport *&sup)
     }
   }
   else  {
-    if (temp_sup->BelongsTo().Type() == DOUBLE)   {
+    if (temp_sup->BelongsTo().PayoffTable()->Type() == DOUBLE)   {
       if ((temp_sup=ComputeDominated((Nfg<double> &) temp_sup->BelongsTo(),*temp_sup,DS.DomStrong(),players,gnull,gstatus)))
 	sup=temp_sup;
     }
@@ -627,7 +630,7 @@ GSPD.GetParams(&P);
 
 EFSupport ES=EFSupport(E);
 Nfg<T> *N = MakeReducedNfg((Efg<T> &)E,ES);
-NFSupport *S=new NFSupport(*N);
+NFSupport *S=new NFSupport(N->GameForm());
 ViewNormal(*N,S);
 
 MixedProfile<T> start(*N,*S);
@@ -737,7 +740,7 @@ GridParams P(status);
 GSPD.GetParams(P);
 
 Nfg<T> *N = MakeReducedNfg((Efg<T> &)E,ES);
-NFSupport *S=new NFSupport(*N);
+NFSupport *S=new NFSupport(N->GameForm());
 ViewNormal(*N,S);
 GridSolveModule M(*N,P,*S);
 M.GridSolve();

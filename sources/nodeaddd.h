@@ -1,6 +1,10 @@
-// File: nodeaddd.h -- Node Add Dialog.  Handles creation of new nodes for the
-// extensive form display.
+//
+// FILE: nodeaddd.h -- Node Add Dialog.  Handles creation of new nodes for the
+//                      extensive form display.
+//
 // $Id$
+//
+
 typedef enum {NodeAddNew,NodeAddIset} NodeAddMode;
 class NodeAddDialog : public MyDialogBox
 {
@@ -42,7 +46,7 @@ NodeAddDialog::NodeAddDialog(BaseEfg &ef_,EFPlayer *player,Infoset *infoset,int 
 set_names=TRUE;
 wxStringList *player_list=new wxStringList;player_name=new char[20];
 player_list->Add("Chance");
-for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.PlayerList()[i])->GetName());
+for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.Players()[i])->GetName());
 player_list->Add("New Player");
 if (player) strcpy(player_name,player->GetName()); else strcpy(player_name,"New Player");
 wxFormItem *player_fitem=Add(wxMakeFormString("Player", &player_name, wxFORM_CHOICE,
@@ -104,10 +108,12 @@ return player;
 
 Infoset *NodeAddDialog::GetInfoset(void)
 {
-if (GetAddMode()==NodeAddIset)
-	return EfgGetPlayer(ef,player_name)->GetInfoset(iset_name);
-else
-	return 0;
+if (GetAddMode()==NodeAddIset)  {
+  for (int iset = 1; iset <= EfgGetPlayer(ef, player_name)->NumInfosets(); iset++)
+    if (EfgGetPlayer(ef, player_name)->Infosets()[iset]->GetName() == iset_name)
+      return EfgGetPlayer(ef,player_name)->Infosets()[iset];
+}
+return 0;
 }
 
 int NodeAddDialog::GetBranches(void)
@@ -122,7 +128,7 @@ iset_item->Clear();
 iset_item->Append("New");
 EFPlayer *player=EfgGetPlayer(ef,name);
 if (player)
-	for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->InfosetList()[i]->GetName());
+	for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->Infosets()[i]->GetName());
 iset_item->SetSelection(iset_item->FindString("New"));
 iset_item->SetSize(-1,-1,-1,-1); // force it to resize
 }
@@ -131,7 +137,13 @@ void NodeAddDialog::OnIset(const char *name)
 {
 EFPlayer *player=EfgGetPlayer(ef,player_item->GetStringSelection());
 if (!player) return;
-Infoset *infoset=player->GetInfoset(name);
+Infoset *infoset = 0;
+for (int iset = 1; iset <= player->NumInfosets(); iset++)
+  if (player->Infosets()[iset]->GetName() == name)  {
+    infoset = player->Infosets()[iset];
+    break;
+  }
+
 if (!infoset) return;
 branch_item->SetValue(ToString(infoset->NumActions()));
 }

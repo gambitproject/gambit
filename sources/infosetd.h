@@ -1,5 +1,9 @@
-// File: infosetd.h -- Declaration of a class to inspect infosets
-// @(#)infosetd.h	1.1 11/20/96
+//
+// FILE: infosetd.h -- Declaration of a class to inspect infosets
+//
+// $Id$
+//
+
 #ifndef INFOSETD_H
 #define INFOSETD_H
 
@@ -67,8 +71,8 @@ help_button->SetClientData((char *)this);
 int i;char tmp_str[50];
 for (i=1;i<=ef.NumPlayers();i++)
 {
-	if (ef.PlayerList()[i]->GetName()!="")
-		player_item->Append(ef.PlayerList()[i]->GetName());
+	if (ef.Players()[i]->GetName()!="")
+		player_item->Append(ef.Players()[i]->GetName());
 	else
 		{sprintf(tmp_str,"Player %d",i);player_item->Append(tmp_str);}
 }
@@ -87,7 +91,7 @@ if (ef.NumPlayers()==0)
 	if (player_item->Number()==0) player_item->Append("None");return;
 }
 player_item->SetSelection(num);
-EFPlayer *player=ef.PlayerList()[num+1];
+EFPlayer *player=ef.Players()[num+1];
 iset_item->Clear();
 for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(ToString(i));
 OnIset(0);
@@ -99,13 +103,13 @@ if (prev_iset)
 	if (strcmp(prev_iset->GetName(),iset_name_item->GetValue())!=0)
 		prev_iset->SetName(iset_name_item->GetValue());
 
-EFPlayer *player=ef.PlayerList()[player_item->GetSelection()+1];
+EFPlayer *player=ef.Players()[player_item->GetSelection()+1];
 if (player->NumInfosets()==0)  // can have players w/ no isets
 {
 	if (iset_item->Number()==0) iset_item->Append("None");return;
 }
 iset_item->SetSelection(num);
-Infoset *iset=player->InfosetList()[num+1];
+Infoset *iset=player->Infosets()[num+1];
 iset_name_item->SetValue(iset->GetName());
 branches_item->SetValue(ToString(iset->NumActions()));
 nodes_item->SetValue(ToString(iset->NumMembers()));
@@ -119,8 +123,8 @@ wxStringList *player_list=new wxStringList;char *player_name=new char[20];
 char tmp_str[50];
 for (int i=1;i<=ef.NumPlayers();i++)
 {
-	if (ef.PlayerList()[i]->GetName()!="")
-		player_list->Add(ef.PlayerList()[i]->GetName());
+	if (ef.Players()[i]->GetName()!="")
+		player_list->Add(ef.Players()[i]->GetName());
 	else
 		{sprintf(tmp_str,"Player %d",i);player_list->Add(tmp_str);}
 }
@@ -137,7 +141,7 @@ new_iset_dialog->Go();
 if (new_iset_dialog->Completed()==wxOK)
 {
 	int pl=wxListFindString(player_list,player_name);
-	EFPlayer *player=ef.PlayerList()[pl+1];
+	EFPlayer *player=ef.Players()[pl+1];
 	Infoset *iset=ef.CreateInfoset(player,num_branches);
 	iset->SetName(iset_name);
 	game_changed=true;
@@ -149,8 +153,8 @@ delete [] iset_name;delete [] player_name;
 
 void InfosetDialog::RemoveInfoset(void)
 {
-EFPlayer *player=ef.PlayerList()[player_item->GetSelection()+1];
-Infoset *iset=player->InfosetList()[iset_item->GetSelection()+1];
+EFPlayer *player=ef.Players()[player_item->GetSelection()+1];
+Infoset *iset=player->Infosets()[iset_item->GetSelection()+1];
 if (iset->NumMembers()!=0)
 	{wxMessageBox("This infoset is not empty.\nOnly empty infosets can be delted");return;}
 ef.DeleteEmptyInfoset(iset);
@@ -159,8 +163,8 @@ game_changed=true;
 
 void InfosetDialog::OnOk(void)
 {
-EFPlayer *player=ef.PlayerList()[player_item->GetSelection()+1];
-Infoset *iset=player->InfosetList()[iset_item->GetSelection()+1];
+EFPlayer *player=ef.Players()[player_item->GetSelection()+1];
+Infoset *iset=player->Infosets()[iset_item->GetSelection()+1];
 if (strcmp(iset->GetName(),iset_name_item->GetValue())!=0)	// name changed
 	iset->SetName(iset_name_item->GetValue());
 

@@ -1,8 +1,9 @@
-//*************************************************************************
-//* Treewin.cc: This file contains the type-specific (templated) portion of
-//* the extensive form rendering code.
-// @(#)treewin.cc	1.35 9/19/96
 //
+// FILE: Treewin.cc -- Type-specific portion of the extensive form rendering code.
+// 
+// $Id$
+//
+
 #include "wx.h"
 #include "wx_form.h"
 #include "wxmisc.h"
@@ -189,9 +190,7 @@ if (s!="")
 #endif   // __GNUG__, __BORLANDC__
 //TEMPLATE class gList<OutcomeWindowS>;
 TEMPLATE class TreeWindow<double> ;
+TEMPLATE class TreeWindow<gRational> ;
 
-#ifdef GRATIONAL
-	TEMPLATE class TreeWindow<gRational> ;
-#endif
 
 

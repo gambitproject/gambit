@@ -1,5 +1,9 @@
-// File: playersd.h -- Defines a dialog to inspect/create EFPlayers for the EF
+//
+// FILE: playersd.h -- Defines a dialog to inspect/create EFPlayers for the EF
+//
 // $Id$
+//
+
 #ifndef PLAYERSD_H
 #define PLAYERSD_H
 
@@ -38,8 +42,8 @@ wxStringList *player_list=new wxStringList;char *player_name=new char[20];
 player_list->Add(ef.GetChance()->GetName());  // CHANCE is always first
 if (ef.NumPlayers()!=0)
 {
-	for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.PlayerList()[i])->GetName());
-	strcpy(player_name,ef.PlayerList()[1]->GetName());
+	for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.Players()[i])->GetName());
+	strcpy(player_name,ef.Players()[1]->GetName());
 }
 else
 	strcpy(player_name,ef.GetChance()->GetName());
@@ -80,7 +84,7 @@ if (strcmp(player->GetName(),new_name_item->GetValue())!=0)	// name changed
 	player->SetName(new_name_item->GetValue());	// might want to check if there already exists one
 	if (new_name==prev_name) new_name=player->GetName();
 	name_item->Clear();
-	for (int i=1;i<=ef.NumPlayers();i++) name_item->Append((ef.PlayerList()[i])->GetName());
+	for (int i=1;i<=ef.NumPlayers();i++) name_item->Append((ef.Players()[i])->GetName());
 	name_item->SetStringSelection(new_name);
 }
 player=EfgGetPlayer(ef,new_name);
