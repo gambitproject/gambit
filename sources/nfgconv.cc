@@ -26,7 +26,15 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
     for (int st = 1; st <= p2->NumStrats(); st++)
       p2->Strategies()[st]->name = p1->Strategies()[st]->name;
   }
+  
+  for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
+    NFOutcome<gRational> *outcome = 
+      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
 
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*outcome)[pl] = gRational((*orig.Outcomes()[outc])[pl]);
+  }
+		       
   NFSupport S1(orig);
   NFSupport S2(*N);
 
@@ -34,8 +42,7 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   NfgContIter<gRational> C2(S2);
   
   do   {
-    for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*C2.Outcome())[pl] = gRational((*C1.Outcome())[pl]);
+    C2.SetOutcome(N->Outcomes()[C1.GetOutcome()->GetNumber()]);
 
     C2.NextContingency();
   } while (C1.NextContingency());
@@ -61,6 +68,14 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
       p2->Strategies()[st]->name = p1->Strategies()[st]->name;
   }
 
+  for (int outc = 1; outc <= orig.NumOutcomes(); outc++)  {
+    NFOutcome<double> *outcome = 
+      (outc > 1) ? N->NewOutcome() : N->Outcomes()[1];
+
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*outcome)[pl] = (double) (*orig.Outcomes()[outc])[pl];
+  }
+		       
   NFSupport S1(orig);
   NFSupport S2(*N);
 
@@ -68,8 +83,7 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
   NfgContIter<double> C2(S2);
   
   do   {
-    for (int pl = 1; pl <= N->NumPlayers(); pl++)
-      (*C2.Outcome())[pl] = (double) (*C1.Outcome())[pl];
+    C2.SetOutcome(N->Outcomes()[C1.GetOutcome()->GetNumber()]);
 
     C2.NextContingency();
   } while (C1.NextContingency());

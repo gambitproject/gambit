@@ -21,9 +21,9 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   int i;
 
   Lexicon *L = new Lexicon(E);
-  for (i = 1; i <= E.NumPlayers(); i++)  {
+  for (i = 1; i <= E.NumPlayers(); i++)  
     L->MakeReducedStrats(support, E.PlayerList()[i], E.RootNode(), NULL);
-  }
+
   gArray<int> dim(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)
     dim[i] = L->strategies[i].Length();
@@ -58,8 +58,11 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   int pl = E.NumPlayers();
   while (1)  {
     E.Payoff(corr, value);
+    
+    if (iter.GetIndex() > 1)  
+      iter.SetOutcome(((Nfg<T> *) L->N)->NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
-      (*iter.Outcome())[j] = value[j];
+      (*iter.GetOutcome())[j] = value[j];
     
     iter.NextContingency();
     while (pl > 0)   {
@@ -235,9 +238,13 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
   
   while (1)  {
     E.Payoff(profile, payoff);
+
+    if (iter.GetIndex() > 0)
+      iter.SetOutcome(afg->NewOutcome());
+
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
       for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)
-	(*iter.Outcome())[npl] = payoff[epl];
+	(*iter.GetOutcome())[npl] = payoff[epl];
     
     while (pl > 0)  {
       if (iter.Next(pl))  {

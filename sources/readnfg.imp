@@ -1,8 +1,8 @@
-//#
-//# FILE: readnfg.imp -- Type-dependent file-reading code
-//#
-//# @(#)readnfg.imp	1.2 12/19/95
-//#
+//
+// FILE: readnfg.imp -- Type-dependent file-reading code
+//
+// $Id$
+//
 
 #include "glist.h"
 #include "readnfg.h"
@@ -55,6 +55,9 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
 template <class T> void NfgFile<T>::SetPayoff(int cont, int pl,
 					      const gRational &value)
 {
+  if (pl == 1)
+    ((Nfg<T> *) N)->payoffs[cont] =
+    ((Nfg<T> *) N)->outcomes[((Nfg<T> *) N)->outcomes.Length()];
   (*((Nfg<T> *) N)->payoffs[cont])[pl] = (T) value;
 }
 

@@ -26,7 +26,7 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
   
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = (*iter.Outcome())[1] - min;
+      A1(i, n1 + j) = (*iter.GetOutcome())[1] - min;
       iter.Next(2);
     }
     iter.Next(1);
@@ -51,7 +51,7 @@ template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = (*iter.Outcome())[2] - min;
+      A2(n1 + j, i) = (*iter.GetOutcome())[2] - min;
       iter.Next(2);
     }
     iter.Next(1);

@@ -25,20 +25,20 @@ template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
 {
   gVector<T> zeroes(dim.Length());
   zeroes = (T) 0;
+  outcomes.Append(new NFOutcome<T>(1, zeroes));
   
-  for (int i = 1; i <= payoffs.Length(); i++)  { 
-    payoffs[i] = new NFOutcome<T>(zeroes);
-    outcomes.Append(payoffs[i]);
-  }
+  for (int i = 1; i <= payoffs.Length(); i++)
+    payoffs[i] = outcomes[1];
 }
 
 template <class T> Nfg<T>::Nfg(const Nfg &n)
   : BaseNfg(n), payoffs(n.payoffs.Length())
 {
-  for (int i = 1; i <= payoffs.Length(); i++)  {
-    payoffs[i] = new NFOutcome<T>(*n.payoffs[i]);
-    outcomes.Append(payoffs[i]);
-  }
+  for (int outc = 1; outc <= n.outcomes.Length(); outc++)
+    outcomes.Append(new NFOutcome<T>(outc, *n.outcomes[outc]));
+
+  for (int cont = 1; cont <= payoffs.Length(); cont++) 
+    payoffs[cont] = outcomes[n.payoffs[cont]->GetNumber()];
 }
 
 template <class T> Nfg<T>::~Nfg()
@@ -108,6 +108,15 @@ template <class T> T Nfg<T>::MaxPayoff(int pl) const
   return maxpay;
 }
 
+template <class T> NFOutcome<T> *Nfg<T>::NewOutcome(void)
+{
+  NFOutcome<T> *outcome = new NFOutcome<T>(outcomes.Length() + 1,
+					   gVector<T>(players.Length()));
+  outcomes.Append(outcome);
+  return outcome;
+}
+  
+
 //
 // Note that the link with the associated efg, if any, is broken
 // only on this end, and the Lexicon of the efg is not deleted
@@ -133,7 +142,7 @@ template <class T> void Nfg<T>::SetOutcome(const StrategyProfile *p,
 }
 
 template <class T> 
-NFOutcome<T> *Nfg<T>::Outcome(const gArray<int> &profile) const 
+NFOutcome<T> *Nfg<T>::GetOutcome(const gArray<int> &profile) const 
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
@@ -142,7 +151,7 @@ NFOutcome<T> *Nfg<T>::Outcome(const gArray<int> &profile) const
 }
 
 template <class T>
-NFOutcome<T> *Nfg<T>::Outcome(const StrategyProfile *p) const
+NFOutcome<T> *Nfg<T>::GetOutcome(const StrategyProfile *p) const
 {
   return payoffs[p->index + 1];
 }

@@ -73,15 +73,19 @@ template <class T> class NfgFile;
 
 template <class T> class NFOutcome   {
   private:
+    int number;
     gVector<T> payoffs;
 
   public:
-    NFOutcome(const gVector<T> &p) : payoffs(p)  { }
+    NFOutcome(int n, const gVector<T> &p) : number(n), payoffs(p)  { }
+    NFOutcome(int n, const NFOutcome<T> &c) : number(n), payoffs(c.payoffs) { }
     ~NFOutcome() { }
 
     const gVector<T> &Payoffs(const)   { return payoffs; }
     const T &operator[](int pl) const    { return payoffs[pl]; }
     T &operator[](int pl)       { return payoffs[pl]; }
+
+    int GetNumber(void) const    { return number; }
 };
 
 #include "glist.h"
@@ -109,10 +113,15 @@ public:
 
   void WriteNfgFile(gOutput &) const;
 
+  const gList<NFOutcome<T> *> &Outcomes(void) const  { return outcomes; }
+  int NumOutcomes(void) const   { return outcomes.Length(); }
+
+  NFOutcome<T> *NewOutcome(void);
+
   void SetOutcome(const gArray<int> &profile, NFOutcome<T> *outcome);
-  NFOutcome<T> *Outcome(const gArray<int> &profile) const;
+  NFOutcome<T> *GetOutcome(const gArray<int> &profile) const;
   void SetOutcome(const StrategyProfile *p, NFOutcome<T> *outcome);
-  NFOutcome<T> *Outcome(const StrategyProfile *p) const;
+  NFOutcome<T> *GetOutcome(const StrategyProfile *p) const;
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);
@@ -121,4 +130,4 @@ public:
 template <class T> int ReadNfgFile(gInput &, Nfg<T> *&);
 void NfgFileType(gInput &f, bool &valid, DataType &type);
 
-#endif //# NFG_H
+#endif    //# NFG_H

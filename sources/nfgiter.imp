@@ -115,9 +115,9 @@ template <class T> long NfgIter<T>::GetIndex(void) const
   return profile->GetIndex();
 }
 
-template <class T> NFOutcome<T> *NfgIter<T>::Outcome(void) const
+template <class T> NFOutcome<T> *NfgIter<T>::GetOutcome(void) const
 {
-  return N->Outcome(profile);
+  return N->GetOutcome(profile);
 }
 
 template <class T> void NfgIter<T>::SetOutcome(NFOutcome<T> *outcome)

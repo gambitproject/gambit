@@ -265,8 +265,8 @@ void GridSolveModule::OutputHeader(gOutput &out)
       for (int i=1;i<=N.NumStrats(1);i++)  {
 	for (int j=1;j<=N.NumStrats(2);j++) {
 	  profile[1]=i;profile[2]=j;
-	  out << (*N.Outcome(profile))[1] << ' ' <<
-	         (*N.Outcome(profile))[2] << ' ';
+	  out << (*N.GetOutcome(profile))[1] << ' ' <<
+	         (*N.GetOutcome(profile))[2] << ' ';
 	}
 	out<<'\n';
       }

@@ -1,6 +1,6 @@
 
 %{
-/* @(#)readnfg.yy	1.3 12/19/95 */
+/* $Id$ */
 #include <ctype.h>
 #include "gmisc.h"
 #include "gambitio.h"
@@ -79,7 +79,10 @@ intlist:      integer
 
 integer:      NUMBER  { numbers.Append(last_rational); }
 
-body:         { cont = 1; pl = 1; } payofflist
+
+body:         { cont = 1;
+                pl = 1; }
+              payofflist
 
 payofflist:   payoff
           |   payofflist payoff
@@ -87,6 +90,11 @@ payofflist:   payoff
 payoff:       NUMBER
               { if (pl > N->NumPlayers())   {
 		  cont++;
+		  if (cont <= ncont)  
+	            if (N->Type() == DOUBLE)
+                      ((Nfg<double> *) N)->NewOutcome();
+	            else
+                      ((Nfg<gRational> *) N)->NewOutcome();
 		  pl = 1;
 		}
 		if (cont > ncont)  YYERROR;

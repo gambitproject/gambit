@@ -43,7 +43,7 @@ public:
   
   long GetIndex(void) const;
   
-  NFOutcome<T> *Outcome(void) const;
+  NFOutcome<T> *GetOutcome(void) const;
   void SetOutcome(NFOutcome<T> *);
 
   const NFSupport &Support(void) const { return support; }

@@ -25,10 +25,10 @@ template <class T> int FindPureNash(const Nfg<T> &N,
     NfgIter<T> niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      T current = (*citer.Outcome())[pl];
+      T current = (*citer.GetOutcome())[pl];
       for (int i = 1; i <= N.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if ((*niter.Outcome())[pl] > current)  {
+	if ((*niter.GetOutcome())[pl] > current)  {
 	  flag = 0;
 	  break;
 	}

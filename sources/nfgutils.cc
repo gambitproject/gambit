@@ -30,7 +30,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   
   do   {
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
-      (*niter.Outcome())[pl] = (*oiter.Outcome())[pl];
+      (*niter.GetOutcome())[pl] = (*oiter.GetOutcome())[pl];
 
     oiter.NextContingency();
   }  while (niter.NextContingency());
