@@ -74,8 +74,11 @@ int main( int /*argc*/, char* argv[] )
 {
   char* c = NULL;
   c = strrchr( argv[0], '\\' );
-  if( c != NULL && *(c+1) != NULL )
+  if( c != NULL )
+  {
+    _SourceDir = new char[ 256 ];
     strcpy( _SourceDir, c+1 );
+  }
     
   
   // Set up the error handling functions:
@@ -86,6 +89,7 @@ int main( int /*argc*/, char* argv[] )
   
   C->Parse();
 
+  delete[] _SourceDir;
   delete C;
   delete _gsm;
   
