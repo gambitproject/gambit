@@ -125,17 +125,6 @@ Bug C21: Algorithms producing nonsense on games of imperfect recall
 
 //------------------------------
 
-Bug C23:  Bug in LcpSolve, reported by Stengel 9/4/98
-
-Include["stengel3.efg"]
-GCL2:= << LcpSolve[e]
-gcl_Linux: lemketab.cc:123: int LTableau<double>::SF_ExitIndex(int): Assertion `BestSet.Length() > 0' failed.
-A segmentation fault has occurred
-
-(the file is in the directory ~rdm/gambit/test)
-
-//------------------------------
-
 Bug C25:  Saving games loses precision.  
 
 
@@ -172,6 +161,15 @@ LcpSolve[EFG], Behav[NFG], and so forth.  The fix is to improve
 BehavProfile<T> and BehavSolution to be smart enough to realize when
 action probabilities at certain information sets are not specified.
 (This bug affects the GUI as well, of course.)
+
+//-----------------------------
+
+Bug C27: can't unassign a static variable
+
+  GCL1:= << $a:=1
+  1
+  GCL2:= << $a:=
+  EXCEPTION: Bad key passed to HashTable
 
 
 //---------------  These are not bugs but suggested improvements ------------
