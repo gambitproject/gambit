@@ -155,7 +155,6 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
   
     index = solutions.Append(MixedSolution(profile, algorithmNfg_ENUMMIXED));
     solutions[index].SetEpsilon(eps);
-    solutions[index].SetIsNash();
   }
   npivots = poly.NumPivots();
 
@@ -321,7 +320,6 @@ template <class T> int EnumModule<T>::Enum(void)
 
     index = solutions.Append(MixedSolution(profile, algorithmNfg_ENUMMIXED));
     solutions[index].SetEpsilon(eps);
-    solutions[index].SetIsNash();
     
     // note:  this is not really sufficient information -- we should also
     //        keep the basis

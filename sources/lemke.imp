@@ -207,9 +207,9 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
 
     int index = solutions.Append(MixedSolution(profile, algorithmNfg_LCP));
     solutions[index].SetEpsilon(epsilon);
-    solutions[index].SetIsNash();
-    if(solutions[index].IsNash())
-      solutions[index].SetIsPerfect(triTRUE);
+    // let the MixedSolution code do this:
+    //    if(solutions[index].IsNash())
+    //      solutions[index].SetIsPerfect(triTRUE);
   }
 }
 

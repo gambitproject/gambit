@@ -311,7 +311,9 @@ void MixedSolution::Invalidate(void) const
   m_support = NFSupport(m_profile.Game());
   m_creator = algorithmNfg_USER;
   m_isNash = triUNKNOWN;
+  m_isPerfect = triUNKNOWN;
   m_isProper = triUNKNOWN;
+  m_checkedPerfect = false;
   m_qreLambda = -1;
   m_qreValue = -1;
   m_liapValue = -1;

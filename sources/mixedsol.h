@@ -40,6 +40,7 @@ protected:
   gArray<gNumber> m_payoff;
   unsigned int m_id;
   
+  void SetIsNash(void) const;
   void LevelPrecision(void);
 
 public:
@@ -85,9 +86,6 @@ public:
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(NfgAlgType p_creator) { m_creator = p_creator; }
-  void SetIsNash(void) const;
-  void SetIsPerfect(gTriState p_isPerfect) { m_isPerfect = p_isPerfect; }
-  void SetIsProper(gTriState p_isProper) { m_isProper = p_isProper; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }

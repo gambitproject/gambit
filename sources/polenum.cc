@@ -150,9 +150,6 @@ int PolEnumModule::SaveSolutions(const gList<gVector<gDouble> > &list)
     gNumber eps = (gNumber)0.0;
     gEpsilon(eps);
     solutions[index].SetEpsilon(eps);
-    //    solutions[index].SetIsNash(triTRUE);
-    // At this point we do not know that it is Nash, since there could
-    // be a beneficial deviation to a nonsupport strategy.
   }
   return index;
 }

@@ -196,7 +196,6 @@ void ZSumModule<T>::GetSolutions(gList<MixedSolution > &solutions) const
 
     index = solutions.Append(MixedSolution(profile, algorithmNfg_LP));
     solutions[index].SetEpsilon(eps);
-    solutions[index].SetIsNash();
   }
 }
 

@@ -49,9 +49,7 @@ void FindPureNash(const NFSupport &p_support, int p_stopAfter,
       for (int pl = 1; pl <= profile.Length(); pl++)
 	temp(pl, profile[pl]) = 1;
       
-      int index = p_solutions.Append(MixedSolution(temp,
-						   algorithmNfg_ENUMPURE));
-      p_solutions[index].SetIsNash();
+      p_solutions.Append(MixedSolution(temp, algorithmNfg_ENUMPURE));
     }
     contNumber++;
   }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&
