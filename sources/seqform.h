@@ -10,7 +10,6 @@
 #include "efg.h"
 #include "rational.h"
 #include "glist.h"
-#include "gdpvect.h"
 #include "gmatrix.h"
 #include "lemketab.h"
 #include "gstatus.h"
@@ -18,8 +17,8 @@
 
 class SeqFormParams     {
   public:
-    int  plev, stopAfter, maxdepth;
-    gOutput *output;
+    int trace, stopAfter, maxdepth;
+    gOutput *tracefile;
     gStatus &status;
     
     SeqFormParams(gStatus &status_ = gstatus);
@@ -64,15 +63,24 @@ public:
   int NumInfosets(int j);
 };
 
-//
-// Convenience functions for "one-shot" evaluations
-//
 
-/*
-template <class T> int SeqForm(const Efg<T> &N, const SeqFormParams &p,
-			     gList<gDPVector<T> > &solutions,
-			     long &npivots, double &time);
-*/				   
+#include "subsolve.h"
+
+template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
+  private:
+    int npivots;
+    SeqFormParams params;
+
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int AlgorithmID() const { return id_SEQFORMSUB; }    
+
+  public:
+    SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &, int max = 0);
+    virtual ~SeqFormBySubgame();
+
+    int NumPivots(void) const  { return npivots; }
+};
+
 
 #endif    // SEQFORM_H
 

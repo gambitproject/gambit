@@ -154,3 +154,31 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 }
 
 
+
+//------------------------------------------
+// Interfacing to solve-by-subgame code
+//------------------------------------------
+
+
+
+int EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
+				  gList<BehavSolution<double> > &solns)
+{
+  BehavProfile<double> bp(E);
+
+  long this_nevals, this_niters;
+
+  Liap(E, params, bp, solns, this_nevals, this_niters);
+
+  nevals += this_nevals;
+  return params.status.Get();
+}
+
+EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
+				 const BehavProfile<double> &s, int max)
+  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
+{ }
+
+EFLiapBySubgame::~EFLiapBySubgame()   { }
+
+

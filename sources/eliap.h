@@ -15,6 +15,8 @@
 #include "behav.h"
 #include "behavsol.h"
 
+#include "subsolve.h"
+
 class EFLiapParams  {
   public:
     int trace, nTries, stopAfter, maxits1, maxitsN;
@@ -29,6 +31,26 @@ class EFLiapParams  {
 bool Liap(const Efg<double> &, EFLiapParams &,
 	  const BehavProfile<double> &, gList<BehavSolution<double> > &,
 	  long &nevals, long &niters);
+
+
+class EFLiapBySubgame : public SubgameSolver<double>  {
+  private:
+    int nevals;
+    EFLiapParams params;
+    BehavProfile<double> start;
+    
+    int SolveSubgame(const Efg<double> &, gList<BehavSolution<double> > &);
+    int AlgorithmID() const { return id_ELIAPSUB; }    
+
+  public:
+    EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &,
+		    const BehavProfile<double> &, int max = 0);
+    virtual ~EFLiapBySubgame();
+
+    int NumEvals(void) const   { return nevals; }
+};
+
+
 
 #endif    // ELIAP_H
 

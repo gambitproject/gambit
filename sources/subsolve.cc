@@ -253,64 +253,13 @@ void SubgameSolver<T>::Solve(void)
 
 	time = watch.Elapsed();
 }
+
 #pragma option -Jgx
+
 //-------------------------------------------------------------------------
 //                      Hooks to specific algorithms
 //-------------------------------------------------------------------------
 
-//-------------------
-// EFLiap
-//-------------------
-
-int EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
-					 gList<BehavSolution<double> > &solns)
-{
-  BehavProfile<double> bp(E);
-
-  long this_nevals, this_niters;
-
-  Liap(E, params, bp, solns, this_nevals, this_niters);
-
-  nevals += this_nevals;
-  return params.status.Get();
-}
-
-EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
-				 const BehavProfile<double> &s, int max)
-  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
-{ }
-
-EFLiapBySubgame::~EFLiapBySubgame()   { }
-
-
-//-------------------
-// Sequence form
-//-------------------
-
-template <class T>
-int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				       gList<BehavSolution<T> > &solns)
-{
-  BehavProfile<T> bp(E);
-
-  SeqFormModule<T> M(E, params, bp.GetEFSupport());
-  
-  M.Lemke();
-
-  npivots += M.NumPivots();
-
-  solns = M.GetSolutions();
-  return params.status.Get();
-}
-
-template <class T>
-SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p,
-				      int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
-{ }
-
-template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
-  
 
 #include "mixed.h"
 
@@ -610,9 +559,6 @@ bool operator!=(const gArray<int> &a, const gArray<int> &b)
 
 TEMPLATE class SubgameSolver<double>;
 TEMPLATE class SubgameSolver<gRational>;
-
-TEMPLATE class SeqFormBySubgame<double>;
-TEMPLATE class SeqFormBySubgame<gRational>;
 
 TEMPLATE class LemkeBySubgame<double>;
 TEMPLATE class LemkeBySubgame<gRational>;

@@ -912,8 +912,8 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
     SeqFormParams SP;
     SP.stopAfter = ((IntPortion *) param[2])->Value();
 
-    SP.output = &((OutputPortion *) param[5])->Value();
-    SP.plev = ((IntPortion *) param[6])->Value();
+    SP.tracefile = &((OutputPortion *) param[5])->Value();
+    SP.trace = ((IntPortion *) param[6])->Value();
 
     SeqFormBySubgame<double> SM(E, SP);
     
@@ -958,8 +958,8 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
     SeqFormParams SP;
     SP.stopAfter = ((IntPortion *) param[2])->Value();
 
-    SP.output = &((OutputPortion *) param[5])->Value();
-    SP.plev = ((IntPortion *) param[6])->Value();
+    SP.tracefile = &((OutputPortion *) param[5])->Value();
+    SP.trace = ((IntPortion *) param[6])->Value();
 
     SeqFormBySubgame<gRational> SM(E, SP);
     

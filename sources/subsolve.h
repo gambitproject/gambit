@@ -9,6 +9,8 @@
 
 #include "efg.h"
 #include "nfg.h"
+#include "behavsol.h"
+
 class NFSupport;
 template <class T> class SubgameSolver   {
   private:
@@ -43,43 +45,6 @@ template <class T> class SubgameSolver   {
     const gList<BehavSolution<T> > &GetSolutions(void) const
       { return solutions; }
 };
-
-#include "seqform.h"
-
-template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
-  private:
-    int npivots;
-    SeqFormParams params;
-
-    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
-    int AlgorithmID() const { return id_SEQFORMSUB; }    
-
-  public:
-    SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &, int max = 0);
-    virtual ~SeqFormBySubgame();
-
-    int NumPivots(void) const  { return npivots; }
-};
-
-#include "eliap.h"
-
-class EFLiapBySubgame : public SubgameSolver<double>  {
-  private:
-    int nevals;
-    EFLiapParams params;
-    BehavProfile<double> start;
-    
-    int SolveSubgame(const Efg<double> &, gList<BehavSolution<double> > &);
-    int AlgorithmID() const { return id_ELIAPSUB; }    
-
-  public:
-    EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &,
-		    const BehavProfile<double> &, int max = 0);
-    virtual ~EFLiapBySubgame();
-
-    int NumEvals(void) const   { return nevals; }
-};
-
 
 #include "lemke.h"
 

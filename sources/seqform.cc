@@ -23,7 +23,7 @@ void Epsilon(gRational &v) {v=(gRational)0; }
 //---------------------------------------------------------------------------
 
 SeqFormParams::SeqFormParams(gStatus &status_) 
-  :  plev(0), stopAfter(0), output(&gnull), status(status_)
+  : trace(0), stopAfter(0), tracefile(&gnull), status(status_)
 { }
 
 
@@ -101,7 +101,7 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   BFS<T> cbfs((T) 0);
   int i;
   
-  if (EF.NumPlayers() != 2 || !params.output)   return 0;
+  if (EF.NumPlayers() != 2 || !params.tracefile)   return 0;
   
   gWatch watch;
   
@@ -109,10 +109,10 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   LCPPath();
   Add_BFS(*tab);
   
-  if (params.plev >= 2)  {
+  if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
-      List[i].Dump(*params.output);
-      (*params.output) << "\n";
+      List[i].Dump(*params.tracefile);
+      (*params.tracefile) << "\n";
     }
   }
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
@@ -125,8 +125,8 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   solutions.Flush();
   solutions.Append(BehavSolution<T>(profile, id_SEQFORM));
   
-//  if(params.plev >= 1)
-//    (*params.output) << "\nN Pivots = " << npivots << "\n";
+//  if(params.trace >= 1)
+//    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
 
   npivots=tab->NumPivots();
   time = watch.Elapsed();
@@ -145,11 +145,11 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tab)
     }
 
   if (List.Contains(cbfs))  return 0;
-//  if(params.plev >=2) (*params.output) << "\nFound CBFS";
-//  (*params.output)  << "\nB = ";
-//  tab.Dump(*params.output);
-//  (*params.output)  << "\ncbfs = ";
-//  cbfs.Dump(*params.output );
+//  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
+//  (*params.tracefile)  << "\nB = ";
+//  tab.Dump(*params.tracefile);
+//  (*params.tracefile)  << "\ncbfs = ";
+//  cbfs.Dump(*params.tracefile );
   List.Append(cbfs);
   return 1;
 }
@@ -308,9 +308,9 @@ template <class T> int SeqFormModule<T>::LCPPath()
 //  if (!At_CBFS())  return 0;
   int enter, exit;
   enter = ns1+ns2+ni1+1;
-//  if(params.plev >=2) {
-//    (*params.output) << "\nbegin LCP path: enter = " << enter << "\n";
-//    Dump(*params.output);
+//  if(params.trace >=2) {
+//    (*params.tracefile) << "\nbegin LCP path: enter = " << enter << "\n";
+//    Dump(*params.tracefile);
 //  }
 //  gout << "\nbegin LCP path: enter = " << enter << "\n";
 //  tab->Dump(gout);
@@ -325,15 +325,15 @@ template <class T> int SeqFormModule<T>::LCPPath()
     params.status.SetProgress((double)nits/(double)(nits+1)); 
     nits++;
     exit = tab->PivotIn(enter);
-//    if(params.plev >=2)
-//      Dump(*params.output);
+//    if(params.trace >=2)
+//      Dump(*params.tracefile);
     
 //    tab->Dump(gout);
     
     enter = -exit;
   } while (exit != 0 && !params.status.Get());
       // Quit when at a CBFS.
-      //  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
+      //  if(params.trace >=2 ) (*params.tracefile) << "\nend of path " << dup;
 //  gout << "\nend of path ";
   return 1;
 }
@@ -368,38 +368,44 @@ class SeqFormModule<gRational>;
 #endif   // __GNUG__, __BORLANDC__
 
 
-//-------------------------------------------------------------------------
-//                    Convenience functions for Sequence Form
-//-------------------------------------------------------------------------
+
+//-----------------------------------
+// Interfacing to solve-by-subgame
+//-----------------------------------
 
 template <class T>
-int SeqForm(const Efg<T> &E, const SeqFormParams &p,
-	  gList<BehavProfile<T> > &/*solutions*/,
-	  long &npivots, double &time)
-{ 
-  EFSupport S(E);
-  SeqFormModule<T> SM(E, p, S);
-  int result = SM.Lemke();
+int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				      gList<BehavSolution<T> > &solns)
+{
+  BehavProfile<T> bp(E);
 
-  npivots = SM.NumPivots();
-  time = SM.Time();
+  SeqFormModule<T> M(E, params, bp.GetEFSupport());
   
-//  solutions = SM.GetSolutions();
+  M.Lemke();
 
-  return result;
+  npivots += M.NumPivots();
+
+  solns = M.GetSolutions();
+  return params.status.Get();
 }
 
+template <class T>
+SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p,
+				      int max)
+  : SubgameSolver<T>(E, max), npivots(0), params(p)
+{ }
+
+template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
+  
+
+
 #ifdef __GNUG__
-template int SeqForm(const Efg<double> &, const SeqFormParams &,
-		   gList<BehavProfile<double> > &, long &, double &);
-template int SeqForm(const Efg<gRational> &, const SeqFormParams &,
-		   gList<BehavProfile<gRational> > &, long &, double &);
+template class SeqFormBySubgame<double>;
+template class SeqFormBySubgame<gRational>;
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int SeqForm(const Efg<double> &, const SeqFormParams &,
-	  gList<BehavProfile<double> > &, long &, double &);
-int SeqForm(const Efg<gRational> &, const SeqFormParams &,
-	  gList<BehavProfile<gRational> > &, long &, double &);
+class SeqFormBySubgame<double>;
+class SeqFormBySubgame<gRational>;
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 
