@@ -62,12 +62,6 @@ public:
   const gList<MixedSolution<T> > &GetSolutions(void) const;
 };
 
-//
-// Convenience functions for "one-shot" evaluations
-//
-template <class T> int Enum(const Nfg<T> &N, const EnumParams &p,
-			    gList<MixedProfile<T> > &solutions,
-			    long &npivots, double &time);
 
 #endif    // ENUM_H
 
