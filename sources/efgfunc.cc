@@ -79,9 +79,8 @@ Portion *GSM_ReadEfg(Portion **param)
   gFileInput f(((gString_Portion *) param[0])->Value());
   
   if (f.IsValid())   {
-    ExtForm<double> *E = new ExtForm<double>;
-
-    ReadEfgFile(f, E);
+    ExtForm<double> *E = 0;
+    ReadEfgFile((gInput &) f, E);
 
     if (E)
       return new Efg_Portion<double>(*E);
