@@ -632,33 +632,34 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
 
   result = Execute(&program, true);
-
-  _ResolveRef( result );
-  if( result->IsReference() )
-  {
-    result_copy = result->ValCopy();
-    delete result;
-    result = result_copy;
-    result_copy = 0;
-  }
-
-  for(i = 0; i < func_info.NumParams; i++)
-  {
-    if(func_info.ParamInfo[i].PassByReference)
-    {
-      if(VarIsDefined(func_info.ParamInfo[i].Name))
-      {
-	assert(VarValue(func_info.ParamInfo[i].Name) != 0);
-	delete param[i];
-	param[i] = _VarRemove(func_info.ParamInfo[i].Name);
-      }
+  
+  if (result)   {
+    _ResolveRef( result );
+    if( result->IsReference() )  {
+      result_copy = result->ValCopy();
+      delete result;
+      result = result_copy;
+      result_copy = 0;
     }
+
+    for(i = 0; i < func_info.NumParams; i++)
+      {
+	if(func_info.ParamInfo[i].PassByReference)
+	  {
+	    if(VarIsDefined(func_info.ParamInfo[i].Name))
+	      {
+		assert(VarValue(func_info.ParamInfo[i].Name) != 0);
+		delete param[i];
+		param[i] = _VarRemove(func_info.ParamInfo[i].Name);
+	      }
+	  }
+      }
+    
+    
+    delete _StackStack->Pop();
+    delete _RefTableStack->Pop();
+    _FuncNameStack->Pop();
   }
-
-
-  delete _StackStack->Pop();
-  delete _RefTableStack->Pop();
-  _FuncNameStack->Pop();
 
   return result;
 }

@@ -284,15 +284,18 @@ gclAssignment::~gclAssignment()
 Portion *gclAssignment::Evaluate(void)
 {
   Portion *lhs = variable->Evaluate();
+  Portion *rhs;
+
   try  {
-    Portion *rhs = value->Evaluate();
-      // Assign() will delete lhs and rhs
-    return _gsm.Assign(lhs, rhs);
+    rhs = value->Evaluate();
   }
   catch (gclRuntimeError &)  {
     delete lhs;
     throw;
   }
+
+  // Assign() will delete lhs and rhs
+  return _gsm.Assign(lhs, rhs);
 }
 
 
