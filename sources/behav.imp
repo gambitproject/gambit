@@ -371,6 +371,8 @@ template <class T> T Efg<T>::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
   T minpay;
+
+  if (NumOutcomes() == 0)  return (T) 0;
   
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
@@ -389,6 +391,8 @@ template <class T> T Efg<T>::MaxPayoff(int pl) const
 {
   int index, p, p1, p2;
   T maxpay;
+
+  if (NumOutcomes() == 0)  return (T) 0;
   
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}

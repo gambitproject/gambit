@@ -1,7 +1,7 @@
 //
 // FILE nfgutils.cc -- useful utilities for the normal form
 //
-// @(#)nfgutils.cc	2.9 4/4/97
+// $Id$
 //
 
 #include "gmisc.h"
@@ -60,6 +60,8 @@ template <class T> bool IsConstSum(const Nfg<T> &nfg)
   T eps;
   gEpsilon(eps);
 
+  if (nfg.NumOutcomes() == 0)  return true;
+
   for (pl = 1; pl <= nfg.gameform->NumPlayers(); pl++)
     cvalue += nfg.payoffs(1, pl);
   
@@ -81,6 +83,8 @@ template <class T> T MinPayoff(const Nfg<T> &nfg, int player)
   int index, p, p1, p2;
   T minpay;
   
+  if (nfg.NumOutcomes() == 0)  return (T) 0;
+
   if (player) 
     p1 = p2 = player;
   else   {
@@ -101,6 +105,8 @@ template <class T> T MaxPayoff(const Nfg<T> &nfg, int player)
 {
   int index, p, p1, p2;
   T maxpay;
+
+  if (nfg.NumOutcomes() == 0)  return (T) 0;
 
   if (player) 
     p1 = p2 = player;
