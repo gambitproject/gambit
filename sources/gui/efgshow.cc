@@ -39,16 +39,15 @@
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
+#include "dlefgplayer.h"
 #include "dlmoveadd.h"
 #include "dlnodedelete.h"
-#include "dlefgplayer.h"
 #include "dlefgoutcome.h"
 #include "dlefgpayoff.h"
 #include "dlefgreveal.h"
 #include "dlactionselect.h"
 #include "dlactionlabel.h"
 #include "dlactionprobs.h"
-#include "dlefgplayers.h"
 #include "dlinfosets.h"
 #include "dlsubgames.h"
 #include "dlefgproperties.h"
@@ -120,8 +119,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_TREE_DELETE, EfgShow::OnEditTreeDelete)
   EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
   EVT_MENU(efgmenuEDIT_TREE_MOVE, EfgShow::OnEditTreeMove)
-  EVT_MENU(efgmenuEDIT_TREE_LABEL, EfgShow::OnEditTreeLabel)
-  EVT_MENU(efgmenuEDIT_TREE_PLAYERS, EfgShow::OnEditTreePlayers)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
   EVT_MENU(efgmenuEDIT_PROPERTIES, EfgShow::OnEditProperties)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
@@ -667,10 +664,6 @@ void EfgShow::MakeMenus(void)
 		   "Move tree from marked node");
   treeMenu->Append(efgmenuEDIT_TREE_DELETE, "&Delete",
 		   "Delete recursively from cursor");
-  treeMenu->Append(efgmenuEDIT_TREE_LABEL, "&Label",
-		   "Set the game label");
-  treeMenu->Append(efgmenuEDIT_TREE_PLAYERS, "&Players",
-		   "Edit/View players");
   treeMenu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
 		   "Edit/View infosets");
 
@@ -1546,24 +1539,6 @@ void EfgShow::OnEditTreeMove(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditTreeLabel(wxCommandEvent &)
-{
-  wxTextEntryDialog dialog(this, "Label game", "Label of game",
-			   (char *) m_efg.GetTitle());
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_efg.SetTitle(dialog.GetValue().c_str());
-    SetFilename(Filename());
-  }
-}
-
-void EfgShow::OnEditTreePlayers(wxCommandEvent &)
-{
-  dialogEfgPlayers dialog(m_efg, this);
-  dialog.ShowModal();
-  OnSupportsEdited();
-}
-
 void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 {
   dialogInfosets dialog(m_efg, this);
@@ -1574,7 +1549,17 @@ void EfgShow::OnEditProperties(wxCommandEvent &)
 {
   dialogEfgProperties dialog(this, m_efg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
-
+    m_efg.SetTitle(dialog.GetGameTitle().c_str());
+    SetFilename(Filename());
+    m_efg.SetComment(dialog.GetComment().c_str());
+    for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
+      if (pl > m_efg.NumPlayers()) {
+	m_efg.NewPlayer()->SetName(dialog.GetPlayerName(pl).c_str());
+      }
+      else {
+	m_efg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
+      }
+    }
   }
 }
 

@@ -108,8 +108,6 @@ private:
   void OnEditTreeDelete(wxCommandEvent &);
   void OnEditTreeCopy(wxCommandEvent &);
   void OnEditTreeMove(wxCommandEvent &);
-  void OnEditTreeLabel(wxCommandEvent &);
-  void OnEditTreePlayers(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
   void OnEditProperties(wxCommandEvent &);

@@ -11,7 +11,6 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "wx/grid.h"
 #include "wx/notebook.h"
 #include "efg.h"
 #include "dlefgproperties.h"
@@ -23,6 +22,9 @@ private:
 
 public:
   panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
+
+  wxString GetGameTitle(void) const { return m_title->GetValue(); }
+  wxString GetComment(void) const { return m_comment->GetValue(); }
 };
 
 panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg,
@@ -74,32 +76,88 @@ panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg,
   Layout();
 }
 
+const int idLIST_PLAYER = 1000;
+const int idBUTTON_NEWPLAYER = 1001;
+
 class panelEfgPlayers : public wxPanel {
 private:
   FullEfg &m_efg;
-  wxGrid *m_playerGrid;
+  int m_lastSelection;
+  wxListBox *m_playerList;
+  wxTextCtrl *m_playerName;
+
+  void OnPlayerSelect(wxCommandEvent &);
+  void OnNewPlayer(wxCommandEvent &);
 
 public:
   panelEfgPlayers(wxWindow *p_parent, FullEfg &p_efg);
+
+  int NumPlayers(void) const { return m_playerList->Number(); }
+  wxString GetPlayerName(int pl) const
+  { return m_playerList->GetString(pl - 1); }
+
+  DECLARE_EVENT_TABLE()
 };
 
+BEGIN_EVENT_TABLE(panelEfgPlayers, wxPanel)
+  EVT_LISTBOX(idLIST_PLAYER, panelEfgPlayers::OnPlayerSelect)
+  EVT_BUTTON(idBUTTON_NEWPLAYER, panelEfgPlayers::OnNewPlayer)
+END_EVENT_TABLE()
+
 panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, FullEfg &p_efg)
-  : wxPanel(p_parent, -1), m_efg(p_efg)
+  : wxPanel(p_parent, -1), m_efg(p_efg), m_lastSelection(0)
 {
   SetAutoLayout(true);
 
-  m_playerGrid = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 200));
-  m_playerGrid->CreateGrid(m_efg.NumPlayers(), 1);
+  wxBoxSizer *playerSizer = new wxBoxSizer(wxVERTICAL);
+  playerSizer->Add(new wxStaticText(this, wxID_STATIC, "Players"),
+		   0, wxLEFT | wxTOP | wxRIGHT, 5);
+  m_playerList = new wxListBox(this, idLIST_PLAYER);
+  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
+    m_playerList->Append((const char *) p_efg.Players()[pl]->GetName());
+  }
+  playerSizer->Add(m_playerList, 0, wxALL, 5);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_playerGrid, 0, wxALL, 5);
+  wxBoxSizer *editSizer = new wxBoxSizer(wxVERTICAL);
+  editSizer->Add(new wxStaticText(this, wxID_STATIC, "Player name"),
+		 0, wxALL, 5);
+  m_playerName = new wxTextCtrl(this, -1, "");
+  if (p_efg.NumPlayers() > 0) {
+    // should always be the case; can't be too careful though!
+    m_playerList->SetSelection(0);
+    m_playerName->SetValue((const char *) p_efg.Players()[1]->GetName());
+  }
+  editSizer->Add(m_playerName, 0, wxALL, 5);
+
+  editSizer->Add(new wxButton(this, idBUTTON_NEWPLAYER, "Add Player"),
+		 0, wxALL, 5);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  topSizer->Add(playerSizer, 0, wxALL, 5);
+  topSizer->Add(editSizer, 0, wxALL, 5);
 
   SetSizer(topSizer);
   // topSizer->Fit(this);
   // topSizer->SetSizeHints(this);
 
   Layout();
-  m_playerGrid->AdjustScrollbars();
+}
+
+void panelEfgPlayers::OnPlayerSelect(wxCommandEvent &p_event)
+{
+  m_playerList->SetString(m_lastSelection, m_playerName->GetValue());
+  m_lastSelection = p_event.GetSelection();
+  m_playerName->SetValue(m_playerList->GetString(m_lastSelection));
+}
+
+void panelEfgPlayers::OnNewPlayer(wxCommandEvent &)
+{
+  m_playerList->SetString(m_lastSelection, m_playerName->GetValue());
+  m_playerList->Append(wxString::Format("Player%d", 
+					m_playerList->Number() + 1));
+  m_lastSelection = m_playerList->Number() - 1;
+  m_playerList->SetSelection(m_lastSelection);
+  m_playerName->SetValue(m_playerList->GetStringSelection());
 }
 
 dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
@@ -135,4 +193,24 @@ dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
   topSizer->SetSizeHints(this);
 
   Layout();
+}
+
+wxString dialogEfgProperties::GetGameTitle(void) const
+{
+  return m_generalPanel->GetGameTitle();
+}
+
+wxString dialogEfgProperties::GetComment(void) const
+{
+  return m_generalPanel->GetComment();
+}
+
+int dialogEfgProperties::NumPlayers(void) const
+{
+  return m_playersPanel->NumPlayers();
+}
+
+wxString dialogEfgProperties::GetPlayerName(int pl) const
+{
+  return m_playersPanel->GetPlayerName(pl);
 }

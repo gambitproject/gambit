@@ -20,8 +20,15 @@ private:
   panelEfgPlayers *m_playersPanel;
 
 public:
+  // Lifecycle
   dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
 
+  // Data access (only valid when ShowModal() returns with wxID_OK
+  wxString GetGameTitle(void) const;
+  wxString GetComment(void) const;
+
+  int NumPlayers(void) const;
+  wxString GetPlayerName(int pl) const;
 };
 
 

@@ -27,7 +27,6 @@
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
 #include "dlefgeditsupport.h"
-#include "dlefgplayers.h"
 #include "dlinfosets.h"
 #include "dlsubgames.h"
 
@@ -589,77 +588,6 @@ void dialogInfosets::OnRemove(wxCommandEvent &)
   m_gameChanged = true;
   wxCommandEvent event;
   OnPlayer(event);
-}
-
-//=========================================================================
-//                   dialogEfgPlayers: Member functions
-//=========================================================================
-
-BEGIN_EVENT_TABLE(dialogEfgPlayers, guiAutoDialog)
-  EVT_BUTTON(idEFPLAYERS_NEW_BUTTON, dialogEfgPlayers::OnNew)
-  EVT_BUTTON(idEFPLAYERS_EDIT_BUTTON, dialogEfgPlayers::OnEdit)
-END_EVENT_TABLE()
-
-dialogEfgPlayers::dialogEfgPlayers(FullEfg &p_efg, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Player Names"), m_efg(p_efg)
-{
-  m_playerNameList = new wxListBox(this, -1);
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerNameList->Append((char *) (ToText(pl) + ": " + m_efg.Players()[pl]->GetName()));
-  }
-  m_playerNameList->SetSelection(0);
-  m_lastSelection = 0;
-
-  wxButton *editPlayer = new wxButton(this, idEFPLAYERS_EDIT_BUTTON, "Edit...");
-
-  wxButton *newPlayer = new wxButton(this, idEFPLAYERS_NEW_BUTTON, "New player...");
-
-  m_cancelButton->Show(FALSE);
-
-  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-
-  rightSizer->Add(editPlayer, 0, wxALL, 5);
-  rightSizer->Add(newPlayer, 0, wxALL, 5);
-
-  topSizer->Add(new wxStaticText(this, -1, "Player:"), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_playerNameList, 0, wxEXPAND | wxALL, 5);
-  topSizer->Add(rightSizer, 0, wxALL, 5);
-
-  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetAutoLayout(TRUE);
-  SetSizer(allSizer); 
-  allSizer->Fit(this);
-  allSizer->SetSizeHints(this); 
-  Layout();
-}
-
-void dialogEfgPlayers::OnEdit(wxCommandEvent &)
-{
-  int selection = m_playerNameList->GetSelection();
-  gText defaultName = m_efg.Players()[selection + 1]->GetName();
-
-  gText newName = wxGetTextFromUser("Name", "Enter Name", (char *) defaultName, this).c_str();
-  if (newName != "") {
-    m_efg.Players()[selection + 1]->SetName(newName);
-    m_playerNameList->SetString(selection, (char *) (ToText(selection + 1) + ": " + newName));
-  }
-}
-
-void dialogEfgPlayers::OnNew(wxCommandEvent &)
-{
-  gText defaultName = "Player " + ToText(m_efg.NumPlayers() + 1);
-  gText newName = wxGetTextFromUser("New Player's name", "Enter Name",
-                                    (char *) defaultName, this).c_str();
-  if (newName != "") {
-    EFPlayer *newPlayer = m_efg.NewPlayer();
-    newPlayer->SetName(newName);
-    m_playerNameList->Append((char *) (ToText(m_efg.NumPlayers()) + ": " + newName));
-    m_playerNameList->SetSelection(m_efg.NumPlayers() - 1);
-  }
 }
 
 //=========================================================================

@@ -45,8 +45,6 @@ typedef enum {
   efgmenuEDIT_TREE_DELETE = 1302,
   efgmenuEDIT_TREE_COPY = 1303,
   efgmenuEDIT_TREE_INSERT = 1304,
-  efgmenuEDIT_TREE_LABEL = 1305,
-  efgmenuEDIT_TREE_PLAYERS = 1306,
   efgmenuEDIT_TREE_MOVE = 1307,
   efgmenuEDIT_TREE_INFOSETS = 1310,
 
