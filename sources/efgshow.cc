@@ -834,6 +834,10 @@ void EfgShow::MakeMenus(void)
 			     "Select the next support from the list");
   supports_menu->Append(efgmenuSUPPORT_SELECT, "&Select", supportsSelectMenu,
 			"Change the current support");
+  supports_menu->AppendSeparator();
+  supports_menu->Append(efgmenuSUPPORT_REACHABLE, "&Root Reachable",
+			"Display only nodes that are support-reachable",
+			TRUE);
   
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
@@ -1149,6 +1153,9 @@ void EfgShow::OnMenuCommand(int id)
       break;
     case efgmenuSUPPORT_SELECT_NEXT:
       SupportSelectNext();
+      break;
+    case efgmenuSUPPORT_REACHABLE:
+      SupportReachable();
       break;
 
     case efgmenuINSPECT_SOLUTIONS: 
@@ -1476,6 +1483,12 @@ void EfgShow::SupportUndominated(void)
   }
 }
 
+void EfgShow::SupportReachable(void)
+{
+  tw->DrawSettings().SetRootReachable(!tw->DrawSettings().RootReachable());
+  tw->ForceRecalc();
+}
+
 
 void EfgShow::GameChanged(void)
 {
@@ -1603,6 +1616,10 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 		  (p_cursor->GetOutcome()) ? TRUE : FALSE);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (ef.NumOutcomes() > 0) ? TRUE : FALSE);
+  
+  if (tw) {
+    menuBar->Check(efgmenuSUPPORT_REACHABLE, tw->DrawSettings().RootReachable());
+  }
 
   menuBar->Enable(efgmenuSOLVE_CUSTOM_EFG_LP,
 		  ef.NumPlayers() == 2 && ef.IsConstSum());

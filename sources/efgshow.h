@@ -133,6 +133,7 @@ public:
   void SupportSelectFromList(void);
   void SupportSelectPrevious(void);
   void SupportSelectNext(void);
+  void SupportReachable(void);
   gText UniqueSupportName(void) const;
 
     // Used by TreeWindow

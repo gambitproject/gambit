@@ -293,6 +293,8 @@ public:
   
   virtual void Render(wxDC &dc);
   void HilightInfoset(int pl,int iset);
+
+  void ForceRecalc(void) { must_recalc = true; }
   
   // Used by parent EfgShow when cur_sup changes
   void SupportChanged(void);
