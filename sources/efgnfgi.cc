@@ -1,4 +1,5 @@
 #include "efgnfgi.h"
+#include "rational.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
