@@ -76,6 +76,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, NfgShow::Close)
   EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
+  EVT_MENU(NFG_FILE_EXPORT_HTML, NfgShow::OnFileExportHTML)
   EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
@@ -378,6 +379,11 @@ void NfgShow::MakeMenus(void)
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
+  wxMenu *fileExportMenu = new wxMenu;
+  fileExportMenu->Append(NFG_FILE_EXPORT_HTML, "&HTML",
+			 "Save this game in HTML format");
+  fileMenu->Append(NFG_FILE_EXPORT, "&Export", fileExportMenu,
+		   "Export the game in various formats");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
@@ -560,6 +566,36 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   catch (gException &) {
     wxMessageBox("Internal exception in Gambit", "Error", wxOK, this);
     if (nfg)  delete nfg;
+  }
+}
+
+void NfgShow::OnFileExportHTML(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
+		      "HTML files (*.html)|*.html|"
+		      "HTML files (*.htm)|*.htm", wxSAVE);
+
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+  
+  try {
+    gFileOutput file(dialog.GetPath().c_str());
+    file << gbtBuildHtml(m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer()).c_str() << '\n';
+  }
+  catch (gFileOutput::OpenFailed &) { 
+    wxMessageBox(wxString::Format("Could not open %s for writing.",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+  }
+  catch (gFileOutput::WriteFailed &) {
+    wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+  }
+  catch (...) {
+    wxMessageBox("An internal exeception occurred in Gambit", "Error",
+		 wxOK, this);
   }
 }
 

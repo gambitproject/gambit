@@ -27,6 +27,9 @@
 #ifndef NFGCONST_H
 #define NFGCONST_H
 
+const int NFG_FILE_EXPORT = 200;
+const int NFG_FILE_EXPORT_HTML = 201;
+
 const int NFG_EDIT_STRATS = 301;
 const int NFG_EDIT_CONTINGENCY = 309;
 const int NFG_EDIT_GAME = 310;

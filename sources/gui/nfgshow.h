@@ -84,6 +84,7 @@ private:
   void OnFileNew(wxCommandEvent &);
   void OnFileOpen(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
+  void OnFileExportHTML(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);
   void OnFilePrint(wxCommandEvent &);
