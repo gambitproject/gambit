@@ -45,6 +45,7 @@
   \
   void emit(Instruction *); \
   void DefineFunction(void); \
+  void RecoverFromError(void); \
   int ProgLength(void); \
   \
   int Parse(void); \
@@ -111,8 +112,8 @@
 
 program:      statements EOC 
               { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
-       |      error EOC   { return 1; }
-       |      error CRLF  { return 1; }
+       |      error EOC   { RecoverFromError();  return 1; }
+       |      error CRLF  { RecoverFromError();  return 1; }
 
 statements:   statement 
           |   statements sep statement
@@ -558,6 +559,20 @@ int GCLCompiler::ProgLength(void)
 {
   return (function) ? function->Length() : program.Length();
 }
+
+void GCLCompiler::RecoverFromError(void)
+{
+  if (function)   {
+    while (function->Length())   delete function->Remove(1);
+    delete function;  function = 0;
+    formals.Flush();
+    types.Flush();
+    refs.Flush();
+  }
+  labels.Flush();
+  listlen.Flush();
+}
+    
 
 void GCLCompiler::DefineFunction(void)
 {
