@@ -203,6 +203,123 @@ void TreeWindow::node_label(void)
 //                       NODE-OUTCOME MENU HANDLER
 //***********************************************************************
 
+//
+// Tree-Outcome menu handler
+//
+
+#define ENTRIES_PER_ROW 3
+
+class EFChangePayoffs : public MyDialogBox {
+private:
+  EFOutcome *outcome;
+  Efg &ef;
+
+  wxText *name_item;
+  wxText **payoff_items;
+
+public:
+  EFChangePayoffs(Efg &, EFOutcome *, wxWindow *parent);
+
+  gArray<gNumber> Payoffs(void);
+  gText Name(void);
+};
+
+EFChangePayoffs::EFChangePayoffs(Efg &p_efg, EFOutcome *p_outcome,
+				 wxWindow *p_parent)
+  : MyDialogBox(p_parent, "Change Payoffs"), outcome(p_outcome), ef(p_efg)
+{
+  Add(wxMakeFormMessage("Change payoffs for outcome:"));
+  Add(wxMakeFormNewLine());
+
+  char *new_name = new char[40];
+  wxFormItem *name_fitem = Add(wxMakeFormString("Outcome:", &new_name, wxFORM_TEXT, 0, 0, 0, 160));
+  Add(wxMakeFormNewLine());
+
+  // Payoff items
+  char **new_payoffs = new char *[ef.NumPlayers()+1];
+  wxFormItem **payoff_fitems = new wxFormItem *[ef.NumPlayers()+1];
+  payoff_items = new wxText *[ef.NumPlayers()+1];
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) {
+    new_payoffs[i] = new char[40];
+    if (ef.Players()[i]->GetName() != "")
+      payoff_fitems[i] = Add(wxMakeFormString(ef.Players()[i]->GetName() + ":", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
+    else
+      payoff_fitems[i] = Add(wxMakeFormString(ToText(i) + ":", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
+
+    if (i % ENTRIES_PER_ROW == 0)
+      Add(wxMakeFormNewLine());
+  }
+
+  AssociatePanel();
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) {
+    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
+    gNumber payoff = 0;
+    if (outcome)
+      payoff = ef.Payoff(outcome, i);
+    payoff_items[i]->SetValue(ToText(payoff));
+  }
+  
+  if (p_outcome && ef.NumPlayers() > 0) {
+    payoff_items[1]->SetFocus();
+  }
+
+  name_item = (wxText *) name_fitem->GetPanelItem();
+  if (outcome)
+    name_item->SetValue(outcome->GetName());
+  else
+    name_item->SetValue("Outcome " + ToText(ef.NumOutcomes() + 1));
+
+  Go1();
+
+  for (int i = 1; i <= ef.NumPlayers(); i++) 
+    delete [] new_payoffs[i];
+
+  delete [] new_payoffs;
+
+  delete [] new_name;
+}
+
+gArray<gNumber> EFChangePayoffs::Payoffs(void)
+{
+  gArray<gNumber> payoffs(ef.NumPlayers());
+
+  for (int i = 1; i <= ef.NumPlayers(); i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+
+  return payoffs;
+}
+
+gText EFChangePayoffs::Name(void)
+{
+  return name_item->GetValue();
+} 
+
+void TreeWindow::ChangePayoffs(void)
+{
+  EFChangePayoffs *dialog = new EFChangePayoffs(ef, cursor->GetOutcome(),
+						pframe);
+
+  if (dialog->Completed() == wxOK) {
+    EFOutcome *outc = cursor->GetOutcome();
+    gArray<gNumber> payoffs(dialog->Payoffs());
+
+    if (!outc) {
+      outc = ef.NewOutcome();
+      cursor->SetOutcome(outc);
+    }
+
+    for (int i = 1; i <= ef.NumPlayers(); i++)
+      ef.SetPayoff(outc, i, payoffs[i]);
+    outc->SetName(dialog->Name());
+
+    outcomes_changed = 1;
+  }
+  
+  delete dialog;
+}
+
 void TreeWindow::EditOutcomeAttach(void)
 {
   if (ef.NumOutcomes() == 0)
@@ -282,6 +399,75 @@ void TreeWindow::EditOutcomeLabel(void)
   delete dialog;
   delete [] name;
 }
+
+void TreeWindow::EditOutcomeNew(void)
+{
+  EFChangePayoffs *dialog = new EFChangePayoffs(ef, 0, pframe);
+
+  if (dialog->Completed() == wxOK) {
+    EFOutcome *outc = ef.NewOutcome();
+    gArray<gNumber> payoffs(dialog->Payoffs());
+
+    for (int i = 1; i <= ef.NumPlayers(); i++)
+      ef.SetPayoff(outc, i, payoffs[i]);
+    outc->SetName(dialog->Name());
+
+    outcomes_changed = 1;
+  }
+  
+  delete dialog;
+}
+
+void TreeWindow::EditOutcomeDelete(void)
+{
+  if (ef.NumOutcomes() == 0)
+    return;
+
+  MyDialogBox *dialog = new MyDialogBox(pframe, "Delete Outcome");
+    
+  wxStringList *outcome_list = new wxStringList;
+  char *outcome_name = new char[256];
+        
+  for (int outc = 1; outc <= ef.NumOutcomes(); outc++) {
+    EFOutcome *outcome = ef.Outcomes()[outc];
+    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
+    tmp += ToText(ef.Payoff(outcome, 1)) + ", " + ToText(ef.Payoff(outcome, 2));
+    if (ef.NumPlayers() > 2) {
+      tmp += ", " + ToText(ef.Payoff(outcome, 3));
+      if (ef.NumPlayers() > 3) 
+	tmp += ",...)";
+      else
+	tmp += ")";
+    }
+    else
+      tmp += ")";
+  
+    outcome_list->Add(tmp);
+  }
+
+  dialog->Add(wxMakeFormString("Outcome", &outcome_name,
+			       wxFORM_CHOICE,
+			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+
+  dialog->Go();
+  
+  if (dialog->Completed() == wxOK) {
+    for (int i = 0; ; i++) {
+      if (outcome_name[i] == ':') {
+	outcome_name[i] = '\0';
+	break;
+      }
+    }
+    
+    int outc = (int) ToDouble(outcome_name);
+    ef.DeleteOutcome(ef.Outcomes()[outc]);
+    outcomes_changed = 1;
+    OnPaint();
+  }
+
+  delete dialog;
+  delete [] outcome_name;
+}  
 
 
 #define DRAG_OUTCOME_END      7

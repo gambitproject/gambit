@@ -229,6 +229,8 @@ public:
     void node_outcome(int out,int x=-1,int y=-1);
     void EditOutcomeAttach(void);
     void EditOutcomeDetach(void);
+    void EditOutcomeNew(void);
+    void EditOutcomeDelete(void);
     void EditOutcomeLabel(void);
     void ChangePayoffs(void);
       

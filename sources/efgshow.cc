@@ -738,6 +738,10 @@ void EfgShow::MakeMenus(void)
   infoset_menu->Append(INFOSET_REVEAL, "&Reveal", "Reveal infoset to players");
 
   wxMenu *outcome_menu = new wxMenu;
+  outcome_menu->Append(TREE_OUTCOMES_NEW, "&New",
+		       "Create a new outcome");
+  outcome_menu->Append(TREE_OUTCOMES_DELETE, "Dele&te",
+		       "Delete an outcome");
   outcome_menu->Append(TREE_OUTCOMES_ATTACH, "&Attach",
 		       "Attach an outcome to the node at cursor");
   outcome_menu->Append(TREE_OUTCOMES_DETACH, "&Detach",
@@ -958,6 +962,12 @@ void EfgShow::OnMenuCommand(int id)
       break;
     case TREE_OUTCOMES_PAYOFFS:
       tw->ChangePayoffs();
+      break;
+    case TREE_OUTCOMES_NEW:
+      tw->EditOutcomeNew();
+      break;
+    case TREE_OUTCOMES_DELETE:
+      tw->EditOutcomeDelete();
       break;
     case TREE_PLAYERS:
       tw->tree_players();
