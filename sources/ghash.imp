@@ -129,7 +129,6 @@ template <class K, class T> T HashTable<K, T>::Remove( K key )
     i = ValidatedHash( key );
     removed_key = key_bucket[ i ].Remove( position );
     removed_value = value_bucket[ i ].Remove( position );
-    // DeleteAction( removed_value );
     assert( key == removed_key );
   }
   return removed_value;
@@ -145,7 +144,9 @@ template <class K, class T> void HashTable<K, T>::Remove( T value )
     {
       if( operator()( key_bucket[i][j] ) == value )
       {
-	Remove( key_bucket[i][j] );
+	T removed_value = Remove( key_bucket[i][j] );
+	assert( removed_value == value );
+	DeleteAction( removed_value );
 	break;
       }
     }
