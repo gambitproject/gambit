@@ -13,6 +13,8 @@
 #include "gmisc.h"
 #include "rational.h"
 
+#include "nfg.h"
+#include "efg.h"
 
 
 
@@ -541,6 +543,77 @@ Portion* GSM_List_Rational( Portion** param )
 }
 
 
+Portion* GSM_List_Nfg( Portion** param )
+{
+  ListPortion* p;
+  int i;
+  assert( param[0]->Spec().Type != porERROR );  
+
+  if( ((IntPortion*) param[1])->Value() < 0 )
+    return new ErrorPortion( "Invalid list length" );
+
+
+  p = new ListValPortion();
+  p->SetDataType( param[0]->Spec().Type );
+
+  if( param[0]->Spec().Type == porNFG_FLOAT )
+  {
+    Nfg<double>& nfg = 
+      * (Nfg<double>*) (((NfgPortion*) param[0])->Value());
+    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+      p->Append( new NfgValPortion( new Nfg<double>( nfg ) ) );  
+  }
+  else if( param[0]->Spec().Type == porNFG_RATIONAL )
+  {
+    Nfg<gRational>& nfg = 
+      * (Nfg<gRational>*) (((NfgPortion*) param[0])->Value());
+    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+      p->Append( new NfgValPortion( new Nfg<gRational>( nfg ) ) );  
+  }
+  else
+    assert( 0 );
+
+  return p;
+}
+
+
+Portion* GSM_List_Efg( Portion** param )
+{
+  ListPortion* p;
+  int i;
+  assert( param[0]->Spec().Type != porERROR );  
+
+  if( ((IntPortion*) param[1])->Value() < 0 )
+    return new ErrorPortion( "Invalid list length" );
+
+
+  p = new ListValPortion();
+  p->SetDataType( param[0]->Spec().Type );
+
+  if( param[0]->Spec().Type == porEFG_FLOAT )
+  {
+    Efg<double>& efg = 
+      * (Efg<double>*) (((EfgPortion*) param[0])->Value());
+    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+      p->Append( new EfgValPortion( new Efg<double>( efg ) ) );  
+  }
+  else if( param[0]->Spec().Type == porEFG_RATIONAL )
+  {
+    Efg<gRational>& efg = 
+      * (Efg<gRational>*) (((EfgPortion*) param[0])->Value());
+    for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+      p->Append( new EfgValPortion( new Efg<gRational>( efg ) ) );  
+  }
+  else
+    assert( 0 );
+
+  return p;
+}
+
+
+
+
+
 //------------------------ Dot --------------------------------
 
 
@@ -895,12 +968,13 @@ void Init_listfunc(GSM *gsm)
 
   //-------------------------- List -----------------------------
 
-  FuncObj = new FuncDescObj("List", 5);
+  FuncObj = new FuncDescObj("List", 7);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_List, PortionSpec(porANYTYPE, 1), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE & 
 					    ~(porINTEGER | porFLOAT | 
-					      porRATIONAL)));
+					      porRATIONAL | 
+					      porNFG | porEFG )));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("length", porINTEGER, 
 					    new IntValPortion(1)));
 
@@ -937,6 +1011,20 @@ void Init_listfunc(GSM *gsm)
 					    new IntValPortion(1)));
   FuncObj->SetParamInfo(4, 2, ParamInfoType("delta", porRATIONAL, 
 					    new RationalValPortion(0)));
+
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_List_Nfg, 
+				       PortionSpec(porNFG, 1), 
+				       2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porNFG));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("length", porINTEGER, 
+					    new IntValPortion(1)));
+
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_List_Efg, 
+				       PortionSpec(porEFG, 1), 
+				       2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("x", porEFG));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("length", porINTEGER, 
+					    new IntValPortion(1)));
 
   gsm->AddFunction(FuncObj);
 
