@@ -4,201 +4,62 @@
 # $Revision$
 #
 # DESCRIPTION:
-# Main makefile for Borland C++
+# Makefile for Borland C++ 5.5 for graphical user interface
 #
+
+.AUTODEPEND
 
 !include makedef.bcc
 
-all:  base math numerical pelican poly game nash gambit
-        
-base:
-	cd base
-	make -f borland
-	cd ..
+WXLIBDIR = $(WXDIR)\lib
+WXLIB = wx24s_bcc tiff jpeg winpng zlib
 
-math:
-	cd math
-	make -f borland
-	cd ..
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.5\"
+EXTRALINKFLAGS = 
 
-numerical:
-	cd numerical
-	make -f borland
-	cd ..
+gambit_SOURCES = \
+	"dialog-about.cc" \
+	"gambit.cc" \
+	"game-document.cc" \
+	"game-frame.cc"
 
-pelican:
-	cd pelican
-	make -f borland
-	cd ..
+OBJECTS = $(gambit_SOURCES:.cc=.obj)
 
-poly:
-	cd poly
-	make -f borland
-	cd ..
+CFG = ..\gambit32.cfg
 
-game:
-	cd game
-	make -f borland
-	cd ..
+OPT = -Od
 
-nash:
-	cd nash
-	make -f borland
-	cd ..
-
-libbase_a_OBJECTS = \
-	+"garray.obj" \
-	+"gblock.obj" \
-	+"glist.obj" \
-	+"gmisc.obj" \
-	+"grarray.obj" \
-	+"odometer.obj" 
-
-libmath_a_OBJECTS = \
-	+complex.obj \
-	+gdpvect.obj \
-	+gmatrix.obj \
-	+gpvector.obj \
-	+gsmatrix.obj \
-	+gvector.obj \
-	+integer.obj \
-	+mathinst.obj \
-	+misc.obj \
-        +mpfloat.obj \
-	+rational.obj
- 
-libnumerical_a_OBJECTS = \
-	+basis.obj \
-	+bfs.obj \
-	+btableau.obj \
-	+gfunc.obj \
-	+gfuncmin.obj \
-	+lemketab.obj \
-	+linrcomb.obj \
-	+lpsolve.obj \
-	+lptab.obj \
-	+ludecomp.obj \
-	+tableau.obj \
-	+vertenum.obj
-
-libgame_a_OBJECTS = \
-	+"game-file.obj" \
-	+"sfg.obj" \
-	+"sfstrat.obj" \
-	+"table-mixed-double.obj" \
-	+"table-mixed-mpfloat.obj" \
-	+"table-mixed-rational.obj" \ 
-	+"table-contingency.obj" \
-        +"table-file.obj" \
-	+"table-game.obj" \
-	+"table-inst.obj" \
-	+"table-outcome.obj" \
-	+"table-player.obj" \
-	+"tree-behav-double.obj" \
-	+"tree-behav-mpfloat.obj" \
-	+"tree-behav-pure.obj" \
-	+"tree-behav-rational.obj" \
-	+"tree-contingency.obj" \
-	+"tree-file.obj" \
-	+"tree-game.obj" \
-	+"tree-infoset.obj" \
-	+"tree-inst.obj" \
-	+"tree-node.obj" \
-	+"tree-outcome.obj" \
-	+"tree-player.obj" 
-
-libpelican_a_OBJECTS = \
-	+pelclhpk.obj \
-	+pelclqhl.obj \
-	+pelclyal.obj \
-	+pelconv.obj \
-	+peleval.obj \
-	+pelgennd.obj \
-	+pelgmatr.obj \
-	+pelhomot.obj \
-	+pelpred.obj \
-	+pelprgen.obj \
-	+pelproc.obj \
-	+pelpsys.obj \
-	+pelqhull.obj \
-	+pelsymbl.obj \
-	+pelutils.obj
-
-libpoly_a_OBJECTS = \
-	+gpartltr.obj \
-	+gpoly.obj \
-	+gpolylst.obj \
-	+gsolver.obj \
-	+ideal.obj \
-	+ineqsolv.obj \
-	+interval.obj \
-	+monomial.obj \
-	+pelclass.obj \
-	+poly.obj \
-	+prepoly.obj \
-	+quiksolv.obj \
-	+rectangl.obj
-
-libnash_a_OBJECTS = \
-	+behavextend.obj \
-	+clique.obj \
-	+efglcp.obj \
-	+efgliap.obj \
-	+efglogit.obj \
-	+efglp.obj \
-	+efgpoly.obj \
-	+efgpure.obj \
-	+lhtab.obj \
-        +nfgch.obj \
-	+nfglcp.obj \
-	+nfgliap.obj \
-	+nfglogit.obj \
-	+nfglp.obj \
-	+nfgmixed.obj \
-	+nfgpoly.obj \
-	+nfgpure.obj \
-	+nfgqregrid.obj \
-	+nfgsimpdiv.obj \
-        +nfgyamamoto.obj
-
-        
-OBJECTS = \
-        $(libbase_a_OBJECTS) \
-        $(libmath_a_OBJECTS) \
-        $(libnumerical_a_OBJECTS) \
-        $(libgame_a_OBJECTS) \
-        $(libpelican_a_OBJECTS) \
-        $(libpoly_a_OBJECTS) \
-        $(libnash_a_OBJECTS)
+.cc.obj:
+	bcc32 $(CPPFLAGS) -P -c {$< }
 
 
-gambit: 
-        -erase gambit.lib
-	tlib gambit /P1024 @&&!
-$(OBJECTS) +$(PERIPH_LIBS:.lib =.lib +)
+GUILIBS=$(WXLIB) base math game pelican poly numerical nash cw32mt import32 ole2w32
+
+LINKFLAGS= /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib;..\base;..\math;..\game;..\pelican;..\poly;..\numerical;..\nash $(EXTRALINKFLAGS)
+OPT = -Od
+DEBUG_FLAGS=
+
+CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
+
+gambit:	$(OBJECTS) gambit.res
+  ilink32 $(LINKFLAGS) @&&!
+c0w32.obj $(OBJECTS)
+gambit
+nul
+$(GUILIBS)
+
+gambit.res
 !
 
-python:
-        cd python
-        make -f borland 
+gambit.res :      gambit.rc 
+    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include gambit
 
 clean:
-	cd base
-	make -f borland clean
-	cd ..\math
-	make -f borland clean
-	cd ..\numerical
-	make -f borland clean
-	cd ..\pelican
-	make -f borland clean
-	cd ..\poly
-	make -f borland clean
-	cd ..\game
-	make -f borland clean
-	cd ..\nash
-	make -f borland clean
-        cd ..
-        del *.obj
+        -erase *.obj
+        -erase *.exe
+        -erase *.res
+        -erase *.map
+        -erase *.rws
 
 
 

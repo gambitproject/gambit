@@ -1,20 +1,20 @@
 ## Process this file with automake to create Makefile.in
 
-SUBDIRS = base math numerical game pelican poly python nash
+bin_PROGRAMS = gambit
 
-EXTRA_DIST = borland.mak gambit32.cfg
+AM_CPPFLAGS = $(WX_CXXFLAGS) -I/usr/local/include/gambit
 
-lib_LTLIBRARIES = libgambit.la
+gambit_SOURCES = \
+	dialog-about.cc \
+	dialog-about.h \
+	gambit.cc \
+	gambit.h \
+	game-document.cc \
+	game-document.h \
+	game-frame.cc \
+	game-frame.h
 
-libgambit_la_SOURCES = dummy.c
+gambit_LDADD = -lgambit
 
-libgambit_la_LDFLAGS = -no-undefined -version-info 0:0:0
+EXTRA_DIST = borland.mak gambit.rc
 
-libgambit_la_LIBADD = \
-	base/libgambit_base.la \
-	math/libgambit_math.la \
-	numerical/libgambit_numerical.la \
-	game/libgambit_game.la \
-	pelican/libgambit_pelican.la \
-	poly/libgambit_poly.la \
-	nash/libgambit_nash.la 

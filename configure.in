@@ -1,41 +1,35 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(sources/game/game.h)
-AM_INIT_AUTOMAKE(gambit, 0.97.1.4)
+AC_INIT(sources/gambit.cc)
+AM_INIT_AUTOMAKE(gambit, 0.97.1.5)
 dnl AM_CONFIG_HEADER(config.h)
-
-dnl User-specified options
-AC_ARG_WITH(gmp,
-[  --with-gmp                Use GNU mp for multiple-precision math ],
-  AC_DEFINE(USE_GNU_MP, 1)
-  GMP_LIBS="-lgmp")
-AC_SUBST(GMP_LIBS)
 
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_LIBTOOL
 
-dnl Check for Python
-dnl We've only tested with 2.3, so this is what it looks for.
-dnl The wrappers may well work with earlier versions.
-AM_PATH_PYTHON(2.3,, :)
+dnl------------------------
+dnl Checking for wxWindows
+dnl------------------------
 
-dnl Guessing that Python is in /usr or /usr/local: is it possible to
-dnl autodetect this somehow?
-PYTHON_INCLUDES="-I/usr/include/python${PYTHON_VERSION} -I/usr/local/include/python${PYTHON_VERSION} -I.."
-AC_SUBST(PYTHON_INCLUDES)
+dnl check for wx-config
+WX_PATH_WXCONFIG(2.4.0, WXCONFIG=1)
+if test "$WXCONFIG" != 1; then
+    AC_MSG_ERROR([
+            Please check that wx-config is in path, the directory
+            where wxWindows libraries are installed (returned by
+            'wx-config --libs' command) is in LD_LIBRARY_PATH or
+            equivalent variable and wxWindows is version 2.4.0 or above.
+    ])
+fi
 
-CXXFLAGS="$CXXFLAGS -Wall"
+CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS}"
+CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
+dnl Newer versions of gcc issue a warning if /usr/local/include listed
+dnl in search path
+CXXFLAGS=`echo $CXXFLAGS | sed 's/-I\/usr\/local\/include//g'`
+LDFLAGS="${LDFLAGS} ${WX_LIBS}"
 
-AC_OUTPUT(Makefile sources/Makefile \
-          sources/base/Makefile \
-          sources/math/Makefile \
-          sources/numerical/Makefile \
-          sources/game/Makefile \
-	  sources/pelican/Makefile \
-	  sources/poly/Makefile \
-	  sources/nash/Makefile \
-	  sources/python/Makefile \
+AC_OUTPUT(Makefile sources/Makefile
           efg/Makefile nfg/Makefile \
 	  scripts/Makefile scripts/python/Makefile)
 
