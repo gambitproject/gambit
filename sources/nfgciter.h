@@ -25,13 +25,14 @@ class StrategyProfile;
 //
 template <class T> class ContIter    {
   private:
+    int undom_only;
     NormalForm<T> *N;
     StrategyProfile *profile;
     gBlock<int> frozen, thawed;
 
   public:
-    ContIter(NormalForm<T> &);
-    ContIter(NormalForm<T> *);
+    ContIter(NormalForm<T> &, int undom = 1);
+    ContIter(NormalForm<T> *, int undom = 1);
     ~ContIter();
 
     void First(void);
@@ -48,11 +49,11 @@ template <class T> class ContIter    {
 
     long GetIndex(void) const;
 
-    const T &Evaluate(int pl) const;
-    T &Evaluate(int pl);
-    void Evaluate(gVector<T> &);
+    const T &Payoff(int pl) const;
+    T &Payoff(int pl);
+    void Payoff(gVector<T> &);
 
-    void Dump(void) const;
+    void Dump(gOutput &) const;
 };
 
 #endif   // CONTITER_H

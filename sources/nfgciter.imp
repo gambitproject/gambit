@@ -8,18 +8,18 @@
 #include "normal.h"
 #include "strategy.h"
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
+template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int undom)
   : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers())
+    thawed(N->NumPlayers()), undom_only(undom)
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
   First();
 }
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> *nf)
+template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int undom)
   : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers())
+    thawed(N->NumPlayers()), undom_only(undom)
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -33,10 +33,13 @@ template <class T> ContIter<T>::~ContIter()
 
 template <class T> void ContIter<T>::First(void)
 {
-  for (int i = 1; i <= thawed.Length(); i++)
-    profile->Set(i, N->GetStrategy(i, 1));
+  for (int i = 1; i <= thawed.Length(); i++)  {
+    Strategy *s = (*N->strategies)(thawed[i], 1);
+    while (undom_only && s->dominator)   s = s->next;
+    profile->Set(thawed[i], s);
+  }
 }
-
+  
 template <class T> void ContIter<T>::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
@@ -77,12 +80,16 @@ template <class T> int ContIter<T>::NextContingency(void)
   
   while (1)   {
     int pl = thawed[j];
-    Strategy *s = (*profile)[pl]->next;
+    Strategy *s = (undom_only) ? (*profile)[pl]->next_undom
+                               : (*profile)[pl]->next;
     if (s)  {
       profile->Set(pl, s);
       return 1;
     }
-    profile->Set(pl, (*N->strategies)(pl, 1));
+
+    s = (*N->strategies)(pl, 1);
+    while (undom_only && s->dominator)   s = s->next;
+    profile->Set(pl, s);
     j--;
     if (j == 0)
       return 0;
@@ -94,12 +101,22 @@ template <class T> long ContIter<T>::GetIndex(void) const
   return profile->GetIndex();
 }
 
-template <class T> void ContIter<T>::Dump(void) const
+template <class T> const T &ContIter<T>::Payoff(int pl) const
 {
-  gout << "{ ";
+  return N->Payoff(pl, *profile);
+}
+
+template <class T> T &ContIter<T>::Payoff(int pl)
+{
+  return N->Payoff(pl, *profile);
+}
+
+template <class T> void ContIter<T>::Dump(gOutput &f) const
+{
+  f << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++)
-    gout << (*profile)[i]->number << ' ';
-  gout << '}';
+    f << (*profile)[i]->number << ' ';
+  f << '}';
 }
 
       

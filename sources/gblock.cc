@@ -28,6 +28,7 @@ TEMPLATE class gBlock<gRational *>;
 TEMPLATE class gBlock<gNumber>;
 TEMPLATE class gBlock<gString>;
 TEMPLATE class gBlock<gBlock<int> >;
+TEMPLATE class gBlock<gBlock<int> *>;
 TEMPLATE class gBlock<gBlock<double> >;
 
 
@@ -43,4 +44,6 @@ TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gNumber> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gString> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> > &);
+TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<double> > &);
+
