@@ -185,8 +185,6 @@ static Portion *GSM_IsConstSum(GSM &, Portion **param)
 // LoadNfg
 //-----------
 
-extern int ReadNfgFile(gInput &f, Nfg *& N);
-
 static Portion *GSM_LoadNfg(GSM &, Portion **param)
 {
   gText file = ((TextPortion *) param[0])->Value();
@@ -195,8 +193,10 @@ static Portion *GSM_LoadNfg(GSM &, Portion **param)
 
   try { 
     gFileInput f(file);
-    if (!ReadNfgFile(f, nfg))
+    nfg = ReadNfgFile(f);
+    if (!nfg) {
       throw gclRuntimeError(file + "is not a valid .nfg file");
+    }
     return new NfgPortion(nfg);
   }
   catch (gFileInput::OpenFailed &)  {

@@ -202,9 +202,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
 {    
   try {
     gFileInput infile(p_filename);
-    Nfg *nfg = 0;
-
-    ReadNfgFile(infile, nfg);
+    Nfg *nfg = ReadNfgFile(infile);
 
     if (nfg) {
       m_fileHistory.AddFileToHistory(p_filename);
