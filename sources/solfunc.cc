@@ -399,6 +399,22 @@ static Portion *GSM_LiapValue_Mixed(Portion **param)
   return new NumberPortion(P->LiapValue());
 }
 
+//-------------
+// Accuracy
+//-------------
+
+static Portion *GSM_Accuracy_Behav(Portion **param)
+{
+  BehavSolution *P = ((BehavPortion *) param[0])->Value();
+  return new NumberPortion(P->Epsilon());
+}
+
+static Portion *GSM_Accuracy_Mixed(Portion **param)
+{
+  MixedSolution *P = ((MixedPortion*) param[0])->Value();
+  return new NumberPortion(P->Epsilon());
+}
+
 //----------
 // Mixed
 //----------
@@ -734,7 +750,9 @@ static Portion *GSM_Support_Mixed(Portion** param)
 void Init_solfunc(GSM *gsm)
 {
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
-    { { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
+    { { "Accuracy[profile->BEHAV] =: NUMBER", GSM_Accuracy_Behav },
+      { "Accuracy[profile->MIXED] =: NUMBER", GSM_Accuracy_Mixed },
+      { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
  	GSM_ActionProb },
       { "ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
 	GSM_ActionProbs },
