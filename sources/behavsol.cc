@@ -511,7 +511,11 @@ const gNumber &BehavSolution::LiapValue(void) const
 
 void BehavSolution::Invalidate(void) const
 {
+  // we depend on GCL or GUI to deallocate if there are structural 
+  // changes in m_efg.  This only deals with changes in action probs of 
+  // m_profile, and changes to outcome payoffs or chance probs of m_efg
   m_profile->Invalidate();
+  m_profile->InitPayoffs(); 
   m_support = EFSupport(m_profile->Game());
   m_creator = algorithmEfg_USER;
   m_ANFNash.Invalidate();
