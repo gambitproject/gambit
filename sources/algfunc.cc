@@ -43,7 +43,7 @@ Portion *GSM_Payoff(Portion **param)
   return new FloatValPortion(bp.Payoff(pl));
 }
 
-Portion *GSM_Nfg(Portion **param)
+Portion *GSM_NfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   NormalForm<double> *N = 0;
@@ -54,13 +54,24 @@ Portion *GSM_Nfg(Portion **param)
   return new NfgValPortion(N);
 }
 
+Portion *GSM_NfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+  NormalForm<gRational> *N = 0;
+  gWatch watch;
+  BuildReducedNormal(E, (NormalForm<gRational>*&) N);
+  
+  ((FloatPortion *) param[1])->Value() = watch.Elapsed();
+  return new NfgValPortion(N);
+}
+
 template <class T> class Behav_ListPortion : public ListValPortion   {
   public:
-    Behav_ListPortion(Efg<T> *, const gList<BehavProfile<T> > &);
+    Behav_ListPortion(const gList<BehavProfile<T> > &);
     virtual ~Behav_ListPortion()   { }
 };
 
-Behav_ListPortion<double>::Behav_ListPortion(Efg<double> *E,
+Behav_ListPortion<double>::Behav_ListPortion(
 			   const gList<BehavProfile<double> > &list)
 {
   _DataType = porBEHAV_FLOAT;
@@ -68,7 +79,7 @@ Behav_ListPortion<double>::Behav_ListPortion(Efg<double> *E,
     Append( new BehavValPortion( new BehavProfile<double>(list[i])));
 }
 
-Behav_ListPortion<gRational>::Behav_ListPortion(Efg<gRational> *E,
+Behav_ListPortion<gRational>::Behav_ListPortion(
 			      const gList<BehavProfile<gRational> > &list)
 {
   _DataType = porBEHAV_RATIONAL;
@@ -78,20 +89,29 @@ Behav_ListPortion<gRational>::Behav_ListPortion(Efg<gRational> *E,
 
 Portion *GSM_GobitEfg(Portion **param)
 {
+  Efg<double> &E = *(Efg<double> *) ((EfgPortion *) param[0])->Value();
+  
   EFGobitParams<double> EP;
  
   EP.pxifile = &((OutputPortion *) param[1])->Value();
-  EP.minLam = ((FloatPortion *) param[3])->Value();
-  EP.maxLam = ((FloatPortion *) param[4])->Value();
-  EP.delLam = ((FloatPortion *) param[5])->Value();
-  EP.powLam = ((IntPortion *) param[6])->Value();
+  EP.fullGraph = ((BoolPortion *) param[5])->Value();
+  EP.minLam = ((FloatPortion *) param[6])->Value();
+  EP.maxLam = ((FloatPortion *) param[7])->Value();
+  EP.delLam = ((FloatPortion *) param[8])->Value();
+  EP.powLam = ((IntPortion *) param[9])->Value();
   
-  EFGobitModule<double> M( * (Efg<double>*) ((EfgPortion*) param[0])->Value(), EP);
+  BehavProfile<double> *foo = (BehavProfile<double> *) ((BehavPortion *) param[10])->Value();
+  BehavProfile<double> start(E);
+  if (foo)   start = *foo;
+
+  EFGobitModule<double> M(E, EP, start);
   M.Gobit(1);
 
   ((FloatPortion *) param[2])->Value() = M.Time();
+  ((IntPortion *) param[3])->Value() = M.NumEvals();
+  ((IntPortion *) param[4])->Value() = M.NumIters();
 
-  return new IntValPortion(1);
+  return new Behav_ListPortion<double>(M.GetSolutions());
 }
 
 Portion *GSM_LiapEfg(Portion **param)
@@ -103,13 +123,16 @@ Portion *GSM_LiapEfg(Portion **param)
   LP.stopAfter = ((IntPortion *) param[3])->Value();
   LP.nTries = ((IntPortion *) param[4])->Value();
  
-  EFLiapModule<double> LM(E, LP);
+  BehavProfile<double> *foo = (BehavProfile<double> *) ((BehavPortion *) param[5])->Value();
+  BehavProfile<double> start(E);
+
+  EFLiapModule<double> LM(E, LP, (foo) ? *foo : start);
   LM.Liap(1);
 
   ((IntPortion *) param[1])->Value() = LM.NumEvals();
   ((FloatPortion *) param[2])->Value() = LM.Time();
 
-  return new Behav_ListPortion<double>(&E, LM.GetSolutions());
+  return new Behav_ListPortion<double>(LM.GetSolutions());
 }
 
 #include "seqform.h"
@@ -127,7 +150,7 @@ Portion *GSM_LemkeEfgFloat(Portion **param)
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
   ((FloatPortion *) param[3])->Value() = SM.Time();
   
-  return new Behav_ListPortion<double>(&E, SM.GetSolutions());
+  return new Behav_ListPortion<double>(SM.GetSolutions());
 }
 
 Portion *GSM_LemkeEfgRational(Portion **param)
@@ -142,7 +165,7 @@ Portion *GSM_LemkeEfgRational(Portion **param)
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
   ((FloatPortion *) param[3])->Value() = SM.Time();
 
-  return new Behav_ListPortion<gRational>(&E, SM.GetSolutions());
+  return new Behav_ListPortion<gRational>(SM.GetSolutions());
 }
 
 extern double Funct_tolBrent, Funct_tolN;
@@ -198,27 +221,33 @@ void Init_algfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("GobitEfg");
-  FuncObj->SetFuncInfo(GSM_GobitEfg, 8);
+  FuncObj->SetFuncInfo(GSM_GobitEfg, 11);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
 			new OutputRefPortion(gnull));
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 3, "minLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg, 3, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 4, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 5, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitEfg, 6, "minLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 4, "maxLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg, 7, "maxLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 5, "delLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitEfg, 8, "delLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 6, "powLam", porINTEGER,
+  FuncObj->SetParamInfo(GSM_GobitEfg, 9, "powLam", porINTEGER,
 		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_GobitEfg, 7, "start", porLIST | porFLOAT,
-		        new ListValPortion);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 10, "start", porBEHAV_FLOAT,
+			new BehavValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapEfg");
-  FuncObj->SetFuncInfo(GSM_LiapEfg, 5);
+  FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_LiapEfg, 1, "time", porFLOAT,
@@ -229,6 +258,8 @@ void Init_algfunc(GSM *gsm)
 		        new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_LiapEfg, 4, "nTries", porINTEGER,
 		        new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapEfg, 5, "start", porBEHAV_FLOAT,
+			new BehavValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LemkeEfg");
@@ -274,11 +305,18 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
-  FuncObj->SetFuncInfo(GSM_Nfg, 2);
-  FuncObj->SetParamInfo(GSM_Nfg, 0, "efg", porEFG_FLOAT,
+  FuncObj->SetFuncInfo(GSM_NfgFloat, 2);
+  FuncObj->SetParamInfo(GSM_NfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
-  FuncObj->SetParamInfo(GSM_Nfg, 1, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_NfgFloat, 1, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_NfgRational, 2);
+  FuncObj->SetParamInfo(GSM_NfgRational, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE, DEFAULT_EFG );
+  FuncObj->SetParamInfo(GSM_NfgRational, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 

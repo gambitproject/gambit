@@ -224,20 +224,28 @@ Portion *GSM_EnumRational(Portion **param)
 
 Portion *GSM_GobitNfg(Portion **param)
 {
+  NormalForm<double> &N = *(NormalForm<double> *) ((NfgPortion *) param[0])->Value();
+
   NFGobitParams<double> NP;
 
   NP.pxifile = &((OutputPortion *) param[1])->Value();
-  NP.minLam = ((FloatPortion *) param[3])->Value();
-  NP.maxLam = ((FloatPortion *) param[4])->Value();
-  NP.delLam = ((FloatPortion *) param[5])->Value();
-  NP.powLam = ((IntPortion *) param[6])->Value();
+  NP.fullGraph = ((BoolPortion *) param[5])->Value();
+  NP.minLam = ((FloatPortion *) param[6])->Value();
+  NP.maxLam = ((FloatPortion *) param[7])->Value();
+  NP.delLam = ((FloatPortion *) param[8])->Value();
+  NP.powLam = ((IntPortion *) param[9])->Value();
 
-  NFGobitModule<double> M( * (NormalForm<double>*) ((NfgPortion*) param[0])->Value(), NP);
+  MixedProfile<double> *foo = (MixedProfile<double> *) ((MixedPortion *) param[10])->Value();
+  MixedProfile<double> start(N);
+
+  NFGobitModule<double> M(N, NP, (foo) ? *foo : start);
   M.Gobit(1);
 
   ((FloatPortion *) param[2])->Value() = M.Time();
+  ((IntPortion *) param[3])->Value() = M.NumEvals();
+  ((IntPortion *) param[4])->Value() = M.NumIters();
 
-  return new IntValPortion(1);
+  return new Mixed_ListPortion<double>(M.GetSolutions());
 }
 
 #include "grid.h"
@@ -332,7 +340,10 @@ Portion *GSM_LiapNfg(Portion **param)
   LP.stopAfter = ((IntPortion *) param[3])->Value();
   LP.nTries = ((IntPortion *) param[4])->Value();
   
-  NFLiapModule<double> LM(N, LP);
+  MixedProfile<double> *foo = (MixedProfile<double> *) ((MixedPortion *) param[5])->Value();
+  MixedProfile<double> start(N);
+
+  NFLiapModule<double> LM(N, LP, (foo) ? *foo : start);
   LM.Liap(1);
 
   ((FloatPortion *) param[1])->Value() = LM.Time();
@@ -423,6 +434,13 @@ Portion *GSM_ReadNfg(Portion **param)
     return new ErrorPortion("ReadNfg: Couldn't open file for reading\n");
 }
 
+Portion *GSM_CrunchNfg(Portion **param)
+{
+  NormalForm<double> &N = * (NormalForm<double> *) ((NfgPortion *) param[0])->Value();
+  NormalForm<double> *M = new NormalForm<double>(N);
+  return new NfgValPortion(M);
+}
+
 Portion *GSM_NewNfg(Portion **param)
 {
   ListPortion *dim = ((ListPortion *) param[0]);
@@ -509,7 +527,7 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitNfg");
-  FuncObj->SetFuncInfo(GSM_GobitNfg, 7);
+  FuncObj->SetFuncInfo(GSM_GobitNfg, 11);
   FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_NFG );
@@ -517,14 +535,22 @@ void Init_nfgfunc(GSM *gsm)
 			new OutputRefPortion(gnull));
   FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "minLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "minLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "maxLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "maxLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "delLam", porFLOAT,
+  FuncObj->SetParamInfo(GSM_GobitNfg, 8, "delLam", porFLOAT,
 			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "powLam", porINTEGER,
+  FuncObj->SetParamInfo(GSM_GobitNfg, 9, "powLam", porINTEGER,
 			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 10, "start", porMIXED_FLOAT,
+			new MixedValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GridSolve");
@@ -602,7 +628,7 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapNfg");
-  FuncObj->SetFuncInfo(GSM_LiapNfg, 5);
+  FuncObj->SetFuncInfo(GSM_LiapNfg, 6);
   FuncObj->SetParamInfo(GSM_LiapNfg, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_NFG);
   FuncObj->SetParamInfo(GSM_LiapNfg, 1, "time", porFLOAT,
@@ -613,6 +639,8 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_LiapNfg, 4, "nTries", porINTEGER,
 			new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapNfg, 5, "start", porMIXED_FLOAT,
+			new MixedValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("PureNash");
@@ -661,6 +689,12 @@ void Init_nfgfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivRational, 5, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("CrunchNfg");
+  FuncObj->SetFuncInfo(GSM_CrunchNfg, 1);
+  FuncObj->SetParamInfo(GSM_CrunchNfg, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewNfg");
