@@ -228,7 +228,12 @@ return gambit_frame;
 }
 
 int GambitApp::OnExit(void)
-{if (wx_frame) wx_frame->OnClose();return TRUE;}
+{
+#ifndef _LINUX // there is no global wx_frame in wxxt(linux)
+if (wx_frame) wx_frame->OnClose();
+#endif
+return TRUE;
+}
 // Define my frame constructor
 GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int ):
 	wxFrame(frame, title, x, y, w, h)
