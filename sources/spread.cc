@@ -700,30 +700,48 @@ void SpreadSheetC::ProcessCursor(int ch)
     //top_frame->OnSelectedMoved(cell.row, cell.col, how);
     top_frame->SetStatusText(gPlainText(cell.str));
 
-    // Make sure the cursor is visible.  Note, do not if this was a mouse
-    // movement (ch = 0)
+    // Make sure the cursor is visible by adjusting the scrollbar
+    // position.  Don't adjust the scrollbars if this was a mouse
+    // movement (ch = 0).
     if (draw_settings->Scrolling() && ch != 0)
     {
-        int x_scroll = 0, y_scroll = 0;
-        
-        if (draw_settings->YStart()+cell.row*draw_settings->GetRowHeight() > 
-            draw_settings->GetRealHeight())
-            y_scroll = (draw_settings->YStart() + cell.row * draw_settings->GetRowHeight()) /
-                draw_settings->YScroll()-1;
-        
-        if (y_scroll < 0) 
-            y_scroll = 0;
-        
-        if (MaxX(cell.col-1) > draw_settings->GetRealWidth())
-            x_scroll = MaxX(cell.col-1)/draw_settings->XScroll()-1;
-        
-        if (x_scroll < 0) 
-            x_scroll = 0;
+		Bool rescroll = FALSE;
 
-        int cx, cy;
+        int cx, cy;  // Current x and y scroll positions.
         ViewStart(&cx, &cy);
-      
-        if (cx != x_scroll || cy != y_scroll) 
+        int x_scroll = cx;
+		int y_scroll = cy;
+
+		int cell_x_min = MaxX(cell.col - 1);  // Minimum x value of cell.
+		int cell_x_max = MaxX(cell.col);      // Maximum x value of cell.
+		int cell_y_min = MaxY(cell.row - 1);  // Minimum y value of cell.
+		int cell_y_max = MaxY(cell.row);      // Maximum y value of cell.
+        int x_scroll_width = draw_settings->XScroll();
+		int y_scroll_width = draw_settings->YScroll();
+		int window_x_min = x_scroll_width * cx;
+		int window_x_max = window_x_min + draw_settings->GetRealWidth();
+		int window_y_min = y_scroll_width * cy;
+		int window_y_max = window_y_min + draw_settings->GetRealHeight();
+
+		// Leave the scrollbars where they are if the new cell position
+		// will fit within them.  Otherwise, position the scrollbar(s)
+		// so that the new position of the cell is as far left (for 
+		// movement in the X direction) or as far up (for movement in
+		// the Y direction) as possible.
+
+		if ((cell_x_min < window_x_min) || (cell_x_max >= window_x_max))
+		{
+			x_scroll = cell_x_min / x_scroll_width;
+			rescroll = TRUE;
+		}
+
+		if ((cell_y_min < window_y_min) || (cell_y_max >= window_y_max))
+		{
+			y_scroll = cell_y_min / y_scroll_width;
+			rescroll = TRUE;
+		}
+
+        if (rescroll)
         {
             Scroll(x_scroll, y_scroll);
         }
