@@ -267,7 +267,7 @@ template <class T> INLINE void gMap<T>::Dump(output& to) const
 {
   for (uint i = 0; i < length; i++)
     to << "(" << i+1 << ") " << numbers[i] << ": " << contents[i];
-  to "\n";
+  to << "\n";
 }
 
 #endif   // GMAP_H
