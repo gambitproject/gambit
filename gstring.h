@@ -9,8 +9,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "input.h"
+#include "output.h"
 
 class gString   {
+  friend input& operator>>(input&,gString&);
+  friend output& operator<<(output&,gString&);
   protected:
     char *storage;
 
@@ -80,6 +84,34 @@ class gString   {
 inline gString operator+(const char *c, const gString &s)
 {
     return gString(c) + s;
+}
+
+input& operator>>(input& from,gString& A){
+  char a;
+  char str[256];
+  int i=0;
+
+  from >> a;
+  while(a==' '||a=='\n'||a=='\t') from >> a;
+  if(a == '\"'){
+    from >> a;
+    while(a != '\"'){
+      str[i] = a; i++;
+      from >> a;
+    }
+    str[i]= '\0';
+  }
+  else{
+    str[i] = a;
+    from >> &(str[i+1]);
+  }
+  gString B(str);
+  A = B;
+  return from;
+}
+
+output& operator<<(output& to,gString& A){
+  to << A.storage; return to;
 }
 
 #endif   // STRING_H
