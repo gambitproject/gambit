@@ -9,15 +9,16 @@ for a listing of functions by category.
 
 &bifaccuracy;
 &bifactionnumber;
+&bifactions;
 
 </sect1>
 
 <sect1 id="gcl.funccat">
 <title>Categorical listing of functions</title>
 
-<para>
-This section contains a listing of all command language functions
-supplied in the distribution, organized by category
-</para>
+&gclbifcat;
 
 </sect1>
+
+
+

@@ -3,7 +3,7 @@
 %content;
 ]>
 
-<book>
+<book id="gambit">
   <bookinfo>
     <title>Gambit</title>
     <subtitle>Software Tools for Game Theory</subtitle>
@@ -107,6 +107,8 @@ econometric analysis of games.
 </para>
 
     &gclbasic;
+    &gcladv;
+    &gclgame;
 
   </chapter>
 

@@ -4,9 +4,13 @@
 <!ENTITY guiefg SYSTEM "guiefg.sgml">
 <!ENTITY guinfg SYSTEM "guinfg.sgml">
 <!ENTITY gclbasic SYSTEM "gclbasic.sgml">
+<!ENTITY gcladv SYSTEM "gcladv.sgml">
+<!ENTITY gclgame SYSTEM "gclgame.sgml">
 <!ENTITY gclbif SYSTEM "gclbif.sgml">
+<!ENTITY gclbifcat SYSTEM "gclbifcat.sgml">
 <!ENTITY bifaccuracy SYSTEM "gcl/bifaccuracy.sgml">
 <!ENTITY bifactionnumber SYSTEM "gcl/bifactionnumber.sgml">
+<!ENTITY bifactions SYSTEM "gcl/bifactions.sgml">
 <!ENTITY algref SYSTEM "algref.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 

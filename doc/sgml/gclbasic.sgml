@@ -256,8 +256,8 @@ data type</entry>
 
 <para>
 The remainder of this section details the rules concerning the
-standard types \texttt{BOOLEAN}, \texttt{NUMBER},
-\texttt{TEXT}, \texttt{INPUT} and \texttt{OUTPUT}, as well as general
+standard types <type>BOOLEAN</type>, <type>NUMBER</type>,
+<type>TEXT</type>, <type>INPUT</type> and <type>OUTPUT</type>, as well as general
 rules for typing.  The extensive form and normal form types, and their
 related types, are detailed later in special sections.
 </para>
@@ -265,25 +265,27 @@ related types, are detailed later in special sections.
 <sect2>
 <title>Boolean</title>
 <para>
-The \texttt{BOOLEAN} type is used to represent the boolean values.
-The \texttt{BOOLEAN} type is implemented in tri-state logic,
-and has the three values ``true'' and ``false'' and ``unknown''.  The
-command language predefines three constants to represent these,
-\texttt{True} and \texttt{False}, and \texttt{Unknown}
+The <type>BOOLEAN</type> type is used to represent the boolean values.
+The <type>BOOLEAN</type> type is implemented in tri-state logic,
+and has the three values &quot;true&quot;, &quot;false&quot; and
+&quot;unknown&quot;.  The
+command language predefines three constants to represent these:
+<literal>True</literal>, <literal>False</literal>, and 
+<literal>Unknown</literal>.
 </para>
 </sect2>
 
 <sect2>
 <title>Numeric data types</title>
 <para>
-The GCL supports one basic numeric data type, \verb+NUMBER+, with a 
-subtype of \verb+INTEGER+.
+The GCL supports one basic numeric data type, <type>NUMBER</type>, with a 
+subtype of <type>INTEGER</type>.
 
 <itemizedlist>
 <listitem>
 <para>
 Number:
-The \texttt{NUMBER} type may contain numbers whose internal
+The <type>NUMBER</type> type may contain numbers whose internal
 representation is either floating point or rational.  The internal
 representation of the number is referred to as the precision
 of the number.  Whether the precision of the number is floating point
@@ -298,8 +300,8 @@ is subject to rounding of least significant digits, and hence these
 numbers can be imprecise; for example, operations usually associated
 with being inverses of each other may not be with floating point
 numbers. However, since arithmetic operations on floating point
-numbers are typically implemented in hardware, the {\tt Float}
-precision is frequently used when speed is important.
+numbers are implemented in hardware, use floating-point 
+precision when speed is important.
 </para>
 
 <para>
@@ -313,10 +315,11 @@ output from them may be unreadably large.
 
 <para>
 Floating point constants are represented in the GCL by any string of
-digits (where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+)
-containing exactly one decimal point (\verb+.+).  Rational constants
+digits (where a digit is an element of 
+<literal>{0,1,2,3,4,5,6,7,8,9}</literal>)
+containing exactly one decimal point (<literal>.</literal>).  Rational constants
 are represented in the GCL by andy string of digits containing at most
-one division sign (\verb+/+).  Any \verb+NUMBER+ in the GCL is assumed
+one division sign (<literal>/</literal>).  Any <type>NUMBER</type> in the GCL is assumed
 to be in base ten representation.
 </para>
 </listitem>
@@ -324,7 +327,7 @@ to be in base ten representation.
 <listitem>
 <para>
 Integer:
-The \texttt{INTEGER} type is a subtype of \verb+NUMBER+ consisting of
+The <type>INTEGER</type> type is a subtype of <type>NUMBER</type> consisting of
 numbers of rational precision, whose denominator is one.  
 </para>
 </listitem>
@@ -338,23 +341,23 @@ you write a numeric constant, keep the following in mind.  Floating
 point constants must include exactly one \verb+.+ in them.  Rational
 constants must have at most one \verb+/+ in them, and integer
 constants must have neither of the above. Thus, to represent the
-number \verb+2+ as a floating point \verb+NUMBER+, you would write
-\verb+2.+, and to represent it as a rational \verb+NUMBER+, you would
-use \verb+2+ or \verb+2/1+, and to represent it as an integer
-\verb+NUMBER+, you would use \verb+2+.
+number <literal>2</literal> as a floating point <type>NUMBER</type>, you would write
+<literal>2.</literal>, and to represent it as a rational <type>NUMBER</type>, you would
+use <literal>2</literal> or <literal>2/1</literal>, and to represent it as an integer
+<type>NUMBER</type>, you would use <literal>2</literal>.
 </para>
 </sect2>
 
 <sect2>
 <title>Text</title>
 <para>
-The \texttt{TEXT} type is used to store text strings, typically labels
+The <type>TEXT</type> type is used to store text strings, typically labels
 for parts of games.  It is generally encouraged to label various
 elements of games in the command language for ease of identification;
-however it is not required.  To specify a {\tt TEXT} constant,
-surround the text with double-quote characters ({\tt "}).  Constants
+however it is not required.  To specify a <type>TEXT</type> constant,
+surround the text with double-quote characters (<literal>"</literal>).  Constants
 may span more than one input line.  Also, line feeds can be explicitly
-included in text constants using the \verb+C+-style notation of
+included in text constants using the C-style notation of
 \verb+\n+. 
 </para>
 </sect2>
@@ -362,21 +365,21 @@ included in text constants using the \verb+C+-style notation of
 <sect2>
 <title>Input and output</title>
 <para>
-The \texttt{INPUT} type is a reference to an input stream, generally a
+The <type>INPUT</type> type is a reference to an input stream, generally a
 file on disk.  Its principal use is to read in external data.  The
 constant, \texttt{StdIn}, is used to refer to the standard input stream
-(generally the console).  New \verb+INPUT+ streams are created with
+(generally the console).  New <type>INPUT</type> streams are created with
 the function \texttt{Input}, documented in the Function Reference
 section.
 </para>
 
 <para>
-The \texttt{OUTPUT} type is a reference to an output stream, generally a
+The <type>OUTPUT</type> type is a reference to an output stream, generally a
 file on disk.  Its principal use is as a logging file for writing
 formatted output from an extended command language job.  The
 constants \texttt{StdOut} and \texttt{NullOut} refer to the standard
 output stream (generally the console) and the null output stream (the
-garbage can), respectively.  New \verb+OUTPUT+ streams are created with the 
+garbage can), respectively.  New <type>OUTPUT</type> streams are created with the 
 function \verb+Output+, documented in the Function Reference section.
 </para>
 </sect2>
@@ -384,14 +387,14 @@ function \verb+Output+, documented in the Function Reference section.
 <sect2>
 <title>Normal form data types</title>
 <para>
-The data type \texttt{NFG} is used to represent a normal form game.  No
+The data type <type>NFG</type> is used to represent a normal form game.  No
 other normal form data type can exist independently of the normal form
-game to which it belongs.  The \texttt{NFPLAYER} and \texttt{STRATEGY}
+game to which it belongs.  The <type>NFPLAYER</type> and <type>STRATEGY</type>
 data types are used to represent players and strategies in a normal
-form game.  A \texttt{NFOUTCOME} is an outcome for a normal form game,
-and an \texttt{NFSUPPORT} represents a support for a normal form
+form game.  A <type>NFOUTCOME</type> is an outcome for a normal form game,
+and an <type>NFSUPPORT</type> represents a support for a normal form
 game, which is a collection of sets of admissible strategies, one for
-each player.  Finally a \texttt{MIXED} is a mixed strategy profile over
+each player.  Finally a <type>MIXED</type> is a mixed strategy profile over
 an arbitrary support.
 </para>
 
@@ -406,20 +409,20 @@ until later.
 <sect2>
 <title>Extensive form data types</title>
 <para>
-The data type \texttt{EFG} is used to represent an extensive form
+The data type <type>EFG</type> is used to represent an extensive form
 game.  As with normal form games, no other extensive form data type
 can exist independently of the extensive form game to which it
-belongs.  The \texttt{EFPLAYER} represents a player in an extensive
-form game.  The types \texttt{NODE}, \texttt{ACTION},
-\texttt{INFOSET}, \texttt{EFOUTCOME} represent the corresponding parts
-of the extensive form representation of the game.  A \texttt{BEHAV} is
+belongs.  The <type>EFPLAYER</type> represents a player in an extensive
+form game.  The types <type>NODE</type>, <type>ACTION</type>,
+<type>INFOSET</type>, <type>EFOUTCOME</type> represent the corresponding parts
+of the extensive form representation of the game.  A <type>BEHAV</type> is
 a behavior strategy profile 
 for an extensive form game. 
-An \texttt{EFSUPPORT} represents a
+An <type>EFSUPPORT</type> represents a
 support for a behavior strategy in an extensive form game, which is a
 collection of sets of admissible actions (at least one for each
-information set of each player).  An \verb+EFBASIS+ is a subtype of
-\verb+EFSUPPORT+, representing a support for an assessment in an
+information set of each player).  An <type>EFBASIS</type> is a subtype of
+<type>EFSUPPORT</type>, representing a support for an assessment in an
 extensive form game. This is a collection of sets of admissible
 actions together with a collection of sets of admissible members of
 information sets (at least one member for each information set).
@@ -436,27 +439,22 @@ discussion of them is deferred until later.
 <sect2>
 <title>Lists</title>
 <para>
-The \texttt{LIST(T)} data type can be used to represent lists of any
-data type \verb+T+ (including \verb+T=LIST(R)+, where \verb+R+ is any
+The <type>LIST(T)</type> data type can be used to represent lists of any
+data type <type>T</type> (including \verb+T=LIST(R)+, where \verb+R+ is any
 data type).  Lists are represented in GCL statements by including
 objects of a given data type in curly braces and separated by commas.
 For example, the following is how to represent a list containing the
 first five integers:
-
-\begin{verbatim}
-{ 1, 2, 3, 4, 5 }
-\end{verbatim}
-
-\noindent 
-The data type \verb+T+ of a list is determined by the data type of its
+<literal>{ 1, 2, 3, 4, 5 }</literal>.
+The data type <type>T</type> of a list is determined by the data type of its
 first element.  All other elements of the list must be of the same
 type as the first element.  The only exception to this rule is that
 subsequent elements can be listed to a different depth than the first
 element.  For example if \verb+T+ is a basic data type, then then the
-second and subsequent elements of a \verb+LIST(T)+ can be of type
-\verb+LIST(T)+ or \verb+LIST(LIST(T))+, etc.  Similarly, the second
-and subsequent elements of a \verb+LIST(LIST(T))+ can be of type
-\verb+T+.  
+second and subsequent elements of a <type>LIST(T)</type> can be of type
+<type>LIST(T)</type> or <type>LIST(LIST(T))</type>, etc.  Similarly, the second
+and subsequent elements of a <type>LIST(LIST(T))</type> can be of type
+<type>T</type>.  
 </para>
 
 <para>
@@ -464,35 +462,22 @@ We refer to the elements at the bottom levels of a nested list as the
 basic elements of the list.  Then lists can be of heterogeneous
 depth.  However, lists must be of homogeneous type. In other words,
 all basic elements of the list must be of the same type.  Hence,
-
-\begin{verbatim}
-{ 1, { 2, 3 }, 4 }
-\end{verbatim}
-
-\noindent 
-is a legal list of type \verb+LIST(NUMBER)+, since all the basic
-elements are of type {\tt NUMBER}, and 
-
-\begin{verbatim}
-{ { 2.0, 3/2 }, 1, 4 }
-\end{verbatim}
-
-\noindent 
-is a legal list of type \verb+LIST(LIST(NUMBER))+.  On the other
+<literal>{ 1, { 2, 3 }, 4 }</literal>
+is a legal list of type <type>LIST(NUMBER)</type>, since all the basic
+elements are of type <type>NUMBER</type>, and 
+<literal>{ { 2.0, 3/2 }, 1, 4 }</literal>
+is a legal list of type <type>LIST(LIST(NUMBER))</type>.  On the other
 hand, 
-
-\begin{verbatim}
-{ 1, { 2, "3" }, 4 }
-\end{verbatim}
-
-\noindent 
+<literal>{ 1, { 2, "3" }, 4 }</literal>
 is not a legal list, since the second element of the nested list is
-not a {\tt NUMBER}.
+not a <type>NUMBER</type>.
+</para>
 
+<para>
 Lists are distinct in type from each other and from their scalar
-equivalents.  That is to say, {\tt LIST(BOOLEAN)} is a distinct data
-type from {\tt LIST(NUMBER)}, and is also a distinct data type from
-{\tt NUMBER}.
+equivalents.  That is to say, <type>LIST(BOOLEAN)</type> is a distinct data
+type from <type>LIST(NUMBER)</type>, and is also a distinct data type from
+<type>BOOLEAN</type>.
 </para>
 </sect2>
 
@@ -507,23 +492,24 @@ data types, but are names used in GCL function prototypes to represent
 subsets of data types.  Following is a list of the conglomerate data
 types along with the types they include:
 
-\medskip
-\begin{center}
-\begin{tabular} {|l|l|}
-\hline 
-Conglomerate Type & Includes \\
-\hline
-\texttt{ANYTYPE} & Any type except \verb+LIST+ \\ 
-\texttt{NLIST(T)} & Nested \verb+LIST(T)+ of any depth \\ 
-& i. e., \verb+LIST(LIST( ... LIST(T) ...))+\\
-\verb+T*+ & \verb+T+, or Null value of type \verb+T+ \\ 
-\hline
-\end{tabular}
-\end{center}
-\medskip
-
-\noindent
-Here \verb+T+ could be any data type except \verb+LIST+
+<table>
+<title>Conglomerate types in GCL</title>
+<tgroup cols="2">
+<thead>
+<row><entry>Conglomerate type</entry><entry>Includes</entry></row>
+</thead>
+<tbody>
+<row><entry><type>ANYTYPE</type></entry>
+<entry>Any type except <type>LIST</type></entry></row>
+<row><entry><type>NLIST(T)</type></entry>
+<entry>Nested <type>LIST(T)</type> of any depth
+(i.e., <type>LIST(LIST( ... LIST(T) ... ))</type></entry></row>
+<row><entry><type>T*</type></entry>
+<entry><type>T</type>, or a null value of <type>T</type>, for any
+<type>T</type> except <type>LIST</type></entry></row>
+</tbody>
+</tgroup>
+</table>
 </para>
 
 </sect2>
@@ -537,7 +523,7 @@ A GCL program consists of a series of expressions.  An expression is
 typically a GCL command built up out of function calls. 
 Expressions can be
 entered interactively, at the command prompt, or can be entered from
-files, via the \verb+Include["filename"]+ directive (see the section
+files, via the <literal>Include["filename"]</literal> directive (see the section
 on including files).  
 </para>
 
@@ -545,13 +531,14 @@ on including files).
 Expressions are terminated by an end-of-line character (the carriage
 return) at a point where all brackets, braces, and quotes are matched
 (cloed).  Expressions can be explicitly continued on additional lines
-by using the continuation character, \verb+\+.
+by using the continuation character, <literal>\</literal>.
 </para>
 
 <para>
 Comments can be
 included in GCL statements by preceeding the comments with the
-characters \verb+//+.  Anything after the \verb+//+ and before a
+characters <literal>//</literal>.  Anything after the <literal>//</literal>
+and before a
 linefeed is ignored by the GCL interpreter.
 </para>
 
@@ -586,20 +573,20 @@ computations to be expressed.
 Functions in the GCL can be either built-in or user defined.  Also
 functions can either require arguments or not.  This leads to four
 combinations.  We label these as follows
-
-\medskip
-\begin{center}
-\begin{tabular} {|l||c|c|} 
-\hline
-Description & Built-in & Parameters\\ 
-\hline
-Constant & Yes & No \\ 
-Built-In Function (BIF) & Yes & Yes \\ 
-Variable & No & No \\ 
-User Defined Function (UDF) & No & Yes \\ 
-\hline
-\end{tabular}
-\end{center}
+<table>
+<title>Function types</title>
+<tgroup cols="3">
+<thead>
+<row><entry>Description</entry><entry>Built-in</entry><entry>Parameters</entry></row>
+</thead>
+<tbody>
+<row><entry>Constant</entry><entry>Yes</entry><entry>No</entry></row>
+<row><entry>Built-in Function</entry><entry>Yes</entry><entry>Yes</entry></row>
+<row><entry>Variable</entry><entry>No</entry><entry>No</entry></row>
+<row><entry>User-defined Function</entry><entry>No</entry><entry>Yes</entry></row> 
+</tbody>
+</tgroup>
+</table>
 </para>
 
 <sect2>
@@ -610,41 +597,63 @@ is a built-in function that has no arguments, and returns the same
 value whenever it is called.  How to construct constants for the basic
 data types is described in the section on data types.  Some examples
 of constants follow:
+<table>
+<title>Constants</title>
+<tgroup cols="2">
+<thead>
+<row><entry>Data type</entry><entry>Constant</entry></row>
+</thead>
+<tbody>
+<row>
+<entry><type>BOOLEAN</type></entry>
+<entry>True, False</entry>
+</row>
+<row>
+<entry><type>NUMBER</type> (rational precision)</entry>
+<entry>1, -1234567/563</entry>
+</row>
+<row>
+<entry><type>NUMBER</type> (float precision)</entry>
+<entry>1., -1.234567</entry>
+</row>
+<row>
+<entry><type>TEXT</type></entry>
+<entry>"Hello, world!"</entry>
+</row>
+<row>
+<entry><type>OUTPUT</type></entry>
+<entry>StdOut, NullOut</entry>
+</row>
+<row>
+<entry><type>INPUT</type></entry>
+<entry>StdIn</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+</para>
 
-\medskip
-\begin{center}
-\begin{tabular} {|l|l|} 
-\hline
-Data Type & Constant \\ 
-\hline
-\verb+BOOLEAN+  & \texttt{True},  \texttt{False} \\
-\verb+NUMBER+ (rational precision) & \verb+1+, \verb+-1234567/563+ \\
-\verb+NUMBER+ (float precision)  & \verb+1.+,  \verb+-1.234567+ \\
-\verb+TEXT+  & \verb+"Help"+ \\
-\verb+OUTPUT+  & \texttt{StdOut}, \texttt{NullOut} \\
-\verb+INPUT+  & \texttt{StdIn} \\
-\hline
-\end{tabular}
-\end{center}
-\medskip
-
+<para>
 You typically don't think of a constant as a function, but it is.  It
 is a function with no arguments, whose name is the constant itself.
 You can ``execute'' a constant by simply typing its name.  When you do
 so, it returns a value, corresponding to the object that the constant
 represents.  
+</para>
 
+<para>
 You are now ready to write your first GCL program:
+<programlisting>
+GCL1:= << "Hello, world!"
+"Hello, world!"
+</programlisting>
+</para>
 
-\begin{verbatim}
-GCL1:= << "Help"
-"Help"
-\end{verbatim}
-
+<para>
 It is important to note that like all functions in the GCL, constants
-have a data type, which is determined by the ``function name''.  If
-you try and use a \verb+NUMBER+ constant, say \verb+123+, where a
-\verb+TEXT+ or other data type is expected, you will get an error.
+have a data type, which is determined by the function name.  If
+you try and use a <type>NUMBER</type> constant, say <literal>123</literal>, where a
+<type>TEXT</type> or other data type is expected, you will get an error.
 </para>
 </sect2>
 
@@ -657,76 +666,71 @@ difference between a constant and a variable is that a variable must
 be created before it can be used, and once it is created, it can be
 deleted or redefined if you want.  To create a new variable, or to
 redefine an existing variable, one can use the built-in function,
-\texttt{Assign}, which has the prototype:
-\begin{verbatim}
+<function>Assign</function>, which has the prototype:
+<programlisting>
 Assign[name->TEXT, value<->T] =: T
-\end{verbatim}
-\noindent 
-for any type \verb+T+.  (How to read a function's prototype is
+</programlisting>
+for any type <type>T</type>.  (How to read a function's prototype is
 described in more detail in the section of function calls.  For now,
-suffice it to say that \texttt{Assign} takes two parameters, the first of
+suffice it to say that <function>Assign</function> takes two parameters, the first of
 which is the name of the variable, and the second of which is the
 value to be assigned to the variable.)  The variable name can be any
-string of alphanumeric characters (\verb+a-z+, \verb+A-Z+, or
-\verb+0-9+) beginning with a letter.  So, to create a variable with
-name \verb+x+ which returns the \verb+NUMBER+ \verb+1+, we can use
-\verb+Assign+ as follows:
-
-\begin{verbatim}
+string of alphanumeric characters (<literal>a-z</literal>, <literal>A-Z</literal>, or
+<literal>0-9</literal>) beginning with a letter.  So, to create a variable with
+name <literal>x</literal> which returns the <type>NUMBER</type> <literal>1</literal>, we can use
+<function>Assign</function> as follows:
+<programlisting>
 GCL1:= << Assign["x",1]
 1
-\end{verbatim}
-
-
-\noindent 
-The \texttt{Assign} function also has an infix operator form, written
-{\tt :=}.  In this form, the quotes are not needed around the variable
+</programlisting>
+The <function>Assign</function> function also has an infix operator form, written
+<literal>:=</literal>.  In this form, the quotes are not needed around the variable
 name, and the function is not ``listable'' (see the section on Lists,
 later in this chapter).  So, equivalently, and more compactly,
-
-\begin{verbatim}
+<programlisting>
 GCL1:= << x := 1
 1
-\end{verbatim}
+</programlisting>
 </para>
 
 <para>
-The {\tt Assign} function can be used to either create a new variable or
+The <function>Assign</function> function can be used to either create a new variable or
 modify an existing one.  However, it cannot be used to change the type
-of a variable.  Consider the calls
-
-\begin{verbatim}
+of a variable.  Consider the sequence
+<programlisting>
 y:=2
 y:=3
 y:="3"
-\end{verbatim}
-\noindent The first call creates a new variable {\tt y} of type {\tt
-NUMBER}, with value of \verb+3+.  The second modifies \verb+y+ to
-have value \verb+3+.  Since the new assignment does not change the
+</programlisting>
+The first call creates a new variable <literal>y</literal> of type 
+<type>NUMBER</type>, with value of <literal>2</literal>.
+The second modifies \verb+y+ to
+have value <literal>3</literal>.  Since the new assignment does not change the
 type of \verb+y+, this command is fine.  The third statement attempts
 to change the data type of \verb+y+.  This statement will result in an
-error, since {\tt Assign} cannot be used to change the type of a
+error, since <function>Assign</function> cannot be used to change the type of a
 variable.  To change the data type of a variable, it must first be
 deleted, and then reassigned.  
+</para>
 
-An existing variable may be deleted by the use of the \texttt{UnAssign}
+<para>
+An existing variable may be deleted by the use of the 
+<function>UnAssign</function>
 function, with the following prototype:
-
-\begin{verbatim}
+<programlisting>
 UnAssign[name->TEXT] =: BOOLEAN
-\end{verbatim}
-
-\noindent After \verb+UnAssign+ is called on a variable, the variable
-is no longer defined.  A subsequent call of {\tt Assign} may redefine
-the variable to be of any type.  \verb+UnAssign+ has a short form of
-\verb+:=+ followed immediately by a linefeed or semicolon.  Hence, if
-\verb+y+ is a variable of type \verb+BOOLEAN+ you can change it to
-\verb+NUMBER+ with value \verb+3.0+ in two steps as follows:
-
-\begin{verbatim}
+</programlisting>
+After <function>UnAssign</function> is called on a variable, the variable
+is no longer defined.  A subsequent call of <function>Assign</function>
+may redefine
+the variable to be of any type.  <function>UnAssign</function> has a short form of
+<literal>:=</literal> followed immediately by a linefeed or semicolon.  Hence, if
+\verb+y+ is a variable of type <type>BOOLEAN</type> you can change it to
+<type>NUMBER</type> with value <literal>3.0</literal> in two steps as follows:
+<programlisting>
 y:=
 y:= 3.0
-\end{verbatim}  
+</programlisting>
 </para>
 
 <sect3>
@@ -745,32 +749,28 @@ values they were assigned in the last call to the function.
 
 <para>
 To modify the default scope and visibility of variables, the GCL uses
-the prefix \verb+$+ in a variable name to represent a ``static''
-variable\index{Variables!Static} and the prefix \verb+$$+ to represent
-a global variable\index{Variables!Global}.  A static variable
+the prefix <literal>$</literal> in a variable name to represent a ``static''
+variable and the prefix <literal>$$</literal> to represent
+a global variable.  A static variable
 is only visible in the function in which it is defined, but remains
 allocated after program control leaves the function, and retains its
 last value when the function is called again.  A global variable
 remains allocated and visible when control passes to any function.  The
 following example illustrates the use of static variables:
-
-\begin{verbatim}
+<programlisting>
 NewFunction[Foo[x->NUMBER]=:NUMBER,If[!IsDefined[$y],$y:=x];$y;];
 GCL2:= << Foo[3]
 3
 GCL3:= << Foo[2]
 3
-\end{verbatim}
-
-\noindent
+</programlisting>
 and the following illustrates the use of global variables:
-
-\begin{verbatim}
+<programlisting>
 $$x:=5
 NewFunction[Foo[],$$x;];
 GCL1:= << Foo[]
 5
-\end{verbatim}
+</programlisting>
 </para>
 
 </sect3>
@@ -810,13 +810,13 @@ call, allowing more complex computations to be expressed.
 
 <para>
 A simple example of a function call is
-
-\begin{verbatim}
+<programlisting>
 Plus[x->1, y->2]
-\end{verbatim}
+</programlisting>
 
-This calls the function named \texttt{Plus}, with parameter \verb+x+ set
-to the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is
+This calls the function named <function>Plus</function>, 
+with parameter \verb+x+ set
+to the value 1 and \verb+y+ set to the value 2.  Since <function>Plus</function> is
 the function for addition of two integers, the value returned would
 be, as you might expect, 3.
 </para>
@@ -824,29 +824,26 @@ be, as you might expect, 3.
 <para>
 In the addition example above, we called a function which is listed in
 the function reference as
-
-\begin{verbatim}
+<programlisting>
 Plus[x->NUMBER, y->NUMBER] =: NUMBER
-\end{verbatim}
-
-\noindent This listing of a function is called its {\it prototype}.  
+</programlisting>
+This listing of a function is called its {\it prototype}.  
 It contains the function's name, its list of parameters, and its return
-value.  In this case, the function {\tt Plus} takes two parameters, the
-first named \verb+x+ and taking a value of type {\tt NUMBER} and the
-second named \verb+y+ and taking a value of type {\tt NUMBER}, and
-returns a value of type {\tt NUMBER}.
+value.  In this case, the function <function>Plus</function> takes two
+parameters, the
+first named \verb+x+ and taking a value of type <type>NUMBER</type> and the
+second named \verb+y+ and taking a value of type <type>NUMBER</type>, and
+returns a value of type <type>NUMBER</type>.
 </para>
 
 <para>
 Because the parameters have explicit names, it is possible to rearrange
 the order in which parameters are listed when a function is called.
 Thus, we could write out sample call equivalently as
-
-\begin{verbatim}
+<programlisting>
 Plus[y->2, x->1]
-\end{verbatim}
-
-\noindent and achieve the same effect.
+</programlisting>
+and achieve the same effect.
 </para>
 
 <para>
@@ -855,10 +852,9 @@ will prove tedious and can hinder readability.  For these reasons, it is
 also legal to specify parameters without their associated formal names.
 These are called passing {\it anonymous} parameters.  Our addition
 example could thus also be written
-
-\begin{verbatim}
+<programlisting>
 Plus[1, 2]
-\end{verbatim}
+</programlisting>
 </para>
 
 <para>
@@ -888,22 +884,18 @@ in the same place in the parameter list as it does in the prototype.
 \end{itemize}
 
 \noindent Therefore, it would be legal to write
-
-\begin{verbatim}
+<programlisting>
 Plus[1, y->2]
-\end{verbatim}
-
-\noindent but
-
-\begin{verbatim}
+</programlisting>
+but
+<programlisting>
 Plus[x->1, 2]
-\end{verbatim}
-
-\noindent is illegal since it violates the third condition.
+</programlisting>
+is illegal since it violates the third condition.
 </para>
 
 <para>
-To be more precise, the function {\tt Plus} comes in several different
+To be more precise, the function <function>Plus</function> comes in several different
 variations listed in the function reference:
 
 \begin{verbatim}
@@ -912,8 +904,7 @@ Plus[x->TEXT, y->TEXT] =: TEXT
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV 
 \end{verbatim}
-
-\noindent This is a good example of function {\it overloading}.  This
+This is an example of function {\it overloading}.  This
 means that one function name may have several possible parameter
 lists, sometimes called {\it signatures}.  The GCL interpreter is
 capable of determining which version of the function to use by
@@ -958,7 +949,7 @@ the function may modify the value of a parameter passed by reference.
 
 <para>
 The symbol for passing a parameter by reference, both in a function's
-prototype and in a function call, is {\tt <->}.  Constants may not be
+prototype and in a function call, is <literal><-></literal>.  Constants may not be
 passed by reference.  Reference parameters may be specified
 anonymously just like a value parameter, subject to the usual rules.
 It is a run-time error to attempt to pass a value to a reference
@@ -975,8 +966,9 @@ Foo[x->INTEGER] =: INTEGER
 Foo[x->NUMBER] =: NUMBER
 \end{verbatim}
 
-Then, a call of \verb+Foo[3]+ resolves to the first signature (since the
-value passed is an integer), and \verb+Foo[3.5]+ resolves to the second
+Then, a call of <literal>Foo[3]</literal> resolves to the first signature (since the
+value passed is an integer), and <literal>Foo[3.5]</literal>
+resolves to the second
 (since it is a number, but not specifically an integer).
 </para>
 
@@ -992,17 +984,16 @@ allow for defining sections of code which may be called later.
 </para>
 
 <para>
-A new function can be created using the function \texttt{NewFunction}.
+A new function can be created using the function <function>NewFunction</function>.
 For example, one might define a function to compute the absolute value
-of an {\tt NUMBER} as such:
-
-\begin{verbatim}
+of an <type>NUMBER</type> 
+as such:
+<programlisting>
 NewFunction[Abs[n->NUMBER],
   If[n > 0, n, If[n < 0, -n, 0]];
 ];
-\end{verbatim}
-
-\noindent After defining the \verb+Abs+ function, it may be called in
+</programlisting>
+After defining the <function>Abs</function> function, it may be called in
 exactly the same way a system-supplied predefined function may.  The
 return value of the function is the value of the last statement
 executed.
@@ -1013,12 +1004,11 @@ Parameter type matching rules apply to user defined functions in
 exactly the same way as to predefined functions.  From the function's
 point of view, the parameter list is a list of variables on which
 assignments are automatically done at the beginning of the function
-execution.  So, taking the \verb+Abs+ example above, in executing the
+execution.  So, taking the <function>Abs</function> example above, in executing the
 call
-
-\begin{verbatim}
+<programlisting>
 Abs[42]
-\end{verbatim}
+</programlisting>
 
 \noindent an assignment \verb+n := 42+ is implicitly performed before
 the body of the function is executed.
@@ -1031,22 +1021,18 @@ this case, the function's ``local'' variable is stored in the same
 physical location in the computer, and modifying the value locally
 also takes effect on the variable passed to the function.  For
 example, it might be useful instead to define \verb+Abs+ as:
-
-\begin{verbatim}
+<programlisting>
 NewFunction[Abs[n<->NUMBER],
 		 If[n > 0, n, If[n < 0, n := -n, 0]]]
-\end{verbatim}
-
-\noindent in which case the function would still return the absolute
+</programlisting>
+in which case the function would still return the absolute
 value of \verb+n+, but also modify the variable passed to \verb+n+ to
 be the absolute value of the input \verb+n+.  So,
-
-\begin{verbatim}
+<programlisting>
 q := -37;
 Abs[q]
-\end{verbatim}
-
-\noindent would result in the variable \verb+q+ containing the value
+</programlisting>
+would result in the variable \verb+q+ containing the value
 37 at the conclusion of execution.
 </para>
 
@@ -1054,28 +1040,23 @@ Abs[q]
 Each function has its own ``scope'', or set of variables.  Within a
 function body, the only variables which are visible are those which
 are declared in the parameter list of the function (this is \verb+n+
-in the \verb+Abs+ example above), and those which are created during
+in the <function>Abs</function> example above), and those which are created during
 the function's execution.  That is, no ``global'' or outside variables
 may be accessed directly by the function.  For example, if the user
 typed in the following:
-
-\begin{verbatim}
+<programlisting>
 i := 4;
 NewFunction[FooFunc[x->NUMBER], x * i]
-\end{verbatim}
-
-\noindent later execution of the \verb+FooFunc+ would yield an
+</programlisting>
+later execution of the <function>FooFunc</function> would yield an
 ``undefined variable i'' error message, since \verb+i+ is never
-defined within the function.  If instead \verb+FooFunc+ had been
+defined within the function.  If instead <function>FooFunc</function> had been
 defined as follows:
-
-\begin{verbatim}
+<programlisting>
 NewFunction[FooFunc[x->NUMBER], i := 13, x * i]
-\end{verbatim}
-
-\noindent \verb+FooFunc+ would always return 13 times the value of the
-parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+
-is always 13, regardless of the value of \verb+i+ outside of the
+</programlisting>
+<function>FooFunc</function> would always return 13 times the value of the
+parameter \verb+x+, since the value of \verb+i+ inside <function>FooFunc</function> is always 13, regardless of the value of \verb+i+ outside of the
 function.
 </para>
 
@@ -1086,17 +1067,16 @@ function.
 <para>
 There are several functions which are so commonly used that special
 ``short forms'' are defined for them.  We already saw one example with
-the function \verb+Assign+, which has the short form \verb+:=+.  Most
+the function <function>Assign</function>, which has the short form
+<literal>:=</literal>.  Most
 functions with short forms are the standard arithmetic and logic
 operators, for which the usual binary infix or unary prefix notations
 are supported.  The example of addition used in a previous section may
 more familiarly be written
-
-\begin{verbatim}
+<programlisting>
 1 + 2
-\end{verbatim}
-
-\noindent which expression is converted to the ``long form'' function
+</programlisting>
+which expression is converted to the ``long form'' function
 call by the interpreter.  Note that formal names may not be specified
 in a ``short form'' call, and the order of parameters is therefore
 significant.
@@ -1106,42 +1086,124 @@ significant.
 Here is a list of the functions thus abbreviated, and their ``short
 form'' equivalents:
 
-\begin{twocollist}
-\twocolitem{\texttt{And[x,y]}}{\texttt{x \&\& y, x AND y}}
-\twocolitem{\texttt{Assign[x,y]}}{\texttt{x := y}}
-\end{twocollist}
-
-%\begin{multicols}{2}
-%\begin{verbatim}
-%And[x,y]            x && y, x AND y 
-%Assign[x,y]         x := y 
-%%%%%Concat[x,y]         x & y 
-%Divide[x,y]         x / y
-%Dot[x,y]            x . y 
-%Equal[x,y]          x = y 
-%Greater[x,y]        x > y 
-%GreaterEqual[x,y]   x >= y
-%IntegerDivide[x,y]  x DIV y 
-%Less[x,y]           x < y 
-%LessEqual[x,y]      x <= y 
-%Minus[x,y]          x - y 
-%Modulus[x,y]        x % y, x MOD y 
-%Not[x]              NOT x, !x 
-%NotEqual[x,y]       x != y 
-%NthChar[text,n]     text[[n]], text_n 
-%NthChild[node,n]    node#n  
-%NthElement[list,n]  list[[n]], list_n
-%Or[x,y]             x || y, x OR y 
-%Parentheses[x]      (x) 
-%Plus[x,y]           x + y 
-%Power[x,y]          x ^ y 
-%Print[x]            << x
-%Read[in,x]          in >> x 
-%Times[x,y]          x * y 
-%UnAssign[x]         x:=
-%Write[out,x]        out << x 
-%\end{verbatim}
-%\end{multicols}
+<table>
+<title>Operators in GCL</title>
+<tgroup cols="2">
+<thead>
+<row><entry>Function</entry><entry>Operator(s)</entry></row>
+</thead>
+<tbody>
+<row>
+<entry><function>And[x,y]</function></entry>
+<entry><literal>x && y</literal>, <literal>x AND y</literal></entry>
+</row>
+<row>
+<entry><function>Assign[x,y]</function></entry>
+<entry><literal>x := y</literal></entry>
+</row>
+<row>
+<entry><function>Concat[x,y]</function></entry>
+<entry><literal>x & y</literal></entry>
+</row>
+<row>
+<entry><function>Divide[x,y]</function></entry>
+<entry><literal>x / y</literal></entry>
+</row>
+<row>
+<entry><function>Dot[x,y]</function></entry>
+<entry><literal>x . y</literal></entry>
+</row>
+<row>
+<entry><function>Equal[x,y]</function></entry>
+<entry><literal>x = y</literal></entry>
+</row>
+<row>
+<entry><function>Greater[x,y]</function></entry>
+<entry><literal>x > y</literal></entry>
+</row>
+<row>
+<entry><function>GreaterEqual[x,y]</function></entry>
+<entry><literal>x >= y</literal></entry>
+</row>
+<row>
+<entry><function>IntegerDivide[x,y]</function></entry>
+<entry><literal>x DIV y</literal></entry>
+</row>
+<row>
+<entry><function>Less[x,y]</function></entry>
+<entry><literal>x < y</literal></entry>
+</row>
+<row>
+<entry><function>LessEqual[x,y]</function></entry>
+<entry><literal>x <= y</literal></entry>
+</row>
+<row>
+<entry><function>Minus[x,y]</function></entry>
+<entry><literal>x - y</literal></entry>
+</row>
+<row>
+<entry><function>Modulus[x,y]</function></entry>
+<entry><literal>x & y</literal>, <literal>x MOD y</literal></entry>
+</row>
+<row>
+<entry><function>Not[x]</function></entry>
+<entry><literal>NOT x</literal>, <literal>!x</literal></entry>
+</row>
+<row>
+<entry><function>NotEqual[x,y]</function></entry>
+<entry><literal>x != y</literal></entry>
+</row>
+<row>
+<entry><function>NthChar[text,n]</function></entry>
+<entry><literal>text[[n]]</literal>, <literal>text_n</literal></entry>
+</row>
+<row>
+<entry><function>NthChild[node,n]</function></entry>
+<entry><literal>node#n</literal></entry>
+</row>
+<row>
+<entry><function>NthElement[list,n]</function></entry>
+<entry><literal>list[[n]]</literal>, <literal>list_n</literal></entry>
+</row>
+<row>
+<entry><function>Or[x,y]</function></entry>
+<entry><literal>x || y</literal>, <literal>x OR y</literal></entry>
+</row>
+<row>
+<entry><function>Parentheses[x]</function></entry>
+<entry><literal>(x)</literal></entry>
+</row>
+<row>
+<entry><function>Plus[x]</function></entry>
+<entry><literal>x + y</literal></entry>
+</row>
+<row>
+<entry><function>Power[x]</function></entry>
+<entry><literal>x ^ y</literal></entry>
+</row>
+<row>
+<entry><function>Print[x]</function></entry>
+<entry><literal>&lt;&lt; x</literal></entry>
+</row>
+<row>
+<entry><function>Read[in,x]</function></entry>
+<entry><literal>in >> x</literal></entry>
+</row>
+<row>
+<entry><function>Times[x,y]</function></entry>
+<entry><literal>x * y</literal></entry>
+</row>
+<row>
+<entry><function>UnAssign[x,y]</function></entry>
+<entry><literal>x :=</literal></entry>
+</row>
+<row>
+<entry><function>Write[out,x]</function></entry>
+<entry><literal>out << x</literal></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
 </para>
 
 <para>
@@ -1171,44 +1233,44 @@ expressions have been eliminated.
 <para>
 The order of precedence for built-in functions is as follows:
 
-\begin{center}
-\begin{verbatim}
-()
-:=
->> <<
-||
-&&
-NOT
-= != < <= > >=
-+ - &
-* . / DIV MOD ^
-(unary) + -
-[[ ]] _ 
-\end{verbatim}
-\end{center}
-</para>
-
-<para>
+<table>
+<title>Order of precedence</title>
+<tgroup cols="1">
+<tbody>
+<row><entry><literal>()</literal></entry></row>
+<row><entry><literal>:=</literal></entry></row>
+<row><entry><literal>&gt;&gt;</literal> <literal>&lt;&lt;</literal></entry></row>
+<row><entry><literal>||</literal></entry></row>
+<row><entry><literal>&amp;&amp;</literal></entry></row>
+<row><entry><literal>NOT</literal></entry></row>
+<row><entry><literal>=</literal> <literal>!=</literal>
+            <literal>&lt;</literal> <literal>&lt;=</literal>
+            <literal>&gt;</literal> <literal>&gt;=</literal></entry></row>    
+<row><entry><literal>+</literal> <literal>-</literal> <literal>&amp;</literal></entry></row>
+<row><entry><literal>*</literal> <literal>.</literal>
+            <literal>/</literal> <literal>DIV</literal>
+            <literal>MOD</literal> <literal>^</literal></entry></row>    
+<row><entry>(unary) <literal>+</literal> <literal>-</literal></entry></row>
+<row><entry><literal>[[ ]]</literal> <literal>_</literal></entry></row>
+</tbody>
+</tgroup>
+</table>
 Thus, the statement \verb & a + b * c& would become 
-\begin{verbatim}
+<programlisting>
 Plus[a,b*c]
 Plus[a,Times[b,c]]
-\end{verbatim}
-
-\noindent
+</programlisting>
 On the other hand, the statement \verb&( a + b ) * c& would become 
-\begin{verbatim}
+<programlisting>
 Parentheses[a+b]*c
 Parentheses[Plus[a,b]]*c
 Times[Parentheses[Plus[a,b]],c]
-\end{verbatim}
-
-\noindent
-which, since \texttt{Parentheses} is just the identity mapping, is
+</programlisting>
+which, since <function>Parentheses</function> is just the identity mapping, is
 equivalent to
-\begin{verbatim}
+<programlisting>
 Times[Plus[a,b],c]
-\end{verbatim}
+</programlisting>
 </para>
 
 </sect2>
@@ -1219,10 +1281,15 @@ Times[Plus[a,b],c]
 <title>Getting and suppressing console output</title>
 <para>
 The GCL will only print output at the console if you explicity ask for
-it with the built-in function \texttt{Print}.  This function has the
-prototype \verb+Print[x->T] =: T+ for any data type \verb+T+, and has
-the short form \verb+<< x+.  You may have noticed that the GCL prompt
-concludes with a \verb+<<+.  In fact, this is not part of the prompt,
+it with the built-in function <function>Print</function>.  This function has the
+prototype
+<programlisting>
+Print[x->T] =: T
+</programlisting>
+for any data type <type>T</type>, and has
+the short form <literal>&lt;&lt; x</literal>.
+You may have noticed that the GCL prompt
+concludes with a <literal>&lt;&lt;</literal>.  In fact, this is not part of the prompt,
 but rather is a ``pre-typed'' part of your GCL command.  
 </para>
 
@@ -1230,26 +1297,27 @@ but rather is a ``pre-typed'' part of your GCL command.
 Once you have become accustomed to the GCL, you may prefer to supress
 output from some or all commands typed at the GCL command line.  This
 can be done for individual commands by using the backspace or delete
-keys to erase the \verb+<<+  part of the prompt.  The
-built-in function \texttt{SetVerbose} controls whether \verb+<<+ is
-pretyped at every prompt.  The command \verb+SetVerbose[False]+ will
+keys to erase the <literal>&lt;&lt;</literal> part of the prompt.  The
+built-in function <function>SetVerbose</function> controls whether 
+<literal>&lt;&lt;</literal> is
+pretyped at every prompt.  The command
+<programlisting>
+SetVerbose[False]
+</programlisting>
+will
 turn off this feature, so that your prompt will then look as
 follows:
-
-\begin{verbatim}
+<programlisting>
 GCL1:= 
-\end{verbatim}
-
+</programlisting>
 Now, the default is that no output is printed.  If you want to have
 the output of specific commands printed, then you can start your
-command with \verb+<<+.  For example
-
-\begin{verbatim}
+command with <literal>&lt;&lt;</literal>.  For example,
+<programlisting>
 GCL1:= 1+1
 GCL2:= << 1+1
 2
-\end{verbatim}
-
+</programlisting>
 Note that error messages will be reported at the console regardless of
 the setting of the verbose mode.
 </para>
@@ -1265,17 +1333,15 @@ the setting of the verbose mode.
 <para>
 Lists play a special role in the GCL.  Variables can be created to
 contain lists in the same fashion as for any other data type:  
-
-\begin{verbatim}
+<programlisting>
 list:={1,{2,3},4}
-\end{verbatim}
-
-The built in function \verb+List[x,n]+\index{List} can be used to
+</programlisting>
+The built in function \verb+List[x,n]+ can be used to
 create a list of length \verb+n+ all of whose elements have the value
-\verb+x+.  For numeric data types, a third parameter for \verb+List+
+\verb+x+.  For numeric data types, a third parameter for 
+<function>List</function>
 allows each successive entry to be incremented.
-
-\begin{verbatim}
+<programlisting>
 GCL1:= << List["Help",3]
 { "Help", "Help", "Help" }
 GCL2:= << List[List[0,3],3]
@@ -1284,34 +1350,32 @@ GCL2:= << List[List[0,3],3]
   { 0, 0, 0 } }
 GCL3:= << List[0/1, 5, 1/4]
 { 0, 1/4, 1/2, 3/4, 1 }
-\end{verbatim}
-
-\noindent
-Lists of any data type can be created with \verb+List+.  So if
-\verb+n+ is a normal form game, then \verb+List[n,5]+ is a list of $5$
+</programlisting>
+Lists of any data type can be created with <function>List</function>.  So if
+\verb+n+ is a normal form game, then \verb+List[n,5]+ is a list of five
 copies of \verb+n+.
 </para>
 
 <para>
-The function \verb+NthElement[list,n]+\texttt{NthElement} can be used
+The function <function>NthElement</function> can be used
 to get \verb+n+th element of the list, \verb+list+.  This function has
-two short forms, \verb+list[[n]]+ and \verb+list_n+.  Since the
+two short forms, <literal>list[[n]]</literal> and <literal>list_n</literal>.
+Since the
 function returns the \verb+n+th element of the list, it can be used
 recursively to get the elements of nested lists.  So \verb+list_i_j+
 returns the \verb+j+th element of the \verb+i+th element of
 \verb+list+.  Also, since \verb+list+ is passed by reference, the
 function can be used to modify the corresponding element of a list.
-Thus, you can constuct your own $3\times 3$ identity matrix as
+Thus, you can constuct your own 3-by-3 identity matrix as
 follows:
-
-\begin{verbatim}
+<programlisting>
 GCL1:= list:=List[List[0,3],3]
 GCL2:= list_1_1:=list_2_2:=list_3_3:=1;
 GCL3:= << list
 { { 1, 0, 0 },
   { 0, 1, 0 },
   { 0, 0, 1 } }
-\end{verbatim}
+</programlisting>
 </para>
 
 </sect2>
@@ -1322,51 +1386,48 @@ GCL3:= << list
 <title>Listability of functions</title>
 <para>
 Almost all of the functions in the GCL are ``listable''.  This means
-that if there is a version of the function which takes a type \verb+T+
+that if there is a version of the function which takes a type <type>T</type>
 as the data type for a parameter, then it can be called with
-\verb+LIST(T)+ as well.  This results in the function generating a
+<type>LIST(T)</type> as well.  This results in the function generating a
 list of the corresponding length and data type as its output.  For
 example, consider a function
-
-\begin{verbatim}
+<programlisting>
 Foo[x->T,y->S] =: R
-\end{verbatim}
-
-\noindent
-where \verb+T+, \verb+S+, and \verb+R+ represent arbitrary data types.
-Then if \verb+a+ is a \verb+LIST(T)+, and \verb+b+ is of type
-\verb+S+, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
-\verb+LIST(R)+, where the length of \verb+c+ is equal to the length of
+</programlisting>
+where <type>T</type>, <type>S</type>, and <type>R</type>
+represent arbitrary data types.
+Then if \verb+a+ is a <type>LIST(T)</type>, and \verb+b+ is of type
+<type>S</type>, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
+<type>LIST(R)</type>, where the length of \verb+c+ is equal to the length of
 \verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.
 </para>
 
 <para>
-If \verb+Foo[]+ is called with both \verb+a+ and \verb+b+ being lists
+If <function>Foo[]</function> is called with both \verb+a+ and \verb+b+ being lists
 of the correct data type, then the GCL checks whether the length of
 \verb+a+ and \verb+b+ is the same.  If not, it generates a
 dimensionality error. If they are of the same dimension, then 
-\verb+c := Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
+\verb+c := Foo[a,b]+ generates \verb+c+ of type <type>LIST(R)</type>, where the
 length of \verb+c+ is equal to the length of \verb+a+, and where
 \verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
 </para>
 
 <para>
-Note that the above rules implicitly define versions of \verb+Foo[]+
+Note that the above rules implicitly define versions of <function>Foo</function>
 of the following forms:
-
-\begin{verbatim}
+<programlisting>
 Foo[x->LIST(T),y->S] =: LIST(R)
 Foo[x->T,y->LIST(S)] =: LIST(R)
 Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
-\end{verbatim}
+</programlisting>
 </para>
 
 <para>
 The same rules apply recursively using these function prototypes as
-well.  So if \verb+a+ is of type \verb+LIST(LIST(T))+, and \verb+b+ is
+well.  So if \verb+a+ is of type <type>LIST(LIST(T))</type>, and \verb+b+ is
 of type \verb+S+, the command \verb+c := Foo[a, b]+ results in a
 listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
-type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
+type <type>LIST(LIST(R))</type>, where \verb+c[[i]] = +
 \verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
 \verb+Foo[a[[i]][[j]],b]+.
 </para>
@@ -1374,27 +1435,26 @@ type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
 <para>
 Note that many vector and matrix math operations follow directly as
 listable calls to the basic arithmetic functions.  In this example,
-listability of \verb+Times+ is used to provide scalar multiplication
-of a scalar and a matrix, and listability of \verb+Plus+ is used to
+listability of <function>Times</function> is used to provide scalar multiplication
+of a scalar and a matrix, and listability of <function>Plus</function>
+is used to
 add two conformable matrices:  
-
-\begin{verbatim}
+<programlisting>
 GCL1:= a:={{1,2},{3,4}};
 GCL2:= << 2*a
 {{2,4},{6,8}}
 GCL3:= << a+Transpose[a]
 {{2,5},{5,8}}
-\end{verbatim}
+</programlisting>
 </para>
 
 <para>
-Here listability of \verb+Power+ is used to create a list of the first
+Here listability of <function>Power</function> is used to create a list of the first
 ten perfect squares:
-
-\begin{verbatim}
+<programlisting>
 GCL4:= << List[1,10,1]^2
 { 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 }
-\end{verbatim}
+</programlisting>
 </para>
 
 <para>
@@ -1419,48 +1479,44 @@ code, while flow control statements are executed in interpreted code.
 <sect1>
 <title>Online documentation</title>
 <para>
-The functions \texttt{Help} and \texttt{Manual} are used to obtain online
+The functions <function>Help</function> and <function>Manual</function>
+are used to obtain online
 documentation of any function in the GCL, including user defined
-functions that you created with the \verb+NewFunction+ command. 
+functions that you created with the <function>NewFunction</function> command. 
 </para>
 
 <para>
-If the \verb+Help+ function is called with a string that is an exact
+If the <function>Help</function> function is called with a string that is an exact
 match for a GCL function name, then it returns a list of function
 prototypes for that function name (there can be more than one
 prototype for a function name since GCL functions can be overloaded.)
 For example,
-
-\begin{verbatim}
+<programlisting>
 GCL1:= << Help["help"]
 { Help[x->TEXT, {udf->True}, {bif->True}] =: LIST(TEXT) }
-\end{verbatim}
-
-\noindent
-returns the function prototype for \verb+Help+: Note that \verb+Help+
-has two optional \verb+BOOLEAN+ parameters, \verb+udf+ and \verb+bif+.
+</programlisting>
+returns the function prototype for <function>Help</function>.
+Note that <function>Help</function>
+has two optional <type>BOOLEAN</type> parameters, \verb+udf+ and \verb+bif+.
 By default, both user defined functions and built-in functions are
 included in the search.  To exclude one or the other of these, set the
-corresponding parameter to \verb+False+.
+corresponding parameter to <literal>False</literal>.
 </para>
 
 <para>
-The required text parameter for \verb+Help+ can also contain the
-regular-expression style wildcards \verb+*+ and \verb+?+.  In this
+The required text parameter for <function>Help</function> can also contain the
+regular-expression style wildcards <literal>*</literal> and <literal>?</literal>.  In this
 case, if there is not an exact match, a list of function names
 matching \verb+x+ is returned.  For example, The command 
-
-\begin{verbatim}
+<programlisting>
 GCL1:= << Help["*efg"]
 { CompressEfg, LoadEfg, NewEfg, SaveEfg }
-\end{verbatim}
-
-\noindent
+</programlisting>
 returns a list of all function names ending with ``efg''
 </para>
 
 <para>
-Note that the function \verb+Help+ is listable (see section on
+Note that the function <function>Help</function> is listable (see section on
 listability), so that we can do \verb+Help[Help["*efg"]]+ to get a
 list of function prototypes for all functions whose names end with
 \verb+efg+.  Similarly, \verb+Help["*"]+ gives a list of all function
@@ -1469,8 +1525,8 @@ function prototypes in the GCL.
 </para>
 
 <para>
-If \verb+Manual+ command is used to obtain a more complete description
-of a GCL function.  If \verb+Manual+ is called with an argument that
+The function <function>Manual</function> is used to obtain a more complete description
+of a GCL function.  If <function>Manual</function> is called with an argument that
 is an exact match for a GCL function name, it returns the manual entry
 for that function.  For a built-in function a textual description of
 the function and its parameters is returned. 

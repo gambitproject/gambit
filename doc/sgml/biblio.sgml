@@ -174,7 +174,7 @@ labelling</title>
 </bibliodiv>
 
 <bibliodiv id="bib.theory">
-<title>General game theory articles</title>
+<title>General game theory articles and texts</title>
 
 <biblioentry xreflabel="Harsanyi1967a">
       <biblioset relation="article">
@@ -276,7 +276,47 @@ labelling</title>
 </biblioset>
 </biblioentry>
 
-<biblioentry xreflabel="vanDamme83">
+<biblioentry id="Mye78" xreflabel="Mye78">
+<biblioset relation="article">
+<author><firstname>Roger</firstname><surname>Myerson</surname></author>
+<title>Refinements of the Nash equilibrium concept</title>
+<pagenums>73-80</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>International Journal of Game Theory</title>
+<volumenum>7</volumenum>
+<copyright><year>1978</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Nas50" xreflabel="Nas50">
+<biblioset relation="article">
+<author><firstname>John</firstname><surname>Nash</surname></author>
+<title>Equilibrium points in n-person games</title>
+<pagenums>48-49</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Proceedings of the National Academy of Sciences</title>
+<volumenum>36</volumenum>
+<copyright><year>1950</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Sel75" xreflabel="Sel75">
+<biblioset relation="artciel">
+<author><firstname>Reinhard</firstname><surname>Selten</surname></author>
+<title>Reexamination of the perfectness concept for equilibrium points in
+extensive games</title>
+<pagenums>25-55</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>International Journal of Game Theory</title>
+<volumenum>4</volumenum>
+<copyright><year>1975</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="vanD83" xreflabel="vanD83">
   <author>
     <firstname>Eric</firstname><surname>van Damme</surname>
     </author>

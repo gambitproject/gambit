@@ -1,0 +1,524 @@
+<sect1>
+<title>Advanced topics</title>
+
+<para></para>
+
+<sect2>
+<title>Including files</title>
+
+<para>
+The function <function>Include[file->TEXT]</function> is used to
+insert the contents of the file given into the input stream, as if
+they had been typed directly by the user.  This can be particularly
+useful in conjunction with user defined functions, in that a library
+of useful functions can be constructed and included into the program
+asily.
+</para>
+
+<para>
+<function>Include</function> may only appear at the ``top level'' of
+the program.  That is to say, it cannot be used inside a loop,
+function declaration, or expression.  However, files may be nested
+arbitrarily deep using <function>Include</function>,
+so you can include a file which
+in turn includes other files.
+</para>
+
+<para>
+When a file is included, the GCL looks for a file with that name in
+the following locations, in order.  
+<orderedlist>
+<listitem>
+<para>The current directory;</para>
+</listitem>
+<listitem>
+<para>The directory specified by the \verb+HOME+ environment variable, if any;</para>
+</listitem>
+<listitem>
+<para>The directory specified by the \verb+GCLLIB+ environment variable, if any;</para>
+</listitem>
+<listitem>
+<para>The directory where the executable is located.</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+This search order applies also to the <filename>gclini.gcl</filename>
+file that is
+loaded whenever the GCL is started.  Hence, you can keep a standard
+version of a file that is frequently included in the same directory as
+the GCL executable, and then modify it for use on a particular project
+by keeping a modified copy of it in the directory associated with that
+project.  
+</para>
+
+<para>
+It is good practice to have included files identify themselves when
+they are included. This can be done by using the
+<function>GetPath</function> function, which returns the full
+pathname of the file from which the command is executed.  For example,
+if the following line is placed as the first line in an included file
+(say with filename <filename>path/myfile.gcl</filename>)
+<programlisting>
+StdOut << "Include[\""&amp;GetPath[]&amp;"\"]\n"
+</programlisting>
+(Note that the standard escape sequences <literal>\"</literal> and 
+<literal>\n</literal> are
+used within a text string to represent a quotation mark and a carriage
+return, respectively.)  Then when the file is included, it will identify
+itself by writing the following message to the standard output stream:
+<programlisting>
+Include["path/myfile.gcl"]
+</programlisting>
+</para>
+</sect2>
+
+
+<sect2>
+<title>Flow control structures</title>
+
+<para>
+The GCL contains three functions which allow flow control within a
+program.  These functions are ``special'' in that their parameters are
+evaluated in a special way (since their parameters are expressions and
+sequences of statements); they also have no ``formal'' names for their
+parameters.
+</para>
+
+<sect3>
+<title>Conditional execution with <function>If</function></title>
+
+<para>
+The function <function>If</function> allows execution of a sequence of statements
+only under certain conditions.  The syntax of the function is
+<programlisting>
+If[boolean-expression, statement-list {, statement-list}]
+</programlisting>
+The function is interpreted as follows: If the
+<parameter>boolean-expression</parameter> evaluates to <literal>True</literal>,
+then the first
+list of statements is executed.  If it evaluates to <literal>False</literal> and
+the second (optional) list of statements is present, that list is
+executed; if it is not present, the <function>If</function> expression evaluates to <literal>False</literal>.
+For example, the statement
+<programlisting>
+If[i = 2, j := 1, j := 2]
+</programlisting>
+sets \verb+j+ to \verb+1+ if the value of \verb+i+ is
+\verb+2+, and sets \verb+j+ to \verb+2+ if the value of \verb+i+ is
+not \verb+2+.  It would also be perfectly legitimate to write
+<programlisting>
+If[i = 2, j := 1]
+</programlisting>
+in which case \verb+j+ would be set to \verb+1+ if \verb+i+
+is equal to \verb+2+, but if \verb+i+ were not \verb+2+, the expression
+evaluates to \verb+False+.
+</para>
+
+<para>
+This last example brings up an important note about conditional
+execution.  Expressions which appear in the branch of an <function>If</function>
+expression which is not taken are treated as if they did not exist.
+So, were this the first mention of \verb+j+ in this scope, the last
+example would leave \verb+j+ defined only if \verb+i+ was equal to
+\verb+2+.  However, \verb+j+ would <emphasis>not</emphasis> be defined otherwise.  It
+is therefore necessary to be careful in constructing <function>If</function>
+expressions which result in the definition of new variables.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Repetitive execution with <function>While</function></title>
+
+<para>
+Often in writing programs it is necessary to execute a block of
+statements repeatedly, usually with different values for variables.
+To this end the GCL provides a special function <function>While</function> as a
+generalized looping construct.  The syntax of the function is
+<programlisting>
+While[boolean-expression, statement-list]
+</programlisting>
+The function is interpreted as follows: While
+<parameter>boolean-expression</parameter> evalutes to <literal>True</literal>, execute the
+statements in <parameter>statement-list</parameter>.  Note that the evaluation of the
+boolean takes place at the beginning of the execution of a block, so
+it is only important whether the value is <literal>True</literal> or
+<literal>False</literal>
+at the beginning of the block, and not at some point in the middle.
+</para>
+
+<para>
+This simple loop creates a list of the first ten perfect squares: 
+<programlisting>
+i := 1;
+list := { };
+While[i <= 10, list := list & { i^2 }; i := i + 1;]
+</programlisting>
+</para>
+
+<para>
+As with <function>If</function>,
+be wary of declaring a variable implicitly inside a
+loop.  A variable is declared only when the corresponding statement is
+executed; so, if the <parameter>boolean-expression</parameter> 
+is <literal>False</literal> the
+first time it is evaluated, the body of the loop never executes, and
+no variables which appear in the loop are considered to be defined.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Indexed looping with <function>For</function></title>
+
+<para>
+The function <function>For</function> is a specialized looping construct, useful
+mostly in cases where some index variable is used to iterate a list or
+some sequence.  The general syntax for <function>For</function> is
+<programlisting>
+For[statement-list, boolean-expression, statement-list, statement-list]
+</programlisting>
+The call is interpreted as follows:
+<orderedlist>
+<listitem>
+<para>
+Execute the statements in the first <parameter>statement-list</parameter>
+(initialization);
+</para>
+</listitem>
+<listitem>
+<para>
+Evaluate the <parameter>boolean-expression</parameter> (or guard);
+</para>
+</listitem>
+<listitem>
+<para>
+If the <parameter>boolean-expression</parameter> is <literal>False</literal>,
+terminate the
+loop and continue with the first statement after the loop.  If it is
+<literal>True</literal>, execute the third 
+<parameter>statement-list</parameter>, which is the body of the loop;
+</para>
+</listitem>
+<listitem>
+<para>
+Execute the second <parameter>statement-list</parameter>, which is usually
+used to increment a counter, and return to the evaluation of the guard
+in step 2.
+</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+Returning to the example in the <function>While</function> section, here is another
+way of writing the loop to create a list of the first ten squares:
+<programlisting>
+For[i:=1; list:={}, i<=10, i:=i+1, list:=list&{i^2}]
+</programlisting>
+The two methods are completely equivalent, but it is often
+more convenient to use the structure afforded by the <function>For</function>
+function.
+</para>
+</sect3>
+
+</sect2>
+
+<sect2>
+<title>Input and output</title>
+
+<para>
+Data can be read from an input stream by the <function>Read</function>
+function.
+So if \verb+in+ is an input stream (i. e., of type <type>INPUT</type>) then
+a successful call of \verb+Read[in,x]+ will read the exposed data (see
+function reference for definition of ``exposed data'') from the input
+stream, \verb+in+, assign \verb+x+ to have that type and value, and
+position the file pointer at the end of the exposed data, to be ready
+for the next call of <function>Read</function>+.  \verb+Read[in,x]+ has the short
+form \verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
+\verb+in+, these commands can be chained.  In other words,
+<programlisting>
+in >> x >> y
+</programlisting>
+is equivalent to 
+<programlisting>
+Read[in,x]
+Read[in,y]
+</programlisting>
+</para>
+
+<para>
+In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
+data type is determined from the exposed data in the input stream.  On
+the other hand if \verb+x+ is previously defined, then the
+<function>Read</function> function will expect to find the corresponding data type
+in the input stream, and a file read error will be generated if the
+exposed data is of the wrong data type.  If \verb+x+ is previously
+defined to be a \verb+LIST(T)+, then \verb+Read[in,x]+ will
+successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.  Thus, if the file <filename>file.dat</filename> contains
+the following data
+<programlisting>
+25 1/3 "This is a text string!" False 3.14159 
+{{1, 0},{0, 1}}
+1 2 3 4 5
+</programlisting>
+then the following GCL code
+<programlisting>
+in:=Input["file.dat"]
+x:=List[0,5]
+in >> i >> r >> t >> b >> f >> l >> x
+</programlisting>
+opens an input stream, consisting of the contents of <filename>file.dat</filename>, and
+then reads data from the input stream into the corresponding
+variables.  After the last statement, 
+\verb+i+ is a <type>NUMBER</type> with value \verb+25+, 
+\verb+r+ is a <type>NUMBER</type> with value \verb+1/3+, 
+\verb+t+ is a <type>TEXT</type> with value <literal>"This is a text string!"</literal>, 
+\verb+b+ is a <type>BOOLEAN</type> with value <literal>False</literal>, 
+\verb+f+ is a <type>NUMBER</type> with value \verb+3.14159+, 
+\verb+l+ is a <type>LIST(LIST(NUMBER))</type> with value \verb+{{1,0},{0,1}}+, and 
+\verb+x+ is a <type>LIST(NUMBER)</type> with value \verb+{1,2,3,4,5}+.  
+</para>
+
+<para>
+Data can be written to an output stream by the use of the
+<function>Write</function> function.  Thus, the following commands
+<programlisting>
+out:=Output["file.out"]
+x:=0/1;y:={0.0,0.0}
+Write[out,x]
+Write[out,y]
+</programlisting>
+creates an output stream, \verb+out+, and then writes out a
+<type>NUMBER</type>, followed by a list of two <type>NUMBER</type>s.
+\verb+Write[out,x]+ has the short form \verb+out << x+.  Since the
+return value of <function>Write</function> is \verb+out+, these commands can be
+chained.  So the two lines writing out \verb+x+ and \verb+y+ in the
+above example could be written instead
+<programlisting>
+out << x << y
+</programlisting>
+</para>
+
+<para>
+The <function>Format</function> and <function>ListFormat</function> functions
+can be used to
+control the formatting of data written to an output stream.  Note that
+the <function>Read</function> and <function>Write</function> functions are not listable.
+</para>
+
+<para>
+The <function>Read</function> and <function>Write</function>
+ functions can only be used with
+certain data types (see function documentation).  Reading and writing
+of <type>EFG</type> and <type>NFG</type> from external files can be done with the
+<function>LoadEfg</function>, <function>SaveEfg</function>,
+<function>LoadNfg</function> and <function>SaveNfg</function> functions.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Null values</title>
+
+<para>
+Certain function calls in the GCL result in either invalid or
+undetermined values for the required data type. Examples would be
+asking for the first child node of a terminal node, or the parent of
+the root node, or an outcome attached to a node with no outcome.
+Similar problems arise in the algorithmic and computational parts of
+the code.  Here, for example, algorithms that do not compute
+sequential equilibria do not return belief probabilities for unreached
+information sets.  Other algorithms may action probabilities for off
+the equilibrium path information sets undetermined.  
+</para>
+
+<para>
+Under certain situations such as the above, when no valid value is
+available for return, instead of returning an error, the GCL will
+a Null value for the given type.  Returning a Null value instead of
+terminating execuation with an error message is frequently desirable
+in a setting where functions are being called listably, as it allows
+for computation of elements of the list that have valid entries
+without aborting the GCL because some elements have invalid entries.  
+</para>
+
+<para>
+The situations in which Null values are returned are described in the
+function reference section of the manual.  Most functions in the GCL,
+when encountering a Null value as a parameter, will abort with an
+error message.  Whether a function will accept Null values as valid
+values for an argument is indicated in the function prototype with an
+asterisk (<literal>*</literal>) after the relevant parameter.  For example, the
+function prototype for <function>IsNull</function> is
+<programlisting>
+IsNull[x->T*]=:BOOLEAN
+  for any data type, T
+</programlisting>
+Here, the <literal>*</literal> indicates that this function accepts Null values
+for its argument.  If a built-in function accepts Null values for an
+argument, it is documented in the function reference section what the
+behavior of the function is when encountering a Null value.  
+</para>
+
+<para>
+Note that user defined functions  will accept Null values for
+arguments also, if the relevant parameter is designated with a
+\verb+*+, as above. 
+</para>
+</sect2>
+
+<sect2>
+<title>System information</title>
+
+<para>
+There are several commands in the GCL that allow you to get
+information from or run processes on the host system.  
+</para>
+
+<para>
+A series of functions, <function>StartWatch</function>,
+<function>StopWatch</function>, and
+<function>ElapsedTime</function>, provide information on the amount of cpu time
+used by the GCL, and can be used to time computation.  
+Another series of functions, <function>GetEnv</function>,
+<function>SetEnv</function>,
+<function>UnSetEnv</function>, <function>Platform</function>,
+allow you to set and check
+environment variables, or check the operating system that the GCL is
+running on.
+A third series of functions, <function>ExePath</function>,
+<function>GetPath</function>, and <function>GambitExe</function> 
+(included in <filename>stdudfs.gcl</filename>),
+provide path and filenames to files being used
+by or related to the GCL.
+Finally, the <function>Shell</function>
+command allows you to run a child process from
+the GCL.  
+</para>
+
+<para>
+The above system functions are also used in the user defined function
+<function>Display</function>,
+which allows you to start a child process that launches
+up the Gambit graphical interface and loads an extensive or normal
+form game. If \verb+game+ is a variable of type <type>NFG</type> or
+<type>EFG</type>, then the call <function>Display[game]</function>
+will load the 
+\verb+game+ in the graphical interface.\footnote{The user defined functions
+<function>GambitExe</function> and <function>Display</function> assume that you used the default
+directories and filenames when you installed Gambit.  If you deviated
+from the standard installation, you may have to edit these functions
+before they work correctly.}
+</para>
+
+</sect2>
+
+<sect2>
+<title>Variables pointing to deleted objects</title>
+
+<para>
+In the GCL, you
+can create variables to represent objects which may be deleted or
+invalidated subsequently as side effects of some functions. For example, suppose
+you define a variable to represent an element (node, information set,
+outcome, etc.) of an extensive form game.  You may subsequently delete
+the part of the tree that contains that element.  The object that the
+variable originally referred to is no longer valid.  
+In this case, the variable is automatically unassigned.
+</para>
+
+<para>
+In the following example, a game is loaded, and the variable \verb+n+
+is defined to be the first child of the first child of the root node.
+Now the part of the tree after the first branch is deleted, the
+variable \verb+n+ is now undefined:
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= r:=RootNode[e]
+GCL3:= n:=r#1#1
+GCL4:= DeleteTree[r#1]
+GCL5:= << n
+ERROR: Print[]: Undefined reference "n" passed for parameter #1
+</programlisting>
+Since the node is no longer present in the tree, the variable \verb+n+ which
+refers to it has been unassigned.  A similar situation occurs here, where
+elements of a list are deleted via <function>DeleteTree</function>:
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= t:=TerminalNodes[e]
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << t
+ERROR: Print[]: Undefined reference "t" passed for parameter #1
+</programlisting>
+In this case, a variable \verb+t+ is defined to refer to the list of
+terminal nodes.  The function <function>DeleteTree</function> deletes some of the
+terminal nodes.  Even though some of the nodes in the list \verb+t+
+are still valid, if any element of a list is deleted, the
+entire list is unassigned.
+</para>
+
+<para>
+Similar situations arise with mixed and behavior strategies if the
+underlying game to which they refer change in a way to invalidate the
+solutions.  In the following example, a solution to the game \verb+e+
+is saved as a variable \verb+b+ of type <type>BEHAV</type>:  
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << b:=EnumMixedSolve[e,asNfg->True]_1
+(Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << b
+ERROR: Print[]: Undefined reference "b" passed for parameter #1
+</programlisting>
+The game is subsequently edited, making the profile no longer valid
+for the changed game; therefore, the variable containing it is
+automatically unassigned.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Errors</title>
+
+<para>
+Sometimes, programs contain errors.  The interpreter is able to detect
+errors which violate rules of the language, and reports information
+about the error so the user can correct it.  There are two main
+classes of errors which may arise in GCL programs: parse errors and
+run time errors.
+</para>
+
+<para>
+A parse error occurs when the GCL interpreter cannot determine the
+meaning of a statement, because it does not conform to the grammatical
+rules of the language.  This most frequently occurs when braces,
+brackets, or quotation marks fail to match up or when punctuation is
+missing.  When it encounters a parse error, the GCL interpreter will
+display an error message giving the filename and line number of the
+error and the point at which it determined an error it occurred.
+</para>
+
+<para>
+A run time error occurs when a statement which obeys the grammatical
+rules of the language violates another rule of the language during its
+execution.  Examples of this type of error include attempting to use a
+variable name which is not defined, and using a value of one type
+where another type was expected.  Also, builtin functions may generate
+this type of error on invalid inputs.  A run time error will result in
+termination of the GCL at the point where the error occurs, with a
+message indicating the type of error encountered.
+</para>
+
+</sect2>
+
+</sect1>
+
+
+
+

@@ -1,0 +1,1205 @@
+<sect1>
+<title>Constructing and manipulating games</title>
+
+<para>
+The whole point of the GCL is to provide an environment to enable
+building and doing computations on games.  This chapter describes how
+to build and solve normal and extensive form games in the GCL.  
+</para>
+
+<sect2>
+<title>Normal form games</title>
+
+<para>
+A normal form game is a set of players, each with a strategy
+set, together with a function from the cartesian product of strategy
+sets to a set of outcomes. Each outcome results in a payoff to each of
+the players.  To construct a normal form game, one must therefore
+define each of these parts.  A collection of GCL functions is available
+for building and editing normal form games.  A complete list is given
+in the sections on ``Normal Form Manipulation'' in the Categorical
+Function Reference section of the manual.  The most generally-useful
+functions are given in the table.
+
+<table>
+<title>Overview of normal form manipulation functions</title>
+<tgroup cols="2">
+<thead>
+<row>
+<entry>Function</entry><entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry><function>DeleteOutcome[o]</function></entry>
+<entry>Deletes outcome \verb+o+ from its game</entry>
+</row>
+<row>
+<entry><function>NewOutcome[n]</function></entry>
+<entry>Returns a new outcome for the game</entry>
+</row> 
+<row>
+<entry><function>NewOutcome[n,name]</function> (user-defined)</entry>
+<entry>Returns a new outcome named <varname>name</varname> for game 
+<varname>n</varname></entry>
+</row>
+<row>
+<entry><function>NewOutcome[p]</function> (user-defined)</entry>
+<entry>Attaches a new outcome with zero payoffs to
+the pure profile <varname>p</varname></entry>
+</row>
+<row>
+<entry><function>Outcome[p]</function></entry>
+<entry>The outcome attached to the pure strategy profile <varname>p</varname></entry> 
+</row>
+<row>
+<entry><function>OutcomeForm[n]</function></entry>
+<entry>The game form for game <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>Outcomes[n]</function></entry>
+<entry>List of outcomes defined for game <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>SetOutcome[p,o]</function></entry>
+<entry>Attach outcome <varname>o</varname> to pure strategy profile <varname>p</varname></entry>
+</row>
+<row>
+<entry><function>NewNfg[dim]</function></entry>
+<entry>A new normal form with dimensions <varname>dim</varname></entry> 
+</row>
+<row>
+<entry><function>NewNfg[dim,True]</function> (user-defined)</entry>
+<entry>A new normal form with dimensions <varname>dim</varname>,
+outcomes in all cells</entry>
+</row>
+<row>
+<entry><function>Nfg[e]</function></entry>
+<entry>Converts extensive form game <varname>e</varname> to normal form</entry>
+</row>
+<row>
+<entry><function>Nfg[x]</function> (user-defined)</entry>
+<entry>Converts nested list of numbers <varname>x</varname> to normal form</entry>
+</row>
+<row>
+<entry><function>Payoff[o,pl]</function></entry>
+<entry>Payoff of outcome <varname>o</varname> to player <varname>pl</varname></entry>
+</row> 
+<row>
+<entry><function>Payoff[m,pl]</function></entry>
+<entry>Payoff of mixed profile <varname>m</varname> to player <varname>pl</varname></entry>
+</row> 
+<row>
+<entry><function>Payoffs[p]</function> (user-defined)</entry>
+<entry>Payoffs of pure strategy <varname>p</varname></entry>
+</row>
+<row>
+<entry><function>Payoffs[n]</function> (user-defined)</entry>
+<entry>Normal form game payoffs of <varname>n</varname> as a nested list</entry>
+</row>
+<row>
+<entry><function>Payoffs[o]</function> (user-defined)</entry>
+<entry>Payoffs of outcome <varname>o</varname></entry>
+</row>
+<row>
+<entry><function>Payoffs[m]</function> (user-defined)</entry>
+<entry>Payoffs of mixed profile <varname>m</varname></entry>
+</row>
+<row>
+<entry><function>Randomize[n,j]</function> (user-defined)</entry>
+<entry>Randomizes the payoffs in <varname>n</varname> with seed <varname>j</varname></entry>
+</row>
+<row>
+<entry><function>Strategies[pl]</function> (user-defined)</entry>
+<entry>Strategies for player <varname>pl</varname></entry>
+</row>
+<row>
+<entry><function>Strategies[n]</function> (user-defined)</entry>
+<entry>Strategies for game <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>SetPayoff[o,pl,pay]</function></entry>
+<entry>Set payoff to player <varname>pl</varname> in outcome <varname>o</varname> to <varname>pay</varname></entry>
+</row> 
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<sect3>
+<title>Creating a normal form game</title>
+
+<para>
+The function <function>NewNfg</function>
+is used to create a new normal form game.  Thus, the expression
+<programlisting>
+GCL1:= NewNfg[{2,3,2}]
+</programlisting>
+will create a new normal form game with three players, where the first
+player has two strategies, the second player has three strategies, and
+the third player has two strategies.  Since no outcomes have been
+defined, all strategy tuples of pure strategies result in the
+null outcome, which has payoff of zero for all players.  
+</para>
+
+<para>
+The game created by <function>NewNfg</function> is not very interesting, because all
+payoffs for all strategies are zero.  To make it more interesting,
+outcomes must be created and associated with strategy tuples.  To
+create a separate outcome for each pure strategy, one can specify the
+second argument in <function>NewNfg</function> to be <literal>True</literal>.
+These outcomes
+will still have zero payoffs until they are changed. The function
+<function>Randomize</function>
+can be used to randomize the payoffs of each outcome
+in the game.  In this way, <function>NewNfg</function> can be used to create
+more interesting games by using it as an argument to other functions
+that accept normal form games as arguments.
+</para>
+
+<para>
+For example, to create a random two person 2 by 2 normal form
+game, with a seed of 34 for the random number generator, you can
+use the function <function>Randomize</function> to randomize the payoffs of the
+original game:
+<programlisting>
+GCL2:= Randomize[NewNfg[{2,2},True],34]
+</programlisting>
+You can look at the payoffs of the game by using the user-defined function
+from <filename>stdudfs.gcl</filename>,
+<function>Payoffs</function> (using <function>Float</function>
+to convert the payoffs of the game to floating
+point precision first):
+<programlisting>
+GCL3:= << Payoffs[Float[Randomize[NewNfg[{2,2},True],34]]]
+{ { { 0.159964, 0.026784 }, { 0.421515, 0.399322 } },
+  { { 0.233245, 0.923402 }, { 0.039071, 0.695271 } } }
+</programlisting>
+Here, the payoffs are written in a nested list, where the
+\verb+(i,j)+th component is the vector of payoffs when player 1 takes
+strategy <varname>i</varname> and player 2 takes strategy <varname>j</varname>.
+The game can be solved for all mixed Nash equilibria by
+<programlisting>
+GCL4:= << AllNash[Randomize[NewNfg[{2,2},True],34]]
+{ (Mixed) { 1.000000 0.000000 }{ 0.000000 1.000000 },
+  (Mixed) { 0.000000 1.000000 }{ 1.000000 0.000000 },
+  (Mixed) { 0.379795 0.620205 }{ 0.839199 0.160801 } }
+</programlisting>
+</para>
+
+<para>
+In all of the above examples, all work is thrown out, and the normal
+form game is created anew in each successive command.  You can avoid
+such wasteful computation, and minimize the typing you need to do by
+saving intermediate results in a variable.  For example, the above
+could be done as follows:
+<programlisting>
+GCL1:= n:=Randomize[NewNfg[{2,2},True],34];
+GCL2:= p:=Payoffs[n];
+GCL3:= m:=EnumMixedSolve[n];
+</programlisting>
+</para>
+
+<para>
+The first statement creates a variable <varname>n</varname>
+to store the normal
+form game.  This variable is then used as an argument in the next two
+function calls.  The second two statements create variables
+<varname>p</varname> and <varname>m</varname>
+to store the nested list of payoffs of the game, and the
+list of mixed strategy solutions of the game.  Any of these variables
+can then be used as input to other function calls, as long as the data
+type of the variable is the same as the data type of the 
+</para>
+
+<para>
+The above also illustrates another important principle of the GCL.
+All of the functions in the GCL (with a few exeptions, noted in the
+Function Reference Section) return objects of some specific data type.
+Any object returned by a function can be stored in a variable.  While
+the GCL supports a large number specialized data types, the data
+typing is all implicit.  In other words, you never have to declare
+what data type a variable will be before it is used.  A variable takes
+on the data type of the object that is first assigned to it.    
+</para>
+
+</sect3>
+
+<sect3>
+<title>Setting payoffs</title>
+
+<para>
+The payoffs in a normal form can be set to have specific values using
+the <function>SetPayoff</function> function.
+The following sequence of expressions
+illustrates how to build a simple prisoner's dilemma game, by first
+creating a normal form game with the appropriate number of players and
+strategies, and then
+modifying the payoffs one by one.  
+<programlisting>
+GCL1:= n:=NewNfg[{2,2}]
+GCL2:= s:=Strategies[n]
+GCL3:= NewOutcome[{s_1_1,s_2_1},{9.0,9.0}]
+GCL4:= NewOutcome[{s_1_1,s_2_2},{0.0,10.0}]
+GCL5:= NewOutcome[{s_1_2,s_2_1},{10.0,0.0}]
+GCL6:= NewOutcome[{s_1_2,s_2_2},{1.0,1.0}]
+GCL7:= << Payoffs[n]
+{ { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
+  { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
+</programlisting>
+Note that the above can be done equivalently and more simply by using
+the standard user-defined function, <function>Nfg</function>,
+to create the game directly from a payoff list:
+<programlisting>
+GCL1:= n:=Nfg[{{{9,9},{0,10}},{{10,0},{1,1}}}]
+GCL2:= << Payoffs[n]
+{ { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
+  { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
+</programlisting>
+You can name the strategies if you want by using <function>Strategies</function> to
+get a list of the strategies in the game, and <function>SetName</function> to name
+them.
+<programlisting>
+GCL3:= s:=Strategies[n]
+GCL4:= SetName[s_1,{"Cooperate","Defect"}]
+GCL5:= SetName[s_2,{"Cooperate","Defect"}]
+GGCL6:= << Name[s]
+{ { Cooperate, Defect },
+  { Cooperate, Defect } }
+</programlisting>
+</para>
+
+<para>
+We now give a more complicated example, in which one can use
+listability of vector and matrix operations to set the payoffs in the
+normal form according to a formula.  In this example, we create a
+version of the ``stag hunt'' game.
+<programlisting>
+GCL1:= << strat:=List[1,3,1]
+{ 1, 2, 3 }
+GCL2:= << stratSets:=List[strat,2]
+{ { 1, 2, 3 },
+  { 1, 2, 3 } }
+GCL3:= << effort:=CartesianProd[stratSets] 
+{ { { 1, 1 }, { 1, 2 }, { 1, 3 } },
+  { { 2, 1 }, { 2, 2 }, { 2, 3 } },
+  { { 3, 1 }, { 3, 2 }, { 3, 3 } } }
+GCL4:= << pay:=Min[effort]-.5*effort
+{ { { 0.500, 0.500 }, { 0.500, 0.000 }, { 0.500, -0.500 } },
+  { { 0.000, 0.500 }, { 1.000, 1.000 }, { 1.000, 0.500 } },
+  { { -0.500, 0.500 }, { 0.500, 1.000 }, { 1.500, 1.500 } } }
+GCL5:= << n:=Nfg[pay]
+(Nfg) ""
+</programlisting>
+</para>
+
+<para>
+First, the set of effort levels for a player (consisting of the list
+of integers from one to 3) is constructed and stored in the variable
+<varname>strat</varname>.  (While this variable is called 
+<varname>strat</varname>, its data
+type is <type>LIST(INTEGER)</type>, not <type>STRATEGY</type>.)
+Second, the set
+of strategy sets for both players is assembled in <varname>stratSets</varname>.
+Third, the set of pure strategy profiles is assembled by taking the
+cartesian product of the strategy sets, and converted to <type>NUMBER</type>
+to give a vector of efforts for each pure strategy profile.  The
+result is stored in the variable <varname>effort</varname>.
+Fourth, the vector of
+payoffs for each pure strategy profile is computed by taking, for
+vector of payoffs, the minimum effort across players, and subtracting
+the cost of effort for each player.  Finally, a game is constructed
+with these payoffs, by using the function <function>Nfg</function>.
+If you now ask
+to see the payoffs for the game via <function>Payoffs[nfg]</function>,
+you will see an array just like <varname>pay</varname>.
+</para>
+
+<para>
+The fourth step in the above calculation illustrates a subtle but
+important point about listable functions.  The function
+<function>Min</function> requires an argument of type
+<type>LIST(NUMBER)</type> and returns type <type>NUMBER</type>.  It is
+being called with an argument of type
+<type>LIST(LIST(LIST(NUMBER)))</type>, with dimension 3 by 3 by 2.
+Hence, the function will be run as a listable function on the
+innermost vectors in the nested list, generating a result of type
+<type>LIST(LIST(NUMBER))</type>, with dimension 3 by 3, each entry of
+which contains the minimum of the vector in that cell.  Thus:
+<programlisting>
+GCL6:= << Min[effort]
+{ { 1, 1, 1 },
+  { 1, 2, 2 },
+  { 1, 2, 3 } }
+</programlisting>
+To subtract the component .5*effort from this, the function
+<function>Minus</function> requires data of type 
+<type>NUMBER</type> for both arguments.
+It is being run with the first argument of type
+<type>LIST(LIST(NUMBER))</type> with dimension 3 by 3, and the second of
+type <type>LIST(LIST(LIST(NUMBER)))</type>, with dimension 3 by 3 by 2.
+The first two levels of the list for both arguments match
+in dimension.  Then it encounters a <type>NUMBER</type> in the first
+argument, and a <type>LIST(NUMBER)</type> of dimension 2 on the second.
+Hence, <type>Minus</type> runs listably on its second argument, yielding a
+<type>LIST(NUMBER)</type> of dimension 2 for each entry in the 3 by 3
+nested list of <function>Min[effort]</function>.
+</para>
+
+<para>
+The functions used in the above construction will accept nested lists
+of any level.  Hence, the above can be extended into a user defined
+function which allows one to build a stag hunt game for an arbitrary
+number of players and strategies:
+<programlisting>
+NewFunction[StagHuntNfg[n->INTEGER,maxeff->INTEGER,cost->NUMBER]=:NFG,
+  strats:=List[1,maxeff,1];
+  effort:=CartesianProd[List[strats,n]];
+  Nfg[Min[effort]-cost*effort];
+];
+</programlisting>
+The expressions in this user defined function are analagous to the
+steps in the two person example above.  Once the above function has
+been defined, then you can then use it as follows:
+<programlisting>
+n:=StagHuntNfg[4,2,.5];
+</programlisting>
+to create a four person stag hunt game where each player has two
+strategy choices (effort levels) and the cost of effort is .5.
+</para>
+
+<para>
+Once a normal form game has been defined, there are a number of
+solution algorithms that can be applied to solve the game.  How to
+solve normal form games is discussed in the next chapter.  Until you
+get to that point, you might want to save your work.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Saving and loading normal form games</title>
+
+<para>
+Once a normal form game has been constructed, it can be saved in a
+similar way to an extensive form game.  The expression
+<programlisting>
+SaveNfg[n, "filename.nfg"]
+</programlisting>
+will save the normal form game <varname>n</varname> to the file
+<filename>filename.nfg</filename>. 
+It is recommended that the filename extension
+<filename>.nfg</filename> be used when saving normal form games, as the Gambit
+graphical user interface recognizes this extension as containing normal
+form games.  Once a normal form game has been saved to an external
+file, it can be loaded by the command <function>LoadNfg</function>,
+as follows:
+<programlisting>
+n := LoadNfg["filename.nfg"]
+</programlisting>
+</para>
+
+</sect3>
+
+</sect2>
+
+<sect2>
+<title>Extensive forms</title>
+
+<para></para>
+
+<sect3>
+<title>Creating a new extensive form</title>
+
+<para>
+The function <function>NewEfg</function> can be used to create a
+new extensive form
+game.  In order to do anything with it, a variable should be created
+to be the new extensive form game.  Thus, the expression
+<programlisting>
+e := NewEfg[]
+</programlisting>
+will create a new extensive form game stored in <varname>e</varname>.
+The game is a trivial game with only one node, the root node, and
+no players (besides the chance player used to represent the realizations
+of random events).  You can create a game which 
+has two players, named Fred and Alice, by specifying
+<programlisting>
+e := NewEfg[{"Fred", "Alice"} ]
+</programlisting>
+</para>
+
+<para>
+For an arbitrary extensive form game, a number of functions are
+available to get information about the game.  A complete list is given
+in the section on ``Getting Information'' in the Categorical Function
+Reference section of this manual.  Some of the more important
+functions are given in the table.
+
+<table>
+<title>Overview of functions on extensive forms</title>
+<tgroup cols="2">
+<thead>
+<row>
+<entry>Function</entry><entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry><function>Actions[i]</function> (user-defined)</entry>
+<entry>Actions at information set <varname>i</varname></entry>
+</row>
+<row>
+<entry><function>Actions[e]</function> (user-defined)</entry>
+<entry>Actions in the game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>Chance[e]</function></entry>
+<entry>Chance player of <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>Children[n]</function></entry>
+<entry>Child nodes of node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>History[n]</function> (user-defined)</entry>
+<entry>History of actions preceeding node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>Infoset[n]</function></entry>
+<entry>Information set that node <varname>n</varname> belongs to</entry>
+</row>
+<row>
+<entry><function>Infoset[a]</function></entry>
+<entry>Information set that action <varname>a</varname> belongs to</entry>
+</row>
+<row>
+<entry><function>Infosets[e]</function></entry>
+<entry>Information sets in the game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>Members[i]</function></entry>
+<entry>Member nodes of information set <varname>i</varname></entry>
+</row>
+<row>
+<entry><function>Nodes[e]</function></entry>
+<entry>Nodes in the game tree of the game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>NonterminalNodes[e]</function> (user-defined)</entry>
+<entry>Nonterminal nodes of game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>NthChild[n,j]</function></entry>
+<entry>The <varname>j</varname>th child of node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>Outcome[n]</function></entry>
+<entry>Outcome attached to node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>Outcomes[e]</function></entry>
+<entry>Outcomes for the game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>Parent[n]</function></entry>
+<entry>Parent node of node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>Payoff[o,p]</function></entry>
+<entry>Payoff of outcome <varname>o</varname> for player <varname>p</varname></entry>
+</row>
+<row>
+<entry><function>Payoffs[o]</function> (user-defined)</entry>
+<entry>Payoff vector of outcome <varname>o</varname></entry>
+</row>
+<row>
+<entry><function>Payoffs[b]</function> (user-defined)</entry>
+<entry>Payoff vector of profile <varname>b</varname></entry>
+</row>
+<row>
+<entry><function>Player[i]</function></entry>
+<entry>Player of information set <varname>i</varname></entry>
+</row>
+<row>
+<entry><function>Players[e]</function></entry>
+<entry>Players of the game <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>PriorAction[n]</function></entry>
+<entry>Action preceding node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>RootNode[e]</function></entry>
+<entry>Root node of <varname>e</varname></entry>
+</row>
+<row>
+<entry><function>TerminalNodes[e]</function> (user-defined)</entry>
+<entry>Terminal nodes of game <varname>e</varname></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+</para>
+
+<para>
+The <function>NthChild</function> function has a short form of
+<literal>n#j</literal>.  So, the second child of the third child of the root node
+of an extensive form game <varname>e</varname> can be obtained
+(if it exists) by the expression
+<literal>RootNode[e]#3#2</literal>.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Modifying an extensive form</title>
+
+<para>
+A series of extensive form game editing functions are available for
+modifying an extensive form game. A complete list is given in the
+section on ``Extensive form manipulation'' in the Categorical Function
+Reference section of this manual.  The more important functions for
+building a game are given in the table.
+
+<table>
+<title>Functions for modifying extensive form games</title>
+<tgroup cols="2">
+<thead>
+<row><entry>Function</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+<row>
+<entry><function>AddMove[i,n]</function></entry>
+<entry>Adds a move from infoset <varname>i</varname> to node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>AddMove[i,a]</function> (user-defined)</entry>
+<entry>Adds a move from infoset <varname>i</varname> to action <varname>a</varname></entry>
+</row>
+<row>
+<entry><function>CopyTree[n1,n2]</function></entry>
+<entry>Copies tree rooted at node <varname>n1</varname> to node <varname>n2</varname></entry>
+</row>
+<row>
+<entry><function>InsertAction[i]</function></entry>
+<entry>Inserts an action into information set <varname>i</varname></entry>
+</row>
+<row>
+<entry><function>InsertMove[i,n]</function></entry>
+<entry>Inserts a move from infoset <varname>i</varname> at node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>MergeInfosets[i1,i2]</function></entry>
+<entry>Moves nodes from infoset <varname>i2</varname> into <varname>i1</varname></entry>
+</row>
+<row>
+<entry><function>MoveToInfoset[n,i]</function></entry>
+<entry>Moves node <varname>n</varname> into infoset <varname>i</varname></entry>
+</row>
+<row>
+<entry><function>NewInfoset[p,j]</function></entry>
+<entry>Creates a new infoset for player <varname>p</varname> with <varname>j</varname> actions</entry>
+</row>
+<row>
+<entry><function>NewInfoset[p,list]</function> (user-defined)</entry>
+<entry>Creates a new infoset for <varname>p</varname> with action names as in \<varname>list</varname></entry>
+</row>
+<row>
+<entry><function>NewOutcome[e,t]</function> (user-defined)</entry>
+<entry>Creates a new outcome for the game <varname>e</varname>
+with name <varname>t</varname></entry>
+</row>
+<row>
+<entry><function>NewPlayer[e,t]</function> (user-defined)</entry>
+<entry>Creates a new player for the game <varname>e</varname>
+with name <varname>t</varname></entry>
+</row>
+<row>
+<entry><function>Randomize[e,j]</function> (user-defined)</entry>
+<entry>Randomizes the payoffs in <varname>e</varname> with seed <varname>j</varname></entry>
+</row>
+<row>
+<entry><function>Reveal[i,list]</function></entry>
+<entry>Reveals infoset <varname>i</varname> to players in <varname>list</varname></entry>
+</row>
+<row>
+<entry><function>SetChanceProbs[i,list]</function></entry>
+<entry>Sets chance probs in infoset <varname>i</varname> to values in <varname>list</varname></entry>
+</row>
+<row>
+<entry><function>SetOutcome[n,o]</function></entry>
+<entry>Attaches outcome <varname>o</varname> to node <varname>n</varname></entry>
+</row>
+<row>
+<entry><function>SetPayoff[o,p,v]</function></entry>
+<entry>Sets payoff of outcome <varname>o</varname> for player <varname>p</varname> to value <varname>v</varname></entry>
+</row>
+<row>
+<entry><function>SetPayoffs[o,list]</function> (user-defined)</entry>
+<entry>Sets payoff of outcome <varname>o</varname> to values in <varname>list</varname></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+The functions in the table can be used to build up any valid extensive
+form game from a trivial game.  The basic procedure by which a more
+complex game is constructed from a simple game is:
+<orderedlist>
+<listitem>
+<para>
+Create a new game, and create all players.  
+</para>
+</listitem>
+<listitem>
+<para>
+Iteratively add moves to the game.  This involves two steps
+<orderedlist>
+<listitem>
+<para>
+Construct a ``template'' for a move by creating an information set for
+a player with the desired choices (actions).  
+</para>
+</listitem>
+<listitem>
+<para>
+Add the move to the game for the appropriate histories of actions.  
+</para>
+</listitem>
+</orderedlist>
+</para>
+</listitem>
+<listitem>
+<para>
+Reveal information about the moves to players that observe them.  
+</para>
+</listitem>
+<listitem>
+<para>
+Compute payoffs and attach outcomes to the game.  
+</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+The next to last step (revealing information) may require considerable
+care for games with complex information structures.  It is usually
+easiest to wait to do this step until the entire game tree is built,
+since Gambit does not maintain a game of perfect recall as
+you add new moves.  Hence, if you reveal a move of player 1 to player
+2, and then add new moves to the game for the player 2, the move that
+was revealed to player 2 will not be ``remembered'' by player 2 at the
+new moves.
+</para>
+
+<para>
+The following sequence of commands builds the game tree for a simple
+poker game as described in <citation><xref linkend="Mye91"></citation>,
+as outlined below.
+</para>
+
+<literallayout>
+                         Game Description:
+
+Fred (Player 1) and Alice (Player 2) each ante $1.00 into the pot.
+Fred draws a card from a deck; Fred observes the card; Alice does not. 
+Fred moves:
+  If Fred Folds, 
+    Fred wins the pot if his card is Red (net gain of $1.00 to Fred).
+    Fred loses the pot if his card is Black (net loss of $1.00 to Fred).
+  If Fred Raises, then Fred throws a dollar in the pot, and Alice moves:
+    If Alice Passes, then Fred wins the pot (net gain of $1.00 to Fred)
+    If Alice Meets, she throws a dollar in the pot; Fred must show the card: 
+      If the card is Red Fred wins the pot (net gain of $2.00 to Fred).
+      If the card is Black Alice wins the pot (net loss of $2.00 to Fred)
+</literallayout>
+
+<para>
+To construct this game, first we create a new game, and the players.
+We create the players separately, using <function>NewPlayer</function>
+so that we
+have variables to refer to them later:
+<programlisting>
+e := NewEfg[];
+fred := NewPlayer[ e, "Fred"];
+alice := NewPlayer[e,"Alice"];
+</programlisting>
+</para>
+
+<para>
+Now, we iteratively add moves to the game, by creating an information
+set with a template for the move, and then adding that move to the
+game at the appropriate histories: 
+
+<programlisting>
+deal := NewInfoset[ Chance[e], {"Red", "Black"}];
+AddMove[deal,RootNode[e]];
+fredmove := NewInfoset[ fred , {"Raise", "Fold"} ];
+AddMove[ fredmove, TerminalNodes[e]];
+alicemove := NewInfoset[ alice , {"Meet", "Pass"} ];
+fredraised:=Filter[t:=TerminalNodes[e],Name[PriorAction[t]]="Raise"]
+AddMove[alicemove,fredraised];
+</programlisting>
+
+In the above, the first move, <varname>deal</varname>, is a chance
+move. It is added at the root node of the game.  The second move is
+called <varname>fredmove</varname>, and is added at the terminal nodes
+of the tree, since Fred gets to take this move for any draw of the
+card.  Since there are two terminal nodes the call to
+<function>AddMove</function> here is a listable call, and adds the
+move to both terminal nodes of the tree.  The third move is called
+<varname>alicemove</varname>. Alice only gets to move if Fred chooses
+to raise.  So the step computing <varname>fredraised</varname>
+identifies all of the terminal nodes whose prior action was named
+<literal>"Raise"</literal>.  The move <varname>alicemove</varname> is
+added at all of these nodes, via a listable call to
+<function>AddMove</function>.  At this point, if you execute the
+expression
+<programlisting>
+Display[e]
+</programlisting>
+you can launch the graphical interview to view the game
+in its current state.  You will see that the game tree looks like the
+game in <citation><xref linkend="Mye91"></citation>,
+except there are no payoffs yet, and Fred
+only has one information set.  This is because you did not yet account
+for the fact that the deal is revealed to Fred.  You can reveal the
+deal to Fred (but not to Alice) via
+<programlisting>
+Reveal[deal,{fred}];
+</programlisting>
+and if you now display the game, then except for the fact that no
+payoffs have yet been defined, the game tree should look like that in
+<citation><xref linkend="Mye91"></citation>.
+Note that an alternate way to get the
+information structure correct is to create separate information sets
+for Fred's moves from the outset.  So, the expressions
+<programlisting>
+fredmove := NewInfoset[fred , {"Raise", "Fold"}];
+AddMove[fredmove, TerminalNodes[e]];
+</programlisting>
+in the above example could be replaced with
+<programlisting>
+fredred := NewInfoset[fred , {"Raise", "Fold"}];
+fredblack := NewInfoset[fred , {"Raise", "Fold"}];
+AddMove[ fredred, RootNode[e]#1];
+AddMove[ fredblack, RootNode[e]#2];
+</programlisting>
+(Here, the short form <literal>n#j</literal> for
+<function>NthChild</function> is used to refer to the
+<varname>j</varname>th child of node <varname>n</varname>).  A move
+from the information set <varname>fredred</varname> is added to the
+first child of the root node (which is the action for chance in which
+the red card is selected) and a move from the second information set
+<varname>fredblack</varname> is added to the second child of the root
+node.  Now, since two separate information sets for Fred are created
+from the outset, there is no need to reveal the deal to Fred.  As with
+life in general, in the GCL there is usually more than one way to skin
+a cat.
+</para>
+
+<para>
+To complete construction of this game, we must now add payoffs. This
+can be done with the following sequence of expressions
+<programlisting>
+ante := 1.00;
+raise := 1.00;
+win := SetPayoffs[NewOutcome[e, "Win"],{ante,-ante}];
+winbig := SetPayoffs[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}];
+lose := SetPayoffs[NewOutcome[e, "Lose"],{-ante,ante}];
+losebig := SetPayoffs[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}];
+SetOutcome[TerminalNodes[e],{winbig,win,win,losebig,win,lose}]
+</programlisting>
+</para>
+
+<para>
+This example has shown how to construct a simple game without any
+recursive structure.  This game might be just as easily created in the
+graphical interface.  The usefulness of the GCL in constructing games comes
+when the game is larger, or has some repetitive structure to it.  In
+Appendix A, part 1, we give an example showing how to construct a multi stage
+holdout game using user defined functions. 
+</para>
+
+</sect3>
+
+<sect3>
+<title>Saving and loading extensive forms</title>
+
+<para>
+Once an extensive form game has been constructed, it can be saved by
+the expression
+<programlisting>
+SaveEfg[e, "filename.efg"]
+</programlisting>
+where <varname>e</varname> is the extensive form game, and
+<filename>filename.efg</filename> is the filename of the file to be created.  It is
+recommended that the filename extension <filename>.efg</filename> be used when
+saving extensive form games, as the Gambit graphical user interface
+recognizes this extension as containing extensive form games.  Once an
+extensive form game has been saved to an external file, it can be
+loaded by the function <function>LoadEfg</function>, as follows:
+<programlisting>
+e := LoadEfg["filename.efg"]
+</programlisting>
+</para>
+
+</sect3>
+
+<sect3>
+<title>Creating a normal form from an extensive form</title>
+
+<para>
+A normal form game can also be created from an extensive form game.
+If <varname>e</varname> is an extensive form game, then the expression
+<programlisting>
+n := Nfg[e]
+</programlisting>
+will create a normal form game <varname>n</varname> which is the reduced normal
+form game associated with the extensive form game <varname>e</varname>.
+</para>
+
+<para>
+Strategies in the reduced normal form are given default names
+consisting of a series of digits, where the <varname>j</varname>th
+digit in the strategy name corresponds to the branch number taken at
+the player's <varname>j</varname>th information set.  To illustrate,
+here we create the reduced normal form of the game of poker
+encountered earlier.
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << Name[Actions[e]]
+{ { { Raise, Fold }, { Raise, Fold } },
+  { { Meet, Pass } } }
+GCL3:= n:=Nfg[e];
+GCL4:= << Name[Strategies[n]]
+{ { 11, 12, 21, 22 },
+  { 1, 2 } }
+</programlisting>
+</para>
+
+<para>
+In the normal form game, player 1 has four strategies.  Player 1's
+second strategy has name <literal>12</literal>.  This indicates that the player
+took action 1 (Raise) in the first information set, and action 2
+(Fold) in the second information set.  
+</para>
+
+<para>
+When a normal form game <varname>n</varname> is created from an
+extensive form game, the GCL will ``remember'' the extensive form game
+that <varname>n</varname> is associated with, as long as neither the
+extensive or normal form game is edited.  Any mixed strategy solutions
+computed on the normal form game <varname>n</varname> can be converted
+back to a behavior strategy of the game <varname>e</varname> by using
+the command <function>Behav</function>.  Thus
+<programlisting>
+n := Nfg[e];
+m := EnumMixedSolve[n];
+b := Behav[m]
+</programlisting>
+will convert the game <varname>e</varname> to reduced normal form, solve it using
+the <function>EnumMixedSolve</function> algorithm, and then convert all mixed profiles found back
+to behavior profiles, and display the list, <varname>b</varname> of behavior
+profiles found. The above can also be done in one command without saving
+intermediate steps as follows:  
+<programlisting>
+b := Behav[EnumMixedSolve[Nfg[e]]]
+</programlisting>
+</para>
+
+</sect3>
+
+</sect2>
+
+<sect2>
+<title>Solving games</title>
+
+<para>
+Every finite game has at least one Nash equilibrium
+in either pure or mixed
+strategies <citation><xref linkend="Nas50"></citation>.
+Various refinements of Nash
+equilibrium are frequently used to select reasonable equilibria in
+games with multiple equilibria.  The most commonly studied refinements
+are perfect and proper equilibria for normal form games,
+and subgame perfect and sequential equilibria for
+extensive form games.
+<footnote>
+<para>Definitions of perfect and subgame perfect
+equilibria are from
+<citation><xref linkend="Sel75"></citation>,
+proper equilibrium from <citation><xref linkend="Mye78"></citation>,
+and sequential equilibrium from
+<citation><xref linkend="KreWil82"></citation>.
+See 
+<citation><xref linkend="vanD83"></citation> or
+<citation><xref linkend="Mye91"></citation>
+for general treatments of refinements.
+</para>
+</footnote>
+</para>
+
+<para>
+The best way to compute an equilibrium depends on many factors, the
+most important of which are the number of players, the number of
+equilibrium you want to find, and what kind of refinement you are
+looking for.  For a detailed discussion of these issues, see
+<citation><xref linkend="McKMcL96"></citation>.
+In general, it is easier to solve two person
+games than n-person games, it is easier to find one equilibrium than
+to find all, and it is easier to find a Nash equilibrium than a
+refinement.
+</para>
+
+<para>
+The computational complexity of solving for equilibria of games also
+typically at least exponential in the number of strategies or actions.
+Consequently, you will find it quite easy to build games in Gambit
+which cannot be solved (in any reasonable amount of time) by Gambit.
+</para>
+
+<para>
+When solving games of any reasonable size, it is therefore good to try
+and simplify things as much as possible before launching into a
+solution algorithm.  One way of simplifying a game is by reducing the
+size of the strategy set by elimination of dominated strategies.  For
+extensive form games, a second way of simplifying the problem is by
+taking account of the subgame structure of the game, and then
+recursively solve the game from the end.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Supports and dominance elimination</title>
+
+<para>
+The GCL data types <type>NFSUPPORT</type> and <type>EFSUPPORT</type> are used
+to represent a support in a normal or extensive form game.  A
+support for a normal form game is a selection of non-empty subsets of
+strategies for all players in the game.  A support for an extensive
+form game is a selection of non-empty subsets of actions for all
+information sets in the game.
+</para>
+
+<para>
+The main use of supports is to represent the sets of strategies that
+remain after dominated strategies have been eliminated from the game.
+All of the built-in functions for solution algorithms in the GCL take
+an <type>NFSUPPORT</type> or <type>EFSUPPORT</type>
+as their first parameter,
+hence can be run on any support of the game.
+</para>
+
+<para>
+The call <literal>Support[g]</literal> returns the full support
+of the normal or extensive form game <varname>g</varname>.  The full support is
+the support in which no strategies (or actions) have been eliminated.
+The function <function>UnDominated</function> can be used to find the dominated
+strategies or strategies in a support of a game.  <function>UnDominated</function>
+returns a support containing the undominated strategies for each
+player (or actions for each information set, in the case of extensive
+for games).  By default weak domination is used, and only domination
+by pure strategies is considered. By setting one or both of the
+optional parameters <parameter>strong</parameter> and
+<parameter>mixed</parameter> to <literal>True</literal>, strong
+domination can be used, and domination by mixed strateies can be
+considered.
+<footnote>
+<para>Elimination by mixed strategies is only
+implemented for normal form games.
+</para>
+</footnote>
+The following
+sequence of expressions shows the computation of the full supports and
+the support resulting from weak dominance elimination in the extensive
+and reduced normal form of the poker example of the previous chapter.
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= efsupp:=UnDominated[e]
+GCL3:= << Name[Actions[e]]
+{ { { Raise, Fold }, { Raise, Fold } },
+  { { Meet, Pass } } }
+GCL4:= << Name[Actions[efsupp]]
+{ { { Raise }, { Raise, Fold } },
+  { { Meet, Pass } } }
+GCL5:= n:=Nfg[e];
+GCL6:= nfsupp:=UnDominated[n];
+GCL7:= << Name[Strategies[n]]
+{ { 11, 12, 21, 22 },
+  { 1, 2 } }
+GCL8:= << Name[Strategies[nfsupp]]
+{ { 11, 12 },
+  { 1, 2 } }
+</programlisting>
+</para>
+
+<para>
+In the above example, for the extensive form game, the action with
+name "Fold" is dominated, and eliminated by <function>UnDominated</function>.
+Correspondingly, in the reduced normal form game, the strategies in
+which the first player takes the second action at the first
+information set is eliminated.  
+</para>
+
+<para>
+A user defined function <function>IterativeUnDominated</function>
+can be used to
+iteratively eliminate dominated strategies in a game, until no further
+dominance elimination is possible.  This function returns the final
+support.  So the program
+<programlisting>
+n:=LoadNfg["mygame.nfg"];
+s:=IterativeUnDominated[n,strong->True,mixed->True];
+</programlisting>
+will find the set of all strategies that remain after iterative
+elimination by mixed strategies of strongly dominated strategies in
+the game <varname>n</varname>.
+</para>
+
+<para>
+While the main use of supports is to represent strategies that
+remain after dominance elimination, you can also construct your own
+support for a game using the functions <function>RemoveStrategy</function>
+and <function>AddStrategy</function>.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Subgames</title>
+
+<para>
+For extensive form games, Gambit recognizes and supports the notion of
+a subgame.  If <varname>efg</varname> is an extensive form game, the
+call <literal>Subgames[efg]</literal> returns a list of nodes
+representing the roots of valid subgames.
+</para>
+
+<para>
+You can control the way the extensive form solution algorithms deal
+with subgames by ``marking'' or ``unmarking'' subgames.  All of the
+extensive form solution algorithms recursively solve the extensive
+form game by subgames, but only for subgames that are marked.  Terminal
+marked subgames are solved first, and then for any solution of the
+subgame, the parent game is pruned, plugging in the continuation value
+generated by the terminal subgame.  The marked subgames that are now
+terminal are then recursively solved in a similar manner, and so on,
+until the game starting at the root node is reached.  Be warned that
+if there are multiple equilibria to each subgame, the size of the set
+of solutions to the full game that are generated by this procedure can
+be exponential with the number of subgames.
+</para>
+
+<para>
+When you first construct a game, the only subgame that is marked is
+the root node of the tree.  This node always represents a valid
+subgame, and it is not possible to unmark the root node.  If
+<varname>node</varname> is the root of a valid non-trivial subgame, then the
+functions <function>MarkSubgame</function> and <function>UnMarkSubgame</function> can be
+used to mark and unmark the specific subgames starting at that node.
+<function>MarkedSubgamd</function> can be used to check if the subgame is marked.
+The user defined functions <function>MarkSubgames</function> and
+<function>UnMarkSubgames</function> can be used to mark and unmark all valid
+subgames in the game.  <function>MarkedSubgames</function>
+returns a lsit of root
+nodes of all currently marked subgames.
+</para>
+
+<para>
+The technique of marking subgames can be used to control whether a
+solution algorithm that finds Nash equilibria returns any Nash
+equilibrium or only subgame perfect Nash equilibria of the game.  If
+no subgames are marked, the algorithm will return Nash equilibria
+which may not be subgame perfect.  If you first mark all subgames, the
+algorithm will return subgame perfect equilibria.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Mixed and behavior strategy profiles</title>
+
+<para>
+The data types <type>MIXED</type> and <type>BEHAV</type> are used to represent
+mixed and behavior strategy profiles for normal and extensive form
+games, respectively.  Mixed and behavior strategy profiles can be
+defined on any support of the game.  A mixed strategy profile is a
+specification of a numeric value (usually interpreted as a
+probability) for each strategy in the support.  Similarly, a behavior
+strategy profile is a specification of a numeric value (usually
+interpreted as a probability) for each action in the support.
+</para>
+
+<para>
+The simplest way of generating a mixed profile for a game is to use
+the built-in function <function>Centroid</function>, which generates a mixed or
+behavior strategy profile in which every player adopts each of their
+strategies (or each action in an information set) with equal
+probability.  For example, if <varname>g</varname> is a variable representing an
+extensive or normal form game, and <varname>s</varname> is a support for the game
+<varname>g</varname>, then the calls <literal>Centroid[g]</literal> or
+<literal>Centroid[s]</literal>
+generate mixed strategy profiles for the game and support, respectively.
+You can use the function <function>SetStrategyProbs</function> 
+<function>SetActionProbs</function> to change
+the strategy probabilites for a mixed or behavior profile.
+You can also use the
+standard user defined functions <function>Mixed</function> or 
+<function>Behav</function> to
+generate a mixed profile from a nested list of numeric data, as long
+as the nested list is of the correct dimensions.
+</para>
+
+<para>
+
+Basic arithmetic operations are defined on mixed and behavior profiles
+as well.  So you can take linear combinations of mixed profiles to
+create new mixed profiles, as illustrated in this example:
+<programlisting>
+GCL1:= n:=Nfg[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}];
+GCL2:= << c:=Centroid[n]
+(Mixed) { 1/3 1/3 1/3 }{ 1/2 1/2 }
+GCL3:= << cc:=Mixed[n,{{1,0,0},{1,0}}]
+(Mixed) { 1 0 0 }{ 1 0 }
+GCL4:= << m:=1/2*c+1/2*cc
+(Mixed) { 2/3 1/6 1/6 }{ 3/4 1/4 }
+</programlisting>
+</para>
+
+<para>
+In most cases, the value assigned to an action or strategy is
+interpreted as the probability with which a player adopts the
+corresponding action or strategy.  However, the data for <type>MIXED</type>
+or <type>BEHAV</type>
+need not be legitimate probabilities.  For example, it would be valid
+to create a mixed profile using the call
+<literal>Mixed[n,{{1,2,3},{4,5}}]</literal>. Probabilities are not
+required to add up to one, or even to be positive.  This feature is
+especially useful in econometric analysis, as the <type>MIXED</type> and
+<type>BEHAV</type> data types can be used to represent choice frequencies of
+corresponding actions or strategies.  
+</para>
+
+<para>
+All of the solution algorithms that operate on games or their supports
+return lists of mixed or behavior profiles to representing the
+solutions.  Some algorithms compute important additional information
+about the profile that may not be recoverable from knowledge of just
+the strategy probabilies.  Consequently, the <type>MIXED</type> an
+<type>BEHAV</type> data types keep track of who created them, and what
+properties are known about them.  A series of functions are available
+to query profiles to return this information.  These functions are
+listed in section on ``information about solutions'' in the
+Categorical Function Reference chapter.  To view all of the
+information that is known about a mixed or behavior profile, you can
+change the format by which solutions are displayed using the
+<function>Format</function> function.
+</para>
+
+</sect2>
+
+</sect1>

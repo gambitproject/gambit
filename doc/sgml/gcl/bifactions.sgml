@@ -1,0 +1,39 @@
+<refentry id="bif.Actions" xreflabel="Actions">
+
+<refmeta>
+<indexterm>
+<primary>Actions</primary>
+</indexterm>
+
+<refentrytitle>Actions</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Actions</refname>
+<refpurpose>
+Returns the list of actions in a support at an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Actions[infoset->INFOSET*, support->EFSUPPORT] =: LIST(ACTION)
+Actions[infoset->INFOSET*, basis->EFBASIS] =: LIST(ACTION)
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Actions</function> returns the list of actions available 
+at <parameter>infoset</parameter> in
+<parameter>support</parameter> or <parameter>basis</parameter>.
+If <parameter>infoset</parameter> is the null
+information set, the empty list of actions is returned.  It is an
+error if <parameter>infoset</parameter> and <parameter>support</parameter>
+(or <parameter>basis</parameter>) are not from the same
+extensive form game.
+</para>
+</refsect1>
+</refentry>
+
