@@ -158,12 +158,9 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 
 void MixedSolution::CheckIsNash(void) const
 {
-  if(!IsValid()) {
-    gout << "\ngame is invalid";
+  if(!IsValid()) 
     Invalidate();
-  }
   if (m_isNash == triUNKNOWN) {
-    gout << "\nm_isNash == triUNKNOWN";
     if(IsComplete())
       m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
     else
