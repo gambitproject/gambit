@@ -40,9 +40,7 @@ to a directory where the help files live.
 Bug D5: Saving files
 
 When saving a file in the GUI, it should remember the current
-name of the file, and use the same name when saving the file.  Also,
-it should give you a message when you save and there is already a file
-with the same name. 
+name of the file, and use the same name when saving the file. 
 
 //------------------------------
 
