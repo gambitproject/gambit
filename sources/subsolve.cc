@@ -110,9 +110,9 @@ const BehavProfile<T> &SubgameSolver<T>::Solve(void)
 template <class T>
 void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 {
-  EFLiapParams<double> EP;
+	EFLiapParams EP;
 
-  EFLiapModule<double> EM(E, EP, bp);
+	EFLiapModule<double> EM(E, EP, bp);
   
   EM.Liap();
 
@@ -123,7 +123,7 @@ void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 }
 
 template <class T>
-EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams<T> &p,
+EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &p,
 				    const BehavProfile<T> &s)
   : SubgameSolver<T>(E), nevals(0), params(p), start(s)
 { }
@@ -182,7 +182,7 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 }
 
 template <class T>
-NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams<T> &p,
+NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &p,
 				    const BehavProfile<T> &s)
 
   : SubgameSolver<T>(E), nevals(0), params(p), start(s)

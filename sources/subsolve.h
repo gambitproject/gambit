@@ -1,7 +1,7 @@
 //#
 //# FILE: subsolve.h -- Interface to generic subgame solver
 //#
-//# $Id$
+//# @(#)subsolve.h	1.4 12/18/95
 //#
 
 #ifndef SUBSOLVE_H
@@ -52,13 +52,13 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
 template <class T> class EFLiapBySubgame : public SubgameSolver<T>  {
   private:
     int nevals;
-    EFLiapParams<T> params;
+    EFLiapParams params;
     BehavProfile<T> start;
     
     void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
 
   public:
-    EFLiapBySubgame(const Efg<T> &E, const EFLiapParams<T> &,
+    EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &,
 		    const BehavProfile<T> &);
     virtual ~EFLiapBySubgame();
 
@@ -88,13 +88,13 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
 template <class T> class NFLiapBySubgame : public SubgameSolver<T>  {
   private:
     int nevals;
-    NFLiapParams<T> params;
+    NFLiapParams params;
     BehavProfile<T> start;
 
     void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
 
   public:
-    NFLiapBySubgame(const Efg<T> &E, const NFLiapParams<T> &,
+    NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &,
 		    const BehavProfile<T> &);
     virtual ~NFLiapBySubgame();
 
