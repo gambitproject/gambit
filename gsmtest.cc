@@ -75,10 +75,10 @@ int main( void )
   gin >> cont;
 
 
-  gout << "Testing PushRef()\n";   // Push() and PushRef() are interchangeable
-  machine->Push( x );              // for gStrings
-  machine->Push( y );
-  machine->Push( z );
+  gout << "Testing PushRef()\n";
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   machine->PushRef( x );
   machine->PushRef( y );
   machine->PushRef( z );
@@ -91,9 +91,9 @@ int main( void )
   gout << "Assigning z = (double)13\n";
   machine->Assign( z, (double)13 );
   gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->Push( x );
-  machine->Push( y );
-  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   machine->PushRef( x );
   machine->PushRef( y );
   machine->PushRef( z );
@@ -112,9 +112,9 @@ int main( void )
   gout << "Assigning z = (gInteger)11\n";
   machine->Assign( z, (gInteger)11 );
   gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->Push( x );
-  machine->Push( y );
-  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   machine->PushRef( x );
   machine->PushRef( y );
   machine->PushRef( z );
@@ -129,9 +129,9 @@ int main( void )
   gout << "Assigning y = (gRational)7\n";
   machine->Assign( y, (gRational)7 );
   gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->Push( x );
-  machine->Push( y );
-  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   machine->PushRef( x );
   machine->PushRef( y );
   machine->PushRef( z );
@@ -175,6 +175,46 @@ int main( void )
   gout << "Attempt to do additional (illegal) PushVals\n";
   machine->PushVal( (gRational)13 );
 
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "Testing boolean operations:\n";
+  gout << "Pushing false\n";
+  gout << "Pushing true\n";
+
+  machine->Push( false );
+  machine->Push( true );
+  gout << "Testing AND()\n";
+  machine->AND();
+  machine->Dump();
+
+  machine->Push( false );
+  machine->Push( true );
+  gout << "Testing OR()\n";
+  machine->OR();
+  machine->Dump();
+
+  machine->Push( false );
+  machine->Push( true );
+  gout << "Testing NOT()\n";
+  machine->NOT();
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "Testing string concatenation:\n";
+  gout << "Pushing \'Test1 \'\n";
+  gout << "Pushing \'Test2 \'\n";
+  machine->Push( (gString)"Test1 " );
+  machine->Push( (gString)"Test2 " );
+  gout << "Testing Add()\n";
+  machine->Add();
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
 
   delete machine;

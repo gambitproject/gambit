@@ -46,6 +46,7 @@ class TestHashTable : public HashTable<char, Test *>
 
  public:
   TestHashTable() { Init(); }
+  ~TestHashTable() { Flush(); }
 };
 
 

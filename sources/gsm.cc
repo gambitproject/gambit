@@ -17,8 +17,10 @@ class RefHashTable : public HashTable<gString, Portion *>
  private:
   int NumBuckets( void ) const { return 1; }
   int Hash( gString ref ) const { return 0; }
+  void DeleteAction( Portion *value ) { delete value; }
  public:
   RefHashTable() { Init(); }
+  ~RefHashTable() { Flush(); }
 };
 
 
@@ -36,6 +38,19 @@ PortionType Portion::Type( void ) const
 {
   return type;
 }
+
+//------------------------- bool type ------------------------------
+bool_Portion::bool_Portion( const bool new_value )
+     : value( new_value )
+{
+  type = porBOOL;
+}
+
+bool bool_Portion::Value( void ) const
+{ return value; }
+bool& bool_Portion::Value( void )
+{ return value; }
+
 
 //------------------------- double type ------------------------------
 double_Portion::double_Portion( const double new_value )
@@ -73,6 +88,19 @@ gRational_Portion::gRational_Portion( const gRational new_value )
 gRational gRational_Portion::Value( void ) const
 { return value; }
 gRational& gRational_Portion::Value( void )
+{ return value; }
+
+
+//------------------------- Reference type ------------------------------
+gString_Portion::gString_Portion( const gString new_value )
+     : value( new_value )
+{
+  type = porSTRING;
+}
+
+gString gString_Portion::Value( void ) const
+{ return value; }
+gString& gString_Portion::Value( void )
 { return value; }
 
 
@@ -126,6 +154,24 @@ int GSM::MaxDepth( void ) const
 //-------------------------------------------------------
   //  Assign & UnAssign functions 
 //-------------------------------------------------------
+void GSM::Assign( const gString ref, const bool data )
+{
+  Portion *data_portion;
+
+  if( !RefTable->IsDefined( ref ) )
+  {
+    data_portion = new bool_Portion( data );
+    RefTable->Define( ref, data_portion );
+  }
+  else
+  {
+    data_portion = (*RefTable)( ref );
+    delete data_portion;
+    data_portion = new bool_Portion( data );
+    (*RefTable)( ref ) = data_portion;
+  }
+}
+
 void GSM::Assign( const gString ref, const double data )
 {
   Portion *data_portion;
@@ -180,6 +226,27 @@ void GSM::Assign( const gString ref, const gRational data )
   }
 }
 
+void GSM::Assign( const gString ref, const gString data )
+{
+  Portion *data_portion;
+
+  if( !RefTable->IsDefined( ref ) )
+  {
+    data_portion = new gString_Portion( data );
+    RefTable->Define( ref, data_portion );
+  }
+  else
+  {
+    data_portion = (*RefTable)( ref );
+    delete data_portion;
+    data_portion = new gString_Portion( data );
+    (*RefTable)( ref ) = data_portion;
+  }
+}
+
+
+
+
 
 void GSM::UnAssign( const gString ref )
 {
@@ -195,6 +262,13 @@ void GSM::UnAssign( const gString ref )
 //------------------------------------------------------------------------
   // Push() functions
 //------------------------------------------------------------------------
+
+void GSM::Push( const bool data )
+{
+  Portion *p;
+  p = new bool_Portion( data );
+  stack->Push( p );
+}
 
 void GSM::Push( const double data )
 {
@@ -220,14 +294,17 @@ void GSM::Push( const gRational data )
 void GSM::Push( const gString data )
 {
   Portion *p;
-  p = new Reference_Portion( data );
+  p = new gString_Portion( data );
   stack->Push( p );
   RefStack->Push( data );
 }
 
 void GSM::PushRef( const gString data )
 {
-  Push( data );
+  Portion *p;
+  p = new Reference_Portion( data );
+  stack->Push( p );
+  RefStack->Push( data );
 }
 
 
@@ -236,6 +313,22 @@ void GSM::PushRef( const gString data )
 //------------------------------------------------------------------
   // PushVal() functions
 //------------------------------------------------------------------
+
+void GSM::PushVal( const bool data )
+{
+  gString ref;
+  while( RefStack->Depth() > 0 )
+  {
+    ref = RefStack->Pop();
+    if( !RefTable->IsDefined( ref ) )
+    {
+      Assign( ref, data );
+      break;
+    }
+  }
+  if( RefStack->Depth() <= 0 )
+    gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
+}
 
 void GSM::PushVal( const double data )
 {
@@ -270,6 +363,22 @@ void GSM::PushVal( const gInteger data )
 }
 
 void GSM::PushVal( const gRational data )
+{
+  gString ref;
+  while( RefStack->Depth() > 0 )
+  {
+    ref = RefStack->Pop();
+    if( !RefTable->IsDefined( ref ) )
+    {
+      Assign( ref, data );
+      break;
+    }
+  }
+  if( RefStack->Depth() <= 0 )
+    gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
+}
+
+void GSM::PushVal( const gString data )
 {
   gString ref;
   while( RefStack->Depth() > 0 )
@@ -333,9 +442,13 @@ Portion *GSM::resolve_ref( Reference_Portion *p )
 
 
 
+//------------------------------------------------------------------------
+  // operation(), the main operations dispatcher
+//------------------------------------------------------------------------
 
-void GSM::operation( OperationMode mode )
+int GSM::operation( OperationMode mode )
 {
+  int result = 0;
   Portion *p2, *p1;
   if( stack->Depth() > 1 )
   {
@@ -351,20 +464,30 @@ void GSM::operation( OperationMode mode )
     {
       switch( p2->Type() )
       {
+      case porBOOL:
+	result = bool_operation((bool_Portion *)p1, 
+				(bool_Portion *)p2, 
+				mode );
+	break;
       case porDOUBLE:
-	double_operation( (double_Portion *)p1, 
-			 (double_Portion *)p2, 
-			 mode );
+	result = double_operation((double_Portion *)p1, 
+				  (double_Portion *)p2, 
+				  mode );
 	break;
       case porINTEGER:
-	gInteger_operation( (gInteger_Portion *)p1, 
-			   (gInteger_Portion *)p2, 
-			   mode );
+	result = gInteger_operation((gInteger_Portion *)p1, 
+				    (gInteger_Portion *)p2, 
+				    mode );
 	break;
       case porRATIONAL:
-	gRational_operation( (gRational_Portion *)p1, 
-			    (gRational_Portion *)p2,
-			    mode );
+	result = gRational_operation((gRational_Portion *)p1, 
+				     (gRational_Portion *)p2,
+				     mode );
+	break;
+      case porSTRING:
+	result = gString_operation((gString_Portion *)p1, 
+				   (gString_Portion *)p2, 
+				   mode );
 	break;
 
       default:
@@ -384,95 +507,256 @@ void GSM::operation( OperationMode mode )
   {
     gout << "** GSM Error: not enough operands to perform binary operation\n";
   }  
+
+  return result;
 }
 
 
 
-void GSM::double_operation( double_Portion *p1, 
-			   double_Portion *p2, 
+
+
+
+int GSM::bool_operation(bool_Portion *p1, 
+			bool_Portion *p2, 
+			OperationMode mode )
+{
+  int result = 0;
+  bool restore_both = false;
+
+  switch( mode )
+  {
+  case opLOGICAL_AND:
+    p1->Value() = ( p1->Value() && p2->Value() );
+    break;
+  case opLOGICAL_OR:
+    p1->Value() = ( p1->Value() || p2->Value() );
+    break;
+  case opLOGICAL_NOT:
+    p2->Value() = !( p2->Value() );
+    restore_both = true;
+    break;
+  default:
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
+    restore_both = true;
+    return result;
+  }
+  stack->Push( p1 );
+  if( restore_both )
+    stack->Push( p2 );
+  else
+    delete p2;
+  return result;
+}
+
+
+
+
+int GSM::double_operation(double_Portion *p1, 
+			  double_Portion *p2, 
+			  OperationMode mode )
+{
+  int result = 0;
+  bool restore_both = false;
+
+  switch( mode )
+  {
+  case opADD:
+    p1->Value() += p2->Value();
+    break;
+  case opSUBTRACT:
+    p1->Value() -= p2->Value();
+    break;
+  case opMULTIPLY:
+    p1->Value() *= p2->Value();
+    break;
+  case opDIVIDE:
+    p1->Value() /= p2->Value();
+    break;
+  case opEQUAL_TO:
+    result = ( p1->Value() == p2->Value() );
+    restore_both = true;
+    break;
+  case opNOT_EQUAL_TO:
+    result = ( p1->Value() != p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN:
+    result = ( p1->Value() > p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN:
+    result = ( p1->Value() < p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() >= p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() <= p2->Value() );
+    restore_both = true;
+    break;
+  default:
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
+    restore_both = true;
+    return result;
+  }
+  stack->Push( p1 );
+  if( restore_both )
+    stack->Push( p2 );
+  else
+    delete p2;
+  return result;
+}
+
+
+int GSM::gInteger_operation(gInteger_Portion *p1, 
+			    gInteger_Portion *p2, 
+			    OperationMode mode )
+{
+  int result = 0;
+  bool restore_both = false;
+
+  switch( mode )
+  {
+  case opADD:
+    p1->Value() += p2->Value();
+    break;
+  case opSUBTRACT:
+    p1->Value() -= p2->Value();
+    break;
+  case opMULTIPLY:
+    p1->Value() *= p2->Value();
+    break;
+  case opDIVIDE:
+    p1->Value() /= p2->Value();
+    break;
+  case opEQUAL_TO:
+    result = ( p1->Value() == p2->Value() );
+    restore_both = true;
+    break;
+  case opNOT_EQUAL_TO:
+    result = ( p1->Value() != p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN:
+    result = ( p1->Value() > p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN:
+    result = ( p1->Value() < p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() >= p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() <= p2->Value() );
+    restore_both = true;
+    break;
+  default:
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
+    restore_both = true;
+    return result;
+  }
+  stack->Push( p1 );
+  if( restore_both )
+    stack->Push( p2 );
+  else
+    delete p2;
+  return result;
+}
+
+
+int GSM::gRational_operation(gRational_Portion *p1, 
+			     gRational_Portion *p2, 
+			     OperationMode mode )
+{
+  int result = 0;
+  bool restore_both = false;
+
+  switch( mode )
+  {
+  case opADD:
+    p1->Value() += p2->Value();
+    break;
+  case opSUBTRACT:
+    p1->Value() -= p2->Value();
+    break;
+  case opMULTIPLY:
+    p1->Value() *= p2->Value();
+    break;
+  case opDIVIDE:
+    p1->Value() /= p2->Value();
+    break;
+  case opEQUAL_TO:
+    result = ( p1->Value() == p2->Value() );
+    restore_both = true;
+    break;
+  case opNOT_EQUAL_TO:
+    result = ( p1->Value() != p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN:
+    result = ( p1->Value() > p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN:
+    result = ( p1->Value() < p2->Value() );
+    restore_both = true;
+    break;
+  case opGREATER_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() >= p2->Value() );
+    restore_both = true;
+    break;
+  case opLESS_THAN_OR_EQUAL_TO:
+    result = ( p1->Value() <= p2->Value() );
+    restore_both = true;
+    break;
+  default:
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
+    restore_both = true;
+    return result;
+  }
+  stack->Push( p1 );
+  if( restore_both )
+    stack->Push( p2 );
+  else
+    delete p2;
+  return result;
+}
+
+
+
+int GSM::gString_operation(gString_Portion *p1, 
+			   gString_Portion *p2, 
 			   OperationMode mode )
 {
+  int result = 0;
+  bool restore_both = false;
+
   switch( mode )
   {
   case opADD:
     p1->Value() += p2->Value();
     break;
-  case opSUBTRACT:
-    p1->Value() -= p2->Value();
-    break;
-  case opMULTIPLY:
-    p1->Value() *= p2->Value();
-    break;
-  case opDIVIDE:
-    p1->Value() /= p2->Value();
-    break;
   default:
-    stack->Push( p1 );
-    stack->Push( p2 );
     gerr << "** GSM Error: attempted an unsupported operation\n";
     assert(0);
-    return;
+    restore_both = true;
+    return result;
   }
   stack->Push( p1 );
-  delete p2;
-}
-
-void GSM::gInteger_operation( gInteger_Portion *p1, 
-					  gInteger_Portion *p2, 
-					  OperationMode mode )
-{
-  switch( mode )
-  {
-  case opADD:
-    p1->Value() += p2->Value();
-    break;
-  case opSUBTRACT:
-    p1->Value() -= p2->Value();
-    break;
-  case opMULTIPLY:
-    p1->Value() *= p2->Value();
-    break;
-  case opDIVIDE:
-    p1->Value() /= p2->Value();
-    break;
-  default:
-    stack->Push( p1 );
+  if( restore_both )
     stack->Push( p2 );
-    gerr << "** GSM Error: attempted an unsupported operation\n";
-    assert(0);
-    return;
-  }
-  stack->Push( p1 );
-  delete p2;
-}
-
-void GSM::gRational_operation( gRational_Portion *p1, 
-				    gRational_Portion *p2, 
-				    OperationMode mode )
-{
-  switch( mode )
-  {
-  case opADD:
-    p1->Value() += p2->Value();
-    break;
-  case opSUBTRACT:
-    p1->Value() -= p2->Value();
-    break;
-  case opMULTIPLY:
-    p1->Value() *= p2->Value();
-    break;
-  case opDIVIDE:
-    p1->Value() /= p2->Value();
-    break;
-  default:
-    stack->Push( p1 );
-    stack->Push( p2 );
-    gerr << "** GSM Error: attempted an unsupported operation\n";
-    assert(0);
-    return;
-  }
-  stack->Push( p1 );
-  delete p2;
+  else
+    delete p2;
+  return result;
 }
 
 
@@ -481,28 +765,98 @@ void GSM::gRational_operation( gRational_Portion *p1,
 
 
 
+//-----------------------------------------------------------------
+  // operations
+//-----------------------------------------------------------------
 
-void GSM::Add( void )
-{
-  operation( opADD );
-}
+void GSM::Add ( void )
+{ operation( opADD ); }
 
-void GSM::Subtract( void )
-{
-  operation( opSUBTRACT );
-}
+void GSM::Subtract ( void )
+{ operation( opSUBTRACT ); }
 
-void GSM::Multiply( void )
-{
-  operation( opMULTIPLY );
-}
+void GSM::Multiply ( void )
+{ operation( opMULTIPLY ); }
 
-void GSM::Divide( void )
-{
-  operation( opDIVIDE );
-}
+void GSM::Divide ( void )
+{ operation( opDIVIDE ); }
 
 
+int  GSM::EqualTo ( void )
+{ return operation( opEQUAL_TO ); }
+
+int  GSM::NotEqualTo ( void )
+{ return operation( opNOT_EQUAL_TO ); }
+
+int  GSM::GreaterThan ( void )
+{ return operation( opGREATER_THAN ); }
+
+int  GSM::LessThan ( void )
+{ return operation( opLESS_THAN ); }
+
+int  GSM::GreaterThanOrEqualTo ( void )
+{ return operation( opGREATER_THAN_OR_EQUAL_TO ); }
+
+int  GSM::LessThanOrEqualTo ( void )
+{ return operation( opLESS_THAN_OR_EQUAL_TO ); }
+
+
+void GSM::AND ( void )
+{ operation( opLOGICAL_AND ); }
+
+void GSM::OR ( void )
+{ operation( opLOGICAL_OR ); }
+
+void GSM::NOT ( void )
+{ operation( opLOGICAL_NOT ); }
+
+
+/*
+void GSM::operator +  ( void )
+{ operation( opADD ); }
+
+void GSM::operator -  ( void )
+{ operation( opSUBTRACT ); }
+
+void GSM::operator *  ( void )
+{ operation( opMULTIPLY ); }
+
+void GSM::operator /  ( void )
+{ operation( opDIVIDE ); }
+
+
+int  GSM::operator == ( void )
+{ return operation( opEQUAL_TO ); }
+
+int  GSM::operator != ( void )
+{ return operation( opNOT_EQUAL_TO ); }
+
+int  GSM::operator >  ( void )
+{ return operation( opGREATER_THAN ); }
+
+int  GSM::operator <  ( void )
+{ return operation( opLESS_THAN ); }
+
+int  GSM::operator >= ( void )
+{ return operation( opGREATER_THAN_OR_EQUAL_TO ); }
+
+int  GSM::operator <= ( void )
+{ return operation( opLESS_THAN_OR_EQUAL_TO ); }
+
+
+void GSM::operator && ( void )
+{ operation( opLOGICAL_AND ); }
+
+void GSM::operator || ( void )
+{ operation( opLOGICAL_OR ); }
+
+void GSM::operator !  ( void )
+{ operation( opLOGICAL_NOT ); }
+*/
+
+//-----------------------------------------------------------------------
+  // Unary operations
+//-----------------------------------------------------------------------
 
 void GSM::Negate( void )
 {
@@ -532,31 +886,43 @@ void GSM::Negate( void )
 }
 
 
+void GSM::Output( void )
+{
+  Portion *p;
+  p = stack->Pop();
+  switch( p->Type() )
+  {
+  case porBOOL:
+    gout << ((bool_Portion *)p)->Value() << "    type: bool\n" ;
+    break;
+  case porDOUBLE:
+    gout << ((double_Portion *)p)->Value() << "    type: double\n" ;
+    break;
+  case porINTEGER:
+    gout << ((gInteger_Portion *)p)->Value() << "    type: gInteger\n" ;
+    break;
+  case porRATIONAL:
+    gout << ((gRational_Portion *)p)->Value() << "    type: gRational\n" ;
+    break;
+  case porSTRING:
+    gout << ((gString_Portion *)p)->Value() << "    type: gString\n" ;
+    break;
+  case porREFERENCE:
+    gout << ((Reference_Portion *)p)->Value() << "    type: Reference\n" ;
+    break;
+  default:
+    gerr << "** GSM Error: unknown type found in stack\n";
+  }
+}
+
+
 void GSM::Dump( void )
 {
   int i;
-  Portion *p;
   for( i = stack->Depth() - 1; i >= 0; i-- )
   {
     gout << "Stack element " << i << " : ";
-    p = stack->Pop();
-    switch( p->Type() )
-    {
-    case porDOUBLE:
-      gout << ((double_Portion *)p)->Value() << "    type: double\n" ;
-      break;
-    case porINTEGER:
-      gout << ((gInteger_Portion *)p)->Value() << "    type: gInteger\n" ;
-      break;
-    case porRATIONAL:
-      gout << ((gRational_Portion *)p)->Value() << "    type: gRational\n" ;
-      break;
-    case porREFERENCE:
-      gout << ((Reference_Portion *)p)->Value() << "    type: Reference\n" ;
-      break;
-    default:
-      gerr << "** GSM Error: unknown type found in stack\n";
-    }
+    Output();
   }
   gout << "\n";
   assert( stack->Depth() == 0 );

@@ -19,16 +19,19 @@ template <class K, class T> class HashTable
 
   //The derived classes need to define this function to do clean ups when
   //a T type member is being removed.
-  virtual void DeleteAction( T value ) { return; }
+  virtual void DeleteAction( T value ) = 0; //  { return; }
 
  protected:
   //This function should be called in the constructor of the decendents
   //because the constructor cannot call virtual function NumBuckets()
   void Init( void );
+  //This function should be called in the destructor of the decendents
+  //because the destructor cannot call virtual function DeleteAction()
+  void Flush( void );
 
  public:
   HashTable();
-  ~HashTable();
+  virtual ~HashTable();
   int IsDefined( K key ) const;
   void Define( K key, T value );
   void Remove( K key );

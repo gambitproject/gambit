@@ -28,7 +28,7 @@ template <class K, class T> void HashTable<K,T>::Init( void )
   }
 }
 
-template <class K, class T> HashTable<K,T>::~HashTable()
+template <class K, class T> void HashTable<K,T>::Flush( void )
 {
   int i;
   T removed_value;
@@ -41,6 +41,22 @@ template <class K, class T> HashTable<K,T>::~HashTable()
       DeleteAction( removed_value );
     }
   }
+}
+
+template <class K, class T> HashTable<K,T>::~HashTable()
+{
+  int i;
+  T removed_value;
+
+  for( i = 0; i < num_of_buckets; i++ )
+  {
+    if( value_bucket[i].Length() > 0 )
+    {
+      gerr << "** HashTable Error: decendent class dtor did not call Flush()\n";
+      assert(0);
+    }
+  }
+
   delete[] key_bucket;
   delete[] value_bucket;
 }
@@ -54,6 +70,8 @@ template <class K, class T> int HashTable<K,T>::ValidatedHash( K key ) const
   if( i < 0 || i >= num_of_buckets )
   {
     gerr << "** HashTable Error: Hash() generated an illegal index\n";
+    if( num_of_buckets == 0 && NumBuckets() > 0 )
+      gerr << "** HashTable Error: decendent class ctor did not call Init()\n";
     assert(0);
   }  
   return i;
