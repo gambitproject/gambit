@@ -153,9 +153,6 @@ gui:	$(OBJDIR) $(ALLGUI_OBJECTS)
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
 	    -o ../$(GUIBINARY); cd ..
 
-readefg.cc:  readefg.yy
-	bison -p efg_yy -o readefg.cc readefg.yy
-
 readnfg.cc:  readnfg.yy
 	bison -p nfg_yy -o readnfg.cc readnfg.yy
 
