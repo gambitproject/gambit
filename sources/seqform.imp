@@ -59,7 +59,7 @@ SeqFormModule<T>::SeqFormModule(const Efg &E, const SeqFormParams &p,
   ns2=S.NumSequences(2);
   ni1=E.Players()[1]->NumInfosets()+1;
   ni2=E.Players()[2]->NumInfosets()+1;
-  gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
+  //* gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
 
   ntot = ns1+ns2+ni1+ni2;
 
@@ -85,17 +85,17 @@ SeqFormModule<T>::SeqFormModule(const Efg &E, const SeqFormParams &p,
   (*A)(ns1+ns2+ni1+1,ns1+1) = -(T)1;
   (*b)[ns1+ns2+1] = -(T)1;
   (*b)[ns1+ns2+ni1+1] = -(T)1;
-  gout.SetWidth(4).SetPrec(1);
-  gout << "\nA:\n";
-  A->Dump(gout);
-  gout << "\nb:\n";
-  b->Dump(gout);
+  //* gout.SetWidth(4).SetPrec(1);
+  //* gout << "\nA:\n";
+  //* A->Dump(gout);
+  //* gout << "\nb:\n";
+  //* b->Dump(gout);
 
   tab = new LTableau<T>(*A,*b);
   eps = tab->Epsilon();
 //  tab->Refactor();  // not necessary?
-  gout << "\ntab:\n";
-  tab->Dump(gout);
+  //* gout << "\ntab:\n";
+  //* tab->Dump(gout);
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -138,7 +138,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
     solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM));
   }
 
-  gout << "\n";  
+  //* gout << "\n";  
   if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
       List[i].Dump(*params.tracefile);
@@ -193,7 +193,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
   BehavProfile<T> profile(EF);
 
-  gout << "\nIn All_Lemke() depth: " << depth;
+  //* gout << "\nIn All_Lemke() depth: " << depth;
   
   newsol =0;
   for (i = B.MinRow(); 
@@ -222,7 +222,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       // gout << "\nafter Pivot, missing: " << missing << "\n";
       // BCopy.Dump(gout);
 
-      gout << "\nDepth: " << depth << " Path: " << i;
+      //* gout << "\nDepth: " << depth << " Path: " << i;
       newsol=0;
 
       if(BCopy.SF_LCPPath(-missing,params.status)==1) {
@@ -238,7 +238,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	// gout << "\nprofile = " << profile;
       }
       else 
-	gout << ": Dead End";
+	//* gout << ": Dead End";
       
       (*A)(i,0)=-(T)1;
       if(newsol)
