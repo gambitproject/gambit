@@ -1,11 +1,12 @@
-EFG 2 D "Centipede game, 4 move" { "Player 1" "Player 2" }
+EFG 2 R "Centipede game, 4 move" { "Player 1" "Player 2" }
+""
 
 p "" 1 1 "(1,1)" { "TAKE" "PASS" } 0
-t "" 1 "Outcome 1" { 0.800000 0.200000 }
+t "" 1 "Outcome 1" { 4/5, 1/5 }
 p "" 2 1 "(2,1)" { "TAKE" "PASS" } 0
-t "" 2 "Outcome 2" { 0.400000 1.600000 }
+t "" 2 "Outcome 2" { 2/5, 8/5 }
 p "" 1 2 "(1,2)" { "TAKE" "PASS" } 0
-t "" 3 "Outcome 3" { 3.200000 0.800000 }
+t "" 3 "Outcome 3" { 16/5, 4/5 }
 p "" 2 2 "(2,2)" { "TAKE" "PASS" } 0
-t "" 4 "Outcome 4" { 1.600000 6.400000 }
-t "" 5 "Outcome 5" { 12.800000 3.200000 }
+t "" 4 "Outcome 4" { 8/5, 32/5 }
+t "" 5 "Outcome 5" { 64/5, 16/5 }
