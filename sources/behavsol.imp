@@ -109,11 +109,6 @@ template <class T> BehavSolution<T>::~BehavSolution()
 
 template <class T> void BehavSolution<T>::EvalEquilibria()
 {
-  if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
-    _IsSequential = T_YES;
-  else
-    _IsSequential = T_DONTKNOW;
-  
   if (IsComplete()) 
     if( _IsNash == T_DONTKNOW )
       if(MaxGripe() <= _Epsilon)
@@ -165,11 +160,6 @@ template <class T> void BehavSolution<T>::SetIsSubgamePerfect(TriState i)
 template <class T> TriState BehavSolution<T>::IsSubgamePerfect(void) const
 {
   ((BehavSolution<T> &) *this).EvalEquilibria(); 
-  if((_Creator != EfgAlg_USER) && (_IsNash == T_YES) && (AllSubgamesMarked(*E)))
-    ((BehavSolution<T> &) *this)._IsSubgamePerfect = T_YES;
-  else
-    ((BehavSolution<T> &) *this)._IsSubgamePerfect = T_DONTKNOW;
-
   return _IsSubgamePerfect; 
 }
 
