@@ -19,14 +19,13 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
 
   do  {
     int flag = 1;
+    NormalIter<T> niter(citer);
 
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
-      NormalIter<T> niter(citer);
-      for (int i = 2; i <= N.NumStrats(pl); i++)  {
+      for (int i = 1; i <= N.Dimensionality()[pl]; i++)  {
 	niter.Next(pl);
-	T pay = niter.Payoff(pl);
-	if (pay > current)  {
+	if (niter.Payoff(pl) > current)  {
 	  flag = 0;
 	  break;
 	}
