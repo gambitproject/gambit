@@ -101,8 +101,7 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
 {
   Infoset *s = (p->IsChance()) ? new ChanceInfoset<T>(this, n, p, br) :
                new Infoset(this, n, p, br);
-  
-  n = 1;
+  p->infosets.Append(s);
   return s;
 }
 

@@ -288,7 +288,6 @@ Infoset *BaseExtForm::AppendNode(Node *n, Player *p, int count)
   if (n->children.Length() == 0)   {
     n->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
     n->infoset->members.Append(n);
-    p->infosets.Append(n->infoset);
     while (count--)
       n->children.Append(CreateNode(n));
   }
@@ -335,7 +334,6 @@ Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
 
   Node *m = CreateNode(n->parent);
   m->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
-  p->infosets.Append(m->infoset);
   m->infoset->members.Append(m);
   if (n->parent)
     n->parent->children[n->parent->children.Find(n)] = m;
@@ -404,7 +402,6 @@ Infoset *BaseExtForm::LeaveInfoset(Node *n)
   n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
 			     n->children.Length());
   n->infoset->members.Append(n);
-  p->infosets.Append(n->infoset);
   for (int i = 1; i <= s->actions.Length(); i++)
     n->infoset->actions[i]->name = s->actions[i]->name;
 
