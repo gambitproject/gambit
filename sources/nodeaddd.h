@@ -50,7 +50,7 @@ wxFormItem *player_fitem=Add(wxMakeFormString("Player", &player_name, wxFORM_CHO
 Add(wxMakeFormNewLine());
 wxFormItem *branch_fitem=Add(wxMakeFormShort("Branches",&branches, wxFORM_TEXT));
 wxStringList *infoset_list=new wxStringList;iset_name=new char[20];
-infoset_list->Add("New");
+infoset_list->Add("New Infoset");
 if (infoset) strcpy(iset_name,infoset->GetName()); else strcpy(iset_name,"New");
 wxFormItem *iset_fitem=Add(wxMakeFormString("Iset", &iset_name, wxFORM_CHOICE,
 			new wxList(wxMakeConstraintStrings(infoset_list),0)));

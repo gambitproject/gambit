@@ -1,5 +1,5 @@
 // File: accels.cc -- functions for working with accelerators
-// @(#)accels.cc	1.9 9/11/95
+// $Id$
 //
 
 #include "wx.h"
@@ -90,7 +90,7 @@ SetLabelPosition(wxHORIZONTAL);
 wxButton *add_button = new wxButton(this, (wxFunction)add_func, "Add", 23, 242, -1, -1, 0, "add_button");
 wxButton *delete_button = new wxButton(this, (wxFunction)delete_func, "Delete", 114, 242, 80, -1, 0, "delete_button");
 wxButton *close_button = new wxButton(this, (wxFunction)close_func, "Close", 214, 242, -1, -1, 0, "close_button");
-                         new wxButton(this, (wxFunction)close_func, "Help", 294, 242, -1, -1, 0, "help_button");
+                         new wxButton(this, (wxFunction)help_func, "Help", 294, 242, -1, -1, 0, "help_button");
 key_ctrl = new wxRadioBox(this, NULL, "Ctrl", 23, 78, -1, -1, 3, accel_state_str, 3, wxHORIZONTAL, "ctrl_state");
 key_shift = new wxRadioBox(this, NULL, "Shift", 22, 143, -1, -1, 3,accel_state_str, 3, wxHORIZONTAL, "shift_state");
 

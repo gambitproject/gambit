@@ -14,7 +14,7 @@
 #define DOM_MIXED				1
 
 #define	SOLN_SECT			"Soln-Defaults"
-#define NFG_ELIMDOM_HELP		"Elimination of Dominated Strategies"
+#define ELIMDOM_HELP		"Elimination of Dominated Strategies"
 
 class DominanceSettings
 {
@@ -110,7 +110,7 @@ private:
 	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((ElimDomParamsDialog *)ob.GetClientData())->OnEvent(wxCANCEL);}
 	static void help_button_func(wxButton &,wxEvent &)
-	{wxHelpContents(NFG_ELIMDOM_HELP);}
+	{wxHelpContents(ELIMDOM_HELP);}
 
 public:
 	ElimDomParamsDialog(int numplayers,wxWindow *parent=NULL)

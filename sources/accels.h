@@ -50,6 +50,6 @@ int 	ReadAccelerators(gList<Accel> &list,const char *section="Accelerators",cons
 int 	WriteAccelerators(const gList<Accel> &list,const char *section="Accelerators",const char *file="gambit.ini");
 void	EditAccelerators(gList<Accel> &list,const gArray<AccelEvent> &events);
 
-#define ACCELERATORS_HELP	"Accelerators"
+#define ACCELERATORS_HELP	"Accelerator Keys"
 
 #endif /* mutual exclusion */
