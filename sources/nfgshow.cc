@@ -946,7 +946,10 @@ void NfgShow::OutcomeLabel(void)
 
 int NfgShow::SolveElimDom(void)
 {
-  dialogElim dialog(nf.NumPlayers(), spread);
+  gArray<gText> playerNames(nf.NumPlayers());
+  for (int pl = 1; pl <= playerNames.Length(); pl++)
+    playerNames[pl] = nf.Players()[pl]->GetName();
+  dialogElim dialog(playerNames, true, spread);
 
   if (dialog.Completed() == wxOK) {
     NFSupport *sup = cur_sup;

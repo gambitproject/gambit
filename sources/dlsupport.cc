@@ -16,9 +16,10 @@ const char *SOLN_SECT = "Soln-Defaults";
 //                  class dialogElim: Member functions
 //=========================================================================
 
-dialogElim::dialogElim(int p_numPlayers, wxWindow *p_parent /* = NULL */)
+dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
+		       wxWindow *p_parent /* = NULL */)
   : wxDialogBox(p_parent, "Dominance Elimination Parameters", TRUE),
-    m_compress(false), m_numPlayers(p_numPlayers)
+    m_mixed(p_mixed), m_compress(false), m_numPlayers(p_players.Length())
 {
   wxGetResource(SOLN_SECT, "ElimDom-All", &m_all, "gambit.ini");
   wxGetResource(SOLN_SECT, "ElimDom-Type", &m_domType, "gambit.ini");
@@ -37,31 +38,36 @@ dialogElim::dialogElim(int p_numPlayers, wxWindow *p_parent /* = NULL */)
   if (m_domType == 0 || m_domType == 1)
     m_domTypeBox->SetSelection(m_domType);
 
-  char *domMethodList[2] = {"Pure", "Mixed"};
-  m_domMethodBox = new wxRadioBox(this, NULL, "Method", -1, -1, -1, -1, 2,
-				  domMethodList, 1);
-  if (m_domMethod == 0 || m_domMethod == 1)
-    m_domMethodBox->SetSelection(m_domMethod);
+  if (m_mixed) {
+    char *domMethodList[2] = {"Pure", "Mixed"};
+    m_domMethodBox = new wxRadioBox(this, NULL, "Method", -1, -1, -1, -1, 2,
+				    domMethodList, 1);
+    if (m_domMethod == 0 || m_domMethod == 1)
+      m_domMethodBox->SetSelection(m_domMethod);
 
-  char *domPrecisionList[2] = {"Float", "Rational" };
-  m_domPrecisionBox = new wxRadioBox(this, NULL, "Precision", -1, -1, -1, -1, 2,
-				     domPrecisionList, 1);
-  if (m_domPrecision == 0 || m_domPrecision == 1)
-    m_domPrecisionBox->SetSelection(m_domPrecision);
+    char *domPrecisionList[2] = {"Float", "Rational" };
+    m_domPrecisionBox = new wxRadioBox(this, NULL, "Precision", -1, -1, -1, -1, 2,
+				       domPrecisionList, 1);
+    if (m_domPrecision == 0 || m_domPrecision == 1)
+      m_domPrecisionBox->SetSelection(m_domPrecision);
+  }
   NewLine();
 
-  wxStringList *playerList = wxStringListInts(m_numPlayers);
-  m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE, -1, -1, -1, -1,
-			      m_numPlayers, playerList->ListToArray());
-  for (int i = 1; i <= m_numPlayers; i++)
-    m_playerBox->SetSelection(i-1, TRUE);
+  m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE);
+  for (int pl = 1; pl <= m_numPlayers; pl++) {
+    if (p_players[pl] != "")
+      m_playerBox->Append(p_players[pl]);
+    else
+      m_playerBox->Append("Player" + ToText(pl));
+    m_playerBox->SetSelection(pl - 1, TRUE);
+  }
   NewLine();
   
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
-  cancelButton->SetClientData((char * )this);
+  cancelButton->SetClientData((char * ) this);
   (void) new wxButton(this, (wxFunction) CallbackHelp, "Help");
   Fit();
   Show(TRUE);
@@ -87,8 +93,10 @@ void dialogElim::OnOK(void)
   m_all = m_allBox->GetValue();
   m_compress = m_compressBox->GetValue();
   m_domType = m_domTypeBox->GetSelection();
-  m_domMethod = m_domMethodBox->GetSelection();
-  m_domPrecision = m_domPrecisionBox->GetSelection();
+  if (m_mixed) {
+    m_domMethod = m_domMethodBox->GetSelection();
+    m_domPrecision = m_domPrecisionBox->GetSelection();
+  }
   int numSelections, *selections = new int[m_numPlayers];
   numSelections = m_playerBox->GetSelections(&selections);
   m_players = gArray<int>(numSelections);

@@ -20,6 +20,7 @@ private:
   wxListBox *m_playerBox;
   wxCheckBox *m_allBox, *m_compressBox;
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
+  bool m_mixed;
   Bool m_compress, m_all;
   int m_completed, m_numPlayers;
   gArray<int> m_players;
@@ -36,7 +37,8 @@ private:
   Bool OnClose(void);
   
 public:
-  dialogElim(int p_numPlayers, wxWindow *p_parent = NULL);
+  dialogElim(const gArray<gText> &p_players, bool p_mixed,
+	     wxWindow *p_parent = NULL);
   virtual ~dialogElim();
 
   const gArray<int> &Players(void) const { return m_players; }

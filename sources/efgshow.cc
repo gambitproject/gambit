@@ -1357,7 +1357,10 @@ void EfgShow::ChangeSupport(int what)
 
 void EfgShow::SolveElimDom(void)
 {
-  dialogElim dialog(ef.NumPlayers(), this);
+  gArray<gText> playerNames(ef.NumPlayers());
+  for (int pl = 1; pl <= playerNames.Length(); pl++)
+    playerNames[pl] = ef.Players()[pl]->GetName();
+  dialogElim dialog(playerNames, false, this);
 
   if (dialog.Completed() == wxOK) {
     EFSupport *sup = cur_sup;
