@@ -157,11 +157,12 @@ private:
   void OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgLp(wxCommandEvent &);
+  void OnToolsEquilibriumCustomEfgQre(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgLp(wxCommandEvent &);
-  void OnToolsEquilibriumQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomNfgQre(wxCommandEvent &);
 
   void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);

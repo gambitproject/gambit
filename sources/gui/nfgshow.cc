@@ -46,8 +46,7 @@
 #include "algenumpure.h"
 #include "alglcp.h"
 #include "alglp.h"
-#include "dlqre.h"
-#include "nfgqre.h"
+#include "algqre.h"
 
 #include "dlelim.h"
 #include "dlsupportselect.h"
@@ -1289,73 +1288,19 @@ void NfgShow::OnToolsEquilibriumCustomLp(wxCommandEvent &)
 
 void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
 {
-  dialogQre dialog(this);
+  gList<MixedSolution> solutions;
+  if (QreNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
+    ChangeSolution(m_solutionTable->Length());
 
-  if (dialog.ShowModal() == wxID_OK) {
-    gOutput *pxifile = &gnull;
-    if (dialog.GeneratePXIFile()) {
-      wxFileDialog fileDialog(this, "Choose file for PXI output",
-			      wxPathOnly(m_filename),
-			      "", "*.pxi",
-			      wxSAVE | wxOVERWRITE_PROMPT);
-      if (fileDialog.ShowModal() != wxID_OK) {
-	return;
-      }
-
-      try {
-	pxifile = new gFileOutput(fileDialog.GetPath().c_str());
-      }
-      catch (gFileOutput::OpenFailed &ex) {
-	wxMessageBox(wxString::Format("Could not open file '%s' for writing.",
-				      fileDialog.GetPath().c_str()),
-		     "Error", wxOK, this);
-	return;
-      }
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
-    Correspondence<double, MixedSolution> solutions;
-
-    try {
-      QreNfg qre;
-      qre.SetMaxLambda(dialog.MaxLambda());
-      qre.SetStepSize(dialog.StepSize());
-
-      wxStatus status(this, "QreSolve Progress");
-      wxBusyCursor cursor;
-      qre.Solve(m_nfg, *pxifile, status, solutions);
-    }
-    catch (gSignalBreak &) {
-      guiExceptionDialog("Algorithm canceled by user", this);
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-      if (pxifile != &gnull) {
-	delete pxifile;
-      }
-      return;
-    }
-
-    if (pxifile != &gnull) {
-      delete pxifile;
-    }
-
-    if (solutions.NumPoints(1) > 0) {
-      for (int soln = 1; soln <= solutions.NumPoints(1); soln++) {
-	AddSolution(solutions.GetPoint(1, soln), true);
-      }
-      ChangeSolution(m_solutionTable->Length());
-      UpdateMenus();
-      if (!m_solutionSashWindow->IsShown())  {
-	m_solutionTable->Show(true);
-	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
-	AdjustSizes();
-      }
-    }
-    else {
-      wxMessageBox("The algorithm returned no solutions.",
-		   "Notification", wxOK, this);
-    }
+    UpdateMenus();
   }
 }
 

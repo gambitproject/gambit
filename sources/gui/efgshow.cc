@@ -61,12 +61,11 @@
 #include "dlsupportselect.h"
 #include "dlefgeditsupport.h"
 
-#include "dlqre.h"
-#include "efgqre.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
 #include "alglcp.h"
 #include "alglp.h"
+#include "algqre.h"
 
 #include "behavedit.h"
 
@@ -175,7 +174,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_POLENUM,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_QRE,
-	   EfgShow::OnToolsEquilibriumQre)
+	   EfgShow::OnToolsEquilibriumCustomEfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMPURE,
 	   EfgShow::OnToolsEquilibriumCustomNfgEnumPure)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED, 
@@ -191,7 +190,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM, 
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QRE,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
@@ -2343,6 +2342,25 @@ void EfgShow::OnToolsEquilibriumCustomEfgLp(wxCommandEvent &)
   }
 }
 
+void EfgShow::OnToolsEquilibriumCustomEfgQre(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (QreEfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
 void EfgShow::OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
@@ -2419,74 +2437,21 @@ void EfgShow::OnToolsEquilibriumCustomNfgLp(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnToolsEquilibriumQre(wxCommandEvent &)
+void EfgShow::OnToolsEquilibriumCustomNfgQre(wxCommandEvent &)
 {
-  dialogQre dialog(this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    gOutput *pxifile = &gnull;
-    if (dialog.GeneratePXIFile()) {
-      wxFileDialog fileDialog(this, "Choose file for PXI output",
-			      wxPathOnly(m_filename),
-			      "", "*.pxi",
-			      wxSAVE | wxOVERWRITE_PROMPT);
-      if (fileDialog.ShowModal() != wxID_OK) {
-	return;
-      }
-
-      try {
-	pxifile = new gFileOutput(fileDialog.GetPath().c_str());
-      }
-      catch (gFileOutput::OpenFailed &ex) {
-	wxMessageBox(wxString::Format("Could not open file '%s' for writing.",
-				      fileDialog.GetPath().c_str()),
-		     "Error", wxOK, this);
-	return;
-      }
+  gList<BehavSolution> solutions;
+  if (QreNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
     }
-
-    gList<BehavSolution> solutions;
-
-    try {
-      QreEfg qre;
-      qre.SetMaxLambda(dialog.MaxLambda());
-      qre.SetStepSize(dialog.StepSize());
-
-      wxStatus status(this, "QreSolve Progress");
-      wxBusyCursor cursor;
-      qre.Solve(m_efg, *pxifile, status, solutions);
-    }
-    catch (gSignalBreak &) {
-      guiExceptionDialog("Algorithm canceled by user", this);
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-      if (pxifile != &gnull) {
-	delete pxifile;
-      }
-      return;
-    }
-
-    if (pxifile != &gnull) {
-      delete pxifile;
-    }
-
-    if (solutions.Length() > 0) {
-      for (int soln = 1; soln <= solutions.Length(); soln++) {
-	AddProfile(solutions[soln], true);
-      }
-      ChangeProfile(m_profileTable->Length());
-      UpdateMenus();
-      if (!m_solutionSashWindow->IsShown())  {
-	m_profileTable->Show(true);
-	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
-	AdjustSizes();
-      }
-    }
-    else {
-      wxMessageBox("The algorithm returned no solutions.",
-		   "Notification", wxOK, this);
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
     }
   }
 }
