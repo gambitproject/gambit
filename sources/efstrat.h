@@ -25,7 +25,7 @@ public:
   EFActionArrays ( const EFActionArrays &a);
   virtual ~EFActionArrays();
   EFActionArrays &operator=( const EFActionArrays &a);
-  bool operator==( const EFActionArrays &a);
+  bool operator==( const EFActionArrays &a) const;
 
 };
 
@@ -46,7 +46,7 @@ public:
   virtual ~EFActionSet();
 
   EFActionSet &operator=(const EFActionSet &);
-  bool operator==(const EFActionSet &s);
+  bool operator==(const EFActionSet &s) const;
 
   //--------------------
   // Member Functions
@@ -112,7 +112,8 @@ public:
   EFSupport ( const EFSupport &);
   virtual ~EFSupport();
   EFSupport &operator=(const EFSupport &);
-  bool operator==(const EFSupport &);
+  bool operator==(const EFSupport &) const;
+  bool operator!=(const EFSupport &) const;
 
   //-------------
   // Members

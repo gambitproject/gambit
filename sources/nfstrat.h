@@ -1,8 +1,8 @@
-//#
-//# FILE: nfstrat.h -- Declaration of Normal Form Strategy data type
-//#
-//# $Id$
-//#
+//
+// FILE: nfstrat.h -- Declaration of Normal Form Strategy data type
+//
+// $Id$
+//
 
 #ifndef NFSTRAT_H
 #define NFSTRAT_H
@@ -136,6 +136,8 @@ public:
   virtual ~NFSupport();
   NFSupport &operator=(const NFSupport &s);
   bool operator==(const NFSupport &s) const;
+  bool operator!=(const NFSupport &s) const;
+
 
   //---------
   // Members

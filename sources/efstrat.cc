@@ -41,7 +41,7 @@ bool operator==(const gArray<Action *> &a, const gArray<Action *> &b)
 }
 #endif
 
-bool EFActionArrays::operator==(const EFActionArrays &a)
+bool EFActionArrays::operator==(const EFActionArrays &a) const
 {
   return (acts == a.acts);
 }
@@ -85,7 +85,7 @@ EFActionSet &EFActionSet::operator=(const EFActionSet &s)
   return *this;
 }
 
-bool EFActionSet::operator==(const EFActionSet &s)
+bool EFActionSet::operator==(const EFActionSet &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -207,7 +207,7 @@ EFSupport &EFSupport::operator=(const EFSupport &s)
   return *this;
 }
 
-bool EFSupport::operator==(const EFSupport &s)
+bool EFSupport::operator==(const EFSupport &s) const
 {
   if (sets.Length() != s.sets.Length())
     return false;
@@ -215,6 +215,11 @@ bool EFSupport::operator==(const EFSupport &s)
   int i;
   for (i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
   return (i > sets.Length());
+}
+
+bool EFSupport::operator!=(const EFSupport &s) const
+{
+  return !(*this == s);
 }
 
 //-----------------------------

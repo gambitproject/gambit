@@ -1,8 +1,8 @@
-//#
-//# FILE: nfstrat.cc -- Implementation of strategy representation for nfg
-//#
-//# $Id$
-//#
+//
+// FILE: nfstrat.cc -- Implementation of strategy representation for nfg
+//
+// $Id$
+//
 
 #include "nfstrat.h"
 #include "nfplayer.h"
@@ -236,8 +236,10 @@ bool NFSupport::operator==(const NFSupport &s) const
   else return (false);
 }
   
-  
-  
+bool NFSupport::operator!=(const NFSupport &s) const
+{
+  return !(*this == s);
+}
 
 //------------------------
 // NFSupport: Members
