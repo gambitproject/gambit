@@ -3591,6 +3591,7 @@ appreciate getting feedback on this.
 # AllPerfect
 # AllSequential 
 # AllSubgamePerfect
+# ManyNash
 # OneNash
 # OnePerfect
 # OneSequential
@@ -5222,14 +5223,12 @@ or equal to the string \verb+y+, using the native character set of the machine.
 \item\lex{LiapSolve}
 \protect \large \begin{verbatim}
 LiapSolve[start->BEHAV, {asNfg->False}, {stopAfter->1}, 
-          {nTries->10}, {maxitsN->20}, {tolN->0.000000}, 
-          {maxits1->100}, {tol1->0.000000}, {time<->0}, 
+          {nTries->10}, {accuracy->0.000000}, {time<->0}, 
           {nEvals<->0}, {traceFile<->(Output)}, 
-          {traceLevel->0}] =: LIST(BEHAV) 
+          {traceLevel->0}] =: LIST(BEHAV)
 LiapSolve[start->MIXED, {stopAfter->1}, {nTries->10}, 
-          {maxitsN->20}, {tolN->0.000000}, {maxits1->100}, 
-          {tol1->0.000000}, {time<->0}, {nEvals<->0}, 
-          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED) 
+          {accuracy->0.000000}, {time<->0}, {nEvals<->0}, 
+          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 
@@ -5260,17 +5259,10 @@ equilibrium. Default is 10.
 \item
 [stopAfter:] Sets the number of equilibria to find.  Default is 1.
 \item
-[maxitsN:] Sets the maximum number of iterations in the
-$n$-dimensional optimization.  Default is 10.
-\item
-[tolN:] Sets the tolerance for the $n$-dimensional optimization
-routine.  Default is 1.0e-10.
-\item
-[maxits1:] Sets the maximum number of iterations in the
-one-dimensional line search.  Default is 100.
-\item
-[tol1:] Sets the tolerance for the one-dimensional line search.
-Default is 2.0e-10.
+[accuracy:] Resulting solutions are ``epsilon equilibria'' to at least
+this accuracy.  I. e., no unilateral deviation by any player will
+result in an improvement of more than the accuracy.  Default is
+$1.0e-8$.
 \item
 [time:] Returns the elapsed time for the operation.
 \item
@@ -6291,17 +6283,15 @@ created by one of these algorithms have a null lambda value.
 \item\lex{QreSolve}
 \protect \large \begin{verbatim}
 QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(MIXED) 
+         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
+         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(MIXED),
 QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(BEHAV) 
+         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
+         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(BEHAV),
 \end{verbatim}\normalsize
 
 \bd 
@@ -6336,17 +6326,10 @@ returned contains the full sequence of profiles computed from each successive
 value of $\lambda$.  The default value is \verb+False+, in which case only
 the profile for the last value of $\lambda$ computed is returned.
 \item
-[maxitsN:] Sets the maximum number of iterations for the $n$-dimensional
-optimization routine.  The default value is $200$.
-\item
-[tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
-The default is 1.0e-10.
-\item
-[maxits1:] Sets the maximum number of iterations for the one-dimensional
-optimization routine.  The default is $100$.
-\item
-[tol1:] Sets the tolerance for the one-dimensional optimization routine.
-The default is 2.0e-10.
+[accuracy:] Resulting solutions are ``epsilon QRE'' to at least this
+accuracy.  I. e., for the given $\lambda$, no unilateral deviation by
+any player will result in an improvement of more than the accuracy.
+Default is $1.0e-8$.
 \item
 [time:] Returns the amount of time consumed by the
 algorithm.
@@ -7388,18 +7371,11 @@ AllNash[e->EFG, {stopAfter->0}, {nTries->0},
 \end{verbatim}\normalsize
 
 \bd 
-Searches for all Nash equilibria of the extensive form game
+Finds all Nash equilibria of the extensive form game
 \verb+e+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  ms:=MarkedSubgames[e];UnMarkSubgames[e];
-  s:=IterativeUnDominated[Nfg[e],strong->True];
-  If[NumPlayers[e] = 2, 
-    m:=EnumMixedSolve[s,0,precision],
-    << InfiniteLoopWarning[stopAfter,nTries];
-    m:=LiapSolve[Centroid[s],stopAfter,nTries]
-  ];
-  MarkSubgames[ms];Behav[m]
+  PolEnumSolve[e,False,stopAfter];
 \end{verbatim} 
 \ed
 
@@ -7410,15 +7386,14 @@ AllNash[n->NFG, {stopAfter->0}, {nTries->0},
 \end{verbatim}\normalsize
 
 \bd 
-Searches for all Nash equilibria of the normal form game
+Finds all Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
   s:=IterativeUnDominated[n,strong->True];
   If[NumPlayers[n] = 2, 
     EnumMixedSolve[s,0,precision],
-    << InfiniteLoopWarning[stopAfter,nTries];
-    LiapSolve[Centroid[s],stopAfter,nTries]
+    PolEnumSolve[s,stopAfter]
   ]
 \end{verbatim} 
 \ed
@@ -8027,10 +8002,9 @@ game instead of a support.  See the built-in function,
 
 \item\lex{LiapSolve}
 \protect \large \begin{verbatim}
-LiapSolve[nfg->NFG, {stopAfter->1}, {nTries->10}, {maxitsN->20}, 
-          {tolN->0.000000}, {maxits1->100}, {tol1->0.000000}, 
-          {time<->0.000000}, {nEvals<->0}, {traceFile<->(Output)}, 
-          {traceLevel->0}] =: LIST(MIXED) 
+LiapSolve[nfg->NFG, {stopAfter->01}, {nTries->10}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {traceFile<->NullOut}, {traceLevel->00}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd 
@@ -8039,17 +8013,15 @@ game instead of a support.  See the built-in function,
 \verb+LiapSolve+ for a description of the parameters.
 \begin{verbatim}
   LiapSolve[Centroid[Support[nfg]], stopAfter, nTries,
-  maxitsN, tolN, maxits1, tol1, time, nEvals, traceFile,
-  traceLevel]
+  accuracy, time, nEvals, traceFile, traceLevel]
 \end{verbatim} 
 \ed
 
 \item\lex{LiapSolve}
 \protect \large \begin{verbatim}
-LiapSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, {nTries->10}, 
-          {maxitsN->20}, {tolN->0.000000}, {maxits1->100}, 
-          {tol1->0.000000}, {time<->0.000000}, {nEvals<->0}, 
-          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+LiapSolve[efg->EFG, {asNfg->False}, {stopAfter->01}, {nTries->10}, 
+          {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+          {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
 \bd 
@@ -8058,8 +8030,7 @@ game instead of a support.  See the built-in function,
 \verb+LiapSolve+ for a description of the parameters.
 \begin{verbatim}
   LiapSolve[Centroid[Support[efg]], asNfg, stopAfter, nTries,
-  maxitsN, tolN, maxits1, tol1, time, nEvals, traceFile,
-  traceLevel]
+  accuracy, time, nEvals, traceFile, traceLevel]
 \end{verbatim} 
 \ed
 
@@ -8123,6 +8094,48 @@ game instead of a support.  See the built-in function,
 \ed
 
 %--M--
+
+\item\lex{ManyNash}
+\protect \large \begin{verbatim}
+ManyNash[n->NFG,{stopAfter->0},{nTries->0},
+         {precision->Float}]=:LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+  s:=IterativeUnDominated[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    LiapSolve[Centroid[s],stopAfter,nTries,accuracy->.00000001]
+\end{verbatim} 
+\ed
+
+\item\lex{ManyNash}
+\protect \large \begin{verbatim}
+ManyNash[e->EFG,{stopAfter->0},{nTries->0},
+         {precision->Float}]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all Nash equilibria of the extensive form game
+\verb+e+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  s:=IterativeUnDominated[Nfg[e],strong->True];
+  If[NumPlayers[e] = 2, 
+    m:=EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    m:=LiapSolve[Centroid[s],stopAfter,nTries,accuracy->.00000001]
+  ];
+  MarkSubgames[ms];Behav[m]
+]  
+\end{verbatim} 
+\ed
 
 \item\lex{MarkedSubgames}
 \protect \large \begin{verbatim}
@@ -8830,12 +8843,11 @@ each player.
 
 \item\lex{QreSolve}
 \protect \large \begin{verbatim}
-QreSolve[efg->EFG, {pxifile->}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(BEHAV) 
+QreSolve[efg->EFG, {pxifile->""}, {minLam->.001}, {maxLam->500.}, 
+         {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {nIters<->00}, {traceFile<->NullOut}, 
+         {traceLevel->00}] =: LIST(BEHAV),
 \end{verbatim}\normalsize
 
 \bd 
@@ -8844,19 +8856,17 @@ game instead of a support.  See the built-in function,
 \verb+QreSolve+ for a description of the parameters.
 \begin{verbatim}
   QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
-  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
-  traceLevel]
+  fullGraph,accuracy,time,nEvals,nIters,traceFile, traceLevel]
 \end{verbatim} 
 \ed
 
 \item\lex{QreSolve}
 \protect \large \begin{verbatim}
-QreSolve[nfg->NFG, {pxifile->}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(MIXED) 
+QreSolve[nfg->NFG, {pxifile->""}, {minLam->.001}, {maxLam->500.}, 
+         {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {nIters<->00}, {traceFile<->NullOut}, 
+         {traceLevel->00}] =: LIST(MIXED),
 \end{verbatim}\normalsize
 
 \bd 
@@ -8865,8 +8875,7 @@ game instead of a support.  See the built-in function,
 \verb+QreSolve+ for a description of the parameters.
 \begin{verbatim}
   QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
-  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
-  traceLevel]
+  fullGraph,accuracy,time,nEvals,nIters,traceFile, traceLevel]
 \end{verbatim} 
 \ed
 
