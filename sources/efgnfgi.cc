@@ -1,6 +1,5 @@
 // File: efgnfgi.cc -- instantiations of the normal->extensive forms interface
-// $Id$
-#include "extform.h"
+// @(#)efgnfgi.cc	1.3 8/7/95
 #include "efgnfgi.h"
 #include "rational.h"
 
