@@ -15,7 +15,7 @@ protected:
 	bool sig;
 	static void button_proc(wxButton& but, wxCommandEvent& event);
 public:
-	wxStatus(wxFrame *frame,const char *title="Progress", int x=300, int y=300, int w=300, int h=250);
+	wxStatus(wxFrame *frame,const char *title="Progress");
 	// functions for gProgress::gOutput
 	int GetWidth(void) {return Width;}
 	gOutput &SetWidth(int w) {Width=w;return *this;}

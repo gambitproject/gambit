@@ -1,9 +1,12 @@
+// File: wxstatus.cc -- defines the status/progress indicator class for use
+// with solution algorithms in the Gambit GUI
+// $Id$
 #include "wx.h"
 #include "wxstatus.h"
 
 static char tmp_str[200];
 
-wxStatus::wxStatus(wxFrame *frame,const char *title, int x, int y, int w, int h):
+wxStatus::wxStatus(wxFrame *frame,const char *title)
 	wxDialogBox(frame,(char *)title,FALSE,-1,-1,300,250)
 {
 sig=0;Width=0;Prec=6;Represent='f';
@@ -17,7 +20,7 @@ cancel->SetClientData((char *)this);
 Show(TRUE);
 }
 
-void wxStatus::button_proc(wxButton& but, wxCommandEvent& event)
+void wxStatus::button_proc(wxButton& but, wxCommandEvent& )
 {((wxStatus *)but.GetClientData())->SetSignal();}
 
 gOutput &wxStatus::operator<<(int x)
@@ -32,11 +35,11 @@ gOutput &wxStatus::operator<<(double x)
 {
 	switch (Represent) {
 	case 'f':
-		sprintf(tmp_str, "%*.*lf", Width, Prec, x);
+		sprintf(tmp_str, "%*.*f", Width, Prec, x);
 		twin->SetValue(tmp_str);
 		break;
 	case 'e':
-		sprintf(tmp_str, "%*.*le", Width, Prec, x);
+		sprintf(tmp_str, "%*.*e", Width, Prec, x);
 		twin->SetValue(tmp_str);
 }
 return *this;
