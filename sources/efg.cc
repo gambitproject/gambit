@@ -514,7 +514,7 @@ Node BaseExtForm::DeleteNode(const Node &n, int keep)
 
 void BaseExtForm::SetOutcome(const Node &n, int outcome)
 {
-  if (outcome < outcomes.Length())   return;
+  if (outcome <= 0 || outcome > outcomes.Length())   return;
   
   int game = n.GetGame();
   if (!nodes.IsDefined(game) || !nodes(game)->IsMember(n))  return;
@@ -838,7 +838,7 @@ void BaseExtForm::RemoveOutcome(int outc)
 //
 gString BaseExtForm::GetOutcomeLabel(int outc) const
 {
-  if (outc > 0 && outc < outcomes.Length())
+  if (outc > 0 && outc <= outcomes.Length())
     return outcomes[outc]->GetName();
   else
     return "";
@@ -849,7 +849,7 @@ gString BaseExtForm::GetOutcomeLabel(int outc) const
 //
 void BaseExtForm::LabelOutcome(int outc, const gString &name)
 {
-  if (outc > 0 && outc < outcomes.Length())
+  if (outc > 0 && outc <= outcomes.Length())
     outcomes[outc]->SetName(name);
 }
 
