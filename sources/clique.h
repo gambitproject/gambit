@@ -6,8 +6,19 @@
 //
 
 //  connected components and their maximal cliques in bipartite graphs 
+//  Bernhard von Stengel
+// 
+//  update 15 August 1998:
+//
+//    - candidate passed to  candtry12  without  poscand,  similarly
+//      candidates and not their stack positions stored in nonconnected-list
+//      (removes serious bug)
+//
+//    - if CAND1 and CLIQUE1 both empty, terminate search;
+//      dito CAND2 and CLIQUE2
+//    - outgraph left in;  
+//    
 //    8 March 1998
-//    Bernhard von Stengel
 //
 //    For a bipartite graph given as a set of pairs  (i,j), it outputs 
 //    - the connected components of that graph, and for each component
@@ -165,8 +176,8 @@
 #define MAXINP2 MAXINP1  // max. no of right nodes in input 
 #define MAXEDGES   50000       // max. no of edges in input 
 #define MAXCO  MIN(MAXINP1, MAXINP2) + 1
-      // max. no of connected components;  on the smaller side,
-      // each node could be in different component 
+  // max. no of connected components;  on the smaller side,
+  // each node could be in different component 
 #define STKSIZE  (MAXM + 1) * (MAXN + 1)  
   // largest stack usage for full graph 
 
@@ -191,48 +202,46 @@ private:
   gArray<int> firstedge;
   int maxinp1,maxinp2;
   void candtry1 (int stk[], // stack 
-		 bool connected[MAXM][MAXN],
-		 int cand,  // the candidate from NODES1  to be added to CLIQUE	 
-		 int poscand,  // its stack position 
-		 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-		 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-		 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-		 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-		 int tos,  // top of stack 
-		 int orignode1[MAXM],
-		 int orignode2[MAXN]
-	       );
+	 bool connected[MAXM][MAXN],
+	 int cand,  // the candidate from NODES1  to be added to CLIQUE	 
+	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+	 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+	 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+	 int tos,  // top of stack 
+	 int orignode1[MAXM],
+	 int orignode2[MAXN]
+         );
   void candtry2 (int stk[], // stack 
-		 bool connected[MAXM][MAXN],
-		 int cand,  // the candidate from NODES2  to be added to CLIQUE 
-		 int poscand,  // its stack position 
-		 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-		 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-		 int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-		 int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-		 int tos,  // top of stack 
-		 int orignode1[MAXM],
-		 int orignode2[MAXN]);
+	 bool connected[MAXM][MAXN],
+	 int cand,  // the candidate from NODES2  to be added to CLIQUE 
+	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+	 int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+	 int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+	 int tos,  // top of stack 
+	 int orignode1[MAXM],
+	 int orignode2[MAXN]);
   void extend (int stk[], // stack 
-	       bool connected[MAXM][MAXN],
-	       int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-	       int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-	       int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-	       int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-	       int tos,   // top of stack,   tos >= ec1, ec2  
-	       int orignode1[MAXM],   // original node numbers as input 
-	       int orignode2[MAXN]);
+       bool connected[MAXM][MAXN],
+       int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+       int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+       int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+       int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+       int tos,   // top of stack,   tos >= ec1, ec2  
+       int orignode1[MAXM],   // original node numbers as input 
+       int orignode2[MAXN]);
   void findfixpoint(int stk[], // stack 
-		    bool connected[MAXM][MAXN],
-		    int *savelist,      // position of savelist on the stack 
-		    int *tmplist,       // position of tmplist on the stack 
-		    int *minnod,        // currently lowest no. of disconnections 
-		    int sninspect, int ecinspect,
-		    int scother, int ecother,
-		    bool binspect1,  // inspected nodes are in class1, o/w class2 
-		    bool *bfound,  // a new lower no. of disconnections was found 
-		    int *fixp,     // the new fixpoint, if *bfound = true  
-		    int *posfix);    // position of fixpoint on the stack, if *bfound 
+	    bool connected[MAXM][MAXN],
+	    int *savelist,      // position of savelist on the stack 
+	    int *tmplist,       // position of tmplist on the stack 
+	    int *minnod,        // currently lowest no. of disconnections 
+	    int sninspect, int ecinspect,
+	    int scother, int ecother,
+	    bool binspect1,  // inspected nodes are in class1, o/w class2 
+	    bool *bfound,  // a new lower no. of disconnections was found 
+	    int *fixp,     // the new fixpoint, if *bfound = true  
+	    int *posfix);    // position of fixpoint on the stack, if *bfound 
 public:
   EnumCliques(gArray<edge> &, int, int);
   ~EnumCliques();
