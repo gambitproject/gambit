@@ -47,53 +47,88 @@ template <class T> gNode<T>::~gNode()
 //                 gList<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> int gList<T>::InsertAt(const T &t, int num)
-{
-  if (!length)  {
-    head = tail = new gNode<T>(t, 0, 0);
-    return ++length;
-  }
-
-  gNode<T> *n = head;
-  for (int i = 2; i <= num; i++, n = n->next);
-  n = new gNode<T>(t, n->prev, n);
-  if (n->prev)
-    n->prev->next = n;
-  else
-    head = n;
-  if (n->next)
-    n->next->prev = n;
-  else
-    tail = n;
-  length++;
-  return num;
-}
-
-template <class T> gList<T>::gList(void) : length(0), head(0), tail(0)
+template <class T> gList<T>::gList(void) 
+: length(0), head(0), tail(0), CurrIndex(0), CurrNode(0)
 { }
 
 template <class T> gList<T>::gList(const gList<T> &b)
  : length(b.length)
 {
-  if (length)   {
+  if (length)   
+  {
     gNode<T> *n = b.head;
     head = new gNode<T>(n->data, 0, 0);
     n = n->next;
     tail = head;
-    while (n)  {
+    while (n)  
+    {
       tail->next = new gNode<T>(n->data, tail, 0);
       n = n->next;
       tail = tail->next;
     }
+    CurrIndex = 1;
+    CurrNode = head;
   }
   else
+  {
     head = tail = 0;
+    CurrIndex = 0;
+    CurrNode = 0;
+  }
 }
 
 template <class T> gList<T>::~gList()
 {
   Flush();
 }
+
+template <class T> int gList<T>::InsertAt(const T &t, int num)
+{
+  assert( num >= 1 && num <= length + 1 );
+
+  if (!length)  
+  {
+    head = tail = new gNode<T>(t, 0, 0);
+    length = 1;
+    CurrIndex = 1;
+    CurrNode = head;
+    return length;
+  }
+
+  gNode<T> *n;
+  int i;
+
+  if( num <= 1 )
+  {
+    n = new gNode<T>(t, 0, head);
+    head->prev = n;
+    CurrNode = head = n;
+    CurrIndex = 1;
+  }
+  else if( num >= length + 1)
+  {
+    n = new gNode<T>(t, tail, 0);
+    tail->next = n;
+    CurrNode = tail = n;
+    CurrIndex = length + 1;
+  }
+  else
+  {
+    assert( CurrIndex >= 1 && CurrIndex <= length );
+    if( num < CurrIndex )
+      for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
+    else
+      for (i = CurrIndex, n = CurrNode; i < num; i++, n = n->next);
+    n = new gNode<T>(t, n->prev, n);
+    CurrNode = n->prev->next = n->next->prev = n;
+    CurrIndex = num;
+  }
+
+  length++;
+  return num;
+}
+
+//--------------------- visible functions ------------------------
 
 template <class T> gList<T> &gList<T>::operator=(const gList<T> &b)
 {
@@ -133,16 +168,30 @@ template <class T> int gList<T>::operator!=(const gList<T> &b) const
 template <class T> const T &gList<T>::operator[](int num) const
 {
   assert(num >= 1 && num <= length);
-  gNode<T> *n = head;
-  for (int i = 1; i < num; i++, n = n->next);
+  assert(CurrIndex >= 1 && CurrIndex <= length);
+  gNode<T> *n;
+  int i;
+  if( num < CurrIndex )
+    for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
+  else
+    for (i = CurrIndex, n = CurrNode; i < num; i++, n = n->next);
+  // CurrIndex = i;
+  // CurrNode = n;
   return n->data;
 }
 
 template <class T> T &gList<T>::operator[](int num)
 {
   assert(num >= 1 && num <= length);
-  gNode<T> *n = head;
-  for (int i = 1; i < num; i++, n = n->next);
+  assert(CurrIndex >= 1 && CurrIndex <= length);
+  gNode<T> *n;
+  int i;
+  if( num < CurrIndex )
+    for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
+  else
+    for (i = CurrIndex, n = CurrNode; i < num; i++, n = n->next);
+  CurrIndex = i;
+  CurrNode = n;
   return n->data;
 }
 
@@ -192,6 +241,8 @@ template <class T> gList<T> &gList<T>::Combine(gList<T> &b)
     b.head = 0;
     b.tail = 0;
     b.length = 0;
+    b.CurrIndex = 0;
+    b.CurrNode = 0;
     return *this;
   }
 
@@ -202,17 +253,14 @@ template <class T> gList<T> &gList<T>::Combine(gList<T> &b)
   b.head = 0;
   b.tail = 0;
   b.length = 0;
+  b.CurrIndex = 0;
+  b.CurrNode = 0;
   return *this;
 }
 
 template <class T> int gList<T>::Append(const T &t)
 {
-  tail = new gNode<T>(t, tail, 0);
-  if (tail->prev)
-    tail->prev->next = tail;
-  else
-    head = tail;
-  return ++length;
+  return InsertAt(t, length + 1);
 }
 
 template <class T> int gList<T>::Insert(const T &t, int n)
@@ -223,21 +271,34 @@ template <class T> int gList<T>::Insert(const T &t, int n)
 template <class T> T gList<T>::Remove(int num)
 {
   assert(num >= 1 && num <= length);
-  gNode<T> *n = head;
-  for (int i = 1; i < num; i++, n = n->next);
+  assert(CurrIndex >= 1 && CurrIndex <= length);
+  gNode<T> *n;
+  int i;
+
+  if( num < CurrIndex )
+    for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
+  else
+    for (i = CurrIndex, n = CurrNode; i < num; i++, n = n->next);
+
   if (n->prev)
     n->prev->next = n->next;
   else
     head = n->next;
-
   if (n->next)
     n->next->prev = n->prev;
   else
     tail = n->prev;
 
+  length--;
+  CurrIndex = i;
+  CurrNode = n->next;
+  if( CurrIndex > length )
+  {
+    CurrIndex = length;
+    CurrNode = tail;
+  }
   T ret = n->data;
   delete n;
-  length--;
   return ret;
 }
 
@@ -270,6 +331,8 @@ template <class T> void gList<T>::Flush(void)
     n = next;
   }
   head = tail = 0;
+  CurrIndex = 0;
+  CurrNode = 0;
 }
 
 template <class T> void gList<T>::Dump(gOutput &f) const

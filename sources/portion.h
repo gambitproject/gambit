@@ -992,12 +992,14 @@ public:
 //                          List class
 //---------------------------------------------------------------------
 
-template <class T> class gBlock;
+// template <class T> class gBlock;
+template <class T> class gList;
 
 class ListPortion : public Portion
 {
 protected:
-  gBlock< Portion* >* _Value;
+  // gBlock< Portion* >* _Value;
+  gList< Portion* >* _Value;
   ListPortion( void );
 
   PortionType      _DataType;
@@ -1012,7 +1014,8 @@ public:
 
   void SetOwner( Portion* p );
 
-  gBlock< Portion* >& Value( void ) const;
+  // gBlock< Portion* >& Value( void ) const;
+  gList< Portion* >& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -1043,7 +1046,8 @@ class ListValPortion : public ListPortion
 {
 public:
   ListValPortion( void );
-  ListValPortion( gBlock< Portion* >& value );
+  // ListValPortion( gBlock< Portion* >& value );
+  ListValPortion( gList< Portion* >& value );
   virtual ~ListValPortion();
   bool IsReference( void ) const;
 };
@@ -1051,7 +1055,7 @@ public:
 class ListRefPortion : public ListPortion
 {
 public:
-  ListRefPortion( gBlock< Portion* >& value );
+  ListRefPortion( gList< Portion* >& value );
   virtual ~ListRefPortion();
   bool IsReference( void ) const;
 };

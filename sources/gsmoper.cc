@@ -165,7 +165,8 @@ Portion* GSM_Concat_List( Portion** param )
   int i;
   int append_result;
 
-  gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
+  // gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
+  gList<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
   result = new ListValPortion( ( (ListPortion*) param[ 0 ] )->Value() );
   for( i = 1; i <= p_value.Length(); i++ )
   {

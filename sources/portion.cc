@@ -24,11 +24,12 @@ class Portion;
 
 #include "garray.imp"
 
-TEMPLATE class gArray<Portion *>;
+//TEMPLATE class gArray<Portion *>;
 
 #include "gblock.imp"
 
-TEMPLATE class gBlock<Portion*>;
+//TEMPLATE class gBlock<Portion*>;
+
 
 #ifdef __BORLANDC__
 #pragma option -Jgx
@@ -2153,7 +2154,8 @@ bool InputRefPortion::IsReference( void ) const
 //                          List class
 //---------------------------------------------------------------------
 
-#include "gblock.h"
+// #include "gblock.h"
+#include "glist.h"
 
 ListPortion::ListPortion( void )
 { 
@@ -2164,7 +2166,8 @@ ListPortion::~ListPortion()
 { }
 
 
-gBlock< Portion* >& ListPortion::Value( void ) const
+// gBlock< Portion* >& ListPortion::Value( void ) const
+gList< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
 
 
@@ -2253,7 +2256,8 @@ void ListPortion::AssignFrom( Portion* p )
   int i;
   int length;
   int result;
-  gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
+  //gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
+  gList< Portion* >& value = *( ( (ListPortion*) p )->_Value );
 
   assert( p->Type() == Type() );
   assert( PortionTypeMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
@@ -2305,15 +2309,19 @@ bool ListPortion::operator == ( Portion *p ) const
 
 
 ListValPortion::ListValPortion( void )
-{ _Value = new gBlock< Portion* >; }
+{ 
+  // _Value = new gBlock< Portion* >;
+  _Value = new gList< Portion* >;
+}
 
-ListValPortion::ListValPortion( gBlock< Portion* >& value )
+// ListValPortion::ListValPortion( gBlock< Portion* >& value )
+ListValPortion::ListValPortion( gList< Portion* >& value )
 { 
   int i;
   int length;
   int result;
 
-  _Value = new gBlock< Portion* >; 
+  _Value = new gList< Portion* >; 
 
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
@@ -2333,7 +2341,8 @@ bool ListValPortion::IsReference( void ) const
 { return false; }
 
 
-ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
+// ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
+ListRefPortion::ListRefPortion( gList< Portion* >& value )
 { _Value = &value; }
 
 ListRefPortion::~ListRefPortion()

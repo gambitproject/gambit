@@ -30,6 +30,9 @@ template <class T> class gList  {
     int length;
     gNode<T> *head, *tail;
 
+    int CurrIndex;
+    gNode<T> *CurrNode;
+
 //
 // Insert the given element at the specified location.  Does not do any
 // error checking as it assumes that the members which call it have already
