@@ -1263,59 +1263,57 @@ BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
                     1, "Edit Behav Solution", parent, ANY_BUTTON),
       soln(soln_), dim(soln_.Support().NumActions())
 {
-    num_isets = soln.Game().TotalNumInfosets();
-    Show(FALSE);
-    int j;
-    int max_dim = gmax(dim);
-    int num_players = dim.Lengths().Length();
+  num_isets = soln.Game().TotalNumInfosets();
+  Show(FALSE);
+  int j;
+  int max_dim = gmax(dim);
+  int num_players = dim.Lengths().Length();
 
-    DrawSettings()->SetColWidth(8, 1);  // Player name "Player #" = 8 chars
-    DrawSettings()->SetColWidth(5, 2);  // Iset name (assume 5 letters average);
-    SetCell(1, 1, "Player");
-    Bold(1, 1, 0, TRUE);
-    SetCell(1, 2, "Iset");
-    Bold(1, 2, 0, TRUE);
-    int cur_pos = 2;
+  DrawSettings()->SetColWidth(8, 1);  // Player name "Player #" = 8 chars
+  DrawSettings()->SetColWidth(5, 2);  // Iset name (assume 5 letters average);
+  SetCell(1, 1, "Player");
+  Bold(1, 1, 0, TRUE);
+  SetCell(1, 2, "Iset");
+  Bold(1, 2, 0, TRUE);
+  int cur_pos = 2;
+  
+  for (j = 1; j <= num_players; j++)  {    // print the players
+    if (dim.Lengths()[j] == 0) 
+      continue;
 
-    for (j = 1; j <= num_players; j++)        // print the player 's
-    {
-        if (dim.Lengths()[j] == 0) 
-            continue;
+    SetCell(cur_pos, 1, soln.Game().Players()[j]->GetName());
 
-        SetCell(cur_pos, 1, soln.Game().Players()[j]->GetName());
+    for (int k = 1; k <= dim.Lengths()[j]; k++) {  // print the infosets
+      // Display ISET in the same format as that selected for the main tree
+      // display below the node.  That is, either the infoset name or the
+      // infoset id.  Check the TreeDrawSettings for the current value.
+      gText iset_label;
 
-        for (int k = 1; k <= dim.Lengths()[j]; k++) // print the infoset 's
-        {
-            // Display ISET in the same format as that selected for the main tree
-            // display below the node.  That is, either the infoset name or the
-            // infoset id.  Check the TreeDrawSettings for the current value.
-            gText iset_label;
+      if (iset_disp == NODE_BELOW_ISETID)
+	iset_label = "("+ToText(j)+","+ToText(k)+")";
+      else
+	iset_label = soln.Game().Players()[j]->Infosets()[k]->GetName();
 
-            if (iset_disp == NODE_BELOW_ISETID)
-                iset_label = "("+ToText(j)+","+ToText(k)+")";
-            else
-                iset_label = soln.Game().Players()[j]->Infosets()[k]->GetName();
+      SetCell(cur_pos, 2, iset_label);
+      
+      for (int l = 1; l <= dim(j, k); l++) {
+	// print actual values
+	Action *action = soln.Game().Players()[j]->Infosets()[k]->Actions()[l];
+	SetCell(cur_pos, 2+l, ToText(soln(action)));
+	SetType(cur_pos, 2+l, gSpreadStr);
+      }
+      for (int l = dim(j, k)+1; l <= max_dim; l++) 
+	HiLighted(cur_pos, 2+l, 0, TRUE);
 
-            SetCell(cur_pos, 2, iset_label);
-            int l;
-
-            for (l = 1; l <= dim(j, k); l++) {
-	      // print actual values
-	      Action *action = soln.Game().Players()[j]->Infosets()[k]->Actions()[l];
-	      SetCell(cur_pos, 2+l, ToText(soln(action)));
-	    }
-            for (l = dim(j, k)+1; l <= max_dim; l++) 
-                HiLighted(cur_pos, 2+l, 0, TRUE);
-
-            cur_pos++;
-        }
+      cur_pos++;
     }
+  }
 
-    SetCurCol(3);
-    SetCurRow(2);
-    MakeButtons(OK_BUTTON|CANCEL_BUTTON|PRINT_BUTTON|HELP_BUTTON);
-    Redraw();
-    Show(TRUE);
+  SetCurCol(3);
+  SetCurRow(2);
+  MakeButtons(OK_BUTTON|CANCEL_BUTTON|PRINT_BUTTON|HELP_BUTTON);
+  Redraw();
+  Show(TRUE);
 }
 
 

@@ -1,6 +1,9 @@
-// File: nfgsoln.cc --  all solution display related routines for the normal
+//
+// FILE: nfgsoln.cc --  all solution display related routines for the normal
 // form.
+//
 // $Id$
+//
 
 #include "wx.h"
 #include "nfgconst.h"
@@ -821,92 +824,89 @@ private:
     gArray<int> dim;
 
 public:
-    // Constructor
-    MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
-        :  SpreadSheet3D(soln_.Game().NumPlayers() + 1,
-                         gmax(soln_.Support().NumStrats()) + 1,
-                         1, "Edit Mixed Solution", parent, ANY_BUTTON),
-           soln(soln_)
-    {
-        Show(FALSE);
-        int i, j;
-        const NFSupport &sup = soln.Support();
-        dim = sup.NumStrats();
-        int max_dim = gmax(dim);
-        int num_players = dim.Length();
-
-        DrawSettings()->SetColWidth(8, 1);
-
-        for (i = 1; i <= num_players; i++)       // label rows
-        {
-            gText tmp_str = sup.Game().Players()[i]->GetName();
-
-            if (tmp_str == "") 
-                tmp_str = "Player " + ToText(i);
-
-            SetCell(i + 1, 1, tmp_str);
-            Bold(i + 1, 1, 0, TRUE);
-        }
-
-        for (i = 1; i <= max_dim; i++)            // label cols
-        {
-            SetCell(1, i + 1, ToText(i));
-            Bold(1, i + 1, 0, TRUE);
-            DrawSettings()->SetColWidth(2 + ToTextPrecision(), i + 1);
-        }
-
-        for (i = 1; i <= num_players; i++)  {
-	  // enter values
-	  for (j = 1; j <= dim[i]; j++) {
-	    Strategy *strategy = soln.Game().Players()[i]->Strategies()[j];
-	    SetCell(i + 1, j + 1, ToText(soln(strategy)));
-	  }
-
-	  for (j = dim[i] + 1; j <= max_dim; j++) 
-	    HiLighted(i + 1, j + 1, 1, TRUE);
-        }
-
-        SetCurCol(2);
-        SetCurRow(2);
-        MakeButtons(OK_BUTTON|CANCEL_BUTTON|PRINT_BUTTON|HELP_BUTTON);
-        Redraw();
-        Show(TRUE);
-    }
-
-    // OnSelectedMoved
-    void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/)
-    {
-        if (row == 1)
-        {
-            SetCurRow(2);
-            row = 2;
-        }
-
-        if (col - 1 > dim[row-1]) 
-            SetCurCol(dim[row-1] + 1);
-
-        if (col == 1) 
-            SetCurCol(2);
-    }
-
-    // OnOK
-    void OnOk(void)
-    {
-      for (int i = 1; i <= dim.Length(); i++)
-	for (int j = 1; j <= dim[i]; j++) {
-	  gNumber value;
-	  FromText(GetCell(i + 1, j + 1), value);
-	  soln.Set(soln.Game().Players()[i]->Strategies()[j], value);
-	}
-      SetCompleted(wxOK);
-      Show(FALSE);
-    }
+  MixedSolnEdit(MixedSolution &soln_, wxFrame *parent);
+  void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/);
+  void OnOk(void);
 };
 
+MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
+  :  SpreadSheet3D(soln_.Game().NumPlayers() + 1,
+		   gmax(soln_.Support().NumStrats()) + 1,
+		   1, "Edit Mixed Solution", parent, ANY_BUTTON),
+     soln(soln_)
+{
+  Show(FALSE);
+  int i, j;
+  const NFSupport &sup = soln.Support();
+  dim = sup.NumStrats();
+  int max_dim = gmax(dim);
+  int num_players = dim.Length();
 
+  DrawSettings()->SetColWidth(8, 1);
+
+  for (i = 1; i <= num_players; i++) {   // label rows
+    gText tmp_str = sup.Game().Players()[i]->GetName();
+
+    if (tmp_str == "") 
+      tmp_str = "Player " + ToText(i);
+
+    SetCell(i + 1, 1, tmp_str);
+    Bold(i + 1, 1, 0, TRUE);
+  }
+  
+  for (i = 1; i <= max_dim; i++) {  // label cols
+    SetCell(1, i + 1, ToText(i));
+    Bold(1, i + 1, 0, TRUE);
+    DrawSettings()->SetColWidth(2 + ToTextPrecision(), i + 1);
+  }
+
+  for (i = 1; i <= num_players; i++)  {
+    // enter values
+    for (j = 1; j <= dim[i]; j++) {
+      Strategy *strategy = soln.Game().Players()[i]->Strategies()[j];
+      SetCell(i + 1, j + 1, ToText(soln(strategy)));
+      SetType(i + 1, j + 1, gSpreadStr);
+    }
+    
+    for (j = dim[i] + 1; j <= max_dim; j++) 
+      HiLighted(i + 1, j + 1, 1, TRUE);
+  }
+
+  SetCurCol(2);
+  SetCurRow(2);
+  MakeButtons(OK_BUTTON|CANCEL_BUTTON|PRINT_BUTTON|HELP_BUTTON);
+  Redraw();
+  Show(TRUE);
+}
+
+void MixedSolnEdit::OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/)
+{
+  if (row == 1) {
+    SetCurRow(2);
+    row = 2;
+  }
+
+  if (col - 1 > dim[row-1]) 
+    SetCurCol(dim[row-1] + 1);
+
+  if (col == 1) 
+    SetCurCol(2);
+}
+
+// OnOK
+void MixedSolnEdit::OnOk(void)
+{
+  for (int i = 1; i <= dim.Length(); i++)
+    for (int j = 1; j <= dim[i]; j++) {
+      gNumber value;
+      FromText(GetCell(i + 1, j + 1), value);
+      soln.Set(soln.Game().Players()[i]->Strategies()[j], value);
+    }
+  SetCompleted(wxOK);
+  Show(FALSE);
+}
 
 // OnAdd
-
 void NfgSolnShow::OnAdd(void)
 {
     MixedSolution temp_soln(parent->CreateSolution());
