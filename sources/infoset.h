@@ -20,6 +20,8 @@ class Action   {
   friend class BaseEfg;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
   friend class Infoset;
   friend class ChanceInfoset<double>;
   friend class ChanceInfoset<gRational>;
@@ -39,6 +41,8 @@ class Infoset   {
   friend class EFPlayer;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
   friend class Lexicon;
 
   protected:
@@ -106,6 +110,8 @@ template <class T> class ChanceInfoset : public Infoset  {
   friend class BaseEfg;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
 
   private:
     gBlock<T> probs;

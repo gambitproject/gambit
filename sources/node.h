@@ -9,11 +9,14 @@
 
 #include "rational.h"
 #include "gblock.h"
+#include "efg.h"
 
 class Node    {
   friend class BaseEfg;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
   friend class Lexicon;
   
   protected:

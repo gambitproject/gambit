@@ -431,7 +431,8 @@ template <class T> int LemkeModule<T>::Lemke(void)
   gWatch watch;
 
   LemkeTableau<T> LT(nf, support, *params.output, params.trace);
-  LT.Lemke((params.stopAfter == 1) ? 1 : 0);
+//  LT.Lemke((params.stopAfter == 1) ? 1 : 0);
+  LT.Lemke(params.stopAfter);
 
   time = watch.Elapsed();
   npivots += LT.NumPivots();

@@ -11,8 +11,12 @@ class gRational;
 
 class EFPlayer   {
   friend class BaseEfg;
+  friend class EFActionSet;
   friend class Efg<double>;
   friend class Efg<gRational>;
+  friend class BehavProfile<double>;
+  friend class BehavProfile<gRational>;
+
   private:
     int number;
     gString name;
