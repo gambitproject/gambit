@@ -441,45 +441,6 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-
-#include "lemketab.h"
-
-Portion* GSM_Lcp_ListFloat(Portion** param)
-{
-  gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
-  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
-  
-  LTableau<double>* tab = new LTableau<double>(*a, *b);
-  tab->LemkePath(0);
-  gVector<double> vector;
-  tab->BasisVector(vector);
-  Portion* result = ArrayToList(vector);
-  delete tab;
-  delete a;
-  delete b;
-  
-  return result;
-}
-
-Portion* GSM_Lcp_ListRational(Portion** param)
-{
-  gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
-  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
-  
-  LTableau<gRational>* tab = new LTableau<gRational>(*a, *b);
-  tab->LemkePath(0);
-  gVector<gRational> vector;
-  tab->BasisVector(vector);
-  Portion* result = ArrayToList(vector);
-  delete tab;
-  delete a;
-  delete b;
-  
-  return result;
-}
-
-
-
 #include "seqform.h"
 #include "lemkesub.h"
 
@@ -523,6 +484,45 @@ static Portion *GSM_Lcp_Efg(Portion **param)
   }
 }
 
+#include "lemketab.h"
+
+Portion* GSM_Lcp_ListNumber(Portion** param)
+{
+  Precision precision = ((PrecisionPortion *) param[2])->Value();
+  if(precision==precDOUBLE)
+    {
+      gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
+      gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+
+      LTableau<double>* tab = new LTableau<double>(*a, *b);
+      tab->LemkePath(0);
+      gVector<double> vector;
+      tab->BasisVector(vector);
+      Portion* result = ArrayToList(vector);
+      delete tab;
+      delete a;
+      delete b;
+      
+      return result;
+    }
+  else if(precision==precRATIONAL)
+    {
+      gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
+      gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+      
+      LTableau<gRational>* tab = new LTableau<gRational>(*a, *b);
+      tab->LemkePath(0);
+      gVector<gRational> vector;
+      tab->BasisVector(vector);
+      Portion* result = ArrayToList(vector);
+      delete tab;
+      delete a;
+      delete b;
+      
+      return result;
+    }
+
+}
 
 //-------------
 // LiapSolve
@@ -1194,7 +1194,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LcpSolve", 4);
+  FuncObj = new FuncDescObj("LcpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1212,39 +1212,34 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_Lcp_ListFloat, 
-				       PortionSpec(porNUMBER, 1), 2));
-  FuncObj->SetParamInfo(1, 0, gclParameter("a", PortionSpec(porNUMBER, 2),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(1, 1, gclParameter("b", PortionSpec(porNUMBER, 1),
-					    REQUIRED, BYVAL));
-
-  FuncObj->SetFuncInfo(2, gclSignature(GSM_Lcp_ListRational, 
-				       PortionSpec(porNUMBER, 1), 2));
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Lcp_Efg, 
+				       PortionSpec(porBEHAV, 1), 8));
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
+              new PrecisionPortion(precDOUBLE)));
+  FuncObj->SetParamInfo(1, 4, gclParameter("nPivots", porINTEGER,
+					    new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Lcp_ListNumber, 
+				       PortionSpec(porNUMBER, 1), 3));
   FuncObj->SetParamInfo(2, 0, gclParameter("a", PortionSpec(porNUMBER, 2),
 					    REQUIRED, BYVAL));
   FuncObj->SetParamInfo(2, 1, gclParameter("b", PortionSpec(porNUMBER, 1),
 					    REQUIRED, BYVAL));
-
-  FuncObj->SetFuncInfo(3, gclSignature(GSM_Lcp_Efg, 
-				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(3, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(3, 1, gclParameter("asNfg", porBOOL,
-					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(3, 2, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(3, 3, gclParameter("precision", porPRECISION,
+  FuncObj->SetParamInfo(2, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(3, 4, gclParameter("nPivots", porINTEGER,
-					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(3, 5, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(3, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(3, 7, gclParameter("traceLevel", porNUMBER,
-					    new NumberPortion(0)));
-  
+
   gsm->AddFunction(FuncObj);
 
 
