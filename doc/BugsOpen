@@ -930,6 +930,43 @@ Here is a stack trace:
       at gcompile.yy:691
   #21 0x8312615 in main (argv=0xbffffb94) at gcl.cc:174
 
+Same problem (it looks like) occurs in IsSubgamePerfect()
+
+  GCL1:= << e:=LoadEfg["../efg/e10.efg"]
+  (Efg) "Nim with 5 stones"
+  GCL2:= <<  p:={ { { 0, 1 },{ 1, 0 },{ 1, 0 },{ 0, 1 } },{ { 1, 0 },{ 0, 1 },{ 1, 0 } } }
+  { { { 0, 1 }, { 1, 0 }, { 1, 0 }, { 0, 1 } },
+    { { 1, 0 }, { 0, 1 }, { 1, 0 } } }
+  GCL3:= << b:=Behav[e,p]                                                                
+  (Behav) { { 0 1 }{ 1 0 }{ 1 0 }{ 0 1 } }{ { 1 0 }{ 0 1 }{ 1 0 } }
+  GCL4:= << IsSubgamePerfect[b]                                                          
+  In function IsSubgamePerfect[], in file "console" at line 4:
+  EXCEPTION: Bad index in gArray
+
+  Current language:  auto; currently c
+  (gdb) bt
+
+  #0  0x4003ba40 in __throw ()
+  #1  0x821b889 in gDPVector<gNumber>::operator() (this=0xbfffe800, a=1, b=1, c=1) at gdpvect.imp:128
+  #2  0x81af213 in BehavProfile<gNumber>::Gripe (this=0xbfffe9b4, value=@0xbfffe8a0) at behav.h:435
+  #3  0x81af6f5 in BehavProfile<gNumber>::MaxGripe (this=0xbfffe9b4) at behav.h:453
+  #4  0x81df481 in SubgamePerfectChecker::SolveSubgame (this=0xbffff324, E=@0xbfffeae8, sup=@0xbfffeb24, solns=@0xbfffec10) at behavsol.cc:810
+  #5  0x8261bc1 in SubgameSolver::FindSubgames (this=0xbffff324, p_support=@0xbffff250, n=0x8514ca0, solns=@0xbfffeed4, values=@0xbfffeebc) at subsolve.cc:130
+  #6  0x8261156 in SubgameSolver::FindSubgames (this=0xbffff324, p_support=@0xbffff250, n=0x8514b80, solns=@0xbffff168, values=@0xbffff150) at subsolve.cc:39
+  #7  0x8261156 in SubgameSolver::FindSubgames (this=0xbffff324, p_support=@0xbffff250, n=0x8514b20, solns=@0xbffff33c, values=@0xbffff2c8) at subsolve.cc:39
+  #8  0x8262f05 in SubgameSolver::Solve (this=0xbffff324, p_support=@0xbffff49c) at subsolve.cc:282
+  #9  0x81dd0a5 in BehavSolution::IsSubgamePerfect (this=0x8512660) at behavsol.cc:409
+  #10 0x82fac2b in GSM_IsSubgamePerfect (param=0x84f93d8) at solfunc.cc:383
+  #11 0x8297c08 in CallFuncObj::CallNormalFunction (this=0xbffff898, gsm=0x84942a0, param=0x84f93d8) at gsmfunc.cc:1051
+  #12 0x829cea0 in CallFuncObj::CallFunction (this=0xbffff898, gsm=0x84942a0, param=0x84f9408) at gsmfunc.cc:1645
+  #13 0x82bcf2e in gclFunctionCall::Evaluate (this=0x850fdf0) at gsminstr.cc:263
+  #14 0x82bcb7e in gclFunctionCall::Evaluate (this=0x84f6c40) at gsminstr.cc:230
+  #15 0x82bd396 in gclAssignment::Evaluate (this=0x84f6c68) at gsminstr.cc:304
+  #16 0x828d659 in GSM::Execute (this=0x84942a0, expr=0x84f6c68) at gsm.cc:559
+  #17 0x8305d9f in GCLCompiler::Execute (this=0xbffffaec) at gcompile.yy:836
+  #18 0x830467c in GCLCompiler::Parse (this=0xbffffaec, line=@0xbffffaa4, file=@0xbffffaa0, lineno=4, rawline=@0xbffffa9c) at gcompile.yy:691
+  #19 0x8312ac1 in main (argv=0xbffffbd8) at gcl.cc:174
+
 ---------------
 
 ITEM 0039:  No way to access Liap and QRE by subsupports.  
