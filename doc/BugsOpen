@@ -505,19 +505,8 @@ ITEM 0022:  Dominance info not displayed on normal form game.
 
 DATE:     9/8/1999 by TLT (was Bug D38 in bugs_gui)
 AFFECTS:  GUI (all platforms)
-STATUS:   OPEN
+STATUS:   CLOSED 9/9/1999 by TLT
 SEVERITY: CRUCIAL
-DETAILS:
-
-Load poker.efg, generate a normal form game, and do
-Supports->ElimDom (Weak,Pure) The dominance information should be
-displayed in the normal form, but it is not displayed, even if you
-select Inspect->Info->DisplayDominance
-
-COMMENTS:
-TLT 9/8/1999.  This is because the dominance elimination code does not
-return any dominance info for the GUI to display.  This will be added
-shortly, and the GUI modified to take advantage.
 
 ---------------
 
