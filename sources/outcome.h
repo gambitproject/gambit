@@ -1,8 +1,11 @@
 //
-// File: outcome.h-- defines Outcome class
+// FILE: outcome.h -- defines Outcome class
 //
-//  Done:  ??
+// $Id$
 //
+
+#ifndef OUTCOME_H
+#define OUTCOME_H
 
 #include "gstring.h"
 #include "gmap.h"
@@ -63,7 +66,7 @@ Outcome::GetOutcomeVector(int num_players) const
 inline double Outcome::operator[](int player) const
 {
   if (values.Contains(player)) 
-    { return values[player];}
+    return values[player];
 
   return 0;  // If no value found for that player
   
@@ -79,12 +82,10 @@ inline void Outcome::SetOutcome(int player, double value)
 inline void Outcome::SetOutcome(const gVector<double> &vals)
 {
   for (uint i = 1; i <= vals.Length(); i++)
-    {
-      if (vals[i] != 0) 
-	values.Insert(vals[i], i);
-      else 
-	if (values.Contains(i))
-	  values.Remove(i);
-    }
+    if (vals[i] != 0) 
+      values.Insert(vals[i], i);
+    else if (values.Contains(i))
+      values.Remove(i);
 }
   
+#endif    // OUTCOME_H
