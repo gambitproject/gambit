@@ -994,49 +994,69 @@ BaseMixedProfile*& MixedPortion::Value( void ) const
 
 PortionType MixedPortion::Type( void ) const
 { 
-  assert( (*_Value) != 0 );
-  switch( (*_Value)->Type() )
+  if( !*_Value )
   {
-  case DOUBLE:
-    return porMIXED_FLOAT;
-  case RATIONAL:
-    return porMIXED_RATIONAL;
-  default:
-    assert( 0 );
+    return porMIXED;
+  }
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      return porMIXED_FLOAT;
+    case RATIONAL:
+      return porMIXED_RATIONAL;
+    default:
+      assert( 0 );
+    }
   }
   return porUNKNOWN;
 }
 
 void MixedPortion::Output( gOutput& s ) const
 {
-  switch( (*_Value)->Type() )
+  if( !*_Value )
   {
-  case DOUBLE:
-    s << "(Mixed) " << * (MixedProfile<double>*) (*_Value); 
-    break;
-  case RATIONAL:
-    s << "(Mixed) " << * (MixedProfile<gRational>*) (*_Value); 
-    break;
-  default:
-    assert( 0 );
+    s << "(Mixed) NULL"; 
+  }
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      s << "(Mixed) " << * (MixedProfile<double>*) (*_Value); 
+      break;
+    case RATIONAL:
+      s << "(Mixed) " << * (MixedProfile<gRational>*) (*_Value); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
 }
 
 Portion* MixedPortion::ValCopy( void ) const
 { 
   Portion* p = 0;
-  switch( (*_Value)->Type() )
+  if( !*_Value )
   {
-  case DOUBLE:
-    p = new MixedValPortion
-      ( new MixedProfile<double>( * (MixedProfile<double>*) (*_Value) ) ); 
-    break;
-  case RATIONAL:
-    p = new MixedValPortion
-      ( new MixedProfile<gRational>( * (MixedProfile<gRational>*) (*_Value) ) ); 
-    break;
-  default:
-    assert( 0 );
+    p = new MixedValPortion( 0 );
+  }
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      p = new MixedValPortion
+	( new MixedProfile<double>( * (MixedProfile<double>*) (*_Value) ) ); 
+      break;
+    case RATIONAL:
+      p = new MixedValPortion
+	( new MixedProfile<gRational>( * (MixedProfile<gRational>*) (*_Value) ) ); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
   p->SetOwner( Owner() );
   p->SetIsValid( IsValid() );
@@ -1060,18 +1080,25 @@ void MixedPortion::AssignFrom( Portion* p )
 
   delete *_Value;
 
-  switch( ( (MixedPortion*) p )->Value()->Type() )
+  if( !( (MixedPortion*) p )->Value()->Type() )
   {
-  case DOUBLE:
-    *_Value = new MixedProfile<double>
-      ( * (MixedProfile<double>*) ( (MixedPortion*) p )->Value() ); 
-    break;
-  case RATIONAL:
-    *_Value =  new MixedProfile<gRational>
-      ( * (MixedProfile<gRational>*) ( (MixedPortion*) p )->Value() ); 
-    break;
-  default:
-    assert( 0 );
+    *_Value = 0;
+  }
+  else
+  {
+    switch( ( (MixedPortion*) p )->Value()->Type() )
+    {
+    case DOUBLE:
+      *_Value = new MixedProfile<double>
+	( * (MixedProfile<double>*) ( (MixedPortion*) p )->Value() ); 
+      break;
+    case RATIONAL:
+      *_Value =  new MixedProfile<gRational>
+	( * (MixedProfile<gRational>*) ( (MixedPortion*) p )->Value() ); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
 
   SetOwner( p->Owner() );
@@ -1134,49 +1161,70 @@ BaseBehavProfile*& BehavPortion::Value( void ) const
 
 PortionType BehavPortion::Type( void ) const
 { 
-  assert( (*_Value) != 0 );
-  switch( (*_Value)->Type() )
+  if( !*_Value )
   {
-  case DOUBLE:
-    return porBEHAV_FLOAT;
-  case RATIONAL:
-    return porBEHAV_RATIONAL;
-  default:
-    assert( 0 );
+    return porMIXED;
   }
-  return porUNKNOWN;
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      return porBEHAV_FLOAT;
+    case RATIONAL:
+      return porBEHAV_RATIONAL;
+    default:
+      assert( 0 );
+    }
+    return porUNKNOWN;
+  }
 }
 
 void BehavPortion::Output( gOutput& s ) const
 {
-  switch( (*_Value)->Type() )
+  if( !*_Value )
   {
-  case DOUBLE:
-    s << "(Behav) " << * (BehavProfile<double>*) (*_Value); 
-    break;
-  case RATIONAL:
-    s << "(Behav) " << * (BehavProfile<gRational>*) (*_Value); 
-    break;
-  default:
-    assert( 0 );
+    s << "(Behav) NULL"; 
+  }
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      s << "(Behav) " << * (BehavProfile<double>*) (*_Value); 
+      break;
+    case RATIONAL:
+      s << "(Behav) " << * (BehavProfile<gRational>*) (*_Value); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
 }
 
 Portion* BehavPortion::ValCopy( void ) const
 { 
   Portion* p;
-  switch( (*_Value)->Type() )
+
+  if( !*_Value )
   {
-  case DOUBLE:
-    p = new BehavValPortion
-      ( new BehavProfile<double>( * (BehavProfile<double>*) (*_Value) ) ); 
-    break;
-  case RATIONAL:
-    p = new BehavValPortion
-      ( new BehavProfile<gRational>( * (BehavProfile<gRational>*) (*_Value) ) ); 
-    break;
-  default:
-    assert( 0 );
+    p = new MixedValPortion( 0 );
+  }
+  else
+  {
+    switch( (*_Value)->Type() )
+    {
+    case DOUBLE:
+      p = new BehavValPortion
+	( new BehavProfile<double>( * (BehavProfile<double>*) (*_Value) ) ); 
+      break;
+    case RATIONAL:
+      p = new BehavValPortion
+	( new BehavProfile<gRational>( * (BehavProfile<gRational>*) (*_Value) ) ); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
   p->SetOwner( Owner() );
   p->SetIsValid( IsValid() );
@@ -1200,18 +1248,25 @@ void BehavPortion::AssignFrom( Portion* p )
 
   delete *_Value;
 
-  switch( ( (BehavPortion*) p )->Value()->Type() )
+  if( !( (BehavPortion*) p )->Value()->Type() )
   {
-  case DOUBLE:
-    *_Value = new BehavProfile<double>
-      ( * (BehavProfile<double>*) ( (BehavPortion*) p )->Value() ); 
-    break;
-  case RATIONAL:
-    *_Value =  new BehavProfile<gRational>
-      ( * (BehavProfile<gRational>*) ( (BehavPortion*) p )->Value() ); 
-    break;
-  default:
-    assert( 0 );
+    *_Value = 0;
+  }
+  else
+  {
+    switch( ( (BehavPortion*) p )->Value()->Type() )
+    {
+    case DOUBLE:
+      *_Value = new BehavProfile<double>
+	( * (BehavProfile<double>*) ( (BehavPortion*) p )->Value() ); 
+      break;
+    case RATIONAL:
+      *_Value =  new BehavProfile<gRational>
+	( * (BehavProfile<gRational>*) ( (BehavPortion*) p )->Value() ); 
+      break;
+    default:
+      assert( 0 );
+    }
   }
 
   SetOwner( p->Owner() );
@@ -2241,4 +2296,5 @@ TEMPLATE class gArray<Portion *>;
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+
 
