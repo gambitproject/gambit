@@ -764,9 +764,7 @@ bool CallFuncObj::SetCurrParam( Portion *param )
   // Repeated parameter defition
   if( _RunTimeParamInfo[ _CurrParamIndex ].Defined )
   {
-    _ErrorMessage( _StdErr, 3, 0, 
-		  _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
-		  _FuncName );
+    _ErrorMessage( _StdErr, 3, _CurrParamIndex, _FuncName );
     delete param;
     _ErrorOccurred = true;
     return false;
@@ -815,9 +813,13 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int params_defined;
   bool match_ok;
 
+
+
+  // Attempt to identify the function being called out of all the
+  // overloaded versions.
+
   if( _FuncIndex == -1 && _NumFuncs == 1 )
     _FuncIndex = 0;
-
 
   if( _FuncIndex == -1 )
   {
@@ -893,6 +895,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
+  // at this point _FuncIndex should be defined; i.e. the function
+  // matching stage is done.  Now to weed out some particular errors:
+
   if( !_ErrorOccurred )
   {
     for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
@@ -939,26 +944,41 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
+  // aborts when a value paremeter is passed by reference or
+  //        when a reference parameter is passed by value
+
   if( !_ErrorOccurred )
   {
     for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
     {
       if( _Param[ index ] != 0 &&
-	 _RunTimeParamInfo[ index ].Defined &&
-	 !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
-	 _Param[ index ]->IsReference() )
+	 _RunTimeParamInfo[ index ].Defined )
       {
-	Portion* old;
-	old = _Param[ index ];
-	_Param[ index ] = old->ValCopy();
-	delete old;
+	if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
+	   _Param[ index ]->IsReference() )
+	{
+	  _ErrorMessage( _StdErr, 12, 0,
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			_FuncName );
+	  _ErrorOccurred = true;
+	}
+	else if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
+		!_Param[ index ]->IsReference() )
+	{
+	  _ErrorMessage( _StdErr, 13, 0,
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			_FuncName );
+	  _ErrorOccurred = true;
+	}
       }
     }
   }
 
 
 
-  /* This section makes the actual function call */
+
+  // This section makes the actual function call
+
   if( !_ErrorOccurred )
   {
     if( !_FuncInfo[ _FuncIndex ].UserDefined )
@@ -1038,8 +1058,8 @@ void CallFuncObj::_ErrorMessage
     s << "  Conflicting variable name specification\n";
     break;
   case 3:
-    s << "  Repeated definition found for parameter \"" <<  str1 << "\"\n";
-    s << "  while calling " << str2 << "[]\n";
+    s << "  Repeated definition found for parameter #" << num1 << "\n";
+    s << "  while calling " << str1 << "[]\n";
     break;
   case 4:
     s << "  Too many parameters specified for function " << str1 << "[]\n";
@@ -1063,7 +1083,16 @@ void CallFuncObj::_ErrorMessage
     s << "  while executing function " << str2 << "[]\n";
     break;
   case 11:
-    s << "  Insufficient parameter type information given\n";
+    s << "  Insufficient parameter type information given;\n";
+    s << "  function call ambiguous\n";
+    break;
+  case 12:
+    s << "  Attempted to pass value parameter \"" << str1 << "\"\n";
+    s << "  by reference while calling function " << str2 << "[]\n";
+    break;
+  case 13:
+    s << "  Attempted to pass reference parameter \"" << str1 << "\"\n";
+    s << "  by value while calling function " << str2 << "[]\n";
     break;
   default:
     s << "  General error\n";
