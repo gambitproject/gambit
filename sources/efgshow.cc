@@ -1673,7 +1673,7 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
 
 void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
 {
-  int algorithm = p_event.GetInt();
+  int algorithm = p_event.GetId();
 
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
@@ -1689,9 +1689,6 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
     }
   }
     
-  // do not want users doing anything while solving
-  Enable(false);
-
   guiEfgSolution *solver = 0;
 
   switch (algorithm) {
@@ -1769,7 +1766,6 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
  
   ChangeSolution(m_solutionTable->Length());
   UpdateMenus();
-  Enable(true);
 }
 
 void EfgShow::OnSolveNormalReduced(wxCommandEvent &)

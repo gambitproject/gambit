@@ -876,9 +876,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
 
 void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 {
-  int id = p_event.GetInt();
-
-  int old_max_soln = m_solutionTable->Length();  // used for extensive update
+  int id = p_event.GetId();
 
   guiNfgSolution *solver;
 
@@ -928,6 +926,13 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddSolution(solutions[soln], true);
     }
+
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+      ChangeSolution(m_solutionTable->Length());
+    }
+
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -936,16 +941,6 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   }
     
   delete solver;
-
-  if (old_max_soln != m_solutionTable->Length()) {
-    if (!m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-
-    ChangeSolution(m_solutionTable->Length());
-  }
-
   UpdateMenus();
 }
 
