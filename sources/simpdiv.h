@@ -7,40 +7,52 @@
 #ifndef SIMPDIV_H
 #define SIMPDIV_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "normal.h"
-#include "rational.h"
+#include "glist.h"
+#include "grarray.h"
 
 class SimpdivParams     {
   public:
     int plev, number, ndivs, leash;
-    gString outfile, errfile;
+    gOutput &output;
     
     SimpdivParams(void);
+    SimpdivParams(gOutput &);
 };
 
-class SimpdivSolver  {
+template <class T> class SimpdivModule  {
   private:
-    const BaseNormalForm &nf;
-    SimpdivParams params;
-    int nevals;
-    gRational time;
+    const NormalForm<T> &rep;
+    const SimpdivParams &params;
 
+    long leash;
+    int t, nplayers, ibar, nevals, nits;
+    T pay,d,maxz,bestz,mingrid;
+    gTuple<int> nstrats,ylabel;
+    gVector<T> M;
+    gRectArray<int> labels,pi;
+    gPVector<int> U,TT;
+    gPVector<T> ab,y,besty,v;
+
+    T simplex(void);
+    T getlabel(gPVector<T> &yy);
+    void update(int j, int i);
+    void getY(gPVector<T> &x,int k);
+    void getnexty(gPVector<T> &x,int i);
+    int get_c(int j, int h);
+    int get_b(int j, int h);
+  
   public:
-    SimpdivSolver(const BaseNormalForm &N, const SimpdivParams &p) 
-      : nf(N), params(p)   { }
-    ~SimpdivSolver()   { }
+    SimpdivModule(const NormalForm<T> &N, const SimpdivParams &);
+    virtual ~SimpdivModule();
 
-    int Simpdiv(void);
-    
-    int NumEvals(void) const    { return nevals; }
-    gRational Time(void) const   { return time; }
+    int NumEvals(void) const  { return nevals; }
+    int NumIters(void) const  { return nits; }
+    double Time(void) const   { return 0.0; }
 
-    SimpdivParams &Parameters(void)   { return params; }
+    int Simpdiv(gList<gPVector<T> > &);
 };
+
 
 
 #endif    // SIMPDIV_H
