@@ -18,7 +18,6 @@ const gNumber MixedProfile<gNumber>::Payoff(const NFOutcome *o, int pl) const
 TEMPLATE_SPECIALIZATION()
 const gRational MixedProfile<gRational>::Payoff(const NFOutcome *o, int pl) const
 { 
-  gout << "\nin MixedProfile<gRational>::Payoff()";
   return o->payoffs[pl];
 }
 
