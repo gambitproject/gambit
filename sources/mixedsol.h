@@ -25,6 +25,7 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gArray<T> _Payoff;
+  void EvalEquilibria();
 
 public:
   MixedSolution(const Nfg<T> &, bool truncated = false);
@@ -42,7 +43,7 @@ public:
   void SetIsPerfect(int);
   int IsPerfect(); //Is it Perfect? Y/N/DK
   void SetIsProper(int);
-  int IsProper() const; //Is it Proper? Y/N/DK
+  int IsProper(); //Is it Proper? Y/N/DK
   NFSupport Support() const; //Support of Profile
 
   void SetGobit(T lambda, T value);

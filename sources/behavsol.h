@@ -23,6 +23,7 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gDPVector<T> _Beliefs;
+  void EvalEquilibria();
 
 public:
   BehavSolution(const Efg<T> &, bool truncated = false);
@@ -38,7 +39,7 @@ public:
   void SetIsNash(int);
   int IsNash(); // Is it Nash? Y/N/DK
   void SetIsSubgamePerfect(int);
-  int IsSubgamePerfect() const; // Is it Subgame Perfect? Y/N/DK
+  int IsSubgamePerfect(); // Is it Subgame Perfect? Y/N/DK
   void SetIsSequential(int);
   int IsSequential(); // Is it Sequential? Y/N/DK
   EFSupport Support() const; // Support of Profile

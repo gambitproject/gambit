@@ -75,6 +75,25 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
 
 template <class T> BehavSolution<T>::~BehavSolution() {}
 
+template <class T> void BehavSolution<T>::EvalEquilibria()
+{
+  if(_Creator == id_LIAP || _Creator == id_GOBIT)
+    _IsSequential = T_YES;
+  else
+    _IsSequential = T_DONTKNOW;
+
+  if( _IsNash == T_DONTKNOW )
+    if(BehavProfile<T>::IsNash())
+      _IsNash = T_YES;
+    else
+      _IsNash = T_NO;
+  if(_IsNash == T_NO)
+  {
+    _IsSubgamePerfect = T_NO;
+    _IsSequential = T_NO;
+  }
+}
+
 template <class T> void BehavSolution<T>::SetCreator(int c)
 { _Creator = c; }
 
@@ -85,29 +104,19 @@ template <class T> void BehavSolution<T>::SetIsNash(int i)
 { _IsNash = i; }
 
 template <class T> int BehavSolution<T>::IsNash()
-{ 
-  if( _IsNash == T_DONTKNOW )
-    _IsNash = BehavProfile<T>::IsNash();
-  return _IsNash; 
-}
+{ EvalEquilibria(); return _IsNash; }
 
 template <class T> void BehavSolution<T>::SetIsSubgamePerfect(int i)
 { _IsSubgamePerfect = i; }
 
-template <class T> int BehavSolution<T>::IsSubgamePerfect() const
-{ return _IsSubgamePerfect; }
+template <class T> int BehavSolution<T>::IsSubgamePerfect()
+{ EvalEquilibria(); return _IsSubgamePerfect; }
 
 template <class T> void BehavSolution<T>::SetIsSequential(int i)
 { _IsSequential = i; }
 
 template <class T> int BehavSolution<T>::IsSequential()
-{
-  if((_Creator == id_LIAP || _Creator == id_GOBIT) && IsNash() == T_YES)
-    _IsSequential = T_YES;
-  else
-    _IsSequential = T_DONTKNOW;
-  return _IsSequential;
-}
+{ EvalEquilibria(); return _IsSequential; }
 
 template <class T> EFSupport BehavSolution<T>::Support() const
 { return behavsupport; }
@@ -125,9 +134,7 @@ template <class T> T BehavSolution<T>::GobitValue() const
 { return _GobitValue; }
 
 template <class T> void BehavSolution<T>::SetLiap(T value)
-{
-  _LiapValue = value;
-}
+{ _LiapValue = value; }
 
 template <class T> T BehavSolution<T>::LiapValue()
 { 
@@ -160,10 +167,7 @@ template <class T> void BehavSolution<T>::Dump(gOutput& f) const
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &s)
-{ 
-  s.Dump(f);  
-  return f;
-}
+{ s.Dump(f); return f; }
 
 
 template <class T> void BehavSolution<T>::Invalidate()

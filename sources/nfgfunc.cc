@@ -1594,47 +1594,83 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
 
 //-------------------- MixedSolution data members --------------------//
 
+//------------ IsNash ---------------//
+
 Portion *GSM_IsNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsNash());
+  return new BoolValPortion(P->IsNash() == T_YES);
 }
 
 Portion *GSM_IsNash_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsNash());
+  return new BoolValPortion(P->IsNash() == T_YES);
 }
+
+//------------ IsPerfect, IsProper ----------------//
 
 Portion *GSM_IsPerfect_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsPerfect());
+  return new BoolValPortion(P->IsPerfect() == T_YES);
 }
 
 Portion *GSM_IsPerfect_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsPerfect());
+  return new BoolValPortion(P->IsPerfect() == T_YES);
 }
 
 Portion *GSM_IsProper_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsProper());
+  return new BoolValPortion(P->IsProper() == T_YES);
 }
 
 Portion *GSM_IsProper_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsProper());
+  return new BoolValPortion(P->IsProper() == T_YES);
 }
+
+//---------- IsntPerfect, IsntProper ------------//
+
+Portion *GSM_IsntPerfect_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_NO);
+}
+
+Portion *GSM_IsntPerfect_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsPerfect() == T_NO);
+}
+
+Portion *GSM_IsntProper_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_NO);
+}
+
+Portion *GSM_IsntProper_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsProper() == T_NO);
+}
+
+//------------- Support -------------//
 
 Portion* GSM_Support_MixedFloat(Portion** param)
 {
@@ -1649,6 +1685,8 @@ Portion* GSM_Support_MixedRational(Portion** param)
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new NfSupportValPortion(new NFSupport(P->Support()));
 }
+
+//------------ GobitLambda, GobitValue --------------//
 
 Portion* GSM_GobitLambda_MixedFloat(Portion** param)
 {
@@ -1678,6 +1716,7 @@ Portion* GSM_GobitValue_MixedRational(Portion** param)
   return new RationalValPortion( bs->GobitValue() );
 }
 
+//-------------- LiapValue ---------------//
 
 Portion *GSM_LiapValue_MixedFloat(Portion **param)
 {
@@ -2100,6 +2139,24 @@ void Init_nfgfunc(GSM *gsm)
 			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetFuncInfo(GSM_IsProper_MixedRational, 1);
   FuncObj->SetParamInfo(GSM_IsProper_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsntPerfect");
+  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsntProper");
+  FuncObj->SetFuncInfo(GSM_IsntProper_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsntProper_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsntProper_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsntProper_MixedRational, 0, "strategy",
 			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 

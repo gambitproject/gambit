@@ -72,6 +72,21 @@ template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
 template <class T> MixedSolution<T>::~MixedSolution() {}
 
 
+template <class T> void MixedSolution<T>::EvalEquilibria()
+{
+  if(_IsNash == T_DONTKNOW)
+    if(MixedProfile<T>::IsNash())
+      _IsNash = T_YES;
+    else
+      _IsNash = T_NO;
+  if( _IsNash == T_NO )
+  {
+    _IsPerfect = T_NO;
+    _IsProper = T_NO;
+  }
+}
+
+
 template <class T> void MixedSolution<T>::SetCreator(int c)
 { _Creator = c; }
 
@@ -82,23 +97,19 @@ template <class T> void MixedSolution<T>::SetIsNash(int i)
 { _IsNash = i; }
 
 template <class T> int MixedSolution<T>::IsNash()
-{ 
-  if( _IsNash == T_DONTKNOW )
-    _IsNash = MixedProfile<T>::IsNash();
-  return _IsNash; 
-}
+{ EvalEquilibria(); return _IsNash; }
 
 template <class T> void MixedSolution<T>::SetIsPerfect(int i)
 { _IsPerfect = i; }
 
 template <class T> int MixedSolution<T>::IsPerfect()
-{ return _IsPerfect; }
+{ EvalEquilibria(); return _IsPerfect; }
 
 template <class T> void MixedSolution<T>::SetIsProper(int i)
 { _IsProper = i; }
 
-template <class T> int MixedSolution<T>::IsProper() const
-{ return _IsProper; }
+template <class T> int MixedSolution<T>::IsProper()
+{ EvalEquilibria(); return _IsProper; }
 
 template <class T> NFSupport MixedSolution<T>::Support() const
 { return stratset; }
@@ -117,9 +128,7 @@ template <class T> T MixedSolution<T>::GobitValue() const
 { return _GobitValue; }
 
 template <class T> void MixedSolution<T>::SetLiap(T value)
-{
-  _LiapValue = value;
-}
+{ _LiapValue = value; }
 
 template <class T> T MixedSolution<T>::LiapValue() 
 { 
@@ -130,9 +139,7 @@ template <class T> T MixedSolution<T>::LiapValue()
 
 template <class T> 
 bool MixedSolution<T>::operator==(const MixedSolution<T> & s) const
-{
-  return MixedProfile<T>::operator==(s);
-}
+{ return MixedProfile<T>::operator==(s); }
 
 template <class T> void MixedSolution<T>::Dump(gOutput& f) const
 {
@@ -148,10 +155,7 @@ template <class T> void MixedSolution<T>::Dump(gOutput& f) const
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &s)
-{ 
-  s.Dump(f);  
-  return f;
-}
+{ s.Dump(f); return f; }
 
 
 template <class T> void MixedSolution<T>::Invalidate()
