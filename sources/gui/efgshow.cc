@@ -221,8 +221,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_profileTable->Show(false);
   m_solutionSashWindow->Show(false);
 
-  m_doc->m_efg->SetIsDirty(false);
-
   AdjustSizes();
   m_treeWindow->FitZoom();
 
@@ -535,7 +533,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
     gFileOutput file(m_doc->GetFilename().c_str());
     gbtEfgGame efg = CompressEfg(*m_doc->m_efg, *m_doc->GetEfgSupport());
     efg.WriteEfgFile(file, 6);
-    m_doc->m_efg->SetIsDirty(false);
+    m_doc->SetIsModified(false);
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -1491,7 +1489,7 @@ void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (p_event.CanVeto() && m_doc->m_efg->IsDirty()) {
+  if (p_event.CanVeto() && m_doc->IsModified()) {
     if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();

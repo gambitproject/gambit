@@ -197,7 +197,6 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_table = new NfgTable(m_doc, this);
   m_table->SetSize(0, 0, 200, 200);
 
-  m_doc->m_nfg->SetIsDirty(false);
   GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES,
 		      !m_table->GetSettings().OutcomeValues());
   UpdateMenus();
@@ -503,7 +502,7 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
     gFileOutput file(m_filename.c_str());
     gbtNfgGame nfg = CompressNfg(*m_doc->m_nfg, *m_doc->m_curNfgSupport);
     nfg.WriteNfgFile(file, 6);
-    m_doc->m_nfg->SetIsDirty(false);
+    m_doc->SetIsModified(false);
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -1121,7 +1120,7 @@ void NfgShow::OnProfilesReport(wxCommandEvent &)
 
 void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (p_event.CanVeto() && GameIsDirty()) {
+  if (p_event.CanVeto() && m_doc->IsModified()) {
     if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();

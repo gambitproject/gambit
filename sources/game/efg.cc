@@ -43,7 +43,7 @@
 
 gbt_efg_game_rep::gbt_efg_game_rep(void)
   : m_refCount(1),
-    sortisets(true), m_dirty(false), m_revision(0), 
+    sortisets(true), m_revision(0), 
     m_outcome_revision(-1), title("UNTITLED"),
     chance(new gbt_efg_player_rep(this, 0)), afg(0), lexicon(0)
 {
@@ -157,7 +157,6 @@ void gbt_efg_game_rep::AppendMove(gbt_efg_node_rep *p_node,
     p_node->m_children.Append(new gbt_efg_node_rep(this, p_node));
   }
   m_revision++;
-  m_dirty = true;
   DeleteLexicon();
   SortInfosets();
 }
@@ -187,7 +186,6 @@ void gbt_efg_game_rep::InsertMove(gbt_efg_node_rep *p_node,
     node->m_children.Append(new gbt_efg_node_rep(this, node));
   }
   m_revision++;
-  m_dirty = true;
   DeleteLexicon();
   SortInfosets();
 }
@@ -203,7 +201,6 @@ gbt_efg_infoset_rep *gbt_efg_game_rep::NewInfoset(gbt_efg_player_rep *p_player,
   gbt_efg_infoset_rep *s = new gbt_efg_infoset_rep(p_player, p_id, p_actions);
   p_player->m_infosets.Append(s);
   m_revision++;
-  m_dirty = true;
   return s;
 }
 
@@ -362,7 +359,6 @@ void gbtEfgGame::SetTitle(const gText &s)
 {
   rep->title = s; 
   rep->m_revision++;
-  rep->m_dirty = true;
 }
 
 const gText &gbtEfgGame::GetTitle(void) const
@@ -372,7 +368,6 @@ void gbtEfgGame::SetComment(const gText &s)
 {
   rep->comment = s;
   rep->m_revision++;
-  rep->m_dirty = true;
 }
 
 const gText &gbtEfgGame::GetComment(void) const
@@ -469,7 +464,6 @@ void gbtEfgGame::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
     WriteEfgFile(p_file, rep->root);
     p_file.SetPrec(oldPrecision);
     rep->m_revision++;
-    rep->m_dirty = false;
   }
   catch (...) {
     p_file.SetPrec(oldPrecision);
@@ -485,19 +479,12 @@ void gbtEfgGame::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
 long gbtEfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 
-void gbtEfgGame::SetIsDirty(bool p_dirty)
-{ rep->m_dirty = p_dirty; }
-
-bool gbtEfgGame::IsDirty(void) const
-{ return rep->m_dirty; }
-
 int gbtEfgGame::NumPlayers(void) const
 { return rep->players.Length(); }
 
 gbtEfgPlayer gbtEfgGame::NewPlayer(void)
 {
   rep->m_revision++;
-  rep->m_dirty = true;
 
   gbt_efg_player_rep *ret = new gbt_efg_player_rep(rep,
 						   rep->players.Length() + 1);
@@ -527,14 +514,12 @@ int gbtEfgGame::NumOutcomes(void) const
 gbtEfgOutcome gbtEfgGame::NewOutcome(void)
 {
   rep->m_revision++;
-  rep->m_dirty = true;
   return NewOutcome(rep->outcomes.Last() + 1);
 }
 
 void gbtEfgGame::DeleteOutcome(gbtEfgOutcome &p_outcome)
 {
   rep->m_revision++;
-  rep->m_dirty = true;
 
   rep->root->DeleteOutcome(p_outcome.rep);
   delete rep->outcomes.Remove(rep->outcomes.Find(p_outcome.rep));
@@ -615,7 +600,6 @@ gbtEfgNode gbtEfgGame::RootNode(void) const
 gbtEfgOutcome gbtEfgGame::NewOutcome(int index)
 {
   rep->m_revision++;
-  rep->m_dirty = true;
   rep->outcomes.Append(new gbt_efg_outcome_rep(rep, index));
   return rep->outcomes[rep->outcomes.Last()];
 } 
@@ -642,7 +626,6 @@ gbtEfgNode gbtEfgGame::DeleteNode(gbtEfgNode n, gbtEfgNode keep)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
   // turn infoset sorting off during tree deletion -- problems will occur
   rep->sortisets = false;
 
@@ -683,7 +666,6 @@ gbtEfgInfoset gbtEfgGame::JoinInfoset(gbtEfgInfoset s, gbtEfgNode n)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   gbt_efg_infoset_rep *t = n.rep->m_infoset;
 
@@ -709,7 +691,6 @@ gbtEfgInfoset gbtEfgGame::LeaveInfoset(gbtEfgNode n)
   if (s->m_members.Length() == 1)   return s;
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   gbt_efg_player_rep *p = s->m_player;
   s->m_members.Remove(s->m_members.Find(n.rep));
@@ -741,7 +722,6 @@ gbtEfgInfoset gbtEfgGame::MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from)
     return from;
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   to.rep->m_members += from.rep->m_members;
   for (int i = 1; i <= from.rep->m_members.Length(); i++) {
@@ -764,7 +744,6 @@ bool gbtEfgGame::DeleteEmptyInfoset(gbtEfgInfoset s)
   if (s.NumMembers() > 0)   return false;
 
   rep->m_revision++;
-  rep->m_dirty = true;
   s.rep->m_player->m_infosets.Remove(s.rep->m_player->m_infosets.Find(s.rep));
   delete s.rep;
 
@@ -794,7 +773,6 @@ gbtEfgInfoset gbtEfgGame::SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p)
   if (s.rep->m_player == p.rep)   return s;
 
   rep->m_revision++;
-  rep->m_dirty = true;
   s.rep->m_player->m_infosets.Remove(s.rep->m_player->m_infosets.Find(s.rep));
   s.rep->m_player = p.rep;
   p.rep->m_infosets.Append(s.rep);
@@ -854,7 +832,6 @@ void gbtEfgGame::Reveal(gbtEfgInfoset where, gbtEfgPlayer who)
   UnmarkSubtree(rep->root);  // start with a clean tree
   
   rep->m_revision++;
-  rep->m_dirty = true;
 
   for (int i = 1; i <= where.rep->m_actions.Length(); i++) {
     for (int j = 1; j <= where.rep->m_members.Length(); j++) { 
@@ -899,7 +876,6 @@ gbtEfgNode gbtEfgGame::CopyTree(gbtEfgNode src, gbtEfgNode dest)
 
   if (src.rep->m_children.Length())  {
     rep->m_revision++;
-    rep->m_dirty = true;
 
     rep->AppendMove(dest.rep, src.rep->m_infoset);
     for (int i = 1; i <= src.rep->m_children.Length(); i++) {
@@ -923,7 +899,6 @@ gbtEfgNode gbtEfgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
   if (src.rep->m_gameroot != dest.rep->m_gameroot)  return src;
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   if (src.rep->m_parent == dest.rep->m_parent) {
     int srcChild = src.rep->m_parent->m_children.Find(src.rep);
@@ -954,7 +929,6 @@ gbtEfgNode gbtEfgGame::DeleteTree(gbtEfgNode n)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   while (n.NumChildren() > 0)   {
     DeleteTree(n.rep->m_children[1]);
@@ -980,7 +954,6 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
   gbtEfgAction action = s.InsertAction(s.NumActions() + 1);
   for (int i = 1; i <= s.NumMembers(); i++) {
     s.rep->m_members[i]->m_children.Append(new gbt_efg_node_rep(rep,
@@ -998,7 +971,6 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
 
   int where;
   for (where = 1; (where <= s.rep->m_actions.Length() &&
@@ -1021,7 +993,6 @@ gbtEfgInfoset gbtEfgGame::DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a)
   }
 
   rep->m_revision++;
-  rep->m_dirty = true;
   int where;
   for (where = 1; (where <= s.rep->m_actions.Length() &&
 		   s.rep->m_actions[where] != a.rep);
@@ -1043,7 +1014,6 @@ void gbtEfgGame::SetChanceProb(gbtEfgInfoset infoset,
 {
   if (infoset.IsChanceInfoset()) {
     rep->m_revision++;
-    rep->m_dirty = true;
     infoset.SetChanceProb(act, value);
   }
 }

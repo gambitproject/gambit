@@ -120,7 +120,6 @@ struct gbt_efg_game_rep {
   int m_refCount;
 
   bool sortisets;
-  mutable bool m_dirty;
   mutable long m_revision;
   mutable long m_outcome_revision;
   gText title, comment;

@@ -425,7 +425,7 @@ static int Product(const gArray<int> &p_dim)
 
 gbt_nfg_game_rep::gbt_nfg_game_rep(const gArray<int> &p_dim)
   : m_refCount(1),
-    m_dirty(false), m_revision(0), m_outcomeRevision(-1), 
+    m_revision(0), m_outcomeRevision(-1), 
     m_title("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
     m_results(Product(p_dim)), m_efg(0)
 { }
@@ -529,12 +529,6 @@ void gbtNfgGame::BreakLink(void)
 long gbtNfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 
-void gbtNfgGame::SetIsDirty(bool p_dirty)
-{ rep->m_dirty = p_dirty; }
-
-bool gbtNfgGame::IsDirty(void) const
-{ return rep->m_dirty; }
-
 void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 { 
   int oldDecimals = p_file.GetPrec();
@@ -590,7 +584,6 @@ void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
     p_file << '\n';
     p_file.SetPrec(oldDecimals);
-    rep->m_dirty = false;
   }
   catch (...) {
     p_file.SetPrec(oldDecimals);
@@ -600,7 +593,6 @@ void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
 gbtNfgOutcome gbtNfgGame::NewOutcome(void)
 {
-  rep->m_dirty = true;
   rep->m_revision++;
   gbt_nfg_outcome_rep *outcome = new gbt_nfg_outcome_rep(rep, 
 							 rep->m_outcomes.Length()+1);
@@ -610,7 +602,6 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
 
 void gbtNfgGame::DeleteOutcome(gbtNfgOutcome p_outcome)
 {
-  rep->m_dirty = true;
   rep->m_revision++;
 
   if (p_outcome.rep) {
@@ -630,7 +621,6 @@ void gbtNfgGame::DeleteOutcome(gbtNfgOutcome p_outcome)
 void gbtNfgGame::SetTitle(const gText &s) 
 {
   rep->m_title = s; 
-  rep->m_dirty = true;
   rep->m_revision++;
 }
 
@@ -640,7 +630,6 @@ const gText &gbtNfgGame::GetTitle(void) const
 void gbtNfgGame::SetComment(const gText &s)
 {
   rep->m_comment = s; 
-  rep->m_dirty = true;
   rep->m_revision++;
 }
 
@@ -700,7 +689,6 @@ void gbtNfgGame::SetOutcome(const gArray<int> &p_profile,
     index += rep->m_players[i]->m_strategies[p_profile[i]]->m_index;
   }
   rep->m_results[index] = p_outcome.rep;
-  rep->m_dirty = true;
   rep->m_revision++;
   BreakLink();
 }
@@ -710,7 +698,6 @@ void gbtNfgGame::SetOutcome(const StrategyProfile &p,
 			    const gbtNfgOutcome &outcome)
 {
   rep->m_results[p.index + 1] = outcome.rep;
-  rep->m_dirty = true;
   rep->m_revision++;
   BreakLink();
 }

@@ -71,8 +71,6 @@ public:
   const gText &GetComment(void) const;
 
   long RevisionNumber(void) const;
-  bool IsDirty(void) const;
-  void SetIsDirty(bool p_dirty);
 
   void WriteNfgFile(gOutput &, int) const;
 

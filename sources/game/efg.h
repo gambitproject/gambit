@@ -136,8 +136,6 @@ public:
   // DATA ACCESS -- GENERAL INFORMATION
   bool IsConstSum(void) const; 
   long RevisionNumber(void) const;
-  bool IsDirty(void) const;
-  void SetIsDirty(bool p_dirty);
   gNumber MinPayoff(int pl = 0) const;
   gNumber MaxPayoff(int pl = 0) const;
   

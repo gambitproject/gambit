@@ -150,8 +150,6 @@ public:
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
-  bool GameIsDirty(void) const { return m_doc->m_nfg->IsDirty(); }
-
   void SetPlayers(int, int);
   void SetProfile(const gArray<int> &);
   gArray<int> GetContingency(void) const;
