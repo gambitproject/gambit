@@ -2,7 +2,7 @@
 // File: quiksolv.imp  
 //        -- Implementation of class gPolyList
 // 
-// $Id$
+// @(#)quiksolv.imp	1.2 01/11/98
 //
 
 #include "quiksolv.h"

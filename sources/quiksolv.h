@@ -1,7 +1,7 @@
 //
 // File: quiksolv.h  --  Declaration of gpolylst data type
 // 
-// $Id$
+// @(#)quiksolv.h	1.2 01/11/98
 //
 
 #ifndef QUIKSOLV_H
