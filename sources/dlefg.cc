@@ -1142,31 +1142,31 @@ dialogInfosets::dialogInfosets(Efg &p_efg, wxFrame *p_parent)
   m_editButton->GetConstraints()->top.SameAs(newButton, wxTop);
   m_editButton->GetConstraints()->right.SameAs(newButton, wxLeft, 10);
   m_editButton->GetConstraints()->height.AsIs();
-  m_editButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+  m_editButton->GetConstraints()->width.AsIs();
 
   newButton->SetConstraints(new wxLayoutConstraints);
   newButton->GetConstraints()->top.SameAs(m_infosetItem, wxBottom, 10);
   newButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
   newButton->GetConstraints()->height.AsIs();
-  newButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+  newButton->GetConstraints()->width.SameAs(m_editButton, wxWidth);
 
   m_removeButton->SetConstraints(new wxLayoutConstraints);
   m_removeButton->GetConstraints()->centreY.SameAs(newButton, wxCentreY);
   m_removeButton->GetConstraints()->left.SameAs(newButton, wxRight, 10);
   m_removeButton->GetConstraints()->height.AsIs();
-  m_removeButton->GetConstraints()->width.AsIs();
+  m_removeButton->GetConstraints()->width.SameAs(m_editButton, wxWidth);
 
   okButton->SetConstraints(new wxLayoutConstraints);
   okButton->GetConstraints()->top.SameAs(newButton, wxBottom, 10);
   okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
   okButton->GetConstraints()->height.AsIs();
-  okButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+  okButton->GetConstraints()->width.SameAs(m_editButton, wxWidth);
 
   helpButton->SetConstraints(new wxLayoutConstraints);
   helpButton->GetConstraints()->top.SameAs(newButton, wxBottom, 10);
   helpButton->GetConstraints()->left.SameAs(okButton, wxRight, 10);
   helpButton->GetConstraints()->height.AsIs();
-  helpButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+  helpButton->GetConstraints()->width.SameAs(m_editButton, wxWidth);
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     m_playerItem->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
