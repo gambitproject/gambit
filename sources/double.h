@@ -40,6 +40,9 @@ public:
   
   ~gDouble();
 
+// Conversion
+  double ToDouble() const;
+
 // Operators
   gDouble&   operator =  (const gDouble& y);
 
@@ -54,6 +57,8 @@ public:
   gDouble    operator -  (const gDouble& y) const;
   gDouble    operator *  (const gDouble& y) const;
   gDouble    operator /  (const gDouble& y) const;
+
+  gDouble    operator -  ()                 const;
 
   void       operator += (const gDouble& y);
   void       operator -= (const gDouble& y);
@@ -72,6 +77,7 @@ public:
   friend gDouble  fabs(const gDouble& x);              
   friend gDouble  sqr(const gDouble& x);              
   friend gDouble  pow(const gDouble& x, const long y);
+  friend gDouble  pow(const gDouble& x, const gDouble& y);
 };
 
 #endif

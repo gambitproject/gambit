@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// $Id$
+// @(#)gpoly.imp	1.5 01 Sep 1996
 //
 
 #include "gpoly.h"
@@ -44,7 +44,7 @@ template <class T> gPoly<T>::gPoly(const gSpace *p, int var_no, int exp,
   Terms += gMono<T>((T)1,exp_vect(p,var_no,exp));
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace *p, 
+template <class T> gPoly<T>::gPoly(const gSpace* p, 
 				       exp_vect exps, 
 				       T coeff,
 				       const term_order* o)
@@ -53,9 +53,9 @@ template <class T> gPoly<T>::gPoly(const gSpace *p,
   Terms += gMono<T>(coeff,exps);
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace *p, 
-				       const gMono<T>& mono, 
-				       const term_order* o)
+template <class T> gPoly<T>::gPoly(const gSpace* p, 
+				   const gMono<T>& mono, 
+				   const term_order* o)
 : Space(p), Order(o), Terms()
 {
   Terms += mono;
@@ -188,7 +188,8 @@ template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p) const
 template<class T> gPoly<T> gPoly<T>::operator/(const T val) const
 {
   assert (val != (T)0);
-  return (1/val) * (*this);
+  T one = (T)1;
+  return (one/val) * (*this);
 }
 
 template<class T> 
@@ -286,6 +287,17 @@ template <class T> void gPoly<T>::GetChar(void)
 {
   charc = TheString[charnum];
 }
+
+/*
+template <class T> void gPoly<T>::GetChar(void)
+{
+  charc = TheString[charnum];
+}
+*/
+
+//----------------------------------
+//           Information
+//----------------------------------
   
 template <class T> const gSpace* gPoly<T>::GetSpace(void) const
 {
@@ -364,12 +376,49 @@ template <class T> gList<exp_vect> gPoly<T>::ExponentVectors() const
   return result;
 }
 
+template <class T> gList<gMono<T> > gPoly<T>::MonomialList() const
+{
+  return Terms;
+}
+
 template <class T> int gPoly<T>::No_Monomials() const
 {
   gout << "Eliminate old code in No_monomials, if successful.\n";
 
   return Terms.Length();
 }
+
+template <class T> int gPoly<T>::UniqueActiveVariable() const
+{
+  gList<exp_vect> ExpVecs = ExponentVectors();
+  int activar = 0;
+  for (int i = 1; i <= ExpVecs.Length(); i++) {
+    for (int j = 1; j <= Dmnsn(); j++) {
+      if (ExpVecs[i][j] > 0)
+	if (activar > 0 && activar != ExpVecs[i][j]) return -1;// multivariate!
+	else activar = ExpVecs[i][j];
+    }
+  }
+  return activar;
+}
+
+template <class T> 
+polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
+{
+  T* coefs = new T[DegreeOfVar(activar)];
+
+  for (int h = 1; h <= DegreeOfVar(activar); h++)
+    coefs[h] = (T)0;
+
+  for (int i = 1; i <= Terms.Length(); i++)
+    coefs[Terms[i].ExpV()[activar]] = Terms[i].Coef();
+
+  return polynomial<T>(coefs,DegreeOfVar(activar));
+}
+
+//-------------------------------------------------------------
+//           Private Versions of Arithmetic Operators
+//-------------------------------------------------------------
 
 template <class T> 
 gList< gMono<T> > gPoly<T>::Adder(const gList<gMono<T> >& One, 
@@ -484,19 +533,28 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 template <class T> 
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
-  gPoly<T> newPoly(*this); 
+  gPoly<T> answer(Space,(T)0,Order);
+//  gPoly<T> newPoly(*this); 
 
   for (int i = 1; i <= Terms.Length(); i++) 
-    newPoly.Terms[i] = 
-      gMono<T>(Terms[i].Coef()*pow(val,Terms[i].ExpV()[varnumber]), 
-	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+    {
 
-  for (int i = 1; i <= Terms.Length(); i++) 
+/*
     newPoly.Terms[i] = 
-      gMono<T>(Terms[i].Coef()*pow(val,Terms[i].ExpV()[varnumber]), 
+      gMono<T>(Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
 	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+*/
 
-  return (newPoly);
+    answer += gPoly<T>(Space,
+	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
+	       Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
+		       Order);
+
+  }
+
+
+  return answer;
+//  return (newPoly);
 }
 
 template <class T>

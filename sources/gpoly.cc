@@ -1,10 +1,11 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// $Id$
+// @(#)gpoly.cc	1.4 16 Aug 1996
 //
 
 #include "gpoly.imp"
+#include "double.h"
 #include "rational.h"
 
 #ifdef __GNUG__
@@ -13,14 +14,6 @@
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class gPoly<int>;
-#ifndef MINI_POLY
-TEMPLATE gPoly<int> operator*(const int val, const gPoly<int> poly);
-TEMPLATE gPoly<int> operator*(const gPoly<int> poly, const int val);
-#endif   // MINI_POLY
-TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<int> &y);
-TEMPLATE gString &operator<<(gString &, const gPoly<int> &);
 
 TEMPLATE class gPoly<gRational>;
 #ifndef MINI_POLY
@@ -38,6 +31,14 @@ TEMPLATE gPoly<double> operator*(const gPoly<double> poly, const double val);
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<double> &y);
 TEMPLATE gString &operator<<(gString &, const gPoly<double> &);
 
+TEMPLATE class gPoly<gDouble>;
+#ifndef MINI_POLY
+TEMPLATE gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> poly);
+TEMPLATE gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
+#endif   // MINI_POLY
+TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
+TEMPLATE gString &operator<<(gString &, const gPoly<gDouble> &);
+
 /*
 TEMPLATE class gPoly<long>;
 TEMPLATE gPoly<long> operator*(const long val, const gPoly<long> poly);
@@ -45,6 +46,7 @@ TEMPLATE gPoly<long> operator*(const gPoly<long> poly, const long val);
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 */
 
+/*
 int gPoly<int>::String_Coeff(int nega)
 {
   gString Coeff = "";
@@ -57,7 +59,6 @@ int gPoly<int>::String_Coeff(int nega)
   else return (nega * atoi(Coeff.stradr()));  
 }
 
-/*
 long gPoly<long>::String_Coeff(long nega)
 {
   gString Coeff = "";
@@ -82,6 +83,19 @@ double gPoly<double>::String_Coeff(double nega)
   }
   if (Coeff == "") return (nega);
   else return (nega * FromString(Coeff,doub));  
+}
+
+gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
+{
+  double doub;
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9' || charc == '.'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * (gDouble)FromString(Coeff,doub));  
 }
 
 gRational gPoly<gRational>::String_Coeff(gRational nega)
@@ -115,6 +129,12 @@ TEMPLATE class gList< gPoly<gRational> * >;
 TEMPLATE class gNode< gPoly<gRational> * >;
 TEMPLATE class gList< gPoly<double> * >;
 TEMPLATE class gNode< gPoly<double> * >;
+TEMPLATE class gList<gDouble>;
+TEMPLATE class gNode<gDouble>;
+TEMPLATE class gList< gPoly<gDouble> * >;
+TEMPLATE class gNode< gPoly<gDouble> * >;
+TEMPLATE class gList< gPoly<gDouble> >;
+TEMPLATE class gNode< gPoly<gDouble> >;
 //TEMPLATE class gList< gPoly<long> * >;
 //TEMPLATE class gNode< gPoly<long> * >;
 

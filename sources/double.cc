@@ -48,10 +48,19 @@ gDouble::~gDouble()
 {}
 
 //--------------------------------------------------------------------------
+//                               Conversion
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
 //                               operators
 //--------------------------------------------------------------------------
 
-gDouble &gDouble::operator =  (const gDouble& y)
+double gDouble::ToDouble() const
+{
+  return dbl;
+}
+
+gDouble& gDouble::operator =  (const gDouble& y)
 {
   if (this == &y) return *this;
 
@@ -144,6 +153,11 @@ gDouble gDouble::operator / (const gDouble& y) const
   return gDouble(dbl/y.dbl);
 }
 
+gDouble gDouble::operator - () const
+{
+  return gDouble(-dbl);
+}
+
 //--------------------------------------------------------------------------
 //                                  errors
 //--------------------------------------------------------------------------
@@ -190,8 +204,25 @@ gDouble sqr(const gDouble& x)
   return gDouble(sqr(x.dbl));
 }
 
-gDouble pow(const gDouble& x, long y)
+gDouble pow(const gDouble& x, const long y)
 {
   return gDouble(pow(x.dbl, y));
 }
 
+gDouble pow(const gDouble& x, const gDouble& y)
+{
+  return gDouble(pow(x.dbl, y.dbl));
+}
+
+/*
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "gmisc.cc"
+TEMPLATE gDouble gmin(const gDouble &a, const gDouble &b);
+TEMPLATE gDouble gmax(const gDouble &a, const gDouble &b);
+*/

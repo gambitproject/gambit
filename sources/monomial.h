@@ -1,11 +1,12 @@
 //
 // FILE: monomial.h -- Multivariate monomial class
 //
-// $Id$
+// @(#)monomial.h	1.2 15 Aug 1996
 //
 
 
 #include "prepoly.h"
+#include "mygmisc.h"
 
 
 // This file provides the template class

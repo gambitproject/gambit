@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// $Id$
+// @(#)gpoly.h	1.5 15 Aug 1996
 //
 
 #ifndef GPOLY_H
@@ -9,13 +9,16 @@
 
 #include "monomial.h"
 
+#ifndef MINI_POLY
+#include "poly.h"
+#endif
+
 // These classes are used to store and mathematically manipulate polynomials.
 
 //  **NOTE**
 //  Every type T to be used needs a procedure to convert a gString coefficient
 //  to the type T for the gString SOP input form and a procedure to convert 
 //  the coefficient into a gString for the SOP output form.  
-
 
 
 // *******************
@@ -135,8 +138,12 @@ public:
   int                 Degree()                             const;
   T                   GetCoef(const gArray<int> &Powers)   const;
   T                   GetCoef(const exp_vect &Powers)      const;
-  gPoly<T>           LeadingCoefficient(int varnumber)    const;
+  gPoly<T>            LeadingCoefficient(int varnumber)    const;
   T                   NumLeadCoeff()                       const; // deg == 0
+  int                 UniqueActiveVariable()               const;
+                      // returns 0 if constant, -1 if truly multivariate
+  polynomial<T>       UnivariateEquivalent(int activar)    const;
+                      // assumes UniqueActiveVariable() is true
 #endif   // MINI_POLY
 
   T                   Evaluate(const gArray<T> &values)    const;
@@ -144,8 +151,9 @@ public:
 #ifndef MINI_POLY
   gPoly<T>           EvaluateOneVar(int varnumber, T val) const;
   gPoly<T>           PartialDerivative(int varnumber)     const;
-  int                 No_Monomials()                       const;
-  gList<exp_vect>     ExponentVectors()                    const;
+  int                No_Monomials()                       const;
+  gList<exp_vect>    ExponentVectors()                    const;
+  gList<gMono<T> >   MonomialList()                       const;
 
   //--------------------
   // Term Order Concepts
