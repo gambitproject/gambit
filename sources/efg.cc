@@ -766,7 +766,7 @@ void Efg::NonterminalDescendantsRECURSION(const Node* n,
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
-      DescendantNodesRECURSION(newn,supp,current);
+      NonterminalDescendantsRECURSION(newn,supp,current);
     }
   }
 }
@@ -781,7 +781,7 @@ void Efg::TerminalDescendantsRECURSION(const Node* n,
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
-      DescendantNodesRECURSION(newn,supp,current);
+      TerminalDescendantsRECURSION(newn,supp,current);
     }
   }
 }
