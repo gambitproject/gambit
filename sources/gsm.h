@@ -16,16 +16,17 @@
 #include "portion.h"
 
 
-
-
-
-//class FunctionHashTable;
+class FunctionHashTable;
 class RefHashTable;
+
 
 
 class GSM
 {
  private:
+  static int FunctionsInitialized;
+  static FunctionHashTable *FuncTable;
+
   gStack<Portion *> *stack;
   RefHashTable *RefTable;
 
@@ -34,6 +35,7 @@ class GSM
   int unary_operation( OperationMode mode );
   int binary_operation( OperationMode mode );
 
+  static void InitFunctions( void );
 
  public:
   GSM( int size );
@@ -74,12 +76,19 @@ class GSM
 
   void Concatenate( void );
 
+
+  static void AddFunction( const gString& funcname, Portion *(*function)( void ) );
+  void CallFunction( const gString& funcname );
+
+
   void Output( void );
   void Dump( void );
 
   void Flush( void );
 
 };
+
+
 
 
 #endif  // GSM_H

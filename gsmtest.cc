@@ -197,9 +197,25 @@ int main( void )
   gout << "GreaterThanOrEqualTo() : " << machine->GreaterThanOrEqualTo() << "\n";
   gout << "LessThanOrEqualTo()    : " << machine->LessThanOrEqualTo() << "\n";
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->Flush();
+  gout << "Testing CallFunction(\"Sign\")\n";
+  machine->CallFunction( (gString) "Sign" );
+  gout << "Testing CallFunction(\"Abs\")\n";
+  machine->CallFunction( (gString) "Abs" );
+  gout << "Testing CallFunction(\"Sqr\")\n";
+  machine->CallFunction( (gString) "Sqr" );
+  machine->Dump();
+
+
 
   delete machine;
 
   return 0;
 }
+
+
+
 

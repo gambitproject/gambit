@@ -9,6 +9,36 @@
 #include "hash.imp"
 
 
+#include "gclmath.h"
+
+
+
+//--------------------------------------------------------------------
+  // hash tables used by GSM
+//-------------------------------------------------------------------
+
+gOutput& operator << (class gOutput &s, class Portion *(*funcname)( void ) )
+{
+  return s << funcname;
+}
+
+class FunctionHashTable : public HashTable<gString, Portion *(*)( void )>
+{
+ private:
+  int NumBuckets() const { return 1; }
+  int Hash( const gString &funcname ) const { return 0; }
+  void DeleteAction( Portion *(*function)( void ) ) { return; }
+ public:
+  FunctionHashTable() { Init(); }
+  ~FunctionHashTable() { Flush(); }  
+};
+
+
+
+int GSM::FunctionsInitialized = false;
+FunctionHashTable *GSM::FuncTable = new FunctionHashTable;
+
+
 
 
 
@@ -16,13 +46,39 @@ class RefHashTable : public HashTable<gString, Portion *>
 {
  private:
   int NumBuckets( void ) const { return 1; }
-  int Hash( gString ref ) const { return 0; }
+  int Hash( const gString& ref ) const { return 0; }
   void DeleteAction( Portion *value ) { delete value; }
  public:
   RefHashTable() { Init(); }
   ~RefHashTable() { Flush(); }
 };
 
+
+//-------------------------------------------------------------------
+  // definable function functions
+//-------------------------------------------------------------------
+
+void GSM::AddFunction( const gString& funcname, Portion *(*function)( void ) )
+{
+  FuncTable->Define( funcname, function );
+}
+
+void GSM::CallFunction( const gString& funcname )
+{
+  Portion *(*function)();
+  Portion *p;
+
+  if( FuncTable->IsDefined( funcname ) )
+  {
+    function = (*FuncTable)( funcname );
+    p = function();
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "** GSM Error: CallFunction() called with an undefined function\n";
+  }
+}
 
 
 
@@ -35,6 +91,10 @@ GSM::GSM( int size )
   assert( size > 0 );
   stack = new gStack<Portion *>( size );
   RefTable = new RefHashTable;
+
+  if( !FunctionsInitialized )
+    InitFunctions();
+
   assert( stack != 0 );
 }
 
