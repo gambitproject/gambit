@@ -117,7 +117,6 @@ private:
     static void spread_ok_func(wxButton &ob, wxEvent &ev);
     static void spread_cancel_func(wxButton  &ob, wxEvent &ev);
     static void spread_print_func(wxButton   &ob, wxEvent &ev);
-    static void spread_change_func(wxButton  &ob, wxEvent &ev);
     static void spread_options_func(wxButton &ob, wxEvent &ev);
     static void spread_help_func(wxButton &ob, wxEvent &ev);
 

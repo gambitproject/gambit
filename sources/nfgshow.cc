@@ -1194,11 +1194,7 @@ void NfgShow::Print(void)
       spread->Print(print_dialog.GetMedia(), print_dialog.GetOption());
     }
     else {    // must be dump_ascii
-      Bool all_cont = FALSE;
-      MyDialogBox cont_dialog(spread, "Contingencies");
-      cont_dialog.Add(wxMakeFormBool("All Contingencies", &all_cont));
-      cont_dialog.Go();
-      DumpAscii(all_cont);
+      DumpAscii(TRUE);
     }
   }
 }
@@ -1347,8 +1343,8 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
     }
     else {
       delete nf;
-      MyMessageBox("Single player normal form games are not supported in the GUI", 
-		   "Error", NFG_GUI_HELP, parent);
+      wxMessageBox("Single player normal form games are not supported", 
+		   "Error");
     }
   }
 

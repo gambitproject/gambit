@@ -14,6 +14,7 @@
 #include "wxmisc.h"
 
 #include "system.h"
+#include "gmisc.h"
 
 //***************************************************************************
 //                       RANDOM USEFUL FUNCTIONS
@@ -162,131 +163,6 @@ Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
   return ok;
 }
 
-
-
-//***************************************************************************
-//                         SOME DIALOGS FOR WXWIN
-// These are the commonly useful dialogs/forms that should be in the generic
-// wxwin dialog code.
-//***************************************************************************
-
-// The basic dialog w/ a form
-// The Form
-MyForm::MyForm(MyDialogBox *p, Bool help) :
-    wxForm(wxFORM_BUTTON_OK|wxFORM_BUTTON_CANCEL|((help) ? wxFORM_BUTTON_HELP : 0), wxFORM_BUTTON_AT_BOTTOM), parent(p)
-{ }
-
-
-void MyForm::OnOk(void)
-{
-    parent->OnOk();
-}
-
-
-void MyForm::OnCancel(void)
-{
-    parent->OnCancel();
-}
-
-
-void MyForm::OnHelp(void)
-{
-    parent->OnHelp();
-}
-
-
-//The dialog
-MyDialogBox::MyDialogBox(wxWindow *parent, char *title, const char *hlp_str) :
-    wxDialogBox(parent, title, TRUE), help_str(0)
-{
-    form = new MyForm(this, (hlp_str) ? TRUE : FALSE);
-    
-    if (hlp_str) help_str = copystring(hlp_str);
-}
-
-
-MyDialogBox::~MyDialogBox(void)
-{
-    // @@ delete form;
-    if (help_str) delete [] help_str;
-}
-
-
-Bool MyDialogBox::Completed(void) const
-{
-    return completed;
-}
-
-
-MyForm *MyDialogBox::Form(void)
-{
-    return form;
-}
-
-
-void MyDialogBox::Go(void)
-{
-    form->AssociatePanel(this);
-    Fit();
-    Centre();
-    Show(TRUE);
-}
-
-
-void MyDialogBox::Go1(void)
-{
-    Fit();
-    Centre();
-    Show(TRUE);
-}
-
-
-void MyDialogBox::SetHelpString(const char *hlp_str)
-{
-    if (help_str) 
-        delete [] help_str;
-
-    help_str = 0;
-    
-    if (hlp_str) 
-        help_str = copystring(hlp_str);
-}
-
-
-void MyDialogBox::OnOk(void)
-{
-    completed = wxOK;
-    Show(FALSE);
-}
-
-
-void MyDialogBox::OnCancel(void)
-{
-    completed = wxCANCEL;
-    Show(FALSE);
-}
-
-
-void MyDialogBox::OnHelp(void)
-{
-    if (help_str) wxHelpContents(help_str);
-}
-
-Bool MyDialogBox::OnClose(void)
-{
-  OnCancel();
-  return FALSE;
-}
-
-
-// Implementation for a message box with help capability
-MyMessageBox::MyMessageBox(const char *message, const char *caption, 
-                           const char *help_str, wxWindow *parent)
-    : MyDialogBox(parent, (char *)caption, help_str)
-{
-    Add(wxMakeFormMessage((char *)message));
-    Go();
-}
 
 //========================================================================
 //                     guiAutoDialog: Member functions
@@ -555,6 +431,57 @@ guiSliderDialog::guiSliderDialog(wxWindow *p_parent, const gText &p_caption,
   Go();
 }
 
+//========================================================================
+//                     guiFloatDialog: Member functions
+//========================================================================
+
+guiFloatDialog::guiFloatDialog(wxWindow *p_parent, const gText &p_caption,
+			       const gText &p_label,
+			       double p_min, double p_max, double p_default)
+  : guiAutoDialog(p_parent, p_caption), m_min(p_min), m_max(p_max)
+{
+  m_value = new wxText(this, 0, p_label);
+  m_value->SetValue(ToText(p_default));
+  m_value->SetConstraints(new wxLayoutConstraints);
+  m_value->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_value->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_value->GetConstraints()->width.AsIs();
+  m_value->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->top.SameAs(m_value, wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->Show(FALSE);
+  m_helpButton->GetConstraints()->top.SameAs(this, wxTop);
+  m_helpButton->GetConstraints()->left.SameAs(this, wxLeft);
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
+void guiFloatDialog::OnOk(void)
+{
+  double value = GetValue();
+
+  if (value >= m_min && value <= m_max) {
+    guiAutoDialog::OnOk();
+  }
+  else {
+    wxMessageBox("Value must be between " + ToText(m_min) + " and " +
+		 ToText(m_max), "Out of range");
+  }
+}
+
+double guiFloatDialog::GetValue(void) const
+{ return ToNumber(m_value->GetValue()); }
 
 //========================================================================
 //                     FontDialogBox: Member functions

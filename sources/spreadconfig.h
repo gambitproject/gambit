@@ -12,7 +12,6 @@
 #define ANY_BUTTON			1			// Specify this to create an empty panel
 #define ALL_BUTTONS			255
 #define	PRINT_BUTTON		2
-#define	CHANGE_BUTTON		4
 #define	OK_BUTTON				8
 #define	CANCEL_BUTTON		16
 #define OPTIONS_BUTTON	32

@@ -107,6 +107,7 @@ void GambitDrawSettings::SaveOptions(char *s) const
 // PlayerColorDialog: allows the user to change player colors graphically
 void GambitDrawSettings::PlayerColorDialog(gArray<gText> &player_names)
 {
+  /*
     MyDialogBox *player_color_dialog = new MyDialogBox(0, "Edit Player Colors");
 
     // list of player names
@@ -169,6 +170,7 @@ void GambitDrawSettings::PlayerColorDialog(gArray<gText> &player_names)
 
     delete [] name;
     delete [] color;
+  */
 }
 
 

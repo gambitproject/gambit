@@ -38,68 +38,6 @@ const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH] =
 #endif
 
 
-class MyDialogBox;
-
-class MyForm: public wxForm
-{
-private:
-    MyDialogBox *parent;
-
-public:
-    MyForm(MyDialogBox *p, Bool help = FALSE);
-    void    OnOk(void);
-    void    OnCancel(void);
-    void    OnHelp(void);
-};
-
-
-class MyDialogBox: public wxDialogBox
-{
-private:
-    MyForm *form;
-    Bool completed;
-    char *help_str;
-
-public:
-    // Constructor
-    MyDialogBox(wxWindow *parent, char *title, const char *help_str = 0);
-
-    // Destructor
-    ~MyDialogBox(void);
-
-    // What was the result? wxOK/wxCANCEL
-    Bool        Completed(void) const;
-
-    // Set the help string.
-    void        SetHelpString(const char *help_str);
-
-    // Access to private data, should be removed
-    MyForm     *Form(void);
-
-    // Simulate a form here, w/ some additional features
-    wxFormItem *Add(wxFormItem *item, long id = -1) {form->Add(item, id); return item; }
-    void        AssociatePanel(void)    {form->AssociatePanel(this); }
-
-    // Choose go to start up the dialog right away (calls associate panel by itself)
-    void        Go(void);
-
-    // Choose Go1 if you have already called associate panel
-    void           Go1(void);
-    virtual void   OnOk(void);
-    virtual void   OnCancel(void);
-    virtual void   OnHelp(void);
-    virtual Bool   OnClose(void);
-};
-
-
-class MyMessageBox: public MyDialogBox
-{
-public:
-    MyMessageBox(const char *message, const char *caption = 0, 
-                 const char *help_str = 0, wxWindow *parent = 0);
-};
-
-
 //
 // A generic standard dialog box featuring automatic layout, frame control
 // handling, and standard button placement
@@ -179,6 +117,25 @@ public:
   int GetValue(void) const { return m_slider->GetValue(); }
 };
 
+/**
+ * A dialog box with just a single float input field
+ */
+
+class guiFloatDialog : public guiAutoDialog {
+private:
+  double m_min, m_max;
+  wxText *m_value;
+
+  void OnOk(void);
+
+public:
+  guiFloatDialog(wxWindow *p_parent, const gText &p_caption,
+		 const gText &p_label, double p_min, double p_max,
+		 double p_default);
+  virtual ~guiFloatDialog() { }
+
+  double GetValue(void) const;
+};
 
 class FontDialogBox : public guiAutoDialog {
 private:

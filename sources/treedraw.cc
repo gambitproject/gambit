@@ -404,30 +404,22 @@ void TreeDrawSettings::LoadOptions(char *file_name)
 }
 
 
-//********************************* SET ZOOM ***********************************
-// Set force to true to set a zoom that is outside the MIN_ZOOM, MAX_ZOOM range.
+// Set force=true to set a zoom that is outside the MIN_ZOOM, MAX_ZOOM range.
 void TreeDrawSettings::SetZoom(float z, bool force)
 {
-#define MAX_ZOOM    10.0
-#define MIN_ZOOM    0.1
+  const double MAX_ZOOM = 10.0;
+  const double MIN_ZOOM = 0.1;
 
-    if (z < -0.5) // if this is not an inc/dec action
-    {
-        float t_zoom_factor = zoom_factor;
-        MyDialogBox *zoom_dialog = new MyDialogBox(NULL, "Set Zoom");
-        zoom_dialog->Form()->Add(wxMakeFormFloat("Zoom [0.1-10]", 
-            &t_zoom_factor, wxFORM_DEFAULT,
-            new wxList(wxMakeConstraintRange(MIN_ZOOM, MAX_ZOOM), 0)));
-        zoom_dialog->Go();
+  if (z < -0.5) {
+    guiFloatDialog dialog(NULL, "Set Zoom", "Zoom [0.1-10]",
+			  MIN_ZOOM, MAX_ZOOM, zoom_factor);
 
-        if (zoom_dialog->Completed() == wxOK)
-            zoom_factor = t_zoom_factor;
-        delete zoom_dialog;
+    if (dialog.Completed() == wxOK) {
+      zoom_factor = dialog.GetValue();
     }
-
-    else
-    {
-        if ((z >= MIN_ZOOM) && (z <= MAX_ZOOM) || force)
-            zoom_factor = z;
-    }
+  }
+  else {
+    if ((z >= MIN_ZOOM) && (z <= MAX_ZOOM) || force)
+      zoom_factor = z;
+  }
 }

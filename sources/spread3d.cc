@@ -154,11 +154,6 @@ void SpreadSheet3D::MakeButtons(long buttons)
         if (buttons & HELP_BUTTON) 
             AddButton("?", (wxFunction)SpreadSheet3D::spread_help_func);
         
-        if (buttons & CHANGE_BUTTON)
-        {
-            AddButtonNewLine();
-            AddButton("Grow/Shrink", (wxFunction)SpreadSheet3D::spread_change_func);
-        }
     }
 }
 
@@ -520,74 +515,6 @@ int SpreadSheet3D::GetRows(void)
 
 int SpreadSheet3D::GetCols(void)
 { return data[cur_level]->GetCols(); }
-
-void SpreadSheet3D::spread_change_func(wxButton  &ob, wxEvent &)
-{
-    SpreadSheet3D *parent = (SpreadSheet3D *)ob.GetClientData();
-
-    // Create the Grow/Shrink dialog box
-    MyDialogBox *gs = new MyDialogBox(0, "Grow/Shrink");
-
-    char *choices[6] =
-    {
-        "Add Row", "Add Column", "Add Level", "Del Row", "Del Column", "Del Level"
-    };
-    
-    wxRadioBox *rb = new wxRadioBox(gs, NULL, NULL, -1, -1, -1, -1, 6, choices, 2);
-    
-    if (!parent->DataSettings()->Change(S_CAN_GROW_ROW)) 
-        rb->Enable(0, FALSE);
-    
-    if (!parent->DataSettings()->Change(S_CAN_GROW_COL)) 
-        rb->Enable(1, FALSE);
-    
-    if (!parent->DataSettings()->Change(S_CAN_GROW_LEVEL)) 
-        rb->Enable(2, FALSE);
-    
-    if (!parent->DataSettings()->Change(S_CAN_SHRINK_ROW)) 
-        rb->Enable(3, FALSE);
-    
-    if (!parent->DataSettings()->Change(S_CAN_SHRINK_COL)) 
-        rb->Enable(4, FALSE);
-    
-    if (!parent->DataSettings()->Change(S_CAN_SHRINK_LEVEL)) 
-        rb->Enable(5, FALSE);
-    
-    gs->Go();
-    
-    if (gs->Completed() == wxOK)
-    {
-        switch (rb->GetSelection())
-        {
-        case 0: 
-            parent->AddRow();
-            break;
-
-        case 1: 
-            parent->AddCol();
-            break;
-
-        case 2: 
-            parent->AddLevel();
-            break;
-
-        case 3: 
-            parent->DelRow();
-            break;
-
-        case 4: 
-            parent->DelCol();
-            break;
-
-        case 5: 
-            parent->DelLevel();
-            break;
-        }
-    }
-
-    delete gs;
-}
-
 
 void SpreadSheet3D::spread_options_func(wxButton &ob, wxEvent &)
 {

@@ -1497,25 +1497,14 @@ void EfgShow::SupportReachable(void)
 
 void EfgShow::GameChanged(void)
 {
-    static Bool inform_delete = TRUE;
+  while (supports.Length()) 
+    delete supports.Remove(1);
 
-    if (supports.Length() > 1 && inform_delete)
-    {
-        MyDialogBox inform_delete_dialog(this, "Deleting supports", EFG_MAKE_SUPPORT_HELP);
-        inform_delete_dialog.Add(wxMakeFormMessage("Deleting all existing supports."));
-        inform_delete_dialog.Add(wxMakeFormNewLine());
-        inform_delete_dialog.Add(wxMakeFormBool("Show this note again", &inform_delete));
-        inform_delete_dialog.Go();
-    }
-
-    while (supports.Length()) 
-        delete supports.Remove(1);
-
-    // Create the full support.
-    cur_sup = new EFSupport(ef);
-    supports.Append(cur_sup);
-    cur_sup->SetName("Full Support");
-    RemoveStartProfiles();
+  // Create the full support.
+  cur_sup = new EFSupport(ef);
+  supports.Append(cur_sup);
+  cur_sup->SetName("Full Support");
+  RemoveStartProfiles();
 }
 
 

@@ -134,54 +134,115 @@ int NodeSolnShow::Pos(int feature)
   return pos;
 }
 
+class dialogFeatures : public guiAutoDialog {
+private:
+  int m_numFeatures;
+  wxCheckBox **m_features;
+
+public:
+  dialogFeatures(wxWindow *, const gText &, const gArray<Bool> &, char **);
+  virtual ~dialogFeatures();
+  
+  gArray<Bool> GetFeatures(void) const;
+};
+
+dialogFeatures::dialogFeatures(wxWindow *p_parent, const gText &p_caption,
+			       const gArray<Bool> &p_settings,
+			       char **p_featureNames)
+  : guiAutoDialog(p_parent, p_caption), m_numFeatures(p_settings.Last())
+{
+  m_features = new wxCheckBox *[m_numFeatures];
+  for (int i = 1; i <= m_numFeatures; i++) {
+    m_features[i - 1] = new wxCheckBox(this, 0, p_featureNames[i]);
+    m_features[i - 1]->SetValue(p_settings[i]);
+  }
+
+  m_features[0]->SetConstraints(new wxLayoutConstraints);
+  m_features[0]->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_features[0]->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_features[0]->GetConstraints()->width.AsIs();
+  m_features[0]->GetConstraints()->height.AsIs();
+
+  for (int i = 1; i < m_numFeatures / 2; i++) {
+    m_features[i*2]->SetConstraints(new wxLayoutConstraints);
+    m_features[i*2]->GetConstraints()->left.SameAs(this, wxLeft, 10);
+    m_features[i*2]->GetConstraints()->top.SameAs(m_features[(i-1)*2],
+						  wxBottom, 10);
+    m_features[i*2]->GetConstraints()->width.AsIs();
+    m_features[i*2]->GetConstraints()->height.AsIs();
+  }
+
+  for (int i = 0; i < m_numFeatures / 2; i++) {
+    m_features[i*2+1]->SetConstraints(new wxLayoutConstraints);
+    m_features[i*2+1]->GetConstraints()->left.SameAs(m_features[6],
+						     wxRight, 10);
+    m_features[i*2+1]->GetConstraints()->top.SameAs(m_features[i*2], wxTop);
+    m_features[i*2+1]->GetConstraints()->width.AsIs();
+    m_features[i*2+1]->GetConstraints()->height.AsIs();
+  }
+
+  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_okButton->GetConstraints()->top.SameAs(m_features[7], wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
+dialogFeatures::~dialogFeatures()
+{
+  delete [] m_features;
+}
+
+gArray<Bool> dialogFeatures::GetFeatures(void) const
+{
+  gArray<Bool> ret(m_numFeatures);
+  for (int i = 1; i <= m_numFeatures; i++) {
+    ret[i] = m_features[i - 1]->GetValue();
+  }
+  return ret;
+}
 
 void NodeSolnShow::SetOptions(void)
 {
-  gArray<Bool> new_features(features);
-  MyDialogBox *options_dialog = new MyDialogBox(this, "Node Inspect Options");
+  dialogFeatures dialog(this, "Node Inspect Features", 
+			features, feature_names);
 
-  for (int i = 1; i <= NUM_FEATURES; i++) {
-    options_dialog->Add(wxMakeFormBool(feature_names[i], &new_features[i]));
-
-    if (i % 2 == 0) 
-      options_dialog->Add(wxMakeFormNewLine());
-  }
-
-  options_dialog->Add(wxMakeFormNewLine());
-  options_dialog->Add(wxMakeFormNewLine());
-  Bool save_def = TRUE;
-  options_dialog->Add(wxMakeFormBool("Save Default", &save_def));
-  options_dialog->Go();
-
-  if (options_dialog->Completed() == wxOK) {
-    // check if we turned anything off
+  if (dialog.Completed() == wxOK) {
+    gArray<Bool> newFeatures(dialog.GetFeatures());
+    
     for (int i = NUM_FEATURES; i >= 1; i--) {
-      if (features[i] && !new_features[i]) {
+      if (features[i] && !newFeatures[i]) {
 	DelRow(Pos(i));
 	features[i] = 0;
       }
     }
 
-    // now check if we turned anything on
     for (int i = 1; i <= NUM_FEATURES; i++) {
-      if (new_features[i] && !features[i]) {
+      if (newFeatures[i] && !features[i]) {
 	AddRow(Pos(i)+1);
 	SetLabelRow(Pos(i)+1, feature_names[i]);
 	features[i] = 1;
       }
     }
 
-    // save as default, if desired
-    if (save_def) {
-      for (int i = 1; i <= NUM_FEATURES; i++)
-	wxWriteResource(NODESOLN_SECTION, feature_names[i], 
-			features[i], gambitApp.ResourceFile());
-    }
+    for (int i = 1; i <= NUM_FEATURES; i++)
+      wxWriteResource(NODESOLN_SECTION, feature_names[i], 
+		      features[i], gambitApp.ResourceFile());
 
     Redraw();
   }
 }
-
 
 void NodeSolnShow::OnMenuCommand(int id)
 {
@@ -655,88 +716,47 @@ int EfgSolnShow::FeaturePos(int feature)
 }
 
 
-// Set Options
 void EfgSolnShow::SetOptions(void)
 {
-    gArray<Bool> new_features = features;
-    char *defaults_file = gambitApp.ResourceFile();
+  dialogFeatures dialog(this, "Settings", features, feature_names);
 
-    MyDialogBox *options_dialog = new MyDialogBox(this, "Settings", 
-                                                  EFG_SOLVE_INSPECT_OPTIONS_HELP);
+  if (dialog.Completed() == wxOK) {
+    gArray<Bool> newFeatures(dialog.GetFeatures());
 
-    for (int i = 0; i < BSOLN_NUM_FEATURES; i++)
-    {
-        options_dialog->Add(wxMakeFormBool(feature_names[i], &new_features[i],
-                                           wxFORM_DEFAULT, 0, 0, 0, 150));
+    for (int i = BSOLN_NUM_FEATURES-1; i > 0; i--) {
+      if (features[i] && !newFeatures[i]) {
+	if (feature_width[i]) 
+	  DelCol(FeaturePos(i));
 
-        if (i % 2 == 0) 
-            options_dialog->Add(wxMakeFormNewLine());
+	features[i] = 0;
+      }
     }
 
-    Bool pick_all;
-    wxGetResource(SOLN_SECT, "Efg-Interactive-Solns-All", &pick_all, defaults_file);
+    for (int i = 1; i < BSOLN_NUM_FEATURES; i++) {
+      if (newFeatures[i] && !features[i]) {
+	if (feature_width[i]) {
+	  int col = FeaturePos(i)+1;
+	  AddCol(col);
+	  SetCell(1, col, feature_names[i]);
+	  Bold(1, col, 0, TRUE);
 
-    if (opts == BSOLN_O_PICKER)
-    {
-        options_dialog->Add(wxMakeFormNewLine());
-        options_dialog->Add(wxMakeFormBool("Pick all solutions [default]", &pick_all));
+	  if (feature_width[i] == -1) // precision dependent
+	    DrawSettings()->SetColWidth(2+ToTextPrecision(), col);
+	  else                        // precision independent
+	    DrawSettings()->SetColWidth(feature_width[i], col);
+	}
+	features[i] = 1;
+      }
     }
 
-    Bool save_def = TRUE;
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormBool("Save Default", &save_def));
-    options_dialog->Go();
-
-    if (options_dialog->Completed() == wxOK)
-    {
-        // check if we turned anything off
-        int i;
-
-        for (i = BSOLN_NUM_FEATURES-1; i >= 0; i--)
-        {
-            if (features[i] && !new_features[i])
-            {
-                if (feature_width[i]) 
-                    DelCol(FeaturePos(i));
-
-                features[i] = 0;
-            }
-        }
-
-        // now check if we turned anything on
-        for (i = 0; i < BSOLN_NUM_FEATURES; i++)
-        {
-            if (new_features[i] && !features[i])
-            {
-                if (feature_width[i])
-                {
-                    int col = FeaturePos(i)+1;
-                    AddCol(col);
-                    SetCell(1, col, feature_names[i]);
-                    Bold(1, col, 0, TRUE);
-
-                    if (feature_width[i] == -1) // precision dependent
-                        DrawSettings()->SetColWidth(2+ToTextPrecision(), col);
-                    else                                            // precision independent
-                        DrawSettings()->SetColWidth(feature_width[i], col);
-                }
-                features[i] = 1;
-            }
-        }
-
-        // save as default, if desired
-        if (save_def)
-        {
-            for (i = 0; i < BSOLN_NUM_FEATURES; i++)
-                wxWriteResource(BSOLN_SHOW_SECT, feature_names[i], features[i], defaults_file);
-
-            wxWriteResource(SOLN_SECT, "Efg-Interactive-Solns-All", pick_all, defaults_file);
-        }
-
-        UpdateValues();
-        Repaint();
+    for (int i = 0; i < BSOLN_NUM_FEATURES; i++) {
+      wxWriteResource(BSOLN_SHOW_SECT, feature_names[i], 
+		      features[i], gambitApp.ResourceFile());
     }
-    delete options_dialog;
+
+    UpdateValues();
+    Repaint();
+  }
 }
 
 

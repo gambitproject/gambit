@@ -2072,8 +2072,8 @@ void TreeWindow::tree_label(void)
 void TreeWindow::tree_delete(void)
 {
   try {
-    if (MyMessageBox("Are you sure?", "Delete Tree",
-		     EFG_TREE_HELP, pframe).Completed() == wxOK) {
+    if (wxMessageBox("Delete the whole subtree?", "Confirm",
+		     wxOK | wxCANCEL | wxCENTRE, this) == wxOK) {
       ef.DeleteTree(Cursor());
       nodes_changed = true;
     }
