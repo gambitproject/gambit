@@ -705,7 +705,8 @@ PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
   wxScrolledWindow(frame, -1, p_position, p_size, style),
   exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false), 
   m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
-  m_ppu(25)
+  m_ppu(25),
+  m_dc(new wxMemoryDC)
 {
   headers.Append(FileHeader(file_name));
   draw_settings=new PxiDrawSettings(headers[1]);
@@ -714,18 +715,35 @@ PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);
 
+  m_dc->SelectObject(wxBitmap(2000, 2000));
+  Update(*m_dc, PXI_UPDATE_SCREEN);
+
   Show(true);
 }
 
-// Define the repainting behaviour
+PxiCanvas::~PxiCanvas()
+{
+  delete m_dc;
+}
+
 void PxiCanvas::OnPaint(wxPaintEvent &)
 {
   if (painting) 
     return; // prevent re-entry
   painting = true;
+
   wxPaintDC dc(this);
-  Update(dc,PXI_UPDATE_SCREEN);
+  dc.Blit(0, 0, GetSize().GetWidth(), GetSize().GetHeight(),
+	  m_dc, 0, 0);
   painting = false;
+}
+
+void PxiCanvas::Render(void)
+{
+  m_dc->Clear();
+  m_dc->BeginDrawing();
+  Update(*m_dc, PXI_UPDATE_SCREEN);
+  m_dc->EndDrawing();
 }
 
 void PxiCanvas::SetScale(double x) 

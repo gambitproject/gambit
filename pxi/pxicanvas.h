@@ -43,6 +43,7 @@ private:
   int m_width, m_height;                // width, height of page
   double m_scale;                        // scaling factor
   double m_ppu;                        // pixels per scroll unit
+  wxMemoryDC *m_dc;        // stored DC
 
   int Width(void) const 
     {if(m_landscape) return m_height; return m_width;}
@@ -93,17 +94,21 @@ private:
   
   void DrawToken(wxDC &dc, int x, int y, int st);
 
+  // Event handlers
+  void OnPaint(wxPaintEvent &);
+  void OnChar(wxKeyEvent &ev);
+  void OnEvent(wxMouseEvent &ev);
+
 public:
   PxiCanvas(wxFrame *frame, const wxPoint &p_position,
 	    const wxSize &p_size, int style=0,const char *file_name=NULL);
+  virtual ~PxiCanvas();
+
   void Update(wxDC& dc,int device);
-  void OnPaint(wxPaintEvent &ev);
-  void OnChar(wxKeyEvent &ev);
-  void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
   void StopIt(void);
-  void Render(void) {wxClientDC dc(this); dc.BeginDrawing();Render(dc);dc.EndDrawing();}
-  void Render(wxDC &dc) {Update(dc,PXI_UPDATE_SCREEN);}
+
+  void Render(void);
   void SetPage(int page) {draw_settings->SetPage(page);}
   void SetNextPage(void) {draw_settings->SetNextPage();}
   void SetPreviousPage(void) {draw_settings->SetPreviousPage();}
@@ -118,3 +123,4 @@ public:
 };
 
 #endif  // PXICANVAS_H
+
