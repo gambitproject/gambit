@@ -3,6 +3,13 @@
 // $Date$
 // $Revision$
 //
+// DESCRIPTION;
+// Implementation of a rational number class
+//
+// This file is part of Gambit
+// Modifications copyright (c) 2002, The Gambit Project
+//
+// The original copyright and license are included below.
 
 /* 
 Copyright (C) 1988 Free Software Foundation

@@ -3,6 +3,13 @@
 // $Date$
 // $Revision$
 //
+// DESCRIPTION;
+// Interface to a rational number class
+//
+// This file is part of Gambit
+// Modifications copyright (c) 2002, The Gambit Project
+//
+// The original copyright and license are included below.
 
 // This may look like C code, but it is really -*- C++ -*-
 
