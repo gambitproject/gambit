@@ -51,6 +51,7 @@
 #include "dlefgplayers.h"
 #include "dlinfosets.h"
 #include "dlsubgames.h"
+#include "dlefgproperties.h"
 
 #include "dllayout.h"
 #include "dllegends.h"
@@ -122,12 +123,12 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_TREE_LABEL, EfgShow::OnEditTreeLabel)
   EVT_MENU(efgmenuEDIT_TREE_PLAYERS, EfgShow::OnEditTreePlayers)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
+  EVT_MENU(efgmenuEDIT_PROPERTIES, EfgShow::OnEditProperties)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
   EVT_MENU(efgmenuVIEW_NAVIGATION, EfgShow::OnViewCursor)
   EVT_MENU(efgmenuVIEW_OUTCOMES, EfgShow::OnViewOutcomes)
   EVT_MENU(efgmenuVIEW_SUPPORTS, EfgShow::OnViewSupports)
   EVT_MENU(efgmenuVIEW_INFOSETS, EfgShow::OnViewInfosets)
-  EVT_MENU(efgmenuVIEW_GAMEINFO, EfgShow::OnViewGameInfo)
   EVT_MENU(efgmenuVIEW_ZOOMIN, EfgShow::OnViewZoomIn)
   EVT_MENU(efgmenuVIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
   EVT_MENU(efgmenuFORMAT_LEGEND, EfgShow::OnFormatLegend)
@@ -596,6 +597,15 @@ void EfgShow::MakeMenus(void)
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
 
   wxMenu *editMenu = new wxMenu;
+  editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
+  editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
+  editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
+  // For the moment, these are not implemented -- leave disabled
+  editMenu->Enable(wxID_CUT, false);
+  editMenu->Enable(wxID_COPY, false);
+  editMenu->Enable(wxID_PASTE, false);
+  editMenu->AppendSeparator();
+
   wxMenu *nodeMenu = new wxMenu;
   nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
   nodeMenu->Append(efgmenuEDIT_NODE_DELETE, "&Delete Move",
@@ -674,6 +684,8 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(efgmenuEDIT_TREE, "&Tree", treeMenu,
 		   "Edit the tree");
   editMenu->AppendSeparator();
+  editMenu->Append(efgmenuEDIT_PROPERTIES, "Pr&operties",
+		   "View and change properties of current selection");
 
   wxMenu *toolsMenu = new wxMenu;
 
@@ -819,9 +831,6 @@ void EfgShow::MakeMenus(void)
 		   "Increase display magnification");
   viewMenu->Append(efgmenuVIEW_ZOOMOUT, "Zoom &out\t-",
 		   "Decrease display magnification");
-  viewMenu->AppendSeparator();
-  viewMenu->Append(efgmenuVIEW_GAMEINFO, "Game&Info",
-		   "Display general information about this game");
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
@@ -1561,6 +1570,14 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
   dialog.ShowModal();
 }
 
+void EfgShow::OnEditProperties(wxCommandEvent &)
+{
+  dialogEfgProperties dialog(this, m_efg);
+  if (dialog.ShowModal() == wxID_OK) {
+
+  }
+}
+
 //----------------------------------------------------------------------
 //                EfgShow: Menu handlers - View menu
 //----------------------------------------------------------------------
@@ -1670,23 +1687,6 @@ void EfgShow::OnViewZoomOut(wxCommandEvent &)
   float zoom = m_treeWindow->GetZoom();
   zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
   m_treeWindow->SetZoom(zoom);
-}
-
-void EfgShow::OnViewGameInfo(wxCommandEvent &)
-{
-  gText tmp;
-  char tempstr[200];
-  sprintf(tempstr, "Number of Players: %d", m_efg.NumPlayers());
-  tmp += tempstr;
-  tmp += "\n";
-  sprintf(tempstr, "Is %sconstant sum", ((m_efg.IsConstSum()) ? "" : "NOT "));
-  tmp += tempstr;
-  tmp += "\n";
-  sprintf(tempstr, "Is %sperfect recall", ((IsPerfectRecall(m_efg)) ? "" : "NOT "));
-  tmp += tempstr;
-  tmp += "\n";
-
-  wxMessageBox((char *) tmp, "Efg Game Info", wxOK, this);
 }
 
 //----------------------------------------------------------------------

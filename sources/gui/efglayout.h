@@ -115,6 +115,8 @@ private:
   gList<SubgameEntry> m_subgameList;
   int m_maxX, m_maxY, m_maxlev;
 
+  const int c_leftMargin, c_topMargin;
+
   NodeEntry *GetEntry(Node *) const;
 
   NodeEntry *NextInfoset(NodeEntry *);

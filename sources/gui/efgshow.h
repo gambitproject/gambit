@@ -112,6 +112,8 @@ private:
   void OnEditTreePlayers(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
+  void OnEditProperties(wxCommandEvent &);
+
   void OnViewProfiles(wxCommandEvent &);
   void OnViewCursor(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
@@ -119,7 +121,6 @@ private:
   void OnViewInfosets(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
-  void OnViewGameInfo(wxCommandEvent &);
 
   void OnFormatLegend(wxCommandEvent &);
   void OnFormatFontsAboveNode(wxCommandEvent &);

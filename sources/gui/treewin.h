@@ -28,7 +28,7 @@ private:
   Infoset *hilight_infoset1;      // Hilight infoset by pressing control
 
   // Context-sensitive popup menus, displayed on right-click
-  wxMenu *m_nodeMenu;
+  wxMenu *m_nodeMenu, *m_gameMenu;
 
   wxDragImage *m_dragImage;
   Node *m_dragSource;

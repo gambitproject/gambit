@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include <math.h>
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -175,6 +176,11 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
       p_dc.DrawText(m_branchAboveLabel,
 		    (xStart + xEnd - textWidth) / 2,
 		    (yStart + yEnd) / 2 - textHeight);
+      p_dc.DrawRotatedText(m_branchAboveLabel,
+			   (xStart + xEnd - textWidth) / 2,
+			   (yStart + yEnd) / 2 - textHeight, 
+			   -atan((double) (yEnd - yStart) /
+				 (double) (xEnd - xStart)) * 180.0 / 3.14159);
     }
     else {
       // this is a flat branch
@@ -206,7 +212,8 @@ int NodeEntry::GetX(void) const
 //-----------------------------------------------------------------------
 
 efgTreeLayout::efgTreeLayout(FullEfg &p_efg, TreeWindow *p_parent)
-  : m_efg(p_efg), m_parent(p_parent)
+  : m_efg(p_efg), m_parent(p_parent),
+    c_leftMargin(20), c_topMargin(40)
 {
   m_subgameList.Append(SubgameEntry(m_efg.RootNode()));
 }
@@ -646,8 +653,8 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   entry->infoset.y = -1;
   entry->infoset.x = -1;
-  entry->x = level * (draw_settings.NodeLength() +
-		      draw_settings.BranchLength());
+  entry->x = c_leftMargin + level * (draw_settings.NodeLength() +
+				     draw_settings.BranchLength());
   if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
     entry->color = wxGetApp().GetPreferences().GetChanceColor();
   }
@@ -809,13 +816,11 @@ void efgTreeLayout::UpdateTableParents(void)
 
 void efgTreeLayout::Layout(const EFSupport &p_support)
 {
-  const int TOP_MARGIN = 40;
-
   while (m_nodeList.Length() > 0) {
     delete m_nodeList.Remove(1);
   }
 
-  int maxlev = 0, miny = 0, maxy = 0, ycoord = TOP_MARGIN;
+  int maxlev = 0, miny = 0, maxy = 0, ycoord = c_topMargin;
   FillTable(m_efg.RootNode(), p_support, 0, maxlev, maxy, miny, ycoord);
   m_maxlev = maxlev;
 

@@ -86,6 +86,12 @@ void TreeWindow::MakeMenus(void)
 		     "Insert a move before this node");
   m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(efgmenuEDIT_NODE_LABEL, "Label Node", "Label this node");
+  m_nodeMenu->Append(efgmenuEDIT_PROPERTIES, "Properties",
+		     "View and change node properties");
+
+  m_gameMenu = new wxMenu;
+  m_gameMenu->Append(efgmenuEDIT_PROPERTIES, "Properties",
+		     "View and change game properties");
 }
 
 //---------------------------------------------------------------------
@@ -605,6 +611,10 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
     PopupMenu(m_nodeMenu, p_event.GetX(), p_event.GetY());
+  }
+  else {
+    // If right-click doesn't hit anything, display generic game menu
+    PopupMenu(m_gameMenu, p_event.GetX(), p_event.GetY());
   }
 }
 
