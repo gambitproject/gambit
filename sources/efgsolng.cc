@@ -1134,7 +1134,8 @@ guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 {
-  wxStatus status(m_parent->Frame(), "PolEnumSolve Progress");
+  wxPolEnumStatus status(m_parent->Frame());
+  status.SetProgress(0.0);
   EfgPolEnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.trace = m_traceLevel;

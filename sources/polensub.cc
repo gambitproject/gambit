@@ -5,6 +5,7 @@
 //
 
 #include "polensub.h"
+#include "nfgalleq.h"
 
 void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
@@ -15,12 +16,12 @@ void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   
   gList<MixedSolution> solutions;
 
-  long neval;
-  double time;
+  long neval = 0;
+  double time = 0.0;
+  gList<const NFSupport> singular_supports;
 
   try {
-    bool is_singular = false; // This info is currently unutilized!!
-    PolEnum(support, params, solutions, neval, time, is_singular);
+    AllNashSolve(support, params, solutions, neval, time, singular_supports);
 
     nevals += neval;
   

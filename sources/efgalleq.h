@@ -28,7 +28,7 @@ private:
   gArray<gNumber> values;
 
   void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_EFG; }    
 
 public:
   efgPolEnumSolve(const EFSupport &, const EfgPolEnumParams &, int max = 0);
