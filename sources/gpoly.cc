@@ -24,7 +24,7 @@ double gPoly<double>::String_Coeff(double nega)
 }
 #endif  // UNUSED
 
-gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
+TEMPLATE_SPECIALIZATION() gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
 {
   double doub;
   gText Coeff = "";
@@ -37,7 +37,7 @@ gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
   else return (nega * (gDouble)FromText(Coeff,doub));  
 }
 
-gRational gPoly<gRational>::String_Coeff(gRational nega)
+TEMPLATE_SPECIALIZATION() gRational gPoly<gRational>::String_Coeff(gRational nega)
 {
   gRational rat;
   gText Coeff = "";
@@ -50,8 +50,7 @@ gRational gPoly<gRational>::String_Coeff(gRational nega)
   else return (nega * FromText(Coeff,rat));  
 }
 
-
-gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
+TEMPLATE_SPECIALIZATION() gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
 {
   gNumber num;
   gText Coeff = "";

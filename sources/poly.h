@@ -76,9 +76,10 @@ public:
   gList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
   gList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
 
-    // output
-  friend gOutput& operator << (gOutput& output, const polynomial<T>& x);
+  void Output(gOutput &) const;
 };
+
+template <class T> gOutput& operator <<(gOutput &, const polynomial<T> &);
 
 
 /*                       REMARKS

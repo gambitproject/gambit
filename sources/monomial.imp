@@ -148,5 +148,5 @@ template<class T> T gMono<T>::Evaluate(const gVector<T>& vals) const
 
 template<class T> gOutput& operator << (gOutput& output, const gMono<T>& x)
 {
-    output << x.coef << x.exps;    return output;
+    output << x.Coef() << x.ExpV();    return output;
 }

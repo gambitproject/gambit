@@ -9,18 +9,20 @@
 
 class ChanceInfoset;
 
+TEMPLATE_SPECIALIZATION()
 const gNumber BehavProfile<gNumber>::Payoff(const EFOutcome *o, int pl) const
 { 
   return o->payoffs[pl];
 }
 
-
+TEMPLATE_SPECIALIZATION()
 const gRational BehavProfile<gRational>::Payoff(const EFOutcome *o, int pl) const
 { 
   //  gout << "\nin BehavProfile<gRational>::Payoff()";
   return o->payoffs[pl];
 }
 
+TEMPLATE_SPECIALIZATION()
 const double BehavProfile<double>::Payoff(const EFOutcome *o, int pl) const
 { 
   return o->double_payoffs[pl];

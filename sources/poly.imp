@@ -488,19 +488,23 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //                                printing
 //--------------------------------------------------------------------------
 
-template <class T> gOutput& operator << 
-                  (gOutput& output, const polynomial<T>& x)
+template <class T> void polynomial<T>::Output(gOutput &output) const
 {
-  if (x.Degree() < 0) output << "0";
+  if (Degree() < 0) output << "0";
   else {
-    for (int t = 0; t <= x.Degree(); t++)
-      if (x.coeflist[t+1] != (T)0) { 
-	output << x.coeflist[t+1]; 
+    for (int t = 0; t <= Degree(); t++)
+      if (coeflist[t+1] != (T)0) { 
+	output << coeflist[t+1]; 
 	if (t >= 1) output << "x";
 	if (t >= 2) output << "^" << t;
-	if (t < x.Degree()) output << " + "; }
+	if (t < Degree()) output << " + "; }
   }
-  return output;
+}
+
+template <class T> gOutput &operator<<(gOutput &p_file, polynomial<T> &p_poly)
+{
+  p_poly.Output(p_file);
+  return p_file;
 }
 
 //--------------------------------------------------------------------------

@@ -157,8 +157,10 @@ template <class T> class QuikSolv {
 				       const int&);
    bool     FindRoots  (const gRectangle<T>&, const int&);
    bool     ARootExists (const gRectangle<T>&, gVector<gDouble>&)    const;
-
-friend gOutput& operator << (gOutput& output, const QuikSolv<T>& x);
+  
+   void Output(gOutput &) const;
 };  
+
+template <class T> gOutput &operator<<(gOutput &output, const QuikSolv<T> &);
 
 #endif QUIKSOLV_H

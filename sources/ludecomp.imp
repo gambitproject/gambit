@@ -56,7 +56,7 @@ LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Tableau<T> &t)
 
 template <class T> 
 LUdecomp<T>::LUdecomp( Tableau<T> &t,
-		      int rfac = 0 )	
+		      int rfac/* = 0 */)	
 : tab(t), basis(t.GetBasis()),  
   scratch1(basis.First(), basis.Last()), 
   scratch2(basis.First(), basis.Last()),

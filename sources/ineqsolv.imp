@@ -167,12 +167,15 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
 //           Printing
 //----------------------------------
 
-template <class T> gOutput& operator << (gOutput& output, 
-					 const IneqSolv<T>& x)
+template <class T> void IneqSolv<T>::Output(gOutput &output) const
 {
-  output << "The system is\n" << x.System << "\nwith error tolerance " <<
-    x.Epsilon << ".\n";
-  return  output;
+  output << "The system is\n" << System << "\nwith error tolerance " <<
+    Epsilon << ".\n";
 }
 
-
+template <class T> gOutput &operator<<(gOutput &p_file,
+				       const IneqSolv<T> &p_solver)
+{
+  p_solver.Output(p_file);
+  return p_file;
+}

@@ -128,6 +128,12 @@ public:
   gText Description(void) const;
 }; 
 
+#ifdef __BCC55__
+#define TEMPLATE_SPECIALIZATION()   template<>
+#else
+#define TEMPLATE_SPECIALIZATION()
+#endif  // __BCC55__
+
 
 #endif    // GMISC_H
 

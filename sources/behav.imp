@@ -1557,7 +1557,8 @@ template <class T> gDPVector<T> &BehavAssessment<T>::Beliefs(void)
 //----------------
 
 template <class T>
-void BehavAssessment<T>::CondPayoff(BehavNode *p_node, T p_prob,
+void BehavAssessment<T>::CondPayoff(BehavProfile<T>::BehavNode *p_node,
+				    T p_prob,
 				    gPVector<T> &p_probs,
 				    gDPVector<T> &p_payoff) const
 {

@@ -132,17 +132,22 @@ template <class T>
 bool LinearCombination<T>::operator!=(const LinearCombination<T> &L) const
 { return !(*this == L); }
 
-template <class T> 
-gOutput &operator<<(gOutput &to, const LinearCombination<T> &L)
+template <class T> void LinearCombination<T>::Output(gOutput &to) const
 {
-  if (L.last_row_is_spanned) {
-    gout << "The last row of the input matrix is spanned by the other rows,\n"
-     << "with a linear dependence given by the weights" << L.weights << ".\n";
+  if (last_row_is_spanned) {
+    to << "The last row of the input matrix is spanned by the other rows,\n"
+     << "with a linear dependence given by the weights" << weights << ".\n";
   }
   else
-    gout << "The last row of the input matrix is not spanned by the"
+    to << "The last row of the input matrix is not spanned by the"
       << " other rows.\n";
-  return to;
+}
+
+template <class T> gOutput &operator<<(gOutput &p_file, 
+				       const LinearCombination<T> &p_comb)
+{
+  p_comb.Output(p_file);
+  return p_file;
 }
 
 //-------------------------------------------------------------------------

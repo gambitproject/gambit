@@ -20,7 +20,7 @@ Since boundary points can be identified, open and half
 open (bounded) intervals can be effected, but less directly.
 */
 
-template<class T> class gRectangle {
+template <class T> class gRectangle {
 private:
     gList<gInterval<T> > sides;
 
@@ -60,9 +60,10 @@ public:
     const T                  DiameterSquared()                  const;
 
     // output
-friend gOutput& operator << (gOutput& output, const gRectangle<T>& x);
+    void Output(gOutput &) const;
 };
 
+template <class T> gOutput &operator<<(gOutput &, const gRectangle<T> &);
 
   //-------------
   // Conversion:

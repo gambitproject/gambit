@@ -201,7 +201,7 @@ gVector<T> operator*(const gVector<T> &v, const gMatrix<T> &M)
 {
   if (!M.CheckColumn(v))   throw gRectArray<T>::BadDim();
 
-  gVector<T> tmp(M.mincol, M.maxcol);
+  gVector<T> tmp(M.MinCol(), M.MaxCol());
   M.RMultiply(v, tmp);
   return tmp;
 }

@@ -170,8 +170,10 @@ public:
 
  // Print polynomial in SOP form
   friend gOutput &operator<< (gOutput &f, const gPoly<T> &y);
-  friend gText &operator<< (gText &, const gPoly<T> &);
+  void Output(gText &) const;
 };
+
+template <class T> gText &operator<< (gText &, const gPoly<T> &);
 
   //-------------
   // Conversion:

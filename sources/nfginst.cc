@@ -9,18 +9,20 @@
 #include "mixed.imp"
 #include "rational.h"
 
+TEMPLATE_SPECIALIZATION()
 const gNumber MixedProfile<gNumber>::Payoff(const NFOutcome *o, int pl) const
 { 
   return o->payoffs[pl];
 }
 
-
+template <>
 const gRational MixedProfile<gRational>::Payoff(const NFOutcome *o, int pl) const
 { 
   gout << "\nin MixedProfile<gRational>::Payoff()";
   return o->payoffs[pl];
 }
 
+TEMPLATE_SPECIALIZATION()
 const double MixedProfile<double>::Payoff(const NFOutcome *o, int pl) const
 { 
   return o->double_payoffs[pl];

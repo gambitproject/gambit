@@ -13,24 +13,10 @@
 EfgPolEnumParams::EfgPolEnumParams(void)
 { }
 
-int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
-	       gList<BehavSolution> &solutions, gStatus &p_status,
-	       long &nevals, double &time, bool &is_singular)
-{
-  EfgPolEnumModule<gDouble> module(support, params);
-  module.EfgPolEnum(p_status);
-  nevals = module.NumEvals();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  is_singular = module.IsSingular();
-
-  return 1;
-}
-
 #include "double.h"
 
-gPoly<gDouble> 
-EfgPolEnumModule<gDouble>::Payoff(int pl) const
+TEMPLATE_SPECIALIZATION()
+gPoly<gDouble> EfgPolEnumModule<gDouble>::Payoff(int pl) const
 {
   gIndexOdometer index(SF.NumSequences());
   gNumber pay;
@@ -52,3 +38,18 @@ EfgPolEnumModule<gDouble>::Payoff(int pl) const
 }
 
 template class EfgPolEnumModule<gDouble>;
+
+int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
+	       gList<BehavSolution> &solutions, gStatus &p_status,
+	       long &nevals, double &time, bool &is_singular)
+{
+  EfgPolEnumModule<gDouble> module(support, params);
+  module.EfgPolEnum(p_status);
+  nevals = module.NumEvals();
+  time = module.Time();
+  solutions = module.GetSolutions();
+  is_singular = module.IsSingular();
+
+  return 1;
+}
+

@@ -888,31 +888,34 @@ template<class T> gPoly<T> operator+(const gPoly<T> &poly, const T val)
   return val + poly;
 }
 
-template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
+template <class T> void gPoly<T>::Output(gText &t) const
 {
   gText s;
-  if (p.Terms.Length() == 0) s += "0";
+  if (Terms.Length() == 0)  {
+    s += "0";
+  }
   else {
-    for (int j = 1; j <= p.Terms.Length(); j++)
-      {	
-	if (p.Terms[j].Coef() < (T)0) {
-	  s += "-";
-	  if (j > 1) s += " ";
+    for (int j = 1; j <= Terms.Length(); j++) {
+      if (Terms[j].Coef() < (T)0) {
+	s += "-";
+	if (j > 1) s += " ";
+      }
+      else if (j > 1) s += "+ ";
+	
+      if ((Terms[j].Coef() != (T)1 && -Terms[j].Coef() != (T)1) ||
+	   Terms[j].IsConstant() ) 
+	if (Terms[j].Coef() < (T)0) { 
+	  s += ToText(-Terms[j].Coef());
 	}
-	else if (j > 1) s += "+ ";
+	else {                        
+	  s += ToText( Terms[j].Coef());
+	}
 	
-	if ( (p.Terms[j].Coef() != (T)1 && -p.Terms[j].Coef() != (T)1) ||
-	    p.Terms[j].IsConstant() ) 
-	  if (p.Terms[j].Coef() < (T)0) 
-	    s += ToText(-p.Terms[j].Coef());
-	  else                        
-	    s += ToText( p.Terms[j].Coef());
-	
-	for (int k = 1; k <= p.Space->Dmnsn(); k++) {
-	  int exp = p.Terms[j].ExpV() [k];
+	for (int k = 1; k <= Space->Dmnsn(); k++) {
+	  int exp = Terms[j].ExpV() [k];
 	  if (exp > 0) {
 	    s += " ";
-	    s += (*p.Space)[k]->Name;
+	    s += (*Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
 	      s += ToText(exp);
@@ -920,14 +923,18 @@ template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
 	  }
 	}
 	
-	if (j < p.Terms.Length()) s += " ";
+	if (j < Terms.Length()) s += " ";
       }
   }
   if (s == "") s = " 0";
   
   t += s;
-  
-  return t;
+}
+
+template <class T> gText &operator<<(gText &p_text, const gPoly<T> &p_poly)
+{
+  p_poly.Output(p_text);
+  return p_text;
 }
 
 //----------------------------------

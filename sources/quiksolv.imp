@@ -596,14 +596,19 @@ QuikSolv<T>::ARootExists (const gRectangle<T>& r,
 //           Printing
 //----------------------------------
 
-template <class T> gOutput& operator << (gOutput& output, 
-					 const QuikSolv<T>& x)
+template <class T> void QuikSolv<T>::Output(gOutput &output) const
 {
-  output << "The system is\n" << x.System;
-  if (x.HasBeenSolved) 
-    output << "It has been solved with roots:\n" << x.Roots;
+  output << "The system is\n" << System;
+  if (HasBeenSolved) 
+    output << "It has been solved with roots:\n" << Roots;
   else output << "It has not been solved.";
-  return  output;
+}
+
+template <class T>
+gOutput &operator<<(gOutput &p_file, const QuikSolv<T> &p_solver)
+{
+  p_solver.Output(p_file);
+  return p_file;
 }
 
 template <class T> QuikSolv<T>::NewtonError::~NewtonError()

@@ -287,7 +287,8 @@ protected:
   gDPVector<T> m_beliefs;
   
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
-  void CondPayoff(BehavNode *, T, gPVector<T> &, gDPVector<T> &) const;
+  void CondPayoff(BehavProfile<T>::BehavNode *, T,
+		  gPVector<T> &, gDPVector<T> &) const;
   
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS

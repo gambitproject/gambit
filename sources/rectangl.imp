@@ -286,12 +286,17 @@ gRectangle<gDouble>  TogDouble(const gRectangle<T>& given)
 //                        interval -- printing
 //--------------------------------------------------------------------------
 
-template<class T> gOutput& operator << (gOutput& output, 
-					const gRectangle<T>& x)
+template <class T> void gRectangle<T>::Output(gOutput &output) const
 {
-  for (int i = 1; i <= x.Dmnsn() - 1; i++)
-    output << x.sides[i] << "x";
-  if (x.Dmnsn() > 0) 
-    output << x.sides[x.Dmnsn()];
-  return output;
+  for (int i = 1; i <= Dmnsn() - 1; i++)
+    output << sides[i] << "x";
+  if (Dmnsn() > 0) 
+    output << sides[Dmnsn()];
+}
+
+template <class T>
+gOutput &operator<<(gOutput &p_file, const gRectangle<T> &p_rect)
+{
+  p_rect.Output(p_file);
+  return p_file;
 }

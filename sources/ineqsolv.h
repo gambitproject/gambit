@@ -82,7 +82,8 @@ template <class T> class IneqSolv {
   // The function that does everything
   const bool ASolutionExists(const gRectangle<T>&, gVector<T>& sample);
 
-friend gOutput& operator << (gOutput& output, const IneqSolv<T>& x);
+  void Output(gOutput &) const;
 };  
 
+template <class T> gOutput &operator<<(gOutput &output, const IneqSolv<T> &x);
 #endif INEQSOLV_H
