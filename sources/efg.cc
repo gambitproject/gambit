@@ -56,7 +56,7 @@ void Infoset::PrintActions(gOutput &f) const
   f << "}";
 }
 
-const Action *Infoset::InsertAction(int where)
+Action *Infoset::InsertAction(int where)
 {
   Action *action = new Action(where, "", this);
   actions.Insert(action, where);
@@ -72,9 +72,9 @@ void Infoset::RemoveAction(int which)
     actions[which]->number = which;
 }
 
-const gList<const Action *> Infoset::ListOfActions(void) const
+const gList<Action *> Infoset::ListOfActions(void) const
 {
-  gList<const Action *> answer;
+  gList<Action *> answer;
   for (int i = 1; i <= actions.Length(); i++) 
     answer += actions[i];
   return answer;
@@ -104,7 +104,7 @@ class ChanceInfoset : public Infoset  {
     void PrintActions(gOutput &f) const;
 
   public:
-    const Action *InsertAction(int where);
+    Action *InsertAction(int where);
     void RemoveAction(int which);
 
     void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
@@ -119,9 +119,9 @@ ChanceInfoset::ChanceInfoset(Efg *E, int n, EFPlayer *p, int br)
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
 }
 
-const Action *ChanceInfoset::InsertAction(int where)
+Action *ChanceInfoset::InsertAction(int where)
 { 
-  const Action *action = Infoset::InsertAction(where);
+  Action *action = Infoset::InsertAction(where);
   probs.Insert((gNumber) 0, where);
   return action;
 }
@@ -189,7 +189,7 @@ const Action *Node::GetAction() const
   if (this == Game()->RootNode()) 
     throw Efg::Exception();
   
-  gArray<const Action *> actions = GetParent()->GetInfoset()->Actions();
+  gArray<Action *> &actions = GetParent()->GetInfoset()->Actions();
   for (int i = 1; i <= actions.Length(); i++)
     if (this == GetParent()->GetChild(actions[i]))
       return actions[i];
@@ -725,7 +725,7 @@ void Efg::DescendantNodesRECURSION(const Node* n,
 {
   current += n;
   if (n->IsNonterminal()) {
-    const gArray<const Action *> actions = supp.Actions(n->GetInfoset());
+    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
       DescendantNodesRECURSION(newn,supp,current);
@@ -739,7 +739,7 @@ void Efg::NonterminalDescendantsRECURSION(const Node* n,
 {
   if (n->IsNonterminal()) {
     current += n;
-    const gArray<const Action *> actions = supp.Actions(n->GetInfoset());
+    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
       DescendantNodesRECURSION(newn,supp,current);

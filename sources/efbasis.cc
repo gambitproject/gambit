@@ -501,7 +501,7 @@ void EFBasis::MakeAb()
     }
 }
 
-int EFBasis::Col(const Action *a) const
+int EFBasis::Col(Action *a) const
 {
   Infoset *iset = a->BelongsTo();
   return (*actIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
@@ -515,7 +515,7 @@ int EFBasis::Col(Node *n) const
 		  (*bigbasis).Find(n));
 }
 
-void EFBasis::AddEquation1(int row, const Action *a) const
+void EFBasis::AddEquation1(int row, Action *a) const
 {
   if(Col(a))
     (*A)(row,Col(a)) = -1.0;
@@ -527,7 +527,7 @@ void EFBasis::AddEquation2(int row,Node *n) const
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
   if(n!=befg->RootNode()) {
-    const Action *act = LastAction(n);
+    Action *act = LastAction(n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
     while(n->GetParent() != befg->RootNode()) {

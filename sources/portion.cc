@@ -1174,7 +1174,7 @@ ActionPortion::~ActionPortion()
   if (!_ref)   delete _Value;
 }
 
-const Action *ActionPortion::Value(void) const
+Action *ActionPortion::Value(void) const
 { return *_Value; }
 
 void ActionPortion::SetValue(Action *value)

@@ -14,10 +14,10 @@ template class gList<const Infoset *>;
 class EFActionArray   {
   friend class EFActionSet;
 protected:
-  gBlock<const Action *> acts;
+  gBlock<Action *> acts;
 
 public:
-  EFActionArray ( const gArray <const Action *> &a);
+  EFActionArray ( const gArray <Action *> &a);
   EFActionArray ( const EFActionArray &a);
   virtual ~EFActionArray();
   EFActionArray &operator=( const EFActionArray &a);
@@ -32,7 +32,7 @@ public:
 // EFActionArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFActionArray::EFActionArray(const gArray<const Action *> &a)
+EFActionArray::EFActionArray(const gArray<Action *> &a)
   : acts(a.Length())
 {
   for (int i = 1; i <= acts.Length(); i++)
@@ -91,10 +91,10 @@ public:
   //--------------------
 
   // Append an action to an infoset;
-  void AddAction(int iset, const Action *);
+  void AddAction(int iset, Action *);
 
   // Insert an action in a particular place in an infoset;
-  void AddAction(int iset, const Action *, int index);
+  void AddAction(int iset, Action *, int index);
 
 
   // Remove an action at int i, returns the removed action pointer
@@ -102,10 +102,10 @@ public:
 
   // Remove an action from an infoset . 
   // Returns true if the action was successfully removed, false otherwise.
-  bool RemoveAction(int iset, const Action *);
+  bool RemoveAction(int iset, Action *);
 
   // Get a garray of the actions in an Infoset
-  const gArray<const Action *> &ActionList(int iset) const
+  const gArray<Action *> &ActionList(int iset) const
      { return infosets[iset]->acts; }
 
   // Get the EFActionArray of an iset
@@ -120,7 +120,7 @@ public:
   const Action *GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int Find(const Action *) const;
+  int Find(Action *) const;
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
@@ -189,13 +189,13 @@ bool EFActionSet::operator==(const EFActionSet &s) const
 //------------------------------------------
 
 // Append an action to a particular infoset;
-void EFActionSet::AddAction(int iset, const Action *s) 
+void EFActionSet::AddAction(int iset, Action *s)
 { 
   infosets[iset]->acts.Append(s); 
 }
 
 // Insert an action  to a particular infoset at a particular place;
-void EFActionSet::AddAction(int iset, const Action *s, int index) 
+void EFActionSet::AddAction(int iset, Action *s, int index)
 { 
   infosets[iset]->acts.Insert(s,index); 
 }
@@ -209,7 +209,7 @@ const Action* EFActionSet::RemoveAction(int iset, int i)
 
 // Removes an action from infoset iset . Returns true if the 
 //Action was successfully removed, false otherwise.
-bool EFActionSet::RemoveAction(int  iset, const Action *s ) 
+bool EFActionSet::RemoveAction(int  iset, Action *s )
 { 
   int t = infosets[iset]->acts.Find(s); 
   if (t>0) infosets[iset]->acts.Remove(t); 
@@ -234,7 +234,7 @@ EFPlayer &EFActionSet::GetPlayer(void) const
   return (*efp);
 }
 
-int EFActionSet::Find(const Action *a) const
+int EFActionSet::Find(Action *a) const
 {
   return (infosets[a->BelongsTo()->GetNumber()]->acts.Find(a));
 }
@@ -316,25 +316,25 @@ int EFSupport::NumActions(const Infoset &i) const
   return sets[i.GetPlayer()->GetNumber()]->NumActions(i.GetNumber());
 }
 
-const gArray<const Action *> &EFSupport::Actions(int pl, int iset) const
+const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
 {
   return sets[pl]->ActionList(iset);
 }
 
-const gArray<const Action *>& EFSupport::Actions(const Infoset &i) const
+const gArray<Action *>& EFSupport::Actions(const Infoset &i) const
 {
   return sets[i.GetPlayer()->GetNumber()]->ActionList(i.GetNumber());
 }
 
-const gArray<const Action *>& EFSupport::Actions(const Infoset *i) const
+const gArray<Action *>& EFSupport::Actions(const Infoset *i) const
 {
   return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
-gList<const Action *> EFSupport::ListOfActions(const Infoset *i) const
+gList<Action *> EFSupport::ListOfActions(const Infoset *i) const
 {
-  gArray<const Action *> actions = Actions(i);
-  gList<const Action *> answer;
+  gArray<Action *> actions = Actions(i);
+  gList<Action *> answer;
   for (int i = 1; i <= actions.Length(); i++)
     answer += actions[i];
   return answer;
@@ -355,7 +355,7 @@ const Node *EFSupport::RootNode(void) const
   return befg->RootNode();
 }
 
-int EFSupport::Find(const Action *a) const
+int EFSupport::Find(Action *a) const
 {
   if (a->BelongsTo()->Game() != befg)   return 0;
 
@@ -364,7 +364,7 @@ int EFSupport::Find(const Action *a) const
   return sets[pl]->Find(a);
 }
 
-bool EFSupport::ActionIsActive(const Action *a) const
+bool EFSupport::ActionIsActive(Action *a) const
 {
   if (a->BelongsTo()->Game() != befg)   
     return false;
@@ -402,7 +402,7 @@ gPVector<int> EFSupport::NumActions(void) const
   return bar;
 }  
 
-bool EFSupport::RemoveAction(const Action *s)
+bool EFSupport::RemoveAction(Action *s)
 {
   Infoset *infoset = s->BelongsTo();
   EFPlayer *player = infoset->GetPlayer();
@@ -410,7 +410,7 @@ bool EFSupport::RemoveAction(const Action *s)
   return sets[player->GetNumber()]->RemoveAction(infoset->GetNumber(), s);
 }
 
-void EFSupport::AddAction(const Action *s)
+void EFSupport::AddAction(Action *s)
 {
   Infoset *infoset = s->BelongsTo();
   EFPlayer *player = infoset->GetPlayer();
@@ -455,7 +455,7 @@ EFSupport::ReachableNonterminalNodes(const Node *n) const
 }
 
 const gList<const Node *> 
-EFSupport::ReachableNonterminalNodes(const Node *n, const Action *a) const
+EFSupport::ReachableNonterminalNodes(const Node *n, Action *a) const
 {
   gList<const Node *> answer;
   const Node *nn = n->GetChild(a);
@@ -477,7 +477,7 @@ const gList<const Infoset *> EFSupport::ReachableInfosets(const Node *n) const
 }
 
 const gList<const Infoset *> 
-EFSupport::ReachableInfosets(const Node *n, const Action *a) const
+EFSupport::ReachableInfosets(const Node *n, Action *a) const
 {
   gList<const Infoset *> answer;
   gList<const Node *> nodelist = ReachableNonterminalNodes(n,a);
@@ -498,7 +498,7 @@ bool EFSupport::AlwaysReachesFrom(const Infoset *i, const Node *n) const
   else
     if (n->GetInfoset() == i) return true;
     else {
-      gArray<const Action *> actions = Actions(n->GetInfoset());
+      gArray<Action *> actions = Actions(n->GetInfoset());
       for (int j = 1; j <= actions.Length(); j++)
 	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]))) 
 	  return false;
@@ -520,8 +520,8 @@ bool EFSupport::MayReach(const Node *n) const
   if (n == RootNode())
     return true;
   else {
-    gArray<const Action *> actions = Actions(n->GetParent()->GetInfoset());
-    const Action * last = NULL;
+    gArray<Action *> actions = Actions(n->GetParent()->GetInfoset());
+    Action *last = NULL;
     for (int i = 1; i <= actions.Length() && last == NULL; i++)
       if (n->GetParent()->GetChild(actions[i]) == n)
 	last = actions[i];
@@ -589,7 +589,7 @@ void EFSupportWithActiveNodes::generate_nonterminal_nodes(const Node *n)
     reachable_nt_nodes += n;
     reachable_nonterminal_nodes[n->GetPlayer()->GetNumber()]
       [n->GetInfoset()->GetNumber()] += n;
-    gArray<const Action *> actions(Actions(n->GetInfoset()));
+    gArray<Action *> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       generate_nonterminal_nodes(n->GetChild(actions[i]));    
   }
@@ -607,7 +607,7 @@ void EFSupportWithActiveNodes::delete_this_and_lower_nonterminal_nodes(
     for (int i = 1; i <= reachable_nonterminal_nodes[pl][iset].Length(); i++)
       if (n == reachable_nonterminal_nodes[pl][iset][i])
 	reachable_nonterminal_nodes[pl][iset].Remove(i);
-    gArray<const Action *> actions(Actions(n->GetInfoset()));
+    gArray<Action *> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       delete_this_and_lower_nonterminal_nodes(n->GetChild(actions[i]));
   }
@@ -717,7 +717,7 @@ EFSupportWithActiveNodes::ReachableNodesInInfoset(const Infoset * i) const
 }
 
 // Editing functions
-void EFSupportWithActiveNodes::AddAction(const Action *s)
+void EFSupportWithActiveNodes::AddAction(Action *s)
 {
   EFSupport::AddAction(s);
 
@@ -727,7 +727,7 @@ void EFSupportWithActiveNodes::AddAction(const Action *s)
     generate_nonterminal_nodes(startlist[i]->GetChild(s));
 }
 
-bool EFSupportWithActiveNodes::RemoveAction(const Action *s)
+bool EFSupportWithActiveNodes::RemoveAction(Action *s)
 {
   Infoset *infoset = s->BelongsTo();
   gList<const Node *> startlist(ReachableNodesInInfoset(infoset));
@@ -749,7 +749,7 @@ void EFSupportWithActiveInfo::generate_nonterminal_nodes(const Node *n)
     reachable_nt_nodes += n;
     reachable_nonterminal_nodes[n->GetPlayer()->GetNumber()]
       [n->GetInfoset()->GetNumber()] += n;
-    gArray<const Action *> actions(Actions(n->GetInfoset()));
+    gArray<Action *> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       generate_nonterminal_nodes(n->GetChild(actions[i]));    
   }
@@ -767,7 +767,7 @@ void EFSupportWithActiveInfo::delete_this_and_lower_nonterminal_nodes(
     for (int i = 1; i <= reachable_nonterminal_nodes[pl][iset].Length(); i++)
       if (n == reachable_nonterminal_nodes[pl][iset][i])
 	reachable_nonterminal_nodes[pl][iset].Remove(i);
-    gArray<const Action *> actions(Actions(n->GetInfoset()));
+    gArray<Action *> actions(Actions(n->GetInfoset()));
     for (int i = 1; i <= actions.Length(); i++) 
       delete_this_and_lower_nonterminal_nodes(n->GetChild(actions[i]));
   }
@@ -907,7 +907,7 @@ EFSupportWithActiveInfo::ReachableNodesInInfoset(const Infoset * i) const
 }
 
 // Editing functions
-void EFSupportWithActiveInfo::AddAction(const Action *s)
+void EFSupportWithActiveInfo::AddAction(Action *s)
 {
   EFSupport::AddAction(s);
 
@@ -917,7 +917,7 @@ void EFSupportWithActiveInfo::AddAction(const Action *s)
     generate_nonterminal_nodes(startlist[i]->GetChild(s));
 }
 
-bool EFSupportWithActiveInfo::RemoveAction(const Action *s)
+bool EFSupportWithActiveInfo::RemoveAction(Action *s)
 {
   Infoset *infoset = s->BelongsTo();
   gList<const Node *> startlist(ReachableNodesInInfoset(infoset));

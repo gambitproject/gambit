@@ -83,7 +83,7 @@ SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
   for(i=1;i<=EF.NumPlayers();i++)
     for(j=1;j<=EF.NumInfosets()[i];j++)
       for(k=1;k<=bigbasis.NumActions(i,j);k++)
-	if((kk=basis.EFSupport::Find(bigbasis.Actions(i,j)[k]))) 
+	if((kk=basis.EFSupport::Find(bigbasis.Actions(i,j)[k])))
 	  if(kk!=basis.NumActions(i,j))
 	    (*sigIndex)(i,j,k) = var++;
   gout << "\nsigIndex: " << (*sigIndex);
@@ -92,7 +92,7 @@ SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
   for(i=1;i<=EF.NumPlayers();i++)
     for(j=1;j<=EF.NumInfosets()[i];j++)
       for(k=1;k<=bigbasis.NumNodes(i,j);k++)
-	if((kk=basis.Find(bigbasis.Nodes(i,j)[k]))) 
+	if((kk=basis.Find(bigbasis.Nodes(i,j)[k])))
 	  if(kk!=basis.NumNodes(i,j))
 	    (*muIndex)(i,j,k) = var++;
   gout << "\nmuIndex: " << (*muIndex);
@@ -144,7 +144,7 @@ SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport
   for(i=1;i<=EF.NumPlayers();i++)
     for(j=1;j<=EF.NumInfosets()[i];j++)
       for(k=1;k<=bigbasis.NumActions(i,j);k++)
-	if((kk=basis.EFSupport::Find(bigbasis.Actions(i,j)[k]))) 
+	if((kk=basis.EFSupport::Find(bigbasis.Actions(i,j)[k])))
 	  if(kk!=basis.NumActions(i,j))
 	    (*sigIndex)(i,j,k) = var++;
   gout << "\nsigIndex: " << (*sigIndex);
@@ -153,7 +153,7 @@ SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport
   for(i=1;i<=EF.NumPlayers();i++)
     for(j=1;j<=EF.NumInfosets()[i];j++)
       for(k=1;k<=bigbasis.NumNodes(i,j);k++)
-	if((kk=basis.Find(bigbasis.Nodes(i,j)[k]))) 
+	if((kk=basis.Find(bigbasis.Nodes(i,j)[k])))
 	  if(kk!=basis.NumNodes(i,j))
 	    (*muIndex)(i,j,k) = var++;
   gout << "\nmuIndex: " << (*muIndex);
@@ -328,7 +328,7 @@ template <class T> gPoly<T>
 SequentialEquilibModule<T>::RealizProb(Node *node) const
 {
   gPoly<T> equation(Space,(T)1,Lex);
-  const Action *act;
+  Action *act;
   Infoset *iset;
   while(node!=EF.RootNode()) {
     act = LastAction(node);
@@ -395,7 +395,7 @@ SequentialEquilibModule<T>::mu(int i, int j, int k) const
 template <class T> gPoly<T> 
 SequentialEquilibModule<T>::zeta(int i, int j, int k) const
 {
-  const Action * act;
+  Action *act;
   act = bigbasis.Actions(i,j)[k];
   if(basis.EFSupport::Find(act))
     return sigma(i,j,k);
@@ -431,7 +431,7 @@ Payoff(Node *n, EFPlayer *p) const
       value += (term * Payoff(n->GetChild(i),p));
     }
   else  {    // player decision node
-    const gArray<const Action *> &actions =
+    const gArray<Action *> &actions =
       support.Actions(pl, iset);
     
     for (int act = 1; act <= actions.Length(); act++)  {

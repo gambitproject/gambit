@@ -41,19 +41,19 @@ public:
 
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
-  int Find(const Action *) const;
-  bool ActionIsActive(const Action *) const;
+  int Find(Action *) const;
+  bool ActionIsActive(Action *) const;
 
   // Find the active actions at an infoset
-  const gArray<const Action *> &Actions(int pl, int iset) const;
-  const gArray<const Action *> &Actions(const Infoset &) const;
-  const gArray<const Action *> &Actions(const Infoset *) const;
-        gList<const Action *> ListOfActions(const Infoset *) const;
+  const gArray<Action *> &Actions(int pl, int iset) const;
+  const gArray<Action *> &Actions(const Infoset &) const;
+  const gArray<Action *> &Actions(const Infoset *) const;
+  gList<Action *> ListOfActions(const Infoset *) const;
   const EFActionArray    *ActionArray(const Infoset *) const;
 
   // Action editing functions
-  virtual  void AddAction(const Action *);
-  virtual  bool RemoveAction(const Action *);
+  virtual  void AddAction(Action *);
+  virtual  bool RemoveAction(Action *);
 
   // Returns the Efg associated with this Support.
   const Efg &Game(void) const;
@@ -70,10 +70,10 @@ public:
   // Reachable Nodes and Information Sets
   const gList<const Node *>    ReachableNonterminalNodes(const Node *) const;
   const gList<const Node *>    ReachableNonterminalNodes(const Node *,
-							 const Action *) const;
+							 Action *) const;
   const gList<const Infoset *> ReachableInfosets(const Node *) const;
   const gList<const Infoset *> ReachableInfosets(const Node *,
-						 const Action *) const;
+						 Action *) const;
   bool AlwaysReaches(const Infoset *) const;
   bool AlwaysReachesFrom(const Infoset *, const Node *) const;
   bool MayReach(const Node *) const;
@@ -107,8 +107,8 @@ public:
   const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
 
   // Action editing functions
-  void AddAction(const Action *);
-  bool RemoveAction(const Action *);
+  void AddAction(Action *);
+  bool RemoveAction(Action *);
 };
 
 
@@ -141,8 +141,8 @@ public:
   const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
 
   // Action editing functions
-  void AddAction(const Action *);
-  bool RemoveAction(const Action *);
+  void AddAction(Action *);
+  bool RemoveAction(Action *);
 
   // Information
   bool ActionIsActive(const int pl, const int iset, const int act) const;

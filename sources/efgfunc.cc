@@ -37,7 +37,7 @@ extern GSM *_gsm;
 
 static Portion *GSM_ActionNumber(Portion **param)
 {
-  const Action *a = ((ActionPortion *) param[0])->Value();
+  Action *a = ((ActionPortion *) param[0])->Value();
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
 
   return new NumberPortion(support->Find(a));
@@ -45,7 +45,7 @@ static Portion *GSM_ActionNumber(Portion **param)
 
 static Portion *GSM_BasisActionNumber(Portion **param)
 {
-  const Action *a = ((ActionPortion *) param[0])->Value();
+  Action *a = ((ActionPortion *) param[0])->Value();
   EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
 
   return new NumberPortion(basis->EFSupport::Find(a));
@@ -90,7 +90,7 @@ static Portion *GSM_BasisActions(Portion **param)
 static Portion *GSM_AddAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  const Action *action = ((ActionPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
 
   EFSupport *S = new EFSupport(*support);
   S->AddAction(action);
@@ -101,7 +101,7 @@ static Portion *GSM_AddAction(Portion **param)
 static Portion *GSM_AddBasisAction(Portion **param)
 {  
   EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
-  const Action *action = ((ActionPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
 
   EFBasis *S = new EFBasis(*basis);
   S->AddAction(action);
@@ -875,7 +875,7 @@ static Portion *GSM_PriorSibling(Portion **param)
 static Portion *GSM_RemoveAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  const Action *action = ((ActionPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
 
   EFSupport *S = new EFSupport(*support);
   S->RemoveAction(action);
@@ -886,7 +886,7 @@ static Portion *GSM_RemoveAction(Portion **param)
 static Portion *GSM_RemoveBasisAction(Portion **param)
 {  
   EFBasis *support = ((EfBasisPortion *) param[0])->Value();
-  const Action *action = ((ActionPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
 
   EFBasis *S = new EFBasis(*support);
   S->RemoveAction(action);

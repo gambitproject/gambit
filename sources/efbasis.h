@@ -29,11 +29,11 @@ protected:
   void MakeIndices();
   void MakeRowIndices();
   void MakeAb();
-  void AddEquation1(int,const Action *) const;
+  void AddEquation1(int,Action *) const;
   void AddEquation2(int,Node *) const;
   void AddEquation3(int,Node *,Node *) const;
   void AddEquation4(int,Node *,Node *) const;
-  int Col(const Action *) const;
+  int Col(Action *) const;
   int Col(Node *) const;
   void GetConsistencySolution(const gVector<double> &x);
   

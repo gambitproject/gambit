@@ -29,10 +29,10 @@ private:
   int number;
   gText name;
   const EFPlayer *player;
-  const Action *action;
+  Action *action;
   const Sequence *parent;
   
-  Sequence(const EFPlayer *pl, const Action *a, const Sequence *p, int n) 
+  Sequence(const EFPlayer *pl, Action *a, const Sequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() { }
 public:
@@ -41,7 +41,7 @@ public:
   
   gList<const Action *> History(void) const;
   int GetNumber(void) const        { return number; }
-  const Action *GetAction(void) const  {return action; }
+  Action *GetAction(void) const  {return action; }
   const Infoset *GetInfoset(void) const   { if(action) return action->BelongsTo();return 0; }
   const EFPlayer *Player(void) const  { return player; }
   const Sequence *Parent(void) const   { return parent; }

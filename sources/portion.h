@@ -661,7 +661,7 @@ public:
   ActionPortion(Action *);
   virtual ~ActionPortion();
 
-  const Action *Value(void) const;
+  Action *Value(void) const;
   void SetValue(Action *);
   PortionSpec Spec(void) const;
 

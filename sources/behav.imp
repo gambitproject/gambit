@@ -469,7 +469,7 @@ void BehavProfile<T>::Payoff(Node *p_node, T p_prob, int p_player,
     else  {
       int npl = p_node->infoset->player->number;
       int iset = p_node->infoset->number;
-      const gArray<const Action *> &actions = m_support.Actions(npl, iset);
+      const gArray<Action *> &actions = m_support.Actions(npl, iset);
 
       for (int act = 1; act <= actions.Length(); act++)
 	Payoff(p_node->children[actions[act]->GetNumber()],
@@ -528,7 +528,7 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
     p_node->scratch = tmp;
   }
   else  {    // player decision node
-    const gArray<const Action *> &actions =
+    const gArray<Action *> &actions =
       m_support.Actions(p_node->node->infoset->player->number, 
 			p_node->node->infoset->number);
     
@@ -652,7 +652,7 @@ void BehavProfile<T>::Beliefs(Node *p_node, T p_prob,
     }
   }
   else {
-    const gArray<const Action *> &actions = m_support.Actions(npl, iset);
+    const gArray<Action *> &actions = m_support.Actions(npl, iset);
 
     for (int act = 1; act <= m_support.NumActions(npl, iset); act++) {
       Beliefs(p_node->children[actions[act]->GetNumber()],

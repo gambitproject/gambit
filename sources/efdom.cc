@@ -39,8 +39,8 @@ bool Dominates(const EFSupport &S,
   }
 
   const EFSupportWithActiveNodes SAct(S);
-  const Action *aAct = S.Actions(pl,iset)[a];
-  const Action *bAct = S.Actions(pl,iset)[b];
+  Action *aAct = S.Actions(pl,iset)[a];
+  Action *bAct = S.Actions(pl,iset)[b];
 
   gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
   if (nodelist.Length() == 0)
@@ -97,7 +97,7 @@ bool Dominates(const EFSupport &S,
 }
 
 bool SomeListElementDominates(const EFSupport &S, 
-			      const gList<const Action *> &l,
+			      const gList<Action *> &l,
 			      const Action *a, 
 			      const bool strong,
 			      const bool conditional,
@@ -116,7 +116,7 @@ bool InfosetHasDominatedElement(const EFSupport &S,
 				const bool conditional,
 				const gStatus &status)
 {
-  gList<const Action *> actions = S.ListOfActions(i);
+  gList<Action *> actions = S.ListOfActions(i);
   for (int i = 1; i <= actions.Length(); i++)
     if (SomeListElementDominates(S,actions,actions[i],
 				 strong,conditional,gstatus))
@@ -142,7 +142,7 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 					int pl, int iset, bool strong,
 					gStatus &status)
 {
-  const gArray<const Action *> &actions = S.Actions(pl, iset);
+  const gArray<Action *> &actions = S.Actions(pl, iset);
 
   gArray<int> set(actions.Length());
   int i;
