@@ -265,12 +265,16 @@ gVector<T>::operator==(T c) const
 //	gVector: other operators
 //------------------------------------------------------------------------
 
-template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V) {
-	 assert(Check(V));
-	 DeleteData();
-	 CopyData(V);
-    return *this;
-  }
+template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
+{
+  assert(Check(V));
+  for (int i = min; i <= max; i++)
+    (*this)[i] = V[i];
+
+//	 DeleteData();
+//	 CopyData(V);
+  return *this;
+}
 
 
 //------------------------------------------------------------------------
