@@ -19,7 +19,7 @@ Main Programmer: Theodore Turocy\\
 Front End: Eugene Grayver\\
  \\
 California Institute of Technology\\ \today.\\
-Version 0.94\\
+Version 0.95\\
  \\
 Part of the Gambit Project:\\
 Richard D. McKelvey and Andrew McLennan, PI's\\
@@ -70,14 +70,15 @@ solution of extensive and normal form games.  The software developed under
 the project is public domain.  
 
 The Gambit Project is funded in part by 
-National Science Foundation grants SBR-9308637 to the California Institute 
+National Science Foundation grants SBR-9308637 and SBR-9617854 
+to the California Institute 
 of Technology and SBR-9308862 to the University of Minnesota.  
 
-Numerous students at Caltech and the University of Minnesota have contributed
- to the Gambit Project:  Among these are Bruce Bell,  Anand Chelian, Nelson 
-Escobar, Todd Kaplan, Brian Trotter, and Gary Wu. 
+Numerous students at Caltech and the University of Minnesota have contributed 
+to the Gambit Project:  Among these are Bruce Bell,  Anand Chelian, Nelson 
+Escobar, Ben Freeman, Todd Kaplan, Brian Trotter, Michael Vanier, and Gary Wu. 
 
-\chapter{Introduction} 
+\chapter{Introduction}
 
 Gambit is a library of computer programs, written
 in \verb$C++$, for building, analyzing, and solving n-person games, in
@@ -104,25 +105,23 @@ underlying library of functions.
 
 \chapter{Hardware and Installation}
 \section{Platforms}
-The current version of gambit \popref{GUI}{guigloss}\ relies on the wxWin 
-library.  The following platforms are currently supported by wxWin:
+The current version of gambit \popref{GUI}{guigloss}\ is available for the
+ following platforms:  
 \begin{itemize}
-\item IBM PC and compatible.  Gambit will run on any IBM PC compatible machine
-equipped with MS Windows 3.1 and above.   A port to Win32 is in the works.
-\item Sun workstations.  Gambit is supported on most Sun workstations running
-either SUN-OS or Solaris.  Either MOTIF or XView toolkits are required.
-\item IBM RS/6000. Gambit is supported on IBM RS/6000 machines running motif.
+\item IBM PC and compatibles running MS Windows 95/98 or NT.
+\item Sun workstations running
+SUN-OS or Solaris.  Either Motif or XView toolkits are required.
+\item IBM RS/6000 machines running Motif.
 \item Hewlett Packard workstations.  Supported using the Motif1.2 toolkit.
-\item Linux.  A version supporting Linux Motif will be available shortly. 
-Contact the authors for additional information.
-\item Macintosh. A Macintosh version of the wxWin library is in the works.  As
-soon as it becomes available, GAMBIT will be ported to that platform as well.
-\item OS/2.  An OS/2 version of the wxWin library is in the works.  As
-soon as it becomes available, GAMBIT will be ported to that platform as well.
-Until then, Gambit GUI will run in a windows box under OS/2.
-\item Others.  wxWin library should work on most UNIX-based platforms.  Contact
-the authors for additional information.
+\item Linux.  Supported on Linux using Motif or XT. 
 \end{itemize}
+
+Although we do not compile and distribute gambit for other platforms, the
+source code is available at our web site.  The gambit GUI relies on the 
+wxWin library, and versions could be compiled for
+any platform that is supported by wxWin.  See the gambit and wxWin web sites 
+for more details
+
 \section{Installation}
 All of the gambit files can be found at the Gambit World Wide Web site
 at 
@@ -184,7 +183,15 @@ which nodes are in which information sets.
 Whenever possible information sets are also represented 
 by vertical lines connecting the nodes that are members of the same information set.  
 It is only possible to do this when nodes 
-in the same information set are at the same level of the tree.  
+in the same information set are at the same level of the tree.  When two member
+nodes of the same information set are not at the same level, the information 
+set is indicated by a ``lagged'' line, the end of which points in 
+the direction of the next node, as illustrated in Figure~\ref{fig_lag_iset}.   
+
+\begin{figure}\label{fig_lag_iset}
+$$\image{1cm;0cm}{lag_iset}$$
+\caption{GAMBIT Display of information set when member nodes are at different levels}\label{fig_lag_iset}
+\end{figure}
 
 \subsection{Labeling}
 There are three locations at which each node can be labeled, (above, 
@@ -288,7 +295,8 @@ $(\$0.50, -\$0.50)$, which is the entry in the normal form for this cell.
 \section{Types of Games}
 \subsection{\index{Perfect Recall}{perfect recall}}\label{perfrecallsec}
 A game of perfect recall is a game in which individuals do not forget what
-they have known or done earlier in the game.  This requires that
+they have known or done earlier in the game (see, eg., \cite{Mye:91}).  
+This requires that
 information sets must refine earlier information sets, and if there is
 an information set, one of whose nodes follows a choice by the same player
 at a previous information set, then all of the members of that information
@@ -297,18 +305,17 @@ set must follow the same choice.
 GAMBIT does not enforce perfect recall on the extensive form games that
 you build.  However, certain algorithms in GAMBIT only work on games of 
 perfect recall.  
-To find out if a game is perfect recall, you can go to the {\tt Solve->GameInfo} 
-menu.  GAMBIT will allow you to convert a games without perfect recall 
+To find out if a game is perfect recall, you can go to the {\tt Inspect->GameInfo} 
+menu.  GAMBIT will allow you to convert a game without perfect recall 
 to normal form and solve for optimal 
 mixed strategies.  The problem comes in converting the mixed strategy back
 to a behavioral strategy.  If the game has perfect recall, then by Kuhn's 
 theorem (see eg., \cite{vanDamme:1983}), any mixed strategy can be 
 converted back to a behavioral strategy which is realization equivalent.   
 If the game does not have perfect recall, this is not always possible.  
-If a game without perfect recall is solved, and there is no realization
-equivalent behavioral strategy, you will be warned that there is a
-problem. [Note -- this option is not yet implemented].  
- 
+In this case, attempting to convert a mixed to a behavior strategy 
+may yield unpredictable results which do not correspond to a valid 
+behavior strategy.   
 
 \subsection{Games of \index{Incomplete Information}{incomplete information}}\label{incinfsec}
 Games of incomplete information are games in which different players have 
@@ -328,21 +335,22 @@ type.
 
 \chapter{Using GAMBIT GUI}
 
-\begin{figure}
-$$\image{3cm;3cm}{biggamb}$$
-\caption{Gambit GUI showing normal and extensive
-forms}\label{fig_biggamb}
-\end{figure}
-
 The Gambit GUI consists of two self-contained modules for representing,
 displaying and manipulating games.  A game can be viewed in either the
 extensive or normal forms.  Although independent, the modules are
 seamlessly integrated and it is possible to solve the game in the normal
 form while viewing it in the extensive.  It is also possible to go from
 the extensive form representation to the normal form (but not vice versa
-at the present).   You can select the module to be used in the File menu,
-in one of two ways.
+at the present).  When you first launch the gambit GUI, you will see a screen 
+as in Figure~\ref{fig_gamgui} 
 
+\begin{figure}
+$$\image{3cm;3cm}{gamgui}$$
+\caption{Gambit GUI Introductory window}\label{fig_gamgui}
+\end{figure}
+
+You can select the module to be used in the File menu,
+in one of two ways:
 \begin{itemize}
 \item Build a new game by selecting File, New , and then choosing either 
 Extensive or Normal.  The toolbar can be used to speed up frequently used
@@ -351,13 +359,12 @@ commands.
 a file that contains a previously saved game in either extensive or normal form.
 \end{itemize}
 
-
 \section{File menu}
 You can load a new game or load a previously saved game from the file 
 menu.  When you save an extensive or normal form game in Gambit, it is 
 written in a standard format.  Files containing extensive form games are
 given the default extension of \verb+.efg+, and files containing normal
-form games are given the default extension \verb+.nfg+ .  When you select
+form games are given the default extension \verb+.nfg+ .  When you select 
 {\tt File->Open}, you will get a file loading dialog box from which you can
 either directly enter the name of the file, or browse the directory system
 for files with the extensions \verb+.efg+ or \verb+.nfg+.  If you select a
@@ -366,32 +373,51 @@ you select an extensive form file, you will bring up the extensive form
 module of the GUI.
 
 \section{Data Types}
-Gambit allows you to do computations in either floating point (double) or
-exact arithmetic (rational).  You must select the data type whenever you
-load a game from an external file or create a new game.  If you want to
-change to a different data type, use the {\tt Solve->DataType} menu.  There
-are two main reasons for changing data types: 1) storing all games as
-rationals to preserve {\em exact} payoff values and 2) changing to doubles
-to execute some algorithms that are not implemented for rationals.
-However, note that saving a rational file and
-reloading it as double could lose information.  (For example, 1/3 would
-be converted to its nearest decimal representation.)
+Gambit can do computations in either floating point (float) or
+exact arithmetic (rational).  Each number in the extensive an extensive 
+or normal form game has an internal representation, or ``precision'' which is 
+either floating point or rational.  
 
 \begin{description}
-\item[Double:]  If you select Double, the game will be represented in double precision floating
- point numbers, which on most machines results in about 15 digits of accuracy.  The benefit of 
-floating point calculations is speed, since floating point numbers are designed to fit in a fixed 
-amount of storage, and arithmetic operations are coded in hardware.  However,  in some games, 
-floating point calculations can result in roundoff errors that will lead to either incorrect 
-solutions, or failure to find solutions that exist.  
-\item[Rational:]  If you select Rational, the game will be represented in rational numbers, 
-which are represented internally as the quotient of two arbitrary precision integers.  Doing 
-calculations in rationals will guarantee that the answer is exact, at least for those algorithms 
-that support rational calculations.  However calculations in rationals are slower than double 
-calculations, by one or two orders of magnitude.  Currently the only algorithms supporting 
-calculations in rationals are the following two person algorithms: LpSolve, LcpSolve, and 
-EnumPure and EnumMixed.  
+\item[Float:] Floating point numbers are represented internally as double 
+precision floating point numbers, which on most machines results in 
+about 15 digits of accuracy.  
+The benefit of floating point calculations is speed, since floating point 
+numbers are designed to fit in a fixed amount of storage, and arithmetic 
+operations are coded in hardware.  However,  in some games, 
+floating point calculations can result in cumulation of roundoff errors that will 
+lead to either incorrect solutions, or failure to find solutions that exist.  
+\item[Rational:]  Rational numbers are represented internally as the 
+quotient of two arbitrary precision integers.  Doing 
+calculations in rationals will guarantee that the answer is exact  
+for those algorithms that support rational calculations.  However 
+calculations in rationals are slower than floating point calculations by one or 
+two orders of magnitude.  Currently the only algorithms supporting 
+calculations in rationals are the following two person 
+algorithms: LpSolve, LcpSolve, and EnumPure and EnumMixed.  
 \end{description}
+
+The precision of a number is indicated in output by 
+the way it is printed.  If the number contains a decimal point, then its 
+internal representation is floating point.  If it has a \verb+/+ or is written 
+as an integer (with no decimal or \verb+/+), then it is a rational.  
+Similarly, when you enter a number, 
+the internal representation is determined by the way it is entered.  
+
+The data for a game can be a mixture of floating point and rational numbers.  
+Any preliminary calculations in Gambit (such as elimination of dominated 
+strategies, conversion to normal form) are done in the best precision that 
+is supported by the data of the game.  For example if a calculation involves 
+a floating point and rational number, the result will be floating point. 
+
+Some of the algorithms in Gambit support either  
+floating point or rational precision. The data for the game will be converted 
+to that precision, and the resulting solutions returned in that precision.  In 
+some cases, conversion from rational to floating point 
+can lose precision.  For example, the number $1/3$ does not have an 
+exact representation in floating point.  Thus, in 
+cases where exact solutions are required, it is good advice to enter all data 
+in rational precision.  
 
 \section{Normal Form GUI}
 
@@ -416,8 +442,12 @@ itself is set by using a combination of settings for the row and column
 players plus the strategy settings for the rest of the players.  {\em The
 payoff vector can be edited by double-clicking on the cell and entering
 new values in the dialog. To enter an entire game matrix, an accelerator
-key may be useful.  Pressing the {\tt TAB} key will call up the payoff
-edit dialog and automatically move the cursor to the next cell}
+key may be useful.  Pressing the {\tt TAB} key will move the cursor to the 
+next cell of the normal form, and call up the payoff edit dialog. So an entire 
+matrix can be entered by first double clicking on the first (upper left) cell, 
+editing the entries (using tab to advance to successive entries), hitting 
+return, then successively pressing tab, editing the entries and pressing return 
+to enter the remaining cells of the matirix.  
 
 \subsection{Row and Column Players} The row and column player choice boxes
 determine which players' strategies get displayed on the horizontal and
@@ -481,19 +511,15 @@ algorithm.
 A large number of different \helpref{algorithms}{SolutionAlgorithms} are 
 available for solving normal form
 games.  In order to cater to experienced users familiar with the 
-properties of individual algorithms, almost every relevant parameter can
+properties of individual algorithms, many relevant parameters can
 be edited through a variety of solution related dialog boxes.  To allow 
 simpler access to the basic features provided by the algorithms, a set of
 commonly used {\em standard} solution types has been included with Gambit.
 The user need only determine the general features of the desired equilibria
 and Gambit will take care of all the details.
 
-All of 
-the settings are saved to a defaults file every time they are changed. There
-is no need to enter the custom parameters before each recalculation, even
-through multiple sessions, unless a change is required.
-After selecting the solution type/parameters, the algorithm must be started
-by selecting the Solve->Solve menu or pressing the 
+The standard solution settings are accessed via the {\tt Solve->Standard} 
+menu, or pressing the 
 \begin{figure}
 \image{.5cm;.5cm}{solvtool}
 \end{figure}
@@ -535,13 +561,13 @@ given in the following table:
 \row{     &        & n person              &Strong & Liap-0      & Not guaranteed}
 \hline
 \hline
-\row{Perfect & One    & 2 person           &Strong & LCP-1    & }
+\row{Perfect & One    & 2 person           &Weak & LCP-1    & }
 \row{     &           & n person              &       &     &Not implemented  }
 \hline
-\row{Perfect & Two    & 2 person              &Strong & LCP-2 & Not guaranteed }
+\row{Perfect & Two    & 2 person              &Weak & EnumMixed-2 & }
 \row{     &           & n person              &       &     & Not implemented }
 \hline
-\row{Perfect & All    & 2 person              &Strong & LCP-0 & Not guaranteed }
+\row{Perfect & All    & 2 person              &Weak & EnumMixed-0 & }
 \row{     &           & n person              &       &     & Not implemented}
 \hline
 \end{tabular}
@@ -558,27 +584,39 @@ To have individual control over each any of the parameters mentioned above, see
 the \helpref{Custom Solutions}{NFGCustomSolutions} section.
 
 \subsubsection{NFG Custom Solutions}\label{NFGCustomSolutions}
-Only a user familiar with these algorithms should use the custom settings
-since the program makes no attempt to check for the validity of some of
+Only a user familiar with the algorithms used by Gambit should use the
+custom settings, 
+since the program makes no attempt to check for the validity of some of 
 the parameters.  For a detailed discussion of the 
 \helpref{algorithms}{SolutionAlgorithms} see the appropriate sections.
 
-All of the custom features are selected in the Solve->Custom submenu.  
+A custom algorithm is selected in the Solve->Custom submenu.  Not all 
+algorithms are applicable to all games.  If an algorithm is not available 
+for the currently loaded normal form, it will be grayed out in the menu.
 
-Each solution is controlled by two groups of settings
+Each solution algorithm is controlled by two groups of settings, both of which are 
+set on the dialog box for the particular algorithm.  
 \begin{description}
-\item[Algorithm] The actual algorithm used to calculate the equilibria.  Not all algorithms
-are applicable to all games.  If an algorithm is not available for the
-currently loaded normal form, it will be grayed out in the dialog.  After an
-algorithm has been selected, the selection may be saved by pressing 
-the {\tt Save} button, or an additional level or parameters can be set by
-pressing the {\tt Params} button.
-\item[Dominance] Prior to running the algorithm, dominated strategies may be eliminated, thus
-speeding up the consequent calculations.  The feature is toggled by 
-the {\tt ElimDom before solve} checkbox.  Either a single step of elimination,
-or a iterative elimination is selected by the {\tt Iterative Eliminate} 
-checkbox.  The dominance type (Strong/Weak) and method (Pure/Mixed) are
- controlled by the radioboxes.
+\item[Dominance elimination]: Prior to running the algorithm, dominated strategies 
+may be eliminated, thus speeding up the consequent calculations.  The type of 
+dominace elimination is controlled by three radioboxes at the top the dialog 
+box for the algorithm. 
+\begin{itemize}
+\item ({\tt None/Once/Iterative}):  Determines whether and how much dominance 
+elimination is to be done.  {\tt None} indicates no dominance elimination is to 
+be done,  {\tt Once} selects a single step of elimination,
+and {\tt Iterative} selects iterative elimination of dominated strategies.  
+\item ({\tt Strong/Weak}): Determines whether to use weak or strong domination.  
+\item ({\tt Pure/Mixed}): Determines whether to eliminate strategies that are 
+dominated only by pure strategies or whether to also eliminate strategies 
+dominated by mixed strategies.  Elimination by pure strategies is faster, but may 
+not find all dominated strategies, as it is possible that strategies that are 
+not dominated by any pure strategy may be dominated by a mixed strategy.  
+\end{itemize}
+\item[Algorithm behavior]: The remainder of the dialog box is used for 
+setting parameters that are specific to the algorithm.  These parameters will 
+differ from algorithm to algorithm.  The settings for the particular algorithm are 
+described in the \helpref{algorithms}{SolutionAlgorithms} section.  
 \end{description}
 
 Note that some algorithms require a starting point.  Depending on the
@@ -596,24 +634,26 @@ $$\image{3cm;3cm}{nfgsoln}$$
 \caption{Normal Form Solution Inspect Window}\label{fig_nfgsoln}
 \end{figure}
 
-The solution inspection window is a very powerful and complex part of the GUI.
-The basic functionality consists of displaying the MixedProfiles that contain the
-probability data for the solutions.  The entries are arranged with each 
-player on a separate row, and strategies in consecutive columns.  
+The solution inspection window displays information about Mixed Profiles 
+that are either returned by algorithms or entered by the user.  This feature 
+is accessed through the {\tt Inspect->Solution} menu item.  The 
+probabilities of each stratgy are arranged with each player on a separate 
+row, and strategies in consecutive columns.  
 Each cell consists of the strategy number (or name), followed by a colon, and followed
 by the probability of that strategy.
 If the {\em display zero prob} option is not turned on, strategies with zero probability
 will not be displayed. 
 
 A variety of data dependent on the generating algorithm are available for most 
-MixedProfiles. Not every category is relevant for every profile.  If a
+Mixed Profiles. Not every category is relevant for every profile.  If a
 certain data member is either not relevant or not available, it will be 
 displayed as {\tt ----}.  The display of each data member is toggled in the
 Options dialog.  Note that the ID data member is always displayed (it is
 an increasing (not necessarily consecutive) index used to identify each
 solution)
 
-The number of the solution that is currently selected will be highlighted in the first
+The number of the solution that is currently selected will be highlighted 
+in the first
 column.  The currently selected solution will also be displayed in the NF window.  
 To change the current solution (and thus change the display in the 
 corresponding NF window), double click (control-click in XView) on the \# of the
@@ -623,8 +663,10 @@ option may be used.  With this option on, the solution will change automatically
 the cursor moves to a different solution \#.  Double clicking on the first
 row deselects the current solution.
 
-Solutions may be removed by pressing the {\tt Remove} button.  A solution may
-be edited, or a new one created by pressing the corresponding button.  Note 
+Solutions may be removed by pressing the {\tt Delete} button while the solution is 
+selected.  A solution may
+be edited by pressing the {\tt Edit} button, or a new one created 
+with the {\tt Add} button.  Note 
 that an edited or a newly created solution will have {\em User} as the
 Creator and will have most data members undefined.  Double clicking on any
 of the strategy values will automatically call up the solution edit dialog.
@@ -633,29 +675,56 @@ the \helpref{Sort/Filter}{SolnSortFilt} functionality is available.
 
 If the underlying Normal Form game was generated from an Extensive Form game, 
 and if the link between the two is still 
-valid, the {\em NF->EF} button will be enabled.  To project the solution to the 
+valid, the {\em Mixed->Behav} button will be enabled.  To project the solution to the 
 extensive form, and immediately display it there, press this button.
 
-Note that all solution windows will be deleted if any changes are 
-made to the underlying NF.
+Note that if the entries in a normal form game are changed, then any solutions 
+to the game are deleted, and any link to an associated extensive form 
+game (if it existed) is broken.  
 
 \normalbox{For configuration and output features of this dialog see
 the generic \helprefn{Table Window}{TableWindow} description.}
 
 \subsubsection{Sorting and Filtering Solutions}\label{SolnSortFilt}
+\begin{figure}
 $$\image{1cm;0cm}{sortfilt}$$
+\caption{Sort/Filter Dialog Box}\label{fig_nfgsortfilt}
+\end{figure}
+
 To facilitate work with a large number of solutions, Gambit implements solution
 sorting and filtering.  These features are accessed by the {\tt Sort/Filter} button
-in the solution inspect window.
-[Double clicking on the first row will sort the solutions by the data member
-that is displayed in the column clicked in].  Deselecting an item in the
+in the solution inspect window.  Clicking an item in the {\tt Sort By} box will 
+sort the solutions by their values on that item.   
+[Double clicking on the column heading in the first row of the Solution Inspect 
+window will also sort the solutions by the corresponding column].  
+Deselecting an item in the 
 {\tt Filter By} box will cause the solutions that satisfy that item not to
 be displayed.  (I.e. to filter out all NASH equilibria, deselect the {\tt Yes} item
-in the {\tt Nash} listbox; to display just solutions generated by the {\tt Gobit}
- algorithm, deselect all items except for Gobit in the {\tt Creator} listbox.
+in the {\tt Nash} listbox; to display just solutions generated by the {\tt QRE}
+ algorithm, deselect all items except for QRE in the {\tt Creator} listbox.
 Note that the filter option may lead to some confusion if newly generated 
 solutions are automatically filtered out.
 
+\subsubsection{Adding and Editing Solutions}\label{SolnAddEdit}
+\begin{figure}
+$$\image{1cm;0cm}{editmix}$$
+\caption{Edit Mixed Solution Dialog Box}\label{fig_nfgsortfilt}
+\end{figure}
+
+Gambit allows the user to add a new mixed profile or edit an existing 
+solution for the purpose of investigate the properties of 
+arbitrary mixed profiles.  Note that mixed profiles that are 
+added or edited do not have to have probabilities that add to one. 
+
+These features are accessed via the {\tt Add} and {\tt Edit} buttons in the 
+solution inspect window.  The probabilities 
+for each strategy can be edited by moving the cursor to the appropriate cell   
+in the Edit Mixed Solution dialog box.  Selecting {\tt OK} 
+will cause the mixed profile to be added to the list of solutions 
+in the Solution Inspect window.  
+Any mixed profile that is added or edited will appear in the 
+Solution Inspect Window with a creator of {\tt User}.  When a solution is 
+edited, typically its properties will change.  
 
 \subsubsection{Elimination of Dominated Strategies}\label{ElimDom}
 \begin{figure}
@@ -669,9 +738,9 @@ consisting of undominated strategies.
 The following parameters can 
 be selected:
 \begin{description}
-\item[DomType:]  You can select whether to eliminate weakly dominated 
+\item[Dom type:]  You can select whether to eliminate weakly dominated 
 strategies or strongly dominated strategies.
-\item[Method:] You can select whether to eliminate only strategies that are
+\item[Dom method:] You can select whether to eliminate only strategies that are
 dominated by a single (pure) strategy or by a combination of some strategies
 (mixed).
 \item[Iterative Eliminate:] Selecting this option will iteratively eliminate dominated strategies. The 
@@ -684,17 +753,29 @@ over the initial support, and then eliminated simultaneously to create the new s
 strategies returned by ElimDom.  
 \end{description}
 
-\subsubsection{Examining NF Supports}\label{ElimDomInspect}
-For a detailed explanation of a {\em Support} see the appropriate theory section.
+\subsubsection{Selecting NF Supports}\label{ElimDomInspect}
+
+The {\tt Support->Select} dialog is used to select or create a support for 
+a normal form game.  For a detailed explanation of a {\em Support} see 
+the section on \helpref{supports}{supportsec} in the theory section.
+
 Supports can be generated either by the 
-\helpref{elimination of dominated strategies}{ElimDom}  algorithm, 
-or explicitly by pressing the \helpref{New Support}{NewSupport} button 
-in this dialog.  Two supports are defined for every NF window:
+\helpref{elimination of dominated strategies}{ElimDom} algorithm, 
+or explicitly by creating a new support in the {\tt Support->Select} dialog.  
+To create a new support, use the \helpref{New}{NewSupport} button in this 
+dialog.  
+
+\begin{figure}
+$$\image{3cm;3cm}{support}$$
+\caption{Support Selection dialog}\label{fig_support}
+\end{figure}
+
+Two supports are defined for every NF window:
 \begin{enumerate}
-\item The displayed support determines the dimensions of the NF that is actually
-displayed in the window.
-\item The current support determines what support will be used for all the solution
-computation and elimination of dominated strategies. 
+\item The {\em current support} determines what support will be used for 
+solution computation or elimination of dominated strategies. 
+\item The {\em displayed support} determines the support  
+that is actually displayed in the window.
 \end{enumerate}
 By default, these supports are identical.  However, an advanced user may wish to
 display one support while working on another.  Solution display may become 
@@ -704,15 +785,18 @@ The dimensionality of the supports is displayed in the text box above the select
 choicebox.
 
 \subsubsection{Creating NF Supports}\label{NewSupport}
-A new support starts with the default of the {\em full support}.  That is, for each player,
-all the strategies are included in the support.  To deselect a player's strategy, click on it
-in the appropriate listbox.  The strategy will no longer be hilighted.  At least one strategy
+A new support starts with the default of the {\em full support}.  That is, for 
+each player,
+all the strategies are included in the support.  To deselect a player's 
+strategy, click on it
+in the appropriate listbox.  The strategy will no longer be hilighted.  At 
+least one strategy
 must remain selected in each listbox.  Upon returning to the 
-\helpref{examination}{ElimDomInspect} dialog, the newly created support will be added
-to the support list.
+\helpref{Select Support}{ElimDomInspect} dialog, the newly created 
+support will be added to the support list.
 
 \subsection{Default Accelerator Keys}\label{NormFormDefAccl}
-To speed up some of the more commonly used commands in the GUI, a set of
+To speed up some of the more commonly used commands in the GUI, a set of 
 {\em accelerator keys} may be defined.  Once defined, a combination of keys
 can be used to activate most of the menus and buttons.  Accelerator key
 definitions are accessed through the Prefs->Accels menu.  Accelerator key
@@ -720,8 +804,9 @@ definitions are saved in the main Gambit defaults file (gambit.ini).  Gambit
 is distributed with the following keys defined.
 \begin{description}
 \item[TAB] The TAB key can be used to rapidly enter or modify a normal form.
-Pressing TAB will call up the payoff values dialog, and automatically move
-the cursor to the next cell once the dialog is dismissed.  Thus the entire
+Pressing TAB will automatically move
+the cursor to the next cell in the normal form, and display a dialog box to 
+edit the entries.  Thus the entire
 game can be entered by repeatedly pressing TAB and entering the values --
 no mouse operations are required.
 \end{description}
@@ -767,46 +852,52 @@ using the {\tt Prefs->Zoom} menu.  You can also use the \verb+-+ and
 \verb&+& keys to change the magnification by constant increments. When 
 editing a large game, if the magnification level is too small, you may 
 not be able to read the textual information displayed on the game tree.  You 
-can use the {\em Zoom Window}, which can be toggled on and off in the 
-{\tt Prefs->ZoomWindow} menu to get a magnified view of the tree 
+can use the {\em Zoom Window}, which can be enabled in the 
+{\tt Inspect->ZoomWindow} menu to get a magnified view of the tree 
 at the cursor location.  
 
-\subsection{Tree Building Functions}
+\subsection{Tree Editing Functions}
 This section assumes a working knowledge of the conventions used in the
 GAMBIT extensive form display (discussed in the 
 \helpref{Extensive Form}{extformsec} section). Note that any changes to
 the tree structure will invalidate all existing solutions.  The solutions
 list will be cleared and solutions removed.
 
-All of the tree editing functions are grouped under the {\tt Build} top
-level menu.  The {\tt Build} menu may also be called up by clicking the
+All of the tree editing functions are grouped under the {\tt Edit} top
+level menu.  The {\tt Edit} menu may also be called up by clicking the
 {\em right} mouse button causing the menu to pop up at
 the current mouse cursor position.
+
 \begin{figure}
 \image{0cm;0cm}{popup}
-\caption{Popup build menu}
+\caption{Popup Edit menu}
 \end{figure}
 
 Many of the editing functions can be executed
 by drag-and-dropping with the mouse (read the following sections to see
 which functions have this).
+
 \begin{figure}
 \image{0cm;0cm}{dragdrop}
 \caption{Sample Drag n' Drop operations}
 \end{figure}
 
-Most of the labeling information can be
-quickly changed by double-clicking on the text of the label and entering
-the data in the dialog that pops up.
+Most of the labeling information can be 
+quickly changed by double-clicking at the location on the tree of the 
+label and entering 
+the data in the dialog that pops up.  Similarly, double clicking on 
+the location of an outcomu will bring up the payoff dialog for outcomes.  
 
 \subsubsection{Node Menu}
 \begin{description}
-\item[Add:] This is the most commonly used tree building
-function.  Each node is determined by the player it belongs to and the
-infoset it belongs to.  There are two ways to add a node: either by
-choosing the number of branches the node is to have and thus create a new
-infoset, or by choosing an existing infoset this node will belong to.  To
-add a node you must first select a player.  The player can be either
+\item[Add Move:] Places the node at the cursor into an information set. 
+The result is that the node becomes a 
+decision node, with number of branches equal to the number of actions in 
+the information set.  New child nodes are created as successor nodes 
+to the actions in the information set.  Only valid at terminal nodes.  
+You may select the player to be in control of 
+the move, and either use an existing information 
+set or create a new one for the player.  The player can be either
 chance or an existing player, or a "New Player."  If New Player is chosen,
 a new player will be created and given a default name "Player \#." After
 selecting the player, you must decide which of the two methods described
@@ -815,14 +906,16 @@ number of branches desired.  If this node is to belong to an existing
 infoset, choose the desired infoset from the Iset choicebox.  If the node
 created was a CHANCE node, you will then be prompted for the probabilities
 associated with each branch.
-\item[Delete:]  When a node is deleted, one of its children (if any
-exist) will replace it.  You will be asked to select a branch.  This determines which 
-node replaces it.  The other children, and all of their descendants will be destroyed.  
-Note that you can not delete the ROOT node.
-\item[Insert:] This is analogous to Add Node, except that it can be used at a 
-non terminal node.  The node is inserted into the tree at that point, and the portion 
-the tree that was previously at that node is moved to the first child 
-of the inserted node. 
+\item[Delete Move:]  
+Deletes the move at the cursor node from the extensive form game.  The
+subtree rooted at one of the actions takes the place of the deleted 
+node in the tree.  You will be prompted to select a branch to keep.  All other 
+subtrees descending from the cursor node are deleted.  Note that you can not 
+delete the ROOT node.
+\item[Insert Move:] This is analogous to Add Move, except that it can be used at a 
+non terminal node.  The move is inserted into the tree at that point, 
+and the portion of the tree that was previously at that node is moved to 
+the first child of the inserted node. 
 \item[Label:]  Each node can have a label associated with it. 
 This function allows the entering or modification of this label.  The
 display of these labels is controlled in the Legends Dialog.
@@ -847,15 +940,61 @@ will delete the action from the tree.
 \item[Insert:]  Inserts a new action at the selected information set.  A branch 
 will be added to every node that belongs to the same information set as the 
 selected node. 
-{\em Drag-And-Drop}  The Insert Action function can be achieved by 
+{\em Drag-And-Drop}  The Insert Action (also Append Action) function 
+can be achieved by 
 placing the cursor at the juncture of the branch lines with the end of the node 
 line (the point where the action branches begin).  Press the mouse button and drag 
 it to the right.  A new branch will appear as a "rubber band,"  which you can drag 
 to a location where you want the new action to appear.   
+\item[Append:]  Appends a new action as the last action at the selected 
+information set.  
 \item[Label:]  Each action in an infoset can have a label. 
 This allows the setting or changing of this label. 
-\item[Probs:]  This option is only valid when the cursor is on a
+\item[Probabilities:]  This option is only valid when the cursor is on a
 CHANCE node.  It allows the explicit setting of each action probability.
+\end{description}
+
+\subsubsection{Infoset Menu}
+\begin{description}
+\item[Merge:] Merges the information set at the cursor into the information set at 
+the mark.  Both information sets must have the same number of actions.  Note
+that you can not merge infosets across different subgames (unmark subgames first).
+{\em Drag-And-Drop:} The merge operation can be achieved by clicking on an
+infoset marker (small circle) at the base of a node and dragging it to the
+infoset marker of the target node.  
+\item[Break:] Removes the node at the cursor from its information set, creating a new 
+information set with just that node in it. 
+\item[Split:] Splits the infoset with all of the nodes above the cursor node
+remaining in the same infoset, while all of the nodes below the cursor node
+are moved to a newly created infoset.
+{\em Drag-And-Drop:} The split operation can be achieved by moving the mouse
+cursor on top of the line connecting the nodes in the infoset while holding
+down the {\tt Shift} key.  When the mouse cursor is on top of the infoset
+line, it will change to 'scissors.'  Pressing the mouse button while the cursor
+is 'scissors' will split the infoset.
+\item[Join:] Removes the node at the cursor from its information set, and puts it into 
+the information set at the mark.  
+\item[Label:] Assigns a textual name to the information set
+\item[Player:]  This allows changing the player that has the choice
+at this node.  You can choose any player except the one that is currently
+selected.  If player names are being displayed on the tree, double clicking
+on the name will also activate this operation.
+\item[Reveal:] Reveals the information set to selected players.  This will 
+result in refining the information partitions of players to which the information set 
+is revealed in such a way that they observe all actions at the information set.  
+\end{description}
+
+\subsubsection{Outcome Menu}
+\begin{description}
+\item[New:] Creates a new outcome.  You will be prompted to assign a name and 
+payoffs to each player.  
+\item[Delete:] Deletes an outcome from the game.  The outcome will be also 
+detached from any nodes in the extensive form game to which it was attached. 
+\item[Attach:] Allows you to select an outcome to attach to the cursor node.  
+\item[Detach:] Detach the outcome that is currently attached to the cursor node. 
+\item[Label:]  Assign a label or name to the outcome attached to the cursor.  
+\item[Payoff:]  Assign payorrs to the outcome attached to the cursor.  If there 
+is no outcome attached, then a new outcome is created and attached to the node.  
 \end{description}
 
 \subsubsection{Tree Menu}
@@ -891,86 +1030,15 @@ displayed on the titlebar of the window.
 is highly recommended that these names be unique.  When a player is first
 created, it is given a default name "Player \#."  This dialog allows you to
 change these default names to something appropriate to the game.
+\item[Infoset] This dialog allows you to change the names of information 
+sets, remove empty information sets, and create new information sets.  
 \end{description}
-
-\subsubsection{Infoset Menu}
-\begin{description}
-\item[Merge:] Merges the information set at the cursor into the information set at 
-the mark.  Both information sets must have the same number of actions.  Note
-that you can not merge infosets across different subgames (unmark subgames first).
-{\em Drag-And-Drop:} The merge operation can be achieved by clicking on an
-infoset marker (small circle) at the base of a node and dragging it to the
-infoset marker of the target node.  
-\item[Break:] Removes the node at the cursor from its information set, creating a new 
-information set with just that node in it. 
-\item[Join:] Removes the node at the cursor from its information set, and puts it into 
-the information set at the mark.  
-\item[Split:] Splits the infoset with all of the nodes above the cursor node
-remaining in the same infoset, while all of the nodes below the cursor node
-are moved to a newly created infoset.
-{\em Drag-And-Drop:} The split operation can be achieved by moving the mouse
-cursor on top of the line connecting the nodes in the infoset while holding
-down the {\tt Shift} key.  When the mouse cursor is on top of the infoset
-line, it will change to 'scissors.'  Pressing the mouse button while the cursor
-is 'scissors' will split the infoset.
-\item[Label:] Assigns a textual name to the information set
-\item[Player:]  This allows changing the player that has the choice
-at this node.  You can choose any player except the one that is currently
-selected.  If player names are being displayed on the tree, double clicking
-on the name will also activate this operation.
-\item[Reveal:] Reveals the information set to selected players.  This will 
-result in refining the information partitions of players to which the information set 
-is revealed in such a way that they observe all actions at the information set.  
-\end{description}
-
-\subsubsection{Outcomes GUI}
-\begin{figure}
-$$\image{0cm;0cm}{outcomes}$$
-\caption{Sample outcome windows}\label{fig_outcomes}
-\end{figure}
-
-The outcomes dialog arranges the payoff data for the game in one of two
-formats: a compact matrix form with each row containing an entire outcome 
-vector with one entry per player, or a long entry form with each player
-payoff taking up an entire row.  The first form is better suited for games
-with simple outcomes (constants) while the second form works better for games
-with polynomial outcomes.  The display form is changed through the {\tt Opt}
- button.
-
-If an entry is blank, it is assumed to be 0.  The last column
-contains the name of the outcome.  If no name is given, a default of
-"Outcome \#" will be assigned.  When first started, the dialog will consist
-of one blank row.  As the greatest row is filled in, a new empty row will
-be created below it.  You can thus create any number of outcomes.  An
-entry can be modified by moving the 'cursor' to it and typing in the
-desired number.
-
-An outcome is automatically saved/modified every time the cursor moves to
-a different row.  Thus, you can use an outcome right after entering it and
-moving the cursor the next row.
-
-To attach an outcome to a node, position the 'cursor' in the outcomes
-dialog on any cell in the row that contains the desired outcome vector.
-Position the cursor in the extensive form display window on the node an
-outcome is to be assigned to.  Press the {\em Attach} button in the
-outcomes dialog.  The extensive form display will update to reflect the
-changes (assuming outcomes are being displayed).  Outcomes attached to
-non-terminal nodes get added to all of the terminal note outcomes descendant
-from that node.
-
-An outcome may be detached from a node by pressing the {\em Detach} button
-while the cursor is on the desired node.  
-
-An outcome may be deleted entirely by pressing the {\em Delete} button.  Note
-that that outcome is automatically detached from all of the nodes it was
-attached to previously.
-
 
 \subsection{Subgames Menu}\label{SubgamesMenu}
 Gambit implements and supports the concept of a game theoretical
-subgame. The 
-conditions necessary for a subtree to be qualified as a subgame, see the 
-theory section of this document.  Gambit can be made to selectively recognize some,  
+subgame. For the 
+conditions necessary for a subtree to be qualified as a subgame, 
+see \cite{Selten:1975}.  Gambit can be made to selectively recognize some,  
 none, or all of the legal subgames in its solution algorithms through 
 the technique of marking subgames.  
 
@@ -991,7 +1059,7 @@ $$\image{0cm;0cm}{subgame}$$
 \end{figure}
 
 All of the solution algorithms (with the current exception of the 
-Gobit algorithms) make use of the marked subgames.  When non-trivial 
+QRE algorithms) make use of the marked subgames.  When non-trivial 
 subgames are defined, then the solution algorithms will solve the 
 extensive form game by recursion through the marked subgames.  Thus, a 
 subgame is solved only when all subgames following it have been 
@@ -1005,13 +1073,11 @@ algorithms to make use of subgames, you must mark the subgames.
 When an algorithm encounters a subgame, the subgame is solved by itself and
 the rest of the tree is resolved for each of the subgame solutions.  Clearly,
 the total number of solutions grows exponentially with the number of subgames.
-To control the total number of solutions, two parameters are available for
-all solution algorithms: maximum number of solutions per subgame, and the
-maximum number of total solutions. For advanced
-users, the {\tt Solve->Custom->Algorithm} dialog provides the option to select
+For advanced users, the {\tt Solve->Custom->Extensive->Algorithm} dialog provides 
+the option to interactively select
 which solutions are used for each subgame.  This feature lets the advanced user
 concentrate on solutions of interest while keeping the total number of solutions
-small.
+small.  
 
 The following list describes the commands for working with subgames. 
 \begin{description}
@@ -1047,8 +1113,6 @@ The display menu allows you to load, set and save various parameters
 which affect the extensive form display.  
 \begin{description}
 \item[Zoom:]  Sets the magnification level.
-\item[Zoom Window:]  Toggles on and off a window in which you can view the 
-portion of the game tree near the cursor without any magnification.  
 \item[Display:] This allows you to change parameters affecting the way in which the 
 game tree is drawn, such as the length of the nodes, branches, and 
 vertical spacing between nodes, and also allows for setting whether to display 
@@ -1078,27 +1142,11 @@ extensive form. A more complete discussion of this topic is given in the section
 on \helpref{Accelerator Keys}{Accelerators}
 \end{description}
 
-\subsection{Command language logging}
-GAMBIT can also be used without the GUI, by running the command line
-version of the program.  However, it is often convenient to build an
-extensive form tree in the GUI, and then operate on it in the command
-language.  To facilitate this, the GAMBIT GUI can log all the commands
-executed through it to a file in the command language format.  To start
-logging, select the {\em File->Logging} menu.  All the commands executed
-following this will be saved to a new file or appended to an existing one.
-To stop logging, select the {\em File->Logging} menu again.  The resulting
-file can now be loaded into the gcl (gambit command language) to produce
-results identical to those achieved in the GUI.
-
-
-\normalbox{For configuration and output features of this dialog see
-the generic \helprefn{Table Window}{TableWindow} description.}
-
 \subsection{Extensive Form Solutions}
 A large number of different \helpref{algorithms}{SolutionAlgorithms} are 
 available for solving extensive form
 games.  In order to cater to experienced users familiar with the 
-properties of individual algorithms, almost every relevant parameter can
+properties of individual algorithms, many parameters can
 be edited through a variety of solution related dialog boxes.  To allow 
 simpler access to the basic features provided by the algorithms, a set of
 commonly used {\em standard} solution types has been included with Gambit.
@@ -1147,7 +1195,7 @@ given in the following table:
 \row{Subgame Perfect & All &  2-person             &  Mark & Strong & NF/EnumMixed-0 &}
 \row{                &     &  n-person             &  Mark & Strong & EF/Liap-0 &Not guaranteed}
 \hline
-\row{Sequential & One &  2 or n-person          &  Unmark & None & EF/Gobit-1 &}
+\row{Sequential & One &  2 or n-person          &  Unmark & None & EF/QRE-1 &}
 \hline
 \row{Sequential & Two &  2 or n-person          &  Unmark & None & EF/Liap-2 &Not guaranteed}
 \hline
@@ -1170,36 +1218,73 @@ since the program makes no attempt to check for the validity of some of
 the parameters.  For a detailed discussion of the 
 \helpref{algorithms}{SolutionAlgorithms} see the appropriate sections.
 
-All of the custom features are selected in the {\tt Solve->Custom} submenu.  
+A custom algorithm is selected in the {\tt Solve->Custom} submenu.  The game 
+can be solved either by algorithms that work directly on the extensive form, 
+or by conversion to the normal form, and solving with algorithms on the 
+normal form.  In the later case, a normal form representation
+will be automatically created, the algorithm run and the solutions 
+converted back to behavioral strategy profiles. 
 
-Each solution is controlled by three groups of settings
+The sub menus {\tt Solve->Custom->Extensive} and 
+{\tt Solve->Custom->Normal} are 
+used to access algorithms which work on the extensive and normal forms 
+respectively.  Not all algorithms are applicable to 
+all games (for example, Linear Programming and Linear Complementarity 
+algorithms can only be applied to two person 
+games.)  Algorithms that are not applicable to the current game will be greyed 
+out in the menu.  
+
+After selecting an algorithm, the Algorithm parameter dialog 
+will appear. Each solution is controlled by three groups of 
+settings, which appear on the dialog box for the algorithm in the 
+following order:
 
 \begin{description}
-\item[Algorithm] The actual algorithm used to calculate the equilibria.  Not all algorithms
-are applicable to all games.  If an algorithm is not available for the
-currently loaded normal form, it will be grayed out in the dialog.  After an
-algorithm has been selected, the selection may be saved by pressing 
-the {\tt Save} button, or an additional level or parameters can be accessed by
-pressing the {\tt Params} button.
+\item[Dominance elimination] Prior to running the algorithm, 
+dominated strategies may be eliminated, thus speeding up the consequent 
+calculations.  For normal form algorithms, the domination is done on the 
+reduced normal form after converting the game to normal form.  For extensive form 
+algorithms, dominance elimination is done directly on the extensive form (Note: 
+dominance elimination on the extensive form can be slower than on the reduced 
+normal form since it grows in complexity with the size of the agent 
+normal form of the game.)  
 
-It is possible to use many of the normal form algorithms to solve
-extensive form games by first converting them to normal form.  If one of
-these algorithms is required, checking the {\em Use NF} checkbox will
-enable the {\em Nfg Algorithms} choicebox.  A normal form representation
-will be automatically created, the algorithm run and the solutions either
-output to a file or converted back to behavioral strategy profiles
-(depending on the algorithm type).
-\item[Dominance] Dominance settings are used only if a NF base algorithm is
-used.  In that case prior to running the algorithm, 
-dominated strategies are eliminated from the temporary NF , thus
-speeding up the consequent calculations.  The feature is toggled by 
-the {\tt ElimDom before solve} checkbox.  Either a single step of elimination,
-or a iterative elimination is selected by the {\tt Iterative Eliminate} 
-checkbox.  The dominance type (strong/weak) and method (pure/mixed) are controlled
-by the respective radioboxes.
+The type of dominance elimination is controlled by radioboxes 
+at the top of the dialog box for the algorithm.  In the case of algorithms that 
+work on the normal form, the same options are available as is described in the 
+normal form algorithm section: 
+\begin{itemize}
+\item ({\tt None/Once/Iterative}):  Determines whether and how much dominance 
+elimination is to be done.  {\tt None} indicates no dominance elimination is to 
+be done,  {\tt Once} selects a single step of elimination,
+and {\tt Iterative} selects iterative elimination of dominated strategies.  
+\item ({\tt Strong/Weak}): Determines whether to use weak or strong domination.  
+\item ({\tt Pure/Mixed}): Determines whether to eliminate strategies that are 
+dominated only by pure strategies or whether to also eliminate strategies 
+dominated by mixed strategies.  Elimination by pure strategies is faster, but may 
+not find all dominated strategies, as it is possible that strategies that are 
+not dominated by any pure strategy may be dominated by a mixed strategy.  
+\end{itemize}
+
+For algorithms that work directly on the 
+extensive form, the {\tt Pure/Mixed} selection is not available. 
+
 \item[Subgames] \helpref{Subgames}{SubgamesMenu} may be marked prior to running
-any algorithm.  In most cases marking the subgames will result in faster 
-calculations.
+any algorithm.  If subgames are marked, Gambit will apply the 
+selected algorithm to each subgame in reverse tree traversal order.  All 
+solutions at each subgame are used to generate continuation values for the 
+higher level subgames.  Marking subgames before running an algorithm that 
+computes Nash equilibria will insure that all equilibria computed are 
+subgame perfect Nash equilibria.  
+
+If there are a lot of subgames, and each subgame produces multiple 
+solutions, the total number of solutions can grow exponentially.  
+To interactively select which solutions to the subgames to keep, toggle 
+the {\tt interactively select subgames} checkbox.  
+
+\item[Algorithm parameters]  The remainder of the dialog box is devoted to 
+parameters specific to the algorithm.  
+
 \end{description}
 
 Note that some algorithms require a starting point.  Depending on the
@@ -1213,31 +1298,23 @@ starting point.
 
 \subsubsection{EFG Solutions and Subgames}\label{EFGSolnSubg}
 If the extensive form contains more than one subgame, and if the subgames are
-either marked explicitly or implicitly by selecting the {\tt Mark Subgames}
-option, an additional feature becomes enabled.  Gambit will apply the 
+either marked explicitly or implicitly by selecting the {\tt Mark Subgames}, 
+Gambit will apply the 
 selected algorithm to each subgame in reverse tree traversal order.  For each
 solution obtained at a subgame node, a full solution will exist.  If there
 are a lot of subgames, and each subgame produces multiple solutions, the 
-total number of solutions grows exponentially.  Two parameters are available
-to assure a reasonable number of total solutions.
-\begin{description}
-\item[Max Solns] The total maximum number of solutions to return.  Once this
-number has been reached, no further solutions will be computed and the
-algorithm will exit.
-\item[Max Solns Per Subgame] No more than this number of solutions will be
-computed for any subgame.  Note that this does not in general limit the
-total number of solutions since the number of subgames can be large and the
-number of solutions grows exponentially with the number of subgames.
-\end{description}
+total number of solutions grows exponentially.  
 
-To provide the user with finer control over which subgame solutions will be
-used to computer the full solutions, the subgame solution picking dialog has
-been created.  This option is enabled from the main Custom solutions dialog.
+To provide the user with interactive control over 
+which subgame solutions will be
+used to compute the full solutions, the subgame solution picking dialog can 
+be used.  This option is enabled from the main Custom solutions dialog by 
+checking the {\tt intractively select subgame solutions} checkbox.
 When enabled, for each subgame solved by Gambit, a solution display window
 will be created and the user must select the subgame solutions to be used
-for further calculations.  Solutions are selected/deselected by {\tt double-clicking} 
-or {\tt Ctrl-clicking} on the corresponding soln number.  At least one solution
-must be selected for each subgame.
+for further calculations.  Solutions are selected/deselected 
+by {\tt double-clicking} or {\tt Ctrl-clicking} on the corresponding soln number.  
+At least one solution must be selected for each subgame.
 
 \begin{figure}
 $$\image{0cm;0cm}{efgpick}$$
@@ -1264,10 +1341,10 @@ $$\image{3cm;3cm}{efgsoln}$$
 \caption{Extensive Form Solution Inspect Window}\label{fig_efgsoln}
 \end{figure}
 
-The solution inspection window is a very powerful and complex part of the GUI.
+The solution inspection window displays information about Behavior Profiles 
+that are either returned by an algorithm or entered by the user.  
 It is accessed through the {\tt Inspect->Solutions} menu.
-The basic functionality consists of displaying the BehaviorProfiles that contain the
-probability data for the solutions.  Each player's infoset is displayed on a separate
+The data for each player's infoset is displayed on a separate
 line.  The {\em Iset} column gives the infoset ID in the form of (player \#,iset \#).
 The next cell contains a vector of probabilities in which each entry corresponds to
 an action that can be taken at that infoset.  If a player has more than one infoset,
@@ -1281,7 +1358,7 @@ Options dialog.  Note that the ID data member is always displayed (it is
 an increasing (not necessarily consecutive) index used to identify each
 solution)
 
-Solutions may be removed by pressing the {\tt Remove} button.  A solution may
+Solutions may be deleted by pressing the {\tt Delete} button.  A solution may
 be edited, or a new one created by pressing the corresponding button.  Note 
 that an edited or a newly created solution will have {\em User} as the
 Creator and will have most data members undefined.  Double clicking on any
@@ -1297,16 +1374,13 @@ option may be used.  With this option on, the solution will change automatically
 the cursor moves to a different solution \#.  To remove solution display from the NF window,
 double click on the first row.
 
-A useful feature when navigating large games is {\em Hilight Infosets}.  It is enabled
-from the EF window {\em Solve->Features}.  When enabled, double clicking on an
+A useful feature when navigating large games is {\em Hilight Infosets}.  It is 
+toggled on or off 
+from the EF window {\em Inspect->Infosets}.  When enabled, double clicking on an
 infoset in the EF window will hilight the corresponding infoset in the Solution inspect
 window.  Double clicking on an infoset (Iset column) in the Solution inspection window
 will hilight the corresponding infoset in the EF window.
 
-If the underlying EF was generated from an NF, and if the link between the two is still
-valid, the {\em EF->NF} button will be enabled.  To project the solution to the NF and
-immediately display it there, press this button.  NOT IMPLEMENTED.
- 
 An additional level of solution inspection is provided by the Node Inspect
 window.  The window may be turned on/off through the Inspect->Info menu. When
 enabled, a small window displays solution information pertaining to the cursor
@@ -1367,8 +1441,8 @@ definitions are accessed through the Prefs->Accels menu.  Accelerator key
 definitions are saved in the main Gambit defaults file (gambit.ini).  Gambit
 is distributed with the following keys defined.
 \begin{description}
-\item[Insert:] Calls up the Build->Node->Add dialog
-\item[ENTER:] Marks the node (Build->Node->Mark)
+\item[Insert:] Calls up the Edit->Node->Add dialog
+\item[ENTER:] Marks the node (Edit->Node->Mark)
 \item[SPACE:] Toggles the expand/collapse state of a subgame
 \end{description}
 
@@ -1594,7 +1668,7 @@ The \helpref{SimpDiv algorithm}{SimpDiv}
  is guaranteed to locate one (approximate) equilibrium 
 for an n-person normal form game.  This algorithm can be 
 very slow on some games.  Hence two other algorithms are also supported, 
-\helpref{Gobit}{Gobit} and 
+\helpref{QRE}{QRE} and 
 \helpref{Liap}{Liap}.  
 These algorithms can also be used to search for multiple equilibria (with no 
 guarantee that all have been found,) and to search for equilibria close to a given 
@@ -1604,7 +1678,7 @@ starting point.
 Sequential equilibria are equilibria that prescribe optimal behavior at any 
 information set of the extensive form, given a consistent assessment of 
 beliefs.  See \cite{KrepsWilson:1982}.  To compute an approximation to a 
-sequential equilibrium you can select GobitSolve in the Extensive form Solve 
+sequential equilibrium you can select QRESolve in the Extensive form Solve 
 menu. 
 
 \section{Solution Algorithms}\label{SolutionAlgorithms}
@@ -1640,7 +1714,7 @@ find.  Has a default value of 1. (not implemented yet)
 \end{description}
 
 
-\subsection{Gobit}\label{Gobit}
+\subsection{QRE}\label{QRE}
 Computes a branch of the logistic {\em quantal response equilibrium} 
 correspondence for n-person normal form games (as described 
 in \cite{McKPal:95a}  and n-person extensive form games (as described 
@@ -1704,7 +1778,7 @@ Default is 2.0e-10.
 input to pxi, a program for graphical viewing and display of the output. 
 \end{description}
 
-\subsection{GobitAll}\label{GobitAll}
+\subsection{QREAll}\label{QREAll}
 Performs a grid search to compute the complete logistic
 quantal response correspondence (as described in \cite{McKPal:95a}
 for a {\em small} two-person normal form game.
@@ -1733,7 +1807,7 @@ value of the objective function is below 'tol2' = 'tol' are kept.
 Limitations:  This algorithm is very computationally intensive, and should only be 
 attampted on small games.  
 
-The following parameters can be set for GobitAll.
+The following parameters can be set for QREAll.
 
 \begin{description}
 \item[minLam:] Sets the minimum value of $\lambda.$
@@ -1924,7 +1998,7 @@ plotting data generated by gambit, but can be used to visualize a wide range
 of econometric data.  It features four unique chart types, publication quality
 graphics output, and an easy to use graphical interface.  PXI is available on
 most platforms supported by gambit.  We strongly recommend using PXI if
-either \helpref{Gobit}{Gobit} or \helpref{GobitAll}{GobitAll} algorithms are used.
+either \helpref{QRE}{QRE} or \helpref{QREAll}{QREAll} algorithms are used.
 
 \normalboxd{ PXI is being released as {\em shareware} and its source code is available
 upon request.
@@ -2132,9 +2206,7 @@ collection of nodes which are connected together by branches in a way that
 looks like a tree:  every node has at most one predecessor (parent), and exactly 
 one node (the root node) has no predecessors.  
 The Game tree represents a sequence of choices in the
-chronological order that they occur.
+chronological order that they occur. 
 
-\end{helpglossary} %
-
-\end{document}
+\end{helpglossary}
 
