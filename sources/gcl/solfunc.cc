@@ -1,7 +1,10 @@
 //
-// FILE: solfunc.cc -- GCL functions on profiles and solutions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// GCL functions on profiles and solutions
 //
 
 #include "gsm.h"
@@ -160,29 +163,6 @@ static Portion *GSM_QreLambda_Mixed(GSM &, Portion** param)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreLambda());
 }
-
-//--------------
-// QreValue
-//--------------
-
-static Portion *GSM_QreValue_Behav(GSM &, Portion** param)
-{
-  BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if (bs->Creator() != algorithmEfg_QRE_EFG &&
-      bs->Creator() != algorithmEfg_QRE_NFG)
-    return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->QreValue());
-}
-
-static Portion *GSM_QreValue_Mixed(GSM &, Portion** param)
-{
-  MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if (bs->Creator() != algorithmNfg_QRE && 
-      bs->Creator() != algorithmNfg_QREALL)
-    return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->QreValue());
-}
-
 
 //----------------
 // InfosetProb
@@ -642,8 +622,6 @@ void Init_solfunc(GSM *gsm)
       { "Creator[profile->BEHAV] =: TEXT", GSM_Creator_Behav },
       { "QreLambda[profile->MIXED] =: NUMBER", GSM_QreLambda_Mixed },
       { "QreLambda[profile->BEHAV] =: NUMBER", GSM_QreLambda_Behav },
-      { "QreValue[profile->MIXED] =: NUMBER", GSM_QreValue_Mixed },
-      { "QreValue[profile->BEHAV] =: NUMBER", GSM_QreValue_Behav },
       { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetProb },
       { "InfosetValue[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
