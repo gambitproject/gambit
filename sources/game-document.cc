@@ -230,6 +230,7 @@ void gbtGameDocument::Load(const wxString &p_filename)
     if (key == "efg") {
       std::istringstream iss(value);
       m_game = ReadEfg(iss);
+      m_game->Canonicalize();
     }
     else if (key == "nfg") {
       std::istringstream iss(value);

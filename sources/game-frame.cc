@@ -334,6 +334,15 @@ void gbtGameFrame::OnFileMRU(wxCommandEvent &p_event)
 {
   wxString filename(wxGetApp().GetFileHistory()->GetHistoryFile(p_event.GetId() - wxID_FILE1));
 
+  if (filename.substr(filename.length() - 3, 3) == "gbt") {
+    gbtGameDocument *doc = new gbtGameDocument(0);
+    doc->Load(filename);
+    doc->SetFilename(filename);
+    wxGetApp().GetFileHistory()->AddFileToHistory(filename);
+    (void) new gbtGameFrame(0, doc);
+    return; 
+  }
+
   std::ifstream file(filename.mb_str());
 
   if (!file.is_open()) {
