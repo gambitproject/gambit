@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.h -- Interface to grid-solve module
 //#
-//# $Id$
+//# @(#)grid.h	1.11 1/5/97
 //#
 
 #ifndef GRID_H
@@ -26,6 +26,8 @@ class GridSolveModule  {
 		const NFSupport &S;
 		const GridParams &params;
 		gArray<int> num_strats;
+		MixedProfile<double> P_calc;
+    gVector<double> tmp; // scratch
 		double lam;
 		int static_player;
 

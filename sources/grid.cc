@@ -33,7 +33,7 @@ Then keep any values of (p,q,f_r(p,q)) where v(p,q) < tolerance.
 
 #include <math.h>
 #include "mixed.h"
-#include "grid1.h"
+#include "grid.h"
 #include "nfg.h"
 #include "gwatch.h"
 
@@ -202,7 +202,6 @@ return dist;
 gVector<double> GridSolveModule::UpdateFunc(const MixedProfile<double> &P,int pl,double lam)
 {
 gVector<double> r(num_strats[pl]);
-static gVector<double> tmp(100); // temporary storage [max(num_strats)]
 double denom;
 int strat;
 denom=0.0;
@@ -223,18 +222,16 @@ bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam)
 {
 P.SetRow(static_player,UpdateFunc(P,static_player,lam));
 
-MixedProfile<double> P_calc(N);
 int pl;
-for (pl=1;pl<=N.NumPlayers();pl++)
-	if (pl!=static_player) P_calc.SetRow(pl,UpdateFunc(P,pl,lam));
-
 double obj_func=0.0;
-
 for (pl=1;pl<=N.NumPlayers();pl++)
-{
-	if (pl!=static_player) obj_func+=Distance(P_calc.GetRow(pl),P.GetRow(pl));
-	if (obj_func>params.tol) return false;
-}
+	if (pl!=static_player)
+	{
+		P_calc.SetRow(pl,UpdateFunc(P,pl,lam));
+		obj_func+=Distance(P_calc.GetRow(pl),P.GetRow(pl));
+		if (obj_func>params.tol) return false;
+	}
+
 // If we got here, objective function is < tolerance -- have an EQU point
 OutputResult(*params.pxifile,P,lam,obj_func); // Output it to file
 if (params.trace>0) OutputResult(*params.tracefile,P,lam,obj_func);
@@ -242,8 +239,15 @@ return true;
 }
 
 GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P, const NFSupport &S_)
-										:N(N_),S(S_),params(P)
-{num_strats=S.SupportDimensions();}
+										:N(N_),S(S_),params(P),P_calc(N_,S_)
+{
+num_strats=S.SupportDimensions();
+// find the player w/ max num strats and make it static
+static_player=1;
+for (int i=2;i<=num_strats.Length();i++)
+	if (num_strats[i]>num_strats[static_player]) static_player=i;
+tmp=gVector<double>(num_strats[static_player]); // max_strats
+}
 
 GridSolveModule::~GridSolveModule() { }
 
@@ -260,7 +264,6 @@ if (params.powLam==0)
 else
 	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+1));
 MixedProfileGrid M(N,S,params.delp);
-static_player=N.NumPlayers();  // should set s.t. Sum[remaining] is min
 M.SetStatic(static_player);
 double lam=params.minLam;
 for (int step=1;step<num_steps && !params.status.Get();step++)
