@@ -71,7 +71,8 @@ void GuiRecorderDatabase::DeleteAction(GuiObject* value)
 }
 
 
-GuiRecorderDatabase::GuiRecorderDatabase()
+GuiRecorderDatabase::GuiRecorderDatabase(void)
+  : HashTable<gText, GuiObject *>(50)
 {
     // Is there an instance already?  If so, abort.
     if (instantiated)
@@ -79,7 +80,6 @@ GuiRecorderDatabase::GuiRecorderDatabase()
         throw DatabaseInUse();
     }
 
-    Init();
     instantiated = true;
 }
 

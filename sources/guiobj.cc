@@ -67,7 +67,8 @@ int GuiNames::Hash(const gText& key) const
 }
 
 
-GuiNames::GuiNames()
+GuiNames::GuiNames(void)
+  : HashTable<gText, int>(50)
 {
     // Is there an instance already?  If so, abort.
     if (instantiated)
@@ -75,7 +76,6 @@ GuiNames::GuiNames()
         throw InUse();
     }
 
-    Init();
     instantiated = true;
 }
 
