@@ -19,6 +19,22 @@ int AllEFNashSolve(const EFSupport &, const EfgPolEnumParams &,
 		 gList<BehavSolution> &, long &nevals, double &time,
 		 gList<const EFSupport> &singular_supports);
 
+#include "subsolve.h"
+
+class efgPolEnumSolve : public SubgameSolver  {
+private:
+  int npivots;
+  EfgPolEnumParams params;
+  gArray<gNumber> values;
+
+  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
+
+public:
+  efgPolEnumSolve(const EFSupport &, const EfgPolEnumParams &, int max = 0);
+  virtual ~efgPolEnumSolve();
+};
+
 #endif    // EFGALLEQ_H
 
 

@@ -1097,6 +1097,24 @@ bool guiefgPolEnumNfg::SolveSetup(void)
 
 #include "efgalleq.h"
 
+class EfgPolEnumBySubgameG : public efgPolEnumSolve, public guiSubgameViaEfg {
+protected:
+  void SelectSolutions(int p_subgame, const Efg &p_efg,
+		       gList<BehavSolution> &p_solutions)
+    { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
+  void ViewSubgame(int p_subgame, const Efg &p_efg, EFSupport &p_support)
+    { BaseViewSubgame(p_subgame, p_efg, p_support); }
+  
+public:
+  EfgPolEnumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+		       const EfgPolEnumParams &p_params,
+		       bool p_eliminate, bool p_iterative, bool p_strong,
+		       int p_max = 0, EfgShowInterface *p_parent = 0)
+    : efgPolEnumSolve(p_support, p_params, p_max),
+      guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
+    { }
+};
+
 guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support, 
 				   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
@@ -1106,18 +1124,15 @@ gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "PolEnumSolve Progress");
   EfgPolEnumParams params(status);
-  //  params.stopAfter = m_stopAfter;
-  //  params.precision = m_precision;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  long nevals;
-  double time;
   gList<BehavSolution> solutions;
-  gList<const EFSupport> singular_supports;
 
   try {
-    AllEFNashSolve(m_support, params, solutions, nevals, time, singular_supports);
+    return EfgPolEnumBySubgameG(m_efg, m_support, params, m_eliminate,
+				m_eliminateAll, !m_eliminateWeak,
+				0, m_parent).Solve(m_support);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -1132,9 +1147,6 @@ bool guiefgPolEnumEfg::SolveSetup(void)
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
     m_markSubgames = dialog.MarkSubgames();
-
-    //    m_stopAfter = dialog.StopAfter();
-    //    m_precision = dialog.Precision();
 
     m_traceFile = dialog.TraceFile();
     m_traceLevel = dialog.TraceLevel();
