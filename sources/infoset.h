@@ -11,7 +11,26 @@
 #include "gstring.h"
 #include "gset.h"
 
-#include "branch.h"
+class Branch   {
+  private:
+    gString name;
+    double prob;
+
+  public:
+    Branch(void) : prob(-1.0)   { }
+    Branch(const Branch &b) : name(b.name), prob(b.prob)  { }
+    ~Branch()   { }
+
+    Branch &operator=(const Branch &b)
+      { name = b.name;  prob = b.prob;  return *this; }
+
+    gString GetBranchName(void) const   { return name; }
+    void SetBranchName(const gString &s)    { name = s; }
+    
+    double GetBranchProb(void) const   { return prob; }
+    void SetBranchProb(double d)    { prob = d; }
+};
+
 
 class Infoset   {
   private:
@@ -55,6 +74,9 @@ class Infoset   {
 	// add a branch to the infoset
     void InsertBranch(int br)
       { branches.Insert(new Branch, br); }
+
+	// FILE OPERATIONS
+    void WriteToFile(FILE *f) const;
 };
 
 

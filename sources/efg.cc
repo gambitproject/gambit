@@ -44,10 +44,9 @@ Node ExtForm::AddNode(const Node &n, int player, int child_count)
   
   if (nodes.MoveNode(n, ret))  
     players.RemoveInfoset(n[1], n[2]);
-
-  for (int i = 1; i <= child_count; i++) 
+  
+  for (int i = 1; i <= child_count; i++)   
     nodes.CreateNode(dummy, CreateInfoset(dummy, 0), ret);
-
   return ret;
 }
 
@@ -108,3 +107,11 @@ Node ExtForm::DeleteTree(const Node &n)
   return n;
 }
 
+
+
+void ExtForm::WriteToFile(FILE *f) const
+{
+  players.WriteToFile(f);
+  fprintf(f, "\n\n");
+  nodes.WriteToFile(f);
+}

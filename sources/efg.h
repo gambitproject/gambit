@@ -52,6 +52,22 @@ class ExtForm    {
     Node CopyTree(const Node &from, const Node &dest);
     Node DeleteTree(const Node &n);
 
+	// OPERATIONS ON NODES
+    Node RootNode(void) const
+      { return nodes.RootNode(); }
+    Node GetParent(const Node &n) const
+      { return nodes.GetParent(n); }
+    int NumChildren(const Node &n) const
+      { return nodes.NumChildren(n); }
+    Node GetChildNumber(const Node &n, int number) const
+      { return nodes.GetChildNumber(n, number); }
+    gSet<Node> GetChildren(const Node &n) const
+      { return nodes.GetChildren(n); }
+    Node GetPriorSibling(const Node &n) const
+      { return nodes.GetPriorSibling(n); }
+    Node GetNextSibling(const Node &n) const
+      { return nodes.GetNextSibling(n); }
+
 	// GENERAL INFORMATION
     int NumNodes(void) const
       { return nodes.NumNodes(); }
@@ -64,6 +80,9 @@ class ExtForm    {
       { return nodes.GetNodeName(n); }
     int GetOutcome(const Node &n) const
       { return nodes.GetOutcome(n); }
+
+	// FILE OPERATIONS
+    void WriteToFile(FILE *f) const;
 
 };
 

@@ -82,6 +82,10 @@ class Player   {
 
 	// returns the player's name
     gString GetPlayerName(void) const    { return name; }
+
+
+	// FILE OPERATIONS
+    void WriteToFile(FILE *f, int plno) const;
 };
 
 
@@ -169,6 +173,9 @@ class PlayerSet   {
 	// insert a branch in an infoset
     void InsertBranch(int p, int iset, int br)
       { players[p + 2]->InsertBranch(iset, br); }
+
+	// FILE OPERATIONS
+    void WriteToFile(FILE *f) const;
     
 };
 #endif    // PLAYER_H
