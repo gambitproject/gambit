@@ -16,6 +16,26 @@
 //      class gPolyList
 // ***********************
 
+//
+// Simple class for compact reference to pairs of indices
+//
+
+class index_pair {
+ private:
+  const int first;
+  const int second;
+
+ public:
+  index_pair(const int&, const int&);
+  ~index_pair();
+
+  bool operator == (const index_pair&) const;
+  bool operator != (const index_pair&) const;
+  int operator [] (const int&) const; 
+
+friend gOutput& operator << (gOutput& output, const index_pair& x);  
+};
+
 
 template <class T> class gPolyList
 //  : private Counted<gPolyList<T> >
@@ -66,10 +86,10 @@ template <class T> class gPolyList
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
 
    // Information
-   inline const gSpace*     AmbientSpace() const { return Space; }
-   inline const term_order* TermOrder()    const { return Order; }
-   inline const int         Length()       const { return List.Length(); }
-   inline const int         Dmnsn()        const { return Space->Dmnsn(); }
+   const gSpace*            AmbientSpace()                            const;
+   const term_order*        TermOrder()                               const;
+   const int                Length()                                  const;
+   const int                Dmnsn()                                   const;
    const gList<gPoly<T> >   UnderlyingList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;
@@ -89,24 +109,5 @@ friend gOutput& operator << (gOutput& output, const gPolyList<T>& x);
 // The following utility class belongs in gmisc.h, but not yet to 
 // avoid cluttering everything at Caltech up.
 
-//
-// Simple class for compact reference to pairs of indices
-//
-
-class index_pair {
- private:
-  const int first;
-  const int second;
-
- public:
-  index_pair(const int&, const int&);
-  ~index_pair();
-
-  bool operator == (const index_pair&) const;
-  bool operator != (const index_pair&) const;
-  int operator [] (const int&) const; 
-
-friend gOutput& operator << (gOutput& output, const index_pair& x);  
-};
-
 #endif GPOLYLST_H
+
