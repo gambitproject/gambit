@@ -36,7 +36,7 @@ int main()
   gz = "1 - 5n4"; pz = gz;
 */
 
-/* simple test of root solving 
+/* simple test of root solving */
   gw = "2 - 9n1 + 9n1^2"; pw = gw;
   gx = "2 - 9n2 + 9n2^2"; px = gx;
   gy = "2 - 9n3 + 9n3^2"; py = gy;
@@ -44,13 +44,13 @@ int main()
 
   ga = "2n3 - 1";         pa = ga;
   gb = "2n4 - 1";         pb = gb;
-*/
+/**/
 
-/* simple test of ARootExists */
+/* simple test of ARootExists 
   gw = "13 - 6n1 + 1n1^2 - 1n2"; pw = gw;
   gx = "13 - 6n1 + 1n1^2 - 1n3"; px = gx;
   gy = "13 - 6n1 + 1n1^2 - 1n4"; py = gy;
-/**/
+*/
 
 /* 3x2x2 game form 
   gw = "3 + 5n3 - 4n4 + 25n3 * n4";                         pw = gw;
@@ -144,9 +144,9 @@ int main()
   test_bss1 += pw;
   test_bss1 += px;
   test_bss1 += py;
-//  test_bss1 += pz;
-//  test_bss1 += pa;
-//  test_bss1 += pb;
+  test_bss1 += pz;
+  test_bss1 += pa;
+  test_bss1 += pb;
 
   gWatch timer;
 
@@ -177,6 +177,8 @@ int main()
 */
 
   gout << "Starting computation ... \n";
+
+/*
   gVector<gDouble> sample(4);
   for (int i = 1; i <= 4; i++) sample[i] = (gDouble)0;
 
@@ -193,7 +195,7 @@ int main()
     << (int)timer.Elapsed() << " seconds.\n\n";
 
   exit(0);
-
+*/
 
   timer.Start();
 
@@ -255,23 +257,6 @@ int main()
     << (int)timer.Elapsed() << " seconds.\n\n";
 
 
-  timer.Start();
-
-
-  if (quickie2.FindRoots(Cube,100000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game\n"
-	 << "without cubic terms, is\n" 
-	 << quickie2.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie2.RootList();
-  else
-    gout << "The system\n" << quickie2.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n";
-
-  timer.Stop();
-  gout << "The QuikSolv computation of roots using FindRoots took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-
   // Third System
 
 /* 2x2x2x2 game form */
@@ -320,21 +305,6 @@ int main()
   gout << "The QuikSolv computation of roots took " 
     << (int)timer.Elapsed() << " seconds.\n";
 
-  timer.Start();
-
-  if (quickie3.FindRoots(Cube,100000))
-    gout << "The system, for totally mixed equilibrium of a 2x2x2x2 game "
-	 << "is\n" 
-	 << quickie3.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie3.RootList();
-  else
-    gout << "The system\n" << quickie3.UnderlyingEquations()
-	 << " could not be resolved by FindRootsRec.\n\n";
-
-  timer.Stop();
-  gout << "The QuikSolv computation of roots took " 
-    << (int)timer.Elapsed() << " seconds.\n";
 
   exit(0);
 }
