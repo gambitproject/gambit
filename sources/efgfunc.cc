@@ -1023,7 +1023,7 @@ static Portion *GSM_WriteSfg(Portion **param)
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
   EFSupport efs(*efg);
-  const Sfg& sfg(efs);
+  Sfg sfg(efs);
   sfg.Dump(out);
   return param[0]->ValCopy();
 }
@@ -1056,7 +1056,7 @@ static Portion *GSM_Sfg(Portion **param)
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
   EFSupport efs(*efg);
-  const Sfg& sfg(efs);
+  Sfg sfg(efs);
 
   ListPortion *por = new ListPortion;
   gIndexOdometer index(sfg.NumSequences());
@@ -1074,7 +1074,7 @@ static Portion *GSM_SfgStrats(Portion **param)
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
   int p = pl->GetNumber();
   EFSupport efs(*efg);
-  const Sfg& sfg(efs);
+  Sfg sfg(efs);
 
   ListPortion *por = new ListPortion;
   for (int i=1;i<=sfg.NumSequences(p);i++) {
@@ -1095,7 +1095,7 @@ static Portion *GSM_SfgConstraints(Portion **param)
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
   int p = pl->GetNumber();
   EFSupport efs(*efg);
-  const Sfg& sfg(efs);
+  Sfg sfg(efs);
 
   gRectArray<gNumber> A(sfg.Constraints(p));
 

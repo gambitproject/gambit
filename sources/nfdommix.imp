@@ -3,11 +3,9 @@
 //
 //
 
-// Note: junk is dummy arg so the function can be templated. 
-// There is probably a cleaner way to do this.  
 template <class T>
 bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
-			   int pl, bool strong, T junk,
+			   int pl, bool strong, T /*junk*/,
 			   gOutput &tracefile, gStatus &status)
 {
   Nfg nfg = S.Game();
@@ -191,11 +189,9 @@ bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
   
 }
 
-// Note: junk is dummy arg so the function can be templated. 
-// There is probably a cleaner way to do this.  
 template <class T>
 bool IsMixedDominated(const NFSupport &S,Strategy *str,
-			   bool strong, T junk,
+			   bool strong, T /*junk*/,
 			   gOutput &tracefile)
 {
   int pl = str->Player()->GetNumber();
