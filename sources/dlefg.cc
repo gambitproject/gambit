@@ -48,12 +48,12 @@ dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
 
   NewLine();
   m_okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
-  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
   m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
   m_okButton->GetConstraints()->height.AsIs();
 
   m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
   m_cancelButton->GetConstraints()->width.AsIs();
   m_cancelButton->GetConstraints()->height.AsIs();
 
@@ -63,7 +63,7 @@ dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
   m_helpButton->GetConstraints()->height.AsIs();
 
   m_playerNameList->SetConstraints(new wxLayoutConstraints);
-  m_playerNameList->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_playerNameList->GetConstraints()->centreX.SameAs(m_cancelButton, wxCentreX);
   m_playerNameList->GetConstraints()->top.SameAs(this, wxTop, 10);
   m_playerNameList->GetConstraints()->width.AsIs();
   m_playerNameList->GetConstraints()->height.AsIs();
@@ -94,11 +94,9 @@ EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
 dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_player,
 			     Infoset *p_infoset, int p_branches,
 			     wxFrame *p_frame)
-  : wxDialogBox(p_frame, p_title, TRUE),
+  : guiAutoDialog(p_frame, p_title),
     m_efg(p_efg), m_branches(p_branches)
 {
-  SetAutoLayout(TRUE);
-
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
   m_playerItem->Append("Chance");
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
@@ -110,6 +108,12 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_playe
     m_playerItem->SetSelection(p_player->GetNumber());
   else
     m_playerItem->SetSelection(0);
+
+  m_playerItem->SetConstraints(new wxLayoutConstraints);
+  m_playerItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerItem->GetConstraints()->width.AsIs();
+  m_playerItem->GetConstraints()->height.AsIs();
 
   m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset,
 				"Infoset");
@@ -125,68 +129,42 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_playe
     m_infosetItem->SetSelection(p_infoset->GetNumber());
   else
     m_infosetItem->SetSelection(0);
-
-  NewLine();
+  m_infosetItem->SetConstraints(new wxLayoutConstraints);
+  m_infosetItem->GetConstraints()->top.SameAs(m_playerItem, wxTop);
+  m_infosetItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
+  m_infosetItem->GetConstraints()->width.AsIs();
+  m_infosetItem->GetConstraints()->height.AsIs();
 
   m_actionItem = new wxText(this, 0, "Actions");
   m_actionItem->SetValue(ToText(p_branches));
   m_actionItem->Enable(m_infosetItem->GetSelection() == 0);
 
-  NewLine();
+  m_actionItem->SetConstraints(new wxLayoutConstraints);
+  m_actionItem->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
+  m_actionItem->GetConstraints()->left.SameAs(m_playerItem, wxLeft);
+  m_actionItem->GetConstraints()->width.AsIs();
+  m_actionItem->GetConstraints()->height.AsIs();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  okButton->SetClientData((char *) this);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->top.SameAs(m_actionItem, wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-					"Help");
-  helpButton->SetClientData((char *) this);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
 
-  okButton->SetConstraints(new wxLayoutConstraints);
-  okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
-  okButton->GetConstraints()->top.SameAs(m_actionItem, wxBottom, 10);
-  okButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
-  okButton->GetConstraints()->height.AsIs();
-
-  cancelButton->SetConstraints(new wxLayoutConstraints);
-  cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
-  cancelButton->GetConstraints()->width.AsIs();
-  cancelButton->GetConstraints()->height.AsIs();
-
-  helpButton->SetConstraints(new wxLayoutConstraints);
-  helpButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
-  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
-  helpButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
-  helpButton->GetConstraints()->height.AsIs();
-
-  okButton->SetDefault();
-  Fit();
-  Show(TRUE);
+  Go();
 }
 
 dialogMoveAdd::~dialogMoveAdd(void)
 { }
-
-void dialogMoveAdd::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogMoveAdd::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-void dialogMoveAdd::OnHelp(void)
-{
-  wxHelpContents("Node Menu");
-}
 
 void dialogMoveAdd::OnPlayer(int p_player)
 {
@@ -228,14 +206,6 @@ void dialogMoveAdd::OnInfoset(int p_infoset)
     m_actionItem->SetValue(ToText(2));
   }
 }
-
-Bool dialogMoveAdd::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
 
 NodeAddMode dialogMoveAdd::GetAddMode(void) const
 {

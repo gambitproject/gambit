@@ -313,8 +313,8 @@ void guiAutoDialog::Go(void)
     totalHeight = gmax(totalHeight, y + height);
   }
 
-  SetSize(-1, -1, totalWidth - minX + 20, totalHeight - minY + 40);
-
+  SetClientSize(totalWidth + 10, totalHeight + 10);
+  
   Show(TRUE);
 }
 
