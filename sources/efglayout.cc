@@ -854,8 +854,14 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
 //
 // The following speed optimizations have been added:
 // The algorithm now traverses the tree as a linear linked list, eliminating
-// expensive searches.  Since the region clipping implemented by wxwin seems
-// to be less than optimal, I add rudimentary clipping of my own.
+// expensive searches.
+//
+// There was some clipping code in here, but it didn't correctly
+// deal with drawing information sets while scrolling.  So, the code
+// has temporarily been removed.  It remains to be seen whether
+// performance will require a more sophisticated solution to the
+// problem.  (TLT 5/2001)
+//
 // The offset is used to simulate scrollbars in the
 // zoom window.  It might be used for the main window if scrollbars prove to
 // be a limitation.
@@ -868,8 +874,6 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
   // Determine the visible region on screen to implement clipping
   int x_start, y_start, width, height;
 
-  wxPoint deviceOrigin = dc.GetDeviceOrigin();
-  
   m_parent->ViewStart(&x_start, &y_start);
   m_parent->GetClientSize(&width, &height);
   
@@ -878,103 +882,89 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
     child_entry = *m_nodeList[pos];    // must make a copy to use Translate
     entry = *child_entry.parent;
         
-    float zoom = m_parent->GetZoom();
+    // draw the labels
+    RenderLabels(dc, &child_entry, &entry);
 
-#ifdef UNUSED
-    // Check if this node/labels are visible
-    if (!(child_entry.x+deviceOrigin.x < x_start*PIXELS_PER_SCROLL  ||
-	  entry.x+deviceOrigin.x > x_start*PIXELS_PER_SCROLL+width/zoom ||
-	  (entry.y+deviceOrigin.y > y_start*PIXELS_PER_SCROLL+height/zoom &&
-	   child_entry.y+deviceOrigin.y > y_start*PIXELS_PER_SCROLL+height/zoom) ||
-	  (entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL && 
-	   child_entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL)) ||
-	(entry.infoset.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL+height/zoom)) {
-#endif // UNUSED
-    if (true) {
-      // draw the labels
-      RenderLabels(dc, &child_entry, &entry);
+    // Draw a triangle to show subgame roots
+    if (entry.n->GetSubgameRoot() == entry.n) {
+      if (entry.expanded) 
+	DrawSmallSubgameIcon(dc, entry);
+    }
 
-      // Draw a triangle to show subgame roots
-      if (entry.n->GetSubgameRoot() == entry.n) {
-	if (entry.expanded) 
-	  DrawSmallSubgameIcon(dc, entry);
-      }
-
-      // Only draw the node line once for all children.
-      if (child_entry.child_number == 1) {
-	// draw the 'node' line
-	bool hilight = 
-	  (m_parent->HighlightInfoset()  && (entry.n->GetInfoset() == m_parent->HighlightInfoset())) ||
-	  (m_parent->HighlightInfoset1() && (entry.n->GetInfoset() == m_parent->HighlightInfoset1()));
-	::DrawLine(dc, entry.x, entry.y,
-		   entry.x + m_parent->DrawSettings().NodeLength() + 
-		   entry.nums * INFOSET_SPACING, entry.y, 
-		   entry.color, hilight ? 1 : 0);
-	
-	// show the infoset lines, if required by draw settings
-	::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
-		     3, entry.color);
-      }
+    // Only draw the node line once for all children.
+    if (child_entry.child_number == 1) {
+      // draw the 'node' line
+      bool hilight = 
+	(m_parent->HighlightInfoset()  && (entry.n->GetInfoset() == m_parent->HighlightInfoset())) ||
+	(m_parent->HighlightInfoset1() && (entry.n->GetInfoset() == m_parent->HighlightInfoset1()));
+      ::DrawLine(dc, entry.x, entry.y,
+		 entry.x + m_parent->DrawSettings().NodeLength() + 
+		 entry.nums * INFOSET_SPACING, entry.y, 
+		 entry.color, hilight ? 1 : 0);
       
-      if (child_entry.n == m_parent->SubgameNode())
-	DrawSubgamePickIcon(dc, child_entry);
+      // show the infoset lines, if required by draw settings
+      ::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
+		   3, entry.color);
+    }
+      
+    if (child_entry.n == m_parent->SubgameNode())
+      DrawSubgamePickIcon(dc, child_entry);
     
-      // draw the 'branches'
-      if (child_entry.n->GetParent() && child_entry.in_sup) {
-	// no branches for root node
-	xs = entry.x+m_parent->DrawSettings().NodeLength()+entry.nums*INFOSET_SPACING;
-	ys = entry.y;
-	xe = xs+m_parent->DrawSettings().ForkLength();
-	ye = child_entry.y;
-	::DrawLine(dc, xs, ys, xe, ye, entry.color);
+    // draw the 'branches'
+    if (child_entry.n->GetParent() && child_entry.in_sup) {
+      // no branches for root node
+      xs = entry.x+m_parent->DrawSettings().NodeLength()+entry.nums*INFOSET_SPACING;
+      ys = entry.y;
+      xe = xs+m_parent->DrawSettings().ForkLength();
+      ye = child_entry.y;
+      ::DrawLine(dc, xs, ys, xe, ye, entry.color);
 
-	// Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
-	double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
-	if (prob > 0) {
-	  ::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
-		     (ys + (ye - ys) * prob), *wxBLACK);
-	}
-	
-	xs = xe;
-	ys = ye;
-	xe = child_entry.x;
-	ye = ys;
-	::DrawLine(dc, xs, ye, xe, ye, entry.color);
-      }
-      else {
-	xe = entry.x;
-	ye = entry.y;
+      // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
+      double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
+      if (prob > 0) {
+	::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
+		   (ys + (ye - ys) * prob), *wxBLACK);
       }
       
-      // Take care of terminal nodes
-      // (either real terminal or collapsed subgames)
-      if (!child_entry.has_children) { 
-	::DrawLine(dc, xe, ye, 
-		   xe + m_parent->DrawSettings().NodeLength() + 
-		   child_entry.nums * INFOSET_SPACING, 
-		   ye, m_parent->DrawSettings().GetPlayerColor(-1));
+      xs = xe;
+      ys = ye;
+      xe = child_entry.x;
+      ye = ys;
+      ::DrawLine(dc, xs, ye, xe, ye, entry.color);
+    }
+    else {
+      xe = entry.x;
+      ye = entry.y;
+    }
       
-	// Collapsed subgame: subgame icon is drawn at this terminal node.
-	if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
-	    !child_entry.expanded)
-	  DrawLargeSubgameIcon(dc, child_entry, m_parent->DrawSettings().NodeLength());
+    // Take care of terminal nodes
+    // (either real terminal or collapsed subgames)
+    if (!child_entry.has_children) { 
+      ::DrawLine(dc, xe, ye, 
+		 xe + m_parent->DrawSettings().NodeLength() + 
+		 child_entry.nums * INFOSET_SPACING, 
+		 ye, m_parent->DrawSettings().GetPlayerColor(-1));
       
-	// Marked Node: a circle is drawn at this terminal node
-	if (child_entry.n == m_parent->MarkNode()) {
-	  ::DrawCircle(dc, 
-		       xe + child_entry.nums * INFOSET_SPACING +
-		       m_parent->DrawSettings().NodeLength(), ye, 
-		       4, m_parent->DrawSettings().CursorColor());
-	}
-      }
-
-      // Draw a circle to show the marked node
-      if ((entry.n == m_parent->MarkNode()) && 
-	  (child_entry.child_number == entry.n->Game()->NumChildren(entry.n))) {
-	::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
-		     m_parent->DrawSettings().NodeLength(), entry.y, 
+      // Collapsed subgame: subgame icon is drawn at this terminal node.
+      if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
+	  !child_entry.expanded)
+	DrawLargeSubgameIcon(dc, child_entry, m_parent->DrawSettings().NodeLength());
+      
+      // Marked Node: a circle is drawn at this terminal node
+      if (child_entry.n == m_parent->MarkNode()) {
+	::DrawCircle(dc, 
+		     xe + child_entry.nums * INFOSET_SPACING +
+		     m_parent->DrawSettings().NodeLength(), ye, 
 		     4, m_parent->DrawSettings().CursorColor());
       }
+    }
+
+    // Draw a circle to show the marked node
+    if ((entry.n == m_parent->MarkNode()) && 
+	(child_entry.child_number == entry.n->Game()->NumChildren(entry.n))) {
+      ::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
+		   m_parent->DrawSettings().NodeLength(), entry.y, 
+		   4, m_parent->DrawSettings().CursorColor());
     }
 
     if (child_entry.child_number == 1) {
