@@ -65,10 +65,10 @@ template <class T> class gArray  {
 //
     virtual void Dump(gOutput &) const;
 };
-
+#ifndef __BORLANDC__
 template <class T> bool operator==(const gArray<T> &, const gArray<T> &);
 template <class T> bool operator!=(const gArray<T> &, const gArray<T> &);
-
+#endif
 template <class T> gOutput &operator<<(gOutput &, const gArray<T> &);
 
 // ***********************
