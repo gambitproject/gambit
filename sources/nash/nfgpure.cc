@@ -27,7 +27,7 @@
 #include "nfgpure.h"
 
 #include "base/base.h"
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "game/game.h"
 
 class gbtNfgNashEnumPure {

@@ -28,7 +28,6 @@ libgambit_base_la_SOURCES = \
 	gmisc.h \
 	gnarray.imp \
 	gnarray.h \
-	gnullstatus.h \
 	grarray.cc \
 	grarray.h \
 	grarray.imp \

@@ -25,7 +25,7 @@
 //
 
 #include "base/base.h"
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "efgpure.h"
 
 #include "game/game.h"

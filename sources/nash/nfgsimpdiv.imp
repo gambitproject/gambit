@@ -36,7 +36,7 @@
 // simplify things. (TLT, 6/2002)
 //
 
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "nfgsimpdiv.h"
 
 template <class T> class gbtNfgNashSimpdiv {

@@ -26,7 +26,6 @@
 //
 
 #include "base/base.h"
-#include "base/gnullstatus.h"
 #include "efglcp.h"
 #include "lhtab.h"
 

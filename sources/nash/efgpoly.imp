@@ -25,7 +25,7 @@
 //
 
 #include "base/base.h"
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "base/odometer.h"
 #include "game/game.h"
 #include "game/sfg.h"

@@ -25,7 +25,7 @@
 //
 
 #include "nfgyamamoto.h"
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "math/gsmatrix.h"
 
 class gbtNfgNashYamamoto {

@@ -25,7 +25,7 @@
 //
 
 #include <math.h>
-#include "base/gnullstatus.h"
+#include "base/gstatus.h"
 #include "math/gmath.h"
 #include "math/gsmatrix.h"
 #include "efglogit.h"
