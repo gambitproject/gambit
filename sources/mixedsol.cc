@@ -274,7 +274,7 @@ gTriState MixedSolution::IsPerfect(void) const
   if(m_isPerfect == triUNKNOWN) {
     EvalEquilibria();
     if(m_isNash && Game().NumPlayers()==2)
-      if(IsMixedDominated(*this,false,precRATIONAL,gout))
+      if(IsMixedDominated(*this,false,m_precision,gout))
 	m_isPerfect = triFALSE;
       else
 	m_isPerfect = triTRUE;

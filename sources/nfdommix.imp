@@ -405,6 +405,7 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     
     s.First();
     for (n = 1; n <= contingencies; n++) {
+      B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
 	s.Set(pl, j);
 	T x1 = nfg.Payoff(s.GetOutcome(), pl);
@@ -416,9 +417,9 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       for (k = 1; k <= strats; k++) {
 	s.Set(pl, k);
 	A(n, k) = -nfg.Payoff(s.GetOutcome(), pl);
-	A(n, strats) = (T) 1;
-	s.NextContingency();
       }
+      A(n, strats+1) = (T) 1;
+      s.NextContingency();
     }
     tracefile << '\n' << (gRectArray<T> &)A << '\n';
     tracefile << B << '\n';
@@ -466,6 +467,7 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     
     s.First();
     for(n=1;n<=contingencies;n++) {
+      B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
 	s.Set(pl, j);
 	T x1 = nfg.Payoff(s.GetOutcome(), pl);
@@ -511,7 +513,7 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       dom = true;
     }
     // else  tracefile << "\n\n";
-    // tracefile << "\n";
+    tracefile << "\n";
     
     if (!ret) 
       return false;

@@ -156,15 +156,15 @@ static Portion *GSM_IsProfileDominated_Nfg(Portion **param)
   MixedProfile<gNumber> pr(*((MixedPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
-  gPrecision prec = ((PrecisionPortion *) param[3])->Value();
+  gPrecision prec = (((MixedPortion *) param[0])->Value())->Precision();
 
   gWatch watch;
   bool ret = false;
 
   ret = IsMixedDominated(pr,strong, prec, 
-			   ((OutputPortion *) param[5])->Value());
+			   ((OutputPortion *) param[4])->Value());
 
-  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   
   return new BoolPortion(ret);
 }
@@ -655,20 +655,18 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   FuncObj->SetFuncInfo(1, gclSignature(GSM_IsProfileDominated_Nfg,
-				       porBOOLEAN, 7));
+				       porBOOLEAN, 6));
   FuncObj->SetParamInfo(1, 0, gclParameter("profile", porMIXED));
   FuncObj->SetParamInfo(1, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("mixed", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
-					   new PrecisionPortion(precRATIONAL)));
-  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }
