@@ -24,7 +24,7 @@ i2:=Infoset[n#1];
 // open outfile 
 o:=Output["eaotest.out"];
 SetListFormat[lf->0,commas->False,braces->False];
-SetNumericFormat[precis->3];
+SetNumericFormat[decimals->3];
 
 // define the constants demarcating the regions of equilibria
 

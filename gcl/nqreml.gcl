@@ -65,9 +65,9 @@ NewFunction[NQreML[n<->NFG,dat->LIST(MIXED),min->NUMBER,max->NUMBER,\
         sum:=Sum[exdat_ii_i];
         For[k:=1,k<=nacts_i,k:=k+1,
           nob:=exdat_ii_i_k;
-          SetNumericFormat[precis->0,width->4];
+          SetNumericFormat[decimals->0,width->4];
           o << "\n        " << nob;
-          SetNumericFormat[precis->4,width->8];
+          SetNumericFormat[decimals->4,width->8];
           If[sum != 0.0, o << " " << nob/sum, o << " " << 0.0];
 //          o << " " << cent_i_k;
           o << goblist_llmax_i_k;

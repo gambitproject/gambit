@@ -81,9 +81,9 @@ NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max-
         sum:=Sum[exdat_ii_i_j];
         For[k:=1,k<=numactions_i_j,k:=k+1,
           nob:=exdat_ii_i_j_k;
-          SetNumericFormat[precis->0,width->7];
+          SetNumericFormat[decimals->0,width->7];
           o << "\n" << i << j << nob;
-          SetNumericFormat[precis->4,width->10];
+          SetNumericFormat[decimals->4,width->10];
           If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
           o << goblist_gobllmax_i_j_k;
           o << osemlist_osemllmax_i_j_k;
@@ -95,7 +95,7 @@ NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max-
     o << "\nLam\Gam                " << 0.0 <<  lamlist_gobllmax << gamlist_osemllmax;
     o << "\nLam\Gam_lo                       " << LamCI_1 << GamCI_1;
     o << "\nLam\Gam_hi                       " << LamCI_2 << GamCI_2;
-    SetNumericFormat[precis->3, width->10];
+    SetNumericFormat[decimals->3, width->10];
     o << "\nLogLik                           " << goblogl_gobllmax << osemlogl_osemllmax << "\n";
   ];
 ];

@@ -31,7 +31,7 @@ NewFunction[AlgTest[e->EFG,{out->StdOut},{precision->Float}],
 //out:=StdOut;
 out:=Output["algtest.out"];
 SetListFormat[lf->1];
-SetNumericFormat[precis->4];
+SetNumericFormat[decimals->4];
 
 time:=StartWatch[];
 

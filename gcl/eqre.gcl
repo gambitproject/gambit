@@ -23,8 +23,8 @@ Include["eqreml.gcl"]
 
 NewFunction[EQre[filename->TEXT],
   //  Load efg and open agg file for reading
-  width:=0;precis:=0;quote:=True;lf:=0;
-  GetNumericFormat[width<->width,precis<->precis];
+  width:=0;decimals:=0;quote:=True;lf:=0;
+  GetNumericFormat[width<->width,decimals<->decimals];
   GetTextFormat[quote<->quote];
   GetListFormat[lf<->lf];
 
@@ -51,7 +51,7 @@ NewFunction[EQre[filename->TEXT],
   out := filename+".out";
 
   EQreML[e,dat,min,max,del,out,pxi,nash];
-  SetNumericFormat[width,precis];
+  SetNumericFormat[width,decimals];
   SetTextFormat[quote];
   SetListFormat[lf->lf];
 ];
