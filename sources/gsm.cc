@@ -214,14 +214,14 @@ bool GSM::Push(const long& data)
 
 bool GSM::Push(const double& data)
 {
-  _Push(new FloatPortion(data));
+  _Push(new NumberPortion(data));
   return true;
 }
 
 
 bool GSM::Push(const gRational& data)
 {
-  _Push(new RationalPortion(data));
+  _Push(new NumberPortion(data));
   return true;
 }
 
@@ -485,11 +485,8 @@ bool GSM::Assign(void)
       case porINTEGER:
 	((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
 	break;
-      case porFLOAT:
-	((FloatPortion*) p1)->Value() = ((FloatPortion*) p2)->Value();
-	break;
-      case porRATIONAL:
-	((RationalPortion*) p1)->Value()=((RationalPortion*) p2)->Value();
+      case porNUMBER:
+	((NumberPortion*) p1)->Value()=((NumberPortion*) p2)->Value();
 	break;
       case porTEXT:
 	((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
@@ -841,10 +838,8 @@ bool GSM::Add (void)
     result = true;
     if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() += ((IntPortion*) p2)->Value();
-    else if(p->Spec().Type==porFLOAT)
-      ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
-    else if(p->Spec().Type==porRATIONAL)
-      ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
+    else if(p->Spec().Type==porNUMBER)
+      ((NumberPortion*) p)->Value() += ((NumberPortion*) p2)->Value();
 /*
     else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
@@ -888,10 +883,8 @@ bool GSM::Subtract (void)
     result = true;
     if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() -= ((IntPortion*) p2)->Value();
-    else if(p->Spec().Type==porFLOAT)
-      ((FloatPortion*) p)->Value() -= ((FloatPortion*) p2)->Value();
-    else if(p->Spec().Type==porRATIONAL)
-      ((RationalPortion*) p)->Value() -= ((RationalPortion*) p2)->Value();
+    else if(p->Spec().Type==porNUMBER)
+      ((NumberPortion*) p)->Value() -= ((NumberPortion*) p2)->Value();
 /*
     else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) -= 
@@ -935,10 +928,8 @@ bool GSM::Multiply (void)
     result = true;
     if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() *= ((IntPortion*) p2)->Value();
-    else if(p->Spec().Type==porFLOAT)
-      ((FloatPortion*) p)->Value() *= ((FloatPortion*) p2)->Value();
-    else if(p->Spec().Type==porRATIONAL)
-      ((RationalPortion*) p)->Value() *= ((RationalPortion*) p2)->Value();
+    else if(p->Spec().Type==porNUMBER)
+      ((NumberPortion*) p)->Value() *= ((NumberPortion*) p2)->Value();
     else
       result = false;
   }
@@ -973,13 +964,11 @@ bool GSM::Divide (void)
     if(p->Spec().Type==porINTEGER && ((IntPortion*) p2)->Value() != 0)
     {
       delete p;
-      p = new RationalPortion(((IntPortion*) p1)->Value());
-      ((RationalPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
+      p = new NumberPortion(((IntPortion*) p1)->Value());
+      ((NumberPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     }
-    else if(p->Spec().Type==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
-      ((FloatPortion*) p)->Value() /= ((FloatPortion*) p2)->Value();
-    else if(p->Spec().Type==porRATIONAL && ((RationalPortion*) p2)->Value() != (gRational)0)
-      ((RationalPortion*) p)->Value() /= ((RationalPortion*) p2)->Value();
+    else if(p->Spec().Type==porNUMBER && ((NumberPortion*) p2)->Value() != (gRational)0)
+      ((NumberPortion*) p)->Value() /= ((NumberPortion*) p2)->Value();
     else
       result = false;
   }
@@ -1007,10 +996,8 @@ bool GSM::Negate(void)
     result = true;
     if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() = -(((IntPortion*) p1)->Value());
-    else if(p->Spec().Type==porFLOAT)
-      ((FloatPortion*) p)->Value() = -(((FloatPortion*) p1)->Value());
-    else if(p->Spec().Type==porRATIONAL)
-      ((RationalPortion*) p)->Value() = -(((RationalPortion*) p1)->Value());
+    else if(p->Spec().Type==porNUMBER)
+      ((NumberPortion*) p)->Value() = -(((NumberPortion*) p1)->Value());
     else
       result = false;
   }
@@ -1156,10 +1143,8 @@ bool GSM::GreaterThan (void)
     result = true;
     if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() > ((IntPortion*) p2)->Value());
-    else if(p1->Spec().Type==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() > ((FloatPortion*) p2)->Value());
-    else if(p1->Spec().Type==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()>((RationalPortion*) p2)->Value());
+    else if(p1->Spec().Type==porNUMBER)
+      b = (((NumberPortion*) p1)->Value()>((NumberPortion*) p2)->Value());
     else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value());
     else
@@ -1190,10 +1175,8 @@ bool GSM::LessThan (void)
     result = true;
     if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() < ((IntPortion*) p2)->Value());
-    else if(p1->Spec().Type==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() < ((FloatPortion*) p2)->Value());
-    else if(p1->Spec().Type==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()<((RationalPortion*) p2)->Value());
+    else if(p1->Spec().Type==porNUMBER)
+      b = (((NumberPortion*) p1)->Value()<((NumberPortion*) p2)->Value());
     else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() < ((TextPortion*) p2)->Value());
     else
@@ -1224,10 +1207,8 @@ bool GSM::GreaterThanOrEqualTo (void)
     result = true;
     if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() >= ((IntPortion*) p2)->Value());
-    else if(p1->Spec().Type==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() >= ((FloatPortion*) p2)->Value());
-    else if(p1->Spec().Type==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()>=((RationalPortion*) p2)->Value());
+    else if(p1->Spec().Type==porNUMBER)
+      b = (((NumberPortion*) p1)->Value()>=((NumberPortion*) p2)->Value());
     else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() >= ((TextPortion*) p2)->Value());
     else
@@ -1258,10 +1239,8 @@ bool GSM::LessThanOrEqualTo (void)
     result = true;
     if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() <= ((IntPortion*) p2)->Value());
-    else if(p1->Spec().Type==porFLOAT)
-      b = (((FloatPortion*) p1)->Value() <= ((FloatPortion*) p2)->Value());
-    else if(p1->Spec().Type==porRATIONAL)
-      b = (((RationalPortion*) p1)->Value()<=((RationalPortion*) p2)->Value());
+    else if(p1->Spec().Type==porNUMBER)
+      b = (((NumberPortion*) p1)->Value()<=((NumberPortion*) p2)->Value());
     else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() <= ((TextPortion*) p2)->Value());
     else
@@ -1773,7 +1752,7 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	instr_success = true;
 	break;
       case iPUSH_FLOAT:
-	_Push(new FloatPortion(instr->FloatVal));
+	_Push(new NumberPortion(instr->FloatVal));
 	instr_success = true;
 	break;
 

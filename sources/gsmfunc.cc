@@ -2,7 +2,7 @@
 // FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
 //                     companion to GSM
 //
-// $Id$
+// @(#)gsmfunc.cc	2.3 4/28/97
 //
 
 #include <assert.h>
@@ -1317,12 +1317,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 		_Param[index] = new IntPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
-	      case porFLOAT:
-		_Param[index] = new FloatPortion(0);
-		_RunTimeParamInfo[index].Defined = true;
-		break;
-	      case porRATIONAL:
-		_Param[index] = new RationalPortion(0);
+	      case porNUMBER:
+		_Param[index] = new NumberPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porTEXT:

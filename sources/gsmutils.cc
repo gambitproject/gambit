@@ -22,7 +22,7 @@ Portion *ArrayToList(const gArray<double> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new FloatPortion(A[i]));
+    ret->Append(new NumberPortion(A[i]));
   return ret;
 }
 
@@ -30,7 +30,7 @@ Portion *ArrayToList(const gArray<gRational> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new RationalPortion(A[i]));
+    ret->Append(new NumberPortion(A[i]));
   return ret;
 }
 
@@ -118,7 +118,7 @@ Portion *gDPVectorToList(const gDPVector<double> &A)
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
       s2 = new ListValPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
-	s2->Append(new FloatPortion(A(i, j, k)));
+	s2->Append(new NumberPortion(A(i, j, k)));
       l++;
       s1->Append(s2);
     }
@@ -139,7 +139,7 @@ Portion* gDPVectorToList(const gDPVector<gRational> &A)
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
       s2 = new ListValPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
-	s2->Append(new RationalPortion(A(i, j, k)));
+	s2->Append(new NumberPortion(A(i, j, k)));
       l++;
       s1->Append(s2);
     }
@@ -158,14 +158,14 @@ gVector<double>* ListToVector_Float(ListPortion* list)
   bool flat = true;
   for(i=1; i<=length; i++)
   {
-    if((*list)[i]->Spec().Type != porFLOAT)
+    if((*list)[i]->Spec().Type != porNUMBER)
       flat = false;
   }
   if(flat)
   {
     vector = new gVector<double>(length);
     for(i=1; i<=length; i++)
-      (*vector)[i] = ((FloatPortion*)(*list)[i])->Value();
+      (*vector)[i] = ((NumberPortion*)(*list)[i])->Value();
   }
   return vector;      
 }
@@ -178,14 +178,14 @@ gVector<gRational>* ListToVector_Rational(ListPortion* list)
   bool flat = true;
   for(i=1; i<=length; i++)
   {
-    if((*list)[i]->Spec().Type != porRATIONAL)
+    if((*list)[i]->Spec().Type != porNUMBER)
       flat = false;
   }
   if(flat)
   {
     vector = new gVector<gRational>(length);
     for(i=1; i<=length; i++)
-      (*vector)[i] = ((RationalPortion*)(*list)[i])->Value();
+      (*vector)[i] = ((NumberPortion*)(*list)[i])->Value();
   }
   return vector;      
 }
@@ -212,7 +212,7 @@ gMatrix<double>* ListToMatrix_Float(ListPortion* list)
       rect = false;
     if(rect)
       for(j=1; j<=cols; j++)
-	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porFLOAT)
+	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porNUMBER)
 	  rect = false;
   }
 
@@ -222,7 +222,7 @@ gMatrix<double>* ListToMatrix_Float(ListPortion* list)
     for(i=1; i<=rows; i++)
       for(j=1; j<=cols; j++)
 	(*matrix)(i,j) = 
-	  ((FloatPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
+	  ((NumberPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
   }
   return matrix;
 }
@@ -246,7 +246,7 @@ gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list)
       rect = false;
     if(rect)
       for(j=1; j<=cols; j++)
-	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porRATIONAL)
+	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porNUMBER)
 	  rect = false;
   }
 
@@ -256,7 +256,7 @@ gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list)
     for(i=1; i<=rows; i++)
       for(j=1; j<=cols; j++)
 	(*matrix)(i,j) = 
-	  ((RationalPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
+	  ((NumberPortion*)(*((ListPortion*)(*list)[i]))[j])->Value();
   }
   return matrix;
 }

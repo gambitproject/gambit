@@ -197,49 +197,20 @@ public:
 
 
 //---------------------------------------------------------------------
-//                          float class
+//                          Number class
 //---------------------------------------------------------------------
 
-class FloatPortion : public Portion
-{
-protected:
-  double* _Value;
-  bool _ref;
-
-  FloatPortion(double &, bool);
-
-public:
-  FloatPortion(double);
-  virtual ~FloatPortion();
-
-  double& Value(void) const;
-  PortionSpec Spec(void) const;
-
-  void Output(gOutput& s) const;
-  gString OutputString( void ) const;
-
-  Portion* ValCopy(void) const;
-  Portion* RefCopy(void) const;
-
-  bool IsReference(void) const;
-};
-
-
-//---------------------------------------------------------------------
-//                          Rational class
-//---------------------------------------------------------------------
-
-class RationalPortion : public Portion
+class NumberPortion : public Portion
 {
 protected:
   gRational* _Value;
   bool _ref;
 
-  RationalPortion(gRational &, bool);
+  NumberPortion(gRational &, bool);
 
 public:
-  RationalPortion(const gRational &);
-  virtual ~RationalPortion();
+  NumberPortion(const gRational &);
+  virtual ~NumberPortion();
 
   gRational& Value(void) const;
   PortionSpec Spec(void) const;

@@ -44,9 +44,8 @@ PortionSpecTextType _PortionSpecText[] =
   { porERROR,              "ERROR" },
   
   { porBOOL,               "BOOLEAN" },
-  { porFLOAT,              "FLOAT" },
   { porINTEGER,            "INTEGER" },
-  { porRATIONAL,           "RATIONAL" },
+  { porNUMBER,             "RATIONAL" },
   { porTEXT,               "TEXT" },
 
   { porMIXED_FLOAT,        "MIXED(FLOAT)" },

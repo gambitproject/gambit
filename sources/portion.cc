@@ -371,94 +371,48 @@ bool IntPortion::IsReference(void) const
 
 
 //---------------------------------------------------------------------
-//                          Float class
-//---------------------------------------------------------------------
-
-FloatPortion::FloatPortion(double value)
-  : _Value(new double(value)), _ref(false)
-{ }
-
-FloatPortion::FloatPortion(double &value, bool ref)
-  : _Value(&value), _ref(ref)
-{ }
-
-FloatPortion::~FloatPortion()
-{ }
-
-double& FloatPortion::Value(void) const
-{ return *_Value; }
-
-PortionSpec FloatPortion::Spec(void) const
-{ return PortionSpec(porFLOAT); }
-
-void FloatPortion::Output(gOutput& s) const
-{
-  Portion::Output(s);
-  s << *_Value; 
-}
-
-gString FloatPortion::OutputString( void ) const
-{
-  return ToString( *_Value );
-}
-
-Portion* FloatPortion::ValCopy(void) const
-{ return new FloatPortion(*_Value); }
-
-Portion* FloatPortion::RefCopy(void) const
-{
-  Portion* p = new FloatPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
-}
-
-bool FloatPortion::IsReference(void) const
-{ return _ref; }
-
-
-//---------------------------------------------------------------------
 //                          Rational class
 //---------------------------------------------------------------------
 
-RationalPortion::RationalPortion(const gRational &value)
+NumberPortion::NumberPortion(const gRational &value)
   : _Value(new gRational(value)), _ref(false)
 { }
 
-RationalPortion::RationalPortion(gRational &value, bool ref)
+NumberPortion::NumberPortion(gRational &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
-RationalPortion::~RationalPortion()
+NumberPortion::~NumberPortion()
 { }
 
-gRational& RationalPortion::Value(void) const
+gRational& NumberPortion::Value(void) const
 { return *_Value; }
 
-PortionSpec RationalPortion::Spec(void) const
-{ return PortionSpec(porRATIONAL); }
+PortionSpec NumberPortion::Spec(void) const
+{ return PortionSpec(porNUMBER); }
 
-void RationalPortion::Output(gOutput& s) const
+void NumberPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << *_Value; 
 }
 
-gString RationalPortion::OutputString( void ) const
+gString NumberPortion::OutputString( void ) const
 {
   return ToString( *_Value );
 }
 
-Portion* RationalPortion::ValCopy(void) const
-{ return new RationalPortion(*_Value); }
+Portion* NumberPortion::ValCopy(void) const
+{ return new NumberPortion(*_Value); }
 
-Portion* RationalPortion::RefCopy(void) const
+Portion* NumberPortion::RefCopy(void) const
 { 
-  Portion* p = new RationalPortion(*_Value, true); 
+  Portion* p = new NumberPortion(*_Value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
-bool RationalPortion::IsReference(void) const
+bool NumberPortion::IsReference(void) const
 { return _ref; }
 
 
@@ -2393,10 +2347,8 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
     b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
   else if(p1->Spec().Type & porINTEGER)   
     b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
-  else if(p1->Spec().Type & porFLOAT)
-    b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
-  else if(p1->Spec().Type & porRATIONAL)
-    b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
+  else if(p1->Spec().Type & porNUMBER)
+    b = (((NumberPortion*) p1)->Value()==((NumberPortion*) p2)->Value());
   else if(p1->Spec().Type & porTEXT)
       b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
   
