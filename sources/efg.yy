@@ -7,7 +7,6 @@
 #include "gstring.h"
 #include "extform.h"
 #include "outcome.h"
-#define PROBLEM_C
 #include "problem.h"
 
 gString *last_name;
@@ -131,8 +130,8 @@ player_isets:   LBRACE { isetNo = 1; } RBRACE   { playerNo++; }
 iset_list:      infoset
          |      iset_list infoset
 
-infoset:        LBRACE { games(gameNo)->CreateInfoset(playerNo, gameNo, 0); }
-                NAME { games(gameNo)->LabelInfoset(playerNo, isetNo, *last_name); } action_data RBRACE  { isetNo++; }
+infoset:        LBRACE { p->games(gameNo)->CreateInfoset(playerNo, gameNo, 0); }
+                NAME { p->games(gameNo)->LabelInfoset(playerNo, isetNo, *last_name); } action_data RBRACE  { isetNo++; }
 
 action_data:    action_list prob_list
            |    action_list
@@ -143,13 +142,13 @@ actions:        action
        |        actions action
 
 action:         NAME
-             { games(gameNo)->AppendAction(playerNo, isetNo);
-               games(gameNo)->LabelAction(playerNo, isetNo, actNo++, *last_name); }
+             { p->games(gameNo)->AppendAction(playerNo, isetNo);
+               p->games(gameNo)->LabelAction(playerNo, isetNo, actNo++, *last_name); }
 
 prob_list:      LBRACE
             { v = new gTuple<gNumber>(1, actNo - 1); actNo = 1; }
                 probs RBRACE
-            { games(gameNo)->SetActionProbs(playerNo, isetNo, *v);
+            { p->games(gameNo)->SetActionProbs(playerNo, isetNo, *v);
               delete v;  }
 
 probs:          prob
@@ -158,7 +157,7 @@ probs:          prob
 prob:           FLOAT  { (*v)[actNo++] = last_double; }
 
 nodes:          LBRACE { nodes = new gBlock<struct nodeinfo *>; } node_list
-                RBRACE   { games(gameNo)->InputFromFile(*nodes);  
+                RBRACE   { p->games(gameNo)->InputFromFile(*nodes);  
         while (nodes->Length())  delete nodes->Remove(1);  delete nodes; }
 
 node_list:      node
