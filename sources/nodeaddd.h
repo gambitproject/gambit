@@ -1,4 +1,6 @@
-
+// File: nodeaddd.h -- Node Add Dialog.  Handles creation of new nodes for the
+// extensive form display.
+// $Id$
 typedef enum {NodeAddNew,NodeAddIset} NodeAddMode;
 class NodeAddDialog : public MyDialogBox
 {
