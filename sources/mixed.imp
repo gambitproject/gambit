@@ -14,7 +14,7 @@
 //---------------------------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-: BaseNfg(dim), payoffs(dim.Length())
+  : BaseNfg(dim), payoffs(dim.Length())
 {
   int accum = 1,i;
   for (i = 1; i <= dim.Length(); i++)
@@ -25,7 +25,7 @@ template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
 }
 
 template <class T> Nfg<T>::Nfg(const Nfg &n)
-: BaseNfg(n), payoffs(n.payoffs.Length())
+  : BaseNfg(n), payoffs(n.payoffs.Length())
 {
   NumPayPerPlayer = n.NumPayPerPlayer;
   for (int i = 1; i <= payoffs.Length(); i++){
@@ -44,6 +44,27 @@ template <class T> Nfg<T>::~Nfg()
 //------------------------
 // Nfg: Member Functions
 //------------------------
+
+template <class T> bool Nfg<T>::IsConstSum(void) const
+{
+  int pl, index;
+  T cvalue = (T) 0;
+
+  for (pl = 1; pl <= players.Length(); pl++)
+    cvalue += payoffs[pl][0];
+  
+  for (index = 1; index < NumPayPerPlayer; index++)  {
+    T thisvalue = (T) 0;
+
+    for (pl = 1; pl <= players.Length(); pl++)
+      thisvalue += payoffs[pl][index];
+
+    if (thisvalue != cvalue)
+      return false;
+  }
+  
+  return true;
+}
 
 template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
 					  const T &value)

@@ -88,6 +88,7 @@ protected:
 
        //# DATA ACCESS -- GENERAL INFORMATION
     virtual DataType Type(void) const = 0;
+    virtual bool IsConstSum(void) const = 0;
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
@@ -177,6 +178,7 @@ template <class T> class Efg : public BaseEfg   {
 
 	//# DATA ACCESS -- GENERAL INFORMATION
     DataType Type(void) const;
+    bool IsConstSum(void) const;
 
         //# DATA ACCESS -- OUTCOMES
     OutcomeVector<T> *NewOutcome(void);

@@ -41,6 +41,7 @@ public:
   const gString &GetTitle(void) const;
 
   virtual DataType Type(void) const = 0;
+  virtual bool IsConstSum(void) const = 0;
 
   int NumPlayers(void) const;
   int NumStrats(int pl) const;
@@ -79,6 +80,7 @@ public:
 
   // returns the type of the nfg, DOUBLE or RATIONAL
   DataType Type(void) const;
+  bool IsConstSum(void) const;
 
   void WriteNfgFile(gOutput &) const;
 

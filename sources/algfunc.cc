@@ -701,6 +701,9 @@ Portion *GSM_LpSolveEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double> *) ((EfgPortion*) param[0])->Value();
   
+  if (E.NumPlayers() > 2 || !E.IsConstSum())
+    return new ErrorPortion("Only valid for two-person zero-sum games");
+
   ZSumParams ZP;
 
   ZSumBySubgame<double> ZM(E, ZP);
@@ -723,6 +726,9 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 {
   Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion*) param[0])->Value();
   
+  if (E.NumPlayers() > 2 || !E.IsConstSum())
+    return new ErrorPortion("Only valid for two-person zero-sum games");
+
   ZSumParams ZP;
 
   ZSumBySubgame<gRational> ZM(E, ZP);

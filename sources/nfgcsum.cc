@@ -37,8 +37,7 @@ template <class T> ZSumModule<T>::~ZSumModule()
 
 template <class T> bool ZSumModule<T>::IsConstSum()
 { 
-// useless as written 
-  return 1;
+  return NF.IsConstSum();
 }
 
 template <class T> void ZSumModule<T>::Make_Abc()

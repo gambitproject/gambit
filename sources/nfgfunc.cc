@@ -352,6 +352,9 @@ Portion *GSM_ConstSumFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
 
+  if (N.NumPlayers() > 2 || !N.IsConstSum())
+    return new ErrorPortion("Only valid for two-person zero-sum games");
+
   ZSumParams ZP;
 
   NFSupport S(N);
@@ -373,6 +376,9 @@ Portion *GSM_ConstSumFloat(Portion **param)
 Portion *GSM_ConstSumRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+
+  if (N.NumPlayers() > 2 || !N.IsConstSum())
+    return new ErrorPortion("Only valid for two-person zero-sum games");
 
   ZSumParams ZP;
   
@@ -398,6 +404,9 @@ Portion *GSM_ConstSumSupport(Portion **param)
   BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
   Portion* por = 0;
 
+  if (N->NumPlayers() > 2 || !N->IsConstSum())
+    return new ErrorPortion("Only valid for two-person zero-sum games");
+
   ZSumParams ZP;
 
   switch( N->Type() )
@@ -414,7 +423,7 @@ Portion *GSM_ConstSumSupport(Portion **param)
     break;
   case RATIONAL:
     {
-      ZSumModule<gRational> ZM( * (Nfg<gRational>*) N, ZP, S);
+      ZSumModule<gRational> ZM( *(Nfg<gRational>*) N, ZP, S);
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
       ((FloatPortion *) param[2])->Value() = ZM.Time();

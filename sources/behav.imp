@@ -192,6 +192,29 @@ template <class T> OutcomeVector<T> *Efg<T>::NewOutcome(void)
   return ret;
 }
 
+template <class T> bool Efg<T>::IsConstSum(void) const
+{
+  int pl, index;
+  T cvalue = (T) 0;
+
+  if (outcomes.Length() == 0)  return true;
+
+  for (pl = 1; pl <= players.Length(); pl++)
+    cvalue += ((OutcomeVector<T> &) *outcomes[1])[pl];
+  
+  for (index = 2; index <= outcomes.Length(); index++)  {
+    T thisvalue = (T) 0;
+    
+    for (pl = 1; pl <= players.Length(); pl++)
+      thisvalue += ((OutcomeVector<T> &) *outcomes[index])[pl];
+
+    if (cvalue != thisvalue)
+      return false;
+  }
+
+  return true;
+}
+
 //------------------------------------------------------------------------
 //                   Efg<T>: Payoff computation
 //------------------------------------------------------------------------
