@@ -171,7 +171,7 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 //  eps = tab->Epsilon();
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	GetProfile(v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();
@@ -226,7 +226,7 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	FillTableau(n->GetChild(i),
 		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);

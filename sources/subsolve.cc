@@ -26,7 +26,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
   ((gVector<gNumber> &) thissolns[1]).operator=(gNumber(0));
   
   gList<Node *> subroots;
-  ChildSubgames(n, subroots);
+  ChildSubgames(efg, n, subroots);
   
   gList<gArray<EFOutcome *> > subrootvalues;
   subrootvalues.Append(gArray<EFOutcome *>(subroots.Length()));

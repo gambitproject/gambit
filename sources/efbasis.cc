@@ -347,7 +347,7 @@ bool EFBasis::IsReachable(Node *n) const
 
   while (n != m_efg->RootNode()) {
     if(!n->GetParent()->GetInfoset()->IsChanceInfoset())
-      if(!EFSupport::Find(LastAction(n))) return false;
+      if(!EFSupport::Find(LastAction(*m_efg,n))) return false;
     n = n->GetParent();
   }
 return true;
@@ -526,12 +526,12 @@ void EFBasis::AddEquation2(int row,Node *n) const
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
   if(n!=m_efg->RootNode()) {
-    Action *act = LastAction(n);
+    Action *act = LastAction(*m_efg,n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
     while(n->GetParent() != m_efg->RootNode()) {
       n = n->GetParent();
-      act = LastAction(n);
+      act = LastAction(*m_efg,n);
       if(Col(act))
 	(*A)(row,Col(act)) = -1.0;
     }

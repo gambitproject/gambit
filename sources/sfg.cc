@@ -100,7 +100,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	MakeSequenceForm(n->GetChild(i),
 		     prob * EF.GetChanceProb(n->GetInfoset(), i), seq,iset,parent);
     }
@@ -122,7 +122,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 	isetFlag(pl,isetnum)=1;
 	flag =true;
       }
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=EF.NumChildren(n);i++) {
 	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
 	  snew[pl]+=1;
 	  if(flag) {
@@ -150,7 +150,7 @@ GetSequenceDims(const Node *n)
 
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	GetSequenceDims(n->GetChild(i));
     }
     else {
@@ -164,7 +164,7 @@ GetSequenceDims(const Node *n)
 	isetRow(pl,isetnum)=infosets[pl].Length()+1;
 	flag =true;
       }
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=EF.NumChildren(n);i++) {
 	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
 	  if(flag) {
 	    seq[pl]++;

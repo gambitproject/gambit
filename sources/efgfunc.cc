@@ -190,8 +190,9 @@ static Portion *GSM_ChanceProb(Portion **param)
 
 static Portion *GSM_Children(Portion **param)
 {
-  Node *n = ((NodePortion *) param[0])->Value();
-  return ArrayToList(n->Children());
+  const Node *n = ((NodePortion *) param[0])->Value();
+  Efg *e = ((FullEfg*) param[0]->Game());
+  return ArrayToList(e->Children(n));
 }
 
 //------------
@@ -272,13 +273,14 @@ static Portion *GSM_DeleteEmptyInfoset(Portion **param)
 static Portion *GSM_DeleteMove(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
+  Efg *e = ((FullEfg*) param[0]->Game());
   Node *keep = ((NodePortion *) param[1])->Value();
 
   if (keep->GetParent() != n)
     throw gclRuntimeError("keep is not a child of node");
 
   _gsm->UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
-  for (int i = 1; i <= n->NumChildren(); i++) 
+  for (int i = 1; i <= e->NumChildren(n); i++) 
     if (n->GetChild(i) != keep)
       _gsm->UnAssignEfgSubTree(n->Game(), n->GetChild(i));
   _gsm->UnAssignEfgElement(n->Game(), porNODE, n);
@@ -735,8 +737,10 @@ static Portion *GSM_Nodes(Portion **param)
 static Portion *GSM_NthChild(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
+  Efg *e = ((FullEfg*) param[0]->Game());
+
   int child = ((NumberPortion *) param[1])->Value();
-  if (child < 1 || child > n->NumChildren())  
+  if (child < 1 || child > e->NumChildren(n))  
     return new NullPortion(porNODE);
 
   return new NodePortion(n->GetChild(child));
@@ -856,7 +860,8 @@ static Portion *GSM_PossibleNashSupports(Portion **param)
 static Portion *GSM_PriorAction(Portion** param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  const Action* a = LastAction(n);
+  Efg *e = ((FullEfg*) param[0]->Game());
+  const Action* a = LastAction(*e,n);
   if(a == 0)
     return new NullPortion(porACTION);
 

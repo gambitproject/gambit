@@ -331,7 +331,7 @@ SequentialEquilibModule<T>::RealizProb(Node *node) const
   Action *act;
   Infoset *iset;
   while(node!=EF.RootNode()) {
-    act = LastAction(node);
+    act = LastAction(EF,node);
     iset = act->BelongsTo();
     if(iset->IsChanceInfoset())
       equation*=(double)EF.GetChanceProb(act);
@@ -422,7 +422,7 @@ Payoff(Node *n, EFPlayer *p) const
     value+=term;
   }
 
-  int nc = n->NumChildren();
+  int nc = EF.NumChildren(n);
   if(nc==0) return value;
 
   if (n->GetInfoset()->IsChanceInfoset())

@@ -836,6 +836,12 @@ gList<Infoset*> FullEfg::DescendantInfosets(const Node& n,
   return answer;
 }
 
+gArray<Node *> FullEfg::Children(const Node *n) const
+{ return n->children; }
+
+int FullEfg::NumChildren(const Node *n) const
+{ return n->children.Length(); }
+
 EFOutcome *FullEfg::NewOutcome(int index)
 {
   m_revision++;
@@ -1250,7 +1256,7 @@ Node *FullEfg::DeleteTree(Node *n)
   m_revision++;
   m_dirty = true;
 
-  while (n->NumChildren() > 0)   {
+  while (NumChildren(n) > 0)   {
     DeleteTree(n->children[1]);
     delete n->children.Remove(1);
   }
@@ -1355,7 +1361,7 @@ gArray<gNumber> FullEfg::GetChanceProbs(Infoset *infoset) const
 void FullEfg::MarkTree(Node *n, Node *base)
 {
   n->ptr = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
+  for (int i = 1; i <= NumChildren(n); i++)
     MarkTree(n->GetChild(i), base);
 }
 
@@ -1363,9 +1369,9 @@ bool FullEfg::CheckTree(Node *n, Node *base)
 {
   int i;
 
-  if (n->NumChildren() == 0)   return true;
+  if (NumChildren(n) == 0)   return true;
 
-  for (i = 1; i <= n->NumChildren(); i++)
+  for (i = 1; i <= NumChildren(n); i++)
     if (!CheckTree(n->GetChild(i), base))  return false;
 
   if (n->GetPlayer()->IsChance())   return true;
@@ -1379,7 +1385,7 @@ bool FullEfg::CheckTree(Node *n, Node *base)
 
 bool FullEfg::IsLegalSubgame(Node *n)
 {
-  if (n->NumChildren() == 0)  
+  if (NumChildren(n) == 0)  
     return false;
 
   MarkTree(n, n);
@@ -1412,7 +1418,7 @@ void FullEfg::MarkSubgame(Node *n, Node *base)
 {
   if (n->gameroot == n)  return;
   n->gameroot = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
+  for (int i = 1; i <= NumChildren(n); i++)
     MarkSubgame(n->GetChild(i), base);
 }
 
@@ -1428,9 +1434,9 @@ void FullEfg::MarkSubgames(const gList<Node *> &list)
 
 void FullEfg::UnmarkSubgames(Node *n)
 {
-  if (n->NumChildren() == 0)   return;
+  if (NumChildren(n) == 0)   return;
 
-  for (int i = 1; i <= n->NumChildren(); i++)
+  for (int i = 1; i <= NumChildren(n); i++)
     UnmarkSubgames(n->GetChild(i));
   
   if (n->gameroot == n && n->parent)  {

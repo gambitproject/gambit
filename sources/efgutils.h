@@ -21,24 +21,24 @@ void Nodes (const Efg &befg, Node *n, gList <Node *> &list);
 int NumNodes (const Efg &befg);
 
 // returns the number of nodes given a starting node
-int CountNodes (Node *n);
+int CountNodes (const Efg &e, Node *n);
 
 // returns the action leading up to the node
-Action* LastAction(Node *node);
+Action* LastAction(const Efg &e, Node *node);
 
 // returns the list of nodes which are marked as the roots of subgames
 void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list);
 
 // returns the list of nodes which are valid roots of subgames
 void LegalSubgameRoots(const Efg &efg, gList<Node *> &list);
-void LegalSubgameRoots(Node *, gList<Node *> &);
+void LegalSubgameRoots(const Efg &efg, Node *, gList<Node *> &);
 bool HasSubgames(const Efg &efg);
-bool HasSubgames(Node * n);
+bool HasSubgames(const Efg &, Node * n);
 
 bool AllSubgamesMarked(const Efg &efg);
 
 // returns the list of nodes which are roots of child subgames
-void ChildSubgames(Node *, gList<Node *> &);
+void ChildSubgames(const Efg &, Node *, gList<Node *> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition

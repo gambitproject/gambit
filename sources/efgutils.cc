@@ -8,74 +8,74 @@
 
 // recursive functions
 
-static void NDoChild (Node *n, gList <Node *> &list)
+static void NDoChild (const Efg &e, Node *n, gList <Node *> &list)
 { 
   list.Append(n);
-  for (int i = 1; i <= n->NumChildren(); i++)
-    NDoChild ( n->GetChild(i), list);
+  for (int i = 1; i <= e.NumChildren(n); i++)
+    NDoChild (e, n->GetChild(i), list);
 }
 
-static void MSRDoChild(Node *n, gList<Node *> &list)
+static void MSRDoChild(const Efg &e, Node *n, gList<Node *> &list)
 {
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MSRDoChild(n->GetChild(i), list);
+  for (int i = 1; i <= e.NumChildren(n); i++)
+    MSRDoChild(e, n->GetChild(i), list);
   if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
-static void LSRDoChild(Node *n, gList<Node *> &list)
+static void LSRDoChild(const Efg &e, Node *n, gList<Node *> &list)
 {
-  for (int i = 1; i <= n->NumChildren(); i++)
-    LSRDoChild(n->GetChild(i), list);
+  for (int i = 1; i <= e.NumChildren(n); i++)
+    LSRDoChild(e, n->GetChild(i), list);
   if (n->Game()->IsLegalSubgame(n))   list.Append(n);
 }
 
-static void CSDoChild(Node *n, gList<Node *> &list)
+static void CSDoChild(const Efg &e, Node *n, gList<Node *> &list)
 {
   if (n->GetSubgameRoot() == n)
     list.Append(n);
   else
-    for (int i = 1; i <= n->NumChildren(); i++)
-      CSDoChild(n->GetChild(i), list);
+    for (int i = 1; i <= e.NumChildren(n); i++)
+      CSDoChild(e, n->GetChild(i), list);
 }
 
 // Public Functions
  
-int CountNodes (Node *n)
+int CountNodes (const Efg &e, Node *n)
 {
   int num = 1;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    num += CountNodes (n->GetChild(i));
+  for (int i = 1; i <= e.NumChildren(n); i++)
+    num += CountNodes (e, n->GetChild(i));
   return num;
 }
 
 void Nodes (const Efg &befg, gList <Node *> &list)
 {
   list.Flush();
-  NDoChild(befg.RootNode(), list); 
+  NDoChild(befg, befg.RootNode(), list); 
 }
 
-void Nodes (const Efg &, Node *n, gList <Node *> &list)
+void Nodes (const Efg &efg, Node *n, gList <Node *> &list)
 {
   list.Flush();
-  NDoChild(n, list);
+  NDoChild(efg,n, list);
 }
 
 void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list)
 {
   list.Flush();
-  MSRDoChild(efg.RootNode(), list);
+  MSRDoChild(efg, efg.RootNode(), list);
 }
 
 void LegalSubgameRoots(const Efg &efg, gList<Node *> &list)
 {
   list.Flush();
-  LSRDoChild(efg.RootNode(), list);
+  LSRDoChild(efg, efg.RootNode(), list);
 }
 
-void LegalSubgameRoots(Node *n, gList<Node *> &list)
+void LegalSubgameRoots(const Efg &efg, Node *n, gList<Node *> &list)
 {
   list.Flush();
-  LSRDoChild(n, list);
+  LSRDoChild(efg, n, list);
 }
 
 bool HasSubgames(const Efg &efg)
@@ -85,10 +85,10 @@ bool HasSubgames(const Efg &efg)
   return list.Length()>1;
 }
 
-bool HasSubgames(Node * n)
+bool HasSubgames(const Efg &e, Node * n)
 {
   gList<Node *> list;
-  LegalSubgameRoots(n, list);
+  LegalSubgameRoots(e, n, list);
   if(n->Game()->IsLegalSubgame(n))
     return list.Length()>1;
   return list.Length()>0;
@@ -105,23 +105,23 @@ bool AllSubgamesMarked(const Efg &efg)
 }
 
 
-void ChildSubgames(Node *n, gList<Node *> &list)
+void ChildSubgames(const Efg &efg, Node *n, gList<Node *> &list)
 {
   list.Flush();
-  for (int i = 1; i <= n->NumChildren(); i++)
-    CSDoChild(n->GetChild(i), list);
+  for (int i = 1; i <= efg.NumChildren(n); i++)
+    CSDoChild(efg, n->GetChild(i), list);
 }
 
 int NumNodes (const Efg &befg)
 {
-  return (CountNodes(befg.RootNode()));
+  return (CountNodes(befg, befg.RootNode()));
 }
 
-Action *LastAction(Node *node)
+Action *LastAction(const Efg &e, Node *node)
 {
   Node *parent = node->GetParent();
   if (parent == 0)  return 0;
-  for (int i = 1; i <= parent->NumChildren(); i++) 
+  for (int i = 1; i <= e.NumChildren(parent); i++) 
     if (parent->GetChild(i) == node)  
       return parent->GetInfoset()->Actions()[i];
   return 0;

@@ -173,11 +173,13 @@ static Portion *GSM_Belief(Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
+  Efg *e = ((FullEfg *) param[11]->Game());
+
   const gDPVector<gNumber> &values(bp->Beliefs());
   Infoset *s = n->GetInfoset();
   const gArray<Node *> &members = s->Members();
 
-  if (s->IsChanceInfoset() || n->NumChildren() == 0)
+  if (s->IsChanceInfoset() || e->NumChildren(n) == 0)
     return new NullPortion(porNUMBER);
 
   int index;

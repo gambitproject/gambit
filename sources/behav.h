@@ -27,8 +27,9 @@ class BehavSolution;
 //      Declaration of BehavNode<T>
 //------------------------------------------------------------------------
 
-template <class T> class BehavNode {
+template <class T> class BehavNode  {
 public:
+  Efg *efg;
   Node *node;
   T nval, bval;
   gVector<T> scratch;
@@ -37,7 +38,7 @@ public:
   T realizProb, belief;
   gVector<T> nodeValue, condPayoff;
 
-  BehavNode(Node *n, int pl);
+  BehavNode(Efg *e, Node *n, int pl);
   ~BehavNode();
 
   void ClearNodeProbs(void);

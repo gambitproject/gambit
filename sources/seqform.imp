@@ -276,7 +276,7 @@ void SeqFormModule<T>::FillTableau(const Node *n, T prob,
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	FillTableau(n->GetChild(i),
 		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
@@ -320,7 +320,7 @@ template <class T> void SeqFormModule<T>
   int i,pl,inf,snew,ind,ind2;
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
+      for(i=1;i<=EF.NumChildren(n);i++)
 	GetProfile(tab, v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();

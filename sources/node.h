@@ -42,9 +42,9 @@ class Node    {
   public:
     FullEfg *Game(void) const   { return E; }
 
-    int NumChildren(void) const    { return children.Length(); }
+  //    int NumChildren(void) const    { return children.Length(); }
     int NumberInInfoset(void) const;
-    const gArray<Node *> &Children(void) const { return children; }
+  //    const gArray<Node *> &Children(void) const { return children; }
     Infoset *GetInfoset(void) const   { return infoset; }
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
