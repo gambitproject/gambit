@@ -90,11 +90,7 @@ template <class T>
 gString TreeWindow<T>::OutcomeAsString(const Node *n)
 {
 if (n->GetOutcome())
-  {
-    OutcomeVector<T> *tmp_ov=(OutcomeVector<T> *)n->GetOutcome();
-    gVector<T> *tmp_v=(gVector<T> *)tmp_ov;
-    return OutcomeToString(*tmp_v,draw_settings);
-  }
+	return OutcomeToString(*((OutcomeVector<T> *)n->GetOutcome()),draw_settings);
 return "";
 }
 
@@ -130,6 +126,7 @@ if (!outcome_dialog)	// creating a new one
 	if (out_name!=gString())
 		for (i=1;i<=num_players;i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 	// create the dialog
+
 	outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
 	for (i=1;i<=num_players;i++)
 		outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
@@ -153,7 +150,7 @@ else	// either going go a new one by clicking on an outcome or closing it
 	if (out_name!="")	// setting a new row
 	{
 		// figure out the # of this outcome
-		for (i=1;i<=num_players;i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
+		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 		outcome_dialog->SetCurRow(out);return;
 	}
 	else	// this is an OK/Cancel action
