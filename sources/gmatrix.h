@@ -4,6 +4,10 @@
 #include "gbmatrix.h"
 #include <stdio.h>
 
+//
+// Notice.  This class will not work with IBM Aix machines due to a compiler
+// bug that does not properly reference the data (second subscript) correctly.
+//
 template <class T> class gMatrix: private gBMatrix<T> {
  public:
   gMatrix(void) { ; }
@@ -15,16 +19,10 @@ template <class T> class gMatrix: private gBMatrix<T> {
   // OPERATOR OVERLOADING
   // assignment
   void operator=(const gMatrix<T> &M)
-    { if(Height()==M.Height() && Width()==M.Width()) {
-	printf("equality overloading\n");
-	for(int i=1;i<=Height();i++) {
-	  printf("[ ");
-	  for(int j=1;j<=Width();j++){
+    { if(Height()==M.Height() && Width()==M.Width())
+	for(int i=1;i<=Height();i++)
+	  for(int j=1;j<=Width();j++)
 	    (*this)(i,j) = M(i,j);
-	    printf("%lf ",M(i,j)); }
-	  printf("]\n");
-	}
-      }
       else gBMatrix<T>::operator=(M);
     }
       
@@ -75,6 +73,7 @@ template <class T> class gMatrix: private gBMatrix<T> {
 
   gMatrix<T> Invert(void) const;
   gMatrix<T> Pivot(int, int) const;
+  T Determinant() const;
 
   gBMatrix<T>::Dump;
 };
@@ -148,17 +147,10 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
 {
   assert(Width() == M.Height());
   gMatrix out(Height(),M.Width());
-  printf("matrix multiplication\n");
-  for(int i=1;i<=Height();i++){
-    printf("[ ");
+  for(int i=1;i<=Height();i++)
     for(int j=1;j<=M.Width();j++)
-      {
 	for(int k=1;k<=Width();k++)
 	  out(i,j) += (*this)(i,k) * M(k,j);
-	printf("%lf ",out(i,j));
-      }
-    printf(" ]\n");
-  }
   return out;
 }
 
@@ -337,6 +329,11 @@ template <class T> gMatrix<T> gMatrix<T>::Invert(void) const
       }
   }
   return tmp;
+}
+
+template <class T> T gMatrix<T>::Determinant() const
+{
+  T result;
 }
 
 //*****************************************************************************
