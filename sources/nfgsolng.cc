@@ -113,7 +113,7 @@ gList<MixedSolution> guinfgEnumPure::Solve(void)
 
 bool guinfgEnumPure::SolveSetup(void)
 {
-  dialogEnumPure dialog(m_parent->Frame());
+  dialogEnumPure dialog(m_parent->Frame(), false, true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -377,7 +377,7 @@ gList<MixedSolution> guinfgLiap::Solve(void)
 
 bool guinfgLiap::SolveSetup(void)
 {
-  dialogLiap dialog(m_parent->Frame(), true);
+  dialogLiap dialog(m_parent->Frame(), false, true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -570,7 +570,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
 
 bool guinfgQre::SolveSetup(void)
 {
-  dialogQre dialog(m_parent->Frame(), m_parent->Filename());
+  dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
