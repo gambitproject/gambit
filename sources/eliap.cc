@@ -218,6 +218,21 @@ int EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
 				  gList<BehavSolution<double> > &solns)
 {
   BehavProfile<double> bp(E);
+  
+  subgame_number++;
+
+  gArray<int> infosets(infoset_subgames.Lengths());
+
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    int niset = 1;
+    for (int iset = 1; iset <= infosets[pl]; iset++)  {
+      if (infoset_subgames(pl, iset) == subgame_number)  {
+	for (int act = 1; act <= bp.GetEFSupport().NumActions(pl, niset); act++)
+	  bp(pl, niset, act) = start(pl, iset, act);
+	niset++;
+      }
+    }
+  }
 
   long this_nevals, this_niters;
 
@@ -227,10 +242,34 @@ int EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
   return params.status.Get();
 }
 
+extern void MarkedSubgameRoots(const BaseEfg &, gList<Node *> &);
+
 EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
-  : SubgameSolver<double>(E, max), nevals(0), params(p), start(s)
-{ }
+  : SubgameSolver<double>(E, max), nevals(0), subgame_number(0),
+    infoset_subgames(E.PureDimensionality()), params(p), start(s)
+{
+  gList<Node *> subroots;
+  MarkedSubgameRoots(E, subroots);
+
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
+    EFPlayer *player = E.PlayerList()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      int index;
+
+      Infoset *infoset = player->InfosetList()[iset];
+      Node *member = infoset->GetMember(1);
+
+      for (index = 1; index <= subroots.Length() &&
+	   member->GetSubgameRoot() != subroots[index]; index++);
+
+      assert(index <= subroots.Length());
+
+      infoset_subgames(pl, iset) = index;
+    }
+  }   
+
+}
 
 EFLiapBySubgame::~EFLiapBySubgame()   { }
 
