@@ -7,7 +7,7 @@
 #include <math.h>
 #include "ngobit.h"
 #include "gfunct.h"
-
+#include "rational.h"
 //-------------------------------------------------------------------------
 //                     NFGobitParams<T>: Member functions
 //-------------------------------------------------------------------------
@@ -143,7 +143,7 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, v, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-      dv = log(v(pl, 1)) - log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+			dv =(T)log(v(pl, 1)) - (T)log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
 //      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)              x += dv / v(pl, 1);
@@ -167,7 +167,7 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, p, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-      z = log(p(pl, 1)) - log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+			z = (T)log(p(pl, 1)) - (T)log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
 //      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
@@ -253,3 +253,8 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 TEMPLATE class NFGobitParams<double>;
 TEMPLATE class NFGobitFunc<double>;
 TEMPLATE class NFGobitModule<double>;
+
+TEMPLATE class NFGobitParams<gRational>;
+TEMPLATE class NFGobitFunc<gRational>;
+TEMPLATE class NFGobitModule<gRational>;
+
