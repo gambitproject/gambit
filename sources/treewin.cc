@@ -60,9 +60,9 @@ wxCursor *scissor_cursor;
 //----------------------------------------------------------------------
 
 TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
-    : TreeRender(frame_, this, node_list, (const Infoset *) hilight_infoset,
-		 (const Infoset *) hilight_infoset1,
-                 (const Node *) mark_node, subgame_node, draw_settings),
+    : TreeRender(frame_, this, node_list, (const Infoset *&) hilight_infoset,
+		 (const Infoset *&) hilight_infoset1,
+                 (const Node *&) mark_node, subgame_node, draw_settings),
       ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
 {
     // Set the cursor to the root node
