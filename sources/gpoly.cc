@@ -3,6 +3,9 @@
 //# $Id$
 //#
 
+#include "glist.imp"
+#include "garray.imp"
+#include "gblock.imp"
 #include "gpoly.imp"
 #include "rational.h"
 
@@ -13,8 +16,23 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
+TEMPLATE class gArray< gPoly< int > * >;
+TEMPLATE class gArray< gPoly< long > * >;
+TEMPLATE class gArray< gPoly< double > * >;
+TEMPLATE class gArray< gPoly< gRational > *>;
+TEMPLATE class gArray< Variable * >;
 
-// ----Instantiation of gPoly and gPolyFamily to integer for now
+TEMPLATE class gBlock<Variable *>;
+
+
+TEMPLATE class gList< gPoly<int> * >;
+TEMPLATE class gNode< gPoly<int> * >;
+TEMPLATE class gList< gPoly<gRational> * >;
+TEMPLATE class gNode< gPoly<gRational> * >;
+TEMPLATE class gList< gPoly<double> * >;
+TEMPLATE class gNode< gPoly<double> * >;
+TEMPLATE class gList< gPoly<long> * >;
+TEMPLATE class gNode< gPoly<long> * >;
 
 TEMPLATE class gPoly<int>;
 TEMPLATE class gPolyFamily<int>;
@@ -47,6 +65,7 @@ TEMPLATE struct term<long>;
 TEMPLATE gPoly<long> operator*(const long val, const gPoly<long> poly);
 TEMPLATE gPoly<long> operator*(const gPoly<long> poly, const long val);
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<long> &y);
+
 
 
 
