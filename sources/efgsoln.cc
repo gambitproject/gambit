@@ -37,309 +37,279 @@ char *NodeSolnShow::feature_names[NUM_FEATURES+1] =
 #define BRANCHVALUE     8
 
 NodeSolnShow::NodeSolnShow(int num_players, const EfgShow *parent_)
-    : SpreadSheet3D(2, 1, 1, "Inspect Node", (wxFrame *)parent_, 0), 
-      parent(parent_),
-      features(NUM_FEATURES)
-
+  : SpreadSheet3D(2, 1, 1, "Inspect Node", (wxFrame *)parent_, 0), 
+    parent(parent_), features(NUM_FEATURES)
 {
-    // Read in the defaults
-    char *defaults_file = "gambit.ini";
-    int i;
+  // Read in the defaults
+  char *defaults_file = "gambit.ini";
 
-    for (i = 1; i <= NUM_FEATURES; i++)
-        wxGetResource(NODESOLN_SECTION, feature_names[i], &features[i], defaults_file);
+  for (int i = 1; i <= NUM_FEATURES; i++)
+    wxGetResource(NODESOLN_SECTION, feature_names[i], &features[i], 
+		  defaults_file);
 
-    int rows = 0;
+  int rows = 0;
 
-    for (i = 1; i <= NUM_FEATURES; i++) 
-    {
-        if (features[i]) 
-            rows++;
-    }
+  for (int i = 1; i <= NUM_FEATURES; i++) { 
+    if (features[i]) 
+      rows++;
+  }
 
-    int width = (features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
-        (2+ToTextPrecision());
+  int width = ((features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
+	       (2+ToTextPrecision()));
 
-    SetEditable(FALSE);
-    SetDimensions(rows, 1);
-    DrawSettings()->SetColWidth(width);
-    DrawSettings()->SetLabels(S_LABEL_ROW);
+  SetEditable(FALSE);
+  SetDimensions(rows, 1);
+  DrawSettings()->SetColWidth(width);
+  DrawSettings()->SetLabels(S_LABEL_ROW);
 
-    // Give the frame an icon
-    wxIcon *frame_icon;
-
+  // Give the frame an icon
 #ifdef wx_msw
-    frame_icon = new wxIcon("efg_icn");
+  wxIcon *frame_icon = new wxIcon("efg_icn");
 #else
 #include "efg.xbm"
-    frame_icon = new wxIcon(efg_bits, efg_width, efg_height);
+  wxIcon *frame_icon = new wxIcon(efg_bits, efg_width, efg_height);
 #endif
 
-    SetIcon(frame_icon);
+  SetIcon(frame_icon);
 
-    SetMenuBar(MakeMenuBar(0));
+  SetMenuBar(MakeMenuBar(0));
 
-    for (i = 1; i <= NUM_FEATURES; i++)
-    {
-        if (features[i]) 
-            SetLabelRow(Pos(i), feature_names[i]);
-    }
+  for (int i = 1; i <= NUM_FEATURES; i++) {
+    if (features[i]) 
+      SetLabelRow(Pos(i), feature_names[i]);
+  }
 
-    Redraw();
-    Show(TRUE);
+  Redraw();
+  Show(TRUE);
 }
 
 
 wxMenuBar *NodeSolnShow::MakeMenuBar(long menus)
 {
-    assert(menus == 0); // we do not use menus and expect it to be 0
+  assert(menus == 0); // we do not use menus and expect it to be 0
 
-    wxMenu *file_menu = new wxMenu;
-    file_menu->Append(OUTPUT_MENU, "Out&put", "Output to any device");
-    wxMenu *display_menu = new wxMenu;
-    display_menu->Append(OPTIONS_MENU, "&Options", "Configure display options");
-    display_menu->Append(EFG_NODE_INSP_OPTIONS, "&Features", "Set Extra Features");
-    wxMenu *help_menu = new wxMenu;
-    help_menu->Append(HELP_MENU_ABOUT, "&About");
-    help_menu->Append(HELP_MENU_CONTENTS, "&Contents");
-    wxMenuBar *tmp_menubar = new wxMenuBar;
-    tmp_menubar->Append(file_menu, "&File");
-    tmp_menubar->Append(display_menu, "&Display");
-    tmp_menubar->Append(help_menu, "&Help");
-    return tmp_menubar;
+  wxMenu *file_menu = new wxMenu;
+  file_menu->Append(OUTPUT_MENU, "Out&put", "Output to any device");
+  wxMenu *display_menu = new wxMenu;
+  display_menu->Append(OPTIONS_MENU, "&Options", "Configure display options");
+  display_menu->Append(EFG_NODE_INSP_OPTIONS, "&Features",
+		       "Set Extra Features");
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(HELP_MENU_ABOUT, "&About");
+  help_menu->Append(HELP_MENU_CONTENTS, "&Contents");
+  wxMenuBar *tmp_menubar = new wxMenuBar;
+  tmp_menubar->Append(file_menu, "&File");
+  tmp_menubar->Append(display_menu, "&Display");
+  tmp_menubar->Append(help_menu, "&Help");
+  return tmp_menubar;
 }
 
 
 int NodeSolnShow::Pos(int feature)
 {
-    int pos = 0;
+  int pos = 0;
 
-    for (int i = 1; i <= feature; i++) 
-    {
-        if (features[i]) 
-            pos++;
-    }
+  for (int i = 1; i <= feature; i++) { 
+    if (features[i]) 
+      pos++;
+  }
 
-    if (pos == 0) 
-        pos = 1;
+  if (pos == 0) 
+    pos = 1;
 
-    return pos;
+  return pos;
 }
 
 
 void NodeSolnShow::SetOptions(void)
 {
-    gArray<Bool> new_features(features);
-    MyDialogBox *options_dialog = new MyDialogBox(this, "Node Inspect Options");
+  gArray<Bool> new_features(features);
+  MyDialogBox *options_dialog = new MyDialogBox(this, "Node Inspect Options");
 
-    for (int i = 1; i <= NUM_FEATURES; i++)
-    {
-        options_dialog->Add(wxMakeFormBool(feature_names[i], &new_features[i]));
+  for (int i = 1; i <= NUM_FEATURES; i++) {
+    options_dialog->Add(wxMakeFormBool(feature_names[i], &new_features[i]));
 
-        if (i % 2 == 0) 
-            options_dialog->Add(wxMakeFormNewLine());
+    if (i % 2 == 0) 
+      options_dialog->Add(wxMakeFormNewLine());
+  }
+
+  options_dialog->Add(wxMakeFormNewLine());
+  options_dialog->Add(wxMakeFormNewLine());
+  Bool save_def = TRUE;
+  options_dialog->Add(wxMakeFormBool("Save Default", &save_def));
+  options_dialog->Go();
+
+  if (options_dialog->Completed() == wxOK) {
+    // check if we turned anything off
+    for (int i = NUM_FEATURES; i >= 1; i--) {
+      if (features[i] && !new_features[i]) {
+	DelRow(Pos(i));
+	features[i] = 0;
+      }
     }
 
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormNewLine());
-    Bool save_def = TRUE;
-    options_dialog->Add(wxMakeFormBool("Save Default", &save_def));
-    options_dialog->Go();
-
-    if (options_dialog->Completed() == wxOK)
-    {
-        // check if we turned anything off
-        int i;
-
-        for (i = NUM_FEATURES; i >= 1; i--)
-        {
-            if (features[i] && !new_features[i])
-            {
-                DelRow(Pos(i));
-                features[i] = 0;
-            }
-        }
-
-        // now check if we turned anything on
-        for (i = 1; i <= NUM_FEATURES; i++)
-        {
-            if (new_features[i] && !features[i])
-            {
-                AddRow(Pos(i)+1);
-                SetLabelRow(Pos(i)+1, feature_names[i]);
-                features[i] = 1;
-            }
-        }
-
-        // save as default, if desired
-        if (save_def)
-        {
-            for (i = 1; i <= NUM_FEATURES; i++)
-                wxWriteResource(NODESOLN_SECTION, feature_names[i], 
-                                features[i], "gambit.ini");
-        }
-
-        Redraw();
+    // now check if we turned anything on
+    for (int i = 1; i <= NUM_FEATURES; i++) {
+      if (new_features[i] && !features[i]) {
+	AddRow(Pos(i)+1);
+	SetLabelRow(Pos(i)+1, feature_names[i]);
+	features[i] = 1;
+      }
     }
+
+    // save as default, if desired
+    if (save_def) {
+      for (int i = 1; i <= NUM_FEATURES; i++)
+	wxWriteResource(NODESOLN_SECTION, feature_names[i], 
+			features[i], "gambit.ini");
+    }
+
+    Redraw();
+  }
 }
 
 
 void NodeSolnShow::OnMenuCommand(int id)
 {
-    switch(id)
-    {
-    case EFG_NODE_INSP_OPTIONS: 
-        SetOptions();
-        break;
+  switch (id) {
+  case EFG_NODE_INSP_OPTIONS: 
+    SetOptions();
+    break;
 
-    default: 
-        SpreadSheet3D::OnMenuCommand(id);
-        break;
-    }
+  default: 
+    SpreadSheet3D::OnMenuCommand(id);
+    break;
+  }
 }
 
 
 // Overide help system
 void NodeSolnShow::OnHelp(int help_type)
 {
-    if (!help_type) // contents
-        wxHelpContents(EFG_INSPECT_HELP);
-    else
-        wxHelpAbout();
+  if (!help_type) // contents
+    wxHelpContents(EFG_INSPECT_HELP);
+  else
+    wxHelpAbout();
 }
 
-
-void NodeSolnShow::Set(const Node *n)
+void NodeSolnShow::Set(const Node *n) 
 {
-    cur_n = n;
-
-    if (!n) // no data available
-    {
-        for (int i = 1; i <= NUM_FEATURES; i++) 
-        {
-            if (features[i]) 
-                SetCell(Pos(i), 1, "N/A");
-        }
-
-        return;
+  cur_n = n;
+  
+  if (!n) { // no data available
+    for (int i = 1; i <= NUM_FEATURES; i++) { 
+      if (features[i]) 
+	SetCell(Pos(i), 1, "N/A");
     }
 
-    // if we got here, the node is valid.
-    gText tmpstr;
+    return;
+  }
 
-    for (int feature = 1; feature <= NUM_FEATURES; feature++)
-    {
-        if (features[feature])
-        {
-            switch(feature)
-            {
-            case INFOSET:
-                if (!n->GetPlayer())
-                {
-                    tmpstr = "TERMINAL";
-                }
-                else
-                {
-                    if (n->GetPlayer()->IsChance())
-                        tmpstr = "CHANCE";
-                    else
-                        tmpstr = "("+ToText(n->GetPlayer()->GetNumber())+","+
-                            ToText(n->GetInfoset()->GetNumber())+")";
-                }
+  // if we got here, the node is valid.
+  gText tmpstr;
 
-                SetCell(Pos(feature), 1, tmpstr);
-                break;
+  for (int feature = 1; feature <= NUM_FEATURES; feature++) {
+    if (features[feature]) {
+      try {
+	switch(feature) {
+	case INFOSET:
+	  if (!n->GetPlayer()) {
+	    tmpstr = "TERMINAL";
+	  }
+	  else {
+	    if (n->GetPlayer()->IsChance())
+	      tmpstr = "CHANCE";
+	    else
+	      tmpstr = ("(" + ToText(n->GetPlayer()->GetNumber()) + "," +
+			ToText(n->GetInfoset()->GetNumber()) + ")");
+	  }
+	  
+	  SetCell(Pos(feature), 1, tmpstr);
+	  break;
 
-            case REALIZPROB: 
-                SetCell(Pos(feature), 1, parent->AsString(tRealizProb, n));
-                break;
+	case REALIZPROB: 
+	  SetCell(Pos(feature), 1, parent->AsString(tRealizProb, n));
+	  break;
+	  
+	case ISETPROB: 
+	  SetCell(Pos(feature), 1, parent->AsString(tIsetProb, n));
+	  break;
 
-            case ISETPROB: 
-                SetCell(Pos(feature), 1, parent->AsString(tIsetProb, n));
-                break;
+	case BELIEFPROB: 
+	  SetCell(Pos(feature), 1, parent->AsString(tBeliefProb, n));
+	  break;
 
-            case BELIEFPROB: 
-                SetCell(Pos(feature), 1, parent->AsString(tBeliefProb, n));
-                break;
+	case NODEVALUE:   
+	  SetCell(Pos(feature), 1, parent->AsString(tNodeValue, n));
+	  break;
 
-            case NODEVALUE:   
-                SetCell(Pos(feature), 1, parent->AsString(tNodeValue, n));
-                break;
+	case ISETVALUE:   
+	  SetCell(Pos(feature), 1, parent->AsString(tIsetValue, n));
+	  break;
+	
+	case BRANCHPROB:  {  // figure out which branch # I am.
+	  Node *p = n->GetParent();
+	  
+	  if (p) {
+	    int branch = 1;
 
-            case ISETVALUE:   
-                SetCell(Pos(feature), 1, parent->AsString(tIsetValue, n));
-                break;
+	    for (int i = 1; i <= p->NumChildren(); i++) {
+	      if (p->GetChild(i) == n) 
+		branch = i;
+	    }
 
-            case BRANCHPROB:   // figure out which branch # I am.
-            {
-                Node *p = n->GetParent();
+	    SetCell(Pos(feature), 1, parent->AsString(tBranchProb, p, branch));
+	  }
+	  else {
+	    SetCell(Pos(feature), 1, ToText(1));
+	  }
+	
+	  break;
+	}
+	
+	case BRANCHVALUE: {
+	  Node *p = n->GetParent();
+	  
+	  if (p) {
+	    int branch = 1;
+	    
+	    for (int i = 1; i <= p->NumChildren(); i++) {
+	      if (p->GetChild(i) == n) 
+		branch = i;
+	    }
 
-                if (p)
-                {
-                    int branch = 1;
+	    SetCell(Pos(feature), 1, parent->AsString(tBranchVal, p, branch));
+	  }
+	  else {
+	    SetCell(Pos(feature), 1, "N/A");
+	  }
+	
+	  break;
+	}
 
-                    for (int i = 1; i <= p->NumChildren(); i++)
-                    {
-                        if (p->GetChild(i) == n) 
-                            branch = i;
-                    }
-
-                    SetCell(Pos(feature), 1, parent->AsString(tBranchProb, p, branch));
-                }
-                else
-                {
-                    SetCell(Pos(feature), 1, ToText(1));
-                }
-
-                break;
-            }
-
-            case BRANCHVALUE:
-            {
-                Node *p = n->GetParent();
-
-                if (p)
-                {
-                    int branch = 1;
-
-                    for (int i = 1; i <= p->NumChildren(); i++)
-                    {
-                        if (p->GetChild(i) == n) 
-                            branch = i;
-                    }
-
-                    SetCell(Pos(feature), 1, parent->AsString(tBranchVal, p, branch));
-                }
-                else
-                {
-                    SetCell(Pos(feature), 1, "N/A");
-                }
-
-                break;
-            }
-
-            default: 
-                assert(0 && "Invalid feature for node solndisp");
-                break;
-            }
-        }
+	default: 
+	  assert(0 && "Invalid feature for node solndisp");
+	  break;
+	}
+      }
+      catch (gNumber::DivideByZero &) { }
     }
-
-    Repaint();
+  }
+  
+  Repaint();
 }
 
 
 void NodeSolnShow::OnOptionsChanged(unsigned int options)
 {
-    if (options&S_PREC_CHANGED)
-    {
-        Set(cur_n);
-        int width = (features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
-            (2+ToTextPrecision());
-        DrawSettings()->SetColWidth(width);
-        Resize();
-        Repaint();
-    }
+  if (options & S_PREC_CHANGED) {
+    Set(cur_n);
+    int width = ((features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
+		 (2+ToTextPrecision()));
+    DrawSettings()->SetColWidth(width);
+    Resize();
+    Repaint();
+  }
 }
 
 

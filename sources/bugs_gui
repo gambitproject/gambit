@@ -228,17 +228,6 @@ these problems:
 
 //------------------------------
 
-Bug D23: Problems with Inspect Cursor dialog. 
-
-Load coord2ts.efg Run Solve->Standard->AllNash. Do
-Inspect->Info->InspectCursor.  Get Internal error in Gambit, Divide by
-zero in gNumber.  Dismiss this, and move cursor in tree window.  The
-gui crashes.  This seems to be a problem in the first solution found,
-which is incomplete, as it does not reach the subgame, and no
-strategies are specified there.
-
-//------------------------------
-
 Bug D25: Problems with editing. 
 
 Edit mixed solution from the NF solution display.  The editor does not
