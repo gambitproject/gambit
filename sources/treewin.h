@@ -6,7 +6,8 @@
 
 #ifndef TREEWINDOW_H
 #define TREEWINDOW_H
-#include "gblock.h"
+#include "garray.h"
+#include "glist.h"
 #include "twiniter.h"
 #include "twflash.h"
 #include "treedraw.h"
@@ -18,35 +19,26 @@ typedef struct NODEENTRY {
 		int nums;				// sum of infosets previous to this level
 		int has_children;	// how many children this node has
 		int child_number;	// what branch # is this node from the parent
-		Node n;
+		const Node *n;
 		NODEENTRY *parent;
-}  NodeEntry;
+} NodeEntry;
 
-template <class T> class ExtensiveShow;
+class BaseExtensiveShow;
 
-class BaseTreeWindow
+class BaseTreeWindow: public wxCanvas
 {
-public:
-	virtual void node_outcome(int out=0) =0;
-	virtual void tree_outcomes(int out=0) =0;
-	virtual void OnPaint(void) =0;
-};
-
-template <class T>
-class TreeWindow : public BaseTreeWindow, public wxCanvas
-{
-		// Private variables
-		ExtForm<T> *the_problem;
-		int			subgame;							// which subgame I am.  1 for root
-		ExtensiveShow<T> *frame;			// parent frame
-		Node mark_node,old_mark_node;	// Used in mark/goto node operations
-		TreeDrawSettings draw_settings;	// Stores drawing parameters
-		TreeWinIter *iterator;				// Used to process cursor keys
-		TreeNodeCursor *flasher;			// Used to flash the cursor
-		wxList *node_list;						// Data for display coordinates of nodes
-		Bool		nodes_changed;    		// Used to determine if a node_list recalc
-		Bool		infosets_changed;			// is needed
+private:
+	BaseExtensiveShow	*frame;
+	BaseExtForm		&ef;
+	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
+	TreeNodeCursor *flasher;			// Used to flash the cursor
+	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
+	Bool		nodes_changed;    		// Used to determine if a node_list recalc
+	Bool		infosets_changed;			// is needed
+	Bool		need_clear;						// Do we need to clear the screen?
 #ifdef SUBGAMES
+	// Subgames are no longer implemented, but the code is in there, just in case
+	int			subgame;							// which subgame I am.  1 for root
 		typedef struct SUBGAMESTRUCT{
 		friend gOutput &operator<<(gOutput &op,const SUBGAMESTRUCT &S);
 										int num;ExtensiveShow<T> *win;
@@ -64,92 +56,130 @@ class TreeWindow : public BaseTreeWindow, public wxCanvas
 											{return (num!=S.num);}
 										} subgame_struct;
 
-		gBlock<subgame_struct>	open_subgames;			// Used to keep track of which subgames are already open
+		gArray<subgame_struct>	open_subgames;			// Used to keep track of which subgames are already open
 #endif
+
+		// Private Functions
+		void	RenderLabels(wxDC &dc,NodeEntry *entry);
+		void 	RenderSubtree(wxDC &dc);
+		int 	FillTable(const Node *n, int level);
+		void 	ProcessCursor(void);
+		void 	ProcessClick(int x,int y);
+		NodeEntry *GetNodeEntry(const Node *n);
+		NodeEntry *NextInfoset(const NodeEntry * const e);
+		void	FillInfosetTable(const Node *n);
+		void	CheckInfosetEntry(NodeEntry *e);
+		void	UpdateTableInfosets(void);
+		void	UpdateTableParents(void);
+	// These functions are type dependent and are defined in TreeWindow
+		virtual double 	ProbAsDouble(const Node *n,int action) { }
+		virtual gString	ProbAsString(const Node *n,int action) { }
+		virtual gString	OutcomeAsString(const Node *n) { }
+protected:
+	Node	 *cursor;										// Used to process cursor keys, stores current pos
+	TreeDrawSettings draw_settings;		// Stores drawing parameters
+public:
+	// Constructor
+  BaseTreeWindow(const BaseTreeWindow &bt);
+	BaseTreeWindow(BaseExtForm &ef_,BaseExtensiveShow *frame,int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
+	// Destructor
+	~BaseTreeWindow(void);
+	// Windows event handlers
+	void OnPaint(void);
+	void OnEvent(wxMouseEvent& event);
+	void OnChar(wxKeyEvent& ch);
+
+
+	// Menu event handlers (these are mostly in treewin1.cc)
+	void node_add(void);
+	void node_game(void);
+	void node_label(void);
+	void node_delete(void);
+	void node_set_mark(void);
+	void node_goto_mark(void);
+#ifdef SUBGAMES
+	void node_subgame(int _game);
+#endif
+
+	void branch_label(void);
+	void branch_insert(void);
+	void branch_delete(void);
+	void tree_delete(void);
+	void tree_copy(void);
+	void tree_move(void);
+	void tree_label(void);
+	void tree_players(void);
+#ifdef SUBGAMES
+	void tree_subgames(void);
+	void tree_subgame_make(void);
+	void tree_subgame_open(int _game);
+	void tree_subgame_delete(int _game);
+	void tree_subgame_name(int _game,gString _label);
+#endif
+
+	void infoset_merge(void);
+	void infoset_break(void);
+	void infoset_join(void);
+	void edit_outcome(void);
+	void display_legends(void);
+	void display_options(void);
+	void display_colors(void);
+	void display_save_options(Bool def=TRUE);
+	void display_load_options(Bool def=TRUE);
+	void display_set_zoom(float z=-1);
+	float display_get_zoom(void);
+
+	void 	output(void);
+	void	print_eps(void);			// output to postscript file
+	void	print(void);					// output to printer (WIN3.1 only)
+	void	print_mf(void);				// copy to clipboard (WIN3.1 only)
+
+// These menu handlers are type dependent and are defined in TreeWindow
+	virtual void	file_save(void) =0;
+	virtual void node_probs(void) =0;
+	virtual void node_outcome(const gString out_name) =0;
+	virtual void tree_outcomes(const gString out_name=gString()) =0;
+
+	gString Title(void) const;
+
+	void Render(wxDC &dc);
+};
+
+template <class T> class ExtensiveShow;
+
+template <class T>
+class TreeWindow : public BaseTreeWindow
+{
+		// Private variables
+		ExtForm<T> &ef;
+		ExtensiveShow<T> *frame;			// parent frame
 		// The copy/assignment operators are private since they are NEVER
 		// used or implemented.  Perhaps later...
 		TreeWindow(const TreeWindow<T> &);
 		void operator=(const TreeWindow<T> &);
-		// Private Functions
-		void	RenderLabels(wxDC &dc,NodeEntry *entry);
-		void 	RenderSubtree(wxDC &dc);
-		int 	FillTable(const Node &n, int level);
-		void 	ProcessCursor(void);
-		void 	ProcessClick(int x,int y);
-		NodeEntry *GetNodeEntry(const Node &n);
-		NodeEntry *NextInfoset(NodeEntry *e);
-		void	FillInfosetTable(const Node &n);
-		void	CheckInfosetEntry(NodeEntry *e);
-		void	UpdateTableInfosets(void);
-		void	UpdateTableParents(void);
+
+		double 	ProbAsDouble(const Node *n,int action);
+		gString	ProbAsString(const Node *n,int action);
+		gString	OutcomeAsString(const Node *n);
 	public:
 		// Constructor
-		TreeWindow(ExtForm<T> *p,ExtensiveShow<T> *frame,int subgame=1,
+		TreeWindow(ExtForm<T> &ef_,ExtensiveShow<T> *frame,int subgame=1,
 							int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
 		// Destructor
 		~TreeWindow();
-		// Windows event handlers
-		void OnPaint(void);
-		void OnEvent(wxMouseEvent& event);
-		void OnChar(wxKeyEvent& ch);
+
+		// Menu events
+		void tree_outcomes(const gString out_name=gString());
+		void node_probs(void);
+		void node_outcome(const gString out_name);
+		void file_save(void);
+
 #ifdef SUBGAMES
 		// Subgame handlers
 		void OpenSubgame(int num);
 		void CloseSubgame(int num);
 		void MakeSubgame(void);
 #endif
-		// Menu event handlers (these are mostly in treewin1.cc)
-		void node_add(void);
-		void node_outcome(int out);
-		void node_game(void);
-		void node_label(void);
-		void node_delete(void);
-		void node_insert(void);
-		void node_set_mark(void);
-		void node_goto_mark(void);
-		void node_probs(void);
-		void node_subgame(int _game);
-
-		void branch_label(void);
-		void branch_insert(void);
-		void branch_delete(void);
-
-		void tree_delete(void);
-		void tree_copy(void);
-		void tree_move(void);
-		void tree_label(void);
-		void tree_outcomes(int out=0);
-		void tree_players(void);
-		void tree_subgames(void);
-		void tree_subgame_make(void);
-		void tree_subgame_open(int _game);
-		void tree_subgame_delete(int _game);
-		void tree_subgame_name(int _game,gString _label);
-
-		void infoset_merge(void);
-		void infoset_break(void);
-		void infoset_join(void);
-
-		void edit_outcome(void);
-
-		void display_legends(void);
-		void display_options(void);
-		void display_save_options(Bool def=TRUE);
-		void display_load_options(Bool def=TRUE);
-		void display_set_zoom(float z=-1);
-		float display_get_zoom(void);
-
-		void 	output(void);
-		void	print_eps(void);			// output to postscript file
-		void	print(void);					// output to printer (WIN3.1 only)
-		void	print_mf(void);				// copy to clipboard (WIN3.1 only)
-
-		void	file_save(void);
-
-		gString Title(void) const;
-
-		void Render(wxDC &dc);
-
 };
 
 #endif   // TREEWINDOW_H

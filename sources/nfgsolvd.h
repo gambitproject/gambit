@@ -12,20 +12,22 @@ private:
 	wxCheckBox *extensive_box;
 	NfgSolutionT algorithm;
 	int result,extensive;
-	gBlock<int> solns;
+	gList<int> solns;
 public:
 // Constructor
-	NfgSolveParamsDialog(const gBlock<int> &got_solns,int have_efg,wxWindow *parent=0):solns(got_solns)
+	NfgSolveParamsDialog(const gList<int> &got_solns,int have_efg,wxWindow *parent=0):solns(got_solns)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 		char *algorithm_list[NFG_NUM_SOLUTIONS];
 		algorithm_list[NFG_PURENASH_SOLUTION]="Pure Nash";
 		algorithm_list[NFG_LEMKE_SOLUTION]="Lemke";
-		algorithm_list[NFG_LYAPUNOV_SOLUTION]="Lyapunov";
+		algorithm_list[NFG_NLIAP_SOLUTION]="Lyapunov";
 		algorithm_list[NFG_ELIMDOM_SOLUTION]="ElimDom";
 		algorithm_list[NFG_GRID_SOLUTION]="GridSolve";
+		algorithm_list[NFG_NGOBIT_SOLUTION]="Gobit";
+    algorithm_list[NFG_SIMPDIV_SOLUTION]="Simpdiv";
 		algorithm_list[NFG_ALL_SOLUTION]="All";
-		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,6,algorithm_list,2);
+		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,NFG_NUM_SOLUTIONS,algorithm_list,2);
 		algorithm_box->SetClientData((char *)this);
 		d->NewLine();
 		extensive_box=new wxCheckBox(d,0,"Extensive Form");

@@ -85,7 +85,7 @@ delete [] file_name;
 }
 
 // PlayerColorDialog: allows the user to change player colors graphically
-void GambitDrawSettings::PlayerColorDialog(gBlock<gString> &player_names)
+void GambitDrawSettings::PlayerColorDialog(gArray<gString> &player_names)
 {
 MyDialogBox *player_color_dialog=new MyDialogBox(0,"Edit Player Colors");
 // list of player names

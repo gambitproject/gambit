@@ -18,6 +18,6 @@ public:
 	void	SaveOptions(char *f=0);
 	void	LoadOptions(char *f);
 // GUI Set colors
-	void	PlayerColorDialog(gBlock<gString> &);
+	void	PlayerColorDialog(gArray<gString> &);
 };
 

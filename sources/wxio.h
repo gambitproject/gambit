@@ -68,7 +68,7 @@ public:
 			{ assert(f);  f->GetLineText(f->GetNumberOfLines(),line_buffer); ok=sscanf(line_buffer, "%lf", &x);  return *this; }
 		gInput& operator>>(float &x)
 			{ assert(f);  f->GetLineText(f->GetNumberOfLines(),line_buffer); ok=sscanf(line_buffer, "%f", &x);   return *this; }
-    gInput& operator>>(char *x)
+		gInput& operator>>(char *x)
 			{ assert(f);  f->GetLineText(f->GetNumberOfLines()-1,line_buffer); ok=sscanf(line_buffer, "%s", x);
 				return *this;
 			}
@@ -96,21 +96,24 @@ public:
 //
 class gWxOutput: public gOutput
 {
-  private:
+	private:
 	wxTextWindow	*f;
 	gWxIOType			__type;
 	char					buffer[100];
-  bool					ok;
-//
+	bool					ok;
+	int Width,Prec;
+	char Represent;
+
+	//
 // The copy constructor and assignment operator are declared private to
 // override the default meanings of these functions.  They are never
 // implemented.
 //+grp
 		gWxOutput(const gFileOutput &);
-    gWxOutput &operator=(const gFileOutput &);
+		gWxOutput &operator=(const gFileOutput &);
 //-grp
 
-  public:
+	public:
 //
 // The default constructor, initializing the instance to point to no stream
 //
@@ -121,6 +124,10 @@ class gWxOutput: public gOutput
 		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
 		frame->Show(TRUE);
 		ok=(f) ? true:false;
+		Width=0;
+		Prec=6;
+		Represent='f';
+
 		}
 //
 // Initialize the instance to point to the stream with a certain filename.
@@ -134,6 +141,9 @@ class gWxOutput: public gOutput
 		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
 		frame->Show(TRUE);
 		ok=(f) ? true:false;
+		Width=0;
+		Prec=6;
+		Represent='f';
 		}
 //
 // Close the window pointed to, if any.
@@ -161,6 +171,15 @@ class gWxOutput: public gOutput
 			{ assert(f);  sprintf(buffer, "%p", x); (*f)<<buffer; return *this; }
 
 		bool IsValid(void) const {return ok;}
+
+		// Functions to control the appearance of the output
+		int GetWidth(void) {return Width;}
+		gOutput &SetWidth(int w) {Width=w;return (*this);}
+		int GetPrec(void) {return Prec;}
+		gOutput &SetPrec(int p) {Prec=p;return (*this);}
+		gOutput &SetExpMode(void) {Represent = 'e';return *this;}
+		gOutput &SetFloatMode(void){Represent = 'f';return *this;}
+		char GetRepMode(void) {return Represent;}
 
 };
 

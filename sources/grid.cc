@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.cc -- Grid-search solution module
 //#
-//# $Id$
+//# @(#)grid.cc	1.14 5/2/95
 //#
 
 #ifdef __GNUG__
@@ -36,7 +36,6 @@ template <class T>
 int GridParams<T>::Ok(void) const
 {
 if (!pxifile) return 0;
-if (type==0 && delLam<=(T)1.0) return 0;
 return 1;
 }
 /*
@@ -61,35 +60,45 @@ GridSolveModule<T>::~GridSolveModule(void)
 
 // Output header
 template <class T>
-void GridSolveModule<T>::OutputHeader(void)
+void GridSolveModule<T>::OutputHeader(gOutput &out)
 {
 int st1=nf.NumStrats(1),st2=nf.NumStrats(2);
-*params.pxifile<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
-*params.pxifile<<"3 2 1\n";
+out<<"Dimensionality:\n";
+out<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
+
+out<<"Game:\n";
+out<<"3 2 1\n";
 for (int i=1;i<=st1;i++)
 {
 	for (int j=1;j<=st2;j++)
-		*params.pxifile<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
-	*params.pxifile<<'\n';
+		out<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
+	out<<'\n';
 }
-*params.pxifile<<"Settings:\n";
-*params.pxifile<<params.tol<<'\n'<<params.delp<<'\n'<<params.delLam<<'\n';
-*params.pxifile<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.type<<'\n';
+
+out<<"Settings:\n";
+out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
+out<<0<<'\n'<<1<<'\n'<<params.type<<'\n';
+
+out<<"Extra:\n";
+out<<1<<'\n'<<params.tol<<'\n'<<params.delp<<'\n';
+
+out<<"DataFormat:\n";
 int num_columns=st1+st2+2;
-*params.pxifile<<num_columns<<' '<<(num_columns-1)<<' '<<num_columns<<' ';
-for (i=1;i<=st1;i++) *params.pxifile<<i<<' ';
-for (i=1;i<=st2;i++) *params.pxifile<<(st1+i)<<' ';
-*params.pxifile<<'\n';
-*params.pxifile<<"Data:\n";
+out<<num_columns<<' '<<(num_columns-1)<<' '<<num_columns<<' ';
+for (i=1;i<=st1;i++) out<<i<<' ';
+for (i=1;i<=st2;i++) out<<(st1+i)<<' ';
+out<<'\n';
+
+out<<"Data:\n";
 }
 
 template <class T>
-void GridSolveModule<T>::OutputResult(T l, T dist,gVector<T> &q,gVector<T> &p)
+void GridSolveModule<T>::OutputResult(gOutput &out,T l, T dist,gVector<T> &q,gVector<T> &p)
 {
 	int i;
-	for (i = p.First(); i <= p.Last(); i++)  *params.pxifile << p[i] << ' ';
-	for (i = q.First(); i <= q.Last(); i++)  *params.pxifile << q[i] << ' ';
-	*params.pxifile << l << ' ' << dist << '\n';
+	for (i = p.First(); i <= p.Last(); i++)  out << p[i] << ' ';
+	for (i = q.First(); i <= q.Last(); i++)  out << q[i] << ' ';
+	out << l << ' ' << dist << '\n';
 }
 
 template <class T>
@@ -134,7 +143,11 @@ for (i = 1; i <= st1; i++)
 	if ((T)fabs(q[i]-q_calc[i])>=params.tol) ok=false;
 }
 
-if (ok) OutputResult(l,dist,q,p);
+if (ok)
+{
+	OutputResult(*params.pxifile,l,dist,q,p);
+	if (params.plev>1)	OutputResult(*params.outfile,l,dist,q,p);
+}
 
 return (ok);
 }
@@ -159,18 +172,19 @@ for (i=1;i<=st1;i++)
 
 // Initialize the output file
 gWatch timer;timer.Start();
-OutputHeader();
+OutputHeader(*params.pxifile);
+if (params.plev>0) OutputHeader(*params.outfile);
 // Create the ProbVector to give us all sets of probability values
 ProbVect<T> *pv=new ProbVect<T>(st1,(int)((T)1.0/params.delp+(T)0.5));
 int num_steps;
-if (params.type)
+if (params.type==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
-	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam));
+	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+(T)1));
 T l=params.minLam;
 for (int step=1;step<num_steps;step++)
 {
-	if (params.type) l=l+params.delLam; else l=l*params.delLam;
+	if (params.type==0)  l=l+params.delLam; else l=l*(params.delLam+(T)1);
 	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),l);
 	pv->Reset();
 	if (params.update_func) (*params.update_func)(step/num_steps);
@@ -178,6 +192,7 @@ for (int step=1;step<num_steps;step++)
 // Record the time taken and close the output file
 *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 delete pv;
+delete params.pxifile; 		// close the file;
 return 1;
 }
 
@@ -196,11 +211,14 @@ TEMPLATE class GridSolveModule<gRational>;
 TEMPLATE class GridParams<double>;
 TEMPLATE class GridParams<gRational>;
 
-#include "g2dblock.imp"
+#include "grarray.imp"
 
 TEMPLATE class PayoffClass<double>;
 TEMPLATE class PayoffClass<gRational>;
 
-TEMPLATE class g2DBlock<PayoffClass<double> >;
-TEMPLATE class g2DBlock<PayoffClass<gRational> >;
+TEMPLATE class gRectArray<PayoffClass<double> >;
+TEMPLATE class gRectArray<PayoffClass<gRational> >;
+
+gOutput &operator<<(gOutput &o, const PayoffClass<double> &p) {return o;}
+gOutput &operator<<(gOutput &o, const PayoffClass<gRational> &p) {return o;}
 

@@ -53,11 +53,52 @@ char *file_name=path_list.FindValidPath((char *)name);
 return  (file_name) ? copystring(file_name) : 0;
 }
 
+// OutputFile
+char *wxOutputFile(const char *name)
+{
+char	t_outfile[250];
+wxGetTempFileName(name,t_outfile);
+return copystring(FileNameFromPath(t_outfile));
+}
+
+
 //***************************************************************************
 //                         SOME DIALOGS FOR WXWIN
 // These are the commonly useful dialogs/forms that should be in the generic
 // wxwin dialog code.
 //***************************************************************************
+
+// The basic dialog w/ a form
+// The Form
+MyForm::MyForm(MyDialogBox *p) : wxForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM), parent(p)
+{ }
+void MyForm::OnOk(void)
+{parent->OnOk();}
+void MyForm::OnCancel(void)
+{parent->OnCancel();}
+//The dialog
+MyDialogBox::MyDialogBox(wxWindow *parent,char *title) :
+	wxDialogBox(parent,title,TRUE)
+{form=new MyForm(this); }
+MyDialogBox::~MyDialogBox(void)
+{
+// @@ delete form;
+}
+
+Bool MyDialogBox::Completed(void)
+{return completed;}
+MyForm *MyDialogBox::Form(void)
+{return form;}
+void MyDialogBox::Go(void)
+{form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
+void MyDialogBox::Go1(void)
+{Fit();Centre();Show(TRUE);}
+void 	MyDialogBox::OnOk(void)
+{completed=wxOK;Show(FALSE);}
+void 	MyDialogBox::OnCancel(void)
+{completed=wxCANCEL;Show(FALSE);}
+
+
 
 // Implementation for a font selector
 FontDialogBox::FontDialogBox(wxWindow *parent,wxFont *def) : MyDialogBox(parent,"Font Selection")
@@ -153,106 +194,6 @@ return NULL;
 FontDialogBox::~FontDialogBox(void)
 {}
 
-wxProgressIndicator::wxProgressIndicator(long total_time)
-{
-cur_value=0;
-dialog=new wxDialogBox(NULL,"Progress");
-wxFormItem *slider_item=wxMakeFormShort("Done %",&dummy,wxFORM_SLIDER,
-	 new wxList(wxMakeConstraintRange(0.0,100.0), 0),NULL,wxHORIZONTAL,140);
-form=new wxForm(wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);
-form->Add(slider_item);
-form->SetEditable(FALSE);
-form->AssociatePanel(dialog);
-slider=(wxSlider *)slider_item->GetPanelItem();
-done=FALSE;
-Start(total_time/100);
-dialog->Fit();
-dialog->Centre();
-dialog->Show(TRUE);
-}
-
-void wxProgressIndicator::Notify(void)
-{
-cur_value++;
-if (cur_value>=100)
-{
-	if (done==FALSE)
-  {
-		done=TRUE;
-		Stop();
-		dialog->Show(FALSE);
-		delete dialog;
-		delete form;
-  }
-}
-else
-	slider->SetValue(cur_value);
-
-}
-
-wxProgressIndicator::~wxProgressIndicator(void)
-{
-if (done==FALSE)
-{
-	done=TRUE;
-	Stop();
-	dialog->Show(FALSE);
-	delete dialog;
-	delete form;
-}
-}
-
-//************************** PROGRESS INDICATOR 1 *************************
-wxProgressIndicator1::wxProgressIndicator1(void)
-{
-cur_value=0;
-dummy=0;
-dialog=new wxDialogBox(NULL,"Progress");
-wxFormItem *slider_item=wxMakeFormShort("Done %",&dummy,wxFORM_SLIDER,
-	 new wxList(wxMakeConstraintRange(0.0,100.0), 0),NULL,wxHORIZONTAL,140);
-form=new wxForm(wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);
-form->Add(slider_item);
-form->SetEditable(FALSE);
-form->AssociatePanel(dialog);
-slider=(wxSlider *)slider_item->GetPanelItem();
-done=FALSE;
-dialog->Fit();
-dialog->Centre();
-dialog->Show(TRUE);
-}
-
-void wxProgressIndicator1::SetMax(int total)
-{
-	max=total;
-}
-void wxProgressIndicator1::Update(void)
-{
-cur_value++;
-if (cur_value>=max)
-{
-	if (done==FALSE)
-	{
-		done=TRUE;
-		dialog->Show(FALSE);
-		delete dialog;
-		delete form;
-	}
-}
-else
-	slider->SetValue((int)((float)cur_value/(float)max*100.0));
-
-}
-
-wxProgressIndicator1::~wxProgressIndicator1(void)
-{
-if (done==FALSE)
-{
-	done=TRUE;
-	dialog->Show(FALSE);
-	delete dialog;
-	delete form;
-}
-}
 
 //************************ OUTPUT DIALOG ***************************
 wxOutputDialogBox::wxOutputDialogBox(wxStringList *extra_media,wxWindow *parent)
@@ -293,7 +234,7 @@ Bool	IsAlphaNum(wxKeyEvent &ev)
 Bool	IsDelete(wxKeyEvent &ev)
 {
 return ((ev.KeyCode()==WXK_DELETE) ||
-				 (ev.KeyCode()==104 && ev.ControlDown()));
+				 (ev.KeyCode()==WXK_BACK));
 }
 
 

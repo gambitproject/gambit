@@ -5,7 +5,7 @@
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
 
-#include "gblock.h"
-#include "gblock.imp"
+#include "garray.h"
+#include "garray.imp"
 class wxChoice;
-TEMPLATE class gBlock<wxChoice *>;
+TEMPLATE class gArray<wxChoice *>;

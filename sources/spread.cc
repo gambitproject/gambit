@@ -5,7 +5,8 @@
 #include	"general.h"
 #include 	"wxmisc.h"
 #include	"spread.h"
-#include "g2dblock.h"
+#include 	"gconvert.h"
+
 //Global GDI objects
 wxPen		*grid_line_pen;
 wxPen		*grid_border_pen;
@@ -18,8 +19,10 @@ wxBrush *s_hilight_brush;
 gOutput &operator<<(gOutput &op,const SpreadSheet3D &s) {return op;}
 gOutput &operator<<(gOutput &op,const SpreadSheet &s) {return op;}
 gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {return op;}
-//inline gOutput &operator<<(gOutput &op,const gTuple<SpreadDataCell> &c) {return op;}
-//**************************** SPREAD SHEET DRAW SETTINGS ****************
+
+//****************************************************************************
+//*                              SPREAD SHEET DRAW SETTINGS                  *
+//****************************************************************************
 SpreadSheetDrawSettings::SpreadSheetDrawSettings(SpreadSheet3D *_parent,int cols):
 		col_width(cols)
 {
@@ -182,7 +185,11 @@ void SpreadSheetDrawSettings::UpdateFontSize(float x,float y)
 if (x<0 && y<0) parent->GetDataExtent(&x,&y);
 tw=(int)x;th=(int)y;
 }
-//**************************** SPREAD SHEET DATA SETTINGS ****************
+
+
+//****************************************************************************
+//*                             SPREAD SHEET DATA SETTINGS                   *
+//****************************************************************************
 void SpreadSheetDataSettings::SetAutoLabelStr(const gString s,int what)
 {
 switch (what)
@@ -205,7 +212,10 @@ switch (what)
 return label;
 }
 
-//**************************** SPREAD SHEET CANVAS ***********************
+//****************************************************************************
+//*                               SPREAD SHEET CANVAS                        *
+//****************************************************************************
+
 // Constructor
 SpreadSheetC::SpreadSheetC(SpreadSheet *_sheet,wxFrame *parent,int x,int y,int w,int h): wxCanvas(parent,x,y,w,h,0)
 {
@@ -330,8 +340,8 @@ if (ch==WXK_F3)
 {
 	if (top_frame->Editable())
 	{
-		if (((*sheet)[cell.row][cell.col].GetType()==gSpreadNum && IsNumeric(ev)) ||
-				((*sheet)[cell.row][cell.col].GetType()==gSpreadStr && IsAlphaNum(ev)))
+		gSpreadValType cell_type=sheet->GetType(cell.row,cell.col);
+		if ((cell_type==gSpreadNum && IsNumeric(ev)) ||	(cell_type==gSpreadStr && IsAlphaNum(ev)))
 		{
 			if (cell.editing==FALSE) cell.editing=TRUE;
 			cell.str+=ch;
@@ -405,11 +415,11 @@ void SpreadSheetC::DrawCell(wxDC &dc,int row,int col)
 {
 dc.SetFont(draw_settings->GetDataFont());
 dc.SetBackgroundMode(wxTRANSPARENT);
-if ((*sheet)[row][col].HiLighted())
+if (sheet->HiLighted(row,col))
 	{dc.SetBrush(s_hilight_brush);dc.SetPen(s_hilight_pen);}
 else
 	{dc.SetBrush(s_white_brush);dc.SetPen(s_white_pen);}
-if ((*sheet)[row][col].Bold())
+if (sheet->Bold(row,col))
 {
 	wxFont *cur=draw_settings->GetDataFont();
 	dc.SetFont(wxTheFontList->FindOrCreateFont(
@@ -544,73 +554,53 @@ if (device==wxMEDIA_PS)
 
 
 
-//************************ SPREAD SHEET ***********************************
+//****************************************************************************
+//*                               SPREAD SHEET                               *
+//****************************************************************************
+
 SpreadSheet::SpreadSheet(int _rows,int _cols,int _level,char *title,wxFrame *parent)
 {
-rows=_rows;cols=_cols;level=_level;
-data=gMatrix1<SpreadDataCell>(rows,cols);
-row_labels=gTuple<gString>(rows);
-col_labels=gTuple<gString>(cols);
-int h,w;
-parent->GetClientSize(&w,&h);
-sheet=new SpreadSheetC(this,parent,0,0,w,h-DEFAULT_BUTTON_SPACE);
-if (title)
-	label=title;
-else
-{
-	char tmp[20];
-	sprintf(tmp," : #%2d",level);
-	label=tmp;
-}
+Init(_rows,_cols,_level,title,parent);
 }
 
 void SpreadSheet::Init(int _rows,int _cols,int _level,char *title,wxFrame *parent)
 {
 rows=_rows;cols=_cols;level=_level;
-data=gMatrix1<SpreadDataCell>(rows,cols);
-row_labels=gTuple<gString>(rows);
-col_labels=gTuple<gString>(cols);
+data=gRectBlock<SpreadDataCell>(rows,cols);
+row_labels=gBlock<gString>(rows);
+col_labels=gBlock<gString>(cols);
 int h,w;
 parent->GetClientSize(&w,&h);
-sheet=new SpreadSheetC(this,parent,0,0,w,h-DEFAULT_BUTTON_SPACE);
-if (title)
-	label=title;
-else
-{
-	char tmp[20];
-	sprintf(tmp," : #%2d",level);
-	label=tmp;
-}
+sheet=new SpreadSheetC(this,parent,0,0,w,h-MIN_BUTTON_SPACE);
+if (title) label=title; else label=" : #"+ToString(level);
 }
 
 void SpreadSheet::Clear(void)
 {
 for (int i=1;i<=rows;i++)
 	for (int j=1;j<=cols;j++)
-		data[i][j].Clear();
+		data(i,j).Clear();
 }
 
 void SpreadSheet::AddRow(void)
 {
 int i;
 // add a new row to the matrix
-data.AddRow((const gBlock<SpreadDataCell>)gBlock<SpreadDataCell>(cols));
+data.AddRow((const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
 // Copy the cell types from the previous row
-for (i=1;i<=cols;i++) data[rows+1][i].SetType(data[rows][i].GetType());
+for (i=1;i<=cols;i++) data(rows+1,i).SetType(data(rows,i).GetType());
 // add a new entry to the row_labels
 rows++;
-row_labels.Expand(1);
-//if (active) sheet->OnPaint();
+row_labels.Append((const gString)gString());
 }
 
 void SpreadSheet::AddCol(void)
 {
 // add a new column to the matrix
-data.AddColumn((const gBlock<SpreadDataCell>)gBlock<SpreadDataCell>(rows));
+data.AddColumn((const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
 // add a new entry to the col_labels
 cols++;
-col_labels.Expand(1);
-//if (active) sheet->OnPaint();
+col_labels.Append((const gString)gString());
 }
 
 void SpreadSheet::DelRow(int row)
@@ -620,9 +610,8 @@ if (row==0) row=rows;
 // remove a row from the matrix
 data.RemoveRow(row);
 // remove an entry from the row_labels;
-row_labels.Contract(rows);
+row_labels.Remove(rows);
 rows--;
-//if (active) sheet->OnPaint();
 }
 
 void SpreadSheet::DelCol(int col)
@@ -632,9 +621,8 @@ if (col==0) col=cols;
 // remove a column from the matrix
 data.RemoveColumn(col);
 // remove an entry from the col_labels
-col_labels.Contract(cols);
+col_labels.Remove(cols);
 cols--;
-//if (active) sheet->OnPaint();
 }
 
 
@@ -643,12 +631,15 @@ void SpreadSheet::SetSize(int xs,int ys,int xe,int ye)
 sheet->SetSize(xs,ys,xe,ye);
 }
 
-//**************************** SPREAD SHEET 3D *****************************
+
+//****************************************************************************
+//*                           SPREAD SHEET 3D                                *
+//****************************************************************************
 SpreadSheet3D::SpreadSheet3D(int rows,int cols,int _levels,char *title,
 					wxFrame *parent,unsigned int _features,SpreadSheetDrawSettings *drs,
 					SpreadSheetDataSettings *dts):	wxFrame(parent,title)
 {
-assert(rows>0);assert(cols>0);assert(_levels>0);
+assert(rows>0 && cols>0 && _levels>0 && "SpreadSheet3D::Bad Dimensions");
 // Initialize some global GDI objects
 grid_line_pen=wxThePenList->FindOrCreatePen("BLACK",1,wxDOT);
 grid_border_pen=wxThePenList->FindOrCreatePen("BLUE",3,wxSOLID);
@@ -667,9 +658,9 @@ editable=TRUE;
 levels=_levels;
 label=title;
 features=_features;
-data=gList<SpreadSheet>(levels);
-// have to do this in two steps since arrays can not take constructors
-for (int i=1;i<=levels;i++) data[i].Init(rows,cols,i,NULL,this);
+// Create the levels,  must do in two steps since gList(int) is not defined
+for (int i=1;i<=levels;i++) data.Append((const SpreadSheet)SpreadSheet());
+for (i=1;i<=levels;i++) data[i].Init(rows,cols,i,0,this);
 // Turn on level #1
 cur_level=0;
 SetLevel(1);
@@ -689,7 +680,7 @@ if (features&ALL_BUTTONS) // Create the panel
 	panel_x=panel_y=0;
 	panel_new_line=FALSE;
 	GetClientSize(&w,&h);
-	panel=new wxPanel(this,0,h-DEFAULT_BUTTON_SPACE,w,DEFAULT_BUTTON_SPACE,wxBORDER);
+	panel=new wxPanel(this,0,h-MIN_BUTTON_SPACE,w,MIN_BUTTON_SPACE,wxBORDER);
 
 	if (levels>1) // create a slider to choose the active level
 	{
@@ -729,6 +720,7 @@ else
 	panel=0;
 	SetMenuBar(MakeMenuBar());
 }
+
 void SpreadSheet3D::OnMenuCommand(int id)
 {
 switch (id)
@@ -747,7 +739,7 @@ void SpreadSheet3D::OnSize(int _w,int _h)
 {
 int w,h;
 GetClientSize(&w, &h);
-panel->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
+if (panel) panel->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
 for (int i=1;i<=levels;i++) data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize());
 }
 
@@ -814,12 +806,12 @@ if (gs->Completed()==wxOK)
 	switch (rb->GetSelection())
 	{
 	case	0: parent->AddRow(); 		break;
-	case	1: parent->AddCol(); 		break;	
-	case	2: parent->AddLevel();	break;	
+	case	1: parent->AddCol(); 		break;
+	case	2: parent->AddLevel();	break;
 	case	3: parent->DelRow();		break;
 	case	4: parent->DelCol();		break;
-  case	5: parent->DelLevel();	break;
-  }
+	case	5: parent->DelLevel();	break;
+	}
 }
 delete gs;
 }
@@ -848,7 +840,6 @@ void SpreadSheet3D::AddLevel(void)
 data.Append(SpreadSheet());
 levels++;
 data[levels].Init(data[1].GetRows(),data[1].GetCols(),levels,NULL,this);
-//((wxWindow *)level_item)->Enable(FALSE);
 level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
 level_item->SetClientData((char *)this);
 Redraw();
@@ -867,8 +858,7 @@ assert(_l>0&&_l<=levels);
 if (cur_level) data[cur_level].SetActive(FALSE);
 cur_level=_l;
 data[cur_level].SetActive(TRUE);
-gString tmp=label+":"+data[cur_level].GetLabel();
-SetTitle(tmp);
+SetTitle(label+":"+data[cur_level].GetLabel());
 }
 
 void SpreadSheet3D::SetLabelRow(int row,const gString &s,int level)
@@ -920,6 +910,7 @@ data[cur_level].GetSize(&w,&h);
 for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 Panel()->Fit();Panel()->GetSize(&w1,&h1);
 w=max(w,w1);
+h1=max(h1,MIN_BUTTON_SPACE);
 DrawSettings()->SetPanelSize(h1);
 Panel()->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
 SetClientSize(w,h+DrawSettings()->PanelSize());

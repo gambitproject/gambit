@@ -29,30 +29,40 @@ const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH]=
 						 "KHAKI","SEA GREEN","DARK GREY"};
 #endif
 
-
+class MyDialogBox;
 class MyForm: public wxForm
 {
 private:
-	int _completed;
+	MyDialogBox *parent;
 public:
-	MyForm(int use_buttons,int place_buttons):wxForm(use_buttons,place_buttons) {};
-	void 	OnOk(void) {_completed=wxOK;wx_form_panel->Show(FALSE);}
-	void 	OnCancel(void) {_completed=wxCANCEL;wx_form_panel->Show(FALSE);}
-	int		Completed(void) {return _completed;}
+	MyForm(MyDialogBox *p);
+	void 	OnOk(void);
+	void 	OnCancel(void);
 };
 
 class MyDialogBox: public wxDialogBox
 {
 private:
 	MyForm *form;
+	Bool completed;
 public:
-	MyDialogBox(wxWindow *parent,char *title):wxDialogBox(parent,title,TRUE)
-	{ form=new MyForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);}
-  ~MyDialogBox(void){delete form;}
-	int			Completed(void) {return form->Completed();}
-	MyForm 	*Form(void) {return form;}
-	void	  Go(void)	{form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
-	void		Go1(void)	{Fit();Centre();Show(TRUE);}
+	// Constructor
+	MyDialogBox(wxWindow *parent,char *title);
+	// Destructor
+	~MyDialogBox(void);
+	// What was the result? wxOK/wxCANCEL
+	Bool		Completed(void);
+	// Access to private data, should be removed
+	MyForm 	*Form(void);
+	// Simulate a form here, w/ some additional features
+	wxFormItem *Add(wxFormItem *item,long id=-1) {form->Add(item,id);return item;}
+	void		AssociatePanel(void)	{form->AssociatePanel(this);}
+	// Choose go to start up the dialog right away (calls associate panel by itself)
+	void	  Go(void);
+  // Choose Go1 if you have already called associate panel
+	void		Go1(void);
+	virtual void 		OnOk(void);
+	virtual void 		OnCancel(void);
 };
 
 class FontDialogBox: public MyDialogBox
@@ -72,7 +82,7 @@ private:
 
 
 public:
-	FontDialogBox(wxWindow *parent,wxFont *def=NULL);
+	FontDialogBox(wxWindow *parent,wxFont *def=0);
 	~FontDialogBox(void);
 
 	int 		FontName(void) {return f_name;}
@@ -98,40 +108,6 @@ public:
 	wxOutputDialogBox(wxStringList *extra_media=0,wxWindow *parent=0);
 	int GetSelection();
 	int GetOption();
-};
-
-
-//***************************** Progress Indicator ***********************
-class wxProgressIndicator:public wxTimer
-{
-private:
-	wxDialogBox *dialog;
-	wxForm *form;
-	wxSlider *slider;
-	int			cur_value;
-	int 		dummy;
-  Bool		done;
-public:
-	wxProgressIndicator(long total_time);
-	~wxProgressIndicator(void);
-	void Notify(void);
-};
-
-//***************************** Progress Indicator  1 *********************
-class wxProgressIndicator1
-{
-private:
-	wxDialogBox *dialog;
-	wxForm *form;
-	wxSlider *slider;
-	int			cur_value,max;
-	int 		dummy;
-  Bool		done;
-public:
-	wxProgressIndicator1(void);
-	~wxProgressIndicator1(void);
-	void	SetMax(int total);
-	void	Update(void);
 };
 
 // Returns the position of s in the list l.  This is useful for finding
@@ -162,4 +138,8 @@ void gDrawText(wxDC &dc,const gString &s,float x,float y);
 // FindFile: finds the specified file in the path.  User deletes the
 // result
 char *wxFindFile(const char *name);
+
+// OutputFile(base): returns a filename of the form baseXXX.out where XXX are consequtive
+// numbers in this dir.
+char *wxOutputFile(const char *name);
 #endif //WXMISC_H

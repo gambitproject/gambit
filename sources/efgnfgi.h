@@ -1,5 +1,5 @@
 //********************************************************************
-// $Id$
+// @(#)efgnfgi.h	1.1 5/1/95
 // This header defines an interface between the normal and extensive
 // form parts of the Gambit program to facilitate the sharing of the
 // solutions between the two modules.  The top-level classes of both
@@ -15,8 +15,8 @@
 #ifndef EFGNFGI_H
 #define EFGNFGI_H
 
-#include "gpvector.h"
-#include "gdpvect.h"
+#include "behav.h"
+#include "mixed.h"
 typedef enum {gNONE=0,gNFG,gEFG} InterfaceTypeT;
 template <class T> class NormalForm;
 template <class T> class ExtForm;
@@ -45,10 +45,10 @@ public:
 	EfgNfgInterface<T> *Interface(void) {return inter;}
 	int InterfaceOk(void) {return (inter) ? 1 : 0;}
 	void InterfaceSet(EfgNfgInterface<T> *i) {inter=i;}
-// Solution passing
-	virtual void SolutionToEfg(const gDPVector<T> &s)
+// Solution passing. set controls if the solution just sent will be displayed now.
+	virtual void SolutionToEfg(const BehavProfile<T> &s,bool set=false)
 		{assert(type==gNFG); inter->SolutionToEfg(s);}
-	virtual void SolutionToNfg(const gPVector<T> &s)
+	virtual void SolutionToNfg(const MixedProfile<T> &s,bool set=false)
 		{assert(type==gEFG); inter->SolutionToNfg(s);}
 // Getting at the underlying object
 	virtual const ExtForm<T> *InterfaceObjectEfg(void)

@@ -9,9 +9,9 @@
 // display only/disable editing by setting Editable attribute.  The labeling
 // of rows and columns is possible through the use of LabelRow/Col functions
 // or through the use of the AutoLabel feature.  The spreadsheet can be set
-// to allow edition of rows, columns, levels through the SetChage funnction.  A row
+// to allow addition of rows, columns, levels through the SetChange funnction.  A row
 // can be added at the end of the matrix by pressing F2 with the
-// hilighed cell on the bottom row.  A column is added using F3. A level by F4
+// hilighed cell on the bottom row.  A column is added using F3. A level by F4.
 
 // The control of the various features of the spreadsheet can be
 // accomplished using either the menu bar, buttons or a combination of
@@ -56,8 +56,8 @@
 #endif
 
 #include "glist.h"
-#include "gtuple.h"
-#include "gtuplem.h"
+#include "gblock.h"
+#include "grblock.h"
 #include "gstring.h"
 
 #define	XSTEPS							20    // Scroll steps horizontally
@@ -71,7 +71,7 @@
 #define MIN_SHEET_WIDTH			160
 #define	DEFAULT_ROW_HEIGHT	30
 #define	DEFAULT_COL_WIDTH		6
-#define DEFAULT_BUTTON_SPACE	40
+#define MIN_BUTTON_SPACE		60
 #define	ROW_LABEL_WIDTH			30
 #define	COL_LABEL_HEIGHT		30
 #define	COL_WIDTH_UNIT			10
@@ -277,6 +277,7 @@ private:
 public:
 	// Constructor
 	SpreadDataCell(void) {entered=FALSE;val_type=gSpreadNum;attributes=0;}
+  ~SpreadDataCell(void) { }
 	SpreadDataCell(const SpreadDataCell &C)
 	{
 		entered=C.entered;val_type=C.val_type;
@@ -318,17 +319,17 @@ class SpreadSheet
 friend gOutput &operator<<(gOutput &op,const SpreadSheet &s);
 private:
 	SpreadSheetC	*sheet;
-	gMatrix1<SpreadDataCell> data;
-	gTuple<gString>	row_labels;
-  gTuple<gString> col_labels;
+	gRectBlock<SpreadDataCell> data;
+	gBlock<gString>	row_labels;
+	gBlock<gString> col_labels;
 	int						rows,cols,level;
 	gString				label;
-  Bool					active;
+	Bool					active;
 public:
 	// Constructors & destructors
-	SpreadSheet(void) {sheet=NULL;}	// Void constructor--must have to init arrays of this
+	SpreadSheet(void) : sheet(0) {;}	// Void constructor--must have to init arrays of this
 	SpreadSheet(int rows,int cols,int level,char *title=NULL,wxFrame *parent=NULL);
-	~SpreadSheet(void)	{if (sheet) delete sheet;}
+	~SpreadSheet(void)	{if (sheet) {sheet->Show(FALSE); delete sheet;}}
 	// Post-Constructor, use if creating arrays of this
 	void Init(int rows,int cols,int level,char *title=NULL,wxFrame *parent=NULL);
 	// Sizing info for the canvas ...
@@ -353,23 +354,27 @@ public:
 	active=_s;
 	}
 	// General data access
-	void		SetValue(int row,int col,const gString &s) {data[row][col]=s;data[row][col].Entered(TRUE);}
-	gString &GetValue(int row,int col) {return data[row][col].GetValue();}
+	void		SetValue(int row,int col,const gString &s) {data(row,col)=s;data(row,col).Entered(TRUE);}
+	gString &GetValue(int row,int col) {return data(row,col).GetValue();}
 	gString &GetLabel(void)	{return label;}
 	void		SetLabel(const gString &s) {label=s;}
-	gBlock<SpreadDataCell> &operator[](int i){assert(i>0&&i<=rows);return data[i];}
-	void		SetType(int row,int col,gSpreadValType t) {data[row][col].SetType(t);}
-	gSpreadValType GetType(int row,int col) {return data[row][col].GetType();}
+	void		SetType(int row,int col,gSpreadValType t) {data(row,col).SetType(t);}
 	int			GetLevel(void)	{return level;}
+	// Cell attributes
+	gSpreadValType GetType(int row,int col) {return data(row,col).GetType();}
+	Bool		Bold(int row,int col) {return data(row,col).Bold();}
+	Bool		HiLighted(int row,int col) {return data(row,col).HiLighted();}
+	void		Bold(int row,int col,Bool _b) {data(row,col).Bold(_b);}
+	void		HiLighted(int row,int col,Bool _h) {data(row,col).HiLighted(_h);}
 	// Erase all the data in the spreadsheet, including clearing all cell attributes
 	void Clear(void);
 	// Checking if the cell has something in it
-	Bool		EnteredCell(int row,int col) {return data[row][col].Entered();}
+	Bool		EnteredCell(int row,int col) {return data(row,col).Entered();}
 	// Row/Column labeling
 	void		SetLabelRow(int row,const gString &s) 	{row_labels[row]=s;}
 	void		SetLabelCol(int col,const gString &s)	{col_labels[col]=s;}
-	void		SetLabelRow(const gTuple<gString> &vs) {row_labels=vs;}
-	void		SetLabelCol(const gTuple<gString> &vs) {col_labels=vs;}
+	void		SetLabelRow(const gBlock<gString> &vs) {row_labels=vs;}
+	void		SetLabelCol(const gBlock<gString> &vs) {col_labels=vs;}
 	gString	GetLabelRow(int row)	{return row_labels[row];}
 	gString	GetLabelCol(int col)	{return col_labels[col];}
 	// Accessing the currently hilighted cell
@@ -377,9 +382,9 @@ public:
 	int			CurCol(void)	{return sheet->Col();}
 	void		SetCurRow(int r)	{sheet->SetRow(r);}
 	void		SetCurCol(int c)	{sheet->SetCol(c);}
-	// These operators are necessary to use the gMatrix1 class
-	int operator==(const SpreadSheet &C) {return data==C.data;}
-	int operator!=(const SpreadSheet &C) {return data!=C.data;}
+	// Equality operators to allow this class to be used in a gList
+	int			operator==(const SpreadSheet &s) {return 0;}
+	int			operator!=(const SpreadSheet &s) {return 1;}
 	// Printing
 	void Print(int device) {sheet->Print(device);}
 	// Forced updating
@@ -504,9 +509,9 @@ public:
 	void		SetLabelCol(int col,const gString &s,int level=0);
 	void		SetLabelLevel(const gString &s,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabel(s);}
-	void		SetLabelRow(const gTuple<gString> &vs,int level=0)
+	void		SetLabelRow(const gBlock<gString> &vs,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabelRow(vs);}
-	void		SetLabelCol(const gTuple<gString> &vs,int level=0)
+	void		SetLabelCol(const gBlock<gString> &vs,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabelCol(vs);}
 	gString	GetLabelRow(int row,int level=0)
 		{if (level==0) level=cur_level;return data[level].GetLabelCol(row);}
@@ -520,13 +525,13 @@ public:
 	Bool		Editable(void)	{return editable;}
 	void		SetEditable(Bool _e) {editable=_e;}
 	Bool		HiLighted(int row,int col,int level=0)
-		{if (level==0) level=cur_level;return data[level][row][col].HiLighted();}
+		{if (level==0) level=cur_level;return data[level].HiLighted(row,col);}
 	void		HiLighted(int row,int col,int level=0,Bool _e=FALSE)
-		{if (level==0) level=cur_level;data[level][row][col].HiLighted(_e);}
+		{if (level==0) level=cur_level;data[level].HiLighted(row,col,_e);}
 	Bool		Bold(int row,int col,int level=0)
-		{if (level==0) level=cur_level;return data[level][row][col].Bold();}
+		{if (level==0) level=cur_level;return data[level].Bold(row,col);}
 	void		Bold(int row,int col,int level=0,Bool _e=FALSE)
-		{if (level==0) level=cur_level;data[level][row][col].Bold(_e);}
+		{if (level==0) level=cur_level;data[level].Bold(row,col,_e);}
 	// Drawing/Data parameters
 	SpreadSheetDrawSettings *DrawSettings(void)	{return draw_settings;}
 	SpreadSheetDataSettings *DataSettings(void)	{return data_settings;}

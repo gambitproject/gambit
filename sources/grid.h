@@ -1,7 +1,7 @@
 //#
 //# FILE: grid.h -- Interface to grid-solve module
 //#
-//# $Id$
+//# @(#)grid.h	1.3 5/2/95
 //#
 
 #ifndef GRID_H
@@ -11,41 +11,42 @@
 #pragma interface
 #endif   // __GNUG__
 
-#include "g2dblock.h"
+#include "grarray.h"
 
 template <class T> class GridParams   {
-  public:
-    T minLam, maxLam, delLam, delp, tol;
-    int type, plev;
-    gOutput *outfile, *errfile, *pxifile;
-    void  (*update_func)(double);
+	public:
+		T minLam, maxLam, delLam, delp, tol;
+		int type, plev;
+		gOutput *outfile, *errfile, *pxifile;
+		void  (*update_func)(double);
 
-    GridParams(void);
-    GridParams(const GridParams<T> &p);
-    int Ok(void) const;	// check the validity of the paramters
+		GridParams(void);
+		GridParams(const GridParams<T> &p);
+		int Ok(void) const;	// check the validity of the paramters
 };
 
 template <class T> class PayoffClass   {
-  public:
-    T row, col;
+	public:
+		T row, col;
 };
+template <class T> gOutput &operator<<(gOutput &, const PayoffClass<T> &);
 
 template <class T> class GridSolveModule  {
-  private:
-    const NormalForm<T> &nf;
-    gVector<T> p, x, q_calc, y;
-    const GridParams<T> &params;
-    g2DBlock<PayoffClass<T> > matrix;
+	private:
+		const NormalForm<T> &nf;
+		gVector<T> p, x, q_calc, y;
+		const GridParams<T> &params;
+		gRectArray<PayoffClass<T> > matrix;
 
-    int CheckEqu(gVector<T> &q,T l);
-    void OutputResult(T l,T dist,gVector<T> &q,gVector<T> &p);
-    void OutputHeader(void);
+		int CheckEqu(gVector<T> &q,T l);
+		void OutputResult(gOutput &out,T l,T dist,gVector<T> &q,gVector<T> &p);
+		void OutputHeader(gOutput &out);
 
-  public:
-    GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param);
-    //	GridSolveModule(const NormalForm<T> &r,gInput &param);
-    ~GridSolveModule();
-    int GridSolve(void);
+	public:
+		GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param);
+		//	GridSolveModule(const NormalForm<T> &r,gInput &param);
+		~GridSolveModule();
+		int GridSolve(void);
 };
 
 #endif    // GRID_H

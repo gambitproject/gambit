@@ -1,8 +1,8 @@
+#include "zfortify.hpp"
 #include "wx.h"
 #include "wx_form.h"
-#include "wxmisc.h"
-#include <stdio.h>
 #pragma hdrstop
+#include "wxmisc.h"
 #include "treedraw.h"
 #include "legendc.h"
 
