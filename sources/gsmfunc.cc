@@ -924,31 +924,34 @@ bool CallFuncObj::SetCurrParamIndex( const gString& param_name )
       f_index < _NumFuncs && result != PARAM_AMBIGUOUS;
       f_index++ )
   {
-    name_match_found = false;
-    for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
+    if(_FuncMatch[f_index])
     {
-      if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
+      name_match_found = false;
+      for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
       {
-	name_match_found = true;
-	if( result == PARAM_NOT_FOUND )
+	if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
 	{
-	  result = index;
-	  TempFuncIndex = f_index;
-	  times_found++;
-	}
-	else if( result == index )
-	{
-	  times_found++;
-	}
-	else // ( result != index )
-	{
-	  result = PARAM_AMBIGUOUS;
-	  break;
+	  name_match_found = true;
+	  if( result == PARAM_NOT_FOUND )
+	  {
+	    result = index;
+	    TempFuncIndex = f_index;
+	    times_found++;
+	  }
+	  else if( result == index )
+	  {
+	    times_found++;
+	  }
+	  else // ( result != index )
+	  {
+	    result = PARAM_AMBIGUOUS;
+	    break;
+	  }
 	}
       }
+      if( !name_match_found )
+	_FuncMatch[ f_index ] = false;
     }
-    if( !name_match_found )
-      _FuncMatch[ f_index ] = false;
   }
   
   
