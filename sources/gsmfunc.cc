@@ -1381,11 +1381,12 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   if(!_ErrorOccurred)
   {
     for(i = 0; i < _FuncInfo[_FuncIndex].NumParams; i++)
-      if(_Param[i]->Spec().Type == porNULL)
-      {
-	null_call = true;
-	break;
-      }
+      if(_Param[i])
+	if(_Param[i]->Spec().Type == porNULL)
+	{
+	  null_call = true;
+	  break;
+	}
   }
   if(_FuncInfo[_FuncIndex].NullArgs)
     null_call = false;
