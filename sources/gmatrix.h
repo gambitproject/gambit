@@ -46,7 +46,6 @@ template <class T> class gMatrix: private gBMatrix<T> {
   void SwitchRow(int row, const gVector<T> &V)
     { assert(V.Length() == Width()); gBMatrix<T>::SwitchRow(row, V); }
   void SwitchColumn(int, const gVector<T> &);
-  void SwitchColumn(int, int);
 
   // DATA ACCESS
   gBMatrix<T>::operator();
@@ -62,6 +61,7 @@ template <class T> class gMatrix: private gBMatrix<T> {
   gMatrix<T> GetSubMatrix(const gSet<int> &, const gSet<int> &) const;
 
   gMatrix<T> Invert(void) const;
+  gMatrix<T> Pivot(int, int) const;
 
   gBMatrix<T>::Dump;
 };
@@ -70,7 +70,7 @@ template <class T> class gNRMatrix: private gBMatrix<T> {
  public:
   gNRMatrix(void) { ; }
   gNRMatrix(int k)
-    { gBMatrix::gBMatrix(k); }
+    { gBMatrix<T>::gBMatrix(k); }
   gNRMatrix(const gNRMatrix<T> &M)
     { data = M.data; }
   ~gNRMatrix() { ; }
@@ -88,11 +88,12 @@ template <class T> class gNRMatrix: private gBMatrix<T> {
   gBMatrix<T>::RemoveRow;
   void AddColumn(const gVector<T> &);
   void RemoveColumn(int);
-  gBMatrix<T>::SwtichRows;
+  gBMatrix<T>::SwitchRows;
   gBMatrix<T>::SwitchRow;
   void SwitchColumn(int,const gVector<T>&);
   void SwitchColumns(int, int);
-  
+  void RemoveElement(int,int);
+  void AddElement(int,T&);
 
   // DATA ACCESS
   gBMatrix<T>::operator();
@@ -285,33 +286,56 @@ template <class T> gMatrix<T> gMatrix<T>::GetSubMatrix(const gSet<int> &Rows,
   return tmp;
 }
 
+template <class T> gMatrix<T> gMatrix<T>::Pivot(int k, int l) const
+{
+  assert((k<=Height())&&(l<=Width()));
+  assert((*this)(k,l)!=0);
+  int j;
+  gMatrix<T> tmp(*this);
+  tmp.data[k] = data[k]/tmp(k,l);
+  for(int i=1;i<=Height();i++)
+    if(i!=k) {
+      tmp.data[i] = tmp.data[i]-(tmp.data[k] * tmp(i,l));
+    }
+  return tmp;
+}
+
 template <class T> gMatrix<T> gMatrix<T>::Invert(void) const
 { 
   assert(Height()==Width()); // square matricies
-  int j,k;
+  int i,j;
   T factor;
   gMatrix<T> tmp1(*this);
   gMatrix<T> tmp(Width(),Height());
-  for(int i=1;i<=Height();i++) // make identity matirx
+  for(i=1;i<=Height();i++) // make identity matirx
     tmp(i,i) = 1;
-  for(i=1;i<=Width();i++)
+  for(i=1;i<=Width();i++) {
+    tmp.data[i] = tmp.data[i]/tmp1(i,i);
+    tmp1.data[i] = tmp1.GetRow(i)/tmp1(i,i);
     for(j=1;j<=Height();j++)
       if(j!=i) {
-	factor = ((*this)(j,i))/((*this)(i,i));
-	tmp1.SwitchRow(j,(tmp1.GetRow(j))-(tmp1.GetRow(i))*factor);
-	tmp.SwitchRow(j,(tmp.GetRow(j))-(tmp.GetRow(i))*factor);
+	tmp.data[j] = tmp.data[j] - (tmp.data[i]*tmp1(j,i));
+	tmp1.data[j] = tmp1.data[j] - (tmp1.data[i]*tmp1(j,i));
       }
-  for(i=1;i<=Height();i++)
-    tmp.data[i] = (tmp.data[i])/tmp1(i,i);
+  }
   return tmp;
+}
+
+//*****************************************************************************
+//These are some of the member fuctions for gNRMatrix<T>.
+//*****************************************************************************
+
+template <class T> output& operator<<(output &to,const gNRMatrix<T> M)
+{
+  M.Dump(to); return to;
 }
 
 template <class T> void gNRMatrix<T>::AddColumn(const gVector<T> &V)
 {
-  assert((V.Length()<=Height())&&(V.Last()<=Height()));
+  assert(V.Length()<=Height());
   int j;
-  for(int i=V.First();i<=V.Last();i++) {
-    gVector<T> tmp(data[i].First(),data[i].Last()+1);
+  for(int i=1;i<=V.Length();i++) {
+    gVector<T> tmp(1,data[i].Length()+1);
     for(j=data[i].First();j<=data[i].Last();j++)
       tmp[j]=(data[i])[j];
     tmp[j] = V[i];
@@ -321,11 +345,12 @@ template <class T> void gNRMatrix<T>::AddColumn(const gVector<T> &V)
 
 template <class T> void gNRMatrix<T>::RemoveColumn(int k)
 {
-  int j;
+  int j,width;
   for(int i=1;i<=Height();i++)
-    if(k>=data[i].First()&&k<=data[i].Last()) {
-      gVector<T> tmp(data[i].First(),tmp(data[i]).Last()-1);
-      j = data[i].First();
+    width = Width(i);
+    if(k<=Width(i)) {
+      gVector<T> tmp(1,Width(i)-1);
+      j = 1;
       while(j!=k) {
 	tmp[j] = (data[i])[j];
 	j++;
@@ -343,20 +368,58 @@ template <class T> void gNRMatrix<T>::SwitchColumns(int k, int l)
 {
   T tmp;
   for(int i=1;i<=Height();i++)
-    if(k>=data[i].First()&&k<=data[i].Last()
-       &&l>=data[i].First()&&l<=data[i].Last()) {
+    if(k<=Width(i)&&l<=Width(i)) {
       tmp = (*this)(i,k);
       (*this)(i,k) = (*this)(i,l);
       (*this)(i,l) = tmp;
     }
 }
 
-template <class T> void gNRMatrix<T>::SwitchColumns(int i, gVector<T> &V)
+template <class T> void gNRMatrix<T>::SwitchColumn(int k,const gVector<T> &V)
 {
-  assert(V.Length()<=Height()&&V.Last()<=Height());
+  assert(V.Length()<=Height());
   for(int i=1;i<=Height();i++) {
-    
+    assert(k<=Width(i));
+    (*this)(i,k) = V[i];
   }
+}
+
+template <class T> gVector<T> gNRMatrix<T>::GetColumn(int k) const
+{
+  gVector<T> tmp(1,Height());
+  for(int i=1;i<=Height();i++) {
+    if(k<=Width(i))
+      tmp[i] = (*this)(i,k);
+    else tmp[i] = 0;
+  }
+  return tmp;
+}
+
+template <class T> void gNRMatrix<T>::RemoveElement(int i, int j)
+{
+  assert(i<=Height()); assert(j<=Width(i));
+  gVector<T> tmp(1,Width(i)-1);
+  int k = 1;
+  while(k!=j) {
+    tmp[k] = (data[i])[k];
+    k++;
+  }
+  k++;
+  while(k<=Width(i)) {
+    tmp[k-1] = (data[i])[k];
+    k++;
+  }
+  data[i] = tmp;
+}
+
+template <class T> void gNRMatrix<T>::AddElement(int k,T& c)
+{
+  assert(k<=Height());
+  gVector<T> tmp(1,Width(k)+1);
+  for(int i=1;i<=Width(k);i++)
+    tmp[i] = (*this)(k,i);
+  tmp[i] = c;
+  data[k] = tmp;
 }
 
 #endif     //GMATRIX_H
