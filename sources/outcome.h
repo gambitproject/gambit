@@ -7,50 +7,37 @@
 #ifndef OUTCOME_H
 #define OUTCOME_H
 
-#include "gstring.h"
-#include "gvector.h"
-
 class Outcome   {
+  friend class BaseExtForm;
+
   protected:
-    int number;
     gString name;
 
-  public:
-    Outcome(int n);
-    virtual ~Outcome();
-
-    virtual DataType Type(void) const = 0;
-    virtual void SetNumPlayers(int p) = 0;
-
-    void SetName(const gString &);
-    const gString &GetName(void) const;
-
-    int GetNumber(void) const;
-    void SetNumber(int n);
-};
-
-template <class T> class OutcomeVector : public Outcome    {
-  private:
-    gVector<T> *values;
-
-  public:
-    OutcomeVector(int n, int pl);
-    ~OutcomeVector();
-
-    DataType Type(void) const;
-
-    void SetNumPlayers(int p);
-
-    const gVector<T> &GetOutcomeVector(void) const;
-
-    const T &operator[](int p) const;
-
-    void SetOutcome(int p, const T &value);
-
-    void SetOutcome(const gVector<T> &v);
-};
-
+    Outcome(void)   { }
+    virtual ~Outcome()   { }
   
+  public:
+    const gString &GetName(void) const   { return name; }
+    void SetName(const gString &s)       { name = s; }
+
+    virtual void PrintValues(gOutput &) const = 0;
+};
+
+#include "gvector.h"
+
+template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
+  friend class ExtForm<T>;
+
+  private:
+    OutcomeVector(int pl) : gVector<T>(pl)  { }
+    ~OutcomeVector()    { }
+
+    void Resize(int pl)    { }
+
+    void PrintValues(gOutput &f) const
+      { Dump(f); }
+};
+
 #endif    // OUTCOME_H
 
 

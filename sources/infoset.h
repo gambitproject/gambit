@@ -7,124 +7,92 @@
 #ifndef INFOSET_H
 #define INFOSET_H
 
-#include "basic.h"
-#include "gstring.h"
-#include "gblock.h"
-#include "gtuple.h"
-#include "gnumber.h"
-#include "noderep.h"
+#include "rational.h"
+#include "gvector.h"
 
-//
-// This class will contain other information later, such as dominance...
-//
+#include "player.h"
+
+#include "gconvert.h"
+
+class Node;
+
 class Action   {
+  friend class BaseExtForm;
+  friend class Infoset;
+
   private:
     gString name;
 
+    Action(const gString &s) : name(s)   { }
+    ~Action()   { }
+
   public:
-    const gString &GetName(void) const;
-    void SetName(const gString &s);
+    const gString &GetName(void) const   { return name; }
 };
 
-//
-// <category lib=glib sect="Extensive Form">
-//
-// This class creates an information set (infoset in most of my
-// documentation).  The gBlock of Actions contains all the possible
-// choices in the information set, and nodes contains all the nodes
-// encompassed by the information set (ie all nodes in the infoset).
-//
 class Infoset   {
-  private:
+  friend class BaseExtForm;
+  friend class Player;
+  friend class ExtForm<double>;
+  friend class ExtForm<gRational>;
+
+  protected:
+    int number;
     gString name;
-    gBlock<Action *>  actions;
-    gBlock<NodeRep *> nodes;
+    Player *player;
+    gBlock<Action *> actions;
+    gList<Node *> members;
+    
+    Infoset(int n, Player *p, int br) : number(n), player(p), actions(br) 
+      { while (br)  { actions[br] = new Action(ToString(br)); br--; } }
+    virtual ~Infoset()  
+      { for (int i = 1; i <= actions.Length(); i++)  delete actions[i]; }
+
+    virtual void PrintActions(gOutput &f) const
+      { f << "{ ";
+	for (int i = 1; i <= actions.Length(); i++)
+	  f << '"' << actions[i]->name << "\" ";
+	f << "}";
+      }
 
   public:
-	//# CONSTRUCTORS AND DESTRUCTOR
-	//
-	// create a new infoset with acts actions
-	//
-    Infoset(int acts = 0);
-	//
-	// clean up after an infoset
-	//
-    ~Infoset();
+    bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
-	//# OPERATOR OVERLOADING
-	//
-	// retrieves the nod'th node.  Used to make statements less verbose.
-	//
-    NodeRep *operator()(int nod)
-      { return GetMember(nod); }
-    
-	//# DATA ACCESS AND MANIPULATION
-	//
-        // return the infoset name
-	//
-    gString GetInfosetName(void) const    { return name; }
-	//
-        // set the infoset name
-	//
-    void SetInfosetName(const gString &s)   { name = s; }
+    void SetName(const gString &s)    { name = s; }
+    const gString &GetName(void) const   { return name; }
 
-	//# ACTION FUNCTIONS
-	//
-	// return the number of actions at the infoset
-	//
+    void SetActionName(int i, const gString &s)
+      { actions[i]->name = s; }
+    const gString &GetActionName(int i) const  { return actions[i]->name; }
+
     int NumActions(void) const   { return actions.Length(); }
-	//
-	// set an action's name
-	//
-    void SetActionName(int act, const gString &s)
-      { actions[act]->SetName(s); }
-	//
-	// return an action's name
-	//
-    gString GetActionName(int act) const
-      { return actions[act]->GetName(); }
-	//
-	// remove an action from the infoset
-	//
-    void RemoveAction(int act)
-      { delete actions.Remove(act); }
-	//
-	// add an action to the infoset
-	//
-    void InsertAction(int act)
-      { actions.Insert(new Action, act); }
-	//
-	// append an action to the infoset
-	//
-    void AppendAction(void)
-      { actions.Append(new Action); }
-
-	//# NODE FUNCTIONS
-	//
-	// return the number of nodes in the infoset
-	//
-    int NumNodes(void) const  { return nodes.Length(); }
-	//
-	// add a new node to the infoset
-	//
-    int CreateMember()
-      { return nodes.Append(new NodeRep); }
-	//
-	// add a node knode to the infoset
-	//
-    int CreateMember(NodeRep *knode)
-      { return nodes.Append(knode); }
-	//
-	// remove a node from the infoset
-	//
-    NodeRep *RemoveMember(int nod)
-      { return nodes.Remove(nod); }
-	//
-	// read a node from the infoset
-	//
-    NodeRep *GetMember(int nod)
-      { return nodes[nod]; }
 };
+
+template <class T> class ChanceInfoset : public Infoset  {
+  friend class BaseExtForm;
+  friend class ExtForm<double>;
+  friend class ExtForm<gRational>;
+
+  private:
+    gVector<T> probs;
+
+    ChanceInfoset(int n, Player *p, int br) : Infoset(n, p, br), probs(br)
+      { probs[1] = (T) 1.0;
+	for (int i = 2; i <= br; probs[i++] = (T) 0.0);
+      }
+    ~ChanceInfoset()    { }
+
+    void PrintActions(gOutput &f) const
+      { f << "{ ";
+	for (int i = 1; i <= actions.Length(); i++)
+	  f << '"' << actions[i]->GetName() << "\" " << probs[i] << ' ';
+	f << "}";
+      }
+  public:
+    void SetActionProb(int i, const T &value)  { probs[i] = value; }
+    const T &GetActionProb(int i) const   { return probs[i]; }
+};
+
 
 
 #endif   //# INFOSET_H
