@@ -1874,10 +1874,12 @@ bool ListPortion::IsInteger(void) const
 
   for (int i = 1; result && i <= rep->value->Length(); i++) { 
     Portion *p = (*rep->value)[i];
-    if (p->Spec().ListDepth > 0)
-      result = result && ((ListPortion *) p)->IsInteger();
-    else
-      result = result && ((NumberPortion *) p)->Value().IsInteger();
+    if (!p->Spec().Null) {  
+      if (p->Spec().ListDepth > 0)
+	result = result && ((ListPortion *) p)->IsInteger();
+      else
+	result = result && ((NumberPortion *) p)->Value().IsInteger();
+    }
   }
   return result;
 }
