@@ -88,6 +88,7 @@
 %token CARET
 %token AMPER
 %token WRITE
+%token READ
 
 %token PERCENT
 %token DIV
@@ -265,6 +266,7 @@ expression:   Ea
 
 Ea:           E0
   |           Ea WRITE E0   { emit(new Write); }
+  |           Ea READ E0    { emit(new Read); }
   ; 
 
 E0:           E1
@@ -401,7 +403,7 @@ static struct tokens toktable[] =
     { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
-    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" },
+    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
     { CLEAR, "Clear" },
@@ -609,6 +611,7 @@ I_dont_believe_Im_doing_this:
 		}
     case '>':   c = nextchar();
                 if (c == '=')  return GEQ;
+                else if (c == '>')  return READ;
                 else   { ungetchar(c);  return GTN; }
     case '&':   c = nextchar();
                 if (c == '&')  return LAND;
