@@ -1468,60 +1468,6 @@ Portion* GSM_Write_list( Portion** param )
 }
 
 
-Portion* GSM_Write_list_Text( Portion** param );
-
-Portion* GSM_Write_list_Text( Portion** param )
-{
-  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-  ListPortion* list = ( (ListPortion*) param[ 1 ] );
-  int i;
-  Portion* p;
-  int length = list->Length();
-  Portion** subparam;
-
-  s << "{";
-  if( length >= 1 )
-  {
-    for( i = 1; i <= length; i++ )
-    {
-      p = (*list)[i];
-      if( i > 1 )
-	s << ",";
-      if( p->IsValid() )
-      {
-	assert( p->Type() == porTEXT || p->Type() == porLIST );
-	if( p->Type() == porTEXT )
-	{
-	  if( _WriteQuoted )
-	    s << " \"" << ((TextPortion*)p)->Value() << "\"";
-	  else
-	    s << " " << ((TextPortion*)p)->Value();
-	}
-	else
-	{
-	  s << ' ';
-	  subparam = new Portion*[2];
-	  subparam[1] = p;
-	  subparam[0] = param[0];
-	  GSM_Write_list_Text( subparam );
-	  delete[] subparam;
-	}
-      }
-      else
-	s << " (undefined)";
-    }
-  }
-  else
-  {
-    s << " empty";
-  }
-  s << " }";
-
-  return param[0]->RefCopy();
-}
-
-
-
 
 //------------------------------ Read --------------------------//
 
@@ -2564,51 +2510,50 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( "Write" );
   FuncObj->SetFuncInfo( GSM_Write_numerical, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_numerical, 1, "x", 
 			porBOOL | porINTEGER | porFLOAT | porRATIONAL );
 
   FuncObj->SetFuncInfo( GSM_Write_gString, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_gString, 1, "x", porTEXT );
 
   FuncObj->SetFuncInfo( GSM_Write_Mixed, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_Mixed, 1, "x", porMIXED );
 
   FuncObj->SetFuncInfo( GSM_Write_Behav, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_Behav, 1, "x", porBEHAV );
 
   FuncObj->SetFuncInfo( GSM_Write_Nfg, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Write_Efg, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Write_list, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT);
+  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_list, 1, "x", 
 			porLIST | porBOOL | porINTEGER | porFLOAT | porTEXT |
 			porRATIONAL | porMIXED | porBEHAV );
-
-  /*
-  FuncObj->SetFuncInfo( GSM_Write_list_Text, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_list_Text, 0, "output", porOUTPUT);
-  FuncObj->SetParamInfo( GSM_Write_list_Text, 1, "x", 
-			porLIST | porTEXT );
-			*/
 
   gsm->AddFunction( FuncObj );
 
@@ -2640,72 +2585,78 @@ void Init_gsmoper( GSM* gsm )
   //-------------------- Read --------------------------
 
   FuncObj = new FuncDescObj( "Read" );
-  /*
-  FuncObj->SetFuncInfo( GSM_Read, 1 );
-  FuncObj->SetParamInfo( GSM_Read, 0, "input", porINPUT );
-  */
 
   FuncObj->SetFuncInfo( GSM_Read_Bool, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Bool, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Bool, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Bool, 1, "x", porBOOL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_List_Bool, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Bool, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Bool, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_List_Bool, 1, "x", porBOOL | porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Integer, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Integer, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Integer, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Integer, 1, "x", porINTEGER, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_List_Integer, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Integer, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Integer, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_List_Integer, 1, "x", porINTEGER | porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Float, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Float, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Float, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Float, 1, "x", porFLOAT,  
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_List_Float, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Float, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Float, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_List_Float, 1, "x", porFLOAT | porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Rational, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Rational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Rational, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Rational, 1, "x", porRATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_List_Rational, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Rational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Rational, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_List_Rational, 1, "x", porRATIONAL|porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Text, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Text, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Text, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Text, 1, "x", porTEXT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_List_Text, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Text, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_List_Text, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_List_Text, 1, "x", porTEXT | porLIST, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
 
@@ -2713,26 +2664,30 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Read_MixedFloat, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_MixedFloat, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_MixedFloat, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_MixedFloat, 1, "x", porMIXED_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_MixedRational, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_MixedRational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_MixedRational, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_MixedRational, 1, "x", porMIXED_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
   FuncObj->SetFuncInfo( GSM_Read_BehavFloat, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_BehavFloat, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_BehavFloat, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_BehavFloat, 1, "x", porBEHAV_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Read_BehavRational, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_BehavRational, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_BehavRational, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_BehavRational, 1, "x", porBEHAV_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
@@ -2740,7 +2695,8 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Read_Undefined, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Undefined, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Undefined, 0, "input", porINPUT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Undefined, 1, "x", porUNDEFINED, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
