@@ -1,4 +1,3 @@
-
 //#
 //# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
@@ -52,13 +51,6 @@ TEMPLATE class gGrowableStack< RefHashTable* >;
 #include "gsmhash.h"
 
 #include "gblock.h"
-#include "infoset.h"
-#include "node.h"
-
-#include "garray.h"
-#include "normal.h"
-#include "efg.h"
-
 
 
 
