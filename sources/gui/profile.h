@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Extensive form behavior profile window
+// Window for displaying profiles
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,32 +24,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGPROFILE_H
-#define EFGPROFILE_H
+#ifndef NFGPROFILE_H
+#define NFGPROFILE_H
 
-#include "wx/listctrl.h"
-#include "efgshow.h"
+#include "wx/grid.h"
+#include "nfgshow.h"
 
-class EfgProfileList : public wxListCtrl, public gbtGameView {
+class gbtProfileGrid;
+
+class gbtProfileFrame : public wxFrame, public gbtGameView {
 private:
-  wxMenu *m_menu;
+  gbtProfileGrid *m_grid;
 
   // Event handlers
-  void OnRightClick(wxMouseEvent &);
-  void OnColumnClick(wxListEvent &);
-  
-  bool IsEfgView(void) const { return true; }
-  bool IsNfgView(void) const { return false; }
+  void OnClose(wxCloseEvent &);
 
+  void OnViewInfo(wxCommandEvent &);
+  void OnViewBehavior(wxCommandEvent &);
+  void OnViewMixed(wxCommandEvent &);
+  void OnViewGrid(wxCommandEvent &);
+  void OnViewMyerson(wxCommandEvent &);
+  void OnViewVector(wxCommandEvent &);
+
+  // Overriding view members
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return true; }
   void OnUpdate(gbtGameView *);
 
 public:
-  EfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgProfileList();
-
-  wxString GetReport(void) const;
+  gbtProfileFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtProfileFrame();
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // EFGPROFILE_H
+#endif  // NFGPROFILE_H

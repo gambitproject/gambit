@@ -51,7 +51,7 @@
 #include "treewin.h"
 #include "efgprint.h"
 #include "efgshow.h"
-#include "efgprofile.h"
+#include "profile.h"
 #include "efgnavigate.h"
 #include "efgoutcome.h"
 #include "efgsupport.h"
@@ -80,7 +80,6 @@
 const int idTREEWINDOW = 999;
 const int idNODEWINDOW = 998;
 const int idTOOLWINDOW = 997;
-const int idSOLUTIONWINDOW = 996;
 const int idINFONOTEBOOK = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
@@ -139,12 +138,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(GBT_MENU_PROFILES_DELETE, EfgShow::OnProfilesDelete)
   EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
   EVT_MENU(GBT_MENU_PROFILES_REPORT, EfgShow::OnProfilesReport)
-  EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesProperties)
-  EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnProfileSelected)
   EVT_SET_FOCUS(EfgShow::OnFocus)
   EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
-  EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
   EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, EfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
@@ -155,7 +151,7 @@ END_EVENT_TABLE()
 EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     gbtGameView(p_doc),
-    m_treeWindow(0), m_profileTable(0), m_solutionSashWindow(0),
+    m_treeWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
   SetSizeHints(300, 300);
@@ -210,14 +206,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_nodeSashWindow->Show(false);
   m_nodeSashWindow->SetSashVisible(wxSASH_LEFT, false);
   
-  m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
-					  wxDefaultPosition,
-					  wxSize(600, 100));
-  m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
-
-  m_profileTable = new EfgProfileList(m_doc, m_solutionSashWindow);
-  m_profileTable->Show(false);
-  m_solutionSashWindow->Show(false);
+  (void) new gbtProfileFrame(m_doc, this);
 
   AdjustSizes();
   m_treeWindow->FitZoom();
@@ -940,18 +929,7 @@ void EfgShow::OnViewNfgReduced(wxCommandEvent &)
 
 void EfgShow::OnViewProfiles(wxCommandEvent &)
 {
-  if (m_solutionSashWindow->IsShown()) {
-    m_profileTable->Show(false);
-    m_solutionSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, false);
-  }
-  else {
-    m_profileTable->Show(true);
-    m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, true);
-  }
-
-  AdjustSizes();
+  m_doc->SetShowProfiles(!m_doc->ShowProfiles());
 }
 
 void EfgShow::OnViewCursor(wxCommandEvent &)
@@ -1235,13 +1213,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 	m_doc->AddProfile(solutions[soln]);
       }
       m_doc->SetCurrentProfile(m_doc->AllBehavProfiles().Length());
-   
-      if (!m_solutionSashWindow->IsShown()) {
-	m_profileTable->Show(true);
-	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, true);
-	AdjustSizes();
-      }
+      m_doc->SetShowProfiles(true);
     }
     catch (gException &ex) {
       wxMessageDialog msgDialog(this, (char *) ex.Description(),
@@ -1379,8 +1351,8 @@ void EfgShow::OnProfilesProperties(wxCommandEvent &)
 
 void EfgShow::OnProfilesReport(wxCommandEvent &)
 {
-  dialogReport dialog(this, m_profileTable->GetReport());
-  dialog.ShowModal();
+  //  dialogReport dialog(this, m_profileTable->GetReport());
+  // dialog.ShowModal();
 }
 
 void EfgShow::OnProfileSelected(wxListEvent &p_event)
@@ -1457,18 +1429,6 @@ void EfgShow::OnSashDrag(wxSashEvent &p_event)
 			      p_event.GetDragRect().width,
 			      m_nodeSashWindow->GetRect().height);
     break;
-  case idSOLUTIONWINDOW:
-    m_treeWindow->SetSize(m_treeWindow->wxWindowBase::GetRect().x,
-			  m_treeWindow->wxWindowBase::GetRect().y,
-			  m_treeWindow->wxWindowBase::GetRect().width,
-			  clientHeight - p_event.GetDragRect().height);
-    m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
-			      m_nodeSashWindow->GetRect().y,
-			      m_nodeSashWindow->GetRect().width,
-			      clientHeight - p_event.GetDragRect().height);
-    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
-				  clientWidth, p_event.GetDragRect().height);
-    break;
   }
 }
 
@@ -1476,11 +1436,6 @@ void EfgShow::AdjustSizes(void)
 {
   int width, height;
   GetClientSize(&width, &height);
-  if (m_profileTable && m_solutionSashWindow->IsShown()) {
-    m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
-				  width, m_solutionSashWindow->GetRect().height);
-    height -= m_solutionSashWindow->GetRect().height;
-  }
 
   if ((m_navigateWindow && m_nodeSashWindow->IsShown())) {
     if (m_treeWindow) {

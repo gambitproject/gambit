@@ -37,7 +37,7 @@
 #include "nfgshow.h"
 #include "nfgtable.h"
 #include "nfgprint.h"
-#include "nfgprofile.h"
+#include "profile.h"
 #include "nfgnavigate.h"
 #include "nfgoutcome.h"
 #include "nfgsupport.h"

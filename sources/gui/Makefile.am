@@ -66,8 +66,6 @@ gambit_SOURCES = \
 	efgoutcome.h \
 	efgprint.cc \
 	efgprint.h \
-	efgprofile.cc \
-	efgprofile.h \
 	efgshow.cc \
 	efgshow.h \
 	efgsupport.cc \
@@ -83,8 +81,6 @@ gambit_SOURCES = \
 	nfgoutcome.h \
 	nfgprint.cc \
 	nfgprint.h \
-	nfgprofile.cc \
-	nfgprofile.h \
 	nfgshow.cc \
 	nfgshow.h \
 	nfgsupport.cc \
@@ -95,6 +91,8 @@ gambit_SOURCES = \
 	numberedit.h \
 	prefs.cc \
 	prefs.h \
+	profile.cc \
+	profile.h \
 	treewin.cc \
 	treewin.h \
 	valnumber.cc \

@@ -35,21 +35,16 @@
 #include "gambit.h"
 #include "nash/behavsol.h"
 
-class EfgProfileList;
 class EfgNavigateWindow;
 class EfgOutcomeWindow;
 class EfgSupportWindow;
 class TreeWindow;
 
-const int idEFG_SOLUTION_LIST = 900;
-
 class EfgShow : public wxFrame, public gbtGameView {
 private:
   TreeWindow *m_treeWindow;
 
-  EfgProfileList *m_profileTable;
-  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
-  wxSashWindow *m_solutionSashWindow;
+  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow;
 
   wxNotebook *m_infoNotebook;
   EfgNavigateWindow *m_navigateWindow;
