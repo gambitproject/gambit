@@ -59,19 +59,30 @@ Node ExtForm::InsertNode(const Node &n, int pl, int children)
 
   int iset = CreateInfoset(pl, children);
 
-  nodes.CreateNode(pl, iset, nodes.GetParent(n));
-  nodes.SetParent(n, Node(pl, iset, 1));
+  Node new_node = nodes.InsertNode(pl, iset, n);
 
   for (int i = 1; i < children; i++)
-    nodes.CreateNode(dummy, CreateInfoset(dummy, 0), Node(pl, iset, 1));
+    nodes.CreateNode(dummy, CreateInfoset(dummy, 0), new_node);
 
   return n;
 }
 
 
-Node ExtForm::DeleteNode(const Node &n)
+Node ExtForm::DeleteNode(const Node &n, int keep)
 {
-  return n;
+  if (!nodes.IsMember(n))    return Node(dummy, 1, 1);
+  if (nodes.IsTerminal(n))    return n;
+
+  Node foo(n), ret;
+
+  for (int i = 1; i < keep; i++)
+    foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 1)));
+  while (nodes.NumChildren(foo) > 1)
+    foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 2)));
+  if (nodes.DeleteInternalNode(foo, ret))
+    players.RemoveInfoset(foo[1], foo[2]);
+
+  return ret;
 }
 
 Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
@@ -153,15 +164,19 @@ Node ExtForm::DeleteBranch(const Node &n, int which)
   return ret;
 }
 
-Node ExtForm::MoveTree(const Node &from, const Node &dest)
+Node ExtForm::MoveTree(const Node &src, const Node &dest)
 {
-  return from;
+  if (!nodes.IsMember(src) || !nodes.IsMember(dest)) return Node(dummy, 1, 1);
+  if (!nodes.IsTerminal(dest))   return src;
+
+  Node ret(src);
+  nodes.AdoptChildren(src, dest);
+  nodes.MoveNode(src, dest, 1);
+  nodes.MoveNode(Node(dest[1], dest[2], 1), ret);
+ 
+  return ret;
 }
 
-Node ExtForm::CopyTree(const Node &from, const Node &dest)
-{
-  return from;
-}
 
 
 // Delete a terminal node, and return the new ID of its parent

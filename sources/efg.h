@@ -35,7 +35,7 @@ class ExtForm    {
     void SetNodeLabel(const Node &n, const gString &s)
       { if (nodes.IsMember(n))  nodes.SetNodeName(n, s); }
     Node InsertNode(const Node &n, int player, int child_count);
-    Node DeleteNode(const Node &n);
+    Node DeleteNode(const Node &n, int keep);
 
     Node JoinInfoset(const Node &new_node, const Node &to_iset);
     Node LeaveInfoset(const Node &n);
@@ -51,7 +51,6 @@ class ExtForm    {
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
 
     Node MoveTree(const Node &from, const Node &dest);
-    Node CopyTree(const Node &from, const Node &dest);
     Node DeleteTree(const Node &n);
 
 	// OPERATIONS ON NODES
