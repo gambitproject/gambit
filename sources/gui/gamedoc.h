@@ -53,6 +53,7 @@ private:
   gList<MixedSolution> m_mixedProfiles;
 
   gbtPreferences m_prefs;
+  bool m_showProfiles;
 
   int m_rowPlayer, m_colPlayer;
   gArray<int> m_contingency;
@@ -66,7 +67,6 @@ public:
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
 
   gbtNfgGame *m_nfg;
-  //  NfgShow *m_nfgShow;
   gbtNfgSupport *m_curNfgSupport;
   gList<gbtNfgSupport *> m_nfgSupports;
 
@@ -88,6 +88,9 @@ public:
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }
+
+  bool ShowProfiles(void) const { return m_showProfiles; }
+  void SetShowProfiles(bool p_show);
 
   // MARKED NODES
   void SetCursor(gbtEfgNode m_node);

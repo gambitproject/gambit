@@ -52,10 +52,9 @@ class dialogNfgSupportInspect;
 class NfgShow : public wxFrame, public gbtGameView {
 private:
   NfgTable *m_table;
-  gbtNfgProfileGrid *m_profileGrid;
   wxNotebook *m_infoNotebook;
 
-  wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;
+  wxSashWindow *m_infoSashWindow;
   NfgNavigateWindow *m_navigateWindow;
   NfgOutcomeWindow *m_outcomeWindow;
   NfgSupportWindow *m_supportWindow;

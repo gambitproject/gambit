@@ -44,6 +44,7 @@
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
+    m_showProfiles(false),
     m_rowPlayer(1), m_colPlayer(2),
     m_efg(new gbtEfgGame(p_efg)), 
     m_curEfgSupport(0),
@@ -64,6 +65,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
+    m_showProfiles(false),
     m_rowPlayer(1), m_colPlayer(2),
     m_contingency(p_nfg.NumPlayers()),
     m_efg(0),
@@ -520,6 +522,12 @@ void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
     }
   }
 
+}
+
+void gbtGameDocument::SetShowProfiles(bool p_show)
+{
+  m_showProfiles = p_show;
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::Submit(gbtGameCommand *p_command)

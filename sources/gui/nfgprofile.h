@@ -30,29 +30,23 @@
 #include "wx/grid.h"
 #include "nfgshow.h"
 
-class gbtNfgProfileGrid : public wxGrid, public gbtGameView {
-private:
-  wxMenu *m_menu;
-  wxGridTableBase *m_table;
+class gbtNfgProfileGrid;
 
-  // wxGrid members
-  // Overriding this suppresses drawing of the grid cell highlight
-  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
+class gbtProfileFrame : public wxFrame, public gbtGameView {
+private:
+  gbtNfgProfileGrid *m_grid;
 
   // Event handlers
-  void OnRightClick(wxGridEvent &);
-  void OnLeftClick(wxGridEvent &);
+  void OnClose(wxCloseEvent &);
 
   // Overriding view members
-  bool IsEfgView(void) const { return false; }
+  bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return true; }
   void OnUpdate(gbtGameView *);
 
 public:
-  gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~gbtNfgProfileGrid();
-
-  wxString GetReport(void) const;
+  gbtProfileFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtProfileFrame();
 
   DECLARE_EVENT_TABLE()
 };

@@ -222,19 +222,48 @@ gbtNfgProfileTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
 }
 
 //-------------------------------------------------------------------------
-//                  class gbtNfgProfileGrid: Member functions
+//                     class gbtNfgProfileGrid
 //-------------------------------------------------------------------------
+
+class gbtNfgProfileGrid : public wxGrid {
+private:
+  gbtGameDocument *m_doc;
+  wxGridTableBase *m_table;
+
+  // wxGrid members
+  // Overriding this suppresses drawing of the grid cell highlight
+  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
+
+  // Event handlers
+  void OnLeftClick(wxGridEvent &);
+
+  // Overriding view members
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
+
+public:
+  gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgProfileGrid();
+
+  wxString GetReport(void) const;
+
+  // Override grid's GetBestSize() for some custom logic
+  virtual wxSize GetBestSize(void) const;
+
+  void OnUpdate(void);
+
+  DECLARE_EVENT_TABLE()
+};
+
 
 BEGIN_EVENT_TABLE(gbtNfgProfileGrid, wxGrid)
   EVT_GRID_CELL_LEFT_CLICK(gbtNfgProfileGrid::OnLeftClick)
-  EVT_GRID_CELL_RIGHT_CLICK(gbtNfgProfileGrid::OnRightClick)
-  EVT_GRID_LABEL_RIGHT_CLICK(gbtNfgProfileGrid::OnRightClick)
 END_EVENT_TABLE()
 
 gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc, 
 				     wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_doc)
+    m_doc(p_doc)
 {
   SetTable(new gbtNfgProfileTable(m_doc), true);
   SetEditable(false);
@@ -242,24 +271,14 @@ gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc,
   DisableDragColSize();
   SetLabelSize(wxVERTICAL, 0);
   SetSelectionMode(wxGrid::wxGridSelectRows);
+  SetMargins(0, 0);
 
-  m_menu = new wxMenu("Profiles");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", 
-		 "Create a new profile");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate profile",
-		 "Duplicate this profile");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete profile", 
-		 "Delete this profile");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_PROPERTIES, "Properties",
-		 "View and edit properties of this profile");
-  m_menu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
-		 "Generate a report with information on profiles");
 }
 
 gbtNfgProfileGrid::~gbtNfgProfileGrid()
 { }
 
-void gbtNfgProfileGrid::OnUpdate(gbtGameView *)
+void gbtNfgProfileGrid::OnUpdate(void)
 {
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
@@ -294,24 +313,20 @@ void gbtNfgProfileGrid::OnUpdate(gbtGameView *)
   }
 }
 
-void gbtNfgProfileGrid::OnRightClick(wxGridEvent &p_event)
-{
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_DUPLICATE,
-		 m_doc->IsProfileSelected());
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_DELETE, 
-		 m_doc->IsProfileSelected());
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_PROPERTIES,
-		 m_doc->IsProfileSelected());
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_REPORT,
-		 m_doc->IsProfileSelected());
-  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
-}
-
 void gbtNfgProfileGrid::OnLeftClick(wxGridEvent &p_event)
 {
   m_doc->SetCurrentProfile(p_event.GetRow() + 1);
   // Veto this event; when grid refreshes, correct row will be selected
   p_event.Veto();
+}
+
+wxSize gbtNfgProfileGrid::GetBestSize(void) const
+{
+  wxSize size = wxGrid::GetBestSize();
+  if (const_cast<gbtNfgProfileGrid *>(this)->GetNumberRows() == 0) {
+    size.SetHeight(size.GetHeight() * 2);
+  }
+  return size;
 }
 
 wxString gbtNfgProfileGrid::GetReport(void) const
@@ -391,4 +406,82 @@ wxString gbtNfgProfileGrid::GetReport(void) const
 
   return report;
 }
+
+//-------------------------------------------------------------------------
+//                      class gbtProfileFrame
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtProfileFrame, wxFrame)
+  EVT_MENU(wxID_CLOSE, gbtProfileFrame::Close)
+  EVT_CLOSE(gbtProfileFrame::OnClose)
+END_EVENT_TABLE()
+
+gbtProfileFrame::gbtProfileFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+    gbtGameView(p_doc)
+{
+  m_grid = new gbtNfgProfileGrid(p_doc, this);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
+		   "Generate a report with information on profiles");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(GBT_NFG_MENU_PROFILES_NEW, "New",
+		   "Create a new profile");
+  editMenu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate",
+		   "Duplicate this profile");
+  editMenu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete",
+		   "Delete this profile");
+  editMenu->Append(GBT_NFG_MENU_PROFILES_PROPERTIES, "Properties",
+		   "View and edit properties of this profile");
+
+  wxMenu *viewMenu = new wxMenu;
+
+  wxMenu *formatMenu = new wxMenu;
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(formatMenu, "&Format");
+  SetMenuBar(menuBar);
+
+  Show(false);
+}
+
+gbtProfileFrame::~gbtProfileFrame()
+{ }
+
+void gbtProfileFrame::OnClose(wxCloseEvent &p_event)
+{
+  m_doc->SetShowProfiles(false);
+  // Frame is now hidden; leave it that way, don't actually close
+  p_event.Veto();
+}
+
+void gbtProfileFrame::OnUpdate(gbtGameView *p_sender)
+{
+  if (m_doc->ShowProfiles()) {
+    m_grid->OnUpdate();
+    wxSize size = m_grid->GetBestSize();
+    SetClientSize(size);
+    m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
+    m_grid->SetScrollRate(0, 0);
+
+    if (m_doc->GetFilename() != "") {
+      SetTitle(wxString::Format("Gambit - Profiles: [%s] %s", 
+				m_doc->GetFilename().c_str(), 
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+    else {
+      SetTitle(wxString::Format("Gambit - Profiles: %s",
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+  }
+  Show(m_doc->ShowProfiles());
+}
+
 
