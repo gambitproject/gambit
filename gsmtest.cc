@@ -2837,6 +2837,26 @@ int main( void )
 
 
 
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+  gout << "Testing Contains\n";
+  machine->InitCallFunction( "Contains" );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
+  machine->Push( (long) 4 );
+  machine->Push( (long) 5 );
+  machine->PushList( 5 );
+  machine->Bind();
+  machine->Push( (double) 6 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
@@ -2850,4 +2870,6 @@ int main( void )
 
   return 0;
 }
+
+
 

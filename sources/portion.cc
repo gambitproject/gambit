@@ -47,7 +47,6 @@ Portion::Portion( void )
   _NumObj++;
   gout << "--- Portion Ctor, count: " << _NumObj << "\n";
 #endif
-  _ReadOnly = false;
 }
 
 Portion::~Portion()
@@ -58,6 +57,10 @@ Portion::~Portion()
 #endif
 }
 
+bool Portion::operator == ( Portion* p ) const
+{
+  return false;
+}
 
 //---------------------------------------------------------------------
 //                          Error class
@@ -91,6 +94,13 @@ void ErrorPortion::AssignFrom( Portion* p )
   _Value = ( (ErrorPortion*) p )->_Value;
 }
 
+bool ErrorPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( _Value == ( (ErrorPortion*) p )->_Value );
+  else
+    return false;
+}
 
 //---------------------------------------------------------------------
 //                          Reference class
@@ -124,6 +134,13 @@ void ReferencePortion::AssignFrom( Portion* p )
   _Value = ( (ReferencePortion*) p )->_Value;
 }
 
+bool ReferencePortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( _Value == ( (ReferencePortion*) p )->_Value );
+  else
+    return false;
+}
 
 
 //---------------------------------------------------------------------
@@ -155,6 +172,14 @@ void IntPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (IntPortion*) p )->_Value );
+}
+
+bool IntPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (IntPortion*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -201,6 +226,14 @@ void FloatPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (FloatPortion*) p )->_Value );
+}
+
+bool FloatPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (FloatPortion*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -250,6 +283,14 @@ void RationalPortion::AssignFrom( Portion* p )
   *_Value = *( ( (RationalPortion*) p )->_Value );
 }
 
+bool RationalPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (RationalPortion*) p )->_Value );
+  else
+    return false;
+}
+
 
 RationalValPortion::RationalValPortion( gRational value )
 { _Value = new gRational( value ); }
@@ -296,6 +337,14 @@ void TextPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (TextPortion*) p )->_Value );
+}
+
+bool TextPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (TextPortion*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -349,6 +398,14 @@ void BoolPortion::AssignFrom( Portion* p )
   *_Value = *( ( (BoolPortion*) p )->_Value );
 }
 
+bool BoolPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (BoolPortion*) p )->_Value );
+  else
+    return false;
+}
+
 
 BoolValPortion::BoolValPortion( bool value )
 { _Value = new bool( value ); }
@@ -398,6 +455,14 @@ void OutcomePortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (OutcomePortion*) p )->_Value );
+}
+
+bool OutcomePortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (OutcomePortion*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -451,6 +516,14 @@ void EfPlayerPortion::AssignFrom( Portion* p )
   *_Value = *( ( (EfPlayerPortion*) p )->_Value );
 }
 
+bool EfPlayerPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (EfPlayerPortion*) p )->_Value );
+  else
+    return false;
+}
+
 
 EfPlayerValPortion::EfPlayerValPortion( Player* value )
 { _Value = new Player*( value ); }
@@ -501,6 +574,14 @@ void InfosetPortion::AssignFrom( Portion* p )
   *_Value = *( ( (InfosetPortion*) p )->_Value );
 }
 
+bool InfosetPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (InfosetPortion*) p )->_Value );
+  else
+    return false;
+}
+
 
 InfosetValPortion::InfosetValPortion( Infoset* value )
 { _Value = new Infoset*( value ); }
@@ -549,6 +630,14 @@ void NodePortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (NodePortion*) p )->_Value );
+}
+
+bool NodePortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (NodePortion*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -603,6 +692,14 @@ void ActionPortion::AssignFrom( Portion* p )
   *_Value = *( ( (ActionPortion*) p )->_Value );
 }
 
+bool ActionPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (ActionPortion*) p )->_Value );
+  else
+    return false;
+}
+
 
 ActionValPortion::ActionValPortion( Action* value )
 { _Value = new Action*( value ); }
@@ -654,6 +751,14 @@ template <class T> void MixedPortion<T>::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (MixedPortion<T>*) p )->_Value );
+}
+
+template <class T> bool MixedPortion<T>::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (MixedPortion<T>*) p )->_Value );
+  else
+    return false;
 }
 
 
@@ -724,6 +829,14 @@ template <class T> void BehavPortion<T>::AssignFrom( Portion* p )
   *_Value = *( ( (BehavPortion<T>*) p )->_Value );
 }
 
+template <class T> bool BehavPortion<T>::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (BehavPortion<T>*) p )->_Value );
+  else
+    return false;
+}
+
 
 template <class T> BehavValPortion<T>::BehavValPortion( BehavProfile<T>& value)
 { _Value = &value; }
@@ -775,6 +888,15 @@ void BaseNfgPortion::AssignFrom( Portion* p )
   *_Value = *( ( (BaseNfgPortion*) p )->_Value );
 }
 
+bool BaseNfgPortion::operator == ( Portion *p ) const
+{
+/*
+  assert( p->Type() == Type() );
+  return ( *_Value == *( (BaseNfgPortion*) p )->_Value );
+*/
+  return false;
+}
+
 
 //---------------------------------------------------------------------
 //                          Nfg class
@@ -795,8 +917,6 @@ template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
 
 template <class T> Portion* NfgPortion<T>::RefCopy( void ) const
 { return new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); }
-
-
 
 
 
@@ -852,6 +972,15 @@ void BaseEfgPortion::AssignFrom( Portion* p )
   *_Value = *( ( (BaseEfgPortion*) p )->_Value );
 }
 
+bool BaseEfgPortion::operator == ( Portion *p ) const
+{
+/*
+  assert( p->Type() == Type() );
+  return ( *_Value == *( (BaseEfgPortion*) p )->_Value );
+*/
+  return false;
+}
+
 
 //---------------------------------------------------------------------
 //                          Efg class
@@ -872,7 +1001,6 @@ template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
 
 template <class T> Portion* EfgPortion<T>::RefCopy( void ) const
 { return new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); }
-
 
 
 
@@ -948,6 +1076,15 @@ void OutputPortion::AssignFrom( Portion* p )
 */
 }
 
+bool OutputPortion::operator == ( Portion *p ) const
+{
+/*
+  assert( p->Type() == Type() );
+  return ( *_Value == *( (OutputPortion*) p )->_Value );
+*/
+  return false;
+}
+
 
 OutputValPortion::OutputValPortion( gOutput& value )
 { _Value = &value; }
@@ -1003,6 +1140,15 @@ void InputPortion::AssignFrom( Portion* p )
   assert( p->Type() == Type() );
   *_Value = *( ( (InputPortion*) p )->_Value );
 */
+}
+
+bool InputPortion::operator == ( Portion *p ) const
+{
+/*
+  assert( p->Type() == Type() );
+  return ( *_Value == *( (InputPortion*) p )->_Value );
+*/
+  return false;
 }
 
 
@@ -1066,6 +1212,34 @@ void ListPortion::AssignFrom( Portion* p )
     result = Insert( value[ i ]->ValCopy(), i );
     assert( result != 0 );
   }
+}
+
+bool ListPortion::operator == ( Portion *p ) const
+{
+  bool result = true;
+  int i;
+  int length = _Value->Length();
+
+  if( p->Type() == Type() )
+  {
+    if( _Value->Length() == ( (ListPortion*) p )->_Value->Length() )
+    {
+      for( i = 1; i <= length; i++ )
+      {
+	result = result & 
+	  ( (*_Value)[ i ] == ( *( (ListPortion*) p )->_Value )[ i ] );
+      }
+    }
+    else
+    {
+      result = false;
+    }
+  }
+  else
+  {
+    result = false;
+  }
+  return result;
 }
 
 
@@ -1204,6 +1378,25 @@ int ListPortion::Insert( Portion* item, int index )
   }
   return result;
 }
+
+
+int ListPortion::Contains( Portion* item ) const
+{
+  int result = 0;
+  int i;
+  int length = _Value->Length();
+
+  for( i = 1; i < length; i++ )
+  {
+    if( (*_Value)[ i ]->operator == ( item ) )
+    {
+      result = i;
+      break;
+    }
+  }
+  return result;
+}
+
 
 
 Portion* ListPortion::Remove( int index )

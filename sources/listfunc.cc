@@ -25,6 +25,12 @@ Portion *GSM_Remove(Portion **param)
   return ret;
 }
 					    
+Portion *GSM_Contains(Portion **param)
+{
+  return new BoolValPortion(((ListPortion *) param[0])->Contains(param[1]));
+}
+
+
 Portion *GSM_LengthList(Portion **param)
 {
   return new IntValPortion(((ListPortion *) param[0])->Length());
@@ -128,10 +134,17 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_LengthList, 1);
   FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porALL | porLIST,
 			NO_DEFAULT_VALUE);
-  
   FuncObj->SetFuncInfo(GSM_LengthText, 1);
   FuncObj->SetParamInfo(GSM_LengthText, 0, "text", porTEXT);
   gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Contains");
+  FuncObj->SetFuncInfo(GSM_Contains, 2);
+  FuncObj->SetParamInfo(GSM_Contains, 0, "list", porALL | porLIST);
+  FuncObj->SetParamInfo(GSM_Contains, 1, "n", porVALUE);
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("NthElement");
   FuncObj->SetFuncInfo(GSM_NthElement, 2);
