@@ -133,9 +133,9 @@ template <class T> class Efg : public BaseEfg   {
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
 		    gPVector<T> &, gDPVector<T> &) const;
     void NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
-			 int index, gArray<T> &NRProbs);
+			 int &index, gArray<T> &NRProbs);
     void Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
-		 int index, gArray<T> BProbs, gPVector<T> &gpv);
+		 int &index, gArray<T> &BProbs, gPVector<T> &gpv);
 
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);

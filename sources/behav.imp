@@ -304,19 +304,19 @@ template <class T>
 gArray<T> Efg<T>::NodeRealizProbs(const BehavProfile<T> &bp)
 {
   gArray<T> NRProbs(NumNodes(*bp.BelongsTo()));
-  NodeRealizProbs( root, (T) 1.0, bp, 1, NRProbs);
+  int index = 1;
+  NodeRealizProbs( root, (T) 1.0, bp, index, NRProbs);
   return NRProbs;
 }
 
 template <class T>
 void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
-				   int index, gArray<T> &NRProbs)
+			     int &index, gArray<T> &NRProbs)
 {
 
   NRProbs[index] = prob;
 
   int pl = (n->infoset) ? n->infoset->player->number : -1;
-  int iset = (n->infoset) ? n->infoset->number : 0;
 
   T cumprob((T) 0), newprob((T) 0);
   int i, nc = n->children.Length();
@@ -325,7 +325,7 @@ void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
     newprob = ((pl) ? profile(pl, n->infoset->number, i) :
 	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
     cumprob += newprob;
-    NodeRealizProbs(n->children[i], prob * newprob, profile, index + 1,
+    NodeRealizProbs(n->children[i], prob * newprob, profile, ++index,
 		     NRProbs);
   }
   
@@ -335,7 +335,7 @@ void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
     else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
 		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
     
-    NodeRealizProbs(n->children[nc], prob * newprob, profile, index + 1,
+    NodeRealizProbs(n->children[nc], prob * newprob, profile, ++index,
 		     NRProbs);
   }
 }
@@ -343,30 +343,37 @@ void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
 template <class T> gArray<T> Efg<T>::Beliefs( const BehavProfile<T> &bp )
 {
   gArray<T> BProbs(NumNodes(*bp.BelongsTo()));
-  gDPVector<T> payoff;
-  gPVector<T> probs;
+  gDPVector<T> payoff(Dimensionality());
+  gPVector<T> probs(Dimensionality().Lengths());
   CondPayoff( bp, payoff, probs);
-  Beliefs ( root, (T) 1.0, bp, 1, BProbs, probs);
+  probs.Dump(gout);  gout << '\n';
+  int index = 1;
+  Beliefs ( root, (T) 1.0, bp, index, BProbs, probs);
+  BProbs.Dump(gout);  gout << '\n';
   return BProbs;
 }
 
 template <class T>
 void Efg<T>::Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
-		     int index, gArray<T> BProbs, gPVector<T> &gpv)
+		     int &index, gArray<T> &BProbs, gPVector<T> &gpv)
 {
-
   int pl = (n->infoset) ? n->infoset->player->number : -1;
   int iset = (n->infoset) ? n->infoset->number : 0;
   T cumprob((T) 0), newprob((T) 0);
   int i, nc = n->children.Length();
 
-  BProbs[index] = (n->infoset) ? prob / gpv(pl,iset) : 1;
+  gout << prob << '\n';
+
+  if (pl == 0 || pl == -1)
+    BProbs[index] = (T) 1.0;
+  else
+    BProbs[index] = prob / gpv(pl, iset);
   
   for (i = 1; i < nc; i++) {
     newprob = ((pl) ? profile(pl, n->infoset->number, i) :
 	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
     cumprob += newprob;
-    Beliefs(n->children[i], prob * newprob, profile, index + 1,
+    Beliefs(n->children[i], prob * newprob, profile, ++index,
 	    BProbs, gpv);
   }
   
@@ -376,7 +383,7 @@ void Efg<T>::Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
     else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
 		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
     
-    Beliefs(n->children[nc], prob * newprob, profile, index + 1,
+    Beliefs(n->children[nc], prob * newprob, profile, ++index,
 	    BProbs, gpv);
   }
 }
