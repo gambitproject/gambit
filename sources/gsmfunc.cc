@@ -134,7 +134,8 @@ Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
       result = _FuncInfo[_FuncIndex].FuncPtr( param );
     else 
       result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
-				    _FuncInfo[_FuncIndex], param );
+				    _FuncInfo[_FuncIndex], param,
+				    FuncName() );
   }
   return result;
 }

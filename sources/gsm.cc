@@ -142,6 +142,7 @@ GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
   _StackStack->Push(new gStack< Portion* >(size));
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
+  _FuncNameStack = new gStack< gString >;
 
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
@@ -164,6 +165,7 @@ GSM::~GSM()
   delete _StackStack->Pop();
   delete _StackStack;
 
+  delete _FuncNameStack;
 
 }
 
@@ -611,7 +613,8 @@ Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 
 Portion* GSM::ExecuteUserFunc(gclExpression& program, 
 			      const FuncInfoType& func_info,
-			      Portion** param)
+			      Portion** param, 
+			      const gString& funcname )
 {
   Portion* result;
   Portion* result_copy;
@@ -619,6 +622,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
   _RefTableStack->Push(new RefHashTable);
   _StackStack->Push(new gStack< Portion* >);
+  _FuncNameStack->Push( funcname );
 
   for(i = 0; i < func_info.NumParams; i++)
   {
@@ -661,8 +665,19 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
   delete _StackStack->Pop();
   delete _RefTableStack->Pop();
+  _FuncNameStack->Pop();
 
   return result;
+}
+
+
+
+gString GSM::UserFuncName( void ) const
+{
+  if( _FuncNameStack->Depth() > 0 )
+    return _FuncNameStack->Peek();
+  else
+    return "";
 }
 
 

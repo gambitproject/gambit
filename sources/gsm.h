@@ -56,8 +56,10 @@ private:
   Portion* _INPUT;
   Portion* _NULL;
 
+
   gStack< gStack< Portion* >* >* _StackStack;
   gStack< RefHashTable* >*       _RefTableStack;
+  gStack< gString >*             _FuncNameStack;
   RefHashTable                   _GlobalRefTable;
   FunctionHashTable*             _FuncTable;
 
@@ -105,10 +107,13 @@ public:
   bool AddFunction( FuncDescObj* func );
   bool DeleteFunction( FuncDescObj* func );
 
-  Portion *Execute(gclExpression *, bool user_func = false );
+  Portion* Execute(gclExpression *, bool user_func = false );
   Portion* ExecuteUserFunc( gclExpression& program, 
 			   const FuncInfoType& func_info,
-			   Portion** param );
+			   Portion** param, 
+			   const gString& funcname );
+  gString UserFuncName( void ) const;
+  
   void Clear  ( void );
 
   Portion* PopValue( void );
