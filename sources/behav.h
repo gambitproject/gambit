@@ -142,14 +142,12 @@ public:
   T GetIsetProb(const Infoset *iset);
   const T &GetIsetValue(const Infoset *iset);
   T GetActionProb(const Action *act) const;
-  const T &GetActionValue(const Action *act);
+  const T &GetActionValue(const Action *act) const;
   const T &GetRegret(const Action *act);
 
   // COMPUTATION OF INTERESTING QUANTITIES
 
   T Payoff(int p_player) const;
-  void ComputeActionValues(Node *node, T prob);
-  void ComputeActionValues(void);
   gDPVector<T> Beliefs(void);
   T LiapValue(void);
   T QreValue(const gVector<T> &lambda, bool &);

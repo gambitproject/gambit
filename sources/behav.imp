@@ -488,9 +488,11 @@ T BehavProfile<T>::GetActionProb(const Action *act) const
 
 
 template <class T>
-const T &BehavProfile<T>::GetActionValue(const Action * act)
+const T &BehavProfile<T>::GetActionValue(const Action *act) const
 { 
-  ComputeSolutionData();
+  // Hack to cast away const; ComputeSolutionData() should be
+  // const, but some stuff needs fixed before that can happen
+  ((BehavProfile *) this)->ComputeSolutionData();
   return ActionValue(act);
 }
 
@@ -550,6 +552,7 @@ template <class T>
 T BehavProfile<T>::DiffActionValue(const Action *p_action,
 				   const Action *p_oppAction) const
 {
+  ((BehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 0;
   Infoset *infoset = p_action->BelongsTo();
   EFPlayer *player = p_action->BelongsTo()->GetPlayer();
@@ -572,6 +575,7 @@ template <class T>
 T BehavProfile<T>::DiffRealizProb(const Node *p_node,
 				  const Action *p_oppAction) const
 {
+  ((BehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 1;
   const Node *node = p_node;
   while (node->GetParent()) {
@@ -589,6 +593,7 @@ template <class T>
 T BehavProfile<T>::DiffNodeValue(const Node *p_node, const EFPlayer *p_player,
 				 const Action *p_oppAction) const
 {
+  ((BehavProfile<T> *) this)->ComputeSolutionData();
   T deriv = (T) 0;
 
   if (m_efg->NumChildren(p_node) > 0) {
@@ -619,8 +624,6 @@ T BehavProfile<T>::DiffNodeValue(const Node *p_node, const EFPlayer *p_player,
 template <class T>
 void BehavProfile<T>::ComputeSolutionDataPass2(const Node *node)
 {
-  //  gVector<T> nv = NodeValue(node);
-
   if (node->outcome) {
     for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
       m_nodeValues(node->number, pl) += Payoff(node->outcome, pl);
@@ -674,29 +677,29 @@ void BehavProfile<T>::ComputeSolutionDataPass2(const Node *node)
 template <class T>
 void BehavProfile<T>::ComputeSolutionDataPass1(const Node *node)
 {
-  T &r = RealizProb(node);
-  if(node->GetParent()) {
-    r = RealizProb(node->GetParent()) * ActionProb(node->GetAction());
+  if (node->GetParent()) {
+    RealizProb(node) = RealizProb(node->GetParent()) * ActionProb(node->GetAction());
   }
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    m_nodeValues(node->number, pl) = (T) 0;
+  else {
+    RealizProb(node) = (T) 1;
   }
   
-  Infoset *iset = node->infoset;
-  
-  if (iset) {
+  if (node->GetInfoset()) {
     const gArray<Node *> &children(m_efg->Children(node));
-    for(int i=1;i<=children.Length();i++)
+    for (int i = 1; i <= children.Length(); i++) {
       ComputeSolutionDataPass1(children[i]);
+    }
   }
 }
 
 template <class T>
 void BehavProfile<T>::ComputeSolutionData(void)
 {
-  if(!m_cached_data) {
+  if (!m_cached_data) {
     m_actionValues = (T) 0;
-    m_realizProbs[m_efg->RootNode()->number] = (T) 1;
+    m_nodeValues = (T) 0;
+    m_infosetValues = (T) 0;
+    m_gripe = (T) 0;
     ComputeSolutionDataPass1(m_efg->RootNode());
     ComputeSolutionDataPass2(m_efg->RootNode());
 
@@ -774,83 +777,6 @@ void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
 	
 }
 
-//----------------
-// ComputeActionValues
-//----------------
-
-template <class T>
-void BehavProfile<T>::ComputeActionValues(Node *node, T prob)
-{
-  //  gVector<T> nv = NodeValue(node);
-
-  if (node->outcome) {
-    for (int pl = 1 ; pl <= m_efg->NumPlayers(); pl++) {
-      m_nodeValues(node->number, pl) += Payoff(node->outcome, pl);
-    }
-  }
-
-  Infoset * iset = node->infoset;
-
-  if (iset) {
-    const gArray<Node *> &children = m_efg->Children(node); 
-	
-    // push down payoffs from outcomes attached to non-terminal nodes 
-    for (int child = 1; child <= children.Length(); child++) {
-      m_nodeValues.SetRow(children[child]->number,
-			  m_nodeValues.Row(node->number));
-    }
-    
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-      m_nodeValues(node->number, pl) = (T) 0;
-    }
-
-    const gArray<Action *> &acts = m_support.Actions(iset);
-    for (int act = 1; act <= acts.Length(); act++)  {
-      Node * child = node->GetChild(acts[act]);
-      
-      const T newprob = ActionProb(acts[act]);
-      ComputeActionValues(child, prob * newprob);
-      
-      //      gVector<T> s = NodeValue(child);
-      
-      for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-	m_nodeValues(node->number, pl) += m_nodeValues(child->number, pl) * newprob;
-      }
-
-      // for some mysterious reason, the following leads to 
-      // differnces in insignificant digits that can eventually lead to different 
-      // convergence properties (i. e., in LiapSolve[LoadEfg["e06.efg"]])
-
-      // nv += s * newprob;  
-      
-      if (!iset->IsChanceInfoset()) {
-	ActionValue(acts[act]) += prob * m_nodeValues(child->number, iset->GetPlayer()->GetNumber());
-      }
-    }
-  }
-}
-
-template <class T> void BehavProfile<T>::ComputeActionValues(void)
-{
-  m_actionValues = (T) 0;
-  ComputeActionValues(m_efg->RootNode(), (T) 1);
-
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    for (int iset = 1; iset <= m_efg->NumInfosets()[pl]; iset++) {
-      Infoset *infoset = m_efg->Players()[pl]->Infosets()[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++) { 
-	// This will protect against divides by zero.
-	// It will leave unreached infoset values at zero.
-	if (IsetProb(infoset) != IsetProb(infoset) * (T) 0) {
-	  m_actionValues(infoset->GetPlayer()->GetNumber(),
-			 infoset->GetNumber(),
-			 act) /= IsetProb(infoset);
-	}
-      }
-    }
-  }
-}
-
 template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void)
 {
   ComputeSolutionData();
@@ -876,7 +802,7 @@ template <class T> T BehavProfile<T>::LiapValue(void)
 
   T x, result = ((T) 0), avg, sum;
 
-  ComputeActionValues();
+  ComputeSolutionData();
 
   const gArray<EFPlayer *> &players = m_efg->Players();
   for (int i = 1; i <= players.Length(); i++) {
@@ -914,7 +840,7 @@ template <class T> T BehavProfile<T>::QreValue(const gVector<T> &lambda, bool &_
 
   T val = (T)0, prob, psum, z,factor;
  
-  ComputeActionValues();
+  ComputeSolutionData();
 
   const gArray<EFPlayer *> players = m_efg->Players();
   for (int pl = 1; pl <= players.Length(); pl++)  {
