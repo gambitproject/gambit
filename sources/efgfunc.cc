@@ -138,7 +138,7 @@ Portion *GSM_AttachOutcome(Portion **param)
   if (n->BelongsTo() != c->BelongsTo())   return 0;
   n->SetOutcome(c);
   
-  return new NodeValPortion(n);
+  return new OutcomeValPortion(c);
 }
 
 Portion *GSM_DeleteTree(Portion **param)
@@ -377,6 +377,23 @@ Portion *GSM_Actions(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   return ArrayToList(s->GetActionList());
 }
+
+Portion *GSM_CentroidEfgFloat(Portion **param)
+{
+  ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
+  BehavProfile<double> *P = new BehavProfile<double>(E);
+  return new BehavValPortion<double>(*P);
+}
+
+Portion *GSM_CentroidEfgRational(Portion **param)
+{
+  ExtForm<gRational> &E = ((EfgPortion<gRational> *) param[0])->Value();
+  BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+  return new BehavValPortion<gRational>(*P);
+}
+
+extern Portion *GSM_CentroidNfgFloat(Portion **);
+extern Portion *GSM_CentroidNfgRational(Portion **);
 
 Portion *GSM_Chance(Portion **param)
 {
@@ -816,6 +833,24 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Actions");
   FuncObj->SetFuncInfo(GSM_Actions, 1);
   FuncObj->SetParamInfo(GSM_Actions, 0, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Centroid");
+  FuncObj->SetFuncInfo(GSM_CentroidEfgFloat, 1);
+  FuncObj->SetParamInfo(GSM_CentroidEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+
+  FuncObj->SetFuncInfo(GSM_CentroidEfgRational, 1);
+  FuncObj->SetParamInfo(GSM_CentroidEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+
+  FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
+  FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+
+  FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
+  FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Chance");
