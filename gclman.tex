@@ -1114,7 +1114,6 @@ Or[x->BOOL, y->BOOL] =: BOOL
 
 \begin{verbatim}
 Divide[x->FLOAT, y->FLOAT] =: FLOAT
-Divide[x->INTEGER, y->INTEGER] =: INTEGER
 Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Exp[x->FLOAT] =: FLOAT
 Greater[x->FLOAT, y->FLOAT] =: BOOL
@@ -1123,6 +1122,7 @@ Greater[x->RATIONAL, y->RATIONAL] =: BOOL
 GreaterEqual[x->FLOAT, y->FLOAT] =: BOOL
 GreaterEqual[x->INTEGER, y->INTEGER] =: BOOL
 GreaterEqual[x->RATIONAL, y->RATIONAL] =: BOOL
+IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
 Less[x->FLOAT, y->FLOAT] =: BOOL
 Less[x->INTEGER, y->INTEGER] =: BOOL
 Less[x->RATIONAL, y->RATIONAL] =: BOOL
@@ -1174,7 +1174,7 @@ DeleteTree[node->NODE] =: NODE
 DetachOutcome[node->NODE] =: NODE
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 InsertNode[node->NODE, infoset->INFOSET] =: NODE
-JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
@@ -1241,7 +1241,10 @@ Text[x->TEXT] =: TEXT
 
 \begin{verbatim}
 Behav[mixed->MIXED] =: BEHAV
-ElimDom[start->NFSUPPORT, {strong->BOOL}, {time<->FLOAT}] =: NFSUPPORT 
+%ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+%   {time<->FLOAT}] =: NFSUPPORT 
+ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+   {time<->FLOAT}] =: NFSUPPORT 
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
@@ -1289,10 +1292,11 @@ SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 
 \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION)
-Centroid[efg->EFG] =: BEHAV
-Centroid[nfg->NFG,support->NFSUPPORT] =: MIXED
-Chance[efg->EFG] =: EFPLAYER
+Centroid[efg<->EFG] =: BEHAV
+Centroid[nfg<->NFG,support->NFSUPPORT] =: MIXED
+Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
+HasOutcome[node->NODE] =: BOOL
 Infoset[node->NODE] =: INFOSET
 Infosets[player->EFPLAYER] =: LIST(INFOSET)
 IsPredecessor[node->NODE, of->NODE] =: BOOL
@@ -1684,20 +1688,8 @@ Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Returns the quotient $x / y$. 
 \item
 [Short form:] \verb+x / y+
-\ed
-
-\item 
-\protect \large \begin{verbatim}
-Divide[x->INTEGER, y->INTEGER] =: INTEGER
-\end{verbatim} \normalsize
-
-\bd
-Returns the quotient $x / y$, rounded to the next integer
-towards zero.
 \item
-[Short form:] \verb%x DIV y%
-\item
-[See also:] \verb+Modulus+.
+[See also:] {\tt IntegerDivide}
 \ed
 
 %--E--
@@ -1716,9 +1708,23 @@ the stopwatch was running.
 [See also:] {\tt IsWatchRunning}, {\tt StartWatch}, {\tt StopWatch}.
 \ed
 
+%\item
+%\protect \large \begin{verbatim}
+%ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+%        {time<->FLOAT} =: NFSUPPORT
+%\end{verbatim} \normalsize
+%
+%\bd
+%Successively eliminates dominated strategies in a support
+%\verb+support+ of a normal form game, returning the final support.  
+%\item
+%[Seealso:] {\tt ElimDom}
+%\ed
+
 \item
 \protect \large \begin{verbatim}
-ElimDom[support->NFSUPPORT, {strong->BOOL}, {time<->FLOAT} =: NFSUPPORT
+ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+        {time<->FLOAT} =: NFSUPPORT
 \end{verbatim} \normalsize
 
 \bd
@@ -1998,18 +2004,17 @@ machine.
 %--H--
 
 
-%Not implemented yet
-%\item
-%\protect \large \begin{verbatim}
-%HasOutcome[node->NODE] =: BOOL
-%\end{verbatim} \normalsize
+\item
+\protect \large \begin{verbatim}
+HasOutcome[node->NODE] =: BOOL
+\end{verbatim} \normalsize
 
-%\bd
-%Returns whether the node \verb+node+ currently has an outcome associated
-%with it.
-%\item
-%[See also:] {\tt AttachOutcome}, {\tt DetachOutcome}, {\tt Outcome}.
-%\ed
+\bd
+Returns whether the node \verb+node+ currently has an outcome associated
+with it.
+\item
+[See also:] {\tt AttachOutcome}, {\tt DetachOutcome}, {\tt Outcome}.
+\ed
 
 %--I--
 
@@ -2104,6 +2109,20 @@ corresponding number of branches are created from the new node.  \verb+node+
 becomes the first child of the new node.  Returns the new node.
 \item
 [See also:] {\tt AppendNode}, {\tt NewInfoset}.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
+\end{verbatim} \normalsize
+
+\bd
+Returns the quotient $x / y$, rounded to the next integer
+towards zero.
+\item
+[Short form:] \verb%x DIV y%
+\item
+[See also:] \verb+Modulus+.
 \ed
 
 \item
@@ -2374,28 +2393,31 @@ to be found.
 [start:] Sets the starting profile for the descent algorithm.  The
 default is the centroid.
 \item
-[ntries:] Sets the maximum number of attempts at finding each
+[nTries:] Sets the maximum number of attempts at finding each
 equilibrium. Default is 10
 \item
 [stopAfter:] Sets the number of equilibria to find.  Has a default
-value of 1.  [maxitsOpt:] Sets the maximum number of iterations to the
-n-dimensional optimization routine.  Default is 200.
+value of 1.  
 \item
-[maxits1D:] Sets the maximum number of iterations in the
+[maxits1:] Sets the maximum number of iterations in the
 1-dimensional line search.  Default is 100.
 \item
-[maxitsND:] Sets the maximum number of iterations in the
+[maxitsN:] Sets the maximum number of iterations in the
 n-dimensional optimization.  
 \item
-[tolND:] Sets the tolerance for the n-dimensional optimization
+[tolN:] Sets the tolerance for the n-dimensional optimization
 routine.  Default is 1.0e-10.
 \item
-[tol1D:] Sets the tolerance for the 1-dimensional line search.
+[tol1:] Sets the tolerance for the 1-dimensional line search.
 Default is 2.0e-10.
 \item
 [time:] Returns the elapsed time for the operation.
+\item
+[nEvals:] Returns the number of function evaluations for the operation.
 \ed
 \ed
+
+
 
 \item
 \protect \large \begin{verbatim}
