@@ -171,6 +171,18 @@ bool GSM::Push( const gString& data )
   return true;
 }
 
+bool GSM::Push( gInput& data )
+{
+  _Push( new InputRefPortion( data ) );
+  return true;
+}
+
+bool GSM::Push( gOutput& data )
+{
+  _Push( new OutputRefPortion( data ) );
+  return true;
+}
+
 
 bool GSM::PushList( const int num_of_elements )
 { 

@@ -31,7 +31,8 @@ typedef enum
 
   iQUIT, iIF_GOTO, iGOTO, iCLEAR,
 
-  iPUSH, iPUSHLIST, iPUSHREF,
+  iPUSH, iPUSHINPUT, iPUSHOUTPUT, 
+  iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD, iREAD, iWRITE,
 
   iADD, iSUB, iCONCAT, iMUL, iDOT, iDIV, iINTDIV, iNEG,
@@ -146,13 +147,35 @@ template <class T> class Push : public Instruction
   void Output( gOutput& s ) const;
 };
 
+class PushInput : public Instruction
+{
+ private:
+  gInput* _Value;
+ public:
+  PushInput( gInput& value );
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+class PushOutput : public Instruction
+{
+ private:
+  gOutput* _Value;
+ public:
+  PushOutput( gOutput& value );
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
 
 class PushList : public Instruction
 {
  private:
   int _NumElements;
  public:
-  PushList( const int num_elements );
+  PushList( int num_elements );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;

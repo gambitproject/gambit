@@ -100,6 +100,8 @@ public:
   bool Push ( const double&    data );
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
+  bool Push ( gInput&    data );
+  bool Push ( gOutput&   data );
 
   bool PushList ( const int num_of_elements );
 

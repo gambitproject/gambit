@@ -117,6 +117,27 @@ template <class T> void Push<T>::Output( gOutput& s ) const
 { s << "Push( " << _Value << " )"; }
 
 
+PushInput::PushInput( gInput& value )
+  :_Value( &value )
+{ }
+Opcode PushInput::Type( void ) const
+{ return iPUSHINPUT; }
+bool PushInput::Execute( GSM& gsm ) const
+{ return gsm.Push( *_Value ); }
+void PushInput::Output( gOutput& s ) const
+{ s << "Push( (Input) )"; }
+
+PushOutput::PushOutput( gOutput& value )
+  :_Value( &value )
+{ }
+Opcode PushOutput::Type( void ) const
+{ return iPUSHOUTPUT; }
+bool PushOutput::Execute( GSM& gsm ) const
+{ return gsm.Push( *_Value ); }
+void PushOutput::Output( gOutput& s ) const
+{ s << "Push( (Output) )"; }
+
+
 PushList::PushList( const int num_elements )
      :_NumElements( num_elements )
 { }
