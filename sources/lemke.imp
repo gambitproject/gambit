@@ -134,12 +134,12 @@ const gList<MixedSolution<T> > &LemkeModule<T>::GetSolutions(void) const
 template <class T> void LemkeModule<T>::AddSolutions(void)
 {
   int i,j;
-  int n1=NF.NumStrats(1);
-  int n2=NF.NumStrats(2);
+  int n1=support.NumStrats(1);
+  int n2=support.NumStrats(2);
   solutions.Flush();
 
   for (i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF);
+    MixedProfile<T> profile(NF,support);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)
