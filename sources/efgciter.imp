@@ -66,12 +66,23 @@ template <class T> void EfgContIter<T>::Freeze(int pl, int iset)
 template <class T> int EfgContIter<T>::NextContingency(void)
 {
   int pl = _efg->NumPlayers();
+
+
+  while (pl > 0 && _efg->PlayerList()[pl]->NumInfosets() == 0)
+    --pl;
+
+  if (pl == 0)   return 0;
+
   int iset = _efg->PlayerList()[pl]->NumInfosets();
     
   while (true)   {
     if (pl == _frozen_pl && iset == _frozen_iset)  {
       if (iset == 1)  {
-	if (--pl == 0)   return 0;
+	do  {
+	  --pl;
+	}  while (pl > 0 && _efg->PlayerList()[pl]->NumInfosets() == 0);
+
+	if (pl == 0)   return 0;
 	iset = _efg->PlayerList()[pl]->NumInfosets();
       }
       else
@@ -89,7 +100,11 @@ template <class T> int EfgContIter<T>::NextContingency(void)
 
     iset--;
     if (iset == 0)  {
-      if (--pl == 0)   return 0;
+      do  {
+	--pl;
+      }  while (pl > 0 && _efg->PlayerList()[pl]->NumInfosets() == 0);
+
+      if (pl == 0)   return 0;
       iset = _efg->PlayerList()[pl]->NumInfosets();
     }
   }
