@@ -7,146 +7,146 @@
 #ifndef EXTFORM_H
 #define EXTFORM_H
 
-#include "node.h"
+#include "gstring.h"
+#include "gnumber.h"
+#include "gtuple.h"
+#include "gmap.h"
+#include "noderep.h"
 
+class Outcome;
+class NodeSet;
+//
+// The extensive form class contains all the functionality necessary for
+// convenient construction and manipulation of extensive form games.
+// Support is available for multiple subgames, thus allowing for the
+// construction of repeated and stochastic games.
+//
+// The subgames of an extensive form are assigned arbitrary positive
+// integers.  There is always a subgame number 1 defined; this game is
+// considered the "root" subgame and the root node of this subgame is the
+// root node of the whole extensive form.  Other subgames may be assigned
+// any number; they need not be consecutive.
+//
 class ExtForm    {
   private:
-    int efg_no;
-    gString name;
-    NodeSet nodes;
+    gString title;
+    gTuple<gString> players;
+    gSparseSet<NodeSet *> nodes;
+    gSparseSet<Outcome *> outcomes;
+
+    void AddPlayer(int p);
+    int CreateInfoset(int p, int game, int iset);
 
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
+//
+// These are being defined privately for now so they are not accidentally
+// used.  They will be implemented later.
+//+grp
+    ExtForm(const ExtForm &);
+    ExtForm &operator=(const ExtForm &);
+//-grp
+
+    int EfgYaccer(void);
+
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
-    ExtForm(int number, int numPlayers, int from_file = 0) : 
-    efg_no(number), nodes(number, numPlayers, from_file)   { }
-    ~ExtForm()  { }
+    ExtForm(void);
+    ExtForm(gInput &f);  
+    ~ExtForm(); 
 
-	//# HIGH-LEVEL OPERATIONS
+        //# TITLE ACCESS AND MANIPULATION
+    void SetTitle(const gString &s);
+    const gString &GetTitle(void) const;
+
+        //# READING AND WRITING DATA FILES
+    void ReadEfgFile(gInput &f);
+    void WriteEfgFile(gOutput &f) const;
+
+	//# DATA ACCESS -- GENERAL INFORMATION
+    int NumNodes(void) const;
+    int NumNodes(int game) const;
+    int NumNodes(int game, int pl) const;
+    int NumNodes(int game, int pl, int iset) const;
+    int NumPlayers(void) const;
+    int NumInfosets(int game, int pl) const;
+    int NumOutcomes(void) const;
+
+	//# DATA ACCESS -- NODES
+    Node RootNode(int game = 1) const;
+    Node GetParent(const Node &n) const;
+    int NumChildren(const Node &n) const;
+    Node GetChildNumber(const Node &n, int number) const;
+    gBlock<Node> GetChildren(const Node &n) const;
+    Node GetPriorSibling(const Node &n) const;
+    Node GetNextSibling(const Node &n) const;
+    int HasSuccessorGame(const Node &n) const;
+    Node GetSuccessorGameRoot(const Node &n) const;
+    int IsSuccessor(const Node &n, const Node &from) const;
+    int IsPredecessor(const Node &n, const Node &of) const;
+    gString GetNodeLabel(const Node &n) const;
+    int GetOutcome(const Node &n) const;
+    int GetNextGame(const Node &n) const;
+
+        //# TREE MODIFICATION ROUTINES -- SUBGAMES
+    int CreateSubgame(void);
+    int CreateSubgame(int game, int from_file = 0);
+    void RemoveSubgame(int game);
+    gString GetSubgameLabel(int game) const;
+    void LabelSubgame(int game, const gString &name);
+    int IsSubgameDefined(int game) const;
+
+	//# TREE MODIFICATION ROUTINES -- NODES
     Node AddNode(const Node &n, int player, int child_count);
-    void SetNodeLabel(const Node &n, const gString &s)
-      { if (nodes.IsMember(n))  nodes.SetNodeName(n, s); }
+    void LabelNode(const Node &n, const gString &s);
     Node InsertNode(const Node &n, int player, int child_count);
     Node DeleteNode(const Node &n, int keep);
+    void SetOutcome(const Node &n, int outcome);
+    void SetNextGame(const Node &n, int game);
 
+        //# TREE MODIFICATION ROUTINES -- INFORMATION SETS
     Node JoinInfoset(const Node &new_node, const Node &to_iset);
     Node LeaveInfoset(const Node &n);
     Node MergeInfoset(const Node &from, const Node &into);
-    void LabelInfoset(const Node &n, const gString &label)
-      { if (!nodes.IsMember(n)) return;
-	nodes.SetInfosetName(n[1], n[2], label); }
-    void LabelInfoset(int pl, int iset, const gString &label)
-      { nodes.SetInfosetName(pl, iset, label); }
-    gString GetInfosetName(const Node &n)
-      { if (!nodes.IsMember(n)) return "Not defined";
-	return nodes.GetInfosetName(n[1], n[2]); }
+    void LabelInfoset(const Node &n, const gString &label);
+    void LabelInfoset(int game, int pl, int iset, const gString &label);
+    gString GetInfosetLabel(const Node &n) const;
 
-    void AppendAction(int pl, int iset)
-      { nodes.AppendAction(pl, iset); }
+        //# TREE MODIFICATION ROUTINES -- ACTIONS
+    void AppendAction(int game, int pl, int iset);
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
-    void LabelAction(const Node &n, int act, const gString &label)
-      { if (!nodes.IsMember(n)) return;
-	nodes.SetActionName(n[1], n[2], act, label); }
-    void LabelAction(int pl, int iset, int act, const gString &label)
-      { nodes.SetActionName(pl, iset, act, label); }
-    gString GetActionLabel(const Node &n, int act)
-      { if (!nodes.IsMember(n)) return "Not defined";
-	nodes.GetActionName(n.GetPlayer(), n.GetInfoset(), act); }
+    void LabelAction(const Node &n, int act, const gString &label);
+    void LabelAction(int game, int pl, int iset, int act,
+		     const gString &label);
+    gString GetActionLabel(const Node &n, int act) const;
     gTuple<gNumber> GetActionProbs(const Node &n) const;
     gNumber GetActionProb(const Node &n, int br) const;
     void SetActionProbs(const Node &n, const gTuple<gNumber> &probs);
-    void SetActionProbs(int pl, int iset, const gTuple<gNumber> &probs);
+    void SetActionProbs(int game, int iset, const gTuple<gNumber> &probs);
 
-    void SetOutcome(const Node &n, int outcome)
-      { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
-    void ExpungeOutcome(int outcome)
-      { nodes.ExpungeOutcome(outcome); }
-
-    void SetNextGame(const Node &n, int game)
-      { if (nodes.IsMember(n))  nodes.SetNextGame(n, game); }
-    int GetNextGame(const Node &n) const
-      { if (!nodes.IsMember(n))   return 0;
-	return nodes.GetNextGame(n); }
-    void ExpungeGame(int game)
-      { nodes.ExpungeGame(game); }
-
+        //# TREE MODIFICATION ROUTINES -- SUBTREES
     Node MoveTree(Node from, Node dest);
     Node CopyTree(Node from, Node dest);
     Node DeleteTree(const Node &n);
 
-    void SetTreeName(const gString &s)   { name = s; }
-    gString GetTreeName(void) const   { return name; }
-
-	//# OPERATIONS ON NODES
-    Node RootNode(void) const
-      { return nodes.RootNode(); }
-    Node GetParent(const Node &n) const
-      { if (!nodes.IsMember(n)) return Node();
-	return nodes.GetParent(n); }
-    int NumChildren(const Node &n) const
-      { if (!nodes.IsMember(n)) return 0;
-	return nodes.NumChildren(n); }
-    Node GetChildNumber(const Node &n, int number) const
-      { if (!nodes.IsMember(n)) return Node();
-	return nodes.GetChildNumber(n, number); }
-    gBlock<Node> GetChildren(const Node &n) const
-      { if (!nodes.IsMember(n)) return gBlock<Node>();
-	return nodes.GetChildren(n); }
-    Node GetPriorSibling(const Node &n) const
-      { if (!nodes.IsMember(n)) return Node();
-	return nodes.GetPriorSibling(n); }
-    Node GetNextSibling(const Node &n) const
-      { if (!nodes.IsMember(n)) return Node();
-	return nodes.GetNextSibling(n); }
-    int HasSuccessorGame(const Node &n) const
-      { if (!nodes.IsMember(n)) return 0;
-	return nodes.HasSuccessorGame(n); }
-    int IsSuccessor(const Node &n, const Node &from) const
-      { if (!nodes.IsMember(n) || !nodes.IsMember(from)) return 0;
-	return nodes.IsPredecessor(from, n); }
-    int IsPredecessor(const Node &n, const Node &of) const
-      { if (!nodes.IsMember(n) || !nodes.IsMember(of)) return 0;
-	return nodes.IsPredecessor(n, of); }
-
-	//# GENERAL INFORMATION
-    int NumNodes(void) const
-      { return nodes.NumNodes(); }
-    int NumNodes(int pl) const
-      { return nodes.NumNodes(pl); }
-    int NumNodes(int pl, int iset) const
-      { return nodes.NumNodes(pl, iset); }
-    int NumPlayers(void) const
-      { return nodes.NumPlayers(); }
-    int NumInfosets(int pl) const
-      { return nodes.NumInfosets(pl); }
-
-    gString GetNodeLabel(const Node &n) const
-      { if (!nodes.IsMember(n)) return "Not defined";
-	return nodes.GetNodeName(n); }
-    int GetOutcome(const Node &n) const
-      { if (!nodes.IsMember(n)) return 0;
-	return nodes.GetOutcome(n); }
-
-    void AddPlayer(int);
-    int CreateInfoset(int, int, int);
+        //# TREE MODIFICATION ROUTINES -- OUTCOMES
+    int CreateOutcome(void);
+    int CreateOutcome(int outc);
+    void RemoveOutcome(int outc);
+    gString GetOutcomeLabel(int outc) const;
+    void LabelOutcome(int outc, const gString &name);
+    int IsOutcomeDefined(int outc) const;
+    gTuple<gNumber> GetOutcomeValues(int outc) const;
+    void SetOutcomeValues(int outc, const gTuple<gNumber> &vals);
+    void SetOutcomeValue(int outc, int pl, gNumber value);
 
         //# MANAGEMENT OF VARIABLES
-    int IsVariableDefined(const gString &name) const
-      { return nodes.IsVariableDefined(name); }
-    Node GetNodeVariable(const gString &name) const
-      { return nodes.GetNodeVariable(name); }
-    int SetNodeVariable(const gString &name, const Node &node)
-      { return nodes.SetNodeVariable(name, node); }
-    void RemoveNodeVariable(const gString &name)
-      { nodes.RemoveNodeVariable(name); }
-
-	//# FILE OPERATIONS
-    int InputFromFile(const gBlock<struct nodeinfo *> &b)
-      { return nodes.InputFromFile(b); }
-    void WriteToFile(gOutput &f) const;
+    int IsVariableDefined(const gString &name) const;
+    Node GetNodeVariable(const gString &name) const;
+    int SetNodeVariable(const gString &name, const Node &node);
+    void RemoveNodeVariable(const gString &name);
 };
 
 
