@@ -236,7 +236,17 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
 END_EVENT_TABLE()
 
 void GclFrame::OnHelpAbout(wxCommandEvent &)
-{ }
+{
+  wxMessageBox("Gambit Command Language, Version 0.96.3\n"
+	       "Built with " wxVERSION_STRING "\n\n"
+	       "Part of the Gambit Project\n"
+	       "www.hss.caltech.edu/~gambit/Gambit.html\n"
+	       "gambit@hss.caltech.edu\n\n"
+	       "Copyright (C) 1999-2000\n"
+	       "California Institute of Technology\n"
+	       "Funding provided by the National Science Foundation",
+	       "About...");
+}
 
 void GclFrame::OnHelpContents(wxCommandEvent &)
 { }
