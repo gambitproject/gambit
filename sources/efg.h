@@ -12,6 +12,7 @@
 #include "gmap.h"
 #include "noderep.h"
 #include "gpvector.h"
+#include "glist.h"
 
 template <class T> class gDPVector;
 class Outcome;
@@ -34,7 +35,7 @@ class BaseExtForm     {
     gString title;
     gTuple<gString> players;
     gSparseSet<NodeSet *> nodes;
-    gSparseSet<Outcome *> outcomes;
+    gList<Outcome *> outcomes;
   
     void AddPlayer(int p);
     int CreateInfoset(int p, int game, int iset);
@@ -131,7 +132,6 @@ class BaseExtForm     {
     void RemoveOutcome(int outc);
     gString GetOutcomeLabel(int outc) const;
     void LabelOutcome(int outc, const gString &name);
-    int IsOutcomeDefined(int outc) const;
 
         //# MANAGEMENT OF VARIABLES
     gString GetUniqueVariable(void) const;

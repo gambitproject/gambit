@@ -8,6 +8,7 @@
 #include "gametree.h"
 #include "outcome.h"
 #include "gmapiter.h"
+#include "glistit.h"
 
 static int generator = 0;
 
@@ -16,7 +17,7 @@ static int generator = 0;
 //---------------------------------------------------------------------------
 
 BaseExtForm::BaseExtForm(void) 
-  : players(0, 0), nodes((NodeSet *) 0), outcomes((Outcome *) 0)
+  : players(0, 0), nodes((NodeSet *) 0)
 { }
 
 BaseExtForm::~BaseExtForm()
@@ -28,15 +29,17 @@ BaseExtForm::~BaseExtForm()
 
 void BaseExtForm::AddPlayer(int p)
 {
-  gSparseSetIter<NodeSet *> iter(nodes);
-  for (iter.GoFirst(); !iter.PastEnd(); iter++)
-    iter.GetValue()->AddPlayer(p);
+  if (p > players.Last())   {
+    gSparseSetIter<NodeSet *> iter(nodes);
+    for (iter.GoFirst(); !iter.PastEnd(); iter++)
+      iter.GetValue()->AddPlayer(p);
 
-  gSparseSetIter<Outcome *> oter(outcomes);
-  for (oter.GoFirst(); !oter.PastEnd(); oter++)
-    oter.GetValue()->SetNumPlayers(p);
+    gListIter<Outcome *> oter(outcomes);
+    for (oter.GoFirst(); !oter.PastEnd(); oter++)
+      oter.GetValue()->SetNumPlayers(p);
 
-  while (players.Last() < p)   players.Expand(1);
+    while (players.Last() < p)   players.Expand(1);
+  }
 }
 
 int BaseExtForm::CreateInfoset(int p, int game, int kids)
@@ -510,12 +513,12 @@ Node BaseExtForm::DeleteNode(const Node &n, int keep)
 
 void BaseExtForm::SetOutcome(const Node &n, int outcome)
 {
-  if (!outcomes.IsDefined(outcome))  return;
+  if (outcome < outcomes.Length())   return;
   
   int game = n.GetGame();
   if (!nodes.IsDefined(game) || !nodes(game)->IsMember(n))  return;
 
-  nodes(game)->SetOutcome(n, outcomes(outcome));
+  nodes(game)->SetOutcome(n, outcomes[outcome]);
 }
 
 //--------------------------------------------------------------------------
@@ -817,13 +820,16 @@ Node BaseExtForm::DeleteTree(const Node &n)
 //
 void BaseExtForm::RemoveOutcome(int outc)
 {
-  if (!outcomes.IsDefined(outc))   return;
+  if (outc <= 0 || outc > outcomes.Length())  return; 
   
   gSparseSetIter<NodeSet *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
-    iter.GetValue()->ExpungeOutcome(outcomes(outc));
+    iter.GetValue()->ExpungeOutcome(outcomes[outc]);
 
   delete outcomes.Remove(outc);
+
+  for (int i = outc; i <= outcomes.Length(); i++)
+    outcomes[i]->SetNumber(i);
 }
 
 //
@@ -831,8 +837,8 @@ void BaseExtForm::RemoveOutcome(int outc)
 //
 gString BaseExtForm::GetOutcomeLabel(int outc) const
 {
-  if (outcomes.IsDefined(outc))
-    return outcomes(outc)->GetName();
+  if (outc > 0 && outc < outcomes.Length())
+    return outcomes[outc]->GetName();
   else
     return "";
 }
@@ -842,16 +848,8 @@ gString BaseExtForm::GetOutcomeLabel(int outc) const
 //
 void BaseExtForm::LabelOutcome(int outc, const gString &name)
 {
-  if (outcomes.IsDefined(outc))
-    outcomes(outc)->SetName(name);
-}
-
-//
-// Returns nonzero if the given outcome number is defined
-//
-int BaseExtForm::IsOutcomeDefined(int outc) const
-{
-  return outcomes.IsDefined(outc);
+  if (outc > 0 && outc < outcomes.Length())
+    outcomes[outc]->SetName(name);
 }
 
 //-------------------------------------------------------------------------
@@ -916,9 +914,7 @@ template <class T> ExtForm<T>::~ExtForm()
   for (nodeiter.GoFirst(); !nodeiter.PastEnd();
        delete nodes.Remove(nodeiter.GetKey()));
 
-  gSparseSetIter<Outcome *> outciter(outcomes);
-  for (outciter.GoFirst(); !outciter.PastEnd();
-       delete outcomes.Remove(outciter.GetKey()));
+  while (outcomes.Length())    delete outcomes.Remove(1);
 }
 
 //---------------------------------------------------------------------------
@@ -1027,9 +1023,8 @@ void ExtForm<T>::SetActionProbs(int game, int iset, const gTuple<T> &probs)
 //
 template <class T> int ExtForm<T>::CreateOutcome(void)
 {
-  int outc = outcomes.FirstVacancy();
-  outcomes.Define(outc, new OutcomeVector<T>(outc, NumPlayers()));
-  return outc;
+  outcomes.Append(new OutcomeVector<T>(outcomes.Length() + 1, NumPlayers()));
+  return outcomes.Length();
 }
 
 //
@@ -1037,9 +1032,10 @@ template <class T> int ExtForm<T>::CreateOutcome(void)
 //
 template <class T> int ExtForm<T>::CreateOutcome(int outc)
 {
-  if (outcomes.IsDefined(outc) || outc <= 0)    return 0;
-  outcomes.Define(outc, new OutcomeVector<T>(outc, NumPlayers()));
-  return outc;
+  if (outc <= outcomes.Length())   return 0;
+  while (outcomes.Length() < outc)
+    outcomes.Append(new OutcomeVector<T>(outcomes.Length() + 1, NumPlayers()));
+  return outcomes.Length();
 }
 
 //
@@ -1047,8 +1043,8 @@ template <class T> int ExtForm<T>::CreateOutcome(int outc)
 //
 template <class T> gVector<T> ExtForm<T>::GetOutcomeValues(int outc) const
 {
-  if (outcomes.IsDefined(outc))
-    return ((OutcomeVector<T> *) outcomes(outc))->GetOutcomeVector();
+  if (outc > 0 && outc <= outcomes.Length())
+    return ((OutcomeVector<T> *) outcomes[outc])->GetOutcomeVector();
   else
     return gVector<T>();
 }
@@ -1059,8 +1055,8 @@ template <class T> gVector<T> ExtForm<T>::GetOutcomeValues(int outc) const
 template <class T>
 void ExtForm<T>::SetOutcomeValues(int outc, const gVector<T> &vals)
 {
-  if (outcomes.IsDefined(outc))
-    ((OutcomeVector<T> *) outcomes(outc))->SetOutcome(vals);
+  if (outc > 0 && outc <= outcomes.Length())
+    ((OutcomeVector<T> *) outcomes[outc])->SetOutcome(vals);
 }
 
 //
@@ -1068,8 +1064,8 @@ void ExtForm<T>::SetOutcomeValues(int outc, const gVector<T> &vals)
 //
 template <class T> void ExtForm<T>::SetOutcomeValue(int outc, int pl, T value)
 {
-  if (outcomes.IsDefined(outc) && pl <= players.Last())
-    ((OutcomeVector<T> *) outcomes(outc))->SetOutcome(pl, value);
+  if (outc > 0 && outc <= outcomes.Length() && pl <= players.Last())
+    ((OutcomeVector<T> *) outcomes[outc])->SetOutcome(pl, value);
 }
 
 
@@ -1096,7 +1092,7 @@ template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
   
   f << "{ ";
 
-  gSparseSetIter<Outcome *> out_iter(outcomes);
+  gListIter<Outcome *> out_iter((gList<Outcome *> &) outcomes);
 
   int flag = 0;
   for (out_iter.GoFirst(); !out_iter.PastEnd(); out_iter++)   {
@@ -1104,7 +1100,7 @@ template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
       f << "\n  ";
     else
       flag = 1;
-    f << "{ " << out_iter.GetKey() << ' ' 
+    f << "{ " << out_iter.GetValue()->GetNumber() << ' ' 
       << ((OutcomeVector<T> *) out_iter.GetValue())->GetOutcomeVector()
       << " \"" << out_iter.GetValue()->GetName() << "\" }";
   }

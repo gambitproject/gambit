@@ -236,7 +236,7 @@ node:           node_ID   { info.my_ID = node; } COLON
                 node_ID   { info.parent_ID = node; }
                 INTEGER   { info.child_no = last_int; }
                 INTEGER   { info.nextgame = last_int; }
-                INTEGER   { info.outcome = (last_int) ? E->outcomes(last_int) : 0; }
+                INTEGER   { info.outcome = (last_int) ? E->outcomes[last_int] : 0; }
                 NAME      { info.name = last_name;
                             nodelist->Append(new struct nodeinfo(info)); }
 

@@ -26,6 +26,7 @@ class Outcome   {
     const gString &GetName(void) const;
 
     int GetNumber(void) const;
+    void SetNumber(int n);
 };
 
 template <class T> class OutcomeVector : public Outcome    {
