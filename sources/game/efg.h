@@ -242,16 +242,20 @@ friend class BehavProfile<double>;
 friend class BehavProfile<gRational>;
 friend class BehavProfile<gNumber>;
 protected:
+  efgGame *m_efg; 
   int m_number;
   gText m_name;
   gBlock<gNumber> m_payoffs;
   gBlock<gNumber> m_doublePayoffs;
 
   efgOutcome(efgGame *p_efg, int p_number)
-    : m_number(p_number), 
+    : m_efg(p_efg), m_number(p_number), 
       m_payoffs(p_efg->NumPlayers()), m_doublePayoffs(p_efg->NumPlayers())
     { }
   ~efgOutcome()  { }
+
+public:
+  efgGame *GetGame(void) const { return m_efg; }
 };
 
 efgGame *ReadEfgFile(gInput &);

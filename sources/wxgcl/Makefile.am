@@ -4,11 +4,10 @@ bin_PROGRAMS = wxgcl
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-wxgcl_SOURCES = wxgcl.cc
+wxgcl_SOURCES = dlabout.cc wxgcl.cc wxstatus.cc 
 
 wxgcl_LDADD = \
 	$(top_builddir)/sources/gcl/libgcl.a \
-	$(top_builddir)/sources/guishare/libguishare.a \
 	$(top_builddir)/sources/nash/libnash.a \
 	$(top_builddir)/sources/numerical/libnumerical.a \
 	$(top_builddir)/sources/game/libgame.a \

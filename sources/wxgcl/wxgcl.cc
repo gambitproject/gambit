@@ -1,7 +1,10 @@
 //
-// FILE: wxgcl.cc -- wxWindows-based front-end for GCL
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// wxWindows-based interface to GCL
 //
 
 #include "wx/wxprec.h"
@@ -13,8 +16,8 @@
 #include "wx/image.h"   // for wxInitAllImageHandlers
 
 #include "wxgcl.h"
-#include "guishare/wxstatus.h"
-#include "guishare/dlabout.h"
+#include "gui/wxstatus.h"
+#include "gui/dlabout.h"
 
 #include "math/gmath.h"
 #include "gcl/gsm.h"
@@ -401,6 +404,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
+  gStandardInput gin;
   m_environment = new wxGSM(this, *m_cancelButton,
 			    gin, *m_outputStream, *m_outputStream);
   wxCommandLine cmdline(20);

@@ -531,25 +531,20 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   gBlock<int> players(S->Game().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  NFSupport *T;
   Portion *por;
+  NFSupport *T;
 
   if (mixed)
-    T = S->MixedUndominated(strong, prec, players,
-			    ((OutputPortion *) param[5])->Value(), 
-			    gsm.GetStatusMonitor());
+    T = new NFSupport(S->MixedUndominated(strong, prec, players,
+					  ((OutputPortion *) param[5])->Value(), 
+					  gsm.GetStatusMonitor()));
   else   {
-    T = S->Undominated(strong, players,
-		       ((OutputPortion *) param[5])->Value(),
-		       gsm.GetStatusMonitor());
+    T = new NFSupport(S->Undominated(strong, players,
+				     ((OutputPortion *) param[5])->Value(),
+				     gsm.GetStatusMonitor()));
   }
 
-  por = ((T) ? new NfSupportPortion(T) :
-	 new NfSupportPortion(new NFSupport(*S)));
-
-  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
-  
-  return por;
+  return new NfSupportPortion(T);
 }
 
 
@@ -621,10 +616,10 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, gclParameter("precision", porPRECISION,
 					   new PrecisionPortion(precRATIONAL)));
   FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
+					   new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
+					   new OutputPortion(*new gNullOutput), 
+					   BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
@@ -643,8 +638,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
+					   new OutputPortion(*new gNullOutput), 
+					   BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   FuncObj->SetFuncInfo(1, gclSignature(GSM_IsProfileDominated_Nfg,
@@ -657,8 +652,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 4, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(gnull), 
-					    BYREF));
+					   new OutputPortion(*new gNullOutput), 
+					   BYREF));
   FuncObj->SetParamInfo(1, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);

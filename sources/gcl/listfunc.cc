@@ -490,19 +490,18 @@ static Portion* GSM_List_Nfg(GSM &, Portion **param)
 static Portion* GSM_List_Efg(GSM &, Portion **param)
 {
   ListPortion* p;
-  int i;
 
-  if( ((NumberPortion*) param[1])->Value() < gNumber(0) )
-    throw gclRuntimeError( "Invalid list Length" );
-
+  if (((NumberPortion*) param[1])->Value() < gNumber(0)) {
+    throw gclRuntimeError( "Invalid list length" );
+  }
 
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
 
-  FullEfg& efg =
-      *(((EfgPortion*) param[0])->Value());
-  for( i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++ )
-    p->Append( new EfgPortion( new FullEfg( efg ) ) );  
+  efgGame &efg = *(((EfgPortion*) param[0])->Value());
+  for (int i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++) {
+    p->Append(new EfgPortion(new efgGame(efg)));
+  }  
 
   return p;
 }

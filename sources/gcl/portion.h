@@ -298,11 +298,11 @@ protected:
   EfOutcomePortion(efgOutcome *&, bool);
 
 public:
-  EfOutcomePortion(const efgOutcome *);
+  EfOutcomePortion(efgOutcome *);
   virtual ~EfOutcomePortion();
 
   efgOutcome *Value(void) const;
-  void SetValue(const efgOutcome *);
+  void SetValue(efgOutcome *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

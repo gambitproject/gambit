@@ -104,6 +104,7 @@ gCmdLineInput::~gCmdLineInput()
 char gCmdLineInput::GetNextChar(void)
 {
   char c;
+  gStandardInput gin;
   gin.get(c);
   return c;
 }
@@ -153,6 +154,7 @@ void gCmdLineInput::GetCmdExec( void )
 
   int historyPos = m_History.Length() + 1;
 
+  gStandardOutput gout;
   gout << cmdBuf;
 
   for( ; ; ) { // infinite loop
@@ -352,6 +354,7 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence(void)
   // remember that the first Escape has already been caught
 
   // the second char must be '[' in an escape sequence
+  gStandardInput gin;
   if (!gin.eof()) {
     c1 = GetNextChar();
   }

@@ -44,7 +44,7 @@ if test "$WXCONFIG" != 1; then
     ])
 fi
 
-CXXFLAGS="${CXXFLAGS} ${WX_CXXFLAGS}"
+CXXFLAGS="-DNEWSTYLE_TEMPLATES ${CXXFLAGS} ${WX_CXXFLAGS}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
 LDFLAGS="${LDFLAGS} ${WX_LIBS}"
 

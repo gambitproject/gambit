@@ -30,15 +30,18 @@ typedef void (*fptr)(int);
 
 void SigFPEHandler(int a)
 {
-  if (a==SIGFPE)
-    gerr << "A floating point error has occured! "
+  if (a==SIGFPE) {
+    gStandardOutput gout;
+    gout << "A floating point error has occured! "
          << "The results returned may be invalid\n";
+  }
   signal(SIGFPE, (fptr) SigFPEHandler);  //  reinstall signal handler
 }
 
 void SigSegFaultHandler(int)
 {
-  gerr << "A segmentation fault has occurred\n";
+  gStandardOutput gout;
+  gout << "A segmentation fault has occurred\n";
 #ifdef __BORLANDC__
   gCmdLineInput::RestoreTermAttr();
 #endif  // __BORLANDC__
@@ -137,6 +140,9 @@ int main(int argc, char *argv[])
       strcpy(_SourceDir, "");
     }
 
+    gStandardInput gin;
+    gStandardOutput gout;
+    gStandardOutput gerr;
     GSM *gsm = new gsmConsole(gin, gout, gerr);
 
 #ifndef __BORLANDC__
@@ -199,6 +205,7 @@ int main(int argc, char *argv[])
   }
   // The last line of defense for exceptions:
   catch (gException &w)  {
+    gStandardOutput gout;
     gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
     return 1;
   }

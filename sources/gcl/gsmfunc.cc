@@ -347,15 +347,13 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
           reqList.Append((Portion*) tmp);
           word = "OUTPUT";
         }
-        else if (word == "NullOut")
-        {
-          OutputPortion* tmp = new OutputPortion(gnull);
+        else if (word == "NullOut") {
+          OutputPortion* tmp = new OutputPortion(*new gNullOutput);
           reqList.Append((Portion*)tmp);
           word = "OUTPUT";
         }
-        else if (word == "StdIn")
-        {
-          InputPortion* tmp = new InputPortion(gin);
+        else if (word == "StdIn") {
+          InputPortion* tmp = new InputPortion(*new gStandardInput);
           reqList.Append((Portion*)tmp);
           word = "INPUT";
         }
@@ -744,15 +742,12 @@ bool gclFunction::Combine(gclFunction* newfunc)
 	}
       }
 
-      if(same_params)
-      {
-	if(!_FuncInfo[f_index].UserDefined)
-	{
-	  gerr << "Function ambiguous with " << FuncList()[f_index+1] <<'\n';
+      if (same_params) {
+	if (!_FuncInfo[f_index].UserDefined) {
+	  m_environment.ErrorStream() << "Function ambiguous with " << FuncList()[f_index+1] <<'\n';
 	  result = false;
 	}
-	else
-	{
+	else {
 	  delete_stack.Push(f_index);
 	}
       }
@@ -761,7 +756,7 @@ bool gclFunction::Combine(gclFunction* newfunc)
     if (result) {
       while(delete_stack.Depth() > 0) {
 	int delete_index = delete_stack.Pop();
-	gerr << "Replacing " << FuncList()[delete_index+1] << '\n';
+	m_environment.ErrorStream() << "Replacing " << FuncList()[delete_index+1] << '\n';
 	Delete(delete_index);
       }
 

@@ -24,7 +24,7 @@ libgcl_a_SOURCES = \
 	portion.cc \
 	solfunc.cc
 
-gcl_SOURCES = gcl.cc gclstatus.cc gcmdline.cc gio.cc
+gcl_SOURCES = gcl.cc gclstatus.cc gcmdline.cc 
 
 gcl_LDADD = \
 	libgcl.a \

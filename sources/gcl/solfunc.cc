@@ -117,7 +117,7 @@ static Portion* GSM_Game_EfgTypes(GSM &, Portion** param)
 {
   if(param[0]->Game())  {
     assert(param[0]->GameIsEfg());
-    return new EfgPortion((FullEfg*) param[0]->Game());
+    return new EfgPortion((efgGame*) param[0]->Game());
   }
   else
     return 0;
@@ -464,7 +464,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   int InfosetNum = 0;
   
   BehavSolution *P = new BehavSolution(*((BehavPortion*) param[0])->Value());
-  Efg::Game &E = P->GetGame();
+  efgGame &E = P->GetGame();
   gArray< EFPlayer* > player = E.Players();
   
   for(i = 1; i <= E.NumPlayers(); i++)

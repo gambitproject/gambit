@@ -1493,7 +1493,7 @@ static Portion *GSM_Times_Behav(GSM &, Portion** param)
 
 static Portion *GSM_Version(GSM &, Portion **)
 {
-  return new NumberPortion(GCL_VERSION);
+  return new TextPortion(VERSION);
 }
 
 //--------
@@ -1519,7 +1519,7 @@ static Portion *GSM_Write_Nfg(GSM &, Portion** param)
 static Portion *GSM_Write_Efg(GSM &, Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
-  FullEfg *efg = ((EfgPortion*) param[1])->Value();
+  efgGame *efg = ((EfgPortion*) param[1])->Value();
   efg->WriteEfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }
@@ -1867,7 +1867,7 @@ void Init_gsmoper(GSM* gsm)
       { "Times[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Times_Number },
       { "Times[x->NUMBER, y->MIXED] =: MIXED", GSM_Times_Mixed },
       { "Times[x->NUMBER, y->BEHAV] =: BEHAV", GSM_Times_Behav },
-      { "Version[] =: NUMBER", GSM_Version },
+      { "Version[] =: TEXT", GSM_Version },
       { 0, 0 }
     };
 
