@@ -39,7 +39,7 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 	      const gDPVector<T> &s);
     virtual ~EFGobitFunc();
 
-    void InitScratch(void);
+    void Init(void);
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
     void Output(gOutput &f,int format) const;
@@ -58,15 +58,8 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
 		 xi(p.Length(), p.Length())
 {
   SetPlev(P.plev);
-  // This can later be replaced by ExtForm<T>::Centroid(), when written
+  Init();
   E.Centroid(pp);
-/*
-  for (int i = 1; i <= E.NumPlayers(); i++)
-    for (int j = 1; j <= E.NumInfosets(1, i); j++)
-      for (int k = 1; k <= E.NumActions(1, i, j); k++)
-	pp(i, j, k) = ((T) 1 / (T) E.NumActions(1, i, j));
-  */
-  InitScratch();
 }
 
 template <class T>
@@ -79,19 +72,15 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
 		 xi(p.Length(), p.Length())
 {
   SetPlev(P.plev);
-  InitScratch();
+  Init();
   pp = s;
 }
 
-template <class T> void EFGobitFunc<T>::InitScratch(void)
+template <class T> void EFGobitFunc<T>::Init(void)
 {
   // Seems to me like this should be a parameter to the gfunct ctor?
   constrained = 1;
-  for (int i = 1; i <= p.Length(); i++)
-    for (int j = 1; j <= p.Length(); j++)  {
-      xi(i, j) = (T) 0;
-      if (i == j)    xi(i, j) = (T) 1;
-    }
+  xi.MakeIdent();
 }
 
 template <class T> EFGobitFunc<T>::~EFGobitFunc()
@@ -190,13 +179,13 @@ template <class T> void EFGobitFunc<T>
 //                  EFGobitModule<T>: Member functions
 //------------------------------------------------------------------------
 
-template <class T>
-EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p)
+template <class T>EFGobitModule<T>
+::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p)
   : GobitModule<T>(p), E(EF)
 { }
 
-template <class T>
-EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s)
+template <class T>EFGobitModule<T>
+::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s)
   : GobitModule<T>(p,s), E(EF)
 { }
 

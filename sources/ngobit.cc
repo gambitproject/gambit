@@ -41,7 +41,7 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 	      const gPVector<T> &s);
     virtual ~NFGobitFunc();
 
-    void InitScratch(void);
+    void Init(void);
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
     void Output(gOutput &f, int format = 0) const;
@@ -59,7 +59,7 @@ template <class T> NFGobitFunc<T>
 		    pp(NF.Dimensionality())
 { 
   SetPlev(P.plev);
-  InitScratch();
+  Init();
   N.Centroid(pp);
 }
 
@@ -71,11 +71,11 @@ template <class T>NFGobitFunc<T>
 		    pp(NF.Dimensionality())
 {
   SetPlev(P.plev);
-  InitScratch();
+  Init();
   pp = s;
 }
 
-template <class T> void NFGobitFunc<T>::InitScratch(void)
+template <class T> void NFGobitFunc<T>::Init(void)
 {
   // Seems to me like this should be a parameter to the gfunct ctor?
   constrained = 1;
