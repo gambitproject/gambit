@@ -30,6 +30,7 @@
 #include "base/base.h"
 #include "math/gnumber.h"
 #include "game/efg.h"
+#include "game/nfg.h"
 #include "gsmincl.h"
 
 //-------------
@@ -303,8 +304,6 @@ inline bool AsBool(Portion *portion)
 // EFOutcome
 //-------------
 
-#include "game/outcome.h"
-
 class EfOutcomePortion : public Portion  {
 protected:
   gbtEfgOutcome *m_value;
@@ -333,8 +332,6 @@ public:
   void *operator new(size_t) { return pool.Alloc(); }
   void operator delete(void *p) { pool.Free(p); }
 };
-
-#include "game/player.h"
 
 //------------
 // NfPlayer
@@ -373,23 +370,21 @@ public:
 // Strategy
 //-----------
 
-class Strategy;
-
 class StrategyPortion : public Portion  {
 protected:
-  Strategy** _Value;
-  bool _ref;
+  gbtNfgStrategy *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  StrategyPortion(Strategy *&, bool);
+  StrategyPortion(gbtNfgStrategy *&, bool);
 
 public:
-  StrategyPortion(Strategy *);
+  StrategyPortion(gbtNfgStrategy);
   virtual ~StrategyPortion();
 
-  Strategy *Value(void) const;
-  void SetValue(Strategy *); 
+  gbtNfgStrategy Value(void) const;
+  void SetValue(gbtNfgStrategy); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

@@ -88,7 +88,7 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
     gbtNfgPlayer player = nfg.GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
       m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					     player.GetStrategy(st)->GetLabel()));
+					     player.GetStrategy(st).GetLabel()));
     }
     m_stratProfile[pl-1]->SetSelection(0);
 
@@ -164,7 +164,7 @@ void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
     for (int st = 1; st <= player.NumStrategies(); st++) {
       if (m_support.Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					       player.GetStrategy(st)->GetLabel()));
+					       player.GetStrategy(st).GetLabel()));
       }
     }
     m_stratProfile[pl-1]->SetSelection(0);

@@ -655,49 +655,49 @@ bool NfPlayerPortion::IsReference(void) const
 
 gPool StrategyPortion::pool(sizeof(StrategyPortion));
 
-StrategyPortion::StrategyPortion(Strategy *value)
-  : _Value(new Strategy *(value)), _ref(false)
+StrategyPortion::StrategyPortion(gbtNfgStrategy p_value)
+  : m_value(new gbtNfgStrategy(p_value)), m_ref(false)
 {
-  SetGame(value->GetPlayer().GetGame());
+  SetGame(p_value.GetPlayer().GetGame());
 }
 
-StrategyPortion::StrategyPortion(Strategy *&value, bool ref)
-  : _Value(&value), _ref(ref)
+StrategyPortion::StrategyPortion(gbtNfgStrategy *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->GetPlayer().GetGame());
+  if (!p_ref) {
+    SetGame(p_value->GetPlayer().GetGame());
   }
 }
 
 StrategyPortion::~StrategyPortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-Strategy *StrategyPortion::Value(void) const
-{ return *_Value; }
+gbtNfgStrategy StrategyPortion::Value(void) const
+{ return *m_value; }
 
-void StrategyPortion::SetValue(Strategy *value)
+void StrategyPortion::SetValue(gbtNfgStrategy p_value)
 {
-  if (_ref) {
-    ((StrategyPortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((StrategyPortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->GetPlayer().GetGame());
-    *_Value = value;
+    SetGame(p_value.GetPlayer().GetGame());
+    *m_value = p_value;
   }
 }
 
 PortionSpec StrategyPortion::Spec(void) const
-{ return PortionSpec(porSTRATEGY); }
+{ return porSTRATEGY; }
 
 void StrategyPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
-  s << "(Strategy) " << *_Value;
-  if (*_Value) {
-    s << " \"" << (*_Value)->GetLabel() << "\""; 
-  }
+  s << "(Strategy) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText StrategyPortion::OutputString(void) const
@@ -707,18 +707,18 @@ gText StrategyPortion::OutputString(void) const
 
 Portion* StrategyPortion::ValCopy(void) const
 {
-  return new StrategyPortion(*_Value); 
+  return new StrategyPortion(*m_value); 
 }
 
 Portion* StrategyPortion::RefCopy(void) const
 {
-  Portion* p = new StrategyPortion(*_Value, true); 
+  Portion *p = new StrategyPortion((gbtNfgStrategy *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool StrategyPortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 
@@ -1394,10 +1394,10 @@ void MixedPortion::Output(gOutput& s) const
     s << "{ ";
     gbtNfgPlayer player = rep->value->Game().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      Strategy *strategy = player.GetStrategy(st);
+      gbtNfgStrategy strategy = player.GetStrategy(st);
       if (_WriteSolutionLabels == triTRUE) {
 	if ((*rep->value)(strategy) > gNumber(0)) {
-	  s << strategy->GetLabel() << '=';
+	  s << strategy.GetLabel() << '=';
 	  s << (*rep->value)(strategy) << ' ';
 	}
       }

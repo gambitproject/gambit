@@ -26,23 +26,24 @@
 
 #include "nfdom.h"
 
-bool gbtNfgSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
+bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
+			      bool strong) const
 {
   const Nfg &n = Game();
 
   NfgContIter A(*this), B(*this);
 
-  A.Freeze(s->GetPlayer());
+  A.Freeze(s.GetPlayer());
   A.Set(s);
-  B.Freeze(s->GetPlayer());
+  B.Freeze(s.GetPlayer());
   B.Set(t);  
 
   if (strong)  {
     do  {
       gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		    n.Payoff(A.GetOutcome(), s->GetPlayer()) : gNumber(0));
+		    n.Payoff(A.GetOutcome(), s.GetPlayer()) : gNumber(0));
       gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		    n.Payoff(B.GetOutcome(), s->GetPlayer()) : gNumber(0));
+		    n.Payoff(B.GetOutcome(), s.GetPlayer()) : gNumber(0));
 
       if (ap <= bp)  {
 	return false;
@@ -57,9 +58,9 @@ bool gbtNfgSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
   
   do   {
     gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		  n.Payoff(A.GetOutcome(), s->GetPlayer()) : gNumber(0));
+		  n.Payoff(A.GetOutcome(), s.GetPlayer()) : gNumber(0));
     gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		  n.Payoff(B.GetOutcome(), s->GetPlayer()) : gNumber(0));
+		  n.Payoff(B.GetOutcome(), s.GetPlayer()) : gNumber(0));
 
     if (ap < bp)   { 
       return false;
@@ -72,12 +73,11 @@ bool gbtNfgSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
   return (!equal);
 }
 
-
-bool gbtNfgSupport::IsDominated(Strategy *s, bool strong) const
+bool gbtNfgSupport::IsDominated(gbtNfgStrategy s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s->GetPlayer().GetId()); i++) {
-    if (i != s->GetId()) {
-      if (Dominates(GetStrategy(s->GetPlayer().GetId(), i), s, strong)) {
+  for (int i = 1; i <= NumStrats(s.GetPlayer().GetId()); i++) {
+    if (i != s.GetId()) {
+      if (Dominates(GetStrategy(s.GetPlayer().GetId(), i), s, strong)) {
 	return true;
       }
     }
@@ -86,7 +86,7 @@ bool gbtNfgSupport::IsDominated(Strategy *s, bool strong) const
 }
 
 bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
-			    gOutput &tracefile, gStatus &status) const
+				gOutput &tracefile, gStatus &status) const
 {
   gArray<int> set(NumStrats(pl));
   int i;
@@ -116,12 +116,12 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
       for (int inc = min + 1; inc <= dis; )  {
 	if (Dominates(GetStrategy(pl, set[min+1]),
 		      GetStrategy(pl, set[dis+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[dis+1])->GetId() << " dominated by " << GetStrategy(pl, set[min+1])->GetId() << '\n';
+	  tracefile << GetStrategy(pl, set[dis+1]).GetId() << " dominated by " << GetStrategy(pl, set[min+1]).GetId() << '\n';
 	  dis--;
 	}
 	else if (Dominates(GetStrategy(pl, set[dis+1]),
 			   GetStrategy(pl, set[min+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[min+1])->GetId() << " dominated by " << GetStrategy(pl, set[dis+1])->GetId() << '\n';
+	  tracefile << GetStrategy(pl, set[min+1]).GetId() << " dominated by " << GetStrategy(pl, set[dis+1]).GetId() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;

@@ -140,7 +140,7 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_table->GetSupport().NumStrats(m_table->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().GetStrategy(m_table->GetRowPlayer(), p_row+1)->GetLabel();
+    return (char *) m_table->GetSupport().GetStrategy(m_table->GetRowPlayer(), p_row+1).GetLabel();
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -158,7 +158,7 @@ wxString NfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_table->GetSupport().NumStrats(m_table->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().GetStrategy(m_table->GetColPlayer(), p_col+1)->GetLabel();
+    return (char *) m_table->GetSupport().GetStrategy(m_table->GetColPlayer(), p_col+1).GetLabel();
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -219,7 +219,7 @@ wxString NfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats &&
 	   col == numColStrats + m_table->ShowDominance() - 1) {
-    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
+    gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     if (support.IsDominated(strategy, true)) {
       return "S";
     }
@@ -232,7 +232,7 @@ wxString NfgGridTable::GetValue(int row, int col)
   }
   else if (row == numRowStrats + m_table->ShowDominance() - 1 &&
 	   col < numColStrats) {
-    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
+    gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     if (support.IsDominated(strategy, true)) {
       return "S";
     }
@@ -245,23 +245,23 @@ wxString NfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
-    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
+    gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     return ((char *) ToText(m_table->GetProfile()(strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
-    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
+    gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     return ((char *) ToText(m_table->GetProfile()(strategy)));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
-    Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->GetPlayer(), strategy)));
+    gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy.GetPlayer(), strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
-    Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->GetPlayer(), strategy)));
+    gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy.GetPlayer(), strategy)));
   }
 
   return "";

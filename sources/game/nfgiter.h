@@ -30,8 +30,8 @@
 template <class T> class gArray;
 
 class StrategyProfile;
+#include "nfg.h"
 #include "nfstrat.h"
-#include "outcome.h"
 class NfgContIter;
 
 //

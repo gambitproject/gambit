@@ -142,6 +142,130 @@ gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
 }
 
 //----------------------------------------------------------------------
+//                 gbt_nfg_strategy_rep: Declaration
+//----------------------------------------------------------------------
+
+struct gbt_nfg_player_rep;
+
+struct gbt_nfg_strategy_rep {
+  int m_id;
+  gbt_nfg_player_rep *m_player;
+  bool m_deleted;
+  gText m_label;
+  long m_index;
+  int m_refCount;
+
+  gbt_nfg_strategy_rep(gbt_nfg_player_rep *);
+};
+
+gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_player_rep *p_player)
+  : m_id(0), m_player(p_player), m_deleted(false), m_index(0L),
+    m_refCount(1)
+{ }
+
+gbtNfgStrategy::gbtNfgStrategy(void)
+  : rep(0)
+{ }
+
+gbtNfgStrategy::gbtNfgStrategy(gbt_nfg_strategy_rep *p_rep)
+  : rep(p_rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgStrategy::gbtNfgStrategy(const gbtNfgStrategy &p_outcome)
+  : rep(p_outcome.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgStrategy::~gbtNfgStrategy()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0) {
+      delete rep;
+    }
+  }
+}
+
+gbtNfgStrategy &gbtNfgStrategy::operator=(const gbtNfgStrategy &p_outcome)
+{
+  if (this == &p_outcome) {
+    return *this;
+  }
+
+  if (rep && --rep->m_refCount == 0) {
+    delete rep;
+  }
+
+  if ((rep = p_outcome.rep) != 0) {
+    rep->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtNfgStrategy::operator==(const gbtNfgStrategy &p_outcome) const
+{
+  return (rep == p_outcome.rep);
+} 
+
+bool gbtNfgStrategy::operator!=(const gbtNfgStrategy &p_outcome) const
+{
+  return (rep != p_outcome.rep);
+} 
+
+int gbtNfgStrategy::GetId(void) const
+{
+  return (rep) ? rep->m_id : 0;
+}
+
+bool gbtNfgStrategy::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+gText gbtNfgStrategy::GetLabel(void) const
+{
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
+}
+
+void gbtNfgStrategy::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    rep->m_label = p_label;
+  }
+}
+
+gbtNfgPlayer gbtNfgStrategy::GetPlayer(void) const
+{
+  if (rep) {
+    return rep->m_player;
+  }
+  else {
+    return 0;
+  }
+}
+
+long gbtNfgStrategy::GetIndex(void) const
+{
+  return (rep) ? rep->m_index : 0L;
+}
+
+gOutput &operator<<(gOutput &p_stream, const gbtNfgStrategy &)
+{ 
+  return p_stream;
+}
+
+//----------------------------------------------------------------------
 //                 gbt_nfg_player_rep: Declaration
 //----------------------------------------------------------------------
 
@@ -150,7 +274,7 @@ struct gbt_nfg_player_rep {
   Nfg *m_nfg;
   bool m_deleted;
   gText m_label;
-  gArray<Strategy *> m_strategies;
+  gArray<gbt_nfg_strategy_rep *> m_strategies;
   int m_refCount;
 
   gbt_nfg_player_rep(Nfg *, int, int);
@@ -161,7 +285,7 @@ gbt_nfg_player_rep::gbt_nfg_player_rep(Nfg *p_nfg, int p_id, int p_strats)
     m_refCount(1)
 {
   for (int i = 1; i <= p_strats; i++) {
-    m_strategies[i] = new Strategy(this);
+    m_strategies[i] = new gbt_nfg_strategy_rep(this);
   }
 }
 
@@ -257,11 +381,12 @@ int gbtNfgPlayer::NumStrategies(void) const
   return (rep) ? rep->m_strategies.Length() : 0;
 }
 
-Strategy *gbtNfgPlayer::GetStrategy(int st) const
+gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
 {
   return (rep) ? rep->m_strategies[st] : 0;
 }
 
+#ifdef UNUSED
 //--------------------------------------
 // Strategy:  Constructors, Destructors
 //--------------------------------------
@@ -285,7 +410,7 @@ Strategy::~Strategy()
 
 gbtNfgPlayer Strategy::GetPlayer(void) const
 { return m_player; }
-
+#endif  // UNUSED
 
 //----------------------------------------------------
 // Nfg: Constructors, Destructors, Operators
@@ -307,8 +432,9 @@ Nfg::Nfg(const gArray<int> &dim)
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new gbt_nfg_player_rep(this, pl, dim[pl]);
     players[pl]->m_label = ToText(pl);
-    for (int st = 1; st <= dim[pl]; st++)
-      players[pl]->m_strategies[st]->m_name = ToText(st);
+    for (int st = 1; st <= dim[pl]; st++) {
+      players[pl]->m_strategies[st]->m_label = ToText(st);
+    }
   }
   IndexStrategies();
 
@@ -402,7 +528,7 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
       gbtNfgPlayer player = GetPlayer(i);
       p_file << "{ ";
       for (int j = 1; j <= player.NumStrategies(); j++)
-	p_file << '"' << EscapeQuotes(player.GetStrategy(j)->GetLabel()) << "\" ";
+	p_file << '"' << EscapeQuotes(player.GetStrategy(j).GetLabel()) << "\" ";
       p_file << "}\n";
     }
   
@@ -604,8 +730,8 @@ void Nfg::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      Strategy *s = players[i]->m_strategies[j];
-      s->m_number = j;
+      gbt_nfg_strategy_rep *s = players[i]->m_strategies[j];
+      s->m_id = j;
       s->m_index = (j - 1) * offset;
     }
     offset *= (j - 1);

@@ -217,19 +217,18 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
-			   bool strong, T /*junk*/,
-			   gOutput &tracefile)
+bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
+		      bool strong, T /*junk*/,
+		      gOutput &tracefile)
 {
-  int pl = str->GetPlayer().GetId();
-  Nfg &nfg = *str->GetPlayer().GetGame();
-  int whichstrat = str->GetId();
+  int pl = str.GetPlayer().GetId();
+  Nfg &nfg = *str.GetPlayer().GetGame();
+  int whichstrat = str.GetId();
   int strats = S.NumStrats(pl);
 
   NfgContIter s(S);
   s.Freeze(pl);
-  
-  
+    
   T eps;
   gEpsilon(eps);
   

@@ -75,7 +75,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   m_probGrid->SetLabelValue(wxHORIZONTAL, "Probability", 0);
   for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
-			      (char *) firstPlayer.GetStrategy(st)->GetLabel(),
+			      (char *) firstPlayer.GetStrategy(st).GetLabel(),
 			      st - 1);
     m_probGrid->SetCellValue((char *) ToText(p_profile(firstPlayer.GetStrategy(st))),
 			     st - 1, 0);
@@ -132,7 +132,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 
   for (int st = 1; st <= player.NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
-			      (char *) player.GetStrategy(st)->GetLabel(),
+			      (char *) player.GetStrategy(st).GetLabel(),
 			      st - 1);
     m_probGrid->SetCellValue((char *) ToText(m_profile(player.GetStrategy(st))),
 			     st - 1, 0);

@@ -49,10 +49,10 @@ template <class T> Portion *ArrayToList(const gList<T> &);
 static Portion *GSM_AddStrategy(GSM &, Portion **param)
 {
   gbtNfgSupport *support = ((NfSupportPortion *) param[0])->Value();
-  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion *) param[1])->Value();
 
   gbtNfgSupport *S = new gbtNfgSupport(*support);
-  S->AddStrategy(s);
+  S->AddStrategy(strategy);
 
   return new NfSupportPortion(S);
 }
@@ -104,7 +104,7 @@ static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 
 static Portion *GSM_IsDominated_Nfg(GSM &, Portion **param)
 {
-  Strategy *str = ((StrategyPortion *) param[0])->Value();
+  gbtNfgStrategy str = ((StrategyPortion *) param[0])->Value();
   gbtNfgSupport *S = ((NfSupportPortion *) param[1])->Value();
   bool strong = ((BoolPortion *) param[2])->Value();
   bool mixed = ((BoolPortion *) param[3])->Value();
@@ -158,7 +158,7 @@ static Portion *GSM_Game_NfPlayer(GSM &, Portion **param)
 
 static Portion *GSM_Game_Strategy(GSM &, Portion **param)
 {
-  Nfg &N = *((StrategyPortion *) param[0])->Value()->GetPlayer().GetGame();
+  Nfg &N = *((StrategyPortion *) param[0])->Value().GetPlayer().GetGame();
 
   return new NfgPortion(&N);
 }
@@ -219,7 +219,7 @@ static Portion* GSM_Name(GSM &, Portion **param)
   case porNFPLAYER:
     return new TextPortion(((NfPlayerPortion*) param[0])->Value().GetLabel());
   case porSTRATEGY:
-    return new TextPortion(((StrategyPortion*) param[0])->Value()->GetLabel());
+    return new TextPortion(((StrategyPortion*) param[0])->Value().GetLabel());
   case porNFOUTCOME:
     return new TextPortion(((NfOutcomePortion*) param[0])->Value().GetLabel());
   case porNFSUPPORT:
@@ -268,17 +268,18 @@ static Portion* GSM_Outcome(GSM &, Portion** param)
   int i;
 
   Nfg &nfg = 
-    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->GetPlayer().GetGame();
+    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
 
   StrategyProfile profile(nfg);
   for (i = 1; i <= nfg.NumPlayers(); i++)  {
-    Strategy *strat =
+    gbtNfgStrategy strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
-    if (strat->GetPlayer().GetId() != i)
+    if (strat.GetPlayer().GetId() != i) {
       throw gclRuntimeError("Invalid profile");
+    }
     profile.Set(i, strat);
   }
   
@@ -329,12 +330,13 @@ static Portion* GSM_Payoff(GSM &, Portion** param)
 
 static Portion *GSM_Player(GSM &, Portion **param)
 {
-  if (param[0]->Spec().Type == porNULL)
+  if (param[0]->Spec().Type == porNULL) {
     return new NullPortion(porNFPLAYER);
+  }
 
-  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  gbtNfgStrategy s = ((StrategyPortion *) param[0])->Value();
 
-  return new NfPlayerPortion(s->GetPlayer());
+  return new NfPlayerPortion(s.GetPlayer());
 }
 
 //------------
@@ -376,10 +378,10 @@ static Portion *GSM_PossibleNashSupportsNFG(GSM &gsm, Portion **param)
 
 static Portion *GSM_StrategyNumber(GSM &, Portion **param)
 {
-  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion *) param[0])->Value();
   gbtNfgSupport *support = ((NfSupportPortion *) param[1])->Value();
 
-  return new NumberPortion(support->GetIndex(s));
+  return new NumberPortion(support->GetIndex(strategy));
 }
 
 //------------------
@@ -389,10 +391,10 @@ static Portion *GSM_StrategyNumber(GSM &, Portion **param)
 static Portion *GSM_RemoveStrategy(GSM &, Portion **param)
 {
   gbtNfgSupport *support = ((NfSupportPortion *) param[0])->Value();
-  Strategy *s = ((StrategyPortion *) param[1])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion *) param[1])->Value();
   
   gbtNfgSupport *S = new gbtNfgSupport(*support);
-  S->RemoveStrategy(s);
+  S->RemoveStrategy(strategy);
 
   return new NfSupportPortion(S);
 }
@@ -452,9 +454,9 @@ static Portion *GSM_SetName_NfPlayer(GSM &, Portion **param)
 
 static Portion *GSM_SetName_Strategy(GSM &, Portion **param)
 {
-  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  gbtNfgStrategy s = ((StrategyPortion *) param[0])->Value();
   gText name = ((TextPortion *) param[1])->Value();
-  s->SetLabel(name);
+  s.SetLabel(name);
   return param[0]->ValCopy();
 }
 
@@ -481,17 +483,18 @@ static Portion *GSM_SetName_NfSupport(GSM &, Portion **param)
 static Portion* GSM_SetOutcome(GSM &gsm, Portion** param)
 {
   Nfg &nfg = 
-    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->GetPlayer().GetGame();
+    *((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value().GetPlayer().GetGame();
   
   if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     throw gclRuntimeError("Invalid profile");
 
   StrategyProfile profile(nfg);
   for (int i = 1; i <= nfg.NumPlayers(); i++)  {
-    Strategy *strat =
+    gbtNfgStrategy strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
-    if (strat->GetPlayer().GetId() != i)
+    if (strat.GetPlayer().GetId() != i) {
       throw gclRuntimeError("Invalid profile");
+    }
     profile.Set(i, strat);
   }
   

@@ -77,7 +77,7 @@ bool gbtStrategyIterator::GoToNext(void)
 //             gbtStrategyIterator: Access to current state
 //------------------------------------------------------------------------
 
-Strategy *gbtStrategyIterator::GetStrategy(void) const
+gbtNfgStrategy gbtStrategyIterator::GetStrategy(void) const
 {
   return m_support.GetStrategy(pl, st);
 }
@@ -93,15 +93,15 @@ bool gbtStrategyIterator::IsLast(void) const
 	  st == m_support.NumStrats(pl)); 
 }
 
-bool gbtStrategyIterator::IsSubsequentTo(const Strategy *p_strategy) const
+bool gbtStrategyIterator::IsSubsequentTo(gbtNfgStrategy p_strategy) const
 {
-  if (pl > p_strategy->GetPlayer().GetId()) {
+  if (pl > p_strategy.GetPlayer().GetId()) {
     return true; 
   }
-  else if (pl < p_strategy->GetPlayer().GetId()) {
+  else if (pl < p_strategy.GetPlayer().GetId()) {
     return false;
   }
   else {
-    return (st > p_strategy->GetId());
+    return (st > p_strategy.GetId());
   }
 }

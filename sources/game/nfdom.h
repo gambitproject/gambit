@@ -34,7 +34,7 @@
 #include "nfgciter.h"
 #include "mixed.h"
 
-bool IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
+bool IsMixedDominated(const gbtNfgSupport &, gbtNfgStrategy,
 		      bool strong, gPrecision precision,
 		      gOutput &tracefile);
 

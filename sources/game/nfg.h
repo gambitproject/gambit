@@ -29,31 +29,9 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
+#include "strategy.h"
 #include "player.h"
 #include "outcome.h"
-
-class Strategy   {
-friend class Nfg;
-friend struct gbt_nfg_player_rep;
-private:
-  int m_number;
-  gbt_nfg_player_rep *m_player;
-  long m_index;
-  gText m_name;
-
-  Strategy(gbt_nfg_player_rep *);
-  Strategy(const Strategy &);
-  Strategy &operator=(const Strategy &);
-  ~Strategy();
-
-public:
-  const gText &GetLabel(void) const { return m_name; }
-  void SetLabel(const gText &s)  { m_name = s; }
-  int GetId(void) const        { return m_number; }
-
-  gbtNfgPlayer GetPlayer(void) const;
-  long GetIndex(void) const        { return m_index; }
-};
 
 class StrategyProfile;
 class Lexicon;
@@ -148,6 +126,7 @@ Nfg *ReadNfgFile(gInput &);
 Nfg *ReadComLabSfg(gInput &);
 void WriteComLabSfg(gOutput &, Nfg *);
 
+#include "nfstrat.h"
 #include "mixed.h"
 
 extern Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S);

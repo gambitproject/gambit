@@ -722,7 +722,7 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
     for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
       gbtNfgPlayer player = m_nfg.GetPlayer(pl);
       for (int st = 1; st <= player.NumStrategies(); st++) {
-	player.GetStrategy(st)->SetLabel(dialog.GetStrategyName(pl, st));
+	player.GetStrategy(st).SetLabel(dialog.GetStrategyName(pl, st));
       }
     }
     m_table->RefreshTable();

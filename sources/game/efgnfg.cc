@@ -157,7 +157,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
 	  name += ToText((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->GetPlayer(i).GetStrategy(j)->SetLabel(name);
+      L->N->GetPlayer(i).GetStrategy(j).SetLabel(name);
     }
   }
 
@@ -214,8 +214,7 @@ Nfg *MakeAfg(const efgGame &E)
     for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)  {
       Infoset *s = E.Players()[epl]->Infosets()[iset];
       for (int act = 1; act <= s->NumActions(); act++)  {
-	Strategy *st = afg->GetPlayer(npl).GetStrategy(act);
-	st->SetLabel(ToText(act));
+	afg->GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
       }
     }
   }

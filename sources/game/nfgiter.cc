@@ -78,7 +78,7 @@ NfgIter &NfgIter::operator=(const NfgIter &it)
 void NfgIter::First(void)
 {
   for (int i = 1; i <= N->NumPlayers(); i++)  {
-    Strategy *s = support.GetStrategy(i, 1);
+    gbtNfgStrategy s = support.GetStrategy(i, 1);
     profile.Set(i, s);
     current_strat[i] = 1;
   }
@@ -86,16 +86,17 @@ void NfgIter::First(void)
 
 int NfgIter::Next(int p)
 {
-  Strategy *s;
   if (current_strat[p] < support.NumStrats(p))  {
-    s = support.GetStrategy(p, ++(current_strat[p]));
+    gbtNfgStrategy s = support.GetStrategy(p, ++(current_strat[p]));
     profile.Set(p, s);
     return 1;
   }
-  s = support.GetStrategy(p, 1);
-  profile.Set(p, s);
-  current_strat[p] = 1;
-  return 0;
+  else {
+    gbtNfgStrategy s = support.GetStrategy(p, 1);
+    profile.Set(p, s);
+    current_strat[p] = 1;
+    return 0;
+  }
 }
 
 int NfgIter::Set(int p, int s)
@@ -111,7 +112,7 @@ int NfgIter::Set(int p, int s)
 void NfgIter::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++) {
-    t[i] = profile[i]->GetId();
+    t[i] = profile[i].GetId();
   }
 }
 
@@ -177,12 +178,12 @@ void NfgContIter::Set(int pl, int num)
   current_strat[pl] = num;
 }
 
-void NfgContIter::Set(const Strategy *s)
+void NfgContIter::Set(gbtNfgStrategy s)
 {
-  if (!frozen.Contains(s->GetPlayer().GetId()))   return;
+  if (!frozen.Contains(s.GetPlayer().GetId()))   return;
 
-  profile.Set(s->GetPlayer().GetId(), s);
-  current_strat[s->GetPlayer().GetId()] = s->GetId();
+  profile.Set(s.GetPlayer().GetId(), s);
+  current_strat[s.GetPlayer().GetId()] = s.GetId();
 }
 
 void NfgContIter::Freeze(const gBlock<int> &freeze)
@@ -217,11 +218,10 @@ int NfgContIter::NextContingency(void)
   int j = thawed.Length();
   if (j == 0) return 0;    	
 
-  Strategy *s;
   while (1)   {
     int pl = thawed[j];
     if (current_strat[pl] < support.NumStrats(pl)) {
-      s = support.GetStrategy(pl, ++(current_strat[pl]));
+      gbtNfgStrategy s = support.GetStrategy(pl, ++(current_strat[pl]));
       profile.Set(pl, s);
       return 1;
     }
@@ -248,7 +248,7 @@ gArray<int> NfgContIter::Get(void) const
 {
   gArray<int> current(N->NumPlayers());
   for (int i = 1; i <= current.Length(); i++) {
-    current[i] = profile[i]->GetId();
+    current[i] = profile[i].GetId();
   }
   return current;
 }
@@ -256,7 +256,7 @@ gArray<int> NfgContIter::Get(void) const
 void NfgContIter::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++) {
-    t[i] = profile[i]->GetId();
+    t[i] = profile[i].GetId();
   }
 }
 
@@ -274,7 +274,7 @@ void NfgContIter::Dump(gOutput &f) const
 {
   f << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++) {
-    f << profile[i]->GetId() << ' ';
+    f << profile[i].GetId() << ' ';
   }
   f << '}';
 }

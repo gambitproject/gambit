@@ -29,7 +29,6 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
-#include "game/mixed.h"
 #include "game/nfg.h"
 #include "algutils.h"  // needed for gFact
 
@@ -67,8 +66,8 @@ public:
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  void Set(Strategy *, const gNumber &);
-  const gNumber &operator()(Strategy *) const;
+  void Set(gbtNfgStrategy , const gNumber &);
+  const gNumber &operator()(gbtNfgStrategy) const;
 
   MixedSolution &operator+=(const MixedSolution &);
   MixedSolution &operator-=(const MixedSolution &);
@@ -110,7 +109,7 @@ public:
   const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
-  gNumber Payoff(gbtNfgPlayer, Strategy *) const;
+  gNumber Payoff(gbtNfgPlayer, gbtNfgStrategy) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

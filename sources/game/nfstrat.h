@@ -31,16 +31,13 @@
 #include "base/gstatus.h"
 #include "math/gnumber.h"
 #include "math/gpvector.h"
-#include "player.h"
-
-class Nfg;
-class Strategy;
+#include "nfstrat.h"
 
 class StrategyProfile   {
   friend class Nfg;
 private:
   long index;
-  gArray<Strategy *> profile;
+  gArray<gbtNfgStrategy> profile;
   
 public:
   StrategyProfile(const Nfg &);
@@ -54,9 +51,9 @@ public:
   
   long GetIndex(void) const;
   
-  Strategy *const operator[](int p) const;
-  Strategy *const Get(int p) const;
-  void Set(int p, const Strategy  *const s);
+  gbtNfgStrategy operator[](int p) const;
+  gbtNfgStrategy Get(int p) const;
+  void Set(int p, gbtNfgStrategy);
 };
 
 class gbtNfgSupport {
@@ -94,21 +91,21 @@ public:
   gArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 
-  Strategy *GetStrategy(int pl, int st) const;
-  int GetIndex(const Strategy *) const;
-  bool Contains(const Strategy *) const;
+  gbtNfgStrategy GetStrategy(int pl, int st) const;
+  int GetIndex(gbtNfgStrategy) const;
+  bool Contains(gbtNfgStrategy) const;
 
   // MANIPULATION
-  void AddStrategy(Strategy *);
-  void RemoveStrategy(Strategy *);
+  void AddStrategy(gbtNfgStrategy);
+  void RemoveStrategy(gbtNfgStrategy);
   
   // DATA ACCESS: PROPERTIES
   bool IsSubset(const gbtNfgSupport &s) const;
   bool IsValid(void) const;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES
-  bool Dominates(Strategy *s, Strategy *t, bool strong) const;
-  bool IsDominated(Strategy *s, bool strong) const; 
+  bool Dominates(gbtNfgStrategy, gbtNfgStrategy, bool strong) const;
+  bool IsDominated(gbtNfgStrategy, bool strong) const; 
 
   gbtNfgSupport Undominated(bool strong, const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status) const;

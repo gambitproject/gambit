@@ -52,12 +52,14 @@ libgame_a_SOURCES = \
 	nfstrat.cc \
 	nfstrat.h \
 	node.h \
+        player.h \
 	readefg.cc \
 	readnfg.cc \
 	sfg.cc \
 	sfg.h \
 	sfstrat.cc \
 	sfstrat.h \
+        strategy.h \
         striter.cc \
         striter.h
 

@@ -103,7 +103,7 @@ END_EVENT_TABLE()
 
 NfgSupportWindow::NfgSupportWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_parent(p_nfgShow), m_map((Strategy *) 0)
+    m_parent(p_nfgShow), m_map(gbtNfgStrategy())
 {
   SetAutoLayout(true);
 
@@ -161,10 +161,10 @@ void NfgSupportWindow::UpdateValues(void)
 					       (char *) player.GetLabel());
     
     for (int st = 1; st <= m_parent->Game().NumStrats(pl); st++) {
-      Strategy *strategy = m_parent->Game().GetPlayer(pl).GetStrategy(st);
+      gbtNfgStrategy strategy = m_parent->Game().GetPlayer(pl).GetStrategy(st);
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
-						       (char *) strategy->GetLabel());
+						       (char *) strategy.GetLabel());
       if (m_parent->GetSupport()->Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
@@ -203,13 +203,13 @@ void NfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
 
 void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 {
-  Strategy *strategy = m_map(p_id);
-  if (!strategy) {
+  gbtNfgStrategy strategy = m_map(p_id);
+  if (strategy.IsNull()) {
     return;
   }
 
   if (m_parent->GetSupport()->Contains(strategy) &&
-      m_parent->GetSupport()->NumStrats(strategy->GetPlayer()) > 1) {
+      m_parent->GetSupport()->NumStrats(strategy.GetPlayer()) > 1) {
     m_parent->GetSupport()->RemoveStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
@@ -226,5 +226,5 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 static gOutput &operator<<(gOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gBaseMap<wxTreeItemId, Strategy *>;
-template class gOrdMap<wxTreeItemId, Strategy *>;
+template class gBaseMap<wxTreeItemId, gbtNfgStrategy>;
+template class gOrdMap<wxTreeItemId, gbtNfgStrategy>;

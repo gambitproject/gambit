@@ -57,8 +57,8 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
       text += wxString::Format("Player %d: ", pl);
     }
 
-    if (player.GetStrategy(p_cont[pl])->GetLabel() != "") {
-      text += (const char *) player.GetStrategy(p_cont[pl])->GetLabel();
+    if (player.GetStrategy(p_cont[pl]).GetLabel() != "") {
+      text += (const char *) player.GetStrategy(p_cont[pl]).GetLabel();
     }
     else {
       text += wxString::Format("Strategy %d", p_cont[pl]);

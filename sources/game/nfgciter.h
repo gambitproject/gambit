@@ -64,7 +64,7 @@ public:
   
   // These next two only work on frozen strategies
   void Set(int pl, int num);
-  void Set(const Strategy *);
+  void Set(gbtNfgStrategy);
   int Next(int pl);
   
   const StrategyProfile &Profile(void) const;

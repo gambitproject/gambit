@@ -27,7 +27,7 @@
 #ifndef DLNFGQRE_H
 #define DLNFGQRE_H
 
-#include "game/nfstrat.h"
+#include "game/nfg.h"
 
 class dialogNfgQre : public wxDialog {
 private:

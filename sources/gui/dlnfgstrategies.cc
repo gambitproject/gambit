@@ -64,7 +64,7 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
 				      (char *) player.GetLabel())); 
     m_strategyNames.Append(gArray<gText>(player.NumStrategies()));
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      m_strategyNames[pl][st] = player.GetStrategy(st)->GetLabel();
+      m_strategyNames[pl][st] = player.GetStrategy(st).GetLabel();
     }
   } 
   m_player->SetSelection(0);

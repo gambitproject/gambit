@@ -25,8 +25,8 @@
 //
 
 #include "base/base.h"
-#include "nfstrat.h"
 #include "nfg.h"
+#include "nfstrat.h"
 
 //--------------------------------------------------------
 // StrategyProfile: Constructors, Destructors, Operators
@@ -37,7 +37,7 @@ StrategyProfile::StrategyProfile(const Nfg &N)
 {
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
     profile[pl] = N.GetPlayer(pl).GetStrategy(1);
-    index += profile[pl]->GetIndex();
+    index += profile[pl].GetIndex();
   }
 }
 
@@ -73,20 +73,20 @@ long StrategyProfile::GetIndex(void) const
   return index; 
 }
 
-Strategy *const StrategyProfile::operator[](int p) const 
+gbtNfgStrategy StrategyProfile::operator[](int p) const 
 { 
   return profile[p];
 }
 
-Strategy *const StrategyProfile::Get(int p) const 
+gbtNfgStrategy StrategyProfile::Get(int p) const 
 { 
-return profile[p];
+  return profile[p];
 }
 
-void StrategyProfile::Set(int p, const Strategy *const s)
+void StrategyProfile::Set(int p, gbtNfgStrategy s)
 {
-  index += (((s) ? s->GetIndex() : 0L) - ((profile[p]) ? profile[p]->GetIndex() : 0L));
-  profile[p] = (Strategy *)s;
+  index += s.GetIndex() - profile[p].GetIndex();
+  profile[p] = s;
 }
 
 //==========================================================================
@@ -154,7 +154,7 @@ int gbtNfgSupport::ProfileLength(void) const
   return total;
 }
 
-Strategy *gbtNfgSupport::GetStrategy(int pl, int st) const
+gbtNfgStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
 {
   int index = 0;
   for (int i = 1; i <= m_nfg->NumStrats(pl); i++) {
@@ -168,9 +168,9 @@ Strategy *gbtNfgSupport::GetStrategy(int pl, int st) const
   return 0;
 }
 
-int gbtNfgSupport::GetIndex(const Strategy *p_strategy) const
+int gbtNfgSupport::GetIndex(gbtNfgStrategy p_strategy) const
 {
-  int pl = p_strategy->GetPlayer().GetId();
+  int pl = p_strategy.GetPlayer().GetId();
   for (int st = 1; st <= NumStrats(pl); st++) {
     if (GetStrategy(pl, st) == p_strategy) {
       return st;
@@ -179,23 +179,23 @@ int gbtNfgSupport::GetIndex(const Strategy *p_strategy) const
   return 0;
 }
 
-bool gbtNfgSupport::Contains(const Strategy *p_strategy) const
+bool gbtNfgSupport::Contains(gbtNfgStrategy p_strategy) const
 {
-  return m_strategies(p_strategy->GetPlayer().GetId(), p_strategy->GetId());
+  return m_strategies(p_strategy.GetPlayer().GetId(), p_strategy.GetId());
 }
 
 //--------------------------------------------------------------------------
 //                  class gbtNfgSupport: Manipulation
 //--------------------------------------------------------------------------
 
-void gbtNfgSupport::AddStrategy(Strategy *s)
+void gbtNfgSupport::AddStrategy(gbtNfgStrategy s)
 {
-  m_strategies(s->GetPlayer().GetId(), s->GetId()) = 1;
+  m_strategies(s.GetPlayer().GetId(), s.GetId()) = 1;
 }
 
-void gbtNfgSupport::RemoveStrategy(Strategy *s)
+void gbtNfgSupport::RemoveStrategy(gbtNfgStrategy s)
 {
-  m_strategies(s->GetPlayer().GetId(), s->GetId()) = 0;
+  m_strategies(s.GetPlayer().GetId(), s.GetId()) = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -235,7 +235,7 @@ void gbtNfgSupport::Output(gOutput &p_output) const
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     p_output << "{ ";
     for (int st = 1; st <= NumStrats(pl); st++) {
-      p_output << "\"" << GetStrategy(pl, st)->GetLabel() << "\" ";
+      p_output << "\"" << GetStrategy(pl, st).GetLabel() << "\" ";
     }
     p_output << "} ";
   }

@@ -363,14 +363,14 @@ static Portion *GSM_RealizProb(GSM &, Portion **param)
 static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> P(*(*((MixedPortion*) param[0])->Value()).Profile());
-  Strategy* s = ((StrategyPortion*) param[1])->Value();
-  gbtNfgPlayer player = s->GetPlayer();
+  gbtNfgStrategy s = ((StrategyPortion*) param[1])->Value();
+  gbtNfgPlayer player = s.GetPlayer();
   Nfg &n = *player.GetGame();
 
   gPVector<gNumber> v(n.NumStrats());
   P.Regret(v);
 
-  return new NumberPortion(v(player.GetId(), s->GetId()));
+  return new NumberPortion(v(player.GetId(), s.GetId()));
 }
 
 static Portion *GSM_Regret_Behav(GSM &, Portion **param)
@@ -513,7 +513,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
 static Portion *GSM_SetStrategyProb(GSM &, Portion **param)
 {
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
-  Strategy *strategy = ((StrategyPortion *) param[1])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
   P->Set(strategy, value);
   ((MixedPortion *) param[0])->SetValue(P);
@@ -558,7 +558,7 @@ static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
 static Portion *GSM_StrategyProb(GSM &, Portion **param)
 {
   const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
-  Strategy* strategy = ((StrategyPortion*) param[1])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion*) param[1])->Value();
   return new NumberPortion((*profile)(strategy));
 }
 
@@ -577,7 +577,7 @@ static Portion *GSM_StrategyProbs(GSM &, Portion **param)
     ListPortion *p1 = new ListPortion;
 
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      Strategy *strategy = player.GetStrategy(st);
+      gbtNfgStrategy strategy = player.GetStrategy(st);
       p1->Append(new NumberPortion((*profile)(strategy)));
     }
 
@@ -596,9 +596,9 @@ static Portion *GSM_StrategyProbs(GSM &, Portion **param)
 static Portion *GSM_StrategyValue(GSM &, Portion **param)
 {
   MixedSolution *profile = ((MixedPortion *) param[0])->Value();
-  Strategy *strategy = ((StrategyPortion*) param[1])->Value();
+  gbtNfgStrategy strategy = ((StrategyPortion*) param[1])->Value();
 
-  return new NumberPortion(profile->Payoff(strategy->GetPlayer(), strategy));
+  return new NumberPortion(profile->Payoff(strategy.GetPlayer(), strategy));
 }
 
 //---------------

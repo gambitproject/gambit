@@ -219,18 +219,19 @@ bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
 { return (m_profile == p_solution.m_profile); }
 
-void MixedSolution::Set(Strategy *p_strategy, const gNumber &p_value)
+void MixedSolution::Set(gbtNfgStrategy p_strategy, const gNumber &p_value)
 { 
   Invalidate();
-  m_profile(p_strategy->GetPlayer().GetId(), p_strategy->GetId()) = p_value;
-  if (p_value.Precision() != m_precision)
+  m_profile(p_strategy.GetPlayer().GetId(), p_strategy.GetId()) = p_value;
+  if (p_value.Precision() != m_precision) {
     LevelPrecision();
+  }
 }
 
-const gNumber &MixedSolution::operator()(Strategy *p_strategy) const
+const gNumber &MixedSolution::operator()(gbtNfgStrategy p_strategy) const
 {
-  gbtNfgPlayer player = p_strategy->GetPlayer();
-  return m_profile(player.GetId(), p_strategy->GetId()); 
+  gbtNfgPlayer player = p_strategy.GetPlayer();
+  return m_profile(player.GetId(), p_strategy.GetId()); 
 }
 
 MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
@@ -333,7 +334,7 @@ void MixedSolution::Invalidate(void) const
 //---------------------
 
 gNumber MixedSolution::Payoff(gbtNfgPlayer p_player, 
-			      Strategy *p_strategy) const
+			      gbtNfgStrategy p_strategy) const
 { return m_profile.Payoff(p_player.GetId(), p_strategy); }
 
 

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Interface to player representation classes
+// Declaration of class to represent a normal form (pure) strategy
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,43 +24,39 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef STRATEGY_H
+#define STRATEGY_H
 
-//
-// The extensive form and normal form player classes are both included
-// in this header file in the hopes of an eventual unification of the
-// two.
-//
-
-struct gbt_nfg_player_rep;
+struct gbt_nfg_strategy_rep;
 class Nfg;
+class gbtNfgPlayer;
 
-class gbtNfgPlayer {
+class gbtNfgStrategy   {
 friend class Nfg;
-protected:
-  struct gbt_nfg_player_rep *rep;
+private:
+  gbt_nfg_strategy_rep *rep;
 
 public:
-  gbtNfgPlayer(void);
-  gbtNfgPlayer(gbt_nfg_player_rep *);
-  gbtNfgPlayer(const gbtNfgPlayer &);
-  ~gbtNfgPlayer();
+  gbtNfgStrategy(void);
+  gbtNfgStrategy(gbt_nfg_strategy_rep *);
+  gbtNfgStrategy(const gbtNfgStrategy &);
+  ~gbtNfgStrategy();
 
-  gbtNfgPlayer &operator=(const gbtNfgPlayer &);
+  gbtNfgStrategy &operator=(const gbtNfgStrategy &);
 
-  bool operator==(const gbtNfgPlayer &) const;
-  bool operator!=(const gbtNfgPlayer &) const;
+  bool operator==(const gbtNfgStrategy &) const;
+  bool operator!=(const gbtNfgStrategy &) const;
 
   bool IsNull(void) const;
 
-  Nfg *GetGame(void) const;
   gText GetLabel(void) const;
   void SetLabel(const gText &);
   int GetId(void) const;
 
-  int NumStrategies(void) const;
-  gbtNfgStrategy GetStrategy(int) const;
+  gbtNfgPlayer GetPlayer(void) const;
+  long GetIndex(void) const;
 };
 
-#endif  // PLAYER_H
+gOutput &operator<<(gOutput &, const gbtNfgStrategy &);
+
+#endif  // STRATEGY_H
