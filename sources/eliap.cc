@@ -15,6 +15,10 @@
 #include "rational.h"
 #include "grandom.h"
 
+#include "behav.h"
+#include "player.h"
+#include "infoset.h"
+
 
 //-------------------------------------------------------------------------
 //                     EFLiapParams<T>: Member functions
@@ -32,7 +36,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
   private:
     int niters, nevals;
     const ExtForm<T> &E;
-    gDPVector<T> p, pp,cpay;
+    BehavProfile<T> p, pp,cpay;
     gMatrix<T> xi;
 
     T Value(const gVector<T> &x);
@@ -40,7 +44,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
   public:
     EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P); 
     EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
-	     const gDPVector<T> &s); 
+	     const BehavProfile<T> &s); 
     virtual ~EFLiapFunc();
 
     int Optimize(int &iter, T &value);
@@ -50,7 +54,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
     int NumIters(void) const;
     int NumEvals(void) const;
 
-    const gDPVector<T> &GetProfile(void) const;
+    const BehavProfile<T> &GetProfile(void) const;
 };
 
 //----------------------------------------------------------------------
@@ -60,8 +64,8 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 template <class T>EFLiapFunc<T>
 ::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
   : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		  P.tolBrent,P.maxitsBrent), E(EF), p(EF.Dimensionality()),
-		  pp(EF.Dimensionality()), cpay(EF.Dimensionality()), 
+		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
+		  pp(EF, false), cpay(EF, false), 
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
@@ -72,10 +76,10 @@ template <class T>EFLiapFunc<T>
 
 template <class T>EFLiapFunc<T>
 ::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
-			  const gDPVector<T> &s)
+			  const BehavProfile<T> &s)
   : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		  P.tolBrent,P.maxitsBrent), E(EF), p(EF.Dimensionality()),
-		  pp(EF.Dimensionality()), cpay(EF.Dimensionality()), 
+		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
+		  pp(EF,false), cpay(EF,false), 
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
@@ -88,7 +92,7 @@ template <class T> EFLiapFunc<T>::~EFLiapFunc()
 { }
 
 
-template <class T> const gDPVector<T> &EFLiapFunc<T>::GetProfile(void) const
+template <class T> const BehavProfile<T> &EFLiapFunc<T>::GetProfile(void) const
 {
   return pp;
 }
@@ -117,10 +121,12 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
 {
   T sum, tmp;
 
-  for (int i = 1; i <= E.NumPlayers(); i++)  
-    for(int j=1;j<=E.NumInfosets(1,i);j++) {
+  for (int i = 1; i <= E.NumPlayers(); i++) {
+    Player *player = E.PlayerList()[i];
+    for(int j=1;j<=player->NumInfosets();j++) {
       sum = (T) 0;
-      for (int k = 1; k < E.NumActions(1,i,j); k++)  {
+      Infoset *s = player->InfosetList()[j];
+      for (int k = 1; k < s->NumActions(); k++)  {
 	do
 	  tmp = (T) Uniform();
 	while (tmp + sum > (T) 1);
@@ -130,6 +136,7 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
       
       pp(i,j,k) = (T) 1 - sum;
     }
+  }
 }
 
 template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
@@ -139,24 +146,29 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 
   nevals++;
 
-  p = v;
+  (gVector<T> &) p = v;
   T x, result((T) 0), avg, sum;
 
-  E.CondPayoff(p,cpay);
+      // Ted -- only reason for this is because you 
+      // got rid of CondPayoff ( . , . )
+  gPVector<T> probs;  
+  E.CondPayoff(p,cpay,probs);
 
 //  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
-
-  for(int i = 1; i <= E.NumPlayers(); i++) 
-    for(int j=1;j<=E.NumInfosets(1,i);j++) {
+  
+  for(int i = 1; i <= E.NumPlayers(); i++) {
+    Player *player = E.PlayerList()[i];
+    for(int j=1;j<=player->NumInfosets();j++) {
       avg = sum = (T) 0;
-      for (int k = 1; k <= E.NumActions(1,i,j); k++) {
+      Infoset *s = player->InfosetList()[j];
+      for (int k = 1; k <= s->NumActions(); k++) {
 	x = p(i, j, k); 
 	avg += (x * cpay(i, j, k));
 	sum += x;
 	if(x > (T)0 ) x = (T)0;
 	result += BIG1*x*x;         // add penalty for neg probabilities
       }
-      for(k=1; k<=E.NumActions(1,i,j); k++) {
+      for(k=1; k<=s->NumActions(); k++) {
 	x=cpay(i,j,k)-avg;
 	if(x < (T)0 ) x = (T)0;
 	result += x*x;          // add penalty if not best response
@@ -164,7 +176,9 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
       x=sum - ((T) 1);
       result += BIG2*x*x ;          // add penalty for sum not equal to 1
     }
+  }
   return result;
+
 }
 
 //------------------------------------------------------------------------
@@ -193,8 +207,8 @@ const gList<gDPVector<T> > &EFLiapModule<T>::GetSolutions(void) const
 template <class T> LiapFunc<T> *EFLiapModule<T>::CreateFunc(void)
 {
   if(start) {
-    gDPVector<T> s(E.Dimensionality());
-    s=*start;
+    BehavProfile<T> s(E, (gDPVector<T> &) *start);
+//    s=*start;
     return new EFLiapFunc<T>(E, params, s); 
   }
   return new EFLiapFunc<T>(E, params);
@@ -219,5 +233,6 @@ TEMPLATE class EFLiapModule<double>;
 TEMPLATE class EFLiapModule<gRational>;
 TEMPLATE class EFLiapFunc<double>;
 TEMPLATE class EFLiapFunc<gRational>;
+
 
 

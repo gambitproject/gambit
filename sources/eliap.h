@@ -10,12 +10,14 @@
 #include "extform.h"
 #include "liap.h"
 #include "glist.h"
+#include "rational.h"
 //#include "gdpvect.h"
 
 template <class T> class EFLiapParams : public LiapParams<T>  {
 public:
   EFLiapParams(void);
 };
+
 
 template <class T> class EFLiapModule : public LiapModule<T>  {
   private:
