@@ -422,7 +422,7 @@ PortionType BoolPortion::Type( void ) const
 { return porBOOL; }
 
 void BoolPortion::Output( gOutput& s ) const
-{ s << ( *_Value ? "true" : "false" ); }
+{ s << ( *_Value ? "True" : "False" ); }
 
 Portion* BoolPortion::ValCopy( void ) const
 { return new BoolValPortion( *_Value ); }
@@ -1315,7 +1315,9 @@ Portion* ListPortion::ValCopy( void ) const
 { return new ListValPortion( *_Value ); }
 
 Portion* ListPortion::RefCopy( void ) const
-{ return new ListRefPortion( *_Value ); }
+{ 
+  return new ListRefPortion( *_Value ); 
+}
 
 void ListPortion::AssignFrom( Portion* p )
 {
@@ -1329,8 +1331,6 @@ void ListPortion::AssignFrom( Portion* p )
 	 _DataType == porUNKNOWN);
 
   Flush();
-  delete _Value;
-  _Value = new gBlock< Portion* >;   
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
     result = Insert( value[ i ]->ValCopy(), i );
@@ -1397,8 +1397,9 @@ bool ListValPortion::IsReference( void ) const
 
 ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
 {
-  // _Value = &value; 
+  _Value = &value; 
 
+/*
   int i;
   int length;
   int result;
@@ -1410,13 +1411,11 @@ ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
     result = Insert( value[ i ]->RefCopy(), i );
     assert( result != 0 );
   }
+*/
 }
 
 ListRefPortion::~ListRefPortion()
-{
-  Flush();
-  delete _Value;
-}
+{ }
 
 bool ListRefPortion::IsReference( void ) const
 { return true; }

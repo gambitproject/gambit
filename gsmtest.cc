@@ -15,9 +15,12 @@
 #include "gsmfunc.h"
 
 
+#include "assert.h"
+
+
 
 #define CRASHTEST
-#define INTERACTIVE
+// #define INTERACTIVE
 
 
 int main( void )
@@ -965,6 +968,9 @@ int main( void )
 
 
 
+
+
+
 #ifdef CRASHTEST
 
 #ifdef INTERACTIVE
@@ -1011,6 +1017,7 @@ int main( void )
 #endif
 
 
+
   machine->PushRef( "lx" );
   machine->PushRef( "x1" );
   machine->PushRef( "x2" );
@@ -1035,13 +1042,9 @@ int main( void )
   machine->PushRef( "lx" );
   machine->Push( (long) -2 );
   machine->Subscript();
-  gout << "here1!\n";
   machine->PushRef( "lx" );
-  gout << "here2!\n";
   machine->Push( (long) 7 );
-  gout << "here3!\n";
   machine->Subscript();
-  gout << "here4!\n";
   machine->Dump();
 
 #endif
@@ -1076,6 +1079,7 @@ int main( void )
   machine->PushRef( "lx" );
   machine->Push( (long) 9 );
   machine->Subscript();
+  machine->Dump();
   machine->PushRef( "lx" );
   machine->Push( (long) 10 );
   machine->Subscript();
@@ -1084,7 +1088,6 @@ int main( void )
   machine->Subscript();  
   machine->Dump();
 #endif
-
 
 
 #ifdef INTERACTIVE
@@ -3250,7 +3253,33 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  
+
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "lx1" );
+  machine->Push( "str1" );
+  machine->PushList( 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "lx1" );
+  machine->PushRef( "lx1" );
+  machine->Push( "str2" );
+  machine->PushList( 1 );
+  machine->Add();
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "lx1" );
+  machine->Dump();
+
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
