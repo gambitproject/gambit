@@ -310,6 +310,8 @@ constant:        BOOLEAN
           { $$ = new gclVarName(tval); }
         |        DOLLAR NAME
           { $$ = new gclVarName(gText("$") + tval); }
+        |        DOLLAR DOLLAR NAME
+          { $$ = new gclVarName(gText("$$") + tval); }   
         |        list   { $$ = $1; }
         ;
 
