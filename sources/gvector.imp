@@ -1,0 +1,225 @@
+//#
+//# FILE: gvector.imp -- Implementation of vector classes
+//#
+//# $Id$
+//#
+
+#ifdef __GNUC__
+// this pragma is not necessary with g++ 2.6.3 /2 -fno-implicit-templates
+//#pragma implementation
+#elif defined(__BORLANDC__)
+#pragma option -Jgx
+#else
+#error Unsupported compiler type.
+#endif   // __GNUC__, __BORLANDC__
+
+
+#include "gvector.h"
+
+
+//------------------------------------------------------------------------
+//	gVector: internal functions
+//------------------------------------------------------------------------
+
+// many internal functions are inline
+
+template <class T> void gVector<T>::CopyData( const gVector<T> &V ) {
+    min=V.min; max=V.max;
+    AllocateData();
+    for(int i=min; i<=max; i++)
+      (*this)[i]=V[i];
+  }
+
+//------------------------------------------------------------------------
+//	gVector: ctors, dtor
+//------------------------------------------------------------------------
+
+// ctors are inline
+
+template <class T>
+gVector<T>::~gVector()
+{
+  DeleteData();
+}
+
+
+//------------------------------------------------------------------------
+//	gVector: arithmetic operators
+//------------------------------------------------------------------------
+
+template<class T> gVector<T>&
+gVector<T>::operator=(T c)
+{
+  for(int i=min; i<=max; i++)
+    (*this)[i]= c;
+  return (*this);
+}
+
+// arithmetic operators
+template <class T> gVector<T>
+gVector<T>::operator+(const gVector<T>& V) const
+{
+  assert( Check(V) );
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= (*this)[i] + V[i];
+  return tmp;
+}
+
+template <class T> gVector<T>
+gVector<T>::operator-(const gVector<T>& V) const
+{
+  assert( Check(V) );
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= (*this)[i] - V[i];
+  return tmp;
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator+=(const gVector<T>& V)
+{
+  assert( Check(V) );
+  for(int i=min; i<=max; i++)
+    (*this)[i] += V[i];
+  return (*this);
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator-=(const gVector<T>& V)
+{
+  assert( Check(V) );
+  for(int i=min; i<=max; i++)
+    (*this)[i] -= V[i];
+  return (*this);
+}
+
+template <class T> gVector<T>
+gVector<T>::operator-(void)
+{
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= -(*this)[i];
+  return tmp;
+}
+
+template <class T> gVector<T>
+gVector<T>::operator*(T c) const
+{
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= (*this)[i]*c;
+  return tmp;
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator*=(T c)
+{
+  for(int i=min; i<=max; i++)
+    (*this)[i] *= c;
+  return (*this);
+}
+
+template <class T> T
+gVector<T>::operator*(const gVector<T>& V) const
+{
+  assert( Check(V) );
+  T sum= (T)0;
+  for(int i=min; i<=max; i++)
+    sum += (*this)[i] * V[i];
+  return sum;
+}
+
+
+template <class T> gVector<T>
+gVector<T>::operator/(T c) const
+{
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= (*this)[i]/c;
+  return tmp;
+}
+
+
+template <class T> gVector<T>
+gVector<T>::operator/(const gVector<T>& V) const
+{
+  assert( Check(V) );
+  gVector<T> tmp(min,max);
+  for(int i=min; i<=max; i++)
+    tmp[i]= (*this)[i] / V[i];
+  return tmp;
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator/=(const gVector<T>& V)
+{
+  assert( Check(V) );
+  for(int i=min; i<=max; i++)
+    (*this)[i] /= V[i];
+  return (*this);
+}
+
+
+template <class T> int
+gVector<T>::operator==(const gVector<T>& V) const
+{
+  assert( Check(V) );
+  for(int i=min; i<=max; i++)
+    if( (*this)[i] != V[i] )
+      return 0;
+  return 1;
+}
+
+template <class T> int
+gVector<T>::operator==(T c) const
+{
+  for(int i=min; i<=max; i++)
+    if( (*this)[i] != c )
+      return 0;
+  return 1;
+}
+
+// != operators are inline functions
+
+
+//------------------------------------------------------------------------
+//	gVector: other operators
+//------------------------------------------------------------------------
+
+template <class T> inline gVector<T>& gVector<T>::operator=(const gVector<T>& V) {
+    assert(Check(V));
+    DeleteData();
+    CopyData(V);
+  }
+
+
+//------------------------------------------------------------------------
+//	gVector: access functions
+//------------------------------------------------------------------------
+
+// index operators are inline functions
+
+// First(), Last(), and Length() are inline functions
+
+template <class T> void
+gVector<T>::Dump(gOutput &to) const
+{
+//to<<"vector dump: "<<Length()<<" elements: "<<First()<<".."<<Last()<<"\n";
+  to<<"{ ";
+  for(int i=min; i<=max; i++)
+    to<<(*this)[i]<<" ";
+  to<<"}";
+}
+
+
+//------------------------------------------------------------------------
+//	gVector: output operator (gOutput operator<<)
+//------------------------------------------------------------------------
+
+template <class T> gOutput &
+operator<<(gOutput &to, const gVector<T> &V)
+{
+  V.Dump(to); return to;
+}
+
