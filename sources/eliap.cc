@@ -184,14 +184,10 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 //                    EFLiapModule<T>: Member functions
 //------------------------------------------------------------------------
 
-template <class T> EFLiapModule<T>
-::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p)
-  : LiapModule<T>(p), E(E)
-{ }
-
-template <class T> EFLiapModule<T>
-::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p,gDPVector<T> &s)
-  : LiapModule<T>(p, s), E(E)
+template <class T>
+EFLiapModule<T>::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p,
+			      BehavProfile<T> &s)
+  : LiapModule<T>(p), E(E), start(s)
 { }
 
 template <class T> EFLiapModule<T>::~EFLiapModule()
@@ -205,12 +201,7 @@ const gList<BehavProfile<T> > &EFLiapModule<T>::GetSolutions(void) const
 
 template <class T> LiapFunc<T> *EFLiapModule<T>::CreateFunc(void)
 {
-  if(start) {
-    BehavProfile<T> s(E, (gDPVector<T> &) *start);
-//    s=*start;
-    return new EFLiapFunc<T>(E, params, s); 
-  }
-  return new EFLiapFunc<T>(E, params);
+  return new EFLiapFunc<T>(E, params, start);
 }
 
 template <class T>
