@@ -25,7 +25,8 @@ typedef enum {
   algorithmEfg_SIMPDIV_NFG,
   algorithmEfg_POLENUM_EFG, algorithmEfg_POLENUM_NFG,
   algorithmEfg_QRE_EFG, algorithmEfg_QRE_NFG,
-  algorithmEfg_QREALL_NFG
+  algorithmEfg_QREALL_NFG,
+  algorithmEfg_POLISH_NASH
 } EfgAlgType;
 
 gText ToText(EfgAlgType);
