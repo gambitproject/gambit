@@ -14,26 +14,6 @@
 #include "tableau.h"
 #include "gtableau.h"
 
-    // Ted -- I tried to put EnumTableau in .cc file, but gnu wouldn't
-    //        let me.  
-//template <class T> class EnumTableau;
-
-//---------------------------------------------------------------------------
-//                    EnumTableau<T>: class definition
-//---------------------------------------------------------------------------
-
-template <class T> class EnumTableau : public Tableau<T> {
-  private:
-    int n1, n2;
-  public:
-    EnumTableau(void);
-    EnumTableau(const NormalForm<T> &);
-    int MinRow(void) const;
-    int MaxRow(void) const;
-//    void AddSolution(gList< gPVector<T> > &);
-    virtual ~EnumTableau();
-};
-
 class EnumParams     {
 public:
   int plev, nequilib;
@@ -50,7 +30,7 @@ public:
 template <class T> class EnumModule  {
 private:
   BFS_List List;
-  EnumTableau<T> tab;
+  DumbTableau<T> tab;
   EnumParams params;
   int rows,cols,level,players;
   long count,npivots;
@@ -62,7 +42,7 @@ public:
   EnumModule(const NormalForm<T> &N, const EnumParams &p); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, Basis<T> &B1, gBlock<int> &targ1);
+  void SubSolve(int pr, int pcl, Tableau<T> &B1, gBlock<int> &targ1);
   
   int NumPivots(void) const;
   gRational Time(void) const;

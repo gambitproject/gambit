@@ -22,82 +22,6 @@ errfile(0),status(status_)
 { }
 
 //-------------------------------------------------------------------------
-//               EnumTableau<T>: constructor and destructor
-//-------------------------------------------------------------------------
-
-template <class T> EnumTableau<T>::EnumTableau(void) 
-  : Tableau<T>(), n1(0), n2(0)
-{ } 
-
-template <class T> EnumTableau<T>::EnumTableau(const NormalForm<T>&NF) 
-  : Tableau<T>(NF.NumStrats(1) + NF.NumStrats(2),
-	       NF.NumStrats(1) + NF.NumStrats(2)), 
-	       n1(NF.NumStrats(1)), n2(NF.NumStrats(2))
-{ 
-  NormalIter<T>
-    iter(NF); T min = (T) 0, x; int i;
-  
-  for (i = 1; i <= n1; i++)   {
-    for (int j = 1; j <= n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-
-  min-=(T)1;
-  
-  for (i = 1; i <= n1; i++) 
-    for (int j = 1; j <= n1; j++) 
-      A(i, j) = (T)0;
-  
-  for (i = n1 + 1; i <= n1 + n2; i++)
-    for (int j = n1 + 1; j <= n1 + n2; j++)
-      A(i, j) = (T)0;
-  
-  for (i = 1; i <= n1; i++)  {
-    for (int j = 1; j <= n2; j++)  {
-      A(i, n1 + j) = iter.Payoff(1) - min;
-      A(n1 + j, i) = iter.Payoff(2) - min;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-  for (i = 1; i <= n1 + n2; i++) 
-    b[i]=-1.0;
-//  A.Dump(gout);
-//  b.Dump(gout);
-
-}
-
-template <class T> int EnumTableau<T>::MinRow(void) const
-{
-return A.MinRow();
-}
-
-template <class T> int EnumTableau<T>::MaxRow(void) const
-{
-return A.MaxRow();
-}
-
-template <class T> EnumTableau<T>::~EnumTableau()
-{ }
-
-
-#ifdef __GNUG__
-template class EnumTableau<double>;
-template class EnumTableau<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class EnumTableau<double>;
-class EnumTableau<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__
-
-//-------------------------------------------------------------------------
 //                    EnumModule<T>: Member functions
 //-------------------------------------------------------------------------
 
@@ -120,13 +44,13 @@ template <class T> int EnumModule<T>::Enum(void)
 	for(int i=1;i<=target.Length();i++)
 		target[i]=i;
 
-	Basis<T> basis(tab);
+	Tableau<T> tableau(tab);
 
 	i = rows+1;
 
 	while(i<=rows+cols && !params.status.Get())
 		if(params.nequilib==0 || List.Length()<params.nequilib) {
-			SubSolve(rows,i,basis,target);
+			SubSolve(rows,i,tableau,target);
 			i++;
       params.status.SetProgress((double)(i-rows-1)/(double)cols);
 		}
@@ -145,12 +69,12 @@ template <class T> int EnumModule<T>::Enum(void)
 
 
 template <class T> void EnumModule<T>
-::SubSolve(int pr, int pcl, Basis<T> &B1, gBlock<int> &targ1)
+::SubSolve(int pr, int pcl, Tableau<T> &B1, gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
 
-  Basis<T> B2(B1);
+  Tableau<T> B2(B1);
 
       // construct new target basis
   gBlock<int> targ2(targ1);  
