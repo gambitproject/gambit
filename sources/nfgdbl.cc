@@ -23,6 +23,7 @@ class gNode<gString>;
 class gNode<gRational>;
 class Node;
 class gList<Node *>;
+class gNode<Node *>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif // __GNUG__, __BORLANDC__
