@@ -122,10 +122,8 @@ void TreeWindow::node_add(void)
 
         if (cursor->NumChildren() == 0)
         {
-#ifdef USE_EXCEPTIONS
             try
             {
-#endif   // USE_EXCEPTIONS
                 if (mode == NodeAddNew)
                 {
                     ef.AppendNode(cursor, player, branches);
@@ -133,20 +131,16 @@ void TreeWindow::node_add(void)
                 }
                 else
                     ef.AppendNode(cursor, infoset);
-#ifdef USE_EXCEPTIONS
             }
             catch (Efg::Exception &e)
             {
                 // internal error in Efg -- for now, ignore silently
             }
-#endif   // USE_EXCEPTIONS
         }
         else
         {
-#ifdef USE_EXCEPTIONS
             try
             {
-#endif   // USE_EXCEPTIONS
                 if (mode == NodeAddNew)
                 {
                     ef.InsertNode(cursor, player, branches);
@@ -155,13 +149,11 @@ void TreeWindow::node_add(void)
                 }
                 else
                     ef.InsertNode(cursor, infoset);
-#ifdef USE_EXCEPTIONS
             }
             catch (Efg::Exception &e)
             {
                 // internal error in Efg -- for now, ignore silently
             }
-#endif   // USE_EXCEPTIONS
         }
         
         // take care of probs for chance nodes.
@@ -195,10 +187,8 @@ void TreeWindow::node_delete(void)
     MyDialogBox *branch_num_dialog = 0;
     char *branch_name = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         branch_num_dialog = new MyDialogBox(this, "Keep Branch", EFG_NODE_HELP);
         wxStringList *branch_list = new wxStringList;
         branch_name = new char[MAX_LABEL_LENGTH];
@@ -227,7 +217,6 @@ void TreeWindow::node_delete(void)
         
         delete [] branch_name;
         delete branch_num_dialog;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
@@ -239,7 +228,6 @@ void TreeWindow::node_delete(void)
 
         throw;
     }
-#endif   // USE_EXCEPTIONS
 }
 
 //***********************************************************************
@@ -251,10 +239,8 @@ void TreeWindow::node_label(void)
     char *label = 0;
     MyDialogBox *label_dialog = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         label = new char[MAX_LABEL_LENGTH];
         strcpy(label, cursor->GetName());
         label_dialog = new MyDialogBox(pframe, "Label Node", EFG_NODE_HELP);
@@ -269,7 +255,6 @@ void TreeWindow::node_label(void)
             cursor->SetName(label);
         delete label_dialog;
         delete [] label;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
@@ -278,7 +263,6 @@ void TreeWindow::node_label(void)
         if (label)   
             delete [] label;
     }
-#endif   // USE_EXCEPTIONS
 }
 
 //***********************************************************************
@@ -473,18 +457,14 @@ void TreeWindow::infoset_join(void)
                      EFG_INFOSET_HELP, pframe);
         return;
     }
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         ef.JoinInfoset(mark_node->GetInfoset(), cursor);
-#ifdef USE_EXCEPTIONS
     }
     catch (Efg::Exception &e)
     {
         // error in Efg class -- for now, just silently ignore
     }
-#endif   // USE_EXCEPTIONS
     infosets_changed = TRUE;
 }
 
@@ -503,10 +483,8 @@ void TreeWindow::infoset_label(void)
     char *label = 0;
     MyDialogBox *label_dialog = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         label = new char[MAX_LABEL_LENGTH];
         Bool label_actions = TRUE;
         if (cursor->GetInfoset()->GetName() != "")
@@ -530,7 +508,6 @@ void TreeWindow::infoset_label(void)
 
         delete label_dialog;
         delete [] label;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
@@ -540,7 +517,6 @@ void TreeWindow::infoset_label(void)
         if (label)    
             delete [] label;
     }
-#endif   // USE_EXCEPTIONS
 }
 
 
@@ -559,10 +535,8 @@ void TreeWindow::infoset_switch_player(void)
     MyDialogBox *infoset_switch_dialog = 0;
     char *player_name = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         infoset_switch_dialog = new MyDialogBox(this, "Set New Player", EFG_INFOSET_HELP);
         wxStringList *player_list = new wxStringList;
         player_name = new char[20];
@@ -599,7 +573,6 @@ void TreeWindow::infoset_switch_player(void)
         
         delete infoset_switch_dialog;
         delete [] player_name;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
@@ -609,7 +582,6 @@ void TreeWindow::infoset_switch_player(void)
         if (player_name)   
             delete [] player_name;
     }
-#endif    // USE_EXCEPTIONS
 }
 
 //***********************************************************************
@@ -627,10 +599,8 @@ void TreeWindow::infoset_reveal(void)
     MyDialogBox *infoset_reveal_dialog = 0;
     char **player_names = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         infoset_reveal_dialog = new MyDialogBox(this, "Reveal to Players",
                                                 EFG_INFOSET_HELP);
         player_names = new char *[ef.NumPlayers()];
@@ -666,7 +636,6 @@ void TreeWindow::infoset_reveal(void)
             delete [] player_names[i - 1];
 
         delete [] player_names;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
@@ -685,7 +654,6 @@ void TreeWindow::infoset_reveal(void)
                 delete [] player_names;
         }
     }
-#endif   // USE_EXCEPTIONS
 }
 
 
@@ -985,10 +953,8 @@ void TreeWindow::tree_delete(void)
     
     MyMessageBox *tree_delete_dialog = 0;
     
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         tree_delete_dialog = new MyMessageBox("Are you sure?",
                                               "Delete Tree",
                                               EFG_TREE_HELP, pframe);
@@ -996,29 +962,23 @@ void TreeWindow::tree_delete(void)
         if (tree_delete_dialog->Completed() == wxOK)
         {
             nodes_changed = true;
-#ifdef USE_EXCEPTIONS
             try
             {
-#endif   // USE_EXCEPTIONS
                 ef.DeleteTree(cursor);
-#ifdef USE_EXCEPTIONS
             }
             catch (Efg::Exception &e)
             {
                 // internal error in Efg class.. ignore silently for now
             }
-#endif   // USE_EXCEPTIONS
         }
         
         delete tree_delete_dialog;
-#ifdef USE_EXCEPTIONS
     }
     catch (...)
     {
         if (tree_delete_dialog)  
             delete tree_delete_dialog;
     }
-#endif   // USE_EXCEPTIONS
 }
 
 //***********************************************************************
@@ -1041,18 +1001,14 @@ void TreeWindow::tree_copy(void)
     }
 
     nodes_changed = true;
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         ef.CopyTree(mark_node, cursor);
-#ifdef USE_EXCEPTIONS
     }
     catch (Efg::Exception &e)
     {
         // internal error in Efg class..  ignore silently for now
     }
-#endif  // USE_EXCEPTIONS
 }
 
 //***********************************************************************
@@ -1074,18 +1030,14 @@ void TreeWindow::tree_move(void)
     }
 
     nodes_changed = true;
-#ifdef USE_EXCEPTIONS
     try
     {
-#endif   // USE_EXCEPTIONS
         ef.MoveTree(mark_node, cursor);
-#ifdef USE_EXCEPTIONS
     }
     catch (Efg::Exception &e)
     {
         // internal error in Efg class.. ignore silently for now
     }
-#endif   // USE_EXCEPTIONS
 }
 
 
@@ -1489,7 +1441,7 @@ void TreeWindow::print_eps(wxOutputOption fit)
     wxPostScriptDC dc(NULL, TRUE);
     if (dc.Ok())
     {
-        float old_zoom;
+        float old_zoom = 1.0;
 
         if (fit == wxFITTOPAGE)
         {
