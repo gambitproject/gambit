@@ -4,12 +4,8 @@ GUI Bugs:
 
 Bug D3: Bugs in Outcome interface
 
-When filling in payoffs for outcomes in the extensive form outcome
-display on Linux, there is no echoing of keystrokes.  So you can't
-tell what you are entering.  Also, when entering outcome names, stray
-numbers are sometimes prefixed to the name (this happens for capital
-letters), and you can't get rid of them.  Finally,the outcome window
-does not stay on top when you attach outcomes to the game.
+For the extensive form, the outcome window does not stay on top when you
+attach outcomes to the game.
 
 For the normal form, there are two outcome windows, one accessed by
 Solve->Outcomes, and the other by double click (Ctrl click on Linux).
@@ -35,6 +31,10 @@ When you hit Help->Contents menu item, it says
 at the unix prompt, then hangs for 45 seconds until it displays a
 window saying that the help file cannot be found.
 
+NOTE: This is almost certainly due to the lack of the "wxhelp" program in
+the user's path.  Also, the WXHELPFILES environment variable has to point
+to a directory where the help files live.
+
 //------------------------------
 
 Bug D5: Loading and saving files
@@ -53,8 +53,9 @@ with the same name.
 
 Bug D7:  Conflict with Netscape
 
-When running the GUI, if netscape is already running, you get the
-follwoing message, (or something like it, depending on the machine): 
+When running the GUI, if netscape is already running, you may or may not
+get the following message, (or something like it, depending on the
+machine):
 
    X Error of failed request:  BadDrawable (invalid Pixmap or Window parameter)
    Major opcode of failed request:  55 (X_CreateGC)
@@ -62,7 +63,9 @@ follwoing message, (or something like it, depending on the machine):
    Serial number of failed request:  379
    Current serial number in output stream:  391
 
-We should either fix this, or deliver a more informative error messsage
+We should either fix this, or deliver a more informative error messsage.
+
+NOTE: This bug can be very difficult to reproduce.
 
 //------------------------------
 

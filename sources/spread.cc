@@ -545,11 +545,17 @@ void SpreadSheetC::OnEvent(wxMouseEvent &ev)
 // Keyboard message handler
 void SpreadSheetC::OnChar(wxKeyEvent &ev)
 {
-    // Allow the default behavior to be overiden
+    // Allow the default behavior to be overriden
     if (top_frame->OnCharNew(ev)) 
         return;
 
     int ch = ev.KeyCode();
+
+	// Ignore shift key.
+	// Note: this will not affect the use of the shift key e.g. in
+	// changing the case of a character.
+	if (ch == WXK_SHIFT)
+		return;
 
     // Cursor keys to move the hilight
     if (IsCursor(ev) || IsEnter(ev))
@@ -604,6 +610,10 @@ void SpreadSheetC::OnChar(wxKeyEvent &ev)
             }
 
             top_frame->SetStatusText(cell.str);
+
+            // Update the character in place.
+            sheet->SetValue(cell.row, cell.col, cell.str);
+            UpdateCell(*(GetDC()), cell);
         }
     }
 }
@@ -1546,65 +1556,65 @@ void SpreadSheet3D::OnPrint1(void)
 void SpreadSheet3D::OnPrint(void)
 {
 #ifdef GUIREC_DEBUG
-	printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
+    printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
 #endif
 
-	if (GUI_PLAYBACK)
-	{
-		gText arg;
-		arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 1);
+    if (GUI_PLAYBACK)
+    {
+        gText arg;
+        arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 1);
 
-		if (arg == "NoExtraMedia")
-		{
-			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
-			wxOutputMedia media = (wxOutputMedia)(atoi((char *)arg));
-			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 3);
-			wxOutputOption option = (wxOutputOption)(atoi((char *)arg));
-			Print(media, option);
-		}
-		else // ExtraMedia
-		{
-			arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
-			char *s = copystring(arg);
+        if (arg == "NoExtraMedia")
+        {
+            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
+            wxOutputMedia media = (wxOutputMedia)(atoi((char *)arg));
+            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 3);
+            wxOutputOption option = (wxOutputOption)(atoi((char *)arg));
+            Print(media, option);
+        }
+        else // ExtraMedia
+        {
+            arg = GUI_READ_ARG("SpreadSheet3D::OnPrint", 2);
+            char *s = copystring(arg);
 
-			if (s)
-			{
-				gFileOutput out(s);
-				data[cur_level].Dump(out);
-			}
-		}
-	}
-	else
-	{
-		wxStringList extras("ASCII", NULL);
-		wxOutputDialogBox od(&extras);
-		
-		if (od.Completed() == wxOK)
-		{
-			GUI_RECORD("PRINT");
+            if (s)
+            {
+                gFileOutput out(s);
+                data[cur_level].Dump(out);
+            }
+        }
+    }
+    else
+    {
+        wxStringList extras("ASCII", NULL);
+        wxOutputDialogBox od(&extras);
+        
+        if (od.Completed() == wxOK)
+        {
+            GUI_RECORD("PRINT");
 
-			if (!od.ExtraMedia())
-			{
-				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "NoExtraMedia");
-				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, ToText(od.GetMedia()));
-				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 3, ToText(od.GetOption()));
-				Print(od.GetMedia(), od.GetOption());
-			}
-			else    // only one extra exists--must be ascii.
-			{
-				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "ExtraMedia");
+            if (!od.ExtraMedia())
+            {
+                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "NoExtraMedia");
+                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, ToText(od.GetMedia()));
+                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 3, ToText(od.GetOption()));
+                Print(od.GetMedia(), od.GetOption());
+            }
+            else    // only one extra exists--must be ascii.
+            {
+                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 1, "ExtraMedia");
 
-				char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
-				GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, gText(s));
-				
-				if (s)
-				{
-					gFileOutput out(s);
-					data[cur_level].Dump(out);
-				}
-			}
-		}
-	}
+                char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
+                GUI_RECORD_ARG("SpreadSheet3D::OnPrint", 2, gText(s));
+                
+                if (s)
+                {
+                    gFileOutput out(s);
+                    data[cur_level].Dump(out);
+                }
+            }
+        }
+    }
 }
 
 
