@@ -490,6 +490,7 @@ void LPTableau<T>::SetCost(const gVector<T>& c)
   if(cost.Check(c)) {
     unitcost= (T)0;
     cost= c;
+    SolveDual();
     return;
   }
   assert(c.First()==cost.First());
