@@ -1,7 +1,7 @@
 //
 // FILE: gcl.cc -- top level of the Gambit Command Line
 //
-// @(#)gcl.cc	1.18 12/29/96
+// $Id$
 //
 
 #include <signal.h>
@@ -104,9 +104,10 @@ int main( int /*argc*/, char* argv[] )
   }
     
   
-  // Set up the error handling functions:
-  signal(SIGFPE, (fptr)SigFPEHandler);
-  
+	// Set up the error handling functions:
+	#ifndef __BORLANDC__
+	signal(SIGFPE, (fptr)SigFPEHandler);
+	#endif  
   _gsm = new GSM(256);
   GCLCompiler *C = new GCLCompiler;
   
