@@ -37,7 +37,7 @@
 
     APPROXIMATE STORAGE REQUIREMENTS:
     for integer arrays, 4 bytes per integer, using constants
-    MAXINP1, MAXINP2  max. node indices in input
+    maxinp1, maxinp2  max. node indices in input
     MAXEDGES          max. no. edges in input
     MAXM, MAXN        max. dimension of incidence matrix
    	              per connected component
@@ -45,8 +45,8 @@
 	   [2 MB  if MAXM = MAXN = 700 ]
     3 x MAXEDGES  integers for edge list
 	   [0.6 MB  if  MAXEDGES = 50000 ]
-    3 x MAXINP1  integers for input nodes and list of components
-	   [60 kB   if  MAXINP1 = MAXINP2 = 5000 ]
+    3 x maxinp1  integers for input nodes and list of components
+	   [60 kB   if  maxinp1 = maxinp2 = 5000 ]
     If these constants are exceeded certain edges will be rejected
     from the input with an error message.  Program shouldn't crash.
     No error value is returned by  main().
@@ -155,6 +155,7 @@
 */
 
 #include <stdio.h>
+#include "garray.h"
 
 #define MAX(A,B)  ((A) > (B) ? (A) : (B))
 #define MIN(A,B)  ((A) < (B) ? (A) : (B))
@@ -171,14 +172,30 @@
 #define STKSIZE  (MAXM + 1) * (MAXN + 1)  
   // largest stack usage for full graph 
 
-struct edge {
+class edge {
+public:
   int node1;
   int node2;
-  int nextedge ;
+  int nextedge;
+  edge() { };
+  ~edge() { } ;
+    // gArray requires the following operators to exist
+  bool operator ==( const edge &y) const 
+    { return (node1 == y.node1 && node2 == y.node2);}
+  bool operator !=(const edge &y) const
+    {return !(*this == y);}
 };
+
+gOutput& operator << (gOutput& s, const edge& y)
+{
+  s << "\n( " << y.node1 << " " << y.node2 << " " << y.nextedge << " )";
+  return s;
+}
 
 class EnumCliques {
 private:
+  gArray<int> firstedge;
+  int maxinp1,maxinp2;
   void candtry1 (int stk[], // stack 
 		 bool connected[MAXM][MAXN],
 		 int cand,  // the candidate from NODES1  to be added to CLIQUE	 
@@ -223,25 +240,25 @@ private:
 		    int *fixp,     // the new fixpoint, if *bfound = true  
 		    int *posfix);    // position of fixpoint on the stack, if *bfound 
 public:
-  EnumCliques();
+  EnumCliques(gArray<edge> &, int, int);
   ~EnumCliques();
 
   void genincidence(int e,
-		    struct edge edgelist[MAXEDGES],
+		    gArray<edge> &edgelist,
 		    int orignode1[MAXM],
 		    int orignode2[MAXN],
 		    bool connected[MAXM][MAXN],
 		    int *m,
 		    int *n);
-  int getconnco(int firstedge[MAXCO],
-		struct edge edgelist[MAXEDGES]);
+  int getconnco(gArray<int> &firstedge,
+		gArray<edge> &edgelist);
   void outCLIQUE(int clique1[], int cliqsize1, 
 		 int clique2[], int cliqsize2,
 		 int orignode1[MAXM],
 		 int orignode2[MAXN]);
   void workonco(int numco,
-		int firstedge[MAXCO],
-		struct edge edgelist[MAXEDGES]);
+		gArray<int> &firstedge,
+		gArray<edge> &edgelist);
 
 /* --- the following are unused TEST ROUTINES --- */
   void getgraph(bool connected[MAXM][MAXN], int *m, int *n);
