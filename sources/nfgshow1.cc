@@ -474,7 +474,7 @@ void NfgShow::SetLabels(int what)
         {
             for (i = 1; i <= num_players; i++)
                 for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-                    disp_sup->Strategies(i)[j]->SetName() = labels->GetCell(i, j);
+                    disp_sup->Strategies(i)[j]->SetName(labels->GetCell(i, j));
         }
 
         delete labels;
