@@ -122,6 +122,7 @@ EFPlayer *player=EfgGetPlayer(ef,name);
 if (player)
 	for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->InfosetList()[i]->GetName());
 iset_item->SetSelection(iset_item->FindString("New"));
+iset_item->SetSize(-1,-1,-1,-1); // force it to resize
 }
 
 void NodeAddDialog::OnIset(const char *name)

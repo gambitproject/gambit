@@ -57,7 +57,7 @@ public:
 	ok_button->SetClientData((char *)this);
 	wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 	cancel_button->SetClientData((char *)this);
-	wxButton *help_button=new wxButton(d,(wxFunction)help_button_func,"Cancel");
+	wxButton *help_button=new wxButton(d,(wxFunction)help_button_func,"?");
 	d->Fit();
 	d->Show(TRUE);
 	}
@@ -69,7 +69,7 @@ public:
 	int  Completed(void) {return completed;}
 };
 
-class SupportInspectDialog:public MyDialogBox
+class SupportInspectDialog:public wxDialogBox
 {
 private:
 	BaseNormShow *bns;
@@ -79,20 +79,33 @@ private:
 	char *cur_str,*disp_str;
 	wxStringList *support_list;
 // Low level event handlers
-	static void cur_func(wxChoice &ob,wxEvent &ev);
-	static void disp_func(wxChoice &ob,wxEvent &ev);
+	static void cur_func(wxChoice &ob,wxEvent &ev)
+	{((SupportInspectDialog *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
+	static void disp_func(wxChoice &ob,wxEvent &ev)
+	{((SupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
 	static void new_sup_func(wxButton &ob,wxEvent &ev)
-	{((SupportInspectDialog *)ob.GetClientData())->OnSupport();}
+	{((SupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
+	static void change_sup_func(wxButton &ob,wxEvent &ev)
+	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
+	static void help_func(wxButton &ob,wxEvent &ev)
+	{wxHelpContents(NFG_SUPPORTS_HELP);}
+	static void close_func(wxButton &ob,wxEvent &ev)
+	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
 // High level event handlers
-	void OnSupport(void)
+	void OnNewSupport(void)
 	{
-	bns->MakeSupport();
-	disp_item->Append(ToString(sups.Length()));
-	cur_item->Append(ToString(sups.Length()));
+	if (bns->MakeSupport())
+	{
+		disp_item->Append(ToString(sups.Length()));
+		disp_item->SetSize(-1,-1,-1,-1);
+		cur_item->Append(ToString(sups.Length()));
+		cur_item->SetSize(-1,-1,-1,-1);
+	}
 	}
 	void OnCur(int cur_sup);
 	void OnDisp(int disp_sup)
 	{disp_dim->SetValue(array_to_string(sups[disp_sup]->SupportDimensions()));}
+
 // Utility funcs
 	static gString array_to_string(const gArray<int> &a)
 	{
@@ -102,8 +115,9 @@ private:
 	}
 public:
 	SupportInspectDialog(const gList<NFSupport *> &sups_,int cur_sup,int disp_sup,BaseNormShow *bns_,wxWindow *parent=0)
-		: MyDialogBox(parent,"Supports",NFG_SUPPORTS_HELP),sups(sups_),bns(bns_)
+		: wxDialogBox(parent,"Supports"),sups(sups_),bns(bns_)
 	{
+	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);
 	cur_dim=new wxText(this,0,"Current",
 											array_to_string(sups[cur_sup]->SupportDimensions()),
@@ -114,37 +128,41 @@ public:
 	support_list=wxStringListInts(sups.Length());
 	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
 	disp_str=new char[10];strcpy(disp_str,ToString(disp_sup));
-	wxFormItem *cur_fitem=Add(wxMakeFormString("",&cur_str,wxFORM_CHOICE,
-					new wxList(wxMakeConstraintStrings(support_list),0)));
-	Add(wxMakeFormMessage("      ")); // fix the spacing... not neat but..
-	wxFormItem *disp_fitem=Add(wxMakeFormString("",&disp_str,wxFORM_CHOICE,
-					new wxList(wxMakeConstraintStrings(support_list),0)));
-	Add(wxMakeFormNewLine());
-	wxFormItem *sup_fitem=Add(wxMakeFormButton("New Support",(wxFunction)new_sup_func));
-	AssociatePanel();
+	wxFormItem *cur_fitem=wxMakeFormString("",&cur_str,wxFORM_CHOICE,
+					new wxList(wxMakeConstraintStrings(support_list),0));
+	f->Add(cur_fitem);
+	f->Add(wxMakeFormMessage("      ")); // fix the spacing... not neat but..
+	wxFormItem *disp_fitem=wxMakeFormString("",&disp_str,wxFORM_CHOICE,
+					new wxList(wxMakeConstraintStrings(support_list),0));
+	f->Add(disp_fitem);
+	f->Add(wxMakeFormNewLine());
+	wxFormItem *close_fitem=wxMakeFormButton("Close",(wxFunction)close_func);
+	f->Add(close_fitem);
+	wxFormItem *cngsup_fitem=wxMakeFormButton("Apply",(wxFunction)change_sup_func);
+	f->Add(cngsup_fitem);
+	wxFormItem *newsup_fitem=wxMakeFormButton("New",(wxFunction)new_sup_func);
+	f->Add(newsup_fitem);
+	wxFormItem *help_fitem=wxMakeFormButton("?",(wxFunction)help_func);
+	f->Add(help_fitem);
+	f->AssociatePanel(this);
 	cur_item=(wxChoice *)cur_fitem->GetPanelItem();
 	cur_item->Callback((wxFunction)cur_func);
 	cur_item->SetClientData((char *)this);
 	disp_item=(wxChoice *)disp_fitem->GetPanelItem();
 	disp_item->SetClientData((char *)this);
 	disp_item->Callback((wxFunction)disp_func);
-	wxButton *sup_item=(wxButton *)sup_fitem->GetPanelItem();
-	sup_item->SetClientData((char *)this);
-	Go1();
+	((wxButton *)newsup_fitem->GetPanelItem())->SetClientData((char *)this);
+	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)bns);
+	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
+	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bns);
+  Fit();
+	Show(TRUE);
 	}
 	// Data Access members
 	int 	CurSup(void) {return cur_item->GetSelection()+1;}
 	int 	DispSup(void) {return disp_item->GetSelection()+1;}
 };
 
-void SupportInspectDialog::cur_func(wxChoice &ob,wxEvent &ev)
-{
-SupportInspectDialog *parent=(SupportInspectDialog *)ob.GetClientData();
-parent->OnCur(ob.GetSelection()+1);
-}
-
-void SupportInspectDialog::disp_func(wxChoice &ob,wxEvent &ev)
-{((SupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
 
 void SupportInspectDialog::OnCur(int cur_sup)
 {

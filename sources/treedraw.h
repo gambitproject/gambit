@@ -30,6 +30,8 @@ class TreeDrawSettings:public GambitDrawSettings
 		Bool	flashing_cursor;
 	// Zoom mode;
 		float zoom_factor;
+	// Display only those nodes in the support that are reachable from root
+		Bool root_reachable;
 	// These are used internally
 		int x_scroll,y_scroll,xsteps,ysteps;
 	// Private functions
@@ -105,7 +107,9 @@ class TreeDrawSettings:public GambitDrawSettings
 	// Set the zoom
 		void		SetZoom(float z,bool force=false);
 		float   Zoom(void) const		{return zoom_factor;}
-
+	// Controls what nodes are displayed in the support
+		Bool		RootReachable(void) const {return root_reachable;}
+		void		SetRootReachable(Bool r) {root_reachable=r;}
 	// Functions to set the various options
 		void	SetOptions(void);
 		void	SetLegends(void);

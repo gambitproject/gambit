@@ -19,14 +19,15 @@ typedef struct NODEENTRY {
 		int nums;				// sum of infosets previous to this level
 		int has_children;	// how many children this node has
 		int child_number;	// what branch # is this node from the parent
+    bool in_sup;			// is this node in disp_sup
 		const Node *n;
 		NODEENTRY *parent;
 		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset_y!=-1) infoset_y+=oy;}
-    NODEENTRY(void) { }
+		NODEENTRY(void) { }
 		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),
 																	 infoset_y(e.infoset_y),num(e.num),
 																	 nums(e.nums),has_children(e.has_children),
-																	 child_number(e.child_number),n(e.n) { }
+																	 child_number(e.child_number),in_sup(e.in_sup), n(e.n) { }
 } NodeEntry;
 
 class BaseExtensiveShow;
@@ -90,8 +91,9 @@ class BaseTreeWindow: public TreeRender
 friend class ExtensivePrintout;
 
 private:
-	BaseExtensiveShow	*frame;
 	BaseEfg		&ef;
+	EFSupport * &disp_sup;	// we only need to know the displayed sup
+	BaseExtensiveShow	*frame;
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
@@ -111,6 +113,8 @@ private:
 	void	UpdateTableInfosets(void);
 	void	UpdateTableParents(void);
 	void	Log(const gString &s);
+	int PlayerNum(const EFPlayer *p) const ;
+	int IsetNum(const Infoset *i) const ;
 	// These functions are type dependent and are defined in TreeWindow
 protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
@@ -123,7 +127,7 @@ public:
 	virtual Bool JustRender(void) const;
 	// Constructor
 //	BaseTreeWindow(const BaseTreeWindow &bt);
-	BaseTreeWindow(BaseEfg &ef_,BaseExtensiveShow *frame);
+	BaseTreeWindow(BaseEfg &ef_,EFSupport * &disp, BaseExtensiveShow *frame);
 	// Destructor
 	~BaseTreeWindow(void);
 	void OnEvent(wxMouseEvent& event);
@@ -181,14 +185,16 @@ public:
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 	Bool	logging(void);
 
-	virtual void	file_save(void) =0;
+	void	file_save(void);
 
 	gString Title(void) const;
 
 	void Render(wxDC &dc,int ox=0,int oy=0);
 	void HilightInfoset(int pl,int iset);
+	// Used by parent BaseExtensiveShow when disp_sup changes
+	void SupportChanged(void);
 	// Gives access to the parent to the private draw_settings. Used for SolnShow
-	const TreeDrawSettings &DrawSettings(void) {return draw_settings;}
+	TreeDrawSettings &DrawSettings(void) {return draw_settings;}
 };
 
 template <class T> class ExtensiveShow;
@@ -208,14 +214,13 @@ public:
 	double 	ProbAsDouble(const Node *n,int action) const ;
 	gString	OutcomeAsString(const Node *n) const;
 	// Constructor
-	TreeWindow(Efg<T> &ef_,ExtensiveShow<T> *frame);
+	TreeWindow(Efg<T> &ef_,EFSupport * &disp,ExtensiveShow<T> *frame);
 	// Destructor
 	~TreeWindow();
 		// Menu events
 	void tree_outcomes(const gString out_name=gString(),int save_num=0);
 	void action_probs(void);
 	void node_outcome(const gString out_name);
-	void file_save(void);
 #ifdef SUBGAMES
 	// Subgame handlers
 	void OpenSubgame(int num);
