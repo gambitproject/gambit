@@ -86,7 +86,7 @@ gStack<gString> GCL_InputFileNames(4);
   int ProgLength(void); \
   \
   int Parse(void); \
-  void Execute(void); \
+  int Execute(void); \
   void LoadInputs( const char* name ); 
 
 %define CONSTRUCTOR_INIT     : record_funcbody(false), \
@@ -208,8 +208,7 @@ delfunc:      writeopt DELFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
               LBRACK formallist RBRACK TYPEopt
-              RBRACK   { /*if (!triv && !semi) emit(new NewInstr(iOUTPUT));*/
-			 if (!DeleteFunction())  YYERROR; } 
+              RBRACK   { if (!DeleteFunction())  YYERROR; } 
 
 TYPEopt:      { functype = "ANYTYPE" }
           |   TYPEDEF { paramtype = ""; } typename 
@@ -263,14 +262,6 @@ binding:      RARROW    { refs.Append(false); }
 
 statement:    writeopt { triv = true; statementcount++; }
          |    expression { triv = false; }
-         |    conditional { triv = false; }
-         |    WRITE conditional { triv = false; emit(new NewInstr(iOUTPUT)); }
-         |    whileloop { triv = false; }
-         |    WRITE whileloop { triv = false; emit(new NewInstr(iOUTPUT)); }
-         |    forloop   { triv = false; }
-         |    WRITE forloop  { triv = false; emit(new NewInstr(iOUTPUT)); }
-         |    writeopt QUIT     { triv = false; quit = true; 
-                         emit(new NewInstr(iQUIT)); }
 
 
 include:      writeopt INCLUDE LBRACK TEXT RBRACK semiopt EOC
@@ -317,8 +308,7 @@ whileloop:    WHILE { gcmdline.SetPrompt( false ); }
               expression { emit(new NewInstr(iNOT)); emit(0);
 			   labels.Push(ProgLength()); }
               CRLFopt COMMA statements RBRACK 
-              { /*if (!triv && !semi)   emit(new NewInstr(iOUTPUT));*/
-                if (function)
+              { if (function)
 		  (*function)[labels.Pop()] = 
                     new NewInstr(iIF_GOTO, (long) ProgLength() + 2);
 		else
@@ -357,7 +347,6 @@ forloop:      FOR { gcmdline.SetPrompt( false ); }
               }
               statements RBRACK
               { 
-               /* if (!triv && !semi)  emit(new NewInstr(iOUTPUT)); */
                 // emit jump to beginning of increment step
                 emit(new NewInstr(iGOTO, (long) labels.Pop()));
 		// link guard-false branch to end of code
@@ -378,6 +367,9 @@ expression:   Ea
           |   WRITE expression  { emit(new NewInstr(iOUTPUT)); }
           |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
           |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
+          |   conditional
+          |   whileloop
+          |   forloop
           ;
 
 Ea:           E0
@@ -451,6 +443,7 @@ E9:           BOOLEAN  { emit(new NewInstr(iPUSH_BOOL, bval)); }
   |           STDIN    { emit(new NewInstr(iPUSHINPUT, &gin)); }
   |           STDOUT   { emit(new NewInstr(iPUSHOUTPUT, &gout)); }
   |           gNULL    { emit(new NewInstr(iPUSHOUTPUT, &gnull)); }
+  |           QUIT     { emit(new NewInstr(iQUIT)); }
   ;
 
 function:     NAME LBRACK { emit(new NewInstr(iINIT_CALL_FUNCTION, tval)); } 
@@ -833,7 +826,7 @@ int GCLCompiler::Parse(void)
     }
     matching.Flush();
     if (!yyparse())  {
-      Execute();
+      if (Execute() == rcQUIT)  quit = true;
       if (inputs.Depth() == 0) command++;
     }
     else 
@@ -1004,13 +997,14 @@ bool GCLCompiler::DeleteFunction(void)
 }
 
 
-void GCLCompiler::Execute(void)
+int GCLCompiler::Execute(void)
 {
 #ifdef ASSEMBLY
   program.Dump(gout);   gout << '\n';
 #endif   // ASSEMBLY
-  gsm.Execute(program);
+  int result = gsm.Execute(program);
   gsm.Flush();
+  return result;
 }
 
 
