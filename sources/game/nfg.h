@@ -146,7 +146,7 @@ public:
   const efgGame *AssociatedEfg(void) const   { return efg; }
 };
 
-int ReadNfgFile(gInput &, Nfg *&);
+Nfg *ReadNfgFile(gInput &);
 
 #include "mixed.h"
 
