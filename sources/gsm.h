@@ -169,7 +169,7 @@ public:
   void Flush  ( void );
   void Clear  ( void );
 
-  Portion* Help(gString text);
+  Portion* Help(gString text, bool udf, bool bif);
   Portion* HelpVars(gString text);
   Portion* UnAssignExt( void );
 };

@@ -2371,7 +2371,9 @@ Portion *GSM_Version(Portion **)
 
 Portion* GSM_Help(Portion** param)
 {
-  return _gsm->Help(((TextPortion*) param[0])->Value());
+  return _gsm->Help(((TextPortion*) param[0])->Value(),
+		    ((BoolPortion*) param[1])->Value(),
+		    ((BoolPortion*) param[2])->Value() );
 }
 
 gString GetLine(gInput& f)
@@ -2395,7 +2397,7 @@ Portion* GSM_Manual(Portion** param)
 {
   gString txt = ((TextPortion*) param[0])->Value();
   gOutput& s = ((OutputPortion*) param[1])->Value();
-  ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt);
+  ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt, true, true);
   int i;
   int body;
 
@@ -3285,8 +3287,12 @@ void Init_gsmoper(GSM* gsm)
   //---------------- faked functions -----------------//
 
   FuncObj = new FuncDescObj("Help", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Help, PortionSpec(porTEXT, 1), 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Help, PortionSpec(porTEXT, 1), 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("udf", porBOOL,
+					    new BoolValPortion( true )));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("bif", porBOOL, 
+					    new BoolValPortion( true )));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Manual", 1);

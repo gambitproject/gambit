@@ -2254,7 +2254,7 @@ void GSM::Clear(void)
 
 
 
-Portion* GSM::Help(gString funcname)
+Portion* GSM::Help(gString funcname, bool udf, bool bif)
 {
   int i;
   int j;
@@ -2273,7 +2273,7 @@ Portion* GSM::Help(gString funcname)
   if(_FuncTable->IsDefined(funcname))
   {
     func = (*_FuncTable)(funcname);
-    gList<gString> list = func->FuncList();
+    gList<gString> list = func->FuncList( udf, bif );
     result = new ListValPortion();
     for(i=1; i<=list.Length(); i++)
       ((ListPortion*) result)->Append(new TextValPortion(list[i]));
@@ -2325,16 +2325,20 @@ Portion* GSM::Help(gString funcname)
 	match = true;
       if(match)
       {	
-	func = funclist[i];
-	funcslist.Append(func);
-	found++;
+	if( (udf && funclist[i]->UDF()) ||
+	   (bif && funclist[i]->BIF()) )
+	{
+	  func = funclist[i];
+	  funcslist.Append(func);
+	  found++;
+	}
       }      
     }
 
     gFuncListSorter sorter(funcslist);
     if(found==1)
     {
-      gList<gString> list = func->FuncList();
+      gList<gString> list = func->FuncList( udf, bif );
       result = new ListValPortion();
       for(i=1; i<=list.Length(); i++)
 	((ListPortion*) result)->Append(new TextValPortion(list[i]));

@@ -137,8 +137,11 @@ public:
   void Delete(int delete_index);
 
   gString FuncName(void) const;
+  
+  bool UDF( void ) const;
+  bool BIF( void ) const;
 
-  gList<gString> FuncList(void) const;
+  gList<gString> FuncList(bool udf = true, bool bif = true) const;
   void Dump(gOutput& f, int i) const;
   void Dump(gOutput& f) const;
 };

@@ -665,7 +665,34 @@ gString FuncDescObj::FuncName(void) const
 { return _FuncName; }
 
 
-gList<gString> FuncDescObj::FuncList(void) const
+
+bool FuncDescObj::UDF( void ) const
+{
+  int i = 0;
+  for( i = 0; i < _NumFuncs; i++ )
+  {
+    if( _FuncInfo[i].UserDefined )
+      return true;
+  }
+  return false;
+}
+
+
+
+bool FuncDescObj::BIF( void ) const
+{
+  int i = 0;
+  for( i = 0; i < _NumFuncs; i++ )
+  {
+    if( !_FuncInfo[i].UserDefined )
+      return true;
+  }
+  return false;
+}
+
+
+
+gList<gString> FuncDescObj::FuncList( bool udf, bool bif ) const
 {
   gList<gString> list;
   gString f;
@@ -674,58 +701,63 @@ gList<gString> FuncDescObj::FuncList(void) const
 
   for(i = 0; i < _NumFuncs; i++)
   {  
-    f = _FuncName + '[';
-    for(j = 0; j < _FuncInfo[i].NumParams; j++)
+    if( (udf && _FuncInfo[i].UserDefined) ||
+       (bif && !_FuncInfo[i].UserDefined) )
     {
-      if(j != 0) f += ", ";
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f += '{';
-      f += _FuncInfo[i].ParamInfo[j].Name;
-      if(_FuncInfo[i].ParamInfo[j].PassByReference) f += '<';
-      f += "->";
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue)
+      f = _FuncName + '[';
+      for(j = 0; j < _FuncInfo[i].NumParams; j++)
       {
-	switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Spec().Type)
+	if(j != 0) f += ", ";
+	if(_FuncInfo[i].ParamInfo[j].DefaultValue) f += '{';
+	f += _FuncInfo[i].ParamInfo[j].Name;
+	if(_FuncInfo[i].ParamInfo[j].PassByReference) f += '<';
+	f += "->";
+	if(_FuncInfo[i].ParamInfo[j].DefaultValue)
 	{
-	case porBOOL:
-	  if(((BoolPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
-	    f += "True";
-	  else
-	    f += "False";
-	  break;
-	case porINTEGER:
-	  f += ToString(((IntPortion*) 
-			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	  break;
-	case porFLOAT:
-	  f += ToString(((FloatPortion*) 
-			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	  break;
-	case porRATIONAL:
-	  f += ToString(((RationalPortion*) 
-			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	  break;
-	case porTEXT:
-	  f += ((TextPortion*)_FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
-	  break;
-	case porINPUT:
-	  f += "INPUT";
-	  break;
-	case porOUTPUT:
-	  f += "OUTPUT";
-	  break;
-	default:
-	  f += "N/A";
+	  switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Spec().Type)
+	  {
+	  case porBOOL:
+	    if(((BoolPortion*)
+		_FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
+	      f += "True";
+	    else
+	      f += "False";
+	    break;
+	  case porINTEGER:
+	    f += ToString(((IntPortion*) 
+			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	    break;
+	  case porFLOAT:
+	    f += ToString(((FloatPortion*) 
+			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	    break;
+	  case porRATIONAL:
+	    f += ToString(((RationalPortion*) 
+			   _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	    break;
+	  case porTEXT:
+	    f += ((TextPortion*)_FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
+	    break;
+	  case porINPUT:
+	    f += "INPUT";
+	    break;
+	  case porOUTPUT:
+	    f += "OUTPUT";
+	    break;
+	  default:
+	    f += "N/A";
+	  }
 	}
+	else
+	  f += PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
+	
+	if(_FuncInfo[i].ParamInfo[j].DefaultValue) 
+	  f += '}';
       }
-      else
-	f += PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
-
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue) 
-	f += '}';
+      f += "] =: ";
+      f += PortionSpecToText(_FuncInfo[i].ReturnSpec);
+      list.Append(f);
     }
-    f += "] =: ";
-    f += PortionSpecToText(_FuncInfo[i].ReturnSpec);
-    list.Append(f);
   }
   return list;
 }
