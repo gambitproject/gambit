@@ -233,6 +233,10 @@ examples no longer leak memory.  This doesn't mean the more complicated
 one above is fixed; I haven't tested it.  So, I'm leaving it here until
 we can verify independently.
 
+COMMENT (magyar 10/28/98): Another fix, this one dealing with dereferencing
+variable names.  Still not 100% sure all leaks are patched, but it is looking
+like we have gotten (most of) the really major ones.
+
 //------------------------------
 
 Bug C30:  ElimDom on efg not working:
