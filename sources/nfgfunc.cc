@@ -42,17 +42,6 @@ Portion *GSM_AddStrategy(Portion **param)
   return por;
 }
 
-//---------------
-// CompressNfg
-//---------------
-
-Portion *GSM_CompressNfg(Portion **param)
-{
-  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  Nfg<double> *M = new Nfg<double>(N);
-  return new NfgValPortion(M);
-}
-
 extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
 				   const gArray<int> &players,
 				   gOutput &tracefile);
@@ -580,13 +569,6 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_AddStrategy, 2);
   FuncObj->SetParamInfo(GSM_AddStrategy, 0, "support", porNF_SUPPORT);
   FuncObj->SetParamInfo(GSM_AddStrategy, 1, "strategy", porSTRATEGY);
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("CompressNfg");
-  FuncObj->SetFuncInfo(GSM_CompressNfg, 1);
-  FuncObj->SetParamInfo(GSM_CompressNfg, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
 
