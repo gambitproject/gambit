@@ -75,6 +75,23 @@ public:
 					      const EFSupport &,
 					      const gList<gList<int> > &) 
     const;
+
+
+
+  void BehavProfile<T>::DeviationInfosetsRECURSION(gList<const Infoset *> &,
+						   const EFSupport & big_supp,
+						   const EFPlayer *pl,
+						   const Node* node,
+						   const Action *act) const;
+  const gList<const Infoset *> DeviationInfosets(const EFSupport &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
+  const gList<const EFSupport> DeviationSupports(const EFSupport &,
+						 const gList<const Infoset*> &,
+						 const EFPlayer *,
+						 const Infoset *,
+						 const Action *) const;
   bool NodeProbabilityPoly(      gPoly<gDouble> &,
 			   const gSpace &, 
 			   const term_order &,
@@ -90,9 +107,9 @@ public:
 			       const EFSupport &,
 			       const gList<gList<int> > &,
 			       const Node *,
-			       const int &pl,
-			       const int &i,
-			       const int &j) const;
+			       const EFPlayer *,
+			       const Infoset *,
+			       const Action *) const;
   gPolyList<gDouble> ANFExpectedPayoffDiffPolys(const gSpace &, 
 						const term_order&,
 						const EFSupport &,

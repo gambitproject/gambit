@@ -752,22 +752,130 @@ BehavProfile<T>::ExtendsToANFNash(const EFSupport &little_supp,
 //         BehavProfile<T>: Used in test of extendability to Nash
 //------------------------------------------------------------------------
 
+template <class T>  void
+BehavProfile<T>::DeviationInfosetsRECURSION(    gList<const Infoset *> &answer,
+					    const EFSupport & big_supp,
+					    const EFPlayer *pl,
+					    const Node* node,
+					    const Action *act) const 
+{
+  Node *child  = node->GetChild(act);
+  if ( child->IsNonterminal() ) {
+    const Infoset *iset = child->GetInfoset();
+    if ( iset->GetPlayer() == pl ) {
+      int insert = 0;
+      bool done = false;
+      while (!done) {
+	insert ++;
+	if (insert > answer.Length() ||
+	    iset->Precedes(answer[insert]->GetMember(1)))
+	  done = true;
+      }
+      answer.Insert(iset,insert);
+    }
+    gList<Action *> action_list = iset->ListOfActions();
+    for (int j = 1; j <= action_list.Length(); j++)
+      DeviationInfosetsRECURSION(answer,big_supp,pl,child,action_list[j]);
+  }
+  return;
+}
+
+template <class T>  const gList<const Infoset *> 
+BehavProfile<T>::DeviationInfosets(const EFSupport & big_supp,
+				   const EFPlayer *pl,
+				   const Infoset *iset,
+				   const Action *act) const 
+{
+  gList<const Infoset *> answer;
+  
+  gList<const Node *> node_list = iset->ListOfMembers();
+  for (int i = 1; i <= node_list.Length(); i++) {
+    DeviationInfosetsRECURSION(answer,big_supp,pl,node_list[i],act);
+  }
+
+  return answer;
+}
+
+template <class T>  const gList<const EFSupport> 
+BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
+				   const gList<const Infoset *> & isetlist,
+				   const EFPlayer *pl,
+				   const Infoset *iset,
+				   const Action *act) const 
+{
+  gList<const EFSupport> answer;
+
+  gArray<int> active_act_no(isetlist.Length());
+  active_act_no = 0;
+ 
+  EFSupport new_supp(big_supp);
+
+  for (int i = 1; i <= isetlist.Length(); i++) {
+    for (int j = 1; j < isetlist[i]->NumActions(); j++)
+      new_supp.RemoveAction(isetlist[i]->GetAction(j));
+    new_supp.AddAction(isetlist[i]->GetAction(1));
+    active_act_no[i] = 1;
+    for (int k = 1; k < i; k++)
+      if (isetlist[k]->Precedes(isetlist[i]->GetMember(1)))
+	if (isetlist[k]->GetAction(1)->Precedes(isetlist[i]->GetMember(1))) {
+	  new_supp.RemoveAction(isetlist[i]->GetAction(1));
+	  active_act_no[i] = 0;
+	}
+  }
+  answer += new_supp;
+
+  int iset_cursor = isetlist.Length();
+  while (iset_cursor > 0) {
+
+    if ( active_act_no[iset_cursor] == 0 || 
+	 active_act_no[iset_cursor] == isetlist[iset_cursor]->NumActions() )
+      iset_cursor--;
+    else {
+      new_supp.RemoveAction(isetlist[iset_cursor]->
+			    GetAction(active_act_no[iset_cursor]));
+      active_act_no[iset_cursor]++;
+      new_supp.AddAction(isetlist[iset_cursor]->
+			 GetAction(active_act_no[iset_cursor]));
+      for (int k = iset_cursor + 1; k <= isetlist.Length(); k++) {
+	if (active_act_no[k] > 0)
+	  new_supp.RemoveAction(isetlist[k]->GetAction(1));
+	int h = 1;
+	bool active = true;
+	while (active && h < k) {
+	  if (isetlist[h]->Precedes(isetlist[k]->GetMember(1)))
+	    if (active_act_no[h] == 0 || 
+		!isetlist[h]->GetAction(active_act_no[h])->
+	              Precedes(isetlist[k]->GetMember(1))) {
+	      active = false;
+	      if (active_act_no[k] > 0) {
+		new_supp.RemoveAction(isetlist[k]->
+				      GetAction(active_act_no[k]));
+		active_act_no[k] = 0;
+	      }
+	    }
+	}
+	if (active){
+	  new_supp.AddAction(isetlist[k]->GetAction(1));
+	  active_act_no[k] = 1;
+	}
+      }
+      answer += new_supp;
+    }
+  }
+  return answer;
+}
+
 template <class T> bool 
 BehavProfile<T>::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 		          	         const gSpace &BehavStratSpace, 
 				         const term_order &Lex,
-				         const EFSupport &big_supp,
+				         const EFSupport &dsupp,
 				         const gList<gList<int> > &var_index,
 				         const Node *tempnode,
-				         const int &pl,
-				         const int &i,
-				         const int &j) const
+					 const EFPlayer *pl,
+				         const Infoset *iset,
+				         const Action *act) const 
 {
-  /*
-  //DEBUG
-  gout << "pl = " << pl << " while infoset = " << i << " and action = " << j << ".\n";
-  */
-
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -776,36 +884,20 @@ BehavProfile<T>::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (big_supp.HasActiveActionAt(last_infoset)) {
-	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
-	  if (j != last_action->GetNumber()) {
-
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because wrong deviation.\n";
-	    */
-	    
+      if (dsupp.HasActiveActionAt(last_infoset)) {
+	if (last_infoset == iset) {
+	  if (act != last_action) {
 	    return false;
 	  }
 	}
 	else
-	  if (big_supp.ActionIsActive((Action *)last_action))
+	  if (dsupp.ActionIsActive((Action *)last_action)) {
+	    if ( last_action->BelongsTo()->GetPlayer() !=
+		         act->BelongsTo()->GetPlayer()     ||
+		 !act->Precedes(tempnode) )
 	    node_prob *= (gDouble)GetValue(last_action);
+	  }
 	  else {
-
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because action is inactive.\n";
-	    */
-	    
 	    return false;
 	  }
       }
@@ -830,6 +922,7 @@ BehavProfile<T>::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
   return true;
 }
 
+
 template <class T> gPolyList<gDouble> 
 BehavProfile<T>::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace, 
 				          const term_order &Lex,
@@ -842,35 +935,53 @@ BehavProfile<T>::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
 
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
-      Infoset *infoset = Game().GetInfosetByIndex(pl,i);
-      if (little_supp.MayReach(infoset)) 
-	for (int j = 1; j <= infoset->NumActions(); j++)
-	  if (!little_supp.ActionIsActive(pl,i,j)) {
-	
+  const gArray<EFPlayer *> players = Game().Players();
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    const gArray<Infoset *> isets_for_pl = players[pl]->Infosets();
+    for (int i = 1; i <= isets_for_pl.Length(); i++) {
+      if (little_supp.MayReach(isets_for_pl[i])) {
+	const gArray<Action *> acts_for_iset = isets_for_pl[i]->Actions();
+	for (int j = 1; j <= acts_for_iset.Length(); j++)
+	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
+	    gList<const Infoset *> isetlist = DeviationInfosets(big_supp, 
+							     players[pl],
+				         		     isets_for_pl[i],
+							     acts_for_iset[j]);
+	    gList<const EFSupport> dsupps = DeviationSupports(big_supp, 
+							     isetlist, 
+							     players[pl],
+				         		     isets_for_pl[i],
+							     acts_for_iset[j]);
+	    for (int k = 1; k <= dsupps.Length(); k++) {
+
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 
-	    // action j
-	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	    // the strategy for pl specified by dsupp[k]
 
-	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
-	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
-	      if (NashNodeProbabilityPoly(node_prob,
-				      BehavStratSpace,
-				      Lex,
-				      big_supp,
-				      var_index,
-				      terminal_nodes[n],
-				      pl,i,j)) {
-		node_prob *= 
-		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
-		next_poly += node_prob;
+	      gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+
+	      for (int n = 1; n <= terminal_nodes.Length(); n++) {
+		gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+		if (NashNodeProbabilityPoly(node_prob,
+					    BehavStratSpace,
+					    Lex,
+					    dsupps[k],
+					    var_index,
+					    terminal_nodes[n],
+					    players[pl],
+					    isets_for_pl[i],
+					    acts_for_iset[j])) {
+		  node_prob *= 
+		    (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		  next_poly += node_prob;
+		}
 	      }
+	      answer += -next_poly + (gDouble)Payoff(pl);
 	    }
-	    answer += -next_poly + (gDouble)Payoff(pl);
 	  }
+      }
     }
+  }
   return answer;
 }
 
