@@ -1,3 +1,8 @@
+// File: gambdraw.h -- declaration of the generic display parameter class
+// for gambit.  Currently only the player colors are set here.
+#ifndef GAMBDRAW_H
+#define GAMBDRAW_H
+
 #include "gblock.h"
 #include "gstring.h"
 class GambitDrawSettings
@@ -21,3 +26,7 @@ public:
 	void	PlayerColorDialog(gArray<gString> &);
 };
 
+#define INIFILE		"gambit.ini"
+#define CURVER		2
+
+#endif

@@ -1,7 +1,9 @@
 //
-// FILE: flasher.cc
+// FILE: flasher.cc -- implements the cursor for navigating the extensive
+// form tree.  Can be set to flash at regular intervals or be solid.  If
+// not flashing, make sure to call Flash after every move.
 //
-// @(#)flasher.cc	1.1 6/6/94
+// $Id$
 //
 
 #include "wx.h"
@@ -19,6 +21,9 @@ TreeNodeCursor::~TreeNodeCursor(void)
 
 void TreeNodeCursor::SetFlashNode(int _x_s,int _y_s,int _x_e,int _y_e)
 {x_s=_x_s;y_s=_y_s;x_e=_x_e;y_e=_y_e;}
+
+void TreeNodeCursor::GetFlashNode(int & _x_s,int & _y_s,int & _x_e,int & _y_e)
+{_x_s=x_s;_y_s=y_s;_x_e=x_e;_y_e=y_e;}
 
 void TreeNodeCursor::Flash(void)
 {

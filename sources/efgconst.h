@@ -82,4 +82,12 @@
 #define EFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
 #define EFG_SOLVE_OPTIONS_HELP	"Extensive Form Solution Options"
 
+
+// Different type-dependent values that need to be displayable in the
+// tree window.  These are accessed through the BaseTreeWindow->
+// TreeWindow->ExtensiveShow.  Also used in NodeInspect window.
+typedef enum {tRealizProb,tIsetProb,tBeliefProb,tNodeValue,tIsetValue,
+							tBranchProb,tBranchVal} TypedSolnValues;
+
+
 #endif

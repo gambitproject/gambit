@@ -21,7 +21,7 @@ public:
 //******************************** Constructor/main ************************
 template <class T>
 GobitSolveParamsDialog<T>::GobitSolveParamsDialog(wxWindow *parent)
-												:PxiParamsDialog("gobit","Gobit Params",parent)
+												:PxiParamsDialog("gobit","Gobit Params",parent,GOBIT_HELP)
 {
 minLam=Gobit_default_minLam;maxLam=Gobit_default_maxLam;delLam=Gobit_default_delLam;
 tolOpt=Funct_tolN;tolBrent=Funct_tolBrent;maxitsBrent=Funct_maxitsBrent;maxitsOpt=Funct_maxitsN;

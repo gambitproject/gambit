@@ -1,7 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
 // @(#)treedraw.cc	1.5 7/18/95
-#include "zfortify.hpp"
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -12,8 +11,10 @@
 TreeDrawSettings::TreeDrawSettings(void)
 {
 zoom_factor=1.0;
-char *file_name=wxFindFile("gambit.ini");
-if (!file_name)
+int gamb_ver=0;
+wxGetResource("Gambit","Gambit-Version",&gamb_ver,INIFILE);
+
+if (gamb_ver!=CURVER)
 {
 	// if there is no ini file yet, use the hard coded defaults and create
 	// the ini file from them.
@@ -53,7 +54,7 @@ else
 	branch_below_font=NULL;
 	node_terminal_font=NULL;
 
-	LoadOptions(file_name);
+	LoadOptions(INIFILE);
 }
 }
 
@@ -264,10 +265,8 @@ delete display_legend_dialog;
 // draw_settings.  The file is ASCII and can be edited by hand if necessary.
 void TreeDrawSettings::SaveOptions(char *s)
 {
-char *file_name;
-
-file_name=copystring((s) ? s : "gambit.ini");
-
+char *file_name=(s) ? s : INIFILE;
+wxWriteResource("Gambit","Gambit-Version",CURVER,file_name);
 wxWriteResource("Gambit","Branch-Length",branch_length,file_name);
 wxWriteResource("Gambit","Node-Length",node_length,file_name);
 wxWriteResource("Gambit","Fork-Length",fork_length,file_name);
@@ -292,21 +291,13 @@ wxWriteResource("Gambit","Branch-Below-Font",wxFontToString(branch_below_font),f
 wxWriteResource("Gambit","Node-Terminal-Font",wxFontToString(node_terminal_font),file_name);
 wxWriteResource("Gambit","Node-Right-Font",wxFontToString(node_right_font),file_name);
 GambitDrawSettings::SaveOptions(file_name);
-delete [] file_name;
 }
 // Load options.  Uses the resource writing capability of wxwin to read from
 // the file file_name all the current settings for the
 // draw_settings.  The file is ASCII and can be edited by hand if necessary.
 void TreeDrawSettings::LoadOptions(char *file_name)
 {
-if (!file_name) file_name=wxFindFile("gambit.ini");
-
-if (!FileExists(file_name))
-{
-	wxMessageBox("Configuration file not found","Error",wxOK | wxCENTRE);
-	return;
-}
-file_name=copystring(file_name);	// must do this: file_name was temp
+if (!file_name) file_name=INIFILE;
 wxGetResource("Gambit","Branch-Length",&branch_length,file_name);
 wxGetResource("Gambit","Node-Length",&node_length,file_name);
 wxGetResource("Gambit","Fork-Length",&fork_length,file_name);
@@ -324,7 +315,7 @@ wxGetResource("Gambit","Node-Right-Label",&node_right_label,file_name);
 wxGetResource("Gambit","Flashing-Cursor",&flashing_cursor,file_name);
 wxGetResource("Gambit","Color-Outcomes",&color_coded_outcomes,file_name);
 // Load the font settings
-char *l_tempstr=new char [100];
+char *l_tempstr=new char[100];
 wxGetResource("Gambit","Node-Above-Font",&l_tempstr,file_name);
 SetNodeAboveFont(wxStringToFont(l_tempstr));
 wxGetResource("Gambit","Node-Below-Font",&l_tempstr,file_name);
@@ -338,7 +329,7 @@ SetNodeTerminalFont(wxStringToFont(l_tempstr));
 wxGetResource("Gambit","Node-Right-Font",&l_tempstr,file_name);
 SetNodeRightFont(wxStringToFont(l_tempstr));
 GambitDrawSettings::LoadOptions(file_name);
-delete [] file_name;
+delete [] l_tempstr;
 }
 
 //********************************* SET ZOOM *******************************

@@ -9,10 +9,15 @@
 #define NFG_SOLVE_PAYOFF_MENU				102 // this is not a real menu=DoubleClick
 #define	NFG_SOLVE_REMOVE_MENU				103
 #define NFG_SOLVE_COMPRESS_MENU			104
+#define NFG_SOLVE_SUPPORTS_MENU			105
 
 #define NFG_DISPLAY_COLORS					200
 #define NFG_DISPLAY_OPTIONS					201
 #define NFG_DISPLAY_ACCELS					202
+
+#define NFG_LABEL_GAME							300
+#define NFG_LABEL_STRATS						301
+#define NFG_LABEL_PLAYERS						302
 
 #define NFG_FILE_SAVE								250
 
@@ -24,4 +29,17 @@
 #define NFG_ELIMDOM_INSPECT_HELP	"Elimdom Solutions Inspect"
 #define NFG_SOLVE_INSPECT_HELP		"Elimdom Solutions"
 #define NFG_SOLVE_INSPECT_OPTIONS_HELP	"Normal Form Inspect Options"
+#define NFG_LABEL_HELP						"Normal Form Labels"
+#define NFG_ELIMDOM_HELP		"Elimination of Dominated Strategies"
+#define NFG_SUPPORTS_HELP		"Examining NF Supports"
+#define NFG_MAKE_SUPPORT_HELP	"Creating NF Supports"
+
+// help names for actual solution algorithms
+#define ENUMPURE_HELP						"EnumPure"
+#define ENUMMIXED_HELP          "EnumMixed"
+#define LP_HELP									"LP"
+#define LCP_HELP								"LCP"
+#define SIMPDIV_HELP						"SimpDiv"
+#define LIAP_HELP								"Liap"
+#define GOBIT_HELP							"Gobit"
 #endif

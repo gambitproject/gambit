@@ -21,6 +21,12 @@ typedef struct NODEENTRY {
 		int child_number;	// what branch # is this node from the parent
 		const Node *n;
 		NODEENTRY *parent;
+		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset_y!=-1) infoset_y+=oy;}
+    NODEENTRY(void) { }
+		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),
+																	 infoset_y(e.infoset_y),num(e.num),
+																	 nums(e.nums),has_children(e.has_children),
+																	 child_number(e.child_number),n(e.n) { }
 } NodeEntry;
 
 class BaseExtensiveShow;
@@ -41,11 +47,11 @@ private:
 	const Infoset * &hilight_infoset;		// Hilight infoset from the solution disp
 	const Node	*&mark_node;							// Used in mark/goto node operations
 	const Node	 *&cursor;								// Used to process cursor keys, stores current pos
-	const TreeDrawSettings &draw_settings;		// Stores drawing parameters
 	// Private Functions
-	void	RenderLabels(wxDC &dc,NodeEntry *entry);
-	void 	RenderSubtree(wxDC &dc);
+	void	RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry);
+	void 	RenderSubtree(wxDC &dc,int ox=0,int oy=0);
 protected:
+	const TreeDrawSettings &draw_settings;		// Stores drawing parameters
 	TreeNodeCursor *flasher;			// Used to flash/display the cursor
 public:
 	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
@@ -54,9 +60,9 @@ public:
 	~TreeRender(void);
 	// Windows event handlers
 	void OnPaint(void);
-	virtual void Render(wxDC &dc);
+	virtual void Render(wxDC &dc,int ox=0,int oy=0);
 	// Call this every time the cursor moves
-	void UpdateCursor(const NodeEntry *entry);
+	virtual void UpdateCursor(const NodeEntry *entry);
 	// Override this if extra functionality is desired
 	virtual Bool JustRender(void) const;
 	// This must be here since we do not have draw_settings at constructor time
@@ -65,10 +71,18 @@ public:
 
 class TreeZoomWindow : public TreeRender
 {
+private:
+// Real xs,ys,xe,ye: true (untranslated) coordinates of the cursor.  Need this
+// if we repaint due to events other than cursor movement.  See ::Render()
+	int xs,ys,xe,ye;
 public:
 	TreeZoomWindow(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,
-						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_);
+						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_,
+						const NodeEntry *cursor_entry);
+	virtual void Render(wxDC &dc,int ox=0,int oy=0);
+	// Makes sure the cursor is always in the center of the window
+	virtual void UpdateCursor(const NodeEntry *entry);
 };
 
 class BaseTreeWindow: public TreeRender
@@ -104,7 +118,7 @@ protected:
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
 public:
 	virtual double 	ProbAsDouble(const Node *n,int action) const =0;
-	virtual gString	ProbAsString(const Node *n,int action) const =0;
+	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
 	virtual gString	OutcomeAsString(const Node *n) const =0;
 	virtual Bool JustRender(void) const;
 	// Constructor
@@ -171,8 +185,8 @@ public:
 
 	gString Title(void) const;
 
-	void Render(wxDC &dc);
-  void HilightInfoset(int pl,int iset);
+	void Render(wxDC &dc,int ox=0,int oy=0);
+	void HilightInfoset(int pl,int iset);
 	// Gives access to the parent to the private draw_settings. Used for SolnShow
 	const TreeDrawSettings &DrawSettings(void) {return draw_settings;}
 };
@@ -192,7 +206,6 @@ class TreeWindow : public BaseTreeWindow
 
 public:
 	double 	ProbAsDouble(const Node *n,int action) const ;
-	gString	ProbAsString(const Node *n,int action) const ;
 	gString	OutcomeAsString(const Node *n) const;
 	// Constructor
 	TreeWindow(Efg<T> &ef_,ExtensiveShow<T> *frame);

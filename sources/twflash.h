@@ -20,7 +20,8 @@ public:
 	TreeNodeCursor(wxDC *_dc);
 	virtual  ~TreeNodeCursor(void);
 	void	SetDC(wxDC *_dc) {dc=_dc;}
-	void	SetFlashNode(int x_s,int x_e,int y_s,int y_e);
+	void	SetFlashNode(int x_s,int y_s,int x_e,int y_e);
+	void	GetFlashNode(int & x_s,int & y_s,int & x_e,int & y_e);
 	virtual void	SetFlashing(Bool _flashing) {flashing=_flashing;}
 	Bool	Flashing(void) {return flashing;}
 	void	Flash(void);		// used to force a flash after moving

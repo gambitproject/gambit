@@ -16,7 +16,7 @@ public:
 
 
 SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *parent)
-														:OutputParamsDialog("SimpDiv Params",parent)
+														:OutputParamsDialog("SimpDiv Params",parent,SIMPDIV_HELP)
 
 {
 stopAfter=1;nRestarts=10;leashLength=0;

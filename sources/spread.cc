@@ -123,6 +123,7 @@ char *file_name;
 const char *sn="SpreadSheet3D";	// section name
 file_name=copystring((s) ? s : "gambit.ini");
 
+wxWriteResource(sn,"SpreadSheet3D-Version",2,file_name);
 wxWriteResource(sn,"Row-Height",row_height,file_name);
 wxWriteResource(sn,"Default-Column-Width",default_col_width,file_name);
 wxWriteResource(sn,"Col-Dim-Char",col_dim_char,file_name);
@@ -139,10 +140,12 @@ delete [] file_name;
 int	SpreadSheetDrawSettings::LoadOptions(const char *s)
 {
 const char *sn="SpreadSheet3D";	// section name
-char *file_name=wxFindFile((s) ? s : "gambit.ini");
-if (!file_name) return 0;
+const char *file_name=(s) ? s : "gambit.ini";
 
 char *font_str=new char[100];
+int version=0;
+wxGetResource(sn,"SpreadSheet3D-Version",&version,file_name);
+if (!version) return 0;
 wxGetResource(sn,"Row-Height",&row_height,file_name);
 wxGetResource(sn,"Default-Column-Width",&default_col_width,file_name);
 wxGetResource(sn,"Col-Dim-Char",&col_dim_char,file_name);
@@ -155,7 +158,6 @@ wxGetResource(sn,"Label-Font",&font_str,file_name);
 label_font=wxStringToFont(font_str);
 wxGetResource(sn,"Use-GText",&gtext,file_name);
 
-delete [] file_name;
 return 1;
 }
 

@@ -51,14 +51,7 @@ delete &ef;
 template <class T>
 double TreeWindow<T>::ProbAsDouble(const Node *n,int action) const
 {
-return (double)frame->GetActionProb(n,action);
-}
-
-template <class T>
-gString TreeWindow<T>::ProbAsString(const Node *n,int action) const
-{
-T prob=frame->GetActionProb(n,action);
-if (prob<(T)0) return ""; else return ToString(prob);
+return (double)frame->BranchProb(n,action);
 }
 
 template <class T>
@@ -94,6 +87,13 @@ else
 // If out_name=="" and save_num>0, update that outcome, if save_num<0, delete
 // that outcome.
 #include "outcomed.h"
+Outcome *EfgGetOutcome(const BaseEfg &ef,const gString &n)
+{
+for (int i=1;i<=ef.NumOutcomes();i++)
+	if (ef.OutcomeList()[i]->GetName()==n) return ef.OutcomeList()[i];
+return 0;
+}
+
 template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,int save_num)
 {
 int i,j,out=1;
@@ -111,7 +111,6 @@ if (!outcome_dialog)	// creating a new one
 	if (out_name!=gString())
 		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 	// create the dialog
-	if (outcome_dialog) {wxMessageBox("Recursion!"); return;}
 	outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
 	if (out>0) outcome_dialog->SetCurRow(out);
 	for (i=1;i<=num_players;i++)
@@ -142,26 +141,35 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 		if (save_num>0)	// save action
 		{
 			T payoff;
+			OutcomeVector<T> *tmp;
 			// if a new row was created, append an entry to old_names.
-			if (save_num>ef.NumOutcomes()) old_names+=gString();
-			OutcomeVector<T> *tmp=(save_num>ef.NumOutcomes()) ? ef.NewOutcome() : (OutcomeVector<T> *)(ef.OutcomeList()[save_num]);
-			if (tmp)
+			if (save_num>old_names.Length())
 			{
-				for (j=1;j<=num_players;j++)
+				gString new_name="Outcome "+ToString(ef.NumOutcomes()+1);
+				old_names+=new_name;
+				tmp=ef.NewOutcome();
+				tmp->SetName(new_name);
+			}
+			else
+				tmp=(OutcomeVector<T> *)EfgGetOutcome(ef,old_names[save_num]);
+			assert(tmp);
+			// check if the values have changed
+			for (j=1;j<=num_players;j++)
+			{
+				FromString(outcome_dialog->GetCell(save_num,j),payoff);
+				if ((*tmp)[j]!=payoff)
+					{(*tmp)[j]=payoff;outcomes_changed=TRUE;}
+			}
+			// check if the name has changed
+			if (outcome_dialog->GetCell(save_num,j)!=old_names[save_num])
+				if (outcome_dialog->GetCell(save_num,j)!="")
+					tmp->SetName(outcome_dialog->GetCell(save_num,j));
+				else
 				{
-					FromString(outcome_dialog->GetCell(save_num,j),payoff);
-					if ((*tmp)[j]!=payoff)
-						{(*tmp)[j]=payoff;outcomes_changed=TRUE;}
-				}
-				if (!outcome_dialog->EnteredCell(save_num,j) || outcome_dialog->GetCell(save_num,j)=="")
-				{
-					outcome_dialog->SetCell(save_num,num_players+1,"Outcome "+ToString(save_num));
+					outcome_dialog->SetCell(save_num,num_players+1,old_names[save_num]);
 					outcome_dialog->OnPaint();
 				}
-				tmp->SetName(outcome_dialog->GetCell(save_num,num_players+1));
-				old_names[save_num]=tmp->GetName();
-				OnPaint();
-			}
+			if (outcomes_changed) OnPaint();
 		}
 		if (save_num==0)	// OK action
 		{
@@ -171,10 +179,17 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 		if (save_num<0)	// delete action
 		{
 			int del_num=-save_num;
-			// ef.DeleteOutcome(....)
-			outcome_dialog->DelRow(del_num);
-			outcomes_changed=TRUE;
-			OnPaint();
+			if (del_num<=old_names.Length()) // not the last, blank row
+			{
+				Outcome *tmp=EfgGetOutcome(ef,old_names[del_num]);
+				assert(tmp);
+				ef.DeleteOutcome(tmp);
+				old_names.Remove(del_num);
+				outcomes_changed=TRUE;
+				outcome_dialog->DelRow(del_num);
+				outcome_dialog->Resize();
+				OnPaint();
+			}
 		}
 	}
 }

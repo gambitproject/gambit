@@ -29,6 +29,11 @@ class BaseExtSolnShow;
 TEMPLATE class gList<BaseExtSolnShow *>;
 TEMPLATE class gNode<BaseExtSolnShow *>;
 
+class NFSupport;
+TEMPLATE class gList<NFSupport *>;
+TEMPLATE class gNode<NFSupport *>;
+
+
 template <class T> class SolnShow;
 TEMPLATE class gNode<SolnShow<double> *>;
 TEMPLATE class gList<SolnShow<double> *>;

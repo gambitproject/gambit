@@ -30,15 +30,17 @@ if (fields&ERROR_FIELD && fields&OUTPUT_FIELD) Add(wxMakeFormNewLine());
 
 trace_list=wxStringListInts(4);trace_str=new char[10];strcpy(trace_str,"0");
 wxGetResource(PARAMS_SECTION,"Trace-Level",&trace_str,defaults_file);
-Add(wxMakeFormString("Trace Level",&trace_str,wxFORM_CHOICE, new wxList(wxMakeConstraintStrings(trace_list), 0)));
+Add(wxMakeFormString("Trace Level",&trace_str,wxFORM_CHOICE,
+				new wxList(wxMakeConstraintStrings(trace_list), 0),0,wxVERTICAL));
 Add(wxMakeFormNewLine());
 def=TRUE;
 Add(wxMakeFormBool("Save as default",&def));
 }
 // Constructor
-OutputParamsDialog::OutputParamsDialog(const char *label,wxWindow *parent) :
-	MyDialogBox(parent,(char *)label),outname(0),errname(0),outfile(0),errfile(0),trace(0),trace_str(0)
-{defaults_file=wxFindFile("gambit.ini");}
+OutputParamsDialog::OutputParamsDialog(const char *label,wxWindow *parent,const char *help_str) :
+	MyDialogBox(parent,(char *)label,help_str),outname(0),errname(0),outfile(0),
+	errfile(0),trace(0),trace_str(0)
+{defaults_file="gambit.ini";}
 
 // Out File
 gOutput *OutputParamsDialog::OutFile(void)
@@ -103,8 +105,8 @@ if (trace_str) delete [] trace_str;
 //****************************	PXI PARAMS **************************************
 
 // Constructor
-PxiParamsDialog::PxiParamsDialog(const char *alg,const char *label,wxWindow *parent)
-		:OutputParamsDialog(label,parent),pxi_command(0),pxiname(0),algname((char *)alg),pxifile(0),run_pxi(FALSE),type(0),type_str(0)
+PxiParamsDialog::PxiParamsDialog(const char *alg,const char *label,wxWindow *parent,const char *help_str)
+		:OutputParamsDialog(label,parent,help_str),pxi_command(0),pxiname(0),algname((char *)alg),pxifile(0),run_pxi(FALSE),type(0),type_str(0)
 { }
 // Make Pxi Fields
 void PxiParamsDialog::MakePxiFields(void)

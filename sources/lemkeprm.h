@@ -16,7 +16,7 @@ public:
 
 
 LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent)
-														:OutputParamsDialog("Lemke Params",parent)
+														:OutputParamsDialog("Lemke Params",parent,LCP_HELP)
 
 {
 stopAfter=0;maxDepth=0;

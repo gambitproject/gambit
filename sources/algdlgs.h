@@ -28,7 +28,7 @@ protected:
 	char *defaults_file;
 public:
 // Constructor
-	OutputParamsDialog(const char *label=0,wxWindow *parent=0);
+	OutputParamsDialog(const char *label=0,wxWindow *parent=0,const char *help_str=0);
 // Destructor
 	~OutputParamsDialog(void);
 // Create the fields
@@ -56,7 +56,7 @@ private:
 	void SaveDefaults(void);
 public:
 // Constructor
-	PxiParamsDialog(const char *alg=0,const char *label=0,wxWindow *parent=0);
+	PxiParamsDialog(const char *alg=0,const char *label=0,wxWindow *parent=0,const char *help_str=0);
 // Destructor
 	~PxiParamsDialog(void);
 // Create Fields

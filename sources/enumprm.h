@@ -17,7 +17,7 @@ public:
 
 
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
-														:OutputParamsDialog("Enum Params",parent)
+														:OutputParamsDialog("Enum Params",parent,ENUMMIXED_HELP)
 
 {
 stopAfter=0;

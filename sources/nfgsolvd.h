@@ -14,10 +14,10 @@
 #endif
 // solution module constants.  Do not change the order.  Add new ones
 // just before NFG_NUM_SOLUTIONS.
-typedef enum {NFG_NO_SOLUTION=-1,NFG_PURENASH_SOLUTION,NFG_LEMKE_SOLUTION,
-							NFG_NLIAP_SOLUTION,NFG_ELIMDOM_SOLUTION,NFG_GRID_SOLUTION,
-							NFG_NGOBIT_SOLUTION,NFG_SIMPDIV_SOLUTION,NFG_ENUM_SOLUTION,
-							NFG_NUM_SOLUTIONS} NfgSolutionT;
+typedef enum {NFG_NO_SOLUTION=-1,NFG_ENUMPURE_SOLUTION,NFG_ENUMMIXED_SOLUTION,
+							NFG_LP_SOLUTION,NFG_LCP_SOLUTION,
+							NFG_GOBIT_SOLUTION,NFG_GOBITALL_SOLUTION,NFG_LIAP_SOLUTION,
+							NFG_SIMPDIV_SOLUTION,NFG_NUM_SOLUTIONS} NfgSolutionT;
 
 // This mini-class is necessary to allow the extensive form solution dialog
 // box to display the same normal form algorithms as the normal form.  Since
@@ -29,19 +29,20 @@ public:
 	wxRadioBox *MakeNfgAlgorithmList(int num_players,wxPanel *parent,wxFunction func=0)
 	{
 		char *nfg_algorithm_list[NFG_NUM_SOLUTIONS];
-		nfg_algorithm_list[NFG_PURENASH_SOLUTION]="Pure Nash";
-		nfg_algorithm_list[NFG_LEMKE_SOLUTION]="Lemke";
-		nfg_algorithm_list[NFG_NLIAP_SOLUTION]="nLiap";
-		nfg_algorithm_list[NFG_ELIMDOM_SOLUTION]="ElimDom";
-		nfg_algorithm_list[NFG_GRID_SOLUTION]="GridSolve";
-		nfg_algorithm_list[NFG_NGOBIT_SOLUTION]="nGobit";
-		nfg_algorithm_list[NFG_SIMPDIV_SOLUTION]="Simpdiv";
-		nfg_algorithm_list[NFG_ENUM_SOLUTION]="Enum";
+		nfg_algorithm_list[NFG_ENUMPURE_SOLUTION]="EnumPure";
+		nfg_algorithm_list[NFG_ENUMMIXED_SOLUTION]="EnumMixed";
+		nfg_algorithm_list[NFG_LP_SOLUTION]="LP";
+		nfg_algorithm_list[NFG_LCP_SOLUTION]="LCP";
+		nfg_algorithm_list[NFG_GOBIT_SOLUTION]="Gobit";
+		nfg_algorithm_list[NFG_GOBITALL_SOLUTION]="GobitAll";
+		nfg_algorithm_list[NFG_LIAP_SOLUTION]="Liap";
+		nfg_algorithm_list[NFG_SIMPDIV_SOLUTION]="SimpDiv";
 		wxRadioBox *nfg_algorithm_box=new	wxRadioBox(parent,func,"Nfg Algorithms",-1,-1,-1,-1,NFG_NUM_SOLUTIONS,nfg_algorithm_list,2);
 		if (num_players!=2)
 		{
-			nfg_algorithm_box->Enable(NFG_LEMKE_SOLUTION,FALSE);
-			nfg_algorithm_box->Enable(NFG_ENUM_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_LCP_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_LP_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_ENUMMIXED_SOLUTION,FALSE);
 		}
 		return nfg_algorithm_box;
 	}

@@ -47,9 +47,9 @@ public:
 	void InterfaceSet(EfgNfgInterface<T> *i) {inter=i;}
 // Solution passing. set controls if the solution just sent will be displayed now.
 	virtual void SolutionToEfg(const BehavProfile<T> &s,bool set=false)
-		{assert(type==gNFG); inter->SolutionToEfg(s);}
+		{assert(type==gNFG); inter->SolutionToEfg(s,set);}
 	virtual void SolutionToNfg(const MixedProfile<T> &s,bool set=false)
-		{assert(type==gEFG); inter->SolutionToNfg(s);}
+		{assert(type==gEFG); inter->SolutionToNfg(s,set);}
 // Getting at the underlying object
 	virtual const Efg<T> *InterfaceObjectEfg(void)
 		{assert(type==gNFG); return inter->InterfaceObjectEfg();}

@@ -73,9 +73,9 @@ public:
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 
 		char *efg_algorithm_list[EFG_NUM_SOLUTIONS];
-		efg_algorithm_list[EFG_EGOBIT_SOLUTION]="eGobit";
-		efg_algorithm_list[EFG_ELIAP_SOLUTION]="eLiap";
-		efg_algorithm_list[EFG_SEQFORM_SOLUTION]="SeqForm";
+		efg_algorithm_list[EFG_GOBIT_SOLUTION]="Gobit";
+		efg_algorithm_list[EFG_LIAP_SOLUTION]="Liap";
+		efg_algorithm_list[EFG_LCP_SOLUTION]="LCP";
 		efg_algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Efg Algorithms",-1,-1,-1,-1,EFG_NUM_SOLUTIONS,efg_algorithm_list,2);
 		efg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
@@ -97,6 +97,10 @@ public:
 		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		(void)new wxButton(d,(wxFunction)help_button_func,"?");
+		if (num_players!=2)
+		{
+			efg_algorithm_box->Enable(EFG_LCP_SOLUTION,FALSE);
+		}
 		OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);

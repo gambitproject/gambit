@@ -15,11 +15,7 @@ gBlock<int> GambitDrawSettings::player_colors=gBlock<int>();
 GambitDrawSettings::GambitDrawSettings(void)
 {
 // if the colors array is empty, try to read it in from config file
-if (!player_colors.Length())
-{
-	char *file_name=wxFindFile("gambit.ini");
-	if (file_name)	LoadOptions(file_name);
-}
+if (player_colors.Length()==0) LoadOptions(INIFILE);
 }
 
 
@@ -57,9 +53,8 @@ else
 // LoadOptions: used to get the player colors from a config file
 void GambitDrawSettings::LoadOptions(char *file_name)
 {
-if (!FileExists(file_name))	return;
 // Load the player color settings
-char *l_tempstr=new char [100];
+char l_tempstr[40];
 int num_player_colors=0;
 wxGetResource("Gambit","Num-Player-Colors",&num_player_colors,file_name);
 player_colors=gBlock<int>(num_player_colors);
@@ -68,14 +63,11 @@ for (int i=1;i<=num_player_colors;i++)
 	sprintf(l_tempstr,"Player-Color-%d",i);
 	wxGetResource("Gambit",l_tempstr,&(player_colors[i]),file_name);
 }
-delete [] l_tempstr;
 }
 // SaveOptions: used to store the player colors to a config file
 void GambitDrawSettings::SaveOptions(char *s) const
 {
-char *file_name;
-
-file_name=copystring((s) ? s : "gambit.ini");
+char *file_name=(s) ? s : INIFILE;
 // Save the player color settings
 wxWriteResource("Gambit","Num-Player-Colors",player_colors.Length(),file_name);
 char s_tempstr[40];
@@ -84,7 +76,6 @@ for (int i=1;i<=player_colors.Length();i++)
 	sprintf(s_tempstr,"Player-Color-%d",i);
 	wxWriteResource("Gambit",s_tempstr,player_colors[i],file_name);
 }
-delete [] file_name;
 }
 
 // PlayerColorDialog: allows the user to change player colors graphically

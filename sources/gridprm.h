@@ -17,7 +17,7 @@ public:
 //******************************** Constructor/main ************************
 template <class T>
 GridSolveParamsDialog<T>::GridSolveParamsDialog(wxWindow *parent)
-				:PxiParamsDialog("grid","Grid Params",parent)
+				:PxiParamsDialog("grid","Grid Params",parent,GOBIT_HELP)
 {
 minLam=0.01;maxLam=3.0;delLam=.1;delp=.01;tol=.01;
 wxGetResource(PARAMS_SECTION,"Grid-minLam",&minLam,defaults_file);

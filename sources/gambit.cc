@@ -3,18 +3,28 @@
 //
 // @(#)gambit.cc	1.4 4/7/94
 //
-
+#include <assert.h>
 #include "wx.h"
 #pragma hdrstop
+#include "wxio.h"
 #include "gambit.h"
 #include "wxmisc.h"
 #include "normgui.h"
 #include "extgui.h"
+#include <signal.h>
 
 #ifdef _AIX
 extern wxApp *wxTheApp=1;
 #endif
 GambitApp gambitApp;
+
+typedef void (*fptr)(int);
+
+void SigFPEHandler(int a)
+{
+signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
+wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
+}
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
@@ -56,18 +66,15 @@ menu_bar->Append(help_menu,	"&Help");
 gambit_frame->SetMenuBar(menu_bar);
 
 // Set up the help system
-wxInitHelp("gambit","Gambit -- Graphics User
-Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey
-(rdm@hss.caltech.edu)\nMain Programmer: Theodore Turocy
-(magyar@hss.caltech.edu)\nFront End: Eugene Grayver
-(egrayver@hss.caltech.edu)
-\n\nPart of The Gambit Project\n
-Richard D. McKelvey and Andrew McLennan, PI's\n
-California Institute of Technology and University of Minnesota,\
-1995.\nFunding provided by the National Science Foundation");
-
+wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
+// Set up the error handling functions:
+signal(SIGFPE, (fptr)SigFPEHandler);
+// Set up the input/output default windows
+wout=new gWxOutput(gWXOUT);wout->Show(FALSE);
+werr=new gWxOutput(gWXERR);werr->Show(FALSE);
+
 // Process command line arguments, if any
 if (argc>1) gambit_frame->LoadFile(argv[1]);
 
@@ -90,7 +97,10 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 
 void GambitFrame::LoadFile(char *s)
 {
-if (!s) s=copystring(wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg"));
+if (!s)
+	s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+if (!s) return;
+s=copystring(s);
 if (strcmp(s,"")!=0)
 {
 	char *filename=FileNameFromPath(s);
@@ -125,7 +135,7 @@ void GambitFrame::OnMenuCommand(int id)
 #endif
 		case GAMBIT_HELP_ABOUT:	wxHelpAbout(); break;
 		case GAMBIT_HELP_CONTENTS: wxHelpContents(GAMBIT_GUI_HELP);	break;
-		default: wxMessageBox("Internal Error!\nContact the author\negrayver@cco.caltech.edu","Error");	break;
+		default: assert(0); break;
 	}
 }
 #ifdef wx_x
@@ -136,7 +146,8 @@ Bool GambitFrame::OnClose()
 {
 #ifdef wx_x
 	wxFlushResources();
-#endif		
+#endif
 	wxKillHelp();
+	delete wout;delete werr;
 	return TRUE;
 }

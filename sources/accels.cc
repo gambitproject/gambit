@@ -1,5 +1,5 @@
 // File: accels.cc -- functions for working with accelerators
-// @(#)accels.cc	1.5 7/4/95
+// $Id$
 //
 
 #include "wx.h"
@@ -60,6 +60,7 @@ private:
 	static void add_func(wxButton& ob, wxCommandEvent& ev);
 	static void delete_func(wxButton& ob, wxCommandEvent& ev);
 	static void close_func(wxButton& ob, wxCommandEvent& ev);
+	static void help_func(wxButton& ob, wxCommandEvent& ev);
 	// Event handlers. High level
 	void OnEventFunc(const gString &name);
 	void OnAddFunc(void);
@@ -86,11 +87,12 @@ for (int i=1;i<=events.Length();i++) event_names[i-1]=events[i].name;
 SetLabelPosition(wxVERTICAL);
 event_choice = new wxChoice(this, (wxFunction)event_func, "Event", 240, 96, -1, -1, events.Length(),event_names, 0, "event_choice");
 SetLabelPosition(wxHORIZONTAL);
-wxButton *add_button = new wxButton(this, (wxFunction)add_func, "Add", 43, 242, -1, -1, 0, "add_button");
-wxButton *delete_button = new wxButton(this, (wxFunction)delete_func, "Delete", 134, 243, 80, 30, 0, "delete_button");
-wxButton *close_button = new wxButton(this, (wxFunction)close_func, "Close", 234, 244, -1, -1, 0, "close_button");
-key_ctrl = new wxRadioBox(this, NULL, "Ctrl", 23, 78, -1, -1, 3, accel_state_str, 3, 0, "ctrl_state");
-key_shift = new wxRadioBox(this, NULL, "Shift", 22, 143, -1, -1, 3,accel_state_str, 3, 0, "shift_state");
+wxButton *add_button = new wxButton(this, (wxFunction)add_func, "Add", 23, 242, -1, -1, 0, "add_button");
+wxButton *delete_button = new wxButton(this, (wxFunction)delete_func, "Delete", 114, 242, 80, -1, 0, "delete_button");
+wxButton *close_button = new wxButton(this, (wxFunction)close_func, "Close", 214, 242, -1, -1, 0, "close_button");
+wxButton *help_button = new wxButton(this, (wxFunction)close_func, "Help", 294, 242, -1, -1, 0, "help_button");
+key_ctrl = new wxRadioBox(this, NULL, "Ctrl", 23, 78, -1, -1, 3, accel_state_str, 3, wxHORIZONTAL, "ctrl_state");
+key_shift = new wxRadioBox(this, NULL, "Shift", 22, 143, -1, -1, 3,accel_state_str, 3, wxHORIZONTAL, "shift_state");
 
 add_button->SetClientData((char *)this);
 delete_button->SetClientData((char *)this);
@@ -228,18 +230,18 @@ void EditAccelDialog::close_func(wxButton& ob, wxCommandEvent& ev)
 EditAccelDialog *parent=(EditAccelDialog *)ob.GetClientData();
 parent->Show(FALSE);
 }
+void EditAccelDialog::help_func(wxButton& ob, wxCommandEvent& ev)
+{wxHelpContents(ACCELERATORS_HELP);}
+
 //**************************************************************************
 //*                       FUNCTIONS FOR WORKING WITH ACCELERATORS          *
 //**************************************************************************
 
 // Reads in accelerators from a data file.  User can set both filename and section to read from
-int ReadAccelerators(gList<Accel> &list,const char *section,const char *file)
+int ReadAccelerators(gList<Accel> &list,const char *section,const char *file_name)
 {
 char 	tmp_str[100],*tmp_str1=new char[100];
 int		fields;
-char *file_name=wxFindFile(file);
-
-if (!file_name)	return 0;
 
 int num_accels=0;
 list.Flush();
@@ -257,12 +259,9 @@ delete [] tmp_str1;
 return 1;
 }
 // Saves accelerators to a data file. User can set both filename and section to write to
-int WriteAccelerators(const gList<Accel> &list,const char *section,const char *file)
+int WriteAccelerators(const gList<Accel> &list,const char *section,const char *file_name)
 {
 char tmp_str[100],tmp_str1[100];
-char *file_name=wxFindFile(file);
-
-if (!file_name)	return 0;
 
 int num_accels=list.Length();
 wxWriteResource(section,"Num-Accells",num_accels,file_name);

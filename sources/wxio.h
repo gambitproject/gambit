@@ -20,7 +20,7 @@ class gWxInput: public gInput, public wxFrame
 private:
 	wxTextWindow	*f;
 	char					line_buffer[100];
-	bool						ok;
+	bool						ok,shown;
 	gWxInput(const gFileInput &);
 	gWxInput &operator=(const gFileInput &);
 public:
@@ -38,8 +38,13 @@ public:
 	ok=(f) ? true:false;
 	Show(TRUE);
 	}
+// You can close the window in the sense that it is no longer visible, but it
+// is never deleted.  In the GUI (windows) the printf function is overloaded
+// to output to wout.  wout is created at startup.
 
-	Bool OnClose(void) {Show(FALSE);return TRUE;}
+	Bool OnClose(void) {f->Clear();Show(FALSE);return FALSE;}
+	Bool Show(Bool show) {shown=show;wxWindow::Show(show);return shown;}
+
 //
 // Close the window pointed to, if any.
 //
@@ -94,7 +99,7 @@ class gWxOutput: public gOutput, public wxFrame
 	private:
 	wxTextWindow	*f;
 	char					buffer[100];
-	bool					ok;
+	bool					ok,shown;
 	int Width,Prec;
 	char Represent;
 
@@ -130,9 +135,11 @@ class gWxOutput: public gOutput, public wxFrame
 		Represent='f';
 		Show(TRUE);
 		}
-
-	Bool OnClose(void) {Show(FALSE);return TRUE;}
-
+// You can close the window in the sense that it is no longer visible, but it
+// is never deleted.  In the GUI (windows) the printf function is overloaded
+// to output to wout.  wout is created at startup.
+	Bool OnClose(void) {f->Clear();Show(FALSE);return FALSE;}
+	Bool Show(Bool show) {shown=show;wxWindow::Show(show);return shown;}
 //
 // Close the window pointed to, if any.
 //
@@ -142,21 +149,21 @@ class gWxOutput: public gOutput, public wxFrame
 // Output primitives for the basic types
 
 		gOutput& operator<<(int x)
-			{ assert(f);  (*f)<<x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<x; return *this; }
 		gOutput& operator<<(unsigned int x)
-			{ assert(f);  (*f)<<(int)x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<(int)x; return *this; }
 		gOutput& operator<<(long x)
-			{ assert(f);  (*f)<<x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<x; return *this; }
 		gOutput& operator<<(char x)
-			{ assert(f);  (*f)<<x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<x; return *this; }
 		gOutput& operator<<(double x)
-			{ assert(f);  (*f)<<x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<x; return *this; }
 		gOutput& operator<<(float x)
-			{ assert(f);  (*f)<<x; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<x; return *this; }
 		gOutput& operator<<(const char *x)
-			{ assert(f);  (*f)<<(char *)x;  return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); (*f)<<(char *)x;  return *this; }
 		gOutput& operator<<(const void *x)
-			{ assert(f);  sprintf(buffer, "%p", x); (*f)<<buffer; return *this; }
+			{ assert(f);  if (!shown) Show(TRUE); sprintf(buffer, "%p", x); (*f)<<buffer; return *this; }
 
 		bool IsValid(void) const {return ok;}
 
