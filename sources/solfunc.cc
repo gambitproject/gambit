@@ -657,8 +657,8 @@ static Portion *GSM_SetActionProbs(Portion **param)
     }
   }
   
-  if(((ListPortion*) param[2])->Length() != 
-     E.Players()[PlayerNum]->Infosets()[InfosetNum]->NumActions())  {
+  if (((ListPortion*) param[2])->Length() != 
+      P->Support().NumActions(PlayerNum, InfosetNum))  {
     delete P;
     return new ErrorPortion("Mismatching number of actions");
   }  
@@ -718,6 +718,7 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
 
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Nfg& N = P->Game();
+  
   const gArray<NFPlayer *> &player = N.Players();
   
   for(i = 1; i <= N.NumPlayers(); i++)  {
@@ -728,7 +729,8 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
     }
   }
   
-  if(((ListPortion*) param[2])->Length() != N.NumStrats(PlayerNum))  {
+  if (((ListPortion*) param[2])->Length() != 
+      P->Support().NumStrats(PlayerNum))  {
     delete P;
     return new ErrorPortion("Mismatching number of strategies");
   }
