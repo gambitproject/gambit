@@ -19,10 +19,18 @@ int foo, bar;
 
 input *input_stream;
 
-void efg_set_input(const gString &s)
+int efg_set_input(const gString &s)
 {
   input_stream = new input((const char *) s);
+
+  if (*input_stream == input(0))  {
+    delete input_stream;
+    return 0;
+  }
+
   last_name = new gString;
+
+  return 1;
 }
 
 void efg_close_input(void)
@@ -129,6 +137,8 @@ int yylex(void)
     
 
     break;
+
+// Comment features of the lexer are not yet implemented...
 /*
     if (c == '/')   {
       *input_stream >> d;
