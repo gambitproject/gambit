@@ -67,13 +67,13 @@ panelNfgEnumPure::panelNfgEnumPure(wxWindow *p_parent)
 							  wxHORIZONTAL);
   m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
   m_findAll->SetValue(false);
-  stopAfterSizer->Add(m_findAll, 0, wxALL, 5);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
   stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
 		      0, wxALL | wxCENTER, 5);
   m_stopAfter = new wxSpinCtrl(this, -1, "1",
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
-  stopAfterSizer->Add(m_stopAfter, 0, wxALL, 5);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
   topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
@@ -141,13 +141,13 @@ panelNfgEnumMixed::panelNfgEnumMixed(wxWindow *p_parent)
 							  wxHORIZONTAL);
   m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
   m_findAll->SetValue(false);
-  stopAfterSizer->Add(m_findAll, 0, wxALL, 5);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
   stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
 		      0, wxALL | wxCENTER, 5);
   m_stopAfter = new wxSpinCtrl(this, -1, "1",
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
-  stopAfterSizer->Add(m_stopAfter, 0, wxALL, 5);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
   topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
@@ -217,13 +217,13 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
 							  wxHORIZONTAL);
   m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
   m_findAll->SetValue(false);
-  stopAfterSizer->Add(m_findAll, 0, wxALL, 5);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
   stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
 		      0, wxALL | wxCENTER, 5);
   m_stopAfter = new wxSpinCtrl(this, -1, "1",
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
-  stopAfterSizer->Add(m_stopAfter, 0, wxALL, 5);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
   topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *algorithmBox = new wxStaticBox(this, wxID_STATIC,
@@ -250,7 +250,7 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
   m_maxits1 = new wxSpinCtrl(this, -1, "100",
 			     wxDefaultPosition, wxDefaultSize,
 			     wxSP_ARROW_KEYS, 10, 10000);
-  paramSizer->Add(m_maxits1, 0, wxALL, 5);
+  paramSizer->Add(m_maxits1, 0, wxALL | wxCENTER, 5);
   
   paramSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   "Tolerance for line search (in digits)"),
@@ -258,7 +258,7 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
   m_tol1 = new wxSpinCtrl(this, -1, "10",
 			  wxDefaultPosition, wxDefaultSize,
 			  wxSP_ARROW_KEYS, 2, 20);
-  paramSizer->Add(m_tol1, 0, wxALL, 5);
+  paramSizer->Add(m_tol1, 0, wxALL | wxCENTER, 5);
 
   paramSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   "Maximum iterations in minimization"),
@@ -266,7 +266,7 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
   m_maxitsN = new wxSpinCtrl(this, -1, "20",
 			     wxDefaultPosition, wxDefaultSize,
 			     wxSP_ARROW_KEYS, 10, 1000);
-  paramSizer->Add(m_maxitsN, 0, wxALL, 5);
+  paramSizer->Add(m_maxitsN, 0, wxALL | wxCENTER, 5);
   
   paramSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   "Tolerance in minimization (in digits)"),
@@ -274,7 +274,7 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
   m_tolN = new wxSpinCtrl(this, -1, "10",
 			  wxDefaultPosition, wxDefaultSize,
 			  wxSP_ARROW_KEYS, 2, 20);
-  paramSizer->Add(m_tolN, 0, wxALL, 5);
+  paramSizer->Add(m_tolN, 0, wxALL | wxCENTER, 5);
 
   funcminSizer->Add(paramSizer, 0, wxALL, 5);
   
@@ -342,7 +342,7 @@ panelNfgPolEnum::panelNfgPolEnum(wxWindow *p_parent)
 							  wxHORIZONTAL);
   m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
   m_findAll->SetValue(false);
-  stopAfterSizer->Add(m_findAll, 0, wxALL, 5);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
   stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
 		      0, wxALL | wxCENTER, 5);
   m_stopAfter = new wxSpinCtrl(this, -1, "1",
@@ -444,23 +444,23 @@ panelNfgSimpdiv::panelNfgSimpdiv(wxWindow *p_parent)
   wxBoxSizer *leashSizer = new wxBoxSizer(wxHORIZONTAL);
   m_useLeash = new wxCheckBox(this, idCHECKBOX_USELEASH, "Use leash");
   m_useLeash->SetValue(false);
-  leashSizer->Add(m_useLeash, 0, wxALL, 5);
+  leashSizer->Add(m_useLeash, 0, wxALL | wxCENTER, 5);
   leashSizer->Add(new wxStaticText(this, wxID_STATIC, "Leash length"),
 		  0, wxALL | wxCENTER, 5);
   m_leashLength = new wxSpinCtrl(this, -1, "100",
 				 wxDefaultPosition, wxDefaultSize,
 				 wxSP_ARROW_KEYS, 1, 10000);
   m_leashLength->Enable(false);
-  leashSizer->Add(m_leashLength, 0, wxALL, 5);
+  leashSizer->Add(m_leashLength, 0, wxALL | wxCENTER, 5);
   algorithmSizer->Add(leashSizer, 0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *restartSizer = new wxBoxSizer(wxHORIZONTAL);
   restartSizer->Add(new wxStaticText(this, wxID_STATIC, "Number of restarts"),
-		    0, wxALL, 5);
+		    0, wxALL | wxCENTER, 5);
   m_numRestarts = new wxSpinCtrl(this, -1, "20",
 				 wxDefaultPosition, wxDefaultSize,
 				 wxSP_ARROW_KEYS, 1, 10000);
-  restartSizer->Add(m_numRestarts, 0, wxALL, 5);
+  restartSizer->Add(m_numRestarts, 0, wxALL | wxCENTER, 5);
   algorithmSizer->Add(restartSizer, 0, wxALL | wxCENTER, 5);
 
   topSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
@@ -608,6 +608,9 @@ nfgNashAlgorithm *dialogNfgNash::GetAlgorithm(void) const
 {
   if (m_algorithms(m_algorithmTree->GetSelection())) {
     return m_algorithms(m_algorithmTree->GetSelection())->GetAlgorithm();
+  }
+  else {
+    return 0;
   }
 }
 
