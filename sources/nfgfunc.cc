@@ -614,36 +614,6 @@ Portion *GSM_GobitNfg_MixedFloat(Portion **param)
 }
 
 
-//------------------------- GobitLambda, GobitValue -----------------//
-
-Portion* GSM_GobitLambda_MixedFloat(Portion** param)
-{
-  MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  return new FloatValPortion( bs->GobitLambda() );
-}
-
-Portion* GSM_GobitLambda_MixedRational(Portion** param)
-{
-  MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  return new RationalValPortion( bs->GobitLambda() );
-}
-
-Portion* GSM_GobitValue_MixedFloat(Portion** param)
-{
-  MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  return new FloatValPortion( bs->GobitValue() );
-}
-
-Portion* GSM_GobitValue_MixedRational(Portion** param)
-{
-  MixedSolution<double>* bs = 
-    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  return new RationalValPortion( bs->GobitValue() );
-}
-
 
 
 //-------------------------- GobitGridSolve -------------------------//
@@ -1622,6 +1592,8 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
 }
 
 
+//-------------------- MixedSolution data members --------------------//
+
 Portion *GSM_IsNash_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
@@ -1635,6 +1607,77 @@ Portion *GSM_IsNash_MixedRational(Portion **param)
     (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
   return new IntValPortion(P->IsNash());
 }
+
+Portion *GSM_IsPerfect_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsPerfect());
+}
+
+Portion *GSM_IsPerfect_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsPerfect());
+}
+
+Portion *GSM_IsProper_MixedFloat(Portion **param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsProper());
+}
+
+Portion *GSM_IsProper_MixedRational(Portion **param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsProper());
+}
+
+Portion* GSM_Support_MixedFloat(Portion** param)
+{
+  MixedSolution<double> *P = 
+    (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new NfSupportValPortion(new NFSupport(P->Support()));
+}
+
+Portion* GSM_Support_MixedRational(Portion** param)
+{
+  MixedSolution<gRational> *P = 
+    (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new NfSupportValPortion(new NFSupport(P->Support()));
+}
+
+Portion* GSM_GobitLambda_MixedFloat(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitLambda_MixedRational(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitValue_MixedFloat(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitValue() );
+}
+
+Portion* GSM_GobitValue_MixedRational(Portion** param)
+{
+  MixedSolution<double>* bs = 
+    (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitValue() );
+}
+
 
 Portion *GSM_LiapValue_MixedFloat(Portion **param)
 {
@@ -2028,27 +2071,54 @@ void Init_nfgfunc(GSM *gsm)
 
   gsm->AddFunction( FuncObj );
 
+
+  //------------------------- MixedSolution member functions ----------//
+
   //----------------------- IsNash ------------------------//
 
   FuncObj = new FuncDescObj("IsNash");
   FuncObj->SetFuncInfo(GSM_IsNash_MixedFloat, 1);
   FuncObj->SetParamInfo(GSM_IsNash_MixedFloat, 0, "strategy",
 			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
   FuncObj->SetFuncInfo(GSM_IsNash_MixedRational, 1);
   FuncObj->SetParamInfo(GSM_IsNash_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("IsPerfect");
+  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsPerfect_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsPerfect_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsProper");
+  FuncObj->SetFuncInfo(GSM_IsProper_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsProper_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsProper_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsProper_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Support");
+  FuncObj->SetFuncInfo(GSM_Support_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_Support_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_Support_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_Support_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapValue");
   FuncObj->SetFuncInfo(GSM_LiapValue_MixedFloat, 1);
   FuncObj->SetParamInfo(GSM_LiapValue_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
   FuncObj->SetFuncInfo(GSM_LiapValue_MixedRational, 1);
   FuncObj->SetParamInfo(GSM_LiapValue_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
 
@@ -2076,9 +2146,4 @@ void Init_nfgfunc(GSM *gsm)
 
 TEMPLATE class Mixed_ListPortion<double>;
 TEMPLATE class Mixed_ListPortion<gRational>;
-
-
-
-
-
 

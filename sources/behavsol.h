@@ -43,6 +43,24 @@ public:
 
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;
+
+
+  void Invalidate();
+
+  T& operator[](int);
+  T& operator()(int, int, int);
+  gDPVector<T>& operator=(const gDPVector<T>&);
+  gDPVector<T>& operator=(const gPVector<T>&);
+  gDPVector<T>& operator=(const gVector<T>&);
+  gDPVector<T>& operator=(T);
+  gDPVector<T>& operator+=(const gDPVector<T>&);
+  gPVector<T>& operator+=(const gPVector<T>&);
+  gVector<T>& operator+=(const gVector<T>&);
+  gDPVector<T>& operator-=(const gDPVector<T>&);
+  gPVector<T>& operator-=(const gPVector<T>&);
+  gVector<T>& operator-=(const gVector<T>&);
+  gDPVector<T>& operator*=(T);
+  BehavProfile<T>& operator=(const BehavProfile<T>&);
 };
 
 #ifndef __BORLANDC__

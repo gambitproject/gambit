@@ -42,7 +42,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
       gArray<int> profile = citer.Get();
       for (int i = 1; i <= profile.Length(); i++)
 	temp(i, profile[i]) = (T) 1;
-      eqs.Append(temp);
+      eqs.Append(MixedSolution<T>(temp, id_PURENASH));
     }
   }  while (citer.NextContingency());
   

@@ -405,7 +405,7 @@ void LemkeTableau<T>::GetSolutions(gList<MixedSolution<T> > &solutions) const
       else
 	profile(2, j) = (T) 0;
 
-    solutions.Append(profile);
+    solutions.Append(MixedSolution<T>(profile, id_LEMKE));
   }
 }
 

@@ -1,5 +1,11 @@
+//#
+//# FILE: mixedsol.cc -- Mixed strategy profile classes
+//#
+//# $Id$
+//#
 
 
+#include "assert.h"
 #include "mixedsol.h"
 
 template <class T> 
@@ -7,6 +13,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
 : MixedProfile<T>(n, truncated),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
+  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -19,6 +26,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 : MixedProfile<T>(n, s),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
+  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -30,6 +38,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
 : MixedProfile<T>(n, v),
   _Creator(id_USER),
   _IsNash(T_DONTKNOW),
+  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -41,6 +50,7 @@ MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, int creator)
 : MixedProfile<T>(m),
   _Creator(creator),
   _IsNash(T_DONTKNOW),
+  _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
   _GobitLambda(-1),
   _GobitValue(-1),
@@ -52,6 +62,7 @@ template <class T> MixedSolution<T>::MixedSolution(const MixedSolution<T>& m)
 : MixedProfile<T>(m), 
   _Creator(m._Creator),
   _IsNash(m._IsNash),
+  _IsPerfect(m._IsPerfect),
   _IsProper(m._IsProper),
   _GobitLambda(m._GobitLambda),
   _GobitValue(m._GobitValue),
@@ -71,12 +82,13 @@ template <class T> int MixedSolution<T>::IsNash()
   return _IsNash; 
 }
 
-template <class T> int MixedSolution<T>::IsPerfect() const
+template <class T> int MixedSolution<T>::IsPerfect()
 { 
   if(_Creator == id_LEMKE)
-    return T_YES;
+    _IsPerfect = T_YES;
   else
-    return T_DONTKNOW; 
+    _IsPerfect = T_DONTKNOW; 
+  return _IsPerfect;
 }
 
 template <class T> int MixedSolution<T>::IsProper() const
@@ -121,7 +133,7 @@ template <class T> void MixedSolution<T>::Dump(gOutput& f) const
   MixedProfile<T>::Dump(f);
   f << " Creator:"; DisplayID(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
-  f << " IsPerfect:"; DisplayTriState(f, IsPerfect());
+  f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
   f << " IsProper:"; DisplayTriState(f, _IsProper);
   f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
@@ -134,3 +146,55 @@ template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &s)
   s.Dump(f);  
   return f;
 }
+
+
+template <class T> void MixedSolution<T>::Invalidate()
+{
+  _Creator = id_USER;
+  _IsNash = T_DONTKNOW;
+  _IsProper = T_DONTKNOW;
+  _GobitLambda = -1;
+  _GobitValue = -1;
+  _LiapValue = -1;
+}
+
+template <class T> T& MixedSolution<T>::operator[](int i)
+{ Invalidate(); return MixedProfile<T>::operator[](i); }
+
+template <class T> T& MixedSolution<T>::operator()(int a, int b)
+{ Invalidate(); return MixedProfile<T>::operator()(a, b); }
+
+template <class T> 
+gPVector<T>& MixedSolution<T>::operator=(const gPVector<T>& v)
+{ Invalidate(); return gPVector<T>::operator=(v); }
+
+template <class T> 
+gPVector<T>& MixedSolution<T>::operator=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gPVector<T>::operator=(v); }
+
+template <class T> 
+gPVector<T>& MixedSolution<T>::operator=(T i)
+{ assert(0); Invalidate(); return gPVector<T>::operator=(i); }
+
+template <class T> 
+gPVector<T>& MixedSolution<T>::operator+=(const gPVector<T>& v)
+{ Invalidate(); return gPVector<T>::operator+=(v); }
+
+template <class T> 
+gVector<T>& MixedSolution<T>::operator+=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gVector<T>::operator+=(v); }
+
+template <class T> 
+gPVector<T>& MixedSolution<T>::operator-=(const gPVector<T>& v)
+{ Invalidate(); return gPVector<T>::operator-=(v); }
+
+template <class T> 
+gVector<T>& MixedSolution<T>::operator-=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gVector<T>::operator-=(v); }
+
+template <class T> gPVector<T>& MixedSolution<T>::operator*=(T i)
+{ Invalidate(); return gPVector<T>::operator*=(i); }
+
+template <class T> 
+MixedProfile<T>& MixedSolution<T>::operator=(const MixedProfile<T>& v)
+{ Invalidate(); return MixedProfile<T>::operator=(v); }

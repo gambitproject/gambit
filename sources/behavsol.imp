@@ -134,8 +134,8 @@ template <class T> void BehavSolution<T>::Dump(gOutput& f) const
   BehavProfile<T>::Dump(f);
   f << " Creator:"; DisplayID(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
-  f << " IsPerfect:"; DisplayTriState(f, _IsSubgamePerfect);
-  f << " IsProper:"; DisplayTriState(f, _IsSequential);
+  f << " IsSubgamePerfect:"; DisplayTriState(f, _IsSubgamePerfect);
+  f << " IsSequential:"; DisplayTriState(f, _IsSequential);
   f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
@@ -147,3 +147,68 @@ template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &s)
   s.Dump(f);  
   return f;
 }
+
+
+template <class T> void BehavSolution<T>::Invalidate()
+{
+  _Creator = id_USER;
+  _IsNash = T_DONTKNOW;
+  _IsSubgamePerfect = T_DONTKNOW;
+  _IsSequential = T_DONTKNOW;
+  _GobitLambda = -1;
+  _GobitValue = -1;
+  _LiapValue = -1;
+}
+
+template <class T> T& BehavSolution<T>::operator[](int i)
+{ Invalidate(); return BehavProfile<T>::operator[](i); }
+
+template <class T> T& BehavSolution<T>::operator()(int a, int b, int c)
+{ Invalidate(); return BehavProfile<T>::operator()(a, b, c); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator=(const gDPVector<T>& v)
+{ Invalidate(); return gDPVector<T>::operator=(v); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator=(const gPVector<T>& v)
+{ assert(0); Invalidate(); return gDPVector<T>::operator=(v); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gDPVector<T>::operator=(v); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator=(T i)
+{ assert(0); Invalidate(); return gDPVector<T>::operator=(i); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator+=(const gDPVector<T>& v)
+{ Invalidate(); return gDPVector<T>::operator+=(v); }
+
+template <class T> 
+gPVector<T>& BehavSolution<T>::operator+=(const gPVector<T>& v)
+{ assert(0); Invalidate(); return gPVector<T>::operator+=(v); }
+
+template <class T> 
+gVector<T>& BehavSolution<T>::operator+=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gVector<T>::operator+=(v); }
+
+template <class T> 
+gDPVector<T>& BehavSolution<T>::operator-=(const gDPVector<T>& v)
+{ Invalidate(); return gDPVector<T>::operator-=(v); }
+
+template <class T> 
+gPVector<T>& BehavSolution<T>::operator-=(const gPVector<T>& v)
+{ assert(0); Invalidate(); return gPVector<T>::operator-=(v); }
+
+template <class T> 
+gVector<T>& BehavSolution<T>::operator-=(const gVector<T>& v)
+{ assert(0); Invalidate(); return gVector<T>::operator-=(v); }
+
+template <class T> gDPVector<T>& BehavSolution<T>::operator*=(T i)
+{ Invalidate(); return gDPVector<T>::operator*=(i); }
+
+template <class T> 
+BehavProfile<T>& BehavSolution<T>::operator=(const BehavProfile<T>& v)
+{ Invalidate(); return BehavProfile<T>::operator=(v); }

@@ -441,7 +441,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
     }
     *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
     *params.tracefile << " maxz = " << maxz; 
-    solutions.Append(MixedProfile<T>(y));
+    solutions.Append(MixedSolution<T>(MixedProfile<T>(y), id_SIMPDIV));
   }
   if(params.status.Get()) params.status.Reset();
 

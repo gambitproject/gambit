@@ -1,3 +1,8 @@
+//#
+//# FILE: mixedsol.h -- Mixed strategy solution classes
+//#
+//# $Id$
+//#
 
 
 
@@ -14,6 +19,7 @@ template <class T> class MixedSolution : public MixedProfile<T>
 protected:
   int _Creator;
   int _IsNash;
+  int _IsPerfect;
   int _IsProper;
   T _GobitLambda;
   T _GobitValue;
@@ -31,7 +37,7 @@ public:
 
   int Creator() const; // Who created this object? (algorithm ID or user)
   int IsNash(); // Is it Nash? Y/N/DK
-  int IsPerfect() const; //Is it Perfect? Y/N/DK
+  int IsPerfect(); //Is it Perfect? Y/N/DK
   int IsProper() const; //Is it Proper? Y/N/DK
   NFSupport Support() const; //Support of Profile
 
@@ -43,6 +49,21 @@ public:
 
   bool operator==(const MixedSolution<T> &) const;
   void Dump(gOutput& f) const;
+
+
+  void Invalidate();
+
+  T& operator[](int);
+  T& operator()(int, int);
+  gPVector<T>& operator=(const gPVector<T>&);
+  gPVector<T>& operator=(const gVector<T>&);
+  gPVector<T>& operator=(T);
+  gPVector<T>& operator+=(const gPVector<T>&);
+  gVector<T>& operator+=(const gVector<T>&);
+  gPVector<T>& operator-=(const gPVector<T>&);
+  gVector<T>& operator-=(const gVector<T>&);
+  gPVector<T>& operator*=(T);
+  MixedProfile<T>& operator=(const MixedProfile<T>&);
 };
 
 

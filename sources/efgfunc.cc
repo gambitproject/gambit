@@ -1881,6 +1881,111 @@ Portion *GSM_SetComponent_BehavRational(Portion **param)
 
 
 
+//-------------------- BehavSolution data members --------------------//
+
+Portion *GSM_IsNash_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsNash());
+}
+
+Portion *GSM_IsNash_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsNash());
+}
+
+Portion *GSM_IsSubgamePerfect_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsSubgamePerfect());
+}
+
+Portion *GSM_IsSubgamePerfect_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsSubgamePerfect());
+}
+
+Portion *GSM_IsSequential_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsSequential());
+}
+
+Portion *GSM_IsSequential_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new IntValPortion(P->IsSequential());
+}
+
+Portion* GSM_Support_BehavFloat(Portion** param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new EfSupportValPortion(new EFSupport(P->Support()));
+}
+
+Portion* GSM_Support_BehavRational(Portion** param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new EfSupportValPortion(new EFSupport(P->Support()));
+}
+
+/*
+Portion* GSM_GobitLambda_BehavFloat(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitLambda_BehavRational(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitLambda() );
+}
+
+Portion* GSM_GobitValue_BehavFloat(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new FloatValPortion( bs->GobitValue() );
+}
+
+Portion* GSM_GobitValue_BehavRational(Portion** param)
+{
+  BehavSolution<double>* bs = 
+    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+  return new RationalValPortion( bs->GobitValue() );
+}
+*/
+
+Portion *GSM_LiapValue_BehavFloat(Portion **param)
+{
+  BehavSolution<double> *P = 
+    (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new FloatValPortion(P->LiapValue());
+}
+
+Portion *GSM_LiapValue_BehavRational(Portion **param)
+{
+  BehavSolution<gRational> *P = 
+    (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
+  return new RationalValPortion(P->LiapValue());
+}
+
+
+
+
 //--------------------------------------------------------------//
 
 void Init_efgfunc(GSM *gsm)
@@ -2502,6 +2607,58 @@ void Init_efgfunc(GSM *gsm)
 			2, "list", porLIST | porRATIONAL );
 
   gsm->AddFunction( FuncObj );
+
+
+
+  //------------------------- BehavSolution member functions ----------//
+
+  //----------------------- IsNash ------------------------//
+
+  FuncObj = new FuncDescObj("IsNash");
+  FuncObj->SetFuncInfo(GSM_IsNash_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_BehavFloat, 0, "strategy",
+			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsNash_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_BehavRational, 0, "strategy",
+			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsSubgamePerfect");
+  FuncObj->SetFuncInfo(GSM_IsSubgamePerfect_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsSubgamePerfect_BehavFloat, 0, "strategy",
+			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsSubgamePerfect_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_IsSubgamePerfect_BehavRational, 0, "strategy",
+			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsSequential");
+  FuncObj->SetFuncInfo(GSM_IsSequential_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsSequential_BehavFloat, 0, "strategy",
+			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsSequential_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_IsSequential_BehavRational, 0, "strategy",
+			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Support");
+  FuncObj->SetFuncInfo(GSM_Support_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_Support_BehavFloat, 0, "strategy",
+			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_Support_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_Support_BehavRational, 0, "strategy",
+			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("LiapValue");
+  FuncObj->SetFuncInfo(GSM_LiapValue_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_BehavFloat, 0, "strategy",
+			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
+  FuncObj->SetFuncInfo(GSM_LiapValue_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_BehavRational, 0, "strategy",
+			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
 
 
   //----------------------- List --------------------------//

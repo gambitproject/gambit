@@ -37,6 +37,16 @@ typedef enum
 #define id_GOBIT 1
 #define id_LIAP 2
 #define id_LEMKE 3
+#define id_ZSUM 4
+#define id_ENUM 5
+#define id_GOBITGRID 6
+#define id_SIMPDIV 7
+#define id_PURENASH 8
+#define id_LEMKESUB 9
+#define id_SEQFORM 10
+#define id_SIMPDIVSUB 11
+#define id_ZSUMSUB 12
+#define id_PURENASHSUB 13
 
 
 #define T_DONTKNOW 2

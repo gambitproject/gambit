@@ -180,7 +180,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	  if(bfs2.IsDefined(k)) 
 	    profile(2,k)/=sum;
 	} 
-	solutions.Append(profile);
+	solutions.Append(MixedSolution<T>(profile, id_ENUM));
       }
     }
 
