@@ -537,21 +537,25 @@ static Portion *GSM_CentroidNFSupport(Portion **param)
 // Game
 //-------
 
-/*
-static Portion* GSM_Game_NfgTypes(Portion** param)
+static Portion* GSM_Game_MixedFloat(Portion** param)
 {
-  if (param[0]->Game())  {
-    assert(!param[0]->GameIsEfg());
-    BaseNfg *nfg = (BaseNfg *) param[0]->Game();
-    if (nfg->Type() == DOUBLE)
-      return new NfgValPortion<double>((Nfg<double> *) nfg);
-    else
-      return new NfgValPortion<gRational>((Nfg<gRational> *) nfg);
-  }
-  else
-    return 0;
+  return new NfgValPortion<double>(&((MixedPortion<double> *) param[0])->Value()->BelongsTo());
 }
-*/
+
+static Portion* GSM_Game_MixedRational(Portion** param)
+{
+  return new NfgValPortion<gRational>(&((MixedPortion<gRational> *) param[0])->Value()->BelongsTo());
+}
+
+static Portion *GSM_Game_NfSupport(Portion **param)
+{
+  NfgPayoffs *N = ((NfSupportPortion *) param[0])->Value()->BelongsTo().PayoffTable();
+
+  if (N->Type() == DOUBLE)
+    return new NfgValPortion<double>((Nfg<double> *) N);
+  else
+    return new NfgValPortion<gRational>((Nfg<gRational> *) N);
+}
 
 static Portion* GSM_Game_EfgTypes(Portion** param)
 {
@@ -1673,18 +1677,20 @@ void Init_solfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-//  FuncObj = new FuncDescObj("Game", 4);
-  FuncObj = new FuncDescObj("Game", 2);
+  FuncObj = new FuncDescObj("Game", 5);
 
-//  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
-//  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_MixedFloat, porNFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_MixedRational, porNFG, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL));
 
-//  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
-//  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porBEHAV));
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_NfSupport, porNFG, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porNFSUPPORT));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("support", porEFSUPPORT));
   gsm->AddFunction(FuncObj);
 
 

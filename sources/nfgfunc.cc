@@ -141,21 +141,28 @@ static Portion *GSM_Float_Nfg(Portion **param)
 //----------
 // Game
 //----------
-/*
-static Portion* GSM_Game_NfgElements(Portion** param)
+
+static Portion *GSM_Game_NfPlayer(Portion **param)
 {
-  if (param[0]->Game())  {
-    assert(!param[0]->GameIsEfg());
-    BaseNfg *nfg = (BaseNfg *) param[0]->Game();
-    if (nfg->PayoffTable()->Type() == DOUBLE)
-      return new NfgValPortion<double>((Nfg<double> *) nfg);
-    else
-      return new NfgValPortion<gRational>((Nfg<gRational> *) nfg);
-  }
+  NfgPayoffs *N = ((NfPlayerPortion *) param[0])->Value()->BelongsTo().PayoffTable();
+
+  if (N->Type() == DOUBLE)
+    return new NfgValPortion<double>((Nfg<double> *) N);
   else
-    return 0;
+    return new NfgValPortion<gRational>((Nfg<gRational> *) N);
 }
-*/
+
+
+static Portion *GSM_Game_Strategy(Portion **param)
+{
+  NfgPayoffs *N = ((StrategyPortion *) param[0])->Value()->nfp->BelongsTo().PayoffTable();
+
+  if (N->Type() == DOUBLE)
+    return new NfgValPortion<double>((Nfg<double> *) N);
+  else
+    return new NfgValPortion<gRational>((Nfg<gRational> *) N);
+}
+
 
 //--------------
 // IsConstSum
@@ -819,14 +826,12 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
-/*
   FuncObj = new FuncDescObj("Game", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfPlayer, porNFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_Strategy, porNFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
-  */
 
   FuncObj = new FuncDescObj("IsConstSum", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSum_Nfg, porBOOL, 1));
