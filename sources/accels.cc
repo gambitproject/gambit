@@ -288,10 +288,10 @@ bool Accel::operator==(wxKeyEvent &p_event) const
 
 gOutput &operator<<(gOutput &p_file, const Accel &p_accel)
 {
-  p_file << "Ctrl " << p_accel.Control()
-	 << " Shift " << p_accel.Shift() 
-	 << " Key " << p_accel.Key()
-	 << " Id " << p_accel.Id() << '\n';
+  p_file << "Ctrl " << (int) p_accel.Control()
+	 << " Shift " << (int) p_accel.Shift() 
+	 << " Key " << (int) p_accel.Key()
+	 << " Id " << (int) p_accel.Id() << '\n';
   return p_file;
 }
 
