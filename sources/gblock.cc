@@ -7,7 +7,7 @@
 #include "basic.h"
 #include "gblock.imp"
 #include "gstring.h"
-#include "gnumber.h"
+#include "rational.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -25,7 +25,6 @@ TEMPLATE class gBlock<double *>;
 TEMPLATE class gBlock<gInteger>;
 TEMPLATE class gBlock<gRational>;
 TEMPLATE class gBlock<gRational *>;
-TEMPLATE class gBlock<gNumber>;
 TEMPLATE class gBlock<gString>;
 TEMPLATE class gBlock<gBlock<int> >;
 TEMPLATE class gBlock<gBlock<double> >;
@@ -40,7 +39,6 @@ TEMPLATE gOutput &operator<<(gOutput &, const gBlock<double *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gInteger> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gRational *> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gNumber> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gString> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<int> > &);
 TEMPLATE gOutput &operator<<(gOutput &, const gBlock<gBlock<double> > &);

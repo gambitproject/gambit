@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include <malloc.h>
 #include "gstring.h"
-#include "extform.h"
 #include "node.h"
+#include "extform.h"
 #include "outcome.h"
 
 gString last_name;
@@ -18,7 +18,7 @@ double last_double;
 int playerNo, gameNo, isetNo, actNo, outcNo, errCode;
 Node node;
 struct nodeinfo info;
-gTuple<gNumber> *v;
+gTuple<double> *v;
 gBlock<struct nodeinfo *> *nodelist;
 
 gInput *efg_input_stream;
@@ -71,7 +71,7 @@ outcome_list:  outcome
             |  outcome_list outcome
 
 outcome:    LBRACE INTEGER  { CreateOutcome(outcNo = last_int);
-            v = new gTuple<gNumber>(1, NumPlayers());
+            v = new gTuple<double>(1, NumPlayers());
             playerNo = 1; }
             outcome_vector
             { SetOutcomeValues(outcNo, *v);  delete v; }
@@ -126,7 +126,7 @@ action:         NAME
                LabelAction(gameNo, playerNo, isetNo, actNo++, last_name); }
 
 prob_list:      LBRACE
-            { v = new gTuple<gNumber>(1, actNo - 1); actNo = 1; }
+            { v = new gTuple<double>(1, actNo - 1); actNo = 1; }
                 probs RBRACE
             { SetActionProbs(gameNo, isetNo, *v);
               delete v;  }

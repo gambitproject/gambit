@@ -18,19 +18,19 @@ int generator = 0;
 //
 // Construct the trivial extensive form game
 //
-ExtForm::ExtForm(void) : players(0, 0), nodes((NodeSet *) 0),
-                         outcomes((Outcome *) 0)
+template <class T> ExtForm<T>::ExtForm(void)
+  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((Outcome<T> *) 0)
 {
   players[0] = "CHANCE";
-  nodes.Define(1, new NodeSet(1, 0, 0));
+  nodes.Define(1, new GameEl<T>(1, 0, 0));
 }
 
 
 //
 // Construct the extensive form game stored in the given file
 //
-ExtForm::ExtForm(gInput &f) : players(0, 0),
-                              nodes((NodeSet *) 0), outcomes((Outcome *) 0)
+template <class T> ExtForm<T>::ExtForm(gInput &f)
+  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((Outcome<T> *) 0)
 {
   ReadEfgFile(f);
 }
@@ -38,13 +38,13 @@ ExtForm::ExtForm(gInput &f) : players(0, 0),
 //
 // Clean up an extensive form game, deallocating all memory
 //
-ExtForm::~ExtForm()
+template <class T> ExtForm<T>::~ExtForm()
 {
-  gSparseSetIter<NodeSet *> nodeiter(nodes);
+  gSparseSetIter<GameEl<T> *> nodeiter(nodes);
   for (nodeiter.GoFirst(); !nodeiter.PastEnd();
        delete nodes.Remove(nodeiter.GetKey()));
 
-  gSparseSetIter<Outcome *> outciter(outcomes);
+  gSparseSetIter<Outcome<T> *> outciter(outcomes);
   for (outciter.GoFirst(); !outciter.PastEnd();
        delete outcomes.Remove(outciter.GetKey()));
 }
@@ -53,16 +53,16 @@ ExtForm::~ExtForm()
 //#                  ExtForm: Private auxiliary functions
 //#--------------------------------------------------------------------------
 
-void ExtForm::AddPlayer(int p)
+template <class T> void ExtForm<T>::AddPlayer(int p)
 {
-  gSparseSetIter<NodeSet *> iter(nodes);
+  gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
     iter.GetValue()->AddPlayer(p);
 
   while (players.Last() < p)   players.Expand(1);
 }
 
-int ExtForm::CreateInfoset(int p, int game, int kids)
+template <class T> int ExtForm<T>::CreateInfoset(int p, int game, int kids)
 {
   return nodes(game)->CreateInfoset(p, kids);
 }
@@ -70,7 +70,7 @@ int ExtForm::CreateInfoset(int p, int game, int kids)
 //
 // Delete a terminal node, and return the new identification of its parent
 //
-Node ExtForm::DeleteTerminalNode(const Node &n)
+template <class T> Node ExtForm<T>::DeleteTerminalNode(const Node &n)
 {
   Node parent;
 
@@ -82,7 +82,7 @@ Node ExtForm::DeleteTerminalNode(const Node &n)
 // Delete the subtree rooted at n, and return the new identification of
 // n's parent
 //
-Node ExtForm::DeleteSubtree(Node n)
+template <class T> Node ExtForm<T>::DeleteSubtree(Node n)
 {
   while (nodes(n.GetGame())->NumChildren(n))
     n = DeleteSubtree(nodes(n.GetGame())->GetChildNumber(n, 1));
@@ -94,12 +94,12 @@ Node ExtForm::DeleteSubtree(Node n)
 //#                ExtForm: Title access and manipulation
 //#--------------------------------------------------------------------------
 
-void ExtForm::SetTitle(const gString &s)
+template <class T> void ExtForm<T>::SetTitle(const gString &s)
 {
   title = s;
 }
 
-const gString &ExtForm::GetTitle(void) const
+template <class T> const gString &ExtForm<T>::GetTitle(void) const
 {
   return title;
 }
@@ -108,7 +108,7 @@ const gString &ExtForm::GetTitle(void) const
 //#              ExtForm: Data access -- general information
 //#--------------------------------------------------------------------------
 
-int ExtForm::NumSubgames(void) const
+template <class T> int ExtForm<T>::NumSubgames(void) const
 {
   return nodes.Length();
 }
@@ -116,10 +116,10 @@ int ExtForm::NumSubgames(void) const
 //
 // Returns the total number of nodes in all subgames
 //
-int ExtForm::NumNodes(void) const
+template <class T> int ExtForm<T>::NumNodes(void) const
 {
   int total = 0;
-  gSparseSetIter<NodeSet *> iter(nodes);
+  gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
     total += iter.GetValue()->NumNodes();
   return total;
@@ -128,7 +128,7 @@ int ExtForm::NumNodes(void) const
 //
 // Returns the total number of nodes in a subgame
 //
-int ExtForm::NumNodes(int game) const
+template <class T> int ExtForm<T>::NumNodes(int game) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->NumNodes();
@@ -140,7 +140,7 @@ int ExtForm::NumNodes(int game) const
 // Returns the number of nodes at which player 'pl' has the decision in
 // subgame number 'game'
 //
-int ExtForm::NumNodes(int game, int pl) const
+template <class T> int ExtForm<T>::NumNodes(int game, int pl) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->NumNodes(pl);
@@ -152,7 +152,7 @@ int ExtForm::NumNodes(int game, int pl) const
 // Returns the number of nodes in the information set identified by
 // 'game', 'pl', and 'iset'
 //
-int ExtForm::NumNodes(int game, int pl, int iset) const
+template <class T> int ExtForm<T>::NumNodes(int game, int pl, int iset) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->NumNodes(pl, iset);
@@ -163,7 +163,7 @@ int ExtForm::NumNodes(int game, int pl, int iset) const
 //
 // Returns the number of (personal) players defined in the game
 //
-int ExtForm::NumPlayers(void) const
+template <class T> int ExtForm<T>::NumPlayers(void) const
 {
   return players.Last();
 }
@@ -172,7 +172,7 @@ int ExtForm::NumPlayers(void) const
 // Returns the number of information sets controlled by player 'pl' in
 // subgame 'game'
 //
-int ExtForm::NumInfosets(int game, int pl) const
+template <class T> int ExtForm<T>::NumInfosets(int game, int pl) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->NumInfosets(pl);
@@ -180,7 +180,7 @@ int ExtForm::NumInfosets(int game, int pl) const
     return 0;
 }
 
-int ExtForm::NumActions(int game, int pl, int iset) const
+template <class T> int ExtForm<T>::NumActions(int game, int pl, int iset) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->NumActions(pl, iset);
@@ -191,7 +191,7 @@ int ExtForm::NumActions(int game, int pl, int iset) const
 //
 // Returns the number of outcomes defined
 //
-int ExtForm::NumOutcomes(void) const
+template <class T> int ExtForm<T>::NumOutcomes(void) const
 {
   return outcomes.Length();
 }
@@ -200,14 +200,14 @@ int ExtForm::NumOutcomes(void) const
 //#                  ExtForm: Player-related Operations
 //#--------------------------------------------------------------------------
 
-gString ExtForm::GetPlayerLabel(int pl) const
+template <class T> gString ExtForm<T>::GetPlayerLabel(int pl) const
 {
   if (pl >= 0 && pl <= NumPlayers())
     return players[pl];
   return "";
 }
 
-void ExtForm::LabelPlayer(int pl, const gString &name)
+template <class T> void ExtForm<T>::LabelPlayer(int pl, const gString &name)
 {
   if (pl >= 0 && pl <= NumPlayers())
     players[pl] = name;
@@ -221,44 +221,44 @@ void ExtForm::LabelPlayer(int pl, const gString &name)
 // Create a new subgame with the lowest undefined subgame number, and return
 // the number of the new subgame
 //
-int ExtForm::CreateSubgame(void)
+template <class T> int ExtForm<T>::CreateSubgame(void)
 {
   int game = nodes.FirstVacancy();
-  nodes.Define(game, new NodeSet(game, players.Last(), 0));
+  nodes.Define(game, new GameEl<T>(game, players.Last(), 0));
   return game;
 }
 
 //
 // Create a new subgame with the given number
 //
-int ExtForm::CreateSubgame(int game, int from_file /* = 0 */)
+template <class T> int ExtForm<T>::CreateSubgame(int game, int from_file/*=0*/)
 {
   if (nodes.IsDefined(game) || game <= 0)   return 0;
-  nodes.Define(game, new NodeSet(game, players.Last(), from_file));
+  nodes.Define(game, new GameEl<T>(game, players.Last(), from_file));
   return game;
 }
 
 //
 // Delete a subgame
 //
-void ExtForm::RemoveSubgame(int game)
+template <class T> void ExtForm<T>::RemoveSubgame(int game)
 {
   if (!nodes.IsDefined(game))   return;
 
   delete nodes.Remove(game);
 
-  gSparseSetIter<NodeSet *> iter(nodes);
+  gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
     iter.GetValue()->ExpungeGame(game);
 
   if (game == 1)
-    nodes.Define(1, new NodeSet(1, players.Last()));
+    nodes.Define(1, new GameEl<T>(1, players.Last()));
 }
 
 //
 // Return the label of a subgame
 //
-gString ExtForm::GetSubgameLabel(int game) const
+template <class T> gString ExtForm<T>::GetSubgameLabel(int game) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->GetName();
@@ -269,7 +269,7 @@ gString ExtForm::GetSubgameLabel(int game) const
 //
 // Set the label of a subgame
 //
-void ExtForm::LabelSubgame(int game, const gString &name)
+template <class T> void ExtForm<T>::LabelSubgame(int game, const gString &name)
 {
   if (nodes.IsDefined(game))
     nodes(game)->SetName(name);
@@ -278,7 +278,7 @@ void ExtForm::LabelSubgame(int game, const gString &name)
 //
 // Returns nonzero when the given subgame number is defined
 //
-int ExtForm::IsSubgameDefined(int game) const
+template <class T> int ExtForm<T>::IsSubgameDefined(int game) const
 {
   return nodes.IsDefined(game);
 }
@@ -293,7 +293,8 @@ int ExtForm::IsSubgameDefined(int game) const
 // and having 'child_count' children.  The node is made the only member of
 // a newly-created information set, and the identity of the node is returned.
 //
-Node ExtForm::AddNode(const Node &n, int player, int child_count)
+template <class T>
+Node ExtForm<T>::AddNode(const Node &n, int player, int child_count)
 {
   int game = n.GetGame();
 
@@ -314,7 +315,7 @@ Node ExtForm::AddNode(const Node &n, int player, int child_count)
 //
 // Set the label of a node
 //
-void ExtForm::LabelNode(const Node &n, const gString &s)
+template <class T> void ExtForm<T>::LabelNode(const Node &n, const gString &s)
 {
   int game = n.GetGame();
 
@@ -329,7 +330,8 @@ void ExtForm::LabelNode(const Node &n, const gString &s)
 // (eldest) child of the newly-created node.  The identity of the newly-
 // created node is returned.
 //
-Node ExtForm::InsertNode(const Node &n, int pl, int children)
+template <class T>
+Node ExtForm<T>::InsertNode(const Node &n, int pl, int children)
 {
   int game = n.GetGame();
 
@@ -353,7 +355,7 @@ Node ExtForm::InsertNode(const Node &n, int pl, int children)
 // the deleted node in the tree; the subtrees rooted by the other children
 // are deleted.
 //
-Node ExtForm::DeleteNode(const Node &n, int keep)
+template <class T> Node ExtForm<T>::DeleteNode(const Node &n, int keep)
 {
   int game = n.GetGame();
 
@@ -371,7 +373,7 @@ Node ExtForm::DeleteNode(const Node &n, int keep)
   return ret;
 }
 
-void ExtForm::SetOutcome(const Node &n, int outcome)
+template <class T> void ExtForm<T>::SetOutcome(const Node &n, int outcome)
 {
   if (!outcomes.IsDefined(outcome))  return;
   
@@ -390,7 +392,8 @@ void ExtForm::SetOutcome(const Node &n, int outcome)
 // to which 'to_iset' belongs.  If this empties the information set, the
 // information set is destroyed.  Returns the new identification of 'new_node'
 //
-Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
+template <class T>
+Node ExtForm<T>::JoinInfoset(const Node &new_node, const Node &to_iset)
 {
   if (new_node.GetGame() != to_iset.GetGame())    return new_node;
 
@@ -419,7 +422,7 @@ Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
 // newly-created singleton information set owned by the same player.  Returns
 // the new identification of 'n'.
 //
-Node ExtForm::LeaveInfoset(const Node &n)
+template <class T> Node ExtForm<T>::LeaveInfoset(const Node &n)
 {
   int game = n.GetGame();
 
@@ -442,7 +445,8 @@ Node ExtForm::LeaveInfoset(const Node &n)
 // the information set to which 'into' belongs.  The newly-emptied information
 // set is destroyed.  The new identification of 'from' is returned.
 //
-Node ExtForm::MergeInfoset(const Node &from, const Node &into)
+template <class T>
+Node ExtForm<T>::MergeInfoset(const Node &from, const Node &into)
 {
   if (from.GetGame() != into.GetGame())   return from;
 
@@ -464,7 +468,8 @@ Node ExtForm::MergeInfoset(const Node &from, const Node &into)
 //
 // Set the label of the information set to which node 'n' belongs
 //
-void ExtForm::LabelInfoset(const Node &n, const gString &label)
+template <class T>
+void ExtForm<T>::LabelInfoset(const Node &n, const gString &label)
 {
   int game = n.GetGame();
 
@@ -476,7 +481,8 @@ void ExtForm::LabelInfoset(const Node &n, const gString &label)
 // Set the label of the information set identified by subgame, player, and
 // information set number
 //
-void ExtForm::LabelInfoset(int game, int pl, int iset, const gString &label)
+template <class T>
+void ExtForm<T>::LabelInfoset(int game, int pl, int iset, const gString &label)
 {
   nodes(game)->SetInfosetName(pl, iset, label);
 }
@@ -485,7 +491,7 @@ void ExtForm::LabelInfoset(int game, int pl, int iset, const gString &label)
 // Return the label associated with the information set to which the node
 // belongs.
 //
-gString ExtForm::GetInfosetLabel(const Node &n) const
+template <class T> gString ExtForm<T>::GetInfosetLabel(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -503,7 +509,7 @@ gString ExtForm::GetInfosetLabel(const Node &n) const
 // Append a new action to all members of the information set specified
 // by the game, player, and information set number
 //
-void ExtForm::AppendAction(int game, int pl, int iset)
+template <class T> void ExtForm<T>::AppendAction(int game, int pl, int iset)
 {
   if (nodes.IsDefined(game))
     nodes(game)->AppendAction(pl, iset);
@@ -513,7 +519,8 @@ void ExtForm::AppendAction(int game, int pl, int iset)
 // Insert a new action for all members of the information set of which
 // 'n' is a member.
 //
-void ExtForm::InsertAction(const Node &n, int where, int number)
+template <class T> 
+void ExtForm<T>::InsertAction(const Node &n, int where, int number)
 {
   int game = n.GetGame();
 
@@ -535,7 +542,7 @@ void ExtForm::InsertAction(const Node &n, int where, int number)
 // 'n' is a member.  The subtrees rooted by each of the corresponding
 // children are destroyed.  The new identification of 'n' is returned.
 //
-Node ExtForm::DeleteAction(const Node &n, int which)
+template <class T> Node ExtForm<T>::DeleteAction(const Node &n, int which)
 {
   int game = n.GetGame();
 
@@ -559,7 +566,8 @@ Node ExtForm::DeleteAction(const Node &n, int which)
 // Sets the label of the 'act'th action at the information set of which
 // 'n' is a member.
 //
-void ExtForm::LabelAction(const Node &n, int act, const gString &label)
+template <class T> 
+void ExtForm<T>::LabelAction(const Node &n, int act, const gString &label)
 {
   int game = n.GetGame();
 
@@ -571,15 +579,17 @@ void ExtForm::LabelAction(const Node &n, int act, const gString &label)
 // Sets the label of the 'act'th action at the information set specified
 // by the game and player number
 //
-void ExtForm::LabelAction(int game, int pl, int iset, int act,
-			  const gString &label)
+template <class T>
+void ExtForm<T>::LabelAction(int game, int pl, int iset, int act,
+			     const gString &label)
 {
   if (nodes.IsDefined(game) && pl >= 0 && pl <= players.Last() &&
       iset > 0 && iset <= nodes(game)->NumInfosets(pl))
     nodes(game)->SetActionName(pl, iset, act, label);
 }
 
-gString ExtForm::GetActionLabel(const Node &n, int act) const
+template <class T>
+gString ExtForm<T>::GetActionLabel(const Node &n, int act) const
 {
   int game = n.GetGame();
 
@@ -591,47 +601,49 @@ gString ExtForm::GetActionLabel(const Node &n, int act) const
 //
 // Returns the vector of probabilities for each branch at a chance node
 //
-gTuple<gNumber> ExtForm::GetActionProbs(const Node &n) const
+template <class T> gTuple<T> ExtForm<T>::GetActionProbs(const Node &n) const
 {
   int game = n.GetGame();
 
   if (!nodes.IsDefined(game) ||
       !nodes(game)->IsMember(n) || n.GetPlayer() != 0)
-    return gTuple<gNumber>(1, 0);
-  return nodes(game)->GetActionProbs(n.GetPlayer(), n.GetInfoset());
+    return gTuple<T>(1, 0);
+  return nodes(game)->GetActionProbs(n.GetInfoset());
 }
 
 //
 // Returns the probability for a branch at a chance node
 //
-gNumber ExtForm::GetActionProb(const Node &n, int act) const
+template <class T> T ExtForm<T>::GetActionProb(const Node &n, int act) const
 {
   int game = n.GetGame();
 
   if (!nodes.IsDefined(game) ||
       !nodes(game)->IsMember(n) || n.GetPlayer() != 0)
     return -1.0;
-  return nodes(game)->GetActionProb(n.GetPlayer(), n.GetInfoset(), act);
+  return nodes(game)->GetActionProb(n.GetInfoset(), act);
 }
 
 //
 // Set the vector of probabilities for each branch at a chance node
 //
-void ExtForm::SetActionProbs(const Node &n, const gTuple<gNumber> &probs)
+template <class T>
+void ExtForm<T>::SetActionProbs(const Node &n, const gTuple<T> &probs)
 {
   int game = n.GetGame();
   
   if (!nodes.IsDefined(game) ||
       !nodes(game)->IsMember(n) || n.GetPlayer() != 0)   return;
-  nodes(game)->SetActionProbs(n.GetPlayer(), n.GetInfoset(), probs);
+  nodes(game)->SetActionProbs(n.GetInfoset(), probs);
 }
 
 //
 // Set the vector of probabilities for each branch for a chance node
 //
-void ExtForm::SetActionProbs(int game, int iset, const gTuple<gNumber> &probs)
+template <class T>
+void ExtForm<T>::SetActionProbs(int game, int iset, const gTuple<T> &probs)
 {
-  nodes(game)->SetActionProbs(0, iset, probs);
+  nodes(game)->SetActionProbs(iset, probs);
 }
 
 
@@ -643,7 +655,7 @@ void ExtForm::SetActionProbs(int game, int iset, const gTuple<gNumber> &probs)
 // Move the subtree rooted at 'src' to the terminal node 'dest', and return
 // the new identification of 'src'.
 //
-Node ExtForm::MoveTree(Node src, Node dest)
+template <class T> Node ExtForm<T>::MoveTree(Node src, Node dest)
 {
   if (src.GetGame() != dest.GetGame())    return src;
 
@@ -667,7 +679,7 @@ Node ExtForm::MoveTree(Node src, Node dest)
 // Copy the subtree rooted art 'src' to the terminal node 'dest', and return
 // the new identification of 'src'.
 //
-Node ExtForm::CopyTree(Node src, Node dest)
+template <class T> Node ExtForm<T>::CopyTree(Node src, Node dest)
 {
   if (src.GetGame() != dest.GetGame())    return src;
   
@@ -698,7 +710,7 @@ Node ExtForm::CopyTree(Node src, Node dest)
 // Delete the subtree rooted at 'n', leaving 'n' as a terminal node.  Returns
 // the new identification of 'n'.
 //
-Node ExtForm::DeleteTree(const Node &n)
+template <class T> Node ExtForm<T>::DeleteTree(const Node &n)
 {
   int game = n.GetGame();
 
@@ -726,32 +738,32 @@ Node ExtForm::DeleteTree(const Node &n)
 // Create a new outcome with the lowest unused outcome number, and return
 // the number of the newly-created outcome
 //
-int ExtForm::CreateOutcome(void)
+template <class T> int ExtForm<T>::CreateOutcome(void)
 {
   int outc = outcomes.FirstVacancy();
-  outcomes.Define(outc, new Outcome());
+  outcomes.Define(outc, new Outcome<T>());
   return outc;
 }
 
 //
 // Create a new outcome with the given number
 //
-int ExtForm::CreateOutcome(int outc)
+template <class T> int ExtForm<T>::CreateOutcome(int outc)
 {
   if (outcomes.IsDefined(outc) || outc <= 0)    return 0;
-  outcomes.Define(outc, new Outcome());
+  outcomes.Define(outc, new Outcome<T>());
   return outc;
 }
 
 //
 // Delete an outcome
 //
-void ExtForm::RemoveOutcome(int outc)
+template <class T> void ExtForm<T>::RemoveOutcome(int outc)
 {
   if (!outcomes.IsDefined(outc))   return;
   delete outcomes.Remove(outc);
   
-  gSparseSetIter<NodeSet *> iter(nodes);
+  gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
     iter.GetValue()->ExpungeOutcome(outc);
 }
@@ -759,7 +771,7 @@ void ExtForm::RemoveOutcome(int outc)
 //
 // Return the label of an outcome
 //
-gString ExtForm::GetOutcomeLabel(int outc) const
+template <class T> gString ExtForm<T>::GetOutcomeLabel(int outc) const
 {
   if (outcomes.IsDefined(outc))
     return outcomes(outc)->GetOutcomeName();
@@ -770,7 +782,7 @@ gString ExtForm::GetOutcomeLabel(int outc) const
 //
 // Set the label of an outcome
 //
-void ExtForm::LabelOutcome(int outc, const gString &name)
+template <class T> void ExtForm<T>::LabelOutcome(int outc, const gString &name)
 {
   if (outcomes.IsDefined(outc))
     outcomes(outc)->SetOutcomeName(name);
@@ -779,7 +791,7 @@ void ExtForm::LabelOutcome(int outc, const gString &name)
 //
 // Returns nonzero if the given outcome number is defined
 //
-int ExtForm::IsOutcomeDefined(int outc) const
+template <class T> int ExtForm<T>::IsOutcomeDefined(int outc) const
 {
   return outcomes.IsDefined(outc);
 }
@@ -787,18 +799,19 @@ int ExtForm::IsOutcomeDefined(int outc) const
 //
 // Returns the payoff vector associated with an outcome
 //
-gTuple<gNumber> ExtForm::GetOutcomeValues(int outc) const
+template <class T> gTuple<T> ExtForm<T>::GetOutcomeValues(int outc) const
 {
   if (outcomes.IsDefined(outc))
     return outcomes(outc)->GetOutcomeVector(players.Last());
   else
-    return gTuple<gNumber>();
+    return gTuple<T>();
 }
 
 //
 // Set the payoff vector associated with an outcome
 //
-void ExtForm::SetOutcomeValues(int outc, const gTuple<gNumber> &vals)
+template <class T>
+void ExtForm<T>::SetOutcomeValues(int outc, const gTuple<T> &vals)
 {
   if (outcomes.IsDefined(outc))
     outcomes(outc)->SetOutcome(vals);
@@ -807,7 +820,7 @@ void ExtForm::SetOutcomeValues(int outc, const gTuple<gNumber> &vals)
 //
 // Set the payoff associated with an outcome for one player
 //
-void ExtForm::SetOutcomeValue(int outc, int pl, gNumber value)
+template <class T> void ExtForm<T>::SetOutcomeValue(int outc, int pl, T value)
 {
   if (outcomes.IsDefined(outc) && pl <= players.Last())
     outcomes(outc)->SetOutcome(pl, value);
@@ -820,18 +833,18 @@ void ExtForm::SetOutcomeValue(int outc, int pl, gNumber value)
 
 extern gInput *efg_input_stream;
 
-void ExtForm::ReadEfgFile(gInput &f)
+template <class T> void ExtForm<T>::ReadEfgFile(gInput &f)
 {
   if (!f.IsValid())   return;
   
   if (nodes.Length() > 0)   {
-    gSparseSetIter<NodeSet *> nodeiter(nodes);
+    gSparseSetIter<GameEl<T> *> nodeiter(nodes);
     for (nodeiter.GoFirst(); !nodeiter.PastEnd();
 	 delete nodes.Remove(nodeiter.GetKey()));
   }
   
   if (outcomes.Length() > 0)  {
-    gSparseSetIter<Outcome *> outciter(outcomes);
+    gSparseSetIter<Outcome<T> *> outciter(outcomes);
     for (outciter.GoFirst(); !outciter.PastEnd();
 	 delete outcomes.Remove(outciter.GetKey()));
   }
@@ -841,21 +854,21 @@ void ExtForm::ReadEfgFile(gInput &f)
   efg_input_stream = &f;
 
   if (EfgYaccer())   {
-    gSparseSetIter<NodeSet *> nodeiter(nodes);
+    gSparseSetIter<GameEl<T> *> nodeiter(nodes);
     for (nodeiter.GoFirst(); !nodeiter.PastEnd();
 	 delete nodes.Remove(nodeiter.GetKey()));
 
-    gSparseSetIter<Outcome *> outciter(outcomes);
+    gSparseSetIter<Outcome<T> *> outciter(outcomes);
     for (outciter.GoFirst(); !outciter.PastEnd();
 	 delete outcomes.Remove(outciter.GetKey()));
     
     title = "";
 
-    nodes.Define(1, new NodeSet(1, 0, 0));
+    nodes.Define(1, new GameEl<T>(1, 0, 0));
   }
 }
 
-void ExtForm::WriteEfgFile(gOutput &f) const
+template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
 {
   f << "{ \"" << title << "\"\n\n{ ";
   for (int i = 0; i <= players.Last(); i++)
@@ -864,7 +877,7 @@ void ExtForm::WriteEfgFile(gOutput &f) const
   
   f << "{ ";
 
-  gSparseSetIter<Outcome *> out_iter(outcomes);
+  gSparseSetIter<Outcome<T> *> out_iter(outcomes);
 
   int flag = 0;
   for (out_iter.GoFirst(); !out_iter.PastEnd(); out_iter++)   {
@@ -878,9 +891,9 @@ void ExtForm::WriteEfgFile(gOutput &f) const
   }
   f << " }\n\n";
 
-  gSparseSetIter<NodeSet *> game_iter(nodes);
+  gSparseSetIter<GameEl<T> *> game_iter(nodes);
   for (game_iter.GoFirst(); !game_iter.PastEnd(); game_iter++)   {
-    NodeSet *game = game_iter.GetValue();
+    GameEl<T> *game = game_iter.GetValue();
 
     f << "{ " << game_iter.GetKey() << " \"" << game->GetName() << '"' << '\n';
     f << "  {";
@@ -896,7 +909,7 @@ void ExtForm::WriteEfgFile(gOutput &f) const
 	if (i == 0)   { // chance player, print branch probs
 	  f << " { ";
 	  for (k = 1; k <= game->NumActions(i, j); k++)
-	    f << game->GetActionProb(0, j, k) << ' ';
+	    f << game->GetActionProb(j, k) << ' ';
 	  f << '}';
 	}
 	
@@ -921,7 +934,7 @@ void ExtForm::WriteEfgFile(gOutput &f) const
 //
 // Returns the root node of subgame number 'game'
 //
-Node ExtForm::RootNode(int game /* = 1 */) const
+template <class T> Node ExtForm<T>::RootNode(int game /* = 1 */) const
 {
   if (nodes.IsDefined(game))
     return nodes(game)->RootNode();
@@ -932,7 +945,7 @@ Node ExtForm::RootNode(int game /* = 1 */) const
 //
 // Returns the parent node of the given node
 //
-Node ExtForm::GetParent(const Node &n) const
+template <class T> Node ExtForm<T>::GetParent(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -945,7 +958,7 @@ Node ExtForm::GetParent(const Node &n) const
 //
 // Returns the number of children of a given node
 //
-int ExtForm::NumChildren(const Node &n) const
+template <class T> int ExtForm<T>::NumChildren(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -958,7 +971,8 @@ int ExtForm::NumChildren(const Node &n) const
 //
 // Returns the 'number'th child of a given node
 //
-Node ExtForm::GetChildNumber(const Node &n, int number) const
+template <class T>
+Node ExtForm<T>::GetChildNumber(const Node &n, int number) const
 {
   int game = n.GetGame();
 
@@ -971,7 +985,7 @@ Node ExtForm::GetChildNumber(const Node &n, int number) const
 //
 // Returns all the children of a given node
 //
-gBlock<Node> ExtForm::GetChildren(const Node &n) const
+template <class T> gBlock<Node> ExtForm<T>::GetChildren(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -984,7 +998,7 @@ gBlock<Node> ExtForm::GetChildren(const Node &n) const
 //
 // Returns the prior sibling of a given node
 //
-Node ExtForm::GetPriorSibling(const Node &n) const
+template <class T> Node ExtForm<T>::GetPriorSibling(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -997,7 +1011,7 @@ Node ExtForm::GetPriorSibling(const Node &n) const
 //
 // Returns the next sibling of a given node
 //
-Node ExtForm::GetNextSibling(const Node &n) const
+template <class T> Node ExtForm<T>::GetNextSibling(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1011,7 +1025,7 @@ Node ExtForm::GetNextSibling(const Node &n) const
 // Returns true (nonzero) when a continuation subgame has been attached to
 // the node
 //
-int ExtForm::HasSuccessorGame(const Node &n) const
+template <class T> int ExtForm<T>::HasSuccessorGame(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1024,7 +1038,7 @@ int ExtForm::HasSuccessorGame(const Node &n) const
 //
 // Returns the root node of the successor game attached to the node
 //
-Node ExtForm::GetSuccessorGameRoot(const Node &n) const
+template <class T> Node ExtForm<T>::GetSuccessorGameRoot(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1038,7 +1052,8 @@ Node ExtForm::GetSuccessorGameRoot(const Node &n) const
 //
 // Returns nonzero if 'n' is a successor node of 'from'
 //
-int ExtForm::IsSuccessor(const Node &n, const Node &from) const
+template <class T> 
+int ExtForm<T>::IsSuccessor(const Node &n, const Node &from) const
 {
   if (n.GetGame() != from.GetGame())   return 0;
 
@@ -1051,7 +1066,8 @@ int ExtForm::IsSuccessor(const Node &n, const Node &from) const
 //
 // Returns nonzero if 'n' is a predecessor node of 'of'
 //
-int ExtForm::IsPredecessor(const Node &n, const Node &of) const
+template <class T>
+int ExtForm<T>::IsPredecessor(const Node &n, const Node &of) const
 {
   if (n.GetGame() != of.GetGame())   return 0;
 
@@ -1064,7 +1080,7 @@ int ExtForm::IsPredecessor(const Node &n, const Node &of) const
 //
 // Returns the label of a node
 //
-gString ExtForm::GetNodeLabel(const Node &n) const
+template <class T> gString ExtForm<T>::GetNodeLabel(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1077,7 +1093,7 @@ gString ExtForm::GetNodeLabel(const Node &n) const
 //
 // Returns the number of the outcome associated with a node, if any
 //
-int ExtForm::GetOutcome(const Node &n) const
+template <class T> int ExtForm<T>::GetOutcome(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1091,7 +1107,7 @@ int ExtForm::GetOutcome(const Node &n) const
 // Returns the number of the continuation subgame associated with a node,
 // if any
 //
-int ExtForm::GetNextGame(const Node &n) const
+template <class T> int ExtForm<T>::GetNextGame(const Node &n) const
 {
   int game = n.GetGame();
 
@@ -1105,27 +1121,27 @@ int ExtForm::GetNextGame(const Node &n) const
 //                    ExtForm: Variable Management
 //-------------------------------------------------------------------------
 
-int ExtForm::IsVariableDefined(const gString &name) const
+template <class T> int ExtForm<T>::IsVariableDefined(const gString &name) const
 {
   return nodes(1)->IsVariableDefined(name);
 }
 
-Node ExtForm::GetNodeVariable(const gString &name) const
+template <class T> Node ExtForm<T>::GetNodeVariable(const gString &name) const
 {
   return nodes(1)->GetNodeVariable(name);
 }
 
-int ExtForm::SetNodeVariable(const gString &name, const Node &node)
+template <class T> int ExtForm<T>::SetNodeVariable(const gString &name, const Node &node)
 {
   return nodes(1)->SetNodeVariable(name, node);
 }
 
-void ExtForm::RemoveNodeVariable(const gString &name)
+template <class T> void ExtForm<T>::RemoveNodeVariable(const gString &name)
 {
   nodes(1)->RemoveNodeVariable(name);
 }
 
-gString ExtForm::GetUniqueVariable(void) const
+template <class T> gString ExtForm<T>::GetUniqueVariable(void) const
 {
   char buffer[20];
 
@@ -1139,15 +1155,16 @@ gString ExtForm::GetUniqueVariable(void) const
 
 #include "gdpvect.h"
 
-void ExtForm::ComputePayoff(Node n, double prob, int pl, double &value,
-			    const gDPVector<double> &strategy) const
+template <class T> 
+void ExtForm<T>::ComputePayoff(Node n, T prob, int pl, T &value,
+			       const gDPVector<T> &strategy) const
 {
   if (GetOutcome(n) != 0)
-    value += prob * (double) GetOutcomeValues(GetOutcome(n))[pl];  
+    value += prob * GetOutcomeValues(GetOutcome(n))[pl];  
   for (int i = 1; i <= NumChildren(n); i++)   {
-    double newprob = prob;
+    T newprob = prob;
     if (n.GetPlayer() == 0)
-      newprob *= (double) GetActionProb(n, i);
+      newprob *= GetActionProb(n, i);
     else
       newprob *= strategy(n.GetPlayer(), n.GetInfoset(), i);
  
@@ -1155,16 +1172,17 @@ void ExtForm::ComputePayoff(Node n, double prob, int pl, double &value,
   }
 }
 
-double ExtForm::Payoff(int pl, const gDPVector<double> &strategy) const
+template <class T>
+T ExtForm<T>::Payoff(int pl, const gDPVector<T> &strategy) const
 {
-  double value = 0.0;
+  T value = (T) 0.0;
 
   ComputePayoff(RootNode(), 1.0, pl, value, strategy);
 
   return value;
 }
 
-gPVector<int> ExtForm::Dimensionality(void) const
+template <class T> gPVector<int> ExtForm<T>::Dimensionality(void) const
 {
   gTuple<int> foo(NumPlayers());
   for (int i = 1; i <= NumPlayers(); i++)
@@ -1178,7 +1196,7 @@ gPVector<int> ExtForm::Dimensionality(void) const
   return bar;
 }
 
-int ExtForm::ProfileLength(void) const
+template <class T> int ExtForm<T>::ProfileLength(void) const
 {
   int sum = 0;
 
@@ -1188,3 +1206,15 @@ int ExtForm::ProfileLength(void) const
 
   return sum;
 }
+
+DataType ExtForm<double>::Type(void) const   { return DOUBLE; }
+//DataType ExtForm<gRational>::Type(void) const  { return RATIONAL; }
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE class ExtForm<double>;

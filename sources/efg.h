@@ -8,15 +8,14 @@
 #define EXTFORM_H
 
 #include "gstring.h"
-#include "gnumber.h"
 #include "gtuple.h"
 #include "gmap.h"
 #include "noderep.h"
 #include "gpvector.h"
 
 template <class T> class gDPVector;
-class Outcome;
-class NodeSet;
+template <class T> class Outcome;
+template <class T> class GameEl;
 //
 // The extensive form class contains all the functionality necessary for
 // convenient construction and manipulation of extensive form games.
@@ -29,12 +28,12 @@ class NodeSet;
 // root node of the whole extensive form.  Other subgames may be assigned
 // any number; they need not be consecutive.
 //
-class ExtForm    {
+template <class T> class ExtForm    {
   private:
     gString title;
     gTuple<gString> players;
-    gSparseSet<NodeSet *> nodes;
-    gSparseSet<Outcome *> outcomes;
+    gSparseSet<GameEl<T> *> nodes;
+    gSparseSet<Outcome<T> *> outcomes;
 
     void AddPlayer(int p);
     int CreateInfoset(int p, int game, int iset);
@@ -42,8 +41,8 @@ class ExtForm    {
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
-    void ComputePayoff(Node n, double prob, int pl, double &value,
-		       const gDPVector<double> &strategy) const;
+    void ComputePayoff(Node n, T prob, int pl, T &value,
+		       const gDPVector<T> &strategy) const;
 //
 // These are being defined privately for now so they are not accidentally
 // used.  They will be implemented later.
@@ -69,6 +68,8 @@ class ExtForm    {
     void WriteEfgFile(gOutput &f) const;
 
 	//# DATA ACCESS -- GENERAL INFORMATION
+    DataType Type(void) const;
+
     int NumSubgames(void) const;
     int NumNodes(void) const;
     int NumNodes(int game) const;
@@ -131,10 +132,10 @@ class ExtForm    {
     void LabelAction(int game, int pl, int iset, int act,
 		     const gString &label);
     gString GetActionLabel(const Node &n, int act) const;
-    gTuple<gNumber> GetActionProbs(const Node &n) const;
-    gNumber GetActionProb(const Node &n, int br) const;
-    void SetActionProbs(const Node &n, const gTuple<gNumber> &probs);
-    void SetActionProbs(int game, int iset, const gTuple<gNumber> &probs);
+    gTuple<T> GetActionProbs(const Node &n) const;
+    T GetActionProb(const Node &n, int br) const;
+    void SetActionProbs(const Node &n, const gTuple<T> &probs);
+    void SetActionProbs(int game, int iset, const gTuple<T> &probs);
 
         //# TREE MODIFICATION ROUTINES -- SUBTREES
     Node MoveTree(Node from, Node dest);
@@ -148,9 +149,9 @@ class ExtForm    {
     gString GetOutcomeLabel(int outc) const;
     void LabelOutcome(int outc, const gString &name);
     int IsOutcomeDefined(int outc) const;
-    gTuple<gNumber> GetOutcomeValues(int outc) const;
-    void SetOutcomeValues(int outc, const gTuple<gNumber> &vals);
-    void SetOutcomeValue(int outc, int pl, gNumber value);
+    gTuple<T> GetOutcomeValues(int outc) const;
+    void SetOutcomeValues(int outc, const gTuple<T> &vals);
+    void SetOutcomeValue(int outc, int pl, T value);
 
         //# MANAGEMENT OF VARIABLES
     gString GetUniqueVariable(void) const;
@@ -162,7 +163,7 @@ class ExtForm    {
         //# PAYOFF INFORMATION
     int ProfileLength(void) const;
     gPVector<int> Dimensionality(void) const;
-    double Payoff(int pl, const gDPVector<double> &) const;
+    T Payoff(int pl, const gDPVector<T> &) const;
 };
 
 

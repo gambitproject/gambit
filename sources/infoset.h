@@ -15,45 +15,15 @@
 #include "noderep.h"
 
 //
-// <category lib=glib sect="Extensive Form">
-//
-// This class is used to name an action, and assign it a probability.
-// It contains no information about the context of the action.
+// This class will contain other information later, such as dominance...
 //
 class Action   {
   private:
     gString name;
-    gNumber prob;
 
   public:
-	//
-	// Creates an empty action, with probability -1
-	//
-    Action(void) : prob(-1.0)   { }
-	//
-	// Copy constructor
-	//
-    Action(const Action &b) : name(b.name), prob(b.prob)  { }
-	//
-	// Deallocate an action
-	//
-    ~Action()   { }
-
-	//
-	// Assignment operator
-	//
-    Action &operator=(const Action &b)
-      { name = b.name;  prob = b.prob;  return *this; }
-
-	// 
-	// Public functions to access private data
-	//+grp
-    gString GetActionName(void) const   { return name; }
-    void SetActionName(const gString &s)    { name = s; }
-    
-    gNumber GetActionProb(void) const   { return prob; }
-    void SetActionProb(gNumber d)    { prob = d; }
-	//-grp
+    const gString &GetName(void) const;
+    void SetName(const gString &s);
 };
 
 //
@@ -66,7 +36,7 @@ class Action   {
 //
 class Infoset   {
   private:
-    gString         name;
+    gString name;
     gBlock<Action *>  actions;
     gBlock<NodeRep *> nodes;
 
@@ -107,25 +77,12 @@ class Infoset   {
 	// set an action's name
 	//
     void SetActionName(int act, const gString &s)
-      { actions[act]->SetActionName(s); }
+      { actions[act]->SetName(s); }
 	//
 	// return an action's name
 	//
     gString GetActionName(int act) const
-      { return actions[act]->GetActionName(); }
-	//
-	// get an action's probability
-	//
-    gNumber GetActionProb(int act) const
-      { return actions[act]->GetActionProb(); }
-	//
-	// get the vector of probabilities for the actions
-	//
-    gTuple<gNumber> GetActionProbs(void) const;
-	//
-	// set the probabilities of the actions
-	//
-    void SetActionProbs(const gTuple<gNumber> &probs);
+      { return actions[act]->GetName(); }
 	//
 	// remove an action from the infoset
 	//
