@@ -32,18 +32,22 @@ type is referred to as <type>NFPLAYER</type>.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgGame gbtEfgPlayer::GetGame(void) const
 gbtNfgGame gbtNfgPlayer::GetGame(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Game[player->EFPLAYER] =: EFG
 Game[player->NFPLAYER] =: NFG
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -61,9 +65,11 @@ returns the extensive or normal form game to which the player belongs.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -76,9 +82,11 @@ index is out of range.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Infosets[player->EFPLAYER] =: LIST(INFOSET) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -97,15 +105,20 @@ returns the list of information sets at which the
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gText gbtEfgPlayer::GetLabel(void) const
 </synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Name[x->INFOSET*] =: TEXT
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -124,9 +137,11 @@ The empty string is returned if the player object is null.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtNfgStrategy gbtNfgPlayer::GetStrategy(int p_index) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -138,9 +153,11 @@ at one.  An exception is thown if the index is out of range.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -157,9 +174,11 @@ in <parameter>support</parameter>.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 bool gbtEfgPlayer::IsChance(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -170,6 +189,7 @@ if the player is a personal player.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <function>IsChance</function> can be written as a user-defined function
 in the GCL as
 <programlisting>
@@ -178,6 +198,7 @@ NewFunction[IsChance[player->EFPLAYER] =: BOOLEAN,
 ];
 </programlisting>
 </para>
+</formalpara>
 
 </sect2>
 
@@ -188,18 +209,22 @@ NewFunction[IsChance[player->EFPLAYER] =: BOOLEAN,
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 bool gbtEfgPlayer::IsNull(void) const
 bool gbtNfgPlayer::IsNull(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 IsNull[x->EFPLAYER*] =: BOOLEAN 
 IsNull[x->NFPLAYER*] =: BOOLEAN
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -216,15 +241,20 @@ null, and <literal>False</literal> (zero) if it is null.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
 </synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 NewInfoset[player->EFPLAYER, actions->INTEGER] =: INFOSET 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -248,9 +278,11 @@ positive.  The newly created information set is returned.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 int gbtEfgPlayer::NumInfosets(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -260,6 +292,7 @@ sets are defined where the player has the decision.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <function>NumInfosets</function> can be written as a user-defined function
 in the GCL as
 <programlisting>
@@ -268,6 +301,7 @@ NewFunction[NumInfosets[player->EFPLAYER] =: INTEGER,
 ];
 </programlisting>
 </para>
+</formalpara>
 
 </sect2>
 
@@ -277,9 +311,11 @@ NewFunction[NumInfosets[player->EFPLAYER] =: INTEGER,
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 int gbtNfgPlayer::NumStrategies(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -289,6 +325,7 @@ player has in the game.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <function>NumStrategies</function> can be written as a user-defined function
 in the GCL as
 <programlisting>
@@ -297,6 +334,7 @@ NewFunction[NumStrategies[player->NFPLAYER] =: INTEGER,
 ];
 </programlisting>
 </para>
+</formalpara>
 
 </sect2>
 
@@ -308,18 +346,22 @@ NewFunction[NumStrategies[player->NFPLAYER] =: INTEGER,
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 void gbtEfgPlayer::SetLabel(const gText &amp;p_label)
 void gbtNfgPlayer::SetLabel(const gText &amp;p_label)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 SetName[x->EFPLAYER, name->TEXT] =: EFPLAYER
 SetName[x->NFPLAYER, name->TEXT] =: NFPLAYER
 </synopsis>
+</para>
 </formalpara>
 
 <para>

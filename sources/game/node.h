@@ -63,28 +63,30 @@ public:
   void SetLabel(const gText &);
 
   int NumChildren(void) const;
-  int NumberInInfoset(void) const;
-  gbtEfgInfoset GetInfoset(void) const;
   bool IsTerminal(void) const { return (NumChildren() == 0); }
   bool IsNonterminal(void) const { return !IsTerminal(); }
-  gbtEfgPlayer GetPlayer(void) const;
-  gbtEfgAction GetAction(void) const; // returns null if root node
   gbtEfgNode GetChild(int i) const;
   gbtEfgNode GetChild(const gbtEfgAction &) const; 
+  bool IsPredecessorOf(const gbtEfgNode &) const;
+
   gbtEfgNode GetParent(void) const;
+  gbtEfgAction GetPriorAction(void) const; // returns null if root node
+
+  gbtEfgNode GetPriorSibling(void) const;
+  gbtEfgNode GetNextSibling(void) const;
+
+  gbtEfgInfoset GetInfoset(void) const;
+  int GetMemberId(void) const;
+  gbtEfgPlayer GetPlayer(void) const;
+
   gbtEfgNode GetSubgameRoot(void) const;
-  gbtEfgNode NextSibling(void) const;
-  gbtEfgNode PriorSibling(void) const;
 
   gbtEfgOutcome GetOutcome(void) const;
   void SetOutcome(const gbtEfgOutcome &);
 
-  gbtEfgInfoset AppendMove(gbtEfgInfoset);
-  gbtEfgInfoset InsertMove(gbtEfgInfoset);
-
-  bool IsPredecessor(const gbtEfgNode &) const;
-  bool IsSuccessor(const gbtEfgNode &p_from) const
-    { return p_from.IsPredecessor(*this); }
+  gbtEfgNode InsertMove(gbtEfgInfoset);
+  void DeleteMove(gbtEfgNode p_keep);
+  void DeleteTree(void);
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgNode &);

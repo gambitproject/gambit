@@ -22,16 +22,20 @@ above; consult those sections of the documentation for more information.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 This part of the interface is currently in flux in C++ and Python.
 Consult the source code or the Gambit development team for information
 if you require this function.
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 AgentForm[efg->EFG, {time<->0}] =: NFG 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -49,16 +53,20 @@ amount of time consumed by the conversion.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 This part of the interface is currently in flux in C++ and Python.
 Consult the source code or the Gambit development team for information
 if you require this function.
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Basis[efg->EFG] =: EFBASIS
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -75,17 +83,21 @@ all actions in the game.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 This part of the interface is currently in flux in C++ and Python.
 Consult the source code or the Gambit development team for information
 if you require this function.
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 CompressEfg[support->EFSUPPORT] =: EFG 
 </synopsis>
-</refsynopsisdiv>
+</para>
+</formalpara>
 
 <para>
 <function>CompressEfg</function> creates a copy of the 
@@ -135,16 +147,20 @@ chance players.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gText gbtEfgGame::GetComment(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Comment[efg->EFG] =: TEXT
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -162,15 +178,20 @@ Comment[efg->EFG] =: TEXT
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gText gbtEfgGame::GetLabel(void) const
 </synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Name[x->EFG*] =: TEXT
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -188,9 +209,11 @@ The empty string is returned if the game object is null.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgOutcome gbtEfgGame::GetOutcome(int p_index) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -202,9 +225,11 @@ An exception is thrown if the index is out of range.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Outcomes[efg->EFG] =: LIST(EFOUTCOME) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -221,9 +246,11 @@ returns the list of outcomes defined on the game <parameter>efg</parameter>.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgPlayer gbtEfgGame::GetPlayer(int p_index) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -235,10 +262,11 @@ at one.  An exception is thown if the index is out of range.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Players[efg->EFG] =: LIST(EFPLAYER) 
-Players[nfg->NFG] =: LIST(NFPLAYER) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -248,9 +276,6 @@ returns the list of players defined on the game <parameter>efg</parameter>.
 
 </sect2>
 
-</refentry>
-
-
 
 <sect2 id="apiref.efg.isconstsum">
 <title>IsConstSum</title>
@@ -258,17 +283,21 @@ returns the list of players defined on the game <parameter>efg</parameter>.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 bool gbtEfgGame::IsConstSum(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 IsConstSum[efg->EFG] =: BOOLEAN 
 </synopsis>
-</refsynopsisdiv>
+</para>
+</formalpara>
 
 <para>
 <function>IsConstSum</function>
@@ -285,17 +314,21 @@ is constant sum and <literal>False</literal> (zero) otherwise.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 bool gbtEfgGame::IsPerfectRecall(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 IsPerfectRecall[efg->EFG] =: BOOLEAN 
 </synopsis>
-</refsynopsisdiv>
+</para>
+</formalpara>
 
 <para>
 <function>IsPerfectRecall</function>
@@ -312,16 +345,20 @@ is a game of perfect recall, and
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgGame ::NewEfg(void)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 NewEfg[{players->{}}] =: EFG 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -344,16 +381,20 @@ Returns the newly created game.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgOutcome gbtEfgGame::NewOutcome(void)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 NewOutcome[efg->EFG] =: EFOUTCOME 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -373,16 +414,20 @@ created outcome.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 gbtEfgPlayer gbtEfgGame::NewPlayer(void)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 NewPlayer[efg->EFG] =: EFPLAYER
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -400,16 +445,20 @@ Returns the newly created player.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 This part of the interface is currently in flux in C++ and Python.
 Consult the source code or the Gambit development team for information
 if you require this function.
+</para>
 </formalpara>
 
 <formalpara>
-<title>GCL usage<?title>
+<title>GCL usage</title>
+<para>
 <synopsis>
 Nfg[efg->EFG, {time<->0}] =: NFG 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -429,17 +478,21 @@ the transformation.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 There is no direct analog to <function>Nodes</function> provided in
 the C++ or Python APIs.  Programs should use <function>GetRoot</function>
 and member functions of <type>Node</type> objects to iterate the tree
 efficiently and extract the nodes of interest.
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Nodes[efg->EFG] =: LIST(NODE) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -457,9 +510,11 @@ prior to any of its descendants.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 int gbtEfgGame::NumOutcomes(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -469,6 +524,7 @@ on the game.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <function>NumOutcomes</function> can be written as a user-defined function
 in the GCL as
 <programlisting>
@@ -477,6 +533,7 @@ NewFunction[NumOutcomes[efg->EFG] =: INTEGER,
 ];
 </programlisting>
 </para>
+</formalpara>
 
 </sect2>
 
@@ -486,9 +543,11 @@ NewFunction[NumOutcomes[efg->EFG] =: INTEGER,
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 int gbtEfgGame::NumPlayers(void) const
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -498,6 +557,7 @@ on the game.
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <function>NumPlayers</function> can be written as a user-defined function
 in the GCL as
 <programlisting>
@@ -506,6 +566,7 @@ NewFunction[NumPlayers[efg->EFG] =: INTEGER,
 ];
 </programlisting>
 </para>
+</formalpara>
 
 </sect2>
 
@@ -517,23 +578,29 @@ NewFunction[NumPlayers[efg->EFG] =: INTEGER,
 
 <formalpara>
 <title>C++ usage</title>
+<para>
 <synopsis>
 gbtEfgGame ::ReadEfg(gInput &amp;p_file)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>Python usage</title>
+<para>
 <synopsis>
 efg = gambit.ReadEfg(filename)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 LoadEfg[file->TEXT] =: EFG 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -554,17 +621,21 @@ not contain a valid extensive form savefile.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 void gbtEfgGame::SetComment(const gText &amp;p_comment)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 SetComment[efg->EFG, comment->TEXT] =: EFG
 SetComment[nfg->NFG, comment->TEXT] =: NFG
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -581,16 +652,20 @@ sets the comment associated with the game <parameter>efg</parameter>.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 <synopsis>
 void gbtEfgGame::SetLabel(const gText &amp;p_label)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 SetName[x->EFG, name->TEXT] =: EFG
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -607,16 +682,20 @@ sets the text label of the game.  The GCL version returns the game.
 
 <formalpara>
 <title>C++/Python usage</title>
+<para>
 This part of the interface is currently in flux in C++ and Python.
 Consult the source code or the Gambit development team for information
 if you require this function.
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 Subgames[efg->EFG] =: LIST(NODE) 
 </synopsis>
+</para>
 </formalpara>
 
 <para>
@@ -636,24 +715,30 @@ all children of a node are listed before the node.
 
 <formalpara>
 <title>C++ usage</title>
+<para>
 <synopsis>
 void gbtEfgGame::WriteEfg(gOutput &amp;p_file) const
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>Python usage</title>
+<para>
 <synopsis>
 efg.WriteEfg(filename)
 </synopsis>
+</para>
 </formalpara>
 
 <formalpara>
 <title>GCL usage</title>
+<para>
 <synopsis>
 SaveEfg[efg->EFG, file->TEXT] =: EFG 
 </synopsis>
-</refsynopsisdiv>
+</para>
+</formalpara>
 
 <para>
 <function>WriteEfg</function>

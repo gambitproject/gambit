@@ -155,8 +155,6 @@ public:
   gbtEfgOutcome NewOutcome(void);
 
   // EDITING OPERATIONS
-  gbtEfgNode DeleteNode(gbtEfgNode n, gbtEfgNode keep);
-
   bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
   gbtEfgInfoset JoinInfoset(gbtEfgInfoset, gbtEfgNode);
@@ -167,7 +165,6 @@ public:
   
   gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
   gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
-  gbtEfgNode DeleteTree(gbtEfgNode n);
 
   gbtEfgAction InsertAction(gbtEfgInfoset);
   gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);

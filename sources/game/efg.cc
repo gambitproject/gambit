@@ -145,27 +145,9 @@ void gbt_efg_game_rep::SortInfosets(void)
 }
 
 //
-// Place terminal node 'p_node' in information set 'p_infoset'.
-// Assumes node and infoset are valid, node is terminal.
-//  
-void gbt_efg_game_rep::AppendMove(gbt_efg_node_rep *p_node,
-				  gbt_efg_infoset_rep *p_infoset)
-{
-  p_node->m_infoset = p_infoset;
-  p_infoset->m_members.Append(p_node);
-  for (int i = p_infoset->m_actions.Length(); i; i--) {
-    p_node->m_children.Append(new gbt_efg_node_rep(this, p_node));
-  }
-  m_revision++;
-  DeleteLexicon();
-  SortInfosets();
-}
-
-//
 // Create a new node, a member of 'p_infoset' in the location of 'p_node'
 // in the tree, and make the subtree rooted in 'p_node' the first child
-// of the new node.  Assumes node and infoset are valid, node is
-// nonterminal.
+// of the new node.  Assumes node and infoset are valid.
 //
 void gbt_efg_game_rep::InsertMove(gbt_efg_node_rep *p_node,
 				  gbt_efg_infoset_rep *p_infoset)
@@ -185,6 +167,69 @@ void gbt_efg_game_rep::InsertMove(gbt_efg_node_rep *p_node,
   for (int i = p_infoset->m_actions.Length() - 1; i; i--) {
     node->m_children.Append(new gbt_efg_node_rep(this, node));
   }
+
+  m_revision++;
+  DeleteLexicon();
+  SortInfosets();
+}
+
+//
+// Delete a node from the tree.  Delete all subtrees from children
+// of the node, except the one rooted at 'p_keep', which is assumed
+// to be a child of 'p_node'.  Both nodes assumed to be valid.
+//
+void gbt_efg_game_rep::DeleteMove(gbt_efg_node_rep *p_node,
+				  gbt_efg_node_rep *p_keep)
+{
+  // turn infoset sorting off during tree deletion -- problems will occur
+  sortisets = false;
+
+  p_node->m_children.Remove(p_node->m_children.Find(p_keep));
+  DeleteTree(p_node);
+  p_keep->m_parent = p_node->m_parent;
+  if (p_node->m_parent) {
+    p_node->m_parent->m_children[p_node->m_parent->m_children.Find(p_node)] = p_keep;
+  }
+  else {
+    root = p_keep;
+  }
+
+  if (p_node->m_refCount == 0) {
+    delete p_node;
+  }
+  else {
+    p_node->m_deleted = true;
+  }
+
+  m_revision++;
+  DeleteLexicon();
+  sortisets = true;
+  SortInfosets();
+}
+
+//
+// Delete an entire subtree.  Assumes 'p_node' is valid.
+//
+void gbt_efg_game_rep::DeleteTree(gbt_efg_node_rep *p_node)
+{
+  while (p_node->m_children.Length() > 0)   {
+    gbt_efg_node_rep *child = p_node->m_children.Remove(1);
+    DeleteTree(child);
+    if (child->m_refCount == 0) {
+      delete child;
+    }
+    else {
+      child->m_deleted = true;
+    }
+  }
+  
+  if (p_node->m_infoset)  {
+    p_node->m_infoset->m_members.Remove(p_node->m_infoset->m_members.Find(p_node));
+    p_node->m_infoset = 0;
+  }
+  p_node->m_outcome = 0;
+  p_node->m_label = "";
+
   m_revision++;
   DeleteLexicon();
   SortInfosets();
@@ -374,7 +419,7 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
     }
 
     gbt_efg_infoset_rep *s = p->m_infosets[m->m_infoset->m_id];
-    p_newEfg->AppendMove(n, s);
+    p_newEfg->InsertMove(n, s);
 
     for (int i = 1; i <= n->m_children.Length(); i++) {
       CopySubtree(p_newEfg, n->m_children[i], m->m_children[i]);
@@ -588,12 +633,12 @@ bool gbtEfgGame::IsPerfectRecall(gbtEfgInfoset &s1, gbtEfgInfoset &s2) const
         for (int m = 1; m <= iset2.NumMembers(); m++) {
           int n;
           for (n = 1; n <= iset1.NumMembers(); n++) {
-            if (iset1.GetMember(n).IsPredecessor(iset2.GetMember(m))
+            if (iset1.GetMember(n).IsPredecessorOf(iset2.GetMember(m))
                 && iset1.GetMember(n) != iset2.GetMember(m)) {
               precedes = true;
               for (int act = 1; act <= iset1.NumActions(); act++) {
                 if (iset1.GetMember(n).GetChild(act).
-                    IsPredecessor(iset2.GetMember(m))) {
+                    IsPredecessorOf(iset2.GetMember(m))) {
                   if (action != 0 && action != act) {
                     s1 = iset1;
                     s2 = iset2;
@@ -684,41 +729,6 @@ gbtEfgOutcome gbtEfgGame::NewOutcome(int index)
 gbtEfgPlayer gbtEfgGame::GetChance(void) const
 {
   return rep->chance;
-}
-
-gbtEfgNode gbtEfgGame::DeleteNode(gbtEfgNode n, gbtEfgNode keep)
-{
-  if (n.IsNull() || keep.IsNull())  {
-    throw gbtEfgNullObject();
-  }
-
-  if (keep.rep->m_parent != n.rep)   return n;
-
-  if (n.rep->m_gameroot == n.rep) {
-    MarkSubgame(keep.rep, keep.rep);
-  }
-
-  rep->m_revision++;
-  // turn infoset sorting off during tree deletion -- problems will occur
-  rep->sortisets = false;
-
-  n.rep->m_children.Remove(n.rep->m_children.Find(keep.rep));
-  DeleteTree(n.rep);
-  keep.rep->m_parent = n.rep->m_parent;
-  if (n.rep->m_parent) {
-    n.rep->m_parent->m_children[n.rep->m_parent->m_children.Find(n.rep)] = keep.rep;
-  }
-  else {
-    rep->root = keep.rep;
-  }
-
-  delete n.rep;
-  rep->DeleteLexicon();
-
-  rep->sortisets = true;
-
-  rep->SortInfosets();
-  return keep;
 }
 
 gbtEfgInfoset gbtEfgGame::JoinInfoset(gbtEfgInfoset s, gbtEfgNode n)
@@ -856,7 +866,7 @@ gbtEfgInfoset gbtEfgGame::SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p)
 }
 
 void gbtEfgGame::CopySubtree(gbt_efg_node_rep *src, gbt_efg_node_rep *dest,
-			  gbt_efg_node_rep *stop)
+			     gbt_efg_node_rep *stop)
 {
   if (src == stop) {
     dest->m_outcome = src->m_outcome;
@@ -864,9 +874,10 @@ void gbtEfgGame::CopySubtree(gbt_efg_node_rep *src, gbt_efg_node_rep *dest,
   }
 
   if (src->m_children.Length())  {
-    rep->AppendMove(dest, src->m_infoset);
-    for (int i = 1; i <= src->m_children.Length(); i++)
-      CopySubtree(src->m_children[i], dest->m_children[i], stop);
+    rep->InsertMove(dest, src->m_infoset);
+    for (int i = 1; i <= src->m_children.Length(); i++) {
+      CopySubtree(src->m_children[i], dest->m_parent->m_children[i], stop);
+    }
   }
 
   dest->m_label = src->m_label;
@@ -950,9 +961,10 @@ gbtEfgNode gbtEfgGame::CopyTree(gbtEfgNode src, gbtEfgNode dest)
   if (src.rep->m_children.Length())  {
     rep->m_revision++;
 
-    rep->AppendMove(dest.rep, src.rep->m_infoset);
+    rep->InsertMove(dest.rep, src.rep->m_infoset);
     for (int i = 1; i <= src.rep->m_children.Length(); i++) {
-      CopySubtree(src.rep->m_children[i], dest.rep->m_children[i], dest.rep);
+      CopySubtree(src.rep->m_children[i], dest.rep->m_parent->m_children[i],
+		  dest.rep->m_parent);
     }
 
     rep->DeleteLexicon();
@@ -967,7 +979,8 @@ gbtEfgNode gbtEfgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
   if (src.IsNull() || dest.IsNull())  {
     throw gbtEfgNullObject();
   }
-  if (src == dest || dest.rep->m_children.Length() || src.IsPredecessor(dest))
+  if (src == dest || dest.rep->m_children.Length() ||
+      src.IsPredecessorOf(dest))
     return src;
   if (src.rep->m_gameroot != dest.rep->m_gameroot)  return src;
 
@@ -993,31 +1006,6 @@ gbtEfgNode gbtEfgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
   rep->DeleteLexicon();
   rep->SortInfosets();
   return dest;
-}
-
-gbtEfgNode gbtEfgGame::DeleteTree(gbtEfgNode n)
-{
-  if (n.IsNull()) {
-    throw gbtEfgNullObject();
-  }
-
-  rep->m_revision++;
-
-  while (n.NumChildren() > 0)   {
-    DeleteTree(n.rep->m_children[1]);
-    delete n.rep->m_children.Remove(1);
-  }
-  
-  if (n.rep->m_infoset)  {
-    n.rep->m_infoset->m_members.Remove(n.rep->m_infoset->m_members.Find(n.rep));
-    n.rep->m_infoset = 0;
-  }
-  n.rep->m_outcome = 0;
-  n.rep->m_label = "";
-
-  rep->DeleteLexicon();
-  rep->SortInfosets();
-  return n;
 }
 
 gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s)
@@ -1074,7 +1062,7 @@ gbtEfgInfoset gbtEfgGame::DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a)
     return s;
   s.RemoveAction(where);
   for (int i = 1; i <= s.rep->m_members.Length(); i++)   {
-    DeleteTree(s.rep->m_members[i]->m_children[where]);
+    rep->DeleteTree(s.rep->m_members[i]->m_children[where]);
     delete s.rep->m_members[i]->m_children.Remove(where);
   }
   rep->DeleteLexicon();

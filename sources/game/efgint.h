@@ -114,7 +114,8 @@ struct gbt_efg_node_rep {
   ~gbt_efg_node_rep();
 
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
-  gbt_efg_node_rep *NextSibling(void);
+  gbt_efg_node_rep *GetPriorSibling(void);
+  gbt_efg_node_rep *GetNextSibling(void);
 };
 
 struct gbt_efg_game_rep {
@@ -138,8 +139,9 @@ struct gbt_efg_game_rep {
   void NumberNodes(gbt_efg_node_rep *, int &);
   void DeleteLexicon(void);
 
-  void AppendMove(gbt_efg_node_rep *, gbt_efg_infoset_rep *);
   void InsertMove(gbt_efg_node_rep *, gbt_efg_infoset_rep *);
+  void DeleteMove(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void DeleteTree(gbt_efg_node_rep *);
 
   gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,
 				  int p_id, int p_actions);

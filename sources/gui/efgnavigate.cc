@@ -112,7 +112,7 @@ void EfgNavigateWindow::OnUpdate(void)
       int branch = 0;
       for (branch = 1; p.GetChild(branch) != cursor; branch++);
 
-      SetCellValue((char *) cursor.GetAction().GetLabel(), 7, 0);
+      SetCellValue((char *) cursor.GetPriorAction().GetLabel(), 7, 0);
       SetCellValue((char *) m_doc->GetActionProb(p, branch), 8, 0);
       SetCellValue((char *) m_doc->GetActionValue(p, branch), 9, 0);
     }

@@ -188,7 +188,7 @@ static Portion *GSM_AddMove(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   gbtEfgNode n = AsEfgNode(param[1]);
-  n.AppendMove(s);
+  n.InsertMove(s);
   return new NodePortion(n.GetChild(1));
 }
 
@@ -293,10 +293,12 @@ static Portion *GSM_DeleteMove(GSM &gsm, Portion **param)
   gbtEfgNode n = AsEfgNode(param[0]);
   gbtEfgNode keep = AsEfgNode(param[1]);
 
-  if (keep.GetParent() != n)
+  if (keep.GetParent() != n) {
     throw gclRuntimeError("keep is not a child of node");
+  }
 
-  return new NodePortion(n.GetGame().DeleteNode(n, keep));
+  n.DeleteMove(keep);
+  return new NodePortion(keep);
 }
 
 //-----------------
@@ -336,7 +338,7 @@ static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 static Portion *GSM_DeleteTree(GSM &gsm, Portion **param)
 {
   gbtEfgNode n = AsEfgNode(param[0]);
-  n.GetGame().DeleteTree(n);
+  n.DeleteTree();
   return new NodePortion(n);
 }
 
@@ -454,8 +456,7 @@ static Portion *GSM_InsertMove(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   gbtEfgNode n = AsEfgNode(param[1]);
-  n.InsertMove(s);
-  return new NodePortion(n.GetParent());
+  return new NodePortion(n.InsertMove(s));
 }
 
 //---------------
@@ -483,7 +484,7 @@ static Portion *GSM_IsBasisConsistent(GSM &, Portion **param)
 static Portion *GSM_IsPredecessor(GSM &, Portion **param)
 {
   return 
-    new BoolPortion(AsEfgNode(param[0]).IsPredecessor(AsEfgNode(param[1])));
+    new BoolPortion(AsEfgNode(param[0]).IsPredecessorOf(AsEfgNode(param[1])));
 }
 
 //---------------
@@ -492,7 +493,7 @@ static Portion *GSM_IsPredecessor(GSM &, Portion **param)
 
 static Portion *GSM_IsSuccessor(GSM &, Portion **param)
 {
-  return new BoolPortion(AsEfgNode(param[0]).IsSuccessor(AsEfgNode(param[1])));
+  return new BoolPortion(AsEfgNode(param[1]).IsPredecessorOf(AsEfgNode(param[0])));
 }
 
 
@@ -685,7 +686,7 @@ static Portion *GSM_NewPlayer(GSM &gsm, Portion **param)
 
 static Portion *GSM_NextSibling(GSM &, Portion **param)
 {
-  gbtEfgNode n = AsEfgNode(param[0]).NextSibling();
+  gbtEfgNode n = AsEfgNode(param[0]).GetNextSibling();
   if (n.IsNull())
     return new NullPortion(porNODE);
   
@@ -853,7 +854,7 @@ static Portion *GSM_PriorAction(GSM &, Portion** param)
 
 static Portion *GSM_PriorSibling(GSM &, Portion **param)
 {
-  gbtEfgNode n = AsEfgNode(param[0]).PriorSibling();
+  gbtEfgNode n = AsEfgNode(param[0]).GetPriorSibling();
   if (n.IsNull())
     return new NullPortion(porNODE);
   

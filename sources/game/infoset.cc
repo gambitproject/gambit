@@ -177,7 +177,7 @@ bool gbtEfgAction::Precedes(gbtEfgNode n) const
   }
 
   while (n != n.GetGame().GetRoot() ) {
-    if (n.GetAction().rep == rep) {
+    if (n.GetPriorAction().rep == rep) {
       return true;
     }
     else {

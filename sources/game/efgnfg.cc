@@ -104,7 +104,7 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
   else if (nn)  {
     gbt_efg_node_rep *m;
     for (; ; nn = nn->m_parent->m_ptr->m_whichbranch)  {
-      m = nn->NextSibling();
+      m = nn->GetNextSibling();
       if (m || nn->m_parent->m_ptr == NULL)   break;
     }
     if (m)  {

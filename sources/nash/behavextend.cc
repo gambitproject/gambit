@@ -186,7 +186,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const gbtEfgAction &act)
 {
   while (tempnode != p_solution.GetGame().GetRoot()) {
-    gbtEfgAction last_action = tempnode.GetAction();
+    gbtEfgAction last_action = tempnode.GetPriorAction();
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
@@ -389,7 +389,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const int &j)
 {
   while (tempnode != p_solution.GetGame().GetRoot()) {
-    gbtEfgAction last_action = tempnode.GetAction();
+    gbtEfgAction last_action = tempnode.GetPriorAction();
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 

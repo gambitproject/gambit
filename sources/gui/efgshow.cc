@@ -714,12 +714,12 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
 
     if (dialog.ShowModal() == wxID_OK) {
       if (dialog.DeleteTree()) {
-	m_doc->GetEfg().DeleteTree(m_doc->GetCursor());
+	m_doc->GetCursor().DeleteTree();
       }
       else {
 	gbtEfgNode keep = dialog.KeepNode();
-	m_doc->SetCursor(m_doc->GetEfg().DeleteNode(m_doc->GetCursor(),
-						  keep));
+	m_doc->GetCursor().DeleteMove(keep);
+	m_doc->SetCursor(keep);
       }
       m_doc->GetEfg().DeleteEmptyInfosets();
       m_doc->OnTreeChanged(true, true);

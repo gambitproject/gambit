@@ -84,7 +84,7 @@ NodeEntry::NodeEntry(gbtEfgNode p_node)
 int NodeEntry::GetChildNumber(void) const
 {
   if (!m_node.GetParent().IsNull()) {
-    return m_node.GetAction().GetId();
+    return m_node.GetPriorAction().GetId();
   }
   else {
     return 0;
@@ -882,6 +882,6 @@ void efgTreeLayout::Render(wxDC &p_dc) const
 void efgTreeLayout::SetCutNode(const gbtEfgNode &p_node)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    m_nodeList[i]->SetCut(p_node.IsPredecessor(m_nodeList[i]->GetNode()));
+    m_nodeList[i]->SetCut(p_node.IsPredecessorOf(m_nodeList[i]->GetNode()));
   }
 }

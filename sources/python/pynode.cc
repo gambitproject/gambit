@@ -70,6 +70,66 @@ PyTypeObject Nodetype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+node_deletemove(nodeobject *self, PyObject *args)
+{
+  PyObject *keep;
+
+  if (!PyArg_ParseTuple(args, "O", &keep)) {
+    return NULL;
+  }
+
+  if (!is_nodeobject(keep)) {
+    return NULL;
+  }
+
+  self->m_node->DeleteMove(*((nodeobject *) keep)->m_node);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
+node_deletetree(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  self->m_node->DeleteTree();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
+node_getchild(nodeobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_node->NumChildren()) {
+    return NULL;
+  }
+
+  nodeobject *child = newnodeobject();
+  *child->m_node = self->m_node->GetChild(index);
+  return (PyObject *) child;
+}
+
+static PyObject *
+node_getgame(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efgobject *game = newefgobject();
+  game->m_efg = new gbtEfgGame(self->m_node->GetGame());
+  return (PyObject *) game;
+}
+
+static PyObject *
 node_getinfoset(nodeobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -92,6 +152,112 @@ node_getlabel(nodeobject *self, PyObject *args)
 }
 
 static PyObject *
+node_getnextsibling(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nodeobject *node = newnodeobject();
+  node->m_node = new gbtEfgNode(self->m_node->GetNextSibling());
+  return (PyObject *) node;
+}
+
+static PyObject *
+node_getoutcome(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efoutcomeobject *outcome = newefoutcomeobject();
+  outcome->m_efoutcome = new gbtEfgOutcome(self->m_node->GetOutcome());
+  return (PyObject *) outcome;
+}
+
+static PyObject *
+node_getparent(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nodeobject *node = newnodeobject();
+  node->m_node = new gbtEfgNode(self->m_node->GetParent());
+  return (PyObject *) node;
+}
+
+static PyObject *
+node_getprioraction(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  actionobject *action = newactionobject();
+  action->m_action = new gbtEfgAction(self->m_node->GetPriorAction());
+  return (PyObject *) action;
+}
+
+
+static PyObject *
+node_getpriorsibling(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nodeobject *node = newnodeobject();
+  node->m_node = new gbtEfgNode(self->m_node->GetPriorSibling());
+  return (PyObject *) node;
+}
+
+static PyObject *
+node_insertmove(nodeobject *self, PyObject *args)
+{
+  PyObject *infoset;
+
+  if (!PyArg_ParseTuple(args, "O", &infoset)) {
+    return NULL;
+  }
+
+  if (!is_infosetobject(infoset)) {
+    return NULL;
+  }
+
+  nodeobject *newnode = newnodeobject();
+  newnode->m_node = new gbtEfgNode(self->m_node->InsertMove(*((infosetobject *) infoset)->m_infoset));
+  return (PyObject *) newnode;
+}
+
+static PyObject *
+node_ispredecessorof(nodeobject *self, PyObject *args)
+{
+  PyObject *node;
+
+  if (!PyArg_ParseTuple(args, "O", &node)) {
+    return NULL;
+  }
+
+  if (!is_nodeobject(node)) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", 
+		       self->m_node->IsPredecessorOf(*((nodeobject *) node)->m_node));
+}
+
+static PyObject *
+node_numchildren(nodeobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("i", self->m_node->NumChildren());
+}
+
+static PyObject *
 node_setlabel(nodeobject *self, PyObject *args)
 {
   char *label;
@@ -105,10 +271,41 @@ node_setlabel(nodeobject *self, PyObject *args)
   return Py_None;
 }
 
+static PyObject *
+node_setoutcome(nodeobject *self, PyObject *args)
+{
+  PyObject *outcome;
+
+  if (!PyArg_ParseTuple(args, "O", &outcome)) {
+    return NULL;
+  }
+
+  if (!is_efoutcomeobject(outcome)) {
+    return NULL;
+  }
+
+  self->m_node->SetOutcome(*((efoutcomeobject *) outcome)->m_efoutcome);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 static struct PyMethodDef node_methods[] = {
+  { "DeleteMove", (PyCFunction) node_deletemove, 1 },
+  { "DeleteTree", (PyCFunction) node_deletetree, 1 },
+  { "GetChild", (PyCFunction) node_getchild, 1 },
+  { "GetGame", (PyCFunction) node_getgame, 1 }, 
   { "GetInfoset", (PyCFunction) node_getinfoset, 1 }, 
   { "GetLabel", (PyCFunction) node_getlabel, 1 },
+  { "GetNextSibling", (PyCFunction) node_getnextsibling, 1 },
+  { "GetOutcome", (PyCFunction) node_getoutcome, 1 },
+  { "GetParent", (PyCFunction) node_getparent, 1 },
+  { "GetPriorAction", (PyCFunction) node_getprioraction, 1 },
+  { "GetPriorSibling", (PyCFunction) node_getpriorsibling, 1 },
+  { "InsertMove", (PyCFunction) node_insertmove, 1 },
+  { "IsPredecessorOf", (PyCFunction) node_ispredecessorof, 1 }, 
+  { "NumChildren", (PyCFunction) node_numchildren, 1 },
   { "SetLabel", (PyCFunction) node_setlabel, 1 },
+  { "SetOutcome", (PyCFunction) node_setoutcome, 1 },
   { NULL, NULL }
 };
 

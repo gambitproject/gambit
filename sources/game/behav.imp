@@ -586,7 +586,7 @@ T BehavProfile<T>::DiffRealizProb(const gbtEfgNode &p_node,
   bool isPrec = false;
   gbtEfgNode node = p_node;
   while (!node.GetParent().IsNull()) {
-    gbtEfgAction prevAction = node.GetAction();
+    gbtEfgAction prevAction = node.GetPriorAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
@@ -666,7 +666,7 @@ void BehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode &node)
 
       //      gVector<T> s = NodeValue(children[child]);
 
-      gbtEfgAction act = node.GetChild(child).GetAction();
+      gbtEfgAction act = node.GetChild(child).GetPriorAction();
 
       for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
 	m_nodeValues(node.GetId(), pl) +=
@@ -693,7 +693,7 @@ void BehavProfile<T>::ComputeSolutionDataPass1(const gbtEfgNode &node)
 {
   if (!node.GetParent().IsNull()) {
     RealizProb(node) = (RealizProb(node.GetParent()) *
-			ActionProb(node.GetAction()));
+			ActionProb(node.GetPriorAction()));
   }
   else {
     RealizProb(node) = (T) 1;
@@ -1028,11 +1028,11 @@ void BehavAssessment<T>::CondPayoff(const gbtEfgNode &p_node,
   if (npl == 0)   {
     for (int child = 1; child <= nc; child++)  {
       CondPayoff(p_node.GetChild(child),
-		 p_prob * ActionProb(p_node.GetChild(child).GetAction()),
+		 p_prob * ActionProb(p_node.GetChild(child).GetPriorAction()),
 		 p_probs, p_payoff);
       
       for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-	tmp[pl] += (ActionProb(p_node.GetChild(child).GetAction()) *
+	tmp[pl] += (ActionProb(p_node.GetChild(child).GetPriorAction()) *
 		    m_nodeValues(p_node.GetChild(child).GetId(), pl));
       }
     }

@@ -90,39 +90,7 @@ information and plans.
 
 </sect1>
 
-<sect1 id="apiref.node">
-<title>Nodes</title>
-
-<para>
-</para>
-
-&bifaddmove;
-&bifchildren;
-&bifcopytree;
-&bifdeletemove;
-&bifdeletetree;
-&bifgame;
-&bifinfoset;
-&bifinsertmove;
-&bifispredecessor;
-&bifissuccessor;
-&bifmarksubgame;
-&bifmarkedsubgame;
-&bifmovetoinfoset;
-&bifmovetree;
-&bifname;
-&bifnthchild;
-&bifnextsibling;
-&bifoutcome;
-&bifparent;
-&bifplayer;
-&bifprioraction;
-&bifpriorsibling;
-&bifsetname;
-&bifsetoutcome;
-&bifunmarksubgame;
-
-</sect1>
+&apirefnode;
 
 <sect1 id="apiref.infoset">
 <title>Information sets</title>

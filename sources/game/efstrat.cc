@@ -603,7 +603,7 @@ bool EFSupport::MayReach(const gbtEfgNode &n) const
   if (n == m_efg.GetRoot())
     return true;
   else {
-    if (!Contains(n.GetAction())) {
+    if (!Contains(n.GetPriorAction())) {
       return false;
     }
     else {
@@ -684,14 +684,14 @@ void EFSupportWithActiveInfo::activate(const gbtEfgNode &n)
 {
   is_nonterminal_node_active[n.GetPlayer().GetId()]
                             [n.GetInfoset().GetId()]
-                            [n.NumberInInfoset()] = true;
+                            [n.GetMemberId()] = true;
 }
 
 void EFSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
 {
   is_nonterminal_node_active[n.GetPlayer().GetId()]
                             [n.GetInfoset().GetId()]
-                            [n.NumberInInfoset()] = false;
+                            [n.GetMemberId()] = false;
 }
 
 void EFSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
@@ -967,7 +967,7 @@ bool EFSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
 {
   return NodeIsActive(n.GetInfoset().GetPlayer().GetId(),
 		      n.GetInfoset().GetId(),
-		      n.NumberInInfoset());
+		      n.GetMemberId());
 }
 
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()

@@ -233,7 +233,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
     }
   }
 
-  efg.DeleteTree(n);
+  n.DeleteTree();
 }
 
 //-----------------------------------------------------------------------
