@@ -22,14 +22,7 @@ class ExtForm    {
 	//# CONSTRUCTORS AND DESTRUCTOR
     ExtForm(int number, int numPlayers, int from_file = 0) : 
     efg_no(number), nodes(number, numPlayers, from_file)   { }
-//# numPlayers above may need +/- 2
-//#    ExtForm(const ExtForm &ef) : nodes(ef.nodes)   { }
     ~ExtForm()  { }
-
-	//# OPERATOR OVERLOADING
-//#    ExtForm &operator=(const ExtForm &);
-
-//#    int yyparse(void);
 
 	//# HIGH-LEVEL OPERATIONS
     Node AddNode(const Node &n, int player, int child_count);
@@ -46,7 +39,6 @@ class ExtForm    {
 	nodes.SetInfosetName(n[1], n[2], label); }
     void LabelInfoset(int pl, int iset, const gString &label)
       { nodes.SetInfosetName(pl, iset, label); }
-//#old code      { players.SetInfosetName(n[1], n[0], n[2], label); }
     gString GetInfosetName(const Node &n)
       { if (!nodes.IsMember(n)) return "Not defined";
 	return nodes.GetInfosetName(n[1], n[2]); }
@@ -140,6 +132,14 @@ class ExtForm    {
 
     void AddPlayer(int);
     int CreateInfoset(int, int, int);
+
+        //# MANAGEMENT OF VARIABLES
+    Node GetNodeVariable(const gString &name) const
+      { return nodes.GetNodeVariable(name); }
+    int SetNodeVariable(const gString &name, const Node &node)
+      { return nodes.SetNodeVariable(name, node); }
+    void RemoveNodeVariable(const gString &name)
+      { nodes.RemoveNodeVariable(name); }
 
 	//# FILE OPERATIONS
     int InputFromFile(const gBlock<struct nodeinfo *> &b)
