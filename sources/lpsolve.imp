@@ -1,11 +1,10 @@
 //
-//# FILE: lpsolve.imp -- Implementation of LP solver
-//#
-//#  $Id$
-//#
+// FILE: lpsolve.imp -- Implementation of LP solver
+//
+//  $Id$
+//
 
 #include "lpsolve.h"
-#include "gsmfunc.h"
 
 template <class T> int NumNegs(const gVector<T> &b) 
 {
