@@ -358,9 +358,9 @@ gOutput *dialogAlgorithm::TraceFile(void) const
     return new gWxOutput;
   case 2:
     try {
-      return new gDebugOutput(m_traceFile);
+      return new gFileOutput(m_traceFile);
     }
-    catch (gDebugOutput::OpenFailed &E) {
+    catch (gFileOutput::OpenFailed &E) {
       return &gnull;
     }
   default:

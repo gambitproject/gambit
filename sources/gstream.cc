@@ -195,6 +195,139 @@ gOutput::gOutput(void)   { }
 gOutput::~gOutput()   { }
 
 //--------------------------------------------------------------------------
+//                         gStandardOutput member functions
+//--------------------------------------------------------------------------
+
+gText gStandardOutput::OpenFailed::Description(void) const
+{
+  return "Open failed in gStandardOutput";
+}
+
+gText gStandardOutput::WriteFailed::Description(void) const
+{
+  return "Write failed in gStandardOutput";
+}
+
+gStandardOutput::gStandardOutput(FILE *out)
+  : f(out), Width(0), Prec(6), Represent('f')
+{
+  if (!f)   throw OpenFailed();
+}
+
+gStandardOutput::~gStandardOutput()
+{
+  if (f)   fclose(f);
+}
+
+int gStandardOutput::GetWidth(void) const
+{
+  return Width;
+}
+
+gOutput &gStandardOutput::SetWidth(int w) 
+{
+  Width = w;
+  return *this;
+}
+
+int gStandardOutput::GetPrec(void) const 
+{
+  return Prec;
+}
+
+gOutput &gStandardOutput::SetPrec(int p) 
+{
+  Prec = p;
+  return *this;
+}
+
+gOutput &gStandardOutput::SetExpMode(void) 
+{
+  Represent = 'e';
+  return *this;
+}
+
+gOutput &gStandardOutput::SetFloatMode(void) 
+{
+  Represent = 'f';
+  return *this;
+}
+
+char gStandardOutput::GetRepMode(void) const
+{
+  return Represent;
+}
+
+gOutput &gStandardOutput::operator<<(int x)
+{
+  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(unsigned int x)
+{
+  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(bool x)
+{
+  if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(long x)
+{
+  if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(char x)
+{
+  if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(double x)
+{
+  if (Represent == 'f')   {
+    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
+      throw WriteFailed();
+  }
+  else   {   // Represent == 'e'
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
+  }
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(float x)
+{
+  if (Represent == 'f')   {
+    if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
+      throw WriteFailed();
+  }
+  else   {   // Represent == 'e'
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
+  }
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(const char *x)
+{
+  if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+gOutput &gStandardOutput::operator<<(const void *x)
+{
+  if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
+  return *this;
+}
+
+
+//--------------------------------------------------------------------------
 //                         gFileOutput member functions
 //--------------------------------------------------------------------------
 
@@ -208,14 +341,10 @@ gText gFileOutput::WriteFailed::Description(void) const
   return "Write failed in gFileOutput";
 }
 
-gFileOutput::gFileOutput(const char *out, bool append /* = false */)
-  : f(fopen(out, (append) ? "a" : "w")), Width(0), Prec(6), Represent('f')
-{
-  if (!f)   throw OpenFailed();
-}
-
-gFileOutput::gFileOutput(FILE *out)
-  : f(out), Width(0), Prec(6), Represent('f')
+gFileOutput::gFileOutput(const char *out, bool append /* = false */, bool close /* = true */)
+  : f(fopen(out, (append) ? "a" : "w")), filename(out), 
+    keepClosed(close), Width(0), 
+    Prec(6), Represent('f')
 {
   if (!f)   throw OpenFailed();
 }
@@ -223,6 +352,19 @@ gFileOutput::gFileOutput(FILE *out)
 gFileOutput::~gFileOutput()
 {
   if (f)   fclose(f);
+}
+
+void gFileOutput::Open(void)
+{
+  if(!f) { 
+    f=fopen(filename,"a");
+    if (!f) throw OpenFailed();
+  }
+}
+
+void gFileOutput::Close(void)
+{
+  if(keepClosed) { fclose(f);f=0;} 
 }
 
 int gFileOutput::GetWidth(void) const
@@ -266,36 +408,47 @@ char gFileOutput::GetRepMode(void) const
 
 gOutput &gFileOutput::operator<<(int x)
 {
+  Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
+  Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(bool x)
 {
+  Open();
   if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
+  Open();
   if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(char x)
 {
+  Open();
   if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(double x)
 {
+  Open();
   if (Represent == 'f')   {
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
       throw WriteFailed();
@@ -304,11 +457,13 @@ gOutput &gFileOutput::operator<<(double x)
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(float x)
 {
+  Open();
   if (Represent == 'f')   {
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
       throw WriteFailed();
@@ -317,177 +472,19 @@ gOutput &gFileOutput::operator<<(float x)
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const char *x)
 {
+  Open();
   if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
+  Close();
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const void *x)
-{
-  if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
-  return *this;
-}
-
-
-//--------------------------------------------------------------------------
-//                         gDebugOutput member functions
-//--------------------------------------------------------------------------
-
-gText gDebugOutput::OpenFailed::Description(void) const
-{
-  return "Open failed in gDebugOutput";
-}
-
-gText gDebugOutput::WriteFailed::Description(void) const
-{
-  return "Write failed in gDebugOutput";
-}
-
-gDebugOutput::gDebugOutput(const char *out, bool append /* = false */)
-  : f(fopen(out, (append) ? "a" : "w")), filename(out), Width(0), 
-    Prec(6), Represent('f')
-{
-  if (!f)   throw OpenFailed();
-}
-
-gDebugOutput::~gDebugOutput()
-{
-  if (f)   fclose(f);
-}
-
-void gDebugOutput::Open(void)
-{
-  if(!f) f=fopen(filename,"a");
-  if (!f) throw OpenFailed();
-}
-
-void gDebugOutput::Close(void)
-{
-  fclose(f);f=0;
-}
-
-int gDebugOutput::GetWidth(void) const
-{
-  return Width;
-}
-
-gOutput &gDebugOutput::SetWidth(int w) 
-{
-  Width = w;
-  return *this;
-}
-
-int gDebugOutput::GetPrec(void) const 
-{
-  return Prec;
-}
-
-gOutput &gDebugOutput::SetPrec(int p) 
-{
-  Prec = p;
-  return *this;
-}
-
-gOutput &gDebugOutput::SetExpMode(void) 
-{
-  Represent = 'e';
-  return *this;
-}
-
-gOutput &gDebugOutput::SetFloatMode(void) 
-{
-  Represent = 'f';
-  return *this;
-}
-
-char gDebugOutput::GetRepMode(void) const
-{
-  return Represent;
-}
-
-gOutput &gDebugOutput::operator<<(int x)
-{
-  Open();
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(unsigned int x)
-{
-  Open();
-  if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(bool x)
-{
-  Open();
-  if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(long x)
-{
-  Open();
-  if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(char x)
-{
-  Open();
-  if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(double x)
-{
-  Open();
-  if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
-      throw WriteFailed();
-  }
-  else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
-      throw WriteFailed();
-  }
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(float x)
-{
-  Open();
-  if (Represent == 'f')   {
-    if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
-      throw WriteFailed();
-  }
-  else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
-      throw WriteFailed();
-  }
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(const char *x)
-{
-  Open();
-  if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
-  Close();
-  return *this;
-}
-
-gOutput &gDebugOutput::operator<<(const void *x)
 {
   Open();
   if (fprintf(f, "%p", x) < 0)   throw WriteFailed();

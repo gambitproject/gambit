@@ -132,14 +132,14 @@ class gOutput  {
     virtual char GetRepMode(void) const = 0;
 };
 
-class gFileOutput : public gOutput  {
+class gStandardOutput : public gOutput  {
   private:
     FILE *f;
     int Width, Prec;
     char Represent;
 
-    gFileOutput(const gFileOutput &);
-    gFileOutput &operator=(const gFileOutput &);
+    gStandardOutput(const gStandardOutput &);
+    gStandardOutput &operator=(const gStandardOutput &);
   public:
     class OpenFailed : public gException   {
     public:
@@ -153,9 +153,8 @@ class gFileOutput : public gOutput  {
       gText Description(void) const;
     };
 
-    gFileOutput(const char *, bool append = false);
-    gFileOutput(FILE *);
-    virtual ~gFileOutput();
+    gStandardOutput(FILE *);
+    virtual ~gStandardOutput();
 
     int GetWidth(void) const;
     gOutput &SetWidth(int w);
@@ -178,15 +177,16 @@ class gFileOutput : public gOutput  {
 
 #include "gtext.h"
 
-class gDebugOutput : public gOutput  {
+class gFileOutput : public gOutput  {
   private:
     FILE *f;
     const gText filename; 
+    bool keepClosed;
     int Width, Prec;
     char Represent;
 
-    gDebugOutput(const gDebugOutput &);
-    gDebugOutput &operator=(const gDebugOutput &);
+    gFileOutput(const gFileOutput &);
+    gFileOutput &operator=(const gFileOutput &);
     void Open(void);
     void Close(void);
 
@@ -203,8 +203,8 @@ class gDebugOutput : public gOutput  {
       gText Description(void) const;
     };
 
-    gDebugOutput(const char *, bool append = false);
-    virtual ~gDebugOutput();
+    gFileOutput(const char *, bool append = false, bool close = true);
+    virtual ~gFileOutput();
 
     int GetWidth(void) const;
     gOutput &SetWidth(int w);

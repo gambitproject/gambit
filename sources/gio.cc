@@ -11,10 +11,10 @@
 gFileInput _gin(stdin);
 gInput &gin = _gin;
 
-gFileOutput _gout(stdout);
+gStandardOutput _gout(stdout);
 gOutput &gout = _gout;
 
-gFileOutput _gerr(stderr);
+gStandardOutput _gerr(stderr);
 gOutput &gerr = _gerr;
 
 #else

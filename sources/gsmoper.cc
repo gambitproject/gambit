@@ -903,25 +903,14 @@ Portion* GSM_Output(Portion** param)
 {
   gText filename = ((TextPortion*) param[0])->Value();
   bool append = ((BoolPortion*) param[1])->Value();
-  bool debug = ((BoolPortion*) param[2])->Value();
+  bool close = ((BoolPortion*) param[2])->Value();
 
-  if(!debug) {
-    try  {
-      return new OutputPortion(*new gFileOutput(filename, append));
-    }
-    catch (gFileOutput::OpenFailed &) {
-      throw gclRuntimeError((gText) "Error opening file \"" +
-			    ((TextPortion*) param[0])->Value() + "\"");
-    }
+  try  {
+    return new OutputPortion(*new gFileOutput(filename, append, close));
   }
-  else {
-    try  {
-      return new OutputPortion(*new gDebugOutput(filename, append));
-    }
-    catch (gDebugOutput::OpenFailed &) {
-      throw gclRuntimeError((gText) "Error opening file \"" +
-			    ((TextPortion*) param[0])->Value() + "\"");
-    }
+  catch (gFileOutput::OpenFailed &) {
+    throw gclRuntimeError((gText) "Error opening file \"" +
+			  ((TextPortion*) param[0])->Value() + "\"");
   }
 }
 
@@ -1909,8 +1898,8 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, gclParameter("file", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("append", porBOOLEAN,
 					    new BoolPortion( false )));
-  FuncObj->SetParamInfo(0, 2, gclParameter("debug", porBOOLEAN,
-					    new BoolPortion( false )));
+  FuncObj->SetParamInfo(0, 2, gclParameter("close", porBOOLEAN,
+					    new BoolPortion( true )));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new gclFunction("Input", 1);
