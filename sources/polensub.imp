@@ -1,0 +1,65 @@
+//
+// FILE: polensub.imp -- Solve efg by enumeration in nfg
+//
+// $Id$ 
+//
+
+#include "polensub.h"
+#include "subsolve.h"
+
+class PolEnumBySubgame : public SubgameSolver  {
+  private:
+    int nevals;
+    PolEnumParams params;
+    gArray<gNumber> values;
+
+    int SolveSubgame(const Efg &, const EFSupport &,
+		     gList<BehavSolution> &);
+    EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
+
+  public:
+    PolEnumBySubgame(const EFSupport &, const gArray<gNumber> &values,
+		  const PolEnumParams &, int max = 0);
+    virtual ~PolEnumBySubgame();
+
+    int NumEvals(void) const   { return nevals; }
+};
+
+int PolEnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+				gList<BehavSolution> &solns)
+{
+  Nfg *N = MakeReducedNfg(E, sup);
+
+  NFSupport *S = new NFSupport(*N);
+  
+  ViewNormal(*N, S);
+  
+  gList<MixedSolution> solutions;
+
+  long neval;
+  double time;
+
+  PolEnum(*S, params, values, solutions, neval, time);
+
+  nevals += neval;
+  
+  for (int i = 1; i <= solutions.Length(); i++)  {
+    BehavProfile<gNumber> bp(sup, values);
+    MixedToBehav(*N, solutions[i], E, bp);
+    solns.Append(bp);
+  }
+
+  delete S;
+  delete N;
+
+  return params.status.Get();
+}
+
+PolEnumBySubgame::PolEnumBySubgame(const EFSupport &S, const gArray<gNumber> &v,
+			     const PolEnumParams &p, int max)
+  : SubgameSolver(S, v, max), nevals(0), params(p), values(v)
+{ }
+
+PolEnumBySubgame::~PolEnumBySubgame()   { }
+
+
