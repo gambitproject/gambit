@@ -89,19 +89,6 @@ int matherr(struct exception *e)
 }
 */
 
-//
-// Set up global stream instances
-//
-gFileInput _gin(stdin);
-gInput &gin = _gin;
-
-gFileOutput _gout(stdout);
-gOutput &gout = _gout;
-
-gFileOutput _gerr(stderr);
-gOutput &gerr = _gerr;
-
-
 GSM* _gsm;
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
