@@ -20,7 +20,7 @@ Technology
 Andrew McLennan\\University of
 Minnesota
 \and 
-Theodore Turocy\\California Institute of Technology
+Theodore Turocy\\Northwestern University
 }
 
 \date{Version 0.9\\ \today\\ \jobname.tex}
@@ -31,10 +31,10 @@ Theodore Turocy\\California Institute of Technology
 
 \section{Introduction}
 
-This document describes the GAMBIT Command Language (GCL).  GAMBIT is
+This document describes the Gambit Command Language (GCL).  Gambit is
 a computer program that allows one to build, manipulate, and solve
 finite extensive and normal form games. The GCL provides a method of
-directing the operation of GAMBIT that is analagous to that of a high
+directing the operation of Gambit that is analagous to that of a high
 level general purpose programming language.
 
 The general purpose of the GCL is to provide a simple, but powerful
@@ -74,7 +74,7 @@ All of the gambit files can be found at the Gambit World Wide Web site
 at 
 
 \begin{verbatim}
-http://hss.caltech.edu/~gambit/Gambit.html
+http://www.hss.caltech.edu/~gambit/Gambit.html
 \end{verbatim} 
 
 \noindent Instructions on downoading and installation as well as a
@@ -88,6 +88,7 @@ at the command line prompt.  You will then receive the GCL prompt
 GCL1:
 \end{verbatim}
 
+\noindent The interpreter is ready for your first command.
 
 \section{Basic concepts}
 
@@ -97,8 +98,19 @@ such as Pascal, C, and Modula-3.  In particular, the GCL's concept of
 types draws heavily from these languages, although the number of
 predefined types in GCL is much larger due to the specialized nature of
 the language.  The second is more specialized programming languages such
-as Mathematica.  
+as Mathematica, from which the GCL's grammar is partially drawn.  Users
+with experience using any of these languages should find the GCL easy to
+learn; however, no programming experience is necessary to begin using the
+language effectively.
 
+\subsection{Statements}
+
+A GCL program consists of a series of statements.  A statement is
+typically an expression built up out of function calls.  A statement
+is terminated by a linefeed or by a semicolon.  The GCL interpreter
+reports the value of each expression evaluated unless the semicolon is
+present. Statements can be continued for more than one line by using
+the continuation character, \verb+\+.   
 
 \subsection{Types}
 
@@ -126,6 +138,7 @@ Type name	& Description \\ \hline
 {\tt STRATEGY}	& a strategy in a normal form game \\
 {\tt NFSUPPORT}	& a support of strategies in a normal form game \\
 {\tt MIXED}	& a mixed strategy profile for a normal form game \\ \hline
+{\tt LIST}	& a list of objects \\ \hline
 \end{tabular}
 
 \medskip
@@ -136,20 +149,20 @@ The remainder of this section details the rules concerning the types
 and normal form types, and their related types, are detailed later in
 special sections.
 
-\subsubsection{Booleans}
+\subsubsection{Boolean}
 
 The {\tt BOOL} type represents boolean values, that is to say, ``true'' and
 ``false''.  The command language predefines two constant values to
 represent these, {\tt True} and {\tt False}.
 
-\subsubsection{Integers}
+\subsubsection{Integer}
 
 The {\tt INTEGER} type may contain integer values.  It is implemented
 as the machine's long integer type, which is typically at least 32
 bits in modern machines.  Thus, there is a danger, however small, of
 overflow or underflow in computations involving these numbers.
 
-\subsubsection{Floats}
+\subsubsection{Float}
 
 The {\tt FLOAT} type may contain floating point values.  It is implemented
 as the machine's double-precision floating point type.  These numbers
@@ -158,7 +171,7 @@ of each other may not be with floating point numbers.  For more precise
 computations, the {\tt RATIONAL} type is available, although these may
 sometimes be bulky and slow.
 
-\subsubsection{Rationals}
+\subsubsection{Rational}
 
 The {\tt RATIONAL} type is a ratio of two arbitrary-length integers.
 This data type is capable of precisely representing any rational
@@ -181,46 +194,7 @@ The {\tt OUTPUT} type is a reference to an output stream, generally a file
 on disk.  Its principal use is as a logging file for formatting output
 from an extended command language job.
 
-\subsection{Variables}
-
-A variable stores one object of the corresponding data type, and
-returns it when called.  To create a user defined variable, or to give
-a new value to an existing variable, one can use the built-in
-function,
-\verb+Assign+, which has the syntax:
-\begin{verbatim}
-Assign[x<->T, y->T]
-\end{verbatim}
-
-If the \verb+x+ parameter is a name which is not a currently visible
-variable name, a new variable of the type is created and the value of
-the expression passed to \verb+y+ is ``assigned'' to \verb+x+.  If
-\verb+Assign+ is called with an argument \verb+varname+ which is a
-currently visible variable, it results in an error if the data type
-which \verb+y+ evaluates to is different that the current data type of
-\verb+x+.  On the other hand, if the data types match, then
-\verb+varname+ is ``modified:'' \verb+varname+ is first deleted from
-the list of visible functions and then
-\verb+Assign+ is executed.  
-
-The Assign function is used so frequently, it has the following short form
-representation:
-\begin{verbatim}
-name := expression
-\end{verbatim}
-
-Once a variable has been assigned, it can be reassigned only if it is
-assigned a value which evaluates to the same data type.  Assigning a
-variable to have a new data type will result in run time error.  To
-change the data type of a variable, it must be unassigned, by using
-the UnAssign[] function.
-
-A variable can be thought of as a constant function with no arguments.
-However, the scoping and visibility rules for variables are different
-than for functions.  Variables have local scope and visibility.  
-
-
-\subsection{Lists}
+\subsubsection{List}
 
 Variables of any type can be contained in lists of arbitrary length.
 Variables of type {\tt LIST} are defined similarly to the above
@@ -251,11 +225,67 @@ of the list and any sublists must always be the same.  Hence
 \noindent is not, since the second element is a {\tt LIST(FLOAT)}.
 
 Lists are distinct in type from each other and from their scalar equivalents.
+That is to say, {\tt LIST(INTEGER)} is not the same time as
+{\tt LIST(FLOAT)}, nor is it the same type as {\tt INTEGER}.
+
+\subsection{Variables}
+
+A variable stores one object of the corresponding data type
+To create a user defined variable, or to give
+a new value to an existing variable, one can use the built-in
+function,
+\verb+Assign+, which has the syntax:
+\begin{verbatim}
+Assign[x<->T, y->T]
+\end{verbatim}
+
+\noindent (How to read a function's declaration is described in more
+detail in the section of function calls.  For now, suffice it to say that
+{\tt Assign} takes two parameters, the first of which is a variable and
+the second a value of the same type as the variable.)  The {\tt Assign}
+function also has an infix operator form, written {\tt :=}.  So, to assign
+the {\tt INTEGER} value 1 to the variable {\tt x}, one could write
+
+\begin{verbatim}
+Assign[x, 1]
+\end{verbatim}
+
+\noindent or equivalently, and more compactly,
+
+\begin{verbatim}
+x := 1
+\end{verbatim}
+
+The {\tt Assign} function can be used to either create a new variable or
+modify an existing one.  However, it cannot be used to change the type
+of a variable.  Consider the calls
+
+\begin{verbatim}
+Assign[y, 2]
+Assign[y, 3.0]
+\end{verbatim}
+
+\noindent The first call defines {\tt y} to be of type {\tt INTEGER}.  The
+second call, then, is interpreted as {\tt Assign[INTEGER, FLOAT]}, which does
+not match the definition of {\tt Assign}.
+
+An existing variable may be deleted by the use of the {\tt UnAssign} function
+
+\begin{verbatim}
+UnAssign[x<->T] =: T
+\end{verbatim}
+
+\noindent After this is called on a variable, the variable is no longer
+defined.  A subsequent call of {\tt Assign} may redefine the variable to
+be of any type.
 
 \subsection{Errors}
 
-There are two main classes of errors which may arise in GCL programs,
-parse errors and run time errors.  
+Sometimes, programs contain errors.  The interpreter is able to detect
+errors which violate rules of the language, and reports information
+about the error so the user can correct it.  There are two main
+classes of errors which may arise in GCL programs, parse errors and
+run time errors.
 
 A parse error occurs when the GCL interpreter cannot determine the
 meaning of a statement, because it does not conform to the grammatical
@@ -275,18 +305,6 @@ termination of the GCL at the point where the error occurs, ith a
 message indicating the type of error encountered.  However, no line
 number is given for run time errors.  
 
-\section{Writing simple programs}
-
-
-
-\subsection{Statements}
-
-A GCL program consists of a series of statements.  A statement is
-typically an expression built up out of function calls.  A statement
-is terminated by a linefeed or by a semicolon.  The GCL interpreter,
-reports the value of each expression evaluated unless the semicolon is
-present. Statements can be continued for more than one line by using
-the continuation character, \verb+\+.   
 
 \subsection{Function calls}
 
@@ -587,11 +605,15 @@ third parameter expressions in a fashion similar to the While command.
 
 \subsection{Including files}
 
-The Include[TEXT] function can be used to insert an external file into
-your GCl program.  This command is useful to avoid unneccessary typing
-of often used sequences of commands or definitions of user defined
-functions.  Such commands can be put in a file, and included whenever
-they are needed.
+The function {\tt Include[TEXT]} is used to insert the contents of the file
+given into the input stream, as if they had been typed directly by the user.
+This can be particularly useful in conjunction with user defined functions, in that
+a library of useful functions can be constructed and included into the program
+easily.
+
+The {\tt Include} directive may only appear at the ``top level'' of the
+program.  That is to say, it cannot be used inside a loop, function declaration, or expression.  However, files may be nested arbitrarily deep using
+{\tt Include}, so you can include a file which in turn includes other files.
   
 \subsection{User defined functions}
 
@@ -679,7 +701,7 @@ always 13, regardless of the value of \verb+i+ outside of the function.
 
 \subsubsection{Creating a new extensive form}
 
-The function NewEfg[] can be used to create a new extensive form game.
+The function {\tt NewEfg[]} can be used to create a new extensive form game.
 In order to do anything with it, a variable should be created to be
 the new extensive form game.  Thus, the command
 
@@ -687,7 +709,7 @@ the new extensive form game.  Thus, the command
 e := NewEfg[]
 \end{verbatim}
 
-\noindent will create a new extensive form game \verb+e+.  The game 
+\noindent will create a new extensive form game stored in \verb+e+.  The game 
 is a trivial game with only one node, a \verb+root node+, and one
 player, \verb+chance+.  By default, the game will have its data stored
 as \verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+,
@@ -696,7 +718,7 @@ specifying
 
 
 \begin{verbatim}
-e := NewEfg[True, {"Fred", "Alice"} ] =: EFG
+e := NewEfg[True, {"Fred", "Alice"} ]
 \end{verbatim}
 
 \subsubsection{Modifying an extensive form}
@@ -709,7 +731,7 @@ in \cite{Mye:91}
 \begin{verbatim}
 e := NewEfg[];
 n := RootNode[e];
-deal := NewInfoset[ Chance[e], {"Red", "Black"}]
+deal := NewInfoset[ Chance[e], {"Red", "Black"}];
 AppendNode[n, deal];
 fred := NewPlayer[e,"Fred"];
 fredred := NewInfoset[ fred , {"Raise", "Fold"} ];
@@ -725,12 +747,12 @@ AppendNode[n#2#1, alicemove];
 \noindent Outcomes can be defined and attached:
 
 \begin{verbatim}
-ante := 1.00
-raise := 1.00
-win := SetPayoff[NewOutcome[e, "Win"],{ante,-ante}]
-winbig := SetPayoff[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}]
-lose := SetPayoff[NewOutcome[e, "Lose"],{-ante,ante}]
-losebig := SetPayoff[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}]
+ante := 1.00;
+raise := 1.00;
+win := SetPayoff[NewOutcome[e, "Win"],{ante,-ante}];
+winbig := SetPayoff[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}];
+lose := SetPayoff[NewOutcome[e, "Lose"],{-ante,ante}];
+losebig := SetPayoff[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}];
 AttachOutcome[n#1#1#1,winbig];
 AttachOutcome[n#1#1#2,win];
 AttachOutcome[n#1#2,lose];
@@ -751,7 +773,7 @@ SaveEfg[e, "filename.efg" ]
 \noindent where \verb+e+ is the extensive form game, and \verb+filename.efg+ is
 the filename of the file to be created.  It is recommended that the
 filename extension \verb+.efg+ be used when saving extensive form
-games, as the Gambit Graphics user interface recognizes this extension
+games, as the Gambit graphics user interface recognizes this extension
 as containing extensive form games.  Once an extensive form game has
 been saved to an external file, it can be loaded by the command
 \verb+LoadEfg+, as follows:
@@ -764,7 +786,7 @@ e := LoadEfg["filename.efg" ]
 
 \subsubsection{Creating a new normal form}
 
-The function NewNfg[] can be used to create a new normal form game.
+The function \verb+NewNfg[]+ is used to create a new normal form game.
 In order to do anything with it, a variable should be created to be
 the new extensive form game.  Thus, the command
 
@@ -773,7 +795,7 @@ n := NewNfg[{3,2,2}]
 \end{verbatim}
 
 \noindent 
-will create a new normal form game \verb+n+, with three players, where
+will create a new normal form game stored in \verb+n+, with three players, where
 the first player has three strategies, and the second and third
 players each have two strategies.  The game has zero payoffs in each
 strategy profile.  By default, the game will have its data stored in
@@ -922,9 +944,9 @@ evaluated on a grid of mesh 'delp.'  This procedure is very
 computationally intensive, and is only feasible for small two-person
 normal form games.
 
-\subsection{Lcp}
+\subsection{Linear Complementarity Program}
 
-The {\tt LcpSolve} function formulates and solves the game as a Linear
+The {\tt LcpSolve} function formulates and solves the game as a linear
 complementarity problem.  This algorithm works for two person
 games in either extensive or normal form.  
  
@@ -948,7 +970,7 @@ The method has nice properties in terms of its computational
 complexity, as it only grows linearly in the size of the extensive
 form game.  
 
-\subsection{Liap}
+\subsection{Lyapunov Function}
 
 The {\tt LiapSolve} function finds Nash equilibria via the Lyapunov
 function method described in \cite{McK:91}.  This method works on
@@ -967,12 +989,12 @@ found, it will keep searching from new randomly chosen starting points
 until a Nash equilibrium has been found or the maximum number of tries
 (parameter 'ntries') is exceeded, whichever comes first.
 
-\subsection{LP}
+\subsection{Linear Program}
 
 Finds the minmimax solution (a Nash equilibrium) for a two person
 constant-sum game in normal form, by solving it as a Linear Program.
 
-\subsection{SimpDiv}
+\subsection{Simpicial Subdivision}
 
 Computes a Nash equilibrium to a n-person normal form game based on a
 simplicial subdivision algorithm.  The algorithm implemented is that
@@ -1015,6 +1037,8 @@ convergence.
 This section contains a list of functions, organized by
 category.  For a description of each function, and the arguments,
 refer to the following, alphabetically organized, section.
+
+\subsection{General Functionality}
 
 \begin{verbatim}
 Assign[x<->T, y->T] =: T
@@ -1061,8 +1085,9 @@ Plus[x->TEXT, y->TEXT] =: TEXT
 LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
-SaveEfg[efg<->EFG,file->TEXT] =: BOOL
-SaveNfg[nfg<->NFG | support->NFSUPPORT,file->TEXT] =: BOOL
+SaveEfg[efg<->EFG, file->TEXT] =: EFG
+SaveNfg[nfg<->NFG, file->TEXT] =: NFG
+SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
 SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->BEHAV] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
@@ -1139,7 +1164,8 @@ Times[x->BEHAV, y->RATIONAL] =: BEHAV
 AppendAction[infoset->INFOSET] =: ACTION
 AppendNode[node->NODE, infoset->INFOSET] =: NODE
 AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
-Behav[efg<->EFG, list->LIST(LIST(LIST(T)))] =: BEHAV
+Behav[efg<->EFG, {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
+Behav[efg<->EFG, {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
@@ -1148,11 +1174,10 @@ DeleteTree[node->NODE] =: NODE
 DetachOutcome[node->NODE] =: NODE
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 InsertNode[node->NODE, infoset->INFOSET] =: NODE
-%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
-Mixed[nfg<->NFG | support->NFSUPPORT, list->LIST(LIST(T))] =: MIXED
 MoveTree[from->NODE, to->NODE] =: NODE
 NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
 NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
@@ -1183,6 +1208,10 @@ SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
 
 \begin{verbatim}
 AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
+Mixed[nfg<->NFG, list->LIST(LIST(FLOAT))] =: MIXED
+Mixed[nfg<->NFG, list->LIST(LIST(RATIONAL))] =: MIXED
+Mixed[support->NFSUPPORT, {list->LIST(LIST(FLOAT))}] =: MIXED
+Mixed[support->NFSUPPORT, {list->LIST(LIST(RATIONAL))}] =: MIXED
 NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
 NewSupport[nfg<->NFG] =: NFSUPPORT
 RandomNfg[nfg<->NFG, {seed->INTEGER}] =: NFG
@@ -3224,24 +3253,36 @@ Returns the root node of the extensive form game \verb+efg+.
 
 \item
 \protect \large \begin{verbatim}
-SaveEfg[efg<->EFG, file->TEXT] =: BOOL
+SaveEfg[efg<->EFG, file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
 Writes the extensive form game \verb+efg+ to an external
-save file.  Returns the success of the operation.
+save file.  Returns \verb+efg+.
 \item
 [See also:] {\tt LoadEfg}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-SaveNfg[nfg<->NFG | support->NFSUPPORT, file->TEXT] =: BOOL
+SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 \end{verbatim}\normalsize
 
 \bd
 Writes the normal form game \verb+nfg+ to an external
-save file.  Returns the success of the operation.
+save file.  Returns \verb+nfg+.
+\item
+[See also:] {\tt LoadNfg}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
+\end{verbatim}\normalsize
+
+\bd
+Writes a normal form game using the strategies in \verb+support+ as the full support
+of the game.  Returns \verb+support+.
 \item
 [See also:] {\tt LoadNfg}.
 \ed
@@ -3320,11 +3361,6 @@ Returns the object \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-SetOptions[alg->TEXT, param->TEXT, value->T] =: T
-\end{verbatim}\normalsize
-
-\item
-\protect \large \begin{verbatim}
 SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
 \end{verbatim}\normalsize
@@ -3381,8 +3417,6 @@ SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 \bd
 Computes a Nash equilibrium to a normal form game based
 on a simplicial subdivision algorithm.  
-
-convergence.
 
 \item
 [Return value:] The list of equilibria found.
