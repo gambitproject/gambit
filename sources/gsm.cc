@@ -169,9 +169,9 @@ bool GSM::VarDefine(const gText& var_name, Portion* p)
   }
 
   if (!type_match) {
-    _ErrorMessage(_StdErr, 42, 0, 0, var_name);
     delete p;
-    result = false;
+    throw gclRuntimeError("Cannot change the type of variable \"" +
+			  var_name + "\"");
   }
   else {
     if (old_value)
@@ -301,7 +301,8 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 	throw gclRuntimeError("Cannot assign from INPUT/OUTPUT variable" );
 	break;
       default:
-	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
+	throw gclRuntimeError("Assigning to unknown type " +
+			      PortionSpecToText(p1Spec));
       }
 
       delete p2;
@@ -352,18 +353,16 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 	VarDefine( varname, p2 );
       result = VarValue( varname )->RefCopy();
     }
-    else // error: changing the type of variable
-    {
-      _ErrorMessage(_StdErr, 66, 0, 0, varname, 
-		    PortionSpecToText(p1Spec),
-		    PortionSpecToText(p2Spec));
+    else { // error: changing the type of variable
       delete p2;
       delete p1;
-      throw gclRuntimeError("Changing the type of a variable");
+      throw gclRuntimeError("Cannot change the type of variable \"" +
+			    varname + "\" from " +
+			    PortionSpecToText(p1Spec) + " to " +
+			    PortionSpecToText(p2Spec));
     }
   }
-  else
-  {
+  else {
     delete p2;
     delete p1;
     throw gclRuntimeError("Must assign to a variable");
@@ -384,21 +383,15 @@ bool GSM::UnAssign(Portion *p)
     {
       delete _VarRemove(((ReferencePortion *) p)->Value());
       delete p;
-//      _Push(new BoolPortion(true));
       return true;
     }
-    else
-    {
+    else {
       delete p;
-//      _Push(new BoolPortion(false));
       return true;
     }
   }
-  else
-  {
-//    _Push(p);
-    _ErrorMessage(_StdErr, 53);
-    return false;
+  else {
+    throw gclRuntimeError("UnAssign[] called on a non-reference value");
   }
 }
 
@@ -433,44 +426,17 @@ Portion* GSM::UnAssignExt(Portion *p)
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
-void GSM::_ResolveRef( Portion*& p )
+void GSM::_ResolveRef(Portion *&p)
 {
-  Portion*  result = 0;
-  gText ref;
-  
-  if(p->Spec().Type == porREFERENCE)
-  {
-    ref = ((ReferencePortion*) p)->Value();
+  if (p->Spec().Type == porREFERENCE) {
+    gText ref = ((ReferencePortion*) p)->Value();
 
-    if(!VarIsDefined(ref))
-    {
-      result = p;
-    }
-    else
-    {
-      result = VarValue(ref)->RefCopy();
+    if (VarIsDefined(ref)) {
+      Portion *result = VarValue(ref)->RefCopy();
       delete p;
-
-      /* temporary
-      if(_VarValue(ref)->IsValid())
-      {
-	result = _VarValue(ref)->RefCopy();
-	delete p;
-      }
-      else
-      {
-	delete _VarRemove(ref);
-	result = p;
-      }
-      */
+      p = result;
     }
   }
-  else
-  {
-    result = p;
-  }
-
-  p = result;
 }
 
 
@@ -488,12 +454,12 @@ bool GSM::AddFunction(FuncDescObj* func)
     _FuncTable->Define(func->FuncName(), func);
     return true;
   }
-  else
-  {
+  else {
     old_func = (*_FuncTable)(func->FuncName());
     result = old_func->Combine(func);
-    if(!result)
-      _ErrorMessage(_StdErr, 60, 0, 0, old_func->FuncName());
+    if (!result)
+      throw gclRuntimeError("New " + old_func->FuncName() +
+			    "[] ambiguous with existing function");
     return result;
   }
 }
@@ -502,21 +468,16 @@ bool GSM::AddFunction(FuncDescObj* func)
 bool GSM::DeleteFunction(FuncDescObj* func)
 {
   FuncDescObj *old_func = 0;
-  bool result;
   if (func == 0)  return 0;
-  if(!_FuncTable->IsDefined(func->FuncName()))
-  {
-    _ErrorMessage(_StdErr, 73, 0, 0, old_func->FuncName());
-    return false;
+  if (!_FuncTable->IsDefined(func->FuncName())) {
+    throw gclRuntimeError("Function " + old_func->FuncName() + " not found");
   }
-  else
-  {
+  else {
     old_func = (*_FuncTable)(func->FuncName());
-    result = old_func->Delete(func);
-    if(!result)
-      _ErrorMessage(_StdErr, 72, 0, 0, old_func->FuncName());
-    return result;
+    if (!old_func->Delete(func))
+      throw gclRuntimeError("No matching prototype found");
   }
+  return true;
 }
 
 
@@ -1023,104 +984,6 @@ void GSM::UnAssignEfgSubTree( Efg* game, Node* node )
   }
   UnAssignEfgElement( game, porNODE, node );
 }
-
-
-
-
-
-//-----------------------------------------------------------------------
-//                         _ErrorMessage
-//-----------------------------------------------------------------------
-
-void GSM::_ErrorMessage
-(
- gOutput&        s,
- const int       error_num,
- const long&     num1, 
- const long&     num2,
- const gText&  str1,
- const gText&  str2,
- const gText&  str3
-)
-{
-#if 0
-  s << "GSM Error " << error_num << ":\n";
-#endif // 0
-
-  s << "GCL: ";
-
-  switch(error_num)
-  {
-  case 11:
-    s << "NthElement[]: Subscript out of range\n";
-    s << "Requested #" << num1 << " out of " << num2 << " elements\n";
-    break;
-  case 12:
-    s << "NthChar[]: Subscript out of range\n";
-    break;
-  case 25:
-    s << "Function " << str1 << "[] undefined\n";
-    break;
-  case 35:
-    s << "Cannot create a list of mixed types\n";
-    break;
-  case 42:
-    s << "Cannot change the type of variable \"" << str1 << "\"\n";
-    break;
-  case 46:
-    s << "Cannot assign to read-only variable \"" << str1 <<"\"\n";
-    break;
-  case 49:
-    s << "Cannot insert undefined reference \"" << str1 << "\" into a list\n";
-    break;
-  case 53:
-    s << "UnAssign[] called on a non-reference value\n";
-    break;
-  case 54:
-    s << "UnAssign[] called on undefined reference \"" << str1 << "\"\n";
-    break;
-  case 55:
-    s << "Cannot remove read-only variable \"" + str1 + "\"\n";
-    break;
-  case 59:
-    s << "Cannot to pass an undefined reference to a function\n";
-    break;
-  case 60:
-    s << "New " << str1 << "[] ambiguous with existing built-in function\n";
-    break;
-  case 61:
-    s << "Cannot pass an undefined reference to a function\n";
-    break;
-  case 62:
-    s << "Function " << str1 << "[] not found\n";
-    break;
-  case 63:
-    s << "Undefined variable " << str1 << " passed to Assign[]\n";
-    break;
-  case 66:
-    s << "Cannot change the type of variable \"" << str1 << "\" from ";
-    s << str2 << " to " << str3 << '\n';
-    break;
-  case 67:
-    s << "Assigning to an unknown type: " << str1 << "\n";
-    break;
-  case 72:
-    s << "No matching function prototype found\n";
-    break;
-  case 73:
-    s << "Function " << str1 << "[] not found\n";
-    break;
-  default:
-    s << "General error " << error_num << "\n";
-  }
-}
-
-
-
-
-
-
-
 
 
 void GSM::GlobalVarDefine     ( const gText& var_name, Portion* p )

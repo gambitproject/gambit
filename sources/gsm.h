@@ -37,8 +37,7 @@ template <class T> class RefCountHashTable;
 
 #define GCL_VERSION   0.95
 
-class GSM
-{
+class GSM  {
 friend class gclFunctionCall;
 friend class gclVarName;
 private:
@@ -67,17 +66,6 @@ private:
   bool _Bind ( const gText& param_name ) const;
 
   Portion* _VarRemove    ( const gText& var_name );
-
-  static void _ErrorMessage
-    (
-     gOutput&        s,
-     const int       error_num = 0,
-     const long& num1      = 0, 
-     const long& num2      = 0,
-     const gText&  str1      = "",
-     const gText&  str2      = "",
-     const gText&  str3      = ""
-     );
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
@@ -130,10 +118,6 @@ public:
 
   // This function will unassign the subtree rooted by the given node
   void UnAssignEfgSubTree( Efg* game, Node* node ); 
-
-
-
-
 
 
   void GlobalVarDefine     ( const gText& var_name, Portion* p );
