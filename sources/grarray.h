@@ -29,8 +29,8 @@ template <class T> class gRectArray    {
     int NumColumns(void) const;
     int MinRow(void) const;
     int MaxRow(void) const;
-    int MinColumn(void) const;
-    int MaxColumn(void) const;
+    int MinCol(void) const;
+    int MaxCol(void) const;
     
     T &operator()(int r, int c);
     const T &operator()(int r, int c) const;

@@ -94,8 +94,8 @@ template <class T> int gRectArray<T>::NumColumns(void) const
 
 template <class T> int gRectArray<T>::MinRow(void) const    { return minrow; }
 template <class T> int gRectArray<T>::MaxRow(void) const    { return maxrow; }
-template <class T> int gRectArray<T>::MinColumn(void) const { return mincol; }
-template <class T> int gRectArray<T>::MaxColumn(void) const { return maxcol; }
+template <class T> int gRectArray<T>::MinCol(void) const { return mincol; }
+template <class T> int gRectArray<T>::MaxCol(void) const { return maxcol; }
 
 template <class T> T &gRectArray<T>::operator()(int r, int c)
 {
