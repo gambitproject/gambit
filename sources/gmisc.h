@@ -67,8 +67,10 @@ long ran1(long* idum);
 class gInteger;
 class gRational;
 
-void    ToStringPrecision(int);			// Set # of decimal places for floating point
-int			ToStringPrecision(void);		// Get the current value of the above
+void ToStringWidth(int); // Set # of decimal places for floating point
+int  ToStringWidth(void); // Get the current value of the above
+void ToStringPrecision(int); // Set # of decimal places for floating point
+int  ToStringPrecision(void); // Get the current value of the above
 gString ToString(int);
 gString ToString(long);
 gString ToString(double);

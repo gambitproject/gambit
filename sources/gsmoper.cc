@@ -1358,6 +1358,9 @@ void GSM_SetWriteOptions(void)
   Portion::_SetWriteListLF(_WriteListLF);
   Portion::_SetWriteListIndent(_WriteListIndent);
   Portion::_SetWriteSolutionInfo(_WriteSolutionInfo);
+
+  ToStringWidth( _WriteWidth );
+  ToStringPrecision( _WritePrecis );
 }
 
 

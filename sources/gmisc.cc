@@ -135,8 +135,20 @@ double Uniform(void)
 //--------------------------------------------------------------------------
 
 #define GCONVERT_BUFFER_LENGTH     64
-char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
-int precision = 2;
+static char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
+static int precision = 6;
+static int width = 0;
+
+void ToStringWidth(int i)
+{
+  width = i;
+}
+
+int ToStringWidth(void)
+{
+  return width;
+}
+
 
 void ToStringPrecision(int i)
 {
@@ -156,13 +168,15 @@ gString ToString(int i)
 
 gString ToString(long l)
 {
-  sprintf(gconvert_buffer, "%.*ld", precision, l);
+  // sprintf(gconvert_buffer, "%.*ld", precision, l);
+  sprintf(gconvert_buffer, "%*d", width, l);
   return gString(gconvert_buffer);
 }
 
 gString ToString(double d)
 {
-  sprintf(gconvert_buffer, "%.*f", precision, d);
+  // sprintf(gconvert_buffer, "%.*f", precision, d);
+  sprintf(gconvert_buffer, "%*.*f", width, precision, d);
   return gString(gconvert_buffer);
 }
 
