@@ -453,7 +453,8 @@ FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
 
 
   // Assumes one argument, which has a prototype func_proto
-FuncDescObj::FuncDescObj(const gString& func_proto)
+FuncDescObj::FuncDescObj( const gString& func_proto, 
+                          Portion* (*funcptr)(Portion**) )
 {
   _NumFuncs = 1;
   _FuncInfo = new FuncInfoType[1];
@@ -471,7 +472,7 @@ FuncDescObj::FuncDescObj(const gString& func_proto)
 
   _FuncName = func_name;
 
-  SetFuncInfo(0,func_proto);
+  SetFuncInfo(0,func_proto,funcptr);
 }
 
 
