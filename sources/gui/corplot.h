@@ -36,8 +36,6 @@
 #include "nash/mixedsol.h"
 #include "nash/behavsol.h"
 
-#include "nfgsupport.h"
-
 //
 // gbtCorBranch is meant to encapsulate the idea of a branch of a
 // correspondence.  For now, implement only for mixed profiles and
@@ -253,6 +251,18 @@ protected:
 
 public:
   gbtNfgCorPlotFrame(const gbtNfgSupport &p_support,
+		     wxWindow *p_parent, const wxPoint &, const wxSize &);
+};
+
+class gbtEfgCorPlotFrame : public gbtCorPlotFrame {
+private:
+  gbtEfgSupport m_support;
+
+protected:
+  void OnEditSupport(wxCommandEvent &);
+
+public:
+  gbtEfgCorPlotFrame(const gbtEfgSupport &p_support,
 		     wxWindow *p_parent, const wxPoint &, const wxSize &);
 };
 

@@ -269,6 +269,11 @@ void dialogQreFile::OnToolsPlot(wxCommandEvent &)
     plotFrame->SetCorrespondence(new gbtCorBranchMixed(m_mixedProfiles));
   }
   else {
-    //    plotFrame->SetCorrespondence(new gbtCorBranchBehav(m_behavProfiles));
+    gbtEfgSupport support(m_behavProfiles[1].GetGame());
+    support.SetLabel("Displayed support");
+    gbtEfgCorPlotFrame *plotFrame = 
+      new gbtEfgCorPlotFrame(support, this, wxDefaultPosition,
+			     wxSize(500, 300));
+    plotFrame->SetCorrespondence(new gbtCorBranchBehav(m_behavProfiles));
   }
 }

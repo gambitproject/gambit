@@ -35,6 +35,10 @@
 #include "id.h"
 #include "corplot.h"
 
+// These are for the support widgets
+#include "nfgsupport.h"
+#include "efgsupport.h"
+
 //========================================================================
 //                          General comments
 //========================================================================
@@ -665,6 +669,136 @@ void gbtNfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
       for (int st = 1; st <= player.NumStrategies(); st++) {
 	GetCorrespondence()->ShowDimension(index++, 
 					   m_support.Contains(player.GetStrategy(st)));
+      }
+    }
+
+    m_plot->Refresh();
+  }
+}
+
+//========================================================================
+//              Implementation of gbtEfgCorPlotSupportDialog
+//========================================================================
+
+const int GBT_EFG_STRATEGY_WIDGET = 8000;
+
+class gbtEfgCorPlotSupportDialog : public wxDialog {
+private:
+  gbtEfgSupport m_support;
+  gbtEfgSupportWidget *m_supportWidget;
+
+  // Event handlers
+  void ToggleStrategy(wxTreeItemId);
+  void OnTreeKeypress(wxTreeEvent &);
+  void OnTreeItemActivated(wxTreeEvent &);
+
+public:
+  gbtEfgCorPlotSupportDialog(wxWindow *p_parent,
+			     const gbtEfgSupport &p_support);
+
+
+  // Only valid if ShowModal() returns wxID_OK
+  const gbtEfgSupport &GetSupport(void) const { return m_support; }
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(gbtEfgCorPlotSupportDialog, wxDialog)
+  EVT_TREE_KEY_DOWN(GBT_EFG_STRATEGY_WIDGET,
+		    gbtEfgCorPlotSupportDialog::OnTreeKeypress)
+  EVT_TREE_ITEM_ACTIVATED(GBT_EFG_STRATEGY_WIDGET,
+			  gbtEfgCorPlotSupportDialog::OnTreeItemActivated)
+END_EVENT_TABLE()
+
+gbtEfgCorPlotSupportDialog::gbtEfgCorPlotSupportDialog(wxWindow *p_parent,
+						       const gbtEfgSupport &p_support)
+  : wxDialog(p_parent, -1, "Choose displayed support", wxDefaultPosition),
+    m_support(p_support)
+{
+  SetAutoLayout(true);
+
+  m_supportWidget = new gbtEfgSupportWidget(this, GBT_EFG_STRATEGY_WIDGET);
+  m_supportWidget->SetSize(300, 300);
+  m_supportWidget->SetSupport(p_support);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_supportWidget, 1, wxEXPAND, 0);
+  
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
+  okButton->SetDefault();
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+  CenterOnParent();
+}
+
+void gbtEfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
+{
+  gbtEfgAction action = m_supportWidget->GetAction(p_id);
+  if (action.IsNull()) {
+    return;
+  }
+
+  if (m_support.Contains(action)) {
+    m_support.RemoveAction(action);
+  }
+  else {
+    m_support.AddAction(action);
+  }
+  m_supportWidget->SetSupport(m_support);
+}
+
+void gbtEfgCorPlotSupportDialog::OnTreeKeypress(wxTreeEvent &p_event)
+{
+  if (p_event.GetKeyCode() == WXK_SPACE) {
+    ToggleStrategy(m_supportWidget->GetSelection());
+  }
+}
+
+void gbtEfgCorPlotSupportDialog::OnTreeItemActivated(wxTreeEvent &p_event)
+{
+  ToggleStrategy(p_event.GetItem());
+}
+
+
+//========================================================================
+//                Implementation of gbtEfgCorPlotFrame
+//========================================================================
+
+gbtEfgCorPlotFrame::gbtEfgCorPlotFrame(const gbtEfgSupport &p_support,
+				       wxWindow *p_parent,
+				       const wxPoint &p_position,
+				       const wxSize &p_size)
+  : gbtCorPlotFrame(p_parent, p_position, p_size),
+    m_support(p_support)
+{ }
+
+
+void gbtEfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
+{
+  gbtEfgCorPlotSupportDialog dialog(this, m_support);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_support = dialog.GetSupport();
+
+    int index = 1;
+
+    for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
+      gbtEfgPlayer player = m_support.GetGame().GetPlayer(pl);
+
+      for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+	gbtEfgInfoset infoset = player.GetInfoset(iset);
+
+	for (int act = 1; act <= infoset.NumActions(); act++) {
+	  GetCorrespondence()->ShowDimension(index++, 
+					     m_support.Contains(infoset.GetAction(act)));
+	}
       }
     }
 
