@@ -798,12 +798,21 @@ public:
 
 class InputPortion : public Portion  {
 protected:
-  gInput* _Value;
+  struct inputrep  {
+    gInput *value;
+    int nref;
+
+    inputrep(gInput *v) : value(v), nref(1)  { }
+    ~inputrep()  { if (value != &gin)  delete value; }
+  };
+  
+  struct inputrep *rep; 
   bool _ref;
+
+  InputPortion(const InputPortion *, bool);
 
 public:
   InputPortion(gInput &value);
-  InputPortion(gInput &value, bool);
   virtual ~InputPortion();
 
   gInput& Value(void) const;

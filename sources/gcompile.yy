@@ -298,7 +298,7 @@ constant:        BOOLEAN
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
         |        STDIN
-          { $$ = new gclConstExpr(new InputPortion(gin, true)); }
+          { $$ = new gclConstExpr(new InputPortion(gin)); }
         |        STDOUT
           { $$ = new gclConstExpr(new OutputPortion(gout)); }
         |        gNULL

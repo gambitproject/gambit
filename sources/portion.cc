@@ -1550,20 +1550,24 @@ bool OutputPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 
-
-InputPortion::InputPortion(gInput &value)
-  : _Value(&value), _ref(false)
+InputPortion::InputPortion(gInput& value)
+  : rep(new struct inputrep(&value)), _ref(false)
 { }
 
-InputPortion::InputPortion(gInput &value, bool ref)
-  : _Value(&value), _ref(ref)
-{ }
+InputPortion::InputPortion(const InputPortion *p, bool ref)
+  : rep(p->rep), _ref(ref)
+{
+  rep->nref++;
+}
 
 InputPortion::~InputPortion()
-{ if (!_ref)  delete _Value; }
+{
+  if (--rep->nref == 0)   delete rep;
+}
+
 
 gInput& InputPortion::Value(void) const
-{ return *_Value; }
+{ return *rep->value; }
 
 PortionSpec InputPortion::Spec(void) const
 { return PortionSpec(porINPUT); }
@@ -1580,11 +1584,13 @@ gString InputPortion::OutputString( void ) const
 }
 
 Portion* InputPortion::ValCopy(void) const
-{  return RefCopy(); }
+{ 
+  return new InputPortion(this, false);
+}
 
 Portion* InputPortion::RefCopy(void) const
 { 
-  Portion* p = new InputPortion(*_Value, true); 
+  Portion* p = new InputPortion(this, true); 
   p->SetOriginal(Original());
   return p;
 }
