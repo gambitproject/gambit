@@ -45,6 +45,7 @@ class gelParamInfo  {
 private:
   gText m_Name;
   gelType m_Type;
+  int m_Depth;
   gText m_Default;
   bool m_Optional;
   bool m_ByReference;
@@ -53,6 +54,7 @@ public:
   gelParamInfo(const gText &fn);
   const gText& Name( void ) const { return m_Name; }
   gelType Type( void ) const { return m_Type; }
+  int Depth( void ) const { return m_Depth; }
 };
 
 class gelSignature   
@@ -60,6 +62,7 @@ class gelSignature
 private:
   gText m_Name;
   gelType m_Type;
+  int m_Depth;
   gList<gelParamInfo *> m_Parameters;
 
   bool m_IsUdf;
@@ -78,6 +81,9 @@ public:
 
   ~gelSignature();
 
+
+  gelType Type( void ) const { return m_Type; }
+  int Depth( void ) const { return m_Depth; }
   
 
   bool Matches(const gText &,

@@ -19,8 +19,33 @@ gText gelBadFunctionSig::Description(void) const
 { return "Bad function signature: " + sig; }
 
 
-static gelType NameToType(const gText &name)
+static int NameToDepth( gText name )
 {
+  // this assumes that there are no spaces in name
+  assert( !name.LastOccur( ' ' ) );
+  int depth = 0;
+  while( name.Length() >= 5 && name.Left( 5 ) == "LIST(" )
+  {
+    ++depth;
+    name = name.Right( name.Length() - 5 );
+    assert( name.Right( 1 ) == ")" );
+    name = name.Left( name.Length() - 1 );
+  }
+  return depth;
+}
+
+
+static gelType NameToType( gText name )
+{
+  // this assumes that there are no spaces in name
+  assert( !name.LastOccur( ' ' ) );
+  while( name.Length() >= 5 && name.Left( 5 ) == "LIST(" )
+  {
+    name = name.Right( name.Length() - 5 );
+    assert( name.Right( 1 ) == ")" );
+    name = name.Left( name.Length() - 1 );
+  }
+
   if (name == "NUMBER")
     return gelNUMBER;
   else if (name == "BOOLEAN")
@@ -118,7 +143,10 @@ gelParamInfo::gelParamInfo(const gText &s)
     m_Default = word;
   }
   else
-    m_Type = NameToType(word);
+  {
+    m_Type = NameToType( word );
+    m_Depth = NameToDepth( word );
+  }
 }
 
 
@@ -230,7 +258,8 @@ void gelSignature::ParseSignature(const gText &s)
     }
   }
 
-  m_Type = NameToType(word);
+  m_Type = NameToType( word );
+  m_Depth = NameToDepth( word );
 }
 
 gelSignature::~gelSignature()
@@ -248,7 +277,8 @@ bool gelSignature::Matches(const gText &n,
   
   for (int i = 1; i <= actuals.Length(); i++)   {
     if (m_Parameters[i]->Type() != gelANYTYPE &&
-        actuals[i]->Type() != m_Parameters[i]->Type())
+        ( ( actuals[i]->Type() != m_Parameters[i]->Type() ) ||
+	  ( actuals[i]->Depth() < m_Parameters[i]->Depth() ) ) )
       return false;
   }
 
@@ -483,7 +513,7 @@ extern void gelSolInit(gelEnvironment *);
 gelEnvironment::gelEnvironment(void)
 {
   gelMathInit(this);
-//  gelListInit(this);
+  // gelListInit(this);
   gelEfgInit(this);
   gelNfgInit(this);
   gelAlgInit(this);

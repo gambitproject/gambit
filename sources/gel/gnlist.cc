@@ -89,7 +89,6 @@ void gNestedList<T>::GetElementInfo( int el,
     }
   }
 
-  gout << "islist: " << islist << " k_start: " << k_start << " k_end: " << k_end << " el_start: " << el_start << " el_end: " << el_end << '\n';
 }
 
 template <class T> 
