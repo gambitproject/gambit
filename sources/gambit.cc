@@ -210,7 +210,7 @@ wxFrame *GambitApp::OnInit(void)
     bool  record_requested   = false;
     bool  options_found      = false;
 
-    int rpindex;  // index into argc/argv list for record/playback options.
+    int rpindex=0;  // index into argc/argv list for record/playback options.
 
     for (int i = 0; i < wxApp::argc; i++)
     {
@@ -417,11 +417,19 @@ void GambitFrame::LoadFile(char *s)
     
     if (strcmp(s, "") != 0)
     {
-        char *filename = copystring(FileNameFromPath(s));
-        filename = wxStrLwr(filename);  // ignore case
+      //  char *filename = copystring(FileNameFromPath(s));
+      //  filename = wxStrLwr(filename);  // ignore case
+      // FileNameFromPath() is buggy if there is no path, so do following instead
+
+      gout << "\ns: " << s;
+      gText filename(s);
+      if(strstr("/",s) || strstr("\\",s))
+	filename = FileNameFromPath(s);
+      filename = filename.Dncase();
+      gout << "\nfilename: " << filename;
         
 #ifndef EFG_ONLY
-        if (strstr(filename, ".nfg"))       // This must be a normal form.
+        if (strstr((const char *)filename, ".nfg"))       // This must be a normal form.
         {
             NfgGUI(0, s, 0, this);
             return;
@@ -429,7 +437,7 @@ void GambitFrame::LoadFile(char *s)
 #endif
         
 #ifndef NFG_ONLY
-        if (strstr(filename, ".efg"))       // This must be an extensive form.
+        if (strstr((const char *)filename, ".efg"))       // This must be an extensive form.
         {
             EfgGUI(0, s, 0, this);
             return;
@@ -438,8 +446,8 @@ void GambitFrame::LoadFile(char *s)
         
         wxMessageBox("Unknown file type");  // If we got here, there is something wrong.
     }
-    
-    delete [] s;
+    // RDM:  I don't think the following should be here.  
+    //    delete [] s;
 }
 
 
