@@ -518,10 +518,12 @@ public:
 
 class NFSupport;
 
-class NfSupportPortion : public Portion
-{
+class NfSupportPortion : public Portion   {
 protected:
   NFSupport** _Value;
+  void *paytable;
+  DataType type;
+
   NfSupportPortion(void);
 
 public:
@@ -529,7 +531,9 @@ public:
 
   NFSupport*& Value(void) const;
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  DataType SubType(void) const;
+
+  void *PayoffTable(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -541,7 +545,7 @@ public:
 class NfSupportValPortion : public NfSupportPortion
 {
 public:
-  NfSupportValPortion(NFSupport* value);
+  NfSupportValPortion(NFSupport* value, void *pay, DataType t);
   virtual ~NfSupportValPortion();
   bool IsReference(void) const;
 };
@@ -549,7 +553,7 @@ public:
 class NfSupportRefPortion : public NfSupportPortion
 {
 public:
-  NfSupportRefPortion(NFSupport*& value);
+  NfSupportRefPortion(NFSupport*& value, void *pay, DataType t);
   virtual ~NfSupportRefPortion();
   bool IsReference(void) const;
 };

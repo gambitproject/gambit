@@ -2497,13 +2497,13 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
       {
 	if( !IsEfg && varslist[i]->Spec() == porMIXED )
 	{
-	  switch( ((BaseNfg*) game)->Type() )
+	  switch(varslist[i]->Spec().Type)
 	  {
-	  case DOUBLE:
+	  case porMIXED_FLOAT:
 	    ((MixedSolution<double>*) ((MixedPortion<double> *) 
 				       varslist[i])->Value())->Invalidate();
 	    break;
-	  case RATIONAL:
+	  case porMIXED_RATIONAL:
 	    ((MixedSolution<gRational>*) ((MixedPortion<gRational> *) 
 					  varslist[i])->Value())->Invalidate();
 	    break;

@@ -938,8 +938,7 @@ PortionSpec NfSupportPortion::Spec(void) const
 
 DataType NfSupportPortion::SubType( void ) const
 {
-  assert( Value() );
-  return Value()->BelongsTo().Type();
+  return type;
 }
 
 void NfSupportPortion::Output(gOutput& s) const
@@ -957,22 +956,30 @@ gString NfSupportPortion::OutputString( void ) const
 
 Portion* NfSupportPortion::ValCopy(void) const
 {
-  Portion* p = new NfSupportValPortion(*_Value); 
+  Portion* p = new NfSupportValPortion(*_Value, paytable, type); 
   p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfSupportPortion::RefCopy(void) const
 {
-  Portion* p = new NfSupportRefPortion(*_Value); 
+  Portion* p = new NfSupportRefPortion(*_Value, paytable, type); 
   p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
-NfSupportValPortion::NfSupportValPortion(NFSupport* value)
-{ _Value = new NFSupport*(value); }
+void *NfSupportPortion::PayoffTable(void) const
+{ return paytable; }
+
+NfSupportValPortion::NfSupportValPortion(NFSupport* value,
+				         void *pay, DataType t)
+{
+  _Value = new NFSupport*(value);
+  paytable = pay;
+  type = t;
+}
 
 NfSupportValPortion::~NfSupportValPortion()
 { 
@@ -983,8 +990,13 @@ bool NfSupportValPortion::IsReference(void) const
 { return false; }
 
 
-NfSupportRefPortion::NfSupportRefPortion(NFSupport*& value)
-{ _Value = &value; }
+NfSupportRefPortion::NfSupportRefPortion(NFSupport*& value,
+				         void *pay, DataType t)
+{
+  _Value = &value; 
+  paytable = pay;
+  type = t;
+}
 
 NfSupportRefPortion::~NfSupportRefPortion()
 { }

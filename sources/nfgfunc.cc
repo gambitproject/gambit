@@ -39,9 +39,7 @@ static Portion *GSM_AddStrategy(Portion **param)
 
   S->AddStrategy(s);
 
-  Portion* por = new StrategyValPortion(s);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+  return param[0]->RefCopy();
 }
 
 //---------------
@@ -53,12 +51,15 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &, const NFSupport &);
 static Portion *GSM_CompressNfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  const BaseNfg &N = S->BelongsTo();
   
-  if (N.Type() == DOUBLE)
-    return new NfgValPortion<double>(CompressNfg((const Nfg<double> &) N, *S));
-  else
-    return new NfgValPortion<gRational>(CompressNfg((const Nfg<gRational> &) N, *S));
+  if (((NfSupportPortion *) param[0])->SubType() == DOUBLE)   {
+    Nfg<double> *N = (Nfg<double> *) ((NfSupportPortion *) param[0])->PayoffTable();
+    return new NfgValPortion<double>(CompressNfg(*N, *S));
+  }
+  else  {
+    Nfg<gRational> *N = (Nfg<gRational> *) ((NfSupportPortion *) param[0])->PayoffTable();
+    return new NfgValPortion<gRational>(CompressNfg(*N, *S));
+  }
 }
 
 template <class T>  
@@ -78,7 +79,6 @@ NFSupport *ComputeMixedDominated(const Nfg<T> &, NFSupport &S, bool strong,
 static Portion *GSM_ElimDom_Nfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  const BaseNfg &N = S->BelongsTo();
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
   
@@ -88,28 +88,35 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
   NFSupport *T;
-  
-  if (mixed)  {
-    if (N.Type() == DOUBLE)
-      T = ComputeMixedDominated((Nfg<double> &) N, *S, strong, players,
+  Portion *por;
+
+  if (((NfSupportPortion *) param[0])->SubType() == DOUBLE)   {
+    Nfg<double> *N = (Nfg<double> *) ((NfSupportPortion *) param[0])->PayoffTable();
+    if (mixed) 
+      T = ComputeMixedDominated(*N, *S, strong, players,
 				((OutputPortion *) param[4])->Value(), gstatus);
     else
-      T = ComputeMixedDominated((Nfg<gRational> &) N, *S, strong, players,
-				((OutputPortion *) param[4])->Value(), gstatus);
+      T = ComputeDominated(*N, *S, strong, players,
+			   ((OutputPortion *) param[4])->Value(), gstatus);
+
+    por = (T) ? new NfSupportValPortion(T, N, DOUBLE) :
+                new NfSupportValPortion(S, N, DOUBLE);
   }
   else  {
-    if (N.Type() == DOUBLE)
-      T = ComputeDominated((Nfg<double> &) N, *S, strong, players,
+    Nfg<gRational> *N = (Nfg<gRational> *) ((NfSupportPortion *) param[0])->PayoffTable();
+    if (mixed) 
+      T = ComputeMixedDominated(*N, *S, strong, players,
+				((OutputPortion *) param[4])->Value(), gstatus);
+    else 
+      T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
-    else
-      T = ComputeDominated((Nfg<gRational> &) N, *S, strong, players,
-			   ((OutputPortion *) param[4])->Value(), gstatus);
+
+    por = (T) ? new NfSupportValPortion(T, N, RATIONAL) :
+                new NfSupportValPortion(S, N, RATIONAL);
   }
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
   
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -579,9 +586,7 @@ static Portion *GSM_RemoveStrategy(Portion **param)
   
   S->RemoveStrategy(s);
 
-  Portion* por = new NfSupportValPortion(S);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+  return param[0]->RefCopy();
 }
 
 //------------
@@ -721,16 +726,16 @@ static Portion *GSM_Strategies(Portion **param)
 
 static Portion *GSM_Support_Nfg(Portion **param)
 {
-  if (param[0]->Spec().Type == porFLOAT)  {
+  if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N));
+    Portion *por = new NfSupportValPortion(new NFSupport(N), &N, DOUBLE);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N));
+    Portion *por = new NfSupportValPortion(new NFSupport(N), &N, RATIONAL);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;

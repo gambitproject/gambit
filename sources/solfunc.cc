@@ -1558,13 +1558,15 @@ static Portion *GSM_Support_Behav(Portion** param)
 static Portion *GSM_Support_MixedFloat(Portion** param)
 {
   MixedProfile<double> *P = ((MixedPortion<double> *) param[0])->Value();
-  return new NfSupportValPortion(new NFSupport(P->Support()));
+  return new NfSupportValPortion(new NFSupport(P->Support()),
+			         &P->BelongsTo(), DOUBLE);
 }
 
 static Portion *GSM_Support_MixedRational(Portion** param)
 {
   MixedProfile<gRational> *P = ((MixedPortion<gRational> *) param[0])->Value();
-  return new NfSupportValPortion(new NFSupport(P->Support()));
+  return new NfSupportValPortion(new NFSupport(P->Support()),
+                                 &P->BelongsTo(), RATIONAL);
 }
 
 
