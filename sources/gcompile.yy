@@ -87,6 +87,7 @@
 %token DOT
 %token CARET
 %token AMPER
+%token WRITE
 
 %token PERCENT
 %token DIV
@@ -258,9 +259,13 @@ forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt
 exprlist:     expression  { emit(new Pop); }
         |     exprlist SEMI expression  { emit(new Pop); }
 
-expression:   E0
-          |   E0 ASSIGN expression { emit(new Assign()); }
+expression:   Ea
+          |   Ea ASSIGN expression { emit(new Assign()); }
           ;
+
+Ea:           E0
+  |           Ea WRITE E0   { emit(new Write); }
+  ; 
 
 E0:           E1
   |           E0 LOR E1  { emit(new OR); }
@@ -396,7 +401,7 @@ static struct tokens toktable[] =
     { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
-    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, 
+    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
     { CLEAR, "Clear" },
@@ -594,6 +599,7 @@ I_dont_believe_Im_doing_this:
 		else   { ungetchar(c);  return LNOT; }
     case '<':   c = nextchar();
                 if (c == '=')  return LEQ;
+	        else if (c == '<')  return WRITE; 
                 else if (c != '-')  { ungetchar(c);  return LTN; }
                 else   { 
 		  c = nextchar();

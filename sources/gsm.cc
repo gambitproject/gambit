@@ -756,6 +756,9 @@ bool GSM::OR ( void )
 bool GSM::NOT ( void )
 { return _UnaryOperation( "Not" ); }
 
+bool GSM::Write ( void )
+{ return _BinaryOperation( "Write" ); }
+
 
 bool GSM::Subscript ( void )
 {

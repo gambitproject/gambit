@@ -32,7 +32,7 @@ typedef enum
   iQUIT, iIF_GOTO, iGOTO, iCLEAR,
 
   iPUSH, iPUSHLIST, iPUSHREF,
-  iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD,
+  iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD, iWRITE,
 
   iADD, iSUB, iCONCAT, iMUL, iDOT, iDIV, iINTDIV, iNEG,
   iMOD, iPOWER,
@@ -198,6 +198,14 @@ class Subscript : public Instruction
 
 
 class Child : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+class Write : public Instruction
 {
  public:
   Opcode Type( void ) const;

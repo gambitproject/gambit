@@ -133,6 +133,7 @@ public:
   
   bool Subscript ( void );
   bool Child ( void );
+  bool Write ( void );
   
   bool AddFunction( FuncDescObj* func );
 

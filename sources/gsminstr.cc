@@ -175,6 +175,14 @@ void Child::Output( gOutput& s ) const
 { s << "Child"; }
 
 
+Opcode Write::Type( void ) const
+{ return iWRITE; }
+bool Write::Execute( GSM& gsm ) const
+{ return gsm.Write(); }
+void Write::Output( gOutput& s ) const
+{ s << "Write"; }
+
+
 //--------------------------- math operations ---------------------------
 
 Opcode Add::Type( void ) const
