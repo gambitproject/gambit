@@ -60,7 +60,9 @@ AC_OUTPUT(Makefile sources/Makefile \
 	  sources/poly/Makefile \
 	  sources/nash/Makefile \
 	  sources/gcl/Makefile \
-          sources/guishare/Makefile \
+	  sources/bitmaps/Makefile \
 	  sources/wxgcl/Makefile \
-          sources/gui/Makefile)
+          sources/gui/Makefile \
+          efg/Makefile nfg/Makefile)
+
 

@@ -18,7 +18,52 @@ WXLIB = wx32 xpm tiff jpeg winpng zlib
 EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=0.97.0.1
 EXTRALINKFLAGS = 
 
-!include filelist.in
+gambit_SOURCES = \
+        dlabout.cc \
+	dleditbehav.cc \
+	dleditcont.cc \
+	dleditefg.cc \
+	dleditmixed.cc \
+	dleditmove.cc \
+	dleditnode.cc \
+	dlefgcolor.cc \
+	dlefgdelete.cc \
+	dlefglayout.cc \
+	dlefglegend.cc \
+	dlefgnash.cc \
+	dlefgreveal.cc \
+	dlelimbehav.cc \
+	dlelimmixed.cc \
+	dlinsertmove.cc \
+	dlnewgame.cc \
+	dlnfgnash.cc \
+	dlnfgproperties.cc \
+	dlnfgqre.cc \
+	dlnfgstrategies.cc \
+	dlqrefile.cc \
+	dlspinctrl.cc \
+	efglayout.cc \
+	efgnavigate.cc \
+	efgoutcome.cc \
+	efgprint.cc \
+	efgprofile.cc \
+	efgshow.cc \
+	efgsupport.cc \
+	gambit.cc \
+	nfgnavigate.cc \
+	nfgoutcome.cc \
+	nfgprofile.cc \
+	nfgprint.cc \
+	nfgshow.cc \
+	nfgsupport.cc \
+	nfgtable.cc \
+        numberedit.cc \
+	treedraw.cc \
+	treewin.cc \
+        valinteger.cc \
+        valnumber.cc \
+        wxstatus.cc 
+
 OBJECTS = $(gambit_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

@@ -6,7 +6,36 @@ bin_PROGRAMS = gcl
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-include filelist.in
+libgcl_a_SOURCES = \
+	algfunc.cc \
+	command.h \
+	efgfunc.cc \
+	gclinst.cc \
+	gclstatus.h \
+	gcmdline.h \
+	gcompile.cc \
+	gpreproc.cc \
+	gpreproc.h \
+	gsm.cc \
+	gsm.h \
+	gsmconsole.h \
+	gsmfunc.cc \
+	gsmfunc.h \
+	gsmhash.cc \
+	gsmhash.h \
+	gsmincl.cc \
+	gsmincl.h \
+	gsminstr.cc \
+	gsminstr.h \
+	gsmoper.cc \
+	gsmoper.h \
+	gsmutils.cc \
+	listfunc.cc \
+	listfunc.h \
+	nfgfunc.cc \
+	portion.cc \
+	portion.h \
+	solfunc.cc
 
 gcl_SOURCES = gcl.cc gclstatus.cc gcmdline.cc 
 
@@ -23,4 +52,5 @@ gcl_LDADD = \
 gcompile.cc:  gcompile.yy
 	bison -p gcl_yy -o gcompile.cc gcompile.yy
 
+EXTRA_DIST = borland.mak gcompile.yy
 

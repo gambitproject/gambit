@@ -14,7 +14,20 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libnumerical_a_SOURCES = \
+	basis.cc \
+	bfs.cc \
+	btableau.cc \
+	gfunc.cc \
+	gfuncmin.cc \
+	lemketab.cc \
+	linrcomb.cc \
+	lpsolve.cc \
+	lptab.cc \
+	ludecomp.cc \
+	tableau.cc \
+	vertenum.cc
+
 OBJECTS = $(libnumerical_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

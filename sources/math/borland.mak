@@ -14,7 +14,21 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libmath_a_SOURCES = \
+	complex.cc \
+	double.cc \
+	gdpvect.cc \
+	gmatrix.cc \
+	gnulib.cc \
+	gnumber.cc \
+	gpvector.cc \
+	gsmatrix.cc \
+	gvector.cc \
+	integer.cc \
+	mathinst.cc \
+	misc.cc \
+	rational.cc
+
 OBJECTS = $(libmath_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

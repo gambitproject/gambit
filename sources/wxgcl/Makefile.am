@@ -4,7 +4,13 @@ bin_PROGRAMS = wxgcl
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-wxgcl_SOURCES = dlabout.cc wxgcl.cc wxstatus.cc 
+wxgcl_SOURCES = \
+	dlabout.cc \
+	dlabout.h \
+	wxgcl.cc \
+	wxgcl.h \
+	wxstatus.cc \
+	wxstatus.h 
 
 wxgcl_LDADD = \
 	$(top_builddir)/sources/gcl/libgcl.a \
@@ -15,3 +21,5 @@ wxgcl_LDADD = \
 	$(top_builddir)/sources/pelican/libpelican.a \
 	$(top_builddir)/sources/math/libmath.a \
 	$(top_builddir)/sources/base/libbase.a
+
+EXTRA_DIST = borland.mak

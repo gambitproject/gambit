@@ -14,7 +14,20 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libbase_a_SOURCES = \
+	garray.cc \
+	gblock.cc \
+	glist.cc \
+	gmisc.cc \
+	gpool.cc \
+	grarray.cc \
+	grblock.cc \
+	gstream.cc \
+	gtext.cc \
+	gwatch.cc \
+	odometer.cc \
+	system.cc
+
 OBJECTS = $(libbase_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

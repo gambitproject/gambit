@@ -14,7 +14,21 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libpoly_a_SOURCES = \
+	gpartltr.cc \
+	gpoly.cc \
+	gpolylst.cc \
+	gsolver.cc \
+	ideal.cc \
+	ineqsolv.cc \
+	interval.cc \
+	monomial.cc \
+	pelclass.cc \
+	poly.cc \
+	prepoly.cc \
+	quiksolv.cc \
+	rectangl.cc
+
 OBJECTS = $(libpoly_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

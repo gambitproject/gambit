@@ -14,7 +14,23 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libpelican_a_SOURCES = \
+	pelclhpk.cc \
+	pelclqhl.cc \
+	pelclyal.cc \
+	pelconv.cc \
+	peleval.cc \
+	pelgennd.cc \
+	pelgmatr.cc \
+	pelhomot.cc \
+	pelpred.cc \
+	pelprgen.cc \
+	pelproc.cc \
+	pelpsys.cc \
+	pelqhull.cc \
+	pelsymbl.cc \
+	pelutils.cc
+
 OBJECTS = $(libpelican_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg

@@ -14,7 +14,30 @@
 EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
-!include filelist.in
+libgame_a_SOURCES = \
+	behavinst.cc \
+	efbasis.cc \
+	efdom.cc \
+	efg.cc \
+	efgensup.cc \
+	efginst.cc \
+	efgiter.cc \
+	efgnfg.cc \
+	efgutils.cc \
+	efstrat.cc \
+	nfdom.cc \
+	nfdommix.cc \
+	nfg.cc \
+	nfgensup.cc \
+	nfginst.cc \
+	nfgiter.cc \
+	nfgutils.cc \
+	nfstrat.cc \
+	readefg.cc \
+	readnfg.cc \
+	sfg.cc \
+	sfstrat.cc
+
 OBJECTS = $(libgame_a_SOURCES:.cc=.obj)
 
 CFG = ..\gambit32.cfg
