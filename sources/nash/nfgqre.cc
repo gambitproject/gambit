@@ -18,29 +18,6 @@
 #include "math/gmatrix.h"
 #include "math/gsmatrix.h"
 
-static void WritePXIHeader(gOutput &pxifile, const Nfg &N)
-{
-  pxifile << "Dimensionality:\n";
-  pxifile << N.NumPlayers() << " ";
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)
-    pxifile << N.NumStrats(pl) << " ";
-  pxifile << "\n";
-  N.WriteNfgFile(pxifile, 6);
-
-  pxifile << "Settings:\n" << 0.0;
-  pxifile << "\n" << 1000.0 << "\n" << 1.05;
-  pxifile << "\n" << 0 << "\n" << 1 << "\n" << 1 << "\n";
-  
-  int numcols = N.ProfileLength() + 2;
-
-  pxifile << "DataFormat:\n" << numcols;
-  
-  for (int i = 1; i <= numcols; i++)
-    pxifile << " " << i;
- 
-  pxifile << "\nData:\n";
-}
-
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -246,7 +223,7 @@ static void QreJacobian(const NFSupport &p_support,
 //
 
 static void TracePath(const MixedProfile<double> &p_start,
-		      double p_startLambda, double p_maxLambda,
+		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gStatus &p_status,
 		      gList<MixedSolution> &p_solutions)
 {
@@ -273,7 +250,6 @@ static void TracePath(const MixedProfile<double> &p_start,
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
-  double omega = 1.0;     // orientation along the curve
   int niters = 0;
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
@@ -291,7 +267,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 
     // Predictor step
     for (int k = 1; k <= x.Length(); k++) {
-      u[k] = x[k] + h * omega * t[k];
+      u[k] = x[k] + h * p_omega * t[k];
       if (k < x.Length() && u[k] < 0.0) {
 	accept = false;
 	break;
@@ -387,7 +363,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 	  }
 	}
 
-	TracePath(newProfile, u[u.Length()], p_maxLambda,
+	TracePath(newProfile, u[u.Length()], p_maxLambda, p_omega,
 		  p_status, p_solutions);
 	return;
       }
@@ -411,7 +387,7 @@ static void TracePath(const MixedProfile<double> &p_start,
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here! :)
-      omega = -omega;
+      p_omega = -p_omega;
     }
     t = newT;
   }
@@ -426,30 +402,9 @@ gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
 {
   gList<MixedSolution> solutions;
   MixedProfile<double> start(p_support);
-  //  WritePXIHeader(gnull, p_support.Game());
 
   try {
-    TracePath(start, 0.0, m_maxLam, p_status, solutions);
-
-#ifdef UNUSED
-      // Write out the QreValue as 0 in the PXI file; not generally
-      // going to be the case, but QreValue is suspect for large lambda 
-      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
-      for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
-	  p_pxiFile << profile(pl, st) << " ";
-	}
-      }
-
-      if (m_fullGraph) { 
-	p_corresp.Append(1, nu / (1.0-nu),
-			 MixedSolution(profile, algorithmNfg_QRE));
-      }
-
-      p_status.Get();
-      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
-			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
-#endif // UNUSED
+    TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);
   }
   catch (...) { }
 

@@ -14,34 +14,6 @@
 #include "numerical/gfunc.h"
 #include "efgqre.h"
 
-static void WritePXIHeader(gOutput &pxifile, const efgGame &E)
-{
-  int pl, iset, nisets = 0;
-
-  pxifile << "Dimensionality:\n";
-  for (pl = 1; pl <= E.NumPlayers(); pl++)
-    nisets += E.Players()[pl]->NumInfosets();
-  pxifile << nisets;
-  for (pl = 1; pl <= E.NumPlayers(); pl++)
-    for (iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++)
-      pxifile << " " << E.Players()[pl]->Infosets()[iset]->NumActions();
-  pxifile << "\n";
-
-  pxifile << "Settings:\n" << 0.0;
-  pxifile << "\n" << 1000.0 << "\n" << 1.05;
-  pxifile << "\n" << 0 << "\n" << 1 << "\n" << 1 << "\n";
-
-  int numcols = E.ProfileLength() + 2;
-  pxifile << "DataFormat:";
-  pxifile << "\n" << numcols;
-  for (int i = 1; i <= numcols; i++)
-    pxifile << ' ' << i;
-  pxifile << "\nData:\n";
-}
-
-extern void Project(gVector<double> &, const gArray<int> &);
-
-
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -229,61 +201,8 @@ static void QreJacobian(const EFSupport &p_support,
   }
 }
 
-#ifdef OLD_VERSION
-static void QreJacobian(const efgGame &p_efg,
-			const BehavProfile<double> &p_profile,
-			const double &p_lambda, gMatrix<double> &p_matrix)
-{
-  p_matrix = (double) 0;
-
-  int rowno = 0;  // indexes the row number in the Jacobian matrix
-  for (int pl1 = 1; pl1 <= p_efg.NumPlayers(); pl1++) {
-    EFPlayer *player1 = p_efg.Players()[pl1];
-
-    for (int iset1 = 1; iset1 <= player1->NumInfosets(); iset1++) {
-      Infoset *infoset1 = player1->Infosets()[iset1];
-      for (int act1 = 1; act1 <= infoset1->NumActions(); act1++) {
-	rowno++;
-
-	int colno = 0;
-	for (int pl2 = 1; pl2 <= p_efg.NumPlayers(); pl2++) {
-	  EFPlayer *player2 = p_efg.Players()[pl2];
-	  for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
-	    Infoset *infoset2 = player2->Infosets()[iset2];
-
-	    for (int act2 = 1; act2 <= infoset2->NumActions(); act2++) {
-	      colno++;
-	      if (infoset1 == infoset2) {
-		if (act1 == act2) {
-		  p_matrix(rowno, colno) = 1.0;
-		}
-		else {
-		  p_matrix(rowno, colno) = 0.0;
-		}
-	      }
-	      else {   // infoset1 != infoset2
-		for (int k = 1; k <= infoset1->NumActions(); k++) {
-		  p_matrix(rowno, colno) += (p_profile.DiffActionValue(infoset1->Actions()[k], infoset2->Actions()[act2]) - p_profile.DiffActionValue(infoset1->Actions()[act1], infoset2->Actions()[act2])) * p_profile.GetActionProb(infoset1->Actions()[k]);
-		}
-		p_matrix(rowno, colno) *= p_lambda * p_profile.GetActionProb(infoset1->Actions()[act1]);
-	      }
-	    }
-	  }
-	}
-
-	// Now for the column wrt lambda
-	for (int k = 1; k <= infoset1->NumActions(); k++) {
-	  p_matrix(rowno, p_matrix.NumColumns()) += (p_profile.GetActionValue(infoset1->Actions()[k]) - p_profile.GetActionValue(infoset1->Actions()[act1])) * p_profile.GetActionProb(infoset1->Actions()[k]);
-	}
-	p_matrix(rowno, p_matrix.NumColumns()) *= p_profile.GetActionProb(infoset1->Actions()[act1]);
-      }
-    }
-  }
-}
-#endif  // OLD_VERSION
-
 static void TracePath(const BehavProfile<double> &p_start,
-		      double p_startLambda, double p_maxLambda,
+		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gStatus &p_status,
 		      gList<BehavSolution> &p_solutions)
 {
@@ -310,7 +229,6 @@ static void TracePath(const BehavProfile<double> &p_start,
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
-  double omega = 1.0;     // orientation along the curve
   int niters = 0;
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
@@ -328,7 +246,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 
     // Predictor step
     for (int k = 1; k <= x.Length(); k++) {
-      u[k] = x[k] + h * omega * t[k];
+      u[k] = x[k] + h * p_omega * t[k];
       if (k < x.Length() && u[k] < 0.0) {
 	accept = false;
 	break;
@@ -427,7 +345,7 @@ static void TracePath(const BehavProfile<double> &p_start,
 	  }
 	}
 
-	TracePath(newProfile, u[u.Length()], p_maxLambda,
+	TracePath(newProfile, u[u.Length()], p_maxLambda, p_omega,
 		  p_status, p_solutions);
 	return;
       }
@@ -451,7 +369,7 @@ static void TracePath(const BehavProfile<double> &p_start,
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here! :)
-      omega = -omega;
+      p_omega = -p_omega;
     }
     t = newT;
   }
@@ -466,30 +384,9 @@ gList<BehavSolution> efgQre::Solve(const EFSupport &p_support,
 {
   gList<BehavSolution> solutions;
   BehavProfile<double> start(p_support);
-  //  WritePXIHeader(gnull, p_support.Game());
 
   try {
-    TracePath(start, 0.0, m_maxLam, p_status, solutions);
-
-#ifdef UNUSED
-      // Write out the QreValue as 0 in the PXI file; not generally
-      // going to be the case, but QreValue is suspect for large lambda 
-      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
-      for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
-	  p_pxiFile << profile(pl, st) << " ";
-	}
-      }
-
-      if (m_fullGraph) { 
-	p_corresp.Append(1, nu / (1.0-nu),
-			 BehavSolution(profile, algorithmNfg_QRE));
-      }
-
-      p_status.Get();
-      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
-			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
-#endif // UNUSED
+    TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);
   }
   catch (...) { }
 
