@@ -762,12 +762,12 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   }
 
     // Bunch of prints for debugging purposes.
-  gout << "\nReturn Type: " << word << "\n";
+  /*gout << "\nReturn Type: " << word << "\n";*/
   /*gout << "Return listNum: " << listNum << "\n";*/
-  gout << "SpecList: \n";
-  specList.Dump(gout);
-  gout << "NameList: \n";
-  nameList.Dump(gout);
+  /*gout << "SpecList: \n";*/
+  /*specList.Dump(gout);*/
+  /*gout << "NameList: \n";*/
+  /*nameList.Dump(gout);*/
   /*gout << "ListList: \n";*/
   /*listList.Dump(gout);*/
   /*int rl = reqList.Length();*/
