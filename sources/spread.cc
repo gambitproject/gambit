@@ -1,6 +1,6 @@
 // File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
-// $Id$
+// @(#)spread.cc	1.28 8/8/96
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
@@ -425,7 +425,8 @@ if (draw_settings->Scrolling() && ch!=0)
 	if (MaxX(cell.col-1)>draw_settings->GetRealWidth())
 		x_scroll=MaxX(cell.col-1)/draw_settings->XScroll()-1;
 	if (x_scroll<0) x_scroll=0;
-	Scroll(x_scroll,y_scroll);
+	int cx,cy;ViewStart(&cx,&cy);
+	if (cx!=x_scroll || cy!=y_scroll) Scroll(x_scroll,y_scroll);
 }
 }
 

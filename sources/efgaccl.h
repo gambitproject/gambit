@@ -1,11 +1,11 @@
 // File: efgaccl.h -- gives names to various Extensive form GUI options
-// @(#)efgaccl.h	1.9 4/16/96
+// $Id$
 
 #ifndef EFGACCL_H
 #define EFGACCL_H
 
 #include "accels.h"
-#define 	NUM_EFG_EVENTS	42
+#define 	NUM_EFG_EVENTS	43
 AccelEvent efg_events[NUM_EFG_EVENTS]=
 {
 AccelEvent("AddNode",NODE_ADD),
@@ -24,6 +24,7 @@ AccelEvent("MoveTree",TREE_MOVE),
 AccelEvent("Outcomes",TREE_OUTCOMES),
 AccelEvent("JoinIset",INFOSET_JOIN),
 AccelEvent("BreakIset",INFOSET_BREAK),
+AccelEvent("SplitIset",INFOSET_SPLIT),
 AccelEvent("MergeIset",INFOSET_MERGE),
 AccelEvent("SwitchPlayer",INFOSET_SWITCH_PLAYER),
 AccelEvent("RevealIset",INFOSET_REVEAL),

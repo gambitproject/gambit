@@ -1,6 +1,6 @@
 // File: wxmisc.cc -- a few general purpose functions that rely on and enhance
 // wxwin.
-// $Id$
+// @(#)wxmisc.cc	1.13 4/16/96
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
@@ -264,11 +264,11 @@ wxOutputMedia wxOutputDialogBox::GetMedia(void)
 {
 switch (media_box->GetSelection())
 {
-case 0: return wxMEDIA_PRINTER; break;
-case 1: return wxMEDIA_PS; break;
-case 2: return wxMEDIA_CLIPBOARD; break;
-case 3: return wxMEDIA_METAFILE; break;
-case 4: return wxMEDIA_PREVIEW; break;
+case 0: return wxMEDIA_PRINTER;
+case 1: return wxMEDIA_PS;
+case 2: return wxMEDIA_CLIPBOARD;
+case 3: return wxMEDIA_METAFILE;
+case 4: return wxMEDIA_PREVIEW;
 }
 return wxMEDIA_NUM;
 }
@@ -325,6 +325,9 @@ float dx,dy;
 gString tmp;
 //gString old_foreground(wxTheColourDatabase->FindName(dc.GetTextForeground()));
 gString old_foreground("BLACK");
+wxFont *old_font=0,*small_font=0;
+float	old_y=0;int old_size=0;
+
 while(i<s.length())
 {
 	tmp=gString();
@@ -342,9 +345,28 @@ while(i<s.length())
 				dc.GetTextExtent("\\",&dx,&dy);
 				x+=dx;i++;
 				break;
-			case 'C' :
+			case 'C':
 				c=(gDrawTextGetNum(s,&i)%WX_COLOR_LIST_LENGTH);
 				dc.SetTextForeground(wxTheColourDatabase->FindColour(wx_color_list[c]));
+				break;
+			case '^':		// Start superscript
+				if (!old_font) old_font=dc.GetFont();
+				if (!old_size) old_size=old_font->GetPointSize();
+				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
+				dc.SetFont(small_font);
+				old_y=y;y-=dx/4;
+				i++;
+				break;
+			case '_':		// Start subscript
+				if (!old_font) old_font=dc.GetFont();
+				if (!old_size) old_size=old_font->GetPointSize();
+				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
+				dc.SetFont(small_font);
+				old_y=y;y+=dx*2/3;
+				i++;
+				break;
+			case '~':		// Stop sub/super script
+				if (old_font) {dc.SetFont(old_font);y=old_y;i++;}
 				break;
 			default:
 				wxError("Unknown code in gDrawText");
@@ -353,6 +375,7 @@ while(i<s.length())
 	}
 }
 dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
+if (old_font) dc.SetFont(old_font);
 }
 
 // Takes a string formated for gDrawText and returns just the text value of it.

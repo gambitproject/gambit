@@ -10,14 +10,17 @@
 #define DOM_WEAK				0
 #define	DOM_STRONG			1
 
-#define		SOLN_SECT			"Soln-Defaults"
+#define	DOM_PURE				0
+#define DOM_MIXED				1
+
+#define	SOLN_SECT			"Soln-Defaults"
 #define NFG_ELIMDOM_HELP		"Elimination of Dominated Strategies"
 
 class DominanceSettings
 {
 protected:
 	Bool use_elimdom,all;
-	int	dom_type;
+	int	dom_type,dom_method;
 	char *defaults_file;
 public:
 	DominanceSettings(void)
@@ -25,17 +28,20 @@ public:
 	defaults_file="gambit.ini";
 	wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
 	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Method",&dom_method,defaults_file);
 	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
 	}
 	~DominanceSettings()
 	{
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Method",dom_method,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
 	}
 	bool UseElimDom(void) const {return use_elimdom;}
 	bool FindAll(void) const {return all;}
 	bool DomStrong(void) const {return dom_type==DOM_STRONG;}
+	bool DomMixed(void) const {return dom_method==DOM_MIXED;}
 };
 
 
@@ -44,8 +50,8 @@ public:
 class DominanceSettingsDialog: public MyDialogBox,public DominanceSettings
 {
 private:
-char *dom_type_str;
-wxStringList *dom_type_list;
+char *dom_type_str,*dom_method_str;
+wxStringList *dom_type_list,*dom_method_list;
 public:
 	DominanceSettingsDialog(wxWindow *parent):MyDialogBox(parent,"Dominance Defaults")
 	{
@@ -57,29 +63,33 @@ public:
 	dom_type_str=new char[20];
 	strcpy(dom_type_str,(char *)dom_type_list->Nth(dom_type)->Data());
 	Add(wxMakeFormString("Dom Type",&dom_type_str,wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(dom_type_list), 0)));
+			 new wxList(wxMakeConstraintStrings(dom_type_list), 0),0,wxVERTICAL));
+	Add(wxMakeFormNewLine());
+	dom_method_list=new wxStringList("Pure","Mixed",0);
+	dom_method_str=new char[20];
+	strcpy(dom_method_str,(char *)dom_method_list->Nth(dom_method)->Data());
+	Add(wxMakeFormString("Dom Type",&dom_method_str,wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(dom_method_list), 0),0,wxVERTICAL));
 	Go();
 	}
 	~DominanceSettingsDialog()
 	{
 	dom_type=wxListFindString(dom_type_list,dom_type_str);
+	dom_method=wxListFindString(dom_method_list,dom_method_str);
 	}
 };
 
-class ElimDomParamsDialog // Can not use MyDialogBox due to wxMULTIPLE
+class ElimDomParamsDialog:public DominanceSettings // Can not use MyDialogBox due to wxMULTIPLE
 {
 private:
 	wxDialogBox *d;
 	wxListBox 	*player_box;
 	wxCheckBox	*all_box,*compress_box;
-	wxRadioBox	*dom_type_box;
-	bool 				all,compress;
+	wxRadioBox	*dom_type_box,*dom_method_box;
+	bool 				compress;
 	int					completed,num_players;
-	int					dom_type;
 	gArray<int>	players;
 	// now come the private functions
-	void 				EnablePlayerBox(Bool e)
-	{((wxWindow *)player_box)->Enable(e);}
 	void OnEvent(int result)
 	{
 	completed=result;
@@ -87,6 +97,7 @@ private:
 	{
 		all=all_box->GetValue();compress=compress_box->GetValue();
 		dom_type=dom_type_box->GetSelection();
+		dom_method=dom_method_box->GetSelection();
 		int num_selections,*selections=new int[num_players];
 		num_selections=player_box->GetSelections(&selections);
 		players=gArray<int>(num_selections);
@@ -108,10 +119,15 @@ public:
 	all=FALSE,compress=FALSE;
 	d=new wxDialogBox(parent,"ElimDom Parameters",TRUE);
 	all_box=new wxCheckBox(d,0,"Iterative Eliminate");
-	compress_box=new wxCheckBox(d,NULL,"Compress");
+	compress_box=new wxCheckBox(d,0,"Compress");
 	d->NewLine();
 	char *dom_type_list[2]={"Weak","Strong"};
-	dom_type_box=new wxRadioBox(d,NULL,"Dom type",-1,-1,-1,-1,2,dom_type_list,2);
+	dom_type_box=new wxRadioBox(d,NULL,"Dom type",-1,-1,-1,-1,2,dom_type_list,1);
+	dom_type_box->SetSelection(dom_type);
+	char *dom_method_list[2]={"Pure Strat","Mixed Strat"};
+	dom_method_box=new wxRadioBox(d,NULL,"Dom method",-1,-1,-1,-1,2,dom_method_list,1);
+	dom_method_box->SetSelection(dom_method);
+	d->NewLine();
 	wxStringList *player_list=wxStringListInts(num_players);
 	player_box=new wxListBox(d,NULL,"Players",wxMULTIPLE,-1,-1,-1,-1,num_players,
 		player_list->ListToArray());
@@ -127,11 +143,9 @@ public:
 	d->Show(TRUE);
 	}
 	// Data access functions
-	gArray<int> Players(void) {return players;}
-	bool FindAll(void) {return all;}
-	bool Compress(void) {return compress;}
-	bool DomStrong(void) {return dom_type==DOM_STRONG;}
-	int  Completed(void) {return completed;}
+	gArray<int> Players(void) const {return players;}
+	bool Compress(void) const {return compress;}
+	int  Completed(void) const {return completed;}
 };
 
 #ifdef ELIMDOM_NFG // the rest of the dominance dialogs are only used in the NFG

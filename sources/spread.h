@@ -287,8 +287,8 @@ public:
 	// Data Access
 	int		Row(void)	{return cell.row;}
 	int		Col(void)	{return cell.col;}
-	void	SetRow(int r)	{cell.row=r;ProcessCursor(0);}
-	void 	SetCol(int c)	{cell.col=c;ProcessCursor(0);}
+	void	SetRow(int r)	{cell.row=r;ProcessCursor(1);}
+	void 	SetCol(int c)	{cell.col=c;ProcessCursor(1);}
 	// Printing
 	void Print(wxOutputMedia device,wxOutputOption fit);
 };

@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// @(#)efgconst.h	1.9 4/16/96
+// $Id$
 //
 
 #ifndef EFGCONST_H
@@ -64,7 +64,8 @@
 #define INFOSET_JOIN						1402
 #define	INFOSET_LABEL						1403
 #define INFOSET_SWITCH_PLAYER		1405
-#define INFOSET_REVEAL						1407
+#define INFOSET_REVEAL 					1407
+#define	INFOSET_SPLIT						1410
 
 #define SOLVE_SOLVE							1501
 #define SOLVE_SOLVE_NORMAL			1504
@@ -74,13 +75,8 @@
 #define	SOLVE_SUBGAMES					1526
 #define	SOLVE_STANDARD					1540		// standard submenu
 #define SOLVE_STANDARD_TYPE			1550
-#define	SOLVE_S_NASH						1551
-#define SOLVE_S_SUBGPERF				1552
-#define	SOLVE_S_SEQUENTIAL			1553
 #define SOLVE_STANDARD_NUM			1560
-#define	SOLVE_SN_ONE						1561
-#define	SOLVE_SN_TWO						1561
-#define	SOLVE_SN_ALL						1561
+#define	SOLVE_DATATYPE					1570
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601

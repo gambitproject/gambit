@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h	1.40 8/6/96
+// $Id$
 //
 
 #ifndef TREEWINDOW_H
@@ -9,7 +9,6 @@
 #include "garray.h"
 #include "glist.h"
 #include "treedraw.h"
-#include "twflash.h"
 #include "efgconst.h"
 
 typedef struct NODEENTRY {
@@ -34,7 +33,7 @@ typedef struct NODEENTRY {
 
 class BaseExtensiveShow;
 class BaseTreeWindow;
-
+class TreeNodeCursor;
 // This class can render an extensive form tree using a pre-calculated
 // (in BaseTreeWindow) list of NodeEntry.  It is used for rendering
 // functions for the main TreeWindow display and for the optional
@@ -65,7 +64,7 @@ public:
 						const TreeDrawSettings &draw_settings_);
 	~TreeRender(void);
 	// Windows event handlers
-	void OnPaint(void);
+	virtual void OnPaint(void);
 	virtual void Render(wxDC &dc,int ox=0,int oy=0);
 	// Call this every time the cursor moves
 	virtual void UpdateCursor(const NodeEntry *entry);
@@ -133,7 +132,8 @@ private:
 	// Private Functions
 	int 	FillTable(const Node *n,int level);
 	void 	ProcessCursor(void);
-	void 	ProcessClick(int x,int y);
+	void 	ProcessClick(wxMouseEvent &ev);
+	void 	ProcessDClick(wxMouseEvent &ev);
 	NodeEntry *GetNodeEntry(const Node *n);
 	NodeEntry *NextInfoset(const NodeEntry * const e);
 	NodeEntry *GetValidParent(const Node *n);
@@ -164,6 +164,7 @@ public:
 	// Event Handlers
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
+	void OnPaint(void);
 	// Menu event handlers (these are mostly in btreewn1.cc)
 	void node_add(void);
 	void node_game(void);
@@ -187,6 +188,7 @@ public:
 
 	void infoset_merge(void);
 	void infoset_break(void);
+	void infoset_split(void);
 	void infoset_join(void);
 	void infoset_label(void);
 	void infoset_switch_player(void);
