@@ -256,6 +256,41 @@ into the command line.  It would be better if after highlighting text
 in the GCL window, the right mouse button would bring up the context
 menu (as in Notepad) to allow to cut or paste text into the GCL window in the standard MS-windows way. 
 
+//------------------------------
+
+Bug C33:  Problems with addition and assignment of NUMBERs
+
+The following is running on mill:
+
+  53 mill:/home/mill/rdm/qrevote newgcl
+  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << x:=874093469074998296576.000000
+  874093469074998296576.000000
+  GCL2:= << x+1
+  874093469074998296576.000000
+  GCL3:= << y:=874093469074998296576
+  874093469074998296576
+  GCL4:= << y+1                     
+  874093469074998296577
+
+Note the first addition was wrong, but the second was correct.  Why?
+They should be the same number.
+
+  GCL5:= << x:=874093469074998296575.000000
+  874093469074998296576.000000
+  GCL6:= << x+1                            
+  874093469074998296576.000000
+
+It got that one right.
+
+  GCL7:= << x:=874093469074998296577.000000
+  874093469074998296576.000000
+
+It didn't even get that assignment right -- is the decimal point
+confusing it?  Is there a maximum NUMBER?
+
+
 
 
 //---------------  These are not bugs but suggested improvements ------------
