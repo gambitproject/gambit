@@ -1638,6 +1638,7 @@ SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 
 \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION)
+Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
 Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
@@ -1696,7 +1697,7 @@ Player[node->NODE] =: EFPLAYER
 Players[efg<->EFG] =: LIST(EFPLAYER)
 Players[nfg<->NFG] =: LIST(NFPLAYER)
 PriorSibling[node->NODE] =: NODE
-RealizProbs[strategy->BEHAV] =: LIST(T)
+RealizProbs[strategy->BEHAV(T)] =: LIST(T)
 RootNode[efg<->EFG] =: NODE
 Support[strategy->MIXED] =: NFSUPPORT
 Support[strategy->BEHAV] =: EFSUPPORT
@@ -1909,17 +1910,20 @@ behavioral profile on the associated extensive form game \verb+efg+.
 
 \item
 \protect \large \begin{verbatim}
-Beliefs[strategy->BEHAV] =: LIST(FLOAT)
-Beliefs[strategy->BEHAV] =: LIST(RATIONAL)
+Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
 \end{verbatim}\normalsize
 
-\bd
-Returns a list of the conditional probabilities of
-being at a node given that a player knows he is in that node's information
-set, if all players are playing the behavioral strategy profile
-\verb+strategy+.  The list is ordered according to the prefix-traversal
-order of the game tree, the same order in which the list of nodes is
-returned by {\tt Nodes}.
+\bd 
+Returns a list of the conditional probabilities of being at a node
+given that a player knows he/she is in that node's information set, if
+all players are playing the behavioral strategy profile
+\verb+strategy+.  The list is ordered first by player, then
+by information set number, and then by node number (in the projection
+of the prefix-traversal order of the game tree) of the nodes within
+the information set.  
+\item
+[See also:] {\tt ActionValues}, {\tt InfosetProbs},
+{\tt NodeValues}, {\tt RealizProbs}.
 \ed
 
 
@@ -3969,8 +3973,7 @@ exposed data consists of all characters until the next whitespace.
 
 \item
 \protect \large \begin{verbatim}
-RealizProbs[strategy->BEHAV] =: LIST(FLOAT)
-RealizProbs[strategy->BEHAV] =: LIST(RATIONAL)
+RealizProbs[strategy->BEHAV(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
 \bd
