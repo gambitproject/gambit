@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// @(#)gpoly.imp	1.10 03 Jun 1997
+// $Id$
 //
 
 #include "gpoly.h"
@@ -138,8 +138,6 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
 }
 
 
-#ifndef MINI_POLY
-
 template<class T> gPoly<T> gPoly<T>::operator-() const
 {
   gPoly<T> neg(*this);
@@ -212,7 +210,6 @@ template<class T> void gPoly<T>::operator*=(const T& val)
     Terms[j] *= val;
 }
 
-#endif   // MINI_POLY
 
 template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 {
@@ -314,8 +311,6 @@ template <class T> int gPoly<T>::Dmnsn() const
   return Space->Dmnsn();
 }
 
-#ifndef MINI_POLY
-
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
 {
   int max = 0;
@@ -360,8 +355,6 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
   if (Terms.Length() == 1) return Terms[1].Coef();
   else                     return (T)0;
 }
-
-#endif   // MINI_POLY
 
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 {
@@ -427,6 +420,8 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 
   return  polynomial<T>(coefs);
 }
+
+#endif   // MINI_POLY
 
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
@@ -542,6 +537,8 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
   return result;
 }
 
+#ifndef MINI_POLY
+
 template <class T> 
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
@@ -593,6 +590,8 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
   return (newPoly);
 }
 
+#endif   // MINI_POLY
+
 
 template <class T> 
 gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
@@ -614,6 +613,8 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 //--------------------
 // Term Order Concepts
 //--------------------
+
+#ifndef MINI_POLY
 
 template <class T> 
 exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
@@ -712,6 +713,8 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
   return L1*(*this) - L2*arg2;
 }
 
+#endif   // MINI_POLY
+
 
 //---------------------------
 //    Global Operators
@@ -728,8 +731,6 @@ template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
 {
   return val * poly;
 }
-
-#endif   // MINI_POLY
 
 template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 {
@@ -773,6 +774,7 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 //           Conversion
 //----------------------------------
 
+#ifdef GDOUBLE
 template<class T>  
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
@@ -789,6 +791,7 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
   
   return answer;
 }
+#endif   // GDOUBLE
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
 {
