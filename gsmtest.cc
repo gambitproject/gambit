@@ -734,10 +734,32 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+  for( i = 0; i < 1000; i++ )
+  {
+    machine->Push( (double) i );
+  }
+
+
+  for( i = 0; i < 999; i++ )
+  {
+    machine->Add();
+  }
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+  machine->Dump();
+
+
   gout << "Deleting machine\n";
   delete machine;
 
   return 0;
 }
+
 
 

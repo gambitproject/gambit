@@ -9,7 +9,7 @@
 #define GSM_H
 
 #include "glist.h"
-#include "gstack.h"
+#include "ggrstack.h"
 
 #include "portion.h"
 #include "gsmfunc.h"
@@ -29,10 +29,10 @@ class Instruction;
 class GSM
 {
  private:
-  gStack< Portion* >*      _Stack;
-  gStack< CallFuncObj* >*  _CallFuncStack;
-  RefHashTable*            _RefTable;
-  FunctionHashTable*       _FuncTable;
+  gGrowableStack< Portion* >*      _Stack;
+  gGrowableStack< CallFuncObj* >*  _CallFuncStack;
+  RefHashTable*                    _RefTable;
+  FunctionHashTable*               _FuncTable;
 
   Portion* _ResolveRef            ( Reference_Portion* p );
   Portion* _ResolvePrimaryRefOnly ( Reference_Portion* p );

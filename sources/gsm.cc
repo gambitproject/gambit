@@ -27,8 +27,8 @@ GSM::GSM( int size )
   assert( size > 0 );
 #endif // NDEBUG
 
-  _Stack         = new gStack< Portion* >( size );
-  _CallFuncStack = new gStack< CallFuncObj* >( size ) ;
+  _Stack         = new gGrowableStack< Portion* >( size );
+  _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
   _RefTable      = new RefHashTable;
   _FuncTable     = new FunctionHashTable;
 
@@ -68,95 +68,55 @@ int GSM::MaxDepth( void ) const
 bool GSM::Push( const bool& data )
 {
   Portion*  p;
-  bool      result = true;
   
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new bool_Portion( data );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+  p = new bool_Portion( data );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
 bool GSM::Push( const double& data )
 {
   Portion*  p;
-  bool      result = true;
   
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new numerical_Portion<double>( data );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+  p = new numerical_Portion<double>( data );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
 bool GSM::Push( const gInteger& data )
 {
   Portion*  p;
-  bool      result = true;
 
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new numerical_Portion<gInteger>( data );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+  p = new numerical_Portion<gInteger>( data );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
 bool GSM::Push( const gRational& data )
 {
   Portion*  p;
-  bool      result = true;
-  
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new numerical_Portion<gRational>( data );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+
+  p = new numerical_Portion<gRational>( data );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
 bool GSM::Push( const gString& data )
 {
   Portion*  p;
-  bool      result = true;
-  
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new gString_Portion( data );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+
+  p = new gString_Portion( data );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
@@ -224,38 +184,22 @@ bool GSM::PushList( const int num_of_elements )
 bool GSM::PushRef( const gString& ref )
 {
   Portion*  p;
-  bool      result = true;
   
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new Reference_Portion( ref );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+  p = new Reference_Portion( ref );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
 bool GSM::PushRef( const gString& ref, const gString& subref )
 {
   Portion*  p;
-  bool      result = true;
   
-  if( _Stack->Depth() < _Stack->MaxDepth() )
-  {
-    p = new Reference_Portion( ref, subref );
-    _Stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: out of stack space\n";
-    result = false;
-  }
-  return result;
+  p = new Reference_Portion( ref, subref );
+  _Stack->Push( p );
+
+  return true;
 }
 
 
@@ -662,8 +606,6 @@ bool GSM::InitCallFunction( const gString& funcname )
   CallFuncObj*  func;
   bool          result = true;
 
-  assert( _CallFuncStack->Depth() < _CallFuncStack->MaxDepth() );
-
   if( _FuncTable->IsDefined( funcname ) )
   {
     func = new CallFuncObj( (*_FuncTable)( funcname ) );
@@ -922,6 +864,12 @@ TEMPLATE class gNode< FuncDescObj* >;
 
 TEMPLATE class gStack< Portion* >;
 TEMPLATE class gStack< CallFuncObj* >;
+
+
+#include "ggrstack.imp"
+
+TEMPLATE class gGrowableStack< Portion* >;
+TEMPLATE class gGrowableStack< CallFuncObj* >;
 
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
