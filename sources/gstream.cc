@@ -1,7 +1,7 @@
 //
 // FILE: gstream.cc -- Implementation of I/O streaming functions
 //
-// @(#)efbasis.cc	1.3 03/09/98 
+// $Id$
 //
 
 #ifdef __GNUG__
@@ -465,10 +465,7 @@ bool gFileOutput::IsValid(void) const
 
 void gWinOutput::OutputString( const char* s ) const
 {
-  int i = 0;
-  int length = strlen( s );
-  for( i = 0; i < length; ++i )
-    ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->PutChar( s[i] );
+  ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->PutString( s );
 }
 
 

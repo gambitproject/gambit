@@ -9,6 +9,10 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
+
+#define GCMDLINE_USE_CR
+
+
 class CWinEditView : public CEditView
 {
 private:
@@ -43,6 +47,7 @@ public:
 public:
 	CString m_Buffer;
 	void PutChar( char ch );
+	void PutString( const char* str );
 	char GetChar( void );
 	virtual ~CWinEditView();
 #ifdef _DEBUG

@@ -168,8 +168,12 @@ char CWinEditView::GetChar( void )
 
   ASSERT( !m_Buffer.IsEmpty() );
 
-  ch = m_Buffer[0];
-  m_Buffer = m_Buffer.Right( m_Buffer.GetLength() - 1 );
+  do
+  {
+    ch = m_Buffer[0];
+    m_Buffer = m_Buffer.Right( m_Buffer.GetLength() - 1 );
+  }
+  while( ch == '\n' );
 
   return ch;
 }
@@ -181,14 +185,23 @@ void CWinEditView::PutChar(char ch)
   CEdit& edit = GetEditCtrl();
   char s[3] = { '\0', '\0', '\0' };
   s[0] = ch;
-  if( s[0] == '\n' || s[0] == '\r' )
+  if( s[0] == '\n' )
   {
     s[0] = '\r';
     s[1] = '\n';
     m_CaretPos = GetWindowTextLength();
+    edit.SetSel( m_CaretPos, m_CaretPos + strlen( s ) );
+    edit.ReplaceSel( s );
+    m_CaretPos += strlen( s );
   }
-
-  if( s[0] == '\a' )
+  else if( s[0] == '\r' )
+  {
+    int lineindex = edit.LineIndex();
+    edit.SetSel( lineindex, -1 );
+    edit.Clear();
+    m_CaretPos = GetWindowTextLength();
+  }
+  else if( s[0] == '\a' )
   {
     // beep here
   }
@@ -204,6 +217,30 @@ void CWinEditView::PutChar(char ch)
     m_CaretPos += strlen( s );
   }
 }
+
+void CWinEditView::PutString(const char* str)
+{
+  // CEditView::OnChar(ch, 1, 0);
+
+  CEdit& edit = GetEditCtrl();
+  if( !strstr(str, "\r") &&
+      !strstr(str, "\n") &&
+      !strstr(str, "\a") &&
+      !strstr(str, "\b") )
+	{
+    edit.SetSel( m_CaretPos, m_CaretPos + strlen( str ) );
+    edit.ReplaceSel( str );
+    m_CaretPos += strlen( str );
+  }
+  else
+  {
+    int length = strlen( str );
+    int i = 0;
+    for( i = 0; i < length; ++i )
+      PutChar( str[i] );
+  }
+}
+
 
 void CWinEditView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
@@ -243,3 +280,5 @@ void CWinEditView::OnContextMenu(CWnd* pWnd, CPoint point)
     GetSelectedText( m_SelectedText );
   m_Buffer += m_SelectedText;
 }
+
+
