@@ -25,33 +25,32 @@
 //
 
 #include "behav.imp"
-#include "math/rational.h"
-
-class ChanceInfoset;
+#include "mixed.imp"
+#include "base/glist.imp"
 
 template<>
-gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
 				      int pl) const
 { 
   return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 template<>
-gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome,
 					  int pl) const
 { 
   return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 template<>
-double gbtBehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
+double gbtBehavProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
   return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 #if GBT_WITH_MP_FLOAT
 template<>
-gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtGameOutcome &p_outcome,
 					       int pl) const
 {
   return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
@@ -82,10 +81,41 @@ template gbtOutput &operator<<(gbtOutput &,
 			       const gbtBehavAssessment<gbtMPFloat> &);
 #endif // GBT_WITH_MP_FLOAT
 
-template class gbtPureBehavProfile<gbtNumber>;
-
-#include "base/glist.imp"
-
 template class gbtList<gbtBehavProfile<double> >;
 template class gbtList<gbtBehavProfile<gbtRational> >;
 template class gbtList<gbtBehavProfile<gbtNumber> >;
+
+
+template<>
+gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
+					     int pl) const
+{ 
+  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+}
+
+template<>
+gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
+{ 
+  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+}
+
+template<>
+double gbtMixedProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
+{ 
+  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+}
+
+template class gbtMixedProfile<double>;
+template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<double> &);
+
+template class gbtMixedProfile<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtRational> &);
+
+template class gbtMixedProfile<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &, const gbtMixedProfile<gbtNumber> &);
+
+
+template class gbtList<gbtMixedProfile<double> >;
+template class gbtList<gbtMixedProfile<gbtRational> >;
+template class gbtList<gbtMixedProfile<gbtNumber> >;
+

@@ -12,7 +12,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgGame gbtNfgAction::GetGame(void) const
+gbtGame gbtGameAction::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -33,7 +33,7 @@ returns the normal form game to which the strategy belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtNfgAction::GetLabel(void) const
+gbtText gbtGameAction::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -54,7 +54,7 @@ The empty string is returned if the strategy object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtNfgAction::SetLabel(const gbtText &amp;p_label)
+void gbtGameAction::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

@@ -12,7 +12,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::DeleteMove(void)
+void gbtGameNode::DeleteMove(void)
 </synopsis>
 </para>
 </formalpara>
@@ -43,7 +43,7 @@ to keep was specified.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::DeleteTree(void)
+void gbtGameNode::DeleteTree(void)
 </synopsis>
 </para>
 </formalpara>
@@ -65,7 +65,7 @@ node then becomes a terminal node.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgNode::GetChild(int p_index) const
+gbtGameNode gbtGameNode::GetChild(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -89,7 +89,7 @@ An exception is thrown if the index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame gbtEfgNode::GetGame(void) const
+gbtGame gbtGameNode::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -109,7 +109,7 @@ the node belongs.
 <title>C++/Python usage</title
 <para>
 <synopsis>
-gbtEfgInfoset gbtEfgNode::GetInfoset(void) const
+gbtGameInfoset gbtGameNode::GetInfoset(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -131,7 +131,7 @@ null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgNode::GetLabel(void) const
+gbtText gbtGameNode::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -152,7 +152,7 @@ empty string is returned if the node object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgNode::GetNextSibling(void) const
+gbtGameNode gbtGameNode::GetNextSibling(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -173,7 +173,7 @@ next sibling, the null node is returned.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgOutcome gbtEfgNode::GetOutcome(void) const
+gbtGameOutcome gbtGameNode::GetOutcome(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -196,7 +196,7 @@ with the null node is the null outcome.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgNode::GetParent(void) const
+gbtGameNode gbtGameNode::GetParent(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -218,7 +218,7 @@ or if <parameter>node</parameter> is null, the null node is returned.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgAction gbtEfgNode::GetPriorAction(void) const
+gbtGameAction gbtGameNode::GetPriorAction(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -241,7 +241,7 @@ null action.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgNode::GetPriorSibling(void) const
+gbtGameNode gbtGameNode::GetPriorSibling(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -264,7 +264,7 @@ sibling, the null node is returned.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgNode::InsertMove(gbtEfgInfoset)
+gbtGameNode gbtGameNode::InsertMove(gbtGameInfoset)
 </synopsis>
 </para>
 </formalpara>
@@ -289,7 +289,7 @@ becomes the first child of the new node.  Returns the new node.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtEfgNode::IsPredecessorOf(gbtEfgNode) const
+bool gbtGameNode::IsPredecessorOf(gbtGameNode) const
 </synopsis>
 </para>
 </formalpara>
@@ -314,7 +314,7 @@ A node is considered its own predecessor.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtEfgNode::NumChildren(void) const
+int gbtGameNode::NumChildren(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -335,7 +335,7 @@ int gbtEfgNode::NumChildren(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::SetLabel(const gbtText &amp;p_label)
+void gbtGameNode::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -355,7 +355,7 @@ void gbtEfgNode::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::SetOutcome(gbtEfgOutcome)
+void gbtGameNode::SetOutcome(gbtGameOutcome)
 </synopsis>
 </para>
 </formalpara>

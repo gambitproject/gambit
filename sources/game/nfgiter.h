@@ -29,9 +29,9 @@
 
 template <class T> class gbtArray;
 
-class gbtNfgContingency;
-#include "nfg.h"
+#include "nfgcont.h"
 #include "nfstrat.h"
+
 class gbtNfgContIterator;
 
 //
@@ -41,12 +41,12 @@ class gbtNfgContIterator;
 class gbtNfgIterator    {
 private:
   gbtNfgSupport support;
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   gbtArray<int> current_strat;
   gbtNfgContingency profile;
 
 public:
-  gbtNfgIterator(gbtNfgGame);
+  gbtNfgIterator(gbtGame);
   gbtNfgIterator(const gbtNfgSupport &s);
   gbtNfgIterator(const gbtNfgIterator &);
   gbtNfgIterator(const gbtNfgContIterator &);
@@ -61,10 +61,10 @@ public:
   void Get(gbtArray<int> &t) const;
   void Set(const gbtArray<int> &t);
 
-  gbtNfgOutcome GetOutcome(void) const;
-  void SetOutcome(gbtNfgOutcome);
+  gbtGameOutcome GetOutcome(void) const;
+  void SetOutcome(gbtGameOutcome);
 
-  gbtNumber GetPayoff(const gbtNfgPlayer &p_player) const 
+  gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return profile.GetPayoff(p_player); }
 
   const gbtNfgSupport &Support(void) const { return support; }

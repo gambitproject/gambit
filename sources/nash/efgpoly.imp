@@ -24,10 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/base.h"
 #include "base/gnullstatus.h"
 #include "base/odometer.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/sfg.h"
 
 #include "efgpoly.h"
@@ -45,7 +44,7 @@ public:
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  gbtEfgGame m_efg;
+  gbtGame m_efg;
   const gbtEfgSupport &support;
   EfgPolEnumParams params;
   gbtPolySpace *Space;
@@ -432,9 +431,9 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
   int numvars(0);
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_efg->GetPlayer(pl);
+    gbtGamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) )
 	numvars += support.NumActions(infoset) - 1;
     }
@@ -444,9 +443,9 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
   int count(0);
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_efg->GetPlayer(pl);
+    gbtGamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
 	for (int act = 1; act <= support.NumActions(infoset) - 1; act++) {
 	  count++;

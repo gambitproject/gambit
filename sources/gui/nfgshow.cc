@@ -43,7 +43,7 @@
 #include "nfgsupport.h"
 #include "id.h"
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
 #include "game/nfgciter.h"
@@ -198,15 +198,18 @@ gbtNfgFrame::gbtNfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
     (void) new gbtProfileFrame(m_doc, this);
     (void) new gbtOutcomeFrame(m_doc, this);
   }
+
   (void) new gbtNfgSupportFrame(m_doc, this);
 
   m_table = new gbtNfgTable(m_doc, this);
   m_table->SetFocus();
+
   m_nav = new gbtNfgNavigate(m_doc, this);
   // Dummy in a size event to get layout correct
   wxSizeEvent foo;
   OnSize(foo);
   Show(true);
+
   m_doc->UpdateViews();
 }
 
@@ -225,17 +228,17 @@ void gbtNfgFrame::OnUpdate(gbtGameView *)
   if (m_doc->GetFilename() != wxT("")) {
     SetTitle(wxString::Format(wxT("Gambit - [%s] %s"), 
 			      (const char *) m_doc->GetFilename().mb_str(), 
-			      (char *) m_doc->GetNfg()->GetLabel()));
+			      (char *) m_doc->GetGame()->GetLabel()));
   }
   else {
     SetTitle(wxString::Format(wxT("Gambit - %s"),
-			      (char *) m_doc->GetNfg()->GetLabel()));
+			      (char *) m_doc->GetGame()->GetLabel()));
   }
 
   wxMenuBar *menu = GetMenuBar();
   gbtArray<int> profile(m_doc->GetContingency());
   menu->Enable(GBT_MENU_FILE_EXPORT_COMLAB, 
-	       m_doc->GetNfg()->NumPlayers() == 2);
+	       m_doc->GetGame()->NumPlayers() == 2);
   menu->Check(GBT_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
   menu->Check(GBT_MENU_VIEW_OUTCOMES, m_doc->ShowOutcomes());
   menu->Check(GBT_MENU_VIEW_SUPPORTS, m_doc->ShowNfgSupports());
@@ -445,8 +448,8 @@ void gbtNfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(),
-				 m_doc->GetNfgSupportList().GetCurrent());
+    gbtGame nfg = CompressNfg(m_doc->GetGame(),
+			      m_doc->GetNfgSupportList().GetCurrent());
     nfg->WriteNfg(file);
     m_doc->SetIsModified(false);
   }
@@ -478,7 +481,7 @@ void gbtNfgFrame::OnFileExportHTML(wxCommandEvent &)
   
   try {
     gbtFileOutput file(dialog.GetPath().mb_str());
-    file << gbtBuildHtml(m_doc->GetNfg(),
+    file << gbtBuildHtml(m_doc->GetGame(),
 			 m_doc->GetRowPlayer(),
 			 m_doc->GetColPlayer()).mb_str() << '\n';
   }
@@ -511,14 +514,14 @@ void gbtNfgFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new gbtNfgPrintout(m_doc->GetNfg(),
+    new wxPrintPreview(new gbtNfgPrintout(m_doc->GetGame(),
 				       m_doc->GetRowPlayer(), 
 				       m_doc->GetColPlayer(),
-				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg()->GetLabel())),
-		       new gbtNfgPrintout(m_doc->GetNfg(),
+				       wxString::Format(wxT("%s"), (char *) m_doc->GetGame()->GetLabel())),
+		       new gbtNfgPrintout(m_doc->GetGame(),
 				       m_doc->GetRowPlayer(),
 				       m_doc->GetColPlayer(),
-				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg()->GetLabel())),
+				       wxString::Format(wxT("%s"), (char *) m_doc->GetGame()->GetLabel())),
 		       &data);
 
   if (!preview->Ok()) {
@@ -538,10 +541,10 @@ void gbtNfgFrame::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  gbtNfgPrintout printout(m_doc->GetNfg(),
+  gbtNfgPrintout printout(m_doc->GetGame(),
 		       m_doc->GetRowPlayer(), m_doc->GetColPlayer(),
 		       wxString::Format(wxT("%s"),
-					(char *) m_doc->GetNfg()->GetLabel()));
+					(char *) m_doc->GetGame()->GetLabel()));
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -573,7 +576,7 @@ void gbtNfgFrame::OnFileMRUFile(wxCommandEvent &p_event)
 
 void gbtNfgFrame::OnEditStrategies(wxCommandEvent &)
 {
-  dialogStrategies dialog(this, m_doc->GetNfg());
+  dialogStrategies dialog(this, m_doc->GetGame());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->Submit(dialog.GetCommand());
@@ -582,19 +585,19 @@ void gbtNfgFrame::OnEditStrategies(wxCommandEvent &)
 
 void gbtNfgFrame::OnEditContingency(wxCommandEvent &)
 {
-  dialogEditContingency dialog(this, m_doc->GetNfg(), m_doc->GetContingency());
+  dialogEditContingency dialog(this, m_doc->GetGame(), m_doc->GetContingency());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtNfgContingency profile(m_doc->GetNfg());
-    for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-      profile.SetStrategy(m_doc->GetNfg()->GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl]));
+    gbtNfgContingency profile(m_doc->GetGame());
+    for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+      profile.SetStrategy(m_doc->GetGame()->GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl]));
     }
 
     if (dialog.GetOutcome() == 0) { 
       profile.SetOutcome(0);
     }
     else {
-      profile.SetOutcome(m_doc->GetNfg()->GetOutcome(dialog.GetOutcome()));
+      profile.SetOutcome(m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
     }
     m_doc->UpdateViews();
   }
@@ -731,9 +734,9 @@ void gbtNfgFrame::OnFormatAutosize(wxCommandEvent &)
 
 void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
 {
-  gbtArray<gbtText> playerNames(m_doc->GetNfg()->NumPlayers());
+  gbtArray<gbtText> playerNames(m_doc->GetGame()->NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_doc->GetNfg()->GetPlayer(pl)->GetLabel();
+    playerNames[pl] = m_doc->GetGame()->GetPlayer(pl)->GetLabel();
   }
   dialogElimMixed dialog(this, playerNames);
 
@@ -938,7 +941,7 @@ void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = gbtMixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetNfg()));
+  MixedSolution profile = gbtMixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetGame()));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

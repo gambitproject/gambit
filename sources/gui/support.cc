@@ -25,9 +25,8 @@
 //
 
 #include "base/base.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efstrat.h"
-#include "game/nfg.h"
 #include "game/nfstrat.h"
 
 #include "support.h"
@@ -49,7 +48,7 @@ gbtEfgSupportList::~gbtEfgSupportList()
 void gbtEfgSupportList::BuildDefaultSupport(void)
 {
   if (m_doc->HasEfg()) {
-    m_supports.Append(gbtEfgSupport(m_doc->GetEfg()));
+    m_supports.Append(gbtEfgSupport(m_doc->GetGame()));
     m_supports[1].SetLabel("Full Support");
     m_current = 1;
   }
@@ -111,7 +110,7 @@ gbtNfgSupportList::~gbtNfgSupportList()
 
 void gbtNfgSupportList::BuildDefaultSupport(void)
 {
-  m_supports.Append(gbtNfgSupport(m_doc->GetNfg()));
+  m_supports.Append(gbtNfgSupport(m_doc->GetGame()));
   m_supports[1].SetLabel("Full Support");
   m_current = 1;
 }

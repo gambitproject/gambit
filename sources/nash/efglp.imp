@@ -102,7 +102,7 @@ template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ gbtLPSolver<T> &lp)
 template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
 						    gbtDPVector<T> &v,
 						    const gbtBasicFeasibleSolution<T> &sol,
-						    const gbtEfgNode &n,
+						    const gbtGameNode &n,
 						    int s1,int s2) const
 {
   
@@ -157,7 +157,7 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_suppo
 
 template <class T>
 void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
-				  gbtMatrix<T> &A, const gbtEfgNode &n, T prob,
+				  gbtMatrix<T> &A, const gbtGameNode &n, T prob,
 				  int s1, int s2, int i1, int i2)
 {
   int i,snew;

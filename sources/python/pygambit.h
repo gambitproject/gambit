@@ -41,7 +41,7 @@
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgGame *m_efg;
+  gbtGame *m_efg;
 } efgobject;
 
 extern PyTypeObject Efgtype;
@@ -55,7 +55,7 @@ efgobject *newefgobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgPlayer *m_efplayer;
+  gbtGamePlayer *m_efplayer;
 } efplayerobject;
 
 extern PyTypeObject Efplayertype;
@@ -69,7 +69,7 @@ efplayerobject *newefplayerobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgInfoset *m_infoset;
+  gbtGameInfoset *m_infoset;
 } infosetobject;
 
 extern PyTypeObject Infosettype;
@@ -83,7 +83,7 @@ infosetobject *newinfosetobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgAction *m_action;
+  gbtGameAction *m_action;
 } actionobject;
 
 extern PyTypeObject Actiontype;
@@ -97,7 +97,7 @@ actionobject *newactionobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgNode *m_node;
+  gbtGameNode *m_node;
 } nodeobject;
 
 extern PyTypeObject Nodetype;
@@ -111,7 +111,7 @@ nodeobject *newnodeobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtEfgOutcome *m_efoutcome;
+  gbtGameOutcome *m_efoutcome;
 } efoutcomeobject;
 
 extern PyTypeObject Efoutcometype;
@@ -139,7 +139,7 @@ efsupportobject *newefsupportobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgGame *m_nfg;
+  gbtGame *m_nfg;
 } nfgobject;
 
 extern PyTypeObject Nfgtype;
@@ -153,7 +153,7 @@ nfgobject *newnfgobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgPlayer *m_nfplayer;
+  gbtGamePlayer *m_nfplayer;
 } nfplayerobject;
 
 extern PyTypeObject Nfplayertype;
@@ -167,7 +167,7 @@ nfplayerobject *newnfplayerobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgAction *m_strategy;
+  gbtGameAction *m_strategy;
 } strategyobject;
 
 extern PyTypeObject Strategytype;
@@ -181,7 +181,7 @@ strategyobject *newstrategyobject(void);
 
 typedef struct {
   PyObject_HEAD
-  gbtNfgOutcome *m_nfoutcome;
+  gbtGameOutcome *m_nfoutcome;
 } nfoutcomeobject;
 
 extern PyTypeObject Nfoutcometype;

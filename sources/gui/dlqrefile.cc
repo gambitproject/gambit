@@ -24,14 +24,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "nash/behavsol.h"
-#include "game/nfg.h"
 #include "nash/mixedsol.h"
 
 #include "id.h"
@@ -219,7 +218,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Dimensionality:\n";
 	file << m_behavProfiles[1].GetGame()->NumPlayers() << ' ';
 	for (int pl = 1; pl <= m_behavProfiles[1].GetGame()->NumPlayers(); pl++) {
-	  gbtEfgPlayer player = m_behavProfiles[1].GetGame()->GetPlayer(pl);
+	  gbtGamePlayer player = m_behavProfiles[1].GetGame()->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	    file << m_behavProfiles[1].Support().NumActions(pl, iset) << ' ';
 	  }

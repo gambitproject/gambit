@@ -36,15 +36,15 @@ private:
   T maxpay, minpay;
   int ns1,ns2,ni1,ni2;
   gbtList<gbtBasicFeasibleSolution<T> > List;
-  gbtList<gbtEfgInfoset> isets1, isets2;
+  gbtList<gbtGameInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &,
-		   gbtMatrix<T> &, const gbtEfgNode &, T ,int ,int , int ,int );
+		   gbtMatrix<T> &, const gbtGameNode &, T ,int ,int , int ,int );
   void GetSolutions(const gbtEfgSupport &, gbtList<BehavSolution> &) const;
   int Add_BFS(/*const*/ gbtLPSolver<T> &B);
   
   void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const gbtBasicFeasibleSolution<T> &sol,
-		  const gbtEfgNode &n, int s1,int s2) const;
+		  const gbtGameNode &n, int s1,int s2) const;
 
 public:
   gbtEfgNashLp(void);

@@ -28,13 +28,10 @@
 #define NFDOM_H
 
 #include "base/gstatus.h"
-#include "math/rational.h"
-#include "nfg.h"
-#include "nfstrat.h"
-#include "nfgciter.h"
+#include "game.h"
 #include "mixed.h"
 
-bool IsMixedDominated(const gbtNfgSupport &, gbtNfgAction,
+bool IsMixedDominated(const gbtNfgSupport &, gbtGameAction,
 		      bool strong, gbtPrecision precision,
 		      gbtOutput &tracefile);
 

@@ -29,15 +29,15 @@
 
 #include "base/gmisc.h"
 #include "math/gpvector.h"
+#include "game.h"
 #include "nfstrat.h"
-#include "outcome.h"
 
 template <class T> class gbtRectArray;
 template <class T> class gbtBehavProfile;
 
 template <class T> class gbtMixedProfile : public gbtPVector<T>  {
   private:
-    gbtNfgGame m_nfg;
+    gbtGame m_nfg;
     gbtNfgSupport support;
 
     // Private Payoff functions
@@ -49,8 +49,7 @@ template <class T> class gbtMixedProfile : public gbtPVector<T>  {
 		int const_st2, int cur_pl, long index, T prob, T &value) const;
     void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 		gbtVector<T> &value) const;
-    void InitPayoffs(void) const;
-    T Payoff(const gbtNfgOutcome &o, int pl) const;
+    T Payoff(const gbtGameOutcome &o, int pl) const;
 
   public:
     gbtMixedProfile(const gbtNfgSupport &);
@@ -60,7 +59,7 @@ template <class T> class gbtMixedProfile : public gbtPVector<T>  {
 
     gbtMixedProfile<T> &operator=(const gbtMixedProfile<T> &);
 
-    gbtNfgGame GetGame(void) const  { return m_nfg; }
+    gbtGame GetGame(void) const  { return m_nfg; }
 
     T LiapValue(void) const;
     void Regret(gbtPVector<T> &value) const;
@@ -68,7 +67,7 @@ template <class T> class gbtMixedProfile : public gbtPVector<T>  {
     void Centroid(void);
 
     T Payoff(int pl) const;
-    T Payoff(int pl, gbtNfgAction) const;
+    T Payoff(int pl, gbtGameStrategy) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 

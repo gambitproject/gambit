@@ -191,7 +191,7 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 			const gbtVector<T> &p_point,
 			gbtMatrix<T> &p_matrix)
 {
-  gbtNfgGame nfg = p_support.GetGame();
+  gbtGame nfg = p_support.GetGame();
   gbtMixedProfile<T> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];

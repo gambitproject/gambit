@@ -34,7 +34,7 @@ private:
   void OnDeleteTree(wxCommandEvent &);
 
 public:
-  dialogEfgDelete(wxWindow *, gbtEfgNode);
+  dialogEfgDelete(wxWindow *, gbtGameNode);
   virtual ~dialogEfgDelete() { }
 
   bool DeleteTree(void) const 

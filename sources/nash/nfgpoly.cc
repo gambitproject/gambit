@@ -40,7 +40,7 @@ public:
 class PolEnumModule  {
 private:
   gbtDouble eps;
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   const gbtNfgSupport &support;
   PolEnumParams params;
   gbtPolySpace Space;
@@ -463,13 +463,13 @@ gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support, gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gbtList<const gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
-								p_status);
+  gbtList<gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
+							    p_status);
 
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";
 
-  gbtList<const gbtNfgSupport> singularSupports;
+  gbtList<gbtNfgSupport> singularSupports;
   gbtList<MixedSolution> solutions;
 
   try { 

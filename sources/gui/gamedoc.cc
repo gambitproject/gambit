@@ -24,74 +24,50 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
 #include "base/base.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efstrat.h"
-#include "game/nfg.h"
 #include "gamedoc.h"
 #include "gambit.h"
 
-gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
+gbtGameDocument::gbtGameDocument(gbtGame p_game, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_showOutcomes(false), m_showProfiles(false),
     m_showEfgSupports(false), m_showEfgNavigate(false),
     m_showNfg(false), m_showNfgSupports(false),
-    m_efg(p_efg), 
+    m_game(p_game), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_efgSupports(this),
-    m_nfg(0),
     m_rowPlayer(1), m_colPlayer(2),
-    m_contingency(p_efg->NumPlayers()),
+    m_contingency(p_game->NumPlayers()),
     m_nfgSupports(this),
     m_curProfile(0)
 {
-  // Make sure that Chance player has a name
-  if (m_efg->GetChance()->GetLabel() == "") {
-    m_efg->GetChance()->SetLabel("Chance");
-  }
-
-  for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
-}
-
-gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
-  : m_filename(p_filename), m_modified(false),
-    m_showOutcomes(false), m_showProfiles(false),
-    m_showEfgSupports(false), m_showEfgNavigate(false),
-    m_showNfg(true), m_showNfgSupports(false),
-    m_efg(0),
-    m_cursor(0), m_copyNode(0), m_cutNode(0),
-    m_efgSupports(this),
-    m_nfg(p_nfg),
-    m_rowPlayer(1), m_colPlayer(2),
-    m_contingency(p_nfg->NumPlayers()),
-    m_nfgSupports(this),
-    m_curProfile(0)
-{
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
+  for (int pl = 1; pl <= m_game->NumPlayers(); m_contingency[pl++] = 1);
 }
 
 gbtGameDocument::~gbtGameDocument()
 { }
 
-void gbtGameDocument::SetCursor(gbtEfgNode p_node)
+void gbtGameDocument::SetCursor(gbtGameNode p_node)
 {
   m_cursor = p_node;
   UpdateViews();
 }
 
-void gbtGameDocument::SetCopyNode(gbtEfgNode p_node)
+void gbtGameDocument::SetCopyNode(gbtGameNode p_node)
 {
   m_copyNode = p_node;
   m_cutNode = 0;
   UpdateViews();
 }
 
-void gbtGameDocument::SetCutNode(gbtEfgNode p_node)
+void gbtGameDocument::SetCutNode(gbtGameNode p_node)
 {
   m_cutNode = 0;
   m_copyNode = p_node;
@@ -102,37 +78,18 @@ void gbtGameDocument::SetCutNode(gbtEfgNode p_node)
 //                 gbtGameDocument: Operations on outcomes
 //==========================================================================
 
-gbtText gbtGameDocument::UniqueEfgOutcomeName(void) const
+gbtText gbtGameDocument::UniqueOutcomeName(void) const
 {
-  int number = m_efg->NumOutcomes() + 1;
+  int number = m_game->NumOutcomes() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= m_efg->NumOutcomes(); i++) {
-      if (m_efg->GetOutcome(i)->GetLabel() == "Outcome" + ToText(number)) {
+    for (i = 1; i <= m_game->NumOutcomes(); i++) {
+      if (m_game->GetOutcome(i)->GetLabel() == "Outcome" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > m_efg->NumOutcomes()) {
-      return "Outcome" + ToText(number);
-    }
-    
-    number++;
-  }
-}
-
-gbtText gbtGameDocument::UniqueNfgOutcomeName(void) const
-{
-  int number = m_nfg->NumOutcomes() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_nfg->NumOutcomes(); i++) {
-      if (m_nfg->GetOutcome(i)->GetLabel() == "Outcome" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_nfg->NumOutcomes()) {
+    if (i > m_game->NumOutcomes()) {
       return "Outcome" + ToText(number);
     }
     
@@ -218,7 +175,7 @@ void gbtGameDocument::RemoveProfile(int p_index)
 //                     gbtGameDocument: Labels
 //==========================================================================
 
-gbtText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetRealizProb(const gbtGameNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
@@ -227,7 +184,7 @@ gbtText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gbtText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetBeliefProb(const gbtGameNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node->GetPlayer().IsNull()) {
@@ -237,16 +194,16 @@ gbtText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gbtText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetNodeValue(const gbtGameNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
   }
   gbtText tmp = "(";
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
     tmp += ToText(m_behavProfiles[m_curProfile].NodeValue(p_node)[pl], 
 		  m_prefs.NumDecimals());
-    if (pl < m_efg->NumPlayers()) {
+    if (pl < m_game->NumPlayers()) {
       tmp += ",";
     }
     else {
@@ -256,7 +213,7 @@ gbtText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
   return tmp;
 }
 
-gbtText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetInfosetProb(const gbtGameNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node->GetPlayer().IsNull()) {
@@ -266,7 +223,7 @@ gbtText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetInfosetValue(const gbtGameNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node->GetPlayer().IsNull() || p_node->GetPlayer()->IsChance()) {
@@ -282,7 +239,7 @@ gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
   }
 }
 
-gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
+gbtText gbtGameDocument::GetActionProb(const gbtGameNode &p_node, int p_act) const
 {
   if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer()->IsChance()) {
     return ToText(p_node->GetInfoset()->GetChanceProb(p_act),
@@ -297,7 +254,7 @@ gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) cons
 		m_prefs.NumDecimals());
 }
 
-gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
+gbtText gbtGameDocument::GetActionValue(const gbtGameNode &p_node, int p_act) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node->GetPlayer().IsNull() || p_node->GetPlayer()->IsChance()) {
@@ -314,7 +271,7 @@ gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) con
   }
 }
 
-gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) const
+gbtNumber gbtGameDocument::ActionProb(const gbtGameNode &p_node, int p_action) const
 {
   if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer()->IsChance()) {
     return p_node->GetInfoset()->GetChanceProb(p_action);
@@ -330,16 +287,6 @@ gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) co
 //==========================================================================
 //               gbtGameDocument: Operations on normal form
 //==========================================================================
-
-gbtNfgGame gbtGameDocument::GetNfg(void) const
-{
-  if (!m_efg.IsNull()) {
-    return m_efg->GetReducedNfg();
-  }
-  else {
-    return m_nfg;
-  }
-}
 
 gbtText gbtGameDocument::UniqueMixedProfileName(void) const
 {
@@ -371,7 +318,7 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
     m_mixedProfiles.Append(p_profile);
   }
 
-  if (!m_efg.IsNull()) {
+  if (HasEfg()) {
     m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(*p_profile.Profile()));
   }
 
@@ -493,8 +440,8 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
     m_curProfile = 0;
 
     // Make sure the contingency points to a non-bogus profile
-    m_contingency = gbtArray<int>(GetNfg()->NumPlayers());
-    for (int pl = 1; pl <= GetNfg()->NumPlayers(); m_contingency[pl++] = 1);
+    m_contingency = gbtArray<int>(GetGame()->NumPlayers());
+    for (int pl = 1; pl <= GetGame()->NumPlayers(); m_contingency[pl++] = 1);
 
     m_modified = true;
   }

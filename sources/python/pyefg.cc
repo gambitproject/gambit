@@ -189,7 +189,7 @@ efg_newplayer(efgobject *self, PyObject *args)
   }
 
   efplayerobject *player = newefplayerobject();
-  player->m_efplayer = new gbtEfgPlayer(self->m_efg->NewPlayer());
+  player->m_efplayer = new gbtGamePlayer(self->m_efg->NewPlayer());
   return (PyObject *) player;
 }
 
@@ -388,7 +388,7 @@ gbt_new_efg(PyObject */*self*/, PyObject *args)
   }
 
   efgobject *efg = newefgobject();
-  efg->m_efg = new gbtEfgGame(NewEfg());
+  efg->m_efg = new gbtGame(NewEfg());
   return (PyObject *) efg;
 }
 
@@ -404,7 +404,7 @@ gbt_read_efg(PyObject */*self*/, PyObject *args)
   efgobject *efg = newefgobject();
   try {
     gbtFileInput file(filename);
-    efg->m_efg = new gbtEfgGame(ReadEfg(file));
+    efg->m_efg = new gbtGame(ReadEfg(file));
     return (PyObject *) efg;
   }
   catch (const gbtFileInput::OpenFailed &) {

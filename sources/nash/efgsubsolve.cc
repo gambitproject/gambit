@@ -31,9 +31,9 @@
 
 void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 				      gbtStatus &p_status,
-				      gbtEfgNode n,
+				      gbtGameNode n,
 				      gbtList<BehavSolution> &solns,
-				      gbtList<gbtEfgOutcome> &values)
+				      gbtList<gbtGameOutcome> &values)
 {
   int i;
   
@@ -41,15 +41,15 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   thissolns.Append(*solution);
   ((gbtVector<gbtNumber> &) thissolns[1]).operator=(gbtNumber(0));
   
-  gbtList<gbtEfgNode> subroots;
+  gbtList<gbtGameNode> subroots;
   ChildSubgames(p_support.GetTree(), n, subroots);
   
-  gbtList<gbtArray<gbtEfgOutcome> > subrootvalues;
-  subrootvalues.Append(gbtArray<gbtEfgOutcome>(subroots.Length()));
+  gbtList<gbtArray<gbtGameOutcome> > subrootvalues;
+  subrootvalues.Append(gbtArray<gbtGameOutcome>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
     gbtList<BehavSolution> subsolns;
-    gbtList<gbtEfgOutcome> subvalues;
+    gbtList<gbtGameOutcome> subvalues;
     
     FindSubgames(p_support, p_status, subroots[i], subsolns, subvalues);
     
@@ -61,7 +61,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     assert(subvalues.Length() == subsolns.Length());
     
     gbtList<gbtBehavProfile<gbtNumber> > newsolns;
-    gbtList<gbtArray<gbtEfgOutcome> > newsubrootvalues;
+    gbtList<gbtArray<gbtGameOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
@@ -86,18 +86,18 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
     
-    gbtEfgGame foo = p_support.GetTree()->Copy(n);
+    gbtGame foo = p_support.GetTree()->Copy(n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
     foo->GetRoot()->SetOutcome(0);
 
-    gbtList<gbtEfgNode> nodes;
+    gbtList<gbtGameNode> nodes;
     Nodes(p_support.GetTree(), n, nodes);
     
     gbtEfgSupport subsupport(foo);
     // here, we build the support for the subgame
     for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
-      gbtEfgPlayer p = foo->GetPlayer(pl);
+      gbtGamePlayer p = foo->GetPlayer(pl);
       int index;
 
       for (index = 1; index <= nodes.Length() &&
@@ -139,7 +139,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       else if (m_nfgAlgorithm) {
 	CompressEfgInPlace(foo, subsupport);
 	subsupport = gbtEfgSupport(foo);
-	gbtNfgGame nfg = foo->GetReducedNfg();
+	gbtGame nfg = foo;
 	gbtNfgSupport support(nfg);
 
 	gbtList<MixedSolution> nfgSolutions;
@@ -172,7 +172,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       solns[ii].SetEpsilon(sol[solno].Epsilon());
       
       for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
-	gbtEfgPlayer p = foo->GetPlayer(pl);
+	gbtGamePlayer p = foo->GetPlayer(pl);
 	int index;
 
 	for (index = 1; index <= nodes.Length() &&
@@ -219,7 +219,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
         }
       }
 
-      gbtEfgOutcome ov = p_support.GetTree()->NewOutcome();
+      gbtGameOutcome ov = p_support.GetTree()->NewOutcome();
       for (i = 1; i <= p_support.NumPlayers(); i++) {
 	ov->SetPayoff(p_support.GetPlayer(i), subval[i]);
       }
@@ -257,16 +257,16 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   solutions.Flush();
-  gbtList<gbtEfgOutcome> values;
+  gbtList<gbtGameOutcome> values;
 
   solution = new gbtBehavProfile<gbtNumber>(p_support);
   ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));
 
-  gbtEfgGame efg = p_support.GetTree()->Copy();
-  infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg->NumPlayers());
+  gbtGame efg = p_support.GetTree()->Copy(p_support.GetTree()->GetRoot());
+  infosets = gbtArray<gbtArray<gbtGameInfoset> *>(efg->NumPlayers());
 
   for (int i = 1; i <= efg->NumPlayers(); i++) {
-    infosets[i] = new gbtArray<gbtEfgInfoset>(efg->GetPlayer(i)->NumInfosets());
+    infosets[i] = new gbtArray<gbtGameInfoset>(efg->GetPlayer(i)->NumInfosets());
     for (int j = 1; j <= efg->GetPlayer(i)->NumInfosets(); j++) {
       (*infosets[i])[j] = efg->GetPlayer(i)->GetInfoset(j);
     }
@@ -275,9 +275,9 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
   gbtEfgSupport support(efg);
 
   for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {
-    gbtEfgPlayer player = p_support.GetPlayer(pl);
+    gbtGamePlayer player = p_support.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) { 
 	if (!p_support.Contains(infoset->GetAction(act))) {
 	  support.RemoveAction(efg->GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
@@ -318,15 +318,15 @@ gbtText gbtEfgNashSubgames::GetAlgorithm(void) const
 
 #include "base/garray.imp"
 
-template class gbtArray<gbtArray<gbtEfgInfoset> *>;
+template class gbtArray<gbtArray<gbtGameInfoset> *>;
 
-template bool operator==(const gbtArray<gbtEfgOutcome> &,
-			 const gbtArray<gbtEfgOutcome> &);
-template bool operator!=(const gbtArray<gbtEfgOutcome> &,
-			 const gbtArray<gbtEfgOutcome> &);
+template bool operator==(const gbtArray<gbtGameOutcome> &,
+			 const gbtArray<gbtGameOutcome> &);
+template bool operator!=(const gbtArray<gbtGameOutcome> &,
+			 const gbtArray<gbtGameOutcome> &);
 
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtEfgOutcome> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtGameOutcome> &);
 
 #include "base/glist.imp"
 
-template class gbtList<gbtArray<gbtEfgOutcome> >;
+template class gbtList<gbtArray<gbtGameOutcome> >;

@@ -25,7 +25,7 @@
 //
 
 #include "base/base.h"
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfgiter.h"
 #include "numerical/vertenum.h"
 
@@ -41,7 +41,7 @@ template <class T>
 gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 					    gbtStatus &p_status)
 {
-  gbtNfgGame nfg = p_support.GetGame();
+  gbtGame nfg = p_support.GetGame();
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
@@ -53,8 +53,8 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 
   gbtNfgIterator iter(p_support); 
 
-  T min = MinPayoff(nfg) - gbtNumber(1);
-  T max = MaxPayoff(nfg);
+  T min = nfg->MinPayoff() - gbtNumber(1);
+  T max = nfg->MaxPayoff();
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2

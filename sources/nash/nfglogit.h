@@ -32,7 +32,7 @@
 //
 // A useful function for QRE stability analysis
 //
-void QreJacobian(const gbtNfgGame &p_nfg,
+void QreJacobian(const gbtGame &p_nfg,
 		 const gbtMixedProfile<double> &p_profile,
 		 const double &p_nu, gbtMatrix<double> &p_matrix);
 

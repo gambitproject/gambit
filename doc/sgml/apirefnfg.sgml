@@ -13,7 +13,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtNfgGame::GetComment(void) const
+gbtText gbtGame::GetComment(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -33,7 +33,7 @@ the game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtNfgGame::GetLabel(void) const
+gbtText gbtGame::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -55,7 +55,7 @@ The empty string is returned if the game object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgPlayer gbtNfgGame::GetPlayer(int p_index) const
+gbtGamePlayer gbtGame::GetPlayer(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -78,7 +78,7 @@ at one.  An exception is thown if the index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtNfgGame::IsConstSum(void) const
+bool gbtGame::IsConstSum(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -99,7 +99,7 @@ is constant sum and <literal>False</literal> (zero) otherwise.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgOutcome gbtNfgGame::NewOutcome(void)
+gbtGameOutcome gbtGame::NewOutcome(void)
 </synopsis>
 </para>
 </formalpara>
@@ -120,7 +120,7 @@ Returns the newly created outcome.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgSupport gbtNfgGame::NewSupport(void)
+gbtNfgSupport gbtGame::NewSupport(void)
 </synopsis>
 </para>
 </formalpara>
@@ -141,7 +141,7 @@ support contains all strategies for all players.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtNfgGame::NumPlayers(void) const
+int gbtGame::NumPlayers(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -162,7 +162,7 @@ on the game.
 <title>C++ usage</title>
 <para>
 <synopsis>
-gbtNfgGame ::ReadNfg(gbtInput &amp;p_file)
+gbtGame ::ReadNfg(gbtInput &amp;p_file)
 </synopsis>
 </para>
 </formalpara>
@@ -196,7 +196,7 @@ not contain a valid normal form savefile.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtNfgGame::SetComment(const gbtText &amp;p_comment)
+void gbtGame::SetComment(const gbtText &amp;p_comment)
 </synopsis>
 </para>
 </formalpara>
@@ -217,7 +217,7 @@ game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtNfgGame::SetLabel(const gbtText &amp;p_label)
+void gbtGame::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -236,7 +236,7 @@ void gbtNfgGame::SetLabel(const gbtText &amp;p_label)
 <title>C++ usage</title>
 <para>
 <synopsis>
-void gbtNfgGame::WriteNfg(gbtOutput &amp;p_file) const
+void gbtGame::WriteNfg(gbtOutput &amp;p_file) const
 </synopsis>
 </para>
 </formalpara>

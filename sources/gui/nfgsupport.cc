@@ -41,10 +41,10 @@
 //
 class gbtCmdAddStrategy : public gbtGameCommand {
 private:
-  gbtNfgAction m_strategy;
+  gbtGameStrategy m_strategy;
 
 public:
-  gbtCmdAddStrategy(gbtNfgAction p_strategy) : m_strategy(p_strategy) { }
+  gbtCmdAddStrategy(gbtGameStrategy p_strategy) : m_strategy(p_strategy) { }
   virtual ~gbtCmdAddStrategy() { }
 
   void Do(gbtGameDocument *);
@@ -67,10 +67,10 @@ void gbtCmdAddStrategy::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdRemoveStrategy : public gbtGameCommand {
 private:
-  gbtNfgAction m_strategy;
+  gbtGameStrategy m_strategy;
 
 public:
-  gbtCmdRemoveStrategy(gbtNfgAction p_strategy) : m_strategy(p_strategy) { }
+  gbtCmdRemoveStrategy(gbtGameStrategy p_strategy) : m_strategy(p_strategy) { }
   virtual ~gbtCmdRemoveStrategy() { }
 
   void Do(gbtGameDocument *);
@@ -117,7 +117,7 @@ void gbtCmdSetNfgSupport::Do(gbtGameDocument *p_doc)
 
 gbtNfgSupportWidget::gbtNfgSupportWidget(wxWindow *p_parent,
 					 wxWindowID p_id)
-  : wxTreeCtrl(p_parent, p_id), m_map(gbtNfgAction())
+  : wxTreeCtrl(p_parent, p_id), m_map(gbtGameStrategy())
 {
   Connect(p_id, wxEVT_COMMAND_TREE_ITEM_COLLAPSING,
 	  (wxObjectEventFunction) (wxEventFunction)
@@ -129,14 +129,14 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
   DeleteAllItems();
   AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtNfgPlayer player = p_support.GetGame()->GetPlayer(pl);
+    gbtGamePlayer player = p_support.GetGame()->GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
 						  (char *) player->GetLabel()));
     
     for (int st = 1; st <= player->NumStrategies(); st++) {
-      gbtNfgAction strategy = player->GetStrategy(st);
+      gbtGameStrategy strategy = player->GetStrategy(st);
 
       wxTreeItemId stratID = AppendItem(id, 
 					wxString::Format(wxT("%s"),
@@ -291,7 +291,7 @@ void gbtNfgSupportWindow::OnTreeItemActivated(wxTreeEvent &p_event)
 
 void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
 {
-  gbtNfgAction strategy = m_supportWidget->GetStrategy(p_id);
+  gbtGameStrategy strategy = m_supportWidget->GetStrategy(p_id);
   if (strategy.IsNull()) {
     return;
   }
@@ -363,11 +363,11 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Supports: %s"),
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
   }
   Show(m_doc->ShowNfgSupports());
@@ -378,5 +378,5 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
 static gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gbtBaseMap<wxTreeItemId, gbtNfgAction>;
-template class gbtOrdMap<wxTreeItemId, gbtNfgAction>;
+template class gbtBaseMap<wxTreeItemId, gbtGameStrategy>;
+template class gbtOrdMap<wxTreeItemId, gbtGameStrategy>;

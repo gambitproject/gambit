@@ -33,7 +33,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditContingency(wxWindow *p_parent, const gbtNfgGame &, 
+  dialogEditContingency(wxWindow *p_parent, const gbtGame &, 
 			const gbtArray<int> &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)

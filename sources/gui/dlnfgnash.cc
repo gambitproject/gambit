@@ -1355,7 +1355,7 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
   m_algorithmTree->SelectItem(init);
 }
 
-int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
+int dialogNfgNash::LoadAlgorithms(const gbtGame &p_nfg)
 {
   wxTreeItemId id;
 

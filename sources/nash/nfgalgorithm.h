@@ -27,7 +27,7 @@
 #ifndef NFGALGORITHM_H
 #define NFGALGORITHM_H
 
-#include "game/nfg.h"
+#include "game/game.h"
 #include "mixedsol.h"
 
 class gbtNfgNashAlgorithm {

@@ -1726,7 +1726,7 @@ dialogEfgNash::dialogEfgNash(wxWindow *p_parent, const gbtEfgSupport &p_support)
   m_algorithmTree->SelectItem(init);
 }
 
-int dialogEfgNash::LoadAlgorithms(const gbtEfgGame &p_efg)
+int dialogEfgNash::LoadAlgorithms(const gbtGame &p_efg)
 {
   wxTreeItemId id;
 

@@ -25,30 +25,30 @@
 //
 
 // Declaration of game API
-#include "efg.h"
+#include "game.h"
 
-// Declaration of internal extensive form classes
-#include "efgint.h"
+// Declaration of internal game form classes
+#include "gamebase.h"
 
 //
 // This file contains the implementation of the API for nodes in
 // a game tree.
 //
 
-gbtEfgNodeBase::gbtEfgNodeBase(gbtEfgGameBase *p_efg,
-			       gbtEfgNodeBase *p_parent)
+gbtGameNodeBase::gbtGameNodeBase(gbtGameBase *p_efg,
+			       gbtGameNodeBase *p_parent)
   : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(0),
     m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0),
     m_gameroot((p_parent) ? p_parent->m_gameroot : this)
 { }
 
-gbtEfgNodeBase::~gbtEfgNodeBase()
+gbtGameNodeBase::~gbtGameNodeBase()
 {
   // for (int i = m_children.Length(); i; delete m_children[i--]);
 }
 
-void gbtEfgNodeBase::DeleteOutcome(gbtEfgOutcomeBase *p_outcome)
+void gbtGameNodeBase::DeleteOutcome(gbtGameOutcomeBase *p_outcome)
 {
   if (p_outcome == m_outcome) {
     m_outcome = 0;
@@ -58,13 +58,13 @@ void gbtEfgNodeBase::DeleteOutcome(gbtEfgOutcomeBase *p_outcome)
   }
 }
 
-gbtEfgNode gbtEfgNodeBase::GetNextSibling(void) const
+gbtGameNode gbtGameNodeBase::GetNextSibling(void) const
 {
   if (!m_parent) {
     return 0;
   }
 
-  int childNumber = m_parent->m_children.Find(const_cast<gbtEfgNodeBase *>(this));
+  int childNumber = m_parent->m_children.Find(const_cast<gbtGameNodeBase *>(this));
   if (childNumber == m_parent->m_children.Length()) {
     return 0;
   }
@@ -73,13 +73,13 @@ gbtEfgNode gbtEfgNodeBase::GetNextSibling(void) const
   }
 }
 
-gbtEfgNode gbtEfgNodeBase::GetPriorSibling(void) const
+gbtGameNode gbtGameNodeBase::GetPriorSibling(void) const
 {
   if (!m_parent) {
     return 0;
   }
 
-  int childNumber = m_parent->m_children.Find(const_cast<gbtEfgNodeBase *>(this));
+  int childNumber = m_parent->m_children.Find(const_cast<gbtGameNodeBase *>(this));
   if (childNumber == 1) {
     return 0;
   }
@@ -88,13 +88,13 @@ gbtEfgNode gbtEfgNodeBase::GetPriorSibling(void) const
   }
 }
 
-gbtEfgNode gbtEfgNodeBase::GetNextMember(void) const
+gbtGameNode gbtGameNodeBase::GetNextMember(void) const
 {
   if (!m_infoset) {
     return 0;
   }
 
-  int memberNumber = m_infoset->m_members.Find(const_cast<gbtEfgNodeBase *>(this));
+  int memberNumber = m_infoset->m_members.Find(const_cast<gbtGameNodeBase *>(this));
   if (memberNumber == m_infoset->m_members.Length()) {
     return 0;
   }
@@ -103,13 +103,13 @@ gbtEfgNode gbtEfgNodeBase::GetNextMember(void) const
   }
 }
 
-gbtEfgNode gbtEfgNodeBase::GetPriorMember(void) const
+gbtGameNode gbtGameNodeBase::GetPriorMember(void) const
 {
   if (!m_infoset) {
     return 0;
   }
 
-  int memberNumber = m_infoset->m_members.Find(const_cast<gbtEfgNodeBase *>(this));
+  int memberNumber = m_infoset->m_members.Find(const_cast<gbtGameNodeBase *>(this));
   if (memberNumber == 1) {
     return 0;
   }
@@ -121,7 +121,7 @@ gbtEfgNode gbtEfgNodeBase::GetPriorMember(void) const
 //
 // MarkSubtree: sets the Node::mark flag on all children of node
 //
-void gbtEfgNodeBase::MarkSubtree(bool p_mark)
+void gbtGameNodeBase::MarkSubtree(bool p_mark)
 {
   m_mark = p_mark;
   for (int i = 1; i <= m_children.Length(); i++) {
@@ -129,27 +129,27 @@ void gbtEfgNodeBase::MarkSubtree(bool p_mark)
   }
 }
 
-gbtEfgInfoset gbtEfgNodeBase::GetInfoset(void) const
+gbtGameInfoset gbtGameNodeBase::GetInfoset(void) const
 {
   return m_infoset;
 }
 
-gbtEfgGame gbtEfgNodeBase::GetGame(void) const
+gbtGame gbtGameNodeBase::GetGame(void) const
 {
   return m_efg;
 }
 
-gbtEfgNode gbtEfgNodeBase::GetParent(void) const
+gbtGameNode gbtGameNodeBase::GetParent(void) const
 {
   return m_parent;
 }
 
-gbtEfgNode gbtEfgNodeBase::GetSubgameRoot(void) const
+gbtGameNode gbtGameNodeBase::GetSubgameRoot(void) const
 {
   return m_gameroot;
 }
 
-gbtEfgNode gbtEfgNodeBase::GetChild(const gbtEfgAction &p_action) const
+gbtGameNode gbtGameNodeBase::GetChild(const gbtGameAction &p_action) const
 {
   if (p_action->GetInfoset() != GetInfoset()) {
     return 0;
@@ -159,27 +159,27 @@ gbtEfgNode gbtEfgNodeBase::GetChild(const gbtEfgAction &p_action) const
   }
 }
 
-gbtEfgNode gbtEfgNodeBase::GetChild(int p_child) const
+gbtGameNode gbtGameNodeBase::GetChild(int p_child) const
 {
   return m_children[p_child];
 }
 
-int gbtEfgNodeBase::NumChildren(void) const
+int gbtGameNodeBase::NumChildren(void) const
 {
   return m_children.Length();
 }
 
-gbtEfgOutcome gbtEfgNodeBase::GetOutcome(void) const
+gbtGameOutcome gbtGameNodeBase::GetOutcome(void) const
 {
   return m_outcome;
 }
 
-void gbtEfgNodeBase::SetOutcome(const gbtEfgOutcome &p_outcome)
+void gbtGameNodeBase::SetOutcome(const gbtGameOutcome &p_outcome)
 {
-  m_outcome = dynamic_cast<gbtEfgOutcomeBase *>(p_outcome.Get());
+  m_outcome = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
 }
 
-int gbtEfgNodeBase::GetMemberId(void) const
+int gbtGameNodeBase::GetMemberId(void) const
 {
   if (!m_infoset) {
     return 0;
@@ -194,13 +194,13 @@ int gbtEfgNodeBase::GetMemberId(void) const
   return 0;
 }
 
-gbtEfgAction gbtEfgNodeBase::GetPriorAction(void) const
+gbtGameAction gbtGameNodeBase::GetPriorAction(void) const
 {
   if (this == m_efg->root) {
-    return gbtEfgAction();
+    return gbtGameAction();
   }
   
-  gbtEfgInfosetBase *infoset = m_parent->m_infoset;
+  gbtGameInfosetBase *infoset = m_parent->m_infoset;
   for (int i = 1; i <= infoset->m_actions.Length(); i++) {
     if (this == m_parent->m_children[i]) {
       return infoset->m_actions[i];
@@ -211,7 +211,7 @@ gbtEfgAction gbtEfgNodeBase::GetPriorAction(void) const
 }
 
 
-gbtEfgPlayer gbtEfgNodeBase::GetPlayer(void) const
+gbtGamePlayer gbtGameNodeBase::GetPlayer(void) const
 {
   if (!m_infoset) {
     return 0;
@@ -221,14 +221,14 @@ gbtEfgPlayer gbtEfgNodeBase::GetPlayer(void) const
   }
 }
 
-bool gbtEfgNodeBase::IsPredecessorOf(const gbtEfgNode &p_node) const
+bool gbtGameNodeBase::IsPredecessorOf(const gbtGameNode &p_node) const
 {
-  gbtEfgNodeBase *n = dynamic_cast<gbtEfgNodeBase *>(p_node.Get());
+  gbtGameNodeBase *n = dynamic_cast<gbtGameNodeBase *>(p_node.Get());
   for (; n && n != this; n = n->m_parent);
   return (n == this);
 }
 
-bool gbtEfgNodeBase::IsSubgameRoot(void) const
+bool gbtGameNodeBase::IsSubgameRoot(void) const
 {
   if (NumChildren() == 0) {
     return false;
@@ -238,13 +238,13 @@ bool gbtEfgNodeBase::IsSubgameRoot(void) const
   return m_efg->CheckTree(this, this);
 }
 
-gbtEfgNode gbtEfgNodeBase::InsertMove(gbtEfgInfoset p_infoset)
+gbtGameNode gbtGameNodeBase::InsertMove(gbtGameInfoset p_infoset)
 {
   if (p_infoset.IsNull()) {
     throw gbtEfgNullObject();
   }
 
-  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(p_infoset.Get());
+  gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());
   // FIXME: For the moment, can't bridge subgames
   if (infoset->m_members.Length() > 0 &&
       m_gameroot != infoset->m_members[1]->m_gameroot) {
@@ -255,7 +255,7 @@ gbtEfgNode gbtEfgNodeBase::InsertMove(gbtEfgInfoset p_infoset)
   return GetParent();
 }
 
-void gbtEfgNodeBase::DeleteMove(void)
+void gbtGameNodeBase::DeleteMove(void)
 {
   if (GetParent().IsNull()) {
     return;
@@ -264,24 +264,24 @@ void gbtEfgNodeBase::DeleteMove(void)
   // FIXME: Unmarking all subgames to be conservative.
   // Is this necessary?  (Or, more likely, will be moot once subgame
   // implementation is improved!)
-  gbtEfgGame(m_efg)->UnmarkSubgames(gbtEfgNode(this));
+  gbtGame(m_efg)->UnmarkSubgames(gbtGameNode(this));
   m_efg->DeleteMove(this);
 }
 
-void gbtEfgNodeBase::DeleteTree(void)
+void gbtGameNodeBase::DeleteTree(void)
 {
   m_efg->sortisets = false;
   m_efg->DeleteTree(this);
   m_efg->sortisets = true;
 }
 
-void gbtEfgNodeBase::JoinInfoset(gbtEfgInfoset p_infoset)
+void gbtGameNodeBase::JoinInfoset(gbtGameInfoset p_infoset)
 {
   if (p_infoset.IsNull())  {
     throw gbtEfgNullObject();
   }
 
-  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(p_infoset.Get());
+  gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());
   // FIXME: can't bridge subgames
   if (infoset->m_members.Length() > 0 &&
       m_gameroot != infoset->m_members[1]->m_gameroot) {
@@ -297,7 +297,7 @@ void gbtEfgNodeBase::JoinInfoset(gbtEfgInfoset p_infoset)
   m_efg->JoinInfoset(infoset, this);
 }
 
-gbtEfgInfoset gbtEfgNodeBase::LeaveInfoset(void)
+gbtGameInfoset gbtGameNodeBase::LeaveInfoset(void)
 {
   if (!m_infoset) {
     return 0;
@@ -306,5 +306,5 @@ gbtEfgInfoset gbtEfgNodeBase::LeaveInfoset(void)
   return m_efg->LeaveInfoset(this);
 }
 
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgNode &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtGameNode &)
 { return p_stream; }

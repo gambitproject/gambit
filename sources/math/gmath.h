@@ -28,6 +28,10 @@
 #define GMATH_H
 
 #include "gnumber.h"
+#include "gvector.h"
+#include "gpvector.h"
+#include "gdpvect.h"
+#include "gmatrix.h"
 #include "mpfloat.h"
 
 template <class T> class gbtArray;

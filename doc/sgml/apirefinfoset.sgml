@@ -12,7 +12,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgInfoset::DeleteInfoset(void)
+void gbtGameInfoset::DeleteInfoset(void)
 </synopsis>
 </para>
 </formalpara>
@@ -34,7 +34,7 @@ this function has no effect.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgAction gbtEfgInfoset::GetAction(int p_index) const
+gbtGameAction gbtGameInfoset::GetAction(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -58,7 +58,7 @@ is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame gbtEfgInfoset::GetGame(void) const
+gbtGame gbtGameInfoset::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -79,7 +79,7 @@ returns the extensive form game to which the information set belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgInfoset::GetLabel(void) const
+gbtText gbtGameInfoset::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -100,7 +100,7 @@ The empty string is returned if the information set object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgNode gbtEfgInfoset::GetMember(int p_index) const
+gbtGameNode gbtGameInfoset::GetMember(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -123,7 +123,7 @@ is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgInfoset::SetLabel(const gbtText &amp;p_label)
+void gbtGameInfoset::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

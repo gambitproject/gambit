@@ -25,18 +25,17 @@
 //
 
 #include "base/gmisc.h"
-#include "nfg.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
 
 
-gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
+gbtGame CompressNfg(const gbtGame &nfg, const gbtNfgSupport &S)
 {
-  gbtNfgGame N = NewNfg(S.NumStrats());
+  gbtGame N = NewNfg(S.NumStrats());
   N->SetLabel(nfg->GetLabel());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
-    gbtNfgPlayer player = N->GetPlayer(pl);
+    gbtGamePlayer player = N->GetPlayer(pl);
     player->SetLabel(nfg->GetPlayer(pl)->GetLabel());
     for (int st = 1; st <= N->NumStrats(pl); st++) {
       player->GetStrategy(st)->SetLabel(S.GetStrategy(pl, st)->GetLabel());
@@ -44,7 +43,7 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   }
 
   for (int outc = 1; outc <= nfg->NumOutcomes(); outc++)  {
-    gbtNfgOutcome outcome = N->NewOutcome();
+    gbtGameOutcome outcome = N->NewOutcome();
 
     outcome->SetLabel(nfg->GetOutcome(outc)->GetLabel());
 
@@ -72,7 +71,7 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   return N;
 }
 
-gbtNumber MinPayoff(const gbtNfgGame &nfg, int player)
+gbtNumber MinPayoff(const gbtGame &nfg, int player)
 {
   int index, p, p1, p2;
   gbtNumber minpay;
@@ -95,7 +94,7 @@ gbtNumber MinPayoff(const gbtNfgGame &nfg, int player)
   return minpay;
 }
 
-gbtNumber MaxPayoff(const gbtNfgGame &nfg, int player)
+gbtNumber MaxPayoff(const gbtGame &nfg, int player)
 {
   int index, p, p1, p2;
   gbtNumber maxpay;
@@ -117,4 +116,3 @@ gbtNumber MaxPayoff(const gbtNfgGame &nfg, int player)
   }
   return maxpay;
 }
-

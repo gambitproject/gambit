@@ -25,7 +25,7 @@
 //
 
 #include "lhtab.h"
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfgiter.h"
 #include "game/nfstrat.h"
 
@@ -33,7 +33,7 @@
 //                        LemkeHowson gbtTableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &N,
+template <class T> gbtMatrix<T> Make_A1(const gbtGame &N,
 				      const gbtNfgSupport &S,
                                       const T &)
 {
@@ -44,8 +44,8 @@ template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &N,
   gbtNfgIterator iter(S); 
   T min; 
 
-  min = MinPayoff(N) - gbtNumber(1);
-  T max = MaxPayoff(N);
+  min = N->MinPayoff() - gbtNumber(1);
+  T max = N->MaxPayoff();
   T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
@@ -59,7 +59,7 @@ template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &N,
   return A1;
 }
 
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &N,
+template <class T> gbtMatrix<T> Make_A2(const gbtGame &N,
 				      const gbtNfgSupport &S,
                                       const T &)
 {
@@ -70,8 +70,8 @@ template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &N,
   gbtNfgIterator iter(S); 
   T min; 
 
-  min = MinPayoff(N) - gbtNumber(1);
-  T max = MaxPayoff(N);
+  min = N->MinPayoff() - gbtNumber(1);
+  T max = N->MaxPayoff();
   T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
@@ -85,7 +85,7 @@ template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &N,
   return A2;
 }
 
-template <class T> gbtVector<T> Make_b1(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b1(const gbtGame &,
 				      const gbtNfgSupport &S,
 				      const T &)
 {
@@ -97,7 +97,7 @@ template <class T> gbtVector<T> Make_b1(const gbtNfgGame &,
   return b1;
 }
 
-template <class T> gbtVector<T> Make_b2(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b2(const gbtGame &,
 				      const gbtNfgSupport &S, const T &)
 {
   int n1, n2, i;

@@ -25,8 +25,9 @@
 //
 
 #include "nfdom.h"
+#include "nfgciter.h"
 
-bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
+bool gbtNfgSupport::Dominates(gbtGameStrategy s, gbtGameStrategy t,
 			      bool strong) const
 {
   gbtNfgContIterator A(*this), B(*this);
@@ -65,7 +66,7 @@ bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
   return (!equal);
 }
 
-bool gbtNfgSupport::IsDominated(gbtNfgAction s, bool strong) const
+bool gbtNfgSupport::IsDominated(gbtGameStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetId()); i++) {
     if (i != s->GetId()) {

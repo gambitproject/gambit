@@ -37,42 +37,45 @@
 
 
 
-class gbtEfgPlayerBase;
-class gbtEfgGame;
-class gbtEfgInfoset;
+class gbtGamePlayerBase;
+class gbtGame;
+class gbtGameInfoset;
 
-class gbtNfgPlayer;
-class gbtEfgPlayer;
-class gbtEfgAction;
+class gbtGamePlayer;
+class gbtGamePlayer;
+class gbtGameAction;
 
-class gbtEfgStrategyRep : public gbtGameObject {
-friend class gbtEfgStrategy;
+class gbtGameStrategyRep : public gbtGameObject {
+friend class gbtGameStrategy;
 public:
   virtual gbtText GetLabel(void) const = 0;
   virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
 
-  virtual gbtEfgPlayer GetPlayer(void) const = 0;
-  virtual gbtEfgAction GetAction(const gbtEfgInfoset &) const = 0;
+  virtual gbtGamePlayer GetPlayer(void) const = 0;
+  virtual gbtGameAction GetAction(const gbtGameInfoset &) const = 0;
   virtual const gbtArray<int> &GetBehavior(void) const = 0;
+
+  // The following only make sense for matrix games
+  virtual long GetIndex(void) const = 0;
 };
 
 class gbtEfgNullStrategy { };
 
-class gbtEfgStrategy {
-friend class gbtNfgGame;
+class gbtGameStrategy {
+friend class gbtGame;
 private:
-  gbtEfgStrategyRep *m_rep;
+  gbtGameStrategyRep *m_rep;
 
 public:
-  gbtEfgStrategy(void) : m_rep(0) { }
-  gbtEfgStrategy(gbtEfgStrategyRep *p_rep)
+  gbtGameStrategy(void) : m_rep(0) { }
+  gbtGameStrategy(gbtGameStrategyRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtEfgStrategy(const gbtEfgStrategy &p_player)
+  gbtGameStrategy(const gbtGameStrategy &p_player)
     : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtEfgStrategy() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+  ~gbtGameStrategy() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtEfgStrategy &operator=(const gbtEfgStrategy &p_player) {
+  gbtGameStrategy &operator=(const gbtGameStrategy &p_player) {
     if (this != &p_player) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
       m_rep = p_player.m_rep;
@@ -81,28 +84,32 @@ public:
     return *this;
   }
 
-  bool operator==(const gbtEfgStrategy &p_player) const
+  bool operator==(const gbtGameStrategy &p_player) const
   { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtEfgStrategy &p_player) const
+  bool operator!=(const gbtGameStrategy &p_player) const
   { return (m_rep != p_player.m_rep); }
 
-  gbtEfgStrategyRep *operator->(void) 
+  gbtGameStrategyRep *operator->(void) 
   { if (!m_rep) throw gbtEfgNullStrategy(); return m_rep; }
-  const gbtEfgStrategyRep *operator->(void) const 
+  const gbtGameStrategyRep *operator->(void) const 
   { if (!m_rep) throw gbtEfgNullStrategy(); return m_rep; }
   
-  gbtEfgStrategyRep *Get(void) const { return m_rep; }
+  gbtGameStrategyRep *Get(void) const { return m_rep; }
 
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }
 };
 
-class gbtEfgPlayerRep : public gbtGameObject {
-friend class gbtEfgPlayer;
-friend class gbtEfgGame;
-friend class gbtEfgInfoset;
+inline gbtOutput &operator<<(gbtOutput &p_stream,
+			     const gbtGameStrategy &)
+{ return p_stream; }
+
+class gbtGamePlayerRep : public gbtGameObject {
+friend class gbtGamePlayer;
+friend class gbtGame;
+friend class gbtGameInfoset;
 public:
-  virtual gbtEfgGame GetGame(void) const = 0;
+  virtual gbtGame GetGame(void) const = 0;
   virtual gbtText GetLabel(void) const = 0;
   virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
@@ -110,91 +117,28 @@ public:
   virtual bool IsChance(void) const = 0;
 
   virtual int NumInfosets(void) const = 0;
-  virtual gbtEfgInfoset NewInfoset(int p_actions) = 0;
-  virtual gbtEfgInfoset GetInfoset(int p_index) const = 0;
-};
-
-class gbtEfgNullPlayer { };
-
-class gbtEfgPlayer {
-private:
-  gbtEfgPlayerRep *m_rep;
-
-public:
-  gbtEfgPlayer(void) : m_rep(0) { }
-  gbtEfgPlayer(gbtEfgPlayerRep *p_rep)
-    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtEfgPlayer(const gbtEfgPlayer &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtEfgPlayer() { if (m_rep && m_rep->Dereference()) delete m_rep; }
-
-  gbtEfgPlayer &operator=(const gbtEfgPlayer &p_player) {
-    if (this != &p_player) {
-      if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
-      if (m_rep) m_rep->Reference();
-    }
-    return *this;
-  }
-
-  bool operator==(const gbtEfgPlayer &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtEfgPlayer &p_player) const
-  { return (m_rep != p_player.m_rep); }
-
-  gbtEfgPlayerRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullPlayer(); return m_rep; }
-  const gbtEfgPlayerRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullPlayer(); return m_rep; }
-  
-  gbtEfgPlayerRep *Get(void) const { return m_rep; }
-
-  // Questionable whether this should be provided
-  bool IsNull(void) const { return (m_rep == 0); }
-};
-
-//------------------------------------------------------------------------
-
-struct gbtNfgPlayerBase;
-class gbtNfgGame;
-class gbtNfgInfoset;
-class gbtNfgAction;
-
-class gbtNfgPlayerRep : public gbtGameObject {
-friend class gbtNfgPlayer;
-friend class gbtNfgGame;
-friend class gbtNfgInfoset;
-public:
-  virtual gbtNfgGame GetGame(void) const = 0;
-  virtual gbtText GetLabel(void) const = 0;
-  virtual void SetLabel(const gbtText &) = 0;
-  virtual int GetId(void) const = 0;
-
-  virtual bool IsChance(void) const = 0;
-
-  virtual int NumInfosets(void) const = 0;
-  //  virtual gbtNfgInfoset NewInfoset(int p_actions) = 0;
-  // virtual gbtNfgInfoset GetInfoset(int p_index) const = 0;
+  virtual gbtGameInfoset NewInfoset(int p_actions) = 0;
+  virtual gbtGameInfoset GetInfoset(int p_index) const = 0;
 
   virtual int NumStrategies(void) const = 0;
-  virtual gbtNfgAction GetStrategy(int) const = 0;
+  virtual gbtGameStrategy GetStrategy(int p_index) const = 0;
 };
 
-class gbtNfgNullPlayer { };
+class gbtGameNullPlayer { };
 
-class gbtNfgPlayer {
+class gbtGamePlayer {
 private:
-  gbtNfgPlayerRep *m_rep;
+  gbtGamePlayerRep *m_rep;
 
 public:
-  gbtNfgPlayer(void) : m_rep(0) { }
-  gbtNfgPlayer(gbtNfgPlayerRep *p_rep)
+  gbtGamePlayer(void) : m_rep(0) { }
+  gbtGamePlayer(gbtGamePlayerRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtNfgPlayer(const gbtNfgPlayer &p_player)
+  gbtGamePlayer(const gbtGamePlayer &p_player)
     : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtNfgPlayer() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+  ~gbtGamePlayer() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtNfgPlayer &operator=(const gbtNfgPlayer &p_player) {
+  gbtGamePlayer &operator=(const gbtGamePlayer &p_player) {
     if (this != &p_player) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
       m_rep = p_player.m_rep;
@@ -203,17 +147,17 @@ public:
     return *this;
   }
 
-  bool operator==(const gbtNfgPlayer &p_player) const
+  bool operator==(const gbtGamePlayer &p_player) const
   { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtNfgPlayer &p_player) const
+  bool operator!=(const gbtGamePlayer &p_player) const
   { return (m_rep != p_player.m_rep); }
 
-  gbtNfgPlayerRep *operator->(void) 
-  { if (!m_rep) throw gbtNfgNullPlayer(); return m_rep; }
-  const gbtNfgPlayerRep *operator->(void) const 
-  { if (!m_rep) throw gbtNfgNullPlayer(); return m_rep; }
+  gbtGamePlayerRep *operator->(void) 
+  { if (!m_rep) throw gbtGameNullPlayer(); return m_rep; }
+  const gbtGamePlayerRep *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullPlayer(); return m_rep; }
   
-  gbtNfgPlayerRep *Get(void) const { return m_rep; }
+  gbtGamePlayerRep *Get(void) const { return m_rep; }
 
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }

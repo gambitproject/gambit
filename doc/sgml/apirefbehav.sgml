@@ -13,7 +13,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetActionProb(gbtEfgAction p_action) const
+gbtNumber BehavSolution::GetActionProb(gbtGameAction p_action) const
 </synopsis>
 </para>
 </formalpara>
@@ -48,7 +48,7 @@ if the probability specified in the profile is rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetActionValue(gbtEfgAction) const
+gbtNumber BehavSolution::GetActionValue(gbtGameAction) const
 </synopsis>
 </para>
 </formalpara>
@@ -83,7 +83,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetBelief(gbtEfgNode) const
+gbtNumber BehavSolution::GetBelief(gbtGameNode) const
 </synopsis>
 </para>
 </formalpara>
@@ -143,7 +143,7 @@ by the user is identified by <literal>User</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame BehavSolution::GetGame(void) const
+gbtGame BehavSolution::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -164,7 +164,7 @@ returns the extensive form game to which the profile belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetInfosetProb(gbtEfgInfoset) const
+gbtNumber BehavSolution::GetInfosetProb(gbtGameInfoset) const
 </synopsis>
 </para>
 </formalpara>
@@ -195,7 +195,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetInfosetValue(gbtEfgInfoset) const
+gbtNumber BehavSolution::GetInfosetValue(gbtGameInfoset) const
 </synopsis>
 </para>
 </formalpara>
@@ -277,7 +277,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetNodeValue(gbtEfgNode, gbtEfgPlayer) const
+gbtNumber BehavSolution::GetNodeValue(gbtGameNode, gbtGamePlayer) const
 </synopsis>
 </para>
 </formalpara>
@@ -306,7 +306,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetPayoff(gbtEfgPlayer p_player) const
+gbtNumber BehavSolution::GetPayoff(gbtGamePlayer p_player) const
 </synopsis>
 </para>
 </formalpara>
@@ -336,7 +336,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetRealizProb(gbtEfgNode) const
+gbtNumber BehavSolution::GetRealizProb(gbtGameNode) const
 </synopsis>
 </para>
 </formalpara>
@@ -367,7 +367,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetRegret(gbtEfgAction p_action) const
+gbtNumber BehavSolution::GetRegret(gbtGameAction p_action) const
 </synopsis>
 </para>
 </formalpara>
@@ -511,7 +511,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void BehavSolution::SetStrategyProb(gbtEfgAction, gbtNumber)
+void BehavSolution::SetStrategyProb(gbtGameAction, gbtNumber)
 </synopsis>
 </para>
 </formalpara>

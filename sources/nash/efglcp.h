@@ -38,9 +38,9 @@ private:
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
   gbtList<gbtBasicFeasibleSolution<T> > List;
-  gbtList<gbtEfgInfoset> isets1, isets2;
+  gbtList<gbtGameInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtEfgNode &, T,
+  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtGameNode &, T,
 		   int, int, int, int);
   int Add_BFS(const gbtLemkeTableau<T> &tab);
   int All_Lemke(const gbtEfgSupport &, int dup, gbtLemkeTableau<T> &B,
@@ -48,7 +48,7 @@ private:
   
   void GetProfile(const gbtEfgSupport &, const gbtLemkeTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
-		  const gbtEfgNode &n, int,int);
+		  const gbtGameNode &n, int,int);
 
 public:
   gbtEfgNashLcp(void);

@@ -298,8 +298,8 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
   double lambda = 1.0;
   double initialsign = -1.0; 
   gbtList<gbtMatrix<int> > partitions;
-  gbtMatrix<double> H(p_support.GetGame()->ProfileLength(),
-		    p_support.GetGame()->ProfileLength() + 1);
+  gbtMatrix<double> H(p_support.GetGame()->MixedProfileLength(),
+		      p_support.GetGame()->MixedProfileLength() + 1);
 
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
     partitions.Append(RankStrategies(profile, pl));

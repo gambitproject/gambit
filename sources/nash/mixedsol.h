@@ -27,9 +27,8 @@
 #ifndef MIXEDSOL_H
 #define MIXEDSOL_H
 
-#include "base/base.h"
-#include "math/gmath.h"
-#include "game/nfg.h"
+#include "game/game.h"
+#include "game/mixed.h"
 #include "algutils.h"  // needed for gFact
 
 class MixedSolution   {
@@ -69,9 +68,9 @@ public:
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  void SetStrategyProb(gbtNfgAction, const gbtNumber &);
-  const gbtNumber &operator()(gbtNfgAction) const;
-  const gbtNumber &GetStrategyProb(const gbtNfgAction &p_strategy) const
+  void SetStrategyProb(gbtGameStrategy, const gbtNumber &);
+  const gbtNumber &operator()(gbtGameStrategy) const;
+  const gbtNumber &GetStrategyProb(const gbtGameStrategy &p_strategy) const
     { return (*this)(p_strategy); }
 
   MixedSolution &operator+=(const MixedSolution &);
@@ -79,7 +78,7 @@ public:
   MixedSolution &operator*=(const gbtNumber &);
 
   // GENERAL DATA ACCESS
-  gbtNfgGame GetGame(void) const { return m_profile.GetGame(); }
+  gbtGame GetGame(void) const { return m_profile.GetGame(); }
   gbtPrecision Precision(void) const { return m_precision; }
   const gbtMixedProfile<gbtNumber> *Profile(void) const { return &m_profile; }
 
@@ -115,8 +114,8 @@ public:
   const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
-  gbtNumber GetPayoff(gbtNfgPlayer) const;
-  gbtNumber GetStrategyValue(gbtNfgAction) const;
+  gbtNumber GetPayoff(gbtGamePlayer) const;
+  gbtNumber GetStrategyValue(gbtGameStrategy) const;
 
   // OUTPUT
   void Dump(gbtOutput &) const;

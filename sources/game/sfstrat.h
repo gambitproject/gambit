@@ -28,7 +28,7 @@
 #define SFSTRAT_H
 
 #include "base/base.h"
-#include "game/efg.h"
+#include "game/game.h"
 
 struct gbtSfgSequence {
 friend class gbtSfgGame;
@@ -36,11 +36,11 @@ friend class gbtSfgSequenceSet;
 private:
   int number;
   gbtText name;
-  gbtEfgPlayer player;
-  gbtEfgAction action;
+  gbtGamePlayer player;
+  gbtGameAction action;
   const gbtSfgSequence *parent;
   
-  gbtSfgSequence(const gbtEfgPlayer &pl, const gbtEfgAction &a,
+  gbtSfgSequence(const gbtGamePlayer &pl, const gbtGameAction &a,
 	   const gbtSfgSequence *p, int n) 
     : number(n), player(pl), action(a), parent(p) { }
   ~gbtSfgSequence() { }
@@ -48,24 +48,24 @@ public:
   const gbtText &GetName(void) const   { return name; }
   void SetName(const gbtText &s)       { name = s; }
   
-  gbtList<gbtEfgAction> History(void) const;
+  gbtList<gbtGameAction> History(void) const;
   int GetNumber(void) const        { return number; }
-  gbtEfgAction GetAction(void) const  {return action; }
-  gbtEfgInfoset GetInfoset(void) const 
+  gbtGameAction GetAction(void) const  {return action; }
+  gbtGameInfoset GetInfoset(void) const 
   { if (!action.IsNull()) return action->GetInfoset(); else return 0; }
-  gbtEfgPlayer Player(void) const  { return player; }
+  gbtGamePlayer Player(void) const  { return player; }
   const gbtSfgSequence *Parent(void) const   { return parent; }
   void Dump(gbtOutput &) const;
 };
 
 class gbtSfgSequenceSet {
 protected:
-  gbtEfgPlayer efp;
+  gbtGamePlayer efp;
   gbtBlock <gbtSfgSequence *> sequences;
   
 public:
   gbtSfgSequenceSet(const gbtSfgSequenceSet &s); 
-  gbtSfgSequenceSet(const gbtEfgPlayer &);
+  gbtSfgSequenceSet(const gbtGamePlayer &);
   
   gbtSfgSequenceSet &operator=(const gbtSfgSequenceSet &s); 
   bool operator==(const gbtSfgSequenceSet &s);

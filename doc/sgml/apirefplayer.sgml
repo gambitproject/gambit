@@ -17,9 +17,9 @@ form).  This limitation is intended to disappear in future versions.
 </para>
 
 <para>
-Players in extensive form games are of type <type>gbtEfgPlayer</type>
+Players in extensive form games are of type <type>gbtGamePlayer</type>
 in C++.  Players in normal form games are of
-type <type>gbtNfgPlayer</type> in C++.
+type <type>gbtGamePlayer</type> in C++.
 </para>
 
 
@@ -31,8 +31,8 @@ type <type>gbtNfgPlayer</type> in C++.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame gbtEfgPlayer::GetGame(void) const
-gbtNfgGame gbtNfgPlayer::GetGame(void) const
+gbtGame gbtGamePlayer::GetGame(void) const
+gbtGame gbtGamePlayer::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -53,7 +53,7 @@ returns the extensive or normal form game to which the player belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
+gbtGameInfoset gbtGamePlayer::GetInfoset(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -77,7 +77,7 @@ index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgPlayer::GetLabel(void) const
+gbtText gbtGamePlayer::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -98,7 +98,7 @@ The empty string is returned if the player object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgAction gbtNfgPlayer::GetStrategy(int p_index) const
+gbtGameAction gbtGamePlayer::GetStrategy(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -120,7 +120,7 @@ at one.  An exception is thown if the index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtEfgPlayer::IsChance(void) const
+bool gbtGamePlayer::IsChance(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -142,8 +142,8 @@ if the player is a personal player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtEfgPlayer::IsNull(void) const
-bool gbtNfgPlayer::IsNull(void) const
+bool gbtGamePlayer::IsNull(void) const
+bool gbtGamePlayer::IsNull(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -164,7 +164,7 @@ null, and <literal>False</literal> (zero) if it is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
+gbtGameInfoset gbtGamePlayer::NewInfoset(int p_actions)
 </synopsis>
 </para>
 </formalpara>
@@ -189,7 +189,7 @@ positive.  The newly created information set is returned.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtEfgPlayer::NumInfosets(void) const
+int gbtGamePlayer::NumInfosets(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -209,7 +209,7 @@ sets are defined where the player has the decision.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtNfgPlayer::NumStrategies(void) const
+int gbtGamePlayer::NumStrategies(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -230,8 +230,8 @@ player has in the game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgPlayer::SetLabel(const gbtText &amp;p_label)
-void gbtNfgPlayer::SetLabel(const gbtText &amp;p_label)
+void gbtGamePlayer::SetLabel(const gbtText &amp;p_label)
+void gbtGamePlayer::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

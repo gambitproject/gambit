@@ -86,7 +86,7 @@ mixed_getgame(mixedobject *self, PyObject *args)
   }
 
   nfgobject *game = newnfgobject();
-  game->m_nfg = new gbtNfgGame(self->m_profile->GetGame());
+  game->m_nfg = new gbtGame(self->m_profile->GetGame());
   return (PyObject *) game;
 }
 

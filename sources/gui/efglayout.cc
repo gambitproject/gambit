@@ -25,13 +25,11 @@
 //
 
 #include <math.h>
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "math/gmath.h"
-
-#include "game/efg.h"
+#include "game/game.h"
 
 #include "treewin.h"
 #include "efgshow.h"
@@ -43,9 +41,9 @@
 //
 // OutcomeAsString: Returns the outcome payoffs at node 'n' as a text string
 //
-static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
+static wxString OutcomeAsString(const gbtGameNode &p_node, int p_numDecimals)
 {
-  gbtEfgOutcome outcome = p_node->GetOutcome();
+  gbtGameOutcome outcome = p_node->GetOutcome();
   if (!outcome.IsNull()) {
     const gbtArray<gbtNumber> &payoffs = outcome->GetPayoff();
     wxString tmp = wxT("(");
@@ -71,7 +69,7 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 //                   class gbtEfgLayoutNode: Member functions
 //-----------------------------------------------------------------------
 
-gbtEfgLayoutNode::gbtEfgLayoutNode(gbtEfgNode p_node)
+gbtEfgLayoutNode::gbtEfgLayoutNode(gbtGameNode p_node)
   : m_node(p_node), m_parent(0),
     m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
     m_cut(false),
@@ -300,7 +298,7 @@ gbtEfgLayout::gbtEfgLayout(gbtGameDocument *p_doc)
     m_infosetSpacing(40), c_leftMargin(20), c_topMargin(40)
 { }
 
-gbtEfgNode gbtEfgLayout::NodeHitTest(int p_x, int p_y) const
+gbtGameNode gbtEfgLayout::NodeHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
@@ -310,7 +308,7 @@ gbtEfgNode gbtEfgLayout::NodeHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode gbtEfgLayout::BranchHitTest(int p_x, int p_y) const
+gbtGameNode gbtEfgLayout::BranchHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     gbtEfgLayoutNode *entry = m_nodeList[i];
@@ -339,7 +337,7 @@ gbtEfgNode gbtEfgLayout::BranchHitTest(int p_x, int p_y) const
 }
 
 
-gbtEfgNode gbtEfgLayout::InfosetHitTest(int p_x, int p_y) const
+gbtGameNode gbtEfgLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     gbtEfgLayoutNode *entry = m_nodeList[i];
@@ -363,7 +361,7 @@ gbtEfgNode gbtEfgLayout::InfosetHitTest(int p_x, int p_y) const
 wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
 					int p_which) const
 {
-  gbtEfgNode n = p_entry->GetNode();
+  gbtGameNode n = p_entry->GetNode();
     
   switch (p_which) {
   case GBT_NODE_LABEL_NOTHING:
@@ -409,7 +407,7 @@ wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
 
 wxString gbtEfgLayout::CreateOutcomeLabel(const gbtEfgLayoutNode *p_entry) const
 {    
-  gbtEfgNode node = p_entry->GetNode();
+  gbtGameNode node = p_entry->GetNode();
 
   switch (m_doc->GetPreferences().OutcomeLabel()) { 
   case GBT_OUTCOME_LABEL_PAYOFFS:
@@ -425,7 +423,7 @@ wxString gbtEfgLayout::CreateOutcomeLabel(const gbtEfgLayoutNode *p_entry) const
 wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
 					  int p_which) const
 {
-  gbtEfgNode parent = p_entry->GetParent()->GetNode();
+  gbtGameNode parent = p_entry->GetParent()->GetNode();
 
   switch (p_which) {
   case GBT_BRANCH_LABEL_NOTHING:
@@ -446,7 +444,7 @@ wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
   }
 }
 
-gbtEfgLayoutNode *gbtEfgLayout::GetEntry(const gbtEfgNode &p_node) const
+gbtEfgLayoutNode *gbtEfgLayout::GetEntry(const gbtGameNode &p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->GetNode() == p_node) {
@@ -456,7 +454,7 @@ gbtEfgLayoutNode *gbtEfgLayout::GetEntry(const gbtEfgNode &p_node) const
   return 0;
 }
 
-gbtEfgNode gbtEfgLayout::PriorSameLevel(const gbtEfgNode &p_node) const
+gbtGameNode gbtEfgLayout::PriorSameLevel(const gbtGameNode &p_node) const
 {
   gbtEfgLayoutNode *entry = GetEntry(p_node);
   if (entry) {
@@ -468,7 +466,7 @@ gbtEfgNode gbtEfgLayout::PriorSameLevel(const gbtEfgNode &p_node) const
   return 0;
 }
 
-gbtEfgNode gbtEfgLayout::NextSameLevel(const gbtEfgNode &p_node) const
+gbtGameNode gbtEfgLayout::NextSameLevel(const gbtGameNode &p_node) const
 {
   gbtEfgLayoutNode *entry = GetEntry(p_node);
   if (entry) {
@@ -481,7 +479,7 @@ gbtEfgNode gbtEfgLayout::NextSameLevel(const gbtEfgNode &p_node) const
   return 0;
 }
 
-int gbtEfgLayout::LayoutSubtree(const gbtEfgNode &p_node, 
+int gbtEfgLayout::LayoutSubtree(const gbtGameNode &p_node, 
 				 const gbtEfgSupport &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
@@ -625,7 +623,7 @@ void gbtEfgLayout::CheckInfosetEntry(gbtEfgLayoutNode *e)
   e->SetNextMember(infoset_entry);
 }
 
-void gbtEfgLayout::FillInfosetTable(const gbtEfgNode &n,
+void gbtEfgLayout::FillInfosetTable(const gbtGameNode &n,
 				     const gbtEfgSupport &cur_sup)
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
@@ -685,18 +683,18 @@ void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
   m_infosetSpacing = 
     (m_doc->GetPreferences().InfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.Length() != NumNodes(m_doc->GetEfg())) {
+  if (m_nodeList.Length() != m_doc->GetGame()->NumNodes()) {
     // A rebuild is in order; force it
     BuildNodeList(p_support);
   }
 
   int miny = 0, maxy = 0, ycoord = c_topMargin;
-  LayoutSubtree(m_doc->GetEfg()->GetRoot(), p_support, maxy, miny, ycoord);
+  LayoutSubtree(m_doc->GetGame()->GetRoot(), p_support, maxy, miny, ycoord);
 
   const gbtPreferences &prefs = m_doc->GetPreferences();
   if (prefs.InfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
-    FillInfosetTable(m_doc->GetEfg()->GetRoot(), p_support);
+    FillInfosetTable(m_doc->GetGame()->GetRoot(), p_support);
     UpdateTableInfosets();
   }
 
@@ -708,7 +706,7 @@ void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
   m_maxY = maxy + 25;
 }
 
-void gbtEfgLayout::BuildNodeList(const gbtEfgNode &p_node, 
+void gbtEfgLayout::BuildNodeList(const gbtGameNode &p_node, 
 				 const gbtEfgSupport &p_support,
 				 gbtEfgLayoutNode *p_parent,
 				 int p_level)
@@ -732,7 +730,7 @@ void gbtEfgLayout::BuildNodeList(const gbtEfgSupport &p_support)
   }
 
   m_maxLevel = 0;
-  BuildNodeList(m_doc->GetEfg()->GetRoot(), p_support, 0, 0);
+  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0, 0);
 }
 
 
@@ -859,7 +857,7 @@ void gbtEfgLayout::Render(wxDC &p_dc) const
   RenderSubtree(p_dc);
 }
 
-void gbtEfgLayout::SetCutNode(const gbtEfgNode &p_node)
+void gbtEfgLayout::SetCutNode(const gbtGameNode &p_node)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     m_nodeList[i]->SetCut(p_node->IsPredecessorOf(m_nodeList[i]->GetNode()));

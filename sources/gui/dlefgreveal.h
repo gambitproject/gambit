@@ -29,12 +29,12 @@
 
 class dialogInfosetReveal : public wxDialog {
 private:
-  gbtEfgGame m_efg;
+  gbtGame m_efg;
   wxCheckBox **m_players;
 
 public:
   // Lifecycle
-  dialogInfosetReveal(wxWindow *, const gbtEfgGame &);
+  dialogInfosetReveal(wxWindow *, const gbtGame &);
   virtual ~dialogInfosetReveal();
 
   // Data access (only valid when ShowModal() returns with wxID_OK)

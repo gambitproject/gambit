@@ -27,9 +27,8 @@
 #ifndef GAMEDOC_H
 #define GAMEDOC_H
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "nash/behavsol.h"
-#include "game/nfg.h"
 #include "nash/mixedsol.h"
 #include "prefs.h"
 #include "support.h"
@@ -54,12 +53,11 @@ private:
   void RemoveView(gbtGameView *);
 
   // Extensive-form related state information
-  gbtEfgGame m_efg;
-  gbtEfgNode m_cursor, m_copyNode, m_cutNode;
+  gbtGame m_game;
+  gbtGameNode m_cursor, m_copyNode, m_cutNode;
   gbtEfgSupportList m_efgSupports;
 
   // Normal-form related state information
-  gbtNfgGame m_nfg;
   int m_rowPlayer, m_colPlayer;
   gbtArray<int> m_contingency;
   gbtNfgSupportList m_nfgSupports;
@@ -74,8 +72,7 @@ private:
 
 public:
   // Lifecycle
-  gbtGameDocument(gbtEfgGame, wxString = wxT(""));
-  gbtGameDocument(gbtNfgGame, wxString = wxT(""));
+  gbtGameDocument(gbtGame, wxString = wxT(""));
   ~gbtGameDocument();
 
   // General information about game
@@ -89,9 +86,10 @@ public:
   void Submit(gbtGameCommand *);
   void UpdateViews(gbtGameView * = 0);
 
+  gbtGame GetGame(void) const { return m_game; }
+  bool HasEfg(void) const { return m_game->IsTree(); }
+
   // Extensive-form related state information
-  gbtEfgGame GetEfg(void) const { return m_efg; }
-  bool HasEfg(void) const { return (!m_efg.IsNull()); }
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }
@@ -115,16 +113,15 @@ public:
   void SetShowEfgSupports(bool p_show);
 
   // MARKED NODES
-  void SetCursor(gbtEfgNode m_node);
-  gbtEfgNode GetCursor(void) const { return m_cursor; }
-  void SetCopyNode(gbtEfgNode);
-  gbtEfgNode GetCopyNode(void) const { return m_copyNode; }
-  void SetCutNode(gbtEfgNode);
-  gbtEfgNode GetCutNode(void) const { return m_cutNode; }
+  void SetCursor(gbtGameNode m_node);
+  gbtGameNode GetCursor(void) const { return m_cursor; }
+  void SetCopyNode(gbtGameNode);
+  gbtGameNode GetCopyNode(void) const { return m_copyNode; }
+  void SetCutNode(gbtGameNode);
+  gbtGameNode GetCutNode(void) const { return m_cutNode; }
   
   // OUTCOMES
-  gbtText UniqueEfgOutcomeName(void) const;
-  gbtText UniqueNfgOutcomeName(void) const;
+  gbtText UniqueOutcomeName(void) const;
    
   // SUPPORTS
   const gbtEfgSupportList &GetEfgSupportList(void) const
@@ -158,18 +155,16 @@ public:
   void RemoveProfile(int p_index);
 
   // LABELS
-  gbtText GetRealizProb(const gbtEfgNode &) const;
-  gbtText GetBeliefProb(const gbtEfgNode &) const;
-  gbtText GetNodeValue(const gbtEfgNode &) const;
-  gbtText GetInfosetProb(const gbtEfgNode &) const;
-  gbtText GetInfosetValue(const gbtEfgNode &) const;
-  gbtText GetActionValue(const gbtEfgNode &, int act) const;
-  gbtText GetActionProb(const gbtEfgNode &, int act) const;
-  gbtNumber ActionProb(const gbtEfgNode &, int br) const;
+  gbtText GetRealizProb(const gbtGameNode &) const;
+  gbtText GetBeliefProb(const gbtGameNode &) const;
+  gbtText GetNodeValue(const gbtGameNode &) const;
+  gbtText GetInfosetProb(const gbtGameNode &) const;
+  gbtText GetInfosetValue(const gbtGameNode &) const;
+  gbtText GetActionValue(const gbtGameNode &, int act) const;
+  gbtText GetActionProb(const gbtGameNode &, int act) const;
+  gbtNumber ActionProb(const gbtGameNode &, int br) const;
 
   // NORMAL FORM STATE
-  gbtNfgGame GetNfg(void) const;
-
   gbtArray<int> GetContingency(void) const;
   void SetContingency(const gbtArray<int> &);
   int GetRowPlayer(void) const { return m_rowPlayer; }

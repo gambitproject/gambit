@@ -31,21 +31,21 @@
 class EFLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
-  gbtEfgGame m_efg;
+  gbtGame m_efg;
   mutable gbtBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(const gbtEfgGame &, const gbtBehavProfile<double> &);
+  EFLiapFunc(const gbtGame &, const gbtBehavProfile<double> &);
   virtual ~EFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 
-EFLiapFunc::EFLiapFunc(const gbtEfgGame &p_efg,
+EFLiapFunc::EFLiapFunc(const gbtGame &p_efg,
 		       const gbtBehavProfile<double> &start)
   : _nevals(0L), m_efg(p_efg), _p(start)
 { }

@@ -27,14 +27,14 @@
 #include "nfgpure.h"
 
 #include "base/base.h"
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
 
 gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 					       gbtStatus &p_status)
 {
-  gbtNfgGame nfg = p_support.GetGame();
+  gbtGame nfg = p_support.GetGame();
   gbtList<MixedSolution> solutions;
   gbtNfgContIterator citer(p_support);
 

@@ -79,7 +79,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gbtList<const gbtEfgSupport> supports = PossibleNashSubsupports(p_support,
+  gbtList<gbtEfgSupport> supports = PossibleNashSubsupports(p_support,
 							    p_status);
 
   p_status.SetProgress(0.0);

@@ -25,7 +25,6 @@
 //
 
 #include "nfgiter.h"
-#include "nfg.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
 
@@ -33,7 +32,7 @@
 // gbtNfgIterator:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
 
-gbtNfgIterator::gbtNfgIterator(gbtNfgGame p_nfg)
+gbtNfgIterator::gbtNfgIterator(gbtGame p_nfg)
   : support(p_nfg),
     m_nfg(p_nfg), current_strat(p_nfg->NumPlayers()), profile(p_nfg)
 {
@@ -78,7 +77,7 @@ gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 void gbtNfgIterator::First(void)
 {
   for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
-    gbtNfgAction s = support.GetStrategy(i, 1);
+    gbtGameStrategy s = support.GetStrategy(i, 1);
     profile.SetStrategy(s);
     current_strat[i] = 1;
   }
@@ -87,12 +86,12 @@ void gbtNfgIterator::First(void)
 int gbtNfgIterator::Next(int p)
 {
   if (current_strat[p] < support.NumStrats(p))  {
-    gbtNfgAction s = support.GetStrategy(p, ++(current_strat[p]));
+    gbtGameStrategy s = support.GetStrategy(p, ++(current_strat[p]));
     profile.SetStrategy(s);
     return 1;
   }
   else {
-    gbtNfgAction s = support.GetStrategy(p, 1);
+    gbtGameStrategy s = support.GetStrategy(p, 1);
     profile.SetStrategy(s);
     current_strat[p] = 1;
     return 0;
@@ -124,12 +123,12 @@ void gbtNfgIterator::Set(const gbtArray<int> &t)
   } 
 }
 
-gbtNfgOutcome gbtNfgIterator::GetOutcome(void) const
+gbtGameOutcome gbtNfgIterator::GetOutcome(void) const
 {
   return profile.GetOutcome();
 }
 
-void gbtNfgIterator::SetOutcome(gbtNfgOutcome outcome)
+void gbtNfgIterator::SetOutcome(gbtGameOutcome outcome)
 {
   profile.SetOutcome(outcome);
 }
@@ -166,7 +165,7 @@ void gbtNfgContIterator::First(void)
   }	
 }
 
-void gbtNfgContIterator::Freeze(gbtNfgAction p_strategy)
+void gbtNfgContIterator::Freeze(gbtGameStrategy p_strategy)
 {
   int player = p_strategy->GetPlayer()->GetId();
   if (!m_frozen.Contains(player)) {
@@ -179,7 +178,7 @@ void gbtNfgContIterator::Freeze(gbtNfgAction p_strategy)
   First();
 }
 
-void gbtNfgContIterator::Thaw(gbtNfgPlayer p_player)
+void gbtNfgContIterator::Thaw(gbtGamePlayer p_player)
 {
   int pl = p_player->GetId();
   if (m_thawed.Contains(pl)) {
@@ -192,7 +191,7 @@ void gbtNfgContIterator::Thaw(gbtNfgPlayer p_player)
   First();
 }
 
-int gbtNfgContIterator::Next(gbtNfgPlayer p_player)
+int gbtNfgContIterator::Next(gbtGamePlayer p_player)
 {
   int p = p_player->GetId();
   if (!m_thawed.Contains(p)) {
@@ -200,13 +199,13 @@ int gbtNfgContIterator::Next(gbtNfgPlayer p_player)
   }
 
   if (m_current[p] < m_support.NumStrats(p))  {
-    gbtNfgAction s = m_support.GetStrategy(p, ++(m_current[p]));
+    gbtGameStrategy s = m_support.GetStrategy(p, ++(m_current[p]));
     m_profile.SetStrategy(s);
     First();
     return 1;
   }
   else {
-    gbtNfgAction s = m_support.GetStrategy(p, 1);
+    gbtGameStrategy s = m_support.GetStrategy(p, 1);
     m_profile.SetStrategy(s);
     m_current[p] = 1;
     First();
@@ -222,7 +221,7 @@ int gbtNfgContIterator::NextContingency(void)
   while (1)   {
     int pl = m_thawed[j];
     if (m_current[pl] < m_support.NumStrats(pl)) {
-      gbtNfgAction s = m_support.GetStrategy(pl, ++(m_current[pl]));
+      gbtGameStrategy s = m_support.GetStrategy(pl, ++(m_current[pl]));
       m_profile.SetStrategy(s);
       return 1;
     }

@@ -205,7 +205,7 @@ void MixedSolution::LevelPrecision(void)
   m_epsilon = 0;
   for (int pl = 1; m_precision == GBT_PREC_RATIONAL && pl <= GetGame()->NumPlayers();
        pl++) {
-    gbtNfgPlayer player = GetGame()->GetPlayer(pl);
+    gbtGamePlayer player = GetGame()->GetPlayer(pl);
     for (int st = 1; (m_precision == GBT_PREC_RATIONAL && 
 		      st <= player->NumStrategies()); st++) {
       if (m_profile(pl, st).Precision() == GBT_PREC_DOUBLE) {
@@ -218,7 +218,7 @@ void MixedSolution::LevelPrecision(void)
 
   if (m_precision == GBT_PREC_DOUBLE) {
     for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-      gbtNfgPlayer player = GetGame()->GetPlayer(pl);
+      gbtGamePlayer player = GetGame()->GetPlayer(pl);
       for (int st = 1; st <= player->NumStrategies(); st++) 
 	m_profile(pl, st) = (double) m_profile(pl, st);
     }
@@ -246,7 +246,7 @@ bool MixedSolution::Equals(const gbtMixedProfile<double> &p_profile) const
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
 { return (m_profile == p_solution.m_profile); }
 
-void MixedSolution::SetStrategyProb(gbtNfgAction p_strategy,
+void MixedSolution::SetStrategyProb(gbtGameStrategy p_strategy,
 				    const gbtNumber &p_value)
 { 
   Invalidate();
@@ -256,9 +256,9 @@ void MixedSolution::SetStrategyProb(gbtNfgAction p_strategy,
   }
 }
 
-const gbtNumber &MixedSolution::operator()(gbtNfgAction p_strategy) const
+const gbtNumber &MixedSolution::operator()(gbtGameStrategy p_strategy) const
 {
-  gbtNfgPlayer player = p_strategy->GetPlayer();
+  gbtGamePlayer player = p_strategy->GetPlayer();
   return m_profile(player->GetId(), p_strategy->GetId()); 
 }
 
@@ -362,12 +362,12 @@ void MixedSolution::Invalidate(void) const
 // Payoff computation
 //---------------------
 
-gbtNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
+gbtNumber MixedSolution::GetPayoff(gbtGamePlayer p_player) const
 {
   return m_profile.Payoff(p_player->GetId());
 }
 
-gbtNumber MixedSolution::GetStrategyValue(gbtNfgAction p_strategy) const
+gbtNumber MixedSolution::GetStrategyValue(gbtGameStrategy p_strategy) const
 {
   return m_profile.Payoff(p_strategy->GetPlayer()->GetId(), p_strategy); 
 }

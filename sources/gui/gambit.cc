@@ -29,14 +29,14 @@
 #include <signal.h>
 #include <math.h>
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "wx/image.h"
-#include "wx/splash.h"
+#include <wx/image.h>
+#include <wx/splash.h>
 
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfstrat.h"
 #include "game/nfgciter.h"
 
@@ -71,7 +71,7 @@ bool gbtApplication::OnInit(void)
     }
   }
   else {
-    gbtEfgGame efg = NewEfg();
+    gbtGame efg = NewEfg();
     efg->NewPlayer()->SetLabel("Player 1");
     efg->NewPlayer()->SetLabel("Player 2");
     efg->SetLabel("Untitled Extensive Form Game");
@@ -96,7 +96,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.CreateEfg()) {
-      gbtEfgGame efg = NewEfg();
+      gbtGame efg = NewEfg();
       efg->SetLabel("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
 	efg->NewPlayer()->SetLabel(gbtText("Player") + ToText(pl));
@@ -104,7 +104,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
       (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
     }
     else {
-      gbtNfgGame nfg = NewNfg(dialog.NumStrategies());
+      gbtGame nfg = NewNfg(dialog.NumStrategies());
       nfg->SetLabel("Untitled Normal Form Game");
       for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
 	nfg->GetPlayer(pl)->SetLabel(gbtText("Player") + ToText(pl));
@@ -114,7 +114,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
 	gbtNfgContIterator iter(support);
 	iter.First();
 	do {
-	  gbtNfgOutcome outcome = nfg->NewOutcome();
+	  gbtGameOutcome outcome = nfg->NewOutcome();
 	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
 	    outcome->SetPayoff(nfg->GetPlayer(pl), 0);
 	    outcome->SetLabel(outcome->GetLabel() +
@@ -169,7 +169,7 @@ void gbtApplication::LoadFile(const wxString &p_filename)
 {    
   try {
     gbtFileInput infile(p_filename.mb_str());
-    gbtNfgGame nfg = ReadNfg(infile);
+    gbtGame nfg = ReadNfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new gbtNfgFrame(new gbtGameDocument(nfg, p_filename), 0);
     return;
@@ -186,7 +186,7 @@ void gbtApplication::LoadFile(const wxString &p_filename)
 
   try {
     gbtFileInput infile(p_filename.mb_str());
-    gbtEfgGame efg = ReadEfg(infile);
+    gbtGame efg = ReadEfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new gbtEfgFrame(new gbtGameDocument(efg, p_filename), 0);
   }

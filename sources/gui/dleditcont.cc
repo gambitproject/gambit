@@ -24,11 +24,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "game/nfg.h"
+#include "game/game.h"
+#include "game/nfgcont.h"
 #include "dleditcont.h"
 
 //======================================================================
@@ -36,7 +37,7 @@
 //======================================================================
 
 dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
-					     const gbtNfgGame &p_nfg,
+					     const gbtGame &p_nfg,
 					     const gbtArray<int> &p_cont)
   : wxDialog(p_parent, -1, _("Contingency properties"), wxDefaultPosition)
 {
@@ -53,7 +54,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Contingency")),
 			 wxVERTICAL);
   for (int pl = 1; pl <= p_cont.Length(); pl++) {
-    gbtNfgPlayer player = p_nfg->GetPlayer(pl);
+    gbtGamePlayer player = p_nfg->GetPlayer(pl);
     wxString text;
     if (player->GetLabel() != "") {
       text += wxString::Format(wxT("%s: "), (const char *) player->GetLabel());
@@ -82,7 +83,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
   for (int outc = 1; outc <= p_nfg->NumOutcomes(); outc++) {
-    gbtNfgOutcome outcome = p_nfg->GetOutcome(outc);
+    gbtGameOutcome outcome = p_nfg->GetOutcome(outc);
     gbtText item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);

@@ -48,15 +48,15 @@ public:
   bool GoToNext(void);
 
   // ACCESS TO CURRENT STATE
-  gbtEfgAction GetAction(void) const;
+  gbtGameAction GetAction(void) const;
   int GetActionId(void) const { return act; }
-  gbtEfgInfoset GetInfoset(void) const;
+  gbtGameInfoset GetInfoset(void) const;
   int GetInfosetId(void) const { return iset; }
-  gbtEfgPlayer GetPlayer(void) const;
+  gbtGamePlayer GetPlayer(void) const;
   int GetPlayerId(void) const { return pl; }
 
   bool IsLast(void) const;
-  bool IsSubsequentTo(const gbtEfgAction &) const;
+  bool IsSubsequentTo(const gbtGameAction &) const;
 };
 
 class gbtActionIterator {
@@ -65,10 +65,10 @@ protected:
   int pl, iset, act;
 
 public:
-  gbtActionIterator(const gbtEfgSupport &, gbtEfgInfoset);
+  gbtActionIterator(const gbtEfgSupport &, gbtGameInfoset);
   gbtActionIterator(const gbtEfgSupport &, int pl, int iset);
 
-  gbtEfgAction operator*(void) const;
+  gbtGameAction operator*(void) const;
   gbtActionIterator &operator++(int);
   
   bool Begin(void);
@@ -76,5 +76,3 @@ public:
 };
 
 #endif  // ACTITER_H
-
-

@@ -27,10 +27,8 @@
 #ifndef BEHAVSOL_H
 #define BEHAVSOL_H
 
-#include "base/base.h"
-#include "math/gnumber.h"
+#include "game/game.h"
 #include "game/behav.h"
-#include "game/efg.h"
 #include "algutils.h"  // needed for gFact
 
 class BehavSolution {
@@ -71,21 +69,21 @@ public:
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
 
-  void SetActionProb(const gbtEfgAction &, const gbtNumber &);
+  void SetActionProb(const gbtGameAction &, const gbtNumber &);
   void Set(int, int, int, const gbtNumber &);
-  const gbtNumber &operator()(const gbtEfgAction &) const;
-  const gbtNumber &GetActionProb(const gbtEfgAction &p_action) const
+  const gbtNumber &operator()(const gbtGameAction &) const;
+  const gbtNumber &GetActionProb(const gbtGameAction &p_action) const
     { return (*this)(p_action); }
 
-  gbtNumber operator[](const gbtEfgAction &) const;
-  gbtNumber &operator[](const gbtEfgAction &);
+  gbtNumber operator[](const gbtGameAction &) const;
+  gbtNumber &operator[](const gbtGameAction &);
 
   BehavSolution &operator+=(const BehavSolution &);
   BehavSolution &operator-=(const BehavSolution &);
   BehavSolution &operator*=(const gbtNumber &);
 
   // GENERAL DATA ACCESS
-  gbtEfgGame GetGame(void) const { return m_profile->GetGame(); }
+  gbtGame GetGame(void) const { return m_profile->GetGame(); }
   const gbtBehavProfile<gbtNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
   gbtPrecision Precision(void) const { return m_precision; }
 
@@ -124,25 +122,25 @@ public:
   // Obsolescent version
   gbtNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
 
-  gbtNumber GetPayoff(const gbtEfgPlayer &p_player) const
+  gbtNumber GetPayoff(const gbtGamePlayer &p_player) const
     { return m_profile->Payoff(p_player->GetId()); }
   
   // DATA ACCESS
-  gbtNumber GetRealizProb(const gbtEfgNode &node) const
+  gbtNumber GetRealizProb(const gbtGameNode &node) const
     { return m_profile->GetRealizProb(node); }
-  gbtNumber GetBelief(const gbtEfgNode &node) const
+  gbtNumber GetBelief(const gbtGameNode &node) const
     { return m_profile->GetBeliefProb(node); }
-  gbtNumber GetNodeValue(const gbtEfgNode &p_node,
-		       const gbtEfgPlayer &p_player) const;
-  gbtVector<gbtNumber> NodeValue(const gbtEfgNode &node) const
+  gbtNumber GetNodeValue(const gbtGameNode &p_node,
+		       const gbtGamePlayer &p_player) const;
+  gbtVector<gbtNumber> NodeValue(const gbtGameNode &node) const
     { return m_profile->GetNodeValue(node); }
-  gbtNumber GetInfosetProb(const gbtEfgInfoset &iset) const
+  gbtNumber GetInfosetProb(const gbtGameInfoset &iset) const
     { return m_profile->GetIsetProb(iset); }
-  gbtNumber GetInfosetValue(const gbtEfgInfoset &iset) const
+  gbtNumber GetInfosetValue(const gbtGameInfoset &iset) const
     { return m_profile->GetIsetValue(iset); }
-  gbtNumber GetActionValue(const gbtEfgAction &act) const
+  gbtNumber GetActionValue(const gbtGameAction &act) const
     { return m_profile->GetActionValue(act); }
-  gbtNumber GetRegret(const gbtEfgAction &act) const
+  gbtNumber GetRegret(const gbtGameAction &act) const
     { return m_profile->GetRegret(act); }
 
   // OUTPUT

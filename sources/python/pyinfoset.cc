@@ -106,7 +106,7 @@ action_getinfoset(actionobject *self, PyObject *args)
   }
 
   infosetobject *infoset = newinfosetobject();
-  infoset->m_infoset = new gbtEfgInfoset(self->m_action->GetInfoset());
+  infoset->m_infoset = new gbtGameInfoset(self->m_action->GetInfoset());
   return (PyObject *) infoset;
 }
 
@@ -174,7 +174,7 @@ newactionobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_action = new gbtEfgAction();
+  self->m_action = new gbtGameAction();
   return self;
 }
 
@@ -325,7 +325,7 @@ infoset_getplayer(infosetobject *self, PyObject *args)
   }
 
   efplayerobject *player = newefplayerobject();
-  player->m_efplayer = new gbtEfgPlayer(self->m_infoset->GetPlayer());
+  player->m_efplayer = new gbtGamePlayer(self->m_infoset->GetPlayer());
   return (PyObject *) player;
 }
 
@@ -384,7 +384,7 @@ newinfosetobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_infoset = new gbtEfgInfoset();
+  self->m_infoset = new gbtGameInfoset();
   return self;
 }
 

@@ -13,8 +13,8 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgOutcome::DeleteOutcome(void)
-void gbtNfgOutcome::DeleteOutcome(void)
+void gbtGameOutcome::DeleteOutcome(void)
+void gbtGameOutcome::DeleteOutcome(void)
 </synopsis>
 </para>
 </formalpara>
@@ -36,8 +36,8 @@ specified outcome attached are reset to having no outcome attached.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame gbtEfgOutcome::GetGame(void) const
-gbtNfgGame gbtNfgOutcome::GetGame(void) const
+gbtGame gbtGameOutcome::GetGame(void) const
+gbtGame gbtGameOutcome::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -57,8 +57,8 @@ returns the extensive or normal form game to which the outcome belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgOutcome::GetLabel(void) const
-gbtText gbtNfgOutcome::GetLabel(void) const
+gbtText gbtGameOutcome::GetLabel(void) const
+gbtText gbtGameOutcome::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -79,8 +79,8 @@ The empty string is returned if the outcome object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber gbtEfgOutcome::GetPayoff(gbtEfgPlayer) const
-gbtNumber gbtNfgOutcome::GetPayoff(gbtNfgPlayer) const
+gbtNumber gbtGameOutcome::GetPayoff(gbtGamePlayer) const
+gbtNumber gbtGameOutcome::GetPayoff(gbtGamePlayer) const
 </synopsis>
 </para>
 </formalpara>
@@ -113,8 +113,8 @@ a rational number class for Python!)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgOutcome::SetLabel(const gbtText &amp;p_label)
-void gbtNfgOutcome::SetLabel(const gbtText &amp;p_label)
+void gbtGameOutcome::SetLabel(const gbtText &amp;p_label)
+void gbtGameOutcome::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -134,8 +134,8 @@ void gbtNfgOutcome::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgOutcome::SetPayoff(gbtEfgPlayer, gbtNumber)
-void gbtNfgOutcome::SetPayoff(gbtNfgPlayer, gbtNumber)
+void gbtGameOutcome::SetPayoff(gbtGamePlayer, gbtNumber)
+void gbtGameOutcome::SetPayoff(gbtGamePlayer, gbtNumber)
 </synopsis>
 </para>
 </formalpara>

@@ -21,15 +21,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfgciter.h"
 #include "nfgprint.h"
 
-wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
+wxString gbtBuildHtml(const gbtGame &p_nfg,
 		      int p_rowPlayer, int p_colPlayer)
 {
   wxString theHtml;
@@ -89,7 +89,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
   return theHtml;
 }
 
-gbtNfgPrintout::gbtNfgPrintout(const gbtNfgGame &p_nfg,
+gbtNfgPrintout::gbtNfgPrintout(const gbtGame &p_nfg,
 			 int p_rowPlayer, int p_colPlayer,
 			 const wxString &p_title)
   : wxHtmlPrintout(p_title)

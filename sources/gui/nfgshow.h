@@ -33,7 +33,7 @@
 
 #include "base/gmisc.h"
 
-#include "game/nfg.h"
+#include "game/game.h"
 #include "game/nfgiter.h"
 #include "nash/mixedsol.h"
 

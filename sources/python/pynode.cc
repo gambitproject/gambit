@@ -119,7 +119,7 @@ node_getgame(nodeobject *self, PyObject *args)
   }
 
   efgobject *game = newefgobject();
-  game->m_efg = new gbtEfgGame(self->m_node->GetGame());
+  game->m_efg = new gbtGame(self->m_node->GetGame());
   return (PyObject *) game;
 }
 
@@ -131,7 +131,7 @@ node_getinfoset(nodeobject *self, PyObject *args)
   }
 
   infosetobject *infoset = newinfosetobject();
-  infoset->m_infoset = new gbtEfgInfoset(self->m_node->GetInfoset());
+  infoset->m_infoset = new gbtGameInfoset(self->m_node->GetInfoset());
   return (PyObject *) infoset;
 }
 
@@ -153,7 +153,7 @@ node_getnextsibling(nodeobject *self, PyObject *args)
   }
 
   nodeobject *node = newnodeobject();
-  node->m_node = new gbtEfgNode(self->m_node->GetNextSibling());
+  node->m_node = new gbtGameNode(self->m_node->GetNextSibling());
   return (PyObject *) node;
 }
 
@@ -165,7 +165,7 @@ node_getoutcome(nodeobject *self, PyObject *args)
   }
 
   efoutcomeobject *outcome = newefoutcomeobject();
-  outcome->m_efoutcome = new gbtEfgOutcome(self->m_node->GetOutcome());
+  outcome->m_efoutcome = new gbtGameOutcome(self->m_node->GetOutcome());
   return (PyObject *) outcome;
 }
 
@@ -177,7 +177,7 @@ node_getparent(nodeobject *self, PyObject *args)
   }
 
   nodeobject *node = newnodeobject();
-  node->m_node = new gbtEfgNode(self->m_node->GetParent());
+  node->m_node = new gbtGameNode(self->m_node->GetParent());
   return (PyObject *) node;
 }
 
@@ -189,7 +189,7 @@ node_getprioraction(nodeobject *self, PyObject *args)
   }
 
   actionobject *action = newactionobject();
-  action->m_action = new gbtEfgAction(self->m_node->GetPriorAction());
+  action->m_action = new gbtGameAction(self->m_node->GetPriorAction());
   return (PyObject *) action;
 }
 
@@ -202,7 +202,7 @@ node_getpriorsibling(nodeobject *self, PyObject *args)
   }
 
   nodeobject *node = newnodeobject();
-  node->m_node = new gbtEfgNode(self->m_node->GetPriorSibling());
+  node->m_node = new gbtGameNode(self->m_node->GetPriorSibling());
   return (PyObject *) node;
 }
 
@@ -220,7 +220,7 @@ node_insertmove(nodeobject *self, PyObject *args)
   }
 
   nodeobject *newnode = newnodeobject();
-  newnode->m_node = new gbtEfgNode(self->m_node->InsertMove(*((infosetobject *) infoset)->m_infoset));
+  newnode->m_node = new gbtGameNode(self->m_node->InsertMove(*((infosetobject *) infoset)->m_infoset));
   return (PyObject *) newnode;
 }
 
@@ -315,7 +315,7 @@ newnodeobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_node = new gbtEfgNode();
+  self->m_node = new gbtGameNode();
   return self;
 }
 

@@ -28,15 +28,14 @@
 #define EFBASIS_H
 
 #include "base/base.h"
-#include "math/gdpvect.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efstrat.h"
 
-class gbtEfgNodeSet;
+class gbtGameNodeSet;
 
 class gbtEfgBasis : public gbtEfgSupport {
 protected:
-  gbtArray <gbtEfgNodeSet *> nodes;
+  gbtArray <gbtGameNodeSet *> nodes;
 
   // This is scratch stuff for consistency computation.
   // FIXME: These shouldn't be members!!
@@ -49,16 +48,16 @@ protected:
   void MakeIndices(void) const;
   void MakeRowIndices(void) const;
   void MakeAb(void) const;
-  void AddEquation1(int, const gbtEfgAction &) const;
-  void AddEquation2(int, gbtEfgNode) const;
-  void AddEquation3(int, const gbtEfgNode &, const gbtEfgNode &) const;
-  void AddEquation4(int, const gbtEfgNode &, const gbtEfgNode &) const;
-  int Col(const gbtEfgAction &) const;
-  int Col(const gbtEfgNode &) const;
+  void AddEquation1(int, const gbtGameAction &) const;
+  void AddEquation2(int, gbtGameNode) const;
+  void AddEquation3(int, const gbtGameNode &, const gbtGameNode &) const;
+  void AddEquation4(int, const gbtGameNode &, const gbtGameNode &) const;
+  int Col(const gbtGameAction &) const;
+  int Col(const gbtGameNode &) const;
   void GetConsistencySolution(const gbtVector<double> &x) const;
   
 public:
-  gbtEfgBasis(const gbtEfgGame &);
+  gbtEfgBasis(const gbtGame &);
   gbtEfgBasis(const gbtEfgBasis &b); 
   virtual ~gbtEfgBasis();
   gbtEfgBasis &operator=(const gbtEfgBasis &b);
@@ -67,19 +66,19 @@ public:
   bool operator!=(const gbtEfgBasis &b) const;
 
   int NumNodes(int pl, int iset) const;
-  int NumNodes(const gbtEfgInfoset &) const;
+  int NumNodes(const gbtGameInfoset &) const;
   gbtPVector<int> NumNodes(void) const;
 
-  bool RemoveNode(const gbtEfgNode &);
-  void AddNode(const gbtEfgNode &);
-  bool IsReachable(gbtEfgNode) const;
+  bool RemoveNode(const gbtGameNode &);
+  void AddNode(const gbtGameNode &);
+  bool IsReachable(gbtGameNode) const;
 
   // Returns the position of the node in the support.  Returns zero
   // if it is not there.
-  int Find(const gbtEfgNode &) const;
+  int Find(const gbtGameNode &) const;
 
-  const gbtArray<gbtEfgNode> &Nodes(int pl, int iset) const;
-  gbtEfgNode GetNode(const gbtEfgInfoset &, int index) const;
+  const gbtArray<gbtGameNode> &Nodes(int pl, int iset) const;
+  gbtGameNode GetNode(const gbtGameInfoset &, int index) const;
 
   bool IsValid(void) const;
   bool IsConsistent(void) const;

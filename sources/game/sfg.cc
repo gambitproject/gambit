@@ -43,7 +43,7 @@ gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
     isetRow(S.NumInfosets()), infosets(m_efg->NumPlayers())
 { 
   int i;
-  gbtArray<gbtEfgInfoset> zero(m_efg->NumPlayers());
+  gbtArray<gbtGameInfoset> zero(m_efg->NumPlayers());
   gbtArray<int> one(m_efg->NumPlayers());
 
   gbtEfgSupport support(m_efg);
@@ -111,8 +111,8 @@ gbtSfgGame::~gbtSfgGame()
 }
 
 void 
-gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>seq, 
-		      gbtArray<gbtEfgInfoset> iset, gbtArray<gbtSfgSequence *> parent) 
+gbtSfgGame::MakeSequenceForm(const gbtGameNode &n, gbtNumber prob,gbtArray<int>seq, 
+		      gbtArray<gbtGameInfoset> iset, gbtArray<gbtSfgSequence *> parent) 
 { 
   int i,pl;
 
@@ -165,7 +165,7 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
   }
 }
 
-void gbtSfgGame::GetSequenceDims(const gbtEfgNode &n) 
+void gbtSfgGame::GetSequenceDims(const gbtGameNode &n) 
 { 
   int i;
 
@@ -242,13 +242,13 @@ int gbtSfgGame::ActionNumber(int pl, int j) const
   return efsupp.GetIndex(GetAction(pl,j));
 }
 
-gbtEfgInfoset gbtSfgGame::GetInfoset(int pl, int j) const 
+gbtGameInfoset gbtSfgGame::GetInfoset(int pl, int j) const 
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetInfoset();
 }
 
-gbtEfgAction gbtSfgGame::GetAction(int pl, int j) const
+gbtGameAction gbtSfgGame::GetAction(int pl, int j) const
 {
   if(j==1) return 0;
   return (*sequences)[pl]->Find(j)->GetAction();
@@ -295,8 +295,8 @@ template class gbtArray<gbtRectArray<gbtNumber> *>;
 #ifndef __BCC55__
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtNumber> &);
 #endif // __BCC55__
-template class gbtArray<gbtList<gbtEfgInfoset> >;
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtList<gbtEfgInfoset> > &);
+template class gbtArray<gbtList<gbtGameInfoset> >;
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtList<gbtGameInfoset> > &);
 #ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtList<gbtEfgInfoset> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtList<gbtGameInfoset> &);
 #endif // __BCC55__

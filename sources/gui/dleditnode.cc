@@ -24,18 +24,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "game/efg.h"
+#include "game/game.h"
 #include "dleditnode.h"
 
 //======================================================================
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGameNode p_node)
   : wxDialog(p_parent, -1, _("Node properties"), wxDefaultPosition), 
     m_node(p_node)
 {
@@ -60,7 +60,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
     m_infoset->Append(_("New information set"));
     int selection = 0;
     for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-      for (gbtEfgInfosetIterator infoset(p_node->GetGame()->GetPlayer(pl));
+      for (gbtGameInfosetIterator infoset(p_node->GetGame()->GetPlayer(pl));
 	   !infoset.End(); infoset++) {
 	if (!(*infoset)->IsChanceInfoset() &&
 	    (*infoset)->NumActions() == p_node->NumChildren()) {
@@ -106,9 +106,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  gbtEfgGame efg = p_node->GetGame();
+  gbtGame efg = p_node->GetGame();
   for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    gbtEfgOutcome outcome = efg->GetOutcome(outc);
+    gbtGameOutcome outcome = efg->GetOutcome(outc);
     gbtText item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = gbtText("Outcome") + ToText(outc);
@@ -153,7 +153,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   CenterOnParent();
 }
 
-gbtEfgInfoset dialogEditNode::GetInfoset(void) const
+gbtGameInfoset dialogEditNode::GetInfoset(void) const
 {
   if (m_infoset->GetSelection() == 0) {
     return 0;

@@ -27,7 +27,7 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "math/rational.h"
-#include "nfg.h"
+#include "game.h"
 #include "nfgciter.h"
 #include "striter.h"
 
@@ -40,7 +40,7 @@ void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 			     gbtStrategyIterator *c,
 			     gbtList<const gbtNfgSupport> *list);
 
-gbtList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
+gbtList<gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
 
 // Subsupports of a given support are _valid_ if each agent has an action.
 
@@ -49,7 +49,7 @@ void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					 gbtStrategyIterator *c,
 					 gbtList<const gbtNfgSupport> *list);
 
-gbtList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
+gbtList<gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -67,7 +67,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					      gbtList<const gbtNfgSupport> *list,
 					gbtStatus &status);
   
-gbtList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
+gbtList<gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
 						 gbtStatus &status);
@@ -89,7 +89,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					    gbtList<const gbtNfgSupport> *list,
 				      gbtStatus &status);
 
-gbtList<const gbtNfgSupport> SortSupportsBySize(gbtList<const gbtNfgSupport> &);
+gbtList<gbtNfgSupport> SortSupportsBySize(gbtList<const gbtNfgSupport> &);
   
-gbtList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
+gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 					       gbtStatus &status);

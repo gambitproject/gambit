@@ -24,16 +24,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "wx/dcps.h"
-#include "wx/dragimag.h"
+#include <wx/dcps.h>
+#include <wx/dragimag.h>
 
-#include "base/gmisc.h"
-#include "math/gmath.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "treewin.h"
 #include "efgshow.h"
 #include "id.h"
@@ -49,10 +47,10 @@
 
 class gbtCmdSetCursor : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
+  gbtGameNode m_node;
 
 public:
-  gbtCmdSetCursor(gbtEfgNode p_node) : m_node(p_node) { }
+  gbtCmdSetCursor(gbtGameNode p_node) : m_node(p_node) { }
   virtual ~gbtCmdSetCursor() { }
 
   void Do(gbtGameDocument *);
@@ -72,7 +70,7 @@ void gbtCmdSetCursor::Do(gbtGameDocument *p_doc)
 
 void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
 {
-  p_doc->GetEfg()->MoveTree(m_src, m_dest);
+  p_doc->GetGame()->MoveTree(m_src, m_dest);
 }
 
 //=======================================================================
@@ -81,7 +79,7 @@ void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)
 
 void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
 {
-  p_doc->GetEfg()->CopyTree(m_src, m_dest);
+  p_doc->GetGame()->CopyTree(m_src, m_dest);
 }
 
 //=======================================================================
@@ -176,7 +174,7 @@ void gbtTreeView::MakeMenus(void)
 //
 void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
 {
-  gbtEfgNode cursor = m_doc->GetCursor();
+  gbtGameNode cursor = m_doc->GetCursor();
 
   if (!cursor.IsNull() && !p_event.ShiftDown()) {
     switch (p_event.KeyCode()) {
@@ -191,7 +189,7 @@ void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
       }
       break;
     case WXK_UP: {
-      gbtEfgNode prior = ((!p_event.ControlDown()) ? 
+      gbtGameNode prior = ((!p_event.ControlDown()) ? 
 			  m_layout.PriorSameLevel(m_doc->GetCursor()) :
 			  cursor->GetPriorMember());
       if (!prior.IsNull()) {
@@ -200,7 +198,7 @@ void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
       break;
     }
     case WXK_DOWN: {
-      gbtEfgNode next = ((!p_event.ControlDown()) ?
+      gbtGameNode next = ((!p_event.ControlDown()) ?
 			 m_layout.NextSameLevel(m_doc->GetCursor()) :
 			 cursor->GetNextMember());
       if (!next.IsNull()) {
@@ -233,7 +231,7 @@ void gbtTreeView::OnUpdate(gbtGameView *)
   AdjustScrollbarSteps();
   EnsureCursorVisible();
 
-  gbtEfgNode cursor = m_doc->GetCursor();
+  gbtGameNode cursor = m_doc->GetCursor();
 
   m_nodeMenu->Enable(wxID_COPY, !cursor.IsNull());
   m_nodeMenu->Enable(wxID_CUT, !cursor.IsNull());
@@ -305,7 +303,7 @@ void gbtTreeView::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-      m_doc->SetCursor(m_doc->GetEfg()->GetRoot());
+      m_doc->SetCursor(m_doc->GetGame()->GetRoot());
     }
   }
     
@@ -390,7 +388,7 @@ void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
       x = (int) ((float) x / m_zoom);
       y = (int) ((float) y / m_zoom);
 
-      gbtEfgNode node = m_layout.NodeHitTest(x, y);
+      gbtGameNode node = m_layout.NodeHitTest(x, y);
     
       if (!node.IsNull() && node->NumChildren() > 0) {
 	m_dragSource = node;
@@ -426,7 +424,7 @@ void gbtTreeView::OnMouseMotion(wxMouseEvent &p_event)
     x = (int) ((float) x / m_zoom);
     y = (int) ((float) y / m_zoom);
 
-    gbtEfgNode node = m_layout.NodeHitTest(x, y);
+    gbtGameNode node = m_layout.NodeHitTest(x, y);
     if (!node.IsNull() && node->NumChildren() == 0) {
       try {
 	if (m_dragMode == dragCOPY) {
@@ -474,7 +472,7 @@ void gbtTreeView::OnLeftDoubleClick(wxMouseEvent &p_event)
   x = (int) ((float) x / m_zoom);
   y = (int) ((float) y / m_zoom);
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
+  gbtGameNode node = m_layout.NodeHitTest(x, y);
   if (!node.IsNull()) {
     m_doc->SetCursor(node);
     Refresh();
@@ -499,7 +497,7 @@ void gbtTreeView::OnRightClick(wxMouseEvent &p_event)
   PrepareDC(dc);
   dc.SetUserScale(m_zoom, m_zoom);
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
+  gbtGameNode node = m_layout.NodeHitTest(x, y);
   if (!node.IsNull()) {
     m_doc->SetCursor(node);
     Refresh();

@@ -13,7 +13,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgAction::DeleteAction(void)
+void gbtGameAction::DeleteAction(void)
 </synopsis>
 </para>
 </formalpara>
@@ -38,7 +38,7 @@ set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber gbtEfgAction::GetChanceProb(void) const
+gbtNumber gbtGameAction::GetChanceProb(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -60,7 +60,7 @@ not an action which is chosen by the chance player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
+gbtGameInfoset gbtGameAction::GetInfoset(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -82,7 +82,7 @@ action is assumed to belong to the null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgAction::GetLabel(void) const
+gbtText gbtGameAction::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -104,7 +104,7 @@ The empty string is returned if the action object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgAction::SetChanceProb(gbtNumber)
+void gbtGameAction::SetChanceProb(gbtNumber)
 </synopsis>
 </para>
 </formalpara>
@@ -128,7 +128,7 @@ by the chance player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgAction::SetLabel(const gbtText &amp;p_label)
+void gbtGameAction::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "base/base.h"
-#include "efg.h"
+#include "game.h"
 
 //=========================================================================
 //                  Temporary representation classes
@@ -95,7 +95,7 @@ InfosetData *NodeData::AddInfosetData(const gbtText &m_infosetName)
 class DefinedInfosetData {
 public:
   int m_fileID;
-  gbtEfgInfoset m_infoset;
+  gbtGameInfoset m_infoset;
   DefinedInfosetData *m_next;
 
   DefinedInfosetData(void) : m_fileID(-1), m_infoset(0), m_next(0) { }
@@ -109,8 +109,8 @@ public:
 
   PlayerData(void);
   ~PlayerData();
-  void AddInfoset(int p_number, gbtEfgInfoset p_infoset);
-  gbtEfgInfoset GetInfoset(int p_number);
+  void AddInfoset(int p_number, gbtGameInfoset p_infoset);
+  gbtGameInfoset GetInfoset(int p_number);
 };
 
 PlayerData::PlayerData(void)
@@ -127,7 +127,7 @@ PlayerData::~PlayerData()
   }
 }
 
-void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
+void PlayerData::AddInfoset(int p_number, gbtGameInfoset p_infoset)
 {
   DefinedInfosetData *infoset = new DefinedInfosetData;
   infoset->m_fileID = p_number;
@@ -148,7 +148,7 @@ void PlayerData::AddInfoset(int p_number, gbtEfgInfoset p_infoset)
 // been created, returns the pointer to the Infoset structure; otherwise,
 // returns null.
 //
-gbtEfgInfoset PlayerData::GetInfoset(int p_number)
+gbtGameInfoset PlayerData::GetInfoset(int p_number)
 {
   for (DefinedInfosetData *infoset = m_firstInfoset;
        infoset; infoset = infoset->m_next) {
@@ -163,9 +163,9 @@ gbtEfgInfoset PlayerData::GetInfoset(int p_number)
 class DefinedOutcomeData {
 public:
   int m_fileID;
-  gbtEfgOutcome m_outcome;
+  gbtGameOutcome m_outcome;
 
-  DefinedOutcomeData(int p_number, gbtEfgOutcome p_outcome)
+  DefinedOutcomeData(int p_number, gbtGameOutcome p_outcome)
     : m_fileID(p_number), m_outcome(p_outcome) { }
 };
 
@@ -182,7 +182,7 @@ public:
 
   void AddPlayer(const gbtText &);
   NodeData *AddNode(const gbtText &, int, int);
-  gbtEfgOutcome GetOutcome(int p_number) const;
+  gbtGameOutcome GetOutcome(int p_number) const;
 };
 
 TreeData::TreeData(void)
@@ -254,7 +254,7 @@ NodeData *TreeData::AddNode(const gbtText &p_name, int p_player, int p_infoset)
 // been created, returns a pointer to the outcome;
 // otherwise, returns a null outcome
 //
-gbtEfgOutcome TreeData::GetOutcome(int p_number) const
+gbtGameOutcome TreeData::GetOutcome(int p_number) const
 {
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     if (m_outcomes[outc]->m_fileID == p_number) {
@@ -635,7 +635,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
+static void BuildSubtree(gbtGame p_efg, gbtGameNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetLabel((*p_nodeData)->m_name);
@@ -645,7 +645,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      gbtEfgOutcome outcome = p_efg->NewOutcome();
+      gbtGameOutcome outcome = p_efg->NewOutcome();
       outcome->SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
@@ -662,11 +662,11 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     for (int i = 1; i < (*p_nodeData)->m_player; i++, player = player->m_next);
 
     if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
-      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      gbtGameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_node->InsertMove(infoset);
     }
     else {
-      gbtEfgInfoset infoset = 
+      gbtGameInfoset infoset = 
 	p_efg->GetPlayer((*p_nodeData)->m_player)->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
       p_node->InsertMove(infoset);
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
@@ -688,11 +688,11 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     PlayerData *player = &p_treeData.m_chancePlayer;
 
     if (!player->GetInfoset((*p_nodeData)->m_infoset).IsNull()) {
-      gbtEfgInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
+      gbtGameInfoset infoset = player->GetInfoset((*p_nodeData)->m_infoset);
       p_node->InsertMove(infoset);
     }
     else {
-      gbtEfgInfoset infoset =
+      gbtGameInfoset infoset =
 	p_efg->GetChance()->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
       p_node->InsertMove(infoset);
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
@@ -717,7 +717,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
   }
 }
 
-static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
+static void BuildEfg(gbtGame p_efg, TreeData &p_treeData)
 {
   p_efg->SetLabel(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -734,12 +734,12 @@ static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 // ReadEfgFile: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame ReadEfg(gbtInput &p_file)
+gbtGame ReadEfg(gbtInput &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  gbtEfgGame efg = NewEfg();
+  gbtGame efg = NewEfg();
 
   try {
     Parse(parser, treeData);

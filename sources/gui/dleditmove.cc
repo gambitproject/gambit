@@ -24,11 +24,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "game/efg.h"
+#include "game/game.h"
 #include "valnumber.h"
 #include "dleditmove.h"
 
@@ -49,7 +49,7 @@ BEGIN_EVENT_TABLE(dialogEditMove, wxDialog)
   EVT_BUTTON(wxID_OK, dialogEditMove::OnOK)
 END_EVENT_TABLE()
 
-dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
+dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtGameInfoset p_infoset)
   : wxDialog(p_parent, -1, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {
@@ -179,7 +179,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
   if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
-  gbtEfgAction action = m_actions[m_lastSelection+1];
+  gbtGameAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
@@ -208,7 +208,7 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
-  gbtEfgAction action = m_actions[m_lastSelection+1];
+  gbtGameAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
@@ -248,7 +248,7 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
-  gbtEfgAction action = m_actions[m_lastSelection+1];
+  gbtGameAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
@@ -323,17 +323,17 @@ void dialogEditMove::OnOK(wxCommandEvent &p_event)
 
 class gbtCmdEditMove : public gbtGameCommand {
 private:
-  gbtEfgInfoset m_infoset;
+  gbtGameInfoset m_infoset;
   gbtText m_infosetLabel;
   int m_infosetPlayer;
-  gbtBlock<gbtEfgAction> m_actions;
+  gbtBlock<gbtGameAction> m_actions;
   gbtBlock<gbtText> m_actionLabels;
   gbtBlock<gbtNumber> m_actionProbs;
 
 public:
-  gbtCmdEditMove(gbtEfgInfoset p_infoset, const gbtText &p_infosetLabel,
+  gbtCmdEditMove(gbtGameInfoset p_infoset, const gbtText &p_infosetLabel,
 		 int p_infosetPlayer,
-		 const gbtBlock<gbtEfgAction> &p_actions,
+		 const gbtBlock<gbtGameAction> &p_actions,
 		 const gbtBlock<gbtText> &p_actionLabels,
 		 const gbtBlock<gbtNumber> &p_actionProbs)
     : m_infoset(p_infoset), m_infosetLabel(p_infosetLabel), 
@@ -354,7 +354,7 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
     
   if (!m_infoset->IsChanceInfoset() && 
       m_infosetPlayer != m_infoset->GetPlayer()->GetId()) {
-    m_infoset->SetPlayer(p_doc->GetEfg()->GetPlayer(m_infosetPlayer));
+    m_infoset->SetPlayer(p_doc->GetGame()->GetPlayer(m_infosetPlayer));
   }
 
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
@@ -366,31 +366,31 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
 
   int insertAt = 1;
   for (int act = 1; act <= m_actions.Length(); act++) {
-    gbtEfgAction action = m_actions[act];
+    gbtGameAction action = m_actions[act];
     if (!action.IsNull()) {
       action->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg()->SetChanceProb(m_infoset, action->GetId(),
+	p_doc->GetGame()->SetChanceProb(m_infoset, action->GetId(),
 				      m_actionProbs[act]);
       }
       insertAt = m_actions[act]->GetId() + 1;
     }
     else if (insertAt > m_infoset->NumActions()) {
-      gbtEfgAction newAction = p_doc->GetEfg()->InsertAction(m_infoset);
+      gbtGameAction newAction = p_doc->GetGame()->InsertAction(m_infoset);
       insertAt++;
       newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg()->SetChanceProb(m_infoset, newAction->GetId(), 
-				      m_actionProbs[act]);
+	p_doc->GetGame()->SetChanceProb(m_infoset, newAction->GetId(), 
+					m_actionProbs[act]);
       }
     }
     else {
-      gbtEfgAction newAction =
-	p_doc->GetEfg()->InsertAction(m_infoset,
-				     m_infoset->GetAction(insertAt++));
+      gbtGameAction newAction =
+	p_doc->GetGame()->InsertAction(m_infoset,
+				       m_infoset->GetAction(insertAt++));
       newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg()->SetChanceProb(m_infoset, newAction->GetId(), 
+	p_doc->GetGame()->SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
     }

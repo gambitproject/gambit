@@ -137,7 +137,7 @@ behav_getgame(behavobject *self, PyObject *args)
   }
 
   efgobject *game = newefgobject();
-  game->m_efg = new gbtEfgGame(self->m_profile->GetGame());
+  game->m_efg = new gbtGame(self->m_profile->GetGame());
   return (PyObject *) game;
 }
 

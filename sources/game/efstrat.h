@@ -30,9 +30,9 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "math/gpvector.h"
-#include "efg.h"
+#include "game.h"
 
-class gbtEfgActionSet;
+class gbtGameActionSet;
 
 //
 // We are in the process of migrating supports so they act like
@@ -40,17 +40,17 @@ class gbtEfgActionSet;
 // usual members of the underlying game (such as NumPlayers()) as well
 // as extra editing features to show/hide actions
 // 
-// This will eventually derive from gbtEfgGame, providing the usual
+// This will eventually derive from gbtGame, providing the usual
 // extensive form operations
 //
 class gbtEfgSupport {
 protected:
   gbtText m_label;
-  gbtEfgGame m_efg;
-  gbtArray<gbtEfgActionSet *> m_players;
+  gbtGame m_efg;
+  gbtArray<gbtGameActionSet *> m_players;
 
 public:
-  gbtEfgSupport(const gbtEfgGame &);
+  gbtEfgSupport(const gbtGame &);
   gbtEfgSupport(const gbtEfgSupport &);
   virtual ~gbtEfgSupport();
   gbtEfgSupport &operator=(const gbtEfgSupport &);
@@ -58,52 +58,52 @@ public:
   bool operator==(const gbtEfgSupport &) const;
   bool operator!=(const gbtEfgSupport &) const;
 
-  gbtEfgGame GetTree(void) const { return m_efg; }
+  gbtGame GetTree(void) const { return m_efg; }
 
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
 
   int NumActions(int pl, int iset) const;
-  int NumActions(const gbtEfgInfoset &) const;
+  int NumActions(const gbtGameInfoset &) const;
   gbtPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.
-  bool HasActiveActionAt(const gbtEfgInfoset &) const;
+  bool HasActiveActionAt(const gbtGameInfoset &) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
-  bool Contains(const gbtEfgAction &) const;
+  bool Contains(const gbtGameAction &) const;
   bool Contains(int pl, int iset, int act) const;
-  int GetIndex(const gbtEfgAction &) const;
-  gbtEfgAction GetAction(const gbtEfgInfoset &, int index) const;
-  gbtEfgAction GetAction(int pl, int iset, int index) const;
+  int GetIndex(const gbtGameAction &) const;
+  gbtGameAction GetAction(const gbtGameInfoset &, int index) const;
+  gbtGameAction GetAction(int pl, int iset, int index) const;
 
   // Action editing functions
-  virtual void AddAction(const gbtEfgAction &);
-  virtual bool RemoveAction(const gbtEfgAction &);
+  virtual void AddAction(const gbtGameAction &);
+  virtual bool RemoveAction(const gbtGameAction &);
 
   // Number of Sequences for the player
   int NumSequences(int pl) const;
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
-  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &,
-					      const gbtEfgAction &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &,
-					 const gbtEfgAction &) const;
-  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
+  gbtList<gbtGameNode> ReachableNonterminalNodes(const gbtGameNode &) const;
+  gbtList<gbtGameNode> ReachableNonterminalNodes(const gbtGameNode &,
+					      const gbtGameAction &) const;
+  gbtList<gbtGameInfoset> ReachableInfosets(const gbtGameNode &) const;
+  gbtList<gbtGameInfoset> ReachableInfosets(const gbtGameNode &,
+					 const gbtGameAction &) const;
+  gbtList<gbtGameInfoset> ReachableInfosets(const gbtGamePlayer &) const;
 
-  bool AlwaysReaches(const gbtEfgInfoset &) const;
-  bool AlwaysReachesFrom(const gbtEfgInfoset &, const gbtEfgNode &) const;
-  bool MayReach(const gbtEfgNode &) const;
-  bool MayReach(const gbtEfgInfoset &) const;
+  bool AlwaysReaches(const gbtGameInfoset &) const;
+  bool AlwaysReachesFrom(const gbtGameInfoset &, const gbtGameNode &) const;
+  bool MayReach(const gbtGameNode &) const;
+  bool MayReach(const gbtGameInfoset &) const;
 
-  bool Dominates(const gbtEfgAction &, const gbtEfgAction &,
+  bool Dominates(const gbtGameAction &, const gbtGameAction &,
 		 bool strong, bool conditional) const;
-  bool IsDominated(const gbtEfgAction &,
+  bool IsDominated(const gbtGameAction &,
 		   bool strong, bool conditional) const;
   gbtEfgSupport Undominated(bool strong, bool conditional,
 			 const gbtArray<int> &players,
@@ -112,19 +112,19 @@ public:
 
 
   // The following are just echoed from the base game.  In the future,
-  // derivation from gbtEfgGame will handle these.
+  // derivation from gbtGame will handle these.
   gbtText GetComment(void) const { return m_efg->GetComment(); }
   void SetComment(const gbtText &p_comment) { m_efg->SetComment(p_comment); }
   bool IsConstSum(void) const { return m_efg->IsConstSum(); }
   int NumPlayers(void) const { return m_efg->NumPlayers(); }
-  gbtEfgPlayer GetChance(void) const { return m_efg->GetChance(); }
-  gbtEfgPlayer GetPlayer(int pl) const { return m_efg->GetPlayer(pl); }
+  gbtGamePlayer GetChance(void) const { return m_efg->GetChance(); }
+  gbtGamePlayer GetPlayer(int pl) const { return m_efg->GetPlayer(pl); }
   int NumOutcomes(void) const { return m_efg->NumOutcomes(); }
   gbtArray<int> NumInfosets(void) const { return m_efg->NumInfosets(); }
   gbtPVector<int> NumMembers(void) const { return m_efg->NumMembers(); }
   int NumNodes(void) const { return m_efg->NumNodes(); }
   int NumPlayerInfosets(void) const { return m_efg->NumPlayerInfosets(); }
-  gbtEfgNode GetRoot(void) const { return m_efg->GetRoot(); }
+  gbtGameNode GetRoot(void) const { return m_efg->GetRoot(); }
   gbtNumber MaxPayoff(void) const { return m_efg->MaxPayoff(); }
   gbtNumber MinPayoff(void) const { return m_efg->MinPayoff(); }
   bool IsPerfectRecall(void) const { return m_efg->IsPerfectRecall(); }
@@ -150,20 +150,20 @@ protected:
   void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
-  void activate(const gbtEfgNode &);
-  void deactivate(const gbtEfgNode &);
-  void activate(const gbtEfgInfoset &);
-  void deactivate(const gbtEfgInfoset &);
+  void activate(const gbtGameNode &);
+  void deactivate(const gbtGameNode &);
+  void activate(const gbtGameInfoset &);
+  void deactivate(const gbtGameInfoset &);
   bool infoset_has_active_nodes(const int pl, const int iset) const;
-  bool infoset_has_active_nodes(const gbtEfgInfoset &) const;
-  void activate_this_and_lower_nodes(const gbtEfgNode &);
-  void deactivate_this_and_lower_nodes(const gbtEfgNode &);
+  bool infoset_has_active_nodes(const gbtGameInfoset &) const;
+  void activate_this_and_lower_nodes(const gbtGameNode &);
+  void deactivate_this_and_lower_nodes(const gbtGameNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const gbtEfgNode &,
-						 gbtList<gbtEfgInfoset> *);
+                                                 const gbtGameNode &,
+						 gbtList<gbtGameInfoset> *);
 
 public:
-  gbtEfgSupportWithActiveInfo(const gbtEfgGame &);
+  gbtEfgSupportWithActiveInfo(const gbtGame &);
   gbtEfgSupportWithActiveInfo(const gbtEfgSupport &);
   gbtEfgSupportWithActiveInfo(const gbtEfgSupportWithActiveInfo &);
   virtual ~gbtEfgSupportWithActiveInfo();
@@ -174,23 +174,23 @@ public:
   bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  gbtList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
-  gbtList<gbtEfgNode> ReachableNonterminalNodes() const;
+  gbtList<gbtGameNode> ReachableNodesInInfoset(const gbtGameInfoset &) const;
+  gbtList<gbtGameNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
-  void AddAction(const gbtEfgAction &);
-  bool RemoveAction(const gbtEfgAction &);
-  bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &,
-					    gbtList<gbtEfgInfoset> *);
+  void AddAction(const gbtGameAction &);
+  bool RemoveAction(const gbtGameAction &);
+  bool RemoveActionReturningDeletedInfosets(const gbtGameAction &,
+					    gbtList<gbtGameInfoset> *);
   //  void GoToNextSubsupportOf(const gbtEfgSupport &);
 
   // Information
   bool InfosetIsActive(const int pl, const int iset) const;
-  bool InfosetIsActive(const gbtEfgInfoset &) const;
+  bool InfosetIsActive(const gbtGameInfoset &) const;
   int  NumActiveNodes(const int pl, const int iset) const;
-  int  NumActiveNodes(const gbtEfgInfoset &) const;
+  int  NumActiveNodes(const gbtGameInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
-  bool NodeIsActive(const gbtEfgNode &) const;
+  bool NodeIsActive(const gbtGameNode &) const;
 
   bool HasActiveActionsAtActiveInfosets();
   bool HasActiveActionsAtActiveInfosetsAndNoOthers();

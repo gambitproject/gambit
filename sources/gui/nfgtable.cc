@@ -127,7 +127,7 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
   rect.x += x;
 
   wxStringTokenizer tok(text, wxT(","));
-  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
     wxString payoff = tok.GetNextToken();
     p_grid.DrawTextRectangle(p_dc, payoff, rect);
@@ -135,7 +135,7 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
     rect.x += x;
     
     p_dc.SetTextForeground(*wxBLACK);
-    if (pl < m_doc->GetNfg()->NumPlayers()) {
+    if (pl < m_doc->GetGame()->NumPlayers()) {
       p_grid.DrawTextRectangle(p_dc, wxT(","), rect);
       p_dc.GetTextExtent(wxT(")"), &x, &y);
       rect.x += x;
@@ -359,7 +359,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
     strategy[m_doc->GetRowPlayer()] = row + 1;
     strategy[m_doc->GetColPlayer()] = col + 1;
     
-    gbtNfgContingency profile(m_doc->GetNfg());
+    gbtNfgContingency profile(m_doc->GetGame());
     for (int pl = 1; pl <= strategy.Length(); pl++) {
       profile.SetStrategy(support.GetStrategy(pl, strategy[pl]));
     }
@@ -369,7 +369,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
       wxString ret = wxT("");
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format(wxT("%s"),
-				(char *) ToText(profile.GetPayoff(m_doc->GetNfg()->GetPlayer(pl)),
+				(char *) ToText(profile.GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
 						m_doc->GetPreferences().NumDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxT(",");
@@ -379,7 +379,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
       return ret;
     }
     else {
-      gbtNfgOutcome outcome = profile.GetOutcome();
+      gbtGameOutcome outcome = profile.GetOutcome();
       if (!outcome.IsNull()) {
 	wxString ret = wxString::Format(wxT("%s"), (char *) outcome->GetLabel());
 	if (ret == wxT("")) {
@@ -394,7 +394,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats &&
 	   col == numColStrats + m_table->ShowDominance() - 1) {
-    gbtNfgAction strategy = support.GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     if (support.IsDominated(strategy, true)) {
       return wxT("S");
     }
@@ -407,7 +407,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row == numRowStrats + m_table->ShowDominance() - 1 &&
 	   col < numColStrats) {
-    gbtNfgAction strategy = support.GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     if (support.IsDominated(strategy, true)) {
       return wxT("S");
     }
@@ -420,28 +420,28 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
-    gbtNfgAction strategy = support.GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     return wxString::Format(wxT("%s"), 
 			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
-    gbtNfgAction strategy = support.GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     return wxString::Format(wxT("%s"), 
 			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
-    gbtNfgAction strategy = support.GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     return wxString::Format(wxT("%s"),
 			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
-    gbtNfgAction strategy = support.GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     return wxString::Format(wxT("%s"),
 			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
@@ -516,7 +516,7 @@ wxGridCellAttr *gbtNfgGridTable::GetAttr(int row, int col,
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
-    if (m_doc->GetNfg()->NumPlayers() == 2) {
+    if (m_doc->GetGame()->NumPlayers() == 2) {
       attr->SetRenderer(new gbtSchellingRenderer(m_doc));
     }
     else {

@@ -99,11 +99,11 @@ int gbtProfileTable::GetBehavColumns(void) const
 
   switch (m_doc->GetPreferences().ProfileStyle()) {
   case GBT_PROFILES_GRID:
-    return m_doc->GetEfg()->ProfileLength();
+    return m_doc->GetGame()->BehavProfileLength();
   case GBT_PROFILES_VECTOR:
   case GBT_PROFILES_MYERSON:
   default:
-    return m_doc->GetEfg()->NumPlayerInfosets();
+    return m_doc->GetGame()->NumPlayerInfosets();
   }
 }
 
@@ -111,11 +111,11 @@ int gbtProfileTable::GetMixedColumns(void) const
 {
   switch (m_doc->GetPreferences().ProfileStyle()) {
   case GBT_PROFILES_GRID:
-    return m_doc->GetNfg()->ProfileLength();
+    return m_doc->GetGame()->MixedProfileLength();
   case GBT_PROFILES_VECTOR:
   case GBT_PROFILES_MYERSON:
   default:
-    return m_doc->GetNfg()->NumPlayers();
+    return m_doc->GetGame()->NumPlayers();
   }
 }
 
@@ -126,12 +126,12 @@ int gbtProfileTable::GetPlayerNumber(int p_col) const
   }
   else if (p_col < GetInfoColumns() + GetBehavColumns()) {
     for (int pl = 1, col = GetInfoColumns(); 
-	 pl <= m_doc->GetEfg()->NumPlayers();
+	 pl <= m_doc->GetGame()->NumPlayers();
 	 pl++) {
-      for (int iset = 1; iset <= m_doc->GetEfg()->GetPlayer(pl)->NumInfosets();
+      for (int iset = 1; iset <= m_doc->GetGame()->GetPlayer(pl)->NumInfosets();
 	   iset++) {
 	if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	  if ((col += m_doc->GetEfg()->GetPlayer(pl)->GetInfoset(iset)->NumActions()) > p_col) {
+	  if ((col += m_doc->GetGame()->GetPlayer(pl)->GetInfoset(iset)->NumActions()) > p_col) {
 	    return pl;
 	  }
 	}
@@ -176,11 +176,11 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
   }
   else if (p_col < GetInfoColumns() + GetBehavColumns()) {
     for (int pl = 1, col = GetInfoColumns(); 
-	 pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
-      gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
+	 pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+      gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  gbtEfgInfoset infoset = player->GetInfoset(iset);
+	  gbtGameInfoset infoset = player->GetInfoset(iset);
 	  for (int act = 1; act <= infoset->NumActions(); col++, act++) {
 	    if (col == p_col) {
 	      return wxString::Format(wxT("%s:%s:%s"),
@@ -205,8 +205,8 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
   else {
     if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
       for (int pl = 1, col = GetInfoColumns() + GetBehavColumns();
-	   pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-	gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(pl);
+	   pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
 	for (int st = 1; st <= player->NumStrategies(); col++, st++) {
 	  if (col == p_col) {
 	    return wxString::Format(wxT("%s:%s"),
@@ -217,7 +217,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
       }
     }
     else {
-      return wxString::Format(wxT("%s"), (char *) m_doc->GetNfg()->GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1)->GetLabel());
+      return wxString::Format(wxT("%s"), (char *) m_doc->GetGame()->GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1)->GetLabel());
     }
   }
 
@@ -304,11 +304,11 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	for (int pl = 1, col = GetInfoColumns();
-	     pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
-	  gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
+	     pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	  gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++, col++) {
 	    if (col == p_col) {
-	      gbtEfgInfoset infoset = player->GetInfoset(iset);
+	      gbtGameInfoset infoset = player->GetInfoset(iset);
 	      wxString ret;
 	      for (int act = 1; act <= infoset->NumActions(); act++) {
 		if ((*behav)(infoset->GetAction(act)) > gbtNumber(0)) {
@@ -344,9 +344,9 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
 	wxString ret = wxT("("); 
-	gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(p_col - offset);
+	gbtGamePlayer player = m_doc->GetGame()->GetPlayer(p_col - offset);
 	for (int st = 1; st <= player->NumStrategies(); st++) {
-	  gbtNfgAction strategy = player->GetStrategy(st);
+	  gbtGameStrategy strategy = player->GetStrategy(st);
 	  if (st > 1) {
 	    ret += wxT(",");
 	  }
@@ -357,9 +357,9 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	wxString ret;
-	gbtNfgPlayer player = m_doc->GetNfg()->GetPlayer(p_col - offset);
+	gbtGamePlayer player = m_doc->GetGame()->GetPlayer(p_col - offset);
 	for (int st = 1; st <= player->NumStrategies(); st++) {
-	  gbtNfgAction strategy = player->GetStrategy(st);
+	  gbtGameStrategy strategy = player->GetStrategy(st);
 	  if ((*mixed)(strategy) > gbtNumber(0)) {
 	    if (ret != wxT("")) {
 	      ret += wxT("+");
@@ -442,17 +442,17 @@ gbtProfileTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
   else {
     if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
       int firstCol = GetInfoColumns() + GetBehavColumns();
-      int lastCol = firstCol - 1 + m_doc->GetNfg()->GetPlayer(1)->NumStrategies();
-      for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
+      int lastCol = firstCol - 1 + m_doc->GetGame()->GetPlayer(1)->NumStrategies();
+      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
 	if (col >= firstCol && col <= lastCol) {
 	  attr->SetTextColour(m_doc->GetPreferences().PlayerColor(pl));
 	  break;
 	}
-	if (pl == m_doc->GetNfg()->NumPlayers()) {
+	if (pl == m_doc->GetGame()->NumPlayers()) {
 	  break;
 	}
 	firstCol = lastCol + 1;
-	lastCol += m_doc->GetNfg()->GetPlayer(pl+1)->NumStrategies();
+	lastCol += m_doc->GetGame()->GetPlayer(pl+1)->NumStrategies();
       }
     }
     else {
@@ -619,7 +619,7 @@ wxString gbtProfileGrid::GetReport(void) const
 {
   wxString report;
   const gbtList<MixedSolution> &profiles = m_doc->AllMixedProfiles();
-  gbtNfgGame nfg = m_doc->GetNfg();
+  gbtGame nfg = m_doc->GetGame();
 
   report += wxString::Format(_("Mixed strategy profiles on game '%s' [%s]\n\n"),
 			     (const char *) nfg->GetLabel(),
@@ -672,7 +672,7 @@ wxString gbtProfileGrid::GetReport(void) const
     report += wxT("\n\n");
 
     for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-      gbtNfgPlayer player = nfg->GetPlayer(pl);
+      gbtGamePlayer player = nfg->GetPlayer(pl);
       report += wxString::Format(wxT("%s\n"), (const char *) player->GetLabel());
 
       for (int st = 1; st <= player->NumStrategies(); st++) {
@@ -788,11 +788,11 @@ void gbtProfileFrame::OnViewGrid(wxCommandEvent &)
 {
   if (m_doc->GetPreferences().ProfileStyle() != GBT_PROFILES_GRID) {
     if (m_doc->HasEfg()) {
-      m_grid->AppendCols(m_doc->GetEfg()->ProfileLength() -
-			 m_doc->GetEfg()->NumPlayerInfosets());
+      m_grid->AppendCols(m_doc->GetGame()->BehavProfileLength() -
+			 m_doc->GetGame()->NumPlayerInfosets());
     }
-    m_grid->AppendCols(m_doc->GetNfg()->ProfileLength() - 
-		       m_doc->GetNfg()->NumPlayers());
+    m_grid->AppendCols(m_doc->GetGame()->MixedProfileLength() - 
+		       m_doc->GetGame()->NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_GRID);
   m_doc->UpdateViews(this);
@@ -803,12 +803,12 @@ void gbtProfileFrame::OnViewMyerson(wxCommandEvent &)
   if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
     if (m_doc->HasEfg()) {
       m_grid->DeleteCols(0,
-			 m_doc->GetEfg()->ProfileLength() -
-			 m_doc->GetEfg()->NumPlayerInfosets());
+			 m_doc->GetGame()->BehavProfileLength() -
+			 m_doc->GetGame()->NumPlayerInfosets());
     }
     m_grid->DeleteCols(0,
-		       m_doc->GetNfg()->ProfileLength() - 
-		       m_doc->GetNfg()->NumPlayers());
+		       m_doc->GetGame()->MixedProfileLength() - 
+		       m_doc->GetGame()->NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_MYERSON);
   m_doc->UpdateViews(this);
@@ -819,12 +819,12 @@ void gbtProfileFrame::OnViewVector(wxCommandEvent &)
   if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
     if (m_doc->HasEfg()) {
       m_grid->DeleteCols(0,
-			 m_doc->GetEfg()->ProfileLength() -
-			 m_doc->GetEfg()->NumPlayerInfosets());
+			 m_doc->GetGame()->BehavProfileLength() -
+			 m_doc->GetGame()->NumPlayerInfosets());
     }
     m_grid->DeleteCols(0,
-		       m_doc->GetNfg()->ProfileLength() - 
-		       m_doc->GetNfg()->NumPlayers());
+		       m_doc->GetGame()->MixedProfileLength() - 
+		       m_doc->GetGame()->NumPlayers());
   }
   m_doc->GetPreferences().SetProfileStyle(GBT_PROFILES_VECTOR);
   m_doc->UpdateViews(this);
@@ -861,11 +861,11 @@ void gbtProfileFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Profiles: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Profiles: %s"),
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
   }
   Show(m_doc->ShowProfiles());

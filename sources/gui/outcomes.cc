@@ -53,21 +53,11 @@ public:
 
 void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
 {
-  if (p_doc->HasEfg()) {
-    gbtText outcomeName = p_doc->UniqueEfgOutcomeName();
-    gbtEfgOutcome outcome = p_doc->GetEfg()->NewOutcome();
-    outcome->SetLabel(outcomeName);
-    for (int pl = 1; pl <= p_doc->GetEfg()->NumPlayers(); pl++) {
-      outcome->SetPayoff(p_doc->GetEfg()->GetPlayer(pl), gbtNumber(0));
-    }
-  }
-  else {
-    gbtText outcomeName = p_doc->UniqueNfgOutcomeName();
-    gbtNfgOutcome outcome = p_doc->GetNfg()->NewOutcome();
-    outcome->SetLabel(outcomeName);
-    for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-      outcome->SetPayoff(p_doc->GetNfg()->GetPlayer(pl), gbtNumber(0));
-    }
+  gbtText outcomeName = p_doc->UniqueOutcomeName();
+  gbtGameOutcome outcome = p_doc->GetGame()->NewOutcome();
+  outcome->SetLabel(outcomeName);
+  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
+    outcome->SetPayoff(p_doc->GetGame()->GetPlayer(pl), gbtNumber(0));
   }
 }
 
@@ -91,12 +81,7 @@ public:
 
 void gbtCmdDeleteOutcome::Do(gbtGameDocument *p_doc)
 {
-  if (p_doc->HasEfg()) {
-    p_doc->GetEfg()->GetOutcome(m_id)->DeleteOutcome();
-  }
-  else {
-    p_doc->GetNfg()->GetOutcome(m_id)->DeleteOutcome();
-  }
+  p_doc->GetGame()->GetOutcome(m_id)->DeleteOutcome();
 }
 
 //-------------------------------------------------------------------------
@@ -121,19 +106,19 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
 {
   if (p_doc->HasEfg()) {
     if (m_id > 0) {
-      p_doc->GetCursor()->SetOutcome(p_doc->GetEfg()->GetOutcome(m_id));
+      p_doc->GetCursor()->SetOutcome(p_doc->GetGame()->GetOutcome(m_id));
     }
     else {
       p_doc->GetCursor()->SetOutcome(0);
     }
   }
   else {
-    gbtNfgContingency profile(p_doc->GetNfg());
-    for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
-      profile.SetStrategy(p_doc->GetNfg()->GetPlayer(pl)->GetStrategy(p_doc->GetContingency()[pl]));
+    gbtNfgContingency profile(p_doc->GetGame());
+    for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
+      profile.SetStrategy(p_doc->GetGame()->GetPlayer(pl)->GetStrategy(p_doc->GetContingency()[pl]));
     }
     if (m_id > 0) {
-      profile.SetOutcome(p_doc->GetNfg()->GetOutcome(m_id));
+      profile.SetOutcome(p_doc->GetGame()->GetOutcome(m_id));
     }
     else {
       profile.SetOutcome(0);
@@ -163,12 +148,7 @@ public:
 
 void gbtCmdLabelOutcome::Do(gbtGameDocument *p_doc)
 {
-  if (p_doc->HasEfg()) {
-    p_doc->GetEfg()->GetOutcome(m_id)->SetLabel((const char *) m_label.mb_str());
-  }
-  else {
-    p_doc->GetNfg()->GetOutcome(m_id)->SetLabel((const char *) m_label.mb_str());
-  }
+  p_doc->GetGame()->GetOutcome(m_id)->SetLabel((const char *) m_label.mb_str());
 }
 
 //-------------------------------------------------------------------------
@@ -194,14 +174,8 @@ public:
 
 void gbtCmdPayoffOutcome::Do(gbtGameDocument *p_doc)
 {
-  if (p_doc->HasEfg()) {
-    gbtEfgPlayer player = p_doc->GetEfg()->GetPlayer(m_player);
-    p_doc->GetEfg()->GetOutcome(m_id)->SetPayoff(player, m_payoff);
-  }
-  else {
-    gbtNfgPlayer player = p_doc->GetNfg()->GetPlayer(m_player);
-    p_doc->GetNfg()->GetOutcome(m_id)->SetPayoff(player, m_payoff);
-  }
+  gbtGamePlayer player = p_doc->GetGame()->GetPlayer(m_player);
+  p_doc->GetGame()->GetOutcome(m_id)->SetPayoff(player, m_payoff);
 }
 
 //=========================================================================
@@ -234,9 +208,8 @@ gbtOutcomeWindow::gbtOutcomeWindow(gbtGameDocument *p_doc,
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_doc(p_doc)
 {
-  CreateGrid((m_doc->HasEfg()) ? m_doc->GetEfg()->NumOutcomes() :
-	      m_doc->GetNfg()->NumOutcomes(),
-	      m_doc->GetNfg()->NumPlayers() + 1);
+  CreateGrid(m_doc->GetGame()->NumOutcomes(),
+	     m_doc->GetGame()->NumPlayers() + 1);
   EnableEditing(true);
   SetSelectionMode(wxGridSelectRows);
   SetLabelSize(wxVERTICAL, 0);
@@ -254,105 +227,53 @@ void gbtOutcomeWindow::OnUpdate(void)
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
   SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   
-  if (m_doc->HasEfg()) {
-    gbtEfgGame efg = m_doc->GetEfg();
+  gbtGame efg = m_doc->GetGame();
 
-    if (GetRows() != efg->NumOutcomes()) {
-      DeleteRows(0, GetRows());
-      AppendRows(efg->NumOutcomes());
-
-      for (int row = 0; row < GetRows(); row++) {
-	for (int col = 1; col < GetCols(); col++) {
-	  SetCellEditor(row, col, new gbtNumberEditor);
-	}
-      }
-    }
-
-    for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
-      gbtEfgOutcome outcome = efg->GetOutcome(outc);
-
-      SetCellValue(wxString::Format(wxT("%s"), (char *) outcome->GetLabel()),
-		   outc - 1, 0);
-
-      for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-	SetCellValue(wxString::Format(wxT("%s"),
-				      (char *) ToText(outcome->GetPayoff(efg->GetPlayer(pl)))),
-		     outc - 1, pl);
-	SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
-			  outc - 1, pl);
-      }
-
-      for (int col = 0; col < GetNumberCols(); col++) {
-	if ((outc - 1) % 2 == 0) {
-	  SetCellBackgroundColour(outc - 1, col, wxColour(200, 200, 200));
-	}
-	else {
-	  SetCellBackgroundColour(outc - 1, col, wxColour(225, 225, 225));
-	}
-      }
-    }
-
-    for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-      if (efg->GetPlayer(pl)->GetLabel() != "") {
-	SetLabelValue(wxHORIZONTAL,
-		      wxString::Format(wxT("%s"),
-				       (char *) efg->GetPlayer(pl)->GetLabel()),
-		      pl);
-      }
-      else {
-	SetLabelValue(wxHORIZONTAL,
-		      wxString::Format(_("Player %d"), pl), pl);
+  if (GetRows() != efg->NumOutcomes()) {
+    DeleteRows(0, GetRows());
+    AppendRows(efg->NumOutcomes());
+    
+    for (int row = 0; row < GetRows(); row++) {
+      for (int col = 1; col < GetCols(); col++) {
+	SetCellEditor(row, col, new gbtNumberEditor);
       }
     }
   }
-  else {
-    gbtNfgGame nfg = m_doc->GetNfg();
 
-    if (GetRows() != nfg->NumOutcomes()) {
-      DeleteRows(0, GetRows());
-      AppendRows(nfg->NumOutcomes());
-
-      for (int row = 0; row < GetRows(); row++) {
-	for (int col = 1; col < GetCols(); col++) {
-	  SetCellEditor(row, col, new gbtNumberEditor);
-	}
-      }
-    }
-
-    for (int outc = 1; outc <= nfg->NumOutcomes(); outc++) {
-      gbtNfgOutcome outcome = nfg->GetOutcome(outc);
-
+  for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
+    gbtGameOutcome outcome = efg->GetOutcome(outc);
+    
+    SetCellValue(wxString::Format(wxT("%s"), (char *) outcome->GetLabel()),
+		 outc - 1, 0);
+    
+    for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
       SetCellValue(wxString::Format(wxT("%s"),
-				    (char *) outcome->GetLabel()), outc - 1, 0);
-
-      for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-	SetCellValue(wxString::Format(wxT("%s"),
-				      (char *) ToText(outcome->GetPayoff(nfg->GetPlayer(pl)))),
-		     outc - 1, pl);
-	SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
-			  outc - 1, pl);
-      }
-
-      for (int col = 0; col < GetNumberCols(); col++) {
-	if ((outc - 1) % 2 == 0) {
-	  SetCellBackgroundColour(outc - 1, col, wxColour(200, 200, 200));
-	}
-	else {
-	  SetCellBackgroundColour(outc - 1, col, wxColour(225, 225, 225));
-	}
-      }
+				    (char *) ToText(outcome->GetPayoff(efg->GetPlayer(pl)))),
+		   outc - 1, pl);
+      SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
+			outc - 1, pl);
     }
-
-    for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-      if (nfg->GetPlayer(pl)->GetLabel() != "") {
-	SetLabelValue(wxHORIZONTAL,
-		      wxString::Format(wxT("%s"),
-				       (char *) nfg->GetPlayer(pl)->GetLabel()),
-		      pl);
+    
+    for (int col = 0; col < GetNumberCols(); col++) {
+      if ((outc - 1) % 2 == 0) {
+	SetCellBackgroundColour(outc - 1, col, wxColour(200, 200, 200));
       }
       else {
-	SetLabelValue(wxHORIZONTAL, wxString::Format(_("Player %d"), pl), pl);
+	SetCellBackgroundColour(outc - 1, col, wxColour(225, 225, 225));
       }
+    }
+  }
+
+  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
+    if (efg->GetPlayer(pl)->GetLabel() != "") {
+      SetLabelValue(wxHORIZONTAL,
+		    wxString::Format(wxT("%s"),
+				     (char *) efg->GetPlayer(pl)->GetLabel()),
+		    pl);
+    }
+    else {
+      SetLabelValue(wxHORIZONTAL,
+		    wxString::Format(_("Player %d"), pl), pl);
     }
   }
 }
@@ -463,11 +384,11 @@ void gbtOutcomeFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Outcomes: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Outcomes: %s"),
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
   }
   Show(m_doc->ShowOutcomes());

@@ -87,7 +87,7 @@ strategy_getplayer(strategyobject *self, PyObject *args)
   }
 
   nfplayerobject *player = newnfplayerobject();
-  player->m_nfplayer = new gbtNfgPlayer(self->m_strategy->GetPlayer());
+  player->m_nfplayer = new gbtGamePlayer(self->m_strategy->GetPlayer());
   return (PyObject *) player;
 }
 
@@ -124,7 +124,7 @@ newstrategyobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_strategy = new gbtNfgAction();
+  self->m_strategy = new gbtGameAction();
   return self;
 }
 

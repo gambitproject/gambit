@@ -42,7 +42,7 @@ private:
   wxMenu *m_nodeMenu, *m_gameMenu;
 
   wxDragImage *m_dragImage;
-  gbtEfgNode m_dragSource;
+  gbtGameNode m_dragSource;
   enum { dragCOPY, dragMOVE, dragOUTCOME } m_dragMode;
 
   // Private Functions
@@ -88,10 +88,10 @@ public:
 //
 class gbtCmdMoveTree : public gbtGameCommand {
 private:
-  gbtEfgNode m_src, m_dest;
+  gbtGameNode m_src, m_dest;
 
 public:
-  gbtCmdMoveTree(gbtEfgNode p_src, gbtEfgNode p_dest)
+  gbtCmdMoveTree(gbtGameNode p_src, gbtGameNode p_dest)
     : m_src(p_src), m_dest(p_dest) { }
   virtual ~gbtCmdMoveTree() { }
 
@@ -106,10 +106,10 @@ public:
 //
 class gbtCmdCopyTree : public gbtGameCommand {
 private:
-  gbtEfgNode m_src, m_dest;
+  gbtGameNode m_src, m_dest;
 
 public:
-  gbtCmdCopyTree(gbtEfgNode p_src, gbtEfgNode p_dest)
+  gbtCmdCopyTree(gbtGameNode p_src, gbtGameNode p_dest)
     : m_src(p_src), m_dest(p_dest) { }
   virtual ~gbtCmdCopyTree() { }
 
@@ -124,11 +124,11 @@ public:
 //
 class gbtCmdSetOutcome : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
-  gbtEfgOutcome m_outcome;
+  gbtGameNode m_node;
+  gbtGameOutcome m_outcome;
 
 public:
-  gbtCmdSetOutcome(gbtEfgNode p_node, gbtEfgOutcome p_outcome) 
+  gbtCmdSetOutcome(gbtGameNode p_node, gbtGameOutcome p_outcome) 
     : m_node(p_node), m_outcome(p_outcome) { }
   virtual ~gbtCmdSetOutcome() { }
 

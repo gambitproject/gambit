@@ -27,7 +27,7 @@
 #include "nfgch.h"
 
 #include "base/base.h"
-#include "game/nfg.h"
+#include "game/game.h"
 
 gbtList<MixedSolution> gbtNfgBehavCH::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)

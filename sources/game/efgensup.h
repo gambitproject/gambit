@@ -26,7 +26,7 @@
 
 #include "base/gstatus.h"
 #include "math/rational.h"
-#include "efg.h"
+#include "game.h"
 #include "efgciter.h"
 #include "actiter.h"
 
@@ -37,9 +37,9 @@
 void AllSubsupportsRECURSIVE(const gbtEfgSupport *s,
 			     gbtEfgSupportWithActiveInfo *sact,
 			     gbtAllActionIterator *c,
-			     gbtList<const gbtEfgSupport> *list);
+			     gbtList<gbtEfgSupport> *list);
 
-gbtList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
+gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 
 
 // Subsupports of a given support are _path equivalent_ if they
@@ -51,9 +51,9 @@ gbtList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport *s,
 					 gbtEfgSupportWithActiveInfo *sact,
 					 gbtAllActionIterator *c,
-					 gbtList<const gbtEfgSupport> *list);
+					 gbtList<gbtEfgSupport> *list);
 
-gbtList<const gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
+gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -65,16 +65,16 @@ gbtList<const gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 // dominated, and thus part of an allowed subsupport.
 
 void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					 gbtEfgSupportWithActiveInfo *sact,
-					 gbtAllActionIterator *c,
-					const bool strong,
-					const bool conditional,
-					 gbtList<const gbtEfgSupport> *list,
+					gbtEfgSupportWithActiveInfo *sact,
+					gbtAllActionIterator *c,
+					bool strong,
+					bool conditional,
+					gbtList<gbtEfgSupport> *list,
 					 const gbtStatus &status);
   
-gbtList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
-						 const bool strong,
-						 const bool conditional,
+gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
+						 bool strong,
+						 bool conditional,
 						 const gbtStatus &status);
 
 // The following two routines combine to produce all subsupports that could
@@ -91,10 +91,10 @@ gbtList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
 					    gbtEfgSupportWithActiveInfo *sact,
 				            gbtAllActionIterator *c,
-					    gbtList<const gbtEfgSupport> *list,
+					    gbtList<gbtEfgSupport> *list,
 				      const gbtStatus &status);
 
-gbtList<const gbtEfgSupport> SortSupportsBySize(gbtList<const gbtEfgSupport> &);
-  
-gbtList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
+gbtList<gbtEfgSupport> SortSupportsBySize(gbtList<gbtEfgSupport> &);
+
+gbtList<gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
 					       gbtStatus &status);

@@ -56,16 +56,9 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxCENTER, 5);
-  if (m_doc->HasEfg()) {
-    m_title = new wxTextCtrl(this, -1, 
-			     wxString::Format(wxT("%s"),
-					      (const char *) m_doc->GetEfg()->GetLabel()));
-  }
-  else {
-    m_title = new wxTextCtrl(this, -1, 
-			     wxString::Format(wxT("%s"),
-					      (const char *) m_doc->GetNfg()->GetLabel()));
-  }
+  m_title = new wxTextCtrl(this, -1, 
+			   wxString::Format(wxT("%s"),
+					    (const char *) m_doc->GetGame()->GetLabel()));
 
   titleSizer->Add(m_title, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
@@ -84,45 +77,30 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 				  wxString(_("Filename: ")) +
 				  m_doc->GetFilename()),
 		 0, wxALL, 5);
+  propSizer->Add(new wxStaticText(this, wxID_STATIC,
+				  wxString::Format(_("Number of players: %d"),
+						   m_doc->GetGame()->NumPlayers())),
+		 0, wxALL, 5);
+  propSizer->Add(new wxStaticText(this, wxID_STATIC,
+				  wxString::Format(_("Constant-sum game: %s"),
+						   (m_doc->GetGame()->IsConstSum()) ?
+						   _("YES") : _("NO"))),
+		   0, wxALL, 5);
   if (m_doc->HasEfg()) {
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format(_("Number of players: %d"),
-						     m_doc->GetEfg()->NumPlayers())),
-		   0, wxALL, 5);
-    propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format(_("Constant-sum game: %s"),
-						     (m_doc->GetEfg()->IsConstSum()) ?
-						     _("YES") : _("NO"))),
-		   0, wxALL, 5);
-    propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Perfect recall: %s"),
-						     (m_doc->GetEfg()->IsPerfectRecall()) ?
+						     (m_doc->GetGame()->IsPerfectRecall()) ?
 						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
   }
-  else {
-    propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format(_("Number of players: %d"),
-						     m_doc->GetNfg()->NumPlayers())),
-		   0, wxALL, 5);
-    propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format(_("Constant-sum game: %s"),
-						     (m_doc->GetNfg()->IsConstSum()) ?
-						     _("YES") : _("NO"))),
-		   0, wxALL, 5);
-  }
+
   centralSizer->Add(propSizer, 1, wxALL | wxEXPAND, 5);
 
   wxStaticBox *playerGridBox = new wxStaticBox(this, wxID_STATIC, _("Players"));
   wxStaticBoxSizer *playerGridSizer = new wxStaticBoxSizer(playerGridBox,
 							   wxVERTICAL);
   m_players = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 150));
-  if (m_doc->HasEfg()) {
-    m_players->CreateGrid(m_doc->GetEfg()->NumPlayers(), 1);
-  }
-  else {
-    m_players->CreateGrid(m_doc->GetNfg()->NumPlayers(), 1);
-  }
+  m_players->CreateGrid(m_doc->GetGame()->NumPlayers(), 1);
   m_players->DisableDragRowSize();
   m_players->DisableDragColSize();
   m_players->EnableGridLines(false);
@@ -132,30 +110,15 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   m_players->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
   m_players->SetLabelValue(wxHORIZONTAL, _("Name"), 0);
 
-  if (m_doc->HasEfg()) {
-    for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
-      m_players->SetCellValue(pl - 1, 0, 
-			      wxString::Format(wxT("%s"),
-					       (char *) m_doc->GetEfg()->GetPlayer(pl)->GetLabel()));
-      if ((pl - 1) % 2 == 0) {
-	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
-      }
-      else {
-	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(225, 225, 225));
-      }
+  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+    m_players->SetCellValue(pl - 1, 0, 
+			    wxString::Format(wxT("%s"),
+					     (char *) m_doc->GetGame()->GetPlayer(pl)->GetLabel()));
+    if ((pl - 1) % 2 == 0) {
+      m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
     }
-  }
-  else {
-    for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
-      m_players->SetCellValue(pl - 1, 0, 
-			      wxString::Format(wxT("%s"),
-					       (char *) m_doc->GetNfg()->GetPlayer(pl)->GetLabel()));
-      if ((pl - 1) % 2 == 0) {
-	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
-      }
-      else {
-	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(225, 225, 225));
-      }
+    else {
+      m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(225, 225, 225));
     }
   }
 
@@ -173,20 +136,11 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   wxStaticBox *commentBox = new wxStaticBox(this, wxID_STATIC, _("Comments"));
   wxStaticBoxSizer *commentSizer = new wxStaticBoxSizer(commentBox,
 							wxHORIZONTAL);
-  if (m_doc->HasEfg()) {
-    m_comment = new wxTextCtrl(this, -1, 
-			       wxString::Format(wxT("%s"),
-						(const char *) m_doc->GetEfg()->GetComment()),
-			       wxDefaultPosition, wxSize(100, 100),
-			       wxTE_MULTILINE);
-  }
-  else {
-    m_comment = new wxTextCtrl(this, -1, 
-			       wxString::Format(wxT("%s"),
-						(const char *) m_doc->GetNfg()->GetComment()),
-			       wxDefaultPosition, wxSize(100, 100),
-			       wxTE_MULTILINE);
-  }
+  m_comment = new wxTextCtrl(this, -1, 
+			     wxString::Format(wxT("%s"),
+					      (const char *) m_doc->GetGame()->GetComment()),
+			     wxDefaultPosition, wxSize(100, 100),
+			     wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 5);
 
@@ -255,24 +209,14 @@ public:
 
 void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
 {
-  if (p_doc->HasEfg()) {
-    gbtEfgGame efg = p_doc->GetEfg();
-    efg->SetLabel(m_title);
-    efg->SetComment(m_comment);
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
-      if (pl > efg->NumPlayers()) {
-	efg->NewPlayer();
-      }
-      efg->GetPlayer(pl)->SetLabel(m_players[pl]);
+  gbtGame game = p_doc->GetGame();
+  game->SetLabel(m_title);
+  game->SetComment(m_comment);
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    if (pl > game->NumPlayers()) {
+      game->NewPlayer();
     }
-  }
-  else {
-    gbtNfgGame nfg = p_doc->GetNfg();
-    nfg->SetLabel(m_title);
-    nfg->SetComment(m_comment);
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
-      nfg->GetPlayer(pl)->SetLabel(m_players[pl]);
-    }
+    game->GetPlayer(pl)->SetLabel(m_players[pl]);
   }
 }
 

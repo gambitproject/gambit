@@ -32,7 +32,7 @@
 
 class dialogStrategies : public wxDialog {
 private:
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   wxListBox *m_playerList;
   wxGrid *m_editGrid;
   int m_selection;
@@ -44,7 +44,7 @@ private:
 
 public:
   // Lifecycle
-  dialogStrategies(wxWindow *, const gbtNfgGame &);
+  dialogStrategies(wxWindow *, const gbtGame &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   gbtGameCommand *GetCommand(void) const;

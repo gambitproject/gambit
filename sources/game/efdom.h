@@ -28,7 +28,7 @@
 #define EFDOM_H
 
 #include "base/gstatus.h"
-#include "game/efg.h"
+#include "game/game.h"
 
 class gbtEfgDominanceException : public gbtException {
 private:

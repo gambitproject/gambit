@@ -41,7 +41,7 @@ private:
   gbtOrdMap<wxTreeItemId, gbtPanelNfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
-  int LoadAlgorithms(const gbtNfgGame &);
+  int LoadAlgorithms(const gbtGame &);
 
   // Event handlers
   void OnSelectionChanging(wxTreeEvent &);

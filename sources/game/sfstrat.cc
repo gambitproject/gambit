@@ -35,10 +35,10 @@
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-gbtList<gbtEfgAction> gbtSfgSequence::History(void) const 
+gbtList<gbtGameAction> gbtSfgSequence::History(void) const 
 { 
-  gbtList<gbtEfgAction> h;
-  gbtEfgAction a = action;
+  gbtList<gbtGameAction> h;
+  gbtGameAction a = action;
   const gbtSfgSequence *s = this;
   while (!a.IsNull()) {
     h.Append(a);
@@ -67,7 +67,7 @@ gbtOutput& operator<<(gbtOutput& s, const gbtSfgSequence& seq)
 // gbtSfgSequenceSet:  Member functions
 //--------------------------------------
 
-gbtSfgSequenceSet::gbtSfgSequenceSet(const gbtEfgPlayer &p)
+gbtSfgSequenceSet::gbtSfgSequenceSet(const gbtGamePlayer &p)
   : efp(p), sequences()
 {
   gbtSfgSequence *empty;

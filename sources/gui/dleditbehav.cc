@@ -50,7 +50,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 				 const BehavSolution &p_profile)
   : wxDialog(p_parent, -1, _("Behavior profile properties"),
 	     wxDefaultPosition),
-    m_profile(p_profile), m_lastInfoset(0), m_map(gbtEfgInfoset())
+    m_profile(p_profile), m_lastInfoset(0), m_map(gbtGameInfoset())
 {
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -79,7 +79,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   wxTreeItemId firstID;
 
   for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_profile.GetGame()->GetPlayer(pl);
+    gbtGamePlayer player = p_profile.GetGame()->GetPlayer(pl);
     wxTreeItemId id;
     if (player->GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
@@ -92,7 +92,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     }
     m_infosetTree->SetItemBold(id, true);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID;
       if (infoset->GetLabel() != "") {
 	isetID = m_infosetTree->AppendItem(id,
@@ -233,7 +233,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
     m_probGrid->DisableCellEditControl();
   }
 
-  gbtEfgInfoset infoset = m_map.Lookup(m_infosetTree->GetSelection());
+  gbtGameInfoset infoset = m_map.Lookup(m_infosetTree->GetSelection());
 
   if (infoset.IsNull()) {
     for (int pl = 1; ; pl++) {
@@ -263,5 +263,5 @@ const BehavSolution &dialogEditBehav::GetProfile(void) const
 gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gbtBaseMap<wxTreeItemId, gbtEfgInfoset>;
-template class gbtOrdMap<wxTreeItemId, gbtEfgInfoset>;
+template class gbtBaseMap<wxTreeItemId, gbtGameInfoset>;
+template class gbtOrdMap<wxTreeItemId, gbtGameInfoset>;

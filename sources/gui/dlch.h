@@ -27,7 +27,7 @@
 #ifndef DLCH_H
 #define DLCH_H
 
-#include "game/nfg.h"
+#include "game/game.h"
 
 class dialogNfgCH : public wxDialog {
 private:

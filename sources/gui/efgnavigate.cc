@@ -73,7 +73,7 @@ void gbtEfgNavigateWindow::OnUpdate(void)
   SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
 
-  gbtEfgNode cursor = m_doc->GetCursor();
+  gbtGameNode cursor = m_doc->GetCursor();
   
   if (cursor.IsNull()) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
@@ -116,7 +116,7 @@ void gbtEfgNavigateWindow::OnUpdate(void)
 				  (char *) m_doc->GetInfosetValue(cursor)),
 		 6, 0);
 	
-    gbtEfgNode p = cursor->GetParent();
+    gbtGameNode p = cursor->GetParent();
 
     if (!p.IsNull()) {
       int branch = 0;
@@ -202,11 +202,11 @@ void gbtEfgNavigateFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Node View: [%s] %s"), 
 				m_doc->GetFilename().c_str(), 
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Node View: %s"),
-				(char *) m_doc->GetNfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
   }
   Show(m_doc->ShowEfgNavigate());

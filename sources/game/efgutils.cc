@@ -32,7 +32,7 @@
 // recursive functions
 
 static void
-NDoChild(const gbtEfgGame & e, const gbtEfgNode & n, gbtList < gbtEfgNode > &list)
+NDoChild(const gbtGame & e, const gbtGameNode & n, gbtList < gbtGameNode > &list)
 {
   list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
@@ -40,8 +40,8 @@ NDoChild(const gbtEfgGame & e, const gbtEfgNode & n, gbtList < gbtEfgNode > &lis
 }
 
 static void
-MSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
-           gbtList < gbtEfgNode > &list)
+MSRDoChild(const gbtGame & e, const gbtGameNode & n,
+           gbtList < gbtGameNode > &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     MSRDoChild(e, n->GetChild(i), list);
@@ -50,8 +50,8 @@ MSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
 }
 
 static void
-LSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
-           gbtList < gbtEfgNode > &list)
+LSRDoChild(const gbtGame & e, const gbtGameNode & n,
+           gbtList < gbtGameNode > &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     LSRDoChild(e, n->GetChild(i), list);
@@ -60,7 +60,7 @@ LSRDoChild(const gbtEfgGame & e, const gbtEfgNode & n,
 }
 
 static void
-CSDoChild(const gbtEfgGame & e, gbtEfgNode n, gbtList < gbtEfgNode > &list)
+CSDoChild(const gbtGame & e, gbtGameNode n, gbtList < gbtGameNode > &list)
 {
   if (n->GetSubgameRoot() == n)
     list.Append(n);
@@ -72,7 +72,7 @@ CSDoChild(const gbtEfgGame & e, gbtEfgNode n, gbtList < gbtEfgNode > &list)
 // Public Functions
 
 int
-CountNodes(const gbtEfgGame & e, const gbtEfgNode & n)
+CountNodes(const gbtGame & e, const gbtGameNode & n)
 {
   int num = 1;
   for (int i = 1; i <= n->NumChildren(); i++)
@@ -81,21 +81,21 @@ CountNodes(const gbtEfgGame & e, const gbtEfgNode & n)
 }
 
 void
-Nodes(const gbtEfgGame & befg, gbtList < gbtEfgNode > &list)
+Nodes(const gbtGame & befg, gbtList < gbtGameNode > &list)
 {
   list.Flush();
   NDoChild(befg, befg->GetRoot(), list);
 }
 
 void
-Nodes(const gbtEfgGame & efg, const gbtEfgNode &n, gbtList < gbtEfgNode > &list)
+Nodes(const gbtGame & efg, const gbtGameNode &n, gbtList < gbtGameNode > &list)
 {
   list.Flush();
   NDoChild(efg, n, list);
 }
 
 void
-TerminalNodes(const gbtEfgNode & p_node, gbtList < gbtEfgNode > &p_list)
+TerminalNodes(const gbtGameNode & p_node, gbtList < gbtGameNode > &p_list)
 {
   if (p_node->NumChildren() == 0) {
     p_list.Append(p_node);
@@ -108,39 +108,39 @@ TerminalNodes(const gbtEfgNode & p_node, gbtList < gbtEfgNode > &p_list)
 }
 
 void
-MarkedSubgameRoots(const gbtEfgGame & efg, gbtList < gbtEfgNode > &list)
+MarkedSubgameRoots(const gbtGame & efg, gbtList < gbtGameNode > &list)
 {
   list.Flush();
   MSRDoChild(efg, efg->GetRoot(), list);
 }
 
 void
-LegalSubgameRoots(const gbtEfgGame & efg, gbtList < gbtEfgNode > &list)
+LegalSubgameRoots(const gbtGame & efg, gbtList < gbtGameNode > &list)
 {
   list.Flush();
   LSRDoChild(efg, efg->GetRoot(), list);
 }
 
 void
-LegalSubgameRoots(const gbtEfgGame & efg, const gbtEfgNode & n,
-                  gbtList < gbtEfgNode > &list)
+LegalSubgameRoots(const gbtGame & efg, const gbtGameNode & n,
+                  gbtList < gbtGameNode > &list)
 {
   list.Flush();
   LSRDoChild(efg, n, list);
 }
 
 bool
-HasSubgames(const gbtEfgGame & efg)
+HasSubgames(const gbtGame & efg)
 {
-  gbtList < gbtEfgNode > list;
+  gbtList < gbtGameNode > list;
   LegalSubgameRoots(efg, list);
   return list.Length() > 1;
 }
 
 bool
-HasSubgames(const gbtEfgGame & e, gbtEfgNode n)
+HasSubgames(const gbtGame & e, gbtGameNode n)
 {
-  gbtList < gbtEfgNode > list;
+  gbtList < gbtGameNode > list;
   LegalSubgameRoots(e, n, list);
   if (n->IsSubgameRoot())
     return list.Length() > 1;
@@ -148,9 +148,9 @@ HasSubgames(const gbtEfgGame & e, gbtEfgNode n)
 }
 
 bool
-AllSubgamesMarked(const gbtEfgGame & efg)
+AllSubgamesMarked(const gbtGame & efg)
 {
-  gbtList < gbtEfgNode > marked, valid;
+  gbtList < gbtGameNode > marked, valid;
 
   LegalSubgameRoots(efg, valid);
   MarkedSubgameRoots(efg, marked);
@@ -160,8 +160,8 @@ AllSubgamesMarked(const gbtEfgGame & efg)
 
 
 void
-ChildSubgames(const gbtEfgGame & efg, const gbtEfgNode &n,
-	      gbtList < gbtEfgNode > &list)
+ChildSubgames(const gbtGame & efg, const gbtGameNode &n,
+	      gbtList < gbtGameNode > &list)
 {
   list.Flush();
   for (int i = 1; i <= n->NumChildren(); i++)
@@ -169,22 +169,22 @@ ChildSubgames(const gbtEfgGame & efg, const gbtEfgNode &n,
 }
 
 int
-NumNodes(const gbtEfgGame & befg)
+NumNodes(const gbtGame & befg)
 {
   return (CountNodes(befg, befg->GetRoot()));
 }
 
-gbtEfgGame
-CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
+gbtGame
+CompressEfg(const gbtGame & efg, const gbtEfgSupport & S)
 {
-  gbtEfgGame newefg = efg->Copy();
+  gbtGame newefg = efg->Copy(efg->GetRoot());
 
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = newefg->GetPlayer(pl);
+    gbtGamePlayer player = newefg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--) {
-        gbtEfgAction oldact =
+        gbtGameAction oldact =
           efg->GetPlayer(pl)->GetInfoset(iset)->GetAction(act);
         if (!S.Contains(oldact)) {
           infoset->GetAction(act)->DeleteAction();
@@ -196,16 +196,16 @@ CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
   return newefg;
 }
 
-void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
+void CompressEfgInPlace(gbtGame p_efg, const gbtEfgSupport &p_support)
 {
   // Do this to avoid problems with p_efg and p_support being incompatible
   // after deletions
   gbtDPVector<int> support(p_support.NumActions());
   support = 0;
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_efg->GetPlayer(pl);
+    gbtGamePlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	if (p_support.Contains(infoset->GetAction(act))) {
 	  support(pl, iset, act) = 1;
@@ -215,9 +215,9 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
   }
 
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_efg->GetPlayer(pl);
+    gbtGamePlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--) {
 	if (!support(pl, iset, act)) {
           infoset->GetAction(act)->DeleteAction();
@@ -226,4 +226,3 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
     }
   }
 }
-

@@ -40,16 +40,16 @@ gbtText gbtEfgDominanceException::Description(void) const
 }
 
 
-bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
+bool gbtEfgSupport::Dominates(const gbtGameAction &a, const gbtGameAction &b,
 			  bool strong, const bool conditional) const
 {
-  gbtEfgInfoset infoset = a->GetInfoset();
+  gbtGameInfoset infoset = a->GetInfoset();
   if (infoset != b->GetInfoset())
     throw gbtEfgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
   const gbtEfgSupportWithActiveInfo SAct(*this);
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtGamePlayer player = infoset->GetPlayer();
   int pl = player->GetId();
   bool equal = true;
 
@@ -73,7 +73,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
   }
 
   else {
-    gbtList<gbtEfgNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    gbtList<gbtGameNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this 
       // prior to entry
@@ -83,7 +83,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
-      gbtList<gbtEfgInfoset> L;
+      gbtList<gbtGameInfoset> L;
       L += ReachableInfosets(nodelist[n], a);
       L += ReachableInfosets(nodelist[n], b);
       L.RemoveRedundancies();
@@ -115,8 +115,8 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 }
 
 bool SomeElementDominates(const gbtEfgSupport &S, 
-			  const gbtArray<gbtEfgAction> &array,
-			  const gbtEfgAction &a,
+			  const gbtArray<gbtGameAction> &array,
+			  const gbtGameAction &a,
 			  bool strong, bool conditional)
 {
   for (int i = 1; i <= array.Length(); i++)
@@ -127,10 +127,10 @@ bool SomeElementDominates(const gbtEfgSupport &S,
   return false;
 }
 
-bool gbtEfgSupport::IsDominated(const gbtEfgAction &a, 
+bool gbtEfgSupport::IsDominated(const gbtGameAction &a, 
 			    bool strong, bool conditional) const
 {
-  gbtArray<gbtEfgAction> array(NumActions(a->GetInfoset()));
+  gbtArray<gbtGameAction> array(NumActions(a->GetInfoset()));
   for (int act = 1; act <= array.Length(); act++) {
     array[act] = GetAction(a->GetInfoset(), act);
   }
@@ -138,11 +138,11 @@ bool gbtEfgSupport::IsDominated(const gbtEfgAction &a,
 }
 
 bool InfosetHasDominatedElement(const gbtEfgSupport &S, 
-				gbtEfgInfoset infoset,
+				gbtGameInfoset infoset,
 				bool strong, bool conditional,
 				gbtStatus &/*status*/)
 {
-  gbtArray<gbtEfgAction> actions(S.NumActions(infoset));
+  gbtArray<gbtGameAction> actions(S.NumActions(infoset));
   for (int i = 1; i <= actions.Length(); i++) {
     actions[i] = S.GetAction(infoset, i);
   }
@@ -182,7 +182,7 @@ bool ElimDominatedInInfoset(const gbtEfgSupport &S, gbtEfgSupport &T,
     if (is_dominated[k]) action_was_eliminated = true;
     else k++;
   }
-  gbtArray<gbtEfgAction> actions(S.NumActions(pl, iset));
+  gbtArray<gbtGameAction> actions(S.NumActions(pl, iset));
   for (int act = 1; act <= actions.Length(); act++) {
     actions[act] = S.GetAction(pl, iset, act);
   }

@@ -34,7 +34,7 @@
 class NFLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   mutable gbtMixedProfile<double> _p;
 
   double Value(const gbtVector<double> &) const;
@@ -44,13 +44,13 @@ private:
     
 
 public:
-  NFLiapFunc(const gbtNfgGame &, const gbtMixedProfile<double> &);
+  NFLiapFunc(const gbtGame &, const gbtMixedProfile<double> &);
   virtual ~NFLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
-NFLiapFunc::NFLiapFunc(const gbtNfgGame &p_nfg,
+NFLiapFunc::NFLiapFunc(const gbtGame &p_nfg,
 		       const gbtMixedProfile<double> &start)
   : _nevals(0L), m_nfg(p_nfg), _p(start)
 { }

@@ -35,45 +35,45 @@
 #include "actiter.h"
 #include "numerical/lpsolve.h"   
 
-class gbtEfgNodeArrays   {
-friend class gbtEfgNodeSet;
+class gbtGameNodeArrays   {
+friend class gbtGameNodeSet;
 protected:
-  gbtBlock<gbtEfgNode> nodes;
+  gbtBlock<gbtGameNode> nodes;
   
 public:
-  gbtEfgNodeArrays(const gbtArray<gbtEfgNode> &a);
-  gbtEfgNodeArrays ( const gbtEfgNodeArrays &a);
-  virtual ~gbtEfgNodeArrays();
-  gbtEfgNodeArrays &operator=( const gbtEfgNodeArrays &a);
-  bool operator==( const gbtEfgNodeArrays &a) const;
+  gbtGameNodeArrays(const gbtArray<gbtGameNode> &a);
+  gbtGameNodeArrays ( const gbtGameNodeArrays &a);
+  virtual ~gbtGameNodeArrays();
+  gbtGameNodeArrays &operator=( const gbtGameNodeArrays &a);
+  bool operator==( const gbtGameNodeArrays &a) const;
 };
 
 //----------------------------------------------------
 // EFNodeArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-gbtEfgNodeArrays::gbtEfgNodeArrays(const gbtArray<gbtEfgNode> &n)
+gbtGameNodeArrays::gbtGameNodeArrays(const gbtArray<gbtGameNode> &n)
   : nodes(n.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
     nodes[i] = n[i];
 }
 
-gbtEfgNodeArrays::gbtEfgNodeArrays(const gbtEfgNodeArrays &n)
+gbtGameNodeArrays::gbtGameNodeArrays(const gbtGameNodeArrays &n)
   : nodes(n.nodes)
 { }
 
-gbtEfgNodeArrays::~gbtEfgNodeArrays ()
+gbtGameNodeArrays::~gbtGameNodeArrays ()
 { }
 
-gbtEfgNodeArrays &gbtEfgNodeArrays::operator=( const gbtEfgNodeArrays &n)
+gbtGameNodeArrays &gbtGameNodeArrays::operator=( const gbtGameNodeArrays &n)
 {
   nodes = n.nodes; 
   return *this;
 }
 
 #ifdef __BORLANDC__
-bool operator==(const gbtArray<gbtEfgNode> &a, const gbtArray<gbtEfgNode> &b)
+bool operator==(const gbtArray<gbtGameNode> &a, const gbtArray<gbtGameNode> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())  {
     return false;
@@ -85,112 +85,112 @@ bool operator==(const gbtArray<gbtEfgNode> &a, const gbtArray<gbtEfgNode> &b)
 }
 #endif
 
-bool gbtEfgNodeArrays::operator==(const gbtEfgNodeArrays &a) const
+bool gbtGameNodeArrays::operator==(const gbtGameNodeArrays &a) const
 {
   return (nodes == a.nodes);
 }
 
-class gbtEfgNodeSet{
+class gbtGameNodeSet{
 
 protected:
-  gbtEfgPlayer efp;
-  gbtArray < gbtEfgNodeArrays *> infosets;
+  gbtGamePlayer efp;
+  gbtArray < gbtGameNodeArrays *> infosets;
 public:
   
   //----------------------------------------
   // Constructors, Destructor, operators
   //----------------------------------------
 
-//  gbtEfgNodeSet();
-  gbtEfgNodeSet(const gbtEfgNodeSet &);
-  gbtEfgNodeSet(const gbtEfgPlayer &);
-  virtual ~gbtEfgNodeSet();
+//  gbtGameNodeSet();
+  gbtGameNodeSet(const gbtGameNodeSet &);
+  gbtGameNodeSet(const gbtGamePlayer &);
+  virtual ~gbtGameNodeSet();
 
-  gbtEfgNodeSet &operator=(const gbtEfgNodeSet &);
-  bool operator==(const gbtEfgNodeSet &s) const;
+  gbtGameNodeSet &operator=(const gbtGameNodeSet &);
+  bool operator==(const gbtGameNodeSet &s) const;
 
   //--------------------
   // Member Functions
   //--------------------
 
   // Append a Node to an infoset;
-  void AddNode(int iset, const gbtEfgNode &);
+  void AddNode(int iset, const gbtGameNode &);
 
   // Insert a Node in a particular place in an infoset;
-  void AddNode(int iset, const gbtEfgNode &, int index);
+  void AddNode(int iset, const gbtGameNode &, int index);
 
 
   // Remove a Node at int i, returns the removed Node pointer
-  gbtEfgNode RemoveNode(int iset, int i);
+  gbtGameNode RemoveNode(int iset, int i);
 
   // Remove a Node from an infoset . 
   // Returns true if the Node was successfully removed, false otherwise.
-  bool RemoveNode(int iset, const gbtEfgNode &);
+  bool RemoveNode(int iset, const gbtGameNode &);
 
   // Get a garray of the Nodes in an Infoset
-  const gbtArray<gbtEfgNode> &NodeList(int iset) const
+  const gbtArray<gbtGameNode> &NodeList(int iset) const
      { return infosets[iset]->nodes; }
   
   // Get a Node
-  gbtEfgNode GetNode(int iset, int index);
+  gbtGameNode GetNode(int iset, int index);
 
   // returns the index of the Node if it is in the NodeSet
-  int Find(const gbtEfgNode &) const;
+  int Find(const gbtGameNode &) const;
 
   // Number of Nodes in a particular infoset
   int NumNodes(int iset) const;
 
-  // return the player of the gbtEfgNodeSet
-  gbtEfgPlayer GetPlayer(void) const;
+  // return the player of the gbtGameNodeSet
+  gbtGamePlayer GetPlayer(void) const;
 
-  // checks for a valid gbtEfgNodeSet
+  // checks for a valid gbtGameNodeSet
   bool IsValid(void) const;
 
 };
 
 //--------------------------------------------------
-// gbtEfgNodeSet: Constructors, Destructor, operators
+// gbtGameNodeSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-gbtEfgNodeSet::gbtEfgNodeSet(const gbtEfgPlayer &p)
+gbtGameNodeSet::gbtGameNodeSet(const gbtGamePlayer &p)
   : efp(p), infosets(p->NumInfosets())
 {
   for (int i = 1; i <= p->NumInfosets(); i++) {
-    gbtArray<gbtEfgNode> members(p->GetInfoset(i)->NumMembers());
+    gbtArray<gbtGameNode> members(p->GetInfoset(i)->NumMembers());
     for (int j = 1; j <= members.Length(); j++) {
       members[j] = p->GetInfoset(i)->GetMember(j);
     }
-    infosets[i] = new gbtEfgNodeArrays(members);
+    infosets[i] = new gbtGameNodeArrays(members);
   }
 }
 
-gbtEfgNodeSet::gbtEfgNodeSet( const gbtEfgNodeSet &s )
+gbtGameNodeSet::gbtGameNodeSet( const gbtGameNodeSet &s )
 : infosets(s.infosets.Length())
 {
   efp = s.efp;
   for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new gbtEfgNodeArrays(*(s.infosets[i]));
+    infosets[i] = new gbtGameNodeArrays(*(s.infosets[i]));
   }
 }
 
-gbtEfgNodeSet::~gbtEfgNodeSet()
+gbtGameNodeSet::~gbtGameNodeSet()
 { 
   for (int i = 1; i <= infosets.Length(); i++)
     delete infosets[i];
 }
 
-gbtEfgNodeSet &gbtEfgNodeSet::operator=(const gbtEfgNodeSet &s)
+gbtGameNodeSet &gbtGameNodeSet::operator=(const gbtGameNodeSet &s)
 {
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
       delete infosets[i];
-      infosets[i] = new gbtEfgNodeArrays(*(s.infosets[i]));
+      infosets[i] = new gbtGameNodeArrays(*(s.infosets[i]));
     }
   }    
   return *this;
 }
 
-bool gbtEfgNodeSet::operator==(const gbtEfgNodeSet &s) const
+bool gbtGameNodeSet::operator==(const gbtGameNodeSet &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -203,31 +203,31 @@ bool gbtEfgNodeSet::operator==(const gbtEfgNodeSet &s) const
 }
 
 //------------------------------------------
-// gbtEfgNodeSet: Member functions 
+// gbtGameNodeSet: Member functions 
 //------------------------------------------
 
 // Append a Node to a particular infoset;
-void gbtEfgNodeSet::AddNode(int iset, const gbtEfgNode &s)
+void gbtGameNodeSet::AddNode(int iset, const gbtGameNode &s)
 { 
   infosets[iset]->nodes.Append(s); 
 }
 
 // Insert a Node  to a particular infoset at a particular place;
-void gbtEfgNodeSet::AddNode(int iset, const gbtEfgNode &s, int index) 
+void gbtGameNodeSet::AddNode(int iset, const gbtGameNode &s, int index) 
 { 
   infosets[iset]->nodes.Insert(s,index); 
 }
 
 // Remove a Node from infoset iset at int i, 
 // returns the removed Infoset pointer
-gbtEfgNode gbtEfgNodeSet::RemoveNode(int iset, int i) 
+gbtGameNode gbtGameNodeSet::RemoveNode(int iset, int i) 
 { 
   return (infosets[iset]->nodes.Remove(i)); 
 }
 
 // Removes a Node from infoset iset . Returns true if the 
 //Node was successfully removed, false otherwise.
-bool gbtEfgNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
+bool gbtGameNodeSet::RemoveNode(int iset, const gbtGameNode &s)
 { 
   int t = infosets[iset]->nodes.Find(s); 
   if (t>0) infosets[iset]->nodes.Remove(t); 
@@ -235,30 +235,30 @@ bool gbtEfgNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
 } 
 
 // Get a Node
-gbtEfgNode gbtEfgNodeSet::GetNode(int iset, int index)
+gbtGameNode gbtGameNodeSet::GetNode(int iset, int index)
 {
   return (infosets[iset]->nodes)[index];
 }
 
 // Number of Nodes in a particular infoset
-int gbtEfgNodeSet::NumNodes(int iset) const
+int gbtGameNodeSet::NumNodes(int iset) const
 {
   return (infosets[iset]->nodes.Length());
 }
 
-// Return the player of this gbtEfgNodeSet
-gbtEfgPlayer gbtEfgNodeSet::GetPlayer(void) const
+// Return the player of this gbtGameNodeSet
+gbtGamePlayer gbtGameNodeSet::GetPlayer(void) const
 {
   return efp;
 }
 
-int gbtEfgNodeSet::Find(const gbtEfgNode &n) const
+int gbtGameNodeSet::Find(const gbtGameNode &n) const
 {
   return (infosets[n->GetInfoset()->GetId()]->nodes.Find(n));
 }
 
-// checks for a valid gbtEfgNodeSet
-bool gbtEfgNodeSet::IsValid(void) const
+// checks for a valid gbtGameNodeSet
+bool gbtGameNodeSet::IsValid(void) const
 {
   if (infosets.Length() != efp->NumInfosets())   return false;
 
@@ -272,11 +272,11 @@ bool gbtEfgNodeSet::IsValid(void) const
 // gbtEfgBasis: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-gbtEfgBasis::gbtEfgBasis(const gbtEfgGame &p_efg) 
+gbtEfgBasis::gbtEfgBasis(const gbtGame &p_efg) 
   : gbtEfgSupport(p_efg), nodes(p_efg->NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++) {
-    nodes[i] = new gbtEfgNodeSet(p_efg->GetPlayer(i));
+    nodes[i] = new gbtGameNodeSet(p_efg->GetPlayer(i));
   }
 }
 
@@ -284,7 +284,7 @@ gbtEfgBasis::gbtEfgBasis(const gbtEfgBasis &b)
   : gbtEfgSupport(b), nodes(b.nodes.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
-    nodes[i] = new gbtEfgNodeSet(*(b.nodes[i]));
+    nodes[i] = new gbtGameNodeSet(*(b.nodes[i]));
 }
 
 gbtEfgBasis::~gbtEfgBasis()
@@ -319,7 +319,7 @@ bool gbtEfgBasis::operator!=(const gbtEfgBasis &b) const
 // gbtEfgBasis: Member Functions 
 //-----------------------------
 
-int gbtEfgBasis::NumNodes(const gbtEfgInfoset &infoset) const
+int gbtEfgBasis::NumNodes(const gbtGameInfoset &infoset) const
 {
   return nodes[infoset->GetPlayer()->GetId()]->NumNodes(infoset->GetId());
 }
@@ -329,17 +329,17 @@ int gbtEfgBasis::NumNodes(int pl, int iset) const
   return nodes[pl]->NumNodes(iset);
 }
 
-const gbtArray<gbtEfgNode> &gbtEfgBasis::Nodes(int pl, int iset) const
+const gbtArray<gbtGameNode> &gbtEfgBasis::Nodes(int pl, int iset) const
 {
   return nodes[pl]->NodeList(iset);
 }
 
-gbtEfgNode gbtEfgBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
+gbtGameNode gbtEfgBasis::GetNode(const gbtGameInfoset &infoset, int index) const
 {
   return nodes[infoset->GetPlayer()->GetId()]->GetNode(infoset->GetId(), index);
 }
 
-int gbtEfgBasis::Find(const gbtEfgNode &n) const
+int gbtEfgBasis::Find(const gbtGameNode &n) const
 {
   if (n->GetInfoset()->GetGame() != m_efg)   return 0;
 
@@ -373,15 +373,15 @@ gbtPVector<int> gbtEfgBasis::NumNodes(void) const
   return bar;
 }  
 
-bool gbtEfgBasis::RemoveNode(const gbtEfgNode &n)
+bool gbtEfgBasis::RemoveNode(const gbtGameNode &n)
 {
-  gbtEfgInfoset infoset = n->GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtGameInfoset infoset = n->GetInfoset();
+  gbtGamePlayer player = infoset->GetPlayer();
 
   return nodes[player->GetId()]->RemoveNode(infoset->GetId(), n);
 }
 
-bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
+bool gbtEfgBasis::IsReachable(gbtGameNode n) const
 {
   if (n == m_efg->GetRoot()) {
     return true;
@@ -398,10 +398,10 @@ bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
   return true;
 }
 
-void gbtEfgBasis::AddNode(const gbtEfgNode &n)
+void gbtEfgBasis::AddNode(const gbtGameNode &n)
 {
-  gbtEfgInfoset infoset = n->GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtGameInfoset infoset = n->GetInfoset();
+  gbtGamePlayer player = infoset->GetPlayer();
 
   nodes[player->GetId()]->AddNode(infoset->GetId(), n);
 }
@@ -552,33 +552,33 @@ void gbtEfgBasis::MakeAb(void) const
     }
 }
 
-int gbtEfgBasis::Col(const gbtEfgAction &p_action) const
+int gbtEfgBasis::Col(const gbtGameAction &p_action) const
 {
-  gbtEfgInfoset iset = p_action->GetInfoset();
+  gbtGameInfoset iset = p_action->GetInfoset();
   return (*actIndex)(iset->GetPlayer()->GetId(), iset->GetId(),
 		     (*bigbasis).gbtEfgSupport::GetIndex(p_action));
 }
 
-int gbtEfgBasis::Col(const gbtEfgNode &n) const
+int gbtEfgBasis::Col(const gbtGameNode &n) const
 {
-  gbtEfgInfoset iset = n->GetInfoset();
+  gbtGameInfoset iset = n->GetInfoset();
   return (*nodeIndex)(iset->GetPlayer()->GetId(), iset->GetId(),
 		      (*bigbasis).Find(n));
 }
 
-void gbtEfgBasis::AddEquation1(int row, const gbtEfgAction &p_action) const
+void gbtEfgBasis::AddEquation1(int row, const gbtGameAction &p_action) const
 {
   if(Col(p_action))
     (*A)(row,Col(p_action)) = -1.0;
   (*b)[row] = -1.0;
 }
 
-void gbtEfgBasis::AddEquation2(int row, gbtEfgNode n) const
+void gbtEfgBasis::AddEquation2(int row, gbtGameNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
   if(n!=m_efg->GetRoot()) {
-    gbtEfgAction act = n->GetPriorAction();
+    gbtGameAction act = n->GetPriorAction();
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
     while(n->GetParent() != m_efg->GetRoot()) {
@@ -590,8 +590,8 @@ void gbtEfgBasis::AddEquation2(int row, gbtEfgNode n) const
   }
 }
 
-void gbtEfgBasis::AddEquation3(int row, const gbtEfgNode &n1, 
-			   const gbtEfgNode &n2) const
+void gbtEfgBasis::AddEquation3(int row, const gbtGameNode &n1, 
+			   const gbtGameNode &n2) const
 {
   if(Col(n1))
     (*A)(row,Col(n1)) = 1.0;
@@ -599,8 +599,8 @@ void gbtEfgBasis::AddEquation3(int row, const gbtEfgNode &n1,
     (*A)(row,Col(n2)) = -1.0;
 }
 
-void gbtEfgBasis::AddEquation4(int row, const gbtEfgNode &n1,
-			   const gbtEfgNode &n2) const
+void gbtEfgBasis::AddEquation4(int row, const gbtGameNode &n1,
+			   const gbtGameNode &n2) const
 {
   if(Col(n1))
     (*A)(row,Col(n1)) = 1.0;
@@ -642,13 +642,13 @@ void gbtEfgBasis::Dump(gbtOutput& s) const
   s << "{ ";
   numplayers = m_efg->NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
-    gbtEfgPlayer player = nodes[i]->GetPlayer();
+    gbtGamePlayer player = nodes[i]->GetPlayer();
     s << '"' << player->GetLabel() << "\" { ";
     for (j = 1; j <= player->NumInfosets(); j++)  {
-      gbtEfgInfoset infoset = player->GetInfoset(j);
+      gbtGameInfoset infoset = player->GetInfoset(j);
       s << '"' << infoset->GetLabel() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
-	gbtEfgNode node = nodes[i]->NodeList(j)[k];
+	gbtGameNode node = nodes[i]->NodeList(j)[k];
 	s << '"' << node->GetLabel() << "\" ";
       }
       s << "} ";
@@ -664,8 +664,8 @@ gbtOutput& operator<<(gbtOutput&s, const gbtEfgBasis& e)
   return s;
 }
 
-template class gbtArray<gbtEfgNodeSet *>;
-template class gbtArray<gbtEfgNodeArrays *>;
+template class gbtArray<gbtGameNodeSet *>;
+template class gbtArray<gbtGameNodeArrays *>;
 template class gbtDPVector<int>;
 #ifndef __BCC55__
 template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<int>&);

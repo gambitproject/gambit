@@ -32,39 +32,7 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 #include "nfstrat.h"
-
-class gbtNfgContingency   {
-friend class gbtNfgGame;
-private:
-  gbtNfgGame m_nfg; 
-  long m_index;
-  gbtArray<gbtNfgAction> m_profile;
-  
-public:
-  gbtNfgContingency(const gbtNfgGame &);
-  gbtNfgContingency(const gbtNfgGame &, const gbtArray<int> &);
-  gbtNfgContingency(const gbtNfgContingency &p);
-
-  ~gbtNfgContingency();
-  
-  gbtNfgContingency &operator=(const gbtNfgContingency &);
-
-  bool operator==(const gbtNfgContingency &p_cont) const;
-  bool operator!=(const gbtNfgContingency &p_cont) const
-    { return !(*this == p_cont); }
-
-  bool IsValid(void) const; 
-  long GetIndex(void) const;
-  
-  gbtNfgAction GetStrategy(int p_player) const
-    { return m_profile[p_player]; }
-  void SetStrategy(gbtNfgAction);
-
-  void SetOutcome(const gbtNfgOutcome &);
-  gbtNfgOutcome GetOutcome(void) const;
-
-  gbtNumber GetPayoff(const gbtNfgPlayer &) const;
-};
+#include "game.h"
 
 //
 // We are in the process of migrating supports so they act like
@@ -72,12 +40,12 @@ public:
 // usual members of the underlying game (such as NumPlayers()) as well
 // as extra editing features to show/hide actions
 // 
-// This will eventually derive from gbtNfgGame, providing the usual
+// This will eventually derive from gbtGame, providing the usual
 // normal form operations
 //
 class gbtNfgSupport {
 protected:
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   // This really could be a gbtPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gbtPVector<int> m_strategies;
@@ -88,7 +56,7 @@ protected:
 
 public:
   // LIFECYCLE
-  gbtNfgSupport(const gbtNfgGame &);
+  gbtNfgSupport(const gbtGame &);
   ~gbtNfgSupport() { }
   gbtNfgSupport &operator=(const gbtNfgSupport &);
 
@@ -98,33 +66,33 @@ public:
   { return !(*this == p_support); }
 
   // DATA ACCESS: GENERAL
-  gbtNfgGame GetGame(void) const { return m_nfg; }
+  gbtGame GetGame(void) const { return m_nfg; }
 
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   
   // DATA ACCESS: STRATEGIES
   int NumStrats(int pl) const;
-  int NumStrats(const gbtNfgPlayer &p_player) const 
+  int NumStrats(const gbtGamePlayer &p_player) const 
     { return NumStrats(p_player->GetId()); }
   gbtArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 
-  gbtNfgAction GetStrategy(int pl, int st) const;
-  int GetIndex(gbtNfgAction) const;
-  bool Contains(gbtNfgAction) const;
+  gbtGameStrategy GetStrategy(int pl, int st) const;
+  int GetIndex(gbtGameStrategy) const;
+  bool Contains(gbtGameStrategy) const;
 
   // MANIPULATION
-  void AddStrategy(gbtNfgAction);
-  void RemoveStrategy(gbtNfgAction);
+  void AddStrategy(gbtGameStrategy);
+  void RemoveStrategy(gbtGameStrategy);
   
   // DATA ACCESS: PROPERTIES
   bool IsSubset(const gbtNfgSupport &s) const;
   bool IsValid(void) const;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES
-  bool Dominates(gbtNfgAction, gbtNfgAction, bool strong) const;
-  bool IsDominated(gbtNfgAction, bool strong) const; 
+  bool Dominates(gbtGameStrategy, gbtGameStrategy, bool strong) const;
+  bool IsDominated(gbtGameStrategy, bool strong) const; 
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
 			    gbtOutput &tracefile, gbtStatus &status) const;
@@ -136,7 +104,7 @@ public:
   void Output(gbtOutput &) const;
 
   // The following are just echoed from the base game.  In the future,
-  // derivation from gbtNfgGame will handle these.
+  // derivation from gbtGame will handle these.
   gbtText GetComment(void) const { return m_nfg->GetComment(); }
   void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
   bool IsConstSum(void) const { return m_nfg->IsConstSum(); }

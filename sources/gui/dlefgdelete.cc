@@ -24,19 +24,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "dlefgdelete.h"
 
 //=========================================================================
 //                   dialogEfgDelete: Member functions
 //=========================================================================
 
-dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
+dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtGameNode p_node)
   : wxDialog(p_parent, -1, _("Delete..."), wxDefaultPosition)
 {
   SetAutoLayout(true);
@@ -76,5 +76,3 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
   Layout();
   CenterOnParent();
 }
-
-

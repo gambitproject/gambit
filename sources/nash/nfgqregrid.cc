@@ -67,7 +67,7 @@ that this technique is easily extended to n steps.
 #include "base/base.h"
 #include "math/gmath.h"
 #include "math/gsmatrix.h"
-#include "game/nfg.h"
+#include "game/game.h"
 #include "nfgqregrid.h"
 
 //==========================================================================

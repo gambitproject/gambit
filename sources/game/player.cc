@@ -25,12 +25,11 @@
 //
 
 // Declaration of game API
-#include "efg.h"
-#include "nfg.h"
+#include "game.h"
 
 // Declaration of internal game classes
-#include "efgint.h"
-#include "nfgint.h"
+#include "gamebase.h"
+
 
 //
 // This file contains the implementation of the API for players.
@@ -38,23 +37,25 @@
 // normal forms very soon.
 //
 
-gbtEfgPlayer gbtEfgStrategyBase::GetPlayer(void) const
+gbtGamePlayer gbtGameStrategyBase::GetPlayer(void) const
 { return m_player; }
 
-gbtEfgAction
-gbtEfgStrategyBase::GetAction(const gbtEfgInfoset &p_infoset) const
+gbtGameAction
+gbtGameStrategyBase::GetAction(const gbtGameInfoset &p_infoset) const
 { return p_infoset->GetAction(m_actions[p_infoset->GetId()]); }
 
+long gbtGameStrategyBase::GetIndex(void) const { return m_index; }
+
 //----------------------------------------------------------------------
-//           class gbtEfgPlayerBase: Member functions
+//           class gbtGamePlayerBase: Member functions
 //----------------------------------------------------------------------
 
-gbtEfgPlayerBase::gbtEfgPlayerBase(gbtEfgGameBase *p_efg, int p_id)
+gbtGamePlayerBase::gbtGamePlayerBase(gbtGameBase *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg)
 { }
 
 
-gbtEfgPlayerBase::~gbtEfgPlayerBase()
+gbtGamePlayerBase::~gbtGamePlayerBase()
 {
   // Temporarily we will leak these information sets while API is in
   // transition.
@@ -65,10 +66,10 @@ gbtEfgPlayerBase::~gbtEfgPlayerBase()
   */
 }
 
-gbtEfgGame gbtEfgPlayerBase::GetGame(void) const
+gbtGame gbtGamePlayerBase::GetGame(void) const
 { return m_efg; }
 
-gbtEfgInfoset gbtEfgPlayerBase::NewInfoset(int p_actions)
+gbtGameInfoset gbtGamePlayerBase::NewInfoset(int p_actions)
 {
   if (p_actions <= 0) {
     throw gbtEfgException();
@@ -76,65 +77,51 @@ gbtEfgInfoset gbtEfgPlayerBase::NewInfoset(int p_actions)
   return m_efg->NewInfoset(this, this->m_infosets.Length() + 1, p_actions);
 }
 
-gbtEfgInfoset gbtEfgPlayerBase::GetInfoset(int p_index) const
+gbtGameInfoset gbtGamePlayerBase::GetInfoset(int p_index) const
 { return m_infosets[p_index]; }
 
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgPlayer &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtGamePlayer &)
 { 
   return p_stream;
 }
 
 
 //----------------------------------------------------------------------
-//           gbtEfgPlayerIterator: Member function definitions
+//           gbtGamePlayerIterator: Member function definitions
 //----------------------------------------------------------------------
 
-gbtEfgPlayerIterator::gbtEfgPlayerIterator(const gbtEfgGame &p_efg)
+gbtGamePlayerIterator::gbtGamePlayerIterator(const gbtGame &p_efg)
   : m_index(1), m_efg(p_efg)
 { }
 
-gbtEfgPlayer gbtEfgPlayerIterator::operator*(void) const
+gbtGamePlayer gbtGamePlayerIterator::operator*(void) const
 { return m_efg->GetPlayer(m_index); }
 
-gbtEfgPlayerIterator &gbtEfgPlayerIterator::operator++(int)
+gbtGamePlayerIterator &gbtGamePlayerIterator::operator++(int)
 { m_index++; return *this; }
 
-bool gbtEfgPlayerIterator::Begin(void)
+bool gbtGamePlayerIterator::Begin(void)
 { m_index = 1; return true; }
 
-bool gbtEfgPlayerIterator::End(void) const
+bool gbtGamePlayerIterator::End(void) const
 { return m_index > m_efg->NumPlayers(); }
 
 //----------------------------------------------------------------------
-//           gbtEfgInfosetIterator: Member function definitions
+//           gbtGameInfosetIterator: Member function definitions
 //----------------------------------------------------------------------
 
-gbtEfgInfosetIterator::gbtEfgInfosetIterator(const gbtEfgPlayer &p_player)
+gbtGameInfosetIterator::gbtGameInfosetIterator(const gbtGamePlayer &p_player)
   : m_index(1), m_player(p_player)
 { }
 
-gbtEfgInfoset gbtEfgInfosetIterator::operator*(void) const
+gbtGameInfoset gbtGameInfosetIterator::operator*(void) const
 { return m_player->GetInfoset(m_index); }
 
-gbtEfgInfosetIterator &gbtEfgInfosetIterator::operator++(int)
+gbtGameInfosetIterator &gbtGameInfosetIterator::operator++(int)
 { m_index++; return *this; }
 
-bool gbtEfgInfosetIterator::Begin(void)
+bool gbtGameInfosetIterator::Begin(void)
 { m_index = 1; return true; }
 
-bool gbtEfgInfosetIterator::End(void) const
+bool gbtGameInfosetIterator::End(void) const
 { return m_index > m_player->NumInfosets(); }
-
-
-//----------------------------------------------------------------------
-//                 gbtNfgPlayerBase: Declaration
-//----------------------------------------------------------------------
-
-gbtNfgPlayerBase::gbtNfgPlayerBase(gbtNfgGameBase *p_nfg,
-				   int p_id, int p_strats)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_refCount(0)
-{
-  m_infosets.Append(new gbt_nfg_infoset_rep(this, 1, p_strats));
-}
-
-gbtNfgGame gbtNfgPlayerBase::GetGame(void) const { return m_nfg; }

@@ -24,7 +24,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "nfg.h"
 #include "striter.h"
 
 //========================================================================
@@ -77,12 +76,12 @@ bool gbtStrategyIterator::GoToNext(void)
 //             gbtStrategyIterator: Access to current state
 //------------------------------------------------------------------------
 
-gbtNfgAction gbtStrategyIterator::GetStrategy(void) const
+gbtGameStrategy gbtStrategyIterator::GetStrategy(void) const
 {
   return m_support.GetStrategy(pl, st);
 }
 
-gbtNfgPlayer gbtStrategyIterator::GetPlayer(void) const
+gbtGamePlayer gbtStrategyIterator::GetPlayer(void) const
 {
   return m_support.GetGame()->GetPlayer(pl);
 }
@@ -93,7 +92,7 @@ bool gbtStrategyIterator::IsLast(void) const
 	  st == m_support.NumStrats(pl)); 
 }
 
-bool gbtStrategyIterator::IsSubsequentTo(gbtNfgAction p_strategy) const
+bool gbtStrategyIterator::IsSubsequentTo(gbtGameStrategy p_strategy) const
 {
   if (pl > p_strategy->GetPlayer()->GetId()) {
     return true; 

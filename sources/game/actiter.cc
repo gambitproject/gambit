@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "efg.h"
+#include "game.h"
 #include "actiter.h"
 
 //========================================================================
@@ -98,17 +98,17 @@ bool gbtAllActionIterator::GoToNext(void)
 //              gbtAllActionIterator: Access to current state
 //------------------------------------------------------------------------
 
-gbtEfgAction gbtAllActionIterator::GetAction(void) const
+gbtGameAction gbtAllActionIterator::GetAction(void) const
 {
   return m_support.GetAction(pl, iset, act);
 }
 
-gbtEfgInfoset gbtAllActionIterator::GetInfoset(void) const
+gbtGameInfoset gbtAllActionIterator::GetInfoset(void) const
 {
   return m_support.GetPlayer(pl)->GetInfoset(iset);
 }
 
-gbtEfgPlayer gbtAllActionIterator::GetPlayer(void) const
+gbtGamePlayer gbtAllActionIterator::GetPlayer(void) const
 {
   return m_support.GetPlayer(pl);
 }
@@ -120,7 +120,7 @@ bool gbtAllActionIterator::IsLast(void) const
 	  act == m_support.NumActions(pl, iset));
 }
 
-bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
+bool gbtAllActionIterator::IsSubsequentTo(const gbtGameAction &p_action) const
 {
   if (pl > p_action->GetInfoset()->GetPlayer()->GetId()) {
     return true; 
@@ -146,7 +146,7 @@ bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 //========================================================================
 
 gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
-				     gbtEfgInfoset p_infoset)
+				     gbtGameInfoset p_infoset)
   : m_support(p_support), pl(p_infoset->GetPlayer()->GetId()),
     iset(p_infoset->GetId()), act(1)
 { }
@@ -156,7 +156,7 @@ gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
   : m_support(p_support), pl(p_player), iset(p_infoset), act(1)
 { }
 
-gbtEfgAction gbtActionIterator::operator*(void) const
+gbtGameAction gbtActionIterator::operator*(void) const
 { return m_support.GetAction(pl, iset, act); }
 
 gbtActionIterator &gbtActionIterator::operator++(int)
@@ -166,4 +166,4 @@ bool gbtActionIterator::Begin(void)
 { act = 1; return true; }
 
 bool gbtActionIterator::End(void) const
-{ return act > m_support.NumActions(pl, iset); }    
+{ return act > m_support.NumActions(pl, iset); }

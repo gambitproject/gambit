@@ -27,20 +27,20 @@
 #ifndef EFGITER_H
 #define EFGITER_H
 
-#include "efg.h"
+#include "efgcont.h"
 
 class gbtEfgContIterator;
 
 class gbtEfgIterator    {
   private:
-    gbtEfgGame m_efg;
+    gbtGame m_efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile<gbtNumber> _profile;
+    gbtEfgContingency _profile;
     gbtPVector<int> _current;
     mutable gbtVector<gbtNumber> _payoff;
 
   public:
-    gbtEfgIterator(gbtEfgGame);
+    gbtEfgIterator(gbtGame);
     gbtEfgIterator(const gbtEfgSupport &);
     gbtEfgIterator(const gbtEfgIterator &);
     gbtEfgIterator(const gbtEfgContIterator &);

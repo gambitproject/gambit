@@ -27,7 +27,7 @@
 #include "base/base.h"
 #include "efgpure.h"
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efgiter.h"
 #include "game/efgciter.h"
 #include "behavsol.h"
@@ -42,7 +42,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 
   int ncont = 1;
   for (int pl = 1; pl <= p_support.NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetPlayer(pl);
+    gbtGamePlayer player = p_support.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       ncont *= p_support.NumActions(pl, iset);
     }
@@ -79,10 +79,10 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 	gbtBehavProfile<gbtNumber> temp(gbtEfgSupport(p_support.GetTree()));
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
-	const gbtPureBehavProfile<gbtNumber> &profile = citer.GetProfile();
-	for (gbtEfgPlayerIterator player(p_support.GetTree());
+	const gbtEfgContingency &profile = citer.GetProfile();
+	for (gbtGamePlayerIterator player(p_support.GetTree());
 	     !player.End(); player++) {
-	  for (gbtEfgInfosetIterator infoset(*player);
+	  for (gbtGameInfosetIterator infoset(*player);
 	       !infoset.End(); infoset++) {
 	    temp((*player)->GetId(),
 		 (*infoset)->GetId(),

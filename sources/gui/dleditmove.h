@@ -31,7 +31,7 @@
 
 class dialogEditMove : public wxDialog {
 private:
-  gbtEfgInfoset m_infoset;
+  gbtGameInfoset m_infoset;
   wxChoice *m_player;
   wxTextCtrl *m_infosetName, *m_actionName, *m_actionProb;
   wxString m_actionProbValue;
@@ -39,7 +39,7 @@ private:
   wxButton *m_addBeforeButton, *m_addAfterButton, *m_deleteButton;
   gbtBlock<gbtText> m_actionNames;
   gbtBlock<gbtNumber> m_actionProbs;
-  gbtBlock<gbtEfgAction> m_actions;
+  gbtBlock<gbtGameAction> m_actions;
   int m_lastSelection;
 
   // Event handlers
@@ -51,14 +51,14 @@ private:
 
 public:
   // Lifecycle
-  dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset);
+  dialogEditMove(wxWindow *p_parent, gbtGameInfoset p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }
   int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
 
   int NumActions(void) const { return m_actions.Length(); }
-  const gbtBlock<gbtEfgAction> &GetActions(void) const { return m_actions; }
+  const gbtBlock<gbtGameAction> &GetActions(void) const { return m_actions; }
   gbtText GetActionName(int p_act) const { return m_actionNames[p_act]; }
   gbtNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
 

@@ -38,10 +38,9 @@
 #include "wxstatus.h"
 
 #include "math/gmath.h"
-#include "game/efg.h"
+#include "game/game.h"
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
-#include "game/nfg.h"
 #include "nash/efglogit.h"
 
 #include "id.h"
@@ -84,10 +83,10 @@
 //
 class gbtCmdDeleteTree : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
+  gbtGameNode m_node;
 
 public:
-  gbtCmdDeleteTree(gbtEfgNode p_node)
+  gbtCmdDeleteTree(gbtGameNode p_node)
     : m_node(p_node) { }
   virtual ~gbtCmdDeleteTree() { }
 
@@ -100,7 +99,7 @@ public:
 void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)  
 {
   m_node->DeleteTree();
-  p_doc->GetEfg()->DeleteEmptyInfosets();
+  p_doc->GetGame()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -112,10 +111,10 @@ void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdDeleteMove : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
+  gbtGameNode m_node;
 
 public:
-  gbtCmdDeleteMove(gbtEfgNode p_node)
+  gbtCmdDeleteMove(gbtGameNode p_node)
     : m_node(p_node) { }
   virtual ~gbtCmdDeleteMove() { }
 
@@ -128,7 +127,7 @@ public:
 void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)  
 {
   m_node->DeleteMove();
-  p_doc->GetEfg()->DeleteEmptyInfosets();
+  p_doc->GetGame()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -140,11 +139,11 @@ void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdReveal : public gbtGameCommand {
 private:
-  gbtEfgInfoset m_infoset;
-  gbtEfgPlayer m_player;
+  gbtGameInfoset m_infoset;
+  gbtGamePlayer m_player;
 
 public:
-  gbtCmdReveal(gbtEfgInfoset p_infoset, gbtEfgPlayer p_player)
+  gbtCmdReveal(gbtGameInfoset p_infoset, gbtGamePlayer p_player)
     : m_infoset(p_infoset), m_player(p_player) { }
   virtual ~gbtCmdReveal() { }
 
@@ -168,10 +167,10 @@ void gbtCmdReveal::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdLeaveInfoset : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
+  gbtGameNode m_node;
 
 public:
-  gbtCmdLeaveInfoset(gbtEfgNode p_node)
+  gbtCmdLeaveInfoset(gbtGameNode p_node)
     : m_node(p_node) { }
   virtual ~gbtCmdLeaveInfoset() { }
 
@@ -195,11 +194,11 @@ void gbtCmdLeaveInfoset::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdJoinInfoset : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
-  gbtEfgInfoset m_infoset;
+  gbtGameNode m_node;
+  gbtGameInfoset m_infoset;
 
 public:
-  gbtCmdJoinInfoset(gbtEfgNode p_node, gbtEfgInfoset p_infoset)
+  gbtCmdJoinInfoset(gbtGameNode p_node, gbtGameInfoset p_infoset)
     : m_node(p_node), m_infoset(p_infoset) { }
   virtual ~gbtCmdJoinInfoset() { }
 
@@ -212,7 +211,7 @@ public:
 void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)  
 {
   m_node->JoinInfoset(m_infoset);
-  p_doc->GetEfg()->DeleteEmptyInfosets();
+  p_doc->GetGame()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -224,11 +223,11 @@ void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdMarkSubgame : public gbtGameCommand {
 private:
-  gbtEfgNode m_node;
+  gbtGameNode m_node;
   bool m_mark; 
 
 public:
-  gbtCmdMarkSubgame(gbtEfgNode p_node, bool p_mark)
+  gbtCmdMarkSubgame(gbtGameNode p_node, bool p_mark)
     : m_node(p_node), m_mark(p_mark) { }
   virtual ~gbtCmdMarkSubgame() { }
 
@@ -241,10 +240,10 @@ public:
 void gbtCmdMarkSubgame::Do(gbtGameDocument *p_doc)  
 {
   if (m_mark) {
-    p_doc->GetEfg()->MarkSubgame(m_node);
+    p_doc->GetGame()->MarkSubgame(m_node);
   }
   else {
-    p_doc->GetEfg()->UnmarkSubgame(m_node);
+    p_doc->GetGame()->UnmarkSubgame(m_node);
   }
 }
 
@@ -396,7 +395,7 @@ gbtEfgFrame::gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
 
   MakeMenus();
   MakeToolbar();
-  
+
   m_treeWindow = new gbtTreeView(m_doc, this);
   m_treeWindow->SetSize(GetClientSize());
   m_treeWindow->FitZoom();
@@ -404,7 +403,6 @@ gbtEfgFrame::gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   (void) new gbtEfgNavigateFrame(m_doc, this);
   (void) new gbtOutcomeFrame(m_doc, this);
   (void) new gbtEfgSupportFrame(m_doc, this);
-  
   (void) new gbtProfileFrame(m_doc, this);
 
   (void) new gbtNfgFrame(m_doc, this);
@@ -424,7 +422,7 @@ gbtEfgFrame::~gbtEfgFrame()
 
 void gbtEfgFrame::OnUpdate(gbtGameView *)
 {
-  gbtEfgNode cursor = m_doc->GetCursor();
+  gbtGameNode cursor = m_doc->GetCursor();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(wxID_COPY, !cursor.IsNull());
@@ -433,9 +431,10 @@ void gbtEfgFrame::OnUpdate(gbtGameView *)
 			       !m_doc->GetCopyNode().IsNull()));
 
   menuBar->Enable(GBT_MENU_EDIT_INSERT, !cursor.IsNull());
-  menuBar->Enable(GBT_MENU_EDIT_DELETE, cursor->NumChildren() > 0);
+  menuBar->Enable(GBT_MENU_EDIT_DELETE, 
+		  !cursor.IsNull() && cursor->NumChildren() > 0);
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, 
-		  !cursor->GetInfoset().IsNull());
+		  !cursor.IsNull() && !cursor->GetInfoset().IsNull());
 
   menuBar->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
 		  (!cursor.IsNull() && cursor->IsSubgameRoot() &&
@@ -464,11 +463,11 @@ void gbtEfgFrame::OnUpdate(gbtGameView *)
   if (m_doc->GetFilename() != wxT("")) {
     SetTitle(wxString::Format(_("Gambit - [%s] %s"), 
 			      m_doc->GetFilename().c_str(), 
-			      (char *) m_doc->GetEfg()->GetLabel()));
+			      (char *) m_doc->GetGame()->GetLabel()));
   }
   else {
     SetTitle(wxString::Format(_("Gambit - %s"), 
-			      (char *) m_doc->GetEfg()->GetLabel()));
+			      (char *) m_doc->GetGame()->GetLabel()));
   }
 }
 
@@ -692,7 +691,7 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), 
+    gbtGame efg = CompressEfg(m_doc->GetGame(), 
 				 m_doc->GetEfgSupportList().GetCurrent());
     efg->WriteEfg(file);
     m_doc->SetIsModified(false);
@@ -728,10 +727,10 @@ void gbtEfgFrame::OnFilePrintPreview(wxCommandEvent &)
   wxPrintPreview *preview = 
     new wxPrintPreview(new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
-							(char *) m_doc->GetEfg()->GetLabel())),
+							(char *) m_doc->GetGame()->GetLabel())),
 		       new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
-							(char *) m_doc->GetEfg()->GetLabel())),
+							(char *) m_doc->GetGame()->GetLabel())),
 		       &data);
 
   if (!preview->Ok()) {
@@ -753,7 +752,7 @@ void gbtEfgFrame::OnFilePrint(wxCommandEvent &)
   wxPrinter printer(&data);
   gbtEfgPrintout printout(m_treeWindow, 
 		       wxString::Format(wxT("%s"),
-					(char *) m_doc->GetEfg()->GetLabel()));
+					(char *) m_doc->GetGame()->GetLabel()));
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -956,12 +955,12 @@ void gbtEfgFrame::OnEditDelete(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
 {
-  dialogInfosetReveal dialog(this, m_doc->GetEfg());
+  dialogInfosetReveal dialog(this, m_doc->GetGame());
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
-	gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
+      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
+	gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
 	m_doc->Submit(new gbtCmdReveal(m_doc->GetCursor()->GetInfoset(),
 				       player));
       }
@@ -984,8 +983,8 @@ void gbtEfgFrame::OnEditToggleSubgame(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
 {
-  gbtList<gbtEfgNode> subgames;
-  LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
+  gbtList<gbtGameNode> subgames;
+  LegalSubgameRoots(m_doc->GetGame(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], true));
   }
@@ -993,8 +992,8 @@ void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
 {
-  gbtList<gbtEfgNode> subgames;
-  LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
+  gbtList<gbtGameNode> subgames;
+  LegalSubgameRoots(m_doc->GetGame(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], false));
   }
@@ -1006,7 +1005,7 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetCursor()->SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {
-      gbtEfgOutcome outcome = m_doc->GetEfg()->GetOutcome(dialog.GetOutcome());
+      gbtGameOutcome outcome = m_doc->GetGame()->GetOutcome(dialog.GetOutcome());
       m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), outcome));
     }
     else {
@@ -1034,7 +1033,7 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 
 void gbtEfgFrame::OnEditMove(wxCommandEvent &)
 {
-  gbtEfgInfoset infoset = m_doc->GetCursor()->GetInfoset();
+  gbtGameInfoset infoset = m_doc->GetCursor()->GetInfoset();
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1229,9 +1228,9 @@ void gbtEfgFrame::OnFormatDisplayDecimals(wxCommandEvent &)
 
 void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 {
-  gbtArray<gbtText> playerNames(m_doc->GetEfg()->NumPlayers());
+  gbtArray<gbtText> playerNames(m_doc->GetGame()->NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_doc->GetEfg()->GetPlayer(pl)->GetLabel();
+    playerNames[pl] = m_doc->GetGame()->GetPlayer(pl)->GetLabel();
   }
   dialogElimBehav dialog(this, playerNames);
 
@@ -1337,7 +1336,7 @@ void gbtEfgFrame::OnToolsNormalAgent(wxCommandEvent &)
 {
 #ifdef UNUSED
   // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_doc->GetEfg())) {
+  if (!IsPerfectRecall(m_doc->GetGame())) {
     if (wxMessageBox("This game is not perfect recall\n"
 		     "Do you wish to continue?", 
 		     "Agent normal form", 
@@ -1347,7 +1346,7 @@ void gbtEfgFrame::OnToolsNormalAgent(wxCommandEvent &)
   }
 
   try {
-    gbtNfgGame nfg = MakeAfg(m_doc->GetEfg());
+    gbtGame nfg = MakeAfg(m_doc->GetGame());
     (void) new gbtNfgFrame(m_doc, m_parent);
   }
   catch (...) {
@@ -1391,7 +1390,7 @@ void gbtEfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtEfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = gbtBehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetEfg()));
+  BehavSolution profile = gbtBehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetGame()));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

@@ -92,7 +92,7 @@ efoutcome_getgame(efoutcomeobject *self, PyObject *args)
   }
 
   efgobject *game = newefgobject();
-  game->m_efg = new gbtEfgGame(self->m_efoutcome->GetGame());
+  game->m_efg = new gbtGame(self->m_efoutcome->GetGame());
   return (PyObject *) game;
 }
 
@@ -179,7 +179,7 @@ newefoutcomeobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_efoutcome = new gbtEfgOutcome();
+  self->m_efoutcome = new gbtGameOutcome();
   return self;
 }
 
@@ -280,7 +280,7 @@ nfoutcome_getgame(nfoutcomeobject *self, PyObject *args)
   }
 
   nfgobject *game = newnfgobject();
-  game->m_nfg = new gbtNfgGame(self->m_nfoutcome->GetGame());
+  game->m_nfg = new gbtGame(self->m_nfoutcome->GetGame());
   return (PyObject *) game;
 }
 
@@ -367,7 +367,7 @@ newnfoutcomeobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_nfoutcome = new gbtNfgOutcome();
+  self->m_nfoutcome = new gbtGameOutcome();
   return self;
 }
 

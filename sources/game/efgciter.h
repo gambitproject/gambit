@@ -29,7 +29,8 @@
 
 #include "base/base.h"
 
-#include "efg.h"
+#include "game.h"
+#include "efgcont.h"
 #include "efstrat.h"
 
 class gbtEfgIterator;
@@ -47,9 +48,9 @@ class gbtEfgContIterator    {
   friend class gbtEfgIterator;
   private:
     int _frozen_pl, _frozen_iset;
-    gbtEfgGame m_efg;
+    gbtGame m_efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile<gbtNumber> _profile;
+    gbtEfgContingency _profile;
     gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
@@ -57,7 +58,7 @@ class gbtEfgContIterator    {
 
   public:
     gbtEfgContIterator(const gbtEfgSupport &);
-    gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
+    gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
     ~gbtEfgContIterator();
   
     void First(void);
@@ -66,10 +67,10 @@ class gbtEfgContIterator    {
   
   // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
-    void Set(const gbtEfgAction &);
+    void Set(const gbtGameAction &);
     int Next(int pl, int iset);
   
-    const gbtPureBehavProfile<gbtNumber> &GetProfile(void) const   
+    const gbtEfgContingency &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);
@@ -85,9 +86,9 @@ class gbtEfgContIterator    {
 class gbtEfgConditionalContIterator    {
   friend class gbtEfgIterator;
   private:
-    gbtEfgGame m_efg;
+    gbtGame m_efg;
     gbtEfgSupport _support;
-    gbtPureBehavProfile<gbtNumber> _profile;
+    gbtEfgContingency _profile;
     gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
@@ -95,22 +96,22 @@ class gbtEfgConditionalContIterator    {
 
   public:
     gbtEfgConditionalContIterator(const gbtEfgSupport &);
-    gbtEfgConditionalContIterator(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
+    gbtEfgConditionalContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
     ~gbtEfgConditionalContIterator();
   
     void First(void); // Sets each infoset's action to the first in the support
   
     void Set(int pl, int iset, int act);
-    void Set(const gbtEfgAction &);
+    void Set(const gbtGameAction &);
     int Next(int pl, int iset); 
   
-    const gbtPureBehavProfile<gbtNumber> &GetProfile(void) const   
+    const gbtEfgContingency &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);   // Needs rewriting
   
     gbtNumber Payoff(int pl) const;
-    gbtNumber Payoff(const gbtEfgNode &, int pl) const;
+    gbtNumber Payoff(const gbtGameNode &, int pl) const;
   
     void Dump(gbtOutput &) const;
 };

@@ -27,8 +27,7 @@
 #ifndef NFGCITER_H
 #define NFGCITER_H
 
-#include "base/base.h"
-#include "player.h"
+#include "nfgcont.h"
 #include "nfstrat.h"
 
 //
@@ -46,7 +45,7 @@ friend class gbtNfgIterator;
 private:
   gbtNfgSupport m_support;
   gbtArray<int> m_current;
-  gbtNfgGame m_nfg;
+  gbtGame m_nfg;
   gbtNfgContingency m_profile;
   gbtBlock<int> m_frozen, m_thawed;
   
@@ -56,20 +55,20 @@ public:
   
   void First(void);
   
-  void Freeze(gbtNfgAction);
-  void Thaw(gbtNfgPlayer);
+  void Freeze(gbtGameStrategy);
+  void Thaw(gbtGamePlayer);
 
   // This only has an effect if the player is currently frozen
-  int Next(gbtNfgPlayer);
+  int Next(gbtGamePlayer);
   
   const gbtNfgContingency &GetProfile(void) const { return m_profile; }
 
   int NextContingency(void);
   
-  gbtNfgOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
-  void SetOutcome(gbtNfgOutcome p_outcome) { m_profile.SetOutcome(p_outcome); }
+  gbtGameOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
+  void SetOutcome(gbtGameOutcome p_outcome) { m_profile.SetOutcome(p_outcome); }
 
-  gbtNumber GetPayoff(const gbtNfgPlayer &p_player) const 
+  gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return m_profile.GetPayoff(p_player); }
 };
 

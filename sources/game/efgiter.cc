@@ -27,7 +27,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-gbtEfgIterator::gbtEfgIterator(gbtEfgGame p_efg)
+gbtEfgIterator::gbtEfgIterator(gbtGame p_efg)
   : m_efg(p_efg), _support(p_efg),
     _profile(p_efg), _current(m_efg->NumInfosets()),
     _payoff(m_efg->NumPlayers())
@@ -145,7 +145,7 @@ gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
 }
 
 gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s, 
-			 const gbtList<gbtEfgInfoset >&active)
+			 const gbtList<gbtGameInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
     m_efg(s.GetTree()), _support(s),
     _profile(s.GetTree()), _current(s.NumInfosets()),
@@ -194,7 +194,7 @@ void gbtEfgContIterator::Set(int pl, int iset, int act)
 }
 
 
-void gbtEfgContIterator::Set(const gbtEfgAction &a)
+void gbtEfgContIterator::Set(const gbtGameAction &a)
 {
   if (a->GetInfoset()->GetPlayer()->GetId() != _frozen_pl ||
       a->GetInfoset()->GetId() != _frozen_iset) return;
@@ -290,7 +290,7 @@ gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport
 }
 
 gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s, 
-					       const gbtList<gbtEfgInfoset> &active)
+					       const gbtList<gbtGameInfoset> &active)
   : m_efg(s.GetTree()), _support(s),
     _profile(s.GetTree()), _current(s.NumInfosets()),
     _is_active(),
@@ -334,7 +334,7 @@ void gbtEfgConditionalContIterator::Set(int pl, int iset, int act)
   _profile.Set(_support.GetAction(pl, iset, act));
 }
 
-void gbtEfgConditionalContIterator::Set(const gbtEfgAction &a)
+void gbtEfgConditionalContIterator::Set(const gbtGameAction &a)
 {
   _profile.Set(a);
 }
@@ -391,7 +391,7 @@ gbtNumber gbtEfgConditionalContIterator::Payoff(int pl) const
   return _payoff[pl];
 }
 
-gbtNumber gbtEfgConditionalContIterator::Payoff(const gbtEfgNode &n, int pl) const
+gbtNumber gbtEfgConditionalContIterator::Payoff(const gbtGameNode &n, int pl) const
 {
   return _profile.Payoff(n,pl);
 }

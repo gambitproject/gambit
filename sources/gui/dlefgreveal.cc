@@ -24,12 +24,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "dlefgreveal.h"
 
 
@@ -38,7 +38,7 @@
 //=========================================================================
 
 dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
-					 const gbtEfgGame &p_efg)
+					 const gbtGame &p_efg)
   : wxDialog(p_parent, -1, _("Reveal move"), wxDefaultPosition), m_efg(p_efg)
 {
   SetAutoLayout(true);
@@ -55,7 +55,7 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 						   2 : 3);
   m_players = new wxCheckBox *[m_efg->NumPlayers()];
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_efg->GetPlayer(pl);
+    gbtGamePlayer player = m_efg->GetPlayer(pl);
     if (player->GetLabel() != "") {
       m_players[pl-1] = new wxCheckBox(this, -1,
 				       wxString::Format(wxT("%s"),

@@ -326,7 +326,7 @@ gbt_new_nfg(PyObject */*self*/, PyObject *args)
   }
 
   nfgobject *nfg = newnfgobject();
-  nfg->m_nfg = new gbtNfgGame(dim);
+  nfg->m_nfg = new gbtGame(dim);
   return (PyObject *) nfg;
 }
 
@@ -342,7 +342,7 @@ gbt_read_nfg(PyObject */*self*/, PyObject *args)
   nfgobject *nfg = newnfgobject();
   try {
     gbtFileInput file(filename);
-    nfg->m_nfg = new gbtNfgGame(ReadNfg(file));
+    nfg->m_nfg = new gbtGame(ReadNfg(file));
     return (PyObject *) nfg;
   }
   catch (const gbtFileInput::OpenFailed &) {

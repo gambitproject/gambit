@@ -23,7 +23,7 @@ above; consult those sections of the documentation for more information.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgPlayer gbtEfgGame::GetChance(void) const
+gbtGamePlayer gbtGame::GetChance(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -47,7 +47,7 @@ chance players.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgGame::GetComment(void) const
+gbtText gbtGame::GetComment(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -68,7 +68,7 @@ the game <parameter>efg</parameter>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtEfgGame::GetLabel(void) const
+gbtText gbtGame::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -88,7 +88,7 @@ empty string is returned if the game object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgOutcome gbtEfgGame::GetOutcome(int p_index) const
+gbtGameOutcome gbtGame::GetOutcome(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -110,7 +110,7 @@ An exception is thrown if the index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgPlayer gbtEfgGame::GetPlayer(int p_index) const
+gbtGamePlayer gbtGame::GetPlayer(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -133,7 +133,7 @@ at one.  An exception is thown if the index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtEfgGame::IsConstSum(void) const
+bool gbtGame::IsConstSum(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -155,7 +155,7 @@ is constant sum and <literal>False</literal> (zero) otherwise.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtEfgGame::IsPerfectRecall(void) const
+bool gbtGame::IsPerfectRecall(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -177,7 +177,7 @@ is a game of perfect recall, and
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgGame ::NewEfg(void)
+gbtGame ::NewEfg(void)
 </synopsis>
 </para>
 </formalpara>
@@ -200,7 +200,7 @@ Returns the newly created game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgOutcome gbtEfgGame::NewOutcome(void)
+gbtGameOutcome gbtGame::NewOutcome(void)
 </synopsis>
 </para>
 </formalpara>
@@ -222,7 +222,7 @@ Returns the newly created outcome.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgPlayer gbtEfgGame::NewPlayer(void)
+gbtGamePlayer gbtGame::NewPlayer(void)
 </synopsis>
 </para>
 </formalpara>
@@ -243,7 +243,7 @@ form game.  Returns the newly created player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtEfgSupport gbtEfgGame::NewSupport(void)
+gbtEfgSupport gbtGame::NewSupport(void)
 </synopsis>
 </para>
 </formalpara>
@@ -264,7 +264,7 @@ information sets for all players.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtEfgGame::NumOutcomes(void) const
+int gbtGame::NumOutcomes(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -284,7 +284,7 @@ on the game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-int gbtEfgGame::NumPlayers(void) const
+int gbtGame::NumPlayers(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -305,7 +305,7 @@ on the game.
 <title>C++ usage</title>
 <para>
 <synopsis>
-gbtEfgGame ::ReadEfg(gbtInput &amp;p_file)
+gbtGame ::ReadEfg(gbtInput &amp;p_file)
 </synopsis>
 </para>
 </formalpara>
@@ -339,7 +339,7 @@ not contain a valid extensive form savefile.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::SetComment(const gbtText &amp;p_comment)
+void gbtGame::SetComment(const gbtText &amp;p_comment)
 </synopsis>
 </para>
 </formalpara>
@@ -359,7 +359,7 @@ sets the comment associated with the game <parameter>efg</parameter>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::SetLabel(const gbtText &amp;p_label)
+void gbtGame::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -379,7 +379,7 @@ void gbtEfgGame::SetLabel(const gbtText &amp;p_label)
 <title>C++ usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::WriteEfg(gbtOutput &amp;p_file) const
+void gbtGame::WriteEfg(gbtOutput &amp;p_file) const
 </synopsis>
 </para>
 </formalpara>
@@ -410,7 +410,7 @@ written is passed.
 <title>C++ usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::WriteNfg(gbtOutput &amp;p_file) const
+void gbtGame::WriteNfg(gbtOutput &amp;p_file) const
 </synopsis>
 </para>
 </formalpara>

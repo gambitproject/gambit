@@ -14,21 +14,21 @@ libgame_a_SOURCES = \
 	efbasis.h \
 	efdom.cc \
 	efdom.h \
-	efg.cc \
-	efg.h \
 	efgciter.h \
+	efgcont.cc \
+	efgcont.h \
 	efgensup.cc \
 	efgensup.h \
-	efginst.cc \
-	efgint.h \
 	efgiter.cc \
 	efgiter.h \
-	efgnfg.cc \
 	efgutils.cc \
 	efgutils.h \
 	efstrat.cc \
 	efstrat.h \
+	game.cc \
 	game.h \
+	gamebase.h \
+	gameinst.cc \
 	gnarray.h \
 	gnarray.imp \
 	infoset.cc \
@@ -39,13 +39,11 @@ libgame_a_SOURCES = \
 	nfdom.h \
 	nfdommix.cc \
 	nfdommix.imp \
-	nfg.cc \
-	nfg.h \
 	nfgciter.h \
+	nfgcont.cc \
+	nfgcont.h \
 	nfgensup.cc \
 	nfgensup.h \
-	nfginst.cc \
-	nfgint.h \
 	nfgiter.cc \
 	nfgiter.h \
 	nfgutils.cc \
@@ -63,8 +61,7 @@ libgame_a_SOURCES = \
 	sfg.h \
 	sfstrat.cc \
 	sfstrat.h \
-        strategy.h \
-        striter.cc \
+`       striter.cc \
         striter.h
 
 EXTRA_DIST = borland.mak 

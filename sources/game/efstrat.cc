@@ -24,55 +24,55 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "efg.h"
+#include "game.h"
 #include "player.h"
 #include "efstrat.h"
 
-class gbtEfgActionArray   {
-  friend class gbtEfgActionSet;
+class gbtGameActionArray   {
+  friend class gbtGameActionSet;
 protected:
-  gbtBlock<gbtEfgAction> acts;
+  gbtBlock<gbtGameAction> acts;
 
 public:
-  gbtEfgActionArray ( const gbtArray<gbtEfgAction> &a);
-  gbtEfgActionArray ( const gbtEfgActionArray &a);
-  virtual ~gbtEfgActionArray();
-  gbtEfgActionArray &operator=( const gbtEfgActionArray &a);
-  bool operator==( const gbtEfgActionArray &a) const;
-  const gbtEfgAction &operator[](int i) const { return acts[i]; }
-  gbtEfgAction operator[](int i) { return acts[i]; }
-  void Set(int i, const gbtEfgAction &action) { acts[i] = action; }
+  gbtGameActionArray ( const gbtArray<gbtGameAction> &a);
+  gbtGameActionArray ( const gbtGameActionArray &a);
+  virtual ~gbtGameActionArray();
+  gbtGameActionArray &operator=( const gbtGameActionArray &a);
+  bool operator==( const gbtGameActionArray &a) const;
+  const gbtGameAction &operator[](int i) const { return acts[i]; }
+  gbtGameAction operator[](int i) { return acts[i]; }
+  void Set(int i, const gbtGameAction &action) { acts[i] = action; }
 
   // Information
   int Length() const { return acts.Length(); }
 };
 
 //----------------------------------------------------
-// gbtEfgActionArray: Constructors, Destructor, operators
+// gbtGameActionArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-gbtEfgActionArray::gbtEfgActionArray(const gbtArray<gbtEfgAction> &a)
+gbtGameActionArray::gbtGameActionArray(const gbtArray<gbtGameAction> &a)
   : acts(a.Length())
 {
   for (int i = 1; i <= acts.Length(); i++)
     acts[i] = a[i];
  }
 
-gbtEfgActionArray::gbtEfgActionArray(const gbtEfgActionArray &a)
+gbtGameActionArray::gbtGameActionArray(const gbtGameActionArray &a)
   : acts(a.acts)
 { }
 
-gbtEfgActionArray::~gbtEfgActionArray ()
+gbtGameActionArray::~gbtGameActionArray ()
 { }
 
-gbtEfgActionArray &gbtEfgActionArray::operator=( const gbtEfgActionArray &a)
+gbtGameActionArray &gbtGameActionArray::operator=( const gbtGameActionArray &a)
 {
   acts = a.acts; 
   return *this;
 }
 
 #ifdef __BORLANDC__
-bool operator==(const gbtArray<gbtEfgAction> &a, const gbtArray<gbtEfgAction> &b)
+bool operator==(const gbtArray<gbtGameAction> &a, const gbtArray<gbtGameAction> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())  {
     return false;
@@ -85,119 +85,119 @@ bool operator==(const gbtArray<gbtEfgAction> &a, const gbtArray<gbtEfgAction> &b
 }
 #endif
 
-bool gbtEfgActionArray::operator==(const gbtEfgActionArray &a) const
+bool gbtGameActionArray::operator==(const gbtGameActionArray &a) const
 {
   return (acts == a.acts);
 }
 
-class gbtEfgActionSet  {
+class gbtGameActionSet  {
 protected:
-  gbtEfgPlayer efp;
-  gbtArray < gbtEfgActionArray *> infosets;
+  gbtGamePlayer efp;
+  gbtArray < gbtGameActionArray *> infosets;
 public:
   
   //----------------------------------------
   // Constructors, Destructor, operators
   //----------------------------------------
 
-//  gbtEfgActionSet();
-  gbtEfgActionSet(const gbtEfgActionSet &);
-  gbtEfgActionSet(const gbtEfgPlayer &);
-  virtual ~gbtEfgActionSet();
+//  gbtGameActionSet();
+  gbtGameActionSet(const gbtGameActionSet &);
+  gbtGameActionSet(const gbtGamePlayer &);
+  virtual ~gbtGameActionSet();
 
-  gbtEfgActionSet &operator=(const gbtEfgActionSet &);
-  bool operator==(const gbtEfgActionSet &s) const;
+  gbtGameActionSet &operator=(const gbtGameActionSet &);
+  bool operator==(const gbtGameActionSet &s) const;
 
   //--------------------
   // Member Functions
   //--------------------
 
   // Append an action to an infoset;
-  void AddAction(int iset, const gbtEfgAction &);
+  void AddAction(int iset, const gbtGameAction &);
 
   // Insert an action in a particular place in an infoset;
-  void AddAction(int iset, const gbtEfgAction &, int index);
+  void AddAction(int iset, const gbtGameAction &, int index);
 
 
   // Remove an action at int i, returns the removed action pointer
-  gbtEfgAction RemoveAction(int iset, int i);
+  gbtGameAction RemoveAction(int iset, int i);
 
   // Remove an action from an infoset . 
   // Returns true if the action was successfully removed, false otherwise.
-  bool RemoveAction(int iset, const gbtEfgAction &);
+  bool RemoveAction(int iset, const gbtGameAction &);
 
   // Get a garray of the actions in an Infoset
   //  const gbtArray<Action *> &ActionList(int iset) const
   //   { return infosets[iset]->acts; }
 
-  // Get the gbtEfgActionArray of an iset
-  const gbtEfgActionArray *ActionArray(int iset) const
+  // Get the gbtGameActionArray of an iset
+  const gbtGameActionArray *ActionArray(int iset) const
      { return infosets[iset]; }
 
-  // Get the gbtEfgActionArray of an Infoset
-  const gbtEfgActionArray *ActionArray(const gbtEfgInfoset &i) const
+  // Get the gbtGameActionArray of an Infoset
+  const gbtGameActionArray *ActionArray(const gbtGameInfoset &i) const
      { return infosets[i->GetId()]; }
   
   // Get an Action
-  gbtEfgAction GetAction(int iset, int index);
+  gbtGameAction GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int Find(const gbtEfgAction &) const;
+  int Find(const gbtGameAction &) const;
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
 
-  // return the player of the gbtEfgActionSet
-  gbtEfgPlayer GetPlayer(void) const;
+  // return the player of the gbtGameActionSet
+  gbtGamePlayer GetPlayer(void) const;
 
-  // checks for a valid gbtEfgActionSet
+  // checks for a valid gbtGameActionSet
   bool HasActiveActionsAtAllInfosets(void) const;
   bool HasActiveActionAt(const int &iset) const;
 
 };
 
 //--------------------------------------------------
-// gbtEfgActionSet: Constructors, Destructor, operators
+// gbtGameActionSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-gbtEfgActionSet::gbtEfgActionSet(const gbtEfgPlayer &p)
+gbtGameActionSet::gbtGameActionSet(const gbtGamePlayer &p)
   : efp(p), infosets(p->NumInfosets())
 {
   for (int i = 1; i <= p->NumInfosets(); i++) {
-    infosets[i] = new gbtEfgActionArray(p->GetInfoset(i)->NumActions());
+    infosets[i] = new gbtGameActionArray(p->GetInfoset(i)->NumActions());
     for (int j = 1; j <= p->GetInfoset(i)->NumActions(); j++) {
       infosets[i]->Set(j, p->GetInfoset(i)->GetAction(j));
     }
   }
 }
 
-gbtEfgActionSet::gbtEfgActionSet( const gbtEfgActionSet &s )
+gbtGameActionSet::gbtGameActionSet( const gbtGameActionSet &s )
 : infosets(s.infosets.Length())
 {
   efp = s.efp;
   for (int i = 1; i <= s.infosets.Length(); i++){
-    infosets[i] = new gbtEfgActionArray(*(s.infosets[i]));
+    infosets[i] = new gbtGameActionArray(*(s.infosets[i]));
   }
 }
 
-gbtEfgActionSet::~gbtEfgActionSet()
+gbtGameActionSet::~gbtGameActionSet()
 { 
   for (int i = 1; i <= infosets.Length(); i++)
     delete infosets[i];
 }
 
-gbtEfgActionSet &gbtEfgActionSet::operator=(const gbtEfgActionSet &s)
+gbtGameActionSet &gbtGameActionSet::operator=(const gbtGameActionSet &s)
 {
   if (this != &s && efp == s.efp) {
     for (int i = 1; i<= infosets.Length(); i++)  {
       delete infosets[i];
-      infosets[i] = new gbtEfgActionArray(*(s.infosets[i]));
+      infosets[i] = new gbtGameActionArray(*(s.infosets[i]));
     }
   }    
   return *this;
 }
 
-bool gbtEfgActionSet::operator==(const gbtEfgActionSet &s) const
+bool gbtGameActionSet::operator==(const gbtGameActionSet &s) const
 {
   if (infosets.Length() != s.infosets.Length() ||
       efp != s.efp)
@@ -210,11 +210,11 @@ bool gbtEfgActionSet::operator==(const gbtEfgActionSet &s) const
 }
 
 //------------------------------------------
-// gbtEfgActionSet: Member functions 
+// gbtGameActionSet: Member functions 
 //------------------------------------------
 
 // Append an action to a particular infoset;
-void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s)
+void gbtGameActionSet::AddAction(int iset, const gbtGameAction &s)
 { 
   if (infosets[iset]->acts.Find(s))
     return;
@@ -232,7 +232,7 @@ void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s)
 }
 
 // Insert an action  to a particular infoset at a particular place;
-void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s, int index)
+void gbtGameActionSet::AddAction(int iset, const gbtGameAction &s, int index)
 { 
   if (!infosets[iset]->acts.Find(s)) {
     infosets[iset]->acts.Insert(s,index); 
@@ -241,14 +241,14 @@ void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s, int index)
 
 // Remove an action from infoset iset at int i, 
 // returns the removed Infoset pointer
-gbtEfgAction gbtEfgActionSet::RemoveAction(int iset, int i) 
+gbtGameAction gbtGameActionSet::RemoveAction(int iset, int i) 
 { 
   return (infosets[iset]->acts.Remove(i)); 
 }
 
 // Removes an action from infoset iset . Returns true if the 
 //Action was successfully removed, false otherwise.
-bool gbtEfgActionSet::RemoveAction(int iset, const gbtEfgAction &s)
+bool gbtGameActionSet::RemoveAction(int iset, const gbtGameAction &s)
 { 
   int t = infosets[iset]->acts.Find(s); 
   if (t>0) infosets[iset]->acts.Remove(t); 
@@ -256,30 +256,30 @@ bool gbtEfgActionSet::RemoveAction(int iset, const gbtEfgAction &s)
 } 
 
 // Get an action
-gbtEfgAction gbtEfgActionSet::GetAction(int iset, int index)
+gbtGameAction gbtGameActionSet::GetAction(int iset, int index)
 {
   return (infosets[iset]->acts)[index];
 }
 
 // Number of Actions in a particular infoset
-int gbtEfgActionSet::NumActions(int iset) const
+int gbtGameActionSet::NumActions(int iset) const
 {
   return (infosets[iset]->acts.Length());
 }
 
-// Return the player of this gbtEfgActionSet
-gbtEfgPlayer gbtEfgActionSet::GetPlayer(void) const
+// Return the player of this gbtGameActionSet
+gbtGamePlayer gbtGameActionSet::GetPlayer(void) const
 {
   return efp;
 }
 
-int gbtEfgActionSet::Find(const gbtEfgAction &a) const
+int gbtGameActionSet::Find(const gbtGameAction &a) const
 {
   return (infosets[a->GetInfoset()->GetId()]->acts.Find(a));
 }
 
-// checks for a valid gbtEfgActionSet
-bool gbtEfgActionSet::HasActiveActionsAtAllInfosets(void) const
+// checks for a valid gbtGameActionSet
+bool gbtGameActionSet::HasActiveActionsAtAllInfosets(void) const
 {
   if (infosets.Length() != efp->NumInfosets())   return false;
 
@@ -289,8 +289,8 @@ bool gbtEfgActionSet::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-// checks for a valid gbtEfgActionSet
-bool gbtEfgActionSet::HasActiveActionAt(const int &iset) const
+// checks for a valid gbtGameActionSet
+bool gbtGameActionSet::HasActiveActionAt(const int &iset) const
 {
   if (iset > efp->NumInfosets())   return false;
 
@@ -304,11 +304,11 @@ bool gbtEfgActionSet::HasActiveActionAt(const int &iset) const
 // gbtEfgSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-gbtEfgSupport::gbtEfgSupport(const gbtEfgGame &p_efg) 
+gbtEfgSupport::gbtEfgSupport(const gbtGame &p_efg) 
   : m_efg(p_efg), m_players(p_efg->NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++) {
-    m_players[pl] = new gbtEfgActionSet(p_efg->GetPlayer(pl));
+    m_players[pl] = new gbtGameActionSet(p_efg->GetPlayer(pl));
   }
 }
 
@@ -317,7 +317,7 @@ gbtEfgSupport::gbtEfgSupport(const gbtEfgSupport &p_support)
     m_players(p_support.m_players.Length())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
-    m_players[pl] = new gbtEfgActionSet(*(p_support.m_players[pl]));
+    m_players[pl] = new gbtGameActionSet(*(p_support.m_players[pl]));
 }
 
 gbtEfgSupport::~gbtEfgSupport()
@@ -332,7 +332,7 @@ gbtEfgSupport &gbtEfgSupport::operator=(const gbtEfgSupport &p_support)
     m_label = p_support.m_label;
     for (int pl = 1; pl <= m_players.Length(); pl++)  {
       delete m_players[pl];
-      m_players[pl] = new gbtEfgActionSet(*(p_support.m_players[pl]));
+      m_players[pl] = new gbtGameActionSet(*(p_support.m_players[pl]));
     }
   }
   return *this;
@@ -368,7 +368,7 @@ int gbtEfgSupport::NumActions(int pl, int iset) const
   }
 }
 
-int gbtEfgSupport::NumActions(const gbtEfgInfoset &i) const
+int gbtEfgSupport::NumActions(const gbtGameInfoset &i) const
 {
   if (i->GetPlayer()->IsChance()) {
     return i->NumActions();
@@ -378,14 +378,14 @@ int gbtEfgSupport::NumActions(const gbtEfgInfoset &i) const
   }
 }
 
-int gbtEfgSupport::GetIndex(const gbtEfgAction &a) const
+int gbtEfgSupport::GetIndex(const gbtGameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)  return 0;
   int pl = a->GetInfoset()->GetPlayer()->GetId();
   return m_players[pl]->Find(a);
 }
 
-bool gbtEfgSupport::Contains(const gbtEfgAction &a) const
+bool gbtEfgSupport::Contains(const gbtGameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)   
     return false;
@@ -406,7 +406,7 @@ bool gbtEfgSupport::Contains(int pl, int iset, int act) const
   return Contains(GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
 }
 
-gbtEfgAction gbtEfgSupport::GetAction(int pl, int iset, int act) const
+gbtGameAction gbtEfgSupport::GetAction(int pl, int iset, int act) const
 {
   if (pl == 0) {
     return m_efg->GetChance()->GetInfoset(iset)->GetAction(act);
@@ -416,7 +416,7 @@ gbtEfgAction gbtEfgSupport::GetAction(int pl, int iset, int act) const
   }
 }
 
-gbtEfgAction gbtEfgSupport::GetAction(const gbtEfgInfoset &infoset, int act) const
+gbtGameAction gbtEfgSupport::GetAction(const gbtGameInfoset &infoset, int act) const
 {
   if (infoset->GetPlayer()->IsChance()) {
     return infoset->GetAction(act);
@@ -426,7 +426,7 @@ gbtEfgAction gbtEfgSupport::GetAction(const gbtEfgInfoset &infoset, int act) con
   }
 }
 
-bool gbtEfgSupport::HasActiveActionAt(const gbtEfgInfoset &infoset) const
+bool gbtEfgSupport::HasActiveActionAt(const gbtGameInfoset &infoset) const
 {
   if (!m_players[infoset->GetPlayer()->GetId()]->
       HasActiveActionAt(infoset->GetId()))
@@ -439,7 +439,7 @@ int gbtEfgSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gbtList<gbtEfgInfoset> active_infosets = ReachableInfosets(GetRoot());
+  gbtList<gbtGameInfoset> active_infosets = ReachableInfosets(GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
@@ -471,18 +471,18 @@ gbtPVector<int> gbtEfgSupport::NumActions(void) const
   return bar;
 }  
 
-bool gbtEfgSupport::RemoveAction(const gbtEfgAction &s)
+bool gbtEfgSupport::RemoveAction(const gbtGameAction &s)
 {
-  gbtEfgInfoset infoset = s->GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtGameInfoset infoset = s->GetInfoset();
+  gbtGamePlayer player = infoset->GetPlayer();
  
   return m_players[player->GetId()]->RemoveAction(infoset->GetId(), s); 
 }
 
-void gbtEfgSupport::AddAction(const gbtEfgAction &s)
+void gbtEfgSupport::AddAction(const gbtGameAction &s)
 {
-  gbtEfgInfoset infoset = s->GetInfoset();
-  gbtEfgPlayer player = infoset->GetPlayer();
+  gbtGameInfoset infoset = s->GetInfoset();
+  gbtGamePlayer player = infoset->GetPlayer();
 
   m_players[player->GetId()]->AddAction(infoset->GetId(), s);
 }
@@ -490,7 +490,7 @@ void gbtEfgSupport::AddAction(const gbtEfgAction &s)
 int gbtEfgSupport::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg->NumPlayers()) return 1;
-  gbtList<gbtEfgInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
+  gbtList<gbtGameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
@@ -505,13 +505,13 @@ int gbtEfgSupport::TotalNumSequences(void) const
   return total;
 }
 
-gbtList<gbtEfgNode> 
-gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
+gbtList<gbtGameNode> 
+gbtEfgSupport::ReachableNonterminalNodes(const gbtGameNode &n) const
 {
-  gbtList<gbtEfgNode> answer;
+  gbtList<gbtGameNode> answer;
   if (n->IsNonterminal()) {
     for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
-      gbtEfgNode nn = n->GetChild(GetAction(n->GetInfoset(), i));
+      gbtGameNode nn = n->GetChild(GetAction(n->GetInfoset(), i));
       if (nn->IsNonterminal()) {
 	answer += nn;
 	answer += ReachableNonterminalNodes(nn);
@@ -521,12 +521,12 @@ gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
   return answer;
 }
 
-gbtList<gbtEfgNode> 
-gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
-				     const gbtEfgAction &a) const
+gbtList<gbtGameNode> 
+gbtEfgSupport::ReachableNonterminalNodes(const gbtGameNode &n,
+				     const gbtGameAction &a) const
 {
-  gbtList<gbtEfgNode> answer;
-  gbtEfgNode nn = n->GetChild(a);
+  gbtList<gbtGameNode> answer;
+  gbtGameNode nn = n->GetChild(a);
   if (nn->IsNonterminal()) {
     answer += nn;
     answer += ReachableNonterminalNodes(nn);
@@ -534,9 +534,9 @@ gbtEfgSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
   return answer;
 }
 
-gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgPlayer &p) const
+gbtList<gbtGameInfoset> gbtEfgSupport::ReachableInfosets(const gbtGamePlayer &p) const
 { 
-  gbtList<gbtEfgInfoset> answer;
+  gbtList<gbtGameInfoset> answer;
 
   for (int i = 1; i <= p->NumInfosets(); i++) {
     if (MayReach(p->GetInfoset(i))) {
@@ -546,34 +546,34 @@ gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgPlayer &p) c
   return answer;
 }
 
-gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n) const
+gbtList<gbtGameInfoset> gbtEfgSupport::ReachableInfosets(const gbtGameNode &n) const
 {
-  gbtList<gbtEfgInfoset> answer;
-  gbtList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n);
+  gbtList<gbtGameInfoset> answer;
+  gbtList<gbtGameNode> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
 
-gbtList<gbtEfgInfoset> gbtEfgSupport::ReachableInfosets(const gbtEfgNode &n, 
-						  const gbtEfgAction &a) const
+gbtList<gbtGameInfoset> gbtEfgSupport::ReachableInfosets(const gbtGameNode &n, 
+						  const gbtGameAction &a) const
 {
-  gbtList<gbtEfgInfoset> answer;
-  gbtList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n,a);
+  gbtList<gbtGameInfoset> answer;
+  gbtList<gbtGameNode> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
     answer += nodelist[i]->GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
 
-bool gbtEfgSupport::AlwaysReaches(const gbtEfgInfoset &i) const
+bool gbtEfgSupport::AlwaysReaches(const gbtGameInfoset &i) const
 {
   return AlwaysReachesFrom(i, m_efg->GetRoot());
 }
 
-bool gbtEfgSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
-				  const gbtEfgNode &n) const
+bool gbtEfgSupport::AlwaysReachesFrom(const gbtGameInfoset &i, 
+				  const gbtGameNode &n) const
 {
   if (n->IsTerminal()) return false;
   else {
@@ -589,7 +589,7 @@ bool gbtEfgSupport::AlwaysReachesFrom(const gbtEfgInfoset &i,
   return true;
 }
 
-bool gbtEfgSupport::MayReach(const gbtEfgInfoset &infoset) const
+bool gbtEfgSupport::MayReach(const gbtGameInfoset &infoset) const
 {
   for (int j = 1; j <= infoset->NumMembers(); j++) {
     if (MayReach(infoset->GetMember(j))) {
@@ -599,7 +599,7 @@ bool gbtEfgSupport::MayReach(const gbtEfgInfoset &infoset) const
   return false;
 }
 
-bool gbtEfgSupport::MayReach(const gbtEfgNode &n) const
+bool gbtEfgSupport::MayReach(const gbtGameNode &n) const
 {
   if (n == m_efg->GetRoot())
     return true;
@@ -618,13 +618,13 @@ void gbtEfgSupport::Dump(gbtOutput &p_output) const
 {
   p_output << '"' << m_label << "\" { ";
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    gbtEfgPlayer player = m_players[pl]->GetPlayer();
+    gbtGamePlayer player = m_players[pl]->GetPlayer();
     p_output << '"' << player->GetLabel() << "\" { ";
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       p_output << '"' << infoset->GetLabel() << "\" { ";
       for (int act = 1; act <= NumActions(pl, iset); act++)  {
-	gbtEfgAction action = m_players[pl]->GetAction(iset, act);
+	gbtGameAction action = m_players[pl]->GetAction(iset, act);
 	p_output << action << ' ';
       }
       p_output << "} ";
@@ -676,37 +676,37 @@ bool gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const int pl,
 }
 
 bool
-gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const gbtEfgInfoset &i) const
+gbtEfgSupportWithActiveInfo::infoset_has_active_nodes(const gbtGameInfoset &i) const
 {
   return infoset_has_active_nodes(i->GetPlayer()->GetId(), i->GetId());
 }
 
-void gbtEfgSupportWithActiveInfo::activate(const gbtEfgNode &n)
+void gbtEfgSupportWithActiveInfo::activate(const gbtGameNode &n)
 {
   is_nonterminal_node_active[n->GetPlayer()->GetId()]
                             [n->GetInfoset()->GetId()]
                             [n->GetMemberId()] = true;
 }
 
-void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
+void gbtEfgSupportWithActiveInfo::deactivate(const gbtGameNode &n)
 {
   is_nonterminal_node_active[n->GetPlayer()->GetId()]
                             [n->GetInfoset()->GetId()]
                             [n->GetMemberId()] = false;
 }
 
-void gbtEfgSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
+void gbtEfgSupportWithActiveInfo::activate(const gbtGameInfoset &i)
 {
   is_infoset_active[i->GetPlayer()->GetId()][i->GetId()] = true;
 }
 
-void gbtEfgSupportWithActiveInfo::deactivate(const gbtEfgInfoset &i)
+void gbtEfgSupportWithActiveInfo::deactivate(const gbtGameInfoset &i)
 {
   is_infoset_active[i->GetPlayer()->GetId()][i->GetId()] = false;
 }
 
 void
-gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
+gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtGameNode &n)
 {
   if (n->IsNonterminal()) {
     activate(n); 
@@ -717,7 +717,7 @@ gbtEfgSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
 }
 
 void
-gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
+gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtGameNode &n)
 {
   if (n->IsNonterminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
@@ -730,8 +730,8 @@ gbtEfgSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n
 }
 
 void gbtEfgSupportWithActiveInfo::
-deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode &n, 
-                                                gbtList<gbtEfgInfoset> *list)
+deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtGameNode &n, 
+                                                gbtList<gbtGameInfoset> *list)
 {
   if (n->IsNonterminal()) {
     deactivate(n); 
@@ -754,7 +754,7 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode 
 void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
   for (int pl = 0; pl <= NumPlayers(); pl++) {
-    gbtEfgPlayer player = (pl == 0) ? GetChance() : GetPlayer(pl); 
+    gbtGamePlayer player = (pl == 0) ? GetChance() : GetPlayer(pl); 
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -773,7 +773,7 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
 void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
   for (int pl = 0; pl <= NumPlayers(); pl++) {
-    gbtEfgPlayer player = (pl == 0) ? GetChance() : GetPlayer(pl);
+    gbtGamePlayer player = (pl == 0) ? GetChance() : GetPlayer(pl);
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
 
@@ -799,7 +799,7 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgGame &p_efg)
+gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtGame &p_efg)
   : gbtEfgSupport(p_efg), 
     is_infoset_active(0, p_efg->NumPlayers()), 
     is_nonterminal_node_active(0, p_efg->NumPlayers())
@@ -873,10 +873,10 @@ gbtEfgSupportWithActiveInfo::operator!=(const gbtEfgSupportWithActiveInfo &s) co
 }
 
 // Member Function
-gbtList<gbtEfgNode> 
-gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
+gbtList<gbtGameNode> 
+gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const gbtGameInfoset &i) const
 {
-  gbtList<gbtEfgNode> answer;
+  gbtList<gbtGameNode> answer;
   int pl = i->GetPlayer()->GetId();
   int iset = i->GetId();
   for (int j = 1; j <= i->NumMembers(); j++)
@@ -885,12 +885,12 @@ gbtEfgSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) con
   return answer;
 }
 
-gbtList<gbtEfgNode>
+gbtList<gbtGameNode>
 gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
-  gbtList<gbtEfgNode> answer;
+  gbtList<gbtGameNode> answer;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    gbtEfgPlayer p = GetPlayer(pl);
+    gbtGamePlayer p = GetPlayer(pl);
     for (int iset = 1; iset <= p->NumInfosets(); iset++) {
       answer += ReachableNodesInInfoset(p->GetInfoset(iset));
     }
@@ -899,18 +899,18 @@ gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
 }
 
 // Editing functions
-void gbtEfgSupportWithActiveInfo::AddAction(const gbtEfgAction &s)
+void gbtEfgSupportWithActiveInfo::AddAction(const gbtGameAction &s)
 {
   gbtEfgSupport::AddAction(s);
 
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<gbtGameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
-bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
+bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtGameAction &s)
 {
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<gbtGameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes(startlist[i]->GetChild(s));
 
@@ -920,10 +920,10 @@ bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
 
 bool 
 gbtEfgSupportWithActiveInfo::
-RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
-				     gbtList<gbtEfgInfoset> *list)
+RemoveActionReturningDeletedInfosets(const gbtGameAction &s,
+				     gbtList<gbtGameInfoset> *list)
 {
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
+  gbtList<gbtGameNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                            startlist[i]->GetChild(s),list);
@@ -941,7 +941,7 @@ int gbtEfgSupportWithActiveInfo::NumActiveNodes(int pl, int iset) const
   return answer;
 }
 
-int gbtEfgSupportWithActiveInfo::NumActiveNodes(const gbtEfgInfoset &i) const
+int gbtEfgSupportWithActiveInfo::NumActiveNodes(const gbtGameInfoset &i) const
 {
   return NumActiveNodes(i->GetPlayer()->GetId(), i->GetId());
 }
@@ -952,7 +952,7 @@ bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const int pl,
   return is_infoset_active[pl][iset];
 }
 
-bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const gbtEfgInfoset &i) const
+bool gbtEfgSupportWithActiveInfo::InfosetIsActive(const gbtGameInfoset &i) const
 {
   return InfosetIsActive(i->GetPlayer()->GetId(), i->GetId());
 }
@@ -964,7 +964,7 @@ bool gbtEfgSupportWithActiveInfo::NodeIsActive(const int pl,
   return is_nonterminal_node_active[pl][iset][node];
 }
 
-bool gbtEfgSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
+bool gbtEfgSupportWithActiveInfo::NodeIsActive(const gbtGameNode &n) const
 {
   return NodeIsActive(n->GetInfoset()->GetPlayer()->GetId(),
 		      n->GetInfoset()->GetId(),

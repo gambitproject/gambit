@@ -27,41 +27,40 @@
 #ifndef EFGUTILS_H
 #define EFGUTILS_H
 
-#include "efg.h"
-#include "node.h"
+#include "game.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
+void Nodes(const gbtGame &, gbtList<gbtGameNode> &list);
 
-void Nodes(const gbtEfgGame &, const gbtEfgNode &n, gbtList<gbtEfgNode> &list);
+void Nodes(const gbtGame &, const gbtGameNode &n, gbtList<gbtGameNode> &list);
 
 // returns the number of nodes in the extensive form
-int NumNodes(const gbtEfgGame &);
+int NumNodes(const gbtGame &);
 
 // returns the number of nodes given a starting node
-int CountNodes(const gbtEfgGame &, const gbtEfgNode &);
+int CountNodes(const gbtGame &, const gbtGameNode &);
 
 // Returns the terminal nodes in a subtree rooted at 'p_node'
-void TerminalNodes(const gbtEfgNode &, gbtList<gbtEfgNode> &);
+void TerminalNodes(const gbtGameNode &, gbtList<gbtGameNode> &);
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
+void MarkedSubgameRoots(const gbtGame &, gbtList<gbtGameNode> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
-void LegalSubgameRoots(const gbtEfgGame &, const gbtEfgNode &,
-		       gbtList<gbtEfgNode> &);
-bool HasSubgames(const gbtEfgGame &);
-bool HasSubgames(const gbtEfgGame &, const gbtEfgNode &n);
+void LegalSubgameRoots(const gbtGame &, gbtList<gbtGameNode> &list);
+void LegalSubgameRoots(const gbtGame &, const gbtGameNode &,
+		       gbtList<gbtGameNode> &);
+bool HasSubgames(const gbtGame &);
+bool HasSubgames(const gbtGame &, const gbtGameNode &n);
 
-bool AllSubgamesMarked(const gbtEfgGame &efg);
+bool AllSubgamesMarked(const gbtGame &efg);
 
 // returns the list of nodes which are roots of child subgames
-void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &, 
-		   gbtList<gbtEfgNode> &);
+void ChildSubgames(const gbtGame &, const gbtGameNode &, 
+		   gbtList<gbtGameNode> &);
 
-gbtEfgGame CompressEfg(const gbtEfgGame &, const gbtEfgSupport &);
+gbtGame CompressEfg(const gbtGame &, const gbtEfgSupport &);
 // An "in-place" version of the above
-void CompressEfgInPlace(gbtEfgGame, const gbtEfgSupport &);
+void CompressEfgInPlace(gbtGame, const gbtEfgSupport &);
 
 #endif // EFGUTILS_H

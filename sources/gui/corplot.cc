@@ -87,7 +87,7 @@ gbtCorBranchMixed::gbtCorBranchMixed(void)
 gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame()->ProfileLength());
+  m_shown = gbtArray<bool>(m_data[1].GetGame()->MixedProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -118,7 +118,7 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
   int index = 1;
 
   for (int pl = 1; pl <= m_data[1].GetGame()->NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_data[1].GetGame()->GetPlayer(pl);
+    gbtGamePlayer player = m_data[1].GetGame()->GetPlayer(pl);
 
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_dim) {
@@ -145,7 +145,7 @@ gbtCorBranchBehav::gbtCorBranchBehav(void)
 gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame()->ProfileLength());
+  m_shown = gbtArray<bool>(m_data[1].GetGame()->BehavProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -614,7 +614,7 @@ gbtNfgCorPlotSupportDialog::gbtNfgCorPlotSupportDialog(wxWindow *p_parent,
 
 void gbtNfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
 {
-  gbtNfgAction strategy = m_supportWidget->GetStrategy(p_id);
+  gbtGameStrategy strategy = m_supportWidget->GetStrategy(p_id);
   if (strategy.IsNull()) {
     return;
   }
@@ -664,7 +664,7 @@ void gbtNfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
     int index = 1;
 
     for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-      gbtNfgPlayer player = m_support.GetGame()->GetPlayer(pl);
+      gbtGamePlayer player = m_support.GetGame()->GetPlayer(pl);
 
       for (int st = 1; st <= player->NumStrategies(); st++) {
 	GetCorrespondence()->ShowDimension(index++, 
@@ -740,7 +740,7 @@ gbtEfgCorPlotSupportDialog::gbtEfgCorPlotSupportDialog(wxWindow *p_parent,
 
 void gbtEfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
 {
-  gbtEfgAction action = m_supportWidget->GetAction(p_id);
+  gbtGameAction action = m_supportWidget->GetAction(p_id);
   if (action.IsNull()) {
     return;
   }
@@ -790,10 +790,10 @@ void gbtEfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
     int index = 1;
 
     for (int pl = 1; pl <= m_support.NumPlayers(); pl++) {
-      gbtEfgPlayer player = m_support.GetPlayer(pl);
+      gbtGamePlayer player = m_support.GetPlayer(pl);
 
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	gbtEfgInfoset infoset = player->GetInfoset(iset);
+	gbtGameInfoset infoset = player->GetInfoset(iset);
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  GetCorrespondence()->ShowDimension(index++, 

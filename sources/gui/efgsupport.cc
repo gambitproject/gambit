@@ -40,10 +40,10 @@
 //
 class gbtCmdAddAction : public gbtGameCommand {
 private:
-  gbtEfgAction m_action;
+  gbtGameAction m_action;
 
 public:
-  gbtCmdAddAction(gbtEfgAction p_action) : m_action(p_action) { }
+  gbtCmdAddAction(gbtGameAction p_action) : m_action(p_action) { }
   virtual ~gbtCmdAddAction() { }
 
   void Do(gbtGameDocument *);
@@ -66,10 +66,10 @@ void gbtCmdAddAction::Do(gbtGameDocument *p_doc)
 //
 class gbtCmdRemoveAction : public gbtGameCommand {
 private:
-  gbtEfgAction m_action;
+  gbtGameAction m_action;
 
 public:
-  gbtCmdRemoveAction(gbtEfgAction p_action) : m_action(p_action) { }
+  gbtCmdRemoveAction(gbtGameAction p_action) : m_action(p_action) { }
   virtual ~gbtCmdRemoveAction() { }
 
   void Do(gbtGameDocument *);
@@ -115,7 +115,7 @@ void gbtCmdSetEfgSupport::Do(gbtGameDocument *p_doc)
 
 gbtEfgSupportWidget::gbtEfgSupportWidget(wxWindow *p_parent,
 					 wxWindowID p_id)
-  : wxTreeCtrl(p_parent, p_id), m_map(gbtEfgAction())
+  : wxTreeCtrl(p_parent, p_id), m_map(gbtGameAction())
 { 
   Connect(p_id, wxEVT_COMMAND_TREE_ITEM_COLLAPSING,
 	  (wxObjectEventFunction) (wxEventFunction)
@@ -127,18 +127,18 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
   DeleteAllItems();
   AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
   for (int pl = 1; pl <= p_support.NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetPlayer(pl);
+    gbtGamePlayer player = p_support.GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
 						  (char *) player->GetLabel()));
     
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player->GetInfoset(iset);
+      gbtGameInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID = AppendItem(id, 
 				       wxString::Format(wxT("%s"), (char *) infoset->GetLabel()));
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	gbtEfgAction action = infoset->GetAction(act);
+	gbtGameAction action = infoset->GetAction(act);
 	wxTreeItemId actID = AppendItem(isetID,
 					wxString::Format(wxT("%s"), (char *) action->GetLabel()));
 	if (p_support.Contains(action)) {
@@ -301,7 +301,7 @@ void gbtEfgSupportWindow::OnTreeItemActivated(wxTreeEvent &p_event)
 
 void gbtEfgSupportWindow::ToggleAction(wxTreeItemId p_id)
 {
-  gbtEfgAction action = m_supportWidget->GetAction(p_id);
+  gbtGameAction action = m_supportWidget->GetAction(p_id);
   if (action.IsNull()) {
     return;
   }
@@ -369,11 +369,11 @@ void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetEfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Supports: %s"),
-				(char *) m_doc->GetEfg()->GetLabel()));
+				(char *) m_doc->GetGame()->GetLabel()));
     }
   }
   Show(m_doc->ShowEfgSupports());
@@ -385,5 +385,5 @@ void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
 static gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gbtBaseMap<wxTreeItemId, gbtEfgAction>;
-template class gbtOrdMap<wxTreeItemId, gbtEfgAction>;
+template class gbtBaseMap<wxTreeItemId, gbtGameAction>;
+template class gbtOrdMap<wxTreeItemId, gbtGameAction>;

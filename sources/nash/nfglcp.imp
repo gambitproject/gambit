@@ -26,16 +26,16 @@
 
 #include "base/base.h"
 #include "math/gpvector.h"
-#include "game/nfg.h"
+#include "game/game.h"
 #include "nfglcp.h"
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &,
+template <class T> gbtMatrix<T> Make_A1(const gbtGame &,
 				      const gbtNfgSupport &, const T &);
-template <class T> gbtVector<T> Make_b1(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b1(const gbtGame &,
 				      const gbtNfgSupport &, const T &);
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &,
+template <class T> gbtMatrix<T> Make_A2(const gbtGame &,
 				      const gbtNfgSupport &, const T &);
-template <class T> gbtVector<T> Make_b2(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b2(const gbtGame &,
 				      const gbtNfgSupport &, const T &);
 
 

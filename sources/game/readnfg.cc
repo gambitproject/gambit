@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "base/base.h"
-#include "nfg.h"
+#include "game.h"
 
 class gbtNfgFilePlayer {
 public:
@@ -406,7 +406,7 @@ static void ParseHeader(gbtNfgParserState &p_state, gbtNfgFileData &p_data)
   }
 }
 
-static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
+static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtGame p_nfg)
 {
   if (p_parser.GetNextSymbol() != symLBRACE) {
     throw gbtNfgParserError();
@@ -451,7 +451,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
       throw gbtNfgParserError();
     }
 
-    gbtNfgOutcome outcome = p_nfg->NewOutcome();
+    gbtGameOutcome outcome = p_nfg->NewOutcome();
     outcome->SetLabel(label);
     for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
       outcome->SetPayoff(p_nfg->GetPlayer(pl), payoffs[pl]);
@@ -466,7 +466,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
   p_parser.GetNextSymbol();
 }
 
-static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
+static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtGame p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
@@ -483,7 +483,7 @@ static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
   }
 }
 
-static void SetPayoff(gbtNfgGame p_nfg,
+static void SetPayoff(gbtGame p_nfg,
 		      int p_cont, int p_pl, const gbtNumber &p_value)
 {
   if (p_pl == 1)  {
@@ -492,7 +492,7 @@ static void SetPayoff(gbtNfgGame p_nfg,
   p_nfg->GetOutcomeIndex(p_cont)->SetPayoff(p_nfg->GetPlayer(p_pl), p_value);
 }
 
-static void ParsePayoffBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
+static void ParsePayoffBody(gbtNfgParserState &p_parser, gbtGame p_nfg)
 {
   int cont = 1, pl = 1;
 
@@ -518,13 +518,13 @@ static void ParsePayoffBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
   }
 }
 
-static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
+static gbtGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 {
   gbtArray<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
-  gbtNfgGame nfg = NewNfg(dim);
+  gbtGame nfg = NewNfg(dim);
   nfg->SetLabel(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
   
@@ -554,7 +554,7 @@ static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 //  ReadNfg: Global visible function to read a normal form savefile
 //=========================================================================
 
-gbtNfgGame ReadNfg(gbtInput &p_file)
+gbtGame ReadNfg(gbtInput &p_file)
 {
   gbtNfgParserState parser(p_file);
   gbtNfgFileData data;

@@ -27,7 +27,7 @@
 #ifndef EFGALGORITHM_H
 #define EFGALGORITHM_H
 
-#include "game/efg.h"
+#include "game/game.h"
 #include "behavsol.h"
 
 class gbtEfgNashAlgorithm {

@@ -28,7 +28,7 @@
 #define LHTAB_H
 
 #include "numerical/lemketab.h"
-#include "game/nfg.h"
+#include "game/game.h"
 
 template <class T> class gbtLemkeHowsonTableau : public gbtBaseTableau<T>{
 protected:

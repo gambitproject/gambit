@@ -31,18 +31,16 @@
 //
 
 // Declaration of game API
-#include "efg.h"
-#include "nfg.h"
+#include "game.h"
 
 // Declaration of internal game classes
-#include "efgint.h"
-#include "nfgint.h"
+#include "gamebase.h"
 
 //----------------------------------------------------------------------
-//            class gbtEfgOutcomeBase: Member functions
+//            class gbtGameOutcomeBase: Member functions
 //----------------------------------------------------------------------
 
-gbtEfgOutcomeBase::gbtEfgOutcomeBase(gbtEfgGameBase *p_efg, int p_id)
+gbtGameOutcomeBase::gbtGameOutcomeBase(gbtGameBase *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg),
     m_payoffs(p_efg->players.Length()),
     m_doublePayoffs(p_efg->players.Length())
@@ -53,37 +51,13 @@ gbtEfgOutcomeBase::gbtEfgOutcomeBase(gbtEfgGameBase *p_efg, int p_id)
   }
 }
 
-void gbtEfgOutcomeBase::DeleteOutcome(void)
+void gbtGameOutcomeBase::DeleteOutcome(void)
 {
   m_efg->DeleteOutcome(this);
 }
 
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgOutcomeBase &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtGameOutcomeBase &)
 { 
   return p_stream;
 }
 
-//----------------------------------------------------------------------
-//                 gbtNfgOutcomeBase: Member functions
-//----------------------------------------------------------------------
-
-gbtNfgOutcomeBase::gbtNfgOutcomeBase(gbtNfgGameBase *p_nfg, int p_id)
-  : m_id(p_id), m_nfg(p_nfg),
-    m_payoffs(p_nfg->m_players.Length()),
-    m_doublePayoffs(p_nfg->m_players.Length())
-{
-  for (int i = 1; i <= m_payoffs.Length(); i++) {
-    m_payoffs[i] = 0;
-    m_doublePayoffs[i] = 0.0;
-  }
-}
-
-void gbtNfgOutcomeBase::DeleteOutcome(void)
-{
-  m_nfg->DeleteOutcome(this);
-}
-
-gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgOutcomeBase &)
-{ 
-  return p_stream;
-}

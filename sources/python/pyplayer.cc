@@ -80,7 +80,7 @@ efplayer_getgame(efplayerobject *self, PyObject *args)
   }
 
   efgobject *game = newefgobject();
-  game->m_efg = new gbtEfgGame(self->m_efplayer->GetGame());
+  game->m_efg = new gbtGame(self->m_efplayer->GetGame());
   return (PyObject *) game;
 }
 
@@ -198,7 +198,7 @@ newefplayerobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_efplayer = new gbtEfgPlayer();
+  self->m_efplayer = new gbtGamePlayer();
   return self;
 }
 
@@ -287,7 +287,7 @@ nfplayer_getgame(nfplayerobject *self, PyObject *args)
   }
 
   nfgobject *game = newnfgobject();
-  game->m_nfg = new gbtNfgGame(self->m_nfplayer->GetGame());
+  game->m_nfg = new gbtGame(self->m_nfplayer->GetGame());
   return (PyObject *) game;
 }
 
@@ -375,7 +375,7 @@ newnfplayerobject(void)
   if (self == NULL) {
     return NULL;
   }
-  self->m_nfplayer = new gbtNfgPlayer();
+  self->m_nfplayer = new gbtGamePlayer();
   return self;
 }
 
