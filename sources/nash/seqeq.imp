@@ -13,7 +13,7 @@
 template <class T> class SequentialEquilibModule  {
 private:
   T eps;
-  const FullEfg &EF;
+  const efgGame &EF;
   const EFBasis &basis;
   const EFSupport &support;
   SeqEquilibParams params;

@@ -20,7 +20,7 @@ class Node;
 class Lexicon;
 
 class Action   {
-  friend class FullEfg;
+  friend class efgGame;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -44,7 +44,7 @@ class Action   {
 };
 
 class Infoset   {
-  friend class FullEfg;
+  friend class efgGame;
   friend class EFPlayer;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
@@ -52,7 +52,7 @@ class Infoset   {
   friend class Lexicon;
 
   protected:
-    FullEfg *E;
+    efgGame *E;
     int number;
     gText name;
     EFPlayer *player;
@@ -60,13 +60,13 @@ class Infoset   {
     gBlock<Node *> members;
     int flag, whichbranch;
     
-    Infoset(FullEfg *e, int n, EFPlayer *p, int br);
+    Infoset(efgGame *e, int n, EFPlayer *p, int br);
     virtual ~Infoset();  
 
     virtual void PrintActions(gOutput &f) const;
 
   public:
-    FullEfg *Game(void) const   { return E; }
+    efgGame *Game(void) const   { return E; }
 
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }
 
@@ -98,7 +98,7 @@ class Infoset   {
 };
 
 class ChanceInfoset : public Infoset  {
-  friend class FullEfg;
+  friend class efgGame;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -109,7 +109,7 @@ class ChanceInfoset : public Infoset  {
   private:
     gBlock<gNumber> probs;
 
-    ChanceInfoset(FullEfg *E, int n, EFPlayer *p, int br);
+    ChanceInfoset(efgGame *E, int n, EFPlayer *p, int br);
     virtual ~ChanceInfoset()    { }
 
     void PrintActions(gOutput &f) const;

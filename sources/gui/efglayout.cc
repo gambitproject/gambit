@@ -242,7 +242,7 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 //                class efgTreeLayout: Member functions
 //-----------------------------------------------------------------------
 
-efgTreeLayout::efgTreeLayout(FullEfg &p_efg, TreeWindow *p_parent)
+efgTreeLayout::efgTreeLayout(efgGame &p_efg, TreeWindow *p_parent)
   : m_efg(p_efg), m_parent(p_parent), m_infosetSpacing(40),
     c_leftMargin(20), c_topMargin(40)
 { }

@@ -17,12 +17,12 @@ class Lexicon   {
     Nfg *N;
     gArray<gList<lexCorrespondence *> > strategies;
 
-    Lexicon(const FullEfg &);
+    Lexicon(const efgGame &);
     ~Lexicon();
 
     void MakeStrategy(class EFPlayer *p);
     void MakeReducedStrats(const class EFSupport &, class EFPlayer *, class Node *, class Node *);
-    void MakeLink(const FullEfg *, Nfg *);
+    void MakeLink(const efgGame *, Nfg *);
 };
 
 

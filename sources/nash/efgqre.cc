@@ -14,7 +14,7 @@
 #include "numerical/gfunc.h"
 #include "efgqre.h"
 
-static void WritePXIHeader(gOutput &pxifile, const FullEfg &E)
+static void WritePXIHeader(gOutput &pxifile, const efgGame &E)
 {
   int pl, iset, nisets = 0;
 
@@ -46,7 +46,7 @@ extern void Project(gVector<double> &, const gArray<int> &);
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
-static void QreJacobian(const FullEfg &p_efg,
+static void QreJacobian(const efgGame &p_efg,
 			const BehavProfile<double> &p_profile,
 			const double &p_lambda, gMatrix<double> &p_matrix)
 {
@@ -97,7 +97,7 @@ static void QreJacobian(const FullEfg &p_efg,
   }
 }
 
-static void QreComputeStep(const FullEfg &p_efg, 
+static void QreComputeStep(const efgGame &p_efg, 
 			   const BehavProfile<double> &p_profile,
 			   const gMatrix<double> &p_matrix,
 			   gDPVector<double> &p_delta, double &p_lambdainc,
@@ -151,7 +151,7 @@ gList<BehavSolution> efgQre::Solve(const EFSupport &p_support,
 {
   gList<BehavSolution> solutions;
 
-  const FullEfg &efg = p_support.GetGame();
+  const efgGame &efg = p_support.GetGame();
   gMatrix<double> H(efg.ProfileLength(), efg.ProfileLength() + 1);
   BehavProfile<double> profile(efg);
   double lambda = 0.0;

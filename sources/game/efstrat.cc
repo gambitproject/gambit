@@ -288,8 +288,8 @@ bool EFActionSet::HasActiveActionAt(const int &iset) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport(const FullEfg &p_efg) 
-  : m_efg((FullEfg *) &p_efg), m_players(p_efg.NumPlayers())
+EFSupport::EFSupport(const efgGame &p_efg) 
+  : m_efg((efgGame *) &p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
     m_players[pl] = new EFActionSet(*(p_efg.Players()[pl]));
@@ -796,7 +796,7 @@ void EFSupportWithActiveInfo::InitializeActiveLists()
 }
 
 // Constructors and Destructor
-EFSupportWithActiveInfo::EFSupportWithActiveInfo(const FullEfg &E) 
+EFSupportWithActiveInfo::EFSupportWithActiveInfo(const efgGame &E) 
   : EFSupport(E), 
     is_infoset_active(0,E.NumPlayers()), 
     is_nonterminal_node_active(0,E.NumPlayers())

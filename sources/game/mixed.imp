@@ -312,7 +312,7 @@ MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
 {
   InitPayoffs();
   
-  const FullEfg &efg = p_profile.GetGame();
+  const efgGame &efg = p_profile.GetGame();
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     for (int st = 1; st <= N->NumStrats(pl); st++)  {
       T prob = (T) 1;

@@ -16,7 +16,7 @@
 
 #include "lexicon.h"
 
-Lexicon::Lexicon(const FullEfg &E)
+Lexicon::Lexicon(const efgGame &E)
   : N(0), strategies(E.NumPlayers())
 { }
 
@@ -28,12 +28,12 @@ Lexicon::~Lexicon()
     N->efg = 0;
 }
 
-void SetEfg(Nfg *nfg, const FullEfg *efg)
+void SetEfg(Nfg *nfg, const efgGame *efg)
 {
   nfg->efg = efg;
 }
 
-void Lexicon::MakeLink(const FullEfg *efg, Nfg *nfg)
+void Lexicon::MakeLink(const efgGame *efg, Nfg *nfg)
 {
   nfg->efg = efg;
   N = nfg;
@@ -110,14 +110,14 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 
 //
 // The following two functions have been placed in the
-// FullEfgNamespace namespace for now, to make the friend
-// declarations in class FullEfg work correctly.
+// efgGameNamespace namespace for now, to make the friend
+// declarations in class efgGame work correctly.
 //
 
 Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
-  const FullEfg &E = support.GetGame();
+  const efgGame &E = support.GetGame();
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)
     L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);
@@ -177,18 +177,18 @@ Nfg *MakeReducedNfg(const EFSupport &support)
     pl = E.NumPlayers();
   }
 
-  ((FullEfg &) E).lexicon = L;
-  SetEfg(((FullEfg &) E).lexicon->N, &E);
-  return ((FullEfg &) E).lexicon->N;
+  ((efgGame &) E).lexicon = L;
+  SetEfg(((efgGame &) E).lexicon->N, &E);
+  return ((efgGame &) E).lexicon->N;
 }
 
-Nfg *MakeAfg(const FullEfg &E)
+Nfg *MakeAfg(const efgGame &E)
 {
   Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
 
   if (!afg)   return 0;
 
-  ((FullEfg &) E).afg = afg;
+  ((efgGame &) E).afg = afg;
   afg->SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {

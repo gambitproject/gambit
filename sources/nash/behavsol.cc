@@ -23,12 +23,12 @@ private:
   BehavProfile<gNumber> start;
   gList<Node *> oldroots;
   
-  void SolveSubgame(const FullEfg &, const EFSupport &,
+  void SolveSubgame(const efgGame &, const EFSupport &,
 		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
   
 public:
-  SubgamePerfectChecker(const FullEfg &, const BehavProfile<gNumber> &, const gNumber & epsilon);
+  SubgamePerfectChecker(const efgGame &, const BehavProfile<gNumber> &, const gNumber & epsilon);
   virtual ~SubgamePerfectChecker();
   gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
@@ -561,7 +561,7 @@ void BehavSolution::Invalidate(void) const
 
 gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
-  const FullEfg &E = GetGame(); 
+  const efgGame &E = GetGame(); 
   Lexicon L(E);  // we use the lexicon without allocating normal form.  
   
   for (int i = 1; i <= E.NumPlayers(); i++)
@@ -648,7 +648,7 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
   return p_file;
 }
 
-SubgamePerfectChecker::SubgamePerfectChecker(const FullEfg &E, const BehavProfile<gNumber> &s,
+SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfile<gNumber> &s,
 					     const gNumber & epsilon)
   : subgame_number(0), eps(epsilon),  
     isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
@@ -674,7 +674,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const FullEfg &E, const BehavProfil
   }   
 }
 
-void SubgamePerfectChecker::SolveSubgame(const FullEfg &E,
+void SubgamePerfectChecker::SolveSubgame(const efgGame &E,
 					 const EFSupport &sup,
 					 gList<BehavSolution> &solns,
 					 gStatus &p_status)

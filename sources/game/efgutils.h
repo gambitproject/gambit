@@ -12,40 +12,40 @@
 #include "node.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes (const FullEfg &befg, gList <Node *> &list);
+void Nodes (const efgGame &befg, gList <Node *> &list);
 
-void Nodes (const FullEfg &befg, Node *n, gList <Node *> &list);
+void Nodes (const efgGame &befg, Node *n, gList <Node *> &list);
 
 // returns the number of nodes in the extensive form
-int NumNodes (const FullEfg &befg);
+int NumNodes (const efgGame &befg);
 
 // returns the number of nodes given a starting node
-int CountNodes (const FullEfg &e, Node *n);
+int CountNodes (const efgGame &e, Node *n);
 
 // returns the action leading up to the node
-Action* LastAction(const FullEfg &e, Node *node);
+Action* LastAction(const efgGame &e, Node *node);
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const FullEfg &efg, gList<Node *> &list);
+void MarkedSubgameRoots(const efgGame &efg, gList<Node *> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const FullEfg &efg, gList<Node *> &list);
-void LegalSubgameRoots(const FullEfg &efg, Node *, gList<Node *> &);
-bool HasSubgames(const FullEfg &efg);
-bool HasSubgames(const FullEfg &, Node *n);
+void LegalSubgameRoots(const efgGame &efg, gList<Node *> &list);
+void LegalSubgameRoots(const efgGame &efg, Node *, gList<Node *> &);
+bool HasSubgames(const efgGame &efg);
+bool HasSubgames(const efgGame &, Node *n);
 
-bool AllSubgamesMarked(const FullEfg &efg);
+bool AllSubgamesMarked(const efgGame &efg);
 
 // returns the list of nodes which are roots of child subgames
-void ChildSubgames(const FullEfg &, Node *, gList<Node *> &);
+void ChildSubgames(const efgGame &, Node *, gList<Node *> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition
-bool IsPerfectRecall(const FullEfg &);
-bool IsPerfectRecall(const FullEfg &, Infoset *&, Infoset *&);
+bool IsPerfectRecall(const efgGame &);
+bool IsPerfectRecall(const efgGame &, Infoset *&, Infoset *&);
 
-void RandomEfg(const FullEfg &);
-FullEfg *CompressEfg(const FullEfg &, const EFSupport &);
+void RandomEfg(const efgGame &);
+efgGame *CompressEfg(const efgGame &, const EFSupport &);
 
 #endif // EFGUTILS_H
 

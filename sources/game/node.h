@@ -19,7 +19,7 @@ class Lexicon;
 template <class T> class BehavAssessment;
 
 class Node    {
-  friend class FullEfg;
+  friend class efgGame;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -31,7 +31,7 @@ class Node    {
   protected:
     bool mark;
     int number; // This is a unique identifier, not related to infoset memship
-    FullEfg *E;
+    efgGame *E;
     gText name;
     Infoset *infoset;
     Node *parent;
@@ -39,13 +39,13 @@ class Node    {
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
 
-    Node(FullEfg *e, Node *p);
+    Node(efgGame *e, Node *p);
     ~Node();
 
     void DeleteOutcome(efgOutcome *outc);
 
   public:
-    FullEfg *Game(void) const   { return E; }
+    efgGame *Game(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
     int GetNumber(void) const { return number; }

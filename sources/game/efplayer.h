@@ -12,22 +12,22 @@
 #endif   // __GNUG__
 
 class EFPlayer   {
-  friend class FullEfg;
+  friend class efgGame;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
   private:
     int number;
     gText name;
-    FullEfg *E;
+    efgGame *E;
     
     gBlock<Infoset *> infosets;
 
-    EFPlayer(FullEfg *e, int n) : number(n), E(e)  { }
+    EFPlayer(efgGame *e, int n) : number(n), E(e)  { }
     ~EFPlayer();
 
   public:
-    FullEfg *Game(void) const   { return E; }
+    efgGame *Game(void) const   { return E; }
   
     const gText &GetName(void) const   { return name; }
     void SetName(const gText &s)       { name = s; }

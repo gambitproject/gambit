@@ -122,7 +122,7 @@ END_EVENT_TABLE()
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
+EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     m_efg(p_efg), m_treeWindow(0), m_cursor(0),
     m_currentProfile(0), m_profileTable(0), m_solutionSashWindow(0),
@@ -744,7 +744,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
     }
   }
 
-  FullEfg *efg = 0;
+  efgGame *efg = 0;
   try {
     gFileOutput file(m_filename);
     efg = CompressEfg(m_efg, *GetSupport());
@@ -763,7 +763,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
 		 "Error", wxOK, this);
     if (efg)  delete efg;
   }
-  catch (FullEfg::Exception &) {
+  catch (efgGame::Exception &) {
     wxMessageBox("Internal exception in extensive form", "Error",
 		 wxOK, this);
     if (efg)  delete efg;

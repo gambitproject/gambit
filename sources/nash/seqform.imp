@@ -10,7 +10,7 @@
 
 template <class T> class SeqFormModule  {
 private:
-  const FullEfg &EF;
+  const efgGame &EF;
   const EFSupport &support;
   const SeqFormParams &params;
   gMatrix<T> *A;

@@ -14,7 +14,7 @@
 
 class dialogEditEfg : public wxDialog {
 private:
-  FullEfg &m_efg;
+  efgGame &m_efg;
   wxNotebook *m_notebook;
 
   // Event handlers
@@ -22,7 +22,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditEfg(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
+  dialogEditEfg(wxWindow *p_parent, efgGame &p_efg, const wxString &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetGameTitle(void) const;

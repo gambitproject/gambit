@@ -28,7 +28,7 @@ const int idEFG_SOLUTION_LIST = 900;
 
 class EfgShow : public wxFrame {
 private:
-  FullEfg &m_efg;
+  efgGame &m_efg;
   TreeWindow *m_treeWindow;
   Node *m_cursor;
 
@@ -124,7 +124,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(FullEfg &p_efg, wxWindow *p_parent);
+  EfgShow(efgGame &p_efg, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
@@ -152,7 +152,7 @@ public:
   gText GetActionProb(const Node *, int act) const;
   gNumber ActionProb(const Node *n, int br) const;
 
-  FullEfg *Game(void) { return &m_efg; }
+  efgGame *Game(void) { return &m_efg; }
 
 
   void UpdateMenus(void);

@@ -57,7 +57,7 @@ bool Infoset::Precedes(const Node * n) const
   return false;
 }
 
-Infoset::Infoset(FullEfg *e, int n, EFPlayer *p, int br)
+Infoset::Infoset(efgGame *e, int n, EFPlayer *p, int br)
   : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
@@ -115,7 +115,7 @@ const gList<const Node *> Infoset::ListOfMembers(void) const
 //           ChanceInfoset: Member function definitions
 //------------------------------------------------------------------------
 
-ChanceInfoset::ChanceInfoset(FullEfg *E, int n, EFPlayer *p, int br)
+ChanceInfoset::ChanceInfoset(efgGame *E, int n, EFPlayer *p, int br)
   : Infoset(E, n, p, br), probs(br)
 {
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
@@ -148,7 +148,7 @@ void ChanceInfoset::PrintActions(gOutput &f) const
 //                   Node: Member function definitions
 //----------------------------------------------------------------------
 
-Node::Node(FullEfg *e, Node *p)
+Node::Node(efgGame *e, Node *p)
   : mark(false), number(0), E(e), infoset(0), parent(p), outcome(0),
     gameroot((p) ? p->gameroot : this)
 { }
@@ -165,7 +165,7 @@ int Node::NumberInInfoset(void) const
     if (GetInfoset()->GetMember(i) == this)
       return i;
   //  This could be speeded up by adding a member to Node to keep track of this
-  throw FullEfg::Exception();
+  throw efgGame::Exception();
 }
 
 
@@ -217,10 +217,10 @@ void Node::DeleteOutcome(efgOutcome *outc)
 //------------------------------------------------------------------------
 
 #ifdef MEMCHECK
-int FullEfg::_NumObj = 0;
+int efgGame::_NumObj = 0;
 #endif // MEMCHECK
 
-FullEfg::FullEfg(void)
+efgGame::efgGame(void)
   : sortisets(true), m_dirty(false), m_revision(0), 
     m_outcome_revision(-1), title("UNTITLED"),
     chance(new EFPlayer(this, 0)), afg(0), lexicon(0)
@@ -234,7 +234,7 @@ FullEfg::FullEfg(void)
   SortInfosets();
 }
 
-FullEfg::FullEfg(const FullEfg &E, Node *n /* = 0 */)
+efgGame::efgGame(const efgGame &E, Node *n /* = 0 */)
   : sortisets(false), m_dirty(false), m_revision(0), 
     m_outcome_revision(-1), title(E.title), comment(E.comment),
     players(E.players.Length()), outcomes(0, E.outcomes.Last()),
@@ -285,16 +285,11 @@ FullEfg::FullEfg(const FullEfg &E, Node *n /* = 0 */)
 
   sortisets = true;
   SortInfosets();
-
-#ifdef MEMCHECK
-  _NumObj++;
-  gout << "--- Efg Ctor: " << _NumObj << "\n";
-#endif // MEMCHECK
 }
 
 #include "lexicon.h"
 
-FullEfg::~FullEfg()
+efgGame::~efgGame()
 {
   delete root;
   delete chance;
@@ -304,35 +299,26 @@ FullEfg::~FullEfg()
 
   if (lexicon)   delete lexicon;
   lexicon = 0;
-
-  for (int i = 1; i <= m_clients.Length(); i++) {
-    m_clients[i]->OnEfgDestructed();
-  }
-
-#ifdef MEMCHECK
-  _NumObj--;
-  gout << "--- Efg Dtor: " << _NumObj << "\n";
-#endif // MEMCHECK
 }
 
 //------------------------------------------------------------------------
 //                  Efg: Private member functions
 //------------------------------------------------------------------------
 
-void FullEfg::DeleteLexicon(void) const
+void efgGame::DeleteLexicon(void) const
 {
   if (lexicon)   delete lexicon;
   lexicon = 0;
 }
 
-Infoset *FullEfg::GetInfosetByIndex(EFPlayer *p, int index) const
+Infoset *efgGame::GetInfosetByIndex(EFPlayer *p, int index) const
 {
   for (int i = 1; i <= p->infosets.Length(); i++)
     if (p->infosets[i]->number == index)   return p->infosets[i];
   return 0;
 }
 
-efgOutcome *FullEfg::GetOutcomeByIndex(int index) const
+efgOutcome *efgGame::GetOutcomeByIndex(int index) const
 {
   for (int i = 1; i <= outcomes.Last(); i++) {
     if (outcomes[i]->m_number == index)  {
@@ -343,7 +329,7 @@ efgOutcome *FullEfg::GetOutcomeByIndex(int index) const
   return 0;
 }
 
-void FullEfg::Reindex(void)
+void efgGame::Reindex(void)
 {
   int i;
 
@@ -358,14 +344,14 @@ void FullEfg::Reindex(void)
 }
 
 
-void FullEfg::NumberNodes(Node *n, int &index)
+void efgGame::NumberNodes(Node *n, int &index)
 {
   n->number = index++;
   for (int child = 1; child <= n->children.Length();
        NumberNodes(n->children[child++], index));
 } 
 
-void FullEfg::SortInfosets(void)
+void efgGame::SortInfosets(void)
 {
   if (!sortisets)  return;
 
@@ -432,7 +418,7 @@ void FullEfg::SortInfosets(void)
   NumberNodes(root, nodeindex);
 }
   
-Infoset *FullEfg::CreateInfoset(int n, EFPlayer *p, int br)
+Infoset *efgGame::CreateInfoset(int n, EFPlayer *p, int br)
 {
   Infoset *s = (p->IsChance()) ? new ChanceInfoset(this, n, p, br) :
                new Infoset(this, n, p, br);
@@ -440,13 +426,13 @@ Infoset *FullEfg::CreateInfoset(int n, EFPlayer *p, int br)
   return s;
 }
 
-efgOutcome *FullEfg::CreateOutcomeByIndex(int index)
+efgOutcome *efgGame::CreateOutcomeByIndex(int index)
 {
   NewOutcome(index);
   return outcomes[outcomes.Last()];
 }
 
-void FullEfg::CopySubtree(Node *n, Node *m)
+void efgGame::CopySubtree(Node *n, Node *m)
 {
   n->name = m->name;
 
@@ -476,24 +462,24 @@ void FullEfg::CopySubtree(Node *n, Node *m)
 //               Efg: Title access and manipulation
 //------------------------------------------------------------------------
 
-void FullEfg::SetTitle(const gText &s)
+void efgGame::SetTitle(const gText &s)
 {
   title = s; 
   m_revision++;
   m_dirty = true;
 }
 
-const gText &FullEfg::GetTitle(void) const
+const gText &efgGame::GetTitle(void) const
 { return title; }
 
-void FullEfg::SetComment(const gText &s)
+void efgGame::SetComment(const gText &s)
 {
   comment = s;
   m_revision++;
   m_dirty = true;
 }
 
-const gText &FullEfg::GetComment(void) const
+const gText &efgGame::GetComment(void) const
 { return comment; }
   
 
@@ -501,7 +487,7 @@ const gText &FullEfg::GetComment(void) const
 //                    Efg: Writing data files
 //------------------------------------------------------------------------
 
-void FullEfg::WriteEfgFile(gOutput &f, Node *n) const
+void efgGame::WriteEfgFile(gOutput &f, Node *n) const
 {
   if (n->children.Length() == 0)   {
     f << "t \"" << EscapeQuotes(n->name) << "\" ";
@@ -570,7 +556,7 @@ void FullEfg::WriteEfgFile(gOutput &f, Node *n) const
     WriteEfgFile(f, n->children[i]);
 }
 
-void FullEfg::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
+void efgGame::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
 {
   int oldPrecision = p_file.GetPrec();
   p_file.SetPrec(p_nDecimals);
@@ -599,10 +585,10 @@ void FullEfg::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
 //                    Efg: General data access
 //------------------------------------------------------------------------
 
-int FullEfg::NumPlayers(void) const
+int efgGame::NumPlayers(void) const
 { return players.Length(); }
 
-EFPlayer *FullEfg::NewPlayer(void)
+EFPlayer *efgGame::NewPlayer(void)
 {
   m_revision++;
   m_dirty = true;
@@ -618,7 +604,7 @@ EFPlayer *FullEfg::NewPlayer(void)
   return ret;
 }
 
-gBlock<Infoset *> FullEfg::Infosets() const
+gBlock<Infoset *> efgGame::Infosets() const
 {
   gBlock<Infoset *> answer;
 
@@ -634,17 +620,17 @@ gBlock<Infoset *> FullEfg::Infosets() const
   return answer;
 }
 
-int FullEfg::NumOutcomes(void) const
+int efgGame::NumOutcomes(void) const
 { return outcomes.Last(); }
 
-efgOutcome *FullEfg::NewOutcome(void)
+efgOutcome *efgGame::NewOutcome(void)
 {
   m_revision++;
   m_dirty = true;
   return NewOutcome(outcomes.Last() + 1);
 }
 
-void FullEfg::DeleteOutcome(efgOutcome *p_outcome)
+void efgGame::DeleteOutcome(efgOutcome *p_outcome)
 {
   m_revision++;
   m_dirty = true;
@@ -654,32 +640,32 @@ void FullEfg::DeleteOutcome(efgOutcome *p_outcome)
   DeleteLexicon();
 }
 
-efgOutcome *FullEfg::GetOutcome(int p_index) const
+efgOutcome *efgGame::GetOutcome(int p_index) const
 {
   return outcomes[p_index];
 }
 
-void FullEfg::SetOutcomeName(efgOutcome *p_outcome, const gText &p_name)
+void efgGame::SetOutcomeName(efgOutcome *p_outcome, const gText &p_name)
 {
   p_outcome->m_name = p_name;
 }
 
-const gText &FullEfg::GetOutcomeName(efgOutcome *p_outcome) const
+const gText &efgGame::GetOutcomeName(efgOutcome *p_outcome) const
 {
   return p_outcome->m_name;
 }
 
-efgOutcome *FullEfg::GetOutcome(const Node *p_node) const
+efgOutcome *efgGame::GetOutcome(const Node *p_node) const
 {
   return p_node->outcome;
 }
 
-void FullEfg::SetOutcome(Node *p_node, efgOutcome *p_outcome)
+void efgGame::SetOutcome(Node *p_node, efgOutcome *p_outcome)
 {
   p_node->outcome = p_outcome;
 }
 
-void FullEfg::SetPayoff(efgOutcome *p_outcome, int pl, 
+void efgGame::SetPayoff(efgOutcome *p_outcome, int pl, 
 			const gNumber &value)
 {
   if (!p_outcome) {
@@ -692,7 +678,7 @@ void FullEfg::SetPayoff(efgOutcome *p_outcome, int pl,
   p_outcome->m_doublePayoffs[pl] = (double) value;
 }
 
-gNumber FullEfg::Payoff(efgOutcome *p_outcome,
+gNumber efgGame::Payoff(efgOutcome *p_outcome,
 			const EFPlayer *p_player) const
 {
   if (!p_outcome) {
@@ -702,12 +688,12 @@ gNumber FullEfg::Payoff(efgOutcome *p_outcome,
   return p_outcome->m_payoffs[p_player->number];
 }
 
-gNumber FullEfg::Payoff(const Node *p_node, const EFPlayer *p_player) const
+gNumber efgGame::Payoff(const Node *p_node, const EFPlayer *p_player) const
 {
   return (p_node->outcome) ? p_node->outcome->m_payoffs[p_player->number] : gNumber(0);
 }
 
-gArray<gNumber> FullEfg::Payoff(efgOutcome *p_outcome) const
+gArray<gNumber> efgGame::Payoff(efgOutcome *p_outcome) const
 {
   if (!p_outcome) {
     gArray<gNumber> ret(players.Length());
@@ -719,7 +705,7 @@ gArray<gNumber> FullEfg::Payoff(efgOutcome *p_outcome) const
   }
 }
 
-bool FullEfg::IsConstSum(void) const
+bool efgGame::IsConstSum(void) const
 {
   int pl, index;
   gNumber cvalue = (gNumber) 0;
@@ -742,7 +728,7 @@ bool FullEfg::IsConstSum(void) const
   return true;
 }
 
-gNumber FullEfg::MinPayoff(int pl) const
+gNumber efgGame::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
   gNumber minpay;
@@ -762,7 +748,7 @@ gNumber FullEfg::MinPayoff(int pl) const
   return minpay;
 }
 
-gNumber FullEfg::MaxPayoff(int pl) const
+gNumber efgGame::MaxPayoff(int pl) const
 {
   int index, p, p1, p2;
   gNumber maxpay;
@@ -782,20 +768,20 @@ gNumber FullEfg::MaxPayoff(int pl) const
   return maxpay;
 }
 
-Node *FullEfg::RootNode(void) const
+Node *efgGame::RootNode(void) const
 { return root; }
 
-bool FullEfg::IsSuccessor(const Node *n, const Node *from) const
+bool efgGame::IsSuccessor(const Node *n, const Node *from) const
 { return IsPredecessor(from, n); }
 
-bool FullEfg::IsPredecessor(const Node *n, const Node *of) const
+bool efgGame::IsPredecessor(const Node *n, const Node *of) const
 {
   while (of && n != of)    of = of->parent;
 
   return (n == of);
 }
 
-gArray<int> FullEfg::PathToNode(const Node *p_node) const
+gArray<int> efgGame::PathToNode(const Node *p_node) const
 {
   gBlock<int> ret;
   const Node *n = p_node;
@@ -806,7 +792,7 @@ gArray<int> FullEfg::PathToNode(const Node *p_node) const
   return ret;
 }
 
-void FullEfg::DescendantNodes(const Node* n, 
+void efgGame::DescendantNodes(const Node* n, 
 			      const EFSupport& supp,
 			      gList<Node *> &current) const
 {
@@ -820,7 +806,7 @@ void FullEfg::DescendantNodes(const Node* n,
   }
 }
 
-void FullEfg::NonterminalDescendants(const Node* n, 
+void efgGame::NonterminalDescendants(const Node* n, 
 					  const EFSupport& supp,
 					  gList<const Node*>& current) const
 {
@@ -834,7 +820,7 @@ void FullEfg::NonterminalDescendants(const Node* n,
   }
 }
 
-void FullEfg::TerminalDescendants(const Node* n, 
+void efgGame::TerminalDescendants(const Node* n, 
 				  const EFSupport& supp,
 				  gList<Node *> &current) const
 {
@@ -852,7 +838,7 @@ void FullEfg::TerminalDescendants(const Node* n,
 }
 
 gList<Node *>
-FullEfg::DescendantNodes(const Node &p_node, const EFSupport &p_support) const
+efgGame::DescendantNodes(const Node &p_node, const EFSupport &p_support) const
 {
   gList<Node *> answer;
   DescendantNodes(&p_node, p_support, answer);
@@ -860,7 +846,7 @@ FullEfg::DescendantNodes(const Node &p_node, const EFSupport &p_support) const
 }
 
 gList<const Node*> 
-FullEfg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
+efgGame::NonterminalDescendants(const Node& n, const EFSupport& supp) const
 {
   gList<const Node*> answer;
   NonterminalDescendants(&n,supp,answer);
@@ -868,19 +854,19 @@ FullEfg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
 }
 
 gList<Node *> 
-FullEfg::TerminalDescendants(const Node& n, const EFSupport& supp) const
+efgGame::TerminalDescendants(const Node& n, const EFSupport& supp) const
 {
   gList<Node *> answer;
   TerminalDescendants(&n,supp,answer);
   return answer;
 }
 
-gList<Node *> FullEfg::TerminalNodes() const
+gList<Node *> efgGame::TerminalNodes() const
 {
   return TerminalDescendants(*(RootNode()),EFSupport(*this));
 }
 
-gList<Infoset*> FullEfg::DescendantInfosets(const Node& n, 
+gList<Infoset*> efgGame::DescendantInfosets(const Node& n, 
 					const EFSupport& supp) const
 {
   gList<Infoset*> answer;
@@ -894,13 +880,13 @@ gList<Infoset*> FullEfg::DescendantInfosets(const Node& n,
   return answer;
 }
 
-const gArray<Node *> &FullEfg::Children(const Node *n) const
+const gArray<Node *> &efgGame::Children(const Node *n) const
 { return n->children; }
 
-int FullEfg::NumChildren(const Node *n) const
+int efgGame::NumChildren(const Node *n) const
 { return n->children.Length(); }
 
-efgOutcome *FullEfg::NewOutcome(int index)
+efgOutcome *efgGame::NewOutcome(int index)
 {
   m_revision++;
   m_dirty = true;
@@ -912,12 +898,12 @@ efgOutcome *FullEfg::NewOutcome(int index)
 //                     Efg: Operations on players
 //------------------------------------------------------------------------
 
-EFPlayer *FullEfg::GetChance(void) const
+EFPlayer *efgGame::GetChance(void) const
 {
   return chance;
 }
 
-Infoset *FullEfg::AppendNode(Node *n, EFPlayer *p, int count)
+Infoset *efgGame::AppendNode(Node *n, EFPlayer *p, int count)
 {
   if (!n || !p || count == 0)
     throw Exception();
@@ -934,11 +920,10 @@ Infoset *FullEfg::AppendNode(Node *n, EFPlayer *p, int count)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return n->infoset;
 }  
 
-Infoset *FullEfg::AppendNode(Node *n, Infoset *s)
+Infoset *efgGame::AppendNode(Node *n, Infoset *s)
 {
   if (!n || !s)   throw Exception();
   
@@ -957,11 +942,10 @@ Infoset *FullEfg::AppendNode(Node *n, Infoset *s)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return s;
 }
   
-Node *FullEfg::DeleteNode(Node *n, Node *keep)
+Node *efgGame::DeleteNode(Node *n, Node *keep)
 {
   if (!n || !keep)   throw Exception();
 
@@ -989,11 +973,10 @@ Node *FullEfg::DeleteNode(Node *n, Node *keep)
   sortisets = true;
 
   SortInfosets();
-  NotifyClients(true, true);
   return keep;
 }
 
-Infoset *FullEfg::InsertNode(Node *n, EFPlayer *p, int count)
+Infoset *efgGame::InsertNode(Node *n, EFPlayer *p, int count)
 {
   if (!n || !p || count <= 0)  throw Exception();
 
@@ -1014,11 +997,10 @@ Infoset *FullEfg::InsertNode(Node *n, EFPlayer *p, int count)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return m->infoset;
 }
 
-Infoset *FullEfg::InsertNode(Node *n, Infoset *s)
+Infoset *efgGame::InsertNode(Node *n, Infoset *s)
 {
   if (!n || !s)  throw Exception();
 
@@ -1044,11 +1026,10 @@ Infoset *FullEfg::InsertNode(Node *n, Infoset *s)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return m->infoset;
 }
 
-Infoset *FullEfg::CreateInfoset(EFPlayer *p, int br)
+Infoset *efgGame::CreateInfoset(EFPlayer *p, int br)
 {
   if (!p || p->Game() != this)  throw Exception();
   m_revision++;
@@ -1056,7 +1037,7 @@ Infoset *FullEfg::CreateInfoset(EFPlayer *p, int br)
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
-Infoset *FullEfg::JoinInfoset(Infoset *s, Node *n)
+Infoset *efgGame::JoinInfoset(Infoset *s, Node *n)
 {
   if (!n || !s)  throw Exception();
 
@@ -1080,11 +1061,10 @@ Infoset *FullEfg::JoinInfoset(Infoset *s, Node *n)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return s;
 }
 
-Infoset *FullEfg::LeaveInfoset(Node *n)
+Infoset *efgGame::LeaveInfoset(Node *n)
 {
   if (!n)  throw Exception();
 
@@ -1107,11 +1087,10 @@ Infoset *FullEfg::LeaveInfoset(Node *n)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return n->infoset;
 }
 
-Infoset *FullEfg::SplitInfoset(Node *n)
+Infoset *efgGame::SplitInfoset(Node *n)
 {
   if (!n)  throw Exception();
 
@@ -1141,11 +1120,10 @@ Infoset *FullEfg::SplitInfoset(Node *n)
   }
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return n->infoset;
 }
 
-Infoset *FullEfg::MergeInfoset(Infoset *to, Infoset *from)
+Infoset *efgGame::MergeInfoset(Infoset *to, Infoset *from)
 {
   if (!to || !from)  throw Exception();
 
@@ -1166,11 +1144,10 @@ Infoset *FullEfg::MergeInfoset(Infoset *to, Infoset *from)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return to;
 }
 
-bool FullEfg::DeleteEmptyInfoset(Infoset *s)
+bool efgGame::DeleteEmptyInfoset(Infoset *s)
 {
   if (!s)  throw Exception();
 
@@ -1181,11 +1158,10 @@ bool FullEfg::DeleteEmptyInfoset(Infoset *s)
   s->player->infosets.Remove(s->player->infosets.Find(s));
   delete s;
 
-  NotifyClients(false, true);
   return true;
 }
 
-void FullEfg::DeleteEmptyInfosets(void)
+void efgGame::DeleteEmptyInfosets(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     for (int iset = 1; iset <= NumInfosets()[pl]; iset++) {
@@ -1196,7 +1172,7 @@ void FullEfg::DeleteEmptyInfosets(void)
   }
 } 
 
-Infoset *FullEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
+Infoset *efgGame::SwitchPlayer(Infoset *s, EFPlayer *p)
 {
   if (!s || !p)  throw Exception();
   if (s->GetPlayer()->IsChance() || p->IsChance())  throw Exception();
@@ -1211,11 +1187,10 @@ Infoset *FullEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(false, true);
   return s;
 }
 
-void FullEfg::CopySubtree(Node *src, Node *dest, Node *stop)
+void efgGame::CopySubtree(Node *src, Node *dest, Node *stop)
 {
   if (src == stop) {
     dest->outcome = src->outcome;
@@ -1235,7 +1210,7 @@ void FullEfg::CopySubtree(Node *src, Node *dest, Node *stop)
 //
 // MarkSubtree: sets the Node::mark flag on all children of p_node
 //
-void FullEfg::MarkSubtree(Node *p_node)
+void efgGame::MarkSubtree(Node *p_node)
 {
   p_node->mark = true;
   for (int i = 1; i <= p_node->children.Length(); i++) {
@@ -1246,7 +1221,7 @@ void FullEfg::MarkSubtree(Node *p_node)
 //
 // UnmarkSubtree: clears the Node::mark flag on all children of p_node
 //
-void FullEfg::UnmarkSubtree(Node *p_node)
+void efgGame::UnmarkSubtree(Node *p_node)
 {
   p_node->mark = false;
   for (int i = 1; i <= p_node->children.Length(); i++) {
@@ -1254,7 +1229,7 @@ void FullEfg::UnmarkSubtree(Node *p_node)
   }
 }
 
-void FullEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
+void efgGame::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
 {
   if (where->actions.Length() <= 1)  {
     // only one action; nothing to reveal!
@@ -1298,10 +1273,9 @@ void FullEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
   }
 
   Reindex();
-  NotifyClients(true, true);
 }
 
-Node *FullEfg::CopyTree(Node *src, Node *dest)
+Node *efgGame::CopyTree(Node *src, Node *dest)
 {
   if (!src || !dest)  throw Exception();
   if (src == dest || dest->children.Length())   return src;
@@ -1319,11 +1293,10 @@ Node *FullEfg::CopyTree(Node *src, Node *dest)
     SortInfosets();
   }
 
-  NotifyClients(true, true);
   return dest;
 }
 
-Node *FullEfg::MoveTree(Node *src, Node *dest)
+Node *efgGame::MoveTree(Node *src, Node *dest)
 {
   if (!src || !dest)  throw Exception();
   if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
@@ -1352,11 +1325,10 @@ Node *FullEfg::MoveTree(Node *src, Node *dest)
   
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return dest;
 }
 
-Node *FullEfg::DeleteTree(Node *n)
+Node *efgGame::DeleteTree(Node *n)
 {
   if (!n)  throw Exception();
 
@@ -1377,11 +1349,10 @@ Node *FullEfg::DeleteTree(Node *n)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return n;
 }
 
-Action *FullEfg::InsertAction(Infoset *s)
+Action *efgGame::InsertAction(Infoset *s)
 {
   if (!s)  throw Exception();
 
@@ -1393,11 +1364,10 @@ Action *FullEfg::InsertAction(Infoset *s)
   }
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return action;
 }
 
-Action *FullEfg::InsertAction(Infoset *s, const Action *a)
+Action *efgGame::InsertAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
 
@@ -1414,11 +1384,10 @@ Action *FullEfg::InsertAction(Infoset *s, const Action *a)
 
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return action;
 }
 
-Infoset *FullEfg::DeleteAction(Infoset *s, const Action *a)
+Infoset *efgGame::DeleteAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
 
@@ -1435,11 +1404,10 @@ Infoset *FullEfg::DeleteAction(Infoset *s, const Action *a)
   }
   DeleteLexicon();
   SortInfosets();
-  NotifyClients(true, true);
   return s;
 }
 
-void FullEfg::SetChanceProb(Infoset *infoset, int act, const gNumber &value)
+void efgGame::SetChanceProb(Infoset *infoset, int act, const gNumber &value)
 {
   if (infoset->IsChanceInfoset()) {
     m_revision++;
@@ -1448,7 +1416,7 @@ void FullEfg::SetChanceProb(Infoset *infoset, int act, const gNumber &value)
   }
 }
 
-gNumber FullEfg::GetChanceProb(Infoset *infoset, int act) const
+gNumber efgGame::GetChanceProb(Infoset *infoset, int act) const
 {
   if (infoset->IsChanceInfoset())
     return ((ChanceInfoset *) infoset)->GetActionProb(act);
@@ -1456,12 +1424,12 @@ gNumber FullEfg::GetChanceProb(Infoset *infoset, int act) const
     return (gNumber) 0;
 }
 
-gNumber FullEfg::GetChanceProb(const Action *a) const
+gNumber efgGame::GetChanceProb(const Action *a) const
 {
   return GetChanceProbs(a->BelongsTo())[a->GetNumber()];
 }
 
-gArray<gNumber> FullEfg::GetChanceProbs(Infoset *infoset) const
+gArray<gNumber> efgGame::GetChanceProbs(Infoset *infoset) const
 {
   if (infoset->IsChanceInfoset())
     return ((ChanceInfoset *) infoset)->GetActionProbs();
@@ -1473,14 +1441,14 @@ gArray<gNumber> FullEfg::GetChanceProbs(Infoset *infoset) const
 //                     Subgame-related functions
 //---------------------------------------------------------------------
 
-void FullEfg::MarkTree(Node *n, Node *base)
+void efgGame::MarkTree(Node *n, Node *base)
 {
   n->ptr = base;
   for (int i = 1; i <= NumChildren(n); i++)
     MarkTree(n->GetChild(i), base);
 }
 
-bool FullEfg::CheckTree(Node *n, Node *base)
+bool efgGame::CheckTree(Node *n, Node *base)
 {
   int i;
 
@@ -1498,7 +1466,7 @@ bool FullEfg::CheckTree(Node *n, Node *base)
   return true;
 }
 
-bool FullEfg::IsLegalSubgame(Node *n)
+bool efgGame::IsLegalSubgame(Node *n)
 {
   if (NumChildren(n) == 0)  
     return false;
@@ -1507,7 +1475,7 @@ bool FullEfg::IsLegalSubgame(Node *n)
   return CheckTree(n, n);
 }
 
-bool FullEfg::MarkSubgame(Node *n)
+bool efgGame::MarkSubgame(Node *n)
 {
   if(n->gameroot == n) return true;
 
@@ -1520,7 +1488,7 @@ bool FullEfg::MarkSubgame(Node *n)
   return false;
 }
 
-void FullEfg::UnmarkSubgame(Node *n)
+void efgGame::UnmarkSubgame(Node *n)
 {
   if (n->gameroot == n && n->parent)  {
     n->gameroot = 0;
@@ -1529,7 +1497,7 @@ void FullEfg::UnmarkSubgame(Node *n)
 }
   
 
-void FullEfg::MarkSubgame(Node *n, Node *base)
+void efgGame::MarkSubgame(Node *n, Node *base)
 {
   if (n->gameroot == n)  return;
   n->gameroot = base;
@@ -1537,7 +1505,7 @@ void FullEfg::MarkSubgame(Node *n, Node *base)
     MarkSubgame(n->GetChild(i), base);
 }
 
-void FullEfg::MarkSubgames(const gList<Node *> &list)
+void efgGame::MarkSubgames(const gList<Node *> &list)
 {
   for (int i = 1; i <= list.Length(); i++)  {
     if (IsLegalSubgame(list[i]))  {
@@ -1547,7 +1515,7 @@ void FullEfg::MarkSubgames(const gList<Node *> &list)
   }
 }
 
-void FullEfg::MarkSubgames(void)
+void efgGame::MarkSubgames(void)
 {
   gList<Node *> subgames;
   LegalSubgameRoots(*this, subgames);
@@ -1558,7 +1526,7 @@ void FullEfg::MarkSubgames(void)
   }
 }
 
-void FullEfg::UnmarkSubgames(Node *n)
+void efgGame::UnmarkSubgames(Node *n)
 {
   if (NumChildren(n) == 0)   return;
 
@@ -1572,7 +1540,7 @@ void FullEfg::UnmarkSubgames(Node *n)
 }
 
 
-int FullEfg::ProfileLength(void) const
+int efgGame::ProfileLength(void) const
 {
   int sum = 0;
 
@@ -1583,7 +1551,7 @@ int FullEfg::ProfileLength(void) const
   return sum;
 }
 
-gArray<int> FullEfg::NumInfosets(void) const
+gArray<int> efgGame::NumInfosets(void) const
 {
   gArray<int> foo(players.Length());
   
@@ -1594,7 +1562,7 @@ gArray<int> FullEfg::NumInfosets(void) const
   return foo;
 }
 
-int FullEfg::NumPlayerInfosets() const
+int efgGame::NumPlayerInfosets() const
 {
   int answer(0);
   int pl;
@@ -1603,17 +1571,17 @@ int FullEfg::NumPlayerInfosets() const
   return answer;
 }
 
-int FullEfg::NumChanceInfosets() const
+int efgGame::NumChanceInfosets() const
 {
   return chance->infosets.Length();
 }
 
-int FullEfg::TotalNumInfosets(void) const
+int efgGame::TotalNumInfosets(void) const
 {
   return NumPlayerInfosets() + NumChanceInfosets();
 }
 
-gPVector<int> FullEfg::NumActions(void) const
+gPVector<int> efgGame::NumActions(void) const
 {
   gArray<int> foo(players.Length());
   int i;
@@ -1630,7 +1598,7 @@ gPVector<int> FullEfg::NumActions(void) const
   return bar;
 }  
 
-int FullEfg::NumPlayerActions(void) const
+int efgGame::NumPlayerActions(void) const
 {
   int answer = 0;
 
@@ -1640,7 +1608,7 @@ int FullEfg::NumPlayerActions(void) const
   return answer;
 }
 
-int FullEfg::NumChanceActions(void) const
+int efgGame::NumChanceActions(void) const
 {
   int answer = 0;
 
@@ -1651,7 +1619,7 @@ int FullEfg::NumChanceActions(void) const
   return answer;
 }
 
-gPVector<int> FullEfg::NumMembers(void) const
+gPVector<int> efgGame::NumMembers(void) const
 {
   gArray<int> foo(players.Length());
 
@@ -1673,7 +1641,7 @@ gPVector<int> FullEfg::NumMembers(void) const
 //                       Efg: Payoff computation
 //------------------------------------------------------------------------
 
-void FullEfg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
+void efgGame::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
 		 gVector<gNumber> &payoff) const
 {
   if (n->outcome)  {
@@ -1691,7 +1659,7 @@ void FullEfg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
 	   prob, profile, payoff);
 }
 
-void FullEfg::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
+void efgGame::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
 			  gPVector<gNumber> &probs) const
 {
   if (n->infoset && n->infoset->player->IsChance())
@@ -1706,20 +1674,20 @@ void FullEfg::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
   }
 }
 
-void FullEfg::Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const
+void efgGame::Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const
 {
   ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
   Payoff(root, 1, profile, payoff);
 }
 
-void FullEfg::InfosetProbs(const gPVector<int> &profile,
+void efgGame::InfosetProbs(const gPVector<int> &profile,
 			  gPVector<gNumber> &probs) const
 {
   ((gVector<gNumber> &) probs).operator=((gNumber) 0);
   InfosetProbs(root, 1, profile, probs);
 }
 
-void FullEfg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
+void efgGame::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
 		    gArray<gNumber> &payoff) const
 {
   if (n->outcome)   {
@@ -1737,7 +1705,7 @@ void FullEfg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile
 	   prob, profile, payoff);
 }
 
-void FullEfg::Payoff(const gArray<gArray<int> *> &profile,
+void efgGame::Payoff(const gArray<gArray<int> *> &profile,
 		 gArray<gNumber> &payoff) const
 {
   for (int i = 1; i <= payoff.Length(); i++)
@@ -1745,7 +1713,7 @@ void FullEfg::Payoff(const gArray<gArray<int> *> &profile,
   Payoff(root, 1, profile, payoff);
 }
 
-Nfg *FullEfg::AssociatedNfg(void) const
+Nfg *efgGame::AssociatedNfg(void) const
 {
   if (lexicon) {
     return lexicon->N;
@@ -1755,43 +1723,8 @@ Nfg *FullEfg::AssociatedNfg(void) const
   }
 }
 
-Nfg *FullEfg::AssociatedAfg(void) const
+Nfg *efgGame::AssociatedAfg(void) const
 {
   return afg;
 }
 
-void FullEfg::RegisterClient(EfgClient *p_client)
-{
-  m_clients.Append(p_client);
-}
-
-void FullEfg::UnregisterClient(EfgClient *p_client)
-{
-  m_clients.Remove(m_clients.Find(p_client));
-}
-
-void FullEfg::NotifyClients(bool p_nodesChanged, bool p_infosetsChanged) const
-{
-  for (int i = 1; i <= m_clients.Length(); i++) {
-    m_clients[i]->OnTreeChanged(p_nodesChanged, p_infosetsChanged);
-  }
-}
-
-
-EfgClient::EfgClient(FullEfg *p_efg)
-  : m_efg(p_efg)
-{
-  p_efg->RegisterClient(this);
-}
-
-EfgClient::~EfgClient()
-{
-  if (m_efg) {
-    m_efg->UnregisterClient(this);
-  }
-}
-
-void EfgClient::OnEfgDestructed(void)
-{
-  m_efg = 0;
-}

@@ -64,7 +64,7 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 
 void EfgOutcomeWindow::UpdateValues(void)
 {
-  const FullEfg &efg = *m_parent->Game();
+  const efgGame &efg = *m_parent->Game();
 
   if (GetCols() < efg.NumPlayers() + 1) {
     AppendCols(efg.NumPlayers() + 1 - GetCols());

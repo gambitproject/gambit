@@ -141,7 +141,7 @@ class TreeWindow;
 
 class efgTreeLayout {
 private:
-  FullEfg &m_efg;
+  efgGame &m_efg;
   TreeWindow *m_parent;
   gList<NodeEntry *> m_nodeList;
   int m_maxX, m_maxY, m_maxLevel;
@@ -170,7 +170,7 @@ private:
   void RenderSubtree(wxDC &dc) const;
 
 public:
-  efgTreeLayout(FullEfg &, TreeWindow *);
+  efgTreeLayout(efgGame &, TreeWindow *);
   virtual ~efgTreeLayout() { }
 
   Node *PriorSameLevel(Node *) const;

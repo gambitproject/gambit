@@ -51,7 +51,7 @@ void EfgProfileList::UpdateValues(void)
   InsertColumn(5, "Liap Value");
   InsertColumn(6, "Qre Lambda");
 
-  const FullEfg &efg = *m_parent->Game();
+  const efgGame &efg = *m_parent->Game();
   int maxColumn = 6;
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {

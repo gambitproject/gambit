@@ -80,7 +80,7 @@ public:
   BehavSolution &operator*=(const gNumber &);
 
   // GENERAL DATA ACCESS
-  FullEfg &GetGame(void) const { return m_profile->GetGame(); }
+  efgGame &GetGame(void) const { return m_profile->GetGame(); }
   const BehavProfile<gNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
   gPrecision Precision(void) const { return m_precision; }
 

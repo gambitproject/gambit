@@ -12,7 +12,7 @@
 
 class AllEFNashSolveModule  {
 private:
-  const FullEfg &EF;
+  const efgGame &EF;
   const EFSupport supersupport;
   gList<const EFSupport> possiblenashsubsupports;
   EfgPolEnumParams params;
@@ -22,7 +22,7 @@ private:
   gList<const EFSupport> singular_supports;
 
 public:
-  AllEFNashSolveModule(const FullEfg &, const EfgPolEnumParams &p,
+  AllEFNashSolveModule(const efgGame &, const EfgPolEnumParams &p,
 		       gStatus &);
   AllEFNashSolveModule(const EFSupport &, const EfgPolEnumParams &p,
 		       gStatus &);
@@ -42,7 +42,7 @@ public:
 //                    AllEFNashSolveModule: Member functions
 //-------------------------------------------------------------------------
 
-AllEFNashSolveModule::AllEFNashSolveModule(const FullEfg &E, 
+AllEFNashSolveModule::AllEFNashSolveModule(const efgGame &E, 
 					   const EfgPolEnumParams &p,
 					   gStatus &p_status)
   : EF(E), 

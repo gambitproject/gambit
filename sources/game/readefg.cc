@@ -620,7 +620,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(FullEfg *p_efg, Node *p_node,
+static void BuildSubtree(efgGame *p_efg, Node *p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
   p_node->SetName((*p_nodeData)->m_name);
@@ -698,7 +698,7 @@ static void BuildSubtree(FullEfg *p_efg, Node *p_node,
   }
 }
 
-static void BuildEfg(FullEfg *p_efg, TreeData &p_treeData)
+static void BuildEfg(efgGame *p_efg, TreeData &p_treeData)
 {
   p_efg->SetTitle(p_treeData.m_title);
   p_efg->SetComment(p_treeData.m_comment);
@@ -715,12 +715,12 @@ static void BuildEfg(FullEfg *p_efg, TreeData &p_treeData)
 // ReadEfgFile: Global visible function to read an extensive form savefile
 //=========================================================================
 
-FullEfg *ReadEfgFile(gInput &p_file)
+efgGame *ReadEfgFile(gInput &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  FullEfg *efg = new FullEfg;
+  efgGame *efg = new efgGame;
 
   try {
     Parse(parser, treeData);

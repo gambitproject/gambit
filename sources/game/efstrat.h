@@ -19,11 +19,11 @@ class EFActionSet;
 class EFSupport {
 protected:
   gText m_name;
-  FullEfg *m_efg;
+  efgGame *m_efg;
   gArray<EFActionSet *> m_players;
 
 public:
-  EFSupport(const FullEfg &);
+  EFSupport(const efgGame &);
   EFSupport(const EFSupport &);
   virtual ~EFSupport();
   EFSupport &operator=(const EFSupport &);
@@ -31,7 +31,7 @@ public:
   bool operator==(const EFSupport &) const;
   bool operator!=(const EFSupport &) const;
 
-  FullEfg &GetGame(void) const { return *m_efg; }
+  efgGame &GetGame(void) const { return *m_efg; }
 
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
@@ -125,7 +125,7 @@ protected:
 						 gList<Infoset *> *);
 
 public:
-  EFSupportWithActiveInfo ( const FullEfg &);
+  EFSupportWithActiveInfo ( const efgGame &);
   EFSupportWithActiveInfo ( const EFSupport &);
   EFSupportWithActiveInfo ( const EFSupportWithActiveInfo &);
   virtual ~EFSupportWithActiveInfo();

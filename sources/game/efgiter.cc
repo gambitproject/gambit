@@ -7,7 +7,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-EfgIter::EfgIter(FullEfg &efg)
+EfgIter::EfgIter(efgGame &efg)
   : _efg(&efg), _support(efg),
     _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())

@@ -55,6 +55,4 @@ template class gList<const Infoset *>;
 
 template class gList<efgOutcome *>;
 
-template class gList<EfgClient *>;
-
 

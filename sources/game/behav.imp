@@ -17,7 +17,7 @@
 //                    PureBehavProfile<T> member functions
 //-------------------------------------------------------------------------
 
-template <class T> PureBehavProfile<T>::PureBehavProfile(const FullEfg &efg)
+template <class T> PureBehavProfile<T>::PureBehavProfile(const efgGame &efg)
   : E(&efg), profile(efg.NumPlayers())
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
@@ -705,7 +705,7 @@ void BehavProfile<T>::ComputeSolutionData(void)
 }
 
 template <class T>
-void BehavProfile<T>::BehaviorStrat(const FullEfg &E, int pl,
+void BehavProfile<T>::BehaviorStrat(const efgGame &E, int pl,
 				    Node *n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
@@ -724,7 +724,7 @@ void BehavProfile<T>::BehaviorStrat(const FullEfg &E, int pl,
 
 template <class T>
 void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
-				       const FullEfg &E, int pl,
+				       const efgGame &E, int pl,
 				       const gArray<int> *const actions,
 				       Node *node)
 {
