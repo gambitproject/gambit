@@ -13,6 +13,7 @@
 #include "normal.h"
 
 class StrategyProfile;
+template <class T> class NormalIter;
 
 //
 // This class is useful for iterating around the normal form.  This iterator
@@ -25,6 +26,7 @@ class StrategyProfile;
 // the total number of possible contingencies in increments of 1.
 //
 template <class T> class ContIter    {
+  friend class NormalIter<T>;
   private:
     int sset;
     NormalForm<T> *N;
@@ -49,6 +51,8 @@ template <class T> class ContIter    {
     int Next(int pl);
 
     int NextContingency(void);
+
+    gTuple<int> Get(void) const;
 
     long GetIndex(void) const;
 
