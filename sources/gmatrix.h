@@ -8,6 +8,7 @@
 #define GMATRIX_H
 
 #ifdef __GNUG__
+// this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
 #pragma interface
 #elif defined(__BORLANDC__)
 #pragma option -Jgx
@@ -17,6 +18,7 @@
 
 #include "gambitio.h"
 #include "gvector.h"
+#include "gblock.h"
 
 template <class T> class gMatrix   {
 protected:
@@ -49,7 +51,7 @@ protected:
   void AllocateData(void);
   void DeleteData(void);
   void CopyData(const gMatrix<T> &);
-  
+
 public:
   // Constructors
   gMatrix(void);
@@ -66,7 +68,7 @@ public:
     assert(Check(row,col));
     return data[row][col]; 
   }
-  T operator()(int row, int col) const {
+  const T& operator()(int row, int col) const {
     assert(Check(row,col));
     return data[row][col]; 
   }
@@ -81,13 +83,15 @@ public:
   gMatrix<T> &operator-=(const gMatrix<T> &);
 
   // *,/ operators
+  // "in-place" column multiply
+  void CMultiply(const gVector<T>&, gVector<T>&) const;
+  // "in-place" row (transposed) multiply
+  void RMultiply(const gVector<T>&, gVector<T>&) const;
   gMatrix<T> operator*(const gMatrix<T> &) const;
   gVector<T> operator*(const gVector<T> &) const;
   friend gVector<T> operator*(const gVector<T> &, const gMatrix<T>&);
-  gMatrix<T> operator*(const T) const;
-  gMatrix<T> &operator*=(const gMatrix<T> &M) {
-    return (*this)= (*this) * M;
-  }
+  gMatrix<T> operator*(T) const;
+  gMatrix<T> &operator*=(const gMatrix<T> &M);
   gMatrix<T> &operator*=(T);
 
   gMatrix<T> operator/(T) const;
@@ -106,7 +110,8 @@ public:
   // manipulation functions
   void AddRow(const gVector<T> &);
   void RemoveRow(int);
-  void SwitchRow(int, const gVector<T> &);
+  void SwitchRow(int, const gVector<T> &); // redundant (identical to SetRow)
+  void SwitchRowWithVector(int, gVector<T> &);
   void SwitchRows(int, int);
   gVector<T> GetRow(int) const;
   void GetRow(int, gVector<T>&) const;
@@ -114,7 +119,7 @@ public:
 
   void AddColumn(const gVector<T> &);
   void RemoveColumn(int);
-  void SwitchColumn(int, const gVector<T> &);
+  void SwitchColumn(int, const gVector<T> &); // redundant (identical to SetColumn)
   void SwitchColumnWithVector(int, gVector<T> &);
   void SwitchColumns(int, int);
   gVector<T> GetColumn(int) const;
@@ -129,17 +134,17 @@ public:
   T Determinant(void) const;
 
   // parameter access functions
-  int MinRow(void) const { return minrow; }
-  int MaxRow(void) const { return maxrow; }
+  const int& MinRow(void) const { return minrow; }
+  const int& MaxRow(void) const { return maxrow; }
   int NumRows(void) const { return maxrow-minrow+1; }
   
-  int MinCol(void) const { return mincol; }
-  int MaxCol(void) const { return maxcol; }
+  const int& MinCol(void) const { return mincol; }
+  const int& MaxCol(void) const { return maxcol; }
   int NumColumns(void) const { return maxcol-mincol+1; }
 
   void Dump(gOutput &to) const;
   
-  void SwapRows(int, int);
+//  void SwapRows(int, int); // use SwitchRows
   void RotateUp(int lo, int hi);
   void RotateDown(int lo, int hi);
 
