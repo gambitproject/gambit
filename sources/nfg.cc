@@ -24,7 +24,7 @@ BaseNfg::BaseNfg( const gArray<int> &dim)
 :players(dim.Length()), dimensions(dim)
 {
   for (int i = 1; i <= players.Length(); i++) 
-    players[i] = new NFPlayer(this, dim[i]);
+    players[i] = new NFPlayer(i, this, dim[i]);
   IndexStrategies();
 }
 
@@ -32,7 +32,7 @@ BaseNfg::BaseNfg (const BaseNfg &b)
 : title(b.title), players(b.players.Length()), dimensions(b.dimensions)
 {
   for (int i = 1; i <= players.Length(); i++){
-    players[i] = new NFPlayer(this, dimensions[i]);
+    players[i] = new NFPlayer(i, this, dimensions[i]);
     players[i]->name = b.players[i]->name;
     for (int j = 1; j <= players[i]->NumStrats(); j++)
       *(players[i]->strategies[j]) = *(b.players[i]->strategies[j]);
@@ -123,8 +123,8 @@ void BaseNfg::IndexStrategies(void)
 // NFPlayer: Member functions 
 // --------------------------
 
-NFPlayer::NFPlayer(BaseNfg *n, int num)
-: N(n), strategies(num)
+NFPlayer::NFPlayer(int n, BaseNfg *N, int num)
+: number(n), N(N), strategies(num)
 { 
   for (int j = 1; j <= num; j++)
     strategies[j] = new Strategy(this);

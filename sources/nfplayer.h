@@ -25,6 +25,7 @@ class NFPlayer {
   friend class ContIter<gRational>;
 
 private:
+  int number;
   gString name;
   BaseNfg *N;
   
@@ -33,7 +34,7 @@ private:
 
 public:
 
-  NFPlayer( BaseNfg *n, int num );
+  NFPlayer( int n, BaseNfg *n, int num );
   virtual ~NFPlayer();
 
   BaseNfg *BelongsTo(void) const;
@@ -45,8 +46,9 @@ public:
 
   const gArray<Strategy *> &StrategyList(void) const;
 
-
+  int GetNumber(void) const  { return number; }
 };
+
 #endif    //# NFPLAYER_H
 
 
