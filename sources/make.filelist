@@ -56,7 +56,7 @@ ALLGCL_SOURCES = $(NALG_SOURCES) $(GPOLY_SOURCES) $(GAME_SOURCES) $(GLIB_SOURCES
 ALLGCL_OBJECTS = $(ALLGCL_SOURCES:.cc=.o)
 
 GUI_SOURCES = gambit.cc treewin.cc treewin1.cc twflash.cc treedraw.cc \
-              wxmisc.cc spread.cc efgshow.cc \
+              wxmisc.cc spread.cc efgshow.cc efgsolvd.cc nfgsolvd.cc \
               spreadim.cc efgsolng.cc wxstatus.cc algdlgs.cc \
               bsolnsf.cc efgsoln.cc accels.cc nfgshow.cc \
               nfgshow1.cc nfgsoln.cc nfgsolng.cc msolnsf.cc \
