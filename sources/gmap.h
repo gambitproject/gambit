@@ -360,8 +360,8 @@ template <class K, class T> class gBaseMap : public gSender {
 // classes.
 //+grp
     int operator==(const gBaseMap &M) const;
-    int operator!=(const gBaseMap &M) const { return !(*this==M); }
-    int operator=(const gBaseMap &M)
+    int operator!=(const gBaseMap &M) const { return !(*this == M); }
+    gBaseMap<K, T> &operator=(const gBaseMap &M);
 //-grp
 
 //
@@ -408,37 +408,39 @@ length(m.length), _default(m._default)
 template <class K, class T> INLINE
 int gBaseMap<K, T>::operator==(const gBaseMap &M) const
 {
-  if(length!=M.length) return 0;
+  if (length != M.length) return 0;
 
-  for(int i=0;i<length;i++)
-    {  if(keys[i]!=M.keys[i]) return 0;
-       if(values[i]!=M.values[i]) return 0;
-     }
+  for (int i = 0; i < length; i++)
+    if (keys[i] != M.keys[i] || values[i] != M.values[i])  return 0;
 
-  if(_default!=_default) return 0;
-
-  return 1;
+  return (_default == M._default);
 }
 
 template <class K, class T> INLINE
-void gBaseMap<K, T>::operator=(const gBaseMap &M) const
+gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap &M)
 {
-  if(this != &M)
-    {  Send(gBaseMapMessage<K, T>(-1,gBaseMapMessage<K, T>::FLUSH));
+  if (this != &M)   {
+    Send(gBaseMapMessage<K, T>(-1, gBaseMapMessage<K, T>::FLUSH));
 
-       length = M.length();
+    length = M.length;
 
-       if(keys) delete [] keys;
-       if(values) delete [] values;
+    if (keys) delete [] keys;
+    if (values) delete [] values;
 
-       keys = new K[M.length];
-       values = new T[M.length];
-
-       memcpy(keys, M.keys, length * sizeof(K));
-       memcpy(values, M.values, length * sizeof(T));
-
-       _default = M._default;
-     }
+    if (M.length)   {
+      keys = new K[M.length];
+      values = new T[M.length];
+      memcpy(keys, M.keys, length * sizeof(K));
+      memcpy(values, M.values, length * sizeof(T));
+    }
+    else  {
+      keys = 0;
+      values = 0;
+    }
+     
+    _default = M._default;
+  }
+  return *this;
 }
 
 template <class K, class T> INLINE
