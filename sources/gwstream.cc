@@ -14,6 +14,18 @@
 //                         gWinOutput member functions
 //--------------------------------------------------------------------------
 
+#include "gtext.h"
+
+gText gWinOutput::OpenFailed::Description(void) const
+{
+  return "Open failed in gWinOutput";
+}
+
+gText gWinOutput::WriteFailed::Description(void) const
+{
+  return "Write failed in gWinOutput";
+}
+
 void gWinOutput::OutputString(const char *s) const
 {
   ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->PutString( s );
@@ -22,7 +34,6 @@ void gWinOutput::OutputString(const char *s) const
 
 gWinOutput::gWinOutput(void)
 {
-  valid=0;
   Width=0;
   Prec=6;
   Represent='f';
@@ -30,9 +41,7 @@ gWinOutput::gWinOutput(void)
 
 
 gWinOutput::~gWinOutput()
-{
-  valid=0;
-}
+{ }
 
 int gWinOutput::GetWidth(void)
 {
@@ -76,89 +85,81 @@ char gWinOutput::GetRepMode(void)
 
 gOutput &gWinOutput::operator<<(int x)
 {
-  int c=sprintf(m_Buffer, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
+  if (sprintf(m_Buffer, "%*d", Width,  x)!=1) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(unsigned int x)
 {
-  int c=sprintf(m_Buffer, "%*d", Width,  x);valid=(c==1) ? 1 : 0;
+  if (sprintf(m_Buffer, "%*d", Width,  x)!=1) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(bool x)
 {
-  int c=sprintf(m_Buffer, "%c", (x) ? 'T' : 'F');valid=(c==1) ? 1 : 0;
+  if(sprintf(m_Buffer, "%c", (x) ? 'T' : 'F')!=1) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(long x)
 {
-  int c=sprintf(m_Buffer, "%*ld", Width, x);valid=(c==1) ? 1 : 0;
+  if( sprintf(m_Buffer, "%*ld", Width, x)!=1) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(char x)
 {
-  int c=sprintf(m_Buffer, "%c", x);valid=(c==1) ? 1 : 0;
+  if(sprintf(m_Buffer, "%c", x)!=1) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(double x)
 {
-  int c = 0;
-
   switch (Represent) {
     case 'f':
-      c = sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      //      c = sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      if(sprintf(m_Buffer, "%*.*f", Width, Prec, x)!=1) throw WriteFailed();
       break;
     case 'e':
-      c = sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      //      c = sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      if(sprintf(m_Buffer, "%*.*e", Width, Prec, x)!=1) throw WriteFailed();
       break;
     }
-	valid=(c==1) ? 1 : 0;
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(float x)
 {
-  int c = 0;
-
   switch (Represent) {
     case 'f':
-      c=sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      //      c=sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      if(sprintf(m_Buffer, "%*.*f", Width, Prec, x)!=1) WriteFailed();
       break;
     case 'e':
-      c=sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      //      c=sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      if(sprintf(m_Buffer, "%*.*e", Width, Prec, x)!=1) WriteFailed();
       break;
     }
-	valid=(c==1) ? 1 : 0;
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(const char *x)
 {
-	int c=sprintf(m_Buffer, "%s", x);valid=(c==1) ? 1 : 0;
+  if(sprintf(m_Buffer, "%s", x)!=1) WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(const void *x)
 {
-  int c=sprintf(m_Buffer, "%p", x);valid=(c==1) ? 1 : 0;
+  if(sprintf(m_Buffer, "%p", x)!=1) WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
-
-bool gWinOutput::IsValid(void) const
-{
-  return valid;
-}
-

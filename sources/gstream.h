@@ -222,6 +222,17 @@ class gWinOutput : public gOutput  {
     void OutputString(const char* s) const;
 
   public:
+    class OpenFailed : public gException   {
+    public:
+      virtual ~OpenFailed()   { }
+      gText Description(void) const;
+    };
+
+    class WriteFailed : public gException   {
+    public:
+      virtual ~WriteFailed()   { }
+      gText Description(void) const;
+    };
     gWinOutput(void);
     virtual ~gWinOutput();
 
