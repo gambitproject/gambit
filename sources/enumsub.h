@@ -7,26 +7,11 @@
 #ifndef ENUMSUB_H
 #define ENUMSUB_H
 
-#include "subsolve.h"
 #include "enum.h"
+#include "behavsol.h"
 
-template <class T> class EnumBySubgame : public SubgameSolver<T>  {
-  private:
-    int npivots;
-    EnumParams params;
-
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
-
-  public:
-    EnumBySubgame(const Efg &E, const EFSupport &,
-		  const EnumParams &, int max = 0);
-    virtual ~EnumBySubgame();
-
-    int NumPivots(void) const   { return npivots; }
-};
-
+int Enum(const EFSupport &, const EnumParams &,
+	 gList<BehavSolution> &, long &npivots, double &time);
 
 #endif   // ENUMSUB_H
 

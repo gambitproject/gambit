@@ -1,7 +1,7 @@
 //
 // FILE: enum.imp -- Nash Enum module
 //
-// @(#)enum.imp	2.10 19 Jul 1997
+// $Id$
 //
 
 #include "gwatch.h"
@@ -9,6 +9,32 @@
 #include "nfgiter.h"
 
 #include "enum.h"
+
+template <class T> class EnumModule  {
+private:
+  T eps;
+  const Nfg &NF;
+  const NFSupport &support;
+  EnumParams params;
+  int rows,cols,level;
+  long count,npivots;
+  double time;
+  gList<MixedSolution> solutions;
+
+  bool EqZero(T x) const;
+  
+public:
+  EnumModule(const Nfg &N, const EnumParams &p, const NFSupport &s); 
+  
+  int Enum(void);
+  
+  long NumPivots(void) const;
+  double Time(void) const;
+  
+  EnumParams &Parameters(void);
+
+  const gList<MixedSolution> &GetSolutions(void) const;
+};
 
 //-------------------------------------------------------------------------
 //                    EnumModule<T>: Member functions

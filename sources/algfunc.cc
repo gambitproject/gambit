@@ -107,25 +107,18 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
 
-  EnumParams EP;
-  EP.stopAfter = ((IntPortion *) param[1])->Value();
-  EP.tracefile = &((OutputPortion *) param[5])->Value();
-  EP.trace = ((IntPortion *) param[6])->Value();
-
-  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
-    EnumModule<double> EM(S->Game(), EP, *S);
-    EM.Enum();
-    ((IntPortion *) param[3])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[4])->Value() = EM.Time();
-    return new Mixed_ListPortion(EM.GetSolutions());
-  }
-  else  {
-    EnumModule<gRational> EM(S->Game(), EP, *S);
-    EM.Enum();
-    ((IntPortion *) param[3])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[4])->Value() = EM.Time();
-    return new Mixed_ListPortion(EM.GetSolutions());
-  }
+  EnumParams params;
+  params.stopAfter = ((IntPortion *) param[1])->Value();
+  params.precision = ((PrecisionPortion *) param[2])->Value();
+  params.tracefile = &((OutputPortion *) param[5])->Value();
+  params.trace = ((IntPortion *) param[6])->Value();
+  
+  gList<MixedSolution> solutions;
+  double time; 
+  Enum(*S, params, solutions,
+       ((IntPortion *) param[3])->Value(), time);
+  ((NumberPortion *) param[4])->Value() = time;
+  return new Mixed_ListPortion(solutions);
 }
 
 #include "enumsub.h"
@@ -134,36 +127,23 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 static Portion *GSM_EnumMixed_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const Efg &E = support.Game();
 
   if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
 
-  EnumParams EP;
-  EP.stopAfter = ((IntPortion *) param[2])->Value();
-  EP.tracefile = &((OutputPortion *) param[6])->Value();
-  EP.trace = ((IntPortion *) param[7])->Value();
+  EnumParams params;
+  params.stopAfter = ((IntPortion *) param[2])->Value();
+  params.precision = ((PrecisionPortion *) param[3])->Value();
+  params.tracefile = &((OutputPortion *) param[6])->Value();
+  params.trace = ((IntPortion *) param[7])->Value();
 
-  if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
-    EnumBySubgame<double> EM(E, support, EP);
+  double time;
+  gList<BehavSolution> solutions;
+  Enum(support, params, solutions, 
+       ((IntPortion *) param[4])->Value(), time);
+  ((NumberPortion *) param[5])->Value() = time;
 
-    EM.Solve();
-
-    ((IntPortion *) param[4])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[5])->Value() = EM.Time();
-
-    return new Behav_ListPortion(EM.GetSolutions());
-  }
-  else  {
-    EnumBySubgame<gRational> EM(E, support, EP);
-
-    EM.Solve();
-
-    ((IntPortion *) param[4])->Value() = EM.NumPivots();
-    ((NumberPortion *) param[5])->Value() = EM.Time();
-
-    return new Behav_ListPortion(EM.GetSolutions());
-  }
+  return new Behav_ListPortion(solutions);
 }
 
 
@@ -179,18 +159,10 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   gWatch watch;
 
-  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
-    gList<MixedSolution> solns;
-    FindPureNash(S->Game(), *S, solns);
-    ((NumberPortion *) param[2])->Value() = watch.Elapsed();
-    return new Mixed_ListPortion(solns);
-  }
-  else  {
-    gList<MixedSolution> solns;
-    FindPureNash(S->Game(), *S, solns);
-    ((NumberPortion *) param[2])->Value() = watch.Elapsed();
-    return new Mixed_ListPortion(solns);
-  }
+  gList<MixedSolution> solns;
+  FindPureNash(S->Game(), *S, solns);
+  ((NumberPortion *) param[2])->Value() = watch.Elapsed();
+  return new Mixed_ListPortion(solns);
 }
 
 #include "efgpure.h"
@@ -199,35 +171,20 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 static Portion *GSM_EnumPure_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-  const Efg &E = support.Game();
 
   if (((BoolPortion *) param[1])->Value())   {
-    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
-      PureNashBySubgame<double> M(E, support);
-	    M.Solve();
-	    ((NumberPortion *) param[4])->Value() = M.Time();
-      return new Behav_ListPortion(M.GetSolutions());
-    }
-    else  {
-      PureNashBySubgame<gRational> M(E, support);
-	    M.Solve();
-	    ((NumberPortion *) param[4])->Value() = M.Time();
-      return new Behav_ListPortion(M.GetSolutions());
-    }
+    gList<BehavSolution> solutions;
+    double time;
+    EnumPureNfg(support, solutions, time);
+    ((NumberPortion *) param[4])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
   else  {
-    if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
-      EfgPSNEBySubgame<double> M(E, support);
-	    M.Solve();
-	    ((NumberPortion *) param[4])->Value() = M.Time();
-      return new Behav_ListPortion(M.GetSolutions());
-    }
-    else  {
-      EfgPSNEBySubgame<gRational> M(E, support);
-	    M.Solve();
-	    ((NumberPortion *) param[4])->Value() = M.Time();
-      return new Behav_ListPortion(M.GetSolutions());
-    }
+    gList<BehavSolution> solutions;
+    double time;
+    EnumPure(support, solutions, time);
+    ((NumberPortion *) param[4])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
 }
 
@@ -240,7 +197,6 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 static Portion *GSM_GobitGrid_Support(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  Portion* por = 0;
 
   GridParams GP;
   
@@ -261,16 +217,12 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   GP.multi_grid = 0;
   if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
   
-	GridSolveModule GM(S.Game(), GP, S);
-	GM.GridSolve();
-	// ((IntPortion *) param[10])->Value() = GM.NumEvals();
-	// ((FloatPortion *) param[11])->Value() = GM.Time();
-	gList<MixedSolution> solns;
-	por = new Mixed_ListPortion(solns);
-	if (GP.pxifile != &gnull)  delete GP.pxifile;
+  gList<MixedSolution> solutions;
+  GridSolve(S, GP, solutions);
 
-  assert(por != 0);
-  return por;
+  if (GP.pxifile != &gnull)  delete GP.pxifile;
+
+  return new Mixed_ListPortion(solutions);
 }
 
 //---------------
@@ -430,24 +382,39 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 {
   EFSupport& S = *((EfSupportPortion*) param[0])->Value();
 
-  SeqFormParams SP;
-  SP.stopAfter = ((IntPortion *) param[2])->Value();
-  SP.tracefile = &((OutputPortion *) param[6])->Value();
-  SP.trace = ((IntPortion *) param[7])->Value();
+  if (((BoolPortion *) param[1])->Value())   {
+    LemkeParams params;
+    
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
 
-  if (((PrecisionPortion *) param[3])->Value() == precDOUBLE)  {
-    SeqFormModule<double> SM(S.Game(), SP, S);
-    SM.Lemke();
-    ((IntPortion *) param[4])->Value() = SM.NumPivots();
-    ((NumberPortion *) param[5])->Value() = SM.Time();
-    return new Behav_ListPortion(SM.GetSolutions());
+    gList<BehavSolution> solutions;
+    double time;
+    int npivots;
+
+    Lemke(S, params, solutions, npivots, time);
+    ((IntPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[5])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
   else  {
-    SeqFormModule<gRational> SM(S.Game(), SP, S);
-    SM.Lemke();
-    ((IntPortion *) param[4])->Value() = SM.NumPivots();
-    ((NumberPortion *) param[5])->Value() = SM.Time();
-    return new Behav_ListPortion(SM.GetSolutions());
+    SeqFormParams params;
+
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
+
+    gList<BehavSolution> solutions;
+    double time;
+    int npivots;
+
+    SeqForm(S, params, solutions, npivots, time);
+    ((IntPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[5])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
 }
 

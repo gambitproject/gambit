@@ -14,19 +14,7 @@
 #include "subsolve.h"
 
 
-int FindPureNash(const Efg &, const EFSupport &, gList<BehavSolution> &);
-
-
-template <class T> class EfgPSNEBySubgame : public SubgameSolver<T>  {
-  private:
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
-
-  public:
-    EfgPSNEBySubgame(const Efg &E, const EFSupport &, int max = 0);
-    virtual ~EfgPSNEBySubgame();
-};
+int EnumPure(const EFSupport &, gList<BehavSolution> &, double &time);
 
 
 #endif    // EFGPURE_H

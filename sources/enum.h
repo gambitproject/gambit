@@ -24,42 +24,16 @@
 class EnumParams     {
 public:
   int trace, stopAfter;
+  Precision precision;
   gOutput *tracefile;
   gStatus &status;
 
   EnumParams(gStatus &status_=gstatus);
 };
 
-//
-// The general-purpose interface to the Module routines
-//
 
-template <class T> class EnumModule  {
-private:
-  T eps;
-  const Nfg &NF;
-  const NFSupport &support;
-  EnumParams params;
-  int rows,cols,level;
-  long count,npivots;
-  double time;
-  gList<MixedSolution> solutions;
-
-  bool EqZero(T x) const;
-  
-public:
-  EnumModule(const Nfg &N, const EnumParams &p, const NFSupport &s); 
-  
-  int Enum(void);
-  
-  long NumPivots(void) const;
-  double Time(void) const;
-  
-  EnumParams &Parameters(void);
-
-  const gList<MixedSolution> &GetSolutions(void) const;
-};
-
+int Enum(const NFSupport &, const EnumParams &,
+	 gList<MixedSolution> &, long &npivots, double &time);
 
 #endif    // ENUM_H
 

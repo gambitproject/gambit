@@ -254,6 +254,30 @@ GridParams::GridParams(gStatus &st)
 		status(st)
 { }
 
+class GridSolveModule  {
+	private:
+		const Nfg &N;
+		const NFSupport &S;
+		const GridParams &params;
+		gArray<int> num_strats;
+		MixedProfile<double> P_calc;
+		gVector<double> tmp; // scratch
+		double lam;
+		int static_player;
+
+		gVector<double> UpdateFunc(const MixedProfile<double> &P,int pl,double lam);
+		bool CheckEqu(MixedProfile<double> P,double lam,int cur_grid);
+		void OutputHeader(gOutput &out);
+		void OutputResult(gOutput &out,const MixedProfile<double> P,double lam,double obj_func);
+	protected:
+		// could use norms other then the simple one
+		virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
+	public:
+		GridSolveModule(const Nfg &, const GridParams &, const NFSupport &);
+		virtual ~GridSolveModule();
+		void GridSolve(void);
+};
+
 // Output header
 void GridSolveModule::OutputHeader(gOutput &out)
 {
@@ -400,7 +424,16 @@ timer.Stop();
 *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 params.status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 
-
 if (params.status.Get()) params.status.Reset();
+}
 
+
+
+int GridSolve(const NFSupport &support, const GridParams &params,
+              gList<MixedSolution> &/*solutions*/)
+{
+  GridSolveModule module(support.Game(), params, support);
+  module.GridSolve();
+//  solutions = module.GetSolutions();
+  return 1;
 }

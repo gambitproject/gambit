@@ -7,19 +7,10 @@
 #ifndef PSNESUB_H
 #define PSNESUB_H
 
-#include "subsolve.h"
 #include "nfgpure.h"
+#include "behavsol.h"
 
-template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
-  private:
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
-
-  public:
-    PureNashBySubgame(const Efg &E, const EFSupport &, int max = 0);
-    virtual ~PureNashBySubgame();
-};
-
+int EnumPureNfg(const EFSupport &, gList<BehavSolution> &, double &time);
+	     
 #endif   // PSNESUB_H
 

@@ -68,6 +68,18 @@ int FindPureNash(const Efg &efg, const EFSupport &sup,
 // Interfacing to solve-by-subgame
 //-----------------------------------
 
+
+template <class T> class EfgPSNEBySubgame : public SubgameSolver<T>  {
+  private:
+    int SolveSubgame(const Efg &, const EFSupport &,
+		     gList<BehavSolution> &);
+    EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
+
+  public:
+    EfgPSNEBySubgame(const Efg &E, const EFSupport &, int max = 0);
+    virtual ~EfgPSNEBySubgame();
+};
+
 template <class T>
 int EfgPSNEBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
@@ -85,3 +97,4 @@ EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg &E, const EFSupport &S,
 
 template <class T> EfgPSNEBySubgame<T>::~EfgPSNEBySubgame()   { }
   
+
