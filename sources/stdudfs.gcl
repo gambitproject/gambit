@@ -683,21 +683,21 @@ NewFunction[ActionNumber[a->ACTION]=:NUMBER,
 //  0.0+x
 //]
 
-//NewFunction[Float[x->MIXED]=:MIXED,
-//  1.0*x;
-//]
+NewFunction[Float[x->MIXED]=:MIXED,
+  1.0*x;
+]
 
-//NewFunction[Float[x->BEHAV]=:BEHAV,
-//  1.0*x
-//]
+NewFunction[Float[x->BEHAV]=:BEHAV,
+  1.0*x
+]
 
-//NewFunction[Float[x->NFOUTCOME]=:NFOUTCOME,
-//  SetPayoffs[x,Float[Payoffs[x]]];
-//]
+NewFunction[Float[x->NFOUTCOME]=:NFOUTCOME,
+  SetPayoffs[x,Float[Payoffs[x]]];
+]
 
-//NewFunction[Float[x->EFOUTCOME]=:EFOUTCOME,
-//  SetPayoffs[x,Float[Payoffs[x]]];
-//]
+NewFunction[Float[x->EFOUTCOME]=:EFOUTCOME,
+  SetPayoffs[x,Float[Payoffs[x]]];
+]
 
 NewFunction[SetProbs[profile<->MIXED,value->LIST(LIST(NUMBER))]=:MIXED,
   SetStrategyProbs[profile,Players[Game[profile]],value];
