@@ -212,6 +212,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       
       LTableau<T> BCopy(B);
       (*A)(i,0)=-small_num;
+      BCopy.Refactor();
 
       if(depth==0) {
 	BCopy.Pivot(j,0);
@@ -224,7 +225,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       // gout << "\nafter Pivot, missing: " << missing << "\n";
       // BCopy.Dump(gout);
 
-      //* gout << "\nDepth: " << depth << " Path: " << i;
+      // gout << "\nDepth: " << depth << " Path: " << i;
       newsol=0;
 
       if(BCopy.SF_LCPPath(-missing,params.status)==1) {
@@ -235,16 +236,19 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	BCopy.BasisVector(sol);
 	// gout << "\nsol = " << sol;
 	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
-	if(newsol)
+	if(newsol) {
 	  solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM)); 
-	// gout << "\nprofile = " << profile;
+	  // gout << "\nprofile = " << profile;
+	}
       }
       else 
-	//* gout << ": Dead End";
+	// gout << ": Dead End";
       
       (*A)(i,0)=-(T)1;
-      if(newsol)
+      if(newsol) {
+	BCopy.Refactor();
 	All_Lemke(i,BCopy,npivots,depth+1);
+      }
     }
   }
   

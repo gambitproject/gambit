@@ -173,7 +173,8 @@ template <class T> bool Tableau<T>::IsBlocked(int label) const
 
 template <class T> void Tableau<T>::Refactor()
 {
-//  B.refactor(*A, basis.label);
+  B.refactor();
+  //** is re-solve necessary here?
   B.solve(*b, solution);
 }
 

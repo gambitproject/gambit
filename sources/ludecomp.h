@@ -76,7 +76,7 @@ public:
   LUdecomp( const LUdecomp<T> &, Basis<T> & );
 
   // Decompose given matrix
-  LUdecomp( Basis<T> &, int rfac = -1 ); 
+  LUdecomp( Basis<T> &, int rfac = 0 ); 
 
   // Destructor
   ~LUdecomp();

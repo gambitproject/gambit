@@ -355,7 +355,7 @@ LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Basis<T> &bas)
 
 template <class T> 
 LUdecomp<T>::LUdecomp( Basis<T> &bas,
-		      int rfac = -1 )	
+		      int rfac = 0 )	
 : basis(bas),  
   scratch1(basis.label.First(), basis.label.Last()), 
   scratch2(basis.label.First(), basis.label.Last()),
