@@ -23,8 +23,7 @@
 #include "normiter.h"
 #include "rational.h"
 #include "gmatrix.h"
-#include "gmatrix1.h"
-#include "mixed.h"
+#include "gpvector.h"
 #include "solution.h"
 #include "simpdiv.h"
 
@@ -45,26 +44,30 @@ private:
   long leash;
   int t, nplayers, ibar,nevals, nits,plev,ndivs;
   T pay,d,maxz,bestz,mingrid;
-  gVector<int> strat,temp,nstrats,ylabel,temp1;
+  gTuple<int> nstrats,ylabel;
   gVector<T> M;
-  gMatrix1<int> labels,pi;
-  gNRMatrix1<int> U,TT;
-  MixedProfile<T> ab,y,besty,v;
+  gMatrix<int> labels,pi;
+  gPVector<int> U,TT;
+  gPVector<T> ab,y,besty,v;
 public:
   SimpdivModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,int plev,
 	      int ndivs, int leashlength)
-    :  SolutionModule(ofile,efile,plev), rep(N),ab(rep),y(rep), plev(plev),
-  leash(leashlength),ndivs(ndivs), nevals(0), nits(0),besty(rep),v(rep){ }
+    :  SolutionModule(ofile,efile,plev), rep(N),ab(rep.Dimensionality()),
+  nstrats(rep.Dimensionality()),y(rep.Dimensionality()), plev(plev),
+  pi(1,rep.ProfileLength(),1,2), labels(1,rep.ProfileLength(),1,2),
+  ylabel(2),leash(leashlength),ndivs(ndivs), nevals(0), nits(0),
+  U(rep.Dimensionality()), TT(rep.Dimensionality()),
+  besty(rep.Dimensionality()),v(rep.Dimensionality()){ }
   
   int Nevals(void) { return nevals;}
   int Simpdiv(int) ;
   virtual ~SimpdivModule() {}
   
   T simplex(void);
-  T getlabel(MixedProfile<T> &yy);
+  T getlabel(gPVector<T> &yy);
   void update(int j, int i);
-  void getY(MixedProfile<T> &x,int k);
-  void getnexty(MixedProfile<T> &x,int i);
+  void getY(gPVector<T> &x,int k);
+  void getnexty(gPVector<T> &x,int i);
   int get_c(int j, int h);
   int get_b(int j, int h);
   
@@ -72,7 +75,7 @@ public:
 
 template <class T> int SimpdivModule<T>::Simpdiv(int number)
 {
-  int qf,soln,i,j,k,maxt,ii;
+  int qf,soln,i,j,k,ii;
   
 
   if(leash==0)leash=32000;
@@ -82,29 +85,10 @@ template <class T> int SimpdivModule<T>::Simpdiv(int number)
   mingrid = ((T)(1))/mingrid;
 //  gout << "\nleash = " << leash << " ndivs = " << ndivs;
 //  gout << " mingrid = " << mingrid;
-
+  
   nplayers=rep.NumPlayers();
   
-  nstrats = gVector<int>(1,nplayers);
-  
-  for(i=1,maxt=0;i<=nplayers;i++)
-    {
-      nstrats[i]=rep.NumStrats(i);
-      maxt+=j;
-    }
-  
-  temp = gVector<int>(2);
-  ylabel = gVector<int>(2);
-  
-  for(i=1,maxt=0;i<=nplayers;i++)
-    maxt+=nstrats[i];
-  
-  pi = gMatrix1<int>(1,maxt,1,2);
-  labels = gMatrix1<int>(1,maxt+1,1,2);
-  U = gNRMatrix1<int>(1,nplayers,1,nstrats);
-  TT = gNRMatrix1<int>(1,nplayers,1,nstrats);
-
-  y = 0;
+  y = (T)(0);
 //  gout << "\nnplayers =" << nplayers;
 //  gout << "\nnstrats = " << nstrats;
 //  gout << "\ny = " << y;
@@ -116,9 +100,9 @@ template <class T> int SimpdivModule<T>::Simpdiv(int number)
       for(i=1;i<=nplayers;i++)
 	{
 //	  gout << "\n i = " << i;
-	  y[i][1]=(T)(1);
+	  y(i,1)=(T)(1);
 	  for(j=1;j<=nstrats[i];j++)
-	    if(j>1)y[i][j]=(T)(0);
+	    if(j>1)y(i,j)=(T)(0);
 	}
       
       for(qf=0;qf!=1 && d > mingrid;)
@@ -127,7 +111,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(int number)
 	  d=(T)(d/(T)2.0);
 	  for(i=1;i<=nplayers;i++)
 	    for(j=1;j<=nstrats[i];j++)
-	      v[i][j]=y[i][j];
+	      v(i,j)=y(i,j);
 	  maxz=simplex();
 	  
 	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
@@ -151,9 +135,9 @@ template <class T> T SimpdivModule<T>::simplex(void)
 	{
 	  TT(j,h)=0;
 	  U(j,h)=0;
-	  if(v[j][h]==(T)0.0)U(j,h)=1;
-	  ab[j][h]=(T)(0);
-	  y[j][h]=v[j][h];
+	  if(v(j,h)==(T)0.0)U(j,h)=1;
+	  ab(j,h)=(T)(0);
+	  y(j,h)=v(j,h);
 	}
     }
   
@@ -233,7 +217,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   getY(y,ii);
   
       /* case3a */
-  if(i==1 && (y[j][k]<=0 || (v[j][k]-y[j][k])>=((T)(leash))*d)) {
+  if(i==1 && (y(j,k)<=0 || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
     if(plev>=4) gout << " Case 3a "; 
     for(hh=1,tot=0;hh<=nstrats[j];hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
@@ -250,17 +234,17 @@ template <class T> T SimpdivModule<T>::simplex(void)
   }
       /* case3b */
   else if(i>=2 && i<=t &&
-	  (y[j][k]<=(T)(0) || (v[j][k]-y[j][k])>=((T)(leash))*d)) {
+	  (y(j,k)<=(T)(0) || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
     if(plev>=4) gout << " Case 3b "; 
     goto step4;
   }
       /* case3c */
-  else if(i==t+1 && ab[j][kk]==(T)(0)) {
+  else if(i==t+1 && ab(j,kk)==(T)(0)) {
     if(plev>=4) gout << " Case 3c "; 
-    if(y[j][h]<=(T)(0) || (v[j][h]-y[j][h])>=((T)(leash))*d)goto step4;
+    if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)goto step4;
     else {
       k=0;
-      while(ab[j][kk]==(T)(0) && k==0) {
+      while(ab(j,kk)==(T)(0) && k==0) {
 	if(kk==h)k=1;
 	kk++;
 	if(kk>nstrats[j])kk=1;
@@ -278,8 +262,8 @@ template <class T> T SimpdivModule<T>::simplex(void)
 	j=pi(t,1);
 	h=pi(t,2);
 	hh=get_b(j,h);
-	y[j][h]-=d;
-	y[j][hh]+=d;
+	y(j,h)-=d;
+	y(j,hh)+=d;
       }
       update(j,i);
     }
@@ -290,7 +274,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   j=pi(i-1,1);
   h=pi(i-1,2);
   TT(j,h)=0;
-  if(y[j][h]<=(T)(0) || (v[j][h]-y[j][h])>=((T)(leash))*d)U(j,h)=1;
+  if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)U(j,h)=1;
   labels.RotateDown(i,t+1);
   pi.RotateDown(i-1,t);
   t--;
@@ -305,18 +289,18 @@ template <class T> T SimpdivModule<T>::simplex(void)
   labels.RotateUp(1,t+1);
   ibar=1;
   pi.RotateUp(1,t);
-  U(j,h)=0;
+  U(j,k)=0;
   jj=pi(1,1);
   hh=pi(1,2);
   kk=get_b(jj,hh);
-  y[jj][hh]-=d;
-  y[jj][kk]+=d;
+  y(jj,hh)-=d;
+  y(jj,kk)+=d;
   
   k=get_c(j,h);
   kk=1;
   while(kk){
     if(k==h)kk=0;
-    ab[j][k]=(ab[j][k]-((T)(1)));
+    ab(j,k)=(ab(j,k)-((T)(1)));
     k++;
     if(k>nstrats[j])k=1;
   }
@@ -334,7 +318,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   } 
   for(i=1;i<=nplayers;i++)
     for(j=1;j<=nstrats[i];j++)
-      y[i][j]=besty[i][j];
+      y(i,j)=besty(i,j);
   nits=0;
   return maxz;
 }
@@ -345,7 +329,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
   
   f=1;
   if(i>=2 && i<=t) {
-    pi.SwapRows(i,i-1);
+    pi.SwitchRows(i,i-1);
     ibar=i;
   }
   else if(i==1) {
@@ -357,7 +341,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
       k=get_c(jj,hh);
       while(f) {
 	if(k==hh)f=0;
-	ab[j][k]=ab[j][k] + ((T)(1));
+	ab(j,k)=ab(j,k) + ((T)(1));
 	k++;
 	if(k>nstrats[jj])k=1;
       }
@@ -373,7 +357,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
       k=get_c(jj,hh);
       while(f) {
 	if(k==hh)f=0;
-	ab[j][k]= ab[j][k]-((T)(1));
+	ab(j,k)= ab(j,k)-((T)(1));
 	k++;
 	if(k>nstrats[jj])k=1;
       }
@@ -383,20 +367,20 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
 }
 
 template <class T> void SimpdivModule<T>
-::getY(MixedProfile<T> &x,int k)
+::getY(gPVector<T> &x,int k)
 {
   int j, h, i,hh;
   
   for(j=1;j<=nplayers;j++)
     for(h=1;h<=nstrats[j];h++)
-      x[j][h]=v[j][h];
+      x(j,h)=v(j,h);
   for(j=1;j<=nplayers;j++)
     for(h=1;h<=nstrats[j];h++)
       if(TT(j,h)==1 || U(j,h)==1) {
-	x[j][h]+=(d*ab[j][h]);
+	x(j,h)+=(d*ab(j,h));
 	hh=h-1;
 	if(hh==0)hh=nstrats[j];
-	x[j][hh]-=(d*ab[j][h]);
+	x(j,hh)-=(d*ab(j,h));
       }
   i=2;
   while(i<=k) {
@@ -406,16 +390,16 @@ template <class T> void SimpdivModule<T>
 }
 
 template <class T> void SimpdivModule<T>
-::getnexty(MixedProfile<T> &x,int i)
+::getnexty(gPVector<T> &x,int i)
 {
   int j,h,hh;
   
   assert(i>=1);
   j=pi(i,1);
   h=pi(i,2);
-  x[j][h]+=d;
+  x(j,h)+=d;
   hh=get_b(j,h);
-  x[j][hh]-=d;
+  x(j,hh)-=d;
 }
 
 template <class T> int SimpdivModule<T>::get_b(int j, int h)
@@ -441,7 +425,7 @@ template <class T> int SimpdivModule<T>::get_c(int j, int h)
   return hh;
 }
 
-template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
+template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
 {
   int i,j,ii,jj;
   T maxz,payoff,maxval;
@@ -458,7 +442,7 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
     maxval=((T)(-1000000));
     for(j=1;j<=rep.NumStrats(i);j++) {
       pay=rep.Payoff(i,i,j,yy);
-      payoff+=(yy[i][j]*pay);
+      payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;
 	jj=j;
@@ -474,14 +458,12 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
     bestz=maxz;
     for(i=1;i<=nplayers;i++)
       for(j=1;j<=nstrats[i];j++)
-	besty[i][j]=yy[i][j];
+	besty(i,j)=yy(i,j);
   }
   return maxz;
 }
 
 int SimpdivSolver::Simpdiv(void)
-//int NormalForm::Simpdiv(int number, int plev,gOutput &out,gOutput &err,
-//			int ndivs, int leashlength,int &nevals)
 {
   BaseSimpdiv *T;
   gOutput *outfile = &gout, *errfile = &gerr;
