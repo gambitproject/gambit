@@ -261,6 +261,8 @@ Portion *GSM_Lemke(Portion **param)
   NormalForm<double> &N = ((NfgPortion<double> *) param[0])->Value();
 
   LemkeParams LP;
+  LP.nequilib = ((IntPortion *) param[1])->Value();
+  
   LemkeModule<double> LS(N, LP);
   LS.Lemke();
 
@@ -297,6 +299,7 @@ Portion *GSM_SimpdivFloat(Portion **param)
   
   SimpdivParams SP;
   SP.number = ((IntPortion *) param[1])->Value();
+  SP.ndivs = ((IntPortion *) param[2])->Value();
   SP.leash = ((IntPortion *) param[3])->Value();
 
   SimpdivModule<double> SM(N, SP);
@@ -314,6 +317,7 @@ Portion *GSM_SimpdivRational(Portion **param)
   
   SimpdivParams SP;
   SP.number = ((IntPortion *) param[1])->Value();
+  SP.ndivs = ((IntPortion *) param[2])->Value();
   SP.leash = ((IntPortion *) param[3])->Value();
 
   SimpdivModule<gRational> SM(N, SP);
