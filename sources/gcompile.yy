@@ -71,6 +71,7 @@
 %token LARROW
 %token DBLARROW
 %token COMMA
+%token HASH
 
 %token NAME
 %token BOOLEAN
@@ -187,6 +188,7 @@ E6:           PLUS E7
   |           E7
 
 E7:           E8
+  |           E7 HASH E8   { emit(new Child); }
   |           E7 DBLLBRACK expression RBRACK RBRACK 
                  { emit(new Subscript); }
   ;
@@ -382,6 +384,7 @@ I_dont_believe_Im_doing_this:
     case '/':   return SLASH;
     case '%':   return PERCENT;
     case '=':   return EQU;
+    case '#':   return HASH;
     case '[':   c = nextchar();
                 if (c == '[')   {
 		  matching.Push('[');
