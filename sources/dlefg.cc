@@ -239,6 +239,17 @@ int dialogMoveAdd::GetActions(void) const
     return (int) ToDouble(m_actionItem->GetValue());
 }
 
+void dialogMoveAdd::OnOk(void)
+{
+  int actions = GetActions();
+  if (actions <= 0) {
+    wxMessageBox("Number of actions must be at least one", "Error");
+  }
+  else {
+    guiAutoDialog::OnOk();
+  }
+}
+
 
 //=========================================================================
 //                   dialogNodeDelete: Member functions

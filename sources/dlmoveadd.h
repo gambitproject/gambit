@@ -27,6 +27,8 @@ private:
   void OnPlayer(int);
   void OnInfoset(int);
 
+  void OnOk(void);
+
   const char *HelpString(void) const { return "Node Menu"; }
   
 public:
