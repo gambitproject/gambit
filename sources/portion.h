@@ -39,10 +39,10 @@ protected:
 
   static gNumber _WriteWidth;
   static gNumber _WritePrecis;
-  static TriState _WriteExpmode;
-  static TriState _WriteQuoted;
-  static TriState _WriteListBraces;
-  static TriState _WriteListCommas;
+  static gTriState _WriteExpmode;
+  static gTriState _WriteQuoted;
+  static gTriState _WriteListBraces;
+  static gTriState _WriteListCommas;
   static gNumber _WriteListLF;
   static gNumber _WriteListIndent;
   static gNumber _WriteSolutionInfo;
@@ -240,18 +240,18 @@ public:
 
 class BoolPortion : public Portion  {
 protected:
-  TriState *_Value;
+  gTriState *_Value;
   bool _ref;
 
   static gPool pool;
 
 public:
   BoolPortion(bool);
-  BoolPortion(TriState);
-  BoolPortion(TriState &, bool);
+  BoolPortion(gTriState);
+  BoolPortion(gTriState &, bool);
   virtual ~BoolPortion();
 
-  TriState &Value(void);
+  gTriState &Value(void);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

@@ -17,12 +17,12 @@ typedef unsigned short ushort;
 
 typedef enum { precERROR, precDOUBLE, precRATIONAL, precMIXED }  Precision;
 
-typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
+typedef enum { triFALSE = 0, triTRUE = 1, triMAYBE = 2 } gTriState;
 
 class gText;
 class gOutput;
-gText NameTriState(TriState i);
-void DisplayTriState(gOutput& o, TriState i);
+gText Name(gTriState);
+gOutput &operator<<(gOutput &, gTriState);
 
 //
 // A few mathematically-related functions which appear frequently

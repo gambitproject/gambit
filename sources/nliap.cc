@@ -207,7 +207,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	int index = solutions.Append(MixedSolution(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
 	if (!params.status.Get()) {
-	  solutions[index].SetIsNash(T_YES);
+	  solutions[index].SetIsNash(triTRUE);
 	  solutions[index].SetEpsilon(params.tolN);
 	}
       }   

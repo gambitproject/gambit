@@ -36,9 +36,9 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 class MixedSolution : public MixedProfile<gNumber>  {
 protected:
   NfgAlgType _Creator;
-  mutable TriState _IsNash;
-  mutable TriState _IsPerfect;
-  mutable TriState _IsProper;
+  mutable gTriState _IsNash;
+  mutable gTriState _IsPerfect;
+  mutable gTriState _IsProper;
   gNumber _Epsilon;
   gNumber _GobitLambda;
   gNumber _GobitValue;
@@ -62,12 +62,12 @@ public:
   NfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
   bool IsComplete(void) const;
   
-  void SetIsNash(TriState);
-  TriState IsNash(void) const; // Is it Nash? Y/N/DK
-  void SetIsPerfect(TriState);
-  TriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
-  void SetIsProper(TriState);
-  TriState IsProper(void) const; //Is it Proper? Y/N/DK
+  void SetIsNash(gTriState);
+  gTriState IsNash(void) const; // Is it Nash? Y/N/DK
+  void SetIsPerfect(gTriState);
+  gTriState IsPerfect(void) const; //Is it Perfect? Y/N/DK
+  void SetIsProper(gTriState);
+  gTriState IsProper(void) const; //Is it Proper? Y/N/DK
   
   void SetEpsilon(gNumber value);
   gNumber Epsilon(void) const; // epsilon for zero tolerance

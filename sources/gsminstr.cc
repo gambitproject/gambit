@@ -412,7 +412,7 @@ Portion *gclConditional::Evaluate(void)
 
   try  {
     Portion *ret;
-    if (((BoolPortion *) guardval)->Value() == T_YES)
+    if (((BoolPortion *) guardval)->Value() == triTRUE)
       ret = truebr->Evaluate();
     else
       ret = falsebr->Evaluate();
@@ -462,7 +462,7 @@ Portion *gclWhileExpr::Evaluate(void)
         guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
-    if (((BoolPortion *) guardval)->Value() != T_YES)  {
+    if (((BoolPortion *) guardval)->Value() != triTRUE)  {
       delete guardval;
       return ret;
     }
@@ -523,7 +523,7 @@ Portion *gclForExpr::Evaluate(void)
 	      guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN"); 
 
-    if (((BoolPortion *) guardval)->Value() != T_YES)  {
+    if (((BoolPortion *) guardval)->Value() != triTRUE)  {
       delete guardval;
       return ret;
     }

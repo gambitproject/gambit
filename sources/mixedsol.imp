@@ -10,8 +10,8 @@
 
 MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
   : MixedProfile<gNumber>(m.Support()),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
-    _IsProper(T_DONTKNOW), _Epsilon((double)0),
+    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
+    _IsProper(triMAYBE), _Epsilon((double)0),
     _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)
 {
@@ -22,8 +22,8 @@ MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creator)
   : MixedProfile<gNumber>(m.Support()),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
-    _IsProper(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
+    _IsProper(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -33,8 +33,8 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &m, NfgAlgType creato
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &m, NfgAlgType creator)
   : MixedProfile<gNumber>(m),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
-    _IsProper(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _Creator(creator), _IsNash(triMAYBE), _IsPerfect(triMAYBE),
+    _IsProper(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -69,15 +69,15 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &m)
 void MixedSolution::EvalEquilibria(void) const
 {
   if(IsComplete())
-    if(_IsNash == T_DONTKNOW)
+    if(_IsNash == triMAYBE)
       if(MaxRegret() <= _Epsilon)
-	_IsNash = T_YES;
+	_IsNash = triTRUE;
       else
-	_IsNash = T_NO;
-  if( _IsNash == T_NO )
+	_IsNash = triFALSE;
+  if( _IsNash == triFALSE )
     {
-      _IsPerfect = T_NO;
-      _IsProper = T_NO;
+      _IsPerfect = triFALSE;
+      _IsProper = triFALSE;
     }
 }
 
@@ -105,22 +105,22 @@ bool MixedSolution::IsComplete(void) const
   return true;
 }
 
-void MixedSolution::SetIsNash(TriState i)
+void MixedSolution::SetIsNash(gTriState i)
 { _IsNash = i; }
 
-TriState MixedSolution::IsNash(void) const
+gTriState MixedSolution::IsNash(void) const
 { this->EvalEquilibria(); return _IsNash; }
 
-void MixedSolution::SetIsPerfect(TriState i)
+void MixedSolution::SetIsPerfect(gTriState i)
 { _IsPerfect = i; }
 
-TriState MixedSolution::IsPerfect(void) const
+gTriState MixedSolution::IsPerfect(void) const
 { this->EvalEquilibria(); return _IsPerfect; }
 
-void MixedSolution::SetIsProper(TriState i)
+void MixedSolution::SetIsProper(gTriState i)
 { _IsProper = i; }
 
-TriState MixedSolution::IsProper(void) const
+gTriState MixedSolution::IsProper(void) const
 { this->EvalEquilibria(); return _IsProper; }
 
 
@@ -175,9 +175,9 @@ void MixedSolution::Dump(gOutput& f) const
 {
   MixedProfile<gNumber>::Dump(f);
   f << " Creator:"; DisplayNfgAlgType(f, _Creator);
-  f << " IsNash:"; DisplayTriState(f, _IsNash);
-  f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
-  f << " IsProper:"; DisplayTriState(f, _IsProper);
+  f << " IsNash:" << _IsNash;
+  f << " IsPerfect:" << _IsPerfect;
+  f << " IsProper:" << _IsProper;
   f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
@@ -191,8 +191,8 @@ gOutput &operator<<(gOutput &f, const MixedSolution &s)
 void MixedSolution::Invalidate(void)
 {
   _Creator = NfgAlg_USER;
-  _IsNash = T_DONTKNOW;
-  _IsProper = T_DONTKNOW;
+  _IsNash = triMAYBE;
+  _IsProper = triMAYBE;
   _GobitLambda = -1;
   _GobitValue = -1;
   _LiapValue = -1;

@@ -42,9 +42,9 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 class BehavSolution : public BehavProfile<gNumber>  {
 protected:
   EfgAlgType _Creator;
-  mutable TriState _IsNash;
-  mutable TriState _IsSubgamePerfect;
-  mutable TriState _IsSequential;
+  mutable gTriState _IsNash;
+  mutable gTriState _IsSubgamePerfect;
+  mutable gTriState _IsSequential;
   gNumber _Epsilon;
   gNumber _GobitLambda;
   gNumber _GobitValue;
@@ -68,12 +68,12 @@ public:
   bool IsComplete(void) const;
 
   EfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
-  void SetIsNash(TriState);
-  TriState IsNash(void) const; // Is it Nash? Y/N/DK
-  void SetIsSubgamePerfect(TriState);
-  TriState IsSubgamePerfect(void) const; // Is it Subgame Perfect? Y/N/DK
-  void SetIsSequential(TriState);
-  TriState IsSequential(void) const; // Is it Sequential? Y/N/DK
+  void SetIsNash(gTriState);
+  gTriState IsNash(void) const; // Is it Nash? Y/N/DK
+  void SetIsSubgamePerfect(gTriState);
+  gTriState IsSubgamePerfect(void) const; // Is it Subgame Perfect? Y/N/DK
+  void SetIsSequential(gTriState);
+  gTriState IsSequential(void) const; // Is it Sequential? Y/N/DK
 
   void SetEpsilon(gNumber value);
   gNumber Epsilon(void) const; // epsilon for zero tolerance

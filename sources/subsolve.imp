@@ -163,13 +163,13 @@ void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
 	int j=solns.Length();
 	solns[j].SetCreator( (EfgAlgType) AlgorithmID());
 	if(failed == 0) {
-	  solns[j].SetIsNash(T_YES);
+	  solns[j].SetIsNash(triTRUE);
 	  if(marked)
-	    solns[j].SetIsSubgamePerfect(T_YES); 
+	    solns[j].SetIsSubgamePerfect(triTRUE); 
 	  if(solns[j].Creator() == EfgAlg_ELIAPSUB) {
 	    solns[j].SetLiap(solns[j].LiapValue());
-	    solns[j].SetIsSequential(T_YES);      // even if marked = false
-	    solns[j].SetIsSubgamePerfect(T_YES);  // even if marked = false
+	    solns[j].SetIsSequential(triTRUE);      // even if marked = false
+	    solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
 	  }
 
 	}

@@ -163,9 +163,9 @@ static void AddSolution(gList<BehavSolution> &solutions,
   int i = solutions.Append(BehavSolution(profile, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
   solutions[i].SetEpsilon(0.0001);
-  if(solutions[i].IsNash() == T_YES) {
-    solutions[i].SetIsSubgamePerfect(T_YES);
-    solutions[i].SetIsSequential(T_YES);
+  if(solutions[i].IsNash() == triTRUE) {
+    solutions[i].SetIsSubgamePerfect(triTRUE);
+    solutions[i].SetIsSequential(triTRUE);
   }
 }
 

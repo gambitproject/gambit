@@ -653,8 +653,8 @@ Portion* GSM_Lp_List(Portion** param)
     delete b;
     delete c;
   
-    ((BoolPortion*) param[5])->Value() = (isFeasible) ? T_YES : T_NO;
-    ((BoolPortion*) param[6])->Value() = (isBounded) ? T_YES : T_NO;
+    ((BoolPortion*) param[5])->Value() = (isFeasible) ? triTRUE : triFALSE;
+    ((BoolPortion*) param[6])->Value() = (isBounded) ? triTRUE : triFALSE;
     return result;
   }
   else  {
@@ -676,8 +676,8 @@ Portion* GSM_Lp_List(Portion** param)
     delete b;
     delete c;
   
-    ((BoolPortion*) param[5])->Value() = (isFeasible) ? T_YES : T_NO;
-    ((BoolPortion*) param[6])->Value() = (isBounded) ? T_YES : T_NO;
+    ((BoolPortion*) param[5])->Value() = (isFeasible) ? triTRUE : triFALSE;
+    ((BoolPortion*) param[6])->Value() = (isBounded) ? triTRUE : triFALSE;
     return result;
   }
 }

@@ -140,7 +140,7 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
     index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
     if(params.status.Get() != 1) {
       solutions[index].SetEpsilon(eps);
-      solutions[index].SetIsNash(T_YES);
+      solutions[index].SetIsNash(triTRUE);
     }
   }
   npivots = poly.NumPivots();
@@ -308,7 +308,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	  index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
 	  if(params.status.Get() != 1) {
 	    solutions[index].SetEpsilon(eps);
-	    solutions[index].SetIsNash(T_YES);
+	    solutions[index].SetIsNash(triTRUE);
 	  }
 	}
       }

@@ -12,8 +12,8 @@
 
 BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
   : BehavProfile<gNumber>(b.Support()),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
-    _IsSequential(T_DONTKNOW), _Epsilon((double)0), 
+    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
+    _IsSequential(triMAYBE), _Epsilon((double)0), 
     _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
@@ -24,8 +24,8 @@ BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
 
 BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creator)
   : BehavProfile<gNumber>(b.Support()),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
-    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
+    _IsSequential(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -35,8 +35,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creato
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber>& b, EfgAlgType creator)
   : BehavProfile<gNumber>(b),
-    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
-    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
+    _IsSequential(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -62,16 +62,16 @@ BehavSolution::~BehavSolution()
 void BehavSolution::EvalEquilibria(void) const
 {
   if (IsComplete()) 
-    if( _IsNash == T_DONTKNOW )
+    if( _IsNash == triMAYBE )
       if(MaxGripe() <= _Epsilon)
-	_IsNash = T_YES;
+	_IsNash = triTRUE;
       else
-	_IsNash = T_NO;
+	_IsNash = triFALSE;
   
-  if(_IsNash == T_NO)
+  if(_IsNash == triFALSE)
     {
-      _IsSubgamePerfect = T_NO;
-      _IsSequential = T_NO;
+      _IsSubgamePerfect = triFALSE;
+      _IsSequential = triFALSE;
     }
 }
 
@@ -100,25 +100,25 @@ bool BehavSolution::IsComplete(void) const
 EfgAlgType BehavSolution::Creator(void) const
 { return _Creator; }
 
-void BehavSolution::SetIsNash(TriState i)
+void BehavSolution::SetIsNash(gTriState i)
 { _IsNash = i; }
 
-TriState BehavSolution::IsNash(void) const
+gTriState BehavSolution::IsNash(void) const
 { EvalEquilibria(); return _IsNash; }
 
-void BehavSolution::SetIsSubgamePerfect(TriState i)
+void BehavSolution::SetIsSubgamePerfect(gTriState i)
 { _IsSubgamePerfect = i; }
 
-TriState BehavSolution::IsSubgamePerfect(void) const
+gTriState BehavSolution::IsSubgamePerfect(void) const
 {
   EvalEquilibria(); 
   return _IsSubgamePerfect; 
 }
 
-void BehavSolution::SetIsSequential(TriState i)
+void BehavSolution::SetIsSequential(gTriState i)
 { _IsSequential = i; }
 
-TriState BehavSolution::IsSequential(void) const
+gTriState BehavSolution::IsSequential(void) const
 { EvalEquilibria(); return _IsSequential; }
 
 void BehavSolution::SetGobit(gNumber lambda, gNumber value)
@@ -192,9 +192,9 @@ void BehavSolution::Dump(gOutput& f) const
 {
   BehavProfile<gNumber>::Dump(f);
   f << " Creator:"; DisplayEfgAlgType(f, _Creator);
-  f << " IsNash:"; DisplayTriState(f, _IsNash);
-  f << " IsSubgamePerfect:"; DisplayTriState(f, _IsSubgamePerfect);
-  f << " IsSequential:"; DisplayTriState(f, _IsSequential);
+  f << " IsNash:" << _IsNash;
+  f << " IsSubgamePerfect:" << _IsSubgamePerfect;
+  f << " IsSequential:" << _IsSequential;
   f << " Support:" << support;
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
@@ -209,9 +209,9 @@ gOutput &operator<<(gOutput &f, const BehavSolution &s)
 void BehavSolution::Invalidate(void)
 {
   _Creator = EfgAlg_USER;
-  _IsNash = T_DONTKNOW;
-  _IsSubgamePerfect = T_DONTKNOW;
-  _IsSequential = T_DONTKNOW;
+  _IsNash = triMAYBE;
+  _IsSubgamePerfect = triMAYBE;
+  _IsSequential = triMAYBE;
   _GobitLambda = -1;
   _GobitValue = -1;
   _LiapValue = -1;

@@ -193,7 +193,7 @@ void ZSumModule<T>::GetSolutions(gList<MixedSolution > &solutions) const
 	profile(2, j) = (T) 0;
 
     index = solutions.Append(MixedSolution(profile, NfgAlg_ZSUM));
-    solutions[index].SetIsNash(T_YES);
+    solutions[index].SetIsNash(triTRUE);
   }
 }
 

@@ -53,7 +53,7 @@ int FindPureNash(const EFSupport &sup, gList<BehavSolution> &eqs)
       }
 
       index = eqs.Append(BehavSolution(temp, EfgAlg_PURENASH));
-      eqs[index].SetIsNash(T_YES);
+      eqs[index].SetIsNash(triTRUE);
     }
   }  while (citer.NextContingency());
 

@@ -2,7 +2,6 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// @(#)gsmoper.cc	2.52 02/07/98
 //
 
 #include <stdlib.h>
@@ -548,9 +547,9 @@ static Portion* GSM_NotEqual_Behav(Portion** param)
 {
   if (*((BehavPortion *) param[0])->Value() !=
       *((BehavPortion *) param[1])->Value())
-    return new BoolPortion(T_YES);
+    return new BoolPortion(triTRUE);
   else
-    return new BoolPortion(T_NO);
+    return new BoolPortion(triFALSE);
 }
 
 static Portion* GSM_NotEqual_NfPlayer(Portion** param)
@@ -593,9 +592,9 @@ static Portion* GSM_NotEqual_Mixed(Portion** param)
 {
   if (*((MixedPortion *) param[0])->Value() !=
       *((MixedPortion *) param[1])->Value())
-    return new BoolPortion(T_YES);
+    return new BoolPortion(triTRUE);
   else
-    return new BoolPortion(T_NO);
+    return new BoolPortion(triFALSE);
 }
 
 //------------
@@ -675,40 +674,40 @@ static Portion *GSM_LessEqual_Text(Portion** param)
 
 static Portion *GSM_And(Portion** param)
 {
-  TriState x = ((BoolPortion *) param[0])->Value();
-  TriState y = ((BoolPortion *) param[1])->Value();
+  gTriState x = ((BoolPortion *) param[0])->Value();
+  gTriState y = ((BoolPortion *) param[1])->Value();
 
-  if (x == T_YES && y == T_YES)    
-    return new BoolPortion(T_YES);
-  else if (x == T_NO && y == T_NO)
-    return new BoolPortion(T_NO); 
+  if (x == triTRUE && y == triTRUE)    
+    return new BoolPortion(triTRUE);
+  else if (x == triFALSE && y == triFALSE)
+    return new BoolPortion(triFALSE); 
   else
-    return new BoolPortion(T_DONTKNOW);  
+    return new BoolPortion(triMAYBE);  
 }
 
 static Portion *GSM_Or(Portion** param)
 {
-  TriState x = ((BoolPortion *) param[0])->Value();
-  TriState y = ((BoolPortion *) param[1])->Value();
+  gTriState x = ((BoolPortion *) param[0])->Value();
+  gTriState y = ((BoolPortion *) param[1])->Value();
 
-  if (x == T_YES || y == T_YES)    
-    return new BoolPortion(T_YES);
-  else if (x == T_DONTKNOW || y == T_DONTKNOW)
-    return new BoolPortion(T_DONTKNOW); 
+  if (x == triTRUE || y == triTRUE)    
+    return new BoolPortion(triTRUE);
+  else if (x == triMAYBE || y == triMAYBE)
+    return new BoolPortion(triMAYBE); 
   else
-    return new BoolPortion(T_NO);
+    return new BoolPortion(triFALSE);
 }
 
 static Portion *GSM_Not(Portion** param)
 {
-  TriState x = ((BoolPortion *) param[0])->Value();
+  gTriState x = ((BoolPortion *) param[0])->Value();
 
-  if (x == T_YES)
-    return new BoolPortion(T_NO);
-  else if (x == T_NO)
-    return new BoolPortion(T_YES);
+  if (x == triTRUE)
+    return new BoolPortion(triFALSE);
+  else if (x == triFALSE)
+    return new BoolPortion(triTRUE);
   else
-    return new BoolPortion(T_DONTKNOW); 
+    return new BoolPortion(triMAYBE); 
 }
 
 
@@ -761,10 +760,10 @@ Portion* GSM_Input(Portion** param)
 
 gNumber _WriteWidth = 0;
 gNumber _WritePrecis = 6;
-TriState _WriteExpmode = T_NO;
-TriState _WriteQuoted = T_YES;
-TriState _WriteListBraces = T_YES;
-TriState _WriteListCommas = T_YES;
+gTriState _WriteExpmode = triFALSE;
+gTriState _WriteQuoted = triTRUE;
+gTriState _WriteListBraces = triTRUE;
+gTriState _WriteListCommas = triTRUE;
 gNumber _WriteListLF = 0;
 gNumber _WriteListIndent = 2;
 gNumber _WriteSolutionInfo = 1;
@@ -805,8 +804,8 @@ Portion* GSM_ListFormat(Portion** param)
 
 Portion* GSM_GetListFormat(Portion** param)
 {
-  ((BoolPortion*) param[0])->Value() = (_WriteListBraces) ? T_YES : T_NO;
-  ((BoolPortion*) param[1])->Value() = (_WriteListCommas) ? T_YES : T_NO;
+  ((BoolPortion*) param[0])->Value() = (_WriteListBraces) ? triTRUE : triFALSE;
+  ((BoolPortion*) param[1])->Value() = (_WriteListCommas) ? triTRUE : triFALSE;
   ((NumberPortion*) param[2])->Value() = _WriteListLF;
   ((NumberPortion*) param[3])->Value() = _WriteListIndent;
 
@@ -828,7 +827,7 @@ Portion* GSM_GetFloatFormat(Portion** param)
 {
   ((NumberPortion*) param[1])->Value() = _WriteWidth;
   ((NumberPortion*) param[2])->Value() = _WritePrecis;
-  ((BoolPortion*) param[3])->Value() = (_WriteExpmode) ? T_YES : T_NO;
+  ((BoolPortion*) param[3])->Value() = (_WriteExpmode) ? triTRUE : triFALSE;
 
   return param[0]->RefCopy();
 }
@@ -844,7 +843,7 @@ Portion* GSM_TextFormat(Portion** param)
 
 Portion* GSM_GetTextFormat(Portion** param)
 {
-  ((BoolPortion*) param[1])->Value() = (_WriteQuoted) ? T_YES : T_NO;
+  ((BoolPortion*) param[1])->Value() = (_WriteQuoted) ? triTRUE : triFALSE;
 
   return param[0]->RefCopy();
 }
@@ -912,7 +911,7 @@ Portion* GSM_Read_Bool(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
-  TriState value = T_DONTKNOW;
+  gTriState value = triMAYBE;
   bool error = false;
   char c = ' ';
 
@@ -927,21 +926,21 @@ Portion* GSM_Read_Bool(Portion** param)
     if(!input.eof()) input.get(c); if(c != 'r') error = true;
     if(!input.eof()) input.get(c); if(c != 'u') error = true;
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = T_YES;
+    value = triTRUE;
   }
   else if (c == 'F')  {
     if(!input.eof()) input.get(c); if(c != 'a') error = true;
     if(!input.eof()) input.get(c); if(c != 'l') error = true;
     if(!input.eof()) input.get(c); if(c != 's') error = true;
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = T_NO;
+    value = triFALSE;
   }
   else if (c == 'M')  {
     if(!input.eof()) input.get(c); if(c != 'a') error = true;
     if(!input.eof()) input.get(c); if(c != 'y') error = true;
     if(!input.eof()) input.get(c); if(c != 'b') error = true;
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = T_DONTKNOW;
+    value = triMAYBE;
   }
   else
     error = true;

@@ -332,24 +332,21 @@ gText EscapeQuotes(const gText &s)
 
 //------------------------ TriState functions -----------------//
 
-gText NameTriState(TriState i)
+gText Name(gTriState b)
 {
-  switch(i)
-    {
-    case T_DONTKNOW:
-      return "DK"; 
-    case T_YES:
-      return "Y";
-    case T_NO:
-      return "N"; 
-    default:
-      return "ERROR";
-    }
+  switch (b) {
+  case triTRUE:
+    return "Y";
+  case triFALSE:
+    return "N"; 
+  default:
+    return "DK";
+  }
 }
 
-void DisplayTriState(gOutput& o, TriState i)
+gOutput &operator<<(gOutput &f, gTriState b)
 {
-  o << NameTriState(i);
+  return (f << Name(b));
 }
 
 //------------------------ Type dependent epsilon -----------------//

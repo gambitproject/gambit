@@ -60,7 +60,7 @@ gStack<gText> GCL_InputFileNames(4);
   gStack<gText> funcnames; \
   gText tval; \
   gclExpression *exprtree; \
-  TriState bval; \
+  gTriState bval; \
   double dval; \
   int ival; \
   \
@@ -416,11 +416,11 @@ static struct tokens toktable[] =
       gerr << "identifier " << tval << '\n';
       break;
     case BOOLEAN:
-      if (bval == T_YES)
+      if (bval == triTRUE)
      	gerr << "True\n";
-      else if (bval == T_NO)
+      else if (bval == triFALSE)
         gerr << "False\n";
-      else  /* (bval == T_DONTKNOW) */
+      else  /* (bval == triMAYBE) */
         gerr << "Maybe\n";
       break;
     case FLOAT:
@@ -468,15 +468,15 @@ int GCLCompiler::yylex(void)
     ungetchar(c);
 
     if (s == "True")   {
-      bval = T_YES;
+      bval = triTRUE;
       return BOOLEAN;
     }
     else if (s == "False")  {
-      bval = T_NO;
+      bval = triFALSE;
       return BOOLEAN;
     }
     else if (s == "Maybe") {
-      bval = T_DONTKNOW;
+      bval = triMAYBE;
       return BOOLEAN;
     }
     else if (s == "StdIn")  return STDIN;

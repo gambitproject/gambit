@@ -42,7 +42,7 @@ int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
 	temp(i, profile[i]) = 1;
 
       index = eqs.Append(MixedSolution(temp, NfgAlg_PURENASH));
-      eqs[index].SetIsNash(T_YES);
+      eqs[index].SetIsNash(triTRUE);
     }
   }  while (citer.NextContingency());
   

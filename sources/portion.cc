@@ -28,10 +28,10 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 
 gNumber Portion::_WriteWidth = 0;
 gNumber Portion::_WritePrecis = 6;
-TriState Portion::_WriteExpmode = T_NO;
-TriState Portion::_WriteQuoted = T_YES;
-TriState Portion::_WriteListBraces = T_YES;
-TriState Portion::_WriteListCommas = T_YES;
+gTriState Portion::_WriteExpmode = triFALSE;
+gTriState Portion::_WriteQuoted = triTRUE;
+gTriState Portion::_WriteListBraces = triTRUE;
+gTriState Portion::_WriteListCommas = triTRUE;
 gNumber Portion::_WriteListLF = 0;
 gNumber Portion::_WriteListIndent = 2;
 gNumber Portion::_WriteSolutionInfo = 1;
@@ -41,13 +41,13 @@ void Portion::_SetWriteWidth(long x)
 void Portion::_SetWritePrecis(long x)
 { _WritePrecis = x; }
 void Portion::_SetWriteExpmode(bool x)
-{ _WriteExpmode = (x) ? T_YES : T_NO; }
+{ _WriteExpmode = (x) ? triTRUE : triFALSE; }
 void Portion::_SetWriteQuoted(bool x)
-{ _WriteQuoted = (x) ? T_YES : T_NO; }
+{ _WriteQuoted = (x) ? triTRUE : triFALSE; }
 void Portion::_SetWriteListBraces(bool x)
-{ _WriteListBraces = (x) ? T_YES : T_NO; }
+{ _WriteListBraces = (x) ? triTRUE : triFALSE; }
 void Portion::_SetWriteListCommas(bool x)
-{ _WriteListCommas = (x) ? T_YES : T_NO; }
+{ _WriteListCommas = (x) ? triTRUE : triFALSE; }
 void Portion::_SetWriteListLF(long x)
 { _WriteListLF = x; }
 void Portion::_SetWriteListIndent(long x)
@@ -411,21 +411,21 @@ bool TextPortion::IsReference(void) const
 gPool BoolPortion::pool(sizeof(BoolPortion));
 
 BoolPortion::BoolPortion(bool value)
-  : _Value(new TriState((value) ? T_YES : T_NO)), _ref(false)
+  : _Value(new gTriState((value) ? triTRUE : triFALSE)), _ref(false)
 { }
 
-BoolPortion::BoolPortion(TriState value)
-  : _Value(new TriState(value)), _ref(false)
+BoolPortion::BoolPortion(gTriState value)
+  : _Value(new gTriState(value)), _ref(false)
 { }
 
-BoolPortion::BoolPortion(TriState &value, bool ref)
+BoolPortion::BoolPortion(gTriState &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
 BoolPortion::~BoolPortion()
 { }
 
-TriState &BoolPortion::Value(void)
+gTriState &BoolPortion::Value(void)
 { return *_Value; }
 
 PortionSpec BoolPortion::Spec(void) const
@@ -439,11 +439,11 @@ void BoolPortion::Output(gOutput& s) const
 
 gText BoolPortion::OutputString(void) const
 {
-  if (*_Value == T_YES)
+  if (*_Value == triTRUE)
     return "True";
-  else if (*_Value == T_NO)
+  else if (*_Value == triFALSE)
     return "False";
-  else /* (*_Value == T_DONTKNOW) */
+  else /* (*_Value == triMAYBE) */
     return "Maybe";
 }
 
