@@ -30,7 +30,8 @@ private:
   static int _NumObj;
   
 friend class EfgFileReader;
-  
+friend class BaseNfg;  
+
 protected:
     bool sortisets;
     gString title;

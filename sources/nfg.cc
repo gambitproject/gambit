@@ -43,8 +43,19 @@ BaseNfg::BaseNfg (const BaseNfg &b)
   IndexStrategies();
 }
 
+#include "efg.h"
+#include "lexicon.h"
+
 BaseNfg::~BaseNfg()
 {
+  if (efg)  {
+    BaseEfg *tmp = efg;
+    // note that Lexicon dtor unsets the efg member...
+
+    delete efg->lexicon;
+    tmp->lexicon = 0;
+  }
+
   for (int i = 1; i <= players.Length(); i++)
     delete players[i];
 }
