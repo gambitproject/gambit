@@ -10,6 +10,7 @@
 #include "gsmfunc.h"
 
 #include "efg.h"
+#include "efgutils.h"
 
 
 
@@ -64,6 +65,14 @@ Portion *ArrayToList(const gArray<Outcome *> &A)
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new OutcomeValPortion(A[i]));
+  return ret;
+}
+
+Portion *ArrayToList(const gArray<Node *> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new NodeValPortion(A[i]));
   return ret;
 }
 
@@ -190,6 +199,19 @@ Portion *GSM_InsertNode(Portion **param)
   n->BelongsTo()->InsertNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetParent());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+Portion* GSM_LastAction( Portion** param )
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Action* a = LastAction( n );
+  if( a == 0 )
+    return new ErrorPortion( "called on a root node" );
+
+  Portion* por = new ActionValPortion( a );
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
   return por;
@@ -324,7 +346,6 @@ Portion *GSM_NewPlayer(Portion **param)
 }
 
 
-#include "efgutils.h"
 
 Portion* GSM_Nodes( Portion** param )
 {
@@ -721,6 +742,16 @@ Portion *GSM_IsSuccessor(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
   return new BoolValPortion(n1->BelongsTo()->IsSuccessor(n1, n2));
+}
+
+Portion *GSM_Members(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+
+  Portion* por = ArrayToList(s->GetMemberList());
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_MoveTree(Portion **param)
@@ -1378,6 +1409,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_InsertNode, 1, "infoset", porINFOSET);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj( "LastAction" );
+  FuncObj->SetFuncInfo( GSM_LastAction, 1 );
+  FuncObj->SetParamInfo( GSM_LastAction, 0, "node", porNODE );
+  gsm->AddFunction( FuncObj );
+
   FuncObj = new FuncDescObj("LeaveInfoset");
   FuncObj->SetFuncInfo(GSM_LeaveInfoset, 1);
   FuncObj->SetParamInfo(GSM_LeaveInfoset, 0, "node", porNODE);
@@ -1597,6 +1633,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_IsSuccessor, 2);
   FuncObj->SetParamInfo(GSM_IsSuccessor, 0, "node", porNODE);
   FuncObj->SetParamInfo(GSM_IsSuccessor, 1, "from", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Members");
+  FuncObj->SetFuncInfo(GSM_Members, 1);
+  FuncObj->SetParamInfo(GSM_Members, 0, "infoset", porINFOSET);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("MoveTree");

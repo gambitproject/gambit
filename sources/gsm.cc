@@ -815,6 +815,7 @@ bool GSM::Child ( void )
 {
   Portion* p2;
   Portion* p1;
+  Portion* old_p1;
 
   Node* old_node;
   Node* new_node;
@@ -835,11 +836,13 @@ bool GSM::Child ( void )
     {
       subscript = ( (IntPortion*) p2 )->Value();
       old_node = ( (NodePortion*) p1 )->Value();
-      delete p1;
+      old_p1 = p1;
       if( subscript >= 1 && subscript <= old_node->NumChildren() )
       {
 	new_node = old_node->GetChild( subscript );
 	p1 = new NodeValPortion( new_node );
+	p1->SetOwner( old_p1->Owner() );
+	p1->AddDependency();
 	_Push( p1 );
       }
       else
@@ -848,6 +851,7 @@ bool GSM::Child ( void )
 	_Push( new ErrorPortion );
 	result = false;
       }
+      delete old_p1;
     }
     else
     {

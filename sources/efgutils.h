@@ -27,6 +27,9 @@ int NumNodes (const BaseEfg &befg);
 // returns the number of nodes given a starting node
 int CountNodes (Node *n);
 
+// returns the action leading up to the node
+Action* LastAction( Node* node );
+
 
 #endif // EFGUTILS_H
 

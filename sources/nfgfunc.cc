@@ -1069,8 +1069,11 @@ Portion *GSM_NewNfg(Portion **param)
     delete p;
   }
 
-  Nfg<double> *N = new Nfg<double>(d);
-
+  BaseNfg* N;
+  if( !( (BoolPortion*) param[ 1 ] )->Value() )
+    N = new Nfg<double>( d );
+  else
+    N = new Nfg<gRational>( d );
   return new NfgValPortion(N);
 }
 
@@ -1708,12 +1711,10 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewNfg");
-  FuncObj->SetFuncInfo(GSM_NewNfg, 3);
+  FuncObj->SetFuncInfo(GSM_NewNfg, 2);
   FuncObj->SetParamInfo(GSM_NewNfg, 0, "dim", porLIST | porINTEGER);
-  FuncObj->SetParamInfo(GSM_NewNfg, 1, "random", porBOOL,
+  FuncObj->SetParamInfo(GSM_NewNfg, 1, "rational", porBOOL,
 			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_NewNfg, 2, "seed", porINTEGER,
-			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RandomNfg");

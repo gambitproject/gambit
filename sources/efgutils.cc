@@ -62,6 +62,29 @@ int NumNodes (const BaseEfg &befg)
   return (CountNodes(befg.RootNode()));
 }
 
+Action* LastAction( Node* node )
+{
+  Node* parent;
+  Infoset* infoset;
+  int childnum;
+  int i;
+
+  parent = node->GetParent();
+  if( parent == 0 )
+    return 0;
+  infoset = parent->GetInfoset();
+  for( i = 1; i <= parent->NumChildren(); i++ )
+  {
+    if( parent->GetChild( i ) == node )
+    {
+      childnum = i;
+      break;
+    }
+  }
+  return infoset->GetActionList()[ childnum ];
+}
+
+
 
 #include "gmisc.h"
 #include "efg.h"
