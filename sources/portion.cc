@@ -836,9 +836,8 @@ EfSupportPortion::EfSupportPortion(EFSupport *value)
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport &value)
-  : _Value(new EFSupport *(NULL)), _ref(false)
+  : _Value(new EFSupport *(new EFSupport(value))), _ref(false)
 {
-  _Value = new EFSupport *(new EFSupport(value));
   SetGame(&value.Game());
 }
 
