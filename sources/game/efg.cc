@@ -222,7 +222,7 @@ void gbt_efg_game_rep::DeleteTree(gbt_efg_node_rep *p_node)
       child->m_deleted = true;
     }
   }
-  
+
   if (p_node->m_infoset)  {
     p_node->m_infoset->m_members.Remove(p_node->m_infoset->m_members.Find(p_node));
     p_node->m_infoset = 0;
@@ -520,7 +520,7 @@ gbtEfgGame::gbtEfgGame(void)
 
 gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
 {
-  gbtEfgGame efg;
+  gbtEfgGame efg = NewEfg();
   efg.rep->sortisets = false;
   efg.rep->m_label = rep->m_label;
   efg.rep->comment = rep->comment;
@@ -559,19 +559,19 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   }
 
   efg.CopySubtree(efg.rep, efg.rep->root, (n.rep ? n.rep : rep->root));
-  
+
   if (n.rep)   {
     for (int pl = 1; pl <= efg.rep->players.Length(); pl++)  {
       for (int i = 1; i <= efg.rep->players[pl]->m_infosets.Length(); i++)  {
-	if (efg.rep->players[pl]->m_infosets[i]->m_members.Length() == 0)
+	if (efg.rep->players[pl]->m_infosets[i]->m_members.Length() == 0) {
 	  delete efg.rep->players[pl]->m_infosets.Remove(i--);
+	}
       }
     }
   }
 
   efg.rep->sortisets = true;
   efg.rep->SortInfosets();
-
   return efg;
 }
 
@@ -629,16 +629,6 @@ bool gbtEfgGame::operator!=(const gbtEfgGame &p_efg) const
 void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
 			     gbt_efg_node_rep *n, gbt_efg_node_rep *m)
 {
-  n->m_label = m->m_label;
-
-  if (m->m_gameroot == m) {
-    n->m_gameroot = n;
-  }
-
-  if (m->m_outcome) {
-    n->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
-  }
-
   if (m->m_infoset)   {
     gbt_efg_player_rep *p;
     if (m->m_infoset->m_player->m_id) {
@@ -651,8 +641,34 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
     gbt_efg_infoset_rep *s = p->m_infosets[m->m_infoset->m_id];
     p_newEfg->InsertMove(n, s);
 
-    for (int i = 1; i <= n->m_children.Length(); i++) {
-      CopySubtree(p_newEfg, n->m_children[i], m->m_children[i]);
+    // This is because of the semantics of InsertMove();
+    // the physical node 'n' gets pushed down one level to become the 
+    // first child of the newly created node
+    gbt_efg_node_rep *newParent = n->m_parent;
+
+    newParent->m_label = m->m_label;
+    
+    if (m->m_gameroot == m) {
+      newParent->m_gameroot = newParent;
+    }
+
+    if (m->m_outcome) {
+      newParent->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
+    }
+
+    for (int i = 1; i <= m->m_children.Length(); i++) {
+      CopySubtree(p_newEfg, newParent->m_children[i], m->m_children[i]);
+    }
+  }
+  else {
+    n->m_label = m->m_label;
+
+    if (m->m_gameroot == m) {
+      n->m_gameroot = n;
+    }
+
+    if (m->m_outcome) {
+      n->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
     }
   }
 }

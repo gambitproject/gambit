@@ -381,7 +381,9 @@ void gbtEfgNode::DeleteTree(void)
     return;
   }
 
+  rep->m_efg->sortisets = false;
   rep->m_efg->DeleteTree(rep);
+  rep->m_efg->sortisets = true;
 }
 
 void gbtEfgNode::JoinInfoset(gbtEfgInfoset p_infoset)
