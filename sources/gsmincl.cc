@@ -107,9 +107,9 @@ gString PortionSpecToText(const PortionSpec& spec)
   
   if(spec.ListDepth != NLIST)
     for(i=0; i<spec.ListDepth; i++)
-      result = (gString) "LIST(" + result + ')';
+      result = (gString) "LIST(" + result + ")";
   else
-    result = (gString) "NLIST(" + result + ')';
+    result = (gString) "NLIST(" + result + ")";
   return result;
 }
 
