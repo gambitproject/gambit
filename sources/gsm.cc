@@ -1193,7 +1193,8 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
     {
     case iQUIT:
       instr_success = true;
-      result = rcQUIT;
+      if( result == rcSUCCESS )
+	result = rcQUIT;
       done = true;
       break;
 
@@ -1238,8 +1239,6 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
       if( user_func )
 	_ErrorMessage( _StdErr, 33, program_counter - 1 );
       result = rcFAIL;
-      done = true;
-      break;
     }
   }
 
