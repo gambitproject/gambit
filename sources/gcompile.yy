@@ -265,9 +265,14 @@ function:        IF LBRACK expression COMMA expression COMMA
                   expression RBRACK
                   { record_funcbody = false; in_funcdecl = false;
                     $$ = DefineFunction($7); }
-        |        NAME LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
+        |        funcname LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
               { $$ = new gclFunctionCall(funcnames.Pop(), $4,
 					 current_line, current_file); }
+
+funcname:          NAME
+        |          FLOATPREC  { tval = "Float"; } 
+        |          RATIONALPREC  { tval = "Rational"; }
+        ;
 
 parameterlist:     { $$ = new gclParameterList; }
              |     reqparameterlist  { $$ = new gclParameterList($1); }
@@ -324,7 +329,7 @@ listels:         expression   { $$ = new gclListConstant($1); }
        ;
 
 
-signature:       NAME  { funcname = tval; }   LBRACK
+signature:       funcname  { funcname = tval; }   LBRACK
                    formallist RBRACK TYPEopt
 
 TYPEopt:         { functype = "ANYTYPE"; }
@@ -404,12 +409,11 @@ static struct tokens toktable[] =
     { DOT, "." }, { CARET, "^" }, { UNDERSCORE, "_" },
     { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" }, { DOLLAR, "$" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
-    { DEFFUNC, "NewFunction" }, 
-    { DELFUNC, "DeleteFunction" },
-    { TYPEDEF, "=:" },
-    { INCLUDE, "Include" },
+    { DEFFUNC, "NewFunction" }, { DELFUNC, "DeleteFunction" },
+    { TYPEDEF, "=:" }, { INCLUDE, "Include" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
-    { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
+    { CRLF, "carriage return" }, { EOC, "carriage return" },
+    { FLOATPREC, "Float" }, { RATIONALPREC, "Rational" }, { 0, 0 }
 };
 
   gerr << s << " at line " << current_line << " in file " << current_file
