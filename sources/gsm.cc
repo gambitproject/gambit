@@ -298,8 +298,7 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 }
 
 
-// note that p may be changed after a call to _VarDefine()
-bool GSM::_VarDefine( const gString& var_name, Portion*& p )
+bool GSM::_VarDefine( const gString& var_name, Portion* p )
 {
   Portion* old_value;
   bool type_match = true;
@@ -344,13 +343,6 @@ bool GSM::_VarDefine( const gString& var_name, Portion*& p )
   }
   else
   {
-    Portion* p_old;
-    if(p->IsReference())
-    {
-      p_old = p;
-      p = p->ValCopy();
-      delete p_old;
-    }
     if(old_value)
       delete _VarRemove(var_name);
     _RefTableStack->Peek()->Define(var_name, p);
@@ -414,6 +406,7 @@ bool GSM::Assign( void )
 {
   Portion* p2;
   Portion* p1;
+  Portion* p_old;
   bool result = true;
   gString varname;
 
@@ -425,6 +418,14 @@ bool GSM::Assign( void )
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
 
+  // deals with problems with assigning a variable to itself
+  if(p1->Original() == p2->Original())
+  {
+    delete p2;
+    _Push(p1);
+    return true;
+  }
+
   PortionSpec p1Spec(p1->Spec());
   PortionSpec p2Spec(p2->Spec());
   
@@ -432,6 +433,12 @@ bool GSM::Assign( void )
   {
     if(p2Spec.Type != porREFERENCE)
     {
+      if(p2->IsReference())
+      {
+	p_old = p2;
+	p2 = p2->ValCopy();
+	delete p_old;
+      }      
       _VarDefine(((ReferencePortion*) p1)->Value(), p2);
       delete p1;
       _Push(p2->RefCopy());
@@ -449,9 +456,9 @@ bool GSM::Assign( void )
   }
   else if(p1Spec == p2Spec)
   {
-    if(p1Spec.ListDepth == 0)
+    if(p1Spec.ListDepth == 0) // not a list
     {
-      if(!(p1Spec.Type & (porINPUT|porOUTPUT))) 
+      if(!(p1Spec.Type & (porINPUT|porOUTPUT))) // not assigning to I/O
       {
 	switch(p1Spec.Type)
 	{
@@ -566,6 +573,7 @@ bool GSM::Assign( void )
 	  p1->SetIsValid( p2->IsValid() );
 	  p1->AddDependency();
 	  break;
+
 	case porNFG_FLOAT:
 	  ((NfgPortion*) p1)->RemoveAllDependents();
 	  delete ((NfgPortion*) p1)->Value();
@@ -590,6 +598,7 @@ bool GSM::Assign( void )
 	  ((EfgPortion*) p1)->Value() =  new Efg<gRational>
 	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
 	  break;
+
 	default:
 	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
 	  assert(0);	  
@@ -597,7 +606,7 @@ bool GSM::Assign( void )
 	_Push(p1->RefCopy()); 
 	delete p2;
       }
-      else 
+      else // error: assigning to INPUT or OUTPUT
       {
 	_ErrorMessage(_StdErr, 64);
 	result = false;
@@ -613,13 +622,13 @@ bool GSM::Assign( void )
 	_Push(p1->RefCopy());
 	delete p2;
       }
-      else
+      else // error: assigning to (list of) INPUT or OUTPUT
       {
 	_ErrorMessage(_StdErr, 64);
 	result = false;
       }
     }
-    else
+    else // error: changing the type of a list
     {      
       _ErrorMessage(_StdErr, 65);
       result = false;
@@ -627,6 +636,12 @@ bool GSM::Assign( void )
   }
   else if(PortionSpecMatch(p1Spec, p2Spec))
   {
+    if(p2->IsReference())
+    {
+      p_old = p2;
+      p2 = p2->ValCopy();
+      delete p_old;
+    }
     _VarDefine(varname, p2);
     delete p1;
     _Push(p2->RefCopy());
@@ -634,11 +649,17 @@ bool GSM::Assign( void )
   else if(p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
 	  p2Spec.ListDepth > 0)
   {
+    if(p2->IsReference())
+    {
+      p_old = p2;
+      p2 = p2->ValCopy();
+      delete p_old;
+    }
     _VarDefine(varname, p2);
     delete p1;
     _Push(p2->RefCopy());
   }
-  else
+  else // error: changing the type of variable
   {
     _ErrorMessage(_StdErr, 66, 0, 0, varname, 
 		  PortionSpecToText(p1Spec),
@@ -1442,7 +1463,7 @@ bool GSM::Subscript ( void )
     bool result = true;
     if (n <= 0 || n > ((ListPortion*) p1)->Length())
     {
-      _ErrorMessage(_StdErr, 11);
+      _ErrorMessage(_StdErr, 11, n, ((ListPortion*) p1)->Length());
       result = false;
     }
     else
@@ -2448,8 +2469,8 @@ void GSM::_ErrorMessage
 (
  gOutput&        s,
  const int       error_num,
- const long&     /*num1*/, 
- const long&     /*num2*/,
+ const long&     num1, 
+ const long&     num2,
  const gString&  str1,
  const gString&  str2,
  const gString&  str3
@@ -2465,6 +2486,7 @@ void GSM::_ErrorMessage
   {
   case 11:
     s << "NthElement[]: Subscript out of range\n";
+    s << "Requested #" << num1 << " out of " << num2 << " elements\n";
     break;
   case 12:
     s << "NthChar[]: Subscript out of range\n";
@@ -2520,6 +2542,11 @@ void GSM::_ErrorMessage
     break;
   case 67:
     s << "Assigning to an unknown type: " << str1 << "\n";
+    break;
+  case 71:
+    s << "Cannot assign to an NFG or an EFG not directly associated\n";
+    s << "with a variable\n";
+    break;
   default:
     s << "General error " << error_num << "\n";
   }

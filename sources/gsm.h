@@ -59,8 +59,7 @@ private:
   bool _Bind ( const gString& param_name ) const;
 
   bool     _VarIsDefined ( const gString& var_name ) const;
-  // note that p may be changed after a call to _VarDefine()
-  bool     _VarDefine    ( const gString& var_name, Portion*& p );
+  bool     _VarDefine    ( const gString& var_name, Portion* p );
   Portion* _VarValue     ( const gString& var_name ) const;
   Portion* _VarRemove    ( const gString& var_name );
 
