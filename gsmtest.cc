@@ -1631,6 +1631,9 @@ int main( void )
 #endif // CRASHTEST
 
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 
   machine->PushRef( "i" );
   machine->Push( (gInteger) 3 );
@@ -1653,6 +1656,31 @@ int main( void )
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
+
+
+  machine->PushRef( "N" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->Push( "e02.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
+
+
+  machine->InitCallFunction( "Lemke" );
+  machine->PushRef( "N" );
+  machine->Bind( "N" );
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+  machine->PushRef( "time" );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 
   gout << "\nDeleting machine\n";
   delete machine;

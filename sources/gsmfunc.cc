@@ -189,6 +189,7 @@ void FuncDescObj::SetParamInfo
     gerr << "                   for SetParamInfo( ... ) while initializing\n";
     gerr << "                   the function \"" << _FuncName << "\" for\n";
     gerr << "                   the parameter \"" << param_name << "\"\n";
+    gerr << "                   Index specified: " << param_index << "\n";
   }
   assert( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams );
 
@@ -560,6 +561,7 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       if( !_RunTimeParamInfo[ index ].Defined )
       {
 	assert( _Param[ index ] == 0 );
+	
 	if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	{
 	  _Param[ index ] = 
@@ -572,6 +574,17 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	  gerr << "\"" << " not found while executing CallFunction()\n";
 	  gerr << "           on function \"" << _FuncName << "\"\n";
 	  _ErrorOccurred = true;
+	}
+      }
+      else // ( _RunTimeParamInfo[ index ].Defined )
+      {
+	if( _RunTimeParamInfo[ index ].Ref != 0 && _Param[ index ] == 0 )
+	{
+	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
+	  {
+	    _Param[ index ] = 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
+	  }	  
 	}
       }
     }

@@ -67,10 +67,9 @@ Portion *GSM_Lemke(Portion **param)
   LemkeModule<double> LS(*N, LP);
   LS.Lemke();
 
-/*
   ((numerical_Portion<double> *) param[2])->Value() = (double) LS.Time();
   ((numerical_Portion<gInteger> *) param[3])->Value() = LS.NumPivots();
-  */
+
   return new Mixed_List_Portion<double>(N, LS.GetSolutions());
 }
 
@@ -135,9 +134,8 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Lemke");
-  FuncObj->SetFuncInfo(GSM_Lemke, 1);
+  FuncObj->SetFuncInfo(GSM_Lemke, 4);
   FuncObj->SetParamInfo(GSM_Lemke, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
-/*
   FuncObj->SetParamInfo(GSM_Lemke, 1, "nequilib", 
 			porINTEGER, new numerical_Portion<gInteger>( 0 ) );
   FuncObj->SetParamInfo(GSM_Lemke, 2, "time", 
@@ -145,7 +143,6 @@ void Init_nfgfunc(GSM *gsm)
 			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Lemke, 3, "npivots", 
 			porINTEGER, new numerical_Portion<gInteger>( 0 ) );
-  */
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapNfg");
