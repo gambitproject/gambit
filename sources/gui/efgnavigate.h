@@ -29,16 +29,17 @@
 
 #include "wx/grid.h"
 #include "efgshow.h"
+#include "gamedoc.h"
 
 class EfgNavigateWindow : public wxGrid {
 private:
-  EfgShow *m_parent;
+  gbtGameDocument *m_doc;
   gbtEfgNode m_cursor;
 
   void OnEditorShown(wxGridEvent &);
 
 public:
-  EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent);
+  EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgNavigateWindow() { }
 
   void Set(gbtEfgNode p_cursor);

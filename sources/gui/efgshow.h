@@ -46,15 +46,8 @@ const int idEFG_SOLUTION_LIST = 900;
 
 class EfgShow : public wxFrame {
 private:
-  gbtEfgGame &m_efg;
+  gbtGameDocument *m_doc;
   TreeWindow *m_treeWindow;
-  gbtEfgNode m_cursor, m_copyNode, m_cutNode;
-
-  int m_currentProfile;
-  gList<BehavSolution> m_profiles;
-
-  EFSupport *m_currentSupport;
-  gList<EFSupport *> m_supports;
 
   EfgProfileList *m_profileTable;
   wxString m_filename;
@@ -149,7 +142,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent);
+  EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
@@ -157,16 +150,17 @@ public:
   void RemoveProfile(int);
   void RemoveProfiles(void);
   void ChangeProfile(int);
-  int CurrentProfile(void) const { return m_currentProfile; }
+  int CurrentProfile(void) const { return m_doc->m_curBehavProfile; }
   const BehavSolution &GetCurrentProfile(void) const;
-  const gList<BehavSolution> &Profiles(void) const { return m_profiles; }
+  const gList<BehavSolution> &Profiles(void) const
+    { return m_doc->m_behavProfiles; }
   gText UniqueProfileName(void) const;
 
   // SUPPORT ACCESS AND MANIPULATION
   EFSupport *GetSupport(void);
-  const gList<EFSupport *> &Supports(void) const { return m_supports; }
+  const gList<EFSupport *> &Supports(void) const
+    { return m_doc->m_efgSupports; }
   void SetSupportNumber(int p_number);
-  gText UniqueSupportName(void) const;
   void OnSupportsEdited(void);
 
   gText GetRealizProb(const gbtEfgNode &) const;
@@ -178,21 +172,17 @@ public:
   gText GetActionProb(const gbtEfgNode &, int act) const;
   gNumber ActionProb(const gbtEfgNode &, int br) const;
 
-  gbtEfgGame GetGame(void) { return m_efg; }
+  gbtEfgGame GetGame(void) { return *m_doc->m_efg; }
 
   void UpdateMenus(void);
   int NumDecimals(void) const;
 
   void OnOutcomesEdited(void);
-  gText UniqueOutcomeName(void) const;
 
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
   void SetCursor(gbtEfgNode m_node);
-  gbtEfgNode Cursor(void) const { return m_cursor; }
-  gbtEfgNode CopyNode(void) const { return m_copyNode; }
-  gbtEfgNode CutNode(void) const { return m_cutNode; }
 
   void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

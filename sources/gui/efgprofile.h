@@ -32,7 +32,7 @@
 
 class EfgProfileList : public wxListCtrl {
 private:
-  EfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   // Event handlers
@@ -40,7 +40,7 @@ private:
   void OnColumnClick(wxListEvent &);
   
 public:
-  EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent);
+  EfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgProfileList();
 
   void UpdateValues(void);

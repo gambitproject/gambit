@@ -153,11 +153,10 @@ END_EVENT_TABLE()
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent)
+EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    m_efg(p_efg), m_treeWindow(0), 
-    m_cursor(0), m_copyNode(0), m_cutNode(0),
-    m_currentProfile(0), m_profileTable(0), m_solutionSashWindow(0),
+    m_doc(p_doc), m_treeWindow(0), 
+    m_profileTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
   SetSizeHints(300, 300);
@@ -186,33 +185,33 @@ EfgShow::EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent)
   MakeMenus();
   MakeToolbar();
   
-  m_currentSupport = new EFSupport(m_efg);
-  m_currentSupport->SetName("Full Support");
-  m_supports.Append(m_currentSupport);
+  m_doc->m_curEfgSupport = new EFSupport(*m_doc->m_efg);
+  m_doc->m_curEfgSupport->SetName("Full Support");
+  m_doc->AddSupport(m_doc->m_curEfgSupport);
 
   m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
 				      wxPoint(0, 40), wxSize(200, 200),
 				      wxNO_BORDER | wxSW_3D);
   m_nodeSashWindow->SetSashVisible(wxSASH_RIGHT, true);
 
-  m_treeWindow = new TreeWindow(this, this);
+  m_treeWindow = new TreeWindow(m_doc, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
   m_treeWindow->RefreshTree();
   m_treeWindow->RefreshLayout();
 
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
-  m_navigateWindow = new EfgNavigateWindow(this, m_infoNotebook);
-  m_navigateWindow->Set(m_cursor);
+  m_navigateWindow = new EfgNavigateWindow(m_doc, m_infoNotebook);
+  m_navigateWindow->Set(m_doc->GetCursor());
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
 
-  m_outcomeWindow = new EfgOutcomeWindow(this, m_infoNotebook);
+  m_outcomeWindow = new EfgOutcomeWindow(m_doc, m_infoNotebook);
   m_outcomeWindow->UpdateValues();
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
-  m_supportWindow = new EfgSupportWindow(this, m_infoNotebook);
+  m_supportWindow = new EfgSupportWindow(m_doc, m_infoNotebook);
   m_supportWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_supportWindow, "Supports");
   m_infoNotebook->SetSelection(0);
@@ -225,11 +224,11 @@ EfgShow::EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent)
 					  wxSize(600, 100));
   m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
 
-  m_profileTable = new EfgProfileList(this, m_solutionSashWindow);
+  m_profileTable = new EfgProfileList(m_doc, m_solutionSashWindow);
   m_profileTable->Show(false);
   m_solutionSashWindow->Show(false);
 
-  m_efg.SetIsDirty(false);
+  m_doc->m_efg->SetIsDirty(false);
 
   AdjustSizes();
   m_treeWindow->FitZoom();
@@ -243,7 +242,7 @@ EfgShow::EfgShow(gbtEfgGame &p_efg, wxWindow *p_parent)
 
 EfgShow::~EfgShow()
 {
-  wxGetApp().RemoveGame(m_efg);
+  wxGetApp().RemoveGame(*m_doc->m_efg);
 }
 
 
@@ -253,10 +252,10 @@ EfgShow::~EfgShow()
 
 void EfgShow::ChangeProfile(int sol)
 {
-  m_currentProfile = sol;
+  m_doc->m_curBehavProfile = sol;
   m_treeWindow->RefreshLabels();
   if (m_navigateWindow) {
-    m_navigateWindow->Set(m_cursor);
+    m_navigateWindow->Set(m_doc->GetCursor());
   }
   if (m_profileTable) {
     m_profileTable->UpdateValues();
@@ -265,18 +264,18 @@ void EfgShow::ChangeProfile(int sol)
 
 void EfgShow::RemoveProfile(int p_profile)
 {
-  m_profiles.Remove(p_profile);
-  if (m_currentProfile == p_profile) {
-    m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
+  m_doc->m_behavProfiles.Remove(p_profile);
+  if (m_doc->m_curBehavProfile == p_profile) {
+    m_doc->m_curBehavProfile = (m_doc->m_behavProfiles.Length() > 0) ? 1 : 0;
   }
-  else if (m_currentProfile > p_profile) {
-    m_currentProfile--;
+  else if (m_doc->m_curBehavProfile > p_profile) {
+    m_doc->m_curBehavProfile--;
   }
 
   m_treeWindow->RefreshLabels();
   
   if (m_navigateWindow) {
-    m_navigateWindow->Set(m_cursor);
+    m_navigateWindow->Set(m_doc->GetCursor());
   }
   if (m_profileTable) {
     m_profileTable->UpdateValues();
@@ -285,16 +284,16 @@ void EfgShow::RemoveProfile(int p_profile)
 
 void EfgShow::RemoveProfiles(void)
 {
-  m_currentProfile = 0;
-  m_profiles.Flush();
+  m_doc->m_curBehavProfile = 0;
+  m_doc->m_behavProfiles.Flush();
   if (m_navigateWindow) {
-    m_navigateWindow->Set(m_cursor);
+    m_navigateWindow->Set(m_doc->GetCursor());
   }
 }
 
 const BehavSolution &EfgShow::GetCurrentProfile(void) const
 {
-  return m_profiles[m_currentProfile];
+  return m_doc->m_behavProfiles[m_doc->m_curBehavProfile];
 }
 
 void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
@@ -302,16 +301,16 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   if (p_profile.GetName() == "") {
     BehavSolution tmp(p_profile);
     tmp.SetName(UniqueProfileName());
-    m_profiles.Append(tmp);
+    m_doc->m_behavProfiles.Append(tmp);
   }
   else {
-    m_profiles.Append(p_profile);
+    m_doc->m_behavProfiles.Append(p_profile);
   }
 
-  if (m_efg.HasAssociatedNfg() && p_map) {
+  if (m_doc->m_efg->HasAssociatedNfg() && p_map) {
     MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
 			p_profile.Creator());
-    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(mixed, false);
+    wxGetApp().GetWindow(m_doc->m_efg->AssociatedNfg())->AddProfile(mixed, false);
   }
 
   m_profileTable->UpdateValues();
@@ -320,16 +319,16 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
 
 gText EfgShow::UniqueProfileName(void) const
 {
-  int number = m_profiles.Length() + 1;
+  int number = m_doc->m_behavProfiles.Length() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= m_profiles.Length(); i++) {
-      if (m_profiles[i].GetName() == "Profile" + ToText(number)) {
+    for (i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
+      if (m_doc->m_behavProfiles[i].GetName() == "Profile" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > m_profiles.Length())
+    if (i > m_doc->m_behavProfiles.Length())
       return "Profile" + ToText(number);
     
     number++;
@@ -338,33 +337,33 @@ gText EfgShow::UniqueProfileName(void) const
 
 gText EfgShow::GetRealizProb(const gbtEfgNode &p_node) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull()) {
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull()) {
     return "";
   }
-  return ToText(m_profiles[m_currentProfile].RealizProb(p_node),
+  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].RealizProb(p_node),
 		NumDecimals());
 }
 
 gText EfgShow::GetBeliefProb(const gbtEfgNode &p_node) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull() ||
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_profiles[m_currentProfile].BeliefProb(p_node),
+  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].BeliefProb(p_node),
 		NumDecimals());
 }
 
 gText EfgShow::GetNodeValue(const gbtEfgNode &p_node) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull()) {
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull()) {
     return "";
   }
   gText tmp = "(";
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    tmp += ToText(m_profiles[m_currentProfile].NodeValue(p_node)[pl], 
+  for (int pl = 1; pl <= m_doc->m_efg->NumPlayers(); pl++) {
+    tmp += ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].NodeValue(p_node)[pl], 
 		  NumDecimals());
-    if (pl < m_efg.NumPlayers()) {
+    if (pl < m_doc->m_efg->NumPlayers()) {
       tmp += ",";
     }
     else {
@@ -376,17 +375,17 @@ gText EfgShow::GetNodeValue(const gbtEfgNode &p_node) const
 
 gText EfgShow::GetInfosetProb(const gbtEfgNode &p_node) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull() ||
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_profiles[m_currentProfile].IsetProb(p_node.GetInfoset()),
+  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].IsetProb(p_node.GetInfoset()),
 		NumDecimals());
 }
 
 gText EfgShow::GetInfosetValue(const gbtEfgNode &p_node) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull() ||
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
     return "";
   }
@@ -407,7 +406,7 @@ gText EfgShow::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 		  NumDecimals());
   }
 
-  if (m_currentProfile == 0 || p_node.GetPlayer().IsNull()) {
+  if (m_doc->m_curBehavProfile == 0 || p_node.GetPlayer().IsNull()) {
     return "";
   }
 
@@ -417,7 +416,7 @@ gText EfgShow::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 
 gText EfgShow::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
-  if (m_currentProfile == 0 || p_node.IsNull() ||
+  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
     return "";
   }
@@ -438,8 +437,8 @@ gNumber EfgShow::ActionProb(const gbtEfgNode &p_node, int p_action) const
     return p_node.GetInfoset().GetChanceProb(p_action);
   }
 
-  if (m_currentProfile && !p_node.GetInfoset().IsNull()) {
-    return m_profiles[m_currentProfile](p_node.GetInfoset().GetAction(p_action));
+  if (m_doc->m_curBehavProfile && !p_node.GetInfoset().IsNull()) {
+    return m_doc->m_behavProfiles[m_doc->m_curBehavProfile](p_node.GetInfoset().GetAction(p_action));
   }
   return -1;
 }
@@ -450,32 +449,13 @@ gNumber EfgShow::ActionProb(const gbtEfgNode &p_node, int p_action) const
 
 void EfgShow::OnOutcomesEdited(void)
 {
-  for (int i = 1; i <= m_profiles.Length(); i++) {
-    m_profiles[i].Invalidate();
+  for (int i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
+    m_doc->m_behavProfiles[i].Invalidate();
   }
   m_treeWindow->RefreshLabels();
   m_treeWindow->Refresh();
   m_outcomeWindow->UpdateValues();
   m_profileTable->UpdateValues();
-}
-
-gText EfgShow::UniqueOutcomeName(void) const
-{
-  int number = m_efg.NumOutcomes() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_efg.NumOutcomes(); i++) {
-      if (m_efg.GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_efg.NumOutcomes()) {
-      return "Outcome" + ToText(number);
-    }
-    
-    number++;
-  }
 }
 
 void EfgShow::OnSupportsEdited(void)
@@ -484,46 +464,28 @@ void EfgShow::OnSupportsEdited(void)
   m_supportWindow->UpdateValues();
 }
 
-gText EfgShow::UniqueSupportName(void) const
-{
-  int number = m_supports.Length() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_supports.Length(); i++) {
-      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_supports.Length())
-      return "Support" + ToText(number);
-    
-    number++;
-  }
-}
-
 void EfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
   if (m_filename != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", m_filename.c_str(), 
-			      (char *) m_efg.GetTitle()));
+			      (char *) m_doc->m_efg->GetTitle()));
   }
   else {
-    SetTitle(wxString::Format("Gambit - %s", (char *) m_efg.GetTitle()));
+    SetTitle(wxString::Format("Gambit - %s", (char *) m_doc->m_efg->GetTitle()));
   }
   wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 EFSupport *EfgShow::GetSupport(void)
 {
-  return m_currentSupport;
+  return m_doc->m_curEfgSupport;
 }
 
 void EfgShow::SetSupportNumber(int p_number)
 {
-  if (p_number >= 1 && p_number <= m_supports.Length()) {
-    m_currentSupport = m_supports[p_number];
+  if (p_number >= 1 && p_number <= m_doc->m_efgSupports.Length()) {
+    m_doc->m_curEfgSupport = m_doc->m_efgSupports[p_number];
     OnSupportsEdited();
   }
 }
@@ -536,22 +498,22 @@ int EfgShow::NumDecimals(void) const
 void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
 {
   if (p_infosetsChanged) {
-    while (m_supports.Length()) { 
-      delete m_supports.Remove(1);
+    while (m_doc->m_efgSupports.Length()) { 
+      delete m_doc->m_efgSupports.Remove(1);
     }
 
-    m_currentSupport = new EFSupport(m_efg);
-    m_supports.Append(m_currentSupport);
-    m_currentSupport->SetName("Full Support");
+    m_doc->m_curEfgSupport = new EFSupport(*m_doc->m_efg);
+    m_doc->m_efgSupports.Append(m_doc->m_curEfgSupport);
+    m_doc->m_curEfgSupport->SetName("Full Support");
     OnSupportsEdited();
   }
 
   if (p_infosetsChanged || p_nodesChanged) {
     // It would be nice to relax this, but be conservative for now
-    m_copyNode = 0;
-    if (!m_cutNode.IsNull()) {
-      m_treeWindow->SetCutNode(m_cutNode, false);
-      m_cutNode = 0;
+    m_doc->m_copyNode = 0;
+    if (!m_doc->GetCutNode().IsNull()) {
+      m_treeWindow->SetCutNode(m_doc->m_cutNode, false);
+      m_doc->m_cutNode = 0;
     }
     m_treeWindow->RefreshTree();
     m_treeWindow->Refresh();
@@ -568,7 +530,7 @@ void EfgShow::SetCursor(gbtEfgNode p_node)
   if (m_navigateWindow) {
     m_navigateWindow->Set(p_node);
   }
-  m_cursor = p_node;
+  m_doc->m_cursor = p_node;
   UpdateMenus();
 }
 
@@ -723,12 +685,13 @@ void EfgShow::MakeMenus(void)
 
 void EfgShow::UpdateMenus(void)
 {
-  gbtEfgNode cursor = Cursor();
+  gbtEfgNode cursor = m_doc->GetCursor();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(wxID_COPY, !cursor.IsNull());
   menuBar->Enable(wxID_CUT, !cursor.IsNull());
-  menuBar->Enable(wxID_PASTE, !m_cutNode.IsNull() || !m_copyNode.IsNull());
+  menuBar->Enable(wxID_PASTE, (!m_doc->GetCutNode().IsNull() || 
+			       !m_doc->GetCopyNode().IsNull()));
 
   menuBar->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
   menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
@@ -736,15 +699,15 @@ void EfgShow::UpdateMenus(void)
 		  !cursor.GetInfoset().IsNull());
 
   menuBar->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		  (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor) &&
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor) &&
 		   !cursor.GetParent().IsNull()));
   menuBar->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor)));
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
   menuBar->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor)));
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
   menuBar->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-		     m_efg.IsLegalSubgame(cursor) &&
+		     m_doc->m_efg->IsLegalSubgame(cursor) &&
 		     cursor.GetSubgameRoot() == cursor) ?
 		    "Unmark &subgame" : "Mark &subgame");
 
@@ -836,9 +799,9 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gFileOutput file(m_filename);
-    gbtEfgGame efg = CompressEfg(m_efg, *GetSupport());
+    gbtEfgGame efg = CompressEfg(*m_doc->m_efg, *GetSupport());
     efg.WriteEfgFile(file, 6);
-    m_efg.SetIsDirty(false);
+    m_doc->m_efg->SetIsDirty(false);
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -869,8 +832,10 @@ void EfgShow::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new EfgPrintout(m_treeWindow,(char *) m_efg.GetTitle()),
-		       new EfgPrintout(m_treeWindow,(char *) m_efg.GetTitle()),
+    new wxPrintPreview(new EfgPrintout(m_treeWindow,
+				       (char *) m_doc->m_efg->GetTitle()),
+		       new EfgPrintout(m_treeWindow,
+				       (char *) m_doc->m_efg->GetTitle()),
 		       &data);
 
   if (!preview->Ok()) {
@@ -890,7 +855,7 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  EfgPrintout printout(m_treeWindow, (char *) m_efg.GetTitle());
+  EfgPrintout printout(m_treeWindow, (char *) m_doc->m_efg->GetTitle());
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -1044,21 +1009,21 @@ void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 
 void EfgShow::OnEditCut(wxCommandEvent &)
 {
-  if (!m_cutNode.IsNull()) {
-    m_treeWindow->SetCutNode(m_cutNode, false);
+  if (!m_doc->GetCutNode().IsNull()) {
+    m_treeWindow->SetCutNode(m_doc->GetCutNode(), false);
   }
-  m_cutNode = Cursor();
-  m_treeWindow->SetCutNode(m_cutNode, true);
-  m_copyNode = 0;
+  m_doc->m_cutNode = m_doc->GetCursor();
+  m_treeWindow->SetCutNode(m_doc->m_cutNode, true);
+  m_doc->m_copyNode = 0;
   m_treeWindow->Refresh();
 }
 
 void EfgShow::OnEditCopy(wxCommandEvent &)
 {
-  m_copyNode = Cursor();
-  if (!m_cutNode.IsNull()) {
-    m_treeWindow->SetCutNode(m_cutNode, false);
-    m_cutNode = 0;
+  m_doc->m_copyNode = m_doc->GetCursor();
+  if (!m_doc->m_cutNode.IsNull()) {
+    m_treeWindow->SetCutNode(m_doc->GetCutNode(), false);
+    m_doc->m_cutNode = 0;
   }
   m_treeWindow->Refresh();
 }
@@ -1066,11 +1031,11 @@ void EfgShow::OnEditCopy(wxCommandEvent &)
 void EfgShow::OnEditPaste(wxCommandEvent &)
 {
   try {
-    if (!m_copyNode.IsNull()) {
-      m_efg.CopyTree(m_copyNode, Cursor());
+    if (!m_doc->GetCopyNode().IsNull()) {
+      m_doc->m_efg->CopyTree(m_doc->GetCopyNode(), m_doc->GetCursor());
     }
     else {
-      m_efg.MoveTree(m_cutNode, Cursor());
+      m_doc->m_efg->MoveTree(m_doc->GetCutNode(), m_doc->GetCursor());
     }
     OnTreeChanged(true, true);
   }
@@ -1081,17 +1046,17 @@ void EfgShow::OnEditPaste(wxCommandEvent &)
 
 void EfgShow::OnEditInsert(wxCommandEvent &)
 { 
-  dialogInsertMove dialog(this, m_efg);
+  dialogInsertMove dialog(this, *m_doc->m_efg);
 
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (dialog.GetInfoset().IsNull()) {
 	gbtEfgInfoset infoset = dialog.GetPlayer().NewInfoset(dialog.GetActions());
-	Cursor().InsertMove(infoset);
+	m_doc->GetCursor().InsertMove(infoset);
 	OnTreeChanged(true, true);
       }
       else {
-	Cursor().InsertMove(dialog.GetInfoset());
+	m_doc->GetCursor().InsertMove(dialog.GetInfoset());
 	OnTreeChanged(true, false);
       }
     }
@@ -1104,17 +1069,18 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
 void EfgShow::OnEditDelete(wxCommandEvent &)
 {
   try {
-    dialogEfgDelete dialog(this, Cursor());
+    dialogEfgDelete dialog(this, m_doc->GetCursor());
 
     if (dialog.ShowModal() == wxID_OK) {
       if (dialog.DeleteTree()) {
-	m_efg.DeleteTree(Cursor());
+	m_doc->m_efg->DeleteTree(m_doc->GetCursor());
       }
       else {
 	gbtEfgNode keep = dialog.KeepNode();
-	m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
+	m_treeWindow->SetCursorPosition(m_doc->m_efg->DeleteNode(m_doc->GetCursor(),
+								 keep));
       }
-      m_efg.DeleteEmptyInfosets();
+      m_doc->m_efg->DeleteEmptyInfosets();
       OnTreeChanged(true, true);
     }
   }
@@ -1125,13 +1091,14 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
 
 void EfgShow::OnEditReveal(wxCommandEvent &)
 {
-  dialogInfosetReveal dialog(this, m_efg);
+  dialogInfosetReveal dialog(this, *m_doc->m_efg);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+      for (int pl = 1; pl <= m_doc->m_efg->NumPlayers(); pl++) {
 	if (dialog.IsPlayerSelected(pl)) {
-	  m_efg.Reveal(Cursor().GetInfoset(), m_efg.GetPlayer(pl));
+	  m_doc->m_efg->Reveal(m_doc->GetCursor().GetInfoset(),
+			       m_doc->m_efg->GetPlayer(pl));
 	}
       }
       OnTreeChanged(true, true);
@@ -1144,11 +1111,11 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
 
 void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
 {
-  if (Cursor().GetSubgameRoot() == Cursor()) {
-    m_efg.UnmarkSubgame(Cursor());
+  if (m_doc->GetCursor().GetSubgameRoot() == m_doc->GetCursor()) {
+    m_doc->m_efg->UnmarkSubgame(m_doc->GetCursor());
   }
   else {
-    m_efg.MarkSubgame(Cursor());
+    m_doc->m_efg->MarkSubgame(m_doc->GetCursor());
   }
   m_treeWindow->RefreshLayout();
   m_treeWindow->Refresh();
@@ -1157,9 +1124,9 @@ void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
 void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
 {
   gList<gbtEfgNode> subgames;
-  LegalSubgameRoots(m_efg, Cursor(), subgames);
+  LegalSubgameRoots(*m_doc->m_efg, m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
-    m_efg.MarkSubgame(subgames[i]);
+    m_doc->m_efg->MarkSubgame(subgames[i]);
   }
   m_treeWindow->RefreshLayout();
   m_treeWindow->Refresh();
@@ -1168,9 +1135,9 @@ void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
 void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
 {
   gList<gbtEfgNode> subgames;
-  LegalSubgameRoots(m_efg, Cursor(), subgames);
+  LegalSubgameRoots(*m_doc->m_efg, m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
-    m_efg.UnmarkSubgame(subgames[i]);
+    m_doc->m_efg->UnmarkSubgame(subgames[i]);
   }
   m_treeWindow->RefreshLayout();
   m_treeWindow->Refresh();
@@ -1178,32 +1145,33 @@ void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
 
 void EfgShow::OnEditNode(wxCommandEvent &)
 {
-  dialogEditNode dialog(this, Cursor());
+  dialogEditNode dialog(this, m_doc->GetCursor());
   if (dialog.ShowModal() == wxID_OK) {
-    Cursor().SetLabel(dialog.GetNodeName().c_str());
+    m_doc->GetCursor().SetLabel(dialog.GetNodeName().c_str());
     if (dialog.GetOutcome() > 0) {
-      Cursor().SetOutcome(m_efg.GetOutcome(dialog.GetOutcome()));
+      m_doc->GetCursor().SetOutcome(m_doc->m_efg->GetOutcome(dialog.GetOutcome()));
     }
     else {
-      Cursor().SetOutcome(0);
+      m_doc->GetCursor().SetOutcome(0);
     }
 
-    if (m_efg.IsLegalSubgame(Cursor()) && !Cursor().GetParent().IsNull()) {
+    if (m_doc->m_efg->IsLegalSubgame(m_doc->GetCursor()) &&
+	!m_doc->GetCursor().GetParent().IsNull()) {
       if (dialog.MarkedSubgame()) {
-	m_efg.MarkSubgame(Cursor());
+	m_doc->m_efg->MarkSubgame(m_doc->GetCursor());
       }
       else {
-	m_efg.UnmarkSubgame(Cursor());
+	m_doc->m_efg->UnmarkSubgame(m_doc->GetCursor());
       }
     }
 
-    if (Cursor().NumChildren() > 0 &&
-	dialog.GetInfoset() != Cursor().GetInfoset()) {
+    if (m_doc->GetCursor().NumChildren() > 0 &&
+	dialog.GetInfoset() != m_doc->GetCursor().GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
-	m_efg.LeaveInfoset(Cursor());
+	m_doc->m_efg->LeaveInfoset(m_doc->GetCursor());
       }
       else {
-	m_efg.JoinInfoset(dialog.GetInfoset(), Cursor());
+	m_doc->m_efg->JoinInfoset(dialog.GetInfoset(), m_doc->GetCursor());
       }
       OnTreeChanged(true, true);
     }
@@ -1215,7 +1183,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
 
 void EfgShow::OnEditMove(wxCommandEvent &)
 {
-  gbtEfgInfoset infoset = Cursor().GetInfoset();
+  gbtEfgInfoset infoset = m_doc->GetCursor().GetInfoset();
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1223,12 +1191,13 @@ void EfgShow::OnEditMove(wxCommandEvent &)
     
     if (!infoset.IsChanceInfoset() && 
 	dialog.GetPlayer() != infoset.GetPlayer().GetId()) {
-      m_efg.SwitchPlayer(infoset, m_efg.GetPlayer(dialog.GetPlayer()));
+      m_doc->m_efg->SwitchPlayer(infoset,
+				 m_doc->m_efg->GetPlayer(dialog.GetPlayer()));
     }
 
     for (int act = 1; act <= infoset.NumActions(); act++) {
       if (!dialog.GetActions().Find(infoset.GetAction(act))) {
-	m_efg.DeleteAction(infoset, infoset.GetAction(act));
+	m_doc->m_efg->DeleteAction(infoset, infoset.GetAction(act));
 	act--;
       }
     }
@@ -1239,27 +1208,27 @@ void EfgShow::OnEditMove(wxCommandEvent &)
       if (!action.IsNull()) {
 	action.SetLabel(dialog.GetActionName(act));
 	if (infoset.IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, action.GetId(),
-			      dialog.GetActionProb(act));
+	  m_doc->m_efg->SetChanceProb(infoset, action.GetId(),
+				      dialog.GetActionProb(act));
 	}
 	insertAt = dialog.GetActions()[act].GetId() + 1;
       }
       else if (insertAt > infoset.NumActions()) {
-	gbtEfgAction newAction = m_efg.InsertAction(infoset);
+	gbtEfgAction newAction = m_doc->m_efg->InsertAction(infoset);
 	insertAt++;
 	newAction.SetLabel(dialog.GetActionName(act));
 	if (infoset.IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
-			      dialog.GetActionProb(act));
+	  m_doc->m_efg->SetChanceProb(infoset, newAction.GetId(), 
+				      dialog.GetActionProb(act));
 	}
       }
       else {
 	gbtEfgAction newAction =
-	  m_efg.InsertAction(infoset, infoset.GetAction(insertAt++));
+	  m_doc->m_efg->InsertAction(infoset, infoset.GetAction(insertAt++));
 	newAction.SetLabel(dialog.GetActionName(act));
 	if (infoset.IsChanceInfoset()) {
-	  m_efg.SetChanceProb(infoset, newAction.GetId(), 
-			      dialog.GetActionProb(act));
+	  m_doc->m_efg->SetChanceProb(infoset, newAction.GetId(), 
+				      dialog.GetActionProb(act));
 	}
       }
     }
@@ -1271,17 +1240,17 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
 void EfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogEditEfg dialog(this, m_efg, m_filename);
+  dialogEditEfg dialog(this, *m_doc->m_efg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
-    m_efg.SetTitle(dialog.GetGameTitle().c_str());
+    m_doc->m_efg->SetTitle(dialog.GetGameTitle().c_str());
     SetFilename(Filename());
-    m_efg.SetComment(dialog.GetComment().c_str());
+    m_doc->m_efg->SetComment(dialog.GetComment().c_str());
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-      if (pl > m_efg.NumPlayers()) {
-	m_efg.NewPlayer().SetLabel(dialog.GetPlayerName(pl).c_str());
+      if (pl > m_doc->m_efg->NumPlayers()) {
+	m_doc->m_efg->NewPlayer().SetLabel(dialog.GetPlayerName(pl).c_str());
       }
       else {
-	m_efg.GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
+	m_doc->m_efg->GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
       }
     }
     m_outcomeWindow->UpdateValues();
@@ -1528,14 +1497,14 @@ void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 
 void EfgShow::OnToolsDominance(wxCommandEvent &)
 {
-  gArray<gText> playerNames(m_efg.NumPlayers());
+  gArray<gText> playerNames(m_doc->m_efg->NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_efg.GetPlayer(pl).GetLabel();
+    playerNames[pl] = m_doc->m_efg->GetPlayer(pl).GetLabel();
   }
   dialogElimBehav dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    EFSupport support(*m_currentSupport);
+    EFSupport support(*m_doc->m_curEfgSupport);
     wxStatus status(this, "Dominance Elimination");
 
     try {
@@ -1551,8 +1520,8 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 	  break;
 	}
 	else {
-	  newSupport.SetName(UniqueSupportName());
-	  m_supports.Append(new EFSupport(newSupport));
+	  newSupport.SetName(m_doc->UniqueEfgSupportName());
+	  m_doc->m_efgSupports.Append(new EFSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -1564,8 +1533,8 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
     }
     catch (gSignalBreak &) { }
     
-    if (*m_currentSupport != support) {
-      m_currentSupport = m_supports[m_supports.Length()]; 
+    if (*m_doc->m_curEfgSupport != support) {
+      m_doc->m_curEfgSupport = m_doc->m_efgSupports[m_doc->m_efgSupports.Length()]; 
       OnSupportsEdited();
       UpdateMenus();
     }
@@ -1578,7 +1547,7 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 
 void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 {
-  dialogEfgNash dialog(this, *m_currentSupport);
+  dialogEfgNash dialog(this, *m_doc->m_curEfgSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtEfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
@@ -1590,12 +1559,12 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
     try {
       wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
       gList<BehavSolution> solutions;
-      solutions = algorithm->Solve(*m_currentSupport, status);
+      solutions = algorithm->Solve(*m_doc->m_curEfgSupport, status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
 	AddProfile(solutions[soln], true);
       }
-      ChangeProfile(m_profiles.Length());
+      ChangeProfile(m_doc->m_behavProfiles.Length());
    
       if (!m_solutionSashWindow->IsShown()) {
 	m_profileTable->Show(true);
@@ -1630,7 +1599,7 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
     algorithm.SetMaxLambda(10000000);
 
     wxStatus status(this, "QreSolve Progress");
-    gList<BehavSolution> solutions = algorithm.Solve(*m_currentSupport,
+    gList<BehavSolution> solutions = algorithm.Solve(*m_doc->m_curEfgSupport,
 						     status);
 
     if (solutions.Length() > 0) {
@@ -1648,7 +1617,7 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
 void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
 {
   // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_efg)) {
+  if (!IsPerfectRecall(*m_doc->m_efg)) {
     if (wxMessageBox("This game is not perfect recall\n"
 		     "Do you wish to continue?", 
 		     "Reduced normal form", 
@@ -1657,25 +1626,25 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     }
   }
     
-  if (m_efg.AssociatedNfg() != 0) {
+  if (m_doc->m_efg->AssociatedNfg() != 0) {
     return;
   }
 
   try {
-    gbtNfgGame nfg = MakeReducedNfg(*m_currentSupport);
+    gbtNfgGame nfg = MakeReducedNfg(*m_doc->m_curEfgSupport);
 
     NfgShow *nfgShow = new NfgShow(nfg, m_parent);
     nfgShow->SetFilename("");
-    wxGetApp().AddGame(m_efg, nfg, nfgShow);
+    wxGetApp().AddGame(*m_doc->m_efg, nfg, nfgShow);
 
-    for (int i = 1; i <= m_profiles.Length(); i++) {
-      BehavProfile<gNumber> profile(*m_profiles[i].Profile());
+    for (int i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
+      BehavProfile<gNumber> profile(*m_doc->m_behavProfiles[i].Profile());
       MixedProfile<gNumber> mixed(profile);
-      nfgShow->AddProfile(MixedSolution(mixed, m_profiles[i].Creator()), false);
+      nfgShow->AddProfile(MixedSolution(mixed, m_doc->m_behavProfiles[i].Creator()), false);
     }
 
-    if (m_profiles.Length() > 0) {
-      nfgShow->ChangeProfile(m_currentProfile);
+    if (m_doc->m_behavProfiles.Length() > 0) {
+      nfgShow->ChangeProfile(m_doc->m_curBehavProfile);
     }
   }
   catch (...) {
@@ -1691,7 +1660,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
 void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 {
   // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_efg)) {
+  if (!IsPerfectRecall(*m_doc->m_efg)) {
     if (wxMessageBox("This game is not perfect recall\n"
 		     "Do you wish to continue?", 
 		     "Agent normal form", 
@@ -1701,7 +1670,7 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
   }
 
   try {
-    gbtNfgGame nfg = MakeAfg(m_efg);
+    gbtNfgGame nfg = MakeAfg(*m_doc->m_efg);
     (void) new NfgShow(nfg, m_parent);
   }
   catch (...) {
@@ -1728,17 +1697,17 @@ void EfgShow::OnHelpAbout(wxCommandEvent &)
 
 void EfgShow::OnSupportDuplicate(wxCommandEvent &)
 {
-  EFSupport *newSupport = new EFSupport(*m_currentSupport);
-  newSupport->SetName(UniqueSupportName());
-  m_supports.Append(newSupport);
-  m_currentSupport = newSupport;
+  EFSupport *newSupport = new EFSupport(*m_doc->m_curEfgSupport);
+  newSupport->SetName(m_doc->UniqueEfgSupportName());
+  m_doc->m_efgSupports.Append(newSupport);
+  m_doc->m_curEfgSupport = newSupport;
   OnSupportsEdited();
 }
 
 void EfgShow::OnSupportDelete(wxCommandEvent &)
 {
-  delete m_supports.Remove(m_supports.Find(m_currentSupport));
-  m_currentSupport = m_supports[1];
+  delete m_doc->m_efgSupports.Remove(m_doc->m_efgSupports.Find(m_doc->m_curEfgSupport));
+  m_doc->m_curEfgSupport = m_doc->m_efgSupports[1];
   OnSupportsEdited();
 }
 
@@ -1748,44 +1717,44 @@ void EfgShow::OnSupportDelete(wxCommandEvent &)
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = BehavProfile<gNumber>(EFSupport(m_efg));
+  BehavSolution profile = BehavProfile<gNumber>(EFSupport(*m_doc->m_efg));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profiles.Length());
+    ChangeProfile(m_doc->m_behavProfiles.Length());
   }
 }
 
 void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  BehavSolution profile(m_profiles[m_currentProfile]);
+  BehavSolution profile(m_doc->m_behavProfiles[m_doc->m_curBehavProfile]);
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profiles.Length());
+    ChangeProfile(m_doc->m_behavProfiles.Length());
   }
 }
 
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_profiles.Remove(m_currentProfile);
-  if (m_efg.HasAssociatedNfg()) {
-    wxGetApp().GetWindow(m_efg.AssociatedNfg())->RemoveProfile(m_currentProfile);
+  m_doc->m_behavProfiles.Remove(m_doc->m_curBehavProfile);
+  if (m_doc->m_efg->HasAssociatedNfg()) {
+    wxGetApp().GetWindow(m_doc->m_efg->AssociatedNfg())->RemoveProfile(m_doc->m_curBehavProfile);
   }
-  m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
-  ChangeProfile(m_currentProfile);
+  m_doc->m_curBehavProfile = (m_doc->m_behavProfiles.Length() > 0) ? 1 : 0;
+  ChangeProfile(m_doc->m_curBehavProfile);
 }
 
 void EfgShow::OnProfilesProperties(wxCommandEvent &)
 {
-  if (m_currentProfile > 0) {
-    dialogEditBehav dialog(this, m_profiles[m_currentProfile]);
+  if (m_doc->m_curBehavProfile > 0) {
+    dialogEditBehav dialog(this, m_doc->m_behavProfiles[m_doc->m_curBehavProfile]);
 
     if (dialog.ShowModal() == wxID_OK) {
-      m_profiles[m_currentProfile] = dialog.GetProfile();
-      ChangeProfile(m_currentProfile);
+      m_doc->m_behavProfiles[m_doc->m_curBehavProfile] = dialog.GetProfile();
+      ChangeProfile(m_doc->m_curBehavProfile);
     }
   }
 }
@@ -1798,10 +1767,10 @@ void EfgShow::OnProfilesReport(wxCommandEvent &)
 
 void EfgShow::OnProfileSelected(wxListEvent &p_event)
 {
-  m_currentProfile = p_event.GetIndex() + 1;
+  m_doc->m_curBehavProfile = p_event.GetIndex() + 1;
   m_treeWindow->RefreshLabels();
   if (m_navigateWindow) {
-    m_navigateWindow->Set(m_cursor);
+    m_navigateWindow->Set(m_doc->GetCursor());
   }
 }
 
@@ -1836,7 +1805,7 @@ void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (p_event.CanVeto() && m_efg.IsDirty()) {
+  if (p_event.CanVeto() && m_doc->m_efg->IsDirty()) {
     if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();

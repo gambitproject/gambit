@@ -29,11 +29,12 @@
 
 #include "wx/treectrl.h"
 #include "efgshow.h"
+#include "gamedoc.h"
 #include "base/gmap.h"
 
 class EfgSupportWindow : public wxPanel {
 private:
-  EfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_actionTree;
@@ -49,7 +50,7 @@ private:
   void OnRightClick(wxMouseEvent &);
 
 public:
-  EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent);
+  EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgSupportWindow() { }
 
   void UpdateValues(void);

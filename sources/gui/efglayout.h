@@ -31,6 +31,7 @@
 #include "treedraw.h"
 #include "efgconst.h"
 #include "game/efg.h"
+#include "gamedoc.h"
 
 class NodeEntry {
 private:
@@ -171,7 +172,7 @@ class TreeWindow;
 
 class efgTreeLayout {
 private:
-  gbtEfgGame m_efg;
+  gbtGameDocument *m_doc;
   TreeWindow *m_parent;
   gList<NodeEntry *> m_nodeList;
   int m_maxX, m_maxY, m_maxLevel;
@@ -201,7 +202,7 @@ private:
   void RenderSubtree(wxDC &dc) const;
 
 public:
-  efgTreeLayout(gbtEfgGame &, TreeWindow *);
+  efgTreeLayout(gbtGameDocument *p_doc, TreeWindow *p_parent);
   virtual ~efgTreeLayout() { }
 
   gbtEfgNode PriorSameLevel(const gbtEfgNode &) const;

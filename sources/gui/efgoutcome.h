@@ -32,7 +32,7 @@
 
 class EfgOutcomeWindow : public wxGrid {
 private:
-  EfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   void OnChar(wxKeyEvent &);
@@ -46,7 +46,7 @@ private:
   void OnPopupOutcomeDetach(wxCommandEvent &);
 
 public:
-  EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
+  EfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgOutcomeWindow() { }
 
   void UpdateValues(void);

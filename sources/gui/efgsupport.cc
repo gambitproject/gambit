@@ -103,9 +103,10 @@ BEGIN_EVENT_TABLE(EfgSupportWindow, wxPanel)
   EVT_TREE_ITEM_COLLAPSING(idACTIONTREE, EfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
-EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
+EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
+				   wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_parent(p_efgShow), m_map(gbtEfgAction())
+    m_doc(p_doc), m_map(gbtEfgAction())
 {
   SetAutoLayout(true);
 
@@ -141,23 +142,23 @@ void EfgSupportWindow::UpdateValues(void)
 {
   m_supportList->Clear();
 
-  const gList<EFSupport *> &supports = m_parent->Supports();
+  const gList<EFSupport *> &supports = m_doc->m_efgShow->Supports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_parent->GetSupport());
+  int supportIndex = supports.Find(m_doc->m_efgShow->GetSupport());
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_parent->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_parent->GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_parent->GetGame().GetPlayer(pl);
+  m_actionTree->AddRoot((char *) m_doc->m_efgShow->GetSupport()->GetName());
+  for (int pl = 1; pl <= m_doc->m_efgShow->GetGame().NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_doc->m_efgShow->GetGame().GetPlayer(pl);
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
 					       (char *) player.GetLabel());
@@ -170,7 +171,7 @@ void EfgSupportWindow::UpdateValues(void)
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action.GetLabel());
-	if (m_parent->GetSupport()->Contains(action)) {
+	if (m_doc->m_efgShow->GetSupport()->Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -189,17 +190,17 @@ void EfgSupportWindow::UpdateValues(void)
 
 void EfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_parent->SetSupportNumber(p_event.GetSelection() + 1);
+  m_doc->m_efgShow->SetSupportNumber(p_event.GetSelection() + 1);
 }
 
 void EfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_parent->SetSupportNumber(m_supportList->GetSelection());
+  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection());
 }
 
 void EfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_parent->SetSupportNumber(m_supportList->GetSelection() + 2);
+  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection() + 2);
 
 }
 
@@ -217,17 +218,17 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_parent->GetSupport()->Contains(action) &&
-      m_parent->GetSupport()->NumActions(action.GetInfoset()) > 1) {
-    m_parent->GetSupport()->RemoveAction(action);
+  if (m_doc->m_efgShow->GetSupport()->Contains(action) &&
+      m_doc->m_efgShow->GetSupport()->NumActions(action.GetInfoset()) > 1) {
+    m_doc->m_efgShow->GetSupport()->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_parent->GetSupport()->AddAction(action);
+    m_doc->m_efgShow->GetSupport()->AddAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxBLACK);
   }
 
-  m_parent->SetSupportNumber(m_supportList->GetSelection() + 1);
+  m_doc->m_efgShow->SetSupportNumber(m_supportList->GetSelection() + 1);
 }
 
 

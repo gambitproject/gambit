@@ -29,6 +29,7 @@
 
 #include "wx/dragimag.h"
 #include "efglayout.h"
+#include "gamedoc.h"
 
 class EfgShow;
 
@@ -37,7 +38,7 @@ friend class EfgPrintout;
 friend class EfgShow;
 private:
   gbtEfgGame m_efg;
-  EfgShow *m_parent;
+  gbtGameDocument *m_doc;
   efgTreeLayout m_layout;
   TreeDrawSettings m_drawSettings;
 
@@ -66,11 +67,9 @@ private:
   void OnKeyEvent(wxKeyEvent &);
     
 public:
-  TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
+  TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~TreeWindow();
     
-  EfgShow *Parent(void) const { return m_parent; }
-  
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);
 
