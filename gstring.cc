@@ -164,8 +164,10 @@ input& operator>>(input &from, gString &s)
 
   if (a == '\"'){
     from >> a;
-    while  (a != '\"') 
+    while  (a != '\"')  {
       s += a;
+      from >> a;
+    }
   }
   else  {
     do  {
