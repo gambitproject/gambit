@@ -7307,8 +7307,8 @@ Searches for all Perfect Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  s:=ElimAllDom[n];
   If[NumPlayers[n] = 2, 
+    s:=ElimAllDom[n];
     EnumMixedSolve[s,0,precision],
     << " Not implemented for n-person games";
     List[Centroid[Support[n]],0]
@@ -8500,8 +8500,8 @@ Finds one Perfect Nash equilibrium of the normal form game
 \verb+n+.  Returns a singleton list containing the equilibrium found.
 
 \begin{verbatim}
-  s:=ElimAllDom[n,strong->True];
   If[NumPlayers[n] = 2, 
+    s:=ElimAllDom[n];
     LcpSolve[s,1,precision],
     << " Not implemented for n-person games";
     List[Centroid[Support[n]],0] // return empty set of mixed
