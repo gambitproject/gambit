@@ -8,6 +8,7 @@
 #include "wx/splitter.h"
 #include "wx/fontdlg.h"
 
+#include "wxgcl.h"
 #include "gsm.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
@@ -128,16 +129,6 @@ gOutput &wxOutputWindowStream::operator<<(const void *x)
   m_window->AppendText(buf);
   return *this;
 }
-
-class GclApp : public wxApp {
-private:
-  bool OnInit(void);
-
-public:
-  virtual ~GclApp() { }
-};
-
-DECLARE_APP(GclApp)
 
 IMPLEMENT_APP(GclApp)
 
