@@ -42,14 +42,62 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "base/gstream.h"
-#include "math/integer.h"
-#include "gnulib.h"
+#include "integer.h"
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-//#include <new.h>
 #include <assert.h>
+
+// internal Integer representation
+class IntRep {
+public:
+  unsigned short  len;          // current length
+  unsigned short  sz;           // allocated space (0 means static).
+  short           sgn;          // 1 means >= 0; 0 means < 0 
+  unsigned short  s[1];         // represented as ushort array starting here
+};
+
+// True if REP is staticly (or manually) allocated,
+// and should not be deleted by an Integer destructor.
+#define STATIC_IntRep(rep) ((rep)->sz==0)
+
+IntRep*  Ialloc(IntRep*, const unsigned short *, int, int, int);
+IntRep*  Icalloc(IntRep*, int);
+IntRep*  Icopy_ulong(IntRep*, unsigned long);
+IntRep*  Icopy_long(IntRep*, long);
+IntRep*  Icopy(IntRep*, const IntRep*);
+IntRep*  Iresize(IntRep*, int);
+IntRep*  add(const IntRep*, int, const IntRep*, int, IntRep*);
+IntRep*  add(const IntRep*, int, long, IntRep*);
+IntRep*  multiply(const IntRep*, const IntRep*, IntRep*);
+IntRep*  multiply(const IntRep*, long, IntRep*);
+IntRep*  lshift(const IntRep*, long, IntRep*);
+IntRep*  lshift(const IntRep*, const IntRep*, int, IntRep*);
+IntRep*  power(const IntRep*, long, IntRep*);
+IntRep*  div(const IntRep*, const IntRep*, IntRep*);
+IntRep*  mod(const IntRep*, const IntRep*, IntRep*);
+IntRep*  div(const IntRep*, long, IntRep*);
+IntRep*  mod(const IntRep*, long, IntRep*);
+IntRep*  Compl(const IntRep*, IntRep*);
+IntRep*  abs(const IntRep*, IntRep*);
+IntRep*  negate(const IntRep*, IntRep*);
+IntRep*  pow(const IntRep*, long);
+IntRep*  gcd(const IntRep*, const IntRep* y);
+int      compare(const IntRep*, const IntRep*);
+int      compare(const IntRep*, long);
+int      ucompare(const IntRep*, const IntRep*);
+int      ucompare(const IntRep*, long);
+gText Itoa(const IntRep* x, int base = 10, int width = 0);
+gText cvtItoa(const IntRep* x, gText fmt, int& fmtlen, int base,
+	      int showbase, int width, int align_right, 
+	      char fillchar, char Xcase, int showpos);
+IntRep*  atoIntRep(const char* s, int base = 10);
+long     Itolong(const IntRep*);
+double   Itodouble(const IntRep*);
+int      Iislong(const IntRep*);
+int      Iisdouble(const IntRep*);
+long     lg(const IntRep*);
 
 long lg(unsigned long x)
 {
@@ -1710,123 +1758,6 @@ IntRep* lshift(const IntRep* x, const IntRep* yy, int negatey, IntRep* r)
   return lshift(x, y, r);
 }
 
-IntRep* bitop(const IntRep* x, const IntRep* y, IntRep* r, char op)
-{
-  nonnil(x);
-  nonnil(y);
-  int xl = x->len;
-  int yl = y->len;
-  int xsgn = x->sgn;
-  int xrsame = x == r;
-  int yrsame = y == r;
-  if (xrsame || yrsame)
-    r = Iresize(r, calc_len(xl, yl, 0));
-  else
-    r = Icalloc(r, calc_len(xl, yl, 0));
-  r->sgn = xsgn;
-  unsigned short* rs = r->s;
-  unsigned short* topr = &(rs[r->len]);
-  const unsigned short* as;
-  const unsigned short* bs;
-  const unsigned short* topb;
-  if (xl >= yl)
-  {
-    as = (xrsame)? rs : x->s;
-    bs = (yrsame)? rs : y->s;
-    topb = &(bs[yl]);
-  }
-  else
-  {
-    bs = (xrsame)? rs : x->s;
-    topb = &(bs[xl]);
-    as = (yrsame)? rs : y->s;
-  }
-
-  switch (op)
-  {
-  case '&':
-    while (bs < topb) *rs++ = *as++ & *bs++;
-    while (rs < topr) *rs++ = 0;
-    break;
-  case '|':
-    while (bs < topb) *rs++ = *as++ | *bs++;
-    while (rs < topr) *rs++ = *as++;
-    break;
-  case '^':
-    while (bs < topb) *rs++ = *as++ ^ *bs++;
-    while (rs < topr) *rs++ = *as++;
-    break;
-  }
-  Icheck(r);
-  return r;
-}
-
-IntRep* bitop(const IntRep* x, long y, IntRep* r, char op)
-{
-  nonnil(x);
-  unsigned short tmp[SHORT_PER_LONG];
-  unsigned long u;
-  int newsgn = (y >= 0);
-  if (newsgn)
-	 u = y;
-  else
-	 u = -y;
-
-  int l = 0;
-  while (u != 0)
-  {
-	 tmp[l++] = extract(u);
-	 u = down(u);
-  }
-
-  int xl = x->len;
-  int yl = l;
-  int xsgn = x->sgn;
-  int xrsame = x == r;
-  if (xrsame)
-	 r = Iresize(r, calc_len(xl, yl, 0));
-  else
-	 r = Icalloc(r, calc_len(xl, yl, 0));
-  r->sgn = xsgn;
-  unsigned short* rs = r->s;
-  unsigned short* topr = &(rs[r->len]);
-  const unsigned short* as;
-  const unsigned short* bs;
-  const unsigned short* topb;
-  if (xl >= yl)
-  {
-	 as = (xrsame)? rs : x->s;
-	 bs = tmp;
-	 topb = &(bs[yl]);
-  }
-  else
-  {
-	 bs = (xrsame)? rs : x->s;
-	 topb = &(bs[xl]);
-	 as = tmp;
-  }
-
-  switch (op)
-  {
-  case '&':
-	 while (bs < topb) *rs++ = *as++ & *bs++;
-	 while (rs < topr) *rs++ = 0;
-	 break;
-  case '|':
-	 while (bs < topb) *rs++ = *as++ | *bs++;
-	 while (rs < topr) *rs++ = *as++;
-	 break;
-  case '^':
-	 while (bs < topb) *rs++ = *as++ ^ *bs++;
-	 while (rs < topr) *rs++ = *as++;
-	 break;
-  }
-  Icheck(r);
-  return r;
-}
-
-
-
 IntRep*  Compl(const IntRep* src, IntRep* r)
 {
   nonnil(src);
@@ -1849,49 +1780,6 @@ IntRep*  Compl(const IntRep* src, IntRep* r)
   *s = b;
   Icheck(r);
   return r;
-}
-
-void (setbit)(gInteger& x, long b)
-{
-  if (b >= 0)
-  {
-	 int bw = (int) ((unsigned long)b / I_SHIFT);
-	 int sw = (int) ((unsigned long)b % I_SHIFT);
-    int xl = x.rep ? x.rep->len : 0;
-    if (xl <= bw)
-      x.rep = Iresize(x.rep, calc_len(xl, bw+1, 0));
-    x.rep->s[bw] |= (1 << sw);
-    Icheck(x.rep);
-  }
-}
-
-void clearbit(gInteger& x, long b)
-{
-  if (b >= 0)
-    {
-      if (x.rep == 0)
-	x.rep = &_ZeroRep;
-      else
-	{
-	  int bw = (int) ((unsigned long)b / I_SHIFT);
-	  int sw = (int) ((unsigned long)b % I_SHIFT);
-	  if (x.rep->len > bw)
-	    x.rep->s[bw] &= ~(1 << sw);
-	}
-    Icheck(x.rep);
-  }
-}
-
-int testbit(const gInteger& x, long b)
-{
-  if (x.rep != 0 && b >= 0)
-  {
-	 int bw = (int) ((unsigned long)b / I_SHIFT);
-	 int sw = (int) ((unsigned long)b % I_SHIFT);
-    return (bw < x.rep->len && (x.rep->s[bw] & (1 << sw)) != 0);
-  }
-  else
-    return 0;
 }
 
 // A  version of knuth's algorithm B / ex. 4.5.3.34
@@ -2070,34 +1958,9 @@ IntRep* negate(const IntRep* src, IntRep* dest)
   return dest;
 }
 
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-gInteger sqrt(const gInteger& x)
-{
-  gInteger r;
-  int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative gInteger");
-  if (s != 0)
-  {
-    r >>= (lg(x) / 2); // get close
-    gInteger q;
-    div(x, r, q);
-    while (q < r)
-    {
-      r += q;
-      r >>= 1;
-      div(x, r, q);
-    }
-  }
-  return r;
-}
-
 gInteger lcm(const gInteger& x, const gInteger& y)
 {
-  gInteger r;
-  if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized gInteger");
-  gInteger g;
+  gInteger r, g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2106,46 +1969,6 @@ gInteger lcm(const gInteger& x, const gInteger& y)
   mul(r, y, r);
   return r;
 }
-
-#else 
-gInteger sqrt(const gInteger& x) 
-{
-  gInteger r(x);
-  int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative gInteger");
-  if (s != 0)
-  {
-    r >>= (lg(x) / 2); // get close
-    gInteger q;
-    div(x, r, q);
-    while (q < r)
-    {
-      r += q;
-      r >>= 1;
-      div(x, r, q);
-    }
-  }
-  return r;
-}
-
-gInteger lcm(const gInteger& x, const gInteger& y) 
-{
-  gInteger r;
-  if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized gInteger");
-  gInteger g;
-  if (sign(x) == 0 || sign(y) == 0)
-    g = 1;
-  else 
-    g = gcd(x, y);
-  div(x, g, r);
-  mul(r, y, r);
-  return r;
-}
-
-#endif
-
-
 
 IntRep* atoIntRep(const char* s, int base)
 {
@@ -2184,16 +2007,14 @@ IntRep* atoIntRep(const char* s, int base)
   return r;
 }
 
-
-static const int _libgxx_maxfmt = 20;
-AllocRing _libgxx_fmtq(_libgxx_maxfmt);
-
-char* Itoa(const IntRep* x, int base, int width)
+gText Itoa(const IntRep *x, int base, int width)
 {
   int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
-  char* fmtbase = (char *) _libgxx_fmtq.alloc(fmtlen);
-  char* f = cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
-  return f;
+  gText fmtbase;
+  for (int i = 0; i < fmtlen; i++) {
+    fmtbase += " ";
+  }
+  return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
 gOutput& operator<<(gOutput &s, const gInteger &y)
@@ -2201,7 +2022,7 @@ gOutput& operator<<(gOutput &s, const gInteger &y)
   return s << Itoa(y.rep);
 }
 
-char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
+gText cvtItoa(const IntRep *x, gText fmt, int& fmtlen, int base, int showbase,
               int width, int align_right, char fillchar, char Xcase, 
               int showpos)
 {
@@ -2294,26 +2115,6 @@ char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
   }
 }
 
-char* dec(const gInteger& x, int width)
-{
-  return Itoa(x, 10, width);
-}
-
-char* oct(const gInteger& x, int width)
-{
-  return Itoa(x, 8, width);
-}
-
-char* hex(const gInteger& x, int width)
-{
-  return Itoa(x, 16, width);
-}
-
-//
-// The >> operator is currently commented out... should be modified to
-// work with the input/output classes later...
-//
-
 gInput &operator>>(gInput& s, gInteger& y)
 {
   char sgn = 0;
@@ -2355,63 +2156,236 @@ gInput &operator>>(gInput& s, gInteger& y)
   return s;
 }
 
-int gInteger::OK() const
+//------------------------------------------------------------------------
+//                    gInteger: Private member functions
+//------------------------------------------------------------------------
+
+int gInteger::OK(void) const
 {
-  if (rep != 0)
-	 {
-      int l = rep->len;
-      int s = rep->sgn;
-      int v = l <= rep->sz || STATIC_IntRep(rep);    // length within bounds
-      v &= s == 0 || s == 1;        // legal sign
-      Icheck(rep);                  // and correctly adjusted
-      v &= rep->len == l;
-      v &= rep->sgn == s;
-      if (v)
-	  return v;
-    }
+  if (rep != 0) {
+    int l = rep->len;
+    int s = rep->sgn;
+    int v = l <= rep->sz || STATIC_IntRep(rep);    // length within bounds
+    v &= s == 0 || s == 1;        // legal sign
+    Icheck(rep);                  // and correctly adjusted
+    v &= rep->len == l;
+    v &= rep->sgn == s;
+    if (v)
+      return v;
+  }
   error("invariant failure");
   return 0;
 }
 
-void gInteger::error(const char* msg) const
-{
-  // (*lib_error_handler)("gInteger", msg);
-  //  gerr << msg << '\n';
+void gInteger::error(const char *) const
+{ }
+
+//------------------------------------------------------------------------
+//                          gInteger: Lifecycle
+//------------------------------------------------------------------------
+
+gInteger::gInteger(void) 
+  : rep(&_ZeroRep)
+{ }
+
+gInteger::gInteger(int y) 
+  : rep(Icopy_long(0, (long) y)) 
+{ }
+
+gInteger::gInteger(long y) 
+  : rep(Icopy_long(0, y)) 
+{ }
+
+gInteger::gInteger(unsigned long y) 
+  : rep(Icopy_ulong(0, y)) 
+{ }
+
+gInteger::gInteger(IntRep *r) 
+  : rep(r)
+{ }
+
+gInteger::gInteger(const gInteger &y) 
+  : rep(Icopy(0, y.rep)) 
+{ }
+
+gInteger::~gInteger() 
+{ 
+  if (rep && !STATIC_IntRep(rep)) {
+    delete rep;
+  }
 }
 
-
-
-// The following were moved from the header file to stop BC from squealing
-// endless quantities of warnings
-
-gInteger::gInteger() :rep(&_ZeroRep) {}
-
-gInteger::gInteger(IntRep* r) :rep(r) {}
-
-gInteger::gInteger(int y) :rep(Icopy_long(0, (long)y)) {}
-
-gInteger::gInteger(long y) :rep(Icopy_long(0, y)) {}
-
-gInteger::gInteger(unsigned long y) :rep(Icopy_ulong(0, y)) {}
-
-gInteger::gInteger(const gInteger&  y) :rep(Icopy(0, y.rep)) {}
-
-gInteger::~gInteger() { if (rep && !STATIC_IntRep(rep)) delete rep; }
-
-void  gInteger::operator = (const gInteger&  y)
+gInteger &gInteger::operator=(const gInteger &y)
 {
   rep = Icopy(rep, y.rep);
+  return *this;
 }
 
-void gInteger::operator = (long y)
+gInteger &gInteger::operator=(long y)
 {
   rep = Icopy_long(rep, y); 
+  return *this;
 }
 
-int gInteger::initialized() const
+//------------------------------------------------------------------------
+//                   gInteger: Comparison operators
+//------------------------------------------------------------------------
+
+bool operator==(const gInteger &x, const gInteger &y)
 {
-  return rep != 0;
+  return (compare(x, y) == 0); 
 }
+
+bool operator==(const gInteger &x, long y)
+{
+  return (compare(x, y) == 0); 
+}
+
+bool operator!=(const gInteger &x, const gInteger &y)
+{
+  return (compare(x, y) != 0); 
+}
+
+bool operator!=(const gInteger &x, long y)
+{
+  return (compare(x, y) != 0); 
+}
+
+bool operator<(const gInteger &x, const gInteger &y)
+{
+  return (compare(x, y) < 0); 
+}
+
+bool operator<(const gInteger &x, long y)
+{
+  return (compare(x, y) < 0); 
+}
+
+bool operator<=(const gInteger &x, const gInteger &y)
+{
+  return (compare(x, y) <= 0); 
+}
+
+bool operator<=(const gInteger &x, long y)
+{
+  return (compare(x, y) <= 0); 
+}
+
+bool operator>(const gInteger &x, const gInteger &y)
+{
+  return (compare(x, y) > 0); 
+}
+
+bool operator>(const gInteger &x, long y)
+{
+  return (compare(x, y) > 0); 
+}
+
+bool operator>=(const gInteger &x, const gInteger &y)
+{
+  return (compare(x, y) >= 0); 
+}
+
+bool operator>=(const gInteger &x, long y)
+{
+  return (compare(x, y) >= 0); 
+}
+
+//------------------------------------------------------------------------
+//                   gInteger: Arithmetic operators
+//------------------------------------------------------------------------
+
+gInteger operator+(const gInteger &x, const gInteger &y)
+{
+  gInteger r;
+  add(x, y, r);
+  return r;
+}
+
+gInteger operator+(const gInteger &x, long y)
+{
+  gInteger r;
+  add(x, y, r);
+  return r;
+}
+
+gInteger operator+(long x, const gInteger &y)
+{
+  gInteger r;
+  add(x, y, r);
+  return r;
+}
+
+gInteger operator-(const gInteger &x, const gInteger &y)
+{
+  gInteger r;
+  sub(x, y, r);
+  return r;
+}
+
+gInteger operator-(const gInteger &x, long y)
+{
+  gInteger r;
+  sub(x, y, r);
+  return r;
+}
+
+gInteger operator-(long x, const gInteger &y)
+{
+  gInteger r;
+  sub(x, y, r);
+  return r;
+}
+
+gInteger operator*(const gInteger &x, const gInteger &y)
+{
+  gInteger r;
+  mul(x, y, r);
+  return r;
+}
+
+gInteger operator*(const gInteger &x, long y)
+{
+  gInteger r;
+  mul(x, y, r);
+  return r;
+}
+
+gInteger operator*(long x, const gInteger &y)
+{
+  gInteger r;
+  mul(x, y, r);
+  return r;
+}
+
+gInteger operator/(const gInteger &x, const gInteger &y)
+{
+  gInteger r;
+  div(x, y, r);
+  return r;
+}
+
+gInteger operator/(const gInteger &x, long y)
+{
+  gInteger r;
+  div(x, y, r);
+  return r;
+}
+
+gInteger operator%(const gInteger &x, const gInteger &y) 
+{
+  gInteger r;
+  mod(x, y, r);
+  return r;
+}
+
+gInteger operator%(const gInteger &x, long y)
+{
+  gInteger r;
+  mod(x, y, r);
+  return r;
+}
+
 
 // procedural versions
 
@@ -2470,21 +2444,6 @@ void  mod(const gInteger& x, const gInteger& y, gInteger& dest)
   dest.rep = mod(x.rep, y.rep, dest.rep);
 }
 
-void  And(const gInteger& x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '&');
-}
-
-void  Or(const gInteger& x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '|');
-}
-
-void  Xor(const gInteger& x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y.rep, dest.rep, '^');
-}
-
 void  lshift(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
@@ -2525,21 +2484,6 @@ void  mod(const gInteger& x, long y, gInteger& dest)
   dest.rep = mod(x.rep, y, dest.rep);
 }
 
-void  And(const gInteger& x, long y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '&');
-}
-
-void  Or(const gInteger& x, long y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '|');
-}
-
-void  Xor(const gInteger& x, long y, gInteger& dest)
-{
-  dest.rep = bitop(x.rep, y, dest.rep, '^');
-}
-
 void  lshift(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, y, dest.rep);
@@ -2565,11 +2509,6 @@ void negate(const gInteger& x, gInteger& dest)
   dest.rep = negate(x.rep, dest.rep);
 }
 
-void complement(const gInteger& x, gInteger& dest)
-{
-  dest.rep = Compl(x.rep, dest.rep);
-}
-
 void  add(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = add(y.rep, 0, x, dest.rep);
@@ -2584,85 +2523,6 @@ void  mul(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = multiply(y.rep, x, dest.rep);
 }
-
-void  And(long x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '&');
-}
-
-void  Or(long x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '|');
-}
-
-void  Xor(long x, const gInteger& y, gInteger& dest)
-{
-  dest.rep = bitop(y.rep, x, dest.rep, '^');
-}
-
-
-// operator versions
-
-int operator == (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) == 0; 
-}
-
-int operator == (const gInteger&  x, long y)
-{
-  return compare(x, y) == 0; 
-}
-
-int operator != (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) != 0; 
-}
-
-int operator != (const gInteger&  x, long y)
-{
-  return compare(x, y) != 0; 
-}
-
-int operator <  (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) <  0; 
-}
-
-int operator <  (const gInteger&  x, long y)
-{
-  return compare(x, y) <  0; 
-}
-
-int operator <= (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) <= 0; 
-}
-
-int operator <= (const gInteger&  x, long y)
-{
-  return compare(x, y) <= 0; 
-}
-
-int operator >  (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) >  0; 
-}
-
-int operator >  (const gInteger&  x, long y)
-{
-  return compare(x, y) >  0; 
-}
-
-int operator >= (const gInteger&  x, const gInteger&  y)
-{
-  return compare(x, y) >= 0; 
-}
-
-int operator >= (const gInteger&  x, long y)
-{
-  return compare(x, y) >= 0; 
-}
-
 
 void  gInteger::operator += (const gInteger& y)
 {
@@ -2707,40 +2567,6 @@ void gInteger::operator *= (long y)
   mul(*this, y, *this);
 }
 
-
-void  gInteger::operator &= (const gInteger& y)
-{
-  And(*this, y, *this);
-}
-
-void  gInteger::operator &= (long y)
-{
-  And(*this, y, *this);
-}
-
-void  gInteger::operator |= (const gInteger& y)
-{
-  Or(*this, y, *this);
-}
-
-void  gInteger::operator |= (long y)
-{
-  Or(*this, y, *this);
-}
-
-
-void  gInteger::operator ^= (const gInteger& y)
-{
-  Xor(*this, y, *this);
-}
-
-void  gInteger::operator ^= (long y)
-{
-  Xor(*this, y, *this);
-}
-
-
-
 void gInteger::operator /= (const gInteger& y)
 {
   div(*this, y, *this);
@@ -2751,41 +2577,6 @@ void gInteger::operator /= (long y)
   div(*this, y, *this);
 }
 
-
-void gInteger::operator <<= (const gInteger&  y)
-{
-  lshift(*this, y, *this);
-}
-
-void gInteger::operator <<= (long  y)
-{
-  lshift(*this, y, *this);
-}
-
-
-void gInteger::operator >>= (const gInteger&  y)
-{
-  rshift(*this, y, *this);
-}
-
-void  gInteger::operator >>= (long y)
-{
-  rshift(*this, y, *this);
-}
-
-#ifdef __GNUG__
-gInteger operator <? (const gInteger& x, const gInteger& y)
-{
-  return (compare(x.rep, y.rep) <= 0) ? x : y;
-}
-
-gInteger operator >? (const gInteger& x, const gInteger& y)
-{
-  return (compare(x.rep, y.rep) >= 0)?  x : y;
-}
-#endif
-
-
 void gInteger::abs()
 {
   ::abs(*this, *this);
@@ -2794,12 +2585,6 @@ void gInteger::abs()
 void gInteger::negate()
 {
   ::negate(*this, *this);
-}
-
-
-void gInteger::complement()
-{
-  ::complement(*this, *this);
 }
 
 
@@ -2818,7 +2603,7 @@ int odd(const gInteger& y)
   return y.rep->len > 0 && (y.rep->s[0] & 1);
 }
 
-char* Itoa(const gInteger& y, int base, int width)
+gText Itoa(const gInteger& y, int base, int width)
 {
   return Itoa(y.rep, base, width);
 }
@@ -2830,73 +2615,6 @@ long lg(const gInteger& x)
   return lg(x.rep);
 }
 
-// constructive operations 
-
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-gInteger  operator +  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  add(x, y, r);
-  return r;
-}
-
-gInteger  operator +  (const gInteger& x, long y)
-{
-  gInteger r;
-  add(x, y, r);
-  return r;
-}
-
-gInteger  operator +  (long  x, const gInteger& y)
-{
-  gInteger r;
-  add(x, y, r);
-  return r;
-}
-
-gInteger  operator -  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  sub(x, y, r);
-  return r;
-}
-
-gInteger  operator -  (const gInteger& x, long y)
-{
-  gInteger r;
-  sub(x, y, r);
-  return r;
-}
-
-gInteger  operator -  (long  x, const gInteger& y)
-{
-  gInteger r;
-  sub(x, y, r);
-  return r;
-}
-
-gInteger  operator *  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  mul(x, y, r);
-  return r;
-}
-
-gInteger  operator *  (const gInteger& x, long y)
-{
-  gInteger r;
-  mul(x, y, r);
-  return r;
-}
-
-gInteger  operator *  (long  x, const gInteger& y)
-{
-  gInteger r;
-  mul(x, y, r);
-  return r;
-}
-
 gInteger sqr(const gInteger& x) 
 {
   gInteger r;
@@ -2904,97 +2622,7 @@ gInteger sqr(const gInteger& x)
   return r;
 }
 
-gInteger  operator &  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  And(x, y, r);
-  return r;
-}
-
-gInteger  operator &  (const gInteger& x, long y)
-{
-  gInteger r;
-  And(x, y, r);
-  return r;
-}
-
-gInteger  operator &  (long  x, const gInteger& y)
-{
-  gInteger r; 
-  And(x, y, r);
-  return r;
-}
-
-gInteger  operator |  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  Or(x, y, r);
-  return r;
-}
-
-gInteger  operator |  (const gInteger& x, long y)
-{
-  gInteger r;
-  Or(x, y, r);
-  return r;
-}
-
-gInteger  operator |  (long  x, const gInteger& y)
-{
-  gInteger r;
-  Or(x, y, r);
-  return r;
-}
-
-gInteger  operator ^  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  Xor(x, y, r);
-  return r;
-}
-
-gInteger  operator ^  (const gInteger& x, long y)
-{
-  gInteger r;
-  Xor(x, y, r);
-  return r;
-}
-
-gInteger  operator ^  (long  x, const gInteger& y)
-{
-  gInteger r;
-  Xor(x, y, r);
-  return r;
-}
-
-gInteger  operator /  (const gInteger& x, const gInteger& y)
-{
-  gInteger r;
-  div(x, y, r);
-  return r;
-}
-
-gInteger operator /  (const gInteger& x, long y)
-{
-  gInteger r;
-  div(x, y, r);
-  return r;
-}
-
-gInteger operator %  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r;
-  mod(x, y, r);
-  return r;
-}
-
-gInteger operator %  (const gInteger& x, long y)
-{
-  gInteger r;
-  mod(x, y, r);
-  return r;
-}
-
+/*
 gInteger operator <<  (const gInteger& x, const gInteger& y)
 {
   gInteger r;
@@ -3022,6 +2650,7 @@ gInteger operator >>  (const gInteger& x, long y)
   rshift(x, y, r);
   return r;
 }
+*/
 
 gInteger pow(const gInteger& x, long y)
 {
@@ -3060,13 +2689,6 @@ gInteger operator - (const gInteger& x)
   return r;
 }
 
-gInteger operator ~ (const gInteger& x) 
-{
-  gInteger r;
-  complement(x, r);
-  return r;
-}
-
 gInteger  atoI(const char* s, int base) 
 {
   gInteger r;
@@ -3080,187 +2702,6 @@ gInteger  gcd(const gInteger& x, const gInteger& y)
   r.rep = gcd(x.rep, y.rep);
   return r;
 }
-
-#else /* NO_NRV */
-
-gInteger  operator +  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; add(x, y, r); return r;
-}
-
-gInteger  operator +  (const gInteger& x, long y) 
-{
-  gInteger r; add(x, y, r); return r;
-}
-
-gInteger  operator +  (long  x, const gInteger& y) 
-{
-  gInteger r; add(x, y, r); return r;
-}
-
-gInteger  operator -  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; sub(x, y, r); return r;
-}
-
-gInteger  operator -  (const gInteger& x, long y) 
-{
-  gInteger r; sub(x, y, r); return r;
-}
-
-gInteger  operator -  (long  x, const gInteger& y) 
-{
-  gInteger r; sub(x, y, r); return r;
-}
-
-gInteger  operator *  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; mul(x, y, r); return r;
-}
-
-gInteger  operator *  (const gInteger& x, long y) 
-{
-  gInteger r; mul(x, y, r); return r;
-}
-
-gInteger  operator *  (long  x, const gInteger& y) 
-{
-  gInteger r; mul(x, y, r); return r;
-}
-
-gInteger sqr(const gInteger& x) 
-{
-  gInteger r; mul(x, x, r); return r;
-}
-
-gInteger  operator &  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; And(x, y, r); return r;
-}
-
-gInteger  operator &  (const gInteger& x, long y) 
-{
-  gInteger r; And(x, y, r); return r;
-}
-
-gInteger  operator &  (long  x, const gInteger& y) 
-{
-  gInteger r; And(x, y, r); return r;
-}
-
-gInteger  operator |  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; Or(x, y, r); return r;
-}
-
-gInteger  operator |  (const gInteger& x, long y) 
-{
-  gInteger r; Or(x, y, r); return r;
-}
-
-gInteger  operator |  (long  x, const gInteger& y) 
-{
-  gInteger r; Or(x, y, r); return r;
-}
-
-gInteger  operator ^  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; Xor(x, y, r); return r;
-}
-
-gInteger  operator ^  (const gInteger& x, long y) 
-{
-  gInteger r; Xor(x, y, r); return r;
-}
-
-gInteger  operator ^  (long  x, const gInteger& y) 
-{
-  gInteger r; Xor(x, y, r); return r;
-}
-
-gInteger  operator /  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; div(x, y, r); return r;
-}
-
-gInteger operator /  (const gInteger& x, long y) 
-{
-  gInteger r; div(x, y, r); return r;
-}
-
-gInteger operator %  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; mod(x, y, r); return r;
-}
-
-gInteger operator %  (const gInteger& x, long y) 
-{
-  gInteger r; mod(x, y, r); return r;
-}
-
-gInteger operator <<  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; lshift(x, y, r); return r;
-}
-
-gInteger operator <<  (const gInteger& x, long y) 
-{
-  gInteger r; lshift(x, y, r); return r;
-}
-
-gInteger operator >>  (const gInteger& x, const gInteger& y) 
-{
-  gInteger r; rshift(x, y, r); return r;
-}
-
-gInteger operator >>  (const gInteger& x, long y) 
-{
-  gInteger r; rshift(x, y, r); return r;
-}
-
-gInteger pow(const gInteger& x, long y) 
-{
-  gInteger r; pow(x, y, r); return r;
-}
-
-gInteger Ipow(long x, long y) 
-{
-  gInteger r(x); pow(r, y, r); return r;
-}
-
-gInteger pow(const gInteger& x, const gInteger& y) 
-{
-  gInteger r; pow(x, y, r); return r;
-}
-
-
-
-gInteger abs(const gInteger& x) 
-{
-  gInteger r; abs(x, r); return r;
-}
-
-gInteger operator - (const gInteger& x) 
-{
-  gInteger r; negate(x, r); return r;
-}
-
-gInteger operator ~ (const gInteger& x) 
-{
-  gInteger r; complement(x, r); return r;
-}
-
-gInteger  atoI(const char* s, int base) 
-{
-  gInteger r; r.rep = atoIntRep(s, base); return r;
-}
-
-gInteger  gcd(const gInteger& x, const gInteger& y) 
-{
-  gInteger r; r.rep = gcd(x.rep, y.rep); return r;
-}
-
-#endif  /* NO_NRV */
 
 void gInteger::operator %= (const gInteger& y)
 {

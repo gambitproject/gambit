@@ -19,7 +19,6 @@ libmath_a_SOURCES = \
 	double.cc \
 	gdpvect.cc \
 	gmatrix.cc \
-	gnulib.cc \
 	gnumber.cc \
 	gpvector.cc \
 	gsmatrix.cc \

@@ -16,8 +16,6 @@ libmath_a_SOURCES = \
 	gmatrix.cc \
 	gmatrix.h \
 	gmatrix.imp \
-	gnulib.cc \
-	gnulib.h \
 	gnumber.cc \
 	gnumber.h \
 	gpvector.cc \
