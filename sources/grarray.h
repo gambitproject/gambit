@@ -37,6 +37,8 @@ template <class T> class gRectArray    {
 
     void RotateUp(int lo, int hi);
     void RotateDown(int lo, int hi);
+    void RotateLeft(int lo, int hi);
+    void RotateRight(int lo, int hi);
 
     void SwitchRows(int, int);
 

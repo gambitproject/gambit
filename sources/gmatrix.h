@@ -8,40 +8,20 @@
 #define GMATRIX_H
 
 #include "gambitio.h"
+#include "grarray.h"
 #include "gvector.h"
-#include "gblock.h"
 
-template <class T> class gMatrix   {
-protected:
-  int minrow,maxrow,mincol,maxcol;
-  T **data;
+template <class T> class gMatrix : public gRectArray<T>  {
+  public:
+       // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
+    gMatrix(void);
+    gMatrix(int rows, int cols);
+    gMatrix(int rows, int cols, int minrows);
+    gMatrix(int rl, int rh, int cl, int ch);
+    gMatrix(const gMatrix<T> &M);
+    virtual ~gMatrix();
 
-
-  T** AllocateIndex(void); 
-  void DeleteIndex(T** p);
-  T* AllocateRow(void);
-  void DeleteRow(T* p);
-  void AllocateData(void);
-  void DeleteData(void);
-  void CopyData(const gMatrix<T> &);
-
-public:
-  // Constructors
-  gMatrix(void);
-  gMatrix(int rows, int cols);
-  gMatrix(int rows, int cols, int minrows);
-  gMatrix(int rl, int rh, int cl, int ch);
-  gMatrix(const gMatrix<T> &M);
-
-  // Destructor
-  ~gMatrix();
-
-  // Access a gMatrix element
-  T& operator()(int row, int col);
-  const T& operator()(int row, int col) const;
-
-  // = operator
-  gMatrix<T> &operator=(const gMatrix<T> &M);
+    gMatrix<T> &operator=(const gMatrix<T> &M);
 
   // +,- operators
   gMatrix<T> operator+(const gMatrix<T> &) const;
@@ -105,24 +85,6 @@ public:
   int Check(int row,int col) const;
     // check matrix for same row and column boundaries
   int CheckBounds(const gMatrix<T> &m) const;
-
-  // parameter access functions
-  const int& MinRow(void) const;
-  const int& MaxRow(void) const;
-  int NumRows(void) const;
-  
-  const int& MinCol(void) const;
-  const int& MaxCol(void) const;
-  int NumColumns(void) const;
-
-  void Dump(gOutput &to) const;
-  
-//  void SwapRows(int, int); // use SwitchRows
-  void RotateUp(int lo, int hi);
-  void RotateDown(int lo, int hi);
-  void RotateLeft(int lo, int hi);
-  void RotateRight(int lo, int hi);
-
 };
 
 template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M);

@@ -6,18 +6,6 @@
 
 #include "gmatrix.h"
 
-// inline member functions
-template <class T>
-T& gMatrix<T>::operator()(int row, int col) { 
-  assert(Check(row,col));
-  return data[row][col]; 
-}
-template <class T>
-const T& gMatrix<T>::operator()(int row, int col) const {
-  assert(Check(row,col));
-  return data[row][col]; 
-}
-
 template <class T>
 int gMatrix<T>::operator!=(const gMatrix<T> &M) const {
   return !((*this)==M);
@@ -26,21 +14,6 @@ template <class T>
 int gMatrix<T>::operator!=( T s ) const {
   return !((*this)==s);
 }
-
-template <class T>
-const int& gMatrix<T>::MinRow(void) const { return minrow; }
-template <class T>
-const int& gMatrix<T>::MaxRow(void) const { return maxrow; }
-template <class T>
-int gMatrix<T>::NumRows(void) const { return maxrow-minrow+1; }
-  
-template <class T>
-const int& gMatrix<T>::MinCol(void) const { return mincol; }
-template <class T>
-const int& gMatrix<T>::MaxCol(void) const { return maxcol; }
-template <class T>
-int gMatrix<T>::NumColumns(void) const { return maxcol-mincol+1; }
-
 
 template <class T> int gMatrix<T>::CheckRow(int row) const
 {
@@ -73,148 +46,33 @@ template <class T> int gMatrix<T>::CheckBounds(const gMatrix<T> &m) const
 	  mincol == m.mincol && maxcol == m.maxcol);
 }
 
-template <class T> T **gMatrix<T>::AllocateIndex(void)
-{
-  T **p = new T*[maxrow - minrow + 1];
-  assert(p);
-  return (p - minrow);
-}
-
-template <class T> void gMatrix<T>::DeleteIndex(T **p)
-{
-  delete [] (p + minrow);
-}
-
-template <class T> T *gMatrix<T>::AllocateRow(void)
-{
-  T *p = new T[maxcol - mincol + 1];
-  assert(p);
-  return (p - mincol);
-}
-
-template <class T> void gMatrix<T>::DeleteRow(T *p)
-{
-  delete [] (p + mincol);
-}
-
 template <class T> gMatrix<T>::gMatrix(void)
-  : minrow(1), maxrow(0), mincol(1), maxcol(0), data(0)
 { }
 
 template <class T> gMatrix<T>::gMatrix(int rows, int cols)
-  : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
-{
-  assert(rows >= 0 && cols >= 0);
-  AllocateData();
-}
+  : gRectArray<T>(rows, cols)
+{ }
 
 template <class T> gMatrix<T>::gMatrix(int rows, int cols, int minrows)
-  : minrow(minrows), maxrow(minrows + rows - 1), mincol(1), maxcol(cols)
-{
-  assert(rows >= 0 && cols >= 0);
-  AllocateData();
-}
+  : gRectArray<T>(minrows, minrows + rows - 1, 1, cols)
+{ }
 
 template <class T> gMatrix<T>::gMatrix(int rl, int rh, int cl, int ch)
-  : minrow(rl), maxrow(rh), mincol(cl), maxcol(ch)
-{
-  assert(rh >= rl - 1 && ch >= cl - 1);
-  AllocateData();
-}
+  : gRectArray<T>(rl, rh, cl, ch)
+{ }
 
 template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
-{
-  minrow=M.MinRow(); maxrow=M.MaxRow();
-  mincol=M.MinCol(); maxcol=M.MaxCol();
-  AllocateData();
-  CopyData(M);
-}
+  : gRectArray<T>(M)
+{ }
  
 template <class T> gMatrix<T>::~gMatrix()
+{ }
+
+
+template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 {
-  DeleteData();
-}
-
-
-// output operations
-
-template <class T> void
-gMatrix<T>::Dump(gOutput &to) const
-{
-  to<<"matrix dump: "<<NumRows()<<" x "<<NumColumns()<<" :: "
-    <<MinRow()<<".."<<MaxRow()<<" x "<<MinCol()<<".."<<MaxCol()<<"\n";
-  for(int i = minrow; i <= maxrow; i++)
-    {
-      to << "[ ";
-      for(int j = mincol; j <= maxcol; j++)
-	to << (*this)(i,j) << " ";
-      to << "]\n";
-    }
-}
-
-/*  this is defined inline in gmatrix.h
-template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
-{
-  M.Dump(to); return to;
-}
-*/
-
-
-
-// internal data operations
-
-template <class T> void
-gMatrix<T>::DeleteData(void)
-{
-  if(data) {
-    for(int i=minrow;i<=maxrow;i++)
-      DeleteRow( data[i] );
-    DeleteIndex( data );
-  }
-}
-
-template <class T> void
-gMatrix<T>::AllocateData(void)
-{
-  typedef T* foo;
-
-  data= AllocateIndex();
-  for(int i=minrow;i<=maxrow;i++) {
-    data[i]= AllocateRow();
-  }
-}
-
-template <class T> void
-gMatrix<T>::CopyData(const gMatrix<T> &M)
-{
-  assert( CheckBounds(M) );
-
-  for(int i=minrow;i<=maxrow;i++) {
-/*
-    for(int j=mincol;j<=maxcol;j++)
-      (*this)(i,j)=M(i,j);
-*/
-    // inner loop
-    T *src= M.data[i]+mincol;
-    T *dst= data[i]+mincol;
-    int j= maxcol-mincol+1;
-    while( j-- )
-      *(dst++)= *(src++);
-    assert( (dst-1) == data[i]+maxcol ); // debug
-    // end inner loop
-    }
-}
-
-// copy operator
-template <class T> gMatrix<T>&
-gMatrix<T>::operator=(const gMatrix<T> &M)
-{
-  assert( CheckBounds(M) );
-  if(this != &M)
-    {
-      CopyData(M);
-    }
-  return (*this);
+  gRectArray<T>::operator=(M);
+  return *this;
 }
 
 
@@ -618,65 +476,6 @@ gMatrix<T>::MakeIdent(void)
     for(int j=mincol;j<=maxcol;j++) {
       if(i==j) (*this)(i,j) = (T) 1;
       else (*this)(i,j)=(T) 0;
-    }
-}
-
-template <class T> void gMatrix<T>::RotateDown(int lo, int hi)
-{
-  assert( CheckRow(lo) && CheckRow(hi) );
-  assert(lo<=hi);
-      // Rotate data rows
-  T *temp;
-  temp=data[hi];
-  for(int k=hi; k>lo; k--)
-    data[k]=data[k-1];
-  data[lo]=temp;
-}
-
-template <class T> void
-gMatrix<T>::RotateUp(int lo, int hi)
-{
-  assert( CheckRow(lo) && CheckRow(hi) );
-  assert(lo<=hi);
-      // Rotate data rows
-  T *temp;
-  temp=data[lo];
-  for(int k=lo; k<hi; k++)
-    data[k]=data[k+1];
-  data[hi]=temp;
-}
-
-template <class T> void
-gMatrix<T>::RotateRight(int lo, int hi)
-{
-  assert( CheckColumn(lo) && CheckColumn(hi) );
-  assert(lo<=hi);
-
-  T temp;
-  for(int i=MinRow(); i<=MaxRow(); i++)
-    {
-      T *row= data[i];
-      temp= row[hi];
-      for(int j=hi; j>lo; j--)
-	row[j]= row[j-1];
-      row[lo]= row[hi];
-    }
-}
-
-template <class T> void
-gMatrix<T>::RotateLeft(int lo, int hi)
-{
-  assert( CheckColumn(lo) && CheckColumn(hi) );
-  assert(lo<=hi);
-
-  T temp;
-  for(int i=MinRow(); i<=MaxRow(); i++)
-    {
-      T *row= data[i];
-      temp= row[lo];
-      for(int j=lo; j<hi; j++)
-	row[j]= row[j+1];
-      row[hi]= temp;
     }
 }
 
