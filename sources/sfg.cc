@@ -221,6 +221,18 @@ int Sfg::ActionNumber(int pl, int j) const
   return (*sequences)[pl]->Find(j)->GetAction()->GetNumber();
 }
 
+const Infoset*  Sfg::GetInfoset(int pl, int j) const 
+{
+  if(j==1) return 0;
+  return (*sequences)[pl]->Find(j)->GetInfoset();
+}
+
+const Action* Sfg::GetAction(int pl, int j) const
+{
+  if(j==1) return 0;
+  return (*sequences)[pl]->Find(j)->GetAction();
+}
+
 BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 {
 //  BehavProfile<gNumber> b(efsupp);

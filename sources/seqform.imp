@@ -42,6 +42,7 @@ public:
 
   void AddSolutions(void);
   const gList<BehavSolution> &GetSolutions() const;
+  gMatrix<T> GetA(void);
 };
 
 
@@ -366,6 +367,10 @@ template <class T> void SeqFormModule<T>
   }
 }
 
+template <class T> gMatrix<T> SeqFormModule<T>::GetA(void)
+{
+return *A;
+}
   
 
 

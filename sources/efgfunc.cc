@@ -1009,6 +1009,115 @@ static Portion *GSM_SaveEfg(Portion **param)
   return param[0]->ValCopy();
 }
 
+//-------------
+// WriteSequenceForm
+//-------------
+
+#include "sfg.h"
+
+static Portion *GSM_WriteSfg(Portion **param)
+{
+  gOutput &out = ((OutputPortion*) param[0])->Value();
+  EFSupport *efs = ((EfSupportPortion*) param[1])->Value();
+  const Sfg& sfg(*efs);
+  sfg.Dump(out);
+  return param[0]->ValCopy();
+}
+
+//-------------
+// SequenceForm
+//-------------
+
+void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index)
+{
+  if(pl <= sfg.NumPlayers()) 
+    for(int j=1;j<=sfg.NumSequences(pl);j++) {
+      ListPortion *p = new ListPortion;
+      Recurse_Sfg(p,pl+1,sfg,index);
+      por->Append(p);
+    }
+  else {
+    ListPortion *p2 = new ListPortion;
+    index.Turn();
+    for (int i = 1; i <= sfg.NumPlayers(); i++) 
+      p2->Append(new NumberPortion(sfg.Payoff(index.CurrentIndices(),i)));
+    por->Append(p2);
+  }
+}
+
+static Portion *GSM_Sfg(Portion **param)
+{
+  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  const Sfg& sfg(*efs);
+
+  ListPortion *por = new ListPortion;
+  gIndexOdometer index(sfg.NumSequences());
+
+  Recurse_Sfg(por,1,sfg,index);
+
+  return por;
+}
+
+static Portion *GSM_SfgStrats(Portion **param)
+{
+  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
+  int p = pl->GetNumber();
+  const Sfg& sfg(*efs);
+  
+  ListPortion *por = new ListPortion;
+  for (int i=1;i<=sfg.NumSequences(p);i++) {
+    gList<const Action *> h((sfg.GetSequence(p,i))->History());
+    ListPortion *por1 = new ListPortion;
+    for(int j=1;j<=h.Length();j++)
+      por1->Append(new ActionPortion((Action *)h[j]));
+    por->Append(por1);
+  }  
+  return por;
+  }
+
+static Portion *GSM_SfgConstraints(Portion **param)
+{
+  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
+  int p = pl->GetNumber();
+  const Sfg& sfg(*efs);
+
+  gRectArray<gNumber> A(sfg.Constraints(p));
+
+  ListPortion *por = new ListPortion;
+  for(int i=A.MinRow();i<=A.MaxRow();i++) {
+    ListPortion *p1 = new ListPortion;
+    for(int j=A.MinCol();j<=A.MaxCol();j++)
+      p1->Append(new NumberPortion(A(i,j)));
+    por->Append(p1);
+  }
+  
+  return por;
+}
+/*
+  #include "seqform.h"
+  #include "seqform.imp"
+  
+  static Portion *GSM_SfgTableau(Portion **param)
+  {
+  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  SeqFormParams prm;
+  SeqFormModule<gNumber> sfm(*efs,prm);
+  
+  gMatrix<gNumber> A(sfm.GetA());
+  ListPortion *por = new ListPortion;
+  for(int i=A.MinRow();i<=A.MaxRow();i++) {
+  ListPortion *p1 = new ListPortion;
+  for(int j=A.MinCol();j<=A.MaxCol();j++)
+  p1->Append(new NumberPortion(A(i,j)));
+  por->Append(p1);
+  }
+  
+  return por;
+  }
+*/
+
 //-------------------
 // SetChanceProbs
 //-------------------
@@ -1334,6 +1443,35 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, gclParameter("players", PortionSpec(porTEXT,1),
 					    new ListPortion));
   gsm->AddFunction(FuncObj);
+
+  // Adding WriteSequenceForm
+  FuncObj = new gclFunction("WriteSequenceForm", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_WriteSfg, porOUTPUT, 2, 0 , funcNONLISTABLE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, gclParameter("support", porEFSUPPORT));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("SequenceForm", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Sfg, PortionSpec(porNUMBER, NLIST), 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  gsm->AddFunction(FuncObj);
+  FuncObj = new gclFunction("SequenceFormStrats", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SfgStrats, PortionSpec(porACTION, 2), 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("player", porEFPLAYER));
+  gsm->AddFunction(FuncObj);
+  FuncObj = new gclFunction("SequenceFormConstraints", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SfgConstraints, PortionSpec(porNUMBER, 2), 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("player", porEFPLAYER));
+  gsm->AddFunction(FuncObj);
+  /*
+    FuncObj = new gclFunction("SequenceFormTableau", 1);
+    FuncObj->SetFuncInfo(0, gclSignature(GSM_SfgTableau, PortionSpec(porNUMBER, 2), 1));
+    FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+    gsm->AddFunction(FuncObj);
+  */
 }
 
 

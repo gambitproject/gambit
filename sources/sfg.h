@@ -46,8 +46,11 @@ public:
   gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
+  const Infoset* GetInfoset(int pl, int sequence) const;
+  const Action*  GetAction(int pl, int sequence) const;
   const Efg &GetEfg(void) const {return EF;}
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
+  const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   
   void Dump(gOutput &) const;
 
