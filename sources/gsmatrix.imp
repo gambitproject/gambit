@@ -17,6 +17,10 @@ template <class T> gSquareMatrix<T>::gSquareMatrix(int size)
   : gMatrix<T>(size, size)
 { }
 
+template <class T> gSquareMatrix<T>::gSquareMatrix(const gMatrix<T> &M)
+  : gMatrix<T>(M)
+{ assert ( M.NumRows() == M.NumColumns() ); }
+
 template <class T> gSquareMatrix<T>::gSquareMatrix(const gSquareMatrix<T> &M)
   : gMatrix<T>(M)
 { }

@@ -13,6 +13,7 @@ template <class T> class gSquareMatrix : public gMatrix<T>   {
   public:
     gSquareMatrix(void);
     gSquareMatrix(int size);
+    gSquareMatrix(const       gMatrix<T> &M);
     gSquareMatrix(const gSquareMatrix<T> &M);
     virtual ~gSquareMatrix();
 
