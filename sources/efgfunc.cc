@@ -1745,7 +1745,7 @@ void Init_efgfunc(GSM *gsm)
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("NewSupport");
+  FuncObj = new FuncDescObj("Support");
   FuncObj->SetFuncInfo(GSM_NewSupport_Efg, 1);
   FuncObj->SetParamInfo(GSM_NewSupport_Efg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);

@@ -691,7 +691,7 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("NewSupport");
+  FuncObj = new FuncDescObj("Support");
   FuncObj->SetFuncInfo(GSM_NewSupport_Nfg, 1);
   FuncObj->SetParamInfo(GSM_NewSupport_Nfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
