@@ -128,6 +128,11 @@ executable files, and run fine when entered from the command line.
   wxWindows: could not execute '~rdm/gambit/pxi/pxi_motif_Linux'
   wxWindows: could not execute 'newpxi'
 
+COMMENT (magyar 10/2/98): Also a problem in the GCL.  Tilde-expansion
+is a shell convenience, which is why it works on the command line.
+We would need to add code to do this.  Not hard, we've just never gotten
+around to doing it.
+
 //------------------------------
 
 Bug D17:  Need "in place" editing of outcomes for large games.  
