@@ -125,19 +125,20 @@ public:
   // Information:
   //-------------
 
-  const gSpace*   GetSpace(void)                       const; 
-  int             Dmnsn()                              const;
-  int             DegreeOfVar(int var_no)              const;
-  int             Degree()                             const;
-  T               GetCoef(const gArray<int> &Powers)   const;
-  T               GetCoef(const exp_vect &Powers)      const;
-  gPoly1<T>       LeadingCoefficient(int varnumber)    const;
-  T               NumLeadCoeff()                       const; //assume deg == 0
-  T               Evaluate(const gArray<T> &values)    const;
-  gPoly1<T>       EvaluateOneVar(int varnumber, T val) const;
-  gPoly1<T>       PartialDerivative(int varnumber)     const;
-  int             No_Monomials()                       const;
-  gList<exp_vect> ExponentVectors()                    const;
+  const gSpace*       GetSpace(void)                       const; 
+  const term_order*   GetOrder(void)                       const; 
+  int                 Dmnsn()                              const;
+  int                 DegreeOfVar(int var_no)              const;
+  int                 Degree()                             const;
+  T                   GetCoef(const gArray<int> &Powers)   const;
+  T                   GetCoef(const exp_vect &Powers)      const;
+  gPoly1<T>           LeadingCoefficient(int varnumber)    const;
+  T                   NumLeadCoeff()                       const; // deg == 0
+  T                   Evaluate(const gArray<T> &values)    const;
+  gPoly1<T>           EvaluateOneVar(int varnumber, T val) const;
+  gPoly1<T>           PartialDerivative(int varnumber)     const;
+  int                 No_Monomials()                       const;
+  gList<exp_vect>     ExponentVectors()                    const;
 
   //--------------------
   // Term Order Concepts
