@@ -935,8 +935,8 @@ void Init_gsmoper( GSM* gsm )
 
   ParamInfoType xy_EfPlayer[] =
   {
-    ParamInfoType( "x", porEF_PLAYER ),
-    ParamInfoType( "y", porEF_PLAYER )
+    ParamInfoType( "x", porPLAYER_EFG ),
+    ParamInfoType( "y", porPLAYER_EFG )
   };
 
   ParamInfoType xy_Node[] =

@@ -566,7 +566,7 @@ Player*& EfPlayerPortion::Value( void ) const
 { return *_Value; }
 
 PortionType EfPlayerPortion::Type( void ) const
-{ return porEF_PLAYER; }
+{ return porPLAYER_EFG; }
 
 void EfPlayerPortion::Output( gOutput& s ) const
 { s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
@@ -1651,7 +1651,7 @@ PortionTypeTextType _PortionTypeText[] =
   { porOUTCOME_FLOAT,    "OUTCOME_FLOAT" },
   { porOUTCOME_RATIONAL, "OUTCOME_RATIONAL" },
   { porOUTCOME_RATIONAL, "OUTCOME" },
-  { porEF_PLAYER,        "EF_PLAYER" },
+  { porPLAYER_EFG,       "PLAYER_EFG" },
   { porINFOSET,          "INFOSET" },
   { porNODE,             "NODE" },
   { porACTION,           "ACTION" },

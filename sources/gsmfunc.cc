@@ -815,14 +815,14 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  switch( _FuncInfo[ f_index ].ParamInfo[ index ].Option )
 	  {
 	  case DEFAULT_NFG:
-	    if( gsm->DefaultNfg()->Type() == 
+	    if( gsm->DefaultNfg()->Type() & 
 	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
 	    {
 	      params_matched++;
 	    }
 	    break;
 	  case DEFAULT_EFG:
-	    if( gsm->DefaultEfg()->Type() == 
+	    if( gsm->DefaultEfg()->Type() & 
 	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
 	    {
 	      params_matched++;
@@ -886,24 +886,19 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ] == 0 )
 	{
-	  gout << "jere!\n\n";
 	  switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Option )
 	  {
 	  case DEFAULT_NFG:
-	    gout << "here1\n";
 	    if( gsm->DefaultNfg()->Type() & 
 	       _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
 	    {
-	      gout << "here11\n";
 	      _Param[ index ] = gsm->DefaultNfg()->ValCopy();
 	    }
 	    break;
 	  case DEFAULT_EFG:
-	    gout << "here2\n";
 	    if( gsm->DefaultEfg()->Type() & 
 	       _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
 	    {
-	      gout << "here21\n";
 	      _Param[ index ] = gsm->DefaultEfg()->ValCopy();
 	    }
 	    break;

@@ -67,7 +67,7 @@ int main( void )
   gin >> cont;
 
 
-/*
+
 
   gout << "\n";
   machine->Push( d_1 );
@@ -2617,9 +2617,6 @@ int main( void )
 
 
 
-  gout << "*********************** Press Return to continue ************";
-  gin >> cont;
-
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
@@ -3440,7 +3437,7 @@ int main( void )
 #endif
 
 
-*/
+
 
 
   prog = new gList< Instruction* >;
