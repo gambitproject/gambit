@@ -114,9 +114,18 @@ bool GambitApp::OnInit(void)
     wxYield();
   }
 
+  const long c_defaultFrameWidth = 400;
+  const long c_defaultFrameHeight = 300;
+  long frameWidth, frameHeight;
+  config.Read("/Sizes/MainFrameWidth", &frameWidth,
+	      c_defaultFrameWidth);
+  config.Read("/Sizes/MainFrameHeight", &frameHeight,
+	      c_defaultFrameHeight);
+  
   // Create the main frame window.
-  GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", 
-					      wxPoint(0, 0), wxDefaultSize);
+  GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", wxPoint(0, 0),
+					     wxSize(frameWidth, frameHeight));
+  gambitFrame->SetSizeHints(c_defaultFrameWidth, c_defaultFrameHeight);
 
   // Set up the help system.
   //  m_help.SetTempDir(".");
@@ -158,6 +167,7 @@ public:
   EfgShow *m_efgShow;
   Nfg *m_nfg;
   NfgShow *m_nfgShow;
+  gText m_fileName;
 
   Game(Efg::Game *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
   Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
@@ -168,7 +178,6 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   : wxFrame(p_parent, -1, p_title, p_position, p_size),
     m_fileHistory(5)
 {
-  SetAutoLayout(true);
 #ifdef __WXMSW__
   SetIcon(wxIcon("gambit_icn"));
 #else
@@ -216,26 +225,12 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   MakeToolbar();
 
   m_gameListCtrl = new wxListCtrl(this, idGAMELISTCTRL,
-				  wxPoint(0, 0), wxSize(400, 200),
+				  wxPoint(0, 0), GetClientSize(),
 				  wxLC_REPORT | wxLC_SINGLE_SEL);
   m_gameListCtrl->InsertColumn(0, "Title");
-  m_gameListCtrl->SetColumnWidth(0, 200);
   m_gameListCtrl->InsertColumn(1, "Filename");
-  m_gameListCtrl->SetColumnWidth(1, 100);
   m_gameListCtrl->InsertColumn(2, "Efg");
-  m_gameListCtrl->SetColumnWidth(2, 50);
   m_gameListCtrl->InsertColumn(3, "Nfg");
-  m_gameListCtrl->SetColumnWidth(3, 50);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_gameListCtrl, 0, wxALL, 0);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-
 }
 
 GambitFrame::~GambitFrame()
@@ -291,6 +286,7 @@ BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
   EVT_MENU(wxID_ABOUT, GambitFrame::OnHelpAbout)
   EVT_CLOSE(GambitFrame::OnCloseWindow)
   EVT_LIST_ITEM_SELECTED(idGAMELISTCTRL, GambitFrame::OnGameSelected)
+  EVT_SIZE(GambitFrame::OnSize)
 END_EVENT_TABLE()
 
 
@@ -525,7 +521,7 @@ void GambitFrame::OnNew(wxCommandEvent &)
 	efg->NewPlayer()->SetName(efgPage->GetName(pl));
       }
       EfgShow *efgShow = new EfgShow(*efg, this);
-      efgShow->SetFileName("");
+      efgShow->SetFilename("");
       AddGame(efg, efgShow);
       SetActiveWindow(efgShow);
       m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
@@ -537,7 +533,7 @@ void GambitFrame::OnNew(wxCommandEvent &)
 	nfg->Players()[pl]->SetName(nfgPage->GetName(pl));
       }
       NfgShow *nfgShow = new NfgShow(*nfg, this);
-      nfgShow->SetFileName("");
+      nfgShow->SetFilename("");
       AddGame(nfg, nfgShow);
       SetActiveWindow(nfgShow);
       m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
@@ -550,12 +546,8 @@ void GambitFrame::OnNew(wxCommandEvent &)
 
 void GambitFrame::OnLoad(wxCommandEvent &)
 {
-  Enable(false); // Don't allow anything while the dialog is up.
-
   gText filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
 				  NULL, NULL, "*.?fg").c_str();
-  Enable(true);
-
   if (filename == "") {
     return;
   }
@@ -613,8 +605,9 @@ void GambitFrame::LoadFile(const gText &p_filename)
 	m_fileHistory.AddFileToHistory((char *) p_filename);
       }
       NfgShow *nfgShow = new NfgShow(*nfg, this);
-      nfgShow->SetFileName(p_filename);
+      nfgShow->SetFilename(p_filename);
       AddGame(nfg, nfgShow);
+      SetFilename(nfgShow, p_filename);
       SetActiveWindow(nfgShow);
       m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
@@ -639,8 +632,9 @@ void GambitFrame::LoadFile(const gText &p_filename)
       }
 
       EfgShow *efgShow = new EfgShow(*efg, this);
-      efgShow->SetFileName(filename);
+      efgShow->SetFilename(filename);
       AddGame(efg, efgShow);
+      SetFilename(efgShow, p_filename);
       SetActiveWindow(efgShow);
       m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
@@ -657,6 +651,10 @@ void GambitFrame::LoadFile(const gText &p_filename)
 
 void GambitFrame::OnCloseWindow(wxCloseEvent &)
 {
+  wxConfig config("Gambit");
+  config.Write("/Sizes/MainFrameWidth", (long) GetSize().GetWidth());
+  config.Write("/Sizes/MainFrameHeight", (long) GetSize().GetHeight());
+
   while (m_gameList.Length() > 0) {
     if (m_gameList[1]->m_efgShow && m_gameList[1]->m_nfgShow) {
       delete m_gameList[1]->m_nfgShow;
@@ -670,8 +668,17 @@ void GambitFrame::OnCloseWindow(wxCloseEvent &)
     }
   }
 
-  //  wout->OnClose(); werr->OnClose();
   Destroy();
+}
+
+void GambitFrame::OnSize(wxSizeEvent &)
+{
+  m_gameListCtrl->SetSize(GetClientSize());
+  int listWidth = GetClientSize().GetWidth();
+  m_gameListCtrl->SetColumnWidth(0, listWidth / 2);
+  m_gameListCtrl->SetColumnWidth(1, listWidth / 4);
+  m_gameListCtrl->SetColumnWidth(2, listWidth / 8);
+  m_gameListCtrl->SetColumnWidth(3, listWidth / 8);
 }
 
 void GambitFrame::UpdateGameList(void)
@@ -685,6 +692,7 @@ void GambitFrame::UpdateGameList(void)
     else {
       m_gameListCtrl->InsertItem(i - 1, (char *) game->m_nfg->GetTitle());
     }
+    m_gameListCtrl->SetItem(i - 1, 1, (char *) game->m_fileName);
     m_gameListCtrl->SetItem(i - 1, 2, (game->m_efg != 0) ? "Yes" : "No");
     m_gameListCtrl->SetItem(i - 1, 3, (game->m_nfg != 0) ? "Yes" : "No");
   }
@@ -781,6 +789,28 @@ NfgShow *GambitFrame::GetWindow(const Nfg *p_nfg)
     }
   }
   return 0;
+}
+
+void GambitFrame::SetFilename(EfgShow *p_efgShow, const gText &p_file)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_efgShow == p_efgShow) {
+      m_gameList[i]->m_fileName = p_file;
+      UpdateGameList();
+      return;
+    }
+  }
+}
+
+void GambitFrame::SetFilename(NfgShow *p_nfgShow, const gText &p_file)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_nfgShow == p_nfgShow) {
+      m_gameList[i]->m_fileName = p_file;
+      UpdateGameList();
+      return;
+    }
+  }
 }
 
 void GambitFrame::SetActiveWindow(EfgShow *p_efgShow)

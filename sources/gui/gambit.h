@@ -73,6 +73,7 @@ private:
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnGameSelected(wxListEvent &);
+  void OnSize(wxSizeEvent &);
 
   void MakeToolbar(void);
   void UpdateGameList(void);
@@ -89,6 +90,8 @@ public:
   void AddGame(Efg::Game *, Nfg *, NfgShow *);
   void RemoveGame(Efg::Game *);
   void RemoveGame(Nfg *);
+  void SetFilename(EfgShow *, const gText &);
+  void SetFilename(NfgShow *, const gText &);
 
   EfgShow *GetWindow(const Efg::Game *);
   NfgShow *GetWindow(const Nfg *);

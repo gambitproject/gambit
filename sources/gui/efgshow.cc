@@ -455,12 +455,6 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action)
   return -1;
 }
 
-const gText &EfgShow::Filename(void) const
-{
-    return filename;
-}
-
-
 void EfgShow::PickSolutions(const Efg::Game &p_efg, Node *p_rootnode,
 			    gList<BehavSolution> &p_solns)
 {
@@ -855,7 +849,7 @@ void EfgShow::OnFileSave(wxCommandEvent &)
       efg = CompressEfg(m_efg, *GetSupport());
       efg->WriteEfgFile(file, s_nDecimals);
       delete efg;
-      SetFileName(dialog.Filename());
+      SetFilename(dialog.Filename());
     }
     catch (gFileOutput::OpenFailed &) {
       wxMessageBox((char *) ("Could not open " + dialog.Filename() + " for writing."),
@@ -1359,7 +1353,7 @@ void EfgShow::OnEditTreeLabel(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_efg.SetTitle(dialog.GetValue().c_str());
-    SetFileName(Filename());
+    SetFilename(Filename());
   }
 }
 
@@ -1931,7 +1925,7 @@ void EfgShow::OnSolveNormalReduced(wxCommandEvent &)
   Nfg *nfg = MakeReducedNfg(*m_currentSupport);
   if (nfg) {
     NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
-    nfgShow->SetFileName("");
+    nfgShow->SetFilename("");
     m_parent->AddGame(&m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_solutionTable->Length(); i++) {
@@ -2416,14 +2410,16 @@ void EfgShow::AdjustSizes(void)
   }
 }
 
-void EfgShow::SetFileName(const gText &p_name)
+void EfgShow::SetFilename(const gText &p_name)
 {
-  if (p_name != "")
-    filename = p_name;
-  else
-    filename = "untitled.efg";
-
-  SetTitle((char *) ("[" + filename + "] " + m_efg.GetTitle()));
+  m_filename = p_name;
+  if (m_filename != "") {
+    SetTitle((char *) ("[" + m_filename + "] " + m_efg.GetTitle()));
+  }
+  else {
+    SetTitle((char *) m_efg.GetTitle());
+  }
+  m_parent->SetFilename(this, p_name);
 }
 
 EFSupport *EfgShow::GetSupport(void)

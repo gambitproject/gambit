@@ -479,7 +479,7 @@ void NfgShow::OnFileSave(wxCommandEvent &)
       nfg = CompressNfg(m_nfg, *m_currentSupport);
       nfg->WriteNfgFile(file, s_nDecimals);
       delete nfg;
-      SetFileName(dialog.Filename());
+      SetFilename(dialog.Filename());
     }
     catch (gFileOutput::OpenFailed &) {
       wxMessageBox((char *) ("Could not open " + dialog.Filename() + " for writing."),
@@ -548,7 +548,7 @@ void NfgShow::OnEditLabel(wxCommandEvent &)
 					(char *) m_nfg.GetTitle());
   if (label) {
     m_nfg.SetTitle(label);
-    SetFileName(Filename());
+    SetFilename(Filename());
   }
 }
 
@@ -1268,16 +1268,16 @@ void NfgShow::OnSolutionSelected(wxListEvent &p_event)
   m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
 }
  
-void NfgShow::SetFileName(const gText &p_fileName)
+void NfgShow::SetFilename(const gText &p_name)
 {
-  if (p_fileName != "") {
-    m_fileName = p_fileName;
+  m_filename = p_name;
+  if (m_filename != "") {
+    SetTitle((char *) ("[" + m_filename + "] " + m_nfg.GetTitle()));
   }
-  else {  
-    m_fileName = "untitled.nfg";
+  else {
+    SetTitle((char *) m_nfg.GetTitle());
   }
-
-  SetTitle((char *) ("[" + m_fileName + "] " + m_nfg.GetTitle()));
+  m_parent->SetFilename(this, p_name);
 }
 
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)

@@ -41,7 +41,7 @@ private:
   NFSupport *m_currentSupport;
   int m_currentSolution;
 
-  gText m_fileName;
+  gText m_filename;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
@@ -127,8 +127,8 @@ public:
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);
   void AddSolution(const MixedSolution &, bool);
 
-  void SetFileName(const gText &s);
-  const gText &Filename(void) const { return m_fileName; }
+  void SetFilename(const gText &s);
+  const gText &Filename(void) const { return m_filename; }
 
   const Nfg &Game(void) const { return m_nfg; }  
 
