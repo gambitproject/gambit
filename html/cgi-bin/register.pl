@@ -34,14 +34,12 @@ unless ($site = $query->param('site'))  {
     $site = 'US';
 }
 
-# Temporarily commenting out Bernhard's site until it is updated
-
-#if ($site eq 'CH')  {
-#    $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96';
-#}
-#else  {
+if ($site eq 'CH')  {
+    $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96.3';
+}
+else  {
     $basepath = 'ftp://ftp.hss.caltech.edu/pub/gambit/ver96.3';
-#}
+}
 
 unless ($name) {
     $name = 'Anonymous';
@@ -64,7 +62,7 @@ unless ($email) {
 }
 
 if (length($email) > 100) {
-    $from_where = 'someone with a really long email';
+    $email = 'someone with a really long email';
 }
 
 # encode commas
@@ -76,11 +74,11 @@ unless ($email =~ /^([^<]*)$/) {
 }
 $email = $1;
 
-if (length($learn) > 1024) {
-    $learn = 'a long explanation';
-}
 unless ($learn) {
     $learn = 'not specified';
+}
+if (length($learn) > 1024) {
+    $learn = 'a long explanation';
 }
 
 # encode commas
@@ -116,7 +114,7 @@ else  {
 if ($binlnx = $query->param('binlnx'))  {
     $binlnx = ',binlnx';
     print <<"EndOfText";
-<LI><a href="$basepath/gambit_motif_Linux.zip">Linux (RedHat 5.1) Executables</a>
+<LI><a href="$basepath/gambit_motif_Linux.zip">Linux (RedHat 6.0) Executables</a>
 EndOfText
 }
 else  {
@@ -206,7 +204,7 @@ else {
 if ($wxlnx = $query->param('wxlnx'))  {
     $wxlnx = ',wxlnx';
     print <<"EndOfText";
-<LI><a href="$basepath/wx_motif_Linux.zip">wxWindows 1.68 libraries for RedHat Linux 5.1</a>
+<LI><a href="$basepath/wx_motif_Linux.zip">wxWindows 1.68 libraries for RedHat Linux 6.0</a>
 EndOfText
 }
 else {
