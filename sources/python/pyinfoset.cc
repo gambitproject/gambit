@@ -361,6 +361,7 @@ infoset_setlabel(infosetobject *self, PyObject *args)
 }
 
 static struct PyMethodDef infoset_methods[] = {
+  { "DeleteInfoset", (PyCFunction) infoset_deleteinfoset, 1 },
   { "GetAction", (PyCFunction) infoset_getaction, 1 },
   { "GetLabel", (PyCFunction) infoset_getlabel, 1 },
   { "GetMember", (PyCFunction) infoset_getmember, 1 },
