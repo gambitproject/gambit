@@ -273,7 +273,6 @@ Portion *gclFunctionCall::Evaluate(void)
   }
   catch (...) {
     if (param)  delete [] param;
-    if (ret)    delete ret;
     throw;
   }
 
