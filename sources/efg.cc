@@ -1360,6 +1360,8 @@ bool Efg::IsLegalSubgame(Node *n)
 
 bool Efg::DefineSubgame(Node *n)
 {
+  if(n->gameroot == n) return true;
+
   if (n->gameroot != n && IsLegalSubgame(n))  {
     n->gameroot = 0;
     MarkSubgame(n, n);
