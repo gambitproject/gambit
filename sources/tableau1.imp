@@ -15,8 +15,8 @@
 
 Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
-    basis(A),  B(basis),
-    solution(A.MinRow(),A.MaxRow()) 
+    basis(A),  B(basis), solution(A.MinRow(),A.MaxRow()),
+    Tabdat(A), Coeff(b), nonbasic(A.MinCol(),A.MaxCol()),denom(1) 
 {
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
@@ -31,16 +31,20 @@ Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
 };
 
 
-Tableau<double>::Tableau(const Tableau<double> &orig) 
+template <class T>
+Tableau<T>::Tableau(const Tableau<T> &orig) 
   : npivots(0), eps1(orig.eps1), eps2(orig.eps2), tmpcol(orig.tmpcol),
     A(orig.A),b(orig.b), basis(orig.basis), B(orig.B, basis),
-    solution(orig.solution) 
+    solution(orig.solution), Tabdat(orig.Tabdat), Coeff(orig.Coeff), nonbasic(orig.nonbasic), 
+    totdenom(orig.totdenom), denom(orig.denom) 
 { }
 
-Tableau<double>::~Tableau()
+template <class T>
+Tableau<T>::~Tableau()
 { }
 
-Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
+template <class T>
+Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
 {
 //  assert( A==orig.A );
   if(this!= &orig) {
@@ -49,6 +53,11 @@ Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
     b = orig.b;
     basis= orig.basis;
     B.Copy( orig.B, basis );
+    Tabdat = orig.Tabdat;
+    Coeff = orig.Coeff;
+    nonbasic = orig.nonbasic;
+    totdenom = orig.totdenom;
+    denom = orig.denom;
     solution= orig.solution;
     npivots = orig.npivots;
   }
@@ -63,40 +72,53 @@ Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
 // BaseTableau<double>::~BaseTableau()
 // { }
 
-bool BaseTableau<double>::ColIndex(int x) const
+template <class T>
+bool BaseTableau<T>::ColIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
 
-bool BaseTableau<double>::RowIndex(int x) const
+template <class T>
+bool BaseTableau<T>::RowIndex(int x) const
 { return MinRow()<=x && x<=MaxRow(); }
 
-bool BaseTableau<double>::ValidIndex(int x) const
+template <class T>
+bool BaseTableau<T>::ValidIndex(int x) const
 { return (ColIndex(x) || RowIndex(-x)); }
 
-void BaseTableau<double>::CompPivot(int outlabel, int col)
+template <class T>
+void BaseTableau<T>::CompPivot(int outlabel, int col)
 {
   Pivot(Find(outlabel),col);
   Pivot(Find(-col),-outlabel);
 }
 
-int Tableau<double>::MinRow() const { return A->MinRow(); }
+template <class T>
+int Tableau<T>::MinRow() const { return A->MinRow(); }
 
-int Tableau<double>::MaxRow() const { return A->MaxRow(); }
+template <class T>
+int Tableau<T>::MaxRow() const { return A->MaxRow(); }
 
-int Tableau<double>::MinCol() const { return A->MinCol(); }
+template <class T>
+int Tableau<T>::MinCol() const { return A->MinCol(); }
 
-int Tableau<double>::MaxCol() const { return A->MaxCol(); }
+template <class T>
+int Tableau<T>::MaxCol() const { return A->MaxCol(); }
 
-const gMatrix<double> & Tableau<double>::Get_A(void) const {return *A; }
+template <class T>
+const gMatrix<T> & Tableau<T>::Get_A(void) const {return *A; }
 
-const gVector<double> & Tableau<double>::Get_b(void) const {return *b;}
+template <class T>
+const gVector<T> & Tableau<T>::Get_b(void) const {return *b;}
 
-bool Tableau<double>::Member(int i) const
+template <class T>
+bool Tableau<T>::Member(int i) const
 { return basis.Member(i);}
 
-int Tableau<double>::Label(int i) const
+template <class T>
+int Tableau<T>::Label(int i) const
 { return basis.Label(i);}
 
-int Tableau<double>::Find(int i) const
+template <class T>
+int Tableau<T>::Find(int i) const
 { return basis.Find(i);}
 
 
@@ -104,13 +126,14 @@ int Tableau<double>::Find(int i) const
 // pivoting operations
 //
 
-int Tableau<double>::CanPivot(int outlabel, int col)
+template <class T>
+int Tableau<T>::CanPivot(int outlabel, int col)
 {
 //  gVector<double> tmpcol(MinRow(),MaxRow());
 //  gout << "\ndim tmpcol = " << tmpcol.First() << " " << tmpcol.Last();
 //  gout << "\ntmpcol = " << tmpcol;
   SolveColumn(col,tmpcol);
-  double val = tmpcol[basis.Find(outlabel)];
+  T val = tmpcol[basis.Find(outlabel)];
   if(val <=eps2 && val >= -eps2) return 0;
   return 1;  
 }
@@ -124,38 +147,35 @@ void Tableau<double>::Pivot(int outrow,int col)
   gout << "\noutrow:" << outrow;
   gout << " outlabel: " << outlabel;
   gout << " inlabel: " << col;
-  BigDump(gout);
+  // BigDump(gout);
   basis.Pivot(outrow,col);
-  /*
-  if( col<0 )
-    { tmpcol=(double)0; tmpcol[-col]=(double)1; }
-  else
-    A->GetColumn(col, tmpcol);
-  B.update(outrow, tmpcol);
-  */
   
   B.update(outrow, col);
   B.solve(*b, solution);
   npivots++;
-  gout << "\nEntering BigDump()";
-  BigDump(gout);
+  // BigDump(gout);
  
  
 }
 
-long Tableau<double>::NumPivots() const
+template <class T>
+long Tableau<T>::NumPivots() const
 { return npivots; }
 
-long &Tableau<double>::NumPivots()
+template <class T>
+long &Tableau<T>::NumPivots()
 { return npivots; }
 
-void Tableau<double>::Mark(int label)
+template <class T>
+void Tableau<T>::Mark(int label)
 {basis.Mark(label);}
 
-void Tableau<double>::UnMark(int label)
+template <class T>
+void Tableau<T>::UnMark(int label)
 {basis.UnMark(label);}
 
-bool Tableau<double>::IsBlocked(int label) const
+template <class T>
+bool Tableau<T>::IsBlocked(int label) const
 {
   return basis.IsBlocked(label);
 }
@@ -164,13 +184,15 @@ bool Tableau<double>::IsBlocked(int label) const
 // raw Tableau functions
 //
 
-void Tableau<double>::Refactor()
+template <class T>
+void Tableau<T>::Refactor()
 {
 //  B.refactor(*A, basis.label);
   B.solve(*b, solution);
 }
 
-void Tableau<double>::BasisVector(gVector<double> &out) const
+template <class T>
+void Tableau<T>::BasisVector(gVector<T> &out) const
 {
   out= solution;
 }
@@ -321,13 +343,13 @@ void Tableau<double>::Dump(gOutput &to) const
 // : Tableau() , 
 // { }
 
+/*
 template <class T>
 void Tableau<T>::BigDump(gOutput &to) const
 { 
   to << "\nBasis:\n";
   basis.Dump(to);
-  int rows=(*A).MaxRow()-(*A).MinRow()+1; 
-  gMatrix<T> AA((*A).MinRow(),(*A).MaxRow(),(*A).MinCol(),(*A).MaxCol()+rows);
+  gMatrix<T> AA((*A).MinRow(),(*A).MaxRow(),(*A).MinCol(),(*A).MaxCol()+(*A).NumRows());
   gVector<T> bb(*b);
 
   BasisVector(bb);
@@ -342,6 +364,62 @@ void Tableau<T>::BigDump(gOutput &to) const
     SolveColumn(-j, bb);
     for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
       AA(i,(*A).MaxCol()+j) = bb[i];
+  }
+  to << "\nTableau:\n" << AA;
+}
+*/
+
+void Tableau<double>::BigDump(gOutput &to) const
+{ 
+  to << "\nBasis:\n";
+  basis.Dump(to);
+  gMatrix<double> AA((*A).MinRow(),(*A).MaxRow(),(*A).MinCol(),(*A).MaxCol()+(*A).NumRows());
+  gVector<double> bb(*b);
+
+  BasisVector(bb);
+  to << "\nBasisVector:\n" << bb;
+
+  for(int j=(*A).MinCol();j<=(*A).MaxCol();j++) {
+    SolveColumn(j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,j) = bb[i];
+  }
+  for(int j=AA.MinRow();j<=AA.MaxRow();j++) {
+    SolveColumn(-j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,(*A).MaxCol()+j) = bb[i];
+  }
+  to << "\nTableau:\n" << AA;
+}
+
+void Tableau<gRational>::BigDump(gOutput &to) const
+{ 
+  to << "\nBasis:\n";
+  basis.Dump(to);
+  gMatrix<double> AA((*A).MinRow(),(*A).MaxRow(),(*A).MinCol(),(*A).MaxCol()+(*A).NumRows());
+  gVector<double> bb((*b).First(),(*b).Last());
+  gVector<gRational> bbb(*b);
+
+  BasisVector(bbb);
+  bbb = bbb/denom;
+  bbb *= sign(denom*totdenom);
+  for(int i=bb.First();i<=bb.Last();i++) 
+    bb[i]=bbb[i];
+  to << "\nBasisVector:\n" << bb;
+
+  for(int j=(*A).MinCol();j<=(*A).MaxCol();j++) {
+    SolveColumn(j, bbb);
+    bbb = bbb/denom;
+    bbb *= sign(denom*totdenom);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,j) = bbb[i];
+  }
+  for(int j=AA.MinRow();j<=AA.MaxRow();j++) {
+    SolveColumn(-j, bbb);
+    bbb = bbb/denom;
+    bbb *= sign(denom*totdenom);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,(*A).MaxCol()+j) = bbb[i];
   }
   to << "\nTableau:\n" << AA;
 }

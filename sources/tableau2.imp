@@ -17,14 +17,10 @@
 // Aligns the column indexes
 int Tableau<gRational>::remap(int col_index) const
 {
-  int adjust(1-(*A).MinCol());
-  if (col_index < 0){
-    if (abs(col_index)>(*A).MaxCol()){
-      return(abs(col_index)+adjust+1);
-    }
-    return((*A).MaxCol()+abs(col_index)+adjust+1);
-  }
-  return(col_index+adjust);
+  int i = nonbasic.First(); 
+  while(i <= nonbasic.Last() && nonbasic[i] !=col_index) { i++;}
+  assert(i <= nonbasic.Last());
+  return i;
 }
       
 
@@ -34,7 +30,7 @@ double Integerize(gMatrix<gRational> &stuff)
   int i, j;
   int idex1,idex2,jdex;
   double real_lcm;
-  int len(stuff.MaxRow()*stuff.MaxCol());
+  int len(stuff.NumRows()*stuff.NumColumns());
   gInteger darray[len];
   for(i=stuff.MinCol();i<=stuff.MaxCol();++i){
     for(j=stuff.MinRow();j<=stuff.MaxRow();++j){
@@ -56,153 +52,56 @@ double Integerize(gMatrix<gRational> &stuff)
 
 void Tableau<gRational>::reintden() const
 {
-  int i,j;
-  double div(denom*totdenom);
+  gRational div(denom*totdenom);
 
-  for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i)
-    for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();++j)
-      Tabdat(i,j)/=div;
+  Tabdat /= div;
+  Coeff  = Coeff/div;
 }
 
 void Tableau<gRational>::unintden() const
 {
-  int i,j;
-  double div(denom*totdenom);
+  gRational div(denom*totdenom);
   
-  for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i)
-    for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();++j)
-      Tabdat(i,j)*=div;
+  Tabdat *= div;
+  Coeff *= div;
 }
 
 
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
     basis(A),B(basis), solution(A.MinRow(), A.MaxRow()),
-    Tabdat(A.MaxRow()-A.MinRow()+1,A.MaxRow()-A.MinRow()+A.MaxCol()-A.MinCol()+3), denom(1)
+    Tabdat(A), Coeff(b), nonbasic(A.MinCol(),A.MaxCol()),denom(1)
 {
   gout << "\nMY CODE\n";
 
-  int i;
-  int j;  //loop control variables
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
+  gMatrix<gRational> TempTabdat(A.MinRow(),A.MaxRow(),A.MinCol(), A.MaxCol()+1);
 
-  // Unnecessary for integers
-  // gEpsilon(eps1,5);
-  // gEpsilon(eps2);
-  //  gout << "\nA = " << A << "\ndim A: " << A.MinRow() << " " << A.MaxRow();
-  //  gout << " " << A.MinCol() << " " << A.MaxCol();
-  //  gout << "\nbasis = ";
-  //  basis.Dump(gout);
-
-  // Not using LU decomposition
-  // B.refactor(A, basis.label);
-
-  // I believe the same applies here BF
-  //  B.solve(b, solution);
-  
-  // Construct the contents of the Simplex Tableau
-
-  // Initialize gMatrix with correct size
-  gVector<gRational> TempVec(A.MaxRow()-A.MinRow()+1);
+  int i,j;
+  for(j=A.MinCol();j<=A.MaxCol();j++) 
+    nonbasic[j] = j;
 
   for (i=A.MinRow();i<=A.MaxRow();++i){
     for (j=A.MinCol();j<=A.MaxCol();++j){
-      Tabdat(i-A.MinRow()+1,j-A.MinCol()+1)=A(i,j);
+      TempTabdat(i,j)=A(i,j);
     }
+    TempTabdat(i,A.MaxCol()+1) = b[i];
   }
-  
-  for (i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i){
-    Tabdat(i,A.MaxCol()-A.MinCol()+2)=b[i+b.First()-1];
-  }
+  //  solution = b;
 
-  solution = b;
+  totdenom = Integerize(TempTabdat);
 
-  for (i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i){
-    for(j=Tabdat.MinRow();j<=Tabdat.MaxRow();++j){
-      if(j==i)Tabdat(i,j+A.MaxCol()-A.MinCol()+2)=1;
-      else Tabdat(i,j+A.MaxCol()-A.MinCol()+2)=0;
+  for (i=A.MinRow();i<=A.MaxRow();++i){
+    for (j=A.MinCol();j<=A.MaxCol();++j){
+      Tabdat(i,j)=TempTabdat(i,j);
     }
+    Coeff[i] = TempTabdat(i,A.MaxCol()+1);
   }
-  totdenom = Integerize(Tabdat);
+  solution = Coeff;
 }
-
-Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
-  : npivots(0), tmpcol(orig.tmpcol), A(orig.A), b(orig.b), 
-    basis(orig.basis), B(orig.B, basis), solution(orig.solution),
-    Tabdat(orig.Tabdat), totdenom(orig.totdenom), denom(orig.denom)
-{ }
-
-Tableau<gRational>::~Tableau()
-{ }
-
-
-Tableau<gRational>& Tableau<gRational>::operator=(const Tableau<gRational> &orig)
-{
-//  assert( A==orig.A );
-  if(this!= &orig) {
-    tmpcol = orig.tmpcol;
-    A = orig.A;
-    b = orig.b;
-    basis = orig.basis;
-    Tabdat = orig.Tabdat;
-    totdenom = orig.totdenom;
-    denom = orig.denom;
-    solution = orig.solution;
-
-    npivots = orig.npivots;
-  }
-  return *this;
-}
-
-
-int Tableau<gRational>::MinRow() const { return A->MinRow(); }
-
-
-int Tableau<gRational>::MaxRow() const { return A->MaxRow(); }
-
-
-int Tableau<gRational>::MinCol() const { return A->MinCol(); }
-
-
-int Tableau<gRational>::MaxCol() const { return A->MaxCol(); }
-
-
-const gMatrix<gRational> & Tableau<gRational>::Get_A(void) const {return *A; }
-
-
-const gVector<gRational> & Tableau<gRational>::Get_b(void) const {return *b;}
-
-
-bool Tableau<gRational>::Member(int i) const
-{ return basis.Member(i);}
-
-
-int Tableau<gRational>::Label(int i) const
-{ return basis.Label(i);}
-
-
-int Tableau<gRational>::Find(int i) const
-{ return basis.Find(i);}
-
 
 //
 // pivoting operations
 //
-
-
-int Tableau<gRational>::CanPivot(int outlabel, int col)
-{
-//  gVector<gRational> tmpcol(MinRow(),MaxRow());
-//  gout << "\ndim tmpcol = " << tmpcol.First() << " " << tmpcol.Last();
-//  gout << "\ntmpcol = " << tmpcol;
-
-  SolveColumn(col,tmpcol);
-  
-  gRational val = tmpcol[basis.Find(outlabel)];
-  if(val <=eps2 && val >= -eps2) return 0;
-  return 1;  
-}
 
 
 void Tableau<gRational>::Pivot(int outrow,int in_col)
@@ -214,33 +113,16 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   gout << "\noutrow:" << outrow;
   gout << " outlabel: " << outlabel;
   gout << " inlabel: " << in_col;
-  // BigDump(gout);
 
-  // gout << "FIRST\n";
-  // gout << Tabdat << '\n';
+  // BigDump(gout);
+  // gout << "\ndenom: " << denom << " totdenom: " << totdenom << " product: " << denom*totdenom;
+  // gout << "\nTabdat: loc 1\n " << Tabdat;
+
   int col;
-  int row(outrow+Tabdat.MinRow()-(*A).MinRow());
+  int row(outrow);
   int i,j; // loop-control variables
 
-
-  // gout << outrow << ":" << in_col << '\n';
-  // gout << solution << '\n';
-
   col = remap(in_col);
-  /*
-  if (in_col<0){
-    if(col!=(*A).MaxCol()+abs(in_col)+2){
-      gout<<"\nALERT:\n" << in_col << ':' << col << '\n';
-      assert(0);
-    }
-  }
-  else{
-    if (col!=in_col+1){
-      gout<<"\nALERT:\n" << in_col << ':' << col << '\n';
-      assert(0);
-    }
-  }
-  */
 
   // Pivot Algorithm:
   // i* denotes Pivot Row
@@ -259,68 +141,38 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
 
 
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i){
-    for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();++j){
-      // try{Tabdat(i,j);} catch(...){gout << "i,j\n"; assert(0);}
-      // try{Tabdat(outrow,j);} catch(...){gout << "o,j\n"; assert(0);}
-      // try{Tabdat(outrow,col);} catch(...){gout << "o,c\n"; assert(0);}
-      // try{Tabdat(i,col);} catch(...){gout << "i,c\n"; assert(0);}
-
-      if(i!=row){
+    if(i!=row){
+      for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();++j){
 	if(j!=col){
-	  Tabdat(i,j)=((Tabdat(row,col)*Tabdat(i,j))-(Tabdat(row,j)*Tabdat(i,col)));
-	  Tabdat(i,j)=Tabdat(i,j)/gRational(denom);
+	  Tabdat(i,j) = (Tabdat(row,col)*Tabdat(i,j))-(Tabdat(row,j)*Tabdat(i,col));
+	  Tabdat(i,j) /= gRational(denom);
 	}
       }
+      Coeff[i] = (Tabdat(row,col)*Coeff[i])-(Coeff[row]*Tabdat(i,col));
+      Coeff[i] /= gRational(denom);
     }
   }
   // Step 2
+  // Note: here we are moving the old basis column into column 'col'
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i){
-    if(i!=row){
-      Tabdat(i,col)=0;
-    }
+    if(i!=row)
+      Tabdat(i,col)=-Tabdat(i,col);
   }
   // Step 4
+  gRational old_denom = denom;
   denom=Tabdat(row,col);
+  Tabdat(row,col)=old_denom;
   // BigDump(gout);
   npivots++;
   basis.Pivot(outrow,in_col);
+  nonbasic[col] = outlabel;
+  
+  solution = Coeff*(gRational)sign(denom*totdenom);
 
-  for (i=solution.First();i<=solution.Last();++i){
-    solution[i]=Tabdat(i+Tabdat.MinRow()-solution.First(),(*A).MaxCol()-(*A).MinCol()+2)*(gRational)sign(denom*totdenom);
-  }
-
-  // gout << "LAST\n";
-  // gout << Tabdat << '\n';
-  // gout << "\nEntering BigDump()";
   // BigDump(gout);
+  // gout << "\ndenom: " << denom << " totdenom: " << totdenom << " product: " << denom*totdenom;
+  // gout << "\nTabdat: loc 2\n" << Tabdat;
 
-}
-
- long Tableau<gRational>::NumPivots() const
-{ return npivots; }
-
- long &Tableau<gRational>::NumPivots()
-{ return npivots; }
-
- void Tableau<gRational>::Mark(int label)
-{basis.Mark(label);}
-
- void Tableau<gRational>::UnMark(int label)
-{basis.UnMark(label);}
-
- bool Tableau<gRational>::IsBlocked(int label) const
-{
-  return basis.IsBlocked(label);
-}
-
-//
-// raw Tableau functions
-//
-
- void Tableau<gRational>::Refactor()
-{
-  // B.refactor(*A, basis.label);
-  // B.solve(*b, solution);
 }
 
 
@@ -339,49 +191,21 @@ void LPTableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational
 }
 
 
-void Tableau<gRational>::BasisVector(gVector<gRational> &out) const
-{
-  out = solution;
-  /*
-  int i; // loop control variable
-  gVector<gRational> TempVector(out.First(),out.Last());
-  reintden();
-  // Basis Vector is the Solution Column
-  for(i=out.First();i<=out.Last();++i){
-    TempVector[i]=Tabdat(Tabdat.MinRow()+i-out.First(),(*A).MaxCol()-(*A).MinCol()+2);
-  }
-  out= TempVector; // Fill This;
-  unintden();
-  */
-}
-
-// bat's dos?
-
-
 void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 {
   // gout << "\nTableau<gRational>::SolveColumn  " << MinRow() << " " << MaxRow(); 
   // gout << " col: " << in_col;
-  int col,i;
+  int col;
   
-  col = remap(in_col);
-  // if (in_col<0){col=(*A).MaxCol()+abs(in_col)+2;}
-  // else col=in_col+1;
-
-    for (i=(*A).MinRow();i<=(*A).MaxRow();++i){
-    out[i] =  Tabdat(i+Tabdat.MinRow()-(*A).MinRow(),col)*(gRational)sign(denom*totdenom);
+  if(Member(in_col)) {
+    out = (gRational)0;
+    out[Find(in_col)] = denom*(gRational)sign(denom*totdenom);
   }
- 
-    //  basis.GetColumn(in_col,out);
-    // gout << "\nout: " << out;
-/*
-  if( col<0 ) {
-    tmpcol2= (gRational)0;
-    tmpcol2[-col]=1;
+  else {
+    col = remap(in_col);
+    Tabdat.GetColumn(col,out);
+    out *= (gRational)sign(denom*totdenom);
   }
-  else
-    A->GetColumn(col,tmpcol2);
-*/
 }
 
 
@@ -481,19 +305,19 @@ void Tableau<gRational>::GetBasis(Basis<gRational> &out) const
  BFS<gRational> Tableau<gRational>::GetBFS() const
 {
   BFS<gRational> cbfs((gRational) 0);
-  reintden();
+  //   reintden();
   for(int i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
-  unintden();
+  //   unintden();
   return cbfs;
 }
 
  BFS<gRational> Tableau<gRational>::GetBFS1() const
 {
   BFS<gRational> cbfs((gRational) 0);
-  reintden();
+  //   reintden();
 int i;
   for(i=-MaxRow();i<=-MinRow();i++) {
     if(Member(i)) 
@@ -503,7 +327,7 @@ int i;
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
-  unintden();
+  //   unintden();
   return cbfs;
 }
 
@@ -515,29 +339,6 @@ int i;
 void Tableau<gRational>::Dump(gOutput &to) const
 { 
 basis.Dump(to);to << "\n";solution.Dump(to); 
-}
-
-
-//
-// checking functions
-//
-
-// BaseTableau<gRational>::~BaseTableau()
-// { }
-
-bool BaseTableau<gRational>::ColIndex(int x) const
-{ return MinCol()<=x && x<=MaxCol(); }
-
-bool BaseTableau<gRational>::RowIndex(int x) const
-{ return MinRow()<=x && x<=MaxRow(); }
-
-bool BaseTableau<gRational>::ValidIndex(int x) const
-{ return (ColIndex(x) || RowIndex(-x)); }
-
-void BaseTableau<gRational>::CompPivot(int outlabel, int col)
-{
-  Pivot(Find(outlabel),col);
-  Pivot(Find(-col),-outlabel);
 }
 
 

@@ -79,8 +79,11 @@ protected:
   gMatrix <T> Tabdat;  // This caries the full tableau
   // This may require a change in implementation, because it may be unweildly
   // to carry this around
-  double totdenom;  // This carries the denominator for Q data or 1 for Z
-  double denom;  // This is the denominator for the simplex
+  gVector<T> Coeff;
+  gVector<int> nonbasic;
+
+  gRational totdenom;  // This carries the denominator for Q data or 1 for Z
+  gRational denom;  // This is the denominator for the simplex
 
 public:
       // constructors and destructors
