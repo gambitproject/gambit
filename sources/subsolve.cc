@@ -4,47 +4,51 @@
 //# $Id$
 //#
 
+//# This file is a mess as far as Borland instantiations are concerned. The
+//# positions of each #pragma option and instantiations are crutical.
+
 #include "efg.h"
 #include "efgutils.h"
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-
-bool operator==(const gArray<int> &a, const gArray<int> &b)
-{
-	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
-	for (int i = a.mindex; i <= a.maxdex; i++)
-		if (a[i] != b[i])   return false;
-	return true;
-}
-
-bool operator!=(const gArray<int> &a, const gArray<int> &b)
-{return !(a == b);}
-
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-#include "glist.imp"
-
-TEMPLATE class gList<gVector<double> >;
-TEMPLATE class gNode<gVector<double> >;
-TEMPLATE class gList<gVector<gRational> >;
-TEMPLATE class gNode<gVector<gRational> >;
-
-TEMPLATE class gList<Outcome *>;
-TEMPLATE class gNode<Outcome *>;
-
-TEMPLATE class gList<gArray<Outcome *> >;
-TEMPLATE class gNode<gArray<Outcome *> >;
-
-#pragma option -Jgx
-
 #include "nfg.h"
 #include "nfstrat.h"
-#include "subsolve.h"
-
 #include "gwatch.h"
+#include "rational.h"
+
+#ifdef __BORLANDC__
+#include "behavsol.h"
+class gNode<BehavProfile<double> >;
+class gNode<BehavProfile<gRational> >;
+class gList<BehavProfile<double> >;
+class gList<BehavProfile<gRational> >;
+class gListIter<BehavProfile<double> >;
+class gListIter<BehavProfile<gRational> >;
+class gNode<BehavSolution<double> >;
+class gNode<BehavSolution<gRational> >;
+class gList<BehavSolution<double> >;
+class gList<BehavSolution<gRational> >;
+class gListIter<BehavSolution<double> >;
+class gListIter<BehavSolution<gRational> >;
+#include "mixedsol.h"
+class gNode<MixedProfile<double> >;
+class gNode<MixedProfile<gRational> >;
+class gList<MixedProfile<double> >;
+class gList<MixedProfile<gRational> >;
+class gListIter<MixedProfile<double> >;
+class gListIter<MixedProfile<gRational> >;
+class gNode<MixedSolution<double> >;
+class gNode<MixedSolution<gRational> >;
+class gList<MixedSolution<double> >;
+class gList<MixedSolution<gRational> >;
+class gListIter<MixedSolution<double> >;
+class gListIter<MixedSolution<gRational> >;
+
+gOutput &operator<<(gOutput &, const gArray<int> &);
+gOutput &operator<<(gOutput &, const gArray<double> &);
+gOutput &operator<<(gOutput &, const gArray<gRational> &);
+#endif
+
+#pragma option -Jgd		// must come before subsolve.h since SubgameSolver<double> is defined in it.
+#include "subsolve.h"
 
 //-------------------------------------------------------------------------
 //                Implementation of base solver algorithm
@@ -52,29 +56,29 @@ TEMPLATE class gNode<gArray<Outcome *> >;
 
 template <class T>
 void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
-				    gList<Outcome *> &values)
+						gList<Outcome *> &values)
 {
-  int i;
+	int i;
 
-  gList<BehavProfile<T> > thissolns;
-  thissolns.Append(solution);
-  ((gVector<T> &) thissolns[1]).operator=((T) 0);
+	gList<BehavProfile<T> > thissolns;
+	thissolns.Append(solution);
+	((gVector<T> &) thissolns[1]).operator=((T) 0);
 
 	gList<Node *> subroots;
-  ChildSubgames(n, subroots);
+	ChildSubgames(n, subroots);
 
-  gList<gArray<Outcome *> > subrootvalues;
-  subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
+	gList<gArray<Outcome *> > subrootvalues;
+	subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
 
-  for (i = 1; i <= subroots.Length(); i++)  {
-    gList<BehavSolution<T> > subsolns;
-    gList<Outcome *> subvalues;
+	for (i = 1; i <= subroots.Length(); i++)  {
+		gList<BehavSolution<T> > subsolns;
+		gList<Outcome *> subvalues;
 
     FindSubgames(subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
-      solns.Flush();
-      return;
+			solns.Flush();
+			return;
     }
 
     assert(subvalues.Length() == subsolns.Length());
@@ -99,7 +103,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
     subrootvalues = newsubrootvalues;
   }
 
-  assert(n->GetSubgameRoot() == n);
+	assert(n->GetSubgameRoot() == n);
 
 // This is here to allow called hook code to figure out which subgame
 // is currently being solved.  The number should correspond to the index
@@ -123,18 +127,18 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 
     SelectSolutions(subgame_number, foo, sol);
 
-    // put behav profile in "total" solution here...
+		// put behav profile in "total" solution here...
 
-    if (sol.Length() == 0)  {
-      solns.Flush();
-      return;
-    }
+		if (sol.Length() == 0)  {
+			solns.Flush();
+			return;
+		}
 
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
 
-    for (int solno = 1; solno <= sol.Length(); solno++)  {
-      solns.Append(thissolns[soln]);
+		for (int solno = 1; solno <= sol.Length(); solno++)  {
+			solns.Append(thissolns[soln]);
 
       for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
 	EFPlayer *p = foo.PlayerList()[pl];
@@ -154,7 +158,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	assert(base <= efg.PlayerList()[pl]->NumInfosets());
 
 	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-	  for (index = 1; index <= infosets[pl]->Length(); index++)
+		for (index = 1; index <= infosets[pl]->Length(); index++)
 	    if ((*infosets[pl])[index] == efg.PlayerList()[pl]->InfosetList()[iset + base - 1])
 	      break;
 
@@ -164,7 +168,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	       act++)
 			solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
 	}
-      }
+			}
     
       gVector<T> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
@@ -224,7 +228,7 @@ template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E, int max)
 
 template <class T> SubgameSolver<T>::~SubgameSolver()  
 {
-  for (int i = 1; i <= efg.NumPlayers(); i++)
+	for (int i = 1; i <= efg.NumPlayers(); i++)
     delete infosets[i];
 }
 
@@ -238,13 +242,13 @@ void SubgameSolver<T>::Solve(void)
 
   gList<Outcome *> values;
 
-  ((gVector<T> &) solution).operator=((T) 0);
+	((gVector<T> &) solution).operator=((T) 0);
 
-  FindSubgames(efg.RootNode(), solutions, values);
+	FindSubgames(efg.RootNode(), solutions, values);
 
-  time = watch.Elapsed();
+	time = watch.Elapsed();
 }
-
+#pragma option -Jgx
 //-------------------------------------------------------------------------
 //                      Hooks to specific algorithms
 //-------------------------------------------------------------------------
@@ -254,7 +258,7 @@ void SubgameSolver<T>::Solve(void)
 //-------------------
 
 void EFLiapBySubgame::SolveSubgame(const Efg<double> &E,
-				   gList<BehavSolution<double> > &solns)
+					 gList<BehavSolution<double> > &solns)
 {
   BehavProfile<double> bp(E);
 
@@ -521,7 +525,7 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
   M.GetSolutions(sol);
 
   for (int i = 1; i <= sol.Length(); i++)  {
-    BehavProfile<T> bp(E);
+		BehavProfile<T> bp(E);
     MixedToBehav(*N, sol[i], E, bp);
     solns.Append(bp);
   }
@@ -532,7 +536,7 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 template <class T>
 ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p,
 				int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
+	: SubgameSolver<T>(E, max), npivots(0), params(p)
 { }
 
 template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
@@ -541,21 +545,12 @@ template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+#pragma option -Jgx
 class gArray<unsigned char>;
 class gArray<BFS<double> >;
 class gArray<BFS<gRational> >;
 class gList<LUupdate<double> >;
 class gList<LUupdate<gRational> >;
-class gList<BehavProfile<double> >;
-class gList<BehavProfile<gRational> >;
-class gListIter<BehavProfile<double> >;
-class gListIter<BehavProfile<gRational> >;
-class gNode<BehavProfile<double> >;
-class gNode<BehavProfile<gRational> >;
-class gListIter<MixedProfile<double> >;
-class gListIter<MixedProfile<gRational> >;
-class gNode<MixedProfile<double> >;
-class gNode<MixedProfile<gRational> >;
 
 class gNode<gArray<int> >;
 class gList<gArray<int> >;
@@ -582,9 +577,17 @@ bool operator!=(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 	return !(a == b);
 }
 
-gOutput &operator<<(gOutput &, const gArray<int> &);
-gOutput &operator<<(gOutput &, const gArray<double> &);
-gOutput &operator<<(gOutput &, const gArray<gRational> &);
+bool operator==(const gArray<int> &a, const gArray<int> &b)
+{
+	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+	for (int i = a.mindex; i <= a.maxdex; i++)
+		if (a[i] != b[i])   return false;
+	return true;
+}
+
+bool operator!=(const gArray<int> &a, const gArray<int> &b)
+{return !(a == b);}
+
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
@@ -622,4 +625,16 @@ TEMPLATE bool operator!=(const gArray<Outcome *> &, const gArray<Outcome *> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<Outcome *> &);
 
 
+#include "glist.imp"
+
+TEMPLATE class gList<gVector<double> >;
+TEMPLATE class gNode<gVector<double> >;
+TEMPLATE class gList<gVector<gRational> >;
+TEMPLATE class gNode<gVector<gRational> >;
+
+TEMPLATE class gList<Outcome *>;
+TEMPLATE class gNode<Outcome *>;
+
+TEMPLATE class gList<gArray<Outcome *> >;
+TEMPLATE class gNode<gArray<Outcome *> >;
 
