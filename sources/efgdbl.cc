@@ -19,6 +19,8 @@ template <class T> class Efg;
 class Efg<gRational>;
 template <class T> class OutcomeVector;
 class OutcomeVector<gRational>;
+template <class T> class ChanceInfoset;
+class ChanceInfoset<gRational>;
 class Node;
 class gString;
 class gList<gString>;

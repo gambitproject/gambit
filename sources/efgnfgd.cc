@@ -4,7 +4,6 @@
 // $Id$
 //
 
-#include "efgnfg.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -12,6 +11,7 @@
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
+#include "efgnfg.imp"
 
 TEMPLATE void ClearNodeProbs(TypedNode<double> *);
 
