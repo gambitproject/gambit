@@ -86,7 +86,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(), m_rnfRegret(), 
-    m_id(0), m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -112,7 +112,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
-    m_id(0), m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -137,7 +137,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
-    m_id(0), m_revision(p_profile.Game().RevisionNumber())
+    m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
     EFPlayer *player = Game().Players()[pl];  
@@ -175,7 +175,7 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
     m_rnfRegret(p_solution.m_rnfRegret), 
-    m_id(0), m_revision(p_solution.m_revision)
+    m_revision(p_solution.m_revision)
 { }
 
 BehavSolution::~BehavSolution() 
@@ -200,7 +200,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
     m_rnfRegret = p_solution.m_rnfRegret;
-    m_id = p_solution.m_id;
+    m_name = p_solution.m_name;
     m_revision = p_solution.m_revision;
   }
 

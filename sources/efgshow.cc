@@ -388,8 +388,7 @@ void EfgShow::OnProfilesNew(wxCommandEvent &)
 void EfgShow::OnProfilesEdit(wxCommandEvent &)
 {
   wxMessageDialog dialog(this, "Placeholder for profile editing dialog",
-			 (char *) ("Profile" +
-				   ToText((int) (*m_solutionTable)[cur_soln].Id())),
+			 (char *) (*m_solutionTable)[cur_soln].GetName(),
 			 wxOK | wxICON_HAND);
   dialog.ShowModal();
 }

@@ -43,14 +43,11 @@ public:
 
 #define     NUM_BCREATORS       16
 
-#define     BSORT_BY_ID         1       // this order must correspond to that in GUI dialogs
-#define     BSORT_BY_CREATOR    2
-#define     BSORT_BY_NASH       3
-#define     BSORT_BY_PERFECT    4
-#define     BSORT_BY_SEQ        5
-#define     BSORT_BY_GVALUE     6
-#define     BSORT_BY_GLAMBDA    7
-#define     BSORT_BY_LVALUE     8
+typedef enum {
+  BSORT_BY_NAME = 1, BSORT_BY_CREATOR = 2,
+  BSORT_BY_NASH = 3, BSORT_BY_PERFECT = 4,
+  BSORT_BY_SEQ = 5, BSORT_BY_GVALUE = 6,
+  BSORT_BY_GLAMBDA = 7, BSORT_BY_LVALUE = 8 } BehavSortType;
 
 class dialogBehavFilter : public wxDialog {
 private:

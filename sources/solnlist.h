@@ -16,11 +16,6 @@ private:
 public:
   SolutionList(void):gSortList<T>(), max_id(1) { }
   SolutionList(const gList<T> &l): gSortList<T>(l), max_id(1) { }
-
-  virtual int Append(const T &a)  
-    { (*this)[gSortList<T>::Append(a)].SetId(max_id++);
-    return Length();
-    }
 };
 
 #endif  // SOLNLIST_H

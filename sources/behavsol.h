@@ -41,7 +41,7 @@ protected:
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   mutable gFact<gNumber> m_liapValue;
   mutable gFact<gPVector<gNumber> > m_rnfRegret;
-  unsigned int m_id;
+  gText m_name;
   mutable long m_revision;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
@@ -157,7 +157,7 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
-  unsigned int Id(void) const { return m_id; }
+  const gText &GetName(void) const { return m_name; }
   EfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
   EFSupport Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
@@ -172,7 +172,7 @@ public:
   const gNumber MaxRegret(void) const;
   const gNumber MaxRNFRegret(void) const;
 
-  void SetId(unsigned int p_id) { m_id = p_id; }
+  void SetName(const gText &p_name) { m_name = p_name; }
   void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)

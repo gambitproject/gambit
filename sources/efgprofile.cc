@@ -52,8 +52,7 @@ void EfgProfileList::UpdateValues(void)
   DeleteAllItems();
   for (int i = 1; i <= VisibleLength(); i++) {
     const BehavSolution &solution = (*this)[i];
-    InsertItem(i - 1, 
-	       (char *) ("Profile" + ToText((int) solution.Id())));
+    InsertItem(i - 1, (char *) solution.GetName());
     SetItem(i - 1, 1, (char *) NameEfgAlgType(solution.Creator()));
     SetItem(i - 1, 2, (char *) Name(solution.IsNash()));
     SetItem(i - 1, 3, (char *) Name(solution.IsSubgamePerfect()));
@@ -82,11 +81,11 @@ void EfgProfileList::UpdateValues(void)
 
 int EfgProfileList::Append(const BehavSolution &p_solution)  
 {
-  unsigned int number = Length() + 1;
+  int number = Length() + 1;
   while (1) {
     int i;
     for (i = 1; i <= Length(); i++) {
-      if ((*this)[i].Id() == number) {
+      if ((*this)[i].GetName() == "Profile" + ToText(number)) {
 	break;
       }
     }
@@ -98,7 +97,7 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
     number++;
   }
 
-  (*this)[gSortList<BehavSolution>::Append(p_solution)].SetId(number);
+  (*this)[gSortList<BehavSolution>::Append(p_solution)].SetName("Profile" + ToText(number));
   return Length();
 }
 
@@ -141,7 +140,7 @@ void EfgProfileList::OnColumnClick(wxListEvent &p_event)
 {
   switch (p_event.m_col) {
   case 0:
-    m_options.SortBy() = BSORT_BY_ID;
+    m_options.SortBy() = BSORT_BY_NAME;
     break;
   case 1:
     m_options.SortBy() = BSORT_BY_CREATOR;

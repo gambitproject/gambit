@@ -31,7 +31,7 @@ BehavListFilter::BehavListFilter(void)
   : m_filterCreator(NUM_BCREATORS), m_filterNash(3), 
     m_filterPerfect(3), m_filterSequential(3)
 {
-  m_sortBy = BSORT_BY_ID;
+  m_sortBy = BSORT_BY_NAME;
 
   for (int i = 1; i <= NUM_BCREATORS; i++) {
     m_filterCreator[i] = true;
@@ -104,8 +104,8 @@ bool BehavListFilter::LessThan(const BehavSolution &a,
 			       const BehavSolution &b) const
 {
   switch (SortBy()) {
-  case BSORT_BY_ID:
-    return (a.Id() < b.Id());
+  case BSORT_BY_NAME:
+    return (a.GetName() < b.GetName());
 
   case BSORT_BY_CREATOR:
     return (NameEfgAlgType(a.Creator()) < NameEfgAlgType(b.Creator()));
