@@ -62,6 +62,24 @@ private:
     }
   }
 
+  bool IsQuoteEscapeSequence( const gString& line ) const
+  {
+    bool backslash = false;
+    assert( line.length() > 0 );
+    char c = line[ line.length() - 1 ];
+    if( c == '\"' )
+    {
+      // if there's an odd number of consecutive backslashes,
+      //   then it's an escape sequence 
+      int i = 2;
+      while( line.length() >= i && line[ line.length() - i ] == '\\' )
+      {
+	backslash = !backslash;
+	++i;
+      }
+    }
+    return backslash;
+  }
 
 
 public:

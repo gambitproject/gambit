@@ -484,18 +484,66 @@ int GCLCompiler::yylex(void)
 
   if (c == '"')   {
     tval = "";
-    c = nextchar();
-    bool lastslash = false;
-	
-    while (c != '"' || lastslash)   {
-      if (lastslash && c == '"')  
-        tval[tval.length() - 1] = '"';
-      else
-        tval += c;
-
-      lastslash = (c == '\\');
+    bool quote = true;
+    bool check_digraph = true;
+    while( quote )
+    {
       c = nextchar();
-    }
+      tval += c;
+      
+      if( check_digraph && 
+          tval.length() >= 2 && 
+          tval[ tval.length() - 2 ] == '\\' )
+      {
+        switch( c )
+        {
+	case '\'':
+	case '\"':
+	case '\?':
+	case '\\':
+          tval = tval.left( tval.length() - 2 ) + c;
+          check_digraph = false;
+          break;
+        case 'a':
+          tval = tval.left( tval.length() - 2 ) + '\a';
+          check_digraph = false;
+          break;            
+        case 'b':
+          tval = tval.left( tval.length() - 2 ) + '\b';
+          check_digraph = false;
+          break;            
+        case 'f':
+          tval = tval.left( tval.length() - 2 ) + '\f';
+          check_digraph = false;
+          break;            
+        case 'n':
+          tval = tval.left( tval.length() - 2 ) + '\n';
+          check_digraph = false;
+          break;            
+        case 'r':
+          tval = tval.left( tval.length() - 2 ) + '\r';
+          check_digraph = false;
+          break;            
+        case 't':
+          tval = tval.left( tval.length() - 2 ) + '\t';
+          check_digraph = false;
+          break;            
+        case 'v':
+          tval = tval.left( tval.length() - 2 ) + '\v';
+          check_digraph = false;
+          break;            
+        } // switch( c )
+      }
+      else
+      {
+        check_digraph = true;
+        if( c == '\"' )
+        {
+          tval = tval.left( tval.length() - 1 );
+          quote = false;
+        }
+      }
+    } // while( quote )
     return TEXT;
   }
 

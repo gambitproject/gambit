@@ -117,7 +117,7 @@ gString gPreprocessor::GetLine( void )
 	    GetChar( c );
 	    line += c;
 
-	    if( c == '\"' )
+	    if( c == '\"' && !IsQuoteEscapeSequence( line ) )
 	      quote = !quote;
 	  }
 	  SetPrompt( true );	  
@@ -149,8 +149,15 @@ gString gPreprocessor::GetLine( void )
 	  {
 	    GetChar( c );
 	    comment += c;
+
 	    if( c == '\"' )
-	      quote = !quote;
+	    {
+	      bool escapeSeq = false;
+	      if( quote )
+		escapeSeq = IsQuoteEscapeSequence( comment );
+	      if( !escapeSeq )
+		quote = !quote;
+	    }
 	  }
 	  SetPrompt( true );
 
@@ -414,8 +421,7 @@ gString gPreprocessor::GetLine( void )
     (void) m_LineNumberStack.Pop();
   }
 
-
-  
+  gerr << ">>> " << line << '\n';
   return line;
 }
 

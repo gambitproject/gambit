@@ -486,16 +486,8 @@ void TextPortion::Output(gOutput& s) const
 gString TextPortion::OutputString( void ) const
 {
   gString text = *_Value;
-  int i = 0;
-  for(i = 0; i < text.length(); i++)
-    if(text[i] == '\\' && text[i + 1] == 'n')
-    {
-      text.remove(i);
-      text[i] = '\n';
-    }
-
   if(_WriteQuoted) 
-	 text = (gString) '\"' + text + "\"";
+    text = (gString) '\"' + text + "\"";
   return text;
 }
 
