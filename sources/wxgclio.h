@@ -15,7 +15,7 @@ private:
 public:
 	gWxGclIoFrame(wxText *&in_): wxFrame(0,"IO"), in(in)
 	{ }
-	Bool OnClose(void) {return TRUE;}
+	Bool OnClose(void) {delete this; return TRUE;}
 	void OnSetFocus(void) {in->SetFocus();}
 };
 
