@@ -280,7 +280,7 @@ TreeWindow::TreeWindow(wxFrame *_frame,int x,int y,int w,int h,Problem *p,int st
 	Node r=the_problem->RootNode();
 	the_problem->AddNode(r, 1, 3);
 
-	node_list = new wxList(wxKEY_INTEGER);
+	node_list = new wxList;
 // $$$  node_list->DeleteContents(TRUE);	// make sure the client data is also deleted
 	zoom_factor=1.0;
 	draw_settings.SetWindow(gRect(0,0,w,h));
@@ -378,7 +378,6 @@ else
 //*********************************************************************
 void TreeWindow::OnEvent(wxMouseEvent& event)
 {
-/*
 	float x, y;
 	event.Position(&x, &y);
 	if (event.LeftDown())
@@ -386,9 +385,7 @@ void TreeWindow::OnEvent(wxMouseEvent& event)
 		ProcessClick((int)x,(int)y);
 		ProcessCursor();
 	}
-*/
 }
-
 
 
 //---------------------------------------------------------------------
@@ -408,14 +405,25 @@ for (int i=0;i<gambit_color_list->Number();i++)
 return -1;
 }
 
+NodeEntry *TreeWindow::GetNodeEntry(const Node &n)
+{
+for (int i=0;i<node_list->Number();i++)
+{
+	if (((NodeEntry *)node_list->Nth(i)->Data())->n==n)
+		return ((NodeEntry *)node_list->Nth(i)->Data());
+}
+return NULL;
+}
+
 int maxlev, maxy, miny, ycoord;
 
 int TreeWindow::FillTable(wxList *node_list,const Node &n, int level)
 {
   int myy, y1, yn;
-	long index=NodeIndex(n);
+
 	NodeEntry *entry=new NodeEntry;
-	node_list->Append(index,(wxObject *)entry);
+  entry->n=n;	// store the node the entry is for
+	node_list->Append((wxObject *)entry);
 	if (the_problem->NumChildren(n) > 0)
 	{
 		for (int i = 1; i <= the_problem->NumChildren(n); i++)
@@ -457,8 +465,7 @@ int TreeWindow::FillTable(wxList *node_list,const Node &n, int level)
 void TreeWindow::RenderSubtree(wxDC &dc,const Node &n, wxList *node_list)
 {
 	int xs,xe,ys,ye;	// x-start,x-end,y-start,y-end: coordinates for drawing branches
-	long index=NodeIndex(n);
-	NodeEntry *entry=(NodeEntry *)node_list->Find(index)->Data();
+	NodeEntry *entry=GetNodeEntry(n);
 	dc.SetFont(label_font);
 
 	::DrawLine(dc,entry->x, entry->y,
@@ -470,8 +477,7 @@ void TreeWindow::RenderSubtree(wxDC &dc,const Node &n, wxList *node_list)
 	for (int i = 1;i<=the_problem->NumChildren(n);i++)
 	{
   	Node child_node=the_problem->GetChildNumber(n,i);
-		long child_index=child_node[1]*100+child_node[2]*10+child_node[3];
-		NodeEntry *child_entry=(NodeEntry *)node_list->Find(child_index)->Data();
+		NodeEntry *child_entry=GetNodeEntry(child_node);
 		xs=entry->x+draw_settings.NodeLength();
 		ys=entry->y;
 		xe=xs+draw_settings.BranchLength()/2;
@@ -499,8 +505,7 @@ void TreeWindow::Render(wxDC &dc)
   {
 		if (iterator != NULL)
 		{
-			long index = NodeIndex(iterator->Cursor());
-			NodeEntry *entry=(NodeEntry *)node_list->Find(index)->Data();
+			NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 			flasher->SetFlashNode(entry->x-4,entry->y-4,
 													entry->x+draw_settings.NodeLength(),entry->y-4);
 		}
@@ -538,8 +543,7 @@ y_scroll=maxy/PIXELS_PER_SCROLL+1;
 // If cursor is active, make sure it is visible
 if (iterator != NULL)
 {
-	long index = NodeIndex(iterator->Cursor()); 
-	NodeEntry *entry=(NodeEntry *)node_list->Find(index)->Data();
+	NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 	// check if in the visible x-dimention
 	xs=(entry->x-draw_settings.XOrigin())*zoom_factor;
 	xe=(entry->x-draw_settings.XOrigin()+draw_settings.NodeLength()/2)*zoom_factor;
@@ -568,14 +572,15 @@ if (x_start!=draw_settings.get_x_scroll() || y_start!=draw_settings.get_y_scroll
 #define DELTA	8
 void TreeWindow::ProcessClick(int x,int y)
 {
-/*
-for (int i=1;i<=the_problem->_nodes->Length();i++)
+wxNode *n=node_list->First();
+for (int i=0;i<node_list->Number();i++)
 {
-	 if(x>node_table[i].x && x<node_table[i].x+draw_settings.NodeLength() &&
-			y>node_table[i].y-DELTA && y<node_table[i].y+DELTA)
-				iterator->SetCursor((*(the_problem->_nodes))[i+1]);
+	 NodeEntry *entry=(NodeEntry *)n->Data();
+	 if(x>entry->x && x<entry->x+draw_settings.NodeLength() &&
+			y>entry->y-DELTA && y<entry->y+DELTA)
+			 {iterator->SetCursor(entry->n);return;}
+   n=n->Next();
 }
-*/
 }
 
 

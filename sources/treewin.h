@@ -67,15 +67,16 @@ friend class DisplayOptionsForm;
     int get_y_scroll(void) {return y_scroll;}
 };
 
-typedef struct   {
-    int x, y, level, color;
-}  NodeEntry;
 
 
 
 class TreeWindow : public wxCanvas
 {
 friend class DisplayOptionsForm;
+	typedef struct   {
+			int x, y, level, color;
+			Node n;
+	}  NodeEntry;
 		// Private variables
 		Problem *the_problem;
 		wxFrame *frame;								// parent frame
@@ -91,7 +92,7 @@ friend class DisplayOptionsForm;
 		int 	FillTable(wxList *node_list,const Node &n, int level);
 		void 	ProcessCursor(void);
 		void 	ProcessClick(int x,int y);
-		long	NodeIndex(const Node &n) { return n[1]*100+n[2]*10+n[3];}
+    NodeEntry *GetNodeEntry(const Node &n);
 	public:
 		TreeWindow(wxFrame *frame, int x, int y, int w, int h, Problem *p = NULL,int style = wxRETAINED);
 		void OnPaint(void);
