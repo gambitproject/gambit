@@ -23,7 +23,7 @@ Minnesota
 Theodore Turocy\\California Institute of Technology
 }
 
-\date{\today\\ \jobname.tex}
+\date{Version 0.9\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -687,10 +687,10 @@ the new extensive form game.  Thus, the command
 e := NewEfg[]
 \end{verbatim}
 
-will create a new extensive form game \verb+e+.  The game is a trivial
-game with only one node, a \verb+root node+, and one player,
-\verb+chance+.  By default, the game will have its data stored in
-\verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+,
+\noindent will create a new extensive form game \verb+e+.  The game 
+is a trivial game with only one node, a \verb+root node+, and one
+player, \verb+chance+.  By default, the game will have its data stored
+as \verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+,
 and which has two players, named \verb+Fred+ and \verb+Alice+  by
 specifying 
 
@@ -722,7 +722,7 @@ AppendNode[n#1#1, alicemove];
 AppendNode[n#2#1, alicemove]; 
 \end{verbatim}
 
-Outcomes can be defined and attached:
+\noindent Outcomes can be defined and attached:
 
 \begin{verbatim}
 ante := 1.00
@@ -748,12 +748,12 @@ the command
 SaveEfg[e, "filename.efg" ]
 \end{verbatim}
 
-where \verb+e+ is the extensive form game, and \verb+filename.efg+ is
+\noindent where \verb+e+ is the extensive form game, and \verb+filename.efg+ is
 the filename of the file to be created.  It is recommended that the
-filename extension \verb+.efg+ be used when saving extensive form games, as
-the Gambit Graphics user interface recognizes this extension as
-containing extensive form games.  Once an extensive form game has been
-saved to an external file, it can be loaded by the command
+filename extension \verb+.efg+ be used when saving extensive form
+games, as the Gambit Graphics user interface recognizes this extension
+as containing extensive form games.  Once an extensive form game has
+been saved to an external file, it can be loaded by the command
 \verb+LoadEfg+, as follows:
 
 \begin{verbatim}
@@ -772,14 +772,15 @@ the new extensive form game.  Thus, the command
 n := NewNfg[{3,2,2}]
 \end{verbatim}
 
+\noindent 
 will create a new normal form game \verb+n+, with three players, where
 the first player has three strategies, and the second and third
-players each have two strategies.   The game has zero payoffs in each
+players each have two strategies.  The game has zero payoffs in each
 strategy profile.  By default, the game will have its data stored in
 \verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+
 by specifying the parameter \verb+rational+ to be \verb+True+.
 
-\subsubsection{Creationg a normal form from an extensive form}
+\subsubsection{Creating a normal form from an extensive form}
 
 A normal form game can also be created from an extensive form game.
 If \verb+e+ is an extensive form game, then the command 
@@ -788,6 +789,7 @@ If \verb+e+ is an extensive form game, then the command
 n := Nfg[e]
 \end{verbatim}
 
+\noindent
 will create a normal form game \verb+n+ which is the reduced normal
 form game associated with the extensive form game \verb+e+.  As long
 as the game \verb+n+ is not edited, then the GCL will ``remember'' the
@@ -798,7 +800,7 @@ the command \verb+Behav+.  Thus
 
 \begin{verbatim}
 n := Nfg[e];
-m := LCPSolve[n];
+m := LcpSolve[n];
 i :=1;
 b := {};
 While[ i<=Length[m],
@@ -808,8 +810,9 @@ While[ i<=Length[m],
 b
 \end{verbatim}
 
+\noindent
 will convert the game \verb+e+ to reduced normal form, solve it using
-the LCPSolve algorithm, and then convert all mixed profiles found back
+the LcpSolve algorithm, and then convert all mixed profiles found back
 to behavior profiles, and display the list, \verb+b+ of behavior
 profiles found. 
   
@@ -822,6 +825,7 @@ valid normal form game from a trivial game.  Thus, the command
 SetPayoff[n,{2,1,2},{3.0,4.0,1.5}]
 \end{verbatim}
 
+\noindent
 changes the payoff for the strategy profile in which player one adopts
 his second strategy, player 2 adopts her first strategy and player
 three adopts his second strategy to the vector \verb+(3.0,4.0,1.5)+,
@@ -837,6 +841,7 @@ similar way to an extensive form game.  The command
 SaveNfg[n, "filename.nfg" ]
 \end{verbatim}
 
+\noindent
 will save the normal form game \verb+n+ to the file
 \verb+filename.nfg+.  It is recommended that the
 filename extension \verb+.nfg+ be used when saving normal form games, as
@@ -888,8 +893,8 @@ $$
 $$ 
 where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
 parameters that can be specified.  In the computation for the first value of
-$\lambda_0$, the algorithm begins its search for a solution at some
-starting point.  At each
+$\lambda_0$, the algorithm begins its search for a solution at a user
+specified starting point.  At each
 successive value of $\lambda_t,$ the algorithm begins its search at
 the point found in step $t - 1.$ 
 
@@ -917,14 +922,14 @@ evaluated on a grid of mesh 'delp.'  This procedure is very
 computationally intensive, and is only feasible for small two-person
 normal form games.
 
-\subsection{LCP}
+\subsection{Lcp}
 
-The {\tt LCPSolve} function formulates and solves the game as a Linear
+The {\tt LcpSolve} function formulates and solves the game as a Linear
 complementarity problem.  This algorithm works for two person
 games in either extensive or normal form.  
  
-For a normal form game, the game is set up as a linear complementarity
-problem, and solved via the Lemke-Howson Algorithm.  (See, eg.,
+For a normal form game, the game is solved via the Lemke-Howson
+Algorithm.  (See, eg.,
 \cite{LemHow:64}) using lexicographic rule for insuring
 termination, as developed in \cite{Eav:71}.  This algorithm can also
 be used to find the set of {\em accessible} Nash equilibria, by
@@ -969,7 +974,7 @@ constant-sum game in normal form, by solving it as a Linear Program.
 
 \subsection{SimpDiv}
 
-Computes a Nash equilibrium to a normal form game based on a
+Computes a Nash equilibrium to a n-person normal form game based on a
 simplicial subdivision algorithm.  The algorithm implemented is that
 of \cite{VTH:1987}.  The algorithm is a simplicial subdivision
 algorithm which can start at any point in the simplex.  The algorithm
@@ -1057,7 +1062,7 @@ LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
 SaveEfg[efg<->EFG,file->TEXT] =: BOOL
-SaveNfg[nfg<->NFG,file->TEXT] =: BOOL
+SaveNfg[nfg<->NFG | support->NFSUPPORT,file->TEXT] =: BOOL
 SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->BEHAV] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
@@ -1106,6 +1111,9 @@ Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Minus[x->MIXED, y->MIXED] =: MIXED
 Minus[x->BEHAV, y->BEHAV] =: BEHAV
 Modulus[x->INTEGER, y->INTEGER] =: INTEGER
+Negate[x->FLOAT] =: FLOAT
+Negate[x->INTEGER] =: INTEGER
+Negate[x->RATIONAL] =: RATIONAL
 Paren[x->T] =: T
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
@@ -1140,11 +1148,11 @@ DeleteTree[node->NODE] =: NODE
 DetachOutcome[node->NODE] =: NODE
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
 InsertNode[node->NODE, infoset->INFOSET] =: NODE
-JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
-Mixed[nfg<->NFG, list->LIST(LIST(T))] =: MIXED
+Mixed[nfg<->NFG | support->NFSUPPORT, list->LIST(LIST(T))] =: MIXED
 MoveTree[from->NODE, to->NODE] =: NODE
 NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
 NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
@@ -1154,8 +1162,7 @@ NewInfoset[player->EFPLAYER, actions->INTEGER,
 NewOutcome[efg<->EFG, {name->TEXT}] =: OUTCOME
 NewPlayer[efg<->EFG, {name->TEXT}] =: EFPLAYER 
 RandomEfg[efg<->EFG, {seed->INTEGER}] =: EFG
-Reveal[infoset->INFOSET, who->LIST(EFPLAYER)),
-       {what->LIST(ACTIONS)}] =: INFOSET
+Reveal[infoset->INFOSET, who->LIST(EFPLAYER))] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
 SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
@@ -1168,6 +1175,8 @@ SetName[x->OUTCOME, name->TEXT] =: OUTCOME
 SetName[x->PLAYER, name->TEXT] =: PLAYER
 SetPayoff[outcome->OUTCOME, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
+SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
+SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
 \end{verbatim}
 
 \subsection{Normal Form Manipulation}
@@ -1225,9 +1234,9 @@ GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
               {delLam->FLOAT}, {powLam->INTEGER}, 
               {delp->FLOAT}, {tol->FLOAT},
               {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LCPSolve[efg<->EFG, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-LCPSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
+LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 LiapSolve[efg<->EFG | start->BEHAV, 
           {stopAfter->INTEGER}, {nTries->INTEGER},
@@ -1239,10 +1248,10 @@ LiapSolve[nfg<->NFG | start->MIXED,
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
           {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(MIXED)
-LPSolve[ nfg->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
+LpSolve[ nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 SetOptions[alg->TEXT, param->TEXT, value->T] =: T
-SimpDivSolve[nfg->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
+SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
              {nRestarts->INTEGER}, {leashLength->INTEGER},
              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}
@@ -1959,17 +1968,19 @@ machine.
 
 %--H--
 
-\item
-\protect \large \begin{verbatim}
-HasOutcome[node->NODE] =: BOOL
-\end{verbatim} \normalsize
 
-\bd
-Returns whether the node \verb+node+ currently has an outcome associated
-with it.
-\item
-[See also:] {\tt AttachOutcome}, {\tt DetachOutcome}, {\tt Outcome}.
-\ed
+%Not implemented yet
+%\item
+%\protect \large \begin{verbatim}
+%HasOutcome[node->NODE] =: BOOL
+%\end{verbatim} \normalsize
+
+%\bd
+%Returns whether the node \verb+node+ currently has an outcome associated
+%with it.
+%\item
+%[See also:] {\tt AttachOutcome}, {\tt DetachOutcome}, {\tt Outcome}.
+%\ed
 
 %--I--
 
@@ -2117,21 +2128,22 @@ Returns whether the system stopwatch is currently running.
 
 %--J--
 
-\item
-\protect \large \begin{verbatim}
-JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
-\end{verbatim}\normalsize
-
-\bd
-Makes the node \verb+node+ a member of the information set
-\verb+infoset+.  If the previous information set of \verb+node+ was
-a singleton (i.e., it contained only \verb+node+), it is removed from the
-extensive form.  It is a run-time error if the number of actions at the
-information set does not match the number of branches at the node.
-Returns the node \verb+node+.
-\item
-[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
-\ed
+% Not yet implemented
+%\item
+%\protect \large \begin{verbatim}
+%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+%\end{verbatim}\normalsize
+%
+%\bd
+%Makes the node \verb+node+ a member of the information set
+%\verb+infoset+.  If the previous information set of \verb+node+ was
+%a singleton (i.e., it contained only \verb+node+), it is removed from the
+%extensive form.  It is a run-time error if the number of actions at the
+%information set does not match the number of branches at the node.
+%Returns the node \verb+node+.
+%\item
+%[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
+%\ed
 
 %--K--
 
@@ -2150,9 +2162,9 @@ the root node of the tree and thus has no such action.
 
 \item
 \protect \large \begin{verbatim}
-LCPSolve[efg<->EFG, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-LCPSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
+LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -2393,7 +2405,7 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-LPSolve[ nfg->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
+LpSolve[ nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -2459,7 +2471,7 @@ Returns the difference $x - y$.
 
 \item
 \protect \large \begin{verbatim}
-Mixed[nfg<->NFG, list->LIST(LIST(T))] =: MIXED
+Mixed[nfg<->NFG | support->NFSUPPORT, list->LIST(LIST(T))] =: MIXED
 \end{verbatim}\normalsize
 
 \bd
@@ -2517,6 +2529,20 @@ Returns the name of the object \verb+x+.
 \item
 [See also:] {\tt SetName}.
 \ed
+
+\item 
+\protect \large \begin{verbatim}
+Negate[x->FLOAT] =: FLOAT
+Negate[x->INTEGER] =: INTEGER
+Negate[x->RATIONAL] =: RATIONAL
+\end{verbatim} \normalsize
+
+\bd
+Returns $-x$.
+\item
+[Short form:] \verb+-x+
+\ed
+
 
 \item
 \protect \large \begin{verbatim} 
@@ -3168,8 +3194,7 @@ no action is taken.  Returns the modified support.
 
 \item
 \protect \large \begin{verbatim}
-Reveal[infoset->INFOSET, who->LIST(EFPLAYER), 
-       {what->LIST(ACTIONS)}] =: INFOSET
+Reveal[infoset->INFOSET, who->LIST(EFPLAYER)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -3211,7 +3236,7 @@ save file.  Returns the success of the operation.
 
 \item
 \protect \large \begin{verbatim}
-SaveNfg[nfg<->NFG, file->TEXT] =: BOOL
+SaveNfg[nfg<->NFG | support->NFSUPPORT, file->TEXT] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -3300,6 +3325,21 @@ SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 
 \item
 \protect \large \begin{verbatim}
+SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
+SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
+\end{verbatim}\normalsize
+
+\bd
+Creates a new outcome, attaches it to the node \verb+node+, and sets
+the payoffs for this outcome to the values specified in list.  If
+there is already an outcome attached to the node, it is detatched, but
+not deleted.  Returns the new outcome attached to the node.  
+\item
+[See also:] {\tt Payoff}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 SetPayoff[outcome->OUTCOME, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
 \end{verbatim}\normalsize
@@ -3333,7 +3373,7 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[nfg->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
+SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
              {nRestarts->INTEGER}, {leashLength->INTEGER},
              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
