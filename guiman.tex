@@ -141,15 +141,15 @@ Glossary.
 
 The extensive form is a detailed description of a sequence of decisions 
 that must be made by a group of individuals. To illustrate the basic ideas,
- Figure~\ref{fig:samp1} 
+ Figure~\ref{fig_samp1} 
 shows how the extensive form of a simple 
 \popref{two player poker game}{pokergloss} (from \cite{Mye:91} is represented
  in the Gambit GUI.  
 
-\begin{figure}\label{fig:samp1}
+\begin{figure}\label{fig_samp1}
 $$\image{1cm;0cm}{poker_ef}$$
 \caption{GAMBIT Display of Extensive Form of
-		a Simple Two Player Poker Game}\label{fig:samp1}
+		a Simple Two Player Poker Game}\label{fig_samp1}
 \end{figure}
 
 In Gambit, the extensive form \popref{game tree}{toptreegloss}, is drawn with the 
@@ -227,7 +227,7 @@ and \verb+312+ indicates the strategy where the player chooses the third
 branch at its first information set, the first branch at its second 
 information set, and the second branch at its third information set.  
 
-In the extensive form of \helpref{Figure~\ref{fig:samp1}}{extformsec}, 
+In the extensive form of \helpref{Figure~\ref{fig_samp1}}{extformsec}, 
 Player 1 has two information sets, each with two choices, so it has a total of four 
 strategies.  They are {\tt 11, 12, 21 } and {\tt 22}.  Player 2 has one 
 information set, with two branches, so they are labeled {\tt 1} and {\tt 2}.  
@@ -263,14 +263,14 @@ form are simply the expected payoff to each player from the given strategy
 \begin{figure}
 $$\image{1cm;0cm}{poker_nf}$$
 \caption{GAMBIT Graphics Display of Normal Form of
-		Simple Two Player Poker Game}\label{fig:samp2}
+		Simple Two Player Poker Game}\label{fig_samp2}
 \end{figure}
 
-Figure~\ref{fig:samp2} gives the normal form for the extensive form game 
+Figure~\ref{fig_samp2} gives the normal form for the extensive form game 
 of poker illustrated in 
-\helpref{Figure~\ref{fig:samp1}}{extformsec}. 
+\helpref{Figure~\ref{fig_samp1}}{extformsec}. 
 
-In the game of  \helpref{Figure~\ref{fig:samp1}}{extformsec}, with the 
+In the game of  \helpref{Figure~\ref{fig_samp1}}{extformsec}, with the 
 strategy profile {\tt (12, 1)}, the realization probability of the terminal 
 node on the path RED, RAISE, MEET, with a payoff of $(\$2.00, -\$2.00)$ 
 is $1/2$, and the realization probability of terminal node on the path 
@@ -320,7 +320,7 @@ individual observe its own type.
 \begin{figure}
 $$\image{3cm;3cm}{biggamb}$$
 \caption{Gambit GUI showing normal and extensive
-forms}\label{fig:biggamb}
+forms}\label{fig_biggamb}
 \end{figure}
 
 The Gambit GUI consists of two self-contained modules for representing,
@@ -381,7 +381,7 @@ EnumPure and EnumMixed.
 
 \begin{figure}
 $$\image{0cm;0cm}{nfg}$$
-\caption{A 3 player normal form}\label{fig:nfg}
+\caption{A 3 player normal form}\label{fig_nfg}
 \end{figure}
 
 In the normal form representation, the game is viewed as a 2-dimensional
@@ -477,7 +477,7 @@ can then be examined in the extensive form display.
 \subsubsection{Normal Solutions Inspect}\label{NormalSolutionInspect}
 \begin{figure}
 $$\image{3cm;3cm}{nfgsoln}$$
-\caption{Normal Form Solution Inspect Window}\label{fig:nfgsoln}
+\caption{Normal Form Solution Inspect Window}\label{fig_nfgsoln}
 \end{figure}
 
 
@@ -577,7 +577,7 @@ None
 
 \begin{figure}
 $$\image{0cm;0cm}{efg}$$
-\caption{A 3 player extensive form}\label{fig:efg}
+\caption{A 3 player extensive form}\label{fig_efg}
 \end{figure}
 
 In the extensive form, the game is represented as a topological tree.  The 
@@ -591,7 +591,8 @@ the solutions and their display.
 
 \subsection{Navigating the Extensive Form}
 The cursor is indicated on the display of the normal form by a dark line above 
-one of the nodes.  The cursor position is used by many of the tree building functions.  
+one of the nodes or by a dark triangle around a subgame icon. 
+The cursor position is used by many of the tree building functions.  
 You can move the cursor around the extensive form game 
 either by use of the arrow keys or by using the mouse.  
 
@@ -695,6 +696,46 @@ at this node.  You can choose any player except the one that is currently
 selected.
 \end{description}
 
+\subsubsection{Subgame Menu}
+Gambit implements and supports the concept of a game theoretical subgame. The
+conditions necessary for a subtree to be qualified as a subgame, see the
+theory section of this document.  When an extensive form is first created or
+read in from a file, no subgames (except for the default ROOT subgame) are 
+defined.  If a node is a subgame root, a small rectangle is drawn at its base.
+If a subgame is collapsed, all of the nodes it contains, up to the next
+subgame root are not displayed but replaced by a subgame icon.
+The following list describes the command for working with subgames.
+Refer to the following picture for an example of subgame structures.
+\begin{figure}
+$$\image{0cm;0cm}{subgame}$$
+\caption{Simple efg with nontrivial subgames}\label{fig_subgames}
+\end{figure}
+
+\begin{description}
+\item[Create:] Uses a built in algorithm to scan the entire tree and mark
+those portions that satisfy the subgame requirements as subgames.  Once the
+subgames have been defined, they are all collapsed except for the ROOT subgame.
+\item[Set:] Set the cursor node to be a subgame root.  If the cursor node is
+not a root of a valid subgame, a warning is issued.
+\item[Clear All:] Removes all subgame information, consequently expanding all
+subgames.
+\item[Clear:] If the cursor node is a subgame root, that subgame is removed
+from the list of subgames and is no longer considered either for display or
+solution purposes.  If the cursor node is not a subgame root, a warning is
+issued.
+\item[Collapse:] If the cursor node is a subgame root, that subgame is 
+collapsed and all of the nodes contained in it, up to the successor subgame
+roots are replaced with a subgame icon.  The cursor changes shape to reflect
+this.
+\item[Collapse:] Applies {\em Collapse} to every node that is marked as a 
+subgame root, including the ROOT node.
+\item[Expand:] If the cursor node is a subgame root, that subgame is expanded
+and all of the nodes it contains are displayed.
+\item[Expand All:] Applies {\em Expand} to every node that is marked as a 
+subgame root.
+\end{description}
+
+
 \subsubsection{Display Menu}\label{displaymenu}
 The display menu allows you to load, set and save various parameters 
 which affect the extensive form display.  
@@ -744,7 +785,7 @@ results identical to those achieved in the gui.
 \subsection{Outcomes GUI}\label{OutcomesGUI}
 \begin{figure}
 $$\image{0cm;0cm}{outcomes}$$
-\caption{A typical outcomes window}\label{fig:outcomes}
+\caption{A typical outcomes window}\label{fig_outcomes}
 \end{figure}
 
 The outcomes dialog arranges the payoff data for the game in a matrix
@@ -795,7 +836,7 @@ output to a file or converted back to behavioral strategy profiles
 \subsubsection{Extensive Solutions Inspect}\label{ExtensiveSolutionInspect}
 \begin{figure}
 $$\image{3cm;3cm}{efgsoln}$$
-\caption{Extensive Form Solution Inspect Window}\label{fig:efgsoln}
+\caption{Extensive Form Solution Inspect Window}\label{fig_efgsoln}
 \end{figure}
 
 The solution inspection window is a very powerful and complex part of the GUI.
@@ -1375,7 +1416,7 @@ To display this data we created a specialized data plotting program {\em PXI}.
 
 \begin{figure}
 $$\image{3cm;3cm}{pxibig}$$
-\caption{Sample PXI screenshot}\label{fig:pxibig}
+\caption{Sample PXI screenshot}\label{fig_pxibig}
 \end{figure}
 
 {\em PXI} was not funded from the same source as gambit itself, but was 
@@ -1414,7 +1455,7 @@ An action is a collection of branches, one at each node of a player's informatio
 set, which are indistinguishable to the player making a decision at that 
 information set. 
 
-In Figure~\ref{fig:samp1}, each information set has two actions.  For the 
+In Figure~\ref{fig_samp1}, each information set has two actions.  For the 
 second player, at her information set, the two branches labelled ``MEET'' are one 
 action, and the two branches labeled ``PASS'' are another action.  
  
@@ -1424,7 +1465,7 @@ follows the other.  Branches are numbered from 1 to k, where k is the
 number of branches at the node.  Branch 1 is the uppermost branch.  Branch 
 2 is the second uppermost branch, etc. 
 
-In Figure~\ref{fig:samp1}, each decision node has two branches, but in
+In Figure~\ref{fig_samp1}, each decision node has two branches, but in
 other extensive forms, the number of branches can be different.
 
 \gloss{Contingency}\label{continggloss}
@@ -1436,7 +1477,7 @@ A decision node is a node which has at least one node that follows it.
 Decision nodes represent points at which either a player or chance must 
 make a decision.  The different choices are represented by branches.
 
-In Figure~\ref{fig:samp1}, there are a total of five decision nodes (including the chance node). 
+In Figure~\ref{fig_samp1}, there are a total of five decision nodes (including the chance node). 
  The number of the player who makes a choice at a node appears underneath the
 node as the first number after the parenthesis.  On the graphics screen,
 decision nodes are color coded, with each player represented by a
@@ -1449,7 +1490,7 @@ is at least as good as t, and there is some contingency in which it is
 better.  The strategy s {\em strongly dominates} t if it is 
 strictly better than t for player i in every contingency.  
 
-In the poker example of \helpref{Figure~\ref{fig:samp1}}{normformsec}, 
+In the poker example of \helpref{Figure~\ref{fig_samp1}}{normformsec}, 
 for player 1, strategy \verb+21+ is weakly dominated by strategy \verb+12+, 
 and strongly dominated by \verb+11+. 
 
@@ -1473,7 +1514,7 @@ for the player at the point it is making a decision.  Since any two nodes
 in the same information set are indistinguishable, they must have exactly 
 the same number of immediately following nodes. 
 
-In Figure~\ref{fig:samp1}, player 1 has two information
+In Figure~\ref{fig_samp1}, player 1 has two information
 sets, labeled (1, 1) and (1, 2), and player 2 has one, labeled (2, 1).
 Player 2 has only one information set because Player 2 does not know whether
  Player 1 drew a red card or a black card from the deck.  So 2's decision 
@@ -1487,7 +1528,7 @@ other players stay fixed.
 \gloss{Node}\label{nodegloss}
 A node is either decision node or a terminal node.  In the graphics 
 display, a node is any location to which you can navigate the graphics 
-cursor. In Figure~\ref{fig:samp1}, there are a total of eleven nodes -- namely 
+cursor. In Figure~\ref{fig_samp1}, there are a total of eleven nodes -- namely 
 five decision nodes (including the chance node), and six terminal nodes.  
 
 \gloss{Outcome}\label{outcomegloss}
@@ -1497,7 +1538,7 @@ extensive form of the game.  When play passes or terminates at a node
 with an outcome attached to it, each player accumulates the payoff which 
 is associated to that player by the outcome at that node. 
 
-In Figure~\ref{fig:samp1}, there is an outcome attached to each of the
+In Figure~\ref{fig_samp1}, there is an outcome attached to each of the
 terminal nodes.  They are indicated by the pair of numbers at each
 terminal node.  The first number represents the payoff to player 1 and the
 second the payoff to player 2.
@@ -1554,7 +1595,7 @@ The root node of a tree is the node with no parent. In the GAMBIT graphics
 representation, the Root node is always the node that is furthest to the
 left.  It can be reached by successively pressing {\bf $\leftarrow$}. 
 
-In Figure~\ref{fig:samp1}, the Root node is the unlabeled node, furthest to 
+In Figure~\ref{fig_samp1}, the Root node is the unlabeled node, furthest to 
 the left.
 
 \gloss{Strategy Profile}\label{stratprofgloss}
@@ -1562,7 +1603,7 @@ A strategy profile is an n-tuple of strategies, one for each player. The
 total number of strategy profiles is equal to the product of the number of 
 strategies for each player. 
  
-In the game of  Figure~\ref{fig:samp1}, the total number of strategy profiles
+In the game of  Figure~\ref{fig_samp1}, the total number of strategy profiles
  is 8. 
 
 \gloss{Subgame}\label{subgamegloss}
@@ -1571,7 +1612,7 @@ set containing members in the subtree, all members of the information
 set are elements of the subtree.  In other words, every information set 
 is either contained in or has empty intersection with the subtree. 
 
-In Figure~\ref{fig:samp1}, there are no proper subtrees of the extensive
+In Figure~\ref{fig_samp1}, there are no proper subtrees of the extensive
 form, because every subtree except that starting at the Root node breaks
 up Player 2's information set.
 
@@ -1579,7 +1620,7 @@ up Player 2's information set.
 A subtree is a decision node together with the collection of nodes that
 follow it in the tree.  Note that any subtree itself has a tree structure.
 
-In Figure~\ref{fig:samp1}, each decision node defines a subtree consisting of itself
+In Figure~\ref{fig_samp1}, each decision node defines a subtree consisting of itself
 and its followers.   
 
 \gloss{Terminal Node}\label{termnodegloss}
@@ -1587,7 +1628,7 @@ A terminal node is a node which has no other node following it.  Terminal
 nodes represent points at which the extensive form game ends, and typically 
 have outcomes attached to them. 
 
-In Figure~\ref{fig:samp1}, there are six terminal nodes, each followed by
+In Figure~\ref{fig_samp1}, there are six terminal nodes, each followed by
 a pair of numbers representing the payoffs to each player when that
 terminal node is reached.
 
