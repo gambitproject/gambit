@@ -48,22 +48,23 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gDPVector<T> *_Beliefs;
-	unsigned int _Id;
+  gDPVector<T> *_Regret;
+  unsigned int _Id;
 
-	void EvalEquilibria(void);
+  void EvalEquilibria(void);
 
 public:
-	BehavSolution(const Efg<T> &);
-	BehavSolution(const Efg<T> &, const gDPVector<T> &);
-	BehavSolution(const EFSupport &);
-	BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
-	BehavSolution(const BehavSolution<T> &);
-	virtual ~BehavSolution();
+  BehavSolution(const Efg<T> &);
+  BehavSolution(const Efg<T> &, const gDPVector<T> &);
+  BehavSolution(const EFSupport &);
+  BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
+  BehavSolution(const BehavSolution<T> &);
+  virtual ~BehavSolution();
 
-	unsigned int Id(void) const;
+  unsigned int Id(void) const;
   void SetId(unsigned int );
-	void SetCreator(EfgAlgType);
-	bool IsComplete(void) const;
+  void SetCreator(EfgAlgType);
+  bool IsComplete(void) const;
 
   EfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
   void SetIsNash(TriState);
@@ -84,6 +85,8 @@ public:
   const gDPVector<T> &Beliefs(void) const;
      // Belief vector, if a sequential equilibrium
 
+  const gDPVector<T> &Regret(void) const;
+	 
   bool operator==(const BehavSolution<T> &) const;
   void Dump(gOutput& f) const;
 

@@ -924,38 +924,15 @@ Portion *GSM_Regret_BehavFloat(Portion **param)
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
 
-  gDPVector<double> v(*P);
-  P->Gripe(v);
-
   Action* a = ((ActionPortion*) param[1])->Value();
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
-  BaseEfg* e = p->BelongsTo();
 
-  if(s->IsChanceInfoset())
+  if (s->IsChanceInfoset())
     return new NullPortion(porFLOAT);
   
-  int i = 0;
-  int player = 0;
-  int infoset = 0;
-  int action = 0;
-  for(i=1; i<=s->NumActions(); i++)
-    if(s->GetActionList()[i] == a)
-      action = i;
-  for(i=1; i<=p->NumInfosets(); i++)
-    if(p->InfosetList()[i] == s)
-      infoset = i;
-  for(i=1; i<=e->NumPlayers(); i++)
-    if(e->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(infoset > 0);
-  assert(action > 0);
-
-  if (!s->GetPlayer()->IsChance()) 
-    return new FloatValPortion(v(player, infoset, action));
-  else
-    return new NullPortion(porFLOAT);
+  return new FloatValPortion(P->Regret()(p->GetNumber(), s->GetNumber(),
+					 a->GetNumber()));
 }
 
 
@@ -964,38 +941,15 @@ Portion *GSM_Regret_BehavRational(Portion **param)
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
 
-  gDPVector<gRational> v(*P);
-  P->Gripe(v);
-
   Action* a = ((ActionPortion*) param[1])->Value();
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
-  BaseEfg* e = p->BelongsTo();
 
-  if(s->IsChanceInfoset())
+  if (s->IsChanceInfoset())
     return new NullPortion(porRATIONAL);
   
-  int i = 0;
-  int player = 0;
-  int infoset = 0;
-  int action = 0;
-  for(i=1; i<=s->NumActions(); i++)
-    if(s->GetActionList()[i] == a)
-      action = i;
-  for(i=1; i<=p->NumInfosets(); i++)
-    if(p->InfosetList()[i] == s)
-      infoset = i;
-  for(i=1; i<=e->NumPlayers(); i++)
-    if(e->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(infoset > 0);
-  assert(action > 0);
-
-  if (!s->GetPlayer()->IsChance()) 
-    return new RationalValPortion(v(player, infoset, action));
-  else
-    return new NullPortion(porRATIONAL);
+  return new RationalValPortion(P->Regret()(p->GetNumber(), s->GetNumber(),
+					    a->GetNumber()));
 }
 
 //-----------------

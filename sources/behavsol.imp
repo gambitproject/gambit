@@ -39,6 +39,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
+  _Regret(0),
   _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -56,6 +57,7 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
+  _Regret(0),
   _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -72,8 +74,9 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
-	_Beliefs(0),
-	_Id(0)
+  _Beliefs(0),
+  _Regret(0),
+  _Id(0)
 {
   gEpsilon(_Epsilon);
 
@@ -90,25 +93,27 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
   _GobitLambda(b._GobitLambda),
   _GobitValue(b._GobitValue),
   _LiapValue(b._LiapValue),
-  _Beliefs(0),
+  _Beliefs(0), _Regret(0),
   _Id(b._Id)
 {
-  if(b._Beliefs) _Beliefs = new gDPVector<T>(*b._Beliefs);
+  if (b._Beliefs) _Beliefs = new gDPVector<T>(*b._Beliefs);
+  if (b._Regret)  _Regret = new gDPVector<T>(*b._Regret);   
 }
 
 template <class T> BehavSolution<T>::~BehavSolution() 
 { 
-  if(_Beliefs) delete _Beliefs;
+  if (_Beliefs) delete _Beliefs;
+  if (_Regret)  delete _Regret;
 }
 
 template <class T> void BehavSolution<T>::EvalEquilibria()
 {
-	if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
+  if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
     _IsSequential = T_YES;
   else
     _IsSequential = T_DONTKNOW;
   
-  if(IsComplete()) 
+  if (IsComplete()) 
     if( _IsNash == T_DONTKNOW )
       if(MaxGripe() <= _Epsilon)
 	_IsNash = T_YES;
@@ -212,6 +217,16 @@ template <class T> const gDPVector<T> &BehavSolution<T>::Beliefs(void) const
   return *_Beliefs; 
 }
 
+template <class T> const gDPVector<T> &BehavSolution<T>::Regret(void) const
+{
+  if (!_Regret)  {
+    ((BehavSolution<T> &) *this)._Regret =
+      new gDPVector<T>(E->Dimensionality());
+    Gripe(*((BehavSolution<T> &) *this)._Regret);
+  }
+
+  return *_Regret;
+}
 
 template <class T> 
 bool BehavSolution<T>::operator==(const BehavSolution<T> & s) const
@@ -250,6 +265,11 @@ template <class T> void BehavSolution<T>::Invalidate(void)
     delete _Beliefs;
     _Beliefs = 0;
   }
+  
+  if (_Regret)  {
+    delete _Regret;
+    _Regret = 0;
+  }
 }
 
 template <class T> T& BehavSolution<T>::operator[](int i)
@@ -281,6 +301,11 @@ BehavSolution<T>& BehavSolution<T>::operator=(const BehavSolution<T> &s)
       _Beliefs = new gDPVector<T>(*s._Beliefs);
     else
       _Beliefs = 0;
+    if (_Regret)   delete _Regret;
+    if (s._Regret)
+      _Regret = new gDPVector<T>(*s._Regret);
+    else
+      _Regret = 0;
   }
 
   return *this;
