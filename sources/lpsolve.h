@@ -33,12 +33,9 @@ private:
   int  well_formed, feasible, bounded, aborted, flag, nvars, neqns;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
-  gList<BFS<T> > verts; // For GetAll
   const gMatrix<T> &A;   // needed?
   const gVector<T> &b, &c;  // needed?
   gMatrix<T> *AA;
-  gMatrix<T> *E; // For GetAll
-  gVector<T> *f; // For GetAll
   LPTableau<T> *tab;
   gVector<int> *UB, *LB;
   gVector<T> *ub, *lb, *xx, *cost; 
