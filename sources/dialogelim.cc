@@ -90,13 +90,27 @@ dialogElim::dialogElim(wxWindow *p_parent,
     m_domPrecisionBox->SetSelection(domPrecision);
   m_domPrecisionBox->SetConstraints(new wxLayoutConstraints);
   m_domPrecisionBox->GetConstraints()->top.SameAs(m_domMethodBox, wxTop);
-  m_domPrecisionBox->GetConstraints()->left.SameAs(m_domMethodBox, wxRight, 10);
+  m_domPrecisionBox->GetConstraints()->left.SameAs(m_domMethodBox,
+						   wxRight, 10);
   m_domPrecisionBox->GetConstraints()->width.AsIs();
   m_domPrecisionBox->GetConstraints()->height.AsIs();
 
-  if (!m_mixed) {
-    m_domMethodBox->Show(FALSE);
-    m_domPrecisionBox->Show(FALSE);
+  wxString domConditionalList[2] = { "Conditional", "Unconditional" };
+  m_domConditionalBox = new wxRadioBox(this, -1, "Conditional",
+				       wxDefaultPosition, wxDefaultSize,
+				       2, domConditionalList, 1);
+  m_domConditionalBox->SetConstraints(new wxLayoutConstraints);
+  m_domConditionalBox->GetConstraints()->top.SameAs(m_domTypeBox, wxTop);
+  m_domConditionalBox->GetConstraints()->left.SameAs(m_domTypeBox, wxRight, 10);
+  m_domConditionalBox->GetConstraints()->width.AsIs();
+  m_domConditionalBox->GetConstraints()->height.AsIs();
+  
+  if (m_mixed) {
+    m_domConditionalBox->Show(false);
+  }
+  else {
+    m_domMethodBox->Show(false);
+    m_domPrecisionBox->Show(false);
   }
 
   m_playerBox = new wxListBox(this, -1, wxDefaultPosition, wxDefaultSize,

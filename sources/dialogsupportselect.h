@@ -17,11 +17,9 @@ public:
   dialogSupportSelect(wxWindow *p_parent, 
 		      const gList<NFSupport *> &p_supports, 
 		      int p_current, const gText &p_caption);
-  /*
   dialogSupportSelect(wxWindow *p_parent,
 		      const gList<EFSupport *> &p_supports, 
 		      int p_current, const gText &p_caption);
-  */
   virtual ~dialogSupportSelect() { }
 
   int Selected(void) const { return (m_supportList->GetSelection() + 1); }

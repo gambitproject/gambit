@@ -49,9 +49,12 @@ public:
   void OnTreeChanged(void);
   void OnOutcomeChanged(EFOutcome *);
   void OnNodeChanged(Node *);
+  void OnSupportChanged(EFSupport *);
   
   double GetZoom(void) const { return m_zoomFactor; }
   void SetZoom(double);
+
+  EFSupport *Support(void) const;
 
   DECLARE_EVENT_TABLE()
 };

@@ -30,6 +30,11 @@
 #include "efgsolutions.h"
 
 #include "guistatus.h"
+#include "dialogauto.h"
+#include "dialogelim.h"
+#include "dialogefgeditsupport.h"
+#include "dialogsupportselect.h"
+
 #include "dialogenumpure.h"
 #include "dialogenummixed.h"
 
@@ -78,6 +83,11 @@ BEGIN_EVENT_TABLE(guiEfgFrame, gambitGameView)
   EVT_MENU(EFG_FILE_SAVE, OnFileSave)
   EVT_MENU(EFG_EDIT_COPY, OnEditCopy)
   EVT_MENU(EFG_EDIT_PASTE, OnEditPaste)
+  EVT_MENU(EFG_SUPPORTS_UNDOMINATED, OnSupportsUndominated)
+  EVT_MENU(EFG_SUPPORTS_NEW, OnSupportsNew)
+  EVT_MENU(EFG_SUPPORTS_EDIT, OnSupportsEdit)
+  EVT_MENU(EFG_SUPPORTS_DELETE, OnSupportsDelete)
+  EVT_MENU(EFG_SUPPORTS_SELECT, OnSupportsSelect)
   EVT_MENU(EFG_SOLVE_CUSTOM_NFG_ENUMPURE, OnSolveCustomNfgEnumPure)
   EVT_MENU(EFG_SOLVE_CUSTOM_NFG_ENUMMIXED, OnSolveCustomNfgEnumMixed)
   EVT_MENU(EFG_VIEW_SOLUTIONS, OnViewSolutions)
@@ -218,6 +228,91 @@ void guiEfgFrame::OnEditPropertiesEfg(wxCommandEvent &)
     }
   }
   */
+}
+
+void guiEfgFrame::OnSupportsUndominated(wxCommandEvent &)
+{
+  gArray<gText> players(m_efgView->GetEfg()->NumPlayers());
+  for (int pl = 1; pl <= m_efgView->GetEfg()->NumPlayers(); pl++) {
+    players[pl] = m_efgView->GetEfg()->Players()[pl]->GetName();
+  }
+  dialogElim dialog(this, players, false);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    EFSupport *support = m_efgView->CurrentSupport();
+    guiStatus status(this, "Dominance Elimination");
+
+    try {
+      if (dialog.FindAll()) {
+	while ((support = support->Undominated(dialog.DomStrong(),
+					       dialog.DomConditional(),
+					       dialog.Players(),
+					       gnull, status)) != 0) {
+	  support->SetName(m_efgView->UniqueSupportName());
+	  m_efgView->AddSupport(support);
+	}
+      }
+      else {
+	if ((support = support->Undominated(dialog.DomStrong(),
+					    dialog.DomConditional(),
+					    dialog.Players(), 
+					    gnull, status)) != 0) {
+	  support->SetName(m_efgView->UniqueSupportName());
+	  m_efgView->AddSupport(support);
+	}
+      }
+    }
+    catch (gSignalBreak &) { }
+  }
+}
+
+void guiEfgFrame::OnSupportsNew(wxCommandEvent &)
+{
+  EFSupport newSupport(*m_efgView->GetEfg());
+  newSupport.SetName(m_efgView->UniqueSupportName());
+  dialogEfgEditSupport dialog(this, newSupport);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    EFSupport *support = new EFSupport(dialog.Support());
+    support->SetName(dialog.Name());
+    m_efgView->AddSupport(support);
+  }
+}
+
+void guiEfgFrame::OnSupportsEdit(wxCommandEvent &)
+{
+  EFSupport *support = m_efgView->CurrentSupport();
+  dialogEfgEditSupport dialog(this, *support);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_efgView->EditCurrentSupport(dialog.Support());
+  }
+}
+
+void guiEfgFrame::OnSupportsDelete(wxCommandEvent &)
+{
+  if (m_efgView->NumSupports() == 1) {
+    return;
+  }
+
+  dialogSupportSelect dialog(this, m_efgView->Supports(), 
+			     m_efgView->CurrentSupportIndex(),
+			     "Delete support");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_efgView->DeleteSupport(dialog.Selected());
+  }
+}
+
+void guiEfgFrame::OnSupportsSelect(wxCommandEvent &)
+{
+  dialogSupportSelect dialog(this, m_efgView->Supports(),
+			     m_efgView->CurrentSupportIndex(),
+			     "Select support");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_efgView->SetCurrentSupport(dialog.Selected());
+  }
 }
 
 void guiEfgFrame::OnViewSolutions(wxCommandEvent &)

@@ -116,8 +116,8 @@ void dialogNfgEditSupport::OnStrategy(wxCommandEvent &)
       if (m_support.NumStrats(player) > 1) {
 	m_support.RemoveStrategy(strategy);
       }
-      else {
-	m_strategyItem->SetSelection(m_support.Strategies(player)[1]->Number() - 1, true);
+      else if (m_support.Find(strategy)) {
+	m_strategyItem->SetSelection(st, true);
       }
     }
   }
@@ -125,5 +125,5 @@ void dialogNfgEditSupport::OnStrategy(wxCommandEvent &)
 
 gText dialogNfgEditSupport::Name(void) const
 {
-  return (char *) m_nameItem->GetValue().c_str();
+  return m_nameItem->GetValue().c_str();
 }

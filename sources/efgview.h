@@ -7,42 +7,41 @@
 #ifndef EFGVIEW_H
 #define EFGVIEW_H
 
-#include "wx/proplist.h"
+#include "wx/grid.h"
 
 class guiEfgFrame;
 class guiEfgTree;
 class guiEfgInfoPanel;
+class guiEfgSupports;
 class guiEfgView;
 
-class guiEfgOutcomeProperties : public wxPropertyListPanel {
+class guiEfgPropertiesView : public wxGrid {
 private:
-  guiEfgView *m_parent;
+  const Efg &m_efg;
   EFOutcome *m_outcome;
-
-public:
-  guiEfgOutcomeProperties(guiEfgView *, EFOutcome *);
-  virtual ~guiEfgOutcomeProperties() { }
-};
-
-class guiEfgNodeProperties : public wxPropertyListPanel {
-private:
-  guiEfgView *m_parent;
   Node *m_node;
 
+  void OnChangeLabels(void);
+  void SetPropertyCount(int);
+
 public:
-  guiEfgNodeProperties(guiEfgView *, Node *);
-  virtual ~guiEfgNodeProperties() { }
+  guiEfgPropertiesView(guiEfgView *, const Efg &);
+  virtual ~guiEfgPropertiesView() { }
+
+  void SetOutcome(EFOutcome *);
+  void SetNode(Node *);
 };
 
 class guiEfgView : public wxPanel {
 private:
   guiEfgTree *m_tree;
   guiEfgInfoPanel *m_infoPanel;
-  guiEfgOutcomeProperties *m_outcomeProps;
-  guiEfgNodeProperties *m_nodeProps;
+  guiEfgPropertiesView *m_propertyView;
+  guiEfgSupports *m_supportsView;
   guiEfgFrame *m_parent;
 
   FullEfg *m_efg;
+  
   Node *m_copyNode;
   EFOutcome *m_copyOutcome;
 
@@ -67,6 +66,17 @@ public:
 
   void OnSelectedNode(Node *, bool);
   void OnNodeChanged(Node *);
+
+  const gList<EFSupport *> &Supports(void) const;
+  int NumSupports(void) const;
+  EFSupport *CurrentSupport(void) const;
+  int CurrentSupportIndex(void) const;
+  gText UniqueSupportName(void) const;
+
+  void AddSupport(EFSupport *);
+  void DeleteSupport(int p_support);
+  void SetCurrentSupport(int p_support, bool = true);
+  void EditCurrentSupport(const EFSupport &);
 
   double GetZoom(void) const;
   void SetZoom(double);

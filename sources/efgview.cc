@@ -26,104 +26,84 @@
 #include "nfgview.h"
 #include "efgtree.h"
 #include "efginfopanel.h"
+#include "efgsupports.h"
 #include "efgsolutions.h"
 
-class guiEfgOutcomePropertyView : public wxPropertyListView {
-private:
-  EFOutcome *m_outcome;
-  guiEfgView *m_parent;
 
-  void OnPropertyChanged(wxProperty *);
-
-public:
-  guiEfgOutcomePropertyView(guiEfgView *p_parent, EFOutcome *p_outcome)
-    : wxPropertyListView(0, wxPROP_PULLDOWN | wxPROP_SHOWVALUES |
-			 wxPROP_DYNAMIC_VALUE_FIELD),
-      m_outcome(p_outcome), m_parent(p_parent)
-    { }
-  virtual ~guiEfgOutcomePropertyView() { }
-};
-
-void guiEfgOutcomePropertyView::OnPropertyChanged(wxProperty *p_property)
+guiEfgPropertiesView::guiEfgPropertiesView(guiEfgView *p_parent,
+					   const Efg &p_efg)
+  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+    m_efg(p_efg), m_outcome(0)
 {
-  gText propertyName = p_property->GetName().c_str();
+  SetLabelSize(wxHORIZONTAL, 0);
+  SetLabelSize(wxVERTICAL, 100);
+  SetCellBackgroundColour(*wxLIGHT_GREY);
+}
 
-  if (propertyName == "Label") {
-    m_outcome->SetName(p_property->GetValue().StringValue());
+void guiEfgPropertiesView::OnChangeLabels(void)
+{
+  if (m_outcome) {
+    SetLabelValue(wxVERTICAL, "Label", 0);
+    for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+      SetLabelValue(wxVERTICAL,
+		    (char *) (ToText(pl)+": "+m_efg.Players()[pl]->GetName()),
+		    pl);
+    }
+  }
+  else if (m_node) {
+    SetLabelValue(wxVERTICAL, "Label", 0);
+    SetLabelValue(wxVERTICAL, "Player", 1);
+    SetLabelValue(wxVERTICAL, "Infoset", 2);
+  }
+
+  SetColumnWidth(0, 95);
+}
+
+void guiEfgPropertiesView::SetPropertyCount(int p_properties)
+{
+  if (GetRows() < p_properties) {
+    AppendRows(p_properties - GetRows());
+  }
+  else if (GetRows() > p_properties) {
+    DeleteRows(0, GetRows() - p_properties);
   }
   else {
-    gRational playerNumber;
-    FromText(propertyName, playerNumber);
-    m_outcome->BelongsTo()->SetPayoff(m_outcome, (int) playerNumber,
-				      p_property->GetValue().RealValue());
+    OnChangeLabels();
   }
-  m_parent->OnOutcomeChanged(m_outcome);
-}
-      
-guiEfgOutcomeProperties::guiEfgOutcomeProperties(guiEfgView *p_parent,
-						 EFOutcome *p_outcome)
-  : wxPropertyListPanel(new guiEfgOutcomePropertyView(p_parent, p_outcome),
-			p_parent),
-    m_parent(p_parent), m_outcome(p_outcome)
-{
-  wxPropertySheet *sheet = new wxPropertySheet;
-  sheet->AddProperty(new wxProperty("Label", (char *) m_outcome->GetName(),
-				    "string"));
-
-  FullEfg *efg = m_outcome->BelongsTo();
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    sheet->AddProperty(new wxProperty((char *) (ToText(pl) + ": " + efg->Players()[pl]->GetName()), (double) efg->Payoff(m_outcome, pl), "real"));
-  }
-  GetView()->ShowView(sheet, this);
-
-  wxPropertyValidatorRegistry *registry = new wxPropertyValidatorRegistry;
-  registry->RegisterValidator("string", new wxStringListValidator);
-  registry->RegisterValidator("real", new wxRealListValidator);
-  GetView()->AddRegistry(registry);
 }
 
-class guiEfgNodePropertyView : public wxPropertyListView {
-private:
-  Node *m_node;
-  guiEfgView *m_parent;
-
-  void OnPropertyChanged(wxProperty *);
-
-public:
-  guiEfgNodePropertyView(guiEfgView *p_parent, Node *p_node)
-    : wxPropertyListView(0, wxPROP_PULLDOWN | wxPROP_SHOWVALUES |
-			 wxPROP_DYNAMIC_VALUE_FIELD),
-      m_node(p_node), m_parent(p_parent)
-    { }
-  virtual ~guiEfgNodePropertyView() { }
-};
-
-void guiEfgNodePropertyView::OnPropertyChanged(wxProperty *p_property)
+void guiEfgPropertiesView::SetOutcome(EFOutcome *p_outcome)
 {
-  gText propertyName = p_property->GetName().c_str();
+  m_outcome = p_outcome;
+  m_node = 0;
 
-  if (propertyName == "Label") {
-    m_node->SetName(p_property->GetValue().StringValue());
+  SetPropertyCount(m_efg.NumPlayers() + 1);
+
+  SetCellValue((char *) m_outcome->GetName(), 0, 0);
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    SetCellValue((char *) ToText(m_efg.Payoff(m_outcome, m_efg.Players()[pl])),
+		 pl, 0);
   }
-
-  m_parent->OnNodeChanged(m_node);
 }
-      
-guiEfgNodeProperties::guiEfgNodeProperties(guiEfgView *p_parent,
-					   Node *p_node)
-  : wxPropertyListPanel(new guiEfgNodePropertyView(p_parent, p_node),
-			p_parent),
-    m_parent(p_parent), m_node(p_node)
-{
-  wxPropertySheet *sheet = new wxPropertySheet;
-  sheet->AddProperty(new wxProperty("Label", (char *) m_node->GetName(),
-				    "string"));
-  GetView()->ShowView(sheet, this);
 
-  wxPropertyValidatorRegistry *registry = new wxPropertyValidatorRegistry;
-  registry->RegisterValidator("string", new wxStringListValidator);
-  registry->RegisterValidator("real", new wxRealListValidator);
-  GetView()->AddRegistry(registry);
+void guiEfgPropertiesView::SetNode(Node *p_node)
+{
+  m_node = p_node;
+  m_outcome = 0;
+
+  SetPropertyCount(3);
+
+  SetCellValue((char *) m_node->GetName(), 0, 0);
+  if (m_node->GetInfoset()) {
+    SetCellValue((char *) m_node->GetPlayer()->GetName(), 1, 0);
+    SetCellValue((char *) m_node->GetInfoset()->GetName(), 2, 0);
+  }
+  else {
+    SetCellValue("(terminal)", 1, 0);
+    SetCellValue("(terminal)", 2, 0);
+  }
+  
 }
 
 BEGIN_EVENT_TABLE(guiEfgView, wxWindow)
@@ -135,15 +115,21 @@ guiEfgView::guiEfgView(guiEfgFrame *p_parent, FullEfg *p_efg,
   : wxPanel(p_solutionSplitter, -1),
     m_parent(p_parent), m_efg(p_efg), m_copyNode(0), m_copyOutcome(0)
 {
+  m_supportsView = new guiEfgSupports(this, *p_efg);
+  m_supportsView->Show(true);
+
   m_tree = new guiEfgTree(this, *p_efg);
   m_tree->Show(true);
+
   m_infoPanel = new guiEfgInfoPanel(this, *p_efg);
   m_infoPanel->Show(true);
 
-  m_outcomeProps = 0;
-  m_nodeProps = 0;
+  m_propertyView = new guiEfgPropertiesView(this, *p_efg);
+  m_propertyView->SetEditable(false);
+  m_propertyView->Show(false);
 
   Show(true);
+  m_supportsView->SetCurrentSupport(1);
 }
 
 void guiEfgView::OnSize(wxSizeEvent &p_event)
@@ -213,14 +199,9 @@ void guiEfgView::Arrange(void)
 {
   int width, height;
   GetClientSize(&width, &height);
-  if (m_outcomeProps) {
-    m_outcomeProps->SetSize(0, 0, 200, height);
-  }
-  else if (m_nodeProps) {
-    m_nodeProps->SetSize(0, 0, 200, height);
-  }
-  else {
-    m_infoPanel->SetSize(0, 0, 200, height);
+  m_supportsView->SetSize(0, 0, 200, height / 2);
+  if (m_propertyView) {
+    m_propertyView->SetSize(0, height / 2, 200, height / 2);
   }
   m_tree->SetSize(200, 0, width - 200, height);
 }
@@ -228,12 +209,11 @@ void guiEfgView::Arrange(void)
 void guiEfgView::OnSelectedOutcome(EFOutcome *p_outcome, bool p_selected)
 {
   if (p_selected) {
-    m_outcomeProps = new guiEfgOutcomeProperties(this, p_outcome);
-    m_outcomeProps->Show(true);
+    m_propertyView->SetOutcome(p_outcome);
+    m_propertyView->Show(true);
   }
   else {
-    delete m_outcomeProps;
-    m_outcomeProps = 0;
+    m_propertyView->Show(false);
   }
   m_infoPanel->Show(!p_selected);
   Arrange();
@@ -242,12 +222,11 @@ void guiEfgView::OnSelectedOutcome(EFOutcome *p_outcome, bool p_selected)
 void guiEfgView::OnSelectedNode(Node *p_node, bool p_selected)
 {
   if (p_selected) {
-    m_nodeProps = new guiEfgNodeProperties(this, p_node);
-    m_nodeProps->Show(true);
+    m_propertyView->SetNode(p_node);
+    m_propertyView->Show(true);
   }
   else {
-    delete m_nodeProps;
-    m_nodeProps = 0;
+    m_propertyView->Show(false);
   }
   m_infoPanel->Show(!p_selected);
   Arrange();
@@ -260,12 +239,46 @@ void guiEfgView::ShowWindows(bool p_show)
 }
 
 double guiEfgView::GetZoom(void) const
-{
-  return m_tree->GetZoom();
-}
+{ return m_tree->GetZoom(); }
 
 void guiEfgView::SetZoom(double p_zoom)
+{ m_tree->SetZoom(p_zoom); }
+
+void guiEfgView::AddSupport(EFSupport *p_support)
+{ m_supportsView->AddSupport(p_support); }
+
+const gList<EFSupport *> &guiEfgView::Supports(void) const 
+{ return m_supportsView->Supports(); }
+
+int guiEfgView::NumSupports(void) const 
+{ return m_supportsView->NumSupports(); }
+
+EFSupport *guiEfgView::CurrentSupport(void) const 
+{ return m_supportsView->CurrentSupport(); }
+
+int guiEfgView::CurrentSupportIndex(void) const
+{ return m_supportsView->CurrentSupportIndex(); }
+
+void guiEfgView::SetCurrentSupport(int p_index, bool p_updateWindow)
 {
-  m_tree->SetZoom(p_zoom);
+  if (p_updateWindow) {
+    m_supportsView->SetCurrentSupport(p_index);
+  }
+  m_tree->OnSupportChanged(m_supportsView->CurrentSupport());
 }
+
+void guiEfgView::EditCurrentSupport(const EFSupport &p_support)
+{
+  m_supportsView->EditCurrentSupport(p_support);
+  m_tree->OnSupportChanged(m_supportsView->CurrentSupport());
+}
+  
+void guiEfgView::DeleteSupport(int p_index)
+{
+  m_supportsView->DeleteSupport(p_index);
+  m_tree->OnSupportChanged(m_supportsView->CurrentSupport());
+}
+
+gText guiEfgView::UniqueSupportName(void) const
+{ return m_supportsView->UniqueSupportName(); }
 

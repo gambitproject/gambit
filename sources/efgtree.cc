@@ -345,12 +345,17 @@ BranchEntry::BranchEntry(guiEfgTree *p_window, Node *p_parent, int p_branch,
 
 void BranchEntry::Draw(wxDC &p_dc, const EfgDrawSettings &p_settings)
 {
-  m_color = p_settings.PlayerColor(m_parent->GetPlayer());
-  p_dc.SetPen(wxPen(m_color, 2, wxSOLID));
-  p_dc.DrawLine(m_x, m_startY, m_x + p_settings.ForkLength(), m_endY);
-  p_dc.DrawLine(m_x + p_settings.ForkLength(), m_endY,
-		m_x + p_settings.ForkLength() + p_settings.BranchLength(),
-		m_endY);
+  Action *action = m_parent->GetInfoset()->Actions()[m_branch];
+  if (m_parent->GetInfoset()->GetPlayer()->IsChance() ||
+      m_window->Support()->Find(action)) {
+    m_color = p_settings.PlayerColor(m_parent->GetPlayer());
+    p_dc.SetPen(wxPen(m_color, 2, wxSOLID));
+    p_dc.DrawLine(m_x, m_startY, m_x + p_settings.ForkLength(), m_endY);
+    
+    p_dc.DrawLine(m_x + p_settings.ForkLength(), m_endY,
+		  m_x + p_settings.ForkLength() + p_settings.BranchLength(),
+		  m_endY);
+  }
 
   if (Selected()) {
     p_dc.SetPen(wxPen(wxColour("BLACK"), 2, wxSOLID));
@@ -361,6 +366,12 @@ void BranchEntry::Draw(wxDC &p_dc, const EfgDrawSettings &p_settings)
 bool BranchEntry::HitTest(int p_x, int p_y,
 			  const EfgDrawSettings &p_settings) const
 {
+  Action *action = m_parent->GetInfoset()->Actions()[m_branch];
+  if (!m_parent->GetInfoset()->GetPlayer()->IsChance() &&
+      !m_window->Support()->Find(action)) {
+    return false;
+  }
+  
   double y = m_startY + (int) (p_x - m_x) * (m_endY - m_startY) / p_settings.ForkLength();
 
   return (p_x >= m_x && p_x <= m_x + p_settings.ForkLength() &&
@@ -483,14 +494,19 @@ void guiEfgTree::LayoutTree(void)
   int ycoord = TOP_MARGIN;
 
   LayoutSubtree(m_efg.RootNode(), 0, m_maxX, m_maxY, m_minY, ycoord);
+  wxMessageBox((char *) (ToText(m_maxX) + " " + ToText(m_maxY) + " " + ToText(m_zoomFactor)));
   ComputeScrollbars();
+  wxMessageBox("ok");
 }
 
 void guiEfgTree::ComputeScrollbars(void)
 {
+  SetScrollbars(20, 20, 50, 50);
+  /*
   SetScrollbars(20, 20, 
 		(m_maxX + m_settings->NodeLength() + 50) * m_zoomFactor / 20 + 1,
 		m_maxY * m_zoomFactor / 20 + 1);
+  */
 }
 
 TreeObject *guiEfgTree::HitTest(int p_x, int p_y) const
@@ -647,11 +663,21 @@ void guiEfgTree::OnNodeChanged(Node *)
   OnDraw();
 }
 
+void guiEfgTree::OnSupportChanged(EFSupport *)
+{
+  OnDraw();
+}
+
 void guiEfgTree::SetZoom(double p_zoomFactor)
 {
   m_zoomFactor = p_zoomFactor;
   ComputeScrollbars();
   OnDraw();
+}
+
+EFSupport *guiEfgTree::Support(void) const
+{
+  return m_parent->CurrentSupport();
 }
 
 #include "garray.imp"

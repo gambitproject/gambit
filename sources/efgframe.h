@@ -30,6 +30,12 @@ private:
   void OnEditCopy(wxCommandEvent &);
   void OnEditPaste(wxCommandEvent &);
 
+  void OnSupportsUndominated(wxCommandEvent &);
+  void OnSupportsNew(wxCommandEvent &);
+  void OnSupportsEdit(wxCommandEvent &);
+  void OnSupportsDelete(wxCommandEvent &);
+  void OnSupportsSelect(wxCommandEvent &);
+
   void OnSolveEfgNfg(wxCommandEvent &);
   void OnSolveCustomNfgEnumPure(wxCommandEvent &);
   void OnSolveCustomNfgEnumMixed(wxCommandEvent &);

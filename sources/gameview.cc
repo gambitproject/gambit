@@ -165,3 +165,4 @@ template class gArray<wxTextCtrl *>;
 #include "glist.imp"
 
 template class gList<NFSupport *>;
+template class gList<EFSupport *>;

@@ -28,7 +28,8 @@ dialogEfgOutcome::dialogEfgOutcome(wxWindow *p_parent,
     m_outcome(p_outcome), m_efg(p_efg)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
-    SetValue(pl, ToText(m_efg.Payoff(p_outcome, pl)));
+    SetValue(pl, ToText(m_efg.Payoff(p_outcome,
+				     m_efg.Players()[pl])));
 
   m_outcomeName = new wxTextCtrl(this, -1);
   if (p_outcome)

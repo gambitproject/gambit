@@ -352,9 +352,8 @@ void guiNfgFrame::OnSupportsNfgUndominated(wxCommandEvent &)
 
 void guiNfgFrame::OnSupportsNfgNew(wxCommandEvent &)
 {
-  /*
-  NFSupport newSupport(*GetNfg());
-  newSupport.SetName(UniqueSupportName());
+  NFSupport newSupport(*m_nfgView->GetNfg());
+  newSupport.SetName(m_nfgView->UniqueSupportName());
   dialogNfgEditSupport dialog(this, newSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -362,24 +361,20 @@ void guiNfgFrame::OnSupportsNfgNew(wxCommandEvent &)
     support->SetName(dialog.Name());
     m_nfgView->AddSupport(support);
   }
-  */
 }
 
 void guiNfgFrame::OnSupportsNfgEdit(wxCommandEvent &)
 {
-  /*
   NFSupport *support = m_nfgView->CurrentSupport();
   dialogNfgEditSupport dialog(this, *support);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_nfgView->EditCurrentSupport(dialog.Support());
   }
-  */
 }
 
 void guiNfgFrame::OnSupportsNfgDelete(wxCommandEvent &)
 {
-  /*
   if (m_nfgView->NumSupports() == 1) {
     return;
   }
@@ -391,7 +386,6 @@ void guiNfgFrame::OnSupportsNfgDelete(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_nfgView->DeleteSupport(dialog.Selected());
   }
-  */
 }
 
 void guiNfgFrame::OnSupportsNfgSelect(wxCommandEvent &)

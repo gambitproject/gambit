@@ -23,6 +23,9 @@
 #include "nfg.h"
 #include "nfstrat.h"
 
+#include "efg.h"
+#include "efstrat.h"
+
 #include "dialogauto.h"
 #include "dialogsupportselect.h"
 
@@ -82,20 +85,19 @@ dialogSupportSelect::dialogSupportSelect(wxWindow *p_parent,
   AutoSize();
 }
 
-#ifdef UNUSED
-dialogSupportSelect::dialogSupportSelect(const gList<EFSupport *> &p_supports,
-					 EFSupport *p_current,
-					 const gText &p_caption,
-					 wxWindow *p_parent /*=0*/)
+dialogSupportSelect::dialogSupportSelect(wxWindow *p_parent,
+					 const gList<EFSupport *> &p_supports,
+					 int p_current,
+					 const gText &p_caption)
   : guiAutoDialog(p_parent, p_caption)
 {
-  SetLabelPosition(wxVERTICAL);
-  m_supportList = new wxListBox(this, 0, "Support", wxSINGLE, 1, 1);
+  m_supportList = new wxListBox(this, -1);
   for (int s = 1; s <= p_supports.Length(); s++) {
     EFSupport *support = p_supports[s];
     gText item = ToText(s) + ": " + support->GetName();
-    m_supportList->Append(item);
-    if (p_supports[s] == p_current) {
+
+    m_supportList->Append((char *) item);
+    if (s == p_current) {
       m_supportList->SetSelection(s - 1);
     }
   }
@@ -121,6 +123,6 @@ dialogSupportSelect::dialogSupportSelect(const gList<EFSupport *> &p_supports,
   m_supportList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
   m_supportList->GetConstraints()->height.AsIs();
   
-  Go();
+  AutoSize();
 }
-#endif  // UNUSED
+
