@@ -25,6 +25,8 @@ NFQreParams::NFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
     status(s)
 { }
 
+// This is the function to be minimized.  It is a non negative real valued 
+// C2 function that is zero only on the QRE correspondence.  
 
 class NFQreFunc : public gC2Function<double>  {
   private:
@@ -162,12 +164,33 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
   pxifile << "\nData:\n";
 }
 
+// DFP routine from Numerical Recipies (with modifications)
+// p = starting vector
+// func = a gC2Function representing the QRE function for which we need 
+//        to find the zeros
+// fret = function return value (should be close to zero after return)
+// iter = number of iterations to complete
+// maxits1 = maximum number of iterations in line search
+// tol1    = tolerance in line search
+// maxitsN = maximum number of iterations in DFP
+// tolN    = tolerance in DFP
+// tracefile  = output stream for debugging output
+// tracelevel = level of debugging output
+// interior   = true restricts from hitting boundary
+
+
 extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		double &fret, int &iter,
 	        int maxits1, double tol1, int maxitsN, double tolN,
 		gOutput &tracefile, int tracelevel, bool interior = false,
 		gStatus &status = gstatus);
 
+
+// This is the function with the main computational loop for tracing the QRE 
+// correspondence.  It proceeds by starting at a point (p, lambda) 
+// on the correspondence.  Then it increments lambda, and uses p 
+// as a starting point to find a new point on the correspondence.  The Davidon 
+// fletcher Powell method is used for minimization.  
 
 void Qre(const Nfg &N, NFQreParams &params,
 	   const MixedProfile<gNumber> &start,
@@ -199,7 +222,8 @@ void Qre(const Nfg &N, NFQreParams &params,
 		      Lambda >= params.minLam && value < 10.0; /*nit++*/)  {
       params.status.Get();
       F.SetLambda(Lambda);
-      DFP(p, F, value, iter,
+      // enter Davidon Fletcher Powell routine.  
+      DFP(p, F, value, iter, 
 	  params.maxits1, params.tol1, params.maxitsN, params.tolN,
 	  *params.tracefile,params.trace-1,true);
       
@@ -243,6 +267,8 @@ void Qre(const Nfg &N, NFQreParams &params,
     throw;
   }
 }
+
+// all of the below is for KQRE computations
 
 class NFKQreFunc : public gFunction<double>   {
 private:
@@ -339,6 +365,8 @@ extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
 		   gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
+
+// This is for computation of the KQRE correspondence.  
 
 void KQre(const Nfg &N, NFQreParams &params,
 	   const MixedProfile<gNumber> &start,
