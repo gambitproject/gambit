@@ -107,14 +107,13 @@ typedef enum {
   
   efgmenuSOLVE_WIZARD = 1525,
 
-  efgmenuINSPECT_SOLUTIONS = 1850,
-  efgmenuINSPECT_CURSOR = 1860,
-  efgmenuINSPECT_OUTCOMES = 1861,
-  efgmenuINSPECT_SUPPORTS = 1862,
-  efgmenuINSPECT_INFOSETS = 1865,
-  efgmenuINSPECT_ZOOM_WIN = 1880,
-  efgmenuINSPECT_GAMEINFO = 1870,
-  efgmenuINSPECT_SCRIPT = 1871,
+  efgmenuVIEW_PROFILES = 1850,
+  efgmenuVIEW_NAVIGATION = 1860,
+  efgmenuVIEW_OUTCOMES = 1861,
+  efgmenuVIEW_SUPPORTS = 1862,
+  efgmenuVIEW_INFOSETS = 1865,
+  efgmenuVIEW_GAMEINFO = 1870,
+  efgmenuVIEW_SCRIPT = 1871,
 
   efgmenuPREFS_ZOOMIN = 1601,
   efgmenuPREFS_ZOOMOUT = 1602,

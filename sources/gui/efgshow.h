@@ -16,7 +16,7 @@
 #include "behavsol.h"
 
 class EfgProfileList;
-class EfgCursorWindow;
+class EfgNavigateWindow;
 class EfgOutcomeWindow;
 class EfgSupportWindow;
 class TreeWindow;
@@ -42,7 +42,7 @@ private:
   wxSashWindow *m_solutionSashWindow;
 
   wxNotebook *m_infoNotebook;
-  EfgCursorWindow *m_cursorWindow;
+  EfgNavigateWindow *m_navigateWindow;
   EfgOutcomeWindow *m_outcomeWindow;
   EfgSupportWindow *m_supportWindow;
 
@@ -141,14 +141,13 @@ private:
   void OnSolveNormalAgent(wxCommandEvent &);
   void OnSolveWizard(wxCommandEvent &);
 
-  void OnInspectSolutions(wxCommandEvent &);
-  void OnInspectCursor(wxCommandEvent &);
-  void OnInspectOutcomes(wxCommandEvent &);
-  void OnInspectSupports(wxCommandEvent &);
-  void OnInspectInfosets(wxCommandEvent &);
-  void OnInspectZoom(wxCommandEvent &);
-  void OnInspectGameInfo(wxCommandEvent &);
-  void OnInspectScript(wxCommandEvent &);
+  void OnViewProfiles(wxCommandEvent &);
+  void OnViewCursor(wxCommandEvent &);
+  void OnViewOutcomes(wxCommandEvent &);
+  void OnViewSupports(wxCommandEvent &);
+  void OnViewInfosets(wxCommandEvent &);
+  void OnViewGameInfo(wxCommandEvent &);
+  void OnViewScript(wxCommandEvent &);
 
   void OnPrefsZoomIn(wxCommandEvent &);
   void OnPrefsZoomOut(wxCommandEvent &);

@@ -96,7 +96,7 @@ GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               behavfilter.cc efgsoln.cc nfgshow.cc \
               nfgsoln.cc nfgsolng.cc mixedfilter.cc \
               wxio.cc dlsupport.cc \
-              efgprofile.cc efgcursor.cc behavedit.cc efgprint.cc \
+              efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgprofile.cc mixededit.cc nfgprint.cc \
               valnumber.cc valinteger.cc userprefs.cc
 

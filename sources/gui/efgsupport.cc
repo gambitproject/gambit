@@ -35,20 +35,20 @@ EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0);
   m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, "<-",
-			      wxDefaultPosition, wxDefaultSize);
+			      wxDefaultPosition, wxSize(30, 30));
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
-			      wxDefaultPosition, wxDefaultSize);
+			      wxDefaultPosition, wxSize(30, 30));
   m_actionTree = new wxTreeCtrl(this, idACTIONTREE,
 				wxDefaultPosition, wxDefaultSize);
   UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
-  selectSizer->Add(m_supportList, 0, wxALL, 5);
+  selectSizer->Add(m_supportList, 1, wxALL | wxEXPAND, 5);
   selectSizer->Add(m_nextButton, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(selectSizer, 0, wxCENTER, 5);
+  topSizer->Add(selectSizer, 0, wxEXPAND, 5);
   topSizer->Add(m_actionTree, 1, wxEXPAND, 5);
   
   SetSizer(topSizer);
