@@ -11,7 +11,6 @@
 #define PXIPLOT2_H
 
 #include "pxi.h"
-#include "pxiconf.h"
 #include "pxiplot.h"
 
 class PxiPlot2 : public PxiPlot {

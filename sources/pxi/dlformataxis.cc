@@ -157,31 +157,6 @@ bool ScalePanel::Validate(void)
 }
 
 //=========================================================================
-//                    class FontPanel implementation
-//=========================================================================
-
-class FontPanel : public wxPanel {
-private:
-  wxFont m_font;
-
-public:
-  FontPanel(wxWindow *p_parent, const wxFont &p_font);
-
-  wxFont GetFont(void) const;
-};
-
-FontPanel::FontPanel(wxWindow *p_parent, const wxFont &p_font)
-  : wxPanel(p_parent, -1), m_font(p_font)
-{
-  
-}
-
-wxFont FontPanel::GetFont(void) const
-{
-  return wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
-}
-
-//=========================================================================
 //                    class ColorPanel implementation
 //=========================================================================
 

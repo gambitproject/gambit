@@ -22,10 +22,10 @@
 #include "pxichild.h"
 #include "pxiplotn.h"
 
-#include "dlgpxi.h"
 #include "dlformataxis.h"
 #include "dlformattitle.h"
 #include "dlformatlegend.h"
+#include "overlay.h"
 
 //
 // wxWindows is "supposed to" pass unhandled menu commands on to
@@ -505,16 +505,13 @@ void PxiChild::OnFormatLegend(wxCommandEvent &)
 
 void PxiChild::OnFormatOverlay(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
-  wxFontData data;
-  data.SetInitialFont(plot->draw_settings->GetOverlayFont());  
-  wxFontDialog dialog(this, &data);
-  
+  PxiPlot *plot = GetShownPlot();
+  Overlay::Dialog dialog(this, plot->GetOverlayProperties());
+
   if (dialog.ShowModal() == wxID_OK) {
-    plot->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
+    plot->GetOverlayProperties() = dialog.GetProperties();
     plot->Render();
   }
-#endif  // NOT_PORTED_YET
 }
 
 //-------------------------------------------------------------------------

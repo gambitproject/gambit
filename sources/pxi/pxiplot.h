@@ -11,7 +11,7 @@
 #define PXIPLOT_H
 
 #include "pxi.h"
-#include "pxiconf.h"
+#include "overlay.h"
 
 class PxiAxisDisplayProperties {
 public:
@@ -64,12 +64,9 @@ public:
   wxColour m_color;
 };
 
-class PxiOverlayProperties {
+class PxiSeriesProperties {
 public:
-  bool m_token;   // use token or data point # for overlays
-  bool m_lines;   // connect overlay points?
-  int m_tokenSize;   // size of token
-  wxFont m_font;
+  bool m_connectDots;
 };
 
 class PxiPlot : public wxScrolledWindow {
@@ -90,7 +87,6 @@ public:
 
 protected:
   const FileHeader &m_header;
-  PxiDrawSettings m_drawSettings;
   gBlock<label_struct> labels;          // labels for generic text
   const ExpData &m_expData;             // reference to experimental data
   bool m_landscape;                     // landscap mode if true
@@ -101,7 +97,8 @@ protected:
   PxiAxisProperties m_lambdaAxisProp, m_probAxisProp;
   PxiTitleProperties m_titleProp;
   PxiLegendProperties m_legendProp;
-  PxiOverlayProperties m_overlayProp;
+  Overlay::Properties m_overlayProp;
+  PxiSeriesProperties m_seriesProp;
 
   int Width(void) const { return (m_landscape) ? m_height : m_width; }
   int Height(void) const { return (m_landscape) ? m_width : m_height; }
@@ -113,7 +110,7 @@ protected:
   virtual void DoPlot(wxDC &dc,
 		      int x0, int y0, int cw,int ch, int level=1) = 0;
   void PlotLabels(wxDC &dc, int ch, int cw);
-  void DrawToken(wxDC &dc, int x, int y, int st);
+  void DrawToken(wxDC &dc, int x, int y, int point);
 
   // Event handlers
   void OnPaint(wxPaintEvent &);
@@ -130,11 +127,12 @@ public:
   const FileHeader &Header(void) { return m_header; }
 
   // Interface to property classes
-  PxiDrawSettings &DrawSettings(void) { return m_drawSettings; }
   PxiAxisProperties &GetLambdaAxisProperties(void) { return m_lambdaAxisProp; }
   PxiAxisProperties &GetProbAxisProperties(void) { return m_probAxisProp; }
   PxiTitleProperties &GetTitleProperties(void) { return m_titleProp; }
   PxiLegendProperties &GetLegendProperties(void) { return m_legendProp; }
+  Overlay::Properties &GetOverlayProperties(void) { return m_overlayProp; }
+  PxiSeriesProperties &GetSeriesProperties(void) { return m_seriesProp; }
 
   bool IsStrategyShown(int iset, int st) const { return (iset == m_page); }
 

@@ -70,7 +70,8 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc,
 			 x0, y0, ch, cw);
       if (m_overlayProp.m_token) {
 	int ts = m_overlayProp.m_tokenSize;
-	dc.SetBrush(m_drawSettings.GetDataBrush());
+	//	dc.SetBrush(m_drawSettings.GetDataBrush());
+	dc.SetBrush(*wxBLACK_BRUSH);
 	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
       }
       else {
@@ -158,7 +159,9 @@ void PxiPlot3::PlotData_3(wxDC& dc, int x0, int y0, int cw,int ch,
     }
   }
 
+#ifdef UNUSED
   if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
+#endif  // UNUSED
   PlotLabels(dc,ch,cw);
 }
 

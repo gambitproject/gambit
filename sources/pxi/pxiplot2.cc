@@ -42,7 +42,8 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc,
     
       if (m_overlayProp.m_token)  {
 	int ts = m_overlayProp.m_tokenSize;
-	dc.SetBrush(m_drawSettings.GetDataBrush());
+	//	dc.SetBrush(m_drawSettings.GetDataBrush());
+	dc.SetBrush(*wxBLACK_BRUSH);
 	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
       }
       else {

@@ -59,7 +59,6 @@
 #include "guishare/dlabout.h"
 
 #include "expdata.h"
-#include "dlgpxi.h"
 #include "pxi.h"
 #include "pxichild.h"
 

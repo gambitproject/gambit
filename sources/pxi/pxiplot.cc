@@ -27,8 +27,7 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
 		 const FileHeader &p_header, int p_page,
 		 const ExpData &p_expData)
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
-    m_header(p_header),
-    m_drawSettings(m_header, p_page), m_expData(p_expData),
+    m_header(p_header), m_expData(p_expData),
     m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
     m_dc(new wxMemoryDC), m_page(p_page)
 {
@@ -63,12 +62,9 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
   m_legendProp.m_showLegend = true;
   m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
   m_legendProp.m_color = *wxBLUE;
-  
-  m_overlayProp.m_token = false;
-  m_overlayProp.m_lines = false;
-  m_overlayProp.m_tokenSize = 4;
-  m_overlayProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
 
+  m_seriesProp.m_connectDots = true;
+  
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);
 
@@ -119,41 +115,65 @@ void PxiPlot::PlotLabels(wxDC &dc, int ch,int cw)
 // If we are using COLOR_PROB mode, a different token is drawn for
 // each strategy #.  Otherwise, we just draw an ellipse.  
 //
-void PxiPlot::DrawToken(wxDC &dc, int x, int y, int st)
+void PxiPlot::DrawToken(wxDC &dc, int x, int y, int point)
 {
-  const int NUM_TOKENS = 7;
+  int ts = GetOverlayProperties().m_tokenSize;
 
-  int ts = m_overlayProp.m_tokenSize;
-  if (m_drawSettings.GetColorMode()==COLOR_PROB) {
+#ifdef UNUSED
+  if (m_drawSettings.GetColorMode() == COLOR_PROB) {
+#endif  // UNUSED
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxBLACK_BRUSH);
-    switch (st%NUM_TOKENS) {
-    case 0: // x (cross diag)
+
+    switch (GetOverlayProperties().m_token) {
+    case Overlay::tokenNUMBER: {
+      wxString tmp = wxString::Format("%d", point);
+      dc.SetFont(GetOverlayProperties().m_font);
+      dc.SetTextForeground(*wxBLACK);
+      wxCoord tw, th;
+      dc.GetTextExtent(tmp, &tw, &th);
+      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
+      break;
+    }
+    case Overlay::tokenX:
       dc.DrawLine((int) (x-ts), (int) (y-ts), (int) (x+ts), (int) (y+ts));
       dc.DrawLine((int) (x-ts), (int) (y+ts), (int) (x+ts), (int) (y-ts));
       break;
-    case 1: // + (cross rect)
+    case Overlay::tokenPLUS:
       dc.DrawLine((int) (x-ts), y, (int) (x+ts), y);
       dc.DrawLine(x, (int) (y-ts), x, (int) (y+ts));
       break;
-    case 2:	// circle
+    case Overlay::tokenCIRCLE:
       dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
       break;
-    case 3: // triangle upsidedown
-      dc.DrawLine(x-ts,y-ts,x,y+ts);dc.DrawLine(x,y+ts,x+ts,y-ts);dc.DrawLine(x-ts,y-ts,x+ts,y-ts);break;
-    case 4: // triangle rightsideup
-      dc.DrawLine(x-ts,y+ts,x,y-ts);dc.DrawLine(x,y-ts,x+ts,y+ts);dc.DrawLine(x-ts,y+ts,x+ts,y+ts);break;
-    case 5: // square
-      dc.DrawLine(x-ts,y+ts,x-ts,y-ts);dc.DrawLine(x-ts,y-ts,x+ts,y-ts);dc.DrawLine(x+ts,y-ts,x+ts,y+ts);dc.DrawLine(x+ts,y+ts,x-ts,y+ts);break;
-    case 6: // * (star)
-      dc.DrawLine(x-ts,y-ts,x+ts,y+ts);dc.DrawLine(x-ts,y+ts,x+ts,y-ts);dc.DrawLine(x,y-ts,x,y+ts);break;
-    default:
-      assert(0);	// if we got here, something is very wrong. make sure # of cases=NUM_TOKENS
+    case Overlay::tokenDEL:
+      dc.DrawLine(x - ts, y - ts, x, y + ts);
+      dc.DrawLine(x, y + ts, x + ts, y - ts);
+      dc.DrawLine(x - ts, y - ts, x + ts, y - ts);
+      break;
+    case Overlay::tokenTRIANGLE:
+      dc.DrawLine(x - ts, y + ts, x, y - ts);
+      dc.DrawLine(x, y - ts, x + ts, y + ts);
+      dc.DrawLine(x - ts, y + ts, x + ts, y + ts);
+      break;
+    case Overlay::tokenSQUARE:
+      dc.DrawLine(x - ts, y + ts, x - ts, y - ts);
+      dc.DrawLine(x - ts, y - ts, x + ts, y - ts);
+      dc.DrawLine(x + ts, y - ts, x + ts, y + ts);
+      dc.DrawLine(x + ts, y + ts, x - ts, y + ts);
+      break;
+    case Overlay::tokenSTAR:
+      dc.DrawLine(x - ts, y - ts, x + ts, y + ts);
+      dc.DrawLine(x - ts, y + ts, x + ts, y - ts);
+      dc.DrawLine(x, y - ts, x, y + ts);
+      break;
     }
+#ifdef UNUSED
   }
   else {
     dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
   }
+#endif  // UNUSED
 }
 
 void PxiPlot::Update(wxDC& dc,int device)
@@ -223,7 +243,6 @@ void PxiPlot::Update(wxDC& dc,int device)
   dc.SetFont(font);
   dc.SetTextForeground(m_lambdaAxisProp.m_color);
   dc.SetPen(*wxBLACK_PEN);
-  dc.SetBrush(m_drawSettings.GetClearBrush());
   
   dc.SetPen(*wxBLACK_PEN);
 

@@ -168,19 +168,10 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc,
       double y = CalcY_X(m_expData.GetDataPoint(points[i], iset, st),
 			 y0, ch);
       double x = CalcX_X(m_expData.MLELambda(points[i]), x0, cw);
-      dc.SetBrush(m_drawSettings.GetDataBrush());
-      if (m_overlayProp.m_token) {
-	DrawToken(dc, (int) x, (int) y, st);
-      }
-      else {
-	wxString tmp = wxString::Format("%d", points[i]);
-	dc.SetFont(m_overlayProp.m_font);
-	dc.SetTextForeground(*wxBLACK);
-	wxCoord tw,th;
-	dc.GetTextExtent(tmp,&tw,&th);
-	dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
-	//      dc.DrawText(tmp,x-3,y-6);
-      }
+      // dc.SetBrush(m_drawSettings.GetDataBrush());
+      dc.SetBrush(*wxBLACK_BRUSH);
+      DrawToken(dc, (int) x, (int) y, points[i]);
+
       if (m_overlayProp.m_lines && st!=1) {
 	dc.SetBrush(*wxBLACK_BRUSH);
 	int y1 = (int) CalcY_X(m_expData.GetDataPoint(points[i], iset, st-1),
@@ -193,20 +184,11 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc,
 }
 
 void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0, 
-			   int cw,int ch,const FileHeader &f_header,int level)
+			  int cw,int ch,const FileHeader &f_header)
   /* This function plots n-dimensional data on a rectangular grid.  The x-axis
    * are error value
    */
 {
-  double x,y;
-  int point_color=1;
-  static int color_start;		// makes each overlay file be plotted a different color set
-  if (level==1) color_start=0;
-  int max_equ=0;
-  //  int new_equ=0;
-
-  EquTracker equs;		// init the EquTracker class
-  
   if (true) {
     wxCoord tw,th;
     dc.SetFont(m_titleProp.m_font);
@@ -224,8 +206,7 @@ void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0,
 	  dc.SetTextForeground(m_legendProp.m_color);
 	  wxCoord tw,th;
 	  dc.GetTextExtent(key,&tw,&th);
-	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
-	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	  dc.SetPen(wxPen(equ_colors[(st-1)%NUM_COLORS+1], 1, wxSOLID));
 	  dc.DrawLine(x0+cw-tw-cw/20,   y0-ch+3*th*lev/2+th/2,
 		      x0+cw-tw,         y0-ch+3*th*lev/2+th/2);
 	  dc.DrawText(key, x0+cw-tw, y0-ch+3*th*lev/2);
@@ -235,53 +216,35 @@ void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0,
     }
   }
 
-  for (int i = 1; i <= f_header.GetData().Length(); i++) {
-    const DataLine &probs = *f_header.GetData()[i];
+  for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
+    if (IsStrategyShown(m_page, st)) {
+      int prevX = -1, prevY = -1;
 
-    //---------------------------if cur_e is in active range ------------
-    if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
-	probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
-      x = CalcX_X(probs.Lambda(),x0,cw);
-      // plot the infosets that are selected for the top graph
-      // if we have experimental data, get it
-#ifdef NOT_PORTED_YET
-      if (m_drawSettings.GetColorMode()==COLOR_EQU)
-	point_color=equs.Check_Equ(probs,&new_equ,prev_point);
-#endif
-      if (m_drawSettings.GetColorMode()==COLOR_NONE)
-	point_color=2;
-      if (point_color>max_equ) max_equ=point_color;
-      // next line sets the correct color
-      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],1,wxSOLID)));
-      
-      for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
-	// plot the data point
-	y = CalcY_X(probs[m_page][st],y0, ch);
-	if (IsStrategyShown(m_page, st))  {
-	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
-	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-#ifdef NOT_PORTED_YET
-	  if (m_drawSettings.ConnectDots() && !new_equ) {
-	    dc.DrawLine((int) CalcX_X(prev_point->E(),x0, cw,thisplot),
-			(int) CalcY_X((*prev_point)[m_page][st],y0,ch,thisplot),
-			(int) x, (int) y);
+      for (int i = 1; i <= f_header.GetData().Length(); i++) {
+	const DataLine &probs = *f_header.GetData()[i];
+	int x = (int) CalcX_X(probs.Lambda(), x0, cw);
+
+	if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
+	    probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
+	  int y = (int) CalcY_X(probs[m_page][st],y0, ch);
+	  
+	  // Must set pen each time for now, since DrawExpPoint might
+	  // reset it
+	  dc.SetPen(wxPen(equ_colors[(st-1)%NUM_COLORS+1], 1, wxSOLID));
+	  if (GetSeriesProperties().m_connectDots &&
+	      prevX >= 0 && prevY >= 0) {
+	    dc.DrawLine(prevX, prevY, x, y); 
 	  }
-	  else {
-#endif
-	    dc.DrawPoint((int) x, (int) y);
-#ifdef NOT_PORTED_YET
-	  }
-#endif  
-	  // if there is an experimental data point for this cur_e, plot it
-	  //	  if (exp_data) {
-	  DrawExpPoint_X(dc,probs.Lambda(),m_page,st,x0,y0,ch,cw);
-	  //	  }
+	  dc.DrawPoint(x, y);
+	    
+	  DrawExpPoint_X(dc,probs.Lambda(), m_page, st, x0, y0, ch, cw);
+
+	  prevX = x;
+	  prevY = y;
 	}
       }
     }
   }
-
-  if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
 }
 
 void PxiPlotN::DoPlot(wxDC& dc,
@@ -291,7 +254,7 @@ void PxiPlotN::DoPlot(wxDC& dc,
 {
   PlotAxis_X(dc,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp,
 	     m_header.EStep());
-  PlotData_X(dc,x0,y0,cw,ch, m_header, 1);
+  PlotData_X(dc,x0,y0,cw,ch, m_header);
 }
 
 void PxiPlotN::OnEvent(wxMouseEvent &ev)

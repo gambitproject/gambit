@@ -11,13 +11,14 @@
 #define DLFORMATAXIS_H
 
 #include "pxiplot.h"    // for PxiAxisProperties
+#include "guishare/fontpanel.h"
 
 class dialogFormatAxis : public wxDialog {
 private:
   wxNotebook *m_notebook;
   class DisplayPanel *m_displayPanel;
   class ScalePanel *m_scalePanel;
-  class FontPanel *m_fontPanel;
+  FontPanel *m_fontPanel;
   class ColorPanel *m_colorPanel;
 
   // Event handlers (mostly for validation)

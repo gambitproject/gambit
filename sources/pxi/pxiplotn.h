@@ -11,7 +11,6 @@
 #define PXIPLOTN_H
 
 #include "pxi.h"
-#include "pxiconf.h"
 #include "pxiplot.h"
 
 class PxiPlotN : public PxiPlot {
@@ -22,7 +21,7 @@ private:
 	      int x0, int y0, int cw,int ch, int level=1);
   void PlotData_X(wxDC& dc,
 		  int x0, int y0, int cw,int ch,
-		  const FileHeader &f_header, int level);
+		  const FileHeader &f_header);
   void DrawExpPoint_X(wxDC &dc,
 		      double cur_e,int iset,int st,
 		      int x0, int y0, int ch,int cw);

@@ -89,7 +89,7 @@ WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 # These are GUI components common to the various binaries, and
 # are found in subdirectory guishare/
-GUISHARE_SOURCES = dlabout.cc valinteger.cc valnumber.cc \
+GUISHARE_SOURCES = dlabout.cc fontpanel.cc valinteger.cc valnumber.cc \
                    wxmisc.cc wxstatus.cc
 
 GUISHARE_OBJECTS = $(GUISHARE_SOURCES:.cc=.o)
@@ -115,11 +115,11 @@ ALLGUI_SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(GPOLY_SOURCES) \
 ALLGUI_OBJECTS = $(ALLGUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 # These are found in subdirectory pxi/
-PXI_SOURCES = pxi.cc pxichild.cc pxiconf.cc \
+PXI_SOURCES = pxi.cc pxichild.cc \
               pxiplot.cc pxiplotn.cc pxiplot2.cc pxiplot3.cc \
               dlformataxis.cc dlformattitle.cc dlformatlegend.cc \
-              dlformatoverlay.cc \
-              equtrac.cc probvect.cc expdata.cc dlgpxi.cc pxifile.cc
+              overlay.cc \
+              equtrac.cc probvect.cc expdata.cc pxifile.cc
 
 PXI_OBJECTS = $(PXI_SOURCES:.cc=$(OBJECT_SUFFIX))
 
