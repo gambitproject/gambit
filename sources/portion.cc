@@ -1276,9 +1276,9 @@ void MixedPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Mixed) ";
   if (_WriteSolutionInfo>1)
-    s << **_Value;
+    (**_Value).Dump(s);
   else
-    s << (const MixedProfile<gNumber> &) **_Value;
+    (**_Value).MixedProfile<gNumber>::Dump(s);
 }
 
 
@@ -1362,9 +1362,9 @@ void BehavPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Behav) ";
   if (_WriteSolutionInfo>1)
-    s << **_Value;
+    (**_Value).Dump(s);
   else
-    s << (const BehavProfile<gNumber> &) **_Value;
+    (**_Value).BehavProfile<gNumber>::Dump(s);
 }
 
 gString BehavPortion::OutputString( void ) const
