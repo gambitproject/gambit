@@ -106,7 +106,7 @@ public:
 
 // = operators  
   gVector<T>& operator=(const gVector<T>& V) {
-    assert(check(V));
+    assert(Check(V));
     DeleteData();
     CopyData(V);
   }
