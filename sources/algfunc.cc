@@ -1137,9 +1137,9 @@ static Portion *GSM_VertEnum(Portion** param)
 
 void Init_algfunc(GSM *gsm)
 {
-  FuncDescObj *FuncObj;
+  gclFunction *FuncObj;
 
-  FuncObj = new FuncDescObj("AgentForm", 1);
+  FuncObj = new gclFunction("AgentForm", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AgentForm, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
@@ -1148,14 +1148,14 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Behav", 1);
+  FuncObj = new gclFunction("Behav", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Behav, porBEHAV, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("mixed", porMIXED));
   gsm->AddFunction(FuncObj);
 
 
 
-  FuncObj = new FuncDescObj("EnumMixedSolve", 2);
+  FuncObj = new gclFunction("EnumMixedSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumMixed_Nfg, 
 				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1199,7 +1199,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("EnumPureSolve", 2);
+  FuncObj = new gclFunction("EnumPureSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumPure_Nfg, 
 				       PortionSpec(porMIXED, 1), 5));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1232,7 +1232,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("QreGridSolve", 1);
+  FuncObj = new gclFunction("QreGridSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_QreGrid_Support, 
 				       PortionSpec(porMIXED, 1), 14));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1267,7 +1267,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("QreSolve", 1);
+  FuncObj = new gclFunction("QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1307,7 +1307,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("KQreSolve", 1);
+  FuncObj = new gclFunction("KQreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
@@ -1347,7 +1347,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LcpSolve", 3);
+  FuncObj = new gclFunction("LcpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1396,7 +1396,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LiapSolve", 2);
+  FuncObj = new gclFunction("LiapSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Liap_Behav,
 				       PortionSpec(porBEHAV, 1), 12));
   FuncObj->SetParamInfo(0, 0, gclParameter("start", porBEHAV));
@@ -1452,7 +1452,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LpSolve", 3);
+  FuncObj = new gclFunction("LpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1505,7 +1505,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Nfg", 1);
+  FuncObj = new gclFunction("Nfg", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Nfg, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
@@ -1514,7 +1514,7 @@ void Init_algfunc(GSM *gsm)
 
 #ifndef MINI_POLY
 
-  FuncObj = new FuncDescObj("PolEnumSolve", 2);
+  FuncObj = new gclFunction("PolEnumSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnum_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1552,7 +1552,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("SeqEquilibSolve", 1);
+  FuncObj = new gclFunction("SeqEquilibSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SequentialEquilib, 
 				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("basis", porEFBASIS));
@@ -1575,7 +1575,7 @@ void Init_algfunc(GSM *gsm)
 #endif // ! MINI_POLY
 
 
-  FuncObj = new FuncDescObj("Payoff", 2);
+  FuncObj = new gclFunction("Payoff", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Payoff_Behav, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, gclParameter("profile", porBEHAV));
@@ -1589,7 +1589,7 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("SimpDivSolve", 2);
+  FuncObj = new gclFunction("SimpDivSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Simpdiv_Nfg,
 				       PortionSpec(porMIXED, 1), 9));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
@@ -1635,7 +1635,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("VertEnum", 1);
+  FuncObj = new gclFunction("VertEnum", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_VertEnum,
 				       PortionSpec(porNUMBER, 2), 3));
   FuncObj->SetParamInfo(0, 0, gclParameter("A", PortionSpec(porNUMBER,2),

@@ -52,16 +52,16 @@ int& GSM::GameRefCount(void* game)
 //----------------------------------------------------------------
 
 
-class gFuncListSorter : public gListSorter<FuncDescObj*>
+class gFuncListSorter : public gListSorter<gclFunction*>
 {
 protected:
-  bool LessThan(FuncDescObj* const& a, FuncDescObj* const& b) const
+  bool LessThan(gclFunction* const& a, gclFunction* const& b) const
   {
     return (a->FuncName() > b->FuncName());
   }
 public:
-  gFuncListSorter(gSortList<FuncDescObj*>& list)
-    : gListSorter<FuncDescObj*>(list)
+  gFuncListSorter(gSortList<gclFunction*>& list)
+    : gListSorter<gclFunction*>(list)
     {}
 };
 
@@ -509,9 +509,9 @@ void GSM::_ResolveRef(Portion *&p)
 //               CallFunction() related functions
 //-------------------------------------------------------------------
 
-bool GSM::AddFunction(FuncDescObj* func)
+bool GSM::AddFunction(gclFunction* func)
 {
-  FuncDescObj *old_func;
+  gclFunction *old_func;
   bool result;
   if (func == 0)  return false;
   if(!_FuncTable->IsDefined(func->FuncName()))
@@ -530,9 +530,9 @@ bool GSM::AddFunction(FuncDescObj* func)
 }
 
 
-bool GSM::DeleteFunction(FuncDescObj* func)
+bool GSM::DeleteFunction(gclFunction* func)
 {
-  FuncDescObj *old_func = 0;
+  gclFunction *old_func = 0;
   if (func == 0)  return 0;
   if (!_FuncTable->IsDefined(func->FuncName())) {
     throw gclRuntimeError("Function " + old_func->FuncName() + " not found");
@@ -649,10 +649,10 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
   bool match;
   int found = 0;
   gText curname;
-  const gList<FuncDescObj*>* funcs = _FuncTable->Value();
-  FuncDescObj *func;
-  gList<FuncDescObj*> funclist;
-  gSortList<FuncDescObj*> funcslist;
+  const gList<gclFunction*>* funcs = _FuncTable->Value();
+  gclFunction *func;
+  gList<gclFunction*> funclist;
+  gSortList<gclFunction*> funcslist;
   Portion* result;
 
   if(_FuncTable->IsDefined(funcname))

@@ -716,7 +716,7 @@ void GCLCompiler::RecoverFromError(void)
 
 gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 {
-  FuncDescObj *func = new FuncDescObj(funcname, 1);
+  gclFunction *func = new gclFunction(funcname, 1);
   PortionSpec funcspec;
 
   try {
@@ -782,7 +782,7 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 bool GCLCompiler::DeleteFunction(void)
 {
 /*
-  FuncDescObj *func = new FuncDescObj(funcname, 1);
+  gclFunction *func = new gclFunction(funcname, 1);
   bool error = false;
 
   PortionSpec funcspec;

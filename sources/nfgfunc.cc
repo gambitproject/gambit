@@ -495,7 +495,7 @@ static Portion *GSM_Support(Portion **param)
 
 void Init_nfgfunc(GSM *gsm)
 {
-  FuncDescObj *FuncObj;
+  gclFunction *FuncObj;
 
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
@@ -541,10 +541,10 @@ void Init_nfgfunc(GSM *gsm)
     };
 
   for (int i = 0; ftable[i].sig != 0; i++) 
-    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func,
+    gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 
-  FuncObj = new FuncDescObj("ElimDom", 1);
+  FuncObj = new gclFunction("ElimDom", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Nfg,
 				       porNFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));

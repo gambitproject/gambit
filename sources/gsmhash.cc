@@ -22,12 +22,12 @@ template <class T> class gNode;
 
 template class gList< void* >;
 template class gList< Portion* >;
-template class gList< FuncDescObj* >;
+template class gList< gclFunction* >;
 
 #include "ghash.imp"
 
 template class HashTable< gText, Portion* >;
-template class HashTable< gText, FuncDescObj* >;
+template class HashTable< gText, gclFunction* >;
 template class HashTable< gclExpression*, int >;
 template class HashTable< void*, int >;
 
@@ -53,11 +53,11 @@ RefHashTable::~RefHashTable()
 int FunctionHashTable::Hash( const gText& funcname ) const 
 { return (int)( funcname[0] ) % 26; }
 
-void FunctionHashTable::DeleteAction( FuncDescObj* func ) 
+void FunctionHashTable::DeleteAction( gclFunction* func ) 
 { delete func; }
 
 FunctionHashTable::FunctionHashTable() 
-  : HashTable<gText, FuncDescObj *>(26)
+  : HashTable<gText, gclFunction *>(26)
 { }
 
 FunctionHashTable::~FunctionHashTable() 

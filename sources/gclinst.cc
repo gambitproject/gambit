@@ -15,7 +15,7 @@
 class Portion;
 class EfgPortion;
 class NfgPortion;
-class FuncDescObj;
+class gclFunction;
 class CallFuncObj;
 class RefHashTable;
 class gclExpression;
@@ -41,8 +41,8 @@ template class gStack<RefHashTable *>;
 
 template class gList<gclExpression *>;
 
-template class gSortList<FuncDescObj *>;
-template class gListSorter<FuncDescObj *>;
+template class gSortList<gclFunction *>;
+template class gListSorter<gclFunction *>;
 template class gSortList<gText>;
 template class gListSorter<gText>;
 

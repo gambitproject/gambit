@@ -775,7 +775,7 @@ void Init_solfunc(GSM *gsm)
     };
 
   for (int i = 0; ftable[i].sig != 0; i++) 
-    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func,
+    gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 }
 

@@ -15,7 +15,7 @@
 #include "gsminstr.h"
 #include "gsmhash.h"
 
-class FuncDescObj;
+class gclFunction;
 class CallFuncObj;
 class Portion;
 class RefHashTable;
@@ -92,8 +92,8 @@ public:
   bool     UnAssign     ( Portion * );
   Portion* UnAssignExt  ( Portion * );
 
-  bool AddFunction( FuncDescObj* func );
-  bool DeleteFunction( FuncDescObj* func );
+  bool AddFunction( gclFunction* func );
+  bool DeleteFunction( gclFunction* func );
 
   Portion* Execute(gclExpression *, bool user_func = false );
   Portion* ExecuteUserFunc( gclExpression& program, 

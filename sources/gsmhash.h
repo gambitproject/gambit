@@ -12,7 +12,7 @@
 #include "ghash.h"
 
 class Portion;
-class FuncDescObj;
+class gclFunction;
 class gText;
 
 
@@ -26,10 +26,10 @@ public:
   virtual ~RefHashTable();
 };
 
-class FunctionHashTable : public HashTable<gText, FuncDescObj*> {
+class FunctionHashTable : public HashTable<gText, gclFunction*> {
 private:
   int Hash( const gText& funcname ) const;
-  void DeleteAction( FuncDescObj* func );
+  void DeleteAction( gclFunction* func );
 
 public:
   FunctionHashTable();

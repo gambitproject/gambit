@@ -1131,7 +1131,7 @@ static Portion *GSM_UnmarkSubgame(Portion **param)
 
 void Init_efgfunc(GSM *gsm)
 {
-  FuncDescObj *FuncObj;
+  gclFunction *FuncObj;
 
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "Actions[infoset->INFOSET*, support->EFSUPPORT] =: LIST(ACTION)",
@@ -1248,10 +1248,10 @@ void Init_efgfunc(GSM *gsm)
 
 
   for (int i = 0; ftable[i].sig != 0; i++) 
-    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func,
+    gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 
-  FuncObj = new FuncDescObj("ElimDom", 1);
+  FuncObj = new gclFunction("ElimDom", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
@@ -1267,7 +1267,7 @@ void Init_efgfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("NewEfg", 1);
+  FuncObj = new gclFunction("NewEfg", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NewEfg, porEFG, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("players", PortionSpec(porTEXT,1),
 					    new ListPortion));

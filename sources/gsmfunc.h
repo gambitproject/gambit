@@ -1,5 +1,5 @@
 //
-// FILE: gsmfunc.h -- definition of FuncDescObj, Function Descriptor Object
+// FILE: gsmfunc.h -- definition of gclFunction, Function Descriptor Object
 //                    companion to GSM
 //
 // $Id$
@@ -42,7 +42,7 @@ typedef unsigned int    FuncFlagType;
 
 
 
-class FuncDescObj;
+class gclFunction;
 class CallFuncObj;
 
 class gInteger;
@@ -100,13 +100,13 @@ public:
 
 
 
-class FuncDescObj  {
+class gclFunction  {
 friend class gclFunctionCall;
 private:
   static RefCountHashTable<gclExpression *> _RefCountTable;
 
 protected:
-  FuncDescObj( FuncDescObj& func );
+  gclFunction( gclFunction& func );
 
   gText        _FuncName;
   int            _NumFuncs;
@@ -114,10 +114,10 @@ protected:
 
   
 public:
-  FuncDescObj(const gText& func_name, int numfuncs);
-  FuncDescObj(const gText& func_proto, Portion* (*funcptr)(Portion**),
+  gclFunction(const gText& func_name, int numfuncs);
+  gclFunction(const gText& func_proto, Portion* (*funcptr)(Portion**),
                    FuncFlagType = funcLISTABLE  );
-  virtual ~FuncDescObj();
+  virtual ~gclFunction();
 
   void SetFuncInfo(int funcindex, gclSignature funcinfo);
   void SetFuncInfo(int funcindex, const gText& s);
@@ -127,8 +127,8 @@ public:
   void SetParamInfo(int funcindex, int index, const gclParameter paraminfo);  
   void SetParamInfo(int funcindex, const gclParameter paraminfo[]);
   
-  bool Combine(FuncDescObj* newfunc);
-  bool Delete(FuncDescObj* newfunc);
+  bool Combine(gclFunction* newfunc);
+  bool Delete(gclFunction* newfunc);
   void Delete(int delete_index);
 
   gText FuncName(void) const;
@@ -145,7 +145,7 @@ public:
 
 
 
-class CallFuncObj : public FuncDescObj {
+class CallFuncObj : public gclFunction {
 private:
   struct RunTimeParamInfoType {
     ReferencePortion *Ref;
@@ -168,7 +168,7 @@ private:
   Portion *CallListFunction(GSM *, Portion **);
 
  public:
-  CallFuncObj(FuncDescObj *, int, const gText &);
+  CallFuncObj(gclFunction *, int, const gText &);
   ~CallFuncObj();
 
   int NumParams(void) const { return m_numParams; }

@@ -159,15 +159,15 @@ class gclUnAssignment : public gclExpression  {
     Portion *Evaluate(void);
 };
 
-class FuncDescObj;
+class gclFunction;
 
 class gclFunctionDef : public gclExpression  {
   private:
-    FuncDescObj *func;
+    gclFunction *func;
     gclExpression *body;
 
   public:
-    gclFunctionDef(FuncDescObj *f, gclExpression *b);
+    gclFunctionDef(gclFunction *f, gclExpression *b);
     virtual ~gclFunctionDef();
 
     Portion *Evaluate(void);

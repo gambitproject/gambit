@@ -131,10 +131,10 @@ gclSignature::~gclSignature()
 //                   Function descriptor objects
 //---------------------------------------------------------------------
 
-RefCountHashTable< gclExpression* > FuncDescObj::_RefCountTable;
+RefCountHashTable< gclExpression* > gclFunction::_RefCountTable;
 
 
-FuncDescObj::FuncDescObj(FuncDescObj& func)
+gclFunction::gclFunction(gclFunction& func)
 {
   int index;
   int f_index;
@@ -180,7 +180,7 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
 }
 
 
-FuncDescObj::FuncDescObj(const gText& func_name, int numfuncs)
+gclFunction::gclFunction(const gText& func_name, int numfuncs)
 : _FuncName(func_name), _NumFuncs(numfuncs)
 {
   _FuncInfo = new gclSignature[_NumFuncs];
@@ -188,7 +188,7 @@ FuncDescObj::FuncDescObj(const gText& func_name, int numfuncs)
 
 
   // Assumes one argument, which has a prototype func_proto
-FuncDescObj::FuncDescObj( const gText& func_proto, 
+gclFunction::gclFunction( const gText& func_proto, 
                           Portion* (*funcptr)(Portion**),
                           FuncFlagType FFT /* = funcLISTABLE */  )
 {
@@ -210,7 +210,7 @@ FuncDescObj::FuncDescObj( const gText& func_proto,
 }
 
 
-FuncDescObj::~FuncDescObj()
+gclFunction::~gclFunction()
 {
   int index;
   int f_index;
@@ -236,7 +236,7 @@ FuncDescObj::~FuncDescObj()
 }
 
 
-void FuncDescObj::SetFuncInfo(int funcindex, gclSignature funcinfo)
+void gclFunction::SetFuncInfo(int funcindex, gclSignature funcinfo)
 {
   if ((funcindex < 0) || (funcindex >= _NumFuncs))
     throw gclRuntimeError("Internal GCL error");
@@ -248,7 +248,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, gclSignature funcinfo)
       _RefCountTable(funcinfo.FuncInstr)++;
 }
 
-void FuncDescObj::SetFuncInfo(int funcindex, const gText& s)
+void gclFunction::SetFuncInfo(int funcindex, const gText& s)
 {
   SetFuncInfo(funcindex, s, 0);
 }
@@ -257,7 +257,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s)
   // in it is used to determine the function info, and then SetFuncInfo 
   // is called with all data passed as arguments rather than a string.
 
-void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
+void gclFunction::SetFuncInfo(int funcindex, const gText& s,
                               Portion* (*funcptr)(Portion**), 
                               FuncFlagType FFT /* = funcLISTABLE */  )
 {
@@ -661,7 +661,7 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     throw gclRuntimeError("ERROR: incorrect type, " + str + ", in function definition");
 }
 
-void FuncDescObj::SetParamInfo(int funcindex, int index, 
+void gclFunction::SetParamInfo(int funcindex, int index, 
 			       const gclParameter param)
 {
   if ((funcindex < 0) || (funcindex >= _NumFuncs))
@@ -671,7 +671,7 @@ void FuncDescObj::SetParamInfo(int funcindex, int index,
   _FuncInfo[funcindex].ParamInfo[index] = param;
 }
 
-void FuncDescObj::SetParamInfo(int funcindex, const gclParameter params[])
+void gclFunction::SetParamInfo(int funcindex, const gclParameter params[])
 {
   if ((funcindex < 0) || (funcindex >= _NumFuncs))
     throw gclRuntimeError("Internal GCL error");
@@ -681,7 +681,7 @@ void FuncDescObj::SetParamInfo(int funcindex, const gclParameter params[])
 
 
 
-bool FuncDescObj::Combine(FuncDescObj* newfunc)
+bool gclFunction::Combine(gclFunction* newfunc)
 {
   bool finalresult = true;
   bool same_params;
@@ -793,7 +793,7 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 }
 
 
-bool FuncDescObj::Delete(FuncDescObj* newfunc)
+bool gclFunction::Delete(gclFunction* newfunc)
 {
   bool finalresult = true;
   bool same_params;
@@ -847,7 +847,7 @@ bool FuncDescObj::Delete(FuncDescObj* newfunc)
 }
 
 
-void FuncDescObj::Delete(int delete_index)
+void gclFunction::Delete(int delete_index)
 {
   gclSignature* NewFuncInfo = new gclSignature[_NumFuncs-1];  
   int j;
@@ -861,12 +861,12 @@ void FuncDescObj::Delete(int delete_index)
 }
 
 
-gText FuncDescObj::FuncName(void) const
+gText gclFunction::FuncName(void) const
 { return _FuncName; }
 
 
 
-bool FuncDescObj::UDF(void) const
+bool gclFunction::UDF(void) const
 {
   for (int i = 0; i < _NumFuncs; i++) {
     if (_FuncInfo[i].UserDefined)
@@ -877,7 +877,7 @@ bool FuncDescObj::UDF(void) const
 
 
 
-bool FuncDescObj::BIF(void) const
+bool gclFunction::BIF(void) const
 {
   for (int i = 0; i < _NumFuncs; i++)  {
     if( !_FuncInfo[i].UserDefined )
@@ -888,7 +888,7 @@ bool FuncDescObj::BIF(void) const
 
 
 
-gList<gText> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
+gList<gText> gclFunction::FuncList( bool udf, bool bif, bool getdesc ) const
 {
   gList<gText> list;
   gText f;
@@ -938,10 +938,10 @@ gList<gText> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
   return list;
 }
 
-void FuncDescObj::Dump(gOutput& f, int i) const
+void gclFunction::Dump(gOutput& f, int i) const
 { f << FuncList()[i+1] << '\n'; }
 
-void FuncDescObj::Dump(gOutput& f) const
+void gclFunction::Dump(gOutput& f) const
 {
   for (int i = 0; i < _NumFuncs; Dump(f, i++));
 }
@@ -955,9 +955,9 @@ void FuncDescObj::Dump(gOutput& f) const
 //---------------------------------------------------------------------
 
 
-CallFuncObj::CallFuncObj(FuncDescObj *p_function,
+CallFuncObj::CallFuncObj(gclFunction *p_function,
 			 int p_line, const gText &p_file)
-  : FuncDescObj(*p_function), m_line(p_line), m_file(p_file),
+  : gclFunction(*p_function), m_line(p_line), m_file(p_file),
     m_funcIndex(-1), m_numParams(0), m_numParamsDefined(0)
 {
   for (int f_index = 0; f_index < _NumFuncs; f_index++)  {
@@ -1730,7 +1730,7 @@ void CallFuncObj::Dump(gOutput& f) const
   if (m_funcIndex < 0)
     f << FuncName() << "[]\n";
   else
-    FuncDescObj::Dump(f, m_funcIndex);
+    gclFunction::Dump(f, m_funcIndex);
 }
 
 

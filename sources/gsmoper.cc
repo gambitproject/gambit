@@ -1687,7 +1687,7 @@ Portion* GSM_IsList( Portion** p )
 
 void Init_gsmoper(GSM* gsm)
 {
-  FuncDescObj* FuncObj;
+  gclFunction* FuncObj;
 
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_And },
@@ -1775,10 +1775,10 @@ void Init_gsmoper(GSM* gsm)
     };
 
   for (int i = 0; ftable[i].sig != 0; i++)
-    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func));
+    gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func));
 
 
-  FuncObj = new FuncDescObj("Quit", 1);
+  FuncObj = new gclFunction("Quit", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Quit, porBOOLEAN, 1, 0,
 				       funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("value", porINTEGER,
@@ -1787,14 +1787,14 @@ void Init_gsmoper(GSM* gsm)
 
   //-------------------- Streams -------------------------
 
-  FuncObj = new FuncDescObj("Output", 1);
+  FuncObj = new gclFunction("Output", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Output, porOUTPUT, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("file", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("append", porBOOLEAN,
 					    new BoolPortion( false )));
   gsm->AddFunction(FuncObj);
   
-  FuncObj = new FuncDescObj("Input", 1);
+  FuncObj = new gclFunction("Input", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Input, porINPUT, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("file", porTEXT));
   gsm->AddFunction(FuncObj);
@@ -1803,7 +1803,7 @@ void Init_gsmoper(GSM* gsm)
 
   GSM_SetWriteOptions();
 
-  FuncObj = new FuncDescObj("Print", 2);
+  FuncObj = new gclFunction("Print", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Print, porANYTYPE, 1, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("x",
 					    PortionSpec(porANYTYPE, 0, 
@@ -1816,7 +1816,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Write", 4);
+  FuncObj = new gclFunction("Write", 4);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("output", porOUTPUT,
@@ -1854,7 +1854,7 @@ void Init_gsmoper(GSM* gsm)
   // *Format
   //---------------
 
-  FuncObj = new FuncDescObj("ListFormat", 1);
+  FuncObj = new gclFunction("ListFormat", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ListFormat, porBOOLEAN, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter
 			("braces", porBOOLEAN,
@@ -1870,7 +1870,7 @@ void Init_gsmoper(GSM* gsm)
 			 _WriteListIndent.RefCopy(), BYREF ));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("GetListFormat", 1);
+  FuncObj = new gclFunction("GetListFormat", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_GetListFormat, porBOOLEAN, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter
 			("braces", porBOOLEAN,
@@ -1887,7 +1887,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Format", 3);
+  FuncObj = new gclFunction("Format", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_FloatFormat, porNUMBER, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, gclParameter
@@ -1916,7 +1916,7 @@ void Init_gsmoper(GSM* gsm)
 					   _WriteSolutionLabels.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("GetFormat", 3);
+  FuncObj = new gclFunction("GetFormat", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_GetFloatFormat, porNUMBER, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, gclParameter
@@ -1949,7 +1949,7 @@ void Init_gsmoper(GSM* gsm)
 
   //-------------------- Read --------------------------
 
-  FuncObj = new FuncDescObj("Read", 7);
+  FuncObj = new gclFunction("Read", 7);
 
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Read_Bool, 
 				       porINPUT, 2, 0, funcNONLISTABLE));
@@ -2002,12 +2002,12 @@ void Init_gsmoper(GSM* gsm)
 					   REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("IsEof", 1);
+  FuncObj = new gclFunction("IsEof", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsEof, porBOOLEAN, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("input", porINPUT));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("IsDefined", 2);
+  FuncObj = new gclFunction("IsDefined", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDefined, porBOOLEAN, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE));
 
@@ -2015,7 +2015,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(1, 0, gclParameter("x", porUNDEFINED));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Help", 1);
+  FuncObj = new gclFunction("Help", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Help, PortionSpec(porTEXT, 1), 3));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("udf", porBOOLEAN,
@@ -2024,44 +2024,44 @@ void Init_gsmoper(GSM* gsm)
 					    new BoolPortion( true )));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Manual", 1);
+  FuncObj = new gclFunction("Manual", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Manual, porBOOLEAN, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("y", porOUTPUT,
 					    new OutputPortion(gout)));
   gsm->AddFunction(FuncObj);
   
-  FuncObj = new FuncDescObj("HelpVars", 1);
+  FuncObj = new gclFunction("HelpVars", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_HelpVars, PortionSpec(porTEXT, 1),
 				       1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Clear", 1);
+  FuncObj = new gclFunction("Clear", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Clear, porBOOLEAN, 0));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Date", 1);
+  FuncObj = new gclFunction("Date", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Date, porTEXT, 0));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Randomize", 1);
+  FuncObj = new gclFunction("Randomize", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Randomize, porNUMBER, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER));
   FuncObj->SetParamInfo(0, 1, gclParameter("seed", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Precision", 1);
+  FuncObj = new gclFunction("Precision", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Precision, porPRECISION, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER));
 
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsNull", 1);
+  FuncObj = new gclFunction("IsNull", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsNull, porBOOLEAN, 1, 0, 
 				       funcLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 
@@ -2070,7 +2070,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Null", 1);
+  FuncObj = new gclFunction("Null", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Null, 
 				       PortionSpec(porANYTYPE, 0, 
 						   porNULLSPEC ),
@@ -2080,7 +2080,7 @@ void Init_gsmoper(GSM* gsm)
 
 
 
-  FuncObj = new FuncDescObj("Shell", 1);
+  FuncObj = new gclFunction("Shell", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Shell, porNUMBER, 2 ));
   FuncObj->SetParamInfo(0, 0, gclParameter("command", porTEXT,
 					    new TextPortion("")));
@@ -2089,24 +2089,24 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("GetEnv", 1);
+  FuncObj = new gclFunction("GetEnv", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_GetEnv, porTEXT, 1 ));
   FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("SetEnv", 1);
+  FuncObj = new gclFunction("SetEnv", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SetEnv, porBOOLEAN, 2 ));
   FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
   FuncObj->SetParamInfo(0, 1, gclParameter("value", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("UnSetEnv", 1);
+  FuncObj = new gclFunction("UnSetEnv", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_UnSetEnv, porBOOLEAN, 1 ));
   FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("ExePath", 1);
+  FuncObj = new gclFunction("ExePath", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ExePath, porTEXT, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("file", porBOOLEAN,
 					    new BoolPortion( true ) ) );
@@ -2114,11 +2114,11 @@ void Init_gsmoper(GSM* gsm)
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Platform", 1);
+  FuncObj = new gclFunction("Platform", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Platform, porTEXT, 0));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("IsList", 2);
+  FuncObj = new gclFunction("IsList", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsList, porBOOLEAN, 1,
 				       NO_PREDEFINED_PARAMS, 
 				       funcNONLISTABLE ));

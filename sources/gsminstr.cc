@@ -599,7 +599,7 @@ Portion *gclForExpr::Evaluate(void)
 // FunctionDef
 //---------------
 
-gclFunctionDef::gclFunctionDef(FuncDescObj *f, gclExpression *b)
+gclFunctionDef::gclFunctionDef(gclFunction *f, gclExpression *b)
   : func(f), body(b)
 { }
 
