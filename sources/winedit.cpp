@@ -93,6 +93,8 @@ BOOL CWinEditApp::InitInstance()
 	return TRUE;
 }
 
+BOOL CWinEditApp::SaveAllModified()  { return 1; }
+
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
 
@@ -206,9 +208,7 @@ int CWinEditApp::Run()
   int argc;
   char** argv;
   WinGetArgs( &argc, &argv );
-  gcl_main( argc, argv );
-
-  return CWinApp::Run();
+  return gcl_main( argc, argv );
 }
 
 

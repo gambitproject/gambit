@@ -39,6 +39,7 @@ public:
 	//{{AFX_VIRTUAL(CWinEditApp)
 	public:
 	virtual BOOL InitInstance();
+  virtual BOOL SaveAllModified();
 	virtual int Run();
 	//}}AFX_VIRTUAL
 
