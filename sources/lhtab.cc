@@ -188,65 +188,6 @@ template <class T> void LHTableau<T>::Refactor()
   T2.Refactor();
 }
 
-/*
-    // solve A x = b 
-template <class T>
-void LHTableau<T>::Solve(const gVector<T> &b, gVector<T> &x) const
-{
-  B.solve(b,x);
-}
-
-    // solve y A = c 
-template <class T>
-void LHTableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
-{
-  B.solveT(c,y);
-}
-
-template <class T>
-void LHTableau<T>::BasisVector(gVector<T> &out) const
-{
-  T1.BasisVector(tmp1);
-  T2.BasisVector(tmp2);
-  for(i=tmp1.First;i<=tmp1.Last;i++)
-    out[i] = tmp1[i];
-  for(i=tmp2.First;i<=tmp2.Last;i++)
-    out[i] = tmp2[i];
-//  out= solution;
-}
-
-template <class T>
-void LHTableau<T>::SolveColumn(int col, gVector<T> &out)
-{
-  gVector<T> tmpcol2(MinRow(),MaxRow());
-  if( col<0 ) {
-    tmpcol2= (T)0;
-    tmpcol2[-col]=1;
-  }
-  else
-    A->GetColumn(col,tmpcol2);
-  B.solve(tmpcol2,out);
-}
-
-
-template <class T>
-void LHTableau<T>::SetBasis(const Basis<T> &in)
-{
-  basis= in;
-  B.refactor(template->A, code.basis);
-  B.solve(template->b, solution);
-  if( costdefined )
-    SolveDual();
-}
-
-
-template <class T>
-void LHTableau<T>::GetBasis(Basis<T> &out) const
-{
-  out= basis;
-}
-*/
-
 // miscellaneous functions
 
 template <class T>

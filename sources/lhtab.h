@@ -47,12 +47,6 @@ public:
   
       // raw Tableau functions
   void Refactor();
-//  void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
-//  void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
-//  void BasisVector(gVector<T> &x) const; // solve M x = (*b)
-//  void SolveColumn(int, gVector<T> &);
-//  void SetBasis( const Basis<T> &); // set new Tableau
-//  void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
       // miscellaneous functions
   BFS<T> GetBFS(void);
