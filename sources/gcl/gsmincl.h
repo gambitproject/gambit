@@ -38,39 +38,35 @@ class gOutput;
 
 #define  porNULLSPEC  true
 
-#define  porBOOLEAN            ( 0x00000001 )
-#define  porPRECISION          ( 0x00000002 )
-#define  porINTEGER            ( 0x00000004 )
-#define  porNUMBER             ( 0x00000008 )
-#define  porTEXT               ( 0x00000010 )
+typedef enum {
+  porBOOLEAN        = 0x00000001,
+  porPRECISION      = 0x00000002,
+  porINTEGER        = 0x00000004,
+  porNUMBER         = 0x00000008,
+  porTEXT           = 0x00000010,
+  porNFOUTCOME      = 0x00000020,
+  porNFG            = 0x00000040,
+  porEFG            = 0x00000100,
+  porMIXED          = 0x00000400,
+  porBEHAV          = 0x00001000,
+  porEFOUTCOME      = 0x00004000,
+  porINFOSET        = 0x00010000,
+  porNFSUPPORT      = 0x00040000,
+  porEFSUPPORT      = 0x00100000,
+  porEFBASIS        = 0x00200000,
+  porNFPLAYER       = 0x00400000,
+  porEFPLAYER       = 0x00800000,
+  porNODE           = 0x01000000,
+  porACTION         = 0x02000000,
+  porREFERENCE      = 0x04000000,
+  porOUTPUT         = 0x08000000,
+  porINPUT          = 0x10000000,
+  porSTRATEGY       = 0x20000000,
+  porNULL           = 0x40000000,
+  porUNDEFINED      = 0x80000000
+};
 
-#define  porNFOUTCOME          ( 0x00000020 )
-
-#define  porNFG                ( 0x00000040 )
-#define  porEFG                ( 0x00000100 )
-#define  porMIXED              ( 0x00000400 )
-#define  porBEHAV              ( 0x00001000 )
-
-#define  porEFOUTCOME          ( 0x00004000 )
-#define  porINFOSET            ( 0x00010000 )
-
-#define  porNFSUPPORT          ( 0x00040000 )
-#define  porEFSUPPORT          ( 0x00100000 )
-#define  porEFBASIS            ( 0x00200000 )
-
-#define  porNFPLAYER           ( 0x00400000 )
-#define  porEFPLAYER           ( 0x00800000 )
-#define  porNODE               ( 0x01000000 )
-#define  porACTION             ( 0x02000000 )
-#define  porREFERENCE          ( 0x04000000 )
-#define  porOUTPUT             ( 0x08000000 )
-#define  porINPUT              ( 0x10000000 )
-#define  porSTRATEGY           ( 0x20000000 )
-
-#define  porNULL               ( 0x40000000 )
-#define  porUNDEFINED          ( 0x80000000 )
-
-#define  porANYTYPE            ( 0xFFFFFFFF )
+const unsigned int porANYTYPE = 0xFFFFFFFF;
 
 #define  NLIST 32767
 

@@ -190,7 +190,7 @@ public:
 };
 
 inline gPrecision AsPrecision(Portion *portion) 
-{ return ((PrecisionPortion *) portion)->Value(); }
+{ return (dynamic_cast<PrecisionPortion *>(portion))->Value(); }
 
 //----------
 // Number
@@ -226,7 +226,7 @@ public:
 };
 
 inline const gNumber &AsNumber(Portion *portion)
-{ return ((NumberPortion *) portion)->Value(); }
+{ return (dynamic_cast<NumberPortion *>(portion))->Value(); }
 
 //--------
 // Text
@@ -261,6 +261,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline const gText &AsText(Portion *portion)
+{ return (dynamic_cast<TextPortion *>(portion))->Value(); }
 
 //--------
 // Bool
@@ -297,7 +299,7 @@ public:
 };
 
 inline bool AsBool(Portion *portion)
-{ return ((BoolPortion *) portion)->Value(); }
+{ return (dynamic_cast<BoolPortion *>(portion))->Value(); }
 
 
 //-------------
@@ -369,6 +371,9 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gbtNfgPlayer AsNfgPlayer(Portion *portion)
+{ return (dynamic_cast<NfPlayerPortion *>(portion))->Value(); }
+
 //-----------
 // Strategy
 //-----------
@@ -402,6 +407,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gbtNfgStrategy AsNfgStrategy(Portion *portion)
+{ return (dynamic_cast<StrategyPortion *>(portion))->Value(); }
 
 //------------
 // NfOutcome
@@ -436,6 +443,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gbtNfgOutcome AsNfgOutcome(Portion *portion)
+{ return (dynamic_cast<NfOutcomePortion *>(portion))->Value(); }
 
 
 //-------------
@@ -482,8 +491,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline const gbtNfgSupport &AsNfgSupport(Portion *portion)
-{ return *((NfSupportPortion *) portion)->Value(); }
+inline gbtNfgSupport &AsNfgSupport(Portion *portion)
+{ return *(dynamic_cast<NfSupportPortion *>(portion))->Value(); }
 
 //-------------
 // EfSupport
@@ -529,8 +538,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline const EFSupport &AsEfgSupport(Portion *portion)
-{ return *((EfSupportPortion *) portion)->Value(); }
+inline EFSupport &AsEfgSupport(Portion *portion)
+{ return *(dynamic_cast<EfSupportPortion *>(portion))->Value(); }
 
 
 //-----------
@@ -568,6 +577,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline EFBasis &AsEfgBasis(Portion *portion)
+{ return *(dynamic_cast<EfBasisPortion *>(portion))->Value(); }
 
 //------------
 // EfPlayer
@@ -603,7 +614,7 @@ public:
 };
 
 inline gbtEfgPlayer AsEfgPlayer(Portion *portion) 
-{ return ((EfPlayerPortion *) portion)->Value(); }
+{ return (dynamic_cast<EfPlayerPortion *>(portion))->Value(); }
 
 //----------
 // Infoset
@@ -676,6 +687,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline Node *AsEfgNode(Portion *portion) 
+{ return (dynamic_cast<NodePortion *>(portion))->Value(); }
 
 //------------
 // Action
@@ -758,7 +771,7 @@ public:
 };
 
 inline const MixedSolution &AsMixed(Portion *portion)
-{ return *((MixedPortion *) portion)->Value(); }
+{ return *(dynamic_cast<MixedPortion *>(portion))->Value(); }
 
 
 //--------
@@ -805,7 +818,7 @@ public:
 };
 
 inline const BehavSolution &AsBehav(Portion *portion)
-{ return *((BehavPortion *) portion)->Value(); }
+{ return *(dynamic_cast<BehavPortion *>(portion))->Value(); }
 
 
 //-------
@@ -841,6 +854,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline Nfg &AsNfg(Portion *portion)
+{ return *(dynamic_cast<NfgPortion *>(portion))->Value(); }
 
 //-------
 // Efg
@@ -877,7 +892,7 @@ public:
 };
 
 inline efgGame &AsEfg(Portion *portion)
-{ return *((EfgPortion *) portion)->Value(); }
+{ return *(dynamic_cast<EfgPortion *>(portion))->Value(); }
 
 
 //---------
