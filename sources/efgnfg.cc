@@ -252,6 +252,11 @@ template <class T>
 void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		  const Efg<T> &E, BehavProfile<T> &bp)
 {
+  if ((Nfg<T> *) E.afg == &N)   {
+    ((gVector<T> &) bp).operator=((gVector<T> &) mp);
+    return;
+  }
+
   if (!E.lexicon || (const Nfg<T> *)E.lexicon->N != &N)   return;
 
   Node *n = E.RootNode();
@@ -279,14 +284,73 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 
 
 
-// This function put in to facilitate error-detection in MixedToBehav[]
-
-BaseNfg* AssociatedNfg( BaseEfg* E )
+template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
 {
-  if( E->lexicon )
+  Nfg<T> *afg = new Nfg<T>(gArray<int>(E.Dimensionality()));
+
+  if (!afg)   return 0;
+
+  E.afg = afg;
+
+  afg->SetTitle(E.GetTitle() + " (Agent Form)");
+
+  for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
+    for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)  {
+      Infoset *s = E.PlayerList()[epl]->InfosetList()[iset];
+      for (int act = 1; act <= s->NumActions(); act++)  {
+	Strategy *st = afg->GetStrategy(npl, act);
+	st->name = ToString(act);
+      }
+    }
+  }
+
+  NfgIter<T> iter(*afg);
+  int pl = afg->NumPlayers();
+
+  gArray<int> dim(E.NumPlayers());
+  for (int i = 1; i <= dim.Length(); i++)
+    dim[i] = E.PlayerList()[i]->NumInfosets();
+  gPVector<int> profile(dim);
+  ((gVector<int> &) profile).operator=(1);
+
+  gVector<T> payoff(E.NumPlayers());
+  
+  while (1)  {
+    E.Payoff(profile, payoff);
+    for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
+      for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)
+	iter.SetPayoff(npl, payoff[epl]);
+    
+    while (pl > 0)  {
+      if (iter.Next(pl))  {
+	profile[pl]++;
+	break;
+      }
+      profile[pl] = 1;
+      pl--;
+    }
+
+    if (pl == 0)  break;
+    pl = afg->NumPlayers();
+  }
+
+  return afg;
+}
+
+
+// These functions put in to facilitate error-detection in MixedToBehav[]
+
+BaseNfg *AssociatedNfg(BaseEfg *E)
+{
+  if (E->lexicon)
     return E->lexicon->N;
   else
     return 0;
+}
+
+BaseNfg *AssociatedAfg(BaseEfg *E)
+{
+  return E->afg;
 }
 
 
@@ -325,4 +389,7 @@ TEMPLATE void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp
 
 TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &);
 TEMPLATE Nfg<gRational> *MakeReducedNfg(Efg<gRational> &);
+
+TEMPLATE Nfg<double> *MakeAfg(Efg<double> &);
+TEMPLATE Nfg<gRational> *MakeAfg(Efg<gRational> &);
 
