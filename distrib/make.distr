@@ -64,7 +64,6 @@ gambit:
 	make -f $(GMAKEFILE) gui GUI=$(GUI) SYSNAME=$(SYSNAME); \
 	mv gui_$(GUI)_$(SYSNAME) ../bin/gambit_$(GUI)_$(SYSNAME); \
 	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
-	cp $(WXWINDIR)/bin/wxhelp2_$(SYSNAME)_$(GUI) ../bin/wxhelp2_$(GUI)_$(SYSNAME); \
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
@@ -86,7 +85,6 @@ gambit:
 	  ./bin/*.gcl \
 	  ./bin/gcl.man \
 	  ./bin/gambit_$(GUI)_$(SYSNAME) \
-	  ./bin/wxhelp2_$(GUI)_$(SYSNAME) \
 	  ./efg/*.efg \
 	  ./nfg/*.nfg \
 	  ./gcl/*.gcl \

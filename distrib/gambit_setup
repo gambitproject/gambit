@@ -17,15 +17,20 @@ echo
 echo The current binaries are:
 echo `ls bin/gambit_*`
 echo `ls bin/gcl_*`
+echo `ls bin/pxi_*`
 echo `ls bin/wxhelp2_*`
 echo
-echo Making symbolic links to gambit, gui, and wxhelp.
+echo Making symbolic links to gambit, gcl, and pxi.
 cd bin
 ln -s `echo gambit_*` gambit
 ln -s `echo gcl_*` gcl
 ln -s `echo pxi_*` pxi
 ln -s `echo wxhelp2_*` wxhelp
 cd ..
+
+cd doc/html
+ln -s `echo ../../bin/wxhelp2*` wxhelp
+cd ../..
 
 echo 
 echo Now executing gambit GUI startup script \(gui-init\).
