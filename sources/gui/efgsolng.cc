@@ -1196,7 +1196,6 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
   params.delLam = m_delLam;
   params.SetAccuracy(m_accuracy);
   params.powLam = m_powLam;
-  params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
@@ -1209,7 +1208,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
   Correspondence<double, MixedSolution> qreCorresp;
 
   try {
-    Qre(*N, params, startm, qreCorresp, status, nevals, nits);
+    Qre(*N, params, *m_pxiFile, startm, qreCorresp, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
