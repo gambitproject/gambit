@@ -125,6 +125,72 @@ bool InfosetHasDominatedElement(const EFSupport &S,
   return false;
 }
 
+class ActionCursorForSupport {
+protected:
+  const EFSupport *support;
+  int pl;
+  int iset;
+  int nodenum;
+
+public:
+  //Constructors and dtor
+  ActionCursorForSupport(const EFSupport &S);
+  ActionCursorForSupport(const ActionCursorForSupport &a);
+  ~ActionCursorForSupport();
+
+  // Operators
+  ActionCursorForSupport &operator =(const ActionCursorForSupport &);
+  bool                    operator==(const ActionCursorForSupport &) const;
+  bool                    operator!=(const ActionCursorForSupport &) const;
+};
+
+
+//----------------------------------------------------
+//                ActionCursorForSupport
+// ---------------------------------------------------
+
+ActionCursorForSupport::ActionCursorForSupport(const EFSupport &S)
+  : support(&S), pl(0), iset(0), nodenum(0)
+{}
+
+ActionCursorForSupport::ActionCursorForSupport(
+                  const ActionCursorForSupport &ac)
+  : support(ac.support), pl(ac.pl), iset(ac.iset), nodenum(ac.nodenum)
+{}
+
+ActionCursorForSupport::~ActionCursorForSupport()
+{}
+
+ActionCursorForSupport& 
+ActionCursorForSupport::operator=(const ActionCursorForSupport &rhs)
+{
+  if (this != &rhs) {
+    support = rhs.support;
+    pl = rhs.pl;
+    iset = rhs.iset;
+    nodenum = rhs.nodenum;
+  }
+  return *this;
+}
+
+bool 
+ActionCursorForSupport::operator==(const ActionCursorForSupport &rhs) const
+{
+  if (support != rhs.support ||
+      pl      != rhs.pl      ||
+      iset    != rhs.iset    ||
+      nodenum != rhs.nodenum)
+    return false;
+  return true;
+}
+
+bool 
+ActionCursorForSupport::operator!=(const ActionCursorForSupport &rhs) const
+{
+ return (!(*this==rhs));
+}
+
+
 // Subsupports of a given support are _path equivalent_ if they
 // agree on every infoset that can be reached under either, hence both,
 // of them.  The next routine outputs one support for each equivalence
@@ -132,7 +198,19 @@ bool InfosetHasDominatedElement(const EFSupport &S,
 // prototype of the eventual path enumerator, which will also perform
 // dominance elimination.
 
-// I am reluctant to embark on this until EFSupportWith... has been upgraded.
+gList<const EFSupport> AllInequivalentSubsupports(const EFSupport *S)
+{
+  gList<const EFSupport> answer;
+
+  // Under construction ...
+  // Phases:
+  // 1.  Enumerate everything
+  // 2.  Add requirement that every infoset has an action
+  EFSupportWithActiveInfo SAct(*S);
+  answer += (EFSupport)SAct;
+
+  return answer;
+}
 
 
 // The code below is old, and uses indexing mechanisms that I do not
