@@ -25,7 +25,7 @@
 //
 
 #include "efg.h"
-#include "efplayer.h"
+#include "player.h"
 #include "efstrat.h"
 
 class EFActionArray   {

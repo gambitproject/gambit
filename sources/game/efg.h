@@ -39,7 +39,7 @@ template <class T> class PureBehavProfile;
 
 #include "outcome.h"
 #include "infoset.h"
-#include "efplayer.h"
+#include "player.h"
 #include "node.h"
 
 struct gbt_efg_game_rep;

@@ -39,9 +39,6 @@
 
 #include "math/gmath.h"
 #include "game/efg.h"
-#include "game/infoset.h"
-#include "game/node.h"
-#include "game/efplayer.h"
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
 #include "game/nfg.h"

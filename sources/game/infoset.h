@@ -33,11 +33,10 @@
 
 #include "math/gvector.h"
 
-#include "efplayer.h"
-
 class Lexicon;
 class gbtEfgInfoset;
 class gbtEfgNode;
+class gbtEfgPlayer;
 
 struct gbt_efg_action_rep;
 

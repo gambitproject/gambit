@@ -33,8 +33,45 @@
 // two.
 //
 
+struct gbt_efg_player_rep;
+class gbtEfgGame;
+class gbtEfgInfoset;
+
+class gbtEfgPlayer {
+friend class gbtEfgGame;
+protected:
+  struct gbt_efg_player_rep *rep;
+
+public:
+  gbtEfgPlayer(void);
+  gbtEfgPlayer(gbt_efg_player_rep *);
+  gbtEfgPlayer(const gbtEfgPlayer &);
+  ~gbtEfgPlayer();
+
+  gbtEfgPlayer &operator=(const gbtEfgPlayer &);
+
+  bool operator==(const gbtEfgPlayer &) const;
+  bool operator!=(const gbtEfgPlayer &) const;
+
+  bool IsNull(void) const;
+  bool IsDeleted(void) const;
+
+  gbtEfgGame GetGame(void) const;
+  gText GetLabel(void) const;
+  void SetLabel(const gText &);
+  int GetId(void) const;
+
+  bool IsChance(void) const;
+
+  int NumInfosets(void) const;
+  gbtEfgInfoset NewInfoset(int p_actions);
+  gbtEfgInfoset GetInfoset(int p_index) const;
+};
+
+
 struct gbt_nfg_player_rep;
 class gbtNfgGame;
+class gbtNfgStrategy;
 
 class gbtNfgPlayer {
 friend class gbtNfgGame;
@@ -54,6 +91,7 @@ public:
   bool operator!=(const gbtNfgPlayer &) const;
 
   bool IsNull(void) const;
+  bool IsDeleted(void) const;
 
   gbtNfgGame GetGame(void) const;
   gText GetLabel(void) const;

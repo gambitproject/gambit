@@ -26,9 +26,11 @@
 
 // Declaration of game API
 #include "efg.h"
+#include "nfg.h"
 
-// Declaration of internal extensive form classes
+// Declaration of internal game classes
 #include "efgint.h"
+#include "nfgint.h"
 
 //
 // This file contains the implementation of the API for players.
@@ -87,44 +89,44 @@ gbtEfgPlayer::~gbtEfgPlayer()
 {
   if (rep) {
     if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
+      delete rep;
     }
     else if (--rep->m_efg->m_refCount == 0) {
-      // delete rep->m_efg;
+      delete rep->m_efg;
     }
   }
 }
 
-gbtEfgPlayer &gbtEfgPlayer::operator=(const gbtEfgPlayer &p_outcome)
+gbtEfgPlayer &gbtEfgPlayer::operator=(const gbtEfgPlayer &p_player)
 {
-  if (this == &p_outcome) {
+  if (this == &p_player) {
     return *this;
   }
 
   if (rep) {
     if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
+      delete rep;
     }
     else if (--rep->m_efg->m_refCount == 0) {
-      // delete rep->m_efg;
+      delete rep->m_efg;
     }
   }
 
-  if ((rep = p_outcome.rep) != 0) {
+  if ((rep = p_player.rep) != 0) {
     rep->m_refCount++;
     rep->m_efg->m_refCount++;
   }
   return *this;
 }
 
-bool gbtEfgPlayer::operator==(const gbtEfgPlayer &p_outcome) const
+bool gbtEfgPlayer::operator==(const gbtEfgPlayer &p_player) const
 {
-  return (rep == p_outcome.rep);
+  return (rep == p_player.rep);
 } 
 
-bool gbtEfgPlayer::operator!=(const gbtEfgPlayer &p_outcome) const
+bool gbtEfgPlayer::operator!=(const gbtEfgPlayer &p_player) const
 {
-  return (rep != p_outcome.rep);
+  return (rep != p_player.rep);
 } 
 
 bool gbtEfgPlayer::IsNull(void) const
@@ -132,20 +134,40 @@ bool gbtEfgPlayer::IsNull(void) const
   return (rep == 0);
 }
 
+bool gbtEfgPlayer::IsDeleted(void) const
+{
+  return (rep && rep->m_deleted);
+}
+
 gbtEfgGame gbtEfgPlayer::GetGame(void) const
 {
-  return (rep) ? rep->m_efg : 0;
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_efg : 0;
+  }
 }
 
 int gbtEfgPlayer::GetId(void) const
 {
-  return (rep) ? rep->m_id : -1;
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_id : -1;
+  }
 }
 
 gText gbtEfgPlayer::GetLabel(void) const
 {
   if (rep) {
-    return rep->m_label;
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      return rep->m_label;
+    }
   }
   else {
     return "";
@@ -155,14 +177,24 @@ gText gbtEfgPlayer::GetLabel(void) const
 void gbtEfgPlayer::SetLabel(const gText &p_label)
 {
   if (rep) {
-    rep->m_label = p_label;
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      rep->m_label = p_label;
+    }
   }
 }
 
 int gbtEfgPlayer::NumInfosets(void) const
 {
   if (rep) {
-    return rep->m_infosets.Length();
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      return rep->m_infosets.Length();
+    }
   }
   else {
     return 0;
@@ -172,7 +204,12 @@ int gbtEfgPlayer::NumInfosets(void) const
 gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
 {
   if (rep) {
-    return rep->m_infosets[p_index];
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      return rep->m_infosets[p_index];
+    }
   }
   else {
     return 0;
@@ -182,11 +219,19 @@ gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
 
 bool gbtEfgPlayer::IsChance(void) const
 {
-  return (rep && rep->m_id == 0);
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep && rep->m_id == 0);
+  }
 }
 
 gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
 {
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
   if (IsNull())  {
     throw gbtEfgNullObject();
   }
@@ -243,4 +288,161 @@ bool gbtEfgInfosetIterator::Begin(void)
 bool gbtEfgInfosetIterator::End(void) const
 { return m_index > m_player.NumInfosets(); }
 
+
+//----------------------------------------------------------------------
+//                 gbt_nfg_player_rep: Declaration
+//----------------------------------------------------------------------
+
+gbt_nfg_player_rep::gbt_nfg_player_rep(gbt_nfg_game_rep *p_nfg,
+				       int p_id, int p_strats)
+  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_strategies(p_strats),
+    m_refCount(0)
+{
+  for (int i = 1; i <= p_strats; i++) {
+    m_strategies[i] = new gbt_nfg_strategy_rep(this);
+  }
+}
+
+gbtNfgPlayer::gbtNfgPlayer(void)
+  : rep(0)
+{ }
+
+gbtNfgPlayer::gbtNfgPlayer(gbt_nfg_player_rep *p_rep)
+  : rep(p_rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+    rep->m_nfg->m_refCount++;
+  }
+}
+
+gbtNfgPlayer::gbtNfgPlayer(const gbtNfgPlayer &p_outcome)
+  : rep(p_outcome.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+    rep->m_nfg->m_refCount++;
+  }
+}
+
+gbtNfgPlayer::~gbtNfgPlayer()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      delete rep;
+    }
+    else if (--rep->m_nfg->m_refCount == 0) {
+      delete rep->m_nfg;
+    }
+  }
+}
+
+gbtNfgPlayer &gbtNfgPlayer::operator=(const gbtNfgPlayer &p_player)
+{
+  if (this == &p_player) {
+    return *this;
+  }
+
+  if (rep) {
+    if (--rep->m_refCount == 0 && rep->m_deleted) {
+      delete rep;
+    }
+    else if (--rep->m_nfg->m_refCount == 0) {
+      delete rep->m_nfg;
+    }
+  }
+
+  if ((rep = p_player.rep) != 0) {
+    rep->m_refCount++;
+    rep->m_nfg->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtNfgPlayer::operator==(const gbtNfgPlayer &p_player) const
+{
+  return (rep == p_player.rep);
+} 
+
+bool gbtNfgPlayer::operator!=(const gbtNfgPlayer &p_player) const
+{
+  return (rep != p_player.rep);
+} 
+
+int gbtNfgPlayer::GetId(void) const
+{
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_id : 0;
+  }
+}
+
+bool gbtNfgPlayer::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+bool gbtNfgPlayer::IsDeleted(void) const
+{
+  return (rep && rep->m_deleted);
+}
+
+gbtNfgGame gbtNfgPlayer::GetGame(void) const
+{
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_nfg : 0;
+  }
+}
+
+gText gbtNfgPlayer::GetLabel(void) const
+{
+  if (rep) {
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      return rep->m_label;
+    }
+  }
+  else {
+    return "";
+  }
+}
+
+void gbtNfgPlayer::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    if (rep->m_deleted) {
+      throw gbtGameObjectDeleted();
+    }
+    else {
+      rep->m_label = p_label;
+    }
+  }
+}
+
+int gbtNfgPlayer::NumStrategies(void) const
+{
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_strategies.Length() : 0;
+  }
+}
+
+gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
+{
+  if (rep && rep->m_deleted) {
+    throw gbtGameObjectDeleted();
+  }
+  else {
+    return (rep) ? rep->m_strategies[st] : 0;
+  }
+}
 
