@@ -80,7 +80,9 @@ template <class T> class gVector : public gArray<T>   {
 template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
 #endif
 
+#ifdef GDOUBLE
 template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
+#endif // GDOUBLE
 
 #endif   //# GVECTOR_H
 
