@@ -38,9 +38,7 @@ protected:
   }
 
   // check vector for identical boundaries
-  virtual int Check(const gVector<T> &v) const {
-    return( v.min==min && v.max==max );
-  }
+  virtual int Check(const gVector<T> &v) const;
 
   T* Allocate(void) {
     T* p = new T[max-min+1];
@@ -91,9 +89,7 @@ public:
     CopyData(V);
   }
 // Destructor
-  virtual ~gVector() {
-    DeleteData();
-  }
+  virtual ~gVector();
 
 	//# OPERATORS
 
@@ -176,6 +172,20 @@ gVector<T>::Dump(gOutput &to) const
   for(int i=min; i<=max; i++)
     to<<(*this)[i]<<" ";
   to<<"}\n";
+}
+
+
+// virtual functions
+template <class T> int
+gVector<T>::Check(const gVector<T> &v) const
+{
+  return( v.min==min && v.max==max );
+}
+
+template <class T>
+gVector<T>::~gVector()
+{
+  DeleteData();
 }
 
 
