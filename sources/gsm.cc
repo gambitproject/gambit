@@ -545,7 +545,7 @@ Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 
 
 Portion* GSM::ExecuteUserFunc(gclExpression& program, 
-			      const FuncInfoType& func_info,
+			      const gclSignature& func_info,
 			      Portion** param, 
 			      const gText& funcname )
 {

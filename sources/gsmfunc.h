@@ -30,7 +30,7 @@ typedef unsigned int    FuncFlagType;
 #define BYREF                true
 #define BYVAL                false
 
-#define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
+#define NO_PREDEFINED_PARAMS ( (gclParameter*) 0 )
 
 
 #define AUTO_VAL_OR_REF      true
@@ -57,7 +57,7 @@ template <class T> class gList;
 template <class T> class RefCountHashTable;
 
 
-class ParamInfoType
+class gclParameter
 {
 public:
   gText      Name;
@@ -65,73 +65,52 @@ public:
   Portion*     DefaultValue;
   bool         PassByReference;
 
-  ParamInfoType(void);
-  ParamInfoType(const ParamInfoType& paraminfo);
-  ParamInfoType
-    ( 
-     const gText& name, 
-     const PortionSpec& spec,
-     Portion* default_value = REQUIRED, 
-     const bool pass_by_ref = false
-     );
-  ~ParamInfoType();
+  gclParameter(void);
+  gclParameter(const gclParameter& paraminfo);
+  gclParameter(const gText &name, const PortionSpec &spec,
+		Portion *default_value = REQUIRED, 
+		const bool pass_by_ref = false);
+  ~gclParameter();
 };
 
 
-
-class FuncInfoType
-{
-private:
-
+class gclSignature  {
 public:
-  bool                 UserDefined;
-  union
-  {
-    Portion*             (*FuncPtr)(Portion **);
-    gclExpression*      FuncInstr;
+  bool UserDefined;
+  union  {
+    Portion *(*FuncPtr)(Portion **);
+    gclExpression *FuncInstr;
   };
-  PortionSpec          ReturnSpec;
-  FuncFlagType         Flag;
-  int                  NumParams;
-  ParamInfoType*       ParamInfo;
-  gText              Desc;
+  PortionSpec ReturnSpec;
+  FuncFlagType Flag;
+  int NumParams;
+  gclParameter *ParamInfo;
+  gText Desc;
 
-  FuncInfoType(void);
-  FuncInfoType(const FuncInfoType& funcinfo);
-  FuncInfoType
-    (
-     Portion* (*funcptr)(Portion**),
-     PortionSpec returnspec,
-     int numparams,
-     ParamInfoType* paraminfo = 0,
-     FuncFlagType = funcLISTABLE
-     );
-  FuncInfoType
-    (
-     gclExpression* funcinstr,
-     PortionSpec returnspec,
-     int numparams,
-     ParamInfoType* paraminfo = 0,
-     FuncFlagType = funcLISTABLE
-     );
-  ~FuncInfoType();
+  gclSignature(void);
+  gclSignature(const gclSignature& funcinfo);
+  gclSignature(Portion* (*funcptr)(Portion**),
+	       PortionSpec returnspec, int numparams,
+	       gclParameter* paraminfo = 0, FuncFlagType = funcLISTABLE);
+  gclSignature(gclExpression* funcinstr, PortionSpec returnspec,
+	       int numparams, gclParameter* paraminfo = 0,
+	       FuncFlagType = funcLISTABLE);
+  ~gclSignature();
 };
 
 
 
-class FuncDescObj
-{
+class FuncDescObj  {
 friend class gclFunctionCall;
 private:
-
-  static RefCountHashTable< gclExpression* > _RefCountTable;
+  static RefCountHashTable<gclExpression *> _RefCountTable;
 
 protected:
   FuncDescObj( FuncDescObj& func );
 
   gText        _FuncName;
   int            _NumFuncs;
-  FuncInfoType*  _FuncInfo;
+  gclSignature*  _FuncInfo;
 
   
 public:
@@ -140,13 +119,13 @@ public:
                    FuncFlagType = funcLISTABLE  );
   virtual ~FuncDescObj();
 
-  void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
+  void SetFuncInfo(int funcindex, gclSignature funcinfo);
   void SetFuncInfo(int funcindex, const gText& s);
   void SetFuncInfo(int funcindex, const gText& s, 
                    Portion* (*funcptr)(Portion**), 
                    FuncFlagType = funcLISTABLE  );
-  void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
-  void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
+  void SetParamInfo(int funcindex, int index, const gclParameter paraminfo);  
+  void SetParamInfo(int funcindex, const gclParameter paraminfo[]);
   
   bool Combine(FuncDescObj* newfunc);
   bool Delete(FuncDescObj* newfunc);
@@ -176,12 +155,9 @@ class CallFuncObj : public FuncDescObj
     bool              AutoValOrRef;
   };
 
-  gOutput&              _StdOut;
-  gOutput&              _StdErr;
+  gOutput &_StdOut, &_StdErr;
 
-  int                   _FuncIndex;
-  int                   _NumParams;
-  int                   _NumParamsDefined;
+  int m_funcIndex, m_numParams, m_numParamsDefined;
   Portion**             _Param;
   RunTimeParamInfoType* _RunTimeParamInfo;
   bool*                 _FuncMatch;
@@ -194,7 +170,7 @@ class CallFuncObj : public FuncDescObj
 			 bool Listable, bool return_type_check = false);
 
   static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
-  static bool _ListNestedCheck( Portion* p, const ParamInfoType& info );
+  static bool _ListNestedCheck( Portion* p, const gclParameter &info );
 
   static void _ErrorMessage
     (
@@ -207,27 +183,26 @@ class CallFuncObj : public FuncDescObj
      const gText& str4 = ""
      );
 
+  void ComputeFuncIndex(GSM *gsm, Portion **param);
+  Portion *CallNormalFunction(GSM *gsm, Portion **param);
+  Portion *CallListFunction(GSM *gsm, Portion **ParamIn);
+
  public:
   CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err );
   ~CallFuncObj();
 
-  int         NumParams ( void ) const;
-  bool        SetCurrParamIndex ( const gText& param_name );
+  int NumParams(void) const { return m_numParams; }
+  bool SetCurrParamIndex(const gText &param_name);
+  bool SetCurrParam(Portion *param, bool auto_val_or_ref = false);
 
-  bool  SetCurrParam ( Portion* param, bool auto_val_or_ref = false );
+  ReferencePortion* GetParamRef (int index) const;
 
-  void        SetErrorOccurred ( void );
-
-  ReferencePortion* GetParamRef ( int index ) const;
-
-  Portion* CallFunction       ( GSM* gsm, Portion** param );
-  Portion* CallNormalFunction ( GSM* gsm, Portion** param );
-  Portion* CallListFunction   ( GSM* gsm, Portion** ParamIn );
+  Portion *CallFunction(GSM *gsm, Portion **param);
 
   void Dump(gOutput& f) const;
 };
 
-PortionSpec ToSpec(gText &str, int num=0);
+PortionSpec ToSpec(gText &str, int num = 0);
 
 
 #endif  // GSMFUNC_H

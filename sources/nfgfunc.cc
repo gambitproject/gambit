@@ -538,19 +538,19 @@ void Init_nfgfunc(GSM *gsm)
 				     funcLISTABLE | funcGAMEMATCH));
 
   FuncObj = new FuncDescObj("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_Nfg,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Nfg,
 				       porNFSUPPORT, 6));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("mixed", porBOOL,
+  FuncObj->SetParamInfo(0, 2, gclParameter("mixed", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }

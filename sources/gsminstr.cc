@@ -11,6 +11,16 @@
 #include "gstream.h"
 #include "gcmdline.h"
 
+#include "gsm.h"
+#include "gsmfunc.h"
+#include "gsmhash.h"
+
+extern GSM &_gsm;
+
+//---------
+// Quit
+//---------
+
 PortionSpec gclQuitExpression::Type(void) const
 {
   return porBOOL;
@@ -20,6 +30,10 @@ Portion *gclQuitExpression::Evaluate(void)
 {
   throw gclQuitOccurred();
 }
+
+//--------
+// Semi
+//--------
 
 gclSemiExpr::gclSemiExpr(gclExpression *e1, gclExpression *e2)
   : lhs(e1), rhs(e2)
@@ -42,6 +56,10 @@ Portion *gclSemiExpr::Evaluate(void)
   return rhs->Evaluate();
 }
 
+
+//--------------------
+// ReqParameterList
+//--------------------
 
 gclReqParameterList::gclReqParameterList(void)
 { }
@@ -71,6 +89,9 @@ gclExpression *gclReqParameterList::operator[](int index) const
   return exprs[index];
 }
 
+//-------------------
+// OptParameterList
+//-------------------
 
 gclOptParameterList::gclOptParameterList(void)
 { }
@@ -107,6 +128,10 @@ gText gclOptParameterList::FormalName(int index) const
   return names[index];
 }
 
+//-----------------
+// ParameterList
+//-----------------
+
 gclParameterList::gclParameterList(void)
   : req(new gclReqParameterList), opt(new gclOptParameterList)
 { }
@@ -131,6 +156,11 @@ gclParameterList::~gclParameterList()
 }
 
 
+
+//----------------
+// FunctionCall
+//----------------
+
 gclFunctionCall::gclFunctionCall(const gText &s)
   : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 { }
@@ -139,7 +169,6 @@ gclFunctionCall::gclFunctionCall(const gText &s, gclExpression *op)
   : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
   params->req->Append(op);
-  AttemptMatch();
 }
 
 gclFunctionCall::gclFunctionCall(const gText &s,
@@ -148,14 +177,11 @@ gclFunctionCall::gclFunctionCall(const gText &s,
 {
   params->req->Append(op1);
   params->req->Append(op2);
-  AttemptMatch();
 }
 
 gclFunctionCall::gclFunctionCall(const gText &s, gclParameterList *p)
   : name(s), params(p), funcptr(0), type(porANYTYPE)
-{
-  AttemptMatch();
-}
+{ }
 
 gclFunctionCall::~gclFunctionCall()
 {
@@ -168,37 +194,6 @@ PortionSpec gclFunctionCall::Type(void) const
   return type;
 }
 
-#include "gsm.h"
-#include "gsmfunc.h"
-#include "gsmhash.h"
-
-extern GSM &_gsm;
-
-void gclFunctionCall::AttemptMatch(void)
-{
-  if (!_gsm._FuncTable->IsDefined(name))
-    return;
-
-  FuncDescObj *func = (*_gsm._FuncTable)(name);
-  for (int i = 0; i < func->_NumFuncs; i++)  {
-    if (func->_FuncInfo[i].NumParams != params->req->NumParams())
-      continue;
-    
-    int j;
-    
-    for (j = 0; j < func->_FuncInfo[i].NumParams; j++)  {
-      if (!(func->_FuncInfo[i].ParamInfo[j].Spec == 
-	  (*params->req)[j+1]->Type()))
-	break;
-    }
-
-    if (j < func->_FuncInfo[i].NumParams)  continue;
-
-//    gout << "Matched function signature " << i << " of " << name << '\n';
-    type = func->_FuncInfo[i].ReturnSpec;
-    break;
-  }
-}
 
 Portion *gclFunctionCall::Evaluate(void)
 {
@@ -266,6 +261,11 @@ Portion *gclFunctionCall::Evaluate(void)
 }
 
 
+
+//--------------
+// Assignment
+//--------------
+
 gclAssignment::gclAssignment(gclExpression *lhs, gclExpression *rhs)
   : variable(lhs), value(rhs)
 { }
@@ -294,6 +294,10 @@ Portion *gclAssignment::Evaluate(void)
 }
 
 
+//----------------
+// UnAssignment
+//----------------
+
 gclUnAssignment::gclUnAssignment(gclExpression *lhs)
   : variable(lhs)
 { }
@@ -311,6 +315,9 @@ Portion *gclUnAssignment::Evaluate(void)
 }
   
 
+//-------------
+// ConstExpr
+//-------------
 
 gclConstExpr::gclConstExpr(Portion *v)
   : value(v)
@@ -332,6 +339,9 @@ Portion *gclConstExpr::Evaluate(void)
 }
 
 
+//---------------
+// ListConstant
+//---------------
 
 gclListConstant::gclListConstant(void)
 { }
@@ -373,6 +383,10 @@ Portion *gclListConstant::Evaluate(void)
 }
 
 
+//-----------
+// VarName
+//-----------
+
 gclVarName::gclVarName(const gText &name)
   : value(new ReferencePortion(name))
 { }
@@ -387,6 +401,10 @@ Portion *gclVarName::Evaluate(void)
   return value->ValCopy();
 }
 
+
+//---------------
+// Conditional
+//---------------
 
 gclConditional::gclConditional(gclExpression *g, gclExpression *t,
                                gclExpression *f)
@@ -422,6 +440,11 @@ Portion *gclConditional::Evaluate(void)
     throw;
   }
 }
+
+
+//------------
+// WhileExpr
+//------------
 
 gclWhileExpr::gclWhileExpr(gclExpression *g, gclExpression *b)
   : guard(g), body(b)
@@ -471,6 +494,10 @@ Portion *gclWhileExpr::Evaluate(void)
   }
 }
 
+
+//-----------
+// ForExpr
+//-----------
 
 gclForExpr::gclForExpr(gclExpression *i, gclExpression *g,
 		       gclExpression *s, gclExpression *b)
@@ -540,6 +567,10 @@ Portion *gclForExpr::Evaluate(void)
   }
 }
     
+
+//---------------
+// FunctionDef
+//---------------
 
 gclFunctionDef::gclFunctionDef(FuncDescObj *f, gclExpression *b)
   : func(f), body(b)

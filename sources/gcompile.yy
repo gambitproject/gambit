@@ -699,8 +699,8 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
     return new gclConstExpr(new BoolPortion(false));;
   }
 
-  FuncInfoType funcinfo = 
-    FuncInfoType(expr, funcspec, formals.Length());
+  gclSignature funcinfo = 
+    gclSignature(expr, funcspec, formals.Length());
 
   funcbody = current_rawline;
   if( !strstr((const char *) funcbody, "/*Private*/" ) )
@@ -732,11 +732,11 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
 
     if (refs[i])
       func->SetParamInfo(0, i - 1, 
-			 ParamInfoType(formals[i], spec,
+			 gclParameter(formals[i], spec,
 				       portions[i], BYREF));
       else
 	func->SetParamInfo(0, i - 1, 
-			   ParamInfoType(formals[i], spec,
+			   gclParameter(formals[i], spec,
 					 portions[i], BYVAL));
   }
 
@@ -768,7 +768,7 @@ bool GCLCompiler::DeleteFunction(void)
     return;
   }
 
-  func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
+  func->SetFuncInfo(0, gclSignature(function, funcspec, formals.Length()));
 
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
@@ -780,11 +780,11 @@ bool GCLCompiler::DeleteFunction(void)
     if (spec.Type != porERROR)   {
       if (refs[i])
 	func->SetParamInfo(0, i - 1, 
-                          ParamInfoType(formals[i], spec,
+                          gclParameter(formals[i], spec,
 			                portions[i], BYREF));
       else
 	func->SetParamInfo(0, i - 1, 
-                          ParamInfoType(formals[i], spec,
+                          gclParameter(formals[i], spec,
 											portions[i], BYVAL));
     }
     else   {

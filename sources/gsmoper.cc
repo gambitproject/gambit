@@ -1747,15 +1747,15 @@ void Init_gsmoper(GSM* gsm)
   //-------------------- Streams -------------------------
 
   FuncObj = new FuncDescObj("Output", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Output, porOUTPUT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("append", porBOOL,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Output, porOUTPUT, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("file", porTEXT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("append", porBOOL,
 					    new BoolPortion( false )));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Input", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Input, porINPUT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Input, porINPUT, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
   //------------------- Formatted Output -------------------
@@ -1763,88 +1763,88 @@ void Init_gsmoper(GSM* gsm)
   GSM_SetWriteOptions();
 
   FuncObj = new FuncDescObj("Print", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Print, porANYTYPE, 1, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x",
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Print, porANYTYPE, 1, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x",
 					    PortionSpec(porANYTYPE, 0, 
 							porNULLSPEC)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Print, PortionSpec(porANYTYPE, NLIST), 1, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Print, PortionSpec(porANYTYPE, NLIST), 1, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(1, 0, gclParameter("x", 
 					    PortionSpec(porANYTYPE, NLIST,
 						      porNULLSPEC)));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Write", 11);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(0, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
+  FuncObj->SetParamInfo(0, 1, gclParameter
 			("x", porBOOL | porNUMBER | porNUMBER));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(1, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", porTEXT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("x", porTEXT));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Write, 
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(2, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porMIXED));
+  FuncObj->SetParamInfo(2, 1, gclParameter("x", porMIXED));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(3, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", porBEHAV));
+  FuncObj->SetParamInfo(3, 1, gclParameter("x", porBEHAV));
   
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Write_Nfg, 
+  FuncObj->SetFuncInfo(4, gclSignature(GSM_Write_Nfg, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(4, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(4, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
+  FuncObj->SetParamInfo(4, 1, gclParameter("x", porNFG,
 					    REQUIRED ));
   
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_Efg,
+  FuncObj->SetFuncInfo(5, gclSignature(GSM_Write_Efg,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(5, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG));
+  FuncObj->SetParamInfo(5, 1, gclParameter("x", porEFG));
 
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(6, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(6, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(6, 1, ParamInfoType
+  FuncObj->SetParamInfo(6, 1, gclParameter
 			("x", PortionSpec(porBOOL | porNUMBER |
 					  porTEXT | porMIXED | porBEHAV, 1)));
 
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(7, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(7, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNFSUPPORT));
+  FuncObj->SetParamInfo(7, 1, gclParameter("x", porNFSUPPORT));
 
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(8, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(8, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEFSUPPORT));
+  FuncObj->SetParamInfo(8, 1, gclParameter("x", porEFSUPPORT));
 
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(9, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(9, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
+  FuncObj->SetParamInfo(9, 1, gclParameter("x", porSTRATEGY));
 
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Write,
+  FuncObj->SetFuncInfo(10, gclSignature(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(10, 0, ParamInfoType("output", porOUTPUT,
+  FuncObj->SetParamInfo(10, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porEFBASIS));
+  FuncObj->SetParamInfo(10, 1, gclParameter("x", porEFBASIS));
 
   gsm->AddFunction(FuncObj);
 
@@ -1856,88 +1856,88 @@ void Init_gsmoper(GSM* gsm)
   //---------------
 
   FuncObj = new FuncDescObj("ListFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListFormat, porBOOL, 4));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ListFormat, porBOOL, 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter
 			("braces", porBOOL,
 			 _WriteListBraces.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
+  FuncObj->SetParamInfo(0, 1, gclParameter
 			("commas", porBOOL,
 			 _WriteListCommas.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType
+  FuncObj->SetParamInfo(0, 2, gclParameter
 			("lf", porNUMBER,
 			 _WriteListLF.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType
+  FuncObj->SetParamInfo(0, 3, gclParameter
 			("indent", porNUMBER,
 			 _WriteListIndent.RefCopy(), BYREF ));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetListFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetListFormat, porBOOL, 4));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetListFormat, porBOOL, 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter
 			("braces", porBOOL,
 			 _WriteListBraces.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
+  FuncObj->SetParamInfo(0, 1, gclParameter
 			("commas", porBOOL,
 			 _WriteListCommas.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType
+  FuncObj->SetParamInfo(0, 2, gclParameter
 			("lf", porNUMBER,
 			 _WriteListLF.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType
+  FuncObj->SetParamInfo(0, 3, gclParameter
 			("indent", porNUMBER,
 			 _WriteListIndent.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Format", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_FloatFormat, porNUMBER, 4));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_FloatFormat, porNUMBER, 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
+  FuncObj->SetParamInfo(0, 1, gclParameter
 			("width", porNUMBER, 
 			 _WriteWidth.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType
+  FuncObj->SetParamInfo(0, 2, gclParameter
 			("precis", porNUMBER,
 			 _WritePrecis.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType
+  FuncObj->SetParamInfo(0, 3, gclParameter
 			("expmode", porBOOL,
 			 _WriteExpmode.RefCopy(), BYREF));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_TextFormat, porTEXT, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_TextFormat, porTEXT, 2));
+  FuncObj->SetParamInfo(1, 0, gclParameter("x", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, gclParameter
 			("quote", porBOOL,
 			 _WriteQuoted.RefCopy(), BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SolutionFormat,
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_SolutionFormat,
 				       porBEHAV | porMIXED, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
-  FuncObj->SetParamInfo(2, 1, ParamInfoType
+  FuncObj->SetParamInfo(2, 0, gclParameter("x", porBEHAV | porMIXED) );
+  FuncObj->SetParamInfo(2, 1, gclParameter
 			("info", porNUMBER,
 			 _WriteSolutionInfo.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetFormat", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetFloatFormat, porNUMBER, 4));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetFloatFormat, porNUMBER, 4));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
+  FuncObj->SetParamInfo(0, 1, gclParameter
 			("width", porNUMBER, 
 			 _WriteWidth.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType
+  FuncObj->SetParamInfo(0, 2, gclParameter
 			("precis", porNUMBER,
 			 _WritePrecis.RefCopy(), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType
+  FuncObj->SetParamInfo(0, 3, gclParameter
 			("expmode", porBOOL,
 			 _WriteExpmode.RefCopy(), BYREF));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GetTextFormat, porTEXT, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_GetTextFormat, porTEXT, 2));
+  FuncObj->SetParamInfo(1, 0, gclParameter("x", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, gclParameter
 			("quote", porBOOL,
 			 _WriteQuoted.RefCopy(), BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GetSolutionFormat,
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_GetSolutionFormat,
 				       porBEHAV | porMIXED, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
-  FuncObj->SetParamInfo(2, 1, ParamInfoType
+  FuncObj->SetParamInfo(2, 0, gclParameter("x", porBEHAV | porMIXED) );
+  FuncObj->SetParamInfo(2, 1, gclParameter
 			("info", porNUMBER,
 			 _WriteSolutionInfo.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
@@ -1948,230 +1948,230 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("Read", 6);
 
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Read_Bool, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Read_Bool, 
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("input", porINPUT, 
+  FuncObj->SetParamInfo(0, 0, gclParameter("input", porINPUT, 
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porBOOL, 
+  FuncObj->SetParamInfo(0, 1, gclParameter("x", porBOOL, 
 					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Read_List_Bool, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Read_List_Bool, 
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("input", porINPUT,
+  FuncObj->SetParamInfo(1, 0, gclParameter("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porBOOL,1), 
+  FuncObj->SetParamInfo(1, 1, gclParameter("x", PortionSpec(porBOOL,1), 
 					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Read_Number,
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Read_Number,
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("input", porINPUT,
+  FuncObj->SetParamInfo(2, 0, gclParameter("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porNUMBER,
+  FuncObj->SetParamInfo(2, 1, gclParameter("x", porNUMBER,
 					    REQUIRED, BYREF));
   
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Read_List_Number,
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_Read_List_Number,
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("input", porINPUT,
+  FuncObj->SetParamInfo(3, 0, gclParameter("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", PortionSpec(porNUMBER,1),
+  FuncObj->SetParamInfo(3, 1, gclParameter("x", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYREF));
   
   
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Read_Text,
+  FuncObj->SetFuncInfo(4, gclSignature(GSM_Read_Text,
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(4, 0, ParamInfoType("input", porINPUT,
+  FuncObj->SetParamInfo(4, 0, gclParameter("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porTEXT,
+  FuncObj->SetParamInfo(4, 1, gclParameter("x", porTEXT,
 					    REQUIRED, BYREF));
   
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Read_List_Text,
+  FuncObj->SetFuncInfo(5, gclSignature(GSM_Read_List_Text,
 				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(5, 0, ParamInfoType("input", porINPUT,
+  FuncObj->SetParamInfo(5, 0, gclParameter("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", PortionSpec(porTEXT,1),
+  FuncObj->SetParamInfo(5, 1, gclParameter("x", PortionSpec(porTEXT,1),
 					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Help", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Help, PortionSpec(porTEXT, 1), 3));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("udf", porBOOL,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Help, PortionSpec(porTEXT, 1), 3));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("udf", porBOOL,
 					    new BoolPortion( true )));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("bif", porBOOL, 
+  FuncObj->SetParamInfo(0, 2, gclParameter("bif", porBOOL, 
 					    new BoolPortion( true )));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Manual", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Manual, porBOOL, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", porOUTPUT,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Manual, porBOOL, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("y", porOUTPUT,
 					    new OutputPortion(gout)));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("HelpVars", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_HelpVars, PortionSpec(porTEXT, 1),
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_HelpVars, PortionSpec(porTEXT, 1),
 				       1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Clear", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Clear, porBOOL, 0));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Clear, porBOOL, 0));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Date", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Date, porTEXT, 0));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Date, porTEXT, 0));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Randomize", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize, porNUMBER, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("seed", porNUMBER,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Randomize, porNUMBER, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER));
+  FuncObj->SetParamInfo(0, 1, gclParameter("seed", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Precision", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Precision, porPRECISION, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Precision, porPRECISION, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("IsNull", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsNull, porBOOL, 1, 0, 
 				       funcLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", 
 					    PortionSpec(porANYTYPE, 0, 
 							porNULLSPEC )));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Null", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Null, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Null, 
 				       PortionSpec(porANYTYPE, 0, 
 						   porNULLSPEC ),
 				       1, 0, funcLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("Shell", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Shell, porNUMBER, 2 ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("command", porTEXT,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Shell, porNUMBER, 2 ));
+  FuncObj->SetParamInfo(0, 0, gclParameter("command", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("spawn", porBOOL, 
+  FuncObj->SetParamInfo(0, 1, gclParameter("spawn", porBOOL, 
 					    new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("GetEnv", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetEnv, porTEXT, 1 ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetEnv, porTEXT, 1 ));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetEnv", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetEnv, porBOOL, 2 ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("value", porTEXT ) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SetEnv, porBOOL, 2 ));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
+  FuncObj->SetParamInfo(0, 1, gclParameter("value", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("UnSetEnv", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnSetEnv, porBOOL, 1 ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_UnSetEnv, porBOOL, 1 ));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT ) );
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("ExePath", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExePath, porTEXT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porBOOL,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ExePath, porTEXT, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("file", porBOOL,
 					    new BoolPortion( true ) ) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
+  FuncObj->SetParamInfo(0, 1, gclParameter("path", porBOOL,
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Platform", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Platform, porTEXT, 0));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Platform, porTEXT, 0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetPath", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetPath, porTEXT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porBOOL,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetPath, porTEXT, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("file", porBOOL,
 					    new BoolPortion( true ) ) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
+  FuncObj->SetParamInfo(0, 1, gclParameter("path", porBOOL,
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("IsList", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsList, porBOOL, 1,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsList, porBOOL, 1,
 				       NO_PREDEFINED_PARAMS, 
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE ));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsList, porBOOL, 1, 
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE ));
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_IsList, porBOOL, 1, 
 				       NO_PREDEFINED_PARAMS, 
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("list", 
+  FuncObj->SetParamInfo(1, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE,NLIST)));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("SaveGlobalVar", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveGlobalVar, porANYTYPE, 2,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SaveGlobalVar, porANYTYPE, 2,
 				       NO_PREDEFINED_PARAMS,
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("var", porANYTYPE) );
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
+  FuncObj->SetParamInfo(0, 1, gclParameter("var", porANYTYPE) );
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SaveGlobalVar, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_SaveGlobalVar, 
 				       PortionSpec(porANYTYPE, NLIST), 2,
 				       NO_PREDEFINED_PARAMS,
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("name", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("var", 
+  FuncObj->SetParamInfo(1, 0, gclParameter("name", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, gclParameter("var", 
 					    PortionSpec(porANYTYPE, NLIST)) );
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("LoadGlobalVar", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadGlobalVar, porANYTYPE, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_LoadGlobalVar, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ExistsGlobalVar", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExistsGlobalVar, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ExistsGlobalVar, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("SaveLocalVar", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveLocalVar, porANYTYPE, 2,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SaveLocalVar, porANYTYPE, 2,
 				       NO_PREDEFINED_PARAMS,
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("var", porANYTYPE) );
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
+  FuncObj->SetParamInfo(0, 1, gclParameter("var", porANYTYPE) );
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SaveLocalVar, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_SaveLocalVar, 
 				       PortionSpec(porANYTYPE, NLIST), 2,
 				       NO_PREDEFINED_PARAMS,
 				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("name", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("var", 
+  FuncObj->SetParamInfo(1, 0, gclParameter("name", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, gclParameter("var", 
 					    PortionSpec(porANYTYPE, NLIST)) );
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("LoadLocalVar", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadLocalVar, porANYTYPE, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_LoadLocalVar, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ExistsLocalVar", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ExistsLocalVar, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ExistsLocalVar, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
   gsm->AddFunction(FuncObj);
 
 

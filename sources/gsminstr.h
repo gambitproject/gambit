@@ -110,8 +110,6 @@ class gclFunctionCall : public gclExpression   {
     Portion *(*funcptr)(Portion **);
     PortionSpec type;    
 
-    void AttemptMatch(void);
-
   public:
     gclFunctionCall(const gText &name);
     gclFunctionCall(const gText &name, gclExpression *op);

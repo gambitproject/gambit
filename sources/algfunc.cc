@@ -967,437 +967,437 @@ void Init_algfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
   FuncObj = new FuncDescObj("AgentForm", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AgentForm, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("time", porNUMBER,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_AgentForm, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
+  FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("Behav", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav, porBEHAV, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Behav, porBEHAV, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("mixed", porMIXED));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("EnumMixedSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EnumMixed_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumMixed_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumMixed_Efg, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumMixed_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("EnumPureSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EnumPure_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumPure_Nfg, 
 				       PortionSpec(porMIXED, 1), 6));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumPure_Efg, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumPure_Efg, 
 				       PortionSpec(porBEHAV, 1), 7));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("GobitGridSolve", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitGrid_Support, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GobitGrid_Support, 
 				       PortionSpec(porMIXED, 1), 14));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("minLam", porNUMBER,
 					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("maxLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("maxLam", porNUMBER,
 					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("delLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("delLam", porNUMBER,
 					    new NumberPortion(0.02)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("delp1", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("delp1", porNUMBER,
 					    new NumberPortion(.1)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("tol1", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("tol1", porNUMBER,
 					    new NumberPortion(.1)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("delp2", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("delp2", porNUMBER,
 					    new NumberPortion(.01)));
-  FuncObj->SetParamInfo(0, 9, ParamInfoType("tol2", porNUMBER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("tol2", porNUMBER,
 					    new NumberPortion(.01)));
-  FuncObj->SetParamInfo(0, 10, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 12, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 12, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull),
 					     BYREF));
-  FuncObj->SetParamInfo(0, 13, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 13, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("GobitSolve", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Gobit_Start, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Gobit_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 16));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("start",
+  FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
+  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("minLam", porNUMBER,
 					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("maxLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("maxLam", porNUMBER,
 					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("delLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("delLam", porNUMBER,
 					    new NumberPortion(0.02)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("fullGraph", porBOOL,
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("maxitsN", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porNUMBER,
 					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("tolN", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("tolN", porNUMBER,
 					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 9, ParamInfoType("maxits1", porNUMBER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("maxits1", porNUMBER,
 					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 10, ParamInfoType("tol1", porNUMBER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("tol1", porNUMBER,
 					     new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 12, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 12, gclParameter("nEvals", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porNUMBER,
+  FuncObj->SetParamInfo(0, 13, gclParameter("nIters", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 14, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 15, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("KGobitSolve", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_KGobit_Start, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_KGobit_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 16));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("start",
+  FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
+  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("minK", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("minK", porNUMBER,
 					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("maxK", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("maxK", porNUMBER,
 					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("delK", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("delK", porNUMBER,
 					    new NumberPortion(-0.1)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("powK", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("powK", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("fullGraph", porBOOL,
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("maxitsN", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porNUMBER,
 					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("tolN", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("tolN", porNUMBER,
 					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 9, ParamInfoType("maxits1", porNUMBER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("maxits1", porNUMBER,
 					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 10, ParamInfoType("tol1", porNUMBER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("tol1", porNUMBER,
 					     new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 12, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 12, gclParameter("nEvals", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porNUMBER,
+  FuncObj->SetParamInfo(0, 13, gclParameter("nIters", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 14, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 15, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("LcpSolve", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lcp_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER, 
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER, 
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Lcp_ListFloat, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Lcp_ListFloat, 
 				       PortionSpec(porNUMBER, 1), 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("a", PortionSpec(porNUMBER,2),
+  FuncObj->SetParamInfo(1, 0, gclParameter("a", PortionSpec(porNUMBER,2),
 					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
+  FuncObj->SetParamInfo(1, 1, gclParameter("b", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYVAL));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lcp_ListRational, 
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Lcp_ListRational, 
 				       PortionSpec(porNUMBER, 1), 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("a", PortionSpec(porNUMBER,2),
+  FuncObj->SetParamInfo(2, 0, gclParameter("a", PortionSpec(porNUMBER,2),
 					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
+  FuncObj->SetParamInfo(2, 1, gclParameter("b", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYVAL));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Lcp_Efg, 
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_Lcp_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(3, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(3, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(3, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(3, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(3, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(3, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(3, 4, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(3, 4, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(3, 5, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(3, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(3, 6, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(3, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(3, 7, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(3, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("LiapSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Liap_Behav,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Liap_Behav,
 				       PortionSpec(porBEHAV, 1), 12));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("start", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(0, 0, gclParameter("start", porBEHAV));
+  FuncObj->SetParamInfo(0, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("nTries", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("nTries", porNUMBER,
 					    new NumberPortion(10)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("maxitsN", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("maxitsN", porNUMBER,
 					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("tolN", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("tolN", porNUMBER,
 					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("maxits1", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("maxits1", porNUMBER,
 					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("tol1", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("tol1", porNUMBER,
 					    new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 10, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 10, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 11, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 11, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Liap_Mixed,
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Liap_Mixed,
 				       PortionSpec(porMIXED, 1), 11));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("start", porMIXED));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 0, gclParameter("start", porMIXED));
+  FuncObj->SetParamInfo(1, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("nTries", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("nTries", porNUMBER,
 					    new NumberPortion(10)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("maxitsN", porNUMBER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("maxitsN", porNUMBER,
 					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("tolN", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("tolN", porNUMBER,
 					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("maxits1", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("maxits1", porNUMBER,
 					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("tol1", porNUMBER,
+  FuncObj->SetParamInfo(1, 6, gclParameter("tol1", porNUMBER,
 					    new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(1, 7, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 8, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(1, 8, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 9, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 9, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 10, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 10, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("LpSolve", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lp_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Lp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Lp_Efg, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Lp_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("nPivots", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("nPivots", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lp_List, 
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Lp_List, 
 				       PortionSpec(porNUMBER, 1), 7));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("a", PortionSpec(porNUMBER, 2)));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("b", PortionSpec(porNUMBER, 1)));
-  FuncObj->SetParamInfo(2, 2, ParamInfoType("c", PortionSpec(porNUMBER, 1)));
-  FuncObj->SetParamInfo(2, 3, ParamInfoType("nEqualities", porNUMBER));
-  FuncObj->SetParamInfo(2, 4, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(2, 0, gclParameter("a", PortionSpec(porNUMBER, 2)));
+  FuncObj->SetParamInfo(2, 1, gclParameter("b", PortionSpec(porNUMBER, 1)));
+  FuncObj->SetParamInfo(2, 2, gclParameter("c", PortionSpec(porNUMBER, 1)));
+  FuncObj->SetParamInfo(2, 3, gclParameter("nEqualities", porNUMBER));
+  FuncObj->SetParamInfo(2, 4, gclParameter("precision", porPRECISION,
 					    new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(2, 5, ParamInfoType("isFeasible", porBOOL,
+  FuncObj->SetParamInfo(2, 5, gclParameter("isFeasible", porBOOL,
 					    new BoolPortion(false), BYREF));
-  FuncObj->SetParamInfo(2, 6, ParamInfoType("isBounded", porBOOL,
+  FuncObj->SetParamInfo(2, 6, gclParameter("isBounded", porBOOL,
 					    new BoolPortion(false), BYREF));
 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Nfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nfg, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("time", porNUMBER,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Nfg, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
+  FuncObj->SetParamInfo(0, 1, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
 
 #ifndef MINI_POLY
 
   FuncObj = new FuncDescObj("PolEnumSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_PolEnum_Nfg, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnum_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_PolEnum_Efg, 
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnum_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("nEvalss", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("nEvalss", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SeqEquilibSolve", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SequentialEquilib, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_SequentialEquilib, 
 				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("basis", porEFBASIS));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("basis", porEFBASIS));
+  FuncObj->SetParamInfo(0, 1, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 3, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
@@ -1405,73 +1405,73 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Payoff", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Behav, porNUMBER, 2,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Payoff_Behav, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
+  FuncObj->SetParamInfo(0, 0, gclParameter("profile", porBEHAV));
+  FuncObj->SetParamInfo(0, 1, gclParameter("player", porEFPLAYER));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_Mixed, porNUMBER, 2,
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Payoff_Mixed, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porNFPLAYER));
+  FuncObj->SetParamInfo(1, 0, gclParameter("profile", porMIXED));
+  FuncObj->SetParamInfo(1, 1, gclParameter("player", porNFPLAYER));
   gsm->AddFunction(FuncObj);
 
 
 
   FuncObj = new FuncDescObj("SimpDivSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Simpdiv_Nfg,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Simpdiv_Nfg,
 				       PortionSpec(porMIXED, 1), 9));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("nRestarts", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("nRestarts", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("leashLength", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("leashLength", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 4, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 7, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Simpdiv_Efg,
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Simpdiv_Efg,
 				       PortionSpec(porBEHAV, 1), 10));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("nRestarts", porNUMBER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("nRestarts", porNUMBER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("leashLength", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("leashLength", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 5, gclParameter("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("nEvals", porNUMBER,
+  FuncObj->SetParamInfo(1, 6, gclParameter("nEvals", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 7, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 8, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 8, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(1, 9, ParamInfoType("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 9, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("VertEnum", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_VertEnum,
 				       PortionSpec(porNUMBER, 2), 3));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("A", PortionSpec(porNUMBER,2),
+  FuncObj->SetParamInfo(0, 0, gclParameter("A", PortionSpec(porNUMBER,2),
 					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
+  FuncObj->SetParamInfo(0, 1, gclParameter("b", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
 					    new PrecisionPortion(precDOUBLE)));
   gsm->AddFunction(FuncObj);
 

@@ -20,7 +20,7 @@ class CallFuncObj;
 class Portion;
 class RefHashTable;
 class FunctionHashTable;
-class FuncInfoType;
+class gclSignature;
 
 class gText;
 class gRational;
@@ -109,14 +109,12 @@ public:
 
   Portion* Execute(gclExpression *, bool user_func = false );
   Portion* ExecuteUserFunc( gclExpression& program, 
-			   const FuncInfoType& func_info,
+			   const gclSignature& func_info,
 			   Portion** param, 
 			   const gText& funcname );
   gText UserFuncName( void ) const;
   
   void Clear  ( void );
-
-  Portion* PopValue( void );
 
   Portion* Help(gText text, bool udf, bool bif, bool getdesc = false );
   Portion* HelpVars(gText text);
