@@ -1147,7 +1147,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 14, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_EfgFloat, 15, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1180,7 +1180,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 14, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitEfg_BehavFloat, 15, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1214,7 +1214,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 14, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_NfgFloat, 15, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1247,7 +1247,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 13, "nIters", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 14, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_GobitNfg_MixedFloat, 15, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1310,7 +1310,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 9, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 10, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg_EfgFloat, 11, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1335,7 +1335,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 9, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 10, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapEfg_BehavFloat, 11, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1359,7 +1359,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 8, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 9, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_NfgFloat, 10, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1382,7 +1382,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 8, "nEvals", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 9, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LiapNfg_MixedFloat, 10, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1404,7 +1404,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 5, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgFloat, 6, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   
@@ -1420,7 +1420,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 5, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LcpSolveEfgRational, 6, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1449,7 +1449,7 @@ void Init_algfunc(GSM *gsm)
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 4, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1466,7 +1466,7 @@ void Init_algfunc(GSM *gsm)
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgRational, 4, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgRational, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1481,7 +1481,7 @@ void Init_algfunc(GSM *gsm)
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 4, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeNfgSupport, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
@@ -1505,7 +1505,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 6, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 7, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgFloat, 8, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1525,7 +1525,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 6, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 7, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SimpdivEfgRational, 8, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
@@ -1541,7 +1541,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgFloat, 4, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1553,7 +1553,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LpSolveEfgRational, 4, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
@@ -1573,7 +1573,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 5, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgFloat, 6, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1589,7 +1589,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 4, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 5, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumMixedEfgRational, 6, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
@@ -1607,7 +1607,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 4, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
 
@@ -1621,7 +1621,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 4, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull));
+			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 5, "traceLevel", porINTEGER,
 			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
