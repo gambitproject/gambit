@@ -7,8 +7,8 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = C:\WXWIN2
-BCCDIR = C:\BCC55
+WXDIR = C:\WX2
+BCCDIR = C:\BORLAND\BCC55
 BISON = C:\GAMBIT97\BISONDOS\BISON
 	
 SOURCE_SUFFIX = .cc
