@@ -10,22 +10,8 @@
 #include "simpdiv.h"
 #include "subsolve.h"
 
-template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
-  private:
-    int nevals;
-    SimpdivParams params;
-
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_SIMPDIVSUB; }    
-
-  public:
-    SimpdivBySubgame(const Efg &E, const EFSupport &,
-		     const SimpdivParams &, int max = 0);
-    virtual ~SimpdivBySubgame();
-
-    int NumEvals(void) const    { return nevals; }
-};
+int Simpdiv(const EFSupport &, const SimpdivParams &, const gArray<gNumber> &,
+	    gList<BehavSolution> &, int &nevals, int &niters, double &time);
 
 
 #endif   // SIMPSUB_H

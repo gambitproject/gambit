@@ -16,19 +16,20 @@ SeqFormParams::SeqFormParams(gStatus &status_)
     tracefile(&gnull), status(status_)
 { }
 
-int SeqForm(const EFSupport &support, const SeqFormParams &params,
-	    gList<BehavSolution> &solutions, int &npivots, double &time)
+int _SeqForm(const EFSupport &support, const gArray<gNumber> &values,
+	     const SeqFormParams &params,
+	     gList<BehavSolution> &solutions, int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    SeqFormBySubgame<double> module(support.Game(), support, params);
-    module.Solve();
+    SeqFormModule<double> module(support, values, params);
+    module.Lemke();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    SeqFormBySubgame<gRational> module(support.Game(), support, params);
-    module.Solve();
+    SeqFormModule<gRational> module(support, values, params);
+    module.Lemke();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
@@ -37,10 +38,21 @@ int SeqForm(const EFSupport &support, const SeqFormParams &params,
   return 1;
 }
 
+int SeqForm(const EFSupport &support, const gArray<gNumber> &values,
+	    const SeqFormParams &params, gList<BehavSolution> &solutions,
+	    int &npivots, double &time)
+{
+  SeqFormBySubgame module(support, values, params);
+  module.Solve();
+  solutions = module.GetSolutions();
+  npivots = module.NumPivots();
+  time = module.Time();
+  return 1;
+}
+
+
 template class SeqFormModule<double>;
 template class SeqFormModule<gRational>;
-template class SeqFormBySubgame<double>;
-template class SeqFormBySubgame<gRational>;
 
 
 

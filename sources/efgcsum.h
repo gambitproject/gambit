@@ -7,74 +7,41 @@
 #ifndef EFGCSUM_H
 #define EFGCSUM_H
 
-#include "efg.h"
 #include "glist.h"
 #include "gstatus.h"
 #include "tableau.h"
 #include "lpsolve.h"
-#include "behav.h"
 #include "behavsol.h"
 
 class CSSeqFormParams     {
   public:
     int trace, stopAfter;
+    Precision precision;
     gOutput *tracefile;
     gStatus &status;
     
     CSSeqFormParams(gStatus &status_ = gstatus);
 };
 
-//
-// The general-purpose interface to the solver routines
-//
-
-template <class T> class CSSeqFormModule  {
-private:
-  const Efg &EF;
-  const CSSeqFormParams &params;
-  const EFSupport &support;
-  gMatrix<T> *A;
-  gVector<T> *b, *c;
-  T maxpay, minpay;
-  long npivots;
-  double time;
-  int ns1,ns2,ni1,ni2;
-  gList<BFS<T> > List;
-  void FillTableau(const Node *, T ,int ,int , int ,int );
-
-public:
-  CSSeqFormModule(const Efg &E, const CSSeqFormParams &p, const EFSupport &);
-  virtual ~CSSeqFormModule();
-
-  bool IsConstSum();
-  
-  int CSSeqForm(int dup = 0);
-
-  void Make_Abc();
-  
-  int Add_BFS(const LPSolve<T> &B);
-  long NumPivots(void) const;
-  double Time(void) const;
-  
-  void GetProfile(gDPVector<T> &v, const BFS<T> &sol,
-		  const Node *n, int s1,int s2) const;
-  void GetSolutions(gList<BehavSolution> &) const;
-};
+int CSSeqForm(const EFSupport &, const gArray<gNumber> &values,
+	      const CSSeqFormParams &,
+	      gList<BehavSolution> &, int &npivots, double &time);
 
 
 #include "subsolve.h"
 
-template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
+class CSSeqFormBySubgame : public SubgameSolver  {
   private:
     long npivots;
     CSSeqFormParams params;
+    gArray<gNumber> values;
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:
-    CSSeqFormBySubgame(const Efg &E, const EFSupport &,
+    CSSeqFormBySubgame(const EFSupport &, const gArray<gNumber> &values,
 		       const CSSeqFormParams &, int max = 0);
     virtual ~CSSeqFormBySubgame();
 

@@ -21,7 +21,7 @@ class SeqFormParams     {
     SeqFormParams(gStatus &status_ = gstatus);
 };
 
-int SeqForm(const EFSupport &, const SeqFormParams &,
+int SeqForm(const EFSupport &, const gArray<gNumber> &, const SeqFormParams &,
 	    gList<BehavSolution> &, int &npivots, double &time);
 
 #endif    // SEQFORM_H

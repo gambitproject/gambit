@@ -101,8 +101,8 @@ public:
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);
   friend bool IsConstSum(const Nfg &);
-  friend gNumber MinPayoff(const Nfg &, int pl = 0);
-  friend gNumber MaxPayoff(const Nfg &, int pl = 0);
+  friend gNumber MinPayoff(const Nfg &, const gArray<gNumber> &, int pl = 0);
+  friend gNumber MaxPayoff(const Nfg &, const gArray<gNumber> &, int pl = 0);
 
 #ifndef NFG_ONLY
   const Efg *AssociatedEfg(void) const   { return efg; }

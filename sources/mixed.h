@@ -34,10 +34,8 @@ template <class T> class MixedProfile : public gPVector<T>  {
 		gVector<T> &value) const;
     
   public:
-    MixedProfile(const Nfg &);
-    MixedProfile(const Nfg &, const NFSupport &);
-    MixedProfile(const Nfg &, const NFSupport &, const gArray<gNumber> &params);
-    MixedProfile(const Nfg &, const gPVector<T> &);
+    MixedProfile(const NFSupport &, const gArray<gNumber> &params);
+//    MixedProfile(const Nfg &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
     virtual ~MixedProfile();
 

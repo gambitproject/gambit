@@ -108,8 +108,8 @@ protected:
 
        //# DATA ACCESS -- GENERAL INFORMATION
     bool IsConstSum(void) const;
-    gNumber MinPayoff(int pl = 0) const;
-    gNumber MaxPayoff(int pl = 0) const;
+    gNumber MinPayoff(const gArray<gNumber> &, int pl = 0) const;
+    gNumber MaxPayoff(const gArray<gNumber> &, int pl = 0) const;
     gSpace *Parameters(void) const   { return parameters; }
     term_order *ParamOrder(void) const   { return paramorder; }
 

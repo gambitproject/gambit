@@ -36,7 +36,7 @@ int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
     }
     
     if (flag)  {
-      MixedProfile<double> temp(N);
+      MixedProfile<double> temp(S, values);
       // zero out all the entries, since any equlibria are pure
       ((gVector<double> &) temp).operator=(0);
       gArray<int> profile = citer.Get();

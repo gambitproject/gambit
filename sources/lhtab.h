@@ -13,15 +13,6 @@
 class Nfg;
 class NFSupport;
 
-/* 
-template <class T> class LHTableau : public LTableau<T> {
-public:
-  LHTableau(const Nfg<T> &, const NFSupport &);
-  LHTableau(Tableau<T> &);
-  virtual ~LHTableau();
-};
-
-*/
 
 template <class T> class LHTableau : public BaseTableau<T>{
 protected:
@@ -30,7 +21,6 @@ protected:
   gVector<T> solution;
 public:
       // constructors and destructors
-  LHTableau(const Nfg &, const NFSupport &);
   LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
 	    const gVector<T> &b1, const gVector<T> &b2); 
   LHTableau(const LHTableau<T>&);

@@ -10,17 +10,16 @@
 //                Implementation of base solver algorithm
 //-------------------------------------------------------------------------
 
-template <class T>
-void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
-						gList<EFOutcome *> &values)
+void SubgameSolver::FindSubgames(Node *n, gList<BehavSolution> &solns,
+				 gList<EFOutcome *> &values)
 {
   int i;
   int failed;
   bool marked = AllSubgamesMarked(efg);
   
-  gList<BehavProfile<T> > thissolns;
+  gList<BehavProfile<gNumber> > thissolns;
   thissolns.Append(solution);
-  ((gVector<T> &) thissolns[1]).operator=((T) 0);
+  ((gVector<gNumber> &) thissolns[1]).operator=(gNumber(0));
   
   gList<Node *> subroots;
   ChildSubgames(n, subroots);
@@ -41,7 +40,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
     
     assert(subvalues.Length() == subsolns.Length());
     
-    gList<BehavProfile<T> > newsolns;
+    gList<BehavProfile<gNumber> > newsolns;
     gList<gArray<EFOutcome *> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length() &&
@@ -49,7 +48,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
 	 soln++)
       for (int subsoln = 1; subsoln <= subsolns.Length() &&
 	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
-	BehavProfile<T> bp(thissolns[soln]);
+	BehavProfile<gNumber> bp(thissolns[soln]);
 	for (int j = 1; j <= bp.Length(); j++)
 	  bp[j] += subsolns[subsoln][j];
 	newsolns.Append(bp);
@@ -176,19 +175,17 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
 	}
       }
       
-      gVector<T> subval(foo.NumPlayers());
+      gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
-	      subval[i] = sol[solno].Payoff(i);
-	      if (n->GetOutcome())  {
-          gArray<gNumber> values(efg.Parameters()->Dmnsn());
-          for (int j = 1; j <= values.Length(); values[j++] = gNumber(0));
-	        subval[i] += (T) efg.Payoff(n->GetOutcome(), i).Evaluate(values);
+	subval[i] = sol[solno].Payoff(i);
+	if (n->GetOutcome())  {
+	  subval[i] += efg.Payoff(n->GetOutcome(), i).Evaluate(paramvalues);
         }
       }
 
       EFOutcome *ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++)
-	      efg.SetPayoff(ov, i, gPoly<gNumber>(efg.Parameters(), gNumber(subval[i]),
+	efg.SetPayoff(ov, i, gPoly<gNumber>(efg.Parameters(), gNumber(subval[i]),
                                             efg.ParamOrder()));
  
       values.Append(ov);
@@ -205,8 +202,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
 // solution process.  Mostly to allow viewing of the subgame, but probably
 // isn't generally useful.
 
-template <class T>
-void SubgameSolver<T>::ViewSubgame(int, const Efg &)
+void SubgameSolver::ViewSubgame(int, const Efg &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -214,8 +210,7 @@ void SubgameSolver<T>::ViewSubgame(int, const Efg &)
 // non-const, so that strategies may be eliminated as seen fit.
 // It is assumed that the NFSupport returned is "sensible"
 
-template <class T>
-void SubgameSolver<T>::ViewNormal(const Nfg &, NFSupport *&)
+void SubgameSolver::ViewNormal(const Nfg &, NFSupport *&)
 { }
 // This is called for each subgame after the solutions have been computed
 // The idea is for the called code to possibly allow for viewing or
@@ -224,21 +219,20 @@ void SubgameSolver<T>::ViewNormal(const Nfg &, NFSupport *&)
 // muck about with the solution list in "bad" ways using this.
 // Caveat utor!
 
-template <class T>
-void SubgameSolver<T>::SelectSolutions(int, const Efg &,
+void SubgameSolver::SelectSolutions(int, const Efg &,
 				       gList<BehavSolution> &)
 { }
 
-template <class T> 
-SubgameSolver<T>::SubgameSolver(const Efg &E, const EFSupport &S, int max)
-  : max_solns(max), efg(E), support(efg), solution(E, S),
-    infosets(E.NumPlayers())
+SubgameSolver::SubgameSolver(const EFSupport &S, const gArray<gNumber> &v,
+			     int max)
+  : max_solns(max), efg(S.Game()), support(efg), solution(S, v),
+    paramvalues(v), infosets(efg.NumPlayers())
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.Players()[i]->Infosets());
   
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-    EFPlayer *player = E.Players()[pl];
+    EFPlayer *player = S.Game().Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) 
@@ -248,14 +242,13 @@ SubgameSolver<T>::SubgameSolver(const Efg &E, const EFSupport &S, int max)
   }
 }
 
-template <class T> SubgameSolver<T>::~SubgameSolver()  
+SubgameSolver::~SubgameSolver()  
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     delete infosets[i];
 }
 
-template <class T> 
-void SubgameSolver<T>::Solve(void)
+void SubgameSolver::Solve(void)
 {
   gWatch watch;
 
@@ -264,7 +257,7 @@ void SubgameSolver<T>::Solve(void)
 
   gList<EFOutcome *> values;
 
-  ((gVector<T> &) solution).operator=((T) 0);
+  ((gVector<gNumber> &) solution).operator=(gNumber(0));
 
   FindSubgames(efg.RootNode(), solutions, values);
 

@@ -10,22 +10,9 @@
 #include "subsolve.h"
 #include "nfgcsum.h"
 
-template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
-  private:
-    int npivots;
-    ZSumParams params;
+int ZSum(const EFSupport &, const ZSumParams &, const gArray<gNumber> &,
+	 gList<BehavSolution> &, int &npivots, double &time);
 
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_ZSUMSUB; }    
-
-  public:
-    ZSumBySubgame(const Efg &E, const EFSupport &,
-		  const ZSumParams &, int max = 0);
-    virtual ~ZSumBySubgame();
-
-    int NumPivots(void) const   { return npivots; }
-};
 
 
 #endif    // CSUMSUB_H

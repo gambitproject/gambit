@@ -44,10 +44,7 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 		 gPVector<T> &gpv) const;
 
   public:
-    BehavProfile(const Efg &);
-    BehavProfile(const Efg &, const gDPVector<T> &);
-    BehavProfile(const Efg &, const EFSupport &);
-    BehavProfile(const Efg &, const EFSupport &, const gArray<gNumber> &paramvals);
+    BehavProfile(const EFSupport &, const gArray<gNumber> &paramvals);
     BehavProfile(const BehavProfile<T> &);
     virtual ~BehavProfile();
 

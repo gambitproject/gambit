@@ -16,17 +16,18 @@ EnumParams::EnumParams(gStatus &status_)
 { }
 
 int Enum(const NFSupport &support, const EnumParams &params,
+	 const gArray<gNumber> &values,
 	 gList<MixedSolution> &solutions, long &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    EnumModule<double> module(support.Game(), params, support);
+    EnumModule<double> module(support, params, values);
     module.Enum();
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
-    EnumModule<gRational> module(support.Game(), params, support);
+    EnumModule<gRational> module(support, params, values);
     module.Enum();
     npivots = module.NumPivots();
     time = module.Time();

@@ -12,9 +12,11 @@
 #include "lemke.h"
 #include "lhtab.h"
 
-template <class T> gMatrix<T> Make_A1(const Nfg &, const NFSupport &, const T &);
+template <class T> gMatrix<T> Make_A1(const Nfg &, const NFSupport &, 
+				      const gArray<gNumber> &, const T &);
 template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &, const T &);
-template <class T> gMatrix<T> Make_A2(const Nfg &, const NFSupport &, const T &);
+template <class T> gMatrix<T> Make_A2(const Nfg &, const NFSupport &,
+				      const gArray<gNumber> &, const T &);
 template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &, const T &);
 
 
@@ -27,11 +29,13 @@ private:
   double time;
   T epsilon;
   int num_strats;
+  gArray<gNumber> values;
   gList<BFS<T> > List;
   gList<MixedSolution> solutions;
 
 public:
-  LemkeModule(const Nfg &N, const LemkeParams &p, const NFSupport &);
+  LemkeModule(const NFSupport &, const LemkeParams &,
+	      const gArray<gNumber> &);
   virtual ~LemkeModule();
   
   int Lemke(int dup = 0);
@@ -69,9 +73,9 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 
   List.Flush();
 
-  gMatrix<T> A1 = Make_A1(NF, support, (T) 0);
+  gMatrix<T> A1 = Make_A1(NF, support, values, (T) 0);
   gVector<T> b1 = Make_b1(NF, support, (T) 0);
-  gMatrix<T> A2 = Make_A2(NF, support, (T) 0);
+  gMatrix<T> A2 = Make_A2(NF, support, values, (T) 0);
   gVector<T> b2 = Make_b2(NF, support, (T) 0);
   LHTableau<T> B(A1,A2,b1,b2);
   epsilon = B.Epsilon();
@@ -168,7 +172,7 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
   solutions.Flush();
 
   for (i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF,support);
+    MixedProfile<T> profile(support, values);
     T sum = (T) 0;
 
     for (j = 1; j <= n1; j++)
@@ -221,10 +225,10 @@ template <class T> long LemkeModule<T>::NumPivots(void) const
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeModule<T>::LemkeModule(const Nfg &N, const LemkeParams &p,
-			    const NFSupport &S)
-  : NF(N), support(S), params(p), npivots(0), epsilon(0),
-    num_strats(S.NumStrats(1) + S.NumStrats(2))
+LemkeModule<T>::LemkeModule(const NFSupport &S, const LemkeParams &p,
+			    const gArray<gNumber> &v)
+  : NF(S.Game()), support(S), params(p), npivots(0), epsilon(0),
+    num_strats(S.NumStrats(1) + S.NumStrats(2)), values(v)
 { }
 
 template <class T> LemkeModule<T>::~LemkeModule()

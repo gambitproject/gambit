@@ -90,7 +90,9 @@ static Portion *GSM_Behav(Portion **param)
   Nfg &N = mp.Game();
   const Efg &E = *(const Efg *) N.AssociatedEfg();
 
-  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(E);
+  gArray<gNumber> values(E.Parameters()->Dmnsn());
+  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(EFSupport(E),
+						        values);
   MixedToBehav(N, mp, E, *bp);
 
   return new BehavPortion(new BehavSolution(*bp));
@@ -113,9 +115,11 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   params.tracefile = &((OutputPortion *) param[5])->Value();
   params.trace = ((IntPortion *) param[6])->Value();
   
+  gArray<gNumber> values(S->Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   gList<MixedSolution> solutions;
   double time; 
-  Enum(*S, params, solutions,
+  Enum(*S, params, values, solutions,
        ((IntPortion *) param[3])->Value(), time);
   ((NumberPortion *) param[4])->Value() = time;
   return new Mixed_ListPortion(solutions);
@@ -137,9 +141,11 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   params.tracefile = &((OutputPortion *) param[6])->Value();
   params.trace = ((IntPortion *) param[7])->Value();
 
+  gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   double time;
   gList<BehavSolution> solutions;
-  Enum(support, params, solutions, 
+  Enum(support, params, values, solutions,
        ((IntPortion *) param[4])->Value(), time);
   ((NumberPortion *) param[5])->Value() = time;
 
@@ -175,14 +181,16 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
   if (((BoolPortion *) param[1])->Value())   {
     gList<BehavSolution> solutions;
     double time;
-    EnumPureNfg(support, solutions, time);
+    gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+    EnumPureNfg(support, values, solutions, time);
     ((NumberPortion *) param[4])->Value() = time;
     return new Behav_ListPortion(solutions);
   }
   else  {
     gList<BehavSolution> solutions;
     double time;
-    EnumPure(support, solutions, time);
+    gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+    EnumPure(support, values, solutions, time);
     ((NumberPortion *) param[4])->Value() = time;
     return new Behav_ListPortion(solutions);
   }
@@ -218,7 +226,8 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
   
   gList<MixedSolution> solutions;
-  GridSolve(S, GP, solutions);
+  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
+  GridSolve(S, values, GP, solutions);
 
   if (GP.pxifile != &gnull)  delete GP.pxifile;
 
@@ -326,10 +335,12 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   params.tracefile = &((OutputPortion *) param[5])->Value();
   params.trace = ((IntPortion *) param[6])->Value();
 
+  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
   gList<MixedSolution> solutions;
   double time;
   int npivots;
-  Lemke(S, params, solutions, npivots, time);
+  Lemke(S, params, values, solutions, npivots, time);
   ((IntPortion *) param[3])->Value() = npivots;
   ((NumberPortion *) param[4])->Value() = time;
 
@@ -390,11 +401,12 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     params.tracefile = &((OutputPortion *) param[6])->Value();
     params.trace = ((IntPortion *) param[7])->Value();
 
+    gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
     gList<BehavSolution> solutions;
     double time;
     int npivots;
 
-    Lemke(S, params, solutions, npivots, time);
+    Lemke(S, params, values, solutions, npivots, time);
     ((IntPortion *) param[4])->Value() = npivots;
     ((NumberPortion *) param[5])->Value() = time;
     return new Behav_ListPortion(solutions);
@@ -407,11 +419,12 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     params.tracefile = &((OutputPortion *) param[6])->Value();
     params.trace = ((IntPortion *) param[7])->Value();
 
+    gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
     gList<BehavSolution> solutions;
     double time;
     int npivots;
 
-    SeqForm(S, params, solutions, npivots, time);
+    SeqForm(S, values, params, solutions, npivots, time);
     ((IntPortion *) param[4])->Value() = npivots;
     ((NumberPortion *) param[5])->Value() = time;
     return new Behav_ListPortion(solutions);
@@ -524,31 +537,23 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
 
-  ZSumParams ZP;
-  ZP.tracefile = &((OutputPortion *) param[4])->Value();
-  ZP.trace = ((IntPortion *) param[5])->Value();
+  ZSumParams params;
+  params.precision = ((PrecisionPortion *) param[1])->Value();
+  params.tracefile = &((OutputPortion *) param[4])->Value();
+  params.trace = ((IntPortion *) param[5])->Value();
 
   if (N->NumPlayers() > 2 || !IsConstSum(*N))
 	  return new ErrorPortion("Only valid for two-person zero-sum games");
 
-  if (((PrecisionPortion *) param[1])->Value() == precDOUBLE)  {
-    ZSumModule<double> ZM(S.Game(), ZP, S);
-    ZM.ZSum();
-    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-    ((NumberPortion *) param[3])->Value() = ZM.Time();
-    gList<MixedSolution> solns;
-    ZM.GetSolutions(solns);
-    return new Mixed_ListPortion(solns);
-  }
-  else  {
-    ZSumModule<gRational> ZM(S.Game(), ZP, S);
-    ZM.ZSum();
-    ((IntPortion *) param[2])->Value() = ZM.NumPivots();
-    ((NumberPortion *) param[3])->Value() = ZM.Time();
-    gList<MixedSolution> solns;
-    ZM.GetSolutions(solns);
-    return new Mixed_ListPortion(solns);
-  }
+  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  gList<MixedSolution> solutions;
+  double time;
+  int npivots;
+  ZSum(S, params, values, solutions, npivots, time);
+  ((IntPortion *) param[2])->Value() = npivots;
+  ((NumberPortion *) param[3])->Value() = time;
+  return new Mixed_ListPortion(solutions);
 }
 
 
@@ -619,48 +624,35 @@ static Portion *GSM_Lp_Efg(Portion **param)
     return new ErrorPortion("Only valid for two-person zero-sum games");
 
   if (((BoolPortion *) param[1])->Value())   {
-   	ZSumParams ZP;
-   	ZP.tracefile = &((OutputPortion *) param[5])->Value();
-	  ZP.trace = ((IntPortion *) param[6])->Value();
+    ZSumParams params;
+    params.precision = ((PrecisionPortion *) param[2])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((IntPortion *) param[6])->Value();
 
-    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
-      ZSumBySubgame<double> ZM(E, support, ZP);
-      ZM.Solve();
-      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
-      ((NumberPortion *) param[4])->Value() = ZM.Time();
-      gList<BehavSolution> solns;
-      solns = ZM.GetSolutions();
-      return new Behav_ListPortion(solns);
-    }
-    else  {
-      ZSumBySubgame<gRational> ZM(E, support, ZP);
-      ZM.Solve();
-      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
-      ((NumberPortion *) param[4])->Value() = ZM.Time();
-      gList<BehavSolution> solns;
-      solns = ZM.GetSolutions();
-      return new Behav_ListPortion(solns);
-    }
+    gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+    gList<BehavSolution> solutions;
+    double time;
+    int npivots;
+    ZSum(support, params, values, solutions, npivots, time);
+    ((IntPortion *) param[3])->Value() = npivots;
+    ((NumberPortion *) param[4])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
   else  {
-   	CSSeqFormParams ZP;
-	  ZP.tracefile = &((OutputPortion *) param[5])->Value();
-	  ZP.trace = ((IntPortion *) param[6])->Value();
+    CSSeqFormParams params;
+    params.precision = ((PrecisionPortion *) param[2])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((IntPortion *) param[6])->Value();
 
-    if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
-      CSSeqFormBySubgame<double> ZM(E, support, ZP);
-	    ZM.Solve();
-      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
-	    ((NumberPortion *) param[4])->Value() = ZM.Time();
-      return new Behav_ListPortion(ZM.GetSolutions());
-    }
-    else  {
-      CSSeqFormBySubgame<gRational> ZM(E, support, ZP);
-	    ZM.Solve();
-      ((IntPortion *) param[3])->Value() = ZM.NumPivots();
-	    ((NumberPortion *) param[4])->Value() = ZM.Time();
-      return new Behav_ListPortion(ZM.GetSolutions());
-    }
+    gList<BehavSolution> solutions;
+    gArray<gNumber> values(E.Parameters()->Dmnsn());
+    double time;
+    int npivots;
+    CSSeqForm(support, values, params, solutions, npivots, time);
+    ((IntPortion *) param[3])->Value() = npivots;
+    ((NumberPortion *) param[4])->Value() = time;
+    return new Behav_ListPortion(solutions);
   }
 }
 
@@ -723,15 +715,17 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
   SP.tracefile = &((OutputPortion *) param[7])->Value();
   SP.trace = ((IntPortion *) param[8])->Value();
 
+  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
+
   if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
-    SimpdivModule<double> SM(S.Game(), SP, S);
+    SimpdivModule<double> SM(S, SP, values);
     SM.Simpdiv();
     ((IntPortion *) param[5])->Value() = SM.NumEvals();
     ((NumberPortion *) param[6])->Value() = SM.Time();
     return new Mixed_ListPortion(SM.GetSolutions());
   }
   else  {
-    SimpdivModule<gRational> SM(S.Game(), SP, S);
+    SimpdivModule<gRational> SM(S, SP, values);
     SM.Simpdiv();
     ((IntPortion *) param[5])->Value() = SM.NumEvals();
     ((NumberPortion *) param[6])->Value() = SM.Time();
@@ -748,28 +742,24 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   if (!((BoolPortion *) param[1])->Value())
     return new ErrorPortion("algorithm not implemented for extensive forms");
 
-  SimpdivParams SP;
-  SP.stopAfter = ((IntPortion *) param[2])->Value();
-  SP.nRestarts = ((IntPortion *) param[3])->Value();
-  SP.leashLength = ((IntPortion *) param[4])->Value();
+  SimpdivParams params;
+  params.stopAfter = ((IntPortion *) param[2])->Value();
+  params.nRestarts = ((IntPortion *) param[3])->Value();
+  params.leashLength = ((IntPortion *) param[4])->Value();
+  params.precision = ((PrecisionPortion *) param[5])->Value();
+  params.tracefile = &((OutputPortion *) param[8])->Value();
+  params.trace = ((IntPortion *) param[9])->Value();
 
-  SP.tracefile = &((OutputPortion *) param[8])->Value();
-  SP.trace = ((IntPortion *) param[9])->Value();
+  gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+  gList<BehavSolution> solutions;
+  int nevals;
+  int niters;
+  double time;
+  Simpdiv(support, params, values, solutions, nevals, niters, time);
 
-  if (((PrecisionPortion *) param[5])->Value() == precDOUBLE)  {
-    SimpdivBySubgame<double> SM(support.Game(), support, SP);
-    SM.Solve();
-    ((IntPortion *) param[6])->Value() = SM.NumEvals();
-    ((NumberPortion *) param[7])->Value() = SM.Time();
-    return new Behav_ListPortion(SM.GetSolutions());
-  }
-  else  {
-    SimpdivBySubgame<gRational> SM(support.Game(), support, SP);
-    SM.Solve();
-    ((IntPortion *) param[6])->Value() = SM.NumEvals();
-    ((NumberPortion *) param[7])->Value() = SM.Time();
-    return new Behav_ListPortion(SM.GetSolutions());
-  }
+  ((IntPortion *) param[6])->Value() = nevals;
+  ((NumberPortion *) param[7])->Value() = time;
+  return new Behav_ListPortion(solutions);
 }
 
 Portion* GSM_VertEnum_Float( Portion** param )

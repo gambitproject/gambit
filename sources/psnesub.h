@@ -10,7 +10,8 @@
 #include "nfgpure.h"
 #include "behavsol.h"
 
-int EnumPureNfg(const EFSupport &, gList<BehavSolution> &, double &time);
+int EnumPureNfg(const EFSupport &, const gArray<gNumber> &values,
+		gList<BehavSolution> &, double &time);
 	     
 #endif   // PSNESUB_H
 

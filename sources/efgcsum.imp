@@ -14,13 +14,52 @@
 //                    CSSeqFormModule<T>: Member functions
 //-------------------------------------------------------------------------
 
+template <class T> class CSSeqFormModule  {
+private:
+  const Efg &EF;
+  const CSSeqFormParams &params;
+  const EFSupport &support;
+  gMatrix<T> *A;
+  gVector<T> *b, *c;
+  T maxpay, minpay;
+  long npivots;
+  double time;
+  int ns1,ns2,ni1,ni2;
+  gList<BFS<T> > List;
+  gArray<gNumber> values;
+
+  void FillTableau(const Node *, T ,int ,int , int ,int );
+
+public:
+  CSSeqFormModule(const EFSupport &, const gArray<gNumber> &v,
+		  const CSSeqFormParams &p);
+  virtual ~CSSeqFormModule();
+
+  bool IsConstSum();
+  
+  int CSSeqForm(int dup = 0);
+
+  void Make_Abc();
+  
+  int Add_BFS(const LPSolve<T> &B);
+  long NumPivots(void) const;
+  double Time(void) const;
+  
+  void GetProfile(gDPVector<T> &v, const BFS<T> &sol,
+		  const Node *n, int s1,int s2) const;
+  void GetSolutions(gList<BehavSolution> &) const;
+};
+
+
 template <class T>
-CSSeqFormModule<T>::CSSeqFormModule(const Efg &E, const CSSeqFormParams &p,
-				    const EFSupport &S)
-  : EF(E), params(p), support(S), A(0), b(0), c(0), npivots(0), 
+CSSeqFormModule<T>::CSSeqFormModule(const EFSupport &S,
+				    const gArray<gNumber> &v,
+				    const CSSeqFormParams &p)
+				    
+  : EF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0), 
     ns1(S.NumSequences(1)), ns2(S.NumSequences(2)),
-    ni1(E.Players()[1]->NumInfosets()+1),  
-    ni2(E.Players()[2]->NumInfosets()+1)
+    ni1(EF.Players()[1]->NumInfosets()+1),  
+    ni2(EF.Players()[2]->NumInfosets()+1), values(v)
 { }
 
 template <class T> CSSeqFormModule<T>::~CSSeqFormModule()
@@ -37,8 +76,8 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   b = new gVector<T>(1,ns1+ni2);
   c = new gVector<T>(1,ns2+ni1);
 
-  maxpay = (T)EF.MaxPayoff()+(T)1;
-  minpay = (T)EF.MinPayoff()-(T)1;
+  maxpay = (T)EF.MaxPayoff(values)+(T)1;
+  minpay = (T)EF.MinPayoff(values)-(T)1;
 
   (*A) = (T)0;
   T prob = (T)1;
@@ -225,7 +264,7 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
 
   int index;
   for (int i = 1; i <= List.Length(); i++)    {
-    BehavProfile<T> profile(EF, support);
+    BehavProfile<T> profile(support, values);
     GetProfile(profile,List[i],EF.RootNode(),1,1);
     index = solutions.Append(BehavSolution(profile, EfgAlg_CSSEQFORM));
     solutions[index].SetIsNash(T_YES);
@@ -249,28 +288,27 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 // Interfacing to solve-by-subgame
 //-----------------------------------
 
-template <class T>
-int CSSeqFormBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-					gList<BehavSolution> &solns)
+int _CSSeqForm(const EFSupport &, const gArray<gNumber> &, 
+	       const CSSeqFormParams &,
+	       gList<BehavSolution> &, int &npivots, double &time);
+
+int CSSeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+				     gList<BehavSolution> &solns)
 {
-  BehavProfile<T> bp(E, sup);
-
-  CSSeqFormModule<T> M(E, params, sup);
-  
-  M.CSSeqForm();
-
-  npivots += M.NumPivots();
-
-  M.GetSolutions(solns);
-  return params.status.Get();
+  int npiv;
+  double time;
+  _CSSeqForm(sup, values, params, solns, npiv, time);
+  npivots += npiv;
+  return 1;
 }
 
-template <class T>
-CSSeqFormBySubgame<T>::CSSeqFormBySubgame(const Efg &E, const EFSupport &S,
-					  const CSSeqFormParams &p,
-					  int max)
-  : SubgameSolver<T>(E, S, max), npivots(0), params(p)
+CSSeqFormBySubgame::CSSeqFormBySubgame(const EFSupport &S,
+				       const gArray<gNumber> &v,
+				       const CSSeqFormParams &p,
+				       int max)
+  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
 { }
 
-template <class T> CSSeqFormBySubgame<T>::~CSSeqFormBySubgame()   { }
+CSSeqFormBySubgame::~CSSeqFormBySubgame()   { }
+
 

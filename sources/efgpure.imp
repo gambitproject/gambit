@@ -13,12 +13,12 @@
 
 #include "efgpure.h"
 
-int FindPureNash(const Efg &efg, const EFSupport &sup,
+int FindPureNash(const EFSupport &sup, const gArray<gNumber> &values,
 		 gList<BehavSolution> &eqs)
 {
   int index;
   EfgContIter<double> citer(sup);
-  gPVector<double> probs(efg.NumInfosets());
+  gPVector<double> probs(sup.Game().NumInfosets());
 
   do  {
     int flag = 1;
@@ -26,31 +26,31 @@ int FindPureNash(const Efg &efg, const EFSupport &sup,
 
     EfgIter<double> eiter(citer);
 
-    for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
+    for (int pl = 1; flag && pl <= sup.Game().NumPlayers(); pl++)  {
       double current = citer.Payoff(pl);
-      for (int iset = 1; flag && iset <= efg.Players()[pl]->NumInfosets();
+      for (int iset = 1; flag && iset <= sup.Game().Players()[pl]->NumInfosets();
 	         iset++)  {
       	if (probs(pl, iset) == 0)   continue;
-	      Infoset *s = efg.Players()[pl]->Infosets()[iset];
+	      Infoset *s = sup.Game().Players()[pl]->Infosets()[iset];
        	for (int act = 1; act <= s->NumActions(); act++)  {
-	        eiter.Next(pl, iset);
-	        if (eiter.Payoff(pl) > current)  {
-	          flag = 0;
-	          break;
-	        }
+	  eiter.Next(pl, iset);
+	  if (eiter.Payoff(pl) > current)  {
+	    flag = 0;
+	    break;
+	  }
       	}
       }
     }
 
     if (flag)  {
-      BehavProfile<double> temp(efg);
+      BehavProfile<double> temp(sup, values);
       // zero out all the entries, since any equlibria are pure
       ((gVector<double> &) temp).operator=(0);
       const PureBehavProfile<double> &profile = citer.GetProfile();
-      for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-	      for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets();
-	           iset++)
-	        temp(pl, iset, profile.Get(efg.Players()[pl]->Infosets()[iset])->GetNumber()) = 1;
+      for (int pl = 1; pl <= sup.Game().NumPlayers(); pl++)  {
+	for (int iset = 1; iset <= sup.Game().Players()[pl]->NumInfosets();
+	     iset++)
+	  temp(pl, iset, profile.Get(sup.Game().Players()[pl]->Infosets()[iset])->GetNumber()) = 1;
       }
 
       index = eqs.Append(BehavSolution(temp, EfgAlg_PURENASH));
@@ -69,32 +69,33 @@ int FindPureNash(const Efg &efg, const EFSupport &sup,
 //-----------------------------------
 
 
-template <class T> class EfgPSNEBySubgame : public SubgameSolver<T>  {
+class EfgPSNEBySubgame : public SubgameSolver  {
   private:
+    gArray<gNumber> values;
+   
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
   public:
-    EfgPSNEBySubgame(const Efg &E, const EFSupport &, int max = 0);
+    EfgPSNEBySubgame(const EFSupport &, const gArray<gNumber> &, int max = 0);
     virtual ~EfgPSNEBySubgame();
 };
 
-template <class T>
-int EfgPSNEBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-				      gList<BehavSolution> &solns)
+
+int EfgPSNEBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+				   gList<BehavSolution> &solns)
 {
-  FindPureNash(E, sup, solns);
+  FindPureNash(sup, values, solns);
 
   return 0;
 }
 
-template <class T>
-EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg &E, const EFSupport &S,
-				      int max)
-  : SubgameSolver<T>(E, S, max)
+EfgPSNEBySubgame::EfgPSNEBySubgame(const EFSupport &S, 
+				   const gArray<gNumber> &v, int max)
+  : SubgameSolver(S, v, max), values(v)
 { }
 
-template <class T> EfgPSNEBySubgame<T>::~EfgPSNEBySubgame()   { }
+EfgPSNEBySubgame::~EfgPSNEBySubgame()   { }
   
 

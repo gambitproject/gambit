@@ -33,7 +33,7 @@ bool Liap(const Efg &, EFLiapParams &,
 	  long &nevals, long &niters);
 
 
-class EFLiapBySubgame : public SubgameSolver<double>  {
+class EFLiapBySubgame : public SubgameSolver  {
   private:
     int nevals, subgame_number;
     gPVector<int> infoset_subgames;

@@ -10,7 +10,7 @@
 #include "enum.h"
 #include "behavsol.h"
 
-int Enum(const EFSupport &, const EnumParams &,
+int Enum(const EFSupport &, const EnumParams &, const gArray<gNumber> &,
 	 gList<BehavSolution> &, long &npivots, double &time);
 
 #endif   // ENUMSUB_H

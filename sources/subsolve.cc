@@ -18,11 +18,6 @@
 
 
 
-
-template class SubgameSolver<double>;
-template class SubgameSolver<gRational>;
-
-
 #include "garray.imp"
 
 template class gArray<gArray<Infoset *> *>;
@@ -46,3 +41,5 @@ template class gNode<EFOutcome *>;
 template class gList<gArray<EFOutcome *> >;
 template class gNode<gArray<EFOutcome *> >;
 
+template class gList<BehavProfile<gNumber> >;
+template class gNode<BehavProfile<gNumber> >;

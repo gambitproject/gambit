@@ -22,7 +22,7 @@ class LemkeParams     {
     LemkeParams(gStatus & = gstatus);
 };
 
-int Lemke(const NFSupport &, const LemkeParams &,
+int Lemke(const NFSupport &, const LemkeParams &, const gArray<gNumber> &,
           gList<MixedSolution> &, int &npivots, double &time);
  
 

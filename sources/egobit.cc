@@ -50,7 +50,8 @@ class EFGobitFunc : public gFunction<double>   {
 EFGobitFunc::EFGobitFunc(const Efg &E,
 			 const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), _probs(E.NumInfosets()),
-    _p(start.Game(), start.Support()), _cpay(E)
+    _p(start.Support(), start.ParameterValues()),
+    _cpay(start.Support(), start.ParameterValues())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -211,7 +212,7 @@ void Gobit(const Efg &E, EFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  BehavProfile<double> p(start.Game(), start.Support());
+  BehavProfile<double> p(start.Support(), start.ParameterValues());
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
   BehavProfile<double> pold(p);

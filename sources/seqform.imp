@@ -23,10 +23,11 @@ private:
   double time;
   gList<BFS<T> > List;
   gList<BehavSolution> solutions;
+  gArray<gNumber> values;
 
 public:
-  SeqFormModule(const Efg &E, const SeqFormParams &p,
-		const EFSupport &);
+  SeqFormModule(const EFSupport &, const gArray<gNumber> &v,
+		const SeqFormParams &p);
   virtual ~SeqFormModule();
   
   int Lemke(void);
@@ -50,15 +51,16 @@ public:
 //---------------------------------------------------------------------------
 
 template <class T>
-SeqFormModule<T>::SeqFormModule(const Efg &E, const SeqFormParams &p, 
-			      const EFSupport &S)
-  : EF(E), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
+SeqFormModule<T>::SeqFormModule(const EFSupport &S, const gArray<gNumber> &v,
+				const SeqFormParams &p) 
+  : EF(S.Game()), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0),
+    values(v)
 { 
   int ntot;
   ns1=S.NumSequences(1);
   ns2=S.NumSequences(2);
-  ni1=E.Players()[1]->NumInfosets()+1;
-  ni2=E.Players()[2]->NumInfosets()+1;
+  ni1=EF.Players()[1]->NumInfosets()+1;
+  ni2=EF.Players()[2]->NumInfosets()+1;
   //* gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
 
   ntot = ns1+ns2+ni1+ni2;
@@ -67,7 +69,7 @@ SeqFormModule<T>::SeqFormModule(const Efg &E, const SeqFormParams &p,
   b = new gVector<T>(1,ntot);
   int i,j;
 
-  maxpay = (T)EF.MaxPayoff()+(T)1;
+  maxpay = (T)EF.MaxPayoff(values)+(T)1;
 
   T prob = (T)1;
   for(i=A->MinRow();i<=A->MaxRow();i++) {
@@ -115,8 +117,10 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   if (EF.NumPlayers() != 2 || !params.tracefile)   return 0;
   
   gWatch watch;
-  
-  BehavProfile<T> profile(EF);
+
+  gArray<gNumber> values(EF.Parameters()->Dmnsn());
+  EFSupport sup(EF);
+  BehavProfile<T> profile(sup, values);
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
     
   solutions.Flush();
@@ -191,7 +195,9 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 
   np+=B.NumPivots();
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
-  BehavProfile<T> profile(EF);
+  gArray<gNumber> values(EF.Parameters()->Dmnsn());
+  EFSupport sup(EF);
+  BehavProfile<T> profile(sup, values);
 
   //* gout << "\nIn All_Lemke() depth: " << depth;
   
@@ -258,59 +264,6 @@ const gList<BehavSolution> &SeqFormModule<T>::GetSolutions(void) const
   return solutions;
 }
 
-
-/*
-template <class T> void LemkeModule<T>::AddSolutions(void)
-{
-  int i,j;
-  int n1=support.NumStrats(1);
-  int n2=support.NumStrats(2);
-  solutions.Flush();
-
-  for (i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF,support);
-    T sum = (T) 0;
-
-    for (j = 1; j <= n1; j++)
-      if (List[i].IsDefined(j))   sum += List[i](j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= n1; j++) 
-      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
-      else  profile(1, j) = (T) 0;
-
-    sum = (T) 0;
-
-    for (j = 1; j <= n2; j++)
-      if (List[i].IsDefined(n1 + j))  
-	sum += List[i](n1 + j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= n2; j++)
-      if (List[i].IsDefined(n1 + j))
-	profile(2, j) = List[i](n1 + j) / sum;
-      else
-	profile(2, j) = (T) 0;
-
-    int index;
-    bool add = false;
-    if((params.status.Get() !=1) 
-//       || (params.status.Get() ==1 && profile.IsNash())
-     )
-      add = true;
-    if(add) {
-      index = solutions.Append(MixedSolution<T>(profile, NfgAlg_LEMKE));
-      if(params.status.Get() != 1) {
-	solutions[index].SetIsNash(T_YES);
-	solutions[index].SetIsPerfect(T_YES);
-	solutions[index].SetEpsilon(epsilon);
-      }
-    }
-  }
-}
-*/
 
 template <class T> long SeqFormModule<T>::NumPivots(void) const
 {
@@ -457,17 +410,18 @@ template <class T> void SeqFormModule<T>
 
 #include "subsolve.h"
 
-template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
+class SeqFormBySubgame : public SubgameSolver  {
   private:
     int npivots;
     SeqFormParams params;
+    gArray<gNumber> values;
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
-    SeqFormBySubgame(const Efg &E, const EFSupport &,
+    SeqFormBySubgame(const EFSupport &, const gArray<gNumber> &values,
                      const SeqFormParams &, int max = 0);
     virtual ~SeqFormBySubgame();
 
@@ -475,27 +429,27 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
 };
 
 
-template <class T>
-int SeqFormBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-				      gList<BehavSolution> &solns)
+int _SeqForm(const EFSupport &support, const gArray<gNumber> &values,
+	     const SeqFormParams &params,
+	     gList<BehavSolution> &solutions, int &npivots, double &time);
+
+int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+				   gList<BehavSolution> &solns)
 {
-  BehavProfile<T> bp(E, sup);
+  int npiv;
+  double time;
+  _SeqForm(sup, values, params, solns, npiv, time);
 
-  SeqFormModule<T> M(E, params, sup);
-  
-  M.Lemke();
+  npivots += npiv;
 
-  npivots += M.NumPivots();
-
-  solns = M.GetSolutions();
-  return params.status.Get();
+  return 1;
 }
 
-template <class T>
-SeqFormBySubgame<T>::SeqFormBySubgame(const Efg &E, const EFSupport &S,
-				      const SeqFormParams &p, int max)
-  : SubgameSolver<T>(E, S, max), npivots(0), params(p)
+SeqFormBySubgame::SeqFormBySubgame(const EFSupport &S,
+				   const gArray<gNumber> &v,
+				   const SeqFormParams &p, int max)
+  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
 { }
 
-template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
+SeqFormBySubgame::~SeqFormBySubgame()   { }
   

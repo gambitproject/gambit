@@ -95,7 +95,6 @@ Portion* GSM_Randomize_Number(Portion** param)
 
 Portion* GSM_Assign(Portion** param)
 {
-  _gsm->PushRef(((TextPortion*) param[0])->Value());
   Portion* p = 0;
   Portion* result = 0;
   if( param[1]->IsReference() )
@@ -108,15 +107,13 @@ Portion* GSM_Assign(Portion** param)
     p = param[1]->ValCopy();
     result = param[1]->ValCopy();
   }
-  _gsm->Push( p );
-  _gsm->Assign();
+  _gsm->Assign(param[0], p);
   return result;
 }
 
 Portion* GSM_UnAssign(Portion** param)
 {
-  _gsm->PushRef(((TextPortion*) param[0])->Value());
-  return _gsm->UnAssignExt();
+  return _gsm->UnAssignExt(param[0]);
 }
 
 Portion* GSM_Fake(Portion**)
@@ -1668,7 +1665,9 @@ Portion *GSM_Mixed_Nfg(Portion **param)
   Portion* p2;
 
   Nfg &N = * ((NfgPortion*) param[0])->Value();
-  MixedSolution *P = new MixedSolution(MixedProfile<gNumber>(N));
+  gArray<gNumber> values(N.Parameters()->Dmnsn());
+  MixedSolution *P = new MixedSolution(MixedProfile<gNumber>(NFSupport(N),
+							     values));
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
   {
@@ -1724,7 +1723,9 @@ Portion *GSM_Behav_Efg(Portion **param)
   Portion* p3;
 
   Efg &E = *((EfgPortion*) param[0])->Value();
-  BehavSolution *P = new BehavSolution(BehavProfile<gNumber>(E));
+  gArray<gNumber> values(E.Parameters()->Dmnsn());
+  BehavSolution *P = new BehavSolution(BehavProfile<gNumber>(EFSupport(E),
+							     values));
 
   if(((ListPortion*) param[1])->Length() != E.NumPlayers())
   {
@@ -2434,7 +2435,7 @@ Portion* GSM_Date(Portion**)
 }
 
 
-
+/*
 Portion* GSM_CallFunction( Portion** param )
 {
   _gsm->InitCallFunction( ( (TextPortion*) param[0] )->Value() );
@@ -2446,7 +2447,7 @@ Portion* GSM_CallFunction( Portion** param )
   return _gsm->PopValue();
 }
 
-
+*/
 
 
 
@@ -3323,7 +3324,7 @@ void Init_gsmoper(GSM* gsm)
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
 
-
+/*
   // ------------------- CallFunction -----------------------
 
   FuncObj = new FuncDescObj("CallFunction", 1);
@@ -3333,7 +3334,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 2, ParamInfoType("h", 
 					    PortionSpec( porSTRATEGY, 2 )));
   gsm->AddFunction(FuncObj);
-
+  */
 
 
 }

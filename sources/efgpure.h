@@ -14,7 +14,8 @@
 #include "subsolve.h"
 
 
-int EnumPure(const EFSupport &, gList<BehavSolution> &, double &time);
+int EnumPure(const EFSupport &, const gArray<gNumber> &,
+	     gList<BehavSolution> &, double &time);
 
 
 #endif    // EFGPURE_H

@@ -10,7 +10,7 @@
 #include "lemke.h"
 #include "behavsol.h"
 
-int Lemke(const EFSupport &, const LemkeParams &, 
+int Lemke(const EFSupport &, const LemkeParams &, const gArray<gNumber> &,
 	  gList<BehavSolution> &, int &npivots, double &time);
 
 #endif   // LEMKESUB_H

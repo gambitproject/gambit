@@ -174,7 +174,8 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   const Efg &E = S->Game();
 
-  return new BehavPortion(new BehavSolution(BehavProfile<gNumber>(E, *S)));
+  gArray<gNumber> values(E.Parameters()->Dmnsn());
+  return new BehavPortion(new BehavSolution(BehavProfile<gNumber>(*S, values)));
 }
 
 //-------------
@@ -447,7 +448,8 @@ static Portion *GSM_LiapValue_Mixed(Portion **param)
 Portion* GSM_Mixed_NFSupport(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  return new MixedPortion(new MixedSolution(MixedProfile<gNumber>(S->Game(), *S)));
+  gArray<gNumber> values(S->Game().Parameters()->Dmnsn());
+  return new MixedPortion(new MixedSolution(MixedProfile<gNumber>(*S, values)));
 }
 
 

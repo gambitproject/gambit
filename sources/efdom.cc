@@ -11,8 +11,6 @@
 
 bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
 {
-	const Efg &E = S.Game();
-
   EfgContIter<gRational> A(S), B(S);
     
     A.Freeze(pl, iset);

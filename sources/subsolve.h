@@ -12,14 +12,15 @@
 #include "behavsol.h"
 
 class NFSupport;
-template <class T> class SubgameSolver   {
+class SubgameSolver   {
   private:
     int max_solns, subgame_number;
     double time;
     Efg efg;
     EFSupport support;
-    BehavProfile<T> solution;
+    BehavProfile<gNumber> solution;
     gList<BehavSolution> solutions;
+    gArray<gNumber> paramvalues;
 
     gArray<gArray<Infoset *> *> infosets;
 
@@ -38,7 +39,7 @@ template <class T> class SubgameSolver   {
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
-    SubgameSolver(const Efg &E, const EFSupport &, int maxsol = 0);
+    SubgameSolver(const EFSupport &, const gArray<gNumber> &, int maxsol = 0);
     virtual ~SubgameSolver();
     
     void Solve(void);

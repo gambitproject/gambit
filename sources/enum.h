@@ -32,7 +32,7 @@ public:
 };
 
 
-int Enum(const NFSupport &, const EnumParams &,
+int Enum(const NFSupport &, const EnumParams &, const gArray<gNumber> &,
 	 gList<MixedSolution> &, long &npivots, double &time);
 
 #endif    // ENUM_H

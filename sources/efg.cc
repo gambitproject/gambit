@@ -622,15 +622,12 @@ bool Efg::IsConstSum(void) const
   return true;
 }
 
-gNumber Efg::MinPayoff(int pl) const
+gNumber Efg::MinPayoff(const gArray<gNumber> &values, int pl) const
 {
   int index, p, p1, p2;
   gNumber minpay;
 
   if (NumOutcomes() == 0)  return (gNumber) 0;
-
-  gArray<gNumber> values(Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
@@ -645,15 +642,12 @@ gNumber Efg::MinPayoff(int pl) const
   return minpay;
 }
 
-gNumber Efg::MaxPayoff(int pl) const
+gNumber Efg::MaxPayoff(const gArray<gNumber> &values, int pl) const
 {
   int index, p, p1, p2;
   gNumber maxpay;
 
   if (NumOutcomes() == 0)  return (gNumber) 0;
-
-  gArray<gNumber> values(Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}

@@ -51,7 +51,7 @@ class NFGobitFunc : public gC2Function<double>  {
 
 NFGobitFunc::NFGobitFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
-  : _nevals(0L), _nfg(N), _p(N, start.Support())
+  : _nevals(0L), _nfg(N), _p(start.Support(), start.ParameterValues())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -188,7 +188,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  MixedProfile<double> p(start.Game(), start.Support());
+  MixedProfile<double> p(start.Support(), start.ParameterValues());
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
 

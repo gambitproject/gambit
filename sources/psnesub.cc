@@ -8,15 +8,12 @@
 #include "psnesub.imp"
 
 
-int EnumPureNfg(const EFSupport &support, gList<BehavSolution> &solutions, 
-		double &time)
+int EnumPureNfg(const EFSupport &support, const gArray<gNumber> &values,
+		gList<BehavSolution> &solutions, double &time)
 {
-  PureNashBySubgame<double> module(support.Game(), support);
+  PureNashBySubgame module(support, values);
   module.Solve();
   time = module.Time();
   solutions = module.GetSolutions();
   return 1;
 }
-
-template class PureNashBySubgame<double>;
-template class PureNashBySubgame<gRational>;

@@ -7,16 +7,14 @@
 #include "efgpure.imp"
 #include "rational.h"
 
-int EnumPure(const EFSupport &support, gList<BehavSolution> &solutions, 
-	     double &time)
+int EnumPure(const EFSupport &support, const gArray<gNumber> &values,
+	     gList<BehavSolution> &solutions, double &time)
 {
-  EfgPSNEBySubgame<double> module(support.Game(), support);
+  EfgPSNEBySubgame module(support, values);
   module.Solve();
   time = module.Time();
   solutions = module.GetSolutions();
   return 1;
 }
 
-template class EfgPSNEBySubgame<double>;
-template class EfgPSNEBySubgame<gRational>;
 

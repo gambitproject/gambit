@@ -11,12 +11,12 @@
 #include "glist.h"
 #include "grarray.h"
 #include "gstatus.h"
-#include "mixed.h"
 #include "mixedsol.h"
 
 class SimpdivParams     {
   public:
     int trace, stopAfter, nRestarts, leashLength;
+    Precision precision;
     gOutput *tracefile;
     gStatus &status;
 
@@ -51,7 +51,8 @@ template <class T> class SimpdivModule  {
     int get_b(int j, int h);
   
   public:
-    SimpdivModule(const Nfg &N, const SimpdivParams &, const NFSupport &);
+    SimpdivModule(const NFSupport &N, const SimpdivParams &, 
+		  const gArray<gNumber> &);
     virtual ~SimpdivModule();
 
     int NumEvals(void) const  { return nevals; }
@@ -62,6 +63,8 @@ template <class T> class SimpdivModule  {
     const gList<MixedSolution> &GetSolutions(void) const  { return solutions; }
 };
 
+int Simpdiv(const NFSupport &, const SimpdivParams &, const gArray<gNumber> &,
+	    gList<MixedSolution> &, int &nevals, int &niters, double &time);
 
 
 #endif    // SIMPDIV_H

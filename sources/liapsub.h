@@ -10,7 +10,7 @@
 #include "nliap.h"
 #include "subsolve.h"
 
-class NFLiapBySubgame : public SubgameSolver<double>  {
+class NFLiapBySubgame : public SubgameSolver  {
   private:
     int nevals, subgame_number;
     gPVector<int> infoset_subgames;

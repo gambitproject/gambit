@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 
 template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
-                                      const T &)
+                                      const gArray<gNumber> &values, const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -23,10 +23,8 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
   NfgIter iter(S); 
   T min; 
 
-  min = (T) MinPayoff(N) - (T) 1;
+  min = (T) MinPayoff(N, values) - (T) 1;
 
-  gArray<gNumber> values(N.Parameters()->Dmnsn());
-  for (int k = 1; k <= values.Length(); values[k++] = gNumber(0));
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
       A1(i, n1 + j) = (T) N.Payoff(iter.GetOutcome(), 1).Evaluate(values) - min;
@@ -34,15 +32,11 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
     }
     iter.Next(1);
   }
-//  gout << "\nA1 " ;
-//  A1.Dump(gout);
-//  gout << "\ndim A1 = " << A1.MinRow() << " " << A1.MaxRow() << " " ;
-//  gout << A1.MinCol() << " " << A1.MaxCol();
   return A1;
 }
 
 template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
-                                      const T &)
+                                      const gArray<gNumber> &values, const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -51,10 +45,8 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
   NfgIter iter(S); 
   T min; 
 
-  min = (T) MinPayoff(N) - (T) 1;
+  min = (T) MinPayoff(N, values) - (T) 1;
 
-  gArray<gNumber> values(N.Parameters()->Dmnsn());
-  for (int k = 1; k <= values.Length(); values[k++] = gNumber(0));
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
       A2(n1 + j, i) = (T) N.Payoff(iter.GetOutcome(), 2).Evaluate(values) - min;
@@ -62,14 +54,11 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
     }
     iter.Next(1);
   }
-//  gout << "\nA2 = ";
-//  A2.Dump(gout);
-//  gout << "\ndim A2 = " << A2.MinRow() << " " << A2.MaxRow() << " " ;
-//  gout << A2.MinCol() << " " << A2.MaxCol();
   return A2;
 }
 
-template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S, const T &)
+template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S,
+				      const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);
@@ -78,9 +67,6 @@ template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S, const T &
 
   for (i = 1; i <= n1; i++) 
     b1[i]=-(T)1;
-//  gout << "\nb1 = ";
-//  b1.Dump(gout);
-//  gout << "\ndim b1 = " << b1.First() << " " << b1.Last();
   return b1;
 }
 
@@ -93,23 +79,12 @@ template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &S, const T &
 
   for (i = n1+1; i <= n1+n2; i++) 
     b2[i]=-(T)1;
-//  gout << "\nb2 = ";
-//  b2.Dump(gout);
-//  gout << "\ndim b2 = " << b2.First() << " " << b2.Last();
   return b2;
 }
 
-template <class T> LHTableau<T> 
-::LHTableau(const Nfg &N, const NFSupport &S)
-  : T1(Make_A1(N,S,(T)0), Make_b1(N,S,(T)0)), T2(Make_A2(N,S,(T)0),Make_b2(N, S,(T)0)),
-//    tmpcol(1,S.NumStrats(1)+S.NumStrats(2)),
-    tmp1(Make_b1(N,S,(T)0)),
-    tmp2(Make_b2(N, S,(T)0)),solution(1,S.NumStrats(1)+S.NumStrats(2))
-{ }
-
-template <class T> LHTableau<T> 
-::LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
-	    const gVector<T> &b1, const gVector<T> &b2)
+template <class T>
+LHTableau<T>::LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
+			const gVector<T> &b1, const gVector<T> &b2)
   : T1(A1,b1), T2(A2,b2), 
 //    tmpcol(b1.First(),b2.Last()), 
     tmp1(b1.First(),b1.Last()),tmp2(b2.First(),b2.Last()),
@@ -367,12 +342,12 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const double &);
-template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gRational &);
+template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const gArray<gNumber> &, const double &);
+template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gArray<gNumber> &, const gRational &);
 template gVector<double> Make_b1(const Nfg &, const NFSupport &, const double &);
 template gVector<gRational> Make_b1(const Nfg &, const NFSupport &, const gRational &);
-template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const double &);
-template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gRational &);
+template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const gArray<gNumber> &, const double &);
+template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gArray<gNumber> &, const gRational &);
 template gVector<double> Make_b2(const Nfg &, const NFSupport &, const double &);
 template gVector<gRational> Make_b2(const Nfg &, const NFSupport &, const gRational &);
 

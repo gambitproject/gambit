@@ -72,15 +72,12 @@ bool IsConstSum(const Nfg &nfg)
   return true;
 }
 
-gNumber MinPayoff(const Nfg &nfg, int player)
+gNumber MinPayoff(const Nfg &nfg, const gArray<gNumber> &values, int player)
 {
   int index, p, p1, p2;
   gNumber minpay;
   
   if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
-
-  gArray<gNumber> values(nfg.Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   if (player)
     p1 = p2 = player;
@@ -98,15 +95,12 @@ gNumber MinPayoff(const Nfg &nfg, int player)
   return minpay;
 }
 
-gNumber MaxPayoff(const Nfg &nfg, int player)
+gNumber MaxPayoff(const Nfg &nfg, const gArray<gNumber> &values, int player)
 {
   int index, p, p1, p2;
   gNumber maxpay;
 
   if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
-
-  gArray<gNumber> values(nfg.Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   if (player)
     p1 = p2 = player;

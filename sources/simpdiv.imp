@@ -24,11 +24,11 @@
 //               SimpdivModule<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T> SimpdivModule<T>::SimpdivModule(const Nfg &n,
+template <class T> SimpdivModule<T>::SimpdivModule(const NFSupport &s,
 						   const SimpdivParams &p,
-						   const NFSupport &s)
-  : N(n), params(p), support(s), 
-    y(n, s), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
+						   const gArray<gNumber> &v)
+  : N(s.Game()), params(p), support(s), 
+    y(s, v), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
     ibar(1), nevals(0), nits(0), nstrats(s.NumStrats()),
     ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
     U(s.NumStrats()), TT(s.NumStrats()),
