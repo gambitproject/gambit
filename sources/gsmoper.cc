@@ -275,9 +275,9 @@ static Portion *GSM_Log(Portion **param)
 
 static Portion *GSM_Power(Portion** param)
 {
-  gRational base = ((NumberPortion*) param[0])->Value();
-  double exponent = ((NumberPortion*) param[1])->Value();
-  return new NumberPortion((double) pow(base, ((long) exponent)));
+  gNumber base = ((NumberPortion*) param[0])->Value();
+  gNumber exponent = ((NumberPortion*) param[1])->Value();
+  return new NumberPortion(pow(base, exponent));
 }
 
 
