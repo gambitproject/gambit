@@ -6,11 +6,10 @@
 
 \title{GAMBIT COMMAND LANGUAGE}
 
-\author{\ \ \\
-Division of Humanities \& Social Sciences\\
-California Institute of Technology }
+\author{Division of Humanities \& Social Sciences\\
+California Institute of Technology}
 
-\date{\today\\ \time \jobname.tex}
+\date{\today\\ \jobname.tex}
 
 \maketitle
 
@@ -167,11 +166,11 @@ Paremeters enclosed in brackets {\tt "{ }"} represent optional parameters which
 are not necessary for the procedure to function.
 
 \begin{itemize}
-
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 \end{verbatim}
+\normalsize
 
 \bd
 \item
@@ -185,13 +184,13 @@ for the given player.
 \par
 \bd
 \item
-[* n:] The terminal node to which branches are to be added.
+[ n:] The terminal node to which branches are to be added.
 \item
-[* pl:] The player whose information set the node will now belong to.
+[ pl:] The player whose information set the node will now belong to.
 If the player specified is not already defined in the game, the player
 is created automatically. 
 \item
-[* br:] The number of branches to be appended to the node.
+[ br:] The number of branches to be appended to the node.
 \ed
 
 \item
@@ -199,9 +198,9 @@ is created automatically.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -213,10 +212,10 @@ AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 
 \bd
 \item
-[* n:] The node to which the outcome is to be attached.  Note that the
+[ n:] The node to which the outcome is to be attached.  Note that the
 node need not be terminal in order to have an outcome attached.
 \item
-[* outc:] The number of the outcome to be attached.  If no outcome
+[ outc:] The number of the outcome to be attached.  If no outcome
 with the indicated number exists, no action is taken.  
 \ed
 
@@ -226,9 +225,9 @@ with the indicated number exists, no action is taken.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Car[l->LIST(T)] =: T	
-\end{verbatim}
+\end{verbatim}\normalsize
 
 For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT 
 
@@ -243,7 +242,7 @@ of the list.
 	
 \bd
 \item
-[*l:] The list of type T on which the procedure is to be performed.
+[l:] The list of type T on which the procedure is to be performed.
 \ed
 
 \item
@@ -252,9 +251,9 @@ of the list.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Cdr[l->LIST(T)] =: LIST(T)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
@@ -269,7 +268,7 @@ first element.
 
 \bd
 \item
-[* l:] The list of type T on which the procedure is to be performed.
+[ l:] The list of type T on which the procedure is to be performed.
 \ed
 \item
 [Optional parameters:] None.
@@ -277,9 +276,9 @@ first element.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
@@ -295,9 +294,9 @@ combination of the two given lists.
 
 \bd
 \item
-[* l1:] The list of type T which is to be placed in front of the second list.
+[ l1:] The list of type T which is to be placed in front of the second list.
 \item 
-[*l2:] The list of type T which is to be placed at the end of the first list.
+[l2:] The list of type T which is to be placed at the end of the first list.
 \ed
 
 \item
@@ -305,9 +304,9 @@ combination of the two given lists.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Contains[e->T, l->LIST(T)] =: BOOLEAN
-\end{verbatim}
+\end{verbatim}\normalsize
 
 For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
 
@@ -322,9 +321,9 @@ contained in the indicated list of type T.
 	
 \bd
 \item	
-[* e:] The value of type T to be searched for.
+[ e:] The value of type T to be searched for.
 \item
-[* l:] The list of type T which is to be searched in.
+[ l:] The list of type T which is to be searched in.
 \ed
 
 \item
@@ -333,9 +332,9 @@ contained in the indicated list of type T.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 CopyTree[n->NODE, to->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -348,9 +347,9 @@ indicated node.
 
 \bd
 \item	
-[* n:] The node at which the subtree to be copied is rooted.
+[ n:] The node at which the subtree to be copied is rooted.
 \item
-[* to:] The node to which the subtree is to be copied.
+[ to:] The node to which the subtree is to be copied.
 \ed
 
 \item
@@ -358,9 +357,9 @@ indicated node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 CrunchNfg[N->NFG] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -375,7 +374,7 @@ corresponding to those strategies.
 	
 \bd
 \item
-[* N:] The problem in normal form from which the new normal form
+[ N:] The problem in normal form from which the new normal form
 problem is to be created.
 \ed
 
@@ -384,9 +383,9 @@ problem is to be created.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DeleteAction[n->NODE, br->INTEGER] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -398,9 +397,9 @@ set containing the specified node.
 	
 \bd
 \item
-[* n:] The node belonging to the information set from which the action
+[ n:] The node belonging to the information set from which the action
 is to be deleted.
-\item [* br:] The number of the branch to be deleted.
+\item [ br:] The number of the branch to be deleted.
 \ed
 
 \item
@@ -408,9 +407,9 @@ is to be deleted.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DeleteNode[n->NODE, keep->INTEGER] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item   
@@ -425,9 +424,9 @@ deleted node are deleted.
 	
 \bd
 \item
-[* n:] The node to be deleted.
+[ n:] The node to be deleted.
 \item
-[* keep:] The child of the deleted node which is to be kept.
+[ keep:] The child of the deleted node which is to be kept.
 \ed
 
 \item
@@ -435,9 +434,9 @@ deleted node are deleted.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DeleteTree[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -450,7 +449,7 @@ This node then becomes a terminal node.
 
 \bd
 \item  
-[* n:] The node where the subtree to be deleted is rooted.
+[ n:] The node where the subtree to be deleted is rooted.
 \ed
 
 \item
@@ -458,9 +457,9 @@ This node then becomes a terminal node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DetachOutcome[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -473,7 +472,7 @@ null outcome.
 
 \bd
 \item	
-[* n:] The node whose outcome is to be detached.
+[ n:] The node whose outcome is to be detached.
 \ed
 
 \item
@@ -481,9 +480,9 @@ null outcome.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DisplayEfg[E->EFG]
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -496,7 +495,7 @@ problem in outline form.
 
 \bd
 \item
-[* E:] The problem in extensive form which is to be displayed.
+[E:] The problem in extensive form which is to be displayed.
 \ed
 
 \item
@@ -504,9 +503,9 @@ problem in outline form.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 DisplayNfg[N->NFG, {sset->INTEGER}]
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -520,7 +519,7 @@ strategy set unless otherwise specified.
 
 \bd	
 \item
-[* N:] The problem in normal form which is to be displayed.
+[ N:] The problem in normal form which is to be displayed.
 \ed
 
 \item
@@ -528,16 +527,16 @@ strategy set unless otherwise specified.
 
 \bd
 \item
-[* SSET:] The number of the strategy set of the specified normal form
+[ SSET:] The number of the strategy set of the specified normal form
 problem which is to be used in displaying the problem.  If not
 specified, the last (smallest) strategy set is used.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -550,7 +549,7 @@ in the corresponding agent normal form.
 
 \bd
 \item
-[* E:] The problem in extensive form to be converted to agent normal form.
+[ E:] The problem in extensive form to be converted to agent normal form.
 \ed
 
 \item
@@ -558,14 +557,14 @@ in the corresponding agent normal form.
 	
 \bd
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -578,7 +577,7 @@ as a reduced normal form game.
 	
 \bd
 \item
-[* E:] The problem in extensive form to be converted to normal form.
+[ E:] The problem in extensive form to be converted to normal form.
 \ed
 
 \item
@@ -586,15 +585,15 @@ as a reduced normal form game.
 	
 \bd
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 ElapsedTime[] =: RATIONAL
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -611,10 +610,10 @@ StopWatch[] match.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
 	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -631,7 +630,7 @@ is equal to 1.
 	
 \bd
 \item
-[* N:] The problem in normal form for which dominated strategies are
+[ N:] The problem in normal form for which dominated strategies are
 to be eliminated.
 \ed
 
@@ -640,29 +639,29 @@ to be eliminated.
 
 \bd
 \item
-[* pl:] Specifies the list of players for which the procedure is to
+[ pl:] Specifies the list of players for which the procedure is to
 be performed.  If unspecified, it defaults to all players. 
 \item
-[* strong:] Determines the type of dominance used.  The default value
+[ strong:] Determines the type of dominance used.  The default value
 is False, which signifies that weak dominance is used.  If `strong` 
 is specified to be True, strong dominance is used.  
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \item
-[* output:] Redirects the output of the procedure to a specified 
+[ output:] Redirects the output of the procedure to a specified 
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, it directs output to the screen.
 \item
-[* NIT:] The number of iterations to be performed by the procedure.
+[ NIT:] The number of iterations to be performed by the procedure.
 If not specified, it has a default value of zero which means 
 that all dominated strategies are iteratively deleted.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
-\end{verbatim}
+\end{verbatim}\normalsize
 
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
@@ -678,9 +677,9 @@ are equal.
 	
 \bd
 \item
-[* l1:] The first list of type T which is to be compared for equality.
+[l1:] The first list of type T which is to be compared for equality.
 \item
-[* l2:] The second list of type T which is to be compared for 
+[l2:] The second list of type T which is to be compared for 
 equality.
 \ed
 
@@ -690,9 +689,9 @@ equality.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetActionName[n->NODE, br->INTEGER] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -705,9 +704,9 @@ the indicated branch of the specified node.
 	
 \bd
 \item
-[* n:] The node at which the action to be found exists.
+[ n:] The node at which the action to be found exists.
 \item
-[* br:] The branch which corresponds to the action to be found.
+[ br:] The branch which corresponds to the action to be found.
 \ed
 
 \item
@@ -715,9 +714,9 @@ the indicated branch of the specified node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetActionProbs[n->NODE] =: LIST(RATIONAL)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -731,7 +730,7 @@ belonging to the player representing chance (player 0).
 	
 \bd
 \item
-[* n:] The node for which the action probabilities are to be found.
+[ n:] The node for which the action probabilities are to be found.
 \ed
 
 \item
@@ -739,9 +738,9 @@ belonging to the player representing chance (player 0).
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -757,13 +756,13 @@ of zero.
 
 \bd
 \item
-[* N:] The problem in normal form in which the specified strategy of
+[ N:] The problem in normal form in which the specified strategy of
 the indicated player is to be tested for domination.
 \item
-[* pl:] The number corresponding to the player for whom the specified
+[ pl:] The number corresponding to the player for whom the specified
 strategy is to be tested for domination.
 \item
-[* st:] The number corresponding to the strategy belonging to the 
+[ st:] The number corresponding to the strategy belonging to the 
 indicated player which is to be tested for domination.
 \ed
 
@@ -772,9 +771,9 @@ indicated player which is to be tested for domination.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetInfosetName[n->NODE] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -787,7 +786,7 @@ specified node belongs.
 
 \bd
 \item
-[* n:] The node which belongs to the information set to be found.
+[ n:] The node which belongs to the information set to be found.
 \ed
 
 \item
@@ -795,9 +794,9 @@ specified node belongs.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetNextSibling[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -810,7 +809,7 @@ node.
 
 \bd
 \item
-[* n:] The node for which the next sibling is to be found.
+[ n:] The node for which the next sibling is to be found.
 \ed
 
 \item
@@ -818,9 +817,9 @@ node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -836,9 +835,9 @@ empty list.
 
 \bd
 \item
-[* E:] The problem in extensive form for which the outcome is to be found.
+[ E:] The problem in extensive form for which the outcome is to be found.
 \item
-[* outc:] The number assigned to the outcome for which the payoff 
+[ outc:] The number assigned to the outcome for which the payoff 
 vector will be returned.
 \ed
 
@@ -847,9 +846,9 @@ vector will be returned.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 
@@ -865,10 +864,10 @@ the name of an outcome is the empty string.
 
 \bd
 \item	  
-[* E:] The problem in extensive form for which the outcome name is to
+[ E:] The problem in extensive form for which the outcome name is to
 be found.
 \item
-[* outc:] The number corresponding to the outcome for which the name 
+[ outc:] The number corresponding to the outcome for which the name 
 will be returned.
 \ed
 
@@ -877,9 +876,9 @@ will be returned.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -894,10 +893,10 @@ procedure returns the empty string.
 
 \bd
 \item  
-[* E:] The problem in extensive form for which the player name is to
+[ E:] The problem in extensive form for which the player name is to
 be found.
 \item
-[* pl:] The number assigned to the player whose name will be 
+[ pl:] The number assigned to the player whose name will be 
 returned.
 \ed
 
@@ -906,9 +905,9 @@ returned.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetPriorSibling[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -920,7 +919,7 @@ GetPriorSibling[n->NODE] =: NODE
 
 \bd
 \item
-[* n:] The node for which the prior sibling is to be found.
+[ n:] The node for which the prior sibling is to be found.
 \ed
 
 \item
@@ -928,9 +927,9 @@ GetPriorSibling[n->NODE] =: NODE
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -944,13 +943,13 @@ to the strategy, the empty string is returned.
 
 \bd
 \item
-[* N:] The problem in normal form in which the name assigned to the
+[ N:] The problem in normal form in which the name assigned to the
 specified strategy of the indicated player is to be found.
 \item
-[* pl:] The number corresponding to the player for which the name of
+[ pl:] The number corresponding to the player for which the name of
 the indicated strategy is to be found.
 \item
-[* st:] The number corresponding to the strategy of the indicated 
+[ st:] The number corresponding to the strategy of the indicated 
 player for which the name is to be found.
 \ed
 
@@ -959,9 +958,9 @@ player for which the name is to be found.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GetTitle[E->EFG] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -974,7 +973,7 @@ the title has not been assigned, the empty string is returned.
 
 \bd
 \item
-[* E:] The problem in extensive form whose title is to be found.
+[ E:] The problem in extensive form whose title is to be found.
 \ed
 
 \item
@@ -982,13 +981,13 @@ the title has not been assigned, the empty string is returned.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolOpt->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
 	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1001,10 +1000,10 @@ either extensive or normal form.
 
 \bd
 \item
-[* N:] The problem in normal form for which the Gobit solution is to
+[ N:] The problem in normal form for which the Gobit solution is to
 be found.
 \item	
-[* E:] The problem in extensive form for which the Gobit solution 
+[ E:] The problem in extensive form for which the Gobit solution 
 is to be found.
 \ed
 
@@ -1013,10 +1012,10 @@ is to be found.
 
 \bd
 \item
-[* nequilib:] Sets the number of equilibria to find.  Has a default 
+[ nequilib:] Sets the number of equilibria to find.  Has a default 
 value of 1.  
 \item
-[* type:]  Type of incrementing 
+[ type:]  Type of incrementing 
 	
 \bd
 \item
@@ -1026,42 +1025,42 @@ value of 1.
 \ed
 
 \item
-[* maxitsOpt:] Sets the masimum number of iterations to the 
+[ maxitsOpt:] Sets the masimum number of iterations to the 
 n-dimensional optimization routine.  Default is 200.
 \item
-[* maxitsBrent:] Sets the maximum number of iterations in
+[ maxitsBrent:] Sets the maximum number of iterations in
 the 1-dimensional line search.  Default is 100.
 \item
-[* tolOpt:] Sets the tolerance for the n-dimensional
+[ tolOpt:] Sets the tolerance for the n-dimensional
 optimization routine.  Default is 1.0e-10.
 \item
-[* tolBrent:] Sets the tolerance for the 1-dimensional line
+[ tolBrent:] Sets the tolerance for the 1-dimensional line
 search.  Default is 2.0e-10.
 \item
-[* minLam:] Sets the minimum value of Lambda.  Has a default value of 0.01.
+[ minLam:] Sets the minimum value of Lambda.  Has a default value of 0.01.
 \item
-[* maxLam:] Sets the maximum value of Lambda.  Has a default value of 30.
+[ maxLam:] Sets the maximum value of Lambda.  Has a default value of 30.
 \item
-[* delLam:] Specifies the rate at which the value of Lambda changes. Has a default value of 1.01.
+[ delLam:] Specifies the rate at which the value of Lambda changes. Has a default value of 1.01.
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \item
-[* output:] Can be used to redirect the output of this procedure to a
+[ output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-[* pxifile:]Can be used to generate an output file
+[ pxifile:]Can be used to generate an output file
 compatible for input to pxi
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL}, 
 	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}, {time<->RATIONAL}]
 	 =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1073,7 +1072,7 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	
 \bd
 \item  
-[* N:] The problem in normal form which is to be operated on.
+[ N:] The problem in normal form which is to be operated on.
 \ed
 
 \item
@@ -1081,36 +1080,36 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 
 \bd
 \item	
- [* plev:] XXXX .
+ [ plev:] XXXX .
 \item
-[* output:] Can be used to redirect the output of this procedure to a
+[ output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-[* errors:] XXXX .
+[ errors:] XXXX .
 \item
-[* minLam:] Sets the minimum value of Lambda.  Has a default value of
+[ minLam:] Sets the minimum value of Lambda.  Has a default value of
 XXXX .
 \item
-[* maxLam:] Sets the maximum value of Lambda.  Has a default value of XXXX .
+[ maxLam:] Sets the maximum value of Lambda.  Has a default value of XXXX .
 \item
-[* delLam:] Specifies the rate at which the value of Lambda changes.
+[ delLam:] Specifies the rate at which the value of Lambda changes.
 Has a default value of XXXX .
 \item
-[* type:] XXXX .
+[ type:] XXXX .
 \item
-[* delp:] XXXX .
+[ delp:] XXXX .
 \item
-[* tol:] XXXX .
+[ tol:] XXXX .
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 InsertAction[n->NODE, as->1, br->3] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1123,12 +1122,12 @@ information set containing the specified node.
 
 \bd
 \item
-[* n:] The node which belongs to the information set which is to have
+[ n:] The node which belongs to the information set which is to have
 actions inserted into it.
 \item
-[* as:] The number which will correspond to the first inserted action.
+[ as:] The number which will correspond to the first inserted action.
 \item
-[* br:] The number of actions to be inserted at the specified node.
+[ br:] The number of actions to be inserted at the specified node.
 \ed
 
 \item
@@ -1136,9 +1135,9 @@ actions inserted into it.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1152,15 +1151,15 @@ the first branch of the new node.
 
 \bd
 \item
-[* n:] The location where the new node is to be inserted.  The node
+[ n:] The location where the new node is to be inserted.  The node
 currently at this location is then moved to the end of the first
 branch of the new node.
 \item
-[* pl:] The number corresponding to the player to which the new node
+[ pl:] The number corresponding to the player to which the new node
 will belong.  If the player specified is not already defined in	the
 game, the player is created automatically.
 \item
-[* br:] The number of branches which the new node will have.
+[ br:] The number of branches which the new node will have.
 \ed
 
 \item
@@ -1168,9 +1167,9 @@ game, the player is created automatically.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1186,13 +1185,13 @@ given player is dominated.  Returns false otherwise.
 
 \bd
 \item
-[* N:] The problem in normal form in which the specified strategy of
+[ N:] The problem in normal form in which the specified strategy of
 the indicated player is to be tested for domination.
 \item
-[* pl:] The number corresponding to the player for whom the specified
+[ pl:] The number corresponding to the player for whom the specified
 strategy is to be tested for domination.
 \item
-[* st:] The number corresponding to the strategy belonging to the 
+[ st:] The number corresponding to the strategy belonging to the 
 indicated player which is to be tested for domination.
 \ed
 
@@ -1201,9 +1200,9 @@ indicated player which is to be tested for domination.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 IsPredecessor[n->NODE, of->NODE] =: BOOLEAN
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1217,10 +1216,10 @@ predecessor of the second node given.
 
 \bd
 \item
-[* n:] The node which, when it is the predecessor of the other node,
+[ n:] The node which, when it is the predecessor of the other node,
 will result in the return value being True.
 \item
-[* of:] The node which, when it is preceeded by the other node, will
+[ of:] The node which, when it is preceeded by the other node, will
 result in the return value being True.
 \ed
 
@@ -1229,9 +1228,9 @@ result in the return value being True.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 IsSuccessor[n->NODE, from->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1244,10 +1243,10 @@ successor of the second node given.
 	
 \bd
 \item
-[* n:] The node which, when it is a successor of the other node, will
+[ n:] The node which, when it is a successor of the other node, will
 result in the return value being True.
 \item
-[* of:] The node which, when it is succeeded by the other node, will
+[ of:] The node which, when it is succeeded by the other node, will
 result in the return value being True.
 \ed
 
@@ -1256,9 +1255,9 @@ result in the return value being True.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 IsWatchRunning[] =: BOOLEAN
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1274,9 +1273,9 @@ Returns False otherwise.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 JoinInfoset[n->NODE, to->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1290,11 +1289,11 @@ which the second node given belongs.
 	  
 \bd
 \item
-[* n:] The node which is to be removed from its current information
+[ n:] The node which is to be removed from its current information
 set and placed in the information set belonging to the second
 node given.
 \item
-[* to:] The node belonging to the information set to which the first
+[ to:] The node belonging to the information set to which the first
 node specified will be transfered.
 \ed
 
@@ -1303,9 +1302,9 @@ node specified will be transfered.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 LeaveInfoset[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1319,7 +1318,7 @@ information set belonging to the same player.
 	  
 \bd
 \item
-[* n:] The node which is to be removed from the information which it
+[ n:] The node which is to be removed from the information which it
 currently belongs to.
 \ed
 
@@ -1328,9 +1327,9 @@ currently belongs to.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1343,7 +1342,7 @@ game specified using the Lemke-Howson algorithm.
 
 \bd
 \item
-[* N:] The problem in normal form for which the solution is to be 
+[ N:] The problem in normal form for which the solution is to be 
 searched.
 \ed
 
@@ -1352,18 +1351,18 @@ searched.
 
 \bd
 \item
-[* nequilib:] Specifies the number of equilibria to find.  If not
+[ nequilib:] Specifies the number of equilibria to find.  If not
 given the default value is zero, which means that all 
 equilibria are to be found.
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Length[l->LIST(T)] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
 \bd
@@ -1377,7 +1376,7 @@ type T.
 
 \bd
 \item
-[* l:] The list of type T for which the number of elements is to be found.
+[ l:] The list of type T for which the number of elements is to be found.
 \ed
 
 \item
@@ -1385,12 +1384,12 @@ type T.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
 	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsOpt->RATIONAL},
 	{maxitsBrent->RATIONAL}, {tolOpt->RATIONAL}, {tolBrent->RATIONAL},
 	{time<->RATIONAL}] =: LIST(MIXED)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1403,7 +1402,7 @@ normal form using the Liapunov algorithm.
 
 \bd
 \item
-[* N:] The problem in normal form for which the Liapunov solution is 
+[ N:] The problem in normal form for which the Liapunov solution is 
 to be found.
 \ed
 
@@ -1412,35 +1411,35 @@ to be found.
 
 \bd
 \item
-[* plev:]XXXX .
+[ plev:]XXXX .
 \item
-[* output:] Can be used to redirect the output of this procedure to a
+[ output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-[* errors:] XXXX .
+[ errors:] XXXX .
 \item
-[* ntries:] XXXX .
+[ ntries:] XXXX .
 \item
-[* nequilib:] Sets the number of equilibria to find.  Has a default 
+[ nequilib:] Sets the number of equilibria to find.  Has a default 
 value of XXXX . 
 \item
-[* maxitsOpt:] XXXX.
+[ maxitsOpt:] XXXX.
 \item
-[* maxitsBrent:] XXXX .
+[ maxitsBrent:] XXXX .
 \item
-[* tolOpt:] XXXX . 
+[ tolOpt:] XXXX . 
 \item
-[* tolBrent:] XXXX .
+[ tolBrent:] XXXX .
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 MergeInfosets[n->NODE, to->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1454,10 +1453,10 @@ second node indicated belongs.
 
 \bd
 \item
-[* n:] The node which belongs to the information set whose nodes are
+[ n:] The node which belongs to the information set whose nodes are
 to be moved to the second information set.
 \item
-[* to:] The node which belongs to the information set to which all
+[ to:] The node which belongs to the information set to which all
 the nodes from the first information set are to be moved.
 \ed
 
@@ -1466,9 +1465,9 @@ the nodes from the first information set are to be moved.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1481,10 +1480,10 @@ profile on the given extensive form problem.
 
 \bd
 \item
-[* E:] The problem in extensive form of which the behavioral profile
+[ E:] The problem in extensive form of which the behavioral profile
 is to be a subvariable.
 \item
-[* mp:] The mixed profile which is to be projected to a behavioral
+[ mp:] The mixed profile which is to be projected to a behavioral
 profile.
 \ed
 
@@ -1493,9 +1492,9 @@ profile.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1508,10 +1507,10 @@ of behavioral profiles on the given extensive form problem.
 
 \bd
 \item
-[* E:] The problem in extensive form of which the vector of 
+[ E:] The problem in extensive form of which the vector of 
 behavioral profiles is to be a subvariable.
 \item
-[* mp:] The vector of mixed profiles which is to be projected to a 
+[ mp:] The vector of mixed profiles which is to be projected to a 
 vector of behavioral profiles.
 \ed
 
@@ -1520,9 +1519,9 @@ vector of behavioral profiles.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 MoveTree[n->NODE, to->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1535,9 +1534,9 @@ the second given node.
 	  
 \bd
 \item
-[* n:] The node at which the subtree to be moved is currently rooted.
+[ n:] The node at which the subtree to be moved is currently rooted.
 \item
-[* to:] The node to which the subtree is to be moved.
+[ to:] The node to which the subtree is to be moved.
 \ed
 
 \item
@@ -1545,9 +1544,9 @@ the second given node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NameOf[n->NODE] =: TEXT
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1559,7 +1558,7 @@ NameOf[n->NODE] =: TEXT
 
 \bd
 \item
-[* n:] The node for which the name will be returned.
+[ n:] The node for which the name will be returned.
 \ed
 
 \item
@@ -1567,9 +1566,9 @@ NameOf[n->NODE] =: TEXT
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NewEfg[{type->DATATYPE}] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1583,15 +1582,15 @@ NewEfg[{type->DATATYPE}] =: EFG
 
 \bd
 \item
-[* type:] Specifies the type (Float or Rational) of the new extensive
+[ type:] Specifies the type (Float or Rational) of the new extensive
 form problem.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1614,7 +1613,7 @@ action is taken and the procedure returns a value of zero.
 
 \bd
 \item
-[* E:] The problem in extensive form for which a new outcome is to
+[ E:] The problem in extensive form for which a new outcome is to
 be created.
 \ed
 
@@ -1623,7 +1622,7 @@ be created.
 
 \bd
 \item
-[* outc:] Allows the user to specify the number given to the new 
+[ outc:] Allows the user to specify the number given to the new 
 outcome created.  If not specified, the new outcome is assigned the 
 lowest positive number for which no otcome is defined.  If the number
 specified already exists as an outcome, no action is taken and the 
@@ -1632,9 +1631,9 @@ procedure returns a value of zero.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NthChild[n->NODE, child->INTEGER] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1649,9 +1648,9 @@ specified node.
 	  
 \bd
 \item
-[* n:] The node for which the indicated child is to be found.
+[ n:] The node for which the indicated child is to be found.
 \item
-[* child:] The number corresponding to the child of the specified 
+[ child:] The number corresponding to the child of the specified 
 node which is to be found.
 \ed
 
@@ -1660,9 +1659,9 @@ node which is to be found.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumChildren[n->NODE] := INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1674,7 +1673,7 @@ NumChildren[n->NODE] := INTEGER
 
 \bd
 \item
-[* n:] The node whose children are to be counted.
+[ n:] The node whose children are to be counted.
 \ed
 
 \item
@@ -1682,9 +1681,9 @@ NumChildren[n->NODE] := INTEGER
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1699,10 +1698,10 @@ game, the return value is equal to zero.
 
 \bd
 \item
-[* E:] The problem in extensive form in which the information sets
+[ E:] The problem in extensive form in which the information sets
 for the specified player are to be counted.	  
 \item
-[* pl:] The number corresponding to the player for which the number 
+[ pl:] The number corresponding to the player for which the number 
 of information sets are to be counted.
 \ed
 \item
@@ -1710,9 +1709,9 @@ of information sets are to be counted.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumNodes[E->EFG] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1725,7 +1724,7 @@ the specified problem in extensive form.
 
 \bd
 \item
-[* E:] The problem in extensive form in which the number of nodes are
+[ E:] The problem in extensive form in which the number of nodes are
 to be counted.
 \ed
 
@@ -1734,9 +1733,9 @@ to be counted.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumOutcomes[E->EFG] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1749,7 +1748,7 @@ extensive form.
 
 \bd
 \item
-[* E:] The problem in extensive form in which the number of outcomes
+[ E:] The problem in extensive form in which the number of outcomes
 is to be found.
 \ed
 
@@ -1758,9 +1757,9 @@ is to be found.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumOutcomes[N->NFG] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1773,7 +1772,7 @@ normal form.
 	
 \bd
 \item
-[* N:] The problem in normal form in which the number of outcomes is
+[ N:] The problem in normal form in which the number of outcomes is
 to be found.
 \ed
 
@@ -1781,9 +1780,9 @@ to be found.
 [Optional parameters:] None.
 \ed
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumPlayers[E->EFG] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1795,7 +1794,8 @@ extensive form.
 [Required parameters:]\hfil\null
 
 \bd
-\item[* E:] The problem in extensive form in which the number of players
+\item
+[E:] The problem in extensive form in which the number of players
 is to be found.
 \ed
 
@@ -1804,9 +1804,9 @@ is to be found.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 NumStrats[N->NFG, pl->INTEGER, {sset->INTEGER}] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 
@@ -1820,10 +1820,10 @@ in the given problem in normal form.
 
 \bd
 \item
-[* N:] The normal form problem in which the number of strategies for
+[ N:] The normal form problem in which the number of strategies for
 the specified player is to be found.
 \item
-[* pl:] The number corresponding to the player in the given problem 
+[ pl:] The number corresponding to the player in the given problem 
 in normal form for whom the number of strategies is to be
 found.
 \ed
@@ -1833,7 +1833,7 @@ found.
 	
 \bd
 \item  
-[* sset:] The number of the strategy set in which strategies for the
+[ sset:] The number of the strategy set in which strategies for the
 specified player will be counted.  If not given the last (smallest) 
 strategy set is used.
 
@@ -1842,9 +1842,9 @@ strategy set is used.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 OutcomeOf[n->NODE] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 
@@ -1860,7 +1860,7 @@ a value of zero is returned.
 	
 \bd
 \item
-[* n:] The node for which the attached outcome is to be found.
+[ n:] The node for which the attached outcome is to be found.
 \ed
 
 \item
@@ -1869,9 +1869,9 @@ a value of zero is returned.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 ParentOf[n->NODE] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1884,7 +1884,7 @@ node.
 	
 \bd
 \item
-[* n:] The node for which the parent is to be found.
+[ n:] The node for which the parent is to be found.
 \ed
 
 \item
@@ -1892,9 +1892,9 @@ node.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 PlayerOf[n->NODE] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1907,7 +1907,7 @@ node.
 
 \bd
 \item
-[* n:] The node for which the player making the decision is to be
+[ n:] The node for which the player making the decision is to be
 found.
 \ed
 
@@ -1916,10 +1916,10 @@ found.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 PureNash[N->NFG, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	 =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1933,7 +1933,7 @@ find and has a default value of 1.
 	
 \bd
 \item
-[* N:] The problem in normal form for which the weak pure strategy
+[ N:] The problem in normal form for which the weak pure strategy
 Nash equilibria are to be found.
 \ed
 
@@ -1942,12 +1942,12 @@ Nash equilibria are to be found.
 	
 \bd
 \item
-[* num:] Allows the user to set the maximum number of Nash equilibria
+[ num:] Allows the user to set the maximum number of Nash equilibria
 to find.  Has a default value of 1.
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \item
-[* output:] Can be used to redirect the output of this procedure to a
+[ output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, output is directed to the screen.  
 
@@ -1956,9 +1956,9 @@ output off.  By default, output is directed to the screen.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Quit
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 
@@ -1974,9 +1974,9 @@ Quit
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, {type->DATATYPE}] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -1989,7 +1989,7 @@ specified dimensionality
 	
 \bd
 \item
-[* dim:] The desired dimensionality of the new problem.
+[ dim:] The desired dimensionality of the new problem.
 \ed
 
 \item
@@ -1997,18 +1997,18 @@ specified dimensionality
 	
 \bd
 \item
-[* seed:] Reseeds the random number generator with the given integer.
+[ seed:] Reseeds the random number generator with the given integer.
 \item
 
-[* type:] Specifies the type (Float or Rational) of the new normal 
+[ type:] Specifies the type (Float or Rational) of the new normal 
 form problem.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 ReadEfgFile[file->TEXT] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2022,7 +2022,7 @@ form game stored in the specified file.
 
 \bd
 \item
-[* file:] Specifies the file from which the extensive form game is to
+[ file:] Specifies the file from which the extensive form game is to
 be read.  If the file specified does not exist, an error 
 message is returned.
 \ed
@@ -2032,9 +2032,9 @@ message is returned.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2048,7 +2048,7 @@ point normal form unless otherwise specified by the user.
 
 \bd
 \item
-[* file:] Specifies the file from which the normal form game is to be
+[ file:] Specifies the file from which the normal form game is to be
 read.  If the file specified does not exist, an error message
 is returned.
 \ed
@@ -2059,7 +2059,7 @@ is returned.
 
 \bd
 \item
-[* type:] Indicates whether the file is to be read as a floating-
+[ type:] Indicates whether the file is to be read as a floating-
 point normal form or as a rational normal form.  If not given,
 the default value is floating-point.
 \ed
@@ -2067,9 +2067,9 @@ the default value is floating-point.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2088,19 +2088,19 @@ outcome which previously had the next highest number, and so on.
 	
 \bd
 \item
-[* E:] The problem in extensive form from which the specified outcome
+[ E:] The problem in extensive form from which the specified outcome
 is to be removed.
 \item
-[* outc:] The number corresponding to the outcome which is to be 
+[ outc:] The number corresponding to the outcome which is to be 
 removed from the given problem.  If no outcome with that number
 exists in the problem, no action is taken.
 \ed
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 RootNode[E->EFG, {game->INTEGER}] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2114,7 +2114,7 @@ is used by default.
 	
 \bd
 \item
-[* E:] The problem in extensive form in which the root node is to be
+[ E:] The problem in extensive form in which the root node is to be
 found.
 \ed
 
@@ -2123,16 +2123,16 @@ found.
 
 \bd
 \item
-[* game:] Specifies the game of which the root node is to be found.
+[ game:] Specifies the game of which the root node is to be found.
 If not given, the first game is used by default.
 \ed
 \ed
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 Run[TEXT]
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2146,7 +2146,7 @@ were replaced by the contents of the file.
 	
 \bd
 \item
-[* TEXT:] Any expression which evaluates to a text string which is a
+[ TEXT:] Any expression which evaluates to a text string which is a
 valid filename.
 \ed
 
@@ -2156,9 +2156,9 @@ valid filename.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2171,12 +2171,12 @@ indicated node to the name given.
 	
 \bd
 \item
-[* n:] The node at which the desired action occurs.
+[ n:] The node at which the desired action occurs.
 \item
-[* br:] The number of the branch or action ocurring at the given node
+[ br:] The number of the branch or action ocurring at the given node
 which is to be assigned a name.
 \item
-[* name:] The name which is to be assigned to the given action.
+[ name:] The name which is to be assigned to the given action.
 \ed
 
 \item
@@ -2186,9 +2186,9 @@ which is to be assigned a name.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetActionProbs[n->NODE, probs->LIST(RATIONAL)] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2202,10 +2202,10 @@ sets belonging to the player representing chance (player 0).
 	
 \bd
 \item
-[* n:] The node at which the actions will be assigned the specified
+[ n:] The node at which the actions will be assigned the specified
 probabilities.
 \item
-[* probs:] The vector of values which represent the probabilites 
+[ probs:] The vector of values which represent the probabilites 
 which will be assigned to the actions at the indicated node.
 \ed
 
@@ -2215,9 +2215,9 @@ which will be assigned to the actions at the indicated node.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetInfosetName[n->NODE, name->TEXT] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2230,10 +2230,10 @@ which the indicated node belongs.
 	
 \bd
 \item
-[* n:] A node belonging to the information set which is to be 
+[ n:] A node belonging to the information set which is to be 
 assigned a name.
 \item
-[* name:] The name which is to be assigned to the given information set.
+[ name:] The name which is to be assigned to the given information set.
 \ed
 
 \item
@@ -2242,9 +2242,9 @@ assigned a name.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetNodeName[n->NODE, name->TEXT] =: NODE
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2256,9 +2256,9 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 	
 \bd
 \item
-[* n:] The node which is to have a name assigned.
+[ n:] The node which is to have a name assigned.
 \item
-[* name:] The name which is to be assigned to the specified node.
+[ name:] The name which is to be assigned to the specified node.
 \ed
 
 \item
@@ -2266,9 +2266,9 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
    
 \bd
 \item
@@ -2281,15 +2281,15 @@ problem in extensive form, to the values in the specified vector.
 	
 \bd
 \item
-[* E:] The extensive form problem in which the given outcome is to be
+[ E:] The extensive form problem in which the given outcome is to be
 assigned values.
 \item
 
-[* outc:] The number corresponding to the outcome which is to be 
+[ outc:] The number corresponding to the outcome which is to be 
 assigned values.  If no outcome with the given number exists,
 then it is created.
 \item
-[* value:] The vector of payoffs (as a list of rationals) which are 
+[ value:] The vector of payoffs (as a list of rationals) which are 
 to be assigned to the outcome.  The length of `value` must 
 match the number of players defined in the problem.
 \ed
@@ -2300,9 +2300,9 @@ match the number of players defined in the problem.
 
 \item
 
-\begin{verbatim} 
+\protect \Large{\begin{verbatim} 
 SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2315,26 +2315,26 @@ outcome in the given problem in extensive form to the given value.
 	
 \bd
 \item
-[* E:] The extensive form problem in which the given outcome is to be
+[ E:] The extensive form problem in which the given outcome is to be
 assigned a value for the specified player.
 \item
-[* outc:] The number corresponding to the outcome which is to be 
+[ outc:] The number corresponding to the outcome which is to be 
 assigned a value for the specified player.  If no outcome with
 the given number exists, no action is performed.
 \item
-[* pl:] The player for which the payoff of the given outcome is to be
+[ pl:] The player for which the payoff of the given outcome is to be
 set.
 \item
-[* value:] The value (as a rational) which is to be assigned to the 
+[ value:] The value (as a rational) which is to be assigned to the 
 given outcome for the specified player.
 \ed
 \ed
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2347,13 +2347,13 @@ given title.
 	
 \bd
 \item
-[* E:] The problem in extensive form in which the indicated outcome 
+[ E:] The problem in extensive form in which the indicated outcome 
 is to be assigned the given title.
 \item
-[* outc:] The number corresponding to the outcome which is to be 
+[ outc:] The number corresponding to the outcome which is to be 
 assigned a title.
 \item
-[* name:] The name which is to be assigned to the indicated outcome.
+[ name:] The name which is to be assigned to the indicated outcome.
 \ed
 
 \item
@@ -2362,9 +2362,9 @@ assigned a title.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2377,13 +2377,13 @@ name.
 
 \bd
 \item
-[* E:] The problem in extensive form in which the indicated player is
+[ E:] The problem in extensive form in which the indicated player is
 to be assigned a name.
 \item
-[* pl:] The number corresponding to the player which is to be 
+[ pl:] The number corresponding to the player which is to be 
 assigned a name.
 \item
-[* name:] The name which is to be assigned to the specified player.
+[ name:] The name which is to be assigned to the specified player.
 \ed
 \item
 [Optional parameters:] None.
@@ -2391,9 +2391,9 @@ assigned a name.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetStratName[N->NFG, pl->INTEGER, st->INTEGER, name->TEXT] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2406,13 +2406,13 @@ indicated player in the given problem in normal form.
 	
 \bd
 \item
-[* N:] The problem in normal form in which the given name is to be
+[ N:] The problem in normal form in which the given name is to be
 assigned to the specified strategy of the indicated player.
 \item
-[* pl:] The number corresponding to the player for which the 
+[ pl:] The number corresponding to the player for which the 
 indicated strategy is to be assigned the given name.
 \item
-[* st:] The number corresponding to the strategy of the indicated 
+[ st:] The number corresponding to the strategy of the indicated 
 player to which the given name is to be assigned.
 \ed
 
@@ -2423,9 +2423,9 @@ player to which the given name is to be assigned.
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SetTitle[E->EFG, title->TEXT] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2438,9 +2438,9 @@ extensive form.
 	
 \bd
 \item
-[* E:] The problem in extensive form which is to be assigned a title.
+[ E:] The problem in extensive form which is to be assigned a title.
 \item
-[* title:] The title which is to be assigned to the given problem in 
+[ title:] The title which is to be assigned to the given problem in 
 extensive form.
 \ed
 
@@ -2449,11 +2449,11 @@ extensive form.
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 	{number->INTEGER}, {ndivs->INTEGER}, {leash->INTEGER}, 
 	{nevals->INTEGER}, {time<->RATIONAL}] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2465,7 +2465,7 @@ SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 
 \bd
 \item
-[* N:] The problem in normal form on which the operation will be performed.
+[ N:] The problem in normal form on which the operation will be performed.
 \ed
 
 \item
@@ -2473,31 +2473,31 @@ SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 	
 \bd
 \item
-[* plev:]XXXX .
+[ plev:]XXXX .
 \item
-[* output:] Can be used to redirect the output of this procedure to a
+[ output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, output is directed to the screen.
 \item
-[* errors:] XXXX .
+[ errors:] XXXX .
 \item
-[* number:] XXXX .
+[ number:] XXXX .
 \item 
-[* ndivs:] XXXX .
+[ ndivs:] XXXX .
 \item
-[* leash:] XXXX .
+[ leash:] XXXX .
 \item
-[* nevals:] XXXX .
+[ nevals:] XXXX .
 \item
-[* time:] Returns the elapsed time for the operation.
+[ time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 StartWatch[] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2511,9 +2511,9 @@ StartWatch[] =: INTEGER
 \ed
 
 \item
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 StopWatch[] =: INTEGER
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2528,9 +2528,9 @@ StopWatch[] =: INTEGER
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2546,19 +2546,19 @@ contains rational numbers.
 
 \bd
 \item
-[* E:] The problem in extensive form which is to be written to the
+[ E:] The problem in extensive form which is to be written to the
 indicated file.
 \item
-[* file:] The name of the file to which the extensive form problem is
+[ file:] The name of the file to which the extensive form problem is
 to be written.
 \ed
 \ed
 
 \item
 
-\begin{verbatim}
+\protect \Large{\begin{verbatim}
 WriteNfgFile[N->NFG, file->TEXT] =: NFG
-\end{verbatim}
+\end{verbatim}\normalsize
 
 \bd
 \item
@@ -2571,11 +2571,11 @@ file.
 
 \bd
 \item
-[* N:] The problem in normal form which is to be written to the
+[ N:] The problem in normal form which is to be written to the
 indicated file.
 
 \item
-[*file:] The name of the file to which the normal form problem is
+[file:] The name of the file to which the normal form problem is
 to be written.
 \ed
 \ed
