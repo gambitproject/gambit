@@ -538,6 +538,8 @@ protected:
 public:
   virtual ~MixedPortion();
 
+  bool IsValid( void ) const;
+
   MixedProfile<T>& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
@@ -550,6 +552,7 @@ public:
 template <class T> class MixedValPortion : public MixedPortion<T>
 {
 public:
+  MixedValPortion( void );
   MixedValPortion( MixedProfile<T>& value );
   virtual ~MixedValPortion();
   bool IsReference( void ) const;
@@ -581,6 +584,8 @@ protected:
 public:
   virtual ~BehavPortion();
 
+  bool IsValid( void ) const;
+
   BehavProfile<T>& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
@@ -593,6 +598,7 @@ public:
 template <class T> class BehavValPortion : public BehavPortion<T>
 {
 public:
+  BehavValPortion( void );
   BehavValPortion( BehavProfile<T>& value );
   virtual ~BehavValPortion();
   bool IsReference( void ) const;

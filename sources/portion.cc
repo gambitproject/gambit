@@ -820,6 +820,9 @@ template <class T> MixedPortion<T>::MixedPortion( void )
 template <class T> MixedPortion<T>::~MixedPortion()
 { }
 
+template <class T> bool MixedPortion<T>::IsValid( void ) const
+{ return _Value != 0; }
+
 template <class T> MixedProfile<T>& MixedPortion<T>::Value( void ) const
 { return *_Value; }
 
@@ -831,8 +834,13 @@ template <class T> void MixedPortion<T>::Output( gOutput& s ) const
 
 template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
 {
-  return new MixedValPortion<T>
-    ( * new MixedProfile<T>( * (MixedProfile<T>*) _Value ) ); 
+  if( _Value != 0 )
+  {
+    return new MixedValPortion<T>
+      ( * new MixedProfile<T>( * (MixedProfile<T>*) _Value ) ); 
+  }
+  else
+    return new MixedValPortion<T>;
 }
 
 template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
@@ -855,6 +863,9 @@ template <class T> bool MixedPortion<T>::operator == ( Portion *p ) const
     return false;
 }
 
+
+template <class T> MixedValPortion<T>::MixedValPortion( void )
+{ _Value = 0; }
 
 template <class T> MixedValPortion<T>::MixedValPortion( MixedProfile<T>& value)
 { _Value = &value; }
@@ -905,6 +916,9 @@ template <class T> BehavPortion<T>::BehavPortion( void )
 template <class T> BehavPortion<T>::~BehavPortion()
 { }
 
+template <class T> bool BehavPortion<T>::IsValid( void ) const
+{ return _Value != 0; }
+
 template <class T> BehavProfile<T>& BehavPortion<T>::Value( void ) const
 { return *_Value; }
 
@@ -916,8 +930,13 @@ template <class T> void BehavPortion<T>::Output( gOutput& s ) const
 
 template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
 {
-  return new BehavValPortion<T>
-    ( * new BehavProfile<T>( * (BehavProfile<T>*) _Value ) ); 
+  if( _Value != 0 )
+  {
+    return new BehavValPortion<T>
+      ( * new BehavProfile<T>( * (BehavProfile<T>*) _Value ) ); 
+  }
+  else
+    return new BehavValPortion<T>;
 }
 
 template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
@@ -940,6 +959,9 @@ template <class T> bool BehavPortion<T>::operator == ( Portion *p ) const
     return false;
 }
 
+
+template <class T> BehavValPortion<T>::BehavValPortion( void )
+{ _Value = 0; }
 
 template <class T> BehavValPortion<T>::BehavValPortion( BehavProfile<T>& value)
 { _Value = &value; }
