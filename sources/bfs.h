@@ -1,24 +1,14 @@
-//#
-//# FILE: bfs.h -- Implementation of tableau type
-//#
-//# $Id$
-//#
+//
+// FILE: bfs.h -- Implementation of tableau type
+//
+// $Id$
+//
 
 
 #ifndef BFS_H
 #define BFS_H
 
-#include <assert.h>
-#include "gmisc.h"
-#include "gambitio.h"
-#include "gmatrix.h"
-#include "gblock.h"
 #include "gmap.h"
-
-#if defined(__BORLANDC__)
-#include <stdio.h>
-#include <conio.h>
-#endif
 
 template <class T> class BFS : public gOrdMap<int, T>  {
   public:
