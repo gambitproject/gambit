@@ -43,6 +43,7 @@ private:
 //  gPoly<T> Equation(int i, int strat2, int strat2) const;
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
+  bool ExtendsToNash(BehavSolution &);
 public:
   EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
   ~EfgPolEnumModule();
@@ -157,11 +158,17 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   return index;	 
 }
 
+template <class T> bool 
+EfgPolEnumModule<T>::ExtendsToNash(BehavSolution &bs)
+{
+  return true;
+}
+
 template <class T> int 
 EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
 {
 
-  int i,j,k,index;
+  int i,j,k,index=0;
   gPVector<double> x(SF.NumSequences());
 
   for(k=1;k<=list.Length();k++) {
@@ -169,13 +176,16 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
     for(i=1;i<=EF.NumPlayers();i++) 
       for(j=1;j<=SF.NumSequences()[i];j++)
 	x(i,j) = Prob(i,j,list[k]);
-    if(params.trace > 0) 
+    if(params.trace > 1) 
       (*params.tracefile) << "\nk: " << k << " x: " << x;
 
-    index = solutions.Append(BehavSolution(SF.ToBehav(x), EfgAlg_POLENUM));
-    if(params.status.Get() != 1) {
-      solutions[index].SetEpsilon(0);
-      solutions[index].SetIsNash(T_YES);
+    BehavSolution sol(SF.ToBehav(x), EfgAlg_POLENUM);
+    if(ExtendsToNash(sol)) {
+      index = solutions.Append(sol);
+      if(params.status.Get() != 1) {
+	solutions[index].SetEpsilon(0);
+	solutions[index].SetIsNash(T_YES);
+      }
     }
   }
 
@@ -333,9 +343,3 @@ EfgPolEnumModule<T>::Equation(int i, int strat1, int strat2) const
   return equation;
 }
 */
-
-
-
-
-
-
