@@ -27,8 +27,6 @@ template class gList<MixedProfile<gNumber> >;
 
 template class gRectBlock<double>;
 template class gRectBlock<gRational>;
-template class gRectBlock<gNumber>;
-
 
 #include "garray.imp"
 #include "gblock.imp"
