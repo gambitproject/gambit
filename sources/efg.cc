@@ -19,7 +19,7 @@ int generator = 0;
 // Construct the trivial extensive form game
 //
 template <class T> ExtForm<T>::ExtForm(void)
-  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((Outcome<T> *) 0)
+  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((OutcomeVector<T> *) 0)
 {
   players[0] = "CHANCE";
   nodes.Define(1, new GameEl<T>(1, 0, 0));
@@ -30,7 +30,7 @@ template <class T> ExtForm<T>::ExtForm(void)
 // Construct the extensive form game stored in the given file
 //
 template <class T> ExtForm<T>::ExtForm(gInput &f)
-  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((Outcome<T> *) 0)
+  : players(0, 0), nodes((GameEl<T> *) 0), outcomes((OutcomeVector<T> *) 0)
 {
   ReadEfgFile(f);
 }
@@ -44,7 +44,7 @@ template <class T> ExtForm<T>::~ExtForm()
   for (nodeiter.GoFirst(); !nodeiter.PastEnd();
        delete nodes.Remove(nodeiter.GetKey()));
 
-  gSparseSetIter<Outcome<T> *> outciter(outcomes);
+  gSparseSetIter<OutcomeVector<T> *> outciter(outcomes);
   for (outciter.GoFirst(); !outciter.PastEnd();
        delete outcomes.Remove(outciter.GetKey()));
 }
@@ -58,6 +58,10 @@ template <class T> void ExtForm<T>::AddPlayer(int p)
   gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
     iter.GetValue()->AddPlayer(p);
+
+  gSparseSetIter<OutcomeVector<T> *> oter(outcomes);
+  for (oter.GoFirst(); !oter.PastEnd(); oter++)
+    oter.GetValue()->SetNumPlayers(p);
 
   while (players.Last() < p)   players.Expand(1);
 }
@@ -380,7 +384,7 @@ template <class T> void ExtForm<T>::SetOutcome(const Node &n, int outcome)
   int game = n.GetGame();
   if (!nodes.IsDefined(game) || !nodes(game)->IsMember(n))  return;
 
-  nodes(game)->SetOutcome(n, outcome);
+  nodes(game)->SetOutcome(n, outcomes(outcome));
 }
 
 //#--------------------------------------------------------------------------
@@ -741,7 +745,7 @@ template <class T> Node ExtForm<T>::DeleteTree(const Node &n)
 template <class T> int ExtForm<T>::CreateOutcome(void)
 {
   int outc = outcomes.FirstVacancy();
-  outcomes.Define(outc, new Outcome<T>());
+  outcomes.Define(outc, new OutcomeVector<T>(outc, NumPlayers()));
   return outc;
 }
 
@@ -751,7 +755,7 @@ template <class T> int ExtForm<T>::CreateOutcome(void)
 template <class T> int ExtForm<T>::CreateOutcome(int outc)
 {
   if (outcomes.IsDefined(outc) || outc <= 0)    return 0;
-  outcomes.Define(outc, new Outcome<T>());
+  outcomes.Define(outc, new OutcomeVector<T>(outc, NumPlayers()));
   return outc;
 }
 
@@ -761,11 +765,12 @@ template <class T> int ExtForm<T>::CreateOutcome(int outc)
 template <class T> void ExtForm<T>::RemoveOutcome(int outc)
 {
   if (!outcomes.IsDefined(outc))   return;
-  delete outcomes.Remove(outc);
   
   gSparseSetIter<GameEl<T> *> iter(nodes);
   for (iter.GoFirst(); !iter.PastEnd(); iter++)
-    iter.GetValue()->ExpungeOutcome(outc);
+    iter.GetValue()->ExpungeOutcome(outcomes(outc));
+
+  delete outcomes.Remove(outc);
 }
 
 //
@@ -774,7 +779,7 @@ template <class T> void ExtForm<T>::RemoveOutcome(int outc)
 template <class T> gString ExtForm<T>::GetOutcomeLabel(int outc) const
 {
   if (outcomes.IsDefined(outc))
-    return outcomes(outc)->GetOutcomeName();
+    return outcomes(outc)->GetName();
   else
     return "";
 }
@@ -785,7 +790,7 @@ template <class T> gString ExtForm<T>::GetOutcomeLabel(int outc) const
 template <class T> void ExtForm<T>::LabelOutcome(int outc, const gString &name)
 {
   if (outcomes.IsDefined(outc))
-    outcomes(outc)->SetOutcomeName(name);
+    outcomes(outc)->SetName(name);
 }
 
 //
@@ -802,7 +807,7 @@ template <class T> int ExtForm<T>::IsOutcomeDefined(int outc) const
 template <class T> gVector<T> ExtForm<T>::GetOutcomeValues(int outc) const
 {
   if (outcomes.IsDefined(outc))
-    return outcomes(outc)->GetOutcomeVector(players.Last());
+    return outcomes(outc)->GetOutcomeVector();
   else
     return gVector<T>();
 }
@@ -844,7 +849,7 @@ template <class T> void ExtForm<T>::ReadEfgFile(gInput &f)
   }
   
   if (outcomes.Length() > 0)  {
-    gSparseSetIter<Outcome<T> *> outciter(outcomes);
+    gSparseSetIter<OutcomeVector<T> *> outciter(outcomes);
     for (outciter.GoFirst(); !outciter.PastEnd();
 	 delete outcomes.Remove(outciter.GetKey()));
   }
@@ -858,7 +863,7 @@ template <class T> void ExtForm<T>::ReadEfgFile(gInput &f)
     for (nodeiter.GoFirst(); !nodeiter.PastEnd();
 	 delete nodes.Remove(nodeiter.GetKey()));
 
-    gSparseSetIter<Outcome<T> *> outciter(outcomes);
+    gSparseSetIter<OutcomeVector<T> *> outciter(outcomes);
     for (outciter.GoFirst(); !outciter.PastEnd();
 	 delete outcomes.Remove(outciter.GetKey()));
     
@@ -877,7 +882,7 @@ template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
   
   f << "{ ";
 
-  gSparseSetIter<Outcome<T> *> out_iter(outcomes);
+  gSparseSetIter<OutcomeVector<T> *> out_iter(outcomes);
 
   int flag = 0;
   for (out_iter.GoFirst(); !out_iter.PastEnd(); out_iter++)   {
@@ -886,8 +891,8 @@ template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
     else
       flag = 1;
     f << "{ " << out_iter.GetKey() << ' ' 
-      << out_iter.GetValue()->GetOutcomeVector(NumPlayers())
-      << " \"" << out_iter.GetValue()->GetOutcomeName() << "\" }";
+      << out_iter.GetValue()->GetOutcomeVector()
+      << " \"" << out_iter.GetValue()->GetName() << "\" }";
   }
   f << " }\n\n";
 
@@ -1096,9 +1101,12 @@ template <class T> gString ExtForm<T>::GetNodeLabel(const Node &n) const
 template <class T> int ExtForm<T>::GetOutcome(const Node &n) const
 {
   int game = n.GetGame();
-
-  if (nodes.IsDefined(game) && nodes(game)->IsMember(n))
-    return nodes(game)->GetOutcome(n);
+  
+  if (nodes.IsDefined(game) && nodes(game)->IsMember(n))  {
+    Outcome *outc = nodes(game)->GetOutcome(n);
+    if (outc)   return outc->GetNumber();
+    else   return 0;
+  }
   else
     return 0;
 }
@@ -1155,31 +1163,10 @@ template <class T> gString ExtForm<T>::GetUniqueVariable(void) const
 
 #include "gdpvect.h"
 
-template <class T> 
-void ExtForm<T>::ComputePayoff(Node n, T prob, int pl, T &value,
-			       const gDPVector<T> &strategy) const
-{
-  if (GetOutcome(n) != 0)
-    value += prob * GetOutcomeValues(GetOutcome(n))[pl];  
-  for (int i = 1; i <= NumChildren(n); i++)   {
-    T newprob = prob;
-    if (n.GetPlayer() == 0)
-      newprob *= GetActionProb(n, i);
-    else
-      newprob *= strategy(n.GetPlayer(), n.GetInfoset(), i);
- 
-    ComputePayoff(GetChildNumber(n, i), newprob, pl, value, strategy);
-  }
-}
-
 template <class T>
 T ExtForm<T>::Payoff(int pl, const gDPVector<T> &strategy) const
 {
-  T value = (T) 0.0;
-
-  ComputePayoff(RootNode(), (T) 1.0, pl, value, strategy);
-
-  return value;
+  return nodes(1)->Payoff(pl, strategy);
 }
 
 template <class T> gPVector<int> ExtForm<T>::Dimensionality(void) const
@@ -1208,67 +1195,11 @@ template <class T> int ExtForm<T>::ProfileLength(void) const
 }
 
 
-template <class T> 
-gVector<T> ExtForm<T>::ComputeCondPayoff(Node n, T prob, gVector<T> value,
-					 const gDPVector<T> &profile,
-					 gDPVector<T> &probs,
-					 gDPVector<T> &payoff) const
-{
-  gVector<T> cumvalue(value);
-
-  for (int i = 1; i <= NumChildren(n); i++)  {
-    T newprob;
-    if (n.GetPlayer() == 0)
-      newprob = GetActionProb(n, i);
-    else
-      newprob = profile(n.GetPlayer(), n.GetInfoset(), i);
-
-    gVector<T> newvalue(ComputeCondPayoff(GetChildNumber(n, i),
-					  prob * newprob, value,
-					  profile, probs, payoff));
-    cumvalue += newvalue * newprob;
-
-    if (n.GetPlayer() > 0)   {
-      probs(n.GetPlayer(), n.GetInfoset(), i) += prob;
-      payoff(n.GetPlayer(), n.GetInfoset(), i) += newvalue[n.GetPlayer()] * prob;
-      if (GetOutcome(n))
-	payoff(n.GetPlayer(), n.GetInfoset(), i) += GetOutcomeValues(GetOutcome(n))[n.GetPlayer()] * prob;
-
-    }
-  }
-
-  if (GetOutcome(n))
-    cumvalue += GetOutcomeValues(GetOutcome(n));
-
-  return cumvalue;
-}
-
 template <class T> void ExtForm<T>::CondPayoff(const gDPVector<T> &profile,
-					       gDPVector<T> &payoff)
+					       gDPVector<T> &payoff) const
 {
-  int i, j, k;
-
-  ((gVector<T> &) payoff).operator=((T) 0);
-  gDPVector<T> probs(payoff);
-  
-  gVector<T> value(NumPlayers());
-  value = (T) 0;
-
-  ComputeCondPayoff(RootNode(), (T) 1.0, value, profile, probs, payoff);
-
-  for (i = 1; i <= NumPlayers(); i++) 
-    for (j = 1; j <= NumInfosets(1, i); j++)
-      for (k = 1; k <= NumActions(1, i, j); k++)
-	// Note that this will have consequences if probs(i, j, k) == 0
-	payoff(i, j, k) /= probs(i, j, k);
-
-  probs.Dump(gout);  gout << '\n';
-  payoff.Dump(gout);  gout << '\n';
-				     
-				
+  nodes(1)->CondPayoff(profile, payoff);
 }
-
-
 
 DataType ExtForm<double>::Type(void) const   { return DOUBLE; }
 //DataType ExtForm<gRational>::Type(void) const  { return RATIONAL; }

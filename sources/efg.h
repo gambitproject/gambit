@@ -14,7 +14,7 @@
 #include "gpvector.h"
 
 template <class T> class gDPVector;
-template <class T> class Outcome;
+template <class T> class OutcomeVector;
 template <class T> class GameEl;
 //
 // The extensive form class contains all the functionality necessary for
@@ -33,19 +33,13 @@ template <class T> class ExtForm    {
     gString title;
     gTuple<gString> players;
     gSparseSet<GameEl<T> *> nodes;
-    gSparseSet<Outcome<T> *> outcomes;
+    gSparseSet<OutcomeVector<T> *> outcomes;
 
     void AddPlayer(int p);
     int CreateInfoset(int p, int game, int iset);
 
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
-
-    void ComputePayoff(Node n, T prob, int pl, T &value,
-		       const gDPVector<T> &strategy) const;
-    gVector<T> ComputeCondPayoff(Node, T, gVector<T>, const gDPVector<T> &,
-			gDPVector<T> &, gDPVector<T> &) const;
-
 
 //
 // These are being defined privately for now so they are not accidentally
@@ -168,10 +162,10 @@ template <class T> class ExtForm    {
     int ProfileLength(void) const;
     gPVector<int> Dimensionality(void) const;
     T Payoff(int pl, const gDPVector<T> &) const;
-    void CondPayoff(const gDPVector<T> &profile,
-		    gDPVector<T> &value) const;
+    void CondPayoff(const gDPVector<T> &profile, gDPVector<T> &value) const;
 };
 
 
 #endif   //# EXTFORM_H
+
 

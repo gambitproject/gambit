@@ -10,33 +10,50 @@
 #include "gstring.h"
 #include "gvector.h"
 
-template <class T> class Outcome    {
-  private:
+class Outcome   {
+  protected:
+    int number;
     gString name;
+
+  public:
+    Outcome(int n);
+    virtual ~Outcome();
+
+    virtual DataType Type(void) const = 0;
+
+    void SetName(const gString &);
+    const gString &GetName(void) const;
+
+    int GetNumber(void) const;
+};
+
+template <class T> class OutcomeVector : public Outcome    {
+  private:
     gVector<T> *values;
 
   public:
-    Outcome(void);
-    ~Outcome();
+    OutcomeVector(int n, int pl);
+    ~OutcomeVector();
 
-    void SetOutcomeName(const gString &s);
-    const gString &GetOutcomeName(void) const;
+    DataType Type(void) const;
 
-    // Return a vector containing the values of outcomes for each player
-    // from (1..num_players).  If a player's value has not been set, it
-    // is assumed to be 0.
-    gVector<T> GetOutcomeVector(int num_players) const;
+    void SetNumPlayers(int p);
 
-    // Return the value of the outcome for player p
-    T operator[](int p) const;
+    const gVector<T> &GetOutcomeVector(void) const;
 
-    // Set a player's value
-    void SetOutcome(int p, T value);
+    const T &operator[](int p) const;
 
-    // Set players' values according to a vector
+    void SetOutcome(int p, const T &value);
+
     void SetOutcome(const gVector<T> &v);
 };
 
   
 #endif    // OUTCOME_H
+
+
+
+
+
+
 
