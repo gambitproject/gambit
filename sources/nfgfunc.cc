@@ -165,7 +165,8 @@ Portion *GSM_EnumFloat(Portion **param)
   EnumModule<double> EM(N, EP);
   EM.Enum();
 
-  ((FloatPortion *) param[2])->Value() = EM.Time();
+  ((IntPortion *) param[2])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = EM.Time();
 
   return new Mixed_ListPortion<double>(&N, EM.GetSolutions());
 }
@@ -181,7 +182,8 @@ Portion *GSM_EnumRational(Portion **param)
   EnumModule<gRational> EM(N, EP);
   EM.Enum();
 
-  ((FloatPortion *) param[2])->Value() = EM.Time();
+  ((IntPortion *) param[2])->Value() = EM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = EM.Time();
 
   return new Mixed_ListPortion<gRational>(&N, EM.GetSolutions());
 }
@@ -256,7 +258,7 @@ Portion *GSM_GridSolveRational(Portion **param)
 
 #include "lemke.h"
 
-Portion *GSM_Lemke(Portion **param)
+Portion *GSM_LemkeNfgFloat(Portion **param)
 {
   NormalForm<double> &N = ((NfgPortion<double> *) param[0])->Value();
 
@@ -266,10 +268,26 @@ Portion *GSM_Lemke(Portion **param)
   LemkeModule<double> LS(N, LP);
   LS.Lemke();
 
-  ((FloatPortion *) param[2])->Value() = (double) LS.Time();
-  ((IntPortion *) param[3])->Value() = LS.NumPivots();
+  ((IntPortion *) param[2])->Value() = LS.NumPivots();
+  ((FloatPortion *) param[3])->Value() = (double) LS.Time();
 
   return new Mixed_ListPortion<double>(&N, LS.GetSolutions());
+}
+
+Portion *GSM_LemkeNfgRational(Portion **param)
+{
+  NormalForm<gRational> &N = ((NfgPortion<gRational> *) param[0])->Value();
+
+  LemkeParams LP;
+  LP.nequilib = ((IntPortion *) param[1])->Value();
+  
+  LemkeModule<gRational> LS(N, LP);
+  LS.Lemke();
+
+  ((IntPortion *) param[2])->Value() = LS.NumPivots();
+  ((FloatPortion *) param[3])->Value() = (double) LS.Time();
+
+  return new Mixed_ListPortion<gRational>(&N, LS.GetSolutions());
 }
 
 #include "nliap.h"
@@ -417,22 +435,26 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Enum");
-  FuncObj->SetFuncInfo(GSM_EnumFloat, 3);
+  FuncObj->SetFuncInfo(GSM_EnumFloat, 4);
   FuncObj->SetParamInfo(GSM_EnumFloat, 0, "nfg", 
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_EnumFloat, 1, "stopAfter", porINTEGER,
 			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_EnumFloat, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_EnumFloat, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumFloat, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_EnumRational, 3);
+  FuncObj->SetFuncInfo(GSM_EnumRational, 4);
   FuncObj->SetParamInfo(GSM_EnumRational, 0, "nfg", 
 			porNFG_RATIONAL, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_EnumRational, 1, "stopAfter", porINTEGER,
 			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_EnumRational, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_EnumRational, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_EnumRational, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -501,17 +523,30 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Lemke");
-  FuncObj->SetFuncInfo(GSM_Lemke, 4);
-  FuncObj->SetParamInfo(GSM_Lemke, 0, "nfg",
+  FuncObj = new FuncDescObj("LemkeNfg");
+  FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 0, "nfg",
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_NFG );
-  FuncObj->SetParamInfo(GSM_Lemke, 1, "stopAfter", 
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 1, "stopAfter", 
 			porINTEGER, new IntValPortion(0));
-  FuncObj->SetParamInfo(GSM_Lemke, 2, "nPivots", 
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 2, "nPivots", 
 			porINTEGER, new IntValPortion(0),
 		        PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lemke, 3, "time", 
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 3, "time", 
+			porFLOAT, new FloatValPortion(0),
+			PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LemkeNfgRational, 4);
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 0, "nfg",
+			porNFG_RATIONAL, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE, DEFAULT_NFG );
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 1, "stopAfter", 
+			porINTEGER, new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 2, "nPivots", 
+			porINTEGER, new IntValPortion(0),
+		        PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 3, "time", 
 			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);

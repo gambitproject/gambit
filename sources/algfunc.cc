@@ -35,6 +35,14 @@ Portion *GSM_BehavFloat(Portion **param)
   return new BehavValPortion<double>(*bp);
 }
 
+Portion *GSM_Payoff(Portion **param)
+{
+  BehavProfile<double> bp = ((BehavPortion<double> *) param[0])->Value();
+  int pl = ((IntPortion *) param[1])->Value();
+
+  return new FloatValPortion(bp.Payoff(pl));
+}
+
 Portion *GSM_Nfg(Portion **param)
 {
   ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
@@ -106,25 +114,34 @@ Portion *GSM_LiapEfg(Portion **param)
 
 #include "seqform.h"
 
-Portion *GSM_SequenceD(Portion **param)
+Portion *GSM_LemkeEfgFloat(Portion **param)
 {
   ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
 
   SeqFormParams SP;
+  SP.nequilib = ((IntPortion *) param[1])->Value();
+
   SeqFormModule<double> SM(E, SP);
   SM.Lemke();
+
+  ((IntPortion *) param[2])->Value() = SM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = SM.Time();
   
   return new Behav_ListPortion<double>(&E, SM.GetSolutions());
 }
 
-Portion *GSM_SequenceR(Portion **param)
+Portion *GSM_LemkeEfgRational(Portion **param)
 {
   ExtForm<gRational> &E = ((EfgPortion<gRational> *) param[0])->Value();
 
   SeqFormParams SP;
+  SP.nequilib = ((IntPortion *) param[1])->Value();
   SeqFormModule<gRational> SM(E, SP);
   SM.Lemke();
   
+  ((IntPortion *) param[2])->Value() = SM.NumPivots();
+  ((FloatPortion *) param[3])->Value() = SM.Time();
+
   return new Behav_ListPortion<gRational>(&E, SM.GetSolutions());
 }
 
@@ -201,7 +218,7 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapEfg");
-  FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
+  FuncObj->SetFuncInfo(GSM_LiapEfg, 5);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_LiapEfg, 1, "time", porFLOAT,
@@ -214,16 +231,27 @@ void Init_algfunc(GSM *gsm)
 		        new IntValPortion(10));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Sequence");
-  FuncObj->SetFuncInfo(GSM_SequenceD, 1);
-  FuncObj->SetParamInfo(GSM_SequenceD, 0, "efg", porEFG_FLOAT,
-			NO_DEFAULT_VALUE, 
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+  FuncObj = new FuncDescObj("LemkeEfg");
+  FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
+  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 1, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  
 
-  FuncObj->SetFuncInfo(GSM_SequenceR, 1);
-  FuncObj->SetParamInfo(GSM_SequenceR, 0, "efg", porEFG_RATIONAL,
-			NO_DEFAULT_VALUE, 
-			PASS_BY_REFERENCE, DEFAULT_EFG );
+  FuncObj->SetFuncInfo(GSM_LemkeEfgRational, 4);
+  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_EFG);
+  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 1, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeEfgRational, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOptions");
@@ -241,7 +269,8 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Behav");
   FuncObj->SetFuncInfo(GSM_BehavFloat, 2);
   FuncObj->SetParamInfo(GSM_BehavFloat, 0, "mixed", porMIXED_FLOAT);
-  FuncObj->SetParamInfo(GSM_BehavFloat, 1, "efg", porEFG_FLOAT);
+  FuncObj->SetParamInfo(GSM_BehavFloat, 1, "efg", porEFG_FLOAT,
+		        NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
@@ -251,6 +280,12 @@ void Init_algfunc(GSM *gsm)
 			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_Nfg, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Payoff");
+  FuncObj->SetFuncInfo(GSM_Payoff, 2);
+  FuncObj->SetParamInfo(GSM_Payoff, 0, "behav", porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_Payoff, 1, "player", porINTEGER);
   gsm->AddFunction(FuncObj);
 
 }
