@@ -360,6 +360,32 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 }
 
 
+//--------------
+// IsDominated
+//--------------
+
+#include "efdom.h"
+
+static Portion *GSM_IsDominated_Efg(Portion **param)
+{
+  Action *act = ((ActionPortion *) param[0])->Value();
+  EFSupport *S = ((EfSupportPortion *) param[1])->Value();
+  bool strong = ((BoolPortion *) param[2])->Value();
+  bool conditional = ((BoolPortion *) param[3])->Value();
+  gWatch watch;
+  bool ret;
+  
+  // The following sets conditional = false.  Could be more general.
+  
+  
+  ret =  IsDominated(*S, act, strong, conditional, gstatus);
+  
+  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
+  
+  return new BoolPortion(ret);
+}
+
+
 //----------
 // Game
 //----------
@@ -1281,6 +1307,24 @@ void Init_efgfunc(GSM *gsm)
 					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 4, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  gsm->AddFunction(FuncObj);
+
+  // Adding IsDominated
+  FuncObj = new gclFunction("IsDominated", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDominated_Efg, porBOOLEAN, 7));
+  FuncObj->SetParamInfo(0, 0, gclParameter("action", porACTION));
+  FuncObj->SetParamInfo(0, 1, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 2, gclParameter("strong", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("conditional", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 

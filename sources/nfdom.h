@@ -4,6 +4,9 @@
 // $Id$
 //
 
+#ifndef NFDOM_H
+#define NFDOM_H
+
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
@@ -34,3 +37,8 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
 NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
+
+
+#endif    // NFDOM_H
+
+

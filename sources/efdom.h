@@ -4,6 +4,9 @@
 // $Id: efdom.h
 //
 
+#ifndef EFDOM_H
+#define EFDOM_H
+
 #include "efg.h"
 #include "gstatus.h"
 
@@ -101,3 +104,5 @@ EFSupport *UnconditionalDominanceTruncatedSupport(const EFSupport &S,
 						  const bool strong,
 						   gOutput & out, // tracefile 
 						   gStatus &status);
+
+#endif    // EFDOM_H

@@ -105,6 +105,12 @@ NFSupport *ComputeMixedDominated(NFSupport &, bool strong,
 				 gPrecision precision,
 				 const gArray<int> &players,
 				 gOutput &, gStatus &status);
+bool IsMixedDominated(const NFSupport &S,Strategy *str,
+			   bool strong, gPrecision precision,
+			   gOutput &tracefile);
+
+bool IsDominated(const NFSupport &S, Strategy *s, bool strong, 
+		 const gStatus &status);
 
 #endif    // NFSTRAT_H
 

@@ -122,6 +122,33 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   return por;
 }
 
+//-------------
+// IsDominated
+//-------------
+
+static Portion *GSM_IsDominated_Nfg(Portion **param)
+{
+  Strategy *str = ((StrategyPortion *) param[0])->Value();
+  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
+  bool strong = ((BoolPortion *) param[2])->Value();
+  bool mixed = ((BoolPortion *) param[3])->Value();
+  gPrecision prec = ((PrecisionPortion *) param[4])->Value();
+
+  gWatch watch;
+  bool ret;
+
+  if (mixed)
+    ret = IsMixedDominated(*S, str,strong, prec, 
+			   ((OutputPortion *) param[6])->Value());
+  else   {
+    ret = IsDominated(*S, str, strong, gstatus);
+  }
+
+  ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
+  
+  return new BoolPortion(ret);
+}
+
 //----------
 // Game
 //----------
@@ -588,4 +615,25 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("IsDominated", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDominated_Nfg,
+				       porBOOLEAN, 8));
+  FuncObj->SetParamInfo(0, 0, gclParameter("strategy", porSTRATEGY));
+  FuncObj->SetParamInfo(0, 1, gclParameter("support", porNFSUPPORT));
+  FuncObj->SetParamInfo(0, 2, gclParameter("strong", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("mixed", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("precision", porPRECISION,
+					   new PrecisionPortion(precRATIONAL)));
+  FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  gsm->AddFunction(FuncObj);
 }
+
