@@ -1231,56 +1231,57 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
   wxTreeItemId root = m_algorithmTree->AddRoot("Algorithms");
   wxTreeItemId standard = m_algorithmTree->AppendItem(root,
 						      "Standard algorithms");
-
+  // This is added to silence some BC warnings
+  panelNfgNashAlgorithm *panel;
   id = m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
-  m_algorithms.Define(id, new panelNfgOneNash(this));
+  m_algorithms.Define(id, panel = new panelNfgOneNash(this));
   
   id = m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
-  m_algorithms.Define(id, new panelNfgTwoNash(this));
+  m_algorithms.Define(id, panel = new panelNfgTwoNash(this));
 
   id = m_algorithmTree->AppendItem(standard, "All Nash equilibria");
-  m_algorithms.Define(id, new panelNfgAllNash(this));
+  m_algorithms.Define(id, panel = new panelNfgAllNash(this));
 
   if (p_nfg.NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
-    m_algorithms.Define(id, new panelNfgOnePerfect(this));
+    m_algorithms.Define(id, panel = new panelNfgOnePerfect(this));
 
     id = m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
-    m_algorithms.Define(id, new panelNfgTwoPerfect(this));
+    m_algorithms.Define(id, panel = new panelNfgTwoPerfect(this));
 
     id = m_algorithmTree->AppendItem(standard, "All perfect equilibria");
-    m_algorithms.Define(id, new panelNfgAllPerfect(this));
+    m_algorithms.Define(id, panel = new panelNfgAllPerfect(this));
   }
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
 
   id = m_algorithmTree->AppendItem(custom, "EnumPureSolve");
-  m_algorithms.Define(id, new panelNfgEnumPure(this));
+  m_algorithms.Define(id, panel = new panelNfgEnumPure(this));
 
   if (p_nfg.NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(custom, "EnumMixedSolve");
-    m_algorithms.Define(id, new panelNfgEnumMixed(this));
+    m_algorithms.Define(id, panel = new panelNfgEnumMixed(this));
 
     id = m_algorithmTree->AppendItem(custom, "LcpSolve");
-    m_algorithms.Define(id, new panelNfgLcp(this));
+    m_algorithms.Define(id, panel = new panelNfgLcp(this));
 
     if (IsConstSum(p_nfg)) {
       id = m_algorithmTree->AppendItem(custom, "LpSolve");
-      m_algorithms.Define(id, new panelNfgLp(this));
+      m_algorithms.Define(id, panel = new panelNfgLp(this));
     }
   }
 
   id = m_algorithmTree->AppendItem(custom, "LiapSolve");
-  m_algorithms.Define(id, new panelNfgLiap(this));
+  m_algorithms.Define(id, panel = new panelNfgLiap(this));
 
   id = m_algorithmTree->AppendItem(custom, "PolEnumSolve");
-  m_algorithms.Define(id, new panelNfgPolEnum(this));
+  m_algorithms.Define(id, panel = new panelNfgPolEnum(this));
   
   id = m_algorithmTree->AppendItem(custom, "QreSolve");
-  m_algorithms.Define(id, new panelNfgQre(this));
+  m_algorithms.Define(id, panel = new panelNfgQre(this));
 
   id = m_algorithmTree->AppendItem(custom, "SimpdivSolve");
-  m_algorithms.Define(id, new panelNfgSimpdiv(this));
+  m_algorithms.Define(id, panel = new panelNfgSimpdiv(this));
 
   m_algorithmTree->Expand(standard);
   m_algorithmTree->Expand(custom);
