@@ -121,8 +121,8 @@ void TreeWindow::node_add(void)
     if (cursor->NumChildren() == 0)  {
       try {
 	if (mode == NodeAddNew) {
-	  //	  ef.AppendNode(cursor, player, branches);
-	  ef.AppendNode(cursor, player, -50);
+	  ef.AppendNode(cursor, player, branches);
+	  //	  ef.AppendNode(cursor, player, -50);
 	  set_names = node_add_dialog.SetNames();
 	}
 	else
