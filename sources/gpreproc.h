@@ -16,7 +16,7 @@ class GSM;
 class gPreprocessor  {
 private:
   GSM &m_environment;
-  gclCommandLine *m_CmdLine;
+  GCL::CommandLine *m_CmdLine;
 
   gStack<gInput *> m_InputStack;
   gStack<int> m_LineNumberStack;
@@ -37,7 +37,7 @@ private:
   bool IsQuoteEscapeSequence(const gText &p_line) const;
 
 public:
-  gPreprocessor(GSM &, gclCommandLine *p_cmdline, const char *p_cmd = NULL); 
+  gPreprocessor(GSM &, GCL::CommandLine *p_cmdline, const char *p_cmd = NULL); 
   ~gPreprocessor();
 
   //----------------------------------------------

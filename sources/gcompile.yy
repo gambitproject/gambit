@@ -295,7 +295,7 @@ constant:        BOOLEAN
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
         |        STDOUT
-          { $$ = new gclConstExpr(new OutputPortion(gout)); }
+          { $$ = new gclConstExpr(new OutputPortion(gsm->OutputStream())); }
         |        gNULL
           { $$ = new gclConstExpr(new OutputPortion(gnull)); }
         |        FLOATPREC
@@ -407,47 +407,47 @@ static struct tokens toktable[] =
     { FLOATPREC, "Float" }, { RATIONALPREC, "Rational" }, { 0, 0 }
 };
 
-  gerr << s << " at line " << current_line << " in file " << current_file
+  gsm->ErrorStream() << s << " at line " << current_line << " in file " << current_file
        << ": ";
 
   for (int i = 0; toktable[i].tok != 0; i++)
     if (toktable[i].tok == gcl_yychar)   {
-      gerr << toktable[i].name << '\n';
+      gsm->ErrorStream() << toktable[i].name << '\n';
       return;
     }
 
   switch (gcl_yychar)   {
     case NAME:
-      gerr << "identifier " << tval << '\n';
+      gsm->ErrorStream() << "identifier " << tval << '\n';
       break;
     case BOOLEAN:
       if (bval == triTRUE)
-     	gerr << "True\n";
+     	gsm->ErrorStream() << "True\n";
       else if (bval == triFALSE)
-        gerr << "False\n";
+        gsm->ErrorStream() << "False\n";
       else  /* (bval == triUNKNOWN) */
-        gerr << "Unknown\n";
+        gsm->ErrorStream() << "Unknown\n";
       break;
     case FLOAT:
-      gerr << "floating-point constant " << dval << '\n';
+      gsm->ErrorStream() << "floating-point constant " << dval << '\n';
       break;
     case INTEGER:
-      gerr << "integer constant " << ival << '\n';
+      gsm->ErrorStream() << "integer constant " << ival << '\n';
       break;
     case TEXT:
-      gerr << "text string " << tval << '\n';
+      gsm->ErrorStream() << "text string " << tval << '\n';
       break;
     case STDOUT:
-      gerr << "StdOut\n";
+      gsm->ErrorStream() << "StdOut\n";
       break;
     case gNULL:
-      gerr << "NullOut\n";
+      gsm->ErrorStream() << "NullOut\n";
       break;
     default:
       if (isprint(gcl_yychar) && !isspace(gcl_yychar))
-        gerr << ((char) gcl_yychar) << '\n';
+        gsm->ErrorStream() << ((char) gcl_yychar) << '\n';
       else 
-        gerr << "nonprinting character " << gcl_yychar << '\n';
+        gsm->ErrorStream() << "nonprinting character " << gcl_yychar << '\n';
       break;
   }    
 }
@@ -712,7 +712,7 @@ gclExpression *NewFunction(gclExpression *expr)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gerr << "Error: Unknown type " << functype << ", " << 
+    gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
       " as return type in declaration of " << funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));;
   }
@@ -741,7 +741,7 @@ gclExpression *NewFunction(gclExpression *expr)
 	spec = TextToPortionSpec(types[i]);
       }
       catch (gclRuntimeError &) {
-	gerr << "Error: Unknown type " << types[i] << ", " << 
+	gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	  PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	  " in declaration of " << funcname << "[]\n";
 	return new gclConstExpr(new BoolPortion(false));;
@@ -778,7 +778,7 @@ gclExpression *DeleteFunction(void)
     funcspec = TextToPortionSpec(functype);
   }
   catch (gclRuntimeError &)  {
-    gerr << "Error: Unknown type " << functype << ", " << 
+    gsm->ErrorStream() << "Error: Unknown type " << functype << ", " << 
       PortionSpecToText(funcspec) << " as return type in declaration of " << 
       funcname << "[]\n";
     return new gclConstExpr(new BoolPortion(false));
@@ -805,7 +805,7 @@ gclExpression *DeleteFunction(void)
 					portions[i], BYVAL));
     }
     catch (gclRuntimeError &) {
-      gerr << "Error: Unknown type " << types[i] << ", " << 
+      gsm->ErrorStream() << "Error: Unknown type " << types[i] << ", " << 
 	PortionSpecToText(spec) << " for parameter " << formals[i] <<
 	" in declaration of " << funcname << "[]\n";
       return new gclConstExpr(new BoolPortion(false));
@@ -833,10 +833,10 @@ int Execute(void)
     throw;
   }
   catch (gclRuntimeError &E) {
-    gout << "ERROR: " << E.Description() << '\n';
+    gsm->OutputStream() << "ERROR: " << E.Description() << '\n';
   }
   catch (gException &E) {
-    gout << "EXCEPTION: " << E.Description() << '\n';
+    gsm->OutputStream() << "EXCEPTION: " << E.Description() << '\n';
   }
 
   return rcSUCCESS;

@@ -7,9 +7,9 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = D:\WX2
-BCCDIR = D:\BORLAND\BCC55
-BISON = D:\GAMBIT\BISONDOS\BISON
+WXDIR = C:\WX2
+BCCDIR = C:\BORLAND\BCC55
+BISON = C:\GAMBIT\BISONDOS\BISON
 	
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj

@@ -13,24 +13,9 @@
 #endif  // __GNUG__
 
 #include "base/base.h"
+#include "command.h"
 
-class gclCommandLine : public gInput {
-private:
-  int m_historyDepth;
-
-protected:
-  virtual char GetNextChar(void) = 0;
-
-public:
-  gclCommandLine(int p_historyDepth);
-  virtual ~gclCommandLine() { }
-
-  int HistoryDepth(void) const { return m_historyDepth; }
-
-  virtual void SetPrompt(bool) = 0;
-};
-
-class gCmdLineInput : public gclCommandLine {
+class gCmdLineInput : public GCL::CommandLine {
 private:
   // the number of instances of the object
   static int s_NumInstances;

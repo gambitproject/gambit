@@ -64,7 +64,7 @@ ALG_OBJECTS = $(ALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 GCL_SOURCES = gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gsminstr.cc portion.cc \
               nfgfunc.cc efgfunc.cc listfunc.cc algfunc.cc solfunc.cc \
-              gsmutils.cc gcompile.cc gsmincl.cc gcmdline.cc \
+              gsmutils.cc gcompile.cc gsmincl.cc \
               gpreproc.cc gclinst.cc
 
 GCL_OBJECTS = $(GCL_SOURCES:.cc=$(OBJECT_SUFFIX))
@@ -74,7 +74,7 @@ ALLGCL_SOURCES = $(GLIB_SOURCES) $(GPOLY_SOURCES) $(GAME_SOURCES) \
 
 ALLGCL_OBJECTS = $(ALLGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
-TTYGCL_SOURCES = $(ALLGCL_SOURCES) gclstatus.cc gio.cc gcl.cc
+TTYGCL_SOURCES = $(ALLGCL_SOURCES) gcmdline.cc gclstatus.cc gio.cc gcl.cc
 
 TTYGCL_OBJECTS = $(TTYGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 

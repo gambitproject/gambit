@@ -19,7 +19,7 @@
 #include "math/math.h"
 #include "gsm.h"
 #include "gnullstatus.h"
-#include "gcmdline.h"
+#include "command.h"
 #include "gpreproc.h"
 
 char *_SourceDir = 0;
@@ -29,12 +29,12 @@ extern int GCLParse(GSM *p_gsm,
 		    const gText& line, const gText &file, int lineno,
 		    const gText& rawline);
 
-class wxCommandLine : public gclCommandLine {
+class wxCommandLine : public GCL::CommandLine {
 protected:
   virtual char GetNextChar(void) { return '\n'; }
 
 public:
-  wxCommandLine(int p_historyDepth) : gclCommandLine(p_historyDepth) { }
+  wxCommandLine(int p_historyDepth) : GCL::CommandLine(p_historyDepth) { }
   virtual ~wxCommandLine() { }
 
   void SetPrompt(bool) { }
@@ -157,7 +157,7 @@ public:
 };
 
 wxCancelButton::wxCancelButton(wxWindow *p_parent)
-  : wxButton(p_parent, idCANCEL_BUTTON, "Cancel")
+  : wxButton(p_parent, idCANCEL_BUTTON, "Cancel"), m_sig(false)
 { }
 
 void wxCancelButton::Get(void) const

@@ -12,11 +12,6 @@
 
 #include "gcmdline.h"
 
-gclCommandLine::gclCommandLine(int p_historyDepth)
-  : m_historyDepth(p_historyDepth)
-{ }
-
-
 int gCmdLineInput::s_NumInstances = 0;
 #ifdef __GNUG__
 struct termios gCmdLineInput::s_TermAttr;
@@ -87,12 +82,8 @@ void gCmdLineInput::SetRawTermAttr( void )
 #endif // __GNUG__
 }
 
-
-
-
-
 gCmdLineInput::gCmdLineInput( int historyDepth )
-  : gclCommandLine(historyDepth),
+  : GCL::CommandLine(historyDepth),
     m_NumInvoke(0), m_EOF(false), m_Verbose(true), m_Prompt(true)
 {
   if( s_NumInstances == 0 )
