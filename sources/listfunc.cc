@@ -335,23 +335,27 @@ Portion* GSM_Transpose( Portion** param )
 {
   int i;
   int j;
-  int size = 0;
+  int length = 0;
+  int width = 0;
   ListPortion* p;
   ListPortion* s;
   assert( param[0]->Type() == porLIST );
-  size = ((ListPortion*) param[0])->Length();
-  for( i = 1; i <= size; i++ )
+  length = ((ListPortion*) param[0])->Length();
+  for( i = 1; i <= length; i++ )
   {
     if( (*(ListPortion*) param[0])[i]->Type() != porLIST )
       return new ErrorPortion( "Bad dimensionality" );
-    if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != size )
-      return new ErrorPortion( "Bad dimensionality" );
+    if( i == 1 )
+      width = ((ListPortion*) (*(ListPortion*) param[0])[i])->Length();
+    else 
+      if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != width )
+	return new ErrorPortion( "Bad dimensionality" );
   }
   p = new ListValPortion();
-  for( i = 1; i <= size; i++ )
+  for( i = 1; i <= width; i++ )
   {
     s = new ListValPortion();
-    for( j = 1; j <= size; j++ )
+    for( j = 1; j <= length; j++ )
     {
       s->Append( (*(ListPortion*)(*(ListPortion*) param[0])[j])[i]->ValCopy());
     }
