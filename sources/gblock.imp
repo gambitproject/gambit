@@ -69,7 +69,7 @@ template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 #ifdef USE_EXCEPTIONS
   if (!new_data)    throw AllocFail();
 #else
-  assert(new_data)
+  assert(new_data);
 #endif   // USE_EXCEPTIONS
 
   int i;
