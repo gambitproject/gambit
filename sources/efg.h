@@ -97,6 +97,7 @@ template <class T> class ExtForm : public BaseExtForm   {
     ExtForm<T> &operator=(const ExtForm<T> &);
 //-grp
 
+    void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
     gVector<T> CondPayoff(Node *n, T prob, const gVector<T> &,
