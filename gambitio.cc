@@ -418,18 +418,21 @@ gOutput &gNullOutput::operator<<(const void *)  { return *this; }
 
 bool gNullOutput::IsValid(void) const   { return true; }
 
+#ifndef NO_GIO // needed to avoid duplicate symbols w/ gclwin
 
 gFileInput _gin(stdin);
 gInput &gin = _gin;
-
-gNullInput _gzero;
-gInput &gzero = _gzero;
 
 gFileOutput _gout(stdout);
 gOutput &gout = _gout;
 
 gFileOutput _gerr(stderr);
 gOutput &gerr = _gerr;
+
+#endif
+
+gNullInput _gzero;
+gInput &gzero = _gzero;
 
 gNullOutput _gnull;
 gOutput &gnull = _gnull;

@@ -30,7 +30,8 @@ source:
 #	cp /egrayver/job/gambit/*.ide .
 #	cp ~egrayver/job/gambit/*.ico .
 	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
-		Makefile ../bisondos/* ./bin/dummy 
+		Makefile ../bisondos/* ./bin32/dummy ./bitmaps/* ./wx_fake/* \
+		make.go make.site*
 	ftp_put gambsrc.zip
 
 
