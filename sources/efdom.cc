@@ -240,9 +240,6 @@ bool ComputeDominated(const EFSupport &S, EFSupport &T,
 		      const int pl, const int iset, const bool strong,
 					gStatus &status)
 {
-  //DEBUG
-  gout << "Got into ComputeDominated().\n";
-
   const gArray<Action *> &actions = S.Actions(pl, iset);
 
   gArray<int> set(actions.Length());
