@@ -163,6 +163,7 @@ public:
 	// Allows to use a previously created settings w/ this parent
 	void SetParent(SpreadSheet3D *_parent) {parent=_parent;}
 	// Inform the class that a new column was added.
+  void SetDimensions(int rows,int cols); // only the col info is used now.
 	void AddCol(void) {col_width.Append(DEFAULT_COL_WIDTH);}
 	// Data Access, Get* functions
 		// These functions control the dimentions of each cell i.e. Width X Height
@@ -339,6 +340,8 @@ public:
 	~SpreadSheet(void)	{if (sheet) {sheet->Show(FALSE); delete sheet;}}
 	// Post-Constructor, use if creating arrays of this
 	void Init(int rows,int cols,int level,char *title=NULL,wxFrame *parent=NULL);
+	// Change dimensions.  Does nothing if current dimensions are given
+	void SetDimensions(int rows, int cols);
 	// Sizing info for the canvas ...
 	void SetSize(int xs,int ys,int xe,int ye);
 	void GetSize(int *w,int *h) {sheet->DesiredSize(w,h);}
@@ -488,6 +491,7 @@ public:
 	int			GetRows(void)		{return data[cur_level].GetRows();}
 	int			GetCols(void)		{return data[cur_level].GetCols();}
 	// Row/Col/Level manipulation
+	void SetDimensions(int rows,int cols,int levels=0);  // Does nothing if current dimensions are given
 	void AddRow(void){for(int i=1;i<=levels;i++) data[i].AddRow();Redraw();}
 	void AddCol(void){for(int i=1;i<=levels;i++) data[i].AddCol();DrawSettings()->AddCol(); Redraw();}
 	void AddLevel(void);

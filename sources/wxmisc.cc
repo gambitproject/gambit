@@ -199,24 +199,23 @@ FontDialogBox::~FontDialogBox(void)
 wxOutputDialogBox::wxOutputDialogBox(wxStringList *extra_media,wxWindow *parent)
 		:MyDialogBox(parent,"Output Media")
 {
-wxStringList media_list("Printer","PS File","Clipboard","Meta File",NULL);
+wxStringList media_list("Printer","PS File","Clipboard","Meta File","PrintPreview",0);
 if (extra_media)
 	for (int i=0;i<extra_media->Number();i++)
 		media_list.Add((const char *)(extra_media->Nth(i)->Data()));
 media_box=new	wxRadioBox(this,NULL,"Media",-1,-1,-1,-1,media_list.Number(),
 						 media_list.ListToArray(),(int)(media_list.Number()/2));
 NewLine();
-char *options[2]={"WYSIWYG","Fit to page"};
-option_box=new wxRadioBox(this,NULL,NULL,-1,-1,-1,-1,2,options);
+fit_box=new wxCheckBox(this,0,"Fit to page");
 #ifdef wx_x	// Printer, Clipboard, and MetaFiles are not yet supp'ed
 media_box->Enable(0,FALSE);media_box->Enable(2,FALSE);media_box->Enable(3,FALSE);
-option_box->Enable(0,FALSE);option_box->Enable(1,FALSE);
+fit_box->Enable(FALSE);
 #endif
 Go();
 }
 
 int wxOutputDialogBox::GetSelection() {return media_box->GetSelection();}
-int wxOutputDialogBox::GetOption() {return option_box->GetSelection();}
+wxOutputOption wxOutputDialogBox::GetOption() {return (fit_box->GetValue()) ? wxFITTOPAGE : wxWYSIWYG;}
 
 //***************************** BASIC KEYBOARD STUFF ****************
 Bool	IsCursor(wxKeyEvent &ev)
@@ -291,3 +290,30 @@ while(i<s.length())
 dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
 }
 
+// Takes a string formated for gDrawText and returns just the text value of it.
+gString gPlainText(const gString &s)
+{
+int i=0;
+gString plain;
+while(i<s.length())
+{
+	while (i<s.length() && s[i]!='\\') {plain+=s[i];i++;}
+	if (s[i]=='\\')	// has to be a command
+	{
+		i++;
+		switch (s[i])
+		{
+			case '\\':
+				plain+="\\";
+				break;
+			case 'C' :
+				gDrawTextGetNum(s,&i); // just absorb that info
+				break;
+			default:
+				wxError("Unknown code in gDrawText");
+				break;
+		}
+	}
+}
+return plain;
+}

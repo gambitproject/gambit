@@ -10,7 +10,6 @@
 #include "extform.h"
 #include "infoset.h"
 #include "node.h"
-#include "gconvert.h"
 #include "gmisc.h"
 #include "treewin.h"
 #include "extshow.h"
@@ -139,7 +138,6 @@ if (!outcome_dialog)	// creating a new one
 		OutcomeVector<T> *tmp=(OutcomeVector<T> *)(ef.OutcomeList()[i]);
 		for (int j=1;j<=num_players;j++)
 			outcome_dialog->SetCell(i,j,ToString((*tmp)[j]));
-		outcome_dialog->SetType(i,cols+1,gSpreadStr);
 		outcome_dialog->SetCell(i,cols+1,tmp->GetName());
 		old_names[i]=tmp->GetName();
 	}
@@ -147,7 +145,7 @@ if (!outcome_dialog)	// creating a new one
 	outcome_dialog->Show(TRUE);
 	return;
 }
-else	// either going go a new one by clicking on an outcome or closing it
+else	// either going to a new one by clicking on an outcome or closing it
 {
 	if (out_name!="")	// setting a new row
 	{
@@ -159,19 +157,12 @@ else	// either going go a new one by clicking on an outcome or closing it
 	{
 		if (outcome_dialog->Completed()==wxOK)
 		{
+			T dummy;
 			for (i=1;i<=outcome_dialog->GetRows()-1;i++)
 			{
-				Outcome *tmp;
-				if (ef.NumOutcomes()<i)
-				{
-					tmp=ef.NewOutcome();
-					tmp->SetName(ToString(i));
-				}
-				else
-					tmp=ef.GetOutcome(old_names[i]);
-
+				Outcome *tmp=(ef.NumOutcomes()<i) ? tmp=ef.NewOutcome() : ef.GetOutcome(old_names[i]);
 				for (j=1;j<=num_players;j++)
-					(*(OutcomeVector<T> *)tmp)[j]=gS2N(outcome_dialog->GetCell(i,j));
+					(*(OutcomeVector<T> *)tmp)[j]=FromString(outcome_dialog->GetCell(i,j),dummy);
 				if (outcome_dialog->EnteredCell(i,j) && outcome_dialog->GetCell(i,j)!="")
 					tmp->SetName(outcome_dialog->GetCell(i,j));
 			}
@@ -185,31 +176,39 @@ else	// either going go a new one by clicking on an outcome or closing it
 //***********************************************************************
 //                      NODE-PROBS MENU HANDLER
 //***********************************************************************
+#define ENTRIES_PER_ROW	8
+
 template<class T> void TreeWindow<T>::node_probs(void)
 {
-int 	i;
-
 Node *n=cursor;
+int 	i,num_children=n->NumChildren();
+
 if (!n->GetPlayer()->IsChance())	// if this is not a chance player
 {
 	wxMessageBox("Probabilities only valid for CHANCE player","Error",wxOK | wxCENTRE,frame);
 	return;
 }
-gArray<float> prob_vector(n->NumChildren());
+
 MyDialogBox *node_probs_dialog=new MyDialogBox(frame,"Node Probabilities");
-for (i=1;i<=n->NumChildren();i++)
+ToStringPrecision(4);
+char **prob_vector=new char *[num_children+1];
+for (i=1;i<=num_children;i++)
 {
 	T temp_p=((ChanceInfoset<T> *)(n->GetInfoset()))->GetActionProb(i);
-	prob_vector[i]=(float)temp_p;
-	node_probs_dialog->Form()->Add(wxMakeFormFloat(NULL,&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
+	prob_vector[i]=new char[20];
+	strcpy(prob_vector[i],ToString(temp_p));
+	node_probs_dialog->Form()->Add(wxMakeFormString("",&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
+	if (i%ENTRIES_PER_ROW==0) node_probs_dialog->Add(wxMakeFormNewLine());
 }
 node_probs_dialog->Go();
 if (node_probs_dialog->Completed()==wxOK)
 {
-	for (i=1;i<=n->NumChildren();i++)
-		((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i,(T)prob_vector[i]);
+	T dummy;
+	for (i=1;i<=num_children;i++)
+		((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i,FromString(prob_vector[i],dummy));
 
 }
+for (i=1;i<=num_children;i++) delete [] prob_vector[i];delete [] prob_vector;
 delete node_probs_dialog;
 }
 

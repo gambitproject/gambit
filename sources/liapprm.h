@@ -1,6 +1,6 @@
 #ifndef LIAPPRM_H
 #define LIAPPRM_H
-#include "outprm.h"
+#include "algdlgs.h"
 
 template <class T>
 class LiapSolveParamsDialog : public OutputParamsDialog
@@ -42,7 +42,7 @@ LiapSolveParamsDialog<T>::~LiapSolveParamsDialog(void)
 template <class T>
 void LiapSolveParamsDialog<T>::GetParams(LiapParams<T> &P)
 {
-P.tolBrent=tolBrent;P.maxitsBrent=maxitsBrent;
+Funct_tolBrent=tolBrent;Funct_maxitsBrent=maxitsBrent;
 P.nequilib=nequilib;P.ntries=ntries;
 // Output stuff
 P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
@@ -55,7 +55,6 @@ P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
 		#define TEMPLATE
 	#endif   // __GNUG__, __BORLANDC__
 	TEMPLATE class LiapSolveParamsDialog<double> ;
-	TEMPLATE class LiapSolveParamsDialog<gRational> ;
 	#ifdef __BORLANDC__
 		#pragma option -Jgx
 	#endif

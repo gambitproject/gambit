@@ -5,7 +5,7 @@
 #include	"general.h"
 #include 	"wxmisc.h"
 #include	"spread.h"
-#include 	"gconvert.h"
+#include 	"gmisc.h"
 
 //Global GDI objects
 wxPen		*grid_line_pen;
@@ -26,7 +26,7 @@ gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {return op;}
 SpreadSheetDrawSettings::SpreadSheetDrawSettings(SpreadSheet3D *_parent,int cols):
 		col_width(cols)
 {
-ref_cnt=1;
+ref_cnt=1;                                        
 parent=_parent;
 if (!LoadOptions())
 {
@@ -164,12 +164,13 @@ return 1;
 // Column width
 int	SpreadSheetDrawSettings::GetColWidth(int col)
 {
-if (!col) col=1;
+if (!col) col=1; else assert(col>=1 && col<=col_width.Length() && "ColWidth::Invalid");
 if (horiz_fit)
 	return col_width[col]*tw+2*TEXT_OFF;
 else
 	return col_width[col]*COL_WIDTH_UNIT;
 }
+
 void SpreadSheetDrawSettings::SetColWidth(int	_c,int col)
 {
 if
@@ -185,6 +186,17 @@ void SpreadSheetDrawSettings::UpdateFontSize(float x,float y)
 if (x<0 && y<0) parent->GetDataExtent(&x,&y);
 tw=(int)x;th=(int)y;
 }
+
+// We need to know how many columns there are ...
+void SpreadSheetDrawSettings::SetDimensions(int rows,int cols)
+{
+int old_cols=col_width.Length();
+if (cols>old_cols)
+	for (int i=1;i<=cols-old_cols;i++) AddCol();
+if (cols<col_width.Length())
+	for (int i=old_cols;i<=cols;i--) col_width.Remove(i);
+}
+
 
 
 //****************************************************************************
@@ -269,7 +281,7 @@ int x_step=-1,y_step=-1;
 
 if (MaxX()>MAX_SHEET_WIDTH)
 	x_step=MaxX()/XSTEPS+5;
-if (sheet->GetRows()*draw_settings->GetRowHeight()>MAX_SHEET_HEIGHT)
+if (draw_settings->YStart()+sheet->GetRows()*draw_settings->GetRowHeight()>MAX_SHEET_HEIGHT)
 	y_step=(draw_settings->YStart()+(sheet->GetRows()+1)*draw_settings->GetRowHeight())/YSTEPS+5;
 
 if (x_step>0 || y_step>0)
@@ -286,7 +298,8 @@ if (x_step>0 || y_step>0)
 }
 if (x_step<0 && y_step<0 && draw_settings->Scrolling())
 {
-	((wxCanvas *)this)->SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
+//	x_step=0;y_step=0;
+	SetScrollbars(x_step,y_step,XSTEPS,YSTEPS,4,4);
 	draw_settings->SetXScroll(x_step);draw_settings->SetYScroll(y_step);
 	draw_settings->SetScrolling(FALSE);
 }
@@ -377,7 +390,7 @@ default:
 cell.Reset(sheet->GetValue(cell.row,cell.col));
 UpdateCell(*(GetDC()),cell);
 top_frame->OnSelectedMoved(cell.row,cell.col);
-top_frame->SetStatusText(cell.str);
+top_frame->SetStatusText(gPlainText(cell.str));
 // Make sure the cursor is visible.  Note, do not if this was a mouse
 // movement (ch=0)
 if (draw_settings->Scrolling() && ch!=0)
@@ -408,7 +421,7 @@ dc.DrawRectangle(	MaxX(cell.col-1)+LINE_OFF,
 									draw_settings->GetColWidth(cell.col)-2*LINE_OFF,
 									draw_settings->GetRowHeight()-2*LINE_OFF);
 // Update the status line text on the topmost frame
-top_frame->SetStatusText(cell.str);
+top_frame->SetStatusText(gPlainText(cell.str));
 // Save the new cell
 old_cell=cell;
 }
@@ -444,18 +457,37 @@ dc.DestroyClippingRegion();
 }
 
 // Updating
+// Changing the code to only redraw the visible part of the window.  This
+// should make updating large spreadsheets considerably faster.
 void SpreadSheetC::Update(wxDC &dc)
 {
 int row,col;
+// Find the visible dimensions
+int min_row,max_row,min_col,max_col;
+int x_start,y_start;
+int width=draw_settings->GetRealWidth(),height=draw_settings->GetRealHeight();
+if (!height || !width) return;
+ViewStart(&x_start,&y_start);
+x_start*=draw_settings->XScroll();y_start*=draw_settings->YScroll();
+min_row=(y_start-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
+if (min_row<1) min_row=1;
+max_row=min_row+height/draw_settings->GetRowHeight();
+if (max_row>sheet->GetRows()) max_row=sheet->GetRows();
+min_col=0;int i=1;
+while (!min_col && i<=sheet->GetCols())	{if (x_start<MaxX(i)) min_col=i;i++;}
+if (min_col<1) min_col=1;
+max_col=0;i=1;
+while (!max_col && i<=sheet->GetCols())	{if (x_start+width<MaxX(i)) max_col=i;i++;}
+if (max_col<1) max_col=sheet->GetCols();
 // Draw the grid
 if (dc.__type!=wxTYPE_DC_METAFILE) dc.Clear();
 dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.SetPen(grid_line_pen);
-for (row=1;row<=sheet->GetRows();row++)
+for (row=min_row;row<=max_row;row++)
 	dc.DrawLine(draw_settings->XStart(),draw_settings->YStart()+row*draw_settings->GetRowHeight(),
 						 MaxX()+1,
 						 draw_settings->YStart()+row*draw_settings->GetRowHeight());
-for (col=1;col<=sheet->GetCols();col++)
+for (col=min_col;col<=max_col;col++)
 	dc.DrawLine(MaxX(col),draw_settings->YStart(),
 							MaxX(col),
 							draw_settings->YStart()+sheet->GetRows()*draw_settings->GetRowHeight()+1);
@@ -464,17 +496,18 @@ dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.DrawRectangle(	draw_settings->XStart(),draw_settings->YStart(),
 									MaxX()-draw_settings->XStart(),
 									sheet->GetRows()*draw_settings->GetRowHeight()+2);
-// Draw the labels if any
+// Draw the labels if any (no sense in showing them if even the first row/col
+// are not visible
 dc.SetFont(draw_settings->GetLabelFont());
-if (draw_settings->RowLabels())
-	for (row=1;row<=sheet->GetRows();row++)
+if (draw_settings->RowLabels() && min_col==1)
+	for (row=min_row;row<=max_row;row++)
 		dc.DrawText(sheet->GetLabelRow(row),0,draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
-if (draw_settings->ColLabels())
-	for (col=1;col<=sheet->GetCols();col++)
+if (draw_settings->ColLabels() && min_row==1)
+	for (col=min_col;col<=max_col;col++)
 		dc.DrawText(sheet->GetLabelCol(col),MaxX(col-1)+TEXT_OFF,0);
 // Fill in the cells
-for (row=1;row<=sheet->GetRows();row++)
-	for (col=1;col<=sheet->GetCols();col++)
+for (row=min_row;row<=max_row;row++)
+	for (col=min_col;col<=max_col;col++)
 		DrawCell(dc,row,col);
 
 // Hilight the currently selected cell
@@ -566,12 +599,10 @@ SpreadSheet::SpreadSheet(int _rows,int _cols,int _level,char *title,wxFrame *par
 Init(_rows,_cols,_level,title,parent);
 }
 
-void SpreadSheet::Init(int _rows,int _cols,int _level,char *title,wxFrame *parent)
+void SpreadSheet::Init(int rows_,int cols_,int level_,char *title,wxFrame *parent)
 {
-rows=_rows;cols=_cols;level=_level;
-data=gRectBlock<SpreadDataCell>(rows,cols);
-row_labels=gBlock<gString>(rows);
-col_labels=gBlock<gString>(cols);
+SetDimensions(rows_,cols_);
+level=level_;
 int h,w;
 parent->GetClientSize(&w,&h);
 sheet=new SpreadSheetC(this,parent,0,0,w,h-MIN_BUTTON_SPACE);
@@ -583,6 +614,15 @@ void SpreadSheet::Clear(void)
 for (int i=1;i<=rows;i++)
 	for (int j=1;j<=cols;j++)
 		data(i,j).Clear();
+}
+
+void SpreadSheet::SetDimensions(int rows_,int cols_)
+{
+assert(rows_>0 && cols_>0 && "SpreadSheet::Invalid Dimensions");
+rows=rows_;cols=cols_;
+data=gRectBlock<SpreadDataCell>(rows,cols);
+row_labels=gBlock<gString>(rows);
+col_labels=gBlock<gString>(cols);
 }
 
 void SpreadSheet::AddRow(void)
@@ -670,7 +710,7 @@ SetLevel(1);
 if (levels>1) features|=ANY_BUTTON;	// we need a panel for the slider
 MakeFeatures();
 CreateStatusLine(2);
-// Size this frame according to the sheet dimentions
+// Size this frame according to the sheet dimensions
 Resize();
 }
 
@@ -710,6 +750,24 @@ if (buttons) // Create the panel
 		AddButtonNewLine();
 		AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
 	}
+}
+}
+
+void SpreadSheet3D::SetDimensions(int rows_,int cols_,int levels_)
+{
+assert(rows_>0 && cols_>0 && "SpreadSheet3D::Invalid Dimensions");
+int i;
+if (GetRows()!=rows_ || GetCols()!=cols_)
+{
+	for(i=1;i<=levels;i++) data[i].SetDimensions(rows_,cols_);
+	DrawSettings()->SetDimensions(rows_,cols_);
+}
+if (levels_)
+{
+	if (levels_>levels)
+		for (i=1;i<=levels_-levels;i++) AddLevel();
+	if (levels_<levels)
+		for (i=1;i<=levels-levels_;i++) DelLevel();
 }
 }
 
@@ -992,7 +1050,7 @@ if (features&ALL_MENUS)
 	if (features&OPTIONS_MENU)
 		display_menu->Append(OPTIONS_MENU,"&Options","Configure display options");
 	if (features&CHANGE_MENU)
-		display_menu->Append(CHANGE_MENU,"&Change","Change sheet dimentions");
+		display_menu->Append(CHANGE_MENU,"&Change","Change sheet dimensions");
 	if (display_menu) tmp_menubar->Append(display_menu,"&Display");
 	if (features&HELP_MENU)
 	{

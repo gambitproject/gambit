@@ -1,5 +1,5 @@
 // File: nfgconst.h -- defines various constants for NormShow menu events
-// $Id$
+// @(#)nfgconst.h	1.1 7/4/95
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
@@ -12,4 +12,6 @@
 #define NFG_DISPLAY_COLORS					200
 #define NFG_DISPLAY_OPTIONS					201
 #define NFG_DISPLAY_ACCELS					202
+
+#define NFG_FILE_SAVE								250
 #endif

@@ -99,15 +99,16 @@ public:
 #define wxMEDIA_PS					1
 #define wxMEDIA_CLIPBOARD		2
 #define wxMEDIA_METAFILE		3
+typedef enum {wxWYSIWYG,wxFITTOPAGE} wxOutputOption;
 class wxOutputDialogBox : public MyDialogBox
 {
 private:
 	wxRadioBox *media_box;
-	wxRadioBox *option_box;
+	wxCheckBox *fit_box;
 public:
 	wxOutputDialogBox(wxStringList *extra_media=0,wxWindow *parent=0);
 	int GetSelection();
-	int GetOption();
+	wxOutputOption GetOption();
 };
 
 // Returns the position of s in the list l.  This is useful for finding
@@ -134,6 +135,8 @@ Bool	IsDelete(wxKeyEvent &ev);
 // from the gambit_color_list.  Note: uses gString
 #include "gstring.h"
 void gDrawText(wxDC &dc,const gString &s,float x,float y);
+// Returns just the text portion of a gDrawText formated string
+gString gPlainText(const gString &s);
 
 // FindFile: finds the specified file in the path.  User deletes the
 // result

@@ -8,7 +8,7 @@
 #include "wx_help.h"
 #pragma hdrstop
 #include "zfortify.hpp"
-#include "const.h"
+#include "efgconst.h"
 #include "gambit.h"
 #include "normgui.h"
 #include "extgui.h"
@@ -16,10 +16,10 @@
 GambitFrame   *gambit_frame = NULL;
 wxHelpInstance *help_instance = NULL;
 wxList 		my_children;
-wxCursor *arrow_cursor;
-#ifdef _AIX                          
+wxCursor *arrow_cursor;                             
+#ifdef _AIX                                                  
 extern wxApp *wxTheApp=1;
-#endif
+#endif                                 
 GambitApp gambitApp;
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR

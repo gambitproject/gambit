@@ -1,11 +1,11 @@
 // File: accels.cc -- functions for working with accelerators
-// $Id$
+// @(#)accels.cc	1.5 7/4/95
 //
 
 #include "wx.h"
 #include "wxmisc.h"
 #include "keynames.h"
-#include "gconvert.h"
+#include "gmisc.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template

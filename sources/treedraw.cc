@@ -1,3 +1,6 @@
+// File: treedraw.cc -- contains the configuration class for the extensive
+// form
+// $Id$
 #include "zfortify.hpp"
 #include "wx.h"
 #include "wx_form.h"

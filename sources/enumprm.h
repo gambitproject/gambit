@@ -1,8 +1,8 @@
-// $Id$
+// @(#)enumprm.h	1.2 6/23/95
 #ifndef ENUMPRM_H
 #define ENUMPRM_H
 
-#include "outprm.h"
+#include "algdlgs.h"
 
 class EnumSolveParamsDialog : public OutputParamsDialog
 {

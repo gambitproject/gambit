@@ -1,3 +1,6 @@
+// File: treedraw.h -- contains the definition of the configuration class 
+// for the extensive form
+// $Id$
 #ifndef TREEDRAW_H
 #define TREEDRAW_H
 #include "gblock.h"

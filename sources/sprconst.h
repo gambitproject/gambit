@@ -1,5 +1,5 @@
 // File: sprconst.h -- definitions for constants for SpreadSheet3D menu events
-// $Id$
+// @(#)sprconst.h	1.1 7/4/95
 #ifndef SPRCONST_H
 #define SPRCONST_H
 

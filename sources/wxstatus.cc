@@ -1,3 +1,6 @@
+// File: wxstatus.cc -- class to implement progress indication/cancel feature
+// for the gambit algorithms in the gui.
+// $Id$
 #include <assert.h>
 #include "wxstatus.h"
 char tmp_str[200];
@@ -115,6 +118,5 @@ void wxStatus::button_proc(wxButton& ob, wxCommandEvent& event)
 {
 wxStatus *parent=(wxStatus *)ob.GetClientData();
 parent->SetSignal();
-wxMessageBox("SetSignal!", "Try me",wxOK | wxCANCEL) ;
 }
 

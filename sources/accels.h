@@ -19,9 +19,9 @@ typedef struct accel_struct
 	accel_struct(AccelState c,AccelState s,long k,long i):ctrl(c),shift(s),key(k),id(i) { }
 // Operators
 	accel_struct &operator=(const accel_struct &a) {ctrl=a.ctrl;shift=a.shift;key=a.key;id=a.id;return *this;}
-	int operator==(const accel_struct &a) {return (ctrl==a.ctrl && shift==a.shift && key==a.key);}
-	int operator!=(const accel_struct &a) {return !(ctrl==a.ctrl && shift==a.shift && key==a.key);}
-	int operator==(wxKeyEvent &a)
+	int operator==(const accel_struct &a) const {return (ctrl==a.ctrl && shift==a.shift && key==a.key);}
+	int operator!=(const accel_struct &a) const {return !(ctrl==a.ctrl && shift==a.shift && key==a.key);}
+	int operator==(wxKeyEvent &a) const 
 	{
 	return ((ctrl==a.ControlDown() || ctrl==aEither) && (shift==a.ShiftDown() || shift==aEither)
 				 && key==a.KeyCode());
