@@ -1,13 +1,5 @@
 GUI Bugs:
 
-
-Bug D1: Precision is not implemented in algorithms.  
-
-There is currently no way in the GUI to solve in Rational precision.
-This needs to be added.  It should be added as an additional checkbox
-in both the standard solution settings, and in the custom algorithms.
-The Rational setting should be greyed out when not available.
-
 Bug D3: Bugs in Outcome interface
 
 When filling in payoffs for outcomes in the extensive form outcome
