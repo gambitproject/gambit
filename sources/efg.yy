@@ -17,7 +17,7 @@ double last_double;
 
 /* Here are some scratch variables... */
 
-int playerNo, gameNo, isetNo, actNo;
+int playerNo, gameNo, isetNo, actNo, outcNo;
 Node node;
 struct nodeinfo info;
 gTuple<gNumber> *v;
@@ -97,12 +97,12 @@ outcomes:   LBRACE RBRACE
 outcome_list:  outcome
             |  outcome_list outcome
 
-outcome:    LBRACE INTEGER  { CreateOutcome(last_int);
+outcome:    LBRACE INTEGER  { CreateOutcome(outcNo = last_int);
             v = new gTuple<gNumber>(1, NumPlayers());
             playerNo = 1; }
             outcome_vector
-            { SetOutcomeValues(last_int, *v);  delete v; }
-            NAME  { SetOutcomeName(last_int, *last_name); }
+            { SetOutcomeValues(outcNo, *v);  delete v; }
+            NAME  { SetOutcomeName(outcNo, *last_name); }
             RBRACE
 
 outcome_vector:  LBRACE RBRACE
@@ -111,7 +111,8 @@ outcome_vector:  LBRACE RBRACE
 outcome_values:  outcome_value
               |  outcome_values outcome_value
 
-outcome_value:   FLOAT   { (*v)[playerNo++] = last_double; }
+outcome_value:   FLOAT    { (*v)[playerNo++] = last_double; }
+             |   INTEGER  { (*v)[playerNo++] = last_int; }
 
 /* Parsing the game list */
 
@@ -161,7 +162,6 @@ probs:          prob
      |          probs prob
 
 prob:           FLOAT  { (*v)[actNo++] = last_double; }
-
 
 nodes:          LBRACE { nodes = new gBlock<struct nodeinfo *>; } node_list
                 RBRACE   { games(gameNo)->InputFromFile(*nodes);  
