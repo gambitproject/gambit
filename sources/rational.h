@@ -23,7 +23,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #define _Rational_h 1
 
-#include <Integer.h>
+#include "integer.h"
+#include "input.h"
+#include "output.h"
 #include <math.h>
 
 class Rational
@@ -99,8 +101,8 @@ public:
   friend Integer   trunc(const Rational& x);
   friend Integer   round(const Rational& x);
 
-  friend istream&  operator >> (istream& s, Rational& y);
-  friend ostream&  operator << (ostream& s, const Rational& y);
+  friend input&    operator >> (input& s, Rational& y);
+  friend output&   operator << (output& s, const Rational& y);
 
   int		   fits_in_float() const;
   int		   fits_in_double() const;

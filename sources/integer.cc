@@ -30,14 +30,14 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "Integer.h"
+#include "integer.h"
 #include "std.h"
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include "Obstack.h"
-#include "AllocRin.h"
+#include "obstack.h"
+#include "allocrin.h"
 #include <new.h>
 #include "builtin.h"
 #include "lg.cc"
@@ -2173,6 +2173,7 @@ char* Itoa(const IntRep* x, int base, int width)
   return f;
 }
 
+/*
 ostream& operator << (ostream& s, const Integer& y)
 {
 #ifdef _OLD_STREAMS
@@ -2187,21 +2188,11 @@ ostream& operator << (ostream& s, const Integer& y)
   return s;
 #endif
 }
+*/
 
-void Integer::printon(ostream& s, int base /* =10 */, int width /* =0 */) const
+output& operator<<(output &s, const Integer &y)
 {
-  int align_right = !(s.flags() & ios::left);
-  int showpos = s.flags() & ios::showpos;
-  int showbase = s.flags() & ios::showbase;
-  char fillchar = s.fill();
-  char Xcase = (s.flags() & ios::uppercase)? 'X' : 'x';
-  const IntRep* x = rep;
-  int fmtlen = (x->len + 1) * I_SHIFT / lg(base) + 4 + width;
-  char* fmtbase = new char[fmtlen];
-  char* f = cvtItoa(x, fmtbase, fmtlen, base, showbase, width, align_right,
-		    fillchar, Xcase, showpos);
-  s.write(f, fmtlen);
-  delete fmtbase;
+  return s << Itoa(y.rep);
 }
 
 char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
@@ -2310,6 +2301,12 @@ char* hex(const Integer& x, int width)
   return Itoa(x, 16, width);
 }
 
+//
+// The >> operator is currently commented out... should be modified to
+// work with the input/output classes later...
+//
+
+/*
 istream& operator >> (istream& s, Integer& y)
 {
 #ifdef _OLD_STREAMS
@@ -2412,6 +2409,7 @@ istream& operator >> (istream& s, Integer& y)
 
   return s;
 }
+*/
 
 int Integer::OK() const
 {

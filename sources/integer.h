@@ -24,7 +24,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #define _Integer_h 1
 
-#include <iostream.h>
+#include "input.h"
+#include "output.h"
 
 struct IntRep                    // internal Integer representations
 {
@@ -211,10 +212,10 @@ public:
 
   friend char*    Itoa(const Integer& x, int base = 10, int width = 0);
   friend Integer  atoI(const char* s, int base = 10);
-  void		  printon(ostream& s, int base = 10, int width = 0) const;
+//  void		  printon(ostream& s, int base = 10, int width = 0) const;
   
-  friend istream& operator >> (istream& s, Integer& y);
-  friend ostream& operator << (ostream& s, const Integer& y);
+  friend input& operator >> (input &s, Integer& y);
+  friend output& operator << (output &s, const Integer& y);
 
 // error detection
 

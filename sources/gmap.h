@@ -400,35 +400,33 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
 
 template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
 {
-  K *new_keys;
-  T *new_values;
-  
+  if (length == 1)  {
+    T ret = values[0];
+    delete keys;
+    delete values;
+    keys = 0;
+    values = 0;
+    return ret;
+  }
+
   T ret = values[where];
     
-  if (length > 1)   {
-    new_keys = new K[length - 1];
-    new_values = new T[length - 1];
+  K *new_keys = new K[length - 1];
+  T *new_values = new T[length - 1];
     
-    memcpy(new_keys, keys, where * sizeof(K));
-    memcpy(new_values, values, where * sizeof(T));
+  memcpy(new_keys, keys, where * sizeof(K));
+  memcpy(new_values, values, where * sizeof(T));
 
-    memcpy(new_keys + where, keys + where + 1,
-	   (length - where - 1) * sizeof(K));
-    memcpy(new_values + where, new_values + where + 1,
-	   (length - where - 1) * sizeof(T));
-  }
+  memcpy(new_keys + where, keys + where + 1,
+	 (length - where - 1) * sizeof(K));
+  memcpy(new_values + where, new_values + where + 1,
+	 (length - where - 1) * sizeof(T));
 
   delete keys;
   delete values;
     
-  if (length > 1)   {
-    keys = new_keys;
-    values = new_values;
-  }
-  else   {
-    keys = 0;
-    values = 0;
-  }
+  keys = new_keys;
+  values = new_values;
 
   length--;
   return ret;
@@ -503,6 +501,7 @@ T gOrdMap<K, T>::operator()(const K &key) const
 template <class K, class T> INLINE
 int gOrdMap<K, T>::IsDefined(const K &key) const
 {
+  if (length == 0)   return 0;
   return (keys[Locate(key)] == key);
 }
 
@@ -536,30 +535,10 @@ template <class K, class T> INLINE T gOrdMap<K, T>::Remove(const K &key)
 // <note> This class implements functionality similar to the (now obsolescent)
 //        gMap class
 //
-template <class T> class gSparseSet   {
-  private:
-    gOrdMap<int, T> contents;
-
+template <class T> class gSparseSet : public gOrdMap<int, T>  {
   public:
-    gSparseSet(const T &d) : contents(d)   { }
-    gSparseSet(const gSparseSet<T> &s) : contents(s.contents)  { }
-    ~gSparseSet()  { }
-    
-    T &operator()(const int &key)   { return contents(key); }
-    T operator()(const int &key) const  { return contents(key); }
-    
-    T &Default(void)   { return contents.Default(); }
-    const T &Default(void) const   { return contents.Default(); }
-    
-    int Length(void) const   { return contents.Length(); }
-    
-    int IsDefined(const int &key) const  { return contents.IsDefined(key); }
-    
-    void Define(const int &key, const T &value) 
-      { contents.Define(key, value); }
-    T Remove(const int &key)   { return contents.Remove(key); }
-    
-    void Dump(output &f) const   { contents.Dump(f); }
+    gSparseSet(const T &d) : gOrdMap<int, T>(d)  { }
+    gSparseSet(const gSparseSet<T> &s) : gOrdMap<int, T>(s)  { }
 };
 
 
