@@ -53,7 +53,6 @@ Portion *GSM_ActionProb_Float(Portion **param)
   for(i=1; i<=e->NumPlayers(); i++)
     if(e->PlayerList()[i] == p)
       player = i;
-  assert(player > 0);
   assert(infoset > 0);
   assert(action > 0);
 
@@ -94,7 +93,6 @@ Portion *GSM_ActionProb_Rational(Portion **param)
   for(i=1; i<=e->NumPlayers(); i++)
     if(e->PlayerList()[i] == p)
       player = i;
-  assert(player > 0);
   assert(infoset > 0);
   assert(action > 0);
 
