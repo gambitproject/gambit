@@ -1,0 +1,75 @@
+//
+//  a GCL program to create a symmetric, n-person 
+//  private value first price auction
+//
+// FirstPriceAuction[n->NUMBER,values->LIST(NUMBER),strats->LIST(NUMBER)]=:EFG
+//
+//    n         number of players
+//    values    reservation values
+//    strats    possible bids
+
+NewFunction[Number[b->BOOLEAN]=:NUMBER,If[b,1,0];];
+
+NewFunction[Subtree[e<->EFG, n->NODE, list->LIST(INFOSET)],
+  If[Length[list]>0, 
+    iset:=list_1;
+    newlist:=Remove[list,1];
+    AddMove[iset, n ];
+    For[i:=1, i<=Length[Actions[iset]],i:=i+1,
+      Subtree[e, n#i, newlist];
+    ];,
+  bids:=History[n]
+  ];
+  e;
+];
+
+NewFunction[FirstPriceAuction[n->NUMBER,values->LIST(NUMBER),
+                              strats->LIST(NUMBER)]=:EFG,
+     // create new game
+  e:=NewEfg[];
+
+    // construct infosets for chance draw of player types
+  liset:={};
+  For[i:=1, i<=n, i:=i+1,
+    liset :=liset & {NewInfoset[Chance[e], Text[values]]}
+  ];
+
+    // construct infosets for player bids
+  For[i:=1, i<=n, i:=i+1,
+    liset :=liset & {NewInfoset[NewPlayer[e, "Player"+Text[i]], Text[strats]]}
+  ];
+
+    // recursively construct the game tree
+  Subtree[e, RootNode[e], liset];
+
+    // reveal private information (their own value) to players
+  For[i:=1, i<=n, i:=i+1,
+    Reveal[liset_i,{Players[e]_i}];
+  ];
+  DeleteEmptyInfosets[e];  // Reveal should take care of this!
+
+    // compute and attach payoffs to terminal nodes
+  t:=TerminalNodes[e];
+  For[i:=1,i<=Length[t],i:=i+1,
+    types:=;bids:=;
+    types:={};bids:={};
+    h:=ActionNumber[History[t_i]];
+    For[j:=1,j<=n,j:=j+1,
+      types:=types&{values_(h_j)};
+      bids:=bids&{strats_(h_(n+j))};
+    ];
+  win:=Number[bids=Max[bids]];
+  pay:=(types-bids)*win/Sum[win];
+  outcome:=SetPayoffs[NewOutcome[e],pay];
+  SetOutcome[t_i,outcome];
+  ];
+  e;
+]
+
+//  For example, the following command creates a First Price 
+//  Auction Game with 2 players, each player having 
+//    two possible types -- 0 and 2 
+//    three possible bids -- 0, 1, and 2
+// 
+//  e:=FirstPriceAuction[2,{0,2},{0,1,2}]
+// 
