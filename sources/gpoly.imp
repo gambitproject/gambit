@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// $Id$
+// @(#)gpoly.imp	1.10 03 Jun 1997
 //
 
 #include "gpoly.h"
@@ -138,6 +138,8 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
 }
 
 
+#ifndef MINI_POLY
+
 template<class T> gPoly<T> gPoly<T>::operator-() const
 {
   gPoly<T> neg(*this);
@@ -209,6 +211,8 @@ template<class T> void gPoly<T>::operator*=(const T& val)
   for (int j = 1; j <= Terms.Length(); j++)
     Terms[j] *= val;
 }
+
+#endif   // MINI_POLY
 
 template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 {
@@ -310,6 +314,8 @@ template <class T> int gPoly<T>::Dmnsn() const
   return Space->Dmnsn();
 }
 
+#ifndef MINI_POLY
+
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
 {
   int max = 0;
@@ -355,6 +361,7 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
   else                     return (T)0;
 }
 
+#endif   // MINI_POLY
 
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 {
@@ -420,8 +427,6 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 
   return  polynomial<T>(coefs);
 }
-
-#endif   // MINI_POLY
 
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
@@ -537,8 +542,6 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
   return result;
 }
 
-#ifndef MINI_POLY
-
 template <class T> 
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
@@ -576,21 +579,20 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
 {
   gPoly<T> newPoly(*this); 
 
-  int i;
-  for (i = 1; i <= newPoly.Terms.Length(); i++)
+  for (int i = 1; i <= newPoly.Terms.Length(); i++)
     newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef()
                            * (T)newPoly.Terms[i].ExpV()[varnumber],
 	  newPoly.Terms[i].ExpV().AfterDecrementingExpOfVariable(varnumber));
 
-  while (i <= newPoly.Terms.Length()) {
-    if (newPoly.Terms[i].Coef() == (T)0) newPoly.Terms.Remove(i);
-    else i++;
+  int j = 1;
+  while (j <= newPoly.Terms.Length()) {
+    if (newPoly.Terms[j].Coef() == (T)0) newPoly.Terms.Remove(j);
+    else j++;
   }
 
   return (newPoly);
 }
 
-#endif   // MINI_POLY
 
 template <class T> 
 gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
@@ -608,9 +610,6 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 
   return (newPoly);
 }
-
-
-#ifndef MINI_POLY
 
 //--------------------
 // Term Order Concepts
@@ -713,8 +712,6 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
   return L1*(*this) - L2*arg2;
 }
 
-#endif   // MINI_POLY
-
 
 //---------------------------
 //    Global Operators
@@ -732,11 +729,12 @@ template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
   return val * poly;
 }
 
+#endif   // MINI_POLY
 
 template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 {
   gString s;
-  if (p.Terms.Length() == 0) s += ToString((T) 0.0);
+  if (p.Terms.Length() == 0) s += "0";
   else {
     for (int j = 1; j <= p.Terms.Length(); j++)
       {
@@ -775,7 +773,6 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 //           Conversion
 //----------------------------------
 
-#ifdef GDOUBLE
 template<class T>  
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
@@ -792,7 +789,6 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
   
   return answer;
 }
-#endif   // GDOUBLE
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
 {
