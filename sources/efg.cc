@@ -267,6 +267,7 @@ FullEfg::FullEfg(void)
 
   outcomes[0] = new Outcome(this, 0);
   outcomes[0]->m_name = "(null)";
+  SortInfosets();
 }
 
 FullEfg::FullEfg(const FullEfg &E, Node *n /* = 0 */)
