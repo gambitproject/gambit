@@ -94,10 +94,16 @@ Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
   if (nodes.NumChildren(new_node) != nodes.NumChildren(to_iset))
     return new_node;
 
-  Node ret(to_iset);
+  if (new_node[1] == to_iset[1] && new_node[2] == to_iset[2])
+    return new_node;
 
-  if (nodes.MoveNode(new_node, ret))
+  Node ret(to_iset);
+  
+  if (nodes.MoveNode(new_node, ret))  {
     players.RemoveInfoset(new_node[1], new_node[0], new_node[2]);
+	// take into account possible infoset renumbering...
+    if (new_node[1] == ret[1] && new_node[2] < ret[2])  ret[2]--;
+  }
 
   return ret;
 }
@@ -122,6 +128,9 @@ Node ExtForm::MergeInfoset(const Node &from, const Node &into)
     return Node(efg_no, dummy, 1, 1);
 
   if (nodes.NumChildren(from) != nodes.NumChildren(into))
+    return from;
+
+  if (from[1] == into[1] && from[2] == into[2])
     return from;
 
   Node ret(nodes.MoveNodes(from, into));
