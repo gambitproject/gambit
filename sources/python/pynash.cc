@@ -46,7 +46,7 @@ gbt_nash_logit_nfg(PyObject *self, PyObject *args)
     return NULL;
   }
 
-  gbtNfgSupport support(((nfgobject *) nfg)->m_nfg);
+  gbtNfgSupport support(*((nfgobject *) nfg)->m_nfg);
   gbtNfgNashLogit algorithm;
   algorithm.SetFullGraph(true);
   gNullStatus status;
