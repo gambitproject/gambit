@@ -12,6 +12,7 @@
 
 class NFPlayer;
 class Strategy;
+class StrategyProfile;
 
 class BaseNfg {
  

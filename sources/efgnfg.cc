@@ -294,15 +294,15 @@ TEMPLATE void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp
 
 
 
-template Nfg<double> *MakeReducedNfg(Efg<double> &);
-template Nfg<gRational> *MakeReducedNfg(Efg<gRational> &);
+TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &);
+TEMPLATE Nfg<gRational> *MakeReducedNfg(Efg<gRational> &);
 
 #include "glist.imp"
 #include "garray.imp"
 
-template class gList<Correspondence *>;
-template class gNode<Correspondence *>;
-template class gListIter<Correspondence *>;
-template gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
-template class gArray<gList<Correspondence *> >;
-template class gArray<gListIter<Correspondence *> *>;
+TEMPLATE class gList<Correspondence *>;
+TEMPLATE class gNode<Correspondence *>;
+TEMPLATE class gListIter<Correspondence *>;
+TEMPLATE gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
+TEMPLATE class gArray<gList<Correspondence *> >;
+TEMPLATE class gArray<gListIter<Correspondence *> *>;

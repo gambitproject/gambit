@@ -506,14 +506,14 @@ void LPTableau<T>::DualVector(gVector<T> &L) const
 }
 
 template <class T>
-T LPTableau<T>::RelativeCost(int col)
+T LPTableau<T>::RelativeCost(int col) const
 {
   if( col<0 ) {
     return cost[-col] - dual[-col];
   }
   else {
 //      gVector<T> tmpcol(MinRow(),MaxRow());
-    A->GetColumn(col, tmpcol);
+    A->GetColumn(col, (gArray<T> &)tmpcol);
     return cost[col] - dual*tmpcol;
   }
 }
