@@ -44,7 +44,7 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
   
   if (!m_cursor) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
-      SetCellValue("N/A", i, 0);
+      SetCellValue("", i, 0);
     }
     return;
   }

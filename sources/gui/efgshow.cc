@@ -863,61 +863,67 @@ void EfgShow::UpdateMenus(void)
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
-		  (m_efg.NumChildren(cursor) > 0) ? false : true);
+		  (!cursor || m_efg.NumChildren(cursor) > 0) ? false : true);
   menuBar->Enable(efgmenuEDIT_NODE_DELETE,
-		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
+  menuBar->Enable(efgmenuEDIT_NODE_INSERT, (cursor) ? true : false);
+  menuBar->Enable(efgmenuEDIT_NODE_LABEL, (cursor) ? true : false);
+  menuBar->Enable(efgmenuEDIT_NODE_SET_MARK, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (markNode) ? true : false);
+
   menuBar->Enable(efgmenuEDIT_INFOSET_MERGE,
 		  (markNode && markNode->GetInfoset() &&
-		   cursor->GetInfoset() &&
+		   cursor && cursor->GetInfoset() &&
 		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot() &&
 		   markNode->GetPlayer() == cursor->GetPlayer()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_BREAK, 
-		  (cursor->GetInfoset()) ? true : false);
+		  (cursor && cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_SPLIT,
-		  (cursor->GetInfoset()) ? true : false);
+		  (cursor && cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_JOIN, 
 		  (markNode && markNode->GetInfoset() &&
-		   cursor->GetInfoset() &&
+		   cursor && cursor->GetInfoset() &&
 		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_LABEL,
-		  (cursor->GetInfoset()) ? true : false);
+		  (cursor && cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
-		  (cursor->GetInfoset() &&
+		  (cursor && cursor->GetInfoset() &&
 		   !cursor->GetPlayer()->IsChance()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
-		  (cursor->GetInfoset()) ? true : false);
+		  (cursor && cursor->GetInfoset()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_ACTION_LABEL,
-		  (cursor->GetInfoset() &&
+		  (cursor && cursor->GetInfoset() &&
 		   cursor->GetInfoset()->NumActions() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
-		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
-		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_DELETE, 
-		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
-		  (cursor->GetInfoset() &&
+		  (cursor && cursor->GetInfoset() &&
 		   cursor->GetPlayer()->IsChance()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_TREE_DELETE,
-		  (m_efg.NumChildren(cursor) > 0) ? true : false);
+		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_TREE_COPY,
-		  (markNode &&
+		  (markNode && cursor &&
 		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
   menuBar->Enable(efgmenuEDIT_TREE_MOVE,
-		  (markNode &&
+		  (markNode && cursor &&
 		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		  (!m_efg.GetOutcome(cursor).IsNull()) ? true : false);
+		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		  (!m_efg.GetOutcome(cursor).IsNull()) ? true : false);
+		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
+  menuBar->Enable(efgmenuEDIT_OUTCOMES_PAYOFFS,
+		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   
   if (m_treeWindow) {
     menuBar->Check(efgmenuTOOLS_SUPPORT_REACHABLE,

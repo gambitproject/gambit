@@ -22,19 +22,6 @@
 #include "efgutils.h"
 #include "base/glist.imp"
 
-extern int INFOSET_SPACING;
-extern int SUBGAME_LARGE_ICON_SIZE;
-extern int SUBGAME_SMALL_ICON_SIZE;
-extern int SUBGAME_PICK_SIZE;
-extern void DrawSubgamePickIcon(wxDC &, const NodeEntry &);
-
-
-#define DELTA                   8
-#define MAX_TW                  60
-#define MAX_TH                  20
-
-#define MIN_WINDOW_WIDTH   600  // at least 12 buttons
-#define MIN_WINDOW_HEIGHT  300
 
 //----------------------------------------------------------------------
 //                      TreeWindow: Member functions
@@ -329,14 +316,16 @@ void TreeWindow::EnsureCursorVisible(void)
 
 void TreeWindow::ProcessCursor(void)
 {
-  NodeEntry *entry = m_layout.GetNodeEntry(Cursor()); 
-  if (!entry) {
-    SetCursorPosition(m_efg.RootNode());
-    entry = m_layout.GetNodeEntry(Cursor());
-  }
+  if (Cursor()) {
+    NodeEntry *entry = m_layout.GetNodeEntry(Cursor()); 
+    if (!entry) {
+      SetCursorPosition(m_efg.RootNode());
+      entry = m_layout.GetNodeEntry(Cursor());
+    }
     
-  UpdateCursor();
-  EnsureCursorVisible();
+    UpdateCursor();
+    EnsureCursorVisible();
+  }
   Refresh();
   m_parent->OnSelectedMoved(Cursor());
 }
@@ -517,11 +506,9 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
   y = (int) ((float) y / m_zoom);
 
   Node *node = m_layout.NodeHitTest(x, y);
-  if (node) {
-    SetCursorPosition(node);
-    Refresh();
-    ProcessCursor();
-  }
+  SetCursorPosition(node);
+  Refresh();
+  ProcessCursor();
 }
 
 void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
@@ -556,10 +543,14 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
+    SetCursorPosition(node);
+    Refresh();
     PopupMenu(m_nodeMenu, p_event.GetX(), p_event.GetY());
   }
   else {
     // If right-click doesn't hit anything, display generic game menu
+    SetCursorPosition(0);
+    Refresh();
     PopupMenu(m_gameMenu, p_event.GetX(), p_event.GetY());
   }
 }
@@ -740,7 +731,7 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 void TreeWindow::UpdateMenus(void)
 {
   m_nodeMenu->Enable(efgmenuEDIT_NODE_ADD,
-		     (m_efg.NumChildren(m_cursor) > 0) ? false : true);
+		     (!m_cursor || m_efg.NumChildren(m_cursor) > 0) ? false : true);
 }
 
 //-----------------------------------------------------------------------
