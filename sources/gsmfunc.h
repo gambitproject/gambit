@@ -93,6 +93,8 @@ class CallFuncObj : public FuncDescObj
   int                   _CurrParamIndex;
   bool                  _ErrorOccurred;
 
+  bool _TypeMatch( Portion* p, PortionType ExpectedType ) const;
+
  public:
   CallFuncObj( FuncDescObj* func, gOutput& s_err );
   ~CallFuncObj();

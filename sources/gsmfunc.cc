@@ -287,6 +287,34 @@ int CallFuncObj::NumParams( void ) const
   return _NumParams;
 }
 
+
+bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
+{
+  bool        result = false;
+  PortionType CalledType;
+  PortionType ExpectedListType;
+
+  assert( p != 0 );
+  CalledType = p->Type();
+
+  if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
+  {
+    if( CalledType == porLIST )
+    {
+      CalledType = ( (List_Portion*) p )->DataType();
+      ExpectedListType = ExpectedType & ~porLIST;
+      result = CalledType & ExpectedListType;
+    }
+  }
+  else // normal type checking
+  {
+    result = CalledType & ExpectedType;
+  }
+  return result;
+}
+
+
+
 int CallFuncObj::FindParamName( const gString& param_name )
 {
   int f_index;
@@ -372,9 +400,10 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	type_match = false;
 	if( param == 0 || _FuncIndex == -1 )
 	  type_match = true;
-	else if( param->Type() & 
-		_FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type )
-	  type_match = true;
+	else 
+	  if( _TypeMatch( param, 
+			 _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type ) )
+	    type_match = true;
 
 	if( type_match )
 	{
@@ -516,8 +545,8 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	{
 	  if( _Param[ index ] != 0 )
 	  {
-	    if( _Param[ index ]->Type() & 
-	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
+	    if( _TypeMatch( _Param[ index ], 
+			   _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
 	      params_matched++;
 	  }
 	}
@@ -555,8 +584,8 @@ Portion* CallFuncObj::CallFunction( Portion **param )
     {
       if( _Param[ index ] != 0 )
       {
-	if( !( _Param[ index ]->Type() & 
-	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ) )
+	if( !_TypeMatch( _Param[ index ], 
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ) )
 	{
 	  _StdErr << "CallFuncObj Error: parameter #" << index;
 	  _StdErr << " type mismatch while calling\n";

@@ -9,7 +9,7 @@
 
 
 
-#define CRASHTEST
+// #define CRASHTEST
 
 
 int main( void )
@@ -1813,6 +1813,33 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+
+
+
+  machine->InitCallFunction( "ListTest" );
+  machine->Push( (double) 1 );
+  machine->PushList( 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "ListTest" );
+  machine->Push( (gRational) 1 );
+  machine->PushList( 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+#ifdef CRASHTEST
+  machine->InitCallFunction( "ListTest" );
+  machine->Push( (gInteger) 1 );
+  machine->PushList( 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+#endif // CRASHTEST
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
