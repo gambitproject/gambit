@@ -5,6 +5,7 @@
 // $Id$
 //
 
+#include "gstatus.h"
 #include "math/gmatrix.h"
 #include "math/gsmatrix.h"
 #include "mixedsol.h"
@@ -287,7 +288,8 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-MixedSolution Yamamoto(const NFSupport &p_support)
+void Yamamoto(const NFSupport &p_support, gStatus &p_status,
+	      gList<MixedSolution> &p_solutions)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
@@ -302,9 +304,14 @@ MixedSolution Yamamoto(const NFSupport &p_support)
     partitions.Append(RankStrategies(profile, pl));
   }
 
-  for (int step = 1; step <= 50000 && lambda > 0.01; step++) { 
-    YamamotoJacobian(profile, lambda, partitions, H);
+  p_solutions.Flush();
 
+  for (int step = 1; step <= 50000 && lambda > 0.01; step++) { 
+    p_status.Get();
+    p_status.SetProgress(1.0 - lambda,
+			 gText("Lambda = ") + ToText(lambda));
+    YamamotoJacobian(profile, lambda, partitions, H);
+      
     gPVector<double> delta(profile);
     double lambdainc;
 
@@ -371,7 +378,7 @@ MixedSolution Yamamoto(const NFSupport &p_support)
     } 
   }
 
-  return MixedSolution(profile);
+  p_solutions.Append(MixedSolution(profile, algorithmNfg_YAMAMOTO));
 }
 
 

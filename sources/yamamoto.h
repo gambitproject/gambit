@@ -6,4 +6,5 @@
 
 #include "mixedsol.h"
 
-MixedSolution Yamamoto(const NFSupport &);
+void Yamamoto(const NFSupport &, gStatus &, gList<MixedSolution> &);
+

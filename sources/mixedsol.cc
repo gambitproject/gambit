@@ -31,6 +31,8 @@ gText ToText(NfgAlgType p_algorithm)
     return "Qre";
   case algorithmNfg_QREALL:
     return "QreAll";
+  case algorithmNfg_YAMAMOTO:
+    return "Yamamoto";
   default:
     return "None";
   }

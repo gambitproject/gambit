@@ -20,7 +20,7 @@ typedef enum {
   algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
   algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
   algorithmNfg_QRE, algorithmNfg_QREALL,
-  algorithmNfg_POLISH_NASH
+  algorithmNfg_POLISH_NASH, algorithmNfg_YAMAMOTO
 } NfgAlgType;
 
 gText ToText(NfgAlgType);

@@ -1495,7 +1495,7 @@ static Portion *GSM_YamamotoSolve(GSM &gsm, Portion **param)
 
   try {
     gsm.StartAlgorithmMonitor("YamamotoSolve");
-    solutions.Append(Yamamoto(*support));
+    Yamamoto(*support, gsm.GetStatusMonitor(), solutions);
   }
   catch (gSignalBreak &) { }
   catch (...) {
