@@ -299,6 +299,19 @@ gOutput &gStandardOutput::operator<<(double x)
   return *this;
 }
 
+gOutput &gStandardOutput::operator<<(long double x)
+{
+  if (Represent == 'f')   {
+    if (fprintf(f, "%*.*lf", Width, Prec, x) < 0)  
+      throw WriteFailed();
+  }
+  else   {   // Represent == 'e'
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
+  }
+  return *this;
+}
+
 gOutput &gStandardOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
@@ -459,6 +472,21 @@ gOutput &gFileOutput::operator<<(double x)
   return *this;
 }
 
+gOutput &gFileOutput::operator<<(long double x)
+{
+  Open();
+  if (Represent == 'f')   {
+    if (fprintf(f, "%*.*lf", Width, Prec, x) < 0)  
+      throw WriteFailed();
+  }
+  else   {   // Represent == 'e'
+    if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
+      throw WriteFailed();
+  }
+  Close();
+  return *this;
+}
+
 gOutput &gFileOutput::operator<<(float x)
 {
   Open();
@@ -524,6 +552,8 @@ gOutput &gNullOutput::operator<<(long)   { return *this; }
 gOutput &gNullOutput::operator<<(char)   { return *this; }
 
 gOutput &gNullOutput::operator<<(double)   { return *this; }
+
+gOutput &gNullOutput::operator<<(long double) { return *this; }
 
 gOutput &gNullOutput::operator<<(float)    { return *this; }
 

@@ -25,6 +25,18 @@
 char *_SourceDir = 0;
 char *_ExePath = 0;
 
+//=======================================================================
+//                     Math error handling code 
+//=======================================================================
+
+#ifdef __BORLANDC__
+int _RTLENTRY _matherr(struct exception *e)
+{
+  wxMessageBox("Math error!");
+  return 1;	// we did not really fix anything, but want no more warnings
+}
+#endif  // __BORLANDC__
+
 extern int GCLParse(GSM *p_gsm,
 		    const gText& line, const gText &file, int lineno,
 		    const gText& rawline);
@@ -68,6 +80,7 @@ public:
   virtual gOutput &operator<<(long x);
   virtual gOutput &operator<<(char x);
   virtual gOutput &operator<<(double x);
+  virtual gOutput &operator<<(long double x);
   virtual gOutput &operator<<(float x);
   virtual gOutput &operator<<(const char *x);
   virtual gOutput &operator<<(const void *x);
@@ -121,9 +134,15 @@ gOutput &wxOutputWindowStream::operator<<(double x)
   return *this;
 }
 
-gOutput &wxOutputWindowStream::operator<<(float x)
+gOutput &wxOutputWindowStream::operator<<(long double x)
 {
   m_window->AppendText((char *) ToText(x));
+  return *this;
+}
+
+gOutput &wxOutputWindowStream::operator<<(float x)
+{
+  m_window->AppendText((char *) ToText((double) x));
   return *this;
 }
 

@@ -38,6 +38,7 @@ public:
   gOutput &operator<<(long x);
   gOutput &operator<<(char x);
   gOutput &operator<<(double x);
+  gOutput &operator<<(long double x);
   gOutput &operator<<(float x);
   gOutput &operator<<(const char *x);
   gOutput &operator<<(const void *x);
@@ -46,6 +47,7 @@ public:
 
   // functions for gProgress
   virtual void SetProgress(double p);
+  virtual void SetProgress(double, const gText &);
 
   // functions for gSignal
   virtual void SetSignal(void) { m_sig = true; }

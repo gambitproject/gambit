@@ -10,6 +10,7 @@
 
 
 template class gSquareMatrix<double>;
+template class gSquareMatrix<long double>;
 template class gSquareMatrix<gDouble>;
 template class gSquareMatrix<gRational>;
 

@@ -47,6 +47,9 @@ gOutput &wxStatus::operator<<(char x)
 gOutput &wxStatus::operator<<(double x)
 { return *this; }
 
+gOutput &wxStatus::operator<<(long double x)
+{ return *this; }
+
 gOutput &wxStatus::operator<<(float x)
 { return *this; }
 
@@ -63,5 +66,11 @@ void wxStatus::SetProgress(double p_value)
 {
   m_value = (int) (p_value * 100);
   Update(p_value * 100);
+}
+
+void wxStatus::SetProgress(double p_value, const gText &p_message)
+{
+  m_value = (int) (p_value * 100);
+  Update(p_value * 100, (const char *) p_message);
 }
 

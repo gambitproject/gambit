@@ -9,6 +9,7 @@
 
 template class gRectArray<int>;
 template class gRectArray<double>;
+template class gRectArray<long double>;
 template class gRectArray<gText>;
 
 template gOutput &operator<<(gOutput &, const gRectArray<int> &);

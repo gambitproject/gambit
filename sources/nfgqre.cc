@@ -13,7 +13,6 @@
 #include "math/gsmatrix.h"
 #include "gnullstatus.h"
 
-
 NFQreParams::NFQreParams(void)
   : m_method(qreHOMOTOPY), 
     powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
@@ -179,7 +178,7 @@ double NFQreFunc::Value(const gVector<double> &v)
 
 void QreJacobian(const Nfg &p_nfg,
 		 const MixedProfile<double> &p_profile,
-		 const double &p_lambda, gMatrix<double> &p_matrix)
+		 const double &p_lambda, gMatrix<long double> &p_matrix)
 {
   p_matrix = (double) 0;
 
@@ -196,7 +195,7 @@ void QreJacobian(const Nfg &p_nfg,
 	  if (pl1 == pl2) {
 	    if (st1 == st2) {
 	      for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-		p_matrix(rowno, colno) += exp(p_lambda * p_profile.Payoff(pl1, pl1, k));
+		p_matrix(rowno, colno) += expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
 	      }
 	    }
 	    else {
@@ -205,33 +204,33 @@ void QreJacobian(const Nfg &p_nfg,
 	  } 
 	  else {  // pl1 != pl2
 	    for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	      p_matrix(rowno, colno) += p_lambda * p_profile.Payoff(pl1, pl1, k, pl2, st2) * exp(p_lambda * p_profile.Payoff(pl1, pl1, k));
+	      p_matrix(rowno, colno) += p_lambda * p_profile.Payoff(pl1, pl1, k, pl2, st2) * expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
 	    }
 	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
-	    p_matrix(rowno, colno) -= p_lambda * p_profile.Payoff(pl1, pl1, st1, pl2, st2) * exp(p_lambda * p_profile.Payoff(pl1, pl1, st1));
+	    p_matrix(rowno, colno) -= p_lambda * p_profile.Payoff(pl1, pl1, st1, pl2, st2) * expl(p_lambda * p_profile.Payoff(pl1, pl1, st1));
 	  }
 	}
       }
 
       // Now for the column wrt lambda
       for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	p_matrix(rowno, p_matrix.NumColumns()) += p_profile.Payoff(pl1, pl1, k) * exp(p_lambda * p_profile.Payoff(pl1, pl1, k));
+	p_matrix(rowno, p_matrix.NumColumns()) += p_profile.Payoff(pl1, pl1, k) * expl(p_lambda * p_profile.Payoff(pl1, pl1, k));
       } 
       p_matrix(rowno, p_matrix.NumColumns()) *= p_profile(pl1, st1);
-      p_matrix(rowno, p_matrix.NumColumns()) -= p_profile.Payoff(pl1, pl1, st1) * exp(p_lambda * p_profile.Payoff(pl1, pl1, st1));
+      p_matrix(rowno, p_matrix.NumColumns()) -= p_profile.Payoff(pl1, pl1, st1) * expl(p_lambda * p_profile.Payoff(pl1, pl1, st1));
     }
   }
 }
 
 void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
-		    const gMatrix<double> &p_matrix,
+		    const gMatrix<long double> &p_matrix,
 		    gPVector<double> &p_delta, double &p_lambdainc,
 		    double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
   int rowno = 0; 
 
-  gSquareMatrix<double> M(p_matrix.NumRows());
+  gSquareMatrix<long double> M(p_matrix.NumRows());
 
   for (int row = 1; row <= M.NumRows(); row++) {
     for (int col = 1; col <= M.NumColumns(); col++) {
@@ -278,7 +277,7 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
 		 gList<MixedSolution> &solutions, gStatus &p_status,
 		 long &nevals, long &nits)
 {
-  gMatrix<double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
+  gMatrix<long double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
   MixedProfile<double> profile(start);
   double lambda = params.minLam;
   double stepsize = 0.0001;
@@ -311,6 +310,11 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
       qreValue.SetLambda(lambda);
       solutions[solutions.Length()].SetQre(lambda, qreValue.Value(profile));
     }
+
+    p_status.Get();
+    p_status.SetProgress((lambda - params.minLam) /
+			 (params.maxLam - params.minLam),
+			 gText("Current lambda: ") + ToText(lambda));
   }
   
   if (!params.fullGraph) { 

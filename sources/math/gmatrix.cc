@@ -8,6 +8,7 @@
 #include "math/rational.h"
 
 template class gMatrix<double>;
+template class gMatrix<long double>;
 template class gMatrix<gRational>;
 template class gMatrix<gInteger>;
 template class gMatrix<int>;
