@@ -19,6 +19,8 @@ class Outcome    {
     ~Outcome()  { }
 
     Outcome &operator=(const Outcome &);
+    void SetOutcomeName(const gString &s)  {name = s;}
+    gString GetOutcomeName(void) const   {return name;}
 
     // Return a vector containing the values of outcomes for each player
     // from (1..num_players).  If a player's value has not been set, it
