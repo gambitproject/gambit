@@ -1,7 +1,7 @@
 //
 // FILE: gmap.h -- Declaration of Map container type
 //
-// @(#)gmap.h	1.10 7/20/94
+// $Id$
 //
 
 #ifndef GMAP_H
@@ -309,6 +309,8 @@ template <class K, class T> class gBaseMapMessage : public gMessage  {
 // library, but the coding is all our own.
 //
 
+template <class K, class T> class gBaseMapIter;
+
 //
 // This is the abstract class from which all Map classes are derived
 //
@@ -432,6 +434,7 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
     delete values;
     keys = 0;
     values = 0;
+    length = 0;
     return ret;
   }
 
@@ -464,6 +467,7 @@ template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
     f << keys[i] << " --> " << values[i] << '\n';
 }
 
+template <class K, class T> class gOrdMapIter;
 //
 // The gOrdMap is an ordered map.  That is, the index class has all the
 // usual ordering operators defined upon it (==, !=, <, <=, >, >=).  These
@@ -472,7 +476,7 @@ template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
 // when using keys which are costly to compare
 //
 template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
-  friend class gOrdMapIter<K,T>;
+  friend class gOrdMapIter<K, T>;
   private:
     int Locate(const K &key) const;
 
@@ -564,6 +568,11 @@ template <class T> class gSparseSet : public gOrdMap<int, T>  {
   public:
     gSparseSet(const T &d) : gOrdMap<int, T>(d)  { }
     gSparseSet(const gSparseSet<T> &s) : gOrdMap<int, T>(s)  { }
+
+    int FirstVacancy(void) const    {
+      for (int v = 0; v < length && keys[v] != v + 1; v++);
+      return ++v;
+    }
 };
 
 
