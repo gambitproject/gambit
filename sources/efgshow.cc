@@ -148,7 +148,13 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
 
 void EfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
 {
-  if (p_event.GetSelection() > 0) {
+  if (p_event.GetSelection() == efgmenuPREFS_INC_ZOOM) {
+    m_parent->SetStatusText("Zoom in");
+  }
+  else if (p_event.GetSelection() == efgmenuPREFS_DEC_ZOOM) {
+    m_parent->SetStatusText("Zoom out");
+  }
+  else if (p_event.GetSelection() > 0) {
     m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
   }
   else {
@@ -250,7 +256,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPREFS_FONTS_ABOVEBRANCH, EfgShow::OnPrefsFontsAboveBranch)
   EVT_MENU(efgmenuPREFS_FONTS_BELOWBRANCH, EfgShow::OnPrefsFontsBelowBranch)
   EVT_MENU(efgmenuPREFS_DISPLAY_LAYOUT, EfgShow::OnPrefsDisplayLayout)
-  EVT_MENU(efgmenuPREFS_DISPLAY_FLASHING, EfgShow::OnPrefsDisplayFlashing)
   EVT_MENU(efgmenuPREFS_DISPLAY_DECIMALS, EfgShow::OnPrefsDisplayDecimals)
   EVT_MENU(efgmenuPREFS_COLORS, EfgShow::OnPrefsColors)
   EVT_MENU(efgmenuPREFS_SAVE, EfgShow::OnPrefsSave)
@@ -781,8 +786,6 @@ void EfgShow::MakeMenus(void)
   wxMenu *prefsDisplayMenu = new wxMenu;
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
-  prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_FLASHING, "&Flashing Cursor",
-			   "Toggle flashing cursor", true);
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_LAYOUT, "&Layout",
 			   "Set tree layout parameters");
   prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display", prefsDisplayMenu,
@@ -1943,26 +1946,16 @@ const float ZOOM_MIN = .2;
 
 void EfgShow::OnPrefsZoomIn(wxCommandEvent &)
 {
-#ifdef ZOOM_WINDOW
-  float zoom = m_treeZoomWindow->GetZoom();
+  float zoom = m_treeWindow->GetZoom();
   zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
-  m_treeZoomWindow->SetZoom(zoom);
-
-  //  m_treeZoomWindow->Show(true);
-  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
-#endif  // ZOOM_WINDOW
+  m_treeWindow->SetZoom(zoom);
 }
 
 void EfgShow::OnPrefsZoomOut(wxCommandEvent &)
 {
-#ifdef ZOOM_WINDOW
-  float zoom = m_treeZoomWindow->GetZoom();
+  float zoom = m_treeWindow->GetZoom();
   zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
-  m_treeZoomWindow->SetZoom(zoom);
-  
-  // m_treeZoomWindow->Show(true);
-  GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
-#endif  // ZOOM_WINDOW
+  m_treeWindow->SetZoom(zoom);
 }
 
 void EfgShow::OnPrefsLegend(wxCommandEvent &)
@@ -2052,13 +2045,6 @@ void EfgShow::OnPrefsDisplayLayout(wxCommandEvent &)
     m_treeWindow->RefreshLayout();
     m_treeWindow->Refresh();
   }
-}
-
-void EfgShow::OnPrefsDisplayFlashing(wxCommandEvent &)
-{
-  m_treeWindow->prefs_display_flashing();
-  GetMenuBar()->Check(efgmenuPREFS_DISPLAY_FLASHING,
-		      m_treeWindow->DrawSettings().FlashingCursor());
 }
 
 void EfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)

@@ -152,7 +152,6 @@ private:
   void OnPrefsFontsAboveBranch(wxCommandEvent &);
   void OnPrefsFontsBelowBranch(wxCommandEvent &);
   void OnPrefsDisplayLayout(wxCommandEvent &);
-  void OnPrefsDisplayFlashing(wxCommandEvent &);
   void OnPrefsDisplayDecimals(wxCommandEvent &);
   void OnPrefsColors(wxCommandEvent &);
   void OnPrefsSave(wxCommandEvent &);

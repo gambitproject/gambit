@@ -289,7 +289,23 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 void TreeWindow::RefreshLayout(void)
 {
   m_layout.Layout(*m_parent->GetSupport());
-  FitZoom();
+  AdjustScrollbarSteps();
+}
+
+void TreeWindow::AdjustScrollbarSteps(void)
+{
+  int width, height;
+  GetClientSize(&width, &height);
+
+  if (width < m_layout.MaxX() * m_zoom || height < m_layout.MaxY() * m_zoom) {
+    int scrollX, scrollY;
+    GetViewStart(&scrollX, &scrollY);
+
+    SetScrollbars(50, 50,
+		  m_layout.MaxX() * m_zoom / 50 + 1,
+		  m_layout.MaxY() * m_zoom / 50 + 1,
+		  scrollX, scrollY);
+  }
 }
 
 void TreeWindow::FitZoom(void)
@@ -303,6 +319,13 @@ void TreeWindow::FitZoom(void)
   zoomx = gmin(zoomx, 1.0); 
   zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
   m_zoom = gmin(zoomx, zoomy);
+}
+
+void TreeWindow::SetZoom(float p_zoom)
+{
+  m_zoom = p_zoom;
+  AdjustScrollbarSteps();
+  Refresh();
 }
 
 void TreeWindow::OnDraw(wxDC &dc)
@@ -323,9 +346,8 @@ void TreeWindow::OnDraw(wxDC &dc)
 
   dc.BeginDrawing();
   m_layout.Render(dc);
+  flasher->Flash(dc);
   dc.EndDrawing();
-
-  flasher->Flash();
 }
 
 void TreeWindow::ProcessCursor(void)
@@ -336,7 +358,44 @@ void TreeWindow::ProcessCursor(void)
     entry = m_layout.GetNodeEntry(Cursor());
   }
     
+  int xScroll, yScroll;
+  GetViewStart(&xScroll, &yScroll);
+  int width, height;
+  GetClientSize(&width, &height);
+  width = (int) (width / m_zoom);
+  height = (int) (height / m_zoom);
+  int xSteps = (int) (m_layout.MaxX() * m_zoom / 50) + 1;
+  int ySteps = (int) (m_layout.MaxY() * m_zoom / 50) + 1;
+
+  if (entry->x < xScroll * 50) {
+    xScroll = entry->x / 50 - 1;
+  }
+  if (entry->x + draw_settings.NodeLength() > xScroll * 50 + width) {
+    xScroll = ((entry->x + draw_settings.NodeLength()) / 50 +
+	       (width / 2) / 50);
+  }
+  if (xScroll < 0) {
+    xScroll = 0;
+  }
+  if (xScroll > xSteps) {
+    xScroll = xSteps;
+  }
+
+  if (entry->y - 10 < yScroll * 50) {
+    yScroll = (entry->y - 10) / 50 - 1;
+  }
+  if (entry->y + 10 > yScroll * 50 + height) {
+    yScroll = (entry->y + 10) / 50 - height / 50;
+  }
+  if (yScroll < 0) {
+    yScroll = 0;
+  }
+  if (yScroll > ySteps) {
+    yScroll = ySteps;
+  }
+
   UpdateCursor();
+  Scroll(xScroll, yScroll);
   m_parent->OnSelectedMoved(Cursor());
 }
 
@@ -363,7 +422,10 @@ void TreeWindow::UpdateCursor(void)
 			  entry->y, nodeCursor);
   }
 
-  flasher->Flash();
+  wxClientDC dc(this);
+  PrepareDC(dc);
+  dc.SetUserScale(m_zoom, m_zoom);
+  flasher->Flash(dc);
 }
 
 gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
@@ -445,7 +507,10 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
     if (outcome_drag->OnEvent(p_event, outcomes_changed) != DRAG_NONE) return;
   }
     
-  int x = p_event.GetX(), y = p_event.GetY();
+  int x, y;
+  CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+  x = (int) ((float) x / m_zoom);
+  y = (int) ((float) y / m_zoom);
 
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
@@ -457,8 +522,10 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
 
 void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
-  long x, y;
-  p_event.GetPosition(&x, &y);
+  int x, y;
+  CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+  x = (int) ((float) x / m_zoom);
+  y = (int) ((float) y / m_zoom);
 
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
@@ -520,11 +587,14 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 {
   int x, y;
-  p_event.GetPosition(&x, &y);
+  CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+  x = (int) ((float) x / m_zoom);
+  y = (int) ((float) y / m_zoom);
 
   int x_start, y_start;
   ViewStart(&x_start, &y_start);
   wxClientDC dc(this);
+  PrepareDC(dc);
   dc.SetUserScale(m_zoom, m_zoom);
   PopupMenu(m_editMenu, dc.LogicalToDeviceX(x-x_start*PIXELS_PER_SCROLL),
 	    dc.LogicalToDeviceY(y-y_start*PIXELS_PER_SCROLL));
@@ -613,6 +683,7 @@ void TreeWindow::SetSubgamePickNode(Node *n)
     ProcessCursor();
     NodeEntry *ne = m_layout.GetNodeEntry(n);
     wxClientDC dc(this);
+    PrepareDC(dc);
     dc.SetUserScale(m_zoom, m_zoom);
     DrawSubgamePickIcon(dc, *ne);
     SetCursorPosition(cur_cursor);
@@ -936,7 +1007,7 @@ void TreeWindow::SubgameExpandAll(void)
 void TreeWindow::OnSize(wxSizeEvent &p_event)
 {
   if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
-    Refresh();
+    m_layout.Layout(*m_parent->GetSupport());
   }
 
   // This extra check because wxMSW seems to generate OnSize events
@@ -946,6 +1017,7 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
     return;
   }
 
+  /*
   double zoomx = ((double) p_event.GetSize().GetWidth() /
 		  (double) m_layout.MaxX());
   double zoomy = ((double) p_event.GetSize().GetHeight() /
@@ -954,26 +1026,11 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
   zoomx = gmin(zoomx, 1.0);
   zoomy = gmin(zoomy, 1.0);
   m_zoom = gmin(zoomx, zoomy); 
+  */
+  AdjustScrollbarSteps();
+
   Refresh();
 }
-
-void TreeWindow::prefs_display_flashing(void)
-{
-  if (!draw_settings.FlashingCursor()) {
-    draw_settings.SetFlashingCursor(true);
-    delete (TreeNodeCursor *) flasher;
-    flasher = new TreeNodeFlasher(this);
-  }
-  else {
-    draw_settings.SetFlashingCursor(false);
-    delete (TreeNodeFlasher *) flasher;
-    flasher = new TreeNodeCursor(this);
-  }
-
-  ProcessCursor();
-  RefreshLayout();
-}
-
 
 template class gList<NodeEntry *>;
 template class gList<SubgameEntry>;

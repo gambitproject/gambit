@@ -122,7 +122,6 @@ typedef enum {
   efgmenuPREFS_FONTS_BELOWBRANCH = 1617,
   efgmenuPREFS_DISPLAY = 1603,
   efgmenuPREFS_DISPLAY_DECIMALS = 1618,
-  efgmenuPREFS_DISPLAY_FLASHING = 1619,
   efgmenuPREFS_DISPLAY_LAYOUT = 1620,
 
   // Menu items for profiles window

@@ -38,19 +38,14 @@ public:
   void GetFlashNode(int & x_s, int & y_s, int & x_e, int & y_e) const;
   virtual void SetFlashing(bool _flashing) { flashing = _flashing; }
   bool Flashing(void) const   { return flashing; }
-  void Flash(void);
   void Flash(wxDC &);  // used to force a flash after moving
   void SetType(FlashType _t) { __mytype = _t; }
   FlashType Type(void) const { return __mytype; }
 };
 
-class TreeNodeFlasher : public wxTimer, public TreeNodeCursor {
-public:
-  TreeNodeFlasher(TreeWindow *);
-  virtual ~TreeNodeFlasher();
-
-  void  Notify(void) { Flash(); }
-  void  SetFlashing(bool _flashing);
-};
-
 #endif  // TWFLASH_H
+
+
+
+
+

@@ -559,8 +559,10 @@ void efgTreeLayout::UpdateTableInfosets(void)
   // now add the needed length to each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     e = m_nodeList[pos];
-    if (e->level != 0) 
+    if (e->level != 0) {
       e->x += nums[e->level-1]*INFOSET_SPACING;
+      m_maxX = gmax(m_maxX, e->x);
+    }
   }
 }
 
@@ -594,10 +596,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
 
   UpdateTableParents();
 
-  m_maxX = ((maxlev + 1) * (draw_settings.BranchLength() + 
-			    draw_settings.ForkLength() + 
-			    draw_settings.NodeLength()) + 
-	    draw_settings.OutcomeLength());
+  m_maxX += draw_settings.NodeLength() + draw_settings.OutcomeLength() * 3;
   m_maxY = maxy + 25;
 }
 
@@ -875,6 +874,7 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
         
     float zoom = m_parent->GetZoom();
 
+#ifdef UNUSED
     // Check if this node/labels are visible
     if (!(child_entry.x+deviceOrigin.x < x_start*PIXELS_PER_SCROLL  ||
 	  entry.x+deviceOrigin.x > x_start*PIXELS_PER_SCROLL+width/zoom ||
@@ -883,7 +883,8 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
 	  (entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL && 
 	   child_entry.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL)) ||
 	(entry.infoset.y+deviceOrigin.y < y_start*PIXELS_PER_SCROLL+height/zoom)) {
-
+#endif // UNUSED
+    if (true) {
       // draw the labels
       RenderLabels(dc, &child_entry, &entry);
 

@@ -64,13 +64,6 @@ void TreeNodeCursor::DrawCursor(wxDC &p_dc, int xs, int ys, int xe, int ye,
   }
 }
 
-void TreeNodeCursor::Flash(void)
-{
-  wxClientDC dc(m_parent);
-  dc.SetUserScale(m_parent->GetZoom(), m_parent->GetZoom());
-  Flash(dc);
-}
-
 void TreeNodeCursor::Flash(wxDC &p_dc)
 {
   static int cur_color;
@@ -110,34 +103,4 @@ void TreeNodeCursor::Flash(wxDC &p_dc)
     DrawCursor(p_dc, x_s, y_s, x_e, y_e, cursor_type);
   }
 }
-
-//-----------------------------------------------------------------------
-//                         class TreeNodeFlasher
-//-----------------------------------------------------------------------
-
-TreeNodeFlasher::TreeNodeFlasher(TreeWindow *p_parent)
-  : TreeNodeCursor(p_parent)
-{
-  SetType(myFlasher);
-  SetFlashing(true);
-}
-
-TreeNodeFlasher::~TreeNodeFlasher(void)
-{
-  Stop();
-}
-
-void TreeNodeFlasher::SetFlashing(bool _flashing)
-{
-  const int FLASHDELAY = 200;
-  TreeNodeCursor::SetFlashing(_flashing);
-    
-  if (TreeNodeCursor::Flashing()) {
-    Start(FLASHDELAY);
-  }
-  else {
-    Stop();
-  }
-}
-
 

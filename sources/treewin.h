@@ -49,9 +49,10 @@ private:
   void MakeFlasher(void);
   void UpdateCursor(void);
 
-  void  ProcessCursor(void);
-  bool  ProcessShift(wxMouseEvent &ev);
+  void ProcessCursor(void);
+  bool ProcessShift(wxMouseEvent &ev);
   void MakeMenus(void);
+  void AdjustScrollbarSteps(void);
 
   // Event handlers
   void OnSize(wxSizeEvent &);
@@ -83,8 +84,6 @@ public:
   void SubgameExpand(void);
   void SubgameExpandBranch(void);
   void SubgameExpandAll(void);
-
-  void prefs_display_flashing(void);
 
   EfgShow *Parent(void) const { return m_parent; }
   
@@ -121,6 +120,7 @@ public:
   // Check if a drag'n'drop object has been activated
   Node *GotObject(long &mx, long &my, int what);
   float GetZoom(void) const { return m_zoom; }
+  void SetZoom(float p_zoom);
   
   // Access to the numeric values from the renderer
   gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
