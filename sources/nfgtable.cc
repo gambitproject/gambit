@@ -182,15 +182,12 @@ void NfgTable::OnChangeValues(void)
 
 void NfgTable::MakeProbDisp(void)
 {
-  /*
   int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) + 1;
   int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) + 1;
 
   if (!features.prob) {
     AppendRows();
-    //SetSelectableRow(row, FALSE);
     AppendCols();
-v    //SetSelectableCol(col, FALSE);
   }
 
   // Note: this insures that Prob is always the FIRST extra after the
@@ -198,21 +195,18 @@ v    //SetSelectableCol(col, FALSE);
   SetLabelValue(wxVERTICAL, "Prob", row-1);
   SetLabelValue(wxHORIZONTAL, "Prob", col-1);
   features.prob = 1;
-  */
 }
 
 
 void NfgTable::RemoveProbDisp(void)
 {
-  /* 
- if (features.prob) {
-    int row = dimensionality[pl1] + 1;
-    int col = dimensionality[m_colPlayer] + 1;
+  if (features.prob) {
+    int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) + 1;
+    int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) + 1;
     DeleteRows(row);
     DeleteCols(col);
     features.prob = 0;
   }
-  */
 }
 
 void NfgTable::MakeDomDisp(void)
@@ -246,9 +240,10 @@ void NfgTable::RemoveDomDisp(void)
 
 void NfgTable::MakeValDisp(void)
 {
-  /*
-  int row = dimensionality[pl1] + features.prob + features.dom + 1;
-  int col = dimensionality[m_colPlayer] + features.prob + features.dom + 1;
+  int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) +
+    features.prob + features.dom + 1;
+  int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) +
+    features.prob + features.dom + 1;
 
   if (!features.val) {
     InsertRows(row);
@@ -258,25 +253,27 @@ void NfgTable::MakeValDisp(void)
   SetLabelValue(wxVERTICAL, "Value", row-1);
   SetLabelValue(wxHORIZONTAL, "Value", col-1);
   features.val = 1;
-  */
 }
 
 
 void NfgTable::RemoveValDisp(void)
 {
-  /*
   if (features.val) {
-    int row = dimensionality[pl1] + features.prob + features.dom + 1;
-    int col = dimensionality[m_colPlayer] + features.prob + features.dom + 1;
+    int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) +
+      features.prob + features.dom + 1;
+    int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) +
+      features.prob + features.dom + 1;
     DeleteRows(row);
     DeleteCols(col);
     features.val = 0;
   }
-  */
 }
 
 void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
 {
-  m_parent->OutcomePayoffs(p_event.GetRow()+1, p_event.GetCol()+1); 
+  if (p_event.GetRow() < m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) &&
+      p_event.GetCol() < m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer())) {
+    m_parent->OutcomePayoffs(p_event.GetRow()+1, p_event.GetCol()+1); 
+  }
 }
 

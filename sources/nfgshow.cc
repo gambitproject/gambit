@@ -401,37 +401,35 @@ void NfgShow::UpdateSoln(void)
   gNumber eps;
   gEpsilon(eps, GetDecimals());
  
-#ifdef NOT_PORTED_YET
   if (m_table->HaveProbs()) {
     // Print out the probability in the next column/row
     for (int i = 1; i <= m_currentSupport->NumStrats(m_rowPlayer); i++)
       m_table->SetCellValue((char *) ToText(soln(m_currentSupport->Strategies(m_rowPlayer)[i]),
 					   GetDecimals()),
-			   i-1, m_currentSupport->Num);
+			   i-1, m_currentSupport->NumStrats(m_colPlayer));
 
     for (int i = 1; i <= m_currentSupport->NumStrats(m_colPlayer); i++)
       m_table->SetCellValue((char *) ToText(soln(m_currentSupport->Strategies(m_colPlayer)[i]),
 					   GetDecimals()),
-			   rows, i-1);
+			   m_currentSupport->NumStrats(m_rowPlayer), i-1);
   }
 
   if (m_table->HaveVal()) {
     // Print out the probability in the last column/row
-    for (int i = 1; i <= rows; i++) {
-      m_table->SetCellValue((char *) ToText(soln.Payoff(m_nfg.Players()[pl1],
-						       m_currentSupport->Strategies(pl1)[i]),
+    for (int i = 1; i <= m_currentSupport->NumStrats(m_rowPlayer); i++) {
+      m_table->SetCellValue((char *) ToText(soln.Payoff(m_nfg.Players()[m_rowPlayer],
+						       m_currentSupport->Strategies(m_rowPlayer)[i]),
 					   GetDecimals()),
-			   i-1, cols+m_table->HaveProbs()+m_table->HaveDom());
+			   i-1, m_currentSupport->NumStrats(m_colPlayer)+m_table->HaveProbs()+m_table->HaveDom());
     }
     
-    for (int j = 1; j <= cols; j++) {
+    for (int j = 1; j <= m_currentSupport->NumStrats(m_colPlayer); j++) {
       m_table->SetCellValue((char *) ToText(soln.Payoff(m_nfg.Players()[m_colPlayer],
 						       m_currentSupport->Strategies(m_colPlayer)[j]),
 					   GetDecimals()),
-			   rows+m_table->HaveProbs()+m_table->HaveDom(), j-1);
+			   m_currentSupport->NumStrats(m_rowPlayer)+m_table->HaveProbs()+m_table->HaveDom(), j-1);
     }
   }
-#endif  // NOT_PORTED_YET
 }
 
 
@@ -442,7 +440,7 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
     return;
 
   // The value in the maximum row&col cell corresponds to prob of being
-  // at this contingency = Product(Prob(strat_here), all players except pl1, m_colPlayer)
+  // at this contingency = Product(Prob(strat_here), all players except m_rowPlayer, m_colPlayer)
   const MixedSolution &soln = (*m_solutionTable)[cur_soln];
 
   gNumber cont_prob(1);
@@ -454,10 +452,9 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
     }
   }
 
-#ifdef NOT_PORTED_YET
   m_table->SetCellValue((char *) ToText(cont_prob, GetDecimals()),
-		       rows, cols);
-#endif  // NOT_PORTED_YET
+			m_currentSupport->NumStrats(m_rowPlayer),
+			m_currentSupport->NumStrats(m_colPlayer));
 }
 
 
@@ -597,8 +594,8 @@ void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 {
   gArray<int> profile(m_panel->GetProfile());
-  profile[m_rowPlayer] = st1 + 1;
-  profile[m_colPlayer] = st2 + 1;
+  profile[m_rowPlayer] = st1;
+  profile[m_colPlayer] = st2;
 
   dialogNfgPayoffs dialog(m_nfg, m_nfg.GetOutcome(profile), this);
 
@@ -748,7 +745,11 @@ void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
 
 void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
 {
-  OutcomePayoffs(m_table->GetCursorRow(), m_table->GetCursorColumn(), false);
+  if (m_table->GetCursorRow() < m_currentSupport->NumStrats(m_rowPlayer) &&
+      m_table->GetCursorColumn() < m_currentSupport->NumStrats(m_colPlayer)) {
+    OutcomePayoffs(m_table->GetCursorRow() + 1,
+		   m_table->GetCursorColumn() + 1, false);
+  }
 }
 
 void NfgShow::OnSupportUndominated(wxCommandEvent &)
@@ -1019,6 +1020,7 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
     ChangeSolution(m_solutionTable->VisibleLength());
   }  
 
+  UpdateMenus();
 }
 
 void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
@@ -1095,6 +1097,8 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
     ChangeSolution(m_solutionTable->VisibleLength());
   }
+
+  UpdateMenus();
 }
 
 void NfgShow::OnViewSolutions(wxCommandEvent &)
@@ -1178,6 +1182,7 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_solutionTable->Append(dialog.GetProfile());
     ChangeSolution(m_solutionTable->Length());
+    UpdateMenus();
   }
 }
 
@@ -1189,6 +1194,7 @@ void NfgShow::OnProfilesClone(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_solutionTable->Append(dialog.GetProfile());
     ChangeSolution(m_solutionTable->Length());
+    UpdateMenus();
   }
 }
 
@@ -1223,6 +1229,7 @@ void NfgShow::OnProfilesDelete(wxCommandEvent &)
   m_solutionTable->Remove(cur_soln);
   cur_soln = (m_solutionTable->Length() > 0) ? 1 : 0;
   ChangeSolution(cur_soln);
+  UpdateMenus();
 }
 
 void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
