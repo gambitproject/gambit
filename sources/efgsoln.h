@@ -11,7 +11,7 @@
 #include "efg.h"
 #include "efgconst.h"
 #include "efgshow.h"
-#include "spread.h"
+#include "spread3d.h"
 #include "bsolnsf.h"
 
 //****************************************************************************

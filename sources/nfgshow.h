@@ -10,7 +10,7 @@
 #include "wx.h"
 #include "wxmisc.h"
 
-#include "spread.h"
+#include "spread3d.h"
 #include "nfgdraw.h"
 #include "accels.h"
 

@@ -6,7 +6,7 @@
 
 #include "wx.h"
 #include "wxmisc.h"
-#include "spread.h"
+#include "spread3d.h"
 #include "garray.h"
 #include "rational.h"
 #include "gmisc.h"

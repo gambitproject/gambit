@@ -1,10 +1,14 @@
-// File: NfgSoln.h -- declaration of classes for displaying the normal
+//
+// FILE: nfgsoln.h -- declaration of classes for displaying the normal
 // form solutions.
 //
 // $Id$
+//
+
 #ifndef NfgSoln_H
 #define NfgSoln_H
-#include "spread.h"
+
+#include "spread3d.h"
 #include "msolnsf.h"
 
 //****************************************************************************
