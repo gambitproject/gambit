@@ -156,87 +156,53 @@ T ExtForm<T>::Payoff(int pl, const BehavProfile<T> &profile) const
 }
 
 template <class T>
-gVector<T> ExtForm<T>::CondPayoff(Node *n, T prob,
-				  const gVector<T> &value,
-				  const BehavProfile<T> &profile,
-				  gPVector<T> &probs,
-				  gDPVector<T> &payoff) const
+void ExtForm<T>::CondPayoff(Node *n, T prob,
+			    const BehavProfile<T> &profile,
+			    gPVector<T> &probs,
+			    gDPVector<T> &payoff) const
 {
-  gVector<T> cumvalue(value);
-
-  if (n->infoset && n->infoset->player->number)
-    probs(n->infoset->player->number, n->infoset->number) += prob;
-  
-  if (profile.IsTruncated() && n->children.Length())   {
-    T p = (T) 0.0;
-    
-    for (int i = 1; i < n->children.Length(); i++)   {
-      T newprob;
-      if (n->infoset->player->number == 0)
-	newprob = ((ChanceInfoset<T> *) n->infoset)->probs[i];
-      else
-	newprob = profile(n->infoset->player->number, n->infoset->number, i);
-
-      p += newprob;
-      
-      gVector<T> newvalue(CondPayoff(n->children[i], prob * newprob,
-				     value, profile, probs, payoff));
-
-      for (int j = 1, l = value.Length(); j <= l; j++)
-	cumvalue[j] += newvalue[j] * newprob;
-    
-      if (n->infoset->player->number)   {
-	payoff(n->infoset->player->number, n->infoset->number, i) +=
-	  newvalue[n->infoset->player->number] * prob;
-	if (n->outcome)
-	  payoff(n->infoset->player->number, n->infoset->number, i) +=
-	  ((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
-      }
-    }
-
-    gVector<T> newvalue(CondPayoff(n->children[i], prob * (1 - p),
-				   value, profile, probs, payoff));
-
-    for (int j = 1, l = value.Length(); j <= l; j++)
-      cumvalue[j] += newvalue[j] * (1 - p);
-
-    if (n->infoset->player->number)   {
-      payoff(n->infoset->player->number, n->infoset->number, i) +=
-	newvalue[n->infoset->player->number] * prob;
-      if (n->outcome)
-	payoff(n->infoset->player->number, n->infoset->number, i) +=
-	((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
-    }
-  }
-  else  {
-    for (int i = 1; i <= n->children.Length(); i++)   {
-      T newprob;
-      if (n->infoset->player->number == 0)
-	newprob = ((ChanceInfoset<T> *) n->infoset)->probs[i];
-      else
-	newprob = profile(n->infoset->player->number, n->infoset->number, i);
-      
-      gVector<T> newvalue(CondPayoff(n->children[i], prob * newprob,
-				     value, profile, probs, payoff));
-
-      for (int j = 1, l = value.Length(); j <= l; j++)
-	cumvalue[j] += newvalue[j] * newprob;
-    
-      if (n->infoset->player->number)   {
-	payoff(n->infoset->player->number, n->infoset->number, i) +=
-	  newvalue[n->infoset->player->number] * prob;
-	if (n->outcome)
-	  payoff(n->infoset->player->number, n->infoset->number, i) +=
-	  ((OutcomeVector<T> &) *n->outcome)[n->infoset->player->number];
-      }
-    }
-  }
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+  int iset = (n->infoset) ? n->infoset->number : 0;
 
   if (n->outcome)
-    cumvalue += ((OutcomeVector<T> &) *n->outcome);
+    *((TypedNode<T> *) n)->scratch += (OutcomeVector<T> &) *n->outcome;
+  for (int i = 1, nc = n->children.Length(); i <= nc; i++)
+    *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
+  
+  T cumprob((T) 0), newprob((T) 0);
 
-  return cumvalue;
+
+  for (i = 1; i < nc; i++)   {
+    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    CondPayoff(n->children[i], prob * newprob, profile, probs, payoff);
+
+    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
+      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
+    if (pl > 0)
+      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
+  }
+  
+  if (nc > 0)  {
+    if (profile.IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else
+      newprob = ((pl) ? profile(pl, n->infoset->number, i) : 
+		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+
+    CondPayoff(n->children[nc], prob * newprob, profile, probs, payoff);
+
+    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
+      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
+    if (pl > 0)
+      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
+  }
+
+  if (pl > 0)
+    probs(pl, n->infoset->number) += prob;
 }
+
 
 template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
 					       gDPVector<T> &payoff,
@@ -245,10 +211,8 @@ template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
   ((gVector<T> &) payoff).operator=((T) 0);
   ((gVector<T> &) probs).operator=((T) 0);
 
-  gVector<T> value(players.Length());
-  value = (T) 0;
-
-  CondPayoff(root, (T) 1.0, value, profile, probs, payoff);
+  *((TypedNode<T> *) root)->scratch = (T) 0;
+  CondPayoff(root, (T) 1.0, profile, probs, payoff);
 
   for (int i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
@@ -256,11 +220,6 @@ template <class T> void ExtForm<T>::CondPayoff(const BehavProfile<T> &profile,
 	// Note that bad things happen if probs(i, j, k) == 0
 	payoff(i, j, k) /= probs(i, j);
 }
-
-//template <class T> gDPVector<T> *ExtForm<T>::NewBehavProfile(void) const
-//{
-//  return new gDPVector<T>(Dimensionality());
-//}
 
 template <class T> int ExtForm<T>::ProfileLength(bool trunc) const
 {

@@ -102,9 +102,11 @@ template <class T> class ExtForm : public BaseExtForm   {
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
-    gVector<T> CondPayoff(Node *n, T prob, const gVector<T> &,
-			  const BehavProfile<T> &, gPVector<T> &,
-			  gDPVector<T> &) const;
+    void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
+		    gPVector<T> &, gDPVector<T> &) const;
+//    gVector<T> CondPayoff(Node *n, T prob, const gVector<T> &,
+//			  const BehavProfile<T> &, gPVector<T> &,
+//			  gDPVector<T> &) const;
 
     Infoset *CreateInfoset(int n, Player *pl, int br);
     Node *CreateNode(Node *parent) const;
