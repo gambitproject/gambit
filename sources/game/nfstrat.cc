@@ -114,10 +114,9 @@ gbtNumber gbtNfgContingency::GetPayoff(const gbtNfgPlayer &p_player) const
     return m_nfg.rep->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
   }
   else {
-    gbtArray<gbtArray<int> *> behav(m_nfg.NumPlayers());
+    gbtArray<gbtArray<int> > behav(m_nfg.NumPlayers());
     for (int pl = 1; pl <= behav.Length(); pl++) {
-      // Casting away const -- sloppy
-      behav[pl] = (gbtArray<int> *) m_profile[pl]->GetBehavior();
+      behav[pl] = m_profile[pl]->GetBehavior()->GetBehavior();
     }
     gbtVector<gbtNumber> payoff(m_nfg.NumPlayers());
     gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);

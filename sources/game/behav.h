@@ -117,7 +117,7 @@ protected:
 
   void BehaviorStrat(const gbtEfgGame &, int, const gbtEfgNode &);
   void RealizationProbs(const gbtMixedProfile<T> &, const gbtEfgGame &,
-			int pl, const gbtArray<int> *const, const gbtEfgNode &);
+			int pl, const gbtArray<int> &, const gbtEfgNode &);
 
 public:
   class BadStuff : public gbtException  {

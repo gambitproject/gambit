@@ -45,7 +45,7 @@ gbt_efg_game_rep::gbt_efg_game_rep(void)
   : m_refCount(1),
     sortisets(true), m_revision(0), 
     m_outcome_revision(-1), m_label("UNTITLED"),
-    chance(new gbtEfgPlayerBase(this, 0)), afg(0), m_reducedNfg(0)
+    chance(new gbtEfgPlayerBase(this, 0)), m_reducedNfg(0)
 {
   root = new gbt_efg_node_rep(this, 0);
   SortInfosets();
@@ -1249,8 +1249,8 @@ gbtPVector<int> gbtEfgGame::NumMembers(void) const
 //------------------------------------------------------------------------
 
 void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gbtNumber prob,
-		     const gbtPVector<int> &profile,
-		     gbtVector<gbtNumber> &payoff) const
+			const gbtPVector<int> &profile,
+			gbtVector<gbtNumber> &payoff) const
 {
   if (n->m_outcome)  {
     for (int i = 1; i <= rep->players.Length(); i++)
@@ -1304,8 +1304,8 @@ void gbtEfgGame::InfosetProbs(const gbtPVector<int> &profile,
 }
 
 void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gbtNumber prob,
-		     const gbtArray<gbtArray<int> *> &profile,
-		     gbtArray<gbtNumber> &payoff) const
+			const gbtArray<gbtArray<int> > &profile,
+			gbtArray<gbtNumber> &payoff) const
 {
   if (n->m_outcome)   {
     for (int i = 1; i <= rep->players.Length(); i++)
@@ -1320,29 +1320,18 @@ void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gbtNumber prob,
     }
   }
   else if (n->m_infoset) {
-    Payoff(n->m_children[(*profile[n->m_infoset->m_player->m_id])[n->m_infoset->m_id]],
+    Payoff(n->m_children[profile[n->m_infoset->m_player->m_id][n->m_infoset->m_id]],
 	   prob, profile, payoff);
   }
 }
 
-void gbtEfgGame::Payoff(const gbtArray<gbtArray<int> *> &profile,
-		 gbtArray<gbtNumber> &payoff) const
+void gbtEfgGame::Payoff(const gbtArray<gbtArray<int> > &profile,
+			gbtArray<gbtNumber> &payoff) const
 {
   for (int i = 1; i <= payoff.Length(); i++)
     payoff[i] = 0;
   Payoff(rep->root, 1, profile, payoff);
 }
-
-bool gbtEfgGame::HasReducedNfg(void) const
-{
-  return rep->m_reducedNfg;
-}
-
-gbtNfgGame gbtEfgGame::AssociatedAfg(void) const
-{
-  return rep->afg;
-}
-
 
 //-------------------------------------------------------------------------
 //                           Global functions 

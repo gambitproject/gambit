@@ -36,6 +36,7 @@ template class gbtArray<gbtArray<gbtText> >;
 template class gbtArray<gbtList<bool> >;
 template class gbtArray<gbtList<gbtList<bool> > >;
 
+template class gbtArray<gbtArray<int> >;
 template class gbtArray<gbtArray<int> *>;
 
 template bool operator==(const gbtArray<int> &, const gbtArray<int> &);

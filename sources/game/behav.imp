@@ -272,11 +272,6 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
   InitProfile();
 
-  if (m_efg.AssociatedAfg() == p_profile.GetGame())   {
-    ((gbtVector<T> &) *this).operator=((gbtVector<T> &) p_profile);
-    return;
-  }
-
   ((gbtVector<T> &) *this).operator=((T)0); 
 
   gbtEfgNode n = m_efg.GetRoot();
@@ -289,7 +284,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       if (p_profile(pl, st) > (T) 0)  {
-	const gbtArray<int> *const actions = nfg.GetPlayer(pl)->GetStrategy(st)->GetBehavior();
+	const gbtArray<int> &actions = nfg.GetPlayer(pl)->GetStrategy(st)->GetBehavior()->GetBehavior();
 
 	m_bvals[n.GetId()] = p_profile(pl, st);
 
@@ -759,9 +754,9 @@ void gbtBehavProfile<T>::BehaviorStrat(const gbtEfgGame &p_efg, int pl,
 
 template <class T>
 void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
-				       const gbtEfgGame &p_efg, int pl,
-				       const gbtArray<int> *const actions,
-				       const gbtEfgNode &node)
+					  const gbtEfgGame &p_efg, int pl,
+					  const gbtArray<int> &actions,
+					  const gbtEfgNode &node)
 {
   static const T tremble = (T) 0;
   T prob;
@@ -769,7 +764,7 @@ void gbtBehavProfile<T>::RealizationProbs(const gbtMixedProfile<T> &mp,
   for (int i = 1; i <= node.NumChildren(); i++)   {
     if (!node.GetPlayer().IsNull() && !node.GetPlayer()->IsChance())   {
       if (node.GetPlayer()->GetId() == pl)  {
-	if ((*actions)[node.GetInfoset().GetId()] == i)
+	if (actions[node.GetInfoset().GetId()] == i)
 	  prob = (T) 1 - tremble + tremble / (T) node.NumChildren();
 	else
 	  prob = tremble / (T) node.NumChildren();

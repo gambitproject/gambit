@@ -31,6 +31,7 @@
 
 class gbtNfgActionRep;
 class gbtNfgPlayer;
+class gbtEfgStrategy;
 
 class gbtNfgActionRep : public gbtGameObject {
 friend class gbtNfgAction;
@@ -44,7 +45,7 @@ public:
   virtual gbtNfgPlayer GetPlayer(void) const = 0;
   virtual long GetIndex(void) const = 0;
 
-  virtual const gbtArray<int> *const GetBehavior(void) const = 0;
+  virtual gbtEfgStrategy GetBehavior(void) const = 0;
 };
 
 class gbtNfgNullAction { };

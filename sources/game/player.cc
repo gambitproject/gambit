@@ -38,8 +38,11 @@
 // normal forms very soon.
 //
 
+gbtEfgPlayer gbtEfgStrategyBase::GetPlayer(void) const
+{ return m_player; }
+
 //----------------------------------------------------------------------
-//           struct gbtEfgPlayerBase: Member functions
+//           class gbtEfgPlayerBase: Member functions
 //----------------------------------------------------------------------
 
 gbtEfgPlayerBase::gbtEfgPlayerBase(gbt_efg_game_rep *p_efg, int p_id)

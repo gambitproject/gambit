@@ -54,6 +54,9 @@ gbtNfgActionBase::~gbtNfgActionBase()
 gbtNfgPlayer gbtNfgActionBase::GetPlayer(void) const 
 { return m_infoset->m_player; }
 
+gbtEfgStrategy gbtNfgActionBase::GetBehavior(void) const
+{ return m_behav; }
+
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgAction &)
 { 
   return p_stream;

@@ -39,6 +39,7 @@
 class gbtNfgPlayerBase;
 struct gbt_nfg_infoset_rep;
 class gbtNfgActionBase;
+class gbtEfgStrategyBase;
 struct gbt_efg_game_rep;
 
 class gbtNfgOutcomeBase : public gbtNfgOutcomeRep {
@@ -82,7 +83,7 @@ class gbtNfgActionBase : public gbtNfgActionRep {
 public:
   int m_id;
   gbt_nfg_infoset_rep *m_infoset;
-  gbtArray<int> *m_behav;
+  gbtEfgStrategyBase *m_behav;
   bool m_deleted;
   gbtText m_label;
   long m_index;
@@ -100,7 +101,7 @@ public:
   gbtNfgPlayer GetPlayer(void) const;
   long GetIndex(void) const { return m_index; }
 
-  const gbtArray<int> *const GetBehavior(void) const { return m_behav; }
+  gbtEfgStrategy GetBehavior(void) const;
 };
 
 class gbtNfgPlayerBase : public gbtNfgPlayerRep {

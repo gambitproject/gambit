@@ -95,7 +95,7 @@ protected:
   void Payoff(gbt_efg_node_rep *n, gbtNumber,
 	      const gbtPVector<int> &, gbtVector<gbtNumber> &) const;
   void Payoff(gbt_efg_node_rep *n, gbtNumber,
-	      const gbtArray<gbtArray<int> *> &, gbtArray<gbtNumber> &) const;
+	      const gbtArray<gbtArray<int> > &, gbtArray<gbtNumber> &) const;
   
   void InfosetProbs(gbt_efg_node_rep *n, gbtNumber,
 		    const gbtPVector<int> &, gbtPVector<gbtNumber> &) const;
@@ -178,16 +178,12 @@ public:
   
   // COMPUTING VALUES OF PROFILES
   void Payoff(const gbtPVector<int> &profile, gbtVector<gbtNumber> &payoff) const;
-  void Payoff(const gbtArray<gbtArray<int> *> &profile,
+  void Payoff(const gbtArray<gbtArray<int> > &profile,
 	      gbtArray<gbtNumber> &payoff) const;
 
   void InfosetProbs(const gbtPVector<int> &profile, gbtPVector<gbtNumber> &prob) const;
     
   gbtNfgGame GetReducedNfg(void) const;
-  bool HasReducedNfg(void) const;
-  gbtNfgGame AssociatedAfg(void) const;
-
-  friend gbtNfgGame MakeAfg(const gbtEfgGame &);
 };
 
 gbtEfgGame NewEfg(void);

@@ -51,12 +51,13 @@ template class gbtBlock<gbtEfgNode>;
 template class gbtArray<gbtEfgActionBase *>;
 template class gbtBlock<gbtEfgActionBase *>;
 
+template class gbtArray<gbtEfgStrategyBase *>;
+template class gbtBlock<gbtEfgStrategyBase *>;
+
 template class gbtArray<gbtEfgAction>;
 template class gbtBlock<gbtEfgAction>;
 
 template class gbtArray<gbtArray<gbtEfgAction> *>;
-
-//template class gbtArray<gbtArray<Action *> *>;
 
 template class gbtArray<gbtEfgOutcomeBase *>;
 template class gbtBlock<gbtEfgOutcomeBase *>;
@@ -67,7 +68,6 @@ template class gbtBlock<gbtBlock<bool> >;
 class gbtEfgActionSet;
 class gbtEfgActionArray;
 
-//template bool operator==(const gbtArray<Action *> &, const gbtArray<Action *> &);
 template class gbtArray<gbtEfgActionSet *>;
 template class gbtArray<gbtEfgActionArray *>;
 

@@ -70,12 +70,35 @@ public:
   void DeleteOutcome(void);
 };
 
+class gbtEfgStrategyBase : public gbtEfgStrategyRep {
+public:
+  int m_id;
+  gbtText m_label;
+  gbtEfgPlayerBase *m_player;
+  gbtArray<int> m_actions;
+
+  gbtEfgStrategyBase(int p_id, gbtEfgPlayerBase *p_player,
+		     const gbtArray<int> &p_actions)
+    : m_id(p_id), m_player(p_player), m_actions(p_actions) { }
+  virtual ~gbtEfgStrategyBase() { }
+
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return 0; }
+
+  gbtEfgPlayer GetPlayer(void) const;
+  gbtEfgAction GetAction(const gbtEfgInfoset &p_infoset) const
+  { return p_infoset.GetAction(m_actions[p_infoset.GetId()]); }
+  const gbtArray<int> &GetBehavior(void) const { return m_actions; }
+};
+
 class gbtEfgPlayerBase : public gbtEfgPlayerRep {
 public:
   int m_id;
   gbt_efg_game_rep *m_efg;
   gbtText m_label;
   gbtBlock<gbt_efg_infoset_rep *> m_infosets;
+  gbtBlock<gbtEfgStrategyBase *> m_strategies;
 
   gbtEfgPlayerBase(gbt_efg_game_rep *, int);
   ~gbtEfgPlayerBase();
@@ -171,7 +194,6 @@ struct gbt_efg_game_rep {
   gbtBlock<gbtEfgOutcomeBase *> outcomes;
   gbt_efg_node_rep *root;
   gbtEfgPlayerBase *chance;
-  gbtNfgGame afg;
   gbt_nfg_game_rep *m_reducedNfg;
 
   gbt_efg_game_rep(void);

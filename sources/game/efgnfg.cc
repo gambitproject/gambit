@@ -37,28 +37,31 @@
 #include "efgint.h"
 #include "nfgint.h"
 
-static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
+static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayerBase *p_player)
 {
-  gbtArray<int> *behav = new gbtArray<int>(p_player->NumInfosets());
+  gbtArray<int> behav(p_player->NumInfosets());
   gbtText label = "";
 
   // FIXME: This is a rather lame labeling scheme.
   for (int iset = 1; iset <= p_player->NumInfosets(); iset++)  {
     if (p_player->GetInfoset(iset).GetFlag()) {
-      (*behav)[iset] = p_player->GetInfoset(iset).GetWhichBranch();
-      label += ToText((*behav)[iset]);
+      behav[iset] = p_player->GetInfoset(iset).GetWhichBranch();
+      label += ToText(behav[iset]);
     }
     else {
-      (*behav)[iset] = 0;
+      behav[iset] = 0;
       label += "*";
     }
   }
 
+  gbtEfgStrategyBase *strategy = new gbtEfgStrategyBase(p_player->m_strategies.Length() + 1, p_player, behav);
+  p_player->m_strategies.Append(strategy);
+
   gbtNfgPlayerBase *player = p_nfg->m_players[p_player->GetId()];
-  gbtNfgActionBase *strategy = new gbtNfgActionBase(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
-  strategy->m_behav = behav;
-  strategy->m_label = label;
-  player->m_infosets[1]->m_actions.Append(strategy);
+  gbtNfgActionBase *action = new gbtNfgActionBase(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
+  action->m_behav = strategy;
+  action->m_label = label;
+  player->m_infosets[1]->m_actions.Append(action);
 }
 
 static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
@@ -131,6 +134,9 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
   nfg->m_label = rep->m_label;
   nfg->m_dimensions = gbtArray<int>(NumPlayers());
   for (int pl = 1; pl <= NumPlayers(); pl++) {
+    while (rep->players[pl]->m_strategies.Length() > 0) {
+      delete rep->players[pl]->m_strategies.Remove(1);
+    }
     nfg->m_players.Append(new gbtNfgPlayerBase(nfg, pl, 0));
     nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
     MakeReducedStrats(nfg, rep->players[pl], rep->root, NULL);
@@ -139,56 +145,3 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
   return (rep->m_reducedNfg = nfg);
 }
 
-gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
-{
-  gbtNfgGame afg(gbtArray<int>(p_efg.NumActions()));
-
-  p_efg.rep->afg = afg;
-  afg.SetLabel(p_efg.GetLabel() + " (Agent Form)");
-
-  for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)   {
-    for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)  {
-      gbtEfgInfoset s = p_efg.GetPlayer(epl)->GetInfoset(iset);
-      for (int act = 1; act <= s.NumActions(); act++)  {
-	afg.GetPlayer(npl)->GetStrategy(act)->SetLabel(ToText(act));
-      }
-    }
-  }
-
-  gbtNfgIterator iter(afg);
-  int pl = afg.NumPlayers();
-
-  gbtArray<int> dim(p_efg.NumPlayers());
-  for (int i = 1; i <= dim.Length(); i++) {
-    dim[i] = p_efg.GetPlayer(i)->NumInfosets();
-  }
-  gbtPVector<int> profile(dim);
-  ((gbtVector<int> &) profile).operator=(1);
-
-  gbtVector<gbtNumber> payoff(p_efg.NumPlayers());
-  
-  while (1)  {
-    p_efg.Payoff(profile, payoff);
-
-    iter.SetOutcome(afg.NewOutcome());
-
-    for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)
-      for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)
-	iter.GetOutcome()->SetPayoff(afg.GetPlayer(npl), payoff[epl]);
-
-    
-    while (pl > 0)  {
-      if (iter.Next(pl))  {
-	profile[pl]++;
-	break;
-      }
-      profile[pl] = 1;
-      pl--;
-    }
-
-    if (pl == 0)  break;
-    pl = afg.NumPlayers();
-  }
-
-  return afg;
-}
