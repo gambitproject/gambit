@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "gsignal.h"
 #include "efg.h"
 #include "efgutils.h"
 #include "nfg.h"
@@ -124,9 +125,15 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       }
     }
 
-    SolveSubgame(foo, subsupport, sol);
-    
-    SelectSolutions(subgame_number, foo, sol);
+    bool interrupted = false;
+
+    try {
+      SolveSubgame(foo, subsupport, sol);
+      SelectSolutions(subgame_number, foo, sol);
+    }
+    catch (gSignalBreak &) {
+      interrupted = true;
+    }
     
     // put behav profile in "total" solution here...
     
@@ -193,6 +200,10 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	efg.SetPayoff(ov, i, subval[i]);
  
       values.Append(ov);
+
+      if (interrupted) {
+	throw gSignalBreak();
+      }
     }
   }
 
@@ -264,7 +275,10 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
     }
   }
 
-  FindSubgames(support, efg.RootNode(), solutions, values);
+  try {
+    FindSubgames(support, efg.RootNode(), solutions, values);
+  }
+  catch (gSignalBreak &) { }
 
   for (int i = 1; i <= efg.NumPlayers(); i++)
     delete infosets[i];
