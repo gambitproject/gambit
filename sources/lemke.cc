@@ -49,6 +49,8 @@ NormalForm::Lemke(int dup_strat)
   }
   for(i=1;i<=n;i++)
     T.Entry(i,0)=(Rational)(-1);
+  for(i=1;i<=n;i++)
+    T.Entry(i,n+1)=(Rational)(0);
   j=dup_strat; if(dup_strat<=0 || dup_strat > n)j=0;
   T.Lemke(j);
 }
