@@ -983,35 +983,38 @@ int NfgShow::SolveElimDom(void)
     NFSupport *sup = cur_sup;
     wxStatus status(spread, "Dominance Elimination");
 
-    if (!EDPD.DomMixed()) {
-      if (EDPD.FindAll()) {
-	while ((sup = ComputeDominated(sup->Game(), 
-				       *sup, EDPD.DomStrong(), 
-				       EDPD.Players(), gnull, status)) != 0)
-	  supports.Append(sup);
+    try {
+      if (!EDPD.DomMixed()) {
+	if (EDPD.FindAll()) {
+	  while ((sup = ComputeDominated(sup->Game(), 
+					 *sup, EDPD.DomStrong(), 
+					 EDPD.Players(), gnull, status)) != 0)
+	    supports.Append(sup);
+	}
+	else {
+	  if ((sup = ComputeDominated(sup->Game(), 
+				      *sup, EDPD.DomStrong(), 
+				      EDPD.Players(), gnull, status)) != 0)
+	    supports.Append(sup);
+	}
       }
       else {
-	if ((sup = ComputeDominated(sup->Game(), 
-				    *sup, EDPD.DomStrong(), 
-				    EDPD.Players(), gnull, status)) != 0)
-	  supports.Append(sup);
+	if (EDPD.FindAll()) {
+	  while ((sup = ComputeMixedDominated(sup->Game(), *sup, 
+					      EDPD.DomStrong(), EDPD.Players(),
+					      gnull, status)) != 0)
+	    supports.Append(sup);
+	}
+	else {
+	  if ((sup = ComputeMixedDominated(sup->Game(), *sup,
+					   EDPD.DomStrong(), EDPD.Players(),
+					   gnull, status)) != 0)
+	    supports.Append(sup);
+	}
       }
     }
-    else {
-      if (EDPD.FindAll()) {
-	while ((sup = ComputeMixedDominated(sup->Game(), *sup, 
-					    EDPD.DomStrong(), EDPD.Players(),
-					    gnull, status)) != 0)
-	  supports.Append(sup);
-      }
-      else {
-	if ((sup = ComputeMixedDominated(sup->Game(), *sup,
-					 EDPD.DomStrong(), EDPD.Players(),
-					 gnull, status)) != 0)
-	  supports.Append(sup);
-      }
-    }
-    
+    catch (gSignalBreak &) { }
+
     if (EDPD.Compress() && disp_sup != sup) {
       disp_sup = supports[supports.Length()]; // displaying the last created support
       SetPlayers(pl1, pl2);

@@ -1362,25 +1362,28 @@ void EfgShow::SolveElimDom(void)
     EFSupport *sup = cur_sup;
     wxStatus status(this, "Dominance Elimination");
 
-    if (!EDPD.DomMixed()) {
-      if (EDPD.FindAll()) {
-	while ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false,
-				       EDPD.Players(), gnull, status)) != 0) {
-	  supports.Append(sup);
+    try {
+      if (!EDPD.DomMixed()) {
+	if (EDPD.FindAll()) {
+	  while ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false,
+					 EDPD.Players(), gnull, status)) != 0) {
+	    supports.Append(sup);
+	  }
+	}
+	else {
+	  if ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false, 
+				      EDPD.Players(), gnull, status)) != 0) {
+	    supports.Append(sup);
+	  }
 	}
       }
       else {
-	if ((sup = ComputeDominated(*sup, EDPD.DomStrong(), false, 
-				    EDPD.Players(), gnull, status)) != 0) {
-	  supports.Append(sup);
-	}
+	wxMessageBox("Mixed dominance is not implemented for\n"
+		     "Extensive form games");
       }
-    }
-    else {
-      wxMessageBox("Mixed dominance is not implemented for\n"
-		   "Extensive form games");
-      }
-    
+  }
+  catch (gSignalBreak &E) { }
+
     if (EDPD.Compress() && disp_sup != sup) {
       cur_sup = supports[supports.Length()]; // displaying the last created support
       disp_sup = cur_sup;
