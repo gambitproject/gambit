@@ -50,6 +50,22 @@ control statements allow for repetitive operations (such as
 investigating games as one changes various parameters) or conditional
 operations.
 
+\section{Acknowledgements}
+
+The Gambit Project is a project for the development of computer code
+for the solution of extensive and normal form games.  The software
+developed under the project is public domain.  The Gambit Project is
+funded in part by National Science Foundation grants SBR-9308637 to
+the California Institute of Technology and SBR-9308862 to the
+University of Minnesota.
+
+Numerous students at Caltech and the University of Minnesota have
+contributed to the Gambit Command Language and to the Gambit Project
+more generally: Among these are Bruce Bell, Anand Chelian, Nelson
+Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and Gary Wu.  We
+are particularly grateful to Gary Wu for his work on the stack machine
+used by the command language.
+
 \section{Installation}
 
 \section{Basic concepts}
@@ -123,11 +139,11 @@ sometimes be bulky and slow.
 
 \subsubsection{Rationals}
 
-The {\tt RATIONAL} type is an arbitrary-length ratio of two integers.
-This is capable of precisely representing any rational number.  However,
-they are slow, and output from them may be unreadably large.  Rational
-numbers are formed from two integers using the {\tt /} operator, 
-described below.
+The {\tt RATIONAL} type is a ratio of two arbitrary-length integers.
+This data type is capable of precisely representing any rational
+number.  However, they are slow, and output from them may be
+unreadably large.  Rational numbers are formed from two integers using
+the {\tt /} operator, described below.
 
 \subsubsection{Text}
 
@@ -181,9 +197,38 @@ Lists are distinct in type from each other and from their scalar equivalents.
 
 \subsection{Errors}
 
+There are two main classes of errors which may arise in GCL programs,
+parse errors and run time errors.  
+
+A parse error occurs when the GCL interpreter cannot determine the
+meaning of a statement, because it does not conform to the grammatical
+rules of the language.  This most frequently occurs when braces,
+brackets, or quotation marks fail to match up or when punctuation is
+missing.  When it encounters a parse error, the GCL interpreter will
+display an error message giving the filename and line number of the
+error and the point at which it determined an error it occurred.
+
+A run time error occurs when a statement which obeys the grammatical
+rules of the language violates another rule of the language during its
+execution.  Examples of this type of error include attempting to use a
+variable name which is not defined, and using a value of one type
+where another type was expected.  Also, builtin functions may generate
+this type of error on invalid inputs.  A run time error will result in
+termination of the GCL at the point where the error occurs, ith a
+message indicating the type of error encountered.  However, no line
+number is given for run time errors.  
+
 \section{Writing simple programs}
 
+
+
 \subsection{Statements}
+
+A GCL program consists of a series of statements.  A statement is
+typically an expression built up out of function calls.  A statement
+is trminated by a linefeed or by a semicolon.  The GCL interpreter,
+reports the value of each expression evaluated unless the semicolon is
+present.  
 
 \subsection{Function calls}
 
@@ -281,6 +326,8 @@ Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Plus[x->TEXT, y->TEXT] =: TEXT
 Plus[x->LIST(T), y->LIST(T) =: LIST(T)
+Plus[x->MIXED, y->MIXED] =: MIXED
+Plus[x->BEHAV, y->BEHAV] =: BEHAV
 \end{verbatim}
 
 \noindent In fact, not all the versions of {\tt Plus} implement addition;
@@ -582,6 +629,8 @@ always 13, regardless of the value of \verb+i+ outside of the function.
 
 \section{Solving games}
 
+
+
 \subsection{Gobit}
 
 The {\tt GobitSolve} function computes a branch of the logistic
@@ -712,14 +761,26 @@ Log[x->FLOAT] =: FLOAT
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
 Minus[x->INTEGER, y->INTEGER] =: INTEGER
 Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Minus[x->MIXED, y->MIXED] =: MIXED
+Minus[x->BEHAV, y->BEHAV] =: BEHAV
 Modulus[x->INTEGER, y->INTEGER] =: INTEGER
 Paren[x->T] =: T
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
 Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Plus[x->MIXED, y->MIXED] =: MIXED
+Plus[x->BEHAV, y->BEHAV] =: BEHAV
 Times[x->FLOAT, y->FLOAT] =: FLOAT
 Times[x->INTEGER, y->INTEGER] =: INTEGER
 Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Times[x->FLOAT, y->MIXED] =: MIXED
+Times[x->MIXED, y->FLOAT] =: MIXED
+Times[x->RATIONAL, y->MIXED] =: MIXED
+Times[x->MIXED, y->RATIONAL] =: MIXED
+Times[x->FLOAT, y->BEHAV] =: BEHAV
+Times[x->BEHAV, y->FLOAT] =: BEHAV
+Times[x->RATIONAL, y->BEHAV] =: BEHAV
+Times[x->BEHAV, y->RATIONAL] =: BEHAV
 \end{verbatim}
 
 \subsection{Extensive Form Manipulation}
@@ -728,6 +789,7 @@ Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
 AppendAction[infoset->INFOSET] =: ACTION
 AppendNode[node->NODE, infoset->INFOSET] =: NODE
 AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
+Behav[efg<->EFG, list->LIST(LIST(LIST(T)))] =: BEHAV
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
@@ -740,6 +802,7 @@ JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
+Mixed[nfg<->NFG, list->LIST(LIST(T))] =: MIXED
 MoveTree[from->NODE, to->NODE] =: NODE
 NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
 NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
@@ -753,6 +816,8 @@ Reveal[infoset->INFOSET, who->LIST(EFPLAYER)),
        {what->LIST(ACTIONS)}] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
+SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
+SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
 SetName[x->ACTION, name->TEXT] =: ACTION
 SetName[x<->EFG, name->TEXT] =: EFG
 SetName[x->INFOSET, name->TEXT] =: INFOSET
@@ -797,43 +862,47 @@ Text[x->TEXT] =: TEXT
 \begin{verbatim}
 Behav[mixed->MIXED] =: BEHAV
 ElimDom[start->NFSUPPORT, {strong->BOOL}, {time<->FLOAT}] =: NFSUPPORT 
-EnumMixedSolve[nfg<->NFG, {stopAfter->INTEGER},
+EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-EnumPureSolve[nfg<->NFG, {stopAfter->INTEGER}, 
+EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
-GobitSolve[efg<->EFG(FLOAT),
-          {pxifile->OUTPUT}, {time<->FLOAT},
-          {nEvals<->INTEGER}, {nIters<->INTEGER},
-          {fullGraph->BOOL},
-          {minLam->FLOAT}, {maxLam->FLOAT}, 
-          {delLam->FLOAT}, {powLam->INTEGER}, 
-          {start->BEHAV}] =: LIST(BEHAV)
-GobitSolve[nfg<->NFG(FLOAT),
-          {pxifile->OUTPUT}, {time<->FLOAT},
-          {nEvals<->INTEGER}, {nIters<->INTEGER},
-          {fullGraph->BOOL},
-          {minLam->FLOAT}, {maxLam->FLOAT}, 
-          {delLam->FLOAT}, {powLam->INTEGER}, 
-          {start->MIXED}] =: LIST(MIXED)
+GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
+           {minLam->FLOAT}, {maxLam->FLOAT},
+           {delLam->FLOAT}, {powLam->INTEGER},
+           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
+GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
+           {minLam->FLOAT}, {maxLam->FLOAT},
+           {delLam->FLOAT}, {powLam->INTEGER},
+           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
+           {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
+GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
+              {minLam->FLOAT}, {maxLam->FLOAT}, 
+              {delLam->FLOAT}, {powLam->INTEGER}, 
+              {delp->FLOAT}, {tol->FLOAT},
+              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 LCPSolve[efg<->EFG, {stopAfter->INTEGER},
-          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-LCPSolve[nfg<->NFG, {stopAfter->INTEGER},
-          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LiapSolve[efg<->EFG, {time<->FLOAT}, {nEvals<->INTEGER},
-         {stopAfter->INTEGER}, {nTries->INTEGER}] =: LIST(BEHAV)
-LiapSolve[nfg<->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
-         {stopAfter->INTEGER}, {nTries->INTEGER}] =: LIST(MIXED)
-LPSolve[nfg<->NFG, {nPivots<->INTEGER},
-          {time<->FLOAT}] =: LIST(MIXED)
-LqreGridSolve[nfg<->NFG, {pxifile->OUTPUT},
-           {minLam->T}, {maxLam->T}, 
-           {delLam->T}, {powLam->INTEGER}, 
-           {delp->T}, {tol->T},
-           {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+         {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
+LCPSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
+         {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+LiapSolve[efg<->EFG | start->BEHAV, 
+          {stopAfter->INTEGER}, {nTries->INTEGER},
+          {maxitsN->INTEGER}, {tolN->FLOAT},
+          {maxits1->INTEGER}, {tol1->FLOAT},
+          {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(BEHAV)
+LiapSolve[nfg<->NFG | start->MIXED, 
+          {stopAfter->INTEGER}, {nTries->INTEGER},
+          {maxitsN->INTEGER}, {tolN->FLOAT},
+          {maxits1->INTEGER}, {tol1->FLOAT},
+          {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(MIXED)
+LPSolve[ nfg->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
+        {time<->FLOAT}] =: LIST(MIXED)
 SetOptions[alg->TEXT, param->TEXT, value->T] =: T
-SimpDivSolve[nfg<->NFG,{stopAfter->INTEGER}, 
-         {nRestarts->INTEGER}, {leashLength->INTEGER},
-         {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+SimpDivSolve[nfg->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
+             {nRestarts->INTEGER}, {leashLength->INTEGER},
+             {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}
 
 \subsection{Getting Information}
@@ -1026,6 +1095,19 @@ attached outcomes.
 \ed
 
 %--B--
+
+
+\item
+\protect \large \begin{verbatim}
+Behav[efg<->EFG, list->LIST(LIST(LIST(T)))] =: BEHAV
+\end{verbatim}\normalsize
+
+\bd
+Creates a behavioral profile for the game \verb+efg+ with values equal
+to that in \verb+list+.  
+\item
+[See also:] {\tt Mixed}.
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -1272,7 +1354,7 @@ contains the amount of time consumed by the elimination.
 
 \item
 \protect \large \begin{verbatim}
-EnumMixedSolve[support->NFSUPPORT, {stopAfter->INTEGER},
+EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -1292,7 +1374,7 @@ be used to specify a maximum number of equilibria.  Upon completion,
 
 \item
 \protect \large \begin{verbatim}
-EnumPureSolve[support->NFSUPPORT, {stopAfter->INTEGER}, 
+EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
@@ -1366,13 +1448,13 @@ until $test$ fails to give $True$.
 
 \item
 \protect \large \begin{verbatim}
-GobitSolve[start->BEHAV, {pxifile->TEXT},
+GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
            {minLam->FLOAT}, {maxLam->FLOAT},
            {delLam->FLOAT}, {powLam->INTEGER},
            {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
            {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
            {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
-GobitSolve[start->MIXED, {pxifile->TEXT},
+GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
            {minLam->FLOAT}, {maxLam->FLOAT},
            {delLam->FLOAT}, {powLam->INTEGER},
            {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
@@ -1430,6 +1512,51 @@ performed by the algorithm.
 \item
 [nIters:] Upon completion, contains the number of iterations performed
 by the algorithm.
+\ed
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
+              {minLam->FLOAT}, {maxLam->FLOAT}, 
+              {delLam->FLOAT}, {powLam->INTEGER}, 
+              {delp->FLOAT}, {tol->FLOAT},
+              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd
+Performs a grid search to compute the complete logistic
+quantal response correspondence for a (small) two-person normal form
+game.  The correspondence is computed for values of $\lambda$ between
+$\underline{\lambda}$ and $\bar{\lambda}.$ Points are evaluated in
+terms of the value of an objective function, that measures the
+distance between the original point, and the best response to the best
+response (under the logistic best response function.)  Points that are
+close (within 'tol') to being fixed points are kept, others are
+discarded.  Values of the probabilities are evaluated on a grid of
+mesh 'delp.'
+
+\item
+[Return value:] The List of Mixed (or Behavior) profiles found -- one
+profile for each value of $\lambda_t$. 
+
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item  
+[nfg:] The two person game in normal form which is to be operated on.
+\ed
+
+\item
+[Optional parameters:]  See GobitSolve[] for additional parameters.
+
+\bd
+\item
+[delp:] Grid size for search over probability space.  Default is XXXX .
+\item
+[tol:] The tolerance on the objective function.  Values of $p$ for
+which the objective function is less this value are kept.  
 \ed
 \ed
 
@@ -1689,15 +1816,13 @@ the root node of the tree and thus has no such action.
 \protect \large \begin{verbatim}
 LCPSolve[efg<->EFG, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-LCPSolve[support->NFSUPPORT, {stopAfter->INTEGER},
+LCPSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
-For a normal form game, the game is set up as a linear
-complementarity problem, and solved via the Lemke-Howson Algorithm.
-(See, eg., Searches for equilibria of the specified normal form game
-specified using the Lemke-Howson algorithm (see
+For a normal form game, the game is set up as a linear complementarity
+problem, and solved via the Lemke-Howson Algorithm.  (See, eg.,
 \cite[1964]{LemHow:64}) using lexicographic rule for insuring
 termination, as developed in \cite[1971]{Eav:71}.
 
@@ -1838,11 +1963,13 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LiapSolve[start->BEHAV, {stopAfter->INTEGER}, {nTries->INTEGER},
+LiapSolve[efg<->EFG | start->BEHAV, 
+          {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
           {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(BEHAV)
-LiapSolve[start->MIXED, {stopAfter->INTEGER}, {nTries->INTEGER},
+LiapSolve[nfg<->NFG | start->MIXED, 
+          {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
           {time<->FLOAT}, {nEvals<->INTEGER}] =: LIST(MIXED)
@@ -1949,7 +2076,7 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-LPSolve[support->NFSUPPORT, {nPivots<->INTEGER},
+LPSolve[ nfg->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -1969,57 +2096,6 @@ two person constant-sum game, by solving it as a Linear Program.
 \bd
 \item[nPivots:] Number of pivots. 
 \item[time:] Elapsed time for the operation.
-\ed
-\ed
-
-\item
-\protect \large \begin{verbatim}
-LqreGridSolve[support->NFSUPPORT, {pxifile->TEXT},
-              {minLam->FLOAT}, {maxLam->FLOAT}, 
-              {delLam->FLOAT}, {powLam->INTEGER}, 
-              {delp->FLOAT}, {tol->FLOAT},
-              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-
-LqreGridSolve[support->NFSUPPORT, {pxifile->TEXT},
-              {minLam->RATIONAL}, {maxLam->RATIONAL}, 
-              {delLam->RATIONAL}, {powLam->INTEGER}, 
-              {delp->RATIONAL}, {tol->RATIONAL},
-              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\bd
-Performs a grid search to compute the complete logistic
-quantal response correspondence for a (small) two-person normal form
-game.  The correspondence is computed for values of $\lambda$ between
-$\underline{\lambda}$ and $\bar{\lambda}.$ Points are evaluated in
-terms of the value of an objective function, that measures the
-distance between the original point, and the best response to the best
-response (under the logistic best response function.)  Points that are
-close (within 'tol') to being fixed points are kept, others are
-discarded.  Values of the probabilities are evaluated on a grid of
-mesh 'delp.'
-
-\item
-[Return value:] The List of Mixed (or Behavior) profiles found -- one
-profile for each value of $\lambda_t$. 
-
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item  
-[nfg:] The two person game in normal form which is to be operated on.
-\ed
-
-\item
-[Optional parameters:]  See LqreSolve[] for additional parameters.
-
-\bd
-\item
-[delp:] Grid size for search over probability space.  Default is XXXX .
-\item
-[tol:] The tolerance on the objective function.  Values of $p$ for
-which the objective function is less this value are kept.  
 \ed
 \ed
 
@@ -2053,6 +2129,8 @@ and \verb+infoset1+ is returned.
 Minus[x->INTEGER, y->INTEGER] =: INTEGER
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
 Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Minus[x->MIXED, y->MIXED] =: MIXED
+Minus[x->BEHAV, y->BEHAV] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd
@@ -2060,6 +2138,20 @@ Returns the difference $x - y$.
 \item
 [Short form:] \verb+x - y+
 \ed
+
+
+\item
+\protect \large \begin{verbatim}
+Mixed[nfg<->NFG, list->LIST(LIST(T))] =: MIXED
+\end{verbatim}\normalsize
+
+\bd
+Creates a mixed profile attached for the normal form game \verb+nfg+
+with values given by list.  
+\item
+[See also:] {\tt Behav}.
+\ed
+
 
 \item
 \protect \large \begin{verbatim}
@@ -2617,6 +2709,8 @@ game \verb+nfg+.
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Plus[x->MIXED, y->MIXED] =: MIXED
+Plus[x->BEHAV, y->BEHAV] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd
@@ -2812,6 +2906,28 @@ save file.  Returns the success of the operation.
 
 \item
 \protect \large \begin{verbatim} 
+SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
+\end{verbatim}\normalsize
+
+\bd
+Sets the componensts of a behavior profile \verb+behav+ for
+information set \verb+infoset+ to be equal to the values in \verb+list+.
+Returns \verb+behav+. 
+\ed
+
+\item
+\protect \large \begin{verbatim} 
+SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
+\end{verbatim}\normalsize
+
+\bd
+Sets the componensts of a mixed profile \verb+mixed+ for player
+\verb+player+ to be equal to the values in \verb+list+.
+Returns \verb+mixed+. 
+\ed
+
+\item
+\protect \large \begin{verbatim} 
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(RATIONAL)] =: INFOSET
 \end{verbatim}\normalsize
@@ -2824,6 +2940,7 @@ player.  Returns \verb+infoset+.
 \item
 [See also:] {\tt ChanceProbs}.
 \ed
+
 
 \item
 \protect \large \begin{verbatim}
@@ -2899,7 +3016,7 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[support->NFSUPPORT, {stopAfter->INTEGER}, 
+SimpDivSolve[nfg->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
              {nRestarts->INTEGER}, {leashLength->INTEGER},
              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -3041,10 +3158,20 @@ Converts the object \verb+x+ into the equivalent text object.
 Times[x->FLOAT, y->FLOAT] =: FLOAT
 Times[x->INTEGER, y->INTEGER] =: INTEGER
 Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Times[x->FLOAT, y->MIXED] =: MIXED
+Times[x->MIXED, y->FLOAT] =: MIXED
+Times[x->RATIONAL, y->MIXED] =: MIXED
+Times[x->MIXED, y->RATIONAL] =: MIXED
+Times[x->FLOAT, y->BEHAV] =: BEHAV
+Times[x->BEHAV, y->FLOAT] =: BEHAV
+Times[x->RATIONAL, y->BEHAV] =: BEHAV
+Times[x->BEHAV, y->RATIONAL] =: BEHAV
 \end{verbatim} \normalsize
   
 \bd
-Computes the product of \verb+x+ and \verb+y+.
+Computes the product of \verb+x+ and \verb+y+.  In the cases where one
+argument is a Mixed or Behavior profile, and the other is a scalar
+type, it computes the scalar product of the scalar and the profile. 
 \item
 [Short form:] \verb+x * y+
 \ed
