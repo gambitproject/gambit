@@ -1,0 +1,11 @@
+In theory, the standard
+
+./configure
+make
+su
+make install
+
+sequence should work on Unices.  However, this is not yet
+widely tested; feedback and patches are welcome in this area.
+
+ 
