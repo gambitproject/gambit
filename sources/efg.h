@@ -82,6 +82,7 @@ class BaseExtForm     {
     Infoset *InsertNode(Node *n, Player *p, int br);
     Infoset *InsertNode(Node *n, Infoset *s);
 
+    virtual Infoset *CreateInfoset(Player *pl, int br) = 0;
     Infoset *JoinInfoset(Infoset *s, Node *n);
     Infoset *LeaveInfoset(Node *n);
     Infoset *MergeInfoset(Infoset *to, Infoset *from);
@@ -130,6 +131,8 @@ template <class T> class ExtForm : public BaseExtForm   {
         //# DATA ACCESS -- OUTCOMES
     OutcomeVector<T> *NewOutcome(void);
     OutcomeVector<T> *GetOutcome(const gString &) const;
+
+    Infoset *CreateInfoset(Player *pl, int br);
 
         //# COMPUTING VALUES OF PROFILES
 //    gDPVector<T> *NewBehavProfile(void) const;

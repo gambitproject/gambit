@@ -112,6 +112,12 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
 template <class T> Node *ExtForm<T>::CreateNode(Node *parent)
 { return new TypedNode<T>(this, parent, players.Length()); }
 
+template <class T> Infoset *ExtForm<T>::CreateInfoset(Player *p, int br)
+{
+  assert(p && p->BelongsTo() == this);
+  return CreateInfoset(p->infosets.Length() + 1, p, br);
+}
+
 //------------------------------------------------------------------------
 //                 ExtForm<T>: Operations on outcomes
 //------------------------------------------------------------------------
