@@ -26,6 +26,7 @@ class gList<gRational>;
 class gList<Node *>;
 class gNode<gString>;
 class gNode<gRational>;
+class gNode<Node *>;
 template <class T> class EfgFile;
 class EfgFile<double>;
 #define TEMPLATE
