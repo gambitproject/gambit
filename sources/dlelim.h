@@ -15,41 +15,28 @@ typedef enum {
   elimPURE = 0, elimMIXED = 1
 } elimMethodType;
 
-class dialogElim : public wxDialogBox {
+class dialogElim : public guiAutoDialog {
 private:
   wxListBox *m_playerBox;
   wxCheckBox *m_allBox, *m_compressBox;
   wxRadioBox *m_domTypeBox, *m_domMethodBox, *m_domPrecisionBox;
   bool m_mixed;
-  Bool m_compress, m_all;
-  int m_completed, m_numPlayers;
-  gArray<int> m_players;
-  int m_domType, m_domMethod, m_domPrecision;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogElim *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogElim *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &, wxEvent &);
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
+  const char *HelpString(void) const { return ""; }
   
 public:
   dialogElim(const gArray<gText> &p_players, bool p_mixed,
 	     wxWindow *p_parent = NULL);
   virtual ~dialogElim();
 
-  const gArray<int> &Players(void) const { return m_players; }
-  bool Compress(void) const { return m_compress; }
-  int Completed(void) const { return m_completed; }
+  gArray<int> Players(void) const;
+  bool Compress(void) const { return m_compressBox->GetValue(); }
 
-  bool FindAll(void) const { return m_all; }
-  bool DomStrong(void) const { return (m_domType == elimSTRONG); }
-  bool DomMixed(void) const { return (m_domMethod == elimMIXED); }
+  bool FindAll(void) const { return m_allBox->GetValue(); }
+  bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 0); }
+  bool DomMixed(void) const { return (m_domMethodBox->GetSelection() == 1); }
   gPrecision Precision(void) const
-    { return (m_domPrecision == 0) ? precDOUBLE : precRATIONAL; }
+    { return (m_domPrecisionBox->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
 };
 
 #endif   // DLELIM_H

@@ -22,7 +22,7 @@
 #define NFG_SUPPORT_NEW                 161
 #define NFG_SUPPORT_EDIT                162
 #define NFG_SUPPORT_DELETE              163
-#define NFG_SUPPORT_VIEW                164
+#define NFG_SUPPORT_SELECT              164
 
 #define NFG_PREFS_OUTCOMES_MENU         350
 

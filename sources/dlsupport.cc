@@ -11,7 +11,7 @@
 #include "gambit.h"
 #include "nfgshow.h"
 #include "dlelim.h"
-#include "dlnfgsupportview.h"
+#include "dlnfgsupportselect.h"
 
 const char *SOLN_SECT = "Soln-Defaults";
 
@@ -21,122 +21,156 @@ const char *SOLN_SECT = "Soln-Defaults";
 
 dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
 		       wxWindow *p_parent /* = NULL */)
-  : wxDialogBox(p_parent, "Dominance Elimination Parameters", TRUE),
-    m_mixed(p_mixed), m_compress(false), m_numPlayers(p_players.Length())
+  : guiAutoDialog(p_parent, "Dominance Elimination Parameters"),
+    m_mixed(p_mixed)
 {
-  wxGetResource(SOLN_SECT, "ElimDom-All", &m_all, gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Type", &m_domType, gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Method", &m_domMethod, gambitApp.ResourceFile());
-  wxGetResource(SOLN_SECT, "ElimDom-Precision", &m_domPrecision,
+  Bool all = FALSE;
+  int domType = 0, domMethod = 0, domPrecision = 0;
+  wxGetResource(SOLN_SECT, "ElimDom-All", &all, gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Type", &domType, gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Method", &domMethod,
+		gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Precision", &domPrecision,
 		gambitApp.ResourceFile());
 
   m_allBox = new wxCheckBox(this, 0, "Eliminate iteratively");
-  m_allBox->SetValue(m_all);
+  m_allBox->SetValue(all);
+  m_allBox->SetConstraints(new wxLayoutConstraints);
+  m_allBox->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_allBox->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_allBox->GetConstraints()->width.AsIs();
+  m_allBox->GetConstraints()->height.AsIs();
+					
   m_compressBox = new wxCheckBox(this, 0, "Compress");
-  NewLine();
+  m_compressBox->SetConstraints(new wxLayoutConstraints);
+  m_compressBox->GetConstraints()->top.SameAs(m_allBox, wxTop);
+  m_compressBox->GetConstraints()->left.SameAs(m_allBox, wxRight, 10);
+  m_compressBox->GetConstraints()->width.AsIs();
+  m_compressBox->GetConstraints()->height.AsIs();
 
   char *domTypeList[2] = {"Weak", "Strong"};
-  m_domTypeBox = new wxRadioBox(this, NULL, "Type", -1, -1, -1, -1, 2,
+  m_domTypeBox = new wxRadioBox(this, NULL, "Type", 1, 1, -1, -1, 2,
 				domTypeList, 1);
-  if (m_domType == 0 || m_domType == 1)
-    m_domTypeBox->SetSelection(m_domType);
+  if (domType == 0 || domType == 1)
+    m_domTypeBox->SetSelection(domType);
+  m_domTypeBox->SetConstraints(new wxLayoutConstraints);
+  m_domTypeBox->GetConstraints()->top.SameAs(m_allBox, wxBottom, 10);
+  m_domTypeBox->GetConstraints()->left.SameAs(m_allBox, wxLeft);
+  m_domTypeBox->GetConstraints()->width.AsIs();
+  m_domTypeBox->GetConstraints()->height.AsIs();
+  
+  char *domMethodList[2] = {"Pure", "Mixed"};
+  m_domMethodBox = new wxRadioBox(this, NULL, "Method", 1, 1, -1, -1, 2,
+				  domMethodList, 1);
+  if (domMethod == 0 || domMethod == 1)
+    m_domMethodBox->SetSelection(domMethod);
+  m_domMethodBox->SetConstraints(new wxLayoutConstraints);
+  m_domMethodBox->GetConstraints()->top.SameAs(m_domTypeBox, wxTop);
+  m_domMethodBox->GetConstraints()->left.SameAs(m_domTypeBox, wxRight, 10);
+  m_domMethodBox->GetConstraints()->width.AsIs();
+  m_domMethodBox->GetConstraints()->height.AsIs();
+  
+  char *domPrecisionList[2] = {"Float", "Rational" };
+  m_domPrecisionBox = new wxRadioBox(this, NULL, "Precision", -1, -1, -1, -1, 2,
+				     domPrecisionList, 1);
+  if (domPrecision == 0 || domPrecision == 1)
+    m_domPrecisionBox->SetSelection(domPrecision);
+  m_domPrecisionBox->SetConstraints(new wxLayoutConstraints);
+  m_domPrecisionBox->GetConstraints()->top.SameAs(m_domMethodBox, wxTop);
+  m_domPrecisionBox->GetConstraints()->left.SameAs(m_domMethodBox, wxRight, 10);
+  m_domPrecisionBox->GetConstraints()->width.AsIs();
+  m_domPrecisionBox->GetConstraints()->height.AsIs();
 
-  if (m_mixed) {
-    char *domMethodList[2] = {"Pure", "Mixed"};
-    m_domMethodBox = new wxRadioBox(this, NULL, "Method", -1, -1, -1, -1, 2,
-				    domMethodList, 1);
-    if (m_domMethod == 0 || m_domMethod == 1)
-      m_domMethodBox->SetSelection(m_domMethod);
-
-    char *domPrecisionList[2] = {"Float", "Rational" };
-    m_domPrecisionBox = new wxRadioBox(this, NULL, "Precision", -1, -1, -1, -1, 2,
-				       domPrecisionList, 1);
-    if (m_domPrecision == 0 || m_domPrecision == 1)
-      m_domPrecisionBox->SetSelection(m_domPrecision);
+  if (!m_mixed) {
+    m_domMethodBox->Show(FALSE);
+    m_domPrecisionBox->Show(FALSE);
   }
-  NewLine();
 
   m_playerBox = new wxListBox(this, NULL, "Players", wxMULTIPLE);
-  for (int pl = 1; pl <= m_numPlayers; pl++) {
-    if (p_players[pl] != "")
-      m_playerBox->Append(p_players[pl]);
-    else
-      m_playerBox->Append("Player" + ToText(pl));
+  for (int pl = 1; pl <= p_players.Length(); pl++) {
+    m_playerBox->Append(ToText(pl) + ": " + p_players[pl]);
     m_playerBox->SetSelection(pl - 1, TRUE);
   }
-  NewLine();
+  m_playerBox->SetConstraints(new wxLayoutConstraints);
+  m_playerBox->GetConstraints()->top.SameAs(m_domTypeBox, wxBottom, 10);
+  m_playerBox->GetConstraints()->left.SameAs(m_domTypeBox, wxLeft);
+  m_playerBox->GetConstraints()->right.SameAs(m_domPrecisionBox, wxRight);
+  m_playerBox->GetConstraints()->height.AsIs();
   
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char * ) this);
-  (void) new wxButton(this, (wxFunction) CallbackHelp, "Help");
-  Fit();
-  Show(TRUE);
+  m_okButton->GetConstraints()->top.SameAs(m_playerBox, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(m_playerBox, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
 }
 
 dialogElim::~dialogElim()
 {
-  wxWriteResource(SOLN_SECT, "ElimDom-All", m_all, gambitApp.ResourceFile());
-  wxWriteResource(SOLN_SECT, "ElimDom-Type", m_domType, gambitApp.ResourceFile());
-  wxWriteResource(SOLN_SECT, "ElimDom-Method", m_domMethod, gambitApp.ResourceFile());
-  wxWriteResource(SOLN_SECT, "ElimDom-Precision", m_domPrecision,
-		  gambitApp.ResourceFile());
-}
-
-void dialogElim::CallbackHelp(wxButton &, wxEvent &)
-{
-  wxHelpContents("Elimination of Dominated Strategies");
-}
-
-void dialogElim::OnOK(void)
-{
-  m_completed = wxOK;
-  m_all = m_allBox->GetValue();
-  m_compress = m_compressBox->GetValue();
-  m_domType = m_domTypeBox->GetSelection();
-  if (m_mixed) {
-    m_domMethod = m_domMethodBox->GetSelection();
-    m_domPrecision = m_domPrecisionBox->GetSelection();
+  if (Completed() == wxOK) {
+    wxWriteResource(SOLN_SECT, "ElimDom-All", 
+		    m_allBox->GetValue(), gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Type", m_domTypeBox->GetSelection(),
+		    gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Method",
+		    m_domMethodBox->GetSelection(), gambitApp.ResourceFile());
+    wxWriteResource(SOLN_SECT, "ElimDom-Precision",
+		    m_domPrecisionBox->GetSelection(), gambitApp.ResourceFile());
   }
-  int numSelections, *selections = new int[m_numPlayers];
-  numSelections = m_playerBox->GetSelections(&selections);
-  m_players = gArray<int>(numSelections);
-  for (int i = 1; i <= numSelections; i++) {
-    m_players[i] = selections[i-1] + 1;
-  }	
-  Show(FALSE);
 }
 
-void dialogElim::OnCancel(void)
+gArray<int> dialogElim::Players(void) const
 {
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogElim::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
+  gBlock<int> players;
+  for (int i = 1; i <= m_playerBox->Number(); i++) {
+    if (m_playerBox->Selected(i-1)) {
+      players.Append(i);
+    }
+  }
+  return players;
 }
 
 //=========================================================================
-//               class dialogNfgSupportView: Member functions
+//               class dialogNfgSupportSelect: Member functions
 //=========================================================================
 
-dialogNfgSupportView::dialogNfgSupportView(const gList<NFSupport *> &p_supports,
-					   NFSupport *p_current,
-					   wxWindow *p_parent /*=0*/)
-  : guiAutoDialog(p_parent, "Select Support")
+dialogNfgSupportSelect::dialogNfgSupportSelect(const gList<NFSupport *> &p_supports,
+					       NFSupport *p_current,
+					       const gText &p_caption,
+					       wxWindow *p_parent /*=0*/)
+  : guiAutoDialog(p_parent, p_caption)
 {
+  SetLabelPosition(wxVERTICAL);
   m_supportList = new wxListBox(this, 0, "Support", wxSINGLE, 1, 1);
-  for (int support = 1; support <= p_supports.Length(); support++) {
-    m_supportList->Append(ToText(support) + ": " + 
-			  p_supports[support]->GetName());
-    if (p_supports[support] == p_current) {
-      m_supportList->SetSelection(support - 1);
+  for (int s = 1; s <= p_supports.Length(); s++) {
+    NFSupport *support = p_supports[s];
+    gText item = ToText(s) + ": " + support->GetName();
+
+    item += (" (" + ToText(support->NumStrats(1)) + ", " +
+	     ToText(support->NumStrats(2)));
+    if (support->Game().NumPlayers() > 2) {
+      item += ", " + ToText(support->NumStrats(3));
+      if (support->Game().NumPlayers() > 3) 
+	item += ",...)";
+      else
+	item += ")";
+    }
+    else
+      item += ")";
+
+    m_supportList->Append(item);
+    if (p_supports[s] == p_current) {
+      m_supportList->SetSelection(s - 1);
     }
   }
 

@@ -78,6 +78,8 @@ private:
   void UpdateContingencyProb(const gArray<int> &profile);
   void DumpAscii(Bool all_cont);
 
+  gText UniqueSupportName(void) const;
+
   // process accelerators
   gArray<AccelEvent> MakeEventNames(void);
 
@@ -106,7 +108,7 @@ public:
   void SupportNew(void);
   void SupportEdit(void);
   void SupportDelete(void);
-  void SupportView(void);
+  void SupportSelect(void);
 
   NFSupport *MakeSupport(void);
   

@@ -11,6 +11,7 @@ class dialogNfgEditSupport : public guiAutoDialog {
 private:
   const Nfg &m_nfg;
   NFSupport m_support;
+  wxText *m_nameItem;
   wxListBox *m_playerItem, *m_strategyItem;
 
   static void CallbackPlayer(wxListBox &, wxCommandEvent &);
@@ -26,6 +27,7 @@ public:
   virtual ~dialogNfgEditSupport() { }
 
   const NFSupport &Support(void) const { return m_support; }
+  gText Name(void) const { return m_nameItem->GetValue(); }
 };
 
 #endif  // DLNFGEDITSUPPORT_H

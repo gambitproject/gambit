@@ -297,20 +297,28 @@ dialogNfgEditSupport::dialogNfgEditSupport(const NFSupport &p_support,
   : guiAutoDialog(p_parent, "Edit support"),
     m_nfg(p_support.Game()), m_support(p_support)
 {
+  m_nameItem = new wxText(this, 0, "Name");
+  m_nameItem->SetValue(p_support.GetName());
+  m_nameItem->SetConstraints(new wxLayoutConstraints);
+  m_nameItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_nameItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_nameItem->GetConstraints()->width.AsIs();
+  m_nameItem->GetConstraints()->height.AsIs();
+
   SetLabelPosition(wxVERTICAL);
   m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
   m_playerItem->wxEvtHandler::SetClientData((char *) this);
-  m_playerItem->SetConstraints(new wxLayoutConstraints());
-  m_playerItem->GetConstraints()->top.SameAs(this, wxTop, 10);
-  m_playerItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerItem->SetConstraints(new wxLayoutConstraints);
+  m_playerItem->GetConstraints()->top.SameAs(m_nameItem, wxBottom, 10);
+  m_playerItem->GetConstraints()->left.SameAs(m_nameItem, wxLeft);
   m_playerItem->GetConstraints()->width.AsIs();
   m_playerItem->GetConstraints()->height.AsIs();
 
   m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
 				 "Strategy", wxMULTIPLE);
   m_strategyItem->wxEvtHandler::SetClientData((char *) this);
-  m_strategyItem->SetConstraints(new wxLayoutConstraints());
-  m_strategyItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_strategyItem->SetConstraints(new wxLayoutConstraints);
+  m_strategyItem->GetConstraints()->top.SameAs(m_playerItem, wxTop);
   m_strategyItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
   m_strategyItem->GetConstraints()->width.AsIs();
   m_strategyItem->GetConstraints()->height.AsIs();

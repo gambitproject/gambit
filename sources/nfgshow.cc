@@ -20,7 +20,7 @@
 #include "dlnfgsave.h"
 
 #include "dlelim.h"
-#include "dlnfgsupportview.h"
+#include "dlnfgsupportselect.h"
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -34,6 +34,7 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   pl2 = 2;        // use the defaults
   cur_soln = 0;
   cur_sup = new NFSupport(nf);    // base support
+  cur_sup->SetName("Full Support");
   supports.Append(cur_sup);
   
   spread = new NormalSpread(cur_sup, pl1, pl2, this, pframe);
@@ -280,6 +281,24 @@ Bool NfgShow::Save(void)
   }
   else {
     return FALSE;
+  }
+}
+
+gText NfgShow::UniqueSupportName(void) const
+{
+  int number = supports.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= supports.Length(); i++) {
+      if (supports[i]->GetName() == "Support" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > supports.Length())
+      return "Support" + ToText(number);
+    
+    number++;
   }
 }
 
@@ -979,27 +998,35 @@ int NfgShow::SolveElimDom(void)
       if (!dialog.DomMixed()) {
 	if (dialog.FindAll()) {
 	  while ((sup = sup->Undominated(dialog.DomStrong(), 
-					 dialog.Players(), gnull, status)) != 0)
+					 dialog.Players(), gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
+	  }
 	}
 	else {
 	  if ((sup = sup->Undominated(dialog.DomStrong(), 
-				      dialog.Players(), gnull, status)) != 0)
+				      dialog.Players(), gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
+	  }
 	}
       }
       else {
 	if (dialog.FindAll()) {
 	  while ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
 					      dialog.Players(),
-					      gnull, status)) != 0)
+					      gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
+	  }
 	}
 	else {
 	  if ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
 					   dialog.Players(),
-					   gnull, status)) != 0)
+					   gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
+	  }
 	}
       }
     }
@@ -1052,11 +1079,13 @@ void NfgShow::ChangeSupport(int what)
 void NfgShow::SupportNew(void)
 {
   NFSupport newSupport(nf);
+  newSupport.SetName(UniqueSupportName());
   dialogNfgEditSupport dialog(newSupport, spread);
 
   if (dialog.Completed() == wxOK) {
     try {
       NFSupport *support = new NFSupport(dialog.Support());
+      support->SetName(dialog.Name());
       supports.Append(support);
 
       ChangeSolution(0);  // chances are, the current solution will not work.
@@ -1076,8 +1105,8 @@ void NfgShow::SupportEdit(void)
   if (dialog.Completed() == wxOK) {
     try {
       *cur_sup = dialog.Support();
-
-      ChangeSolution(0);  // chances are, the current solution will not work.
+      cur_sup->SetName(dialog.Name());
+      ChangeSolution(0);
       SetPlayers(pl1, pl2);
     }
     catch (gException &E) {
@@ -1090,7 +1119,7 @@ void NfgShow::SupportDelete(void)
 {
   if (supports.Length() == 1)  return;
 
-  dialogNfgSupportView dialog(supports, cur_sup, spread);
+  dialogNfgSupportSelect dialog(supports, cur_sup, "Delete Support", spread);
 
   if (dialog.Completed() == wxOK) {
     try {
@@ -1107,14 +1136,14 @@ void NfgShow::SupportDelete(void)
   }
 }
 
-void NfgShow::SupportView(void)
+void NfgShow::SupportSelect(void)
 {
-  dialogNfgSupportView dialog(supports, cur_sup, spread);
+  dialogNfgSupportSelect dialog(supports, cur_sup, "Select Support", spread);
 
   if (dialog.Completed() == wxOK) {
     try {
       cur_sup = supports[dialog.Selected()];
-      ChangeSolution(0);  // chances are, the current solution will not work.
+      ChangeSolution(0); 
       SetPlayers(pl1, pl2);
     }
     catch (gException &E) {
@@ -1685,8 +1714,8 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			"Edit the currently displayed support");
   supports_menu->Append(NFG_SUPPORT_DELETE, "&Delete",
 			"Delete a support");
-  supports_menu->Append(NFG_SUPPORT_VIEW, "&View",
-			"Change the viewed support");
+  supports_menu->Append(NFG_SUPPORT_SELECT, "&Select",
+			"Change the current support");
 
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",
@@ -2006,8 +2035,8 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_SUPPORT_DELETE:
       parent->SupportDelete();
       break;
-    case NFG_SUPPORT_VIEW:
-      parent->SupportView();
+    case NFG_SUPPORT_SELECT:
+      parent->SupportSelect();
       break;
       
     case NFG_SOLVE_STANDARD_MENU: 
