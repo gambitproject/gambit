@@ -48,7 +48,6 @@ libgame_a_SOURCES = \
 	nfgiter.h \
 	nfgsupport.cc \
 	nfgsupport.h \
-	nfgutils.cc \
 	node.cc \
 	node.h \
 	outcome.cc \

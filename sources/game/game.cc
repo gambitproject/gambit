@@ -32,6 +32,7 @@
 #include "efgsupport.h"
 #include "actiter.h"
 #include "nfgiter.h"
+#include "nfgciter.h"
 
 // Declarations of internal structures
 #include "gamebase.h"
@@ -1579,4 +1580,46 @@ gbtGame NewEfg(void)
 gbtGame NewNfg(const gbtArray<int> &p_dim)
 {
   return gbtGame(new gbtGameBase(p_dim));
+}
+
+gbtGame CompressNfg(const gbtGame &nfg, const gbtNfgSupport &S)
+{
+  gbtGame N = NewNfg(S.NumStrats());
+  N->SetLabel(nfg->GetLabel());
+
+  for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
+    gbtGamePlayer player = N->GetPlayer(pl);
+    player->SetLabel(nfg->GetPlayer(pl)->GetLabel());
+    for (int st = 1; st <= N->NumStrats(pl); st++) {
+      player->GetStrategy(st)->SetLabel(S.GetStrategy(pl, st)->GetLabel());
+    }
+  }
+
+  for (int outc = 1; outc <= nfg->NumOutcomes(); outc++)  {
+    gbtGameOutcome outcome = N->NewOutcome();
+
+    outcome->SetLabel(nfg->GetOutcome(outc)->GetLabel());
+
+    for (int pl = 1; pl <= N->NumPlayers(); pl++) {
+      outcome->SetPayoff(nfg->GetPlayer(pl),
+			 nfg->GetOutcome(outc)->GetPayoff(nfg->GetPlayer(pl)));
+    }
+  }
+
+  gbtNfgContIterator oiter(S);
+  gbtNfgSupport newS(N);
+  gbtNfgContIterator niter(newS);
+  
+  do   {
+    if (!oiter.GetOutcome().IsNull()) {
+      niter.SetOutcome(N->GetOutcome(oiter.GetOutcome()->GetId()));
+    }
+    else {
+      niter.SetOutcome(0);
+    }
+
+    oiter.NextContingency();
+  }  while (niter.NextContingency());
+
+  return N;
 }
