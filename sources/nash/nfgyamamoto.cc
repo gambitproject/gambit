@@ -57,7 +57,7 @@ static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 {
   for (int st = 1; st <= p_profile->GetPlayer(p_player)->NumStrategies(); st++) {
     if (p_partition(p_index, st) > 0) {
-      return p_profile->Payoff(p_player, p_profile->GetPlayer(p_player)->GetStrategy(st));
+      return p_profile->GetStrategyValue(p_profile->GetPlayer(p_player)->GetStrategy(st));
     }
   }
   
@@ -67,11 +67,14 @@ static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 
 
 static gbtMatrix<int> RankStrategies(const gbtMixedProfile<double> &p_profile,
-				   int p_player)
+				     int p_player)
 {
-  gbtVector<double> payoffs(p_profile->GetPlayer(p_player)->NumStrategies());
-  gbtArray<int> strategies(p_profile->GetPlayer(p_player)->NumStrategies());
-  p_profile->Payoff(p_player, p_player, payoffs);
+  gbtGamePlayer player = p_profile->GetPlayer(p_player);
+  gbtVector<double> payoffs(player->NumStrategies());
+  gbtArray<int> strategies(player->NumStrategies());
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    payoffs[st] = p_profile->GetStrategyValue(player->GetStrategy(st));
+  }
 
   for (int i = 1; i <= strategies.Length(); i++) {
     strategies[i] = i;
@@ -179,7 +182,13 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 		  continue;
 		}
 
-		p_matrix(rowno, colno) = p_profile->Payoff(pl, pl, st1, pl2, st2) - p_profile->Payoff(pl, pl, st, pl2, st2);
+		p_matrix(rowno, colno) =
+		  p_profile->GetPayoff(p_profile->GetPlayer(pl),
+				       p_profile->GetPlayer(pl)->GetStrategy(st1),
+				       p_profile->GetPlayer(pl2)->GetStrategy(st2)) -
+		  p_profile->GetPayoff(p_profile->GetPlayer(pl),
+				       p_profile->GetPlayer(pl)->GetStrategy(st),
+				       p_profile->GetPlayer(pl2)->GetStrategy(st2));
 	      }
 	    }
 	  }

@@ -99,11 +99,12 @@ template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ gbtLPSolver<T> &lp)
 
 
 
-template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
-						    gbtDPVector<T> &v,
-						    const gbtBasicFeasibleSolution<T> &sol,
-						    const gbtGameNode &n,
-						    int s1,int s2) const
+template <class T> void 
+gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
+			    gbtBehavProfile<T> &v,
+			    const gbtBasicFeasibleSolution<T> &sol,
+			    const gbtGameNode &n,
+			    int s1,int s2) const
 {
   
   int i,pl,inf,snew;
@@ -204,7 +205,7 @@ void gbtEfgNashLp<T>::GetSolutions(const gbtEfgSupport &p_support,
 {
   for (int i = 1; i <= List.Length(); i++)    {
     gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
-    GetProfile(p_support, profile->GetDPVector(), List[i],
+    GetProfile(p_support, profile, List[i],
 	       p_support->GetRoot(), 1, 1);
     solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
   }

@@ -196,15 +196,15 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	  
 	  for (int act = 1; act <= subsupport->NumActions(pl, iset); act++) {
 	    int actno = subsupport->GetAction(pl, iset, act)->GetId();
-	    solns[solns.Length()]->Set(pl, index, actno,
-				       sol[solno](subsupport->GetAction(pl, iset, act)));
+	    solns[solns.Length()](pl, index, actno) =
+	      sol[solno](subsupport->GetAction(pl, iset, act));
 	  }
 	}
       }
       
       gbtVector<gbtNumber> subval(foo->NumPlayers());
       for (i = 1; i <= foo->NumPlayers(); i++)  {
-	subval[i] = sol[solno]->Payoff(i);
+	subval[i] = sol[solno]->GetPayoff(sol[solno]->GetPlayer(i));
 	if (!n->GetOutcome().IsNull())  {
 	  subval[i] += n->GetOutcome()->GetPayoff(p_support->GetPlayer(i));
         }

@@ -282,7 +282,7 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 		  next_poly += node_prob;
 		}
 	      }
-	      answer += -next_poly + (gbtDouble) p_solution->Payoff(pl);
+	      answer += -next_poly + (gbtDouble) p_solution->GetPayoff(p_solution->GetPlayer(pl));
 	    }
 	  }
       }
@@ -468,7 +468,7 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gbtDouble) p_solution->Payoff(player->GetId());
+	    answer += -next_poly + (gbtDouble) p_solution->GetPayoff(player);
 	  }
     }
   }

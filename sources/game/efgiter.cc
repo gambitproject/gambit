@@ -27,17 +27,10 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-gbtEfgIterator::gbtEfgIterator(gbtGame p_efg)
-  : m_support(p_efg->NewEfgSupport()),
-    m_current(m_support->NumInfosets()), m_profile(p_efg)
-{
-  First();
-}
-
 gbtEfgIterator::gbtEfgIterator(const gbtEfgSupport &p_support)
   : m_support(p_support),
     m_current(m_support->NumInfosets()),
-    m_profile(m_support->GetTree())
+    m_profile(m_support)
 {
   First();
 }
@@ -120,7 +113,7 @@ void gbtEfgIterator::GetPayoff(gbtVector<gbtNumber> &p_payoff) const
 
 gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &p_support)
   : m_frozenPlayer(0), m_frozenInfoset(0),
-    m_support(p_support), m_profile(m_support->GetTree()), 
+    m_support(p_support), m_profile(m_support), 
     m_current(m_support->NumInfosets()),
     m_numActiveInfosets(m_support->NumPlayers())
 {
@@ -140,7 +133,7 @@ gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &p_support)
 gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &p_support, 
 				       const gbtList<gbtGameInfoset> &p_active)
   : m_frozenPlayer(0), m_frozenInfoset(0),
-    m_support(p_support), m_profile(m_support->GetTree()), 
+    m_support(p_support), m_profile(m_support), 
     m_current(m_support->NumInfosets()),
     m_numActiveInfosets(m_support->NumPlayers())
 {
@@ -265,16 +258,16 @@ gbtNumber gbtEfgContIterator::GetPayoff(int pl) const
 
 
 gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s)
-  : m_efg(s->GetTree()), _support(s),
-    _profile(s->GetTree()), _current(s->NumInfosets()),
+  : _support(s),
+    _profile(s), _current(s->NumInfosets()),
     _is_active(),
-    _num_active_infosets(m_efg->NumPlayers()),
-    _payoff(m_efg->NumPlayers())
+    _num_active_infosets(_support->NumPlayers()),
+    _payoff(_support->NumPlayers())
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= _support->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
+    gbtBlock<bool> active_for_pl(_support->GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= _support->GetPlayer(pl)->NumInfosets(); iset++) {
       active_for_pl[iset] = true;
       _num_active_infosets[pl]++;
     }
@@ -285,17 +278,17 @@ gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport
 
 gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s, 
 					       const gbtList<gbtGameInfoset> &active)
-  : m_efg(s->GetTree()), _support(s),
-    _profile(s->GetTree()), _current(s->NumInfosets()),
+  : _support(s),
+    _profile(s), _current(s->NumInfosets()),
     _is_active(),
-    _num_active_infosets(m_efg->NumPlayers()),
-    _payoff(m_efg->NumPlayers())
+    _num_active_infosets(_support->NumPlayers()),
+    _payoff(_support->NumPlayers())
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= _support->NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      if ( active.Contains(m_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
+    gbtBlock<bool> active_for_pl(_support->GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= _support->GetPlayer(pl)->NumInfosets(); iset++) {
+      if ( active.Contains(_support->GetPlayer(pl)->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -313,8 +306,8 @@ gbtEfgConditionalContIterator::~gbtEfgConditionalContIterator()
 
 void gbtEfgConditionalContIterator::First(void)
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
+  for (int pl = 1; pl <= _support->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= _support->GetPlayer(pl)->NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
 	_profile.Set(_support->GetAction(pl, iset, 1));
@@ -348,11 +341,11 @@ int gbtEfgConditionalContIterator::Next(int pl, int iset)
 
 int gbtEfgConditionalContIterator::NextContingency(void)
 {
-  int pl = m_efg->NumPlayers();
+  int pl = _support->NumPlayers();
   while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
   if (pl == 0)   return 0;
-  int iset = m_efg->GetPlayer(pl)->NumInfosets();
+  int iset = _support->GetPlayer(pl)->NumInfosets();
     
   while (true) {
 
@@ -374,7 +367,7 @@ int gbtEfgConditionalContIterator::NextContingency(void)
       }  while (pl > 0 && _num_active_infosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = m_efg->GetPlayer(pl)->NumInfosets();
+      iset = _support->GetPlayer(pl)->NumInfosets();
     }
   }
 }

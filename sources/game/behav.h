@@ -56,14 +56,11 @@ public:
   virtual bool operator==(const gbtBehavProfileRep<T> &) const = 0;
   
   // INITIALIZATION, VALIDATION
-  virtual void Centroid(void) = 0;
+  virtual void SetCentroid(void) = 0;
 
   // GENERAL DATA ACCESS
-  virtual gbtEfgSupport GetSupport(void) const = 0;
-  
   virtual const T &operator()(const gbtGameAction &) const = 0;
   virtual T &operator()(const gbtGameAction &) = 0;
-  virtual void Set(int, int, int, const gbtNumber &) = 0;
 
   virtual const T &GetRealizProb(const gbtGameNode &node) const = 0;
   virtual const T &GetBeliefProb(const gbtGameNode &node) const = 0;
@@ -75,11 +72,8 @@ public:
   virtual const T &GetRegret(const gbtGameAction &act) const = 0;
 
   // COMPUTATION OF INTERESTING QUANTITIES
-  virtual T Payoff(int p_player) const = 0;
-  virtual gbtDPVector<T> Beliefs(void) const = 0;
+  virtual T GetPayoff(const gbtGamePlayer &p_player) const = 0;
   virtual T GetLiapValue(bool p_penalty = true) const = 0;
-  virtual T QreValue(const gbtVector<T> &lambda, bool &) const = 0;
-  virtual T MaxRegret(void) const = 0;
 
   virtual T DiffActionValue(const gbtGameAction &action, 
 			    const gbtGameAction &oppAction) const = 0;
@@ -87,8 +81,6 @@ public:
 			   const gbtGameAction &oppAction) const = 0;
   virtual T DiffNodeValue(const gbtGameNode &node, const gbtGamePlayer &player,
 			  const gbtGameAction &oppAction) const = 0;
-
-  virtual void Dump(gbtOutput &) const = 0;
 
   // IMPLEMENTATION OF gbtDPVector OPERATIONS
   virtual const T &operator()(int a, int b, int c) const = 0;
@@ -100,12 +92,6 @@ public:
 
   virtual bool operator==(const gbtDPVector<T> &x) const = 0;
   virtual bool operator!=(const gbtDPVector<T> &x) const = 0;
-
-  virtual const gbtArray<int> &Lengths(void) const = 0;
-
-  virtual const gbtPVector<T> &GetPVector(void) const = 0;
-  virtual const gbtDPVector<T> &GetDPVector(void) const = 0;
-  virtual gbtDPVector<T> &GetDPVector(void)  = 0;
 
   virtual operator gbtMixedProfile<T>(void) const = 0;
 };

@@ -39,7 +39,6 @@ friend class gbtMixedProfile<T>;
 public:
   // Some non-virtual generic implementations of operations
   void SetCentroid(void);
-  T GetMaxRegret(void) const;
   void GetRegret(gbtPVector<T> &value) const;
   T GetLiapValue(void) const;
 
@@ -50,21 +49,9 @@ public:
    
   virtual bool operator==(const gbtMixedProfileRep<T> &) const = 0;
 
-  virtual gbtNfgSupport GetSupport(void) const = 0;
-
-  virtual void SetStrategyProb(const gbtGameStrategy &p_strategy,
-			       const T &p_prob) = 0;
-  virtual T GetStrategyValue(const gbtGameStrategy &p_strategy) const = 0;
+  // Access to individual strategy probabilities
   virtual T &operator()(const gbtGameStrategy &p_strategy) = 0;
   virtual const T &operator()(const gbtGameStrategy &p_strategy) const = 0;
-
-  virtual T Payoff(int pl) const = 0;
-  virtual T Payoff(int pl, gbtGameStrategy) const = 0;
-
-  virtual T Payoff(int pl, int player1, int strat1, int player2, int strat2) const = 0;
-  virtual void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const = 0;
-
-  virtual operator gbtBehavProfile<T>(void) const = 0;
 
   // The following implement the necessary gPVector-style operations
   // traditionally permitted on mixed profiles.
@@ -74,11 +61,23 @@ public:
   virtual const T &operator[](int) const = 0;
   virtual T &operator[](int) = 0;
 
-  virtual gbtVector<T> GetRow(int) const = 0;
-  virtual void SetRow(int row, const gbtVector<T> &) = 0;
-  virtual void CopyRow(int row, const gbtPVector<T> &) = 0;
-  virtual void CopyRow(int row, const gbtMixedProfile<T> &) = 0;
-  virtual const gbtArray<int> &Lengths(void) const = 0;
+  // Computations of payoffs and other values
+  virtual T GetPayoff(const gbtGamePlayer &) const = 0;
+  virtual T GetPayoff(const gbtGamePlayer &,
+		      const gbtGameStrategy &) const = 0;
+  virtual T GetPayoff(const gbtGamePlayer &, 
+		      const gbtGameStrategy &,
+		      const gbtGameStrategy &) const = 0;
+
+  virtual T GetStrategyValue(const gbtGameStrategy &p_strategy) const = 0;
+
+  virtual operator gbtBehavProfile<T>(void) const = 0;
+
+  virtual gbtVector<T> GetStrategy(const gbtGamePlayer &) const = 0;
+  virtual void SetStrategy(const gbtGamePlayer &, const gbtVector<T> &) = 0;
+  virtual void CopyStrategy(const gbtGamePlayer &, const gbtPVector<T> &) = 0;
+  virtual void CopyStrategy(const gbtGamePlayer &,
+			    const gbtMixedProfile<T> &) = 0;
 };
 
 
@@ -130,6 +129,7 @@ public:
 
   gbtMixedProfileRep<T> *Get(void) const { return m_rep; }
 
+  operator gbtNfgGame(void) const { return m_rep; }
   operator gbtBehavProfile<T>(void) const 
   { return (gbtBehavProfile<T>) *m_rep; }
 

@@ -560,40 +560,45 @@ public:
   gbtMixedProfileTable(const gbtMixedProfileTable<T> &);
   virtual ~gbtMixedProfileTable() { delete m_support; }
 
-  gbtMixedProfileTable<T> *Copy(void) const;
-  
-  void SetStrategyProb(const gbtGameStrategy &p_strategy,
-		       const T &p_prob);
-  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
+  gbtMixedProfileRep<T> *Copy(void) const;
+   
+  bool operator==(const gbtMixedProfileRep<T> &) const;
+
+  // Access to individual strategy probabilities
   T &operator()(const gbtGameStrategy &p_strategy);
   const T &operator()(const gbtGameStrategy &p_strategy) const;
 
-  T Payoff(int pl) const;
-  T Payoff(int pl, gbtGameStrategy) const;
-  T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
-  void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
+  // The following implement the necessary gPVector-style operations
+  // traditionally permitted on mixed profiles.
+  const T &operator()(int pl, int st) const { return m_profile(pl, st); }
+  T &operator()(int pl, int st) { return m_profile(pl, st); }
 
-  bool operator==(const gbtMixedProfileRep<T> &) const;
+  const T &operator[](int index) const { return m_profile[index]; }
+  T &operator[](int index) { return m_profile[index]; }
 
-  gbtNfgSupport GetSupport(void) const   { return m_support; }
+  // Computations of payoffs and other values
+  T GetPayoff(const gbtGamePlayer &) const;
+  T GetPayoff(const gbtGamePlayer &, const gbtGameStrategy &) const;
+  T GetPayoff(const gbtGamePlayer &, 
+	      const gbtGameStrategy &, const gbtGameStrategy &) const;
+
+  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
 
   operator gbtBehavProfile<T>(void) const;
 
-  const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
-  T &operator()(int pl, int st) { return m_profile(pl, st); }
+  gbtVector<T> GetStrategy(const gbtGamePlayer &p_player) const
+  { return m_profile.GetRow(p_player->GetId()); }
+  void SetStrategy(const gbtGamePlayer &p_player, 
+		   const gbtVector<T> &p_strategy)
+  { m_profile.SetRow(p_player->GetId(), p_strategy); }
+  void CopyStrategy(const gbtGamePlayer &p_player, 
+		    const gbtPVector<T> &p_from) 
+  { m_profile.CopyRow(p_player->GetId(), p_from); }
+  void CopyStrategy(const gbtGamePlayer &p_player,
+		    const gbtMixedProfile<T> &p_from)
+  { m_profile.CopyRow(p_player->GetId(),
+		      dynamic_cast<gbtMixedProfileTable<T> *>(p_from.Get())->m_profile); }
 
-  const T &operator[](int i) const { return m_profile[i]; }
-  T &operator[](int i) { return m_profile[i]; }
-
-  gbtVector<T> GetRow(int row) const { return m_profile.GetRow(row); }
-  void SetRow(int row, const gbtVector<T> &p_vector) 
-  { m_profile.SetRow(row, p_vector); }
-  const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
-
-  void CopyRow(int row, const gbtPVector<T> &p_vector) 
-  { m_profile.CopyRow(row, p_vector); }
-  void CopyRow(int row, const gbtMixedProfile<T> &p_profile) 
-  { m_profile.CopyRow(row, dynamic_cast<gbtMixedProfileTable<T> *>(p_profile.Get())->m_profile); }
 
   // IMPLEMENTATION OF gbtGameObject INTERFACE
   gbtText GetLabel(void) const { return ""; }
@@ -646,40 +651,44 @@ public:
   gbtMixedProfileTree(const gbtBehavProfileBase<T> &);
   virtual ~gbtMixedProfileTree() { }
 
-  gbtMixedProfileTree<T> *Copy(void) const;
-  
-  void SetStrategyProb(const gbtGameStrategy &p_strategy,
-		       const T &p_prob);
-  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
+  gbtMixedProfileRep<T> *Copy(void) const;
+   
+  bool operator==(const gbtMixedProfileRep<T> &) const;
+
+  // Access to individual strategy probabilities
   T &operator()(const gbtGameStrategy &p_strategy);
   const T &operator()(const gbtGameStrategy &p_strategy) const;
 
-  T Payoff(int pl) const;
-  T Payoff(int pl, gbtGameStrategy) const;
-  T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
-  void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
+  // The following implement the necessary gPVector-style operations
+  // traditionally permitted on mixed profiles.
+  const T &operator()(int pl, int st) const { return m_profile(pl, st); }
+  T &operator()(int pl, int st) { return m_profile(pl, st); }
 
-  bool operator==(const gbtMixedProfileRep<T> &) const;
+  const T &operator[](int index) const { return m_profile[index]; }
+  T &operator[](int index) { return m_profile[index]; }
 
-  gbtNfgSupport GetSupport(void) const   { return m_nfgSupport; }
+  // Computations of payoffs and other values
+  T GetPayoff(const gbtGamePlayer &) const;
+  T GetPayoff(const gbtGamePlayer &, const gbtGameStrategy &) const;
+  T GetPayoff(const gbtGamePlayer &, 
+	      const gbtGameStrategy &, const gbtGameStrategy &) const;
+
+  T GetStrategyValue(const gbtGameStrategy &p_strategy) const;
 
   operator gbtBehavProfile<T>(void) const;
 
-  const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
-  T &operator()(int pl, int st) { return m_profile(pl, st); }
-
-  const T &operator[](int i) const { return m_profile[i]; }
-  T &operator[](int i) { return m_profile[i]; }
-
-  gbtVector<T> GetRow(int row) const { return m_profile.GetRow(row); }
-  void SetRow(int row, const gbtVector<T> &p_vector) 
-  { m_profile.SetRow(row, p_vector); }
-  const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
-
-  void CopyRow(int row, const gbtPVector<T> &p_vector) 
-  { m_profile.CopyRow(row, p_vector); }
-  void CopyRow(int row, const gbtMixedProfile<T> &p_profile) 
-  { m_profile.CopyRow(row, dynamic_cast<gbtMixedProfileTree<T> *>(p_profile.Get())->m_profile); }
+  gbtVector<T> GetStrategy(const gbtGamePlayer &p_player) const
+  { return m_profile.GetRow(p_player->GetId()); }
+  void SetStrategy(const gbtGamePlayer &p_player, 
+		   const gbtVector<T> &p_strategy)
+  { m_profile.SetRow(p_player->GetId(), p_strategy); }
+  void CopyStrategy(const gbtGamePlayer &p_player, 
+		    const gbtPVector<T> &p_from) 
+  { m_profile.CopyRow(p_player->GetId(), p_from); }
+  void CopyStrategy(const gbtGamePlayer &p_player,
+		    const gbtMixedProfile<T> &p_from)
+  { m_profile.CopyRow(p_player->GetId(),
+		      dynamic_cast<gbtMixedProfileTree<T> *>(p_from.Get())->m_profile); }
 
   // IMPLEMENTATION OF gbtGameObject INTERFACE
   gbtText GetLabel(void) const { return ""; }
@@ -757,9 +766,9 @@ public:
 
   bool operator==(const gbtEfgSupportRep &) const;
 
-  gbtGame GetTree(void) const { return m_efg; }
-
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
+
+  gbtGame GetTree(void) const { return m_efg; }
 
   int NumActions(int pl, int iset) const;
   int NumActions(const gbtGameInfoset &) const;
@@ -886,7 +895,7 @@ class gbtBehavProfileBase : public gbtBehavProfileRep<T> {
 public:
   gbtDPVector<T> m_profile;
   gbtEfgSupportBase *m_support;
-  mutable bool m_cached_data;
+  mutable bool m_cachedData;
 
   // structures for storing cached data: nodes
   mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
@@ -949,7 +958,7 @@ public:
   void ComputeSolutionDataPass1(const gbtGameNode &node) const;
   void ComputeSolutionData(void) const;
 
-  void BehaviorStrat(const gbtGame &, int, const gbtGameNode &);
+  void BehaviorStrat(int, const gbtGameNode &);
   void RealizationProbs(const gbtMixedProfileTree<T> &,
 			int pl, const gbtArray<int> &, const gbtGameNode &);
 
@@ -965,13 +974,9 @@ public:
   bool operator==(const gbtBehavProfileRep<T> &) const;
 
   // INITIALIZATION, VALIDATION
-  inline void Invalidate(void) const {m_cached_data=false;}
-  virtual bool IsAssessment(void) const { return false; }
-  void Centroid(void);
+  void SetCentroid(void);
 
   // GENERAL DATA ACCESS
-  gbtEfgSupport GetSupport(void) const   { return m_support; }
-  
   const T &GetRealizProb(const gbtGameNode &node) const;
   const T &GetBeliefProb(const gbtGameNode &node) const;
   gbtVector<T> GetNodeValue(const gbtGameNode &node) const;
@@ -983,11 +988,8 @@ public:
 
   // COMPUTATION OF INTERESTING QUANTITIES
 
-  T Payoff(int p_player) const;
-  gbtDPVector<T> Beliefs(void) const;
+  T GetPayoff(const gbtGamePlayer &p_player) const;
   T GetLiapValue(bool p_penalty = true) const;
-  T QreValue(const gbtVector<T> &lambda, bool &) const;
-  T MaxRegret(void) const;
 
   T DiffActionValue(const gbtGameAction &action, 
 		    const gbtGameAction &oppAction) const;
@@ -998,9 +1000,6 @@ public:
 
   const T &operator()(const gbtGameAction &) const;
   T &operator()(const gbtGameAction &);
-  void Set(int, int, int, const gbtNumber &);
-
-  void Dump(gbtOutput &) const;
 
   // IMPLEMENTATION OF gbtDPVector OPERATIONS
   // These are reimplemented here to correctly handle invalidation
@@ -1008,26 +1007,19 @@ public:
   const T &operator()(int a, int b, int c) const
     { return m_profile(a, b, c); }
   T &operator()(int a, int b, int c) 
-    { Invalidate();  return m_profile(a, b, c); }
+    { m_cachedData = false;  return m_profile(a, b, c); }
   const T &operator[](int a) const
     { return m_profile[a]; }
   T &operator[](int a)
-    { Invalidate();  return m_profile[a]; }
+    { m_cachedData = false;  return m_profile[a]; }
 
   void operator=(const T &x)  
-    { Invalidate();  m_profile = x; }
+    { m_cachedData = false;  m_profile = x; }
 
   bool operator==(const gbtDPVector<T> &x) const
   { return (m_profile == x); }
   bool operator!=(const gbtDPVector<T> &x) const
   { return (m_profile != x); }
-
-  const gbtArray<int> &Lengths(void) const
-    { return m_profile.Lengths(); }
-
-  const gbtPVector<T> &GetPVector(void) const { return m_profile; }
-  const gbtDPVector<T> &GetDPVector(void) const { return m_profile; }
-  gbtDPVector<T> &GetDPVector(void) { Invalidate(); return m_profile; }
 
   // IMPLEMENTATION OF gbtGameObject INTERFACE
   gbtText GetLabel(void) const { return ""; }

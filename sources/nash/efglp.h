@@ -43,7 +43,8 @@ private:
   void GetSolutions(const gbtEfgSupport &, gbtBehavNashSet &) const;
   int Add_BFS(/*const*/ gbtLPSolver<T> &B);
   
-  void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const gbtBasicFeasibleSolution<T> &sol,
+  void GetProfile(const gbtEfgSupport &, gbtBehavProfile<T> &v, 
+		  const gbtBasicFeasibleSolution<T> &sol,
 		  const gbtGameNode &n, int s1,int s2) const;
 
 public:

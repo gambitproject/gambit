@@ -161,10 +161,10 @@ const gbtBlock<gbtSfgSequence *> &gbtSfgSequenceSet::GetSFSequenceSet(void) cons
 //-----------------------------------------------
 
 gbtSfgSupport::gbtSfgSupport(const gbtSfgGame &SF) 
-  : bsfg(&SF), sups(SF.GetEfg()->NumPlayers())
+  : bsfg(&SF), sups(SF.NumPlayers())
 { 
   for (int i = 1; i <= sups.Length(); i++) {
-    sups[i] = new gbtSfgSequenceSet(SF.GetEfg()->GetPlayer(i));
+    sups[i] = new gbtSfgSequenceSet(SF.GetPlayer(i));
   }
 }
 
@@ -280,7 +280,7 @@ void gbtSfgSupport::Dump(gbtOutput&s) const
   gbtArray<gbtSfgSequence *> strat;
 
   s << "{ ";
-  numplayers = (*bsfg).GetEfg()->NumPlayers();
+  numplayers = bsfg->NumPlayers();
   for( i = 1; i <= numplayers; i++ )
   {
     s << "{ ";

@@ -98,13 +98,13 @@ bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol, int pl,
   bool ret = false;
 
   if(precision == GBT_PREC_RATIONAL) {
-    gbtMixedProfile<gbtRational> p = sol->GetSupport()->NewMixedProfile(gbtRational(0));
+    gbtMixedProfile<gbtRational> p = sol->NewMixedProfile(gbtRational(0));
     for (int i = 1; i <= p->MixedProfileLength(); i++)
       p[i] = sol[i];
     ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   else if (precision == GBT_PREC_DOUBLE) {
-    gbtMixedProfile<double> p = sol->GetSupport()->NewMixedProfile(0.0);
+    gbtMixedProfile<double> p = sol->NewMixedProfile(0.0);
     for (int i = 1; i <= p->MixedProfileLength(); i++)
       p[i] = sol[i];
     

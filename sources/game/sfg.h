@@ -36,8 +36,7 @@
 
 class gbtSfgGame  {
 private:
-  gbtGame m_efg;
-  const gbtEfgSupport &efsupp;
+  const gbtEfgSupport &m_support;
   gbtArray<gbtSfgSequenceSet *> *sequences;
   gbtNDArray<gbtArray<gbtNumber> *> *SF;  // sequence form
   gbtArray<gbtRectArray<gbtNumber> *> *E;   // constraint matrices for sequence form.  
@@ -58,7 +57,8 @@ public:
   inline gbtArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const { return m_efg->NumPlayers(); }
+  inline int NumPlayers() const { return m_support->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int pl) const { return m_support->GetPlayer(pl); }
   
   inline gbtArray<gbtNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
   gbtNumber Payoff(const gbtArray<int> & index,int pl) const;
@@ -68,7 +68,6 @@ public:
   int ActionNumber(int pl, int sequence) const;
   gbtGameInfoset GetInfoset(int pl, int sequence) const;
   gbtGameAction GetAction(int pl, int sequence) const;
-  gbtGame GetEfg(void) const { return m_efg; }
   gbtBehavProfile<gbtNumber> ToBehav(const gbtPVector<double> &x) const;
   const gbtSfgSequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   

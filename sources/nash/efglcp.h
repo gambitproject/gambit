@@ -47,7 +47,7 @@ private:
 		int depth, gbtMatrix<T> &, gbtBehavNashSet &, gbtStatus &);
   
   void GetProfile(const gbtEfgSupport &, const gbtLemkeTableau<T> &tab, 
-		  gbtDPVector<T> &, const gbtVector<T> &, 
+		  gbtBehavProfile<T> &, const gbtVector<T> &, 
 		  const gbtGameNode &n, int,int);
 
 public:

@@ -113,7 +113,7 @@ gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
       
       Add_BFS(tab);
       tab.BasisVector(sol);
-      GetProfile(p_support, tab, profile->GetDPVector(), sol,
+      GetProfile(p_support, tab, profile, sol,
 		 p_support->GetRoot(), 1, 1);
       solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
     }
@@ -197,7 +197,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile->GetDPVector(),
+	GetProfile(p_support, BCopy, profile,
 		   sol, p_support->GetRoot(), 1, 1);
 	if(newsol) {
 	  p_solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
@@ -275,7 +275,8 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
 template <class T>
 void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 				  const gbtLemkeTableau<T> &tab, 
-				  gbtDPVector<T> &v, const gbtVector<T> &sol,
+				  gbtBehavProfile<T> &v,
+				  const gbtVector<T> &sol,
 				  const gbtGameNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;

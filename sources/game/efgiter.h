@@ -38,7 +38,6 @@ private:
   gbtEfgContingency m_profile;
 
 public:
-  gbtEfgIterator(gbtGame);
   gbtEfgIterator(const gbtEfgSupport &);
   gbtEfgIterator(const gbtEfgIterator &);
   gbtEfgIterator(const gbtEfgContIterator &);

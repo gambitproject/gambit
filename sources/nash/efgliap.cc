@@ -28,33 +28,31 @@
 #include "math/gmatrix.h"
 #include "numerical/gfuncmin.h"
 
-class EFLiapFunc : public gbtC1Function<double>  {
+class gbtBehavLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
-  gbtGame m_efg;
   mutable gbtBehavProfile<double> _p;
 
   double Value(const gbtVector<double> &x) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
-  EFLiapFunc(const gbtGame &, const gbtBehavProfile<double> &);
-  virtual ~EFLiapFunc();
+  gbtBehavLiapFunc(const gbtBehavProfile<double> &);
+  virtual ~gbtBehavLiapFunc();
     
   long NumEvals(void) const  { return _nevals; }
 };
 
 
-EFLiapFunc::EFLiapFunc(const gbtGame &p_efg,
-		       const gbtBehavProfile<double> &start)
-  : _nevals(0L), m_efg(p_efg), _p(start)
+gbtBehavLiapFunc::gbtBehavLiapFunc(const gbtBehavProfile<double> &start)
+  : _nevals(0L), _p(start)
 { }
 
-EFLiapFunc::~EFLiapFunc()
+gbtBehavLiapFunc::~gbtBehavLiapFunc()
 { }
 
 
-double EFLiapFunc::Value(const gbtVector<double> &v) const
+double gbtBehavLiapFunc::Value(const gbtVector<double> &v) const
 {
   _nevals++;
   ((gbtVector<double> &) _p).operator=(v);
@@ -102,23 +100,25 @@ static void Project(gbtVector<double> &grad, const gbtVector<double> &x,
   }
 }
 
-bool EFLiapFunc::Gradient(const gbtVector<double> &x,
+bool gbtBehavLiapFunc::Gradient(const gbtVector<double> &x,
 			  gbtVector<double> &grad) const
 {
   const double DELTA = .00001;
 
-  ((gbtVector<double> &) _p).operator=(x);
+  for (int i = 1; i <= x.Length(); i++) {
+    _p[i] = x[i];
+  }
   for (int i = 1; i <= x.Length(); i++) {
     _p[i] += DELTA;
-    double value = Value(_p->GetDPVector());
+    double value = _p->GetLiapValue(false);
     _p[i] -= 2.0 * DELTA;
-    value -= Value(_p->GetDPVector());
+    value -= _p->GetLiapValue(false);
     _p[i] += DELTA;
     grad[i] = value / (2.0 * DELTA);
   }
 
   // Project for constraints
-  Project(grad, x, _p->GetPVector().Lengths());
+  Project(grad, x, _p->NumActions());
 
   return true;
 }
@@ -133,7 +133,8 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p->GetSupport()->NumActions(pl, iset); act++)  {
+      for (act = 1; act < p->GetPlayer(pl)->GetInfoset(iset)->NumActions(); 
+	   act++)  {
 	do
 	  tmp = Uniform();
 	while (tmp + sum > 1.0);
@@ -158,7 +159,7 @@ gbtBehavNashSet gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
   static const double ALPHA = .00000001;
 
   gbtBehavProfile<double> p = p_support->NewBehavProfile(0.0);
-  EFLiapFunc F(p_support->GetTree(), p);
+  gbtBehavLiapFunc F(p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk = 0;
@@ -187,7 +188,12 @@ gbtBehavNashSet gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
       gbtVector<double> gradient(p->BehavProfileLength());
       gbtVector<double> dx(p->BehavProfileLength());
       double fval;
-      minimizer.Set(F, p->GetDPVector(), fval, gradient, .01, .0001);
+      
+      gbtVector<double> pcopy(p->BehavProfileLength());
+      for (int j = 1; j <= pcopy.Length(); j++) {
+	pcopy[j] = p[j];
+      }
+      minimizer.Set(F, pcopy, fval, gradient, .01, .0001);
 
       try {
 	for (int iter = 1; iter <= m_maxitsN; iter++) {
@@ -195,8 +201,12 @@ gbtBehavNashSet gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 	    p_status.Get();
 	  }
 	  
-	  if (!minimizer.Iterate(F, p->GetDPVector(), fval, gradient, dx)) {
+	  if (!minimizer.Iterate(F, pcopy, fval, gradient, dx)) {
 	    break;
+	  }
+
+	  for (int j = 1; j <= pcopy.Length(); j++) {
+	    p[j] = pcopy[j];
 	  }
 
 	  if (sqrt(gradient.NormSquared()) < .001 &&

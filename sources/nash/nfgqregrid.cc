@@ -119,7 +119,7 @@ MixedProfileIterator::MixedProfileIterator(const gbtMixedProfile<double> &p_base
 					   int p_staticPlayer)
   : m_staticPlayer(p_staticPlayer), m_step(p_step),
     m_current(p_base), m_minVal(p_base), m_maxVal(p_base),
-    m_sums(p_base->Lengths().Length())
+    m_sums(p_base->NumPlayers())
 {
   for (int i = 1; i <= m_sums.Length(); i++) {
     m_sums[i] = 0;
@@ -297,7 +297,7 @@ gbtVector<double> QreNfgGrid::UpdateFunc(const gbtMixedProfile<double> &p_profil
   gbtVector<double> tmp(p_profile->GetPlayer(p_player)->NumStrategies());
   double denom = 0.0;
   for (int st = 1; st <= r.Length(); st++) {
-    double p = p_profile->Payoff(p_player, p_profile->GetPlayer(p_player)->GetStrategy(st));
+    double p = p_profile->GetStrategyValue(p_profile->GetPlayer(p_player)->GetStrategy(st));
     tmp[st] = exp(p_lambda * p);
     denom += tmp[st];
   }
@@ -313,14 +313,16 @@ bool QreNfgGrid::CheckEqu(gbtMixedProfile<double> &p_profile,
 			  double p_lambda, int p_staticPlayer,
 			  double p_tol) const
 {
-  p_profile->SetRow(p_staticPlayer, 
-		    UpdateFunc(p_profile, p_staticPlayer, p_lambda));
+  p_profile->SetStrategy(p_profile->GetPlayer(p_staticPlayer), 
+			 UpdateFunc(p_profile, p_staticPlayer, p_lambda));
   
   gbtMixedProfile<double> newProfile(p_profile);
   for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
     if (pl != p_staticPlayer) {
-      newProfile->SetRow(pl, UpdateFunc(p_profile, pl, p_lambda));
-      if (Distance(newProfile->GetRow(pl), p_profile->GetRow(pl)) > p_tol) {
+      newProfile->SetStrategy(newProfile->GetPlayer(pl),
+			      UpdateFunc(p_profile, pl, p_lambda));
+      if (Distance(newProfile->GetStrategy(newProfile->GetPlayer(pl)),
+		   p_profile->GetStrategy(p_profile->GetPlayer(pl))) > p_tol) {
 	return false;
       }
     }
@@ -337,10 +339,10 @@ static void Jacobian(gbtVector<double> &p_vector,
 		     gbtSquareMatrix<double> &p_matrix,
 		     const gbtMixedProfile<double> &p_profile, double p_lambda)
 {
-  gbtPVector<double> logitterms(p_profile->Lengths());
+  gbtPVector<double> logitterms(p_profile->NumStrategies());
   for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
-      logitterms(pl, st) = exp(p_lambda * p_profile->Payoff(pl, p_profile->GetPlayer(pl)->GetStrategy(st)));
+      logitterms(pl, st) = exp(p_lambda * p_profile->GetStrategyValue(p_profile->GetPlayer(pl)->GetStrategy(st)));
     }
   }
 
@@ -373,10 +375,17 @@ static void Jacobian(gbtVector<double> &p_vector,
 	  else {
 	    p_matrix(rowno, colno) = 0.0;
 	    for (int st = 1; st <= p_profile->GetPlayer(pl1)->NumStrategies(); st++) {
-	      p_matrix(rowno, colno) += p_profile->Payoff(pl1, pl1, st, pl2, st2) * logitterms(pl1, st);
+	      p_matrix(rowno, colno) += 
+		p_profile->GetPayoff(p_profile->GetPlayer(pl1),
+				     p_profile->GetPlayer(pl1)->GetStrategy(st),
+				     p_profile->GetPlayer(pl2)->GetStrategy(st2)) * logitterms(pl1, st);
 	    }
 	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
-	    p_matrix(rowno, colno) -= p_profile->Payoff(pl1, pl1, st1, pl2, st2) * logitterms(pl1, st1);
+	    p_matrix(rowno, colno) -= 
+	      p_profile->GetPayoff(p_profile->GetPlayer(pl1),
+				   p_profile->GetPlayer(pl1)->GetStrategy(st1),
+				   p_profile->GetPlayer(pl2)->GetStrategy(st2))
+	      * logitterms(pl1, st1);
 	    p_matrix(rowno, colno) *= p_lambda;
 	  }
 	}

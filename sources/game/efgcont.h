@@ -31,7 +31,7 @@
 
 class gbtEfgContingency   {
 protected:
-  gbtGame m_efg;
+  gbtEfgGame m_efg;
   gbtArray<gbtArray<gbtGameAction> *> profile;
 
   //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
@@ -43,7 +43,7 @@ protected:
 		    gbtPVector<gbtNumber> &) const;
 
 public:
-  gbtEfgContingency(const gbtGame &);
+  gbtEfgContingency(const gbtEfgGame &);
   gbtEfgContingency(const gbtEfgContingency &);
   ~gbtEfgContingency();
 
@@ -63,7 +63,6 @@ public:
   gbtNumber Payoff(const gbtGameNode &, int pl) const;
   void Payoff(gbtArray<gbtNumber> &payoff) const;
   void InfosetProbs(gbtPVector<gbtNumber> &prob) const;
-  gbtGame GetGame(void) const   { return m_efg; }
 };
 
 

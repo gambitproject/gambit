@@ -383,23 +383,22 @@ template <class T>
 bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 		      bool strong, gbtOutput &tracefile)
 {
-  gbtNfgSupport S = pr->GetSupport();
-  int strats = S->GetPlayer(pl)->NumStrategies();
-  gbtVector<T> prob = pr->GetRow(pl);
+  int strats = pr->GetPlayer(pl)->NumStrategies();
+  gbtVector<T> prob = pr->GetStrategy(pr->GetPlayer(pl));
   assert( prob.Length() == strats);
 
-  gbtNfgContIterator s(S);
+  gbtNfgContIterator s(pr);
   
   T eps,x;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S->GetPlayer(pl)->NumStrategies());
+  gbtVector<T> dominator(pr->GetPlayer(pl)->NumStrategies());
   
   int st,i,k,n;
   bool ret = false;
   int contingencies = 1;
-  for (k = 1; k <= S->NumPlayers(); k++) {
-    if(k!=pl) contingencies*=S->GetPlayer(k)->NumStrategies();
+  for (k = 1; k <= pr->NumPlayers(); k++) {
+    if(k!=pl) contingencies *= pr->GetPlayer(k)->NumStrategies();
   }
   
   if (strong)   {
@@ -421,15 +420,15 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
     for (n = 1; n <= contingencies; n++) {
       B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
-	s.Freeze(S->GetPlayer(pl)->GetStrategy(j));
-	T x1 = s.GetPayoff(S->GetPlayer(pl));
+	s.Freeze(pr->GetPlayer(pl)->GetStrategy(j));
+	T x1 = s.GetPayoff(pr->GetPlayer(pl));
 	T x2 = prob[j];
 	x = -x1*x2;
-	B[n] += -s.GetPayoff(S->GetPlayer(pl));
+	B[n] += -s.GetPayoff(pr->GetPlayer(pl));
       }
       for (k = 1; k <= strats; k++) {
-	s.Freeze(S->GetPlayer(pl)->GetStrategy(k));
-	A(n, k) = -s.GetPayoff(S->GetPlayer(pl));
+	s.Freeze(pr->GetPlayer(pl)->GetStrategy(k));
+	A(n, k) = -s.GetPayoff(pr->GetPlayer(pl));
       }
       A(n, strats+1) = (T) 1;
       s.NextContingency();
@@ -480,8 +479,8 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
     for(n=1;n<=contingencies;n++) {
       B[n]=(T)0;
       for(int j=1;j<=strats;j++) {
-	s.Freeze(S->GetPlayer(pl)->GetStrategy(j));
-	T x1 = s.GetPayoff(S->GetPlayer(pl));
+	s.Freeze(pr->GetPlayer(pl)->GetStrategy(j));
+	T x1 = s.GetPayoff(pr->GetPlayer(pl));
 	T x2 = prob[j];
 	x = - x1 * x2;
 	// x=-nfg->Payoff(s.GetOutcome(), pl)*prob[j];
@@ -489,8 +488,8 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 	C0 -= x;
       }
       for(k=1;k<=strats;k++) {
-	s.Freeze(S->GetPlayer(pl)->GetStrategy(pl));
-	x=-s.GetPayoff(S->GetPlayer(pl));
+	s.Freeze(pr->GetPlayer(pl)->GetStrategy(pl));
+	x=-s.GetPayoff(pr->GetPlayer(pl));
 	A(n,k)=x;
 	C[k]-=x;
       }

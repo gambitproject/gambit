@@ -381,7 +381,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
     maxval=((T)(-1000000));
     jj=0;
     for(j=1;j<=yy->GetPlayer(i)->NumStrategies();j++) {
-      pay=yy->Payoff(i, yy->GetPlayer(i)->GetStrategy(j));
+      pay=yy->GetStrategyValue(yy->GetPlayer(i)->GetStrategy(j));
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;

@@ -45,9 +45,9 @@ public:
   bool operator!=(const gbtEfgSupportRep &p_support) const
   { return !(*this == p_support); }
 
-  virtual gbtGame GetTree(void) const = 0;
-
   virtual void SetLabel(const gbtText &p_label) = 0;
+
+  virtual gbtGame GetTree(void) const = 0;
 
   virtual int NumActions(int pl, int iset) const = 0;
   virtual int NumActions(const gbtGameInfoset &) const = 0;
@@ -152,6 +152,8 @@ public:
   { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtEfgSupportRep *operator->(void) const 
   { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+
+  operator gbtEfgGame(void) const { return m_rep; }
 
   gbtEfgSupportRep *Get(void) const { return m_rep; }
   

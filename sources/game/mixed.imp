@@ -52,21 +52,21 @@ template <class T> T gbtMixedProfileRep<T>::GetLiapValue(void) const
 
   for (int i = 1; i <= NumPlayers(); i++) {
     gbtGamePlayer player = GetPlayer(i);
-    tmp->CopyRow(i, payoff);
+    tmp->CopyStrategy(GetPlayer(i), payoff);
     avg = sum = (T) 0;
     // then for each strategy for that player set it to 1 and evaluate
     int j;
     for (j = 1; j <= player->NumStrategies(); j++) {
       tmp(i, j) = (T) 1;
       x = p(i, j);
-      payoff(i, j) = tmp->Payoff(i);
+      payoff(i, j) = tmp->GetPayoff(tmp->GetPlayer(i));
       avg += x * payoff(i, j);
       sum += x;
       if (x>(T)0) x=0;
       result += BIG1*x*x;         // add penalty for neg probabilities
       tmp(i,j) = (T) 0;
     }
-    tmp->CopyRow(i, p);
+    tmp->CopyStrategy(tmp->GetPlayer(i), p);
     for (j = 1; j <= player->NumStrategies(); j++) {
       x=payoff(i,j)-avg;
       if (x<=(T)0) x=(T)0;
@@ -82,9 +82,9 @@ template <class T>
 void gbtMixedProfileRep<T>::GetRegret(gbtPVector<T> &value) const
 {
   for (int i = 1; i <= NumPlayers(); i++) {
-    T pay = Payoff(i);
+    T pay = GetPayoff(GetPlayer(i));
     for (int j = 1; j <= GetPlayer(i)->NumStrategies(); j++) {
-      T x = Payoff(i, GetPlayer(i)->GetStrategy(j));
+      T x = GetStrategyValue(GetPlayer(i)->GetStrategy(j));
       if (x > pay) {
 	value(i, j) = x - pay;
       }
@@ -94,20 +94,6 @@ void gbtMixedProfileRep<T>::GetRegret(gbtPVector<T> &value) const
       }
     }
   }
-}
-
-template <class T> T gbtMixedProfileRep<T>::GetMaxRegret(void) const
-{
-  T maxgripe = (T) 0;
-  gbtPVector<T> v(NumStrategies());
-  GetRegret(v);
-
-  for (int i = v.First(); i <= v.Last(); i++) {
-    if (v[i] > maxgripe) {
-      maxgripe = v[i];
-    }
-  }
-  return maxgripe;
 }
 
 //---------------------------------------------------------------------------
@@ -129,52 +115,42 @@ gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtMixedProfileTable<T> &p_p
 { }
 
 
-template <class T> T gbtMixedProfileTable<T>::Payoff(int pl) const
+template <class T> T 
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  return PPayoff(pl, 1, 1);
+  return PPayoff(p_player->GetId(), 1, 1);
 }
 
 template <class T> T
-gbtMixedProfileTable<T>::Payoff(int pl, gbtGameStrategy strategy) const
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player,
+				   const gbtGameStrategy &p_strategy) const
 {
   T value = (T) 0;
-  PPayoff(pl, strategy->GetPlayer()->GetId(), strategy->GetId(), 1,
-	  strategy->GetIndex() + 1, (T) 1, value);
+  PPayoff(p_player->GetId(),
+	  p_strategy->GetPlayer()->GetId(), p_strategy->GetId(), 1,
+	  p_strategy->GetIndex() + 1, (T) 1, value);
   return value;
 }
 
 template <class T> T
-gbtMixedProfileTable<T>::Payoff(int pl, 
-				int player1, int strat1, 
-				int player2, int strat2) const
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player,
+				   const gbtGameStrategy &p_strategy1,
+				   const gbtGameStrategy &p_strategy2) const
 {
-  if (player1 == player2) return (T) 0;
+  if (p_strategy1->GetPlayer() == p_strategy2->GetPlayer()) return (T) 0;
   T value = (T) 0;
-  PPayoff(pl, player1, strat1, player2, strat2, 1,
-	  m_support->GetPlayer(player1)->GetStrategy(strat1)->GetIndex() +
-	  m_support->GetPlayer(player2)->GetStrategy(strat2)->GetIndex() + 1,
+  PPayoff(p_player->GetId(), 
+	  p_strategy1->GetPlayer()->GetId(), p_strategy1->GetId(),
+	  p_strategy2->GetPlayer()->GetId(), p_strategy2->GetId(), 1,
+	  p_strategy1->GetIndex() + p_strategy2->GetIndex() + 1,
 	  (T) 1, value);
   return value;
-}
-
-template <class T> 
-void gbtMixedProfileTable<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
-{
-  value = (T) 0;
-  PPayoff(pl, player1, 1, 1, (T) 1, value);
-}
-
-template <class T> void
-gbtMixedProfileTable<T>::SetStrategyProb(const gbtGameStrategy &p_strategy,
-					 const T &p_prob)
-{
-  m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId()) = p_prob;
 }
 
 template <class T> T
 gbtMixedProfileTable<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
 {
-  return Payoff(p_strategy->GetPlayer()->GetId(), p_strategy);
+  return GetPayoff(p_strategy->GetPlayer(), p_strategy);
 }
 
 template <class T> T &
@@ -307,7 +283,7 @@ void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int cur_pl, long ind
 
 template <class T>
 T gbtMixedProfileTable<T>::Payoff(const gbtGameOutcome &p_outcome,
-				int pl) const
+				  int pl) const
 { 
   return p_outcome->GetPayoff(m_support->GetPlayer(pl));
 }
@@ -320,7 +296,7 @@ gbtNfgContingency gbtMixedProfileTable<T>::NewContingency(void) const
 }
 
 template <class T>
-gbtMixedProfileTable<T> *gbtMixedProfileTable<T>::Copy(void) const
+gbtMixedProfileRep<T> *gbtMixedProfileTable<T>::Copy(void) const
 {
   return new gbtMixedProfileTable<T>(*this);
 }
@@ -389,45 +365,38 @@ gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtMixedProfileTree<T> &p_prof
 { }
 
 
-template <class T> T gbtMixedProfileTree<T>::Payoff(int pl) const
+template <class T> T
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  return gbtBehavProfileBase<T>(*this).Payoff(pl);
+  return gbtBehavProfileBase<T>(*this).GetPayoff(p_player);
 }
 
 template <class T> T
-gbtMixedProfileTree<T>::Payoff(int pl, gbtGameStrategy strategy) const
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player,
+				  const gbtGameStrategy &p_strategy) const
 {
   gbtMixedProfileTree<T> foo(*m_efgSupport);
-  gbtGamePlayer player = m_efgSupport->GetPlayer(strategy->GetPlayer()->GetId());
+  gbtGamePlayer player = m_efgSupport->GetPlayer(p_strategy->GetPlayer()->GetId());
   for (int st = 1; st <= player->NumStrategies();
-       foo(strategy->GetPlayer()->GetId(), st++) = 0);
-  foo(strategy->GetPlayer()->GetId(), m_nfgSupport->GetIndex(strategy)) = 1;
-  return gbtBehavProfileBase<T>(foo).Payoff(pl);
+       foo(p_strategy->GetPlayer()->GetId(), st++) = 0);
+  foo(p_strategy->GetPlayer()->GetId(), m_nfgSupport->GetIndex(p_strategy)) = 1;
+  return gbtBehavProfileBase<T>(foo).GetPayoff(p_player);
 }
 
 template <class T> T
-gbtMixedProfileTree<T>::Payoff(int pl, 
-			int player1, int strat1, 
-			int player2, int strat2) const
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player,
+				  const gbtGameStrategy &p_strategy1,
+				  const gbtGameStrategy &p_strategy2) const
 {
-  if (player1 == player2) return (T) 0;
+  if (p_strategy1->GetPlayer() == p_strategy2->GetPlayer()) return (T) 0;
   gbtMixedProfileTree<T> foo(*m_efgSupport);
-  for (int st = 1; st <= m_efgSupport->GetPlayer(player1)->NumStrategies();
-       foo(player1, st++) = 0);
-  for (int st = 1; st <= m_efgSupport->GetPlayer(player2)->NumStrategies();
-       foo(player2, st++) = 0);
-  foo(player1, strat1) = 1;
-  foo(player2, strat2) = 1;
-  return gbtBehavProfileBase<T>(foo).Payoff(pl);
-}
-
-template <class T> 
-void gbtMixedProfileTree<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
-{
-  gbtGamePlayer player = GetSupport()->GetPlayer(player1);
-  for (int st = 1; st <= player->NumStrategies(); st++) {
-    value[st] = Payoff(pl, player->GetStrategy(st));
-  }
+  for (int st = 1; st <= m_efgSupport->GetPlayer(p_strategy1->GetPlayer()->GetId())->NumStrategies();
+       foo(p_strategy1->GetPlayer()->GetId(), st++) = 0);
+  for (int st = 1; st <= m_efgSupport->GetPlayer(p_strategy2->GetPlayer()->GetId())->NumStrategies();
+       foo(p_strategy2->GetPlayer()->GetId(), st++) = 0);
+  foo(p_strategy1) = 1;
+  foo(p_strategy2) = 1;
+  return gbtBehavProfileBase<T>(foo).GetPayoff(p_player);
 }
 
 template <class T>
@@ -467,22 +436,15 @@ gbtNfgContingency gbtMixedProfileTree<T>::NewContingency(void) const
 }
 
 template <class T>
-gbtMixedProfileTree<T> *gbtMixedProfileTree<T>::Copy(void) const
+gbtMixedProfileRep<T> *gbtMixedProfileTree<T>::Copy(void) const
 {
   return new gbtMixedProfileTree<T>(*this);
-}
-
-template <class T> void
-gbtMixedProfileTree<T>::SetStrategyProb(const gbtGameStrategy &p_strategy,
-					 const T &p_prob)
-{
-  m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId()) = p_prob;
 }
 
 template <class T> T
 gbtMixedProfileTree<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
 {
-  return Payoff(p_strategy->GetPlayer()->GetId(), p_strategy);
+  return GetPayoff(p_strategy->GetPlayer(), p_strategy);
 }
 
 template <class T> T &

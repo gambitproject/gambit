@@ -30,7 +30,7 @@
 //                    gbtEfgContingency member functions
 //-------------------------------------------------------------------------
 
-gbtEfgContingency::gbtEfgContingency(const gbtGame &efg)
+gbtEfgContingency::gbtEfgContingency(const gbtEfgGame &efg)
   : m_efg(efg), profile(efg->NumPlayers())
 {
   for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {

@@ -177,12 +177,12 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 	  if (vert1id[i1] == 0) {
 	    id1++;
 	    vert1id[i1] = id1;
-	    key2.Append(profile->GetRow(2));
+	    key2.Append(profile->GetStrategy(profile->GetPlayer(2)));
 	  }
 	  if (vert2id[i2] == 0) {
 	    id2++;
 	    vert2id[i2] = id2;
-	    key1.Append(profile->GetRow(1));
+	    key1.Append(profile->GetStrategy(profile->GetPlayer(1)));
 	  }
 	  node1.Append(vert2id[i2]);
 	  node2.Append(vert1id[i1]);

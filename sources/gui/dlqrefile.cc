@@ -55,9 +55,9 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
-  const gbtNfgSupport &support = p_profiles[1]->GetSupport();
-  for (int pl = 1; pl <= support->NumPlayers(); pl++) {
-    for (int st = 1; st <= support->GetPlayer(pl)->NumStrategies(); st++) {
+
+  for (int pl = 1; pl <= p_profiles[1]->NumPlayers(); pl++) {
+    for (int st = 1; st <= p_profiles[1]->GetPlayer(pl)->NumStrategies(); st++) {
       m_qreList->InsertColumn(++maxColumn,
 			      wxString::Format(wxT("%d:%d"), pl, st));
     }
@@ -114,10 +114,9 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
-  const gbtEfgSupport &support = p_profiles[1]->GetSupport();
-  for (int pl = 1; pl <= support->NumPlayers(); pl++) {
-    for (int iset = 1; iset <= support->GetPlayer(pl)->NumInfosets(); iset++) {
-      for (int act = 1; act <= support->NumActions(pl, iset); act++) {
+  for (int pl = 1; pl <= p_profiles[1]->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= p_profiles[1]->GetPlayer(pl)->NumInfosets(); iset++) {
+      for (int act = 1; act <= p_profiles[1]->GetPlayer(pl)->GetInfoset(iset)->NumActions(); act++) {
 	m_qreList->InsertColumn(++maxColumn,
 				wxString::Format(wxT("%d:(%d,%d)"),
 						 pl, iset, act));
@@ -129,8 +128,8 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
     m_qreList->InsertItem(i - 1, 
 			  wxString::Format(wxT("%s"), "???"));
 			  //					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gbtPVector<gbtNumber> &profile = p_profiles[i]->GetPVector();
-    for (int j = 1; j <= profile.Length(); j++) {
+    const gbtBehavProfile<gbtNumber> &profile = p_profiles[i];
+    for (int j = 1; j <= profile->BehavProfileLength(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
 					  (char *) ToText(profile[j])));
@@ -224,7 +223,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	for (int pl = 1; pl <= m_behavProfiles[1]->NumPlayers(); pl++) {
 	  gbtGamePlayer player = m_behavProfiles[1]->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    file << m_behavProfiles[1]->GetSupport()->NumActions(pl, iset) << ' ';
+	    file << player->GetInfoset(iset)->NumActions() << ' ';
 	  }
 	}
 	file << "\n";

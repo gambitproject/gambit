@@ -79,11 +79,11 @@ gbtBehavNashSet gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
 	const gbtEfgContingency &profile = citer.GetProfile();
-	for (gbtGamePlayerIterator player(p_support->GetTree());
-	     !player.End(); player++) {
-	  for (gbtGameInfosetIterator infoset(*player);
+	for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+	  gbtGamePlayer player = p_support->GetPlayer(pl);
+	  for (gbtGameInfosetIterator infoset(player);
 	       !infoset.End(); infoset++) {
-	    temp((*player)->GetId(),
+	    temp(player->GetId(),
 		 (*infoset)->GetId(),
 		 profile.GetAction(*infoset)->GetId()) = 1;
 	  }

@@ -81,7 +81,6 @@ public:
 class gbtEfgConditionalContIterator    {
   friend class gbtEfgIterator;
   private:
-    gbtGame m_efg;
     gbtEfgSupport _support;
     gbtEfgContingency _profile;
     gbtPVector<int> _current;

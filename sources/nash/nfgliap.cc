@@ -69,16 +69,17 @@ double gbtMixedLiapFunc::LiapDerivValue(int i1, int j1,
     gbtGamePlayer player = p->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       psum += p(i,j);
-      x1 = p->Payoff(i, player->GetStrategy(j)) - p->Payoff(i);
+      x1 = p->GetStrategyValue(player->GetStrategy(j)) - p->GetPayoff(player);
       if (i1 == i) {
 	if (x1 > 0.0) {
-	  x -= x1 * p->Payoff(i, player1->GetStrategy(j1));
+	  x -= x1 * p->GetPayoff(player, player1->GetStrategy(j1));
 	}
       }
       else {
 	if (x1 > 0.0) {
-	  x += x1 * (p->Payoff(i, i, j, i1, j1) - 
-		     p->Payoff(i, player1->GetStrategy(j1)));
+	  x += x1 * (p->GetPayoff(player, player->GetStrategy(j),
+				  player1->GetStrategy(j1)) -
+		     p->GetPayoff(player, player1->GetStrategy(j1)));
 	}
       }
     }
@@ -137,7 +138,7 @@ bool gbtMixedLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d
   }
 
   // Project for constraints
-  Project(d, v, _p->Lengths());
+  Project(d, v, _p->NumStrategies());
   return true;
 }
   
@@ -151,24 +152,24 @@ double gbtMixedLiapFunc::Value(const gbtVector<double> &v) const
   ((gbtVector<double> &) _p).operator=(v);
   
   gbtMixedProfile<double> tmp(_p);
-  gbtPVector<double> payoff(_p->Lengths());
+  gbtPVector<double> payoff(_p->NumStrategies());
 
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
   
   for (int i = 1; i <= _p->NumPlayers(); i++)  {
-    tmp->CopyRow(i, payoff);
+    tmp->CopyStrategy(tmp->GetPlayer(i), payoff);
     avg = sum = 0.0;
 
     // then for each strategy for player i, consider the value of
     // deviating to that strategy
 
     int j;
-    gbtGamePlayer player = _p->GetSupport()->GetPlayer(i);
+    gbtGamePlayer player = _p->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       tmp(i, j) = 1.0;
       x = _p(i, j);
-      payoff(i, j) = tmp->Payoff(i);
+      payoff(i, j) = tmp->GetPayoff(tmp->GetPlayer(i));
       avg += x * payoff(i, j);
       sum += x;
       if (x > 0.0)  x = 0.0;
@@ -176,7 +177,7 @@ double gbtMixedLiapFunc::Value(const gbtVector<double> &v) const
       tmp(i, j) = 0.0;
     }
 
-    tmp->CopyRow(i, _p);
+    tmp->CopyStrategy(tmp->GetPlayer(i), _p);
     for (j = 1; j <= player->NumStrategies(); j++)  {
       x = payoff(i, j) - avg;
       if (x < 0.0)  x = 0.0;
@@ -229,7 +230,8 @@ gbtMixedNashSet gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
   int kk;
   for (kk = 1; kk <= p->MixedProfileLength() && p[kk] > ALPHA; kk++);
   if (kk <= p->MixedProfileLength()) {
-    gbtMixedProfile<double> centroid = p->GetSupport()->NewMixedProfile(0.0);
+    gbtMixedProfile<double> centroid = p->NewMixedProfile(0.0);
+    centroid->SetCentroid();
     for (int k = 1; k <= p->MixedProfileLength(); k++) {
       p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
