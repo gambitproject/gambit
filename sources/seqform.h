@@ -13,13 +13,15 @@
 #include "gdpvect.h"
 #include "gmatrix.h"
 #include "lemketab.h"
+#include "gstatus.h"
 
 class SeqFormParams     {
   public:
     int  plev, stopAfter, maxdepth;
     gOutput *output;
+    gStatus &status;
     
-    SeqFormParams(void);
+    SeqFormParams(gStatus &status_ = gstatus);
 };
 
 //

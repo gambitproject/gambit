@@ -22,8 +22,8 @@ void Epsilon(gRational &v) {v=(gRational)0; }
 //                        SeqFormParams: member functions
 //---------------------------------------------------------------------------
 
-SeqFormParams::SeqFormParams(void) 
-  :  plev(0), stopAfter(0), output(&gnull)
+SeqFormParams::SeqFormParams(gStatus &status_) 
+  :  plev(0), stopAfter(0), output(&gnull), status(status_)
 { }
 
 
@@ -319,7 +319,10 @@ template <class T> int SeqFormModule<T>::LCPPath()
 //  if (Member(dup))
 //    enter = -dup;
       // Central loop - pivot until another CBFS is found
+  long nits = 0
   do  {
+    // Talk about optimism! This is dumb, but better than nothing (I guess):
+    params.SetProgress((double)nits/(double(nits+1)); 
     exit = tab->PivotIn(enter);
 //    if(params.plev >=2)
 //      Dump(*params.output);
@@ -327,7 +330,7 @@ template <class T> int SeqFormModule<T>::LCPPath()
 //    tab->Dump(gout);
     
     enter = -exit;
-  } while (exit != 0);
+  } while (exit != 0 && !params.status.Get());
       // Quit when at a CBFS.
       //  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
 //  gout << "\nend of path ";
