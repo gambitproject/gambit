@@ -44,14 +44,14 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
     m_parent(p_efgShow)
 {
   m_menu = new wxMenu("Profiles");
-  m_menu->Append(efgmenuPROFILES_NEW, "New profile", "Create a new profile");
-  m_menu->Append(efgmenuPROFILES_DUPLICATE, "Duplicate profile",
+  m_menu->Append(GBT_EFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
+  m_menu->Append(GBT_EFG_MENU_PROFILES_DUPLICATE, "Duplicate profile",
 		 "Duplicate this profile");
-  m_menu->Append(efgmenuPROFILES_DELETE, "Delete profile", 
+  m_menu->Append(GBT_EFG_MENU_PROFILES_DELETE, "Delete profile", 
 		 "Delete this profile");
-  m_menu->Append(efgmenuPROFILES_PROPERTIES, "Properties",
+  m_menu->Append(GBT_EFG_MENU_PROFILES_PROPERTIES, "Properties",
 		 "View and edit properties of this profile");
-  m_menu->Append(efgmenuPROFILES_REPORT, "Report",
+  m_menu->Append(GBT_EFG_MENU_PROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
   UpdateValues();
 }
@@ -124,10 +124,10 @@ void EfgProfileList::UpdateValues(void)
 
 void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(efgmenuPROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_REPORT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_DELETE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_EFG_MENU_PROFILES_REPORT, m_parent->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 

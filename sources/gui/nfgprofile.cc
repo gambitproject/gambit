@@ -42,13 +42,13 @@ NfgProfileList::NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent)
     m_parent(p_nfgShow)
 {
   m_menu = new wxMenu("Profiles");
-  m_menu->Append(NFG_PROFILES_NEW, "New profile", "Create a new profile");
-  m_menu->Append(NFG_PROFILES_DUPLICATE, "Duplicate profile",
+  m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
+  m_menu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate profile",
 		 "Duplicate this profile");
-  m_menu->Append(NFG_PROFILES_DELETE, "Delete profile", "Delete this profile");
-  m_menu->Append(NFG_PROFILES_PROPERTIES, "Properties",
+  m_menu->Append(GBT_NFG_MENU_PROFILES_DELETE, "Delete profile", "Delete this profile");
+  m_menu->Append(GBT_NFG_MENU_PROFILES_PROPERTIES, "Properties",
 		 "View and edit properties of this profile");
-  m_menu->Append(NFG_PROFILES_REPORT, "Report",
+  m_menu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
 
   UpdateValues();
@@ -114,10 +114,10 @@ void NfgProfileList::UpdateValues(void)
 
 void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(NFG_PROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(NFG_PROFILES_DELETE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(NFG_PROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(NFG_PROFILES_REPORT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_DELETE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_REPORT, m_parent->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 

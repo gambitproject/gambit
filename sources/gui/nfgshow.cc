@@ -78,40 +78,40 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_CLOSE, NfgShow::Close)
   EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
-  EVT_MENU(NFG_FILE_IMPORT_COMLAB, NfgShow::OnFileImportComLab)
-  EVT_MENU(NFG_FILE_EXPORT_COMLAB, NfgShow::OnFileExportComLab)
-  EVT_MENU(NFG_FILE_EXPORT_HTML, NfgShow::OnFileExportHTML)
+  EVT_MENU(GBT_NFG_MENU_FILE_IMPORT_COMLAB, NfgShow::OnFileImportComLab)
+  EVT_MENU(GBT_NFG_MENU_FILE_EXPORT_COMLAB, NfgShow::OnFileExportComLab)
+  EVT_MENU(GBT_NFG_MENU_FILE_EXPORT_HTML, NfgShow::OnFileExportHTML)
   EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
   EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
-  EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
-  EVT_MENU(NFG_EDIT_CONTINGENCY, NfgShow::OnEditContingency)
-  EVT_MENU(NFG_EDIT_GAME, NfgShow::OnEditGame)
-  EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
-  EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
-  EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
-  EVT_MENU(NFG_VIEW_SUPPORTS, NfgShow::OnViewSupports)
-  EVT_MENU(NFG_VIEW_DOMINANCE, NfgShow::OnViewDominance)
-  EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
-  EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
-  EVT_MENU(NFG_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
-  EVT_MENU(NFG_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
-  EVT_MENU(NFG_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
-  EVT_MENU(NFG_FORMAT_FONT_LABELS, NfgShow::OnFormatFontLabels)
-  EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
-  EVT_MENU(NFG_TOOLS_QRE, NfgShow::OnToolsQre)
-  EVT_MENU(NFG_TOOLS_CH, NfgShow::OnToolsCH)
+  EVT_MENU(GBT_NFG_MENU_EDIT_STRATS, NfgShow::OnEditStrategies)
+  EVT_MENU(GBT_NFG_MENU_EDIT_CONTINGENCY, NfgShow::OnEditContingency)
+  EVT_MENU(GBT_NFG_MENU_EDIT_GAME, NfgShow::OnEditGame)
+  EVT_MENU(GBT_NFG_MENU_VIEW_PROFILES, NfgShow::OnViewProfiles)
+  EVT_MENU(GBT_NFG_MENU_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
+  EVT_MENU(GBT_NFG_MENU_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
+  EVT_MENU(GBT_NFG_MENU_VIEW_SUPPORTS, NfgShow::OnViewSupports)
+  EVT_MENU(GBT_NFG_MENU_VIEW_DOMINANCE, NfgShow::OnViewDominance)
+  EVT_MENU(GBT_NFG_MENU_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
+  EVT_MENU(GBT_NFG_MENU_VIEW_VALUES, NfgShow::OnViewValues)
+  EVT_MENU(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
+  EVT_MENU(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
+  EVT_MENU(GBT_NFG_MENU_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
+  EVT_MENU(GBT_NFG_MENU_FORMAT_FONT_LABELS, NfgShow::OnFormatFontLabels)
+  EVT_MENU(GBT_NFG_MENU_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
+  EVT_MENU(GBT_NFG_MENU_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
+  EVT_MENU(GBT_NFG_MENU_TOOLS_QRE, NfgShow::OnToolsQre)
+  EVT_MENU(GBT_NFG_MENU_TOOLS_CH, NfgShow::OnToolsCH)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
-  EVT_MENU(NFG_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
-  EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
-  EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
-  EVT_MENU(NFG_PROFILES_DUPLICATE, NfgShow::OnProfilesDuplicate)
-  EVT_MENU(NFG_PROFILES_DELETE, NfgShow::OnProfilesDelete)
-  EVT_MENU(NFG_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
-  EVT_MENU(NFG_PROFILES_REPORT, NfgShow::OnProfilesReport)
+  EVT_MENU(GBT_NFG_MENU_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
+  EVT_MENU(GBT_NFG_MENU_SUPPORT_DELETE, NfgShow::OnSupportDelete)
+  EVT_MENU(GBT_NFG_MENU_PROFILES_NEW, NfgShow::OnProfilesNew)
+  EVT_MENU(GBT_NFG_MENU_PROFILES_DUPLICATE, NfgShow::OnProfilesDuplicate)
+  EVT_MENU(GBT_NFG_MENU_PROFILES_DELETE, NfgShow::OnProfilesDelete)
+  EVT_MENU(GBT_NFG_MENU_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
+  EVT_MENU(GBT_NFG_MENU_PROFILES_REPORT, NfgShow::OnProfilesReport)
   EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnProfileSelected)
   EVT_SIZE(NfgShow::OnSize)
@@ -195,7 +195,7 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
   m_table->SetSize(0, 0, 200, 200);
 
   m_nfg.SetIsDirty(false);
-  GetMenuBar()->Check(NFG_VIEW_OUTCOMES,
+  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES,
 		      !m_table->GetSettings().OutcomeValues());
   UpdateMenus();
   m_table->SetFocus();
@@ -266,11 +266,11 @@ void NfgShow::ChangeProfile(int sol)
   else if (sol == 0)  {
     if (m_table->ShowProbs()) {
       m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, false);
+      GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROBABILITIES, false);
     }
     if (m_table->ShowValues()) {
       m_table->ToggleValues();
-      GetMenuBar()->Check(NFG_VIEW_VALUES, false);
+      GetMenuBar()->Check(GBT_NFG_MENU_VIEW_VALUES, false);
     }
   }
 
@@ -386,16 +386,16 @@ void NfgShow::MakeMenus(void)
   fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
   fileMenu->AppendSeparator();
   wxMenu *fileImportMenu = new wxMenu;
-  fileImportMenu->Append(NFG_FILE_IMPORT_COMLAB, "&ComLabGames",
+  fileImportMenu->Append(GBT_NFG_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
 			 "Import a game saved in ComLabGames format");
-  fileMenu->Append(NFG_FILE_IMPORT, "&Import", fileImportMenu,
+  fileMenu->Append(GBT_NFG_MENU_FILE_IMPORT, "&Import", fileImportMenu,
 		   "Import a game from various formats");
   wxMenu *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(NFG_FILE_EXPORT_COMLAB, "&ComLabGames",
+  fileExportMenu->Append(GBT_NFG_MENU_FILE_EXPORT_COMLAB, "&ComLabGames",
 			 "Export game to ComLabGames format");
-  fileExportMenu->Append(NFG_FILE_EXPORT_HTML, "&HTML",
+  fileExportMenu->Append(GBT_NFG_MENU_FILE_EXPORT_HTML, "&HTML",
 			 "Save this game in HTML format");
-  fileMenu->Append(NFG_FILE_EXPORT, "&Export", fileExportMenu,
+  fileMenu->Append(GBT_NFG_MENU_FILE_EXPORT, "&Export", fileExportMenu,
 		   "Export the game in various formats");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
@@ -415,57 +415,57 @@ void NfgShow::MakeMenus(void)
   editMenu->Enable(wxID_COPY, false);
   editMenu->Enable(wxID_PASTE, false);
   editMenu->AppendSeparator();
-  editMenu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
-  editMenu->Append(NFG_EDIT_CONTINGENCY, "&Contingency",
+  editMenu->Append(GBT_NFG_MENU_EDIT_STRATS, "&Strategies", "Edit strategy names");
+  editMenu->Append(GBT_NFG_MENU_EDIT_CONTINGENCY, "&Contingency",
 		   "Edit the selected contingency");
-  editMenu->Append(NFG_EDIT_GAME, "&Game", "Edit game properties");
+  editMenu->Append(GBT_NFG_MENU_EDIT_GAME, "&Game", "Edit game properties");
 
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(NFG_VIEW_PROFILES, "&Profiles",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_PROFILES, "&Profiles",
 		   "Display/hide profiles window", true);
-  viewMenu->Check(NFG_VIEW_PROFILES, false);
+  viewMenu->Check(GBT_NFG_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(NFG_VIEW_NAVIGATION, "&Navigation",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_NAVIGATION, "&Navigation",
 		   "Display navigation window", true);
-  viewMenu->Check(NFG_VIEW_NAVIGATION, true);
-  viewMenu->Append(NFG_VIEW_OUTCOMES, "&Outcomes", 
+  viewMenu->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
+  viewMenu->Append(GBT_NFG_MENU_VIEW_OUTCOMES, "&Outcomes", 
 		   "Display and edit outcomes", true);
-  viewMenu->Check(NFG_VIEW_OUTCOMES, false);
-  viewMenu->Append(NFG_VIEW_SUPPORTS, "&Supports",
+  viewMenu->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
+  viewMenu->Append(GBT_NFG_MENU_VIEW_SUPPORTS, "&Supports",
 		   "Display and edit supports", true);
-  viewMenu->Check(NFG_VIEW_SUPPORTS, false);
+  viewMenu->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(NFG_VIEW_DOMINANCE, "&Dominance",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_DOMINANCE, "&Dominance",
 		   "Display dominance information", TRUE);
-  viewMenu->Append(NFG_VIEW_PROBABILITIES, "&Probabilities",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_PROBABILITIES, "&Probabilities",
 		   "Display solution probabilities", TRUE);
-  viewMenu->Append(NFG_VIEW_VALUES, "&Values",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_VALUES, "&Values",
 		   "Display strategy values", TRUE);
   viewMenu->AppendSeparator();
   // This probably belongs in formatting instead
-  viewMenu->Append(NFG_VIEW_OUTCOME_LABELS, "Outcome &Labels",
+  viewMenu->Append(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, "Outcome &Labels",
 		   "Display outcome labels", TRUE);
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
-  formatDisplayMenu->Append(NFG_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
+  formatDisplayMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
 
-  formatMenu->Append(NFG_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
+  formatMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
 		    "Configure display options");
   wxMenu *formatFontMenu = new wxMenu;
-  formatFontMenu->Append(NFG_FORMAT_FONT_DATA, "&Data", "Set data font");
-  formatFontMenu->Append(NFG_FORMAT_FONT_LABELS, "&Labels", "Set label font");
-  formatMenu->Append(NFG_FORMAT_FONT, "&Font", formatFontMenu, "Set fonts");
+  formatFontMenu->Append(GBT_NFG_MENU_FORMAT_FONT_DATA, "&Data", "Set data font");
+  formatFontMenu->Append(GBT_NFG_MENU_FORMAT_FONT_LABELS, "&Labels", "Set label font");
+  formatMenu->Append(GBT_NFG_MENU_FORMAT_FONT, "&Font", formatFontMenu, "Set fonts");
 
   wxMenu *toolsMenu = new wxMenu;
-  toolsMenu->Append(NFG_TOOLS_DOMINANCE, "&Dominance",
+  toolsMenu->Append(GBT_NFG_MENU_TOOLS_DOMINANCE, "&Dominance",
 		       "Find undominated strategies");
-  toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium",
+  toolsMenu->Append(GBT_NFG_MENU_TOOLS_EQUILIBRIUM, "&Equilibrium",
 		    "Compute Nash equilibria (and refinements)");
-  toolsMenu->Append(NFG_TOOLS_QRE, "&Qre",
+  toolsMenu->Append(GBT_NFG_MENU_TOOLS_QRE, "&Qre",
 		    "Compute quantal response equilibria");
-  toolsMenu->Append(NFG_TOOLS_CH, "&CH",
+  toolsMenu->Append(GBT_NFG_MENU_TOOLS_CH, "&CH",
 		    "Compute cognitive hierarchy correspondence");
   
   wxMenu *helpMenu = new wxMenu;
@@ -521,10 +521,10 @@ void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetContingency());
-  menu->Enable(NFG_FILE_EXPORT_COMLAB, m_nfg.NumPlayers() == 2);
-  menu->Enable(NFG_VIEW_PROBABILITIES, m_profiles.Length() > 0);
-  menu->Enable(NFG_VIEW_VALUES, m_profiles.Length() > 0);
-  menu->Check(NFG_VIEW_OUTCOME_LABELS, 
+  menu->Enable(GBT_NFG_MENU_FILE_EXPORT_COMLAB, m_nfg.NumPlayers() == 2);
+  menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_profiles.Length() > 0);
+  menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_profiles.Length() > 0);
+  menu->Check(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, 
 	      !m_table->GetSettings().OutcomeValues());
 }
 
@@ -776,12 +776,12 @@ void NfgShow::OnViewProfiles(wxCommandEvent &)
   if (m_solutionSashWindow->IsShown()) {
     m_profileTable->Show(false);
     m_solutionSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_PROFILES, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, false);
   }
   else {
     m_profileTable->Show(true);
     m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, true);
   }
 
   AdjustSizes();
@@ -792,18 +792,18 @@ void NfgShow::OnViewNavigation(wxCommandEvent &)
   if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
     m_infoNotebook->SetSelection(0);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
   }
   else if (m_infoSashWindow->IsShown()) {
     m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
   }
   else {
     m_infoSashWindow->Show(true);
     m_infoNotebook->SetSelection(0);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
   }
 
   AdjustSizes();
@@ -814,18 +814,18 @@ void NfgShow::OnViewOutcomes(wxCommandEvent &)
   if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
     m_infoNotebook->SetSelection(1);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
   }
   else if (m_infoSashWindow->IsShown()) {
     m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
   }
   else {
     m_infoSashWindow->Show(true);
     m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, true);
   }
 
   AdjustSizes();
@@ -836,18 +836,18 @@ void NfgShow::OnViewSupports(wxCommandEvent &)
   if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
     m_infoNotebook->SetSelection(2);
     m_navigateWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, true);
   }
   else if (m_infoSashWindow->IsShown()) {
     m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
   }
   else {
     m_infoSashWindow->Show(true);
     m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, true);
+    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, true);
   }
 
   AdjustSizes();
@@ -967,7 +967,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
       m_currentSupport = m_supports[m_supports.Length()];
       if (!m_table->ShowDominance()) {
 	m_table->ToggleDominance();
-	GetMenuBar()->Check(NFG_VIEW_DOMINANCE, true);
+	GetMenuBar()->Check(GBT_NFG_MENU_VIEW_DOMINANCE, true);
       }
       OnSupportsEdited();
       UpdateMenus();
@@ -998,12 +998,12 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
    
       if (solutions.Length() > 0 && !m_table->ShowProbs()) {
 	m_table->ToggleProbs();
-	GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+	GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROBABILITIES, true);
       }
       if (!m_solutionSashWindow->IsShown()) {
 	m_profileTable->Show(true);
 	m_solutionSashWindow->Show(true);
-	GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
+	GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, true);
 	AdjustSizes();
       }
       
@@ -1278,9 +1278,9 @@ void NfgShow::OnSetFocus(wxFocusEvent &)
 
 void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 {
-  GetMenuBar()->Check(NFG_VIEW_NAVIGATION, p_event.GetSelection() == 0);
-  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, p_event.GetSelection() == 1);
-  GetMenuBar()->Check(NFG_VIEW_SUPPORTS, p_event.GetSelection() == 2);
+  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, p_event.GetSelection() == 0);
+  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, p_event.GetSelection() == 1);
+  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, p_event.GetSelection() == 2);
 }
 
 //----------------------------------------------------------------------

@@ -83,26 +83,26 @@ void TreeWindow::MakeMenus(void)
   m_nodeMenu->Append(wxID_PASTE, "Paste subtree",
 		     "Paste subtree from clipboard");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
-  m_nodeMenu->Append(efgmenuEDIT_REVEAL, "Reveal move",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_INSERT, "Insert move", "Insert a move");
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_REVEAL, "Reveal move",
 		     "Reveal this move");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(efgmenuEDIT_TOGGLE_SUBGAME, "Mark subgame",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME, "Mark subgame",
 		     "Mark or unmark this subgame");
-  m_nodeMenu->Append(efgmenuEDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
 		     "Mark all subgames in this tree");
-  m_nodeMenu->Append(efgmenuEDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
 		     "Unmark all subgames in this tree");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(efgmenuEDIT_NODE, "Edit node",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_NODE, "Edit node",
 		     "View and change node properties");
-  m_nodeMenu->Append(efgmenuEDIT_MOVE, "Edit move",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_MOVE, "Edit move",
 		     "View and change move properties");
-  m_nodeMenu->Append(efgmenuEDIT_GAME, "Edit game",
+  m_nodeMenu->Append(GBT_EFG_MENU_EDIT_GAME, "Edit game",
 		     "View and change game properties");
 
   m_gameMenu = new wxMenu;
-  m_gameMenu->Append(efgmenuEDIT_GAME, "Edit game",
+  m_gameMenu->Append(GBT_EFG_MENU_EDIT_GAME, "Edit game",
 		     "View and change game properties");
 }
 
@@ -560,20 +560,20 @@ void TreeWindow::UpdateMenus(void)
   m_nodeMenu->Enable(wxID_CUT, (cursor) ? true : false);
   m_nodeMenu->Enable(wxID_PASTE, (m_parent->CopyNode() || 
 				  m_parent->CutNode()) ? true : false);
-  m_nodeMenu->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
-  m_nodeMenu->Enable(efgmenuEDIT_REVEAL,
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_INSERT, (cursor) ? true : false);
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_REVEAL,
 		     (cursor && cursor->GetInfoset()));
-  m_nodeMenu->Enable(efgmenuEDIT_MOVE, 
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MOVE, 
 		     (cursor && cursor->GetInfoset()));
 
-  m_nodeMenu->Enable(efgmenuEDIT_TOGGLE_SUBGAME,
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		     (cursor && m_efg.IsLegalSubgame(cursor) &&
 		      cursor->GetParent()));
-  m_nodeMenu->Enable(efgmenuEDIT_MARK_SUBGAME_TREE,
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
 		     (cursor && m_efg.IsLegalSubgame(cursor)));
-  m_nodeMenu->Enable(efgmenuEDIT_UNMARK_SUBGAME_TREE,
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
 		     (cursor && m_efg.IsLegalSubgame(cursor)));
-  m_nodeMenu->SetLabel(efgmenuEDIT_TOGGLE_SUBGAME,
+  m_nodeMenu->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		       (cursor && cursor->GetParent() &&
 			m_efg.IsLegalSubgame(cursor) &&
 			cursor->GetSubgameRoot() == cursor) ?
