@@ -359,6 +359,7 @@ exprlist:     expression  { emit(new NewInstr(iPOP)); }
         |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
 
 expression:   Ea
+          |   WRITE { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }  
           |   WRITE expression  { emit(new NewInstr(iOUTPUT)); }
           |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
           |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
