@@ -1,7 +1,7 @@
 /*
 The files argcargv.c, winio.c and wmhandlr.c are all needed to simulate a
 console under Windows for the GCL.
- $Id$
+ @(#)argcargv.c	1.1 6/12/96
 
 ARGCARGV.C -- WinMain->main startup for WINIO library
 Changed considerably since the version in MSJ (May 1991)
@@ -27,37 +27,6 @@ Microsoft Systems Journal, April 1993
 
 #define MAIN_BUFFER 32760
 
-#if defined(__BORLANDC__) || defined(__SC__)
-	// Borland and Symantec followed (incorrect) doc in SDK Guide, p. 14-3
-	#define argc _argc
-	#define argv _argv
-	// #define argc _C0argc
-	// #define argv _C0argv
-	
-	extern int _argc;
-	extern char **_argv;
-	// extern int _C0argc;
-	// extern char **_C0argv;
-#elif defined(__WATCOMC__)
-	// for now!
-	int argc = 0;
-	char **argv = 0;
-#else
-	// Microsoft C code per MSJ, May 1991, pp. 135-6
-	#define argc __argc
-	#define argv __argv
-
-	extern int __argc;
-	extern char **__argv;
-#endif
-
-#if defined(__SC__) && !defined(_WIN32)
-// Saw this in Symantec's source and added it - not used for Win32
-// I'm not sure what this is for!!  Andy C. 6/17/95
-short _acrtused_winc = 1234;  // Causes linker to pull in automatically for SC++
-#endif
-
-// weird! couldn't find environ
 // oh well, nobody ever uses it!
 #if ( defined(_MSC_VER) && (_MSC_VER >= 700) ) || defined(__SC__) || defined(__BORLANDC__)
 extern int main(int argc, char **argv);
@@ -75,34 +44,83 @@ HWND __hMainWnd;
 UINT __hAppTimer;
 char __szModule[9] = {0};
 
+
+void getargs(char *m_lpCmdLine,int *argc,char ***argv) // taken from the wx_win code
+{
+	// Split command line into tokens, as in usual main(argc, argv)
+	char **command = (char **)malloc(sizeof(char *)*50);
+	int count = 0;
+	char *buf = (char *)malloc(sizeof(char)*(strlen(m_lpCmdLine) + 1));
+
+	// Hangs around until end of app. in case
+	// user carries pointers to the tokens
+
+	/* Model independent strcpy */
+	{
+		int i;
+		for (i = 0; (buf[i] = m_lpCmdLine[i]) != 0; i++)
+		{
+			/* loop */;
+		}
+	}
+
+	// Get application name
+	{
+		char name[200];
+		GetModuleFileName(__hInst, name, 199);
+
+	// Is it only 16-bit Borland that already copies the program name
+	// to the first command index?
+// #if ! (defined(__BORLANDC__) && !defined(WIN32))
+		command[count++] = strdup(name);
+// #endif
+	}
+
+	/* Break-up string */
+	{
+		char *token;
+		const char *IFS = " \t\r\n";
+		if ((token = strtok(buf, IFS)) != NULL) {
+			do {
+				if (*token != '\0' && strchr(IFS, *token) == NULL)
+					command[count++] = token;
+			} while ((token = strtok(NULL, IFS)) != NULL);
+		}
+	}
+	command[count] = NULL; /* argv[] is NULL terminated list! */
+	*argv=command;
+	*argc=count;
+}
+
 int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow)
 		{
 		int ret;
-
+		char **argv;
+		int argc;
 		__hInst = hInstance;
-    __hPrevInst = hPrevInstance;
-    __lpCmdLine = lpCmdLine;
-    __nCmdShow = nCmdShow;
-    
-    getexefilename(__hInst, __szModule);
-    
+		__hPrevInst = hPrevInstance;
+		__lpCmdLine = lpCmdLine;
+		__nCmdShow = nCmdShow;
+
+		getexefilename(__hInst, __szModule);
+
     winio_about(__szModule);    // default; can override
     
     if (! winio_init())
         {
-        winio_warn(FALSE, __szModule, "Could not initialize");
-        return 1;
-        }
-    
-    if (__hMainWnd = winio_window((LPSTR) NULL, MAIN_BUFFER,
-                WW_HASMENU | WW_EXITALLOWED))
-        {
-        // App timer to allow multitasking
-        __hAppTimer = SetTimer(NULL, 0xABCD, 100, NULL);
-    
-				winio_setcurrent(__hMainWnd);
+				winio_warn(FALSE, __szModule, "Could not initialize");
+				return 1;
+				}
 
+		if (__hMainWnd = winio_window((LPSTR) NULL, MAIN_BUFFER,
+								WW_HASMENU | WW_EXITALLOWED))
+				{
+				// App timer to allow multitasking
+				__hAppTimer = SetTimer(NULL, 0xABCD, 100, NULL);
+
+				winio_setcurrent(__hMainWnd);
+				getargs(lpCmdLine,&argc,&argv);
 #if ( defined(_MSC_VER) && (_MSC_VER >= 700) ) || defined(__SC__) || defined(__BORLANDC__)
 				ret = main(argc, argv);
 #else
@@ -138,4 +156,4 @@ void getexefilename(HANDLE hInst, char *strName)
         
     strcpy(strName, *p == '\\' ? ++p : p);
     }
-    
+
