@@ -40,6 +40,8 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 
   public:
     NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P); 
+    NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P, 
+	     const gPVector<T> &s); 
     virtual ~NFLiapFunc();
 
     void Randomize(void);
@@ -52,6 +54,12 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     const gPVector<T> &GetProfile(void) const;
 };
 
+//------------------------------------------------------------------------
+//               NFLiapFunc<T>: Constructor and destructor
+//------------------------------------------------------------------------
+
+
+
 template <class T>NFLiapFunc<T>
 ::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
   : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
@@ -60,6 +68,18 @@ template <class T>NFLiapFunc<T>
 {
   SetPlev(P.plev);
   N.Centroid(pp);
+}
+
+
+template <class T>NFLiapFunc<T>
+::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P,
+	   const gPVector<T>& s)
+  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality()),  niters(0), nevals(0)
+{
+  SetPlev(P.plev);
+  pp = s;
 }
 
 template <class T> NFLiapFunc<T>::~NFLiapFunc()
@@ -213,7 +233,12 @@ template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 
 template <class T> 
 NFLiapModule<T>::NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p)
-  : LiapModule<T>(p), nf(N)
+  : LiapModule<T>(p), N(N)
+{ }
+
+template <class T>NFLiapModule<T>
+::NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p, gPVector<T> &s)
+  : LiapModule<T>(p,s), N(N)
 { }
 
 template <class T> NFLiapModule<T>::~NFLiapModule()
@@ -228,7 +253,12 @@ const gList<gPVector<T> > &NFLiapModule<T>::GetSolutions(void) const
 template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 {
 //  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
-  return new NFLiapFunc<T>(nf, params);
+  if(start) {
+    gPVector<T> s(N.Dimensionality());
+    s=*start;
+    return new NFLiapFunc<T>(N, params, s);
+  }
+  return new NFLiapFunc<T>(N, params);
 }
 
 template <class T>
