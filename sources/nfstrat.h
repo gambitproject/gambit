@@ -14,9 +14,11 @@
 #include "gstring.h"
 #include "gblock.h"
 
+class NFPlayer;
+
 struct Strategy   {
   int number;
-  Strategy *dominator;
+  NFPlayer *nfp;
   long index;
   gString name;
 
@@ -49,8 +51,6 @@ public:
   void Set(int p, Strategy  *const s);
 };
 
-class NFPlayer;
-class Strategy;
 template <class T> class NfgIter;
 template <class T> class ContIter;
 
@@ -60,7 +60,7 @@ class NFStrategySet {
   friend class ContIter<double>;
   friend class ContIter<gRational>;
 protected:
-  const NFPlayer * nfp;
+  NFPlayer * nfp;
   gBlock <Strategy *> strategies;
   
 public:
@@ -73,7 +73,7 @@ public:
 
   NFStrategySet(const NFStrategySet &s); 
   
-  NFStrategySet(const NFPlayer &p);
+  NFStrategySet( NFPlayer &p);
   
   NFStrategySet &operator=(const NFStrategySet &s); 
   bool operator==(const NFStrategySet &s);
@@ -105,6 +105,10 @@ public:
 
   //  return the entire strategy set in a const gArray
   const gArray<Strategy *> &GetNFStrategySet(void);
+
+  // return the NFPlayer of this NFStrategySet
+  NFPlayer &GetPlayer(void) const;
+
 };
 
 class BaseNfg;
@@ -118,6 +122,7 @@ class NFSupport {
 
 protected:
   gString name;
+  const BaseNfg *bnfg;
   gArray <NFStrategySet *> sups;
   
 public:
@@ -126,7 +131,7 @@ public:
   // Constructors, Destructors, operators
   //
 
-  NFSupport(const BaseNfg &);
+  NFSupport( const BaseNfg &);
   NFSupport(const NFSupport &s); 
   virtual ~NFSupport();
   NFSupport &operator=(const NFSupport &s);
@@ -136,12 +141,12 @@ public:
   // Members
   //---------
 
-  void SetNFStrategySet(int pl, NFStrategySet *s)   { sups[pl] = s; }
+  void SetNFStrategySet(int pl, NFStrategySet *s);   
   NFStrategySet *GetNFStrategySet(int pl)     { return sups[pl]; }
 
   Strategy *GetStrategy(int pl, int num) const;
   const gArray<Strategy *> &GetStrategy(int pl) const;
-
+  const BaseNfg &BelongsTo(void) const;
 };
 
 

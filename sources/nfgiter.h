@@ -25,6 +25,7 @@ private:
   StrategyProfile *profile;
   
 public:
+  NfgIter ( Nfg<T> &);
   NfgIter(const NFSupport *s);
   NfgIter(const NfgIter<T> &);
   NfgIter(const ContIter<T> &);

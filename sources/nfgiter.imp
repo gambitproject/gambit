@@ -14,10 +14,16 @@
 //--------------------------------------------------------------------------
 // NfgIter<T>:  Constructors, Destructors, Operators
 //--------------------------------------------------------------------------
-
+template <class T> NfgIter<T>::NfgIter (Nfg<T> &N)
+: stratset ( new NFSupport(N)),
+  N(&N), current_strat((stratset->sups).Length()),
+  profile(new StrategyProfile(stratset->sups.Length()))
+{
+  First();
+}
 template <class T> NfgIter<T>::NfgIter(const NFSupport *s) 
-  :  N((Nfg<T> *) s->sups[1]->nfp->N), current_strat((s->sups).Length()),
-    profile(new StrategyProfile(s->sups.Length()))
+: N((Nfg<T> *) s->sups[1]->nfp->N), current_strat((s->sups).Length()),
+  profile(new StrategyProfile(s->sups.Length()))
 {
   stratset = s;
   First();
@@ -25,15 +31,15 @@ template <class T> NfgIter<T>::NfgIter(const NFSupport *s)
 
 
 template <class T> NfgIter<T>::NfgIter(const NfgIter<T> &it)
-  : N(it.N), current_strat(it.current_strat), 
-    profile(new StrategyProfile(*it.profile))
+: N(it.N), current_strat(it.current_strat), 
+  profile(new StrategyProfile(*it.profile))
 { 
   stratset = it.stratset;
 }
 
 template <class T> NfgIter<T>::NfgIter(const ContIter<T> &it)
-  : N(it.N), current_strat(it.current_strat),
-    profile(new StrategyProfile(*it.profile))
+: N(it.N), current_strat(it.current_strat),
+  profile(new StrategyProfile(*it.profile))
 { }
 
 template <class T> NfgIter<T>::~NfgIter()
