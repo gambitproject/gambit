@@ -151,6 +151,9 @@ public:
   // Returns a gPVector representing the Dimensionality of the support.
   gPVector<int> Dimensionality(bool trunc) const;
 
+  // Number of Sequences for the player
+  int NumSequences(int pl) const;
+
   void Dump(gOutput& s) const;
 };
 

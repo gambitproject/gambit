@@ -59,8 +59,6 @@ public:
   void GetProfile(gDPVector<T> &, const gVector<T> &, 
 		  const Node *n, int,int);
   const gList<BehavSolution<T> > &GetSolutions() const;
-  int NumSequences(int j);
-  int NumInfosets(int j);
 };
 
 

@@ -303,6 +303,17 @@ void EFSupport::AddAction( int i, int j, Action *s, int k)
   sets[i]->AddAction(j,s,k);
 }
 
+int EFSupport::NumSequences(int j) const
+{
+  if(j<befg->PlayerList().First() || j>befg->PlayerList().Last()) return 1;
+  gArray<Infoset *> isets;
+  isets = (befg->PlayerList())[j]->InfosetList();
+  int num = 1;
+  for(int i = isets.First();i<= isets.Last();i++)
+    num+=NumActions(j,i);
+  return num;
+}
+
 void EFSupport::Dump(gOutput& s) const
 {
   int numplayers;

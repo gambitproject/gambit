@@ -13,12 +13,6 @@
 #include "efplayer.h"
 #include "infoset.h"
 
-/*  Old code with both sets of constraints
-void Epsilon(double &v) {v=(double).0000000001; }
-
-void Epsilon(gRational &v) {v=(gRational)0; }
-*/
-
 
 //---------------------------------------------------------------------------
 //                        SeqFormParams: member functions
@@ -39,13 +33,11 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   : EF(E), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
 { 
   int ntot;
-  ns1=NumSequences(1);
-  ns2=NumSequences(2);
-  ni1=NumInfosets(1)+1;
-  ni2=NumInfosets(2)+1;
-  /*  Old code with both sets of constraints
-  ntot = ns1+ns2+2*(ni1+ni2)+2;
-  */
+  ns1=S.NumSequences(1);
+  ns2=S.NumSequences(2);
+  ni1=E.PlayerList()[1]->NumInfosets()+1;
+  ni2=E.PlayerList()[2]->NumInfosets()+1;
+
   ntot = ns1+ns2+(ni1+ni2)+2;
   A = new gMatrix<T>(1,ntot,0,ntot);
   b = new gVector<T>(1,ntot);
@@ -67,21 +59,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
     (*A)(i,0) = -(T)1;
-  /*  Old code with both sets of constraints
-  (*A)(1,ns1+ns2+1) = -(T)1;
-  (*A)(1,ns1+ns2+ni1+1) = (T)1;
-  (*A)(ns1+ns2+1,1) = (T)1;
-  (*A)(ns1+ns2+ni1+1,1) = -(T)1;
-  (*A)(ns1+1,ns1+ns2+ni1+ni1+1) = -(T)1;
-  (*A)(ns1+1,ns1+ns2+ni1+ni1+ni2+1) = (T)1;
-  (*A)(ns1+ns2+ni1+ni1+1,ns1+1) = (T)1;
-  (*A)(ns1+ns2+ni1+ni1+ni2+1,ns1+1) = -(T)1;
-  (*b)[ns1+ns2+1] = -(T)1;
-  (*b)[ns1+ns2+ni1+1] = (T)1;
-  (*b)[ns1+ns2+ni1+ni1+1] = -(T)1;
-  (*b)[ns1+ns2+ni1+ni1+ni2+1] = (T)1;
-  */
-
   (*A)(1,ns1+ns2+1) = (T)1;
   (*A)(ns1+ns2+1,1) = -(T)1;
   (*A)(ns1+1,ns1+ns2+ni1+1) = (T)1;
@@ -194,11 +171,6 @@ template <class T> double SeqFormModule<T>::Time(void) const
 template <class T> void SeqFormModule<T>
 ::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
 {
-  /*  Old code with both sets of constraints
-  T EPSILON;
-  Epsilon(EPSILON);
-  */
-
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
 //  gout << " prob = " << prob;
   int i,snew;
@@ -222,20 +194,6 @@ template <class T> void SeqFormModule<T>
       for(i=1;i<i1;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
 
-      /*  Old code with both sets of constraints
-      (*A)(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
-      (*A)(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
-      (*A)(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
-      (*A)(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
-      for(i=1;i<=n->NumChildren();i++) {
-	(*A)(snew+i,ns1+ns2+i1+1) = -(T)1;
-	(*A)(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
-	(*A)(ns1+ns2+i1+1,snew+i) = (T)1;
-	(*A)(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
-      }
-      */
-
       (*A)(s1,ns1+ns2+i1+1) = -(T)1;
       (*A)(ns1+ns2+i1+1,s1) = (T)1;
       for(i=1;i<=n->NumChildren();i++) {
@@ -249,21 +207,6 @@ template <class T> void SeqFormModule<T>
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-
-      /*  Old code with both sets of constraints
-      (*A)(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
-      (*A)(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
-      (*A)(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
-      (*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
-      for(i=1;i<=n->NumChildren();i++) {
-	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
-	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
-	(*A)(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
-	(*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
-      }
-      */
-
       (*A)(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       (*A)(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
       for(i=1;i<=n->NumChildren();i++) {
@@ -274,10 +217,6 @@ template <class T> void SeqFormModule<T>
     }
     
   }
-  
-/*
-  Refactor();
-  */
 }
 
 template <class T> void SeqFormModule<T>
@@ -383,25 +322,6 @@ template <class T> int SeqFormModule<T>::LCPPath()
 //  gout << "\nend of path ";
   return 1;
 }
-
-template <class T> int SeqFormModule<T>::NumSequences(int j)
-{
-  if(j<EF.PlayerList().First() || j>EF.PlayerList().Last()) return 1;
-  gArray<Infoset *> isets;
-  isets = EF.PlayerList()[j]->InfosetList();
-  int num = 1;
-  for(int i = isets.First();i<= isets.Last();i++)
-    num+=support.NumActions(j,i);
-  return num;
-}
-
-template <class T> int SeqFormModule<T>::NumInfosets(int j)
-{
-  if(j<EF.PlayerList().First() || j>EF.PlayerList().Last()) return 0;
-  return EF.PlayerList()[j]->InfosetList().Length();
-}
-
-
 
 #ifdef __GNUG__
 template class SeqFormModule<double>;
