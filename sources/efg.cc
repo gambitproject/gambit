@@ -37,7 +37,7 @@ Infoset::Infoset(Efg *e, int n, EFPlayer *p, int br)
   : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
-    actions[br] = new Action(br, ToText(br), this);
+    actions[br] = new Action(br, "", this);
     br--; 
   }
 }
