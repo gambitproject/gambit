@@ -3324,9 +3324,9 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_NfSupport, porBOOL, 2));
   FuncObj->SetParamInfo(17, 0, ParamInfoType( "x", 
-                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+                              PortionSpec(porNFSUPPORT, 0, porNULLSPEC)) );
   FuncObj->SetParamInfo(17, 1, ParamInfoType( "y", 
-                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+                              PortionSpec(porNFSUPPORT, 0, porNULLSPEC)) );
 
   FuncObj->SetFuncInfo(18, FuncInfoType(GSM_Equal_MixedFloat, porBOOL, 2));
   FuncObj->SetParamInfo(18, 0, ParamInfoType( "x", 
