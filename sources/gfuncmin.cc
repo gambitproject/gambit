@@ -368,7 +368,7 @@ bool DFP(gVector<double> &p,
   return false;
 }
 
-
+#ifdef UNUSED
 bool Powell(gVector<double> &p,
 	    gMatrix<double> &xi,
 	    gFunction<double> &func,
@@ -438,4 +438,105 @@ bool Powell(gVector<double> &p,
   }
   return false;
 }
+#endif   // UNUSED
 
+#include "gpvector.h"
+
+void Project(gVector<double> &x,
+	     const gArray<int> &lengths)
+{
+  int index = 1;
+  for (int part = 1; part <= lengths.Length(); part++)  {
+    double avg = 0.0;
+    int j;
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      avg += x[index];
+    }
+    avg /= (double) lengths[part];
+    index -= lengths[part];
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      x[index] -= avg;
+    }
+  }
+}
+
+//
+// New version of Powell that keeps on the hyperplane of the simplices
+//
+bool Powell(gPVector<double> &p,
+	    gMatrix<double> &xi,
+	    gFunction<double> &func,
+	    double &fret, int &iter,
+	    int maxits1, double tol1, int maxitsN, double tolN,
+	    gOutput &tracefile, int tracelevel)
+{
+  int ibig,n;
+  double t,fptt,fp,del;
+  
+  n=p.Length();
+  gVector<double> pt(n);
+  gVector<double> ptt(n);
+  gVector<double> xit(n);
+  fret=func.Value(p);
+
+  if (tracelevel > 0)  
+    tracefile << "Initializing Powell, location = " << p
+              << "  value = " << fret << "\n\n";
+
+  pt=p;
+  for (iter=1;;iter++) {
+    if (tracelevel > 0)
+      tracefile << "Powell iteration " << iter << '\n';
+
+    fp=fret;
+    ibig=0;
+    del=0.0;
+    int index = 1;
+    for (int part = 1; part <= p.Lengths().Length(); part++, index++)  {
+      for (int j = 1; j < p.Lengths()[part]; j++, index++)   {
+	xi.GetRow(index, xit);
+	fptt=fret;
+
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+      
+	if (fptt-fret > del) {
+	  del=fptt-fret;
+	  ibig=index;
+	}
+      }
+    }
+    
+    if (fret <= tolN) return true;
+
+    if (iter == maxitsN)   {
+      if (tracelevel > 0)  {
+	tracefile << "location = " << p << " value = " << fret << "\n\n";
+	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
+      }
+      return false;
+    }
+    
+    ptt=((gVector<double> &) p)*2.0-pt;
+    xit=((gVector<double> &) p)-pt;
+
+    pt=p;
+    
+    fptt=func.Value(ptt);
+    if (fptt < fp) {
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
+      if (t < 0.0) {
+	Project(xit, p.Lengths());
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+	xi.SetRow(ibig, xit);
+      }
+    }
+    
+    if (tracelevel > 0)   {
+      tracefile << "Approximate Hessian:\n\n";
+      tracefile << ((gRectArray<double> &)xi) << '\n';
+
+      tracefile << "location = " << p << " value = " << fret << "\n\n";
+    }
+  }
+  return false;
+}

@@ -48,7 +48,7 @@ class EFGobitFunc : public gFunction<double>   {
 EFGobitFunc::EFGobitFunc(const Efg<double> &E,
 			 const BehavProfile<double> &start)
   : _nevals(0L), _efg(E), _probs(E.Dimensionality().Lengths()),
-    _p(E, true), _cpay(E)
+    _p(start), _cpay(E)
 {
   int pl;
 
@@ -58,16 +58,6 @@ EFGobitFunc::EFGobitFunc(const Efg<double> &E,
     _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
     for (int iset = 1; iset <= nisets; iset++)
       _scratch[pl][iset] = new gVector<double>(_p.GetEFSupport().NumActions(pl, iset));
-  }
-  
-  for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    EFPlayer *p = _efg.PlayerList()[pl];
-    for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
-      Infoset *s = p->InfosetList()[iset];
-      for (int act = 1; act < s->NumActions(); act++)  {
-	_p(pl, iset, act) = start(pl, iset, act);
-      }
-    }
   }
 }
 
@@ -109,7 +99,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 	_cpay(pl, iset, act) = z;
       }
       
-      for (act = 1; act < s->NumActions(); act++)  {
+      for (act = 1; act <= s->NumActions(); act++)  {
 	z = _p(pl, iset, act);
 	prob += z;
 	if (z < 0.0)
@@ -119,10 +109,9 @@ double EFGobitFunc::Value(const gVector<double> &v)
       }
 
       z = 1.0 - prob;
-      if (z < 0.0)
-	val += PENALTY * z * z;
-      z -= _cpay(pl, iset, act) / psum;
-      val += z * z;
+      val += 100.0 * z * z;
+//      z -= _cpay(pl, iset, act) / psum;
+//      val += z * z;
     }
   }
 
@@ -157,30 +146,28 @@ static void AddSolution(gList<BehavSolution<double> > &solutions,
 			double lambda,
 			double value)
 {
-  int i;
-  const Efg<double> &E = *profile.BelongsTo();
-
-  BehavProfile<double> bar(E);
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
-      double accum = 0.0;
-      int act;
-      for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); act++)  {
-	bar(pl, iset, act) = profile(pl, iset, act);
-	accum += profile(pl, iset, act);
-      }
-      bar(pl, iset, act) = 1.0 - accum;
-    }
-  }
-
-  i = solutions.Append(BehavSolution<double>(bar, EfgAlg_GOBIT));
+  int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
 }
 
-extern bool Powell(gVector<double> &p, gMatrix<double> &xi,
+extern void Project(gVector<double> &, const gArray<int> &);
+
+static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
+{
+  xi.MakeIdent();
+
+  gVector<double> foo(xi.NumColumns());
+  for (int i = 1; i <= xi.NumRows(); i++)   {
+    xi.GetRow(i, foo);
+    Project(foo, dim);
+    xi.SetRow(i, foo);
+  }
+}
+
+extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile);
+		   gOutput &tracefile, int tracelevel);
 
 
 
@@ -207,22 +194,10 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  BehavProfile<double> p(E, true);
-  p.Centroid();
-
-  // convert from non-truncated to truncated vector for starting point
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    EFPlayer *player = E.PlayerList()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *s = player->InfosetList()[iset];
-      for (int act = 1; act < s->NumActions(); act++)  {
-	p(pl, iset, act) = start(pl, iset, act);
-      }
-    }
-  }
-
+  BehavProfile<double> p(start);
   gMatrix<double> xi(p.Length(), p.Length());
-  xi.MakeIdent();
+
+  InitMatrix(xi, p.Lengths());
 
   for (nit = 1; !params.status.Get() &&
        Lambda <= params.maxLam && Lambda >= params.minLam &&
@@ -231,7 +206,7 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     F.SetLambda(Lambda);
     Powell(p, xi, F, value, iter,
 	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	   (params.tracefile) ? *params.tracefile : gnull);
+	   *params.tracefile, params.trace);
     
     // tracefile stuff omitted for now
 
@@ -242,9 +217,9 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
 	for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
 	     iset++)  {
 	  double prob = 0.0;
-	  for (int act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += p(pl, iset, act++))
+	  for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += p(pl, iset, act++))
 	    *params.pxifile << p(pl, iset, act) << ' ';
-	  *params.pxifile << (1.0 - prob) << ' ';
+//	  *params.pxifile << (1.0 - prob) << ' ';
 	}
     } 
 
