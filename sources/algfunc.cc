@@ -17,6 +17,8 @@
 #include "nfplayer.h"
 #include "efg.h"
 
+#include "vertenum.h"
+
 
 extern Portion *ArrayToList(const gArray<int> &A);
 extern Portion *ArrayToList(const gArray<double> &A);
@@ -1094,6 +1096,73 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   return por;
 }
 
+
+
+
+Portion* GSM_VertEnum_Float( Portion** param )
+{
+  gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
+  gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+  gVector<double>* start = ListToVector_Float((ListPortion*) param[2]);
+
+  VertEnum< double >* vertenum = NULL;
+  if( ( (ListPortion*) start )->Length() == 0 )
+    vertenum = new VertEnum< double >( *A, *b );
+  else 
+    vertenum = new VertEnum< double >( *A, *b, *start );
+
+  gList< gVector< double > > verts;
+  vertenum->Vertices( verts );
+
+  delete A;
+  delete b;
+  delete start;
+  delete vertenum;
+
+  ListPortion* list = new ListValPortion();
+  int i = 0;
+  for( i = 1; i < list->Length(); ++i )
+  {
+    list->Append( ArrayToList( verts[i] ) );
+  }
+
+  return list;
+}
+
+
+Portion* GSM_VertEnum_Rational( Portion** param )
+{
+  gMatrix<gRational>* A = ListToMatrix_Rational((ListPortion*) param[0]);
+  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+  gVector<gRational>* start = ListToVector_Rational((ListPortion*) param[2]);
+
+  VertEnum< gRational >* vertenum = NULL;
+  if( ( (ListPortion*) start )->Length() == 0 )
+    vertenum = new VertEnum< gRational >( *A, *b );
+  else 
+    vertenum = new VertEnum< gRational >( *A, *b, *start );
+
+  gList< gVector< gRational > > verts;
+  vertenum->Vertices( verts );
+
+  delete A;
+  delete b;
+  delete start;
+  delete vertenum;
+
+  ListPortion* list = new ListValPortion();
+  int i = 0;
+  for( i = 1; i < list->Length(); ++i )
+  {
+    list->Append( ArrayToList( verts[i] ) );
+  }
+
+  return list;
+}
+
+
+
+
 void Init_algfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -1514,6 +1583,30 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 8, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
+
+
+
+
+  FuncObj = new FuncDescObj("VertEnum", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum_Float, 
+				       PortionSpec(porFLOAT, 2), 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("A", PortionSpec(porFLOAT,2),
+					    REQUIRED, BYVAL));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("b", PortionSpec(porFLOAT,1),
+					    REQUIRED, BYVAL));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("start", PortionSpec(porFLOAT,1),
+					    new ListValPortion(), BYVAL));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_VertEnum_Rational, 
+				       PortionSpec(porRATIONAL, 2), 3));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("A", PortionSpec(porRATIONAL,2),
+					    REQUIRED, BYVAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("b", PortionSpec(porRATIONAL,1),
+					    REQUIRED, BYVAL));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("start", PortionSpec(porRATIONAL,1),
+					    new ListValPortion(), BYVAL));
+  gsm->AddFunction(FuncObj);
+
 }
 
 
