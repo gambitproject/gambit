@@ -904,13 +904,13 @@ bool NfSupportPortion::IsReference(void) const
 EfSupportPortion::EfSupportPortion(EFSupport *value)
   : _Value(new EFSupport *(value)), _ref(false)
 {
-  SetGame(&value->BelongsTo());
+  SetGame(&value->Game());
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
-  SetGame(&value->BelongsTo());
+  SetGame(&value->Game());
 }
 
 EfSupportPortion::~EfSupportPortion()
@@ -926,7 +926,7 @@ EFSupport *EfSupportPortion::Value(void) const
 
 void EfSupportPortion::SetValue(EFSupport *value)
 {
-  SetGame(&value->BelongsTo());
+  SetGame(&value->Game());
   delete *_Value;
   *_Value = value;
 }
@@ -1386,13 +1386,13 @@ bool MixedPortion<gRational>::IsReference(void) const
 BehavPortion<double>::BehavPortion(BehavProfile<double> *value)
   : _Value(new BehavProfile<double> *(value)), _ref(false)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
 }
 
 BehavPortion<double>::BehavPortion(BehavProfile<double> *& value, bool ref)
   : _Value(&value), _ref(ref)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
 }
 
 BehavPortion<double>::~BehavPortion()
@@ -1408,7 +1408,7 @@ BehavProfile<double> *BehavPortion<double>::Value(void) const
 
 void BehavPortion<double>::SetValue(BehavProfile<double> *value)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
   delete *_Value;
   *_Value = value;
 }
@@ -1460,13 +1460,13 @@ bool BehavPortion<double>::IsReference(void) const
 BehavPortion<gRational>::BehavPortion(BehavProfile<gRational> *value)
   : _Value(new BehavProfile<gRational> *(value)), _ref(false)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
 }
 
 BehavPortion<gRational>::BehavPortion(BehavProfile<gRational> *& value, bool ref)
   : _Value(&value), _ref(ref)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
 }
 
 BehavPortion<gRational>::~BehavPortion()
@@ -1482,7 +1482,7 @@ BehavProfile<gRational> *BehavPortion<gRational>::Value(void) const
 
 void BehavPortion<gRational>::SetValue(BehavProfile<gRational> *value)
 {
-  SetGame(&value->Support().BelongsTo());
+  SetGame(&value->Support().Game());
   delete *_Value;
   *_Value = value;
 }

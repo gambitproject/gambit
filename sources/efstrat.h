@@ -1,7 +1,7 @@
 //
 // FILE: efstrat.h -- Supports and stuff for the extensive form games
 //
-// $Id$
+// @(#)efstrat.h	2.3 19 Jul 1997
 //
 
 #ifndef EFSTRAT_H
@@ -49,7 +49,7 @@ public:
   void AddAction(Action *);
 
   // Returns the Efg associated with this Support.
-  const Efg &BelongsTo(void) const;
+  const Efg &Game(void) const;
 
   // Checks to see that every infoset in the support has at least one
   // action in it.

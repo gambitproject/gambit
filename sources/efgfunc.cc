@@ -1,5 +1,5 @@
 //
-// File: efgfunc.cc -- Extensive form editing builtins
+// FILE: efgfunc.cc -- Extensive form editing builtins
 //
 // $Id$
 //
@@ -127,9 +127,8 @@ Efg *CompressEfg(const Efg &, const EFSupport &);
 static Portion *GSM_CompressEfg(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
-  const Efg &E = S->BelongsTo();
-  
-  return new EfgValPortion(CompressEfg(E, *S));
+
+  return new EfgValPortion(CompressEfg(S->Game(), *S));
 }
 
 //---------------
@@ -264,7 +263,7 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
     return new ErrorPortion("Elimination by mixed strategies not implemented");
 
   gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
+  gBlock<int> players(S->Game().NumPlayers());
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
@@ -573,7 +572,7 @@ static Portion *GSM_Name_EfgElements(Portion **param)
 static Portion *GSM_NewEfg(Portion **param)
 {
   Efg *E = new Efg;
-  ListPortion *players = (ListPortion *) param[1];
+  ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++)
     E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
   return new EfgValPortion(E);
@@ -1255,10 +1254,8 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("NewEfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewEfg, porEFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("rational", porBOOL,
-					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("players", PortionSpec(porTEXT,1),
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewEfg, porEFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("players", PortionSpec(porTEXT,1),
 					    new ListValPortion));
   gsm->AddFunction(FuncObj);
 

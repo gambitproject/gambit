@@ -47,7 +47,7 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
-    Efg &BelongsTo(void) const   { return const_cast< Efg& >( *E ); }
+    Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
 
     const T &GetValue(Infoset *s, int act) const;
 

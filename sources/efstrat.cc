@@ -1,7 +1,7 @@
 //
 // FILE: efstrat.cc -- Implementation of supports for the extensive form
 //
-// @(#)efstrat.cc	2.4 6/4/97
+// $Id$
 //
 
 #include "efg.h"
@@ -298,7 +298,7 @@ const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
   return sets[pl]->ActionList(iset);
 }
 
-const Efg &EFSupport::BelongsTo(void) const
+const Efg &EFSupport::Game(void) const
 {
   return *befg;
 }

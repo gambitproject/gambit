@@ -1,7 +1,7 @@
 //
 // FILE: eliap.cc -- Extensive Form Liapunov module
 //
-// $Id$
+// @(#)eliap.cc	2.4 19 Jul 1997
 //
 
 #include "eliap.h"
@@ -89,8 +89,8 @@ static void PickRandomProfile(BehavProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.BelongsTo().NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.BelongsTo().Players()[pl]->NumInfosets();
+  for (int pl = 1; pl <= p.Game().NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= p.Game().Players()[pl]->NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;

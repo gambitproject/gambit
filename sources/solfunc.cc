@@ -81,7 +81,7 @@ static Portion *GSM_ActionProbs_Float(Portion **param)
   BehavSolution<double> *profile =
     (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
   const EFSupport *support = &profile->Support();
-  const Efg &efg = support->BelongsTo();
+  const Efg &efg = support->Game();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
@@ -112,7 +112,7 @@ static Portion *GSM_ActionProbs_Rational(Portion **param)
   BehavSolution<gRational> *profile =
     (BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value();
   const EFSupport *support = &profile->Support();
-  const Efg &efg = support->BelongsTo();
+  const Efg &efg = support->Game();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
@@ -154,7 +154,7 @@ static Portion *GSM_ActionValue_Float(Portion **param)
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Find(action))  {
-    Efg *efg = &profile->BelongsTo();
+    Efg *efg = &profile->Game();
 
     gDPVector<double> values(efg->NumActions());
     gPVector<double> probs(efg->NumInfosets());
@@ -183,7 +183,7 @@ static Portion *GSM_ActionValue_Rational(Portion **param)
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Find(action))  {
-    Efg *efg = &profile->BelongsTo();
+    Efg *efg = &profile->Game();
 
     gDPVector<gRational> values(efg->NumActions());
     gPVector<gRational> probs(efg->NumInfosets());
@@ -211,7 +211,7 @@ static Portion *GSM_ActionValues_Float(Portion **param)
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion<gRational> *) param[0])->Value();
 
   const EFSupport &support = bp->Support(); 
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
   ListPortion *por = new ListValPortion; 
   
   gDPVector<double> values(E->NumActions());
@@ -248,7 +248,7 @@ static Portion *GSM_ActionValues_Rational(Portion **param)
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value();
 
   const EFSupport &support = bp->Support();
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
   ListPortion *por = new ListValPortion;
 
   gDPVector<gRational> values(E->NumActions());
@@ -287,86 +287,15 @@ static Portion *GSM_ActionValues_Rational(Portion **param)
 
 static Portion *GSM_Behav_EFSupport(Portion **param)
 {
-  int i;
-  int j;
-  int k;
-  Portion* p1;
-  Portion* p2;
-  Portion* p3;
-  Portion* por = 0;
-
-
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  const Efg &E = S->Game();
 
-    const Efg &E = S->BelongsTo();
-    BehavSolution<double> *P = new BehavSolution<double>(E);
+  Precision prec = ((PrecisionPortion *) param[1])->Value();
 
-    if(((ListPortion*) param[1])->Length() != E.NumPlayers())
-    {
-      delete P;
-      return new ErrorPortion("Mismatching number of players");
-    }
-    
-    for(i = 1; i <= E.NumPlayers(); i++)
-    {
-      p1 = ((ListPortion*) param[1])->SubscriptCopy(i);
-      if(p1->Spec().ListDepth == 0)
-      {
-	delete p1;
-	delete P;
-	return new ErrorPortion("Mismatching dimensionality");
-      }
-      if(((ListPortion*) p1)->Length() != E.Players()[i]->NumInfosets())
-      {
-	delete p1;
-	delete P;
-	return new ErrorPortion("Mismatching number of infosets");
-      }
-      
-      for(j = 1; j <= E.Players()[i]->NumInfosets(); j++)
-      {
-	p2 = ((ListPortion*) p1)->SubscriptCopy(j);
-	if(p2->Spec().ListDepth == 0)
-	{
-	  delete p2;
-	  delete p1;
-	  delete P;
-	  return new ErrorPortion("Mismatching dimensionality");
-	}
-	if (((ListPortion*) p2)->Length() != S->NumActions(i, j))
-	{
-	  delete p2;
-	  delete p1;
-	  delete P;
-	  return new ErrorPortion("Mismatching number of actions");
-	}
-	
-	for (k = 1; k <= S->NumActions(i, j); k++)  {
-	  p3 = ((ListPortion*) p2)->SubscriptCopy(k);
-	  if(p3->Spec().Type != porNUMBER)
-	  {
-	    delete p3;
-	    delete p2;
-	    delete p1;
-	    delete P;
-	    return new ErrorPortion("Mismatching dimensionality");
-	  }
-	  
-	  (*P)(i, j, k) = ((NumberPortion*) p3)->Value();
-	  
-	  delete p3;
-	}
-	delete p2;
-      }
-      delete p1;
-    }
-    por = new BehavPortion<double>(P);
-
-
-  if(por == 0)
-    por = new ErrorPortion("Mismatching EFG and list type");
-
-  return por;
+  if (prec == precDOUBLE)
+    return new BehavPortion<double>(new BehavSolution<double>(E));
+  else
+    return new BehavPortion<gRational>(new BehavSolution<gRational>(E));
 }
 
 //-------------
@@ -431,7 +360,7 @@ static Portion *GSM_Centroid_EFSupport(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  return new BehavPortion<double>(new BehavSolution<double>(S->BelongsTo(), *S));
+  return new BehavPortion<double>(new BehavSolution<double>(S->Game(), *S));
 }
 
 static Portion *GSM_Centroid_NFSupport(Portion **param)
@@ -533,7 +462,7 @@ static Portion *GSM_InfosetProb_Float(Portion **param)
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
 
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
 
   gDPVector<double> values(E->NumActions());
   gPVector<double> probs(E->NumInfosets());
@@ -555,7 +484,7 @@ static Portion *GSM_InfosetProb_Rational(Portion **param)
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
 
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
   gDPVector<gRational> values(E->NumActions());
   gPVector<gRational> probs(E->NumInfosets());
 
@@ -576,7 +505,7 @@ static Portion *GSM_InfosetProbs_Float(Portion **param)
 {
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
 
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
 
   gDPVector<double> values(E->NumActions());
   gPVector<double> probs(E->NumInfosets());
@@ -595,7 +524,7 @@ static Portion *GSM_InfosetProbs_Rational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value();
 
-  Efg *E = &bp->BelongsTo();
+  Efg *E = &bp->Game();
 
   gDPVector<gRational> values(E->NumActions());
   gPVector<gRational> probs(E->NumInfosets());
@@ -889,7 +818,7 @@ static Portion *GSM_NodeValue_Float(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
   Node* n = ((NodePortion*) param[2])->Value();
 
-  Efg* E = &bp->BelongsTo();
+  Efg* E = &bp->Game();
   gList<Node *> list;
   Nodes(*E, list);
   
@@ -908,7 +837,7 @@ static Portion *GSM_NodeValue_Rational(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
   Node* n = ((NodePortion*) param[2])->Value();
 
-  Efg* E = &bp->BelongsTo();
+  Efg* E = &bp->Game();
   gList<Node *> list;
   Nodes(*E, list);
   
@@ -952,7 +881,7 @@ static Portion *GSM_RealizProb_Float(Portion **param)
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
   
-  Efg* E = &bp->BelongsTo();
+  Efg* E = &bp->Game();
   gList<Node *> list;
   Nodes(*E, list);
   
@@ -970,7 +899,7 @@ static Portion *GSM_RealizProb_Rational(Portion **param)
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
   
-  Efg* E = &bp->BelongsTo();
+  Efg* E = &bp->Game();
   gList<Node *> list;
   Nodes(*E, list);
   
@@ -1144,7 +1073,7 @@ static Portion *GSM_SetActionProbs_Float(Portion **param)
   
   BehavSolution<double>* P = 
     (BehavSolution<double>*) ((BehavPortion<double>*) param[0])->Value();
-  Efg& E = P->BelongsTo();
+  Efg& E = P->Game();
   gArray< EFPlayer* > player = E.Players();
   
   for(i = 1; i <= E.NumPlayers(); i++)
@@ -1197,7 +1126,7 @@ static Portion *GSM_SetActionProbs_Rational(Portion **param)
   
   BehavSolution<gRational>* P = 
     (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[0])->Value();
-  Efg& E = P->BelongsTo();
+  Efg& E = P->Game();
   gArray< EFPlayer* > player = E.Players();
   
   for(i = 1; i <= E.NumPlayers(); i++)
@@ -1511,7 +1440,8 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_EFSupport, 
 				       porBEHAV, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("value", PortionSpec(porNUMBER, 3)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("precision", porPRECISION,
+               new PrecisionPortion(precDOUBLE)));
   gsm->AddFunction(FuncObj);
 
 

@@ -11,7 +11,7 @@
 
 bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
 {
-	const Efg &E = S.BelongsTo();
+	const Efg &E = S.Game();
 
   EfgContIter<gRational> A(S), B(S);
     
@@ -114,13 +114,13 @@ EFSupport *ComputeDominated(EFSupport &S, bool strong,
   // calc total # of isets
   int i,iset;
   for (i = 1; i <= players.Length(); i++)
-    num_isets += S.BelongsTo().Players()[players[i]]->NumInfosets();
+    num_isets += S.Game().Players()[players[i]]->NumInfosets();
 
   for (i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
     status << "Dominated strategies for player " << pl << ":\n";
     for (iset = 1;
-	 iset <= S.BelongsTo().Players()[pl]->NumInfosets() && !status.Get();
+	 iset <= S.Game().Players()[pl]->NumInfosets() && !status.Get();
 	 iset++)   {
       status << "Dominated strategies in infoset " << iset << ":\n";
       status.SetProgress((double)cur_iset/(double)num_isets);cur_iset++;

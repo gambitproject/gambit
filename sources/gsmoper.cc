@@ -2198,7 +2198,7 @@ Portion* GSM_Read_BehavFloat(Portion** param)
   Portion* sub_param[2];
   Portion* owner = 
     new EfgValPortion(&((BehavSolution<double>*) 
-		       ((BehavPortion<double>*) param[1])->Value())->BelongsTo());
+		       ((BehavPortion<double>*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2236,7 +2236,7 @@ Portion* GSM_Read_BehavRational(Portion** param)
   Portion* sub_param[2];
   Portion* owner = 
     new EfgValPortion(&((BehavSolution<gRational>*) 
-		       ((BehavPortion<gRational>*) param[1])->Value())->BelongsTo());
+		       ((BehavPortion<gRational>*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
