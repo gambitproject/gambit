@@ -12,76 +12,74 @@
 #include "gvector.h"
 #include "gmatrix.h"
 #include "stdio.h"
+#include "homotopy.h" // needed for HomQreParams
 
 // User Functions ////////////////////////////////////////////////////////
-void F( const gVector<double> &X, gVector<double> &V );
+template <class T> void F( const gVector<T> &X, gVector<T> &V );
 
-void Fjac( const gVector<double> &X, gVector<double> &V, int K );
+template <class T> void Fjac( const gVector<T> &X, gVector<T> &V, int K );
 
-void rho( const gVector<double> &A,const gMatrix<double> &row_payoffs,
-          const gMatrix<double> &col_payoffs,const double lambda,
-          const gVector<double> &X, gVector<double> &V);
+template <class T> void rho( const gVector<T> &A, const T lambda,
+          const gVector<T> &X, gVector<T> &V);
 
-void rhojac( const gVector<double> &A,const gMatrix<double> &row_payoffs,
-             const gMatrix<double> &col_payoffs, const double lambda,
-             const gVector<double> &X, gVector<double> &V, int K );
+template <class T> void rhojac( const gVector<T> &A, const T lambda,
+             const gVector<T> &X, gVector<T> &V, int K );
 
 
 // Prototypes ////////////////////////////////////////////////////////////
-void fixpnf( FILE *fp,const gMatrix<double> &row_payoffs,
-             const gMatrix<double> &col_payoffs,
-				 int N, gVector<double> &Y, int &flag, double rel_arc_err,
-             double abs_arc_err, double rel_ans_err, double abs_ans_err,
-             bool trace, gVector<double> &A, gArray<double> &stepsize_params,
-             int &jeval_num, double &arclength,double max_lambda,
+template <class T> void fixpnf(
+	     const NFSupport &supp,
+             HomQreParams &params, 
+             gList<MixedSolution> &solutions,
+	     int N, gVector<T> &Y, int &flag, T rel_arc_err,
+             T abs_arc_err, T rel_ans_err, T abs_ans_err,
+             bool trace, gVector<T> &A, gArray<T> &stepsize_params,
+             int &jeval_num, T &arclength,T max_lambda,
              bool poly_switch);
 
-void stepnf( int N,
-             const gMatrix<double> &row_payoffs,
-             const gMatrix<double> &col_payoffs,
+template <class T> void stepnf( int N,
              int &jeval_num,
              int &flag,
              bool &start,       bool &crash,
-             double &old_step,  double &step_size,
-             double &rel_err,   double &abs_err,
-             double &arclength,
-             gVector<double> &Y,        gVector<double> &Ytan,
-             gVector<double> &Y_old,    gVector<double> &Ytan_old,
-             const gVector<double> &A,
-             const gArray<double> &stepsize_params
+             T &old_step,  T &step_size,
+             T &rel_err,   T &abs_err,
+             T &arclength,
+             gVector<T> &Y,        gVector<T> &Ytan,
+             gVector<T> &Y_old,    gVector<T> &Ytan_old,
+             const gVector<T> &A,
+             const gArray<T> &stepsize_params
            );
 
-void rootnf( int N,const gMatrix<double> &row_payoffs,
-             const gMatrix<double> &col_payoffs,
+template <class T> void rootnf( int N,
              int &jevalcount, int &flag,
-             double relerr,     double abserr,
-             const gVector<double> &Y,
-             gVector<double> &Ytan,
-             gVector<double> &Y_old,
-             gVector<double> &Ytan_old,
-             const gVector<double> &A
+             T relerr,     T abserr,
+             const gVector<T> &Y,
+             gVector<T> &Ytan,
+             gVector<T> &Y_old,
+             gVector<T> &Ytan_old,
+             const gVector<T> &A
            );
 
-void root( double &t, double &F_of_t,
-           double &b, double &c,
-           double relerr, double abserr,
+template <class T> void root( T &t, T &F_of_t,
+           T &b, T &c,
+           T relerr, T abserr,
            int &flag
          );
-void show_probs(char *msg,const gVector<double> &Y,int n_rows,int n_cols);
-bool out_of_bounds(gVector<double> &W,int range);
-void build_prediction(gVector<double> &W,int n, gVector<double> &Y_old,
-						gVector<double> &Ytan_old,gVector<double> &Y,
-                  gVector<double> &Ytan,double old_step,double old_step_plus_step_size
+template <class T> void show_probs(char *msg,const gVector<T> &Y,NFSupport &supp);
+template <class T> bool out_of_bounds(gVector<T> &W,int range);
+template <class T> void build_prediction(gVector<T> &W,int n, gVector<T> &Y_old,
+						gVector<T> &Ytan_old,gVector<T> &Y,
+                  gVector<T> &Ytan,T old_step,T old_step_plus_step_size
                  );
-void tangnf( double &rholen,
-				 const gMatrix<double> &row_payoffs,
-             const gMatrix<double> &col_payoffs,
-             const gVector<double> &Y,
-             gVector<double> &Ytan,
-             const gVector<double> &Ytan_old,
-             const gVector<double> &A,
-             gVector<double> &Newton_step,
+template <class T> void tangnf( T &rholen,
+             const gVector<T> &Y,
+             gVector<T> &Ytan,
+             const gVector<T> &Ytan_old,
+             const gVector<T> &A,
+             gVector<T> &Newton_step,
              int &jevalcount, int N, int &flag
            );
 
-#endif
+template <class T> T qofs(T f0, T fp0, T f1, T fp1, T dels, T s);
+
+#endif // HOMPACK_H

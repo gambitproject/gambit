@@ -40,7 +40,7 @@ NALG_SOURCES = btableau.cc tableau.cc lptab.cc bfs.cc lemke.cc nliap.cc \
 		ngobit.cc enum.cc simpdiv.cc ludecomp.cc nfgpure.cc lhtab.cc \
 		lemketab.cc grid.cc nfgcsum.cc lpsolve.cc nfdom.cc \
 		nfdommix.cc vertenum.cc polenum.cc clique.cc basis.cc \
-		nfgensup.cc nfgalleq.cc
+		nfgensup.cc nfgalleq.cc homotopy.cc hompack.cc lapack.cc
 
 NALG_OBJECTS = $(NALG_SOURCES:.cc=.o)
 

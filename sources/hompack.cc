@@ -9,11 +9,11 @@
 #include <iostream.h>
 #include <math.h>
 #include "gmisc.h"
-#include "hompack3.h"
+#include "hompack.h"
 #include "lapack.h"
-#include "ttest.h"
+#include "homotopy.h"
 
- // Constants ////////////////////////////////////////////////////////////// "LIMITD is an upper bound on the number of steps."
+// Constants ////////////////////////////////////////////////////////////// "LIMITD is an upper bound on the number of steps."
  const int limitd = 10000;  //originally = 1000
  						          // temporarily 100000 2/16/00 Vale Murthy
                             // This change seems to have affected the range of
@@ -30,9 +30,9 @@
 
  // qofs //////////////////////////////////////////////////////////////////
  // The code below is related to the  Hermite cubic predictor
-double qofs(double f0, double fp0, double f1, double fp1, double dels, double s)
+template <class T> T qofs(T f0, T fp0, T f1, T fp1, T dels, T s)
 {
-  double dd01, dd001, dd011, dd0011;
+  T dd01, dd001, dd011, dd0011;
   dd01 = (f1 - f0) / dels;
   dd001 = (dd01 - fp0) / dels;
   dd011 = (fp1 - dd01) / dels;
@@ -40,7 +40,7 @@ double qofs(double f0, double fp0, double f1, double fp1, double dels, double s)
   return ((dd0011 * (s - dels) + dd001) * s + fp0) * s + f0;
 }
 
-bool out_of_bounds(gVector<double> &W,int range)
+template <class T> bool out_of_bounds(gVector<T> &W,int range)
 {
   int i;
   
@@ -50,9 +50,9 @@ bool out_of_bounds(gVector<double> &W,int range)
   return false;
 }
 
-void build_prediction(gVector<double> &W,int N, gVector<double> &Y_old,
-						gVector<double> &Ytan_old,gVector<double> &Y,
-                  gVector<double> &Ytan,double old_step,double old_step_plus_step_size)
+template <class T> void build_prediction(gVector<T> &W,int N, gVector<T> &Y_old,
+						gVector<T> &Ytan_old,gVector<T> &Y,
+                  gVector<T> &Ytan,T old_step,T old_step_plus_step_size)
 {
   for (int j = 1; j <= N+1; ++j)
     W[j] = qofs(Y_old[j], Ytan_old[j], Y[j], Ytan[j], old_step, old_step_plus_step_size);
@@ -257,42 +257,45 @@ static gVector<double> *Ytan_p;     // YP = tangent vector to zero curve at Y
 static gVector<double> *Y_old_p;    // Yold = previous point on the zero curve
 static gVector<double> *Ytan_old_p; // YPold = previous tangent vector
 
-void fixpnf( FILE *fp,       // Name of the output file
-	     const gMatrix<double> &row_payoffs, //row player's payoffs
-	     const gMatrix<double> &col_payoffs, //col player's payoffs
+template <class T> void fixpnf(
+	     const NFSupport &supp,
+             HomQreParams &params,       // Name of the output file
+             gList<MixedSolution> &solutions,
 	     int N,                     // N is the dimension
-	     gVector<double> &Y,        // Y = [lambda, X]
+	     gVector<T> &Y,        // Y = [lambda, X]
 	     int &flag,                 // IFLAG
-	     double rel_arc_err,        // ARCRE = relative arc error
-	     double abs_arc_err,        // ARCAE = absolute arc error
-	     double rel_ans_err,        // ANSRE = relative answer error
-	     double abs_ans_err,        // ANSAE = absolute answer error
+	     T rel_arc_err,        // ARCRE = relative arc error
+	     T abs_arc_err,        // ARCAE = absolute arc error
+	     T rel_ans_err,        // ANSRE = relative answer error
+	     T abs_ans_err,        // ANSAE = absolute answer error
 	     bool trace,                // TRACE -> Print intermediate results?
-	     gVector<double> &A,        // A is the parameter vector
-	     gArray<double> &stepsize_params,    // SSPAR are step size parameters
+	     gVector<T> &A,        // A is the parameter vector
+	     gArray<T> &stepsize_params,    // SSPAR are step size parameters
 	     int &jeval_num,            // NFE = number of Jacobian evaluations
-	     double &arclength,         // ARCLEN is the arc length
-	     double max_lambda,    // Ceiling on lambda
+	     T &arclength,         // ARCLEN is the arc length
+	     T max_lambda,    // Ceiling on lambda
 	     bool poly_switch  // POLY_SWITCH = ?
 	     )
 {
+  MixedProfile<gNumber> sol(supp);
+
   //cout << "Entered fixpnf()." << endl;
   void cleanup();
   
   // Static variables //////////////////////////////////////////////////
   // these were marked with SAVE in the Fortran
-  static double abs_err;          // ABSERR
-  static double current_tolerance;// CURTOL
-  static double max_step;         // H was the maximum step size
-  static double old_step;         // HOLD was the size of the previous step
-  static double rel_err;          // RELERR
-  static double total_arclength;  // S was the cumulative arc length
+  static T abs_err;          // ABSERR
+  static T current_tolerance;// CURTOL
+  static T max_step;         // H was the maximum step size
+  static T old_step;         // HOLD was the size of the previous step
+  static T rel_err;          // RELERR
+  static T total_arclength;  // S was the cumulative arc length
   
   static int iteration;           // ITER counted iterations in the main loop
   static int limit;               // LIMIT is the iteration limit
   
   static bool crash, start;
-  
+
   // check the arguments
   if ( N <= 0                 // N must be positive
        || rel_ans_err <= 0    // Relative error must be positive
@@ -322,9 +325,9 @@ void fixpnf( FILE *fp,       // Name of the output file
     if (Y_old_p    != NULL)  delete Y_old_p;
     if (Ytan_old_p != NULL)  delete Ytan_old_p;
     
-    Ytan_p     = new gVector<double>(N+1);
-    Y_old_p    = new gVector<double>(N+1);
-    Ytan_old_p = new gVector<double>(N+1);
+    Ytan_p     = new gVector<T>(N+1);
+    Y_old_p    = new gVector<T>(N+1);
+    Ytan_old_p = new gVector<T>(N+1);
     
     // "Set initial conditions for first call to stepnf()."
     start = true;
@@ -414,9 +417,9 @@ void fixpnf( FILE *fp,       // Name of the output file
   // main loop /////////////////////////////////////////////////////////
   for (iteration = 1; iteration <= limit; ++iteration) {
     // local variables
-    gVector<double> &Ytan     = *Ytan_p;
-    gVector<double> &Y_old    = *Y_old_p;
-    gVector<double> &Ytan_old = *Ytan_old_p;
+    gVector<T> &Ytan     = *Ytan_p;
+    gVector<T> &Y_old    = *Y_old_p;
+    gVector<T> &Ytan_old = *Ytan_old_p;
     
     // printf("iteration: %d",iteration); // Vale Murthy 1/25/00
     
@@ -476,16 +479,14 @@ void fixpnf( FILE *fp,       // Name of the output file
     */
     // "Take a step along the curve."
     
-    //    int  n_rows = row_payoffs.NumRows();
-    //    int  n_cols = row_payoffs.NumColumns();
-    //    show_probs("Before stepnf",Y,n_rows,n_cols);
+    //    show_probs("Before stepnf",Y,supp);
     
     
-    stepnf(N,row_payoffs,col_payoffs, jeval_num, flag, start, crash, old_step, max_step, rel_err,
+    stepnf(N,supp, jeval_num, flag, start, crash, old_step, max_step, rel_err,
 	   abs_err, total_arclength, Y, Ytan, Y_old, Ytan_old, A,
 	   stepsize_params);
     
-    //   show_probs("After stepnf",Y,n_rows,n_cols);
+    //   show_probs("After stepnf",Y,supp);
     
     // 3/1/00 Vale Murthy
     
@@ -517,77 +518,44 @@ void fixpnf( FILE *fp,       // Name of the output file
       
     */
     
-    if (trace) {
-      double p_resid;
-      double q_resid;
-      
-      double sum;
-      int  n_rows = row_payoffs.NumRows();
-      int  n_cols = row_payoffs.NumColumns();
-      
-      gVector<double> p(n_rows-1);
-      gVector<double> q(n_cols-1);
-      
-      int i;
-      
-      for(i = 1;i < n_rows;i++)
-	{
-	  p[i] = Y[i+1];
-	}
-      
-      for(i = 1;i < n_cols;i++) {
-	q[i] = Y[n_rows+i];
-      }
-      
-      
-      
-      sum = 0.0;
-      for(i = 1; i <= n_cols - 1; i++)
-	sum += q[i];
-      q_resid = 1.0 - sum;
-      
-      sum = 0.0;
-      for(i = 1; i <= n_rows -1; i++)
-        sum += p[i];
-      p_resid = 1.0 - sum;
-      
-      /*
-	if (iteration == 1)
-	
-	{
-	fprintf(fp,"step \t jeval_num \t arclength lambda ");
-	for(int i = 1; i <= n_rows; i++)
-	fprintf(fp,"p_%d ",i);
-	
-	for(int i = 1; i <= n_cols; i++)
-	fprintf(fp,"q_%d ",i);
-	
-	fprintf(fp,"\n");
-	
-	}
-      */
-      
-      double tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
-      //          tlambda = log(1+tlambda);
-      //          double tlambda = Y[1];
-      
-      fprintf(fp,"%d \t %d \t \t %e \t  %e ",iteration,jeval_num,total_arclength,tlambda);
-      
-      for(int i = 1; i < n_rows; i++)
-	fprintf(fp,"%e ",Y[i+1]);
-      fprintf(fp,"%e ",p_resid);
-      
-      for(int i = 1; i < n_cols; i++)
-	fprintf(fp,"%e ",Y[n_rows + i]);
-      fprintf(fp,"%e ",q_resid);
-      
-      fprintf(fp,"\n");
-      
-    }
+    T tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
+    //          tlambda = log(1+tlambda);
+    //          T tlambda = Y[1];
     
+    int j = 2;
+    for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+      T resid = 1;
+      int i;
+      for(i=1;i<supp.NumStrats(pl);i++) {
+	sol(pl,i) = Y[j];
+	resid -= Y[j];
+	j++;
+      }
+      sol(pl,i) =  resid;
+    }
+
+    if (params.fullGraph) {
+      int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
+      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetEpsilon(params.Accuracy());
+    }
+
+    if(params.pxifile) {
+      (*params.pxifile).SetFloatMode();
+      *params.pxifile << " " << tlambda;
+      *params.pxifile << " " << total_arclength;
+      for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) 
+	for(int i=1;i<=supp.NumStrats(pl);i++) 
+	  *params.pxifile << " " << sol(pl,i);
+      *params.pxifile << "\n";
+
+    }
     
     // "Check if the step was successful."
     if (flag > 0) {
+      int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
+      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetEpsilon(params.Accuracy());
       arclength = total_arclength;
       cleanup();
       return;
@@ -604,19 +572,22 @@ void fixpnf( FILE *fp,       // Name of the output file
       limit -= iteration;
       
       flag = 2;   // Return error 2: Error tolerance too small.
+      int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
+      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetEpsilon(params.Accuracy());
       return;
     }
     
     
     if (Y[1] >= max_lambda) {
-      printf("untransformed Y[1] > %lf\n",max_lambda);
+      printf("untransformed Y[1] > %f\n",max_lambda);
       // "Use hermite cubic interpolation and Newton iteration to get
       //  the answer at lambda = 1."
       
       // "Save Y_old for arc length calculation later."
-      gVector<double> Z0 = Y_old;
+      gVector<T> Z0 = Y_old;
       
-      rootnf(N,row_payoffs,col_payoffs,jeval_num, flag, rel_ans_err, abs_ans_err,
+      rootnf(N,supp, jeval_num, flag, rel_ans_err, abs_ans_err,
 	     Y, Ytan, Y_old, Ytan_old, A);
       
       // "Calculate final arc length."
@@ -650,6 +621,10 @@ void fixpnf( FILE *fp,       // Name of the output file
   arclength = total_arclength;
   printf("lambda has not reached 1!\n");
   flag = 3;           // Return error 3: StepNF has been called 1000 times
+  int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
+  T tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
+  solutions[index].SetQre(tlambda,0);  // need to compute value here
+  solutions[index].SetEpsilon(params.Accuracy());
   return;
 }
 
@@ -659,53 +634,25 @@ void cleanup() {
   if (Ytan_old_p != NULL)  delete Ytan_old_p;
 }
 
-void show_probs(char *msg,const gVector<double> &Y,int n_rows,int n_cols)
+template <class T> void show_probs(char *msg,const gVector<T> &Y,NFSupport &supp)
 {
-  double p_resid;
-  double q_resid;
-  double sum;
-  
-  //         int  n_rows = row_payoffs.NumRows();
-  //         int  n_cols = row_payoffs.NumColumns();
-  
-  gVector<double> p(n_rows-1);
-  gVector<double> q(n_cols-1);
-  
-  int i;
-  
-  for(i = 1;i < n_rows;i++) {
-    p[i] = Y[i+1];
+  MixedProfile<gNumber> sol(supp);
+
+  int j=2;
+  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+    T resid = 1;
+    int i;
+    for(i=1;i<supp.NumStrats(pl);i++) {
+      sol(pl,i) = Y[j];
+      resid -= Y[j];
+      j++;
+    }
+    sol(pl,i) =  resid;
   }
-  
-  for(i = 1;i < n_cols;i++) {
-    q[i] = Y[n_rows+i];
-  }
-  
-  
-  
-  sum = 0.0;
-  for(i = 1; i <= n_cols - 1; i++)
-    sum += q[i];
-  q_resid = 1.0 - sum;
-  
-  sum = 0.0;
-  for(i = 1; i <= n_rows -1; i++)
-    sum += p[i];
-  p_resid = 1.0 - sum;
-  
-  double tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
-  printf("%s: %8.6lf ",msg,tlambda);
-  
-  for(int i = 1; i < n_rows; i++)
-    printf("%8.6lf ",Y[i+1]);
-  printf("%8.6lf ",p_resid);
-  
-  for(int i = 1; i < n_cols; i++)
-    printf("%8.6lf ",Y[n_rows + i]);
-  printf("%8.6lf ",q_resid);
-  
-  printf("\n");
-  
+  T tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
+
+  gout << msg << "\nlam: " << tlambda << " sol:" << sol;
+  gout << "\n";
 }
  
  
@@ -840,25 +787,24 @@ void show_probs(char *msg,const gVector<double> &Y,int n_rows,int n_cols)
    C CALLS  DNRM2 , TANGNF .
 */
 
-void stepnf( int N,
-	     const gMatrix<double> &row_payoffs,
-	     const gMatrix<double> &col_payoffs,
+template <class T> void stepnf( int N,
+	     const NFSupport &supp,
 	     int &jeval_num,
 	     int &flag,
 	     bool &start,       bool &crash,
-	     double &old_step,  double &step_size,
-	     double &rel_err,   double &abs_err,
-	     double &arclength,
-	     gVector<double> &Y,        gVector<double> &Ytan,
-	     gVector<double> &Y_old,    gVector<double> &Ytan_old,
-	     const gVector<double> &A,
-	     const gArray<double> &stepsize_params
+	     T &old_step,  T &step_size,
+	     T &rel_err,   T &abs_err,
+	     T &arclength,
+	     gVector<T> &Y,        gVector<T> &Ytan,
+	     gVector<T> &Y_old,    gVector<T> &Ytan_old,
+	     const gVector<T> &A,
+	     const gArray<T> &stepsize_params
 	     )
 {
   // top-level variables
-  static double step_size_fail;
-  gVector<double> W(N+1), Wtan(N+1), Z0(N+1), Z1(N+1);
-  double lcalc, rcalc;
+  static T step_size_fail;
+  gVector<T> W(N+1), Wtan(N+1), Z0(N+1), Z1(N+1);
+  T lcalc = 0.0, rcalc = 0.0;
   int itnum;
   bool fail;
   
@@ -871,7 +817,7 @@ void stepnf( int N,
   }
   
   // "If step size is too small, determine an acceptable one."
-  double d = 4 * DBL_EPSILON * (arclength + 1);
+  T d = 4 * DBL_EPSILON * (arclength + 1);
   if (step_size < d) {
     step_size = d;
     crash = true;
@@ -879,7 +825,7 @@ void stepnf( int N,
   }
   
   // "If error tolerances are too small, increase them to acceptable values."
-  double temp = sqrt(Y.NormSquared());
+  T temp = sqrt(Y.NormSquared());
   if ( (rel_err*temp + abs_err) < 4 * DBL_EPSILON * temp ) {
     if (rel_err != 0) {
       rel_err = 4 * DBL_EPSILON * (4 * DBL_EPSILON + 1);
@@ -894,7 +840,7 @@ void stepnf( int N,
   crash = false;
   
   if (start) {
-    gVector<double> Newton_step(N+1);
+    gVector<T> Newton_step(N+1);
     
     // "Startup Section (First step along zero curve)."
     fail = start = false;
@@ -908,15 +854,13 @@ void stepnf( int N,
     Ytan_old = 0;
     Ytan_old[1] = 1;
     
-    int  n_rows = row_payoffs.NumRows();
-    int  n_cols = row_payoffs.NumColumns();
     // display lambda,player 1's p's, player 2's q's
     // Vale Murthy 3/1/00 The printing will scroll off the screen
-    //    show_probs("Before tangnf",Y,n_rows,n_cols);
+    //    show_probs("Before tangnf",Y,supp);
     
-    tangnf(arclength,row_payoffs,col_payoffs, Y, Ytan, Ytan_old, A, Newton_step, jeval_num, N, flag);
+    tangnf(arclength,supp, Y, Ytan, Ytan_old, A, Newton_step, jeval_num, N, flag);
     
-    //    show_probs("After tangnf",Y,n_rows,n_cols);
+    //    show_probs("After tangnf",Y,supp);
     
     if (flag > 0) return;
     
@@ -924,18 +868,16 @@ void stepnf( int N,
       Z0 = W = Y + Ytan * step_size;
       
       for (int iteration = 1; iteration <= Newton_iter_limit; ++iteration) {
-	double rholen = -1;
+	T rholen = -1;
 	
 	// "Calculate the Newton step at the current point W."
 	
 	
-	int  n_rows = row_payoffs.NumRows();
-	int  n_cols = row_payoffs.NumColumns();
 	// display lambda,player 1's p's, player 2's q's
-	//show_probs("Before tangnf(2):",W,n_rows,n_cols);
+	//show_probs("Before tangnf(2):",W,supp);
 	
-	tangnf(rholen,row_payoffs,col_payoffs,W, Wtan, Ytan_old, A, Newton_step, jeval_num, N, flag);
-	//show_probs("After tangnf(2):",W,n_rows,n_cols);
+	tangnf(rholen,supp ,W, Wtan, Ytan_old, A, Newton_step, jeval_num, N, flag);
+	//show_probs("After tangnf(2):",W,supp);
 	if (flag > 0)
 	  return;     // Return tangnf error.
 	
@@ -971,7 +913,7 @@ void stepnf( int N,
     }
   }
   else { // if (!start) 
-    gVector<double> Newton_step(N+1);
+    gVector<T> Newton_step(N+1);
     
     fail = false;
     
@@ -983,7 +925,7 @@ void stepnf( int N,
       int imax = 50;
       int count = 0;
       //
-      double init_step_size = step_size;
+      T init_step_size = step_size;
       
       build_prediction(W,N,Y_old,Ytan_old,Y,Ytan,old_step,old_step+step_size);
       
@@ -1001,26 +943,21 @@ void stepnf( int N,
       
       Z0 = W; // End of predictor section
       
-      int  n_rows = row_payoffs.NumRows();
-      int  n_cols = row_payoffs.NumColumns();
-      
       // display lambda,player 1's p's, player 2's q's
       // Vale Murthy 3/1/00 The printing will scroll off the screen
-      // show_probs("End of Predictor section",W,n_rows,n_cols);
+      // show_probs("End of Predictor section",W,supp);
       
       // Corrector section
       for (int iteration = 1; iteration <= Newton_iter_limit; ++iteration) {
-	double rholen = -1;
+	T rholen = -1;
 	
-	//int  n_rows = row_payoffs.NumRows();
-	//int  n_cols = row_payoffs.NumColumns();
 	// display lambda,player 1's p's, player 2's q's
-	//show_probs("Before tangnf(3):",W,n_rows,n_cols);
+	//show_probs("Before tangnf(3):",W,supp);
 	
 	// "Calculate the Newton step at the curent point W."
-	tangnf(rholen, row_payoffs,col_payoffs, W, Wtan, Ytan, A,
+	tangnf(rholen, supp, W, Wtan, Ytan, A,
 	       Newton_step, jeval_num, N, flag);
-	// show_probs("After tangnf(3):",W,n_rows,n_cols);
+	// show_probs("After tangnf(3):",W,supp);
 	if (flag > 0)  return;     // Return tangnf error.
 	// "Take Newton step and check convergence."
 	//W += Newton_step;
@@ -1030,7 +967,7 @@ void stepnf( int N,
 	
 	int imax = 50;
 	int count = 0;
-	gVector<double> result_step(N+1);
+	gVector<T> result_step(N+1);
 	result_step = Newton_step+W;
 	
 	while ( out_of_bounds(result_step,N+1) && (count < imax) ) {
@@ -1072,7 +1009,7 @@ void stepnf( int N,
 	
 	// "Go to mop-up section after convergence."
 	if (sqrt(Newton_step.NormSquared()) <= rel_err*sqrt(W.NormSquared()) + abs_err) {
-	  //                    show_probs("After convergence",Y,n_rows,n_cols);
+	  //                    show_probs("After convergence",Y,supp);
 	  goto mop_up;
 	}
       }
@@ -1100,11 +1037,9 @@ void stepnf( int N,
   Y_old = Y;
   
   // Vale Murthy 3/1/00
-  // int  n_rows = row_payoffs.NumRows();
-  // int  n_cols = row_payoffs.NumColumns();
-  // show_probs("Before Y=W",Y,n_rows,n_cols);
+  // show_probs("Before Y=W",Y,supp);
   Y = W;
-  // show_probs("After Y=W",Y,n_rows,n_cols);
+  // show_probs("After Y=W",Y,supp);
   Ytan = Wtan;
   
   
@@ -1117,7 +1052,7 @@ void stepnf( int N,
   // Optimal step size estimation section
   
   // "Calculate the distance factor dcalc."
-  double dcalc = sqrt( (Z0 - Y).NormSquared() );
+  T dcalc = sqrt( (Z0 - Y).NormSquared() );
   if (dcalc != 0)
     dcalc = sqrt( (Z1 - Y).NormSquared() )/dcalc;
   
@@ -1132,22 +1067,22 @@ void stepnf( int N,
     lcalc = 0;
   
   // "Formula for optimal step size."
-  double optimal_step_size;
+  T optimal_step_size;
   if (lcalc + rcalc + dcalc == 0) {
     optimal_step_size = stepsize_params[7] * old_step;
   } 
   else {
-    double l = lcalc/stepsize_params[1];
-    double r = rcalc/stepsize_params[2];
-    double d = dcalc/stepsize_params[3];
-    double max = gmax( gmax(l, r), d );
+    T l = lcalc/stepsize_params[1];
+    T r = rcalc/stepsize_params[2];
+    T d = dcalc/stepsize_params[3];
+    T max = gmax( gmax(l, r), d );
     optimal_step_size = old_step * pow(1 / max, 1 / stepsize_params[8]);
   }
   
   // "optimal_step_size contains the estimated optimal step size.
   //  Now put it within reasonable bounds."
   {
-    double max = gmax( gmax(optimal_step_size, stepsize_params[6]*old_step),
+    T max = gmax( gmax(optimal_step_size, stepsize_params[6]*old_step),
 		       stepsize_params[4] );
     step_size = gmin( gmin(max, stepsize_params[7]*old_step), stepsize_params[5] );
   }
@@ -1236,36 +1171,36 @@ void stepnf( int N,
    C CALLS  D1MACH , DNRM2 , ROOT , TANGNF .
 */
 
-void rootnf( int N,const gMatrix<double> &row_payoffs,
-	     const gMatrix<double> &col_payoffs,
+template <class T> void rootnf( int N,
+	     const NFSupport &supp,
 	     int &jevalcount, int &flag,
-	     double relerr,     double abserr,
-	     const gVector<double> &Y, //debugging 2/16/00 Vale Murthy
-	     gVector<double> &Ytan,
-	     gVector<double> &Y_old,
-	     gVector<double> &Ytan_old,
-	     const gVector<double> &A
+	     T relerr,     T abserr,
+	     gVector<T> &Y, //debugging 2/16/00 Vale Murthy
+	     gVector<T> &Ytan,
+	     gVector<T> &Y_old,
+	     gVector<T> &Ytan_old,
+	     const gVector<T> &A
 	     )
 {
   //cout << "Entered rootnf()." << endl;
-  double rerr = gmax(relerr, DBL_EPSILON);
-  double aerr = gmax(abserr, 0.);
+  T rerr = gmax(relerr, DBL_EPSILON);
+  T aerr = gmax(abserr, 0.);
   
   /* *****  MAIN LOOP.  ***** */
   for (int iteration = 1; iteration <= 20; ++iteration) {
-    gVector<double> Newton_step = Y - Y_old;
-    double dels = sqrt(Newton_step.NormSquared());
+    gVector<T> Newton_step = Y - Y_old;
+    T dels = sqrt(Newton_step.NormSquared());
     
     // "USING TWO POINTS AND TANGENTS ON THE HOMOTOPY ZERO CURVE, CONSTRUCT
     //  THE HERMITE CUBIC INTERPOLANT Q(S).  THEN USE  ROOT  TO FIND THE S
     //  CORRESPONDING TO  LAMBDA = 1 .  THE TWO POINTS ON THE ZERO CURVE ARE
     //  ALWAYS CHOSEN TO BRACKET LAMBDA=1, WITH THE BRACKETING INTERVAL
     //  ALWAYS BEING [0, DELS]."
-    double sa = 0;
-    double sb = dels;
+    T sa = 0;
+    T sb = dels;
     int lcode = 1;
     
-    double sout, qsout;
+    T sout, qsout;
     root(sout, qsout, sa, sb, rerr, aerr, lcode);
     //cout << "rootnf: Left root(), #1." << endl;
     
@@ -1281,20 +1216,18 @@ void rootnf( int N,const gMatrix<double> &row_payoffs,
     }
     
     // "CALCULATE Q(SA) AS THE INITIAL POINT FOR A NEWTON ITERATION."
-    gVector<double> W(N+1), WP(N+1);
+    gVector<T> W(N+1), WP(N+1);
     for (int i = 1; i <= N+1; ++i)
       W[i] = qofs( Y_old[i], Ytan_old[i], Y[i], Ytan[i], dels, sa);
     
-    int  n_rows = row_payoffs.NumRows();
-    int  n_cols = row_payoffs.NumColumns();
     // display lambda,player 1's p's, player 2's q's
-    // show_probs("Before tangnf(4):",W,n_rows,n_cols);
+    // show_probs("Before tangnf(4):",W,supp);
     
     
     // "CALCULATE NEWTON STEP AT Q(SA)."
-    tangnf(sa,row_payoffs,col_payoffs, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
+    tangnf(sa,supp, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
     //cout << "rootnf: Left tangnf(), #1." << endl;
-    // show_probs("After tangnf(4):",W,n_rows,n_cols);
+    // show_probs("After tangnf(4):",W,supp);
     
     if (flag > 0)
       return;
@@ -1303,11 +1236,11 @@ void rootnf( int N,const gMatrix<double> &row_payoffs,
     W += Newton_step;
     
     // display lambda,player 1's p's, player 2's q's
-    // show_probs("Before tangnf(5):",W,n_rows,n_cols);
+    // show_probs("Before tangnf(5):",W,supp);
     
     // "GET THE TANGENT  WP  AT  W  AND THE NEXT NEWTON STEP IN Newton_step.
-    tangnf(sa,row_payoffs,col_payoffs, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
-    // show_probs("After tangnf(5):",W,n_rows,n_cols);
+    tangnf(sa,supp, W, WP, Ytan_old, A, Newton_step, jevalcount, N, flag);
+    // show_probs("After tangnf(5):",W,supp);
     //cout << "rootnf: Left tangnf(), #2." << endl;
     
     if (flag > 0)
@@ -1318,8 +1251,8 @@ void rootnf( int N,const gMatrix<double> &row_payoffs,
     
     // Since the Fortran computes the norm starting at Newton_step[2] and
     // W[2], we need to correct for the first number.
-    double ns2 = Newton_step.NormSquared() - Newton_step[1] * Newton_step[1];
-    double w2  = W.NormSquared() - W[1] * W[1];
+    T ns2 = Newton_step.NormSquared() - Newton_step[1] * Newton_step[1];
+    T w2  = W.NormSquared() - W[1] * W[1];
     if ( abs(W[1]-1) <= rerr + aerr
 	 && sqrt(ns2) <= rerr * sqrt(w2) + aerr) {
       Y = W;
@@ -1399,9 +1332,9 @@ void rootnf( int N,const gMatrix<double> &row_payoffs,
     C  CALLS  D1MACH .
 */
 
-void root( double &t, double &F_of_t,
-	   double &b, double &c,
-	   double relerr, double abserr,
+template <class T> void root( T &t, T &F_of_t,
+	   T &b, T &c,
+	   T relerr, T abserr,
 	   int &flag
 	   )
 {
@@ -1409,11 +1342,11 @@ void root( double &t, double &F_of_t,
   
   /* Local variables */
   static int count, ic;
-  static double a, acbs, ae, fa, fb, fc, fx, re;
+  static T a, acbs, ae, fa, fb, fc, fx, re;
   
   if (flag >= 0) {
     re = gmax(relerr, DBL_EPSILON);
-    ae = gmax(abserr, (double)0  );
+    ae = gmax(abserr, (T)0  );
     ic = 0;
     acbs = fabs(b - c);
     t = a = c;
@@ -1458,8 +1391,8 @@ void root( double &t, double &F_of_t,
       c = a;  fc = fa;
     }
   
-  double bc_midpoint = (c - b) * .5;
-  double tolerance = re * fabs(b) + ae;
+  T bc_midpoint = (c - b) * .5;
+  T tolerance = re * fabs(b) + ae;
   
   // "TEST STOPPING CRITERION AND FUNCTION COUNT."
   if (fabs(bc_midpoint) <= tolerance) {
@@ -1481,8 +1414,8 @@ void root( double &t, double &F_of_t,
   // "CALCULATE NEW ITERATE EXPLICITLY AS B+P/Q
   //  WHERE WE ARRANGE P.GE.0.  THE IMPLICIT
   //  FORM IS USED TO PREVENT OVERFLOW."
-  double p = (b - a) * fb;
-  double q = fa - fb;
+  T p = (b - a) * fb;
+  T q = fa - fb;
   
   if (p < 0)  { p = -p;  q = -q; }
   
@@ -1602,23 +1535,22 @@ void root( double &t, double &F_of_t,
    C CALLS  DGEQPF , DNRM2 , DORMQR , F (OR  RHO ), FJAC (OR  RHOJAC ).
 */
 
-void tangnf( double &rholen,
-	     const gMatrix<double> &row_payoffs,
-	     const gMatrix<double> &col_payoffs,
-	     const gVector<double> &Y,
-	     gVector<double> &Ytan,
-	     const gVector<double> &Ytan_old,
-	     const gVector<double> &A,
-	     gVector<double> &Newton_step,
+template <class T> void tangnf( T &rholen,
+	     const NFSupport &supp,
+	     const gVector<T> &Y,
+	     gVector<T> &Ytan,
+	     const gVector<T> &Ytan_old,
+	     const gVector<T> &A,
+	     gVector<T> &Newton_step,
 	     int &jevalcount, int N, int &flag) 
 {
   // cout << "Entered tangnf()." << endl;
   
-  const double &lambda = Y[1];
-  //    const double lambda = Y[1];
-  gMatrix<double> QR(N, N+1);         // Split the N+2 column of QR
-  gVector<double> QR_Np2(N);          // and put it in its own vector.
-  gVector<double> alpha(N+1);
+  const T &lambda = Y[1];
+  //    const T lambda = Y[1];
+  gMatrix<T> QR(N, N+1);         // Split the N+2 column of QR
+  gVector<T> QR_Np2(N);          // and put it in its own vector.
+  gVector<T> alpha(N+1);
   gVector<int> pivot(N+1);
   
   // "jevalcount contains the number of Jacobian evaluations."
@@ -1629,43 +1561,41 @@ void tangnf( double &rholen,
     // "QR = ( d rho(A,lambda,X)/d lambda, d rho(A,lambda,X)/dx,
     //                                              rho(a,lambda,X) ).
     
-    int  n_rows = row_payoffs.NumRows();
-    int  n_cols = row_payoffs.NumColumns();
     // display lambda,player 1's p's, player 2's q's
-    //    show_probs("Before rho:",Y,n_rows,n_cols);
+    //    show_probs("Before rho:",Y,supp);
     
     
     // Y[1] = lambda
     // Y[2] to Y[n_rows] = p[1] ... p[n_rows-1]
     // Y[n_rows+1] to Y[n_rows+n_cols-1] = q[1] to q[n_cols-1]
     
-    gVector<double> X(N);
+    gVector<T> X(N);
     for (int i = 1; i <= N; ++i) {
       X[i] = Y[i+1];
     }
     
-    gVector<double> V(N);
+    gVector<T> V(N);
     
     for (int i = 1; i <= N+1; ++i) {
-      rhojac(A,row_payoffs,col_payoffs, lambda, X, V, i);
+      rhojac(supp, A, lambda, X, V, i);
       QR.SetColumn(i, V);
     }
     
-    rho(A,row_payoffs,col_payoffs, lambda, X, QR_Np2);
+    rho(supp, A, lambda, X, QR_Np2);
     
   }
   else { // if (flag != -2) 
-    gVector<double> X(N);
+    gVector<T> X(N);
     for (int i = 1; i <= N; ++i)
       X[i] = Y[i+1];
     
-    gVector<double> V(N);
+    gVector<T> V(N);
     
     F(X, V);
     
     if (flag == 0) {
       // "QR = ( A - F(X), I - lambda * DF(X), X - A + lambda*(A - F(X)) )."
-      gVector<double> temp = A - V;
+      gVector<T> temp = A - V;
       QR.SetColumn(1, temp);
       
       QR_Np2 = X - A + temp * lambda;
@@ -1678,7 +1608,7 @@ void tangnf( double &rholen,
     }
     else { // if (flag != 0) 
       // "QR = ( F(X) - X + A, lambda * DF(X) + (1 - lambda)*I, X - A + lambda*(F(X) - X + A) )."
-      gVector<double> XmA = X - A;
+      gVector<T> XmA = X - A;
       QR.SetColumn(1, V - XmA);
       
       QR_Np2 = XmA + (V - XmA) * lambda;
@@ -1698,7 +1628,7 @@ void tangnf( double &rholen,
   // "Reduce the Jacobian matrix to upper triangular form."
   pivot = 0;
   int info;
-  gVector<double> tau(N);
+  gVector<T> tau(N);
   
   // CALL DGEQPF(N,NP1,QR,N,PIVOT,YP,ALPHA,K)
   dgeqpf(QR, pivot, tau, info);
@@ -1724,16 +1654,16 @@ void tangnf( double &rholen,
   {
     //"call dormqr('L', 'T', N, 1, N, QR, N, YP, QR(:, NP2), N, alpha, 3*N+3, K)"
     // Need to pass QR(1:N,1:N) to dormqr as A.
-    gMatrix<double> A(N, N);
+    gMatrix<T> A(N, N);
     for (int j = 1; j <= N; ++j) {
       // It seems that gMatrix<T>::Column() is buggy.
-      //gVector<double> temp = QR.Column(j);
+      //gVector<T> temp = QR.Column(j);
       //A.SetColumn(j, temp);
-      gVector<double> temp(N);
+      gVector<T> temp(N);
       QR.GetColumn(j, temp);
       A.SetColumn(j, temp);
     }
-    gMatrix<double> C(N, 1);
+    gMatrix<T> C(N, 1);
     C.SetColumn(1, QR_Np2);
     dormqr('L', 'T', N, A, tau, C, info);
     C.GetColumn(1, QR_Np2);
@@ -1746,14 +1676,14 @@ void tangnf( double &rholen,
   Newton_step[N+1] = 1;
   for (int i = N; i >= 1; --i) {
     //Newton_step[i] = -DOT_PRODUCT( QR[i, i+1:N+1], Newton_step[i+1:N+1] ) / alpha[i];
-    double dot_product = 0;
+    T dot_product = 0;
     for (int j = i+1; j <= N+1; ++j)
       dot_product += QR(i, j) * Newton_step[j] ;
     
     Newton_step[i] = -dot_product / alpha[i];
   }
   
-  double Ytan_norm = sqrt( Newton_step.NormSquared() );
+  T Ytan_norm = sqrt( Newton_step.NormSquared() );
   for (int i = 1; i <= N+1; ++i)
     Ytan[pivot[i]] = Newton_step[i] / Ytan_norm;
   
@@ -1768,7 +1698,7 @@ void tangnf( double &rholen,
   alpha[N+1] = 1;
   for (int i = N; i >= 1; --i) {
     //alpha[i] = -( DOT_PRODUCT(QR[i,i+1:N+1], alpha[i+1:N+1]) + QR[i,N+2]) / alpha[i];
-    double dot_product = 0;
+    T dot_product = 0;
     for (int j = i+1; j <= N+1; ++j)
       dot_product += QR(i, j) * alpha[j];
     alpha[i] = -(dot_product + QR_Np2[i]) / alpha[i];
@@ -1789,3 +1719,38 @@ void tangnf( double &rholen,
     printf("\n");
   */
 }
+
+// Instantiations  ////////////////////////////////////////////////////////////
+
+template void fixpnf(const NFSupport &, HomQreParams &,
+		     gList<MixedSolution> &, 
+		     int, gVector<double> &, int &, double, double, double, double, bool, 
+		     gVector<double> &, gArray<double> &, int &, double &, double, bool);
+
+template void stepnf(int , const NFSupport &, 
+		     int &, int &, bool &, bool &, double &, double &, double &, 
+		     double &, double &, gVector<double> &, gVector<double> &, 
+		     gVector<double> &, gVector<double> &,
+		     const gVector<double> &, const gArray<double> &);
+
+template void rootnf( int, const NFSupport &, int &, int &,
+		      double, double, gVector<double> &, gVector<double> &,
+		      gVector<double> &, gVector<double> &, const gVector<double> &);
+
+template void root( double &, double &, double &, double &, double, double, int &);
+
+template void show_probs(char *,const gVector<double> &,NFSupport &);
+
+template bool out_of_bounds(gVector<double> &,int);
+
+template void build_prediction(gVector<double> &,int, gVector<double> &, gVector<double> &,
+			       gVector<double> &, gVector<double> &,double,double);
+
+template void tangnf( double &, const NFSupport &,  
+		      const gVector<double> &, gVector<double> &, const gVector<double> &,
+		      const gVector<double> &, gVector<double> &, int &, int, int &);
+
+
+template double qofs(double, double, double, double, double, double);
+
+
