@@ -369,8 +369,9 @@ bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<T>& r,
       UnderlyingEquations().SquareDerivativeMatrix(point);      
 
     if ( HasNoOtherRootsIn(r,point,Df.Inverse()) ) return true;
+    else                                           return false;
   }
-  else return false;
+  else                                             return false;
 }
 
 //--------------------------
@@ -413,6 +414,7 @@ QuikSolv<T>& QuikSolv<T>::operator=(const QuikSolv<T> & rhs)
     HasBeenSolved = rhs.HasBeenSolved;
     Roots         = rhs.Roots;
   }
+  return *this;
 }
 
 template<class T>  
