@@ -25,9 +25,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   ni2=E.Players()[2]->NumInfosets()+1;
   gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
 
-//  old version: 
-//  ntot = ns1+ns2+2*(ni1+ni2)+2;
-
   ntot = ns1+ns2+ni1+ni2;
 
   A = new gMatrix<T>(1,ntot,0,ntot);
@@ -43,7 +40,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
       (*A)(i,j) = (T)0; 
   }
 
-  // New code
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
     (*A)(i,0) = -(T)1;
@@ -64,39 +60,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
 //  tab->Refactor();  // not necessary?
   gout << "\ntab:\n";
   tab->Dump(gout);
-  // end new code
-
-  /*
-    // old code with dual sets of inequalities
-  FillTableau(EF.RootNode(),prob,1,1,0,0);
-  for(i=A->MinRow();i<=A->MaxRow();i++) 
-    (*A)(i,0) = -(T)1;
-  (*A)(1,ns1+ns2+1) = -(T)1;
-  (*A)(1,ns1+ns2+ni1+1) = (T)1;
-  (*A)(ns1+ns2+1,1) = (T)1;
-  (*A)(ns1+ns2+ni1+1,1) = -(T)1;
-  (*A)(ns1+1,ns1+ns2+ni1+ni1+1) = -(T)1;
-  (*A)(ns1+1,ns1+ns2+ni1+ni1+ni2+1) = (T)1;
-  (*A)(ns1+ns2+ni1+ni1+1,ns1+1) = (T)1;
-  (*A)(ns1+ns2+ni1+ni1+ni2+1,ns1+1) = -(T)1;
-  (*b)[ns1+ns2+1] = (T)1;
-  (*b)[ns1+ns2+ni1+1] = -(T)1;
-  (*b)[ns1+ns2+ni1+ni1+1] = (T)1;
-  (*b)[ns1+ns2+ni1+ni1+ni2+1] = -(T)1;
-  gout.SetWidth(4).SetPrec(1);
-  gout << "\nA:\n";
-  A->Dump(gout);
-  gout << "\nb:\n";
-  b->Dump(gout);
-
-  tab = new LTableau<T>(*A,*b);
-  eps = tab->Epsilon();
-  // end old code
-  */
-
-//  tab->Refactor();  // not necessary?
-//  tab->Pivot(ns1+ns2+ni1+1,0);
-//  tab->Dump(gout);
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -129,10 +92,6 @@ template <class T> int SeqFormModule<T>::Lemke(void)
 
     tab->Pivot(ns1+ns2+1,0);
     tab->SF_LCPPath(ns1+ns2+1,params.status);
-
-    // old code, with dual set of constraints
-    // tab->Pivot(ns1+ns2+ni1+1,0);
-    // tab->LCPPath(ns1+ns2+ni1+1,params.status);
 
     Add_BFS(*tab);
     tab->BasisVector(sol);
@@ -482,68 +441,3 @@ SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const EFSupport &S,
 
 template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
   
-/*
-// old Fill Tableau (two E and F matrices)
-
-template <class T> void SeqFormModule<T>
-::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
-{
-  T EPSILON;
-//  EPSILON = eps;
-  gEpsilon(EPSILON);
-  
-//  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
-//  gout << " prob = " << prob;
-  int i,snew;
-  if(n->GetOutcome()) {
-    (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
-      prob*EF.Payoff(n->GetOutcome(), 1) - maxpay;
-    (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
-      prob*EF.Payoff(n->GetOutcome(), 2) - maxpay;
-  }
-  if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
-	FillTableau(n->GetChild(i),
-		    prob * EF.GetChanceProb(n->GetInfoset(), i), 
-		    s1,s2,i1,i2);
-    }
-    int pl = n->GetPlayer()->GetNumber();
-    if(pl==1) {
-      i1=n->GetInfoset()->GetNumber();
-      snew=1;
-      for(i=1;i<i1;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
-      (*A)(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
-      (*A)(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
-      (*A)(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
-      (*A)(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
-      for(i=1;i<=n->NumChildren();i++) {
-	(*A)(snew+i,ns1+ns2+i1+1) = -(T)1;
-	(*A)(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
-	(*A)(ns1+ns2+i1+1,snew+i) = (T)1;
-	(*A)(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
-      }
-    }
-    if(pl==2) {
-      i2=n->GetInfoset()->GetNumber();
-      snew=1;
-      for(i=1;i<i2;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
-      (*A)(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
-      (*A)(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
-      (*A)(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
-      (*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
-      for(i=1;i<=n->NumChildren();i++) {
-	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
-	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
-	(*A)(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
-	(*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
-      }
-    }
-    
-  }
-}
-*/
