@@ -703,20 +703,20 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     
         }
       }
+ 
+        // See if it is modified by a star
+      if (ch == '*')
+      {  
+        word += ch;
+        ch=s[index++];
+      }
 
       specList.Append(word);
       listList.Append(listNum);
-
-        // See if it is modified by a star
-      if (s[index] == '*')
-      {  
-        gout << "HEY!! STAR!!";  
-        index++;
-      }
   
         // Move ch past the right parentheses (and braces), if applicable
       while (ch == ')') {  ch=s[index++];  }
-      while (ch == '}') {  ch=s[index++];  }
+      /*while (ch == '}') {  ch=s[index++];  }*/
 
       if (ch == ',')  // If there will be another variable
       {
@@ -762,12 +762,12 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   }
 
     // Bunch of prints for debugging purposes.
-  /*gout << "\nReturn Type: " << word << "\n";*/
+  gout << "\nReturn Type: " << word << "\n";
   /*gout << "Return listNum: " << listNum << "\n";*/
-  /*gout << "SpecList: \n";*/
-  /*specList.Dump(gout);*/
-  /*gout << "NameList: \n";*/
-  /*nameList.Dump(gout);*/
+  gout << "SpecList: \n";
+  specList.Dump(gout);
+  gout << "NameList: \n";
+  nameList.Dump(gout);
   /*gout << "ListList: \n";*/
   /*listList.Dump(gout);*/
   /*int rl = reqList.Length();*/
@@ -834,6 +834,50 @@ PortionSpec ToSpec(gString &str, int num /* =0 */)
     return PortionSpec(porINPUT, num);
   else if (str == "OUTPUT")
     return PortionSpec(porOUTPUT, num);
+
+
+  else if (str == "NUMBER*")
+    return PortionSpec(porNUMBER, num, porNULLSPEC);
+  else if (str == "BOOLEAN*")
+    return PortionSpec(porBOOL, num, porNULLSPEC);
+  else if (str == "INTEGER*")
+    return PortionSpec(porINTEGER, num, porNULLSPEC);
+  else if (str == "TEXT*")
+    return PortionSpec(porTEXT, num, porNULLSPEC);
+  else if (str == "EFG*")
+    return PortionSpec(porEFG, num, porNULLSPEC);
+  else if (str == "EFPLAYER*")
+    return PortionSpec(porEFPLAYER, num, porNULLSPEC);
+  else if (str == "EFOUTCOME*")
+    return PortionSpec(porEFOUTCOME, num, porNULLSPEC);
+  else if (str == "NODE*")
+    return PortionSpec(porNODE, num, porNULLSPEC);
+  else if (str == "INFOSET*")
+    return PortionSpec(porINFOSET, num, porNULLSPEC);
+  else if (str == "BEHAV*")
+    return PortionSpec(porBEHAV, num, porNULLSPEC);
+  else if (str == "NFG*")
+    return PortionSpec(porNFG, num, porNULLSPEC);
+  else if (str == "NFPLAYER*")
+    return PortionSpec(porNFPLAYER, num, porNULLSPEC);
+  else if (str == "NFOUTCOME*")
+    return PortionSpec(porNFOUTCOME, num, porNULLSPEC);
+  else if (str == "MIXED*")
+    return PortionSpec(porMIXED, num, porNULLSPEC);
+  else if (str == "STRATEGY*")
+    return PortionSpec(porSTRATEGY, num, porNULLSPEC);
+  else if (str == "ACTION*")
+    return PortionSpec(porACTION, num, porNULLSPEC);
+  else if (str == "ANYTYPE*")
+    return PortionSpec(porANYTYPE, num, porNULLSPEC);
+  else if (str == "EFSUPPORT*")
+    return PortionSpec(porEFSUPPORT, num, porNULLSPEC);
+  else if (str == "NFSUPPORT*")
+    return PortionSpec(porNFSUPPORT, num, porNULLSPEC);
+  else if (str == "INPUT*")
+    return PortionSpec(porINPUT, num, porNULLSPEC);
+  else if (str == "OUTPUT*")
+    return PortionSpec(porOUTPUT, num, porNULLSPEC);
   else
   {
     gout << "ERROR: incorrect type, " << str << ", in function definition\n\n";
