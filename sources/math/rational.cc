@@ -520,10 +520,12 @@ gRational FromText(const gText &f,gRational &y)
 {
   char ch = ' ';
   int sign = 1;
-  int index=0,length=f.Length();
+  unsigned int index = 0, length = f.Length();
   gInteger num = 0, denom = 1;
 
-  while (isspace(ch) && index<=length)    ch=f[index++];
+  while (isspace(ch) && index<=length) {
+    ch = f[index++];
+  }
 
   if (ch == '-' && index<=length)  {
     sign = -1;

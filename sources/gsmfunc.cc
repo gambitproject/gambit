@@ -195,7 +195,7 @@ gclFunction::gclFunction(GSM &p_environment, const gText& func_proto,
   _NumFuncs = 1;
   _FuncInfo = new gclSignature[1];
   
-  int index = 0;
+  unsigned int index = 0;
   gText func_name;
   char ch = func_proto[index++];
 
@@ -262,7 +262,7 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
                               FuncFlagType FFT /* = funcLISTABLE */)
 {
   char ch = ' ';
-  int index=0, length=s.Length();
+  unsigned int index=0, length=s.Length();
   int numArgs=0;
   bool done = false;
   gList<gText> specList;
@@ -360,16 +360,16 @@ void gclFunction::SetFuncInfo(int funcindex, const gText& s,
           word = "INPUT";
         }
           // If it is a text string (for now just assume it is if it begins '"')
-        else if (word[0] == '"')
+        else if (word[0u] == '"')
         {
           gText* tmp = new gText(word);
           reqList.Append((Portion*)tmp);
           word = "TEXT";
         }
           // If it is a number (int or double)
-        else if ((word[0] >= '0' && word[0] <= '9') || word[0] == '-') {
+        else if ((word[0u] >= '0' && word[0u] <= '9') || word[0u] == '-') {
           int sign = 1;
-          int index2 = 0;
+          unsigned int index2 = 0;
           bool isDouble = false;
           /*gInteger num = 0, denom = 1;*/
           gNumber* num = new gNumber(0);

@@ -31,7 +31,7 @@ class BehavSolution;
 // 
 
 template <class T> class BehavProfile : private gDPVector<T>  {
-  friend BehavSolution;
+  friend class BehavSolution;
 protected:
   const Efg::Game *m_efg;
   EFSupport m_support;

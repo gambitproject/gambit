@@ -104,7 +104,7 @@ void gPreprocessor::GetChar(char &p_char)
     }
   }
   else if (m_StartupString.Length() > 0)  {
-    p_char = m_StartupString[0];
+    p_char = m_StartupString[0u];
     m_StartupString = m_StartupString.Right(m_StartupString.Length() - 1);
   }
   else {
@@ -129,7 +129,7 @@ bool gPreprocessor::IsQuoteEscapeSequence(const gText &p_line) const
   if (c == '\"') {
     // if there's an odd number of consecutive backslashes,
     //   then it's an escape sequence 
-    int i = 2;
+    unsigned int i = 2;
     while (p_line.Length() >= i && p_line[p_line.Length() - i] == '\\') {
       backslash = !backslash;
       i++;

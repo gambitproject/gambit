@@ -112,8 +112,8 @@ bool GSM::VarIsDefined(const gText &p_name) const
   if (p_name == "")
     throw gclRuntimeError("Tried to see if empty variable name defined");
 
-  else if (p_name[0] == '$') {
-    if (p_name[1] == '$')
+  else if (p_name[0u] == '$') {
+    if (p_name[1u] == '$')
       return _GlobalRefTable.IsDefined(p_name.Right(p_name.Length() - 2));
     else
       return _GlobalRefTable.IsDefined(UserFuncName() + gText((char) 1) +
@@ -134,9 +134,9 @@ void GSM::VarDefine(const gText& var_name, Portion* p)
 
   _ResolveRef(p);
 
-  if (var_name[0] == '$') {
+  if (var_name[0u] == '$') {
     gText global_name;
-    if (var_name[1] != '$')
+    if (var_name[1u] != '$')
       global_name = (UserFuncName() + gText((char) 1) +
 		     var_name.Right(var_name.Length() - 1));
     else
@@ -221,8 +221,8 @@ Portion* GSM::VarValue(const gText &p_name) const
   if (p_name == "")
     throw gclRuntimeError("Tried to get value of empty variable name");
 
-  else if (p_name[0] == '$') {
-    if (p_name[1] == '$')
+  else if (p_name[0u] == '$') {
+    if (p_name[1u] == '$')
       return _GlobalRefTable(p_name.Right(p_name.Length() - 2));
     else
       return _GlobalRefTable(UserFuncName() + gText((char) 1) +
@@ -238,8 +238,8 @@ Portion* GSM::_VarRemove(const gText &p_name)
   if (p_name == "")
     throw gclRuntimeError("Tried to remove empty variable name");
 
-  else if (p_name[0] == '$') {
-    if (p_name[1] == '$')
+  else if (p_name[0u] == '$') {
+    if (p_name[1u] == '$')
       return _GlobalRefTable.Remove(p_name.Right(p_name.Length() - 2));
     else
       return _GlobalRefTable.Remove(UserFuncName() + gText((char) 1) +
@@ -651,8 +651,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
 {
   int i;
   int j;
-  int fk;
-  int ck;
+  unsigned int fk, ck;
   int cfk;
   bool match;
   int found = 0;
@@ -685,7 +684,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
       fk = 0; 
       ck = 0;
       cfk = -1;
-      while(match && (fk<funcname.Length()) && (ck<curname.Length()))
+      while(match && (fk <funcname.Length()) && (ck<curname.Length()))
       {
 	if(funcname[fk]=='*')
 	{
@@ -756,8 +755,7 @@ Portion* GSM::HelpVars(gText varname)
 {
   int i;
   int j;
-  int fk;
-  int ck;
+  unsigned int fk, ck;
   int cfk;
   bool match;
   gText curname;

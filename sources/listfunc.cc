@@ -361,16 +361,16 @@ static Portion *GSM_LengthList(GSM &, Portion **param)
 
 static Portion *GSM_LengthText(GSM &, Portion **param)
 {
-  return new NumberPortion(((TextPortion *) param[0])->Value().Length());
+  return new NumberPortion((int) ((TextPortion *) param[0])->Value().Length());
 }
 
 static Portion *GSM_NthElementText(GSM &, Portion **param)
 {
   gText text(((TextPortion *) param[0])->Value());
-  int n = ((NumberPortion *) param[1])->Value();
+  unsigned int n = ((NumberPortion *) param[1])->Value();
   if (n <= 0 || n > text.Length())
     return 0;
-  return new TextPortion(text[n-1]);
+  return new TextPortion(text[(unsigned int) (n-1)]);
 }
 
 

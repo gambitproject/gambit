@@ -31,7 +31,7 @@ private:
   gList<gMono<T> >     Terms;    // alternative implementation
 
   // used for gText parsing;
-  int charnum;   char charc;   gText TheString;
+  unsigned int charnum;   char charc;   gText TheString;
 
   //----------------------
   // some private members

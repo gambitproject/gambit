@@ -520,7 +520,7 @@ static Portion *GSM_Manual(GSM &gsm, Portion** param)
   catch (gFileInput::OpenFailed &) {
     if (search) {
       if (!man_found && System::GetEnv("HOME") != NULL) {
-        ManFileName = (gText) System::GetEnv("HOME") + SLASH + name;
+        ManFileName = ((gText) System::GetEnv("HOME")) + gText(SLASH) + name;
         try  {
           f = new gFileInput(ManFileName);
         }
@@ -528,7 +528,7 @@ static Portion *GSM_Manual(GSM &gsm, Portion** param)
         if(f) { man_found = true;}
       }
       if( !man_found && (System::GetEnv( "GCLLIB" ) != NULL) ) {
-        ManFileName = (gText) System::GetEnv( "GCLLIB" ) + SLASH + name;
+        ManFileName = (gText) System::GetEnv("GCLLIB") + gText(SLASH) + name;
         try{
         f = new gFileInput( ManFileName );
         }
@@ -536,7 +536,7 @@ static Portion *GSM_Manual(GSM &gsm, Portion** param)
         if (f) {man_found = true;}
       }
       if( !man_found && (SOURCE != NULL) ) {
-        ManFileName = (gText) SOURCE + SLASH + name;
+        ManFileName = (gText) SOURCE + gText(SLASH) + name;
         try{
         f = new gFileInput( ManFileName );
         }
@@ -579,7 +579,7 @@ static Portion *GSM_Manual(GSM &gsm, Portion** param)
 	line_out = line;
 	while(true) {
 	  char* s;
-	  int idx;
+	  unsigned int idx;
 	  int numchars;
 	  if((s=strstr((char *) line_out, "\\bd")) != 0)
 	    numchars = 3;
@@ -1170,7 +1170,7 @@ static Portion *GSM_ReadText_Number(GSM &, Portion** param)
   char c = ' ';
   gText t;
   gInput& input = ((InputPortion*) param[0])->Value();
-  int n = ((NumberPortion *) param[2])->Value();
+  unsigned int n = ((NumberPortion *) param[2])->Value();
 
   long old_pos = input.getpos();
 
@@ -1729,9 +1729,9 @@ Portion *GSM_Assign(GSM &gsm, Portion** param)
   }
   gText txt = ((TextPortion*) param[0])->Value();
 
-  if(!isalpha(txt[0])) 
+  if (!isalpha(txt[0u])) 
       throw gclRuntimeError("Bad Variable Name");
-  for(int i = 1;i<txt.Length();i++) 
+  for(unsigned int i = 1;i<txt.Length();i++) 
     if(!isalnum(txt[i]))
       throw gclRuntimeError("Bad Variable Name");
 

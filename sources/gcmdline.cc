@@ -112,7 +112,7 @@ void gCmdLineInput::GetCmdExec( void )
 {
   // number of invokations thus far
 
-  int i = 0;
+  unsigned int i = 0;
 
   if( m_CmdExec.Length() > 0 )
     return;
@@ -148,7 +148,7 @@ void gCmdLineInput::GetCmdExec( void )
 
   gText cmdBuf = buf;
   gText cmdBufOld;
-  int curPos = cmdBuf.Length();
+  unsigned int curPos = cmdBuf.Length();
   char c = 0;
 
   int historyPos = m_History.Length() + 1;
@@ -194,13 +194,13 @@ void gCmdLineInput::GetCmdExec( void )
 #ifdef USE_CR
 	  gout << '\r';
 #else
-	  for( i = 0; i < curPos; ++i )
+	  for ( i = 0; i < curPos; ++i)
 	    gout << '\b';
 #endif
-	  for( i = 0; i < cmdBuf.Length(); ++i )
+	  for ( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << ' ';
 #ifndef USE_CR
-	  for( i = 0; i < cmdBuf.Length(); ++i )
+	  for ( i = 0; i < cmdBuf.Length(); ++i )
 	    gout << '\b';
 #endif
 
@@ -505,14 +505,14 @@ gText gCmdLineInput::UpdatePromptNum( gText cmdBuf ) const
 		     &val0, &numchars0, &val1, &numchars1 );
   if( match == 1 )
   {
-    sprintf( buf, "GCL%d:=%s", m_NumInvoke, &cmdBuf[numchars0] );
+    sprintf( buf, "GCL%d:=%s", m_NumInvoke, &cmdBuf[(unsigned int) numchars0] );
     cmdBuf = buf;
   }
   else if( match == 2 )
   {
     sprintf( buf, "GCL%d:=; GCL%d:=%s",
 	    m_NumInvoke - HistoryDepth(), m_NumInvoke, 
-	    &cmdBuf[numchars1] );
+	    &cmdBuf[(unsigned int) numchars1] );
     cmdBuf = buf;
   }
   return cmdBuf;

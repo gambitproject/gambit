@@ -34,7 +34,7 @@ template class HashTable< void*, int >;
 #include "gsmhash.h"
 
 int RefHashTable::Hash( const gText& ref ) const
-{ return (int)( ref[0] % 26 ); }
+{ return (int)( ref[0u] % 26 ); }
 
 void RefHashTable::DeleteAction( Portion* value )
 { delete value; }
@@ -49,7 +49,7 @@ RefHashTable::~RefHashTable()
 
 
 int FunctionHashTable::Hash( const gText& funcname ) const 
-{ return (int)( funcname[0] ) % 26; }
+{ return (int)( funcname[0u] ) % 26; }
 
 void FunctionHashTable::DeleteAction( gclFunction* func ) 
 { delete func; }

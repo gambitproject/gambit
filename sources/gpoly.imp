@@ -243,7 +243,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
   val = String_Coeff(nega);
   
   while (charc != '+' && charc != '-') {
-    if (charc == ' ') { charnum ++; charc = TheString[charnum]; }
+    if (charc == ' ') { charnum++; charc = TheString[charnum]; }
     else String_VarAndPow(PowArray);
   }
 
@@ -291,7 +291,7 @@ template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
 // bool function to check the string in &Hold
 
 template <class T> bool gPoly<T>::Check_String(const gText &Hold){
- int charnum=0;
+ unsigned int charnum=0;
  int boolflag=0;
 // state variables
  int statenumber=0;
@@ -302,7 +302,7 @@ template <class T> bool gPoly<T>::Check_String(const gText &Hold){
  enum var {novarbef, varbef};
  enum sign {nosignbef, signbef}; 
  gText TheString = Hold;
- char charc=TheString[charnum];
+ char charc = TheString[charnum];
 //movement along the string with a switch case
  while (charnum < TheString.Length()){
   switch (charc){
@@ -321,7 +321,7 @@ template <class T> bool gPoly<T>::Check_String(const gText &Hold){
     break;
    case 'n':
     if (statenumber==0 && statesign==0) boolflag++;
-    if (charnum==(TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.Length()-1)) boolflag++;
     statenumber=number(0);
     statevar=varbef;
     statesign=nosignbef;
@@ -329,7 +329,7 @@ template <class T> bool gPoly<T>::Check_String(const gText &Hold){
    case '^':
     if (statenumber==0) boolflag++;
     if (statevar==0) boolflag++;
-    if (charnum==(TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=nosignbef;
@@ -337,14 +337,14 @@ template <class T> bool gPoly<T>::Check_String(const gText &Hold){
    case '/':
    case '.':
     if (statenumber==0) boolflag++;
-    if (charnum==(TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statesign=nosignbef;
     break;
    case '+':
    case '-':
     if (statenumber==0 && charnum!=0) boolflag++;
-    if (charnum==(TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.Length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=signbef;
@@ -356,7 +356,7 @@ template <class T> bool gPoly<T>::Check_String(const gText &Hold){
     break;
    }    
  charnum++;
- charc=TheString[charnum];
+ charc = TheString[charnum];
  }
 // return values
  if (boolflag==0) return true;

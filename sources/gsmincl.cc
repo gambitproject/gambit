@@ -129,7 +129,7 @@ PortionSpec TextToPortionSpec(const gText& text)
     t = t.Mid(t.Length()-7, 7);
   }
   for (int i = 0; i < NUM_PortionSpecs; i++)  
-    if (t.Left(strlen(_PortionSpecText[i].Text)) == _PortionSpecText[i].Text) {
+    if (t.Left(strlen(_PortionSpecText[i].Text)) == gText(_PortionSpecText[i].Text)) {
       result.Type = result.Type | _PortionSpecText[i].Type;
       t = t.Right(t.Length() - strlen(_PortionSpecText[i].Text));
       if(t.Left(1) == "*") {

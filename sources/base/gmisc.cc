@@ -143,7 +143,7 @@ gText EscapeQuotes(const gText &s)
 {
   gText ret;
   
-  for (int i = 0; i < s.Length(); i++)  {
+  for (unsigned int i = 0; i < s.Length(); i++)  {
     if (s[i] == '"')   ret += '\\';
     ret += s[i];
   }

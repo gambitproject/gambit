@@ -28,7 +28,7 @@ gStack<gText> GCL_InputFileNames(4);
 
 static GSM *gsm; \
 static bool record_funcbody, in_funcdecl;
-static int current_char, current_line;
+static unsigned int current_char, current_line;
 static gText current_expr, current_file, current_rawline;
 static gText funcbody, funcname, funcdesc, paramtype, functype; 
 static gList<gText> formals, types; 
@@ -678,7 +678,7 @@ int GCLParse(GSM *p_gsm,
   current_line = lineno;
   current_rawline = rawline;
 
-  for (int i = 0; i < line.Length(); i++)   {
+  for (unsigned int i = 0; i < line.Length(); i++)   {
     if (!isspace(line[i]))  {	
       if (!gcl_yyparse())  {	
         Execute();

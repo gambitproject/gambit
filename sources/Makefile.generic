@@ -46,7 +46,7 @@ PXIBINARY = pxi_gtk_linux
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
-WXDIR = /home/gambit/wxGTK
+WXDIR = /home/magyar/wxGTK
 WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include -D__WXGTK__
 WXLIB = -lwx_gtk
