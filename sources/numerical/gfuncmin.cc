@@ -81,7 +81,7 @@ trial:
   if ((fc - fa) + u == 0) {
     // TLT: Added this check 2002/08/31 due to floating point exceptions
     // under MSW.  Not really sure how to handle this correctly.
-    throw gFuncMinException;
+    throw gFuncMinException();
   }
   stepb = 0.5 * stepc * u / ((fc - fa) + u);
 
