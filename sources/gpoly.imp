@@ -1,7 +1,7 @@
 //#
 //# FILE: gpoly.imp  -- Implementation of gPoly data type
 //#
-//# $Id$
+//# @(#)gpoly.imp	1.9 1/23/96
 //#
 
 #include "gpoly.h"
@@ -168,10 +168,6 @@ template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
   temp = Adder(Root, p.Root);
   Remover (Root);
   Root = temp;
-
-//DEBUG
-//  gout << "In operator +=, after Adder, *this = " << *this << "\n\n";
-
   ZeroCoefRemover(Root, NULL);
   Collapsor(Root, NULL);
 }
@@ -905,12 +901,14 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
   
   one = One; two = Two;
 
+/*
   gString foo;
   printer(one, "", foo, List);
   gout << foo << '\n';
   foo = "";
   printer(two, "", foo, List);
   gout << foo << '\n';
+*/
 
 //BIG CASE #1  
   if (one != NULL && two != NULL &&
@@ -966,7 +964,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 
 	if (one->pow == 0)  {
 	  kRoot->next = CreatDupl(one->next);
-	  gout << one->next << ' ' << kRoot->next << '\n';
+//	  gout << one->next << ' ' << kRoot->next << '\n';
 	  kRoot->down->down = Adder(one->down->down, two);
 	}
 	else  {
