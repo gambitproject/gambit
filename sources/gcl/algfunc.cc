@@ -1278,41 +1278,6 @@ void Init_algfunc(GSM *gsm)
 
   gsm->AddFunction(FuncObj);
 
-#ifdef INTERNAL_VERSION
-  FuncObj = new gclFunction(*gsm, "KQreSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
-				       PortionSpec(porMIXED | porBEHAV , 1), 13));
-  FuncObj->SetParamInfo(0, 0, gclParameter("start",
-					    porMIXED | porBEHAV));
-  FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
-					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, gclParameter("minK", porNUMBER,
-					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("maxK", porNUMBER,
-					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, gclParameter("delK", porNUMBER,
-					    new NumberPortion(-0.1)));
-  FuncObj->SetParamInfo(0, 5, gclParameter("powK", porINTEGER,
-					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
-					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
-					    new NumberPortion(1.0e-8)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(*new gNullOutput), 
-					     BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
-					     new NumberPortion(0)));
-
-  gsm->AddFunction(FuncObj);
-#endif // INTERNAL_VERSION
-
   FuncObj = new gclFunction(*gsm, "LcpSolve", 3);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Lcp_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
@@ -1508,29 +1473,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 8, gclParameter("recurse",porBOOLEAN, 
 					   new BoolPortion(true)));
   gsm->AddFunction(FuncObj);
-
-#ifdef INTERNAL_VERSION
-  FuncObj = new gclFunction(*gsm, "SeqEquilibSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_SequentialEquilib, 
-				       PortionSpec(porBEHAV, 1), 8));
-  FuncObj->SetParamInfo(0, 0, gclParameter("basis", porEFBASIS));
-  FuncObj->SetParamInfo(0, 1, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(0, 2, gclParameter("stopAfter", porINTEGER,
-					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("precision", porPRECISION,
-					   new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 4, gclParameter("nEvals", porINTEGER,
-					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
-					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 6, gclParameter("traceFile", porOUTPUT,
-					    new OutputPortion(*new gNullOutput), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
-					    new NumberPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-#endif // INTERNAL_VERSION
 
   FuncObj = new gclFunction(*gsm, "Payoff", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Payoff_Behav, porNUMBER, 2,
