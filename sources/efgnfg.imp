@@ -5,7 +5,6 @@
 //
 
 #include "efg.h"
-#include "tnode.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"
@@ -182,35 +181,41 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   return E.lexicon->N;
 }
 
+// Sort of hackish...
+#include "efg.imp"
+
 template <class T>
 void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
 		      const Efg<T> &E, BehavProfile<T> &bp,
-		      int pl, const gArray<int> *const actions, Node *n)
+		      int pl, const gArray<int> *const actions,
+		      BehavNode<T> *n)
 {
   static const T tremble = (T) 0.0;
   T prob;
 
-  for (int i = 1; i <= n->NumChildren(); i++)   {
-    if (n->GetPlayer() && !n->GetPlayer()->IsChance())   {
-      if (n->GetPlayer()->GetNumber() == pl)  {
-	if ((*actions)[n->GetInfoset()->GetNumber()] == i)
-	  prob = (T) 1.0 - tremble + tremble / (T) n->NumChildren();
+  Node *node = n->node;
+
+  for (int i = 1; i <= n->children.Length(); i++)   {
+    if (node->GetPlayer() && !node->GetPlayer()->IsChance())   {
+      if (node->GetPlayer()->GetNumber() == pl)  {
+	if ((*actions)[node->GetInfoset()->GetNumber()] == i)
+	  prob = (T) 1.0 - tremble + tremble / (T) node->NumChildren();
 	else
-	  prob = tremble / (T) n->NumChildren();
+	  prob = tremble / (T) node->NumChildren();
       }
-      else if (bp.Support().Find(n->GetInfoset()->Actions()[i]))
-	prob = (T) 1.0 / (T) bp.Support().NumActions(n->GetPlayer()->GetNumber(),
-							  n->GetInfoset()->GetNumber());
+      else if (bp.Support().Find(node->GetInfoset()->Actions()[i]))
+	prob = (T) 1.0 / (T) bp.Support().NumActions(node->GetPlayer()->GetNumber(),
+							  node->GetInfoset()->GetNumber());
       else
 	prob = (T) 0.0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = E.GetChanceProb(n->GetInfoset(), i);
+      prob = E.GetChanceProb(node->GetInfoset(), i);
     }
 
-    Node *child = n->GetChild(i);
-    ((TypedNode<T> *) child)->bval = prob * ((TypedNode<T> *) n)->bval;
-    ((TypedNode<T> *) child)->nval += ((TypedNode<T> *) child)->bval;    
+    BehavNode<T> *child = n->children[i];
+    child->bval = prob * n->bval;
+    child->nval += child->bval;    
 
     RealizationProbs(N, mp, E, bp, pl, actions, child);
   }    
@@ -218,26 +223,27 @@ void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
 }
 
 template <class T>
-void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl, Node *n)
+void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl,
+		   BehavNode<T> *n)
 {
-  for (int i = 1; i <= n->NumChildren(); i++)   {
-    Node *child = n->GetChild(i);
-    if (n->GetPlayer() && n->GetPlayer()->GetNumber() == pl)
-      if (((TypedNode<T> *) n)->nval > (T) 0.0 &&
-	  ((TypedNode<T> *) child)->nval > (T) 0.0)  {
-	bp(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), 
-	   bp.Support().Find(n->GetInfoset()->Actions()[i])) =
-	  ((TypedNode<T> *) child)->nval / ((TypedNode<T> *) n)->nval;
+  for (int i = 1; i <= n->children.Length(); i++)   {
+    BehavNode<T> *child = n->children[i];
+    if (n->node->GetPlayer() && n->node->GetPlayer()->GetNumber() == pl)
+      if (n->nval > (T) 0.0 && child->nval > (T) 0.0)  {
+	bp(n->node->GetPlayer()->GetNumber(),
+	   n->node->GetInfoset()->GetNumber(), 
+	   bp.Support().Find(n->node->GetInfoset()->Actions()[i])) =
+	  child->nval / n->nval;
       }
     BehaviorStrat(E, bp, pl, child);
   }
 }
 
-template <class T> void ClearNodeProbs(TypedNode<T> *n)
+template <class T> void ClearNodeProbs(BehavNode<T> *n)
 {
   n->nval = 0.0;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    ClearNodeProbs(((TypedNode<T> *) n->GetChild(i)));
+  for (int i = 1; i <= n->children.Length(); i++)
+    ClearNodeProbs(n->children[i]);
 }
 
 
@@ -256,24 +262,24 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 
   ((gVector<T> &) bp).operator=((T)0); 
 
-  Node *n = E.RootNode();
+  BehavNode<T> *n = bp.root;
   const NFSupport &support = mp.Support();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
-    ClearNodeProbs((TypedNode<T> *) n);
+    ClearNodeProbs(n);
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       int snum = support.Strategies(pl)[st]->number;
       if (mp(pl, st) > (T) 0.0)  {
 	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
 
-	((TypedNode<T> *) n)->bval = mp(pl, st);
+	n->bval = mp(pl, st);
 
-	RealizationProbs(N, mp, E, bp, pl, actions, E.RootNode());
+	RealizationProbs(N, mp, E, bp, pl, actions, bp.root);
       }
     }
     
-    ((TypedNode<T> *) E.RootNode())->nval = (T) 1.0;
+    bp.root->nval = (T) 1.0;
     BehaviorStrat(E, bp, pl, n);
   }
 }

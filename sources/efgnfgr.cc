@@ -23,7 +23,7 @@ Nfg<gRational> *AssociatedAfg(Efg<gRational> *E)
   return E->afg;
 }
 
-template void ClearNodeProbs(TypedNode<gRational> *);
+template void ClearNodeProbs(BehavNode<gRational> *);
 
 template void MixedToBehav(const Nfg<gRational> &, const MixedProfile<gRational> &,
 			   const Efg<gRational> &, BehavProfile<gRational> &);
@@ -33,9 +33,9 @@ template void BehavToMixed(const Efg<gRational> &, const BehavProfile<gRational>
 
 template void RealizationProbs(const Nfg<gRational> &N, const MixedProfile<gRational> &mp,
 			       const Efg<gRational> &E, BehavProfile<gRational> &bp,
-			       int pl, const gArray<int> *const actions, Node *);
+			       int pl, const gArray<int> *const actions, BehavNode<gRational> *);
 
-template void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp, int pl, Node *n);
+template void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp, int pl, BehavNode<gRational> *n);
 
 template Nfg<gRational> *MakeReducedNfg(Efg<gRational> &, const EFSupport &);
 

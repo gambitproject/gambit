@@ -15,17 +15,25 @@
 
 template <class T> class Efg;
 class Infoset;
+template <class T> class BehavNode;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
+friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
+			 const Efg<T> &E, BehavProfile<T> &bp);
   protected:
     const Efg<T> *E;
+    BehavNode<T> *root;
+    gArray<BehavNode<T> *> nodes;
+
     EFSupport support;
 
     void Payoff(Node *n, T prob, int pl, T &value) const;
-    void NodeValues(Node *n, int pl, gArray<T> &valarray,
+    void NodeValues(BehavNode<T> *n, int pl, gArray<T> &valarray,
 		    int &index) const;
-    void CondPayoff(Node *n, T prob, gPVector<T> &, gDPVector<T> &) const;
-    void NodeRealizProbs(Node *n, T prob, int &index, gArray<T> &NRProbs) const;
+    void CondPayoff(BehavNode<T> *n, T prob, gPVector<T> &,
+		    gDPVector<T> &) const;
+    void NodeRealizProbs(BehavNode<T> *n, T prob, int &index,
+			 gArray<T> &NRProbs) const;
     void Beliefs(Node *n, T prob, gDPVector<T> &BProbs, 
 		 gPVector<T> &gpv) const;
 
