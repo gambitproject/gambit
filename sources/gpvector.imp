@@ -226,6 +226,15 @@ template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
     (*this)(row,i)= v[i];
 }
 
+template <class T> void gPVector<T>::CopyRow(int row, const gPVector<T> &v)
+{
+  assert(svlen == v.svlen);
+  assert(svlen.First() <= row && row <= svlen.Last());
+
+  for (int i = 1; i <= svlen[row]; i++)
+    svptr[row][i] = v.svptr[row][i];
+}
+
 template <class T> const gTuple<int> &gPVector<T>::Lengths(void) const
 {
   return svlen;

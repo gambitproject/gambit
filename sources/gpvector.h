@@ -39,6 +39,7 @@ template <class T> class gPVector : public gVector<T> {
   gVector<T> GetRow(int row) const;
   void GetRow(int row, gVector<T> &v) const;
   void SetRow(int row, const gVector<T> &v);
+  void CopyRow(int row, const gPVector<T> &v);
 
   // more operators
 
