@@ -21,7 +21,6 @@ libbase_a_SOURCES = \
 	gmisc.cc \
 	gpool.cc \
 	grarray.cc \
-	grblock.cc \
 	gstream.cc \
 	gtext.cc \
 	gwatch.cc \
