@@ -154,9 +154,8 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
   return *this;
 }
 
-template <class T> void MixedProfile<T>::Centroid() 
+template <class T> void MixedProfile<T>::Centroid(void) 
 {
-  gVector<T>::operator=(gPVector<T>(N->Dimensionality()));
   T center;
   
   for (int i = 1; i <= N->NumPlayers(); i++)  {
