@@ -216,7 +216,7 @@ template <class T> class gPVector: public gVector<T> {
     { return ! ((*this)==v); }
 
   // parameter access functions
-  gTuple<int> Lengths()
+  const gTuple<int>& Lengths()
     { return svlen; }
 
   void Dump(gOutput &) const;
