@@ -300,7 +300,7 @@ wxFrame *GambitApp::OnInit(void)
   wxGetResourceStr("Gambit", "Help-Directory", helpDir,
 		   gambitApp.ResourceFile());
 
-  wxInitHelp(helpDir + "/gambit", "Gambit Graphics User Interface, Version 0.96\n\n"
+  wxInitHelp(helpDir + "/gambit", "Gambit Graphics User Interface, Version 0.96.2\n\n"
 	     "Part of the Gambit Project\n\n"
 	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
 	     "gambit@hss.caltech.edu\n\n"
