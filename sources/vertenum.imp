@@ -168,7 +168,7 @@ template <class T> void VertEnum<T>::Dump(gOutput &to) const
 ///////////////////////////////////////////////////////////////////////////
 
 
-// This will be the constructor for my project blah blah blah
+// This constructor doesn't require y>=0, but requires one vertex.
 template <class T>
 NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
 		      const gVector<T> &start, gStatus &status_)
@@ -208,15 +208,16 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   }
 
     // Check that all d are less than or equal to zero
+    // (No longer necessary?)
   int i; // Counter int
-  for (i=d.First(); i<=d.Last(); i++)
-  {
-    if (d[i] > (T)0)
-    {
-      gout << "The value for the second argument should always be <= to 0.\n\n";
-      return;
-    }
-  }
+  /*for (i=d.First(); i<=d.Last(); i++)*/
+  /*{*/
+    /*if (d[i] > (T)0)*/
+    /*{*/
+      /*gout << "The value for the second argument should always be <= to 0.\n\n";*/
+      /*return;*/
+    /*}*/
+  /*}*/
   
     // C1 stores ineq's which go through start, C2 holds the rest of them.
   gSquareMatrix<T> C1(n);
@@ -380,43 +381,43 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
     // Here I will convert the results back into the original form.
 
     // These will hold the normalized and un-normalized vertices
-  gMatrix<T> VERTS(List.Length(),n);
-  gMatrix<T> VERTSMOD(List.Length(),n);
+  gMatrix<T> Verts(List.Length(),n);
+  gMatrix<T> Vertsmod(List.Length(),n);
 
-    // Sets VERTS to be the normalized vertices
-  for(i=VERTS.MinRow();i<=VERTS.MaxRow();i++) {
+    // Sets Verts to be the normalized vertices
+  for(i=Verts.MinRow();i<=Verts.MaxRow();i++) {
     gVector<T> vert(A->NumColumns());
     vert = (T)0;
     for(j=1;j<=vert.Length();j++) 
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
-    VERTS.SetRow(i, vert);
+    Verts.SetRow(i, vert);
   }
 
-    // Spit out VERTS for debugging purposes
-  /*gout << "\n VERTS is:\n";*/
-  /*gout << VERTS;*/
+    // Spit out Verts for debugging purposes
+  /*gout << "\n Verts is:\n";*/
+  /*gout << Verts;*/
   /*gout << "\n So there.\n";*/
 
-    // Sets VERTSMOD to the un-normalized vertices
-  for(i=VERTS.MinRow();i<=VERTS.MaxRow();i++) 
+    // Sets Vertsmod to the un-normalized vertices
+  for(i=Verts.MinRow();i<=Verts.MaxRow();i++) 
   {
     gVector<T> vert(A->NumColumns());
     vert = (T)0;
-    VERTS.GetRow(i,vert);
-    VERTSMOD.SetRow(i,( (CInv * vert) + start) );
+    Verts.GetRow(i,vert);
+    Vertsmod.SetRow(i,( (CInv * vert) + start) );
   }
 
-    // Spit out VERTSMOD for debugging purposes
-  /*gout << "\n VERTSMOD is:\n";*/
-  /*gout << VERTSMOD;*/
-  /*gout << "\n So there.\n";*/
+    // Spit out Vertsmod for debugging purposes
+  gout << "\n Vertsmod is:\n";
+  gout << Vertsmod;
+  gout << " So there.\n\n";
 
 
     // Sets List to the vertices in the original basis
-  for(i=VERTSMOD.MinRow();i<=VERTSMOD.MaxRow();i++) {
+  for(i=Vertsmod.MinRow();i<=Vertsmod.MaxRow();i++) {
     gVector<T> vert(A->NumColumns());
     vert = (T)0;
-    VERTSMOD.GetRow(i,vert);
+    Vertsmod.GetRow(i,vert);
     for(j=1;j<=vert.Length();j++) 
     {
         List[i](j) = -vert[j];
