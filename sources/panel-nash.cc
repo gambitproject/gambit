@@ -106,7 +106,7 @@ void gbtAllNashThread::OnExit(void)
 void *gbtAllNashThread::Entry(void)
 {
   try {
-    m_eqa = gbtPNSNfg(m_parent->GetDocument()->GetGame(), 0);
+    m_eqa = gbtNashPNSNfg(m_parent->GetDocument()->GetGame(), 0);
   }
   catch (gbtException &) {
     // Just eat it for now... need to issue a message
