@@ -513,7 +513,7 @@ bool Powell(gPVector<double> &p,
     
     fptt=func.Value(ptt);
     if (fptt < fp) {
-      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2.0)-del*pow(fp-fptt,2.0);
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,(long)2)-del*pow(fp-fptt,(long)2);
       if (t < 0.0) {
 	Project(xit, p.Lengths());
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,interior);
@@ -606,7 +606,7 @@ bool OldPowell(gVector<double> &p,
     
     fptt=func.Value(ptt);
     if (fptt < fp) {
-      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2.0)-del*pow(fp-fptt,2.0);
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,(long)2)-del*pow(fp-fptt,(long)2);
       if (t < 0.0) {
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,true);
 //	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
