@@ -5,7 +5,7 @@
 //
 
 #include "wx/wx.h"
-#include "wx/splitter.h"
+#include "wx/sashwin.h"
 #include "wx/fontdlg.h"
 
 #include "wxgcl.h"
@@ -131,15 +131,43 @@ gOutput &wxOutputWindowStream::operator<<(const void *x)
   return *this;
 }
 
+const int idCANCEL_BUTTON = 1500;
+
+class wxCancelButton : public wxButton, public gNullStatus {
+private:
+  bool m_sig;
+
+public:
+  wxCancelButton(wxWindow *p_parent);
+  virtual ~wxCancelButton() { }
+  
+  void Get(void) const;
+  void Reset(void) { m_sig = false; }
+  void Set(void) { m_sig = true; }
+};
+
+wxCancelButton::wxCancelButton(wxWindow *p_parent)
+  : wxButton(p_parent, idCANCEL_BUTTON, "Cancel")
+{ }
+
+void wxCancelButton::Get(void) const
+{
+  wxYield();
+  if (m_sig) {
+    throw gSignalBreak();
+  }
+}
+
 class wxGSM : public GSM {
 private:
-  gNullStatus m_status;
+  gStatus &m_status;
   wxWindow *m_parent;
 
 public:
-  wxGSM(wxWindow *p_parent,
+  wxGSM(wxWindow *p_parent, gStatus &p_status,
 	gInput &p_input, gOutput &p_output, gOutput &p_error)
-    : GSM(p_input, p_output, p_error), m_parent(p_parent) { }
+    : GSM(p_input, p_output, p_error), m_status(p_status), m_parent(p_parent)
+    { }
   virtual ~wxGSM() { }
 
   gStatus &GetStatusMonitor(void) { return m_status; }
@@ -164,6 +192,8 @@ class GclFrame : public wxFrame {
 private:
   wxTextCtrl *m_outputWindow;
   wxTextCtrl *m_inputWindow;
+  wxSashWindow *m_inputSashWindow;
+  wxCancelButton *m_cancelButton;
   wxOutputWindowStream *m_outputStream;
   gList<gText> m_history;
 
@@ -180,7 +210,9 @@ private:
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
-
+  void OnSize(wxSizeEvent &);
+  void OnSashDrag(wxSashEvent &);
+  void OnCancel(wxCommandEvent &);
   void OnTextEnter(wxCommandEvent &);
 
 public:
@@ -199,6 +231,7 @@ bool GclApp::OnInit(void)
 }
 
 const int idINPUT_WINDOW = 1001;
+const int idINPUT_SASH_WINDOW = 1002;
 
 const int idSAVE = 2000;
 const int idSAVE_LOG = 2001;
@@ -241,26 +274,40 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 
   CreateStatusBar();
 
-  wxSplitterWindow *splitter = new wxSplitterWindow(this);
-  m_outputWindow = new wxTextCtrl(splitter, -1, "",
-				  wxDefaultPosition, wxDefaultSize,
+  m_outputWindow = new wxTextCtrl(this, -1, "",
+				  wxPoint(0, 0), wxSize(400, 300),
 				  wxTE_MULTILINE | wxTE_READONLY);
   m_outputStream = new wxOutputWindowStream(m_outputWindow);
+  m_inputSashWindow = new wxSashWindow(this, idINPUT_SASH_WINDOW,
+				       wxPoint(0, 300), wxSize(400, 100));
 #ifdef __WXMSW__
-  m_inputWindow = new wxTextCtrl(splitter, idINPUT_WINDOW, "",
+  m_inputWindow = new wxTextCtrl(m_inputSashWindow, idINPUT_WINDOW, "",
 				 wxDefaultPosition, wxDefaultSize,
 				 wxTE_PROCESS_ENTER);
 #else
-  m_inputWindow = new wxTextCtrl(splitter, idINPUT_WINDOW, "",
+  m_inputWindow = new wxTextCtrl(m_inputSashWindow, idINPUT_WINDOW, "",
 				 wxDefaultPosition, wxDefaultSize,
 				 wxTE_MULTILINE | wxTE_PROCESS_ENTER);
 #endif  // __WXMSW__
-  splitter->SplitHorizontally(m_outputWindow, m_inputWindow, 300);
+  m_cancelButton = new wxCancelButton(m_inputSashWindow);
+  m_cancelButton->Enable(false);
+
+  m_inputSashWindow->SetSashVisible(wxSASH_TOP, true);
+
+  wxBoxSizer *inputSizer = new wxBoxSizer(wxHORIZONTAL);
+  inputSizer->Add(m_inputWindow, 1, wxEXPAND | wxRIGHT, 5);
+  inputSizer->Add(m_cancelButton, 0, wxCENTER | wxALL, 5);
+
+  m_inputSashWindow->SetAutoLayout(true);
+  m_inputSashWindow->SetSizer(inputSizer);
+  inputSizer->SetSizeHints(m_inputSashWindow);
+  m_inputSashWindow->Layout();
 
   m_inputWindow->SetFocus();
   m_inputWindow->SetValue("<< ");
   m_inputWindow->SetInsertionPointEnd();
-  
+
+  SetSizeHints(300, 300);
   Show(true);
 
   _SourceDir = new char[1024];
@@ -268,7 +315,8 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
-  m_environment = new wxGSM(this, gin, *m_outputStream, *m_outputStream);
+  m_environment = new wxGSM(this, *m_cancelButton,
+			    gin, *m_outputStream, *m_outputStream);
   m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
@@ -281,6 +329,9 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
       m_compiler->Parse(line, fileName, lineNumber, rawLine);
     }
   }
+  catch (gSignalBreak &) {
+    m_environment->OutputStream() << "Computation interrupted!\n";
+  }
   catch (gclQuitOccurred &) {
 
   }
@@ -288,6 +339,9 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
     m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description()
 				  << "; Caught in GclFrame::GclFrame()\n";
   }
+
+  m_inputWindow->SetInsertionPointEnd();
+  m_inputWindow->SetFocus();
 }
 
 GclFrame::~GclFrame()
@@ -303,6 +357,9 @@ BEGIN_EVENT_TABLE(GclFrame, wxFrame)
   EVT_MENU(wxID_HELP_CONTENTS, GclFrame::OnHelpContents)
   EVT_TEXT_ENTER(idINPUT_WINDOW, GclFrame::OnTextEnter)
   EVT_CLOSE(GclFrame::OnCloseWindow)
+  EVT_SIZE(GclFrame::OnSize)
+  EVT_SASH_DRAGGED(idINPUT_SASH_WINDOW, GclFrame::OnSashDrag)
+  EVT_BUTTON(idCANCEL_BUTTON, GclFrame::OnCancel)
 END_EVENT_TABLE()
 
 void GclFrame::OnSaveLog(wxCommandEvent &)
@@ -389,15 +446,47 @@ void GclFrame::OnCloseWindow(wxCloseEvent &)
   Destroy();
 }
 
+void GclFrame::OnSize(wxSizeEvent &)
+{
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  m_outputWindow->SetSize(0, 0, clientWidth,
+			  gmax(clientHeight - m_inputSashWindow->GetRect().height, 50));
+  m_inputSashWindow->SetSize(0, m_outputWindow->GetRect().height,
+			     clientWidth,
+			     clientHeight - m_outputWindow->GetRect().height);
+  m_inputSashWindow->Layout();
+}
+
+void GclFrame::OnSashDrag(wxSashEvent &p_event)
+{
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  int dragHeight = gmax(gmin(clientHeight - 50, p_event.GetDragRect().height),
+			50);
+
+  m_outputWindow->SetSize(0, 0, clientWidth,
+			  clientHeight - dragHeight);
+  m_inputSashWindow->SetSize(0, clientHeight - dragHeight,
+			     clientWidth, dragHeight);
+  m_inputSashWindow->Layout();
+}
+
 void GclFrame::OnTextEnter(wxCommandEvent &)
 {
   m_outputWindow->AppendText(m_inputWindow->GetValue());
   m_history.Append(m_inputWindow->GetValue().c_str());
   m_outputWindow->AppendText("\n");
 
+  m_inputWindow->Enable(false);
+  m_cancelButton->Enable(true);
+
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline,
 			gText(m_inputWindow->GetValue().c_str()) + "\n");
+  m_inputWindow->SetValue("");
   try {
     while (!preproc.eof()) {
       gText line = preproc.GetLine();
@@ -407,6 +496,9 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
       m_compiler->Parse(line, fileName, lineNumber, rawLine);
     }
   }
+  catch (gSignalBreak &) {
+    m_environment->OutputStream() << "Computation interrupted!\n";
+  }
   catch (gclQuitOccurred &) {
 
   }
@@ -414,12 +506,17 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
     m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description() 
 				  << "; Caught in GclFrame::OnTextEnter()\n";
   }
+
+  m_cancelButton->Enable(false);
   m_inputWindow->SetValue("<< ");
   m_inputWindow->SetInsertionPointEnd();
+  m_inputWindow->Enable(true);
   m_outputWindow->AppendText("\n");
+  m_inputWindow->SetFocus();
 }
 
-/*
-gFileInput _gin(stdin);
-gInput &gin = _gin;
-*/
+void GclFrame::OnCancel(wxCommandEvent &)
+{
+  m_cancelButton->Set();
+}
+
