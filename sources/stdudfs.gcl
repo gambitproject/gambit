@@ -792,9 +792,9 @@ NewFunction[NewOutcome[nfg->NFG,  name->TEXT] =: NFOUTCOME,
   SetName[NewOutcome[nfg],name]
 ]
 
-//NewFunction[Concat[list->LIST(TEXT)]=:TEXT,
-//  If[Length[list]=1,list_1,list_1&Concat[Remove[list,1]]];
-//]
+NewFunction[Concat[list->LIST(TEXT)]=:TEXT,
+  If[Length[list]=1,list_1,list_1+Concat[Remove[list,1]]];
+]
 
 NewFunction[NewOutcome[profile->LIST(STRATEGY)]=:NFOUTCOME,
   name:=Concat[Name[profile]];
