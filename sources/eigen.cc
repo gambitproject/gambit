@@ -11,18 +11,18 @@
 #include <math.h>
 #include "math/gsmatrix.h"
 
-void Balance(gSquareMatrix<float> &p_matrix)
+void Balance(gSquareMatrix<double> &p_matrix)
 {
-  const float RADIX = 2.0;
+  const double RADIX = 2.0;
 
-  float sqrdx = RADIX * RADIX;
+  double sqrdx = RADIX * RADIX;
   bool last = false;
 
   while (!last) {
     last = true;
     for (int i = 1; i <= p_matrix.NumRows(); i++) {  
       // calculate row and column norms
-      float r = 0.0, c = 0.0;
+      double r = 0.0, c = 0.0;
       for (int j = 1; j <= p_matrix.NumRows(); j++) {
 	if (j != i) {
 	  c += fabs(p_matrix(j, i));
@@ -31,9 +31,9 @@ void Balance(gSquareMatrix<float> &p_matrix)
       }
 
       if (c && r) {
-	float g = r / RADIX;
-	float f = 1.0;
-	float s = c + r;
+	double g = r / RADIX;
+	double f = 1.0;
+	double s = c + r;
 
 	while (c < g) {
 	  // find the integer power of the machine radix that
@@ -61,17 +61,17 @@ void Balance(gSquareMatrix<float> &p_matrix)
   }
 }
 
-inline void swap(float &x, float &y)
+inline void swap(double &x, double &y)
 {
-  float tmp = x;
+  double tmp = x;
   x = y;
   y = tmp;
 }
 
-void MakeHessenberg(gSquareMatrix<float> &p_matrix)
+void MakeHessenberg(gSquareMatrix<double> &p_matrix)
 {
   for (int m = 2; m < p_matrix.NumRows(); m++) {
-    float x = 0.0;
+    double x = 0.0;
     int i = m;
     for (int j = m; j <= p_matrix.NumRows(); j++) {
       // Find the pivot
@@ -95,7 +95,7 @@ void MakeHessenberg(gSquareMatrix<float> &p_matrix)
     if (x) {
       // carry out the elimination
       for (int i = m + 1; i <= p_matrix.NumRows(); i++) {
-	float y = p_matrix(i, m-1);
+	double y = p_matrix(i, m-1);
 	if (y != 0.0) {
 	  y /= x;
 	  p_matrix(i, m-1) = y;
@@ -111,7 +111,7 @@ void MakeHessenberg(gSquareMatrix<float> &p_matrix)
   }
 }
 
-inline float ifsign(float p, float q)
+inline double ifsign(double p, double q)
 {
   return (q >= 0.0) ? fabs(p) : -fabs(p);
 }
@@ -119,7 +119,7 @@ inline float ifsign(float p, float q)
 void Eigenvalues(const gSquareMatrix<double> &p_matrix, 
 		 gArray<double> &p_realParts, gArray<double> &p_complexParts)
 {
-  gSquareMatrix<float> M(p_matrix.NumRows());
+  gSquareMatrix<double> M(p_matrix.NumRows());
   for (int i = 1; i <= M.NumRows(); i++) {
     for (int j = 1; j <= M.NumRows(); j++) {
       M(i, j) = p_matrix(i, j);
@@ -128,8 +128,8 @@ void Eigenvalues(const gSquareMatrix<double> &p_matrix,
   Balance(M);
   MakeHessenberg(M);
 
-  float anorm = 0.0;
-  float z, y, x, w, v, u, t, s, r, q, p;
+  double anorm = 0.0;
+  double z, y, x, w, v, u, t, s, r, q, p;
   int nn, m, l, k, j, its, i, mmin;
   
   for (i = 1; i <= M.NumRows(); i++) {
@@ -150,7 +150,7 @@ void Eigenvalues(const gSquareMatrix<double> &p_matrix,
 	if (s == 0.0) {
 	  s = anorm;
 	}
-	if ((float) fabs((float) M(l, l-1) + (float) s) == (float) s) {
+	if ((double) fabs((double) M(l, l-1) + (double) s) == (double) s) {
 	  break;
 	}
       }
@@ -228,7 +228,7 @@ void Eigenvalues(const gSquareMatrix<double> &p_matrix,
 	    }
 	    u = fabs(M(m, m-1)) * (fabs(q) + fabs(r));
 	    v = fabs(p) * (fabs(M(m-1, m-1)) + fabs(z) + fabs(M(m+1, m+1)));
-	    if ((float) (u + v) == v) {
+	    if ((double) (u + v) == v) {
 	      break;
 	    }
 	  }
@@ -303,13 +303,3 @@ void Eigenvalues(const gSquareMatrix<double> &p_matrix,
   }
 }
 
-
-#include "base/grarray.imp"
-#include "math/gvector.imp"
-#include "math/gmatrix.imp"
-#include "math/gsmatrix.imp"
-
-template class gVector<float>;
-template class gRectArray<float>;
-template class gMatrix<float>;
-template class gSquareMatrix<float>;
