@@ -1,3 +1,6 @@
+// File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
+// extensively in gambit.
+// $Id$
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"

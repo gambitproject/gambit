@@ -1,10 +1,15 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// @(#)gambit.cc	1.4 4/7/94
+// $Id$
 //
 #include <assert.h>
 #include "wx.h"
+#ifdef wx_msw
+#include "wx_bbar.h"
+#else
+#include "wx_tbar.h"
+#endif
 #pragma hdrstop
 #include "wxio.h"
 #include "gambit.h"
@@ -25,6 +30,85 @@ void SigFPEHandler(int a)
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
 }
+
+
+
+class GambitToolBar:	// no reason to have yet another .h file for just this
+#ifdef wx_msw
+								public wxButtonBar
+#else
+								public wxToolBar
+#endif
+{
+private:
+	wxFrame *parent;
+public:
+	GambitToolBar(wxFrame *frame);
+	Bool OnLeftClick(int toolIndex, Bool toggled);
+	void OnMouseEnter(int toolIndex);
+};
+
+
+//***************************************************************************
+//                EXTENSIVE FORM TOOLBAR
+//***************************************************************************
+
+GambitToolBar::GambitToolBar(wxFrame *frame):
+#ifdef wx_msw
+	wxButtonBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
+#else
+	wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
+#endif
+{
+parent=frame;
+// Load palette bitmaps
+#ifdef wx_msw
+wxBitmap *ToolbarOpenBitmap=new wxBitmap("OPENTOOL");
+wxBitmap *ToolbarHelpBitmap=new wxBitmap("HELPTOOL");
+wxBitmap *ToolbarNfgBitmap=new wxBitmap("NFGTOOL");
+wxBitmap *ToolbarEfgBitmap=new wxBitmap("EFGTOOL");
+#endif
+#ifdef wx_x
+#include "bitmaps/open.xbm"
+#include "bitmaps/help.xbm"
+#include "bitmaps/efg.xbm"
+#include "bitmaps/nfg.xbm"
+wxBitmap *ToolbarHelpBitmap=new wxBitmap(HELP_bits,HELP_width,HELP_height);
+wxBitmap *ToolbarNfgBitmap=new wxBitmap(NFG_bits,NFG_width,NFG_height);
+wxBitmap *ToolbarEfgBitmap=new wxBitmap(EFG_bits,EFG_width,EFG_height);
+wxBitmap *ToolbarOpenBitmap=new wxBitmap(OPEN_bits,OPEN_width,OPEN_height);
+#endif
+// Open | Efg,Nfg | Help
+// Create the toolbar
+SetMargins(2, 2);
+#ifdef wx_msw
+SetDefaultSize(33,30);
+#endif
+GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
+int dx = 3;
+int gap = 8;
+#ifdef wx_msw
+	int width = 38;
+#else
+	int width = ToolbarOpenBitmap->GetWidth();
+#endif
+	int currentX = gap;
+	AddTool(FILE_LOAD, ToolbarOpenBitmap,NULL,FALSE,(float)currentX,-1,NULL);
+	currentX += width + dx+gap;
+	AddTool(FILE_NEW_EFG, ToolbarEfgBitmap, NULL,FALSE, (float)currentX, -1, NULL);
+	currentX += width + dx;
+	AddTool(FILE_NEW_NFG, ToolbarNfgBitmap, NULL,FALSE, (float)currentX, -1, NULL);
+	currentX += width + dx+gap;
+	AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap, NULL,FALSE, (float)currentX, -1, NULL);
+}
+
+Bool GambitToolBar::OnLeftClick(int tool, Bool toggled)
+{parent->OnMenuCommand(tool);return TRUE;}
+
+void GambitToolBar::OnMouseEnter(int tool)
+{parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));}
+
+
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
@@ -34,7 +118,7 @@ wxMessageBox("A floating point error has occured!\nThe results returned may be i
 wxFrame *GambitApp::OnInit(void)
 {
 // Create the main frame window
-GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
+GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 220, 150,wxDEFAULT_FRAME);
 // Give it an icon
 wxIcon *frame_icon;
 #ifdef wx_msw
@@ -64,6 +148,8 @@ menu_bar->Append(help_menu,	"&Help");
 
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
+gambit_frame->CreateStatusLine();
+new GambitToolBar(gambit_frame);
 
 // Set up the help system
 wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.9\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");

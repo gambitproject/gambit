@@ -1,7 +1,7 @@
 //*************************************************************************
 //* Treewin.cc: This file contains the type-specific (templated) portion of
 //* the extensive form rendering code.
-// @(#)treewin.cc	1.18 7/4/95
+// $Id$
 //
 #pragma hdrstop
 #include "wx.h"
@@ -33,8 +33,8 @@ void TreeWindow<T>::operator=(const TreeWindow<T> &t)
 
 //************************* normal constructor ********************
 template <class T>
-TreeWindow<T>::TreeWindow(Efg<T> &ef_,ExtensiveShow<T> *frame_)
-												:	ef(ef_), frame(frame_), BaseTreeWindow(ef_,frame_)
+TreeWindow<T>::TreeWindow(Efg<T> &ef_,EFSupport * &disp,ExtensiveShow<T> *frame_)
+												:	ef(ef_), frame(frame_), BaseTreeWindow(ef_,disp,frame_)
 { }
 
 template <class T>
@@ -45,7 +45,6 @@ if (subgame!=1) ;		// if I am a subgame, notify parent of my death
 //	 ((ExtensiveShow<T> *)frame->parent)->tw->CloseSubgame(subgame);
 else
 #endif
-delete &ef;
 }
 
 template <class T>
@@ -245,20 +244,6 @@ for (int d=0;d<=num_d;d++)
 	delete node_probs_dialog;
 }
 }
-
-//***********************************************************************
-//                      FILE-SAVE MENU HANDLER
-//***********************************************************************
-template <class T> void TreeWindow<T>::file_save(void)
-{
-char *s=wxFileSelector("Save data file", 0, 0, 0, "*.efg");
-if (s)
-{
-	gFileOutput out((const char *)s);
-	ef.WriteEfgFile(out);
-}
-}
-
 
 
 #ifdef __GNUG__

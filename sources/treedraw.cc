@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// @(#)treedraw.cc	1.5 7/18/95
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -41,6 +41,7 @@ if (gamb_ver!=CURVER)
 	branch_above_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
 	branch_below_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
 	node_terminal_font=new wxFont(12,wxSWISS,wxNORMAL,wxNORMAL);
+	root_reachable=TRUE;
 	SaveOptions();
 }
 else
@@ -283,6 +284,7 @@ wxWriteResource("Gambit","Branch-Below-Label",branch_below_label,file_name);
 wxWriteResource("Gambit","Node-Terminal-Label",node_terminal_label,file_name);
 wxWriteResource("Gambit","Flashing-Cursor",flashing_cursor,file_name);
 wxWriteResource("Gambit","Color-Outcomes",color_coded_outcomes,file_name);
+wxWriteResource("Gambit","Root-Reachable",root_reachable,file_name);
 // Save the font settings
 wxWriteResource("Gambit","Node-Above-Font",wxFontToString(node_above_font),file_name);
 wxWriteResource("Gambit","Node-Below-Font",wxFontToString(node_below_font),file_name);
@@ -314,6 +316,7 @@ wxGetResource("Gambit","Node-Terminal-Label",&node_terminal_label,file_name);
 wxGetResource("Gambit","Node-Right-Label",&node_right_label,file_name);
 wxGetResource("Gambit","Flashing-Cursor",&flashing_cursor,file_name);
 wxGetResource("Gambit","Color-Outcomes",&color_coded_outcomes,file_name);
+wxGetResource("Gambit","Root-Reachable",&root_reachable,file_name);
 // Load the font settings
 char *l_tempstr=new char[100];
 wxGetResource("Gambit","Node-Above-Font",&l_tempstr,file_name);

@@ -1,3 +1,6 @@
+// File: spreadim.cc -- template instantiations for classes that for some
+// reason did not fit anywhere.
+// $Id$
 #include "wx.h"
 #include "wxmisc.h"
 #pragma		hdr_stop
@@ -32,6 +35,10 @@ TEMPLATE class gNode<BaseExtSolnShow *>;
 class NFSupport;
 TEMPLATE class gList<NFSupport *>;
 TEMPLATE class gNode<NFSupport *>;
+
+class EFSupport;
+TEMPLATE class gList<EFSupport *>;
+TEMPLATE class gNode<EFSupport *>;
 
 
 template <class T> class SolnShow;
