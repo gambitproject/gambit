@@ -86,7 +86,7 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
   _GobitValue(b._GobitValue),
   _LiapValue(b._LiapValue),
   _Beliefs(0),
-  _Id(MaxId)
+  _Id(b._Id)
 {
   if(b._Beliefs) _Beliefs = new gDPVector<T>(*b._Beliefs);
 }
