@@ -149,7 +149,7 @@ void gCmdLineInput::GetCmdExec( void )
     }
   }
   else
-    sprintf( buf, "" );
+    strcpy(buf, "");
 
 
   gString cmdBuf = buf;
