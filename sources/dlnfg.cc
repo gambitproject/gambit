@@ -8,10 +8,12 @@
 #include "wxmisc.h"
 
 #include "nfg.h"
+#include "nfstrat.h"
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgsave.h"
+#include "dlnfgnewsupport.h"
 
 //=========================================================================
 //                 class dialogNfgPayoffs: Member functions 
@@ -156,6 +158,80 @@ Bool dialogNfgOutcomeSelect::OnClose(void)
 NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 {
   return m_nfg.Outcomes()[m_outcomeSelected + 1];
+}
+
+//=========================================================================
+//                   dialogNfgNewSupport: Member functions
+//=========================================================================
+
+dialogNfgNewSupport::dialogNfgNewSupport(const Nfg &p_nfg, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Define support", TRUE), m_nfg(p_nfg)
+{
+  SetLabelPosition(wxVERTICAL);
+  m_strategyLists = new wxListBox *[m_nfg.NumPlayers()];
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    m_strategyLists[pl-1] = new wxListBox(this, 0, "Player " + ToText(pl),
+					  wxMULTIPLE);
+    for (int st = 1; st <= m_nfg.NumStrats(pl); st++) {
+      m_strategyLists[pl-1]->Append(ToText(st) + ": " +
+				    m_nfg.Strategies(pl)[st]->Name());
+#ifndef LINUX_WXXT
+      m_strategyLists[pl-1]->SetSelection(st - 1, TRUE);
+#endif  // LINUX_WXXT
+    }
+  }
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+dialogNfgNewSupport::~dialogNfgNewSupport()
+{
+  delete [] m_strategyLists;
+}
+
+void dialogNfgNewSupport::OnOK(void)
+{
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    int *selections;
+    if (m_strategyLists[pl-1]->GetSelections(&selections) == 0)
+      return;
+  }
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogNfgNewSupport::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogNfgNewSupport::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+NFSupport *dialogNfgNewSupport::CreateSupport(void) const
+{
+  NFSupport *support = new NFSupport(m_nfg);
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    for (int st = 1; st <= m_nfg.NumStrats(pl); st++) {
+      if (!m_strategyLists[pl-1]->Selected(st-1))
+	support->RemoveStrategy(m_nfg.Strategies(pl)[st]);
+    }
+  }
+
+  return support;
 }
 
 //=========================================================================

@@ -12,6 +12,7 @@
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
+#include "dlnfgnewsupport.h"
 #include "dlnfgsave.h"
 
 //======================================================================
@@ -812,68 +813,13 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
 
 NFSupport *NfgShow::MakeSupport(void)
 {
-  MyDialogBox *support = new MyDialogBox(spread, 
-					 "Create Support", 
-					 NFG_MAKE_SUPPORT_HELP);
+  dialogNfgNewSupport dialog(nf, spread);
 
-  support->SetLabelPosition(wxVERTICAL);
-  wxListBox **players = new wxListBox*[nf.NumPlayers() + 1];
-
-  for (int i = 1; i <= nf.NumPlayers(); i++) {
-    int num_strats = nf.NumStrats(i);
-    char **strats = new char *[num_strats];
-
-    for (int j = 0; j < num_strats; j++) 
-      strats[j] = copystring(nf.Strategies(i)[j+1]->Name());
-
-    players[i] = new wxListBox(support, 0, nf.Players()[i]->GetName(), 
-			       TRUE, -1, -1, 80, 100,
-			       num_strats, strats);
-
-#ifndef LINUX_WXXT
-    for (int j = 0; j < num_strats; j++) 
-      players[i]->SetSelection(j, TRUE);
-#endif
-
-    for (int j = 0; j < num_strats; j++) 
-      delete [] strats[j];
-
-    delete [] strats;
+  if (dialog.Completed() == wxOK) {
+    NFSupport *support = dialog.CreateSupport();
+    supports.Append(support);
+    return support;
   }
-
-  support->Go();
-
-  if (support->Completed() == wxOK) {
-    NFSupport *sup = new NFSupport(nf);
-    bool failed = false;
-
-    for (int i = 1; i <= nf.NumPlayers(); i++) {
-      int num_strats = sup->NumStrats(i);
-
-      for (int j = num_strats; j >= 1; j--) {
-	if (!players[i]->Selected(j - 1))
-	  sup->RemoveStrategy(nf.Players()[i]->Strategies()[j]);
-      }
-
-      // Check that each player has at least one strategy.
-      if (sup->NumStrats(i) == 0) 
-	failed = true; 
-    }
-
-    delete support;
-
-    if (!failed) {
-      supports.Append(sup);
-      return sup;
-    }
-    else {
-      wxMessageBox("This support is invalid!\n"
-		   "Each player must have at least one strategy");
-      return 0;
-    }
-  }
-  
-  delete support;
   return 0;
 }
 
