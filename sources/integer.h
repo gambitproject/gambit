@@ -284,11 +284,6 @@ extern gInteger  lcm(const gInteger& x, const gInteger& y); // least common mult
 
 typedef gInteger IntTmp; // for backward compatibility
 
-//
-// This is for backward compatibility, and may be removed at any time
-//
-typedef gInteger Integer;
-
 #endif /* _Integer_h */
 
 

@@ -51,7 +51,7 @@ public:
 
                   ~gRational();
 
-  void             operator =  (const gRational& y);
+  gRational &operator =  (const gRational& y);
 
   friend int       operator == (const gRational& x, const gRational& y);
   friend int       operator != (const gRational& x, const gRational& y);
@@ -122,7 +122,6 @@ public:
 };
 
 typedef gRational RatTmp; // backwards compatibility
-typedef gRational Rational;
 
 inline gRational::gRational() : num(&_ZeroRep), den(&_OneRep) {}
 inline gRational::~gRational() {}
@@ -155,9 +154,9 @@ inline gRational::gRational(unsigned long n, unsigned long d) :num(n), den(d)
   normalize();
 }
 
-inline  void gRational::operator =  (const gRational& y)
+inline gRational &gRational::operator =  (const gRational& y)
 {
-  num = y.num;  den = y.den;
+  num = y.num;  den = y.den;   return *this;
 }
 
 inline int operator == (const gRational& x, const gRational& y)

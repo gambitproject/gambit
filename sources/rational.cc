@@ -363,7 +363,7 @@ gInput &operator>>(gInput &f, gRational &y)
 {
   char ch = ' ';
   int sign = 1;
-  Integer num = 0, denom = 1;
+  gInteger num = 0, denom = 1;
 
   while (isspace(ch))    f >> ch;
   
@@ -400,7 +400,8 @@ gInput &operator>>(gInput &f, gRational &y)
 
   f.unget(ch);
 
-  y = Rational(sign * num, denom);
+  y = gRational(sign * num, denom);
+  y.normalize();
 
   return f;
 }

@@ -230,7 +230,7 @@ int GridSolver::GridSolve(void)
       break;
     }
     case RATIONAL:  {
-      GridSolveModule<gRational> M((NormalForm<Rational> &) nf, *outfile,
+      GridSolveModule<gRational> M((NormalForm<gRational> &) nf, *outfile,
 				  params.tol, params.delp,
 				  params.delLam, params.minLam,
 				  params.maxLam, params.type);
