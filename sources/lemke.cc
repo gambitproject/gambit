@@ -356,7 +356,7 @@ void LemkeTableau<T>::GetSolutions(gList<gPVector<T> > &solutions) const
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    gTuple<int> dim(2);
+    gArray<int> dim(2);
     dim[1] = N.NumStrats(1);
     dim[2] = N.NumStrats(2);
 
