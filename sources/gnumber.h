@@ -7,6 +7,7 @@
 #ifndef GNUMBER_H
 #define GNUMBER_H
 
+#include "gmisc.h"
 #include "rational.h"
 #include <math.h>
 

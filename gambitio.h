@@ -1,14 +1,13 @@
-//#
-//# FILE: gambitio.h -- Declaration of input and output classes
-//#
-//# $Id$
-//#
+//
+// FILE: gambitio.h -- Declaration of input and output classes
+//
+// $Id$
+//
 
 #ifndef GAMBITIO_H
 #define GAMBITIO_H
 
 #include <stdio.h>
-#include "gmisc.h"
 
 #ifdef __GNUG__
 #pragma interface
