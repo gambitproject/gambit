@@ -238,7 +238,7 @@ Portion* GSM_Divide_int( Portion** param )
 Portion* GSM_Divide_gRational( Portion** param )
 {
   Portion* result = 0;
-  if( ( (RationalPortion*) param[ 1 ] )->Value() != 0 )
+  if( ( (RationalPortion*) param[ 1 ] )->Value() != (gRational)0 )
   {
     result = new RationalValPortion
       (
