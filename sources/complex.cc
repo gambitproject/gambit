@@ -220,27 +220,20 @@ gComplex pow(const gComplex& x, const long y)
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
 
-gString ToString(gComplex d)
+gString ToString(const gComplex /* d */)
 {
   gout << "\nError: ToString(gComplex) must be defined for compilation,";
   gout << " but is not functional.\n";
   exit(0);
-
-// Code inherited from gDouble
-//  sprintf(mygconvert_buffer, "%.*f", myprecision, d.ToDouble());
-//  return gString(mygconvert_buffer);
 }
 
 // conversions from strings to numbers
 
-gComplex TOgComplex(const gString &s)
+gComplex TOgComplex(const gString & /* s */)
 { 
   gout << "\nError: TOgComplex must be defined for compilation,";
   gout << " but is not functional.\n";
   exit(0);
-
-//  gComplex answer(0,0);
-//  return answer; 
 }
 
 #include "glist.imp"
