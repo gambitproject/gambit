@@ -162,6 +162,20 @@ template <class T>
       }
       break;
 
+    case opINTEGER_DIVIDE:
+      if( Type() == porINTEGER )
+      {
+	// This is coded as is because the compiler complains when 
+	// instantiating for double and gRational types 
+	// if the % operator is used.  This version is about as fast as
+	// the original C operator %.
+	_Value = _Value - _Value / p_value * p_value;
+      }
+      else
+      {
+	result = Portion::Operation( p, mode );
+      }
+
     case opMODULUS:
       if( p_value != 0 )
       {
@@ -642,11 +656,8 @@ Portion* Nfg_Portion::Copy( void ) const
 
 void Nfg_Portion::MakeCopyOfData( Portion* p )
 {
-/*
   Portion::MakeCopyOfData( p );
-  _Value = new BaseNormalForm;
-  _Value->value = ( (Nfg_Portion*) p )->_Value->value;
-  */
+  _Value = new BaseNormalForm( ( (Nfg_Portion*) p )->_Value );
 }
 
 

@@ -67,7 +67,7 @@ class GSM
   bool Push ( const gString&   data );
 
   // This function is only temporarily here for testing reasons
-  bool GenerateNfg ( const double& data );
+  // bool GenerateNfg ( const double& data );
 
   bool PushList ( const int num_of_elements );
 
@@ -83,7 +83,8 @@ class GSM
   bool Divide   ( void );
   bool Negate   ( void );
 
-  bool Modulus      ( void );
+  bool IntegerDivide ( void );
+  bool Modulus       ( void );
 
   bool EqualTo              ( void );
   bool NotEqualTo           ( void );
@@ -106,7 +107,7 @@ class GSM
   bool BindVal          ( void );
   bool BindRef          ( void );
   bool Bind             ( const gString& param_name );
-  bool BindVal           ( const gString& param_name );
+  bool BindVal          ( const gString& param_name );
   bool BindRef          ( const gString& param_name );
   bool CallFunction     ( void );
 

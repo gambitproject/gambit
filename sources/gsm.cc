@@ -466,8 +466,23 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   if( p1->Type() == p2->Type() )
   {
-    // Main operations dispatcher
-    result = p1->Operation( p2, mode );
+    // SPECIAL CASE HANDLING - Integer division to produce gRationals
+    if( mode == opDIVIDE && p1->Type() == porINTEGER &&
+       ( (numerical_Portion<gInteger>*) p2 )->Value() != 0 )
+    {
+      p = new numerical_Portion<gRational>
+	( ( (numerical_Portion<gInteger>*) p1 )->Value() );
+      ( (numerical_Portion<gRational>*) p )->Value() /=
+	( ( (numerical_Portion<gInteger>*) p2 )->Value() );
+      delete p2;
+      delete p1;
+      p1 = p;
+    }
+    else
+    {
+      // Main operations dispatcher
+      result = p1->Operation( p2, mode );
+    }
 
     // SPECIAL CASE HANDLING - Boolean operators
     if(
@@ -569,6 +584,9 @@ bool GSM::Divide ( void )
 bool GSM::Negate( void )
 { return _UnaryOperation( opNEGATE ); }
 
+
+bool GSM::IntegerDivide ( void )
+{ return _BinaryOperation( opINTEGER_DIVIDE ); }
 
 bool GSM::Modulus ( void )
 { return _BinaryOperation( opMODULUS ); }

@@ -604,7 +604,7 @@ int main( void )
 
 
 
-
+/*
   machine->PushRef( "x" );
   machine->GenerateNfg( 100 );
   machine->Assign();
@@ -626,6 +626,7 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
+ 
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -754,6 +755,8 @@ int main( void )
 
   machine->PushRef( "x" );
   machine->Dump();
+*/
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -1177,7 +1180,7 @@ int main( void )
   machine->Execute( program );
 
 
-
+/*
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "z" );
   machine->Bind();
@@ -1272,7 +1275,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 #endif
-
+*/
 
 
   machine->Push( (gInteger) 0 );
@@ -1326,6 +1329,15 @@ int main( void )
   machine->Dump();
 
 #endif
+
+
+  machine->Push( (gInteger) 11 );
+  machine->Dump();
+
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 3 );
+  machine->Divide();
+  machine->Dump();
 
 
   gout << "Deleting machine\n";
