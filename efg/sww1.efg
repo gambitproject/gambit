@@ -3,6 +3,6 @@ EFG 2 R "Schotter-Weigelt-Wilson (GEB 94), Fig 1" { "Player 1" "Player 2" }
 
 p "ROOT" 1 1 "(1,1)" { "R" "L" } 0
 p "" 2 1 "(2,1)" { "R" "L" } 0
-t "" 1 "Outcome 1" { 6.000000, 3.000000 }
-t "" 2 "Outcome 2" { 0.000000, 1.000000 }
-t "" 3 "Outcome 3" { 4.000000, 4.000000 }
+t "" 1 "Outcome 1" { 6, 3 }
+t "" 2 "Outcome 2" { 0, 1 }
+t "" 3 "Outcome 3" { 4, 4 }

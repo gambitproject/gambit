@@ -1,257 +1,258 @@
 EFG 2 R "UNTITLED" { "Player1" "Player2" "Player3" }
+""
 
-c "" 1 "" { "Guilty" 0.500000 "Innocent" 0.500000 } 0
-c "" 2 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
-c "" 3 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
-c "" 4 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
+c "" 1 "" { "Guilty" 1/2 "Innocent" 1/2 } 0
+c "" 2 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
+c "" 3 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
+c "" 4 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-c "" 4 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 5 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-c "" 3 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
-c "" 4 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 6 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
+c "" 7 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-c "" 4 "" { "Signal Guilty" 0.700000 "Signal Innocent" 0.300000 } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 8 "" { "Signal Guilty" 7/10 "Signal Innocent" 3/10 } 0
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 1 "Convict-Guilty" { 1.000000 1.000000 1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 1 "Convict-Guilty" { 1, 1, 1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-t "" 3 "Acquit-Guilty" { -1.000000 -1.000000 -1.000000 }
-c "" 5 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
-c "" 6 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
-c "" 7 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+t "" 2 "Acquit-Guilty" { -1, -1, -1 }
+c "" 9 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
+c "" 10 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
+c "" 11 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-c "" 7 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 12 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 1 1 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-c "" 6 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
-c "" 7 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 13 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
+c "" 14 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 1 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-c "" 7 "" { "Signal Guilty" 0.300000 "Signal Innocent" 0.700000 } 0
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+c "" 15 "" { "Signal Guilty" 3/10 "Signal Innocent" 7/10 } 0
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 1 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 1 2 "" { "Convict" "Acquit" } 0
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 2 "Convict-Innocent" { -1.000000 -1.000000 -1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 3 "Convict-Innocent" { -1, -1, -1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 2 2 "" { "Convict" "Acquit" } 0
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
 p "" 3 2 "" { "Convict" "Acquit" } 0
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
-t "" 4 "Acquit-Innocent" { 1.000000 1.000000 1.000000 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
+t "" 4 "Acquit-Innocent" { 1, 1, 1 }
