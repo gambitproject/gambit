@@ -1,5 +1,5 @@
 //
-// FILE: enum.cc -- Nash Enum module
+// FILE: enum.imp -- Nash Enum module
 //
 // $Id$
 //
@@ -9,7 +9,6 @@
 #include "nfgiter.h"
 
 #include "enum.h"
-#include "glistit.h"
 
 void Epsilon_T(double &v, int i);
 void Epsilon_T(gRational &v, int i);
@@ -109,22 +108,21 @@ template <class T> int EnumModule<T>::Enum(void)
   T sum;
   bool nash;
 
-  gListIter< BFS<T> > iter1((gList< BFS<T> > &) verts1);
-  gListIter< BFS<T> > iter2((gList< BFS<T> > &) verts2);
-
   i=0;
-  for( iter2.GoFirst(),iter2++; 
-       !iter2.PastEnd() &&  !params.status.Get()
+
+  int i1,i2;
+  for( i2=2; 
+       i2<=v2 &&  !params.status.Get()
        && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
-       iter2++ ) {
-    bfs1 = iter2.GetValue();
+       i2++ ) {
+    bfs1 = verts2[i2];
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
     i++;
-    for( iter1.GoFirst(),iter1++; !iter1.PastEnd()
-       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
-	 iter1++ ) {
-      bfs2 = iter1.GetValue();
+    for( i1=2; 
+	 i1<=v1 && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+	 i1++ ) {
+      bfs2 = verts1[i1];
       
       // check if solution is nash 
       // need only check complementarity, since it is feasible
