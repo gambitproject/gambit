@@ -17,12 +17,18 @@
 //
 // <category lib=glib sect="Extensive Form">
 //
+// This class is used to name an action, and assign it a probability.
+// It contains no information about the context of the action.
+//
 class Action   {
   private:
     gString name;
     gNumber prob;
 
   public:
+	//
+	// Creates an empty action, with probability -1
+	//
     Action(void) : prob(-1.0)   { }
 	//
 	// Copy constructor
@@ -53,6 +59,11 @@ class Action   {
 //
 // <category lib=glib sect="Extensive Form">
 //
+// This class creates an information set (infoset in most of my
+// documentation).  The gBlock of Actions contains all the possible
+// choices in the information set, and nodes contains all the nodes
+// encompassed by the information set (ie all nodes in the infoset).
+//
 class Infoset   {
   private:
     gString         name;
@@ -62,8 +73,7 @@ class Infoset   {
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
 	//
-	// create a new infoset with acts actions and nods nodes
-	// check ordering with Ted (which is more likely default)
+	// create a new infoset with acts actions
 	//
     Infoset(int acts = 0);
 	//
@@ -87,6 +97,8 @@ class Infoset   {
         // set the infoset name
 	//
     void SetInfosetName(const gString &s)   { name = s; }
+
+	//# ACTION FUNCTIONS
 	//
 	// return the number of actions at the infoset
 	//
@@ -129,6 +141,8 @@ class Infoset   {
 	//
     void AppendAction(void)
       { actions.Append(new Action); }
+
+	//# NODE FUNCTIONS
 	//
 	// return the number of nodes in the infoset
 	//
