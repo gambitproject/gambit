@@ -771,6 +771,21 @@ void Efg::NonterminalDescendantsRECURSION(const Node* n,
   }
 }
 
+void Efg::TerminalDescendantsRECURSION(const Node* n, 
+				       const EFSupport& supp,
+				       gList<const Node*>& current) const
+{
+  if (n->IsTerminal()) 
+    current += n;
+  else {
+    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
+    for (int i = 1; i <= actions.Length(); i++) {
+      const Node* newn = n->GetChild(actions[i]);
+      DescendantNodesRECURSION(newn,supp,current);
+    }
+  }
+}
+
 gList<const Node*> 
 Efg::DescendantNodes(const Node& n, const EFSupport& supp) const
 {
@@ -785,6 +800,19 @@ Efg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
   gList<const Node*> answer;
   NonterminalDescendantsRECURSION(&n,supp,answer);
   return answer;
+}
+
+gList<const Node*> 
+Efg::TerminalDescendants(const Node& n, const EFSupport& supp) const
+{
+  gList<const Node*> answer;
+  TerminalDescendantsRECURSION(&n,supp,answer);
+  return answer;
+}
+
+ gList<const Node *> Efg::TerminalNodes() const
+{
+  return TerminalDescendants(*(RootNode()),EFSupport(*this));
 }
 
 gList<Infoset*> Efg::DescendantInfosets(const Node& n, 
@@ -1409,6 +1437,20 @@ int Efg::NumPlayersInfosets(const int pl) const
   else         return players[pl]->infosets.Length();
 }
 
+int Efg::NumPlayerInfosets() const
+{
+  int answer(0);
+  int pl;
+  for (pl = 1; pl <= NumPlayers(); pl++)
+    answer +=  players[pl]->infosets.Length();
+  return answer;
+}
+
+int Efg::NumChanceInfosets() const
+{
+  return chance->infosets.Length();
+}
+
 int Efg::TotalNumInfosets(void) const
 {
   int foo=0;
@@ -1438,6 +1480,32 @@ gPVector<int> Efg::NumActions(void) const
 
   return bar;
 }  
+
+int Efg::NumPlayerActions(void) const
+{
+  int answer(0);
+
+  int num_players_infosets(0);
+  int i;
+  for (i = 1; i <= players.Length(); i++)
+    num_players_infosets += players[i]->infosets.Length();
+
+  gPVector<int> nums_actions = NumActions();
+  for (i = 1; i <= NumPlayers(); i++)
+    answer += nums_actions[i];
+  return answer;
+}
+
+int Efg::NumChanceActions(void) const
+{
+  int answer(0);
+
+  int i;
+  for (i = 1; i <= players[0]->infosets.Length(); i++)
+    answer += NumActionsAtInfoset(0,i);
+
+  return answer;
+}
 
 int Efg::NumNodesInInfoset(const int pl, const int iset) const
 {
@@ -1540,4 +1608,3 @@ void Efg::Payoff(const gArray<gArray<int> *> &profile,
 
 #include "efgiter.imp"
 #include "efgciter.imp"
-

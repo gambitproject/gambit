@@ -14,6 +14,7 @@
 #include "gpvector.h"
 #include "grblock.h"
 #include "gnumber.h"
+#include "gpolylst.h"
 
 class EFOutcome;
 class EFPlayer;
@@ -127,9 +128,15 @@ protected:
     void NonterminalDescendantsRECURSION(const Node*, 
 					 const EFSupport&, 
 					 gList<const Node*>&) const;
+    void TerminalDescendantsRECURSION(const Node*, 
+				      const EFSupport&, 
+				      gList<const Node*>&) const;
     gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
     gList<const Node*> NonterminalDescendants(const Node&, 
 					      const EFSupport&) const;
+    gList<const Node*> TerminalDescendants(const Node&, 
+					   const EFSupport&) const;
+    gList<const Node*> TerminalNodes() const;
     gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
 
        //# DATA ACCESS -- PLAYERS
@@ -198,9 +205,13 @@ protected:
     int ProfileLength(void) const;
     int TotalNumInfosets(void) const;
 
-    gArray<int>   NumInfosets(void) const;
-    int           NumPlayersInfosets(const int pl) const;
+    gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
+    int           NumPlayerInfosets(void) const;
+    int           NumChanceInfosets(void) const;
+    int           NumPlayersInfosets(const int pl) const; // pl ==0 is chance
     gPVector<int> NumActions(void) const;
+    int           NumPlayerActions(void) const;
+    int           NumChanceActions(void) const;
     int           NumActionsAtInfoset(const int pl, const int iset) const;
     int           NumNodesInInfoset(const int pl, const int iset) const;
     gPVector<int> NumMembers(void) const;
