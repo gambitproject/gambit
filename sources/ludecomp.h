@@ -7,82 +7,120 @@
 #ifndef LUDECOMP_H
 #define LUDECOMP_H
 
+
 #include "gmatrix.h"
 #include "gvector.h"
-#include "gblock.h"
 #include "glist.h"
 #include "gambitio.h"
+#include "gblock.h"
 
 
-// LUupdatelist is used only by LUdecomp
-template <class T> class LUupdate {
+template <class T> class EtaMatrix {
  public:
-  gBlock<bool> rowp;
-  gVector<T> alpha;
+  int col;
+  gVector<T> etadata;
+  
+  
+  EtaMatrix(int c, gVector<T> &v) : col(c), etadata(v) {};
 
-  LUupdate();
-  LUupdate(int,int);
-  ~LUupdate();
+// required for list class
+bool operator==(const EtaMatrix<T> &) const;
+bool operator!=(const EtaMatrix<T> &) const;
 
-  // required for list class
-  int operator==(const LUupdate<T>) const;
-  int operator!=(const LUupdate<T>) const;
+};
 
-  int First();
-  int Last();
-}; // end class updatelist
-
-
-
+template <class T> gOutput &operator<<( gOutput &, const EtaMatrix<T> &);
 
 template <class T> class LUdecomp {
 
- private:
- protected:
-  gMatrix<T> mat;
-  gBlock<int> rpp;
-  int rpparity;
-  gList< LUupdate<T> > updates;
+private:
+ public:         // for debugging purposes only
+  const gMatrix<T> *A;
+  gBlock<int> basis;
+  bool IsBasisIdent;     //set true if matrix is the identity matrix
+  gList< EtaMatrix<T> > L;
+  gList< EtaMatrix<T> > U;
+  gList< EtaMatrix<T> > E;
+  gList< int > P;
 
-  void null_rpp(); // initialize row permutation to identity
-  void identity(); // fill mat with identity matrix (already factored...)
+public:
 
-  void factor(); // factor in place
-  void permute(const gVector<T>&x, gVector<T>&y) const; // y <- P(x)
-  void unpermute(const gVector<T>&x, gVector<T>&y) const; // y <- P^-1(x)
-  void Lsolve(const gVector<T>&b, gVector<T>&x) const; // solve: L x = b
-  void LsolveT(const gVector<T>&c, gVector<T>&y) const; // solve: y L = c
-  void apply(gVector<T> &) const; // apply updates factored into U (Z x)
-  void applyT(gVector<T> &) const; // apply updates to row vector (y Z)
-  void unapply(gVector<T> &) const; // apply inverse of updates (Z^-1 x)
-  void Usolve(const gVector<T>&b, gVector<T>&x) const; // solve U x = b
-  void UsolveT(const gVector<T>&c, gVector<T>&y) const; // solve y U = c
+  // ------------------------
+  // Constructors, Destructor
+  // ------------------------
+    
+  // copy constructor
+  LUdecomp( const LUdecomp<T> & );
 
- public:
-  LUdecomp(int); // create identity matrix [1..length][1..length]
-  LUdecomp(int,int); // create identity matrix [a..b][a..b]
-  LUdecomp(const gMatrix<T>&); // decompose matrix
-  LUdecomp(const gMatrix<T>&, const gBlock<int>&); // decompose select columns
-  LUdecomp(const gMatrix<T>&, const gBlock<bool>&, const gBlock<int>&);
-    // decompose select unit and matrix columns
+  // Decompose given matrix
+  LUdecomp( const gMatrix<T> & ); 
 
+  // Decompose the selected columns of the given matrix
+  LUdecomp( const gMatrix<T> &, const gBlock<int> & );
+
+  // Destructor
   ~LUdecomp();
 
-  void update(int, const gVector<T>&); // replace (update) column with vector
-  void refactor(const gMatrix<T>&); // factor a new matrix
-  void refactor(const gMatrix<T>&, const gBlock<int>&);
-    // reinitialize /w selected indices -- rows (neg) or columns (pos) 
-  void solve(const gVector<T>&, gVector<T>&) const; // solve:  M x = b
-  void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct
-  void reconstruct(gMatrix<T>&) const; // reconstruct M from decomposition
-  T Determinant() const; // compute determinant
+  // Equality operator
+  LUdecomp<T>& operator=(const LUdecomp<T>&);
 
-}; // end class LUdecomp
 
-/*
-#ifdef __BORLANDC__
-#include "ludecomp.imp"
-#endif   // __BORLANDC__
-*/
+  // --------------------
+  // Public Members
+  // --------------------
 
+  // replace (update) the column given with the vector given.
+  void update( int, const gVector<T> & );
+  void update( int, int matcol ); // matcol is the column number in the matrix
+
+  // refactor 
+  void refactor();
+  
+  // factor a new matrix.
+  void refactor( const gMatrix<T> & );
+
+  // reinitialize with selected indices -- rows (neg), columns (pos)
+  void refactor( const gMatrix<T> &, const gBlock<int> & );
+  
+  // solve: Bk d = a
+  void solve (const gVector<T> &, gVector<T> & ) const;
+
+  // solve: y Bk = c
+  void solveT( const gVector<T> &, gVector <T> & ) const;
+
+  // compute Determinant
+  T Determinant() const; 
+
+  //-------------------
+  // Private Members
+  //-------------------
+
+private:
+    
+  void FactorBasis();
+  void GaussElem( gMatrix<T> &, int, int );
+  bool CheckBasis( const gBlock<int> & );
+  bool CheckBasis();
+
+  void VectorEtaSolve( const gVector<T> &v,  
+		      const EtaMatrix<T> &, 
+		      gVector<T> &y ) const;
+
+  void EtaVectorSolve( const gVector<T> &v, 
+		      const EtaMatrix<T> &,
+		      gVector<T> &d ) const;
+
+  void yLP_mult( const gVector<T> &y, int j, gVector<T> &) const;
+  void LPd_mult( const gVector<T> &d, int j, gVector<T> &) const;
+
+
+};  // end of class LUdecomp
+    
 #endif     // LUDECOMP_H
+
+
+
+
+
+
+

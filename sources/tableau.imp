@@ -52,6 +52,8 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &code)
 template <class T>
 int Basis<T>::Pivot(int outindex, int col)
 {
+  // gout << "\nPivot: comp = " << outindex << " out= ";
+  // gout << label[outindex] << " in= " << col;
   if( col<0 ) 
     assert(A->CheckRow(-col) );
   else 
@@ -62,11 +64,19 @@ int Basis<T>::Pivot(int outindex, int col)
 //
 //     with gBlocks, the following is faster than the above
 
+  /*
+    // this is for the old LUDecomp code
   int i;
   int outlabel = label[outindex];
   for(i=outindex;i<label.Last();i++)
     label[i]=label[i+1];
   label[i]=col;
+  return outlabel;
+  */
+
+    // this is for the new LUDecomp code
+  int outlabel = label[outindex];
+  label[outindex] = col;
   return outlabel;
 }
 
@@ -149,7 +159,7 @@ void Basis<T>::Dump(gOutput &to) const
 template <class T>
 Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
   : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
-    basis(A),  B(A.MinRow(), A.MaxRow()),
+    basis(A),  B(A),
     solution(A.MinRow(),A.MaxRow()) 
 {
   Epsilon_T(eps1,1);
@@ -158,7 +168,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 //  gout << " " << A.MinCol() << " " << A.MaxCol();
 //  gout << "\nbasis = ";
 //  basis.Dump(gout);
-  B.refactor(A, basis.label);
+//  B.refactor(A, basis.label);
   B.solve(b, solution);
 };
 
@@ -264,12 +274,15 @@ void Tableau<T>::Pivot(int outrow,int col)
   assert( ValidIndex(col) );
   basis.Pivot(outrow,col);
 
+  /*
   if( col<0 )
     { tmpcol=(T)0; tmpcol[-col]=(T)1; }
   else
     A->GetColumn(col, tmpcol);
   B.update(outrow, tmpcol);
+  */
   
+  B.update(outrow, col);
   B.solve(*b, solution);
   npivots++;
 }
@@ -286,7 +299,7 @@ template <class T> long &Tableau<T>::NumPivots()
 
 template <class T> void Tableau<T>::Refactor()
 {
-  B.refactor(*A, basis.label);
+//  B.refactor(*A, basis.label);
   B.solve(*b, solution);
 }
 
@@ -314,6 +327,7 @@ template <class T>
 void Tableau<T>::SolveColumn(int col, gVector<T> &out)
 {
 //  gout << "\nTableau<T>::SolveColumn  " << MinRow() << " " << MaxRow(); 
+//  gout << " col: " << col;
   gVector<T> tmpcol2(MinRow(),MaxRow());
   if( col<0 ) {
     tmpcol2= (T)0;
@@ -451,7 +465,7 @@ LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
     unitcost(A.MinRow(),A.MaxRow()),
     cost(A.MinCol(),A.MaxCol())
 {
-  B.refactor(A, basis.label);
+//  B.refactor(A, basis.label);
   B.solve(b, solution);
 };
 
@@ -562,7 +576,11 @@ void LPTableau<T>::SolveDual()
 {
   gVector<T> tmpcol1(MinRow(),MaxRow());
   basis.BasisSelect(unitcost,cost,tmpcol1);
+  // gout << "\nIn SolveDual() tab = \n";
+  // Dump(gout);
+  // gout << "\n tmpcol1: " << tmpcol1;
   B.solveT(tmpcol1,dual);
+  // gout << "\n dual: " << dual;
 }
 
     // Redefined functions
@@ -684,6 +702,12 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	}
 	c_k = RelativeCost(enter);
 	c_jo = c_k - a_ik * ratio; 
+	// gout << "\ntmpdual = " << tmpdual << "\n";
+	// gout << " c_j:" << c_j; 
+	// gout << " c_k:" << c_k; 
+	// gout << " c_jo:" << c_jo; 
+	// gout << " a_ij:" << a_ij; 
+	// gout << " a_ik:" << a_ik; 
 	if(GeZero(c_jo)) {
 	  // gout << "\ni not col to enter in prior tableau: ";
 	  // gout << "c_jo<0";
