@@ -13,7 +13,6 @@
 #include "twflash.h"
 #include "efgshow.h"
 
-#include "playersd.h"
 #include "glist.imp"
 
 #define INFOSET_SPACING         10
@@ -1069,6 +1068,77 @@ Node *TreeWindow::IsetDragger::EndNode(void)
 // choose a player.
 //
 
+//
+// A dialog box to select the player
+//
+class BranchDraggerDialog : public MyDialogBox {
+private:
+  Efg &ef;
+  char *player_name;
+  wxChoice *name_item;
+
+public:
+  BranchDraggerDialog(Efg &, wxWindow * = 0);
+  virtual ~BranchDraggerDialog();
+  EFPlayer *GetPlayer(void);
+};
+
+BranchDraggerDialog::BranchDraggerDialog(Efg &ef_, wxWindow *parent)
+  : MyDialogBox(parent, "Select Player", EFG_TREE_HELP), ef(ef_)
+{
+  wxStringList *player_list = new wxStringList;
+  player_name = new char[20];
+  player_list->Add(ef.GetChance()->GetName()); 
+  if (ef.NumPlayers() != 0) {
+    for (int i = 1; i <= ef.NumPlayers(); i++)
+      player_list->Add(ToText(i) + ": " + ef.Players()[i]->GetName());
+    strcpy(player_name,ef.Players()[1]->GetName());
+  }
+  else
+    strcpy(player_name, ef.GetChance()->GetName());
+
+  wxFormItem *name_fitem = Add(wxMakeFormString("Player", &player_name,
+						wxFORM_CHOICE,
+						new wxList(wxMakeConstraintStrings(player_list),0),
+						NULL, wxVERTICAL));
+  AssociatePanel();
+
+  name_item = (wxChoice *)name_fitem->GetPanelItem();
+
+  // Init the first entry
+  wxCommandEvent ev(wxEVENT_TYPE_CHOICE_COMMAND);
+  ev.commandInt=0;
+  name_item->Command(ev);
+
+  Go1();
+}
+
+BranchDraggerDialog::~BranchDraggerDialog()
+{
+  delete [] player_name;
+}
+
+EFPlayer *BranchDraggerDialog::GetPlayer(void)
+{
+  if (Completed() != wxOK)
+    return 0;
+
+  if (!strcmp(player_name, "Chance"))
+    return ef.GetChance();
+
+  char tmp[20];
+  strncpy(tmp, player_name, 20);
+  for (int i = 0; ; i++) {
+    if (tmp[i] == ':') {
+      tmp[i] = '\0';
+      break;
+    }
+  }
+
+  return ef.Players()[(int) ToDouble(tmp)];
+}
+
+
 class TreeWindow::BranchDragger
 {
 private:
@@ -1159,8 +1229,8 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
             }
             else
             {
-                PlayerNamesDialog PND(ef, parent->GetParent());
-                EFPlayer *player = PND.GetPlayer();
+                BranchDraggerDialog dialog(ef, parent->GetParent());
+                EFPlayer *player = dialog.GetPlayer();
                 if (player) ef.AppendNode(start_node, player, 1);
             }
             infosets_changed = TRUE;
