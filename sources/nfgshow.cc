@@ -559,10 +559,7 @@ void NfgShow::SolveStandard(void)
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	if (IsConstSum(nf))
-	  solver = new guinfgLp(*sup, this, 1, dialog.Precision(), true);
-	else
-	  solver = new guinfgLcp(*sup, this, 1, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*sup, this, 1, dialog.Precision(), true);
       }
       else {
 	wxMessageBox("One-Perfect not implemented", "Standard Solution");
@@ -580,10 +577,7 @@ void NfgShow::SolveStandard(void)
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	if (IsConstSum(nf)) 
-	  solver = new guinfgLp(*sup, this, 2, dialog.Precision(), true);
-	else
-	  solver = new guinfgLcp(*sup, this, 2, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
       }
       else {
@@ -604,10 +598,7 @@ void NfgShow::SolveStandard(void)
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	if (IsConstSum(nf))  
-	  solver = new guinfgLp(*sup, this, 0, dialog.Precision(), true);
-	else
-	  solver = new guinfgLcp(*sup, this, 0, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
       }
       else {

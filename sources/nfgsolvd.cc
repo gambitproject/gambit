@@ -139,36 +139,24 @@ void dialogNfgSolveStandard::OnChanged(void)
   case 1:
     switch (m_standardNum->GetSelection()) {
     case 0:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
-	m_description->SetValue("LpSolve");
-	m_precision->Enable(TRUE);
-      }
-      else if (m_nfg.NumPlayers() == 2) {
-	m_description->SetValue("LcpSolve");
+      if (m_nfg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve");
 	m_precision->Enable(TRUE);
       }
       else 
 	m_description->SetValue("NOT IMPLEMENTED");
       break;
     case 1:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
-	m_description->SetValue("LpSolve");
-	m_precision->Enable(TRUE);
-      }
-      else if (m_nfg.NumPlayers() == 2) {
-	m_description->SetValue("LcpSolve");
+      if (m_nfg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve");
 	m_precision->Enable(TRUE);
       }
       else
 	m_description->SetValue("NOT IMPLEMENTED");
       break;
     case 2:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) { 
-	m_description->SetValue("LpSolve");
-	m_precision->Enable(TRUE);
-      }
-      else if (m_nfg.NumPlayers() == 2) {
-	m_description->SetValue("LcpSolve");
+      if (m_nfg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve");
 	m_precision->Enable(TRUE);
       }
       else
