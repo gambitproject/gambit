@@ -37,8 +37,7 @@ public:
   virtual ~BaseSimpdiv() {}
 };
 
-template <class T> class SimpdivModule
-: public BaseSimpdiv, public SolutionModule {
+template <class T> class SimpdivModule : public BaseSimpdiv  {
 private:
   const NormalForm<T> &rep;
   long leash;
@@ -52,7 +51,7 @@ private:
 public:
   SimpdivModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,int plev,
 	      int ndivs, int leashlength)
-    :  SolutionModule(ofile,efile,plev), rep(N),ab(rep.Dimensionality()),
+    : rep(N),ab(rep.Dimensionality()),
   nstrats(rep.Dimensionality()),y(rep.Dimensionality()), plev(plev),
   pi(1,rep.ProfileLength(),1,2), labels(1,rep.ProfileLength(),1,2),
   ylabel(2),leash(leashlength),ndivs(ndivs), nevals(0), nits(0),
