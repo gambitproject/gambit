@@ -221,35 +221,29 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
   else if (method == 0 || method == 1)
     m_methodChoice->SetSelection(method);
 
-  wxLayoutConstraints *constraints;
+  m_depthChoice->SetConstraints(new wxLayoutConstraints);
+  m_depthChoice->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft, 10);
+  m_depthChoice->GetConstraints()->top.SameAs(m_dominanceGroup, wxTop, 20);
+  m_depthChoice->GetConstraints()->height.AsIs();
+  m_depthChoice->GetConstraints()->width.AsIs();
 
-  constraints = new wxLayoutConstraints;
-  constraints->left.SameAs(m_dominanceGroup, wxLeft, 10);
-  constraints->top.SameAs(m_dominanceGroup, wxTop, 20);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  m_depthChoice->SetConstraints(constraints);
+  m_typeChoice->SetConstraints(new wxLayoutConstraints);
+  m_typeChoice->GetConstraints()->left.SameAs(m_depthChoice, wxRight, 10);
+  m_typeChoice->GetConstraints()->top.SameAs(m_depthChoice, wxTop);
+  m_typeChoice->GetConstraints()->height.AsIs();
+  m_typeChoice->GetConstraints()->width.AsIs();
 
-  constraints = new wxLayoutConstraints;
-  constraints->left.SameAs(m_depthChoice, wxRight, 10);
-  constraints->top.SameAs(m_depthChoice, wxTop);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  m_typeChoice->SetConstraints(constraints);
+  m_methodChoice->SetConstraints(new wxLayoutConstraints);
+  m_methodChoice->GetConstraints()->top.SameAs(m_depthChoice, wxTop);
+  m_methodChoice->GetConstraints()->left.SameAs(m_typeChoice, wxRight, 10);
+  m_methodChoice->GetConstraints()->height.AsIs();
+  m_methodChoice->GetConstraints()->width.AsIs();
 
-  constraints = new wxLayoutConstraints;
-  constraints->top.SameAs(m_depthChoice, wxTop);
-  constraints->left.SameAs(m_typeChoice, wxRight, 10);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  m_methodChoice->SetConstraints(constraints);
-
-  constraints = new wxLayoutConstraints;
-  constraints->top.SameAs(this, wxTop, 5);
-  constraints->left.SameAs(this, wxLeft, 5);
-  constraints->bottom.SameAs(m_depthChoice, wxBottom, -10);
-  constraints->right.SameAs(m_methodChoice, wxRight, -10);
-  m_dominanceGroup->SetConstraints(constraints);
+  m_dominanceGroup->SetConstraints(new wxLayoutConstraints);    
+  m_dominanceGroup->GetConstraints()->top.SameAs(this, wxTop, 5);
+  m_dominanceGroup->GetConstraints()->left.SameAs(this, wxLeft, 5);
+  m_dominanceGroup->GetConstraints()->bottom.SameAs(m_depthChoice, wxBottom, -10);
+  m_dominanceGroup->GetConstraints()->right.SameAs(m_methodChoice, wxRight, -10);
 
   NewLine();
 }
@@ -272,29 +266,23 @@ void dialogAlgorithm::SubgameFields(void)
   m_selectSolutions->SetValue(select);
   NewLine();
 
-  wxLayoutConstraints *constraints;
+  m_markSubgames->SetConstraints(new wxLayoutConstraints);
+  m_markSubgames->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft, 10);
+  m_markSubgames->GetConstraints()->top.SameAs(m_subgamesGroup, wxTop, 20);
+  m_markSubgames->GetConstraints()->height.AsIs();
+  m_markSubgames->GetConstraints()->width.AsIs();
 
-  constraints = new wxLayoutConstraints;
-  constraints->left.SameAs(m_subgamesGroup, wxLeft, 10);
-  constraints->top.SameAs(m_subgamesGroup, wxTop, 20);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  m_markSubgames->SetConstraints(constraints);
+  m_selectSolutions->SetConstraints(new wxLayoutConstraints);
+  m_selectSolutions->GetConstraints()->left.SameAs(m_markSubgames, wxLeft);
+  m_selectSolutions->GetConstraints()->top.SameAs(m_markSubgames, wxBottom, 10);
+  m_selectSolutions->GetConstraints()->height.AsIs();
+  m_selectSolutions->GetConstraints()->width.AsIs();
 
-  constraints = new wxLayoutConstraints;
-  constraints->left.SameAs(m_markSubgames, wxLeft);
-  constraints->top.SameAs(m_markSubgames, wxBottom, 10);
-  constraints->height.AsIs();
-  constraints->width.AsIs();
-  m_selectSolutions->SetConstraints(constraints);
-
-  constraints = new wxLayoutConstraints;
-  constraints->top.SameAs(m_dominanceGroup, wxBottom, 15);
-  constraints->left.SameAs(m_dominanceGroup, wxLeft);
-  constraints->bottom.SameAs(m_selectSolutions, wxBottom, -10);
-  constraints->right.SameAs(m_selectSolutions, wxRight, -10);
-  m_subgamesGroup->SetConstraints(constraints);
-
+  m_subgamesGroup->SetConstraints(new wxLayoutConstraints);
+  m_subgamesGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
+  m_subgamesGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
+  m_subgamesGroup->GetConstraints()->bottom.SameAs(m_selectSolutions, wxBottom, -10);
+  m_subgamesGroup->GetConstraints()->right.SameAs(m_selectSolutions, wxRight, -10);
 }
 
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
