@@ -13,9 +13,9 @@
 
 template <class T> class gArray  {
   friend bool operator==(const gArray<T> &, const gArray<T> &);
-// the following is causing problems -- commenting it out for now
-//  friend bool operator!=(const gArray<T> &, const gArray<T> &);
-                           
+#ifdef __BORLANDC__  // need this for BC++ compile, but not for g++
+  friend bool operator!=(const gArray<T> &, const gArray<T> &);
+#endif                           
   protected:
     int mindex, maxdex;
     T *data;
