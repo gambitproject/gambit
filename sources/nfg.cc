@@ -26,7 +26,7 @@ int Nfg::Product(const gArray<int> &dim)
   
 Nfg::Nfg(const gArray<int> &dim)
   : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    parameters(new gSpace)
+    parameters(new gSpace), efg(0)
 {
   ORD_PTR ord = &lex;
   paramorder = new term_order(parameters, ord);
@@ -45,7 +45,7 @@ Nfg::Nfg(const gArray<int> &dim)
 Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()),
+    results(b.results.Length()), efg(0),
     parameters(b.parameters), paramorder(b.paramorder)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {

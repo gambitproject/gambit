@@ -71,11 +71,14 @@ gString ToString(double);
 gString ToString(const gInteger &);
 gString ToString(const gRational &, bool approx = true);
 gString ToString(const gNumber &);
+template <class T> class gPoly;
+gString ToString(const gPoly<gNumber> &);
+
 
 double		FromString(const gString &s,double &d);
 gRational	FromString(const gString &s,gRational &r);
-
-double ToDouble(const gString &);
+gNumber		FromString(const gString &s,gNumber &n);
+double		ToDouble(const gString &);
 
 
 //
@@ -89,7 +92,7 @@ gString EscapeQuotes(const gString &);
 
 void gEpsilon(double &v, int i = 8);
 void gEpsilon(gRational &v, int i = 8);
-
+void gEpsilon(gNumber &v, int i=8);
 #endif    // GMISC_H
 
 

@@ -34,25 +34,15 @@ template <class T> T gmax(const T &a, const T &b)
 //                     Template function instantiations
 //--------------------------------------------------------------------------
 
+template int gmin(const int &a, const int &b);
+template float gmin(const float &a, const float &b);
+template double gmin(const double &a, const double &b);
+template gRational gmin(const gRational &a, const gRational &b);
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE int gmin(const int &a, const int &b);
-TEMPLATE float gmin(const float &a, const float &b);
-TEMPLATE double gmin(const double &a, const double &b);
-TEMPLATE gRational gmin(const gRational &a, const gRational &b);
-
-TEMPLATE int gmax(const int &a, const int &b);
-TEMPLATE float gmax(const float &a, const float &b);
-TEMPLATE double gmax(const double &a, const double &b);
-TEMPLATE gRational gmax(const gRational &a, const gRational &b);
-
-#pragma -Jgx
+template int gmax(const int &a, const int &b);
+template float gmax(const float &a, const float &b);
+template double gmax(const double &a, const double &b);
+template gRational gmax(const gRational &a, const gRational &b);
 
 #ifndef hpux
 double abs(double a)
@@ -99,7 +89,7 @@ long ran1(long* idum)
   long k;
   static long iy = 0;
   static long iv[NTAB];
-  
+
   if(*idum <= 0 || !iy) {
     if(-(*idum) < 1) *idum = 1;
     else *idum = -(*idum);
@@ -183,7 +173,7 @@ gString ToString(double d)
 
 gString ToString(const gNumber &n)
 {
-  if (n.GetRep() == DOUBLE)
+  if (n.GetRep() == gDOUBLE)
     return ToString((double) n);
   else
     return ToString((gRational) n);
@@ -195,11 +185,21 @@ gString ToString(const gInteger &i)
   return gString(Itoa(i));
 }
 
+#include "gpoly.h"
+gString &operator<<(gString &, const gPoly<gNumber> &);
+
+gString ToString(const gPoly<gNumber> &p)
+{
+  gString t;
+  t << p;
+  return t;
+}
+
 // Note: when converting a double to a gRational, the num & den often turn out
 // to be VERY large numbers due to an inherent imprecision of floating point.
 // I.e. 0.50 can become 50001/100000.  This may cause serious display problems.
 // However, since the main point of using rationals is to have PRECISE answers,
-// no attempt will be made to 'approx reduce' the fractions.  Thus the 
+// no attempt will be made to 'approx reduce' the fractions.  Thus the
 // approximation feature is disabled for now.
 
 gString ToString(const gRational &r, bool )
@@ -257,20 +257,20 @@ gRational FromString(const gString &f,gRational &y)
   int sign = 1;
   int index=0,length=f.length();
   gInteger num = 0, denom = 1;
-  
+
   while (isspace(ch) && index<=length)    ch=f[index++];
-  
+
   if (ch == '-' && index<=length)  {
     sign = -1;
     ch=f[index++];
   }
-  
+
   while (ch >= '0' && ch <= '9' && index<=length)   {
     num *= 10;
     num += (int) (ch - '0');
     ch=f[index++];
   }
-  
+
   if (ch == '/')  {
     denom = 0;
     ch=f[index++];
@@ -290,7 +290,7 @@ gRational FromString(const gString &f,gRational &y)
       ch=f[index++];
     }
   }
-  
+
   y = gRational(sign * num, denom);
   return y;
 }
@@ -308,6 +308,18 @@ double FromString(const gString &f,double &d)
 double ToDouble(const gString &s)
 { return strtod(s, NULL); }
 
+// Rational if there is no decimal point
+gNumber FromString(const gString &s,gNumber &n)
+{
+  gRational r;
+  double d;
+  gString tmp=s;
+  if (tmp.lastOccur('.'))
+    n=FromString(s,d);
+  else
+    n=FromString(s,r);
+  return n;
+}
 
 gString EscapeQuotes(const gString &s)
 {
@@ -331,7 +343,7 @@ gString NameTriState(TriState i)
     case T_DONTKNOW:
       return "DK"; 
     case T_YES:
-      return "Y"; 
+      return "Y";
     case T_NO:
       return "N"; 
     default:
@@ -350,9 +362,14 @@ void gEpsilon(double &v, int i)
 { v=pow(10.0,-i); }
 
 
-void gEpsilon(gRational &v, int /* i */) 
-{ v = (gRational)0;} 
+void gEpsilon(gRational &v, int /* i */)
+{ v = (gRational)0;}
 
-
-
+void gEpsilon(gNumber &n, int i)
+{
+  if (n.GetRep() == gRATIONAL)
+    n = (gRational)0;
+  else
+    n = pow(10.0,-i);
+}
 
