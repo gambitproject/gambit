@@ -1,0 +1,246 @@
+//#
+//# FILE: gdpvect.imp -- Implementation of doubly-partitioned vector class
+//#
+//# $Id$
+//#
+
+#include "gdpvect.h"
+#include <assert.h>
+
+//--------------------------------------------------------------------------
+//          gDPVector<T>: Private and protected member functions
+//--------------------------------------------------------------------------
+
+template <class T>
+int gDPVector<T>::sum(int part, const gPVector<int> &v) const
+{
+  int s = 0;
+
+  gTuple<int> len(v.Lengths());
+  for (int j = 1; j <= len[part]; j++)
+    s += v(part, j);
+
+  return s;
+}
+
+template <class T>
+gTuple<int> gDPVector<T>::Flatten(const gPVector<int> &v) const
+{
+  gTuple<int> t(v.Length());
+  
+  for (int i = 1; i <= v.Length(); i++)
+    t[i] = v[i];
+
+  return t;
+}
+  
+template <class T> void gDPVector<T>::setindex(void)
+{
+  int index = 1;
+  
+  for (int i = 1; i <= dvlen.Length(); i++)  {
+    dvptr[i] = svptr + index - 1;
+    dvidx[i] = index;
+    index += dvlen[i];
+  }
+}
+    
+//--------------------------------------------------------------------------
+//    gDPVector<T>: Constructors, destructor, and constructive operators
+//--------------------------------------------------------------------------
+
+template <class T> gDPVector<T>::gDPVector(void) : dvptr(0)
+{ }
+
+template <class T> gDPVector<T>::gDPVector(const gPVector<int> &sig)
+  : gPVector<T>(Flatten(sig)), dvlen(sig.Lengths().Length()),
+    dvidx(sig.Lengths().Length())
+{
+  dvptr = new T **[dvlen.Length()];
+  dvptr -= 1;
+
+  for (int i = 1; i <= dvlen.Length(); i++)
+    dvlen[i] = sig.Lengths()[i];
+
+  setindex();
+}
+
+template <class T> gDPVector<T>::gDPVector(const gVector<T> &val,
+					   const gPVector<int> &sig)
+  : gPVector<T>(val, Flatten(sig)), dvlen(sig.Lengths().Length()),
+    dvidx(sig.Lengths().Length())
+{
+  dvptr = new T **[dvlen.Length()];
+  dvptr -= 1;
+
+  for (int i = 1; i <= dvlen.Length(); i++)
+    dvlen[i] = sig.Lengths()[i];
+
+  setindex();
+}
+
+template <class T> gDPVector<T>::gDPVector(const gDPVector<T> &v)
+  : gPVector<T>(v), dvlen(v.dvlen), dvidx(v.dvidx)
+{
+  dvptr = new T **[dvlen.Length()];
+  dvptr -= 1;
+
+  setindex();
+}
+
+template <class T> gDPVector<T>::~gDPVector()
+{
+  if (dvptr)  delete [] (dvptr + 1);
+}
+
+template <class T> gDPVector<T> &gDPVector<T>::operator=(const gDPVector<T> &v)
+{
+  assert(dvlen == v.dvlen);
+  gPVector<T>::operator=(v);
+  return *this;
+}
+
+template <class T> gDPVector<T> &gDPVector<T>::operator=(const gPVector<T> &v)
+{
+  gPVector<T>::operator=(v);
+  return *this;
+}
+
+template <class T> gDPVector<T> &gDPVector<T>::operator=(const gVector<T> &v)
+{
+  gPVector<T>::operator=(v);
+  return *this;
+}
+
+//--------------------------------------------------------------------------
+//                    gDPVector<T>: Operator definitions
+//--------------------------------------------------------------------------
+
+template <class T> T &gDPVector<T>::operator()(int a, int b, int c)
+{
+  assert(dvlen.First() <= a && a <= dvlen.Last());
+  assert(1 <= b && b <= dvlen[a]);
+  assert(1 <= c && c <= svlen[dvidx[a] + b - 1]);
+  return dvptr[a][b][c];
+}
+
+template <class T> const T &gDPVector<T>::operator()(int a, int b, int c) const
+{
+  assert(dvlen.First() <= a && a <= dvlen.Last());
+  assert(1 <= b && b <= dvlen[a]);
+  assert(1 <= c && c <= svlen[dvidx[a] + b - 1]);
+  return dvptr[a][b][c];
+}
+
+template <class T>
+gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
+{
+  assert(dvlen == v.dvlen);
+  gDPVector<T> tmp(*this);
+  tmp.gPVector<T>::operator+=(v);
+  return tmp;
+}
+
+template <class T>
+gDPVector<T> &gDPVector<T>::operator+=(const gDPVector<T> &v)
+{
+  assert(dvlen == v.dvlen);
+  gPVector<T>::operator+=(v);
+  return *this;
+}
+
+template <class T> gDPVector<T> gDPVector<T>::operator-(void) const
+{
+  gDPVector<T> tmp(*this);
+  for (int i = First(); i <= Last(); i++)
+    tmp[i] = -tmp[i];
+  return tmp;
+}
+
+template <class T>
+gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
+{
+  assert(dvlen == v.dvlen);
+  gDPVector<T> tmp(*this);
+  tmp.gPVector<T>::operator-=(v);
+  return tmp;
+}
+
+template <class T>
+gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
+{
+  assert(dvlen == v.dvlen);
+  gPVector<T>::operator-=(v);
+  return *this;
+}
+
+template <class T> T gDPVector<T>::operator*(const gDPVector<T> &v) const
+{
+  assert(dvlen == v.dvlen);
+  return (*this).gPVector<T>::operator*(v);
+}
+
+template <class T> gDPVector<T> &gDPVector<T>::operator*=(const T &c)
+{
+  gPVector<T>::operator*=(c);
+  return *this;
+}
+
+template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
+{
+  gDPVector<T> tmp(*this);
+  tmp = tmp.gPVector<T>::operator/(c);
+  return tmp;
+}
+
+template <class T>
+gDPVector<T> gDPVector<T>::operator/(const gDPVector<T> &v) const
+{
+  assert(dvlen == v.dvlen);
+  gDPVector<T> tmp(*this);
+  tmp.gPVector<T>::operator/=(v);
+  return tmp;
+}
+
+template <class T>
+gDPVector<T> &gDPVector<T>::operator/=(const gDPVector<T> &v)
+{
+  assert(dvlen == v.dvlen);
+  gPVector<T>::operator/=(v);
+  return *this;
+}
+
+template <class T> int gDPVector<T>::operator==(const gDPVector<T> &v) const
+{
+  assert(dvlen == v.dvlen);
+  return gPVector<T>::operator==(v);
+}
+
+template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
+{
+  return !(*this == v);
+}
+
+//--------------------------------------------------------------------------
+//                      gDPVector<T>: Output functions
+//--------------------------------------------------------------------------
+
+template <class T> void gDPVector<T>::Dump(gOutput &f) const
+{
+  for (int i = 1; i <= dvlen.Length(); i++)  {
+    gout << "{ ";
+    for (int j = 1; j <= dvlen[i]; j++)  {
+      gout << "{ ";
+      for (int k = 1; k <= svlen[dvidx[i] + j - 1]; k++)
+	gout << (*this)(i, j, k) << ' ';
+      gout << "}";
+    }
+    gout << " }";
+  }
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gDPVector<T> &v)
+{
+  v.Dump(f);  return f;
+}
+
