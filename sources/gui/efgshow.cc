@@ -31,7 +31,9 @@
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
+#if !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include "wx/dcps.h"
+#endif  // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include "dlspinctrl.h"
 #include "wxstatus.h"
 
@@ -581,6 +583,7 @@ void EfgShow::MakeMenus(void)
   wxMenu *fileExportMenu = new wxMenu;
   fileExportMenu->Append(efgmenuFILE_EXPORT_POSTSCRIPT, "&PostScript",
 			 "Save a printout of the game in PostScript format");
+  fileExportMenu->Enable(efgmenuFILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
   fileMenu->Append(efgmenuFILE_EXPORT, "&Export", fileExportMenu,
 		   "Export the game in various formats");
   fileMenu->AppendSeparator();
@@ -891,6 +894,7 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
 
 void EfgShow::OnFileExportPS(wxCommandEvent &)
 {
+#if wxUSE_POSTSCRIPT
   wxPrintData printData(m_printData);
 
   wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
@@ -944,6 +948,7 @@ void EfgShow::OnFileExportPS(wxCommandEvent &)
   m_treeWindow->OnDraw(dc, actualScale);
   dc.EndPage();
   dc.EndDoc();
+#endif  // wxUSE_POSTSCRIPT
 }
 
 void EfgShow::OnFileExit(wxCommandEvent &)
