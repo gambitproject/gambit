@@ -139,18 +139,18 @@ T NFRep<T>::LiapValue(const MixedProfile<T> &p) const
   return result;
 }
 
-int NormalForm::Liap(int number)
+int NormalForm::Liap(int number, int plev, gOutput &out, gOutput &err)
 {
   BaseLiap *T;
 
   switch (type)  {
-  case nfDOUBLE:   
-    T = new LiapModule<double>((NFRep<double> &) *data, gout, gerr,0);
-    break;
+    case DOUBLE:   
+      T = new LiapModule<double>((NFRep<double> &) *data, out, err, plev);
+      break;
 /*
-  case nfRATIONAL:  
-    T = new LiapModule<Rational>((NFRep<Rational> &) *data, gout, gerr,0);
-    break; 
+    case RATIONAL:  
+      T = new LiapModule<Rational>((NFRep<Rational> &) *data, out, err, plev);
+      break; 
 */
   }
   T->Liap(number);

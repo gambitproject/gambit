@@ -378,7 +378,7 @@ LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
-int NormalForm::Lemke(int dup_strat)
+int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err)
 {
   if (NumPlayers() != 2)   return 0;
 
@@ -388,13 +388,13 @@ int NormalForm::Lemke(int dup_strat)
   BaseLemke *T;
 
   switch (type)   {
-    case nfDOUBLE:
-      T = new LemkeTableau<double>((NFRep<double> &) *data, gout, gerr, 0);
+    case DOUBLE:
+      T = new LemkeTableau<double>((NFRep<double> &) *data, out, err, plev);
       break;
 
-    case nfRATIONAL:
+    case RATIONAL:
       T = new LemkeTableau<Rational>((NFRep<Rational> &) *data,
-				     gout, gerr, 0);
+				     out, err, plev);
       break;
   }
 
