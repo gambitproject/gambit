@@ -753,7 +753,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("length", 1);
+  FuncObj = new FuncDescObj("Length", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LengthList, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
                               PortionSpec(porANYTYPE, 1, porNULLSPEC )));
@@ -869,7 +869,7 @@ void Init_listfunc(GSM *gsm)
 				       PortionSpec(porINTEGER, 1), 
 				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porINTEGER));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("length", porINTEGER, 
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("ength", porINTEGER, 
 					    new IntPortion(1)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("delta", porINTEGER, 
 					    new IntPortion(0)));
