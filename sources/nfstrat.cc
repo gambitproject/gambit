@@ -261,6 +261,14 @@ const gArray<int> NFSupport::NumStrats(void) const
   return a;
 }
 
+int NFSupport::TotalNumStrats(void) const
+{
+  int total = 0;
+  for (int i = 1 ; i <= sups.Length(); i++)
+    total += sups[i]->NumStrats();
+  return total;
+}
+
 int NFSupport::Find(Strategy *s) const
 {
   return sups[s->nfp->GetNumber()]->GetNFStrategySet().Find(s);

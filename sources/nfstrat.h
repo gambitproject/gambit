@@ -74,6 +74,7 @@ public:
 
   int NumStrats(int pl) const;
   const gArray<int> NumStrats(void) const;
+  int TotalNumStrats(void) const;
 
   void AddStrategy(Strategy *);
   bool RemoveStrategy(Strategy *);
