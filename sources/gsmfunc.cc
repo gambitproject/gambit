@@ -15,7 +15,7 @@
 #include "portion.h"
 #include "gsmhash.h"
 #include "gsminstr.h"
-
+#include "rational.h"
 
 
 // This function is called once at the first instance of GSM.
@@ -50,92 +50,40 @@ void GSM::InitFunctions( void )
 
 //----------------------------- List stuff --------------------------
 
-bool CallFuncObj::_ListDimMatch( ListPortion* p1, ListPortion* p2 )
+bool CallFuncObj::_ListDimMatch(ListPortion* p1, ListPortion* p2)
 {
   int i;
   bool result = true;
   Portion* s1;
   Portion* s2;
 
-  if( p1->Length() != p2->Length() )
-    return false;
-
-  for( i = 1; i <= p1->Length(); i++ )
-  {
-    s1 = (*p1)[i];
-    s2 = (*p2)[i];
-    if( s1->Type() == porLIST && s2->Type() == porLIST )
+  if(p1->Length() != p2->Length())
+    result = false;
+  else
+    for(i = 1; i <= p1->Length(); i++)
     {
-      /*
-      if( ((ListPortion*) s1)->ContainsListsOnly() !=
-	 ((ListPortion*) s2)->ContainsListsOnly() )
-	result = false;
-      else 
-      */
-      if( !_ListDimMatch((ListPortion*) s1, (ListPortion*) s2 ))
-	result = false;
+      s1 = (*p1)[i];
+      s2 = (*p2)[i];
+      if(s1->Spec().ListDepth > 0 && s2->Spec().ListDepth > 0)
+	if(!_ListDimMatch((ListPortion*) s1, (ListPortion*) s2))
+	  result = false;
     }
-    /*
-    else if( s1->Type() == porLIST || s2->Type() == porLIST )
-      result = false;
-      */
-  }
-
   return result;
 }
 
 
-int CallFuncObj::_ListNestedLevel( ListPortion* p )
+bool CallFuncObj::_ListNestedCheck(Portion* p, const ParamInfoType& info)
 {
-  int i;
-  int NestedLevel = 0;
-  int SubNestedLevel;
-
-  if( ! p->ContainsListsOnly() )
-    NestedLevel = 1;
-  else
-    for( i = 1; i <= p->Length(); i++ )
-      if( (*p)[i]->Type() == porLIST )
-      {
-	SubNestedLevel = _ListNestedLevel( (ListPortion*) (*p)[i] );
-	// SubNestedLevel = _ListNestedLevel( (ListPortion*) s );
-	if( NestedLevel == 0 )
-	  NestedLevel = SubNestedLevel + 1;
-	else if( SubNestedLevel + 1 < NestedLevel )
-	  NestedLevel = SubNestedLevel + 1;
-      }
-  
-  return NestedLevel;
-}
-
-
-bool CallFuncObj::_ListNestedCheck( Portion* p, const ParamInfoType& info )
-{
-  if( p == 0 && info.Type == porUNDEFINED )
-    return false;
-  else
-    assert( p != 0 );
-
-  if( p->Type() == porLIST )
+  bool result = false;
+  if(p == 0 && info.Spec.Type == porUNDEFINED)
+    result = false;
+  else 
   {
-    if( info.Type & porLIST )
-    {
-      if( ((ListPortion*) p)->ContainsListsOnly() )
-      {
-	if( info.NestedListLevel == 0 ||
-	   (_ListNestedLevel( (ListPortion*) p ) > info.NestedListLevel && 
-	    info.NestedListLevel != 0 ) )
-	{
-	  return true;
-	}
-      }
-    }
-    else
-    {
-      return true;
-    }
+    assert(p);
+    if(p->Spec().ListDepth > info.Spec.ListDepth)
+      result = true;
   }
-  return false;
+  return result;
 }
 
 
@@ -147,8 +95,8 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
   ListPortion* p = 0;
   Portion* result;
   int NumParams = _FuncInfo[_FuncIndex].NumParams;
-  Portion** CurrParam = new Portion*[ NumParams ];
-  bool* Listed = new bool[ NumParams ];
+  Portion** CurrParam;
+  bool Listed[NumParams];
   ListPortion* Source = 0;  // source to look at to create dimensionality
   bool recurse;
 
@@ -157,7 +105,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
   {
     Listed[i] =
       _ListNestedCheck( ParamIn[i], _FuncInfo[_FuncIndex].ParamInfo[i] );
-    if( Listed[i] )
+    if(Listed[i])
       Source = (ListPortion*) ParamIn[i];
   }
 
@@ -167,17 +115,18 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
     for( j = i + 1; j < NumParams; j++ )
     {
       if( Listed[i] && Listed[j] )
-	if( ParamIn[i]->Type() == porLIST && ParamIn[j]->Type() == porLIST )
+	if( ParamIn[i]->Spec().ListDepth > 0 && 
+	   ParamIn[j]->Spec().ListDepth > 0)
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
 	    return new ErrorPortion( "Mismatched dimensionalities" );
     }
   }
 
 
+  CurrParam = new Portion*[NumParams];
   p = new ListValPortion();
 
   assert( Source != 0 );
-  // assert( Source->Length() > 0 );
 
   // i is now the index in the lists
   for( i = 1; i <= Source->Length(); i++ )
@@ -192,7 +141,6 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
 	CurrParam[j] = ParamIn[j];
       else
       {
-	// CurrParam[j] = ((ListPortion*) ParamIn[j])->Subscript(i);
 	CurrParam[j] = (*(ListPortion*) ParamIn[j])[i];
 	if( _ListNestedCheck( CurrParam[j], 
 			     _FuncInfo[_FuncIndex].ParamInfo[j] ) )
@@ -223,9 +171,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
     p->Append( result );
   }
 
-
   delete[] CurrParam;
-  delete[] Listed;
   return p;
 }
 
@@ -240,7 +186,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
 ParamInfoType::ParamInfoType( void )
 {
   Name = "";
-  Type = porERROR;
+  Spec = PortionSpec(porERROR);
   DefaultValue = NO_DEFAULT_VALUE;
   PassByReference = 0;
 }
@@ -248,26 +194,23 @@ ParamInfoType::ParamInfoType( void )
 ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
 :
  Name( param_info.Name ),
- Type( param_info.Type ),
+ Spec( param_info.Spec ),
  DefaultValue( param_info.DefaultValue ),
- PassByReference( param_info.PassByReference ),
- NestedListLevel( param_info.NestedListLevel )
+ PassByReference( param_info.PassByReference )
 { }
 
 ParamInfoType::ParamInfoType
 ( 
  const gString& name,
- const PortionType& type,
+ const PortionSpec& spec,
  Portion* default_value, 
- const bool pass_by_ref,
- const int nested_list_level
+ const bool pass_by_ref
  )
 :
  Name( name ), 
- Type( type ), 
+ Spec( spec ), 
  DefaultValue( default_value ), 
- PassByReference( pass_by_ref ),
- NestedListLevel( nested_list_level )
+ PassByReference( pass_by_ref )
 { }
 
 ParamInfoType::~ParamInfoType()
@@ -276,10 +219,9 @@ ParamInfoType::~ParamInfoType()
 ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
 {
   Name = param_info.Name;
-  Type = param_info.Type;
+  Spec = param_info.Spec;
   DefaultValue = param_info.DefaultValue;
   PassByReference = param_info.PassByReference;
-  NestedListLevel = param_info.NestedListLevel;
   return *this;
 }
 
@@ -392,13 +334,11 @@ void FuncDescObj::SetFuncInfo
   int f_index = -1;
 
   for( i = 0; i < _NumFuncs; i++ )
-  {
     if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
     }
-  }
 
   _SetFuncInfo( f_index, num_params, listable );
   
@@ -422,13 +362,11 @@ void FuncDescObj::SetFuncInfo
   int f_index = -1;
 
   for( i = 0; i < _NumFuncs; i++ )
-  {
     if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
     {
       f_index = i;
       break;
     }
-  }
 
   _SetFuncInfo( f_index, num_params, listable );
   
@@ -436,13 +374,9 @@ void FuncDescObj::SetFuncInfo
   _FuncInfo[ _NumFuncs - 1 ].FuncInstr = func_instr;
 
   if( !_RefCountTable.IsDefined( _FuncInfo[ _NumFuncs - 1 ].FuncInstr ) )
-  {
     _RefCountTable.Define( _FuncInfo[ _NumFuncs - 1 ].FuncInstr, 1 );
-  }
   else
-  {
     _RefCountTable( _FuncInfo[ _NumFuncs - 1 ].FuncInstr )++;
-  }
 
   if( param_info != 0 )
     SetParamInfo( func_instr, param_info );
@@ -460,9 +394,7 @@ _SetFuncInfo( const int f_index, const int num_params, const bool listable )
     _NumFuncs++;
     NewFuncInfo = new FuncInfoType[ _NumFuncs ];
     for( i = 0; i < _NumFuncs - 1; i++ )
-    {
       NewFuncInfo[ i ] = _FuncInfo[ i ];
-    }
     delete [] _FuncInfo;
     _FuncInfo = NewFuncInfo;
 
@@ -491,33 +423,29 @@ void FuncDescObj::SetParamInfo
  Portion*           (*func_ptr)(Portion**),
  const int          param_index,
  const gString&     param_name, 
- const PortionType  param_type, 
+ const PortionSpec  param_spec, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference,
- const int          param_nested_list_level
+ const bool         param_pass_by_reference
  )
 {
   int i;
   int f_index = -1;
   
   for( i = 0; i < _NumFuncs; i++ )
-  {
     if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
     }
-  }
 
   _SetParamInfo
     ( 
      f_index,
      param_index,
      param_name, 
-     param_type, 
+     param_spec, 
      param_default_value,
-     param_pass_by_reference,
-     param_nested_list_level
+     param_pass_by_reference
      );
 }
 
@@ -527,33 +455,29 @@ void FuncDescObj::SetParamInfo
  gList< Instruction* >* func_instr,
  const int              param_index,
  const gString&         param_name, 
- const PortionType      param_type, 
+ const PortionSpec      param_spec, 
  Portion*               param_default_value,
- const bool             param_pass_by_reference,
- const int              param_nested_list_level
+ const bool             param_pass_by_reference
  )
 {
   int i;
   int f_index = -1;
   
   for( i = 0; i < _NumFuncs; i++ )
-  {
     if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
     {
       f_index = i;
       break;
     }
-  }
 
   _SetParamInfo
     ( 
      f_index,
      param_index,
      param_name, 
-     param_type, 
+     param_spec, 
      param_default_value,
-     param_pass_by_reference,
-     param_nested_list_level
+     param_pass_by_reference
      );
 }
 
@@ -563,10 +487,9 @@ void FuncDescObj::_SetParamInfo
  const int          f_index,
  const int          param_index,
  const gString&     param_name, 
- const PortionType  param_type, 
+ const PortionSpec  param_spec, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference,
- const int          param_nested_list_level
+ const bool         param_pass_by_reference
  )
 {
   int index;
@@ -595,13 +518,11 @@ void FuncDescObj::_SetParamInfo
 
 
   for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
-  {
     if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
     {
       repeated_variable_declaration = true;
       break;
     }
-  }
 
   if( repeated_variable_declaration )
   {
@@ -624,14 +545,12 @@ void FuncDescObj::_SetParamInfo
   
   _FuncInfo[ f_index ].ParamInfo[ param_index ].Name = 
     param_name;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].Type = 
-    param_type;
+  _FuncInfo[ f_index ].ParamInfo[ param_index ].Spec = 
+    param_spec;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
     param_default_value;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].NestedListLevel = 
-    param_nested_list_level;
 }
 
 
@@ -645,18 +564,25 @@ void FuncDescObj::SetParamInfo
   int f_index = -1;
 
   for( i = 0; i < _NumFuncs; i++ )
-  {
     if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
     }
+
+#ifndef NDEBUG
+  if( f_index == -1 )
+  {
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  An undefined function pointer specified\n";
+    gerr << "  for SetParamInfo( ... ) while initializing\n";
+    gerr << "  the function " << _FuncName << "[]\n";
   }
+  assert( f_index >= 0 && f_index < _NumFuncs );
+#endif // NDEBUG
 
   for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
-  {
     _FuncInfo[ f_index ].ParamInfo[ i ] = ParamInfoType( param_info[ i ] );
-  }
 }
 
 
@@ -669,19 +595,26 @@ void FuncDescObj::SetParamInfo
   int i;
   int f_index = -1;
 
-  for( i = 0; i < _NumFuncs; i++ )
-  {
-    if( _FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncInstr == func_instr ) )
+  for(i=0; i<_NumFuncs; i++)
+    if(_FuncInfo[i].UserDefined && (_FuncInfo[i].FuncInstr == func_instr))
     {
       f_index = i;
       break;
     }
+
+#ifndef NDEBUG
+  if( f_index == -1 )
+  {
+    gerr << "FuncDescObj Error:\n";
+    gerr << "  An undefined function pointer specified\n";
+    gerr << "  for SetParamInfo( ... ) while initializing\n";
+    gerr << "  the function " << _FuncName << "[]\n";
   }
+  assert( f_index >= 0 && f_index < _NumFuncs );
+#endif // NDEBUG
 
   for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
-  {
-    _FuncInfo[ f_index ].ParamInfo[ i ] = ParamInfoType( param_info[ i ] );
-  }
+    _FuncInfo[ f_index ].ParamInfo[ i ] = param_info[ i ];
 }
 
 
@@ -705,19 +638,13 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	  (index < newfunc->_FuncInfo[ i ].NumParams); 
 	  index++ )
       {
-	if(
-	   ( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 && 
-	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].DefaultValue == 0 ) &&
-	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Name ==
-	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name ) &&
-	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Type &
-	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) &&
-	   (( _FuncInfo[ f_index ].ParamInfo[ index ].Type & 
-	     newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) != porLIST )
-	   )
-	{
+	if((_FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 && 
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].DefaultValue == 0) &&
+	   (_FuncInfo[ f_index ].ParamInfo[ index ].Name ==
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name) &&
+	   (_FuncInfo[ f_index ].ParamInfo[ index ].Spec ==
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Spec))
 	  same_params = same_params & true;
-	}
 	else
 	{
 	  same_params = false;
@@ -725,7 +652,7 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	}
       }
       
-      if( same_params )
+      if(same_params)
       {
 	result = false;
 	break;
@@ -733,20 +660,14 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
     }
 
     if( result )
-    {
       if( newfunc->_FuncInfo[ i ].UserDefined )
-      {
 	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncInstr, 
 		    newfunc->_FuncInfo[ i ].NumParams,
 		    newfunc->_FuncInfo[ i ].ParamInfo );
-      }
       else
-      {
 	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncPtr, 
 		    newfunc->_FuncInfo[ i ].NumParams,
 		    newfunc->_FuncInfo[ i ].ParamInfo );
-      } 
-    }
     
     for( j = 0; j < newfunc->_FuncInfo[ i ].NumParams; j++ )
     {
@@ -762,9 +683,7 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 
 
 gString FuncDescObj::FuncName( void ) const
-{
-  return _FuncName;
-}
+{ return _FuncName; }
 
 
 gList<gString> FuncDescObj::FuncList(void) const
@@ -784,44 +703,46 @@ gList<gString> FuncDescObj::FuncList(void) const
       f += _FuncInfo[i].ParamInfo[j].Name;
       if(_FuncInfo[i].ParamInfo[j].PassByReference) f += '<';
       f += "->";
-    if(_FuncInfo[i].ParamInfo[j].DefaultValue)
-    {
-      switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Type())
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue)
       {
-      case porBOOL:
-	if(((BoolPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
-	  f += "True";
-	else
-	  f += "False";
-	break;
-      case porINTEGER:
-	f += ToString(((IntPortion*) 
-		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	break;
-      case porFLOAT:
-	f += ToString(((FloatPortion*) 
-		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	break;
-      case porRATIONAL:
-	f += ToString(((RationalPortion*) 
-		       _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
-	break;
-      case porTEXT:
-	f += ((TextPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
-	break;
-      case porINPUT:
-	f += "INPUT";
-	break;
-      case porOUTPUT:
-	f += "OUTPUT";
-	break;
-      default:
-	f += "N/A";
+	switch(_FuncInfo[i].ParamInfo[j].DefaultValue->Spec().Type)
+	{
+	case porBOOL:
+	  if(((BoolPortion*) _FuncInfo[i].ParamInfo[j].DefaultValue)->Value())
+	    f += "True";
+	  else
+	    f += "False";
+	  break;
+	case porINTEGER:
+	  f += ToString(((IntPortion*) 
+			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	  break;
+	case porFLOAT:
+	  f += ToString(((FloatPortion*) 
+			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	  break;
+	case porRATIONAL:
+	  f += ToString(((RationalPortion*) 
+			 _FuncInfo[i].ParamInfo[j].DefaultValue)->Value());
+	  break;
+	case porTEXT:
+	  f += ((TextPortion*)_FuncInfo[i].ParamInfo[j].DefaultValue)->Value();
+	  break;
+	case porINPUT:
+	  f += "INPUT";
+	  break;
+	case porOUTPUT:
+	  f += "OUTPUT";
+	  break;
+	default:
+	  f += "N/A";
+	}
       }
-    }
-    else
-      f += PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
-    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f += '}';
+      else
+	f += PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
+
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue) 
+	f += '}';
     }
     f += ']';
     list.Append(f);
@@ -830,9 +751,7 @@ gList<gString> FuncDescObj::FuncList(void) const
 }
 
 void FuncDescObj::Dump(gOutput& f, int i) const
-{
-  f << FuncList()[i] << '\n';
-}
+{ f << FuncList()[i] << '\n'; }
 
 void FuncDescObj::Dump(gOutput& f) const
 {
@@ -872,9 +791,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )
   _ErrorOccurred = false;
 
   for( f_index = 0; f_index < _NumFuncs; f_index++ )
-  {
     _FuncMatch[ f_index ] = true;
-  }
   for( index = 0; index < _NumParams; index++ )
   {
     _Param[ index ] = NO_DEFAULT_VALUE;
@@ -889,13 +806,11 @@ CallFuncObj::~CallFuncObj()
 {
   int index;
   if( _ErrorOccurred )
-  {
     for( index = 0; index < _NumParams; index++ )
     {
       delete _RunTimeParamInfo[ index ].Ref;
       delete _Param[ index ];
     }
-  }
   delete[] _FuncMatch;
   delete[] _RunTimeParamInfo;
   delete[] _Param;
@@ -903,61 +818,40 @@ CallFuncObj::~CallFuncObj()
 
 
 int CallFuncObj::NumParams( void ) const
-{
-  return _NumParams;
-}
+{ return _NumParams; }
 
 
 bool CallFuncObj::
-_TypeMatch( Portion* p, PortionType ExpectedType, bool Listable )
+_TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable )
 {
   bool        result = false;
-  PortionType CalledType;
-  PortionType ExpectedListType;
+  PortionSpec CalledSpec;
 
 
-  if( p == 0 && ExpectedType == porUNDEFINED )
+  if( p == 0 && ExpectedSpec.Type == porUNDEFINED )
     return true;
-  else
-    assert( p != 0 );
-
-
-
-  CalledType = p->Type();
   
-  if( (ExpectedType != porANYTYPE) && (ExpectedType & porLIST) )
-  {
-    if( CalledType == porLIST )
+  assert(p != 0);
+  CalledSpec = p->Spec();
+  
+  if(CalledSpec == ExpectedSpec)
+    result = true;
+  else if((CalledSpec.Type & ExpectedSpec.Type) &&
+	  (CalledSpec.ListDepth == ExpectedSpec.ListDepth))
+    result = true;
+  else if((CalledSpec.Type & ExpectedSpec.Type) &&
+	  (!Listable) &&
+	  (CalledSpec.ListDepth>0) &&
+	  (ExpectedSpec.ListDepth>0))
+    result = true;
+  else if((CalledSpec.ListDepth > ExpectedSpec.ListDepth))
+    if((CalledSpec.Type & ExpectedSpec.Type) && Listable)
+      result = true;
+    else if(ExpectedSpec.ListDepth == 0 && CalledSpec.Type == porUNDEFINED)
     {
-      if( ExpectedType == porLIST )
-      {
-	result = true;
-      }
-      else
-      {
-	CalledType = ( (ListPortion*) p )->DataType();
-	ExpectedListType = ExpectedType & ~porLIST;
-	if(CalledType & ExpectedListType)
-	  result = true; 
-	else if( CalledType == porUNDEFINED )
-	{
-	  result = true;
-	  ( (ListPortion*) p )->SetDataType( ExpectedListType );
-	}
-      }
+      result = true;
+      ( (ListPortion*) p )->SetDataType( ExpectedSpec.Type );
     }
-  }
-  else // normal type checking
-  {
-    if (CalledType & ExpectedType)
-      result = true; 
-    else if( CalledType == porLIST && Listable )
-    {
-      CalledType = ((ListPortion*) p)->DataType();
-      if (CalledType & ExpectedType)
-	result = true; 
-    }
-  }
   return result;
 }
 
@@ -1090,7 +984,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
   }
 
   // Passed an undefined variable
-  if( param != 0 && param->Type() == porREFERENCE )
+  if( param != 0 && param->Spec().Type == porREFERENCE )
   {
 
     // check whether undefined variables are allowed
@@ -1102,7 +996,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 	if((_FuncInfo[f_index].ParamInfo[_CurrParamIndex].PassByReference &&
 	    _FuncInfo[f_index].ParamInfo[_CurrParamIndex].DefaultValue != 0)|| 
 	   _FuncInfo[f_index].UserDefined ||
-	   _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Type == porUNDEFINED )
+	   _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Spec.Type == porUNDEFINED )
 	  AllowUndefinedRef = true;
 	else
 	  _FuncMatch[ f_index ] = false;
@@ -1152,7 +1046,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 	{
 	  if( !_TypeMatch
 	     ( param, 
-	      _FuncInfo[ f_index ].ParamInfo[_CurrParamIndex].Type,
+	      _FuncInfo[ f_index ].ParamInfo[_CurrParamIndex].Spec,
 	      _FuncInfo[ f_index ].Listable ) )
 	  {
 	    _FuncMatch[ f_index ] = false;
@@ -1170,14 +1064,14 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
       {
 	if( !_TypeMatch
 	   ( param, 
-	    _FuncInfo[ _FuncIndex ].ParamInfo[_CurrParamIndex].Type,
+	    _FuncInfo[ _FuncIndex ].ParamInfo[_CurrParamIndex].Spec,
 	    _FuncInfo[ _FuncIndex ].Listable ) )
 	{
 	  _ErrorMessage( _StdErr, 26, _CurrParamIndex + 1, _FuncName,
 			_FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
-			PortionTypeToText( _FuncInfo[ _FuncIndex ].
-					  ParamInfo[_CurrParamIndex].Type ),
-			PortionTypeToText( param->Type() ) );
+			PortionSpecToText( _FuncInfo[ _FuncIndex ].
+					  ParamInfo[_CurrParamIndex].Spec ),
+			PortionSpecToText( param->Spec() ) );
 	  _ErrorOccurred = true;
 	  delete param;
 	  return false;
@@ -1259,7 +1153,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  // parameter is defined
 	  if( !_TypeMatch
 	     ( _Param[ index ],
-	      _FuncInfo[ f_index ].ParamInfo[ index ].Type,
+	      _FuncInfo[ f_index ].ParamInfo[ index ].Spec,
 	      _FuncInfo[ f_index ].Listable ) )
 	    match_ok = false;
 	}
@@ -1310,7 +1204,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     {
       if( _Param[ index ] != 0 )
       {
-	if( _Param[ index ]->Type() == porERROR )
+	if( _Param[ index ]->Spec().Type == porERROR )
 	{
 	  _ErrorMessage( _StdErr, 6, index + 1, _FuncName,
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
@@ -1318,7 +1212,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	}
 	else if( !_TypeMatch
 		( _Param[ index ], 
-		 _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type,
+		 _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Spec,
 		 _FuncInfo[ _FuncIndex ].Listable ) )
 	{
 	  _ErrorMessage( _StdErr, 7, index + 1, _FuncName, 
@@ -1363,7 +1257,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	    if( _FuncInfo[ _FuncIndex ].UserDefined )
 	    {
 	      // default values for undefined variables
-	      switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
+	      switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Spec.Type )
 	      {
 	      case porBOOL:
 		_Param[ index ] = new BoolValPortion( false );
@@ -1391,7 +1285,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 		_ErrorOccurred = true;
 	      }
 	    }
-	    else if( _FuncInfo[_FuncIndex].ParamInfo[index].Type != 
+	    else if( _FuncInfo[_FuncIndex].ParamInfo[index].Spec.Type != 
 		    porUNDEFINED )
 	    {
 	      _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
@@ -1502,7 +1396,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       _ErrorOccurred = true;
       result = new ErrorPortion;
     }
-    else if( result->Type() == porERROR )
+    else if( result->Spec().Type == porERROR )
     {
       _StdErr << _FuncName << "[]: ";
       result->Output( _StdErr );
@@ -1513,8 +1407,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
 
-
-  
   if( !_ErrorOccurred )
   {
     for( index = 0; index < _NumParams; index++ )
@@ -1620,7 +1512,7 @@ void CallFuncObj::Dump(gOutput& f) const
 	// if(_FuncInfo[i].ParamInfo[j].DefaultValue)
 	//   f << _FuncInfo[i].ParamInfo[j].DefaultValue;
 	// else
-	f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+	f << PortionSpecToText(_FuncInfo[i].ParamInfo[j].Spec);
 	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
       }
     }

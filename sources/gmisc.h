@@ -24,8 +24,10 @@ typedef enum { DOUBLE, RATIONAL }  DataType;
 
 typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
 
-#include "gambitio.h"
-#include "gstring.h"
+//#include "gambitio.h"
+//#include "gstring.h"
+class gString;
+class gOutput;
 gString NameTriState(TriState i);
 void DisplayTriState(gOutput& o, TriState i);
 

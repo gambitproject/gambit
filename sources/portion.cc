@@ -8,6 +8,9 @@
 
 #include <assert.h>
 #include <string.h>
+
+
+
 //----------------------------------------------------------------------
 //                         class instantiations
 //----------------------------------------------------------------------
@@ -42,7 +45,12 @@ class Portion;
 
 #include "nfg.h"
 #include "efg.h"
+#include "nfplayer.h"
+#include "nfstrat.h"
+#include "efstrat.h"
 
+#include "mixedsol.h"
+#include "behavsol.h"
 
 
 //---------------------------------------------------------------------
@@ -153,9 +161,9 @@ void Portion::AddDependency( void )
 {
   if( Owner() != 0 )
   {
-    if( Owner()->Type() & porNFG )
+    if( Owner()->Spec().Type & porNFG )
       ( (NfgPortion*) Owner() )->AddDependent( Original() );
-    else if( Owner()->Type() & porEFG )
+    else if( Owner()->Spec().Type & porEFG )
       ( (EfgPortion*) Owner() )->AddDependent( Original() );
   }
 }
@@ -165,9 +173,9 @@ void Portion::RemoveDependency( void )
 {
   if( Owner() != 0 )
   {
-    if( Owner()->Type() & porNFG )
+    if( Owner()->Spec().Type & porNFG )
       ( (NfgPortion*) Owner() )->RemoveDependent( Original() );
-    else if( Owner()->Type() & porEFG )
+    else if( Owner()->Spec().Type & porEFG )
       ( (EfgPortion*) Owner() )->RemoveDependent( Original() );
   }
 }
@@ -187,8 +195,8 @@ ErrorPortion::~ErrorPortion()
 gString ErrorPortion::Value( void )
 { return _Value; }
 
-PortionType ErrorPortion::Type( void ) const
-{ return porERROR; }
+PortionSpec ErrorPortion::Spec( void ) const
+{ return PortionSpec(porERROR); }
 
 void ErrorPortion::Output( gOutput& s ) const
 {
@@ -222,8 +230,8 @@ ReferencePortion::~ReferencePortion()
 gString ReferencePortion::Value( void )
 { return _Value; }
 
-PortionType ReferencePortion::Type( void ) const
-{ return porREFERENCE; }
+PortionSpec ReferencePortion::Spec( void ) const
+{ return PortionSpec(porREFERENCE); }
 
 void ReferencePortion::Output( gOutput& s ) const
 { 
@@ -254,8 +262,8 @@ IntPortion::~IntPortion()
 long& IntPortion::Value( void ) const
 { return *_Value; }
 
-PortionType IntPortion::Type( void ) const
-{ return porINTEGER; }
+PortionSpec IntPortion::Spec( void ) const
+{ return PortionSpec(porINTEGER); }
 
 void IntPortion::Output( gOutput& s ) const
 {
@@ -306,8 +314,8 @@ FloatPortion::~FloatPortion()
 double& FloatPortion::Value( void ) const
 { return *_Value; }
 
-PortionType FloatPortion::Type( void ) const
-{ return porFLOAT; }
+PortionSpec FloatPortion::Spec( void ) const
+{ return PortionSpec(porFLOAT); }
 
 void FloatPortion::Output( gOutput& s ) const
 {
@@ -360,8 +368,8 @@ RationalPortion::~RationalPortion()
 gRational& RationalPortion::Value( void ) const
 { return *_Value; }
 
-PortionType RationalPortion::Type( void ) const
-{ return porRATIONAL; }
+PortionSpec RationalPortion::Spec( void ) const
+{ return PortionSpec(porRATIONAL); }
 
 void RationalPortion::Output( gOutput& s ) const
 {
@@ -414,8 +422,8 @@ TextPortion::~TextPortion()
 gString& TextPortion::Value( void ) const
 { return *_Value; }
 
-PortionType TextPortion::Type( void ) const
-{ return porTEXT; }
+PortionSpec TextPortion::Spec( void ) const
+{ return PortionSpec(porTEXT); }
 
 void TextPortion::Output( gOutput& s ) const
 { 
@@ -473,8 +481,8 @@ BoolPortion::~BoolPortion()
 bool& BoolPortion::Value( void ) const
 { return *_Value; }
 
-PortionType BoolPortion::Type( void ) const
-{ return porBOOL; }
+PortionSpec BoolPortion::Spec( void ) const
+{ return PortionSpec(porBOOL); }
 
 void BoolPortion::Output( gOutput& s ) const
 {
@@ -530,15 +538,15 @@ OutcomePortion::~OutcomePortion()
 Outcome*& OutcomePortion::Value( void ) const
 { return *_Value; }
 
-PortionType OutcomePortion::Type( void ) const
+PortionSpec OutcomePortion::Spec( void ) const
 { 
   assert( (*_Value)->BelongsTo() != 0 );
   switch( (*_Value)->BelongsTo()->Type() )
   {
   case DOUBLE:
-    return porOUTCOME_FLOAT;
+    return PortionSpec(porOUTCOME_FLOAT);
   case RATIONAL:
-    return porOUTCOME_RATIONAL;
+    return PortionSpec(porOUTCOME_RATIONAL);
   default:
     assert( 0 );
   }
@@ -615,8 +623,8 @@ NfPlayerPortion::~NfPlayerPortion()
 NFPlayer*& NfPlayerPortion::Value( void ) const
 { return *_Value; }
 
-PortionType NfPlayerPortion::Type( void ) const
-{ return porPLAYER_NFG; }
+PortionSpec NfPlayerPortion::Spec( void ) const
+{ return PortionSpec(porPLAYER_NFG); }
 
 void NfPlayerPortion::Output( gOutput& s ) const
 {
@@ -693,8 +701,8 @@ StrategyPortion::~StrategyPortion()
 Strategy*& StrategyPortion::Value( void ) const
 { return *_Value; }
 
-PortionType StrategyPortion::Type( void ) const
-{ return porSTRATEGY; }
+PortionSpec StrategyPortion::Spec( void ) const
+{ return PortionSpec(porSTRATEGY); }
 
 void StrategyPortion::Output( gOutput& s ) const
 { 
@@ -763,8 +771,8 @@ NfSupportPortion::~NfSupportPortion()
 NFSupport*& NfSupportPortion::Value( void ) const
 { return *_Value; }
 
-PortionType NfSupportPortion::Type( void ) const
-{ return porNF_SUPPORT; }
+PortionSpec NfSupportPortion::Spec( void ) const
+{ return PortionSpec(porNF_SUPPORT); }
 
 void NfSupportPortion::Output( gOutput& s ) const
 { 
@@ -831,8 +839,8 @@ EfSupportPortion::~EfSupportPortion()
 EFSupport*& EfSupportPortion::Value( void ) const
 { return *_Value; }
 
-PortionType EfSupportPortion::Type( void ) const
-{ return porEF_SUPPORT; }
+PortionSpec EfSupportPortion::Spec( void ) const
+{ return PortionSpec(porEF_SUPPORT); }
 
 void EfSupportPortion::Output( gOutput& s ) const
 { 
@@ -900,8 +908,8 @@ EfPlayerPortion::~EfPlayerPortion()
 EFPlayer*& EfPlayerPortion::Value( void ) const
 { return *_Value; }
 
-PortionType EfPlayerPortion::Type( void ) const
-{ return porPLAYER_EFG; }
+PortionSpec EfPlayerPortion::Spec( void ) const
+{ return PortionSpec(porPLAYER_EFG); }
 
 void EfPlayerPortion::Output( gOutput& s ) const
 {
@@ -965,11 +973,17 @@ InfosetPortion::InfosetPortion( void )
 InfosetPortion::~InfosetPortion()
 { }
 
+bool InfosetPortion::IsValid( void ) const
+{ 
+  assert(*_Value);
+  return _IsValid && (*_Value)->IsValid();
+}
+
 Infoset*& InfosetPortion::Value( void ) const
 { return *_Value; }
 
-PortionType InfosetPortion::Type( void ) const
-{ return porINFOSET; }
+PortionSpec InfosetPortion::Spec( void ) const
+{ return PortionSpec(porINFOSET); }
 
 void InfosetPortion::Output( gOutput& s ) const
 {
@@ -1033,11 +1047,17 @@ NodePortion::NodePortion( void )
 NodePortion::~NodePortion()
 { }
 
+bool NodePortion::IsValid( void ) const
+{ 
+  assert(*_Value);
+  return _IsValid && (*_Value)->IsValid();
+}
+
 Node*& NodePortion::Value( void ) const
 { return *_Value; }
 
-PortionType NodePortion::Type( void ) const
-{ return porNODE; }
+PortionSpec NodePortion::Spec( void ) const
+{ return PortionSpec(porNODE); }
 
 void NodePortion::Output( gOutput& s ) const
 {
@@ -1106,8 +1126,8 @@ ActionPortion::~ActionPortion()
 Action*& ActionPortion::Value( void ) const
 { return *_Value; }
 
-PortionType ActionPortion::Type( void ) const
-{ return porACTION; }
+PortionSpec ActionPortion::Spec( void ) const
+{ return PortionSpec(porACTION); }
 
 void ActionPortion::Output( gOutput& s ) const
 {
@@ -1169,7 +1189,7 @@ bool ActionRefPortion::IsReference( void ) const
 
 
 MixedPortion::MixedPortion( void )
-{ }
+{}
 
 MixedPortion::~MixedPortion()
 { }
@@ -1177,25 +1197,29 @@ MixedPortion::~MixedPortion()
 BaseMixedProfile*& MixedPortion::Value( void ) const
 { return *_Value; }
 
-PortionType MixedPortion::Type( void ) const
+PortionSpec MixedPortion::Spec( void ) const
 { 
-  if( !*_Value )
-  {
-    return porMIXED;
-  }
-  else
-  {
-    switch( (*_Value)->Type() )
+  static unsigned long _DataType = porMIXED;
+  if(_DataType == porMIXED)
+    if( !*_Value )
     {
-    case DOUBLE:
-      return porMIXED_FLOAT;
-    case RATIONAL:
-      return porMIXED_RATIONAL;
-    default:
-      assert( 0 );
+      _DataType = porMIXED;
     }
-  }
-  return porUNDEFINED;
+    else
+    {
+      switch( (*_Value)->Type() )
+      {
+      case DOUBLE:
+	_DataType = porMIXED_FLOAT;
+	break;
+      case RATIONAL:
+	_DataType = porMIXED_RATIONAL;
+	break;
+      default:
+	assert( 0 );
+      }
+    }
+  return PortionSpec(_DataType);
 }
 
 void MixedPortion::Output( gOutput& s ) const
@@ -1311,25 +1335,29 @@ BehavPortion::~BehavPortion()
 BaseBehavProfile*& BehavPortion::Value( void ) const
 { return *_Value; }
 
-PortionType BehavPortion::Type( void ) const
+PortionSpec BehavPortion::Spec( void ) const
 { 
-  if( !*_Value )
-  {
-    return porBEHAV;
-  }
-  else
-  {
-    switch( (*_Value)->Type() )
+  static unsigned long _DataType = porBEHAV;
+  if(_DataType == porBEHAV)
+    if( !*_Value )
     {
-    case DOUBLE:
-      return porBEHAV_FLOAT;
-    case RATIONAL:
-      return porBEHAV_RATIONAL;
-    default:
-      assert( 0 );
+      _DataType = porBEHAV;
     }
-    return porUNDEFINED;
-  }
+    else
+    {
+      switch( (*_Value)->Type() )
+      {
+      case DOUBLE:
+	_DataType = porBEHAV_FLOAT;
+	break;
+      case RATIONAL:
+	_DataType = porBEHAV_RATIONAL;
+	break;
+      default:
+	assert( 0 );
+      }
+    }
+  return PortionSpec(_DataType);
 }
 
 void BehavPortion::Output( gOutput& s ) const
@@ -1449,19 +1477,19 @@ NfgPortion::~NfgPortion()
 BaseNfg*& NfgPortion::Value( void ) const
 { return *_Value; }
 
-PortionType NfgPortion::Type( void ) const
+PortionSpec NfgPortion::Spec( void ) const
 { 
   assert( (*_Value) != 0 );
   switch( (*_Value)->Type() )
   {
   case DOUBLE:
-    return porNFG_FLOAT;
+    return PortionSpec(porNFG_FLOAT);
   case RATIONAL:
-    return porNFG_RATIONAL;
+    return PortionSpec(porNFG_RATIONAL);
   default:
     assert( 0 );
   }
-  return porUNDEFINED;
+  return PortionSpec(porUNDEFINED);
 }
 
 void NfgPortion::Output( gOutput& s ) const
@@ -1576,19 +1604,19 @@ EfgPortion::~EfgPortion()
 BaseEfg*& EfgPortion::Value( void ) const
 { return *_Value; }
 
-PortionType EfgPortion::Type( void ) const
+PortionSpec EfgPortion::Spec( void ) const
 { 
   assert( (*_Value) != 0 );
   switch( (*_Value)->Type() )
   {
   case DOUBLE:
-    return porEFG_FLOAT;
+    return PortionSpec(porEFG_FLOAT);
   case RATIONAL:
-    return porEFG_RATIONAL;
+    return PortionSpec(porEFG_RATIONAL);
   default:
     assert( 0 );
   }
-  return porUNDEFINED;
+  return PortionSpec(porUNDEFINED);
 }
 
 void EfgPortion::Output( gOutput& s ) const
@@ -1691,8 +1719,8 @@ OutputPortion::~OutputPortion()
 gOutput& OutputPortion::Value( void ) const
 { return *_Value; }
 
-PortionType OutputPortion::Type( void ) const
-{ return porOUTPUT; }
+PortionSpec OutputPortion::Spec( void ) const
+{ return PortionSpec(porOUTPUT); }
 
 void OutputPortion::Output( gOutput& s ) const
 {
@@ -1745,8 +1773,8 @@ InputPortion::~InputPortion()
 gInput& InputPortion::Value( void ) const
 { return *_Value; }
 
-PortionType InputPortion::Type( void ) const
-{ return porINPUT; }
+PortionSpec InputPortion::Spec( void ) const
+{ return PortionSpec(porINPUT); }
 
 void InputPortion::Output( gOutput& s ) const
 {
@@ -1866,15 +1894,15 @@ void ListPortion::SetOwner( Portion* p )
 
 
 
-PortionType ListPortion::Type( void ) const
-{ return porLIST; }
+PortionSpec ListPortion::Spec( void ) const
+{ return PortionSpec(_DataType, _ListDepth()); }
 
 Portion* ListPortion::ValCopy( void ) const
 { 
   ListPortion* p =new ListValPortion( *_Value ); 
   // p->SetOwner( Owner() );
-  if( p->DataType() == porUNDEFINED )
-    p->SetDataType( _DataType );
+  if( p->_DataType == porUNDEFINED )
+    p->_DataType = _DataType;
   p->AddDependency();
   return p;
 }
@@ -1896,8 +1924,8 @@ void ListPortion::AssignFrom( Portion* p )
   //gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
   gList< Portion* >& value = *( ( (ListPortion*) p )->_Value );
 
-  assert( p->Type() == Type() );
-  assert( PortionTypeMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
+  assert( p->Spec() == Spec() );
+  assert( PortionSpecMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
 	 _DataType == porUNDEFINED || 
 	 ( (ListPortion*) p )->_DataType == porUNDEFINED );
 
@@ -1927,7 +1955,7 @@ bool ListPortion::operator == ( Portion* p ) const
   Portion* p2;
   bool type_found;
 
-  if( p->Type() == Type() )
+  if( p->Spec() == Spec() )
   {
     if( _Value->Length() == ( (ListPortion*) p )->_Value->Length() )
     {
@@ -1935,9 +1963,9 @@ bool ListPortion::operator == ( Portion* p ) const
       {
 	p1 = (*_Value)[i];
 	p2 = (*(((ListPortion*) p)->_Value))[i];
-	if(p1->Type() == p2->Type())
+	if(p1->Spec() == p2->Spec())
 	{
-	  if(p1->Type() == porLIST)
+	  if(p1->Spec().ListDepth > 0)
 	    result = result &
 	      ( ((ListPortion*) p1)->operator==(p2));
 	  else
@@ -2006,6 +2034,21 @@ bool ListRefPortion::IsReference( void ) const
 
 
 
+int ListPortion::_ListDepth(void) const
+{
+  int i;
+  int Depth = 1;
+
+  if(Length() > 0)
+  {
+    Depth = operator[](1)->Spec().ListDepth + 1;
+    for(i=2; i<=Length(); i++)
+      if(operator[](i)->Spec().ListDepth + 1 < Depth)
+	Depth = operator[](i)->Spec().ListDepth + 1;
+  }
+
+  return Depth;
+}
 
 bool ListPortion::ContainsListsOnly( void ) const
 {
@@ -2015,20 +2058,11 @@ bool ListPortion::ContainsListsOnly( void ) const
     return _ContainsListsOnly;
 }
 
-
-void ListPortion::SetDataType( PortionType data_type )
-{
-  assert( _DataType == porUNDEFINED );
-  ( (ListPortion*) Original() )->_DataType = data_type;
-  _DataType = data_type;
-}
-
-PortionType ListPortion::DataType( void ) const
-{ return _DataType; }
-
+void ListPortion::SetDataType( unsigned long type )
+{ _DataType = type; }
 
 void ListPortion::Output( gOutput& s ) const
-{ Output( s, 0 ); }
+{ Output(s, 0); }
 
 void ListPortion::Output( gOutput& s, long ListLF ) const
 {
@@ -2036,7 +2070,7 @@ void ListPortion::Output( gOutput& s, long ListLF ) const
   int i;
   int c;
   int length = _Value->Length();
-
+  
   if( _WriteListBraces ) s << '{';
   if( _WriteListLF > ListLF ) s << '\n';
   if( length >= 1 )
@@ -2056,7 +2090,7 @@ void ListPortion::Output( gOutput& s, long ListLF ) const
       {
 	if( _WriteListLF <= ListLF )
 	  s << ' ';
-	if( (*_Value)[ i ]->Type() != porLIST )
+	if( (*_Value)[ i ]->Spec().ListDepth == 0)
 	  s << (*_Value)[ i ];
 	else
 	  ((ListPortion*) (*_Value)[ i ])->Output( s, ListLF + 1 );
@@ -2090,23 +2124,23 @@ int ListPortion::Append( Portion* item )
 int ListPortion::Insert( Portion* item, int index )
 {
   int result = 0;
-  PortionType item_type;
+  PortionSpec item_type;
 
 #ifndef NDEBUG
-  if( item->Type() == porREFERENCE )
+  if( item->Spec().Type == porREFERENCE )
   {
     gerr << "Portion Error:\n";
     gerr << "  Attempted to insert a ReferencePortion into\n";
     gerr << "  a ListPortion\n";
   }
-  assert( item->Type() != porREFERENCE );
+  assert( item->Spec().Type != porREFERENCE );
 #endif
   
-  if( item->Type() == porLIST )
-    item_type = ( (ListPortion*) item )->_DataType;
+  if( item->Spec().ListDepth > 0 )
+    item_type.Type = ( (ListPortion*) item )->_DataType;
   else
   {
-    item_type = item->Type();
+    item_type = item->Spec();
     _ContainsListsOnly = false;
   }
 
@@ -2115,13 +2149,13 @@ int ListPortion::Insert( Portion* item, int index )
   {
     if( _Value->Length() == 0 )
       _Owner = item->Original()->Owner();
-    _DataType = item_type;
-    ((ListPortion*) Original())->_DataType = item_type;
+    _DataType = item_type.Type;
+    ((ListPortion*) Original())->_DataType = item_type.Type;
     result = _Value->Insert( item, index );
   }
   else  // inserting into an existing list
   {
-    if( PortionTypeMatch( item_type, _DataType ) )
+    if( PortionSpecMatch( item_type, _DataType ) )
     {
       if( _Value->Length() == 0 )
 	_Owner = item->Original()->Owner();
@@ -2132,8 +2166,8 @@ int ListPortion::Insert( Portion* item, int index )
       if( _Value->Length() == 0 )
 	_Owner = item->Original()->Owner();
       result = _Value->Insert( item, index );
-      assert( item->Type() == porLIST );
-      ((ListPortion*) item)->SetDataType( _DataType );
+      assert( item->Spec().ListDepth > 0 );
+      ((ListPortion*) item)->_DataType = _DataType;
     }
     else
       delete item;
@@ -2152,14 +2186,14 @@ bool ListPortion::Contains( Portion* p2 ) const
   for( i = 1; i <= length; i++ )
   {
     p1 = (*_Value)[i];
-    if(p1->Type() != porLIST)
+    if(p1->Spec().ListDepth == 0)
     {
       if(PortionEqual(p1, p2, type_found))
 	return true;
     }      
     else 
     {
-      if(p2->Type() == porLIST && ((ListPortion*) p1)->operator==(p2))
+      if(p2->Spec().ListDepth > 0 && ((ListPortion*) p1)->operator==(p2))
 	return true;
       if(((ListPortion*) p1)->Contains(p2))
 	return true;
@@ -2196,7 +2230,7 @@ void ListPortion::Flush( void )
 }
 
 
-Portion* ListPortion::operator[]( int index )
+Portion* ListPortion::operator[]( int index ) const
 {
   if( index >= 1 && index <= _Value->Length() )
   {
@@ -2209,7 +2243,7 @@ Portion* ListPortion::operator[]( int index )
 
 
 
-Portion* ListPortion::Subscript( int index )
+Portion* ListPortion::Subscript( int index ) const
 {
   Portion* p;
   if( index >= 1 && index <= _Value->Length() )
@@ -2232,171 +2266,6 @@ Portion* ListPortion::Subscript( int index )
 
 
 
-bool PortionTypeMatch( const PortionType& t1, const PortionType& t2 )
-{
-  if( t1 == t2 )
-    return true;
-  else if(( ( t1 & porMIXED   ) && ( t2 & porMIXED   ) ) ||
-	  ( ( t1 & porBEHAV   ) && ( t2 & porBEHAV   ) ) ||
-	  ( ( t1 & porOUTCOME ) && ( t2 & porOUTCOME ) ) ||
-	  ( ( t1 & porNFG     ) && ( t2 & porNFG     ) ) ||
-	  ( ( t1 & porEFG     ) && ( t2 & porEFG     ) ))
-    return true;
-  else
-    return false;
-}
-
-
-
-
-
-struct PortionTypeTextType
-{
-  PortionType Type;
-  char * Text;
-};  
-
-
-#define NumPortionTypes 38
-
-PortionTypeTextType _PortionTypeText[] =
-{
-  { porERROR,            "ERROR" },
-  
-  { porBOOL,             "BOOL" },
-  { porFLOAT,            "FLOAT" },
-  { porINTEGER,          "INTEGER" },
-  { porRATIONAL,         "RATIONAL" },
-  { porTEXT,             "TEXT" },
-  { porLIST,             "LIST" },
-  { porNFG_FLOAT,        "NFG(FLOAT)" },
-  { porNFG_RATIONAL,     "NFG(RATIONAL)" },
-  { porEFG_FLOAT,        "EFG(FLOAT)" },
-  { porEFG_RATIONAL,     "EFG(RATIONAL)" },
-  { porMIXED_FLOAT,      "MIXED(FLOAT)" },
-  { porMIXED_RATIONAL,   "MIXED(RATIONAL)" },
-  { porBEHAV_FLOAT,      "BEHAV(FLOAT)" },
-  { porBEHAV_RATIONAL,   "BEHAV(RATIONAL)" },
-
-  { porOUTCOME_FLOAT,    "OUTCOME(FLOAT)" },
-  { porOUTCOME_RATIONAL, "OUTCOME(RATIONAL)" },
-  { porPLAYER_NFG,       "PLAYER(NFG)" },
-  { porPLAYER_EFG,       "PLAYER(EFG)" },
-  { porNF_SUPPORT,       "SUPPORT(NFG)" },
-  { porEF_SUPPORT,       "SUPPORT(EFG)" },
-  { porINFOSET,          "INFOSET" },
-  { porNODE,             "NODE" },
-  { porACTION,           "ACTION" },
-  { porSTRATEGY,         "STRATEGY" },
-
-  { porREFERENCE,        "REFERENCE" },
-
-  { porOUTPUT,           "OUTPUT" },
-  { porINPUT,            "INPUT" },
-
-  { porUNDEFINED,        "UNDEFINED" },
-
-  { porNFG,              "NFG" },
-  { porEFG,              "EFG" },
-  { porMIXED,            "MIXED" },
-  { porBEHAV,            "BEHAV" },
-  { porOUTCOME,          "OUTCOME" },
-  { porPLAYER,           "PLAYER" },
-
-  { porNUMERICAL,        "NUMERICAL" },
-  { porANYLIST,          "ANYLIST" },
-  { porANYTYPE,          "ANYTYPE" }
-};
-
-
-
-
-gString PortionTypeToText( const PortionType& type )
-{
-  int i;
-  gString result = "";
-
-
-  for( i = NumPortionTypes - 9; i < NumPortionTypes; i++ )
-  {
-    if( type == _PortionTypeText[ i ].Type )
-      result = (gString) " " + _PortionTypeText[ i ].Text;
-  }
-
-  if( result == "" )
-  {
-    if( type & porLIST )
-    {
-      for( i = 0; i < NumPortionTypes - 9; i++ )
-      {
-	if( ( _PortionTypeText[ i ].Type & type ) && 
-	   ( _PortionTypeText[ i ].Type != porLIST ) )
-	{
-	  result = result + " LIST(" + _PortionTypeText[ i ].Text + ")";
-	}
-      }
-      if( result == "" )
-	result = " LIST";
-    }
-    else
-    {
-      for( i = 0; i < NumPortionTypes - 9; i++ )
-      {
-	if( _PortionTypeText[ i ].Type & type )
-	{
-	  result = result + " " + _PortionTypeText[ i ].Text;
-	}
-      }
-    }
-  }
-
-  if( result == "" )
-    result = (gString) " " + _PortionTypeText[ 0 ].Text;
-
-  result.remove(0);
-  return result;
-}
-
-
-PortionType TextToPortionType( const gString& text )
-{
-  int i;
-  PortionType result = _PortionTypeText[ 0 ].Type;
-
-  for( i = 0; i < NumPortionTypes; i++ )
-  {
-    if( strstr( (const char *)text, _PortionTypeText[ i ].Text ) )
-    {
-      if( !strstr( (const char *)text, (gString) "(" + _PortionTypeText[ i ].Text + ")" ) )
-      {
-	if( !( result & _PortionTypeText[ i ].Type ) )
-	  result = result | _PortionTypeText[ i ].Type;
-      }
-      else if( strstr((const char *) text, (gString) "LIST(" + 
-		      _PortionTypeText[ i ].Text + ")" ) )
-	result = result | _PortionTypeText[ i ].Type;	
-    }
-  }
-  return result;
-}
-
-int TextToPortionListDepth( const gString& text )
-{
-  int result = 0;
-  while( ( text.length() > result * 5 ) &&
-	( strstr((const char *) text.right(text.length()-result*5),
-		 (gString) "LIST(" ) ) )
-    result++;
-  return result;
-}
-
-
-
-void PrintPortionTypeSpec( gOutput& s, PortionType type )
-{
-  s << PortionTypeToText( type );
-}
-
 
 
 gOutput& operator << ( gOutput& s, Portion* p )
@@ -2410,49 +2279,49 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 {
   bool b = false;
 
-  if(p1->Type() != p2->Type()) 
+  if(!(p1->Spec() == p2->Spec())) 
     return false;
 
   type_found = true;
 
-  if(p1->Type()==porBOOL)   
+  if(p1->Spec().Type==porBOOL)   
     b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
-  else if(p1->Type()==porINTEGER)   
+  else if(p1->Spec().Type==porINTEGER)   
     b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
-  else if(p1->Type()==porFLOAT)
+  else if(p1->Spec().Type==porFLOAT)
     b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
-  else if(p1->Type()==porRATIONAL)
+  else if(p1->Spec().Type==porRATIONAL)
     b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
-  else if(p1->Type()==porTEXT)
+  else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
   
-  else if(p1->Type()==porNODE)
+  else if(p1->Spec().Type==porNODE)
     b = (((NodePortion*) p1)->Value() == ((NodePortion*) p2)->Value());
-  else if(p1->Type()==porACTION)
+  else if(p1->Spec().Type==porACTION)
       b = (((ActionPortion*) p1)->Value() == ((ActionPortion*) p2)->Value());
-  else if(p1->Type()==porINFOSET)
+  else if(p1->Spec().Type==porINFOSET)
     b = (((InfosetPortion*) p1)->Value() == ((InfosetPortion*) p2)->Value());
-  else if(p1->Type()==porOUTCOME)
+  else if(p1->Spec().Type==porOUTCOME)
     b = (((OutcomePortion*) p1)->Value() == ((OutcomePortion*) p2)->Value());
-  else if(p1->Type()==porPLAYER_NFG)
+  else if(p1->Spec().Type==porPLAYER_NFG)
     b = (((NfPlayerPortion*) p1)->Value() == ((NfPlayerPortion*) p2)->Value());
-  else if(p1->Type()==porSTRATEGY)
+  else if(p1->Spec().Type==porSTRATEGY)
     b = (((StrategyPortion*) p1)->Value() == ((StrategyPortion*) p2)->Value());
-  else if(p1->Type()==porNF_SUPPORT)
+  else if(p1->Spec().Type==porNF_SUPPORT)
     b = (((NfSupportPortion*) p1)->Value()==((NfSupportPortion*) p2)->Value());
-  else if(p1->Type()==porEF_SUPPORT)
+  else if(p1->Spec().Type==porEF_SUPPORT)
     b = (((EfSupportPortion*) p1)->Value()==((EfSupportPortion*) p2)->Value());
   
-  else if(p1->Type()==porMIXED_FLOAT)
+  else if(p1->Spec().Type==porMIXED_FLOAT)
     b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
 	 (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
-  else if(p1->Type()==porMIXED_RATIONAL)
+  else if(p1->Spec().Type==porMIXED_RATIONAL)
     b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
 	 (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
-  else if(p1->Type()==porBEHAV_FLOAT)
+  else if(p1->Spec().Type==porBEHAV_FLOAT)
     b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
 	 (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
-  else if(p1->Type()==porBEHAV_RATIONAL)
+  else if(p1->Spec().Type==porBEHAV_RATIONAL)
     b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
 	 (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
   else

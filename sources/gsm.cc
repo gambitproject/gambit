@@ -4,32 +4,11 @@
 //# $Id$
 //#
 
-//-----------------------------------------------------------------------
-//                       Template instantiations
-//-----------------------------------------------------------------------
-
 
 class Portion;
 class CallFuncObj;
 class RefHashTable;
 template <class T> class gStack;
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-#include "gstack.imp"
-
-TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gStack< Portion* >* >;
-TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< RefHashTable* >;
-
-#ifdef __BORLANDC__
-#pragma option -Jgx
-#endif
 
 #include "gsm.h"
 
@@ -45,11 +24,13 @@ TEMPLATE class gStack< RefHashTable* >;
 
 #include "gblock.h"
 
-
-
-
+#include "nfg.h"
+#include "rational.h"
+#include "mixedsol.h"
+#include "behavsol.h"
 
 #include "gslist.h"
+#include "garray.h"
 
 class gFuncListSorter : public gListSorter<FuncDescObj*>
 {
@@ -243,7 +224,7 @@ bool GSM::PushList( const int num_of_elements )
     p = _Pop();
     p = _ResolveRef( p );
 
-    if( p->Type() != porREFERENCE )
+    if( p->Spec().Type != porREFERENCE )
     {
       insert_result = list->Insert( p->ValCopy(), 1 );
       delete p;
@@ -296,21 +277,21 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
   if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
-    if( old_value->Type() != p->Type() )
+    if( old_value->Spec().Type != p->Spec().Type )
     {
-      if( !PortionTypeMatch( old_value->Type(), p->Type() ) )
+      if( !PortionSpecMatch( old_value->Spec().Type, p->Spec().Type ) )
 	type_match = false;
     }
-    else if( p->Type() == porLIST )
+    else if( p->Spec().ListDepth > 0 )
     {
-      assert( old_value->Type() == porLIST );
-      if( ( (ListPortion*) old_value )->DataType() != 
-	 ( (ListPortion*) p )->DataType() )
+      assert( old_value->Spec().ListDepth > 0 );
+      if( ( (ListPortion*) old_value )->Spec().Type != 
+	 ( (ListPortion*) p )->Spec().Type )
       {
-	if( ( (ListPortion*) p )->DataType() == porUNDEFINED )
+	if( ( (ListPortion*) p )->Spec().Type == porUNDEFINED )
 	{
 	  ( (ListPortion*) p )->
-	    SetDataType( ( (ListPortion*) old_value )->DataType() );
+	    SetDataType( ( (ListPortion*) old_value )->Spec().Type );
 	}
 	else
 	{
@@ -400,15 +381,15 @@ bool GSM::Assign( void )
 
   p2 = _Pop();
   p1 = _Pop();
-  if(p1->Type() == porREFERENCE)
+  if(p1->Spec().Type == porREFERENCE)
     varname = ((ReferencePortion*) p1)->Value();
 
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
   
-  if(p1->Type() == porREFERENCE)
+  if(p1->Spec().Type == porREFERENCE)
   {
-    if(p2->Type() != porREFERENCE)
+    if(p2->Spec().Type != porREFERENCE)
     {
       _VarDefine(((ReferencePortion*) p1)->Value(), p2);
       delete p1;
@@ -420,12 +401,12 @@ bool GSM::Assign( void )
       result = false;
     } 
   }
-  else if(p2->Type() == porREFERENCE)
+  else if(p2->Spec().Type == porREFERENCE)
   {
     _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
     result = false;
   }
-  else if(p1->Type() == p2->Type())
+  else if(p1->Spec() == p2->Spec())
   {
     if(varname != "")
     {
@@ -443,11 +424,11 @@ bool GSM::Assign( void )
 	_Push(_VarValue(varname)->RefCopy());
       }
     }
-    else if(p1->Type() != porLIST)
+    else if(p1->Spec().ListDepth == 0)
     {
-      if(!(p1->Type() & (porINPUT|porOUTPUT))) 
+      if(!(p1->Spec().Type & (porINPUT|porOUTPUT))) 
       {
-	switch(p1->Type())
+	switch(p1->Spec().Type)
 	{
 	case porINTEGER:
 	  ((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
@@ -585,7 +566,7 @@ bool GSM::Assign( void )
 	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
 	  break;
 	default:
-	  _ErrorMessage(_StdErr, 67, 0, 0, PortionTypeToText(p1->Type()));
+	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1->Spec().Type));
 	  assert(0);	  
 	}
 	_Push(p1->RefCopy()); 
@@ -597,11 +578,11 @@ bool GSM::Assign( void )
 	result = false;
       }
     }
-    else if((((ListPortion*) p1)->DataType() ==
-	     ((ListPortion*) p2)->DataType()) ||
-	    (((ListPortion*) p1)->DataType() == porUNDEFINED) )
+    // both p1 and p2 are lists
+    else if((p1->Spec().Type == p2->Spec().Type) ||
+	    (p1->Spec().Type == porUNDEFINED) )
     {
-      if( !( ((ListPortion*) p1)->DataType() & (porINPUT|porOUTPUT) ) )
+      if( !( p1->Spec().Type & (porINPUT|porOUTPUT) ) )
       {
 	((ListPortion*) p1)->AssignFrom(p2);
 	_Push(p1->RefCopy());
@@ -619,7 +600,7 @@ bool GSM::Assign( void )
       result = false;
     }
   }
-  else if(PortionTypeMatch(p1->Type(), p2->Type()))
+  else if(PortionSpecMatch(p1->Spec().Type, p2->Spec().Type))
   {
     _VarDefine(varname, p2);
     delete p1;
@@ -653,7 +634,7 @@ bool GSM::UnAssign( void )
 #endif // NDEBUG
 
   p = _Pop();
-  if( p->Type() == porREFERENCE )
+  if( p->Spec().Type == porREFERENCE )
   {
     if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
     {
@@ -691,7 +672,7 @@ Portion* GSM::UnAssignExt( void )
 #endif // NDEBUG
 
   p = _Pop();
-  if( p->Type() == porREFERENCE )
+  if( p->Spec().Type == porREFERENCE )
   {
     if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
     {
@@ -728,7 +709,7 @@ Portion* GSM::_ResolveRef( Portion* p )
   Portion*  result = 0;
   gString ref;
   
-  if( p->Type() == porREFERENCE )
+  if( p->Spec().Type == porREFERENCE )
   {
     ref = ( (ReferencePortion*) p )->Value();
 
@@ -850,25 +831,25 @@ bool GSM::Add ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER)
+    if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() += ((IntPortion*) p2)->Value();
-    else if(p->Type()==porFLOAT)
+    else if(p->Spec().Type==porFLOAT)
       ((FloatPortion*) p)->Value() += ((FloatPortion*) p2)->Value();
-    else if(p->Type()==porRATIONAL)
+    else if(p->Spec().Type==porRATIONAL)
       ((RationalPortion*) p)->Value() += ((RationalPortion*) p2)->Value();
-    else if(p->Type()==porMIXED_FLOAT)
+    else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) += 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-    else if(p->Type()==porMIXED_RATIONAL)
+    else if(p->Spec().Type==porMIXED_RATIONAL)
       (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) += 
 	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-    else if(p->Type()==porBEHAV_FLOAT)
+    else if(p->Spec().Type==porBEHAV_FLOAT)
       (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) += 
 	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-    else if(p->Type()==porBEHAV_RATIONAL)
+    else if(p->Spec().Type==porBEHAV_RATIONAL)
       (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) += 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
@@ -895,25 +876,25 @@ bool GSM::Subtract ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER)
+    if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() -= ((IntPortion*) p2)->Value();
-    else if(p->Type()==porFLOAT)
+    else if(p->Spec().Type==porFLOAT)
       ((FloatPortion*) p)->Value() -= ((FloatPortion*) p2)->Value();
-    else if(p->Type()==porRATIONAL)
+    else if(p->Spec().Type==porRATIONAL)
       ((RationalPortion*) p)->Value() -= ((RationalPortion*) p2)->Value();
-    else if(p->Type()==porMIXED_FLOAT)
+    else if(p->Spec().Type==porMIXED_FLOAT)
       (*((MixedSolution<double>*) ((MixedPortion*) p)->Value())) -= 
 	(*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-    else if(p->Type()==porMIXED_RATIONAL)
+    else if(p->Spec().Type==porMIXED_RATIONAL)
       (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value())) -= 
 	(*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-    else if(p->Type()==porBEHAV_FLOAT)
+    else if(p->Spec().Type==porBEHAV_FLOAT)
       (*((BehavSolution<double>*) ((BehavPortion*) p)->Value())) -= 
 	(*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-    else if(p->Type()==porBEHAV_RATIONAL)
+    else if(p->Spec().Type==porBEHAV_RATIONAL)
       (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value())) -= 
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
     else
@@ -940,14 +921,14 @@ bool GSM::Multiply ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
   
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER)
+    if(p->Spec().Type==porINTEGER)
       ((IntPortion*) p)->Value() *= ((IntPortion*) p2)->Value();
-    else if(p->Type()==porFLOAT)
+    else if(p->Spec().Type==porFLOAT)
       ((FloatPortion*) p)->Value() *= ((FloatPortion*) p2)->Value();
-    else if(p->Type()==porRATIONAL)
+    else if(p->Spec().Type==porRATIONAL)
       ((RationalPortion*) p)->Value() *= ((RationalPortion*) p2)->Value();
     else
       result = false;
@@ -977,18 +958,18 @@ bool GSM::Divide ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+    if(p->Spec().Type==porINTEGER && ((IntPortion*) p2)->Value() != 0)
     {
       delete p;
       p = new RationalValPortion(((IntPortion*) p1)->Value());
       ((RationalPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     }
-    else if(p->Type()==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
+    else if(p->Spec().Type==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
       ((FloatPortion*) p)->Value() /= ((FloatPortion*) p2)->Value();
-    else if(p->Type()==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
+    else if(p->Spec().Type==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
       ((RationalPortion*) p)->Value() /= ((RationalPortion*) p2)->Value();
     else
       result = false;
@@ -1005,20 +986,25 @@ bool GSM::Negate( void )
 {
   Portion* p1;
   Portion* p;
-  bool result = true;
+  bool result = false;
 
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p->Type()==porINTEGER)
-    ((IntPortion*) p)->Value() = -(((IntPortion*) p1)->Value());
-  else if(p->Type()==porFLOAT)
-    ((FloatPortion*) p)->Value() = -(((FloatPortion*) p1)->Value());
-  else if(p->Type()==porRATIONAL)
-    ((RationalPortion*) p)->Value() = -(((RationalPortion*) p1)->Value());
-  else
-    result = false;
+  
+  if(p->Spec().ListDepth == 0)
+  {
+    result = true;
+    if(p->Spec().Type==porINTEGER)
+      ((IntPortion*) p)->Value() = -(((IntPortion*) p1)->Value());
+    else if(p->Spec().Type==porFLOAT)
+      ((FloatPortion*) p)->Value() = -(((FloatPortion*) p1)->Value());
+    else if(p->Spec().Type==porRATIONAL)
+      ((RationalPortion*) p)->Value() = -(((RationalPortion*) p1)->Value());
+    else
+      result = false;
+  }
 
   if(result)
   { delete p1; _Push(p); }
@@ -1047,10 +1033,10 @@ bool GSM::IntegerDivide ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+    if(p->Spec().Type==porINTEGER && ((IntPortion*) p2)->Value() != 0)
       ((IntPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     else
       result = false;
@@ -1077,10 +1063,10 @@ bool GSM::Modulus ( void )
   p1 = _ResolveRef(p1);  
   p = p1->ValCopy();
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p->Type()==porINTEGER && ((IntPortion*) p2)->Value() != 0)
+    if(p->Spec().Type==porINTEGER && ((IntPortion*) p2)->Value() != 0)
       ((IntPortion*) p)->Value() %= ((IntPortion*) p2)->Value();
     else
       result = false;
@@ -1106,7 +1092,7 @@ bool GSM::EqualTo ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
     b = PortionEqual(p1, p2, result);
@@ -1131,7 +1117,7 @@ bool GSM::NotEqualTo ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
     b = !PortionEqual(p1, p2, result);
@@ -1156,16 +1142,16 @@ bool GSM::GreaterThan ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porINTEGER)   
+    if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() > ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
+    else if(p1->Spec().Type==porFLOAT)
       b = (((FloatPortion*) p1)->Value() > ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
+    else if(p1->Spec().Type==porRATIONAL)
       b = (((RationalPortion*) p1)->Value()>((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
+    else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value());
     else
       result = false;
@@ -1190,16 +1176,16 @@ bool GSM::LessThan ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porINTEGER)   
+    if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() < ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
+    else if(p1->Spec().Type==porFLOAT)
       b = (((FloatPortion*) p1)->Value() < ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
+    else if(p1->Spec().Type==porRATIONAL)
       b = (((RationalPortion*) p1)->Value()<((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
+    else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() < ((TextPortion*) p2)->Value());
     else
       result = false;
@@ -1224,16 +1210,16 @@ bool GSM::GreaterThanOrEqualTo ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porINTEGER)   
+    if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() >= ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
+    else if(p1->Spec().Type==porFLOAT)
       b = (((FloatPortion*) p1)->Value() >= ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
+    else if(p1->Spec().Type==porRATIONAL)
       b = (((RationalPortion*) p1)->Value()>=((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
+    else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() >= ((TextPortion*) p2)->Value());
     else
       result = false;
@@ -1258,16 +1244,16 @@ bool GSM::LessThanOrEqualTo ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porINTEGER)   
+    if(p1->Spec().Type==porINTEGER)   
       b = (((IntPortion*) p1)->Value() <= ((IntPortion*) p2)->Value());
-    else if(p1->Type()==porFLOAT)
+    else if(p1->Spec().Type==porFLOAT)
       b = (((FloatPortion*) p1)->Value() <= ((FloatPortion*) p2)->Value());
-    else if(p1->Type()==porRATIONAL)
+    else if(p1->Spec().Type==porRATIONAL)
       b = (((RationalPortion*) p1)->Value()<=((RationalPortion*) p2)->Value());
-    else if(p1->Type()==porTEXT)
+    else if(p1->Spec().Type==porTEXT)
       b = (((TextPortion*) p1)->Value() <= ((TextPortion*) p2)->Value());
     else
       result = false;
@@ -1293,10 +1279,10 @@ bool GSM::AND ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porBOOL)   
+    if(p1->Spec().Type==porBOOL)   
       b = (((BoolPortion*) p1)->Value() && ((BoolPortion*) p2)->Value());
     else
       result = false;
@@ -1321,10 +1307,10 @@ bool GSM::OR ( void )
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==p2->Type())
+  if(p1->Spec() == p2->Spec() && p1->Spec().ListDepth == 0)
   {
     result = true;
-    if(p1->Type()==porBOOL)   
+    if(p1->Spec().Type==porBOOL)   
       b = (((BoolPortion*) p1)->Value() || ((BoolPortion*) p2)->Value());
     else
       result = false;
@@ -1341,15 +1327,19 @@ bool GSM::NOT ( void )
 {
   Portion* p1;
   bool b;
-  bool result = true;
+  bool result = false;
 
   p1 = _Pop();
   p1 = _ResolveRef(p1);  
 
-  if(p1->Type()==porBOOL)
-    b = !((BoolPortion*) p1)->Value();
-  else
-    result = false;
+  if(p1->Spec().ListDepth == 0)
+  {
+    result = true;
+    if(p1->Spec().Type==porBOOL)
+      b = !((BoolPortion*) p1)->Value();
+    else
+      result = false;
+  }
 
   if(result)
   { delete p1; _Push(new BoolValPortion(b)); }
@@ -1381,10 +1371,10 @@ bool GSM::Subscript ( void )
   _Push( p1 );
   _Push( p2 );
 
-  if( p1->Type() == porTEXT )
-    return _BinaryOperation( "NthChar" );
-  else
+  if( p1->Spec().ListDepth > 0 )
     return _BinaryOperation( "NthElement" );
+  else
+    return _BinaryOperation( "NthChar" );
 }
 
 
@@ -1485,7 +1475,7 @@ bool GSM::BindVal( const gString& param_name )
 
     if( param->IsValid() )
     {
-      if( param->Type() != porREFERENCE )
+      if( param->Spec().Type != porREFERENCE )
 	result = _CallFuncStack->Peek()->SetCurrParam( param->ValCopy() );
       else
 	result = _CallFuncStack->Peek()->SetCurrParam( 0 );
@@ -1564,7 +1554,7 @@ bool GSM::CallFunction( void )
 
   assert( return_value != 0 );
 
-  if( return_value->Type() == porERROR )
+  if( return_value->Spec().Type == porERROR )
     result = false;
 
 
@@ -1600,7 +1590,6 @@ bool GSM::CallFunction( void )
 }
 
 
-#include "garray.h"
 
 //----------------------------------------------------------------------------
 //                       Execute function
@@ -1637,7 +1626,7 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
 
     case iIF_GOTO:
       p = _Pop();
-      if( p->Type() == porBOOL )
+      if( p->Spec().Type == porBOOL )
       {
 	if( ( (BoolPortion*) p )->Value() )
 	{
@@ -1655,7 +1644,7 @@ int GSM::Execute( gList< Instruction* >& prog, bool user_func )
       else
       {
 	gerr << "Instruction IfGoto called on a non-boolean data type\n";
-	assert( p->Type() == porBOOL );	
+	assert( p->Spec().Type == porBOOL );	
 	_Push( p );
 	program_counter++;
 	instr_success = false;
@@ -1722,7 +1711,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
 
   for( i = 0; i < func_info.NumParams; i++ )
   {
-    if( param[ i ] != 0 && param[ i ]->Type() != porREFERENCE )
+    if( param[ i ] != 0 && param[ i ]->Spec().Type != porREFERENCE )
     {
       _VarDefine( func_info.ParamInfo[ i ].Name, param[ i ] );
       param[ i ] = param[ i ]->RefCopy();
@@ -1751,7 +1740,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
       delete result;
       result = result_copy;
       result_copy = 0;
-      if( result->Type() == porERROR )
+      if( result->Spec().Type == porERROR )
       {
 	delete result;
 	result = 0;
@@ -1827,7 +1816,7 @@ void GSM::Output( void )
     if( p->IsValid() )
     {
       p->Output( _StdOut );
-      if( p->Type() == porREFERENCE )
+      if( p->Spec().Type == porREFERENCE )
 	_StdOut << " (undefined)";
       _StdOut << "\n";
     }
@@ -2038,7 +2027,7 @@ Portion* GSM::HelpVars(gString varname)
   if( _RefTableStack->Peek()->IsDefined( varname ) )
   {
     result = new ListValPortion();
-    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + PortionTypeToText( (*(_RefTableStack->Peek()))(varname)->Type() )));
+    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + PortionSpecToText( (*(_RefTableStack->Peek()))(varname)->Spec().Type )));
   }
   else
   {
@@ -2097,7 +2086,7 @@ Portion* GSM::HelpVars(gString varname)
     sorter.Sort();
     result = new ListValPortion();
     for(i=1; i<=varslist.Length(); i++)
-      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + PortionTypeToText( (*(_RefTableStack->Peek()))(varslist[i])->Type() )));
+      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + PortionSpecToText( (*(_RefTableStack->Peek()))(varslist[i])->Spec().Type )));
   }
 
   if(!result)
@@ -2187,8 +2176,11 @@ void GSM::_ErrorMessage
 }
 
 
-#include "garray.imp"
-#include "gslist.imp"
+
+
+//-----------------------------------------------------------------------
+//                       Template instantiations
+//-----------------------------------------------------------------------
 
 
 
@@ -2198,6 +2190,17 @@ void GSM::_ErrorMessage
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
+
+#include "gstack.imp"
+
+TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< gStack< Portion* >* >;
+TEMPLATE class gStack< CallFuncObj* >;
+TEMPLATE class gStack< RefHashTable* >;
+
+
+#include "garray.imp"
+#include "gslist.imp"
 
 TEMPLATE class gArray<Instruction*>;
 TEMPLATE class gSortList<FuncDescObj*>;

@@ -14,19 +14,23 @@
 
 #include "gsmincl.h"
 
-#include "gambitio.h"
 
-#include "mixedsol.h"
-#include "behavsol.h"
-
-#include "nfg.h"
-#include "efg.h"
 
 #include "glist.h"
+#include "gstring.h"
 
-#include "nfplayer.h"
-#include "nfstrat.h"
-#include "efstrat.h"
+//#include "gambitio.h"
+
+//#include "mixedsol.h"
+//#include "behavsol.h"
+
+//#include "nfg.h"
+//#include "efg.h"
+//#include "nfplayer.h"
+//#include "nfstrat.h"
+//#include "efstrat.h"
+
+
 
 //---------------------------------------------------------------------
 //                          base class
@@ -80,7 +84,7 @@ public:
   void SetOriginal( const Portion* p );
   Portion* Original( void ) const;
 
-  virtual PortionType Type( void ) const = 0;
+  virtual PortionSpec Spec( void ) const = 0;
   virtual void Output( gOutput& s ) const;
   virtual Portion* ValCopy( void ) const = 0;
   virtual Portion* RefCopy( void ) const = 0;
@@ -104,7 +108,7 @@ public:
   virtual ~ErrorPortion();
 
   gString Value( void );
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -127,7 +131,7 @@ public:
   virtual ~ReferencePortion();
 
   gString Value( void );
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -152,7 +156,7 @@ public:
   virtual ~IntPortion();
 
   long& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -189,7 +193,7 @@ public:
   virtual ~FloatPortion();
 
   double& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -227,7 +231,7 @@ public:
   virtual ~RationalPortion();
 
   gRational& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -267,7 +271,7 @@ public:
   virtual ~TextPortion();
 
   gString& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -305,7 +309,7 @@ public:
   virtual ~BoolPortion();
 
   bool& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -353,7 +357,7 @@ public:
   virtual ~OutcomePortion();
 
   Outcome*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -392,7 +396,7 @@ public:
   virtual ~NfPlayerPortion();
 
   NFPlayer*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -435,7 +439,7 @@ public:
   virtual ~StrategyPortion();
 
   Strategy*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -465,7 +469,7 @@ public:
 //                          NfSupport class
 //---------------------------------------------------------------------
 
-class NfSupport;
+class NFSupport;
 
 class NfSupportPortion : public Portion
 {
@@ -477,7 +481,7 @@ public:
   virtual ~NfSupportPortion();
 
   NFSupport*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -505,7 +509,7 @@ public:
 //---------------------------------------------------------------------
 
 
-class EfSupport;
+class EFSupport;
 
 class EfSupportPortion : public Portion
 {
@@ -517,7 +521,7 @@ public:
   virtual ~EfSupportPortion();
 
   EFSupport*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -545,7 +549,7 @@ public:
 //                          EfPlayer class
 //---------------------------------------------------------------------
 
-class Player;
+class EFPlayer;
 
 class EfPlayerPortion : public Portion
 {
@@ -557,7 +561,7 @@ public:
   virtual ~EfPlayerPortion();
 
   EFPlayer*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -597,8 +601,9 @@ protected:
 public:
   virtual ~InfosetPortion();
 
+  bool IsValid( void ) const;
   Infoset*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -637,8 +642,9 @@ protected:
 public:
   virtual ~NodePortion();
 
+  bool IsValid( void ) const;
   Node*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -678,7 +684,7 @@ public:
   virtual ~ActionPortion();
 
   Action*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -723,7 +729,7 @@ public:
   virtual ~MixedPortion();
 
   BaseMixedProfile*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -766,7 +772,7 @@ public:
   virtual ~BehavPortion();
 
   BaseBehavProfile*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -811,7 +817,7 @@ public:
   virtual ~NfgPortion();
 
   BaseNfg*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -858,7 +864,7 @@ public:
   virtual ~EfgPortion();
 
   BaseEfg*& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -903,7 +909,7 @@ public:
   virtual ~OutputPortion();
 
   gOutput& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -942,7 +948,7 @@ public:
   virtual ~InputPortion();
 
   gInput& Value( void ) const;
-  PortionType Type( void ) const;
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
@@ -980,7 +986,8 @@ protected:
   ListPortion( void );
 
   bool _ContainsListsOnly;
-  PortionType      _DataType;
+  unsigned long _DataType;
+  int _ListDepth(void) const;
 
 public:
   virtual ~ListPortion();
@@ -996,16 +1003,14 @@ public:
 
   // gBlock< Portion* >& Value( void ) const;
   gList< Portion* >& Value( void ) const;
-  PortionType Type( void ) const;
+  void SetDataType( unsigned long type );
+  PortionSpec Spec( void ) const;
   void Output( gOutput& s ) const;
   void Output( gOutput& s, long ListLF ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );
   bool operator == ( Portion* p ) const;
-
-  void              SetDataType ( PortionType data_type );
-  PortionType       DataType    ( void ) const;
 
   int      Append     ( Portion* item );
   int      Insert     ( Portion* item, int index );
@@ -1015,12 +1020,12 @@ public:
   void     Flush      ( void );
 
   // Use operator[] when you just want to check the info on an element;
-  Portion* operator[]( int index );
+  Portion* operator[]( int index ) const;
 
   // Use Subscript() when you want to extract a copy of an element
   // Warning: Subscript() already makes a copy; 
   //          don't calling ValCopy() or RefCopy() on Subscript() !
-  Portion* Subscript( int index );
+  Portion* Subscript( int index ) const;
 };
 
 class ListValPortion : public ListPortion
@@ -1049,16 +1054,6 @@ public:
 //                 Miscellaneous Portion functions
 //-----------------------------------------------------------------
 
-
-
-bool PortionTypeMatch( const PortionType& t1, const PortionType& t2 );
-
-
-gString PortionTypeToText( const PortionType& type );
-PortionType TextToPortionType( const gString& text );
-int TextToPortionListDepth( const gString& text );
-
-void PrintPortionTypeSpec( gOutput& s, PortionType type );
 
 gOutput& operator << ( gOutput& s, Portion* p );
 

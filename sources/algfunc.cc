@@ -11,7 +11,10 @@
 #include "rational.h"
 
 #include "gwatch.h"
-#include "mixed.h"
+#include "mixedsol.h"
+#include "behavsol.h"
+#include "nfg.h"
+#include "efg.h"
 
 
 extern Portion *ArrayToList(const gArray<double> &A);
@@ -533,7 +536,7 @@ Portion *GSM_GobitGrid_Support(Portion **param)
 
 Portion *GSM_Gobit(Portion **param)
 {
-  if (param[0]->Type() == porNFG_FLOAT)  {
+  if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
     MixedSolution<double> start(N);
   
@@ -611,7 +614,7 @@ Portion *GSM_Gobit(Portion **param)
 
 Portion *GSM_Gobit_Start(Portion **param)
 {
-  if (param[0]->Type() == porMIXED_FLOAT)  {
+  if (param[0]->Spec().Type == porMIXED_FLOAT)  {
     MixedSolution<double> &start = 
       * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
     Nfg<double> &N = *start.BelongsTo();
@@ -1447,7 +1450,7 @@ Portion* GSM_Payoff_NfgFloat( Portion** param )
   for( i = 1; i <= nfg->NumPlayers() ; i++ )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Type() == porINTEGER );
+    assert( p->Spec().Type == porINTEGER );
     Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
@@ -1473,7 +1476,7 @@ Portion* GSM_Payoff_NfgRational( Portion** param )
   for( i = 1; i <= nfg->NumPlayers() ; i++ )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Type() == porINTEGER );
+    assert( p->Spec().Type == porINTEGER );
     Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
@@ -1505,14 +1508,14 @@ Portion* GSM_SetPayoff_NfgFloat( Portion** param )
   for( i = 1; i <= nfg->NumPlayers() ; i++ )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Type() == porINTEGER );
+    assert( p->Spec().Type == porINTEGER );
     Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
-    assert( p->Type() == porFLOAT );
+    assert( p->Spec().Type == porFLOAT );
     nfg->SetPayoff( i, Solution, ( (FloatPortion*) p )->Value() );
     delete p;
   }
@@ -1534,14 +1537,14 @@ Portion* GSM_SetPayoff_NfgRational( Portion** param )
   for( i = 1; i <= nfg->NumPlayers() ; i++ )
   {
     p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Type() == porINTEGER );
+    assert( p->Spec().Type == porINTEGER );
     Solution[ i ] = ( (IntPortion*) p )->Value();
     delete p;
   }
   for( i = 1; i <= nfg->NumPlayers(); i++ )
   {
     p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
-    assert( p->Type() == porRATIONAL );
+    assert( p->Spec().Type == porRATIONAL );
     nfg->SetPayoff( i, Solution, ( (RationalPortion*) p )->Value() );
     delete p;
   }
@@ -2091,16 +2094,18 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0));
 
   FuncObj->SetFuncInfo(GSM_Lcp_ListFloat, 2);
-  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 0, "a", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 1, "b", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 0, "a", PortionSpec(porFLOAT,2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lcp_ListFloat, 1, "b", PortionSpec(porFLOAT,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   FuncObj->SetFuncInfo(GSM_Lcp_ListRational, 2);
-  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 0, "a", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 1, "b", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 0, "a", 
+			PortionSpec(porRATIONAL,2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lcp_ListRational, 1, "b", 
+			PortionSpec(porRATIONAL,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   gsm->AddFunction(FuncObj);
 
@@ -2273,12 +2278,12 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0));
 
   FuncObj->SetFuncInfo(GSM_Lp_ListFloat, 6);
-  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 0, "a", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 1, "b", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
-  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 2, "c", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 0, "a", PortionSpec(porFLOAT,2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 1, "b", PortionSpec(porFLOAT,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lp_ListFloat, 2, "c", PortionSpec(porFLOAT,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
   FuncObj->SetParamInfo(GSM_Lp_ListFloat, 3, "nEqualities", porINTEGER);
   FuncObj->SetParamInfo(GSM_Lp_ListFloat, 4, "isFeasible", porBOOL,
 			new BoolValPortion(false), PASS_BY_REFERENCE);
@@ -2286,12 +2291,15 @@ void Init_algfunc(GSM *gsm)
 			new BoolValPortion(false), PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_Lp_ListRational, 6);
-  FuncObj->SetParamInfo(GSM_Lp_ListRational, 0, "a", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
-  FuncObj->SetParamInfo(GSM_Lp_ListRational, 1, "b", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
-  FuncObj->SetParamInfo(GSM_Lp_ListRational, 2, "c", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 1);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 0, "a", 
+			PortionSpec(porRATIONAL,2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 1, "b", 
+			PortionSpec(porRATIONAL,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj->SetParamInfo(GSM_Lp_ListRational, 2, "c", 
+			PortionSpec(porRATIONAL,1),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
   FuncObj->SetParamInfo(GSM_Lp_ListRational, 3, "nEqualities", porINTEGER);
   FuncObj->SetParamInfo(GSM_Lp_ListRational, 4, "isFeasible", porBOOL,
 			new BoolValPortion(false), PASS_BY_REFERENCE);
@@ -2336,13 +2344,13 @@ void Init_algfunc(GSM *gsm)
 			0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Payoff_NfgFloat,
-			1, "list", porLIST | porINTEGER );
+			1, "list", PortionSpec(porINTEGER,1) );
   FuncObj->SetFuncInfo(GSM_Payoff_NfgRational, 2);
   FuncObj->SetParamInfo(GSM_Payoff_NfgRational, 
 			0, "nfg", porNFG_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Payoff_NfgRational,
-			1, "list", porLIST | porINTEGER );
+			1, "list", PortionSpec(porINTEGER,1) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj( "SetPayoff" );
@@ -2351,18 +2359,18 @@ void Init_algfunc(GSM *gsm)
 			0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SetPayoff_NfgFloat,
-			1, "list", porLIST | porINTEGER );
+			1, "list", PortionSpec(porINTEGER,1) );
   FuncObj->SetParamInfo(GSM_SetPayoff_NfgFloat,
-			2, "payoff", porLIST | porFLOAT );
+			2, "payoff", PortionSpec(porFLOAT,1) );
 
   FuncObj->SetFuncInfo(GSM_SetPayoff_NfgRational, 3);
   FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational, 
 			0, "nfg", porNFG_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational,
-			1, "list", porLIST | porINTEGER );
+			1, "list", PortionSpec(porINTEGER,1) );
   FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational,
-			2, "payoff", porLIST | porRATIONAL );
+			2, "payoff", PortionSpec(porRATIONAL,1) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SimpDivSolve");

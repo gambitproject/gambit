@@ -9,7 +9,9 @@
 #ifndef GSMINCL_H
 #define GSMINCL_H
 
-
+#include "gstring.h"
+class gString;
+class gOutput;
 
 typedef enum 
 { 
@@ -39,11 +41,8 @@ typedef enum
 
 
 
-#ifndef __BORLANDC__
-typedef unsigned int PortionType;
-#else
-typedef unsigned long PortionType;
-#endif
+
+
 
 #define  porERROR      ( 0x0000 )
 #define  porBOOL       ( 0x0001 )
@@ -51,7 +50,6 @@ typedef unsigned long PortionType;
 #define  porINTEGER    ( 0x0004 )
 #define  porRATIONAL   ( 0x0008 )
 #define  porTEXT       ( 0x0010 )
-#define  porLIST       ( 0x0020 )
 
 #define  porNFG_FLOAT      ( 0x0040 )
 #define  porNFG_RATIONAL   ( 0x0080 )
@@ -88,9 +86,37 @@ typedef unsigned long PortionType;
 #define  porNF_SUPPORT ( 0x04000000 )
 #define  porEF_SUPPORT ( 0x08000000 )
 
-#define  porNUMERICAL  ( porFLOAT | porINTEGER | porRATIONAL )
-#define  porANYLIST    ( 0xFFFFFFFF )
-#define  porANYTYPE    ( porANYLIST & ~porREFERENCE & ~porUNDEFINED )
+#define  porANYTYPE    ( 0xFFFFFFFF )
+
+
+
+class PortionSpec
+{
+public:
+  unsigned long Type;
+  unsigned short ListDepth;
+
+  PortionSpec(const PortionSpec& spec)
+    : Type(spec.Type), ListDepth(spec.ListDepth)
+    {}
+  PortionSpec(unsigned long type = porERROR, signed short listdepth = 0)
+    : Type(type), ListDepth(listdepth)
+    {}
+  ~PortionSpec()
+  {}
+
+  bool operator==(const PortionSpec& spec) const
+  { return Type==spec.Type && ListDepth==spec.ListDepth; }
+};
+
+
+bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 );
+
+
+gString PortionSpecToText( const PortionSpec& type );
+PortionSpec TextToPortionSpec( const gString& text );
+void PrintPortionSpec( gOutput& s, PortionSpec type );
 
 
 #endif // GSMINCL_H
+

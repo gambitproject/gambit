@@ -701,7 +701,7 @@ Portion *GSM_MoveTree(Portion **param)
 
 Portion *GSM_Name_EfgElements(Portion **param)
 {
-  switch (param[0]->Type())  {
+  switch (param[0]->Spec().Type)  {
     case porACTION:
       return new TextValPortion(((ActionPortion *) param[0])->Value()->GetName());
     case porINFOSET:
@@ -798,7 +798,7 @@ Portion *GSM_NewOutcome(Portion **param)
   Outcome *c;
   gString name = ((TextPortion *) param[1])->Value();
 
-  if (param[0]->Type() == porEFG_FLOAT)
+  if (param[0]->Spec().Type == porEFG_FLOAT)
     c = ((Efg<double> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
   else
     c = ((Efg<gRational> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
@@ -1260,15 +1260,15 @@ Portion *GSM_SetChanceProbs(Portion **param)
     return new ErrorPortion
       ("Information set does not belong to chance player");
   
-  if ((s->BelongsTo()->Type() == DOUBLE && p->DataType() != porFLOAT) ||
-      (s->BelongsTo()->Type() == RATIONAL && p->DataType() != porRATIONAL))
+  if ((s->BelongsTo()->Type() == DOUBLE && p->Spec().Type != porFLOAT) ||
+      (s->BelongsTo()->Type() == RATIONAL && p->Spec().Type != porRATIONAL))
     return new ErrorPortion("Probability list does not match game type");
   if (p->Length() != s->NumActions())  
     return new ErrorPortion("Wrong number of probabilities");
 
   int i;
 
-  switch (p->DataType())   {
+  switch (p->Spec().Type)   {
     case porFLOAT:
       for (i = 1; i <= p->Length(); i++) 
 	((ChanceInfoset<double> *) s)->SetActionProb
@@ -1295,7 +1295,7 @@ Portion *GSM_SetName_EfgElements(Portion **param)
 {
   gString name(((TextPortion *) param[1])->Value());
   
-  switch (param[0]->Type())   {
+  switch (param[0]->Spec().Type)   {
     case porACTION:
       ((ActionPortion *) param[0])->Value()->SetName(name);
       break;
@@ -1698,7 +1698,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_NewEfg, 2);
   FuncObj->SetParamInfo(GSM_NewEfg, 0, "rational", porBOOL,
 			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_NewEfg, 1, "players", porLIST | porTEXT,
+  FuncObj->SetParamInfo(GSM_NewEfg, 1, "players", PortionSpec(porTEXT,1),
 			new ListValPortion);
   gsm->AddFunction(FuncObj);
 
@@ -1711,7 +1711,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_NewInfoset2, 3);
   FuncObj->SetParamInfo(GSM_NewInfoset2, 0, "player", porPLAYER_EFG);
-  FuncObj->SetParamInfo(GSM_NewInfoset2, 1, "actions", porLIST | porTEXT);
+  FuncObj->SetParamInfo(GSM_NewInfoset2, 1, "actions", PortionSpec(porTEXT,1));
   FuncObj->SetParamInfo(GSM_NewInfoset2, 2, "name", porTEXT,
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
@@ -1881,7 +1881,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Reveal");
   FuncObj->SetFuncInfo(GSM_Reveal, 2);
   FuncObj->SetParamInfo(GSM_Reveal, 0, "infoset", porINFOSET);
-  FuncObj->SetParamInfo(GSM_Reveal, 1, "who", porLIST | porPLAYER_EFG);
+  FuncObj->SetParamInfo(GSM_Reveal, 1, "who", PortionSpec(porPLAYER_EFG,1));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RootNode");
@@ -1901,7 +1901,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_SetChanceProbs, 2);
   FuncObj->SetParamInfo(GSM_SetChanceProbs, 0, "infoset", porINFOSET);
   FuncObj->SetParamInfo(GSM_SetChanceProbs, 1, "probs",
-			porLIST | porFLOAT | porRATIONAL);
+			PortionSpec(porFLOAT | porRATIONAL,1));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetName");
@@ -1920,13 +1920,14 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("SetPayoff");
   FuncObj->SetFuncInfo(GSM_SetPayoff_Float, 2);
   FuncObj->SetParamInfo(GSM_SetPayoff_Float, 0, "outcome", porOUTCOME_FLOAT);
-  FuncObj->SetParamInfo(GSM_SetPayoff_Float, 1, "payoff", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_SetPayoff_Float, 1, "payoff", 
+			PortionSpec(porFLOAT,1));
 
   FuncObj->SetFuncInfo(GSM_SetPayoff_Rational, 2);
   FuncObj->SetParamInfo(GSM_SetPayoff_Rational, 0, "outcome",
 			porOUTCOME_RATIONAL);
   FuncObj->SetParamInfo(GSM_SetPayoff_Rational, 1, "payoff",
-			porLIST | porRATIONAL);
+			PortionSpec(porRATIONAL,1));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SubgameRoots");

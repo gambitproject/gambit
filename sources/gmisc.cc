@@ -12,6 +12,9 @@
 #include <limits.h>
 #include <ctype.h>
 
+#include "gambitio.h"
+#include "gstring.h"
+
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
 //--------------------------------------------------------------------------

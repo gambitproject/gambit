@@ -5,7 +5,9 @@
 //
 
 #include "portion.h"
+#include "rational.h"
 #include "gvector.h"
+#include "gdpvect.h"
 #include "gmatrix.h"
 
 Portion *ArrayToList(const gArray<double> &A)
@@ -140,7 +142,7 @@ gVector<double>* ListToVector_Float(ListPortion* list)
   bool flat = true;
   for(i=1; i<=length; i++)
   {
-    if((*list)[i]->Type() != porFLOAT)
+    if((*list)[i]->Spec().Type != porFLOAT)
       flat = false;
   }
   if(flat)
@@ -160,7 +162,7 @@ gVector<gRational>* ListToVector_Rational(ListPortion* list)
   bool flat = true;
   for(i=1; i<=length; i++)
   {
-    if((*list)[i]->Type() != porRATIONAL)
+    if((*list)[i]->Spec().Type != porRATIONAL)
       flat = false;
   }
   if(flat)
@@ -186,7 +188,7 @@ gMatrix<double>* ListToMatrix_Float(ListPortion* list)
   bool rect = true;
   for(i=1; i<=rows; i++)
   {
-    if((*list)[i]->Type() != porLIST)
+    if((*list)[i]->Spec().ListDepth == 0)
       rect = false;
     else if(cols==0)
       cols = ((ListPortion*) (*list)[i])->Length();
@@ -194,7 +196,7 @@ gMatrix<double>* ListToMatrix_Float(ListPortion* list)
       rect = false;
     if(rect)
       for(j=1; j<=cols; j++)
-	if((*((ListPortion*) (*list)[i]))[j]->Type() != porFLOAT)
+	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porFLOAT)
 	  rect = false;
   }
 
@@ -220,7 +222,7 @@ gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list)
   bool rect = true;
   for(i=1; i<=rows; i++)
   {
-    if((*list)[i]->Type() != porLIST)
+    if((*list)[i]->Spec().ListDepth == 0)
       rect = false;
     else if(cols==0)
       cols = ((ListPortion*) (*list)[i])->Length();
@@ -228,7 +230,7 @@ gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list)
       rect = false;
     if(rect)
       for(j=1; j<=cols; j++)
-	if((*((ListPortion*) (*list)[i]))[j]->Type() != porRATIONAL)
+	if((*((ListPortion*) (*list)[i]))[j]->Spec().Type != porRATIONAL)
 	  rect = false;
   }
 

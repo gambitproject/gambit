@@ -9,10 +9,10 @@
 #define GSM_H
 
 
-
-#include "gsmincl.h"
 #include "gambitio.h"
-#include "gsmfunc.h"
+
+//#include "gsmincl.h"
+//#include "gsmfunc.h"
 
 class Instruction;
 class FuncDescObj;
@@ -21,6 +21,7 @@ class Portion;
 class Reference_Portion;
 class RefHashTable;
 class FunctionHashTable;
+class FuncInfoType;
 
 class gString;
 class gRational;

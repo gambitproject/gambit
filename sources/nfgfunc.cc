@@ -10,6 +10,7 @@
 #include "gsmfunc.h"
 
 #include "nfg.h"
+#include "nfplayer.h"
 
 #include "glist.h"
 #include "mixed.h"
@@ -702,7 +703,7 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NewNfg");
   FuncObj->SetFuncInfo(GSM_NewNfg, 2);
-  FuncObj->SetParamInfo(GSM_NewNfg, 0, "dim", porLIST | porINTEGER);
+  FuncObj->SetParamInfo(GSM_NewNfg, 0, "dim", PortionSpec(porINTEGER,1));
   FuncObj->SetParamInfo(GSM_NewNfg, 1, "rational", porBOOL,
 			new BoolValPortion(false));
   gsm->AddFunction(FuncObj);

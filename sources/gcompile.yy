@@ -20,6 +20,7 @@
 #include "gsm.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"
+#include "portion.h"
 
 extern GSM& _gsm;  // defined at the end of gsm.cc
 
@@ -757,24 +758,25 @@ bool GCLCompiler::DefineFunction(void)
 
   bool error = false;
   for (int i = 1; i <= formals.Length(); i++)   {
-    PortionType type;
+    PortionSpec spec;
     if(portions[i])
-      type = portions[i]->Type();
+      spec = portions[i]->Spec();
     else
-      type = TextToPortionType(types[i]);
-    int listdepth = TextToPortionListDepth(types[i]);
+      spec = TextToPortionSpec(types[i]);
 
-    if (type != porERROR)   {
+    if (spec.Type != porERROR)   {
       if (refs[i])
-	func->SetParamInfo(function, i - 1, formals[i], type,
-			   portions[i], PASS_BY_REFERENCE, listdepth);
+	func->SetParamInfo(function, i - 1, formals[i], spec,
+			   portions[i], PASS_BY_REFERENCE);
       else
-	func->SetParamInfo(function, i - 1, formals[i], type,
-			   portions[i], PASS_BY_VALUE, listdepth);
+	func->SetParamInfo(function, i - 1, formals[i], spec,
+			   portions[i], PASS_BY_VALUE);
     }
     else   {
       error = true;
-      gerr << "Error: Unknown type " << types[i] << " for parameter " << formals[i] << " in declaration of " << funcname << "[]\n";
+      gerr << "Error: Unknown type " << types[i] << ", " << 
+	PortionSpecToText(spec) << " for parameter " << formals[i] <<
+	 " in declaration of " << funcname << "[]\n";
       break;
     }
   }

@@ -9,6 +9,9 @@
 #include "gsmfunc.h"
 
 #include "efg.h"
+#include "nfg.h"
+#include "behavsol.h"
+#include "mixedsol.h"
 
 
 //
@@ -101,7 +104,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
   for( i = 1; i <= E.NumPlayers(); i++ )
   {
     p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
+    if( p1->Spec().ListDepth == 0 )
     {
       delete p1;
       delete P;
@@ -117,7 +120,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
     for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
     {
       p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porLIST )
+      if( p2->Spec().ListDepth == 0 )
       {
 	delete p2;
 	delete p1;
@@ -136,7 +139,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
       for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
       {
 	p3 = ( (ListPortion*) p2 )->Subscript( k );
-	if( p3->Type() != porFLOAT )
+	if( p3->Spec().Type != porFLOAT )
 	{
 	  delete p3;
 	  delete p2;
@@ -182,7 +185,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
   for( i = 1; i <= E.NumPlayers(); i++ )
   {
     p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
+    if( p1->Spec().ListDepth == 0 )
     {
       delete p1;
       delete P;
@@ -198,7 +201,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
     for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
     {
       p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porLIST )
+      if( p2->Spec().ListDepth == 0 )
       {
 	delete p2;
 	delete p1;
@@ -217,7 +220,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
       for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
       {
 	p3 = ( (ListPortion*) p2 )->Subscript( k );
-	if( p3->Type() != porRATIONAL )
+	if( p3->Spec().Type != porRATIONAL )
 	{
 	  delete p3;
 	  delete p2;
@@ -257,7 +260,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 
   // This is incredibly redundent; must find a way to reuse the code
   // from the previous two functions.
-  if (S->BelongsTo().Type() == DOUBLE && param[1]->Type() & porFLOAT )
+  if (S->BelongsTo().Type() == DOUBLE && param[1]->Spec().Type & porFLOAT )
   {
     // The code here is completely copied from GSM_Behav_EfgFloat
 
@@ -273,7 +276,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
     for( i = 1; i <= E.NumPlayers(); i++ )
     {
       p1 = ( (ListPortion*) param[1] )->Subscript( i );
-      if( p1->Type() != porLIST )
+      if( p1->Spec().ListDepth == 0 )
       {
 	delete p1;
 	delete P;
@@ -289,7 +292,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
       for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
       {
 	p2 = ( (ListPortion*) p1 )->Subscript( j );
-	if( p2->Type() != porLIST )
+	if( p2->Spec().ListDepth == 0 )
 	{
 	  delete p2;
 	  delete p1;
@@ -308,7 +311,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 	for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
 	{
 	  p3 = ( (ListPortion*) p2 )->Subscript( k );
-	  if( p3->Type() != porFLOAT )
+	  if( p3->Spec().Type != porFLOAT )
 	  {
 	    delete p3;
 	    delete p2;
@@ -329,7 +332,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 
 
   }
-  else if (S->BelongsTo().Type()== RATIONAL && param[1]->Type() & porRATIONAL )
+  else if (S->BelongsTo().Type()== RATIONAL && param[1]->Spec().Type & porRATIONAL )
   {
     // The code here is entirely copied from GSM_Behav_EfgRational()
 
@@ -345,7 +348,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
     for( i = 1; i <= E.NumPlayers(); i++ )
     {
       p1 = ( (ListPortion*) param[1] )->Subscript( i );
-      if( p1->Type() != porLIST )
+      if( p1->Spec().ListDepth == 0 )
       {
 	delete p1;
 	delete P;
@@ -361,7 +364,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
       for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
       {
 	p2 = ( (ListPortion*) p1 )->Subscript( j );
-	if( p2->Type() != porLIST )
+	if( p2->Spec().ListDepth == 0 )
 	{
 	  delete p2;
 	  delete p1;
@@ -380,7 +383,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 	for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
 	{
 	  p3 = ( (ListPortion*) p2 )->Subscript( k );
-	  if( p3->Type() != porRATIONAL )
+	  if( p3->Spec().Type != porRATIONAL )
 	  {
 	    delete p3;
 	    delete p2;
@@ -1042,7 +1045,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
   for( i = 1; i <= N.NumPlayers(); i++ )
   {
     p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
+    if( p1->Spec().ListDepth == 0 )
     {
       delete p1;
       delete P;
@@ -1058,7 +1061,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
     for( j = 1; j <= N.NumStrats( i ); j++ )
     {
       p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porFLOAT )
+      if( p2->Spec().Type != porFLOAT )
       {
 	delete p2;
 	delete p1;
@@ -1101,7 +1104,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
   for( i = 1; i <= N.NumPlayers(); i++ )
   {
     p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
+    if( p1->Spec().ListDepth == 0 )
     {
       delete p1;
       delete P;
@@ -1117,7 +1120,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
     for( j = 1; j <= N.NumStrats( i ); j++ )
     {
       p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != porRATIONAL )
+      if( p2->Spec().Type != porRATIONAL )
       {
 	delete p2;
 	delete p1;
@@ -1147,13 +1150,13 @@ Portion* GSM_Mixed_NFSupport( Portion** param )
   gArray<int> dim = S->SupportDimensions();
   BaseMixedProfile *P;
   Portion* por;
-  PortionType datatype;
+  unsigned long datatype;
   int i;
   int j;
   Portion* p1;
   Portion* p2;
 
-  switch( param[ 0 ]->Owner()->Type() )
+  switch( param[ 0 ]->Owner()->Spec().Type )
   {
   case porNFG_FLOAT:
     P = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
@@ -1177,7 +1180,7 @@ Portion* GSM_Mixed_NFSupport( Portion** param )
   for( i = 1; i <= dim.Length(); i++ )
   {
     p1 = ( (ListPortion*) param[1] )->Subscript( i );
-    if( p1->Type() != porLIST )
+    if( p1->Spec().ListDepth == 0 )
     {
       delete p1;
       delete P;
@@ -1193,7 +1196,7 @@ Portion* GSM_Mixed_NFSupport( Portion** param )
     for( j = 1; j <= dim[ i ]; j++ )
     {
       p2 = ( (ListPortion*) p1 )->Subscript( j );
-      if( p2->Type() != datatype )
+      if( p2->Spec().Type != datatype )
       {
 	delete p2;
 	delete p1;
@@ -1314,13 +1317,13 @@ Portion *GSM_SetComponent_BehavFloat(Portion **param)
       k++ )
   {
     p3 = ( (ListPortion*) param[ 2 ] )->Subscript( k );
-    if( p3->Type() == porLIST )
+    if( p3->Spec().ListDepth > 0 )
     {
       delete p3;
       return new ErrorPortion( "Mismatching dimensionality" );
     }
 
-    assert( p3->Type() == porFLOAT );
+    assert( p3->Spec().Type == porFLOAT );
     (*P)( PlayerNum, InfosetNum, k ) = ( (FloatPortion*) p3 )->Value();
 
     delete p3;
@@ -1370,13 +1373,13 @@ Portion *GSM_SetComponent_BehavRational(Portion **param)
       k++ )
   {
     p3 = ( (ListPortion*) param[ 2 ] )->Subscript( k );
-    if( p3->Type() == porLIST )
+    if( p3->Spec().ListDepth > 0 )
     {
       delete p3;
       return new ErrorPortion( "Mismatching dimensionality" );
     }
 
-    assert( p3->Type() == porRATIONAL );
+    assert( p3->Spec().Type == porRATIONAL );
     (*P)( PlayerNum, InfosetNum, k ) = ( (RationalPortion*) p3 )->Value();
 
     delete p3;
@@ -1415,13 +1418,13 @@ Portion *GSM_SetComponent_MixedFloat(Portion **param)
   for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
   {
     p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
-    if( p2->Type() == porLIST )
+    if( p2->Spec().ListDepth > 0 )
     {
       delete p2;
       return new ErrorPortion( "Mismatching dimensionality" );
     }
 
-    assert( p2->Type() == porFLOAT );
+    assert( p2->Spec().Type == porFLOAT );
     (*P)( PlayerNum, j ) = ( (FloatPortion*) p2 )->Value();
 
     delete p2;
@@ -1461,13 +1464,13 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
   for( j = 1; j <= N.NumStrats( PlayerNum ); j++ )
   {
     p2 = ( (ListPortion*) param[ 2 ] )->Subscript( j );
-    if( p2->Type() == porLIST )
+    if( p2->Spec().ListDepth > 0 )
     {
       delete p2;
       return new ErrorPortion( "Mismatching dimensionality" );
     }
 
-    assert( p2->Type() == porRATIONAL );
+    assert( p2->Spec().Type == porRATIONAL );
     (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
 
     delete p2;
@@ -1517,21 +1520,21 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 
-			1, "list", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 3);
+			1, "list", PortionSpec(porFLOAT, 3),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   FuncObj->SetFuncInfo( GSM_Behav_EfgRational, 2 );
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
-			1, "list", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 3);
+			1, "list", PortionSpec(porRATIONAL, 3),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   FuncObj->SetFuncInfo( GSM_Behav_EFSupport, 2 );
   FuncObj->SetParamInfo( GSM_Behav_EFSupport, 0, "support", porEF_SUPPORT,
 			NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( GSM_Behav_EFSupport, 
-			1, "list", porLIST | porFLOAT | porRATIONAL );
+			1, "list", PortionSpec(porFLOAT | porRATIONAL, 1) );
   gsm->AddFunction(FuncObj);
 
 
@@ -1749,20 +1752,20 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 
-			1, "list", porLIST | porFLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+			1, "list", PortionSpec(porFLOAT, 2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
   FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
-			1, "list", porLIST | porRATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2);
+			1, "list", PortionSpec(porRATIONAL, 2),
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
   FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
   FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
   FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 
-			1, "list", porLIST | porFLOAT | porRATIONAL );
+			1, "list", PortionSpec(porFLOAT | porRATIONAL, 1) );
   gsm->AddFunction( FuncObj );
 
 
@@ -1796,7 +1799,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
 			1, "infoset", porINFOSET );
   FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
-			2, "list", porLIST | porFLOAT );
+			2, "list", PortionSpec(porFLOAT, 1) );
 
   FuncObj->SetFuncInfo( GSM_SetComponent_BehavRational, 3 );
   FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
@@ -1805,7 +1808,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
 			1, "infoset", porINFOSET );
   FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
-			2, "list", porLIST | porRATIONAL );
+			2, "list", PortionSpec(porRATIONAL,1) );
 
   FuncObj = new FuncDescObj( "SetComponent" );
 
@@ -1816,7 +1819,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
 			1, "player", porPLAYER_NFG );
   FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			2, "list", porLIST | porFLOAT );
+			2, "list", PortionSpec(porFLOAT,1) );
 
   FuncObj->SetFuncInfo( GSM_SetComponent_MixedRational, 3 );
   FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
@@ -1825,7 +1828,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
 			1, "player", porPLAYER_NFG );
   FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			2, "list", porLIST | porRATIONAL );
+			2, "list", PortionSpec(porRATIONAL,1) );
 
   gsm->AddFunction( FuncObj );
 

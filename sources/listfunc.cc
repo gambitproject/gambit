@@ -4,6 +4,8 @@
 //# $Id$
 //#
 
+#include <assert.h>
+
 #include "gsm.h"
 #include "portion.h"
 #include "gsmfunc.h"
@@ -163,7 +165,7 @@ Portion* GSM_List( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Type() != porERROR );  
+  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
@@ -178,7 +180,7 @@ Portion* GSM_List_List( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( param[0]->Type() != porERROR );  
+  assert( param[0]->Spec().Type != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
@@ -199,7 +201,7 @@ Portion* GSM_List_Integer( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
-  p->SetDataType( param[0]->Type() );
+  p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new IntValPortion( ((IntPortion*) param[0])->Value()+ 
 				 (i-1)*((IntPortion*) param[2])->Value() ));
@@ -215,7 +217,7 @@ Portion* GSM_List_Float( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
-  p->SetDataType( param[0]->Type() );
+  p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new FloatValPortion( ((FloatPortion*) param[0])->Value()+ 
 				   (i-1)*((FloatPortion*) param[2])->Value()));
@@ -231,7 +233,7 @@ Portion* GSM_List_Rational( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
-  p->SetDataType( param[0]->Type() );
+  p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new RationalValPortion( ((RationalPortion*) param[0])->Value()+ 
 				      (gRational)(i-1)*
@@ -249,7 +251,7 @@ Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
   if( p1->Length() != p2->Length() )
     return new ErrorPortion( "Mismatched dimentionalities" );
   for( i = 1; i <= p1->Length(); i++ )
-    if( (*p1)[ i ]->Type() == porLIST )
+    if( (*p1)[ i ]->Spec().ListDepth > 0 )
       return new ErrorPortion("Can only operate on 1-D lists");
   return 0;
 }
@@ -327,11 +329,11 @@ Portion* GSM_ArgMax_Integer( Portion** param )
   long max = 0;
   int index = 0;
   int i;
-  assert( param[0]->Type() == porLIST );
+  assert( param[0]->Spec().ListDepth > 0 );
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Type() == porINTEGER )
+    if( p->Spec().Type == porINTEGER )
     {
       if( ((IntPortion*) p)->Value() >= max ||
 	 i == ((ListPortion*) param[0])->Length() )
@@ -352,11 +354,11 @@ Portion* GSM_ArgMax_Float( Portion** param )
   double max = 0;
   int index = 0;
   int i;
-  assert( param[0]->Type() == porLIST );
+  assert( param[0]->Spec().ListDepth > 0 );
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Type() == porFLOAT )
+    if( p->Spec().Type == porFLOAT )
     {
       if( ((FloatPortion*) p)->Value() >= max || 
 	 i == ((ListPortion*) param[0])->Length() )
@@ -377,11 +379,11 @@ Portion* GSM_ArgMax_Rational( Portion** param )
   gRational max = 0;
   int index = 0;
   int i;
-  assert( param[0]->Type() == porLIST );
+  assert( param[0]->Spec().ListDepth > 0 );
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Type() == porRATIONAL )
+    if( p->Spec().Type == porRATIONAL )
     {
       if( ((RationalPortion*) p)->Value() >= max ||
 	 i == ((ListPortion*) param[0])->Length() )
@@ -407,11 +409,11 @@ Portion* GSM_Transpose( Portion** param )
   int width = 0;
   ListPortion* p;
   ListPortion* s;
-  assert( param[0]->Type() == porLIST );
+  assert( param[0]->Spec().ListDepth > 0 );
   length = ((ListPortion*) param[0])->Length();
   for( i = 1; i <= length; i++ )
   {
-    if( (*(ListPortion*) param[0])[i]->Type() != porLIST )
+    if( (*(ListPortion*) param[0])[i]->Spec().ListDepth == 0 )
       return new ErrorPortion( "Bad dimensionality" );
     if( i == 1 )
       width = ((ListPortion*) (*(ListPortion*) param[0])[i])->Length();
@@ -458,7 +460,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Length");
   FuncObj->SetFuncInfo(GSM_LengthList, 1, NO_PREDEFINED_PARAMS);
-  FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porANYLIST | porLIST,
+  FuncObj->SetParamInfo(GSM_LengthList, 0, "list", PortionSpec(porANYTYPE,1),
 			NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
@@ -470,21 +472,21 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Contains");
   FuncObj->SetFuncInfo(GSM_Contains, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_Contains, 0, "list", porANYLIST | porLIST);
+  FuncObj->SetParamInfo(GSM_Contains, 0, "list", PortionSpec(porANYTYPE,1));
   FuncObj->SetParamInfo(GSM_Contains, 1, "x", porANYTYPE);
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NthElement");
   FuncObj->SetFuncInfo(GSM_NthElement, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porANYLIST | porLIST,
+  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", PortionSpec(porANYTYPE, 1),
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_NthElement, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Remove");
   FuncObj->SetFuncInfo(GSM_Remove, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_Remove, 0, "list", porANYLIST | porLIST);
+  FuncObj->SetParamInfo(GSM_Remove, 0, "list", PortionSpec(porANYTYPE,1));
   FuncObj->SetParamInfo(GSM_Remove, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 
@@ -550,13 +552,13 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("List");
   FuncObj->SetFuncInfo(GSM_List, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_List, 0, "x", porANYTYPE & ~porLIST &
+  FuncObj->SetParamInfo(GSM_List, 0, "x", porANYTYPE & 
 			~(porINTEGER|porFLOAT|porRATIONAL));
   FuncObj->SetParamInfo(GSM_List, 1, "length", porINTEGER, 
 			new IntValPortion(1));
 
   FuncObj->SetFuncInfo(GSM_List_List, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
-  FuncObj->SetParamInfo(GSM_List_List, 0, "x", porANYLIST);
+  FuncObj->SetParamInfo(GSM_List_List, 0, "x", PortionSpec(porANYTYPE,1));
   FuncObj->SetParamInfo(GSM_List_List, 1, "length", porINTEGER, 
 			new IntValPortion(1));
 
@@ -590,34 +592,35 @@ void Init_listfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Dot");
   
   FuncObj->SetFuncInfo(GSM_Dot_Integer, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Integer, 0, "x", porLIST | porINTEGER);
-  FuncObj->SetParamInfo(GSM_Dot_Integer, 1, "y", porLIST | porINTEGER);
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 0, "x", PortionSpec(porINTEGER,1));
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 1, "y", PortionSpec(porINTEGER,1));
 
   FuncObj->SetFuncInfo(GSM_Dot_Float, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Float, 0, "x", porLIST | porFLOAT);
-  FuncObj->SetParamInfo(GSM_Dot_Float, 1, "y", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_Dot_Float, 0, "x", PortionSpec(porFLOAT,1));
+  FuncObj->SetParamInfo(GSM_Dot_Float, 1, "y", PortionSpec(porFLOAT,1));
   
   FuncObj->SetFuncInfo(GSM_Dot_Rational, 2);
-  FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", porLIST | porRATIONAL);
-  FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", porLIST | porRATIONAL);
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", PortionSpec(porRATIONAL,1));
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", PortionSpec(porRATIONAL,1));
   gsm->AddFunction(FuncObj);
 
   //----------------------- ArgMax ------------------------
   FuncObj = new FuncDescObj( "ArgMax" );
   FuncObj->SetFuncInfo(GSM_ArgMax_Integer, 1);
-  FuncObj->SetParamInfo(GSM_ArgMax_Integer, 0, "x", porLIST | porINTEGER );
+  FuncObj->SetParamInfo(GSM_ArgMax_Integer, 0, "x", PortionSpec(porINTEGER,1));
   FuncObj->SetFuncInfo(GSM_ArgMax_Float, 1);
-  FuncObj->SetParamInfo(GSM_ArgMax_Float, 0, "x", porLIST | porFLOAT );
+  FuncObj->SetParamInfo(GSM_ArgMax_Float, 0, "x", PortionSpec(porFLOAT,1));
   FuncObj->SetFuncInfo(GSM_ArgMax_Rational, 1);
-  FuncObj->SetParamInfo(GSM_ArgMax_Rational, 0, "x", porLIST | porRATIONAL );
+  FuncObj->SetParamInfo(GSM_ArgMax_Rational, 0, "x", 
+			PortionSpec(porRATIONAL,1));
   gsm->AddFunction(FuncObj);
 
   //------------------ Transpose -----------------------
   FuncObj = new FuncDescObj( "Transpose" );
   FuncObj->SetFuncInfo(GSM_Transpose, 1);
   FuncObj->SetParamInfo(GSM_Transpose,
-			0, "x", porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2 );
+			0, "x", PortionSpec(porANYTYPE,2), 
+			NO_DEFAULT_VALUE, PASS_BY_VALUE);
   gsm->AddFunction(FuncObj);
 
 }

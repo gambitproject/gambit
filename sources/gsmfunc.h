@@ -12,14 +12,14 @@
 #define GSMFUNC_H
 
 
+//#include "gmisc.h"
 #include "gsmincl.h"
 
-#include "gmisc.h"
 #include "gstring.h"
 
-#include "portion.h"
+//#include "portion.h"
 
-
+class gOutput;
 
 #define NO_DEFAULT_VALUE  ( (Portion*)  0 )
 #define PARAM_NOT_FOUND   ( (int)      -1 )
@@ -45,6 +45,7 @@ class gInteger;
 class GSM;
 class Instruction;
 class Portion;
+class ListPortion;
 class ReferencePortion;
 
 template <class T> class gList;
@@ -59,10 +60,9 @@ friend GSM;
   
 private:
   gString      Name;
-  PortionType  Type;
+  PortionSpec  Spec;
   Portion*     DefaultValue;
   bool         PassByReference;
-  int          NestedListLevel;
 
 public:
   ParamInfoType( void );
@@ -70,10 +70,9 @@ public:
   ParamInfoType
     ( 
      const gString& name, 
-     const PortionType& type,
+     const PortionSpec& spec,
      Portion* default_value = NO_DEFAULT_VALUE, 
-     const bool pass_by_ref = false,
-     const nested_list_level = 0
+     const bool pass_by_ref = false
      );
   ~ParamInfoType();
 
@@ -113,10 +112,9 @@ private:
      const int         f_index, 
      const int         index, 
      const gString&    name,
-     const PortionType type,
+     const PortionSpec spec,
      Portion*          default_value,
-     const bool        pass_by_reference,
-     const int         nested_list_level
+     const bool        pass_by_reference
      );
 
 protected:
@@ -152,10 +150,9 @@ public:
      Portion*          (*func_ptr)(Portion**),
      const int         index, 
      const gString&    name,
-     const PortionType type,
+     const PortionSpec spec,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE,
-     const int         nested_list_level = 0
+     const bool        pass_by_reference = PASS_BY_VALUE
      );
 
   void SetParamInfo
@@ -163,10 +160,9 @@ public:
      gList< Instruction* >* func_instr,
      const int         index, 
      const gString&    name,
-     const PortionType type,
+     const PortionSpec spec,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE,
-     const int         nested_list_level = 0
+     const bool        pass_by_reference = PASS_BY_VALUE
      );
   
   void SetParamInfo
@@ -217,10 +213,9 @@ class CallFuncObj : public FuncDescObj
 
   gString _ParamName( const int index ) const;
 
-  static bool _TypeMatch( Portion* p, PortionType ExpectedType, bool Listable);
+  static bool _TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable);
 
   static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
-  static int _ListNestedLevel( ListPortion* p );
   static bool _ListNestedCheck( Portion* p, const ParamInfoType& info );
 
   static void _ErrorMessage

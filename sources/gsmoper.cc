@@ -15,83 +15,12 @@
 #include "rational.h"
 #include "gblock.h"
 
+#include "mixedsol.h"
+#include "behavsol.h"
+
+#include "nfg.h"
 
 extern GSM& _gsm;
-
-/*
-Portion* GSM_Assign_Undefined( Portion** param )
-{
-  // assert(0);
-  assert( param[0] == 0 );
-  if( param[1]->Type() & (porINPUT|porOUTPUT) )
-  {
-    if( param[1]->Original() == param[1] )
-    {
-      param[0] = param[1];
-      param[1] = param[1]->RefCopy();      
-    }
-    else
-      return 
-	new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
-  }
-  else
-  {
-    param[0] = param[1];
-    param[1] = param[0]->RefCopy();
-  }
-  return param[0]->RefCopy();
-}
-*/
-
-
-/*
-Portion* GSM_Assign( Portion** param )
-{
-  assert(0);
-  Portion* result = 0;
-
-  assert( param[0] != 0 );  assert( param[1] != 0 );
-
-  if( param[ 0 ]->Type() == param[ 1 ]->Type() )
-  {    
-    if( param[ 0 ]->Type() != porLIST )
-    {
-      if( !(param[0]->Type() & (porINPUT|porOUTPUT)) )
-      {
-	param[ 0 ]->AssignFrom( param[ 1 ] );
-	result = param[ 0 ]->RefCopy();
-      }
-      else
-	result = 
-	  new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
-    }
-    else if((((ListPortion*) param[ 0 ] )->DataType() ==
-	     ((ListPortion*) param[ 1 ] )->DataType() ) ||
-	    ((ListPortion*) param[ 0 ] )->DataType() == porUNDEFINED )
-    {
-      if( !( ((ListPortion*)param[0])->DataType() & (porINPUT|porOUTPUT) ) )
-      {
-	param[ 0 ]->AssignFrom( param[ 1 ] );
-	result = param[ 0 ]->RefCopy();
-      }
-      else
-	result = 
-	  new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
-    }
-    else
-    {
-      result = new ErrorPortion( "Attempted to change the type of a list" );
-    }
-  }
-  else
-  {
-    result = new ErrorPortion( "Attempted to change the type of a variable" );
-  }
-
-  return result;
-}
-*/
-
 
 
 Portion* GSM_Assign(Portion** param)
@@ -1249,7 +1178,7 @@ Portion* GSM_AND( Portion** param )
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Type() == porBOOL );
+  assert( param[ 0 ]->Spec().Type == porBOOL );
   
   result = new BoolValPortion
     (
@@ -1265,7 +1194,7 @@ Portion* GSM_OR( Portion** param )
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Type() == porBOOL );
+  assert( param[ 0 ]->Spec().Type == porBOOL );
   
   result = new BoolValPortion
     (
@@ -1282,7 +1211,7 @@ Portion* GSM_NOT( Portion** param )
 {
   Portion* result = 0;
 
-  assert( param[ 0 ]->Type() == porBOOL );
+  assert( param[ 0 ]->Spec().Type == porBOOL );
   
   result = new BoolValPortion( !( (BoolPortion*) param[ 0 ] )->Value() );
 
@@ -1305,7 +1234,7 @@ Portion* GSM_NewOutputStream( Portion** param )
   Portion* result = 0;
   gOutput* g;
   
-  assert( param[ 0 ]->Type() == porTEXT );
+  assert( param[ 0 ]->Spec().Type == porTEXT );
 
   g = new gFileOutput( ( (TextPortion*) param[ 0 ] )->Value() );
   result = new OutputValPortion( *g );
@@ -1319,7 +1248,7 @@ Portion* GSM_NewInputStream( Portion** param )
   Portion* result = 0;
   gInput* g;
   
-  assert( param[ 0 ]->Type() == porTEXT );
+  assert( param[ 0 ]->Spec().Type == porTEXT );
 
   g = new gFileInput( ( (TextPortion*) param[ 0 ] )->Value() );
 
@@ -1387,6 +1316,7 @@ Portion* GSM_SetFormat( Portion** param )
 
 Portion* GSM_Write_numerical( Portion** param )
 {
+  assert(param[1]->Spec().Type & (porINTEGER|porFLOAT|porRATIONAL));
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   s << param[ 1 ];
   return param[0]->RefCopy();
@@ -1395,6 +1325,7 @@ Portion* GSM_Write_numerical( Portion** param )
 
 Portion* GSM_Write_gString( Portion** param )
 {
+  assert(param[1]->Spec().Type == porTEXT);
   int i = 0;
 
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
@@ -1417,6 +1348,7 @@ Portion* GSM_Write_gString( Portion** param )
 
 Portion* GSM_Write_Mixed( Portion** param )
 {
+  assert(param[1]->Spec().Type & porMIXED);
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   s << param[1];
   return param[0]->RefCopy();
@@ -1425,6 +1357,7 @@ Portion* GSM_Write_Mixed( Portion** param )
 
 Portion* GSM_Write_Behav( Portion** param )
 {
+  assert(param[1]->Spec().Type & porBEHAV);
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   s << param[1];
   return param[0]->RefCopy();
@@ -1433,6 +1366,7 @@ Portion* GSM_Write_Behav( Portion** param )
 
 Portion* GSM_Write_Nfg( Portion** param )
 {
+  assert(param[1]->Spec().Type & porNFG);
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
 
   BaseNfg* nfg = ( (NfgPortion*) param[ 1 ] )->Value();
@@ -1447,6 +1381,7 @@ Portion* GSM_Write_Nfg( Portion** param )
 
 Portion* GSM_Write_Efg( Portion** param )
 {
+  assert(param[1]->Spec().Type & porEFG);
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
 
   BaseEfg* efg = ( (EfgPortion*) param[ 1 ] )->Value();
@@ -1463,6 +1398,7 @@ Portion* GSM_Write_Efg( Portion** param )
 
 Portion* GSM_Write_list( Portion** param )
 {
+  assert(param[1]->Spec().ListDepth > 0);
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   s << param[ 1 ];
   return param[0]->RefCopy();
@@ -1692,7 +1628,7 @@ Portion* GSM_Read_Text( Portion** param )
 
 
 
-Portion* GSM_Read_List( Portion** param, PortionType type,
+Portion* GSM_Read_List( Portion** param, PortionSpec spec,
 		       Portion* (*func) ( Portion** ), bool ListFormat )
 {
   Portion* p;
@@ -1734,7 +1670,8 @@ Portion* GSM_Read_List( Portion** param, PortionType type,
 
   for( i=1; i <= list->Length(); i++ )
   {
-    assert( (*list)[i]->Type()==type || (*list)[i]->Type()==porLIST );
+    assert( (*list)[i]->Spec().Type==spec.Type || 
+	   (*list)[i]->Spec().ListDepth > 0 );
     sub_param[0] = param[0];
     sub_param[1] = (*list)[i];
 
@@ -1752,12 +1689,12 @@ Portion* GSM_Read_List( Portion** param, PortionType type,
 	input.unget(c);      
     }
 
-    if( (*list)[i]->Type() == type )
+    if( (*list)[i]->Spec().Type == spec.Type )
       p = (*func)( sub_param );
     else
-      p = GSM_Read_List( sub_param, type, func, ListFormat );
+      p = GSM_Read_List( sub_param, spec, func, ListFormat );
 
-    if( p->Type() == porERROR )
+    if( p->Spec().Type == porERROR )
     {
       delete[] sub_param;
       input.setpos(old_pos);
@@ -1794,7 +1731,7 @@ Portion* GSM_Read_List_Bool( Portion** param )
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List( param, porBOOL, GSM_Read_Bool, false );
-  if( p->Type() == porERROR )
+  if( p->Spec().Type == porERROR )
     ((ListPortion*) param[1])->AssignFrom( temp );
   delete temp;
   return p;
@@ -1804,7 +1741,7 @@ Portion* GSM_Read_List_Integer( Portion** param )
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List( param, porINTEGER, GSM_Read_Integer, false );
-  if( p->Type() == porERROR )
+  if( p->Spec().Type == porERROR )
     ((ListPortion*) param[1])->AssignFrom( temp );
   delete temp;
   return p;
@@ -1814,7 +1751,7 @@ Portion* GSM_Read_List_Float( Portion** param )
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List( param, porFLOAT, GSM_Read_Float, false );
-  if( p->Type() == porERROR )
+  if( p->Spec().Type == porERROR )
     ((ListPortion*) param[1])->AssignFrom( temp );
   delete temp;
   return p;
@@ -1824,7 +1761,7 @@ Portion* GSM_Read_List_Rational( Portion** param )
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List( param, porRATIONAL, GSM_Read_Rational, false );
-  if( p->Type() == porERROR )
+  if( p->Spec().Type == porERROR )
     ((ListPortion*) param[1])->AssignFrom( temp );
   delete temp;
   return p;
@@ -1834,7 +1771,7 @@ Portion* GSM_Read_List_Text( Portion** param )
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List( param, porTEXT, GSM_Read_Text, false );
-  if( p->Type() == porERROR )
+  if( p->Spec().Type == porERROR )
     ((ListPortion*) param[1])->AssignFrom( temp );
   delete temp;
   return p;
@@ -1976,7 +1913,7 @@ Portion* GSM_Read_Undefined( Portion** param )
       sub_param[0] = param[0];
       sub_param[1] = 0;
       result = GSM_Read_Undefined( sub_param );
-      if( result->Type() != porERROR )
+      if( result->Spec().Type != porERROR )
 	((ListPortion*) param[1])->Append( sub_param[1] );
       else
       {
@@ -2024,35 +1961,35 @@ Portion* GSM_Read_Undefined( Portion** param )
     param[1] = new BoolValPortion( false );
     result = GSM_Read_Bool( param );
 
-    if( result->Type() == porERROR )
+    if( result->Spec().Type == porERROR )
     {
       delete param[1];
       delete result;
       param[1] = new IntValPortion( 0 );
       result = GSM_Read_Integer( param );    
     }
-    if( result->Type() == porERROR )
+    if( result->Spec().Type == porERROR )
     {
       delete param[1];
       delete result;
       param[1] = new FloatValPortion( 0 );
       result = GSM_Read_Float( param );    
     }
-    if( result->Type() == porERROR )
+    if( result->Spec().Type == porERROR )
     {
       delete param[1];
       delete result;
       param[1] = new RationalValPortion( 0 );
       result = GSM_Read_Rational( param );    
     }
-    if( result->Type() == porERROR )
+    if( result->Spec().Type == porERROR )
     {
       delete param[1];
       delete result;
       param[1] = new TextValPortion( (gString) "" );
       result = GSM_Read_Text( param );    
     }
-    if( result->Type() == porERROR )
+    if( result->Spec().Type == porERROR )
     {
       delete param[1];
       delete result;
@@ -2109,7 +2046,7 @@ Portion* GSM_Manual(Portion** param)
 
   for(i=1; i<=Prototypes->Length(); i++)
   {
-    assert(Prototypes->DataType() == porTEXT);
+    assert(Prototypes->Spec().Type == porTEXT);
     s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
   }
 
@@ -2224,29 +2161,11 @@ void Init_gsmoper( GSM* gsm )
 {
   FuncDescObj* FuncObj;
 
-
   FuncObj = new FuncDescObj("Version");
   FuncObj->SetFuncInfo(GSM_Version, 0, NO_PREDEFINED_PARAMS, NON_LISTABLE);
   gsm->AddFunction(FuncObj);
 
   //---------------------- Assign ------------------------
-
-/*
-  FuncObj = new FuncDescObj( (gString) "Assign" );
-  FuncObj->SetFuncInfo( GSM_Assign, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Assign, 0, "x", porANYTYPE,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Assign, 1, "y", porANYTYPE );
-  
-  FuncObj->SetFuncInfo( GSM_Assign_Undefined, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Assign_Undefined, 0, "x", porUNDEFINED, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Assign_Undefined, 1, "y", porANYTYPE );
-
-  gsm->AddFunction( FuncObj );
-*/
 
 
   ParamInfoType xy_Int[] =
@@ -2281,8 +2200,8 @@ void Init_gsmoper( GSM* gsm )
 
   ParamInfoType xy_List[] =
   {
-    ParamInfoType( "x", porLIST ),
-    ParamInfoType( "y", porLIST )
+    ParamInfoType( "x", PortionSpec(porANYTYPE, 1) ),
+    ParamInfoType( "y", PortionSpec(porANYTYPE, 1) )
   };
 
 
@@ -2702,8 +2621,8 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Write_list, 1, "x", 
-			porLIST | porBOOL | porINTEGER | porFLOAT | porTEXT |
-			porRATIONAL | porMIXED | porBEHAV );
+			PortionSpec(porBOOL | porINTEGER | porFLOAT | porTEXT |
+				    porRATIONAL | porMIXED | porBEHAV, 1) );
 
   gsm->AddFunction( FuncObj );
 
@@ -2747,8 +2666,8 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_List_Bool, 0, "input", porINPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Bool, 1, "x", porBOOL | porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+  FuncObj->SetParamInfo( GSM_Read_List_Bool, 1, "x", PortionSpec(porBOOL,1), 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Integer, 2, 
@@ -2762,8 +2681,9 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_List_Integer, 0, "input", porINPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Integer, 1, "x", porINTEGER | porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+  FuncObj->SetParamInfo( GSM_Read_List_Integer, 1, "x", 
+			PortionSpec(porINTEGER,1), 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Float, 2,
@@ -2777,8 +2697,8 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_List_Float, 0, "input", porINPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Float, 1, "x", porFLOAT | porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+  FuncObj->SetParamInfo( GSM_Read_List_Float, 1, "x", PortionSpec(porFLOAT,1), 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Rational, 2,
@@ -2792,8 +2712,9 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_List_Rational, 0, "input", porINPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Rational, 1, "x", porRATIONAL|porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+  FuncObj->SetParamInfo( GSM_Read_List_Rational, 1, "x", 
+			PortionSpec(porRATIONAL,1), 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
   FuncObj->SetFuncInfo( GSM_Read_Text, 2, 
@@ -2807,8 +2728,8 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_List_Text, 0, "input", porINPUT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Text, 1, "x", porTEXT | porLIST, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, 1 );
+  FuncObj->SetParamInfo( GSM_Read_List_Text, 1, "x", PortionSpec(porTEXT,1), 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 
 
