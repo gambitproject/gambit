@@ -83,12 +83,14 @@ GSM::~GSM()
 
   _NumObj--;
 
+  /*
   if( _CallFuncStack->Depth() != 0 )
     _ErrorMessage( _StdErr, 47 );
   for( i = _CallFuncStack->Depth(); i > 0; i-- )
   {
     CallFunction();
   }
+  */
   assert( _CallFuncStack->Depth() == 0 );
   delete _CallFuncStack;
 
@@ -1193,8 +1195,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
     {
     case iQUIT:
       instr_success = true;
-      if( result == rcSUCCESS )
-	result = rcQUIT;
+      result = rcQUIT;
       done = true;
       break;
 
@@ -1239,15 +1240,15 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
       if( user_func )
 	_ErrorMessage( _StdErr, 33, program_counter - 1 );
       result = rcFAIL;
-      if( instruction->Type() == iINIT_CALL_FUNCTION )
-	done = true;
+      done = true;
+      break;
     }
   }
 
 
   for( i = _CallFuncStack->Depth(); i > initial_num_of_funcs; i-- )
   {
-    CallFunction();
+    delete _CallFuncStack->Pop();
   }
   assert( _CallFuncStack->Depth() == initial_num_of_funcs );
 
