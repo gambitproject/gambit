@@ -297,6 +297,7 @@ guiAutoDialog::guiAutoDialog(wxWindow *p_parent, char *p_title)
 void guiAutoDialog::Go(void)
 {
   Layout();
+  Fit();
   wxList *children = GetChildren();
 
   int minX = 1000, minY = 1000, totalWidth = 0, totalHeight = 0;
