@@ -184,17 +184,19 @@ bool operator == (const gNumber& x, const gNumber& y)
     return *(x.rval) == *(y.rval);
   else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
   {
-    double eps;
-    gEpsilon(eps, 8);
-    return (   (y.dval <= double(*(x.rval)) + eps)
-            && (y.dval >= double(*(x.rval)) - eps) );
+    return false;
+//    double eps;
+//    gEpsilon(eps, 8);
+//    return (   (y.dval <= double(*(x.rval)) + eps)
+//            && (y.dval >= double(*(x.rval)) - eps) );
   }
   else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
   {
-    double eps;
-    gEpsilon(eps, 8);
-    return (   (x.dval <= double(*(y.rval)) + eps)
-            && (x.dval >= double(*(y.rval)) - eps) );
+    return false;
+//    double eps;
+//    gEpsilon(eps, 8);
+//    return (   (x.dval <= double(*(y.rval)) + eps)
+//            && (x.dval >= double(*(y.rval)) - eps) );
   }
 }
 
@@ -206,17 +208,19 @@ bool operator != (const gNumber& x, const gNumber& y)
     return *(x.rval) != *(y.rval);
   else if (x.rep == precRATIONAL && y.rep == precDOUBLE)
   {
-    double eps;
-    gEpsilon(eps, 8);
-    return (   (y.dval >= double(*(x.rval)) + eps)
-            || (y.dval <= double(*(x.rval)) - eps) );
+    return true;
+//    double eps;
+//    gEpsilon(eps, 8);
+//    return (   (y.dval >= double(*(x.rval)) + eps)
+//            || (y.dval <= double(*(x.rval)) - eps) );
   }
   else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
   {
-    double eps;
-    gEpsilon(eps, 8);
-    return (   (x.dval >= double(*(y.rval)) + eps)
-            || (x.dval <= double(*(y.rval)) - eps) );
+    return true;
+//    double eps;
+//    gEpsilon(eps, 8);
+//    return (   (x.dval >= double(*(y.rval)) + eps)
+//            || (x.dval <= double(*(y.rval)) - eps) );
   }
 }
 
