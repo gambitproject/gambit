@@ -4083,7 +4083,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("UnAssign", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnAssign, porANYTYPE, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnAssign, porBOOL, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
 

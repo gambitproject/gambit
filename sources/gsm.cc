@@ -690,15 +690,17 @@ bool GSM::UnAssign(void)
   {
     if(_VarIsDefined(((ReferencePortion*) p)->Value()))
     {
-      _Push(_VarRemove(((ReferencePortion*) p)->Value()));
+//      _Push(_VarRemove(((ReferencePortion*) p)->Value()));
+      delete _VarRemove(((ReferencePortion *) p)->Value());
       delete p;
+      _Push(new BoolPortion(true));
       return true;
     }
     else
     {
-      _Push(p);
-      _ErrorMessage(_StdErr, 54, 0, 0, ((ReferencePortion*) p)->Value());
-      return false;
+      delete p;
+      _Push(new BoolPortion(false));
+      return true;
     }
   }
   else
@@ -730,24 +732,20 @@ Portion* GSM::UnAssignExt(void)
     if(_VarIsDefined( varname ) )
     {
       delete p;
-      return _VarRemove( varname );
+      delete _VarRemove( varname );
+      return new BoolPortion(true);
     }
     else
     {
-      _Push(p);
-      txt = "UnAssign[] called on undefined reference \"";
-      txt += varname;
-      txt += '\"';
-      p = new ErrorPortion(txt);
-      return p;
+      delete p;
+      return new BoolPortion(false);
     }
   }
   else
   {
     _Push(p);
     txt = "UnAssign[] called on a non-reference value";
-    p = new ErrorPortion(txt);
-    return p;
+    return new ErrorPortion(txt);
   }
 }
 
