@@ -12,7 +12,11 @@ GLIB_OBJECTS = $(GLIB_SOURCES:.cc=$(OBJECT_SUFFIX))
 GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc \
                 poly.cc quiksolv.cc gpartltr.cc gsolver.cc \
                 odometer.cc rectangl.cc ideal.cc gpolylst.cc \
-                linrcomb.cc ineqsolv.cc
+                linrcomb.cc ineqsolv.cc pelclass.cc pelclhpk.cc \
+		pelclqhl.cc pelclyal.cc pelconv.cc peleval.cc \
+		pelgennd.cc pelgmatr.cc \
+		pelpred.cc pelprgen.cc pelproc.cc pelhomot.cc \
+		pelpsys.cc pelqhull.cc pelsymbl.cc pelutils.cc
 
 GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=$(OBJECT_SUFFIX))
 
