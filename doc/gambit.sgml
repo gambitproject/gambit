@@ -31,9 +31,9 @@
       </author>
     </authorgroup>
     <edition>Version 0.97.1</edition>
-    <pubdate>2004</pubdate>
+    <pubdate>2005</pubdate>
     <copyright>
-      <year>2004</year>
+      <year>2005</year>
       <holder>The Gambit Project</holder>
     </copyright>
   </bookinfo>
@@ -244,8 +244,93 @@ are only available for game trees in this version.
 <title>Editing extensive form games</title>
 
 <para>
-Editing of extensive form games is not yet supported in this version.
+The methods for creating, editing, and navigating extensive form games
+are being completely overhauled from previous versions.  This section
+outlines the current features.  The graphical idioms (drag and drop and
+so forth) for editing games are still provisional, and are being circulated
+for comments and suggestions.
 </para>
+
+<sect2 id="efg.editing.new">
+<title>Creating a new extensive form game</title>
+
+<para>
+A new extensive form game is created using 
+<guimenu>File</guimenu>-&gt;<guisubmenu>New</guisubmenu>-&gt;
+<guimenuitem>Extensive</guimenuitem>. The new extensive form is trivial,
+having only one node which is both root and terminal, and two personal
+(non-chance) players.  This trivial extensive form game is also
+created when the graphical interface is first launched.
+</para>
+
+<para>
+Across the top of the extensive form tree view is a toolbar specific to
+extensive forms.  It contains an array of colored and numbered squares,
+which represent the players currently defined in the game.
+</para>
+
+</sect2>
+
+<sect2 id="efg.editing.addingmoves">
+<title>Adding moves to an extensive form game</title>
+
+<para>
+To add a move at any terminal node, click on the icon in the extensive
+form toolbar corresponding to the player who will have the move at that
+node, and drag it to the node.  This creates a new information set for
+the player, with two moves by default.
+</para>
+
+<para>
+To add an additional choice at an information set, drag the icon for
+that player to a node in the information set.  This operation adds one
+new move each time it is done.
+</para>
+
+<para>
+Dragging a player icon to a decision node belonging to a different
+player gives the dragged player the move at that information set.
+</para>
+
+</sect2>
+
+<sect2 id="efg.editing.copytree">
+<title>Moving and copying subtrees</title>
+
+<para>
+Dragging from one node to another moves the entire subtree rooted
+at the original node to the destination node.
+</para>
+
+<para>
+Dragging from one node to another while holding down the Control
+key on the keyboard causes the subtree to be copied.
+</para>
+
+</sect2>
+
+<sect2 id="efg.editing.infosets">
+<title>Editing information structure</title>
+
+<para>
+Dragging from one node to another while holding down the Shift key
+places the target node in the same information set as the originating
+node, if possible (that is, if both nodes have the same number of
+actions).
+</para>
+
+</sect2>
+
+<sect2 id="efg.editing.labels">
+<title>Editing labels</title>
+
+<para>
+Nodes, information sets, and actions can all be given text labels.
+Double-clicking on a node obtains a dialog for editing the label of
+that node, its information set, and the actions at that information set.
+</para>
+
+</sect2>
 
 </sect1>
 
