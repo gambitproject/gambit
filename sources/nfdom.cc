@@ -12,7 +12,7 @@
 
 gRectArray<gNumber> *paytable;
 
-bool Dominates(const Nfg &N,
+bool Dominates(const Nfg &,
 	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
   NfgContIter A(S), B(S);
