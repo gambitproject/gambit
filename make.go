@@ -133,7 +133,7 @@ gui_$(GUI)_$(HOST): $(GUI_OBJECTS)
 	$(CC) $(GUI_OBJECTS) $(LIBDIR) $(GUILIBS) -o ../gui_$(GUI)_$(HOST)
 
 depend_gcl:
-	makedepend -f make.go $(GCL_SOURCES) 
+	makedepend -f make.go -I./wx_fake $(GCL_SOURCES) 
 depend_gui:
 	makedepend -f make.go -I./wx_fake $(GUI_SOURCES) 
 clean:
