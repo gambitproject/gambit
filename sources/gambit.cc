@@ -55,8 +55,15 @@ menu_bar->Append(help_menu,	"&Help");
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
 
-// Set up the help system
-wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
+// Set up the help system wxInitHelp("gambit","Gambit -- Graphics User
+Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey
+(rdm@hss.caltech.edu)\nMain Programmer: Theodore Turocy
+(magyar@hss.caltech.edu)\nFront End: Eugene Grayver
+(egrayver@hss.caltech.edu)
+\n\nPart of The Gambit Project\n
+Richard D. McKelvey and Andrew McLennan, PI's\n
+California Institute of Technology and University of Minnesota,\
+1995.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
 // Process command line arguments, if any
