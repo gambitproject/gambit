@@ -9,7 +9,6 @@
 
 #include "gstring.h"
 #include "gblock.h"
-#include "glist.h"
 
 class Outcome;
 class Player;
@@ -21,7 +20,7 @@ class BaseExtForm     {
   protected:
     gString title;
     gBlock<Player *> players;
-    gList<Outcome *> outcomes;
+    gBlock<Outcome *> outcomes;
     Node *root;
     Player *chance;
 
@@ -48,18 +47,21 @@ class BaseExtForm     {
        //# DATA ACCESS -- GENERAL INFORMATION
     virtual DataType Type(void) const = 0;
 
-    int NumPlayers(void) const;
-    int NumOutcomes(void) const;
-
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
     bool IsPredecessor(const Node *n, const Node *of) const;
 
        //# DATA ACCESS -- PLAYERS
+    int NumPlayers(void) const;
+
     Player *GetPlayer(const gString &name) const;
     Player *GetChance(void) const;
     Player *NewPlayer(void);
     const gArray<Player *> &PlayerList(void) const  { return players; }
+
+       //# DATA ACCESS -- OUTCOMES
+    int NumOutcomes(void) const;
+    const gArray<Outcome *> &OutcomeList(void) const  { return outcomes; }
  
        //# EDITING OPERATIONS
     Infoset *AppendNode(Node *n, Player *p, int br);

@@ -7,6 +7,7 @@
 #ifndef INFOSET_H
 #define INFOSET_H
 
+#include "glist.h"
 #include "rational.h"
 #include "gvector.h"
 

@@ -292,9 +292,6 @@ DataType BaseBehavProfile::Type(void) const
 
 #include "glist.imp"
 
-TEMPLATE class gList<Outcome *>;
-TEMPLATE class gNode<Outcome *>;
-
 TEMPLATE class gList<Node *>;
 TEMPLATE class gNode<Node *>;
 
@@ -312,6 +309,9 @@ TEMPLATE class gBlock<Node *>;
 
 TEMPLATE class gArray<Action *>;
 TEMPLATE class gBlock<Action *>;
+
+TEMPLATE class gArray<Outcome *>;
+TEMPLATE class gBlock<Outcome *>;
 
 
 
