@@ -349,6 +349,12 @@ template <class T> bool BehavProfile<T>::IsPure(int pl) const
   return false;
 }
 
+template <class T>
+const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
+{
+  return (*this)(s->GetPlayer()->GetNumber(), s->GetNumber(), act);
+}
+
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p)
 { p.Dump(f);   return f;  }
 

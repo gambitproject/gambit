@@ -282,6 +282,20 @@ DataType BaseBehavProfile::Type(void) const
   return E->Type();
 }
 
+const gString &BaseBehavProfile::GetPlayerName(int p) const
+{
+  return E->PlayerList()[p]->GetName();
+}
+
+const gString &BaseBehavProfile::GetInfosetName(int p, int iset) const
+{
+  return E->PlayerList()[p]->InfosetList()[iset]->GetName();
+}
+
+const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const
+{
+  return E->PlayerList()[p]->InfosetList()[iset]->GetActionName(act);
+}
 
 #ifdef __GNUG__
 #define TEMPLATE template

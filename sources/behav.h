@@ -26,12 +26,17 @@ class BaseBehavProfile   {
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
     bool IsTruncated(void) const    { return truncated; }
+
+    const gString &GetPlayerName(int p) const;
+    const gString &GetInfosetName(int p, int iset) const;
+    const gString &GetActionName(int p, int iset, int act) const;
 };
 
 
 #include "gdpvect.h"
 
 template <class T> class ExtForm;
+class Infoset;
 
 template <class T> class BehavProfile
   : public BaseBehavProfile, public gDPVector<T>  {
@@ -44,6 +49,8 @@ template <class T> class BehavProfile
 
     bool IsPure(void) const;
     bool IsPure(int pl) const;
+
+    const T &GetValue(Infoset *s, int act) const;
 };
 
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p);
