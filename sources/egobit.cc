@@ -120,7 +120,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 
 
 static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
-			   const EFGobitParams &/*params*/)
+			   const EFGobitParams &params)
 {
   int pl, iset, nisets = 0;
 
@@ -132,6 +132,10 @@ static void WritePXIHeader(gOutput &pxifile, const Efg<double> &E,
     for (iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)
       pxifile << " " << E.PlayerList()[pl]->InfosetList()[iset]->NumActions();
   pxifile << "\n";
+
+	pxifile << "Settings:\n" << params.minLam;
+	pxifile << "\n" << params.maxLam << "\n" << params.delLam;
+	pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
 
   int numcols = E.ProfileLength() + 2;
   pxifile << "DataFormat:";
