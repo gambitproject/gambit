@@ -107,8 +107,21 @@ ALLGUI_SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(GPOLY_SOURCES) \
 
 ALLGUI_OBJECTS = $(ALLGUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 
+# These are found in subdirectory pxi/
+PXI_SOURCES = pxi.cc pxichild.cc pxiconf.cc \
+              pxiplot.cc pxiplotn.cc pxiplot2.cc pxiplot3.cc \
+              dlformataxis.cc dlformattitle.cc dlformatlegend.cc \
+              wxmisc.cc dlabout.cc valinteger.cc valnumber.cc \
+              equtrac.cc probvect.cc expdata.cc dlgpxi.cc pxifile.cc
+
+PXI_OBJECTS = $(PXI_SOURCES:.cc=$(OBJECT_SUFFIX))
+
+ALLPXI_SOURCES = $(GLIB_SOURCES) $(PXI_SOURCES)
+
+ALLPXI_OBJECTS = $(ALLPXI_SOURCES:.cc=$(OBJECT_SUFFIX))
+
 SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(GPOLY_SOURCES) \
-          $(ALG_SOURCES) $(GCL_SOURCES) $(GUI_SOURCES) \
+          $(ALG_SOURCES) $(GCL_SOURCES) $(GUI_SOURCES) $(PXI_SOURCES) \
           gclstatus.cc gio.cc gcl.cc wxgcl.cc
 
 OBJECTS = $(SOURCES:.cc=$(OBJECT_SUFFIX))

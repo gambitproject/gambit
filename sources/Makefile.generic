@@ -38,6 +38,7 @@
 GCLBINARY = gcl_linux
 WXGCLBINARY = wxgcl_gtk_linux
 GUIBINARY = gambit_gtk_linux
+PXIBINARY = pxi_gtk_linux
 
 # Generic WxWin information:
 # 
@@ -94,7 +95,7 @@ OBJECT_SUFFIX = .o
 #
 OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
-vpath %.cc  base:math:gui
+vpath %.cc  base:math:gui:pxi
 
 # rule for creating .o (object) files from .cc files
 
@@ -138,7 +139,7 @@ include	$(SOURCES:.cc=.d)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-all:	gcl wxgcl gui
+all:	gcl wxgcl gui pxi
 
 gcl:	$(OBJDIR) $(TTYGCL_OBJECTS)
 	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../$(GCLBINARY); cd ..
@@ -152,6 +153,11 @@ gui:	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
 	    -o ../$(GUIBINARY); cd ..
+
+pxi:	$(OBJDIR) $(ALLPXI_OBJECTS)
+	cd $(OBJDIR); \
+	$(CC) $(ALLPXI_OBJECTS) $(LIBDIR) $(GUILIBS) \
+	    -o ../$(PXIBINARY); cd ..
 
 readnfg.cc:  readnfg.yy
 	bison -p nfg_yy -o readnfg.cc readnfg.yy
