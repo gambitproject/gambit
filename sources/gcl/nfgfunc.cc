@@ -560,7 +560,6 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   gBlock<int> players(S->Game().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  Portion *por;
   gbtNfgSupport *T;
 
   if (mixed)

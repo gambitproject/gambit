@@ -91,7 +91,7 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
   gridSizer->Add(new wxStaticText(this, -1, "Size of nodes"),
 		 0, wxCENTER | wxALL, 5);
   m_nodeSize = new wxSpinCtrl(this, -1,
-			      wxString::Format("%d", p_settings.NodeSize()),
+			      wxString::Format("%ld", p_settings.NodeSize()),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxSP_ARROW_KEYS,
 			      NODE_LENGTH_MIN, NODE_LENGTH_MAX);
@@ -101,7 +101,7 @@ panelNodes::panelNodes(wxWindow *p_parent, const TreeDrawSettings &p_settings)
 		 0, wxCENTER | wxALL, 5);
   m_terminalSpacing =
     new wxSpinCtrl(this, -1,
-		   wxString::Format("%d", p_settings.TerminalSpacing()),
+		   wxString::Format("%ld", p_settings.TerminalSpacing()),
 		   wxDefaultPosition, wxDefaultSize,
 		   wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
   gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
@@ -164,7 +164,7 @@ panelBranches::panelBranches(wxWindow *p_parent,
   gridSizer->Add(new wxStaticText(this, -1, "Branch length"),
 		 0, wxCENTER | wxALL, 5);
   m_branchLength = new wxSpinCtrl(this, -1,
-				  wxString::Format("%d",
+				  wxString::Format("%ld",
 						   p_settings.BranchLength()),
 				  wxDefaultPosition, wxDefaultSize,
 				  wxSP_ARROW_KEYS,
@@ -174,7 +174,7 @@ panelBranches::panelBranches(wxWindow *p_parent,
   gridSizer->Add(new wxStaticText(this, -1, "Tine length"),
 		 0, wxCENTER | wxALL, 5);
   m_tineLength = new wxSpinCtrl(this, -1,
-				wxString::Format("%d",
+				wxString::Format("%ld",
 						 p_settings.TineLength()),
 				wxDefaultPosition, wxDefaultSize,
 				wxSP_ARROW_KEYS,

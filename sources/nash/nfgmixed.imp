@@ -165,7 +165,7 @@ gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_suppor
 	  }
 	}
 
-	int index = solutions.Append(MixedSolution(profile, "EnumMixed[NFG]")); 
+	solutions.Append(MixedSolution(profile, "EnumMixed[NFG]")); 
 	//    solutions[index].SetEpsilon(eps);
     
 	// note:  The keys give the mixed strategy associated with each node.  

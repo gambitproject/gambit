@@ -27,22 +27,6 @@
 #include "nfgyamamoto.h"
 #include "math/gsmatrix.h"
 
-static int NumPartitions(const gMatrix<int> &p_partition)
-{
-  int count = 0;
-
-  for (int row = 1; row <= p_partition.NumRows(); row++) {
-    for (int col = 1; col <= p_partition.NumColumns(); col++) {
-      if (p_partition(row, col) > 0) {
-	count++;
-	break;
-      }
-    }
-  }
-
-  return count;
-}
-
 static int NumMembers(const gMatrix<int> &p_partition, int p_index)
 {
   int count = 0;

@@ -395,8 +395,8 @@ gText TreeWindow::OutcomeAsString(const Node *n) const
     return "";
 }
 
-#include "bitmaps/copy.xpm"
-#include "bitmaps/move.xpm"
+//#include "bitmaps/copy.xpm"
+//#include "bitmaps/move.xpm"
 
 void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 {

@@ -41,7 +41,6 @@ gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
 				      gStatus &status) const
 {
   gbtNfgSupport newS(*this);
-  bool any = false;
   
   if (precision == precRATIONAL) {
     for (int i = 1; i <= players.Length(); i++)   {

@@ -498,24 +498,3 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
   
 }
 
-//==========================================================================
-//                            Logit Dynamics
-//==========================================================================
-
-static gVector<double> UpdateFunc(const MixedProfile<double> &p_profile,
-				  int p_player, double p_lambda) 
-{
-  gVector<double> r(p_profile.Support().NumStrats(p_player));
-  gVector<double> tmp(p_profile.Support().NumStrats(p_player));
-  double denom = 0.0;
-  for (int st = 1; st <= r.Length(); st++) {
-    double p = p_profile.Payoff(p_player, p_player, st);
-    tmp[st] = exp(p_lambda * p);
-    denom += tmp[st];
-  }
-  for (int st = 1; st <= r.Length(); st++) {
-    r[st] = tmp[st] / denom;
-  }
-  return r;
-}
-

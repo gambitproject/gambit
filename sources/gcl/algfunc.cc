@@ -515,7 +515,6 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
   const BehavProfile<gNumber> &start = *AsBehav(param[0]).Profile();
-  const efgGame &efg = start.GetGame();
   const EFSupport &support = start.Support();
   
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
@@ -553,7 +552,6 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 {
   const MixedProfile<gNumber> &start = *AsMixed(param[0]).Profile();
-  const Nfg &nfg = start.Game();
 
   gbtNfgNashLiap algorithm;
   algorithm.SetStopAfter(AsNumber(param[1]));
