@@ -274,6 +274,5 @@ TEMPLATE class TreeWindow<double> ;
 #ifdef GRATIONAL
 	TEMPLATE class TreeWindow<gRational> ;
 #endif
-#include "glist.imp"
-#pragma -Jgx
+
 
