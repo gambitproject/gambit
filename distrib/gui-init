@@ -11,10 +11,11 @@ endif
 
 grep -s "Root-Dir" ~/.gambit.ini
 if ($status) then
-	echo Setting the local install dir to : `pwd`
-	echo "Install.Root-Dir:       " `pwd` >> ~/.gambit.ini
-	echo Setting the local help dir to : `pwd`/manual/
-	echo "Install.Help-Dir:       " `pwd`/manual/ >> ~/.gambit.ini
+	set gambit-install-dir `pwd | sed -e 's/\/[^/]*//'`
+	echo Setting the local install dir to : $gambit-install-dir
+	echo "Install.Root-Dir:       " $gambit-install-dir >> ~/.gambit.ini
+	echo Setting the local help dir to : $gambit-install-dir/doc
+	echo "Install.Help-Dir:       " $gambit-install-dir/doc >> ~/.gambit.ini
 else
 	echo Local dir variables already set, no changes made
 endif
