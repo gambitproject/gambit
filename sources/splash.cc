@@ -6,24 +6,21 @@
 
 #include "wx/wx.h"
 #include "splash.h"
+#include "bitmaps/gambit.xpm"
 
 const int idTIMER = 3000;
 
-BEGIN_EVENT_TABLE(Splash, wxDialog)
+BEGIN_EVENT_TABLE(Splash, wxFrame)
   EVT_TIMER(idTIMER, Splash::OnTimer)
   EVT_PAINT(Splash::OnPaint)
 END_EVENT_TABLE()
 
 Splash::Splash(long p_seconds)
-  : wxDialog(0, -1, "", wxDefaultPosition, wxDefaultSize, wxDIALOG_MODAL),
+  : wxFrame(0, -1, "", wxDefaultPosition, wxDefaultSize,
+	     wxDIALOG_MODAL | wxSIMPLE_BORDER),
     m_bitmap(NULL), m_timer(NULL)
 {
-#ifdef __WXMSW__
-  m_bitmap = new wxBitmap("gambit");
-#else
-  m_bitmap = new wxBitmap(300, 300);   // a default, for now
-#endif  // __WXMSW__
-
+  m_bitmap = new wxBITMAP(gambit);
   m_timer = new wxTimer(this, idTIMER);
 
   SetSize(0, 0, m_bitmap->GetWidth() + 4, m_bitmap->GetHeight() + 4);
@@ -49,7 +46,7 @@ void Splash::OnTimer(wxTimerEvent &p_event)
   if (m_timer) {
     m_timer->Stop(); 
   }
-  EndModal(0);
+  Show(false);
   Destroy(); 
 }
 

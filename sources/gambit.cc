@@ -108,7 +108,10 @@ bool GambitApp::OnInit(void)
   wxConfig config("Gambit");
 
   Splash *splash = new Splash(2);
-  splash->ShowModal();
+  splash->Show(true);
+  while (splash->IsShown()) {
+    wxYield();
+  }
 
   // Create the main frame window.
   GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", 

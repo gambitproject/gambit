@@ -7,7 +7,7 @@
 #ifndef SPLASH_H
 #define SPLASH_H
 
-class Splash : public wxDialog {
+class Splash : public wxFrame {
 private:
   wxBitmap *m_bitmap;
   wxTimer *m_timer;
