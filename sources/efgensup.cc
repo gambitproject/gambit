@@ -206,6 +206,8 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 { 
   bool abort = false;
   bool no_deletions = true;
+  bool add_support = true;
+
   bool check_domination = false;
   if (sact->HasActiveActionsAtActiveInfosets()) 
     check_domination = true;
@@ -221,9 +223,13 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	delete_this_action = true;  
       else
 	if (check_domination) 
-	  if (sact->IsDominated(this_action,true,true) ||
-	      sact->IsDominated(this_action,true,false) ) 
-	    delete_this_action = true;
+	  if ( sact->IsDominated(this_action,true,true) ||
+	       sact->IsDominated(this_action,true,false) ) {
+	    add_support = false;
+	    if ( c->InfosetGuaranteedActiveByPriorCommitments(sact,
+						   this_action->BelongsTo()) )
+	      delete_this_action = true;
+	  }
     if (delete_this_action) {
       no_deletions = false;
       if (c->IsSubsequentTo(this_action)) 
@@ -244,18 +250,18 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	abort = true;
     }
 
-    if (!abort && deletion_list.Length() > 0)
+    if (!abort && deletion_list.Length() > 0) 
       PossibleNashSubsupportsRECURSIVE(s,sact,c,list,status);
-    
-    for (int i = 1; i <= actual_deletions.Length(); i++)
+        
+    for (int i = 1; i <= actual_deletions.Length(); i++) {
       sact->AddAction(actual_deletions[i]);
+    }
   }
 
-  if (!abort && no_deletions) {
+  if (!abort && deletion_list.Length() == 0) {
 
-    if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
-      (*list) += sact->UnderlyingSupport();
-    
+    if (add_support && sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
+      (*list) += sact->UnderlyingSupport();    
     ActionCursorForSupport c_copy(*c);
     do {
       if ( sact->ActionIsActive((Action *)c_copy.GetAction()) ) {
@@ -265,6 +271,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	if (!c_copy.DeletionsViolateActiveCommitments(sact,
 						      &deactivated_infosets))
 	  PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
+
 	sact->AddAction(c_copy.GetAction());
       }
     } while (c_copy.GoToNext()) ;
@@ -366,7 +373,7 @@ ActionCursorForSupport::operator!=(const ActionCursorForSupport &rhs) const
 bool
 ActionCursorForSupport::GoToNext()
 {
-  if      (act != support->NumActions(pl,iset))
+  if (act != support->NumActions(pl,iset))
     { act++; return true; }
   else if (iset != support->Game().GetPlayer(pl)->NumInfosets())
     { iset++; act = 1; return true; }
@@ -419,13 +426,6 @@ ActionCursorForSupport::IsLast() const
 bool 
 ActionCursorForSupport::IsSubsequentTo(const Action *a) const
 {
-  /*
-  //DEBUG
-  gout << "In IsSubsequentTo with pl = " << pl 
-       << ", and a's player = " << a ->BelongsTo()->GetPlayer()->GetNumber()
-       << ".\n";
-  */
-
   if (pl > a->BelongsTo()->GetPlayer()->GetNumber())
     return true; 
   else if (pl < a->BelongsTo()->GetPlayer()->GetNumber())
@@ -461,6 +461,27 @@ DeletionsViolateActiveCommitments(const EFSupportWithActiveInfo *S,
 			       infoset->GetNumber(),
 			       act) )
 	  return true;
+  }
+  return false;
+}
+
+
+bool ActionCursorForSupport::
+InfosetGuaranteedActiveByPriorCommitments(const EFSupportWithActiveInfo *S,
+					  const Infoset *infoset)
+{
+  gList<const Node *> members = infoset->ListOfMembers();
+  for (int i = 1; i <= members.Length(); i++) {
+    const Node* current = members[i];
+    if ( current == S->Game().RootNode() )
+      return true;
+    else
+      while ( S->ActionIsActive((Action *)current->GetAction()) &&
+	      IsSubsequentTo(current->GetAction()) ) {
+	current = current->GetParent();
+	if ( current == S->Game().RootNode() )
+	  return true;
+      }
   }
   return false;
 }

@@ -85,9 +85,9 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 class ActionCursorForSupport {
 protected:
   const EFSupport *support;
-  int pl;
-  int iset;
-  int act;
+        int pl;
+        int iset;
+        int act;
 
 public:
   //Constructors and dtor
@@ -115,6 +115,9 @@ public:
   bool IsSubsequentTo(const Action *) const;
 
   // Special
+  bool InfosetGuaranteedActiveByPriorCommitments(const 
+						     EFSupportWithActiveInfo *,
+						 const Infoset *);
   bool DeletionsViolateActiveCommitments(const EFSupportWithActiveInfo *,
 					 const gList<Infoset *> *);
 };
