@@ -6,7 +6,7 @@
 
 #ifndef TREEWINDOW_H
 #define TREEWINDOW_H
-#include "gset.h"
+#include "gblock.h"
 #include "twiniter.h"
 #include "twflash.h"
 #include "treedraw.h"
@@ -16,31 +16,44 @@ typedef struct NODEENTRY {
 		int infoset_y;	// y of the next node in the infoset to connect to
 		int	num;				// # of the infoset line on this level
 		int nums;				// sum of infosets previous to this level
+		int has_children;	// how many children this node has
+		int child_number;	// what branch # is this node from the parent
 		Node n;
-    
+		NODEENTRY *parent;
 }  NodeEntry;
 
-class ExtensiveFrame;
-class TreeWindow : public wxCanvas
+template <class T> class ExtensiveShow;
+class BaseTreeWindow
+{
+public:
+	virtual void node_outcome(int out=0) =0;
+	virtual void tree_outcomes(int out=0) =0;
+	virtual void OnPaint(void) =0;
+};
+
+template <class T>
+class TreeWindow : public BaseTreeWindow, public wxCanvas
 {
 		// Private variables
-		Problem *the_problem;
+		ExtForm<T> *the_problem;
 		int			subgame;							// which subgame I am.  1 for root
-		ExtensiveFrame *frame;				// parent frame
-		Node mark_node;								// Used in mark/goto node operations
+		ExtensiveShow<T> *frame;				// parent frame
+		Node mark_node,old_mark_node;	// Used in mark/goto node operations
 		TreeDrawParams draw_settings;	// Stores drawing parameters
 		TreeWinIter *iterator;				// Used to process cursor keys
 		TreeNodeCursor *flasher;			// Used to flash the cursor
 		wxList *node_list;						// Data for display coordinates of nodes
 		Bool		nodes_changed;    		// Used to determine if a node_list recalc
 		Bool		infosets_changed;			// is needed
+#ifdef SUBGAMES
 		typedef struct SUBGAMESTRUCT{
-										int num;ExtensiveFrame *win;
+		friend gOutput &operator<<(gOutput &op,const SUBGAMESTRUCT &S);
+										int num;ExtensiveShow<T> *win;
 										SUBGAMESTRUCT(void)
 											{num=0;win=NULL;}
 										SUBGAMESTRUCT(const int _num)
 											{num=_num;win=NULL;}
-										SUBGAMESTRUCT(int _num,ExtensiveFrame *_win)
+										SUBGAMESTRUCT(int _num,ExtensiveShow<T> *_win)
 											{num=_num;win=_win;}
 										SUBGAMESTRUCT &operator=(const SUBGAMESTRUCT &S)
 											{num=S.num;win=S.win;return (*this);}
@@ -50,10 +63,15 @@ class TreeWindow : public wxCanvas
 											{return (num!=S.num);}
 										} subgame_struct;
 
-		gSet<subgame_struct>	open_subgames;			// Used to keep track of which subgames are already open
+		gBlock<subgame_struct>	open_subgames;			// Used to keep track of which subgames are already open
+#endif
+		// The copy/assignment operators are private since they are NEVER
+		// used or implemented.  Perhaps later...
+		TreeWindow(const TreeWindow<T> &);
+		void operator=(const TreeWindow<T> &);
 		// Private Functions
-		void	RenderLabels(wxDC &dc,const Node &n);
-		void 	RenderSubtree(wxDC &dc,const Node &n);
+		void	RenderLabels(wxDC &dc,NodeEntry *entry);
+		void 	RenderSubtree(wxDC &dc);
 		int 	FillTable(const Node &n, int level);
 		void 	ProcessCursor(void);
 		void 	ProcessClick(int x,int y);
@@ -62,23 +80,26 @@ class TreeWindow : public wxCanvas
 		void	FillInfosetTable(const Node &n);
 		void	CheckInfosetEntry(NodeEntry *e);
 		void	UpdateTableInfosets(void);
+		void	UpdateTableParents(void);
 	public:
 		// Constructor
-		TreeWindow(ExtensiveFrame *frame,int x,int y,int w,int h,Problem *p=NULL,
-							int _subgame=1,int style=wxRETAINED);
+		TreeWindow(ExtForm<T> *p,ExtensiveShow<T> *frame,int subgame=1,
+							int x=-1,int y=-1,int w=-1,int h=-1,int style=wxRETAINED);
 		// Destructor
 		~TreeWindow();
 		// Windows event handlers
 		void OnPaint(void);
 		void OnEvent(wxMouseEvent& event);
 		void OnChar(wxKeyEvent& ch);
+#ifdef SUBGAMES
 		// Subgame handlers
 		void OpenSubgame(int num);
 		void CloseSubgame(int num);
 		void MakeSubgame(void);
+#endif
 		// Menu event handlers (these are mostly in treewin1.cc)
 		void node_add(void);
-		void node_outcome(int out=-1);
+		void node_outcome(int out);
 		void node_game(void);
 		void node_label(void);
 		void node_delete(void);
@@ -86,7 +107,7 @@ class TreeWindow : public wxCanvas
 		void node_set_mark(void);
 		void node_goto_mark(void);
 		void node_probs(void);
-    void node_subgame(int _game);
+		void node_subgame(int _game);
 
 		void branch_label(void);
 		void branch_insert(void);
@@ -96,7 +117,7 @@ class TreeWindow : public wxCanvas
 		void tree_copy(void);
 		void tree_move(void);
 		void tree_label(void);
-		void tree_outcomes(int out=-1);
+		void tree_outcomes(int out=0);
 		void tree_players(void);
 		void tree_subgames(void);
 		void tree_subgame_make(void);
@@ -115,38 +136,54 @@ class TreeWindow : public wxCanvas
 		void display_save_options(Bool def=TRUE);
 		void display_load_options(Bool def=TRUE);
 		void display_set_zoom(float z=-1);
-		float display_get_zoom(void) {return draw_settings.Zoom();}
+		float display_get_zoom(void);
 
+		void 	output(void);
 		void	print_eps(void);			// output to postscript file
 		void	print(void);					// output to printer (WIN3.1 only)
 		void	print_mf(void);				// copy to clipboard (WIN3.1 only)
 
 		void	file_save(void);
 
-		gString Title(void) const   { return the_problem->GetTitle(); }
+		gString Title(void) const;
 
 		void Render(wxDC &dc);
 
 };
 
-class ExtensiveFrame : public wxFrame
+template <class T>
+class ExtensiveShow : public wxFrame
 {
-	private:
-		wxList *accelerators;					// Used to process accelerator keys
-	public:
-		wxFrame *parent;
-		TreeWindow *tw;
-		// Constructor
-		ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w, int h,
-								int type, char *filename=NULL,Problem *p=NULL,int _subgame=1);
-		// Destructor
-		~ExtensiveFrame();
-
-		Bool 		OnClose(void);
-		wxList 	*MakeAccelerators(void);
-		Bool		CheckAccelerators(int ch);
-		void 		OnMenuCommand(int id);
+private:
+	ExtForm<T> *ef;
+	wxList *accelerators;					// Used to process accelerator keys
+	// Solution routines
+  gBlock<int> got_soln;
+	void SolveNormal(void);
+	void SolveEGambit(void);
+public:
+	wxFrame *parent;
+	TreeWindow<T> *tw;
+	// Constructor.  You need only suply the ExtForm
+	ExtensiveShow(ExtForm<T> *ef,int subgame=1,wxFrame *frame=NULL,
+								const char *title=0,int x=-1,int y=-1,int w=600,
+								int h=400,int type=wxDEFAULT_FRAME);
+	// Destructor
+	~ExtensiveShow();
+	// Event handlers
+	Bool 		OnClose(void);
+	void 		OnMenuCommand(int id);
+	// Accelerators allow for platform-indep handling of hotkeys
+	wxList 	*MakeAccelerators(void);
+	Bool		CheckAccelerators(int ch);
+	// Solution modules
+	void		Solve(void);
 };
+
+// Solution constants
+#define EFG_NORMAL_SOLUTION		0
+#define EFG_EGAMBIT_SOLUTION	1
+#define EFG_ALL_SOLUTION			2
 
 #endif   // TREEWINDOW_H
 
