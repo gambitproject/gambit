@@ -27,6 +27,7 @@
 //   +, -(binary), *(binary), /, ==, =
 //
 template <class T> class gVector {
+friend class gMatrix<T>;
 private:
 protected:
   int min, max;
