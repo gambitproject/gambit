@@ -119,8 +119,8 @@ void NfgShow::UpdateSoln(void)
 
     for (int st1 = 1; st1 <= disp_sup->NumStrats(pl); st1++) {
       if (soln(disp_sup->Strategies(pl)[st1]) > t_max) {
-	profile[pl] = st1;
-	t_max = soln(disp_sup->Strategies(pl)[st1]);
+    profile[pl] = st1;
+    t_max = soln(disp_sup->Strategies(pl)[st1]);
       }
     }
   }
@@ -137,10 +137,10 @@ void NfgShow::UpdateSoln(void)
   for (int st1 = 1; st1 <= rows; st1++) {
     for (int st2 = 1; st2 <= cols; st2++) {
       if (soln(disp_sup->Strategies(pl1)[st1]) > eps
-	  && soln(disp_sup->Strategies(pl2)[st2]) > eps)
-	spread->HiLighted(st1, st2, 0, TRUE);
+      && soln(disp_sup->Strategies(pl2)[st2]) > eps)
+    spread->HiLighted(st1, st2, 0, TRUE);
       else
-	spread->HiLighted(st1, st2, 0, FALSE);
+    spread->HiLighted(st1, st2, 0, FALSE);
     }
   }
 
@@ -149,25 +149,25 @@ void NfgShow::UpdateSoln(void)
     // Print out the probability in the next column/row
     for (int i = 1; i <= rows; i++)
       spread->SetCell(i, cols+1,
-		      ToText(soln(disp_sup->Strategies(pl1)[i])));
+              ToText(soln(disp_sup->Strategies(pl1)[i])));
 
     for (int i = 1; i <= cols; i++)
       spread->SetCell(rows+1, i, 
-		      ToText(soln(disp_sup->Strategies(pl2)[i])));
+              ToText(soln(disp_sup->Strategies(pl2)[i])));
   }
 
   if (spread->HaveVal()) {
     // Print out the probability in the last column/row
     for (int i = 1; i <= rows; i++) {
       spread->SetCell(i, cols+spread->HaveProbs()+spread->HaveDom()+1, 
-		      ToText(soln.Payoff(nf.Players()[pl1],
-					 disp_sup->Strategies(pl1)[i])));
+              ToText(soln.Payoff(nf.Players()[pl1],
+                     disp_sup->Strategies(pl1)[i])));
     }
     
     for (int j = 1; j <= cols; j++) {
       spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1, j, 
-		      ToText(soln.Payoff(nf.Players()[pl2],
-					 disp_sup->Strategies(pl2)[j])));
+              ToText(soln.Payoff(nf.Players()[pl2],
+                     disp_sup->Strategies(pl2)[j])));
     }
   }
 
@@ -698,8 +698,6 @@ void NfgShow::Solve(int id)
 
   int old_max_soln = solns.Length();  // used for extensive update
 
-  wxBeginBusyCursor();
-
   NfgSolutionG *solver;
 
   switch (id) {
@@ -732,9 +730,9 @@ void NfgShow::Solve(int id)
     return;
   }
 
-  wxBeginBusyCursor();
-
   bool go = solver->SolveSetup();
+
+  wxBeginBusyCursor();
 
   try {
     if (go)
@@ -754,7 +752,7 @@ void NfgShow::Solve(int id)
     // Now, transfer the NEW solutions to extensive form if requested
     if (NSD.GetExtensive()) {
       for (int i = old_max_soln+1; i <= solns.Length(); i++) 
-	SolutionToExtensive(solns[i]);
+    SolutionToExtensive(solns[i]);
     }
 
     if (!spread->HaveProbs()) {
@@ -784,8 +782,6 @@ void NfgShow::SolveStandard(void)
     sup = MakeSolnSupport();
 
   int old_max_soln = solns.Length();  // used for extensive update
-
-  wxBeginBusyCursor();
 
   NfgSolutionG *solver;
 
@@ -836,7 +832,7 @@ void NfgShow::SolveStandard(void)
     // Now, transfer the NEW solutions to extensive form if requested
     if (NSD.GetExtensive()) {
       for (int i = old_max_soln+1; i <= solns.Length(); i++) 
-	SolutionToExtensive(solns[i]);
+    SolutionToExtensive(solns[i]);
     }
 
     if (!spread->HaveProbs()) {
@@ -1652,14 +1648,14 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter, wxFrame
         }
         else  // from data file
         {
-	    try{
-		gFileInput infile(infile_name);
-		ReadNfgFile((gInput &) infile, nf);
+        try{
+        gFileInput infile(infile_name);
+        ReadNfgFile((gInput &) infile, nf);
 
-		if (!nf)
-		    wxMessageBox("ReadFailed:FormatInvalid::Check the file");
-	    }
-	    catch(gFileInput::OpenFailed &) {
+        if (!nf)
+            wxMessageBox("ReadFailed:FormatInvalid::Check the file");
+        }
+        catch(gFileInput::OpenFailed &) {
                 wxMessageBox("ReadFailed:FileInvalid::Check the file");
                 return;
             }
