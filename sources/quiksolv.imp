@@ -469,6 +469,15 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
   gList<gVector<gDouble> >* rootlistptr = new gList<gVector<gDouble> >();
 
+  if (NoEquations == 0) {
+    gVector<gDouble> answer(0);
+    *rootlistptr += answer; 
+    Roots = *rootlistptr;  
+    HasBeenSolved = true;
+    return true;
+  }
+
+
   gArray<int> precedence(System.Length());  
             // Orders search for nonvanishing poly
   for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
@@ -626,6 +635,12 @@ template <class T> bool
 QuikSolv<T>::ARootExists (const gRectangle<T>& r, 
 			        gVector<gDouble>& sample) const
 {
+  if (NoEquations == 0) {
+    gVector<gDouble> answer(0);
+    sample = answer;
+    return true;
+  }
+
   gRectangle<gDouble> r_double(TogDouble(r));
   gArray<int> precedence(System.Length());  
             // Orders search for nonvanishing poly
