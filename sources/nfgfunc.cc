@@ -90,7 +90,8 @@ static Portion *GSM_DeleteOutcome(Portion **param)
 NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
-NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S, bool strong,
+NFSupport *ComputeMixedDominated(NFSupport &S,
+				 bool strong, gPrecision precision,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status);
 
@@ -114,7 +115,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
 
   Nfg *N = (Nfg *) &S->Game();
   if (mixed)
-    T = ComputeMixedDominated(*N, *S, strong, players,
+    T = ComputeMixedDominated(*S, strong, precRATIONAL, players,
 			      ((OutputPortion *) param[4])->Value(), gstatus);
   else   {
     T = ComputeDominated(*N, *S, strong, players,

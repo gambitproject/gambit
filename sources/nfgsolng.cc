@@ -38,8 +38,8 @@ void guiNfgSolution::Eliminate(void)
   if (m_eliminateAll) {
     if (m_eliminateMixed) {
       NFSupport *oldSupport = new NFSupport(m_support), *newSupport;
-      while ((newSupport = ComputeMixedDominated(oldSupport->Game(), 
-						 *oldSupport, !m_eliminateWeak,
+      while ((newSupport = ComputeMixedDominated(*oldSupport, !m_eliminateWeak,
+						 precRATIONAL,
 						 players, gnull, gstatus)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
@@ -64,8 +64,8 @@ void guiNfgSolution::Eliminate(void)
   else {
     if (m_eliminateMixed) {
       NFSupport *newSupport;
-      if ((newSupport = ComputeMixedDominated(m_support.Game(), 
-					      m_support, !m_eliminateWeak,
+      if ((newSupport = ComputeMixedDominated(m_support, !m_eliminateWeak,
+					      precRATIONAL,
 					      players, gnull, gstatus)) != 0) {
 	m_support = *newSupport;
 	delete newSupport;

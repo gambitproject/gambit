@@ -1001,14 +1001,16 @@ int NfgShow::SolveElimDom(void)
       }
       else {
 	if (EDPD.FindAll()) {
-	  while ((sup = ComputeMixedDominated(sup->Game(), *sup, 
-					      EDPD.DomStrong(), EDPD.Players(),
+	  while ((sup = ComputeMixedDominated(*sup, 
+					      EDPD.DomStrong(), precRATIONAL,
+					      EDPD.Players(),
 					      gnull, status)) != 0)
 	    supports.Append(sup);
 	}
 	else {
-	  if ((sup = ComputeMixedDominated(sup->Game(), *sup,
-					   EDPD.DomStrong(), EDPD.Players(),
+	  if ((sup = ComputeMixedDominated(*sup,
+					   EDPD.DomStrong(), precRATIONAL,
+					   EDPD.Players(),
 					   gnull, status)) != 0)
 	    supports.Append(sup);
 	}

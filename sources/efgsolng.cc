@@ -143,8 +143,8 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
   if (m_iterative) {
     if (m_mixed) {
       NFSupport *oldSupport = new NFSupport(p_support), *newSupport;
-      while ((newSupport = ComputeMixedDominated(oldSupport->Game(), 
-						 *oldSupport, m_strong,
+      while ((newSupport = ComputeMixedDominated(*oldSupport, m_strong,
+						 precRATIONAL,
 						 players, gnull, gstatus)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
@@ -169,8 +169,8 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
   else {
     if (m_mixed) {
       NFSupport *newSupport;
-      if ((newSupport = ComputeMixedDominated(p_support.Game(), 
-					      p_support, m_strong,
+      if ((newSupport = ComputeMixedDominated(p_support, m_strong,
+					      precRATIONAL,
 					      players, gnull, gstatus)) != 0) {
 	p_support = *newSupport;
 	delete newSupport;

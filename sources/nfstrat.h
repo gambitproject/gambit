@@ -10,6 +10,7 @@
 #include "gtext.h"
 #include "gblock.h"
 #include "gstream.h"
+#include "gnumber.h"
 #include "nfplayer.h"
 
 class NFPlayer;
@@ -96,7 +97,8 @@ class gStatus;
 NFSupport *ComputeDominated(const Nfg &, NFSupport &, bool strong,
 			    const gArray<int> &players,
 			    gOutput &, gStatus &gstatus);
-NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &, bool strong,
+NFSupport *ComputeMixedDominated(NFSupport &, bool strong,
+				 gPrecision precision,
 				 const gArray<int> &players,
 				 gOutput &, gStatus &status);
 
