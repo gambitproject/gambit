@@ -802,7 +802,7 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
   else {
     for (int j = 1; j <= p.Terms.Length(); j++)
       {
-	if (p.Terms[j].Coef() < (T)0) s += "-";
+	if (p.Terms[j].Coef() < (T)0) s += "- ";
 	else if (j > 1) s += "+ ";
 	
 	if ( (p.Terms[j].Coef() != (T)1 && -p.Terms[j].Coef() != (T)1) ||
@@ -812,9 +812,12 @@ template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 	  else                        
 	    s += ToString( p.Terms[j].Coef());
 	
+	bool pastfirst = false;
 	for (int k = 1; k <= p.Space->Dmnsn(); k++) {
 	  int exp = p.Terms[j].ExpV() [k];
 	  if (exp > 0) {
+	    if (pastfirst) s += " ";
+	    pastfirst = true;
 	    s += (*p.Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
