@@ -14,6 +14,147 @@
 
 #include "gvector.h"
 
+//-------------------------------------------------------------------------
+//                    PureBehavProfile<T> member functions
+//-------------------------------------------------------------------------
+
+template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
+  : E(&efg), profile(efg.NumPlayers()),
+    payoffs(new gRectArray<T>(efg.NumOutcomes(), efg.NumPlayers()))
+{
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+    EFPlayer *player = efg.Players()[pl];
+    profile[pl] = new gArray<Action *>(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)
+      (*profile[pl])[iset] = player->Infosets()[iset]->Actions()[1];
+  }
+
+  gArray<int> dim(efg.GetChance()->NumInfosets());
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    dim[iset] = efg.GetChance()->Infosets()[iset]->NumActions();
+  chanceprobs = new gPVector<T>(dim);
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    for (int act = 1; act <= efg.GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
+
+  for (int outc = 1; outc <= E->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= E->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = (T) E->Payoff(E->Outcomes()[outc], pl);
+
+}
+
+template <class T>
+PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
+  : E(p.E), profile(p.profile.Length()),
+    payoffs(new gRectArray<T>(*p.payoffs))
+{
+  for (int pl = 1; pl <= profile.Length(); pl++)   {
+    profile[pl] = new gArray<Action *>(p.profile[pl]->Length());
+    for (int iset = 1; iset <= profile[pl]->Length(); iset++)
+      (*profile[pl])[iset] = (*p.profile[pl])[iset];
+  }
+
+  gArray<int> dim(E->GetChance()->NumInfosets());
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
+  chanceprobs = new gPVector<T>(dim);
+  for (int iset = 1; iset <= dim.Length(); iset++)
+    for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
+       (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
+}
+
+template <class T> PureBehavProfile<T>::~PureBehavProfile()
+{
+  for (int pl = 1; pl <= profile.Length(); delete profile[pl++]);
+  delete payoffs;
+  delete chanceprobs;
+}
+
+template <class T>
+PureBehavProfile<T> &PureBehavProfile<T>::operator=(const PureBehavProfile<T> &p)
+{
+  if (this != &p && E == p.E)   {
+    for (int pl = 1; pl <= profile.Length(); pl++)
+      for (int iset = 1; iset <= profile[pl]->Length(); iset++)
+        (*profile[pl])[iset] = (*p.profile[pl])[iset];
+  }
+  return *this;
+}
+
+template <class T> T PureBehavProfile<T>::operator()(Action *action) const
+{
+  if ((*profile[action->BelongsTo()->GetPlayer()->GetNumber()])
+              [action->BelongsTo()->GetNumber()] == action)
+    return (T) 1;
+  else
+    return (T) 0;
+}
+
+template <class T> void PureBehavProfile<T>::Set(Action *action)
+{
+  (*profile[action->BelongsTo()->GetPlayer()->GetNumber()])
+               [action->BelongsTo()->GetNumber()] = action;
+}
+
+template <class T>
+void PureBehavProfile<T>::Set(const EFPlayer *player,
+                              const gArray<Action *> &actions)
+{
+  *profile[player->GetNumber()] = actions;
+}
+
+template <class T>
+Action *PureBehavProfile<T>::Get(Infoset *infoset) const
+{
+  return (*profile[infoset->GetPlayer()->GetNumber()])[infoset->GetNumber()];
+}
+
+template <class T>
+void PureBehavProfile<T>::Payoff(Node *n, T prob, gArray<T> &payoff) const
+{
+  if (n->GetOutcome())
+    for (int pl = 1; pl <= E->NumPlayers(); pl++)
+      payoff[pl] += prob * (*payoffs)(n->GetOutcome()->GetNumber(), pl);
+  
+  if (n->GetInfoset() && n->GetPlayer()->IsChance())
+    for (int i = 1; i <= n->NumChildren(); i++)
+      Payoff(n->GetChild(i),
+	     prob * (T) E->GetChanceProb(n->GetInfoset(), i), payoff);
+  else if (n->GetInfoset())
+    Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
+	   prob, payoff);
+}
+
+template <class T>
+void PureBehavProfile<T>::InfosetProbs(Node *n, T prob, gPVector<T> &probs) const
+{
+  if (n->GetInfoset() && n->GetPlayer()->IsChance())
+    for (int i = 1; i <= n->NumChildren(); i++)
+      InfosetProbs(n->GetChild(i),
+		   prob * (T) E->GetChanceProb(n->GetInfoset(), i), probs);
+  else if (n->GetInfoset())  {
+    probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()) += prob;
+    InfosetProbs(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
+		 prob, probs);
+  }
+}
+
+
+template <class T>
+void PureBehavProfile<T>::Payoff(gArray<T> &payoff) const
+{
+  for (int pl = 1; pl <= payoff.Length(); payoff[pl++] = (T) 0);
+  Payoff(E->RootNode(), (T) 1.0, payoff);
+}
+
+template <class T>
+void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
+{
+  ((gVector<T> &) probs).operator=((T) 0);
+  InfosetProbs(E->RootNode(), (T) 1.0, probs);
+}
+
+
 
 //-------------------------------------------------------------------------
 //                    BehavProfile<T> member functions

@@ -175,7 +175,7 @@ protected:
 
         //# COMPUTING VALUES OF PROFILES
     void Payoff(const gPVector<int> &profile, gVector<gRational> &payoff) const;
-    void Payoff(const gArray<gArray<int> *> &profile, 
+    void Payoff(const gArray<gArray<int> *> &profile,
 		gVector<gRational> &payoff) const;
 
     void InfosetProbs(const gPVector<int> &profile, gPVector<gRational> &prob) const;
@@ -211,6 +211,35 @@ protected:
 
 // These functions are provided in readefg.y/readefg.cc
 int ReadEfgFile(gInput &, Efg *&);
+
+template <class T> class PureBehavProfile   {
+  protected:
+    const Efg *E;
+    gArray<gArray<Action *> *> profile;
+    gPVector<T> *chanceprobs;
+    gRectArray<T> *payoffs;
+
+    void Payoff(Node *n, T, gArray<T> &) const;
+    void InfosetProbs(Node *n, T, gPVector<T> &) const;
+
+  public:
+    PureBehavProfile(const Efg &);
+    PureBehavProfile(const PureBehavProfile<T> &);
+    ~PureBehavProfile();
+
+    PureBehavProfile<T> &operator=(const PureBehavProfile<T> &);
+
+    Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
+
+    T operator()(Action *) const;
+    void Set(Action *);
+    void Set(const EFPlayer *, const gArray<Action *> &);
+    Action *Get(Infoset *) const;
+
+    void Payoff(gArray<T> &payoff) const;
+    void InfosetProbs(gPVector<T> &prob) const;
+};
+
 
 #endif   // EFG_H
 

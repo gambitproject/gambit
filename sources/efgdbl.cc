@@ -13,6 +13,8 @@ template class BehavNode<double>;
 template class BehavProfile<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
+template class PureBehavProfile<double>;
+
 #include "behavsol.imp"
 
 template class BehavSolution<double>;

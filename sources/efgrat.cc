@@ -11,6 +11,8 @@ template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 
+template class PureBehavProfile<gRational>;
+
 #include "behavsol.imp"
 
 template class BehavSolution<gRational>;

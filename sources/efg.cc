@@ -26,6 +26,8 @@ template class gBlock<Node *>;
 template class gArray<Action *>;
 template class gBlock<Action *>;
 
+template class gArray<gArray<Action *> *>;
+
 template class gArray<EFOutcome *>;
 template class gBlock<EFOutcome *>;
 
