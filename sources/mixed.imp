@@ -171,8 +171,7 @@ MixedProfile<T>::Payoff( int pl, int player1, int strat1 ) const
 {
   T value = (T) 0;
   Payoff(pl, player1, strat1, 1,
-	 (*N)(player1,strat1)->index +
-	 (pl - 1), (T) 1.0, value);
+	 (*N)(player1,strat1)->index, (T) 1.0, value);
   return value;
 }
 
@@ -184,8 +183,7 @@ MixedProfile<T>::Payoff( int pl, int player1, int strat1, int player2,
   T value = (T) 0;
   Payoff(pl, player1, strat1, player2, strat2, 1,
 	 (*N)(player1,strat1)->index +
-	 (*N)(player2,strat2)->index +
-	 (pl - 1),
+	 (*N)(player2,strat2)->index,
 	 (T) 1.0, value);
   return value;
 }
@@ -194,7 +192,7 @@ template <class T>
 void MixedProfile<T>::Payoff( int pl, int player1, gVector<T> &value) const
 {
   value = (T) 0;
-  Payoff(pl, player1, 1, (pl - 1), (T) 1.0, value);
+  Payoff(pl, player1, 1, 0, (T) 1.0, value);
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &p)
@@ -206,15 +204,20 @@ T MixedProfile<T>::Payoff(int pl, StrategyProfile &p,
 			  const gArray<int> &Player,
 			  int i) const
 {
+  Strategy *s;
+
   if (i > N->NumPlayers()) return Payoff(pl, p);
+  T temp;
   T sum = (T) 0;
   int k = Player[i], j = 1;
-  for (Strategy *s = N->GetStrategy(k,1);
-       j <= (*N)(k).Length(); j++ ) {
+  for ( ; j <= (*N)(k).Length(); j++ ) {
+    s = N->GetStrategy(k, j);
     if ((*this)(k, j) != (T) 0) {
       p.Set(k, s);
-      sum += (*this)(k, j) * Payoff(pl, p, Player, i + 1);
+      temp = Payoff(pl, p, Player, i + 1);
+      sum += (*this)(k, j) * temp;
     }
+    
   }
   return sum;
 }
@@ -223,18 +226,21 @@ template <class T>
 void MixedProfile<T>::Payoff(int pl, int const_pl, int const_st,
 			   int cur_pl, long index, T prob, T &value) const
 {
+  Strategy *s;
+
   if (cur_pl == const_pl)
     Payoff(pl, const_pl, const_st, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * *(Nf->payoffs[index]);
+    value += prob * (Nf->payoffs[pl][index]);
   else   {
     int j = 1;
-    for (Strategy *s = N->GetStrategy(cur_pl,1); 
-	 j <= (*N)(cur_pl).Length(); j++)
+    for ( ; j <= (*N)(cur_pl).Length(); j++ ){
+      s = N->GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	Payoff(pl, const_pl, const_st, cur_pl + 1,
 	       index + s->index, prob * (*this)(cur_pl, j), value);
+    }
   }
 } 
 
@@ -244,19 +250,22 @@ void MixedProfile<T>::Payoff(int pl, int const_pl1, int const_st1,
 			   int const_pl2, int const_st2,
 			   int cur_pl, long index, T prob, T &value) const
 {
+  Strategy *s;
+
   if (cur_pl == const_pl1 || cur_pl == const_pl2)
     Payoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	   cur_pl + 1, index,prob, value);
   else if (cur_pl > Nf->NumPlayers())
-    value += prob * *(Nf->payoffs[index]);
+    value += prob * (Nf->payoffs[pl][index]);
   else   {
     int j = 1;
-    for (Strategy *s = N->GetStrategy(cur_pl,1);
-	 j <= (*N)(cur_pl).Length(); j++) 
+    for ( ; j <= (*N)(cur_pl).Length(); j++ ) {
+      s = N->GetStrategy(cur_pl,1);
       if ((*this)(cur_pl, j) > (T) 0)
 	Payoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	       cur_pl + 1, index + s->index, prob * (*this)(cur_pl, j), 
 	       value);
+    }
   }
 }
 
@@ -264,24 +273,26 @@ template <class T>
 void MixedProfile<T>::Payoff(int pl, int const_pl, int cur_pl, long index, 
 			   T prob, gVector<T> &value) const
 {
+  Strategy *s;
+
   if (cur_pl == const_pl)
     Payoff(pl, const_pl, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())  {
     int j = 1;
-    for (Strategy *s = N->GetStrategy(const_pl,1);
-	 j <= (*N)(const_pl).Length(); 
-	 j++, s = N->GetStrategy(const_pl,j) )
-      value[j] += prob * *(Nf->payoffs[index + s->index]);
+    for ( ; j <= (*N)(const_pl).Length(); j++ ){ 
+      s = N->GetStrategy(const_pl,j);
+      value[j] += prob * (Nf->payoffs[pl][s->index]);
+    }
   }
   else   {
     int j = 1;
-    for (Strategy *s = N->GetStrategy(const_pl,1);
-	 j <= (*N)(const_pl).Length(); 
-	 j++, s = N->GetStrategy(const_pl,j))
+    for ( ; j <= (*N)(const_pl).Length(); j++ ) {
+      s = N->GetStrategy(const_pl,j);
       if ((*this)(cur_pl, j) > (T) 0)
 	Payoff(pl, const_pl, cur_pl + 1,
 	       index + s->index, prob * (*this)(cur_pl, j), value);
+    }
   }
 }
 
@@ -291,7 +302,7 @@ void MixedProfile<T>::Payoff(int pl, int const_pl, int cur_pl, long index,
 template <class T>
 const T &MixedProfile<T>::Payoff(int pl, const StrategyProfile &p) const
 {
-  return *(Nf->payoffs[p.GetIndex() + (pl - 1)]);
+  return Nf->payoffs[pl][p.GetIndex()];
 }
 
 
