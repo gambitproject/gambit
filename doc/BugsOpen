@@ -923,6 +923,57 @@ or BehavProfile<double> from a Solution is not difficult; we can just
 create one on the desired subsupport, then use the () operator to
 fill it in appropriately.
 
+---------------
+
+ITEM 0040:  Order of Precedence for Exponentiation not correct
+
+DATE:     10/2/1999 by RDM
+AFFECTS:  GCL
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+Shouldn't exponentiation have a higher order of precedence than
+multiplication and division?  Right now they are at the same level,
+which gives the following:
+
+  GCL1:= << 4 * 10^2
+  1600
+
+when one would expect:
+
+  GCL2:= << 4 * (10^2)
+  400
+
+(but shouldn't have to put the parentheses.) 
+
+
+---------------
+
+ITEM 0041:  Dimensionality checking too stringent. 
+
+DATE:     10/4/1999 by RDM
+AFFECTS:  GCL
+STATUS:   OPEN
+SEVERITY: MINOR
+DETAILS:
+
+The following example is reporting mismatched dimensionalities, but
+should not:
+
+  GCL1:= NewFunction[Foo[x->LIST(NUMBER),y->LIST(NUMBER)]=:LIST(NUMBER),x&y;];
+  GCL2:= a:={1,2,3}
+  GCL3:= b:={4,5}
+  GCL4:= << aa:={a,a}
+  { { 1, 2, 3 },
+    { 1, 2, 3 } }
+  GCL5:= << bb:={b,b}
+  { { 4, 5 },
+    { 4, 5 } }
+  GCL6:= << Foo[a,b]
+  { 1, 2, 3, 4, 5 }
+  GCL7:= << Foo[aa,bb]
+  ERROR: Mismatched dimensionalities
 
 
 
