@@ -43,7 +43,9 @@ private:
   // with last probs for each player substituted out.  
 //  gPoly<T> Equation(int i, int strat2, int strat2) const;
 
-  int SaveSolutions(const gList<gVector<gDouble> > &list);
+  int SaveNashSolutions(const gList<gVector<gDouble> > &list);
+  int SaveANFNashSolutions(const gList<gVector<gDouble> > &list);
+  bool ExtendsToNash(const BehavSolution &, gStatus &);
   bool ExtendsToANFNash(const BehavSolution &, gStatus &);
 
 public:
@@ -165,7 +167,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
     is_singular = true;
   }
 
-  int index = SaveSolutions(quickie.RootList());
+  int index = SaveNashSolutions(quickie.RootList());
   time = watch.Elapsed();
   return index;	 
 }
@@ -174,11 +176,18 @@ template <class T> bool
 EfgPolEnumModule<T>::ExtendsToANFNash(const BehavSolution &bs, 
 				            gStatus &m_status)
 {
-  return bs.ExtendsToANFNash(m_status);
+  return bs.ExtendsToANFNash(bs.Support(),bs.Support(),m_status);
+}
+
+template <class T> bool 
+EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs, 
+				            gStatus &m_status)
+{
+  return bs.ExtendsToNash(bs.Support(),bs.Support(),m_status);
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list)
 {
 
   int i,j,k,index=0;
@@ -194,7 +203,33 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
 
     BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
 
-    if(ExtendsToANFNash(sol,params.status)) { 
+    if(ExtendsToNash(sol,params.status)) { 
+      index = solutions.Append(sol);
+      solutions[index].SetEpsilon(0);
+      //    solutions[index].SetIsNash(triTRUE);
+    }
+  }
+  return index;
+}
+
+template <class T> int 
+EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list)
+{
+
+  int i,j,k,index=0;
+  gPVector<double> x(SF.NumSequences());
+
+  for(k=1;k<=list.Length();k++) {
+
+    for(i=1;i<=EF.NumPlayers();i++) 
+      for(j=1;j<=SF.NumSequences()[i];j++)
+	x(i,j) = Prob(i,j,list[k]);
+    if(params.trace > 1) 
+      (*params.tracefile) << "\nk: " << k << " x: " << x;
+
+    BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
+
+    if(ExtendsToNash(sol,params.status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
       //    solutions[index].SetIsNash(triTRUE);

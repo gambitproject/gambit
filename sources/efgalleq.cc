@@ -84,8 +84,8 @@ void AllEFNashSolveModule::NashEnum(void)
 	       newevals, 
 	       newtime, 
 	       is_singular);
-    for (int j = 1; j <= newsolns.Length(); j++) 
-      if (newsolns[j].IsNash()) 
+    for (int j = 1; j <= newsolns.Length(); j++)
+      if (newsolns[j].IsANFNash()) 
 	solutions += newsolns[j];
     if (is_singular) 
       singular_supports += possiblenashsubsupports[i];

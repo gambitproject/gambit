@@ -345,6 +345,12 @@ static Portion *GSM_IsNash_Behav(Portion **param)
   return new BoolPortion(P->IsNash());
 }
 
+static Portion *GSM_IsANFNash_Behav(Portion **param)
+{
+  BehavSolution *P = ((BehavPortion *) param[0])->Value();
+  return new BoolPortion(P->IsANFNash());
+}
+
 static Portion *GSM_IsNash_Mixed(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
@@ -779,6 +785,7 @@ void Init_solfunc(GSM *gsm)
       { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
 	GSM_InfosetProbs },
       { "IsNash[profile->BEHAV] =: BOOLEAN", GSM_IsNash_Behav },
+      { "IsANFNash[profile->BEHAV] =: BOOLEAN", GSM_IsANFNash_Behav },
       { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
       { "IsPerfect[profile->MIXED] =: BOOLEAN", GSM_IsPerfect },
       { "IsSequential[profile->BEHAV] =: BOOLEAN", GSM_IsSequential },
