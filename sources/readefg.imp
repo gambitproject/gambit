@@ -57,7 +57,7 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
 						     const gList<gRational> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (((ChanceInfoset<T> &) *s).GetActionProb(i) != p[i])  return false;
+    if (((ChanceInfoset<T> &) *s).GetActionProb(i) !=(T) p[i])  return false;
   return true;
 }
 
