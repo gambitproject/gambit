@@ -37,8 +37,11 @@ private:
   void OnViewZoomOut(wxCommandEvent &);
   void OnViewZoom(wxCommandEvent &);
 
-  void OnDataOverlayData(wxCommandEvent &);
-  void OnDataOverlayFile(wxCommandEvent &);
+  void OnSeriesOverlay(wxCommandEvent &);
+
+  void OnDataLoad(wxCommandEvent &);
+  void OnDataSave(wxCommandEvent &);
+  void OnDataEdit(wxCommandEvent &);
 
   void OnFormatLambdaAxis(wxCommandEvent &);
   void OnFormatProfileAxis(wxCommandEvent &);

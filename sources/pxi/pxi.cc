@@ -506,6 +506,7 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/garray.imp"
 #include "base/gblock.imp"
 #include "base/grarray.imp"
+#include "base/grblock.imp"
 #include "base/glist.imp"
 
 template class gArray<FileHeader>;
@@ -534,7 +535,8 @@ gOutput &operator<<(gOutput &p_file, const gBlock<double> &)
 gOutput &operator<<(gOutput &p_file, const gBlock<int> &)
 { return p_file; }
 
-template class gRectArray<gBlock<double> >;
+template class gRectArray<gBlock<int> >;
+template class gRectBlock<gBlock<int> >;
 
 //
 // For global stream instances

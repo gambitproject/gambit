@@ -63,10 +63,10 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc,
   try {
     gBlock<int> points(m_expData.FitPoints(p_lambda));
     for (int i = 1; i <= points.Length(); i++) {
-      double y = CalcY_3(m_expData.GetDataPoint(points[i], iset, st1),
+      double y = CalcY_3(m_expData.GetDataProb(points[i], iset, st1),
 			 x0, y0, cw, ch);
-      double x = CalcX_3(m_expData.GetDataPoint(points[i], iset, st1),
-			 m_expData.GetDataPoint(points[i], iset, st2),
+      double x = CalcX_3(m_expData.GetDataProb(points[i], iset, st1),
+			 m_expData.GetDataProb(points[i], iset, st2),
 			 x0, y0, ch, cw);
       if (m_overlayProp.m_token) {
 	int ts = m_overlayProp.m_tokenSize;

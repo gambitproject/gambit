@@ -22,6 +22,7 @@
 #include "pxichild.h"
 #include "pxiplotn.h"
 
+#include "dleditdata.h"
 #include "dlformataxis.h"
 #include "dlformattitle.h"
 #include "dlformatlegend.h"
@@ -45,8 +46,10 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_VIEW_ZOOM_IN, PxiChild::OnViewZoomIn)
   EVT_MENU(PXI_VIEW_ZOOM_OUT, PxiChild::OnViewZoomOut)
   EVT_MENU(PXI_VIEW_ZOOM, PxiChild::OnViewZoom)
-  EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnDataOverlayData)
-  EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnDataOverlayFile)
+  EVT_MENU(PXI_SERIES_OVERLAY, PxiChild::OnSeriesOverlay)
+  EVT_MENU(PXI_DATA_LOAD, PxiChild::OnDataLoad)
+  EVT_MENU(PXI_DATA_SAVE, PxiChild::OnDataSave)
+  EVT_MENU(PXI_DATA_EDIT, PxiChild::OnDataEdit)
   EVT_MENU(PXI_FORMAT_LAMBDA_AXIS, PxiChild::OnFormatLambdaAxis)
   EVT_MENU(PXI_FORMAT_PROFILE_AXIS, PxiChild::OnFormatProfileAxis)
   EVT_MENU(PXI_FORMAT_TITLE, PxiChild::OnFormatTitle)
@@ -130,12 +133,14 @@ void PxiChild::MakeMenus(void)
   viewMenu->Append(PXI_VIEW_ZOOM_IN, "Zoom &In", "Zoom in");
   viewMenu->Append(PXI_VIEW_ZOOM_OUT, "Zoom &Out", "Zoom out");
   viewMenu->Append(PXI_VIEW_ZOOM, "&Zoom", "Set magnification");
+  
+  wxMenu *seriesMenu = new wxMenu;
+  seriesMenu->Append(PXI_SERIES_OVERLAY, "&Overlay", "Overlay another file");
 
   wxMenu *dataMenu = new wxMenu;
-  dataMenu->Append(PXI_DATA_OVERLAY_DATA, "Overlay &Data",
-		   "Overlay experimental data on plot");
-  dataMenu->Append(PXI_DATA_OVERLAY_FILE, "Overlay &File",
-		   "Overlay another pxi file");
+  dataMenu->Append(PXI_DATA_LOAD, "&Load", "Load experimental data");
+  dataMenu->Append(PXI_DATA_SAVE, "&Save", "Save experimental data");
+  dataMenu->Append(PXI_DATA_EDIT, "&Edit", "Edit experimental data");
   
   wxMenu *formatMenu = new wxMenu;
   formatMenu->Append(PXI_FORMAT_LAMBDA_AXIS, "Lambda &axis",
@@ -157,6 +162,7 @@ void PxiChild::MakeMenus(void)
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(viewMenu, "&View");
+  menuBar->Append(seriesMenu, "&Series");
   menuBar->Append(dataMenu, "&Data");
   menuBar->Append(formatMenu, "&Format");
   menuBar->Append(helpMenu, "&Help");
@@ -401,12 +407,32 @@ void PxiChild::OnViewOptions(wxCommandEvent &)
 #endif  // NOT_PORTED_YET
 }
 
+//-------------------------------------------------------------------------
+//                        Series menu handlers
+//-------------------------------------------------------------------------
+
+void PxiChild::OnSeriesOverlay(wxCommandEvent &)
+{
+#ifdef NOT_PORTED_YET
+  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
+  if (s) {
+    FileHeader temp_header(s);
+    if ( (temp_header.NumStrategies()!=(plot->Header(1)).NumStrategies()) ||
+	 (temp_header.NumInfosets()!=(plot->Header(1)).NumInfosets()) )
+      wxMessageBox("These data files do not\nhave the same structure!");
+    else
+      plot->AppendHeader(temp_header);
+  }
+  wxClientDC dc(this);
+  plot->Update(dc,PXI_UPDATE_SCREEN);
+#endif  // NOT_PORTED_YET
+}
 
 //-------------------------------------------------------------------------
 //                        Data menu handlers
 //-------------------------------------------------------------------------
 
-void PxiChild::OnDataOverlayData(wxCommandEvent &)
+void PxiChild::OnDataLoad(wxCommandEvent &)
 {
   wxFileDialog dialog(this, "Choose data file", "", m_expDatafile, "*.agg");
   
@@ -425,24 +451,39 @@ void PxiChild::OnDataOverlayData(wxCommandEvent &)
       ((PxiPlot *) m_plotBook->GetPage(i))->Render();
     }
   }
-
 }
 
-void PxiChild::OnDataOverlayFile(wxCommandEvent &)
+void PxiChild::OnDataEdit(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
-  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
-  if (s) {
-    FileHeader temp_header(s);
-    if ( (temp_header.NumStrategies()!=(plot->Header(1)).NumStrategies()) ||
-	 (temp_header.NumInfosets()!=(plot->Header(1)).NumInfosets()) )
-      wxMessageBox("These data files do not\nhave the same structure!");
-    else
-      plot->AppendHeader(temp_header);
+  dialogEditData dialog(this, m_expData);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_expData = dialog.GetData();
+    m_expData.ComputeMLEs(m_fileHeader, gnull);
+    
+    for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
+      ((PxiPlot *) m_plotBook->GetPage(i))->Render();
+    }
   }
-  wxClientDC dc(this);
-  plot->Update(dc,PXI_UPDATE_SCREEN);
-#endif  // NOT_PORTED_YET
+}
+
+void PxiChild::OnDataSave(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose data file", "", m_expDatafile, "*.agg",
+		      wxSAVE | wxOVERWRITE_PROMPT);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    m_expDatafile = dialog.GetPath();
+    try {
+      gFileOutput file(m_expDatafile);
+      m_expData.SaveData(file);
+    }
+    catch (...) {
+      wxMessageBox("There was an error in writing to " + m_expDatafile,
+		   "Error", wxOK | wxCENTRE | wxICON_ERROR);
+      return;
+    }
+  }
 }
 
 //-------------------------------------------------------------------------

@@ -50,36 +50,40 @@ static void OutputLikeHeader(gOutput &p_file, int p_numPoints)
 //=======================================================================
 
 //-----------------------------------------------------------------------
-//                 Lifecycle and data reading/writing
+//                             Lifecycle
 //-----------------------------------------------------------------------
 
 ExpData::ExpData(void)
+  : m_haveMLEs(false), m_numInfosets(0)
 { }
+
+//-----------------------------------------------------------------------
+//                   Reading and writing .agg files
+//-----------------------------------------------------------------------
 
 bool ExpData::LoadData(gInput &p_file)
 {
   try {
-    int numInfosets, numPoints;
-  
-    p_file >> numInfosets;
-    gBlock<int> strategies(numInfosets);
-    for (int iset = 1; iset <= numInfosets; iset++) {
-      p_file >> strategies[iset];
+    p_file >> m_numInfosets;
+    m_numActions = gBlock<int>(m_numInfosets);
+    for (int iset = 1; iset <= m_numInfosets; iset++) {
+      p_file >> m_numActions[iset];
     }
 
+    int numPoints;
     p_file >> numPoints;
-    m_probs = gRectArray<gBlock<double> >(numPoints, numInfosets);
+    m_points = gRectBlock<gBlock<int> >(numPoints, m_numInfosets);
     
     for (int j = 1; j <= numPoints; j++) {
-      for (int iset = 1; iset <= numInfosets; iset++) {
-	m_probs(j, iset) = gBlock<double>(strategies[iset]);
+      for (int iset = 1; iset <= m_numInfosets; iset++) {
+	m_points(j, iset) = gBlock<int>(m_numActions[iset]);
       }
     }
 
     for (int j = 1; j <= numPoints; j++) {
-      for (int iset = 1; iset <= numInfosets; iset++) {
-	for (int i = 1; i <= strategies[iset]; i++) {
-	  p_file >> (m_probs(j,iset))[i];
+      for (int iset = 1; iset <= m_numInfosets; iset++) {
+	for (int i = 1; i <= m_numActions[iset]; i++) {
+	  p_file >> (m_points(j,iset))[i];
 	}
       }
     }
@@ -95,6 +99,78 @@ bool ExpData::LoadData(gInput &p_file)
   return true;
 }
 
+bool ExpData::SaveData(gOutput &p_file)
+{
+  try {
+    p_file << m_numInfosets << ' ';
+    for (int iset = 1; iset <= m_numInfosets; iset++) {
+      p_file << m_numActions[iset] << ' ';
+    }
+    p_file << '\n';
+    
+    p_file << m_points.NumRows() << '\n';
+    
+    for (int i = 1; i <= m_points.NumRows(); i++) {
+      for (int iset = 1; iset <= m_numInfosets; iset++) {
+	for (int act = 1; act <= m_numActions[iset]; act++) {
+	  p_file << m_points(i, iset)[act] << ' ';
+	}
+      }
+      p_file << '\n';
+    }
+  }
+  catch (...) {
+    return false;
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------
+//                        General data access
+//-----------------------------------------------------------------------
+
+int ExpData::NumActions(void) const
+{
+  int act = 0;
+  for (int iset = 1; iset <= m_numInfosets; act += m_numActions[iset++]);
+  return act;
+}
+
+double ExpData::GetDataProb(int p_point, int p_iset, int p_act) const
+{
+  int total = 0;
+  for (int i = 1; i <= m_numActions[p_iset];
+       total += m_points(p_point, p_iset)[i++]);
+  return ((double) m_points(p_point, p_iset)[p_act] / (double) total);
+}
+
+//-----------------------------------------------------------------------
+//                      Editing data points
+//-----------------------------------------------------------------------
+
+void ExpData::AddDataPoint(void)
+{
+  gArray<gBlock<int> > row(m_numInfosets);
+  for (int iset = 1; iset <= m_numInfosets; iset++) {
+    row[iset] = gBlock<int>(m_numActions[iset]);
+  }
+  m_points.AddRow(row);
+}
+
+void ExpData::RemoveDataPoint(int i)
+{
+  m_points.RemoveRow(i);
+}
+
+void ExpData::SetDataPoint(int i, int iset, int act, int value)
+{
+  m_points(i, iset)[act] = value;
+  // set this flag after assigning, since bad indices will generate
+  // an exception, and won't invalidate estimates.
+  m_haveMLEs = false;
+}
+
 //-----------------------------------------------------------------------
 //                Fitting data to QRE correspondence
 //-----------------------------------------------------------------------
@@ -104,7 +180,7 @@ void ExpData::ComputeMLEs(FileHeader &p_qreFile, gOutput &p_likeFile)
   double likeMax = -1000, likeMin = 1000;
   
   // Output the likelihood file header
-  OutputLikeHeader(p_likeFile, m_probs.NumRows());
+  OutputLikeHeader(p_likeFile, m_points.NumRows());
   
   gBlock<double> likes(NumPoints());
   for (int j = 1; j <= NumPoints(); j++) {
@@ -120,7 +196,8 @@ void ExpData::ComputeMLEs(FileHeader &p_qreFile, gOutput &p_likeFile)
       double like = 0.0;
       for (int iset = 1; iset <= qre.NumInfosets(); iset++) {
 	for (int i = 1; i <= qre.NumStrategies(iset); i++) {
-	  like += m_probs(j, iset)[i] * log(gmax(qre[iset][i], ALMOST_ZERO));
+	  like += (((double) m_points(j, iset)[i]) *
+		   log(gmax(qre[iset][i], ALMOST_ZERO)));
 	}
       }
       like = -like;	// taking -log of like.... Minimum is the best fit
@@ -144,19 +221,7 @@ void ExpData::ComputeMLEs(FileHeader &p_qreFile, gOutput &p_likeFile)
   p_likeFile << likeMax << '\n';
   p_likeFile << p_qreFile.DataType() << '\n';
 
-  // Normalize the probs (experimental data) to be used for plotting.  Is this right?!
-  for (int j = 1; j <= NumPoints(); j++) {
-    for (int iset = 1; iset <= m_probs.NumColumns(); iset++) {
-      double sum = 0.0;
-      for (int i = 1; i <= m_probs(j, iset).Length(); i++) {
-	sum += m_probs(j, iset)[i];
-      }
-      for (int i = 1; i <= m_probs(j, iset).Length(); i++) {
-	m_probs(j, iset)[i] /= sum;
-      }
-    }
-  }
-  m_solved = true;
+  m_haveMLEs = true;
 }
 
 gBlock<int> ExpData::FitPoints(double p_lambda) const
@@ -164,7 +229,7 @@ gBlock<int> ExpData::FitPoints(double p_lambda) const
   const double DELTA_DOUBLE = 0.0001;
 
   gBlock<int> points;
-  if (m_solved) {
+  if (m_haveMLEs) {
     for (int i = 1; i <= NumPoints(); i++) {
       if (m_fitLambdas[i] > p_lambda - DELTA_DOUBLE &&
 	  m_fitLambdas[i] < p_lambda + DELTA_DOUBLE) {
@@ -174,5 +239,4 @@ gBlock<int> ExpData::FitPoints(double p_lambda) const
   }
   return points;
 }
-
 

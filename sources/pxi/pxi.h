@@ -41,6 +41,12 @@ const int PXI_VIEW_ZOOM = 137;
 const int PXI_VIEW_ZOOM_IN = 150;
 const int PXI_VIEW_ZOOM_OUT = 151;
 
+const int PXI_DATA_LOAD = 215;
+const int PXI_DATA_SAVE = 216;
+const int PXI_DATA_EDIT = 217;
+
+const int PXI_SERIES_OVERLAY = 220;
+
 const int PXI_FORMAT_LAMBDA_AXIS = 130;
 const int PXI_FORMAT_PROFILE_AXIS = 131;
 const int PXI_FORMAT_TITLE = 133;
@@ -58,9 +64,6 @@ const int PXI_FORMAT_COLORS = 124;
 
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
-
-#define PXI_DATA_OVERLAY_DATA 215
-#define PXI_DATA_OVERLAY_FILE 220
 
 #define PXI_PLOT_2_STEP        .1
 #define MAXN    10

@@ -118,7 +118,7 @@ ALLGUI_OBJECTS = $(ALLGUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 PXI_SOURCES = pxi.cc pxichild.cc \
               pxiplot.cc pxiplotn.cc pxiplot2.cc pxiplot3.cc \
               dlformataxis.cc dlformattitle.cc dlformatlegend.cc \
-              overlay.cc \
+              overlay.cc dleditdata.cc \
               equtrac.cc probvect.cc expdata.cc pxifile.cc
 
 PXI_OBJECTS = $(PXI_SOURCES:.cc=$(OBJECT_SUFFIX))

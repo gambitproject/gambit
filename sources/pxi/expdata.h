@@ -35,32 +35,53 @@
 #include <math.h>
 #include <stdio.h>
 #include "base/gstream.h"
-#include "base/grarray.h"
+#include "base/grblock.h"
 #include "pxifile.h"
-
-gOutput &operator<<(gOutput &op,const gBlock<double> &d);
 
 class ExpData {
 private:
-  bool m_solved;
+  bool m_haveMLEs;
+  int m_numInfosets;
+  gBlock<int> m_numActions;
   gBlock<double> m_fitLambdas, m_fitLikes;
-  gRectArray<gBlock<double> > m_probs;
+  gRectBlock<gBlock<int> > m_points;
 
 public:
+  // LIFECYCLE
   ExpData(void);
 
-  int NumPoints(void) const { return m_probs.NumRows(); }
-  gBlock<int> FitPoints(double p_lambda) const;
-  
-  double MLELambda(int i) const { return m_fitLambdas[i]; }
-  double MLEValue(int i) const { return m_fitLikes[i]; } 
-  double GetDataPoint(int i, int iset, int act) const
-    { return m_probs(i, iset)[act]; }
+  // READING AND WRITING .AGG FILES
+  bool LoadData(gInput &);
+  bool SaveData(gOutput &);
 
-  bool HaveMLEs(void) const { return m_solved; }
+  // GENERAL DATA ACCESS
+  int NumPoints(void) const { return m_points.NumRows(); }
+  int NumInfosets(void) const { return m_points.NumColumns(); }
+  int NumActions(int iset) const { return m_points(1, iset).Length(); }
+  int NumActions(void) const;
+
+  int GetDataPoint(int i, int iset, int act) const
+    { return m_points(i, iset)[act]; }
+
+  double GetDataProb(int i, int iset, int act) const;
+
+  // EDITING DATA POINTS
+  void AddDataPoint(void);
+  void RemoveDataPoint(int i);
+
+  void SetDataPoint(int i, int iset, int act, int value);
+
+  // COMPUTING ESTIMATES
   void ComputeMLEs(FileHeader &, gOutput &p_likeFile);
 
-  bool LoadData(gInput &);
+  // ACCESSING ESTIMATES
+  bool HaveMLEs(void) const { return m_haveMLEs; }
+
+  gBlock<int> FitPoints(double p_lambda) const;
+
+  double MLELambda(int i) const { return m_fitLambdas[i]; }
+  double MLEValue(int i) const { return m_fitLikes[i]; } 
+
 };
 
 #endif  // EXPDATA_H

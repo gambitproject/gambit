@@ -37,8 +37,8 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc,
   try {
     gBlock<int> points(m_expData.FitPoints(p_lambda));
     for (int i = 1; i <= points.Length(); i++) {
-      double x = x0 + m_expData.GetDataPoint(points[i], pl1, st1) * cw;
-      double y = y0 - m_expData.GetDataPoint(points[i], pl2, st2) * ch;
+      double x = x0 + m_expData.GetDataProb(points[i], pl1, st1) * cw;
+      double y = y0 - m_expData.GetDataProb(points[i], pl2, st2) * ch;
     
       if (m_overlayProp.m_token)  {
 	int ts = m_overlayProp.m_tokenSize;

@@ -158,7 +158,7 @@ void PxiPlotN::DrawExpPoint(wxDC &dc,
   try {
     gBlock<int> points(m_expData.FitPoints(p_lambda)); 
     for (int i = 1; i <= points.Length(); i++) {
-      double y = CalcY(m_expData.GetDataPoint(points[i], iset, st),
+      double y = CalcY(m_expData.GetDataProb(points[i], iset, st),
 		       y0, ch);
       double x = CalcX(m_expData.MLELambda(points[i]), x0, cw);
       // dc.SetBrush(m_drawSettings.GetDataBrush());
@@ -167,7 +167,7 @@ void PxiPlotN::DrawExpPoint(wxDC &dc,
 
       if (m_overlayProp.m_lines && st!=1) {
 	dc.SetBrush(*wxBLACK_BRUSH);
-	int y1 = (int) CalcY(m_expData.GetDataPoint(points[i], iset, st-1),
+	int y1 = (int) CalcY(m_expData.GetDataProb(points[i], iset, st-1),
 			     y0, ch);
 	dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
       }
