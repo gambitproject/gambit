@@ -357,7 +357,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 
 Portion *GSM_Gobit(Portion **param)
 {
-  if (param[0]->Type() == porEFG_FLOAT)  {
+  if (param[0]->Type() == porNFG_FLOAT)  {
     Nfg<double> &N = *(Nfg<double> *) ((NfgPortion *) param[0])->Value();
     MixedSolution<double> start(N);
   
