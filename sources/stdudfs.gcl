@@ -1,6 +1,6 @@
 // Standard User defined functions
 
-StdOut << "Include[\""&GetPath[]&"\"]\n"
+StdOut << "Include[\""+GetPath[]+"\"]\n"
 
 NewFunction[SetNumericFormat[{width->0},{precis->6},{expmode->False}]=:BOOLEAN,
   !IsNull[Format[1.0,width,precis,expmode]]
@@ -525,7 +525,7 @@ NewFunction[MarkedSubgames[efg->EFG(T)]=:LIST(NODE),
 ]
 
 //NewFunction[CheckEnv[x->TEXT]=: TEXT,
-//  If[(t:=GetEnv[x])="",StdOut << "Environment Variable "&x&" undefined\n";];
+//  If[(t:=GetEnv[x])="",StdOut << "Environment Variable "+x+" undefined\n";];
 //  t;
 //];
 
@@ -534,20 +534,21 @@ NewFunction[GambitExe[]=:TEXT,
   If[p="DOS/Windows",f:="gambit32"];
   If[p="HP UX" || p="HPPA",f:="gui_motif_hp"];
   If[p="SPARC" || p="SUN",f:="gui_motif_sun4"];
-  If[p="SVR4",f:="gui_motif_solaris"];
+  If[p="SVR4",f:="gui_SunOS_sun4m"];
+  If[p="Linux",f:="gui_Linux"];
   If[p="AIX32" || p="AIX",f:="gui_motif_rs6000"];
-  If[(h:=GetEnv["GAMBIT_HOME"])="",p:=ExePath[file->False]&f,p:=h&f];
+  If[(h:=GetEnv["GAMBIT_HOME"])="",p:=ExePath[file->False]+f,p:=h+f];
   p
 ]
 
 NewFunction[Display[e->EFG]=:NUMBER,
   SaveEfg[e,"junk.efg"];
-  Shell[GambitExe[]&" junk.efg"]
+  Shell[GambitExe[]+" junk.efg"]
 ]
 
 NewFunction[Display[n->NFG]=:NUMBER,
   SaveNfg[n,"junk.nfg"];
-  Shell[GambitExe[]&" junk.nfg"]
+  Shell[GambitExe[]+" junk.nfg"]
 ]
 
 
@@ -791,9 +792,9 @@ NewFunction[NewOutcome[nfg->NFG,  name->TEXT] =: NFOUTCOME,
   SetName[NewOutcome[nfg],name]
 ]
 
-NewFunction[Concat[list->LIST(TEXT)]=:TEXT,
-  If[Length[list]=1,list_1,list_1&Concat[Remove[list,1]]];
-]
+//NewFunction[Concat[list->LIST(TEXT)]=:TEXT,
+//  If[Length[list]=1,list_1,list_1&Concat[Remove[list,1]]];
+//]
 
 NewFunction[NewOutcome[profile->LIST(STRATEGY)]=:NFOUTCOME,
   name:=Concat[Name[profile]];
