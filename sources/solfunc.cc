@@ -793,76 +793,17 @@ Portion *GSM_LiapValue_MixedRational(Portion **param)
 
 Portion *GSM_ListForm_BehavFloat(Portion **param)
 {
-  int i;
-  int j;
-  int k;
-  Portion* p1;
-  Portion* p2;
-  Portion* p3;
-  Portion* por;
-
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
-
-  por = new ListValPortion();
-
-  for( i = 1; i <= P->DPLengths().Length(); i++ )
-  {
-    p1 = new ListValPortion();
-
-    for( j = 1; j <= P->DPLengths()[i]; j++ )
-    {
-      p2 = new ListValPortion();
-
-      for( k = 1; k <= P->Lengths()[j]; k++ )
-      {
-	p3 = new FloatValPortion( (*P)( i, j, k ) );
-	((ListPortion*) p2)->Append( p3 );
-      }
-      ((ListPortion*) p1)->Append( p2 );
-    }
-    ((ListPortion*) por)->Append( p1 );
-  }
-
-  return por;
-
+  return gDPVectorToList(* (gDPVector<double>*) P);
 }
 
 
 Portion *GSM_ListForm_BehavRational(Portion **param)
 {
-  int i;
-  int j;
-  int k;
-  Portion* p1;
-  Portion* p2;
-  Portion* p3;
-  Portion* por;
-
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
-
-  por = new ListValPortion();
-
-  for( i = 1; i <= P->DPLengths().Length(); i++ )  {
-    p1 = new ListValPortion();
-
-    for( j = 1; j <= P->DPLengths()[i]; j++ )
-    {
-      p2 = new ListValPortion();
-
-      for( k = 1; k <= P->Lengths()[j]; k++ )
-      {
-	p3 = new RationalValPortion( (*P)( i, j, k ) );
-	((ListPortion*) p2)->Append( p3 );
-      }
-      ((ListPortion*) p1)->Append( p2 );
-    }
-    ((ListPortion*) por)->Append( p1 );
-  }
-
-  return por;
-
+  return gDPVectorToList(* (gDPVector<gRational>*) P);
 }
 
 Portion *GSM_ListForm_MixedFloat(Portion **param)
