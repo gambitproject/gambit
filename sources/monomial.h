@@ -50,11 +50,9 @@ public:
     const exp_vect& ExpV()                      const;
     T               Evaluate(const gArray<T>&)  const;
     T               Evaluate(const gVector<T>&) const;
-
-    // output
-  friend gOutput& operator << (gOutput&, const gMono<T>&);
 };
 
+template <class T> gOutput &operator<<(gOutput &, const gMono<T> &);
 
 
 

@@ -34,7 +34,7 @@ inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
                      const wxColour &color, int thick = 0)
 {
   dc.SetPen(wxPen(color, (thick) ? 8 : 2, wxSOLID));
-  dc.DrawLine(x_s, y_s, x_e, y_e);
+  dc.DrawLine((int) x_s, (int) y_s, (int) x_e, (int) y_e);
 }
 
 inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,

@@ -279,9 +279,9 @@ void TreeWindow::AdjustScrollbarSteps(void)
   GetViewStart(&scrollX, &scrollY);
 
   SetScrollbars(50, 50,
-		(m_layout.MaxX() + draw_settings.NodeLength() + 
-		 draw_settings.OutcomeLength()) * m_zoom / 50 + 1,
-		m_layout.MaxY() * m_zoom / 50 + 1,
+		(int) ((m_layout.MaxX() + draw_settings.NodeLength() + 
+			draw_settings.OutcomeLength()) * m_zoom / 50 + 1),
+		(int) (m_layout.MaxY() * m_zoom / 50 + 1),
 		scrollX, scrollY);
 }
 
@@ -334,13 +334,14 @@ void TreeWindow::EnsureCursorVisible(void)
   GetClientSize(&width, &height);
 
   int xx, yy;
-  CalcScrolledPosition(entry->x * m_zoom - 20, entry->y * m_zoom, &xx, &yy);
+  CalcScrolledPosition((int) (entry->x * m_zoom - 20),
+		       (int) (entry->y * m_zoom), &xx, &yy);
   if (xx < 0) {
     xScroll -= -xx / 50 + 1;
   }
-  CalcScrolledPosition(entry->x * m_zoom + draw_settings.NodeLength() +
-		       draw_settings.OutcomeLength(),
-		       entry->y * m_zoom, &xx, &yy);
+  CalcScrolledPosition((int) (entry->x * m_zoom + draw_settings.NodeLength() +
+			      draw_settings.OutcomeLength()),
+		       (int) (entry->y * m_zoom), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;
   }
@@ -351,11 +352,13 @@ void TreeWindow::EnsureCursorVisible(void)
     xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  CalcScrolledPosition(entry->x * m_zoom, entry->y * m_zoom - 20, &xx, &yy);
+  CalcScrolledPosition((int) (entry->x * m_zoom),
+		       (int) (entry->y * m_zoom - 20), &xx, &yy);
   if (yy < 0) {
     yScroll -= -yy / 50 + 1;
   }
-  CalcScrolledPosition(entry->x * m_zoom, entry->y * m_zoom + 20, &xx, &yy);
+  CalcScrolledPosition((int) (entry->x * m_zoom),
+		       (int) (entry->y * m_zoom + 20), &xx, &yy);
   if (yy > height) {
     yScroll += (yy - height) / 50 + 1;
   }

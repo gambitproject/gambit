@@ -779,7 +779,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       Dvector x,Ivector basis,Ivector nonbasis,
       Dmatrix DtypesR, Dmatrix Q, Dvector t1, Dvector t2);
 
-#endif # PELUTILS
+#endif // PELUTILS
 
 
 

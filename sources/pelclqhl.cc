@@ -249,7 +249,7 @@ node aset_lower_facets(node A)
 /* #define ACTUALLY_PRINT */
 node aset_print_subdiv(node A, node norms, Imatrix T)
 {
-  int i;
+  //  int i;
     node ptr = 0, ptc = 0, res = 0;
     Imatrix M = 0, Tp = 0;
     int v, mv = 0, t = 0;

@@ -85,8 +85,8 @@ XLIB = -lgtk -lgdk -lpthread
 # define compiler and flags
 
 CC = g++
-CFLAGS = -Wall $(DEFINES) \
-	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
+CFLAGS = -Wall $(DEFINES) -DNEWSTYLE_TEMPLATES \
+	 -fno-implicit-templates $(INCDIR) 
 OBJECT_SUFFIX = .o
  
 #

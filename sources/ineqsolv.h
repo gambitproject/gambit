@@ -86,4 +86,4 @@ template <class T> class IneqSolv {
 };  
 
 template <class T> gOutput &operator<<(gOutput &output, const IneqSolv<T> &x);
-#endif INEQSOLV_H
+#endif // INEQSOLV_H

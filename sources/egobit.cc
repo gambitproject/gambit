@@ -9,6 +9,7 @@
 #include "egobit.h"
 
 #include "gfunc.h"
+#include "math/math.h"
 #include "math/gmatrix.h"
 #include "gnullstatus.h"
 

@@ -104,7 +104,7 @@ public:
   gText Description(void) const;
 }; 
 
-#ifdef __BCC55__
+#if defined(__BCC55__) || defined(NEWSTYLE_TEMPLATES)
 #define TEMPLATE_SPECIALIZATION()   template<>
 #else
 #define TEMPLATE_SPECIALIZATION()

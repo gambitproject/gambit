@@ -201,78 +201,6 @@ gRational pow(const gRational& x, const gInteger& y)
   return pow(x, yy);
 }               
 
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-gRational operator - (const gRational& x) return r(x)
-{
-  r.negate();
-}
-
-gRational abs(const gRational& x) return r(x)
-{
-  if (sign(r.num) < 0) r.negate();
-}
-
-
-gRational sqr(const gRational& x) return r
-{
-  mul(x.num, x.num, r.num);
-  mul(x.den, x.den, r.den);
-  r.normalize();
-}
-
-gInteger floor(const gRational& x) return q
-{
-  gInteger r;
-  divide(x.num, x.den, q, r);
-  if (sign(x.num) < 0 && sign(r) != 0) --q;
-}
-
-gInteger ceil(const gRational& x) return q
-{
-  gInteger  r;
-  divide(x.num, x.den, q, r);
-  if (sign(x.num) >= 0 && sign(r) != 0) ++q;
-}
-
-gInteger round(const gRational& x) return q
-{
-  gInteger r;
-  divide(x.num, x.den, q, r);
-  r <<= 1;
-  if (ucompare(r, x.den) >= 0)
-  {
-    if (sign(x.num) >= 0)
-      ++q;
-    else
-      --q;
-  }
-}
-
-// power: no need to normalize since num & den already relatively prime
-
-gRational pow(const gRational& x, long y) return r
-{
-  if (y >= 0)
-  {
-    pow(x.num, y, r.num);
-    pow(x.den, y, r.den);
-  }
-  else
-  {
-    y = -y;
-    pow(x.num, y, r.den);
-    pow(x.den, y, r.num);
-    if (sign(r.den) < 0)
-    {
-      r.num.negate();
-      r.den.negate();
-    }
-  }
-}
-
-#else
-
 gRational operator - (const gRational& x) 
 {
   gRational r(x); r.negate(); return r;
@@ -350,8 +278,6 @@ gRational pow(const gRational& x, long y)
   }
   return r;
 }
-
-#endif
 
 gOutput& operator << (gOutput& s, const gRational& y)
 {
@@ -555,30 +481,6 @@ gRational operator >? (const gRational& x, const gRational& y)
 }
 #endif
 
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-gRational operator + (const gRational& x, const gRational& y) return r
-{
-  add(x, y, r);
-}
-
-gRational operator - (const gRational& x, const gRational& y) return r
-{
-  sub(x, y, r);
-}
-
-gRational operator * (const gRational& x, const gRational& y) return r
-{
-  mul(x, y, r);
-}
-
-gRational operator / (const gRational& x, const gRational& y) return r
-{
-  div(x, y, r);
-}
-
-#else /* NO_NRV */
-
 gRational operator + (const gRational& x, const gRational& y) 
 {
   gRational r; add(x, y, r); return r;
@@ -598,7 +500,6 @@ gRational operator / (const gRational& x, const gRational& y)
 {
   gRational r; div(x, y, r); return r;
 }
-#endif
 
 
 gText ToText(const gRational &r)

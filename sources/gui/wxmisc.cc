@@ -234,7 +234,7 @@ void gDrawText(wxDC &dc, const gText &s0, float x, float y)
       i++;
     }
 
-    dc.DrawText((char *)tmp, x, y);
+    dc.DrawText((char *) tmp, (int) x, (int) y);
     dc.GetTextExtent((char *)tmp, &dx, &dy);
     x += dx;
         
@@ -243,7 +243,7 @@ void gDrawText(wxDC &dc, const gText &s0, float x, float y)
 
       switch (s[i]) {
       case '\\':
-	dc.DrawText("\\", x, y);
+	dc.DrawText("\\", (int) x, (int) y);
 	dc.GetTextExtent("\\", &dx, &dy);
 	x += dx;
 	i++;

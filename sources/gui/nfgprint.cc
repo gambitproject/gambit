@@ -33,7 +33,8 @@ bool NfgPrintout::OnPrintPage(int)
 
   float marginX = 1*ppiPrinterX;
   float marginY = 1*ppiPrinterY;
-  dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
+  dc->SetDeviceOrigin((int) (marginX*pageScaleX), 
+		      (int) (marginY*pageScaleY));
 
 #if 0
   // Temporarily commented out for changes to grid setup

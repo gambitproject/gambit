@@ -96,4 +96,4 @@ class gPermutationOdometer {
 friend gOutput& operator << (gOutput& output, const gPermutationOdometer& x);
 };  
 
-#endif ODOMETER_H
+#endif // ODOMETER_H

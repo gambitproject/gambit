@@ -45,6 +45,7 @@ that this technique is easily extended to n steps.
 
 #include <math.h>
 #include "base/base.h"
+#include "math/math.h"
 #include "mixed.h"
 #include "grid.h"
 #include "nfg.h"

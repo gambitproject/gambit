@@ -679,10 +679,12 @@ void Init_listfunc(GSM *gsm)
 {
   gclFunction *FuncObj;
 
+#ifdef UNUSED
   gclParameter x_Int[] =
   {
     gclParameter( "x", porNUMBER )
   };
+#endif // UNUSED
   gclParameter x_Number[] =
   {
     gclParameter( "x", porNUMBER )

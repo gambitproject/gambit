@@ -60,7 +60,7 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
   dc.SetFont(GetLabelFont());
   wxCoord w, h, descent;
   dc.GetTextExtent("Sequential", &w, &h, &descent);
-  SetLabelSize(wxHORIZONTAL, (h + descent) * 1.25);
+  SetLabelSize(wxHORIZONTAL, (int) ((h + descent) * 1.25));
 
   UpdateValues();
 }

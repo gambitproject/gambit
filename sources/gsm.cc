@@ -1048,7 +1048,7 @@ void GSM::UnAssignEfgOutcome(Efg::Game *game, const Efg::Outcome &data)
 	  }
 	}
       }
-#endif FIXME
+#endif // FIXME
     }
 
     // go through all scopes on the stack; restore later

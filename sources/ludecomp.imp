@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "math/math.h"
 #include "ludecomp.h"
 #include "tableau.h"
 

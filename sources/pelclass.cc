@@ -1,5 +1,6 @@
 #include "pelclass.h"
 #include "base/base.h"
+#include "math/math.h"
 /*
 #include "glist.h"
 #include "gvector.h"

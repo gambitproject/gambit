@@ -60,7 +60,7 @@ extern IntRep*  div(const IntRep*, const IntRep*, IntRep*);
 extern IntRep*  mod(const IntRep*, const IntRep*, IntRep*);
 extern IntRep*  div(const IntRep*, long, IntRep*);
 extern IntRep*  mod(const IntRep*, long, IntRep*);
-extern IntRep*  compl(const IntRep*, IntRep*);
+extern IntRep*  Compl(const IntRep*, IntRep*);
 extern IntRep*  abs(const IntRep*, IntRep*);
 extern IntRep*  negate(const IntRep*, IntRep*);
 extern IntRep*  pow(const IntRep*, long);
@@ -168,9 +168,9 @@ public:
   friend void     mod(const gInteger& x, const gInteger& y, gInteger& dest);
   friend void     divide(const gInteger& x, const gInteger& y, 
                          gInteger& q, gInteger& r);
-  friend void     and(const gInteger& x, const gInteger& y, gInteger& dest);
-  friend void     or(const gInteger& x, const gInteger& y, gInteger& dest);
-  friend void     xor(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     And(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     Or(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     Xor(const gInteger& x, const gInteger& y, gInteger& dest);
   friend void     lshift(const gInteger& x, const gInteger& y, gInteger& dest);
   friend void     rshift(const gInteger& x, const gInteger& y, gInteger& dest);
   friend void     pow(const gInteger& x, const gInteger& y, gInteger& dest);
@@ -183,9 +183,9 @@ public:
   friend void     div(const gInteger& x, long y, gInteger& dest);
   friend void     mod(const gInteger& x, long y, gInteger& dest);
   friend void     divide(const gInteger& x, long y, gInteger& q, long& r);
-  friend void     and(const gInteger& x, long y, gInteger& dest);
-  friend void     or(const gInteger& x, long y, gInteger& dest);
-  friend void     xor(const gInteger& x, long y, gInteger& dest);
+  friend void     And(const gInteger& x, long y, gInteger& dest);
+  friend void     Or(const gInteger& x, long y, gInteger& dest);
+  friend void     Xor(const gInteger& x, long y, gInteger& dest);
   friend void     lshift(const gInteger& x, long y, gInteger& dest);
   friend void     rshift(const gInteger& x, long y, gInteger& dest);
   friend void     pow(const gInteger& x, long y, gInteger& dest);
@@ -195,9 +195,9 @@ public:
   friend void     add(long x, const gInteger& y, gInteger& dest);
   friend void     sub(long x, const gInteger& y, gInteger& dest);
   friend void     mul(long x, const gInteger& y, gInteger& dest);
-  friend void     and(long x, const gInteger& y, gInteger& dest);
-  friend void     or(long x, const gInteger& y, gInteger& dest);
-  friend void     xor(long x, const gInteger& y, gInteger& dest);
+  friend void     And(long x, const gInteger& y, gInteger& dest);
+  friend void     Or(long x, const gInteger& y, gInteger& dest);
+  friend void     Xor(long x, const gInteger& y, gInteger& dest);
 
 // coercion & conversion
 

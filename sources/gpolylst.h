@@ -94,5 +94,5 @@ template <class T> class gPolyList
 
 template <class T> gOutput &operator<<(gOutput &, const gPolyList<T> &);
 
-#endif GPOLYLST_H
+#endif // GPOLYLST_H
 

@@ -70,8 +70,8 @@ private:
   //   private friends
   //----------------------
 
-  friend gPoly<T> operator*(const gPoly<T> &poly, const T val);
-  friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
+  //  friend gPoly<T> operator*<>(const gPoly<T> &poly, const T val);
+  //  friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
 
 public:
 

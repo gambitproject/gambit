@@ -173,4 +173,4 @@ template <class T> class QuikSolv {
 
 template <class T> gOutput &operator<<(gOutput &output, const QuikSolv<T> &);
 
-#endif QUIKSOLV_H
+#endif // QUIKSOLV_H

@@ -57,7 +57,7 @@ bool EfgPrintout::OnPrintPage(int)
     real_zoom = gmin(zoom_x, zoom_y);
         
     dc->SetUserScale(real_zoom, real_zoom);
-    dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
+    dc->SetDeviceOrigin((int) (marginX*pageScaleX), (int) (marginY*pageScaleY));
 #ifdef UNUSED
   }
   else {  // WYSIWYG

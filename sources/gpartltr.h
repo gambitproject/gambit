@@ -70,7 +70,7 @@ public:
    bool PolyEverywhereNegativeIn(const gRectangle<T>&)         const;
    bool MultiaffinePolyEverywhereNegativeIn(const gRectangle<T>&) const;
 
-friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
+   //friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
 };
 
 
@@ -112,7 +112,7 @@ public:
 					  const gVector<T>&, 
 					  const gVector<T>&)      const;
 
-friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
+   //friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
 };
 
 #endif // GPARTLTR_H

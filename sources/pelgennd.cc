@@ -350,7 +350,7 @@ node Gen_aset(Gen_node g){
 void print_Proc(Gen_node (*p)(Gen_node))
 {
 #ifdef LOG_PRINT
- fprintf(stdout /* was Pel_Out */,"%ld",p)
+ fprintf(stdout /* was Pel_Out */,"%p",p)
 #endif
 ;
 }

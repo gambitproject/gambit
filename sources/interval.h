@@ -51,8 +51,8 @@ public:
     const gInterval<T> SameCenterTwiceLength()                      const;
     const gInterval<T> SameCenterWithNewLength(const T&)            const;
 
-    // output
-  friend gOutput& operator <<(gOutput& output, const gInterval<T>& x);
 };
 
-#endif INTERVAL_H
+template <class T> gOutput &operator<<(gOutput &, const gInterval<T> &);
+
+#endif // INTERVAL_H
