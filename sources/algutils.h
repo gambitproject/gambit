@@ -85,9 +85,9 @@ public:
 // class MyClass {
 // private:
 //   gNumber GetInfo(void);
-//   mutable gFact<MyClass, gTriState> m_Info;
+//   mutable gFact<MyClass, gNumber> m_Info;
 // public:
-//  MyClass() :  m_Info(*this,&MyClass::GetInfo);
+//   MyClass() :  m_Info(*this,&MyClass::GetInfo);
 // }  
 
 /*
