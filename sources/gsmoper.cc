@@ -1575,7 +1575,7 @@ Portion* GSM_Read_Bool(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
-  bool value;
+  bool value = false;
   bool error = false;
   char c = ' ';
 

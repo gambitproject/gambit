@@ -1,8 +1,8 @@
-//#
-//# FILE: gsm.cc  implementation of GSM (Stack machine)
-//#
-//# @(#)gsm.cc	1.162 8/5/96
-//#
+//
+// FILE: gsm.cc  implementation of GSM (Stack machine)
+//
+// $Id$
+//
 
 
 class Portion;
@@ -1391,7 +1391,7 @@ bool GSM::OR (void)
 bool GSM::NOT (void)
 {
   Portion* p1;
-  bool b;
+  bool b = false;
   bool result = false;
 
   p1 = _Pop();
@@ -1529,7 +1529,7 @@ bool GSM::AddFunction(FuncDescObj* func)
 
 bool GSM::DeleteFunction(FuncDescObj* func)
 {
-  FuncDescObj *old_func;
+  FuncDescObj *old_func = 0;
   bool result;
   assert(func != 0);
   if(!_FuncTable->IsDefined(func->FuncName()))

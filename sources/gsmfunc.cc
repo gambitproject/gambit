@@ -1,9 +1,9 @@
-//#
-//# FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
-//#                     companion to GSM
-//#
-//# $Id$
-//#
+//
+// FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
+//                     companion to GSM
+//
+// $Id$
+//
 
 #include <assert.h>
 
@@ -642,7 +642,7 @@ bool FuncDescObj::Delete(FuncDescObj* newfunc)
   bool same_params;
   int i;
   int f_index;
-  int delete_index;
+  int delete_index = 0;
   int index;
 
   for(i = 0; i < newfunc->_NumFuncs; i++)
@@ -1156,7 +1156,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 {
   int index;
   int f_index;
-  int curr_f_index;
+  int curr_f_index = 0;
   int param_sets_matched;
   Portion* result = 0;
 
