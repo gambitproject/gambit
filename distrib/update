@@ -6,7 +6,7 @@
 # and automatically place them onto the primary GAMBIT ftp site.
 
 # Usage: 
-# update TARGET=[gambit, gcl, src, guidoc, gcldoc, all] 
+# update TARGET=[gambit, src, guidoc, gcldoc, all] 
 #        SYSNAME=[Linux, SunOS_5_6, HPUX, all] 
 #        GUI=[motif,xt,all]
 #
