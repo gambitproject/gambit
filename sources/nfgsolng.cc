@@ -26,6 +26,7 @@ guiNfgSolution::guiNfgSolution(const NFSupport &p_support,
 { }
 
 #include "nfstrat.h"
+#include "nfdom.h"
 
 void guiNfgSolution::Eliminate(void)
 {

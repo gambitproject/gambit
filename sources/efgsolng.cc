@@ -69,6 +69,7 @@ void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg &p_efg,
 }
 
 #include "efdom.h"
+#include "nfdom.h"
 
 class guiSubgameViaEfg : public guiSubgameSolver {
 protected:

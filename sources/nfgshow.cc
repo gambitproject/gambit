@@ -8,7 +8,8 @@
 #include "nfgshow.h"
 #include "nfgsoln.h"
 #include "nfgconst.h"
-#include "nfplayer.h" 
+#include "nfplayer.h"
+#include "nfdom.h"
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
