@@ -32,6 +32,13 @@ private:
 			        const gVector<T>&,
 		       	              gVector<int>&)           const;
 
+   T MaximalNonconstantDifferenceRECURSIVE(
+				const gTreeNode<gPoly<T> >*,
+				const gTreeNode<gPoly<T> >*,
+		      	        const gVector<T>&,
+			        const gVector<T>&,
+		       	              gVector<int>&)           const;
+
 public:
    TreeOfPartials(const gPoly<T> &);  
    TreeOfPartials(const TreeOfPartials<T> &);
@@ -49,6 +56,9 @@ public:
 
    T MaximalNonconstantContribution(const gVector<T>&, 
 				    const gVector<T>&)         const;
+   T MaximalNonconstantDifference(const TreeOfPartials<T>&,
+				  const gVector<T>&, 
+				  const gVector<T>&)         const;
 
    inline gTreeNode<gPoly<T> >* RootNode()                     const 
      { return PartialTree.RootNode(); }

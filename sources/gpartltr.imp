@@ -100,6 +100,97 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
   return answer;
 }
 
+template <class T> T
+TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
+					     const gTreeNode<gPoly<T> >* n1,
+					     const gTreeNode<gPoly<T> >* n2,
+					     const gVector<T>& p,
+					     const gVector<T>& halvesoflengths,
+					     gVector<int>& wrtos) const
+{
+  T answer = (T)0;
+
+  if (n1->GetEldest() != NULL && n2->GetEldest() != NULL) {
+    gList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    gList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    for (int i = 1; i <= children1.Length(); i++) {
+      wrtos[i]++;
+
+      T increment = children1[i]->GetData().Evaluate(p) - 
+	            children2[i]->GetData().Evaluate(p);
+      if (increment < (T)0) increment = -increment;
+     	  
+      for (int j = 1; j <= p.Length(); j++) 
+	for (int k = 1; k <= wrtos[j]; k++) {
+	  increment *= halvesoflengths[j];
+	  increment /= (T)k;
+	}
+
+      answer += increment;
+
+      answer += MaximalNonconstantDifferenceRECURSIVE(children1[i],
+						      children2[i],
+						      p,
+						      halvesoflengths,
+						      wrtos);
+      
+      wrtos[i]--;
+    }
+  }
+
+  else if (n1->GetEldest() != NULL && n2->GetEldest() == NULL) {
+    gList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    for (int i = 1; i <= children1.Length(); i++) {
+      wrtos[i]++;
+
+      T increment = children1[i]->GetData().Evaluate(p);
+      if (increment < (T)0) increment = -increment;
+     	  
+      for (int j = 1; j <= p.Length(); j++) 
+	for (int k = 1; k <= wrtos[j]; k++) {
+	  increment *= halvesoflengths[j];
+	  increment /= (T)k;
+	}
+
+      answer += increment;
+
+      answer += MaximalNonconstantContributionRECURSIVE(children1[i],
+							p,
+							halvesoflengths,
+							wrtos);
+      
+      wrtos[i]--;
+    }
+  }
+
+  else if (n1->GetEldest() == NULL && n2->GetEldest() != NULL) {
+    gList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    for (int i = 1; i <= children2.Length(); i++) {
+      wrtos[i]++;
+
+      T increment = children2[i]->GetData().Evaluate(p);
+      if (increment < (T)0) increment = -increment;
+     	  
+      for (int j = 1; j <= p.Length(); j++) 
+	for (int k = 1; k <= wrtos[j]; k++) {
+	  increment *= halvesoflengths[j];
+	  increment /= (T)k;
+	}
+
+      answer += increment;
+
+      answer += MaximalNonconstantContributionRECURSIVE(children2[i],
+							p,
+							halvesoflengths,
+							wrtos);
+      
+      wrtos[i]--;
+    }
+  }
+
+  return answer;
+}
+
 
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
@@ -109,10 +200,26 @@ TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
   gVector<int> WithRespectTos(p.Length());
   for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
 
-  return MaximalNonconstantContributionRECURSIVE(PartialTree.RootNode(),
+  return MaximalNonconstantContributionRECURSIVE(RootNode(),
 						 p,
 						 halvesoflengths,
 						 WithRespectTos); 
+}
+
+template <class T> T
+TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
+						const gVector<T>& p,
+						const gVector<T>& 
+						   halvesoflengths) const
+{
+  gVector<int> WithRespectTos(p.Length());
+  for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
+
+  return MaximalNonconstantDifferenceRECURSIVE(other.RootNode(),
+					       RootNode(),
+					       p,
+					       halvesoflengths,
+					       WithRespectTos); 
 }
 
 
