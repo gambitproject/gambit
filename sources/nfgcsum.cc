@@ -43,7 +43,6 @@ template <class T> bool ZSumModule<T>::IsConstSum()
 template <class T> void ZSumModule<T>::Make_Abc()
 {
   int i,j,m,k;
-  T pay;
   
   m = support.NumStrats(1);
   k = support.NumStrats(2);
@@ -52,19 +51,7 @@ template <class T> void ZSumModule<T>::Make_Abc()
   c = new gVector<T>(1,m+1);
   NfgIter<T> iter(&support);
 
-      // Ted -- this should be in the normal form.  
-  minpay = (T)0;
-  for (i = 1; i <= k; i++)  {
-    for (j = 1; j <= m; j++)  {
-      pay = iter.Payoff(1);
-      if(pay < minpay)minpay = pay;
-      iter.Next(1);
-    }
-    (*A)(i,m+1) = (T)1;
-    iter.Next(2);
-  }
-
-  minpay=minpay-(T)1;
+  minpay = NF.MinPayoff()-(T)1; 
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {

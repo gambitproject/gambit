@@ -41,14 +41,10 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   ntot = ns1+ns2+(ni1+ni2)+2;
   A = new gMatrix<T>(1,ntot,0,ntot);
   b = new gVector<T>(1,ntot);
-  T newpay;
   int i,j;
-  for(i=1;i<=EF.NumOutcomes();i++)
-    for(j=1;j<=EF.NumPlayers();j++) {
-      newpay = ( (OutcomeVector<T> &) *( EF.OutcomeList()[i] ))[j];
-      if(newpay>=maxpay) maxpay=newpay;
-    }
-  maxpay=maxpay+(T)1;
+
+  maxpay = EF.MaxPayoff()+(T)1; 
+
   T prob = (T)1;
   for(i=A->MinRow();i<=A->MaxRow();i++) {
     (*b)[i] = (T)0;
