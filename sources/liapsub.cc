@@ -52,6 +52,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
     solns.Append(bp);
   }
 
+  delete S;
   delete N;
   return params.status.Get();
 }
