@@ -61,10 +61,10 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
-  :gBFunctMin<T>(EF.ProfileLength(true)), E(EF),
+  :gBFunctMin<T>(EF.ProfileLength(true)),
+                 probs(EF.Dimensionality().Lengths()),
 		 p(EF, true), pp(EF, true), cpay(EF),
-		 probs(EF.Dimensionality().Lengths()),
-		 xi(p.Length(), p.Length())
+		 xi(p.Length(), p.Length()), E(EF)
 {
   Init();
   E.Centroid(pp);
@@ -73,10 +73,10 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
 			    const BehavProfile<T> &s)
-  :gBFunctMin<T>(EF.ProfileLength(true)), E(EF),
-		 p(EF, true), pp(EF, true), cpay(EF),
+  :gBFunctMin<T>(EF.ProfileLength(true)),
 		 probs(EF.Dimensionality().Lengths()),
-		 xi(p.Length(), p.Length())
+		 p(EF, true), pp(EF, true), cpay(EF),
+		 xi(p.Length(), p.Length()), E(EF)
 {
   Init();
   pp = s;
@@ -99,7 +99,6 @@ template <class T> EFGobitFunc<T>::~EFGobitFunc()
 template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
 {
   static const T PENALTY1 = (T) 10000.0;
-  static const T PENALTY2 = (T) 100.0;
 
   (gVector<T> &) p = v;
   T val((T) 0), prob, psum, z;

@@ -83,13 +83,13 @@ gString ToString(int i)
 
 gString ToString(long l)
 {
-  sprintf(gconvert_buffer, "%.*ld",precision, l);
+  sprintf(gconvert_buffer, "%.*ld", precision, l);
   return gString(gconvert_buffer);
 }
 
 gString ToString(double d)
 {
-  sprintf(gconvert_buffer, "%.*lf",precision, d);
+  sprintf(gconvert_buffer, "%.*f", precision, d);
   return gString(gconvert_buffer);
 }
 

@@ -69,7 +69,7 @@ template <class T> int gList<T>::InsertAt(const T &t, int num)
   return num;
 }
 
-template <class T> gList<T>::gList(void) : head(0), tail(0), length(0)
+template <class T> gList<T>::gList(void) : length(0), head(0), tail(0)
 { }
 
 template <class T> gList<T>::gList(const gList<T> &b)

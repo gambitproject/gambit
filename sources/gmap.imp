@@ -37,7 +37,7 @@ int gBaseMapMessage<K, T>::operator==(const gMessage &m) const
 //-------------------------------------------------------------------------
 
 template <class K, class T> gBaseMap<K, T>::gBaseMap(const T &d)
-  : _default(d), length(0), keys(0), values(0)
+  : length(0), _default(d), keys(0), values(0)
 { }
 
 template <class K, class T>

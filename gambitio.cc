@@ -331,10 +331,11 @@ gOutput &gFileOutput::operator<<(double x)
   assert(f);
   switch (Represent) { 
     case 'f':
-      c=fprintf(f, "%*.*lf", Width, Prec, x);
+      c = fprintf(f, "%*.*f", Width, Prec, x);
       break;
     case 'e':
-      c=fprintf(f, "%*.*le", Width, Prec, x);
+      c = fprintf(f, "%*.*e", Width, Prec, x);
+      break;
     }
   valid=(c==1) ? 1 : 0;
   return *this;

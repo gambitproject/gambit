@@ -33,7 +33,7 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
 }
 
 template <class T> gNArray<T>::gNArray(const gNArray<T> &a)
-  : dim(a.dim), storage_size(a.storage_size)
+  : storage_size(a.storage_size), dim(a.dim)
 {
   storage = (storage_size > 0) ? new T[storage_size] : 0;
   for (int i = 0; i < storage_size; i++)

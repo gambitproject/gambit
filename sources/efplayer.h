@@ -20,7 +20,7 @@ class Player   {
     
     gBlock<Infoset *> infosets;
 
-    Player(BaseExtForm *e, int n) : E(e), number(n)  { }
+    Player(BaseExtForm *e, int n) : number(n), E(e)  { }
     ~Player();
 
   public:

@@ -62,7 +62,8 @@ extern two_arg_error_handler_t
        set_lib_error_handler(two_arg_error_handler_t f);
 
 
-double abs(double arg);
+#if defined(IV)
+
 float abs(float arg);
 short abs(short arg);
 long abs(long arg);
@@ -77,14 +78,9 @@ void (setbit)(long& x, long b);
 void clearbit(long& x, long b);
 int testbit(long x, long b);
 
-#if !defined(IV)
-
-#if ! _G_MATH_H_INLINES /* hpux and SCO define this in math.h */
-inline double abs(double arg) 
-{
-  return (arg < 0.0)? -arg : arg;
-}
 #endif
+
+#if !defined(IV)
 
 inline float abs(float arg) 
 {

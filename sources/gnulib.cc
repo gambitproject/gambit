@@ -100,7 +100,7 @@ int Obstack::OK()
 }
 
 AllocRing::AllocRing(int max)
-  :n(max), current(0), nodes(new AllocQNode[max])
+  : nodes(new AllocQNode[max]), n(max), current(0)
 {
   for (int i = 0; i < n; ++i)
   {

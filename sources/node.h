@@ -25,7 +25,7 @@ class Node    {
     gBlock<Node *> children;
 
     Node(BaseExtForm *e, Node *p)
-      : valid(true), E(e), parent(p), infoset(0), outcome(0)   { }
+      : valid(true), E(e), infoset(0), parent(p), outcome(0)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
 

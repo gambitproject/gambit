@@ -17,7 +17,7 @@ class Outcome   {
     gString name;
     BaseExtForm *E;
 
-    Outcome(BaseExtForm *e, int n) : E(e), number(n)   { }
+    Outcome(BaseExtForm *e, int n) : number(n), E(e)   { }
     virtual ~Outcome()   { }
   
   public:
