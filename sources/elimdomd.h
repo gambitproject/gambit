@@ -139,7 +139,7 @@ public:
 	ok_button->SetClientData((char *)this);
 	wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 	cancel_button->SetClientData((char *)this);
-	new wxButton(d,(wxFunction)help_button_func,"Help");
+	(void)new wxButton(d,(wxFunction)help_button_func,"Help");
 	d->Fit();
 	d->Show(TRUE);
 	}
