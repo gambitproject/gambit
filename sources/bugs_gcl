@@ -164,15 +164,6 @@ action probabilities at certain information sets are not specified.
 
 //-----------------------------
 
-Bug C27: can't unassign a static variable
-
-  GCL1:= << $a:=1
-  1
-  GCL2:= << $a:=
-  EXCEPTION: Bad key passed to HashTable
-
-//-----------------------------
-
 Bug C28: Fails to resolve zero-parameter function calls to overloaded function:
 
 GCL1:= << NewFunction[Foo[], 1]

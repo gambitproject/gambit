@@ -250,15 +250,20 @@ Portion* GSM::VarValue(const gText &p_name) const
 }
 
 
-Portion* GSM::_VarRemove(const gText& var_name)
+Portion* GSM::_VarRemove(const gText &p_name)
 {
-  if (var_name == "")
+  if (p_name == "")
     throw gclRuntimeError("Tried to remove empty variable name");
 
-  else if (var_name[0] == '$')
-    return _GlobalRefTable.Remove(var_name.Right(var_name.Length() - 1));
+  else if (p_name[0] == '$') {
+    if (p_name[1] == '$')
+      return _GlobalRefTable.Remove(p_name.Right(p_name.Length() - 2));
+    else
+      return _GlobalRefTable.Remove(UserFuncName() + gText((char) 1) +
+				    p_name.Right(p_name.Length() - 1));
+  }
 
-  return _RefTableStack->Peek()->Remove(var_name);
+  return _RefTableStack->Peek()->Remove(p_name);
 }
 
 //---------------------------------------------------------------------
