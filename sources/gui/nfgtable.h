@@ -14,7 +14,8 @@
 
 class NfgTableSettings {
 private:
-  int m_decimals, m_outcomeValues;
+  bool m_outcomeValues;
+  long m_decimals;
   wxFont m_dataFont, m_labelFont;
 
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
@@ -24,7 +25,7 @@ public:
   NfgTableSettings(void);
 
   void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
-  int GetDecimals(void) const { return m_decimals; }
+  long GetDecimals(void) const { return m_decimals; }
 
   void SetOutcomeValues(bool p_outcomeValues) 
     { m_outcomeValues = p_outcomeValues; }

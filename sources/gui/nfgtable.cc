@@ -1,7 +1,10 @@
 //
-// FILE: nfgtable.cc -- Implementation of normal form table class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of normal form table class
 //
 
 #include "wx/wxprec.h"
@@ -35,7 +38,7 @@ void NfgTableSettings::SaveFont(const wxString &p_prefix,
 void NfgTableSettings::LoadFont(const wxString &p_prefix,
 				const wxConfig &p_config, wxFont &p_font)
 {
-  int size, family, style, weight;
+  long size, family, style, weight;
   wxString face;
   p_config.Read(p_prefix + "Size", &size, 10);
   p_config.Read(p_prefix + "Family", &family, wxMODERN);
@@ -51,7 +54,7 @@ void NfgTableSettings::LoadSettings(void)
 {
   wxConfig config("Gambit");
   config.Read("/NfgDisplay/DisplayPrecision", &m_decimals, 2);
-  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, 1);
+  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, true);
 
   LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
   LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);
