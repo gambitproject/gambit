@@ -1,18 +1,19 @@
 //
-// FILE: efgsolvd.cc -- Standard solution methods for extensive form
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Dialog to select from standard algorithms for extensive form games
 //
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "guishare/wxmisc.h"
-
 #include "game/efg.h"
-#include "gambit.h"
-#include "efgsolvd.h"
+#include "efgshow.h"
+#include "dlefgstandard.h"
 
 //========================================================================
 //                dialogEfgSolveStandard: Member functions
@@ -106,19 +107,20 @@ void dialogEfgSolveStandard::UpdateFields(void)
     if (IsPerfectRecall(m_efg)) {
       if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
 	m_algorithm->SetValue("LpSolve[EFG]");
-	m_precision->Show(true);
+	m_precision->Enable(true);
 	m_details->SetValue("Uses linear programming on "
 			    "the associated sequence form.");
       }
       else if (m_efg.NumPlayers() == 2) {
 	m_algorithm->SetValue("LcpSolve[EFG]");
-	m_precision->Show(true);
+	m_precision->Enable(true);
 	m_details->SetValue("Uses linear complementarity algorithms on "
 			    "the associated sequence form.");
       }
       else {
 	m_algorithm->SetValue("SimpdivSolve[NFG]");
-	m_precision->Show(false);
+	m_precision->Enable(false);
+	m_precision->SetSelection(0);
 	m_details->SetValue("Uses simplicial subdivision on the "
 			    "associated reduced normal form.  This "
 			    "algorithm uses floating-point arithmetic.");
@@ -126,7 +128,8 @@ void dialogEfgSolveStandard::UpdateFields(void)
     }
     else {
       m_algorithm->SetValue("QreSolve[EFG]");
-      m_precision->Show(false);
+      m_precision->Enable(false);
+      m_precision->SetSelection(0);
       m_details->SetValue("Uses agent logistic quantal response equilibrium "
 			  "correspondence tracing.  This "
 			  "algorithm uses floating-point arithmetic.");
@@ -136,13 +139,14 @@ void dialogEfgSolveStandard::UpdateFields(void)
   case 4:  // two subgame perfect equilibria
     if (m_efg.NumPlayers() == 2) {
       m_algorithm->SetValue("EnumMixedSolve[NFG]");
-      m_precision->Show(true);
+      m_precision->Enable(true);
       m_details->SetValue("Uses enumeration of mixed strategies "
 			  "on the associated normal form.");
     }
     else {
       m_algorithm->SetValue("LiapSolve[NFG]");
-      m_precision->Show(false);
+      m_precision->Enable(false);
+      m_precision->SetSelection(0);
       m_details->SetValue("Uses Liapunov function minimization. "
 			  "Note: this algorithm is not guaranteed to find "
 			  "two equilibria. "
@@ -153,20 +157,22 @@ void dialogEfgSolveStandard::UpdateFields(void)
   case 5:  // all subgame perfect equilibria
     if (m_efg.NumPlayers() == 2) {
       m_algorithm->SetValue("EnumMixedSolve[NFG]");
-      m_precision->Show(true);
+      m_precision->Enable(true);
       m_details->SetValue("Uses enumeration of mixed strategies "
 			  "on the associated normal form.");
     }
     else {
       m_algorithm->SetValue("PolEnumSolve[EFG]");
-      m_precision->Show(false);
+      m_precision->Enable(false);
+      m_precision->SetSelection(1);
       m_details->SetValue("Uses enumeration of solutions to systems "
 			  "of polynomial equations and inequalities. "
 			  "This algorithm uses rational arithmetic.");
     }
   case 6:  // one sequential equilibrium
       m_algorithm->SetValue("QreSolve[EFG]");
-      m_precision->Show(false);
+      m_precision->Enable(false);
+      m_precision->SetSelection(0);
       m_details->SetValue("Uses agent logistic quantal response equilibrium "
 			  "correspondence tracing.  This "
 			  "algorithm uses floating-point arithmetic.");
@@ -174,10 +180,11 @@ void dialogEfgSolveStandard::UpdateFields(void)
   case 7:  // two sequential equilibria
   case 8:  // all sequential equilibria
     m_algorithm->SetValue("LiapSolve[EFG]");
-    m_precision->Show(false);
+    m_precision->Enable(false);
+    m_precision->SetSelection(0);
     m_details->SetValue("Uses Liapunov function minimization. "
 			"Note: this algorithm is not guaranteed to find "
-			"two equilibria. "
+			"all equilibria. "
 			"This algorithm uses floating-point arithmetic.");
     break;
   default:  // shouldn't happen; just clear entries if it does
@@ -185,15 +192,5 @@ void dialogEfgSolveStandard::UpdateFields(void)
     m_details->SetValue("");
     break;
   }
-}
-
-efgStandardType dialogEfgSolveStandard::Type(void) const
-{
-  return efgSTANDARD_NASH;
-}
-
-efgStandardNum dialogEfgSolveStandard::Number(void) const
-{
-  return efgSTANDARD_ONE;
 }
 

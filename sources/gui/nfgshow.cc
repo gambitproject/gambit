@@ -31,14 +31,12 @@
 #include "nfdom.h"
 #include "game/nfgciter.h"
 
-#include "nfgsolvd.h"
-
 #include "gambit.h"
 #include "efgshow.h"
 #include "dlstrategies.h"
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
-
+#include "dlnfgstandard.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
 #include "alglcp.h"
@@ -870,11 +868,16 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 
 void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 { 
-#ifdef COMMENTED_OUT
   dialogNfgSolveStandard dialog(this, m_nfg);
   
-  if (dialog.ShowModal() != wxID_OK)
-    return;
+  if (dialog.ShowModal() == wxID_OK) {
+
+
+  }
+
+}
+
+#ifdef UNUSED
 
   int old_max_soln = m_profileTable->Length();  // used for extensive update
 
@@ -972,8 +975,9 @@ void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
   }  
 
   UpdateMenus();
-#endif  // COMMENTED_OUT
 }
+
+#endif  // UNUSED
 
 void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
 {

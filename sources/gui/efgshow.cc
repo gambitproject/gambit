@@ -36,7 +36,6 @@
 #include "efgoutcome.h"
 #include "efgsupport.h"
 #include "nfgshow.h"
-#include "efgsolvd.h"
 
 #include "dlinsertmove.h"
 #include "dlefgdelete.h"
@@ -44,12 +43,10 @@
 #include "dleditnode.h"
 #include "dleditmove.h"
 #include "dleditefg.h"
-
 #include "dllayout.h"
 #include "dllegends.h"
-
 #include "dlelimbehav.h"
-
+#include "dlefgstandard.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
 #include "alglcp.h"
