@@ -364,8 +364,6 @@ QuikSolv<T>::SlowNewtonPolishOnce(const gVector<gDouble>& point) const
   return point + Del;
 }
 
-#include "gsm.h"
-
 template<class T>   gVector<gDouble> 
 QuikSolv<T>::NewtonPolishedRoot(const gVector<gDouble> &initial) const
 {
