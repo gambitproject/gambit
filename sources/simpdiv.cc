@@ -24,7 +24,7 @@
 #include "simpdiv.h"
 
 SimpdivParams::SimpdivParams(void) 
-  : number(1), plev(0), ndivs(20), leash(0), output(&gnull)
+  : number(1), plev(0), ndivs(20), leash(0), output(&gnull), sig(gbreak)
 { }
 
 //-------------------------------------------------------------------------
@@ -413,7 +413,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
 //  *params.output << "\ny = " << y;
   
   solns.Flush();
-  for(soln=0;soln<params.number;soln++)
+  for(soln=0;soln<params.number && !params.sig.Get();soln++)
     {
       k=1;
       d=(T) 1.0 / (T) k;
@@ -425,7 +425,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
 	    if(j>1)y(i,j)=(T)(0);
 	}
       
-      for(qf=0;qf!=1 && d > mingrid;)
+      for(qf=0;qf!=1 && d > mingrid && !params.sig.Get();)
 	{
 	  ii=0;
 	  d=(T)(d/(T)2.0);
@@ -441,6 +441,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
       *params.output << " maxz = " << maxz; 
       solns.Append(y);
     }
+  if(params.sig.Get()) params.sig.Reset();
 }
 
 

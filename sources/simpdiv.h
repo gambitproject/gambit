@@ -10,11 +10,13 @@
 #include "normal.h"
 #include "glist.h"
 #include "grarray.h"
+#include "gsignal.h"
 
 class SimpdivParams     {
   public:
     int plev, number, ndivs, leash;
     gOutput *output;
+    gSignal &sig;
     
     SimpdivParams(void);
 };
