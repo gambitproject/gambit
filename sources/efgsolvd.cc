@@ -115,11 +115,13 @@ void dialogEfgSolveStandard::OnChanged(void)
 	}
 	else {
 	  m_description->SetValue("SimpdivSolve[NFG]");
-	  m_precision->Enable(TRUE);
+	  m_precision->SetSelection(0);
+	  m_precision->Enable(FALSE);
 	}
       }
       else {
 	m_description->SetValue("QreSolve[EFG]");
+	m_precision->SetSelection(0);
 	m_precision->Enable(FALSE);
       }
       break;
@@ -130,16 +132,18 @@ void dialogEfgSolveStandard::OnChanged(void)
       }
       else {
 	m_description->SetValue("LiapSolve[EFG]");
+	m_precision->SetSelection(0);
 	m_precision->Enable(FALSE);
       }
       break;
     case 2:
       if (m_efg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(FALSE);
+	m_precision->Enable(TRUE);
       }
       else {
 	m_description->SetValue("LiapSolve[EFG]");
+	m_precision->SetSelection(0);
 	m_precision->Enable(FALSE);
       }
       break;
@@ -149,7 +153,8 @@ void dialogEfgSolveStandard::OnChanged(void)
     switch (m_standardNum->GetSelection()) {
     case 0:
       m_description->SetValue("QreSolve[EFG]");
-      m_precision->Enable(TRUE);
+      m_precision->SetSelection(0);
+      m_precision->Enable(FALSE);
       break;
     case 1:
     case 2:
@@ -159,6 +164,7 @@ void dialogEfgSolveStandard::OnChanged(void)
       }
       else {
 	m_description->SetValue("LiapSolve[EFG]");
+	m_precision->SetSelection(0);
 	m_precision->Enable(FALSE);
       }
       break;

@@ -106,13 +106,19 @@ void dialogNfgSolveStandard::OnChanged(void)
   case 0:
     switch (m_standardNum->GetSelection()) {
     case 0:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) 
+      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
 	m_description->SetValue("LpSolve");
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg))
+	m_precision->Enable(TRUE);
+      }
+      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
 	m_description->SetValue("LcpSolve");
-      else
+	m_precision->Enable(TRUE);
+      }
+      else {
 	m_description->SetValue("SimpdivSolve");
-      m_precision->Enable(TRUE);
+	m_precision->Enable(FALSE);
+	m_precision->SetSelection(0);
+      }
       break;
     case 1:
     case 2:
@@ -122,6 +128,7 @@ void dialogNfgSolveStandard::OnChanged(void)
       }
       else {
 	m_description->SetValue("LiapSolve");
+	m_precision->SetSelection(0);
 	m_precision->Enable(FALSE);
       }
       break;
@@ -131,13 +138,19 @@ void dialogNfgSolveStandard::OnChanged(void)
   case 1:
     switch (m_standardNum->GetSelection()) {
     case 0:
-      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) 
+      if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
 	m_description->SetValue("LpSolve");
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg))
+	m_precision->Enable(TRUE);
+      }
+      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
 	m_description->SetValue("LcpSolve");
-      else
+	m_precision->Enable(TRUE);
+      }
+      else {
 	m_description->SetValue("SimpdivSolve");
-      m_precision->Enable(TRUE);
+	m_precision->Enable(FALSE);
+	m_precision->SetSelection(0);
+      }
       break;
     case 1:
       if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) 
