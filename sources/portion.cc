@@ -2,7 +2,7 @@
 //# FILE: portion.cc -- implementation of Portion base and descendent classes
 //#                     companion to GSM
 //#
-//# $Id$
+//# @(#)portion.cc	1.154 12/17/96
 //#
 
 
@@ -286,7 +286,7 @@ void NullPortion::Output(gOutput& s) const
 
 gString NullPortion::OutputString( void ) const
 {
-  return (gString) "Null(" + PortionSpecToText(_DataType) + ')';
+  return (gString) "Null(" + PortionSpecToText(_DataType) + ")";
 }
 
 Portion* NullPortion::ValCopy(void) const
@@ -550,7 +550,7 @@ gString TextPortion::OutputString( void ) const
     }
 
   if(_WriteQuoted) 
-    text = (gString) '\"' + text + '\"';
+	 text = (gString) '\"' + text + "\"";
   return text;
 }
 

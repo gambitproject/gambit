@@ -960,7 +960,7 @@ void GCLCompiler::LoadInputs( void )
   const char SLASH = '/';
   const char SOURCE[] = "/usr/local/lib/gambit";
 #elif defined __BORLANDC__
-  const char SLASH = '\\';
+  const char * SLASH = "\\";
   extern char* _SourceDir;
   const char* SOURCE = _SourceDir;
 #endif   // __GNUG__
