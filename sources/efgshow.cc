@@ -5,6 +5,7 @@
 //
 
 #include "wx/wx.h"
+#include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
 #include "wx/printdlg.h"
@@ -219,10 +220,24 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   m_treeWindow = new TreeWindow(this, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
 
-  m_cursorWindow = new EfgCursorWindow(this, m_nodeSashWindow);
+  wxNotebook *notebook = new wxNotebook(m_nodeSashWindow, -1);
+
+  m_cursorWindow = new EfgCursorWindow(this, notebook);
   m_cursorWindow->Set(m_treeWindow->Cursor());
   m_cursorWindow->SetSize(200, 200);
-  m_cursorWindow->Show(false);
+  notebook->AddPage(m_cursorWindow, "Cursor");
+
+  wxPanel *outcomePanel = new wxPanel(notebook, -1);
+  (void) new wxStaticText(outcomePanel, -1, 
+			  "Hi!  I'm going to be the outcome window");
+  notebook->AddPage(outcomePanel, "Outcomes");
+
+  wxPanel *supportPanel = new wxPanel(notebook, -1);
+  (void) new wxStaticText(supportPanel, -1,
+			  "Hi!  I'm going to be the support window");
+  notebook->AddPage(supportPanel, "Supports");
+  notebook->SetSelection(0);
+
   m_nodeSashWindow->Show(false);
 
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
