@@ -1,6 +1,6 @@
 // File: wxstatus.cc -- class to implement progress indication/cancel feature
 // for the gambit algorithms in the gui.
-// $Id$
+// @(#)wxstatus.cc	1.3 7/18/95
 #include <assert.h>
 #include "wxstatus.h"
 char tmp_str[200];

@@ -8,12 +8,7 @@
 #ifndef EFGCONST_H
 #define EFGCONST_H
 
-#define FILE_NEW								1000
-#define FILE_NEW_NFG						1001
-#define	FILE_NEW_EFG						1002
-#define FILE_LOAD								1010
 #define FILE_SAVE								1020
-#define FILE_QUIT								1030
 #define FILE_OUTPUT							1040
 #define	FILE_CLOSE							1050
 
@@ -27,19 +22,14 @@
 #define NODE_DELETE							1108
 #define NODE_INSERT							1109
 #define NODE_LABEL							1110
-#define NODE_PROBS							1111
 #define NODE_SET_MARK   				1112
 #define NODE_GOTO_MARK  				1113
 #define	NODE_SUBGAME						1114
-#define	NODE_SWITCH_PLAYER			1115
 
-#define BRANCH_LABEL_LABEL      1201
-#define BRANCH_LABEL_DIALOG     1202
-#define BRANCH_INSERT_NUMBRCH   1203
-#define BRANCH_INSERT_DIALOG    1204
-#define BRANCH_DELETE						1205
-#define BRANCH_INSERT						1206
-#define BRANCH_LABEL						1207
+#define ACTION_DELETE						1205
+#define ACTION_INSERT						1206
+#define ACTION_LABEL						1207
+#define ACTION_PROBS						1208
 
 #define TREE_LABEL_LABEL				1300
 #define TREE_LABEL_DIALOG				1301
@@ -56,7 +46,6 @@
 #define INFOSET_BREAK						1401
 #define INFOSET_JOIN						1402
 #define	INFOSET_LABEL						1403
-#define INFOSET_ACTION_LABEL		1404
 #define INFOSET_SWITCH_PLAYER		1405
 
 #define SOLVE_SOLVE							1501
@@ -77,7 +66,15 @@
 #define DISPLAY_LOAD_CUSTOM			1608
 #define DISPLAY_REDRAW					1611
 
-#define	HELP_GAMBIT							1700
-#define HELP_ABOUT							1701
+// Help system
+#define	EFG_GUI_HELP				"Extensive Form GUI"
+#define EFG_OUTCOME_HELP		"Outcomes GUI"
+#define EFG_ACTION_HELP			"Action Menu"
+#define	EFG_NODE_HELP				"Node Menu"
+#define EFG_INFOSET_HELP		"Infoset Menu"
+#define EFG_TREE_HELP				"Tree Menu"
+#define EFG_SOLVE_HELP			"Extensive Form Solutions"
+#define EFG_INSPECT_HELP		"Extensive Solutions Inspect"
+#define NFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
 
 #endif

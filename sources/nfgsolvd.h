@@ -9,6 +9,9 @@
 #define	SD_ALGORITHM 	2
 #define SD_INSPECT 		3
 
+#ifndef NFG_SOLVE_HELP	// if this is included in efgsolvd.h, we do not need it
+#define NFG_SOLVE_HELP	""
+#endif
 // solution module constants.  Do not change the order.  Add new ones
 // just before NFG_NUM_SOLUTIONS.
 typedef enum {NFG_NO_SOLUTION=-1,NFG_PURENASH_SOLUTION,NFG_LEMKE_SOLUTION,
@@ -54,6 +57,18 @@ private:
 	NfgSolutionT algorithm;
 	int result,extensive;
 	gList<int> solns;
+// Static event handlers
+	static void solve_button_func(wxButton &ob,wxEvent &ev)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SOLVE);}
+	static void inspect_button_func(wxButton &ob,wxEvent &ev)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_INSPECT);}
+	static void cancel_button_func(wxButton &ob,wxEvent &ev)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
+	static void help_button_func(wxButton &ob,wxEvent &ev)
+	{wxHelpContents(NFG_SOLVE_HELP);}
+	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &ev)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
+
 public:
 // Constructor
 	NfgSolveParamsDialog(const gList<int> &got_solns,int have_efg,int num_players,wxWindow *parent=0):solns(got_solns)
@@ -71,6 +86,7 @@ public:
 		inspect_button->SetClientData((char *)this);
 		wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
+		new wxButton(d,(wxFunction)help_button_func,"?");
 		OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);
@@ -90,30 +106,9 @@ public:
 		inspect_button->Enable(solns.Contains(nfg_algorithm_box->GetSelection()));
 	}
 	}
-// Data access
+	// Data access
 	NfgSolutionT GetAlgorithm(void) {return algorithm;}
 	int GetResult(void) {return result;}
 	int GetExtensive(void) {return extensive;}
-// Static event handlers
-	static void solve_button_func(wxButton &ob,wxEvent &ev)
-	{
-		NfgSolveParamsDialog *parent=(NfgSolveParamsDialog *)ob.GetClientData();
-		parent->OnEvent(SD_SOLVE);
-	}
-	static void inspect_button_func(wxButton &ob,wxEvent &ev)
-	{
-		NfgSolveParamsDialog *d=(NfgSolveParamsDialog *)ob.GetClientData();
-		d->OnEvent(SD_INSPECT);
-	}
-	static void cancel_button_func(wxButton &ob,wxEvent &ev)
-	{
-		NfgSolveParamsDialog *d=(NfgSolveParamsDialog *)ob.GetClientData();
-		d->OnEvent(SD_CANCEL);
-	}
-	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &ev)
-	{
-		NfgSolveParamsDialog *d=(NfgSolveParamsDialog *)ob.GetClientData();
-		d->OnEvent(SD_ALGORITHM);
-	}
 };
 

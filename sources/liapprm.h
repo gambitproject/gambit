@@ -1,3 +1,6 @@
+// File: liapprm.h -- definition of the parameter dialog for the liap
+// algorithm
+// $Id$
 #ifndef LIAPPRM_H
 #define LIAPPRM_H
 #include "algdlgs.h"

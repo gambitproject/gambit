@@ -1,6 +1,6 @@
 // File: wxstatus.h -- definition of the class to implement progress 
 // indication/cancel feature for the gambit algorithms in the gui.
-// $Id$
+// @(#)wxstatus.h	1.6 7/18/95
 #include "wx.h"
 #include "gstatus.h"
 class wxStatus: public wxFrame,public gStatus

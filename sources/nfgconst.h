@@ -8,10 +8,20 @@
 #define NFG_SOLVE_INSPECT_MENU			101
 #define NFG_SOLVE_PAYOFF_MENU				102 // this is not a real menu=DoubleClick
 #define	NFG_SOLVE_REMOVE_MENU				103
+#define NFG_SOLVE_COMPRESS_MENU			104
 
 #define NFG_DISPLAY_COLORS					200
 #define NFG_DISPLAY_OPTIONS					201
 #define NFG_DISPLAY_ACCELS					202
 
 #define NFG_FILE_SAVE								250
+
+// Help system
+#define NFG_GUI_HELP							"Normal Form GUI"
+#define NFG_FEATURES_HELP					"Normal Form Features"
+#define NFG_SOLVE_HELP						"Normal Form Solutions"
+#define NFG_INSPECT_HELP					"Normal Solutions Inspect"
+#define NFG_ELIMDOM_INSPECT_HELP	"Elimdom Solutions Inspect"
+#define NFG_SOLVE_INSPECT_HELP		"Elimdom Solutions"
+#define NFG_SOLVE_INSPECT_OPTIONS_HELP	"Normal Form Inspect Options"
 #endif

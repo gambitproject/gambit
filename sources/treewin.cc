@@ -16,7 +16,7 @@
 
 
 template <class T>
-char *OutcomeToString(const gVector<T> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE)
+char *OutcomeToString(const gVector<T> &v,const TreeDrawSettings &draw_settings)
 {
 static gString gvts;
 gvts="(";
@@ -24,10 +24,12 @@ ToStringPrecision(2);
 for (int i=v.First();i<=v.Last();i++)
 {
 	if (i!=1) gvts+=",";
-	if (color_coded) gvts+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
+	if (draw_settings.ColorCodedOutcomes())
+		gvts+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
 	gvts+=ToString(v[i]);
 }
-gvts+=')';
+if (draw_settings.ColorCodedOutcomes()) gvts+=("\\C{"+ToString(WX_COLOR_LIST_LENGTH-1)+"}");
+gvts+=")";
 
 return (char *)gvts;
 }
@@ -100,7 +102,7 @@ return "";
 // If save_now is true, we just update the outcome data in the extensive
 // form, but do not delete the dialog
 #include "outcomed.h"
-template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,bool save_now)
+template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,int save_num)
 {
 int i,j,out=1;
 static OutcomeDialog *outcome_dialog=0;
@@ -115,13 +117,12 @@ if (!outcome_dialog)	// creating a new one
 	int cols=num_players;
 	// figure out the # of this outcome
 	if (out_name!=gString())
-		for (i=1;i<=num_players;i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
+		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 	// create the dialog
 
 	outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
 	for (i=1;i<=num_players;i++)
 		outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
-	outcome_dialog->SetType(1,cols+1,gSpreadStr);
 	old_names=gBlock<gString>(ef.NumOutcomes());
 	for (i=1;i<=ef.NumOutcomes();i++)
 	{
@@ -135,7 +136,7 @@ if (!outcome_dialog)	// creating a new one
 	outcome_dialog->Show(TRUE);
 	return;
 }
-else	// either going to a new one by clicking on an outcome or closing it
+else	// either going to a new one by clicking on an outcome, closing, or saving
 {
 	if (out_name!="")	// setting a new row
 	{
@@ -143,27 +144,29 @@ else	// either going to a new one by clicking on an outcome or closing it
 		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 		outcome_dialog->SetCurRow(out);return;
 	}
-	else	// this is an OK/Cancel action
+	else	// this is an OK, or it is a save action
 	{
-		if (outcome_dialog->Completed()==wxOK || save_now)
+		if (save_num)	// save action
 		{
 			T dummy;
-			// if we are just updating, make sure to save any changes to old_names.
-			// note that this assumes that we can not delete outcomes
-			if (save_now && outcome_dialog->GetRows()-1>ef.NumOutcomes())
-				old_names+=gBlock<gString>(outcome_dialog->GetRows()-1-ef.NumOutcomes());
-			for (i=1;i<=outcome_dialog->GetRows()-1;i++)
+			// if a new row was created, append an entry to old_names.
+			if (save_num>ef.NumOutcomes()) old_names+=gString();
+			OutcomeVector<T> *tmp=(save_num>ef.NumOutcomes()) ? ef.NewOutcome() : ef.GetOutcome(old_names[save_num]);
+			if (tmp)
 			{
-				Outcome *tmp=(ef.NumOutcomes()<i) ? tmp=ef.NewOutcome() : ef.GetOutcome(old_names[i]);
 				for (j=1;j<=num_players;j++)
-					(*(OutcomeVector<T> *)tmp)[j]=FromString(outcome_dialog->GetCell(i,j),dummy);
-				if (outcome_dialog->EnteredCell(i,j) && outcome_dialog->GetCell(i,j)!="")
-					tmp->SetName(outcome_dialog->GetCell(i,j));
-				if (save_now) old_names[i]=tmp->GetName();
+						(*tmp)[j]=FromString(outcome_dialog->GetCell(save_num,j),dummy);
+				if (!outcome_dialog->EnteredCell(save_num,j) || outcome_dialog->GetCell(save_num,j)=="")
+				{
+					outcome_dialog->SetCell(save_num,num_players+1,"Outcome "+ToString(save_num));
+					outcome_dialog->OnPaint();
+				}
+				tmp->SetName(outcome_dialog->GetCell(save_num,num_players+1));
+				old_names[save_num]=tmp->GetName();
+				OnPaint();
 			}
-      OnPaint();
 		}
-		if (!save_now)
+		else	// OK action
 		{
 			delete outcome_dialog;
 			outcome_dialog=0;
@@ -177,7 +180,7 @@ else	// either going to a new one by clicking on an outcome or closing it
 //***********************************************************************
 #define ENTRIES_PER_ROW	8
 
-template<class T> void TreeWindow<T>::node_probs(void)
+template<class T> void TreeWindow<T>::action_probs(void)
 {
 Node *n=cursor;
 int 	i,num_children=n->NumChildren();
@@ -233,10 +236,10 @@ if (s)
 	#define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
 TEMPLATE class TreeWindow<double> ;
-TEMPLATE char *OutcomeToString(const gVector<double> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
+TEMPLATE char *OutcomeToString(const gVector<double> &v,const TreeDrawSettings &draw_settings);
 
 #ifdef GRATIONAL
 	TEMPLATE class TreeWindow<gRational> ;
-	TEMPLATE char *OutcomeToString(const gVector<gRational> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
+	TEMPLATE char *OutcomeToString(const gVector<gRational> &v,const TreeDrawSettings &draw_settings);
 #endif
 

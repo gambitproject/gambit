@@ -7,6 +7,7 @@ private:
 	int		branches;
 	char	*player_name;
 	char	*iset_name;
+	Bool	set_names;
 	// keep track of the panel items
 	wxChoice	*player_item;
 	wxChoice	*iset_item;
@@ -29,12 +30,14 @@ public:
 	Player 			*GetPlayer(void);
 	Infoset 		*GetInfoset(void);
 	int					GetBranches(void);
+	Bool				SetNames(void) const;
 };
 
 //************************************** CONSTRUCTOR **************************
 NodeAddDialog::NodeAddDialog(BaseExtForm &ef_,Player *player,Infoset *infoset,int branches_,wxFrame *frame)
-						:MyDialogBox(frame,"Add Node"),ef(ef_),branches(branches_)
+						:MyDialogBox(frame,"Add Node",EFG_NODE_HELP),ef(ef_),branches(branches_)
 {
+set_names=TRUE;
 wxStringList *player_list=new wxStringList;player_name=new char[20];
 player_list->Add("Chance");
 for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.PlayerList()[i])->GetName());
@@ -50,6 +53,8 @@ infoset_list->Add("New");
 if (infoset) strcpy(iset_name,infoset->GetName()); else strcpy(iset_name,"New");
 wxFormItem *iset_fitem=Add(wxMakeFormString("Iset", &iset_name, wxFORM_CHOICE,
 			new wxList(wxMakeConstraintStrings(infoset_list),0)));
+Add(wxMakeFormNewLine());
+Add(wxMakeFormBool("Set names",&set_names));
 AssociatePanel();
 player_item=(wxChoice *)player_fitem->GetPanelItem();
 player_item->Callback((wxFunction)player_func);
@@ -104,10 +109,11 @@ else
 	return 0;
 }
 
-int NodeAddDialog::GetBranches()
-{
-return branches;
-}
+int NodeAddDialog::GetBranches(void)
+{return branches;}
+
+Bool NodeAddDialog::SetNames(void) const
+{return set_names;}
 //***************************** EVENT HANDLERS-HIGH LEVEL *********************
 void NodeAddDialog::OnPlayer(const char *name)
 {

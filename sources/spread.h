@@ -53,7 +53,13 @@
 // OnMenuCommand, OnCharNew (this receives events from the active canvas),
 // OnSize, OnOk, OnCancel, OnDoubleClick (Ctrl-Click in X), and some others.
  
-// @(#)spread.h	1.5 7/4/95
+// Note: on some platforms (msw,motif?), after any item on the panel has been
+// accessed, the keyboard focus switches to the panel.  This can cause
+// undesirable behavior (i.e. can not enter data, arrow keys do not work). It
+// is advisable to call CanvasFocus member after processing any panel item
+// events.
+
+// $Id$
 
 #ifndef	SPREAD_H
 #define	SPREAD_H
@@ -143,6 +149,7 @@ private:
 	int			panel_size;
 	Bool		scrolling;
 	Bool		vert_fit,horiz_fit,show_labels,col_dim_char;
+	Bool		gtext;
 	int			labels;
 	wxFont	*data_font;
 	wxFont  *label_font;
@@ -164,7 +171,7 @@ public:
 	void SetParent(SpreadSheet3D *_parent) {parent=_parent;}
 	// Inform the class that a new column was added.
   void SetDimensions(int rows,int cols); // only the col info is used now.
-	void AddCol(void) {col_width.Append(DEFAULT_COL_WIDTH);}
+	void AddCol(int col=0) {col_width.Insert(DEFAULT_COL_WIDTH,((col) ? col :col_width.Length()+1));}
 	// Data Access, Get* functions
 		// These functions control the dimentions of each cell i.e. Width X Height
 	int	GetRowHeight(void)	{return ((vert_fit) ? (th+2*TEXT_OFF) : row_height);}
@@ -193,6 +200,8 @@ public:
 	void		SetPanelSize(int _s)	{panel_size=_s;}
 		// Updates font information after change/on init
 	void		UpdateFontSize(float w=-1,float h=-1);
+		// Are we to use the color-capable gtext or the plain text
+	Bool		UseGText(void) const {return gtext;}
 		// Set* functions
 	void	SetRowHeight(int _r)	{row_height=_r;}
 	void	SetColWidth(int	_c,int col=0);
@@ -208,6 +217,7 @@ public:
 	void	SetLabels(int _l)			{labels=_l;}
 	void	SetXStart(int _x)			{x_start=_x;}
 	void	SetYStart(int _y)			{y_start=_y;}
+	void	SetGText(Bool g)			{gtext=g;}
 };
 
 //********************* SPREAD SHEET CANVAS *******************************
@@ -351,8 +361,8 @@ public:
 	void GetLabelExtent(char *str,float *x,float *y)	{sheet->GetLabelExtent(str,x,y);}
 	void GetDataExtent(float *x,float *y,const char *str="W")	{sheet->GetDataExtent(x,y,str);}
 	// Row/Col manipulation
-	void AddRow(void);
-	void AddCol(void);
+	void AddRow(int row=0);
+	void AddCol(int col=0);
 	void DelRow(int row);
 	void DelCol(int col);
 	// Data access stuff for the canvas
@@ -431,12 +441,19 @@ private:
 	gString								label;
 	void	SavePanelPos(void)	{panel->GetCursor(&panel_x,&panel_y);}
 	void	MakeFeatures();
+	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
+	static void spread_ok_func(wxButton	&ob,wxEvent &ev);
+	static void spread_cancel_func(wxButton	 &ob,wxEvent &ev);
+	static void	spread_print_func(wxButton	 &ob,wxEvent &ev);
+	static void spread_change_func(wxButton  &ob,wxEvent &ev);
+	static void spread_options_func(wxButton &ob,wxEvent &ev);
+	static void spread_help_func(wxButton &ob,wxEvent &ev);
 protected:
 	wxPanel *Panel(void) {return panel;}
 	wxMenuBar *MenuBar(void) {return menubar;}
-	wxMenuBar *MakeMenuBar(void);
+	virtual wxMenuBar *MakeMenuBar(long menus);
 	void SetMenuBar(wxMenuBar *bar);
-	void MakeButtons(long buttons);
+	virtual void MakeButtons(long buttons);
 public:
 	// Constructor
 	SpreadSheet3D(int rows,int cols,int levels,char *title,
@@ -452,12 +469,6 @@ public:
 	void Update(wxDC *dc=NULL);
 	virtual void OnSize(int w,int h);
 	virtual void OnMenuCommand(int id);
-	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
-	static void spread_ok_func(wxButton	&ob,wxEvent &ev);
-	static void spread_cancel_func(wxButton	 &ob,wxEvent &ev);
-	static void	spread_print_func(wxButton	 &ob,wxEvent &ev);
-	static void spread_change_func(wxButton  &ob,wxEvent &ev);
-	static void spread_options_func(wxButton &ob,wxEvent &ev);
 	virtual void OnOk(void);
 	virtual void OnCancel(void);
 	virtual void OnDoubleClick(int row,int col,int level,const gString &value) { }
@@ -498,11 +509,11 @@ public:
 	int			GetCols(void)		{return data[cur_level].GetCols();}
 	// Row/Col/Level manipulation
 	void SetDimensions(int rows,int cols,int levels=0);  // Does nothing if current dimensions are given
-	void AddRow(void){for(int i=1;i<=levels;i++) data[i].AddRow();Redraw();}
-	void AddCol(void){for(int i=1;i<=levels;i++) data[i].AddCol();DrawSettings()->AddCol(); Redraw();}
-	void AddLevel(void);
-	void DelRow(int row=0){for(int i=1;i<=levels;i++) data[i].DelRow(row);Redraw();}
-	void DelCol(int col=0){for(int i=1;i<=levels;i++) data[i].DelCol(col);Redraw();}
+	void AddRow(int row=0) {for(int i=1;i<=levels;i++) data[i].AddRow(row);}
+	void AddCol(int col=0){for(int i=1;i<=levels;i++) data[i].AddCol(col);DrawSettings()->AddCol(col);}
+	void AddLevel(int level=0);
+	void DelRow(int row=0) {for(int i=1;i<=levels;i++) data[i].DelRow(row);}
+	void DelCol(int col=0) {for(int i=1;i<=levels;i++) data[i].DelCol(col);}
 	void DelLevel(void);
 	// Row/Column labeling
 	void		SetLabelRow(int row,const gString &s,int level=0);

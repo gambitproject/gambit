@@ -20,7 +20,7 @@ public:
 
 //************************************** CONSTRUCTOR **************************
 PlayerNamesDialog::PlayerNamesDialog(BaseExtForm &ef_,wxFrame *parent)
-												:ef(ef_),MyDialogBox(parent,"Player Names")
+												:ef(ef_),MyDialogBox(parent,"Player Names",EFG_TREE_HELP)
 {
 wxStringList *player_list=new wxStringList;char *player_name=new char[20];
 for (int i=1;i<=ef.NumPlayers();i++) player_list->Add((ef.PlayerList()[i])->GetName());

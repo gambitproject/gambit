@@ -35,9 +35,10 @@ class MyForm: public wxForm
 private:
 	MyDialogBox *parent;
 public:
-	MyForm(MyDialogBox *p);
+	MyForm(MyDialogBox *p,Bool help=FALSE);
 	void 	OnOk(void);
 	void 	OnCancel(void);
+	void 	OnHelp(void);
 };
 
 class MyDialogBox: public wxDialogBox
@@ -45,13 +46,16 @@ class MyDialogBox: public wxDialogBox
 private:
 	MyForm *form;
 	Bool completed;
+	char *help_str;
 public:
 	// Constructor
-	MyDialogBox(wxWindow *parent,char *title);
+	MyDialogBox(wxWindow *parent,char *title,const char *help_str=0);
 	// Destructor
 	~MyDialogBox(void);
 	// What was the result? wxOK/wxCANCEL
-	Bool		Completed(void);
+	Bool		Completed(void) const;
+	// Set the help string.
+	void		SetHelpString(const char *help_str);
 	// Access to private data, should be removed
 	MyForm 	*Form(void);
 	// Simulate a form here, w/ some additional features
@@ -59,10 +63,17 @@ public:
 	void		AssociatePanel(void)	{form->AssociatePanel(this);}
 	// Choose go to start up the dialog right away (calls associate panel by itself)
 	void	  Go(void);
-  // Choose Go1 if you have already called associate panel
+	// Choose Go1 if you have already called associate panel
 	void		Go1(void);
 	virtual void 		OnOk(void);
 	virtual void 		OnCancel(void);
+	virtual void		OnHelp(void);
+};
+
+class MyMessageBox: public MyDialogBox
+{
+public:
+	MyMessageBox(const char *message,const char *caption=0,const char *help_str=0,wxWindow *parent=0);
 };
 
 class FontDialogBox: public MyDialogBox
@@ -149,4 +160,10 @@ char *wxFindFile(const char *name);
 // OutputFile(base): returns a filename of the form baseXXX.out where XXX are consequtive
 // numbers in this dir.
 char *wxOutputFile(const char *name);
+
+// Functions to implement online help system.
+void wxInitHelp(const char *file_name,const char *help_about_str=0);
+void wxHelpContents(const char *name);
+void wxHelpAbout(const char *help_str=0);
+void wxKillHelp(void);
 #endif //WXMISC_H

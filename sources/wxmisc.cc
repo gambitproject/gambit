@@ -1,5 +1,6 @@
 #include "wx.h"
 #include "wx_form.h"
+#include "wx_help.h"
 #pragma hdr_stop
 #define WXMISC_C
 #include "wxmisc.h"
@@ -61,6 +62,37 @@ wxGetTempFileName(name,t_outfile);
 return copystring(FileNameFromPath(t_outfile));
 }
 
+// Help system functions.
+wxHelpInstance *help_instance = 0;
+void wxInitHelp(const char *name,const char *help_about_str)
+{
+if (!help_instance)
+{
+	help_instance = new wxHelpInstance(TRUE);
+	help_instance->Initialize((char *)name);
+}
+if (help_about_str) wxHelpAbout(help_about_str);
+}
+void wxHelpContents(const char *section)
+{
+help_instance->LoadFile();
+if (!section)
+	help_instance->DisplayContents();
+else
+	help_instance->KeywordSearch((char *)section);
+}
+void wxHelpAbout(const char *helpstr)
+{
+static char *help_str="Product based on wxWin";
+if (helpstr)	// init with a new string
+	help_str=strdup(helpstr);
+else
+	wxMessageBox(help_str,"Help About");
+}
+void wxKillHelp(void)
+{
+if (help_instance) {help_instance->Quit();delete help_instance;}
+}
 
 //***************************************************************************
 //                         SOME DIALOGS FOR WXWIN
@@ -70,36 +102,43 @@ return copystring(FileNameFromPath(t_outfile));
 
 // The basic dialog w/ a form
 // The Form
-MyForm::MyForm(MyDialogBox *p) : wxForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM), parent(p)
+MyForm::MyForm(MyDialogBox *p,Bool help) :
+wxForm(wxFORM_BUTTON_OK|wxFORM_BUTTON_CANCEL|((help) ? wxFORM_BUTTON_HELP : 0),wxFORM_BUTTON_AT_BOTTOM), parent(p)
 { }
-void MyForm::OnOk(void)
-{parent->OnOk();}
-void MyForm::OnCancel(void)
-{parent->OnCancel();}
+void MyForm::OnOk(void) {parent->OnOk();}
+void MyForm::OnCancel(void) {parent->OnCancel();}
+void MyForm::OnHelp(void) {parent->OnHelp();}
+
 //The dialog
-MyDialogBox::MyDialogBox(wxWindow *parent,char *title) :
-	wxDialogBox(parent,title,TRUE)
-{form=new MyForm(this); }
+MyDialogBox::MyDialogBox(wxWindow *parent,char *title,const char *hlp_str) :
+ wxDialogBox(parent,title,TRUE),help_str(0)
+{
+form=new MyForm(this,(hlp_str) ? TRUE : FALSE);
+if (hlp_str) help_str=copystring(hlp_str);
+}
 MyDialogBox::~MyDialogBox(void)
 {
 // @@ delete form;
+if (help_str) delete [] help_str;
 }
 
-Bool MyDialogBox::Completed(void)
-{return completed;}
-MyForm *MyDialogBox::Form(void)
-{return form;}
-void MyDialogBox::Go(void)
-{form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
-void MyDialogBox::Go1(void)
-{Fit();Centre();Show(TRUE);}
-void 	MyDialogBox::OnOk(void)
-{completed=wxOK;Show(FALSE);}
-void 	MyDialogBox::OnCancel(void)
-{completed=wxCANCEL;Show(FALSE);}
+Bool MyDialogBox::Completed(void) const {return completed;}
+MyForm *MyDialogBox::Form(void) {return form;}
+void MyDialogBox::Go(void) {form->AssociatePanel(this);Fit();Centre();Show(TRUE);}
+void MyDialogBox::Go1(void) {Fit();Centre();Show(TRUE);}
+void MyDialogBox::SetHelpString(const char *hlp_str)
+{if (help_str) delete [] help_str; help_str=0; if (hlp_str) help_str=copystring(hlp_str);}
+void MyDialogBox::OnOk(void) {completed=wxOK;Show(FALSE);}
+void MyDialogBox::OnCancel(void) {completed=wxCANCEL;Show(FALSE);}
+void MyDialogBox::OnHelp(void) {if (help_str) wxHelpContents(help_str);}
 
-
-
+// Implementation for a message box with help capability
+MyMessageBox::MyMessageBox(const char *message,const char *caption,const char *help_str,wxWindow *parent)
+: MyDialogBox(parent,(char *)caption,help_str)
+{
+Add(wxMakeFormMessage((char *)message));
+Go();
+}
 // Implementation for a font selector
 FontDialogBox::FontDialogBox(wxWindow *parent,wxFont *def) : MyDialogBox(parent,"Font Selection")
 {

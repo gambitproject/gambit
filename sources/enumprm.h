@@ -7,7 +7,7 @@
 class EnumSolveParamsDialog : public OutputParamsDialog
 {
 private:
-	int nequilib;
+	int stopAfter;
 	void SaveDefaults(void);
 public:
 	EnumSolveParamsDialog(wxWindow *parent=0);
@@ -20,10 +20,10 @@ EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Enum Params",parent)
 
 {
-nequilib=0;
-wxGetResource(PARAMS_SECTION,"Enum-Nequilib",&nequilib,defaults_file);
+stopAfter=0;
+wxGetResource(PARAMS_SECTION,"Enum-StopAfter",&stopAfter,defaults_file);
 
-Form()->Add(wxMakeFormShort("# Equilibria",&nequilib));
+Form()->Add(wxMakeFormShort("# Equilibria",&stopAfter));
 Form()->Add(wxMakeFormNewLine());
 
 // Now add the basic stuff
@@ -34,7 +34,7 @@ Go();
 void EnumSolveParamsDialog::SaveDefaults(void)
 {
 if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Enum-Nequilib",nequilib,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Enum-StopAfter",stopAfter,defaults_file);
 }
 
 EnumSolveParamsDialog::~EnumSolveParamsDialog(void)
@@ -42,7 +42,7 @@ EnumSolveParamsDialog::~EnumSolveParamsDialog(void)
 
 void EnumSolveParamsDialog::GetParams(EnumParams &P)
 {
-P.nequilib=nequilib;
+P.stopAfter=stopAfter;
 // Output stuff
 P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
 }

@@ -14,16 +14,18 @@ l_struct node_below_src[]={{"Nothing",		NODE_BELOW_NOTHING},
 l_struct branch_above_src[]={{"Nothing",	BRANCH_ABOVE_NOTHING},
 													 {"Label",			BRANCH_ABOVE_LABEL},
 													 {"Player",			BRANCH_ABOVE_PLAYER},
-													 {"Infoset",		BRANCH_ABOVE_INFOSET},
-                           {"Probs",			BRANCH_ABOVE_PROBS},
+													 {"Probs",			BRANCH_ABOVE_PROBS},
 													 {"",						LEGEND_END}};
 l_struct branch_below_src[]={{"Nothing",	BRANCH_BELOW_NOTHING},
 													 {"Label",			BRANCH_BELOW_LABEL},
 													 {"Player",			BRANCH_BELOW_PLAYER},
-													 {"Infoset",		BRANCH_BELOW_INFOSET},
 													 {"Probs",			BRANCH_BELOW_PROBS},
 													 {"",						LEGEND_END}};
 l_struct node_terminal_src[]={{"Nothing",	NODE_TERMINAL_NOTHING},
 													 {"Outcome",		NODE_TERMINAL_OUTCOME},
 													 {"Name",				NODE_TERMINAL_NAME},
+													 {"",						LEGEND_END}};
+l_struct node_right_src[]={{"Nothing",		NODE_RIGHT_NOTHING},
+													 {"Outcome",		NODE_RIGHT_OUTCOME},
+													 {"Name",				NODE_RIGHT_NAME},
 													 {"",						LEGEND_END}};

@@ -3,35 +3,28 @@
 //
 // @(#)gambit.cc	1.4 4/7/94
 //
- 
+
 #include "wx.h"
-#include "wx_help.h"
 #pragma hdrstop
-#include "zfortify.hpp"
-#include "efgconst.h"
 #include "gambit.h"
+#include "wxmisc.h"
 #include "normgui.h"
 #include "extgui.h"
 
-GambitFrame   *gambit_frame = NULL;
-wxHelpInstance *help_instance = NULL;
-wxList 		my_children;
-wxCursor *arrow_cursor;                             
-#ifdef _AIX                                                  
+#ifdef _AIX
 extern wxApp *wxTheApp=1;
-#endif                                                 
+#endif
 GambitApp gambitApp;
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
- 
+
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 wxFrame *GambitApp::OnInit(void)
-{                                         
-arrow_cursor = new wxCursor(wxCURSOR_ARROW);
-// Create the main frame window                                   
-gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
+{
+// Create the main frame window
+GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200, 100,wxMDI_PARENT | wxDEFAULT_FRAME);
 // Give it an icon
 wxIcon *frame_icon;
 #ifdef wx_msw
@@ -52,8 +45,8 @@ wxMenu *file_menu = new wxMenu;
 	file_menu->Append(FILE_LOAD,"&Open",									"Open a file");
 	file_menu->Append(FILE_QUIT, "&Quit",                	"Quit program");
 wxMenu *help_menu = new wxMenu;
-	help_menu->Append(HELP_GAMBIT,"&Contents",						"Table of contents");
-	help_menu->Append(HELP_ABOUT,"&About",								"About this program");
+	help_menu->Append(GAMBIT_HELP_CONTENTS,"&Contents",						"Table of contents");
+	help_menu->Append(GAMBIT_HELP_ABOUT,"&About",								"About this program");
 
 wxMenuBar *menu_bar = new wxMenuBar;
 menu_bar->Append(file_menu, "&File");
@@ -62,9 +55,12 @@ menu_bar->Append(help_menu,	"&Help");
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
 
+// Set up the help system
+wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
+
 gambit_frame->Show(TRUE);
 // Process command line arguments, if any
-if (argc>1) gambit_frame->file_load(argv[1]);
+if (argc>1) gambit_frame->LoadFile(argv[1]);
 
 // Return the main frame window
 return gambit_frame;
@@ -76,17 +72,17 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 {}
 
 //--------------------------------------------------------------------
-//              GAMBITFRAME: EVENT-HANDLING HOOK MEMBERS
+//              GAMBITFRAME: EVENT-HANDLING MEMBERS
 //--------------------------------------------------------------------
 
 //********************************************************************
 //                       FILE-LOAD MENU HANDLER
 //********************************************************************
 
-void GambitFrame::file_load(char *s)
+void GambitFrame::LoadFile(char *s)
 {
 if (!s) s=copystring(wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg"));
-if (s)
+if (strcmp(s,"")!=0)
 {
 	char *filename=FileNameFromPath(s);
 #ifndef EFG_ONLY
@@ -98,8 +94,8 @@ if (s)
 		{ExtensiveFormGUI(0,s,0,this);return;}
 #endif
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
-	delete [] s;
 }
+delete [] s;
 }
 
 //*******************************************************************
@@ -108,44 +104,24 @@ if (s)
 
 void GambitFrame::OnMenuCommand(int id)
 {
-	switch (id)  {
-		case FILE_QUIT:
-			OnClose();
-			delete this;
-			break;
-		case FILE_LOAD:
-			file_load();
-			break;
+	switch (id)
+	{
+		case FILE_QUIT: OnClose(); delete this;	break;
+		case FILE_LOAD:	LoadFile();	break;
 #ifndef EFG_ONLY
-		case FILE_NEW_NFG:
-			NormalFormGUI(0,gString(),0,this);
-			break;
+		case FILE_NEW_NFG: NormalFormGUI(0,gString(),0,this);	break;
 #endif
 #ifndef NFG_ONLY
-		case FILE_NEW_EFG:
-			ExtensiveFormGUI(0,gString(),0,this);
-			break;
+		case FILE_NEW_EFG: ExtensiveFormGUI(0,gString(),0,this); break;
 #endif
-		case HELP_ABOUT:
-			(void)wxMessageBox("Gambit -- Graphics User Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
-			break;
-		case HELP_GAMBIT:
-			if (help_instance==NULL)
-			{
-				help_instance = new wxHelpInstance(TRUE);
-				help_instance->Initialize("gambit");
-			}
-			help_instance->LoadFile("gambit");
-			help_instance->DisplayContents();
-			break;
-		default:
-			(void)wxMessageBox("Internal Error!\nContact the author\negrayver@cco.caltech.edu","Error");
-			break;
+		case GAMBIT_HELP_ABOUT:	wxHelpAbout(); break;
+		case GAMBIT_HELP_CONTENTS: wxHelpContents(GAMBIT_GUI_HELP);	break;
+		default: wxMessageBox("Internal Error!\nContact the author\negrayver@cco.caltech.edu","Error");	break;
 	}
 }
 
 Bool GambitFrame::OnClose()
 {
-	if (help_instance) help_instance->Quit();
+	wxKillHelp();
 	return TRUE;
 }

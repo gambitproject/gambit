@@ -33,6 +33,8 @@ private:
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
 	static void algorithm_box_func(wxRadioBox &ob,wxEvent &ev)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
+	static void help_button_func(wxButton &ob,wxEvent &ev)
+	{wxHelpContents(EFG_SOLVE_HELP);}
 	// Event handlers: high level
 	void OnEvent(int event)
 	{
@@ -73,6 +75,7 @@ public:
 		char *efg_algorithm_list[EFG_NUM_SOLUTIONS];
 		efg_algorithm_list[EFG_EGOBIT_SOLUTION]="eGobit";
 		efg_algorithm_list[EFG_ELIAP_SOLUTION]="eLiap";
+		efg_algorithm_list[EFG_SEQFORM_SOLUTION]="SeqForm";
 		efg_algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Efg Algorithms",-1,-1,-1,-1,EFG_NUM_SOLUTIONS,efg_algorithm_list,2);
 		efg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
@@ -93,6 +96,7 @@ public:
 		inspect_button->SetClientData((char *)this);
 		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
+		(void)new wxButton(d,(wxFunction)help_button_func,"?");
 		OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);

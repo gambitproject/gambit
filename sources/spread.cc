@@ -37,6 +37,7 @@ if (!LoadOptions())
 	vert_fit=TRUE;
 	data_font=wxTheFontList->FindOrCreateFont(11,wxMODERN,wxNORMAL,wxNORMAL);
 	label_font=wxTheFontList->FindOrCreateFont(12,wxMODERN,wxNORMAL,wxNORMAL);
+	gtext=TRUE;
 	SaveOptions();
 }
 
@@ -51,29 +52,30 @@ Bool labels_col=ColLabels(),labels_row=RowLabels();
 int horiz=col_width[1],vert=row_height;
 
 MyDialogBox *options_dialog=new MyDialogBox((wxWindow *)parent,"Options");
-options_dialog->Form()->Add(wxMakeFormMessage("Fonts"));
+options_dialog->Add(wxMakeFormMessage("Fonts"));
 wxFormItem *lfont_but=wxMakeFormButton("Label",(wxFunction)spread_options_lfont_func);
-options_dialog->Form()->Add(lfont_but);
+options_dialog->Add(lfont_but);
 wxFormItem *dfont_but=wxMakeFormButton("Data",(wxFunction)spread_options_dfont_func);
-options_dialog->Form()->Add(dfont_but);
-options_dialog->Form()->Add(wxMakeFormNewLine());
-options_dialog->Form()->Add(wxMakeFormMessage("Cell size"));
-options_dialog->Form()->Add(wxMakeFormNewLine());
-options_dialog->Form()->Add(wxMakeFormShort("Horiz",&horiz,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
-options_dialog->Form()->Add(wxMakeFormBool("char",&horiz_fit));
+options_dialog->Add(dfont_but);
+options_dialog->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormMessage("Cell size"));
+options_dialog->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormShort("Horiz",&horiz,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
+options_dialog->Add(wxMakeFormBool("char",&horiz_fit));
 wxStringList *column_list=new wxStringList;
 char *col_str=new char[10];
 column_list->Add("All");
 column_list=wxStringListInts(col_width.Length(),column_list);
-options_dialog->Form()->Add(wxMakeFormString("Col",&col_str,wxFORM_CHOICE,
+options_dialog->Add(wxMakeFormString("Col",&col_str,wxFORM_CHOICE,
 	new wxList(wxMakeConstraintStrings(column_list),0)));
-options_dialog->Form()->Add(wxMakeFormNewLine());
-options_dialog->Form()->Add(wxMakeFormShort("Vert",&vert,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
-options_dialog->Form()->Add(wxMakeFormBool("Fit to font",&vert_fit));
-options_dialog->Form()->Add(wxMakeFormNewLine());
-options_dialog->Form()->Add(wxMakeFormMessage("Show Labels"));
-options_dialog->Form()->Add(wxMakeFormBool("row",&labels_row));
-options_dialog->Form()->Add(wxMakeFormBool("col",&labels_col));
+options_dialog->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormShort("Vert",&vert,wxFORM_SLIDER,new wxList(wxMakeConstraintRange(0, 50), 0)));
+options_dialog->Add(wxMakeFormBool("Fit to font",&vert_fit));
+options_dialog->Add(wxMakeFormNewLine());
+options_dialog->Add(wxMakeFormMessage("Show Labels"));
+options_dialog->Add(wxMakeFormBool("row",&labels_row));
+options_dialog->Add(wxMakeFormBool("col",&labels_col));
+options_dialog->Add(wxMakeFormBool("Color Text",&gtext));
 options_dialog->Form()->Add(wxMakeFormNewLine());
 Bool save=FALSE;
 options_dialog->Form()->Add(wxMakeFormBool("Save now",&save));
@@ -129,20 +131,16 @@ wxWriteResource(sn,"Fit-Text-Horiz",horiz_fit,file_name);
 wxWriteResource(sn,"Show-Labels",show_labels,file_name);
 wxWriteResource(sn,"Data-Font",wxFontToString(data_font),file_name);
 wxWriteResource(sn,"Label-Font",wxFontToString(label_font),file_name);
+wxWriteResource(sn,"Use-GText",gtext,file_name);
 
 delete [] file_name;
 }
 
 int	SpreadSheetDrawSettings::LoadOptions(const char *s)
 {
-char *file_name;
 const char *sn="SpreadSheet3D";	// section name
-file_name=copystring((s) ? s : "gambit.ini");
-// now try finding this file in our path
-wxPathList *path_list=new wxPathList;
-path_list->AddEnvList("PATH");
-file_name=path_list->FindValidPath(file_name);
-if (file_name) file_name=copystring(file_name); else return 0;
+char *file_name=wxFindFile((s) ? s : "gambit.ini");
+if (!file_name) return 0;
 
 char *font_str=new char[100];
 wxGetResource(sn,"Row-Height",&row_height,file_name);
@@ -155,6 +153,7 @@ wxGetResource(sn,"Data-Font",&font_str,file_name);
 data_font=wxStringToFont(font_str);
 wxGetResource(sn,"Label-Font",&font_str,file_name);
 label_font=wxStringToFont(font_str);
+wxGetResource(sn,"Use-GText",&gtext,file_name);
 
 delete [] file_name;
 return 1;
@@ -456,9 +455,15 @@ dc.SetClippingRegion(MaxX(col-1)+TEXT_OFF,
 									draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF,
 									draw_settings->GetColWidth(col)-2*TEXT_OFF,
 									draw_settings->GetRowHeight()-2*TEXT_OFF);
+if (draw_settings->UseGText())	// use possibly colored text
 gDrawText(dc,sheet->GetValue(row,col),
-							MaxX(col-1)+TEXT_OFF,
-							draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+					MaxX(col-1)+TEXT_OFF,
+					draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+else
+gDrawText(dc,gPlainText(sheet->GetValue(row,col)),
+					MaxX(col-1)+TEXT_OFF,
+					draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+
 dc.DestroyClippingRegion();
 }
 
@@ -706,6 +711,8 @@ if (device==wxMEDIA_PS)
 	wxPostScriptDC dc_ps(NULL,TRUE);
 	if (dc_ps.Ok())
 	{
+		Bool gtext=draw_settings->UseGText();
+		draw_settings->SetGText(FALSE);
 		if (fit)
 			{draw_settings->SetRealWidth(MaxX());draw_settings->SetRealHeight(MaxY());}
 		dc_ps.StartDoc("");
@@ -713,6 +720,7 @@ if (device==wxMEDIA_PS)
 		Update(dc_ps);
 		dc_ps.EndPage();
 		dc_ps.EndDoc();
+		draw_settings->SetGText(gtext);
 	}
 }
 }
@@ -752,25 +760,26 @@ row_labels=gBlock<gString>(rows);
 col_labels=gBlock<gString>(cols);
 }
 
-void SpreadSheet::AddRow(void)
+void SpreadSheet::AddRow(int row)
 {
-int i;
+if (row==0) row=rows+1;
 // add a new row to the matrix
-data.AddRow((const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
+data.InsertRow(row,(const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
 // Copy the cell types from the previous row
-for (i=1;i<=cols;i++) data(rows+1,i).SetType(data(rows,i).GetType());
+for (int i=1;i<=cols;i++) data(rows+1,i).SetType(data(rows,i).GetType());
 // add a new entry to the row_labels
+row_labels.Insert((const gString)gString(),row);
 rows++;
-row_labels.Append((const gString)gString());
 }
 
-void SpreadSheet::AddCol(void)
+void SpreadSheet::AddCol(int col)
 {
+if (col==0) col=cols+1;
 // add a new column to the matrix
-data.AddColumn((const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
+data.InsertColumn(col,(const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
 // add a new entry to the col_labels
+col_labels.Insert((const gString)gString(),col);
 cols++;
-col_labels.Append((const gString)gString());
 }
 
 void SpreadSheet::DelRow(int row)
@@ -780,7 +789,7 @@ if (row==0) row=rows;
 // remove a row from the matrix
 data.RemoveRow(row);
 // remove an entry from the row_labels;
-row_labels.Remove(rows);
+row_labels.Remove(row);
 rows--;
 }
 
@@ -791,7 +800,7 @@ if (col==0) col=cols;
 // remove a column from the matrix
 data.RemoveColumn(col);
 // remove an entry from the col_labels
-col_labels.Remove(cols);
+col_labels.Remove(col);
 cols--;
 }
 
@@ -852,7 +861,7 @@ void SpreadSheet3D::MakeFeatures(void)
 {
 panel=0;
 MakeButtons(features&ALL_BUTTONS);
-SetMenuBar(MakeMenuBar());
+SetMenuBar(MakeMenuBar(features&ALL_MENUS));
 }
 
 void SpreadSheet3D::MakeButtons(long buttons)
@@ -879,6 +888,7 @@ if (buttons) // Create the panel
 	if (buttons&CANCEL_BUTTON) AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
 	if (buttons&PRINT_BUTTON) AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
 	if (buttons&OPTIONS_BUTTON) AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
+	if (buttons&HELP_BUTTON) AddButton("?",(wxFunction)SpreadSheet3D::spread_help_func);
 	if (buttons&CHANGE_BUTTON)
 	{
 		AddButtonNewLine();
@@ -944,6 +954,11 @@ void SpreadSheet3D::OnOk(void)
 	SetCompleted(wxOK);
 	Show(FALSE);
 }
+void	SpreadSheet3D::OnCancel(void)
+{
+	SetCompleted(wxCANCEL);
+	Show(FALSE);
+}
 
 void SpreadSheet3D::OnPrint(void)
 {
@@ -967,27 +982,16 @@ if (od.Completed()==wxOK)
 
 #pragma argsused		// turn off the ev not used message
 void	SpreadSheet3D::spread_print_func(wxButton	&ob,wxEvent &ev)
-{
-	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-	parent->OnPrint();
-}
+{((SpreadSheet3D *)ob.GetClientData())->OnPrint();}
 #pragma argsused		// turn off the ev not used message
 void	SpreadSheet3D::spread_cancel_func(wxButton	&ob,wxEvent &ev)
-{
-	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-	parent->OnCancel();
-}
-void	SpreadSheet3D::OnCancel(void)
-{
-	SetCompleted(wxCANCEL);
-	Show(FALSE);
-}
+{((SpreadSheet3D *)ob.GetClientData())->OnCancel();}
 #pragma argsused		// turn off the ev not used message
 void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &ev)
-{
-((SpreadSheet3D *)ob.GetClientData())->SetLevel(ob.GetValue());
-}
-
+{((SpreadSheet3D *)ob.GetClientData())->SetLevel(ob.GetValue());}
+#pragma argsused		// turn off the ev not used message
+void	SpreadSheet3D::spread_help_func(wxButton	&ob,wxEvent &ev)
+{((SpreadSheet3D *)ob.GetClientData())->OnHelp();}
 #pragma argsused		// turn off the ev not used message
 void	SpreadSheet3D::spread_change_func(wxButton	&ob,wxEvent &ev)
 {
@@ -1038,11 +1042,12 @@ level_item->SetClientData((char *)this);
 Redraw();
 }
 
-void SpreadSheet3D::AddLevel(void)
+void SpreadSheet3D::AddLevel(int level)
 {
-data.Append(SpreadSheet());
+if (level==0) level=levels+1;
+data.Insert(SpreadSheet(),level);
 levels++;
-data[levels].Init(data[1].GetRows(),data[1].GetCols(),levels,NULL,this);
+data[level].Init(data[1].GetRows(),data[1].GetCols(),levels,NULL,this);
 level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
 level_item->SetClientData((char *)this);
 Redraw();
@@ -1183,28 +1188,28 @@ menubar->Append(submenu,(char *)label);
 SetMenuBar(menubar);
 }
 */
-wxMenuBar *SpreadSheet3D::MakeMenuBar(void)
+wxMenuBar *SpreadSheet3D::MakeMenuBar(long menus)
 {
 wxMenuBar *tmp_menubar=0;
 //-------------------------------make menus----------------------------
-if (features&ALL_MENUS)
+if (menus)
 {
 	tmp_menubar=new wxMenuBar;
 	wxMenu *file_menu=0;
-	if (features&(OUTPUT_MENU|CLOSE_MENU)) file_menu=new wxMenu;
-	if (features&OUTPUT_MENU)
+	if (menus&(OUTPUT_MENU|CLOSE_MENU)) file_menu=new wxMenu;
+	if (menus&OUTPUT_MENU)
 		file_menu->Append(OUTPUT_MENU,"Out&put","Output to any device");
-	if (features&CLOSE_MENU)
+	if (menus&CLOSE_MENU)
 		file_menu->Append(CLOSE_MENU,"&Close","Exit");
 	if (file_menu) tmp_menubar->Append(file_menu,"&File");
 	wxMenu *display_menu=0;
-	if (features&(OPTIONS_MENU|CHANGE_MENU)) display_menu=new wxMenu;
-	if (features&OPTIONS_MENU)
+	if (menus&(OPTIONS_MENU|CHANGE_MENU)) display_menu=new wxMenu;
+	if (menus&OPTIONS_MENU)
 		display_menu->Append(OPTIONS_MENU,"&Options","Configure display options");
-	if (features&CHANGE_MENU)
+	if (menus&CHANGE_MENU)
 		display_menu->Append(CHANGE_MENU,"&Change","Change sheet dimensions");
 	if (display_menu) tmp_menubar->Append(display_menu,"&Display");
-	if (features&HELP_MENU)
+	if (menus&HELP_MENU)
 	{
 		wxMenu *help_menu=new wxMenu;
 		help_menu->Append(HELP_MENU_ABOUT,"&About");

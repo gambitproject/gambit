@@ -80,3 +80,44 @@ public:
 
 };
 
+class ElimDomInspectDialog:public MyDialogBox
+{
+private:
+	const BaseNormalForm &nf;
+	wxText *msg_item;
+	char *dom_strat_str;
+	wxStringList *dom_strat_list;
+	Bool compress;
+
+	static void sset_func(wxChoice &ob,wxEvent &ev)
+	{((ElimDomInspectDialog *)ob.GetClientData())->OnSset(ob.GetSelection()+1);}
+	void OnSset(int cur_sset)
+	{msg_item->SetValue(array_to_string(nf.Dimensionality(cur_sset)));}
+	static gString array_to_string(const gArray<int> &a)
+	{
+	gString tmp='(';
+	for (int i=1;i<=a.Length();i++) tmp+=ToString(a[i])+((i==a.Length()) ? ")" : ",");
+	return tmp;
+	}
+public:
+	ElimDomInspectDialog(const BaseNormalForm &nf_,int cur_sset,wxWindow *parent=0)
+		: MyDialogBox(parent,"ElimDomInspect Options"),nf(nf_)
+	{
+	msg_item=new wxText(this,0,"Dim:",array_to_string(nf.Dimensionality(cur_sset)),-1,-1,150,-1,wxREADONLY);
+	dom_strat_list=wxStringListInts(nf.NumStratSets());
+	dom_strat_str=new char[10];strcpy(dom_strat_str,ToString(cur_sset));
+	wxFormItem *sset_fitem=Add(wxMakeFormString("Strategy Set",&dom_strat_str,wxFORM_CHOICE,
+					new wxList(wxMakeConstraintStrings(dom_strat_list),0)));
+	compress=FALSE;
+	Add(wxMakeFormNewLine());
+	Add(wxMakeFormBool("Compress",&compress));
+	AssociatePanel();
+	wxChoice *sset_item=(wxChoice *)sset_fitem->GetPanelItem();
+	sset_item->SetClientData((char *)this);
+	sset_item->Callback((wxFunction)sset_func);
+	Go1();
+	}
+	// Data Access members
+	int 	Sset(void) {return (wxListFindString(dom_strat_list,dom_strat_str)+1);}
+	Bool 	Compress(void) {return compress;}
+};

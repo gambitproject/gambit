@@ -10,6 +10,7 @@
 #include "glist.h"
 #include "treedraw.h"
 #include "twflash.h"
+#include "efgconst.h"
 
 typedef struct NODEENTRY {
 		int x, y, level, color;
@@ -96,20 +97,22 @@ public:
 	void node_delete(void);
 	void node_set_mark(void);
 	void node_goto_mark(void);
-	void node_switch_player(void);
 	void node_outcome(int out);
 #ifdef SUBGAMES
 	void node_subgame(int _game);
 #endif
 
-	void branch_label(void);
-	void branch_insert(void);
-	void branch_delete(void);
+	void action_label(void);
+	void action_insert(void);
+	void action_delete(void);
+	virtual void action_probs(void) =0;
+
 	void tree_delete(void);
 	void tree_copy(void);
 	void tree_move(void);
 	void tree_label(void);
 	void tree_players(void);
+	virtual void tree_outcomes(const gString out_name=gString(),int save_num=0) =0;
 #ifdef SUBGAMES
 	void tree_subgames(void);
 	void tree_subgame_make(void);
@@ -122,7 +125,6 @@ public:
 	void infoset_break(void);
 	void infoset_join(void);
 	void infoset_label(void);
-  void infoset_action_label(void);
 	void infoset_switch_player(void);
 
 	void edit_outcome(void);
@@ -139,10 +141,7 @@ public:
 	void	print(wxOutputOption fit,bool preview=false);	// output to printer (WIN3.1 only)
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 
-// These menu handlers are type dependent and are defined in TreeWindow
 	virtual void	file_save(void) =0;
-	virtual void node_probs(void) =0;
-	virtual void tree_outcomes(const gString out_name=gString(),bool save_now=false) =0;
 
 	gString Title(void) const;
 
@@ -175,8 +174,8 @@ class TreeWindow : public BaseTreeWindow
 		~TreeWindow();
 
 		// Menu events
-		void tree_outcomes(const gString out_name=gString(),bool save_now=false);
-		void node_probs(void);
+		void tree_outcomes(const gString out_name=gString(),int save_num=0);
+		void action_probs(void);
 		void node_outcome(const gString out_name);
 		void file_save(void);
 
