@@ -60,12 +60,10 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
 template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S,
 				      const T &)
 {
-  int n1, n2, i;
-  n1=S.NumStrats(1);
-  n2=S.NumStrats(2);
+  int n1 = S.NumStrats(1);
   gVector<T> b1(1,n1);
 
-  for (i = 1; i <= n1; i++) 
+  for (int i = 1; i <= n1; i++) 
     b1[i]=-(T)1;
   return b1;
 }

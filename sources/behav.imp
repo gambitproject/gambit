@@ -508,7 +508,6 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
   for (int child = 1; child <= nc; child++)
     p_node->children[child]->scratch = p_node->scratch;
   
-  T newprob((T) 0);
   gVector<T> tmp(m_efg->NumPlayers());
   tmp = (T) 0;
   
@@ -534,7 +533,7 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
     
     for (int act = 1; act <= actions.Length(); act++)  {
       int childno = actions[act]->GetNumber();
-      newprob = (*this)(npl, p_node->node->infoset->number, act);
+      T newprob = (*this)(npl, p_node->node->infoset->number, act);
       CondPayoff(p_node->children[childno], p_prob * newprob,
 		 p_probs, p_payoff);
       

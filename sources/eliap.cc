@@ -158,7 +158,6 @@ bool Liap(const Efg &E, EFLiapParams &params,
 
   double value;
   int iter;
-  bool found;
 
   for (int i = 1; (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
@@ -171,7 +170,7 @@ bool Liap(const Efg &E, EFLiapParams &params,
     if(params.trace>0)
       *params.tracefile << "\nTry #: " << i << " p: ";
     
-    if (found = Powell(p, xi, F, value, iter,
+    if (Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, 
 		       params.tolN,*params.tracefile, params.trace-1, true, 
 		       params.status)) {
