@@ -243,6 +243,7 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
   m_maxitsND = 20;
   m_tol1D = 2.0e-10;
   m_tolND = 1.0e-10;
+  m_startOption = 0;
 }
 
 gList<BehavSolution> guiefgLiapEfg::Solve(void) const

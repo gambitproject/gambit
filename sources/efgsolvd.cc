@@ -4,57 +4,13 @@
 // $Id$
 //
 
-// Most of these probably aren't necessary... figure out which ones are!
-
 #include "wx.h"
 #include "wxmisc.h"
-#include "efg.h"
-#include "efgconst.h"
-#include "treewin.h"
-#include "efgshow.h"
-#include "efgsoln.h"
-#include "nfggui.h"
-#include "efgnfgi.h"
-#include "behavsol.h"
 
+#include "efg.h"
 #include "efgsolvd.h"
 
-//=========================================================================
-//               EfgSolveSettings: Private member functions
-//=========================================================================
-
-void EfgSolveSettings::Warn(const char *p_warning) 
-{
-  wxMessageBox((char *) p_warning, "Standard Solution");
-}
-
-//=========================================================================
-//              EfgSolveSettings: Constructor and destructor
-//=========================================================================
-
-EfgSolveSettings::EfgSolveSettings(const Efg &p_efg, bool p_solving /*= true*/)
-  : solving(p_solving), ef(p_efg)
-{
-  result = SD_SAVE;
-  defaults_file = "gambit.ini";
-  wxGetResource(SOLN_SECT, "Use-Nfg", &use_nfg, defaults_file);
-  char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
-  wxGetResource(SOLN_SECT,alg_sect,&algorithm,defaults_file);
-  wxGetResource(SOLN_SECT,"Efg-Nfg",&normal,defaults_file);
-  wxGetResource(SOLN_SECT,"Efg-Mark-Subgames",&subgames,defaults_file);
-  wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_solns,defaults_file);
-}
-
-EfgSolveSettings::~EfgSolveSettings()
-{
-  if (result != SD_CANCEL) {
-    wxWriteResource(SOLN_SECT,"Use-Nfg",use_nfg,defaults_file);
-    char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
-    wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
-    wxWriteResource(SOLN_SECT,"Efg-Nfg",normal,defaults_file);
-    wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
-  }
-}
+static const char *SOLN_SECT = "Soln-Defaults";
 
 //========================================================================
 //                dialogEfgSolveStandard: Member functions
@@ -111,13 +67,15 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 
 dialogEfgSolveStandard::~dialogEfgSolveStandard()
 {
-  gText defaultsFile("gambit.ini");
-  wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
-		  m_standardType->GetSelection(), defaultsFile);
-  wxWriteResource(SOLN_SECT, "Efg-Standard-Num",
-		  m_standardNum->GetSelection(), defaultsFile);
-  wxWriteResource(SOLN_SECT, "Efg-Standard-Precision",
-		  m_precision->GetSelection(), defaultsFile);
+  if (m_completed == wxOK) {
+    gText defaultsFile("gambit.ini");
+    wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
+		    m_standardType->GetSelection(), defaultsFile);
+    wxWriteResource(SOLN_SECT, "Efg-Standard-Num",
+		    m_standardNum->GetSelection(), defaultsFile);
+    wxWriteResource(SOLN_SECT, "Efg-Standard-Precision",
+		    m_precision->GetSelection(), defaultsFile);
+  }
 }
 
 void dialogEfgSolveStandard::OnOK(void)
@@ -208,7 +166,7 @@ void dialogEfgSolveStandard::OnChanged(void)
   }
 }
 
-guiStandardType dialogEfgSolveStandard::Type(void) const
+efgStandardType dialogEfgSolveStandard::Type(void) const
 {
   switch (m_standardType->GetSelection()) {
   case 0:
@@ -222,7 +180,7 @@ guiStandardType dialogEfgSolveStandard::Type(void) const
   }
 }
 
-guiStandardNum dialogEfgSolveStandard::Number(void) const
+efgStandardNum dialogEfgSolveStandard::Number(void) const
 {
   switch (m_standardNum->GetSelection()) {
   case 0:
