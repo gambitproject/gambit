@@ -28,57 +28,24 @@
 #include "mixed.imp"
 #include "base/glist.imp"
 
-template<>
-gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
-					     int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
-}
 
-template<>
-gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome,
-					  int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
-}
-
-template<>
-double gbtBehavProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
-{ 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
-}
-
-#if GBT_WITH_MP_FLOAT
-template<>
-gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtGameOutcome &p_outcome,
-					       int pl) const
-{
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
-}
-#endif // GBT_WITH_MP_FLOAT
+template class gbtBehavProfileBase<double>;
+template class gbtBehavProfileBase<gbtRational>;
+template class gbtBehavProfileBase<gbtNumber>;
 
 template class gbtBehavProfile<double>;
-template class gbtBehavAssessment<double>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<double> &);
 
 template class gbtBehavProfile<gbtRational>;
-template class gbtBehavAssessment<gbtRational>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<gbtRational> &);
 
 template class gbtBehavProfile<gbtNumber>;
-template class gbtBehavAssessment<gbtNumber>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<gbtNumber> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBehavAssessment<gbtNumber> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtBehavProfile<gbtMPFloat>;
-template class gbtBehavAssessment<gbtMPFloat>;
 template gbtOutput &operator<<(gbtOutput &, 
 			       const gbtBehavProfile<gbtMPFloat> &);
-template gbtOutput &operator<<(gbtOutput &,
-			       const gbtBehavAssessment<gbtMPFloat> &);
 #endif // GBT_WITH_MP_FLOAT
 
 template class gbtList<gbtBehavProfile<double> >;

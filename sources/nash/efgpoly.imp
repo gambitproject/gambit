@@ -449,7 +449,7 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
       if ( support.MayReach(infoset) ) {
 	for (int act = 1; act <= support.NumActions(infoset) - 1; act++) {
 	  count++;
-	  answer[count] = (gbtDouble)sol.GetActionProb(support.GetAction(infoset, act));
+	  answer[count] = (gbtDouble)sol->GetActionProb(support.GetAction(infoset, act));
 	}
       }
     }

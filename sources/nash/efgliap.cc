@@ -62,7 +62,7 @@ double EFLiapFunc::Value(const gbtVector<double> &v) const
   // Don't impose penalties in Lyapunov function; avoid this as
   // we go out of the feasible set in numerically computing the
   // derivative of the function.
-  return _p.LiapValue(false);
+  return _p->LiapValue(false);
 }
 
 //
@@ -110,15 +110,15 @@ bool EFLiapFunc::Gradient(const gbtVector<double> &x,
   ((gbtVector<double> &) _p).operator=(x);
   for (int i = 1; i <= x.Length(); i++) {
     _p[i] += DELTA;
-    double value = Value(_p.GetDPVector());
+    double value = Value(_p->GetDPVector());
     _p[i] -= 2.0 * DELTA;
-    value -= Value(_p.GetDPVector());
+    value -= Value(_p->GetDPVector());
     _p[i] += DELTA;
     grad[i] = value / (2.0 * DELTA);
   }
 
   // Project for constraints
-  Project(grad, x, _p.GetPVector().Lengths());
+  Project(grad, x, _p->GetPVector().Lengths());
 
   return true;
 }
@@ -127,13 +127,13 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.GetGame()->GetPlayer(pl)->NumInfosets();
+  for (int pl = 1; pl <= p->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= p->GetPlayer(pl)->NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p.GetSupport().NumActions(pl, iset); act++)  {
+      for (act = 1; act < p->GetSupport().NumActions(pl, iset); act++)  {
 	do
 	  tmp = Uniform();
 	while (tmp + sum > 1.0);
@@ -157,20 +157,20 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 {
   static const double ALPHA = .00000001;
 
-  gbtBehavProfile<double> p(p_support);
+  gbtBehavProfile<double> p = p_support.NewBehavProfile(0.0);
   EFLiapFunc F(p_support.GetTree(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk = 0;
-  for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
-  if (kk <= p.Length()) {
-    gbtBehavProfile<double> c(p_support);
-    for (int k = 1; k <= p.Length(); k++) {
+  for (int kk = 1; kk <= p->BehavProfileLength() && p[kk] > ALPHA; kk++);
+  if (kk <= p->BehavProfileLength()) {
+    gbtBehavProfile<double> c = p_support.NewBehavProfile(0.0);
+    for (int k = 1; k <= p->BehavProfileLength(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
     }
   }
 
-  gbtMatrix<double> xi(p.Length(), p.Length());
+  gbtMatrix<double> xi(p->BehavProfileLength(), p->BehavProfileLength());
 
   gbtList<BehavSolution> solutions;
   
@@ -183,10 +183,11 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 			   gbtText("Attempt ") + ToText(i) + 
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
-      gbtConjugatePRMinimizer minimizer(p.Length());
-      gbtVector<double> gradient(p.Length()), dx(p.Length());
+      gbtConjugatePRMinimizer minimizer(p->BehavProfileLength());
+      gbtVector<double> gradient(p->BehavProfileLength());
+      gbtVector<double> dx(p->BehavProfileLength());
       double fval;
-      minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
+      minimizer.Set(F, p->GetDPVector(), fval, gradient, .01, .0001);
 
       try {
 	for (int iter = 1; iter <= m_maxitsN; iter++) {
@@ -194,7 +195,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 	    p_status.Get();
 	  }
 	  
-	  if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	  if (!minimizer.Iterate(F, p->GetDPVector(), fval, gradient, dx)) {
 	    break;
 	  }
 

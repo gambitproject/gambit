@@ -33,7 +33,7 @@
 
 class BehavSolution {
 protected:
-  gbtBehavProfile<gbtNumber> *m_profile;
+  gbtBehavProfile<gbtNumber> m_profile;
   gbtPrecision m_precision;
   mutable gbtEfgSupport m_support;
   mutable gbtText m_creator;
@@ -78,13 +78,10 @@ public:
   gbtNumber operator[](const gbtGameAction &) const;
   gbtNumber &operator[](const gbtGameAction &);
 
-  BehavSolution &operator+=(const BehavSolution &);
-  BehavSolution &operator-=(const BehavSolution &);
-  BehavSolution &operator*=(const gbtNumber &);
-
   // GENERAL DATA ACCESS
   gbtGame GetGame(void) const { return m_profile->GetGame(); }
-  const gbtBehavProfile<gbtNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
+  const gbtBehavProfile<gbtNumber> &Profile(void) const
+  { CheckIsValid(); return m_profile; }
   gbtPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?

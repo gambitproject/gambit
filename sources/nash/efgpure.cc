@@ -76,7 +76,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
       }
 
       if (flag)  {
-	gbtBehavProfile<gbtNumber> temp(gbtEfgSupport(p_support.GetTree()));
+	gbtBehavProfile<gbtNumber> temp = p_support.GetTree()->NewBehavProfile(gbtNumber(0));
 	// zero out all the entries, since any equilibria are pure
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
 	const gbtEfgContingency &profile = citer.GetProfile();

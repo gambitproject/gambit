@@ -256,9 +256,7 @@ gbtGameAction gbtSfgGame::GetAction(int pl, int j) const
 
 gbtBehavProfile<gbtNumber> gbtSfgGame::ToBehav(const gbtPVector<double> &x) const
 {
-  gbtBehavProfile<gbtNumber> b(efsupp);
-
-  b = (gbtNumber) 0;
+  gbtBehavProfile<gbtNumber> b = efsupp.NewBehavProfile(gbtNumber(0));
 
   gbtSfgSequence *sij;
   const gbtSfgSequence *parent;

@@ -115,11 +115,12 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const gbtEfgSupport &p_support, const gbtVector<double> &p_point,
+static void QreLHS(const gbtEfgSupport &p_support,
+		   const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
-  gbtBehavProfile<double> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
+  gbtBehavProfile<double> profile = p_support.NewBehavProfile(0.0);
+  for (int i = 1; i <= profile->BehavProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
@@ -139,8 +140,8 @@ static void QreLHS(const gbtEfgSupport &p_support, const gbtVector<double> &p_po
       for (int act = 2; act <= p_support.NumActions(pl, iset); act++) {
 	p_lhs[++rowno] = log(profile(pl, iset, act) / profile(pl, iset, 1));
 	p_lhs[rowno] -= (lambda *
-			 (profile.GetActionValue(p_support.GetAction(pl, iset, act)) -
-			  profile.GetActionValue(p_support.GetAction(pl, iset, 1))));
+			 (profile->GetActionValue(p_support.GetAction(pl, iset, act)) -
+			  profile->GetActionValue(p_support.GetAction(pl, iset, 1))));
 	p_lhs[rowno] *= profile(pl, iset, 1) * profile(pl, iset, act);
       }
     }
@@ -151,8 +152,8 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 			const gbtVector<double> &p_point,
 			gbtMatrix<double> &p_matrix)
 {
-  gbtBehavProfile<double> profile(p_support);
-  for (int i = 1; i <= profile.Length(); i++) {
+  gbtBehavProfile<double> profile = p_support.NewBehavProfile(0.0);
+  for (int i = 1; i <= profile->BehavProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
@@ -204,18 +205,18 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 		}
 	      }
 	      else {   // infoset1 != infoset2
-		if (profile.GetIsetProb(infoset1) < 1.0e-10) {
+		if (profile->GetIsetProb(infoset1) < 1.0e-10) {
 		  p_matrix(colno, rowno) = 0;
 		}
 		else {
-		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.GetAction(pl1, iset1, act1), p_support.GetAction(pl2, iset2, act2)) - profile.DiffActionValue(p_support.GetAction(pl1, iset1, 1), p_support.GetAction(pl2, iset2, act2)));
+		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->DiffActionValue(p_support.GetAction(pl1, iset1, act1), p_support.GetAction(pl2, iset2, act2)) - profile->DiffActionValue(p_support.GetAction(pl1, iset1, 1), p_support.GetAction(pl2, iset2, act2)));
 		}
 	      }
 	    }
 	  }
 	}
 
-	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.GetActionValue(p_support.GetAction(pl1, iset1, act1)) - profile.GetActionValue(p_support.GetAction(pl1, iset1, 1)));
+	p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->GetActionValue(p_support.GetAction(pl1, iset1, act1)) - profile->GetActionValue(p_support.GetAction(pl1, iset1, 1)));
       }
     }
   }
@@ -236,17 +237,19 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   double h = .03;                  // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
-  for (int i = 1; i <= p_start.Length(); i++) {
+  gbtVector<double> x(p_start->BehavProfileLength() + 1);
+  gbtVector<double> u(p_start->BehavProfileLength() + 1);
+  for (int i = 1; i <= p_start->BehavProfileLength(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gbtVector<double> t(p_start.Length() + 1);
-  gbtVector<double> y(p_start.Length());
+  gbtVector<double> t(p_start->BehavProfileLength() + 1);
+  gbtVector<double> y(p_start->BehavProfileLength());
 
-  gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
-  gbtSquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.GetSupport(), x, b);
+  gbtMatrix<double> b(p_start->BehavProfileLength() + 1,
+		      p_start->BehavProfileLength());
+  gbtSquareMatrix<double> q(p_start->BehavProfileLength() + 1);
+  QreJacobian(p_start->GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -256,7 +259,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     if (x[i] < 1.0e-10) {
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      gbtEfgSupport newSupport(p_start.GetSupport());
+      gbtEfgSupport newSupport(p_start->GetSupport());
       int index = 1;
       for (int pl = 1; pl <= newSupport.NumPlayers(); pl++) {
 	gbtGamePlayer player = newSupport.GetPlayer(pl);
@@ -269,8 +272,8 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	}
       }
       
-      gbtBehavProfile<double> newProfile(newSupport);
-      for (int j = 1; j <= newProfile.Length(); j++) {
+      gbtBehavProfile<double> newProfile = newSupport.NewBehavProfile(0.0);
+      for (int j = 1; j <= newProfile->BehavProfileLength(); j++) {
 	if (j < i) {
 	  newProfile[j] = x[j];
 	}
@@ -318,7 +321,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     }
 
     double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.GetSupport(), u, b);
+    QreJacobian(p_start->GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -326,7 +329,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.GetSupport(), u, y);
+      QreLHS(p_start->GetSupport(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -381,7 +384,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtEfgSupport newSupport(p_start.GetSupport());
+	gbtEfgSupport newSupport(p_start->GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.NumPlayers(); pl++) {
 	  gbtGamePlayer player = newSupport.GetPlayer(pl);
@@ -394,8 +397,8 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	  }
 	}
 
-	gbtBehavProfile<double> newProfile(newSupport);
-	for (int j = 1; j <= newProfile.Length(); j++) {
+	gbtBehavProfile<double> newProfile = newSupport.NewBehavProfile(0.0);
+	for (int j = 1; j <= newProfile->BehavProfileLength(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
 	  }
@@ -416,7 +419,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     x[x.Length()] = u[u.Length()];
 
     gbtBehavProfile<double> foo(p_start);
-    for (int i = 1; i <= foo.Length(); i++) {
+    for (int i = 1; i <= foo->BehavProfileLength(); i++) {
       foo[i] = x[i];
     }
     p_solutions.Append(BehavSolution(foo, "Qre[EFG]"));
@@ -442,7 +445,7 @@ gbtList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
 					    gbtStatus &p_status)
 {
   gbtList<BehavSolution> solutions;
-  gbtBehavProfile<double> start(p_support);
+  gbtBehavProfile<double> start = p_support.NewBehavProfile(0.0);
 
   try {
     TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);

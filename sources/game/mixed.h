@@ -59,6 +59,8 @@ public:
   virtual T Payoff(int pl, int player1, int strat1, int player2, int strat2) const = 0;
   virtual void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const = 0;
 
+  virtual operator gbtBehavProfile<T>(void) const = 0;
+
   // The following implement the necessary gPVector-style operations
   // traditionally permitted on mixed profiles.
   virtual const T &operator()(int, int) const = 0;
@@ -116,8 +118,10 @@ public:
   const gbtMixedProfileRep<T> *operator->(void) const 
   { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
 
-
   gbtMixedProfileRep<T> *Get(void) const { return m_rep; }
+
+  operator gbtBehavProfile<T>(void) const 
+  { return (gbtBehavProfile<T>) *m_rep; }
 
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }

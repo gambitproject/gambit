@@ -61,7 +61,7 @@ BehavSolution PolishEquilibrium(const gbtEfgSupport &support,
 {
   EfgPolEnumParams params;
   EfgPolEnumModule<gbtDouble> module(support, params);
-  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(*(sol.Profile()));
+  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(sol.Profile());
   module.PolishKnownRoot(vec);
   return module.ReturnPolishedSolution(vec);
 }

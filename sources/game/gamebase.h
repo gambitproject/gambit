@@ -365,6 +365,10 @@ public:
   gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
   gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const;
 
+  gbtBehavProfile<double> NewBehavProfile(double) const;
+  gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const;
+  gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const;
+
   // EDITING OPERATIONS
   void DeleteEmptyInfosets(void);
 
@@ -569,6 +573,8 @@ public:
 
   gbtNfgSupport GetSupport(void) const   { return m_support; }
 
+  operator gbtBehavProfile<T>(void) const;
+
   const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
   T &operator()(int pl, int st) { return m_profile(pl, st); }
 
@@ -621,6 +627,8 @@ public:
   gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 
+template <class T> class gbtBehavProfileRep;
+
 template <class T>
 class gbtMixedProfileTree : public gbtMixedProfileRep<T> {
 private:
@@ -630,7 +638,7 @@ private:
 public:
   gbtMixedProfileTree(const gbtNfgSupport &);
   gbtMixedProfileTree(const gbtMixedProfileTree<T> &);
-  gbtMixedProfileTree(const gbtBehavProfile<T> &);
+  gbtMixedProfileTree(const gbtBehavProfileRep<T> &);
   virtual ~gbtMixedProfileTree() { }
 
   gbtMixedProfileTree<T> *Copy(void) const;
@@ -645,6 +653,8 @@ public:
   bool operator==(const gbtMixedProfileRep<T> &) const;
 
   gbtNfgSupport GetSupport(void) const   { return m_support; }
+
+  operator gbtBehavProfile<T>(void) const;
 
   const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
   T &operator()(int pl, int st) { return m_profile(pl, st); }
@@ -698,5 +708,214 @@ public:
   gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 
+
+template <class T> 
+class gbtBehavProfileBase : public gbtBehavProfileRep<T> {
+public:
+  gbtDPVector<T> m_profile;
+  gbtEfgSupport m_support;
+  mutable bool m_cached_data;
+
+  // structures for storing cached data: nodes
+  mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
+  mutable gbtMatrix<T> m_nodeValues;
+
+  // structures for storing cached data: information sets
+  mutable gbtPVector<T> m_infosetValues;
+
+  // structures for storing cached data: actions
+  mutable gbtDPVector<T> m_actionValues;   // aka conditional payoffs
+  mutable gbtDPVector<T> m_gripe;
+
+  void InitPayoffs(void) const;
+  void InitProfile(void);
+
+  //
+  // FUNCTIONS FOR DATA ACCESS
+  //
+  // NOTE: These functions all assume the cached data is up-to-date.
+  // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
+  
+  T &RealizProb(const gbtGameNode &node) const;
+  T &RealizProb(const gbtGameNode &node);
+
+  T &BeliefProb(const gbtGameNode &node) const;
+  T &BeliefProb(const gbtGameNode &node);
+  
+  gbtVector<T> NodeValues(const gbtGameNode &node) const
+    { return m_nodeValues.Row(node->GetId()); }
+  T &NodeValue(const gbtGameNode &node, int pl) const
+    { return m_nodeValues(node->GetId(), pl); }
+  T &NodeValue(const gbtGameNode &node, int pl)
+    { return m_nodeValues(node->GetId(), pl); }
+
+  T IsetProb(const gbtGameInfoset &iset) const;
+
+  T &IsetValue(const gbtGameInfoset &iset) const;
+  T &IsetValue(const gbtGameInfoset &iset);
+
+  T &ActionValue(const gbtGameAction &act) const 
+    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetId(),
+			    act->GetInfoset()->GetId(),
+			    act->GetId()); }
+  T &ActionValue(const gbtGameAction &act)
+    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetId(),
+			    act->GetInfoset()->GetId(),
+			    act->GetId()); }
+  
+  T ActionProb(const gbtGameAction &act) const;
+
+  T &Regret(const gbtGameAction &act) const;
+  T &Regret(const gbtGameAction &);
+
+  // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
+
+  void Payoff(const gbtGameNode &, T, int, T &) const;
+  T Payoff(const gbtGameOutcome &, int pl) const;
+  
+  void ComputeSolutionDataPass2(const gbtGameNode &node) const;
+  void ComputeSolutionDataPass1(const gbtGameNode &node) const;
+  void ComputeSolutionData(void) const;
+
+  void BehaviorStrat(const gbtGame &, int, const gbtGameNode &);
+  void RealizationProbs(const gbtMixedProfileTree<T> &,
+			int pl, const gbtArray<int> &, const gbtGameNode &);
+
+  class BadStuff : public gbtException  {
+  public:
+    virtual ~BadStuff();
+    gbtText Description(void) const;
+  };
+
+  // CONSTRUCTORS, DESTRUCTOR
+  gbtBehavProfileBase(const gbtEfgSupport &);
+  gbtBehavProfileBase(const gbtBehavProfileBase<T> &);
+  gbtBehavProfileBase(const gbtMixedProfileTree<T> &);
+  virtual ~gbtBehavProfileBase();
+
+  gbtBehavProfileRep<T> *Copy(void) const;
+  
+  // OPERATOR OVERLOADING
+  bool operator==(const gbtBehavProfileRep<T> &) const;
+
+  // INITIALIZATION, VALIDATION
+  inline void Invalidate(void) const {m_cached_data=false;}
+  virtual bool IsAssessment(void) const { return false; }
+  void Centroid(void);
+
+  // GENERAL DATA ACCESS
+
+  gbtGame GetGame(void) const   { return m_support.GetTree(); }
+  gbtEfgSupport GetSupport(void) const   { return m_support; }
+  
+  const T &GetRealizProb(const gbtGameNode &node) const;
+  const T &GetBeliefProb(const gbtGameNode &node) const;
+  gbtVector<T> GetNodeValue(const gbtGameNode &node) const;
+  T GetIsetProb(const gbtGameInfoset &iset) const;
+  const T &GetIsetValue(const gbtGameInfoset &iset) const;
+  T GetActionProb(const gbtGameAction &act) const;
+  const T &GetActionValue(const gbtGameAction &act) const;
+  const T &GetRegret(const gbtGameAction &act) const;
+
+  // COMPUTATION OF INTERESTING QUANTITIES
+
+  T Payoff(int p_player) const;
+  gbtDPVector<T> Beliefs(void) const;
+  T LiapValue(bool p_penalty = true) const;
+  T QreValue(const gbtVector<T> &lambda, bool &) const;
+  T MaxRegret(void) const;
+
+  T DiffActionValue(const gbtGameAction &action, 
+		    const gbtGameAction &oppAction) const;
+  T DiffRealizProb(const gbtGameNode &node,
+		   const gbtGameAction &oppAction) const;
+  T DiffNodeValue(const gbtGameNode &node, const gbtGamePlayer &player,
+		  const gbtGameAction &oppAction) const;
+
+  void Dump(gbtOutput &) const;
+
+  // IMPLEMENTATION OF gbtDPVector OPERATIONS
+  // These are reimplemented here to correctly handle invalidation
+  // of cached information.
+  const T &operator()(int a, int b, int c) const
+    { return m_profile(a, b, c); }
+  T &operator()(int a, int b, int c) 
+    { Invalidate();  return m_profile(a, b, c); }
+  const T &operator[](int a) const
+    { return m_profile[a]; }
+  T &operator[](int a)
+    { Invalidate();  return m_profile[a]; }
+
+  void operator=(const T &x)  
+    { Invalidate();  m_profile = x; }
+
+  bool operator==(const gbtDPVector<T> &x) const
+  { return (m_profile == x); }
+  bool operator!=(const gbtDPVector<T> &x) const
+  { return (m_profile != x); }
+
+  const gbtArray<int> &Lengths(void) const
+    { return m_profile.Lengths(); }
+
+  const gbtPVector<T> &GetPVector(void) const { return m_profile; }
+  const gbtDPVector<T> &GetDPVector(void) const { return m_profile; }
+  gbtDPVector<T> &GetDPVector(void) { Invalidate(); return m_profile; }
+
+  // IMPLEMENTATION OF gbtGameObject INTERFACE
+  gbtText GetLabel(void) const { return ""; }
+  void SetLabel(const gbtText &) { }
+
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return m_support.IsTree(); }
+  bool IsMatrix(void) const { return m_support.IsMatrix(); }
+
+  gbtText GetComment(void) const { return ""; }
+
+  // DATA ACCESS -- PLAYERS
+  int NumPlayers(void) const { return m_support.NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_support.GetPlayer(index); }
+
+  // DATA ACCESS -- OUTCOMES
+  int NumOutcomes(void) const { return m_support.NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_support.GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_support.IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_support.MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_support.MinPayoff(pl); }
+
+  // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
+
+  // DATA ACCESS -- GENERAL
+  bool IsPerfectRecall(void) const { return m_support.IsPerfectRecall(); }
+
+  // DATA ACCESS -- PLAYERS
+  gbtGamePlayer GetChance(void) const { return m_support.GetChance(); }
+
+  // DATA ACCESS -- NODES
+  int NumNodes(void) const { return m_support.NumNodes(); }
+  gbtGameNode GetRoot(void) const { return m_support.GetRoot(); }
+
+  // DATA ACCESS -- ACTIONS
+  gbtPVector<int> NumActions(void) const { return m_support.NumActions(); }
+  int BehavProfileLength(void) const { return m_support.BehavProfileLength(); }
+
+  // DATA ACCESS -- INFORMATION SETS
+  int TotalNumInfosets(void) const { return m_support.TotalNumInfosets(); }
+  gbtArray<int> NumInfosets(void) const { return m_support.NumInfosets(); }
+  int NumPlayerInfosets(void) const { return m_support.NumPlayerInfosets(); }
+  int NumPlayerActions(void) const { return m_support.NumPlayerActions(); }
+  gbtPVector<int> NumMembers(void) const { return m_support.NumMembers(); }
+
+  // DATA ACCESS -- SUPPORTS
+  gbtEfgSupport NewEfgSupport(void) const { return m_support.NewEfgSupport(); }
+
+  operator gbtMixedProfile<T>(void) const;
+
+  // DATA ACCESS -- PROFILES
+  gbtBehavProfile<double> NewBehavProfile(double) const;
+  gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const;
+  gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const;
+};
 
 #endif  // GAMEBASE_H

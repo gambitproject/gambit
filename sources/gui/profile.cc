@@ -286,7 +286,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
       int offset = GetInfoColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return wxString::Format(wxT("%s"), (char *) ToText((*behav->Profile())[p_col - offset],
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->Profile()[p_col - offset],
 							   m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {

@@ -165,6 +165,11 @@ public:
   // DATA ACCESS -- SUPPORTS
   gbtEfgSupport NewEfgSupport(void) const;
 
+  // DATA ACCESS -- PROFILES
+  gbtBehavProfile<double> NewBehavProfile(double) const;
+  gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const;
+  gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const;
+
   void SetComment(const gbtText &p_comment) { m_efg->SetComment(p_comment); }
   gbtGamePlayer GetChance(void) const { return m_efg->GetChance(); }
 

@@ -232,7 +232,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
 	file << "DataFormat:\n";
-	int numcols = m_behavProfiles[1].Profile()->Length() + 2;
+	int numcols = m_behavProfiles[1].Profile()->BehavProfileLength() + 2;
 	file << numcols << ' ';
 	for (int i = 1; i <= numcols; i++) {
 	  file << i << ' ';
@@ -242,10 +242,10 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-	  const gbtBehavProfile<gbtNumber> &profile = *m_behavProfiles[i].Profile();
+	  const gbtBehavProfile<gbtNumber> &profile = m_behavProfiles[i].Profile();
 	  file << ((double) m_behavProfiles[i].QreLambda()) << " 0.000000 ";
 	  
-	  for (int j = 1; j <= profile.Length(); j++) {
+	  for (int j = 1; j <= profile->BehavProfileLength(); j++) {
 	    file << ((double) profile[j]) << ' ';
 	  }
 

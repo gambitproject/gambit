@@ -86,6 +86,7 @@ class gbtNfgSupport;
 class gbtNfgContingency;
 
 template <class T> class gbtMixedProfile;
+template <class T> class gbtBehavProfile;
 
 class gbtConstGameRep : public gbtGameObject {
 public:
@@ -125,7 +126,6 @@ public:
   virtual gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const = 0;
 };
 
-
 class gbtConstEfgRep : public virtual gbtConstGameRep {
 public:
   // DATA ACCESS -- GENERAL
@@ -153,6 +153,12 @@ public:
 
   // DATA ACCESS -- SUPPORTS
   virtual gbtEfgSupport NewEfgSupport(void) const = 0;
+
+  // DATA ACCESS -- PROFILES
+  // These could be declared template, but aren't, for portability
+  virtual gbtBehavProfile<double> NewBehavProfile(double) const = 0;
+  virtual gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const = 0;
+  virtual gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const = 0;
 };
 
 class gbtGameRep : public gbtConstNfgRep, public gbtConstEfgRep {

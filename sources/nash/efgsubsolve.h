@@ -35,7 +35,7 @@ class gbtEfgNashSubgames : public gbtEfgNashAlgorithm  {
 private:
   bool m_isPerfectRecall;
   double time;
-  gbtBehavProfile<gbtNumber> *solution;
+  gbtBehavProfile<gbtNumber> solution;
   gbtList<BehavSolution> solutions;
   gbtEfgNashAlgorithm *m_efgAlgorithm;
   gbtNfgNashAlgorithm *m_nfgAlgorithm;

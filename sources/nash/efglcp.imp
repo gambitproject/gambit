@@ -98,7 +98,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   gbtLemkeTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
-  gbtBehavProfile<T> profile(p_support);
+  gbtBehavProfile<T> profile = p_support.NewBehavProfile((T) 0);
   gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
   gbtList<BehavSolution> solutions;
@@ -113,7 +113,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
       
       Add_BFS(tab);
       tab.BasisVector(sol);
-      GetProfile(p_support, tab, profile.GetDPVector(), sol,
+      GetProfile(p_support, tab, profile->GetDPVector(), sol,
 		 p_support.GetRoot(), 1, 1);
       solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
     }
@@ -163,7 +163,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
   T small_num = (T)1/(T)1000;
 
   gbtVector<T> sol(B.MinRow(),B.MaxRow());
-  gbtBehavProfile<T> profile(p_support);
+  gbtBehavProfile<T> profile = p_support.NewBehavProfile((T) 0);
 
   newsol =0;
   for (i = B.MinRow(); 
@@ -197,7 +197,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile.GetDPVector(),
+	GetProfile(p_support, BCopy, profile->GetDPVector(),
 		   sol, p_support.GetRoot(), 1, 1);
 	if(newsol) {
 	  p_solutions.Append(BehavSolution(profile, "Lcp[EFG]")); 

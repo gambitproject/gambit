@@ -1390,7 +1390,7 @@ void gbtEfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtEfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  BehavSolution profile = gbtBehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetGame()));
+  BehavSolution profile = m_doc->GetGame()->NewBehavProfile(gbtNumber(0));
 
   dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

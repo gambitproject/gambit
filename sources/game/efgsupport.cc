@@ -26,6 +26,8 @@
 
 #include "game.h"
 #include "efgsupport.h"
+#include "behav.h"
+#include "gamebase.h"
 
 class gbtGameActionArray   {
   friend class gbtGameActionSet;
@@ -642,6 +644,23 @@ void gbtEfgSupport::Dump(gbtOutput &p_output) const
 gbtEfgSupport gbtEfgSupport::NewEfgSupport(void) const
 {
   return gbtEfgSupport(*this);
+}
+
+gbtBehavProfile<double> gbtEfgSupport::NewBehavProfile(double) const
+{
+  return new gbtBehavProfileBase<double>(*this);
+}
+
+gbtBehavProfile<gbtRational>
+gbtEfgSupport::NewBehavProfile(const gbtRational &) const
+{
+  return new gbtBehavProfileBase<gbtRational>(*this);
+}
+
+gbtBehavProfile<gbtNumber>
+gbtEfgSupport::NewBehavProfile(const gbtNumber &) const
+{
+  return new gbtBehavProfileBase<gbtNumber>(*this);
 }
 
 gbtOutput& operator<<(gbtOutput&s, const gbtEfgSupport& e)
