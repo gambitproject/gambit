@@ -325,6 +325,18 @@ static Portion *GSM_Players(Portion **param)
 }
 
 
+//------------
+// StrategyNumber
+//------------
+
+static Portion *GSM_StrategyNumber(Portion **param)
+{
+  Strategy *s = ((StrategyPortion *) param[0])->Value();
+  NFSupport *support = ((NfSupportPortion *) param[1])->Value();
+
+  return new IntPortion(support->Find(s));
+}
+
 //------------------
 // RemoveStrategy
 //------------------
@@ -495,6 +507,8 @@ void Init_nfgfunc(GSM *gsm)
 	GSM_Payoff },
       { "Player[strategy->STRATEGY*] =: NFPLAYER", GSM_Player },
       { "Players[nfg->NFG] =: LIST(NFPLAYER)", GSM_Players },
+      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER", 
+	GSM_StrategyNumber },
       { "RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
 	GSM_RemoveStrategy },
       { "SaveNfg[nfg->NFG, file->TEXT] =: NFG", GSM_SaveNfg },
