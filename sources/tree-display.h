@@ -30,6 +30,22 @@
 #include "game-document.h"
 #include "tree-layout.h"
 
+class gbtTreeToolbar : public wxScrolledWindow, public gbtGameView {
+private:
+  // Implementation of gbtGameView members
+  void OnUpdate(void);
+
+  // Event handlers
+  void OnDraw(wxDC &);
+  void OnLeftDown(wxMouseEvent &);
+
+public:
+  gbtTreeToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  DECLARE_EVENT_TABLE()
+};
+
+
 class gbtTreeDisplay : public wxScrolledWindow, public gbtGameView {
 private:
   gbtTreeLayout m_layout;

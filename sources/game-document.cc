@@ -196,6 +196,16 @@ void gbtGameDocument::SetStrategyLabel(gbtGameStrategy p_strategy,
   UpdateViews();
 }
 
+void gbtGameDocument::NewMove(gbtGameNode p_node, gbtGamePlayer p_player)
+{
+  SaveUndo(_("adding new move"));
+  gbtGameInfoset infoset = p_player->NewInfoset(2);
+  p_node->InsertMove(infoset);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
 wxColour gbtGameDocument::GetPlayerColor(int p_player) const
 {
   if (p_player == 0) {

@@ -80,6 +80,7 @@ public:
   void SetStrategyLabel(gbtGameStrategy p_strategy, 
 			const std::string &p_label);
 
+  void NewMove(gbtGameNode, gbtGamePlayer);
 
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;

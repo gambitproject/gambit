@@ -105,8 +105,19 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxGetApp().AddWindow(this);
   MakeMenu();
 
+  wxPanel *treePanel = 0;
+
   if (p_doc->GetGame()->HasTree()) {
-    m_treeDisplay = new gbtTreeDisplay(this, p_doc);
+    treePanel = new wxPanel(this);
+    m_treeDisplay = new gbtTreeDisplay(treePanel, p_doc);
+    
+    gbtTreeToolbar *treeToolbar = new gbtTreeToolbar(treePanel, p_doc);
+
+    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(treeToolbar, 1, wxEXPAND, 0);
+    sizer->Add(m_treeDisplay, 10, wxEXPAND, 0);
+    treePanel->SetSizer(sizer);
+    treePanel->Layout();
     m_matrixPanel = 0;
     m_schellingPanel = 0;
   }
@@ -121,7 +132,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
   if (m_treeDisplay) {
-    sizer->Add(m_treeDisplay, 1, wxEXPAND, 0);
+    sizer->Add(treePanel, 1, wxEXPAND, 0);
   }
   else {
     sizer->Add(m_matrixPanel, 1, wxEXPAND, 0);
