@@ -10,16 +10,20 @@
 #include "nfgciter.h"
 #include "nfstrat.h"
 #include "lpsolve.h"
-
+#include "gstatus.h"
 
 template <class T>
 NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
-				     int pl, bool strong, gOutput &tracefile)
+				     int pl, bool strong, gOutput &tracefile,
+				     gStatus &status)
 {
   T eps;
   NfgContIter<T> s(&S);
   s.Freeze(pl);
   gEpsilon(eps);
+  double d1,d2;
+  d1 = (double)(pl-1)/(double)S.BelongsTo().NumPlayers();
+  d2 = (double)pl/(double)S.BelongsTo().NumPlayers();
 
   NFStrategySet *newS = new NFStrategySet(*S.GetNFStrategySet(pl));
   gArray<bool> dom(S.NumStrats(pl));
@@ -58,7 +62,9 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       s.NextContingency();
     }
 
-    for (k = 1; k <= strats; k++)	{
+    for (k = 1; k <= strats && !status.Get(); k++)	{
+      double s1 = (double)k/(double)(strats);
+      status.SetProgress((1.0-s1)*d1 + s1*d2);
       tracefile << '\n' << (gRectArray<T> &)A << '\n';
       tracefile << B << '\n';
       tracefile << C << '\n';
@@ -127,7 +133,9 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       s.NextContingency();
     }
 
-    for (k = 1; k <= strats; k++)	{
+    for (k = 1; k <= strats && !status.Get(); k++)	{
+      double s1 = (double)k/(double)(strats);
+      status.SetProgress((1.0-s1)*d1 + s1*d2);
       tracefile << '\n' << (gRectArray<T> &)A << '\n';
       tracefile << B << '\n';
       tracefile << C << '\n';
@@ -177,13 +185,14 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
 #include "rational.h"
-#include "gstatus.h"
 TEMPLATE NFStrategySet *ComputeMixedDominated(const Nfg<double> &,
-								const NFSupport &,
-								int, bool, gOutput &);
+					      const NFSupport &,
+					      int, bool, gOutput &,
+					      gStatus &);
 TEMPLATE NFStrategySet *ComputeMixedDominated(const Nfg<gRational> &,
-								const NFSupport &,
-								int, bool, gOutput &);
+					      const NFSupport &,
+					      int, bool, gOutput &,
+					      gStatus &);
 #pragma option -Jgx
 
 NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
@@ -198,11 +207,11 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
     NFStrategySet *SS;
     if (S.BelongsTo().Type() == DOUBLE)
       SS = ComputeMixedDominated((Nfg<double> &) S.BelongsTo(),
-				 S, pl, strong, tracefile);
+				 S, pl, strong, tracefile, status);
     else
       SS = ComputeMixedDominated((Nfg<gRational> &) S.BelongsTo(),
-				 S, pl, strong, tracefile);
-	status.SetProgress((double)i/players.Length());
+				 S, pl, strong, tracefile, status);
+//	status.SetProgress((double)i/players.Length());
 		if (SS)  {
 			delete T->GetNFStrategySet(pl);
 			T->SetNFStrategySet(pl, SS);
