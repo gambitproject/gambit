@@ -10,7 +10,8 @@
 #include "gblock.h"
 #include "gvector.h"
 
-template <class T> class NormalForm;
+#include "normal.h"
+
 class StrategyProfile;
 
 //
@@ -25,14 +26,16 @@ class StrategyProfile;
 //
 template <class T> class ContIter    {
   private:
-    int undom_only;
+    int sset;
     NormalForm<T> *N;
     StrategyProfile *profile;
     gBlock<int> frozen, thawed;
 
   public:
-    ContIter(NormalForm<T> &, int undom = 1);
-    ContIter(NormalForm<T> *, int undom = 1);
+    ContIter(NormalForm<T> &n);
+    ContIter(NormalForm<T> &n, int sset);
+    ContIter(NormalForm<T> *n);
+    ContIter(NormalForm<T> *n, int sset);
     ~ContIter();
 
     void First(void);

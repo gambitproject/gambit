@@ -8,18 +8,36 @@
 #include "normal.h"
 #include "strategy.h"
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int undom)
+template <class T> ContIter<T>::ContIter(NormalForm<T> &nf, int set)
   : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), undom_only(undom)
+    thawed(N->NumPlayers()), sset(set)
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
   First();
 }
 
-template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int undom)
+template <class T> ContIter<T>::ContIter(NormalForm<T> *nf, int set)
   : N(nf), profile(new StrategyProfile(N->NumPlayers())),
-    thawed(N->NumPlayers()), undom_only(undom)
+    thawed(N->NumPlayers()), sset(set)
+{
+  for (int i = 1; i <= thawed.Length(); i++)
+    thawed[i] = i;
+  First();
+}
+
+template <class T> ContIter<T>::ContIter(NormalForm<T> &nf)
+  : N(&nf), profile(new StrategyProfile(N->NumPlayers())),
+    thawed(N->NumPlayers()), sset(nf.NumStratSets())
+{
+  for (int i = 1; i <= thawed.Length(); i++)
+    thawed[i] = i;
+  First();
+}
+
+template <class T> ContIter<T>::ContIter(NormalForm<T> *nf)
+  : N(nf), profile(new StrategyProfile(N->NumPlayers())),
+    thawed(N->NumPlayers()), sset(nf->NumStratSets())
 {
   for (int i = 1; i <= thawed.Length(); i++)
     thawed[i] = i;
@@ -34,8 +52,7 @@ template <class T> ContIter<T>::~ContIter()
 template <class T> void ContIter<T>::First(void)
 {
   for (int i = 1; i <= thawed.Length(); i++)  {
-    Strategy *s = (*N->strategies)(thawed[i], 1);
-    while (undom_only && s->dominator)   s = s->next;
+    Strategy *s = (*N->strategies[sset])(thawed[i], 1);
     profile->Set(thawed[i], s);
   }
 }
@@ -44,7 +61,7 @@ template <class T> void ContIter<T>::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
 
-  profile->Set(pl, N->GetStrategy(pl, num));
+  profile->Set(pl, N->GetStrategy(pl, num, sset));
 }
 
 template <class T> void ContIter<T>::Freeze(const gBlock<int> &freeze)
@@ -80,15 +97,13 @@ template <class T> int ContIter<T>::NextContingency(void)
   
   while (1)   {
     int pl = thawed[j];
-    Strategy *s = (undom_only) ? (*profile)[pl]->next_undom
-                               : (*profile)[pl]->next;
+    Strategy *s = (*profile)[pl]->next[sset];
     if (s)  {
       profile->Set(pl, s);
       return 1;
     }
 
-    s = (*N->strategies)(pl, 1);
-    while (undom_only && s->dominator)   s = s->next;
+    s = (*N->strategies[sset])(pl, 1);
     profile->Set(pl, s);
     j--;
     if (j == 0)
