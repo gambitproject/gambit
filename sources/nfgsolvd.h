@@ -168,6 +168,8 @@ public:
 	int  StandardType(void) const {return standard_type;}
 	int  StandardNum(void) const {return standard_num;}
 };
+#define NFG_SOLVE_HELP						"Normal Form Solutions"
+#define NFG_STANDARD_HELP					"NFG Standard Solutions"
 
 class NfgSolveParamsDialog: public NfgAlgorithmList, public NfgSolveSettings
 {
