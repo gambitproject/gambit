@@ -114,7 +114,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	assert(index <= infosets[pl]->Length());
 	for (int act = 1; act <= p->Infosets()[iset]->NumActions();
 	     act++)  {
-	  if (!p_support.Find((*infosets[pl])[index]->Actions()[act]))
+          if (!p_support.Find(pl, index, (*infosets[pl])[index]->Actions()[act]))
             subsupport.RemoveAction(p->Infosets()[iset]->Actions()[act]);
 	}
       }

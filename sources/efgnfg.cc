@@ -141,10 +141,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   gArray<int> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {
     corrs[i] = 1;
-    if (L->N->NumStrats(i) > 0)
-      corr[i] = L->strategies[i][1];
-    else
-      corr[i] = new gArray<int>(0);
+    corr[i] = L->strategies[i][1];
   }
 
   gArray<gNumber> value(E.NumPlayers());

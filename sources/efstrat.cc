@@ -376,12 +376,12 @@ int EFSupport::Find(Action *a) const
 
   return m_players[pl]->Find(a);
 }
-/*
+
 int EFSupport::Find(int p_player, int p_infoset, Action *p_action) const
 {
   return m_players[p_player]->Find(p_infoset, p_action);
 }
-*/
+
 bool EFSupport::ActionIsActive(Action *a) const
 {
   //DEBUG
