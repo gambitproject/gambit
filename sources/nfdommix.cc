@@ -193,9 +193,11 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 #include "rational.h"
 
 
-template bool ComputeMixedDominated(const Nfg<double> &, const NFSupport &,
-				    int, bool, gOutput &);
-template bool ComputeMixedDominated(const Nfg<gRational> &, const NFSupport &,
-				    int, bool, gOutput &);
+template NFStrategySet *ComputeMixedDominated(const Nfg<double> &,
+					      const NFSupport &,
+					      int, bool, gOutput &);
+template NFStrategySet *ComputeMixedDominated(const Nfg<gRational> &,
+					      const NFSupport &,
+					      int, bool, gOutput &);
 
 
