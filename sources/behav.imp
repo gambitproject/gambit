@@ -741,7 +741,7 @@ void BehavProfile<T>::Beliefs(Node *n, T prob,
     mnum++;
   assert(mnum<=n->infoset->NumMembers());
   
-  if (gpv(pl, iset) != (T)0)
+  if (pl > 0 && gpv(pl, iset) != (T)0)
     BProbs(pl,iset,mnum) = prob / gpv(pl, iset);
 
   if (pl == 0)  {
