@@ -1482,6 +1482,31 @@ static Portion *GSM_VertEnum(GSM &gsm, Portion** param)
   }
 }
 
+//------------------
+// YamamotoSolve
+//------------------
+
+#include "yamamoto.h"
+
+static Portion *GSM_YamamotoSolve(GSM &gsm, Portion **param)
+{
+  NFSupport *support = ((NfSupportPortion*) param[0])->Value();
+  gList<MixedSolution> solutions;
+
+  try {
+    gsm.StartAlgorithmMonitor("YamamotoSolve");
+    solutions.Append(Yamamoto(*support));
+  }
+  catch (gSignalBreak &) { }
+  catch (...) {
+    gsm.EndAlgorithmMonitor();
+    throw;
+  }
+
+  gsm.EndAlgorithmMonitor();
+  return new Mixed_ListPortion(solutions);
+}
+
 void Init_algfunc(GSM *gsm)
 {
   gclFunction *FuncObj;
@@ -2009,4 +2034,10 @@ void Init_algfunc(GSM *gsm)
 					    new PrecisionPortion(precDOUBLE)));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new gclFunction(*gsm, "YamamotoSolve", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_YamamotoSolve,
+				       PortionSpec(porMIXED, 1), 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
+  gsm->AddFunction(FuncObj);
 }
