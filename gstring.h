@@ -1,7 +1,7 @@
 //
 // FILE: gstring.h -- Definition of gString class
 //
-// $Id$
+// @(#)gstring.h	1.11 1/1/95
 //
 
 #ifndef GSTRING_H

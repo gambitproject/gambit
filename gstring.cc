@@ -1,7 +1,7 @@
 //
 // FILE: gstring.cc -- Implementation of String class
 //
-// $Id$
+// @(#)gstring.cc	1.9 1/1/95
 //
 
 #ifdef __GNUG__
