@@ -14,6 +14,7 @@
 #include "gnumber.h"
 #include "nfplayer.h"
 #include "nfg.h"
+#include "algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmNfg_USER,
@@ -26,22 +27,23 @@ typedef enum {
 gText NameNfgAlgType(NfgAlgType i);
 void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 
-
-
 class MixedSolution   {
 protected:
   MixedProfile<gNumber> m_profile;
   gPrecision m_precision;
   mutable NFSupport m_support;
   mutable NfgAlgType m_creator;
-  mutable gTriState m_isNash, m_isPerfect, m_isProper;
-  mutable bool m_checkedPerfect;
-  mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
+  mutable gFact<gTriState> m_Nash, m_Perfect, m_Proper;
+  mutable gFact<gNumber> m_liapValue;
+  mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   gArray<gNumber> m_payoff;
   unsigned int m_id;
   mutable long m_revision;
   
-  void CheckIsNash(void) const;
+  gTriState GetNash(void) const;
+  gTriState GetPerfect(void) const;
+  gTriState GetProper(void) const;
+
   void LevelPrecision(void);
 
 public:
@@ -75,25 +77,26 @@ public:
   bool IsComplete(void) const;
 
   unsigned int Id(void) const { return m_id; }
-  NfgAlgType Creator(void) const { return m_creator; }
-  const NFSupport &Support(void) const { return m_support; }
-  gTriState IsNash(void) const;
-  gTriState IsPerfect(void) const;
-  gTriState IsProper(void) const;
-  const gNumber &Epsilon(void) const { return m_epsilon; }
-  const gNumber &QreLambda(void) const { return m_qreLambda; }
-  const gNumber &QreValue(void) const { return m_qreValue; }
+  NfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
+  const NFSupport &Support(void) const { CheckIsValid(); return m_support; }
+  const gTriState &IsNash(void) const;
+  const gTriState &IsPerfect(void) const;
+  const gTriState &IsProper(void) const;
+  const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
+  const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
+  const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
-  void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
   
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
+  void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
   bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
+
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
   gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
@@ -109,5 +112,6 @@ public:
 
 
 gOutput &operator<<(gOutput &f, const MixedSolution &);
+
 
 #endif    // MIXEDSOL_H

@@ -13,6 +13,7 @@
 #include "gtext.h"
 #include "gnumber.h"
 #include "efg.h"
+#include "algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmEfg_USER,
@@ -36,19 +37,20 @@ protected:
   gPrecision m_precision;
   mutable EFSupport m_support;
   mutable EfgAlgType m_creator;
-  mutable gTriState m_isANFNash, m_isNash;
-  mutable gTriState m_isSubgamePerfect, m_isSequential;
-  mutable bool m_checkedANFNash,  m_checkedNash;
-  mutable bool m_checkedSubgamePerfect, m_checkedSequential;
-  mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
-  mutable gPVector<gNumber> *m_rnf_regret;
+  mutable gFact<gTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
+  mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
+  mutable gFact<gNumber> m_liapValue;
+  mutable gFact<gPVector<gNumber> > m_rnfRegret;
   unsigned int m_id;
   mutable long m_revision;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
-  void CheckIsNash(void) const;
-  void CheckIsSubgamePerfect(void) const;
-  void CheckIsANFNash(void) const;
+  gTriState GetNash(void) const;
+  gTriState GetANFNash(void) const;
+  gTriState GetSubgamePerfect(void) const;
+  gTriState GetSequential(void) const;
+  gPVector<gNumber> GetRNFRegret(void) const;
+
   void LevelPrecision(void);
 
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
@@ -149,22 +151,22 @@ public:
 
   // GENERAL DATA ACCESS
   Efg &Game(void) const { return m_profile->Game(); }
-  const BehavProfile<gNumber> *Profile(void) const { if(!IsValid()) Invalidate(); return m_profile; }
+  const BehavProfile<gNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
   gPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
   unsigned int Id(void) const { return m_id; }
-  EfgAlgType Creator(void) const { if(!IsValid()) Invalidate(); return m_creator; }
-  EFSupport Support(void) const { if(!IsValid()) Invalidate(); return m_support; }
-  gTriState IsNash(void) const;
-  gTriState IsANFNash(void) const;
-  gTriState IsSubgamePerfect(void) const;
-  gTriState IsSequential(void) const;
-  const gNumber &Epsilon(void) const { if(!IsValid()) Invalidate(); return m_epsilon; }
-  const gNumber &QreLambda(void) const { if(!IsValid()) Invalidate(); return m_qreLambda; }
-  const gNumber &QreValue(void) const { if(!IsValid()) Invalidate(); return m_qreValue; }
+  EfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
+  EFSupport Support(void) const { CheckIsValid(); return m_support; }
+  const gTriState &IsNash(void) const;
+  const gTriState &IsANFNash(void) const;
+  const gTriState &IsSubgamePerfect(void) const;
+  const gTriState &IsSequential(void) const;
+  const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
+  const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
+  const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
   const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
   const gNumber MaxRegret(void) const;
@@ -175,10 +177,10 @@ public:
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
-  void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
 	 
   // Force the invalidation of cached data
   void Invalidate(void) const;
+  void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
   bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
 
   // COMPUTATION OF INTERESTING QUANTITIES

@@ -83,13 +83,9 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN),
-    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
-    m_checkedANFNash(false), m_checkedNash(false),
-    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
-    m_epsilon(0.0),
-    m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_rnf_regret(0), 
+    m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
+    m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
+    m_liapValue(), m_rnfRegret(), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -114,12 +110,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN), 
-    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
-    m_checkedANFNash(false), m_checkedNash(false),
-    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
-    m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_rnf_regret(0), 
+    m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
+    m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -143,12 +135,8 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN),
-    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
-    m_checkedANFNash(false), m_checkedNash(false),
-    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
-    m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_rnf_regret(0), 
+    m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
+    m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -178,30 +166,21 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
   : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
     m_precision(p_solution.m_precision), 
     m_support(p_solution.m_support), m_creator(p_solution.m_creator),
-    m_isANFNash(p_solution.m_isANFNash),
-    m_isNash(p_solution.m_isNash),
-    m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
-    m_isSequential(p_solution.m_isSequential), 
-    m_checkedANFNash(p_solution.m_checkedANFNash),
-    m_checkedNash(p_solution.m_checkedNash),
-    m_checkedSubgamePerfect(p_solution.m_checkedSubgamePerfect),
-    m_checkedSequential(p_solution.m_checkedSequential), 
+    m_ANFNash(p_solution.m_ANFNash),
+    m_Nash(p_solution.m_Nash),
+    m_SubgamePerfect(p_solution.m_SubgamePerfect),
+    m_Sequential(p_solution.m_Sequential),
     m_epsilon(p_solution.m_epsilon),
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
-    m_rnf_regret(0), 
+    m_rnfRegret(p_solution.m_rnfRegret), 
     m_id(0), m_revision(p_solution.m_revision)
-{
-  if (p_solution.m_rnf_regret) {
-    m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);   
-  }
-}
+{ }
 
 BehavSolution::~BehavSolution() 
 { 
   delete m_profile;
-  if (m_rnf_regret)  delete m_rnf_regret;
 }
 
 BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
@@ -212,27 +191,17 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_precision = p_solution.m_precision;
     m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
-    m_isANFNash = p_solution.m_isANFNash;
-    m_isNash = p_solution.m_isNash;
-    m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
-    m_isSequential = p_solution.m_isSequential;
-    m_checkedANFNash = p_solution.m_checkedANFNash;
-    m_checkedNash = p_solution.m_checkedNash;
-    m_checkedSubgamePerfect = p_solution.m_checkedSubgamePerfect;
-    m_checkedSequential = p_solution.m_checkedSequential;
+    m_ANFNash = p_solution.m_ANFNash;
+    m_Nash = p_solution.m_Nash;
+    m_SubgamePerfect = p_solution.m_SubgamePerfect;
+    m_Sequential = p_solution.m_Sequential;
     m_epsilon = p_solution.m_epsilon;
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
+    m_rnfRegret = p_solution.m_rnfRegret;
     m_id = p_solution.m_id;
     m_revision = p_solution.m_revision;
-    if (m_rnf_regret)   delete m_rnf_regret;
-    if (p_solution.m_rnf_regret) {
-      m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);
-    }
-    else {
-      m_rnf_regret = 0;
-    }
   }
 
   return *this;
@@ -242,101 +211,124 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-void BehavSolution::CheckIsNash(void) const
+gTriState BehavSolution::GetANFNash(void) const
 {
-  if(!IsValid()) Invalidate();
-  if (m_checkedNash == false) {
-    bool decomposes = HasSubgames(Game());
-    // check subgame perfection if game decomposes (its faster)
-    if(decomposes) 
-      CheckIsSubgamePerfect();
-    // and if it wasn't settled in that call, ...
-    if (m_checkedNash == false) { 
-      // use reduced normal form regrets for complete profiles
-
-      if(IsComplete()) 
-	m_isNash = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
-      //  else let Andy figure it out
-      // Is perfect recall needed here, Andy?
-      else 
-	
-	if (IsPerfectRecall(m_profile->Game())) { 
-	  gStatus &m_status = gstatus;
-	  // not sure MaxRegret does the right thing here
-	  m_isNash = (m_profile->MaxRegret() <= m_epsilon  &&
-		      ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
-	}
-    }
-    m_checkedNash = true;
-    
-    // Done.  Now mark other obvious inferences 
-
-    if (m_isNash == triFALSE) {
-      m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
-      m_isSequential = triFALSE; m_checkedSequential = true;
-    }
-    if (m_isNash == triTRUE) {
-      m_isANFNash = triTRUE; m_checkedANFNash = true;
-      if(!decomposes) { 
-	m_isSubgamePerfect = triTRUE; m_checkedSubgamePerfect = true;
-      }
-    }
+  gTriState answer;
+  gStatus &m_status = gstatus;
+  answer = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
+		triTRUE:triFALSE;
+  if (answer == triFALSE) {
+    m_Nash.Set(triFALSE);
+    m_SubgamePerfect.Set(triFALSE);
+    m_Sequential.Set(triFALSE);
   }
+  return answer;
 }
 
-void BehavSolution::CheckIsSubgamePerfect(void) const
+gTriState BehavSolution::GetNash(void) const
 {
-  if(!IsValid()) Invalidate();
-  if(m_checkedSubgamePerfect == false) {
-    // Note -- HasSubgames should be cached in Efg
-    bool decomposes = HasSubgames(Game());
-    if(!decomposes) CheckIsNash();
-    // if it is not yet resolved, ... 
-    if(m_checkedSubgamePerfect == false) {
-      // for complete profiles, use subgame perfect checker.  
-      if(IsComplete()) {
-	BehavProfile<gNumber> p(*this);
-	SubgamePerfectChecker checker(p.Game(),p, Epsilon());
-	checker.Solve(p.Support());
-	m_isSubgamePerfect = checker.IsSubgamePerfect();
+  gTriState answer = triUNKNOWN;
+  bool decomposes = HasSubgames(Game());
+  // check subgame perfection if game decomposes (its faster)
+  if(decomposes) 
+    GetSubgamePerfect();
+  // if it was settled in that call, ...
+  if (m_Nash.Checked() == true) 
+    answer = m_Nash.Answer();
+  else {
+    // use reduced normal form regrets for complete profiles
+    if(IsComplete()) 
+      answer = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
+    //  else let Andy figure it out
+    // Is perfect recall needed here, Andy?
+    else 
+      if (IsPerfectRecall(m_profile->Game())) { 
+	gStatus &m_status = gstatus;
+	// not sure MaxRegret does the right thing here
+	answer = (m_profile->MaxRegret() <= m_epsilon  &&
+		    ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
       }
-      // else, for now, we require complete profiles for subgame perfection.  
-      // but we may want to turn over to Andy here. 
-      else 
-	m_isSubgamePerfect = triFALSE;
-    }
-    m_checkedSubgamePerfect = true;
-
-    // Done.  Now mark other obvious inferences 
-
-    if(m_isSubgamePerfect) {
-      m_isNash = triTRUE; m_checkedNash = triTRUE;
-      m_isANFNash = triTRUE; m_checkedANFNash = true;
-    }
-    if(!m_isSubgamePerfect) {
-      m_isSequential = triFALSE; m_checkedSequential = triFALSE;
-      if(!decomposes) { 
-	m_isNash = triFALSE; m_checkedNash = true;
-      }
-    }
   }
+  // Done.  Now mark other obvious inferences 
+  
+  if (answer == triFALSE) {
+    m_SubgamePerfect.Set(triFALSE);
+    m_Sequential.Set(triFALSE);
+  }
+  if (answer == triTRUE) {
+    m_ANFNash.Set(triTRUE);
+    if(!decomposes) 
+      m_SubgamePerfect.Set(triTRUE);
+  }
+  return answer;
 }
 
-void BehavSolution::CheckIsANFNash(void) const
+gTriState BehavSolution::GetSubgamePerfect(void) const
 {
-  if(!IsValid()) Invalidate();
-  if (m_checkedANFNash == false) {
-    gStatus &m_status = gstatus;
-    m_isANFNash = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
-      triTRUE:triFALSE;
-    if (m_isANFNash == triFALSE) {
-      m_isNash = triFALSE; m_checkedNash = true;
-      m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
-      m_isSequential = triFALSE; m_checkedSequential = true;
+  gTriState answer;
+  // Note -- HasSubgames should be cached in Efg
+  bool decomposes = HasSubgames(Game());
+  if(!decomposes) GetNash();
+  // if it was already resolved ...
+  if(m_SubgamePerfect.Checked() == true) 
+    answer = m_SubgamePerfect.Answer();
+  else {
+    // for complete profiles, use subgame perfect checker.  
+    if(IsComplete()) {
+      BehavProfile<gNumber> p(*this);
+      SubgamePerfectChecker checker(p.Game(),p, Epsilon());
+      checker.Solve(p.Support());
+      answer = checker.IsSubgamePerfect();
     }
-    m_checkedANFNash = true;
+    // else, for now, we require complete profiles for subgame perfection.  
+    // but we may want to turn over to Andy here. 
+    else 
+      answer = triFALSE;
   }
+  // Done.  Now mark other obvious inferences 
+  
+  if(answer) {
+    m_Nash.Set(triTRUE);
+    m_ANFNash.Set(triTRUE);
+  }
+  if(!answer) {
+    m_Sequential.Set(triFALSE);
+    if(!decomposes) 
+      m_Nash.Set(triFALSE);
+  }
+  return answer;
 }
+
+gTriState BehavSolution::GetSequential(void) const
+{
+  if(IsSubgamePerfect()==triTRUE) {
+    // Liap and QRE should be returning Nash solutions that give positive 
+    // probability to all actions, and hence will be approximations to 
+    // sequential equilibria.  But we should add code to check up on these 
+    // algorithms
+    if(Creator() == algorithmEfg_LIAP_EFG || Creator() == algorithmEfg_QRE_EFG)
+      return triTRUE;
+    else {
+      // check if game is perfect info
+      // this should be in efg.h
+      bool flag = true;
+      gPVector<int> v((Game()).NumMembers());
+      for(int i=v.First();flag == true && i<=v.Last();i++)
+	if(v[i]>1) flag = false;
+      if(flag==true) return triTRUE;
+    }
+    return triUNKNOWN;
+  }
+  else 
+    return IsSubgamePerfect();
+}
+
+/*
+gNumber BehavSolution::GetLiapValue(void)
+{ 
+  return m_profile->LiapValue();
+}
+*/
 
 void BehavSolution::LevelPrecision(void)
 {
@@ -477,58 +469,44 @@ bool BehavSolution::IsComplete(void) const
   return true;
 }
 
-gTriState BehavSolution::IsNash(void) const
+const gTriState &BehavSolution::IsNash(void) const
 {
-  CheckIsNash();
-  return m_isNash;
+  CheckIsValid();
+  if(!m_Nash.Checked())
+    m_Nash.Set(GetNash());
+  return m_Nash.Answer();
 }
 
-gTriState BehavSolution::IsANFNash(void) const
+const gTriState &BehavSolution::IsANFNash(void) const
 {
-  CheckIsANFNash();
-  return m_isANFNash;
+  CheckIsValid();
+  if(!m_ANFNash.Checked())
+    m_ANFNash.Set(GetANFNash());
+  return m_ANFNash.Answer();
 }
 
-gTriState BehavSolution::IsSubgamePerfect(void) const
+const gTriState &BehavSolution::IsSubgamePerfect(void) const
 {
-  CheckIsSubgamePerfect();
-  return m_isSubgamePerfect;
+  CheckIsValid();
+  if(!m_SubgamePerfect.Checked())
+    m_SubgamePerfect.Set(GetSubgamePerfect());
+  return m_SubgamePerfect.Answer();
 }
 
-gTriState BehavSolution::IsSequential(void) const
+const gTriState &BehavSolution::IsSequential(void) const
 {
-  CheckIsNash();
-  if(m_checkedSequential == false) {
-    if(IsSubgamePerfect()==triTRUE) {
-      // Liap and QRE should be returning Nash solutions that give positive 
-      // probability to all actions, and hence will be approximations to 
-      // sequential equilibria.  But we should add code to check up on these 
-      // algorithms
-      if(Creator() == algorithmEfg_LIAP_EFG || Creator() == algorithmEfg_QRE_EFG)
-	m_isSequential = triTRUE;
-      else {
-	// check if game is perfect info
-	// this should be in efg.h
-	bool flag = true;
-	gPVector<int> v((Game()).NumMembers());
-	for(int i=v.First();flag == true && i<=v.Last();i++)
-	  if(v[i]>1) flag = false;
-	if(flag==true) m_isSequential = triTRUE;
-      }
-    }
-    else 
-      m_isSequential = IsSubgamePerfect();
-    m_checkedSequential = true;
-  }
-  return m_isSequential;
+  CheckIsValid();
+  if(!m_Sequential.Checked())
+    m_Sequential.Set(GetSequential());
+  return m_Sequential.Answer();
 }
 
 const gNumber &BehavSolution::LiapValue(void) const
 { 
-  if(!IsValid()) Invalidate();
-  if (m_liapValue < (gNumber) 0)
-    m_liapValue = m_profile->LiapValue();
-  return m_liapValue; 
+  CheckIsValid();
+  if(!m_liapValue.Checked())
+    m_liapValue.Set(m_profile->LiapValue());
+  return m_liapValue.Answer();
 }
 
 void BehavSolution::Invalidate(void) const
@@ -536,22 +514,14 @@ void BehavSolution::Invalidate(void) const
   m_profile->Invalidate();
   m_support = EFSupport(m_profile->Game());
   m_creator = algorithmEfg_USER;
-  m_isANFNash = triUNKNOWN;
-  m_isNash = triUNKNOWN;
-  m_isSubgamePerfect = triUNKNOWN;
-  m_isSequential = triUNKNOWN;
-  m_checkedNash = false;
-  m_checkedANFNash = false;
-  m_checkedSubgamePerfect = false;
-  m_checkedSequential = false;
+  m_ANFNash.Invalidate();
+  m_Nash.Invalidate();
+  m_SubgamePerfect.Invalidate();
+  m_Sequential.Invalidate();
   m_qreLambda = -1;
   m_qreValue = -1;
-  m_liapValue = -1;
-
-  if (m_rnf_regret)  {
-    delete m_rnf_regret;
-    m_rnf_regret = 0;
-  }
+  m_liapValue.Invalidate();
+  m_rnfRegret.Invalidate();
   m_revision = Game().RevisionNumber();
 }
 
@@ -559,43 +529,50 @@ void BehavSolution::Invalidate(void) const
 // Computation of interesting quantities
 //-----------------------------------------
 
-const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
+
+gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
-  if(!IsValid()) Invalidate();
-  if (!m_rnf_regret)  {
-    const Efg& E = Game(); 
-    Lexicon L(E);  // we use the lexicon without allocating normal form.  
-    
-    for (int i = 1; i <= E.NumPlayers(); i++)
-      L.MakeReducedStrats(m_support, E.Players()[i], E.RootNode(), NULL);
-    
-    gArray<int> dim(E.NumPlayers());
-    for (int i = 1; i <= E.NumPlayers(); i++)
-      dim[i] = (L.strategies[i].Length()) ? L.strategies[i].Length() : 1;
-    
-    m_rnf_regret = new gPVector<gNumber>(dim);
-    
-    for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-      gNumber pay = Payoff(pl);
-      for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
-	BehavProfile<gNumber> scratch(*this);
-	//	gout << "\ninstalled 1:  " << scratch.IsInstalled() << " scratch: " << scratch;
-	const gArray<int> *const actions = L.strategies[pl][st];
-	for(int j = 1;j<=(*actions).Length();j++) {
-	  int a = (*actions)[j];
-	  //	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
-	  for (int k = 1;k<=scratch.Support().NumActions(pl,j);k++)
-	    scratch(pl,j,k) = (gNumber)0;
-	  if(a>0)scratch(pl,j,a) = (gNumber)1;
-	}
-	//	gout << "\ninstalled 2:  " << scratch.IsInstalled() << " scratch: " << scratch;
-	gNumber pay2 = scratch.Payoff(pl);
-	// use pay - pay instead of zero to get correct precision
-	(*m_rnf_regret)(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
+  const Efg& E = Game(); 
+  Lexicon L(E);  // we use the lexicon without allocating normal form.  
+  
+  for (int i = 1; i <= E.NumPlayers(); i++)
+    L.MakeReducedStrats(m_support, E.Players()[i], E.RootNode(), NULL);
+  
+  gArray<int> dim(E.NumPlayers());
+  for (int i = 1; i <= E.NumPlayers(); i++)
+    dim[i] = (L.strategies[i].Length()) ? L.strategies[i].Length() : 1;
+  
+  gPVector<gNumber> regret(dim); 
+  
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    gNumber pay = Payoff(pl);
+    for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
+      BehavProfile<gNumber> scratch(*this);
+      //	gout << "\ninstalled 1:  " << scratch.IsInstalled() << " scratch: " << scratch;
+      const gArray<int> *const actions = L.strategies[pl][st];
+      for(int j = 1;j<=(*actions).Length();j++) {
+	int a = (*actions)[j];
+	//	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
+	for (int k = 1;k<=scratch.Support().NumActions(pl,j);k++)
+	  scratch(pl,j,k) = (gNumber)0;
+	if(a>0)scratch(pl,j,a) = (gNumber)1;
       }
+      //	gout << "\ninstalled 2:  " << scratch.IsInstalled() << " scratch: " << scratch;
+      gNumber pay2 = scratch.Payoff(pl);
+      // use pay - pay instead of zero to get correct precision
+      regret(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
     }
   }
-  return *m_rnf_regret;
+  return regret;
+}
+
+
+const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
+{
+  CheckIsValid();
+  if(!m_rnfRegret.Checked()) 
+    m_rnfRegret.Set(GetRNFRegret());
+  return m_rnfRegret.Answer();
 }
 
 const gNumber BehavSolution::MaxRegret(void) const
@@ -605,10 +582,10 @@ const gNumber BehavSolution::MaxRegret(void) const
 
 const gNumber BehavSolution::MaxRNFRegret(void) const
 {
-  ReducedNormalFormRegret();
   gNumber ret = 0;
-  for(int i=m_rnf_regret->First();i<=m_rnf_regret->Last();i++)
-    if((*m_rnf_regret)[i]>=ret)ret = (*m_rnf_regret)[i];
+  const gVector<gNumber> & regret = (gVector<gNumber>)ReducedNormalFormRegret();
+  for(int i=regret.First();i<=regret.Last();i++)
+    if(regret[i]>=ret)ret = regret[i];
 
   return ret;
 }
@@ -624,7 +601,7 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
 					const gList<gList<int> > &var_index) 
   const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   int pl;
@@ -652,7 +629,7 @@ bool BehavSolution::ANFNodeProbabilityPoly(gPoly<gDouble> & node_prob,
 					   const int &i,
 					   const int &j) const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -701,7 +678,7 @@ BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 					  const gList<gList<int> > &var_index) 
   const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
@@ -746,7 +723,7 @@ BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace,
 				     const EFSupport &big_supp,
 				     const gList<gList<int> > &var_index) const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
 				     Lex, 
@@ -764,7 +741,7 @@ bool BehavSolution::ExtendsToNash(const EFSupport &little_supp,
 				  const EFSupport &big_supp,
 				        gStatus &m_status) const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   // This asks whether there is a Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
@@ -822,7 +799,7 @@ bool BehavSolution::ExtendsToANFNash(const EFSupport &little_supp,
 				     const EFSupport &big_supp,
 				           gStatus &m_status) const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   // This asks whether there is an ANF Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
@@ -929,7 +906,7 @@ BehavSolution::DeviationInfosets(const EFSupport & big_supp,
 				   const Infoset *iset,
 				   const Action *act) const 
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gList<const Infoset *> answer;
   
   gList<const Node *> node_list = iset->ListOfMembers();
@@ -947,7 +924,7 @@ BehavSolution::DeviationSupports(const EFSupport & big_supp,
 				   const Infoset */*iset*/,
 				   const Action */*act*/) const 
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gList<const EFSupport> answer;
 
   gArray<int> active_act_no(isetlist.Length());
@@ -1024,7 +1001,7 @@ BehavSolution::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 				         const Infoset *iset,
 				         const Action *act) const 
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -1080,7 +1057,7 @@ BehavSolution::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 				          const gList<gList<int> > &var_index) 
   const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
@@ -1143,7 +1120,7 @@ BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace,
 				    const EFSupport &big_supp,
 				    const gList<gList<int> > &var_index) const
 {
-  if(!IsValid()) Invalidate();
+  CheckIsValid();
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
 				     Lex, 
@@ -1256,3 +1233,4 @@ SubgamePerfectChecker::~SubgamePerfectChecker() {
   (start.Game()).UnmarkSubgames((start.Game()).RootNode());
   (start.Game()).MarkSubgames(oldroots);
 }
+

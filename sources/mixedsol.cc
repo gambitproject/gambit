@@ -49,11 +49,10 @@ void DisplayNfgAlgType(gOutput &p_file, NfgAlgType p_algorithm)
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
-    m_support(p_profile.Support()),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
-    m_isProper(triUNKNOWN), m_checkedPerfect(false), m_epsilon(0.0),
-    m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_id(0), m_revision(p_profile.Game().RevisionNumber())
+    m_support(p_profile.Support()), 
+    m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
+    m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
+    m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -71,9 +70,8 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
-    m_isProper(triUNKNOWN), m_checkedPerfect(false), m_qreLambda(-1), 
-    m_qreValue(-1), m_liapValue(-1), m_id(0), 
+    m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
+    m_liapValue(), m_qreLambda(-1), m_qreValue(-1), m_id(0), 
     m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -92,9 +90,8 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
-    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
-    m_isProper(triUNKNOWN), m_checkedPerfect(false), m_qreLambda(-1), 
-    m_qreValue(-1),m_liapValue(-1), m_id(0), 
+    m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
+    m_liapValue(), m_qreLambda(-1), m_qreValue(-1),m_id(0), 
     m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -117,13 +114,13 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 MixedSolution::MixedSolution(const MixedSolution &p_solution)
   : m_profile(p_solution.m_profile), m_precision(p_solution.m_precision),
     m_support(p_solution.m_support), m_creator(p_solution.m_creator), 
-    m_isNash(p_solution.m_isNash), m_isPerfect(p_solution.m_isPerfect),
-    m_isProper(p_solution.m_isProper), 
-    m_checkedPerfect(p_solution.m_checkedPerfect), 
+    m_Nash(p_solution.m_Nash), m_Perfect(p_solution.m_Perfect),
+    m_Proper(p_solution.m_Proper), 
+    m_liapValue(p_solution.m_liapValue), 
     m_epsilon(p_solution.m_epsilon),
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue), 
-    m_liapValue(p_solution.m_liapValue), m_id(p_solution.m_id), 
+    m_id(p_solution.m_id), 
     m_revision(p_solution.m_revision)
 { }
 
@@ -137,14 +134,13 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
     m_precision = p_solution.m_precision;
     m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
-    m_isNash = p_solution.m_isNash;
-    m_isPerfect = p_solution.m_isPerfect;
-    m_isProper = p_solution.m_isProper;
-    m_checkedPerfect = p_solution.m_checkedPerfect;
+    m_Nash = p_solution.m_Nash;
+    m_Perfect = p_solution.m_Perfect;
+    m_Proper = p_solution.m_Proper;
+    m_liapValue = p_solution.m_liapValue;
     m_epsilon = p_solution.m_epsilon;
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
-    m_liapValue = p_solution.m_liapValue;
     m_id = p_solution.m_id;
     m_revision = p_solution.m_revision;
   }
@@ -156,21 +152,33 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-void MixedSolution::CheckIsNash(void) const
+gTriState MixedSolution::GetNash(void) const
 {
-  if(!IsValid()) 
-    Invalidate();
-  if (m_isNash == triUNKNOWN) {
-    if(IsComplete())
-      m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
-    else
-      m_isNash = triFALSE;
-    if (m_isNash == triFALSE) {
-      m_checkedPerfect = true;
-      m_isPerfect = triFALSE;
-      m_isProper = triFALSE;
-    }
+  gTriState answer;
+  if(IsComplete())
+    answer = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
+  else
+    answer =  triFALSE;
+  if (answer == triFALSE) {
+    m_Perfect.Set(triFALSE);
+    m_Proper.Set(triFALSE);
   }
+  return answer;
+}
+
+gTriState MixedSolution::GetPerfect(void) const
+{
+  if(IsNash())
+    if(IsMixedDominated(*this,false,m_precision,gnull))
+      return triFALSE;
+    else if(Game().NumPlayers()==2)
+      return triTRUE;
+  return triUNKNOWN;
+}
+
+gTriState MixedSolution::GetProper(void) const
+{
+  return triUNKNOWN;
 }
 
 void MixedSolution::LevelPrecision(void)
@@ -278,49 +286,48 @@ bool MixedSolution::IsComplete(void) const
   return true;
 }
 
-gTriState MixedSolution::IsNash(void) const
+const gTriState &MixedSolution::IsNash(void) const
 {
-  CheckIsNash();
-  return m_isNash;
+  CheckIsValid();
+  if(!m_Nash.Checked())
+    m_Nash.Set(GetNash());
+  return m_Nash.Answer();
 }
 
-gTriState MixedSolution::IsPerfect(void) const
+const gTriState &MixedSolution::IsPerfect(void) const
 {
-  if(m_checkedPerfect == false) {
-    if(IsNash())
-      if(IsMixedDominated(*this,false,m_precision,gnull))
-	m_isPerfect = triFALSE;
-      else if(Game().NumPlayers()==2)
-	m_isPerfect = triTRUE;
-    m_checkedPerfect = true;
-  }
-  return m_isPerfect;
+  CheckIsValid();
+  if(!m_Perfect.Checked())
+    m_Perfect.Set(GetPerfect());
+  return m_Perfect.Answer();
 }
 
-gTriState MixedSolution::IsProper(void) const
+const gTriState &MixedSolution::IsProper(void) const
 {
-  CheckIsNash();
-  return m_isProper;
+  CheckIsValid();
+  if(!m_Proper.Checked())
+    m_Proper.Set(GetProper());
+  return m_Proper.Answer();
 }
 
 const gNumber &MixedSolution::LiapValue(void) const 
 { 
-  if (m_liapValue < (gNumber) 0)
-    m_liapValue = m_profile.LiapValue();
-  return m_liapValue; 
+  CheckIsValid();
+  if(!m_liapValue.Checked())
+    m_liapValue.Set(m_profile.LiapValue());
+  return m_liapValue.Answer();
 }
 
 void MixedSolution::Invalidate(void) const
 {
   m_support = NFSupport(m_profile.Game());
   m_creator = algorithmNfg_USER;
-  m_isNash = triUNKNOWN;
-  m_isPerfect = triUNKNOWN;
-  m_isProper = triUNKNOWN;
-  m_checkedPerfect = false;
+  m_Nash.Invalidate();
+  m_Perfect.Invalidate();
+  m_Proper.Invalidate();
+  m_liapValue.Invalidate();
   m_qreLambda = -1;
   m_qreValue = -1;
-  m_liapValue = -1;
   m_revision = Game().RevisionNumber();
 }
 
@@ -360,3 +367,4 @@ gOutput &operator<<(gOutput &p_file, const MixedSolution &p_solution)
   p_solution.Dump(p_file);
   return p_file;
 }
+
