@@ -1,7 +1,7 @@
 //#
 //# FILE: gmatrix.imp -- Implementation of gMatrix method functions
 //#
-//# $Id$
+//# @(#)gmatrix.imp	1.22 7/17/96
 //#
 
 #include "gmatrix.h"
@@ -23,6 +23,10 @@ template <class T> gMatrix<T>::gMatrix(int rows, int cols, int minrows)
 
 template <class T> gMatrix<T>::gMatrix(int rl, int rh, int cl, int ch)
   : gRectArray<T>(rl, rh, cl, ch)
+{ }
+
+template <class T> gMatrix<T>::gMatrix(const gRectArray<T> &M)
+  : gRectArray<T>(M)
 { }
 
 template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
@@ -273,6 +277,15 @@ template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
            (*this)(i+minrow, k+mincol) * M(j+M.minrow-1,l+M.mincol-1);
 
   return tmp;
+}
+
+//-------------------------------------------------------------------------
+//                  gMatrix<T>: Transpose
+//-------------------------------------------------------------------------
+
+template <class T> gMatrix<T> gMatrix<T>::Transpose() const
+{
+  return gMatrix(gRectArray<T>::Transpose());
 }
 
 //-------------------------------------------------------------------------

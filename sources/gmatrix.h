@@ -1,7 +1,7 @@
 //#
 //# FILE: gmatrix.h -- Implementation of matrix classes
 //#
-//# $Id$
+//# @(#)gmatrix.h	1.38 7/17/96
 //#
 
 #ifndef GMATRIX_H
@@ -19,6 +19,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
     gMatrix(int rows, int cols);
     gMatrix(int rows, int cols, int minrows);
     gMatrix(int rl, int rh, int cl, int ch);
+    gMatrix(const gRectArray<T> &);
     gMatrix(const gMatrix<T> &);
     virtual ~gMatrix();
 
@@ -49,6 +50,9 @@ template <class T> class gMatrix : public gRectArray<T>  {
 
        // KRONECKER PRODUCT
     gMatrix<T> operator&(const gMatrix<T> &) const;
+
+       // TRANSPOSE
+    gMatrix<T>       Transpose()         const;
 
        // COMPARISON OPERATORS
     bool operator==(const gMatrix<T> &) const;
