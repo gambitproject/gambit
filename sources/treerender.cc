@@ -694,8 +694,8 @@ void TreeZoomWindow::Render(wxDC &dc)
 {
   int width, height;
   GetClientSize(&width, &height);
-  width /= m_zoom;
-  height /= m_zoom;
+  width = (int)(width/m_zoom);
+  height = (int)(height/m_zoom);
 
   // coordinates of the middle of the cursor
   int xm = (xs+xe)/2, ym = (ys+ye)/2;
