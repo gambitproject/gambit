@@ -123,13 +123,13 @@ class gOutput  {
     virtual gOutput &operator<<(const char *x) = 0;
     virtual gOutput &operator<<(const void *x) = 0;
 
-    virtual int GetWidth(void)  = 0;
-    virtual gOutput &SetWidth(int w)  = 0;
-    virtual int GetPrec(void)  = 0;
-    virtual gOutput &SetPrec(int p)  = 0;
-    virtual gOutput &SetExpMode(void)  = 0;
-    virtual gOutput &SetFloatMode(void)  = 0;
-    virtual char GetRepMode(void) = 0;
+    virtual int GetWidth(void) const = 0;
+    virtual gOutput &SetWidth(int w) = 0;
+    virtual int GetPrec(void) const = 0;
+    virtual gOutput &SetPrec(int p) = 0;
+    virtual gOutput &SetExpMode(void) = 0;
+    virtual gOutput &SetFloatMode(void) = 0;
+    virtual char GetRepMode(void) const = 0;
 };
 
 class gFileOutput : public gOutput  {
@@ -158,13 +158,13 @@ class gFileOutput : public gOutput  {
     gFileOutput(FILE *);
     virtual ~gFileOutput();
 
-    int GetWidth(void);
+    int GetWidth(void) const;
     gOutput &SetWidth(int w);
-    int GetPrec(void);
+    int GetPrec(void) const;
     gOutput &SetPrec(int p);
     gOutput &SetExpMode(void);
     gOutput &SetFloatMode(void);
-    char GetRepMode(void);
+    char GetRepMode(void) const;
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
@@ -186,13 +186,13 @@ class gNullOutput : public gOutput  {
     gNullOutput(void);
     virtual ~gNullOutput();
 
-    int GetWidth(void);
+    int GetWidth(void) const;
     gOutput &SetWidth(int w);
-    int GetPrec(void);
+    int GetPrec(void) const;
     gOutput &SetPrec(int p);
     gOutput &SetExpMode(void);
     gOutput &SetFloatMode(void);
-    char GetRepMode(void);
+    char GetRepMode(void) const;
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);

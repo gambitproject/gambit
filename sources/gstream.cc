@@ -8,7 +8,6 @@
 #pragma implementation "gstream.h"
 #endif   // __GNUG__
 
-#include <assert.h>
 #include "gstream.h"
 
 //--------------------------------------------------------------------------
@@ -226,7 +225,7 @@ gFileOutput::~gFileOutput()
   if (f)   fclose(f);
 }
 
-int gFileOutput::GetWidth(void) 
+int gFileOutput::GetWidth(void) const
 {
   return Width;
 }
@@ -237,7 +236,7 @@ gOutput &gFileOutput::SetWidth(int w)
   return *this;
 }
 
-int gFileOutput::GetPrec(void) 
+int gFileOutput::GetPrec(void) const 
 {
   return Prec;
 }
@@ -260,7 +259,7 @@ gOutput &gFileOutput::SetFloatMode(void)
   return *this;
 }
 
-char gFileOutput::GetRepMode(void)
+char gFileOutput::GetRepMode(void) const
 {
   return Represent;
 }
@@ -342,11 +341,11 @@ gNullOutput::gNullOutput(void)   { }
 
 gNullOutput::~gNullOutput()   { }
 
-int gNullOutput::GetWidth(void) { return true; }
+int gNullOutput::GetWidth(void) const  { return 0; }
 
 gOutput &gNullOutput::SetWidth(int) { return *this; }
 
-int gNullOutput::GetPrec(void) { return true; }
+int gNullOutput::GetPrec(void) const { return 6; }
 
 gOutput &gNullOutput::SetPrec(int) { return *this; }
 
@@ -354,7 +353,7 @@ gOutput &gNullOutput::SetExpMode(void) { return *this; }
 
 gOutput &gNullOutput::SetFloatMode(void) { return *this; }
 
-char gNullOutput::GetRepMode(void) { return true; }
+char gNullOutput::GetRepMode(void) const { return 'f'; }
 
 gOutput &gNullOutput::operator<<(int)    { return *this; }
 

@@ -20,13 +20,13 @@ public:
   ~gGCLStatus();
 
   // OUTPUT DISPLAY FORMATS
-  int GetWidth(void) { return m_width; }
+  int GetWidth(void) const { return m_width; }
   gOutput &SetWidth(int w) { m_width = w; return *this; }
-  int GetPrec(void) { return m_prec; }
+  int GetPrec(void) const { return m_prec; }
   gOutput &SetPrec(int p) { m_prec = p; return *this; }
   gOutput &SetExpMode(void) { m_represent = 'e'; return *this; }
   gOutput &SetFloatMode(void) { m_represent = 'f'; return *this; }
-  char GetRepMode(void) { return m_represent; } 
+  char GetRepMode(void) const { return m_represent; } 
 
   // OUTPUT OPERATORS
   gOutput &operator<<(int) { return *this; }
