@@ -39,6 +39,8 @@ private:
   // Properties
   gbtBlock<wxColour> m_playerColors;
   bool m_modified;
+  gbtBlock<wxString> m_undoFiles, m_undoDescriptions;
+  gbtBlock<wxString> m_redoFiles, m_redoDescriptions;
   wxString m_filename;
   double m_treeZoom;
 
@@ -48,12 +50,25 @@ private:
   void RemoveView(gbtGameView *);
   void UpdateViews(void);
 
+  void SaveUndo(const wxString &);
+
 public:
   gbtGameDocument(const gbtGame &);
+  ~gbtGameDocument();
 
   const gbtGame &GetGame(void) const { return m_game; }
 
   // non-const member access to control updating of views
+  bool CanUndo(void) const { return (m_undoFiles.Length() > 0); }
+  const wxString &GetUndoDescription(void) const
+    { return m_undoDescriptions[m_undoDescriptions.Last()]; }
+  void Undo(void); 
+
+  bool CanRedo(void) const { return (m_redoFiles.Length() > 0); }
+  const wxString &GetRedoDescription(void) const
+    { return m_redoDescriptions[m_redoDescriptions.Last()]; }
+  void Redo(void);
+
   gbtGameOutcome NewOutcome(void);
   void SetPayoff(gbtGameOutcome p_outcome,
 		 const gbtGamePlayer &p_player, const gbtRational &p_value);

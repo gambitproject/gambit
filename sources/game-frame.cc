@@ -70,6 +70,8 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtGameFrame::OnFileExportPNG)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
+  EVT_MENU(wxID_UNDO, gbtGameFrame::OnEditUndo)
+  EVT_MENU(wxID_REDO, gbtGameFrame::OnEditRedo)
   EVT_MENU(GBT_MENU_VIEW_EFG, gbtGameFrame::OnViewEfg)
   EVT_MENU(GBT_MENU_VIEW_NFG, gbtGameFrame::OnViewNfg)
   EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtGameFrame::OnViewZoomIn)
@@ -168,6 +170,10 @@ void gbtGameFrame::MakeMenu(void)
 
   fileMenu->Append(wxID_EXIT, _("E&xit"), _("Exit Gambit"));
 
+  wxMenu *editMenu = new wxMenu;
+  editMenu->Append(wxID_UNDO, _("&Undo"), _("Undo the last action"));
+  editMenu->Append(wxID_REDO, _("&Redo"), _("Redo the last undone action"));
+
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(GBT_MENU_VIEW_EFG, _("&Extensive form"),
 		   _("Show the extensive form of this game"), true);
@@ -191,6 +197,7 @@ void gbtGameFrame::MakeMenu(void)
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
   menuBar->Append(viewMenu, _("&View"));
   menuBar->Append(toolsMenu, _("&Tools"));
   menuBar->Append(helpMenu, _("&Help"));
@@ -522,6 +529,16 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &)
   }
 }
 
+void gbtGameFrame::OnEditUndo(wxCommandEvent &)
+{
+  m_doc->Undo();
+}
+
+void gbtGameFrame::OnEditRedo(wxCommandEvent &)
+{
+  m_doc->Redo();
+}
+
 void gbtGameFrame::OnViewEfg(wxCommandEvent &)
 {
   if (GetSizer()->IsShown(m_treeDisplay)) {
@@ -617,6 +634,23 @@ void gbtGameFrame::OnUpdate(void)
   GetMenuBar()->Enable(wxID_PRINT,
 		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
 
+  GetMenuBar()->Enable(wxID_UNDO, m_doc->CanUndo());
+  if (m_doc->CanUndo()) {
+    GetMenuBar()->SetLabel(wxID_UNDO, "Undo " + m_doc->GetUndoDescription());
+  }
+  else {
+    GetMenuBar()->SetLabel(wxID_UNDO, "Undo");
+  }
+
+  GetMenuBar()->Enable(wxID_REDO, m_doc->CanRedo());
+  if (m_doc->CanRedo()) {
+    GetMenuBar()->SetLabel(wxID_REDO, "Redo " + m_doc->GetRedoDescription());
+  }
+  else {
+    GetMenuBar()->SetLabel(wxID_REDO, "Redo");
+  }
+  
+  
   GetMenuBar()->Check(GBT_MENU_VIEW_EFG, 
 		      m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
   GetMenuBar()->Enable(GBT_MENU_VIEW_EFG, m_doc->GetGame()->HasTree());

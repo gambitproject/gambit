@@ -62,6 +62,9 @@ private:
   void OnFileExit(wxCommandEvent &);
   void OnFileMRU(wxCommandEvent &);
 
+  void OnEditUndo(wxCommandEvent &);
+  void OnEditRedo(wxCommandEvent &);
+
   void OnViewEfg(wxCommandEvent &);
   void OnViewNfg(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);

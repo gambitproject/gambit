@@ -31,6 +31,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/filename.h>
 
 #include "game-document.h"
 
@@ -56,6 +57,17 @@ gbtGameDocument::gbtGameDocument(const gbtGame &p_game)
   }
 }
 
+gbtGameDocument::~gbtGameDocument()
+{
+  for (int i = 1; i <= m_undoFiles.Length(); i++) {
+    wxRemoveFile(m_undoFiles[i]);
+  }
+
+  for (int i = 1; i <= m_redoFiles.Length(); i++) {
+    wxRemoveFile(m_redoFiles[i]);
+  }
+}
+
 
 void gbtGameDocument::AddView(gbtGameView *p_view)
 { 
@@ -73,12 +85,63 @@ void gbtGameDocument::UpdateViews(void)
   for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate());
 }
 
+void gbtGameDocument::SaveUndo(const wxString &p_description)
+{
+  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  Save(tempfile);
+  m_undoFiles.Append(tempfile);
+  m_undoDescriptions.Append(p_description);
+
+  for (int i = 1; i <= m_redoFiles.Last(); i++) {
+    wxRemoveFile(m_redoFiles[i]);
+  }
+  m_redoFiles.Flush();
+  m_redoDescriptions.Flush();
+}
+
+void gbtGameDocument::Undo(void)
+{
+  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  Save(tempfile);
+  m_redoFiles.Append(tempfile);
+  m_redoDescriptions.Append(m_undoDescriptions[m_undoDescriptions.Last()]);
+
+  Load(m_undoFiles[m_undoFiles.Last()]);
+  wxRemoveFile(m_undoFiles[m_undoFiles.Last()]);
+  m_undoFiles.Remove(m_undoFiles.Last());
+  m_undoDescriptions.Remove(m_undoDescriptions.Last());
+
+  if (m_undoFiles.Length() == 0) {
+    m_modified = false;
+  }
+
+  UpdateViews();
+}
+
+void gbtGameDocument::Redo(void)
+{
+  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  Save(tempfile);
+  m_undoFiles.Append(tempfile);
+  m_undoDescriptions.Append(m_redoDescriptions[m_redoDescriptions.Last()]);
+
+  Load(m_redoFiles[m_redoFiles.Last()]);
+  wxRemoveFile(m_redoFiles[m_redoFiles.Last()]);
+  m_redoFiles.Remove(m_redoFiles.Last());
+  m_redoDescriptions.Remove(m_redoDescriptions.Last());
+
+  m_modified = true;
+  UpdateViews();
+}
+
+
 //-----------------------------------------------------------------------
 //         gbtGameDocument: Operations modifying the document
 //-----------------------------------------------------------------------
 
 gbtGameOutcome gbtGameDocument::NewOutcome(void) 
 { 
+  SaveUndo("creating new outcome");
   gbtGameOutcome r = m_game->NewOutcome(); 
   m_modified = true;
   UpdateViews(); 
@@ -89,6 +152,7 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
 				const gbtGamePlayer &p_player, 
 				const gbtRational &p_value)
 { 
+  SaveUndo("setting payoff");
   p_outcome->SetPayoff(p_player, p_value); 
   m_modified = true;
   UpdateViews(); 
