@@ -1808,12 +1808,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ActionValue", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValue_Float, 
-				       PortionSpec(porFLOAT, 1), 2));
+				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValuesRational, 
-				       PortionSpec(porRATIONAL, 1), 2));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
@@ -1860,13 +1860,13 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Belief", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Belief_Float, 
-				       PortionSpec(porFLOAT, 1), 2));
+				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Belief_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porBEHAV_RATIONAL, 
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("node", porNODE));
@@ -1962,12 +1962,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("InfosetProb", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProb_Float, 
-				       PortionSpec(porFLOAT, 2), 2));
+				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_InfosetProb_Rational, 
-				       PortionSpec(porRATIONAL, 2), 2));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
@@ -2187,13 +2187,13 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NodeValue", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValue_Float, 
-				       PortionSpec(porFLOAT, 1), 3));
+				       porFLOAT, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_EFG));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NodeValue_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_EFG));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
@@ -2215,12 +2215,12 @@ void Init_solfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("RealizProb", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProb_Float, 
-				       PortionSpec(porFLOAT, 1), 2));
+				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
   
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RealizProb_Rational, 
-				       PortionSpec(porRATIONAL, 1), 2));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);

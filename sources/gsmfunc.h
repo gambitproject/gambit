@@ -25,15 +25,15 @@ class gOutput;
 #define PARAM_AMBIGUOUS   ( (int)      -2 )
 
 
-#define PASS_BY_REFERENCE    true
-#define BYREF                PASS_BY_REFERENCE
-#define PASS_BY_VALUE        false
-#define BYVAL                PASS_BY_VALUE
+#define BYREF                true
+#define BYVAL                false
 
 #define AUTO_VAL_OR_REF      true
 
 #define NON_LISTABLE         false
 #define LISTABLE             true
+
+#define NULL_ARGS            true
 
 #define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
 
@@ -86,6 +86,7 @@ public:
   };
   PortionSpec          ReturnSpec;
   bool                 Listable;
+  bool                 NullArgs;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
 
@@ -97,7 +98,8 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE
+     bool listable = LISTABLE,
+     bool null_args = !NULL_ARGS
      );
   FuncInfoType
     (
@@ -105,7 +107,8 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE
+     bool listable = LISTABLE,
+     bool null_args = !NULL_ARGS
      );
   ~FuncInfoType();
 };

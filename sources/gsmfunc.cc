@@ -220,7 +220,7 @@ ParamInfoType::ParamInfoType(void)
  Name(""), 
  Spec(PortionSpec(porERROR)), 
  DefaultValue(NO_DEFAULT_VALUE), 
- PassByReference(PASS_BY_VALUE)
+ PassByReference(BYVAL)
 {}
 
 ParamInfoType::ParamInfoType(const ParamInfoType& paraminfo)
@@ -258,6 +258,7 @@ FuncInfoType::FuncInfoType(void)
  FuncPtr(0),
  ReturnSpec(PortionSpec(porERROR)),
  Listable(LISTABLE),
+ NullArgs(!NULL_ARGS),
  NumParams(0),
  ParamInfo(0)
 {}
@@ -267,6 +268,7 @@ FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
  UserDefined(funcinfo.UserDefined),
  ReturnSpec(funcinfo.ReturnSpec),
  Listable(funcinfo.Listable),
+ NullArgs(funcinfo.NullArgs),
  NumParams(funcinfo.NumParams)
 {
   int i;
@@ -286,13 +288,15 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable
+ bool listable,
+ bool null_args
 )
 :
  UserDefined(false),
  FuncPtr(funcptr),
  ReturnSpec(returnspec),
  Listable(listable),
+ NullArgs(null_args),
  NumParams(numparams)
 {
   int i;
@@ -308,13 +312,15 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable
+ bool listable,
+ bool null_args
 )
 :
  UserDefined(true),
  FuncInstr(funcinstr),
  ReturnSpec(returnspec),
  Listable(listable),
+ NullArgs(null_args),
  NumParams(numparams)
 {
   int i;
@@ -347,6 +353,7 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
   {
     _FuncInfo[f_index].UserDefined = func._FuncInfo[f_index].UserDefined;
     _FuncInfo[f_index].Listable    = func._FuncInfo[f_index].Listable;
+    _FuncInfo[f_index].NullArgs    = func._FuncInfo[f_index].NullArgs;
     _FuncInfo[f_index].ReturnSpec  = func._FuncInfo[f_index].ReturnSpec;
 
     if(!_FuncInfo[f_index].UserDefined)
@@ -1287,6 +1294,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	break;
       }
   }
+  if(_FuncInfo[_FuncIndex].NullArgs)
+    null_call = false;
   
   bool list_op;
   list_op = false;  

@@ -24,6 +24,18 @@
 extern GSM* _gsm;
 
 
+
+
+//---------------------------------------
+//           IsNull
+//---------------------------------------
+
+Portion* GSM_IsNull(Portion** param)
+{
+  return new BoolValPortion(param[0]->Spec().Type == porNULL);
+}
+
+
 //---------------------------------------
 //           Randomize
 //---------------------------------------
@@ -2908,6 +2920,14 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porRATIONAL));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER,
 					    new IntValPortion(0)));
+  gsm->AddFunction(FuncObj);
+
+
+
+  FuncObj = new FuncDescObj("IsNull", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
+				       NON_LISTABLE, NULL_ARGS));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
 }
