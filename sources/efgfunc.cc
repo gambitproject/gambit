@@ -1201,7 +1201,7 @@ void Init_efgfunc(GSM *gsm)
       { "MarkSubgame[node->NODE] =: BOOLEAN", GSM_MarkSubgame },
       { "MarkedSubgame[node->NODE] =: BOOLEAN", GSM_MarkedSubgame },
       { "Members[infoset->INFOSET*] =: LIST(NODE)", GSM_Members },
-      { "MergeInfosets[infoset1->INFOSET, infoset2->INFOSET] =: INFOSET",
+      { "MergeInfosets[to->INFOSET, from->INFOSET] =: INFOSET",
 	GSM_MergeInfosets },
       { "MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE",
 	GSM_MoveToInfoset },

@@ -716,7 +716,7 @@ void Init_listfunc(GSM *gsm)
 
 
   FuncObj = new gclFunction("NumElements", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_NumElements, porNUMBER, 1,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_NumElements, porINTEGER, 1,
 				       0, funcNONLISTABLE ));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
                               PortionSpec(porANYTYPE, 1, porNULLSPEC )));
@@ -724,13 +724,13 @@ void Init_listfunc(GSM *gsm)
 
 
   FuncObj = new gclFunction("Length", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthList, porNUMBER, 1));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthList, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
                               PortionSpec(porANYTYPE, 1, porNULLSPEC )));
   gsm->AddFunction(FuncObj);
 			
   FuncObj = new gclFunction("NumChars", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthText, porNUMBER, 1));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_LengthText, porINTEGER, 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("text", porTEXT));
   gsm->AddFunction(FuncObj);
 
