@@ -46,7 +46,7 @@
 
 %%
 
-efgfile:    header { path.Push(E->RootNode()); } body
+efgfile:    header { path.Push(E->RootNode()); } body  { return 0; }
 
 header:     NAME { E->SetTitle(last_name); } playerlist
 
