@@ -1,0 +1,96 @@
+//#
+//# FILE: readefg.imp -- Type-dependent file-reading code
+//#
+//# $Id$
+//#
+
+#include "ggrstack.h"
+#include "readefg.h"
+
+
+template <class T> class EfgFile : public EfgFileReader    {
+  public:
+    EfgFile(gInput &, ExtForm<T> *&);
+    virtual ~EfgFile();
+
+    int Parse(void);
+
+    Outcome *NewOutcome(void);
+    Outcome *GetOutcome(const gString &);
+    void SetOutcome(Outcome *, const gList<gRational> &);
+    void SetActionProbs(Infoset *, const gList<gRational> &);
+    bool CheckActionProbs(Infoset *, const gList<gRational> &);
+};
+
+template <class T> EfgFile<T>::EfgFile(gInput &f, ExtForm<T> *& E)
+  : EfgFileReader(f, E)
+{ }
+
+template <class T> EfgFile<T>::~EfgFile()
+{ }
+
+template <class T> Outcome *EfgFile<T>::NewOutcome(void)
+{
+  return ((ExtForm<T> &) *E).NewOutcome();
+}
+
+template <class T> Outcome *EfgFile<T>::GetOutcome(const gString &s)
+{
+  return ((ExtForm<T> &) *E).GetOutcome(s);
+}
+
+template <class T> void EfgFile<T>::SetOutcome(Outcome *c,
+					       const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    ((OutcomeVector<T> &) *c)[i] = p[i];
+}
+
+template <class T> void EfgFile<T>::SetActionProbs(Infoset *s,
+						   const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    ((ChanceInfoset<T> &) *s).SetActionProb(i, p[i]);
+}
+
+template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
+						     const gList<gRational> &p)
+{
+  for (int i = 1; i <= p.Length(); i++)
+    if (((ChanceInfoset<T> &) *s).GetActionProb(i) != p[i])  return false;
+  return true;
+}
+
+template <class T> int EfgFile<T>::Parse(void)
+{
+  infile.seekp(0);
+  static char *prologue = { "EFG 1 " };
+  char c;
+  for (int i = 0; i < strlen(prologue); i++)   {
+    infile.get(c);
+    if (c != prologue[i])   return 1;
+  }
+
+  infile.get(c);
+  if (c != ((E->Type() == DOUBLE) ? 'D' : 'R'))   return 1;
+  return yyparse();
+}
+
+template <class T> int ReadEfgFile(gInput &f, ExtForm<T> *& E)
+{
+  assert(!E);
+
+  E = new ExtForm<T>;
+
+  EfgFile<T> R(f, E);
+  
+  if (R.Parse())  {
+    if (E)  {  delete E;  E = 0; }
+    return 0;
+  }
+
+  return 1;
+}
+
+
+
