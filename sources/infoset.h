@@ -99,6 +99,7 @@ class Infoset   {
     int NumActions(void) const   { return actions.Length(); }
 
     const gArray<Node *> &GetMemberList(void) const   { return members; }
+    Node *GetMember(int i) const   { return members[i]; }
     int NumMembers(void) const   { return members.Length(); }
 
 // This function exists only to facilitate the current version of efg2nfg

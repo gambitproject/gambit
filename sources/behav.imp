@@ -93,6 +93,54 @@ template <class T> Efg<T>::Efg(const Efg<T> &E)
 
   root = new TypedNode<T>(this, 0, E.NumPlayers());
   CopySubtree(root, E.root);
+
+  sortisets = true;
+  SortInfosets();
+}
+
+//
+// This function creates a new Efg out of an Efg, treating it as if
+// it were rooted at node 'n'.
+// This is designed to be used as a way of extracting subgames, but
+// there is no restriction that 'n' be a subgame root.
+//
+// Use with care, if at all!
+//
+template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
+  : BaseEfg(E)
+{
+  int i;
+
+  assert(n->BelongsTo() == &E);
+
+  for (i = 1; i <= E.outcomes.Length(); i++)
+    outcomes.Append(new OutcomeVector<T>(this, 
+					 (OutcomeVector<T> &) *E.outcomes[i]));
+  
+  for (i = 1; i <= E.chance->infosets.Length(); i++)   {
+    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
+    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
+					       t->actions.Length());
+    s->name = t->name;
+    for (int j = 1; j <= s->probs.Length(); j++)  {
+      s->probs[j] = t->probs[j];
+      s->actions[j]->name = t->actions[j]->name;
+    }
+    chance->infosets.Append(s);
+  }
+
+  root = new TypedNode<T>(this, 0, E.NumPlayers());
+  CopySubtree(root, n);
+  
+  for (int pl = 1; pl <= players.Length(); pl++)   {
+    for (i = 1; i <= players[pl]->infosets.Length(); i++)  {
+      if (players[pl]->infosets[i]->members.Length() == 0)
+	delete players[pl]->infosets.Remove(i--);
+    }
+  }     
+
+  sortisets = true;
+  SortInfosets();
 }
 
 template <class T> Efg<T>::~Efg()
@@ -221,9 +269,9 @@ template <class T> gPVector<int> Efg<T>::Dimensionality(bool trunc) const
 }  
 
 
-//---------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 //                    BehavProfile<T> member functions
-//---------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
 template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
 						 bool trunc)

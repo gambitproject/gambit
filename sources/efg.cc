@@ -90,7 +90,8 @@ int BaseEfg::_NumObj = 0;
 #endif // MEMCHECK
 
 BaseEfg::BaseEfg(void)
-  : title("UNTITLED"), chance(new EFPlayer(this, 0)), lexicon(0)
+  : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
+    lexicon(0)
 {
 #ifdef MEMCHECK
   _NumObj++;
@@ -99,7 +100,8 @@ BaseEfg::BaseEfg(void)
 }
 
 BaseEfg::BaseEfg(const BaseEfg &E)
-  : title(E.title), players(E.players.Length()), chance(new EFPlayer(this, 0)),
+  : sortisets(false), title(E.title),
+    players(E.players.Length()), chance(new EFPlayer(this, 0)),
     lexicon(0)
 {
   for (int i = 1; i <= players.Length(); i++)  {
@@ -193,6 +195,8 @@ void BaseEfg::Reindex(void)
 
 void BaseEfg::SortInfosets(void)
 {
+  if (!sortisets)  return;
+
   for (int pl = 1; pl <= players.Length(); pl++)  {
     gList<Node *> nodes;
 

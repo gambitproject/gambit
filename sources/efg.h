@@ -27,6 +27,7 @@ private:
 friend class EfgFileReader;
   
 protected:
+    bool sortisets;
     gString title;
     gBlock<EFPlayer *> players;
     gBlock<Outcome *> outcomes;
@@ -164,6 +165,7 @@ template <class T> class Efg : public BaseEfg   {
 	//# CONSTRUCTORS AND DESTRUCTOR
     Efg(void);
     Efg(const Efg<T> &);
+    Efg(const Efg<T> &, Node *);
     virtual ~Efg(); 
 
 	//# DATA ACCESS -- GENERAL INFORMATION
@@ -175,8 +177,6 @@ template <class T> class Efg : public BaseEfg   {
     Infoset *CreateInfoset(EFPlayer *pl, int br);
 
         //# COMPUTING VALUES OF PROFILES
-        //    gDPVector<T> *NewBehavProfile(void) const;
-
 
     int ProfileLength(bool trunc = false) const;
     gPVector<int> Dimensionality(bool trunc = false) const;

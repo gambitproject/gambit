@@ -15,6 +15,8 @@
 // returns a glist of all nodes in the extensive form
 void Nodes (const BaseEfg &befg, gList <Node *> &list);
 
+void Nodes (const BaseEfg &befg, Node *n, gList <Node *> &list);
+
 // returns a glist of the Terminal Nodes in the extensive form 
 void TerminalNodes (const BaseEfg &befg, gList <Node *> &list);
 
