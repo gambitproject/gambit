@@ -20,6 +20,7 @@ class gclExpression     {
   public:
     virtual ~gclExpression()  { }
     
+    virtual PortionSpec Type(void) const   { return porANYTYPE; }
     virtual Portion *Evaluate(void) = 0;
 };
 
@@ -29,23 +30,22 @@ class gclQuitExpression : public gclExpression  {
     gclQuitExpression(void)  { }
     virtual ~gclQuitExpression()  { } 
 
+    PortionSpec Type(void) const;
     Portion *Evaluate(void);
 };
 
-class gclExpressionList : public gclExpression  {
+
+class gclSemiExpr : public gclExpression  {
   private:
-    gList<gclExpression *> exprs;
+    gclExpression *lhs, *rhs;
 
-  public: 
-    gclExpressionList(gclExpression *);
-    virtual ~gclExpressionList();
-  
-    void Prepend(gclExpression *);
-    void Append(gclExpression *);
+  public:
+    gclSemiExpr(gclExpression *l, gclExpression *r);
+    virtual ~gclSemiExpr();
 
+    PortionSpec Type(void) const;
     Portion *Evaluate(void);
 };
-  
 
 class gclReqParameterList  {
   private:
@@ -99,6 +99,11 @@ class gclFunctionCall : public gclExpression   {
   private:
     gString name;
     gclParameterList *params;
+    
+    Portion *(*funcptr)(Portion **);
+    PortionSpec type;    
+
+    void AttemptMatch(void);
 
   public:
     gclFunctionCall(const gString &name);
@@ -108,6 +113,7 @@ class gclFunctionCall : public gclExpression   {
     gclFunctionCall(const gString &name, gclParameterList *params);
     virtual ~gclFunctionCall();
 
+    PortionSpec Type(void) const;
     Portion *Evaluate(void);
 };
 
@@ -156,6 +162,7 @@ class gclConstExpr : public gclExpression    {
     gclConstExpr(Portion *value);
     virtual ~gclConstExpr();
 
+    PortionSpec Type(void) const;
     Portion *Evaluate(void);
 };
 

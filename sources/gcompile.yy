@@ -36,8 +36,6 @@ template class gStack<int>;
 template class gStack<char>;
 template class gStack<gInput *>;
 template class gStack<unsigned int>;
-template class gStack<gclExpression *>;
-template class gStack<gclFunctionCall *>;
 
 #include "glist.imp"
 
@@ -92,15 +90,13 @@ gStack<gString> GCL_InputFileNames(4);
 
 %union  {
   gclExpression *eval;
-  gclExpressionList *lval;
   gclParameterList *pval;
   gclReqParameterList *rpval; 
   gclOptParameterList *opval;
   gclListConstant *lcval;
 }
 
-%type <eval> expression constant function include
-%type <lval> expressionlist parameter
+%type <eval> expression constant function include parameter
 %type <pval> parameterlist
 %type <rpval> reqparameterlist 
 %type <opval> optparameterlist
@@ -166,6 +162,7 @@ gStack<gString> GCL_InputFileNames(4);
 %token CRLF
 %token EOC
 
+%right  SEMI
 %left  UWRITE
 %right  ASSIGN
 %left  WRITE  READ
@@ -181,20 +178,11 @@ gStack<gString> GCL_InputFileNames(4);
 
 %%
 
-program: expressionlist  EOC  { exprtree = $1; return 0; }
+program: expression  EOC  { exprtree = $1; return 0; }
        | error EOC    { RecoverFromError(); return 1; }
        | error CRLF   { RecoverFromError(); return 1; }
        ;
  
-expressionlist:  expression   { $$ = new gclExpressionList($1); }
-              |  expressionlist sep expression
-                     { $1->Append($3); $$ = $1; }
-
-sep:    SEMI | CRLFs
-
-CRLFs:   CRLF 
-     |   CRLFs CRLF
-
 include:         INCLUDE LBRACK TEXT RBRACK
                    { ++fakeCRLFs; fakesemi = true; LoadInputs(tval); 
                      $$ = new gclConstExpr(new BoolPortion(true)); }
@@ -203,6 +191,8 @@ expression:      constant
           |      function
           |      include
           |      LPAREN expression RPAREN   { $$ = $2; }
+          |      expression SEMI expression
+              { $$ = new gclSemiExpr($1, $3); }
           |      expression ASSIGN expression 
               { $$ = new gclAssignment($1, $3); }
 	  |      expression ASSIGN
@@ -259,21 +249,21 @@ expression:      constant
               { $$ = new gclFunctionCall("Read", $1, $3); }
           ;
 
-function:        IF LBRACK expressionlist COMMA expressionlist COMMA
-                           expressionlist RBRACK
+function:        IF LBRACK expression COMMA expression COMMA
+                           expression RBRACK
               { $$ = new gclConditional($3, $5, $7); } 
-        |        IF LBRACK expressionlist COMMA expressionlist RBRACK
+        |        IF LBRACK expression COMMA expression RBRACK
               { $$ = new gclConditional($3, $5, 
 				new gclConstExpr(new BoolPortion(false))); }
-        |        WHILE LBRACK expressionlist COMMA expressionlist RBRACK
+        |        WHILE LBRACK expression COMMA expression RBRACK
               { $$ = new gclWhileExpr($3, $5); }
-	|        FOR LBRACK expressionlist COMMA expressionlist COMMA
-                            expressionlist COMMA expressionlist RBRACK
+	|        FOR LBRACK expression COMMA expression COMMA
+                            expression COMMA expression RBRACK
               { $$ = new gclForExpr($3, $5, $7, $9); }
         |        DEFFUNC { if (in_funcdecl) YYERROR;  in_funcdecl = true; }
                   LBRACK  { gcmdline.SetPrompt(false); } signature COMMA 
                   { funcbody = ""; record_funcbody = true; }
-                  expressionlist RBRACK
+                  expression RBRACK
                   { record_funcbody = false; in_funcdecl = false;
                     $$ = DefineFunction($8);
 	            gcmdline.SetPrompt(true); }
@@ -289,12 +279,12 @@ parameterlist:     { $$ = new gclParameterList; }
 reqparameterlist:  parameter  { $$ = new gclReqParameterList($1); }
              |     reqparameterlist COMMA parameter  { $1->Append($3); }
 
-parameter:       expressionlist
+parameter:       expression
 
-optparameterlist:  NAME  { funcnames.Push(tval); } arrow expressionlist
+optparameterlist:  NAME  { funcnames.Push(tval); } arrow expression
                          { $$ = new gclOptParameterList(funcnames.Pop(), $4); }
                 |  optparameterlist COMMA NAME  { funcnames.Push(tval); }
-	              arrow expressionlist
+	              arrow expression
                          { $1->Append(funcnames.Pop(), $6); }
 
 arrow:         RARROW | DBLARROW

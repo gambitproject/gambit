@@ -14,6 +14,11 @@
 
 #include "gcmdline.h"
 
+PortionSpec gclQuitExpression::Type(void) const
+{
+  return porBOOL;
+}
+
 Portion *gclQuitExpression::Evaluate(void)
 {
   gCmdLineInput::RestoreTermAttr();
@@ -21,38 +26,30 @@ Portion *gclQuitExpression::Evaluate(void)
   return 0;
 }
 
-gclExpressionList::gclExpressionList(gclExpression *exp)
+gclSemiExpr::gclSemiExpr(gclExpression *e1, gclExpression *e2)
+  : lhs(e1), rhs(e2)
+{ }
+
+gclSemiExpr::~gclSemiExpr()
 {
-  exprs.Append(exp);
+  delete lhs;
+  delete rhs;
 }
 
-gclExpressionList::~gclExpressionList()
+PortionSpec gclSemiExpr::Type(void) const
 {
-  for (int i = 1; i <= exprs.Length(); delete exprs[i++]);
+  return rhs->Type();
 }
 
-void gclExpressionList::Prepend(gclExpression *exp)
+Portion *gclSemiExpr::Evaluate(void) 
 {
-  exprs.Insert(exp, 1);
-}
+  Portion *lv = lhs->Evaluate();
+  if (lv->Spec().Type == porERROR)
+    return lv;
 
-void gclExpressionList::Append(gclExpression *exp)
-{
-  exprs.Append(exp);
-}
-
-Portion *gclExpressionList::Evaluate(void)
-{
-  Portion *value = 0;
-
-  for (int i = 1; i <= exprs.Length(); i++)   {
-    value = exprs[i]->Evaluate();
-    if (value->Spec().Type == porERROR)
-      return value;
-    if (i < exprs.Length())  delete value;
-  }
-
-  return value;
+  delete lv;
+  
+  return rhs->Evaluate();
 }
 
 
@@ -145,26 +142,30 @@ gclParameterList::~gclParameterList()
 
 
 gclFunctionCall::gclFunctionCall(const gString &s)
-  : name(s), params(new gclParameterList)
+  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 { }
 
 gclFunctionCall::gclFunctionCall(const gString &s, gclExpression *op)
-  : name(s), params(new gclParameterList)
+  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
   params->req->Append(op);
+  AttemptMatch();
 }
 
 gclFunctionCall::gclFunctionCall(const gString &s,
 				 gclExpression *op1, gclExpression *op2)
-  : name(s), params(new gclParameterList)
+  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
   params->req->Append(op1);
   params->req->Append(op2);
+  AttemptMatch();
 }
 
 gclFunctionCall::gclFunctionCall(const gString &s, gclParameterList *p)
-  : name(s), params(p)
-{ }
+  : name(s), params(p), funcptr(0), type(porANYTYPE)
+{
+  AttemptMatch();
+}
 
 gclFunctionCall::~gclFunctionCall()
 {
@@ -172,11 +173,42 @@ gclFunctionCall::~gclFunctionCall()
 }
 
 
+PortionSpec gclFunctionCall::Type(void) const
+{
+  return type;
+}
+
 #include "gsm.h"
 #include "gsmfunc.h"
 #include "gsmhash.h"
 
 extern GSM &_gsm;
+
+void gclFunctionCall::AttemptMatch(void)
+{
+  if (!_gsm._FuncTable->IsDefined(name))
+    return;
+
+  FuncDescObj *func = (*_gsm._FuncTable)(name);
+  for (int i = 0; i < func->_NumFuncs; i++)  {
+    if (func->_FuncInfo[i].NumParams != params->req->NumParams())
+      continue;
+    
+    int j;
+    
+    for (j = 0; j < func->_FuncInfo[i].NumParams; j++)  {
+      if (!(func->_FuncInfo[i].ParamInfo[j].Spec == 
+	  (*params->req)[j+1]->Type()))
+	break;
+    }
+
+    if (j < func->_FuncInfo[i].NumParams)  continue;
+
+//    gout << "Matched function signature " << i << " of " << name << '\n';
+    type = func->_FuncInfo[i].ReturnSpec;
+    break;
+  }
+}
 
 Portion *gclFunctionCall::Evaluate(void)
 {
@@ -304,6 +336,11 @@ gclConstExpr::gclConstExpr(Portion *v)
 gclConstExpr::~gclConstExpr()
 {
   delete value;
+}
+
+PortionSpec gclConstExpr::Type(void) const
+{
+  return value->Spec();
 }
 
 Portion *gclConstExpr::Evaluate(void)

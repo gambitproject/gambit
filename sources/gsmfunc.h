@@ -122,6 +122,7 @@ public:
 
 class FuncDescObj
 {
+friend class gclFunctionCall;
 private:
 
   static RefCountHashTable< gclExpression* > _RefCountTable;
