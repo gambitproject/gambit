@@ -217,15 +217,13 @@ and parameter settings which work &quot;well&quot; in general.
 
 <para>
 For both extensive and normal forms, Gambit provides a set of
-standard Nash equilibrium computation algorithm settings.  The
-menu item <guimenuitem>Standard...</guimenuitem> on the
-<guisubmenu>Equilibrium</guisubmenu> submenu of the
-<guimenu>Tools</guimenu> menu displays a dialog listing the standard
-options available.  The dialog also indicates which algorithm and
-parameters will be used to compute the equilibria.
-</para>
-
-<para>
+standard Nash equilibrium computation algorithm settings.  
+These standard procedures are run from the Nash equilibrium dialog
+(accessible with the
+<guimenuitem>Equilibrium</guimenuitem> item on the 
+<guimenu>Tools</guimenu> menu).  Standard algorithms to compute one,
+two, or all Nash equilibria are available for both extensive and normal
+forms, as well as for selected refinements as appropriate.
 Refinements currently supported by Gambit are sequential and
 subgame perfect Nash equilibria on the extensive form, and
 (trembling-hand) perfect equilibria on the normal form.

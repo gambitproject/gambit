@@ -1,4 +1,5 @@
-<sect1><title>A simple game of poker</title>
+<sect1 id="gui.poker">
+<title>A simple game of poker</title>
   <para>
 This chapter takes a high-level tour of the Gambit graphical interface using
 as an example the simple one-card poker game appearing in
@@ -60,7 +61,7 @@ file.  After doing so, Gambit will display the opened game in a new
 window, as shown in Figure XXX.  The screenshot in Figure XXX shows
 the game as rendered by Gambit using the default settings.  Many
 display options are available to customize the appearance of game trees;
-see <xref linkend="gui.efgdisplay"> for details.
+see <xref linkend="gui.efg.display"> for details.
   </para>
 
 <para>
@@ -128,25 +129,13 @@ a vertical line.
 
 <para>
 The analytical features of Gambit are located on the <guimenu>Tools</guimenu>
-menu.  These are grouped into four submenus:
+menu.  These include:
 <itemizedlist>
-      <listitem>
-	<para>
-	  <guisubmenu>Subgames</guisubmenu>,
-          which contains items for the identification
-	  and manipulation of subgames of the tree.  Since Player~2 does not
-	  observe the card drawn by Player~1, this game has no proper subgames,
-	  and so this menu will not be explored further in this introduction.
-	</para>
-      </listitem>
       <listitem
 	<para>
-	  <guisubmenu>Supports</guisubmenu>,
-          which contains items dealing with sets of
-	  actions.  Of most immediate interest in this menu is the
-	  <guimenuitem>Undominated</guimenuitem> item,
-	  which determines which actions are not
-	  dominated by other actions.
+	  <guisubmenu>Dominance</guisubmenu>,
+          which interfaces to routines for identifying and eliminating
+          dominanted actions. 
 	</para>
       </listitem>
       <listitem>
@@ -160,13 +149,12 @@ menu.  These are grouped into four submenus:
       <listitem>
 	<para>
 	  <guisubmenu>Normal form</guisubmenu>,
-          which contains items to compute normal
+          which contains items to create normal
 	  forms corresponding to the extensive form game.
 	  </para>
       </listitem>
     </itemizedlist>
-In the following analysis, each of the latter three submenus will
-be visited.
+In the following analysis, each of these will be visited.
   </para>
 </sect1>
 

@@ -1,8 +1,105 @@
 <sect1 id="gui.efg">
 <title>Extensive form games</title>
-      <para>
+<para>
 
-	</para>
+</para>
+
+<sect2 id="gui.efg.prelim">
+<title>Extensive form games: Conventions and preliminaries</title>
+
+<para>
+Gambit displays extensive form games as a tree, with time flowing from
+left to right.  As the tree is built, Gambit uses an automatic layout
+algorithm to render the tree.
+<footnote>
+<para>
+That is, there is no mechanism currently for customizing the
+location of nodes in the tree display.  This is an item on the list for
+future enhancement.
+</para>
+</footnote>
+Some options are provided to customize the display of the tree;
+see <xref linkend="gui.efg.display"> for details.  The current objective
+of these options is to provide sufficient customizability to be able to
+use Gambit to create figures suitable for use in classroom materials and
+working papers; however, it might not be sufficient at this state for
+users who desire fine control over tree figures.
+</para>
+
+<para>
+Extensive form games have one or more players.  The players
+are specified when the game is created (see <xref linkend="gui.efg.file.new">);
+players may also be added on the fly using the 
+<guilabel>Extensive form properties</guilabel> dialog
+(see <xref linkend="gui.efg.edit.game">).
+<footnote>
+<para>Note that on-the-fly player adding is not currently supported in
+normal form games.
+</para>
+</footnote>
+Each player is indexed by her player number, which ranges from 1 to the
+number of players.  The player number 0 is reserved for the 
+player called &quot;chance&quot; or &quot;nature&quot;.
+For each player, the nodes at which she chooses are partitioned into
+information sets.  For convenience, Gambit assigns an ordered pair
+to each information set of the form (player number, information set number).
+The information set number ranges from 1 to the number of information
+sets a player has, and information set numbers are only unique within
+a player; therefore, information set (1,1), which is player 1's information
+set number 1, is distinct from information set (2,1), which is player 2's
+information set number 1.  
+The information set ID's are arbitrary, and have no significance in terms
+of analysis.  By default, Gambit displays information set ID's below
+each node; this feature can be configured by editing the display
+settings (see <xref linkend="gui.efg.display">).
+</para>
+
+<para>
+Gambit has a flexible interpretation of the concept of an outcome.
+An outcome is an object which has associated with it a vector of
+payoffs, one for each player.  A particular outcome may appear at
+multiple nodes in a tree, a feature used in the poker game example
+in <xref linkend="gui.poker">.  Outcomes may even appear at
+non-terminal nodes within a game; in such cases, they are interpreted
+as incremental payoffs.  Permitting outcomes to appear at non-terminal
+nodes makes it easier to construct trees where a stage game is repeated,
+with the supergame payoffs being the sum of the stage game payoffs earned.
+<footnote>
+<para>
+A two-stage Bayesian game using outcomes at non-terminal nodes in this
+fashion can be found in the <filename>bayes2a.efg</filename> game in
+the standard Gambit distribution.
+</para>
+</footnote>
+</para>
+
+<para>
+Most of the operations involving constructing and editing games require
+the selection of a node.  A node is selected by clicking with the left
+mouse button on a node, which may be represented by a circle, square,
+diamond, or horizontal line, depending on the selected style.  A selected
+node is drawn using a thicker line than its non-selected counterparts.
+Left-clicking the tree window away from any node unselects all nodes.
+Shortcuts are provided for quickly navigating through a tree; see
+<xref linkend="gui.efg.nav"> for a complete list.
+</para>
+
+</sect2>
+
+<sect2 id="gui.efg.file.new">
+<title>Creating a new extensive form game</title>
+
+<para>
+</para>
+</sect2>
+
+<sect2 id="gui.efg.file.open">
+<title>Reading an extensive form game from disk</title>
+
+<para>
+</para>
+</sect2>
+
 
 <sect2 id="gui.efg.insert">
 <title>Adding or inserting a move into the tree</title>
@@ -25,7 +122,23 @@ probabilities associated with each branch.
 
 </sect2>
 
-  <sect2 id="gui.efgdisplay" xreflabel="Changing how the tree is displayed" >
+<sect2 id="gui.efg.nav">
+<title>Navigating extensive form game trees</title>
+
+<para>
+
+</para>
+</sect2>
+
+<sect2 id="gui.efg.edit.game">
+<title>Viewing and changing extensive form game properties</title>
+
+<para>
+</para>
+
+</sect2>
+
+  <sect2 id="gui.efg.display" xreflabel="Changing how the tree is displayed" >
     <title>Changing how the tree is displayed</title>
     <para>
       The graphical interface offers a number of options which
