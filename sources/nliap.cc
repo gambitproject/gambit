@@ -105,7 +105,7 @@ template <class T> int NFLiapFunc<T>::Optimize(void)
   T val = (T) 0;
   int iter = 0;
   DFP(pp, params.tolDFP, iter, val);
-  if (params.plev > 0)
+  if (params.plev > 0 && params.outfile)
     *params.outfile << "\np= " << pp << " f = " << val;
   return (val < (T) ((T) 1 / (T) 100000));
 }
