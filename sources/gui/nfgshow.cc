@@ -586,7 +586,7 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
       profile.SetOutcome(0);
     }
     else {
-      profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(dialog.GetOutcome()));
+      profile.SetOutcome(m_doc->GetNfg().GetOutcome(dialog.GetOutcome()));
     }
     m_doc->UpdateViews(0, false, true);
   }

@@ -319,7 +319,7 @@ static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
     }
   }
     
-  efg.DeleteOutcome(outcome);
+  outcome.DeleteOutcome();
 
   ListPortion *ret = new ListPortion;
   for (int i = 1; i <= nodes.Length(); i++) {

@@ -34,162 +34,6 @@
 #include "nfgiter.h"
 
 //----------------------------------------------------------------------
-//                gbt_nfg_outcome_rep: Declaration
-//----------------------------------------------------------------------
-
-gbt_nfg_outcome_rep::gbt_nfg_outcome_rep(gbt_nfg_game_rep *p_nfg, int p_id)
-  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), 
-    m_payoffs(p_nfg->m_players.Length()),
-    m_doublePayoffs(p_nfg->m_players.Length()),
-    m_refCount(0)
-{
-  for (int i = 1; i <= m_payoffs.Length(); i++) {
-    m_payoffs[i] = 0;
-    m_doublePayoffs[i] = 0.0;
-  }
-}
-
-gbtNfgOutcome::gbtNfgOutcome(void)
-  : rep(0)
-{ }
-
-gbtNfgOutcome::gbtNfgOutcome(gbt_nfg_outcome_rep *p_rep)
-  : rep(p_rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-  }
-}
-
-gbtNfgOutcome::gbtNfgOutcome(const gbtNfgOutcome &p_outcome)
-  : rep(p_outcome.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-  }
-}
-
-gbtNfgOutcome::~gbtNfgOutcome()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0) {
-      // delete rep;
-    }
-  }
-}
-
-gbtNfgOutcome &gbtNfgOutcome::operator=(const gbtNfgOutcome &p_outcome)
-{
-  if (this == &p_outcome) {
-    return *this;
-  }
-
-  if (rep && --rep->m_refCount == 0) {
-    // delete rep;
-  }
-
-  if ((rep = p_outcome.rep) != 0) {
-    rep->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtNfgOutcome::operator==(const gbtNfgOutcome &p_outcome) const
-{
-  return (rep == p_outcome.rep);
-} 
-
-bool gbtNfgOutcome::operator!=(const gbtNfgOutcome &p_outcome) const
-{
-  return (rep != p_outcome.rep);
-} 
-
-int gbtNfgOutcome::GetId(void) const
-{
-  return (rep) ? rep->m_id : 0;
-}
-
-bool gbtNfgOutcome::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-gbtNfgGame gbtNfgOutcome::GetGame(void) const
-{
-  return (rep) ? rep->m_nfg : 0;
-}
-
-gText gbtNfgOutcome::GetLabel(void) const
-{
-  if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtNfgOutcome::SetLabel(const gText &p_label)
-{
-  if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-gNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
-{
-  if (rep && p_player.rep) {
-    return rep->m_payoffs[p_player.rep->m_id];
-  }
-  else {
-    return 0;
-  }
-}
-
-gArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
-{
-  if (rep) {
-    return rep->m_payoffs;
-  }
-  else {
-    return gArray<gNumber>();
-  }
-}
-
-double gbtNfgOutcome::GetPayoffDouble(int p_player) const
-{
-  if (rep) {
-    return rep->m_payoffs[p_player];
-  }
-  else {
-    return 0;
-  }
-}
-
-void gbtNfgOutcome::SetPayoff(const gbtNfgPlayer &p_player,
-			      const gNumber &p_value)
-{
-  if (rep && p_player.rep) {
-    rep->m_payoffs[p_player.rep->m_id] = p_value;
-    rep->m_doublePayoffs[p_player.rep->m_id] = (double) p_value;
-    // FIXME: tell game to update cached values
-  }
-}
-
-void gbtNfgOutcome::SetPayoff(const gArray<gNumber> &p_value)
-{
-  if (rep && rep->m_payoffs.Length() == p_value.Length()) {
-    (gArray<gNumber> &) rep->m_payoffs = p_value;
-  }
-}
-
-
-gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
-{ 
-  return p_stream;
-}
-
-//----------------------------------------------------------------------
 //                 gbt_nfg_strategy_rep: Declaration
 //----------------------------------------------------------------------
 
@@ -455,6 +299,39 @@ gbt_nfg_game_rep::~gbt_nfg_game_rep()
   for (int outc = 1; outc <= m_outcomes.Length(); delete m_outcomes[outc++]);
 }
 
+//
+// Deletes the outcome from the normal form.
+// Assumes outcome is not null.
+//
+void gbt_nfg_game_rep::DeleteOutcome(gbt_nfg_outcome_rep *p_outcome)
+{
+  // Remove references to the outcome from the table
+  for (int i = 1; i <= m_results.Length(); i++) {
+    if (m_results[i] == p_outcome) {
+      m_results[i] = 0;
+    }
+  }
+
+  // Remove the outcome from the list of defined outcomes
+  m_outcomes.Remove(m_outcomes.Find(p_outcome));
+
+  // If no external references, deallocate the memory;
+  // otherwise, mark as "deleted"
+  if (p_outcome->m_refCount == 0) {
+    delete p_outcome;
+  }
+  else {
+    p_outcome->m_deleted = true;
+  }
+
+  // Renumber the remaining outcomes
+  for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
+    m_outcomes[outc]->m_id = outc;
+  }
+
+  m_revision++;
+}
+
 //----------------------------------------------------
 // Nfg: Constructors, Destructors, Operators
 //----------------------------------------------------
@@ -611,24 +488,6 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
   return outcome;
 }
 
-void gbtNfgGame::DeleteOutcome(gbtNfgOutcome p_outcome)
-{
-  rep->m_revision++;
-
-  if (p_outcome.rep) {
-    for (int i = 1; i <= rep->m_results.Length(); i++) {
-      if (rep->m_results[i] == p_outcome.rep)
-	rep->m_results[i] = 0;
-    }
-
-    delete rep->m_outcomes.Remove(p_outcome.rep->m_id);
-
-    for (int outc = 1; outc <= rep->m_outcomes.Length(); outc++) {
-      rep->m_outcomes[outc]->m_id = outc;
-    }
-  }
-}
-
 void gbtNfgGame::SetTitle(const gText &s) 
 {
   rep->m_title = s; 
@@ -682,7 +541,7 @@ int gbtNfgGame::NumOutcomes(void) const
   return rep->m_outcomes.Length(); 
 }
 
-gbtNfgOutcome gbtNfgGame::GetOutcomeId(int p_id) const
+gbtNfgOutcome gbtNfgGame::GetOutcome(int p_id) const
 {
   return rep->m_outcomes[p_id];
 }

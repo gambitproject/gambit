@@ -81,7 +81,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   m_outcome->Append("(null)");
   m_outcome->SetSelection(0);
   for (int outc = 1; outc <= p_nfg.NumOutcomes(); outc++) {
-    gbtNfgOutcome outcome = p_nfg.GetOutcomeId(outc);
+    gbtNfgOutcome outcome = p_nfg.GetOutcome(outc);
     gText item = ToText(outc) + ": " + outcome.GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);

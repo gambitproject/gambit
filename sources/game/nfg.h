@@ -90,9 +90,7 @@ public:
 
   // OUTCOMES
   gbtNfgOutcome NewOutcome(void);
-  void DeleteOutcome(gbtNfgOutcome);
-
-  gbtNfgOutcome GetOutcomeId(int p_id) const;
+  gbtNfgOutcome GetOutcome(int p_id) const;
   int NumOutcomes(void) const;
 
   void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);

@@ -29,6 +29,7 @@ libgame_a_SOURCES = \
 	efplayer.h \
 	efstrat.cc \
 	efstrat.h \
+	game.h \
 	gnarray.h \
 	gnarray.imp \
 	infoset.cc \

@@ -46,10 +46,11 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
     gbtNfgOutcome outcome = N.NewOutcome();
 
-    outcome.SetLabel(nfg.GetOutcomeId(outc).GetLabel());
+    outcome.SetLabel(nfg.GetOutcome(outc).GetLabel());
 
     for (int pl = 1; pl <= N.NumPlayers(); pl++) {
-      outcome.SetPayoff(nfg.GetOutcomeId(outc).GetPayoff());
+      outcome.SetPayoff(nfg.GetPlayer(pl),
+			nfg.GetOutcome(outc).GetPayoff(nfg.GetPlayer(pl)));
     }
   }
 
@@ -59,7 +60,7 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   
   do   {
     if (!oiter.GetOutcome().IsNull()) {
-      niter.SetOutcome(N.GetOutcomeId(oiter.GetOutcome().GetId()));
+      niter.SetOutcome(N.GetOutcome(oiter.GetOutcome().GetId()));
     }
     else {
       niter.SetOutcome(0);
@@ -79,13 +80,13 @@ bool IsConstSum(const gbtNfgGame &nfg)
   if (nfg.NumOutcomes() == 0)  return true;
 
   for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-    cvalue += nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(pl));
+    cvalue += nfg.GetOutcome(1).GetPayoff(nfg.GetPlayer(pl));
 
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-      thisvalue += nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(pl));
+      thisvalue += nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(pl));
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -108,11 +109,11 @@ gNumber MinPayoff(const gbtNfgGame &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  minpay = nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(p1));
+  minpay = nfg.GetOutcome(1).GetPayoff(nfg.GetPlayer(p1));
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p)) < minpay)
-	minpay = nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p));
+      if (nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(p)) < minpay)
+	minpay = nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(p));
   }
   return minpay;
 }
@@ -131,11 +132,11 @@ gNumber MaxPayoff(const gbtNfgGame &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  maxpay = nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(p1));
+  maxpay = nfg.GetOutcome(1).GetPayoff(nfg.GetPlayer(p1));
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p)) > maxpay)
-	maxpay = nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p));
+      if (nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(p)) > maxpay)
+	maxpay = nfg.GetOutcome(index).GetPayoff(nfg.GetPlayer(p));
   }
   return maxpay;
 }
@@ -144,7 +145,7 @@ void RandomNfg(gbtNfgGame nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)
-      nfg.GetOutcomeId(outc).SetPayoff(nfg.GetPlayer(pl), gNumber(Uniform()));
+      nfg.GetOutcome(outc).SetPayoff(nfg.GetPlayer(pl), gNumber(Uniform()));
 }  
 
 

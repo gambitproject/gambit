@@ -478,7 +478,7 @@ static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
     }
 
     p_nfg.SetOutcomeIndex(cont++,
-			  p_nfg.GetOutcomeId(p_parser.GetLastInteger().as_long()));
+			  p_nfg.GetOutcome(p_parser.GetLastInteger().as_long()));
     p_parser.GetNextSymbol();
   }
 }

@@ -94,6 +94,8 @@ struct gbt_nfg_game_rep {
   gbt_nfg_game_rep(gbt_efg_game_rep *);
   gbt_nfg_game_rep(const gArray<int> &);
   ~gbt_nfg_game_rep();
+
+  void DeleteOutcome(gbt_nfg_outcome_rep *);
 };
 
 #endif // NFGINT_H

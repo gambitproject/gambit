@@ -85,8 +85,7 @@ static Portion *GSM_CompressNfg(GSM &, Portion **param)
 
 static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 {
-  gbtNfgOutcome outc = AsNfgOutcome(param[0]);
-  outc.GetGame().DeleteOutcome(outc);
+  AsNfgOutcome(param[0]).DeleteOutcome();
   return new BoolPortion(true);
 }
 
@@ -278,7 +277,7 @@ static Portion *GSM_Outcomes(GSM &, Portion **param)
   
   ListPortion *ret = new ListPortion;
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
-    ret->Append(new NfOutcomePortion(nfg.GetOutcomeId(outc)));
+    ret->Append(new NfOutcomePortion(nfg.GetOutcome(outc)));
   }
 
   return ret;

@@ -203,6 +203,36 @@ gbt_efg_infoset_rep *gbt_efg_game_rep::NewInfoset(gbt_efg_player_rep *p_player,
   return s;
 }
 
+//
+// Deletes the outcome from the extensive form.
+// Assumes outcome is not null.
+//
+void gbt_efg_game_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
+{
+  // Remove references to the outcome from the tree
+  root->DeleteOutcome(p_outcome);
+
+  // Remove the outcome from the list of defined outcomes
+  outcomes.Remove(outcomes.Find(p_outcome));
+
+  // If no external references, deallocate the memory;
+  // otherwise, mark as "deleted"
+  if (p_outcome->m_refCount == 0) {
+    delete p_outcome;
+  }
+  else {
+    p_outcome->m_deleted = true;
+  }
+
+  // Renumber the remaining outcomes
+  for (int outc = 1; outc <= outcomes.Length(); outc++) {
+    outcomes[outc]->m_id = outc;
+  }
+
+  m_revision++;
+  DeleteLexicon();
+}
+
 
 //------------------------------------------------------------------------
 //       Efg: Constructors, destructor, constructive operators
@@ -517,15 +547,6 @@ gbtEfgOutcome gbtEfgGame::NewOutcome(void)
 {
   rep->m_revision++;
   return NewOutcome(rep->outcomes.Last() + 1);
-}
-
-void gbtEfgGame::DeleteOutcome(gbtEfgOutcome p_outcome)
-{
-  rep->m_revision++;
-
-  rep->root->DeleteOutcome(p_outcome.rep);
-  delete rep->outcomes.Remove(rep->outcomes.Find(p_outcome.rep));
-  rep->DeleteLexicon();
 }
 
 gbtEfgOutcome gbtEfgGame::GetOutcome(int p_index) const

@@ -27,6 +27,8 @@
 #ifndef OUTCOME_H
 #define OUTCOME_H
 
+#include "game.h"
+
 //
 // The extensive form and normal form outcome classes are both included
 // in this header file in the hopes of an eventual unification of the
@@ -55,6 +57,7 @@ public:
   bool operator!=(const gbtEfgOutcome &) const;
 
   bool IsNull(void) const;
+  bool IsDeleted(void) const;
   int GetId(void) const;
   gbtEfgGame GetGame(void) const;
   gText GetLabel(void) const;
@@ -64,6 +67,8 @@ public:
   gNumber GetPayoff(const gbtEfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
   void SetPayoff(const gbtEfgPlayer &, const gNumber &);
+
+  void DeleteOutcome(void);
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
@@ -91,6 +96,7 @@ public:
   bool operator!=(const gbtNfgOutcome &) const;
 
   bool IsNull(void) const;
+  bool IsDeleted(void) const;
   int GetId(void) const;
   gbtNfgGame GetGame(void) const;
   gText GetLabel(void) const;
@@ -100,7 +106,8 @@ public:
   gNumber GetPayoff(const gbtNfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
   void SetPayoff(const gbtNfgPlayer &, const gNumber &);
-  void SetPayoff(const gArray<gNumber> &);
+
+  void DeleteOutcome(void);
 };
 
 gOutput &operator<<(gOutput &, const gbtNfgOutcome &);

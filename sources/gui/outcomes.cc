@@ -32,6 +32,110 @@
 #include "numberedit.h"
 #include "id.h"
 
+//=========================================================================
+//                       Outcome-editing commands
+//=========================================================================
+
+//-------------------------------------------------------------------------
+//                       class gbtCmdNewOutcome
+//-------------------------------------------------------------------------
+
+class gbtCmdNewOutcome : public gbtGameCommand {
+public:
+  gbtCmdNewOutcome(void) { }
+  virtual ~gbtCmdNewOutcome() { }
+
+  void Do(gbtGameDocument *);
+};
+
+void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
+{
+  if (p_doc->HasEfg()) {
+    gText outcomeName = p_doc->UniqueEfgOutcomeName();
+    gbtEfgOutcome outcome = p_doc->GetEfg().NewOutcome();
+    outcome.SetLabel(outcomeName);
+    for (int pl = 1; pl <= p_doc->GetEfg().NumPlayers(); pl++) {
+      outcome.SetPayoff(p_doc->GetEfg().GetPlayer(pl), gNumber(0));
+    }
+  }
+  else {
+    gText outcomeName = p_doc->UniqueNfgOutcomeName();
+    gbtNfgOutcome outcome = p_doc->GetNfg().NewOutcome();
+    outcome.SetLabel(outcomeName);
+    for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
+      outcome.SetPayoff(p_doc->GetNfg().GetPlayer(pl), gNumber(0));
+    }
+  }
+}
+
+//-------------------------------------------------------------------------
+//                   class gbtCmdDeleteOutcome
+//-------------------------------------------------------------------------
+
+class gbtCmdDeleteOutcome : public gbtGameCommand {
+private:
+  int m_id;
+
+public:
+  gbtCmdDeleteOutcome(int p_id) : m_id(p_id) { }
+  virtual ~gbtCmdDeleteOutcome() { }
+
+  void Do(gbtGameDocument *);
+};
+
+void gbtCmdDeleteOutcome::Do(gbtGameDocument *p_doc)
+{
+  if (p_doc->HasEfg()) {
+    p_doc->GetEfg().GetOutcome(m_id).DeleteOutcome();
+  }
+  else {
+    p_doc->GetNfg().GetOutcome(m_id).DeleteOutcome();
+  }
+}
+
+//-------------------------------------------------------------------------
+//                   class gbtCmdAttachOutcome
+//-------------------------------------------------------------------------
+
+class gbtCmdAttachOutcome : public gbtGameCommand {
+private:
+  int m_id;
+
+public:
+  gbtCmdAttachOutcome(int p_id) : m_id(p_id) { }
+  virtual ~gbtCmdAttachOutcome() { }
+
+  void Do(gbtGameDocument *);
+};
+
+void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
+{
+  if (p_doc->HasEfg()) {
+    if (m_id > 0) {
+      p_doc->GetCursor().SetOutcome(p_doc->GetEfg().GetOutcome(m_id));
+    }
+    else {
+      p_doc->GetCursor().SetOutcome(0);
+    }
+  }
+  else {
+    StrategyProfile profile(p_doc->GetNfg());
+    for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
+      profile.Set(pl, p_doc->GetNfg().GetPlayer(pl).GetStrategy(p_doc->GetContingency()[pl]));
+    }
+    if (m_id > 0) {
+      profile.SetOutcome(p_doc->GetNfg().GetOutcome(m_id));
+    }
+    else {
+      profile.SetOutcome(0);
+    }
+  }
+}
+
+//=========================================================================
+//                       class gbtOutcomeWindow
+//=========================================================================
+
 class gbtOutcomeWindow : public wxGrid {
 private:
   gbtGameDocument *m_doc;
@@ -54,7 +158,7 @@ BEGIN_EVENT_TABLE(gbtOutcomeWindow, wxGrid)
 END_EVENT_TABLE()
 
 gbtOutcomeWindow::gbtOutcomeWindow(gbtGameDocument *p_doc,
-					 wxWindow *p_parent)
+				   wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_doc(p_doc)
 {
@@ -138,7 +242,7 @@ void gbtOutcomeWindow::OnUpdate(void)
     }
 
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
-      gbtNfgOutcome outcome = nfg.GetOutcomeId(outc);
+      gbtNfgOutcome outcome = nfg.GetOutcome(outc);
 
       SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
@@ -168,8 +272,6 @@ void gbtOutcomeWindow::OnUpdate(void)
       }
     }
   }
-  
-  AdjustScrollbars();
 }
 
 //
@@ -185,34 +287,7 @@ void gbtOutcomeWindow::OnChar(wxKeyEvent &p_event)
       SaveEditControlValue();
       HideCellEditControl();
     }
-    if (m_doc->HasEfg()) {
-      gText outcomeName = m_doc->UniqueEfgOutcomeName();
-      gbtEfgOutcome outcome = m_doc->GetEfg().NewOutcome();
-      outcome.SetLabel(outcomeName);
-      for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-	outcome.SetPayoff(m_doc->GetEfg().GetPlayer(pl), gNumber(0));
-      }
-      AppendRows();
-      for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-	SetCellEditor(GetRows() - 1, pl, new NumberEditor);
-      }
-      m_doc->UpdateViews(0, true, true);
-      SetGridCursor(GetRows() - 1, 0);
-    }
-    else {
-      gText outcomeName = m_doc->UniqueNfgOutcomeName();
-      gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
-      outcome.SetLabel(outcomeName);
-      for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-	outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
-      }
-      AppendRows();
-      for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-	SetCellEditor(GetRows() - 1, pl, new NumberEditor);
-      }
-      m_doc->UpdateViews(0, true, true);
-      SetGridCursor(GetRows() - 1, 0);
-    }
+    m_doc->Submit(new gbtCmdNewOutcome());
   }
   else {
     p_event.Skip();
@@ -237,7 +312,7 @@ void gbtOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
     }
   }
   else {
-    gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcomeId(row+1);
+    gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(row+1);
     if (col == 0) { 
       // Edited cell label
       outcome.SetLabel(GetCellValue(row, col).c_str());
@@ -250,9 +325,9 @@ void gbtOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   }
 }
 
-//-------------------------------------------------------------------------
-//                      class gbtOutcomeFrame
-//-------------------------------------------------------------------------
+//=========================================================================
+//                       class gbtOutcomeFrame
+//=========================================================================
 
 BEGIN_EVENT_TABLE(gbtOutcomeFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, gbtOutcomeFrame::Close)
@@ -331,76 +406,21 @@ void gbtOutcomeFrame::OnUpdate(gbtGameView *p_sender)
 
 void gbtOutcomeFrame::OnOutcomeNew(wxCommandEvent &)
 {
-  if (m_doc->HasEfg()) {
-    gText outcomeName = m_doc->UniqueEfgOutcomeName();
-    gbtEfgOutcome outcome = m_doc->GetEfg().NewOutcome();
-    outcome.SetLabel(outcomeName);
-    // Appending the row here keeps currently selected row selected
-    m_grid->AppendRows();
-    for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-      outcome.SetPayoff(m_doc->GetEfg().GetPlayer(pl), gNumber(0));
-      m_grid->SetCellEditor(m_grid->GetRows() - 1, pl, new NumberEditor);
-    }
-  }
-  else {
-    gText outcomeName = m_doc->UniqueNfgOutcomeName();
-    gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
-    outcome.SetLabel(outcomeName);
-    // Appending the row here keeps currently selected row selected
-    m_grid->AppendRows();
-    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-      outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
-      m_grid->SetCellEditor(m_grid->GetRows() - 1, pl, new NumberEditor);
-    }
-  }
-  m_doc->UpdateViews(0, true, true);
+  m_doc->Submit(new gbtCmdNewOutcome());
 }
 
 void gbtOutcomeFrame::OnOutcomeDelete(wxCommandEvent &)
 {
-  if (m_grid->GetGridCursorRow() >= 0 && 
-      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
-    if (m_doc->HasEfg()) {
-      m_doc->GetEfg().DeleteOutcome(m_doc->GetEfg().GetOutcome(m_grid->GetGridCursorRow() + 1));
-    }
-    else {
-      m_doc->GetNfg().DeleteOutcome(m_doc->GetNfg().GetOutcomeId(m_grid->GetGridCursorRow() + 1));
-    }
-  }
-  m_doc->UpdateViews(0, true, true);
+  m_doc->Submit(new gbtCmdDeleteOutcome(m_grid->GetCursorRow() + 1));
 }
 
 void gbtOutcomeFrame::OnOutcomeAttach(wxCommandEvent &)
 {
-  if (m_grid->GetGridCursorRow() >= 0 && 
-      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
-    if (m_doc->HasEfg()) {
-      m_doc->GetCursor().SetOutcome(m_doc->GetEfg().GetOutcome(m_grid->GetGridCursorRow() + 1));
-    }
-    else {
-      StrategyProfile profile(m_doc->GetNfg());
-      for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-	profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
-      }
-      profile.SetOutcome(m_doc->GetNfg().GetOutcomeId(m_grid->GetGridCursorRow() + 1));
-    }
-  }
-  m_doc->UpdateViews(0, true, true);
+  m_doc->Submit(new gbtCmdAttachOutcome(m_grid->GetCursorRow() + 1));
 }
 
 void gbtOutcomeFrame::OnOutcomeDetach(wxCommandEvent &)
 {
-  if (m_doc->HasEfg()) {
-    StrategyProfile profile(m_doc->GetNfg());
-    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-      profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
-    }
-    profile.SetOutcome(0);
-  }
-  else {
-    m_doc->GetCursor().SetOutcome(0);
-  }
-
-  m_doc->UpdateViews(0, true, true);
+  m_doc->Submit(new gbtCmdAttachOutcome(0));
 }
 
