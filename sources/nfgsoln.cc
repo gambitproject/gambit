@@ -566,7 +566,7 @@ void NfgSolnShow::OnOptionsChanged(unsigned int options)
 Bool NfgSolnShow:: OnClose(void)
 {
   OnOk();
-  return False;
+  return FALSE;
 }
 
 void NfgSolnShow::UpdateValues(void)

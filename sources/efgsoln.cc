@@ -913,7 +913,7 @@ void EfgSolnShow::SolutionToNormal(void)
 Bool EfgSolnShow:: OnClose(void)
 {
   OnOk();
-  return False;
+  return FALSE;
 }
 
 
