@@ -1,7 +1,10 @@
 //
-// FILE: gsm.h -- definition of GSM (stack machine) type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to GCL environment (GSM)
 //
 
 #ifndef GSM_H
@@ -26,17 +29,11 @@ class gRational;
 class Node;
 class Infoset;
 
-namespace Efg {
-  class Game;
-}
-
 template <class T> class gList;
 template <class T> class gStack;
 
 template <class T> class RefCountHashTable;
 
-
-#define GCL_VERSION   0.962
 
 class GSM  {
 friend class gclFunctionCall;
@@ -106,15 +103,15 @@ public:
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
 
-  void UnAssignEfgOutcome(Efg::Game *game, const Efg::Outcome &outcome);
+  void UnAssignEfgOutcome(efgGame *game, const efgOutcome *outcome);
   // Unassigns a SINGLE given element of an Efg
-  void UnAssignEfgElement(Efg::Game *game, PortionSpec spec, void* data );
+  void UnAssignEfgElement(efgGame *game, PortionSpec spec, void* data );
 
   // This function will unassign an infoset and all associated actions
-  void UnAssignEfgInfoset(Efg::Game *game, Infoset* infoset );
+  void UnAssignEfgInfoset(efgGame *game, Infoset* infoset );
 
   // This function will unassign the subtree rooted by the given node
-  void UnAssignEfgSubTree(Efg::Game *game, Node* node ); 
+  void UnAssignEfgSubTree(efgGame *game, Node* node ); 
 
 
   void GlobalVarDefine     ( const gText& var_name, Portion* p );

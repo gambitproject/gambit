@@ -297,7 +297,7 @@ constant:        BOOLEAN
         |        STDOUT
           { $$ = new gclConstExpr(new OutputPortion(gsm->OutputStream())); }
         |        gNULL
-          { $$ = new gclConstExpr(new OutputPortion(gnull)); }
+          { $$ = new gclConstExpr(new OutputPortion(*new gNullOutput)); }
         |        FLOATPREC
           { $$ = new gclConstExpr(new PrecisionPortion(precDOUBLE)); }
         |        RATIONALPREC

@@ -286,25 +286,23 @@ inline bool AsBool(Portion *portion)
 // EFOutcome
 //-------------
 
-namespace Efg {
-  class Outcome;
-}
+class efgOutcome;
 
 class EfOutcomePortion : public Portion  {
 protected:
-  Efg::Outcome *m_value;
+  efgOutcome **m_value;
   bool m_ref;
 
   static gPool pool;
 
-  EfOutcomePortion(Efg::Outcome &, bool);
+  EfOutcomePortion(efgOutcome *&, bool);
 
 public:
-  EfOutcomePortion(const Efg::Outcome &);
+  EfOutcomePortion(const efgOutcome *);
   virtual ~EfOutcomePortion();
 
-  Efg::Outcome Value(void) const;
-  void SetValue(const Efg::Outcome &);
+  efgOutcome *Value(void) const;
+  void SetValue(const efgOutcome *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
