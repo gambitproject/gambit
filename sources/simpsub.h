@@ -1,0 +1,29 @@
+//
+// FILE: subnsimp.h -- Solve efg by simpdiv on nfg
+//
+// $Id$
+//
+
+#ifndef SUBNSIMP_H
+#define SUBNSIMP_H
+
+#include "simpdiv.h"
+#include "subsolve.h"
+
+template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
+  private:
+    int nevals;
+    SimpdivParams params;
+
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int AlgorithmID() const { return id_SIMPDIVSUB; }    
+
+  public:
+    SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &, int max = 0);
+    virtual ~SimpdivBySubgame();
+
+    int NumEvals(void) const    { return nevals; }
+};
+
+
+#endif   // SUBNSIMP_H
