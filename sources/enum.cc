@@ -82,8 +82,8 @@ template <class T> int EnumModule<T>::Enum(void)
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
 
-  VertEnum<T> poly1(A1,b1);
-  VertEnum<T> poly2(A2,b2);
+  VertEnum<T> poly1(A1,b1,params.status);
+  VertEnum<T> poly2(A2,b2,params.status);
 
   v1=poly1.VertexList().Last();
   v2=poly2.VertexList().Last();
@@ -95,7 +95,7 @@ template <class T> int EnumModule<T>::Enum(void)
   T sum;
   bool nash;
 
-  for(i=2;i<=v2;i++) {
+  for(i=2;i<=v2 && !params.status.Get();i++) {
     bfs1 = poly2.VertexList()[i];
     sum = (T)0;
     for(k=1;k<=n1;k++) {
@@ -155,6 +155,11 @@ template <class T> int EnumModule<T>::Enum(void)
   }
 //  gout << "\n";
   npivots = poly1.NumPivots()+poly2.NumPivots();
+
+  if(params.status.Get()) {
+    (*params.tracefile) << "\n User Break \n";
+    params.status.Reset();
+  }
 
   time = watch.Elapsed();
   return 1;
