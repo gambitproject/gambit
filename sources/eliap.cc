@@ -73,7 +73,7 @@ EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &LP)
 template <class T>
 EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &,
 			  const BehavProfile<T> &start)
-  : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
+  : gBFunctMin<T>(EF.ProfileLength(),LP.status), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
     xi(p.Length(),p.Length())
 {
