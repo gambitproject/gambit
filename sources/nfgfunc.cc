@@ -174,6 +174,22 @@ Portion *GSM_ReadNfg(Portion **param)
     return 0;
 }
 
+Portion *GSM_NewNfg(Portion **param)
+{
+  ListPortion *dim = ((ListPortion *) param[0]);
+  gArray<int> d(dim->Length());
+  
+  for (int i = 1; i <= dim->Length(); i++)
+    d[i] = ((IntPortion *) dim->Subscript(i))->Value();
+
+  bool random = ((BoolPortion *) param[1])->Value();
+  int seed = ((BoolPortion *) param[2])->Value();
+
+  NormalForm<double> *N = new NormalForm<double>(d, random, seed);
+
+  return new NfgValPortion<double>(*N);
+}
+
 Portion *GSM_WriteNfg(Portion **param)
 {
   gOutput &f = ((OutputPortion *) param[0])->Value();
@@ -269,6 +285,15 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Simpdiv");
   FuncObj->SetFuncInfo(GSM_Simpdiv, 1);
   FuncObj->SetParamInfo(GSM_Simpdiv, 0, "N", porNFG_FLOAT);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NewNfg");
+  FuncObj->SetFuncInfo(GSM_NewNfg, 3);
+  FuncObj->SetParamInfo(GSM_NewNfg, 0, "dim", porLIST | porINTEGER);
+  FuncObj->SetParamInfo(GSM_NewNfg, 1, "random", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_NewNfg, 2, "seed", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ReadNfg");
