@@ -104,6 +104,8 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
   T val((T) 0), prob, psum, z;
 
   E.CondPayoff(p, cpay,probs);
+
+//  gout << "\np = " << p << " cpay = " << cpay;
   
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     for (int iset = 1; iset <= E.NumInfosets(1, pl); iset++)  {
@@ -111,7 +113,8 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
       psum = (T) 0;
       
       for (int act = 1; act <= E.NumActions(1, pl, iset); act++)  {
-	z = probs(pl,iset) * Lambda * cpay(pl, iset, act);
+	z = Lambda * cpay(pl, iset, act);
+//	z = probs(pl,iset) * Lambda * cpay(pl, iset, act);
 //	assert(z < (T) 600);
 	z = exp(z);
 	psum += z;
