@@ -5,64 +5,12 @@
 //
 
 #include "gmisc.h"
+#include "exprtree.h"
 #include "funcmisc.h"
 #include "glist.h"
 #include "tristate.h"
 
 
-#define DECLARE_NOPARAM(funcclass,typer)   class funcclass : public gelExpression<typer>  {  \
-  public: \
-    funcclass(void); \
-    virtual ~funcclass(); \
-    virtual typer Evaluate(gelVariableTable *) const; \
-}; \
-\
-funcclass::funcclass(void)  \
-{ } \
-\
-funcclass::~funcclass() \
-{ \
-}
-
-#define DECLARE_UNARY(funcclass,type1,typer)   class funcclass : public gelExpression<typer>  {  \
-  private: \
-    gelExpression<type1> *op1; \
-\
-  public: \
-    funcclass(gelExpression<type1> *); \
-    virtual ~funcclass(); \
-    virtual typer Evaluate(gelVariableTable *) const; \
-}; \
-\
-funcclass::funcclass(gelExpression<type1> *x) \
-  : op1(x) \
-{ } \
-\
-funcclass::~funcclass() \
-{ \
-  delete op1; \
-}
-
-#define DECLARE_BINARY(funcclass,type1,type2,typer)   class funcclass : public gelExpression<typer>  {  \
-  private: \
-    gelExpression<type1> *op1; \
-    gelExpression<type2> *op2; \
-\
-  public: \
-    funcclass(gelExpression<type1> *, gelExpression<type2> *); \
-    virtual ~funcclass(); \
-    virtual typer Evaluate(gelVariableTable *) const; \
-}; \
-\
-funcclass::funcclass(gelExpression<type1> *x, gelExpression<type2> *y) \
-  : op1(x), op2(y) \
-{ } \
-\
-funcclass::~funcclass() \
-{ \
-  delete op1; \
-  delete op2; \
-}
 
 DECLARE_UNARY(gelfuncPrintNumber, gNumber, gNumber)
 DECLARE_UNARY(gelfuncPrintBoolean, gTriState, gTriState)
@@ -70,34 +18,32 @@ DECLARE_UNARY(gelfuncPrintText, gText, gText)
 
 DECLARE_UNARY(gelfuncNot, gTriState, gTriState)
 
-gNumber gelfuncPrintNumber::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncPrintNumber::EvalItem( gNumber x1 ) const
 {
-  gNumber value = op1->Evaluate(vt);
-  gout << value;
-  return value;
+  gout << x1;
+  return x1;
 }
 
-gTriState gelfuncPrintBoolean::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncPrintBoolean::EvalItem( gTriState x1 ) const
 {
-  gTriState value = op1->Evaluate(vt);
-  switch (value)   {
+  switch( x1 )
+  {
     case triTRUE:  gout << "True";  break;
     case triFALSE: gout << "False"; break;
     case triMAYBE: gout << "Maybe"; break;
   }
-  return value;
+  return x1;
 }
 
-gText gelfuncPrintText::Evaluate(gelVariableTable *vt) const
+gText gelfuncPrintText::EvalItem( gText x1 ) const
 {
-  gText value = op1->Evaluate(vt);
-  gout << value;
-  return value;
+  gout << x1;
+  return x1;
 }
 
-gTriState gelfuncNot::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncNot::EvalItem( gTriState x1 ) const
 {
-  return TriStateNot(op1->Evaluate(vt));
+  return TriStateNot( x1 );
 }
 
 DECLARE_BINARY(gelfuncDivide, gNumber, gNumber, gNumber)
@@ -106,24 +52,24 @@ DECLARE_BINARY(gelfuncPlus, gNumber, gNumber, gNumber)
 DECLARE_BINARY(gelfuncTimes, gNumber, gNumber, gNumber)
 
 
-gNumber gelfuncDivide::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncDivide::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return op1->Evaluate(vt) / op2->Evaluate(vt);
+  return x1 / x2;
 }
 
-gNumber gelfuncMinus::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncMinus::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return op1->Evaluate(vt) - op2->Evaluate(vt);
+  return x1 - x2;
 }
 
-gNumber gelfuncPlus::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncPlus::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return op1->Evaluate(vt) + op2->Evaluate(vt);
+  return x1 + x2;
 }
 
-gNumber gelfuncTimes::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncTimes::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return op1->Evaluate(vt) * op2->Evaluate(vt);
+  return x1 * x2;
 }
 
 DECLARE_BINARY(gelfuncLessNumber, gNumber, gNumber, gTriState)
@@ -134,47 +80,47 @@ DECLARE_BINARY(gelfuncEqualNumber, gNumber, gNumber, gTriState)
 DECLARE_BINARY(gelfuncNotEqualNumber, gNumber, gNumber, gTriState)
 
 
-gTriState gelfuncLessNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncLessNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) < op2->Evaluate(vt));
+  return gTriState( x1 < x2 );
 }
 
-gTriState gelfuncLessEqualNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncLessEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) <= op2->Evaluate(vt));
+  return gTriState( x1 <= x2 );
 }
 
-gTriState gelfuncGreaterNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncGreaterNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) > op2->Evaluate(vt));
+  return gTriState( x1 > x2 );
 }
 
-gTriState gelfuncGreaterEqualNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncGreaterEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) > op2->Evaluate(vt));
+  return gTriState( x1 >= x2);
 }
 
-gTriState gelfuncEqualNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) == op2->Evaluate(vt));
+  return gTriState( x1 == x2 );
 }
 
-gTriState gelfuncNotEqualNumber::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncNotEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) != op2->Evaluate(vt));
+  return gTriState( x1 != x2 );
 }
 
 DECLARE_BINARY(gelfuncAnd, gTriState, gTriState, gTriState)
 DECLARE_BINARY(gelfuncOr, gTriState, gTriState, gTriState)
 
-gTriState gelfuncAnd::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncAnd::EvalItem( gTriState x1, gTriState x2 ) const
 {
-  return TriStateAnd(op1->Evaluate(vt), op2->Evaluate(vt));
+  return TriStateAnd( x1, x2 );
 }
 
-gTriState gelfuncOr::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncOr::EvalItem( gTriState x1, gTriState x2 ) const
 {
-  return TriStateOr(op1->Evaluate(vt), op2->Evaluate(vt));
+  return TriStateOr( x1, x2 );
 }
 
 DECLARE_BINARY(gelfuncLessText, gText, gText, gTriState)
@@ -185,41 +131,41 @@ DECLARE_BINARY(gelfuncEqualText, gText, gText, gTriState)
 DECLARE_BINARY(gelfuncNotEqualText, gText, gText, gTriState)
 
 
-gTriState gelfuncLessText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncLessText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) < op2->Evaluate(vt));
+  return gTriState( x1 < x2 );
 }
 
-gTriState gelfuncLessEqualText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncLessEqualText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) <= op2->Evaluate(vt));
+  return gTriState( x1 <= x2 );
 }
 
-gTriState gelfuncGreaterText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncGreaterText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) > op2->Evaluate(vt));
+  return gTriState( x1 > x2 );
 }
 
-gTriState gelfuncGreaterEqualText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncGreaterEqualText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) > op2->Evaluate(vt));
+  return gTriState( x1 >= x2);
 }
 
-gTriState gelfuncEqualText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncEqualText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) == op2->Evaluate(vt));
+  return gTriState( x1 == x2 );
 }
 
-gTriState gelfuncNotEqualText::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncNotEqualText::EvalItem( gText x1, gText x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) != op2->Evaluate(vt));
+  return gTriState( x1 != x2 );
 }
 
 DECLARE_UNARY(gelfuncNumChars, gText, gNumber)
 
-gNumber gelfuncNumChars::Evaluate(gelVariableTable *vt) const
+gNumber gelfuncNumChars::EvalItem( gText x1 ) const
 {
-  return op1->Evaluate(vt).Length();
+  return x1.Length();
 }
 
 DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
@@ -233,44 +179,43 @@ class gelExceptionNonInteger : public gException  {
 };
 #endif   // USE_EXCEPTIONS
 
-gText gelfuncNthElement::Evaluate(gelVariableTable *vt) const
+gText gelfuncNthElement::EvalItem( gText x1, gNumber x2 ) const
 {
-  gText lhs = op1->Evaluate(vt);
-  gNumber index = op2->Evaluate(vt);
 #ifdef USE_EXCEPTIONS
-  if (!index.IsInteger())   
+  if (!x2.IsInteger())   
     throw gelExceptionNonInteger();
 #else
-  assert( index.IsInteger() );
+  assert( x2.IsInteger() );
 #endif   // USE_EXCEPTIONS
-  return lhs[index - gNumber(1)];
+  return x1[x2 - gNumber(1)];
 }
 
 
 DECLARE_BINARY(gelfuncEqualBoolean, gTriState, gTriState, gTriState)
 DECLARE_BINARY(gelfuncNotEqualBoolean, gTriState, gTriState, gTriState)
 
-gTriState gelfuncEqualBoolean::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) == op2->Evaluate(vt));
+  return gTriState( x1 == x2 );
 }
 
-gTriState gelfuncNotEqualBoolean::Evaluate(gelVariableTable *vt) const
+gTriState gelfuncNotEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
 {
-  return gTriState(op1->Evaluate(vt) != op2->Evaluate(vt));
+  return gTriState( x1 != x2 );
 }
 
 
-template <class T> class gelfuncSemi : public gelExpression<T>  {
-  private:
-    gelExpr *op1;
-    gelExpression<T> *op2;
-
-  public:
-    gelfuncSemi(gelExpr *, gelExpression<T> *);
-    ~gelfuncSemi();
-
-    T Evaluate(gelVariableTable *vt) const;
+template <class T> class gelfuncSemi : public gelExpression<T>  
+{
+private:
+  gelExpr *op1;
+  gelExpression<T> *op2;
+  
+public:
+  gelfuncSemi(gelExpr *, gelExpression<T> *);
+  ~gelfuncSemi();
+  
+  gList<T> Evaluate(gelVariableTable *vt) const;
 };
 
 template <class T>
@@ -281,7 +226,8 @@ gelfuncSemi<T>::gelfuncSemi(gelExpr *x, gelExpression<T> *y)
 template <class T> gelfuncSemi<T>::~gelfuncSemi()
 { delete op1;  delete op2; }
 
-template <class T> T gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
+template <class T> 
+gList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
 {
   op1->Execute(vt);
   return op2->Evaluate(vt);
@@ -298,10 +244,12 @@ gWatch _gelStopwatch;
 
 DECLARE_NOPARAM(gelfuncStartWatch, gNumber);
 
-gNumber gelfuncStartWatch::Evaluate(gelVariableTable *) const
+gList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
-  return 0;
+  gList<gNumber> ret;
+  ret += 0;
+  return ret;
 }
 
 

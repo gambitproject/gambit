@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "gblock.h"
 #include "gstack.h"
@@ -28,6 +28,9 @@
   int ival; \
   double dval; \
   gText tval; \
+  gList<gTriState> blist; \
+  gList<gNumber> dlist; \
+  gList<gText> tlist; \
   int current_char, current_line; \
   gText current_expr, current_file, current_rawline; \
   gelEnvironment environment; \
@@ -236,7 +239,31 @@ constant:        FLOAT    { $$ = new gelConstant<gNumber>(dval); }
         |        TEXT     { $$ = new gelConstant<gText>(tval); }
         |        NAME     { $$ = LookupVar(tval); }
         |        QUIT     { $$ = new gelQuitExpr(); }
+        |        LBRACE { dlist.Flush(); }
+                 numberlist 
+                 RBRACE { $$ = new gelConstant<gNumber>( dlist ); }
+        |        LBRACE { tlist.Flush(); }
+                 textlist
+                 RBRACE { $$ = new gelConstant<gText>( tlist ); }
+        |        LBRACE { blist.Flush(); }
+                 booleanlist
+                 RBRACE { $$ = new gelConstant<gTriState>( blist ); }
         ;
+
+numberlist:      INTEGER { dlist += gNumber( ival ); }
+        |        INTEGER { dlist += gNumber( ival ); } COMMA numberlist 
+        |        FLOAT   { dlist += gNumber( dval ); }
+        |        FLOAT   { dlist += gNumber( dval ); } COMMA numberlist 
+        ;
+
+textlist:        TEXT { tlist += tval; }
+        |        TEXT { tlist += tval; } COMMA textlist 
+        ;
+
+booleanlist:     BOOLEAN { blist += bval; }
+        |        BOOLEAN { blist += bval; } COMMA booleanlist 
+        ;
+
 
 lvalue:          NAME     { $$ = new gelVariable<gNumber>(tval); }
 

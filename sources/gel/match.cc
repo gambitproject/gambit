@@ -232,7 +232,8 @@ bool gelSignature::Matches(const gText &n,
       actuals.Length() != m_Parameters.Length())
     return false;
 
-  for (int i = 1; i <= actuals.Length(); i++)  {
+  for (int i = 1; i <= actuals.Length(); i++)  
+  {
     if (actuals[i]->Type() != m_Parameters[i]->Type())
       return false;
   }
@@ -407,9 +408,6 @@ template class gArray<gelExpr*>;
 #include "glist.imp"
 
 template class gList<gelSignature *>;
-template class gNode<gelSignature *>;
 template class gList<gelAdapter *>;
-template class gNode<gelAdapter *>;
 template class gList<gelParamInfo *>;
-template class gNode<gelParamInfo *>;
 

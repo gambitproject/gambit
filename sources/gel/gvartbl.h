@@ -14,30 +14,31 @@
 #include "glist.h"
 #include "exprtree.h"
 
-class gelVariableTable   {
-  private:
-    gList<gText> m_NumberNames;
-    gList<gNumber> m_NumberValues;
-
-    gList<gText> m_BooleanNames;
-    gList<gTriState> m_BooleanValues;
-    
-    gList<gText> m_TextNames;
-    gList<gText> m_TextValues;
-
-  public:
-    gelVariableTable(void);
-
-    bool IsDefined(const gText &name) const;
-    void Define(const gText &name, gelType type);
-    gelType Type(const gText &name) const;
-
-    void Value(const gText &name, gNumber &) const;
-    void Value(const gText &name, gTriState &) const;
-    void Value(const gText &name, gText &) const;
-    void SetValue(const gText &name, const gNumber &value);
-    void SetValue(const gText &name, const gTriState &value);
-    void SetValue(const gText &name, const gText &value);
+class gelVariableTable   
+{
+private:
+  gList<gText> m_NumberNames;
+  gList< gList<gNumber> > m_NumberValues;
+  
+  gList<gText> m_BooleanNames;
+  gList< gList<gTriState> > m_BooleanValues;
+  
+  gList<gText> m_TextNames;
+  gList< gList<gText> > m_TextValues;
+  
+public:
+  gelVariableTable(void);
+  
+  bool IsDefined(const gText& name) const;
+  void Define(const gText& name, gelType type);
+  gelType Type(const gText& name) const;
+  
+  void Value(const gText& name, gList<gNumber>&) const;
+  void Value(const gText& name, gList<gTriState>&) const;
+  void Value(const gText& name, gList<gText>&) const;
+  void SetValue(const gText& name, const gList<gNumber>& value);
+  void SetValue(const gText& name, const gList<gTriState>& value);
+  void SetValue(const gText& name, const gList<gText>& value);
 };
 
 

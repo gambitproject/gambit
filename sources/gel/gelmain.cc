@@ -1,7 +1,7 @@
 //
 // FILE: gel.cc -- Supplies main() for the GEL standalone
 //
-//$Id$
+// $Id$
 //
 
 #include <signal.h>
@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "gblock.h"
 #include "gstack.h"
