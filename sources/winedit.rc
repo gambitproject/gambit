@@ -99,36 +99,34 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
-        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
-        MENUITEM SEPARATOR
-        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
-        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
-        MENUITEM SEPARATOR
-        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About GCL...",           ID_APP_ABOUT
-    END
-END
+IDR_MAINFRAME MENU PRELOAD MOVEABLE DISCARDABLE 
+{
+ POPUP "&File"
+ {
+  MENUITEM "&Print...\tCtrl+P", ID_FILE_PRINT
+  MENUITEM "P&rint Setup...", ID_FILE_PRINT_SETUP
+  MENUITEM SEPARATOR
+  MENUITEM "E&xit", ID_APP_EXIT
+ }
+
+ POPUP "&Edit"
+ {
+  MENUITEM "&Copy\tCtrl+C", ID_EDIT_COPY
+  MENUITEM "&Paste\tCtrl+V", ID_EDIT_PASTE
+ }
+
+ POPUP "&View"
+ {
+  MENUITEM "&Toolbar", ID_VIEW_TOOLBAR
+  MENUITEM "&Status Bar", ID_VIEW_STATUS_BAR
+ }
+
+ POPUP "&Help"
+ {
+  MENUITEM "&About GCL...", ID_APP_ABOUT
+ }
+
+}
 
 
 /////////////////////////////////////////////////////////////////////////////
