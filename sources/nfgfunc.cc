@@ -536,7 +536,7 @@ void Init_nfgfunc(GSM *gsm)
       { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
       { "Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)",
 	GSM_Strategies },
-      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: NUMBER", 
+      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER", 
 	GSM_StrategyNumber },
       { "Support[nfg->NFG] =: NFSUPPORT", GSM_Support },
       { 0, 0 }
