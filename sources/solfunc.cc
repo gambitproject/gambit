@@ -28,90 +28,55 @@ extern Portion *ArrayToList(const gArray<gRational> &);
 template <class T> Portion *ArrayToList(const gList<T> &);
 template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
+
 //----------------
 // ActionProb
 //----------------
 
 Portion *GSM_ActionProb_Float(Portion **param)
 {
-  Portion* por;
-  BehavSolution<double>* bp = 
+  Portion *por;
+  BehavSolution<double>* profile = 
     (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Action* a = ((ActionPortion*) param[1])->Value();
-  Infoset* s = a->BelongsTo();
-  EFPlayer* p = s->GetPlayer();
-  BaseEfg* e = p->BelongsTo();
+  Action* action = ((ActionPortion*) param[1])->Value();
+  Infoset* infoset = action->BelongsTo();
+  EFPlayer* player = infoset->GetPlayer();
   
-  int i = 0;
-  int action = 0;
-  for(i=1; i<=s->NumActions(); i++)
-    if(s->GetActionList()[i] == a)
-      action = i;
-  assert(action > 0);
-
-  if (s->GetPlayer()->IsChance())
-    por = new FloatValPortion(((ChanceInfoset<double> *) s)->
-			      GetActionProbs()[action]);  
-  else if(bp->GetEFSupport().Contains(a))
-  {
-    int player = 0;
-    for(i=1; i<=e->NumPlayers(); i++)
-      if(e->PlayerList()[i] == p)
-	player = i;
-    assert(player > 0);
-    int infoset = 0;
-    for(i=1; i<=p->NumInfosets(); i++)
-      if(p->InfosetList()[i] == s)
-	infoset = i;
-    assert(infoset > 0);
-    por = new FloatValPortion((*bp)(player, infoset, action));
-  }
+  if (player->IsChance())
+    por = new FloatValPortion(((ChanceInfoset<double> *) infoset)->
+			      GetActionProbs()[action->GetNumber()]);  
+  else if (profile->GetEFSupport().Find(action))
+    por = new FloatValPortion((*profile)(player->GetNumber(),
+					 infoset->GetNumber(),
+					 profile->GetEFSupport().Find(action)));
   else
-    por = new NullPortion(porFLOAT);
+    por = new FloatValPortion(0.0);
 
-  por->SetOwner( param[ 0 ]->Owner() );
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
 
 Portion *GSM_ActionProb_Rational(Portion **param)
 {
-  Portion* por;
-  BehavSolution<gRational>* bp = 
+  Portion *por;
+  BehavSolution<gRational>* profile = 
     (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  Action* a = ((ActionPortion*) param[1])->Value();
-  Infoset* s = a->BelongsTo();
-  EFPlayer* p = s->GetPlayer();
-  BaseEfg* e = p->BelongsTo();
+  Action* action = ((ActionPortion*) param[1])->Value();
+  Infoset* infoset = action->BelongsTo();
+  EFPlayer* player = infoset->GetPlayer();
   
-  int i = 0;
-  int action = 0;
-  for(i=1; i<=s->NumActions(); i++)
-    if(s->GetActionList()[i] == a)
-      action = i;
-  assert(action > 0);
-
-  if (s->GetPlayer()->IsChance())
-    por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->
-			      GetActionProbs()[action]);  
-  else if(bp->GetEFSupport().Contains(a))
-  {
-    int player = 0;
-    for(i=1; i<=e->NumPlayers(); i++)
-      if(e->PlayerList()[i] == p)
-	player = i;
-    assert(player > 0);
-    int infoset = 0;
-    for(i=1; i<=p->NumInfosets(); i++)
-      if(p->InfosetList()[i] == s)
-	infoset = i;
-    assert(infoset > 0);
-    por = new RationalValPortion((*bp)(player, infoset, action));
-  }
+  if (player->IsChance())
+    por = new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->
+				 GetActionProbs()[action->GetNumber()]);  
+  else if (profile->GetEFSupport().Find(action))
+    por = new RationalValPortion((*profile)(player->GetNumber(),
+					    infoset->GetNumber(),
+					    profile->GetEFSupport().Find(action)));
   else
-    por = new NullPortion(porFLOAT);
+    por = new RationalValPortion(0);
 
-  por->SetOwner( param[ 0 ]->Owner() );
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
@@ -123,116 +88,60 @@ Portion *GSM_ActionProb_Rational(Portion **param)
 
 Portion *GSM_ActionValue_Float(Portion **param)
 {
-  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Action* a = ((ActionPortion*) param[1])->Value();
-  Infoset *s = a->BelongsTo();
+  BehavSolution<double> *profile =
+    (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  Action* action = ((ActionPortion*) param[1])->Value();
+  Infoset *infoset = action->BelongsTo();
 
-  if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Solution and infoset must belong to same game");
+  if (infoset->BelongsTo() != profile->BelongsTo())
+    return new ErrorPortion("Profile and infoset must belong to same game");
 
-  if (s->GetPlayer()->IsChance())
+  if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porFLOAT);
   //return new ErrorPortion("Infoset must belong to personal player");
+  else if (profile->GetEFSupport().Find(action))  {
+    Efg<double> *efg = profile->BelongsTo();
 
-  Efg<double> *E = bp->BelongsTo();
+    gDPVector<double> values(efg->Dimensionality());
+    gPVector<double> probs(efg->Dimensionality().Lengths());
 
-  gDPVector<double> values(E->Dimensionality());
-  gPVector<double> probs(E->Dimensionality().Lengths());
-
-  bp->CondPayoff(values, probs);
+    profile->CondPayoff(values, probs);
   
-  return new FloatValPortion(values(s->GetPlayer()->GetNumber(), 
-				    s->GetNumber(), a->GetNumber()));
+    return new FloatValPortion(values(infoset->GetPlayer()->GetNumber(), 
+				      infoset->GetNumber(),
+				      profile->GetEFSupport().Find(action)));
+  }
+  else
+    return new ErrorPortion("Not implemented yet for non-support actions");
 }
 
 Portion *GSM_ActionValue_Rational(Portion **param)
 {
-  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  Action* a = ((ActionPortion*) param[1])->Value();
-  Infoset *s = a->BelongsTo();
+  BehavSolution<gRational> *profile =
+    (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  Action* action = ((ActionPortion*) param[1])->Value();
+  Infoset *infoset = action->BelongsTo();
 
-  if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Solution and infoset must belong to same game");
-  
-  if (s->GetPlayer()->IsChance())
+  if (infoset->BelongsTo() != profile->BelongsTo())
+    return new ErrorPortion("Profile and infoset must belong to same game");
+
+  if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porRATIONAL);
   //return new ErrorPortion("Infoset must belong to personal player");
+  else if (profile->GetEFSupport().Find(action))  {
+    Efg<gRational> *efg = profile->BelongsTo();
 
-  Efg<gRational> *E = bp->BelongsTo();
+    gDPVector<gRational> values(efg->Dimensionality());
+    gPVector<gRational> probs(efg->Dimensionality().Lengths());
 
-  gDPVector<gRational> values(E->Dimensionality());
-  gPVector<gRational> probs(E->Dimensionality().Lengths());
-
-  bp->CondPayoff(values, probs);
+    profile->CondPayoff(values, probs);
   
-  return new RationalValPortion(values(s->GetPlayer()->GetNumber(), 
-				       s->GetNumber(), a->GetNumber()));
-}
-
-//------------------
-// ActionValues
-//------------------
-
-Portion *GSM_ActionValuesFloat(Portion **param)
-{
-  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
-
-  if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Solution and infoset must belong to same game");
-
-  if(s->GetPlayer()->IsChance())
-  {
-    ListPortion* por = new ListValPortion();
-    for(int i = 1; i <= s->NumActions(); i++)
-      por->Append(new NullPortion(porFLOAT));
-    return por;
-    //return new ErrorPortion("Infoset must belong to personal player");
+    return new RationalValPortion(values(infoset->GetPlayer()->GetNumber(), 
+					 infoset->GetNumber(),
+					 profile->GetEFSupport().Find(action)));
   }
-
-  Efg<double> *E = bp->BelongsTo();
-
-  gDPVector<double> values(E->Dimensionality());
-  gPVector<double> probs(E->Dimensionality().Lengths());
-
-  bp->CondPayoff(values, probs);
-  
-  gVector<double> ret(s->NumActions());
-  for (int i = 1; i <= s->NumActions(); i++)
-    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
-
-  return ArrayToList(ret);
-}
-
-Portion *GSM_ActionValuesRational(Portion **param)
-{
-  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
-
-  if (s->BelongsTo() != bp->BelongsTo())
-    return new ErrorPortion("Solution and infoset must belong to same game");
-
-  if (s->GetPlayer()->IsChance())
-  {
-    ListPortion* por = new ListValPortion();
-    for(int i = 1; i <= s->NumActions(); i++)
-      por->Append(new NullPortion(porRATIONAL));
-    return por;
-    //return new ErrorPortion("Infoset must belong to personal player");
-  }
-
-  Efg<gRational> *E = bp->BelongsTo();
-
-  gDPVector<gRational> values(E->Dimensionality());
-  gPVector<gRational> probs(E->Dimensionality().Lengths());
-
-  bp->CondPayoff(values, probs);
-  
-  gVector<gRational> ret(s->NumActions());
-  for (int i = 1; i <= s->NumActions(); i++)
-    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
-
-  return ArrayToList(ret);
+  else
+    return new ErrorPortion("Not implemented yet for non-support actions");
 }
 
 //--------------
@@ -2064,18 +1973,6 @@ void Init_solfunc(GSM *gsm)
 				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("action", porACTION));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ActionValues", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValuesFloat, 
-				       PortionSpec(porFLOAT, 1), 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValuesRational, 
-				       PortionSpec(porRATIONAL, 1), 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
 
 

@@ -683,9 +683,9 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
   
   for (i = 1; i < nc; i++) {
     if ( pl == 0 || pl == -1 ||
-	support.Contains(n->infoset->actions[i])) {  
+	support.Find(n->infoset->actions[i])) {  
       if (pl != 0 && pl != -1)
-	anum = support.GetNumber(n->infoset->actions[i]);
+	anum = support.Find(n->infoset->actions[i]);
       
       newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
 		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
@@ -697,9 +697,9 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
 
   if (nc > 0) 
     if  ( pl == 0 || pl == -1 ||  
-	 support.Contains(n->infoset->actions[i])) {
+	 support.Find(n->infoset->actions[i])) {
       if (pl !=0 && pl != -1)
-	anum = support.GetNumber(n->infoset->actions[i]);
+	anum = support.Find(n->infoset->actions[i]);
       
       newprob = ((pl) ? (*this)(pl, n->infoset->number, anum) :
 		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
@@ -811,8 +811,8 @@ void BehavProfile<T>::NodeValues(Node *n, int pl,
 
   for (int i = 1, npl = n->infoset->player->number,
        iset = n->infoset->number; i <= n->children.Length(); i++)  {
-    if (support.Contains(n->infoset->actions[i])) {
-      int anum = support.GetNumber(n->infoset->actions[i]);
+    if (support.Find(n->infoset->actions[i])) {
+      int anum = support.Find(n->infoset->actions[i]);
       NodeValues(n->children[i], pl, valarray, ++index);
       value += ((npl) ? (*this)(npl, iset, anum) :
 		((ChanceInfoset<T> *) n->infoset)->probs[i]) *

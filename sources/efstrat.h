@@ -74,10 +74,7 @@ public:
   Action *GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int Contains(Action *);
- 
-  // returns the index of the action in the original ActionSet
-  int GetNumber(Action *);
+  int Find(Action *) const;
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
@@ -124,14 +121,10 @@ public:
 
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
-  int Contains(Action *) const;
+  int Find(Action *) const;
 
   const gArray<Action *> &ActionList(int pl, int iset) const
     { return sets[pl]->ActionList(iset); }
-
-  // Returns the original position of the action before any changes were made
-  // in the support.
-  int GetNumber(Action *);
 
   // Action editing functions
   Action * RemoveAction( int, int, int );

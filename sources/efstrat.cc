@@ -147,20 +147,9 @@ EFPlayer &EFActionSet::GetPlayer(void) const
   return (*efp);
 }
 
-// Returns true if action is in the ActionSet
-int EFActionSet::Contains(Action *a)
+int EFActionSet::Find(Action *a) const
 {
   return (infosets[a->BelongsTo()->GetNumber()]->acts.Find(a));
-}
-
-// Returns the number of the action in the support
-int EFActionSet::GetNumber(Action *a)
-{
-  int i, iset = a->BelongsTo()->GetNumber();
-  for (i = 1; i <= infosets[iset]->acts.Length() && 
-       (infosets[iset]->acts)[i] != a; i++);
-  if (i > infosets[iset]->acts.Length()) return 0;
-  else return i;
 }
 
 // checks for a valid EFActionSet
@@ -236,18 +225,13 @@ const BaseEfg &EFSupport::BelongsTo(void) const
   return *befg;
 }
 
-int EFSupport::Contains(Action *a) const
+int EFSupport::Find(Action *a) const
 {
   if (a->BelongsTo()->BelongsTo() != befg)   return 0;
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 
-  return sets[pl]->Contains(a);
-}
-
-int EFSupport::GetNumber(Action *a)
-{
-  return sets[a->BelongsTo()->GetPlayer()->GetNumber()]->GetNumber(a);
+  return sets[pl]->Find(a);
 }
 
 bool EFSupport::IsValid(void) const

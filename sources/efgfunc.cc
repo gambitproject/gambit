@@ -55,7 +55,7 @@ Portion *GSM_Actions(Portion **param)
   {
     por = new ListValPortion();
     for(i=1; i<=s->GetActionList().Length(); i++)
-      if(sup->Contains(s->GetActionList()[i]))
+      if(sup->Find(s->GetActionList()[i]))
 	((ListPortion*) por)->
 	  Append(new ActionValPortion(s->GetActionList()[i]));
   }
