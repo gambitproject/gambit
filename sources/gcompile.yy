@@ -998,6 +998,7 @@ void GCLCompiler::LoadInputs( const char* name )
 #endif   // __GNUG__
 
   bool search = false;
+  bool ini_found = false;
   if( strchr( name, SLASH ) == NULL )
     search = true;
   gString IniFileName;
@@ -1006,46 +1007,57 @@ void GCLCompiler::LoadInputs( const char* name )
   inputs.Push( new gFileInput( IniFileName ) );
   if (!inputs.Peek()->IsValid())
     delete inputs.Pop();
-  else  
+  else
+  {  
     filenames.Push( IniFileName );
-
+    ini_found = true;
+  }
 
   if( search )
   {
 
-    if( (inputs.Depth() == 0) && (System::GetEnv( "HOME" ) != NULL) )
+    if( !ini_found && (System::GetEnv( "HOME" ) != NULL) )
     {
       IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();
-      else  
+      else
+      {  
         filenames.Push( IniFileName );
+        ini_found = true;
+      }
     }
 
-    if( (inputs.Depth() == 0) && (System::GetEnv( "GCLLIB" ) != NULL) )
+    if( !ini_found && (System::GetEnv( "GCLLIB" ) != NULL) )
     {
       IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();
-      else  
+      else
+      {
         filenames.Push( IniFileName );
+        ini_found = true;
+      }
     }
 
-    if( (inputs.Depth() == 0) && (SOURCE != NULL) )
+    if( !ini_found && (SOURCE != NULL) )
     {
       IniFileName = (gString) SOURCE + SLASH + name;
       inputs.Push( new gFileInput( IniFileName ) );
       if (!inputs.Peek()->IsValid())
         delete inputs.Pop();
-      else  
+      else
+      {  
         filenames.Push( IniFileName );
+        ini_found = true;
+      }
     }
 
   }
 
-  if( inputs.Depth() > 0 )
+  if( ini_found )
     lines.Push(1);
   else
     gerr << "GCL Warning: " << name << " not found.\n";
