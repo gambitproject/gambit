@@ -65,6 +65,8 @@ public:
   virtual ~gbtGameView();
 
   virtual void OnUpdate(void) = 0;
+
+  gbtGameDocument *GetDocument(void) const { return m_doc; }
 };
 
 #endif   // GAME_DOCUMENT_H

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of main frame for displaying game
+// Declaration of panel for controlling equilibrium computation
 //
 // This file is part of Gambit
 // Copyright (c) 2004, The Gambit Project
@@ -24,36 +24,30 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAME_FRAME_H
-#define GAME_FRAME_H
+#ifndef PANEL_NASH_H
+#define PANEL_NASH_H
 
 #include "game-document.h"
 
-class gbtGameFrame : public wxFrame, gbtGameView {
+class gbtNashPanel;
+
+class gbtNashPanel : public wxPanel, public gbtGameView {
 private:
-  wxPanel *m_tablePanel, *m_algorithmPanel;
+  wxStaticText *m_text;
+  wxButton *m_startButton, *m_cancelButton;
+  wxThread *m_thread;
+  gbtList<gbtMixedProfile<double> > m_eqa;
 
-  // Auxiliary functions for setting up frame
-  void MakeMenu(void);
-
-  // Menu command handlers
-  void OnFileNew(wxCommandEvent &);
-  void OnFileOpen(wxCommandEvent &);
-  void OnFileClose(wxCommandEvent &);
-  void OnFileSave(wxCommandEvent &);
-  void OnFileExit(wxCommandEvent &);
-
-  void OnToolsEquilibrium(wxCommandEvent &);
-
-  void OnHelpAbout(wxCommandEvent &);
-
-  // Implementation of gbtGameView members
   void OnUpdate(void);
 
+  void OnStartButton(wxCommandEvent &);
+  void OnCancelButton(wxCommandEvent &);
+  void OnThreadDone(wxCommandEvent &);
+  
 public:
-  gbtGameFrame(wxWindow *, gbtGameDocument *);
+  gbtNashPanel(wxWindow *p_parent, gbtGameDocument *);
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif   // GAME_FRAME_H
+#endif  // PANEL_NASH_H

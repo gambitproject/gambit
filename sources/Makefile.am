@@ -14,6 +14,8 @@ gambit_SOURCES = \
 	game-frame.cc \
 	game-frame.h \
 	pairarr.h \
+	panel-nash.cc \
+	panel-nash.h \
 	sheet.cc \
 	sheet.h \
 	sheetctl.cc \

@@ -22,6 +22,7 @@ gambit_SOURCES = \
 	"gambit.cc" \
 	"game-document.cc" \
 	"game-frame.cc" \
+	"panel-nash.cc" \
 	"sheet.cc" \
 	"sheetctl.cc" \
 	"sheetsel.cc" \

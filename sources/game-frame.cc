@@ -37,6 +37,9 @@
 #include "dialog-about.h"        // for "About..." dialog
 
 #include "table-schelling.h"
+#include "panel-nash.h"
+
+const int GBT_MENU_TOOLS_EQM = 1000;
 
 BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_NEW, gbtGameFrame::OnFileNew)
@@ -44,6 +47,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
+  EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
 END_EVENT_TABLE()
 
@@ -52,14 +56,19 @@ END_EVENT_TABLE()
 //-------------------------------------------------------------------------
 
 gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxFrame(p_parent, -1, ""), gbtGameView(p_doc)
+  : wxFrame(p_parent, -1, "",
+	    wxDefaultPosition, wxSize(800, 600)), 
+    gbtGameView(p_doc)
 {
   MakeMenu();
 
-  gbtTableSchelling *table = new gbtTableSchelling(this, p_doc);
+  m_tablePanel = new gbtTableSchelling(this, p_doc);
+  m_algorithmPanel = new gbtNashPanel(this, p_doc);
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-  sizer->Add(table, 1, wxEXPAND, 0);
+  sizer->Add(m_tablePanel, 1, wxEXPAND, 0);
+  sizer->Add(m_algorithmPanel, 1, wxEXPAND, 0);
+  sizer->Show(m_algorithmPanel, false);
   SetSizer(sizer);
   Layout();
 
@@ -81,11 +90,16 @@ void gbtGameFrame::MakeMenu(void)
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, _("E&xit"), _("Exit Gambit"));
 
+  wxMenu *toolsMenu = new wxMenu;	
+  toolsMenu->Append(GBT_MENU_TOOLS_EQM, _("&Equilibrium"),
+		    _("Compute Nash equilibria of the game"), true);
+  
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, _("&About"), _("About Gambit"));
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(toolsMenu, _("&Tools"));
   menuBar->Append(helpMenu, _("&Help"));
 
   SetMenuBar(menuBar);
@@ -191,10 +205,18 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &)
   }
 }
 
+void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
+{
+  GetSizer()->Show(m_algorithmPanel,
+		   !GetSizer()->IsShown(m_algorithmPanel));
+  Layout();
+}
+
 void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 {
   gbtAboutDialog(this).ShowModal();
 }
+
 
 //-------------------------------------------------------------------------
 //           gbtGameFrame: Implementation of view interface
