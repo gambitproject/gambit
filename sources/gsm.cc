@@ -322,10 +322,17 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 	  type_match = false;
       }
     }
-    else if( old_value->Spec().Type != p->Spec().Type )
-    {
-      if( !PortionSpecMatch( old_value->Spec(), p->Spec() ) )
-	type_match = false;
+    else
+    {      
+      PortionSpec ospec = old_value->Spec();
+      PortionSpec pspec = p->Spec();
+      if(ospec.Type == porNULL)
+	ospec = ((NullPortion*) old_value)->DataType();
+      if(pspec.Type == porNULL)
+	pspec = ((NullPortion*) p)->DataType();
+      if(ospec.Type != pspec.Type)
+	if(!PortionSpecMatch(ospec, pspec))
+	  type_match = false;
     }
   }
 
@@ -634,36 +641,54 @@ bool GSM::Assign( void )
       result = false;
     }
   }
-  else if(PortionSpecMatch(p1Spec, p2Spec))
+  else if(varname != "") // make sure variable is associated with a var name
   {
-    if(p2->IsReference())
+    if(PortionSpecMatch(p1Spec, p2Spec) ||
+       (p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
+	p2Spec.ListDepth > 0))
     {
-      p_old = p2;
-      p2 = p2->ValCopy();
-      delete p_old;
+      if(p2->IsReference())
+      {
+	p_old = p2;
+	p2 = p2->ValCopy();
+	delete p_old;
+      }
+      assert(varname != "");
+      _VarDefine(varname, p2);
+      delete p1;
+      _Push(p2->RefCopy());
     }
-    _VarDefine(varname, p2);
-    delete p1;
-    _Push(p2->RefCopy());
-  }
-  else if(p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
-	  p2Spec.ListDepth > 0)
-  {
-    if(p2->IsReference())
+    else if(p1Spec.Type == porNULL || p2Spec.Type == porNULL)
     {
-      p_old = p2;
-      p2 = p2->ValCopy();
-      delete p_old;
+      if(p1Spec.Type == porNULL)
+	p1Spec = ((NullPortion*) p1)->DataType();
+      if(p2Spec.Type == porNULL)
+	p2Spec = ((NullPortion*) p2)->DataType();
+      if(p1Spec == p2Spec)
+      {
+	if(p2->IsReference())
+	{
+	  p_old = p2;
+	  p2 = p2->ValCopy();
+	  delete p_old;
+	}
+	assert(varname != "");
+	_VarDefine(varname, p2);
+	delete p1;
+	_Push(p2->RefCopy());
+      }
     }
-    _VarDefine(varname, p2);
-    delete p1;
-    _Push(p2->RefCopy());
+    else // error: changing the type of variable
+    {
+      _ErrorMessage(_StdErr, 66, 0, 0, varname, 
+		    PortionSpecToText(p1Spec),
+		    PortionSpecToText(p2Spec));
+      result = false;
+    }
   }
-  else // error: changing the type of variable
+  else
   {
-    _ErrorMessage(_StdErr, 66, 0, 0, varname, 
-		  PortionSpecToText(p1Spec),
-		  PortionSpecToText(p2Spec));
+    _ErrorMessage(_StdErr, 71);
     result = false;
   }
 
@@ -2544,8 +2569,7 @@ void GSM::_ErrorMessage
     s << "Assigning to an unknown type: " << str1 << "\n";
     break;
   case 71:
-    s << "Cannot assign to an NFG or an EFG not directly associated\n";
-    s << "with a variable\n";
+    s << "Cannot assign to a value not directly associated with a variable\n";
     break;
   default:
     s << "General error " << error_num << "\n";
