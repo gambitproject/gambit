@@ -237,6 +237,50 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
     } while (c_copy.GoToNext()) ;
   }
 }
+
+gList<const NFSupport> SortSupportsBySize(gList<const NFSupport> &list) 
+{
+  gArray<int> sizes(list.Length());
+  for (int i = 1; i <= list.Length(); i++)
+    sizes[i] = list[i].TotalNumStrats();
+
+  gArray<int> listproxy(list.Length());
+  for (int i = 1; i <= list.Length(); i++)
+    listproxy[i] = i;
+
+  int maxsize(0);
+  for (int i = 1; i <= list.Length(); i++)
+    if (sizes[i] > maxsize)
+      maxsize = sizes[i];
+
+  int cursor(1);
+
+  for (int j = 0; j < maxsize; j++) {
+    int scanner(list.Length());
+    while (cursor < scanner)
+      if (sizes[scanner] != j)
+	scanner--;
+      else {
+	while (sizes[cursor] == j)
+	  cursor++;
+	if (cursor < scanner) {
+	  int tempindex = listproxy[cursor];
+	  listproxy[cursor] = listproxy[scanner];
+	  listproxy[scanner] = tempindex;
+	  int tempsize = sizes[cursor];
+	  sizes[cursor] = sizes[scanner];
+	  sizes[scanner] = tempsize;
+	  cursor++;
+	}
+      }
+  }
+
+  gList<const NFSupport> answer;
+  for (int i = 1; i <= list.Length(); i++)
+    answer += list[listproxy[i]];
+
+  return answer;
+}
   
 gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
 					       gStatus &status)
@@ -282,6 +326,7 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
       answer.Remove(i);
   }
     
+  return SortSupportsBySize(answer);
   return answer;
 }
 

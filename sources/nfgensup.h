@@ -70,6 +70,8 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 				            StrategyCursorForSupport *c,
 					    gList<const NFSupport> *list,
 				      gStatus &status);
+
+gList<const NFSupport> SortSupportsBySize(gList<const NFSupport> &);
   
 gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
 					       gStatus &status);

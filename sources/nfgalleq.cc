@@ -71,18 +71,21 @@ AllNashSolveModule::AllNashSolveModule(const NFSupport &S,
 
 void AllNashSolveModule::NashEnum(gStatus &p_status)
 {
-  for (int i = possiblenashsubsupports.Length(); i >= 1; i--) {
+  for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
     p_status.Get();
     p_status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
     long newevals = 0;
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
     bool is_singular = false;
+
     PolEnum(possiblenashsubsupports[i], params, newsolns, p_status,
 	    newevals, newtime, is_singular);
+
     for (int j = 1; j <= newsolns.Length(); j++)
       if (newsolns[j].IsNash()) 
 	solutions += newsolns[j];
+
     if (is_singular) 
       singular_supports += possiblenashsubsupports[i];
     nevals += newevals;
