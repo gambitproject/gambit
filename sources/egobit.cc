@@ -49,7 +49,7 @@ class EFGobitFunc : public gFunction<double>   {
 
 EFGobitFunc::EFGobitFunc(const Efg<double> &E,
 			 const BehavProfile<double> &start)
-  : _nevals(0L), _efg(E), _probs(E.Dimensionality().Lengths()),
+  : _nevals(0L), _domain_err(false), _efg(E), _probs(E.Dimensionality().Lengths()),
     _p(start), _cpay(E)
 {
   int pl;
