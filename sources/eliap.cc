@@ -153,12 +153,12 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 	x = p(i, j, k); 
 	avg += (x * cpay(i, j, k));
 	sum += x;
-	x= (x > ((T) 0) ? ((T) 0) : x);
+	if(x > (T)0 ) x = (T)0;
 	result += BIG1*x*x;         // add penalty for neg probabilities
       }
       for(k=1; k<=E.NumActions(1,i,j); k++) {
 	x=cpay(i,j,k)-avg;
-	x = (x > 0 ? x : 0);
+	if(x < (T)0 ) x = (T)0;
 	result += x*x;          // add penalty if not best response
       }
       x=sum - ((T) 1);
