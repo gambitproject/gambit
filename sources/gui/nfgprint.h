@@ -39,7 +39,7 @@ wxString gbtBuildHtml(const gbtNfgGame &, int, int);
 // 
 class NfgPrintout : public wxHtmlPrintout {
 private:
-  NfgTable *m_table;
+  gbtNfgTable *m_table;
 
 public:
   NfgPrintout(const gbtNfgGame &, int, int, const wxString &);

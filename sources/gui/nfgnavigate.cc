@@ -30,156 +30,117 @@
 #endif // WX_PRECOMP
 #include "nfgnavigate.h"
 
-const int idSTRATEGY_CHOICE = 2001;
-const int idROWPLAYER_CHOICE = 2002;
-const int idCOLPLAYER_CHOICE = 2003;
 
-BEGIN_EVENT_TABLE(NfgNavigateWindow, wxPanel)
-  EVT_CHOICE(idSTRATEGY_CHOICE, NfgNavigateWindow::OnStrategyChange)
-  EVT_CHOICE(idROWPLAYER_CHOICE, NfgNavigateWindow::OnRowPlayerChange)
-  EVT_CHOICE(idCOLPLAYER_CHOICE, NfgNavigateWindow::OnColPlayerChange)
+BEGIN_EVENT_TABLE(gbtNfgNavigate, wxGrid)
+  EVT_GRID_CELL_LEFT_CLICK(gbtNfgNavigate::OnLeftClick)
 END_EVENT_TABLE()
 
-NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
-				     wxWindow *p_parent)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc),
-    m_rowPlayer(1), m_colPlayer(2)
+gbtNfgNavigate::gbtNfgNavigate(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+    gbtGameView(p_doc)
 {
   gbtNfgGame nfg = m_doc->GetNfg();
+  CreateGrid(nfg.NumPlayers(), 6);
+  SetEditable(false);
+  SetLabelSize(wxVERTICAL, 0);
+  EnableGridLines(false);
 
-  wxStaticBoxSizer *playerViewSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "View players"),
-			 wxVERTICAL);
-
-  wxBoxSizer *rowChoiceSizer = new wxBoxSizer(wxHORIZONTAL);
-  rowChoiceSizer->Add(new wxStaticText(this, -1, "Row player"),
-		      1, wxALIGN_LEFT | wxRIGHT, 5);
-  m_rowChoice = new wxChoice(this, idROWPLAYER_CHOICE);
-  rowChoiceSizer->Add(m_rowChoice, 0, wxALL | wxEXPAND, 0);
-
-  wxBoxSizer *colChoiceSizer = new wxBoxSizer(wxHORIZONTAL);
-  colChoiceSizer->Add(new wxStaticText(this, -1, "Column player"),
-		      1, wxALIGN_LEFT | wxRIGHT, 5);
-  m_colChoice = new wxChoice(this, idCOLPLAYER_CHOICE);
-  colChoiceSizer->Add(m_colChoice, 0, wxALL | wxEXPAND, 0);
-
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    wxString playerName = (char *) (ToText(pl) + ": " +
-				    nfg.GetPlayer(pl).GetLabel());
-    m_rowChoice->Append(playerName);
-    m_colChoice->Append(playerName);
-  }
-
-  m_rowChoice->SetSelection(0);
-  m_colChoice->SetSelection(1);
-
-  playerViewSizer->Add(rowChoiceSizer, 1, wxALL | wxEXPAND, 5);
-  playerViewSizer->Add(colChoiceSizer, 1, wxALL | wxEXPAND, 5);
-
-  wxStaticBoxSizer *contViewSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Current contingency"),
-			 wxVERTICAL);
-
-  m_playerNames = new wxStaticText *[nfg.NumPlayers()];
-  m_stratProfile = new wxChoice *[nfg.NumPlayers()];
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    m_stratProfile[pl-1] = new wxChoice(this, idSTRATEGY_CHOICE);
-    
-    gbtNfgPlayer player = nfg.GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					     player.GetStrategy(st).GetLabel()));
-    }
-    m_stratProfile[pl-1]->SetSelection(0);
-
-    wxBoxSizer *stratSizer = new wxBoxSizer(wxHORIZONTAL);
-    if (player.GetLabel() != "") {
-      m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
-					     (char *) player.GetLabel());
-    }
-    else {
-      m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
-					     wxString::Format("Player %d",
-							      pl));
-    }
-    stratSizer->Add(m_playerNames[pl-1], 1, wxALIGN_LEFT | wxRIGHT, 5);
-    stratSizer->Add(m_stratProfile[pl-1], 0, wxALL, 0);
-    contViewSizer->Add(stratSizer, 0, wxALL | wxEXPAND, 5);
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(playerViewSizer, 0, wxALL | wxEXPAND, 10);
-  topSizer->Add(contViewSizer, 0, wxALL | wxEXPAND, 10);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
+  DisableDragRowSize();
+  DisableDragColSize();
+  OnUpdate(0);
   Show(true);
 }
 
-NfgNavigateWindow::~NfgNavigateWindow()
+gbtNfgNavigate::~gbtNfgNavigate()
 {
-  delete [] m_playerNames;
-  delete [] m_stratProfile;
 }
 
-void NfgNavigateWindow::OnUpdate(gbtGameView *)
+void gbtNfgNavigate::OnUpdate(gbtGameView *)
 {
+  SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+
+  SetColLabelValue(0, "R/C");
+  SetColLabelValue(1, "Player");
+  SetColLabelValue(2, "#");
+  SetColLabelValue(3, "Strategy");
+  SetColLabelValue(4, "");
+  SetColLabelValue(5, "");
+
+  if (GetNumberRows() < m_doc->GetNfg().NumPlayers()) {
+    AppendRows(m_doc->GetNfg().NumPlayers() - GetNumberRows());
+  }
+  else if (GetNumberRows() > m_doc->GetNfg().NumPlayers()) {
+    DeleteRows(0, GetNumberRows() - m_doc->GetNfg().NumPlayers());
+  }
+
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
 
-  m_rowChoice->Clear();
-  m_colChoice->Clear();
-
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
-    m_rowChoice->Append((char *) (ToText(pl) + ": " + player.GetLabel()));
-    m_colChoice->Append((char *) (ToText(pl) + ": " + player.GetLabel()));
-
-    m_stratProfile[pl-1]->Clear();
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      if (support.Contains(player.GetStrategy(st))) {
-	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					       player.GetStrategy(st).GetLabel()));
-      }
+    for (int col = 0; col < GetNumberCols(); col++) {
+      SetCellTextColour(pl - 1, col, 
+			m_doc->GetPreferences().PlayerColor(pl));
     }
-    m_stratProfile[pl-1]->SetSelection(m_doc->GetContingency()[pl] - 1);
+
+    if (m_doc->GetRowPlayer() == pl) {
+      SetCellValue(pl - 1, 0, "(row)");
+    }
+    else if (m_doc->GetColPlayer() == pl) {
+      SetCellValue(pl - 1, 0, "(col)");
+    } 
+    else {
+      SetCellValue(pl - 1, 0, "");
+    }
+
+    SetCellValue(pl - 1, 1, (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel());
+    SetCellValue(pl - 1, 2, (char *) ToText(m_doc->GetContingency()[pl]));
+    SetCellValue(pl - 1, 3, 
+		 (char *) support.GetStrategy(pl,
+					      m_doc->GetContingency()[pl]).GetLabel());
+    SetCellValue(pl - 1, 4, "+");
+    SetCellValue(pl - 1, 5, "-");
   }
-  m_rowChoice->SetSelection(m_doc->GetRowPlayer() - 1);
-  m_colChoice->SetSelection(m_doc->GetColPlayer() - 1);
+
+  AutoSizeRows();
+  AutoSizeColumns();
+  AdjustScrollbars();
 }
 
-void NfgNavigateWindow::OnStrategyChange(wxCommandEvent &)
+void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
 {
-  gArray<int> contingency(m_doc->GetNfg().NumPlayers());
-  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-    contingency[pl] = m_stratProfile[pl-1]->GetSelection() + 1;
+  int player = p_event.GetRow() + 1;
+
+  if (p_event.GetCol() == 0) {
+    if (m_doc->GetNfg().NumPlayers() == 2) {
+      // Just implement a toggle
+      m_doc->SetRowPlayer(3 - m_doc->GetRowPlayer());
+    }
+    else if (player == m_doc->GetRowPlayer()) {
+      // Toggle row and column
+      m_doc->SetColPlayer(player);
+    }
+    else if (player == m_doc->GetColPlayer()) {
+      // Toggle row and column
+      m_doc->SetRowPlayer(player);
+    }
+    else {
+      m_doc->SetRowPlayer(player);
+    }
   }
-  m_doc->SetContingency(contingency);
-}
-
-void NfgNavigateWindow::OnRowPlayerChange(wxCommandEvent &)
-{
-  int oldRowPlayer = m_doc->GetRowPlayer();
-  int newRowPlayer = m_rowChoice->GetSelection() + 1;
-
-  if (newRowPlayer == oldRowPlayer) {
-    return;
+  else if (p_event.GetCol() == 4) {
+    gArray<int> cont = m_doc->GetContingency();
+    if (cont[player] < m_doc->GetNfgSupport().NumStrats(player)) {
+      cont[player]++;
+    }
+    m_doc->SetContingency(cont);
   }
-
-  m_doc->SetRowPlayer(newRowPlayer);
-}
-
-void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
-{
-  int oldColPlayer = m_doc->GetColPlayer();
-  int newColPlayer = m_colChoice->GetSelection() + 1;
-
-  if (newColPlayer == oldColPlayer) {
-    return;
+  else if (p_event.GetCol() == 5) {
+    gArray<int> cont = m_doc->GetContingency();
+    if (cont[player] > 1) {
+      cont[player]--;
+    }
+    m_doc->SetContingency(cont);
   }
-
-  m_doc->SetColPlayer(newColPlayer);
 }
 

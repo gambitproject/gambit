@@ -118,9 +118,9 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(1000, 600)),
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(800, 500)),
     gbtGameView(p_doc),
-    m_table(0), m_navigateWindow(0)
+    m_table(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -149,17 +149,12 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   }
   (void) new gbtNfgSupportFrame(m_doc, this);
 
-  m_navigateWindow = new NfgNavigateWindow(m_doc, this);
-  m_table = new NfgTable(m_doc, this);
+  m_table = new gbtNfgTable(m_doc, this);
   m_table->SetFocus();
-
-  SetAutoLayout(true);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  topSizer->Add(m_navigateWindow, 0, wxALL, 0);
-  topSizer->Add(m_table, 1, wxALL | wxEXPAND, 5);
-  SetSizer(topSizer);
-  topSizer->SetSizeHints(this);
-  Layout();
+  m_nav = new gbtNfgNavigate(m_doc, this);
+  // Dummy in a size event to get layout correct
+  wxSizeEvent foo;
+  OnSize(foo);
   Show(true);
   m_doc->UpdateViews();
 }
@@ -944,4 +939,15 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 void NfgShow::OnSetFocus(wxFocusEvent &)
 {
   m_table->SetFocus();
+}
+
+void NfgShow::OnSize(wxSizeEvent &)
+{
+  wxSize size = GetClientSize();
+
+  m_nav->SetSize(0, 0, m_nav->GetBestSize().GetWidth() + 2, size.GetHeight());
+  m_table->SetSize(m_nav->GetSize().GetWidth() + 2,
+		   0,
+		   size.GetWidth() - m_nav->GetSize().GetWidth(),
+		   size.GetHeight());
 }

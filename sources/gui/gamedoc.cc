@@ -125,6 +125,14 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
     m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
     m_curNfgSupport->SetName("Full Support");
     m_nfgSupports.Append(m_curNfgSupport);
+
+    gArray<int> newcont(m_efg->NumPlayers());
+    for (int pl = 1; pl <= m_contingency.Length(); pl++) {
+      newcont[pl] = m_contingency[pl];
+    }
+    for (int pl = m_contingency.Length() + 1; pl <= m_efg->NumPlayers(); 
+	 newcont[pl++] = 1);
+    m_contingency = newcont;
   }
 }
 

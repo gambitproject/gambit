@@ -24,26 +24,25 @@
 #ifndef NFGNAVIGATE_H
 #define NFGNAVIGATE_H
 
+#include <wx/grid.h>
 #include "nfgshow.h"
 
-class NfgNavigateWindow : public wxPanel, public gbtGameView {
+class gbtNfgNavigate : public wxGrid, public gbtGameView {
 private:
-  wxStaticText **m_playerNames;
-  wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
+  // wxGrid members
+  // Overriding this suppresses drawing of the grid cell highlight
+  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
 
-  int m_rowPlayer, m_colPlayer;
-  
-  void OnStrategyChange(wxCommandEvent &);
-  void OnRowPlayerChange(wxCommandEvent &);
-  void OnColPlayerChange(wxCommandEvent &);
+  // Event handlers
+  void OnLeftClick(wxGridEvent &);
 
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
   void OnUpdate(gbtGameView *);
   
 public:
-  NfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~NfgNavigateWindow();
+  gbtNfgNavigate(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgNavigate();
   
   DECLARE_EVENT_TABLE()
 };

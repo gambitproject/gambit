@@ -27,11 +27,9 @@
 #ifndef NFGSHOW_H
 #define NFGSHOW_H
 
-#include "wx/wx.h"
-#include "wx/listctrl.h"
-#include "wx/sashwin.h"
-#include "wx/printdlg.h"
-#include "wx/notebook.h"
+#include <wx/wx.h>
+#include <wx/grid.h>
+#include <wx/printdlg.h>
 
 #include "base/gmisc.h"
 
@@ -41,14 +39,12 @@
 
 #include "gambit.h"
 
-class NfgNavigateWindow;
-class NfgTable;
-class dialogNfgSupportInspect;
+class gbtNfgTable;
 
 class NfgShow : public wxFrame, public gbtGameView {
 private:
-  NfgTable *m_table;
-  NfgNavigateWindow *m_navigateWindow;
+  wxGrid *m_nav;
+  gbtNfgTable *m_table;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
@@ -103,6 +99,7 @@ private:
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnSetFocus(wxFocusEvent &);
+  void OnSize(wxSizeEvent &);
 
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }

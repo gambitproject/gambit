@@ -26,9 +26,8 @@
 
 #include "wx/grid.h"
 
-class NfgTable : public wxPanel, public gbtGameView {
+class gbtNfgTable : public wxGrid, public gbtGameView {
 private:
-  wxGrid *m_grid;
   bool m_editable;
   int m_showProb, m_showDom, m_showValue;
 
@@ -43,8 +42,8 @@ private:
   void OnUpdate(gbtGameView *);
 
 public:
-  NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~NfgTable() { }
+  gbtNfgTable(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgTable() { }
 
   void ToggleProbs(void);
   int ShowProbs(void) const { return m_showProb; }

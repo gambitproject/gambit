@@ -267,10 +267,10 @@ void gbtSchellingRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
 class NfgGridTable : public wxGridTableBase {
 private:
   gbtGameDocument *m_doc;
-  NfgTable *m_table;
+  gbtNfgTable *m_table;
 
 public:
-  NfgGridTable(NfgTable *p_table, gbtGameDocument *p_doc);
+  NfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc);
   virtual ~NfgGridTable() { }
 
   int GetNumberRows(void);
@@ -292,7 +292,7 @@ public:
   wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind);
 };
 
-NfgGridTable::NfgGridTable(NfgTable *p_table, gbtGameDocument *p_doc)
+NfgGridTable::NfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc)
   : m_doc(p_doc), m_table(p_table)
 { }
 
@@ -524,165 +524,154 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col,
 }
 
 //======================================================================
-//                   class NfgTable: Member functions
+//                   class gbtNfgTable: Member functions
 //======================================================================
 
-BEGIN_EVENT_TABLE(NfgTable, wxPanel)
-  EVT_GRID_CELL_LEFT_CLICK(NfgTable::OnLeftClick)
-  EVT_GRID_CELL_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
-  EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
+BEGIN_EVENT_TABLE(gbtNfgTable, wxGrid)
+  EVT_GRID_CELL_LEFT_CLICK(gbtNfgTable::OnLeftClick)
+  EVT_GRID_CELL_LEFT_DCLICK(gbtNfgTable::OnLeftDoubleClick)
+  EVT_GRID_LABEL_LEFT_CLICK(gbtNfgTable::OnLabelLeftClick)
 END_EVENT_TABLE()
 
-NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc),
+gbtNfgTable::gbtNfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+    gbtGameView(p_doc),
     m_editable(true), 
     m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
 
-  m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  m_grid->SetTable(new NfgGridTable(this, m_doc), true);
-  m_grid->SetGridCursor(0, 0);
-  m_grid->SetEditable(false);
-  m_grid->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
-  m_grid->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
-  m_grid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  m_grid->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  m_grid->SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  m_grid->DisableDragRowSize();
-  m_grid->DisableDragColSize();
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-  m_grid->AdjustScrollbars();
-  m_grid->SetSize(m_grid->GetBestSize());
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  topSizer->Add(m_grid, 1, wxALL | wxEXPAND, 0);
-
-  SetSizer(topSizer);
-  topSizer->SetSizeHints(this);
-
-  Layout();
+  SetTable(new NfgGridTable(this, m_doc), true);
+  SetGridCursor(0, 0);
+  SetEditable(false);
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+  SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  SetColLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  DisableDragRowSize();
+  DisableDragColSize();
+  AutoSizeRows();
+  AutoSizeColumns();
+  AdjustScrollbars();
+  SetSize(GetBestSize());
   Show(true);
 }
 
-void NfgTable::OnUpdate(gbtGameView *)
+void gbtNfgTable::OnUpdate(gbtGameView *)
 { 
-  m_grid->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
-  m_grid->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
 
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
   int rowPlayer = m_doc->GetRowPlayer(), colPlayer = m_doc->GetColPlayer();
-  m_grid->BeginBatch();
-  int stratRows = m_grid->GetRows() - m_showProb - m_showDom - m_showValue;
-  int stratCols = m_grid->GetCols() - m_showProb - m_showDom - m_showValue;
+  BeginBatch();
+  int stratRows = GetRows() - m_showProb - m_showDom - m_showValue;
+  int stratCols = GetCols() - m_showProb - m_showDom - m_showValue;
 
   if (support.NumStrats(rowPlayer) < stratRows) {
-    m_grid->DeleteRows(0, stratRows - support.NumStrats(rowPlayer));
+    DeleteRows(0, stratRows - support.NumStrats(rowPlayer));
   }
   else if (support.NumStrats(rowPlayer) > stratRows) {
-    m_grid->InsertRows(0, support.NumStrats(rowPlayer) - stratRows); 
+    InsertRows(0, support.NumStrats(rowPlayer) - stratRows); 
   }
 
   if (support.NumStrats(colPlayer) < stratCols) {
-    m_grid->DeleteCols(0, stratCols - support.NumStrats(colPlayer));
+    DeleteCols(0, stratCols - support.NumStrats(colPlayer));
   }
   else if (support.NumStrats(colPlayer) > stratCols) {
-    m_grid->InsertCols(0, support.NumStrats(colPlayer) - stratCols);
+    InsertCols(0, support.NumStrats(colPlayer) - stratCols);
   }
 
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
+  AutoSizeRows();
+  AutoSizeColumns();
   // Set all strategy columns to be the same width, which is
   // the narrowest width which fits all the entries
   int max = 0;
   for (int col = 0; col < support.NumStrats(colPlayer); col++) {
-    if (m_grid->GetColSize(col) > max) {
-      max = m_grid->GetColSize(col);
+    if (GetColSize(col) > max) {
+      max = GetColSize(col);
     }
   }
   for (int col = 0; col < support.NumStrats(colPlayer); col++) {
-    m_grid->SetColSize(col, max);
+    SetColSize(col, max);
   }
 
-  m_grid->SetGridCursor(m_doc->GetContingency()[m_doc->GetRowPlayer()] - 1,
-			m_doc->GetContingency()[m_doc->GetColPlayer()] - 1);
-  m_grid->EndBatch();
-  m_grid->AdjustScrollbars();
-  m_grid->ForceRefresh();
-  m_grid->SetSize(m_grid->GetBestSize());
+  SetGridCursor(m_doc->GetContingency()[m_doc->GetRowPlayer()] - 1,
+		m_doc->GetContingency()[m_doc->GetColPlayer()] - 1);
+  EndBatch();
+  AdjustScrollbars();
+  ForceRefresh();
   Layout();
 }
 
-void NfgTable::ToggleProbs(void)
+void gbtNfgTable::ToggleProbs(void)
 {
   m_showProb = 1 - m_showProb;
   if (m_showProb) {
-    m_grid->AppendCols();
-    m_grid->AppendRows();
+    AppendCols();
+    AppendRows();
   }
   else {
-    m_grid->DeleteCols();
-    m_grid->DeleteRows();
+    DeleteCols();
+    DeleteRows();
   }
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-  m_grid->AdjustScrollbars();
-  m_grid->Refresh();
+  AutoSizeRows();
+  AutoSizeColumns();
+  AdjustScrollbars();
+  Refresh();
 }
 
-void NfgTable::ToggleDominance(void)
+void gbtNfgTable::ToggleDominance(void)
 {
   m_showDom = 1 - m_showDom;
   if (m_showDom) {
-    m_grid->AppendCols();
-    m_grid->AppendRows();
+    AppendCols();
+    AppendRows();
   }
   else {
-    m_grid->DeleteCols();
-    m_grid->DeleteRows();
+    DeleteCols();
+    DeleteRows();
   }
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-  m_grid->AdjustScrollbars();
-  m_grid->Refresh();
+  AutoSizeRows();
+  AutoSizeColumns();
+  AdjustScrollbars();
+  Refresh();
 }
 
-void NfgTable::ToggleValues(void)
+void gbtNfgTable::ToggleValues(void)
 {
   m_showValue = 1 - m_showValue;
   if (m_showValue) {
-    m_grid->AppendCols();
-    m_grid->AppendRows();
+    AppendCols();
+    AppendRows();
   }
   else {
-    m_grid->DeleteCols();
-    m_grid->DeleteRows();
+    DeleteCols();
+    DeleteRows();
   }
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-  m_grid->AdjustScrollbars();
-  m_grid->Refresh();
+  AutoSizeRows();
+  AutoSizeColumns();
+  AdjustScrollbars();
+  Refresh();
 }
 
-void NfgTable::OnLeftClick(wxGridEvent &p_event)
+void gbtNfgTable::OnLeftClick(wxGridEvent &p_event)
 {
   if (p_event.GetRow() >= m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer()) ||
       p_event.GetCol() >= m_doc->GetNfgSupport().NumStrats(m_doc->GetColPlayer())) {
     p_event.Veto();
   }
   else {
-    // m_cursorMoving = true;  // this prevents re-entry
     gArray<int> contingency = m_doc->GetContingency();
     contingency[m_doc->GetRowPlayer()] = p_event.GetRow() + 1;
     contingency[m_doc->GetColPlayer()] = p_event.GetCol() + 1;
     m_doc->SetContingency(contingency);
-    // m_cursorMoving = false;
     // now continue with the default behavior (i.e., highlight the new cell)
   }
 }
 
-void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
+void gbtNfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
 {
   if (m_editable &&
       p_event.GetRow() < m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer()) &&
@@ -693,7 +682,7 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
   }
 }
 
-void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
+void gbtNfgTable::OnLabelLeftClick(wxGridEvent &p_event)
 {
   // for the moment, just veto it
   p_event.Veto();
