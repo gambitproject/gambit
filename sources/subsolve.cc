@@ -2,7 +2,7 @@
 //# FILE: subsolve.cc -- Implementation of solve-by-subgame algorithms
 //#
 //# $Id$
-//#  
+//#
 
 #include "efg.h"
 #include "efgutils.h"
@@ -11,6 +11,18 @@
 #define TEMPLATE template
 #elif defined __BORLANDC__
 #define TEMPLATE
+
+bool operator==(const gArray<int> &a, const gArray<int> &b)
+{
+	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+	for (int i = a.mindex; i <= a.maxdex; i++)
+		if (a[i] != b[i])   return false;
+	return true;
+}
+
+bool operator!=(const gArray<int> &a, const gArray<int> &b)
+{return !(a == b);}
+
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 #include "glist.imp"
@@ -558,6 +570,9 @@ bool operator!=(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 	return !(a == b);
 }
 
+gOutput &operator<<(gOutput &, const gArray<int> &);
+gOutput &operator<<(gOutput &, const gArray<double> &);
+gOutput &operator<<(gOutput &, const gArray<gRational> &);
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
