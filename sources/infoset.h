@@ -58,7 +58,6 @@ class Infoset   {
   friend class Lexicon<gRational>;
 
   protected:
-    bool valid;
     BaseEfg *E;
     int number;
     gString name;
@@ -73,8 +72,6 @@ class Infoset   {
     virtual void PrintActions(gOutput &f) const;
 
   public:
-
-    bool IsValid(void) const             { return valid; }
     BaseEfg *BelongsTo(void) const   { return E; }
 
     bool IsChanceInfoset(void) const   { return (player->IsChance()); }

@@ -27,7 +27,7 @@ class Node    {
   friend class Lexicon<gRational>;
   
   protected:
-    bool valid, mark;
+    bool mark;
     BaseEfg *E;
     gString name;
     Infoset *infoset;
@@ -42,8 +42,6 @@ class Node    {
     virtual void Resize(int) = 0;
 
   public:
-
-    bool IsValid(void) const     { return valid; }
     BaseEfg *BelongsTo(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }

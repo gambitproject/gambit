@@ -85,7 +85,7 @@ EFPlayer::~EFPlayer()
 //----------------------------------------------------------------------
 
 Infoset::Infoset(BaseEfg *e, int n, EFPlayer *p, int br)
-  : valid(true), E(e), number(n), player(p), actions(br), flag(0) 
+  : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
     actions[br] = new Action(br, ToString(br), this);
@@ -128,7 +128,7 @@ void Infoset::RemoveAction(int which)
 //----------------------------------------------------------------------
 
 Node::Node(BaseEfg *e, Node *p)
-  : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0),
+  : mark(false), E(e), infoset(0), parent(p), outcome(0),
     gameroot((p) ? p->gameroot : this)
 { }
 
@@ -217,10 +217,6 @@ BaseEfg::~BaseEfg()
   for (i = 1; i <= players.Length(); delete players[i++]);
   for (i = 1; i <= outcomes.Length(); delete outcomes[i++]);
 
-  for (i = 1; i <= dead_nodes.Length(); delete dead_nodes[i++]);
-  for (i = 1; i <= dead_infosets.Length(); delete dead_infosets[i++]);
-  for (i = 1; i <= dead_outcomes.Length(); delete dead_outcomes[i++]);
-
 #ifdef MEMCHECK
   _NumObj--;
   gout << "--- BaseEfg Dtor: " << _NumObj << "\n";
@@ -230,25 +226,6 @@ BaseEfg::~BaseEfg()
 //------------------------------------------------------------------------
 //                  BaseEfg: Private member functions
 //------------------------------------------------------------------------
-
-void BaseEfg::ScrapNode(Node *n)
-{
-  n->children.Flush();
-  n->valid = false;
-  dead_nodes.Append(n);
-}
-
-void BaseEfg::ScrapInfoset(Infoset *s)
-{
-  s->members.Flush();
-  s->valid = false;
-  dead_infosets.Append(s);
-}
-
-void BaseEfg::ScrapOutcome(EFOutcome *c)
-{
-  dead_outcomes.Append(c);
-}
 
 Infoset *BaseEfg::GetInfosetByIndex(EFPlayer *p, int index) const
 {
@@ -388,7 +365,7 @@ void BaseEfg::DeleteOutcome(EFOutcome *outc)
 {
   root->DeleteOutcome(outc);
   outcomes.Remove(outcomes.Find(outc));
-  ScrapOutcome(outc);
+  delete outc;
   DeleteLexicon();
 }
 
@@ -476,7 +453,7 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
   else
     root = keep;
 
-  ScrapNode(n);
+  delete n;
   DeleteLexicon();
 
   sortisets = true;
@@ -635,7 +612,7 @@ bool BaseEfg::DeleteEmptyInfoset(Infoset *s)
   if (s->NumMembers() > 0)   return false;
 
   s->player->infosets.Remove(s->player->infosets.Find(s));
-  ScrapInfoset(s);
+  delete s;
 
   return true;
 }
@@ -769,7 +746,7 @@ Node *BaseEfg::DeleteTree(Node *n)
 
   while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
-    ScrapNode(n->children.Remove(1));
+    delete n->children.Remove(1);
   }
   
   if (n->infoset)  {

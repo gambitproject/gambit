@@ -25,8 +25,10 @@ class BaseEfg     {
   
 private:
   // this is used to track memory leakage; #define MEMCHECK to use it
+#ifdef MEMCHECK
   static int _NumObj;
-  
+#endif   // MEMCHECK  
+
 friend class EfgFileReader;
 
 protected:
@@ -36,10 +38,6 @@ protected:
     gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-
-    gBlock<Node *> dead_nodes;
-    gBlock<Infoset *> dead_infosets;
-    gBlock<EFOutcome *> dead_outcomes;
 
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
     BaseEfg(void);
@@ -53,10 +51,6 @@ protected:
 
     virtual Infoset *CreateInfoset(int n, EFPlayer *pl, int br) = 0;
     virtual Node *CreateNode(Node *parent) = 0;
-
-    void ScrapNode(Node *);
-    void ScrapInfoset(Infoset *);
-    void ScrapOutcome(EFOutcome *);
 
     void SortInfosets(void);
 
