@@ -13,6 +13,7 @@
 template <class T> class EFGobitParams : public GobitParams<T>  {
   public:
     EFGobitParams(void);
+    EFGobitParams(gOutput &out, gOutput &err, gOutput &pxi);
 };
 
 

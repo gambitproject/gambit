@@ -17,6 +17,11 @@
 template <class T> EFGobitParams<T>::EFGobitParams(void)
 { }
 
+template <class T> EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &err,
+						   gOutput &pxi)
+  : GobitParams<T>(out, err, pxi)
+{ }
+
 //-------------------------------------------------------------------------
 //                   EFGobitFunc<T>: Class declaration
 //-------------------------------------------------------------------------

@@ -15,6 +15,11 @@
 template <class T> NFGobitParams<T>::NFGobitParams(void)
 { }
 
+template <class T> NFGobitParams<T>::NFGobitParams(gOutput &out, gOutput &err,
+						   gOutput &pxi)
+  : GobitParams<T>(out, err, pxi)
+{ }
+
 //-------------------------------------------------------------------------
 //                   NFGobitFunc<T>: Class declaration
 //-------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 template <class T> class NFGobitParams : public GobitParams<T>   {
   public:
     NFGobitParams(void);
+    NFGobitParams(gOutput &out, gOutput &err, gOutput &pxi);
 };
 
 
