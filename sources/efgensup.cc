@@ -109,7 +109,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
 	delete_this_action = true;  
       else 
 	if (check_domination) 
-	  if ( IsDominated(*sact,this_action,strong,conditional,status) ) 
+	  if (sact->IsDominated(this_action,strong,conditional) ) 
 	    delete_this_action = true;
 	
     if (delete_this_action) {
@@ -221,8 +221,8 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	delete_this_action = true;  
       else
 	if (check_domination) 
-	  if ( IsDominated(*sact,this_action,true,true,status) ||
-	       IsDominated(*sact,this_action,true,false,status) ) 
+	  if (sact->IsDominated(this_action,true,true) ||
+	      sact->IsDominated(this_action,true,false) ) 
 	    delete_this_action = true;
     if (delete_this_action) {
       no_deletions = false;
@@ -296,15 +296,15 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 	  Action *other_act = act->BelongsTo()->GetAction(j);
 	  if (other_act != act)
 	    if (current.ActionIsActive(other_act)) {
-	      if (Dominates(current,other_act,act,false,true ,status) ||
-		  Dominates(current,other_act,act,false,false,status)) 
+	      if (current.Dominates(other_act,act,false,true) ||
+		  current.Dominates(other_act,act,false,false)) 
 		remove = true;
 	    }
 	    else { 
 	      current.AddAction(other_act);
 	      if (current.HasActiveActionsAtActiveInfosetsAndNoOthers())
-		if (Dominates(current,other_act,act,false,true ,status) ||
-		    Dominates(current,other_act,act,false,false,status)) {
+		if (current.Dominates(other_act,act,false,true) ||
+		    current.Dominates(other_act,act,false,false)) {
 		  remove = true;
 		}
 	      current.RemoveAction(other_act);

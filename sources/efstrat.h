@@ -11,6 +11,7 @@
 #include "gblock.h"
 #include "efg.h"
 #include "gpvector.h"
+#include "gstatus.h"
 
 class Action;
 class EFPlayer;
@@ -69,15 +70,25 @@ public:
 
   // Reachable Nodes and Information Sets
   gList<Node *> ReachableNonterminalNodes(const Node *) const;
-  gList<Node *> ReachableNonterminalNodes(const Node *, Action *) const;
+  gList<Node *> ReachableNonterminalNodes(const Node *, const Action *) const;
   gList<Infoset *> ReachableInfosets(const Node *) const;
-  gList<Infoset *> ReachableInfosets(const Node *, Action *) const;
+  gList<Infoset *> ReachableInfosets(const Node *, const Action *) const;
   gList<Infoset *> ReachableInfosets(const EFPlayer *) const;
 
   bool AlwaysReaches(const Infoset *) const;
   bool AlwaysReachesFrom(const Infoset *, const Node *) const;
   bool MayReach(const Node *) const;
   bool MayReach(const Infoset *) const;
+
+  bool Dominates(const Action *a, const Action *b,
+		 bool strong, bool conditional) const;
+  bool IsDominated(const Action *a, 
+		   bool strong, bool conditional) const;
+  EFSupport *Undominated(bool strong, bool conditional,
+			 const gArray<int> &players,
+			 gOutput &, // tracefile 
+			 gStatus &status) const;
+
 
   void Dump(gOutput &) const;
 };

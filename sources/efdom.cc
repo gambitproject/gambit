@@ -20,31 +20,27 @@ gText efgDominanceException::Description(void) const
 }
 
 
-bool Dominates(const EFSupport &S, 
-	       const int pl, 
-	       const int iset, 
-	       const int a, const int b, 
-	       const bool strong,
-	       const bool conditional,
-	       const gStatus &status)
+bool EFSupport::Dominates(const Action *a, const Action *b,
+			  bool strong, const bool conditional) const
 {
-  const EFSupportWithActiveInfo SAct(S);
-  const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
-  Action *aAct = infoset->GetAction(a);
-  Action *bAct = infoset->GetAction(b);
+  const Infoset *infoset = a->BelongsTo();
+  if (infoset != b->BelongsTo())
+    throw efgDominanceException
+      ("Dominates(..) needs actions in same infoset.\n");
 
+  const EFSupportWithActiveInfo SAct(*this);
+  const EFPlayer *player = infoset->GetPlayer();
+  int pl = player->GetNumber();
   bool equal = true;
 
   if (!conditional) {
-
-    EfgContIter A(S), B(S);
-    A.Freeze(pl, iset); 
-    B.Freeze(pl, iset); 
-    A.Set(aAct);
-    B.Set(bAct);
+    EfgContIter A(*this), B(*this);
+    A.Freeze(player->GetNumber(), infoset->GetNumber()); 
+    B.Freeze(player->GetNumber(), infoset->GetNumber());
+    A.Set(a);
+    B.Set(b);
 
     do  {
-      status.Get();
       gRational ap = A.Payoff(pl);  
       gRational bp = B.Payoff(pl);
 
@@ -66,16 +62,15 @@ bool Dominates(const EFSupport &S,
     for (int n = 1; n <= nodelist.Length(); n++) {
       
       gList<Infoset *> L;
-      L += S.ReachableInfosets(nodelist[n],aAct);
-      L += S.ReachableInfosets(nodelist[n],bAct);
+      L += ReachableInfosets(nodelist[n], a);
+      L += ReachableInfosets(nodelist[n], b);
       L.RemoveRedundancies();
       
-      EfgConditionalContIter A(S,L), B(S,L);
-      A.Set(aAct);
-      B.Set(bAct);
+      EfgConditionalContIter A(*this,L), B(*this,L);
+      A.Set(a);
+      B.Set(b);
       
       do  {
-	status.Get();
 	gRational ap = A.Payoff(nodelist[n],pl);  
 	gRational bp = B.Payoff(nodelist[n],pl);
 	
@@ -90,63 +85,32 @@ bool Dominates(const EFSupport &S,
   
   if (strong) return true;
   else  return (!equal); 
-}
-
-// Another window to the computation above.
-
-bool Dominates(const EFSupport &S, 
-	       const Action *a, const Action *b,
-	       const bool strong,
-	       const bool conditional,
-	       const gStatus &status)
-{
-  const Infoset *infoset = a->BelongsTo();
-  if (infoset != b->BelongsTo())
-    throw efgDominanceException
-      ("Dominates(..) needs actions in same infoset.\n");
-  const EFPlayer *player = infoset->GetPlayer();
-  return Dominates(S,player->GetNumber(),infoset->GetNumber(),
+  /*
+  return ::Dominates(*this,player->GetNumber(),infoset->GetNumber(),
 		   a->GetNumber(),b->GetNumber(),
-		   strong, conditional, status);
+		   strong, conditional);
+  */
 }
 
-bool SomeListElementDominates(const EFSupport &S, 
-			      const gList<Action *> &l,
-			      const Action *a, 
-			      const bool strong,
-			      const bool conditional,
-			      const gStatus &status)
-{
-  for (int i = 1; i <= l.Length(); i++)
-    if (l[i] != a)
-      if (Dominates(S,l[i],a,strong,conditional,status))
-	return true;
-  return false;
-}
-
-bool SomeArrayElementDominates(const EFSupport &S, 
-			       const gArray<Action *> &array,
-			       const Action *a, 
-			       const bool strong,
-			       const bool conditional,
-			       const gStatus &status)
+bool SomeElementDominates(const EFSupport &S, 
+			  const gArray<Action *> &array,
+			  const Action *a, 
+			  const bool strong,
+			  const bool conditional)
 {
   for (int i = 1; i <= array.Length(); i++)
     if (array[i] != a)
-      if (Dominates(S,array[i],a,strong,conditional,status)) {
+      if (S.Dominates(array[i],a,strong,conditional)) {
 	return true;
       }
   return false;
 }
 
-bool IsDominated(const EFSupport &S, 
-		 const Action *a, 
-		 const bool strong,
-		 const bool conditional,
-		 const gStatus &status)
+bool EFSupport::IsDominated(const Action *a, 
+			    bool strong, bool conditional) const
 {
-  gArray<Action *> array(S.Actions(a->BelongsTo()));
-  return SomeArrayElementDominates(S,array,a,strong,conditional,status);
+  gArray<Action *> array(Actions(a->BelongsTo()));
+  return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
 bool InfosetHasDominatedElement(const EFSupport &S, 
@@ -155,10 +119,10 @@ bool InfosetHasDominatedElement(const EFSupport &S,
 				const bool conditional,
 				const gStatus &/*status*/)
 {
-  gList<Action *> actions = S.ListOfActions(i);
+  gArray<Action *> actions = S.Actions(i);
   for (int i = 1; i <= actions.Length(); i++)
-    if (SomeListElementDominates(S,actions,actions[i],
-				 strong,conditional,gstatus))
+    if (SomeElementDominates(S,actions,actions[i],
+			     strong,conditional))
       return true;
 
   return false;
@@ -180,7 +144,7 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
   for (int i = 1; i <= actions.Length(); i++)
     for (int j = 1; j <= actions.Length(); j++)
       if (i != j && !is_dominated[i] && !is_dominated[j]) 
-	if (Dominates(S, pl, iset, i, j, strong, conditional, status)) {
+	if (S.Dominates(actions[i], actions[j], strong, conditional)) {
 	  is_dominated[j] = true;
 	  status.Get();
 	}
@@ -220,14 +184,12 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
   return action_was_eliminated;
 }
 
-EFSupport *ComputeDominated(const EFSupport &S, 
-			    const bool strong,
-			    const bool conditional,
-			    const gArray<int> &players,
-			    gOutput &, // tracefile 
-			    gStatus &status)
+EFSupport *EFSupport::Undominated(bool strong, bool conditional,
+				  const gArray<int> &players,
+				  gOutput &, // tracefile 
+				  gStatus &status) const
 {
-  EFSupport *T = new EFSupport(S);
+  EFSupport *T = new EFSupport(*this);
   bool any = false;
   int cumiset;
 
@@ -236,7 +198,7 @@ EFSupport *ComputeDominated(const EFSupport &S,
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
-      if (ElimDominatedForPlayer(S, *T, pl, cumiset, 
+      if (ElimDominatedForPlayer(*this, *T, pl, cumiset, 
 				 strong, conditional, status)) 
 	any = true;
     }
@@ -252,23 +214,4 @@ EFSupport *ComputeDominated(const EFSupport &S,
   }
 
   return T;
-}
-
-
-// void AndyTest(const EFSupport &, gStatus &status);
-
-EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
-				     const bool strong,
-				     const bool conditional,
-				           gOutput & out, // tracefile 
-				           gStatus &status)
-{
-  //  AndyTest(S,status);
-  //  exit(0);
-
-  gBlock<int> players(S.Game().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  return ComputeDominated(S, strong, conditional, players, out, status);
 }

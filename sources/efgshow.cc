@@ -1363,13 +1363,13 @@ void EfgShow::SolveElimDom(void)
     try {
       if (!dialog.DomMixed()) {
 	if (dialog.FindAll()) {
-	  while ((sup = ComputeDominated(*sup, dialog.DomStrong(), false,
+	  while ((sup = sup->Undominated(dialog.DomStrong(), false,
 					 dialog.Players(), gnull, status)) != 0) {
 	    supports.Append(sup);
 	  }
 	}
 	else {
-	  if ((sup = ComputeDominated(*sup, dialog.DomStrong(), false, 
+	  if ((sup = sup->Undominated(dialog.DomStrong(), false, 
 				      dialog.Players(), gnull, status)) != 0) {
 	    supports.Append(sup);
 	  }

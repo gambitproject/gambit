@@ -330,12 +330,6 @@ static Portion *GSM_DeleteTree(Portion **param)
 }
 
 
-extern EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
-					    const bool strong, 
-					    const bool conditional,
-					          gOutput &tracefile,
-					          gStatus &status);
-
 //--------------
 // ElimDom
 //--------------
@@ -348,9 +342,12 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 
   // The following sets conditional = false.  Could be more general.
 
-  EFSupport *T = DominanceTruncatedSupport(*S, strong, false,
-				  ((OutputPortion *) param[3])->Value(),
-				  gstatus);
+  gBlock<int> players(S->Game().NumPlayers());
+  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport *T = S->Undominated(strong, false, players,
+				((OutputPortion *) param[3])->Value(),
+				gstatus);
 
   ((NumberPortion *) param[2])->SetValue(watch.Elapsed());
   
@@ -364,8 +361,6 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 // IsDominated
 //--------------
 
-#include "efdom.h"
-
 static Portion *GSM_IsDominated_Efg(Portion **param)
 {
   Action *act = ((ActionPortion *) param[0])->Value();
@@ -375,10 +370,7 @@ static Portion *GSM_IsDominated_Efg(Portion **param)
   gWatch watch;
   bool ret;
   
-  // The following sets conditional = false.  Could be more general.
-  
-  
-  ret =  IsDominated(*S, act, strong, conditional, gstatus);
+  ret = S->IsDominated(act, strong, conditional);
   
   ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
   

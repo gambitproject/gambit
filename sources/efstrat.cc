@@ -486,7 +486,7 @@ gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n) const
 }
 
 gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n,
-						   Action *a) const
+						   const Action *a) const
 {
   gList<Node *> answer;
   Node *nn = n->GetChild(a);
@@ -518,7 +518,8 @@ gList<Infoset *> EFSupport::ReachableInfosets(const Node *n) const
   return answer;
 }
 
-gList<Infoset *> EFSupport::ReachableInfosets(const Node *n, Action *a) const
+gList<Infoset *> EFSupport::ReachableInfosets(const Node *n, 
+					      const Action *a) const
 {
   gList<Infoset *> answer;
   gList<Node *> nodelist = ReachableNonterminalNodes(n,a);

@@ -96,8 +96,8 @@ void guiSubgameViaEfg::BaseViewSubgame(int, const Efg &p_efg,
 
   if (m_iterative) {
     EFSupport *oldSupport = new EFSupport(p_support), *newSupport;
-    while ((newSupport = ComputeDominated(*oldSupport, m_strong, false,
-					  players, gnull, gstatus)) != 0) {
+    while ((newSupport = oldSupport->Undominated(m_strong, false,
+						 players, gnull, gstatus)) != 0) {
       delete oldSupport;
       oldSupport = newSupport;
     }
@@ -107,8 +107,8 @@ void guiSubgameViaEfg::BaseViewSubgame(int, const Efg &p_efg,
   }
   else {
     EFSupport *newSupport;
-    if ((newSupport = ComputeDominated(p_support, m_strong, false,
-				       players, gnull, gstatus)) != 0) {
+    if ((newSupport = p_support.Undominated(m_strong, false,
+					    players, gnull, gstatus)) != 0) {
       p_support = *newSupport;
       delete newSupport;
     }
