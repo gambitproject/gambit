@@ -4,8 +4,8 @@
 // @(#)polytope.cc	1.27 06/13/97
 //
 
-#include "dualtope.imp"
 #include "rational.h"
+#include "dualtope.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -21,6 +21,19 @@ TEMPLATE class gList<gVector<int> >;
 TEMPLATE class gNode<gVector<int> >;
 //TEMPLATE class gList<gVector<gRational> >;
 //TEMPLATE class gNode<gVector<gRational> >;
+
+
+template class gHalfSpc<gRational>;
+template gOutput &operator<<(gOutput&, const gHalfSpc<gRational>&);
+
+template class gList<gHalfSpc<gRational> >;
+template class gNode<gHalfSpc<gRational> >;
+
+template class gDualTpe<gRational>;
+template gOutput &operator<<(gOutput&, const gDualTpe<gRational>&);
+
+
+
 
 TEMPLATE class gPolytope<int>;
 TEMPLATE gOutput &operator<<(gOutput &f, const gPolytope<int> &y);

@@ -5,6 +5,135 @@
 #include "dualtope.h"
 
 //------------------------------------------------------------------------
+//     gHalfSpc: Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> gHalfSpc<T>::gHalfSpc(const gSpace* space, 
+					 const T& constant, 
+					 const gVector<T>& normalvector)
+: Space(space), Constant(constant), NormalVector(normalvector)
+{
+  assert(NormalVector.Length() == Dmnsn());
+}
+
+template <class T> gHalfSpc<T>::gHalfSpc(const gHalfSpc<T>& given)
+: Space(given.Space), 
+  Constant(given.Constant), 
+  NormalVector(given.NormalVector)
+{
+}
+
+template <class T> gHalfSpc<T>::~gHalfSpc()
+{
+}
+
+//------------------------------------------------------------------------
+//     gHalfSpc: Information
+//------------------------------------------------------------------------
+
+template <class T> const gSpace* gHalfSpc<T>::TheSpace() const
+{
+  return Space;
+}
+
+template <class T> int gHalfSpc<T>::Dmnsn() const
+{
+  return Space->Dmnsn();
+}
+
+//------------------------------------------------------------------------
+//     gHalfSpc: Operators
+//------------------------------------------------------------------------
+
+template <class T> 
+bool gHalfSpc<T>::operator == (const gHalfSpc<T>& rhs) const
+{
+  return (Constant == rhs.Constant && NormalVector == rhs.NormalVector);
+}
+
+template <class T> 
+bool gHalfSpc<T>::operator != (const gHalfSpc<T>& rhs) const
+{
+  return !(*this == rhs);
+}
+
+//------------------------------------------------------------------------
+//     gHalfSpc: Printing
+//------------------------------------------------------------------------
+
+
+template <class T> gOutput &operator<<(gOutput& f, const gHalfSpc<T>& h)
+{
+  f << h.NormalVector[1] << "n1";
+  for (int i = 2; i <= h.Dmnsn(); i++) 
+    f << " + " << h.NormalVector[i] << "n" << i;
+  f << " >= " << h.Constant;
+  return f;
+}
+
+//------------------------------------------------------------------------
+//     gDualTpe: Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> 
+gDualTpe<T>::gDualTpe(const gSpace* space, const gList<gHalfSpc<T> >& list)
+: Space(space), Inequalities(list)
+{
+  for (int i = 1; i <= Inequalities.Length(); i++)
+    assert (Inequalities[i].TheSpace() == Space);
+
+// We should eventually clean up, eliminating redundant inequalities
+
+}
+
+template <class T> gDualTpe<T>::gDualTpe(const gDualTpe<T>& given)
+: Space(given.Space), 
+  Inequalities(given.Inequalities)
+{
+}
+
+template <class T> gDualTpe<T>::~gDualTpe()
+{
+}
+
+//------------------------------------------------------------------------
+//     gDualTpe: Operators
+//------------------------------------------------------------------------
+
+template <class T> 
+bool gDualTpe<T>::operator == (const gDualTpe<T>& rhs) const
+{
+  return (Inequalities == rhs.Inequalities);
+}
+
+template <class T> 
+bool gDualTpe<T>::operator != (const gDualTpe<T>& rhs) const
+{
+  return !(*this == rhs);
+}
+
+//------------------------------------------------------------------------
+//     gDualTpe: Information
+//------------------------------------------------------------------------
+
+template <class T> int gDualTpe<T>::Dmnsn() const
+{
+  return Space->Dmnsn();
+}
+
+//------------------------------------------------------------------------
+//     gDualTpe: Printing
+//------------------------------------------------------------------------
+
+
+template <class T> gOutput &operator<<(gOutput& f, const gDualTpe<T>& p)
+{
+  for (int i = 1; i <= p.Inequalities.Length(); i++) 
+    f << p.Inequalities[i] << "\n";
+  return f;
+}
+
+//------------------------------------------------------------------------
 //     gPolytope: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 

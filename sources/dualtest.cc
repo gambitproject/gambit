@@ -20,74 +20,49 @@
 // This is inherited from earlier versions of polytope.h.  
 
 #include "glist.imp"
+#include "dualtope.imp"
+/*
 TEMPLATE class gList<gPolytope<int>*>;
 TEMPLATE class gNode<gPolytope<int>*>;
 TEMPLATE class gList<int_pair*>;
 TEMPLATE class gNode<int_pair*>;
+*/
+
 
 int V_CT, P_CT, M_CT;
 
-
-gList<gPolytope<int>*> read_input(char* filename, int** nos_vrtcs, int& D, int& N)
-{ 
-  gFileInput data(filename);
-  data >> D >> N;
-  *nos_vrtcs = new int[N];
-  for(int i=0 ; i<N; i++) 
-    data >> (*nos_vrtcs)[i];
-  gList<gPolytope<int>*> p_list;
-  gSpace* list = new gSpace(N);
-
-  for (int i = 0; i < N; i++)  {
-    gPolytope<int>* temp = new gPolytope<int>(list, D, (*nos_vrtcs)[i], data);
-    p_list+=temp;
-  }
-  return p_list;
-}
-
 int main(int argc, char *argv[])
 {
-  assert (argc == 2);
+  assert (argc == 1);
 
-  gout << "reading input ...\n\n";
+  gSpace* Space = new gSpace(2);
 
-  int D, N;
-  gList<gPolytope<int>*> input_polys;
-  int *NumVerts;
-  input_polys = read_input(argv[argc - 1], &NumVerts, D, N);
+  gVector<gRational> normal1(2);
+  normal1[1] = (gRational)1;
+  normal1[2] = (gRational)2;
+  gRational constant1 = (gRational)3;
+  gHalfSpc<gRational> halfspace1(Space,constant1,normal1);
 
-  gout << "finding extreme vertices and edges ...\n\n";
+  gVector<gRational> normal2(2);
+  normal2[1] = (gRational)-1;
+  normal2[2] = (gRational)-2;
+  gRational constant2 = (gRational)-6;
+  gHalfSpc<gRational> halfspace2(Space,constant2,normal2);
 
-  int* nos_edges = new int[N];
-  int_pair** edges = new (int_pair *)[N];
-  for (int i = 1; i <= N; i++)
-    {
-      gList<ind_pair*> edge_pairs;
+  gVector<gRational> normal3(2);
+  normal3[1] = (gRational)-2;
+  normal3[2] = (gRational)-1;
+  gRational constant3 = (gRational)-6;
+  gHalfSpc<gRational> halfspace3(Space,constant3,normal3);
 
-//DEBUG
-//      gout << "We have  i = " << i << "  and  N = " << N << ".\n";
+  gList<gHalfSpc<gRational> > list;
+  list += halfspace1; 
+  list += halfspace2; 
+  list += halfspace3; 
 
-      edge_pairs = input_polys[i]->ind_pairs_of_edges();
-      nos_edges[i] = edge_pairs.Length();
+  gDualTpe<gRational> dualtope(Space,list);
 
-      edges[i] = new int_pair[nos_edges[i]];
+  gout << "Our first dualtope is\n" << dualtope << ".\n";
 
-      for (int j = 1; j <= nos_edges[i]; j++)
-	{
-	  edges[i][j-1].head = edge_pairs[j]->head - 1;
-	  edges[i][j-1].tail = edge_pairs[j]->tail - 1;
-	}
-    }
-
-  delete [] NumVerts;
-
-  for (int i = 1; i <= N; i++)
-    gout << "Polytope " << i+1 << " is\n" << *(input_polys[i]);
-
-  for (int i = 0; i < N; i++)
-    delete [] edges[i];
-  delete [] edges;
-  delete [] nos_edges;
-  
   exit(0);     
 }

@@ -1,11 +1,80 @@
-/* // polytope.h // */
+/* // dualtope.h // */
 
 #include "glist.h"
 #include "glpsolv1.h"
 #include "gpoly.h"
 
-#ifndef POLYTOPE_H
-#define POLYTOPE_H
+#ifndef DUALTOPE_H
+#define DUALTOPE_H
+
+/*
+
+   We begin by developing a class that represents halfspaces.
+
+*/
+
+template <class T> class gHalfSpc {
+private:
+
+  const gSpace*    Space;
+  const T          Constant;
+  const gVector<T> NormalVector;
+
+// Overwriting is illegal, due to const members
+  operator = (const gHalfSpc& rhs);
+
+public:
+
+  gHalfSpc(const gSpace*, const T&, const gVector<T>&);
+  gHalfSpc(const gHalfSpc&);
+  ~gHalfSpc();
+
+// Operators
+
+  bool operator == (const gHalfSpc<T>&) const;
+  bool operator != (const gHalfSpc<T>&) const;
+
+// Information
+
+  const gSpace* TheSpace() const;
+        int     Dmnsn()    const;
+
+// Printing
+
+  friend gOutput &operator<< (gOutput &f, const gHalfSpc<T> &y);
+};
+
+
+template <class T> class gDualTpe {
+private:
+
+  const gSpace*             Space;
+  const gList<gHalfSpc<T> > Inequalities;
+
+// Overwriting is illegal, due to const members
+  operator = (const gDualTpe& rhs);
+
+public:
+
+  gDualTpe(const gSpace*, const gList<gHalfSpc<T> >&);
+  gDualTpe(const gDualTpe&);
+  ~gDualTpe();
+
+// Operators
+
+  bool operator == (const gDualTpe<T>&) const;
+  bool operator != (const gDualTpe<T>&) const;
+
+// Information
+
+  int     Dmnsn()    const;
+
+// Printing
+
+  friend gOutput &operator<< (gOutput &f, const gDualTpe<T> &y);
+};
+
+// -------------------Old Below------------------
 
 /*
 
@@ -117,4 +186,4 @@ programming routine in glpsolve1.h, which is of the form
 
  */
 
-#endif //# POLYTOPE_H
+#endif //# DUALTOPE_H
