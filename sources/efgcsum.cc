@@ -21,25 +21,6 @@ CSSeqFormParams::CSSeqFormParams(gStatus &status_)
 // Interfacing to solve-by-subgame
 //-----------------------------------
 
-int _CSSeqForm(const EFSupport &, const CSSeqFormParams &,
-	       gList<BehavSolution> &, int &npivots, double &time);
-
-int efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-			     gList<BehavSolution> &solns)
-{
-  int npiv;
-  double time;
-  _CSSeqForm(sup, params, solns, npiv, time);
-  npivots += npiv;
-  return 1;
-}
-
-efgLpSolve::efgLpSolve(const EFSupport &S, const CSSeqFormParams &p, int max)
-  : SubgameSolver(max), npivots(0), params(p)
-{ }
-
-efgLpSolve::~efgLpSolve()   { }
-
 static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
 		      gList<BehavSolution> &solutions, int &npivots, double &time)
 {
@@ -61,6 +42,22 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   }
   return 1;
 }    
+
+int efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			     gList<BehavSolution> &solns)
+{
+  int npiv;
+  double time;
+  _CSSeqForm(sup, params, solns, npiv, time);
+  npivots += npiv;
+  return 1;
+}
+
+efgLpSolve::efgLpSolve(const EFSupport &S, const CSSeqFormParams &p, int max)
+  : SubgameSolver(max), npivots(0), params(p)
+{ }
+
+efgLpSolve::~efgLpSolve()   { }
 
 template class CSSeqFormModule<double>;
 template class CSSeqFormModule<gRational>;
