@@ -39,17 +39,13 @@ public:
 };
 
 class StrategyProfile;
-
-#ifndef NFG_ONLY
 class Lexicon;
 class Efg;
-#endif   // NFG_ONLY
 
 class Nfg  {
-#ifndef NFG_ONLY
 friend class Lexicon;
+friend class NfgFileReader;
 friend void SetEfg(Nfg *, const Efg *);
-#endif   // NFG_ONLY
 protected:
   mutable bool m_dirty;
   gText title, comment;
