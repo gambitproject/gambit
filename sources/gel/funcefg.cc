@@ -14,6 +14,19 @@
 #include "efgutils.h"
 
 
+//------------
+// AddAction
+//------------
+
+DECLARE_BINARY(gelfuncAddAction, EFSupport *, Action *, EFSupport *)
+
+EFSupport *gelfuncAddAction::EvalItem(EFSupport *S, Action *a) const
+{
+  EFSupport *T = new EFSupport(*S);
+  T->AddAction(a);
+  return T;
+}
+
 
 //-----------
 // AddMove
@@ -481,6 +494,19 @@ Node *gelfuncPriorSibling::EvalItem(Node *n) const
   return n->PriorSibling();
 }
 
+//----------------
+// RemoveAction
+//----------------
+
+DECLARE_BINARY(gelfuncRemoveAction, EFSupport *, Action *, EFSupport *)
+
+EFSupport *gelfuncRemoveAction::EvalItem(EFSupport *S, Action *a) const
+{
+  EFSupport *T = new EFSupport(*S);
+  T->RemoveAction(a);
+  return T;
+}
+
 //------------
 // RootNode
 //------------
@@ -569,6 +595,18 @@ EFOutcome *gelfuncSetOutcome::EvalItem(Node *n, EFOutcome *c) const
   return c;
 }
 
+//------------
+// Support
+//------------
+
+DECLARE_UNARY(gelfuncSupportEfg, Efg *, EFSupport *)
+
+EFSupport *gelfuncSupportEfg::EvalItem(Efg *E) const
+{
+  return new EFSupport(*E);
+}
+
+
 //-----------------
 // UnmarkSubgame
 //-----------------
@@ -581,6 +619,12 @@ Node *gelfuncUnmarkSubgame::EvalItem(Node *n) const
   return n;
 }
 
+
+gelExpr *GEL_AddAction(const gArray<gelExpr *> &params)
+{
+  return new gelfuncAddAction((gelExpression<EFSupport *> *) params[1],
+                              (gelExpression<Action *> *) params[2]);
+}
 
 gelExpr *GEL_AddMove(const gArray<gelExpr *> &params)
 {
@@ -815,6 +859,12 @@ gelExpr *GEL_PriorSibling(const gArray<gelExpr *> &params)
   return new gelfuncPriorSibling((gelExpression<Node *> *) params[1]);
 }
 
+gelExpr *GEL_RemoveAction(const gArray<gelExpr *> &params)
+{
+  return new gelfuncRemoveAction((gelExpression<EFSupport *> *) params[1],
+                                 (gelExpression<Action *> *) params[2]);
+}
+
 gelExpr *GEL_RootNode(const gArray<gelExpr *> &params)
 {
   return new gelfuncRootNode((gelExpression<Efg *> *) params[1]);
@@ -868,6 +918,11 @@ gelExpr *GEL_SetOutcome(const gArray<gelExpr *> &params)
                                (gelExpression<EFOutcome *> *) params[2]);
 }
 
+gelExpr *GEL_SupportEfg(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSupportEfg((gelExpression<Efg *> *) params[1]);
+}
+
 gelExpr *GEL_UnmarkSubgame(const gArray<gelExpr *> &params)
 {
   return new gelfuncUnmarkSubgame((gelExpression<Node *> *) params[1]);
@@ -879,6 +934,7 @@ gelExpr *GEL_UnmarkSubgame(const gArray<gelExpr *> &params)
 void gelEfgInit(gelEnvironment *env)
 {
   struct  { gelAdapter *func; char *sig; }  sigarray[] = {
+    { GEL_AddAction, "AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT" },
     { GEL_AddMove, "AddMove[infoset->INFOSET, node->NODE] =: NODE" },
     { GEL_Chance, "Chance[efg->EFG] =: EFPLAYER" },
     { GEL_ChanceProb, "ChanceProb[action->ACTION] =: NUMBER" },
@@ -922,6 +978,7 @@ void gelEfgInit(gelEnvironment *env)
     { GEL_PayoffEFOutcome, "Payoff[outcome->EFOUTCOME, player->EFPLAYER] =: NUMBER" },
     { GEL_Player, "Player[infoset->INFOSET] =: EFPLAYER" },
     { GEL_PriorSibling, "PriorSibling[node->NODE] =: NODE" },
+    { GEL_RemoveAction, "RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT" },
     { GEL_RootNode, "RootNode[efg->EFG] =: NODE" },
     { GEL_SaveEfg, "SaveEfg[efg->EFG, file->TEXT] =: EFG" },
     { GEL_SetNameAction, "SetName[action->ACTION, name->TEXT] =: ACTION" },
@@ -931,6 +988,7 @@ void gelEfgInit(gelEnvironment *env)
     { GEL_SetNameEFPlayer, "SetName[player->EFPLAYER, name->TEXT] =: EFPLAYER" },
     { GEL_SetNameEfg, "SetName[efg->EFG, name->TEXT] =: EFG" },
     { GEL_SetOutcome, "SetOutcome[node->NODE, outcome->EFOUTCOME] =: EFOUTCOME" },
+    { GEL_SupportEfg, "Support[efg->EFG] =: EFSUPPORT" },
     { GEL_UnmarkSubgame, "UnmarkSubgame[node->NODE] =: NODE" },
     { 0, 0 } };
 

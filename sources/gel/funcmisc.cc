@@ -26,10 +26,14 @@ DECLARE_UNARY(gelfuncPrintAction, Action *, Action *)
 DECLARE_UNARY(gelfuncPrintInfoset, Infoset *, Infoset *)
 DECLARE_UNARY(gelfuncPrintEFPlayer, EFPlayer *, EFPlayer *)
 DECLARE_UNARY(gelfuncPrintEFOutcome, EFOutcome *, EFOutcome *)
+DECLARE_UNARY(gelfuncPrintEFSupport, EFSupport *, EFSupport *)
+DECLARE_UNARY(gelfuncPrintBehav, BehavSolution *, BehavSolution *)
 DECLARE_UNARY(gelfuncPrintNfg, Nfg *, Nfg *)
 DECLARE_UNARY(gelfuncPrintStrategy, Strategy *, Strategy *)
 DECLARE_UNARY(gelfuncPrintNFPlayer, NFPlayer *, NFPlayer *)
 DECLARE_UNARY(gelfuncPrintNFOutcome, NFOutcome *, NFOutcome *)
+DECLARE_UNARY(gelfuncPrintNFSupport, NFSupport *, NFSupport *)
+DECLARE_UNARY(gelfuncPrintMixed, MixedSolution *, MixedSolution *)
 
 
 gNestedList<gNumber> gelfuncPrintNumber::Evaluate(gelVariableTable *vt) const
@@ -89,6 +93,18 @@ EFOutcome *gelfuncPrintEFOutcome::EvalItem(EFOutcome *c) const
   return c;
 }
 
+EFSupport *gelfuncPrintEFSupport::EvalItem(EFSupport *s) const
+{
+  gout << s;
+  return s;
+}
+
+BehavSolution *gelfuncPrintBehav::EvalItem(BehavSolution *b) const
+{
+  gout << b;
+  return b;
+}
+
 Nfg *gelfuncPrintNfg::EvalItem(Nfg *N) const
 {
   gout << N->GetTitle();
@@ -113,6 +129,18 @@ NFOutcome *gelfuncPrintNFOutcome::EvalItem(NFOutcome *c) const
   return c;
 }
 
+NFSupport *gelfuncPrintNFSupport::EvalItem(NFSupport *s) const
+{
+  gout << s;
+  return s;
+}
+
+MixedSolution *gelfuncPrintMixed::EvalItem(MixedSolution *m) const
+{
+  gout << m;
+  return m;
+}
+
 //----------
 // Semi
 //----------
@@ -126,7 +154,7 @@ private:
 public:
   gelfuncSemi(gelExpr *, gelExpression<T> *);
   ~gelfuncSemi();
-  
+
   gNestedList<T> Evaluate(gelVariableTable *vt) const;
 };
 
@@ -138,7 +166,7 @@ gelfuncSemi<T>::gelfuncSemi(gelExpr *x, gelExpression<T> *y)
 template <class T> gelfuncSemi<T>::~gelfuncSemi()
 { delete op1;  delete op2; }
 
-template <class T> 
+template <class T>
 gNestedList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
 {
   op1->Execute(vt);
@@ -154,10 +182,14 @@ template class gelfuncSemi<Action *>;
 template class gelfuncSemi<Infoset *>;
 template class gelfuncSemi<EFPlayer *>;
 template class gelfuncSemi<EFOutcome *>;
+template class gelfuncSemi<EFSupport *>;
+template class gelfuncSemi<BehavSolution *>;
 template class gelfuncSemi<Nfg *>;
 template class gelfuncSemi<Strategy *>;
 template class gelfuncSemi<NFPlayer *>;
 template class gelfuncSemi<NFOutcome *>;
+template class gelfuncSemi<NFSupport *>;
+template class gelfuncSemi<MixedSolution *>;
 
 
 #include "gwatch.h"
@@ -274,6 +306,16 @@ gelExpr *GEL_PrintEFOutcome(const gArray<gelExpr *> &params)
   return new gelfuncPrintEFOutcome((gelExpression<EFOutcome *> *) params[1]);
 }
 
+gelExpr *GEL_PrintEFSupport(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintEFSupport((gelExpression<EFSupport *> *) params[1]);
+}
+
+gelExpr *GEL_PrintBehav(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintBehav((gelExpression<BehavSolution *> *) params[1]);
+}
+
 gelExpr *GEL_PrintNfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncPrintNfg((gelExpression<Nfg *> *) params[1]);
@@ -292,6 +334,16 @@ gelExpr *GEL_PrintNFPlayer(const gArray<gelExpr *> &params)
 gelExpr *GEL_PrintNFOutcome(const gArray<gelExpr *> &params)
 {
   return new gelfuncPrintNFOutcome((gelExpression<NFOutcome *> *) params[1]);
+}
+
+gelExpr *GEL_PrintNFSupport(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintNFSupport((gelExpression<NFSupport *> *) params[1]);
+}
+
+gelExpr *GEL_PrintMixed(const gArray<gelExpr *> &params)
+{
+  return new gelfuncPrintMixed((gelExpression<MixedSolution *> *) params[1]);
 }
 
 gelExpr *GEL_SemiBoolean(const gArray<gelExpr *> &params)
@@ -348,6 +400,18 @@ gelExpr *GEL_SemiEFOutcome(const gArray<gelExpr *> &params)
 				((gelExpression<EFOutcome *> *) params[2]));
 }
 
+gelExpr *GEL_SemiEFSupport(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<EFSupport *>(params[1],
+				((gelExpression<EFSupport *> *) params[2]));
+}
+
+gelExpr *GEL_SemiBehav(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<BehavSolution *>(params[1],
+				((gelExpression<BehavSolution *> *) params[2]));
+}
+
 gelExpr *GEL_SemiNfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncSemi<Nfg *>(params[1],
@@ -370,6 +434,18 @@ gelExpr *GEL_SemiNFOutcome(const gArray<gelExpr *> &params)
 {
   return new gelfuncSemi<NFOutcome *>(params[1],
 				((gelExpression<NFOutcome *> *) params[2]));
+}
+
+gelExpr *GEL_SemiNFSupport(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<NFSupport *>(params[1],
+				((gelExpression<NFSupport *> *) params[2]));
+}
+
+gelExpr *GEL_SemiMixed(const gArray<gelExpr *> &params)
+{
+  return new gelfuncSemi<MixedSolution *>(params[1],
+				((gelExpression<MixedSolution *> *) params[2]));
 }
 
 gelExpr *GEL_StartWatch(const gArray<gelExpr *> &)
@@ -399,10 +475,14 @@ void gelMiscInit(gelEnvironment *env)
     { GEL_PrintAction, "Print[x->ACTION] =: ACTION" },
     { GEL_PrintEFPlayer, "Print[x->EFPLAYER] =: EFPLAYER" },
     { GEL_PrintEFOutcome, "Print[x->EFOUTCOME] =: EFOUTCOME" },
+    { GEL_PrintEFSupport, "Print[x->EFSUPPORT] =: EFSUPPORT" },
+    { GEL_PrintBehav, "Print[x->BEHAV] =: BEHAV" },
     { GEL_PrintNfg, "Print[x->NFG] =: NFG" },
     { GEL_PrintStrategy, "Print[x->STRATEGY] =: STRATEGY" },
     { GEL_PrintNFPlayer, "Print[x->NFPLAYER] =: NFPLAYER" },
     { GEL_PrintNFOutcome, "Print[x->NFOUTCOME] =: NFOUTCOME" },
+    { GEL_PrintNFSupport, "Print[x->NFSUPPORT] =: NFSUPPORT" },
+    { GEL_PrintMixed, "Print[x->MIXED] =: MIXED" },
     { GEL_SemiBoolean, "Semi[x->ANYTYPE, y->BOOLEAN] =: BOOLEAN" },
     { GEL_SemiNumber, "Semi[x->ANYTYPE, y->NUMBER] =: NUMBER" },
     { GEL_SemiText, "Semi[x->ANYTYPE, y->TEXT] =: TEXT" },
@@ -412,10 +492,14 @@ void gelMiscInit(gelEnvironment *env)
     { GEL_SemiInfoset, "Semi[x->ANYTYPE, y->INFOSET] =: INFOSET" },
     { GEL_SemiEFPlayer, "Semi[x->ANYTYPE, y->EFPLAYER] =: EFPLAYER" },
     { GEL_SemiEFOutcome, "Semi[x->ANYTYPE, y->EFOUTCOME] =: EFOUTCOME" },
+    { GEL_SemiEFSupport, "Semi[x->ANYTYPE, y->EFSUPPORT] =: EFSUPPORT" },
+    { GEL_SemiBehav, "Semi[x->ANYTYPE, y->BEHAV] =: BEHAV" },
     { GEL_SemiNfg, "Semi[x->ANYTYPE, y->NFG] =: NFG" },
     { GEL_SemiStrategy, "Semi[x->ANYTYPE, y->STRATEGY] =: STRATEGY" },
     { GEL_SemiNFPlayer, "Semi[x->ANYTYPE, y->NFPLAYER] =: NFPLAYER" },
     { GEL_SemiNFOutcome, "Semi[x->ANYTYPE, y->NFOUTCOME] =: NFOUTCOME" },
+    { GEL_SemiNFSupport, "Semi[x->ANYTYPE, y->NFSUPPORT] =: NFSUPPORT" },
+    { GEL_SemiMixed, "Semi[x->ANYTYPE, y->MIXED] =: MIXED" },
     { GEL_StartWatch, "StartWatch[] =: NUMBER" },
     { GEL_StopWatch, "StopWatch[] =: NUMBER" },
     { 0, 0 } };
