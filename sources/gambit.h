@@ -20,18 +20,22 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
-class GambitApp: public wxApp
-{
+class GambitApp : public wxApp {
 private:
-	gText current_dir; /* Current position in directory tree. */
+  gText m_currentDir; /* Current position in directory tree. */
+  gText m_resourceFile;  /* path to resource file */
 
 public:
-    wxFrame *OnInit(void);
-    int OnExit(void);
+  wxFrame *OnInit(void);
+  int OnExit(void);
 
-	const gText& CurrentDir()              { return current_dir; }
-	void  SetCurrentDir(const gText& dir)  { current_dir = dir; }
+  const gText &CurrentDir(void)   { return m_currentDir; }
+  void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
+
+  const gText &ResourceFile(void)  { return m_resourceFile; }
 };
+
+extern GambitApp gambitApp;
 
 
 class GambitFrame : public wxFrame, public GuiObject

@@ -10,6 +10,8 @@
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif  // __BORLANDC__
+
+#include "gambit.h"
 #include "gambdraw.h"
 
 gBlock<int> GambitDrawSettings::player_colors = gBlock<int>();

@@ -12,6 +12,7 @@
 #endif // __BORLANDC__
 
 #include "wxmisc.h"
+#include "gambit.h"
 #include "treedraw.h"
 #include "legendc.h"
 

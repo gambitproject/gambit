@@ -186,7 +186,7 @@ void    SpreadSheetDrawSettings::SaveOptions(const char *s)
 {
     char *file_name;
     const char *sn = "SpreadSheet3D";   // section name
-    file_name = copystring((s) ? s : "gambit.ini");
+    file_name = copystring((s) ? s : (char *) gambitApp.ResourceFile());
     
     wxWriteResource(sn, "SpreadSheet3D-Version", 2, file_name);
     wxWriteResource(sn, "Row-Height", row_height, file_name);
@@ -206,7 +206,7 @@ void    SpreadSheetDrawSettings::SaveOptions(const char *s)
 int SpreadSheetDrawSettings::LoadOptions(const char *s)
 {
     const char *sn = "SpreadSheet3D";   // section name
-    const char *file_name = (s) ? s : "gambit.ini";
+    const char *file_name = (s) ? s : (char *) gambitApp.ResourceFile();
     
     char *font_str = new char[100];
     int version = 0;

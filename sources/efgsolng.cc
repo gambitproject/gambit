@@ -11,6 +11,7 @@
 #include "wxstatus.h"
 #include "subsolve.h"
 #include "gfunc.h"
+#include "gambit.h"
 #include "efgsolng.h"
 #include "nfgconst.h"
 
@@ -52,7 +53,7 @@ guiSubgameSolver::guiSubgameSolver(EfgShowInterface *p_parent, const Efg &p_efg,
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
   wxGetResource("Soln-Defaults", "Efg-Interactive-Solns",
-		&m_pickSoln, "gambit.ini");
+		&m_pickSoln, gambitApp.ResourceFile());
 }
 
 //

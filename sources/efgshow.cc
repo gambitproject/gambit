@@ -148,7 +148,7 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   // Create the menu bar
   MakeMenus();
   // Create the accelerators (to add an accelerator, see const.h)
-  ReadAccelerators(accelerators, "EfgAccelerators");
+  ReadAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
     
   // Create the canvas(TreeWindow) on which to draw the tree
   tw = new TreeWindow(ef, disp_sup, this);
@@ -308,7 +308,7 @@ void EfgShow::SolveStandard(void)
 
   try {
     wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
-		    FALSE, "gambit.ini");
+		    FALSE, gambitApp.ResourceFile());
     if (markSubgames)  
       tw->SubgameMarkAll();
     else
@@ -1180,7 +1180,7 @@ void EfgShow::OnMenuCommand(int id)
       break;
     case efgmenuPREFS_ACCELS:
       EditAccelerators(accelerators, MakeEventNames());
-      WriteAccelerators(accelerators, "EfgAccelerators");
+      WriteAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
       break;
 
     case efgmenuHELP_ABOUT:

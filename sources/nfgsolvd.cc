@@ -8,6 +8,7 @@
 #include "wxmisc.h"
 
 #include "nfg.h"
+#include "gambit.h"
 #include "nfgsolvd.h"
 
 static const char *SOLN_SECT = "Soln-Defaults";
@@ -22,7 +23,7 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
 					       wxWindow *p_parent)
   : wxDialogBox(p_parent, "Standard Solution", TRUE), m_nfg(p_nfg)
 {
-  gText defaultsFile("gambit.ini");
+  gText defaultsFile(gambitApp.ResourceFile());
   int standardType = 0, standardNum = 0, precision = 0;
   wxGetResource(SOLN_SECT, "Nfg-Standard-Type", &standardType,
 		defaultsFile);
@@ -72,7 +73,7 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
 dialogNfgSolveStandard::~dialogNfgSolveStandard()
 {
   if (m_completed == wxOK) {
-    gText defaultsFile("gambit.ini");
+    gText defaultsFile(gambitApp.ResourceFile());
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Type",
 		    m_standardType->GetSelection(), defaultsFile);
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Num",

@@ -177,9 +177,10 @@ void GambitToolBar::OnMouseEnter(int tool)
 wxFrame *GambitApp::OnInit(void)
 {
     // First check if we have a current settings file (gambit.ini).  If not, exit!
-    
+    m_resourceFile = "gambit.ini";
+
     int ver;
-    wxGetResource("Gambit", "Gambit-Version", &ver, "gambit.ini");
+    wxGetResource("Gambit", "Gambit-Version", &ver, m_resourceFile);
     
     if (ver != GAMBIT_VERSION)
     {
@@ -324,7 +325,8 @@ wxFrame *GambitApp::OnInit(void)
     
     // Initialize the output (floating point) precision.
     int num_prec;
-    wxGetResource("Gambit", "Output-Precision", &num_prec, "gambit.ini");
+    wxGetResource("Gambit", "Output-Precision", &num_prec,
+                  gambitApp.ResourceFile());
     ToTextPrecision(num_prec);
 
     gambit_frame->Show(TRUE);

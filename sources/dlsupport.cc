@@ -22,11 +22,11 @@ dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
   : wxDialogBox(p_parent, "Dominance Elimination Parameters", TRUE),
     m_mixed(p_mixed), m_compress(false), m_numPlayers(p_players.Length())
 {
-  wxGetResource(SOLN_SECT, "ElimDom-All", &m_all, "gambit.ini");
-  wxGetResource(SOLN_SECT, "ElimDom-Type", &m_domType, "gambit.ini");
-  wxGetResource(SOLN_SECT, "ElimDom-Method", &m_domMethod, "gambit.ini");
+  wxGetResource(SOLN_SECT, "ElimDom-All", &m_all, gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Type", &m_domType, gambitApp.ResourceFile());
+  wxGetResource(SOLN_SECT, "ElimDom-Method", &m_domMethod, gambitApp.ResourceFile());
   wxGetResource(SOLN_SECT, "ElimDom-Precision", &m_domPrecision,
-		"gambit.ini");
+		gambitApp.ResourceFile());
 
   m_allBox = new wxCheckBox(this, 0, "Eliminate iteratively");
   m_allBox->SetValue(m_all);
@@ -76,11 +76,11 @@ dialogElim::dialogElim(const gArray<gText> &p_players, bool p_mixed,
 
 dialogElim::~dialogElim()
 {
-  wxWriteResource(SOLN_SECT, "ElimDom-All", m_all, "gambit.ini");
-  wxWriteResource(SOLN_SECT, "ElimDom-Type", m_domType, "gambit.ini");
-  wxWriteResource(SOLN_SECT, "ElimDom-Method", m_domMethod, "gambit.ini");
+  wxWriteResource(SOLN_SECT, "ElimDom-All", m_all, gambitApp.ResourceFile());
+  wxWriteResource(SOLN_SECT, "ElimDom-Type", m_domType, gambitApp.ResourceFile());
+  wxWriteResource(SOLN_SECT, "ElimDom-Method", m_domMethod, gambitApp.ResourceFile());
   wxWriteResource(SOLN_SECT, "ElimDom-Precision", m_domPrecision,
-		  "gambit.ini");
+		  gambitApp.ResourceFile());
 }
 
 void dialogElim::CallbackHelp(wxButton &, wxEvent &)

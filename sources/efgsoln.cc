@@ -41,7 +41,7 @@ NodeSolnShow::NodeSolnShow(int num_players, const EfgShow *parent_)
     parent(parent_), features(NUM_FEATURES)
 {
   // Read in the defaults
-  char *defaults_file = "gambit.ini";
+  char *defaults_file = gambitApp.ResourceFile();
 
   for (int i = 1; i <= NUM_FEATURES; i++)
     wxGetResource(NODESOLN_SECTION, feature_names[i], &features[i], 
@@ -161,7 +161,7 @@ void NodeSolnShow::SetOptions(void)
     if (save_def) {
       for (int i = 1; i <= NUM_FEATURES; i++)
 	wxWriteResource(NODESOLN_SECTION, feature_names[i], 
-			features[i], "gambit.ini");
+			features[i], gambitApp.ResourceFile());
     }
 
     Redraw();
@@ -506,7 +506,7 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
 
     SetIcon(frame_icon);
     // Read in the default features
-    char *defaults_file = "gambit.ini";
+    char *defaults_file = gambitApp.ResourceFile();
 
     if (opts&BSOLN_O_OPTIONS)
     {
@@ -645,7 +645,7 @@ int EfgSolnShow::FeaturePos(int feature)
 void EfgSolnShow::SetOptions(void)
 {
     gArray<Bool> new_features = features;
-    char *defaults_file = "gambit.ini";
+    char *defaults_file = gambitApp.ResourceFile();
 
     MyDialogBox *options_dialog = new MyDialogBox(this, "Settings", 
                                                   EFG_SOLVE_INSPECT_OPTIONS_HELP);
@@ -1395,7 +1395,7 @@ EfgSolnPicker::EfgSolnPicker(const Efg &ef_, BehavSolutionList &soln,
     picked(soln.Length())
 {
     SetTitle("Pick solutions to proceed");
-    char *defaults_file = "gambit.ini";
+    char *defaults_file = gambitApp.ResourceFile();
     wxGetResource(SOLN_SECT, "Efg-Interactive-Solns-All", &pick_all, defaults_file);
     Panel()->NewLine();
     //wxCheckBox *pick_all_box = new wxCheckBox(Panel(), (wxFunction)pick_all_func, "All");

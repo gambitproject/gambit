@@ -42,7 +42,7 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   SetPlayers(pl1, pl2, true);
 
   // Create the accelerators
-  ReadAccelerators(accelerators, "NfgAccelerators");
+  ReadAccelerators(accelerators, "NfgAccelerators", gambitApp.ResourceFile());
   
   UpdateVals();
   spread->Redraw();
@@ -1229,7 +1229,7 @@ int NfgShow::CheckAccelerators(wxKeyEvent &ev)
 void NfgShow::EditAccelerators(void)
 {
   ::EditAccelerators(accelerators, MakeEventNames());
-  WriteAccelerators(accelerators, "NfgAccelerators");
+  WriteAccelerators(accelerators, "NfgAccelerators", gambitApp.ResourceFile());
 }
 
 
@@ -1368,7 +1368,7 @@ int NfgGUI::GetNFParams(gArray<int> &dimensionality, gArray<gText> &names, wxFra
 NormalDrawSettings::NormalDrawSettings(void)
   : output_precision(2)
 {
-  char *defaults_file = "gambit.ini";
+  char *defaults_file = gambitApp.ResourceFile();
   wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, defaults_file);
 }
 
@@ -1390,7 +1390,7 @@ void NormalDrawSettings::OutcomeOptions(void)
     options_dialog->Go();
     
     if (options_dialog->Completed() == wxOK) {
-      char *defaults_file = "gambit.ini";
+      char *defaults_file = gambitApp.ResourceFile();
       outcome_disp = wxListFindString(opt_list, opt_str);
       wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
     }

@@ -89,12 +89,12 @@ gOutput &operator<<(gOutput &o, const AccelEvent &p);
 long    CheckAccelerators(gList<Accel> &list, wxKeyEvent &ev);
 
 int     ReadAccelerators(gList<Accel> &list, 
-                         const char *section = "Accelerators", 
-                         const char *file = "gambit.ini");
+                         const char *section,
+                         const char *file);
 
 int     WriteAccelerators(const gList<Accel> &list, 
-                          const char *section = "Accelerators", 
-                          const char *file = "gambit.ini");
+                          const char *section,
+                          const char *file);
 
 void    EditAccelerators(gList<Accel> &list, const gArray<AccelEvent> &events);
 

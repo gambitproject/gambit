@@ -42,7 +42,7 @@ public:
     void    PlayerColorDialog(gArray<gText> &);
 };
 
-#define INIFILE     "gambit.ini"
+#define INIFILE     (gambitApp.ResourceFile())
 
 #endif  // GAMBDRAW_H
 

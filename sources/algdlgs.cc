@@ -8,6 +8,7 @@
 #include "gstream.h"
 #include "system.h"
 #include "wxio.h"
+#include "gambit.h"
 #include "algdlgs.h"
 #include "wxmisc.h"
 
@@ -48,40 +49,40 @@ dialogAlgorithm::~dialogAlgorithm(void)
   if (m_completed == wxOK) {
     if (m_usesNfg) {
       wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
-		      m_depthChoice->GetSelection(), "gambit.ini");
+		      m_depthChoice->GetSelection(), gambitApp.ResourceFile());
       if (m_depthChoice->GetSelection() != 0) {
 	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Type",
-			m_typeChoice->GetSelection(), "gambit.ini");
+			m_typeChoice->GetSelection(), gambitApp.ResourceFile());
 	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Method",
-			m_methodChoice->GetSelection(), "gambit.ini");
+			m_methodChoice->GetSelection(), gambitApp.ResourceFile());
       }
     }
     else {
       wxWriteResource("Soln-Defaults", "Efg-ElimDom-Depth",
-		      m_depthChoice->GetSelection(), "gambit.ini");
+		      m_depthChoice->GetSelection(), gambitApp.ResourceFile());
       if (m_depthChoice->GetSelection() != 0)
 	wxWriteResource("Soln-Defaults", "Efg-ElimDom-Type",
-			m_typeChoice->GetSelection(), "gambit.ini");
+			m_typeChoice->GetSelection(), gambitApp.ResourceFile());
     }
 
     if (m_subgames) {
       wxWriteResource("Soln-Defaults", "Efg-Mark-Subgames",
-		      m_markSubgames->GetValue(), "gambit.ini");
+		      m_markSubgames->GetValue(), gambitApp.ResourceFile());
       wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
-		      m_selectSolutions->GetValue(), "gambit.ini");
+		      m_selectSolutions->GetValue(), gambitApp.ResourceFile());
     }
 
     if (m_stopAfter) {
       if (m_findAll->GetValue()) 
-	wxWriteResource("Algorithm Params", "StopAfter", 0, "gambit.ini");
+	wxWriteResource("Algorithm Params", "StopAfter", 0, gambitApp.ResourceFile());
       else
 	wxWriteResource("Algorithm Params", "StopAfter",
-			m_stopAfter->GetInteger(), "gambit.ini");
+			m_stopAfter->GetInteger(), gambitApp.ResourceFile());
     }
 
     if (m_precision) 
       wxWriteResource("Algorithm Params", "Precision",
-		      m_precision->GetSelection(), "gambit.ini");
+		      m_precision->GetSelection(), gambitApp.ResourceFile());
   }
 }
 
@@ -128,15 +129,15 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 
   if (p_usesNfg) {
     (void) new wxMessage(this, "Eliminate dominated mixed strategies");
-    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, "gambit.ini");
-    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Type", &type, "gambit.ini");
+    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
+    wxGetResource("Soln-Defaults", "Nfg-ElimDom-Type", &type, gambitApp.ResourceFile());
     wxGetResource("Soln-Defaults", "Nfg-ElimDom-Method", &method,
-		  "gambit.ini");
+		  gambitApp.ResourceFile());
   }
   else {
     (void) new wxMessage(this, "Eliminate dominated behavior strategies");
-    wxGetResource("Soln-Defaults", "Efg-ElimDom-Depth", &depth, "gambit.ini");
-    wxGetResource("Soln-Defaults", "Efg-ElimDom-Type", &type, "gambit.ini");
+    wxGetResource("Soln-Defaults", "Efg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
+    wxGetResource("Soln-Defaults", "Efg-ElimDom-Type", &type, gambitApp.ResourceFile());
   }
   NewLine();
 
@@ -175,9 +176,9 @@ void dialogAlgorithm::SubgameFields(void)
   (void) new wxMessage(this, "Subgames");
   NewLine();
 
-  wxGetResource("Soln-Defaults", "Efg-Mark-Subgames", &mark, "gambit.ini");
+  wxGetResource("Soln-Defaults", "Efg-Mark-Subgames", &mark, gambitApp.ResourceFile());
   wxGetResource("Soln-Defaults", "Efg-Interactive-Solns", &select,
-		"gambit.ini");
+		gambitApp.ResourceFile());
 
   m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
   m_markSubgames->SetValue(mark);
@@ -227,7 +228,7 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 void dialogAlgorithm::StopAfterField(void)
 {
   int stopAfter = 0;
-  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, "gambit.ini");
+  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, gambitApp.ResourceFile());
   
   m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
   m_findAll->SetClientData((char *) this);
@@ -245,7 +246,7 @@ void dialogAlgorithm::StopAfterField(void)
 void dialogAlgorithm::PrecisionField(void)
 {
   int precision = 0;
-  wxGetResource("Algorithm Params", "Precision", &precision, "gambit.ini");
+  wxGetResource("Algorithm Params", "Precision", &precision, gambitApp.ResourceFile());
 
   char *precisionChoices[] = { "Float", "Rational" };
   m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
@@ -317,19 +318,19 @@ dialogPxi::~dialogPxi()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
-		    m_plotType->GetSelection(), "gambit.ini");
+		    m_plotType->GetSelection(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Run-Pxi",
-		    m_runPxi->GetValue(), "gambit.ini");
+		    m_runPxi->GetValue(), gambitApp.ResourceFile());
     if (m_runPxi->GetValue()) 
       wxWriteResource("Algorithm Params", "Pxi-Command",
-		      m_pxiCommand->GetValue(), "gambit.ini");
+		      m_pxiCommand->GetValue(), gambitApp.ResourceFile());
   }
 }
 
 void dialogPxi::PxiFields(void)
 {
   int plotType = 0;
-  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, "gambit.ini");
+  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
   char *plotTypeChoices[] = { "Log", "Linear" };
   m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
 			      2, plotTypeChoices);
@@ -342,14 +343,14 @@ void dialogPxi::PxiFields(void)
   NewLine();
 
   Bool runPxi = false;
-  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, "gambit.ini");
+  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, gambitApp.ResourceFile());
   m_runPxi = new wxCheckBox(this, (wxFunction) CallbackRun, "Run PXI");
   m_runPxi->SetClientData((char *) this);
   m_runPxi->SetValue(runPxi);
 
   gText pxiCommand;
   wxGetResourceStr("Algorithm Params", "Pxi-Command", pxiCommand, 
-		   "gambit.ini");
+		   gambitApp.ResourceFile());
   m_pxiCommand = new wxText(this, 0, "PXI command");
   m_pxiCommand->SetValue(pxiCommand);
   m_pxiCommand->Enable(m_runPxi->GetValue());
@@ -531,13 +532,13 @@ dialogLiap::~dialogLiap()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
-		    "gambit.ini");
-    wxWriteResource("Algorithm Params", "Func-tolND", TolND(), "gambit.ini");
-    wxWriteResource("Algorithm Params", "Func-tol1D", Tol1D(), "gambit.ini");
+		    gambitApp.ResourceFile());
+    wxWriteResource("Algorithm Params", "Func-tolND", TolND(), gambitApp.ResourceFile());
+    wxWriteResource("Algorithm Params", "Func-tol1D", Tol1D(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-maxitsND",
-		    MaxitsND(), "gambit.ini");
+		    MaxitsND(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-maxits1D",
-		    Maxits1D(), "gambit.ini");
+		    Maxits1D(), gambitApp.ResourceFile());
   }
 }
 
@@ -550,31 +551,31 @@ void dialogLiap::AlgorithmFields(void)
   NewLine();
 
   int nTries = 0;
-  wxGetResource("Algorithm Params", "Liap-nTries", &nTries, "gambit.ini");
+  wxGetResource("Algorithm Params", "Liap-nTries", &nTries, gambitApp.ResourceFile());
   m_nTries = new wxIntegerItem(this, "nTries", nTries, -1, -1, 100, -1);
   NewLine();
 
   int tolND = 8;
-  wxGetResource("Algorithm Params", "Func-tolND", &tolND, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-tolND", &tolND, gambitApp.ResourceFile());
   m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, 150, -1);
   int tol1D = 8;
-  wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, gambitApp.ResourceFile());
   m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, 150, -1);
   NewLine();
 
   int maxitsND = 0;
-  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsND, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsND, gambitApp.ResourceFile());
   m_maxitsND = new wxIntegerItem(this, "Iterations n-D", maxitsND,
 				 -1, -1, 150, -1);
   int maxits1D = 0;
-  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1D, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1D, gambitApp.ResourceFile());
   m_maxits1D = new wxIntegerItem(this, "Iterations 1-D", maxits1D,
 				 -1, -1, 150, -1);
   NewLine();
 
   int startOption = 0;
   wxGetResource("Algorithm Params", "Start-Option", &startOption,
-		"gambit.ini");
+		gambitApp.ResourceFile());
   char *startOptions[] = { "Default", "Saved", "Prompt" };
   m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
 				 3, startOptions);
@@ -607,9 +608,9 @@ dialogSimpdiv::~dialogSimpdiv()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Simpdiv-nRestarts", NumRestarts(),
-		    "gambit.ini");
+		    gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Simpdiv-leashLength", LeashLength(),
-		    "gambit.ini");
+		    gambitApp.ResourceFile());
   }
 }
 
@@ -624,13 +625,13 @@ void dialogSimpdiv::AlgorithmFields(void)
 
   int nRestarts = 0;
   wxGetResource("Algorithm Params", "Simpdiv-nRestarts", &nRestarts,
-		"gambit.ini");
+		gambitApp.ResourceFile());
   m_nRestarts = new wxIntegerItem(this, "# restarts", nRestarts,
 				  -1, -1, 100, -1);
 
   int leashLength = 0;
   wxGetResource("Algorithm Params", "Simpdiv-leashLength", &leashLength,
-		"gambit.ini");
+		gambitApp.ResourceFile());
   m_leashLength = new wxIntegerItem(this, "Leash length", leashLength,
 				    -1, -1, 100, -1);
   NewLine();
@@ -695,21 +696,21 @@ dialogQre::~dialogQre()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Qre-minLam",
-		    m_minLam->GetValue(), "gambit.ini");
+		    m_minLam->GetValue(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-maxLam",
-		    m_maxLam->GetValue(), "gambit.ini");
+		    m_maxLam->GetValue(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-delLam",
-		    m_delLam->GetValue(), "gambit.ini");
+		    m_delLam->GetValue(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-tolND",
-		    m_tolN->GetInteger(), "gambit.ini");
+		    m_tolN->GetInteger(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-tol1D",
-		    m_tol1->GetInteger(), "gambit.ini");
+		    m_tol1->GetInteger(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-maxitsND",
-		    m_maxitsN->GetInteger(), "gambit.ini");
+		    m_maxitsN->GetInteger(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Func-maxits1D",
-		    m_maxits1->GetInteger(), "gambit.ini");
+		    m_maxits1->GetInteger(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-startOption",
-		    m_startOption->GetSelection(), "gambit.ini");
+		    m_startOption->GetSelection(), gambitApp.ResourceFile());
   }
 }
 
@@ -720,13 +721,13 @@ void dialogQre::AlgorithmFields(void)
 
   gText minLam, maxLam, delLam;
   int tolN, tol1, maxitsN, maxits1;
-  wxGetResourceStr("Algorithm Params", "Qre-minLam", minLam, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "Qre-maxLam", maxLam, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "Qre-delLam", delLam, "gambit.ini");
-  wxGetResource("Algorithm Params", "Func-tolND", &tolN, "gambit.ini");
-  wxGetResource("Algorithm Params", "Func-tol1D", &tol1, "gambit.ini");
-  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsN, "gambit.ini");
-  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "Qre-minLam", minLam, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "Qre-maxLam", maxLam, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "Qre-delLam", delLam, gambitApp.ResourceFile());
+  wxGetResource("Algorithm Params", "Func-tolND", &tolN, gambitApp.ResourceFile());
+  wxGetResource("Algorithm Params", "Func-tol1D", &tol1, gambitApp.ResourceFile());
+  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsN, gambitApp.ResourceFile());
+  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1, gambitApp.ResourceFile());
 
   m_minLam = new wxNumberItem(this, "minLam", minLam);
   m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
@@ -743,7 +744,7 @@ void dialogQre::AlgorithmFields(void)
 
   int startOption;
   wxGetResource("Algorithm Params", "Qre-startOption",
-		&startOption, "gambit.ini");
+		&startOption, gambitApp.ResourceFile());
   char *startOptions[] = { "Default", "Saved", "Prompt" };
   m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
 				 3, startOptions);
@@ -772,36 +773,36 @@ dialogQreGrid::~dialogQreGrid()
 {
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "QreGrid-minLam",
-		    (float) m_minLam->GetNumber(), "gambit.ini");
+		    (float) m_minLam->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-maxLam",
-		    (float) m_maxLam->GetNumber(), "gambit.ini");
+		    (float) m_maxLam->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-delLam",
-		    (float) m_delLam->GetNumber(), "gambit.ini");
+		    (float) m_delLam->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Parmas", "QreGrid-delp1",
-		    (float) m_delp1->GetNumber(), "gambit.ini");
+		    (float) m_delp1->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-delp2",
-		    (float) m_delp2->GetNumber(), "gambit.ini");
+		    (float) m_delp2->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-tol1",
-		    (float) m_tol1->GetNumber(), "gambit.ini");
+		    (float) m_tol1->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-tol2",
-		    (float) m_tol2->GetNumber(), "gambit.ini");
+		    (float) m_tol2->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-startOption",
-		    m_startOption->GetSelection(), "gambit.ini");
+		    m_startOption->GetSelection(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
-		    m_multiGrid->GetValue(), "gambit.ini");
+		    m_multiGrid->GetValue(), gambitApp.ResourceFile());
   }
 }
 
 void dialogQreGrid::AlgorithmFields(void)
 {
   gText minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
-  wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, "gambit.ini");
-  wxGetResourceStr("Algorithm Parmas", "QreGrid-delp1", delp1, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "QreGrid-delp2", delp2, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "QreGrid-tol1", tol1, "gambit.ini");
-  wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Parmas", "QreGrid-delp1", delp1, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-delp2", delp2, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-tol1", tol1, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, gambitApp.ResourceFile());
 
   m_minLam = new wxNumberItem(this, "minLam", minLam);
   m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
@@ -817,14 +818,14 @@ void dialogQreGrid::AlgorithmFields(void)
 
   Bool multiGrid;
   wxGetResource("Algorithm Params", "QreGrid-multiGrid",
-		&multiGrid, "gambit.ini");
+		&multiGrid, gambitApp.ResourceFile());
   m_multiGrid = new wxCheckBox(this, 0, "Use MultiGrid");
   m_multiGrid->SetValue(multiGrid);
   NewLine();
 
   int startOption;
   wxGetResource("Algorithm Params", "Qre-GridstartOption",
-		&startOption, "gambit.ini");
+		&startOption, gambitApp.ResourceFile());
   char *startOptions[] = { "Default", "Saved", "Prompt" };
   m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
 				 3, startOptions);

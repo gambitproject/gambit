@@ -8,6 +8,7 @@
 #include "wxmisc.h"
 
 #include "efg.h"
+#include "gambit.h"
 #include "efgsolvd.h"
 
 static const char *SOLN_SECT = "Soln-Defaults";
@@ -20,7 +21,7 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 					       wxWindow *p_parent)
   : wxDialogBox(p_parent, "Standard Solution", TRUE), m_efg(p_efg)
 {
-  gText defaultsFile("gambit.ini");
+  gText defaultsFile(gambitApp.ResourceFile());
   int standardType = 0, standardNum = 0, precision = 0;
   wxGetResource(SOLN_SECT, "Efg-Standard-Type", &standardType, 
 		defaultsFile);
@@ -68,7 +69,7 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 dialogEfgSolveStandard::~dialogEfgSolveStandard()
 {
   if (m_completed == wxOK) {
-    gText defaultsFile("gambit.ini");
+    gText defaultsFile(gambitApp.ResourceFile());
     wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
 		    m_standardType->GetSelection(), defaultsFile);
     wxWriteResource(SOLN_SECT, "Efg-Standard-Num",

@@ -197,7 +197,7 @@ NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_, int num_players_,
     SetIcon(frame_icon);
 
     // Read in the default features
-    char *defaults_file = "gambit.ini";
+    char *defaults_file = gambitApp.ResourceFile();
 
     if (opts&MSOLN_O_OPTIONS)
     {
@@ -534,7 +534,7 @@ void NfgSolnShow::SetOptions(void)
         }
 
         // save as default, if desired
-        char *defaults_file = "gambit.ini";
+        char *defaults_file = gambitApp.ResourceFile();
 
         if (save_def)
         {
