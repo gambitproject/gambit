@@ -17,7 +17,7 @@
 
 extern void dt1toefg(FILE *, FILE *);
 
-output cout(stdout);
+gOutput cout(stdout);
 
 void doConversion(gString fIn, gString fOut)
 {

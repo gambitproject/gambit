@@ -2,6 +2,7 @@
 %{
 /* $Id$ */
 #include <stdio.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <ctype.h>
 #include <string.h>
@@ -12,7 +13,7 @@
 gString last_name;
 int last_int;
 double last_double;
-input *input_stream;
+gInput *input_stream;
 int i, j;
 int cGames, cNodes, cISets, cPlayers, cOutcomes;
 int numGames, numNodes, numISets, numPlayers, numOutcomes;
@@ -32,7 +33,7 @@ void yyerror(char *s)
 
 void dt1_set_input(FILE *f)
 {
-  input_stream = new input(f);
+  input_stream = new gInput(f);
 }
 
 void dt1_close_input(void)
