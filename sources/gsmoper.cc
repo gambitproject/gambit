@@ -66,6 +66,17 @@ Portion* GSM_Add_gRational( Portion** param )
   return result;
 }
 
+Portion* GSM_Add_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new gString_Portion
+    (
+     ( (gString_Portion*) param[ 0 ] )->Value() +
+     ( (gString_Portion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
 Portion* GSM_Add_List( Portion** param )
 {
   Portion* result = 0;
@@ -747,6 +758,12 @@ void Init_gsmoper( GSM* gsm )
 			porRATIONAL, NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( GSM_Add_gRational, 1, "y", 
 			porRATIONAL, NO_DEFAULT_VALUE );
+
+  FuncObj->SetFuncInfo( GSM_Add_gString, 2 );
+  FuncObj->SetParamInfo( GSM_Add_gString, 0, "x", 
+			porSTRING, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Add_gString, 1, "y", 
+			porSTRING, NO_DEFAULT_VALUE );
 
   FuncObj->SetFuncInfo( GSM_Add_List, 2 );
   FuncObj->SetParamInfo( GSM_Add_List, 0, "x", 
