@@ -187,7 +187,7 @@ gInteger find_lcd(const gMatrix<gRational> &mat)
   gInteger lcd(1);
   for(int i=mat.MinRow();i<=mat.MaxRow();i++)
     for(int j=mat.MinCol();j<=mat.MaxCol();j++) 
-      lcd = lcm(mat(i,j).denominator(),lcd);
+      lcd = lcm(mat(i,j).GetDenominator(),lcd);
   return lcd;
 }
 
@@ -195,7 +195,7 @@ gInteger find_lcd(const gVector<gRational> &vec)
 {
   gInteger lcd(1);
   for(int i=vec.First();i<=vec.Last();i++)
-    lcd = lcm(vec[i].denominator(),lcd);
+    lcd = lcm(vec[i].GetDenominator(),lcd);
   return lcd;
 }
 
@@ -217,14 +217,14 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
   
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
-    if(x.denominator() != 1) throw BadDenom();
-    Coeff[i] = x.numerator();
+    if(x.GetDenominator() != 1) throw BadDenom();
+    Coeff[i] = x.GetNumerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) 
     for (int j = MinCol();j<=MaxCol();j++) {
       gRational x = A(i,j)*(gRational)totdenom;
-      if(x.denominator() != 1) throw BadDenom();
-      Tabdat(i,j) = x.numerator();
+      if(x.GetDenominator() != 1) throw BadDenom();
+      Tabdat(i,j) = x.GetNumerator();
     }
   for (int i = b.First();i<=b.Last();i++) 
     solution[i] = (gRational)Coeff[i];
@@ -247,14 +247,14 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
   
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
-    if(x.denominator() != 1) throw BadDenom();
-    Coeff[i] = x.numerator();
+    if(x.GetDenominator() != 1) throw BadDenom();
+    Coeff[i] = x.GetNumerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) {
     for (int j = MinCol();j<=A.MaxCol();j++) {
       gRational x = A(i,j)*(gRational)totdenom;
-      if(x.denominator() != 1) throw BadDenom();
-      Tabdat(i,j) = x.numerator();
+      if(x.GetDenominator() != 1) throw BadDenom();
+      Tabdat(i,j) = x.GetNumerator();
     }
     for (int j = A.MaxCol()+1;j<=MaxCol();j++)
       Tabdat(artificial[j],j) = totdenom;
@@ -471,12 +471,12 @@ void Tableau<gRational>::Refactor()
   //gout << "\nCoeffew:\n" << Coeffnew;
 
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();i++) {
-    if(Coeffnew[i].denominator() != 1) throw BadDenom();
-    Coeff[i] = Coeffnew[i].numerator();
+    if(Coeffnew[i].GetDenominator() != 1) throw BadDenom();
+    Coeff[i] = Coeffnew[i].GetNumerator();
     for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();j++) {
-      if(Tabnew(i,j).denominator() != 1) throw BadDenom();
-      Tabdat(i,j) = Tabnew(i,j).numerator();
-    }
+      if(Tabnew(i,j).GetDenominator() != 1) throw BadDenom();
+      Tabdat(i,j) = Tabnew(i,j).GetNumerator();
+   }
   }
   //BigDump(gout);
 }

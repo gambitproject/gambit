@@ -463,7 +463,7 @@ gNumber::operator gRational(void) const
 bool gNumber::IsInteger(void) const
 {
   return ((rep == precDOUBLE && fmod(dval, 1.0) == 0.0) ||
-	  (rep == precRATIONAL && rval->denominator() == 1));
+	  (rep == precRATIONAL && rval->GetDenominator() == 1));
 }
 
 gText ToText(const gNumber &n)

@@ -380,7 +380,7 @@ static Portion *GSM_IntegerDivide(GSM &, Portion **param)
   if (((NumberPortion *) param[1])->Value() != (gNumber) 0) {
     gRational x = ((NumberPortion *) param[0])->Value().operator gRational();
     gRational y = ((NumberPortion *) param[1])->Value().operator gRational();
-    return new NumberPortion(x.numerator() / y.numerator());
+    return new NumberPortion(x.GetNumerator() / y.GetNumerator());
   }
   else
     return new NullPortion(porNUMBER);
@@ -699,7 +699,7 @@ static Portion *GSM_Modulus(GSM &, Portion **param)
   if (((NumberPortion *) param[1])->Value() != (gNumber) 0) {
     gRational x = ((NumberPortion *) param[0])->Value().operator gRational();
     gRational y = ((NumberPortion *) param[1])->Value().operator gRational();
-    return new NumberPortion(x.numerator() % y.numerator());
+    return new NumberPortion(x.GetNumerator() % y.GetNumerator());
   }
   else
     return new NullPortion(porNUMBER);
@@ -990,7 +990,7 @@ static Portion *GSM_Power(GSM &, Portion** param)
     return new NumberPortion(pow((double) base, (double) exponent));
   else if (base.Precision() == precRATIONAL && exponent.IsInteger())
     return new NumberPortion(pow(base.operator gRational(),
-				 exponent.operator gRational().numerator()));
+				 exponent.operator gRational().GetNumerator()));
   else
     throw gclRuntimeError("Not implemented for rational base with non-integer exponent");
 }
