@@ -12,17 +12,22 @@
 #include "normal.h"
 #include "normiter.h"
 #include "rational.h"
-#include "mixed.h"
+#include "gmatrix.h"
+#include "gpvector.h"
 #include "solution.h"
 #include "gfunct.h"
 #include "gobit.h"
 
-GobitParams::GobitParams(void) : plev(0), nequilib(1)
+GobitParams::GobitParams(void) 
+  : plev(0), nequilib(1), minLam(.01), maxLam(30),delLam(1.01), 
+    tolDFP(1.0e-10)
 { }
 
 class BaseGobit {
 public:
   virtual int Gobit(int) = 0;
+  virtual int Nevals(void) = 0;
+  virtual int Nits(void) = 0;
   virtual ~BaseGobit() {}
 };
 
@@ -31,52 +36,51 @@ template <class T> class GobitModule
 private:
   const NormalForm<T> &rep;
   T Lambda;
-  MixedProfile<T> p;
-  gVector<T> x;
-  T minlam,maxlam,factor;
+  gPVector<T> p;
+  GobitParams params;
   int maxits;
   
 public:
-  GobitModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,int plev)
-    :  SolutionModule(ofile,efile,plev), rep(N), Lambda(0), p(rep),
-  minlam((T)(.01)),maxlam(30),factor((T)(1.05)),maxits(500),
-  x(rep.ProfileLength()), gBC2Funct_nDim<T>(N.ProfileLength()){ }
+  GobitModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,
+	      const GobitParams &params)
+    :  SolutionModule(ofile,efile,params.plev), rep(N), Lambda(0),
+  p(rep.Dimensionality()), params(params),
+  maxits(500), gBC2Funct_nDim<T>(N.ProfileLength()){ }
   virtual ~GobitModule() {}
   
-  T GobitDerivValue(int i1, int j1, const MixedProfile<T> &p) const;
+  T GobitDerivValue(int i1, int j1, const gPVector<T> &p) const;
   T GobitValue(void) const;
-  void get_x(void);
-  void get_p(void);
-  void get_grad(const MixedProfile<T> &p, gVector<T> &dp);
+  void get_grad(const gPVector<T> &p, gVector<T> &dp);
   
   T operator()(const gVector<T> &x);
   int Deriv(const gVector<T> &p, gVector<T> &d);
   int Hess(const gVector<T> &p, gMatrix<T> &d) {return 1;}
   int Gobit(int);
+  int Nevals(void) {return nevals;}
+  int Nits(void) {return nits;}
+
 };
 
 template <class T> int GobitModule<T>::Gobit(int number)
 {
-  p = MixedProfile<T>(rep.Centroid());
-  x = gVector<T>(rep.ProfileLength());
-  T ftol;
+  for(int i=1;i<=rep.NumPlayers();i++)
+    for(int j=1;j<=rep.NumStrats(i);j++)
+      p(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+  
   int iter=0;
-
-  ftol  = ((T)(1.0e-10));
-  Lambda=minlam;
+  
+  Lambda=(T) (params.minLam);
   T value;
   
   int nit=0;
-  while(nit < maxits && Lambda<=maxlam) {
+  while(nit < maxits && Lambda<=(T)(params.maxLam)) {
     nit++;
-    get_x();
-    
-    DFP(x,ftol,iter,value);
-    get_p();
+    DFP(p, (T)(params.tolDFP), iter, value);
     gout << "\nLam = " << Lambda << " nits= " << iter;
     gout << " val = " << value << " p = " << p;
+    gout << " evals = " << Nevals();
     if(value>=10.0)return nit;
-    Lambda*=factor;
+    Lambda = Lambda * ((T)(params.delLam));
   }
   return nit;
 };
@@ -85,36 +89,34 @@ template <class T>
 T GobitModule<T>::operator()(const gVector<T> &v)
 {
 //  gout << " in GobitModule::Operator()";
-  assert(v.Length()==x.Length());
+  assert(v.Length()==p.Length());
   
-  x=v;
-  get_p();
+  p = v;
   return GobitValue();
 };
 
 template <class T> int GobitModule<T>::
 Deriv(const gVector<T> &v, gVector<T> &d)
 {
-  x=v;
-  get_p();
+  p=v;
   get_grad(p,d);
 //  for(i=1;i<=rep.ProfileLength();i++)x[i]=dp[i];
 //  gout << "\n in Deriv()";
 //  gout << "\n p = " << p;
 //  gout << "\n d = " << d;
-
+  
   return 1;
 };
 
 template <class T> void GobitModule<T>::
-get_grad(const MixedProfile<T> &p, gVector<T> &dp)
+get_grad(const gPVector<T> &p, gVector<T> &dp)
 {
   int i1,j1,ii;
   T avg;
-
+  
 //  gout << "\n in get_grad()";
-
-  for(i1=1,ii=1;i1<=rep.NumPlayers();i1++) { 
+  
+  for(i1=1,ii=1;i1<=rep.NumPlayers();i1++) {
     avg=(T)(0);
     for(j1=1;j1<=rep.NumStrats(i1);j1++) {
       dp[ii]=GobitDerivValue(i1,j1,p);
@@ -132,6 +134,7 @@ get_grad(const MixedProfile<T> &p, gVector<T> &dp)
 }
 
 
+/*
 
 template <class T> void GobitModule<T>::
 get_x(void)
@@ -156,6 +159,7 @@ get_p(void)
     }
   }
 };
+*/
 
 #define BIG1 ((T) 100)
 #define BIG2 ((T) 100)
@@ -169,13 +173,13 @@ GobitValue(void) const
   v=(T)(0);
 //  gout << "\nGobitValue(): p = " << p;
   for(i=1;i<=rep.NumPlayers();i++) {
-//    psum=p[i][1];
+//    psum=p(i,1);
     for(j=2;j<=rep.NumStrats(i);j++) {
-      z=log(p[i][1])-log(p[i][j])
+      z=log(p(i,1))-log(p(i,j))
 	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
       v+=(z*z);
-//      if(p[i][j]<(double)0.0)v+=(p[i][j]*p[i][j]);
-//      psum+=p[i][j];
+//      if(p(i,j)<(double)0.0)v+=(p(i,j)*p(i,j));
+//      psum+=p(i,j);
     }
 //    z=(T)(1)-psum;
 //    v+=(z*z);
@@ -184,7 +188,7 @@ GobitValue(void) const
 }
 
 template <class T> T GobitModule<T>::
-GobitDerivValue(int i1, int j1, const MixedProfile<T> &p) const
+GobitDerivValue(int i1, int j1, const gPVector<T> &p) const
 {
   int i, j;
   T x, x1,dv;
@@ -193,18 +197,18 @@ GobitDerivValue(int i1, int j1, const MixedProfile<T> &p) const
 //  gout << "\nGobitDerivValue(): p = " << p;
   for(i=1;i<=rep.NumPlayers();i++) {
     for(j=2;j<=rep.NumStrats(i);j++) {
-      dv=log(p[i][1])-log(p[i][j])
+      dv=log(p(i,1))-log(p(i,j))
 	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
       if(i==i1) {
-	if(j1==1)  x+=dv/p[i][1];
-	if(j1==j)  x-=dv/p[i][j];
+	if(j1==1)  x+=dv/p(i,1);
+	if(j1==j)  x-=dv/p(i,j);
       }
       if(i!=i1)
 	x-=dv*Lambda*(rep.Payoff(i,i,1,i1,j1,p)-rep.Payoff(i,i,j,i1,j1,p));
     }
   }
-//  if(p[i1][j1]<(T)(0))x+=p[i1][j1];
-
+//  if(p(i1,j1)<(T)(0))x+=p(i1,j1);
+  
   return ((T)(2))*x;
 }
 
@@ -215,60 +219,36 @@ int GobitSolver::Gobit(void)
 {
   BaseGobit *T;
   gOutput *outfile = &gout, *errfile = &gerr;
-
+  
   if (params.outfile != "")
     outfile = new gFileOutput((char *) params.outfile);
   if (params.errfile != "" && params.errfile != params.outfile)
     errfile = new gFileOutput((char *) params.errfile);
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
- 
+  
   
   switch (nf.Type())  {
   case DOUBLE:
     T = new GobitModule<double>((NormalForm<double> &) nf, *outfile,
-				*errfile, params.plev);
+				*errfile, params);
     break;
 /*
- case nfRATIONAL:
+ case RATIONAL:
     T = new GobitModule<Rational>((NFRep<Rational> &) *data, gout, gerr,0);
-    break;
+		break;
     */
   }
   T->Gobit(params.nequilib);
-
+  
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
-    delete errfile;
-
+		delete errfile;
+  
   delete T;
   return 1;
 }
-
-
-#if 0
-
-void get_hess(double **p)
-{
-  int i1,i2,j1,j2,ii,iii;
-  
-  for(i1=1,ii=1;i1<=nplayers;i1++)
-    for(j1=1;j1<=nstrats[i1];j1++)
-      {
-	for(i2=1,iii=1;i2<=nplayers;i2++)
-	  for(j2=1;j2<=nstrats[i2];j2++)
-	    {
-	      if(iii<ii)dp2[ii][iii]=dp2[iii][ii];
-	      else dp2[ii][iii]=deriv2_val(i1,j1,i2,j2,p);
-	      iii++;
-	    }
-	ii++;
-      }
-  
-}
-#endif
-
 
 
 
