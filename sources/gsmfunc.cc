@@ -34,7 +34,7 @@ void GSM::InitFunctions( void )
   Init_gsmoper( this );
 
   Init_nfgfunc( this );
-  // Init_efgfunc( this );
+  Init_efgfunc( this );
 }
 
 
@@ -369,6 +369,32 @@ void FuncDescObj::_SetParamInfo
     param_default_value;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
+}
+
+
+void FuncDescObj::SetParamInfo
+( 
+ Portion*          (*func_ptr)(Portion**),
+ const int         index, 
+ const ParamInfoType     param_info[]
+ )
+{
+ int i;
+  int f_index = -1;
+  
+  for( i = 0; i < _NumFuncs; i++ )
+  {
+    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
+    {
+      f_index = i;
+      break;
+    }
+  }
+
+ for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
+ {
+   _FuncInfo[ f_index ].ParamInfo[ i ] = param_info[ i ];
+ }
 }
 
 
