@@ -1,7 +1,7 @@
 //
 // FILE: gcl.cc -- top level of the Gambit Command Line
 //
-// $Id$
+// @(#)gcl.cc	1.18 12/29/96
 //
 
 #include <signal.h>
@@ -84,7 +84,7 @@ int main( int /*argc*/, char* argv[] )
 #ifdef __GNUG__
   const char SLASH = '/';
 #elif defined __BORLANDC__
-  const char * SLASH = "\\";
+  const char SLASH = '\\';
 #endif   // __GNUG__
 
 

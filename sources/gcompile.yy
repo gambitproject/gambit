@@ -981,13 +981,15 @@ void GCLCompiler::LoadInputs( const char* name )
 
 #ifdef __GNUG__
   const char SLASH = '/';
+  const char SLASH1 = '/';
 #elif defined __BORLANDC__
   const char * SLASH = "\\";
+  const char  SLASH1 = '\\';
 #endif   // __GNUG__
 
   bool search = false;
   bool ini_found = false;
-  if( strchr( name, SLASH ) == NULL )
+  if( strchr( name, SLASH1 ) == NULL )
     search = true;
   gString IniFileName;
 
