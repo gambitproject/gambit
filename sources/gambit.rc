@@ -2,6 +2,8 @@ gambit_icn ICON gambit.ico
 efg_icn    ICON efg.ico
 nfg_icn    ICON nfg.ico
 
+COPYBITMAP	BITMAP	 bitmaps\copy.bmp
+MOVEBITMAP      BITMAP	 bitmaps\move.bmp
 SAVETOOL	 	BITMAP	 bitmaps\save.bmp
 PRINTTOOL		BITMAP	 bitmaps\print.bmp
 DELETETOOL	BITMAP	 bitmaps\delete.bmp
