@@ -69,9 +69,6 @@
 //                 Implementation of class NfgShow
 //=====================================================================
 
-const int idINFONOTEBOOK = 3003;
-const int idINFOWINDOW = 3004;
-
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_NEW, NfgShow::OnFileNew)
   EVT_MENU(wxID_OPEN, NfgShow::OnFileOpen)
@@ -90,7 +87,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(GBT_NFG_MENU_EDIT_CONTINGENCY, NfgShow::OnEditContingency)
   EVT_MENU(GBT_NFG_MENU_EDIT_GAME, NfgShow::OnEditGame)
   EVT_MENU(GBT_NFG_MENU_VIEW_PROFILES, NfgShow::OnViewProfiles)
-  EVT_MENU(GBT_NFG_MENU_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
   EVT_MENU(GBT_NFG_MENU_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
   EVT_MENU(GBT_NFG_MENU_VIEW_SUPPORTS, NfgShow::OnViewSupports)
   EVT_MENU(GBT_NFG_MENU_VIEW_DOMINANCE, NfgShow::OnViewDominance)
@@ -116,9 +112,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(GBT_NFG_MENU_PROFILES_REPORT, NfgShow::OnProfilesReport)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
-  EVT_SASH_DRAGGED(idINFOWINDOW, NfgShow::OnSashDrag)
   EVT_SET_FOCUS(NfgShow::OnSetFocus)
-  EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, NfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
@@ -126,11 +120,9 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(1000, 600)),
     gbtGameView(p_doc),
-    m_table(0), 
-    m_infoSashWindow(0),
-    m_navigateWindow(0), m_supportWindow(0)
+    m_table(0), m_navigateWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -159,31 +151,19 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 
   (void) new gbtProfileFrame(m_doc, this);
   (void) new gbtOutcomeFrame(m_doc, this);
+  (void) new gbtNfgSupportFrame(m_doc, this);
 
-  m_infoSashWindow = new wxSashWindow(this, idINFOWINDOW,
-				      wxPoint(0, 40), wxSize(200, 200),
-				      wxNO_BORDER | wxSW_3D);
-  m_infoSashWindow->SetSashVisible(wxSASH_RIGHT, true);
-  m_infoSashWindow->Show(true);
-
-  m_infoNotebook = new wxNotebook(m_infoSashWindow, idINFONOTEBOOK);
-  m_infoNotebook->Show(true);
-
-  m_navigateWindow = new NfgNavigateWindow(m_doc, m_infoNotebook);
-  m_navigateWindow->SetSize(200, 200);
-  m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
-
-  m_supportWindow = new NfgSupportWindow(m_doc, m_infoNotebook);
-  m_supportWindow->SetSize(200, 200);
-  m_infoNotebook->AddPage(m_supportWindow, "Supports");
-  m_infoNotebook->SetSelection(0);
-
+  m_navigateWindow = new NfgNavigateWindow(m_doc, this);
   m_table = new NfgTable(m_doc, this);
-  m_table->SetSize(0, 0, 200, 200);
-
   m_table->SetFocus();
 
-  AdjustSizes();
+  SetAutoLayout(true);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  topSizer->Add(m_navigateWindow, 0, wxALL, 0);
+  topSizer->Add(m_table, 1, wxALL | wxEXPAND, 5);
+  SetSizer(topSizer);
+  topSizer->SetSizeHints(this);
+  Layout();
   Show(true);
   m_doc->UpdateViews(0, true, true);
 }
@@ -210,6 +190,7 @@ void NfgShow::OnUpdate(gbtGameView *)
   menu->Enable(GBT_NFG_MENU_FILE_EXPORT_COMLAB, m_doc->m_nfg->NumPlayers() == 2);
   menu->Check(GBT_NFG_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
   menu->Check(GBT_NFG_MENU_VIEW_OUTCOMES, m_doc->ShowOutcomes());
+  menu->Check(GBT_NFG_MENU_VIEW_SUPPORTS, m_doc->ShowNfgSupports());
   menu->Enable(GBT_NFG_MENU_VIEW_PROBABILITIES, m_doc->IsProfileSelected());
   menu->Enable(GBT_NFG_MENU_VIEW_VALUES, m_doc->IsProfileSelected());
   menu->Check(GBT_NFG_MENU_VIEW_OUTCOME_LABELS,
@@ -270,9 +251,6 @@ void NfgShow::MakeMenus(void)
 		   "Display/hide profiles window", true);
   viewMenu->Check(GBT_NFG_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_NFG_MENU_VIEW_NAVIGATION, "&Navigation",
-		   "Display navigation window", true);
-  viewMenu->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
   viewMenu->Append(GBT_NFG_MENU_VIEW_OUTCOMES, "&Outcomes", 
 		   "Display and edit outcomes", true);
   viewMenu->Check(GBT_NFG_MENU_VIEW_OUTCOMES, false);
@@ -615,27 +593,6 @@ void NfgShow::OnViewProfiles(wxCommandEvent &)
   m_doc->SetShowProfiles(!m_doc->ShowProfiles());
 }
 
-void NfgShow::OnViewNavigation(wxCommandEvent &)
-{
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
-    m_infoNotebook->SetSelection(0);
-    m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
-  }
-  else if (m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
-  }
-  else {
-    m_infoSashWindow->Show(true);
-    m_infoNotebook->SetSelection(0);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, true);
-  }
-
-  AdjustSizes();
-}
-
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
 {
   m_doc->SetShowOutcomes(!m_doc->ShowOutcomes());
@@ -643,23 +600,7 @@ void NfgShow::OnViewOutcomes(wxCommandEvent &)
 
 void NfgShow::OnViewSupports(wxCommandEvent &)
 {
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
-    m_infoNotebook->SetSelection(1);
-    m_navigateWindow->Show(true);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, true);
-  }
-  else if (m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, false);
-  }
-  else {
-    m_infoSashWindow->Show(true);
-    m_infoNotebook->SetSelection(2);
-    GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, true);
-  }
-
-  AdjustSizes();
+  m_doc->SetShowNfgSupports(!m_doc->ShowNfgSupports());
 }
 
 
@@ -1017,65 +958,7 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
   Destroy();
 }
 
-void NfgShow::AdjustSizes(void)
-{
-  int width, height;
-  GetClientSize(&width, &height);
-
-  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
-    if (m_table) {
-      m_table->SetSize(m_infoSashWindow->GetRect().width, 0,
-		       width - m_infoSashWindow->GetRect().width, height);
-    }
-  }
-  else if (m_table) {
-    m_table->SetSize(0, 0, width, height);
-  }
-
-  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->SetSize(0, 0, m_infoSashWindow->GetRect().width, height);
-  }
-
-  if (m_table) {
-    m_table->SetFocus();
-  }
-}
-
-
-void NfgShow::OnSize(wxSizeEvent &)
-{
-  AdjustSizes();
-}
-
-void NfgShow::OnSashDrag(wxSashEvent &p_event)
-{
-  int clientWidth, clientHeight;
-  GetClientSize(&clientWidth, &clientHeight);
-
-  switch (p_event.GetId()) {
-  case idINFOWINDOW:
-    m_table->SetSize(p_event.GetDragRect().width,
-		     m_table->GetRect().y,
-		     clientWidth - p_event.GetDragRect().width,
-		     m_table->GetRect().height);
-    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
-			      m_infoSashWindow->GetRect().y,
-			      p_event.GetDragRect().width,
-			      m_infoSashWindow->GetRect().height);
-    break;
-  }
-}
-
 void NfgShow::OnSetFocus(wxFocusEvent &)
 {
   m_table->SetFocus();
 }
-
-void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
-{
-  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_NAVIGATION, p_event.GetSelection() == 0);
-  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_OUTCOMES, p_event.GetSelection() == 1);
-  GetMenuBar()->Check(GBT_NFG_MENU_VIEW_SUPPORTS, p_event.GetSelection() == 2);
-}
-
-

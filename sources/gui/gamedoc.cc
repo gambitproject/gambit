@@ -44,7 +44,7 @@
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
-    m_showProfiles(false),
+    m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
     m_rowPlayer(1), m_colPlayer(2),
     m_efg(new gbtEfgGame(p_efg)), 
     m_curEfgSupport(0),
@@ -65,7 +65,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
-    m_showProfiles(false),
+    m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
     m_rowPlayer(1), m_colPlayer(2),
     m_contingency(p_nfg.NumPlayers()),
     m_efg(0),
@@ -416,10 +416,6 @@ void gbtGameDocument::MakeReducedNfg(void)
 {
   m_nfg = new gbtNfgGame(m_efg->GetReducedNfg(*m_curEfgSupport));
   m_contingency = gArray<int>(m_nfg->NumPlayers());
-  printf("m_nfg->NumPlayers() = %d\n", m_nfg->NumPlayers());
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    printf("strategies for %d = %d\n", pl, m_nfg->GetPlayer(pl).NumStrategies());
-  }
   for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
   (void) new NfgShow(this, 0);
 
@@ -533,6 +529,12 @@ void gbtGameDocument::SetShowProfiles(bool p_show)
 {
   m_showProfiles = p_show;
   UpdateViews(0, true, true);
+}
+
+void gbtGameDocument::SetShowNfgSupports(bool p_show)
+{
+  m_showNfgSupports = p_show;
+  UpdateViews(0, false, true);
 }
 
 void gbtGameDocument::Submit(gbtGameCommand *p_command)

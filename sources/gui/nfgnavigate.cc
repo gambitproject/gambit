@@ -55,13 +55,13 @@ NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
   rowChoiceSizer->Add(new wxStaticText(this, -1, "Row player"),
 		      1, wxALIGN_LEFT | wxRIGHT, 5);
   m_rowChoice = new wxChoice(this, idROWPLAYER_CHOICE);
-  rowChoiceSizer->Add(m_rowChoice, 0, wxALL, 0);
+  rowChoiceSizer->Add(m_rowChoice, 0, wxALL | wxEXPAND, 0);
 
   wxBoxSizer *colChoiceSizer = new wxBoxSizer(wxHORIZONTAL);
   colChoiceSizer->Add(new wxStaticText(this, -1, "Column player"),
 		      1, wxALIGN_LEFT | wxRIGHT, 5);
   m_colChoice = new wxChoice(this, idCOLPLAYER_CHOICE);
-  colChoiceSizer->Add(m_colChoice, 0, wxALL, 0);
+  colChoiceSizer->Add(m_colChoice, 0, wxALL | wxEXPAND, 0);
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
     wxString playerName = (char *) (ToText(pl) + ": " +
@@ -73,8 +73,8 @@ NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
   m_rowChoice->SetSelection(0);
   m_colChoice->SetSelection(1);
 
-  playerViewSizer->Add(rowChoiceSizer, 0, wxALL | wxEXPAND, 5);
-  playerViewSizer->Add(colChoiceSizer, 0, wxALL | wxEXPAND, 5);
+  playerViewSizer->Add(rowChoiceSizer, 1, wxALL | wxEXPAND, 5);
+  playerViewSizer->Add(colChoiceSizer, 1, wxALL | wxEXPAND, 5);
 
   wxStaticBoxSizer *contViewSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Current contingency"),

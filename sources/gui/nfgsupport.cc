@@ -175,7 +175,7 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
     m_strategyTree->Expand(id);
   }
   m_strategyTree->Expand(m_strategyTree->GetRootItem());
-
+  Layout();
 }
 
 void NfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
@@ -218,6 +218,69 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
   }
 
   m_doc->SetNfgSupport(m_supportList->GetSelection() + 1);
+}
+
+//-------------------------------------------------------------------------
+//                    class gbtNfgSupportFrame
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtNfgSupportFrame, wxFrame)
+  EVT_MENU(wxID_CLOSE, gbtNfgSupportFrame::Close)
+  EVT_CLOSE(gbtNfgSupportFrame::OnClose)
+END_EVENT_TABLE()
+
+gbtNfgSupportFrame::gbtNfgSupportFrame(gbtGameDocument *p_doc, 
+				       wxWindow *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 300)),
+    gbtGameView(p_doc)
+{
+  m_panel = new NfgSupportWindow(p_doc, this);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+
+  wxMenu *editMenu = new wxMenu;
+
+  wxMenu *viewMenu = new wxMenu;
+
+  wxMenu *formatMenu = new wxMenu;
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(formatMenu, "&Format");
+  SetMenuBar(menuBar);
+
+  Show(false);
+}
+
+gbtNfgSupportFrame::~gbtNfgSupportFrame()
+{ }
+
+void gbtNfgSupportFrame::OnClose(wxCloseEvent &p_event)
+{
+  m_doc->SetShowNfgSupports(false);
+  // Frame is now hidden; leave it that way, don't actually close
+  p_event.Veto();
+}
+
+void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
+{
+  if (m_doc->ShowNfgSupports()) {
+    m_panel->OnUpdate(p_sender);
+
+    if (m_doc->GetFilename() != "") {
+      SetTitle(wxString::Format("Gambit - Supports: [%s] %s", 
+				m_doc->GetFilename().c_str(), 
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+    else {
+      SetTitle(wxString::Format("Gambit - Supports: %s",
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+  }
+  Show(m_doc->ShowNfgSupports());
 }
 
 #include "base/gmap.imp"

@@ -43,25 +43,19 @@
 #include "nfgconst.h"
 
 class NfgNavigateWindow;
-class NfgSupportWindow;
-class gbtNfgProfileGrid;
 class NfgTable;
 class dialogNfgSupportInspect;
 
 class NfgShow : public wxFrame, public gbtGameView {
 private:
   NfgTable *m_table;
-  wxNotebook *m_infoNotebook;
-
-  wxSashWindow *m_infoSashWindow;
   NfgNavigateWindow *m_navigateWindow;
-  NfgSupportWindow *m_supportWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
+
   void MakeMenus(void);
   void MakeToolbar(void);
-  void AdjustSizes(void);
 
   // Menu event handlers
   void OnFileNew(wxCommandEvent &);
@@ -81,7 +75,6 @@ private:
   void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
-  void OnViewNavigation(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
   void OnViewSupports(wxCommandEvent &);
   void OnViewDominance(wxCommandEvent &);
@@ -110,12 +103,8 @@ private:
   void OnProfilesProperties(wxCommandEvent &);
   void OnProfilesReport(wxCommandEvent &);
 
-  void OnInfoNotebookPage(wxNotebookEvent &);
-
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
-  void OnSize(wxSizeEvent &);
-  void OnSashDrag(wxSashEvent &);
   void OnSetFocus(wxFocusEvent &);
 
   bool IsEfgView(void) const { return false; }

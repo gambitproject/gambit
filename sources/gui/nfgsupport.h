@@ -47,7 +47,6 @@ private:
   // Overriding view members
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
-  void OnUpdate(gbtGameView *);
 
 public:
   NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
@@ -55,6 +54,27 @@ public:
 
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);
+
+  void OnUpdate(gbtGameView *);
+
+  DECLARE_EVENT_TABLE()
+};
+
+class gbtNfgSupportFrame : public wxFrame, public gbtGameView {
+private:
+  NfgSupportWindow *m_panel;
+
+  // Event handlers
+  void OnClose(wxCloseEvent &);
+  
+  // Overriding view members
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
+  void OnUpdate(gbtGameView *);
+
+public:
+  gbtNfgSupportFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgSupportFrame();
 
   DECLARE_EVENT_TABLE()
 };

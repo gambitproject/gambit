@@ -554,12 +554,12 @@ NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_grid->AutoSizeRows();
   m_grid->AutoSizeColumns();
   m_grid->AdjustScrollbars();
+  m_grid->SetSize(m_grid->GetBestSize());
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  topSizer->Add(m_grid, 1, wxALL | wxEXPAND | wxALIGN_RIGHT, 5);
+  topSizer->Add(m_grid, 1, wxALL | wxEXPAND, 0);
 
   SetSizer(topSizer);
-  topSizer->Fit(this);
   topSizer->SetSizeHints(this);
 
   Layout();
@@ -610,6 +610,8 @@ void NfgTable::OnUpdate(gbtGameView *)
   m_grid->EndBatch();
   m_grid->AdjustScrollbars();
   m_grid->ForceRefresh();
+  m_grid->SetSize(m_grid->GetBestSize());
+  Layout();
 }
 
 void NfgTable::ToggleProbs(void)
