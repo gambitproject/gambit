@@ -428,6 +428,22 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
   else                     return (T)0;
 }
 
+template <class T> bool gPoly<T>::IsConstant() const
+{
+  for (int i = 1; i <= Terms.Length(); i++)
+    if (!Terms[i].IsConstant())
+      return false;
+  return true;
+}
+
+template <class T> bool gPoly<T>::IsMultiaffine() const
+{
+  for (int i = 1; i <= Terms.Length(); i++)
+    if (!Terms[i].IsMultiaffine())
+      return false;
+  return true;
+}
+
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 {
   T answer=0;

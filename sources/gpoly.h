@@ -136,6 +136,8 @@ public:
   T                   GetCoef(const exp_vect &Powers)      const;
   gPoly<T>            LeadingCoefficient(int varnumber)    const;
   T                   NumLeadCoeff()                       const; // deg == 0
+  bool                IsConstant()                         const;
+  bool                IsMultiaffine()                      const;
   int                 UniqueActiveVariable()               const;
                       // returns 0 if constant, -1 if truly multivariate
 #ifndef MINI_POLY
