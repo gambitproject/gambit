@@ -1192,21 +1192,28 @@ gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   if (ExpectedSpec.Type == porANYTYPE && return_type_check)
     return matchEXACT;  
 
-  PortionSpec CalledSpec = p->Spec();
+  bool nullPortion = false;
 
-  if (p->Spec().Type == porNULL)
+  PortionSpec CalledSpec = p->Spec();
+  if (p->Spec().Type == porNULL) {
     CalledSpec = ((NullPortion*) p)->DataType();
+    nullPortion = true;
+  }
 
   gclMatchLevel matchtype = matchEXACT;
 
   if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER) {
-    if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
-	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
+    if (nullPortion)
+      matchtype = matchNONE;
+    else if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
+	     (CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
       CalledSpec.Type = porINTEGER;
   }
   else if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porNUMBER) {
-    if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
-	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
+    if (nullPortion)
+      matchtype = matchNONE;
+    else if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
+	     (CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
       matchtype = matchSUPERTYPE;
   }
 
@@ -1371,14 +1378,18 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
 	if (TypeMatch(param, 
 		      _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Spec,
 		      (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)) == matchNONE) {
-	  throw gclRuntimeError(_FuncName + "[]: Type mismatch on parameter #"+
-				ToText(m_currParamIndex + 1) + ", \"" +
-				_FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Name +
-				"\"; expected " +
-				PortionSpecToText(_FuncInfo[m_funcIndex].
-					  ParamInfo[m_currParamIndex].Spec) +
-				", got " +
-				PortionSpecToText(param->Spec()));
+	  gText message = (_FuncName + "[]: Type mismatch on parameter #"+
+			   ToText(m_currParamIndex + 1) + ", \"" +
+			   _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Name +
+			   "\"; expected " +
+			   PortionSpecToText(_FuncInfo[m_funcIndex].
+					     ParamInfo[m_currParamIndex].Spec) +
+			   ", got ");
+	  if (param->Spec().Type != porNULL)
+	    message += PortionSpecToText(param->Spec());
+	  else
+	    message += "NULL(" + PortionSpecToText(((NullPortion *) param)->DataType()) + ")";
+	  throw gclRuntimeError(message);
 	}
       }
       else {
