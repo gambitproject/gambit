@@ -634,18 +634,26 @@ void Efg::DeleteOutcome(EFOutcome *outc)
 
 void Efg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
 {
-  m_dirty = true;
-  outc->payoffs[pl] = value;
+  if (outc) {
+    m_dirty = true;
+    outc->payoffs[pl] = value;
+  }
 }
 
 gNumber Efg::Payoff(EFOutcome *outc, int pl) const
 {
-  return outc->payoffs[pl];
+  return (outc) ? outc->payoffs[pl] : gNumber(0); 
 }
 
 gArray<gNumber> Efg::Payoff(EFOutcome *outc) const
 {
-  return outc->payoffs;
+  if (outc)
+    return outc->payoffs;
+  else {
+    gArray<gNumber> ret(players.Length());
+    for (int i = 1; i <= ret.Length(); ret[i++] = 0);
+    return ret;
+  }
 }
 
 bool Efg::IsConstSum(void) const
