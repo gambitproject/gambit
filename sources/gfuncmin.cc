@@ -357,9 +357,9 @@ bool DFP(gPVector<double> &p,
   func.Deriv(p, g);
   xi = -g;
   
+  fret = func.Value(p);
   if (tracelevel > 0)  {
-    tracefile << "\n\nIn DFP: ";
-    tracefile.SetExpMode() << "\nstart:  val = " << fret << " ";
+    tracefile.SetExpMode() << "\n\nDFP start:  val = " << fret << " ";
     tracefile.SetFloatMode();
     tracefile << " p = " << p;
   }
@@ -371,9 +371,6 @@ bool DFP(gPVector<double> &p,
   
   for (its = 1; its <= maxitsN && !status.Get(); its++)  {
     iter = its;
-    if (tracelevel > 0)
-      tracefile << "DFP iteration " << iter << '\n';
-
     Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
     if(interior)
@@ -416,13 +413,19 @@ bool DFP(gPVector<double> &p,
 	hessin(i, j) += (fac * (xi[i] * xi[j])) - (fad * (hdg[i] * hdg[j])) +
                  	(fae * (dg[i] * dg[j]));
     xi = -(hessin * g);
-
-    if (tracelevel > 0)   {
-      tracefile << "Hessian:\n\n";
-      tracefile << ((gRectArray<double> &)xi) << '\n';
-
-      tracefile << "location = " << p << " value = " << fret << "\n\n";
+    
+    if (tracelevel > 0) {
+      tracefile << "\nDFP iter: " << iter;
+      tracefile.SetExpMode();
+      tracefile << " val = " << fret;
+      tracefile.SetFloatMode();
+      tracefile << " p = " << p;
     }
+    if (tracelevel > 1 )   {
+      tracefile << "\nHessian:\n";
+      tracefile << xi;
+    }
+
   }
 
   gout << "Too many iterations in DFP";
@@ -453,8 +456,7 @@ bool Powell(gPVector<double> &p,
   startVal = fret;
   
   if (tracelevel > 0)  {
-    tracefile << "\n\nIn Powell: ";
-    tracefile.SetExpMode() << "\nstart:  val = " << fret << " ";
+    tracefile.SetExpMode() << "\n\nPow start:  val = " << fret << " ";
     tracefile.SetFloatMode();
     tracefile << " p = " << p;
   }
@@ -483,7 +485,7 @@ bool Powell(gPVector<double> &p,
     }
     
     if (tracelevel > 0) {
-      tracefile << "\niter: " << iter;
+      tracefile << "\nPow iter: " << iter;
       tracefile.SetExpMode() << " val = " << fret << " ";
       tracefile.SetFloatMode();
       tracefile << " p = " << p;
@@ -520,7 +522,8 @@ bool Powell(gPVector<double> &p,
     
     if (tracelevel > 1)   {
       tracefile << "Approximate Hessian:\n\n";
-      tracefile << ((gRectArray<double> &)xi) << '\n';
+//      tracefile << ((gRectArray<double> &)xi) << '\n';
+      tracefile << xi << '\n';
 
       tracefile << "location = " << p << " value = " << fret << "\n\n";
     }
@@ -528,6 +531,90 @@ bool Powell(gPVector<double> &p,
   return false;
 }
 
+
+bool OldPowell(gVector<double> &p,
+	    gMatrix<double> &xi,
+	    gFunction<double> &func,
+	    double &fret, int &iter,
+	    int maxits1, double tol1, int maxitsN, double tolN,
+	    gOutput &tracefile, int tracelevel, gStatus &status = gstatus)
+{
+  int i,ibig,n;
+  double t,fptt,fp,del;
+  double startVal;
+  
+  n=p.Length();
+  gVector<double> pt(1,n);
+  gVector<double> ptt(1,n);
+  gVector<double> xit(1,n);
+  fret=func.Value(p);
+  startVal = fret;
+
+  if (tracelevel > 0)  {
+    tracefile.SetExpMode() << "\nPow start:  val = " << fret << " ";
+    tracefile.SetFloatMode();
+    tracefile << " p = " << p;
+  }
+  
+  pt=p;
+  for (iter=1;;iter++) {
+    fp=fret;
+    if(startVal>tolN)
+      status.SetProgress((double)(startVal-fp)/(double)(startVal-tolN));
+    ibig=0;
+    del=0.0;
+    for (i=1;i<=n;i++) {
+      xi.GetRow(i, xit);
+      fptt=fret;
+      
+      RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+      
+      if (fptt-fret > del) {
+	del=fptt-fret;
+	ibig=i;
+      }
+    }
+    
+    if (tracelevel > 0) {
+      tracefile << "\nPow iter: " << iter;
+      tracefile.SetExpMode() << " val = " << fret << " ";
+      tracefile.SetFloatMode();
+      tracefile << " p = " << p;
+    }
+    if(status.Get()) return false;
+    if (fret <= tolN) return true;
+
+    if (iter == maxitsN) {
+      if (tracelevel > 0)  {
+	tracefile << "location = " << p << " value = " << fret << "\n\n";
+	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
+      }
+      return false;
+    }
+    
+    ptt=p*2.0-pt;
+    xit=p-pt;
+    
+    pt=p;
+    
+    fptt=func.Value(ptt);
+    if (fptt < fp) {
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
+      if (t < 0.0) {
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+	xi.SetRow(ibig, xit);
+      }
+    }
+
+    if (tracelevel > 1)   {
+      tracefile << "Approximate Hessian:\n\n";
+      tracefile << xi << '\n';
+      
+      tracefile << "location = " << p << " value = " << fret << "\n\n";
+    }
+  }
+  return false;
+}
 
 
 
