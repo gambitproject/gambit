@@ -238,26 +238,6 @@ Gui should display nfg.ico.
 
 //------------------------------
 
-Bug D27: Solution Numbering
-
-Numbering of solutions should begin afresh when solutions are deleted
-in the solution display windows
-
-//------------------------------
-
-Bug D28: Problems in converting to normal form in the gui
-
-This problem only occurs under MS-Win version.  
-
-Load poker.efg, convert it to reduced normal form, and then try to
-save this as a normal form game (junk.nfg).  The gui crashes.
-Similarly, if you try to solve the game with the QRE algorithm, the
-gui crashes.
-
-RDM: The above is now fixed (12/29/98)
-
-//------------------------------
-
 Bug D29: .efg and .nfg files not recognized in wxxt port of gambit
 
 When you start up the gambit gui compiled with wxxt and try to load
