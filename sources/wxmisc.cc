@@ -97,30 +97,6 @@ char *wxFindFile(const char *name)
 }
 
 
-// OutputFile: takes the input filename, strips it of the path and extension and
-// appends a ".pxi" extension.
-char *wxOutputFile(const char *name)
-{
-  static char t_outfile[250];
-  static char slash[2];
-  slash[0] = System::Slash();
-  slash[1] = '\0';
-
-  if (strstr(slash, name)) {
-    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
-  }
-  else
-    strcpy(t_outfile, name);
-
-  char *period = strchr(t_outfile, '.'); // strip the extension
-  
-  if (period) t_outfile[period-t_outfile] = '\0';
-  strcat(t_outfile, ".pxi"); // add a ".pxi" extension
-  
-  return t_outfile;
-}
-
-
 // Help system functions.
 wxHelpInstance *help_instance = 0;
 void wxInitHelp(const char *name, const char *help_about_str)

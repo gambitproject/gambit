@@ -6,8 +6,10 @@
 //
 
 #include "gstream.h"
+#include "system.h"
 #include "wxio.h"
 #include "algdlgs.h"
+#include "wxmisc.h"
 
 #include "nfgconst.h"
 
@@ -15,13 +17,13 @@
 // and replaces it with a newly created string (while deleting the old one).
 // This is NOT what we want.
 
-Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
+Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
 {
   char *tmp_str = 0;
   Bool ok = wxGetResource(section, entry, &tmp_str, file);
 
   if (ok) {
-    strcpy(value, tmp_str);
+    value = tmp_str;
     delete [] tmp_str;
   }
   
@@ -280,45 +282,94 @@ int dialogAlgorithm::TraceLevel(void) const
 }
 
 //=======================================================================
-//                class PxiParamsDialog: Member functions
+//                   class dialogPxi: Member functions
 //=======================================================================
 
-// Constructor
-PxiParamsDialog::PxiParamsDialog(const char *alg, const char *label, 
-                                 const char *fn, wxWindow *parent,
-                                 const char *help_str)
-  : dialogAlgorithm(label, false, parent, help_str)
-{ }
-
-// Make Pxi Fields
-void PxiParamsDialog::MakePxiFields(void)
+static char *wxOutputFile(const char *name)
 {
-  /*
-  Form()->Add(wxMakeFormNewLine());
+  static char t_outfile[250];
+  static char slash[2];
+  slash[0] = System::Slash();
+  slash[1] = '\0';
+
+  if (strstr(slash, name)) {
+    strcpy(t_outfile, FileNameFromPath((char *)name)); // strip the path
+  }
+  else
+    strcpy(t_outfile, name);
+
+  char *period = strchr(t_outfile, '.'); // strip the extension
   
-  Form()->Add(wxMakeFormString("Plot Type", &type_str, wxFORM_RADIOBOX,
-			       new wxList(wxMakeConstraintStrings(type_list), 0)));
+  if (period) t_outfile[period-t_outfile] = '\0';
+  strcat(t_outfile, ".pxi"); // add a ".pxi" extension
   
-  Form()->Add(wxMakeFormString("PxiFile", &pxiname, 
-			       wxFORM_DEFAULT, NULL, NULL, 0,
-			       300));
-  
-  Add(wxMakeFormString("Next", &name_option_str, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(name_option_list), 0)));
-  Form()->Add(wxMakeFormNewLine());
-  
-  Form()->Add(wxMakeFormBool("Run PXI", &run_pxi));
-  
-  Form()->Add(wxMakeFormString("PXI Command", &pxi_command,
-			       wxFORM_DEFAULT, NULL, NULL, 0,
-			       300));
-  */
+  return t_outfile;
 }
 
-// Destructor
-PxiParamsDialog::~PxiParamsDialog() { }
+dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
+		     wxWindow *p_parent, const char *p_helpStr)
+  : dialogAlgorithm(p_label, false, p_parent, p_helpStr)
+{ 
+  m_defaultPxiFile = wxOutputFile(p_filename);
+}
 
+dialogPxi::~dialogPxi()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
+		    m_plotType->GetSelection(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Run-Pxi",
+		    m_runPxi->GetValue(), "gambit.ini");
+    if (m_runPxi->GetValue()) 
+      wxWriteResource("Algorithm Params", "Pxi-Command",
+		      m_pxiCommand->GetValue(), "gambit.ini");
+  }
+}
 
+void dialogPxi::PxiFields(void)
+{
+  int plotType = 0;
+  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, "gambit.ini");
+  char *plotTypeChoices[] = { "Log", "Linear" };
+  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
+			      2, plotTypeChoices);
+  if (plotType == 0 || plotType == 1)
+    m_plotType->SetSelection(plotType);
+  NewLine();
+
+  m_pxiFile = new wxText(this, 0, "PXI file");
+  m_pxiFile->SetValue(m_defaultPxiFile);
+  NewLine();
+
+  Bool runPxi = false;
+  wxGetResource("Algorithm Params", "Run-Pxi", &runPxi, "gambit.ini");
+  m_runPxi = new wxCheckBox(this, (wxFunction) CallbackRun, "Run PXI");
+  m_runPxi->SetClientData((char *) this);
+  m_runPxi->SetValue(runPxi);
+
+  gText pxiCommand;
+  wxGetResourceStr("Algorithm Params", "Pxi-Command", pxiCommand, 
+		   "gambit.ini");
+  m_pxiCommand = new wxText(this, 0, "PXI command");
+  m_pxiCommand->SetValue(pxiCommand);
+  m_pxiCommand->Enable(m_runPxi->GetValue());
+  NewLine();
+}
+
+void dialogPxi::OnRun(void)
+{
+  m_pxiCommand->Enable(m_runPxi->GetValue());
+}
+
+gOutput *dialogPxi::PxiFile(void) const
+{
+  try {
+    return new gFileOutput(m_pxiFile->GetValue());
+  }
+  catch (gFileOutput::OpenFailed &E) {
+    return 0;
+  }
+}
 
 //=======================================================================
 //                   dialogEnumPure: Member functions
@@ -627,3 +678,61 @@ int dialogPolEnum::StopAfter(void) const
   else
     return m_stopAfter->GetInteger(); 
 }
+
+//=======================================================================
+//                      dialogQre: Member functions
+//=======================================================================
+
+#include "dlqre.h"
+
+dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
+		     bool p_vianfg)
+  : dialogPxi("QreSolve Params", p_filename, p_parent, QRE_HELP)
+{
+  MakeCommonFields(true, false, p_vianfg);
+  Go();
+}
+
+dialogQre::~dialogQre()
+{
+  if (m_completed == wxOK) {
+
+  }
+}
+
+void dialogQre::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  NewLine();
+
+  float minLam, maxLam, delLam, tolN, tol1;
+  int maxitsN, maxits1;
+  wxGetResource("Algorithm Params", "Qre-minLam", &minLam, "gambit.ini");
+  wxGetResource("Algorithm Params", "Qre-maxLam", &maxLam, "gambit.ini");
+  wxGetResource("Algorithm Params", "Qre-delLam", &delLam, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-tolND", &tolN, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-tol1D", &tol1, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-maxitsND", &maxitsN, "gambit.ini");
+  wxGetResource("Algorithm Params", "Func-maxits1D", &maxits1, "gambit.ini");
+
+  m_minLam = new wxNumberItem(this, "minLam", minLam);
+  m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
+  m_delLam = new wxNumberItem(this, "delLam", delLam);
+  NewLine();
+
+  m_tolN = new wxNumberItem(this, "Tolerance n-D", tolN);
+  m_tol1 = new wxNumberItem(this, "Tolerance 1-D", tol1);
+  NewLine();
+
+  m_maxitsN = new wxIntegerItem(this, "Iterations n-D", maxitsN);
+  m_maxits1 = new wxIntegerItem(this, "Iterations 1-D", maxits1);
+  NewLine();
+
+  char *startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+				 3, startOptions);
+  NewLine();
+
+  PxiFields();
+}  
+

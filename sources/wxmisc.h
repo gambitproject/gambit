@@ -216,10 +216,6 @@ gText gPathOnly(const char *name);
 // result
 char *wxFindFile(const char *name);
 
-// OutputFile(base): returns a filename of the form baseXXX.out where XXX are consequtive
-// numbers in this dir.
-char *wxOutputFile(const char *name);
-
 // Functions to implement online help system.
 void wxInitHelp(const char *file_name, const char *help_about_str = 0);
 void wxHelpContents(const char *name);

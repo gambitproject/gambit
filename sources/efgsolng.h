@@ -243,7 +243,11 @@ public:
 
 class guiefgQreEfg : public guiEfgSolution {
 private:
-  int m_stopAfter, m_startOption;
+  int m_stopAfter, m_startOption, m_maxits1D, m_maxitsND, m_powLam;
+  double m_minLam, m_maxLam, m_delLam, m_tol1D, m_tolND;
+  gOutput *m_pxiFile;
+  bool m_runPxi;
+  gText m_pxiCommand, m_pxiFilename;
 
 public:
   guiefgQreEfg(const EFSupport &, EfgShowInterface *);
@@ -257,7 +261,11 @@ public:
 
 class guiefgQreNfg : public guiEfgSolution {
 private:
-  int m_startOption;
+  int m_stopAfter, m_startOption, m_maxits1D, m_maxitsND, m_powLam;
+  double m_minLam, m_maxLam, m_delLam, m_tol1D, m_tolND;
+  gOutput *m_pxiFile;
+  bool m_runPxi;
+  gText m_pxiCommand, m_pxiFilename;
 
 public:
   guiefgQreNfg(const EFSupport &, EfgShowInterface *);

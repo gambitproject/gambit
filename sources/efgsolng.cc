@@ -1140,44 +1140,13 @@ bool guiefgPolEnumEfg::SolveSetup(void)
 //                               QreSolve
 //========================================================================
 
-#include "gobitprm.h"
-#include "ngobit.h"
-#include "egobit.h"
-
-QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
-					   const gText p_filename,
-					   bool p_vianfg)
-  : PxiParamsDialog("Qre","QRESolve Params", p_filename, p_parent, QRE_HELP)
-{
-  MakeCommonFields(true, false, p_vianfg);
-  Go();
-}
-
-void QreSolveParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm parameters");
-  m_minLam = new wxText(this, 0, "minLam");
-  m_maxLam = new wxText(this, 0, "maxLam");
-  m_delLam = new wxText(this, 0, "delLam");
-  NewLine();
-
-  m_tolN = new wxText(this, 0, "Tolerance n-D");
-  m_tol1 = new wxText(this, 0, "Tolerance 1-D");
-  NewLine();
-
-  m_maxitsN = new wxText(this, 0, "Iterations n-D");
-  m_maxits1 = new wxText(this, 0, "Iterations 1-D");
-  NewLine();
-
-  char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
-				 3, startOptions);
-  NewLine();
-}  
+#include "dlqre.h"
 
 //---------------------
 // Qre on nfg
 //---------------------
+
+#include "ngobit.h"
 
 guiefgQreNfg::guiefgQreNfg(const EFSupport &p_support, 
 			   EfgShowInterface *p_parent)
@@ -1187,12 +1156,23 @@ guiefgQreNfg::guiefgQreNfg(const EFSupport &p_support,
 gList<BehavSolution> guiefgQreNfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "QreSolve Progress");
+  BehavProfile<gNumber> startb = m_parent->CreateStartProfile(m_startOption);
 
   NFQreParams params(status);
+  params.minLam = m_minLam;
+  params.maxLam = m_maxLam;
+  params.delLam = m_delLam;
+  params.tol1 = m_tol1D;
+  params.tolN = m_tolND;
+  params.maxits1 = m_maxits1D;
+  params.maxitsN = m_maxitsND;
+  params.powLam = m_powLam;
+  params.pxifile = m_pxiFile;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   Nfg *N = MakeReducedNfg(EFSupport(m_efg));
 
-  BehavProfile<gNumber> startb = m_parent->CreateStartProfile(m_startOption);
   MixedProfile<gNumber> startm(*N);
 
   BehavToMixed(m_efg, startb, *N, startm);
@@ -1202,7 +1182,11 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
   try {
     Qre(*N, params, startm, nfg_solns, nevals, nits);
-    //GSPD.RunPxi();
+    if (m_runPxi) {
+      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+	wxMessageBox("Unable to launch PXI successfully");
+      }
+    }
   }
   catch (gSignalBreak &) { }
 
@@ -1220,7 +1204,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
 bool guiefgQreNfg::SolveSetup(void)
 {
-  QreSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename(), true);
+  dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -1230,6 +1214,22 @@ bool guiefgQreNfg::SolveSetup(void)
     m_markSubgames = dialog.MarkSubgames();
 
     m_startOption = dialog.StartOption();
+    m_minLam = dialog.MinLam();
+    m_maxLam = dialog.MaxLam();
+    m_delLam = dialog.DelLam();
+    m_tol1D = dialog.Tol1D();
+    m_tolND = dialog.TolND();
+    m_maxits1D = dialog.Maxits1D();
+    m_maxitsND = dialog.MaxitsND();
+    m_powLam = (dialog.LinearPlot()) ? 0 : 1;
+
+    m_pxiFile = dialog.PxiFile();
+    m_pxiFilename = dialog.PxiFilename();
+    m_runPxi = dialog.RunPxi();
+    m_pxiCommand = dialog.PxiCommand();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else
@@ -1240,6 +1240,8 @@ bool guiefgQreNfg::SolveSetup(void)
 // Qre on efg
 //---------------------
 
+#include "egobit.h"
+
 guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support, 
 			   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
@@ -1248,29 +1250,55 @@ guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
 guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
 			   EfgShowInterface *p_parent,
 			   int p_stopAfter, bool p_eliminateWeak)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+  : guiEfgSolution(p_support, p_parent),
+    m_stopAfter(p_stopAfter), m_pxiFile(0), m_runPxi(false)
 {
   m_eliminate = true;
   m_eliminateAll = true;
   m_eliminateWeak = p_eliminateWeak;
   m_eliminateMixed = false;
+
+  m_minLam = 0.01;
+  m_maxLam = 30.0;
+  m_delLam = 0.01;
+  m_tol1D = 2.0e-10;
+  m_tolND = 1.0e-10;
+  m_maxits1D = 100;
+  m_maxitsND = 20;
+  m_powLam = 1;
 }
 
 gList<BehavSolution> guiefgQreEfg::Solve(void) const
 {
   wxStatus status(m_parent->Frame(), "QreSolve Progress");
   BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
-  EFQreParams P(status);
+  EFQreParams params(status);
+  params.minLam = m_minLam;
+  params.maxLam = m_maxLam;
+  params.delLam = m_delLam;
+  params.tol1 = m_tol1D;
+  params.tolN = m_tolND;
+  params.maxits1 = m_maxits1D;
+  params.maxitsN = m_maxitsND;
+  params.powLam = m_powLam;
+  params.pxifile = m_pxiFile;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
+
   long nevals, nits;
   gList<BehavSolution> solns;
 
   try {
-    Qre(m_efg, P, start, solns, nevals, nits);
+    Qre(m_efg, params, start, solns, nevals, nits);
     if (!solns[1].IsSequential()) {
       wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
 		   "Returning last value.\n");
     }
-    //dialog.RunPxi();
+    if (m_runPxi) {
+      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+	wxMessageBox("Unable to launch PXI successfully");
+      }
+    }
   }
   catch (gSignalBreak &) { }
 
@@ -1279,17 +1307,32 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
 
 bool guiefgQreEfg::SolveSetup(void)
 { 
-  QreSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename()); 
+  dialogQre dialog(m_parent->Frame(), m_parent->Filename()); 
 
   if (dialog.Completed() == wxOK) {
-    m_eliminate =dialog.Eliminate();
+    m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
     m_markSubgames = dialog.MarkSubgames();
 
     m_startOption = dialog.StartOption();
+    m_minLam = dialog.MinLam();
+    m_maxLam = dialog.MaxLam();
+    m_delLam = dialog.DelLam();
+    m_tol1D = dialog.Tol1D();
+    m_tolND = dialog.TolND();
+    m_maxits1D = dialog.Maxits1D();
+    m_maxitsND = dialog.MaxitsND();
+    m_powLam = (dialog.LinearPlot()) ? 0 : 1;
 
+    m_pxiFile = dialog.PxiFile();
+    m_pxiFilename = dialog.PxiFilename();
+    m_runPxi = dialog.RunPxi();
+    m_pxiCommand = dialog.PxiCommand();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

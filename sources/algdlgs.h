@@ -97,18 +97,37 @@ public:
 
 
 //=========================================================================
-//                 PxiParamsDialog: Class declaration
+//                      dialogPxi: Class declaration
 //=========================================================================
 
-class PxiParamsDialog : public dialogAlgorithm {
-public:
-  PxiParamsDialog(const char *alg = "Pxi", const char *label = 0, 
-		  const char *filename = "pxi.out", wxWindow *parent = 0, 
-		  const char *help_str = 0);
-  virtual ~PxiParamsDialog(void);
+class dialogPxi : public dialogAlgorithm {
+protected:
+  gText m_defaultPxiFile;
+  wxRadioBox *m_plotType;
+  wxText *m_pxiFile, *m_pxiCommand;
+  wxCheckBox *m_runPxi;
 
-  void MakePxiFields(void);
-  virtual bool FromDialog(void) { return true; }
+  static void CallbackRun(wxCheckBox &p_object, wxEvent &)
+    { ((dialogPxi *) p_object.GetClientData())->OnRun(); }
+
+  void OnRun(void);
+
+  void PxiFields(void);
+
+public:
+  dialogPxi(const char *p_label = 0, const char *p_filename = "pxi.out",
+	    wxWindow *p_parent = 0, const char *p_helpStr = 0);
+  virtual ~dialogPxi();
+
+  bool LinearPlot(void) const 
+    { return (m_plotType->GetSelection() == 1); }
+  gOutput *PxiFile(void) const;
+  gText PxiFilename(void) const
+    { return m_pxiFile->GetValue(); }
+  bool RunPxi(void) const
+    { return m_runPxi->GetValue(); }
+  gText PxiCommand(void) const
+    { return m_pxiCommand->GetValue(); }
 };
 
 #endif   // ALGDLGS_H

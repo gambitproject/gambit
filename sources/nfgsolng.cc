@@ -527,8 +527,8 @@ bool guinfgPolEnum::SolveSetup(void)
 // Qre
 //----------
 
+#include "dlqre.h"
 #include "ngobit.h"
-#include "gobitprm.h"
 
 guinfgQre::guinfgQre(const NFSupport &p_support, NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
@@ -538,6 +538,17 @@ gList<MixedSolution> guinfgQre::Solve(void)
 {
   wxStatus status(m_parent->Frame(), "QreSolve Progress");
   NFQreParams params(status);
+  params.minLam = m_minLam;
+  params.maxLam = m_maxLam;
+  params.delLam = m_delLam;
+  params.tol1 = m_tol1D;
+  params.tolN = m_tolND;
+  params.maxits1 = m_maxits1D;
+  params.maxitsN = m_maxitsND;
+  params.powLam = m_powLam;
+  params.pxifile = m_pxiFile;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
 
   MixedProfile<gNumber> start(m_parent->CreateStartProfile(m_startOption));
 
@@ -545,7 +556,11 @@ gList<MixedSolution> guinfgQre::Solve(void)
   gList<MixedSolution> solutions;
   try {
     Qre(m_nfg, params, start, solutions, nevals, nits);
-    //GSPD.RunPxi();
+    if (m_runPxi) {
+      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+	wxMessageBox("Unable to launch PXI successfully");
+      }
+    }
   }
   catch (gSignalBreak &) { }
 
@@ -554,7 +569,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
 
 bool guinfgQre::SolveSetup(void)
 {
-  QreSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename());
+  dialogQre dialog(m_parent->Frame(), m_parent->Filename());
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -563,7 +578,22 @@ bool guinfgQre::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
 
     m_startOption = dialog.StartOption();
+    m_minLam = dialog.MinLam();
+    m_maxLam = dialog.MaxLam();
+    m_delLam = dialog.DelLam();
+    m_tol1D = dialog.Tol1D();
+    m_tolND = dialog.TolND();
+    m_maxits1D = dialog.Maxits1D();
+    m_maxitsND = dialog.MaxitsND();
+    m_powLam = (dialog.LinearPlot()) ? 0 : 1;
 
+    m_pxiFile = dialog.PxiFile();
+    m_pxiFilename = dialog.PxiFilename();
+    m_runPxi = dialog.RunPxi();
+    m_pxiCommand = dialog.PxiCommand();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

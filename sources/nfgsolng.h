@@ -141,7 +141,11 @@ public:
 
 class guinfgQre : public guiNfgSolution   {
 private:
-  int m_startOption;
+  int m_stopAfter, m_startOption, m_maxits1D, m_maxitsND, m_powLam;
+  double m_minLam, m_maxLam, m_delLam, m_tol1D, m_tolND;
+  gOutput *m_pxiFile;
+  bool m_runPxi;
+  gText m_pxiCommand, m_pxiFilename;
 
 public:
   guinfgQre(const NFSupport &, NfgShowInterface *);
