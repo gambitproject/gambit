@@ -89,14 +89,10 @@ private:
     void SubgamesSetup(void);
     void NodeInspect(bool insp);
 
-    struct es_features
-    {
-        Bool node_inspect;
-        Bool iset_hilight;
-        es_features(void):node_inspect(FALSE), iset_hilight(FALSE) { }
-        es_features(const es_features &s)
-            : node_inspect(s.node_inspect), iset_hilight(s.iset_hilight) { }
-    } features;
+  struct es_features {
+    Bool iset_hilight;
+    es_features(void) : iset_hilight(FALSE) { }
+  } features;
 
     void MakeMenus(void);
 

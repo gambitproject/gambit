@@ -192,6 +192,12 @@ void NodeSolnShow::OnHelp(int help_type)
     wxHelpAbout();
 }
 
+Bool NodeSolnShow::OnClose(void)
+{
+  Show(FALSE);
+  return FALSE;
+}
+
 void NodeSolnShow::Set(const Node *n) 
 {
   cur_n = n;

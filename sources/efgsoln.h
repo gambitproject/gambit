@@ -1,7 +1,9 @@
+//
 // File: efgsoln.h -- declaration of classes for displaying the extensive
 // form solutions.
 //
 // $Id$
+//
 
 #ifndef EFGSOLN_H
 #define EFGSOLN_H
@@ -37,6 +39,7 @@ public:
     void OnMenuCommand(int id);
     // Override the help system
     void OnHelp(int =0);
+    Bool OnClose(void);
 };
 
 

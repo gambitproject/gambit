@@ -162,6 +162,9 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   // now zoom in/out to show the full tree
   tw->display_zoom_fit();
     
+  node_inspect = new NodeSolnShow(ef.NumPlayers(), this);
+  node_inspect->Set(tw->Cursor());
+  node_inspect->Show(FALSE);
   Show(TRUE);
 }
 
@@ -175,24 +178,12 @@ EfgShow::~EfgShow(void)
 
 #include "elimdomd.h"
 
-void EfgShow::NodeInspect(bool insp)
-{
-    if (insp && !node_inspect)
-    {
-        node_inspect = new NodeSolnShow(ef.NumPlayers(), this);
-        node_inspect->Set(tw->Cursor());
-    }
-    else
-    {
-        delete node_inspect;
-        node_inspect = 0;
-    }
-}
-
-
 void EfgShow::OnSelectedMoved(const Node *n)
 {
-    if (features.node_inspect) node_inspect->Set(n);
+  // The only time the inspection window won't be around is on construction
+  if (node_inspect) {
+    node_inspect->Set(n);
+  }
 }
 
 //*******************************************************************
@@ -428,12 +419,13 @@ void EfgShow::InspectSolutions(int what)
 
 void EfgShow::ChangeSolution(int sol)
 {
-    if (cur_soln != sol)
-    {
-        cur_soln = sol;
-        tw->OnPaint();
-        if (features.node_inspect) node_inspect->Set(tw->Cursor());
+  if (cur_soln != sol) {
+    cur_soln = sol;
+    tw->OnPaint();
+    if (node_inspect) {
+      node_inspect->Set(tw->Cursor());
     }
+  }
 }
 
 
@@ -833,7 +825,7 @@ void EfgShow::MakeMenus(void)
   inspect_menu->Append(INSPECT_SOLUTIONS, "&Solutions",
 		       "Inspect existing solutions");
   inspect_menu->Append(INSPECT_CURSOR, "&Cursor",
-		       "Inspect node at cursor", TRUE);
+		       "Information about the node at cursor");
   inspect_menu->Append(INSPECT_INFOSETS, "&Infosets",
 		       "Inspect information sets", TRUE);
   inspect_menu->Append(INSPECT_ZOOM_WIN, "Zoom &Window",
@@ -1027,9 +1019,8 @@ void EfgShow::OnMenuCommand(int id)
       InspectSolutions(CREATE_DIALOG);
       break;
     case INSPECT_CURSOR:
-      features.node_inspect = !features.node_inspect;
-      NodeInspect(features.node_inspect);
-      GetMenuBar()->Check(m_inspectCursorItem, features.node_inspect);
+      node_inspect->Set(tw->Cursor());
+      node_inspect->Show(TRUE);
       break;
     case INSPECT_INFOSETS:
       features.iset_hilight = !features.iset_hilight;
