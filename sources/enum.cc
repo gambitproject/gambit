@@ -67,10 +67,8 @@ template <class T> int EnumModule<T>::Enum(void)
   min-=(T)1;
 
    // construct A1,A2,b1,b2  
-
-  for (i=1; i<=n1; i++)  {
-    A1(i, n2) = - (T)1;
-    A2(n2, i) = (T)1;
+  
+  for (i=1; i<=n1; i++) {
     for (j=1; j<=n2; j++)  {
       A1(i, j) = iter.Payoff(1) - min;
       A2(j, i) = iter.Payoff(2) - min;

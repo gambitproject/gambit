@@ -467,24 +467,19 @@ LPTableau<T>::LPTableau(const LPTableau<T> &orig)
 template <class T> LPTableau<T>::~LPTableau()
 { }
 
-/*
+
 template <class T>
 LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 {
 //  assert( A==orig.A );
+  Tableau<T>::operator=(orig);
   if(this!= &orig) {
-    A = orig.A;
-    b = orig.b;
-    basis= orig.basis;
-    B= orig.B;
-    solution= orig.solution;
-    npivots = orig.npivots;
+    dual=orig.dual;
     unitcost= orig.unitcost;
     cost= orig.cost;
   }
   return *this;
 }
-*/
 
 // cost-based functions
 

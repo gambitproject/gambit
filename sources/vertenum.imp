@@ -61,12 +61,15 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   if(tab.IsLexMin()) 
     List.Append(tab.GetBFS1());
   tab.ReversePivots(PivotList);  // get list of reverse pivots
-  for(k=1;k<=PivotList.Length();k++) {
-    pivot = PivotList[k];
+  if(PivotList.Length()) {
     LPTableau<T> tab2(tab);
-    npivots++;
-    tab2.Pivot(pivot[1],pivot[2]);
-    Search(tab2);
+    for(k=1;k<=PivotList.Length();k++) {
+      pivot = PivotList[k];
+      npivots++;
+      tab2=tab;
+      tab2.Pivot(pivot[1],pivot[2]);
+      Search(tab2);
+    }
   }
 }
   
@@ -82,13 +85,14 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   Search(tab);         // do primal search
   if(mult_opt) {
     tab.SetConst(btemp);    // install artifical constraint vector
+    LPTableau<T> tab2(tab);
     for(i=b.First();i<=b.Last();i++)
       if(b[i]==(T)0)
 	for(j=-b.Last();j<=c.Last();j++) 
 	  if(j && !tab.Member(j))
 	    if(tab.IsDualReversePivot(i,j)) {
-	      LPTableau<T> tab2(tab);
 	      npivots++;
+	      tab2=tab;
 	      tab2.Pivot(i,j);
 	      DualSearch(tab2);
 	    }
