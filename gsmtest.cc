@@ -64,7 +64,6 @@ int main( void )
   gin >> cont;
 
 
-/*
 
 
   gout << "\n";
@@ -3232,7 +3231,7 @@ int main( void )
 #endif
 
 
-*/
+
 
   machine->PushRef( "nx" );
   machine->InitCallFunction( "ReadNfg" );
