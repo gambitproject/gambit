@@ -30,8 +30,7 @@ ExtForm::ExtForm(void) : players(0, 0), nodes((NodeSet *) 0),
 ExtForm::ExtForm(gInput &f) : players(0, 0),
                               nodes((NodeSet *) 0), outcomes((Outcome *) 0)
 {
-// Gotta implement this later!
-  assert(0);
+  ReadEfgFile(f);
 }
 
 //
