@@ -25,7 +25,7 @@ TARGET=none
 SCCS=none
 #Values controlling SCCS updates.  
 GET_false=/home/ironbark/gambit/distrib/fake_get # used to avoid SCCS updates
-GET_true=get
+GET_true=$(GET)
 
 all:
 #Check which targets we are building, if all, build all
