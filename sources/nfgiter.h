@@ -49,6 +49,7 @@ public:
 //  const gArray<int> *const GetActions(int pl) const;
 
   Strategy *GetStrategy(int pl, int num);
+const NFSupport &GetNFSupport(void) const {return *stratset;}
 };
 
 #endif   // NFGITER_H
