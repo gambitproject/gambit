@@ -43,7 +43,7 @@
 #define NFG_STANDARD_HELP					"NFG Standard Solutions"
 #define NFG_SOLN_SORT_HELP		"Sorting and Filtering Solutions"
 #define NFG_SOLNSTART_HELP		"Setting algorithm starting point"
-
+#define NFG_DATATYPE_HELP			"Changing Game DataTypes"
 // help names for actual solution algorithms
 #define ENUMPURE_HELP						"EnumPure"
 #define ENUMMIXED_HELP          "EnumMixed"

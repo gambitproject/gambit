@@ -17,7 +17,7 @@ private:
 	Bool				flashing;
 	// since this class makes sense only with interactive (screen) devices,
 	// its ok to init it with physical device coords: _s-start,_e-end
-	int	x_s,x_e,y_s,y_e,ox,oy,old_x_s,old_x_e,old_y_s,old_y_e,old_ox,old_oy;
+	int	x_s,x_e,y_s,y_e,old_x_s,old_x_e,old_y_s,old_y_e;
 	wxDC *dc;
 	void DrawCursor(int xs,int ys,int xe,int ye,CursorType type);
 public:
@@ -25,7 +25,6 @@ public:
 	virtual  ~TreeNodeCursor(void);
 	void	SetDC(wxDC *_dc) {dc=_dc;}
 	void	SetFlashNode(int x_s,int y_s,int x_e,int y_e,CursorType	type);
-  void	Translate(int ox,int oy);
 	void	GetFlashNode(int & x_s,int & y_s,int & x_e,int & y_e) const;
 	virtual void	SetFlashing(Bool _flashing) {flashing=_flashing;}
 	Bool	Flashing(void) const {return flashing;}

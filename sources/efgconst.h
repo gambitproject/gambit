@@ -77,6 +77,7 @@
 #define SOLVE_STANDARD_TYPE			1550
 #define SOLVE_STANDARD_NUM			1560
 #define	SOLVE_DATATYPE					1570
+#define SOLVE_GAMEINFO					1580
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601
@@ -119,6 +120,8 @@
 #define EFG_SUBGAMESOLN_HELP	"EFG Solutions and Subgames"
 #define EFG_SOLN_SORT_HELP		"Sorting and Filtering Solutions"
 #define EFG_SOLNSTART_HELP		"Setting algorithm starting point"
+#define EFG_DATATYPE_HELP			"Changing Game DataTypes"
+#define EFG_GAMEINFO_HELP			"EFG Information"
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"
 #define		BSOLN_SHOW_SECT	"Behav-Soln-Show"

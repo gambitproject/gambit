@@ -1,6 +1,6 @@
 // File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
-// @(#)spread.cc	1.28 8/8/96
+// $Id$
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
@@ -1268,3 +1268,5 @@ menubar=bar;
 if (menubar) wxFrame::SetMenuBar(menubar);
 }
 
+void SpreadSheet3D::OnSelectedMoved(int ,int ,SpreadMoveDir )
+{ }

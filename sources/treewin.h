@@ -22,7 +22,6 @@ typedef struct NODEENTRY {
 		const Node *n;
 		NODEENTRY *parent;
 		bool expanded;		// is this subgame root expanded or collapsed
-		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset.y!=-1) {infoset.y+=oy;infoset.x+=ox;}}
 		NODEENTRY(void) { }
 		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),
 																	 infoset(e.infoset),num(e.num),
@@ -53,7 +52,7 @@ private:
 	const Node	 *&cursor;								// Used to process cursor keys, stores current pos
 	// Private Functions
 	void	RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry);
-	void 	RenderSubtree(wxDC &dc,int ox=0,int oy=0);
+	void 	RenderSubtree(wxDC &dc);
 protected:
 	const TreeDrawSettings &draw_settings;		// Stores drawing parameters
 	TreeNodeCursor *flasher;			// Used to flash/display the cursor
@@ -65,7 +64,7 @@ public:
 	~TreeRender(void);
 	// Windows event handlers
 	virtual void OnPaint(void);
-	virtual void Render(wxDC &dc,int ox=0,int oy=0);
+	virtual void Render(wxDC &dc);
 	// Call this every time the cursor moves
 	virtual void UpdateCursor(const NodeEntry *entry);
 	// Override this if extra functionality is desired
@@ -85,7 +84,7 @@ public:
 						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
 						const TreeDrawSettings &draw_settings_,const NodeEntry *cursor_entry);
-	virtual void Render(wxDC &dc,int ox=0,int oy=0);
+	virtual void Render(wxDC &dc);
 	// Makes sure the cursor is always in the center of the window
 	virtual void UpdateCursor(const NodeEntry *entry);
 };
@@ -225,7 +224,7 @@ public:
 
 	gString Title(void) const;
 
-	virtual void Render(wxDC &dc,int ox=0,int oy=0);
+	virtual void Render(wxDC &dc);
 	void HilightInfoset(int pl,int iset);
 	// Used by parent BaseExtensiveShow when disp_sup changes
 	void SupportChanged(void);

@@ -481,7 +481,7 @@ public:
 	virtual void OnOk(void);
 	virtual void OnCancel(void);
 	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
-	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump) { }
+	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
 	virtual void OnPrint(void);
 	virtual void OnHelp(int =0) { }
 	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}
