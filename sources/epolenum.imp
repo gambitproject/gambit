@@ -28,38 +28,43 @@ private:
   bool is_singular;
   gArray<gArray<int> * > var;
 
-  // p_i_j as a gPoly, eliminating the last variable for 
-  // each information set, and satisfying the adding up 
-  // constraints of the sequence form strategies
-  gPoly<T> Prob(int pl,int seq) const;
-  double Prob(int pl,int seq, const gVector<gDouble> &x) const;
+  // The strategy is to develop the polynomial for each agent's expected
+  // payoff as a function of the behavior strategies on the support,
+  // eliminating the last last action probability for each information set.
+  // The system is obtained by requiring that all of the partial
+  // derivatives vanish, and that the sum of action probabilities at
+  // each information set be less than one.
+  gPoly<T>     ProbOfSequence(int pl,int seq)          const;
+  gPoly<T>     Payoff(int pl)                          const;
+  gPolyList<T> IndifferenceEquations()                 const;
+  gPolyList<T> LastActionProbPositiveInequalities()    const;
+  gPolyList<T> NashOnSupportEquationsAndInequalities() const;
+  gList<gVector<gDouble> > 
+               NashOnSupportSolnVectors(const gPolyList<T> &equations,
+					const gRectangle<T> &Cube,
+					gWatch &timer,
+					gStatus &p_status);
 
-  // Payoff to player pl, after eliminating last variable for 
-  // each infoset.  
-  gPoly<T> Payoff(int pl) const;
+  // Pass to the sequence form variables from the solution variables
+  double NumProbOfSequence(int pl,int seq, const gVector<gDouble> &x) const;
+  gPVector<double> SeqFormVectorFromSolFormVector(const gVector<gDouble> &x)
+                                                                      const;
 
-  // equation for when player i sets strat1 = strat2
-  // with last probs for each player substituted out.  
-//  gPoly<T> Equation(int i, int strat2, int strat2) const;
-
-  int SaveNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
+  bool ExtendsToANFNash(const BehavSolution &, gStatus &)             const;
   int SaveANFNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
-  bool ExtendsToNash(const BehavSolution &, gStatus &);
-  bool ExtendsToANFNash(const BehavSolution &, gStatus &);
+  bool ExtendsToNash(const BehavSolution &, gStatus &)                const;
+  int SaveNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
+
 public:
   EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
   ~EfgPolEnumModule();
 
   int EfgPolEnum(gStatus &);
-  
-  long NumEvals(void) const;
-  double Time(void) const;
-  bool IsSingular(void) const;
 
-//  void SequentialEquilibrium(const EFSupport &B, const EFBasis &b); 
-  
   EfgPolEnumParams &Parameters(void);
-//   void SequenceForm(const Node *, gNumber,gArray<int>, gArray<int>);
+  long             NumEvals(void)   const;
+  double           Time(void)       const;
+  bool             IsSingular(void) const;
 
   const gList<BehavSolution> &GetSolutions(void) const;
 };
@@ -113,43 +118,117 @@ EfgPolEnumModule<T>::~EfgPolEnumModule()
   delete Space;
 }
 
-template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gStatus &p_status)
+template <class T> 
+gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
 {
-  int i,j;
+  gPoly<T> equation(Space,Lex);
+  gVector<int> exps(num_vars);
+  int j = 0;
+  
+  int isetrow = SF.InfosetRowNumber(p,seq);
+  int act  = SF.ActionNumber(p,seq);
+  int varno = (*(var[p]))[seq];
 
+  if(seq==1) {
+    exps=0;
+    exp_vect const_exp(Space,exps);
+    gMono<T> const_term((T)1,const_exp);
+    gPoly<T> new_term(Space,const_term,Lex);
+    equation+=new_term;
+  }
+  else if(act<support.NumActions(SF.GetInfoset(p,seq))) { 
+    assert (varno>=exps.First());
+    assert (varno<=exps.Last());
+    exps=0;
+    exps[varno]=1;
+    exp_vect const_exp(Space,exps);
+    gMono<T> const_term((T)1,const_exp);
+    gPoly<T> new_term(Space,const_term,Lex);
+    equation+=new_term;
+  }
+  else {
+    for(j=1;j<seq;j++) {
+      if((SF.Constraints(p))(isetrow,j)==(gNumber)-1)
+	equation-=ProbOfSequence(p,j);
+      if((SF.Constraints(p))(isetrow,j)==(gNumber)1)
+	equation+=ProbOfSequence(p,j);
+    }
+  }
+  return equation;
+}
 
-  gWatch watch;
+template <class T> gPoly<T> 
+EfgPolEnumModule<T>::Payoff(int pl) const
+{
+  gIndexOdometer index(SF.NumSequences());
+  gNumber pay;
+
+  gPoly<T> equation(Space,Lex);
+  while (index.Turn()) {
+    pay=SF.Payoff(index.CurrentIndices(),pl);
+    if( pay !=(gNumber)0) {
+      gPoly<T> term(Space,(T)pay,Lex);
+      int k;
+      for(k=1;k<=EF.NumPlayers();k++) 
+	term*=ProbOfSequence(k,(index.CurrentIndices())[k]);
+      equation+=term;
+    }
+  }
+  if(params.trace >1)
+    (*params.tracefile) << "\nPayoff( " << pl << "): " << equation;
+  return equation;
+}
+
+template <class T>  
+gPolyList<T> EfgPolEnumModule<T>::IndifferenceEquations() const
+{
   gPolyList<T> equations(Space,Lex);
 
-  // equations for equality of strat j to strat j+1
-
-  int kk=0;
-  for( i=1;i<=SF.NumPlayers();i++) {
-    int n_vars=SF.NumSequences(i)-SF.NumInfosets(i)-1; 
-    for(j=1;j<=n_vars;j++) 
-      equations+=(Payoff(i)).PartialDerivative(kk+j);
+  int kk = 0;
+  for (int pl = 1; pl <= SF.NumPlayers(); pl++) {
+    gPoly<T> payoff = Payoff(pl);
+    int n_vars = SF.NumSequences(pl) - SF.NumInfosets(pl) - 1; 
+    for (int j = 1; j <= n_vars; j++) 
+      equations += payoff.PartialDerivative(kk+j);
     kk+=n_vars;
   }
 
-  for( i=1;i<=SF.NumPlayers();i++) 
-    for(j=2;j<=SF.NumSequences(i);j++) {
+  return equations;
+}
+
+template <class T>  
+gPolyList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
+{
+  gPolyList<T> equations(Space,Lex);
+
+  for (int i = 1; i <= SF.NumPlayers(); i++) 
+    for (int j = 2; j <= SF.NumSequences(i); j++) {
       int act_num = SF.ActionNumber(i,j);
-      //      if(act_num==support.NumActions(i,SF.InfosetNumber(i,j)) && act_num>1) 
-      if(act_num==support.NumActions(SF.GetInfoset(i,j)) && act_num>1) 
-	equations+=Prob(i,j);
+      if ( act_num == support.NumActions(SF.GetInfoset(i,j)) && act_num > 1 ) 
+	equations += ProbOfSequence(i,j);
     }
 
-  // set up the rectangle of search
-  gVector<T> bottoms(num_vars), tops(num_vars);
-  bottoms = (T)0;
-  tops = (T)1;
- 
-  gRectangle<T> Cube(bottoms, tops); 
+  return equations;
+}
 
-  // start QuikSolv
-  gWatch timer;
-  timer.Start();
+template <class T>  
+gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
+{
+  gPolyList<T> equations(Space,Lex);
+  
+  equations += IndifferenceEquations();
+  equations += LastActionProbPositiveInequalities();
 
+  return equations;
+}
+
+
+template <class T> gList<gVector<gDouble> > 
+EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
+					      const gRectangle<T> &Cube,
+					      gWatch &timer,
+					      gStatus &p_status)
+{
   QuikSolv<T> quickie(equations, p_status);
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
@@ -180,43 +259,67 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gStatus &p_status)
   catch (gSquareMatrix<gDouble>::MatrixSingular) {
     is_singular = true;
   }
+  
+  return quickie.RootList();
+}
 
-  int index = SaveNashSolutions(quickie.RootList(), p_status);
+template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gStatus &p_status)
+{
+  gPolyList<T> equations = NashOnSupportEquationsAndInequalities();
+
+  // set up the rectangle of search
+  gVector<T> bottoms(num_vars), tops(num_vars);
+  bottoms = (T)0;
+  tops = (T)1;
+  gRectangle<T> Cube(bottoms, tops); 
+
+  // timing
+  gWatch watch;
+  gWatch timer;
+  timer.Start();
+
+  gList<gVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+								   Cube,
+								   timer,
+								   p_status);
+
+  int index = SaveNashSolutions(solutionlist, p_status);
   time = watch.Elapsed();
   return index;	 
 }
 
-template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToANFNash(const BehavSolution &bs, 
-				            gStatus &m_status)
+template <class T> gPVector<double> 
+EfgPolEnumModule<T>::SeqFormVectorFromSolFormVector(const gVector<gDouble> &v)
+                                                                      const
 {
-  return bs.ExtendsToANFNash(bs.Support(),bs.Support(),m_status);
+  gPVector<double> x(SF.NumSequences());
+
+  for (int i = 1; i <= EF.NumPlayers(); i++) 
+    for (int j = 1; j <= SF.NumSequences()[i]; j++)
+      x(i,j) = NumProbOfSequence(i,j,v);
+  
+  return x;
 }
 
 template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs, 
-				            gStatus &m_status)
+EfgPolEnumModule<T>::ExtendsToANFNash(const BehavSolution &bs, 
+				            gStatus &m_status) const
 {
-  return bs.ExtendsToNash(bs.Support(),bs.Support(),m_status);
+  return bs.ExtendsToANFNash(bs.Support(),bs.Support(),m_status);
 }
 
 template <class T> int 
 EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list,
 					  gStatus &p_status)
 {
+  int index=0;
+  for (int k = 1; k <= list.Length(); k++) {
+    gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-  int i,j,k,index=0;
-  gPVector<double> x(SF.NumSequences());
-
-  for(k=1;k<=list.Length();k++) {
-
-    for(i=1;i<=EF.NumPlayers();i++) 
-      for(j=1;j<=SF.NumSequences()[i];j++)
-	x(i,j) = Prob(i,j,list[k]);
     if(params.trace > 1) 
-      (*params.tracefile) << "\nk: " << k << " x: " << x;
+      (*params.tracefile) << "\nk: " << k << " y: " << y;
 
-    BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
+    BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
 
     if(ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
@@ -227,28 +330,29 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list,
   return index;
 }
 
+template <class T> bool 
+EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs, 
+				            gStatus &m_status) const
+{
+  return bs.ExtendsToNash(bs.Support(),bs.Support(),m_status);
+}
+
 template <class T> int 
 EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list,
 				       gStatus &p_status)
 {
+  int index=0;
+  for (int k = 1; k <= list.Length(); k++) {
+    gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-  int i,j,k,index=0;
-  gPVector<double> x(SF.NumSequences());
-
-  for(k=1;k<=list.Length();k++) {
-
-    for(i=1;i<=EF.NumPlayers();i++) 
-      for(j=1;j<=SF.NumSequences()[i];j++)
-	x(i,j) = Prob(i,j,list[k]);
     if(params.trace > 1) 
-      (*params.tracefile) << "\nk: " << k << " x: " << x;
+      (*params.tracefile) << "\nk: " << k << " y: " << y;
 
-    BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
+    BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
 
     if(ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
-      //    solutions[index].SetIsNash(triTRUE);
     }
   }
   return index;
@@ -282,7 +386,7 @@ const gList<BehavSolution> &EfgPolEnumModule<T>::GetSolutions(void) const
 }
 
 template <class T> double EfgPolEnumModule<T>::
-Prob(int p,int seq, const gVector<gDouble> &x) const
+NumProbOfSequence(int p,int seq, const gVector<gDouble> &x) const
 {
   int j = 0;
   double value=0;
@@ -298,72 +402,12 @@ Prob(int p,int seq, const gVector<gDouble> &x) const
   else {    
     for(j=1;j<seq;j++) {
       if((SF.Constraints(p))(isetrow,j)==-(gNumber)1)
-	value-=Prob(p,j,x);
+	value-=NumProbOfSequence(p,j,x);
       if((SF.Constraints(p))(isetrow,j)==(gNumber)1)
-	value+=Prob(p,j,x);
+	value+=NumProbOfSequence(p,j,x);
     }
     return value;
   }
-}
-
-template <class T> gPoly<T> EfgPolEnumModule<T>::Prob(int p, int seq) const
-{
-  gPoly<T> equation(Space,Lex);
-  gVector<int> exps(num_vars);
-  int j = 0;
-  
-  int isetrow = SF.InfosetRowNumber(p,seq);
-  int act  = SF.ActionNumber(p,seq);
-  int varno = (*(var[p]))[seq];
-
-  if(seq==1) {
-    exps=0;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
-    equation+=new_term;
-  }
-  else if(act<support.NumActions(SF.GetInfoset(p,seq))) { 
-    assert (varno>=exps.First());
-    assert (varno<=exps.Last());
-    exps=0;
-    exps[varno]=1;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
-    equation+=new_term;
-  }
-  else {
-    for(j=1;j<seq;j++) {
-      if((SF.Constraints(p))(isetrow,j)==(gNumber)-1)
-	equation-=Prob(p,j);
-      if((SF.Constraints(p))(isetrow,j)==(gNumber)1)
-	equation+=Prob(p,j);
-    }
-  }
-  return equation;
-}
-
-template <class T> gPoly<T> 
-EfgPolEnumModule<T>::Payoff(int pl) const
-{
-  gIndexOdometer index(SF.NumSequences());
-  gNumber pay;
-
-  gPoly<T> equation(Space,Lex);
-  while (index.Turn()) {
-    pay=SF.Payoff(index.CurrentIndices(),pl);
-    if( pay !=(gNumber)0) {
-      gPoly<T> term(Space,(T)pay,Lex);
-      int k;
-      for(k=1;k<=EF.NumPlayers();k++) 
-	term*=Prob(k,(index.CurrentIndices())[k]);
-      equation+=term;
-    }
-  }
-  if(params.trace >1)
-    (*params.tracefile) << "\nPayoff( " << pl << "): " << equation;
-  return equation;
 }
 
 
