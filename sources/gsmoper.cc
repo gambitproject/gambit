@@ -1760,7 +1760,6 @@ void Init_gsmoper(GSM* gsm)
 
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_And },
-      { "Concat[x->TEXT, y->TEXT] =: TEXT", GSM_Concat_Text },
       { "Divide[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Divide },
       { "Equal[x->BOOLEAN*, y->BOOLEAN*] =: BOOLEAN", GSM_Equal_Boolean },
       { "Equal[x->NUMBER*, y->NUMBER*] =: BOOLEAN", GSM_Equal_Number },
@@ -1843,6 +1842,14 @@ void Init_gsmoper(GSM* gsm)
 
   for (int i = 0; ftable[i].sig != 0; i++)
     gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func));
+
+
+  FuncObj = new FuncDescObj("Concat", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Concat_Text, porTEXT, 2, 0,
+				       funcNONLISTABLE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("y", porTEXT));
+  gsm->AddFunction(FuncObj);
 
   //-------------------- Streams -------------------------
 
