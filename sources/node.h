@@ -16,11 +16,16 @@
 
 class Lexicon;
 
+template <class T> class BehavAssessment;
+
 class Node    {
   friend class FullEfg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
+  friend class BehavAssessment<double>;
+  friend class BehavAssessment<gRational>;
+  friend class BehavAssessment<gNumber>;
   friend class Lexicon;
   
   protected:

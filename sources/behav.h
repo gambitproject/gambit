@@ -29,6 +29,8 @@ class BehavSolution;
 //  the game payoffs or probabilities may change.  
 // 
 
+class FullEfg::Outcome;
+
 template <class T> class BehavProfile : public gDPVector<T>  {
   friend BehavSolution;
 public:
@@ -93,7 +95,7 @@ protected:
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
   void Payoff(Node *, T, int, T &) const;
-  T Payoff(const efgOutcome &, int pl) const;
+  T Payoff(FullEfg::Outcome *, int pl) const;
   
   void ComputeSolutionDataPass2(const Node *node);
   void ComputeSolutionDataPass1(const Node *node);

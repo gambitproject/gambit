@@ -15,6 +15,7 @@
 
 #include "efg.h"
 #include "efgutils.h"
+#include "fullefgoutcome.h"
 
 //========================================================================
 //             class efgOutcome: Generic outcome handle class
@@ -44,20 +45,6 @@ efgOutcomeFullEfg::efgOutcomeFullEfg(int p_outcomeID, FullEfg *p_efg)
 //------------------------------------------------------------------------
 //          class FullEfg::Outcome: Outcome representation
 //------------------------------------------------------------------------
-
-class FullEfg::Outcome   {
-friend class FullEfg;
-protected:
-  bool m_deleted; 
-  int m_number;
-  gText m_name;
-  gBlock<gNumber> payoffs;
-
-  Outcome(Efg *p_efg, int p_number)
-    : m_deleted(false), m_number(p_number), payoffs(p_efg->NumPlayers())
-    { }
-  ~Outcome()  { }
-};
 
 //----------------------------------------------------------------------
 //                 EFPlayer: Member function definitions
@@ -307,7 +294,7 @@ FullEfg::FullEfg(const FullEfg &E, Node *n /* = 0 */)
 
   for (int outc = 0; outc <= E.NumOutcomes(); outc++)  {
     (outcomes[outc] = new Outcome(this, outc))->m_name = E.outcomes[outc]->m_name;
-    outcomes[outc]->payoffs = E.outcomes[outc]->payoffs;
+    outcomes[outc]->m_payoffs = E.outcomes[outc]->m_payoffs;
   }
 
   root = new Node(this, 0);
@@ -549,7 +536,7 @@ void FullEfg::WriteEfgFile(gOutput &f, Node *n) const
 	EscapeQuotes(n->outcome->m_name) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->payoffs[pl];
+	f << n->outcome->m_payoffs[pl];
 	if (pl < NumPlayers())
 	  f << ", ";
 	else
@@ -572,7 +559,7 @@ void FullEfg::WriteEfgFile(gOutput &f, Node *n) const
 	EscapeQuotes(n->outcome->m_name) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->payoffs[pl];
+	f << n->outcome->m_payoffs[pl];
 	if (pl < NumPlayers())
 	  f << ", ";
 	else
@@ -594,7 +581,7 @@ void FullEfg::WriteEfgFile(gOutput &f, Node *n) const
 	EscapeQuotes(n->outcome->m_name) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->payoffs[pl];
+	f << n->outcome->m_payoffs[pl];
         if (pl < NumPlayers()) 
           f << ", ";
         else
@@ -650,7 +637,9 @@ EFPlayer *FullEfg::NewPlayer(void)
   players.Append(ret);
 
   for (int outc = 0; outc <= outcomes.Last();
-       outcomes[outc++]->payoffs.Append(0));
+       outcomes[outc++]->m_payoffs.Append(0));
+  for (int outc = 0; outc <= outcomes.Last();
+       outcomes[outc++]->m_doublePayoffs.Append(0));
   DeleteLexicon();
   return ret;
 }
@@ -752,7 +741,7 @@ void FullEfg::SetPayoff(const efgOutcome &p_outcome, int pl,
 
   m_revision++;
   m_dirty = true;
-  outcomes[GetOutcomeID(p_outcome)]->payoffs[pl] = value;
+  outcomes[GetOutcomeID(p_outcome)]->m_payoffs[pl] = value;
 }
 
 gNumber FullEfg::Payoff(const efgOutcome &p_outcome,
@@ -762,12 +751,12 @@ gNumber FullEfg::Payoff(const efgOutcome &p_outcome,
     return gNumber(0);
   }
 
-  return outcomes[GetOutcomeID(p_outcome)]->payoffs[p_player->number];
+  return outcomes[GetOutcomeID(p_outcome)]->m_payoffs[p_player->number];
 }
 
 gNumber FullEfg::Payoff(const Node *p_node, const EFPlayer *p_player) const
 {
-  return (p_node->outcome) ? p_node->outcome->payoffs[p_player->number] : gNumber(0);
+  return (p_node->outcome) ? p_node->outcome->m_payoffs[p_player->number] : gNumber(0);
 }
 
 gArray<gNumber> FullEfg::Payoff(const efgOutcome &p_outcome) const
@@ -778,7 +767,7 @@ gArray<gNumber> FullEfg::Payoff(const efgOutcome &p_outcome) const
     return ret;
   }
   else {
-    return outcomes[GetOutcomeID(p_outcome)]->payoffs;
+    return outcomes[GetOutcomeID(p_outcome)]->m_payoffs;
   }
 }
 
@@ -790,13 +779,13 @@ bool FullEfg::IsConstSum(void) const
   if (outcomes.Last() == 0)  return true;
 
   for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += outcomes[1]->payoffs[pl];
+    cvalue += outcomes[1]->m_payoffs[pl];
 
   for (index = 2; index <= outcomes.Last(); index++)  {
     gNumber thisvalue(0);
 
     for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += outcomes[index]->payoffs[pl];
+      thisvalue += outcomes[index]->m_payoffs[pl];
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -815,12 +804,12 @@ gNumber FullEfg::MinPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  minpay = outcomes[1]->payoffs[p1];
+  minpay = outcomes[1]->m_payoffs[p1];
 
   for (index = 1; index <= outcomes.Last(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p] < minpay)
-	minpay = outcomes[index]->payoffs[p];
+      if (outcomes[index]->m_payoffs[p] < minpay)
+	minpay = outcomes[index]->m_payoffs[p];
   }
   return minpay;
 }
@@ -835,12 +824,12 @@ gNumber FullEfg::MaxPayoff(int pl) const
   if(pl) { p1=p2=pl;}
   else {p1=1;p2=players.Length();}
 
-  maxpay = outcomes[1]->payoffs[p1];
+  maxpay = outcomes[1]->m_payoffs[p1];
 
   for (index = 1; index <= outcomes.Last(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->payoffs[p] > maxpay)
-	maxpay = outcomes[index]->payoffs[p];
+      if (outcomes[index]->m_payoffs[p] > maxpay)
+	maxpay = outcomes[index]->m_payoffs[p];
   }
   return maxpay;
 }
@@ -1719,7 +1708,7 @@ void FullEfg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
 {
   if (n->outcome)  {
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i];
+      payoff[i] += prob * n->outcome->m_payoffs[i];
   }
 
   if (n->infoset && n->infoset->player->IsChance())
@@ -1765,7 +1754,7 @@ void FullEfg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile
 {
   if (n->outcome)   {
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->payoffs[i];
+      payoff[i] += prob * n->outcome->m_payoffs[i];
   }
   
   if (n->infoset && n->infoset->player->IsChance())
@@ -1790,14 +1779,11 @@ void FullEfg::InitPayoffs(void) const
 {
   if (m_outcome_revision == RevisionNumber()) return;
 
-#ifdef UNUSED
-  // double_payoffs feature currently removed while Efg code restructured
-  for (int outc = 1; outc <= NumOutcomes(); outc++)
-    for (int pl = 1; pl <= NumPlayers(); pl++)
-      outcomes[outc]->double_payoffs[pl] = outcomes[outc]->payoffs[pl];
-#endif  // UNUSED
-
-  m_outcome_revision = RevisionNumber();
+  for (int outc = 1; outc <= NumOutcomes(); outc++) {
+    for (int pl = 1; pl <= NumPlayers(); pl++) {
+      outcomes[outc]->m_doublePayoffs[pl] = outcomes[outc]->m_payoffs[pl];
+    }
+  }
 }
 
 Nfg *FullEfg::AssociatedNfg(void) const
