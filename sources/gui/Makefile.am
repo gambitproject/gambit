@@ -72,8 +72,6 @@ gambit_SOURCES = \
 	efgsupport.h \
 	gambit.cc \
 	gambit.h \
-        gamedoc.cc \
-	gamedoc.h \
 	nfgconst.h \
 	nfgnavigate.cc \
 	nfgnavigate.h \

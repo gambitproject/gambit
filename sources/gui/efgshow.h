@@ -28,6 +28,7 @@
 #define EFGSHOW_H
 
 #include "wx/listctrl.h"
+#include "wx/sashwin.h"
 #include "wx/printdlg.h"
 #include "wx/notebook.h"
 
@@ -36,28 +37,47 @@
 #include "nash/behavsol.h"
 
 class EfgProfileList;
+class EfgNavigateWindow;
 class EfgOutcomeWindow;
+class EfgSupportWindow;
 class TreeWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame, public gbtGameView {
+class EfgShow : public wxFrame {
 private:
+  efgGame &m_efg;
   TreeWindow *m_treeWindow;
+  Node *m_cursor, *m_copyNode, *m_cutNode;
+
+  int m_currentProfile;
+  gList<BehavSolution> m_profiles;
+
+  EFSupport *m_currentSupport;
+  gList<EFSupport *> m_supports;
 
   EfgProfileList *m_profileTable;
+  wxString m_filename;
+  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
+  wxSashWindow *m_solutionSashWindow;
+
   wxNotebook *m_infoNotebook;
+  EfgNavigateWindow *m_navigateWindow;
   EfgOutcomeWindow *m_outcomeWindow;
+  EfgSupportWindow *m_supportWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
 
   void MakeMenus(void);
   void MakeToolbar(void);
+  void AdjustSizes(void);
   
   // Event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnFocus(wxFocusEvent &);
+  void OnSize(wxSizeEvent &);
+  void OnSashDrag(wxSashEvent &);
 
   // Menu event handlers
   void OnFileNew(wxCommandEvent &);
@@ -129,19 +149,50 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(gbtGameDocument *p_game, wxWindow *p_parent);
-  ~EfgShow();
+  EfgShow(efgGame &p_efg, wxWindow *p_parent);
+  virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
   void AddProfile(const BehavSolution &, bool map);
   void RemoveProfile(int);
   void RemoveProfiles(void);
   void ChangeProfile(int);
+  int CurrentProfile(void) const { return m_currentProfile; }
+  const BehavSolution &GetCurrentProfile(void) const;
+  const gList<BehavSolution> &Profiles(void) const { return m_profiles; }
   gText UniqueProfileName(void) const;
 
+  // SUPPORT ACCESS AND MANIPULATION
+  EFSupport *GetSupport(void);
+  const gList<EFSupport *> &Supports(void) const { return m_supports; }
+  void SetSupportNumber(int p_number);
+  gText UniqueSupportName(void) const;
+  void OnSupportsEdited(void);
+
+  gText GetRealizProb(const Node *) const;
+  gText GetBeliefProb(const Node *) const;
+  gText GetNodeValue(const Node *) const;
+  gText GetInfosetProb(const Node *) const;
+  gText GetInfosetValue(const Node *) const;
+  gText GetActionValue(const Node *, int act) const;
+  gText GetActionProb(const Node *, int act) const;
+  gNumber ActionProb(const Node *n, int br) const;
+
+  efgGame *Game(void) { return &m_efg; }
+
   void UpdateMenus(void);
+  int NumDecimals(void) const;
 
   void OnOutcomesEdited(void);
+  gText UniqueOutcomeName(void) const;
+
+  void SetFilename(const wxString &s);
+  const wxString &Filename(void) const { return m_filename; }
+
+  void SetCursor(Node *m_node);
+  Node *Cursor(void) const { return m_cursor; }
+  Node *CopyNode(void) const { return m_copyNode; }
+  Node *CutNode(void) const { return m_cutNode; }
 
   void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

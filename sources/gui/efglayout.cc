@@ -271,8 +271,8 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 //                class efgTreeLayout: Member functions
 //-----------------------------------------------------------------------
 
-efgTreeLayout::efgTreeLayout(gbtGameDocument *p_game, TreeWindow *p_parent)
-  : m_game(p_game), m_parent(p_parent), m_infosetSpacing(40),
+efgTreeLayout::efgTreeLayout(efgGame &p_efg, TreeWindow *p_parent)
+  : m_efg(p_efg), m_parent(p_parent), m_infosetSpacing(40),
     c_leftMargin(20), c_topMargin(40)
 { }
 
@@ -359,11 +359,11 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
   case NODE_ABOVE_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_ABOVE_REALIZPROB:
-    return (const char *) m_game->GetRealizProb(n);
+    return (const char *) m_parent->Parent()->GetRealizProb(n);
   case NODE_ABOVE_BELIEFPROB:
-    return (const char *) m_game->GetBeliefProb(n);
+    return (const char *) m_parent->Parent()->GetBeliefProb(n);
   case NODE_ABOVE_VALUE:
-    return (const char *) m_game->GetNodeValue(n);
+    return (const char *) m_parent->Parent()->GetNodeValue(n);
   default:
     return "";
   }
@@ -392,11 +392,11 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
   case NODE_BELOW_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_BELOW_REALIZPROB:
-    return (const char *) m_game->GetRealizProb(n);
+    return (const char *) m_parent->Parent()->GetRealizProb(n);
   case NODE_BELOW_BELIEFPROB:
-    return (const char *) m_game->GetBeliefProb(n);
+    return (const char *) m_parent->Parent()->GetBeliefProb(n);
   case NODE_BELOW_VALUE:
-    return (const char *) m_game->GetNodeValue(n);
+    return (const char *) m_parent->Parent()->GetNodeValue(n);
   default:
     return "";
   }
@@ -428,11 +428,11 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
   case BRANCH_ABOVE_LABEL:
     return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
   case BRANCH_ABOVE_PROBS:
-    return (const char *) m_game->GetActionProb(parent,
-						p_entry->GetChildNumber());
+    return (const char *) m_parent->Parent()->GetActionProb(parent,
+							    p_entry->GetChildNumber());
   case BRANCH_ABOVE_VALUE:
-    return (const char *) m_game->GetActionValue(parent,
-						 p_entry->GetChildNumber());
+    return (const char *) m_parent->Parent()->GetActionValue(parent,
+							     p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -448,11 +448,11 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
   case BRANCH_BELOW_LABEL:
     return (const char *) parent->GetInfoset()->GetActionName(p_entry->GetChildNumber());
   case BRANCH_BELOW_PROBS:
-    return (const char *) m_game->GetActionProb(parent,
-						p_entry->GetChildNumber());
+    return (const char *) m_parent->Parent()->GetActionProb(parent,
+							    p_entry->GetChildNumber());
   case BRANCH_BELOW_VALUE:
-    return (const char *) m_game->GetActionValue(parent,
-						 p_entry->GetChildNumber());
+    return (const char *) m_parent->Parent()->GetActionValue(parent,
+							     p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -715,7 +715,7 @@ void efgTreeLayout::UpdateTableParents(void)
 {
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
     NodeEntry *e = m_nodeList[pos];
-    e->SetParent((e->GetNode() == m_game->m_efg->RootNode()) ? 
+    e->SetParent((e->GetNode() == m_efg.RootNode()) ? 
 		 e : GetValidParent(e->GetNode()));
   }
 }
@@ -726,18 +726,18 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
   m_infosetSpacing = 
     (m_parent->DrawSettings().InfosetJoin() == INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.Length() != NumNodes(*m_game->m_efg)) {
+  if (m_nodeList.Length() != NumNodes(m_efg)) {
     // A rebuild is in order; force it
     BuildNodeList(p_support);
   }
 
   int miny = 0, maxy = 0, ycoord = c_topMargin;
-  LayoutSubtree(m_game->m_efg->RootNode(), p_support, maxy, miny, ycoord);
+  LayoutSubtree(m_efg.RootNode(), p_support, maxy, miny, ycoord);
 
   const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
   if (draw_settings.InfosetConnect() != INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
-    FillInfosetTable(m_game->m_efg->RootNode(), p_support);
+    FillInfosetTable(m_efg.RootNode(), p_support);
     UpdateTableInfosets();
   }
 
@@ -771,7 +771,7 @@ void efgTreeLayout::BuildNodeList(const EFSupport &p_support)
   }
 
   m_maxLevel = 0;
-  BuildNodeList(m_game->m_efg->RootNode(), p_support, 0);
+  BuildNodeList(m_efg.RootNode(), p_support, 0);
 }
 
 
@@ -791,8 +791,8 @@ void efgTreeLayout::GenerateLabels(void)
       entry->SetBranchAboveFont(settings.BranchAboveFont());
       entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
       entry->SetBranchBelowFont(settings.BranchBelowFont());
-      entry->SetActionProb(m_game->ActionProb(entry->GetNode()->GetParent(),
-					      entry->GetChildNumber()));
+      entry->SetActionProb(m_parent->Parent()->ActionProb(entry->GetNode()->GetParent(),
+							  entry->GetChildNumber()));
     }
   }
 }
@@ -899,7 +899,7 @@ void efgTreeLayout::Render(wxDC &p_dc) const
 void efgTreeLayout::SetCutNode(Node *p_node, bool p_cut)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_game->m_efg->IsPredecessor(p_node, m_nodeList[i]->GetNode())) {
+    if (m_efg.IsPredecessor(p_node, m_nodeList[i]->GetNode())) {
       m_nodeList[i]->SetCut(p_cut);
     }
   }

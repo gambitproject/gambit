@@ -123,9 +123,9 @@ END_EVENT_TABLE()
 //               NfgShow: Constructor and destructor
 //----------------------------------------------------------------------
 
-NfgShow::NfgShow(gbtGameDocument *p_game, wxWindow *p_parent)
+NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
-    gbtGameView(p_game),
+    m_nfg(p_nfg),
     m_table(0), m_profileTable(0),
     m_solutionSashWindow(0), m_infoSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
@@ -137,10 +137,10 @@ NfgShow::NfgShow(gbtGameDocument *p_game, wxWindow *p_parent)
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 
-  m_game->m_currentProfile = 0;
-  m_game->m_currentNfgSupport = new gbtNfgSupport(*m_game->m_nfg);    // base support
-  m_game->m_currentNfgSupport->SetName("Full Support");
-  m_game->m_nfgSupports.Append(m_game->m_currentNfgSupport);
+  m_currentProfile = 0;
+  m_currentSupport = new gbtNfgSupport(m_nfg);    // base support
+  m_currentSupport->SetName("Full Support");
+  m_supports.Append(m_currentSupport);
 
   MakeMenus();
 
@@ -161,7 +161,7 @@ NfgShow::NfgShow(gbtGameDocument *p_game, wxWindow *p_parent)
 					  wxSize(600, 100));
   m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
 
-  m_profileTable = new NfgProfileList(m_game, this, m_solutionSashWindow);
+  m_profileTable = new NfgProfileList(this, m_solutionSashWindow);
   m_profileTable->Show(false);
   m_solutionSashWindow->Show(false);
 
@@ -174,24 +174,24 @@ NfgShow::NfgShow(gbtGameDocument *p_game, wxWindow *p_parent)
   m_infoNotebook = new wxNotebook(m_infoSashWindow, idINFONOTEBOOK);
   m_infoNotebook->Show(true);
 
-  m_navigateWindow = new NfgNavigateWindow(m_game, this, m_infoNotebook);
+  m_navigateWindow = new NfgNavigateWindow(this, m_infoNotebook);
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
 
-  m_outcomeWindow = new NfgOutcomeWindow(m_game, this, m_infoNotebook);
+  m_outcomeWindow = new NfgOutcomeWindow(this, m_infoNotebook);
   m_outcomeWindow->UpdateValues();
   m_outcomeWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
-  m_supportWindow = new NfgSupportWindow(m_game, this, m_infoNotebook);
+  m_supportWindow = new NfgSupportWindow(this, m_infoNotebook);
   m_supportWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_supportWindow, "Supports");
   m_infoNotebook->SetSelection(0);
 
-  m_table = new NfgTable(*m_game->m_nfg, this);
+  m_table = new NfgTable(m_nfg, this);
   m_table->SetSize(0, 0, 200, 200);
 
-  m_game->m_nfg->SetIsDirty(false);
+  m_nfg.SetIsDirty(false);
   GetMenuBar()->Check(NFG_VIEW_OUTCOMES,
 		      !m_table->GetSettings().OutcomeValues());
   UpdateMenus();
@@ -203,7 +203,7 @@ NfgShow::NfgShow(gbtGameDocument *p_game, wxWindow *p_parent)
 
 NfgShow::~NfgShow()
 {
-  wxGetApp().RemoveGame(m_game->m_nfg);
+  wxGetApp().RemoveGame(&m_nfg);
 }
 
 //----------------------------------------------------------------------
@@ -215,14 +215,14 @@ void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
   if (p_profile.GetName() == "") {
     MixedSolution tmp(p_profile);
     tmp.SetName(UniqueProfileName());
-    m_game->m_mixedProfiles.Append(tmp);
+    m_profiles.Append(tmp);
   }
   else {
-    m_game->m_mixedProfiles.Append(p_profile);
+    m_profiles.Append(p_profile);
   }
 
-  if (m_game->m_nfg->AssociatedEfg() && p_map) {
-    wxLogWarning("Profile not mapped.");
+  if (m_nfg.AssociatedEfg() && p_map) {
+    wxGetApp().GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(*p_profile.Profile()), false);
   }
   m_profileTable->UpdateValues();
   UpdateMenus();
@@ -230,15 +230,15 @@ void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
 
 void NfgShow::RemoveProfile(int p_profile)
 {
-  m_game->m_mixedProfiles.Remove(p_profile);
-  if (m_game->m_currentProfile == p_profile) {
-    m_game->m_currentProfile = (m_game->m_mixedProfiles.Length() > 0) ? 1 : 0;
+  m_profiles.Remove(p_profile);
+  if (m_currentProfile == p_profile) {
+    m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
   }
-  else if (m_game->m_currentProfile > p_profile) {
-    m_game->m_currentProfile--;
+  else if (m_currentProfile > p_profile) {
+    m_currentProfile--;
   }
-  if (m_game->m_currentProfile > 0) {
-    m_table->SetProfile(m_game->m_mixedProfiles[m_game->m_currentProfile]);
+  if (m_currentProfile > 0) {
+    m_table->SetProfile(m_profiles[m_currentProfile]);
   }
   else {
     m_table->ClearProfile();
@@ -255,10 +255,10 @@ void NfgShow::RemoveProfile(int p_profile)
 
 void NfgShow::ChangeProfile(int sol)
 {
-  m_game->m_currentProfile = sol;
+  m_currentProfile = sol;
 
   if (sol > 0) {
-    m_table->SetProfile(m_game->m_mixedProfiles[m_game->m_currentProfile]);
+    m_table->SetProfile(m_profiles[m_currentProfile]);
   }
   else if (sol == 0)  {
     if (m_table->ShowProbs()) {
@@ -279,22 +279,22 @@ void NfgShow::ChangeProfile(int sol)
 
 void NfgShow::OnProfileSelected(wxListEvent &p_event)
 {
-  m_game->m_currentProfile = p_event.GetIndex() + 1;
-  m_table->SetProfile(m_game->m_mixedProfiles[m_game->m_currentProfile]);
+  m_currentProfile = p_event.GetIndex() + 1;
+  m_table->SetProfile(m_profiles[m_currentProfile]);
 }
  
 gText NfgShow::UniqueProfileName(void) const
 {
-  int number = m_game->m_mixedProfiles.Length() + 1;
+  int number = m_profiles.Length() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= m_game->m_mixedProfiles.Length(); i++) {
-      if (m_game->m_mixedProfiles[i].GetName() == "Profile" + ToText(number)) {
+    for (i = 1; i <= m_profiles.Length(); i++) {
+      if (m_profiles[i].GetName() == "Profile" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > m_game->m_mixedProfiles.Length()) {
+    if (i > m_profiles.Length()) {
       return "Profile" + ToText(number);
     }
     
@@ -342,8 +342,8 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
 
 void NfgShow::OnOutcomesEdited(void)
 {
-  for (int i = 1; i <= m_game->m_mixedProfiles.Length(); i++) {
-    m_game->m_mixedProfiles[i].Invalidate();
+  for (int i = 1; i <= m_profiles.Length(); i++) {
+    m_profiles[i].Invalidate();
   }
   m_table->RefreshTable();
   m_profileTable->UpdateValues();
@@ -351,16 +351,16 @@ void NfgShow::OnOutcomesEdited(void)
 
 gText NfgShow::UniqueOutcomeName(void) const
 {
-  int number = m_game->m_nfg->NumOutcomes() + 1;
+  int number = m_nfg.NumOutcomes() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= m_game->m_nfg->NumOutcomes(); i++) {
-      if (m_game->m_nfg->GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
+    for (i = 1; i <= m_nfg.NumOutcomes(); i++) {
+      if (m_nfg.GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > m_game->m_nfg->NumOutcomes()) {
+    if (i > m_nfg.NumOutcomes()) {
       return "Outcome" + ToText(number);
     }
     
@@ -516,9 +516,9 @@ void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetContingency());
-  menu->Enable(NFG_FILE_EXPORT_COMLAB, m_game->m_nfg->NumPlayers() == 2);
-  menu->Enable(NFG_VIEW_PROBABILITIES, m_game->m_mixedProfiles.Length() > 0);
-  menu->Enable(NFG_VIEW_VALUES, m_game->m_mixedProfiles.Length() > 0);
+  menu->Enable(NFG_FILE_EXPORT_COMLAB, m_nfg.NumPlayers() == 2);
+  menu->Enable(NFG_VIEW_PROBABILITIES, m_profiles.Length() > 0);
+  menu->Enable(NFG_VIEW_VALUES, m_profiles.Length() > 0);
   menu->Check(NFG_VIEW_OUTCOME_LABELS, 
 	      !m_table->GetSettings().OutcomeValues());
 }
@@ -557,9 +557,9 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   Nfg *nfg = 0;
   try {
     gFileOutput file(m_filename.c_str());
-    nfg = CompressNfg(*m_game->m_nfg, *m_game->m_currentNfgSupport);
+    nfg = CompressNfg(m_nfg, *m_currentSupport);
     nfg->WriteNfgFile(file, 6);
-    m_game->m_nfg->SetIsDirty(false);
+    m_nfg.SetIsDirty(false);
     delete nfg;
   }
   catch (gFileOutput::OpenFailed &) {
@@ -594,7 +594,7 @@ void NfgShow::OnFileExportComLab(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       gFileOutput file(dialog.GetPath().c_str());
-      WriteComLabSfg(file, m_game->m_nfg);
+      WriteComLabSfg(file, &m_nfg);
     }
     catch (gFileOutput::OpenFailed &) { 
       wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -625,7 +625,7 @@ void NfgShow::OnFileExportHTML(wxCommandEvent &)
   
   try {
     gFileOutput file(dialog.GetPath().c_str());
-    file << gbtBuildHtml(*m_game->m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer()).c_str() << '\n';
+    file << gbtBuildHtml(m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer()).c_str() << '\n';
   }
   catch (gFileOutput::OpenFailed &) { 
     wxMessageBox(wxString::Format("Could not open %s for writing.",
@@ -656,14 +656,14 @@ void NfgShow::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new NfgPrintout(*m_game->m_nfg, 
+    new wxPrintPreview(new NfgPrintout(m_nfg, 
 				       m_table->GetRowPlayer(), 
 				       m_table->GetColPlayer(),
-				       (char *) m_game->m_nfg->GetTitle()),
-		       new NfgPrintout(*m_game->m_nfg,
+				       (char *) m_nfg.GetTitle()),
+		       new NfgPrintout(m_nfg,
 				       m_table->GetRowPlayer(),
 				       m_table->GetColPlayer(),
-				       (char *) m_game->m_nfg->GetTitle()),
+				       (char *) m_nfg.GetTitle()),
 		       &data);
 
   if (!preview->Ok()) {
@@ -683,8 +683,8 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  NfgPrintout printout(*m_game->m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer(),
-		       (char *) m_game->m_nfg->GetTitle());
+  NfgPrintout printout(m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer(),
+		       (char *) m_nfg.GetTitle());
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -716,11 +716,11 @@ void NfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 
 void NfgShow::OnEditStrategies(wxCommandEvent &)
 {
-  dialogStrategies dialog(this, *m_game->m_nfg);
+  dialogStrategies dialog(this, m_nfg);
 
   if (dialog.ShowModal() == wxID_OK) {
-    for (int pl = 1; pl <= m_game->m_nfg->NumPlayers(); pl++) {
-      gbtNfgPlayer player = m_game->m_nfg->GetPlayer(pl);
+    for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+      gbtNfgPlayer player = m_nfg.GetPlayer(pl);
       for (int st = 1; st <= player.NumStrategies(); st++) {
 	player.GetStrategy(st).SetLabel(dialog.GetStrategyName(pl, st));
       }
@@ -731,15 +731,15 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
 
 void NfgShow::OnEditContingency(wxCommandEvent &)
 {
-  dialogEditContingency dialog(this, *m_game->m_nfg, GetContingency());
+  dialogEditContingency dialog(this, m_nfg, GetContingency());
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.GetOutcome() == 0) { 
-      m_game->m_nfg->SetOutcome(GetContingency(), 0);
+      m_nfg.SetOutcome(GetContingency(), 0);
     }
     else {
-      m_game->m_nfg->SetOutcome(GetContingency(),
-		       m_game->m_nfg->GetOutcomeId(dialog.GetOutcome()));
+      m_nfg.SetOutcome(GetContingency(),
+		       m_nfg.GetOutcomeId(dialog.GetOutcome()));
     }
     m_table->RefreshTable();
   }
@@ -747,13 +747,13 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
 
 void NfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogNfgProperties dialog(this, *m_game->m_nfg, m_filename);
+  dialogNfgProperties dialog(this, m_nfg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
-    m_game->m_nfg->SetTitle(dialog.GetGameTitle().c_str());
+    m_nfg.SetTitle(dialog.GetGameTitle().c_str());
     SetFilename(Filename());
-    m_game->m_nfg->SetComment(dialog.GetComment().c_str());
+    m_nfg.SetComment(dialog.GetComment().c_str());
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-      m_game->m_nfg->GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
+      m_nfg.GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
     }
     m_navigateWindow->UpdateLabels();
     m_outcomeWindow->UpdateValues();
@@ -914,14 +914,14 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
 
 void NfgShow::OnToolsDominance(wxCommandEvent &)
 {
-  gArray<gText> playerNames(m_game->m_nfg->NumPlayers());
+  gArray<gText> playerNames(m_nfg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_game->m_nfg->GetPlayer(pl).GetLabel();
+    playerNames[pl] = m_nfg.GetPlayer(pl).GetLabel();
   }
   dialogElimMixed dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtNfgSupport support(*m_game->m_currentNfgSupport);
+    gbtNfgSupport support(*m_currentSupport);
     wxStatus status(this, "Dominance Elimination");
 
     try {
@@ -946,7 +946,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 	}
 	else {
 	  newSupport.SetName(UniqueSupportName());
-	  m_game->m_nfgSupports.Append(new gbtNfgSupport(newSupport));
+	  m_supports.Append(new gbtNfgSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -958,8 +958,8 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
     }
     catch (gSignalBreak &) { }
 
-    if (*m_game->m_currentNfgSupport != support) {
-      m_game->m_currentNfgSupport = m_game->m_nfgSupports[m_game->m_nfgSupports.Length()];
+    if (*m_currentSupport != support) {
+      m_currentSupport = m_supports[m_supports.Length()];
       if (!m_table->ShowDominance()) {
 	m_table->ToggleDominance();
 	GetMenuBar()->Check(NFG_VIEW_DOMINANCE, true);
@@ -972,7 +972,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 
 void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 { 
-  dialogNfgNash dialog(this, *m_game->m_currentNfgSupport);
+  dialogNfgNash dialog(this, *m_currentSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
     gbtNfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
@@ -984,12 +984,12 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
     try {
       wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
       gList<MixedSolution> solutions;
-      solutions = algorithm->Solve(*m_game->m_currentNfgSupport, status);
+      solutions = algorithm->Solve(*m_currentSupport, status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
 	AddProfile(solutions[soln], true);
       }
-      ChangeProfile(m_game->m_mixedProfiles.Length());
+      ChangeProfile(m_profiles.Length());
    
       if (solutions.Length() > 0 && !m_table->ShowProbs()) {
 	m_table->ToggleProbs();
@@ -1012,7 +1012,7 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 
 void NfgShow::OnToolsQre(wxCommandEvent &)
 {
-  dialogNfgQre dialog(this, *m_game->m_currentNfgSupport);
+  dialogNfgQre dialog(this, *m_currentSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
     gList<MixedSolution> solutions;
@@ -1032,7 +1032,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 
 	wxStatus status(this, "QreGridSolve Progress");
 	gNullOutput gnull;
-	algorithm.Solve(*m_game->m_currentNfgSupport, gnull, status, solutions);
+	algorithm.Solve(*m_currentSupport, gnull, status, solutions);
       }
       else {
 	gbtNfgNashLogit algorithm;
@@ -1040,7 +1040,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 	algorithm.SetMaxLambda(10000000);
 
 	wxStatus status(this, "QreSolve Progress");
-	solutions = algorithm.Solve(*m_game->m_currentNfgSupport, status);
+	solutions = algorithm.Solve(*m_currentSupport, status);
       }
     }
     catch (gSignalBreak &) { }
@@ -1075,17 +1075,17 @@ void NfgShow::OnHelpAbout(wxCommandEvent &)
 
 void NfgShow::OnSupportDuplicate(wxCommandEvent &)
 {
-  gbtNfgSupport *newSupport = new gbtNfgSupport(*m_game->m_currentNfgSupport);
+  gbtNfgSupport *newSupport = new gbtNfgSupport(*m_currentSupport);
   newSupport->SetName(UniqueSupportName());
-  m_game->m_nfgSupports.Append(newSupport);
-  m_game->m_currentNfgSupport = newSupport;
+  m_supports.Append(newSupport);
+  m_currentSupport = newSupport;
   OnSupportsEdited();
 }
 
 void NfgShow::OnSupportDelete(wxCommandEvent &)
 {
-  delete m_game->m_nfgSupports.Remove(m_game->m_nfgSupports.Find(m_game->m_currentNfgSupport));
-  m_game->m_currentNfgSupport = m_game->m_nfgSupports[1];
+  delete m_supports.Remove(m_supports.Find(m_currentSupport));
+  m_currentSupport = m_supports[1];
   OnSupportsEdited();
 }
 
@@ -1095,47 +1095,47 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = MixedProfile<gNumber>(gbtNfgSupport(*m_game->m_nfg));
+  MixedSolution profile = MixedProfile<gNumber>(gbtNfgSupport(m_nfg));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_game->m_mixedProfiles.Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
   }
 }
 
 void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  MixedSolution profile(m_game->m_mixedProfiles[m_game->m_currentProfile]);
+  MixedSolution profile(m_profiles[m_currentProfile]);
   
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_game->m_mixedProfiles.Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
   }
 }
 
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_game->m_mixedProfiles.Remove(m_game->m_currentProfile);
-  if (m_game->m_nfg->AssociatedEfg()) {
-    wxLogWarning("Profile not removed from other window");
+  m_profiles.Remove(m_currentProfile);
+  if (m_nfg.AssociatedEfg()) {
+    wxGetApp().GetWindow(m_nfg.AssociatedEfg())->RemoveProfile(m_currentProfile);
   }
-  m_game->m_currentProfile = (m_game->m_mixedProfiles.Length() > 0) ? 1 : 0;
-  ChangeProfile(m_game->m_currentProfile);
+  m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
+  ChangeProfile(m_currentProfile);
   UpdateMenus();
 }
 
 void NfgShow::OnProfilesProperties(wxCommandEvent &)
 {
-  if (m_game->m_currentProfile > 0) {
-    dialogEditMixed dialog(this, m_game->m_mixedProfiles[m_game->m_currentProfile]);
+  if (m_currentProfile > 0) {
+    dialogEditMixed dialog(this, m_profiles[m_currentProfile]);
 
     if (dialog.ShowModal() == wxID_OK) {
-      m_game->m_mixedProfiles[m_game->m_currentProfile] = dialog.GetProfile();
-      ChangeProfile(m_game->m_currentProfile);
+      m_profiles[m_currentProfile] = dialog.GetProfile();
+      ChangeProfile(m_currentProfile);
     }
   }
 }
@@ -1248,16 +1248,16 @@ void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 
 gText NfgShow::UniqueSupportName(void) const
 {
-  int number = m_game->m_nfgSupports.Length() + 1;
+  int number = m_supports.Length() + 1;
   while (1) {
     int i;
-    for (i = 1; i <= m_game->m_nfgSupports.Length(); i++) {
-      if (m_game->m_nfgSupports[i]->GetName() == "Support" + ToText(number)) {
+    for (i = 1; i <= m_supports.Length(); i++) {
+      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
 	break;
       }
     }
 
-    if (i > m_game->m_nfgSupports.Length())
+    if (i > m_supports.Length())
       return "Support" + ToText(number);
     
     number++;
@@ -1269,26 +1269,26 @@ void NfgShow::SetFilename(const wxString &p_name)
   m_filename = p_name;
   if (m_filename != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", m_filename.c_str(), 
-			      (char *) m_game->m_nfg->GetTitle()));
+			      (char *) m_nfg.GetTitle()));
   }
   else {
-    SetTitle(wxString::Format("Gambit - %s", (char *) m_game->m_nfg->GetTitle()));
+    SetTitle(wxString::Format("Gambit - %s", (char *) m_nfg.GetTitle()));
   }
   wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 void NfgShow::SetSupportNumber(int p_number)
 {
-  if (p_number >= 1 && p_number <= m_game->m_nfgSupports.Length()) {
-    m_game->m_currentNfgSupport = m_game->m_nfgSupports[p_number];
+  if (p_number >= 1 && p_number <= m_supports.Length()) {
+    m_currentSupport = m_supports[p_number];
     OnSupportsEdited();
   }
 }
 
 void NfgShow::OnSupportsEdited(void)
 {
-  m_navigateWindow->SetSupport(*m_game->m_currentNfgSupport);
-  m_table->SetSupport(*m_game->m_currentNfgSupport);
+  m_navigateWindow->SetSupport(*m_currentSupport);
+  m_table->SetSupport(*m_currentSupport);
   m_supportWindow->UpdateValues();
 }
 

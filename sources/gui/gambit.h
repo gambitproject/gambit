@@ -15,21 +15,24 @@
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
 #include "wx/listctrl.h"
-#include "gamedoc.h"      // for gbtGameDocument
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
+class efgGame;
 class EfgShow;
+class Nfg;
 class NfgShow;
+
+class Game;
 
 class GambitApp : public wxApp {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory;
 
-  gBlock<gbtGameDocument *> m_gameList;
+  gBlock<Game *> m_gameList;
 
   bool OnInit(void);
 
@@ -41,12 +44,15 @@ public:
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 
   void AddGame(efgGame *, EfgShow *);
-  void AddGame(Nfg *);
-  void AddGame(efgGame *, Nfg *);
+  void AddGame(Nfg *, NfgShow *);
+  void AddGame(efgGame *, Nfg *, NfgShow *);
   void RemoveGame(efgGame *);
   void RemoveGame(Nfg *);
   void SetFilename(EfgShow *, const wxString &);
   void SetFilename(NfgShow *, const wxString &);
+
+  EfgShow *GetWindow(const efgGame *);
+  NfgShow *GetWindow(const Nfg *);
 
   void LoadFile(const wxString &);
 

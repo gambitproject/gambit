@@ -59,15 +59,13 @@ END_EVENT_TABLE()
 //                  TreeWindow: Constructor and destructor
 //----------------------------------------------------------------------
 
-TreeWindow::TreeWindow(gbtGameDocument *p_game,
-		       EfgShow *p_efgShow, wxWindow *p_parent)
-  : wxScrolledWindow(p_parent, -1, wxDefaultPosition, wxSize(300, 300)),
-    gbtGameView(p_game),
-    m_parent(p_efgShow), m_layout(p_game, this),
+TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
+  : wxScrolledWindow(p_parent),
+    m_efg(*p_efgShow->Game()), m_parent(p_efgShow), m_layout(m_efg, this),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   // Make sure that Chance player has a name
-  m_game->m_efg->GetChance()->SetName("Chance");
+  m_efg.GetChance()->SetName("Chance");
 
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
@@ -85,26 +83,26 @@ void TreeWindow::MakeMenus(void)
   m_nodeMenu->Append(wxID_PASTE, "Paste subtree",
 		     "Paste subtree from clipboard");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_EFG_EDIT_INSERT, "Insert move", "Insert a move");
-  m_nodeMenu->Append(GBT_EFG_EDIT_REVEAL, "Reveal move",
+  m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
+  m_nodeMenu->Append(efgmenuEDIT_REVEAL, "Reveal move",
 		     "Reveal this move");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_EFG_EDIT_TOGGLE_SUBGAME, "Mark subgame",
+  m_nodeMenu->Append(efgmenuEDIT_TOGGLE_SUBGAME, "Mark subgame",
 		     "Mark or unmark this subgame");
-  m_nodeMenu->Append(GBT_EFG_EDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
+  m_nodeMenu->Append(efgmenuEDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
 		     "Mark all subgames in this tree");
-  m_nodeMenu->Append(GBT_EFG_EDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
+  m_nodeMenu->Append(efgmenuEDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
 		     "Unmark all subgames in this tree");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_EFG_EDIT_NODE, "Edit node",
+  m_nodeMenu->Append(efgmenuEDIT_NODE, "Edit node",
 		     "View and change node properties");
-  m_nodeMenu->Append(GBT_EFG_EDIT_MOVE, "Edit move",
+  m_nodeMenu->Append(efgmenuEDIT_MOVE, "Edit move",
 		     "View and change move properties");
-  m_nodeMenu->Append(GBT_EFG_EDIT_GAME, "Edit game",
+  m_nodeMenu->Append(efgmenuEDIT_GAME, "Edit game",
 		     "View and change game properties");
 
   m_gameMenu = new wxMenu;
-  m_gameMenu->Append(GBT_EFG_EDIT_GAME, "Edit game",
+  m_gameMenu->Append(efgmenuEDIT_GAME, "Edit game",
 		     "View and change game properties");
 }
 
@@ -151,37 +149,37 @@ static Node *NextSameIset(const Node *n)
 //
 void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 {
-  if (m_game->Cursor() && !p_event.ShiftDown()) {
+  if (m_parent->Cursor() && !p_event.ShiftDown()) {
     bool c = false;   // set to true if cursor position has changed
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
-      if (m_game->Cursor()->GetParent()) {
-	m_game->SelectNode(m_layout.GetValidParent(m_game->Cursor())->GetNode());
+      if (m_parent->Cursor()->GetParent()) {
+	m_parent->SetCursor(m_layout.GetValidParent(m_parent->Cursor())->GetNode());
 	c = true;
       }
       break;
     case WXK_RIGHT:
-      if (m_layout.GetValidChild(m_game->Cursor())) {
-	m_game->SelectNode(m_layout.GetValidChild(m_game->Cursor())->GetNode());
+      if (m_layout.GetValidChild(m_parent->Cursor())) {
+	m_parent->SetCursor(m_layout.GetValidChild(m_parent->Cursor())->GetNode());
 	c = true;
       }
       break;
     case WXK_UP: {
       Node *prior = ((!p_event.ControlDown()) ? 
-		     m_layout.PriorSameLevel(m_game->Cursor()) :
-		     PriorSameIset(m_game->Cursor()));
+		     m_layout.PriorSameLevel(m_parent->Cursor()) :
+		     PriorSameIset(m_parent->Cursor()));
       if (prior) {
-	m_game->SelectNode(prior);
+	m_parent->SetCursor(prior);
 	c = true;
       }
       break;
     }
     case WXK_DOWN: {
       Node *next = ((!p_event.ControlDown()) ?
-		    m_layout.NextSameLevel(m_game->Cursor()) :
-		    NextSameIset(m_game->Cursor()));
+		    m_layout.NextSameLevel(m_parent->Cursor()) :
+		    NextSameIset(m_parent->Cursor()));
       if (next) {
-	m_game->SelectNode(next);
+	m_parent->SetCursor(next);
 	c = true;
       }
       break;
@@ -207,14 +205,14 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 
 void TreeWindow::RefreshTree(void)
 {
-  m_layout.BuildNodeList(*m_game->GetEfgSupport());
-  m_layout.Layout(*m_game->GetEfgSupport());
+  m_layout.BuildNodeList(*m_parent->GetSupport());
+  m_layout.Layout(*m_parent->GetSupport());
   AdjustScrollbarSteps();
 }
 
 void TreeWindow::RefreshLayout(void)
 {
-  m_layout.Layout(*m_game->GetEfgSupport());
+  m_layout.Layout(*m_parent->GetSupport());
   AdjustScrollbarSteps();
 }
 
@@ -269,9 +267,9 @@ void TreeWindow::SetZoom(double p_zoom)
 
 void TreeWindow::OnDraw(wxDC &dc)
 {
-  if (m_game->Cursor()) {
-    if (!m_layout.GetNodeEntry(m_game->Cursor())) {
-      m_game->SelectNode(m_game->m_efg->RootNode());
+  if (m_parent->Cursor()) {
+    if (!m_layout.GetNodeEntry(m_parent->Cursor())) {
+      m_parent->SetCursor(m_efg.RootNode());
     }
     
     UpdateCursor();
@@ -293,18 +291,13 @@ void TreeWindow::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void TreeWindow::OnUpdate(gbtGameView *)
-{
-  RefreshTree();
-}
-
 void TreeWindow::EnsureCursorVisible(void)
 {
-  if (!m_game->Cursor()) {
+  if (!m_parent->Cursor()) {
     return;
   }
 
-  NodeEntry *entry = m_layout.GetNodeEntry(m_game->Cursor()); 
+  NodeEntry *entry = m_layout.GetNodeEntry(m_parent->Cursor()); 
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
   int width, height;
@@ -352,11 +345,11 @@ void TreeWindow::EnsureCursorVisible(void)
 
 void TreeWindow::ProcessCursor(void)
 {
-  if (m_game->Cursor()) {
-    NodeEntry *entry = m_layout.GetNodeEntry(m_game->Cursor()); 
+  if (m_parent->Cursor()) {
+    NodeEntry *entry = m_layout.GetNodeEntry(m_parent->Cursor()); 
     if (!entry) {
-      m_game->SelectNode(m_game->m_efg->RootNode());
-      entry = m_layout.GetNodeEntry(m_game->Cursor());
+      m_parent->SetCursor(m_efg.RootNode());
+      entry = m_layout.GetNodeEntry(m_parent->Cursor());
     }
     
     UpdateCursor();
@@ -367,7 +360,7 @@ void TreeWindow::ProcessCursor(void)
 
 void TreeWindow::UpdateCursor(void)
 {
-  NodeEntry *entry = m_layout.GetNodeEntry(m_game->Cursor());
+  NodeEntry *entry = m_layout.GetNodeEntry(m_parent->Cursor());
 
   if (entry) {
     entry->SetCursor(true);
@@ -416,7 +409,7 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 
       Node *node = m_layout.NodeHitTest(x, y);
     
-      if (node && m_game->m_efg->NumChildren(node) > 0) {
+      if (node && m_efg.NumChildren(node) > 0) {
 	m_dragSource = node;
 	if (p_event.ControlDown()) {
 	  m_dragImage = new wxDragImage("Copy subtree",
@@ -454,11 +447,11 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
     if (node && node->NumChildren() == 0) {
       try {
 	if (m_dragMode == dragCOPY) {
-	  m_game->m_efg->CopyTree(m_dragSource, node);
+	  m_efg.CopyTree(m_dragSource, node);
 	  m_parent->OnTreeChanged(true, false);
 	}
 	else if (m_dragMode == dragMOVE) {
-	  m_game->m_efg->MoveTree(m_dragSource, node);
+	  m_efg.MoveTree(m_dragSource, node);
 	  m_parent->OnTreeChanged(true, false);
 	  RefreshTree();
 	}
@@ -488,7 +481,7 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
   y = (int) ((float) y / m_zoom);
 
   Node *node = m_layout.NodeHitTest(x, y);
-  m_game->SelectNode(node);
+  m_parent->SetCursor(node);
   Refresh();
   ProcessCursor();
 }
@@ -506,7 +499,7 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
-    m_game->SelectNode(node);
+    m_parent->SetCursor(node);
     Refresh();
     wxCommandEvent event;
     m_parent->OnEditNode(event);
@@ -530,13 +523,13 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
-    m_game->SelectNode(node);
+    m_parent->SetCursor(node);
     Refresh();
     PopupMenu(m_nodeMenu, p_event.GetX(), p_event.GetY());
   }
   else {
     // If right-click doesn't hit anything, display generic game menu
-    m_game->SelectNode(0);
+    m_parent->SetCursor(0);
     Refresh();
     PopupMenu(m_gameMenu, p_event.GetX(), p_event.GetY());
   }
@@ -544,8 +537,8 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 
 void TreeWindow::SupportChanged(void)
 {
-  if (!m_layout.GetNodeEntry(m_game->Cursor())) {
-    m_game->SelectNode(0);
+  if (!m_layout.GetNodeEntry(m_parent->Cursor())) {
+    m_parent->SetCursor(0);
   }
   RefreshTree();
   Refresh();
@@ -553,36 +546,36 @@ void TreeWindow::SupportChanged(void)
 
 void TreeWindow::SetCursorPosition(Node *p_cursor)
 {
-  if (m_game->Cursor()) {
-    m_layout.GetNodeEntry(m_game->Cursor())->SetCursor(false);
-    m_layout.GetNodeEntry(m_game->Cursor())->SetSelected(false);
+  if (m_parent->Cursor()) {
+    m_layout.GetNodeEntry(m_parent->Cursor())->SetCursor(false);
+    m_layout.GetNodeEntry(m_parent->Cursor())->SetSelected(false);
   }
 }
 
 void TreeWindow::UpdateMenus(void)
 {
-  Node *cursor = m_game->Cursor();
+  Node *cursor = m_parent->Cursor();
 
   m_nodeMenu->Enable(wxID_COPY, (cursor) ? true : false);
   m_nodeMenu->Enable(wxID_CUT, (cursor) ? true : false);
-  m_nodeMenu->Enable(wxID_PASTE, (m_game->CopyNode() || 
-				  m_game->CutNode()) ? true : false);
-  m_nodeMenu->Enable(GBT_EFG_EDIT_INSERT, (cursor) ? true : false);
-  m_nodeMenu->Enable(GBT_EFG_EDIT_REVEAL,
+  m_nodeMenu->Enable(wxID_PASTE, (m_parent->CopyNode() || 
+				  m_parent->CutNode()) ? true : false);
+  m_nodeMenu->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
+  m_nodeMenu->Enable(efgmenuEDIT_REVEAL,
 		     (cursor && cursor->GetInfoset()));
-  m_nodeMenu->Enable(GBT_EFG_EDIT_MOVE, 
+  m_nodeMenu->Enable(efgmenuEDIT_MOVE, 
 		     (cursor && cursor->GetInfoset()));
 
-  m_nodeMenu->Enable(GBT_EFG_EDIT_TOGGLE_SUBGAME,
-		     (cursor && m_game->m_efg->IsLegalSubgame(cursor) &&
+  m_nodeMenu->Enable(efgmenuEDIT_TOGGLE_SUBGAME,
+		     (cursor && m_efg.IsLegalSubgame(cursor) &&
 		      cursor->GetParent()));
-  m_nodeMenu->Enable(GBT_EFG_EDIT_MARK_SUBGAME_TREE,
-		     (cursor && m_game->m_efg->IsLegalSubgame(cursor)));
-  m_nodeMenu->Enable(GBT_EFG_EDIT_UNMARK_SUBGAME_TREE,
-		     (cursor && m_game->m_efg->IsLegalSubgame(cursor)));
-  m_nodeMenu->SetLabel(GBT_EFG_EDIT_TOGGLE_SUBGAME,
+  m_nodeMenu->Enable(efgmenuEDIT_MARK_SUBGAME_TREE,
+		     (cursor && m_efg.IsLegalSubgame(cursor)));
+  m_nodeMenu->Enable(efgmenuEDIT_UNMARK_SUBGAME_TREE,
+		     (cursor && m_efg.IsLegalSubgame(cursor)));
+  m_nodeMenu->SetLabel(efgmenuEDIT_TOGGLE_SUBGAME,
 		       (cursor && cursor->GetParent() &&
-			m_game->m_efg->IsLegalSubgame(cursor) &&
+			m_efg.IsLegalSubgame(cursor) &&
 			cursor->GetSubgameRoot() == cursor) ?
 		       "Unmark subgame" : "Mark subgame");
 }
@@ -594,7 +587,7 @@ void TreeWindow::UpdateMenus(void)
 void TreeWindow::OnSize(wxSizeEvent &p_event)
 {
   if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
-    m_layout.Layout(*m_game->GetEfgSupport());
+    m_layout.Layout(*m_parent->GetSupport());
   }
 
   // This extra check because wxMSW seems to generate OnSize events

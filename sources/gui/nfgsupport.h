@@ -31,7 +31,7 @@
 #include "nfgshow.h"
 #include "base/gmap.h"
 
-class NfgSupportWindow : public wxPanel, public gbtGameView {
+class NfgSupportWindow : public wxPanel {
 private:
   NfgShow *m_parent;
   wxChoice *m_supportList;
@@ -46,8 +46,7 @@ private:
   void OnTreeItemCollapse(wxTreeEvent &);
 
 public:
-  NfgSupportWindow(gbtGameDocument *p_game,
-		   NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgSupportWindow(NfgShow *p_nfgShow, wxWindow *p_parent);
   virtual ~NfgSupportWindow() { }
 
   void UpdateValues(void);

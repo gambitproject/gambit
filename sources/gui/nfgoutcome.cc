@@ -47,10 +47,8 @@ BEGIN_EVENT_TABLE(NfgOutcomeWindow, wxGrid)
   EVT_MENU(idPOPUP_DETACH, NfgOutcomeWindow::OnPopupOutcomeDetach)
 END_EVENT_TABLE()
 
-NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_game,
-				   NfgShow *p_nfgShow, wxWindow *p_parent)
+NfgOutcomeWindow::NfgOutcomeWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_game),
     m_parent(p_nfgShow)
 {
   CreateGrid(p_nfgShow->Game().NumOutcomes(),

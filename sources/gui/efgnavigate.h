@@ -28,17 +28,20 @@
 #define EFGNAVIGATE_H
 
 #include "wx/grid.h"
-#include "gamedoc.h"
+#include "efgshow.h"
 
-class EfgNavigateWindow : public wxPanel, public gbtGameView {
+class EfgNavigateWindow : public wxGrid {
 private:
-  wxGrid *m_grid;
+  EfgShow *m_parent;
+  const Node *m_cursor;
 
-  virtual void OnUpdate(gbtGameView *);
+  void OnEditorShown(wxGridEvent &);
 
 public:
-  EfgNavigateWindow(gbtGameDocument *p_game, wxWindow *p_parent);
+  EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~EfgNavigateWindow() { }
+
+  void Set(const Node *p_cursor);
 };
 
 #endif  // EFGNAVIGATE_H

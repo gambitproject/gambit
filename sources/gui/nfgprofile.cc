@@ -36,11 +36,9 @@ BEGIN_EVENT_TABLE(NfgProfileList, wxListCtrl)
   EVT_RIGHT_DOWN(NfgProfileList::OnRightClick)
 END_EVENT_TABLE()
 
-NfgProfileList::NfgProfileList(gbtGameDocument *p_game,
-			       NfgShow *p_nfgShow, wxWindow *p_parent)
+NfgProfileList::NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxListCtrl(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
 	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
-    gbtGameView(p_game),
     m_parent(p_nfgShow)
 {
   m_menu = new wxMenu("Profiles");

@@ -30,95 +30,80 @@
 #endif  // WX_PRECOMP
 #include "efgnavigate.h"
 
-EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_game,
-				     wxWindow *p_parent)
-  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(200, 200)),
-    gbtGameView(p_game)
+EfgNavigateWindow::EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent)
+  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+    m_parent(p_efgShow)
 {
-  SetAutoLayout(true);
+  CreateGrid(10, 1);
+  SetEditable(false);
+  SetDefaultCellAlignment(wxCENTER, wxCENTER);
 
-  m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  m_grid->CreateGrid(10, 1);
-  m_grid->SetEditable(false);
-  m_grid->SetMargins(0, 0);
-  m_grid->SetDefaultCellAlignment(wxCENTER, wxCENTER);
+  SetLabelValue(wxVERTICAL, "Node label", 0);
+  SetLabelValue(wxVERTICAL, "Pr(node reached)", 1);
+  SetLabelValue(wxVERTICAL, "Node value", 2);
+  SetLabelValue(wxVERTICAL, "Information set", 3);
+  SetLabelValue(wxVERTICAL, "Pr(infoset reached)", 4);
+  SetLabelValue(wxVERTICAL, "Belief", 5);
+  SetLabelValue(wxVERTICAL, "Information set value", 6);
+  SetLabelValue(wxVERTICAL, "Incoming action label", 7);
+  SetLabelValue(wxVERTICAL, "Pr(incoming action)", 8);
+  SetLabelValue(wxVERTICAL, "Incoming action value", 9);
 
-  m_grid->SetLabelValue(wxVERTICAL, "Node label", 0);
-  m_grid->SetLabelValue(wxVERTICAL, "Pr(node reached)", 1);
-  m_grid->SetLabelValue(wxVERTICAL, "Node value", 2);
-  m_grid->SetLabelValue(wxVERTICAL, "Information set", 3);
-  m_grid->SetLabelValue(wxVERTICAL, "Pr(infoset reached)", 4);
-  m_grid->SetLabelValue(wxVERTICAL, "Belief", 5);
-  m_grid->SetLabelValue(wxVERTICAL, "Information set value", 6);
-  m_grid->SetLabelValue(wxVERTICAL, "Incoming action label", 7);
-  m_grid->SetLabelValue(wxVERTICAL, "Pr(incoming action)", 8);
-  m_grid->SetLabelValue(wxVERTICAL, "Incoming action value", 9);
-
-  m_grid->SetLabelSize(wxHORIZONTAL, 0);
-  m_grid->SetLabelSize(wxVERTICAL, 150);
-  m_grid->SetSize(m_grid->GetLabelSize(wxVERTICAL) +
-		  m_grid->GetColumnWidth(0), 200);
-  m_grid->AdjustScrollbars();
-  
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_grid, 1, wxALL | wxEXPAND, 0);
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  Layout();
-  
+  SetLabelSize(wxHORIZONTAL, 0);
+  SetLabelSize(wxVERTICAL, 150);
+  AdjustScrollbars();
   Show(true);
 }
 
-void EfgNavigateWindow::OnUpdate(gbtGameView *)
+void EfgNavigateWindow::Set(const Node *p_cursor) 
 {
-  Node *cursor = m_game->m_cursor;
+  m_cursor = p_cursor;
   
-  if (!cursor) { // no data available
-    for (int i = 0; i < m_grid->GetRows(); i++) { 
-      m_grid->SetCellValue("", i, 0);
+  if (!m_cursor) { // no data available
+    for (int i = 0; i < GetRows(); i++) { 
+      SetCellValue("", i, 0);
     }
     return;
   }
 
   // if we got here, the node is valid.
   try {
-    m_grid->SetCellValue((char *) cursor->GetName(), 0, 0);
-    m_grid->SetCellValue((char *) m_game->GetRealizProb(cursor), 1, 0);
-    m_grid->SetCellValue((char *) m_game->GetNodeValue(cursor), 2, 0);
+    SetCellValue((char *) m_cursor->GetName(), 0, 0);
+    SetCellValue((char *) m_parent->GetRealizProb(m_cursor), 1, 0);
+    SetCellValue((char *) m_parent->GetNodeValue(m_cursor), 2, 0);
 
     gText tmpstr;
   
-    if (!cursor->GetPlayer()) {
+    if (!m_cursor->GetPlayer()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (cursor->GetPlayer()->IsChance())
+      if (m_cursor->GetPlayer()->IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(cursor->GetPlayer()->GetNumber()) + "," +
-		  ToText(cursor->GetInfoset()->GetNumber()) + ")");
+	tmpstr = ("(" + ToText(m_cursor->GetPlayer()->GetNumber()) + "," +
+		  ToText(m_cursor->GetInfoset()->GetNumber()) + ")");
     }
 	  
-    m_grid->SetCellValue((char *) tmpstr, 3, 0);
-    m_grid->SetCellValue((char *) m_game->GetInfosetProb(cursor), 4, 0);
-    m_grid->SetCellValue((char *) m_game->GetBeliefProb(cursor), 5, 0);
-    m_grid->SetCellValue((char *) m_game->GetInfosetValue(cursor), 6, 0);
+    SetCellValue((char *) tmpstr, 3, 0);
+    SetCellValue((char *) m_parent->GetInfosetProb(m_cursor), 4, 0);
+    SetCellValue((char *) m_parent->GetBeliefProb(m_cursor), 5, 0);
+    SetCellValue((char *) m_parent->GetInfosetValue(m_cursor), 6, 0);
 	
-    Node *p = cursor->GetParent();
+    Node *p = m_cursor->GetParent();
 
     if (p) {
       int branch = 0;
-      for (branch = 1; p->GetChild(branch) != cursor; branch++);
+      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
 
-      m_grid->SetCellValue((char *) cursor->GetAction()->GetName(), 7, 0);
-      m_grid->SetCellValue((char *) m_game->GetActionProb(p, branch), 8, 0);
-      m_grid->SetCellValue((char *) m_game->GetActionValue(p, branch), 9, 0);
+      SetCellValue((char *) m_cursor->GetAction()->GetName(), 7, 0);
+      SetCellValue((char *) m_parent->GetActionProb(p, branch), 8, 0);
+      SetCellValue((char *) m_parent->GetActionValue(p, branch), 9, 0);
     }
     else {
-      m_grid->SetCellValue("N/A (root)", 7, 0);
-      m_grid->SetCellValue("1", 8, 0);
-      m_grid->SetCellValue("N/A", 9, 0);
+      SetCellValue("N/A (root)", 7, 0);
+      SetCellValue("1", 8, 0);
+      SetCellValue("N/A", 9, 0);
     }
   }	
   catch (gException &) { }

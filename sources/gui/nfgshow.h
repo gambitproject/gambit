@@ -51,8 +51,10 @@ class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
-class NfgShow : public wxFrame, public gbtGameView {
+class NfgShow : public wxFrame {
 private:
+  Nfg &m_nfg;
+
   NfgTable *m_table;
   NfgProfileList *m_profileTable;
   wxNotebook *m_infoNotebook;
@@ -61,6 +63,12 @@ private:
   NfgNavigateWindow *m_navigateWindow;
   NfgOutcomeWindow *m_outcomeWindow;
   NfgSupportWindow *m_supportWindow;
+
+  int m_currentProfile;
+  gList<MixedSolution> m_profiles;
+
+  gbtNfgSupport *m_currentSupport;
+  gList<gbtNfgSupport *> m_supports;
 
   wxString m_filename;
 
@@ -128,22 +136,20 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  NfgShow(gbtGameDocument *p_game, wxWindow *p_window);
+  NfgShow(Nfg &N, wxWindow *p_window);
   virtual ~NfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
   void AddProfile(const MixedSolution &, bool);
   void RemoveProfile(int);
   void ChangeProfile(int);
-  int CurrentProfile(void) const { return m_game->m_currentProfile; }
-  const gList<MixedSolution> &Profiles(void) const 
-    { return m_game->m_mixedProfiles; }
+  int CurrentProfile(void) const { return m_currentProfile; }
+  const gList<MixedSolution> &Profiles(void) const { return m_profiles; }
   gText UniqueProfileName(void) const;
 
   // SUPPORT ACCESS AND MANIPULATION
-  gbtNfgSupport *GetSupport(void) { return m_game->m_currentNfgSupport; }
-  const gList<gbtNfgSupport *> &Supports(void) const
-    { return m_game->m_nfgSupports; }
+  gbtNfgSupport *GetSupport(void) { return m_currentSupport; }
+  const gList<gbtNfgSupport *> &Supports(void) const { return m_supports; }
   void SetSupportNumber(int p_number);
   gText UniqueSupportName(void) const;
   void OnSupportsEdited(void);
@@ -154,10 +160,10 @@ public:
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
-  const Nfg &Game(void) const { return *m_game->m_nfg; }  
-  Nfg &Game(void) { return *m_game->m_nfg; }
+  const Nfg &Game(void) const { return m_nfg; }  
+  Nfg &Game(void) { return m_nfg; }
 
-  bool GameIsDirty(void) const { return m_game->m_nfg->IsDirty(); }
+  bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 
   void SetPlayers(int, int);
   void SetProfile(const gArray<int> &);

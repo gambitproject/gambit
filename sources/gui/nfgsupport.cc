@@ -101,10 +101,8 @@ BEGIN_EVENT_TABLE(NfgSupportWindow, wxPanel)
   EVT_TREE_ITEM_COLLAPSING(idSTRATEGYTREE, NfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
-NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_game,
-				   NfgShow *p_nfgShow, wxWindow *p_parent)
+NfgSupportWindow::NfgSupportWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_game),
     m_parent(p_nfgShow), m_map(gbtNfgStrategy())
 {
   SetAutoLayout(true);
