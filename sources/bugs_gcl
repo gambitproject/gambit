@@ -91,6 +91,8 @@ Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
   In function LpSolve[], in file "console" at line 2:
   GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
 
+Note: Bug does not occur if stopAfter->1
+
 //------------------------------
 
 Bug C21: Algorithms producing nonsense on games of imperfect recall
@@ -227,6 +229,7 @@ On the other hand, if P1 is deallocated before each call, as in
 
 then it is OK.  Also, if the contents of test.gcl are run from the
 command line, it is OK.
+
 
 
 //---------------  These are not bugs but suggested improvements ------------

@@ -112,7 +112,7 @@ cursor, but this may be harder to achieve.
 
 Bug D20: PolEnum on extensive forms
 
-  Although there is a menu item for this algorithm, it has not been
+Although there is a menu item for this algorithm, it has not been
 implemented in the GUI until a final decision is made whether it is
 complete and stable enough for this release.
 
@@ -156,7 +156,12 @@ No harm seems to come of this.
 
 Bug D35: Field width too narrow on some dialog boxes. 
 
-On File Save, the field for the decimal places is too narrow to see
+Examples:
+
+1. On Solve->Custom->NFG->SimpDiv, the #restarts field is too narrow
+on MSWin.  
+
+2. On File Save, the field for the decimal places is too narrow to see
 the number.  There were other dialogs with similar problems.  Can't
 recall them now.
 
@@ -168,24 +173,41 @@ On Liap and QRE algorithms, the formatting of the lambda and tolerance
 parameters is bad.  We agreed to change the tolerance to an integer,
 and the lambda parameters to text strings.
 
+//--------------------------------
+
+Bug D37:  Bug in interactive selection of subgame solutions
+
+The following causes a crash:
+
+Load coord2ts.efg, and solve via Solve->Custom->Efg->LCP (noDomElim,
+Interactive selection, findAll)
+
+//--------------------------------
+
+Bug D38:  Dominance info not displayed on normal form game.  
+
+eg.  Load poker.efg, generate a normal form game, and do
+Supports->ElimDom (Weak,Pure) The dominance information should be
+displayed in the normal form, but it is not displayed, even if you
+select Inspect->Info->DisplayDominance
+
 -------------  older bugs that still remain ---------------
 
 //------------------------------
 
-GUI Bug 5.2
+GUI Bug 5.2: Fix upper right close button 
 
 > 2. Why the solution list window does not vanish from the upper right
 > close button?
 
-RDM: 8/20/99 Solution list window is fixed, but the
-Edit->Strats->Label dialog box (and perhaps others as well) can not be
-gotten rid of.  Also, after this window has been created, the main
-Gambit window can be dismissed and the child windows do not get
-dismissed.  (this is on Linux) N.B. the "close" button here refers to
-the window manager close button.
-
-RDM: 12/27/98 This bug is now fixed for most windows, but there are
-still a few with the problem -- especially in the elimdom menu.
+RDM: 8/20/99 Solution list window is fixed, but there are still a few
+with the problem -- i.e, in the inspect solution window, the edit
+mixed window cannot be deleted.  Also, the Edit->Strats->Label dialog
+box (and perhaps others as well) can not be gotten rid of.  Also,
+after this window has been created, the main Gambit window can be
+dismissed and the child windows do not get dismissed.  (this is on
+Linux) N.B. the "close" button here refers to the window manager close
+button.
 
 //------------------------------
 
@@ -196,19 +218,22 @@ GUI Bug 5.4,  Scrolling problems
 
 RDM: Problem still exists 9/3/98.  Here are furhter details:
 
-Scrolling is not correct: Eg(this is all on Linux): Load caro2.efg.
-Hit +magnify button twice.  Move cursor R,R,D,R,R.  Notice how screen
-does not always display cursor.  Now hit L,L,L,L, and try to get back
-to the root node.  Again cursor moves off the screen, and the bottom
-scroll bar does not help to move the window to display the cursor.
+On Linux: Load caro2.efg.  Hit +magnify button twice.  Move cursor
+R,R,D,R,R.  Notice how screen does not always display cursor.  Now hit
+L,L,L,L, and try to get back to the root node.  Again cursor moves off
+the screen, and the bottom scroll bar does not help to move the window
+to display the cursor.  Also, the scroll bars require a complete
+redraw before the next scroll bar hit is recorded. Load a big game
+like bayes2a.efg, andthen hit the right scroll bar three times
+insuccession to try and scroll the screen down.  It redraws the screen
+three times instead of halting the redraw when the second and third
+hits to the scroll bar are made.  Also, dragging the scroll bar does
+not work.  This makes it very time consuming to move around a large
+game.
 
-Also, the scroll bars require a complete redraw before the next scroll
-bar hit is recorded. Load a big game like bayes2a.efg, andthen hit the
-right scroll bar three times insuccession to try and scroll the screen
-down.  It redraws the screen three times instead of halting the redraw
-when the second and third hits to the scroll bar are made.  Also,
-dragging the scroll bar does not work.  This makes it very time
-consuming to move around a large gaem.
+On MSWindows: Load condjury.efg, and hit the -magnify button twice (to
+get to mag .6).  Then try and get to the lower right part of the tree.
+It is impossible either by the cursor or by the use of the scrollbars.
 
 
 //------------------------------
