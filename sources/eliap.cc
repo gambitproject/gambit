@@ -145,13 +145,14 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 
   nevals++;
 
-  (gVector<T> &) p = v;
+  ((gVector<T> &) p).operator=(v);
+  BehavProfile<T> tmp(p);
   T x, result((T) 0), avg, sum;
 
       // Ted -- only reason for this is because you 
       // got rid of CondPayoff ( . , . )
   gPVector<T> probs(E.Dimensionality().Lengths());  
-  E.CondPayoff(p,cpay,probs);
+  tmp.CondPayoff(cpay,probs);
 
 //  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
   

@@ -32,8 +32,9 @@ SeqFormParams::SeqFormParams(void)
 //---------------------------------------------------------------------------
 
 template <class T>
-SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p)
-  : EF(E), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
+SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p, 
+			      const EFSupport &S)
+  : EF(E), support(S), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
 { 
   int ntot;
   ns1=NumSequences(1);
@@ -52,7 +53,6 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p)
     }
   maxpay=maxpay+(T)1;
   T prob = (T)1;
-//  A=(T)0;
   for(i=A->MinRow();i<=A->MaxRow();i++) {
     (*b)[i] = (T)0;
     for(j=A->MinCol();j<=A->MaxCol();j++)
@@ -326,7 +326,7 @@ template <class T> int SeqFormModule<T>::NumSequences(int j)
   isets = EF.PlayerList()[j]->InfosetList();
   int num = 1;
   for(int i = isets.First();i<= isets.Last();i++)
-    num+=(isets[i])->NumActions();
+    num+=support.NumActions(j,i);
   return num;
 }
 
@@ -357,7 +357,8 @@ int SeqForm(const Efg<T> &E, const SeqFormParams &p,
 	  gList<BehavProfile<T> > &solutions,
 	  long &npivots, double &time)
 { 
-  SeqFormModule<T> SM(E, p);
+  EFSupport S(E);
+  SeqFormModule<T> SM(E, p, S);
   int result = SM.Lemke();
 
   npivots = SM.NumPivots();

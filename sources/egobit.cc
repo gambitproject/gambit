@@ -33,30 +33,31 @@ EFGobitParams<T>::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &status_)
 
 template <class T>
 class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
-  private:
+private:
   long niters, nevals;
-    T Lambda;
-    gPVector<T> probs;
-    BehavProfile<T> p, pp, cpay;
-    gMatrix<T> xi;
-    const Efg<T> &E;
+  T Lambda;
+  gPVector<T> probs;
+  BehavProfile<T> p, pp, cpay;
+  gMatrix<T> xi;
+  const Efg<T> &E;
+  gVector<T> ***scratch;
     
-    // Inherited virtual function from gBFunctMin
-    T Value(const gVector<T> &x);
-
-  public:
-    EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
+      // Inherited virtual function from gBFunctMin
+  T Value(const gVector<T> &x);
+  
+public:
+  EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
 	      const BehavProfile<T> &s);
     virtual ~EFGobitFunc();
-
-    void Init(void);
-    // These two are inherited virtual functions from GobitFunc
-    void Optimize(T Lambda, int &iter, T &value);
-    void Output(gOutput &f, int format = 0) const;
-    long NumIters(void) const;
-    long NumEvals(void) const;
-
-    const BehavProfile<T> &GetProfile(void) const;
+  
+  void Init(void);
+      // These two are inherited virtual functions from GobitFunc
+  void Optimize(T Lambda, int &iter, T &value);
+  void Output(gOutput &f, int format = 0) const;
+  long NumIters(void) const;
+  long NumEvals(void) const;
+  
+  const BehavProfile<T> &GetProfile(void) const;
 };
 
 //-------------------------------------------------------------------------
@@ -88,10 +89,27 @@ template <class T> void EFGobitFunc<T>::Init(void)
   // Seems to me like this should be a parameter to the gfunct ctor?
   constrained = 1;
   xi.MakeIdent();
+  scratch = new gVector<T> **[E.NumPlayers()] -1;
+  for(int i=1;i<=E.NumPlayers();i++) {
+    int nisets = (E.PlayerList()[i])->NumInfosets();
+    scratch[i] = new gVector<T> *[nisets];  // -1 ?
+    for(int j=1;j<=nisets;j++) {
+      scratch[i][j] = new gVector<T>(pp.GetEFSupport().NumActions(i,j));
+    }
+  }
 }
 
 template <class T> EFGobitFunc<T>::~EFGobitFunc()
-{ }
+{ 
+  for(int i=1;i<=E.NumPlayers();i++) {
+    int nisets = (E.PlayerList()[i])->NumInfosets();
+    for(int j=1;j<=nisets;j++) {
+      delete scratch[i][j];
+    }
+    delete scratch[i];
+  }
+  delete [] (scratch + 1);
+}
 
 //-------------------------------------------------------------------------
 //           EFGobitFunc<T>: Implementation of function members
@@ -102,10 +120,10 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
   static const T PENALTY1 = (T) 10000.0;
 
   nevals++;
-  (gVector<T> &) p = v;
+  ((gVector<T> &) p).operator=(v);
   T val((T) 0), prob, psum, z;
-
-  E.CondPayoff(p, cpay, probs);
+//  gVector<T> &payoff = *scratch
+  p.CondPayoff(cpay, probs);
 
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     EFPlayer *player = E.PlayerList()[pl];

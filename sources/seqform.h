@@ -29,6 +29,7 @@ class SeqFormParams     {
 template <class T> class SeqFormModule  {
 private:
   const Efg<T> &EF;
+  const EFSupport &support;
   const SeqFormParams &params;
   gMatrix<T> *A;
   gVector<T> *b;
@@ -41,7 +42,8 @@ private:
   gList< BehavProfile<T> > solutions;
 
 public:
-  SeqFormModule(const Efg<T> &E, const SeqFormParams &p);
+  SeqFormModule(const Efg<T> &E, const SeqFormParams &p, 
+		const EFSupport &);
   virtual ~SeqFormModule();
   
   int Lemke(int dup = 0);
