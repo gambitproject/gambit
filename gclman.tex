@@ -1208,14 +1208,17 @@ finds all pure strategy Nash equilibrium.  Optionally it can be set to
 find the first \verb+k+ Nash equilibria.  This algorithm will work on
 any normal form game.  
 
-The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure and
-mixed) for a given support of a two person normal form
-game.  More precisely, it finds the set of extreme points of the
-components of the set of Nash equilibria.  The procedure is to
-enumerate the set of complementary basic feasible solutions. (See, eg
-\cite[1964]{Man:64}.)  By default, all equilibria are found.
-Optionally, it can be set to find the first \verb+k+ equilibria.  
-This algorithm works only on two-person normal form games.  
+The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure
+and mixed) for a given support of a two person normal form game.  More
+precisely, it finds the set of extreme Nash equilibria, as defined in
+\cite[1964]{Man:64}.  For any normal form game, as shown in
+Mangasarian, every Nash equilibrium can be expressed as a convex
+combination of the extreme Nash equilibria.  For generic games, there
+are just a finite number of Nash equilibria, which coincide with the
+extreme equilibria.  By default, all extreme equilibria are found.
+Optionally, the algorithm can be set to find the first \verb+k+
+equilibria.  This algorithm works only on two-person normal form
+games.
 
 \subsection{Gobit}
 
