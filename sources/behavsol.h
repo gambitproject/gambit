@@ -37,93 +37,92 @@ typedef enum
 gText NameEfgAlgType(EfgAlgType i);
 void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 
-
-
-class BehavSolution : protected BehavProfile<gNumber>  {
+class BehavSolution {
 protected:
-  EfgAlgType _Creator;
-  mutable gTriState _IsNash;
-  mutable gTriState _IsSubgamePerfect;
-  mutable gTriState _IsSequential;
-  gNumber _Epsilon;
-  gNumber _GobitLambda;
-  gNumber _GobitValue;
-  mutable gNumber _LiapValue;
-  mutable gDPVector<gNumber> *_Beliefs;
-  mutable gDPVector<gNumber> *_Regret;
-  unsigned int _Id;
+  BehavProfile<gNumber> *m_profile;
+  mutable EfgAlgType m_creator;
+  mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
+  mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
+  mutable gDPVector<gNumber> *m_beliefs, *m_regret;
+  unsigned int m_id;
 
   void EvalEquilibria(void) const;
 
 public:
-  BehavSolution(const BehavProfile<double> &, EfgAlgType creator = EfgAlg_USER);
-  BehavSolution(const BehavProfile<gRational> &, EfgAlgType creator = EfgAlg_USER);
-  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType creator = EfgAlg_USER);
+  // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
+  BehavSolution(const BehavProfile<double> &, EfgAlgType = EfgAlg_USER);
+  BehavSolution(const BehavProfile<gRational> &, EfgAlgType = EfgAlg_USER);
+  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType = EfgAlg_USER);
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
-  unsigned int Id(void) const;
-  void SetId(unsigned int );
-  void SetCreator(EfgAlgType);
+  BehavSolution &operator=(const BehavSolution &);
+
+  // OPERATOR OVERLOADING
+  bool Equals(const BehavProfile<double> &) const;
+  bool operator==(const BehavSolution &) const;
+  bool operator!=(const BehavSolution &p_solution) const
+    { return !(*this == p_solution); }
+
+  gNumber &operator()(int, int, int);
+  const gNumber &operator()(int, int, int) const;
+
+  BehavSolution &operator+=(const BehavSolution &);
+  BehavSolution &operator-=(const BehavSolution &);
+  BehavSolution &operator*=(const gNumber &);
+
+  // GENERAL DATA ACCESS
+  Efg &Game(void) const   { return m_profile->Game(); }
+
+  // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
-  EfgAlgType Creator(void) const; //Who created this object? (algorithm ID or user)
-  void SetIsNash(gTriState);
-  gTriState IsNash(void) const; // Is it Nash? Y/N/DK
-  void SetIsSubgamePerfect(gTriState);
-  gTriState IsSubgamePerfect(void) const; // Is it Subgame Perfect? Y/N/DK
-  void SetIsSequential(gTriState);
-  gTriState IsSequential(void) const; // Is it Sequential? Y/N/DK
-
-  void SetEpsilon(gNumber value);
-  gNumber Epsilon(void) const; // epsilon for zero tolerance
-
-  void SetGobit(gNumber lambda, gNumber value);
-  gNumber GobitLambda(void) const; // lambda from gobit alg
-  gNumber GobitValue(void) const; // objective function from gobit alg
-  void SetLiap(gNumber value);
-  gNumber LiapValue(void) const; // liapunov function value (to test for Nash)
+  unsigned int Id(void) const { return m_id; }
+  EfgAlgType Creator(void) const { return m_creator; }
+  gTriState IsNash(void) const;
+  gTriState IsSubgamePerfect(void) const;
+  gTriState IsSequential(void) const;
+  const gNumber &Epsilon(void) const { return m_epsilon; }
+  const gNumber &GobitLambda(void) const { return m_gobitLambda; }
+  const gNumber &GobitValue(void) const { return m_gobitValue; }
+  const gNumber &LiapValue(void) const;
   const gDPVector<gNumber> &Beliefs(void) const;
-     // Belief vector, if a sequential equilibrium
-
   const gDPVector<gNumber> &Regret(void) const;
+
+  void SetId(unsigned int p_id) { m_id = p_id; }
+  void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
+  void SetIsNash(gTriState p_isNash) { m_isNash = p_isNash; }
+  void SetIsSubgamePerfect(gTriState p_isSubgamePerfect)
+    { m_isSubgamePerfect = p_isSubgamePerfect; }
+  void SetIsSequential(gTriState p_isSequential)
+    { m_isSequential = p_isSequential; }
+  void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
+  void SetGobit(const gNumber &p_gobitLambda, const gNumber &p_gobitValue)
+    { m_gobitLambda = p_gobitLambda; m_gobitValue = p_gobitValue; }
+  void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
 	 
-  bool Equals(const BehavProfile<double> &s) const;
-  bool operator==(const BehavSolution &) const;
-  bool operator!=(const BehavSolution &s) const { return !(*this == s); }
+  // Force the invalidation of cached quantities
+  void Invalidate(void) const;
 
-  BehavSolution &operator+=(const BehavSolution &s)
-    { Invalidate(); BehavProfile<gNumber>::operator+=(s); return *this; }
-  BehavSolution &operator-=(const BehavSolution &s)
-    { Invalidate(); BehavProfile<gNumber>::operator-=(s); return *this; }
-  BehavSolution &operator*=(const gNumber &x)
-    { Invalidate(); BehavProfile<gNumber>::operator*=(x); return *this; }
-  void Dump(gOutput& f) const;
+  // FUNCTIONS FOR COMPATIBILITY WITH GUI
+  // these are all obsolescent :)
 
-  void Invalidate(void);
-
-  gNumber Payoff(int pl) const
-    { return BehavProfile<gNumber>::Payoff(pl); }
-
-  Efg &Game(void) const   { return BehavProfile<gNumber>::Game(); } 
-
-  void CondPayoff(gDPVector<gNumber> &value, gPVector<gNumber> &probs) const
-    { BehavProfile<gNumber>::CondPayoff(value, probs); }
-  gArray<gNumber> NodeValues(int pl) const
-    { return BehavProfile<gNumber>::NodeValues(pl); }
-  gArray<gNumber> NodeRealizProbs(void) const
-    { return BehavProfile<gNumber>::NodeRealizProbs(); }
-  const gNumber &GetValue(Infoset *s, int act) const
-    { return BehavProfile<gNumber>::GetValue(s, act); }
-
-  gNumber& operator[](int);
-  const gNumber& operator[](int) const;
-  gNumber& operator()(int, int, int);
-  const gNumber& operator()(int, int, int) const;
-
-  BehavSolution& operator=(const BehavSolution &);
-  
   EFSupport Support(void) const { return EFSupport(Game()); }
+
+
+  // COMPUTATION OF INTERESTING QUANTITIES
+  gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
+  void CondPayoff(gDPVector<gNumber> &value, gPVector<gNumber> &probs) const
+    { m_profile->CondPayoff(value, probs); }
+  gArray<gNumber> NodeValues(int pl) const
+    { return m_profile->NodeValues(pl); }
+  gArray<gNumber> NodeRealizProbs(void) const
+    { return m_profile->NodeRealizProbs(); }
+  const gNumber &GetValue(Infoset *s, int act) const
+    { return m_profile->GetValue(s, act); }
+
+  // OUTPUT
+  void Dump(gOutput& f) const;
 };
 
 gOutput &operator<<(gOutput &f, const BehavSolution &);

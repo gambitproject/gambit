@@ -4,263 +4,312 @@
 // $Id$
 //
 
-
-#include <assert.h>
 #include "efgutils.h"
 #include "behavsol.h"
 #include "gmisc.h"
 
-BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
-  : BehavProfile<gNumber>(b.Support()),
-    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
-    _IsSequential(triMAYBE), _Epsilon((double)0), 
-    _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
+//----------------------------------------------------
+// Constructors, Destructor, Constructive Operators
+//----------------------------------------------------
+
+BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
+			     EfgAlgType p_creator)
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
+    m_isSequential(triMAYBE), m_epsilon(0.0),
+    m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
-  gEpsilon(_Epsilon);
-  for (int i = 1; i <= b.Length(); i++)
-    ((gVector<gNumber> &) *this)[i] = b[i];
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = Game().Players()[pl];  
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	if (index > 0)
+	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
+	else
+	  (*m_profile)(pl, iset, act) = gNumber(0.0);
+      }
+    }
+  }
 }
 
-BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creator)
-  : BehavProfile<gNumber>(b.Support()),
-    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
-    _IsSequential(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
+
+BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
+			     EfgAlgType p_creator)
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
+    m_isSequential(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
-  gEpsilon(_Epsilon);
-  for (int i = 1; i <= b.Length(); i++)
-    ((gVector<gNumber> &) *this)[i] = b[i];
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = Game().Players()[pl];  
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	if (index > 0)
+	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
+	else
+	  (*m_profile)(pl, iset, act) = gNumber(0);
+      }
+    }
+  }
 }
 
-BehavSolution::BehavSolution(const BehavProfile<gNumber>& b, EfgAlgType creator)
-  : BehavProfile<gNumber>(b),
-    _Creator(creator), _IsNash(triMAYBE), _IsSubgamePerfect(triMAYBE),
-    _IsSequential(triMAYBE), _GobitLambda(-1), _GobitValue(-1),
-    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
+BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
+			     EfgAlgType p_creator)
+  : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
+    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
+    m_isSequential(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
-  gEpsilon(_Epsilon);
+  gEpsilon(m_epsilon);
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = Game().Players()[pl];  
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      Infoset *infoset = player->Infosets()[iset];
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	if (index > 0)
+	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
+	else
+	  (*m_profile)(pl, iset, act) = gNumber(0);
+      }
+    }
+  }
 }
 
-BehavSolution::BehavSolution(const BehavSolution& b)
-  : BehavProfile<gNumber>(b), _Creator(b._Creator),
-    _IsNash(b._IsNash), _IsSubgamePerfect(b._IsSubgamePerfect),
-    _IsSequential(b._IsSequential), _Epsilon(b._Epsilon),
-    _GobitLambda(b._GobitLambda), _GobitValue(b._GobitValue),
-    _LiapValue(b._LiapValue), _Beliefs(0), _Regret(0), _Id(b._Id)
+BehavSolution::BehavSolution(const BehavSolution &p_solution)
+  : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
+    m_creator(p_solution.m_creator), m_isNash(p_solution.m_isNash),
+    m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
+    m_isSequential(p_solution.m_isSequential), m_epsilon(p_solution.m_epsilon),
+    m_gobitLambda(p_solution.m_gobitLambda),
+    m_gobitValue(p_solution.m_gobitValue),
+    m_liapValue(p_solution.m_liapValue),
+    m_beliefs(0), m_regret(0), m_id(0)
 {
-  if (b._Beliefs) _Beliefs = new gDPVector<gNumber>(*b._Beliefs);
-  if (b._Regret)  _Regret = new gDPVector<gNumber>(*b._Regret);   
+  if (p_solution.m_beliefs)
+    m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
+  if (p_solution.m_regret)
+    m_regret = new gDPVector<gNumber>(*p_solution.m_regret);   
 }
 
 BehavSolution::~BehavSolution() 
 { 
-  if (_Beliefs) delete _Beliefs;
-  if (_Regret)  delete _Regret;
+  delete m_profile;
+  if (m_beliefs) delete m_beliefs;
+  if (m_regret)  delete m_regret;
 }
 
-void BehavSolution::EvalEquilibria(void) const
+BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 {
-  if (IsComplete()) 
-    if( _IsNash == triMAYBE )
-      if(MaxGripe() <= _Epsilon)
-	_IsNash = triTRUE;
-      else
-	_IsNash = triFALSE;
-  
-  if(_IsNash == triFALSE)
-    {
-      _IsSubgamePerfect = triFALSE;
-      _IsSequential = triFALSE;
-    }
-}
-
-unsigned int BehavSolution::Id(void) const
-{return _Id;}
-void BehavSolution::SetId(unsigned int i)
-{_Id=i;}
-
-void BehavSolution::SetCreator(EfgAlgType c)
-{ _Creator = c; }
-
-bool BehavSolution::IsComplete(void) const
-{ 
-  gNumber sum;
-  for(int pl= 1; pl <=dvlen.Length(); pl++)
-    for(int iset = 1;iset <=dvlen[pl]; iset++) { 
-      sum = -1;
-      for(int act = 1;act <= svlen[dvidx[pl] + iset -1]; act++) 
-	sum+= dvptr[pl][iset][act];
-      if(sum > _Epsilon || sum < -_Epsilon) 
-	return false;
-    }
-  return true;
-}
-
-EfgAlgType BehavSolution::Creator(void) const
-{ return _Creator; }
-
-void BehavSolution::SetIsNash(gTriState i)
-{ _IsNash = i; }
-
-gTriState BehavSolution::IsNash(void) const
-{ EvalEquilibria(); return _IsNash; }
-
-void BehavSolution::SetIsSubgamePerfect(gTriState i)
-{ _IsSubgamePerfect = i; }
-
-gTriState BehavSolution::IsSubgamePerfect(void) const
-{
-  EvalEquilibria(); 
-  return _IsSubgamePerfect; 
-}
-
-void BehavSolution::SetIsSequential(gTriState i)
-{ _IsSequential = i; }
-
-gTriState BehavSolution::IsSequential(void) const
-{ EvalEquilibria(); return _IsSequential; }
-
-void BehavSolution::SetGobit(gNumber lambda, gNumber value)
-{
-  _GobitLambda = lambda;
-  _GobitValue = value;
-}
-
-gNumber BehavSolution::GobitLambda(void) const
-{ return _GobitLambda; }
-
-void BehavSolution::SetEpsilon(gNumber value)
-{
-  _Epsilon = value;
-}
-
-gNumber BehavSolution::Epsilon(void) const
-{ return _Epsilon; }
-
-gNumber BehavSolution::GobitValue(void) const
-{ return _GobitValue; }
-
-void BehavSolution::SetLiap(gNumber value)
-{ _LiapValue = value; }
-
-gNumber BehavSolution::LiapValue(void) const
-{ 
-  if (_LiapValue < (gNumber)0)
-    _LiapValue = BehavProfile<gNumber>::LiapValue();
-  return _LiapValue; 
-}
-
-const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
-{ 
-  if (! _Beliefs) 
-    _Beliefs = new gDPVector<gNumber>(BehavProfile<gNumber>::Beliefs());
-
-  return *_Beliefs; 
-}
-
-const gDPVector<gNumber> &BehavSolution::Regret(void) const
-{
-  if (!_Regret)  {
-    _Regret = new gDPVector<gNumber>(E->NumActions());
-    Gripe(*_Regret);
-  }
-
-  return *_Regret;
-}
-
-bool BehavSolution::Equals(const BehavProfile<double> &s) const
-{ 
-  gNumber eps(_Epsilon);
-  gEpsilon(eps,4);  // this should be a function of _Epsilon
-  bool flag=true;
-  int i=s.First();
-  while(flag==true && i<=s.Length()) {
-    if(abs((*this)[i]-(gNumber)s[i]) > eps) 
-      flag=false;
-    i++;
-  }
-  return flag;
-}
-
-bool BehavSolution::operator==(const BehavSolution &s) const
-{
-  return BehavProfile<gNumber>::operator==(s);
-}
-
-void BehavSolution::Dump(gOutput& f) const
-{
-  BehavProfile<gNumber>::Dump(f);
-  f << " Creator:"; DisplayEfgAlgType(f, _Creator);
-  f << " IsNash:" << _IsNash;
-  f << " IsSubgamePerfect:" << _IsSubgamePerfect;
-  f << " IsSequential:" << _IsSequential;
-  f << " Support:" << support;
-  f << " GobitLambda:" << _GobitLambda;
-  f << " GobitValue:" << _GobitValue;
-  f << " LiapValue:" << _LiapValue;
-  if(_Beliefs) f << " Beliefs:" << *_Beliefs;
-}
-
-gOutput &operator<<(gOutput &f, const BehavSolution &s)
-{ s.Dump(f); return f; }
-
-
-void BehavSolution::Invalidate(void)
-{
-  _Creator = EfgAlg_USER;
-  _IsNash = triMAYBE;
-  _IsSubgamePerfect = triMAYBE;
-  _IsSequential = triMAYBE;
-  _GobitLambda = -1;
-  _GobitValue = -1;
-  _LiapValue = -1;
-  if (_Beliefs) { 
-    delete _Beliefs;
-    _Beliefs = 0;
-  }
-  
-  if (_Regret)  {
-    delete _Regret;
-    _Regret = 0;
-  }
-}
-
-gNumber &BehavSolution::operator[](int i)
-{ Invalidate(); return BehavProfile<gNumber>::operator[](i); }
-
-const gNumber& BehavSolution::operator[](int i) const
-{ return BehavProfile<gNumber>::operator[](i); }
-
-gNumber& BehavSolution::operator()(int a, int b, int c)
-{ Invalidate(); return BehavProfile<gNumber>::operator()(a, b, c); }
-
-const gNumber& BehavSolution::operator()(int a, int b, int c) const
-{ return BehavProfile<gNumber>::operator()(a, b, c); }
-
-BehavSolution& BehavSolution::operator=(const BehavSolution &s)
-{
-  if (this != &s)   {
-    BehavProfile<gNumber>::operator=((const BehavProfile<gNumber> &) s);
-    _Creator = s._Creator;
-    _IsNash = s._IsNash;
-    _IsSubgamePerfect = s._IsSubgamePerfect;
-    _IsSequential = s._IsSequential;
-    _GobitLambda = s._GobitLambda;
-    _GobitValue = s._GobitValue;
-    _LiapValue = s._LiapValue;
-    if (_Beliefs)   delete _Beliefs;
-    if (s._Beliefs)
-      _Beliefs = new gDPVector<gNumber>(*s._Beliefs);
+  if (this != &p_solution)   {
+    *m_profile = *p_solution.m_profile;
+    m_creator = p_solution.m_creator;
+    m_isNash = p_solution.m_isNash;
+    m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
+    m_isSequential = p_solution.m_isSequential;
+    m_gobitLambda = p_solution.m_gobitLambda;
+    m_gobitValue = p_solution.m_gobitValue;
+    m_liapValue = p_solution.m_liapValue;
+    if (m_beliefs)   delete m_beliefs;
+    if (p_solution.m_beliefs)
+      m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
     else
-      _Beliefs = 0;
-    if (_Regret)   delete _Regret;
-    if (s._Regret)
-      _Regret = new gDPVector<gNumber>(*s._Regret);
+      m_beliefs = 0;
+    if (m_regret)   delete m_regret;
+    if (p_solution.m_regret)
+      m_regret = new gDPVector<gNumber>(*p_solution.m_regret);
     else
-      _Regret = 0;
+      m_regret = 0;
   }
 
   return *this;
 }
-    
+
+//-----------------------------
+// Private member functions
+//-----------------------------
+
+void BehavSolution::EvalEquilibria(void) const
+{
+  if (IsComplete()) {
+    if (m_isNash == triMAYBE)
+      m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
+  }  
+  if (m_isNash == triFALSE) {
+    m_isSubgamePerfect = triFALSE;
+    m_isSequential = triFALSE;
+  }
+}
+
+//------------------------
+// Operator overloading
+//------------------------
+
+bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
+{ 
+  gNumber eps(m_epsilon);
+  gEpsilon(eps, 4);  // this should be a function of m_epsilon
+
+  int i = p_profile.First();
+  while (i <= p_profile.Length()) {
+    if (abs((*m_profile)[i] - (gNumber) p_profile[i]) > eps) 
+      break;
+    i++;
+  }
+  return (i <= p_profile.Length());
+}
+
+bool BehavSolution::operator==(const BehavSolution &p_solution) const
+{ return (*m_profile == *p_solution.m_profile); }
+
+gNumber &BehavSolution::operator()(int p_player, int p_infoset, int p_action)
+{
+  Invalidate();
+  return (*m_profile)(p_player, p_infoset, p_action);
+}
+
+const gNumber &BehavSolution::operator()(int p_player, int p_infoset,
+					 int p_action) const
+{ return (*m_profile)(p_player, p_infoset, p_action); }
+
+BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
+{
+  Invalidate(); 
+  *m_profile += *p_solution.m_profile;
+  return *this;
+}
+
+BehavSolution &BehavSolution::operator-=(const BehavSolution &p_solution)
+{
+  Invalidate();
+  *m_profile -= *p_solution.m_profile;
+  return *this;
+}
+
+BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
+{ 
+  Invalidate();
+  *m_profile *= p_constant;
+  return *this;
+}
+
+//-----------------------
+// General data access
+//-----------------------
+
+bool BehavSolution::IsComplete(void) const
+{ 
+  gNumber sum;
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = Game().Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) { 
+      Infoset *infoset = player->Infosets()[iset];
+      sum = -1;
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	sum += (*this)(pl, iset, act);
+      if (sum > m_epsilon || sum < -m_epsilon) 
+	return false;
+    }
+  }
+  return true;
+}
+
+gTriState BehavSolution::IsNash(void) const
+{
+  EvalEquilibria();
+  return m_isNash;
+}
+
+gTriState BehavSolution::IsSubgamePerfect(void) const
+{
+  EvalEquilibria();
+  return m_isSubgamePerfect;
+}
+
+gTriState BehavSolution::IsSequential(void) const
+{
+  EvalEquilibria();
+  return m_isSequential;
+}
+
+const gNumber &BehavSolution::LiapValue(void) const
+{ 
+  if (m_liapValue < (gNumber) 0)
+    m_liapValue = m_profile->LiapValue();
+  return m_liapValue; 
+}
+
+void BehavSolution::Invalidate(void) const
+{
+  m_creator = EfgAlg_USER;
+  m_isNash = triMAYBE;
+  m_isSubgamePerfect = triMAYBE;
+  m_isSequential = triMAYBE;
+  m_gobitLambda = -1;
+  m_gobitValue = -1;
+  m_liapValue = -1;
+
+  if (m_beliefs) { 
+    delete m_beliefs;
+    m_beliefs = 0;
+  }
+  
+  if (m_regret)  {
+    delete m_regret;
+    m_regret = 0;
+  }
+}
+
+//-----------------------------------------
+// Computation of interesting quantities
+//-----------------------------------------
+
+const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
+{ 
+  if (!m_beliefs) 
+    m_beliefs = new gDPVector<gNumber>(m_profile->Beliefs());
+
+  return *m_beliefs; 
+}
+
+const gDPVector<gNumber> &BehavSolution::Regret(void) const
+{
+  if (!m_regret)  {
+    m_regret = new gDPVector<gNumber>(Game().NumActions());
+    m_profile->Gripe(*m_regret);
+  }
+
+  return *m_regret;
+}
+
+//----------
+// Output
+//----------
+
+void BehavSolution::Dump(gOutput &p_file) const
+{
+  p_file << *m_profile;
+  p_file << " Creator:"; DisplayEfgAlgType(p_file, m_creator);
+  p_file << " IsNash:" << m_isNash;
+  p_file << " IsSubgamePerfect:" << m_isSubgamePerfect;
+  p_file << " IsSequential:" << m_isSequential;
+  p_file << " GobitLambda:" << m_gobitLambda;
+  p_file << " GobitValue:" << m_gobitValue;
+  p_file << " LiapValue:" << m_liapValue;
+  if (m_beliefs)
+    p_file << " Beliefs:" << *m_beliefs;
+}
+
+gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
+{
+  p_solution.Dump(p_file);
+  return p_file;
+}
+
