@@ -63,13 +63,13 @@ bool GambitApp::OnInit(void)
 		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
 		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
 		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
-#if defined(__WXMSW__) || defined(__WXMAC__)
+#if defined(__WXGTK__)
   wxYield();
-#else  // !__WXMSW__ or !__WXMAC___
+#else  // !__WXGTK__
   while (splash->IsShown()) {
     wxYield();
   }
-#endif  // !__WXMSW__
+#endif  // !__WXGTK__
 
   // Process command line arguments, if any.
   if (argc > 1) {
