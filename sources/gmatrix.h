@@ -16,24 +16,6 @@ protected:
   int minrow,maxrow,mincol,maxcol;
   T **data;
 
-  // check for correct row index
-  int CheckRow(int row) const;
-
-  // check row vector for correct column boundaries
-  int CheckRow(const gVector<T> &v) const;
-
-  // check for correct column index
-  int CheckColumn(int col) const;
-
-  // check column vector for correct row boundaries
-  int CheckColumn(const gVector<T> &v) const;
-
-  // check row and column indices
-  int Check(int row,int col) const;
-
-  // check matrix for same row and column boundaries
-  int CheckBounds(const gMatrix<T> &m) const;
-
 
   T** AllocateIndex(void); 
   void DeleteIndex(T** p);
@@ -113,6 +95,21 @@ public:
   gMatrix<T> ExternalPivot(int, int) const;
   void Pivot(int, int);
   T Determinant(void) const;
+
+
+  // check functions
+    // check for correct row index
+  int CheckRow(int row) const;
+    // check row vector for correct column boundaries
+  int CheckRow(const gVector<T> &v) const;
+    // check for correct column index
+  int CheckColumn(int col) const;
+    // check column vector for correct row boundaries
+  int CheckColumn(const gVector<T> &v) const;
+    // check row and column indices
+  int Check(int row,int col) const;
+    // check matrix for same row and column boundaries
+  int CheckBounds(const gMatrix<T> &m) const;
 
   // parameter access functions
   const int& MinRow(void) const;

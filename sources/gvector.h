@@ -28,11 +28,6 @@ protected:
   int min, max;
   T *data;
 
-  // check whether index is within vector boundaries
-  int Check(int index) const;
-  // check vector for identical boundaries
-  int Check(const gVector<T> &v) const;
-
   T* Allocate(void);
   void Delete(T* p);
   void AllocateData(void);
@@ -88,6 +83,12 @@ public:
 // Tests if all components of the vector are equal to a constant c
   int operator==(T c) const;
   int operator!=(T c) const;
+
+// check functions
+    // check whether index is within vector boundaries
+  int Check(int index) const;
+    // check vector for identical boundaries
+  int Check(const gVector<T> &v) const;
 
 // parameter access functions
   int First(void) const;
