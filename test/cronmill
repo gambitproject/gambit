@@ -1,0 +1,32 @@
+#!/bin/csh
+
+date
+
+source ~/.cshrc
+cd ~/gambit/sources
+cvs update
+make gcl
+make gui
+cd ../test
+echo '*************** Finished re-compiling ************'
+
+rm junk
+cp gclini.mill.test gclini.gcl
+newgcl > junk
+cp ~/gambit/bin/gclini.gcl gclini.gcl
+mv algtest.out algtest.mill.out
+echo '*************** Finished test.gcl ****************'
+
+diff chainst.efg chainst.efg.old
+diff holdout.efg holdout.efg.old
+diff condjury.efg condjury.efg.old
+diff 2x2a.out 2x2a.out.old
+diff bhg3.out bhg3.out.old
+diff algtest.mill.out algtest.mill.out.old
+echo '*************** Finished diffing *****************'
+
+cd ../doc
+cvs update
+rm tex2ps.log
+tex2ps gclman > tex2ps.log
+echo '*************** Finished updating docs ***********'

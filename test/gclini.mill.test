@@ -1,0 +1,9 @@
+Format["",quote->False];
+ListFormat[lf->1];
+StdOut << "Include["&GetPath[]&"]\n";
+Include["stdudfs.gcl"]
+Include["efgtest.gcl"]
+Include["qretest.gcl"]
+Include["algtest.gcl"]
+Quit
+
