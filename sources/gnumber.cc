@@ -359,6 +359,11 @@ gInput& operator>>(gInput& f, gNumber &y)
 
   while (isspace(ch))    f >> ch;
   
+  if (ch != '-' && !isdigit(ch) && ch != '.') {
+    f.setpos(old_pos);
+    throw gFileInput::ReadFailed();
+  }
+
   if (ch == '-')  { 
     sign = -1;
     f >> ch;
