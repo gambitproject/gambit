@@ -11,7 +11,7 @@
 #include "nfgensup.h"
 
 
-int NfgAllNash(const Nfg &, const PolEnumParams &, 
+int AllNashSolve(const Nfg &, const PolEnumParams &, 
 	       gList<MixedSolution> &, long &nevals, double &time);
 
 #endif    // NFGALLEQ_H

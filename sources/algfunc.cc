@@ -891,12 +891,12 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
 }
 
 //------------------
-// NfgAllNashSolve
+// AllNashSolveSolve
 //------------------
 
 #include "nfgalleq.h"
 
-static Portion *GSM_NfgAllNash_Nfg(Portion **param)
+static Portion *GSM_AllNashSolve_Nfg(Portion **param)
 {
   Nfg &N = *((NfgPortion*) param[0])->Value();
   NFSupport* S = new NFSupport(N);
@@ -917,7 +917,7 @@ static Portion *GSM_NfgAllNash_Nfg(Portion **param)
   try {
     long nevals = 0;
     double time = 0.0;
-    NfgAllNash(S->Game(), params, solutions, nevals, time);
+    AllNashSolve(S->Game(), params, solutions, nevals, time);
 
     ((NumberPortion *) param[3])->SetValue(nevals);
     ((NumberPortion *) param[4])->SetValue(time);
@@ -1594,8 +1594,8 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("NfgAllNash", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_NfgAllNash_Nfg, 
+  FuncObj = new gclFunction("AllNashSolve", 2);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
 				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("nfg", porNFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,

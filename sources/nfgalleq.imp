@@ -6,7 +6,7 @@
 
 #include "nfgalleq.h"
 
-template <class T> class NfgAllNashModule  {
+template <class T> class AllNashSolveModule  {
 private:
   const Nfg &NF;
   const NFSupport fullsupport;
@@ -17,7 +17,7 @@ private:
   gList<MixedSolution> solutions;
 
 public:
-  NfgAllNashModule(const Nfg &, const PolEnumParams &p);
+  AllNashSolveModule(const Nfg &, const PolEnumParams &p);
 
   void NashEnum(void);
   
@@ -29,11 +29,11 @@ public:
 };
 
 //-------------------------------------------------------------------------
-//                    NfgAllNashModule<T>: Member functions
+//                    AllNashSolveModule<T>: Member functions
 //-------------------------------------------------------------------------
 
 template <class T>
-NfgAllNashModule<T>::NfgAllNashModule(const Nfg &N, const PolEnumParams &p)
+AllNashSolveModule<T>::AllNashSolveModule(const Nfg &N, const PolEnumParams &p)
   : NF(N), 
     fullsupport(N), 
     possiblenashsupports(), 
@@ -44,7 +44,7 @@ NfgAllNashModule<T>::NfgAllNashModule(const Nfg &N, const PolEnumParams &p)
 }
 
 
-template <class T> void NfgAllNashModule<T>::NashEnum(void)
+template <class T> void AllNashSolveModule<T>::NashEnum(void)
 {
   for (int i = 1; i <= possiblenashsupports.Length(); i++) {
     long newevals = 0;
@@ -59,23 +59,23 @@ template <class T> void NfgAllNashModule<T>::NashEnum(void)
   }
 }
 
-template <class T> long NfgAllNashModule<T>::NumEvals(void) const
+template <class T> long AllNashSolveModule<T>::NumEvals(void) const
 {
   return nevals;
 }
 
-template <class T> double NfgAllNashModule<T>::Time(void) const
+template <class T> double AllNashSolveModule<T>::Time(void) const
 {
   return time;
 }
 
-template <class T> PolEnumParams &NfgAllNashModule<T>::Parameters(void)
+template <class T> PolEnumParams &AllNashSolveModule<T>::Parameters(void)
 {
   return params;
 }
 
 template <class T>
-const gList<MixedSolution> &NfgAllNashModule<T>::GetSolutions(void) const
+const gList<MixedSolution> &AllNashSolveModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
