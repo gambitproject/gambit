@@ -475,7 +475,7 @@ void BehavProfile<T>::CondPayoff(gDPVector<T> &payoff,
 	// is probably not in general what we want.
 	// CondPayoff() was designed for use with Gobit in which case
 	// this doesn't happen. (?)   -- Ted
-	if (probs(i,j) != (T) 0)
+	if (probs(i,j) != probs(i,j) * (T) 0)
 	  payoff(i, j, k) /= probs(i, j);
 }
 
