@@ -30,10 +30,18 @@ private:
   static int _NumObj;
 
 protected:
+  Portion* _Owner;
+  Portion* _Original;
   Portion( void );
 
 public:
   virtual ~Portion();
+
+  virtual void SetOwner( Portion* p );
+  Portion* Owner( void ) const;
+
+  void SetOriginal( const Portion* p );
+  Portion* Original( void ) const;
 
   virtual PortionType Type( void ) const = 0;
   virtual void Output( gOutput& s ) const = 0;
@@ -836,6 +844,8 @@ protected:
 
 public:
   virtual ~ListPortion();
+
+  void SetOwner( Portion* p );
 
   gBlock< Portion* >& Value( void ) const;
   PortionType Type( void ) const;

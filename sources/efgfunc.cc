@@ -605,8 +605,11 @@ Portion *GSM_PlayerNode(Portion **param)
 
 Portion *GSM_Players(Portion **param)
 {
+  Portion* result;
   BaseExtForm &E = ((BaseEfgPortion *) param[0])->Value();
-  return ArrayToList(E.PlayerList());
+  result = ArrayToList(E.PlayerList());
+  result->SetOwner( param[ 0 ]->Original() );
+  return result;
 }
 
 Portion *GSM_PriorSibling(Portion **param)

@@ -32,7 +32,6 @@
 
 
 
-
 //---------------------------------------------------------------------
 //                          base class
 //---------------------------------------------------------------------
@@ -43,6 +42,9 @@ int Portion::_NumObj = 0;
 
 Portion::Portion( void )
 {
+  _Owner = 0;
+  _Original = 0;
+
 #ifdef MEMCHECK
   _NumObj++;
   gout << "--- Portion Ctor, count: " << _NumObj << "\n";
@@ -64,6 +66,27 @@ bool Portion::operator == ( Portion* p ) const
 }
 
 
+void Portion::SetOwner( Portion* p )
+{
+  _Owner = p; 
+}
+
+Portion* Portion::Owner( void ) const
+{ return _Owner; }
+
+
+void Portion::SetOriginal( const Portion* p )
+{
+  _Original = (Portion*) p;
+}
+
+Portion* Portion::Original( void ) const
+{ 
+  if( !IsReference() )
+    return (Portion*) this;
+  else
+    return _Original; 
+}
 
 
 //---------------------------------------------------------------------
@@ -181,7 +204,11 @@ Portion* IntPortion::ValCopy( void ) const
 { return new IntValPortion( *_Value ); }
 
 Portion* IntPortion::RefCopy( void ) const
-{ return new IntRefPortion( *_Value ); }
+{ 
+  Portion* p = new IntRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void IntPortion::AssignFrom( Portion* p )
 {
@@ -241,7 +268,11 @@ Portion* FloatPortion::ValCopy( void ) const
 { return new FloatValPortion( *_Value ); }
 
 Portion* FloatPortion::RefCopy( void ) const
-{ return new FloatRefPortion( *_Value ); }
+{
+  Portion* p = new FloatRefPortion( *_Value );
+  p->SetOriginal( this );
+  return p;
+}
 
 void FloatPortion::AssignFrom( Portion* p )
 {
@@ -303,7 +334,11 @@ Portion* RationalPortion::ValCopy( void ) const
 { return new RationalValPortion( *_Value ); }
 
 Portion* RationalPortion::RefCopy( void ) const
-{ return new RationalRefPortion( *_Value ); }
+{ 
+  Portion* p = new RationalRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void RationalPortion::AssignFrom( Portion* p )
 {
@@ -365,7 +400,11 @@ Portion* TextPortion::ValCopy( void ) const
 { return new TextValPortion( *_Value ); }
 
 Portion* TextPortion::RefCopy( void ) const
-{ return new TextRefPortion( *_Value ); }
+{ 
+  Portion* p = new TextRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void TextPortion::AssignFrom( Portion* p )
 {
@@ -430,7 +469,11 @@ Portion* BoolPortion::ValCopy( void ) const
 { return new BoolValPortion( *_Value ); }
 
 Portion* BoolPortion::RefCopy( void ) const
-{ return new BoolRefPortion( *_Value ); }
+{ 
+  Portion* p = new BoolRefPortion( *_Value );
+  p->SetOriginal( this );
+  return p;
+}
 
 void BoolPortion::AssignFrom( Portion* p )
 {
@@ -510,7 +553,11 @@ Portion* OutcomePortion::ValCopy( void ) const
 { return new OutcomeValPortion( *_Value ); }
 
 Portion* OutcomePortion::RefCopy( void ) const
-{ return new OutcomeRefPortion( *_Value ); }
+{ 
+  Portion* p = new OutcomeRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void OutcomePortion::AssignFrom( Portion* p )
 {
@@ -572,10 +619,19 @@ void EfPlayerPortion::Output( gOutput& s ) const
 { s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* EfPlayerPortion::ValCopy( void ) const
-{ return new EfPlayerValPortion( *_Value ); }
+{
+  Portion* p = new EfPlayerValPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  return p;
+}
 
 Portion* EfPlayerPortion::RefCopy( void ) const
-{ return new EfPlayerRefPortion( *_Value ); }
+{
+  Portion* p = new EfPlayerRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  p->SetOriginal( this );
+  return p;
+}
 
 void EfPlayerPortion::AssignFrom( Portion* p )
 {
@@ -636,10 +692,19 @@ void InfosetPortion::Output( gOutput& s ) const
 { s << "(Infoset) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* InfosetPortion::ValCopy( void ) const
-{ return new InfosetValPortion( *_Value ); }
+{ 
+  Portion* p = new InfosetValPortion( *_Value );
+  p->SetOwner( _Owner );
+  return p;
+}
 
 Portion* InfosetPortion::RefCopy( void ) const
-{ return new InfosetRefPortion( *_Value ); }
+{
+  Portion* p = new InfosetRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  p->SetOriginal( this );
+  return p;
+}
 
 void InfosetPortion::AssignFrom( Portion* p )
 {
@@ -700,10 +765,19 @@ void NodePortion::Output( gOutput& s ) const
 { s << "(Node) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* NodePortion::ValCopy( void ) const
-{ return new NodeValPortion( *_Value ); }
+{
+  Portion* p = new NodeValPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  return p;
+}
 
 Portion* NodePortion::RefCopy( void ) const
-{ return new NodeRefPortion( *_Value ); }
+{
+  Portion* p = new NodeRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  p->SetOriginal( this );
+  return p;
+}
 
 void NodePortion::AssignFrom( Portion* p )
 {
@@ -766,10 +840,19 @@ void ActionPortion::Output( gOutput& s ) const
 { s << "(Action) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* ActionPortion::ValCopy( void ) const
-{ return new ActionValPortion( *_Value ); }
+{
+  Portion* p = new ActionValPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  return p;
+}
 
 Portion* ActionPortion::RefCopy( void ) const
-{ return new ActionRefPortion( *_Value ); }
+{
+  Portion* p = new ActionRefPortion( *_Value ); 
+  p->SetOwner( _Owner );
+  p->SetOriginal( this );
+  return p;
+}
 
 void ActionPortion::AssignFrom( Portion* p )
 {
@@ -844,7 +927,11 @@ template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
 }
 
 template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
-{ return new MixedRefPortion<T>( *_Value ); }
+{
+  Portion* p = new MixedRefPortion<T>( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 template <class T> void MixedPortion<T>::AssignFrom( Portion* p )
 {
@@ -940,7 +1027,11 @@ template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
 }
 
 template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
-{ return new BehavRefPortion<T>( *_Value ); }
+{
+  Portion* p = new BehavRefPortion<T>( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 template <class T> void BehavPortion<T>::AssignFrom( Portion* p )
 {
@@ -1050,7 +1141,11 @@ template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
 }
 
 template <class T> Portion* NfgPortion<T>::RefCopy( void ) const
-{ return new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); }
+{ 
+  Portion* p = new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 
 
@@ -1144,7 +1239,11 @@ template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
 }
 
 template <class T> Portion* EfgPortion<T>::RefCopy( void ) const
-{ return new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); }
+{ 
+  Portion* p = new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 
 
@@ -1219,7 +1318,11 @@ Portion* OutputPortion::ValCopy( void ) const
 }
 
 Portion* OutputPortion::RefCopy( void ) const
-{ return new OutputRefPortion( *_Value ); }
+{ 
+  Portion* p = new OutputRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void OutputPortion::AssignFrom( Portion* p )
 {
@@ -1294,7 +1397,11 @@ Portion* InputPortion::ValCopy( void ) const
 }
 
 Portion* InputPortion::RefCopy( void ) const
-{ return new InputRefPortion( *_Value ); }
+{ 
+  Portion* p = new InputRefPortion( *_Value ); 
+  p->SetOriginal( this );
+  return p;
+}
 
 void InputPortion::AssignFrom( Portion* p )
 {
@@ -1354,6 +1461,20 @@ ListPortion::~ListPortion()
 gBlock< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
 
+
+void ListPortion::SetOwner( Portion* p )
+{ 
+  int i;
+  int length;
+  _Owner = p;
+  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  {
+    (*_Value)[ i ]->SetOwner( _Owner );
+  }
+}
+
+
+
 PortionType ListPortion::Type( void ) const
 { return porLIST; }
 
@@ -1364,6 +1485,7 @@ Portion* ListPortion::RefCopy( void ) const
 { 
   Portion* p = new ListRefPortion( *_Value ); 
   ( (ListPortion*) p )->_DataType = _DataType;
+  p->SetOriginal( this );
   return p;
 }
 

@@ -2960,6 +2960,8 @@ int main( void )
   // machine->Pop();
 #endif // 0
 
+  machine->Dump();
+
 
 
   machine->InitCallFunction( "WriteEfg" );
@@ -3329,7 +3331,7 @@ int main( void )
   machine->CallFunction();
   machine->Output();
   machine->Pop();
-  
+
   machine->InitCallFunction( "Players" );
   machine->PushRef( "E" );
   machine->Bind();
@@ -3351,8 +3353,18 @@ int main( void )
   machine->Pop();
 
   machine->PushRef( "E" );
+  machine->Dump();
+
+  machine->PushRef( "E" );
   machine->UnAssign();
   machine->Dump();
+
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "NewEfg" );
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
+  machine->Pop();
 
   machine->PushRef( "p" );
   machine->Dump();
@@ -3510,6 +3522,10 @@ int main( void )
 
 
   machine->PushRef( "NE" );
+  machine->Dump();
+
+
+  machine->PushRef( "p" );
   machine->Dump();
 
 
