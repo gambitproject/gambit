@@ -2019,7 +2019,7 @@ void Init_nfgfunc(GSM *gsm)
 
 
   //----------------------- List --------------------------//
-  FuncObj = new FuncDescObj( "List" );
+  FuncObj = new FuncDescObj( "ListForm" );
   FuncObj->SetFuncInfo( GSM_List_MixedFloat, 1 );
   FuncObj->SetParamInfo(GSM_List_MixedFloat, 
 			0, "mixed", porMIXED_FLOAT );

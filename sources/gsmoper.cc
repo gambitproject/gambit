@@ -1663,10 +1663,10 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Assign, 2 );
   FuncObj->SetParamInfo( GSM_Assign, 0, "x", 
-			porVALUE, NO_DEFAULT_VALUE,
+			porANYTYPE, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Assign, 1, "y", 
-			porVALUE );
+			porANYTYPE );
   gsm->AddFunction( FuncObj );
   */
 
@@ -2062,7 +2062,7 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj = new FuncDescObj("Paren");
   FuncObj->SetFuncInfo(GSM_Paren, 1);
-  FuncObj->SetParamInfo(GSM_Paren, 0, "x", porVALUE);
+  FuncObj->SetParamInfo(GSM_Paren, 0, "x", porANYTYPE);
   gsm->AddFunction(FuncObj);
 
   //-------------------- NewStream -------------------------

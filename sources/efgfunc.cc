@@ -2487,7 +2487,7 @@ void Init_efgfunc(GSM *gsm)
 
 
   //----------------------- List --------------------------//
-  FuncObj = new FuncDescObj( "List" );
+  FuncObj = new FuncDescObj( "ListForm" );
   FuncObj->SetFuncInfo( GSM_List_BehavFloat, 1 );
   FuncObj->SetParamInfo(GSM_List_BehavFloat, 
 			0, "behav", porBEHAV_FLOAT );

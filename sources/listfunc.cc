@@ -177,7 +177,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Length");
   FuncObj->SetFuncInfo(GSM_LengthList, 1);
-  FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porALL | porLIST,
+  FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porANYLIST | porLIST,
 			NO_DEFAULT_VALUE);
   FuncObj->SetFuncInfo(GSM_LengthText, 1);
   FuncObj->SetParamInfo(GSM_LengthText, 0, "text", porTEXT);
@@ -186,20 +186,20 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Contains");
   FuncObj->SetFuncInfo(GSM_Contains, 2);
-  FuncObj->SetParamInfo(GSM_Contains, 0, "list", porALL | porLIST);
-  FuncObj->SetParamInfo(GSM_Contains, 1, "x", porVALUE);
+  FuncObj->SetParamInfo(GSM_Contains, 0, "list", porANYLIST | porLIST);
+  FuncObj->SetParamInfo(GSM_Contains, 1, "x", porANYTYPE);
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NthElement");
   FuncObj->SetFuncInfo(GSM_NthElement, 2);
-  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porALL | porLIST);
+  FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porANYLIST | porLIST);
   FuncObj->SetParamInfo(GSM_NthElement, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Remove");
   FuncObj->SetFuncInfo(GSM_Remove, 2);
-  FuncObj->SetParamInfo(GSM_Remove, 0, "list", porALL | porLIST);
+  FuncObj->SetParamInfo(GSM_Remove, 0, "list", porANYLIST | porLIST);
   FuncObj->SetParamInfo(GSM_Remove, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 

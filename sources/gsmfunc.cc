@@ -61,10 +61,10 @@ void Init_userfunc( GSM* gsm )
   func = new FuncDescObj( "Assign" );
   func->SetFuncInfo( prog, 2 );
   func->SetParamInfo( prog, 0, "x", 
-		     porVALUE, NO_DEFAULT_VALUE,
+		     porANYTYPE, NO_DEFAULT_VALUE,
 		     PASS_BY_REFERENCE );
   func->SetParamInfo( prog, 1, "y", 
-				 porVALUE );
+				 porANYTYPE );
   gsm->AddFunction( func );
 
 }
@@ -670,7 +670,7 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
   
   CalledType = p->Type();
   
-  if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
+  if( (ExpectedType != porANYTYPE) && (ExpectedType & porLIST) )
   {
     if( CalledType == porLIST )
     {

@@ -2603,8 +2603,8 @@ PortionTypeTextType _PortionTypeText[] =
   { porPLAYER,           "PLAYER" },
 
   { porNUMERICAL,        "NUMERICAL" },
-  { porALL,              "ALL" },
-  { porVALUE,            "VALUE" }
+  { porANYLIST,          "ANYLIST" },
+  { porANYTYPE,          "ANYTYPE" }
 };
 
 

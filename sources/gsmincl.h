@@ -92,8 +92,8 @@ typedef unsigned long PortionType;
 #define  porEF_SUPPORT ( 0x08000000 )
 
 #define  porNUMERICAL  ( porFLOAT | porINTEGER | porRATIONAL )
-#define  porALL        ( 0xFFFFFFFF )
-#define  porVALUE      ( porALL & ~porREFERENCE )
+#define  porANYLIST    ( 0xFFFFFFFF )
+#define  porANYTYPE    ( porANYLIST & ~porREFERENCE )
 
 
 #endif // GSMINCL_H
