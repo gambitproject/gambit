@@ -47,7 +47,7 @@ Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {
     gbtNfgOutcome outcome = N->NewOutcome();
 
-    N->SetLabel(outcome, nfg.GetOutcomeId(outc).GetLabel());
+    outcome.SetLabel(nfg.GetOutcomeId(outc).GetLabel());
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++) {
       N->SetPayoff(outcome, pl, nfg.Payoff(nfg.GetOutcomeId(outc), pl));

@@ -136,6 +136,13 @@ gText gbtNfgOutcome::GetLabel(void) const
   }
 }
 
+void gbtNfgOutcome::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    rep->m_label = p_label;
+  }
+}
+
 gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
 { 
   return p_stream;
@@ -649,13 +656,6 @@ int Nfg::ProfileLength(void) const
 gbtNfgOutcome Nfg::GetOutcomeId(int p_id) const
 {
   return outcomes[p_id];
-}
-
-void Nfg::SetLabel(gbtNfgOutcome p_outcome, const gText &p_label)
-{
-  if (p_outcome.rep) { 
-    p_outcome.rep->m_label = p_label;
-  }
 }
 
 void Nfg::SetOutcome(const gArray<int> &p_profile,

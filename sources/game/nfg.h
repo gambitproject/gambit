@@ -96,8 +96,6 @@ public:
   gbtNfgOutcome GetOutcomeId(int p_id) const;
   int NumOutcomes(void) const   { return outcomes.Length(); }
 
-  void SetLabel(gbtNfgOutcome, const gText &);
-
   void SetOutcome(const gArray<int> &profile, const gbtNfgOutcome &outcome);
   gbtNfgOutcome GetOutcome(const gArray<int> &profile) const;
   void SetOutcome(const StrategyProfile &p, const gbtNfgOutcome &outcome);

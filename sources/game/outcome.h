@@ -89,7 +89,8 @@ public:
   int GetId(void) const;
   Nfg *GetGame(void) const;
   gText GetLabel(void) const;
-
+  void SetLabel(const gText &);
+  
   gNumber GetPayoff(int p_playerId) const;
   double GetPayoffDouble(int p_playerId) const;
 };

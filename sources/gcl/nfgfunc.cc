@@ -428,8 +428,7 @@ static Portion *GSM_SetName_Strategy(GSM &, Portion **param)
 
 static Portion *GSM_SetName_NfOutcome(GSM &, Portion **param)
 {
-  AsNfgOutcome(param[0]).GetGame()->SetLabel(AsNfgOutcome(param[0]),
-					     AsText(param[1]));
+  AsNfgOutcome(param[0]).SetLabel(AsText(param[1]));
   return param[0]->ValCopy();
 }
 

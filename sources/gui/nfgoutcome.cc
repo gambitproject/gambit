@@ -133,7 +133,7 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
     }
     gText outcomeName = m_parent->UniqueOutcomeName();
     gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
-    m_parent->Game().SetLabel(outcome, outcomeName);
+    outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
       m_parent->Game().SetPayoff(outcome, pl, gNumber(0));
     }
@@ -157,8 +157,7 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
   if (col == 0) { 
     // Edited cell label
-    m_parent->Game().SetLabel(m_parent->Game().GetOutcomeId(row+1),
-			      GetCellValue(row, col).c_str());
+    m_parent->Game().GetOutcomeId(row+1).SetLabel(GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
@@ -183,7 +182,7 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
   gText outcomeName = m_parent->UniqueOutcomeName();
   gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
-  m_parent->Game().SetLabel(outcome, outcomeName);
+  outcome.SetLabel(outcomeName);
   // Appending the row here keeps currently selected row selected
   AppendRows();
   for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {

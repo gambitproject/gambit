@@ -435,7 +435,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
     }
 
     gbtNfgOutcome outcome = p_nfg->NewOutcome();
-    p_nfg->SetLabel(outcome, label);
+    outcome.SetLabel(label);
     for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
       p_nfg->SetPayoff(outcome, pl, payoffs[pl]);
     }
