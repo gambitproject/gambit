@@ -949,6 +949,7 @@ template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
 //----------------------------------
 
 #ifdef GDOUBLE
+
 template<class T>  
 gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
 {
@@ -965,6 +966,28 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
   
   return answer;
 }
+
+template<class T>  
+gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given) 
+{
+  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gList<gMono<T> > list = given.MonomialList();
+  gDouble maxcoeff = (gDouble)0;
+  for (int i =1; i <= list.Length(); i++) {
+    maxcoeff = gmax(maxcoeff,abs((gDouble)list[i].Coef()));
+  }
+  for (int i =1; i <= list.Length(); i++) {
+    gDouble nextcoef = (gDouble)list[i].Coef()/maxcoeff;
+    gPoly<gDouble> next(given.GetSpace(),
+			list[i].ExpV(),
+			nextcoef,
+			given.GetOrder());
+    answer += next;
+  }
+  
+  return answer;
+}
+
 #endif   // GDOUBLE
 
 template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)

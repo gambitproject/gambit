@@ -86,7 +86,8 @@ template <class T> class gPolyList
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 
    // Conversion
-   gList<gPoly<gDouble> > ListTogDouble() const;
+   gList<gPoly<gDouble> > ListTogDouble()  const;
+   gList<gPoly<gDouble> > NormalizedList() const;
 
 friend gOutput& operator << (gOutput& output, const gPolyList<T>& x);
 };  

@@ -510,6 +510,17 @@ gList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
   return newlist;
 }
 
+template<class T> 
+gList<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
+{
+  gList<gPoly<gDouble> > newlist;
+  int ii;
+  for (ii = 1; ii <= List.Length(); ii++) {
+    newlist += gPoly<gDouble>(NormalizationOfPoly(*List[ii]));
+  }
+  return newlist;
+}
+
 template <class T> const gSpace* gPolyList<T>::AmbientSpace() const { return Space; }
 template <class T> const term_order* gPolyList<T>::TermOrder()  const { return Order; }
 template <class T> const int gPolyList<T>::Length() const { return List.Length(); }

@@ -73,6 +73,7 @@ template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRationa
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
+template gPoly<gDouble> NormalizationOfPoly(const gPoly<gRational>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
 template gText &operator<<(gText &, const gPoly<gRational> &);
@@ -83,6 +84,7 @@ template gPoly<gNumber> operator*(const gPoly<gNumber> &poly, const gNumber val)
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
+template gPoly<gDouble> NormalizationOfPoly(const gPoly<gNumber>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
 template gText &operator<<(gText &, const gPoly<gNumber> &);
@@ -93,6 +95,7 @@ template gPoly<double> operator*(const gPoly<double> &poly, const double val);
 
 #ifdef GDOUBLE
 template gPoly<gDouble> TogDouble(const gPoly<double>&);
+template gPoly<gDouble> NormalizationOfPoly(const gPoly<double>&);
 #endif   // GDOUBLE
 template gOutput &operator<<(gOutput &f, const gPoly<double> &y);
 template gText &operator<<(gText &, const gPoly<double> &);
@@ -105,6 +108,7 @@ template gPoly<gDouble> operator+(const gDouble val, const gPoly<gDouble> &poly)
 template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
+template gPoly<gDouble> NormalizationOfPoly(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
 template gText &operator<<(gText &, const gPoly<gDouble> &);
 #endif   // GDOUBLE
@@ -113,6 +117,7 @@ template class gPoly<long>;
 template gPoly<long> operator*(const long val, const gPoly<long> poly);
 template gPoly<long> operator*(const gPoly<long> poly, const long val);
 template gPoly<gDouble> TogDouble(const gPoly<long>&);
+template gPoly<gDouble> NormalizationOfPoly(const gPoly<long>&);
 template gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 */
 

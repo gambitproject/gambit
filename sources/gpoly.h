@@ -196,7 +196,8 @@ public:
   //-------------
 
 #ifdef GDOUBLE
-template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
+template <class T> gPoly<gDouble> TogDouble(const gPoly<T>&);
+template <class T> gPoly<gDouble> NormalizationOfPoly(const gPoly<T>&);
 #endif   // GDOUBLE
 
 // global multiply by scalar operators
