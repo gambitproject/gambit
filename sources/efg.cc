@@ -46,12 +46,7 @@ TEMPLATE class gBlock<Outcome *>;
 
 #pragma -Jgx
 
-
 #include "extform.h"
-#include "player.h"
-#include "infoset.h"
-#include "node.h"
-#include "outcome.h"
 #include "gconvert.h"
 #include <assert.h>
 

@@ -139,6 +139,11 @@ template <class T> class ExtForm : public BaseExtForm   {
 		    gPVector<T> &probs) const;
 };
 
+#include "player.h"
+#include "infoset.h"
+#include "node.h"
+#include "outcome.h"
+
 
 // These functions are provided in readefg.y/readefg.cc
 int ReadEfgFile(gInput &, BaseExtForm *&);
