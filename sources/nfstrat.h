@@ -75,7 +75,8 @@ public:
   StrategySet(const NFPlayer &p);
   
   StrategySet &operator=(const StrategySet &s); 
-  
+  bool operator==(const StrategySet &s);
+
   virtual ~StrategySet();
 
   //
@@ -127,7 +128,7 @@ public:
   Support(const Support &s); 
   virtual ~Support();
   Support &operator=(const Support &s);
-  
+  bool operator==(const Support &s);
   void SetStrategySet(int pl, StrategySet *s)   { sups[pl] = s; }
   StrategySet *GetStrategySet(int pl)     { return sups[pl]; }
 

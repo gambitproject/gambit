@@ -117,6 +117,14 @@ StrategySet &StrategySet::operator=(const StrategySet &s)
   return (*this);
 }
 
+bool StrategySet::operator==(const StrategySet &s)
+{
+  assert( strategies.Length() == s.strategies.Length());
+  for (int i = 1; i <= strategies. Length() 
+       && strategies[i] == s.strategies[i]; i++);
+  if (i > strategies.Length()) return (true);
+  else return (false);
+}
 
 //------------------------------------------
 // StrategySet: Member functions 
@@ -190,6 +198,17 @@ Support &Support::operator=(const Support &s)
   }
   return (*this);
 }
+
+bool Support::operator==(const Support &s)
+{
+  assert(sups.Length() == s.sups.Length());
+  for (int i = 1; i <= sups.Length() && sups[i] == s.sups[i]; i++);
+  if (i > sups.Length()) return (true);
+  else return (false);
+}
+  
+  
+  
 
 //------------------------
 // Support: Members
