@@ -1,7 +1,7 @@
 //
 // FILE: efbasis.h -- Declaration of EFBasis class
 //
-// $Id$ 
+// @(#)efbasis.h	1.2 02/10/98 
 //
 
 #ifndef EFBASIS_H

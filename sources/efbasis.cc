@@ -1,7 +1,7 @@
 //
 // FILE: efbasis.cc -- Implementation of EFBasis class
 //
-// $Id$ 
+// @(#)efbasis.cc	1.1 02/10/98 
 //
 
 #include "efbasis.h"
