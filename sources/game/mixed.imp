@@ -331,7 +331,7 @@ MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
     for (int st = 1; st <= N->NumStrats(pl); st++)  {
       T prob = (T) 1;
 
-      for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets(); iset++) {
+      for (int iset = 1; iset <= efg.GetPlayer(pl).NumInfosets(); iset++) {
 	if ((*efg.GetLexicon()->strategies[pl][st])[iset] > 0)
 	  prob *= p_profile(pl, iset, (*efg.GetLexicon()->strategies[pl][st])[iset]);
       }

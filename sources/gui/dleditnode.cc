@@ -62,7 +62,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
 	  infosets[iset]->NumActions() == p_node->NumChildren()) {
 	m_infosetList.Append(infosets[iset]);
 	m_infoset->Append(wxString::Format("Player %d, Infoset %d",
-			  infosets[iset]->GetPlayer()->GetNumber(),
+			  infosets[iset]->GetPlayer().GetId(),
 			  infosets[iset]->GetNumber()));
 	if (infosets[iset] == p_node->GetInfoset()) {
 	  selection = m_infosetList.Length();
@@ -109,10 +109,10 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
       item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(efg.Payoff(outcome, efg.Players()[1])) + ", " +
-	     ToText(efg.Payoff(outcome, efg.Players()[2])));
+    item += (" (" + ToText(efg.Payoff(outcome, efg.GetPlayer(1))) + ", " +
+	     ToText(efg.Payoff(outcome, efg.GetPlayer(2))));
     if (efg.NumPlayers() > 2) {
-      item += ", " + ToText(efg.Payoff(outcome, efg.Players()[3]));
+      item += ", " + ToText(efg.Payoff(outcome, efg.GetPlayer(3)));
       if (efg.NumPlayers() > 3) {
 	item += ",...)";
       }

@@ -850,9 +850,9 @@ static Portion *GSM_Nfg(GSM &, Portion **param)
 Portion* GSM_Payoff_Behav(GSM &, Portion** param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
 
-  return new NumberPortion(bp->Payoff(player->GetNumber()));
+  return new NumberPortion(bp->Payoff(player.GetId()));
 }
 
 Portion* GSM_Payoff_Mixed(GSM &, Portion** param)

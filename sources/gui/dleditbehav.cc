@@ -70,19 +70,19 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   wxTreeItemId firstID;
 
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
-    EFPlayer *player = p_profile.GetGame().Players()[pl];
+    gbtEfgPlayer player = p_profile.GetGame().GetPlayer(pl);
     wxTreeItemId id;
-    if (player->GetName() != "") {
+    if (player.GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
-				     (char *) player->GetName());
+				     (char *) player.GetLabel());
     }
     else {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
 				     wxString::Format("Player %d", pl));
     }
     m_infosetTree->SetItemBold(id, true);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Infoset *infoset = player->Infosets()[iset];
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      Infoset *infoset = player.GetInfoset(iset);
       wxTreeItemId isetID;
       if (infoset->GetName() != "") {
 	isetID = m_infosetTree->AppendItem(id,
@@ -92,8 +92,8 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 	isetID = m_infosetTree->AppendItem(id, wxString::Format("(%d,%d)",
 								pl, iset));
       }
-      m_map.Define(isetID, player->Infosets()[iset]);
-      if (player->Infosets()[iset] == m_lastInfoset) {
+      m_map.Define(isetID, player.GetInfoset(iset));
+      if (player.GetInfoset(iset) == m_lastInfoset) {
 	firstID = isetID;
       }
     }

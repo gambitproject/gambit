@@ -58,21 +58,21 @@ void Lexicon::MakeLink(const efgGame *efg, Nfg *nfg)
   N = nfg;
 }
 
-void Lexicon::MakeStrategy(EFPlayer *p)
+void Lexicon::MakeStrategy(gbtEfgPlayer p)
 {
-  lexCorrespondence *c = new lexCorrespondence(p->NumInfosets());
+  lexCorrespondence *c = new lexCorrespondence(p.NumInfosets());
   
-  for (int i = 1; i <= p->NumInfosets(); i++)  {
-    if (p->Infosets()[i]->flag == 1)
-      (*c)[i] = p->Infosets()[i]->whichbranch;
+  for (int i = 1; i <= p.NumInfosets(); i++)  {
+    if (p.GetInfoset(i)->flag == 1)
+      (*c)[i] = p.GetInfoset(i)->whichbranch;
     else
       (*c)[i] = 0;
   }
-  strategies[p->GetNumber()].Append(c);
+  strategies[p.GetId()].Append(c);
 }
 
 void Lexicon::MakeReducedStrats(const EFSupport &S,
-				EFPlayer *p, Node *n, Node *nn)
+				gbtEfgPlayer p, Node *n, Node *nn)
 {
   int i;
   Node *m, *mm;
@@ -80,7 +80,7 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
   if (!n->parent)  n->ptr = 0;
 
   if (S.GetGame().NumChildren(n) > 0)  {
-    if (n->infoset->player == p)  {
+    if (gbtEfgPlayer(n->infoset->player) == p)  {
       if (n->infoset->flag == 0)  {
 	// we haven't visited this infoset before
 	n->infoset->flag = 1;
@@ -138,8 +138,9 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   int i;
   const efgGame &E = support.GetGame();
   Lexicon *L = new Lexicon(E);
-  for (i = 1; i <= E.NumPlayers(); i++)
-    L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);
+  for (i = 1; i <= E.NumPlayers(); i++) {
+    L->MakeReducedStrats(support, E.GetPlayer(i), E.RootNode(), NULL);
+  }
 
   gArray<int> dim(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)
@@ -149,7 +150,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   L->N->SetTitle(E.GetTitle());
 
   for (i = 1; i <= E.NumPlayers(); i++)   {
-    L->N->GetPlayer(i).SetLabel(E.Players()[i]->GetName());
+    L->N->GetPlayer(i).SetLabel(E.GetPlayer(i).GetLabel());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gText name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
@@ -211,8 +212,8 @@ Nfg *MakeAfg(const efgGame &E)
   afg->SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
-    for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)  {
-      Infoset *s = E.Players()[epl]->Infosets()[iset];
+    for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)  {
+      Infoset *s = E.GetPlayer(epl).GetInfoset(iset);
       for (int act = 1; act <= s->NumActions(); act++)  {
 	afg->GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
       }
@@ -223,8 +224,9 @@ Nfg *MakeAfg(const efgGame &E)
   int pl = afg->NumPlayers();
 
   gArray<int> dim(E.NumPlayers());
-  for (int i = 1; i <= dim.Length(); i++)
-    dim[i] = E.Players()[i]->NumInfosets();
+  for (int i = 1; i <= dim.Length(); i++) {
+    dim[i] = E.GetPlayer(i).NumInfosets();
+  }
   gPVector<int> profile(dim);
   ((gVector<int> &) profile).operator=(1);
 
@@ -238,7 +240,7 @@ Nfg *MakeAfg(const efgGame &E)
     }
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
-      for (int iset = 1; iset <= E.Players()[epl]->NumInfosets(); iset++, npl++)
+      for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)
 	afg->SetPayoff(iter.GetOutcome(), npl, payoff[epl]);
 
     

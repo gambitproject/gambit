@@ -570,23 +570,21 @@ public:
 // EfPlayer
 //------------
 
-class EFPlayer;
-
 class EfPlayerPortion : public Portion  {
 protected:
-  EFPlayer** _Value;
-  bool _ref;
+  gbtEfgPlayer *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  EfPlayerPortion(EFPlayer *&, bool);
+  EfPlayerPortion(gbtEfgPlayer *&, bool);
 
 public:
-  EfPlayerPortion(EFPlayer *);
+  EfPlayerPortion(gbtEfgPlayer); 
   virtual ~EfPlayerPortion();
 
-  EFPlayer *Value(void) const;
-  void SetValue(EFPlayer *);
+  gbtEfgPlayer Value(void) const;
+  void SetValue(gbtEfgPlayer); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -601,6 +599,8 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gbtEfgPlayer AsEfgPlayer(Portion *portion) 
+{ return ((EfPlayerPortion *) portion)->Value(); }
 
 //----------
 // Infoset

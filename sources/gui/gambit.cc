@@ -90,8 +90,8 @@ bool GambitApp::OnInit(void)
 
   if (m_gameList.Length() == 0) {
     efgGame *efg = new efgGame;
-    efg->NewPlayer()->SetName("Player 1");
-    efg->NewPlayer()->SetName("Player 2");
+    efg->NewPlayer().SetLabel("Player 1");
+    efg->NewPlayer().SetLabel("Player 2");
     efg->SetTitle("Untitled Extensive Form Game");
 
     EfgShow *efgShow = new EfgShow(*efg, 0);
@@ -130,7 +130,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       efgGame *efg = new efgGame;
       efg->SetTitle("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-	efg->NewPlayer()->SetName(gText("Player") + ToText(pl));
+	efg->NewPlayer().SetLabel(gText("Player") + ToText(pl));
       }
       EfgShow *efgShow = new EfgShow(*efg, 0);
       efgShow->SetFilename("");

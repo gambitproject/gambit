@@ -65,7 +65,7 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   // Make sure that Chance player has a name
-  m_efg.GetChance()->SetName("Chance");
+  m_efg.GetChance().SetLabel("Chance");
 
   SetBackgroundColour(*wxWHITE);
   MakeMenus();

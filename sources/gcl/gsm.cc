@@ -994,11 +994,6 @@ void GSM::UnAssignEfgElement( efgGame *game, PortionSpec spec, void* data )
 	    if( ((EfBasisPortion*) varslist[i])->Value() == data )
 	      _RefTableStack->Peek()->Remove( varslist[i] );
 	  }
-	  if( spec.Type & porEFPLAYER )
-	  {
-	    if( ((EfPlayerPortion*) varslist[i])->Value() == data )
-	      _RefTableStack->Peek()->Remove( varslist[i] );
-	  }
 	  if( spec.Type & porINFOSET )
 	  {
 	    if( ((InfosetPortion*) varslist[i])->Value() == data )

@@ -65,7 +65,6 @@ class Action   {
 
 class Infoset   {
   friend class efgGame;
-  friend class EFPlayer;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -75,12 +74,12 @@ class Infoset   {
     efgGame *E;
     int number;
     gText name;
-    EFPlayer *player;
+    gbt_efg_player_rep *player;
     gBlock<Action *> actions;
     gBlock<Node *> members;
     int flag, whichbranch;
     
-    Infoset(efgGame *e, int n, EFPlayer *p, int br);
+    Infoset(efgGame *e, int n, gbt_efg_player_rep *p, int br);
     virtual ~Infoset();  
 
     virtual void PrintActions(gOutput &f) const;
@@ -88,9 +87,8 @@ class Infoset   {
   public:
     efgGame *Game(void) const   { return E; }
 
-    bool IsChanceInfoset(void) const   { return (player->IsChance()); }
-
-    EFPlayer *GetPlayer(void) const    { return player; }
+    virtual bool IsChanceInfoset(void) const { return false; }
+    gbtEfgPlayer GetPlayer(void) const;
 
     void SetName(const gText &s)    { name = s; }
     const gText &GetName(void) const   { return name; }
@@ -127,12 +125,14 @@ class ChanceInfoset : public Infoset  {
   private:
     gBlock<gNumber> probs;
 
-    ChanceInfoset(efgGame *E, int n, EFPlayer *p, int br);
+    ChanceInfoset(efgGame *E, int n, gbt_efg_player_rep *p, int br);
     virtual ~ChanceInfoset()    { }
 
     void PrintActions(gOutput &f) const;
 
   public:
+    bool IsChanceInfoset(void) const { return true; }
+
     Action *InsertAction(int where);
     void RemoveAction(int which);
 

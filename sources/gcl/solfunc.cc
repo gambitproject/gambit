@@ -57,9 +57,9 @@ static Portion *GSM_ActionProb(GSM &, Portion **param)
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
   Infoset* infoset = action->BelongsTo();
-  EFPlayer* player = infoset->GetPlayer();
+  gbtEfgPlayer player = infoset->GetPlayer();
   
-  if (player->IsChance()) {
+  if (player.IsChance()) {
     return new NumberPortion(profile->ActionProb(action));
   }
   else if (profile->Support().Contains(action)) {
@@ -80,7 +80,7 @@ static Portion *GSM_ActionValue(GSM &, Portion **param)
   Action* action = ((ActionPortion*) param[1])->Value();
   Infoset *infoset = action->BelongsTo();
 
-  if (infoset->GetPlayer()->IsChance())
+  if (infoset->GetPlayer().IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Contains(action))  {
     if(profile->IsetProb(infoset)>gNumber(0.0))
@@ -338,10 +338,10 @@ Portion* GSM_Mixed(GSM &, Portion** param)
 static Portion *GSM_NodeValue(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
   Node* n = ((NodePortion*) param[2])->Value();
 
-  return new NumberPortion(bp->NodeValue(n)[p->GetNumber()]);
+  return new NumberPortion(bp->NodeValue(n)[player.GetId()]);
 }
 
 //----------------
@@ -461,15 +461,11 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
   
   BehavSolution *P = new BehavSolution(*((BehavPortion*) param[0])->Value());
   efgGame &E = P->GetGame();
-  gArray< EFPlayer* > player = E.Players();
   
-  for(i = 1; i <= E.NumPlayers(); i++)
-  {
-    for(j = 1; j <= E.Players()[i]->NumInfosets(); j++)
-    {
-      if(((InfosetPortion*) param[1])->Value() ==
-	 E.Players()[i]->Infosets()[j])
-      {
+  for (i = 1; i <= E.NumPlayers(); i++) {
+    for(j = 1; j <= E.GetPlayer(i).NumInfosets(); j++) {
+      if (((InfosetPortion*) param[1])->Value() ==
+	  E.GetPlayer(i).GetInfoset(j)) {
 	PlayerNum = i;
 	InfosetNum = j;
 	break;
@@ -483,10 +479,9 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     throw gclRuntimeError("Mismatching number of actions");
   }  
 
-  for(k = 1; 
-      k <= E.Players()[PlayerNum]->Infosets()[InfosetNum]->NumActions();
-      k++)
-  {
+  for (k = 1; 
+       k <= E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->NumActions();
+       k++) {
     p3 = ((ListPortion*) param[2])->SubscriptCopy(k);
     if(p3->Spec().ListDepth > 0)
     {
@@ -496,7 +491,7 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    P->Set((E.Players()[PlayerNum]->Infosets()[InfosetNum]->Actions()[k]),
+    P->Set((E.GetPlayer(PlayerNum).GetInfoset(InfosetNum)->Actions()[k]),
 	   ((NumberPortion*) p3)->Value());
 
     delete p3;

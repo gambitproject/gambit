@@ -668,7 +668,7 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     }
     else {
       Infoset *infoset =
-	p_efg->AppendNode(p_node, p_efg->Players()[(*p_nodeData)->m_player],
+	p_efg->AppendNode(p_node, p_efg->GetPlayer((*p_nodeData)->m_player),
 			  (*p_nodeData)->m_infosetData->m_actions.Length());
 
       infoset->SetName((*p_nodeData)->m_infosetData->m_name);
@@ -721,7 +721,7 @@ static void BuildEfg(efgGame *p_efg, TreeData &p_treeData)
   p_efg->SetComment(p_treeData.m_comment);
   for (PlayerData *player = p_treeData.m_firstPlayer; player;
        player = player->m_next) {
-    p_efg->NewPlayer()->SetName(player->m_name);
+    p_efg->NewPlayer().SetLabel(player->m_name);
   }
   NodeData *node = p_treeData.m_firstNode;
   BuildSubtree(p_efg, p_efg->RootNode(), p_treeData, &node);

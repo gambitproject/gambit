@@ -347,14 +347,15 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
     return (const char *) n->GetName();
   case NODE_ABOVE_PLAYER:
     return ((const char *) 
-	    ((n->GetPlayer()) ? n->GetPlayer()->GetName() : gText("")));
+	    (!(n->GetPlayer().IsNull()) ? 
+	     n->GetPlayer().GetLabel() : gText("")));
   case NODE_ABOVE_ISETLABEL:
     return ((const char *)
 	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
   case NODE_ABOVE_ISETID:
     return ((const char *)
 	    ((n->GetInfoset()) ?
-	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
+	     ("(" + ToText(n->GetPlayer().GetId()) +
 	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
   case NODE_ABOVE_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
@@ -380,14 +381,15 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
     return (const char *) n->GetName();
   case NODE_BELOW_PLAYER:
     return ((const char *)
-	    ((n->GetPlayer()) ? n->GetPlayer()->GetName() : gText("")));
+	    ((!n->GetPlayer().IsNull()) ?
+	     n->GetPlayer().GetLabel() : gText("")));
   case NODE_BELOW_ISETLABEL:
     return ((const char *)
 	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
   case NODE_BELOW_ISETID:
     return ((const char *)
 	    ((n->GetInfoset()) ?
-	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
+	     ("(" + ToText(n->GetPlayer().GetId()) +
 	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
   case NODE_BELOW_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
@@ -535,7 +537,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
 	y1 = yn;
       }
 
-      if (!p_node->GetPlayer()->IsChance() &&
+      if (!p_node->GetPlayer().IsChance() &&
 	  !p_support.Contains(p_node->GetInfoset()->Actions()[i])) {
 	m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
       }
@@ -557,12 +559,12 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
 						    settings.TineLength()));
   }
 
-  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+  if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer().IsChance()) {
     entry->SetColor(settings.ChanceColor());
     entry->SetToken(settings.ChanceToken());
   }
-  else if (p_node->GetPlayer()) {
-    entry->SetColor(settings.PlayerColor(p_node->GetPlayer()->GetNumber()));
+  else if (!p_node->GetPlayer().IsNull()) {
+    entry->SetColor(settings.PlayerColor(p_node->GetPlayer().GetId()));
     entry->SetToken(settings.PlayerToken());
   }
   else {
@@ -665,7 +667,7 @@ void efgTreeLayout::FillInfosetTable(Node *n, const EFSupport &cur_sup)
   if (n->Game()->NumChildren(n)>0) {
     for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
       bool in_sup = true;
-      if (n->GetPlayer()->GetNumber()) {
+      if (n->GetPlayer().GetId()) {
 	in_sup = cur_sup.Contains(n->GetInfoset()->Actions()[i]);
       }
             

@@ -49,14 +49,14 @@ bool EFSupport::Dominates(const Action *a, const Action *b,
       ("Dominates(..) needs actions in same infoset.\n");
 
   const EFSupportWithActiveInfo SAct(*this);
-  const EFPlayer *player = infoset->GetPlayer();
-  int pl = player->GetNumber();
+  gbtEfgPlayer player = infoset->GetPlayer();
+  int pl = player.GetId();
   bool equal = true;
 
   if (!conditional) {
     EfgContIter A(*this), B(*this);
-    A.Freeze(player->GetNumber(), infoset->GetNumber()); 
-    B.Freeze(player->GetNumber(), infoset->GetNumber());
+    A.Freeze(player.GetId(), infoset->GetNumber()); 
+    B.Freeze(player.GetId(), infoset->GetNumber());
     A.Set(a);
     B.Set(b);
 
@@ -195,7 +195,7 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
 {
   bool action_was_eliminated = false;
 
-  for (int iset = 1; iset <= S.GetGame().Players()[pl]->NumInfosets();
+  for (int iset = 1; iset <= S.GetGame().GetPlayer(pl).NumInfosets();
        iset++, cumiset++) {
     status.SetProgress((double) cumiset /
 		       (double) S.GetGame().NumPlayerInfosets());

@@ -128,7 +128,7 @@ static void PickRandomProfile(BehavProfile<double> &p)
   double sum, tmp;
 
   for (int pl = 1; pl <= p.GetGame().NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.GetGame().Players()[pl]->NumInfosets();
+    for (int iset = 1; iset <= p.GetGame().GetPlayer(pl).NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;

@@ -52,7 +52,7 @@ public:
   int GetActionId(void) const { return act; }
   Infoset *GetInfoset(void) const;
   int GetInfosetId(void) const { return iset; }
-  EFPlayer *GetPlayer(void) const;
+  gbtEfgPlayer GetPlayer(void) const;
   int GetPlayerId(void) const { return pl; }
 
   bool IsLast(void) const;

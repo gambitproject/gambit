@@ -157,13 +157,13 @@ void EfgSupportWindow::UpdateValues(void)
 
   m_actionTree->AddRoot((char *) m_parent->GetSupport()->GetName());
   for (int pl = 1; pl <= m_parent->Game()->NumPlayers(); pl++) {
-    EFPlayer *player = m_parent->Game()->Players()[pl];
+    gbtEfgPlayer player = m_parent->Game()->GetPlayer(pl);
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
-					       (char *) player->GetName());
+					       (char *) player.GetLabel());
     
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Infoset *infoset = player->Infosets()[iset];
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      Infoset *infoset = player.GetInfoset(iset);
       wxTreeItemId isetID = m_actionTree->AppendItem(id, 
 						     (char *) infoset->GetName());
       for (int act = 1; act <= infoset->NumActions(); act++) {

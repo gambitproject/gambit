@@ -31,7 +31,6 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 
-class EFPlayer;
 class Infoset;
 class Node;
 class Action;
@@ -43,6 +42,7 @@ template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
 #include "outcome.h"
+#include "efplayer.h"
 
 class efgGame {
 private:
@@ -60,10 +60,10 @@ protected:
   mutable long m_revision;
   mutable long m_outcome_revision;
   gText title, comment;
-  gBlock<EFPlayer *> players;
+  gBlock<gbt_efg_player_rep *> players;
   gBlock<gbt_efg_outcome_rep *> outcomes;
   Node *root;
-  EFPlayer *chance;
+  gbt_efg_player_rep *chance;
   mutable Nfg *afg;
   mutable Lexicon *lexicon;
   
@@ -147,9 +147,9 @@ public:
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
-  EFPlayer *GetChance(void) const;
-  EFPlayer *NewPlayer(void);
-  const gArray<EFPlayer *> &Players(void) const  { return players; }
+  gbtEfgPlayer GetChance(void) const;
+  gbtEfgPlayer NewPlayer(void);
+  gbtEfgPlayer GetPlayer(int index) const;
 
   // DATA ACCESS -- INFOSETS
   gBlock<Infoset *> Infosets(void) const;
@@ -165,13 +165,13 @@ public:
   void SetLabel(gbtEfgOutcome &, const gText &);
  
   // EDITING OPERATIONS
-  Infoset *AppendNode(Node *n, EFPlayer *p, int br);
+  Infoset *AppendNode(Node *n, gbtEfgPlayer, int br);
   Infoset *AppendNode(Node *n, Infoset *s);
   Node *DeleteNode(Node *n, Node *keep);
-  Infoset *InsertNode(Node *n, EFPlayer *p, int br);
+  Infoset *InsertNode(Node *n, gbtEfgPlayer, int br);
   Infoset *InsertNode(Node *n, Infoset *s);
 
-  Infoset *CreateInfoset(EFPlayer *pl, int br);
+  Infoset *CreateInfoset(gbtEfgPlayer, int br);
   bool DeleteEmptyInfoset(Infoset *);
   void DeleteEmptyInfosets(void);
   Infoset *JoinInfoset(Infoset *s, Node *n);
@@ -179,7 +179,7 @@ public:
   Infoset *SplitInfoset(Node *n);
   Infoset *MergeInfoset(Infoset *to, Infoset *from);
 
-  Infoset *SwitchPlayer(Infoset *s, EFPlayer *p);
+  Infoset *SwitchPlayer(Infoset *s, gbtEfgPlayer p);
   
   Node *CopyTree(Node *src, Node *dest);
   Node *MoveTree(Node *src, Node *dest);
@@ -189,7 +189,7 @@ public:
   Action *InsertAction(Infoset *s, const Action *at);
   Infoset *DeleteAction(Infoset *s, const Action *a);
 
-  void Reveal(Infoset *, const gArray<EFPlayer *> &);
+  void Reveal(Infoset *, gbtEfgPlayer);
 
   void SetChanceProb(Infoset *, int, const gNumber &);
   gNumber GetChanceProb(Infoset *, int) const;
@@ -197,8 +197,8 @@ public:
   gArray<gNumber> GetChanceProbs(Infoset *) const;
 
   void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
-  gNumber Payoff(const gbtEfgOutcome &, const EFPlayer *) const;
-  gNumber Payoff(const Node *, const EFPlayer *) const;
+  gNumber Payoff(const gbtEfgOutcome &, const gbtEfgPlayer &) const;
+  gNumber Payoff(const Node *, const gbtEfgPlayer &) const;
   gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 
   void InitPayoffs(void) const;
@@ -218,7 +218,6 @@ public:
   int           NumChanceInfosets(void) const;
   gPVector<int> NumActions(void) const;
   int           NumPlayerActions(void) const;
-  int           NumChanceActions(void) const;
   gPVector<int> NumMembers(void) const;
   
   // COMPUTING VALUES OF PROFILES
@@ -236,12 +235,12 @@ public:
   friend Nfg *MakeAfg(const efgGame &);
 
   // These are auxiliary functions used by the .efg file reader code
-  Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
-  Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
+  Infoset *GetInfosetByIndex(gbtEfgPlayer, int index) const;
+  Infoset *CreateInfosetByIndex(gbtEfgPlayer, int index, int br);
   gbtEfgOutcome GetOutcomeByIndex(int index) const;
   gbtEfgOutcome CreateOutcomeByIndex(int index);
   void Reindex(void);
-  Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
+  Infoset *CreateInfoset(int n, gbtEfgPlayer, int br);
 };
 
 //#include "behav.h"
@@ -274,7 +273,7 @@ template <class T> class PureBehavProfile   {
 
     // Manipulation
     void Set(const Action *);
-    void Set(const EFPlayer *, const gArray<const Action *> &);
+    void Set(const gbtEfgPlayer &, const gArray<const Action *> &);
 
     // Information
     const Action *GetAction(const Infoset *) const;

@@ -90,9 +90,9 @@ static Portion *GSM_BasisActions(GSM &, Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
-  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
-                ArrayToList(sup->Actions(s->GetPlayer()->GetNumber(),
-					 s->GetNumber()));
+  Portion *por = ((s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
+		  ArrayToList(sup->Actions(s->GetPlayer().GetId(),
+					   s->GetNumber())));
   return por;
 }
 
@@ -142,9 +142,9 @@ static Portion *GSM_BasisNodes(GSM &, Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
 
-  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Members()) :
-                ArrayToList(sup->Nodes(s->GetPlayer()->GetNumber(),
-					 s->GetNumber()));
+  Portion *por = ((s->IsChanceInfoset()) ? ArrayToList(s->Members()) :
+		  ArrayToList(sup->Nodes(s->GetPlayer().GetId(),
+					 s->GetNumber())));
   return por;
 }
 
@@ -194,8 +194,9 @@ static Portion *GSM_ChanceProb(GSM &, Portion **param)
 {
   const Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
-  if (!infoset->GetPlayer()->IsChance()) 
+  if (!infoset->GetPlayer().IsChance()) { 
     throw gclRuntimeError("Action must belong to the chance player");
+  }
   efgGame *efg = infoset->Game();
 
   return new NumberPortion(efg->GetChanceProb(infoset, action->GetNumber()));
@@ -422,9 +423,14 @@ static Portion *GSM_Infoset_Action(GSM &, Portion **param)
 
 static Portion *GSM_Infosets(GSM &, Portion **param)
 {
-  EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
+  gbtEfgPlayer player = AsEfgPlayer(param[0]);
 
-  return ArrayToList(p->Infosets());
+  ListPortion *ret = new ListPortion;
+  for (gbtEfgInfosetIterator infoset(player); !infoset.End(); infoset++) {
+    ret->Append(new InfosetPortion(*infoset));
+  }
+
+  return ret;
 }
 
 //----------------
@@ -647,8 +653,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
   case porEFOUTCOME:
     return new TextPortion(((EfOutcomePortion *) param[0])->Value().GetLabel());
   case porEFPLAYER:
-    return new TextPortion(((EfPlayerPortion *) param[0])->Value()->
-			   GetName());
+    return new TextPortion(AsEfgPlayer(param[0]).GetLabel());
   case porEFSUPPORT:
     return new TextPortion(((EfSupportPortion *) param[0])->Value()->GetName());
   case porEFG:
@@ -668,8 +673,9 @@ static Portion *GSM_NewEfg(GSM &, Portion **param)
 {
   efgGame *E = new efgGame;
   ListPortion *players = (ListPortion *) param[0];
-  for (int i = 1; i <= players->Length(); i++)
-    E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
+  for (int i = 1; i <= players->Length(); i++) {
+    E->NewPlayer().SetLabel(((TextPortion *) (*players)[i])->Value());
+  }
   return new EfgPortion(E);
 }
 
@@ -680,16 +686,15 @@ static Portion *GSM_NewEfg(GSM &, Portion **param)
 
 static Portion *GSM_NewInfoset(GSM &gsm, Portion **param)
 {
-  EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
+  gbtEfgPlayer player = AsEfgPlayer(param[0]);
   int n = ((NumberPortion *) param[1])->Value();
 
-  if (n <= 0)
+  if (n <= 0) {
     throw gclRuntimeError("Information sets must have at least one action");
+  }
 
-  Infoset *s = p->Game()->CreateInfoset(p, n);
-
-  gsm.UnAssignGameElement(p->Game(), true, porBEHAV | porEFSUPPORT);
-
+  Infoset *s = player.GetGame()->CreateInfoset(player, n);
+  gsm.UnAssignGameElement(player.GetGame(), true, porBEHAV | porEFSUPPORT);
   return new InfosetPortion(s);
 }
  
@@ -712,11 +717,11 @@ static Portion *GSM_NewOutcome(GSM &, Portion **param)
 static Portion *GSM_NewPlayer(GSM &gsm, Portion **param)
 {
   efgGame &E = *((EfgPortion*) param[0])->Value();
-  EFPlayer *p = E.NewPlayer();
+  gbtEfgPlayer player = E.NewPlayer();
 
   gsm.UnAssignGameElement(&E, true, porBEHAV | porEFSUPPORT);
 
-  return new EfPlayerPortion(p);
+  return new EfPlayerPortion(player);
 }
 
 //----------------
@@ -826,8 +831,8 @@ static Portion *GSM_Payoff(GSM &, Portion **param)
   if (param[0]->Spec().Type == porNULL)
     return new NumberPortion(0);
   gbtEfgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
-  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
-  efgGame *efg = player->Game();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
+  efgGame *efg = player.GetGame();
 
   return new NumberPortion(efg->Payoff(outcome, player));
 }
@@ -856,7 +861,12 @@ static Portion *GSM_Players(GSM &, Portion **param)
 {
   efgGame &E = *((EfgPortion*) param[0])->Value();
 
-  return ArrayToList(E.Players());
+  ListPortion *ret = new ListPortion;
+  for (int pl = 1; pl <= E.NumPlayers(); pl++) {
+    ret->Append(new EfPlayerPortion(E.GetPlayer(pl)));
+  }
+
+  return ret;
 }
 
 //------------------------
@@ -955,11 +965,9 @@ static Portion *GSM_Reveal(GSM &gsm, Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   ListPortion *players = (ListPortion *) param[1];
 
-  gBlock<EFPlayer *> player(players->Length());
-  for (int i = 1; i <= players->Length(); i++)
-    player[i] = ((EfPlayerPortion *) (*players)[i])->Value();
-  
-  s->Game()->Reveal(s, player);
+  for (int i = 1; i <= players->Length(); i++) {
+    s->Game()->Reveal(s, AsEfgPlayer((*players)[i]));
+  }
 
   gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
 
@@ -1056,8 +1064,8 @@ static Portion *GSM_SfgStrats(GSM &, Portion **param)
   const efgGame *efg = ((EfgPortion*) param[0])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
-  EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
-  int p = pl->GetNumber();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
+  int p = player.GetId();
   EFSupport efs(*efg);
   Sfg sfg(efs);
 
@@ -1077,8 +1085,8 @@ static Portion *GSM_SfgConstraints(GSM &, Portion **param)
   const efgGame *efg = ((EfgPortion*) param[0])->Value();
   if (!IsPerfectRecall(*efg)) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
-  EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
-  int p = pl->GetNumber();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
+  int p = player.GetId();
   EFSupport efs(*efg);
   Sfg sfg(efs);
 
@@ -1127,8 +1135,9 @@ static Portion *GSM_SetChanceProbs(GSM &gsm, Portion **param)
   ListPortion *p = (ListPortion *) param[1];
   efgGame *efg = s->Game();
 
-  if (!s->GetPlayer()->IsChance())
+  if (!s->GetPlayer().IsChance()) {
     throw gclRuntimeError("Information set does not belong to chance player");
+  }
   
   for (int i = 1; i <= p->Length(); i++)
     efg->SetChanceProb(s, i, ((NumberPortion *) (*p)[i])->Value());
@@ -1173,7 +1182,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     break;
   }
   case porEFPLAYER:
-    ((EfPlayerPortion *) param[0])->Value()->SetName(name);
+    AsEfgPlayer(param[0]).SetLabel(name);
     break;
   case porEFSUPPORT:
     ((EfSupportPortion *) param[0])->Value()->SetName(name);
@@ -1215,11 +1224,11 @@ static Portion *GSM_SetOutcome(GSM &gsm, Portion **param)
 static Portion *GSM_SetPayoff(GSM &gsm, Portion **param)
 {
   gbtEfgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
-  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
-  efgGame *efg = player->Game();
+  gbtEfgPlayer player = AsEfgPlayer(param[1]);
+  efgGame *efg = player.GetGame();
   gNumber value = ((NumberPortion *) param[2])->Value();
 
-  efg->SetPayoff(outcome, player->GetNumber(), value);
+  efg->SetPayoff(outcome, player.GetId(), value);
 
   gsm.InvalidateGameProfile(outcome.GetGame(), true);
 

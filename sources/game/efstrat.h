@@ -33,7 +33,6 @@
 #include "efg.h"
 
 class Action;
-class EFPlayer;
 class EFActionSet;
 
 class EFSupport {
@@ -87,7 +86,7 @@ public:
   gList<Node *> ReachableNonterminalNodes(const Node *, const Action *) const;
   gList<Infoset *> ReachableInfosets(const Node *) const;
   gList<Infoset *> ReachableInfosets(const Node *, const Action *) const;
-  gList<Infoset *> ReachableInfosets(const EFPlayer *) const;
+  gList<Infoset *> ReachableInfosets(const gbtEfgPlayer &) const;
 
   bool AlwaysReaches(const Infoset *) const;
   bool AlwaysReachesFrom(const Infoset *, const Node *) const;

@@ -38,7 +38,7 @@ public:
   virtual ~dialogInfosetReveal();
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  gArray<EFPlayer *> GetPlayers(void) const;
+  bool IsPlayerSelected(int p_id) const;
 };
 
 #endif  // DLEFGREVEAL_H

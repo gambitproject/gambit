@@ -347,7 +347,7 @@ gText EfgShow::GetRealizProb(const Node *p_node) const
 
 gText EfgShow::GetBeliefProb(const Node *p_node) const
 {
-  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
+  if (m_currentProfile == 0 || !p_node || p_node->GetPlayer().IsNull()) {
     return "";
   }
   return ToText(m_profiles[m_currentProfile].BeliefProb(p_node),
@@ -375,7 +375,7 @@ gText EfgShow::GetNodeValue(const Node *p_node) const
 
 gText EfgShow::GetInfosetProb(const Node *p_node) const
 {
-  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
+  if (m_currentProfile == 0 || !p_node || p_node->GetPlayer().IsNull()) {
     return "";
   }
   return ToText(m_profiles[m_currentProfile].IsetProb(p_node->GetInfoset()),
@@ -384,8 +384,8 @@ gText EfgShow::GetInfosetProb(const Node *p_node) const
 
 gText EfgShow::GetInfosetValue(const Node *p_node) const
 {
-  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer() ||
-      p_node->GetPlayer()->IsChance()) {
+  if (m_currentProfile == 0 || !p_node || p_node->GetPlayer().IsNull() ||
+      p_node->GetPlayer().IsChance()) {
     return "";
   }
   if (GetCurrentProfile().IsetProb(p_node->GetInfoset()) > gNumber(0)) {
@@ -400,12 +400,12 @@ gText EfgShow::GetInfosetValue(const Node *p_node) const
 
 gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
 {
-  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+  if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer().IsChance()) {
     return ToText(m_efg.GetChanceProb(p_node->GetInfoset(), p_act),
 		  NumDecimals());
   }
 
-  if (m_currentProfile == 0 || !p_node->GetPlayer()) {
+  if (m_currentProfile == 0 || p_node->GetPlayer().IsNull()) {
     return "";
   }
 
@@ -415,8 +415,8 @@ gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
 
 gText EfgShow::GetActionValue(const Node *p_node, int p_act) const
 {
-  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer() ||
-      p_node->GetPlayer()->IsChance()) {
+  if (m_currentProfile == 0 || !p_node || p_node->GetPlayer().IsNull() ||
+      p_node->GetPlayer().IsChance()) {
     return "";
   }
 
@@ -432,7 +432,7 @@ gText EfgShow::GetActionValue(const Node *p_node, int p_act) const
 
 gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
 {
-  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
+  if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer().IsChance()) {
     return m_efg.GetChanceProb(p_node->GetInfoset(), p_action);
   }
 
@@ -1132,7 +1132,11 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_efg.Reveal(Cursor()->GetInfoset(), dialog.GetPlayers());
+      for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+	if (dialog.IsPlayerSelected(pl)) {
+	  m_efg.Reveal(Cursor()->GetInfoset(), m_efg.GetPlayer(pl));
+	}
+      }
       OnTreeChanged(true, true);
     }
     catch (gException &ex) {
@@ -1221,8 +1225,8 @@ void EfgShow::OnEditMove(wxCommandEvent &)
     infoset->SetName(dialog.GetInfosetName().c_str());
     
     if (!infoset->IsChanceInfoset() && 
-	dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-      m_efg.SwitchPlayer(infoset, m_efg.Players()[dialog.GetPlayer()]);
+	dialog.GetPlayer() != infoset->GetPlayer().GetId()) {
+      m_efg.SwitchPlayer(infoset, m_efg.GetPlayer(dialog.GetPlayer()));
     }
 
     for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -1277,10 +1281,10 @@ void EfgShow::OnEditGame(wxCommandEvent &)
     m_efg.SetComment(dialog.GetComment().c_str());
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
       if (pl > m_efg.NumPlayers()) {
-	m_efg.NewPlayer()->SetName(dialog.GetPlayerName(pl).c_str());
+	m_efg.NewPlayer().SetLabel(dialog.GetPlayerName(pl).c_str());
       }
       else {
-	m_efg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
+	m_efg.GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
       }
     }
     m_outcomeWindow->UpdateValues();
@@ -1529,7 +1533,7 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_efg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_efg.Players()[pl]->GetName();
+    playerNames[pl] = m_efg.GetPlayer(pl).GetLabel();
   }
   dialogElimBehav dialog(this, playerNames);
 

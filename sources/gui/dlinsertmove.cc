@@ -50,17 +50,17 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent, efgGame &p_efg)
   m_playerItem->Append("Chance");
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     m_playerItem->Append((char *)
-			 (ToText(pl) + ": " + m_efg.Players()[pl]->GetName()));
+			 (ToText(pl) + ": " + m_efg.GetPlayer(pl).GetLabel()));
   }
   m_playerItem->Append("New Player");
   m_playerItem->SetSelection(1);
 
   m_infosetItem = new wxListBox(this, idMOVE_INFOSET_LISTBOX);
   m_infosetItem->Append("New");
-  EFPlayer *player = p_efg.Players()[1];
-  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+  gbtEfgPlayer player = p_efg.GetPlayer(1);
+  for (int iset = 1; iset <= player.NumInfosets(); iset++) {
     m_infosetItem->Append((char *) (ToText(iset) + ": " +
-				    player->Infosets()[iset]->GetName()));
+				    player.GetInfoset(iset)->GetName()));
   }
   m_infosetItem->SetSelection(0);
 
@@ -109,18 +109,18 @@ void dialogInsertMove::OnPlayer(wxCommandEvent &)
 {
   int playerNumber = m_playerItem->GetSelection(); 
 
-  EFPlayer *player = 0;
+  gbtEfgPlayer player;
   if (playerNumber == 0)
     player = m_efg.GetChance();
   else if (playerNumber <= m_efg.NumPlayers())
-    player = m_efg.Players()[playerNumber];
+    player = m_efg.GetPlayer(playerNumber);
 
   m_infosetItem->Clear();
   m_infosetItem->Append("New");
-  if (player) {
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+  if (!player.IsNull()) {
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       m_infosetItem->Append((char *) (ToText(iset) + ": " +
-			    player->Infosets()[iset]->GetName()));
+			    player.GetInfoset(iset)->GetName()));
     }
   }
   m_infosetItem->SetSelection(0);
@@ -136,9 +136,9 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
     int playerNumber = m_playerItem->GetSelection();
     Infoset *infoset;
     if (playerNumber == 0)
-      infoset = m_efg.GetChance()->Infosets()[infosetNumber];
+      infoset = m_efg.GetChance().GetInfoset(infosetNumber);
     else
-      infoset = m_efg.Players()[playerNumber]->Infosets()[infosetNumber];
+      infoset = m_efg.GetPlayer(playerNumber).GetInfoset(infosetNumber);
     m_actions->Enable(false);
     m_actions->SetValue(infoset->NumActions());
   }
@@ -148,7 +148,7 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
   }
 }
 
-EFPlayer *dialogInsertMove::GetPlayer(void) const
+gbtEfgPlayer dialogInsertMove::GetPlayer(void) const
 {
   int playerNumber = m_playerItem->GetSelection();
 
@@ -156,11 +156,11 @@ EFPlayer *dialogInsertMove::GetPlayer(void) const
     return m_efg.GetChance();
   }
   else if (playerNumber <= m_efg.NumPlayers()) {
-    return m_efg.Players()[playerNumber];
+    return m_efg.GetPlayer(playerNumber);
   }
   else {
-    EFPlayer *player = m_efg.NewPlayer();
-    player->SetName("Player " + ToText(m_efg.NumPlayers()));
+    gbtEfgPlayer player = m_efg.NewPlayer();
+    player.SetLabel("Player " + ToText(m_efg.NumPlayers()));
     return player;
   }
 }
@@ -168,11 +168,11 @@ EFPlayer *dialogInsertMove::GetPlayer(void) const
 Infoset *dialogInsertMove::GetInfoset(void) const
 {
   if (m_playerItem->GetSelection() <= m_efg.NumPlayers()) {
-    EFPlayer *player = GetPlayer();
+    gbtEfgPlayer player = GetPlayer();
     int infosetNumber = m_infosetItem->GetSelection();
     
-    if (player && infosetNumber > 0) {
-      return player->Infosets()[infosetNumber];
+    if (!player.IsNull() && infosetNumber > 0) {
+      return player.GetInfoset(infosetNumber);
     }
     else {
       return 0;

@@ -81,9 +81,9 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
     for (int pl = 1; pl <= p_infoset->Game()->NumPlayers(); pl++) {
       m_player->Append(wxString::Format("%d: %s", pl,
 					(char *) 
-					p_infoset->Game()->Players()[pl]->GetName()));
+					p_infoset->Game()->GetPlayer(pl).GetLabel()));
     } 
-    m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
+    m_player->SetSelection(p_infoset->GetPlayer().GetId() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);

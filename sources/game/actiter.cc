@@ -69,7 +69,7 @@ bool gbtActionIterator::GoToNext(void)
   int tempiset = iset + 1;
 
   while (temppl <= m_support.GetGame().NumPlayers()) {
-    while (tempiset <= m_support.GetGame().Players()[temppl]->NumInfosets()) {
+    while (tempiset <= m_support.GetGame().GetPlayer(temppl).NumInfosets()) {
       if (m_support.NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
@@ -97,27 +97,27 @@ Action *gbtActionIterator::GetAction(void) const
 
 Infoset *gbtActionIterator::GetInfoset(void) const
 {
-  return m_support.GetGame().Players()[pl]->Infosets()[iset];
+  return m_support.GetGame().GetPlayer(pl).GetInfoset(iset);
 }
 
-EFPlayer *gbtActionIterator::GetPlayer(void) const
+gbtEfgPlayer gbtActionIterator::GetPlayer(void) const
 {
-  return m_support.GetGame().Players()[pl];
+  return m_support.GetGame().GetPlayer(pl);
 }
 
 bool gbtActionIterator::IsLast(void) const
 {
   return (pl == m_support.GetGame().NumPlayers() &&
-	  iset == m_support.GetGame().Players()[pl]->NumInfosets() &&
+	  iset == m_support.GetGame().GetPlayer(pl).NumInfosets() &&
 	  act == m_support.NumActions(pl, iset));
 }
 
 bool gbtActionIterator::IsSubsequentTo(const Action *p_action) const
 {
-  if (pl > p_action->BelongsTo()->GetPlayer()->GetNumber()) {
+  if (pl > p_action->BelongsTo()->GetPlayer().GetId()) {
     return true; 
   }
-  else if (pl < p_action->BelongsTo()->GetPlayer()->GetNumber()) {
+  else if (pl < p_action->BelongsTo()->GetPlayer().GetId()) {
     return false;
   }
   else {

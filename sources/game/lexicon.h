@@ -40,8 +40,9 @@ class Lexicon   {
     Lexicon(const efgGame &);
     ~Lexicon();
 
-    void MakeStrategy(class EFPlayer *p);
-    void MakeReducedStrats(const class EFSupport &, class EFPlayer *, class Node *, class Node *);
+    void MakeStrategy(gbtEfgPlayer p);
+    void MakeReducedStrats(const class EFSupport &, gbtEfgPlayer, 
+			   class Node *, class Node *);
     void MakeLink(const efgGame *, Nfg *);
 };
 

@@ -95,11 +95,11 @@ protected:
   T &IsetValue(const Infoset *iset);
 
   const T &ActionValue(const Action *act) const 
-    { return m_actionValues(act->BelongsTo()->GetPlayer()->GetNumber(),
+    { return m_actionValues(act->BelongsTo()->GetPlayer().GetId(),
 			    act->BelongsTo()->GetNumber(),
 			    act->number); }
   T &ActionValue(const Action *act)
-    { return m_actionValues(act->BelongsTo()->GetPlayer()->GetNumber(),
+    { return m_actionValues(act->BelongsTo()->GetPlayer().GetId(),
 			    act->BelongsTo()->GetNumber(),
 			    act->number); }
   
@@ -174,7 +174,7 @@ public:
 
   T DiffActionValue(const Action *action, const Action *oppAction) const;
   T DiffRealizProb(const Node *node, const Action *oppAction) const;
-  T DiffNodeValue(const Node *node, const EFPlayer *player,
+  T DiffNodeValue(const Node *node, const gbtEfgPlayer &player,
 		  const Action *oppAction) const;
 
   void Dump(gOutput &) const;

@@ -157,12 +157,12 @@ bool IsPerfectRecall(const efgGame &p_efg)
 bool IsPerfectRecall(const efgGame &efg, Infoset *&s1, Infoset *&s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
-    EFPlayer *player = efg.Players()[pl];
+    gbtEfgPlayer player = efg.GetPlayer(pl);
     
-    for (int i = 1; i <= player->NumInfosets(); i++)  {
-      Infoset *iset1 = player->Infosets()[i];
-      for (int j = 1; j <= player->NumInfosets(); j++)   {
-	Infoset *iset2 = player->Infosets()[j];
+    for (int i = 1; i <= player.NumInfosets(); i++)  {
+      Infoset *iset1 = player.GetInfoset(i);
+      for (int j = 1; j <= player.NumInfosets(); j++)   {
+	Infoset *iset2 = player.GetInfoset(j);
 
 	bool precedes = false;
 	int action = 0;
@@ -215,11 +215,11 @@ efgGame *CompressEfg(const efgGame &efg, const EFSupport &S)
   efgGame *newefg = new efgGame(efg);
 
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
-    EFPlayer *player = newefg->Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->Infosets()[iset];
+    gbtEfgPlayer player = newefg->GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
+      Infoset *infoset = player.GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--)  {
-	Action *oldact = efg.Players()[pl]->Infosets()[iset]->Actions()[act];
+	Action *oldact = efg.GetPlayer(pl).GetInfoset(iset)->Actions()[act];
 	if (!S.Contains(oldact)) {
 	  newefg->DeleteAction(infoset, infoset->Actions()[act]);
 	}

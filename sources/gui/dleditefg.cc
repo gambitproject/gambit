@@ -141,7 +141,7 @@ panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, efgGame &p_efg)
 		   0, wxLEFT | wxTOP | wxRIGHT, 5);
   m_playerList = new wxListBox(this, idLIST_PLAYER);
   for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
-    m_playerList->Append((const char *) p_efg.Players()[pl]->GetName());
+    m_playerList->Append((const char *) p_efg.GetPlayer(pl).GetLabel());
   }
   playerSizer->Add(m_playerList, 0, wxALL, 5);
 
@@ -152,7 +152,7 @@ panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, efgGame &p_efg)
   if (p_efg.NumPlayers() > 0) {
     // should always be the case; can't be too careful though!
     m_playerList->SetSelection(0);
-    m_playerName->SetValue((const char *) p_efg.Players()[1]->GetName());
+    m_playerName->SetValue((const char *) p_efg.GetPlayer(1).GetLabel());
   }
   editSizer->Add(m_playerName, 0, wxALL | wxCENTER, 5);
 

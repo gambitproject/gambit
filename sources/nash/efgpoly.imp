@@ -468,9 +468,9 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
   int numvars(0);
 
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    EFPlayer *player = EF.Players()[pl];  
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const Infoset *infoset = player->GetInfoset(iset);
+    gbtEfgPlayer player = EF.GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      const Infoset *infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) )
 	numvars += support.Actions(infoset).Length() - 1;
     }
@@ -480,9 +480,9 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const BehavProfile<gNumber> &sol)
   int count(0);
 
   for (int pl = 1; pl <= EF.NumPlayers(); pl++) {
-    EFPlayer *player = EF.Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      const Infoset *infoset = player->GetInfoset(iset);
+    gbtEfgPlayer player = EF.GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      const Infoset *infoset = player.GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
 	const gArray<Action *> acts = support.Actions(infoset);
 	for (int act = 1; act <= acts.Length() - 1; act++) {

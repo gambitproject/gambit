@@ -31,36 +31,66 @@
 #pragma interface
 #endif   // __GNUG__
 
-class EFPlayer   {
-  friend class efgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
-  private:
-    int number;
-    gText name;
-    efgGame *E;
-    
-    gBlock<Infoset *> infosets;
+struct gbt_efg_player_rep;
+class efgGame;
 
-    EFPlayer(efgGame *e, int n) : number(n), E(e)  { }
-    ~EFPlayer();
+class gbtEfgPlayer {
+friend class efgGame;
+protected:
+  struct gbt_efg_player_rep *rep;
 
-  public:
-    efgGame *Game(void) const   { return E; }
-  
-    const gText &GetName(void) const   { return name; }
-    void SetName(const gText &s)       { name = s; }
+public:
+  gbtEfgPlayer(void);
+  gbtEfgPlayer(gbt_efg_player_rep *);
+  gbtEfgPlayer(const gbtEfgPlayer &);
+  ~gbtEfgPlayer();
 
-    bool IsChance(void) const      { return (number == 0); }
+  gbtEfgPlayer &operator=(const gbtEfgPlayer &);
 
-    int NumInfosets(void) const    { return infosets.Length(); }
-    const gArray<Infoset *> &Infosets(void) const  { return infosets; }
-    const Infoset *GetInfoset(const int iset) const { return infosets[iset]; }
+  bool operator==(const gbtEfgPlayer &) const;
+  bool operator!=(const gbtEfgPlayer &) const;
 
-    int GetNumber(void) const    { return number; }
+  bool IsNull(void) const;
+
+  efgGame *GetGame(void) const;
+  gText GetLabel(void) const;
+  void SetLabel(const gText &);
+  int GetId(void) const;
+
+  bool IsChance(void) const;
+  int NumInfosets(void) const;
+  Infoset *GetInfoset(int p_index) const;
 };
 
+class gbtEfgPlayerIterator {
+private:
+  int m_index;
+  efgGame &m_efg;
+
+public:
+  gbtEfgPlayerIterator(efgGame &p_efg);
+  
+  gbtEfgPlayer operator*(void) const;
+  gbtEfgPlayerIterator &operator++(int);
+
+  bool Begin(void);
+  bool End(void) const;
+};
+
+class gbtEfgInfosetIterator {
+private:
+  int m_index;
+  gbtEfgPlayer m_player;
+
+public:
+  gbtEfgInfosetIterator(const gbtEfgPlayer &p_player);
+  
+  Infoset *operator*(void) const;
+  gbtEfgInfosetIterator &operator++(int);
+
+  bool Begin(void);
+  bool End(void) const;
+};
 
 #endif    // EFPLAYER_H
 

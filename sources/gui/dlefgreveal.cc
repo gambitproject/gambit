@@ -55,9 +55,9 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 						   2 : 3);
   m_players = new wxCheckBox *[m_efg.NumPlayers()];
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    EFPlayer *player = m_efg.Players()[pl];
-    if (player->GetName() != "") {
-      m_players[pl-1] = new wxCheckBox(this, -1, (char *) player->GetName());
+    gbtEfgPlayer player = m_efg.GetPlayer(pl);
+    if (player.GetLabel() != "") {
+      m_players[pl-1] = new wxCheckBox(this, -1, (char *) player.GetLabel());
     }
     else {
       m_players[pl-1] = new wxCheckBox(this, -1, 
@@ -89,15 +89,7 @@ dialogInfosetReveal::~dialogInfosetReveal()
   delete [] m_players;
 }
 
-gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
+bool dialogInfosetReveal::IsPlayerSelected(int p_index) const
 {
-  gBlock<EFPlayer *> players;
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    if (m_players[pl-1]->GetValue()) {
-      players.Append(m_efg.Players()[pl]);
-    }
-  }
-
-  return players;
+  return m_players[p_index-1]->GetValue();
 }

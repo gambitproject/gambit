@@ -129,7 +129,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   int maxColumn = 0;
   const EFSupport &support = p_profiles[1].Support();
   for (int pl = 1; pl <= support.GetGame().NumPlayers(); pl++) {
-    for (int iset = 1; iset <= support.GetGame().Players()[pl]->NumInfosets(); iset++) {
+    for (int iset = 1; iset <= support.GetGame().GetPlayer(pl).NumInfosets(); iset++) {
       for (int act = 1; act <= support.NumActions(pl, iset); act++) {
 	m_qreList->InsertColumn(++maxColumn,
 				wxString::Format("%d:(%d,%d)", pl, iset, act));
@@ -225,8 +225,8 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 	file << "Dimensionality:\n";
 	file << m_behavProfiles[1].GetGame().NumPlayers() << ' ';
 	for (int pl = 1; pl <= m_behavProfiles[1].GetGame().NumPlayers(); pl++) {
-	  EFPlayer *player = m_behavProfiles[1].GetGame().Players()[pl];
-	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	  gbtEfgPlayer player = m_behavProfiles[1].GetGame().GetPlayer(pl);
+	  for (int iset = 1; iset <= player.NumInfosets(); iset++) {
 	    file << m_behavProfiles[1].Support().NumActions(pl, iset) << ' ';
 	  }
 	}

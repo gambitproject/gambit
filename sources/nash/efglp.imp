@@ -42,10 +42,10 @@ gList<BehavSolution> gbtEfgNashLp<T>::Solve(const EFSupport &p_support,
   
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame().Players()[1]->NumInfosets()+1;  
-  ni2 = p_support.GetGame().Players()[2]->NumInfosets()+1; 
-  isets1 = p_support.ReachableInfosets(p_support.GetGame().Players()[1]);
-  isets2 = p_support.ReachableInfosets(p_support.GetGame().Players()[2]); 
+  ni1 = p_support.GetGame().GetPlayer(1).NumInfosets()+1;  
+  ni2 = p_support.GetGame().GetPlayer(2).NumInfosets()+1; 
+  isets1 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(1));
+  isets2 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(2)); 
 
   if (p_support.GetGame().NumPlayers() != 2 ||
       !p_support.GetGame().IsConstSum() ||
@@ -110,11 +110,11 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
   T eps = (T)0;
 //  eps = tab->Epsilon();
   if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
+    if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->Game()->NumChildren(n);i++)
 	GetProfile(p_support,v,sol,n->GetChild(i),s1,s2);
     }
-    pl = n->GetPlayer()->GetNumber();
+    pl = n->GetPlayer().GetId();
     if(pl==2) {
     inf= isets2.Find(n->GetInfoset());
       snew=1;
@@ -163,16 +163,16 @@ void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
   int i,snew;
   if (!n->Game()->GetOutcome(n).IsNull()) {
     A(s1,s2) = gNumber(A(s1,s2)) +
-      gNumber(prob) * n->Game()->Payoff(n, n->Game()->Players()[1]) - gNumber(minpay);
+      gNumber(prob) * n->Game()->Payoff(n, n->Game()->GetPlayer(1)) - gNumber(minpay);
   }
   if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
+    if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->Game()->NumChildren(n);i++)
 	FillTableau(p_support, A, n->GetChild(i),
 		    gNumber(prob) * n->Game()->GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
-    int pl = n->GetPlayer()->GetNumber();
+    int pl = n->GetPlayer().GetId();
     if(pl==1) {
       i1=isets1.Find(n->GetInfoset());
       snew=1;

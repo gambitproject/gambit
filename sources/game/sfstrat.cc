@@ -53,7 +53,7 @@ void Sequence::Dump(gOutput &out) const
   int a = 0, p = 0;
   if(action) a = action->GetNumber();
   if(parent) p = parent->GetNumber();
-  out << "\nPl#: " << player->GetNumber() << " Seq# " << number << " act# " << a << " parent: " << p;
+  out << "\nPl#: " << player.GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }
 
 gOutput& operator<<(gOutput& s, const Sequence& seq)
@@ -67,7 +67,7 @@ gOutput& operator<<(gOutput& s, const Sequence& seq)
 // SFSequenceSet:  Member functions
 //--------------------------------------
 
-SFSequenceSet::SFSequenceSet(const EFPlayer *p)
+SFSequenceSet::SFSequenceSet(const gbtEfgPlayer &p)
   : efp(p), sequences()
 {
   Sequence *empty;
@@ -160,10 +160,12 @@ const gBlock<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
 // SFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-SFSupport::SFSupport(const Sfg &SF) : bsfg(&SF), sups(SF.GetEfg().NumPlayers())
+SFSupport::SFSupport(const Sfg &SF) 
+  : bsfg(&SF), sups(SF.GetEfg().NumPlayers())
 { 
-  for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new SFSequenceSet(SF.GetEfg().Players()[i]);
+  for (int i = 1; i <= sups.Length(); i++) {
+    sups[i] = new SFSequenceSet(SF.GetEfg().GetPlayer(i));
+  }
 }
 
 SFSupport::SFSupport(const SFSupport &s)
@@ -237,17 +239,17 @@ int SFSupport::TotalNumSequences(void) const
 
 int SFSupport::Find(Sequence *s) const
 {
-  return sups[s->Player()->GetNumber()]->GetSFSequenceSet().Find(s);
+  return sups[s->Player().GetId()]->GetSFSequenceSet().Find(s);
 }
 
 void SFSupport::AddSequence(Sequence *s)
 {
-  sups[s->Player()->GetNumber()]->AddSequence(s);
+  sups[s->Player().GetId()]->AddSequence(s);
 }
 
 bool SFSupport::RemoveSequence(Sequence *s)
 {
-  return sups[s->Player()->GetNumber()]->RemoveSequence(s);
+  return sups[s->Player().GetId()]->RemoveSequence(s);
 }
 
 

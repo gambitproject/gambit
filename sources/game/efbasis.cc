@@ -92,7 +92,7 @@ bool EFNodeArrays::operator==(const EFNodeArrays &a) const
 class EFNodeSet{
 
 protected:
-  EFPlayer *efp;
+  gbtEfgPlayer efp;
   gArray < EFNodeArrays *> infosets;
 public:
   
@@ -102,7 +102,7 @@ public:
 
 //  EFNodeSet();
   EFNodeSet(const EFNodeSet &);
-  EFNodeSet(EFPlayer &);
+  EFNodeSet(const gbtEfgPlayer &);
   virtual ~EFNodeSet();
 
   EFNodeSet &operator=(const EFNodeSet &);
@@ -139,8 +139,8 @@ public:
   // Number of Nodes in a particular infoset
   int NumNodes(int iset) const;
 
-  // return the EFPlayer of the EFNodeSet
-  EFPlayer &GetPlayer(void) const;
+  // return the player of the EFNodeSet
+  gbtEfgPlayer GetPlayer(void) const;
 
   // checks for a valid EFNodeSet
   bool IsValid(void) const;
@@ -151,12 +151,11 @@ public:
 // EFNodeSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-EFNodeSet::EFNodeSet(EFPlayer &p)
-  : infosets(p.NumInfosets())
+EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
+  : efp(p), infosets(p.NumInfosets())
 {
-  efp = &p;
   for (int i = 1; i <= p.NumInfosets(); i++){
-    infosets[i] = new EFNodeArrays(p.Infosets()[i]->Members());
+    infosets[i] = new EFNodeArrays(p.GetInfoset(i)->Members());
   }
 }
 
@@ -242,10 +241,10 @@ int EFNodeSet::NumNodes(int iset) const
   return (infosets[iset]->nodes.Length());
 }
 
-// Return the EFPlayer of this EFNodeSet
-EFPlayer &EFNodeSet::GetPlayer(void) const
+// Return the player of this EFNodeSet
+gbtEfgPlayer EFNodeSet::GetPlayer(void) const
 {
-  return (*efp);
+  return efp;
 }
 
 int EFNodeSet::Find(Node *n) const
@@ -256,7 +255,7 @@ int EFNodeSet::Find(Node *n) const
 // checks for a valid EFNodeSet
 bool EFNodeSet::IsValid(void) const
 {
-  if (infosets.Length() != efp->NumInfosets())   return false;
+  if (infosets.Length() != efp.NumInfosets())   return false;
 
   for (int i = 1; i <= infosets.Length(); i++)
     if (infosets[i]->nodes.Length() == 0)   return false;
@@ -270,8 +269,9 @@ bool EFNodeSet::IsValid(void) const
 
 EFBasis::EFBasis(const efgGame &E) : EFSupport(E), nodes(E.NumPlayers())
 {
-  for (int i = 1; i <= nodes.Length(); i++)
-    nodes[i] = new EFNodeSet(*(E.Players()[i]));
+  for (int i = 1; i <= nodes.Length(); i++) {
+    nodes[i] = new EFNodeSet(E.GetPlayer(i));
+  }
 }
 
 EFBasis::EFBasis(const EFBasis &b)
@@ -327,7 +327,7 @@ int EFBasis::Find(Node *n) const
 {
   if (n->GetInfoset()->Game() != m_efg)   return 0;
 
-  int pl = n->GetInfoset()->GetPlayer()->GetNumber();
+  int pl = n->GetInfoset()->GetPlayer().GetId();
 
   return nodes[pl]->Find(n);
 }
@@ -360,9 +360,9 @@ gPVector<int> EFBasis::NumNodes(void) const
 bool EFBasis::RemoveNode(Node *n)
 {
   Infoset *infoset = n->GetInfoset();
-  EFPlayer *player = infoset->GetPlayer();
+  gbtEfgPlayer player = infoset->GetPlayer();
 
-  return nodes[player->GetNumber()]->RemoveNode(infoset->GetNumber(), n);
+  return nodes[player.GetId()]->RemoveNode(infoset->GetNumber(), n);
 }
 
 bool EFBasis::IsReachable(Node *n) const
@@ -385,9 +385,9 @@ bool EFBasis::IsReachable(Node *n) const
 void EFBasis::AddNode(Node *n)
 {
   Infoset *infoset = n->GetInfoset();
-  EFPlayer *player = infoset->GetPlayer();
+  gbtEfgPlayer player = infoset->GetPlayer();
 
-  nodes[player->GetNumber()]->AddNode(infoset->GetNumber(), n);
+  nodes[player.GetId()]->AddNode(infoset->GetNumber(), n);
 }
 
 bool EFBasis::IsConsistent()
@@ -533,15 +533,15 @@ void EFBasis::MakeAb()
 int EFBasis::Col(Action *a) const
 {
   Infoset *iset = a->BelongsTo();
-  return (*actIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
+  return (*actIndex)(iset->GetPlayer().GetId(), iset->GetNumber(),
 		     (*bigbasis).EFSupport::GetIndex(a));
 }
 
 int EFBasis::Col(Node *n) const
 {
   Infoset *iset = n->GetInfoset();
-  return (*nodeIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
-		  (*bigbasis).Find(n));
+  return (*nodeIndex)(iset->GetPlayer().GetId(), iset->GetNumber(),
+		      (*bigbasis).Find(n));
 }
 
 void EFBasis::AddEquation1(int row, Action *a) const
@@ -618,10 +618,10 @@ void EFBasis::Dump(gOutput& s) const
   s << "{ ";
   numplayers = m_efg->NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
-    EFPlayer& player = nodes[i]->GetPlayer();
-    s << '"' << player.GetName() << "\" { ";
+    gbtEfgPlayer player = nodes[i]->GetPlayer();
+    s << '"' << player.GetLabel() << "\" { ";
     for (j = 1; j <= player.NumInfosets(); j++)  {
-      Infoset* infoset = player.Infosets()[j];
+      Infoset* infoset = player.GetInfoset(j);
       s << '"' << infoset->GetName() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
 	Node* Node = nodes[i]->NodeList(j)[k];

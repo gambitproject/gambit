@@ -1048,53 +1048,55 @@ bool EfBasisPortion::IsReference(void) const
 { return _ref; }
 
 
-//------------
+//-----------
 // EfPlayer
-//------------
+//-----------
 
 gPool EfPlayerPortion::pool(sizeof(EfPlayerPortion));
 
-EfPlayerPortion::EfPlayerPortion(EFPlayer *value)
-  : _Value(new EFPlayer *(value)), _ref(false)
+EfPlayerPortion::EfPlayerPortion(gbtEfgPlayer p_value)
+  : m_value(new gbtEfgPlayer(p_value)), m_ref(false)
 {
-  SetGame(value->Game());
+  SetGame(p_value.GetGame());
 }
 
-EfPlayerPortion::EfPlayerPortion(EFPlayer *& value, bool ref)
-  : _Value(&value), _ref(ref)
+EfPlayerPortion::EfPlayerPortion(gbtEfgPlayer *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref)
-    SetGame(value->Game());
+  if (!p_ref) {
+    SetGame(p_value->GetGame());
+  }
 }
 
 EfPlayerPortion::~EfPlayerPortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-EFPlayer *EfPlayerPortion::Value(void) const
-{ return *_Value; }
+gbtEfgPlayer EfPlayerPortion::Value(void) const
+{ return *m_value; }
 
-void EfPlayerPortion::SetValue(EFPlayer *value)
+void EfPlayerPortion::SetValue(gbtEfgPlayer p_value)
 {
-  if (_ref) {
-    ((EfPlayerPortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((EfPlayerPortion *) Original())->SetValue(p_value);
   }
   else {
-    *_Value = value;
-    SetGame(value->Game());
+    SetGame(p_value.GetGame());
+    *m_value = p_value;
   }
 }
 
 PortionSpec EfPlayerPortion::Spec(void) const
-{ return PortionSpec(porEFPLAYER); }
+{ return porNFPLAYER; }
 
 void EfPlayerPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(EfPlayer) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(EfPlayer) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText EfPlayerPortion::OutputString(void) const
@@ -1104,20 +1106,19 @@ gText EfPlayerPortion::OutputString(void) const
 
 Portion* EfPlayerPortion::ValCopy(void) const
 {
-  return new EfPlayerPortion(*_Value); 
+  return new EfPlayerPortion(*m_value); 
 }
 
 Portion* EfPlayerPortion::RefCopy(void) const
 {
-  Portion* p = new EfPlayerPortion(*_Value, true); 
+  Portion *p = new EfPlayerPortion((gbtEfgPlayer *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool EfPlayerPortion::IsReference(void) const
-{
-  return _ref;
-}
+{ return m_ref; }
+
 
 //----------
 // Infoset
@@ -1490,19 +1491,18 @@ void BehavPortion::Output(gOutput& s) const
 
   for (int pl = 1; pl <= rep->value->GetGame().NumPlayers(); pl++)  {
     s << "{ ";
-    EFPlayer *player = rep->value->GetGame().Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+    gbtEfgPlayer player = rep->value->GetGame().GetPlayer(pl);
+    for (gbtEfgInfosetIterator infoset(player); !infoset.End(); infoset++) {
       s << "{ ";
-      Infoset *infoset = player->Infosets()[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++) {
+      for (int act = 1; act <= (*infoset)->NumActions(); act++) {
 	if (_WriteSolutionLabels == triTRUE) {
-	  if ((*rep->value)(infoset->Actions()[act]) > gNumber(0)) {
-	    s << infoset->Actions()[act]->GetName() << '=';
-	    s << (*rep->value)(infoset->Actions()[act]) << ' ';
+	  if ((*rep->value)((*infoset)->Actions()[act]) > gNumber(0)) {
+	    s << (*infoset)->Actions()[act]->GetName() << '=';
+	    s << (*rep->value)((*infoset)->Actions()[act]) << ' ';
 	  }
 	}
 	else
-	  s << (*rep->value)(infoset->Actions()[act]) << ' ';
+	  s << (*rep->value)((*infoset)->Actions()[act]) << ' ';
       }
       s << "}";
     }
@@ -1854,10 +1854,6 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
       }
       if (spec.Type & porEFBASIS)  {
 	if (((EfBasisPortion*) (*rep->value)[i])->Value() == data)
-	  return true;
-      }
-      if (spec.Type & porEFPLAYER)  {
-	if (((EfPlayerPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
       if (spec.Type & porINFOSET)  {

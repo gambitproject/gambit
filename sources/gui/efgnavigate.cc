@@ -74,14 +74,14 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
 
     gText tmpstr;
   
-    if (!m_cursor->GetPlayer()) {
+    if (m_cursor->GetPlayer().IsNull()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (m_cursor->GetPlayer()->IsChance())
+      if (m_cursor->GetPlayer().IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(m_cursor->GetPlayer()->GetNumber()) + "," +
+	tmpstr = ("(" + ToText(m_cursor->GetPlayer().GetId()) + "," +
 		  ToText(m_cursor->GetInfoset()->GetNumber()) + ")");
     }
 	  

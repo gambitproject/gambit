@@ -74,9 +74,9 @@ void EfgProfileList::UpdateValues(void)
   int maxColumn = 6;
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-    EFPlayer *player = efg.Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Infoset *infoset = player->Infosets()[iset];
+    gbtEfgPlayer player = efg.GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      Infoset *infoset = player.GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	InsertColumn(++maxColumn,
 		     wxString::Format("(%d,%d):%d", pl, iset, act));
@@ -101,9 +101,9 @@ void EfgProfileList::UpdateValues(void)
 
     int column = 6;
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      EFPlayer *player = efg.Players()[pl];
-      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	Infoset *infoset = player->Infosets()[iset];
+      gbtEfgPlayer player = efg.GetPlayer(pl);
+      for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+	Infoset *infoset = player.GetInfoset(iset);
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  SetItem(i - 1, ++column,
 		  (char *) ToText(profile(infoset->Actions()[act])));
@@ -188,11 +188,11 @@ wxString EfgProfileList::GetReport(void) const
     report += "\n\n";
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      EFPlayer *player = efg.Players()[pl];
-      report += wxString::Format("%s\n", (const char *) player->GetName());
+      gbtEfgPlayer player = efg.GetPlayer(pl);
+      report += wxString::Format("%s\n", (const char *) player.GetLabel());
 
-      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	Infoset *infoset = player->Infosets()[iset];
+      for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+	Infoset *infoset = player.GetInfoset(iset);
 
 	report += wxString::Format("%s\n", (const char *) infoset->GetName());
 

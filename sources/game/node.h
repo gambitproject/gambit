@@ -74,9 +74,7 @@ class Node    {
     Infoset *GetInfoset(void) const   { return infoset; }
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
-    EFPlayer *GetPlayer(void) const
-      { if (!infoset)   return 0;
-	else  return infoset->GetPlayer(); }
+    gbtEfgPlayer GetPlayer(void) const;
     Action *GetAction(void) const; // returns null if root node
     Node *GetChild(int i) const    { return children[i]; }
     Node *GetChild(const Action* a) const    

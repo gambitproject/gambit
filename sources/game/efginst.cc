@@ -32,8 +32,8 @@ class ChanceInfoset;
 #include "base/gblock.imp"
 #include "base/glist.imp"
 
-template class gArray<EFPlayer *>;
-template class gBlock<EFPlayer *>;
+template class gArray<gbt_efg_player_rep *>;
+template class gBlock<gbt_efg_player_rep *>;
 
 template class gArray<Infoset *>;
 template class gBlock<Infoset *>;

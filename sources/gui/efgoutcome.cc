@@ -111,14 +111,14 @@ void EfgOutcomeWindow::UpdateValues(void)
     SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      SetCellValue((char *) ToText(efg.Payoff(outcome, efg.Players()[pl])),
+      SetCellValue((char *) ToText(efg.Payoff(outcome, efg.GetPlayer(pl))),
 		   outc - 1, pl);
     }
   }
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-    if (efg.Players()[pl]->GetName() != "") {
-      SetLabelValue(wxHORIZONTAL, (char *) efg.Players()[pl]->GetName(), pl);
+    if (efg.GetPlayer(pl).GetLabel() != "") {
+      SetLabelValue(wxHORIZONTAL, (char *) efg.GetPlayer(pl).GetLabel(), pl);
     }
     else {
       SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);

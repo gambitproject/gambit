@@ -79,8 +79,9 @@ Sfg::Sfg(const EFSupport &S)
   } 
 
   sequences = new gArray<SFSequenceSet *>(EF.NumPlayers());
-  for(i=1;i<=EF.NumPlayers();i++)
-    (*sequences)[i] = new SFSequenceSet( (EF.Players())[i] );
+  for (i=1;i<=EF.NumPlayers();i++) {
+    (*sequences)[i] = new SFSequenceSet( EF.GetPlayer(i) );
+  }
 
   gArray<Sequence *> parent(EF.NumPlayers());
   for(i=1;i<=EF.NumPlayers();i++)
@@ -116,16 +117,16 @@ Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 
   if (!EF.GetOutcome(n).IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.Players()[pl]);
+      (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.GetPlayer(pl));
   }
   if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
+    if (n->GetPlayer().IsChance()) {
       for(i=1;i<=EF.NumChildren(n);i++)
 	MakeSequenceForm(n->GetChild(i),
 		     prob * EF.GetChanceProb(n->GetInfoset(), i), seq,iset,parent);
     }
     else {
-      int pl = n->GetPlayer()->GetNumber();
+      int pl = n->GetPlayer().GetId();
       iset[pl]=n->GetInfoset();
       int isetnum = iset[pl]->GetNumber();
       gArray<int> snew(seq);
@@ -169,12 +170,12 @@ GetSequenceDims(const Node *n)
   int i;
 
   if(n->GetInfoset()) {
-    if(n->GetPlayer()->IsChance()) {
+    if(n->GetPlayer().IsChance()) {
       for(i=1;i<=EF.NumChildren(n);i++)
 	GetSequenceDims(n->GetChild(i));
     }
     else {
-      int pl = n->GetPlayer()->GetNumber();
+      int pl = n->GetPlayer().GetId();
       int isetnum = n->GetInfoset()->GetNumber();
     
       bool flag = false;
