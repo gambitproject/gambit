@@ -153,7 +153,7 @@ int main( int /*argc*/, char* argv[] )
     signal(SIGINT, gGCLStatusHandler);
 #endif  
     
-    _gsm = new GSM(256);
+    _gsm = new GSM;
     
     GCLCompiler C;
     gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");

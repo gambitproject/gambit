@@ -87,8 +87,8 @@ public:
 
 int GSM::_NumObj = 0;
 
-GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
-  :_Verbose(true), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
+GSM::GSM(gInput& s_in, gOutput& s_out, gOutput& s_err)
+  : _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
   // global function default variables initialization
   // these should be done before InitFunctions() is called

@@ -45,8 +45,6 @@ private:
 
   static RefCountHashTable< void* > _GameRefCount;
 
-  bool _Verbose;
-
   gInput&  _StdIn;
   gOutput& _StdOut;
   gOutput& _StdErr;
@@ -70,8 +68,7 @@ private:
 
 
 public:
-  GSM( int size = 10, 
-      gInput&  s_in  = gin, 
+  GSM(gInput&  s_in  = gin, 
       gOutput& s_out = gout, 
       gOutput& s_err = gerr );
   ~GSM();
