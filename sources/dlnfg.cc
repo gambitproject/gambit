@@ -52,7 +52,7 @@ dialogNfgPayoffs::dialogNfgPayoffs(const Nfg &p_nfg, NFOutcome *p_outcome,
 			      s_payoffsPerDialog); pl++) {
     m_outcomePayoffs[pl-1] = new wxNumberItem(this,
 					      ToText(pl) + "  ",
-					      m_payoffs[pl]);
+					      ToText(m_payoffs[pl]));
     NewLine();
   }
 

@@ -794,14 +794,14 @@ dialogQreGrid::~dialogQreGrid()
 
 void dialogQreGrid::AlgorithmFields(void)
 {
-  float minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
-  wxGetResource("Algorithm Params", "QreGrid-minLam", &minLam, "gambit.ini");
-  wxGetResource("Algorithm Params", "QreGrid-maxLam", &maxLam, "gambit.ini");
-  wxGetResource("Algorithm Params", "QreGrid-delLam", &delLam, "gambit.ini");
-  wxGetResource("Algorithm Parmas", "QreGrid-delp1", &delp1, "gambit.ini");
-  wxGetResource("Algorithm Params", "QreGrid-delp2", &delp2, "gambit.ini");
-  wxGetResource("Algorithm Params", "QreGrid-tol1", &tol1, "gambit.ini");
-  wxGetResource("Algorithm Params", "QreGrid-tol2", &tol2, "gambit.ini");
+  gText minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
+  wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, "gambit.ini");
+  wxGetResourceStr("Algorithm Parmas", "QreGrid-delp1", delp1, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-delp2", delp2, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-tol1", tol1, "gambit.ini");
+  wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, "gambit.ini");
 
   m_minLam = new wxNumberItem(this, "minLam", minLam);
   m_maxLam = new wxNumberItem(this, "maxLam", maxLam);

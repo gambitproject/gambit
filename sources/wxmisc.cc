@@ -1146,20 +1146,9 @@ static bool IsNumber(wxText &p_item)
     return false;
 }
 
-wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
-			   const gNumber &p_default,
-			   int p_x, int p_y, int p_width, int p_height)
-  : wxText(p_parent, (wxFunction) EventCallback, p_label, "",
-	   p_x, p_y, p_width, p_height), m_value(p_default)
-{
-  // Passing a nonempty string to the wxText ctor affects the default
-  // sizing.  So, we set after the fact instead.
-  int toTextPrecision = ToTextPrecision();
-  ToTextPrecision(10);
-  SetValue(ToText(p_default));
-  ToTextPrecision(toTextPrecision);
-}
-
+//
+// NB: This ctor does not check for valid number entries
+//
 wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
 			   const gText &p_default,
 			   int p_x, int p_y, int p_width, int p_height)

@@ -486,7 +486,7 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
   for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
        act++) {
     m_probItems[act-1] = new wxNumberItem(this, ToText(act) + "  ", 
-					  m_actionProbs[act]);
+					  ToText(m_actionProbs[act]));
     NewLine();
   }
 
@@ -632,7 +632,7 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 			      s_payoffsPerDialog); pl++) {
     m_outcomePayoffs[pl-1] = new wxNumberItem(this,
 					      ToText(pl) + "  ",
-					      m_payoffs[pl]);
+					      ToText(m_payoffs[pl]));
     NewLine();
   }
 

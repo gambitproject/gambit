@@ -255,8 +255,6 @@ private:
   static void EventCallback(wxNumberItem &p_object, wxCommandEvent &p_event);
 
 public:
-  wxNumberItem(wxPanel *p_parent, char *p_label, const gNumber &p_default,
-	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
   wxNumberItem(wxPanel *p_parent, char *p_label, const gText &p_default,
 	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
   virtual ~wxNumberItem() { }
