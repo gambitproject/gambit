@@ -19,7 +19,7 @@ wxList 		my_children;
 wxCursor *arrow_cursor;                             
 #ifdef _AIX                                                  
 extern wxApp *wxTheApp=1;
-#endif                                 
+#endif                                                 
 GambitApp gambitApp;
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
@@ -127,7 +127,7 @@ void GambitFrame::OnMenuCommand(int id)
 			break;
 #endif
 		case HELP_ABOUT:
-			(void)wxMessageBox("Gambit Front End\nAuthor: Eugene Grayver egrayver@cco.caltech.edu\n(c) Caltech EPS, 1994", "About Gambit");
+			(void)wxMessageBox("Gambit -- Graphics User Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
 			break;
 		case HELP_GAMBIT:
 			if (help_instance==NULL)

@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// $Id$
+// @(#)treedraw.cc	1.5 7/18/95
 #include "zfortify.hpp"
 #include "wx.h"
 #include "wx_form.h"
@@ -316,7 +316,8 @@ delete [] file_name;
 }
 
 //********************************* SET ZOOM *******************************
-void TreeDrawSettings::SetZoom(float z)
+// set force to true to set a zoom that is outside the MIN_ZOOM,MAX_ZOOM range
+void TreeDrawSettings::SetZoom(float z,bool force)
 {
 #define MAX_ZOOM	10
 #define MIN_ZOOM	.1
@@ -333,6 +334,6 @@ if (z<-.5)			// if this is not an inc/dec action
 }
 else
 {
-	if (z>=MIN_ZOOM && z<=MAX_ZOOM)	zoom_factor=z;
+	if (z>=MIN_ZOOM && z<=MAX_ZOOM || force)	zoom_factor=z;
 }
 }

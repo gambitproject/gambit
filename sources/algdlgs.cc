@@ -104,7 +104,7 @@ if (trace_str) delete [] trace_str;
 
 // Constructor
 PxiParamsDialog::PxiParamsDialog(const char *alg,const char *label,wxWindow *parent)
-		:OutputParamsDialog(label,parent),algname((char *)alg),pxiname(0),pxifile(0),pxi_command(0),run_pxi(FALSE),type(0),type_str(0)
+		:OutputParamsDialog(label,parent),pxi_command(0),pxiname(0),algname((char *)alg),pxifile(0),run_pxi(FALSE),type(0),type_str(0)
 { }
 // Make Pxi Fields
 void PxiParamsDialog::MakePxiFields(void)

@@ -17,8 +17,8 @@ wxBrush	*s_white_brush;
 wxBrush *s_hilight_brush;
 
 gOutput &operator<<(gOutput &op,const SpreadSheet3D &s) {return op;}
-gOutput &operator<<(gOutput &op,const SpreadSheet &s) {return op;}
-gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {return op;}
+gOutput &operator<<(gOutput &op,const SpreadSheet &s) {s.Dump(op); return op;}
+gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {op<<c.value; return op;}
 
 //****************************************************************************
 //*                              SPREAD SHEET DRAW SETTINGS                  *
@@ -254,6 +254,13 @@ for (int i=1;i<=col;i++)	temp+=draw_settings->GetColWidth(i);
 return temp;
 }
 
+int SpreadSheetC::MaxY(int row)
+{
+int temp=draw_settings->YStart();
+if (row<0) row=sheet->GetRows();
+temp+=draw_settings->GetRowHeight()*row;
+return temp;
+}
 
 void SpreadSheetC::OnSize(int _w,int _h)
 {
@@ -430,7 +437,6 @@ old_cell=cell;
 void SpreadSheetC::DrawCell(wxDC &dc,int row,int col)
 {
 dc.SetFont(draw_settings->GetDataFont());
-dc.SetBackgroundMode(wxTRANSPARENT);
 if (sheet->HiLighted(row,col))
 	{dc.SetBrush(s_hilight_brush);dc.SetPen(s_hilight_pen);}
 else
@@ -457,7 +463,7 @@ dc.DestroyClippingRegion();
 }
 
 // Updating
-// Changing the code to only redraw the visible part of the window.  This
+// Changed the code to only redraw the visible part of the window.  This
 // should make updating large spreadsheets considerably faster.
 void SpreadSheetC::Update(wxDC &dc)
 {
@@ -480,22 +486,23 @@ max_col=0;i=1;
 while (!max_col && i<=sheet->GetCols())	{if (x_start+width<MaxX(i)) max_col=i;i++;}
 if (max_col<1) max_col=sheet->GetCols();
 // Draw the grid
-if (dc.__type!=wxTYPE_DC_METAFILE) dc.Clear();
+if (dc.__type!=wxTYPE_DC_METAFILE) {dc.Clear();dc.BeginDrawing();}
+if (dc.__type!=wxTYPE_DC_POSTSCRIPT) dc.SetBackgroundMode(wxTRANSPARENT);
 dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.SetPen(grid_line_pen);
 for (row=min_row;row<=max_row;row++)
 	dc.DrawLine(draw_settings->XStart(),draw_settings->YStart()+row*draw_settings->GetRowHeight(),
-						 MaxX()+1,
+						 MaxX(max_col)+1,
 						 draw_settings->YStart()+row*draw_settings->GetRowHeight());
 for (col=min_col;col<=max_col;col++)
 	dc.DrawLine(MaxX(col),draw_settings->YStart(),
 							MaxX(col),
-							draw_settings->YStart()+sheet->GetRows()*draw_settings->GetRowHeight()+1);
+							draw_settings->YStart()+max_row*draw_settings->GetRowHeight()+1);
 dc.SetPen(grid_border_pen);
 dc.SetBrush(wxTRANSPARENT_BRUSH);
 dc.DrawRectangle(	draw_settings->XStart(),draw_settings->YStart(),
-									MaxX()-draw_settings->XStart(),
-									sheet->GetRows()*draw_settings->GetRowHeight()+2);
+									MaxX(max_col)-draw_settings->XStart(),
+									max_row*draw_settings->GetRowHeight()+2);
 // Draw the labels if any (no sense in showing them if even the first row/col
 // are not visible
 dc.SetFont(draw_settings->GetLabelFont());
@@ -512,62 +519,183 @@ for (row=min_row;row<=max_row;row++)
 
 // Hilight the currently selected cell
 UpdateCell(dc,cell);
+if (dc.__type!=wxTYPE_DC_METAFILE) dc.EndDrawing();
 }
 
-void GetRes(wxDC &dc,float *horiz,float *vert)
+
+//****************************************************************************
+//*                               SPREAD SHEET PRINTOUT
+//****************************************************************************
+#ifdef wx_msw
+#include "wx_print.h"
+
+class SpreadSheetPrintout: public wxPrintout
 {
-int old_mode=dc.GetMapMode();
-dc.SetMapMode(MM_METRIC);
-int dev_x=dc.LogicalToDeviceX(10);
-*horiz=dev_x/10.0;
-int dev_y=dc.LogicalToDeviceY(10);
-*vert=dev_y/10.0;
-dc.SetMapMode(old_mode);
+private:
+	SpreadSheetC *sheet;
+	wxOutputOption fit;
+	int num_pages;
+public:
+	SpreadSheetPrintout(SpreadSheetC *s,wxOutputOption f,const char *title="SpreadPrintout");
+	Bool OnPrintPage(int page);
+	Bool HasPage(int page);
+	Bool OnBeginDocument(int startPage, int endPage);
+	void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
+};
+
+SpreadSheetPrintout::SpreadSheetPrintout(SpreadSheetC *s,wxOutputOption f,const char *title)
+			:sheet(s),fit(f),wxPrintout((char *)title)
+{ }
+
+Bool SpreadSheetPrintout::OnBeginDocument(int startPage, int endPage)
+{
+	if (!wxPrintout::OnBeginDocument(startPage, endPage))
+		return FALSE;
+
+	return TRUE;
 }
 
-void SpreadSheetC::Print(int device)
+// Since we can not get at the actual device context in this function, we
+// have no way to tell how many pages will be used in the wysiwyg mode. So,
+// we have no choice but to disable the From:To page selection mechanism.
+void SpreadSheetPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
+{
+num_pages=1;
+*minPage = 0;
+*maxPage = num_pages;
+*selPageFrom = 0;
+*selPageTo = 0;
+}
+
+Bool SpreadSheetPrintout::HasPage(int pageNum)
+{
+	return (pageNum<=num_pages);
+}
+
+
+Bool SpreadSheetPrintout::OnPrintPage(int page)
+{
+wxDC *dc = GetDC();
+if (!dc) return FALSE;
+
+// Get the logical pixels per inch of screen and printer
+int ppiScreenX, ppiScreenY;
+GetPPIScreen(&ppiScreenX, &ppiScreenY);
+int ppiPrinterX, ppiPrinterY;
+GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
+
+// Now we have to check in case our real page size is reduced
+// (e.g. because we're drawing to a print preview memory DC)
+int pageWidth, pageHeight;
+float w, h;
+dc->GetSize(&w, &h);
+GetPageSizePixels(&pageWidth, &pageHeight);
+float pageScaleX=(float)w/pageWidth;
+float pageScaleY=(float)h/pageHeight;
+dc->SetBackgroundMode(wxTRANSPARENT);
+
+if (!fit) // WYSIWYG
+{
+	// This scales the DC so that the printout roughly represents the
+	// the screen scaling. The text point size _should_ be the right size
+	// but in fact is too small for some reason. This is a detail that will
+	// need to be addressed at some point but can be fudged for the
+	// moment.
+	float scaleX = (float)((float)ppiPrinterX/(float)ppiScreenX);
+	float scaleY = (float)((float)ppiPrinterY/(float)ppiScreenY);
+
+	// If printer pageWidth == current DC width, then this doesn't
+	// change. But w might be the preview bitmap width, so scale down.
+	float overallScaleX = scaleX * (float)pageScaleX;
+	float overallScaleY = scaleY * (float)pageScaleY;
+	dc->SetUserScale(overallScaleX, overallScaleY);
+
+	// Make the margins.  They are just 1" on all sides now.
+	float marginX=1*ppiPrinterX,marginY=1*ppiPrinterY;
+	dc->SetDeviceOrigin(marginX*pageScaleX,marginY*pageScaleY);
+
+	sheet->draw_settings->SetRealWidth((pageWidth-2*marginX)/scaleX);
+	sheet->draw_settings->SetRealHeight((pageHeight-2*marginY)/scaleY);
+}
+else	// FIT TO PAGE
+{
+	float maxX = sheet->MaxX();
+	float maxY = sheet->MaxY();
+
+// Make the margins.  They are just 1" on all sides now.
+	float marginX = 1*ppiPrinterX;
+	float marginY = 1*ppiPrinterY;
+
+	// Calculate a suitable scaling factor
+	float scaleX=(float)((pageWidth-2*marginX)/maxX)*pageScaleX;
+	float scaleY=(float)((pageHeight-2*marginY)/maxY)*pageScaleY;
+
+	// Use x or y scaling factor, whichever fits on the DC
+	float actualScale = min(scaleX,scaleY);
+
+	// Set the scale and origin
+	dc->SetUserScale(actualScale, actualScale);
+	dc->SetDeviceOrigin(marginX*pageScaleX,marginY*pageScaleY);
+
+	// Let the spreadsheet know the new dimensions
+	sheet->draw_settings->SetRealWidth(maxX);
+	sheet->draw_settings->SetRealHeight(maxY);
+	sheet->Scroll(0,0);	// bad--should be set in draw_settings.
+}
+
+sheet->Update(*dc);
+
+return TRUE;
+}
+#endif
+
+
+void SpreadSheetC::Print(wxOutputMedia device,wxOutputOption fit)
 {
 if (device==wxMEDIA_PRINTER)
 {
 	#ifdef wx_msw
-	wxPrinterDC dc_pr(NULL, NULL, NULL,FALSE);
-	if (dc_pr.Ok())
-	{
-		// using scaling to achieve WYSIWYG look.  This uses the DPI of
-		// the Printer and the DPI of the screen
-		float res_scr_x,res_scr_y,res_prn_x,res_prn_y;
-		GetRes(*GetDC(),&res_scr_x,&res_scr_y);
-		GetRes(dc_pr,&res_prn_x,&res_prn_y);
-		dc_pr.SetUserScale(res_prn_x/res_scr_x,res_prn_y/res_scr_y);
-		dc_pr.StartDoc(sheet->GetLabel());
-		dc_pr.StartPage();
-		Update(dc_pr);
-		dc_pr.EndPage();
-		dc_pr.EndDoc();
-	}
+	wxPrinter printer;
+	SpreadSheetPrintout printout(this,fit);
+	printer.Print(top_frame,&printout,TRUE);
 	#else
 	wxMessageBox("Printing not supported under X");
+	#endif
+}
+if (device==wxMEDIA_PREVIEW)
+{
+#ifdef wx_msw
+	wxPrintPreview *preview = new wxPrintPreview(new SpreadSheetPrintout(this,fit), new SpreadSheetPrintout(this,fit));
+	wxPreviewFrame *frame = new wxPreviewFrame(preview, top_frame, "Print Preview", 100, 100, 600, 650);
+	frame->Centre(wxBOTH);
+	frame->Initialize();
+	frame->Show(TRUE);
+	#else
+	wxMessageBox("Previewing not supported under X");
 	#endif
 }
 if (device==wxMEDIA_CLIPBOARD || device==wxMEDIA_METAFILE)
 {
 	#ifdef wx_msw
-	char *metafile_name=NULL;
+	// Make the metafile just 640x480 and scale the sheet accordingly
+	char *metafile_name=0;
 	if (device==wxMEDIA_METAFILE)
 		metafile_name=copystring(wxFileSelector("Save Metafile",0,0,".wmf","*.wmf"));
 	wxMetaFileDC dc_mf(metafile_name);
 	if (dc_mf.Ok())
 	{
+		float real_scale=min(640/MaxX(),480/MaxY());
+		dc_mf.SetUserScale(real_scale,real_scale);
+		draw_settings->SetRealWidth(MaxX());draw_settings->SetRealHeight(MaxY());
 		Update(dc_mf);
 		wxMetaFile *mf = dc_mf.Close();
 		if (mf)
 		{
-			Bool success=mf->SetClipboard((int)(dc_mf.MaxX()+10),(int)(dc_mf.MaxY()+10));
+			Bool success=mf->SetClipboard(MaxX(),MaxY());
 			if (!success) wxMessageBox("Copy Failed","Error",wxOK | wxCENTRE,this);
 			delete mf;
 		}
-		if (device==wxMEDIA_METAFILE)
-			wxMakeMetaFilePlaceable(metafile_name,0,0,(int)(dc_mf.MaxX()+10),(int)(dc_mf.MaxY()+10));
+		if (device==wxMEDIA_METAFILE)	wxMakeMetaFilePlaceable(metafile_name,0,0,MaxX(),MaxY());
 	}
 	#else
 	wxMessageBox("Metafiles not supported under X");
@@ -578,6 +706,8 @@ if (device==wxMEDIA_PS)
 	wxPostScriptDC dc_ps(NULL,TRUE);
 	if (dc_ps.Ok())
 	{
+		if (fit)
+			{draw_settings->SetRealWidth(MaxX());draw_settings->SetRealHeight(MaxY());}
 		dc_ps.StartDoc("");
 		dc_ps.StartPage();
 		Update(dc_ps);
@@ -586,9 +716,6 @@ if (device==wxMEDIA_PS)
 	}
 }
 }
-
-
-
 
 //****************************************************************************
 //*                               SPREAD SHEET                               *
@@ -674,7 +801,14 @@ void SpreadSheet::SetSize(int xs,int ys,int xe,int ye)
 sheet->SetSize(xs,ys,xe,ye);
 }
 
-
+void SpreadSheet::Dump(gOutput &o) const
+{
+for (int i=1;i<=rows;i++)
+{
+	for (int j=1;j<=cols;j++) o<<gPlainText(data(i,j).GetValue())<<' ';
+	o<<'\n';
+}
+}
 //****************************************************************************
 //*                           SPREAD SHEET 3D                                *
 //****************************************************************************
@@ -813,8 +947,22 @@ void SpreadSheet3D::OnOk(void)
 
 void SpreadSheet3D::OnPrint(void)
 {
-wxOutputDialogBox od;
-if (od.Completed()==wxOK) Print(od.GetSelection());
+wxStringList extras("ASCII",0);
+wxOutputDialogBox od(&extras);
+if (od.Completed()==wxOK)
+{
+	if (!od.ExtraMedia())
+		Print(od.GetMedia(),od.GetOption());
+	else	// only one extra exists--must be ascii.
+	{
+		char *s=wxFileSelector("Save",NULL,NULL,NULL,"*.asc",wxSAVE);
+		if (s)
+		{
+			gFileOutput out(s);
+			data[cur_level].Dump(out);
+		}
+	}
+}
 }
 
 #pragma argsused		// turn off the ev not used message

@@ -214,8 +214,27 @@ fit_box->Enable(FALSE);
 Go();
 }
 
-int wxOutputDialogBox::GetSelection() {return media_box->GetSelection();}
-wxOutputOption wxOutputDialogBox::GetOption() {return (fit_box->GetValue()) ? wxFITTOPAGE : wxWYSIWYG;}
+wxOutputMedia wxOutputDialogBox::GetMedia(void)
+{
+switch (media_box->GetSelection())
+{
+case 0: return wxMEDIA_PRINTER; break;
+case 1: return wxMEDIA_PS; break;
+case 2: return wxMEDIA_CLIPBOARD; break;
+case 3: return wxMEDIA_METAFILE; break;
+case 4: return wxMEDIA_PREVIEW; break;
+}
+return wxMEDIA_NUM;
+}
+
+int wxOutputDialogBox::GetExtraMedia(void)
+{return (media_box->GetSelection()>=wxMEDIA_NUM) ? media_box->GetSelection() : -1;}
+
+wxOutputOption wxOutputDialogBox::GetOption(void)
+{return (fit_box->GetValue()) ? wxFITTOPAGE : wxWYSIWYG;}
+
+Bool wxOutputDialogBox::ExtraMedia(void)
+{return (media_box->GetSelection()>=wxMEDIA_NUM);}
 
 //***************************** BASIC KEYBOARD STUFF ****************
 Bool	IsCursor(wxKeyEvent &ev)

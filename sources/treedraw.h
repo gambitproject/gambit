@@ -1,6 +1,6 @@
 // File: treedraw.h -- contains the definition of the configuration class 
 // for the extensive form
-// $Id$
+// @(#)treedraw.h	1.7 7/18/95
 #ifndef TREEDRAW_H
 #define TREEDRAW_H
 #include "gblock.h"
@@ -14,6 +14,8 @@ class TreeDrawSettings:public GambitDrawSettings
 	// Size info for different elements of the tree
 		int branch_length, node_length, y_spacing,x_origin, y_origin;
 		int outcome_length;
+	// Total size
+  	int max_x,max_y;
   // Colors
 		int chance_color,cursor_color;
   // Labeling info
@@ -47,6 +49,11 @@ class TreeDrawSettings:public GambitDrawSettings
 		void 	SetNodeLength(int l)		 	{ node_length=l;}
 		int 	YSpacing(void) 			      { return y_spacing; }
 		void 	SetYSpacing(int l)			 	{ y_spacing=l;}
+	// Total size of the tree (calculated in ::Render)
+		int		MaxX(void)								{ return max_x;}
+		void	SetMaxX(int m)						{ max_x=m;}
+		int		MaxY(void)								{ return max_y;}
+    void	SetMaxY(int m)						{ max_y=m;}
 	// Controls the display of infoset lines (turn of to speed up)
 		void	SetShowInfosets(Bool _s) 	{show_infosets=_s;}
 		int		ShowInfosets(void) {return show_infosets;}
@@ -86,7 +93,7 @@ class TreeDrawSettings:public GambitDrawSettings
 		int 	CursorColor(void) 			  { return cursor_color; }
 		void 	SetCursorColor(int _cl)	 	{ cursor_color=_cl;}
 	// Set the zoom
-		void		SetZoom(float z);
+		void		SetZoom(float z,bool force=false);
 		float   Zoom(void)				{return zoom_factor;}
 
 	// Functions to set the various options

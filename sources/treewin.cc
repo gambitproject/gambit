@@ -18,7 +18,6 @@
 template <class T>
 char *OutcomeToString(const gVector<T> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE)
 {
-char tempstr[20];
 static gString gvts;
 gvts="(";
 ToStringPrecision(2);
@@ -95,26 +94,17 @@ if (n->GetOutcome())
 return "";
 }
 
-
-//***********************************************************************
-//                       NODE-OUTCOME MENU HANDLER
-//***********************************************************************
-template<class T> void TreeWindow<T>::node_outcome(const gString out_name)
-{
-Outcome *out;
-if ((out=ef.GetOutcome(out_name))==0)
-	{wxMessageBox("This outcome is not defined yet"); return;}
-cursor->SetOutcome(out);
-}
 //***********************************************************************
 //                      TREE-OUTCOME MENU HANDLER
 //***********************************************************************
+// If save_now is true, we just update the outcome data in the extensive
+// form, but do not delete the dialog
 #include "outcomed.h"
-template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name)
+template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,bool save_now)
 {
 int i,j,out=1;
 static OutcomeDialog *outcome_dialog=0;
-static gArray<gString> old_names;
+static gBlock<gString> old_names;
 int num_players=ef.NumPlayers();
 if (!outcome_dialog)	// creating a new one
 {
@@ -132,7 +122,7 @@ if (!outcome_dialog)	// creating a new one
 	for (i=1;i<=num_players;i++)
 		outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
 	outcome_dialog->SetType(1,cols+1,gSpreadStr);
-	old_names=gArray<gString>(ef.NumOutcomes());
+	old_names=gBlock<gString>(ef.NumOutcomes());
 	for (i=1;i<=ef.NumOutcomes();i++)
 	{
 		OutcomeVector<T> *tmp=(OutcomeVector<T> *)(ef.OutcomeList()[i]);
@@ -155,9 +145,13 @@ else	// either going to a new one by clicking on an outcome or closing it
 	}
 	else	// this is an OK/Cancel action
 	{
-		if (outcome_dialog->Completed()==wxOK)
+		if (outcome_dialog->Completed()==wxOK || save_now)
 		{
 			T dummy;
+			// if we are just updating, make sure to save any changes to old_names.
+			// note that this assumes that we can not delete outcomes
+			if (save_now && outcome_dialog->GetRows()-1>ef.NumOutcomes())
+				old_names+=gBlock<gString>(outcome_dialog->GetRows()-1-ef.NumOutcomes());
 			for (i=1;i<=outcome_dialog->GetRows()-1;i++)
 			{
 				Outcome *tmp=(ef.NumOutcomes()<i) ? tmp=ef.NewOutcome() : ef.GetOutcome(old_names[i]);
@@ -165,10 +159,15 @@ else	// either going to a new one by clicking on an outcome or closing it
 					(*(OutcomeVector<T> *)tmp)[j]=FromString(outcome_dialog->GetCell(i,j),dummy);
 				if (outcome_dialog->EnteredCell(i,j) && outcome_dialog->GetCell(i,j)!="")
 					tmp->SetName(outcome_dialog->GetCell(i,j));
+				if (save_now) old_names[i]=tmp->GetName();
 			}
+      OnPaint();
 		}
-		delete outcome_dialog;
-		outcome_dialog=0;
+		if (!save_now)
+		{
+			delete outcome_dialog;
+			outcome_dialog=0;
+		}
 	}
 }
 }

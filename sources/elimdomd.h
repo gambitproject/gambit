@@ -50,7 +50,7 @@ public:
 	ElimDomParamsDialog(int numplayers,wxWindow *parent=NULL)
 	{
 	num_players=numplayers;
-	Bool all=FALSE,compress=FALSE;
+	all=FALSE,compress=FALSE;
 	d=new wxDialogBox(parent,"ElimDom Parameters",TRUE);
 	all_box=new wxCheckBox(d,(wxFunction)all_box_func,"Find All");
 	all_box->SetClientData((char *)this);

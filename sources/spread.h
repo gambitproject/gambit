@@ -215,6 +215,7 @@ class SpreadSheet;
 class SpreadSheet3D;
 class SpreadSheetC: public wxCanvas
 {
+friend class SpreadSheetPrintout;
 class SpreadCell {
 								public:
 								int 				row;
@@ -252,6 +253,7 @@ public:
 	// It is never less than MIN_SHEET_WIDTH and never greater than MAX_SHEET_WIDTH
 	void	DesiredSize(int *w,int *h);
 	int	 MaxX(int col=-1);
+	int	 MaxY(int row=-1);
 	// CheckScrollbars
 	void	CheckScrollbars(void);
 	// LabelExtent.  Since only the actual canvas can tell the extent...
@@ -266,7 +268,7 @@ public:
 	void	SetRow(int r)	{cell.row=r;ProcessCursor(0);}
 	void 	SetCol(int c)	{cell.col=c;ProcessCursor(0);}
 	// Printing
-	void Print(int device);
+	void Print(wxOutputMedia device,wxOutputOption fit);
 };
 
 enum gSpreadValType {gSpreadNum,gSpreadStr};
@@ -285,7 +287,7 @@ private:
 public:
 	// Constructor
 	SpreadDataCell(void) {entered=FALSE;val_type=gSpreadNum;attributes=0;}
-  ~SpreadDataCell(void) { }
+	~SpreadDataCell(void) { }
 	SpreadDataCell(const SpreadDataCell &C)
 	{
 		entered=C.entered;val_type=C.val_type;
@@ -304,16 +306,16 @@ public:
 	int operator==(const SpreadDataCell &C) {return value==C.value;}
 	int operator!=(const SpreadDataCell &C) {return !(value==C.value);}
 	// General info
-	Bool	Entered(void) {return entered;}
+	Bool	Entered(void) const {return entered;}
 	void	Entered(Bool _e)	{entered=_e;}
 	void	SetAttributes(long a) {attributes=a;}
-	Bool	HiLighted(void)	{return attributes&S_HILIGHT;}
+	Bool	HiLighted(void)	const {return attributes&S_HILIGHT;}
 	void	HiLighted(Bool _e)	{if (_e) attributes|=S_HILIGHT; else attributes&=(~S_HILIGHT);}
-	Bool	Bold(void) {return attributes&S_BOLD;}
+	Bool	Bold(void) const {return attributes&S_BOLD;}
 	void 	Bold(Bool _b) {if (_b) attributes|=S_BOLD; else attributes&=(~S_BOLD);}
 	void	SetType(gSpreadValType _type) {val_type=_type;}
-	gSpreadValType	GetType(void)	{return val_type;}
-	gString					&GetValue(void)	{return value;}
+	gSpreadValType	GetType(void)	const {return val_type;}
+	const gString		&GetValue(void)	const {return value;}
 	void						SetValue(const gString &S) {value=S;}
 	// Erase all the data in the cell, including clearing all cell attributes
 	void 	Clear(void) {entered=FALSE;value=gString();attributes=0;}
@@ -354,8 +356,8 @@ public:
 	void DelRow(int row);
 	void DelCol(int col);
 	// Data access stuff for the canvas
-	int		GetRows(void)			{return rows;}
-	int		GetCols(void)			{return cols;}
+	int		GetRows(void)	const		{return rows;}
+	int		GetCols(void)	const		{return cols;}
 	// Data access for top level
 	void	SetActive(Bool _s)
 	{
@@ -365,7 +367,7 @@ public:
 	}
 	// General data access
 	void		SetValue(int row,int col,const gString &s) {data(row,col)=s;data(row,col).Entered(TRUE);}
-	gString &GetValue(int row,int col) {return data(row,col).GetValue();}
+	const gString &GetValue(int row,int col) const {return data(row,col).GetValue();}
 	gString &GetLabel(void)	{return label;}
 	void		SetLabel(const gString &s) {label=s;}
 	void		SetType(int row,int col,gSpreadValType t) {data(row,col).SetType(t);}
@@ -396,11 +398,14 @@ public:
 	int			operator==(const SpreadSheet &s) {return 0;}
 	int			operator!=(const SpreadSheet &s) {return 1;}
 	// Printing
-	void Print(int device) {sheet->Print(device);}
+	void Print(wxOutputMedia device,wxOutputOption fit) {sheet->Print(device,fit);}
 	// Forced updating
 	void Repaint(void) {sheet->OnPaint();}
+	// Forced focus.  Need this if focus gets lost to a button/menu.  That would
+	// disable the keyboard input to the canvas.  Call this to force focus.
+  void SetFocus(void) {sheet->SetFocus();}
 	// Debugging
-	void		Dump(gOutput &out) {data.Dump(out);}
+	void Dump(gOutput &out) const;
 };
 //**************************** SPREAD SHEET 3D ******************************
 // Feature control constants: the low byte is used by the panel/buttons,
@@ -460,6 +465,7 @@ public:
 	virtual void OnPrint(void);
 	virtual void OnHelp(int help_type=0) { }
 	virtual Bool OnCharNew(wxKeyEvent &ev) {return FALSE;}
+	void CanvasFocus(void) {data[cur_level].SetFocus();}
 	// General data access
 	void		SetType(int row,int col,gSpreadValType t) {data[cur_level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col) {return data[cur_level].GetType(row,col);}
@@ -468,11 +474,11 @@ public:
 	SpreadSheet &operator[](int i){assert(i>0&&i<=levels);return data[i];}
 	void		SetCell(int row,int col,const gString &s)
 		{data[cur_level].SetValue(row,col,s);}
-	gString &GetCell(int row,int col)
+	const gString &GetCell(int row,int col) const
 		{return data[cur_level].GetValue(row,col);}
 	void		SetCell(int row,int col,int level,const gString &s)
 		{assert(level>0 && level<=levels);data[level].SetValue(row,col,s);}
-	gString &GetCell(int row,int col,int level)
+	const gString &GetCell(int row,int col,int level) const
 		{assert(level>0 && level<=levels);return data[level].GetValue(row,col);}
 	// Erase all the data in the spreadsheet, including clearing all cell attributes
 	void Clear(int level=0) {if (level==0) level=cur_level;data[level].Clear();}
@@ -537,7 +543,7 @@ public:
 	void	Redraw(void);
 	void 	Repaint(void) {data[cur_level].Repaint();}
 	// Printing
-	void Print(int device) {data[cur_level].Print(device);}
+	void Print(wxOutputMedia device,wxOutputOption fit) {data[cur_level].Print(device,fit);}
 	// Adding buttons
 	wxButton *AddButton(const char *label,wxFunction fun);
 	wxPanel *AddPanel(void);

@@ -26,6 +26,8 @@ class BaseExtensiveShow;
 
 class BaseTreeWindow: public wxCanvas
 {
+friend class ExtensivePrintout;
+
 private:
 	BaseExtensiveShow	*frame;
 	BaseExtForm		&ef;
@@ -95,6 +97,7 @@ public:
 	void node_set_mark(void);
 	void node_goto_mark(void);
 	void node_switch_player(void);
+	void node_outcome(int out);
 #ifdef SUBGAMES
 	void node_subgame(int _game);
 #endif
@@ -132,15 +135,14 @@ public:
 	float display_get_zoom(void);
 
 	void 	output(void);
-	void	print_eps(void);			// output to postscript file
-	void	print(void);					// output to printer (WIN3.1 only)
-	void	print_mf(void);				// copy to clipboard (WIN3.1 only)
+	void	print_eps(wxOutputOption fit);			// output to postscript file
+	void	print(wxOutputOption fit,bool preview=false);	// output to printer (WIN3.1 only)
+	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 
 // These menu handlers are type dependent and are defined in TreeWindow
 	virtual void	file_save(void) =0;
 	virtual void node_probs(void) =0;
-	virtual void node_outcome(const gString out_name) =0;
-	virtual void tree_outcomes(const gString out_name=gString()) =0;
+	virtual void tree_outcomes(const gString out_name=gString(),bool save_now=false) =0;
 
 	gString Title(void) const;
 
@@ -173,7 +175,7 @@ class TreeWindow : public BaseTreeWindow
 		~TreeWindow();
 
 		// Menu events
-		void tree_outcomes(const gString out_name=gString());
+		void tree_outcomes(const gString out_name=gString(),bool save_now=false);
 		void node_probs(void);
 		void node_outcome(const gString out_name);
 		void file_save(void);

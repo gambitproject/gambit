@@ -94,21 +94,25 @@ public:
 };
 
 //**************************** Output Dialog ************************
-// use the following constants to determine return times
-#define wxMEDIA_PRINTER			0
-#define wxMEDIA_PS					1
-#define wxMEDIA_CLIPBOARD		2
-#define wxMEDIA_METAFILE		3
 typedef enum {wxWYSIWYG,wxFITTOPAGE} wxOutputOption;
+typedef enum {wxMEDIA_PRINTER=0,wxMEDIA_PS,wxMEDIA_CLIPBOARD,wxMEDIA_METAFILE,
+							wxMEDIA_PREVIEW,wxMEDIA_NUM	} wxOutputMedia;
 class wxOutputDialogBox : public MyDialogBox
 {
 private:
 	wxRadioBox *media_box;
 	wxCheckBox *fit_box;
 public:
+	// Constructor
 	wxOutputDialogBox(wxStringList *extra_media=0,wxWindow *parent=0);
-	int GetSelection();
-	wxOutputOption GetOption();
+	// Returns one of the built-in media types
+	wxOutputMedia GetMedia(void);
+	// Returns the additional media type given in extra_media, if any
+	int	GetExtraMedia(void);
+	// Returns true if the selection was an extra_media
+	Bool ExtraMedia(void);
+  // Returns either wysiwyg or fit to page if appropriate
+	wxOutputOption GetOption(void);
 };
 
 // Returns the position of s in the list l.  This is useful for finding
