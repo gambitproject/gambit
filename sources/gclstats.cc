@@ -19,9 +19,19 @@ private:
 	char Represent;
 public:
 	// Constructor
-	gGCLStatus(void) : sig(false),Width(0),Prec(6),Represent('f')	{signal(SIGINT, gGCLStatusHandler);}
+	gGCLStatus(void) : sig(false),Width(0),Prec(6),Represent('f')
+	{
+	#ifndef __BORLANDC__
+	signal(SIGINT, gGCLStatusHandler);
+	#endif
+	}
 	// Destructor
-	~gGCLStatus(void) {signal(SIGINT, SIG_DFL);}
+	~gGCLStatus(void)
+	{
+	#ifndef __BORLANDC__
+	signal(SIGINT, SIG_DFL);
+	#endif
+	}
 	// functions for gProgress::gOutput
 	int GetWidth(void) {return Width;}
 	gOutput &SetWidth(int w) {Width=w;return *this;}
