@@ -43,6 +43,7 @@ public:
 
 	gOutput &operator<<(int x);
 	gOutput &operator<<(unsigned int x);
+	gOutput &operator<<(bool x);
 	gOutput &operator<<(long x);
 	gOutput &operator<<(char x);
 	gOutput &operator<<(double x);
@@ -62,6 +63,8 @@ public:
 gOutput &gGCLStatus::operator<<(int)
 {/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(unsigned int)
+{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
+gOutput &gGCLStatus::operator<<(bool)
 {/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(long)
 {/*sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;*/return *this;}
