@@ -34,7 +34,7 @@ Basis<T>::Basis(const Tableau<T> &tab)
   basis(tab.A.MinRow(),tab.A.MaxRow()),
   dual(tab.A.MinRow(),tab.A.MaxRow()),
   unitcost(tab.A.MinRow(),tab.A.MaxRow()),
-  cost(tab.A.MinCol(),tab.A.MaxCol()),
+	cost(tab.A.MinCol(),tab.A.MaxCol()),
   costdefined(0)
 {
   B.refactor(tab.A, columns.unitflag, columns.column);
@@ -66,7 +66,7 @@ Basis<T>::Basis(const Tableau<T> &tab, const gVector<T> &c, const BasisCode<T> &
   unitcost(tab.A.MinRow(),tab.A.MaxRow()),
   cost(c),
   dual(tab.A.MinRow(),tab.A.MaxRow()),
-  costdefined(1)
+	costdefined(1)
 // , tmpcol(tab.A.MinRow(),tab.A.MaxRow())
 {
   assert( c.First()==tab.A.MinCol() && c.Last()==tab.A.MaxCol() );
@@ -130,8 +130,7 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
   costdefined= orig.costdefined;
 }
 
-template <class T>
-virtual Basis<T>::~Basis()
+template <class T> Basis<T>::~Basis()
 {
 }
 
@@ -191,7 +190,7 @@ void Basis<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 
 
 template <class T>
-void Basis<T>::GetCost(gVector<T> &uc, gVector<T> &c)
+void Basis<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
 {
   assert(costdefined);
   uc= unitcost;
@@ -214,7 +213,7 @@ T Basis<T>::TotalCost() const
 }
 
 template <class T>
-void Basis<T>::DualVector(gVector<T> &L)
+void Basis<T>::DualVector(gVector<T> &L) const
 {
   assert(costdefined);
   L= dual;
@@ -436,7 +435,7 @@ bool Basis<T>::IsNash() const
 
 template <class T>
 BFS<T> Basis<T>::GetBFS() const
-{ 
+{
   BFS<T> cbfs((T) 0);
   for(int i=columns.column.First();i<=columns.column.Last();i++) {
     if(Member(i)) 
@@ -713,7 +712,7 @@ int BasisCode<T>::find(int col) const
 }
 
 template <class T>
-int BasisCode<T>::find(bool flag, int col)
+int BasisCode<T>::find(bool flag, int col) const
 {
   if(flag)
     {

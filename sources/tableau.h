@@ -122,11 +122,11 @@ template <class T> class Basis {
   void SetCost(const gVector<T>&, const gVector<T>& ); // tableau row
   void GetCost(gVector<T>&, gVector<T>& ) const; // tableau row
   void ClearCost(); // make cost undefined
-  T TotalCost(); // cost of current solution
-  T RelativeCost(int) const; // negative index convention
-  T RelativeCost(bool,int) const; // flag/index convention
-  void RelativeCostVector(gVector<T> &, gVector<T> &) const; // tableau row
-  void DualVector(gVector<T> &) const; // column vector
+	T TotalCost() const; // cost of current solution
+	T RelativeCost(int) const; // negative index convention
+	T RelativeCost(bool,int) const; // flag/index convention
+	void RelativeCostVector(gVector<T> &, gVector<T> &) const; // tableau row
+	void DualVector(gVector<T> &) const; // column vector
 
   // non-cost-based functions
   void BasisVector(gVector<T> &) const; // column vector
@@ -151,8 +151,8 @@ template <class T> class Basis {
   void Multiply(const gVector<T> &, gVector<T>& ) const;
   void MultiplyT(const gVector<T> &, gVector<T> &) const;
 
-  BFS<T> GetBFS(void);
-  bool IsNash(void);
+	BFS<T> GetBFS(void) const;
+	bool IsNash(void) const;
   void Dump(gOutput &) const;
 };
 
