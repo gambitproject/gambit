@@ -29,28 +29,26 @@
 
 #include "game.h"
 
-//
-// The extensive form and normal form outcome classes are both included
-// in this header file in the hopes of an eventual unification of the
-// two.
-//
-
-
 class gbtGame;
 class gbtGamePlayer;
 
-class gbtGameOutcomeRep : public gbtGameObject {
+class gbtGameConstOutcomeRep : public gbtGameObject {
+public:
+  virtual int GetId(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+
+  virtual gbtNumber GetPayoff(const gbtGamePlayer &) const = 0;
+  virtual gbtArray<gbtNumber> GetPayoff(void) const = 0;
+};
+
+class gbtGameOutcomeRep : public gbtGameConstOutcomeRep {
 friend class gbtGameOutcome;
 friend class gbtGame;
 friend class gbtGameNode;
 public:
-  virtual int GetId(void) const = 0;
-  virtual gbtText GetLabel(void) const = 0;
   virtual void SetLabel(const gbtText &) = 0;
 
-  virtual gbtArray<gbtNumber> GetPayoff(void) const = 0;
-  virtual gbtNumber GetPayoff(const gbtGamePlayer &) const = 0;
-  virtual double GetPayoffDouble(int p_playerId) const = 0;
+  //  virtual double GetPayoffDouble(int p_playerId) const = 0;
   virtual void SetPayoff(const gbtGamePlayer &, const gbtNumber &) = 0;
 
   virtual void DeleteOutcome(void) = 0;

@@ -29,28 +29,16 @@
 
 #include "game.h"
 
-//
-// The extensive form and normal form player classes are both included
-// in this header file in the hopes of an eventual unification of the
-// two.
-//
-
-
-
-class gbtGamePlayerBase;
 class gbtGame;
 class gbtGameInfoset;
 
 class gbtGamePlayer;
-class gbtGamePlayer;
 class gbtGameAction;
 
-class gbtGameStrategyRep : public gbtGameObject {
-friend class gbtGameStrategy;
+class gbtGameConstStrategyRep : public gbtGameObject {
 public:
-  virtual gbtText GetLabel(void) const = 0;
-  virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
 
   virtual gbtGamePlayer GetPlayer(void) const = 0;
   virtual gbtGameAction GetAction(const gbtGameInfoset &) const = 0;
@@ -58,6 +46,13 @@ public:
 
   // The following only make sense for matrix games
   virtual long GetIndex(void) const = 0;
+
+};
+
+class gbtGameStrategyRep : public gbtGameConstStrategyRep {
+friend class gbtGameStrategy;
+public:
+  virtual void SetLabel(const gbtText &) = 0;
 };
 
 class gbtEfgNullStrategy { };
@@ -104,24 +99,30 @@ inline gbtOutput &operator<<(gbtOutput &p_stream,
 			     const gbtGameStrategy &)
 { return p_stream; }
 
-class gbtGamePlayerRep : public gbtGameObject {
-friend class gbtGamePlayer;
-friend class gbtGame;
-friend class gbtGameInfoset;
+class gbtGameConstPlayerRep : public gbtGameObject {
 public:
-  virtual gbtGame GetGame(void) const = 0;
-  virtual gbtText GetLabel(void) const = 0;
-  virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+
+  virtual gbtGame GetGame(void) const = 0;
 
   virtual bool IsChance(void) const = 0;
 
   virtual int NumInfosets(void) const = 0;
-  virtual gbtGameInfoset NewInfoset(int p_actions) = 0;
   virtual gbtGameInfoset GetInfoset(int p_index) const = 0;
 
   virtual int NumStrategies(void) const = 0;
   virtual gbtGameStrategy GetStrategy(int p_index) const = 0;
+};
+
+class gbtGamePlayerRep : public gbtGameConstPlayerRep {
+friend class gbtGamePlayer;
+friend class gbtGame;
+friend class gbtGameInfoset;
+public:
+  virtual void SetLabel(const gbtText &) = 0;
+
+  virtual gbtGameInfoset NewInfoset(int p_actions) = 0;
 };
 
 class gbtGameNullPlayer { };

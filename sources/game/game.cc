@@ -737,8 +737,6 @@ gbtGamePlayer gbtGameBase::NewPlayer(void)
 
   for (int outc = 1; outc <= outcomes.Last();
        outcomes[outc++]->m_payoffs.Append(0));
-  for (int outc = 1; outc <= outcomes.Last();
-       outcomes[outc++]->m_doublePayoffs.Append(0));
   ComputeReducedStrategies();
   return ret;
 }

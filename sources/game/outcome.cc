@@ -42,13 +42,9 @@
 
 gbtGameOutcomeBase::gbtGameOutcomeBase(gbtGameBase *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg),
-    m_payoffs(p_efg->players.Length()),
-    m_doublePayoffs(p_efg->players.Length())
+    m_payoffs(p_efg->players.Length())
 {
-  for (int i = 1; i <= m_payoffs.Length(); i++) {
-    m_payoffs[i] = 0;
-    m_doublePayoffs[i] = 0.0;
-  }
+  for (int i = 1; i <= m_payoffs.Length(); m_payoffs[i++] = 0);
 }
 
 void gbtGameOutcomeBase::DeleteOutcome(void)

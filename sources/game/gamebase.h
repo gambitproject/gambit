@@ -43,7 +43,6 @@ public:
   gbtGameBase *m_efg;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
-  gbtBlock<double> m_doublePayoffs;
 
   gbtGameOutcomeBase(gbtGameBase *, int);
 
@@ -54,10 +53,8 @@ public:
   gbtArray<gbtNumber> GetPayoff(void) const { return m_payoffs; }
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const
   { return m_payoffs[p_player->GetId()]; }
-  double GetPayoffDouble(int p_playerId) const 
-  { return m_doublePayoffs[p_playerId]; }
   void SetPayoff(const gbtGamePlayer &p_player, const gbtNumber &p_value)
-  { m_payoffs[p_player->GetId()] = p_value; m_doublePayoffs[p_player->GetId()] = p_value; } 
+  { m_payoffs[p_player->GetId()] = p_value; } 
 
   void DeleteOutcome(void);
 };

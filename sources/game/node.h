@@ -27,28 +27,22 @@
 #ifndef NODE_H
 #define NODE_H
 
-template <class T> class gbtBehavAssessment;
-
-class gbtGameNodeRep : public gbtGameObject {
-friend class gbtGame;
-friend class gbtGameInfosetBase;
-friend class gbtGameNode;
-friend struct gbt_efg_game_rep;
+class gbtGameConstNodeRep : public gbtGameObject {
 public:
-  virtual gbtText GetLabel(void) const = 0;
-  virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+
   virtual gbtGame GetGame(void) const = 0;
 
   virtual int NumChildren(void) const = 0;
-  bool IsTerminal(void) const { return (NumChildren() == 0); }
-  bool IsNonterminal(void) const { return !IsTerminal(); }
   virtual gbtGameNode GetChild(int i) const = 0;
   virtual gbtGameNode GetChild(const gbtGameAction &) const = 0; 
+  bool IsTerminal(void) const { return (NumChildren() == 0); }
+  bool IsNonterminal(void) const { return !IsTerminal(); }
   virtual bool IsPredecessorOf(const gbtGameNode &) const = 0;
 
   virtual gbtGameNode GetParent(void) const = 0;
-  virtual gbtGameAction GetPriorAction(void) const = 0; // returns null if root node
+  virtual gbtGameAction GetPriorAction(void) const = 0;
 
   virtual gbtGameNode GetPriorSibling(void) const = 0;
   virtual gbtGameNode GetNextSibling(void) const = 0;
@@ -64,6 +58,15 @@ public:
   virtual bool IsSubgameRoot(void) const = 0;
 
   virtual gbtGameOutcome GetOutcome(void) const = 0;
+};
+
+class gbtGameNodeRep : public gbtGameConstNodeRep {
+friend class gbtGame;
+friend class gbtGameInfosetBase;
+friend class gbtGameNode;
+public:
+  virtual void SetLabel(const gbtText &) = 0;
+
   virtual void SetOutcome(const gbtGameOutcome &) = 0;
 
   virtual gbtGameNode InsertMove(gbtGameInfoset) = 0;
@@ -105,9 +108,9 @@ public:
   { return (m_rep != p_player.m_rep); }
 
   gbtGameNodeRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtEfgNullNode(); return m_rep; }
   const gbtGameNodeRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtEfgNullNode(); return m_rep; }
   
   gbtGameNodeRep *Get(void) const { return m_rep; }
 
