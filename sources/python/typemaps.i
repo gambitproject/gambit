@@ -30,6 +30,30 @@
   if ($1) free($1);
 }
 
+%typemap(in) const gbtBlock<gbtGameStrategy> & {
+  int i;
+  if (!PySequence_Check($input)) {
+    PyErr_SetString(PyExc_ValueError, "Expected a sequence");
+    return NULL;
+  }
+  $1 = new gbtBlock<gbtGameStrategy>(PySequence_Length($input));
+  for (i = 0; i < PySequence_Length($input); i++) {
+    PyObject *o = PySequence_GetItem($input, i);
+    gbtGameStrategy *s;
+    if (SWIG_ConvertPtr(o, (void **) &s, SWIGTYPE_p_gbtGameStrategy,
+			SWIG_POINTER_EXCEPTION) == -1)  {
+      return NULL;
+    }	
+    else {
+      (*$1)[i+1] = *s;
+    }			
+  }
+}
+
+%typemap(freearg) const gbtBlock<gbtGameStrategy> & {
+  if ($1) free($1);
+}
+
 %typemap(out) gbtArray<double> {
   int i;
   $result = PyList_New($1.Length());

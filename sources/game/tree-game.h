@@ -139,6 +139,15 @@ public:
   gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const;
   //@}
 
+  /// @name Creating restrictions of the game
+  //@{
+  gbtGame Restrict(const gbtBlock<gbtGameStrategy> &) const
+    { throw gbtGameUndefinedException(); }
+  gbtGame RestrictTo(const gbtBlock<gbtGameStrategy> &) const
+    { throw gbtGameUndefinedException(); }
+  bool IsRestriction(void) const { return false; }
+  //@}
+
   /// @name Writing data files
   //@{
   void WriteEfg(std::ostream &) const;

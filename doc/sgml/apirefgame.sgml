@@ -317,6 +317,27 @@ a game of perfect recall, and <literal>False</literal> (zero) otherwise.
 
 </sect2>
 
+<sect2 id="apiref.game.isrestriction">
+<title>IsRestriction</title>
+<indexterm><primary>IsRestriction</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGame::IsRestriction(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsRestriction</function>
+returns <literal>True</literal> (nonzero) if the game is a restriction
+of another game, and <literal>False</literal> (zero) otherwise. 
+</para>
+
+</sect2>
+
 <sect2 id="apiref.game.newbehavprofile">
 <title>NewBehavProfile</title>
 <indexterm><primary>NewBehavProfile</primary></indexterm>
@@ -653,6 +674,50 @@ In Python, this is mapped to an <errorname>IOError</errorname> error.
 </para>
 
 </sect2>
+
+
+<sect2 id="apiref.game.restrict">
+<title>Restrict</title>
+<indexterm><primary>Restrict</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGame gbtGame::Restrict(const gbtBlock&lt;gbtGameStrategy&gt; &amp;p_list) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Restrict</function> creates a retriction of the game, where
+strategies in <parameter>p_list</parameter> are removed from the game.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.game.restrictto">
+<title>RestrictTo</title>
+<indexterm><primary>Restrict</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGame gbtGame::RestrictTo(const gbtBlock&lt;gbtGameStrategy&gt; &amp;p_list) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>RestrictTo</function> creates a retriction of the game,
+where only strategies in <parameter>p_list</parameter> are included in
+the game.  
+</para>
+
+</sect2>
+
 
 <sect2 id="apiref.game.setcomment">
 <title>SetComment</title>

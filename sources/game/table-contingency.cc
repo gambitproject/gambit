@@ -113,13 +113,13 @@ void gbtTableContingencyRep::SetOutcome(const gbtGameOutcome &p_outcome)
     gbtTableOutcomeRep *outcome = 
       dynamic_cast<gbtTableOutcomeRep *>(p_outcome.Get());
     if (!outcome || outcome->m_nfg != m_nfg) throw gbtGameMismatchException();
-    m_nfg->m_results[m_index + 1] = outcome;
+    (*m_nfg->m_results)[m_index + 1] = outcome;
   }
 }
 
 gbtGameOutcome gbtTableContingencyRep::GetOutcome(void) const
 {
-  return m_nfg->m_results[m_index + 1];
+  return (*m_nfg->m_results)[m_index + 1];
 }
 
 gbtRational 
@@ -130,8 +130,8 @@ gbtTableContingencyRep::GetPayoff(const gbtGamePlayer &p_player) const
     dynamic_cast<gbtTablePlayerRep *>(p_player.Get());
   if (!player || player->m_nfg != m_nfg)  throw gbtGameMismatchException();
 
-  if (m_nfg->m_results[m_index + 1]) {
-    return m_nfg->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
+  if ((*m_nfg->m_results)[m_index + 1]) {
+    return (*m_nfg->m_results)[m_index + 1]->m_payoffs[p_player->GetId()];
   }
   else {
     return gbtRational(0);
@@ -255,7 +255,7 @@ gbtTableContingencyIteratorRep::GetStrategy(const gbtGamePlayer &p_player) const
   
 gbtGameOutcome gbtTableContingencyIteratorRep::GetOutcome(void) const
 {
-  return m_nfg->m_results[m_index + 1];
+  return (*m_nfg->m_results)[m_index + 1];
 }
 
 gbtRational 
@@ -266,8 +266,8 @@ gbtTableContingencyIteratorRep::GetPayoff(const gbtGamePlayer &p_player) const
     dynamic_cast<gbtTablePlayerRep *>(p_player.Get());
   if (!player || player->m_nfg != m_nfg)  throw gbtGameMismatchException();
 
-  if (m_nfg->m_results[m_index + 1]) {
-    return m_nfg->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
+  if ((*m_nfg->m_results)[m_index + 1]) {
+    return (*m_nfg->m_results)[m_index + 1]->m_payoffs[p_player->GetId()];
   }
   else {
     return gbtRational(0);

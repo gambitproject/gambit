@@ -190,6 +190,9 @@ typedef gbtGameSingleHandle<gbtGameContingencyRep> gbtGameContingency;
 class gbtGameContingencyIteratorRep;
 typedef gbtGameSingleHandle<gbtGameContingencyIteratorRep> gbtGameContingencyIterator;
 
+class gbtGameRep;
+typedef gbtGameObjectHandle<gbtGameRep> gbtGame;
+
 template <class T> class gbtBehavProfile;
 template <class T> class gbtMixedProfile;
 
@@ -323,6 +326,18 @@ public:
   virtual gbtBehavProfile<double> NewBehavProfile(double) const = 0;
   /// Create a new behavior profile in rational precision
   virtual gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const = 0;
+  //@}
+
+  //!
+  //! @name Creating restrictions of the game
+  //!
+  //@{
+  /// Create a game where the players are restricted from playing strategies
+  virtual gbtGame Restrict(const gbtBlock<gbtGameStrategy> &) const = 0;
+  /// Create a game where the players are restricted to playing strategies
+  virtual gbtGame RestrictTo(const gbtBlock<gbtGameStrategy> &) const = 0;
+  /// Returns true if game is a restriction of another game
+  virtual bool IsRestriction(void) const = 0;
   //@}
 
   //!

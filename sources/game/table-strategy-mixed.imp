@@ -149,8 +149,8 @@ T gbtTableMixedProfileRep<T>::GetPayoff(gbtTablePlayerRep *p_player,
 					long index, int pl) const
 {
   if (pl > m_game->m_players.Length())  {
-    if (m_game->m_results[index]) {
-      return m_game->m_results[index]->m_payoffs[p_player->m_id];
+    if ((*m_game->m_results)[index]) {
+      return (*m_game->m_results)[index]->m_payoffs[p_player->m_id];
     }
     else {
       return (T) 0;
@@ -190,8 +190,8 @@ T gbtTableMixedProfileRep<T>::GetPayoffDeriv(gbtTablePlayerRep *p_player,
     return GetPayoffDeriv(p_player, p_constPlayer, index, pl + 1);
   }
   else if (pl > m_game->m_players.Length())  {
-    if (m_game->m_results[index]) {
-      return (T) m_game->m_results[index]->m_payoffs[p_player->m_id];
+    if ((*m_game->m_results)[index]) {
+      return (T) (*m_game->m_results)[index]->m_payoffs[p_player->m_id];
     }
     else {
       return (T) 0;
@@ -246,8 +246,8 @@ T gbtTableMixedProfileRep<T>::GetPayoffDeriv(gbtTablePlayerRep *p_player,
 			  index, pl + 1);
   }
   else if (pl > m_game->m_players.Length())  {
-    if (m_game->m_results[index]) {
-      return (T) m_game->m_results[index]->m_payoffs[p_player->m_id];
+    if ((*m_game->m_results)[index]) {
+      return (T) (*m_game->m_results)[index]->m_payoffs[p_player->m_id];
     }
     else {
       return (T) 0;

@@ -238,6 +238,16 @@ public:
     { return (*self)->NewBehavProfile(gbtRational(0)); }
 
   //--------------------------------------------------------------------
+  //            Creating strategy profiles on the game
+  //--------------------------------------------------------------------
+
+  gbtGame Restrict(const gbtBlock<gbtGameStrategy> &p_list) const
+    { return (*self)->Restrict(p_list); }	
+  gbtGame RestrictTo(const gbtBlock<gbtGameStrategy> &p_list) const
+    { return (*self)->RestrictTo(p_list); }
+  bool IsRestriction(void) const  { return (*self)->IsRestriction(); }
+	
+  //--------------------------------------------------------------------
   //                     Writing data files
   //--------------------------------------------------------------------
   void WriteEfg(char *filename)  {

@@ -340,7 +340,7 @@ static void ParseOutcomeBody(gbtGameParserState &p_parser,
       throw gbtNfgParserException();
     }
 
-    p_nfg->m_results[cont++] = p_nfg->m_outcomes[p_parser.GetLastInteger().as_long()];
+    (*p_nfg->m_results)[cont++] = p_nfg->m_outcomes[p_parser.GetLastInteger().as_long()];
     p_parser.GetNextSymbol();
   }
 }
@@ -350,9 +350,9 @@ static void SetPayoff(gbtTableGameRep *p_nfg,
 {
   if (p_pl == 1)  {
     p_nfg->NewOutcome();
-    p_nfg->m_results[p_cont] = p_nfg->m_outcomes[p_nfg->m_outcomes.Length()];
+    (*p_nfg->m_results)[p_cont] = p_nfg->m_outcomes[p_nfg->m_outcomes.Length()];
   }
-  p_nfg->m_results[p_cont]->m_payoffs[p_pl] = p_value;
+  (*p_nfg->m_results)[p_cont]->m_payoffs[p_pl] = p_value;
 }
 
 static void ParsePayoffBody(gbtGameParserState &p_parser, 

@@ -46,8 +46,9 @@ static int Product(const gbtArray<int> &p_dim)
 }
 
 gbtTableGameRep::gbtTableGameRep(const gbtArray<int> &p_dim)
-  : m_refCount(0), m_label("UNTITLED"), m_dimensions(p_dim), 
-    m_players(p_dim.Length()), m_results(Product(p_dim))
+  : m_refCount(0), m_label(""), m_dimensions(p_dim), 
+    m_unrestrictedGame(0), m_players(p_dim.Length()), 
+    m_results(new gbtArray<gbtTableOutcomeRep *>(Product(p_dim)))
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)  {
     m_players[pl] = new gbtTablePlayerRep(this, pl, p_dim[pl]);
@@ -58,14 +59,44 @@ gbtTableGameRep::gbtTableGameRep(const gbtArray<int> &p_dim)
   }
   IndexStrategies();
 
-  for (int cont = 1; cont <= m_results.Length();
-       m_results[cont++] = (gbtTableOutcomeRep *) 0);
+  for (int cont = 1; cont <= m_results->Length();
+       (*m_results)[cont++] = (gbtTableOutcomeRep *) 0);
 }
+
+gbtTableGameRep::gbtTableGameRep(gbtTableGameRep *p_unrestrictedGame,
+				 const gbtBlock<gbtGameStrategy> &p_list)
+  : m_refCount(0), m_label(""), m_dimensions(p_unrestrictedGame->NumPlayers()),
+    m_unrestrictedGame(p_unrestrictedGame),
+    m_players(p_unrestrictedGame->NumPlayers()),
+    m_results(p_unrestrictedGame->m_results)
+{
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    m_dimensions[pl] = 0;
+    m_players[pl] = new gbtTablePlayerRep(this, pl, 0);
+    gbtTablePlayerRep *player = p_unrestrictedGame->m_players[pl];
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      if (!p_list.Contains(player->m_infosets[1]->m_actions[st])) {
+	gbtTableStrategyRep *strategy = 
+	  new gbtTableStrategyRep(m_players[pl]->m_infosets[1], st);
+	strategy->m_index = player->m_infosets[1]->m_actions[st]->m_index;
+	m_players[pl]->m_infosets[1]->m_actions.Append(strategy);
+	m_dimensions[pl]++; 
+      }
+    }
+  }
+}
+
 
 gbtTableGameRep::~gbtTableGameRep()
 {
   for (int pl = 1; pl <= m_players.Length(); delete m_players[pl++]);
   for (int outc = 1; outc <= m_outcomes.Length(); delete m_outcomes[outc++]); 
+  if (!m_unrestrictedGame)  {
+    delete m_results;
+  }
+  else {
+    m_unrestrictedGame->Dereference();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -248,6 +279,34 @@ gbtTableGameRep::NewBehavProfile(const gbtRational &) const
 
 
 //----------------------------------------------------------------------
+//     class gbtTableGameRep: Creating restrictions of the game
+//----------------------------------------------------------------------
+
+gbtGame 
+gbtTableGameRep::Restrict(const gbtBlock<gbtGameStrategy> &p_list) const
+{ 
+  return gbtGame(new gbtTableGameRep(const_cast<gbtTableGameRep *>(this), 
+				     p_list));
+} 
+
+gbtGame
+gbtTableGameRep::RestrictTo(const gbtBlock<gbtGameStrategy> &p_to) const
+{
+  gbtBlock<gbtGameStrategy> list;
+
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
+      if (!p_to.Contains(m_players[pl]->GetStrategy(st))) {
+	list.Append(m_players[pl]->GetStrategy(st));
+      }
+    }
+  }
+
+  return gbtGame(new gbtTableGameRep(const_cast<gbtTableGameRep *>(this),
+				     list));
+}
+
+//----------------------------------------------------------------------
 //              class gbtTableGameRep: Writing data files
 //----------------------------------------------------------------------
 
@@ -312,8 +371,8 @@ void gbtTableGameRep::WriteNfg(std::ostream &p_file) const
     p_file << "}\n";
   
     for (int cont = 1; cont <= ncont; cont++)  {
-      if (m_results[cont] != 0)
-	p_file << m_results[cont]->m_id << ' ';
+      if ((*m_results)[cont] != 0)
+	p_file << (*m_results)[cont]->m_id << ' ';
       else
 	p_file << "0 ";
     }
@@ -332,9 +391,9 @@ void gbtTableGameRep::WriteNfg(std::ostream &p_file) const
 void gbtTableGameRep::DeleteOutcome(gbtTableOutcomeRep *p_outcome)
 {
   // Remove references to the outcome from the table
-  for (int i = 1; i <= m_results.Length(); i++) {
-    if (m_results[i] == p_outcome) {
-      m_results[i] = 0;
+  for (int i = 1; i <= m_results->Length(); i++) {
+    if ((*m_results)[i] == p_outcome) {
+      (*m_results)[i] = 0;
     }
   }
 

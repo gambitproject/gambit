@@ -47,16 +47,19 @@ public:
   int m_refCount;
   std::string m_label, m_comment;
   gbtArray<int> m_dimensions;
+  gbtTableGameRep *m_unrestrictedGame;
 
   gbtBlock<gbtTablePlayerRep *> m_players;
   gbtBlock<gbtTableOutcomeRep *> m_outcomes;
 
-  gbtArray<gbtTableOutcomeRep *> m_results;
+  gbtArray<gbtTableOutcomeRep *> *m_results;
 
   /// @name Constructors and destructor
   //@{
-  /// Constructor, creating a table game with the given shape
+  /// Create a new table game with the specified shape 
   gbtTableGameRep(const gbtArray<int> &);
+  /// Create a restriction of a table game, omitting the given strategies
+  gbtTableGameRep(gbtTableGameRep *, const gbtBlock<gbtGameStrategy> &);
   /// Destructor
   virtual ~gbtTableGameRep();
   //@}
@@ -135,6 +138,13 @@ public:
   gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
   gbtBehavProfile<double> NewBehavProfile(double) const;
   gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const;
+  //@}
+
+  /// @name Creating restrictions of the game
+  //@{
+  gbtGame Restrict(const gbtBlock<gbtGameStrategy> &) const;
+  gbtGame RestrictTo(const gbtBlock<gbtGameStrategy> &) const;
+  bool IsRestriction(void) const { return (m_unrestrictedGame != 0); }
   //@}
 
   /// @name Writing data files
