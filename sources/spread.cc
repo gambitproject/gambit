@@ -16,7 +16,11 @@
 #include    "spread.h"
 #include    "gmisc.h"
 
-//Global GDI objects
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
+
+// Global GDI objects
 wxPen       *grid_line_pen;
 wxPen       *grid_border_pen;
 wxPen       *s_selected_pen;
@@ -24,6 +28,17 @@ wxPen       *s_hilight_pen;
 wxPen       *s_white_pen;
 wxBrush *s_white_brush;
 wxBrush *s_hilight_brush;
+
+
+// ----------------------------------------
+// For GUI logging:
+// ----------------------------------------
+ 
+gText SpreadSheet3D::GuiLogRootName  = "SpreadSheet3D#";
+int   SpreadSheet3D::GuiLogNameCount = 1;
+ 
+// ----------------------------------------
+
 
 gOutput &operator<<(gOutput &op, const SpreadSheet3D &)
 {
@@ -245,9 +260,9 @@ int SpreadSheetDrawSettings::GetColWidth(int col)
 void SpreadSheetDrawSettings::SetColWidth(int _c, int col)
 {
     if (col) 
-	{
-		col_width[col] = _c;
-	}
+    {
+        col_width[col] = _c;
+    }
     else
     {
         for (int i = 1; i <= col_width.Length(); i++) 
@@ -776,7 +791,7 @@ void SpreadSheetC::Update(wxDC &dc)
     int width = draw_settings->GetRealWidth(), height = draw_settings->GetRealHeight();
     
     if (!height || !width) 
-		return;
+        return;
 
     ViewStart(&x_start, &y_start);
     x_start *= draw_settings->XScroll();
@@ -784,12 +799,12 @@ void SpreadSheetC::Update(wxDC &dc)
     min_row = (y_start-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
 
     if (min_row < 1) 
-		min_row = 1;
+        min_row = 1;
 
     max_row = min_row+height/draw_settings->GetRowHeight();
     
     if (max_row > sheet->GetRows()) 
-		max_row = sheet->GetRows();
+        max_row = sheet->GetRows();
 
     min_col = 0;
     int i = 1;
@@ -797,13 +812,13 @@ void SpreadSheetC::Update(wxDC &dc)
     while (!min_col && i <= sheet->GetCols())
     {
         if (x_start < MaxX(i)) 
-			min_col = i;
+            min_col = i;
 
         i++;
     }
     
     if (min_col < 1) 
-		min_col = 1;
+        min_col = 1;
 
     max_col = 0;
     i = 1;
@@ -811,13 +826,13 @@ void SpreadSheetC::Update(wxDC &dc)
     while (!max_col && i <= sheet->GetCols())
     {
         if (x_start+width < MaxX(i)) 
-			max_col = i;
+            max_col = i;
 
         i++;
     }
     
     if (max_col < 1) 
-		max_col = sheet->GetCols();
+        max_col = sheet->GetCols();
 
     // Draw the grid
     char *dc_type = dc.GetClassInfo()->GetClassName();
@@ -829,79 +844,79 @@ void SpreadSheetC::Update(wxDC &dc)
     }
     
     if (strcmp(dc_type, "wxPostScriptDC") != 0) 
-		dc.SetBackgroundMode(wxTRANSPARENT);
+        dc.SetBackgroundMode(wxTRANSPARENT);
 
     dc.SetBrush(wxTRANSPARENT_BRUSH);
     dc.SetPen(grid_line_pen);
 
     for (row = min_row; row <= max_row; row++)
-	{
+    {
         dc.DrawLine(draw_settings->XStart(), 
-					draw_settings->YStart()+row*draw_settings->GetRowHeight(),
+                    draw_settings->YStart()+row*draw_settings->GetRowHeight(),
                     MaxX(max_col)+1,
                     draw_settings->YStart()+row*draw_settings->GetRowHeight());
-	}
+    }
 
     for (col = min_col; col <= max_col; col++)
-	{
+    {
         dc.DrawLine(MaxX(col), 
-					draw_settings->YStart(),
+                    draw_settings->YStart(),
                     MaxX(col),
                     draw_settings->YStart()+max_row*draw_settings->GetRowHeight()+1);
-	}
+    }
 
     dc.SetPen(grid_border_pen);
     dc.SetBrush(wxTRANSPARENT_BRUSH); // draw bounding rectangle out of 4 lines
     
     if (min_col == 1)   // left
-	{
+    {
         dc.DrawLine(draw_settings->XStart(), 
-					draw_settings->YStart(), 
-					draw_settings->XStart(),
+                    draw_settings->YStart(), 
+                    draw_settings->XStart(),
                     max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
-	}
+    }
     
     if (max_col == sheet->GetCols()) // right
-	{
+    {
         dc.DrawLine(MaxX(), 
-					draw_settings->YStart(), 
-					MaxX(),
+                    draw_settings->YStart(), 
+                    MaxX(),
                     max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
-	}
+    }
     
     if (min_row == 1) // top
-	{
+    {
         dc.DrawLine(draw_settings->XStart(), 
-					draw_settings->YStart(), 
-					MaxX(max_col), 
-					draw_settings->YStart());
-	}
+                    draw_settings->YStart(), 
+                    MaxX(max_col), 
+                    draw_settings->YStart());
+    }
     
     if (max_row == sheet->GetRows()) // bottom
-	{
+    {
         dc.DrawLine(draw_settings->XStart(), 
-					max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart(),
+                    max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart(),
                     MaxX(), 
-					max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
-	}
+                    max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
+    }
 
     // Draw the labels if any (no sense in showing them if even the first row/col
     // are not visible
     dc.SetFont(draw_settings->GetLabelFont());
     
     if (draw_settings->RowLabels() && min_col == 1)
-	{
+    {
         for (row = min_row; row <= max_row; row++)
             dc.DrawText(sheet->GetLabelRow(row), 0, 
-						draw_settings->YStart() + 
-						(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
-	}
+                        draw_settings->YStart() + 
+                        (row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+    }
     
     if (draw_settings->ColLabels() && min_row == 1)
-	{
+    {
         for (col = min_col; col <= max_col; col++)
             dc.DrawText(sheet->GetLabelCol(col), MaxX(col-1)+TEXT_OFF, 0);
-	}
+    }
 
     // Fill in the cells
     for (row = min_row; row <= max_row; row++)
@@ -912,7 +927,7 @@ void SpreadSheetC::Update(wxDC &dc)
     UpdateCell(dc, cell);
     
     if (strcmp(dc_type, "wxMetaFileDC") != 0)
-		dc.EndDrawing();
+        dc.EndDrawing();
 }
 
 
@@ -931,7 +946,7 @@ private:
 
 public:
     SpreadSheetPrintout(SpreadSheetC *s, wxOutputOption f, 
-						const char *title = "SpreadPrintout");
+                        const char *title = "SpreadPrintout");
     Bool OnPrintPage(int page);
     Bool HasPage(int page);
     Bool OnBeginDocument(int startPage, int endPage);
@@ -940,7 +955,7 @@ public:
 
 
 SpreadSheetPrintout::SpreadSheetPrintout(SpreadSheetC *s, 
-										 wxOutputOption f, const char *title)
+                                         wxOutputOption f, const char *title)
     : sheet(s), fit(f), wxPrintout((char *)title)
 { }
 
@@ -956,7 +971,7 @@ Bool SpreadSheetPrintout::OnBeginDocument(int startPage, int endPage)
 // have no way to tell how many pages will be used in the wysiwyg mode. So,
 // we have no choice but to disable the From:To page selection mechanism.
 void SpreadSheetPrintout::GetPageInfo(int *minPage, int *maxPage, 
-									  int *selPageFrom, int *selPageTo)
+                                      int *selPageFrom, int *selPageTo)
 {
     num_pages = 1;
     *minPage = 0;
@@ -977,7 +992,7 @@ Bool SpreadSheetPrintout::OnPrintPage(int page)
     wxDC *dc = GetDC();
     
     if (!dc) 
-		return FALSE;
+        return FALSE;
     
     // Get the logical pixels per inch of screen and printer
     int ppiScreenX, ppiScreenY;
@@ -1068,11 +1083,11 @@ void SpreadSheetC::Print(wxOutputMedia device, wxOutputOption fit)
     {
 #ifdef wx_msw
         wxPrintPreview *preview = 
-			new wxPrintPreview(new SpreadSheetPrintout(this, fit), 
-							   new SpreadSheetPrintout(this, fit));
+            new wxPrintPreview(new SpreadSheetPrintout(this, fit), 
+                               new SpreadSheetPrintout(this, fit));
         wxPreviewFrame *frame =
-			new wxPreviewFrame(preview, top_frame, "Print Preview", 
-							   100, 100, 600, 650);
+            new wxPreviewFrame(preview, top_frame, "Print Preview", 
+                               100, 100, 600, 650);
         frame->Centre(wxBOTH);
         frame->Initialize();
         frame->Show(TRUE);
@@ -1088,10 +1103,10 @@ void SpreadSheetC::Print(wxOutputMedia device, wxOutputOption fit)
         char *metafile_name = 0;
         
         if (device == wxMEDIA_METAFILE)
-		{
+        {
             metafile_name = 
-				copystring(wxFileSelector("Save Metafile", 0, 0, ".wmf", "*.wmf"));
-		}
+                copystring(wxFileSelector("Save Metafile", 0, 0, ".wmf", "*.wmf"));
+        }
 
         wxMetaFileDC dc_mf(metafile_name);
         
@@ -1109,13 +1124,13 @@ void SpreadSheetC::Print(wxOutputMedia device, wxOutputOption fit)
                 Bool success = mf->SetClipboard(MaxX(), MaxY());
                 
                 if (!success) 
-					wxMessageBox("Copy Failed", "Error", wxOK | wxCENTRE, this);
+                    wxMessageBox("Copy Failed", "Error", wxOK | wxCENTRE, this);
 
                 delete mf;
             }
             
             if (device == wxMEDIA_METAFILE) 
-				wxMakeMetaFilePlaceable(metafile_name, 0, 0, MaxX(), MaxY());
+                wxMakeMetaFilePlaceable(metafile_name, 0, 0, MaxX(), MaxY());
         }
 #else
         wxMessageBox("Metafiles not supported under X");
@@ -1153,14 +1168,14 @@ void SpreadSheetC::Print(wxOutputMedia device, wxOutputOption fit)
 //****************************************************************************
 
 SpreadSheet::SpreadSheet(int _rows, int _cols, int _level, 
-						 char *title, wxFrame *parent)
+                         char *title, wxFrame *parent)
 {
     Init(_rows, _cols, _level, title, parent);
 }
 
 
 void SpreadSheet::Init(int rows_, int cols_, int level_, 
-					   char *title, wxFrame *parent)
+                       char *title, wxFrame *parent)
 {
     SetDimensions(rows_, cols_);
     level = level_;
@@ -1195,14 +1210,14 @@ void SpreadSheet::SetDimensions(int rows_, int cols_)
 void SpreadSheet::AddRow(int row)
 {
     if (row == 0) 
-		row = rows + 1;
+        row = rows + 1;
 
     // add a new row to the matrix
     data.InsertRow(row, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
 
     // Copy the cell types from the previous row
     for (int i = 1; i <= cols; i++) 
-		data(rows+1, i).SetType(data(rows, i).GetType());
+        data(rows+1, i).SetType(data(rows, i).GetType());
 
     // add a new entry to the row_labels
     row_labels.Insert((const gText)gText(), row);
@@ -1213,7 +1228,7 @@ void SpreadSheet::AddRow(int row)
 void SpreadSheet::AddCol(int col)
 {
     if (col == 0) 
-		col = cols + 1;
+        col = cols + 1;
 
     // add a new column to the matrix
     data.InsertColumn(col, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
@@ -1227,10 +1242,10 @@ void SpreadSheet::AddCol(int col)
 void SpreadSheet::DelRow(int row)
 {
     if (rows < 2) 
-		return;
+        return;
     
     if (row == 0) 
-		row = rows;
+        row = rows;
 
     // remove a row from the matrix
     data.RemoveRow(row);
@@ -1244,10 +1259,10 @@ void SpreadSheet::DelRow(int row)
 void SpreadSheet::DelCol(int col)
 {
     if (cols < 2) 
-		return;
+        return;
     
     if (col == 0) 
-		col = cols;
+        col = cols;
 
     // remove a column from the matrix
     data.RemoveColumn(col);
@@ -1268,7 +1283,7 @@ void SpreadSheet::Dump(gOutput &o) const
     for (int i = 1; i <= rows; i++)
     {
         for (int j = 1; j <= cols; j++) 
-			o << gPlainText(data(i, j).GetValue()) << ' ';
+            o << gPlainText(data(i, j).GetValue()) << ' ';
 
         o << '\n';
     }
@@ -1280,11 +1295,18 @@ void SpreadSheet::Dump(gOutput &o) const
 //****************************************************************************
 SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
                              wxFrame *parent, unsigned int _features, 
-							 SpreadSheetDrawSettings *drs,
+                             SpreadSheetDrawSettings *drs,
                              SpreadSheetDataSettings *dts)
-	: wxFrame(parent, title)
+    : wxFrame(parent, title)
 {
     assert(rows > 0 && cols > 0 && _levels > 0 && "SpreadSheet3D::Bad Dimensions");
+
+    // Give the object a unique name usable by the GUI playback system,
+    // and add it to the database.
+ 
+    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
+    GuiLogNameCount++;
+    GUI_RECORDER_ADD_TO_DB(GuiLogName, SPREADSHEET3D, (void *)this);
 
     // Initialize some global GDI objects
     grid_line_pen   = wxThePenList->FindOrCreatePen("BLACK", 1, wxDOT);
@@ -1312,17 +1334,17 @@ SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
     int i;
 
     for (i = 1; i <= levels; i++) 
-		data.Append((const SpreadSheet)SpreadSheet());
+        data.Append((const SpreadSheet)SpreadSheet());
 
     for (i = 1; i <= levels; i++) 
-		data[i].Init(rows, cols, i, 0, this);
+        data[i].Init(rows, cols, i, 0, this);
 
     // Turn on level #1
     cur_level = 0;
     SetLevel(1);
     
     if (levels > 1) 
-		features |= ANY_BUTTON; // we need a panel for the slider
+        features |= ANY_BUTTON; // we need a panel for the slider
 
     MakeFeatures();
     CreateStatusLine(2);
@@ -1349,10 +1371,10 @@ SpreadSheet3D::~SpreadSheet3D(void)
     }
     
     if (--draw_settings->ref_cnt == 0) 
-		delete draw_settings;
+        delete draw_settings;
     
     if (--data_settings->ref_cnt == 0) 
-		delete data_settings;
+        delete data_settings;
 }
 
 
@@ -1376,33 +1398,33 @@ void SpreadSheet3D::MakeButtons(long buttons)
             panel_new_line = FALSE;
             GetClientSize(&w, &h);
             panel = new wxPanel(this, 0, h-MIN_BUTTON_SPACE, w, 
-								MIN_BUTTON_SPACE, wxBORDER);
+                                MIN_BUTTON_SPACE, wxBORDER);
         }
         
         if (levels > 1 && !level_item) // create a slider to choose the active level
         {
             level_item = new wxSlider(panel, 
-									  (wxFunction)SpreadSheet3D::spread_slider_func, 
-									  NULL, 1, 1, levels, 140);
+                                      (wxFunction)SpreadSheet3D::spread_slider_func, 
+                                      NULL, 1, 1, levels, 140);
             level_item->SetClientData((char *)this);
             panel->NewLine();
             SavePanelPos();
         }
         
         if (buttons & OK_BUTTON) 
-			AddButton("OK", (wxFunction)SpreadSheet3D::spread_ok_func);
+            AddButton("OK", (wxFunction)SpreadSheet3D::spread_ok_func);
         
         if (buttons & CANCEL_BUTTON) 
-			AddButton("Cancel", (wxFunction)SpreadSheet3D::spread_cancel_func);
+            AddButton("Cancel", (wxFunction)SpreadSheet3D::spread_cancel_func);
         
         if (buttons & PRINT_BUTTON) 
-			AddButton("P", (wxFunction)SpreadSheet3D::spread_print_func);
+            AddButton("P", (wxFunction)SpreadSheet3D::spread_print_func);
         
         if (buttons & OPTIONS_BUTTON) 
-			AddButton("Config", (wxFunction)SpreadSheet3D::spread_options_func);
+            AddButton("Config", (wxFunction)SpreadSheet3D::spread_options_func);
         
         if (buttons & HELP_BUTTON) 
-			AddButton("?", (wxFunction)SpreadSheet3D::spread_help_func);
+            AddButton("?", (wxFunction)SpreadSheet3D::spread_help_func);
         
         if (buttons & CHANGE_BUTTON)
         {
@@ -1421,7 +1443,7 @@ void SpreadSheet3D::SetDimensions(int rows_, int cols_, int levels_)
     if (GetRows() != rows_ || GetCols() != cols_)
     {
         for (i = 1; i <= levels; i++) 
-			data[i].SetDimensions(rows_, cols_);
+            data[i].SetDimensions(rows_, cols_);
 
         DrawSettings()->SetDimensions(rows_, cols_);
     }
@@ -1429,16 +1451,16 @@ void SpreadSheet3D::SetDimensions(int rows_, int cols_, int levels_)
     if (levels_)
     {
         if (levels_ > levels)
-		{
+        {
             for (i = 1; i <= levels_-levels; i++) 
-				AddLevel();
-		}
+                AddLevel();
+        }
         
         if (levels_ < levels)
-		{
+        {
             for (i = 1; i <= levels-levels_; i++) 
-				DelLevel();
-		}
+                DelLevel();
+        }
     }
 }
 
@@ -1448,30 +1470,30 @@ void SpreadSheet3D::OnMenuCommand(int id)
     switch (id)
     {
     case OUTPUT_MENU: 
-		OnPrint();
+        OnPrint();
         break;
 
     case CLOSE_MENU: 
-		OnOk();
+        OnOk();
         break;
 
     case OPTIONS_MENU: 
-		DrawSettings()->SetOptions();
+        DrawSettings()->SetOptions();
         break;
 
     case CHANGE_MENU: 
-		break;
+        break;
 
     case HELP_MENU_ABOUT: 
-		OnHelp(HELP_MENU_ABOUT);
+        OnHelp(HELP_MENU_ABOUT);
         break;
 
     case HELP_MENU_CONTENTS: 
-		OnHelp();
+        OnHelp();
         break;
 
     default: 
-		wxMessageBox("Unknown");
+        wxMessageBox("Unknown");
         break;
     }
 }
@@ -1484,17 +1506,17 @@ void SpreadSheet3D::OnSize(int , int )
     GetClientSize(&w, &h);
     
     if (toolbar) 
-		toolbar->SetSize(0, 0, w, toolbar_height);
+        toolbar->SetSize(0, 0, w, toolbar_height);
     
     if (panel) 
-		panel->SetSize(0, h-DrawSettings()->PanelSize(), 
-					   w, DrawSettings()->PanelSize());
+        panel->SetSize(0, h-DrawSettings()->PanelSize(), 
+                       w, DrawSettings()->PanelSize());
 
     //for (int i = 1; i <= data.Length(); i++) data[i].CheckSize();
     for (int i = 1; i <= levels; i++)
     {
         data[i].SetSize(0, toolbar_height, w, 
-						h-DrawSettings()->PanelSize()-toolbar_height);
+                        h-DrawSettings()->PanelSize()-toolbar_height);
         data[i].CheckSize();
     }
 }
@@ -1541,13 +1563,18 @@ void SpreadSheet3D::OnPrint1(void)
 
 void SpreadSheet3D::OnPrint(void)
 {
-    wxStringList extras("ASCII", 0);
+#ifdef GUIREC_DEBUG
+printf("SpreadSheet3D::OnPrint: Printing contents of spreadsheet...\n");
+#endif
+    wxStringList extras("ASCII", NULL);
     wxOutputDialogBox od(&extras);
     
     if (od.Completed() == wxOK)
     {
         if (!od.ExtraMedia())
+        {
             Print(od.GetMedia(), od.GetOption());
+        }
         else    // only one extra exists--must be ascii.
         {
             char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
@@ -1556,7 +1583,35 @@ void SpreadSheet3D::OnPrint(void)
             {
                 gFileOutput out(s);
                 data[cur_level].Dump(out);
+                GUI_RECORD("PRINT");
+                GUI_RECORD_A("ASCII");
+                GUI_RECORD_AN(s);
             }
+        }
+    }
+}
+
+
+// This version of OnPrint is for GUI playback only.
+
+void SpreadSheet3D::OnPrint_Playback(char *type, char *s)
+{
+#ifdef GUIPB_DEBUG
+printf("SpreadSheet3D::OnPrint_Playback: Printing contents of spreadsheet...\n");
+#endif
+    
+    if (strcmp(type, "ASCII") == 0)
+    {
+        if (s != NULL)
+        {
+            printf("output to file: %s\n", s);
+            gFileOutput out(s);
+            data[cur_level].Dump(out);
+        }
+        else
+        {
+            wxMessageBox("SpreadSheet3D::OnPrint_Playback: invalid filename.\n"
+                         "Command ignored.");
         }
     }
 }
@@ -1611,22 +1666,22 @@ void    SpreadSheet3D::spread_change_func(wxButton  &ob, wxEvent &)
     wxRadioBox *rb = new wxRadioBox(gs, NULL, NULL, -1, -1, -1, -1, 6, choices, 2);
     
     if (!parent->DataSettings()->Change(S_CAN_GROW_ROW)) 
-		rb->Enable(0, FALSE);
+        rb->Enable(0, FALSE);
     
     if (!parent->DataSettings()->Change(S_CAN_GROW_COL)) 
-		rb->Enable(1, FALSE);
+        rb->Enable(1, FALSE);
     
     if (!parent->DataSettings()->Change(S_CAN_GROW_LEVEL)) 
-		rb->Enable(2, FALSE);
+        rb->Enable(2, FALSE);
     
     if (!parent->DataSettings()->Change(S_CAN_SHRINK_ROW)) 
-		rb->Enable(3, FALSE);
+        rb->Enable(3, FALSE);
     
     if (!parent->DataSettings()->Change(S_CAN_SHRINK_COL)) 
-		rb->Enable(4, FALSE);
+        rb->Enable(4, FALSE);
     
     if (!parent->DataSettings()->Change(S_CAN_SHRINK_LEVEL)) 
-		rb->Enable(5, FALSE);
+        rb->Enable(5, FALSE);
     
     gs->Go();
     
@@ -1635,27 +1690,27 @@ void    SpreadSheet3D::spread_change_func(wxButton  &ob, wxEvent &)
         switch (rb->GetSelection())
         {
         case 0: 
-			parent->AddRow();
+            parent->AddRow();
             break;
 
         case 1: 
-			parent->AddCol();
+            parent->AddCol();
             break;
 
         case 2: 
-			parent->AddLevel();
+            parent->AddLevel();
             break;
 
         case 3: 
-			parent->DelRow();
+            parent->DelRow();
             break;
 
         case 4: 
-			parent->DelCol();
+            parent->DelCol();
             break;
 
         case 5: 
-			parent->DelLevel();
+            parent->DelLevel();
             break;
         }
     }
@@ -1674,14 +1729,14 @@ void SpreadSheet3D::spread_options_func(wxButton &ob, wxEvent &)
 void SpreadSheet3D::DelLevel(void)
 {
     if (levels < 2) 
-		return;
+        return;
 
     data.Remove(levels);
     levels--;
     delete level_item;
     level_item = new wxSlider(panel, 
-							  (wxFunction)SpreadSheet3D::spread_slider_func, 
-							  NULL, 1, 1, levels, 140);
+                              (wxFunction)SpreadSheet3D::spread_slider_func, 
+                              NULL, 1, 1, levels, 140);
     level_item->SetClientData((char *)this);
     Redraw();
 }
@@ -1690,14 +1745,14 @@ void SpreadSheet3D::DelLevel(void)
 void SpreadSheet3D::AddLevel(int level)
 {
     if (level == 0) 
-		level = levels+1;
+        level = levels+1;
 
     data.Insert(SpreadSheet(), level);
     levels++;
     data[level].Init(data[1].GetRows(), data[1].GetCols(), levels, NULL, this);
     level_item = new wxSlider(panel, 
-							  (wxFunction)SpreadSheet3D::spread_slider_func, 
-							  NULL, 1, 1, levels, 140);
+                              (wxFunction)SpreadSheet3D::spread_slider_func, 
+                              NULL, 1, 1, levels, 140);
     level_item->SetClientData((char *)this);
     Redraw();
 }
@@ -1709,7 +1764,7 @@ void SpreadSheet3D::Dump(void)
     out << levels << "\n";
 
     for (int i = 1; i <= levels; i++)
-	{
+    {
         data[i].Dump(out);
         out << "\n\n";
     }
@@ -1721,7 +1776,7 @@ void SpreadSheet3D::SetLevel(int _l)
     assert(_l > 0 && _l <= levels);
     
     if (cur_level) 
-		data[cur_level].SetActive(FALSE);
+        data[cur_level].SetActive(FALSE);
 
     cur_level = _l;
     data[cur_level].SetActive(TRUE);
@@ -1732,10 +1787,10 @@ void SpreadSheet3D::SetLevel(int _l)
 void SpreadSheet3D::SetLabelRow(int row, const gText &s, int level)
 {
     if (level == 0)
-	{
+    {
         for (level = 1; level <= levels; level++) 
-			data[level].SetLabelRow(row, s);
-	}
+            data[level].SetLabelRow(row, s);
+    }
     else
         data[level].SetLabelRow(row, s);
 }
@@ -1744,10 +1799,10 @@ void SpreadSheet3D::SetLabelRow(int row, const gText &s, int level)
 void SpreadSheet3D::SetLabelCol(int col, const gText &s, int level)
 {
     if (level == 0)
-	{
+    {
         for (level = 1; level <= levels; level++)
             data[level].SetLabelCol(col, s);
-	}
+    }
     else
         data[level].SetLabelCol(col, s);
 }
@@ -1766,7 +1821,7 @@ void SpreadSheet3D::FitLabels(void)
             data[1].GetLabelExtent(data[cur_level].GetLabelRow(i), &w, &h);
             
             if (w > max_w) 
-				max_w = (int)w;
+                max_w = (int)w;
         }
 
         draw_settings->SetXStart(max_w+3);
@@ -1779,7 +1834,7 @@ void SpreadSheet3D::FitLabels(void)
             data[1].GetLabelExtent(data[cur_level].GetLabelCol(i), &w, &h);
             
             if (h > max_h) 
-				max_h = (int)h;
+                max_h = (int)h;
         }
 
         draw_settings->SetYStart(max_h+3);
@@ -1911,7 +1966,7 @@ wxMenuBar *SpreadSheet3D::MakeMenuBar(long menus)
         wxMenu *file_menu = 0;
         
         if (menus & (OUTPUT_MENU | CLOSE_MENU)) 
-			file_menu = new wxMenu;
+            file_menu = new wxMenu;
         
         if (menus & OUTPUT_MENU)
             file_menu->Append(OUTPUT_MENU, "Out&put", "Output to any device");
@@ -1920,12 +1975,12 @@ wxMenuBar *SpreadSheet3D::MakeMenuBar(long menus)
             file_menu->Append(CLOSE_MENU, "&Close", "Exit");
         
         if (file_menu) 
-			tmp_menubar->Append(file_menu, "&File");
+            tmp_menubar->Append(file_menu, "&File");
 
         wxMenu *display_menu = 0;
         
         if (menus & (OPTIONS_MENU | CHANGE_MENU)) 
-			display_menu = new wxMenu;
+            display_menu = new wxMenu;
 
         if (menus & OPTIONS_MENU)
             display_menu->Append(OPTIONS_MENU, "&Options", "Configure display options");
@@ -1934,7 +1989,7 @@ wxMenuBar *SpreadSheet3D::MakeMenuBar(long menus)
             display_menu->Append(CHANGE_MENU, "&Change", "Change sheet dimensions");
 
         if (display_menu) 
-			tmp_menubar->Append(display_menu, "&Display");
+            tmp_menubar->Append(display_menu, "&Display");
 
         if (menus & HELP_MENU)
         {
@@ -1954,11 +2009,25 @@ void SpreadSheet3D::SetMenuBar(wxMenuBar *bar)
     menubar = bar;
 
     if (menubar) 
-		wxFrame::SetMenuBar(menubar);
+        wxFrame::SetMenuBar(menubar);
 }
 
 
 void SpreadSheet3D::OnSelectedMoved(int , int , SpreadMoveDir )
 { }
 
+
+// Debugging functions.
+
+bool SpreadSheet3D::is_SpreadSheet3D() const
+{
+    return true;
+}
+
+
+void SpreadSheet3D::SpreadSheet3D_hello() const
+{
+    printf("instance of class SpreadSheet3D accessed at %x\n", (unsigned int)this);
+    printf("Log name: %s\n", (char *)GuiLogName);
+}
 
