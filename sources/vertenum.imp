@@ -8,8 +8,8 @@
 
 template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b) 
-  : depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0) ,
-    nodes(0), status(gstatus)
+  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
+    npivots(0), nodes(0), status(gstatus)
 {
   Enum();
 }	
@@ -18,8 +18,8 @@ VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b)
 template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
 		      gStatus &status)
-  : depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0), 
-    nodes(0), status(status) 
+  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), 
+    npivots(0), nodes(0), status(status) 
 {
   Enum();
 }
@@ -36,7 +36,6 @@ template <class T> void VertEnum<T>::Enum()
 
       // Initialize the tableau
   int i;
-  mult_opt=0;
 
   for(i=b.First();i<=b.Last();i++)
     if(b[i]==(T)0)
@@ -70,19 +69,8 @@ template <class T> void VertEnum<T>::Report()
     i++;
   }
   status.SetProgress((double)nodes/estNodes);
-
-/*
-  gout << "\ndepth = " << depth << " npivots = " << npivots;
-  gout << " nodes = " << nodes << " estnodes = " << estNodes;
-  gout << " progress = " << nodes/estNodes;
-
-  gout << "\nvisits = \n";
-  visits.Dump(gout);
-  gout << "\nbranches = \n";
-  branches.Dump(gout);
-  gout << "\n";
-*/
 }
+
 template <class T> void VertEnum<T>::Deeper()
 {
   depth++;
@@ -99,9 +87,10 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   int k;
   Deeper();
   gList<gArray<int> > PivotList;
-  gArray<int> pivot;
+  gArray<int> pivot(2);
   if(tab.IsLexMin()) 
     List.Append(tab.GetBFS1());
+  assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
     branches[depth]+=PivotList.Length();
@@ -125,7 +114,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   branches[depth]+=1;
 
 //  gList<gArray<int> > PivotList;
-//  gArray<int> pivot;
+//  gArray<int> pivot(2);
 
   // gout << "\nin DualSearch";
   if(mult_opt) {
