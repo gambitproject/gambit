@@ -69,9 +69,8 @@ int NumNodes (const BaseEfg &befg)
 
 // prototype in efg.h
 
-template <class T> void Random(Efg<T> &efg, int seed = 0)
+template <class T> void RandomEfg(Efg<T> &efg)
 {
-  SetSeed(seed);
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)
       ((OutcomeVector<T>&) *efg.outcomes[j])[i] = (T) Uniform();
@@ -86,8 +85,8 @@ template <class T> void Random(Efg<T> &efg, int seed = 0)
 
 #include "rational.h"
 
-TEMPLATE void Random(Efg<double> &efg, int seed );
-TEMPLATE void Random(Efg<gRational> &efg, int seed);
+TEMPLATE void RandomEfg(Efg<double> &efg);
+TEMPLATE void RandomEfg(Efg<gRational> &efg);
 
 
 

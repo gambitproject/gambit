@@ -88,7 +88,7 @@ public:
   const T &Payoff(int pl, const StrategyProfile *p) const;
 
   // defined in nfgutils.cc
-  friend void Random(Nfg<T> &, int seed = 0);
+  friend void RandomNfg(Nfg<T> &);
 };
 
 template <class T> int ReadNfgFile(gInput &, Nfg<T> *&);

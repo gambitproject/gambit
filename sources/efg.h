@@ -186,7 +186,7 @@ template <class T> class Efg : public BaseEfg   {
 		             const Efg<T> &E, BehavProfile<T> &bp);
 
     // defined in efgutils.cc
-    friend void Random(Efg<T> &, int seed = 0);
+    friend void RandomEfg(Efg<T> &);
 };
 
 #include "efplayer.h"
