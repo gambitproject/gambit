@@ -310,7 +310,7 @@ int EFBasis::Find(Node *n) const
 
 bool EFBasis::IsValid(void) const
 {
-  if(!(*this).EFSupport::IsValid()) return false;
+  if(!(*this).EFSupport::HasActiveActionsAtAllInfosets()) return false;
   if (nodes.Length() != m_efg->NumPlayers())   return false;
   for (int i = 1; i <= nodes.Length(); i++)
     if (!nodes[i]->IsValid())  return false;

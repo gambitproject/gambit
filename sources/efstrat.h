@@ -45,7 +45,7 @@ public:
   // Checks to see that every infoset in the support has at least one
   // action in it.
   bool HasActiveActionAt(const Infoset *) const;
-  bool IsValid(void) const;
+  bool HasActiveActionsAtAllInfosets(void) const;
 
   // Returns the position of the action in the support. 
   // Returns zero if the action is not contained in the support

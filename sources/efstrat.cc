@@ -128,7 +128,7 @@ public:
   EFPlayer &GetPlayer(void) const;
 
   // checks for a valid EFActionSet
-  bool IsValid(void) const;
+  bool HasActiveActionsAtAllInfosets(void) const;
   bool HasActiveActionAt(const int &iset) const;
 
 };
@@ -258,7 +258,7 @@ int EFActionSet::Find(int p_infoset, Action *a) const
 }
 
 // checks for a valid EFActionSet
-bool EFActionSet::IsValid(void) const
+bool EFActionSet::HasActiveActionsAtAllInfosets(void) const
 {
   if (infosets.Length() != efp->NumInfosets())   return false;
 
@@ -431,11 +431,11 @@ bool EFSupport::HasActiveActionAt(const Infoset *infoset) const
   return true;
 }
 
-bool EFSupport::IsValid(void) const
+bool EFSupport::HasActiveActionsAtAllInfosets(void) const
 {
   if (m_players.Length() != m_efg->NumPlayers())   return false;
   for (int i = 1; i <= m_players.Length(); i++)
-    if (!m_players[i]->IsValid())  return false;
+    if (!m_players[i]->HasActiveActionsAtAllInfosets())  return false;
 
   return true;
 }
