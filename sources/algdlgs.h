@@ -16,7 +16,8 @@
 // Also creates the option to use the current settings as default
 #define		ERROR_FIELD 		1
 #define		OUTPUT_FIELD		2
-#define		SUBGAME_FIELD		4
+#define		SPS_FIELD				4
+#define		MAXSOLN_FIELD		8
 //******************	BASIC OUTPUT PARAMS  ********************************
 class OutputParamsSettings
 {
@@ -25,7 +26,7 @@ protected:
 	gOutput *outfile,*errfile;
 	wxStringList *trace_list;
 	char *trace_str;
-	int sps,max_solns; // max solutions_per_subgame, max total solutions
+	int stopAfter,max_solns; // max solutions_per_subgame, max total solutions
 	char *defaults_file;
 	gOutput *MakeOutputFile(const char *s);
 	void SaveDefaults(void);// Called automatically in the destructor
@@ -38,7 +39,7 @@ public:
 	int			TraceLevel(void);
 	bool		Default(void) {return 1;}
 	// subgame stuff
-	int			SolnsPerSubgame(void);
+	int			StopAfter(void);
 	int			MaxSolns(void);
 };
 

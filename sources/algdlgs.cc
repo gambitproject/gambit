@@ -19,8 +19,8 @@ errname=new char[250];
 wxGetResource(PARAMS_SECTION,"Trace-Err",&errname,defaults_file);
 trace_str=new char[10];
 wxGetResource(PARAMS_SECTION,"Trace-Level",&trace_str,defaults_file);
-wxGetResource(PARAMS_SECTION,"Solns-Per-Subgame",&sps,defaults_file);
-wxGetResource(PARAMS_SECTION,"Max-Subgames",&max_solns,defaults_file);
+wxGetResource(PARAMS_SECTION,"Stop-After",&stopAfter,defaults_file);
+wxGetResource(PARAMS_SECTION,"Max-Solns",&max_solns,defaults_file);
 trace_list=wxStringListInts(4);
 outfile=0;errfile=0;
 }
@@ -39,8 +39,8 @@ void OutputParamsSettings::SaveDefaults(void)
 wxWriteResource(PARAMS_SECTION,"Trace-Out",outname,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Trace-Err",errname,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Trace-Level",trace_str,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Solns-Per-Subgame",sps,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Max-Subgames",max_solns,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Stop-After",stopAfter,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
 }
 
 
@@ -69,8 +69,8 @@ gOutput *OutputParamsSettings::ErrFile(void)
 int OutputParamsSettings::TraceLevel(void)
 {return wxListFindString(trace_list,trace_str);}
 // Subgame stuff
-int OutputParamsSettings::SolnsPerSubgame(void)
-{return sps;}
+int OutputParamsSettings::StopAfter(void)
+{return stopAfter;}
 int OutputParamsSettings::MaxSolns(void)
 {return max_solns;}
 
@@ -85,21 +85,29 @@ OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
 // Make Output Fields
+// The following fields are available:
+// Max Solns --
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
 Add(wxMakeFormNewLine());
+if (fields&MAXSOLN_FIELD && !fields&SPS_FIELD)
+{
+	Add(wxMakeFormShort("Max Ttl Solns",&stopAfter,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+	Add(wxMakeFormNewLine());
+}
+
+if (fields&MAXSOLN_FIELD && fields&SPS_FIELD)
+{
+	Add(wxMakeFormShort("Solns/Subgame",&stopAfter,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+	Add(wxMakeFormShort("Max Ttl Solns",&max_solns,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+	Add(wxMakeFormNewLine());
+}
+
 if (fields&OUTPUT_FIELD)
 	Add(wxMakeFormString("TraceFile",&outname,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 if (fields&ERROR_FIELD)
 	Add(wxMakeFormString("ErrFile",&errname,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 if (fields&ERROR_FIELD && fields&OUTPUT_FIELD) Add(wxMakeFormNewLine());
-if (fields&SUBGAME_FIELD)
-{
-	Add(wxMakeFormNewLine());
-	Add(wxMakeFormShort("Solns/Subgame",&sps,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-	Add(wxMakeFormShort("Max Solns",&max_solns,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-	Add(wxMakeFormNewLine());
-}
 
 Add(wxMakeFormString("Trace Level",&trace_str,wxFORM_CHOICE,
 				new wxList(wxMakeConstraintStrings(trace_list), 0),0,wxVERTICAL));

@@ -9,7 +9,8 @@ class LiapParamsSettings: public OutputParamsSettings
 {
 protected:
 	float tolOpt, tolBrent;
-	int maxitsOpt,maxitsBrent,stopAfter,nTries;
+	int maxitsOpt,maxitsBrent,nTries;
+	bool subgames;
 	void SaveDefaults(void);
 public:
 	LiapParamsSettings(void);
@@ -20,7 +21,7 @@ public:
 class LiapSolveParamsDialog : public OutputParamsDialog,public LiapParamsSettings
 {
 public:
-	LiapSolveParamsDialog(wxWindow *parent);
+	LiapSolveParamsDialog(wxWindow *parent,bool subgames=false);
 //	~LiapSolveParamsDialog(void);
 };
 
@@ -31,7 +32,6 @@ LiapParamsSettings::LiapParamsSettings(void)
 										:OutputParamsSettings()
 {
 wxGetResource(PARAMS_SECTION,"Liap-Ntries",&nTries,defaults_file);
-wxGetResource(PARAMS_SECTION,"Liap-stopAfter",&stopAfter,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-tolN",&tolOpt,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-tolBrent",&tolBrent,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-maxitsBrent",&maxitsBrent,defaults_file);
@@ -42,7 +42,6 @@ void LiapParamsSettings::SaveDefaults(void)
 {
 if (!Default()) return;
 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Liap-stopAfter",stopAfter,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-tolN",tolOpt,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-tolBrent",tolBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
@@ -55,17 +54,16 @@ LiapParamsSettings::~LiapParamsSettings(void)
 void LiapParamsSettings::GetParams(LiapParams &P)
 {
 Funct_tolBrent=tolBrent;Funct_maxitsBrent=maxitsBrent;
-P.stopAfter=stopAfter;P.nTries=nTries;
+P.stopAfter=StopAfter();P.nTries=nTries;
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 
-LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *parent)
+LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *parent,bool subgames)
 												:OutputParamsDialog("Liap Params",parent),LiapParamsSettings()
 {
-Form()->Add(wxMakeFormShort("# Equilibria",&stopAfter,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-Form()->Add(wxMakeFormShort("# Tries",&nTries,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormShort("Max # Tries",&nTries,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormNewLine());
 Form()->Add(wxMakeFormFloat("Tolerance n-D",&tolOpt,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("Tolerance 1-D",&tolBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
@@ -74,7 +72,7 @@ Form()->Add(wxMakeFormShort("Iterations n-D",&maxitsOpt,wxFORM_DEFAULT,NULL,NULL
 Form()->Add(wxMakeFormShort("Iterations 1-D",&maxitsBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 
 // Now add the basic stuff
-MakeOutputFields(OUTPUT_FIELD|SUBGAME_FIELD);
+MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
 Go();
 }
 

@@ -11,6 +11,60 @@
 
 #define		SOLN_SECT			"Soln-Defaults"
 
+class DominanceSettings
+{
+protected:
+	Bool use_elimdom,all;
+	int	dom_type;
+	char *defaults_file;
+public:
+	DominanceSettings(void)
+	{
+	defaults_file="gambit.ini";
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
+	}
+	~DominanceSettings()
+	{
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+	}
+	bool UseElimDom(void) const {return use_elimdom;}
+	bool FindAll(void) const {return all;}
+	bool DomStrong(void) const {return dom_type==DOM_STRONG;}
+};
+
+
+
+
+class DominanceSettingsDialog: public MyDialogBox,public DominanceSettings
+{
+private:
+char *dom_type_str;
+wxStringList *dom_type_list;
+public:
+	DominanceSettingsDialog(wxWindow *parent):MyDialogBox(parent,"Dominance Defaults")
+	{
+	Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
+	Add(wxMakeFormNewLine());
+	Add(wxMakeFormBool("Iterative Eliminate",&all));
+	Add(wxMakeFormNewLine());
+	dom_type_list=new wxStringList("Weak","Strong",0);
+	dom_type_str=new char[20];
+	strcpy(dom_type_str,(char *)dom_type_list->Nth(dom_type)->Data());
+	Add(wxMakeFormString("Dom Type",&dom_type_str,wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(dom_type_list), 0)));
+	Go();
+	}
+	~DominanceSettingsDialog()
+	{
+	dom_type=wxListFindString(dom_type_list,dom_type_str);
+	}
+};
+
+#ifdef ELIMDOM_NFG // the rest of the dominance dialogs are only used in the NFG
 class ElimDomParamsDialog // Can not use MyDialogBox due to wxMULTIPLE
 {
 private:
@@ -52,7 +106,7 @@ public:
 	num_players=numplayers;
 	all=FALSE,compress=FALSE;
 	d=new wxDialogBox(parent,"ElimDom Parameters",TRUE);
-	all_box=new wxCheckBox(d,0,"Find All");
+	all_box=new wxCheckBox(d,0,"Iterative Eliminate");
 	compress_box=new wxCheckBox(d,NULL,"Compress");
 	d->NewLine();
 	char *dom_type_list[2]={"Weak","Strong"};
@@ -79,59 +133,8 @@ public:
 	int  Completed(void) {return completed;}
 };
 
-class DominanceSettings
-{
-protected:
-	Bool use_elimdom,all;
-	int	dom_type;
-	char *defaults_file;
-public:
-	DominanceSettings(void)
-	{
-	defaults_file="gambit.ini";
-	wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
-	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
-	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
-	}
-	~DominanceSettings()
-	{
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
-	}
-	bool UseElimDom(void) const {return use_elimdom;}
-	bool FindAll(void) const {return all;}
-	bool DomStrong(void) const {return dom_type==DOM_STRONG;}
-};
 
-
-
-
-class DominanceSettingsDialog: public MyDialogBox,public DominanceSettings
-{
-private:
-char *dom_type_str;
-wxStringList *dom_type_list;
-public:
-	DominanceSettingsDialog(wxWindow *parent):MyDialogBox(parent,"Dominance Defaults")
-	{
-	Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
-	Add(wxMakeFormNewLine());
-	Add(wxMakeFormBool("Find All",&all));
-	Add(wxMakeFormNewLine());
-	dom_type_list=new wxStringList("Weak","Strong",0);
-	dom_type_str=new char[20];
-	strcpy(dom_type_str,(char *)dom_type_list->Nth(dom_type)->Data());
-	Add(wxMakeFormString("Dom Type",&dom_type_str,wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(dom_type_list), 0)));
-	Go();
-	}
-	~DominanceSettingsDialog()
-	{
-	dom_type=wxListFindString(dom_type_list,dom_type_str);
-	}
-};
-
+class BaseNormShow;
 class SupportInspectDialog:public wxDialogBox
 {
 private:
@@ -232,3 +235,4 @@ public:
 	int 	DispSup(void) {return disp_item->GetSelection()+1;}
 };
 
+#endif // ELIMDOM_NFG

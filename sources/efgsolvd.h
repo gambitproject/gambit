@@ -9,7 +9,7 @@
 class EfgSolveSettings
 {
 protected:
-	Bool use_nfg,normal,subgames;
+	Bool use_nfg,normal,subgames,pick_solns,auto_inspect;
 	int algorithm;
 	char *defaults_file;
 	int result;
@@ -23,6 +23,8 @@ public:
 	wxGetResource(SOLN_SECT,alg_sect,&algorithm,defaults_file);
 	wxGetResource(SOLN_SECT,"Efg-Nfg",&normal,defaults_file);
 	wxGetResource(SOLN_SECT,"Efg-Mark-Subgames",&subgames,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_solns,defaults_file);
+	wxGetResource(SOLN_SECT,"Auto-Inspect-Solns",&auto_inspect,defaults_file);
 	}
 	~EfgSolveSettings()
 	{
@@ -32,15 +34,17 @@ public:
 		char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
 		wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
 		wxWriteResource(SOLN_SECT,"Efg-Nfg",normal,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
+		wxWriteResource(SOLN_SECT,"Auto-Inspect-Solns",auto_inspect,defaults_file);
 	}
 	}
-	bool UseNF(void)
-	{	return use_nfg;	}
-	EfgSolutionT GetEfgAlgorithm(void)
+	bool UseNF(void) const	{	return use_nfg;	}
+	EfgSolutionT GetEfgAlgorithm(void) const
 	{assert(!UseNF() && "Wrong type: use Nfg");return algorithm;}
-	NfgSolutionT GetNfgAlgorithm(void)
+	NfgSolutionT GetNfgAlgorithm(void) const
 	{assert(UseNF() && "Wrong type: use Efg");return algorithm;}
-  bool MarkSubgames(void) {return subgames;}
+	bool MarkSubgames(void) const {return subgames;}
+	bool AutoInspect(void) const {return auto_inspect;}
 };
 
 class EfgSolveParamsDialog: public NfgAlgorithmList, public EfgSolveSettings
@@ -50,7 +54,7 @@ private:
 	wxButton *cancel_button,*solve_button,*inspect_button;
 	wxRadioBox *efg_algorithm_box;
 	wxRadioBox *nfg_algorithm_box;
-	wxCheckBox *normal_box,*use_nfg_box;
+	wxCheckBox *normal_box,*use_nfg_box,*pick_solns_box,*auto_inspect_box;
 	gBlock<int> solns;
 	// Event Handlers: low level
 	static void use_nfg_func(wxCheckBox &ob,wxEvent &)
@@ -71,6 +75,8 @@ private:
 	algorithm=(use_nfg) ? nfg_algorithm_box->GetSelection() : efg_algorithm_box->GetSelection();
 	result=event;
 	normal=normal_box->GetValue();
+	pick_solns=pick_solns_box->GetValue();
+	auto_inspect=auto_inspect_box->GetValue();
 	d->Show(FALSE);
 	}
 	void OnUseNF(Bool usenf)
@@ -103,6 +109,10 @@ public:
 		use_nfg_box=new wxCheckBox(d,(wxFunction)use_nfg_func,"Use NF");
 		use_nfg_box->SetClientData((char *)this);
 		d->NewLine();
+		pick_solns_box=new wxCheckBox(d,0,"Pick subgame solutions");
+		d->NewLine();
+		auto_inspect_box=new wxCheckBox(d,0,"Auto Inspect");
+		d->NewLine();
 		solve_button=new wxButton(d,(wxFunction)params_button_func,"Params");
 		solve_button->SetClientData((char *)this);
 		inspect_button=new wxButton(d,(wxFunction)save_button_func,"Save");
@@ -122,6 +132,8 @@ public:
 		efg_algorithm_box->wxWindow::Enable(!use_nfg);
 		((use_nfg) ? nfg_algorithm_box : efg_algorithm_box)->SetSelection(algorithm);
 		use_nfg_box->SetValue(use_nfg);
+		pick_solns_box->SetValue(pick_solns);
+		auto_inspect_box->SetValue(auto_inspect);
 
 		//OnEvent(SD_ALGORITHM);
 		d->Fit();

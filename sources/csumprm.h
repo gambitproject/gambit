@@ -1,4 +1,4 @@
-// $Id$
+// @(#)csumprm.h	1.5 4/16/96
 #ifndef ZSUMPRM_H
 #define ZSUMPRM_H
 
@@ -7,7 +7,6 @@
 class LPParamsSettings: public OutputParamsSettings
 {
 protected:
-	int stopAfter;
 	void SaveDefaults(void);
 public:
 	LPParamsSettings(void);
@@ -17,36 +16,30 @@ public:
 class LPSolveParamsDialog : public OutputParamsDialog, public LPParamsSettings
 {
 public:
-	LPSolveParamsDialog(wxWindow *parent=0);
+	LPSolveParamsDialog(wxWindow *parent=0,bool subgames=false);
 };
 
 #ifdef CSUM_PRM_INST   // instantiate only once
 LPParamsSettings::LPParamsSettings(void)
-{
-wxGetResource(PARAMS_SECTION,"LP-StopAfter",&stopAfter,defaults_file);
-}
+{}
 
 void LPParamsSettings::SaveDefaults(void)
-{
-wxWriteResource(PARAMS_SECTION,"LP-StopAfter",stopAfter,defaults_file);
-}
+{}
 
 void LPParamsSettings::GetParams(ZSumParams &P)
 {
-P.stopAfter=stopAfter;
+P.stopAfter=StopAfter();
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
-LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *parent)
+LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *parent,bool subgames)
 														:OutputParamsDialog("LP Params",parent,LP_HELP)
 
 {
-Add(wxMakeFormShort("# Equilibria",&stopAfter));
 Add(wxMakeFormNewLine());
-
 // Now add the basic stuff
-MakeOutputFields();
+MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
 Go();
 }
 

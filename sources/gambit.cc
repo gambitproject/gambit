@@ -19,6 +19,7 @@
 #include "normgui.h"
 #include "extgui.h"
 #include <signal.h>
+#include <math.h>
 
 #ifdef _AIX
 extern wxApp *wxTheApp=1;
@@ -32,6 +33,30 @@ void SigFPEHandler(int a)
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
 }
+
+#ifdef wx_msw // this handler is defined differently under win/unix
+int _RTLENTRY _matherr (struct exception *e)
+#else
+int matherr(struct exception *e)
+#endif
+{
+char *whyS [] =
+{
+		"argument domain error",
+		"argument singularity ",
+		"overflow range error ",
+		"underflow range error",
+		"total loss of significance",
+		"partial loss of significance"
+};
+
+char errMsg[ 80 ];
+sprintf (errMsg,
+			"%s (%8g,%8g): %s\n", e->name, e->arg1, e->arg2, whyS [e->type - 1]);
+wxError(errMsg,"Numerical Error");
+return 0;
+}
+
 
 char *wxStrLwr(char *s)
 {for (int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}

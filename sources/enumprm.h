@@ -7,7 +7,6 @@
 class EnumParamsSettings:public OutputParamsSettings
 {
 protected:
-	int stopAfter;
 	void SaveDefaults(void);
 public:
 	EnumParamsSettings(void);
@@ -18,36 +17,31 @@ public:
 class EnumSolveParamsDialog : public OutputParamsDialog,public EnumParamsSettings
 {
 public:
-	EnumSolveParamsDialog(wxWindow *parent=0);
+	EnumSolveParamsDialog(wxWindow *parent=0,bool subgames=false);
 };
 
 #ifdef ENUM_PRM_INST  // instantiate only once
 EnumParamsSettings::EnumParamsSettings(void)
-{
-wxGetResource(PARAMS_SECTION,"Enum-StopAfter",&stopAfter,defaults_file);
-}
+{}
 void EnumParamsSettings::SaveDefaults(void)
-{
-wxWriteResource(PARAMS_SECTION,"Enum-StopAfter",stopAfter,defaults_file);
-}
+{}
 
 void EnumParamsSettings::GetParams(EnumParams &P)
 {
-P.stopAfter=stopAfter;
+P.stopAfter=StopAfter();
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 
-EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
+EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent,bool subgames)
 														:OutputParamsDialog("Enum Params",parent,ENUMMIXED_HELP)
 
 {
-Add(wxMakeFormShort("# Equilibria",&stopAfter));
 Add(wxMakeFormNewLine());
 
 // Now add the basic stuff
-MakeOutputFields();
+MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
 Go();
 }
 
