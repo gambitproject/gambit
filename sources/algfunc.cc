@@ -1215,8 +1215,8 @@ Portion* GSM_Lp_ListFloat(Portion** param)
   delete b;
   delete c;
   
-  ((BoolPortion*) param[3])->Value() = isFeasible;
-  ((BoolPortion*) param[4])->Value() = isBounded;
+  ((BoolPortion*) param[4])->Value() = isFeasible;
+  ((BoolPortion*) param[5])->Value() = isBounded;
   return result;
 }
 
@@ -1240,8 +1240,8 @@ Portion* GSM_Lp_ListRational(Portion** param)
   delete b;
   delete c;
   
-  ((BoolPortion*) param[3])->Value() = isFeasible;
-  ((BoolPortion*) param[4])->Value() = isBounded;
+  ((BoolPortion*) param[4])->Value() = isFeasible;
+  ((BoolPortion*) param[5])->Value() = isBounded;
   return result;
 }
 
