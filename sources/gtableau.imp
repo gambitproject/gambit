@@ -1,0 +1,78 @@
+//#
+//# FILE: gtableau.imp -- Implementation of tableau classes
+//#
+//# @(#)gtableau.imp	1.4 12/19/95
+//#
+
+#include "gtableau.h"
+
+//--------------------------------------------------------------------------
+//                  class gTableau<T>: member functions
+//--------------------------------------------------------------------------
+
+template <class T> gTableau<T>::gTableau(void)  { } 
+
+template <class T> gTableau<T>::gTableau(int row_min, int row_max,
+					 int row_labels,
+					 int col_min, int col_max,
+					 int col_labels)
+     : Tableau(row_min, row_max, col_min, col_max), Col_Labels(1, col_labels),
+       Row_Labels(1, row_labels)
+{ }
+
+template <class T> gTableau<T>::gTableau(const gTableau<T> &t)
+  : Tableau(t.Tableau), Col_Labels(t.Col_Labels), Row_Labels(t.Row_Labels)
+{ }
+
+template <class T> gTableau<T>::gTableau(gInput &f)
+{
+  Input(f);
+}
+
+template <class T> gTableau<T>::~gTableau()
+{ }
+
+template <class T> gTableau<T> &gTableau<T>::operator=(const gTableau<T> &t)
+{
+  if (this != &t)  {
+    Tableau = t.Tableau;
+    Row_Labels = t.Row_Labels;
+    Col_Labels = t.Col_Labels;
+  }
+  return *this;
+}
+
+template <class T> T gTableau<T>::Entry(int row, int col) const
+{
+  return Tableau(row, col);
+}
+
+template <class T> T &gTableau<T>::Entry(int row, int col)
+{
+  return Tableau(row, col);
+}
+
+template <class T> void gTableau<T>::DoPivot(int row, int col)
+{
+  Tableau.Pivot(row, col);
+}
+
+template <class T> void gTableau<T>::Input(gInput &)
+{
+// Row_Labels.Input(f);
+// Col_Labels.Input(f);
+// Tableau.Input(f);
+}
+
+template <class T> void gTableau<T>::Dump(gOutput &f)
+{
+  Row_Labels.Dump(f);  f << '\n';
+  Col_Labels.Dump(f);  f << '\n';
+  Tableau.Dump(f);
+}
+
+
+
+
+
+
