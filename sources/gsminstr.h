@@ -31,7 +31,7 @@ typedef enum
   iPUSH, iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN, iSUBSCRIPT,
 
-  iADD, iSUB, iMUL, iDIV, iNEG,
+  iADD, iSUB, iMUL, iDIV, iINTDIV, iNEG,
   iMOD,
 
   iEQU, iNEQ, iGTN, iLTN, iGEQ, iLEQ,
@@ -210,6 +210,14 @@ class Mul : public Instruction
 
 
 class Div : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM &gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+class IntDiv : public Instruction
 {
  public:
   Opcode Type( void ) const;

@@ -191,6 +191,14 @@ void Div::Output( gOutput& s ) const
 { s << "Div"; }
 
 
+Opcode IntDiv::Type( void ) const
+{ return iINTDIV; }
+bool IntDiv::Execute( GSM &gsm ) const
+{ return gsm.IntegerDivide(); }
+void IntDiv::Output( gOutput& s ) const
+{ s << "Intdiv"; }
+
+
 Opcode Neg::Type( void ) const
 { return iNEG; }
 bool Neg::Execute( GSM &gsm ) const
