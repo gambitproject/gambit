@@ -211,7 +211,7 @@ template <class T> INLINE int gBlock<T>::InsertAt(const T &t, int n)
   new_data[i++] = t;
   for (; i < length; i++)       new_data[i] = data[i - 1];
 
-  delete [] data;
+  if (data)   delete [] data;
   data = new_data;
 
   return n;
@@ -232,6 +232,13 @@ template <class T> INLINE T gBlock<T>::Remove(int n)
   assert(n >= 1 && n <= length);
 
   T ret(data[--n]);
+
+  if (length == 1)  {
+    delete [] data;
+    data = 0;
+    return ret;
+  }
+
   T *new_data = (--length) ? new T[length] : 0;
 
   for (int i = 0; i < n; i++)     new_data[i] = data[i];
