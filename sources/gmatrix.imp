@@ -6,45 +6,9 @@
 
 #include "gmatrix.h"
 
-template <class T>
-int gMatrix<T>::operator!=(const gMatrix<T> &M) const {
-  return !((*this)==M);
-}
-template <class T>
-int gMatrix<T>::operator!=( T s ) const {
-  return !((*this)==s);
-}
-
-template <class T> int gMatrix<T>::CheckRow(int row) const
-{
-  return (minrow <= row && row <= maxrow);
-}
-
-template <class T> int gMatrix<T>::CheckRow(const gVector<T> &v) const
-{
-  return (v.First() == mincol && v.Last() == maxcol);
-}
-
-template <class T> int gMatrix<T>::CheckColumn(int col) const
-{
-  return (mincol <= col && col <= maxcol);
-}
-
-template <class T> int gMatrix<T>::CheckColumn(const gVector<T> &v) const
-{
-  return (v.First() == minrow && v.Last() == maxrow);
-}
-
-template <class T> int gMatrix<T>::Check(int row, int col) const
-{
-  return (CheckRow(row) && CheckColumn(col));
-}
-
-template <class T> int gMatrix<T>::CheckBounds(const gMatrix<T> &m) const
-{
-  return (minrow == m.minrow && maxrow == m.maxrow &&
-	  mincol == m.mincol && maxcol == m.maxcol);
-}
+//-------------------------------------------------------------------------
+//       gMatrix<T>: Constructors, destructors, constructive operators
+//-------------------------------------------------------------------------
 
 template <class T> gMatrix<T>::gMatrix(void)
 { }
@@ -68,7 +32,6 @@ template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
 template <class T> gMatrix<T>::~gMatrix()
 { }
 
-
 template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 {
   gRectArray<T>::operator=(M);
@@ -76,398 +39,250 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 }
 
 
-// arithmetic operators
-template <class T> gMatrix<T>
-gMatrix<T>::operator+(const gMatrix<T> &M) const
+//-------------------------------------------------------------------------
+//                     gMatrix<T>: Additive operators
+//-------------------------------------------------------------------------
+
+template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
 {
-  assert( CheckBounds(M) );
-  gMatrix<T> tmp(minrow,maxrow, mincol, maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	tmp(i,j)= (*this)(i,j) + M(i,j);
-*/
-      // inner loop
-      T *src1= data[i]+mincol;
-      T *src2= M.data[i]+mincol;
-      T *dst= tmp.data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++)= *(src1++) + *(src2++);
-      assert( (dst-1) == tmp.data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  assert(CheckBounds(M));
+  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *src1 = data[i] + mincol;
+    T *src2 = M.data[i] + mincol;
+    T *dst = tmp.data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++)= *(src1++) + *(src2++);
+    assert((dst - 1) == tmp.data[i] + maxcol );
+  }
   return tmp;
 }
 
-template <class T> gMatrix<T>
-gMatrix<T>::operator-(const gMatrix<T> &M) const
+template <class T> gMatrix<T> gMatrix<T>::operator-(const gMatrix<T> &M) const
 {
-  assert( CheckBounds(M) );
-  gMatrix<T> tmp(minrow,maxrow, mincol, maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	tmp(i,j)= (*this)(i,j) - M(i,j);
-*/
-      // inner loop
-      T *src1= data[i]+mincol;
-      T *src2= M.data[i]+mincol;
-      T *dst= tmp.data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++)= *(src1++) - *(src2++);
-      assert( (dst-1) == tmp.data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  assert(CheckBounds(M));
+  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)   {
+    T *src1 = data[i] + mincol;
+    T *src2 = M.data[i] + mincol;
+    T *dst = tmp.data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++)= *(src1++) - *(src2++);
+    assert((dst - 1) == tmp.data[i] + maxcol);
+  }
   return tmp;
 }
 
-template <class T> gMatrix<T> &
-gMatrix<T>::operator+=(const gMatrix<T> &M)
+template <class T> gMatrix<T> &gMatrix<T>::operator+=(const gMatrix<T> &M)
 {
-  assert( CheckBounds(M) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	(*this)(i,j)+= M(i,j);
-*/
-    // inner loop
-    T *src= M.data[i]+mincol;
-    T *dst= data[i]+mincol;
-    int j= maxcol-mincol+1;
-    while( j-- )
-      *(dst++)+= *(src++);
-    assert( (dst-1) == data[i]+maxcol ); // debug
-    // end inner loop
-    }
+  assert(CheckBounds(M));
+  for (int i = minrow; i <= maxrow; i++)   {
+    T *src = M.data[i] + mincol;
+    T *dst = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) += *(src++);
+    assert((dst - 1) == data[i] + maxcol);
+  }
   return (*this);
 }
 
-template <class T> gMatrix<T> &
-gMatrix<T>::operator-=(const gMatrix<T> &M)
+template <class T> gMatrix<T> &gMatrix<T>::operator-=(const gMatrix<T> &M)
 {
-  assert( CheckBounds(M) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	(*this)(i,j)-= M(i,j);
-*/
-    // inner loop
-    T *src= M.data[i]+mincol;
-    T *dst= data[i]+mincol;
-    int j= maxcol-mincol+1;
-    while( j-- )
-      *(dst++)-= *(src++);
-    assert( (dst-1) == data[i]+maxcol ); // debug
-    // end inner loop
-    }
+  assert(CheckBounds(M));
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *src = M.data[i] + mincol;
+    T *dst = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) -= *(src++);
+    assert((dst - 1) == data[i] + maxcol); 
+  }
   return (*this);
 }
 
-template <class T> void
-gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
+//-------------------------------------------------------------------------
+//                  gMatrix<T>: Multiplicative operators
+//-------------------------------------------------------------------------
+
+template <class T>
+void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
 {
-  assert( CheckRow(in) && CheckColumn(out) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T sum= (T)0;
+  assert(CheckRow(in) && CheckColumn(out));
+  for (int i = minrow; i <= maxrow; i++)   {
+    T sum = (T) 0;
 
-      // inner loop
-      T *src1= data[i] + mincol;
-      T *src2= in.data + mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	sum += *(src1++) * *(src2++);
-      assert( src1-1 == data[i]+maxcol ); // debug
-      // end inner loop
+    T *src1 = data[i] + mincol;
+    T *src2 = in.data + mincol;
+    int j = maxcol - mincol +1;
+    while (j--)
+      sum += *(src1++) * *(src2++);
+    assert(src1 - 1 == data[i] + maxcol);
 
-      out[i]= sum;
-    }
+    out[i] = sum;
+  }
 }
 
-template <class T> gMatrix<T>
-gMatrix<T>::operator*(const gMatrix<T> &M) const
+template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
 {
-  assert( mincol==M.minrow && maxcol==M.maxrow );
-  gMatrix<T> tmp(minrow,maxrow, M.mincol, M.maxcol);
-  gVector<T> column(M.minrow,M.maxrow);
-  gVector<T> result(minrow,maxrow);
-  for(int j=M.mincol; j<=M.maxcol; j++)
-    {
-      M.GetColumn(j,column);
-      CMultiply(column, result);
-      tmp.SetColumn(j,result);
-    }
+  assert(mincol == M.minrow && maxcol == M.maxrow );
+  gMatrix<T> tmp(minrow, maxrow, M.mincol, M.maxcol);
+  gVector<T> column(M.minrow, M.maxrow);
+  gVector<T> result(minrow, maxrow);
+  for (int j = M.mincol; j <= M.maxcol; j++)  {
+    M.GetColumn(j, column);
+    CMultiply(column, result);
+    tmp.SetColumn(j, result);
+  }
   return tmp;
 }
 
-template <class T> gVector<T>
-gMatrix<T>::operator*(const gVector<T> &v) const
+template <class T> gVector<T> gMatrix<T>::operator*(const gVector<T> &v) const
 {
-  assert( CheckRow(v) );
+  assert(CheckRow(v));
   gVector<T> tmp(minrow, maxrow);
-  CMultiply(v,tmp);
+  CMultiply(v, tmp);
   return tmp;
 }
 
-template <class T> void
-gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
+template <class T>
+void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 {
-  assert( CheckColumn(in) && CheckRow(out) );
-  out= (T)0;
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T k= in[i];
+  assert(CheckColumn(in) && CheckRow(out));
+  out= (T) 0;
+  for(int i = minrow; i <= maxrow; i++)  {
+    T k = in[i];
 
-      // inner loop
-      T *src= data[i] + mincol;
-      T *dst= out.data + mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++) += *(src++) * k;
-      assert( src-1 == data[i] + maxcol ); // debug
-      // end inner loop
-    }
+    T *src = data[i] + mincol;
+    T *dst = out.data + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) += *(src++) * k;
+    assert(src - 1 == data[i] + maxcol);
+  }
 }
 
 // transposed (row) vector*matrix multiplication operator
 // a friend function of gMatrix
-template <class T> gVector<T>
-operator*(const gVector<T> &v, const gMatrix<T> &M)
+template <class T>
+gVector<T> operator*(const gVector<T> &v, const gMatrix<T> &M)
 {
-  assert( M.CheckColumn(v) );
+  assert(M.CheckColumn(v));
   gVector<T> tmp(M.mincol, M.maxcol);
-  M.RMultiply(v,tmp);
+  M.RMultiply(v, tmp);
   return tmp;
 }
 
-
-template <class T> gMatrix<T>
-gMatrix<T>::operator*(T s) const
+template <class T> gMatrix<T> gMatrix<T>::operator*(const T &s) const
 {
-  gMatrix<T> tmp(minrow,maxrow, mincol,maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	tmp(i,j)= (*this)(i,j) * s;
-*/
-      // inner loop
-      T *src= data[i]+mincol;
-      T *dst= tmp.data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++) = *(src++) * s;
-      assert( (src-1) == data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *src = data[i] + mincol;
+    T *dst = tmp.data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) = *(src++) * s;
+    assert((src - 1) == data[i] + maxcol);
+  }
   return tmp;
 }
 
 // in-place multiplication by square matrix
-template <class T> gMatrix<T> &
-gMatrix<T>::operator*=(const gMatrix<T> &M)
+template <class T> gMatrix<T> &gMatrix<T>::operator*=(const gMatrix<T> &M)
 {
-  assert( mincol==M.minrow && maxcol==M.maxrow );
-  assert( M.minrow==M.mincol && M.maxrow==M.maxcol );
-  gVector<T> row(mincol,maxcol);
-  gVector<T> result(mincol,maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      GetRow(i,row);
-      M.RMultiply(row,result);
-      SetRow(i,result);
-    }
+  assert(mincol == M.minrow && maxcol == M.maxrow);
+  assert(M.minrow == M.mincol && M.maxrow == M.maxcol);
+  gVector<T> row(mincol, maxcol);
+  gVector<T> result(mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)  {
+    GetRow(i, row);
+    M.RMultiply(row, result);
+    SetRow(i, result);
+  }
   return (*this);
 }
 
-template <class T> gMatrix<T> &
-gMatrix<T>::operator*=( T s )
+template <class T> gMatrix<T> &gMatrix<T>::operator*=(const T &s)
 {
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	(*this)(i,j) *= s;
-*/
-      // inner loop
-      T *dst= data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++) *= s;
-      assert( (dst-1) == data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  for (int i = minrow; i <= maxrow; i++)   {
+    T *dst = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) *= s;
+    assert((dst - 1) == data[i] + maxcol);
+  }
   return (*this);
 }
 
-template <class T> gMatrix<T>
-gMatrix<T>::operator/(T s) const
+template <class T> gMatrix<T> gMatrix<T>::operator/(const T &s) const
 {
-  assert( s != (T)0 );
-  gMatrix<T> tmp(minrow,maxrow, mincol,maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	tmp(i,j)= (*this)(i,j) / s;
-*/
-      // inner loop
-      T *src= data[i]+mincol;
-      T *dst= tmp.data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++) = *(src++) / s;
-      assert( (src-1) == data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  assert(s != (T) 0);
+  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)   {
+    T *src = data[i] + mincol;
+    T *dst = tmp.data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) = *(src++) / s;
+    assert((src - 1) == data[i] + maxcol);
+  }
   return tmp;
 }
 
-template <class T> gMatrix<T> &
-gMatrix<T>::operator/=( T s )
+template <class T> gMatrix<T> &gMatrix<T>::operator/=(const T &s)
 {
-  assert( s != (T)0 );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	(*this)(i,j) /= s;
-*/
-      // inner loop
-      T *dst= data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	*(dst++) /= s;
-      assert( (dst-1) == data[i]+maxcol ); // debug
-      // end inner loop
-    }
+  assert(s != (T) 0);
+  for (int i = minrow; i <= maxrow; i++)  {
+    T *dst = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      *(dst++) /= s;
+    assert((dst - 1) == data[i] + maxcol);
+  }
   return (*this);
 }
 
-// comparison operators
+//-------------------------------------------------------------------------
+//                    gMatrix<T>: Comparison operators
+//-------------------------------------------------------------------------
 
-template <class T> int
-gMatrix<T>::operator==(const gMatrix<T> &M) const
+template <class T> bool gMatrix<T>::operator==(const gMatrix<T> &M) const
 {
-  assert( CheckBounds(M) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	if( M(i,j) != (*this)(i,j) )
-	  return 0;
-*/
-      // inner loop
-      T *src1= M.data[i]+mincol;
-      T *src2= data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	if( *(src1++) != *(src2++) )
-	  return 0;
-      assert( src1-1 == M.data[i]+maxcol ); // debug
-      // end inner loop
-    }
-  return 1;
-}
-
-template <class T> int
-gMatrix<T>::operator==(T s) const
-{
-  for(int i=minrow; i<=maxrow; i++)
-    {
-/*
-      for(int j=mincol; j<=maxcol; j++)
-	if( (*this)(i,j) != s )
-	  return 0;
-*/
-      // inner loop
-      T *src= data[i]+mincol;
-      int j= maxcol-mincol+1;
-      while( j-- )
-	if( *(src++) != s )
-	  return 0;
-      assert( src-1 == data[i]+maxcol ); // debug
-      // end inner loop
-    }
-  return 1;
-}
-
-
-// row manipulation
-
-// note:  this is redundant (identical to SetRow)
-template <class T> void
-gMatrix<T>::SwitchRow(int row, const gVector<T> &v)
-{
-  assert( CheckRow(row) && CheckRow(v) );
-  T* rowptr= data[row];
-  for(int i=mincol; i<=maxcol; i++)
-    rowptr[i]= v[i];
-}
-
-template <class T> void
-gMatrix<T>::SwitchRowWithVector(int row, gVector<T> &v)
-{
-  assert( CheckRow(row) && CheckRow(v) );
-
-  T* rowptr= data[row];
-  T tmp;
-  for(int i=mincol; i<=maxcol; i++) {
-    tmp= rowptr[i];
-    rowptr[i]= v[i];
-    v[i]= tmp;
+  assert(CheckBounds(M));
+  for (int i = minrow; i <= maxrow; i++)   {
+    // inner loop
+    T *src1 = M.data[i] + mincol;
+    T *src2 = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--)
+      if(*(src1++) != *(src2++))   return false;
+    assert(src1 - 1 == M.data[i] + maxcol);
   }
+  return true;
 }
 
-template <class T> void
-gMatrix<T>::SwitchRows(int i, int j)
+template <class T> bool gMatrix<T>::operator!=(const gMatrix<T> &M) const
+{ return !(*this == M); }
+
+template <class T> bool gMatrix<T>::operator==(const T &s) const
 {
-  // note: SwapRows has been changed to SwitchRows,
-  // since that's the name in the original gMatrix class
-  assert( CheckRow(i) && CheckRow(j) );
-  T *temp;
-      // Swap data rows
-  temp=data[j];
-  data[j]=data[i];
-  data[i]=temp;
+  for (int i = minrow; i <= maxrow; i++)   {
+    T *src = data[i] + mincol;
+    int j = maxcol - mincol + 1;
+    while (j--) 
+      if (*(src++) != s)   return false;
+    assert(src - 1 == data[i] + maxcol);
+  }
+  return true;
 }
 
-template <class T> gVector<T>
-gMatrix<T>::GetRow(int row) const
-{
-  assert( CheckRow(row) );
-  gVector<T> v(mincol, maxcol);
-  T* rowptr= data[row];
-  for(int i=mincol; i<=maxcol; i++)
-    v.data[i]= rowptr[i];
-  return v;
-}
+template <class T> bool gMatrix<T>::operator!=(const T &s) const
+{ return !(*this == s);  }
 
-template <class T> void
-gMatrix<T>::GetRow(int row, gVector<T> &v) const
-{
-  assert( CheckRow(row) );
-  assert( CheckRow(v) );
-  T* rowptr= data[row];
-  for(int i=mincol; i<=maxcol; i++)
-    v.data[i]= rowptr[i];
-}
 
-template <class T> void
-gMatrix<T>::SetRow(int row, const gVector<T> &v)
-{
-  assert( CheckRow(row) );
-  assert( CheckRow(v) );
-  T* rowptr= data[row];
-  for(int i=mincol; i<=maxcol; i++)
-    rowptr[i]= v.data[i];
-}
+// more complex functions
 
 template <class T> void
 gMatrix<T>::MakeIdent(void)
@@ -478,75 +293,6 @@ gMatrix<T>::MakeIdent(void)
       else (*this)(i,j)=(T) 0;
     }
 }
-
-// column manipulation
-
-// note: this is redundant (identical to SetColumn)
-template<class T> void
-gMatrix<T>::SwitchColumn(int col, const gVector<T> &v)
-{
-  assert( CheckColumn(col) && CheckColumn(v) );
-  for(int i=minrow; i<=maxrow; i++)
-    (*this)(i,col)= v[i];
-}
-
-template<class T> void
-gMatrix<T>::SwitchColumnWithVector(int col, gVector<T> &v)
-{
-  assert( CheckColumn(col) && CheckColumn(v) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T* a= data[i] + col;
-      T* b= v.data + i;
-      T tmp= *a;
-      *a= *b;
-      *b= tmp;
-    }
-}
-
-template<class T> void
-gMatrix<T>::SwitchColumns(int a, int b)
-{
-  assert( CheckColumn(a) && CheckColumn(b) );
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T* row= data[i];
-      T tmp= row[a];
-      row[a]= row[b];
-      row[b]= tmp;
-    }
-}
-
-template<class T> gVector<T>
-gMatrix<T>::GetColumn(int col) const
-{
-  assert( CheckColumn(col) );
-  gVector<T> v(minrow, maxrow);
-  for(int i=minrow; i<=maxrow; i++)
-    v.data[i]= data[i][col];
-  return v;
-}
-
-template <class T> void
-gMatrix<T>::GetColumn(int col, gVector<T> &v) const
-{
-  assert( CheckColumn(col) );
-  assert( CheckColumn(v) );
-  for(int i=minrow; i<=maxrow; i++)
-    v.data[i]= data[i][col];
-}
-
-template <class T> void
-gMatrix<T>::SetColumn(int col, const gVector<T> &v)
-{
-  assert( CheckColumn(col) );
-  assert( CheckColumn(v) );
-  for(int i=minrow; i<=maxrow; i++)
-    data[i][col]= v.data[i];
-}
-
-
-// more complex functions
 
 #ifdef UNUSED
 template<class T> gMatrix<T>
