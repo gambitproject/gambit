@@ -185,10 +185,10 @@ void LUdecomp<T>::LsolveT(const gVector<T> &c, gVector<T> &y) const
   int min=y.First(), max=y.Last();
 
   T sum;
-  for(int col=max; col>=min; col++)
+  for(int col=max; col>=min; col--)
     {
       sum= c[col];
-      for(int row=max; row>min; row++)
+      for(int row=max; row>col; row--)
 	sum-= mat(row,col)*y[row];
       y[col]= sum;
     }
@@ -208,18 +208,18 @@ void LUdecomp<T>::apply(gVector<T> &v) const
   gListIter< LUupdate<T> > iter(updates);
   for( iter.GoFirst(); ! iter.PastEnd(); iter++ )
     {
-      LUupdate<T> update= iter.GetValue();
-      assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
+      LUupdate<T> *update= &iter.GetValue();
+      assert( v.First()<=update->First() && update->Last()==v.Last()-1 );
 
-      for(int i=update.First(); i<=update.Last(); i++)
+      for(int i=update->First(); i<=update->Last(); i++)
 	{
-	  if(update.rowp[i])
+	  if(update->rowp[i])
 	    {
 	      tmp= v[i];
 	      v[i]= v[i+1];
 	      v[i+1]= tmp;
 	    }
-	  v[i+1]-= v[i]*update.alpha[i];
+	  v[i+1]-= v[i]*update->alpha[i];
 	}
     }
 } // end apply()
@@ -237,13 +237,13 @@ void LUdecomp<T>::applyT(gVector<T> &v) const
   gListIter< LUupdate<T> > iter(updates);
   for( iter.GoLast(); !iter.PastBeginning(); iter--)
     {
-      LUupdate<T> update= iter.GetValue();
-      assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
+      LUupdate<T> *update= &iter.GetValue();
+      assert( v.First()<=update->First() && update->Last()==v.Last()-1 );
 
-      for(int i=update.Last(); i<=update.Last(); i--)
+      for(int i=update->Last(); i>=update->First(); i--)
 	{
-	  v[i]-= v[i+1]*update.alpha[i];
-	  if(update.rowp[i])
+	  v[i]-= v[i+1]*update->alpha[i];
+	  if(update->rowp[i])
 	    {
 	      tmp= v[i];
 	      v[i]= v[i+1];
