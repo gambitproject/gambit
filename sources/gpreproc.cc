@@ -5,12 +5,8 @@
 // $Id$
 //
 
-
-
 #include "gpreproc.h"
 #include "system.h"
-
-
 
 //-------------------------------------------------------------------
 // GetLine
@@ -36,19 +32,15 @@
 
 gText gPreprocessor::GetLine( void )
 {
-  
   m_RawLine = "";
 
-
   // If no more input available, return nothing.
-  if( eof() )
-    return gText( "" );
+  if (eof())
+    return "";
 
   // Record the current file name and line number.
   m_PrevFileName = m_FileNameStack.Peek();
   m_PrevLineNumber = m_LineNumberStack.Peek();
-
-
 
   // This is initialized to work with the explicit continuation
   //   processing code.  The backslask will be stripped.
@@ -61,7 +53,6 @@ gText gPreprocessor::GetLine( void )
   bool error = false;
   int bracket = 0;
   bool continuation = false;
-
 
   while( line.Right( 1 ) == '\\' && !error )
   {
@@ -446,54 +437,88 @@ gInput* gPreprocessor::LoadInput( gText& name )
   const char SLASH = System::Slash();
   
   bool search = false;
-  if( strchr( (char *) name, SLASH ) == NULL )
+  if (strchr((char *) name, SLASH) == NULL)
     search = true;
   gText IniFileName;
   
   IniFileName = name;
+#ifdef USE_EXCEPTIONS
+  try   {
+    _Input = new gFileInput(IniFileName);
+  }
+  catch (gFileInput::OpenFailed &)   {
+    delete _Input;
+    if (search)   {
+      if (System::GetEnv("HOME") != NULL)   {
+	IniFileName = (gText) System::GetEnv("HOME") + 
+	              (gText) SLASH + (gText) name;
+	try   {
+	  _Input = new gFileInput(IniFileName);
+	}
+	catch (gFileInput::OpenFailed &)   {
+	  delete _Input;
+	  if (System::GetEnv("GCLLIB") != NULL)  {
+	    IniFileName = (gText) System::GetEnv("GCLLIB") + 
+                          (gText) SLASH + (gText) name;
+	    try  {
+	      _Input = new gFileInput(IniFileName);
+	    }
+	    catch (gFileInput::OpenFailed &)   {
+	      delete _Input;
+	      if (SOURCE != NULL)  {
+		IniFileName = (gText) SOURCE + (gText) SLASH + (gText) name;
+		try  {
+		  _Input = new gFileInput(IniFileName);
+		}
+		catch (gFileInput::OpenFailed &)  {
+		  delete _Input;
+		  _Input = 0;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  return _Input;
+#else
   _Input = new gFileInput( IniFileName );
-  if( _Input->IsValid() )
-  {
+  if (_Input->IsValid())  {
     name = IniFileName;
     return _Input;
   }
   else
     delete _Input;
-
-  if( search )
-  {
-    if( System::GetEnv( "HOME" ) != NULL )
-    {
+  
+  if (search)  {
+    if (System::GetEnv("HOME") != NULL )  {
       IniFileName = (gText) System::GetEnv( "HOME" ) + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
-      if( _Input->IsValid() )
-      {
+      if (_Input->IsValid())  {
 	name = IniFileName;
 	return _Input;
       }
       else
 	delete _Input;
     }
-
-    if( System::GetEnv( "GCLLIB" ) != NULL )
-    {
+    
+    if (System::GetEnv("GCLLIB") != NULL)  {
       IniFileName = (gText) System::GetEnv( "GCLLIB" ) + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
-      if( _Input->IsValid() )
-      {
+      if (_Input->IsValid())  {
 	name = IniFileName;
 	return _Input;
       }
       else
 	delete _Input;
     }
-
-    if( SOURCE != NULL )
-    {
+    
+    if (SOURCE != NULL)  {
       IniFileName = (gText) SOURCE + (gText) SLASH + (gText) name;
       _Input = new gFileInput( IniFileName );
-      if( _Input->IsValid() )
-      {
+      if (_Input->IsValid())  {
 	name = IniFileName;
 	return _Input;
       }
@@ -503,6 +528,7 @@ gInput* gPreprocessor::LoadInput( gText& name )
   }
 
   return NULL;
+#endif    // USE_EXCEPTIONS
 }
 
 
