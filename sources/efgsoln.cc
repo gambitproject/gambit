@@ -18,6 +18,20 @@
 #define NODESOLN_SECTION    "NodeSolnShow"  // for parameter reading
 
 
+class BehavSolnEdit : public SpreadSheet3D {
+private:
+  BehavSolution &soln;
+  gPVector<int> dim;
+  int num_isets;
+
+public:
+  BehavSolnEdit(BehavSolution &soln, int iset_disp, wxFrame *parent);
+
+  void OnSelectedMoved(int row, int col, SpreadMoveDir how);
+  void OnOk(void);
+  Bool OnClose(void);
+};
+
 //****************************************************************************
 //                       NODE INSPECT WINDOW
 //****************************************************************************
@@ -1316,8 +1330,13 @@ BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
   Show(TRUE);
 }
 
+Bool BehavSolnEdit::OnClose(void)
+{
+  SetCompleted(wxCANCEL);
+  Show(FALSE);
+  return FALSE;
+}
 
-// OnSelectedMoved
 void BehavSolnEdit::OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/)
 {
     int pl = 1, iset = 1;

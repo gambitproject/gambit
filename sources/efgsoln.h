@@ -177,18 +177,4 @@ public:
 };
 
 
-class BehavSolnEdit : public SpreadSheet3D
-{
-private:
-    BehavSolution &soln;
-    gPVector<int> dim;
-    int num_isets;
-
-public:
-    // Constructor
-    BehavSolnEdit(BehavSolution &soln, int iset_disp, wxFrame *parent);
-    void OnSelectedMoved(int row, int col, SpreadMoveDir how);
-    void OnOk(void);
-};
-
 #endif // EFGSOLN_H
