@@ -1512,6 +1512,8 @@ Portion* GSM_Write_numerical(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1524,6 +1526,8 @@ Portion* GSM_Write_gString(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1536,6 +1540,8 @@ Portion* GSM_Write_Mixed(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1548,6 +1554,8 @@ Portion* GSM_Write_Behav(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1560,6 +1568,8 @@ Portion* GSM_Write_NfSupport(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1571,6 +1581,8 @@ Portion* GSM_Write_EfSupport(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1582,6 +1594,8 @@ Portion* GSM_Write_Strategy(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1599,6 +1613,8 @@ Portion* GSM_Write_Nfg(Portion** param)
   nfg->WriteNfgFile(s);
 
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1616,6 +1632,8 @@ Portion* GSM_Write_Efg(Portion** param)
   efg->WriteEfgFile(s);
 
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1630,6 +1648,8 @@ Portion* GSM_Write_list(Portion** param)
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
+  // swap the first parameter with the return value, so things like
+  //   Output["..."] << x << y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1684,6 +1704,9 @@ Portion* GSM_Read_Bool(Portion** param)
 
   ((BoolPortion*) param[1])->Value() = value;
 
+
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1728,6 +1751,8 @@ Portion* GSM_Read_Integer(Portion** param)
   ((IntPortion*) param[1])->Value() = value;
 
 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1766,6 +1791,8 @@ Portion* GSM_Read_Float(Portion** param)
   ((FloatPortion*) param[1])->Value() = value;
 
 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1827,6 +1854,8 @@ Portion* GSM_Read_Rational(Portion** param)
   ((RationalPortion*) param[1])->Value() /= denominator;
  
 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1867,6 +1896,8 @@ Portion* GSM_Read_Text(Portion** param)
   ((TextPortion*) param[1])->Value() = t;
  
 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* p = param[0];
   param[0] = p->RefCopy();
   return p;
@@ -1877,12 +1908,13 @@ Portion* GSM_Read_Text(Portion** param)
 Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 		       Portion* (*func) (Portion**), bool ListFormat)
 {
-  Portion* p;
-  Portion** sub_param;
-  ListPortion* list;
-  int i;
+  Portion* p = NULL;
+  Portion* sub_param[2];
+  ListPortion* list = NULL;
+  int i = 0;
   char c = ' ';  
   gInput& input = ((InputPortion*) param[0])->Value();
+  list = ((ListPortion*) param[1]);
   long old_pos = input.getpos();
 
 
@@ -1910,8 +1942,6 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
   }
 
 
-  sub_param = new Portion*[2];
-  list = ((ListPortion*) param[1]);
 
 
   for(i=1; i <= list->Length(); i++)
@@ -1941,14 +1971,28 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 
     if(p->Spec().Type == porERROR)
     {
-      delete[] sub_param;
       input.setpos(old_pos);
       return p;
     }
     else
-      delete p;
+    {
+      // okay, complicated things going on here
+      // we want to delete the return value, but
+      //   p is actually swapped with sub_param[0] in the
+      //   GSM_Read() functions!  So, can't just delete p;
+      //   need to swap p and sub_param[0] first.
+
+      // just to make sure that the above description is still
+      //   correct...
+      assert( p == param[0] );
+      assert( sub_param[0] != param[0] );
+      
+      // delete and swap
+      delete sub_param[0];
+      sub_param[0] = p;
+      p = NULL;
+    }
   }
-  delete[] sub_param;
 
   if(ListFormat)
   {
@@ -1968,6 +2012,8 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
   }
 
 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
   Portion* result = param[0];
   param[0] = result->RefCopy();
   return result;
@@ -2389,26 +2435,35 @@ Portion *GSM_Behav_EfgRational(Portion **param)
 
 Portion* GSM_Read_MixedFloat(Portion** param)
 {
-  Portion** sub_param = new Portion*[2];
-  //Portion* owner = param[1]->Owner();
+  Portion* sub_param[2];
   Portion* owner = 
     new NfgValPortion(((MixedSolution<double>*) 
 		       ((MixedPortion*) param[1])->Value())->BelongsTo());
+
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_MixedFloat(sub_param);
+
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Float(sub_param);
+  // result and sub_param[0] have been swapped by GSM_Read() functions!
+  //   Make sure that this is still the case, and propagate the swap
+  //   to param[0] as well
+  assert( result == param[0] );
+  assert( sub_param[0] != param[0] );
+  param[0] = sub_param[0];
+
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Mixed_NfgFloat(sub_param);
   (*((MixedSolution<double>*) ((MixedPortion*) param[1])->Value())) = 
     (*((MixedSolution<double>*) ((MixedPortion*) p)->Value()));
+
+  delete owner;
   delete list;
   delete p;
-  delete owner;
-  delete[] sub_param;
+
   return result;
 }
 
@@ -2416,26 +2471,35 @@ Portion* GSM_Read_MixedFloat(Portion** param)
 
 Portion* GSM_Read_MixedRational(Portion** param)
 {
-  Portion** sub_param = new Portion*[2];
-  //Portion* owner = param[1]->Owner();
+  Portion* sub_param[2];
   Portion* owner = 
     new NfgValPortion(((MixedSolution<gRational>*) 
 		       ((MixedPortion*) param[1])->Value())->BelongsTo());
+
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_MixedRational(sub_param);
+
   sub_param[0] = param[0];
   sub_param[1] = list;
-  Portion* result = GSM_Read_List_Rational(sub_param);
+  Portion* result = GSM_Read_List_Float(sub_param);
+  // result and sub_param[0] have been swapped by GSM_Read() functions!
+  //   Make sure that this is still the case, and propagate the swap
+  //   to param[0] as well
+  assert( result == param[0] );
+  assert( sub_param[0] != param[0] );
+  param[0] = sub_param[0];
+
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Mixed_NfgRational(sub_param);
   (*((MixedSolution<gRational>*) ((MixedPortion*) param[1])->Value())) = 
     (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value()));
+
+  delete owner;
   delete list;
   delete p;
-  delete owner;
-  delete[] sub_param;
+
   return result;
 }
 
@@ -2446,25 +2510,35 @@ extern Portion* GSM_Behav_EfgFloat(Portion **param);
 
 Portion* GSM_Read_BehavFloat(Portion** param)
 {
-  Portion** sub_param = new Portion*[2];
-  //Portion* owner = param[1]->Owner();
+  Portion* sub_param[2];
   Portion* owner = 
     new EfgValPortion(((BehavSolution<double>*) 
 		       ((BehavPortion*) param[1])->Value())->BelongsTo());
+
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_BehavFloat(sub_param);
+
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Float(sub_param);
+  // result and sub_param[0] have been swapped by GSM_Read() functions!
+  //   Make sure that this is still the case, and propagate the swap
+  //   to param[0] as well
+  assert( result == param[0] );
+  assert( sub_param[0] != param[0] );
+  param[0] = sub_param[0];
+
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Behav_EfgFloat(sub_param);
   (*((BehavSolution<double>*) ((BehavPortion*) param[1])->Value())) = 
     (*((BehavSolution<double>*) ((BehavPortion*) p)->Value()));
+
+  delete owner;
   delete list;
   delete p;
-  delete[] sub_param;
+
   return result;
 }
 
@@ -2474,25 +2548,35 @@ extern Portion* GSM_Behav_EfgRational(Portion **param);
 
 Portion* GSM_Read_BehavRational(Portion** param)
 {
-  Portion** sub_param = new Portion*[2];
-  //Portion* owner = param[1]->Owner();
+  Portion* sub_param[2];
   Portion* owner = 
     new EfgValPortion(((BehavSolution<gRational>*) 
 		       ((BehavPortion*) param[1])->Value())->BelongsTo());
+
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_BehavRational(sub_param);
+
   sub_param[0] = param[0];
   sub_param[1] = list;
   Portion* result = GSM_Read_List_Rational(sub_param);
+  // result and sub_param[0] have been swapped by GSM_Read() functions!
+  //   Make sure that this is still the case, and propagate the swap
+  //   to param[0] as well
+  assert( result == param[0] );
+  assert( sub_param[0] != param[0] );
+  param[0] = sub_param[0];
+
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Behav_EfgRational(sub_param);
   (*((BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value())) = 
     (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value()));
+
+  delete owner;
   delete list;
   delete p;
-  delete[] sub_param;
+
   return result;
 }
 
