@@ -51,11 +51,9 @@
 #include "gmisc.h"
 #include "general.h"
 #include "gambitio.h"
-#include "gstring.h"
 #include "arrays.h"
 #include "equtrac.h"
 #include "normequs.h"
-#include "ncalcset.h"
 #include "expdata.h"
 #include "onedot.h"
 #include "pxi.h"
@@ -987,9 +985,12 @@ void PxiDrawSettings::SetOptions(wxWindow *parent)
     stop_max = strtod(dialog.GetMaxLam(),NULL);
     data_min = strtod(dialog.GetMinY(),NULL);
     data_max = strtod(dialog.GetMaxY(),NULL);
-    SetPlotFeatures(dialog.GetPlotMode());
 
     int mode = dialog.GetPlotMode();
+    if(mode==0)plot_mode=PXI_PLOT_X;
+    if(mode==1)plot_mode=PXI_PLOT_2;
+    if(mode==2)plot_mode=PXI_PLOT_3;
+
     mode = dialog.GetColorMode();
     if(mode==0)color_mode=COLOR_EQU;
     if(mode==1)color_mode=COLOR_PROB;
@@ -1111,14 +1112,6 @@ void PxiDrawSettings::AskPlotFeatures(void)
 #endif // NOT_IMPLEMENTED
 }
 
-void PxiDrawSettings::SetPlotFeatures(unsigned int feat)
-{
-  switch (plot_mode) {
-  case	PXI_PLOT_3: plot3_features=feat;break;
-  case	PXI_PLOT_X: plotx_features=feat;break;
-  case	PXI_PLOT_2: plot2_features=feat;break;
-  }
-}
 unsigned int PxiDrawSettings::PlotFeatures(void)
 {
   switch (plot_mode) {

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "onedot.h"
-#include "gstring.h"
 #include "gmisc.h"
 
 //CopyFile
@@ -32,7 +31,7 @@ int CopyFile (const char *file1, const char *file2)
 // This just copies everything that comes before the Data: line to the output file
 void OneDot::CopyHeader(gInput &in,gOutput &out)
 {
-gString	tmp_str;
+  wxString tmp_str;
 char c;
 do
 {

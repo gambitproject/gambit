@@ -51,6 +51,20 @@
 #define PXI_PLOT_2_STEP        .1
 #define MAXN    10
 
+#define	OVERLAY_TOKEN   1
+#define	OVERLAY_NUMBER  2
+
+#define MIN_TOKEN_SIZE  2
+#define MAX_TOKEN_SIZE  10
+#define DEF_TOKEN_SIZE  4
+
+#define TOP_PLOT        0
+#define	BOTTOM_PLOT     1
+
+#define	COLOR_EQU       1
+#define COLOR_PROB      2
+#define COLOR_NONE      3
+
 
 /*********************** PXI.H ******************************************/
 
@@ -71,20 +85,6 @@ public:
 };
 
 DECLARE_APP(PxiApp)
-
-#define	OVERLAY_TOKEN   1
-#define	OVERLAY_NUMBER  2
-
-#define MIN_TOKEN_SIZE  2
-#define MAX_TOKEN_SIZE  10
-#define DEF_TOKEN_SIZE  4
-
-#define TOP_PLOT        0
-#define	BOTTOM_PLOT     1
-
-#define	COLOR_EQU       1
-#define COLOR_PROB      2
-#define COLOR_NONE      3
 
 class PxiDrawSettings
 {
@@ -193,13 +193,10 @@ public:
   void	SetOverlayLines(Bool l)	{overlay_lines=l;}
   void	SetTokenSize(int s) {overlay_token_size=s;}
   void	SetLabelFont(wxFont *f)	{label_font=f;}
-  
-  void	SetPlotFeatures(unsigned int feat);
 };
 
-
-
 // Define a new canvas
+
 class PxiCanvas: public wxScrolledWindow
 {
 public:
@@ -258,6 +255,7 @@ public:
 };
 
 // Define a new frame
+
 class PxiFrame: public wxFrame
 {
 private:
@@ -356,4 +354,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif
+#endif // PXI_H
