@@ -64,6 +64,9 @@
 #include "wx/sizer.h"
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
+#include "wx/print.h"
+#include "wx/printdlg.h"
+
 
 gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
 {op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
@@ -82,7 +85,7 @@ bool PxiApp::OnInit(void)
   // Set up the help system.
   wxString helpDir = wxGetWorkingDirectory();
   config.Read("Help-Directory", &helpDir);
-
+  
   wxInitHelp(wxString(helpDir.c_str()) + "/gambit", 
 	     "PXI(Plus or Minus), Version 0.97.3\n"
 	     "Based on Eugene Grayver's PXI, version .94\n\n"
@@ -266,7 +269,9 @@ void PxiFrame::LoadFile(const wxString &p_filename)
 
 BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
-  EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
+  //  EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
+  EVT_MENU(wxID_PRINT, PxiChild::OnPrint)
+  EVT_MENU(wxID_PREVIEW, PxiChild::OnPrintPreview)
   EVT_MENU(PXI_CHILD_CLOSE, PxiChild::Close)
   EVT_MENU(PXI_CHILD_QUIT, PxiChild::OnQuit)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
@@ -413,6 +418,15 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480), 
 	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent)
 {
+  m_printData = new wxPrintData;
+  m_pageSetupData = new wxPageSetupDialogData;
+
+// perhaps can be deleted -- compatability with old system.
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
+    (*m_printData) = * wxThePrintSetupData;
+#endif
+
+    
   SetSizeHints(300, 300);
 
   // Give the frame an icon
@@ -443,7 +457,8 @@ void PxiChild::MakeMenus(void)
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load new data file");
   file_menu->Append(PXI_CHILD_CLOSE, "&Close", "Close child window");
-  file_menu->Append(PXI_OUTPUT, "Output", "Output to file or printer");
+  file_menu->Append(wxID_PRINT, "Output", "Output to file or printer");
+  file_menu->Append(wxID_PREVIEW, "Preview", "Print Preview");
   file_menu->AppendSeparator();
   file_menu->Append(PXI_CHILD_QUIT, "&Quit", "Quit Program");
   wxMenu *data_menu= new wxMenu;
@@ -518,6 +533,7 @@ void PxiCanvas::ShowDetail(void)
 
 void PxiCanvas::StopIt(void)
 {
+#ifdef NOT_IMPLEMENTED
   if (draw_settings->GetStopMax()==draw_settings->GetMaxL()) {
     //	if (updating) draw_settings->SetStopMax(cur_e);
   }
@@ -528,6 +544,7 @@ void PxiCanvas::StopIt(void)
       Render();
     }
   }
+#endif // NOT_IMPLEMENTED
 }
 
 void PxiCanvas::NewExpData(ExpDataParams &P) 
@@ -601,23 +618,98 @@ PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
   Show(true);
 }
 
-#ifdef __WXMSW__
+#include "wx/printdlg.h"
+#ifdef UNUSED
+void PxiChild::MyPrint(wxCommandEvent &event)
+{
+
+/*
+	wxPrintData data;
+	wxPrintDialogData dd(data);
+	dd.SetMaxPage(canvas->draw_settings->GetMaxPage());
+	wxPrintDialog dialog(this,&dd);
+*/
+   wxPrintDialog dialog(this);
+   dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
+	if(dialog.ShowModal() == wxID_OK) {
+		wxDC *dc(dialog.GetPrintDC());
+      if (dc->Ok()) {
+      	if(dialog.GetPrintDialogData().GetPrintToFile())
+      //			if(dd.GetPrintToFile())
+			dc->StartDoc("PXI printout");
+			dc->StartPage();
+			this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
+	    dc->EndPage();
+	    dc->EndDoc();
+ 	 }
+  this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
+  }
+}
+#endif // UNUSED
+
+void PxiChild::OnPrint(wxCommandEvent& event)
+{
+    wxPrintDialogData printDialogData(* m_printData);
+
+    wxPrinter printer(& printDialogData);
+    PxiPrintout printout(*canvas, "PXI printout");
+    if (!printer.Print(this, &printout, TRUE))
+      wxMessageBox("There was a problem printing.\nPerhaps your current printer is not set correctly?", "Printing", wxOK);
+    else {
+      (*m_printData) = printer.GetPrintDialogData().GetPrintData();
+    }
+}
+
+void PxiChild::OnPrintPreview(wxCommandEvent& event)
+{
+  // Pass two printout objects: for preview, and possible printing.
+  wxPrintDialogData printDialogData(* m_printData);
+  wxPrintPreview *preview 
+    = new wxPrintPreview(new PxiPrintout(*canvas, "PXI printout"), 
+			 new PxiPrintout(*canvas, "PXI printout"), & printDialogData);
+  if (!preview->Ok()) {
+    delete preview;
+    wxMessageBox("There was a problem previewing.\nPerhaps your current printer is not set correctly?", 
+		 "Previewing", wxOK);
+    return;
+  }
+  
+  wxPreviewFrame *frame 
+    = new wxPreviewFrame(preview, 
+			 this, "PXI Print Preview", wxPoint(100, 100), wxSize(600, 650));
+  frame->Centre(wxBOTH);
+  frame->Initialize();
+  frame->Show(TRUE);
+}
+
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
-  wxPrintData  data;
-  wxPrinterDC dc(data);
-  //  wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
-  // normal Windows printing under Win 3.1
-  if (dc.Ok()) {
-    dc.StartDoc("PXI printout");
-    dc.StartPage();
-    this->canvas->Update(dc,PXI_UPDATE_PRINTER);
-    dc.EndPage();
-    dc.EndDoc();
+
+/*
+	wxPrintData data;
+	wxPrintDialogData dd(data);
+	dd.SetMaxPage(canvas->draw_settings->GetMaxPage());
+	wxPrintDialog dialog(this,&dd);
+*/
+   wxPrintDialog dialog(this);
+   dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
+	if(dialog.ShowModal() == wxID_OK) {
+		wxDC *dc(dialog.GetPrintDC());
+      if (dc->Ok()) {
+      	if(dialog.GetPrintDialogData().GetPrintToFile())
+      //			if(dd.GetPrintToFile())
+			dc->StartDoc("PXI printout");
+			dc->StartPage();
+			this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
+	    dc->EndPage();
+	    dc->EndDoc();
+ 	 }
+  this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
   }
-  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
+
 }
-#else
+
+#ifdef UNUSED
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
   if (!preview)
@@ -737,51 +829,21 @@ void PxiFrame::OnCloseWindow(wxCloseEvent &)
 //*************************************************************************
 
 PxiDrawSettings::PxiDrawSettings(FileHeader &header)
-  : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),
-    label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
-    axis_font(10,wxSWISS,wxNORMAL,wxBOLD),
-    clear_brush("BLACK",wxTRANSPARENT),
-    exp_data_brush("BLACK",wxSOLID), 
-    axis_text_color("BLUE")
+  : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
+    axis_font(10,wxSWISS,wxNORMAL,wxBOLD), clear_brush("BLACK",wxTRANSPARENT),
+    exp_data_brush("BLACK",wxSOLID), axis_text_color("BLUE"), plots_per_page(2), 
+    maxpage(1), whichpage(1), whichplot(1), overlay_symbol(OVERLAY_NUMBER),
+    overlay_lines(FALSE), overlay_token_size(DEF_TOKEN_SIZE), 
+    data_mode(header.DataType()), color_mode(COLOR_PROB),
+    connect_dots(FALSE), restart_overlay_colors(TRUE), 
+    num_infosets(header.NumInfosets()), 
+    l_start(header.EStart()), l_stop(header.EStop()), l_step(header.EStep())
 {
-  int i,j;
-  whichpage=1;
-  overlay_symbol=OVERLAY_NUMBER;
-  overlay_lines=FALSE;
-  overlay_token_size=DEF_TOKEN_SIZE;
-  //  color_mode=COLOR_EQU;
-  color_mode=COLOR_PROB;
-  restart_overlay_colors=TRUE;
-  connect_dots=FALSE;
-  data_mode=header.DataType();
-  plot_mode=PXI_PLOT_X;
-  l_start=header.EStart();l_stop=header.EStop();l_step=header.EStep();
-  stop_min=l_start;stop_max=l_stop;
-  data_min=header.DataMin();data_max=header.DataMax();
-  
-  num_infosets=header.NumInfosets();
-  // Create the 'what to display where' data structures
-  // Default is to show first 1/2 of the infosets with all their strategies
-  // on the top portion of the graph (in two graph mode) and the rest on the
-  // bottom.  In one graph mode, the default is to show just the first 1/2 of
-  // the infosets with all their strategies.
-  strategy_show=gBlock<show_player_strategies>(num_infosets);
-  for (i=1;i<=num_infosets;i++) {
-    strategy_show[i]=show_player_strategies(header.NumStrategies(i));
-    for (j=1;j<=header.NumStrategies(i);j++) strategy_show[i][j]=TRUE;
-  }
+  thisplot=gBlock< PlotInfo >(num_infosets);
+  for (int i=1;i<=num_infosets;i++)
+    thisplot[i].Init(header,i);
 
-  myplot=gBlock< gBlock<int> >(num_infosets);
-  for (i=1;i<=num_infosets;i++) {
-    myplot[i]=gBlock<int>(1);
-    myplot[i][1]=i;
-  }
-  SetPlotsPerPage( (header.NumInfosets()>1) ? 2 : 1);  // also sets maxpage, whichpage
-
-  // Default features are everything on
-  plot3_features=DRAW_AXIS|DRAW_LABELS;
-  plotx_features=DRAW_AXIS|DRAW_TICKS|DRAW_NUMS;
-  plot2_features=DRAW_AXIS|DRAW_TICKS|DRAW_NUMS|DRAW_SQUARE;
+  SetPlotsPerPage( (num_infosets>1) ? 2 : 1);  // also sets maxpage, whichpage
 }
 
 // Plot3 mode is now more flexible: it works great (by default) on 2d player
@@ -793,6 +855,7 @@ PxiDrawSettings::PxiDrawSettings(FileHeader &header)
 
 Bool PxiDrawSettings::CheckPlot3Mode(void)
 {
+#ifdef NOT_IMPLEMENTED
   int i;
   // Check if there are 3 or over strategy_show for each player
   int page = whichpage;
@@ -822,6 +885,7 @@ Bool PxiDrawSettings::CheckPlot3Mode(void)
     wxMessageBox("Only two strategies per player allowed!");
     return FALSE;
   }
+#endif // NOT_IMPLEMENTED
   return TRUE;
 }
 
@@ -832,6 +896,7 @@ Bool PxiDrawSettings::CheckPlot3Mode(void)
 
 Bool PxiDrawSettings::CheckPlot2Mode(void)
 {
+#ifdef NOT_IMPLEMENTED
   int i,j,num_strategies=0;
   for (j=1;j<=strategy_show.Length();j++)
     for (i=1;i<=strategy_show[j].Length();i++)
@@ -840,30 +905,13 @@ Bool PxiDrawSettings::CheckPlot2Mode(void)
     wxMessageBox("Only TWO strategies TOTAL can be checked\nin the strategy selection dialog");
     return FALSE;
   }
+#endif // NOT_IMPLEMENTED
   return TRUE;
 }
 
 void PxiDrawSettings::SetOptions(wxWindow *parent)
 {
   dialogDrawSettings dialog(parent, *this);
-}
-
-void PxiDrawSettings::SetPlotFeatures(unsigned int feat)
-{
-  switch (plot_mode) {
-  case PXI_PLOT_3: plot3_features=feat;break;
-  case PXI_PLOT_X: plotx_features=feat;break;
-  case PXI_PLOT_2: plot2_features=feat;break;
-  }
-}
-
-unsigned int PxiDrawSettings::PlotFeatures(void)
-{
-  switch (plot_mode) {
-  case	PXI_PLOT_3: return plot3_features;
-  case	PXI_PLOT_X: return plotx_features;
-  case	PXI_PLOT_2: return plot2_features;
-  }
 }
 
 //
@@ -878,3 +926,306 @@ void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
 }
 
 
+PlotInfo::PlotInfo(void) : plotMode(PXI_PLOT_X), x_min(0), x_max(1), 
+  y_min(0), y_max(1), showAxis(true), showTicks(true), showNums(true), 
+  showLabels(true), showSquare(true)
+{ } 
+
+PlotInfo::~PlotInfo(void) 
+{ }
+
+void PlotInfo::Init(const FileHeader &header, int plot_number) 
+{
+  int num_infosets = header.NumInfosets();
+  number = plot_number;
+  strategies=gBlock< show_actions >(num_infosets);
+  for (int i=1;i<=num_infosets;i++) {
+    strategies[i]=show_actions(header.NumStrategies(i));
+    for (int j=1;j<=header.NumStrategies(i);j++) 
+      strategies[i][j]=true;
+  }
+  isets = gBlock<int>(1);
+  isets[1]=plot_number;
+  float l_start = header.EStart(); 
+  float l_stop = header.EStop(); 
+  float l_step = header.EStep();
+  x_min = l_start; 
+  x_max = l_stop; 
+  y_min = header.DataMin(); 
+  y_max = header.DataMax();
+}
+
+PlotInfo &PlotInfo::operator=(const PlotInfo &p)
+{
+  if(this != &p) {
+    plotMode = p.plotMode;
+    showAxis = p.showAxis;
+    showTicks = p.showTicks;
+    showNums = p.showNums;
+    showLabels = p.showLabels;
+    showSquare = p.showSquare;
+    number = p.number;    
+    isets = p.isets;
+    strategies = p.strategies;
+    for(int i = 1; i<=strategies.Length(); i++) {
+      strategies[i] = p.strategies[i];
+    }
+  }
+}
+
+bool PlotInfo::operator==(const PlotInfo &p)
+{
+  assert(0);  //needed for gBlock<T>, but lets see if it's ever used
+  //      if isets != p.isets return false;
+  //      if strategies != p.strategies return false;
+}
+
+
+PxiPrintout::PxiPrintout(PxiCanvas &c, char *title)
+  : wxPrintout(title), canvas(c)
+{ }
+
+PxiPrintout::~PxiPrintout(void) 
+{ }
+
+bool PxiPrintout::OnPrintPage(int page)
+{
+  wxDC *dc = GetDC();
+  if (dc) {
+    dc->SetDeviceOrigin(0, 0);
+    dc->SetUserScale(1.0, 1.0);
+    
+    canvas.SetPage(page);
+    canvas.Update(*dc,PXI_UPDATE_PRINTER);
+    
+    return true;
+  }
+  else
+    return false;
+}
+
+bool PxiPrintout::OnBeginDocument(int startPage, int endPage)
+{
+  if (!wxPrintout::OnBeginDocument(startPage, endPage))
+    return false;
+  return true;
+}
+
+void PxiPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
+{
+  int max =  (canvas.DrawSettings())->GetMaxPage();
+  *minPage =1;
+  *maxPage = max;
+  *selPageFrom = 1;
+  *selPageTo = max;
+}
+
+bool PxiPrintout::HasPage(int pageNum)
+{
+  if(pageNum>=1 && pageNum <=  canvas.DrawSettings()->GetMaxPage())
+    return true;
+  return false;
+}
+
+
+
+#ifdef UNUSED
+void MyPrintout::DrawPageOne(wxDC *dc)
+{
+/* You might use THIS code if you were scaling
+* graphics of known size to fit on the page.
+    */
+    int w, h;
+    
+    // We know the graphic is 200x200. If we didn't know this,
+    // we'd need to calculate it.
+    float maxX = 200;
+    float maxY = 200;
+    
+    // Let's have at least 50 device units margin
+    float marginX = 50;
+    float marginY = 50;
+    
+    // Add the margin to the graphic size
+    maxX += (2*marginX);
+    maxY += (2*marginY);
+    
+    // Get the size of the DC in pixels
+    dc->GetSize(&w, &h);
+    
+    // Calculate a suitable scaling factor
+    float scaleX=(float)(w/maxX);
+    float scaleY=(float)(h/maxY);
+    
+    // Use x or y scaling factor, whichever fits on the DC
+    float actualScale = wxMin(scaleX,scaleY);
+    
+    // Calculate the position on the DC for centring the graphic
+    float posX = (float)((w - (200*actualScale))/2.0);
+    float posY = (float)((h - (200*actualScale))/2.0);
+    
+    // Set the scale and origin
+    dc->SetUserScale(actualScale, actualScale);
+    dc->SetDeviceOrigin( (long)posX, (long)posY );
+    
+    frame->Draw(*dc);
+}
+
+void MyPrintout::DrawPageTwo(wxDC *dc)
+{
+/* You might use THIS code to set the printer DC to ROUGHLY reflect
+* the screen text size. This page also draws lines of actual length 5cm
+* on the page.
+    */
+    // Get the logical pixels per inch of screen and printer
+    int ppiScreenX, ppiScreenY;
+    GetPPIScreen(&ppiScreenX, &ppiScreenY);
+    int ppiPrinterX, ppiPrinterY;
+    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
+    
+    // This scales the DC so that the printout roughly represents the
+    // the screen scaling. The text point size _should_ be the right size
+    // but in fact is too small for some reason. This is a detail that will
+    // need to be addressed at some point but can be fudged for the
+    // moment.
+    float scale = (float)((float)ppiPrinterX/(float)ppiScreenX);
+    
+    // Now we have to check in case our real page size is reduced
+    // (e.g. because we're drawing to a print preview memory DC)
+    int pageWidth, pageHeight;
+    int w, h;
+    dc->GetSize(&w, &h);
+    GetPageSizePixels(&pageWidth, &pageHeight);
+    
+    // If printer pageWidth == current DC width, then this doesn't
+    // change. But w might be the preview bitmap width, so scale down.
+    float overallScale = scale * (float)(w/(float)pageWidth);
+    dc->SetUserScale(overallScale, overallScale);
+    
+    // Calculate conversion factor for converting millimetres into
+    // logical units.
+    // There are approx. 25.1 mm to the inch. There are ppi
+    // device units to the inch. Therefore 1 mm corresponds to
+    // ppi/25.1 device units. We also divide by the
+    // screen-to-printer scaling factor, because we need to
+    // unscale to pass logical units to DrawLine.
+    
+    // Draw 50 mm by 50 mm L shape
+    float logUnitsFactor = (float)(ppiPrinterX/(scale*25.1));
+    float logUnits = (float)(50*logUnitsFactor);
+    dc->SetPen(* wxBLACK_PEN);
+    dc->DrawLine(50, 250, (long)(50.0 + logUnits), 250);
+    dc->DrawLine(50, 250, 50, (long)(250.0 + logUnits));
+    
+    dc->SetFont(* wxGetApp().m_testFont);
+    dc->SetBackgroundMode(wxTRANSPARENT);
+    
+    dc->DrawText("Some test text", 200, 200 );
+    
+    { // GetTextExtent demo:
+        wxString words[7] = {"This ", "is ", "GetTextExtent ", "testing ", "string. ", "Enjoy ", "it!"};
+        long w, h;
+        long x = 200, y= 250;
+        wxFont fnt(15, wxSWISS, wxNORMAL, wxNORMAL);
+        
+        dc->SetFont(fnt);
+        for (int i = 0; i < 7; i++) {
+            dc->GetTextExtent(words[i], &w, &h);
+            dc->DrawRectangle(x, y, w, h);
+            dc->DrawText(words[i], x, y);
+            x += w;
+        }
+        dc->SetFont(* wxGetApp().m_testFont);
+    }
+    
+    // TESTING
+    
+    int leftMargin = 20;
+    int rightMargin = 20;
+    int topMargin = 20;
+    int bottomMargin = 20;
+    
+    int pageWidthMM, pageHeightMM;
+    GetPageSizeMM(&pageWidthMM, &pageHeightMM);
+    
+    float leftMarginLogical = (float)(logUnitsFactor*leftMargin);
+    float topMarginLogical = (float)(logUnitsFactor*topMargin);
+    float bottomMarginLogical = (float)(logUnitsFactor*(pageHeightMM - bottomMargin));
+    float rightMarginLogical = (float)(logUnitsFactor*(pageWidthMM - rightMargin));
+    
+    dc->SetPen(* wxRED_PEN);
+    dc->DrawLine( (long)leftMarginLogical, (long)topMarginLogical, 
+        (long)rightMarginLogical, (long)topMarginLogical);
+    dc->DrawLine( (long)leftMarginLogical, (long)bottomMarginLogical, 
+        (long)rightMarginLogical,  (long)bottomMarginLogical);
+    
+    WritePageHeader(this, dc, "A header", logUnitsFactor);
+}
+
+
+void MyFrame::OnPrintSetup(wxCommandEvent& WXUNUSED(event))
+{
+    wxPrintDialogData printDialogData(* m_printData);
+    wxPrintDialog printerDialog(this, & printDialogData);
+
+    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+    printerDialog.ShowModal();
+
+    (*m_printData) = printerDialog.GetPrintDialogData().GetPrintData();
+}
+
+void MyFrame::OnPageSetup(wxCommandEvent& WXUNUSED(event))
+{
+    (*m_pageSetupData) = * m_printData;
+
+    wxPageSetupDialog pageSetupDialog(this, m_pageSetupData);
+    pageSetupDialog.ShowModal();
+
+    (*m_printData) = pageSetupDialog.GetPageSetupData().GetPrintData();
+    (*m_pageSetupData) = pageSetupDialog.GetPageSetupData();
+}
+
+#if defined(__WXMSW__) && wxTEST_POSTSCRIPT_IN_MSW
+void MyFrame::OnPrintPS(wxCommandEvent& WXUNUSED(event))
+{
+    wxPostScriptPrinter printer(m_printData);
+    MyPrintout printout("My printout");
+    printer.Print(this, &printout, TRUE);
+
+    (*m_printData) = printer.GetPrintData();
+}
+
+void MyFrame::OnPrintPreviewPS(wxCommandEvent& WXUNUSED(event))
+{
+    // Pass two printout objects: for preview, and possible printing.
+    wxPrintDialogData printDialogData(* m_printData);
+    wxPrintPreview *preview = new wxPrintPreview(new MyPrintout, new MyPrintout, & printDialogData);
+    wxPreviewFrame *frame = new wxPreviewFrame(preview, this, "Demo Print Preview", wxPoint(100, 100), wxSize(600, 650));
+    frame->Centre(wxBOTH);
+    frame->Initialize();
+    frame->Show(TRUE);
+}
+
+void MyFrame::OnPrintSetupPS(wxCommandEvent& WXUNUSED(event))
+{
+    wxPrintDialogData printDialogData(* m_printData);
+    wxGenericPrintDialog printerDialog(this, & printDialogData);
+
+    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+    printerDialog.ShowModal();
+
+    (*m_printData) = printerDialog.GetPrintDialogData().GetPrintData();
+}
+
+void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))
+{
+    (*m_pageSetupData) = * m_printData;
+
+    wxGenericPageSetupDialog pageSetupDialog(this, m_pageSetupData);
+    pageSetupDialog.ShowModal();
+
+    (*m_printData) = pageSetupDialog.GetPageSetupData().GetPrintData();
+    (*m_pageSetupData) = pageSetupDialog.GetPageSetupData();
+}
+#endif
+#endif // UNUSED

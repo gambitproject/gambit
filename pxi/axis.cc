@@ -6,45 +6,43 @@
 #include <assert.h>
 #include "axis.h"
 #include "gmisc.h"
+#include "pxi.h"
 
-#define XOFF			30
-#define YSCALE 		(ch-3*XOFF)/2
-#define XGRID			(cw-2*XOFF)/XGRIDS
-#define YGRID			(ch-ch/2*num_plots-2*XOFF)/YGRIDS
-#define MY_XGRID		cw/XGRIDS
-#define MY_YGRID		ch/YGRIDS
+#define XOFF		30
+#define XGRID		cw/XGRIDS
+#define YGRID		ch/YGRIDS
 
 /***************************** PLOT AXIS X ********************************/
-void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
-		float y_end,int x0, int y0, int cw,int ch,int plot_type,
-		unsigned int features,float log_step)
+void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
+		int plot_type, float log_step)
 {
   int i1;
   float tempf;
   double p,k,x_per_grid;
   char axis_label_str[90];
+  float x_start = thisplot.GetMinX();
+  float x_end = thisplot.GetMaxX();
+  float y_start = thisplot.GetMinY();
+  float y_end = thisplot.GetMaxY();
   
-  if (features&DRAW_AXIS) {
-    dc.DrawLine(
-		x0,   y0,
+  if (thisplot.ShowAxis()) {
+    dc.DrawLine(x0,   y0,
 		x0,   y0-ch);
-    dc.DrawLine(
-		x0,   y0,
+    dc.DrawLine(x0,   y0,
 		x0+cw,y0);
   }
   if (plot_type==DATA_TYPE_ARITH) {   	// arithmetic scale
     for (i1=0;i1<=XGRIDS;i1++) {
-      if (features&DRAW_TICKS)
-	dc.DrawLine(
-		    x0+i1*MY_XGRID,      y0-GRID_H, 
-		    x0+i1*MY_XGRID,      y0+GRID_H);
-      if (features&DRAW_NUMS) {
+      if (thisplot.ShowTicks())
+	dc.DrawLine(x0+i1*XGRID,      y0-GRID_H, 
+		    x0+i1*XGRID,      y0+GRID_H);
+      if (thisplot.ShowNums()) {
 	tempf=x_start+fabs((x_start-x_end)/XGRIDS)*i1;
 	  sprintf(axis_label_str,"% 3.2f",tempf);
 	  wxCoord tw,th;
 	  dc.GetTextExtent(axis_label_str,&tw,&th);
 	  dc.DrawText(axis_label_str,
-		      x0+i1*MY_XGRID-tw/2, y0+GRID_H);
+		      x0+i1*XGRID-tw/2, y0+GRID_H);
       }
     }
   }
@@ -56,8 +54,7 @@ void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
       k=x_per_grid*(i1);
       p=x_start*pow(log_step,k);
       double x=(cw-2*XOFF)/(x_end-x_start)*(p-x_start);
-      dc.DrawLine(
-		  x0+x,     y0-GRID_H,
+      dc.DrawLine(x0+x,     y0-GRID_H,
 		  x0+x,     y0+GRID_H);
       sprintf(axis_label_str,"% 3.2f",p);
       wxCoord tw,th;
@@ -70,89 +67,91 @@ void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
       k=x_per_grid*(i1);
       p=x_start*pow(log_step,k);
       sprintf(axis_label_str,"% 3.2f",p);
-      if (features&DRAW_TICKS)
-	dc.DrawLine(
-		    x0+i1*MY_XGRID,    y0-GRID_H,
-		    x0+i1*MY_XGRID,    y0+GRID_H);
-      if (features&DRAW_NUMS) {
+      if (thisplot.ShowTicks())
+	dc.DrawLine(x0+i1*XGRID,    y0-GRID_H,
+		    x0+i1*XGRID,    y0+GRID_H);
+      if (thisplot.ShowNums()) {
 	wxCoord tw,th;
 	dc.GetTextExtent(axis_label_str,&tw,&th);
 	dc.DrawText(axis_label_str,
-		    x0+i1*MY_XGRID-tw/2,y0+GRID_H);
+		    x0+i1*XGRID-tw/2,y0+GRID_H);
       }
     }
 #endif
   }
   for (i1=0;i1<=YGRIDS;i1++) {
-    if (features&DRAW_TICKS)
-      dc.DrawLine(
-		  x0-GRID_H,  y0-ch+i1*MY_YGRID,
-		  x0+GRID_H,  y0-ch+i1*MY_YGRID);
-      if (features&DRAW_NUMS) {
+    if (thisplot.ShowTicks())
+      dc.DrawLine(x0-GRID_H,  y0-ch+i1*YGRID,
+		  x0+GRID_H,  y0-ch+i1*YGRID);
+      if (thisplot.ShowNums()) {
 	tempf=y_end-fabs((y_start-y_end)/YGRIDS)*i1;
 	sprintf(axis_label_str,"%3.2f",tempf);
 	wxCoord tw,th;
 	dc.GetTextExtent(axis_label_str,&tw,&th);
 	dc.DrawText(axis_label_str,
-		    x0-GRID_H-tw,  y0-ch+i1*MY_YGRID-th/2);
+		    x0-GRID_H-tw,  y0-ch+i1*YGRID-th/2);
       }
   }
 }
 
 /***************************** PLOT AXIS X ********************************/
 
-void PlotAxis_2(wxDC& dc,float x_start,float x_end,float y_start,float y_end,
-		int x0, int y0, int cw,int ch,unsigned int features)
+void PlotAxis_2(wxDC& dc, const PlotInfo &thisplot, 
+		int x0, int y0, int cw,int ch)
 {
   int i1;
   float tempf;
   char axis_label_str[90];
   int num_plots=0;
+  float x_start = thisplot.GetMinY();
+  float x_end = thisplot.GetMaxY();
+  float y_start = thisplot.GetMinY();
+  float y_end = thisplot.GetMaxY();
   
-  if (features&DRAW_AXIS) {
+  if (thisplot.ShowAxis()) {
     dc.DrawLine(x0, y0, x0, y0-ch);
     dc.DrawLine(x0, y0, x0+cw, y0);}
-  if (features&DRAW_SQUARE) {
+  if (thisplot.ShowSquare()) {
     dc.DrawLine(x0+cw, y0-ch, x0, y0-ch);
     dc.DrawLine(x0+cw, y0-ch, x0+cw, y0);}
   for (i1=0;i1<=XGRIDS;i1++) {
-    if (features&DRAW_TICKS) {
-      dc.DrawLine(x0+i1*MY_XGRID, y0-GRID_H, x0+i1*MY_XGRID, y0+GRID_H);
-      if (features&DRAW_SQUARE)
-	dc.DrawLine( x0+i1*MY_XGRID, y0-ch-GRID_H, x0+i1*MY_XGRID,  y0-ch+GRID_H);
+    if (thisplot.ShowTicks()) {
+      dc.DrawLine(x0+i1*XGRID, y0-GRID_H, x0+i1*XGRID, y0+GRID_H);
+      if (thisplot.ShowSquare())
+	dc.DrawLine( x0+i1*XGRID, y0-ch-GRID_H, x0+i1*XGRID,  y0-ch+GRID_H);
     }
-    if (features&DRAW_NUMS) {
+    if (thisplot.ShowNums()) {
       tempf=x_start+fabs((x_start-x_end)/XGRIDS)*i1;
-      sprintf(axis_label_str,"%3.2f",tempf);
+      sprintf(axis_label_str,"%2.1f",tempf);
       wxCoord tw,th;
       dc.GetTextExtent(axis_label_str,&tw,&th);
       dc.DrawText(axis_label_str,
-		  x0+i1*MY_XGRID-tw/2, y0+GRID_H);
-      if (features&DRAW_SQUARE)
+		  x0+i1*XGRID-tw/2, y0+GRID_H);
+      if (thisplot.ShowSquare())
 	dc.DrawText(axis_label_str,
-		    x0+i1*MY_XGRID-tw/2,y0-ch-GRID_H-th);
+		    x0+i1*XGRID-tw/2,y0-ch-GRID_H-th);
     }
   }
   for (i1=0;i1<=YGRIDS;i1++) {
-    if (features&DRAW_TICKS) {
+    if (thisplot.ShowTicks()) {
       dc.DrawLine(
-		  x0-GRID_H,   y0-ch+i1*MY_YGRID,
-		  x0+GRID_H,   y0-ch+i1*MY_YGRID);
-      if (features&DRAW_SQUARE)
+		  x0-GRID_H,   y0-ch+i1*YGRID,
+		  x0+GRID_H,   y0-ch+i1*YGRID);
+      if (thisplot.ShowSquare())
 	dc.DrawLine(
-		    x0+cw-GRID_H,  y0-ch+i1*MY_YGRID,
-		    x0+cw+GRID_H,  y0-ch+i1*MY_YGRID);
+		    x0+cw-GRID_H,  y0-ch+i1*YGRID,
+		    x0+cw+GRID_H,  y0-ch+i1*YGRID);
     }
-    if (features&DRAW_NUMS) {
+    if (thisplot.ShowNums()) {
       tempf=y_end-fabs((y_start-y_end)/YGRIDS)*i1;
       sprintf(axis_label_str,"%3.2f",tempf);
       wxCoord tw,th;
       dc.GetTextExtent(axis_label_str,&tw,&th);
       dc.DrawText(axis_label_str,
-		  x0-GRID_H-tw,   y0-ch+i1*MY_YGRID-th/2);
-      if (features&DRAW_SQUARE)
+		  x0-GRID_H-tw,   y0-ch+i1*YGRID-th/2);
+      if (thisplot.ShowSquare())
 	dc.DrawText(axis_label_str,
-		    x0+cw+GRID_H, y0-ch+i1*MY_YGRID-th/2);
+		    x0+cw+GRID_H, y0-ch+i1*YGRID-th/2);
     }
   }
 }
@@ -162,29 +161,24 @@ void PlotAxis_2(wxDC& dc,float x_start,float x_end,float y_start,float y_end,
 // two triangles, corresponding to num_plots = 0,1 respectively.  Note that the
 // axis scaling is not currently used.
 
-void PlotAxis_3(wxDC& dc, int x0, int y0, int cw,int ch,
-		unsigned int features, wxString label[])
+void PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
+		wxString label[])
 {
-  dc.DrawLine(
-	      x0,        y0,
+  dc.DrawLine(x0,        y0,
 	      x0+cw,     y0);               // bottom
-  dc.DrawLine(
-	      x0,        y0,
+  dc.DrawLine(x0,        y0,
 	      x0+cw/2,   y0-PXI_3_HEIGHT);  // left side
-  dc.DrawLine(
-	      x0+cw,     y0,
+  dc.DrawLine(x0+cw,     y0,
 	      x0+cw/2,   y0-PXI_3_HEIGHT);  // right side
-  if (features&DRAW_AXIS) { 		// now draw the bisectors
-    dc.DrawLine(
-		x0,          y0,
+  if (thisplot.ShowAxis()) { 		// now draw the bisectors
+    dc.DrawLine(x0,          y0,
 		x0+cw*3/4, y0-PXI_3_HEIGHT/2);
-    dc.DrawLine(
-		x0+cw,     y0,
+    dc.DrawLine(x0+cw,     y0,
 		x0+cw/4,   y0-PXI_3_HEIGHT/2);
     dc.DrawLine(x0+cw/2,   y0-PXI_3_HEIGHT,
 		x0+cw/2,   y0);
   }
-  if (features&DRAW_LABELS) {
+  if (thisplot.ShowSquare()) {
     wxCoord tw,th;
     dc.GetTextExtent(label[2],&tw,&th);
     dc.DrawText(label[2],
@@ -197,4 +191,5 @@ void PlotAxis_3(wxDC& dc, int x0, int y0, int cw,int ch,
 		x0+cw,        y0);
   }
 }
+
 

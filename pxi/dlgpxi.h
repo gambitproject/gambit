@@ -22,7 +22,7 @@ class dialogOverlayData: public guiAutoDialog
 private:
   PxiCanvas *canvas;
   PxiChild *frame;
-
+  
   wxString likename, pxiname, expname;
   gOutput *likefile;
   gInput *pxifile,*expfile;
@@ -30,20 +30,20 @@ private:
   //PxiFrame *frame;
   wxTextCtrl *m_pxiName, *m_expName, *m_likeName;
   wxCheckBox *m_saveLike, *m_loadNow;
-
+  
   void OnBrowsePxi(wxCommandEvent &);
   void OnBrowseExp(wxCommandEvent &);
-
+  
   void Run(void);
 public:
   // Constructor
   dialogOverlayData(PxiChild *, PxiCanvas *);
   ~dialogOverlayData(void);
-
+  
   // Data access
   void	GetParams(ExpDataParams &P);
   void	LoadNow(void);
-
+  
   DECLARE_EVENT_TABLE()
 };
 
@@ -56,19 +56,22 @@ public:
 class dialogDrawSettings : public guiAutoDialog {
 private:
   PxiDrawSettings &draw_settings;       // draw settings, see above
-  wxListBox *m_infosetItem, *m_actionItem, *m_whichPlotItem, *m_whichIsetItem;
+  wxListBox *m_actionItem, *m_plotItem, *m_isetItem;
   wxNumberItem *m_minLam, *m_maxLam, *m_minY, *m_maxY;
-  wxButton *m_overlayButton, *m_fontButton, *m_plotButton;
+  wxButton *m_overlayButton, *m_plotButton;
   wxRadioBox *m_plotMode, *m_colorMode;
   wxCheckBox *m_twoPlots, *m_connectDots, *m_restartColors;
-
+  
+  int whichiset;
+  
   void OnWhichPlot(wxCommandEvent &);
   void OnWhichInfoset(wxCommandEvent &);
   void OnInfoset(wxCommandEvent &);
   void OnAction(wxCommandEvent &);
   void OnOverlay(wxCommandEvent &);
-  void OnFont(wxCommandEvent &);
   void OnPlot(wxCommandEvent &);
+  void OnPlotMode(wxCommandEvent &);
+  PlotInfo & ThisPlot(void);
 
   void Run(void);
 public:
@@ -86,14 +89,14 @@ public:
 
 class dialogPlotOptions : public guiAutoDialog {
 private:
-  PxiDrawSettings &draw_settings;       // draw settings, see above
+  PlotInfo &thisplot;       // information about plot
   wxCheckBox m_axis, m_labels, m_ticks, m_nums, m_square;
-	
-  const char *HelpString(void) const { return "Plot Options"; }
 
+  const char *HelpString(void) const { return "Plot Options"; }
+  
   void Run(void);
 public:
-  dialogPlotOptions(wxWindow *, PxiDrawSettings &);
+  dialogPlotOptions(wxWindow *, PlotInfo &);
   virtual ~dialogPlotOptions();
 };
 
@@ -125,7 +128,7 @@ const int idSETTINGS_WHICH_INFOSET_LISTBOX = 2019;
 const int idSETTINGS_INFOSET_LISTBOX = 2020;
 const int idSETTINGS_ACTION_LISTBOX = 2021;
 const int idSETTINGS_OVERLAY_BUTTON = 2022;
-const int idSETTINGS_FONT_BUTTON = 2023;
+const int idSETTINGS_PLOT_MODE = 2023;
 const int idSETTINGS_PLOT_BUTTON = 2024;
 
 #endif EXPDPRM_H

@@ -25,6 +25,7 @@
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
 #include "expdata.h"
+#include "wxmisc.h"
 
 #define PXI_QUIT              100
 #define PXI_OUTPUT            101
@@ -49,9 +50,6 @@
 #define	PXI_PAGE_NEXT           135
 #define	PXI_PAGE_PREV           136
 
-#define	PXI_PLOT_X              0
-#define	PXI_PLOT_3              1
-#define PXI_PLOT_2              2
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
 #define	PXI_KEY_STOP          WXK_SPACE
@@ -91,7 +89,7 @@ class PxiApp: public wxApp
 {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
-
+  
   bool  OnInit(void);
 public:
   virtual ~PxiApp() { }
@@ -102,85 +100,159 @@ public:
 
 DECLARE_APP(PxiApp)
 
+typedef enum {
+   PXI_PLOT_X = 0, PXI_PLOT_2 = 1 , PXI_PLOT_3 = 2
+} PxiPlotMode;
+
+/*
+typedef enum {
+   COLOR_EQU = 0, COLOR_PROB = 1 , COLOR_NONE = 2
+} PxiColorMode;
+*/
+
+class PxiCanvas;
+
+class PxiPrintout: public wxPrintout
+{
+private:
+  PxiCanvas &canvas;
+  
+public:
+  PxiPrintout(PxiCanvas &canvas, char *title = "PXI printout");
+  ~PxiPrintout();
+  bool OnPrintPage(int page);
+  bool HasPage(int page);
+  bool OnBeginDocument(int startPage, int endPage);
+  void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
+};
+
+class PlotInfo
+{
+private:
+  PxiPlotMode plotMode;
+  bool showAxis, showTicks, showNums, showLabels, showSquare;
+  double x_min,x_max;                  // plot limits on X (lambda) variable
+  double y_min,y_max;                  // plot limits on Y variable
+  int number;                         // plot number
+
+  gBlock<int> isets;                  // infosets to plot for each plot
+
+  // Bool instead of bool needeed here for template ambiguity in gBlock for BC
+  typedef gBlock<Bool> show_actions;
+  friend gOutput &operator<<(gOutput &op,const show_actions &p);
+  friend gOutput &operator<<(gOutput &op,const PlotInfo &p);
+  gBlock< show_actions > strategies;  // strategies to plot for each infoset
+
+public:
+  PlotInfo(void);
+  ~PlotInfo(void);
+  PlotInfo &operator=(const PlotInfo &p);       
+  bool operator==(const PlotInfo &p);       
+  bool operator!=(const PlotInfo &p) {return !(*this == p);}  
+
+  void Init(const FileHeader &, int num);
+
+  const gBlock<int> &GetIsets(void) const {return isets;}
+  bool Contains(int iset) const {return isets.Contains(iset);}
+  void AddInfoset(int iset) {if(iset>=1 && iset <=GetNumIsets()) isets.Append(iset);}
+  void RemoveInfoset(int iset) {isets.Remove(isets.Find(iset));}
+
+  bool GetStrategyShow(int j, int k) const {return strategies[j][k];}
+  int GetNumStrats(int j) const {return strategies[j].Length();}
+  int GetNumIsets(void) const {return strategies.Length();}
+  int GetPlotNumber(void) const {return number;}
+  void SetPlotNumber(int i) {number=i;}
+
+  bool ShowAxis(void) const {return showAxis;}
+  bool ShowTicks(void) const {return showTicks;}
+  bool ShowNums(void) const {return showNums;}
+  bool ShowLabels(void) const {return showLabels;}
+  bool ShowSquare(void) const {return showSquare;}
+
+  double GetMinX(void) const {return x_min;}
+  double GetMaxX(void) const {return x_max;}
+  double GetMinY(void) const {return y_min;}
+  double GetMaxY(void) const {return y_max;}
+  PxiPlotMode GetPlotMode(void) const {return plotMode;}
+
+  void SetStrategyShow(int j, int k, bool flag) {strategies[j][k]=flag;}
+  void SetShowAxis(bool flag) {showAxis = flag;}
+  void SetShowTicks(bool flag) {showTicks = flag;}
+  void SetShowNums(bool flag) {showNums = flag;}
+  void SetShowLabels(bool flag) {showLabels = flag;}
+  void SetShowSquare(bool flag) {showSquare = flag;}
+  void SetMinX(double x) {x_min = x;}
+  void SetMaxX(double x) {x_max = x;}
+  void SetMinY(double x) {y_min = x;}
+  void SetMaxY(double x) {y_max = x;}
+  void SetPlotMode(PxiPlotMode m) {plotMode = m;}
+
+  // RangeX, determines if x falls in the drawable range
+  bool RangeX(double x) const {return (x>x_min && x<x_max);}
+  // RangeY, determines if y falls in the drawable range
+  bool RangeY(double y) const {return (y>y_min && y<y_max);}
+};
+
 class PxiDrawSettings
 {
-friend class dialogDrawSettings;
 private:
-  int 		plot_mode;    // PXI_PLOT_X, PXI_PLOT_2, or PXI_PLOT_3
-  int           data_mode;    // Can be either 1-Log or 0-Linear
-  int           one_or_two;   // Plots per page
-  int           whichpage;    // current page number
-  int           maxpage;       // maximum page number
-  int           plots_per_page; // Plots per page
-  int		color_mode;   // COLOR_EQU, COLOR_PROB, or COLOR_NONE
-  int           num_infosets; // total number of infosets
-  Bool		connect_dots;   // connect dots on plot.  
-  Bool          restart_overlay_colors; // new set of colors for each overlay 
-
-  typedef	gBlock<Bool> show_player_strategies; 
-  friend	gOutput &operator<<(gOutput &op,const show_player_strategies &p);
-
-  gBlock<show_player_strategies> strategy_show;  // strategies to plot for each infoset
-  gBlock< gBlock<int> >	         myplot;         // infosets to plot for each plot
-
-  double	stop_min,stop_max;               // plot limits on X (lambda) variable
-  double        data_min,data_max;               // plot limits on Y variable
-  double	l_start,l_stop,l_step;           // data limits on X (lambda)
   wxFont	overlay_font, label_font, axis_font; 
   wxBrush       clear_brush, exp_data_brush;
   wxColour      axis_text_color;
+  
+  int           plots_per_page; // Plots per page
+  int           maxpage;       // maximum page number
+  int           whichpage;    // current page number
+  int           whichplot;    // current plot
+  
   int		overlay_symbol;      // one of : OVERLAY_TOKEN | OVERLAY_NUMBER
   Bool		overlay_lines;       // connect overlay points?
   int		overlay_token_size;  
-  unsigned int  plotx_features;  // Plot features, using bit arithmetic -- one of 
-  unsigned int  plot2_features;  // DRAW_AXIS|DRAW_TICKS|DRAW_NUMS|DRAW_LABELS|DRAW_SQUARE
-  unsigned int  plot3_features;
+  
+  int           data_mode;    // Can be either 1-Log or 0-Linear
+  int		color_mode;   // COLOR_EQU, COLOR_PROB, or COLOR_NONE
+  Bool		connect_dots;   // connect dots on plot.  
+  Bool          restart_overlay_colors; // new set of colors for each overlay 
+  
+  int           num_infosets; // total number of infosets
+  double	l_start,l_stop,l_step;           // data limits on X (lambda)
+  
+  gBlock< PlotInfo> thisplot;
+  
   Bool CheckPlot3Mode(void);
   Bool CheckPlot2Mode(void);
 public:
   PxiDrawSettings(FileHeader &header);
-
+  
   // Get* functions
-
-  // PlotMode, returns the type of plot currently selected:
-  //   one of PLOT_X | PLOT_3 | PLOT_2
-  int 	GetPlotMode(void) {return plot_mode;}
-  // NumPlots, returns either 1 or 2, corresponding to # of grids/plots per page
-  //   currently only works for PlotX
-  int	GetPlotsPerPage(void) {return one_or_two;}
+  
+  int GetPlotsPerPage(void) const {return plots_per_page;}
   // NumInfosets returns total number of infosets
-  int	GetNumInfosets(void) {return num_infosets;}
+  int GetNumInfosets(void) const {return num_infosets;}
   // DataMode, returns one of DATA_TYPE_ARITH | DATA_TYPE_LOG indicating data type
-  int	GetDataMode(void) {return data_mode;}
+  int GetDataMode(void) const {return data_mode;}
   // ColorMode, how to color the data: by equilibrium #, prob #, or just a constant
-  int	GetColorMode(void) {return color_mode;}
-  // StrategyShow, tells whether player p's strategy #s is to be plotted
-  Bool	GetStrategyShow(int p,int s) {return strategy_show[p][s];}
-  // StopMin, returns the value to start plotting at
-  double GetStopMin(void) {return stop_min;}
-  // StopMax, returns the value to stop plotting at
-  double GetStopMax(void) {return stop_max;}
-  // MaxL, returns the maximum labmda value in the data file
-  double GetMaxL(void) {return l_stop;}
+  int GetColorMode(void) const {return color_mode;}
+  void SetColorMode(int mode ) {color_mode=mode;}
+
+  // number of strats in infoset j
+  //  int GetNumStrats(int j) {return thisplot[1].GetNumStrats(j);}
+
+  double GetMaxL(void) const {return l_stop;}
   // MinL, returns the minimum labmda value in the data file
-  double GetMinL(void) {return l_start;}
+  double GetMinL(void) const {return l_start;}
   // DelL, return the lambda step
-  double GetDelL(void) {return l_step;}
-  // DataMin, returns the smallest value of y to plot
-  double GetDataMin(void) {return data_min;}
-  // DataMax, returns the largest value of y to plot
-  double GetDataMax(void) {return data_max;}
+  double GetDelL(void) const {return l_step;}
 
-  //  Gets the list of infosets for plot i
-  gBlock<int> &GetMyPlot(int i=1) // UNSAFE -- allow calling code to change elements of myplot!!
-    {if(i>=1 &&i<=myplot.Length()) return myplot[i];}
-  int GetNumPlots(void) {return myplot.Length();}
-
+  PlotInfo &GetPlotInfo(int i=1) {return thisplot[i];}
+  int GetNumPlots(void) const {return thisplot.Length();}
+  
   // OverlayFont, if the experimental data overlay is done using the number
   //   of the point in the file, this font is used to display that number
   const wxFont &GetOverlayFont(void) const {return overlay_font;}
   // LabelFont, returns the font to be used for labels [created w/ Shift-Click]
   const wxFont &GetLabelFont(void) const {return label_font;}
+
   // OverlaySym, returns one of : OVERLAY_CIRCLE | OVERLAY_NUMBER, indicating
   //   if the experimental data overlay points will be plotted using little circles
   //   or their number in the data file
@@ -188,20 +260,16 @@ public:
   // OverlaySize, determines the size of the tokens use for overlay
   const int GetTokenSize(void) const {return overlay_token_size;}
   // OverlayLines, determines if the experimental data overlay dots will be connected
-  const Bool GetOverlayLines(void) const {return overlay_lines;}
+  const bool GetOverlayLines(void) const {return overlay_lines;}
 
   // ConnectDots, determines if the regular data file dots will be connected
-  Bool ConnectDots(void) {return connect_dots;}
+  bool ConnectDots(void) const {return connect_dots;}
+  void SetConnectDots(bool flag) {connect_dots = flag;}
   // RestartOverlayColors, determines if the colors used for the equilibria
   // lines will restart at 0 for each of the file overlays or will increment
   // from the previous file
-  Bool RestartOverlayColors(void) {return restart_overlay_colors;}
-  // RangeX, determines if x falls in the drawable range
-  Bool RangeX(double x) {return (x>stop_min && x<stop_max);}
-  // RangeY, determines if y falls in the drawable range
-  Bool RangeY(double y) {return (y>data_min && y<data_max);}
-  // PlotFeatures determines if axis and labels,etc. are to be drawn
-  unsigned int PlotFeatures(void);
+  bool RestartOverlayColors(void) const {return restart_overlay_colors;}
+  void SetRestartOverlayColors(bool flag) {restart_overlay_colors = flag;}
 
   // Set* functions
 
@@ -210,32 +278,37 @@ public:
   void SetPlotsPerPage(int n) 
     {
       if(n>=1 || n<=2) 
-	one_or_two=n; 
+	plots_per_page = n; 
       int npl=GetNumPlots(); 
       SetMaxPages(npl-((n*npl-npl)/n));  // to get the least integer greater than npl/n
     }
   void SetNextPage(void) {SetPage(whichpage+1);}
   void SetPreviousPage(void) {SetPage(whichpage-1);}
-  int GetPage(void) {return whichpage;}
+  int GetPage(void) const {return whichpage;}
+  int GetMaxPage(void) const {return maxpage;}
 
-  void SetPlotFeatures(unsigned int feat);
+  void SetWhichPlot(int i) {if( i>=1 && i<=GetNumPlots()) whichplot=i;}
+  int GetWhichPlot(void) const {return whichplot;}
+
   void SetOptions(wxWindow *parent);
+
+  /*
   void SetStopMax(double sm) {stop_max=sm;}
   void SetStopMin(double sm) {stop_min=sm;}
+
   void ResetSetStop(void) {stop_min=l_start;stop_max=l_stop;}
-  
+  */  
+
   void SetOverlaySym(int s) {overlay_symbol=s;}
   void SetOverlayLines(Bool l)	{overlay_lines=l;}
   void SetTokenSize(int s) {overlay_token_size=s;}
   void SetAxisFont(const wxFont &f) {axis_font=f;}
   void SetLabelFont(const wxFont &f) {label_font=f;}
   void SetOverlayFont(const wxFont &f) {overlay_font=f;}
-  const wxFont &GetLabelFont(void) {return axis_font;}
-  const wxFont &GetAxisFont(void) {return axis_font;}
-  const wxFont &GetOverlayFont(void) {return axis_font;}
-  const wxBrush &GetDataBrush(void) {return exp_data_brush;}
-  const wxBrush &GetClearBrush(void) {return clear_brush;}
-  const wxColour &GetAxisTextColor(void) {return axis_text_color;}
+  const wxFont &GetAxisFont(void) const {return axis_font;}
+  const wxBrush &GetDataBrush(void) const {return exp_data_brush;}
+  const wxBrush &GetClearBrush(void) const {return clear_brush;}
+  const wxColour &GetAxisTextColor(void) const {return axis_text_color;}
 };
 
 // Define a new canvas
@@ -258,6 +331,7 @@ public:
   } label_struct;
 private:
   PxiDrawSettings *draw_settings;       // draw settings, see above
+
   ExpData *exp_data;                    // experimental data overlay
   gBlock<label_struct> labels;          // labels for generic text
   DataLine probs;                       // a line of data
@@ -266,31 +340,41 @@ private:
   double cur_e;
   bool painting;
 
-  void DoPlot_X(wxDC& dc,float minx, float maxx, float miny, float maxy, 
-		int x0, int y0, int cw,int ch, int whichplot, int level=1);
-  void DoPlot_2(wxDC& dc,float minx, float maxx, float miny, float maxy, 
-		int x0, int y0, int cw,int ch, int whichplot, int level=1);
-  void DoPlot_3(wxDC& dc,float minx, float maxx, float miny, float maxy, 
-		int x0, int y0, int cw,int ch, int whichplot, int level=1);
-  void PlotData_X(wxDC& dc,int x0, int y0, int cw,int ch,
-		  const FileHeader &f_header,int whichplot, int level);
-  void PlotData_3(wxDC& dc,int x0, int y0, int cw,int ch,
-		    const FileHeader &f_header,int whichplot, int level);
-  void PlotData_2(wxDC& dc,int x0, int y0, int cw,int ch,
-		    const FileHeader &f_header, int whichplot, int level=1);
-  void PlotLabels(wxDC &dc,int ch,int cw);
-  void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int x0, int y0, int ch,int cw);
+  void DoPlot_X(wxDC& dc,const PlotInfo &thisplot,
+		int x0, int y0, int cw,int ch, int level=1);
+  void DoPlot_2(wxDC& dc,const PlotInfo &thisplot,
+		int x0, int y0, int cw,int ch, int level=1);
+  void DoPlot_3(wxDC& dc,const PlotInfo &thisplot,
+		int x0, int y0, int cw,int ch, int level=1);
 
-  double CalcY_X(double y,int x0, int ch);
-  double CalcX_X(double x,int y0, int cw);
-  
-  void DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,
-			int x0, int y0, int cw,int ch);
-  double CalcY_3(double p1,int x0, int y0, int ch,int cw);
-  double CalcX_3(double p1,double p2,int x0, int y0, int ch,int cw);
-  
-  void DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,
+  void PlotData_X(wxDC& dc, const PlotInfo &thisplot, 
+		  int x0, int y0, int cw,int ch,
+		  const FileHeader &f_header, int level);
+  void PlotData_2(wxDC& dc, const PlotInfo &thisplot, 
+		  int x0, int y0, int cw,int ch,
+		  const FileHeader &f_header, int level=1);
+  void PlotData_3(wxDC& dc, const PlotInfo &thisplot, 
+		  int x0, int y0, int cw,int ch,
+		  const FileHeader &f_header, int level=1);
+
+  void DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot, 
+		      double cur_e,int iset,int st,
+		      int x0, int y0, int ch,int cw);
+  void DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, 
+		      double cur_e,int pl1,int st1,
 		      int pl2,int st2,int x0, int y0, int cw, int ch);
+  
+  void DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot, 
+		      double cur_e,int iset,int st1,int st2,
+		      int x0, int y0, int cw,int ch);
+
+  void PlotLabels(wxDC &dc,int ch,int cw);
+
+
+  double CalcY_X(double y,int x0, int ch, const PlotInfo &thisplot);
+  double CalcX_X(double x,int y0, int cw, const PlotInfo &thisplot);
+  double CalcY_3(double p1,int x0, int y0, int ch,int cw);
+  double CalcX_3(double p1,double p2,int x0, int y0, int ch,int cw, const PlotInfo &thisplo);
   
   void DrawToken(wxDC &dc,double x,double y,int st);
 public:
@@ -304,6 +388,7 @@ public:
   void StopIt(void);
   void Render(void) {wxClientDC dc(this); dc.BeginDrawing();Render(dc);dc.EndDrawing();}
   void Render(wxDC &dc) {Update(dc,PXI_UPDATE_SCREEN);}
+  void SetPage(int page) {draw_settings->SetPage(page);}
   void SetNextPage(void) {draw_settings->SetNextPage();}
   void SetPreviousPage(void) {draw_settings->SetPreviousPage();}
 
@@ -350,6 +435,14 @@ private:
   PxiFrame *parent;
   PxiCanvas *canvas;
 
+  wxPrintData  *m_printData;
+  wxPageSetupData* m_pageSetupData;
+
+
+  //  void MyPrint(wxCommandEvent &);  // output to printer
+  void OnPrint(wxCommandEvent &);  // output to printer
+  void OnPrintPreview(wxCommandEvent &);  // output to printer
+
   void OnQuit(wxCommandEvent &);
   void OnOverlayData(wxCommandEvent &);
   void OnOverlayFile(wxCommandEvent &);
@@ -380,5 +473,7 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
+
+
 
 #endif // PXI_H

@@ -146,29 +146,29 @@ void dialogOverlayData::Run(void)
 BEGIN_EVENT_TABLE(dialogDrawSettings, guiAutoDialog)
   EVT_LISTBOX(idSETTINGS_WHICH_PLOT_LISTBOX, dialogDrawSettings::OnWhichPlot)
   EVT_LISTBOX(idSETTINGS_WHICH_INFOSET_LISTBOX, dialogDrawSettings::OnWhichInfoset)
-  EVT_LISTBOX(idSETTINGS_INFOSET_LISTBOX, dialogDrawSettings::OnInfoset)
   EVT_LISTBOX(idSETTINGS_ACTION_LISTBOX, dialogDrawSettings::OnAction)
   EVT_BUTTON(idSETTINGS_OVERLAY_BUTTON, dialogDrawSettings::OnOverlay)
-  EVT_BUTTON(idSETTINGS_FONT_BUTTON, dialogDrawSettings::OnFont)
   EVT_BUTTON(idSETTINGS_PLOT_BUTTON, dialogDrawSettings::OnPlot)
+  EVT_RADIOBOX(idSETTINGS_PLOT_MODE, dialogDrawSettings::OnPlotMode)
 END_EVENT_TABLE()
 
 dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   : guiAutoDialog(p_parent, "Draw Settings"), 
-    draw_settings(s)
+    draw_settings(s), whichiset(1)
 {
+  wxString tmp;
   int num_plots = 1;
-  if(draw_settings.one_or_two==2) num_plots = 2;
+  if(draw_settings.GetPlotsPerPage()==2) num_plots = 2;
   
-  m_whichPlotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
+  m_plotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
   for (int i = 1; i <= draw_settings.GetNumPlots(); i++) {
-    char tmp[80];
-    sprintf(tmp, "Plot %d", i);
-    m_whichPlotItem->Append(tmp);
+    tmp.Printf("Plot %d", i);
+    m_plotItem->Append(tmp);
   }
-  m_whichPlotItem->SetSelection(0);
+  m_plotItem->SetSelection(0);
+  const PlotInfo &thisplot(draw_settings.GetPlotInfo(1));
   
-  m_whichIsetItem = new wxListBox(this, idSETTINGS_WHICH_INFOSET_LISTBOX, 
+  m_isetItem = new wxListBox(this, idSETTINGS_WHICH_INFOSET_LISTBOX, 
 				  wxDefaultPosition, wxDefaultSize,0,0,
 #ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
 				  wxLB_EXTENDED
@@ -176,17 +176,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 				  wxLB_MULTIPLE
 #endif // __WXGTK__
 				  );
-  wxCommandEvent event;
-  OnWhichPlot(event);
-  wxString tmp;
-
-  m_infosetItem = new wxListBox(this, idSETTINGS_INFOSET_LISTBOX);
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    tmp.Printf("Infoset %d", iset);
-    m_infosetItem->Append(tmp);
-  }
-  m_infosetItem->SetSelection(0);
-  
   m_actionItem = new wxListBox(this, idSETTINGS_ACTION_LISTBOX, 
 			       wxDefaultPosition, wxDefaultSize,0,0,
 #ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
@@ -195,16 +184,14 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
                                wxLB_MULTIPLE
 #endif // __WXGTK__
 			       );
-  OnInfoset(event);
-  
-  tmp.Printf( "%f", draw_settings.stop_min);
+  tmp.Printf( "%f", thisplot.GetMinX());
   m_minLam = new wxNumberItem(this, "minLam", tmp);
-  tmp.Printf( "%f", draw_settings.stop_max);
+  tmp.Printf( "%f", thisplot.GetMaxX());
   m_maxLam = new wxNumberItem(this, "maxLam", tmp);
-  tmp.Printf( "%f", draw_settings.data_min);
-  m_minY = new wxNumberItem(this, "minLam", tmp);
-  tmp.Printf( "%f", draw_settings.data_max);
-  m_maxY = new wxNumberItem(this, "maxLam", tmp);
+  tmp.Printf( "%f", thisplot.GetMinY());
+  m_minY = new wxNumberItem(this, "minY", tmp);
+  tmp.Printf( "%f", thisplot.GetMaxY());
+  m_maxY = new wxNumberItem(this, "maxY", tmp);
   
   wxBoxSizer *lambdaSizer = new wxBoxSizer(wxHORIZONTAL);
   lambdaSizer->Add(new wxStaticText(this, -1, "X Min"),
@@ -223,55 +210,52 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   dataSizer->Add(m_maxY, 0, wxALL, 5);
   
   wxBoxSizer *plotSizer = new wxBoxSizer(wxHORIZONTAL);
-  plotSizer->Add(m_whichPlotItem, 0, wxCENTRE | wxALL, 5);
-  plotSizer->Add(m_whichIsetItem, 0, wxCENTRE | wxALL, 5);
-  
-  wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
-  selectSizer->Add(m_infosetItem, 0, wxCENTRE | wxALL, 5);
-  selectSizer->Add(m_actionItem, 0, wxCENTRE | wxALL, 5);
+  plotSizer->Add(m_plotItem, 0, wxCENTRE | wxALL, 5);
+  plotSizer->Add(m_isetItem, 0, wxCENTRE | wxALL, 5);
+  plotSizer->Add(m_actionItem, 0, wxCENTRE | wxALL, 5);
   
   wxString plotModeChoices[] = { "Plot X", "Plot 2", "Plot 3" };
-  m_plotMode = new wxRadioBox(this, -1, "Plot Mode",
+  m_plotMode = new wxRadioBox(this, idSETTINGS_PLOT_MODE,"Plot Mode",
 			      wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			      wxSize(250,25),3, plotModeChoices, 0, wxRA_SPECIFY_COLS
+			      wxSize(250,25),3, plotModeChoices, 1, wxRA_SPECIFY_ROWS
 #else
-			      wxDefaultSize,3, plotModeChoices, 0, wxRA_SPECIFY_ROWS
+			      wxDefaultSize,3, plotModeChoices, 1, wxRA_SPECIFY_ROWS
 #endif
 			      );
-  if (draw_settings.plot_mode == PXI_PLOT_X) 
-    m_plotMode->SetSelection(0);
-  else if (draw_settings.plot_mode == PXI_PLOT_2) 
-    m_plotMode->SetSelection(1);
-  else if (draw_settings.plot_mode == PXI_PLOT_3) 
-    m_plotMode->SetSelection(2);
+
+  m_plotMode->SetSelection(thisplot.GetPlotMode());
   
   wxString colorModeChoices[] = { "Equ", "Prob", "None" };
   m_colorMode = new wxRadioBox(this, -1, "Color Mode",
 			       wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
-			       wxSize(250,25),3, colorModeChoices, 0, wxRA_SPECIFY_COLS
+			       wxSize(250,25),3, colorModeChoices, 1, wxRA_SPECIFY_ROWS
 #else
-			       wxDefaultSize,3, colorModeChoices, 0, wxRA_SPECIFY_ROWS
+			       wxDefaultSize,3, colorModeChoices, 1, wxRA_SPECIFY_ROWS
 #endif
 			       );  
-  if (draw_settings.color_mode == COLOR_EQU) 
+  switch(draw_settings.GetColorMode()) {
+  case COLOR_EQU: 
     m_colorMode->SetSelection(0);
-  else if (draw_settings.color_mode == COLOR_PROB) 
+    break;
+  case COLOR_PROB:
     m_colorMode->SetSelection(1);
-  else if (draw_settings.color_mode == COLOR_NONE) 
+    break;
+  case COLOR_NONE: 
     m_colorMode->SetSelection(2);
-  
+    break;
+  }
+
   wxBoxSizer *modeSizer = new wxBoxSizer(wxHORIZONTAL);
   modeSizer->Add(m_plotMode, 0, wxALL, 5);
   modeSizer->Add(m_colorMode, 0, wxALL, 5);
   
   m_overlayButton = new wxButton(this, idSETTINGS_OVERLAY_BUTTON, "Overlay");
-  m_fontButton = new wxButton(this, idSETTINGS_FONT_BUTTON, "Font");
   m_plotButton = new wxButton(this, idSETTINGS_PLOT_BUTTON, "Plot");
   
   m_twoPlots = new wxCheckBox(this, -1, "Two Plots");
-  if(draw_settings.one_or_two==2)
+  if(draw_settings.GetPlotsPerPage()==2)
     m_twoPlots->SetValue(true);
   else
     m_twoPlots->SetValue(false);
@@ -280,7 +264,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   m_connectDots->SetValue(draw_settings.ConnectDots());
 
   m_restartColors = new wxCheckBox(this, -1, "Restart Colors");
-  m_restartColors->SetValue(draw_settings.restart_overlay_colors);
+  m_restartColors->SetValue(draw_settings.RestartOverlayColors());
 
   wxBoxSizer *miscSizer = new wxBoxSizer(wxHORIZONTAL);
   miscSizer->Add(m_twoPlots, 0, wxALL, 5);
@@ -289,7 +273,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 
   wxBoxSizer *botSizer = new wxBoxSizer(wxHORIZONTAL);
   botSizer->Add(m_overlayButton, 0, wxALL, 5);
-  botSizer->Add(m_fontButton, 0, wxALL, 5);
   botSizer->Add(m_plotButton, 0, wxALL, 5);
 
   wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
@@ -297,7 +280,6 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   allSizer->Add(lambdaSizer, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(dataSizer, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(plotSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(selectSizer, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(modeSizer, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(miscSizer, 0, wxCENTRE | wxALL, 5);
   allSizer->Add(botSizer, 0, wxCENTRE | wxALL, 5);
@@ -314,69 +296,102 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 dialogDrawSettings::~dialogDrawSettings()
 { }
 
-void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
+PlotInfo & dialogDrawSettings::ThisPlot(void)
 {
-  int whichplot = m_whichPlotItem->GetSelection()+1; 
+  return draw_settings.GetPlotInfo(m_plotItem->GetSelection()+1);
+}
 
-  m_whichIsetItem->Clear();
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    char tmp[80];
-    sprintf(tmp, "Infoset %d", iset);
-    m_whichIsetItem->Append(tmp);
+void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
+{
+  wxString tmp;
+  const PlotInfo &thisplot(ThisPlot());
+
+  m_isetItem->Clear();
+  for (int iset = 1; iset <= thisplot.GetNumIsets(); iset++) {
+    tmp.Printf("Infoset %d", iset);
+    m_isetItem->Append(tmp);
   }
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    if (draw_settings.GetMyPlot(whichplot).Contains(iset)) 
-      m_whichIsetItem->SetSelection(iset-1, true);
+  bool mark = true;
+  whichiset = 0;
+  for (int iset = 1; iset <= thisplot.GetNumIsets(); iset++) {
+    if (thisplot.Contains(iset)) {
+      m_isetItem->SetSelection(iset-1, true);
+      if(mark) {whichiset = iset; mark = false;}
+    }
+  }
+
+  m_plotMode->SetSelection(thisplot.GetPlotMode());
+  m_plotMode->Show(true);
+
+  m_actionItem->Clear();
+  if(whichiset) {
+    for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) {
+      tmp.Printf("Action %d", act);
+      m_actionItem->Append(tmp);
+    }
+    
+    for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) 
+      if(thisplot.GetStrategyShow(whichiset, act))
+	m_actionItem->SetSelection(act - 1, true);
+  }
+}  
+
+void dialogDrawSettings::OnPlotMode(wxCommandEvent &)
+{
+  switch(m_plotMode->GetSelection()) {
+  case 0: 
+    ThisPlot().SetPlotMode(PXI_PLOT_X);
+    break;
+  case 1: 
+    ThisPlot().SetPlotMode(PXI_PLOT_2);
+    break;
+  case 2: 
+    ThisPlot().SetPlotMode(PXI_PLOT_3);
+    break;
   }
 }
 
 void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
 {
-  int whichplot = m_whichPlotItem->GetSelection()+1; 
-  int j = 0;
+  PlotInfo &thisplot(ThisPlot());
+  bool flag = false;
+  wxString tmp;
 
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    bool flag = m_whichIsetItem->Selected(iset-1);
-    bool member = draw_settings.GetMyPlot(whichplot).Contains(iset);
-    if (flag && !member) {
-      draw_settings.GetMyPlot(whichplot).Append(iset);
-      j = iset;
+  for (int iset = 1; iset <= thisplot.GetNumIsets(); iset++) {
+    bool selected = m_isetItem->Selected(iset-1);
+    bool member = thisplot.Contains(iset);
+    if (selected && !member) {
+      thisplot.AddInfoset(iset);
+      flag = true;
+      whichiset = iset;
     }
-    else if (!flag && member) 
-      draw_settings.GetMyPlot(whichplot).Remove(draw_settings.GetMyPlot(whichplot).Find(iset));
+    else if (!selected && member) {
+      thisplot.RemoveInfoset(iset);
+    } 
   }
+  
+  if(flag) {
+    m_actionItem->Clear();
+    for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) {
+      tmp.Printf("Action %d", act);
+      m_actionItem->Append(tmp);
+    }
+    
+    for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) 
+      if(thisplot.GetStrategyShow(whichiset, act))
+	m_actionItem->SetSelection(act - 1, true);
 
-  if(j) {
-    m_infosetItem->SetSelection(j-1);
     wxCommandEvent event;
-    OnInfoset(event);
+    OnAction(event);
   }
-}
-
-void dialogDrawSettings::OnInfoset(wxCommandEvent &)
-{
-  int iset = m_infosetItem->GetSelection()+1; 
-
-  m_actionItem->Clear();
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
-    char tmp[80];
-    sprintf(tmp, "Action %d", act);
-    m_actionItem->Append(tmp);
-  }
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
-    if(draw_settings.strategy_show[iset][act])
-      m_actionItem->SetSelection(act - 1, true);
-  }
-  m_actionItem->Enable(true);
 }
 
 void dialogDrawSettings::OnAction(wxCommandEvent &)
 { 
-  int iset = m_infosetItem->GetSelection()+1; 
+  PlotInfo &thisplot(ThisPlot());
 
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) 
-    draw_settings.strategy_show[iset][act] = m_actionItem->Selected(act-1);
-  
+  for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) 
+    thisplot.SetStrategyShow(whichiset, act, m_actionItem->Selected(act-1));
 }
 
 void dialogDrawSettings::OnOverlay(wxCommandEvent &)
@@ -384,37 +399,46 @@ void dialogDrawSettings::OnOverlay(wxCommandEvent &)
   dialogOverlayOptions dialog(this, draw_settings);
 }
 
+/*
 void dialogDrawSettings::OnFont(wxCommandEvent &)
 { 
   //  draw_settings.label_font_func();
 }
+*/
 
 void dialogDrawSettings::OnPlot(wxCommandEvent &)
 { 
-  dialogPlotOptions dialog(this, draw_settings);
+  dialogPlotOptions dialog(this, ThisPlot());
 }
 
 void dialogDrawSettings::Run()
 { 
+  wxCommandEvent event;
+  OnWhichPlot(event);
+
+  PlotInfo &thisplot(ThisPlot());
+
   if(ShowModal() == wxID_OK){ 
-    draw_settings.stop_min = m_minLam->GetNumber();
-    draw_settings.stop_max = m_maxLam->GetNumber();
-    draw_settings.data_min =  m_minY->GetNumber();
-    draw_settings.data_max = m_maxY->GetNumber();
+    thisplot.SetMinX(m_minLam->GetNumber());
+    thisplot.SetMaxX(m_maxLam->GetNumber());
+    thisplot.SetMinY(m_minY->GetNumber());
+    thisplot.SetMaxY(m_maxY->GetNumber());
 
+    /*
     int mode = m_plotMode->GetSelection();
-    if(mode==0)draw_settings.plot_mode=PXI_PLOT_X;
-    if(mode==1)draw_settings.plot_mode=PXI_PLOT_2;
-    if(mode==2)draw_settings.plot_mode=PXI_PLOT_3;
+    if(mode==0)thisplot.SetPlotMode(PXI_PLOT_X);
+    if(mode==1)thisplot.SetPlotMode(PXI_PLOT_2);
+    if(mode==2)thisplot.SetPlotMode(PXI_PLOT_3);
+    */
 
-    mode = m_colorMode->GetSelection();
-    if(mode==0)draw_settings.color_mode=COLOR_EQU;
-    if(mode==1)draw_settings.color_mode=COLOR_PROB;
-    if(mode==2)draw_settings.color_mode=COLOR_NONE;
+    int mode = m_colorMode->GetSelection();
+    if(mode==0)draw_settings.SetColorMode(COLOR_EQU);
+    if(mode==1)draw_settings.SetColorMode(COLOR_PROB);
+    if(mode==2)draw_settings.SetColorMode(COLOR_NONE);
 
     draw_settings.SetPlotsPerPage(m_twoPlots->GetValue()+1);
-    draw_settings.connect_dots = m_connectDots->GetValue();
-    draw_settings.restart_overlay_colors = m_restartColors->GetValue();
+    draw_settings.SetConnectDots(m_connectDots->GetValue());
+    draw_settings.SetRestartOverlayColors(m_restartColors->GetValue());
   };
 }
 
@@ -424,20 +448,19 @@ void dialogDrawSettings::Run()
 //
 // ----------------------------------------------------------------------
 
-dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PxiDrawSettings &s)
-  : guiAutoDialog(p_parent, "Plot Options"),  draw_settings(s),
+dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PlotInfo &plot)
+  : guiAutoDialog(p_parent, "Plot Options"),  thisplot(plot),
     m_axis(this, -1, "Draw Axis"), m_labels(this, -1, "Draw Labels"), 
     m_ticks(this, -1, "Draw Ticks"), m_nums(this, -1, "Draw Nums"), 
     m_square(this, -1, "Square Axis")
 {
-  unsigned int feat = draw_settings.PlotFeatures();
-  int type = draw_settings.GetPlotMode();
+  int type = thisplot.GetPlotMode();
 
-  m_axis.SetValue((feat&DRAW_AXIS) ? true : false);
-  m_labels.SetValue((feat&DRAW_LABELS) ? true : false);
-  m_ticks.SetValue((feat&DRAW_TICKS) ? true : false);
-  m_nums.SetValue((feat&DRAW_NUMS) ? true : false);
-  m_square.SetValue((feat&DRAW_SQUARE) ? true : false);
+  m_axis.SetValue(thisplot.ShowAxis());
+  m_labels.SetValue(thisplot.ShowLabels());
+  m_ticks.SetValue(thisplot.ShowTicks());
+  m_nums.SetValue(thisplot.ShowNums());
+  m_square.SetValue(thisplot.ShowSquare());
 
   switch (type) {
   case PXI_PLOT_3: 
@@ -448,6 +471,7 @@ dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PxiDrawSettings &s)
   case PXI_PLOT_X: 
     m_labels.Enable(false);
     m_square.Enable(false);
+    break;
   case PXI_PLOT_2: 
     m_labels.Enable(false);
     break;
@@ -475,30 +499,28 @@ dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PxiDrawSettings &s)
 dialogPlotOptions::~dialogPlotOptions()
 { }
 
+
 void dialogPlotOptions::Run()
 {
-  unsigned int feat=draw_settings.PlotFeatures();
-  
   if (ShowModal() == wxID_OK) {
-    feat=0;
-    switch (draw_settings.GetPlotMode()) {
+    
+    switch (thisplot.GetPlotMode()) {
     case PXI_PLOT_3: 
-      if (m_axis.GetValue()) feat|=DRAW_AXIS;
-      if (m_labels.GetValue()) feat|=DRAW_LABELS;
+      thisplot.SetShowAxis(m_axis.GetValue());
+      thisplot.SetShowLabels(m_labels.GetValue());
       break;
     case PXI_PLOT_X: 
-      if (m_axis.GetValue()) feat|=DRAW_AXIS;
-      if (m_ticks.GetValue()) feat|=DRAW_TICKS;
-      if (m_nums.GetValue()) feat|=DRAW_NUMS;
+      thisplot.SetShowAxis(m_axis.GetValue());
+      thisplot.SetShowTicks(m_ticks.GetValue());
+      thisplot.SetShowNums(m_nums.GetValue());
       break;
     case PXI_PLOT_2: 
-      if (m_axis.GetValue()) feat|=DRAW_AXIS;
-      if (m_ticks.GetValue()) feat|=DRAW_TICKS;
-      if (m_nums.GetValue()) feat|=DRAW_NUMS;
-      if (m_square.GetValue()) feat|=DRAW_SQUARE;
+      thisplot.SetShowAxis(m_axis.GetValue());
+      thisplot.SetShowTicks(m_ticks.GetValue());
+      thisplot.SetShowNums(m_nums.GetValue());
+      thisplot.SetShowSquare(m_square.GetValue());
       break;
     }
-    draw_settings.SetPlotFeatures(feat);
   }
 }
 
