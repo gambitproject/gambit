@@ -101,10 +101,12 @@ class gNullInput : public gInput  {
 
 class gOutput  {
   private:
+  
     gOutput(const gOutput &);
     gOutput &operator=(const gOutput &);
 
   public:
+    
     gOutput(void);
     virtual ~gOutput();
 
@@ -118,12 +120,22 @@ class gOutput  {
     virtual gOutput &operator<<(const void *x) = 0;
 
     virtual bool IsValid(void) const = 0;
+    
+    virtual int GetWidth(void)  = 0;
+    virtual int SetWidth(int w)  = 0;
+    virtual int GetPrec(void)  = 0;
+    virtual int SetPrec(int p)  = 0;
+    virtual int SetExpMode(void)  = 0;
+    virtual int SetFloatMode(void)  = 0;
+    virtual char GetRepMode(void) = 0;
 };
 
 class gFileOutput : public gOutput  {
   private:
     FILE *f;
     bool valid;
+    int Width,Prec;
+    char Represent;
 
     gFileOutput(const gFileOutput &);
     gFileOutput &operator=(const gFileOutput &);
@@ -133,6 +145,14 @@ class gFileOutput : public gOutput  {
     gFileOutput(const char *);
     gFileOutput(FILE *);
     virtual ~gFileOutput();
+
+    int GetWidth(void);
+    int SetWidth(int w);
+    int GetPrec(void);
+    int SetPrec(int p);
+    int SetExpMode(void);
+    int SetFloatMode(void);
+    char GetRepMode(void);
 
     gFileOutput &operator=(FILE *);
     gFileOutput &operator=(const char *);
@@ -147,6 +167,8 @@ class gFileOutput : public gOutput  {
     gOutput &operator<<(const void *x);
 
     bool IsValid(void) const;
+
+
 };
 
 //extern gFileOutput gout, gerr;
@@ -159,6 +181,14 @@ class gNullOutput : public gOutput  {
   public:
     gNullOutput(void);
     virtual ~gNullOutput();
+
+    int GetWidth(void);
+    int SetWidth(int w);
+    int GetPrec(void);
+    int SetPrec(int p);
+    int SetExpMode(void);
+    int SetFloatMode(void);
+    char GetRepMode(void);
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
@@ -177,3 +207,5 @@ extern gInput &gin, &gzero;
 extern gOutput &gout, &gerr, &gnull;
 
 #endif   // GAMBITIO_H
+
+

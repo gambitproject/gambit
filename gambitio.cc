@@ -206,7 +206,6 @@ gOutput::gOutput(void)   { }
 
 gOutput::~gOutput()   { }
 
-
 //--------------------------------------------------------------------------
 //                         gFileOutput member functions
 //--------------------------------------------------------------------------
@@ -214,22 +213,73 @@ gOutput::~gOutput()   { }
 
 gFileOutput::gFileOutput(void)
 {
-  f = 0;valid=0;
+  f = 0;
+  valid=0;
+  Width=8;
+  Prec=2;
+  Represent='f';
 }
 
 gFileOutput::gFileOutput(const char *out)
 {
-  f = fopen(out, "w");valid=(f==NULL) ? 0 : 1;
+  f = fopen(out, "w");
+  valid=(f==NULL) ? 0 : 1;
+  Width=8;
+  Prec=2;
+  Represent='f';
 }
 
 gFileOutput::gFileOutput(FILE *out)
 {
-  f = out;valid=(f==NULL) ? 0 : 1;
+  f = out;
+  valid=(f==NULL) ? 0 : 1;
+  Width=8;
+  Prec=2;
+  Represent='f';
 }
 
 gFileOutput::~gFileOutput()
 {
   if (f)   fclose(f);valid=0;
+}
+
+int gFileOutput::GetWidth(void) 
+{
+  return Width;
+}
+
+int gFileOutput::SetWidth(int w) 
+{
+  Width = w;
+  return (w == Width);
+}
+
+int gFileOutput::GetPrec(void) 
+{
+  return Prec;
+}
+
+int gFileOutput::SetPrec(int p) 
+{
+  Prec = p;
+  return (p == Prec);
+}
+
+int gFileOutput::SetExpMode(void) 
+{
+  Represent = 'e';
+  return (Represent == 'e');
+}
+
+int gFileOutput::SetFloatMode(void) 
+{
+  Represent = 'f';
+  return (Represent == 'f');
+}
+
+char gFileOutput::GetRepMode(void)
+{
+  return Represent;
 }
 
 gFileOutput &gFileOutput::operator=(FILE *out)
@@ -249,21 +299,21 @@ gFileOutput &gFileOutput::operator=(const char *out)
 gOutput &gFileOutput::operator<<(int x)
 {
   assert(f);
-  int c=fprintf(f, "%d", x);  valid = (c == 1) ? 1 : 0;
+  int c=fprintf(f, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
   assert(f);
-  int c=fprintf(f, "%d", x);valid=(c==1) ? 1 : 0;
+  int c=fprintf(f, "%*d", Width,  x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
   assert(f);
-  int c=fprintf(f, "%ld", x);valid=(c==1) ? 1 : 0;
+  int c=fprintf(f, "%*ld", Width, x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
@@ -276,15 +326,34 @@ gOutput &gFileOutput::operator<<(char x)
 
 gOutput &gFileOutput::operator<<(double x)
 {
+  int c;
+
   assert(f);
-  int c=fprintf(f, "%lf", x);valid=(c==1) ? 1 : 0;
+  switch (Represent) { 
+    case 'f':
+      c=fprintf(f, "%*.*lf", Width, Prec, x);
+      break;
+    case 'e':
+      c=fprintf(f, "%*.*le", Width, Prec, x);
+    }
+  valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(float x)
 {
+  int c;
+
   assert(f);
-  int c=fprintf(f, "%f", x);valid=(c==1) ? 1 : 0;
+  switch (Represent) {
+    case 'f':
+      c=fprintf(f, "%*.*f", Width, Prec, x);
+      break;
+    case 'e':
+      c=fprintf(f, "%*.*e", Width, Prec, x);
+      break;
+    }
+  valid=(c==1) ? 1 : 0;
   return *this;
 }
 
@@ -315,6 +384,20 @@ bool gFileOutput::IsValid(void) const
 gNullOutput::gNullOutput(void)   { }
 
 gNullOutput::~gNullOutput()   { }
+
+int gNullOutput::GetWidth(void) { return true; }
+
+int gNullOutput::SetWidth(int w) { return true; }
+
+int gNullOutput::GetPrec(void) { return true; }
+
+int gNullOutput::SetPrec(int p) { return true; }
+
+int gNullOutput::SetExpMode(void) { return true; }
+
+int gNullOutput::SetFloatMode(void) { return true; }
+
+char gNullOutput::GetRepMode(void) { return true; }
 
 gOutput &gNullOutput::operator<<(int)    { return *this; }
 
