@@ -23,6 +23,8 @@ gambit_SOURCES = \
 	"gambit.cc" \
 	"game-document.cc" \
 	"game-frame.cc" \
+	"panel-mixed-detail.cc" \
+	"panel-mixed-list.cc" \
 	"panel-nash.cc" \
 	"panel-qre.cc" \
 	"sheet.cc" \
@@ -31,6 +33,8 @@ gambit_SOURCES = \
 	"sheetspt.cc" \
 	"table-matrix.cc" \
 	"table-schelling.cc" \
+	"text-window.cc" \
+	"thread-nash-mixed.cc" \
 	"tree-display.cc" \
 	"tree-print.cc"
 

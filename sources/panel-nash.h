@@ -33,10 +33,12 @@ class gbtTextWindow;
 class gbtMixedProfileCtrl;
 class gbtMixedProfileDetail;
 
+const int GBT_THREAD_DONE = 999;
+
 class gbtNashPanel : public wxPanel, public gbtGameView {
 private:
-  gbtTextWindow *m_count;
-  int m_countValue;
+  gbtTextWindow *m_count, *m_method;
+  int m_countValue, m_methodValue;
   wxButton *m_startButton, *m_cancelButton;
   gbtMixedProfileCtrl *m_profileCtrl;
   gbtMixedProfileDetail *m_profileDetail;
@@ -51,6 +53,7 @@ private:
   void OnProfileSelected(wxCommandEvent &);
   
   void OnCountButton(wxCommandEvent &);
+  void OnMethodButton(wxCommandEvent &);
   void OnMenu(wxCommandEvent &);
   
 public:

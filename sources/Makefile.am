@@ -16,6 +16,10 @@ gambit_SOURCES = \
 	game-frame.cc \
 	game-frame.h \
 	pairarr.h \
+	panel-mixed-detail.cc \
+	panel-mixed-detail.h \
+	panel-mixed-list.cc \
+	panel-mixed-list.h \
 	panel-nash.cc \
 	panel-nash.h \
 	panel-qre.cc \
@@ -32,6 +36,10 @@ gambit_SOURCES = \
 	table-matrix.h \
 	table-schelling.cc \
 	table-schelling.h \
+	text-window.cc \
+	text-window.h \
+	thread-nash-mixed.cc \
+	thread-nash-mixed.h \
 	tree-display.cc \
 	tree-display.h \
 	tree-print.cc \
