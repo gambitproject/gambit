@@ -4,3 +4,4 @@
 #define	DEF_ESTEP			1.01
 #define	DEF_ESTART		0.01
 #define	DEF_ESTOP			30
+#define	DEF_DATATYPE	DATA_TYPE_LOG
