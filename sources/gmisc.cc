@@ -7,6 +7,7 @@
 #include "gmisc.h"
 #include "rational.h"
 #include "gnumber.h"
+#include "double.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -51,11 +52,13 @@ template int gmin(const int &a, const int &b);
 template float gmin(const float &a, const float &b);
 template double gmin(const double &a, const double &b);
 template gRational gmin(const gRational &a, const gRational &b);
+template gDouble gmin(const gDouble &a, const gDouble &b);
 
 template int gmax(const int &a, const int &b);
 template float gmax(const float &a, const float &b);
 template double gmax(const double &a, const double &b);
 template gRational gmax(const gRational &a, const gRational &b);
+template gDouble gmax(const gDouble &a, const gDouble &b);
 
 template int gmax(const gArray<int> &);
 
