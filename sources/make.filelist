@@ -87,9 +87,10 @@ WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc wxstatus.cc dlabout.cc gio.cc
 
 WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
+# These are found in subdirectory gui/
 GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               efglayout.cc wxmisc.cc splash.cc dlabout.cc efgshow.cc \
-	      efgsolvd.cc nfgsolvd.cc dlefg.cc dlnfg.cc \
+	      efgsolvd.cc efgoutcome.cc nfgsolvd.cc dlefg.cc dlnfg.cc \
               efgsolng.cc wxstatus.cc algdlgs.cc \
               behavfilter.cc efgsoln.cc nfgshow.cc \
               nfgsoln.cc nfgsolng.cc mixedfilter.cc \
