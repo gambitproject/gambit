@@ -70,6 +70,8 @@ class GSM
   bool Push ( Action*  data );
   bool Push ( Node*    data );
 
+  bool PushStream( const gString& data );
+
   bool PushList ( const int num_of_elements );
 
   bool PushRef  ( const gString& ref );

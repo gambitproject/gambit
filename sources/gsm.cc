@@ -175,6 +175,17 @@ bool GSM::Push( Node* data )
 }
 
 
+bool GSM::PushStream( const gString& data )
+{
+  Portion*  p;
+
+  p = new Stream_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
 bool GSM::PushList( const int num_of_elements )
 { 
   int            i;
@@ -528,6 +539,7 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	{
 	  result = 0;
 	}
+	break;
       case porNFG_RATIONAL:
 	if( ((Nfg_Portion<gRational>*) result )->IsDefined( subvalue ) )
 	{
@@ -538,6 +550,7 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	{
 	  result = 0;
 	}
+	break;
 
       default:
 	gerr << "GSM Error: attempted to resolve the subvariable of a type\n";

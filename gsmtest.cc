@@ -8,7 +8,7 @@
 
 
 
-#define CRASHTEST
+// #define CRASHTEST
 
 
 int main( void )
@@ -41,7 +41,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -885,6 +885,7 @@ int main( void )
   machine->Dump();
 
 
+#ifdef CRASHTEST
   machine->PushRef( "x" );
   machine->Push( (gInteger) 0 );
   machine->Subscript();
@@ -899,7 +900,7 @@ int main( void )
   machine->Push( (double) 6 );
   machine->Subscript();  
   machine->Dump();
-
+#endif // CRASHTEST
 
 
 
@@ -1047,6 +1048,7 @@ int main( void )
   machine->Execute( program );
 
 
+#ifdef CRASHTEST
   machine->Push( (gInteger) 0 );
   machine->Push( (gInteger) 0 );
   machine->Divide();
@@ -1060,7 +1062,7 @@ int main( void )
   machine->Push( (gInteger) 0 );
   machine->Modulus();
   machine->Dump();
-
+#endif // CRASHTEST
 
 
 
@@ -1160,13 +1162,10 @@ int main( void )
 
 
   machine->PushRef( "x" );
-#if 0
-  machine->InitCallFunction( "ReadNfgFile" );
+  machine->InitCallFunction( "ReadNfg" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
-#endif
-  machine->Push( (double) 101 );
   machine->Assign();
   machine->Dump();
 
@@ -1188,12 +1187,12 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
-
+#ifdef CRASHTEST
   machine->PushRef( "x", "a" );
   machine->Push( (double) 1 );
   machine->Assign();
   machine->Dump();
-
+#endif  // CRASHTEST
 
 
   gout << "*********************** press return to continue ************";
@@ -1205,13 +1204,10 @@ int main( void )
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
-#if 0
-  machine->InitCallFunction( "ReadNfgFile" );
+  machine->InitCallFunction( "ReadNfg" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
-#endif
-  machine->Push( (double) 0 );
 
   machine->Bind();
   machine->CallFunction();
@@ -1222,15 +1218,21 @@ int main( void )
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x", "a" );
+  gout << "1\n";
   machine->Bind();
+  gout << "2\n";
   machine->Push( (double) 1 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
 
+  machine->PushRef( "x", "b" );
+  machine->Push( (double) 2 );
+  machine->Assign();
 
   gout << "Assigned subrefs; now display:\n";
 
+  machine->PushRef( "x", "b" );
   machine->PushRef( "x", "a" );
   machine->PushRef( "x" );
   machine->Dump();
@@ -1281,7 +1283,7 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
-
+#ifdef CRASHTEST
   machine->InitCallFunction( "Test" );
   machine->CallFunction();
   machine->Dump();
@@ -1289,7 +1291,7 @@ int main( void )
   machine->InitCallFunction( "Test" );
   machine->CallFunction();
   machine->Dump();
-
+#endif // CRASHTEST
 
 
   machine->InitCallFunction( "Test" );
@@ -1455,7 +1457,7 @@ int main( void )
   machine->Push( (double) 8 );
   machine->Assign();
 
-
+#ifdef CRASHTEST
   machine->InitCallFunction( "Test" );
   machine->PushRef( "x" );
   machine->Bind(  );
@@ -1467,7 +1469,7 @@ int main( void )
   machine->PushRef( "x" );
   machine->PushRef( "y" );
   machine->Dump();
-
+#endif // CRASHTEST
 
   machine->InitCallFunction( "Test" );
   machine->Push( (double) 5 );
@@ -1485,6 +1487,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+#ifdef CRASHTEST
   machine->InitCallFunction( "Test" );
   machine->Push( (gInteger) 5 );
   machine->Bind();
@@ -1492,7 +1495,7 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
-
+#endif // CRASHTEST
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -1679,6 +1682,7 @@ int main( void )
   machine->PushRef( "time" );
   machine->Dump();
 
+#ifdef CRASHTEST
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
@@ -1694,6 +1698,14 @@ int main( void )
 
   machine->PushRef( "time" );
   machine->Dump();
+#endif // CRASHTEST
+
+*/
+
+
+  machine->PushStream( "stdout" );
+  machine->Dump();
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;

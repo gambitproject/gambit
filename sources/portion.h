@@ -61,7 +61,9 @@ typedef unsigned int PortionType;
 #define  porNODE       ( 0x020000 )
 #define  porACTION     ( 0x040000 )
 
-#define  porREFERENCE  ( 0x080000 )
+#define  porSTREAM     ( 0x080000 )
+
+#define  porREFERENCE  ( 0x100000 )
 
 #define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
 				  
@@ -438,6 +440,22 @@ class Node_Portion : public Portion
 };
 
 
+
+class Stream_Portion : public Portion
+{
+ private:
+  gFileOutput* _Value;
+
+ public:
+  Stream_Portion( const gString& filename );
+  ~Stream_Portion();
+
+  gFileOutput&  Value     ( void );
+  Portion*      Copy      ( void ) const;
+  PortionType   Type      ( void ) const;
+  bool          Operation ( Portion* p, OperationMode mode );
+  void          Output    ( gOutput& s ) const;
+};
 
 
 

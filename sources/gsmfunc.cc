@@ -399,7 +399,8 @@ bool CallFuncObj::SetCurrParam( Portion *param )
       {
 	gerr << "CalFuncObj Error: multiple definitions found for parameter ";
 	gerr << "\"" << _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
-	gerr << "\"\n while executing CallFunction() on\n";
+	gerr << "\"\n";
+	gerr << "                  while executing CallFunction() on\n";
 	gerr << "                  function \"" << _FuncName << "\" )\n";
 	result = false;
       }

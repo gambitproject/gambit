@@ -1364,6 +1364,65 @@ void Node_Portion::Output( gOutput& s ) const
 
 
 
+//---------------------------------------------------------------------
+//                            Stream type
+//---------------------------------------------------------------------
+Stream_Portion::Stream_Portion( const gString& filename )
+{
+  _Value = new gFileOutput( filename );
+}
+
+Stream_Portion::~Stream_Portion()
+{
+  delete _Value;
+}
+
+
+gFileOutput& Stream_Portion::Value( void )
+{ return *_Value; }
+
+PortionType Stream_Portion::Type( void ) const
+{ return porSTREAM; }
+
+Portion* Stream_Portion::Copy( void ) const
+{ return new Error_Portion( "Portion Error: cannot copy a Stream_Portion" ); }
+
+
+bool Stream_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  gFileOutput*  p_value = ( (Stream_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Stream_Portion::Output( gOutput& s ) const
+{
+  s << " (Stream) ";
+}
+
+
+
+
+
 
 
 
