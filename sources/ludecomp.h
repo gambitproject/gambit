@@ -1,7 +1,6 @@
 //
 // FILE: ludecomp.h -- Definition of the LUdecomp class
 //
-// 
 // $Id$
 //
 
@@ -23,8 +22,6 @@ template <class T> class LUdecomp;
 
 template <class T> class Basis {
 
-//friend class Tableau<T>;
-//friend class LPTableau<T>;
 friend class LUdecomp<T>;
   
 protected:
@@ -35,6 +32,8 @@ protected:
   gBlock<int> rows;
   gBlock<int> arts;
   gBlock<int> artificial;
+  gArray<bool> colBlocked;
+  gArray<bool> rowBlocked;
   bool IsBasisIdent;
 
 public:
@@ -66,6 +65,12 @@ public:
 
   // finds label of variable corresponding to Basis index
   int Label(int index) const;
+
+  // marks/unmarks label to block it from entering basis
+  void Mark(int label);
+
+  // returns true if label is blocked from entering basis
+  bool IsBlocked(int label) const;
 
   // select Basis elements according to Tableau rows and cols
   void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;

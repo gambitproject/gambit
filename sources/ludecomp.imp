@@ -3,7 +3,6 @@
 //                       and Basis class (for now).
 // $Id$
 //
-//
 
 #include "ludecomp.h"
 
@@ -19,16 +18,20 @@ template <class T>
 Basis<T>::Basis(const gMatrix<T> &mat)
 : A(&mat), label( mat.MinRow(), mat.MaxRow() ), 
   cols( mat.MinCol(), mat.MaxCol() ), rows( mat.MinRow(), mat.MaxRow() ), 
-  arts(), artificial()
+  arts(), artificial(),colBlocked(mat.MinCol(), mat.MaxCol() ),
+  rowBlocked( mat.MinRow(), mat.MaxRow() )
 {
 
   int i;
-  for(i = mat.MinCol(); i <= mat.MaxCol(); i++) 
+  for(i = mat.MinCol(); i <= mat.MaxCol(); i++) {
     cols[i] = 0;
+    colBlocked[i] = false;
+  }
 
   for(i = label.First(); i <= label.Last(); i++) {
     label[i]= - i;
     rows[i] = i;
+    rowBlocked[i] = false;
   }
   IsBasisIdent = true;
 }
@@ -36,7 +39,9 @@ Basis<T>::Basis(const gMatrix<T> &mat)
 template <class T>
 Basis<T>::Basis(const Basis<T> &bas)
 : A(bas.A), label(bas.label), cols( bas.cols ), rows( bas.rows ),
-  arts(bas.arts), artificial(bas.artificial), IsBasisIdent(bas.IsBasisIdent)
+  arts(bas.arts), artificial(bas.artificial),
+  colBlocked(bas.colBlocked),rowBlocked(bas.rowBlocked),
+  IsBasisIdent(bas.IsBasisIdent)
 { }
 
 template <class T>
@@ -53,6 +58,8 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
     rows = orig.rows;
     arts = orig.arts;
     artificial = orig.artificial;
+    rowBlocked = orig.rowBlocked;
+    colBlocked = orig.colBlocked;
     IsBasisIdent = orig.IsBasisIdent;
 
   }
@@ -133,6 +140,25 @@ template <class T>
 int Basis<T>::Label(int index) const
 {
   return  label[index];
+}
+
+template <class T>
+void Basis<T>::Mark(int col )
+{
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+    rowBlocked[-col] = !rowBlocked[-col];
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+    colBlocked[col] = !colBlocked[col];
+}
+
+template <class T>
+bool Basis<T>::IsBlocked(int col) const
+{
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+    return rowBlocked[-col];
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+    return colBlocked[col];
+  return false;
 }
 
 template <class T>
