@@ -68,10 +68,18 @@ vpath %.o  $(OBJDIR)
 #   WXLIBDIR = location of wxwin libraries
 #   WXLIB    = any wx libraries used
 
+ifdef WXXT
+WXDIR = /home/mill/gambit/wxxt/wxxt-1.67
+WXLIBDIR = -L$(WXDIR)/lib/linux
+WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/Linux -I$(WXDIR)/src/xt-widgets \
+           -DLINUX_WXXT
+WXLIB = -lwx_xt -lwx_xtwidgets
+else
 WXDIR = /home/mill/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
 WXLIB = -lwx_motif_$(SYSNAME)
+endif
 
 # Site Specific information:
 #
@@ -90,11 +98,16 @@ DEFINES = -D_HPUX_SOURCE -DSVR4
 XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
 XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
 XLIB = -lXm -lXt -lX11 -lc -lm -lg++
-else 
-# Linux
+else # Linux
+ifdef WXXT
+XINCDIR = -I/usr/X11R6/include
+XLIBDIR = -L/usr/X11R6/lib 
+XLIB = -lXpm -lXaw -lXext -lXmu -lXt -lSM -lICE -lX11 -lm
+else
 XINCDIR = -I/usr/X11R6/include
 XLIBDIR = -L/usr/X11R6/lib
 XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
+endif # WXXT
 endif
 endif
 
