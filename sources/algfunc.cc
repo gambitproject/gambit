@@ -256,14 +256,15 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
 static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
-  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  NFSupport *support = ((NfSupportPortion*) param[0])->Value();
 
   gWatch watch;
   gList<MixedSolution> solutions;
 
   try {
-    FindPureNash(*S, ((NumberPortion *) param[1])->Value(),
-		 gstatus, solutions);
+    nfgEnumPure solver;
+    solver.SetStopAfter(((NumberPortion *) param[1])->Value());
+    solver.Solve(*support, gstatus, solutions);
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   }
   catch (gSignalBreak &) {

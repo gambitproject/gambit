@@ -108,7 +108,9 @@ gList<MixedSolution> guinfgEnumPure::Solve(const NFSupport &p_support)
   gList<MixedSolution> solutions;
 
   try {
-    FindPureNash(p_support, m_stopAfter, status, solutions);
+    nfgEnumPure solver;
+    solver.SetStopAfter(m_stopAfter);
+    solver.Solve(p_support, status, solutions);
   }
   catch (gSignalBreak &) { }
   return solutions;

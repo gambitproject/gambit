@@ -12,9 +12,20 @@
 #include "glist.h"
 #include "gstatus.h"
 
-void FindPureNash(const NFSupport &, int, gStatus &, gList<MixedSolution> &);
+class nfgEnumPure {
+private:
+  int m_stopAfter;
 
+public:
+  nfgEnumPure(void) : m_stopAfter(0) { }
+  virtual ~nfgEnumPure() { }
 
-#endif    // NFGPURE_H
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  void Solve(const NFSupport &, gStatus &, gList<MixedSolution> &);
+};
+
+#endif // NFGPURE_H
 
 
