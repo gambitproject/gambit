@@ -509,8 +509,9 @@ bool Powell(gPVector<double> &p,
 	Project(xit, p.Lengths());
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,interior);
 	xi.SetRow(ibig, xit);
-	for(int kk=1;kk<p.Length();kk++)
-	  assert(p[kk]>=0.0);
+	if(interior)
+	  for(int kk=1;kk<p.Length();kk++)
+	    assert(p[kk]>=0.0);
       }
     }
     
