@@ -10,8 +10,8 @@
 #include "nfstrat.h"
 #include "mixed.h"
 #include "glist.h"
-#include "contiter.h"
 #include "nfgiter.h"
+#include "nfgciter.h"
 
 #include "lexicon.h"
 

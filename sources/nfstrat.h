@@ -52,13 +52,13 @@ public:
 };
 
 template <class T> class NfgIter;
-template <class T> class ContIter;
+template <class T> class NfgContIter;
 
 class NFStrategySet {
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
-  friend class ContIter<double>;
-  friend class ContIter<gRational>;
+  friend class NfgContIter<double>;
+  friend class NfgContIter<gRational>;
 protected:
   NFPlayer * nfp;
   gBlock <Strategy *> strategies;
@@ -117,8 +117,8 @@ class NFSupport {
 
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
-  friend class ContIter<double>;
-  friend class ContIter<gRational>;
+  friend class NfgContIter<double>;
+  friend class NfgContIter<gRational>;
 
 protected:
   gString name;

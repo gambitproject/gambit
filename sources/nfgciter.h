@@ -1,14 +1,13 @@
-//#
-//# FILE: contiter.h -- Normal form contingency iterator class
-//#
-//# $Id$
-//#
+//
+// FILE: nfgciter.h -- Normal form contingency iterator class
+//
+// $Id$
+//
 
-#ifndef CONTITER_H
-#define CONTITER_H
+#ifndef NFGCITER_H
+#define NFGCITER_H
 
 #include "gblock.h"
-//#include "gvector.h"
 
 template <class T> class Nfg;
 class StrategyProfile;
@@ -23,7 +22,7 @@ class StrategyProfile;
 // to hold constant.  The iteration is based on an index that goes from 1 to
 // the total number of possible contingencies in increments of 1.
 //
-template <class T> class ContIter    {
+template <class T> class NfgContIter    {
 friend class NfgIter<T>;
 private:
   const NFSupport *stratset;
@@ -33,8 +32,8 @@ private:
   gBlock<int> frozen, thawed;
   
 public:
-  ContIter(const NFSupport *s);
-  ~ContIter();
+  NfgContIter(const NFSupport *s);
+  ~NfgContIter();
   
   void First(void);
   
@@ -60,7 +59,7 @@ public:
   void Dump(void) const;
 };
 
-#endif   // CONTITER_H
+#endif   // NFGCITER_H
 
 
 

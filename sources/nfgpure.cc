@@ -9,7 +9,7 @@
 #include "gambitio.h"
 #include "nfg.h"
 #include "nfgiter.h"
-#include "contiter.h"
+#include "nfgciter.h"
 #include "rational.h"
 #include "glist.h"
 #include "mixed.h"
@@ -19,7 +19,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 {
   int index;
   NFSupport S(N);
-  ContIter<T> citer(&S);
+  NfgContIter<T> citer(&S);
   
   do  {
     int flag = 1;

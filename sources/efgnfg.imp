@@ -10,7 +10,7 @@
 #include "nfplayer.h"
 #include "nfstrat.h"
 #include "nfgiter.h"
-#include "contiter.h"
+#include "nfgciter.h"
 #include "mixed.h"
 #include "lexicon.h"
 
@@ -43,7 +43,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E)
   }
   
   NFSupport S(*L->N);
-  ContIter<T> iter(&S);
+  NfgContIter<T> iter(&S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<int> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {

@@ -40,7 +40,7 @@ gOutput &operator<<(gOutput &, const MixedSolution<double> &);
 
 #include "nfg.imp"
 #include "nfgiter.imp"
-#include "contiter.imp"
+#include "nfgciter.imp"
 #include "readnfg.imp"
 
 TEMPLATE class Nfg<double>;
@@ -49,7 +49,7 @@ DataType Nfg<double>::Type(void) const { return DOUBLE; }
 TEMPLATE class NfgFile<double>;
 TEMPLATE int ReadNfgFile(gInput &, Nfg<double> *&);
 
-TEMPLATE class ContIter<double>;
+TEMPLATE class NfgContIter<double>;
 TEMPLATE class NfgIter<double>;
 
 TEMPLATE class MixedProfile<double>;

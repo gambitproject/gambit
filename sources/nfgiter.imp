@@ -37,7 +37,7 @@ template <class T> NfgIter<T>::NfgIter(const NfgIter<T> &it)
   stratset = it.stratset;
 }
 
-template <class T> NfgIter<T>::NfgIter(const ContIter<T> &it)
+template <class T> NfgIter<T>::NfgIter(const NfgContIter<T> &it)
 : N(it.N), current_strat(it.current_strat),
   profile(new StrategyProfile(*it.profile))
 {

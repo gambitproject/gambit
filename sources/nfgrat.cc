@@ -39,7 +39,7 @@ gOutput &operator<<(gOutput &, const MixedSolution<gRational> &);
 
 #include "nfg.imp"
 #include "nfgiter.imp"
-#include "contiter.imp"
+#include "nfgciter.imp"
 #include "readnfg.imp"
 
 TEMPLATE class Nfg<gRational>;
@@ -49,7 +49,7 @@ TEMPLATE class NfgFile<gRational>;
 TEMPLATE int ReadNfgFile(gInput &, Nfg<gRational> *&);
 
 TEMPLATE class NfgIter<gRational>;
-TEMPLATE class ContIter<gRational>;
+TEMPLATE class NfgContIter<gRational>;
 
 TEMPLATE class MixedProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);

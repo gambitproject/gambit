@@ -6,7 +6,7 @@
 
 #include "nfg.h"
 #include "nfstrat.h"
-#include "contiter.h"
+#include "nfgciter.h"
 #include "rational.h"
 
 bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
@@ -15,7 +15,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
 
   switch (N.Type())   {
     case DOUBLE:  {
-      ContIter<double> A(&S), B(&S);
+      NfgContIter<double> A(&S), B(&S);
 
       A.Freeze(pl);
       A.Set(pl, a);
@@ -47,7 +47,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
     }
 
     case RATIONAL:  {
-      ContIter<gRational> A(&S), B(&S);
+      NfgContIter<gRational> A(&S), B(&S);
 
       A.Freeze(pl);
       A.Set(pl, a);

@@ -8,7 +8,7 @@
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"
-#include "contiter.h"
+#include "nfgciter.h"
 #include "rational.h"
 
 Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
@@ -30,8 +30,8 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   NFSupport S1(orig);
   NFSupport S2(*N);
 
-  ContIter<double> C1(&S1);
-  ContIter<gRational> C2(&S2);
+  NfgContIter<double> C1(&S1);
+  NfgContIter<gRational> C2(&S2);
   
   do   {
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
@@ -64,8 +64,8 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
   NFSupport S1(orig);
   NFSupport S2(*N);
 
-  ContIter<gRational> C1(&S1);
-  ContIter<double> C2(&S2);
+  NfgContIter<gRational> C1(&S1);
+  NfgContIter<double> C2(&S2);
   
   do   {
     for (int pl = 1; pl <= N->NumPlayers(); pl++)

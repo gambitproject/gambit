@@ -11,7 +11,7 @@ class Strategy;
 class gRational;
 template <class T> class Nfg;
 template <class T> class NfgIter;
-template <class T> class ContIter;
+template <class T> class NfgContIter;
 
 class NFPlayer {
 
@@ -21,8 +21,8 @@ class NFPlayer {
   friend class Nfg<gRational>;
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
-  friend class ContIter<double>;
-  friend class ContIter<gRational>;
+  friend class NfgContIter<double>;
+  friend class NfgContIter<gRational>;
 
 private:
   int number;

@@ -28,7 +28,7 @@ public:
   NfgIter ( Nfg<T> &);
   NfgIter(const NFSupport *s);
   NfgIter(const NfgIter<T> &);
-  NfgIter(const ContIter<T> &);
+  NfgIter(const NfgContIter<T> &);
   ~NfgIter();
   
   NfgIter<T> &operator=(const NfgIter<T> &);
