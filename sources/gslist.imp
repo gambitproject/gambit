@@ -121,15 +121,22 @@ template <class T> gListSorter<T>::~gListSorter()
 
 template <class T> void gListSorter<T>::Sort(void)
 {
-// this uses a bubble sort algorithm
-  bool changed = false;
-  do   {
-    for (int i = 1; i <= list.VisibleLength() - 1; i++)
-      if (LessThan(list[i], list[i+1]))   {
-	list.Swap(i, i+1);
-	changed = true;
-      }
-  } while (changed);
+    // this uses a bubble sort algorithm
+    bool changed = false;
+
+    do   
+    {
+        changed = false;
+
+        for (int i = 1; i <= list.VisibleLength() - 1; i++)
+        {
+            if (LessThan(list[i], list[i+1]))   
+            {
+                list.Swap(i, i+1);
+                changed = true;
+            }
+        }
+    } while (changed);
 }
 
 
