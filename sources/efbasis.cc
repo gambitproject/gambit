@@ -1,17 +1,23 @@
 //
 // FILE: efbasis.cc -- Implementation of EFBasis class
 //
-// @(#)efbasis.cc	1.1 02/10/98 
+// $Id$ 
 //
 
 #include "efbasis.h"
 #include "garray.imp"
+#include "gvector.h"
+#include "gpvector.h"
+#include "gdpvect.imp"
+#include "gmatrix.h"
+#include "efgutils.h"
+#include "lpsolve.h"
 
 class EFNodeArrays   {
-  friend class EFNodeSet;
+friend class EFNodeSet;
 protected:
   gBlock<Node *> nodes;
-
+  
 public:
   EFNodeArrays ( const gArray <Node *> &a);
   EFNodeArrays ( const EFNodeArrays &a);
@@ -29,7 +35,7 @@ EFNodeArrays::EFNodeArrays(const gArray<Node *> &n)
 {
   for (int i = 1; i <= nodes.Length(); i++)
     nodes[i] = n[i];
- }
+}
 
 EFNodeArrays::EFNodeArrays(const EFNodeArrays &n)
   : nodes(n.nodes)
@@ -335,6 +341,18 @@ bool EFBasis::RemoveNode(Node *n)
   return nodes[player->GetNumber()]->RemoveNode(infoset->GetNumber(), n);
 }
 
+bool EFBasis::IsReachable(Node *n) const
+{
+  if(n == befg->RootNode()) return true;
+
+  while (n != befg->RootNode()) {
+    if(!n->GetParent()->GetInfoset()->IsChanceInfoset())
+      if(!EFSupport::Find(LastAction(n))) return false;
+    n = n->GetParent();
+  }
+return true;
+}
+
 void EFBasis::AddNode(Node *n)
 {
   Infoset *infoset = n->GetInfoset();
@@ -343,11 +361,219 @@ void EFBasis::AddNode(Node *n)
   nodes[player->GetNumber()]->AddNode(infoset->GetNumber(), n);
 }
 
-bool EFBasis::IsConsistent() const
+bool EFBasis::IsConsistent()
 {
+  bigbasis = new EFBasis(*befg);
+  nodeIndex = new gDPVector<int>(bigbasis->NumNodes());
+  actIndex = new gDPVector<int>(bigbasis->NumActions());
+  MakeIndices();
+  // gout << "\nactIndex:  " << (*actIndex);
+  // gout << "\nnodeIndex: " << (*nodeIndex);
+ 
+  int num_vars = num_act_vars + num_node_vars;
 
+  // gout << "\nnum_eqs: " << num_eqs;
+  // gout << " num_ineqs: " << num_ineqs;
+
+  // gout << "\nnum_act_vars: " << num_act_vars;
+  // gout << " num_node_vars: " << num_node_vars;
+  // gout << " num_vars: " << num_vars;
+
+  A = new gMatrix<double>(1,num_eqs+num_ineqs,1,num_vars);
+  b = new gVector<double>(1,num_eqs+num_ineqs);
+  c = new gVector<double>(1,num_vars);
+  (*A) = 0.0; (*b) = 0.0; (*c)= 0.0;
+
+  MakeAb();
+  for(int i=1;i<=num_act_vars;i++)
+    (*c)[i]=-1.0;
+
+  // gout << "\nA: \n" << (*A);
+  // gout << "\nb: \n" << (*b);
+  // gout << "\nc: \n" << (*c);
+
+  LPSolve<double> lp((*A),(*b),(*c),num_eqs);
+
+  // gout << "\noptimum: " << lp.OptimumVector();
+  if(!lp.IsWellFormed()) gout << "\nLP not well formed";
+  if(!lp.IsBounded()) gout << "\nLP not bounded";
+  bool flag = lp.IsFeasible();
+  for(int i=1;i<=num_act_vars;i++)
+    if(lp.OptimumVector()[i]<=0.0) flag = false;
+  if(flag)
+    GetConsistencySolution(lp.OptimumVector());
+
+  delete A;
+  delete b;
+  delete c;
+
+  delete bigbasis;
+  delete nodeIndex;
+  delete actIndex;
+
+  return flag;
 }
 
+void EFBasis::MakeIndices()
+{
+  int i,j,k;
+  int ind = 1;
+
+  for(i=1;i<=befg->NumPlayers();i++)
+    for(j=1;j<=(befg->NumInfosets())[i];j++) 
+      for(k=1;k<=bigbasis->NumActions(i,j);k++)
+	if(EFSupport::Find(bigbasis->Actions(i,j)[k]))
+	  (*actIndex)(i,j,k)=0;
+	else 
+	  (*actIndex)(i,j,k) = ind++;
+  num_act_vars=ind-1;
+  for(i=1;i<=befg->NumPlayers();i++)
+    for(j=1;j<=(befg->NumInfosets())[i];j++) 
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++) {
+	if(IsReachable(bigbasis->Nodes(i,j)[k]))
+	  (*nodeIndex)(i,j,k)=0;
+	else 
+	  (*nodeIndex)(i,j,k) = ind++;
+      }
+  num_node_vars=ind-num_act_vars-1;
+  MakeRowIndices();
+}
+
+void EFBasis::MakeRowIndices()
+{
+  int i,j,k,kk;
+
+  num_eqs = 0;
+  num_ineqs = 0;
+  for(i=1;i<=befg->NumPlayers();i++)
+    for(j=1;j<=(befg->NumInfosets())[i];j++) {
+      for(k=1;k<=bigbasis->NumActions(i,j);k++)
+	if((*actIndex)(i,j,k))
+	  num_ineqs++;
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++)
+	if((*nodeIndex)(i,j,k))
+	  num_eqs++;
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++)
+	for(kk=k+1;kk<=bigbasis->NumNodes(i,j);kk++)
+	  if(Find(bigbasis->Nodes(i,j)[k]))
+	    if(Find(bigbasis->Nodes(i,j)[kk])) {
+	      if((*nodeIndex)(i,j,k) || (*nodeIndex)(i,j,kk))
+		num_eqs++;
+	    }
+	    else
+	      num_ineqs++;
+	  else
+	    if(Find(bigbasis->Nodes(i,j)[kk]))
+	      num_ineqs++;
+    }
+}
+
+void EFBasis::MakeAb()
+{
+  int i,j,k,kk;
+  int eq = num_ineqs+1;
+  int ineq = 1;
+
+  for(i=1;i<=befg->NumPlayers();i++)
+    for(j=1;j<=(befg->NumInfosets())[i];j++) {
+      for(k=1;k<=bigbasis->NumActions(i,j);k++)
+	if((*actIndex)(i,j,k))
+	  AddEquation1(ineq++,bigbasis->Actions(i,j)[k]);
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++)
+	if((*nodeIndex)(i,j,k))
+	  AddEquation2(eq++,bigbasis->Nodes(i,j)[k]);
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++)
+	for(kk=k+1;kk<=bigbasis->NumNodes(i,j);kk++)
+	  if(Find(bigbasis->Nodes(i,j)[k]))
+	    if(Find(bigbasis->Nodes(i,j)[kk])) {
+	      if((*nodeIndex)(i,j,k) || (*nodeIndex)(i,j,kk))
+		AddEquation3(eq++,bigbasis->Nodes(i,j)[k],
+			     bigbasis->Nodes(i,j)[kk]);
+	    }
+	    else
+	      AddEquation4(ineq++,bigbasis->Nodes(i,j)[k],
+			   bigbasis->Nodes(i,j)[kk]);
+	  else
+	    if(Find(bigbasis->Nodes(i,j)[kk]))
+	      AddEquation4(ineq++,bigbasis->Nodes(i,j)[kk],
+			   bigbasis->Nodes(i,j)[k]);
+    }
+}
+
+int EFBasis::Col(Action *a) const
+{
+  Infoset *iset = a->BelongsTo();
+  return (*actIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
+		  (*bigbasis).EFSupport::Find(a));
+}
+
+int EFBasis::Col(Node *n) const
+{
+  Infoset *iset = n->GetInfoset();
+  return (*nodeIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
+		  (*bigbasis).Find(n));
+}
+
+void EFBasis::AddEquation1(int row,Action *a) const
+{
+  if(Col(a))
+    (*A)(row,Col(a)) = -1.0;
+  (*b)[row] = -1.0;
+}
+
+void EFBasis::AddEquation2(int row,Node *n) const
+{
+  if(Col(n))
+    (*A)(row,Col(n)) = 1.0;
+  if(n!=befg->RootNode()) {
+    Action *act = LastAction(n);
+    if(Col(act))
+      (*A)(row,Col(act)) = -1.0;
+    while(n->GetParent() != befg->RootNode()) {
+      n = n->GetParent();
+      act = LastAction(n);
+      if(Col(act))
+	(*A)(row,Col(act)) = -1.0;
+    }
+  }
+}
+
+void EFBasis::AddEquation3(int row,Node *n1, Node *n2) const
+{
+  if(Col(n1))
+    (*A)(row,Col(n1)) = 1.0;
+  if(Col(n2))
+    (*A)(row,Col(n2)) = -1.0;
+}
+
+void EFBasis::AddEquation4(int row,Node *n1, Node *n2) const
+{
+  if(Col(n1))
+    (*A)(row,Col(n1)) = 1.0;
+  if(Col(n2))
+    (*A)(row,Col(n2)) = -1.0;
+  (*b)[row] = -1.0;
+}
+
+void EFBasis::GetConsistencySolution(const gVector<double> &x)
+{
+  gDPVector<int> nodes(bigbasis->NumNodes());
+  gDPVector<int> acts(bigbasis->NumActions());
+  nodes = 0;
+  acts = 0;
+  int i,j,k;
+  for(i=1;i<=befg->NumPlayers();i++)
+    for(j=1;j<=(befg->NumInfosets())[i];j++) {
+      for(k=1;k<=bigbasis->NumActions(i,j);k++)
+	if((*actIndex)(i,j,k))
+	  acts(i,j,k) = (int)x[(*actIndex)(i,j,k)];
+      for(k=1;k<=bigbasis->NumNodes(i,j);k++) 
+	if((*nodeIndex)(i,j,k))
+	  nodes(i,j,k) = (int)x[(*nodeIndex)(i,j,k)];
+    }
+  gout << "\nacts: " << acts;
+  gout << "\nnodes: " << nodes;
+}
 
 void EFBasis::Dump(gOutput& s) const
 {
@@ -356,7 +582,9 @@ void EFBasis::Dump(gOutput& s) const
   int j;
   int k;
 
+  s << "\nActions: ";
   (*this).EFSupport::Dump(s);
+  s << "\nNodes:   ";
   s << "{ ";
   numplayers = befg->NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
@@ -384,3 +612,5 @@ gOutput& operator<<(gOutput&s, const EFBasis& e)
 
 template class gArray<EFNodeSet *>;
 template class gArray<EFNodeArrays *>;
+template class gDPVector<int>;
+template gOutput & operator<< (gOutput&, const gDPVector<int>&);
