@@ -1,0 +1,139 @@
+<!DOCTYPE Book PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+<!ENTITY % content SYSTEM "entities.ent">
+%content;
+]>
+
+<book>
+  <bookinfo>
+    <title>Gambit</title>
+    <subtitle>Software Tools for Game Theory</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Richard</firstname>
+	<surname>McKelvey</surname>
+	<affiliation>
+	  <orgname>California Institute of Technology</orgname>
+	</affiliation>
+      </author>
+      <author>
+	<firstname>Andrew</firstname>
+	<surname>McLennan</surname>
+	<affiliation>
+	  <orgname>University of Minnesota</orgname>
+	</affiliation>
+      </author>
+      <author>
+	<firstname>Theodore</firstname>
+	<surname>Turocy</surname>
+	<affiliation>
+	  <orgname>Texas A&amp;M University</orgname>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <edition>Version 0.97.0.1</edition>
+    <pubdate>2002</pubdate>
+    <copyright>
+      <year>2002</year>
+      <holder>The Gambit Project</holder>
+    </copyright>
+    <legalnotice>
+      <para>Permission to use, copy, modify, and distribute this
+software and its documentation for any purpose is hereby granted
+without fee, provided that the above copyright notice and this
+permission notice appear in all copies of this software and related
+documentation.</para>
+      <para>
+THE SOFTWARE IS PROVIDED ``AS-IS'' AND WITHOUT WARRANTY OF ANY KIND,
+EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+      </para>
+
+      <para>
+IN NO EVENT SHALL THE GAMBIT PROJECT, THE CALIFORNIA INSTITUTE OF
+TECHNOLOGY, THE UNIVERSITY OF MINNESOTA, OR ANYONE ASSOCIATED WITH THE
+DEVELOPMENT OF COMPUTER SOFTWARE UNDER THE GAMBIT PROJECT, BE LIABLE
+FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY
+KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+PROFITS, WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON
+ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE
+OR PERFORMANCE OF THIS SOFTWARE.
+	</para>
+    </legalnotice>
+  </bookinfo>
+
+&intro;
+
+<chapter>
+    <title>Getting Started with the Graphical Interface</title>
+    <para>Some GUI docs</para>
+
+    &guistart
+  </chapter>
+
+
+
+<chapter id="gui.ref">
+    <title>Graphical Interface Reference</title>
+    <para>Formal reference here</para>
+
+    &guiconv;
+    &guiefg;
+    &guinfg;
+
+  </chapter>
+
+<chapter>
+    <title>The Gambit Command Language</title>
+    <para>
+This chapter is an introduction to the Gambit Command Language (GCL).
+The GCL provides a
+method of directing the operation of Gambit that is analagous to that
+of a high level general purpose programming language.
+</para>
+<para>
+The purpose of the GCL is to provide a simple, but powerful and
+flexible language by which one can perform complicated or repetitive
+operations and procedures on games in extensive or normal form.  The
+language has facilities for building and editing an extensive or
+normal form game, converting back and forth between the extensive and
+normal form representations, and solving the resulting games for
+various equilibria of interest.  Standard arithmetic, logic, text and
+input-output operations are provided, as well as vectorizable
+functions which support many vector and matrix operations.  Flow
+control statements allow for repetitive operations (such as
+investigating games as one changes various parameters) or conditional
+operations.  Thus the GCL is also suitable for certain types of
+econometric analysis of games.
+</para>
+
+    &gclbasic;
+
+  </chapter>
+
+<chapter>
+    <title>Command Language Function Reference</title>
+    <para>Function reference goes here</para>
+
+    &gclbif;
+      
+  </chapter>
+
+<appendix id="app.alg">
+    <title>Reference: Algorithms to Compute Nash Equilibria</title>
+    <para>This appendix is an overview of the literature on computing
+Nash equilibria in finite games.  The focus here is on detailing the
+essentials of the theory for the user who wants to compute equilibria, 
+and to document the implementations of the algorithms provided in
+Gambit.  The interested user should consult McKelvey and McLennan's
+survey article <citation><xref linkend="McKMcL96"></citation>,
+plus the references
+therein and the <xref linkend="bib"> of this manual for more information.
+    </para>
+
+    &algref;
+
+</appendix>
+
+&biblio;
+
+</book>

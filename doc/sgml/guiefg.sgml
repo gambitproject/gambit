@@ -1,0 +1,88 @@
+<sect1 id="gui.efg">
+<title>Extensive form games</title>
+      <para>
+
+	</para>
+
+<sect2 id="gui.efg.insert">
+<title>Adding or inserting a move into the tree</title>
+
+<para>
+This dialog is used to add a move to the extensive form game, and is
+accessed through the {\bf Edit->Node->AddMove} or {\bf 
+Edit->Node->InsertMove} menu items in the extensive form GUI.  
+
+Select the player to be in control of the move by clicking on a player
+in the Player choicebox.  The player can be either chance or an
+existing player, or a "New Player."  If New Player is chosen, a new
+player will be created and given a default name "Player \#."  If this
+node is to belong to an existing information set, choose the desired
+infoset from the Infoset choicebox.  If a new information set is to be
+created, just enter the number of branches desired.  If the node
+created was a CHANCE node, you will be prompted for the
+probabilities associated with each branch.
+</para>
+
+</sect2>
+
+  <sect2 id="gui.efgdisplay" xreflabel="Changing how the tree is displayed" >
+    <title>Changing how the tree is displayed</title>
+    <para>
+      The graphical interface offers a number of options which
+      allow the user to customize the display of game trees to
+      his or her own tastes.
+    </para>
+
+      <sect3><title>Customizing tree layout</title>
+	<para>
+	  The layout of a game tree can be customized using the
+	  Layout Parameters dialog, which is accessible by way of the
+	  <guimenuitem>Layout</guimenuitem> item on the
+	  <guimenu>Format</guimenu> menu.
+	</para>
+
+	<para>
+	  All lengths are in pixels.  The
+	  <guilabel>Show Infoset Lines</guilabel>
+	  choicebox is used to select a mode for display of
+	  information sets on the extensive form. 
+	  <guilabel>None</guilabel> means no
+	  lines are drawn connecting members of information sets.
+	  <guilabel>Same Level</guilabel>
+	  means only members of an information set at
+	  the same level of the tree are connected with lines. 
+	  <guilabel>All Levels</guilabel> means that all nodes are connected,
+	  using lagged lines if necessary.  (See Figure~\ref{fig_lag_iset}
+	  in the extensive form section for an
+	  illustration.)
+	</para>
+      </sect3>
+
+      <sect3>
+	<title>Customizing tree legends</title>
+	<para>
+	  The text labels displayed on nodes and branches can be
+	  customized using the Legends dialog
+	  (<guimenu>Format</guimenu> menu, <guimenuitem>Legends</guimenuitem>
+	  item).
+	</para>
+
+	<para>
+	  There are two positions where information can be displayed for each
+	  branch (above and below.)  In each of these positions, you can select
+	  to display information about the game tree (such as branch numbers or
+	  action names), or information about the currently selected solution
+	  (such as action probabilities or action values).  Similarly, there are
+	  three positions at which information can be displayed for a node
+	  (above, below, and to the right).  In the positions above and below
+	  the node, you can select to display information about the game tree
+	  (such as infoset name or ID), or information about the currently
+	  selected solution (such as realization probabilities, node values,
+	  belief probabilities). The position to the right of the node is
+	  reserved for information relating to outcomes, and here you can select
+	  to display the outcome name or outcome vector.
+	</para>
+      </sect3>
+
+  </sect2>
+</sect1>

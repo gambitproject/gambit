@@ -1,0 +1,196 @@
+<sect1><title>A simple game of poker</title>
+  <para>
+This chapter takes a high-level tour of the Gambit graphical interface using
+as an example the simple one-card poker game appearing in
+<citation><xref linkend="Mye91"></citation>.
+This game is included in the Gambit distribution
+as <filename>poker.efg</filename>,
+and can be found in the <filename class="directory">efg</filename>
+subdirectory
+of the directory in which Gambit is installed.  (For example, in the
+standard installation under Microsoft Windows, this would be
+<filename>c:/gambit/efg/poker.efg</filename>.)  By convention, files ending in
+<filename>.efg</filename>
+ store extensive form games, and files ending in
+<filename>.nfg</filename> store normal form games. 
+</para>
+
+<para>
+When launched, Gambit displays a window similar to that displayed in
+Figure XX.
+<footnote>
+<para>
+All the screenshots contained in this manual were
+taken on a system running XXXXX.  If you use a different operating system,
+your windows may appear slightly differently.
+</para>
+</footnote>
+This window contains
+a trivial extensive form game, containing exactly one node, which is both
+root and terminal.  Chapter XX describes how to use the extensive form
+window to construct and edit extensive form games.
+  </para>
+
+<para>
+There are three equivalent ways to open a saved game from any window in Gambit:
+    <orderedlist>
+      <listitem>
+	<para>
+	  Select the <guimenuitem>Open</guimenuitem> menu item from the
+	  <guimenu>File</guimenu> menu;
+	  </para>
+      </listitem>
+      <listitem>
+	<para>
+	  Use the shortcut key combination 
+	  <keycap>Ctrl</keycap>-<keycap>O</keycap>;
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  Click on the file folder icon on the toolbar.
+	</para>
+      </listitem>
+    </orderedlist>
+
+Any of these actions leads to a dialog box for selecting a file to
+open.  Use the dialog to locate and select the 
+<filename>poker.efg</filename>
+file.  After doing so, Gambit will display the opened game in a new
+window, as shown in Figure XXX.  The screenshot in Figure XXX shows
+the game as rendered by Gambit using the default settings.  Many
+display options are available to customize the appearance of game trees;
+see <xref linkend="gui.efgdisplay"> for details.
+  </para>
+
+<para>
+The extensive form game tree is drawn with the root node at far left,
+with branches going from left to right, and successive nodes to the
+right of their predecessors.  Each node is represented as a horizontal
+line.  Every non-terminal node is a decision node and is represented
+by the color of the player who makes a decision at that node.  Nodes
+are connected by branches, which are represented by two connected line
+segments, which can be thought of as the &quot;fork&quot; and the
+&quot;tine&quot;.  The fork is used in the graphics display to indicate
+graphically the probabilities of taking each branch.  The tine is used
+as a location at which to display textual information about the
+branch.
+  </para>
+
+<para>
+The poker game begins with Chance selecting either a Red card or
+a Black card to deal to Player~1.  This is represented in the tree
+by the grey node and subsequent branches labeled &quot;Red&quot; and &quot;Black&quot;.
+The forks of the branches have superimposed black lines stretching
+halfway along the fork, indicating a probability of one-half that
+each card is chosen.  After each of the two possible draws, Player~1,
+whose nodes are colored in red, has the option to either &quot;Raise&quot; or
+&quot;Fold&quot;.  If Player~1 folds, the game ends; if he raises, Player~2,
+with nodes colored in green,
+then has the option to either &quot;Meet&quot; or &quot;Pass&quot; in either case,
+the game ends after Player~2's choice.   All terminal nodes are drawn
+in black.
+  </para>
+
+<para>
+In this game, outcomes are attached to each of the six terminal
+nodes, and payoffs to the two players are indicated to the right
+of the corresponding node, with Player~1's payoff listed first, then
+Player~2's.  Outcomes are indicated to the right of nodes, but may
+be attached to nonterminal nodes, in which case their payoffs are 
+interpreted as incremental payoffs.   Outcomes may also be displayed
+by textual name rather than by their payoff vector.
+  </para>
+
+<para>
+Information sets are identified by a pair of numbers.  The first
+number indicates the number of the player who has the choice at the information
+set.  The second number provides an identifying number for the
+information set which is unique among that player's information sets.
+Whenever possible, information sets are also
+represented by vertical lines connecting the nodes that are members of
+the same information set.
+<footnote>
+      <para>
+	Eventually discuss somewhere &quot;lagged&quot; information sets.
+	</para>
+    </footnote>
+In this game, Player~1 observes which
+card he has drawn prior to making his choice to &quot;Raise&quot; or
+&quot;Fold&quot; ;
+therefore, the node following Chance's &quot;Red&quot; move is in a separate
+information set, numbered (1,1), from the node following Chance's
+&quot;Black&quot; move, which is in information set (1,2).  Player~2, on the
+other hand, does not observe Player~1's card, and so Player~2 has one
+information set, numbered (2,1), with two member nodes connected by
+a vertical line.
+  </para>
+
+<para>
+The analytical features of Gambit are located on the <guimenu>Tools</guimenu>
+menu.  These are grouped into four submenus:
+<itemizedlist>
+      <listitem>
+	<para>
+	  <guisubmenu>Subgames</guisubmenu>,
+          which contains items for the identification
+	  and manipulation of subgames of the tree.  Since Player~2 does not
+	  observe the card drawn by Player~1, this game has no proper subgames,
+	  and so this menu will not be explored further in this introduction.
+	</para>
+      </listitem>
+      <listitem
+	<para>
+	  <guisubmenu>Supports</guisubmenu>,
+          which contains items dealing with sets of
+	  actions.  Of most immediate interest in this menu is the
+	  <guimenuitem>Undominated</guimenuitem> item,
+	  which determines which actions are not
+	  dominated by other actions.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <guisubmenu>Equilibrium</guisubmenu>,
+          which contains items interfacing to the
+	  various algorithms provided by Gambit to compute Nash equilibria of
+	  the game.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  <guisubmenu>Normal form</guisubmenu>,
+          which contains items to compute normal
+	  forms corresponding to the extensive form game.
+	  </para>
+      </listitem>
+    </itemizedlist>
+In the following analysis, each of the latter three submenus will
+be visited.
+  </para>
+</sect1>
+
+<sect1><title>Finding Nash equilibria using the extensive form</title>
+<para>
+The analysis begins by searching for actions which might be dominated
+by other actions at the same move.     
+
+For an overview of the literature on algorithms to compute Nash
+equilibria, see <citation>McKMcL96</citation> and the references
+therein. 
+  </para>
+</sect1>
+
+<sect1><title>Finding Nash equilibria using the normal form</title>
+<para>
+You can compute Nash equilibria on the normal form.
+  </para>
+</sect1>
+
+<sect1><title>Viewing normal forms</title>
+<para>
+You can have Gambit show you the normal form of the game, both
+reduced and agent.
+  </para>
+</sect1>
+    

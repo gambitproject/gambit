@@ -1,0 +1,37 @@
+<refentry id="bif.Accuracy" xreflabel="Accuracy">
+
+<refmeta>
+<indexterm>
+<primary>Accuracy</primary>
+</indexterm>
+
+<refentrytitle>Accuracy</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Accuracy</refname>
+<refpurpose>
+Returns the accuracy used by the algorithm which computed a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Accuracy[profile->BEHAV] =: NUMBER
+Accuracy[profile->MIXED] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Accuracy</function> returns the accuracy of
+<parameter>profile</parameter>.  The accuracy is the error
+that is allowed in the computation of which Nash refinements
+the profile satified.  Thus, if the profile is marked as
+Nash, then no deviation by any player can yield an improvement
+of more than the returned accuracy.
+</para>
+</refsect1>
+</refentry>
+

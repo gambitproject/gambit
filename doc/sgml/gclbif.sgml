@@ -1,0 +1,23 @@
+<sect1 id="gcl.builtin">
+<title>Built-in functions</title>
+
+<para>
+This section lists in alphabetical order all the functions which
+are predefined in the command language.  See <xref linkend="gcl.funccat">
+for a listing of functions by category.
+</para>
+
+&bifaccuracy;
+&bifactionnumber;
+
+</sect1>
+
+<sect1 id="gcl.funccat">
+<title>Categorical listing of functions</title>
+
+<para>
+This section contains a listing of all command language functions
+supplied in the distribution, organized by category
+</para>
+
+</sect1>

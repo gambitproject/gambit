@@ -1,0 +1,44 @@
+<refentry id="bif.ActionNumber" xreflabel="ActionNumber">
+
+<refmeta>
+<indexterm>
+<primary>ActionNumber</primary>
+</indexterm>
+
+<refentrytitle>ActionNumber</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ActionNumber</refname>
+<refpurpose>
+Returns the index of an action in a support or basis
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ActionNumber[action->ACTION, sup->EFSUPPORT] =: INTEGER 
+ActionNumber[action->ACTION, basis->EFBASIS] =: INTEGER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+Returns the number assigned to <parameter>action</parameter> 
+in the support <parameter>sup</parameter> or basis
+<parameter>basis</parameter>.
+For each information set, actions are
+numbered from 1 to the number of actions at the information set.  If
+an action is not in the corresponding support or basis, 
+<function>ActionNumber</function> returns 0.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.actions">
+</para>
+</refsect1>
+
+</refentry>

@@ -1,0 +1,418 @@
+<sect1 id="app.alg.start">
+<title>Tips on getting started</title>
+
+<para>
+Gambit has a number of algorithms to find Nash equilibria.  The
+appropriate algorithm to use depends on a number of factors, most
+importantly, the number of players in the game, and the number of
+equilibria you want to find.  
+</para>
+
+<para>
+Before computing equilibria, you may wish to eliminate
+dominated strategies.  The smaller the number of strategies the
+algorithm must consider, 
+the faster any algorithm will run.  However, dominance
+elimination can itself be computationally intensive, especially if
+domination by mixed strategies (for the normal form) is considered,
+or if dominance elimination is done on a large extensive form.
+<itemizedlist>
+<listitem>
+<para>
+If you want to find more than one, or all Nash equilibria of a game,
+then you may first successively eliminate strongly dominated
+strategies.  Any equilibrium of the original game will also be an
+equilibrium of the reduced game.
+</para>
+</listitem>
+<listitem>
+<para>
+If you just want to find <emphasis>one</emphasis> Nash equilibrium,
+you can first successively eliminate <emphasis>weakly</emphasis>
+dominated strategies.  Elimination of weakly dominated strategies may
+eliminate some Nash equilibria of the original game, so it should not
+be used if you want to find multiple Nash equilibria, but any Nash
+equilibrium to the reduced game will be an equilibrium to the original
+game, so it can be used if you only want to find one equilibrium.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<sect2 id="app.alg.start.common">
+<title>Common algorithm parameters</title>
+<para>
+There are a few parameters which are common among several algorithms.
+</para>
+</sect2>
+
+<sect2 id="app.alg.start.pure">
+<title>Pure strategy equilibria</title>
+<para>
+The <xref linkend="app.alg.enumpure"> algorithm can be used to enumerate
+all of the pure strategy equilibria for both extensive and normal form
+games.  
+</para>
+</sect2>
+
+<sect2 id="app.alg.start.zerosum">
+<title>Two Person Constant Sum Games</title>
+<para>
+For two person constant sum normal form games, the minimax theorem
+applies.  The set of Nash equilibria is a convex set, and the problem
+of finding Nash equilibria can be formulated as a linear program.  The 
+<xref linkend="app.alg.lp"> algorithm
+will solve a constant sum game using this approach.
+</para>
+</sect2>
+
+<sect2 id="app.alg.start.2p">
+<title>Two Person Games</title>
+<para>
+For two person nonzero sum games, the problem of finding Nash
+equilibria can be formulated as a linear complementarity problem, and
+exact solutions can be found as long as computations are done in
+rationals.  The <xref linkend="app.alg.lcp">
+algorithm solves a two person game
+using this approach.  Note that this algorithm can also be used
+directly on an extensive form game, where it implements the Koller,
+Megiddo, von Stengel sequence form
+<citation><xref linkend="KolMegSte94"></citation>.
+</para>
+
+<para>
+For a two person game the <xref linkend="app.alg.enummixed"> algorithm
+will enumerate all of the extreme points of the components of the set
+of Nash equilibria, and hence can be used to find <emphasis>all</emphasis> Nash
+equilibria.  
+</para>
+</sect2>
+
+<sect2 id="app.alg.start.np">
+<title>Games With More Than Two Players</title>
+<para>
+For n-person normal form games, with n greater than two, the
+<xref linkend="app.alg.polenum"> algorithm will find all Nash
+equilibria. The PolEnum algorithm may be computationally infeasible on
+large games.  Thus other algorithms are also available for finding one
+or a sample of Nash equilibria.  Since Nash equilibria can be
+irrational, the algorithms to locate one equilibrium will only find
+approximations (to machine accuracy) of Nash equilibria.
+</para>
+
+<para>
+<xref linkend="app.alg.simpdiv">SimpDivSolve is guaranteed to locate one
+equilibrium for an n-person normal form game.  This algorithm can be
+very slow on some games.  Hence two other algorithms are also
+implemented, <xref linkend="app.alg.qre">
+and <xref linkend="app.alg.liap">.  These
+algorithms can also be used to search for multiple equilibria (with no
+guarantee that all have been found), and to search for equilibria
+close to a given starting point.
+</para>
+</sect2>
+
+<sect2 id="app.alg.start.sequential">
+<title>Sequential Equilibria</title>
+<para>
+Sequential equilibria are equilibria that prescribe optimal behavior
+at any information set of the extensive form, given a consistent
+assessment of beliefs.  See <citation><xref linkend="KreWil82"></citation>.  
+<xref linkend="app.alg.qre"> on extensive form games
+is guaranteed to converge to a sequential equilibrium.
+</para>
+</sect2>
+
+</sect1>
+
+<sect1 id="app.alg.enummixed" xreflabel="EnumMixedSolve">
+<title>EnumMixedSolve</title>
+<para>
+EnumMixedSolve finds all Nash equilibria for a two person game.  More
+precisely, it finds the set of extreme points of the components of the
+set of Nash equilibria.  The procedure is to enumerate the set of
+complementary basic feasible solutions. 
+See Mangasarian <citation><xref linkend="Man64"></citation> for details.
+<important>
+<para>
+EnumMixedSolve only works for two-person normal form games.
+</para>
+</important>
+</para>
+</sect1>
+
+<sect1 id="app.alg.enumpure" xreflabel="EnumPureSolve">
+<title>EnumPureSolve</title>
+<para>
+Computation of pure strategy Nash equilibria is done by simple enumeration.
+All pure strategies are checked to see if they are Nash equilibria.  
+</para>
+</sect1>
+
+<sect1 id="app.alg.qre" xreflabel="QreSolve">
+<title>QreSolve</title>
+<para>
+Computes a branch of the logistic quantal response equilibrium
+correspondence for n-person normal form games (as described
+<citation><xref linkend="McKPal95"></citation>) and n-person extensive
+form games (as described in <citation><xref
+linkend="McKPal98"></citation>).
+</para>
+
+<para>
+This algorithm returns the last point computed.  
+This algorithm computes the principal branch of the
+logistic quantal response equilibrium correspondence.
+In this case taking the limit,
+as lambda goes to infinity, the quantal response equilibrium defines a
+unique selection from the set of Nash equilibrium for generic normal
+form games.  Similarly, for extensive form games, it defines a
+selection from the set of sequential equilibria.  Therefore, in
+extensive form games, this algorithm can be used to compute
+approximations to a sequential equilibrium.
+</para>
+</sect1>
+
+<sect1 id="app.alg.qregrid" xreflabel="QreGridSolve">
+<title>QreGridSolve</title>
+<para>
+Performs a grid search to compute the complete logistic
+quantal response correspondence, as described in 
+<citation><xref linkend="McKPal95"></citation>.
+<important>
+<para>
+This algorithm is <emphasis>very</emphasis> computationally
+intensive, and should only be attempted on small games.
+</para>
+</important>
+</para>
+
+<para>
+\item[Grid 1 Del:] Grid size for search over course grid of probability space.
+\item[Grid 1 Tol:] Maximum value of objective function for which to accept
+solution on course grid.
+\item[Grid 2 Del:] Grid size for search over fine grid of probability space.  
+\item[Grid 2 Tol:] Maximum value of objective function for which to
+accept solution on fine grid.
+</para>
+</sect1>
+
+<sect1 id="app.alg.lcp" xreflabel="LcpSolve">
+<title>LcpSolve</title>
+<para>
+This algorithm formulates and solves the game as a linear
+complementarity problem.  For a normal form game, this algorithm
+searches for equilibria of the specified normal form game using the
+Lemke-Howson algorithm, as described in
+<citation><xref linkend="LemHow64"></citation>. 
+Eaves <citation><xref linkend="Eav71"></citation> 
+lexicographic rule for linear complementarity problems
+is used to avoid cycling.
+</para>
+
+<para>
+In the Lemke-Howson algorithm equilibria are found by following paths
+of &quot;almost&quot; equilibria, where one relaxes at most one constaint.
+Equilibria are thus inter-connected by networks of paths that result
+when different of the constraints are relaxed.  One can find the set
+of &quot;accessible&quot; equilibria in such methods by starting at the
+extraneous solution and then tracing out this entire network.  See,
+e. g., Shapley <citation><xref linkend="Sha74"></citation>. 
+However, the set of accessible
+equilibria does not necessarily include all Nash equilibria.
+</para>
+
+<para>
+For extensive form games, this algorithm implements Lemke's algorithm
+on the sequence form of the game, as defined by Koller, Megiddo
+and von Stengel, in <citation><xref linkend="KolMegSte94"></citation>.
+</para>
+
+<important>
+<para>
+This algorithm is fast, but only works for two
+person games.  Wilson <citation><xref linkend="Wil71"></citation> and 
+Rosenmuller <citation><xref linkend="Ros71"></citation> have
+suggested ways in which the Lemke-Howson Algorithm can be extended to
+general $n$-player games, but these extensions require methods of
+tracing the solution to a set of non linear simultaneous equations,
+and have not been implemented in Gambit.  Also, on some problems with
+data type of Double, the current implementation can exhibit numerical
+instability which in extreme cases can even lead to incorrect
+solutions.  Solving the same problem with Rationals will resolve any
+such difficulties.  However, the algorithm is much slower when
+operating on Rationals than on Doubles.
+</para>
+</important>
+
+</sect1>
+
+<sect1 id="app.alg.liap" xreflabel="LiapSolve">
+<title>LiapSolve</title>
+<para>
+Finds Nash equilibria via the Lyapunov function method
+described in <citation><xref linkend="McK91"></citation>.
+Works on either the extensive or normal
+form.  This algorithm casts the problem as a function minimization
+problem by use of a Lyapunov function for Nash equilibria.  This is a
+continuously differentiable non negative function whose zeros coincide
+with the set of Nash equilibria of the game.  A standard descent
+algorithm is used to find a constrained local minimum of the function
+from any given starting location.  Since a local minimum need not be a
+global minimum (with value 0), the algorithm is not guaranteed to find
+a Nash equilibrium from any fixed starting point.  The algorithm thus
+incorporates the capability of restarting.  The algorithm starts from
+the initial starting point determined by the parameter 
+<parameter>start</parameter>.  If a
+Nash equilibrium is not found, it will keep searching from new
+randomly chosen starting points until a Nash equilibrium has been
+found or the maximum number of tries is exceeded,
+whichever comes first.  For an extensive form game, if the algorithm
+converges, it converges to a sequential equilibrium
+<footnote>
+<para>Andrew Solnick, personal communication to Richard McKelvey</para>
+</footnote>
+
+<important>
+<para>
+The disadvantages of this method are that it is
+generally slower than any of the above methods, and also, there can be
+local minima to the Liapunov function which are not zeros of the
+function.  Thus the algorithm can potentially converge to a non Nash
+point.  However, inspection of the objective function can determine if
+this problem has occurred.  If the objective function is zero, a Nash
+equilibrium has been found. If it is greater than zero, the point is
+not Nash.  The algorithm will automatically check this.  If the
+objective function is larger than the tolerance, then the point is
+discarded.
+</para>
+</important>
+</para>
+
+<para>
+The following parameters can be set;
+
+\begin{description}
+\item[nTries:] Sets the maximum number of attempts at finding each
+equilibrium. Note that a value of 0 means the algorithm will continue
+forever, or until the algorithm is terminated by the user, whichever
+comes first.
+\item[start:] Sets the starting profile for the descent algorithm.
+{\bf Default} is the centroid.
+\end{description}
+</para>
+</sect1>
+
+<sect1 id="app.alg.lp" xreflabel="LpSolve">
+<title>LpSolve</title>
+<para>
+This algorithm formulates and solves the game as a linear program, and
+finds the minimax solution of the game.  This algorithm only works for
+two person, zero sum games.
+This algorithm only finds one Nash equilibrium.  However, For a
+constant sum game, any other equilibria will have the same value.
+There are no algorithm specific parameters.
+</para>
+</sect1>
+
+<sect1 id="app.alg.polenum" xreflabel="PolEnumSolve">
+<title>PolEnumSolve</title>
+<para>
+Solves for all totally mixed Nash equilibrium of the game on a given
+support. The algorithm iterates through all sub-supports of the
+initial support to find the full support equilibria on each
+sub-support.  Supports with singular solutions are skipped by the
+algorithm when determined to have singular solutions.
+</para>
+
+<para>
+On each sub-support, the algorithm starts with a cube containing the
+space of possible solutions and proceeds recursively.  The recursion
+step begins with a subcube.  The subcube is discarded if the cube is
+irrelevant in the sense of lying outside the space of possible
+solutions.  Otherwise a modified Newton's method is used to search for
+a solution in the subcube.  In the event that such a solution is
+found, Taylor's series information at the solution is used to inquire
+whether the solution is necessarily the unique solution in the
+subcube.  If Newton's method leaves the subcube before finding a
+solution, Taylor's series information at the center is used to inquire
+whether we can be sure that the subcube contains no solutions.  If
+neither of these procedures resolves the issue, the subcube is
+subdivided and this recursion is performed on each smaller subcube.
+Supports with singular solutions 
+</para>
+
+<para>
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+
+\begin{description}
+\item[Singular Supps:] Returns a list of the supports which have
+singular solutions. {\bf Note:} This is currently not implemented in
+the GUI, but is available in the GCL.
+\item[recurse:] Determines whether to recurse to all sub supports.
+Default is {\bf True}. 
+\end{description}
+</para>
+
+</sect1>
+
+<sect1 id="app.alg.simpdiv" xreflabel="SimpDivSolve">
+<title>SimpDivSolve</title>
+<para>
+Computes a Nash equilibrium to a normal form game based on a
+simplicial subdivision algorithm.  The algorithm implemented is that
+of <citation><xref linkend="VTH87"></citation>.  
+The algorithm is a simplicial subdivision
+algorithm which can start at any point in the simplex.  The algorithm
+starts with a given grid size, follows a path of almost completely
+labeled subsimplexes, and converges to a completely labeled
+sub-simplex that approximates the solution.  Additional accuracy is
+obtained by refining the grid size and restarting from the previously
+found point.  The idea is that by restarting at a close approximation
+to the solution, each successive increase in accuracy will yield a
+short path, and hence be quick.
+</para>
+
+<para>
+In its pure form, the algorithm is guaranteed to find at least one
+mixed strategy equilibrium to any n-person game.  Experience shows
+that the algorithm works well, and is acceptably fast for many
+moderate size problems.  But in some examples it can be quite slow.
+The reason for this is that sometimes after restarting with a refined
+grid size, even though the starting point is a good approximation to
+the solution, the algorithm will go to the boundary of the simplex
+before converging back to a point that is close to the original
+starting point.  When this occurs, each halving of the grid size will
+take twice as long to converge as the previous grid size.  If a high
+degree of accuracy is required, or if the normal form is large, this
+can result in the algorithm taking a long time to converge.
+</para>
+
+<para>
+In order to combat the above difficulty, a parameter 'leash' has been
+added to the algorithm which places a limit on the distance which the
+algorithm can wander from the restart point. (Setting this parameter
+to 0 results in no limit, and gives the pure form of the algorithm.)
+With this parameter set to a non trivial value, the algorithm is no
+longer guaranteed to converge, and setting small values of the
+parameter will sometimes yield lack of convergence.  However,
+experience shows that values of the parameter on the order of 10
+generally do not destroy convergence, and yield much faster
+convergence.
+</para>
+
+<para>
+Parameters:
+
+\begin{description}
+\item[Stop after:] Maximum number of equilibria to find. Default is 1.  
+\item[n Restarts:] Number of restarts.  At each restart the mesh of the
+triangulation is halved.  So this parameter determines the final mesh
+by the formula ${1/2}^{ndivs}$.
+\item[Leash:] Sets the leashlength. Default is 0, which results in no
+constraint, or no leash.  
+\end{description}
+
+</para>
+</sect1>

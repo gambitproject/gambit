@@ -1,0 +1,245 @@
+<sect1 id="gui.conv">
+<title>Conventions used in the graphical interface</title>
+
+<para>
+This section discusses features of the graphical interface which
+are common between the extensive and normal forms.  For features which
+are specific to the extensive form, see <xref linkend="gui.efg">, and for
+features which are specific to the normal form, see <xref linkend="gui.nfg">.  
+</para>
+
+<sect2 id="gui.conv.structure">
+<title>Structure of game windows</title>
+
+<para>
+Extensive and normal form windows in the graphical interface share a
+common structure:
+<itemizedlist>
+<listitem>
+<para>
+A game window, which displays the game tree of the extensive form
+or the payoff table of the normal form;
+</para>
+</listitem>
+<listitem>
+<para>
+A profile table, displayed when the <guimenuitem>Profiles</guimenuitem>
+menu item is checked on the <guimenu>View</guimenu> menu, which organizes
+all strategy profiles currently in memory;
+</para>
+</listitem>
+<listitem>
+<para>
+A navigation window, which displays information about the currently
+selected object in the game, and can be used to navigate through the
+game display;
+</para>
+</listitem>
+<listitem>
+<para>
+An outcomes window, which lists all the outcomes currently defined in
+the game, and their associated payoffs to all players;
+</para>
+</listitem>
+<listitem>
+<para>
+A supports window, which organizes all the supports which have been
+computed by dominance elimination or defined by the user
+</para>
+</listitem>
+</itemizedlist>
+The last three windows are organized into a notebook, which is displayed
+whenever any of the <guimenuitem>Navigation</guimenuitem>,
+<guimenuitem>Outcomes</guimenuitem>, or <guimenuitem>Supports</guimenuitem>
+menu items are checked on the <guimenu>View</guimenu> menu.
+</para>
+
+<para>
+Details about the game window will be left for the subsequent separate
+sections addressing extensive and normal forms; the rest of this section
+will look at each of the auxiliary windows in turn.
+</para>
+
+</sect2>
+
+
+<sect2 id="gui.conv.profiles">
+<title>Working with strategy profiles</title>
+
+<para>
+The profile table organizes all mixed or behavior strategy profiles,
+as appropriate, that have been computed by algorithms or entered by
+the user.  Display of the profile table is togged by the checkable
+menu item <guimenuitem>Profiles</guimenuitem> on the <guimenu>View</guimenu>
+menu.  The profile table is also automatically displayed when an
+algorithm returns solutions.  A draggable sash along the top of the
+profile table permits resizing of the profiles window to taste.
+</para>
+
+<para>
+Each row in the table corresponds to one strategy profile.
+When a profile is selected, its row is highlighted; the selected profile
+is used by the game window to display strategy or action probabilities,
+values, or other information.  Information about the current profile 
+also appears in the <guilabel>Navigate</guilabel> window.
+Selecting a profile is done by left-clicking on the row corresponding to
+the profile.
+</para>
+
+<para>
+A variety of data dependent on the generating algorithm are available
+for most mixed or behavior profiles. Not every category is relevant
+for every profile.  If a certain data member is either not relevant or
+not available, it will be displayed as <guilabel>----</guilabel>.
+</para>
+
+<para>
+Clicking with the right mouse button within the profile table 
+accesses a popup menu with the following items:
+<itemizedlist>
+<listitem>
+<para><guimenuitem>Sort</guimenuitem></para>
+</listitem>
+<listitem>
+<para><guimenuitem>New</guimenuitem> creates a new profile and opens
+a dialog to edit its properties.  All profiles created with the
+<guimenuitem>New</guimenuitem> command are tagged with a creator
+field of <guilabel>User</guilabel>.</para>
+</listitem>
+<listitem>
+<para><guimenuitem>Duplicate</guimenuitem></para>
+</listitem>
+<listitem>
+<para><guimenuitem>Delete</guimenuitem></para>
+</listitem>
+<listitem>
+<para><guimenuitem>Properties</guimenuitem> displays a dialog to view
+and edit properties of the profile, including the probabilities assigned
+to actions or strategies.  Profiles which are edited using this dialog
+have their creator field reset to <guilabel>User</guilabel>.</para>
+</listitem>
+</itemizedlist>
+The <guilabel>Properties</guilabel> dialog also appears when a profile's
+entry in the table is double-clicked.
+</para>
+
+<para>
+When both the extensive and normal form representations of a game are
+displayed, the profile lists in the two windows are coordinated.
+</para>
+
+<para>
+When a game is edited and payoffs are changed, the equilibrium
+fields such as <guilabel>Nash</guilabel> will reset to 
+<guilabel>DK</guilabel>.  When a game is edited to change the number
+of information sets, actions, or strategies, all profiles are deleted.
+</para>
+
+<note>
+<title>Changes from previous versions</title>
+<para>
+In versions prior to 0.97, this was referred to as the
+<guilabel>Solutions</guilabel> window, and appeared as a separate frame.
+The nomenclature has been changed to reflect the usefulness of investigating
+the properties of profiles which might not satisfy any particular solution
+concepts.  Additionally, in prior versions, solutions had to be manually
+mapped from a normal form back to its corresponding extensive form, and
+the two solution lists were separate.
+</para>
+</note>
+</sect2>
+
+<sect2 id="gui.conv.supports">
+<title>Working with supports</title>
+<para>
+This dialog is used to create a new support or edit an existing
+support.  It is accessed through the {\bf Supports->New} or {\bf
+Supports->Edit} menu item.  Only the normal form version is shown, as
+the functionality for the extensive form is similar.
+
+The hilighted strategies are those that are included in the support.
+A new support starts with the default of the {\em full support},
+editing a support starts with the selected support as the default.  To
+deselect a player's strategy, click on it in the appropriate listbox.
+The strategy will no longer be hilighted.  When the dialog is
+dismissed, the newly created support will be added to the support
+list.
+
+This dialog is used to compute undominated strategies for a normal or
+extensive form games, and return a new support consisting of
+undominated strategies.  It is accessed via the {\bf 
+Supports->UnDominated} menu item.
+
+The following parameters can be selected:
+
+\begin{description}
+\item[Eliminate Iteratively:] Select this checkbox to iteratively
+eliminate dominated strategies. The result will be a nested sequence
+of supports, with the last one consisting of strategies that are
+undominated in the final support.
+\item[Type:] You can select the type of domination to use: weak or
+strong domination.  
+\item[Method:] You can select whether to eliminate only strategies
+that are dominated by a single (pure) strategy or by a combination of
+some strategies (mixed).  Elimination by mixed strategies is only
+available for normal form games.  For extensive form games this
+choicebox will also allow selection of {\bf Conditional} domination,
+which means that dominance computations are done using payoffs that
+are conditional on reaching the information set of the strategy,
+rather than on the payoff at the root node.
+\item[Precision:] This option is only available for mixed elimination,
+and determines whether the resulting computations are done in Rational
+or Floating point.  
+\item[Players:] You may select which players to eliminate dominated
+strategies for. The default is all players, meaning that dominated
+strategies for each player are computed over the initial support, and
+then eliminated simultaneously to create the new support.
+\end{description}
+
+</para>
+</sect2>
+
+<sect2 id="gui.conv.standard">
+<title>Standard Nash equilibrium algorithms</title>
+
+<para>
+In most cases, the first task a user will ask Gambit to do after entering
+a game is to compute some Nash equilibria.
+In general, it is not possible to &quot;black box&quot; the
+process of computing a Nash equilibrium, or a refinement thereof.
+The algorithm best suited to a particular task depends upon both
+the properties of the game, such as whether it is zero-sum, or how
+many players it has, the number of equilibria the user wants to find,
+and what refinements, if any, the equilibria should satisfy.
+However, both theory and experience can inform choices for algorithms
+and parameter settings which work &quot;well&quot; in general.
+</para>
+
+<para>
+For both extensive and normal forms, Gambit provides a set of
+standard Nash equilibrium computation algorithm settings.  The
+menu item <guimenuitem>Standard...</guimenuitem> on the
+<guisubmenu>Equilibrium</guisubmenu> submenu of the
+<guimenu>Tools</guimenu> menu displays a dialog listing the standard
+options available.  The dialog also indicates which algorithm and
+parameters will be used to compute the equilibria.
+</para>
+
+<para>
+Refinements currently supported by Gambit are sequential and
+subgame perfect Nash equilibria on the extensive form, and
+(trembling-hand) perfect equilibria on the normal form.
+<footnote>
+<para>
+An implementation of Yamamoto's algorithm
+<citation><xref linkend="Yam93"></citation>
+for finding one proper
+equilibrium in a normal form game is currently planned for release
+0.97.1.x.
+</para>
+</footnote>
+</para>
+
+</sect2>
+
+</sect1>

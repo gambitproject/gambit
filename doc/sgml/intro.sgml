@@ -1,0 +1,214 @@
+<chapter>
+    <title>Introduction</title>
+    <para>An introduction to Gambit</para>
+
+    <sect1><title>History and acknowledgements</title>
+      <para>
+The Gambit Project is a project for the development of computer code
+for the solution of extensive and normal form games.  The software
+developed under the project is public domain. The Gambit Project has been
+funded in part by National Science Foundation grants SBR-9308637 and
+SBR-9617854 to the California Institute of Technology and SBR-9308862
+to the University of Minnesota.</para>
+
+      <para>
+The Gambit Project was founded in the mid-1980s by Richard McKelvey.
+The original implementation was a graphical interface written in
+BASIC.  The code was ported to C around 1990 with the help of
+Bruce Bell, and this version was distributed publicly as
+version 0.13 in 1991 and 1992.
+	</para>
+
+      <para>
+A major step in the evolution of Gambit took place with the awarding
+of the NSF grants in 1994, with McKelvey and Andrew McLennan as
+principal investigators.  The grants sponsored a complete rewrite
+of Gambit in C++, with the code taking essentially the organization it
+has today.  The graphical interface was made portable across
+platforms through the use of the wxWindows library
+(<ulink url="http://www.wxwindows.org">http://www.wxwindows.org</ulink>),
+and a scripting language,
+the Gambit Command Language, was developed.  Version 0.94 of Gambit
+was released in the late summer of 1994, and version 0.96 followed in 1999.
+</para>
+
+      <para>
+Many other individuals have contributed to the project, by coding,
+documenting, and testing, especially students at Caltech and the
+University of Minnesota.  We wish to acknowledge their contributions
+alphabetically here:
+      <simplelist type="vert" columns="2">
+	<member>Bruce Bell</member>
+	<member>Anand Chelian</member>
+	<member>Matthew Derer</member>
+	<member>Nelson Escobar</member>
+	<member>Ben Freeman</member>
+	<member>Eugene Grayver</member>
+	<member>Todd Kaplan</member>
+	<member>Geoff Matters</member>
+	<member>Brian Trotter</member>
+	<member>Michael Vanier</member>
+	<member>Roberto Weber</member>
+	<member>Gary Wu</member>
+      </simplelist>
+      </para>
+
+      <para>
+The project especially wishes to thank Bernhard von Stengel,
+of the London School of Economics,  
+for help and advice on implementation of the sequence form
+and for contributing his &quot;clique&quot; code for identification of
+equilibrium components in two person games.
+      </para>
+
+      <para>
+This manual documents version 0.97 of Gambit.  With this version,
+the goal is to move Gambit towards the development and release practices
+of other Open Source software projects.  Therefore, releases will take
+place more frequently, with unstable releases being made publicly
+available for testing.  The goal will be to provide two stable releases
+a year, roughly coinciding with university semesters.
+	</para>
+
+      <para>
+Beginning with version 0.97, Gambit releases will be numbered
+0.x.y.z, with x denoting the major version, y the minor version, and
+z the patchlevel.  For historical reasons, the version number will
+always be preceded by the zero.  Whether a release is considered
+stable will be indicated on the Gambit website, and in the 
+<guimenuitem>About</guimenuitem> menu item on the 
+<guimenu>Help</guimenu> menu in the graphical interface.
+      </para>
+
+      <para>
+The initial release of version 0.97 improves upon 0.96 in two main
+ways.  First, the graphical interface has been reimplemented in
+version 2.2 of the wxWindows library.  This redesigned library offers
+more functionality than the 1.xx series used in previous releases,
+and therefore the graphical interface has been updated to reflect
+modern practices in user interface, menu layout, and so forth.  These
+changes should eliminate many of the misfeatures of the earlier versions
+of the graphical interface.  Secondly, the structure of the project
+files has been reorganized to bring it more in line with the practices
+of most Open Source projects, a process which will continue over the
+next several releases.  The goal is to make the internal API accessible
+enough for use in developing new tools for game theoretic analysis.
+For version 0.97, there are no significant changes to the command language
+itself.  A console-based binary can now be built under Windows for
+better scripting support on that platform, and a new cross-platform
+window interface is provided, replacing the MFC-based interface for
+Windows in version 0.96.
+      </para>
+</sect1>
+
+    <sect1><title>Getting and installing Gambit</title>
+      <para>
+The development and testing of Gambit takes place primarily
+on the following platforms:
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      Microsoft Windows 95, 98 and NT, using the free Borland C++ 5.5
+	      compiler.  The binary distributions for Windows should work on
+	      other versions of Windows, but may not be tested.
+	      </para>
+	    </listitem>
+	  <listitem>
+	    <para>
+	      RedHat Linux 6.x and 7.x, using the GTK toolkit and the latest
+	      version of <application>gcc</application>.  The wxWindows library
+	      also supports Motif/Lesstif, and the code should compile
+	      on other flavors of Linux and Unix; again, however, these
+	      may not be tested.
+	      </para>
+	    </listitem>
+	</itemizedlist>
+      </para>
+
+      <para>
+	The latest stable and unstable releases of Gambit can always
+	be found at the Gambit website at
+	<ulink url="http://www.hss.caltech.edu/gambit">http://www.hss.caltech.edu/gambit</ulink>.
+      </para>
+    </sect1>
+
+    <sect1><title>Contacting or contributing to the Gambit Project</title>
+      <para>
+	All email correspondence to the Gambit Project can be addressed to
+	<email>gambit@hss.caltech.edu</email>.  We welcome all manner of
+	suggestions, including feature requests, documentation improvements,
+	bug reports, bug fixes, and interest in contributing new code to
+	the Gambit library.
+      </para>
+
+      <para>
+	If you encounter a bug in Gambit, we want to hear about it.
+	It will be most helpful if, in reporting your problem, you
+	include the following information:
+	<orderedlist>
+	  <listitem>
+	    <para>The version number</para>
+	  </listitem>
+	  <listitem>
+	    <para>The platform(s) on which you experienced the problem</para>
+	  </listitem>
+	  <listitem>
+	    <para>As complete a description of the circumstances of the
+	      problem as possible.  It is especially helpful if you can
+	      provide a sequence of steps which reproduces the problem.</para>
+	  </listitem>
+	</orderedlist>
+	</para>
+
+      <para>
+	Currently, there is no formal techincal support for Gambit.
+	However, the developers try very hard to respond to user comments
+	and suggestions, and will make every effort to answer any questions
+	regarding the program and its documentation.
+	</para>
+
+      <para>
+	We hope you will find Gambit to be a useful tool for research and
+	instruction.
+      </para>
+
+    </sect1>
+
+
+<sect1>
+<title>About this manual</title>
+
+<para>
+This manual is written with the assumption the reader is familiar with
+the basic terms and concepts of game theory.  Where possible, Gambit
+uses terminology standard in game theory; definitions of game-theoretic
+concepts will only be introduced where confusion may occur.  
+Game theory novices should supplement this manual with a standard text
+on the topic; a list of some of these is given in the
+<xref linkend="bib">.
+</para>
+
+<para>
+Beginning with version 0.97, the Gambit manual is written using DocBook.
+This manual can always be browsed online at the Gambit website, and can
+be downloaded in HTML and PDF formats for local use.
+</para>
+
+<note>
+<title>Changes from previous versions</title>
+<para>
+This manual, particularly the graphical interface sections, has been
+substantially overhauled since the last release.  As a result, it is
+still in flux.  Please report any areas in which the manual is unclear
+or lacking to the Gambit address.
+</para>
+<para>
+Throughout the manual, changes from previous versions are highlighted
+in notes, such as this one. 
+</para> 
+</note>
+
+</sect1>
+
+
+ </chapter>

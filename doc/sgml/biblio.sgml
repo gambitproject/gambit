@@ -1,0 +1,308 @@
+<bibliography id="bib" xreflabel="bibliography">
+<title>Bibliography</title>
+
+<bibliodiv id="bib.cne">
+<title>Articles on computation of Nash equilibria</title>
+
+<biblioentry id="Eav71" xreflabel="Eav71">
+<biblioset relation="article">
+<author><firstname>B. C.</firstname><surname>Eaves</surname></author>
+<title>The linear complementarity problem</title>
+<pagenums>612-634</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Management Science</title>
+<volumenum>17</volumenum>
+<copyright><year>1971</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="KolMegSte94" xreflabel="KolMegSte94">
+<biblioset relation="article">
+<authorgroup>
+  <author><firstname>Daphne</firstname><surname>Koller</surname></author>
+  <author><firstname>Nimrod</firstname><surname>Megiddo</surname></author>
+  <author><firstname>Bernhard</firstname><surname>von Stengel</surname></author>
+</authorgroup>
+<title>
+Efficient computation of equilibria for extensive two-person games
+</title>
+<pagenums>247-259</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Games and Economic Behavior</title>
+<volumenum>14</volumenum>
+<copyright><year>1996</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="LemHow64" xreflabel="LemHow64">
+<biblioset relation="article">
+<authorgroup>
+<author><firstname>C. E.</firstname><surname>Lemke</surname></author>
+<author><firstname>J. T.</firstname><surname>Howson</surname></author>
+</authorgroup>
+<title>Equilibrium points of bimatrix games</title>
+<pagenums>413-423</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Journal of the Society of Industrial and Applied Mathematics</title>
+<volumenum>12</volumenum>
+<copyright><year>1964</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Man64" xreflabel="Man64">
+<biblioset relation="article">
+<author><firstname>O.</firstname><surname>Mangasarian</surname></author>
+<title>Equilibrium points in bimatrix games</title>
+<pagenums>778-780</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Journal of the Society for Industrial and Applied Mathematics</title>
+<volumenum>12</volumenum>
+<copyright><year>1964</year></copyright>
+</biblioset>
+
+</biblioentry>
+
+<biblioentry id="McK91" xreflabel="McK91">
+<author><firstname>Richard</firstname><surname>McKelvey</surname></author>
+<title>A Liapunov function for Nash equilibria</title>
+<copyright><year>1991</year></copyright>
+<orgname>California Institute of Technology</orgname>
+</biblioentry>
+
+<biblioentry id="McKMcL96" xreflabel="McKMcL96">
+  <biblioset relation="article">
+    <authorgroup>
+      <author>
+	<firstname>Richard</firstname><surname>McKelvey</surname>
+      </author>
+      <author>
+	<firstname>Andrew</firstname><surname>McLennan</surname>
+      </author>
+    </authorgroup>
+    <title>Computation of equilibria in finite games</title>
+    <pagenums>87-142</pagenums>
+  </biblioset>
+  <biblioset relation="book">
+    <title>Handbook of Computational Economics</title>
+    <editor><firstname>H.</firstname><surname>Amman</surname></editor>
+    <editor><firstname>D.</firstname><surname>Kendrick</surname></editor>
+    <editor><firstname>J.</firstname><surname>Rust</surname></editor>
+    <publisher>
+       <publishername>Elsevier</publishername>
+    </publisher>
+    <copyright><year>1996</year></copyright>
+  </biblioset>
+</biblioentry>
+
+<biblioentry id="Ros71" xreflabel="Ros71">
+<biblioset relation="article">
+<author><firstname>J.</firstname><surname>Rosenmuller</surname></author>
+<title>On a generalization of the Lemke-Howson Algorithm to 
+noncooperative n-person games</title>
+<pagenums>73-79</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>SIAM Journal of Applied Mathematics</title>
+<volumenum>21</volumenum>
+<copyright><year>1971</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Sha74" xreflabel="Sha74">
+<biblioset relation="article">
+<author><firstname>Lloyd</firstname><surname>Shapley</surname></author>
+<title>A note on the Lemke-Houson algorithm</title>
+<pagenums>175-189</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Mathematical Programming Study</title>
+<volumenum>1</volumenum>
+<copyright><year>1974</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="VTH87" xreflabel="VTH87">
+<biblioset relation="article">
+<authorgroup>
+<author><firstname>G.</firstname><surname>van der Laan</surname></author>
+<author><firstname>A. J. J.</firstname><surname>Talman</surname></author>
+<author><firstname>L.</firstname><surname>van Der Heyden</surname></author>
+</authorgroup>
+<title>Simplicial variable dimension algorithms for solving the nonlinear
+complementarity problem on a product of unit simplices using a general
+labelling</title>
+<pagenums>377-397</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Mathematics of Operations Research</title>
+<copyright><year>1987</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Wil71" xreflabel="Wil71">
+<biblioset relation="article">
+<author><firstname>Robert</firstname><surname>Wilson</surname></author>
+<title>Computing equilibria of n-person games</title>
+<pagenums>80-87</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>SIAM Applied Math</title>
+<volumenum>21</volumenum>
+<copyright><year>1971</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="Yam93" xreflabel="Yam93">
+<biblioset relation="article">
+  <author>
+    <firstname>Y.</firstname><surname>Yamamoto</surname>
+  </author>
+  <copyright><year>1993</year></copyright>
+  <title>A Path-Following Procedure to Find a 
+  Proper Equilibrium of Finite Games
+  </title>
+</biblioset>
+<biblioset relation="journal">
+  <title>International Journal of Game Theory</title>
+</biblioset>
+</biblioentry>         
+  
+</bibliodiv>
+
+<bibliodiv id="bib.theory">
+<title>General game theory articles</title>
+
+<biblioentry xreflabel="Harsanyi1967a">
+      <biblioset relation="article">
+	<author>
+	  <firstname>John</firstname><surname>Harsanyi</surname>
+	  </author>
+	<title>Games of Incomplete Information Played By
+	  Bayesian Players I</title>
+	<pagenums>159-182</pagenums>
+      </biblioset>
+      <biblioset relation="journal">
+	<title>Management Science</title>
+	<volumenum>14</volumenum>
+	<copyright><year>1967</year></copyright>
+      </biblioset>
+    </biblioentry>
+
+<biblioentry xreflabel="Harsanyi1967b">
+      <biblioset relation="article">
+	<author>
+	  <firstname>John</firstname><surname>Harsanyi</surname>
+	  </author>
+	<title>Games of Incomplete Information Played By
+	  Bayesian Players II</title>
+	<pagenums>320-334</pagenums>
+      </biblioset>
+      <biblioset relation="journal">
+	<title>Management Science</title>
+	<volumenum>14</volumenum>
+	<copyright><year>1967</year></copyright>
+      </biblioset>
+    </biblioentry>
+
+<biblioentry xreflabel="Harsanyi1968">
+      <biblioset relation="article">
+	<author>
+	  <firstname>John</firstname><surname>Harsanyi</surname>
+	  </author>
+	<title>Games of Incomplete Information Played By
+	  Bayesian Players III</title>
+	<pagenums>486-502</pagenums>
+      </biblioset>
+      <biblioset relation="journal">
+	<title>Management Science</title>
+	<volumenum>14</volumenum>
+	<copyright><year>1968</year></copyright>
+      </biblioset>
+    </biblioentry>
+
+<biblioentry id="KreWil82" xreflabel="KreWil82">
+      <biblioset relation="article">
+	<authorgroup>
+	  <author>
+	    <firstname>David</firstname><surname>Kreps</surname>
+	    </author>
+	  <author>
+	    <firstname>Robert</firstname><surname>Wilson</surname>
+	  </author>
+	</authorgroup>
+	<title>Sequential Equilibria</title>
+	<pagenums>863-894</pagenums>
+      </biblioset>
+      <biblioset relation="journal">
+	<title>Econometrica</title>
+	<volumenum>50</volumenum>
+	<copyright><year>1982</year></copyright>
+      </biblioset>
+    </biblioentry>
+
+<biblioentry id="McKPal95" xreflabel="McKPal95">
+<biblioset relation="article">
+<authorgroup>
+<author><firstname>Richard</firstname><surname>McKelvey</surname></author>
+<author><firstname>Tom</firstname><surname>Palfrey</surname></author>
+</authorgroup>
+<title>Quantal response equilibria for normal form games</title>
+<pagenums>6-38</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Games and Economic Behavior</title>
+<volumenum>10</volumenum>
+<copyright><year>1995</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry id="McKPal98" xreflabel="McKPal98">
+<biblioset relation="article">
+<authorgroup>
+<author><firstname>Richard</firstname><surname>McKelvey</surname></author>
+<author><firstname>Tom</firstname><surname>Palfrey</surname></author>
+</authorgroup>
+<title>Quantal response equilibria for extensive form games</title>
+<pagenums>9-41</pagenums>
+</biblioset>
+<biblioset relation="journal">
+<title>Experimental Economics</title>
+<volumenum>1</volumenum>
+<copyright><year>1998</year></copyright>
+</biblioset>
+</biblioentry>
+
+<biblioentry xreflabel="vanDamme83">
+  <author>
+    <firstname>Eric</firstname><surname>van Damme</surname>
+    </author>
+  <copyright><year>1983</year></copyright>
+  <title>Stability and Perfection of Nash Equilibria</title>
+  <publisher>
+    <publishername>Springer-Verlag</publishername>
+    <address><city>Berlin</city></address>
+  </publisher>
+</biblioentry>
+
+</bibliodiv>
+
+<bibliodiv id="bib.general">
+<title>Textbooks and general reference</title>
+<biblioentry id="Mye91" xreflabel="Mye91">
+    <author>
+      <firstname>Roger</firstname><surname>Myerson</surname>
+    </author>
+    <copyright><year>1991</year></copyright>
+    <title>Game Theory</title>
+    <subtitle>Analysis of Conflict</subtitle>
+    <publisher>
+      <publishername>Harvard University Press</publishername>
+    </publisher>
+  </biblioentry>
+</bibliodiv>
+
+</bibliography>

@@ -1,0 +1,12 @@
+<!ENTITY intro SYSTEM "intro.sgml">
+<!ENTITY guistart SYSTEM "guistart.sgml">
+<!ENTITY guiconv SYSTEM "guiconv.sgml">
+<!ENTITY guiefg SYSTEM "guiefg.sgml">
+<!ENTITY guinfg SYSTEM "guinfg.sgml">
+<!ENTITY gclbasic SYSTEM "gclbasic.sgml">
+<!ENTITY gclbif SYSTEM "gclbif.sgml">
+<!ENTITY bifaccuracy SYSTEM "gcl/bifaccuracy.sgml">
+<!ENTITY bifactionnumber SYSTEM "gcl/bifactionnumber.sgml">
+<!ENTITY algref SYSTEM "algref.sgml">
+<!ENTITY biblio SYSTEM "biblio.sgml">
+
