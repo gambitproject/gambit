@@ -1,0 +1,335 @@
+//
+//# FILE: lpsolve.imp -- Implementation of LP solver
+//#
+//# $Id$ 
+//#
+
+#include "lpsolve.h"
+
+void Epsilon(double &v, int i) 
+{
+  if(i==1)v=(double)1.0e-5;
+  if(i==2)v=(double)1.0e-8;
+  if(i==3)v=(double)1.0e-6;
+}
+
+void Epsilon(gRational &v, int i) { v=(gRational)0;}
+
+template <class T>
+LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
+		    const gVector<T> &c,int neq = 0) 
+  : well_formed(1), feasible(1), bounded(1), 
+    nvars(c.Length()),neqs(b.Length()),
+    opt_bfs((T)0),  dual_bfs((T)0) ,A(A), b(b), c(c), tab(0), 
+    UB(c.Length()+b.Length()), LB(b.Length()+c.Length()), 
+    ub(c.Length()+b.Length()),lb(c.Length()+b.Length()),
+    xx(c.Length()+b.Length()),
+    y(b.Length()),x(b.Length()),d(b.Length()),
+    cost(c.Length()+b.Length())
+{
+  Epsilon(eps1,1);
+  Epsilon(eps2,2);
+  Epsilon(eps3,3);
+
+      // Check dimensions
+  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
+    well_formed = 0;
+    return;
+  }
+      // initialize data
+  UB = 0; LB = 0;
+  ub = (T)0; lb = (T)0;
+  int i,num_ineq;
+  num_ineq = A.NumRows()-neq;
+
+//  gout << "\nNum inequalities = " << num_ineq;
+  
+  gout << "\n--- Phase I ---\n";
+  
+      // Define Phase I upper and lower bounds
+  for(i=1;i<=nvars;i++) {
+    LB[i]=1;
+    lb[i]=(T)0;
+  }
+      // for slack variables
+  for(i = 1;i<= neqs;i++) {
+    if(b[i] >= (T)0) LB[nvars+i] = 1;
+    else UB[nvars+i] = 1;
+  }
+      // define Phase 1 unit cost vector
+  cost = (T)0;
+  for (i = 1; i <= neqs; i++)  {
+    cost[nvars+i] = (T)0;
+    if (UB[i]) cost[nvars+i] = (T)1;
+    else 
+      if(i > num_ineq) cost[nvars+i] = -(T)1;
+  }
+  
+  
+//  gout << "\nUB = " <<  UB << " " << " LB = " << LB;
+//  gout << "\nub = " <<  ub << " " << " lb = " << lb;
+//  gout << "\nc = " <<  cost;
+  
+      // Initialize the tableau
+  
+  tab = new LPTableau<T>(A,b);
+  tab->SetCost(cost);
+  
+  gout << "\nInitial Tableau = \n";
+  tab->Dump(gout);
+  
+  
+  Solve();
+  
+  gout << "\nFinal tableau: ";
+  tab->Dump(gout);   gout << '\n';
+  
+  gout << "\n--- End Phase I ---\n";
+  
+  if(tab->TotalCost() > (T)0) {
+    feasible = 0;
+    return;
+  }
+  
+// Define Phase II upper and lower bounds for slack variables
+  
+  UB = 0; LB = 1;
+  ub = (T)0; lb = (T)0;
+  for(i=num_ineq + 1;i<= neqs;i++) UB[nvars+i] = 1;
+  
+// install Phase II unit cost vector
+  
+  for(i=1;i<=nvars;i++)
+    cost[i] = c[i];
+  for(i=nvars+1;i<=nvars+neqs;i++)
+    tab->SetCost(cost);
+  
+//  gout << "\nUB = " <<  UB << " " << " LB = " << LB;
+//  gout << "\nub = " <<  ub << " " << " lb = " << lb;
+//  gout << "\nc = " <<  cost;
+  
+  gout << "\nInitial basis: ";
+  tab->Dump(gout);   gout << '\n';
+  
+  Solve();
+  
+  gout << "\nFinal basis: ";
+  tab->Dump(gout);   gout << '\n';
+  tab->DualVector(y);
+  gout << "DualVector = " << y << "\n";
+  opt_bfs = tab->GetBFS();
+//  opt_bfs.Dump(gout);
+//  gout << "\n";
+//  BFS<T> dual_bfs((T)0);
+  dual_bfs = tab->DualBFS();
+//  dual_bfs.Dump(gout);
+  for(i=1;i<=neqs;i++)
+    if(dual_bfs.IsDefined(-i))
+      opt_bfs.Define(-i,dual_bfs(-i));
+//  gout << "\n";
+//  opt_bfs.Dump(gout);
+
+  
+}
+
+
+template <class T> LPSolve<T>::
+LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
+	const gVector<T> &C,  const gVector<int> &sense, 
+	const gVector<int> &LB,  const gVector<T> &lb, 
+	const gVector<int> &UB, const gVector<T> &ub)
+  : well_formed(1), feasible(1), bounded(1),  
+    nvars(c.Length()),neqs(b.Length()),
+    opt_bfs((T)0),  dual_bfs((T)0),  A(A), b(b), c(c), tab(0), 
+    UB(c.Length()+b.Length()), LB(b.Length()+c.Length()), 
+    ub(c.Length()+b.Length()),lb(c.Length()+b.Length()),
+    xx(c.Length()+b.Length()),
+    y(b.Length()),x(b.Length()),d(b.Length()),
+    cost(c.Length()+b.Length())
+{ 
+  gout << "\n This constructor not implemented yet";
+  assert(0);
+}
+
+template <class T> void LPSolve<T>::Solve()
+{
+  int i, out,in,outlab,xlab;
+  outlab = 0;
+  gVector<T> a(neqs);
+  
+  for(i=1;i<=xx.Length();i++) {
+    if(LB[i]) xx[i]=lb[i];
+    else if(UB[i]) xx[i]=ub[i];
+    else xx[i]=(T)0;
+  }
+  tab->BasisVector(x);
+  for(i=1;i<=x.Length();i++) {
+    xlab = tab->Label(i);
+    if(xlab<0) xlab=nvars-xlab;
+    xx[xlab]=x[i];
+  }
+  
+  do { 
+    tab->DualVector(y);         // step 1: Solve y B = c_B
+    do {
+      in = Enter();            // step 2: Choose entering variable 
+      if(in) {
+	if(in>0) 
+	  A.GetColumn(in,a);
+	else {
+	  a=(T)0;a[-in]=(T)1;
+	}
+	tab->Solve(a,d);    // step 3: Solve B d = a
+	out = Exit(in);          // step 4: Choose leaving variable
+	outlab = tab->Label(out);
+      }
+    }
+    while(outlab==in && outlab !=0); 
+    if(in) {
+      tab->Pivot(out,in);       // step5b: Pivot new variable into basis
+      tab->BasisVector(x);
+      tab->Dump(gout);
+      gout << ", Cost = " << tab->TotalCost() << "\n";
+      for(int k=1;k<=x.Length();k++) {
+	int xlab = tab->Label(k);
+	gout.SetExpMode();
+	if(k==x.Length()) {
+//	  gout << "\nk = " << k << " xlab = " << xlab; 
+//	  gout << " x[k] = " << x[k]; 
+	}
+	if(xlab>0) { 
+	  if(!(x[k]>=(T)0)) {
+//	    gout << "\nk = " << k << " xlab = " << xlab; 
+//	    gout << " x[k] = " << x[k]; 
+//	    assert(x[k]>=(T)0);
+	  }
+	}
+	if(xlab<0) {
+	  xlab=nvars-xlab;
+//	  if(UB[xlab])assert(x[k]<=ub[xlab]);
+	  if(LB[xlab])if(!(x[k]>=lb[xlab])) {
+//	    gout << "\nk = " << k << " xlab = " << xlab; 
+//	    gout << " x[k] = " << x[k]; 
+//	    assert(x[k]>=lb[xlab]);
+	  }
+	}
+	gout.SetFloatMode();
+      }
+//      gout << "\nAfter pivot tab = \n";
+    }
+  }
+  while(in);
+  
+}
+  
+template <class T> int LPSolve<T>::Enter()
+{ 
+  int i,in;
+  T z;
+  gVector<T> tmp(A.MinRow(), A.MaxRow());
+
+  in = 0;
+
+  T test = (T)0+eps1;
+    for(i=1;i<=nvars+neqs;i++) {
+      int lab = i;
+      if(i>nvars)lab=nvars-i;
+      if(!tab->Member(lab)) {
+	if(i<=nvars) {
+	  A.GetColumn(i,tmp);
+	  z = y * tmp;
+	}
+	else 
+	  z = y[i-nvars];
+//	gout << "\n i = " << -i << " z: " << z << " a: " << tmp;
+	if(cost[i]-z > test)  
+//	  if(UB[i]==0 || (UB[i]==1 && x[i] < ub[i]))
+	  if(UB[i]==0 || (UB[i]==1 && (T)0 < ub[i])) 
+	    {test=cost[i]-z;in = lab;flag = -1;}
+	if(z - cost[i] > test) 
+//	  if(LB[i]==0 || (LB[i]==1 && x[i] > lb[i])) 
+	  if(LB[i]==0 || (LB[i]==1 && (T)0 > lb[i])) 
+	    {test=z-cost[i];in=lab;flag = 1;}
+      }
+    }
+  return in;
+}
+
+template <class T> int LPSolve<T>::Exit(int in)
+{
+  int i,j,out,lab,col;
+  T t, tmin;
+
+  tmin = (T)100000000;
+  for (j=1; j<=neqs; j++)  {
+    lab=tab->Label(j);
+    col=lab;
+    if(lab<0)col=nvars-lab;
+    if(flag == -1) {
+      t = (T)1000000000;
+      if (d[j] > eps2 && LB[col]==1) {
+	t = (x[j]-lb[col])/d[j];
+      }
+      if (d[j] < eps2 && UB[col]==1) { 
+	t = (x[j]-ub[col])/d[j];
+      }
+      if(t>=(T)0 && t < tmin) {
+	tmin = t;
+	out = j;
+      }
+    }
+    if(flag == 1) {
+      t = (T)1000000000;
+      if (d[j] > eps2 && UB[col]==1) { 
+	t = (ub[col]-x[j])/d[j];
+      }
+      if (d[j] < eps2 && LB[col]==1) { 
+	t = (lb[col]-x[j])/d[j];
+      }
+      if(t >= (T)0 && t < tmin) {
+	tmin = t;
+	out = j;
+      }
+    }
+  }
+  return out;
+}
+
+template <class T> T LPSolve<T>::OptimumCost(void) const
+{
+  return total_cost;
+}
+
+template <class T> const gVector<T> &LPSolve<T>::OptimumVector(void) const
+{
+  return xx;
+}
+
+template <class T> int LPSolve<T>::IsFeasible(void) const
+{
+  return feasible;
+}
+
+template <class T> int LPSolve<T>::IsBounded(void) const
+{
+  return bounded;
+}
+
+template <class T> int LPSolve<T>::IsWellFormed(void) const
+{
+  return well_formed;
+}
+
+template <class T> long LPSolve<T>::NumPivots(void) const
+{
+  return tab->NumPivots();
+}
+
+template <class T> void LPSolve<T>::OptBFS(BFS<T> &b) const
+{
+  b = opt_bfs;
+}
+
+template <class T> LPSolve<T>::~LPSolve()
+{ if(tab) delete tab; }
+
