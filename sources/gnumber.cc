@@ -175,6 +175,7 @@ Precision gNumber::GetPrecision(void) const
   return rep;
 }
 
+  // Comparison operators
 bool operator == (const gNumber& x, const gNumber& y)
 {
   if (x.rep == precDOUBLE && y.rep == precDOUBLE)
@@ -241,7 +242,7 @@ bool operator <= (const gNumber& x, const gNumber& y)
   {
     double eps;
     gEpsilon(eps, 8);
-    return y.dval <= (double(*(x.rval)) + eps);
+    return y.dval >= (double(*(x.rval)) - eps);
   }
   else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
   {
@@ -273,7 +274,7 @@ bool operator >= (const gNumber& x, const gNumber& y)
   {
     double eps;
     gEpsilon(eps, 8);
-    return y.dval >= (double(*(x.rval)) - eps);
+    return y.dval <= (double(*(x.rval)) + eps);
   }
   else // (x.rep == precDOUBLE && y.rep == precRATIONAL)
   {
