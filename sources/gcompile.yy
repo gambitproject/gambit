@@ -55,6 +55,7 @@
 %token ASSIGN
 %token SEMI
 %token LBRACK
+%token DBLLBRACK
 %token RBRACK
 %token LBRACE
 %token RBRACE
@@ -162,6 +163,8 @@ E6:           PLUS E7
   |           E7
 
 E7:           E8
+  |           E7 DBLLBRACK expression RBRACK RBRACK 
+                 { emit(new Subscript); }
   ;
 
 E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
@@ -329,7 +332,9 @@ int GCLCompiler::yylex(void)
     case '/':   return SLASH;
     case '%':   return PERCENT;
     case '=':   return EQU;
-    case '[':   return LBRACK;
+    case '[':   c = nextchar();
+                if (c == '[')  return DBLLBRACK;
+                else   { ungetchar(c);  return LBRACK; }
     case ']':   return RBRACK;
     case ':':   c = nextchar();
                 if (c == '=')  return ASSIGN;
