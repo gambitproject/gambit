@@ -115,8 +115,10 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   Deeper();
   gList<gArray<int> > PivotList;
   gArray<int> pivot(2);
-  if(tab.IsLexMin()) 
+  if(tab.IsLexMin()) {
     List.Append(tab.GetBFS1());
+    DualList.Append(tab.DualBFS());
+  }
   assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
@@ -169,6 +171,11 @@ template <class T> const gList<BFS<T> > &VertEnum<T>::VertexList() const
   return List;
 }
 
+template <class T> const gList<BFS<T> > &VertEnum<T>::DualVertexList() const
+{ 
+  return DualList;
+}
+
 template <class T> void VertEnum<T>::Vertices(gList<gVector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
@@ -203,6 +210,14 @@ DoubleVertEnum<T>::DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
     btemp(_b), c(_A.MinCol(),_A.MaxCol()), npivots(0), 
     nodes(0), status(status_) 
 {
+  Enum();
+}
+
+template <class T> DoubleVertEnum<T>::~DoubleVertEnum()
+{ }
+
+template <class T> void DoubleVertEnum<T>::Enum()
+{
       // Check dimensions
   assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
   assert(A2.NumRows() == b2.Length());
@@ -217,14 +232,6 @@ DoubleVertEnum<T>::DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   btemp = -(T)1;
   c = (T)1;
 
-  Enum();
-}
-
-template <class T> DoubleVertEnum<T>::~DoubleVertEnum()
-{ }
-
-template <class T> void DoubleVertEnum<T>::Enum()
-{
   LPTableau<T> tab(A,b);
   tab.SetCost(c);
   Tableau<T> tab2(A2,b2);
@@ -263,22 +270,37 @@ template <class T> void DoubleVertEnum<T>::Deeper()
   nodes++;
 }
 
-template <class T> void DoubleVertEnum<T>::Search(LPTableau<T> &tab, Tableau<T> &tab2)
+template <class T> void DoubleVertEnum<T>::
+EnumerateComplementaryFace(LPTableau<T> &tab, Tableau<T> &tab2)
+{
+  int i;
+  gout << "\ntab:";
+  tab.Dump(gout);
+  gout << "\ntab2:";
+  tab2.Dump(gout);
+  gVector<T> x(tab.MinRow(),tab.MaxRow());
+  tab.BasisVector(x);
+  for(i=tab.MinRow();i<=tab.MaxRow();i++)
+    if(x[i]>tab.Epsilon(2)) tab2.Mark(tab.Label(i));
+
+  if(tab2.IsFeasible()) {
+    List.Append(tab.GetBFS1());
+    List2.Append(tab2.GetBFS1());
+  }
+
+  for(i=tab.MinRow();i<=tab.MaxRow();i++)
+    if(x[i]>tab.Epsilon(2)) tab2.UnMark(tab.Label(i));
+}
+
+template <class T> void DoubleVertEnum<T>::
+Search(LPTableau<T> &tab, Tableau<T> &tab2)
 {
   int k;
   Deeper();
   gList<gArray<int> > PivotList;
   gArray<int> pivot(2);
-  if(tab.IsLexMin()) {
-//    gout << "\ntab:";
-//    tab.Dump(gout);
-//    gout << "\ntab2:";
-//    tab2.Dump(gout);
-    if(tab2.IsFeasible()) {
-      List.Append(tab.GetBFS1());
-      List2.Append(tab2.GetBFS1());
-    }
-  }
+  if(tab.IsLexMin())
+    EnumerateComplementaryFace(tab,tab2);
   assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {

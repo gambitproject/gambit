@@ -37,6 +37,7 @@ private:
   const gVector<T> &b;
   gVector<T> btemp,c;
   gList<BFS<T> > List;
+  gList<BFS<T> > DualList;
   gList<gVector<T> > Verts;
   long npivots,nodes;
   gStatus &status;
@@ -53,6 +54,7 @@ public:
   virtual ~VertEnum();
 
   const gList<BFS<T> > &VertexList() const;
+  const gList<BFS<T> > &DualVertexList() const;
   void Vertices(gList<gVector<T> > &verts) const;
   long NumPivots() const;
   void Dump(gOutput &) const;
@@ -79,6 +81,7 @@ private:
   void Report();
   void Search(LPTableau<T> &, Tableau<T> &);
   void DualSearch(LPTableau<T> &, Tableau<T> &);
+  void EnumerateComplementaryFace(LPTableau<T> &, Tableau<T> &);
 public:
   DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 		 const gMatrix<T> &_A2, const gVector<T> &_b2, 
