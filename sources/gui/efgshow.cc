@@ -436,8 +436,12 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
 
 void EfgShow::OnOutcomesEdited(void)
 {
+  for (int i = 1; i <= m_profiles.Length(); i++) {
+    m_profiles[i].Invalidate();
+  }
   m_treeWindow->Refresh();
   m_outcomeWindow->UpdateValues();
+  m_profileTable->UpdateValues();
 }
 
 void EfgShow::OnSupportsEdited(void)
@@ -1131,6 +1135,8 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 	m_efg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
       }
     }
+    m_outcomeWindow->UpdateValues();
+    m_supportWindow->UpdateValues();
   }
 }
 
@@ -2073,7 +2079,8 @@ void EfgShow::AdjustSizes(void)
 
   if ((m_navigateWindow && m_nodeSashWindow->IsShown())) {
     if (m_treeWindow) {
-      m_treeWindow->SetSize(250, 0, width - 250, height);
+      m_treeWindow->SetSize(m_nodeSashWindow->GetRect().width, 0,
+			    width - m_nodeSashWindow->GetRect().width, height);
     }
   }
   else if (m_treeWindow) {
@@ -2081,7 +2088,7 @@ void EfgShow::AdjustSizes(void)
   }
 
   if (m_navigateWindow && m_nodeSashWindow->IsShown()) {
-    m_nodeSashWindow->SetSize(0, 0, 250, height);
+    m_nodeSashWindow->SetSize(0, 0, m_nodeSashWindow->GetRect().width, height);
   }
 
   if (m_treeWindow) {

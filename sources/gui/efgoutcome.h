@@ -18,6 +18,7 @@ private:
   EfgShow *m_parent;
   wxMenu *m_menu;
 
+  void OnChar(wxKeyEvent &);
   void OnCellChanged(wxGridEvent &);
   void OnCellRightClick(wxGridEvent &);
   void OnLabelRightClick(wxGridEvent &);

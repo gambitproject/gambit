@@ -20,6 +20,7 @@ const int idPOPUP_ATTACH = 2003;
 const int idPOPUP_DETACH = 2004;
 
 BEGIN_EVENT_TABLE(NfgOutcomeWindow, wxGrid)
+  EVT_KEY_DOWN(NfgOutcomeWindow::OnChar)
   EVT_GRID_CELL_CHANGE(NfgOutcomeWindow::OnCellChanged)
   EVT_GRID_CELL_RIGHT_CLICK(NfgOutcomeWindow::OnCellRightClick)
   EVT_GRID_LABEL_RIGHT_CLICK(NfgOutcomeWindow::OnLabelRightClick)
@@ -48,11 +49,6 @@ NfgOutcomeWindow::NfgOutcomeWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   SetDefaultCellAlignment(wxCENTER, wxCENTER);
   EnableDragRowSize(false);
 
-  for (int i = 1; i <= p_nfgShow->Game().NumPlayers(); i++) {
-    SetLabelValue(wxHORIZONTAL, 
-		  (char *) p_nfgShow->Game().Players()[i]->GetName(), i);
-  }
-  
   AdjustScrollbars();
 
   m_menu = new wxMenu("Outcomes");
@@ -82,7 +78,7 @@ void NfgOutcomeWindow::UpdateValues(void)
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
-    NFOutcome *outcome = nfg.GetOutcome(outc);
+    NFOutcome *outcome = nfg.Outcomes()[outc];
 
     SetCellValue((char *) outcome->GetName(), outc - 1, 0);
 
@@ -90,6 +86,41 @@ void NfgOutcomeWindow::UpdateValues(void)
       SetCellValue((char *) ToText(nfg.Payoff(outcome, nfg.Players()[pl])),
 		   outc - 1, pl);
     }
+  }
+
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+    if (nfg.Players()[pl]->GetName() != "") {
+      SetLabelValue(wxHORIZONTAL, (char *) nfg.Players()[pl]->GetName(), pl);
+    }
+    else {
+      SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);
+    }
+  }
+  
+  AdjustScrollbars();
+}
+
+//
+// This implements the automatic creation of a new outcome via
+// pressing return or down-arrow while in the last row
+//
+void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
+{
+  if (GetCursorRow() == GetRows() - 1 &&
+      (p_event.GetKeyCode() == WXK_DOWN ||
+       p_event.GetKeyCode() == WXK_RETURN)) {
+    if (IsCellEditControlEnabled()) {
+      SaveEditControlValue();
+      HideCellEditControl();
+    }
+    m_parent->Game().NewOutcome();
+    AppendRows();
+    m_parent->OnOutcomesEdited();
+    UpdateValues();
+    SetGridCursor(GetRows() - 1, 0);
+  }
+  else {
+    p_event.Skip();
   }
 }
 
@@ -132,7 +163,7 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game().DeleteOutcome(m_parent->Game().GetOutcome(GetGridCursorRow() + 1));
+    m_parent->Game().DeleteOutcome(m_parent->Game().Outcomes()[GetGridCursorRow() + 1]);
     m_parent->OnOutcomesEdited();
   }
 }
@@ -141,7 +172,7 @@ void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
     m_parent->Game().SetOutcome(m_parent->GetContingency(),
-				m_parent->Game().GetOutcome(GetGridCursorRow() + 1));
+				m_parent->Game().Outcomes()[GetGridCursorRow() + 1]);
     m_parent->OnOutcomesEdited();
   }
 }

@@ -540,11 +540,8 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
   if (m_editable &&
       p_event.GetRow() < m_support.NumStrats(GetRowPlayer()) &&
       p_event.GetCol() < m_support.NumStrats(GetColPlayer())) {
-    /*
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-			 NFG_EDIT_OUTCOMES_PAYOFFS);
+    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, NFG_EDIT_CONTINGENCY);
     m_parent->AddPendingEvent(event);
-    */
   }
 }
 

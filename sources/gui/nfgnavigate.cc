@@ -59,6 +59,7 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Current contingency"),
 			 wxVERTICAL);
 
+  m_playerNames = new wxStaticText *[nfg.NumPlayers()];
   m_stratProfile = new wxChoice *[nfg.NumPlayers()];
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
     m_stratProfile[pl-1] = new wxChoice(this, idSTRATEGY_CHOICE);
@@ -71,9 +72,16 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
     m_stratProfile[pl-1]->SetSelection(0);
 
     wxBoxSizer *stratSizer = new wxBoxSizer(wxHORIZONTAL);
-    stratSizer->Add(new wxStaticText(this, -1,
-				     (char *) ("Player " + ToText(pl))),
-		    1, wxALIGN_LEFT | wxRIGHT, 5);
+    if (player->GetName() != "") {
+      m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
+					     (char *) player->GetName());
+    }
+    else {
+      m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
+					     wxString::Format("Player %d",
+							      pl));
+    }
+    stratSizer->Add(m_playerNames[pl-1], 1, wxALIGN_LEFT | wxRIGHT, 5);
     stratSizer->Add(m_stratProfile[pl-1], 0, wxALL, 0);
     contViewSizer->Add(stratSizer, 0, wxALL | wxEXPAND, 5);
   }
@@ -90,6 +98,11 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   Show(true);
 }
 
+NfgNavigateWindow::~NfgNavigateWindow()
+{
+  delete [] m_playerNames;
+  delete [] m_stratProfile;
+}
 
 void NfgNavigateWindow::SetProfile(const gArray<int> &p_profile)
 {
@@ -179,3 +192,28 @@ void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
   }
 }
 
+void NfgNavigateWindow::UpdateLabels(void)
+{
+  const Nfg &nfg = m_parent->Game();
+
+  int rowSelection = m_rowChoice->GetSelection();
+  int colSelection = m_colChoice->GetSelection();
+  m_rowChoice->Clear();
+  m_colChoice->Clear();
+  
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+    wxString playerName = (char *) (ToText(pl) + ": " +
+				    nfg.Players()[pl]->GetName());
+    m_rowChoice->Append(playerName);
+    m_colChoice->Append(playerName);
+    if (nfg.Players()[pl]->GetName() != "") {
+      m_playerNames[pl-1]->SetLabel((char *) nfg.Players()[pl]->GetName());
+    }
+    else {
+      m_playerNames[pl-1]->SetLabel(wxString::Format("Player %d", pl));
+    }
+  }
+
+  m_rowChoice->SetSelection(rowSelection);
+  m_colChoice->SetSelection(colSelection);
+}

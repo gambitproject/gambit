@@ -20,6 +20,7 @@ const int idPOPUP_ATTACH = 2003;
 const int idPOPUP_DETACH = 2004;
 
 BEGIN_EVENT_TABLE(EfgOutcomeWindow, wxGrid)
+  EVT_KEY_DOWN(EfgOutcomeWindow::OnChar)
   EVT_GRID_CELL_CHANGE(EfgOutcomeWindow::OnCellChanged)
   EVT_GRID_CELL_RIGHT_CLICK(EfgOutcomeWindow::OnCellRightClick)
   EVT_GRID_LABEL_RIGHT_CLICK(EfgOutcomeWindow::OnLabelRightClick)
@@ -48,11 +49,6 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   SetDefaultCellAlignment(wxCENTER, wxCENTER);
   EnableDragRowSize(false);
 
-  for (int i = 1; i <= p_efgShow->Game()->NumPlayers(); i++) {
-    SetLabelValue(wxHORIZONTAL, 
-		  (char *) p_efgShow->Game()->Players()[i]->GetName(), i);
-  }
-  
   AdjustScrollbars();
 
   m_menu = new wxMenu("Outcomes");
@@ -69,6 +65,16 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 void EfgOutcomeWindow::UpdateValues(void)
 {
   const FullEfg &efg = *m_parent->Game();
+
+  if (GetCols() < efg.NumPlayers() + 1) {
+    AppendCols(efg.NumPlayers() + 1 - GetCols());
+
+    for (int row = 0; row < GetRows(); row++) {
+      for (int col = 1; col < GetCols(); col++) {
+	SetCellEditor(row, col, new NumberEditor);
+      }
+    }
+  }
 
   if (GetRows() != efg.NumOutcomes()) {
     DeleteRows(0, GetRows());
@@ -90,6 +96,41 @@ void EfgOutcomeWindow::UpdateValues(void)
       SetCellValue((char *) ToText(efg.Payoff(outcome, efg.Players()[pl])),
 		   outc - 1, pl);
     }
+  }
+
+  for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
+    if (efg.Players()[pl]->GetName() != "") {
+      SetLabelValue(wxHORIZONTAL, (char *) efg.Players()[pl]->GetName(), pl);
+    }
+    else {
+      SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);
+    }
+  }
+
+  AdjustScrollbars();
+}
+
+//
+// This implements the automatic creation of a new outcome via
+// pressing return or down-arrow while in the last row
+//
+void EfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
+{
+  if (GetCursorRow() == GetRows() - 1 &&
+      (p_event.GetKeyCode() == WXK_DOWN ||
+       p_event.GetKeyCode() == WXK_RETURN)) {
+    if (IsCellEditControlEnabled()) {
+      SaveEditControlValue();
+      HideCellEditControl();
+    }
+    m_parent->Game()->NewOutcome();
+    AppendRows();
+    m_parent->OnOutcomesEdited();
+    UpdateValues();
+    SetGridCursor(GetRows() - 1, 0);
+  }
+  else {
+    p_event.Skip();
   }
 }
 

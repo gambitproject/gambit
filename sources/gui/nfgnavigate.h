@@ -15,6 +15,7 @@
 class NfgNavigateWindow : public wxPanel {
 private:
   NfgShow *m_parent;
+  wxStaticText **m_playerNames;
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
 
   int m_rowPlayer, m_colPlayer;
@@ -26,7 +27,7 @@ private:
 
 public:
   NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent);
-  virtual ~NfgNavigateWindow() { }
+  virtual ~NfgNavigateWindow();
   
   void SetProfile(const gArray<int> &profile);
   gArray<int> GetProfile(void) const;
@@ -42,6 +43,8 @@ public:
 
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }
+
+  void UpdateLabels(void);
 
   DECLARE_EVENT_TABLE()
 };

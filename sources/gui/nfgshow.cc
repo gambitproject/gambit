@@ -119,6 +119,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnProfileSelected)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
+  EVT_SASH_DRAGGED(idINFOWINDOW, NfgShow::OnSashDrag)
   EVT_SASH_DRAGGED(idSOLUTIONWINDOW, NfgShow::OnSashDrag)
   EVT_SET_FOCUS(NfgShow::OnSetFocus)
   EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, NfgShow::OnInfoNotebookPage)
@@ -176,7 +177,6 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
 				      wxNO_BORDER | wxSW_3D);
   m_infoSashWindow->SetSashVisible(wxSASH_RIGHT, true);
   m_infoSashWindow->Show(true);
-  m_infoSashWindow->SetSashVisible(wxSASH_LEFT, false);
 
   m_infoNotebook = new wxNotebook(m_infoSashWindow, idINFONOTEBOOK);
   m_infoNotebook->Show(true);
@@ -311,7 +311,11 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
 
 void NfgShow::OnOutcomesEdited(void)
 {
+  for (int i = 1; i <= m_profiles.Length(); i++) {
+    m_profiles[i].Invalidate();
+  }
   m_table->RefreshTable();
+  m_profileTable->UpdateValues();
 }
 
 //----------------------------------------------------------------------
@@ -646,6 +650,9 @@ void NfgShow::OnEditGame(wxCommandEvent &)
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
       m_nfg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
     }
+    m_navigateWindow->UpdateLabels();
+    m_outcomeWindow->UpdateValues();
+    m_supportWindow->UpdateValues();
   }
 }
 
@@ -1339,7 +1346,8 @@ void NfgShow::AdjustSizes(void)
 
   if (m_navigateWindow && m_infoSashWindow->IsShown()) {
     if (m_table) {
-      m_table->SetSize(250, 0, width - 250, height);
+      m_table->SetSize(m_infoSashWindow->GetRect().width, 0,
+		       width - m_infoSashWindow->GetRect().width, height);
     }
   }
   else if (m_table) {
@@ -1347,7 +1355,7 @@ void NfgShow::AdjustSizes(void)
   }
 
   if (m_navigateWindow && m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->SetSize(0, 0, 250, height);
+    m_infoSashWindow->SetSize(0, 0, m_infoSashWindow->GetRect().width, height);
   }
 
   if (m_table) {

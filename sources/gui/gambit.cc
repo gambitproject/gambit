@@ -150,8 +150,8 @@ bool GambitApp::OnInit(void)
   // Set up the help system.
   //  m_help.SetTempDir(".");
   wxInitAllImageHandlers();
-  m_help.AddBook("help/guiman.hhp");
-  m_help.AddBook("help/gclman.hhp");
+  // m_help.AddBook("help/guiman.hhp");
+  // m_help.AddBook("help/gclman.hhp");
 
   // Set up the error handling functions.
   // For some reason this does not work w/ BC++ (crash on exit)
@@ -455,19 +455,19 @@ void GambitApp::OnFileMRUFile(wxCommandEvent &p_event)
 
 void GambitApp::OnHelpContents(void)
 {
-  HelpController().DisplaySection("Main page");
+  //  HelpController().DisplaySection("Main page");
 }
 
 void GambitApp::OnHelpIndex(void)
 {
-  HelpController().DisplayContents();
+  //  HelpController().DisplayContents();
 }
 
 void GambitApp::OnHelpAbout(wxWindow *p_parent)
 {
   dialogAbout dialog(p_parent, "About Gambit...",
 		     "Gambit Graphical User Interface",
-		     "Version 0.97 (alpha)");
+		     "Version 0.97.0.0 (special for CBMS conference)");
   dialog.ShowModal();
 }
 
