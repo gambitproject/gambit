@@ -760,7 +760,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   /*gout << "\n\n";*/
 
   
-  ParamInfoType PIT[numArgs];
+  ParamInfoType *PIT = new ParamInfoType[numArgs];
 
   for (int i=1;i<=numArgs;i++)
   {
