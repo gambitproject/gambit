@@ -1362,7 +1362,8 @@ void GSM::Output( void )
     if( p->Type() == porREFERENCE )
       _StdOut << " (undefined)";
     _StdOut << "\n";
-    delete p;
+    
+    _Push( p );
   }
 }
 
