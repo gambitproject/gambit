@@ -67,7 +67,7 @@ int main( void )
   gin >> cont;
 
 
-
+/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -3440,9 +3440,80 @@ int main( void )
 #endif
 
 
+*/
+
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "temp" ) );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Assign );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new PushRef( "b" ) );
+  prog->Append( new Assign );
+  prog->Append( new PushRef( "b" ) );
+  prog->Append( new PushRef( "temp" ) );
+  prog->Append( new Assign );
+  prog->Append( new Flush );
+  prog->Append( new PushRef( "temp" ) );
+  
+  func = new FuncDescObj( "T" );
+  func->SetFuncInfo( prog, 2 );
+  func->SetParamInfo( prog, 0, "a", porRATIONAL,
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  func->SetParamInfo( prog, 1, "b", porRATIONAL,
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  machine->AddFunction( func );
 
 
 
+
+
+
+  prog = new gList< Instruction* >;
+  prog->Append( new Push<double>( 1 ) );
+  prog->Append( new Push<double>( 2 ) );
+  prog->Append( new Push<double>( 3 ) );
+  prog->Append( new Dump );
+  prog->Append( new PushRef( "a" ) );
+
+  func = new FuncDescObj( "Plus" );
+  func->SetFuncInfo( prog, 1 );
+  func->SetParamInfo( prog, 0, "a", porFLOAT, new FloatValPortion( 10 ) );
+  machine->AddFunction( func );
+
+
+
+
+  machine->InitCallFunction( "Plus" );
+  machine->Push( (double) 5 );
+  machine->Bind();
+  machine->Push( (double) 6 );
+  machine->Bind();
+  // machine->Push( (gRational) 5 );
+  // machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->InitCallFunction( "WriteEfg" );
+  machine->PushRef( "OUTPUT" );
+  machine->Bind();
+  machine->PushRef( "NE" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->PushRef( "NE" );
+  machine->Dump();
 
 
   gout << "*********************** Press Return to continue ************";

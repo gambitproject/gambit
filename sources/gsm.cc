@@ -911,6 +911,7 @@ bool GSM::Child ( void )
 
 bool GSM::AddFunction( FuncDescObj* func )
 {
+  FuncDescObj *old_func;
   if( !_FuncTable->IsDefined( func->FuncName() ) )
   {
     _FuncTable->Define( func->FuncName(), func );
@@ -918,9 +919,14 @@ bool GSM::AddFunction( FuncDescObj* func )
   }
   else
   {
+    old_func = (*_FuncTable)( func->FuncName() );
+    old_func->Combine( func );
+    return true;
+    /*
     _ErrorMessage( _StdErr, 50, 0, 0, func->FuncName() );
     delete func;
     return false;
+    */
   }
 }
 

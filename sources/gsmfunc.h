@@ -133,7 +133,8 @@ public:
   void SetFuncInfo
     (
      gList< Instruction* >* func_instr,
-     const int       num_params = 0 
+     const int       num_params = 0, 
+     const ParamInfoType param_info[] = 0
      );
 
   void SetParamInfo
@@ -164,6 +165,14 @@ public:
      const ParamInfoType param_info[]
      );
   
+  void SetParamInfo
+    (
+     gList< Instruction* >* func_instr,
+     const ParamInfoType param_info[]
+     );
+  
+  void Combine( FuncDescObj* newfunc );
+
   gString FuncName ( void ) const;
 };
 
