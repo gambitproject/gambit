@@ -115,8 +115,8 @@ static Portion* GSM_Plus_Mixed(Portion** param)
      ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
-  Portion *result = param[0]->ValCopy();
-  *((MixedPortion*) result)->Value() += *((MixedPortion*) param[1])->Value();
+  MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
+  *result->Value() += *((MixedPortion*) param[1])->Value();
   return result;
 }
 
@@ -126,8 +126,8 @@ static Portion *GSM_Plus_Behav(Portion** param)
      ((BehavPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
-  Portion *result = param[0]->ValCopy();
-  *((BehavPortion*) result)->Value() += *((BehavPortion*) param[1])->Value();
+  BehavPortion *result = new BehavPortion(new BehavSolution(*((BehavPortion *) param[0])->Value()));
+  *result->Value() += *((BehavPortion*) param[1])->Value();
   return result;
 }
 
@@ -165,8 +165,8 @@ static Portion *GSM_Minus_Mixed(Portion** param)
      ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
-  Portion *result = param[0]->ValCopy();
-  *((MixedPortion*) result)->Value() -= *((MixedPortion*) param[1])->Value();
+  MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[0])->Value()));
+  *result->Value() -= *((MixedPortion*) param[1])->Value();
   return result;
 }
 
@@ -176,8 +176,8 @@ static Portion *GSM_Minus_Behav(Portion** param)
      ((BehavPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
-  Portion *result = param[0]->ValCopy();
-  *((BehavPortion*) result)->Value() -= *((BehavPortion*) param[1])->Value();
+  BehavPortion *result = new BehavPortion(new BehavSolution(*((BehavPortion *) param[0])->Value()));
+  *result->Value() -= *((BehavPortion*) param[1])->Value();
   return result;
 }
 
@@ -200,15 +200,15 @@ static Portion *GSM_Times_Number(Portion** param)
 
 static Portion *GSM_Times_Mixed(Portion** param)
 {
-  Portion *result = param[1]->ValCopy();
-  *((MixedPortion*) result)->Value() *= ((NumberPortion*) param[0])->Value();
+  MixedPortion *result = new MixedPortion(new MixedSolution(*((MixedPortion *) param[1])->Value()));
+  *result->Value() *= ((NumberPortion*) param[0])->Value();
   return result;
 }
 
 static Portion *GSM_Times_Behav(Portion** param)
 {
-  Portion *result = param[1]->ValCopy();
-  *((BehavPortion*) result)->Value() *= ((NumberPortion*) param[0])->Value();
+  BehavPortion *result = new BehavPortion(new BehavSolution(*((BehavPortion *) param[1])->Value()));
+  *result->Value() *= ((NumberPortion*) param[0])->Value();
   return result;
 }
 
