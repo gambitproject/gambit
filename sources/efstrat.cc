@@ -1,7 +1,7 @@
 //#
 //# FILE: efstrat.cc -- Implementation of supports for the extensive form
 //#
-//# @(#)efstrat.cc	1.1 10/2/95
+//# $Id$
 //#
 
 //#include "efstrat.h"
