@@ -217,7 +217,7 @@ Portion* GSM_List_Rational( Portion** param )
   p->SetDataType( param[0]->Type() );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new RationalValPortion( ((RationalPortion*) param[0])->Value()+ 
-				      (i-1)*
+				      (gRational)(i-1)*
 				      ((RationalPortion*) param[2])->Value()));
   return p;
 }
