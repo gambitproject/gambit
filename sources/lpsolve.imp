@@ -270,12 +270,12 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	// gout << "\nstep 5a, i: " << i;
 	  xlab=tab->Label(i);
 	  if(xlab<0)xlab=nvars-xlab;
-	  (*xx)[xlab]=(*xx)[xlab]+flag*tmin*d[i];
+	  (*xx)[xlab]=(*xx)[xlab]+(T)flag*tmin*d[i];
 	}
 	if(in>0)
-	  (*xx)[in] -= flag*tmin;
+	  (*xx)[in] -= (T)flag*tmin;
 	if(in<0)
-	  (*xx)[nvars-in] -= flag*tmin;
+	  (*xx)[nvars-in] -= (T)flag*tmin;
 	// gout << "\nstep 5a, xx: " << (*xx);
       }
     }
