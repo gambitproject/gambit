@@ -13,7 +13,6 @@
 #include "wx/printdlg.h"
 #include "wxmisc.h"
 
-#include "nfgdraw.h"
 #include "base/gmisc.h"
 
 #include "nfg.h"
@@ -41,8 +40,6 @@ private:
   NFSupport *m_currentSupport;
   int m_currentSolution;
 
-  int m_rowPlayer, m_colPlayer;
-  NormalDrawSettings m_drawSettings;
   gText m_fileName;
 
   wxPageSetupData m_pageSetupData;
@@ -111,18 +108,12 @@ public:
   NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
   virtual ~NfgShow();
 
-  gArray<int> GetProfile(void) const;
-
   NFSupport *CurrentSupport(void) const { return m_currentSupport; }
   int NumSupports(void) const { return m_supports.Length(); }
   
   void OutcomePayoffs(int st1, int st2, bool next = false);
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
-  void SetProfile(const gArray<int> &);
-  void SetPlayers(int p_rowPlayer, int p_colPlayer);
-  int GetRowPlayer(void) const { return m_rowPlayer; }
-  int GetColPlayer(void) const { return m_colPlayer; }
   
   void ChangeSolution(int sol);
 
@@ -137,10 +128,6 @@ public:
   const Nfg &Game(void) const { return m_nfg; }  
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
-
-  int GetDecimals(void) const { return m_drawSettings.GetDecimals(); }
-  void SetDecimals(int p_decimals) { m_drawSettings.SetDecimals(p_decimals); }
-  bool OutcomeValues(void) const { return m_drawSettings.OutcomeValues(); }
 
   DECLARE_EVENT_TABLE()
 };

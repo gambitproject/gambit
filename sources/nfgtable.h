@@ -11,11 +11,37 @@
 
 class NfgTable : public wxPanel {
 private:
-  NfgShow *m_parent;
+  Nfg &m_nfg;
+  wxWindow *m_parent;
   wxGrid *m_grid;
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
+  bool m_editable;
+  int m_rowPlayer, m_colPlayer;
+  NFSupport m_support;
+  MixedSolution *m_solution;
 
   int m_showProb, m_showDom, m_showValue;
+
+  class Settings {
+  private:
+    int m_decimals, m_outcomeValues;
+
+  public:
+    Settings(void);
+    virtual ~Settings();
+
+    void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
+    int GetDecimals(void) const { return m_decimals; }
+    void SetOutcomeValues(bool p_outcomeValues) 
+      { m_outcomeValues = p_outcomeValues; }
+    bool OutcomeValues(void) const { return m_outcomeValues; }
+
+    void LoadSettings(void);
+    void SaveSettings(void) const;
+  };
+
+  Settings m_settings;
+
 
   // Event handlers
   void OnLeftClick(wxGridEvent &);
@@ -26,7 +52,7 @@ private:
   void OnColPlayerChange(wxCommandEvent &);
 
 public:
-  NfgTable(NfgShow *);
+  NfgTable(Nfg &, wxWindow *);
   virtual ~NfgTable() { }
 
   void SetProfile(const gArray<int> &profile);
@@ -44,13 +70,29 @@ public:
   int ShowDominance(void) const { return m_showDom; }
   void ToggleValues(void);
   int ShowValues(void) const { return m_showValue; }
-  
-  int GetDecimals(void) const { return m_parent->GetDecimals(); }
+
+  bool OutcomeValues(void) const { return m_settings.OutcomeValues(); }
+  void SetOutcomeValues(bool p_outcomeValues) 
+    { m_settings.SetOutcomeValues(p_outcomeValues); }
+  int GetDecimals(void) const { return m_settings.GetDecimals(); }
+  void SetDecimals(int p_decimals) { m_settings.SetDecimals(p_decimals); }
+  void SaveSettings(void) const { m_settings.SaveSettings(); }
+  void LoadSettings(void) { m_settings.LoadSettings(); }
+
 
   void OnChangeValues(void);
   void OnChangeLabels(void);
 
   void SetSupport(const NFSupport &);
+
+  bool IsEditable(void) const { return m_editable; }
+  void SetEditable(bool p_editable) { m_editable = p_editable; }
+
+  int GetRowPlayer(void) const { return m_rowPlayer; }
+  int GetColPlayer(void) const { return m_colPlayer; }
+
+  void SetSolution(const MixedSolution &);
+  void ClearSolution(void);
 
   DECLARE_EVENT_TABLE()
 };

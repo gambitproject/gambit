@@ -99,8 +99,7 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
     m_nfg(p_nfg),
-    m_table(0), m_solutionTable(0), m_solutionSashWindow(0),
-    m_rowPlayer(1), m_colPlayer(2)
+    m_table(0), m_solutionTable(0), m_solutionSashWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -129,7 +128,7 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   CreateStatusBar(3);
   MakeToolbar();
 
-  m_table = new NfgTable(this);
+  m_table = new NfgTable(m_nfg, this);
   m_table->SetSize(0, 0, 200, 200);
 
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
@@ -141,9 +140,8 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   m_solutionTable->Show(true);
   m_solutionSashWindow->Show(false);
 
-  SetPlayers(1, 2);
-
   m_nfg.SetIsDirty(false);
+  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, !m_table->OutcomeValues());
   UpdateMenus();
   Show(true);
 }
@@ -284,8 +282,6 @@ void NfgShow::MakeMenus(void)
   menuBar->Append(prefsMenu, "&Prefs");
   menuBar->Append(helpMenu, "&Help");
 
-  viewMenu->Check(NFG_VIEW_OUTCOMES, !m_drawSettings.OutcomeValues());
-  
   SetMenuBar(menuBar);
 }
 
@@ -327,7 +323,7 @@ void NfgShow::MakeToolbar(void)
 void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
-  gArray<int> profile(GetProfile());
+  gArray<int> profile(m_table->GetProfile());
 
   menu->Enable(NFG_EDIT_OUTCOMES_DELETE, m_nfg.NumOutcomes() > 0);
   menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, m_nfg.NumOutcomes() > 0);
@@ -601,8 +597,8 @@ void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
 
 void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
 {
-  if (m_table->GetRowStrategy() <= m_currentSupport->NumStrats(m_rowPlayer) &&
-      m_table->GetColStrategy() <= m_currentSupport->NumStrats(m_colPlayer)) {
+  if (m_table->GetRowStrategy() <= m_currentSupport->NumStrats(m_table->GetRowPlayer()) &&
+      m_table->GetColStrategy() <= m_currentSupport->NumStrats(m_table->GetColPlayer())) {
     OutcomePayoffs(m_table->GetRowStrategy(),
 		   m_table->GetColStrategy(), false);
   }
@@ -659,7 +655,6 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
 
     if (m_currentSupport != sup) {
       m_currentSupport = m_supports[m_supports.Length()];
-      SetPlayers(m_rowPlayer, m_colPlayer);
     }
     else if (!m_table->ShowDominance()) {
       m_table->ToggleDominance();
@@ -682,7 +677,6 @@ void NfgShow::OnSupportNew(wxCommandEvent &)
 
       ChangeSolution(0);
       m_currentSupport = support;
-      SetPlayers(m_rowPlayer, m_colPlayer);
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -698,7 +692,6 @@ void NfgShow::OnSupportEdit(wxCommandEvent &)
     try {
       *m_currentSupport = dialog.Support();
       m_currentSupport->SetName(dialog.Name());
-      SetPlayers(m_rowPlayer, m_colPlayer);
       ChangeSolution(0);
       m_table->OnChangeValues();
     }
@@ -720,7 +713,6 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
       delete m_supports.Remove(dialog.Selected());
       if (!m_supports.Find(m_currentSupport)) {
 	m_currentSupport = m_supports[1];
-	SetPlayers(m_rowPlayer, m_colPlayer);
 	ChangeSolution(0);
       }
     }
@@ -738,7 +730,6 @@ void NfgShow::OnSupportSelectFromList(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_currentSupport = m_supports[dialog.Selected()];
-      SetPlayers(m_rowPlayer, m_colPlayer);
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), this);
@@ -755,7 +746,6 @@ void NfgShow::OnSupportSelectPrevious(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index - 1];
   }
-  SetPlayers(m_rowPlayer, m_colPlayer);
 }
 
 void NfgShow::OnSupportSelectNext(wxCommandEvent &)
@@ -767,7 +757,6 @@ void NfgShow::OnSupportSelectNext(wxCommandEvent &)
   else {
     m_currentSupport = m_supports[index + 1];
   }
-  SetPlayers(m_rowPlayer, m_colPlayer);
 }
 
 void NfgShow::OnSolveStandard(wxCommandEvent &)
@@ -991,7 +980,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
 {
-  m_drawSettings.SetOutcomeValues(1 - m_drawSettings.OutcomeValues());
+  m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
   m_table->OnChangeValues();
 }
 
@@ -1071,18 +1060,19 @@ void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
   guiSliderDialog dialog(this, "Column width", 0, 100, 20);
 
   if (dialog.ShowModal() == wxID_OK) {
-    for (int i = 1; i <= m_currentSupport->NumStrats(m_colPlayer); i++) {
-      //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
-    }
+    //    for (int i = 1; i <= m_currentSupport->NumStrats(m_); i++) {
+    //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
+    //    }
   }
 }
 
 void NfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
 {
-  guiSliderDialog dialog(this, "Decimal places", 0, 25, GetDecimals());
+  guiSliderDialog dialog(this, "Decimal places", 0, 25,
+			 m_table->GetDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
-    SetDecimals(dialog.GetValue());
+    m_table->SetDecimals(dialog.GetValue());
     m_table->OnChangeValues();
   }
 }
@@ -1093,7 +1083,7 @@ void NfgShow::OnPrefsFontData(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
+    //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
     //    m_table->SetCellTextFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeValues();
   }
@@ -1105,7 +1095,7 @@ void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
+    // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
     //    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_table->OnChangeLabels();
   }
@@ -1117,31 +1107,21 @@ void NfgShow::OnPrefsColors(wxCommandEvent &)
 
 void NfgShow::OnPrefsSave(wxCommandEvent &)
 {
-  m_drawSettings.SaveSettings();
+  m_table->SaveSettings();
 }
 
 void NfgShow::OnPrefsLoad(wxCommandEvent &)
 {
-  m_drawSettings.LoadSettings();
+  m_table->LoadSettings();
 }
 
 //----------------------------------------------------------------------
 //                class NfgShow: Public member functions
 //----------------------------------------------------------------------
 
-gArray<int> NfgShow::GetProfile(void) const
-{
-  return m_table->GetProfile();
-}
-
 void NfgShow::SetStrategy(int p_player, int p_strategy)
 {
   m_table->SetStrategy(p_player, p_strategy);
-}
-
-void NfgShow::SetProfile(const gArray<int> &p_profile)
-{
-  m_table->SetProfile(p_profile);
 }
 
 void NfgShow::UpdateProfile(gArray<int> &profile)
@@ -1153,7 +1133,7 @@ void NfgShow::ChangeSolution(int sol)
 {
   m_currentSolution = sol;
     
-  m_table->OnChangeValues();
+  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
   if (m_solutionTable) {
     m_solutionTable->UpdateValues();
   }
@@ -1162,7 +1142,7 @@ void NfgShow::ChangeSolution(int sol)
 void NfgShow::OnSolutionSelected(wxListEvent &p_event)
 {
   m_currentSolution = p_event.m_itemIndex + 1;
-  m_table->OnChangeValues();
+  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
 }
  
 void NfgShow::SetFileName(const gText &p_fileName)
@@ -1202,28 +1182,11 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
   SolutionToEfg(bp, set);
 }
 
-void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
-{
-  m_rowPlayer = p_rowPlayer;
-  m_colPlayer = p_colPlayer;
-  
-  SetTitle((char *) (m_nfg.GetTitle() + " : " + 
-		     m_nfg.Players()[m_rowPlayer]->GetName() +
-		     " x " + m_nfg.Players()[m_colPlayer]->GetName()));
-
-  m_table->SetPlayers(m_rowPlayer, m_colPlayer);
-  SetStrategy(m_rowPlayer, 1);
-  SetStrategy(m_colPlayer, 1);
-  m_table->OnChangeLabels();
-  m_table->SetSupport(*m_currentSupport);
-  m_table->OnChangeValues();
-}
-
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 {
   gArray<int> profile(m_table->GetProfile());
-  profile[m_rowPlayer] = st1;
-  profile[m_colPlayer] = st2;
+  profile[m_table->GetRowPlayer()] = st1;
+  profile[m_table->GetColPlayer()] = st2;
 
   dialogNfgPayoffs dialog(m_nfg, m_nfg.GetOutcome(profile), this);
 
@@ -1248,33 +1211,6 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 const gList<MixedSolution> &NfgShow::Solutions(void) const
 {
   return *m_solutionTable;
-}
-
-//-----------------------------------------------------------------------
-//               class NormalDrawSettings: Member functions
-//-----------------------------------------------------------------------
-
-NormalDrawSettings::NormalDrawSettings(void)
-  : m_decimals(2), m_dataFont(*wxNORMAL_FONT), m_labelFont(*wxNORMAL_FONT)
-{
-  LoadSettings();
-}
-
-NormalDrawSettings::~NormalDrawSettings()
-{ }
-
-void NormalDrawSettings::LoadSettings(void)
-{
-  wxConfig config("Gambit");
-  config.Read("NfgDisplay/Display-Precision", &m_decimals, 2);
-  config.Read("NfgDisplay/Outcome-Values", &m_outcomeValues, 1);
-}
-
-void NormalDrawSettings::SaveSettings(void) const
-{
-  wxConfig config("Gambit");
-  config.Write("NfgDisplay/Display-Precision", (long) m_decimals);
-  config.Write("NfgDisplay/Outcome-Values", (long) m_outcomeValues);
 }
 
 #include "base/glist.imp"
