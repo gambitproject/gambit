@@ -617,10 +617,13 @@ static Portion *GSM_SetActionProb(Portion **param)
 {
   BehavSolution *P = new BehavSolution(*((BehavPortion *) param[0])->Value());
   Action *a = ((ActionPortion *) param[1])->Value();
+  int infoset = a->BelongsTo()->GetNumber();
+  int player = a->BelongsTo()->GetPlayer()->GetNumber();
+  int action = P->Support().Find(a);
+
   gNumber value = ((NumberPortion *) param[2])->Value();
   
-  (*P)(a->BelongsTo()->GetPlayer()->GetNumber(),
-       a->BelongsTo()->GetNumber(), a->GetNumber()) = value;
+  (*P)(player, infoset, action) = value;
   ((BehavPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -693,8 +696,10 @@ static Portion *GSM_SetStrategyProb(Portion **param)
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
-  
-  (*P)(s->nfp->GetNumber(), s->number) = value;
+  int player = s->nfp->GetNumber();
+  int strat = (*P).Support().Strategies(player).Find(s);
+
+  (*P)(player, strat) = value;
   ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
