@@ -332,13 +332,13 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 
   cancelButton->SetConstraints(new wxLayoutConstraints);
   cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
-  cancelButton->GetConstraints()->top.SameAs(okButton, wxTop);
+  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
   cancelButton->GetConstraints()->height.AsIs();
   cancelButton->GetConstraints()->width.AsIs();
 
   helpButton->SetConstraints(new wxLayoutConstraints);
   helpButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
-  helpButton->GetConstraints()->top.SameAs(okButton, wxTop);
+  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
   helpButton->GetConstraints()->height.AsIs();
   helpButton->GetConstraints()->width.AsIs();
 
