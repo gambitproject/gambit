@@ -509,7 +509,7 @@ void BaseEfg::UnmarkSubtree(Node *n)
     UnmarkSubtree(n->children[i]);
 }
 
-void BaseEfg::Reveal(Infoset *where, gBlock<EFPlayer *> who)
+void BaseEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
 {
   int i,j,k,l,m;
   bool flag;
@@ -541,6 +541,8 @@ void BaseEfg::Reveal(Infoset *where, gBlock<EFPlayer *> who)
 	}
       }
   }
+
+  Reindex();
 }
 
 Node *BaseEfg::CopyTree(Node *src, Node *dest)

@@ -43,7 +43,6 @@ class BaseEfg     {
     void CopySubtree(Node *, Node *, Node *);
     void MarkSubtree(Node *);
     void UnmarkSubtree(Node *);
-    void Reveal(Infoset *, gBlock<EFPlayer *>);
 
     void DisplayTree(gOutput &, Node *) const;
     void WriteEfgFile(gOutput &, Node *) const;
@@ -116,6 +115,8 @@ class BaseEfg     {
     Infoset *AppendAction(Infoset *s);
     Infoset *InsertAction(Infoset *s, Action *a);
     Infoset *DeleteAction(Infoset *s, Action *a);
+
+    void Reveal(Infoset *, const gArray<EFPlayer *> &);
 };
 
 
