@@ -883,11 +883,21 @@ void EfgShow::MakeMenus(void)
 
 Bool EfgShow::OnClose(void)
 {
-    ChangeSupport(DESTROY_DIALOG);
-    ChangeOutcomes(DESTROY_DIALOG);
-    InspectSolutions(DESTROY_DIALOG);
-    Show(FALSE);
+  if (ef.IsDirty()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL)
+      return FALSE;
+    else {
+      ChangeSupport(DESTROY_DIALOG);
+      ChangeOutcomes(DESTROY_DIALOG);
+      InspectSolutions(DESTROY_DIALOG);
+      Show(FALSE);
+      return TRUE;
+    }
+  }
+  else {
     return TRUE;
+  }
 }
 
 //---------------------------------------------------------------------

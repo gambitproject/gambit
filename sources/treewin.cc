@@ -2804,75 +2804,142 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
 //***********************************************************************
 Efg *CompressEfg(const Efg &, const EFSupport &);
 
-void TreeWindow::file_save(void)
+class efgFileSaveDialog : public wxDialogBox {
+private:
+  int m_completed;
+
+  wxText *m_fileName, *m_treeLabel;
+  wxSlider *m_numDecimals;
+  
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((efgFileSaveDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((efgFileSaveDialog *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackBrowse(wxButton &p_object, wxEvent &)
+    { ((efgFileSaveDialog *) p_object.GetClientData())->OnBrowse(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  void OnBrowse(void);
+  Bool OnClose(void);
+
+public:
+  efgFileSaveDialog(const gText &, const gText &, int, wxWindow *);
+  virtual ~efgFileSaveDialog() { }
+
+  int Completed(void) const { return m_completed; }
+  gText Filename(void) const { return m_fileName->GetValue(); }
+  gText Label(void) const { return m_treeLabel->GetValue(); }
+  int NumDecimals(void) const { return m_numDecimals->GetValue(); }
+};
+
+efgFileSaveDialog::efgFileSaveDialog(const gText &p_name,
+				     const gText &p_label, int p_decimals,
+				     wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Save File", TRUE)
+{
+  m_fileName = new wxText(this, 0, "Path:");
+  m_fileName->SetValue(p_name);
+
+  wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
+					"Browse...");
+  browseButton->SetClientData((char *) this);
+  NewLine();
+
+  m_treeLabel = new wxText(this, 0, "Description:", p_label, -1, -1, 300);
+  m_treeLabel->SetValue(p_label);
+  NewLine();
+
+  m_numDecimals = new wxSlider(this, 0, "Decimal places:",
+			       p_decimals, 0, 25, 100);
+  NewLine();
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void efgFileSaveDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void efgFileSaveDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool efgFileSaveDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void efgFileSaveDialog::OnBrowse(void)
+{
+  char *file = wxFileSelector("Save data file", 
+			      gPathOnly(m_fileName->GetValue()),
+			      gFileNameFromPath(m_fileName->GetValue()),
+			      ".efg", "*.efg");
+
+  if (file) {
+    m_fileName->SetValue(file);
+  }
+}
+
+
+Bool TreeWindow::file_save(void)
 {
   static int s_nDecimals = 6;
-  gText filename = frame->Filename();
-  gText s = wxFileSelector("Save data file", (char *)gPathOnly(filename),
-               (char *)gFileNameFromPath(filename), ".efg", "*.efg",
-               wxSAVE | wxOVERWRITE_PROMPT);
+  efgFileSaveDialog dialog(frame->Filename(), ef.GetTitle(),
+			   s_nDecimals, this);
 
-#ifdef __GNUG__
-    // Overwrite protection doesn't work in Unix, so we
-    // have to check explicitly.
-
-    if (wxFileExists((char *) s))  {  // Ask for confirmation.
-      if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK | wxCANCEL) 
-      != wxOK) {
-    return;
+  if (dialog.Completed() == wxOK) {
+    if (wxFileExists(dialog.Filename())) {
+      if (wxMessageBox("File " + dialog.Filename() + " exists.  Overwrite?",
+		       "Confirm", wxOK | wxCANCEL) != wxOK) {
+	return FALSE;
       }
     }
-#endif  // __GNUG__
 
-    if (s != "") {
-      // Allow to change description 
-      if (filename != "untitled.efg") {
-    char *label = 0;
-    MyDialogBox *efg_save_dialog = 0;
+    ef.SetTitle(dialog.Label());
 
+    Efg *efg = 0;
     try {
-      label = new char[256];
-      strcpy(label, ef.GetTitle());
-
-      efg_save_dialog = new MyDialogBox(pframe, "Label Game",
-			      EFG_TREE_HELP);
-      wxFormItem *label_item = 
-        wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-	  new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
-	  0, 0, 350);
-      efg_save_dialog->Add(label_item);
-      efg_save_dialog->Add(wxMakeFormNewLine());
-      wxFormItem *decimals_item =
-        wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
-          new wxList(wxMakeConstraintRange(0, 25), 0));
-      efg_save_dialog->Add(decimals_item);
-      efg_save_dialog->AssociatePanel();
-      ((wxText *)label_item->PanelItem)->SetFocus();
-      efg_save_dialog->Go1();
-    
-      if (efg_save_dialog->Completed() == wxOK)
-        ef.SetTitle(label);
-    
-      delete efg_save_dialog;
-      delete [] label;
+      gFileOutput file(dialog.Filename());
+      efg = CompressEfg(ef, *frame->GetSupport(0));
+      efg->WriteEfgFile(file, s_nDecimals);
+      delete efg;
+      frame->SetFileName(dialog.Filename());
     }
-    catch (gException &E) {
-      if (label)
-        delete [] label;
-      if (efg_save_dialog)
-        delete efg_save_dialog;
-    
-      guiExceptionDialog(E.Description(), pframe);
-      return;
+    catch (gFileOutput::OpenFailed &) {
+      wxMessageBox("Could not open " + dialog.Filename() + " for writing.",
+		   "Error", wxOK);
+      if (efg)  delete efg;
     }
-      }
-      gFileOutput out((const char *)s);
-      // Compress the efg to the current support
-      Efg *E = CompressEfg(ef, *frame->GetSupport(0));
-      E->WriteEfgFile(out, s_nDecimals);
-      delete E;
-      frame->SetFileName(s);
+    catch (gFileOutput::WriteFailed &) {
+      wxMessageBox("Write error occurred in saving " + dialog.Filename(),
+		   "Error", wxOK);
+      if (efg)  delete efg;
     }
+    catch (Efg::Exception &) {
+      wxMessageBox("Internal exception in extensive form", "Error", wxOK);
+      if (efg)  delete efg;
+    }
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 void TreeWindow::SetCursorPosition(Node *p_cursor)

@@ -276,7 +276,7 @@ public:
     void display_zoom_win(void);
     void delete_zoom_win(void);
     
-    void  file_save(void);
+    Bool file_save(void);
     void  output(void);
     void  print_eps(wxOutputOption fit);                 // output to postscript file
     void  print(wxOutputOption fit,bool preview=false);  // output to printer (WIN3.1 only)
