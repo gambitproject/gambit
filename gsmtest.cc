@@ -28,9 +28,9 @@ int main( void )
   double d_1 = (double) 7.5;
   double d_2 = (double) 11.5;
   double d_temp;
-  gInteger i_1 = (gInteger) 13;
-  gInteger i_2 = (gInteger) 17;
-  gInteger i_temp;
+  long i_1 = (long) 13;
+  long i_2 = (long) 17;
+  long i_temp;
   gRational r_1 = (gRational) 19/3;
   gRational r_2 = (gRational) 23/7;
   gRational r_temp;
@@ -43,25 +43,29 @@ int main( void )
   FuncDescObj* func;
 
 
+/*
   gFileOutput _sout( "sout" );
   gOutput& sout = _sout;
   gFileOutput _serr( "serr" );
   gOutput& serr = _serr;
+*/
 
   machine = new GSM( 32, gin, gout, gerr );
-  gsm = new GSM( 10, gin, gout, gerr );
+//  gsm = new GSM( 10, gin, gout, gerr );
 
   gList< Instruction* > program;
 
 
   gout << "Machine setup done\n";
-  sout << "Machine setup done\n";
+  // sout << "Machine setup done\n";
 
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-/*
+
+
+
 
   gout << "\n";
   machine->Push( d_1 );
@@ -419,14 +423,14 @@ int main( void )
 #endif
 
   machine->Flush();
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->PushList( 1 );
   machine->PushList( 1 );
   machine->PushList( 1 );
   machine->PushList( 1 );
   machine->PushList( 1 );
   machine->PushList( 1 );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->PushList( 2 );
   machine->PushList( 1 );
   machine->PushList( 1 );
@@ -449,10 +453,10 @@ int main( void )
 
   machine->Flush();
   machine->PushRef( (gString) "y1" );
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 13 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 13 );
   machine->Multiply();
-  machine->Push( (gInteger) 130 );
+  machine->Push( (long) 130 );
   machine->GreaterThan();
   machine->Assign();
   machine->Dump();
@@ -472,35 +476,35 @@ int main( void )
   machine->Dump();
 
   machine->Flush();
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 13 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 13 );
   machine->GreaterThan();
-  machine->Push( (gInteger) 13 );
-  machine->Push( (gInteger) 11 );
+  machine->Push( (long) 13 );
+  machine->Push( (long) 11 );
   machine->GreaterThan();
-  machine->Push( (gInteger) 12 );
-  machine->Push( (gInteger) 12 );
+  machine->Push( (long) 12 );
+  machine->Push( (long) 12 );
   machine->GreaterThanOrEqualTo();
-  machine->Push( (gInteger) 24 );
-  machine->Push( (gInteger) 25 );
+  machine->Push( (long) 24 );
+  machine->Push( (long) 25 );
   machine->GreaterThanOrEqualTo();
   machine->Push( (double) 11 );
   machine->Push( (double) 11 );
   machine->GreaterThan();
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 11 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 11 );
   machine->GreaterThanOrEqualTo();
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 110 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 110 );
   machine->GreaterThan();
   machine->Push( (double) 110 );
   machine->Push( (double) 11 );
   machine->GreaterThanOrEqualTo();
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 11 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 11 );
   machine->GreaterThan();
-  machine->Push( (gInteger) -10 );
-  machine->Push( (gInteger) -11 );
+  machine->Push( (long) -10 );
+  machine->Push( (long) -11 );
   machine->GreaterThan();
   machine->PushList( 10 );
   machine->Dump();
@@ -753,55 +757,55 @@ int main( void )
 
 
 
-  machine->Push( (gInteger) 6 );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 6 );
+  machine->Push( (long) 5 );
   machine->Divide();
   machine->Dump();
 
   machine->InitCallFunction( "Divide" );
-  machine->Push( (gInteger) 6 );
+  machine->Push( (long) 6 );
   machine->Bind();
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
 
 
-  machine->Push( (gInteger) 6 );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 6 );
+  machine->Push( (long) 5 );
   machine->Divide();
   machine->Dump();
 
   machine->InitCallFunction( "Divide" );
-  machine->Push( (gInteger) 6 );
+  machine->Push( (long) 6 );
   machine->Bind();
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
 
   gout << "Testing Modulus\n";
-  machine->Push( (gInteger) 6 );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 6 );
+  machine->Push( (long) 5 );
   machine->Modulus();
   machine->Dump();
 
   gout << "Testing Modulus\n";
-  machine->Push( (gInteger) 5 );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
+  machine->Push( (long) 5 );
   machine->Modulus();
   machine->Dump();
 
 
   gout << "Testing Instructions:\n";
 
-  program.Append( new Push<gInteger>( 6 ) );
-  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Push<long>( 6 ) );
+  program.Append( new Push<long>( 5 ) );
   program.Append( new Mod );
   program.Append( new Dump );
 
-  program.Append( new Push<gInteger>( 5 ) );
-  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Push<long>( 5 ) );
+  program.Append( new Push<long>( 5 ) );
   program.Append( new Mod );
   program.Append( new Dump );
 
@@ -848,18 +852,18 @@ int main( void )
 
 
   program.Append( new InitCallFunction( "Modulus" ) );
-  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Push<long>( 6 ) );
   program.Append( new Bind );
-  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Push<long>( 5 ) );
   program.Append( new Bind );
   program.Append( new CallFunction );
   program.Append( new Dump );
 
 
   program.Append( new InitCallFunction( "Modulus" ) );
-  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Push<long>( 6 ) );
   program.Append( new Bind );
-  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Push<long>( 6 ) );
   program.Append( new Bind );
   program.Append( new CallFunction );
   program.Append( new Dump );
@@ -927,10 +931,10 @@ int main( void )
 
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 10 );
+  machine->Push( (long) 10 );
   for( i = 1; i <= 9; i++ )
   {
-    machine->Push( (gInteger) i );
+    machine->Push( (long) i );
   }
   machine->PushList( 10 );
   machine->Assign();
@@ -938,20 +942,20 @@ int main( void )
 
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
 
 #ifdef CRASHTEST
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 9 );
+  machine->Push( (long) 9 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 10 );
+  machine->Push( (long) 10 );
   machine->Subscript();
 
   machine->PushRef( "x" );
@@ -1024,16 +1028,16 @@ int main( void )
 #endif
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) -2 );
+  machine->Push( (long) -2 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 7 );
+  machine->Push( (long) 7 );
   machine->Subscript();
   machine->Dump();
 
@@ -1052,25 +1056,25 @@ int main( void )
   machine->Push( (double) 10 );
   for( i = 1; i <= 9; i++ )
   {
-    machine->Push( (gInteger) i );
+    machine->Push( (long) i );
   }
   machine->PushList( 9 );
   machine->Assign();
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 9 );
+  machine->Push( (long) 9 );
   machine->Subscript();
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 10 );
+  machine->Push( (long) 10 );
   machine->Subscript();
   machine->PushRef( "x" );
   machine->Push( (double) 6 );
@@ -1118,8 +1122,8 @@ int main( void )
 
 
 #ifdef CRASHTEST
-  machine->Push( (gInteger) 0 );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
+  machine->Push( (long) 0 );
   machine->Divide();
   machine->Push( (gRational) 0 );
   machine->Push( (gRational) 0 );
@@ -1127,14 +1131,15 @@ int main( void )
   machine->Push( (double) 0 );
   machine->Push( (double) 0 );
   machine->Divide();
-  machine->Push( (gInteger) 0 );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
+  machine->Push( (long) 0 );
   machine->Modulus();
   machine->Dump();
 #endif // CRASHTEST
 
 
 
+
 #ifdef CRASHTEST
 
   machine->InitCallFunction( "Assign" );
@@ -1169,23 +1174,31 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+  machine->InitCallFunction( "Assign" );
+  machine->Push( (double) 10 );
+  machine->BindRef();
+  machine->Push( (double) 15 );
+  machine->BindRef();
+  machine->CallFunction();
+  machine->Dump();
+
 #endif
 
 
 
 
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 3 );
   machine->Divide();
   machine->Dump();
 
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 3 );
   machine->IntegerDivide();
   machine->Dump();
 
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 3 );
   machine->Modulus();
   machine->Dump();
 
@@ -1199,9 +1212,9 @@ int main( void )
   machine->CallFunction();
 
   machine->InitCallFunction( "Divide" );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
   machine->Bind();
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
   machine->Bind();
   machine->CallFunction();
 
@@ -1214,9 +1227,9 @@ int main( void )
 #endif
 
   machine->InitCallFunction( "Divide" );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Bind();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Bind();
   machine->CallFunction();
 
@@ -1429,13 +1442,13 @@ int main( void )
   machine->Dump();
   
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Dump();
 
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Push( (double) 5 );
   machine->Assign();
@@ -1463,13 +1476,13 @@ int main( void )
   
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Dump();
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Bind();
   machine->Push( (double) 5 );
@@ -1526,9 +1539,9 @@ int main( void )
 
 #ifdef CRASHTEST
   machine->InitCallFunction( "Test" );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Bind();
-  machine->Push( (gInteger) 6 );
+  machine->Push( (long) 6 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
@@ -1542,25 +1555,25 @@ int main( void )
 
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 1 );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
 
-  machine->Push( (gInteger) 11 );
-  machine->Push( (gInteger) 12 );
+  machine->Push( (long) 11 );
+  machine->Push( (long) 12 );
 
-  machine->Push( (gInteger) 21 );
-  machine->Push( (gInteger) 22 );
-  machine->Push( (gInteger) 23 );
-  machine->Push( (gInteger) 24 );
-  machine->Push( (gInteger) 25 );
+  machine->Push( (long) 21 );
+  machine->Push( (long) 22 );
+  machine->Push( (long) 23 );
+  machine->Push( (long) 24 );
+  machine->Push( (long) 25 );
   machine->PushList( 5 );
 
-  machine->Push( (gInteger) 14 );
-  machine->Push( (gInteger) 15 );
+  machine->Push( (long) 14 );
+  machine->Push( (long) 15 );
   machine->PushList( 5 );
 
-  machine->Push( (gInteger) 4 );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 4 );
+  machine->Push( (long) 5 );
   machine->PushList( 5 );
   machine->Assign();
   machine->Dump();
@@ -1568,25 +1581,25 @@ int main( void )
 
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 33 );
+  machine->Push( (long) 33 );
   machine->Assign();
   machine->Dump();
 
@@ -1595,14 +1608,14 @@ int main( void )
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Bind();
-  machine->Push( (gInteger) 43 );
+  machine->Push( (long) 43 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
@@ -1612,12 +1625,12 @@ int main( void )
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Bind();
-  machine->Push( (gInteger) 53 );
+  machine->Push( (long) 53 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
@@ -1627,12 +1640,12 @@ int main( void )
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Bind();
-  machine->Push( (gInteger) 52 );
+  machine->Push( (long) 52 );
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
@@ -1643,9 +1656,9 @@ int main( void )
 #ifdef CRASHTEST
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->Subscript();
   machine->Bind();
   machine->Push( (double) 62 );
@@ -1683,7 +1696,7 @@ int main( void )
 
 
   machine->PushRef( "i" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Assign();
 
   machine->PushRef( "x" );
@@ -1731,6 +1744,8 @@ int main( void )
 
 
 #ifdef CRASHTEST
+
+
   machine->InitCallFunction( "GobitNfg" );
   machine->PushRef( "N" );
   machine->Bind();
@@ -1818,15 +1833,26 @@ int main( void )
 #endif
 
 
+
+  machine->InitCallFunction( "Output" );
+  machine->Push( "stdout1" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  
   machine->PushRef( "x1" );
-  machine->PushOutput( "stdout1" );
+  machine->InitCallFunction( "Output" );
+  machine->Push( "stdout1" );
+  machine->Bind();
+  machine->CallFunction();
   machine->Assign();
   machine->Dump();
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x2" );
   machine->Bind();
-  machine->InitCallFunction( "NewOutput" );
+  machine->InitCallFunction( "Output" );
   machine->Push( "stdout2" );
   machine->Bind();
   machine->CallFunction();
@@ -1834,10 +1860,14 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
+
   machine->PushRef( "x1" );
   machine->PushRef( "x2" );
   machine->Assign();
   machine->Dump();
+
+
 
 
 #ifdef INTERACTIVE
@@ -1909,7 +1939,7 @@ int main( void )
 
 #ifdef CRASHTEST
   machine->InitCallFunction( "ListTest" );
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->PushList( 1 );
   machine->Bind();
   machine->CallFunction();
@@ -1979,7 +2009,7 @@ int main( void )
 
 #ifdef CRASHTEST
   machine->PushRef( "xyz" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Dump();
 #endif // CRASHTEST
@@ -2136,27 +2166,27 @@ int main( void )
   machine->Dump();
 
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 0 );
+  machine->Push( (long) 0 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 2 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 3 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 4 );
+  machine->Push( (long) 4 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 5 );
+  machine->Push( (long) 5 );
   machine->Subscript();
   machine->Output();
   machine->PushRef( "x1" );
@@ -2180,17 +2210,17 @@ int main( void )
 #endif
 
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 1 );
-  machine->Push( (gInteger) 2 );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
   machine->PushList( 3 );
   machine->Assign();
   machine->Dump();
 
   machine->PushRef( "x2" );
-  machine->Push( (gInteger) 4 );
-  machine->Push( (gInteger) 5 );
-  machine->Push( (gInteger) 6 );
+  machine->Push( (long) 4 );
+  machine->Push( (long) 5 );
+  machine->Push( (long) 6 );
   machine->PushList( 3 );
   machine->Assign();
   machine->Dump();
@@ -2276,9 +2306,9 @@ int main( void )
 #endif
 
   machine->PushRef( "x1" );
-  machine->Push( (gInteger) 1 );
-  machine->Push( (gInteger) 2 );
-  machine->Push( (gInteger) 3 );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
   machine->PushList( 3 );
   machine->Assign();
   machine->Dump();
@@ -2370,8 +2400,8 @@ int main( void )
 
 
   machine->PushRef( "L" );
-  machine->Push( (gInteger) 1 );
-  machine->Push( (gInteger) 2 );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
   machine->PushList( 2 );
   machine->Assign();
   machine->Dump();
@@ -2382,7 +2412,7 @@ int main( void )
   machine->InitCallFunction( "Remove" );
   machine->PushRef( "L" );
   machine->Bind();
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->Bind();
   machine->CallFunction();
   machine->Assign();
@@ -2394,7 +2424,7 @@ int main( void )
   machine->InitCallFunction( "Remove" );
   machine->PushRef( "M" );
   machine->Bind();
-  machine->Push( (gInteger) 1 );
+  machine->Push( (long) 1 );
   machine->Bind();
   machine->CallFunction();
   machine->Assign();
@@ -2407,7 +2437,6 @@ int main( void )
   machine->PushRef( "M" );
   machine->PushRef( "L" );
   machine->Dump();
-
 
 
   machine->PushRef( "L" );
@@ -2425,9 +2454,13 @@ int main( void )
   gin >> cont;
 #endif
 
+
+
+
   machine->PushRef( "a" );
-  machine->Push( (gInteger) 1 );
-  machine->PushList( 1 );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->PushList( 2 );
   machine->Assign();
   machine->Dump();
 
@@ -2435,6 +2468,7 @@ int main( void )
   machine->PushList( 0 );
   machine->Assign();
   machine->Dump();
+
 
   machine->PushRef( "a" );
   machine->Push( "a" );
@@ -2471,7 +2505,7 @@ int main( void )
 
   func = new FuncDescObj( "TestDump" );
   func->SetFuncInfo( prog, 1 );
-  func->SetParamInfo( prog, 0, "a", porSTRING,
+  func->SetParamInfo( prog, 0, "a", porTEXT,
 		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   machine->AddFunction( func );
 
@@ -2492,6 +2526,8 @@ int main( void )
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 #endif
+
+
 
 
 
@@ -2544,27 +2580,10 @@ int main( void )
   machine->Dump();
 
 
+
   machine->PushRef( "t1" );
+  machine->Push( "t1, before:" );
   machine->Dump();
-  
-  machine->InitCallFunction( "TestSwap" );
-  machine->PushRef( "t1" );
-  machine->Bind();
-  machine->Push( "test string" );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Flush();
-
-  machine->PushRef( "t1" );
-  machine->Dump();
-
-
-#ifdef INTERACTIVE
-  gout << "*********************** Press Return to continue ************";
-  gin >> cont;
-#endif
-
-
 
   machine->InitCallFunction( "TestSwap" );
   machine->PushRef( "t1" );
@@ -2575,12 +2594,17 @@ int main( void )
   machine->Flush();
 
 
+  machine->PushRef( "t1" );
+  machine->Push( "t1, after:" );
+  machine->Dump();
 
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 #endif
+
+
 
 
 
@@ -2593,7 +2617,7 @@ int main( void )
   machine->Dump();
 
   machine->InitCallFunction( "ReadDefaultEfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02rat.efg" );
   machine->Bind();
   machine->CallFunction();
@@ -2610,7 +2634,7 @@ int main( void )
   machine->Dump();
 
   machine->InitCallFunction( "ReadDefaultEfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02.efg" );
   machine->Bind();
   machine->CallFunction();
@@ -2629,7 +2653,7 @@ int main( void )
 
   machine->PushRef( "test_efg" );
   machine->InitCallFunction( "ReadEfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02rat.efg" );
   machine->Bind();
   machine->CallFunction();
@@ -2674,8 +2698,12 @@ int main( void )
   machine->PushRef( "OUTPUT" );
   machine->Dump();
 
+
   machine->PushRef( "OUTPUT" );
-  machine->PushOutput( "hello" );
+  machine->InitCallFunction( "Output" );
+  machine->Push( "hello;" );
+  machine->Bind();
+  machine->CallFunction();
   machine->Assign();
   machine->Dump();
 
@@ -2693,7 +2721,7 @@ int main( void )
   machine->Dump();
 
   machine->InitCallFunction( "ReadDefaultNfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
@@ -2706,7 +2734,7 @@ int main( void )
   machine->Dump();
 
   machine->InitCallFunction( "ReadDefaultNfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02.nfg" );
   machine->Bind();
   machine->CallFunction();
@@ -2720,7 +2748,7 @@ int main( void )
 
   machine->PushRef( "test_nfg" );
   machine->InitCallFunction( "ReadNfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
@@ -2745,11 +2773,11 @@ int main( void )
   gin >> cont;
 #endif
 
-*/
+
 
   machine->PushRef( "E" );
   machine->InitCallFunction( "ReadEfg" );
-  machine->InitCallFunction( "NewInput" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02.efg" );
   machine->Bind();
   machine->CallFunction();
@@ -2768,14 +2796,56 @@ int main( void )
   
   machine->Dump();
 
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+
+  machine->PushRef( "x" );
+  machine->InitCallFunction( "Output" );
+  machine->Push( "stdout0" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Bind();
+  machine->InitCallFunction( "Output" );
+  machine->Push( "stdout1" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  
+  machine->PushRef( "x" );
+  machine->Dump();
+
+
+
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 
 
 
   gout << "\nDeleting machine\n";
-  sout << "\nDeleting machine\n";
-  delete gsm;
+//  sout << "\nDeleting machine\n";
+//  delete gsm;
   delete machine;
 
   return 0;

@@ -14,174 +14,779 @@
 
 #include "gsmincl.h"
 
-#include "basic.h"
-#include "integer.h"
-#include "rational.h"
-
-#include "gstring.h"
-
-#include "gblock.h"
-#include "mixed.h"
-#include "behav.h"
-
-
-class List_Portion;
-
-class Outcome;
-class Player;
-class Infoset;
-class Action;
-class Node;
-
-template <class T> class RefCountHashTable;
+#include "gambitio.h"
 
 
 
 
+//---------------------------------------------------------------------
+//                          base class
+//---------------------------------------------------------------------
 
 class Portion
 {
- private:
-  // variable used to detect memory leakage
-  static int _NumPortions;
+private:
+  static int _NumObj;
 
- protected:
-  // the following two are only used by List operations (so far)
-  Portion*       _ShadowOf;
-  List_Portion*  _ParentList;
+protected:
+  bool _ReadOnly;
+  Portion( void );
 
-  bool _Static;
-  static gString _ErrorMessage( const int error_num, const gString& str = "" );
-
- public:
-  Portion();
+public:
   virtual ~Portion();
 
-  Portion*&           ShadowOf       ( void );
-  List_Portion*&      ParentList     ( void );
-  virtual PortionType Type           ( void ) const = 0;
-  virtual Portion*    Copy           ( bool new_data = false ) const = 0;
-  virtual Portion*    Operation      ( Portion* p, OperationMode mode );
-  virtual void        Output         ( gOutput& s ) const = 0;
+  virtual PortionType Type( void ) const = 0;
+  virtual void Output( gOutput& s ) const = 0;
+  virtual Portion* ValCopy( void ) const = 0;
+  virtual Portion* RefCopy( void ) const = 0;
+  virtual void AssignFrom( Portion* p ) = 0;
+
+  bool& ReadOnly( void )
+  { return _ReadOnly; }
 };
 
 
 
+//---------------------------------------------------------------------
+//                          Error class
+//---------------------------------------------------------------------
 
-
-
-class Error_Portion : public Portion
+class ErrorPortion : public Portion
 {
- private:
+protected:
   gString _Value;
 
- public:
-  Error_Portion( const gString& value = "" );
+public:
+  ErrorPortion( const gString& value = "" );
+  virtual ~ErrorPortion();
 
-  gString&    Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
+  gString Value( void );
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );  
 };
 
 
 
-template <class T> class numerical_Portion : public Portion
-{
- private:
-  static _NumObj;
-  T* _Value;
+//---------------------------------------------------------------------
+//                          Reference class
+//---------------------------------------------------------------------
 
- public:
-  numerical_Portion( const T& value );
-  numerical_Portion( T& value, bool var_static );
-  ~numerical_Portion();
-  
-  T&          Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  Portion*    Operation ( Portion* p, OperationMode mode );
-  void        Output    ( gOutput& s ) const;
+class ReferencePortion : public Portion
+{
+protected:
+  gString _Value;
+
+public:
+  ReferencePortion( const gString& value );
+  virtual ~ReferencePortion();
+
+  gString Value( void );
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );  
 };
 
 
-class bool_Portion : public Portion
+
+
+
+//---------------------------------------------------------------------
+//                          int class
+//---------------------------------------------------------------------
+
+class IntPortion : public Portion
 {
- private:
-  static _NumObj;
+protected:
+  long* _Value;
+  IntPortion( void );
+
+public:
+  virtual ~IntPortion();
+
+  long& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class IntValPortion : public IntPortion
+{
+public:
+  IntValPortion( long value );
+  virtual ~IntValPortion();
+};
+
+class IntRefPortion : public IntPortion
+{
+public:
+  IntRefPortion( long& value );
+  virtual ~IntRefPortion();
+};
+
+
+//---------------------------------------------------------------------
+//                          float class
+//---------------------------------------------------------------------
+
+class FloatPortion : public Portion
+{
+protected:
+  double* _Value;
+  FloatPortion( void );
+
+public:
+  virtual ~FloatPortion();
+
+  double& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class FloatValPortion : public FloatPortion
+{
+public:
+  FloatValPortion( double value );
+  virtual ~FloatValPortion();
+};
+
+class FloatRefPortion : public FloatPortion
+{
+public:
+  FloatRefPortion( double& value );
+  virtual ~FloatRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          Rational class
+//---------------------------------------------------------------------
+
+class RationalPortion : public Portion
+{
+protected:
+  gRational* _Value;
+  RationalPortion( void );
+
+public:
+  virtual ~RationalPortion();
+
+  gRational& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class RationalValPortion : public RationalPortion
+{
+public:
+  RationalValPortion( gRational value );
+  virtual ~RationalValPortion();
+};
+
+class RationalRefPortion : public RationalPortion
+{
+public:
+  RationalRefPortion( gRational& value );
+  virtual ~RationalRefPortion();
+};
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Text class
+//---------------------------------------------------------------------
+
+class TextPortion : public Portion
+{
+protected:
+  gString* _Value;
+  TextPortion( void );
+
+public:
+  virtual ~TextPortion();
+
+  gString& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class TextValPortion : public TextPortion
+{
+public:
+  TextValPortion( gString value );
+  virtual ~TextValPortion();
+};
+
+class TextRefPortion : public TextPortion
+{
+public:
+  TextRefPortion( gString& value );
+  virtual ~TextRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          Bool class
+//---------------------------------------------------------------------
+
+class BoolPortion : public Portion
+{
+protected:
   bool* _Value;
+  BoolPortion( void );
 
- public:
-  bool_Portion( const bool& value );
-  bool_Portion( bool& value, bool var_static );
-  ~bool_Portion();
+public:
+  virtual ~BoolPortion();
 
-  bool&       Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  Portion*    Operation ( Portion* p, OperationMode mode );
-  void        Output    ( gOutput& s ) const;
+  bool& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
 };
 
-
-class gString_Portion : public Portion
+class BoolValPortion : public BoolPortion
 {
- private:
-  static _NumObj;
-  gString *_Value;
-
- public:
-  gString_Portion( const gString& value );
-  gString_Portion( gString& value, bool var_static );
-  ~gString_Portion();
-
-  gString&    Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  Portion*    Operation ( Portion* p, OperationMode mode );
-  void        Output    ( gOutput& s ) const;
+public:
+  BoolValPortion( bool value );
+  virtual ~BoolValPortion();
 };
 
-
-
-class Reference_Portion : public Portion
+class BoolRefPortion : public BoolPortion
 {
- private:
-  gString     _Value;
-
- public:
-  Reference_Portion( const gString& value );
-
-  gString&     Value    ( void );
-  Portion*     Copy     ( bool new_data ) const;
-  PortionType  Type     ( void ) const;
-  void         Output   ( gOutput& s ) const;
+public:
+  BoolRefPortion( bool& value );
+  virtual ~BoolRefPortion();
 };
 
 
 
 
 
-class List_Portion : public Portion
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Outcome class
+//---------------------------------------------------------------------
+
+class Outcome;
+
+class OutcomePortion : public Portion
 {
- protected:
-  gBlock<Portion*> _Value;
+protected:
+  Outcome** _Value;
+  OutcomePortion( void );
+
+public:
+  virtual ~OutcomePortion();
+
+  Outcome*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class OutcomeValPortion : public OutcomePortion
+{
+public:
+  OutcomeValPortion( Outcome* value );
+  virtual ~OutcomeValPortion();
+};
+
+class OutcomeRefPortion : public OutcomePortion
+{
+public:
+  OutcomeRefPortion( Outcome*& value );
+  virtual ~OutcomeRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          EfPlayer class
+//---------------------------------------------------------------------
+
+class Player;
+
+class EfPlayerPortion : public Portion
+{
+protected:
+  Player** _Value;
+  EfPlayerPortion( void );
+
+public:
+  virtual ~EfPlayerPortion();
+
+  Player*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class EfPlayerValPortion : public EfPlayerPortion
+{
+public:
+  EfPlayerValPortion( Player* value );
+  virtual ~EfPlayerValPortion();
+};
+
+class EfPlayerRefPortion : public EfPlayerPortion
+{
+public:
+  EfPlayerRefPortion( Player*& value );
+  virtual ~EfPlayerRefPortion();
+};
+
+
+
+
+//---------------------------------------------------------------------
+//                          Infoset class
+//---------------------------------------------------------------------
+
+class Infoset;
+
+class InfosetPortion : public Portion
+{
+protected:
+  Infoset** _Value;
+  InfosetPortion( void );
+
+public:
+  virtual ~InfosetPortion();
+
+  Infoset*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class InfosetValPortion : public InfosetPortion
+{
+public:
+  InfosetValPortion( Infoset* value );
+  virtual ~InfosetValPortion();
+};
+
+class InfosetRefPortion : public InfosetPortion
+{
+public:
+  InfosetRefPortion( Infoset*& value );
+  virtual ~InfosetRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          Node class
+//---------------------------------------------------------------------
+
+class Node;
+
+class NodePortion : public Portion
+{
+protected:
+  Node** _Value;
+  NodePortion( void );
+
+public:
+  virtual ~NodePortion();
+
+  Node*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class NodeValPortion : public NodePortion
+{
+public:
+  NodeValPortion( Node* value );
+  virtual ~NodeValPortion();
+};
+
+class NodeRefPortion : public NodePortion
+{
+public:
+  NodeRefPortion( Node*& value );
+  virtual ~NodeRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          Action class
+//---------------------------------------------------------------------
+
+class Action;
+
+class ActionPortion : public Portion
+{
+protected:
+  Action** _Value;
+  ActionPortion( void );
+
+public:
+  virtual ~ActionPortion();
+
+  Action*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class ActionValPortion : public ActionPortion
+{
+public:
+  ActionValPortion( Action* value );
+  virtual ~ActionValPortion();
+};
+
+class ActionRefPortion : public ActionPortion
+{
+public:
+  ActionRefPortion( Action*& value );
+  virtual ~ActionRefPortion();
+};
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Mixed class
+//---------------------------------------------------------------------
+
+template <class T> class MixedProfile;
+
+template <class T> class MixedPortion : public Portion
+{
+protected:
+  MixedProfile<T>* _Value;
+  MixedPortion( void );
+
+public:
+  virtual ~MixedPortion();
+
+  MixedProfile<T>& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+template <class T> class MixedValPortion : public MixedPortion<T>
+{
+public:
+  MixedValPortion( MixedProfile<T>& value );
+  virtual ~MixedValPortion();
+};
+
+template <class T> class MixedRefPortion : public MixedPortion<T>
+{
+public:
+  MixedRefPortion( MixedProfile<T>& value );
+  virtual ~MixedRefPortion();
+};
+
+
+
+
+//---------------------------------------------------------------------
+//                          Behav class
+//---------------------------------------------------------------------
+
+template <class T> class BehavProfile;
+
+template <class T> class BehavPortion : public Portion
+{
+protected:
+  BehavProfile<T>* _Value;
+  BehavPortion( void );
+
+public:
+  virtual ~BehavPortion();
+
+  BehavProfile<T>& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+template <class T> class BehavValPortion : public BehavPortion<T>
+{
+public:
+  BehavValPortion( BehavProfile<T>& value );
+  virtual ~BehavValPortion();
+};
+
+template <class T> class BehavRefPortion : public BehavPortion<T>
+{
+public:
+  BehavRefPortion( BehavProfile<T>& value );
+  virtual ~BehavRefPortion();
+};
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          BaseNfg class
+//---------------------------------------------------------------------
+
+class BaseNormalForm;
+
+class BaseNfgPortion : public Portion
+{
+protected:
+  BaseNormalForm* _Value;
+  BaseNfgPortion( void );
+
+public:
+  virtual ~BaseNfgPortion();
+
+  BaseNormalForm& Value( void ) const;
+  virtual PortionType Type( void ) const = 0;
+  virtual void Output( gOutput& s ) const = 0;
+  virtual Portion* ValCopy( void ) const = 0;
+  virtual Portion* RefCopy( void ) const = 0;
+  virtual void AssignFrom( Portion* p );
+};
+
+
+//---------------------------------------------------------------------
+//                          Nfg class
+//---------------------------------------------------------------------
+
+template <class T> class NormalForm;
+
+template <class T> class NfgPortion : public BaseNfgPortion
+{
+public:
+  NormalForm<T>& Value( void ) const;
+
+  virtual PortionType Type( void ) const;
+  virtual void Output( gOutput& s ) const;
+  virtual Portion* ValCopy( void ) const;
+  virtual Portion* RefCopy( void ) const;
+};
+
+template <class T> class NfgValPortion : public NfgPortion<T>
+{
+public:
+  NfgValPortion( NormalForm<T>& value );
+  ~NfgValPortion();
+};
+
+template <class T> class NfgRefPortion : public NfgPortion<T>
+{
+public:
+  NfgRefPortion( NormalForm<T>& value );
+  ~NfgRefPortion();
+};
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          BaseEfg class
+//---------------------------------------------------------------------
+
+class BaseExtForm;
+
+class BaseEfgPortion : public Portion
+{
+protected:
+  BaseExtForm* _Value;
+  BaseEfgPortion( void );
+
+public:
+  virtual ~BaseEfgPortion();
+
+  BaseExtForm& Value( void ) const;
+  virtual PortionType Type( void ) const = 0;
+  virtual void Output( gOutput& s ) const = 0;
+  virtual Portion* ValCopy( void ) const = 0;
+  virtual Portion* RefCopy( void ) const = 0;
+  virtual void AssignFrom( Portion* p );
+};
+
+
+//---------------------------------------------------------------------
+//                          Efg class
+//---------------------------------------------------------------------
+
+template <class T> class ExtForm;
+
+template <class T> class EfgPortion : public BaseEfgPortion
+{
+public:
+  ExtForm<T>& Value( void ) const;
+
+  virtual PortionType Type( void ) const;
+  virtual void Output( gOutput& s ) const;
+  virtual Portion* ValCopy( void ) const;
+  virtual Portion* RefCopy( void ) const;
+};
+
+template <class T> class EfgValPortion : public EfgPortion<T>
+{
+public:
+  EfgValPortion( ExtForm<T>& value );
+  ~EfgValPortion();
+};
+
+template <class T> class EfgRefPortion : public EfgPortion<T>
+{
+public:
+  EfgRefPortion( ExtForm<T>& value );
+  ~EfgRefPortion();
+};
+
+
+//---------------------------------------------------------------------
+//                          Output class
+//---------------------------------------------------------------------
+
+class OutputPortion : public Portion
+{
+protected:
+  gOutput* _Value;
+  OutputPortion( void );
+
+public:
+  virtual ~OutputPortion();
+
+  gOutput& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class OutputValPortion : public OutputPortion
+{
+public:
+  OutputValPortion( gOutput& value );
+  virtual ~OutputValPortion();
+};
+
+class OutputRefPortion : public OutputPortion
+{
+public:
+  OutputRefPortion( gOutput& value );
+  virtual ~OutputRefPortion();
+};
+
+
+
+
+//---------------------------------------------------------------------
+//                          Input class
+//---------------------------------------------------------------------
+
+class InputPortion : public Portion
+{
+protected:
+  gInput* _Value;
+  InputPortion( void );
+
+public:
+  virtual ~InputPortion();
+
+  gInput& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+};
+
+class InputValPortion : public InputPortion
+{
+public:
+  InputValPortion( gInput& value );
+  virtual ~InputValPortion();
+};
+
+class InputRefPortion : public InputPortion
+{
+public:
+  InputRefPortion( gInput& value );
+  virtual ~InputRefPortion();
+};
+
+
+
+//---------------------------------------------------------------------
+//                          List class
+//---------------------------------------------------------------------
+
+template <class T> class gBlock;
+
+class ListPortion : public Portion
+{
+protected:
+  gBlock< Portion* >* _Value;
+  ListPortion( void );
+
   PortionType      _DataType;
-
   bool TypeCheck( Portion* item );
 
- public:
-  List_Portion( void );
-  List_Portion( const gBlock<Portion*>& value );
-  ~List_Portion();
+public:
+  virtual ~ListPortion();
+  
+  gBlock< Portion* >& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
 
-  gBlock<Portion*>& Value       ( void );
-  Portion*          Copy        ( bool new_data ) const;
-  PortionType       Type        ( void ) const;
   void              SetDataType ( PortionType data_type );
   PortionType       DataType    ( void ) const;
-  Portion*          Operation   ( Portion* p, OperationMode mode );
-  void              Output      ( gOutput& s ) const;
 
   int      Append     ( Portion* item );
   int      Insert     ( Portion* item, int index );
@@ -189,249 +794,25 @@ class List_Portion : public Portion
   int      Length     ( void ) const;
   void     Flush      ( void );
 
-  Portion* GetSubscript( int index ) const;
-  Portion* SetSubscript( int index, Portion* p );
+  Portion* Subscript( int index ) const;
 };
 
-
-
-
-
-template <class T> class Mixed_Portion : public Portion
-{
- private:
-  MixedProfile<T> _Value;
-
- public:
-  Mixed_Portion( const MixedProfile<T>& value );
-
-  MixedProfile<T>& Value     ( void );
-  Portion*         Copy      ( bool new_data ) const;
-  PortionType      Type      ( void ) const;
-  void             Output    ( gOutput& s ) const;
-};
-
-
-
-
-template <class T> class Behav_Portion : public Portion
-{
- private:
-  BehavProfile<T> _Value;
-
- public:
-  Behav_Portion( const BehavProfile<T>& value );
-
-  BehavProfile<T>& Value     ( void );
-  Portion*         Copy      ( bool new_data ) const;
-  PortionType      Type      ( void ) const;
-  void             Output    ( gOutput& s ) const;
-};
-
-
-
-
-
-
-
-
-class BaseNfg_Portion : public Portion
-{
-private:
-  static int _NumObj;
-  static RefCountHashTable< BaseNormalForm* > _RefCountTable;
-
-protected:
-  BaseNormalForm* _Value;
-
-public:
-  BaseNfg_Portion( BaseNormalForm& value );
-  ~BaseNfg_Portion();
-
-  BaseNormalForm&     Value          ( void );
-  virtual Portion*    Copy           ( bool new_data ) const = 0;
-  virtual PortionType Type           ( void ) const;
-  virtual void        Output         ( gOutput& s ) const;
-};
-
-
-template <class T> class Nfg_Portion : public BaseNfg_Portion
+class ListValPortion : public ListPortion
 {
 public:
-  Nfg_Portion( NormalForm<T>& value );
-
-  NormalForm<T>& Value          ( void );
-  Portion*       Copy           ( bool new_data ) const;
-  PortionType    Type           ( void ) const;
-  void           Output         ( gOutput& s ) const;
+  ListValPortion( void );
+  ListValPortion( gBlock< Portion* >& value );
+  virtual ~ListValPortion();
 };
 
-
-
-
-
-
-
-
-class BaseEfg_Portion : public Portion
-{
-private:
-  static int _NumObj;
-  static RefCountHashTable< BaseExtForm* > _RefCountTable;
-
-protected:
-  BaseExtForm* _Value;
-
-public:
-  BaseEfg_Portion( BaseExtForm& value );
-  ~BaseEfg_Portion();
-
-  BaseExtForm&        Value          ( void );
-  virtual Portion*    Copy           ( bool new_data ) const = 0;
-  virtual PortionType Type           ( void ) const;
-  virtual void        Output         ( gOutput& s ) const;
-};
-
-
-template <class T> class Efg_Portion : public BaseEfg_Portion
+class ListRefPortion : public ListPortion
 {
 public:
-  Efg_Portion( ExtForm<T>& value );
-
-  ExtForm<T>&    Value          ( void );
-  Portion*       Copy           ( bool new_data ) const;
-  PortionType    Type           ( void ) const;
-  void           Output         ( gOutput& s ) const;
+  ListRefPortion( gBlock< Portion* >& value );
+  virtual ~ListRefPortion();
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Outcome_Portion : public Portion
-{
- private:
-  Outcome* _Value;
-
- public:
-  Outcome_Portion( Outcome* value );
-
-  Outcome*&   Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
-};
-
-
-class Player_Portion : public Portion
-{
- private:
-  Player* _Value;
-
- public:
-  Player_Portion( Player* value );
-
-  Player*&    Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
-};
-
-
-class Infoset_Portion : public Portion
-{
- private:
-  Infoset* _Value;
-
- public:
-  Infoset_Portion( Infoset* value );
-
-  Infoset*&   Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
-};
-
-
-class Action_Portion : public Portion
-{
- private:
-  Action* _Value;
-
- public:
-  Action_Portion( Action* value );
-
-  Action*&    Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
-};
-
-
-class Node_Portion : public Portion
-{
- private:
-  Node* _Value;
-
- public:
-  Node_Portion( Node* value );
-
-  Node*&      Value     ( void );
-  Portion*    Copy      ( bool new_data ) const;
-  PortionType Type      ( void ) const;
-  void        Output    ( gOutput& s ) const;
-};
-
-
-
-
-class Output_Portion : public Portion
-{
- private:
-  static int _NumObj;
-  static RefCountHashTable< gOutput* > _RefCountTable;
-  gOutput* _Value;
-
- public:
-  Output_Portion( gOutput& value, bool var_static = false );
-  ~Output_Portion();
-
-  gOutput&      Value          ( void );
-  Portion*      Copy           ( bool new_data ) const;
-  PortionType   Type           ( void ) const;
-  void          Output         ( gOutput& s ) const;
-};
-
-
-class Input_Portion : public Portion
-{
- private:
-  static int _NumObj;
-  static RefCountHashTable< gInput* > _RefCountTable;
-  gInput* _Value;
-
- public:
-  Input_Portion( gInput& value, bool var_static = false );
-  ~Input_Portion();
-
-  gInput&       Value          ( void );
-  Portion*      Copy           ( bool new_data ) const;
-  PortionType   Type           ( void ) const;
-  void          Output         ( gOutput& s ) const;
-};
 
 
 
@@ -444,4 +825,8 @@ gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H
+
+
+
+
 

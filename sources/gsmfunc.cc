@@ -29,6 +29,7 @@ extern void Init_nfgfunc( GSM* );
 extern void Init_efgfunc( GSM* );
 extern void Init_algfunc(GSM *);
 extern void Init_listfunc(GSM *);
+void Init_userfunc( GSM* );
 
 void GSM::InitFunctions( void )
 {
@@ -40,6 +41,32 @@ void GSM::InitFunctions( void )
   Init_nfgfunc(this);
   Init_efgfunc(this);
   Init_algfunc(this);
+
+  Init_userfunc( this );
+}
+
+
+
+
+void Init_userfunc( GSM* gsm )
+{
+  gList< Instruction* >* prog;
+  FuncDescObj* func;
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "x" ) );
+  prog->Append( new PushRef( "y" ) );
+  prog->Append( new Assign );
+  
+  func = new FuncDescObj( "Assign" );
+  func->SetFuncInfo( prog, 2 );
+  func->SetParamInfo( prog, 0, "x", 
+		     porVALUE, NO_DEFAULT_VALUE,
+		     PASS_BY_REFERENCE );
+  func->SetParamInfo( prog, 1, "y", 
+		     porVALUE );
+  gsm->AddFunction( func );
+
 }
 
 
@@ -58,6 +85,7 @@ ParamInfoType::ParamInfoType( void )
   Type = porERROR;
   DefaultValue = NO_DEFAULT_VALUE;
   PassByReference = 0;
+  Option = 0;
 }
 
 ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
@@ -65,7 +93,8 @@ ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
  Name( param_info.Name ),
  Type( param_info.Type ),
  DefaultValue( param_info.DefaultValue ),
- PassByReference( param_info.PassByReference )
+ PassByReference( param_info.PassByReference ),
+ Option( param_info.Option )
 { }
 
 ParamInfoType::ParamInfoType
@@ -73,13 +102,15 @@ ParamInfoType::ParamInfoType
  const gString& name, 
  const PortionType& type,
  Portion* default_value, 
- const bool pass_by_ref
+ const bool pass_by_ref,
+ const int option
  )
 :
  Name( name ), 
  Type( type ), 
  DefaultValue( default_value ), 
- PassByReference( pass_by_ref )
+ PassByReference( pass_by_ref ),
+ Option( option )
 { }
 
 ParamInfoType::~ParamInfoType()
@@ -91,6 +122,7 @@ ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
   Type = param_info.Type;
   DefaultValue = param_info.DefaultValue;
   PassByReference = param_info.PassByReference;
+  Option = param_info.Option;
   return *this;
 }
 
@@ -139,18 +171,8 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
 
       if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 )
       {
-	if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
-	   ShadowOf() == 0 )
-	{
-	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	    _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->Copy();
-	}
-	else
-	{
-	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	    _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
-	      ShadowOf()->Copy();
-	}
+	_FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
+	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->ValCopy();
       }	
     }
   }
@@ -170,16 +192,12 @@ FuncDescObj::~FuncDescObj()
   int index;
   int f_index;
   Instruction* instruction;
-
+  
   for( f_index = 0; f_index < _NumFuncs; f_index++ )
   {
     for( index = 0; index < _FuncInfo[ f_index ].NumParams; index ++ )
     {
-      if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 &&
-	 _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->ShadowOf() == 0)
-      {
-	delete _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue;
-      }
+      delete _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue;
     }
     if( _FuncInfo[ f_index ].UserDefined )
     {
@@ -307,7 +325,8 @@ void FuncDescObj::SetParamInfo
  const gString&     param_name, 
  const PortionType  param_type, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference
+ const bool         param_pass_by_reference,
+ const int          param_option
  )
 {
   int i;
@@ -329,7 +348,8 @@ void FuncDescObj::SetParamInfo
      param_name, 
      param_type, 
      param_default_value,
-     param_pass_by_reference
+     param_pass_by_reference,
+     param_option
      );
 }
 
@@ -341,7 +361,8 @@ void FuncDescObj::SetParamInfo
  const gString&         param_name, 
  const PortionType      param_type, 
  Portion*               param_default_value,
- const bool             param_pass_by_reference
+ const bool             param_pass_by_reference,
+ const int              param_option
  )
 {
   int i;
@@ -363,7 +384,8 @@ void FuncDescObj::SetParamInfo
      param_name, 
      param_type, 
      param_default_value,
-     param_pass_by_reference
+     param_pass_by_reference,
+     param_option
      );
 }
 
@@ -375,7 +397,8 @@ void FuncDescObj::_SetParamInfo
  const gString&     param_name, 
  const PortionType  param_type, 
  Portion*           param_default_value,
- const bool         param_pass_by_reference
+ const bool         param_pass_by_reference,
+ const int          param_option
  )
 {
   int index;
@@ -441,6 +464,8 @@ void FuncDescObj::_SetParamInfo
     param_default_value;
   _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
     param_pass_by_reference;
+  _FuncInfo[ f_index ].ParamInfo[ param_index ].Option = 
+    param_option;
 }
 
 
@@ -506,7 +531,6 @@ CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )
     _Param[ index ] = NO_DEFAULT_VALUE;
     _RunTimeParamInfo[ index ].Defined = false;
     _RunTimeParamInfo[ index ].Ref = 0;
-    _RunTimeParamInfo[ index ].ShadowOf = 0;
   }
 }
 
@@ -543,7 +567,7 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
       }
       else
       {
-	CalledType = ( (List_Portion*) p )->DataType();
+	CalledType = ( (ListPortion*) p )->DataType();
 	ExpectedListType = ExpectedType & ~porLIST;
 	result = CalledType & ExpectedListType;
       }
@@ -622,84 +646,61 @@ void CallFuncObj::SetCurrParamIndex( const int index )
 }
 
 
-bool CallFuncObj::SetCurrParam( Portion *param, Reference_Portion* ref_param )
+bool CallFuncObj::SetCurrParam( Portion *param )
 {
-  bool result = true;
-  bool type_match;
+  ReferencePortion* ref_param = 0;
+  
 
-  if( !_ErrorOccurred )
+  // Parameter index out of bounds
+  if( _CurrParamIndex >= _NumParams )
   {
-    if( _CurrParamIndex < _NumParams )
-    {
-      if( !_RunTimeParamInfo[ _CurrParamIndex ].Defined )
-      {
-	type_match = false;
-	if( param == 0 || _FuncIndex == -1 )
-	  type_match = true;
-	else 
-	  if( _TypeMatch( param, _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type ) )
-	    type_match = true;
-
-	if( type_match )
-	{
-	  if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
-	  {
-	    delete _Param[ _CurrParamIndex ];
-	  }
-	  _Param[ _CurrParamIndex ] = param;
-	  _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
-	  if( param )
-	    _RunTimeParamInfo[ _CurrParamIndex ].ShadowOf = param->ShadowOf();
-	  _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref_param;
-	  _CurrParamIndex++;
-	  _NumParamsDefined++;
-	}
-	else
-	{
-	  _ErrorMessage( _StdErr, 2, _CurrParamIndex, _FuncName );
-	  result = false;
-	}
-      }
-      else
-      {
-	_ErrorMessage( _StdErr, 3, 0, 
-		      _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
-		      _FuncName );
-	result = false;
-      }
-    }
-    else // ( _CurrParamIndex >= _NumParams )
-    {
-      _ErrorMessage( _StdErr, 4, 0, _FuncName );
-      result = false;
-    }
-  }
-  else
-  {
+    _ErrorMessage( _StdErr, 4, 0, _FuncName );
     delete param;
-    delete ref_param;
-  }
-
-  if( result == false )
-  {
     _ErrorOccurred = true;
-    delete param;
-    delete ref_param;
+    return false;
   }
-  return result;
+
+  // Repeated parameter defition
+  if( _RunTimeParamInfo[ _CurrParamIndex ].Defined )
+  {
+    _ErrorMessage( _StdErr, 3, 0, 
+		  _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
+		  _FuncName );
+    delete param;
+    _ErrorOccurred = true;
+    return false;
+  }
+  
+  // An error had already occurred with the current function call
+  if( _ErrorOccurred )
+  {
+    delete param;
+    return true;
+  }
+
+
+  if( param->Type() == porREFERENCE )
+  {
+    ref_param = (ReferencePortion*) param;
+    param = 0;
+  }
+
+  assert( _Param[ _CurrParamIndex ] == 0 );
+  _Param[ _CurrParamIndex ] = param;
+  _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
+  _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref_param;
+  _CurrParamIndex++;
+  _NumParamsDefined++;
+  
+  return true;
 }
 
 
-Reference_Portion* CallFuncObj::GetCurrParamRef( void ) const
+ReferencePortion* CallFuncObj::GetCurrParamRef( void ) const
 {
   return _RunTimeParamInfo[ _CurrParamIndex ].Ref;
 }
 
-
-Portion* CallFuncObj::GetCurrParamShadowOf( void ) const
-{
-  return _RunTimeParamInfo[ _CurrParamIndex ].ShadowOf;
-}
 
 
 Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
@@ -707,6 +708,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int index;
   int f_index;
   int curr_f_index;
+  int orig_params_defined;
   int params_defined;
   int params_matched;
   int param_sets_matched;
@@ -719,51 +721,69 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
   if( _FuncIndex == -1 )
   {
-    params_defined = 0;
+    orig_params_defined = 0;
     for( index = 0; index < _NumParams; index++ )
     {
       if( _Param[ index ] != 0 )
       {
-	params_defined++;
+	orig_params_defined++;
       }
     }
-    if( params_defined )
+
+    param_sets_matched = 0;
+    for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
-      param_sets_matched = 0;
-      for( f_index = 0; f_index < _NumFuncs; f_index++ )
+      params_defined = orig_params_defined;
+      params_matched = 0;
+      for( index = 0; 
+	  index < _FuncInfo[ f_index ].NumParams; 
+	  index++ )
       {
-	params_matched = 0;
-	for( index = 0; 
-	    index < _FuncInfo[ f_index ].NumParams; 
-	    index++ )
+	if( _Param[ index ] != 0 )
 	{
-	  if( _Param[ index ] != 0 )
+	  if( _TypeMatch( _Param[ index ], 
+			 _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+	    params_matched++;
+	}
+	else
+	{
+	  switch( _FuncInfo[ f_index ].ParamInfo[ index ].Option )
 	  {
-	    if( _TypeMatch( _Param[ index ], 
-			   _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+	  case DEFAULT_NFG:
+	    if( gsm->DefaultNfg()->Type() == 
+	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
+	    {
+	      _Param[ index ] = gsm->DefaultNfg()->ValCopy();
+	      params_defined++;
 	      params_matched++;
+	    }
+	    break;
+	  case DEFAULT_EFG:
+	    if( gsm->DefaultEfg()->Type() == 
+	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
+	    {
+	      _Param[ index ] = gsm->DefaultEfg()->ValCopy();
+	      params_defined++;
+	      params_matched++;
+	    }
+	    break;
 	  }
 	}
-	if( params_matched == params_defined )
-	{
-	  curr_f_index = f_index;
-	  param_sets_matched++;
-	}
       }
-
-      if( param_sets_matched == 1 )
+      if( params_matched == params_defined && params_defined != 0 )
       {
-	_FuncIndex = curr_f_index;
-      }
-      if ( param_sets_matched > 1 )
-      {
-	_ErrorMessage( _StdErr, 5, 0, _FuncName );
-	_ErrorOccurred = true;
+	curr_f_index = f_index;
+	param_sets_matched++;
       }
     }
-    else // ( !params_defined )
+
+    if( param_sets_matched == 1 )
     {
-      _ErrorMessage( _StdErr, 6, 0, _FuncName );
+      _FuncIndex = curr_f_index;
+    }
+    if ( param_sets_matched > 1 )
+    {
+      _ErrorMessage( _StdErr, 5, 0, _FuncName );
       _ErrorOccurred = true;
     }
   }
@@ -799,24 +819,12 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   {
     for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
     {
-      if( !_RunTimeParamInfo[ index ].Defined )
+      if( !_RunTimeParamInfo[ index ].Defined && _Param[ index ] == 0 )
       {
-	assert( _Param[ index ] == 0 );
-	
 	if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	{
-	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-	     ShadowOf() == 0 )
-	  {
-	    _Param[ index ] = 
-	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
-	  }
-	  else
-	  {
-	    _Param[ index ] = 
-	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		ShadowOf()->Copy();
-	  }
+	  _Param[ index ] = 
+	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->ValCopy();
 	}
 	else
 	{
@@ -841,19 +849,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  {
 	    if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	    {
-	      if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		 ShadowOf() == 0 )
-	      {
-		_Param[ index ] = 
-		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		    Copy();
-	      }
-	      else
-	      {
-		_Param[ index ] = 
-		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		    ShadowOf()->Copy();
-	      }
+	      _Param[ index ] = 
+		_FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		  ValCopy();
 	    }	  
 	  }
 	}
@@ -880,17 +878,20 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       _ErrorOccurred = true;
     }
   }
-
+  
   if( !_ErrorOccurred )
   {
     for( index = 0; index < _NumParams; index++ )
     {
       if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference )
       {
-	delete _Param[ index ];
-	_Param[ index ] = 0;
 	delete _RunTimeParamInfo[ index ].Ref;
 	_RunTimeParamInfo[ index ].Ref = 0;
+      }
+      if( _RunTimeParamInfo[ index ].Ref == 0 )
+      {
+	delete _Param[ index ];
+	_Param[ index ] = 0;
       }
     }
   }
@@ -914,17 +915,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 }
 
 
-bool CallFuncObj::ParamPassByReference( const int index ) const
-{
-  if( _FuncIndex >= 0 && _FuncIndex < _NumFuncs )
-  {
-    if( index >= 0 && index < _FuncInfo[ _FuncIndex ].NumParams )
-      return _FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference;
-  }
-
-  return false;
-}
-
 
 
 
@@ -933,7 +923,7 @@ void CallFuncObj::_ErrorMessage
 ( 
  gOutput& s,
  const int error_num, 
- const gInteger& num1,
+ const long& num1,
  const gString& str1,
  const gString& str2
  )

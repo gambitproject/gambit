@@ -23,7 +23,6 @@ class RefHashTable;
 class FunctionHashTable;
 
 class gString;
-class gInteger;
 class gRational;
 
 template <class T> class gList;
@@ -38,6 +37,13 @@ private:
   gInput&  _StdIn;
   gOutput& _StdOut;
   gOutput& _StdErr;
+
+  Portion* _OUTPUT;
+  Portion* _INPUT;
+  Portion* _NULL;
+
+  Portion* _DefaultNfg;
+  Portion* _DefaultEfg;
   
   gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
   gGrowableStack< CallFuncObj* >*                _CallFuncStack;
@@ -45,10 +51,9 @@ private:
   FunctionHashTable*                             _FuncTable;
 
   Portion* _ResolveRef             ( Portion* p );
-  Portion* _ResolveRefWithoutError ( Reference_Portion* p );
 
-  bool _UnaryOperation  ( OperationMode mode );
-  bool _BinaryOperation ( OperationMode mode );
+  bool _UnaryOperation  ( const gString& funcname );
+  bool _BinaryOperation ( const gString& funcname );
 
   void _BindCheck ( void ) const;
   bool _BindCheck ( const gString& param_name ) const;
@@ -57,12 +62,16 @@ private:
   bool     _VarDefine    ( const gString& var_name, Portion* p );
   Portion* _VarValue     ( const gString& var_name ) const;
 
+  int      _Depth( void ) const;
+  void     _Push( Portion* p );
+  Portion* _Pop( void );
+
   static void _ErrorMessage
     (
      gOutput&        s,
      const int       error_num = 0,
-     const gInteger& num1      = 0, 
-     const gInteger& num2      = 0,
+     const long& num1      = 0, 
+     const long& num2      = 0,
      const gString&  str1      = "",
      const gString&  str2      = "",
      Portion*        por       = 0,
@@ -84,19 +93,22 @@ public:
   int MaxDepth ( void ) const;
 
 
+  Portion*& DefaultNfg( void );
+  Portion*& DefaultEfg( void );
+
+
+
   bool Push ( const bool&      data );
+  bool Push ( const long&      data );
   bool Push ( const double&    data );
-  bool Push ( const gInteger&  data );
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
-
-  bool PushOutput( const gString& data );
-  bool PushInput ( const gString& data );
 
   bool PushList ( const int num_of_elements );
 
   bool PushRef  ( const gString& ref );
   bool Assign   ( void );
+  bool UnAssign ( void );
 
 
   bool Add      ( void );
@@ -122,7 +134,7 @@ public:
   bool Subscript ( void );
   bool Child ( void );
   
-  void AddFunction( FuncDescObj* func );
+  bool AddFunction( FuncDescObj* func );
 
   bool InitCallFunction ( const gString& funcname );
   bool Bind             ( void );

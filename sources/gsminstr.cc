@@ -399,7 +399,7 @@ void Flush::Output( gOutput& s ) const
 
 TEMPLATE class Push< bool >;
 TEMPLATE class Push< double >;
-TEMPLATE class Push< gInteger >;
+TEMPLATE class Push< long >;
 TEMPLATE class Push< gRational >;
 TEMPLATE class Push< gString >;
 

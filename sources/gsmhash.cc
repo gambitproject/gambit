@@ -99,20 +99,6 @@ template <class T> RefCountHashTable<T>::~RefCountHashTable()
 TEMPLATE class gNode< int >;
 TEMPLATE class gList< int >;
 
-TEMPLATE class gNode< gOutput* >;
-TEMPLATE class gList< gOutput* >;
-
-TEMPLATE class gNode< gInput* >;
-TEMPLATE class gList< gInput* >;
-
-
-
-TEMPLATE class gNode< BaseNormalForm* >;
-TEMPLATE class gList< BaseNormalForm* >;
-
-TEMPLATE class gNode< BaseExtForm* >;
-TEMPLATE class gList< BaseExtForm* >;
-
 TEMPLATE class gList< Portion* >;
 TEMPLATE class gNode< Portion* >;
 
@@ -134,18 +120,6 @@ TEMPLATE class gNode< gList< Instruction* >* >;
 
 #include "hash.imp"
 
-TEMPLATE class HashTable< gOutput*, int >;
-TEMPLATE class RefCountHashTable< gOutput* >;
-
-TEMPLATE class HashTable< gInput*, int >;
-TEMPLATE class RefCountHashTable< gInput* >;
-
-
-TEMPLATE class HashTable< BaseNormalForm*, int >;
-TEMPLATE class RefCountHashTable< BaseNormalForm* >;
-
-TEMPLATE class HashTable< BaseExtForm*, int >;
-TEMPLATE class RefCountHashTable< BaseExtForm* >;
 
 TEMPLATE class HashTable< gList< Instruction* >*, int >;
 TEMPLATE class RefCountHashTable< gList< Instruction* >* >;

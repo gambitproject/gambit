@@ -14,17 +14,23 @@
 
 #include "gsmincl.h"
 
-#include "basic.h"
+#include "gmisc.h"
 #include "gstring.h"
 
 #include "portion.h"
 
 
-#define NO_DEFAULT_VALUE  (Portion*)  0
-#define PARAM_NOT_FOUND   (int)      -1
-#define PARAM_AMBIGUOUS   (int)      -2
+
+#define NO_DEFAULT_VALUE  ( (Portion*)  0 )
+#define PARAM_NOT_FOUND   ( (int)      -1 )
+#define PARAM_AMBIGUOUS   ( (int)      -2 )
+#define DEFAULT_NFG       ( (int) 1 )
+#define DEFAULT_EFG       ( (int) 2 )
+
 
 #define PASS_BY_REFERENCE true
+#define PASS_BY_VALUE     false
+
 
 class FuncDescObj;
 class CallFuncObj;
@@ -33,7 +39,7 @@ class gInteger;
 class GSM;
 class Instruction;
 class Portion;
-class Reference_Portion;
+class ReferencePortion;
 
 template <class T> class gList;
 template <class T> class RefCountHashTable;
@@ -50,6 +56,7 @@ private:
   PortionType  Type;
   Portion*     DefaultValue;
   bool         PassByReference;
+  int          Option;
 
 public:
   ParamInfoType( void );
@@ -59,7 +66,8 @@ public:
      const gString& name, 
      const PortionType& type,
      Portion* default_value, 
-     const bool pass_by_ref = false 
+     const bool pass_by_ref = false,
+     const int option = 0
      );
   ~ParamInfoType();
 
@@ -99,7 +107,8 @@ private:
      const gString&    name,
      const PortionType type,
      Portion*          default_value,
-     const bool        pass_by_reference
+     const bool        pass_by_reference,
+     const int         option
      );
 
 protected:
@@ -133,7 +142,8 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = false
+     const bool        pass_by_reference = PASS_BY_VALUE,
+     const int         option = 0
      );
 
   void SetParamInfo
@@ -143,7 +153,8 @@ public:
      const gString&    name,
      const PortionType type,
      Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = false
+     const bool        pass_by_reference = PASS_BY_VALUE,
+     const int         option = 0
      );
   
   void SetParamInfo
@@ -164,8 +175,7 @@ class CallFuncObj : public FuncDescObj
   struct RunTimeParamInfoType
   {
     bool               Defined;
-    Reference_Portion* Ref;
-    Portion*           ShadowOf;
+    ReferencePortion* Ref;
   };
 
   gOutput&              _StdOut;
@@ -185,7 +195,7 @@ class CallFuncObj : public FuncDescObj
     (
      gOutput& s,
      const int error_num, 
-     const gInteger& num1 = 0,
+     const long& num1 = 0,
      const gString& str1 = "",
      const gString& str2 = ""
      );
@@ -195,16 +205,14 @@ class CallFuncObj : public FuncDescObj
   ~CallFuncObj();
 
   int         NumParams ( void ) const;
-  bool        ParamPassByReference( const int index ) const;
   int         FindParamName        ( const gString& param_name );
 
   void  SetCurrParamIndex   ( const int index );
-  bool  SetCurrParam ( Portion* param, Reference_Portion* ref_param = 0 );
+  bool  SetCurrParam ( Portion* param );
 
   void        SetErrorOccurred ( void );
 
-  Reference_Portion* GetCurrParamRef ( void ) const;
-  Portion*    GetCurrParamShadowOf ( void ) const;
+  ReferencePortion* GetCurrParamRef ( void ) const;
 
   Portion*    CallFunction      ( GSM*, Portion** param );
 };

@@ -8,88 +8,89 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "gconvert.h"
+#include "gmisc.h"
+#include "rational.h"
 
 Portion *GSM_NthElement(Portion **param)
 {
-  return ((List_Portion *) param[0])->GetSubscript
-    (((numerical_Portion<gInteger> *) param[1])->Value().as_long())->Copy();
+  return ((ListPortion *) param[0])->Subscript
+    (((IntPortion *) param[1])->Value())->ValCopy();
 }
 
 Portion *GSM_Remove(Portion **param)
 {
-  List_Portion *ret = (List_Portion *) param[0]->Copy();
+  ListPortion *ret = (ListPortion *) param[0]->ValCopy();
   delete ret->Remove
-    (((numerical_Portion<gInteger> *) param[1])->Value().as_long());
+    (((IntPortion *) param[1])->Value());
   return ret;
 }
 					    
 Portion *GSM_LengthList(Portion **param)
 {
-  return new numerical_Portion<gInteger>(((List_Portion *) param[0])->Length());
+  return new IntValPortion(((ListPortion *) param[0])->Length());
 }
 
 Portion *GSM_LengthText(Portion **param)
 {
-  return new numerical_Portion<gInteger>(((gString_Portion *) param[0])->Value().length());
+  return new IntValPortion(((TextPortion *) param[0])->Value().length());
 }
 
 Portion *GSM_NthChar(Portion **param)
 {
-  gString text(((gString_Portion *) param[0])->Value());
-  int n = ((numerical_Portion<gInteger> *) param[1])->Value().as_long();
+  gString text(((TextPortion *) param[0])->Value());
+  int n = ((IntPortion *) param[1])->Value();
   if (n < 0 || n >= text.length())   return 0;
-  return new gString_Portion(text[n-1]);
+  return new TextValPortion(text[n-1]);
 }
 						   
 Portion *GSM_TextInt(Portion **param)
 {
-  return new gString_Portion(ToString(((numerical_Portion<gInteger> *) param[0])->Value()));
+  return new TextValPortion(ToString(((IntPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextFloat(Portion **param)
 {
-  return new gString_Portion(ToString(((numerical_Portion<double> *) param[0])->Value()));
+  return new TextValPortion(ToString(((FloatPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextRat(Portion **param)
 {
-  return new gString_Portion(ToString(((numerical_Portion<gRational> *) param[0])->Value()));
+  return new TextValPortion(ToString(((RationalPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextText(Portion **param)
 {
-  return param[0]->Copy();
+  return param[0]->ValCopy();
 }
 
 Portion *GSM_FloatRational(Portion **param)
 {
-  return new numerical_Portion<double>((double) ((numerical_Portion<gRational> *) param[0])->Value());
+  return new FloatValPortion((double) ((RationalPortion *) param[0])->Value());
 }
 
 Portion *GSM_FloatInteger(Portion **param)
 {
-  return new numerical_Portion<double>((double) ((numerical_Portion<gInteger> *) param[0])->Value().as_long());
+  return new FloatValPortion((double) ((IntPortion *) param[0])->Value());
 }
 
 Portion *GSM_FloatFloat(Portion **param)
 {
-  return param[0]->Copy();
+  return param[0]->ValCopy();
 }
 
 Portion *GSM_RationalFloat(Portion **param)
 {
-  return new numerical_Portion<gRational>(((numerical_Portion<double> *) param[0])->Value());
+  return new RationalValPortion(((FloatPortion *) param[0])->Value());
 }
 
 Portion *GSM_RationalInteger(Portion **param)
 {
-  return new numerical_Portion<gRational>(((numerical_Portion<gInteger> *) param[0])->Value());
+  return new RationalValPortion(((IntPortion *) param[0])->Value());
 }
 
 Portion *GSM_RationalRational(Portion **param)
 {
-  return param[0]->Copy();
+  return param[0]->ValCopy();
 }
 
 #include "gwatch.h"
@@ -99,23 +100,23 @@ gWatch _gcl_watch(0);
 Portion *GSM_StartWatch(Portion **param)
 {
   _gcl_watch.Start();
-  return new numerical_Portion<double>(0.0);
+  return new FloatValPortion(0.0);
 }
 
 Portion *GSM_StopWatch(Portion **param)
 {
   _gcl_watch.Stop();
-  return new numerical_Portion<double>(_gcl_watch.Elapsed());
+  return new FloatValPortion(_gcl_watch.Elapsed());
 }
 
 Portion *GSM_ElapsedTime(Portion **param)
 {
-  return new numerical_Portion<double>(_gcl_watch.Elapsed());
+  return new FloatValPortion(_gcl_watch.Elapsed());
 }
 
 Portion *GSM_IsWatchRunning(Portion **param)
 {
-  return new bool_Portion(_gcl_watch.IsRunning());
+  return new BoolValPortion(_gcl_watch.IsRunning());
 }
 					   
 
@@ -129,7 +130,7 @@ void Init_listfunc(GSM *gsm)
 			NO_DEFAULT_VALUE);
   
   FuncObj->SetFuncInfo(GSM_LengthText, 1);
-  FuncObj->SetParamInfo(GSM_LengthText, 0, "text", porSTRING);
+  FuncObj->SetParamInfo(GSM_LengthText, 0, "text", porTEXT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NthElement");
@@ -146,7 +147,7 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NthChar");
   FuncObj->SetFuncInfo(GSM_NthChar, 2);
-  FuncObj->SetParamInfo(GSM_NthChar, 0, "text", porSTRING);
+  FuncObj->SetParamInfo(GSM_NthChar, 0, "text", porTEXT);
   FuncObj->SetParamInfo(GSM_NthChar, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
 
@@ -155,13 +156,13 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_TextInt, 0, "x", porINTEGER);
 
   FuncObj->SetFuncInfo(GSM_TextFloat, 1);
-  FuncObj->SetParamInfo(GSM_TextFloat, 0, "x", porDOUBLE);
+  FuncObj->SetParamInfo(GSM_TextFloat, 0, "x", porFLOAT);
 
   FuncObj->SetFuncInfo(GSM_TextRat, 1);
   FuncObj->SetParamInfo(GSM_TextRat, 0, "x", porRATIONAL);
 
   FuncObj->SetFuncInfo(GSM_TextText, 1);
-  FuncObj->SetParamInfo(GSM_TextText, 0, "x", porSTRING);
+  FuncObj->SetParamInfo(GSM_TextText, 0, "x", porTEXT);
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Float");
@@ -172,12 +173,12 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_FloatInteger, 0, "x", porINTEGER);
 
   FuncObj->SetFuncInfo(GSM_FloatFloat, 1);
-  FuncObj->SetParamInfo(GSM_FloatFloat, 0, "x", porDOUBLE);
+  FuncObj->SetParamInfo(GSM_FloatFloat, 0, "x", porFLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Rational");
   FuncObj->SetFuncInfo(GSM_RationalFloat, 1);
-  FuncObj->SetParamInfo(GSM_RationalFloat, 0, "x", porDOUBLE);
+  FuncObj->SetParamInfo(GSM_RationalFloat, 0, "x", porFLOAT);
   
   FuncObj->SetFuncInfo(GSM_RationalInteger, 1);
   FuncObj->SetParamInfo(GSM_RationalInteger, 0, "x", porINTEGER);

@@ -12,6 +12,7 @@
 #include "normal.h"
 
 #include "glist.h"
+#include "mixed.h"
 
 
 //---------------------------------------------------------------
@@ -19,23 +20,23 @@
 //---------------------------------------------------------------
 
 
-extern Portion* _DefaultNfgShadow;
+extern GSM* _CurrentGSM;
 
 Portion* GSM_DefaultNfg( Portion** param )
 {
-  return _DefaultNfgShadow->ShadowOf()->Copy();
+  return _CurrentGSM->DefaultNfg()->ValCopy();
 }
 
 Portion *GSM_ReadDefaultNfg(Portion **param)
 {
-  gInput &f = ((Input_Portion *) param[0])->Value();
+  gInput &f = ((InputPortion *) param[0])->Value();
   
   if (f.IsValid())  
   {
     NormalForm<double> *N = new NormalForm<double>(f);
-    delete _DefaultNfgShadow->ShadowOf();
-    _DefaultNfgShadow->ShadowOf() = new Nfg_Portion<double>(*N);
-    return new bool_Portion( true );
+    delete _CurrentGSM->DefaultNfg();
+    _CurrentGSM->DefaultNfg() = new NfgValPortion<double>(*N);
+    return new BoolValPortion( true );
   }
   else
     return 0;
@@ -43,9 +44,9 @@ Portion *GSM_ReadDefaultNfg(Portion **param)
 
 Portion* GSM_CopyDefaultNfg( Portion** param )
 {
-  delete _DefaultNfgShadow->ShadowOf();
-  _DefaultNfgShadow->ShadowOf() = param[0]->Copy();
-  return param[0]->Copy();
+  delete _CurrentGSM->DefaultNfg();
+  _CurrentGSM->DefaultNfg() = param[0]->ValCopy();
+  return param[0]->ValCopy();
 }
 
 
@@ -54,38 +55,38 @@ Portion* GSM_CopyDefaultNfg( Portion** param )
 
 Portion *GSM_ElimDom(Portion **param)
 {
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> *N = &((NfgPortion<double> *) param[0])->Value();
   
   N->FindAllDominated(STRONG, &gout);
 
-  return new numerical_Portion<gInteger>(1);
+  return new IntValPortion(1);
 }
 
 
-template <class T> class Mixed_List_Portion : public List_Portion   {
+template <class T> class Mixed_ListPortion : public ListPortion   {
   public:
-    Mixed_List_Portion(NormalForm<double> *, const gList<gPVector<T> > &);
+    Mixed_ListPortion(NormalForm<double> *, const gList<gPVector<T> > &);
 };
 
-Mixed_List_Portion<double>::Mixed_List_Portion(NormalForm<double> *N,
+Mixed_ListPortion<double>::Mixed_ListPortion(NormalForm<double> *N,
 			       const gList<gPVector<double> > &list)
 {
-  _DataType = porMIXED_DOUBLE;
+  _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new Mixed_Portion<double>(MixedProfile<double>(*N, list[i])));
+    Append(new MixedValPortion<double>(MixedProfile<double>(*N, list[i])));
 }
 
 #include "enum.h"
 
 Portion *GSM_Enum(Portion **param)
 {
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> *N = &((NfgPortion<double> *) param[0])->Value();
 
   EnumParams EP;
   EnumModule<double> EM(*N, EP);
   EM.Enum();
 
-  return new Mixed_List_Portion<double>(N, EM.GetSolutions());
+  return new Mixed_ListPortion<double>(N, EM.GetSolutions());
 }
 
 #include "ngobit.h"
@@ -94,80 +95,80 @@ Portion *GSM_GobitNfg(Portion **param)
 {
   NFGobitParams<double> NP;
 
-  NP.pxifile = &((Output_Portion *) param[1])->Value();
-  NP.minLam = ((numerical_Portion<double> *) param[3])->Value();
-  NP.maxLam = ((numerical_Portion<double> *) param[4])->Value();
-  NP.delLam = ((numerical_Portion<double> *) param[5])->Value();
-  NP.powLam = ((numerical_Portion<gInteger> *) param[6])->Value().as_long();
+  NP.pxifile = &((OutputPortion *) param[1])->Value();
+  NP.minLam = ((FloatPortion *) param[3])->Value();
+  NP.maxLam = ((FloatPortion *) param[4])->Value();
+  NP.delLam = ((FloatPortion *) param[5])->Value();
+  NP.powLam = ((IntPortion *) param[6])->Value();
 
-  NFGobitModule<double> M(((Nfg_Portion<double> *) param[0])->Value(), NP);
+  NFGobitModule<double> M(((NfgPortion<double> *) param[0])->Value(), NP);
   M.Gobit(1);
 
-  ((numerical_Portion<double> *) param[2])->Value() = M.Time();
+  ((FloatPortion *) param[2])->Value() = M.Time();
 
-  return new numerical_Portion<gInteger>(1);
+  return new IntValPortion(1);
 }
 
 #include "lemke.h"
 
 Portion *GSM_Lemke(Portion **param)
 {
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> *N = &((NfgPortion<double> *) param[0])->Value();
 
   LemkeParams LP;
   LemkeModule<double> LS(*N, LP);
   LS.Lemke();
 
-  ((numerical_Portion<double> *) param[2])->Value() = (double) LS.Time();
-  ((numerical_Portion<gInteger> *) param[3])->Value() = LS.NumPivots();
+  ((FloatPortion *) param[2])->Value() = (double) LS.Time();
+  ((IntPortion *) param[3])->Value() = LS.NumPivots();
 
-  return new Mixed_List_Portion<double>(N, LS.GetSolutions());
+  return new Mixed_ListPortion<double>(N, LS.GetSolutions());
 }
 
 #include "nliap.h"
 
 Portion *GSM_LiapNfg(Portion **param)
 {
-  NormalForm<double> &N = ((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> &N = ((NfgPortion<double> *) param[0])->Value();
 
   NFLiapParams<double> LP;
   NFLiapModule<double> LM(N, LP);
   LM.Liap(1);
 
-  return new Mixed_List_Portion<double>(&N, LM.GetSolutions());
+  return new Mixed_ListPortion<double>(&N, LM.GetSolutions());
 }
 
 #include "simpdiv.h"
 
 Portion *GSM_Simpdiv(Portion **param)
 {
-  NormalForm<double> &N = ((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> &N = ((NfgPortion<double> *) param[0])->Value();
 
   SimpdivParams SP;
   SimpdivModule<double> SM(N, SP);
   SM.Simpdiv();
 
-  return new Mixed_List_Portion<double>(&N, SM.GetSolutions());
+  return new Mixed_ListPortion<double>(&N, SM.GetSolutions());
 }
 
 #include "purenash.h"
 
 Portion *GSM_PureNash(Portion **param)
 {
-  NormalForm<double> &N = ((Nfg_Portion<double> *) param[0])->Value();
+  NormalForm<double> &N = ((NfgPortion<double> *) param[0])->Value();
 
   gList<gPVector<double> > solns;
   FindPureNash(N, solns);
-  return new Mixed_List_Portion<double>(&N, solns);
+  return new Mixed_ListPortion<double>(&N, solns);
 }
  
 Portion *GSM_ReadNfg(Portion **param)
 {
-  gInput &f = ((Input_Portion *) param[0])->Value();
+  gInput &f = ((InputPortion *) param[0])->Value();
   
   if (f.IsValid())  {
     NormalForm<double> *N = new NormalForm<double>(f);
-    return new Nfg_Portion<double>(*N);
+    return new NfgValPortion<double>(*N);
   }
   else
     return 0;
@@ -175,19 +176,19 @@ Portion *GSM_ReadNfg(Portion **param)
 
 Portion *GSM_WriteNfg(Portion **param)
 {
-  gOutput &f = ((Output_Portion *) param[0])->Value();
-  BaseNormalForm &N = ((BaseNfg_Portion *) param[1])->Value();
-  int sset = ((numerical_Portion<gInteger> *) param[2])->Value().as_long();
+  gOutput &f = ((OutputPortion *) param[0])->Value();
+  BaseNormalForm &N = ((BaseNfgPortion *) param[1])->Value();
+  int sset = ((IntPortion *) param[2])->Value();
 
   N.WriteNfgFile(f, sset);
-  return new Output_Portion(f);
+  return new OutputRefPortion(f);
 }
 
 /*
 Portion *GSM_NumPlayers(Portion **param)
 {
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
-  return new numerical_Portion<gInteger>(N->NumPlayers());
+  NormalForm<double> *N = &((NfgPortion<double> *) param[0])->Value();
+  return new IntValPortion(N->NumPlayers());
 }
 */
 
@@ -202,69 +203,72 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimDom, 1);
-  FuncObj->SetParamInfo(GSM_ElimDom, 0, "nfg", porNFG_DOUBLE,
-			_DefaultNfgShadow);
+  FuncObj->SetParamInfo(GSM_ElimDom, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_VALUE, DEFAULT_NFG );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Enum");
   FuncObj->SetFuncInfo(GSM_Enum, 1);
-  FuncObj->SetParamInfo(GSM_Enum, 0, "nfg", porNFG_DOUBLE,
-		        _DefaultNfgShadow);
+  FuncObj->SetParamInfo(GSM_Enum, 0, "nfg", 
+			porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_VALUE, DEFAULT_NFG );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitNfg");
   FuncObj->SetFuncInfo(GSM_GobitNfg, 8);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", porNFG_DOUBLE,
-		        _DefaultNfgShadow);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
+			porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_VALUE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
-			new Output_Portion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porDOUBLE,
-			new numerical_Portion<double>(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "minLam", porDOUBLE,
-			new numerical_Portion<double>(Gobit_default_minLam, true));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "maxLam", porDOUBLE,
-			new numerical_Portion<double>(Gobit_default_maxLam, true));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "delLam", porDOUBLE,
-			new numerical_Portion<double>(Gobit_default_delLam, true));
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
   FuncObj->SetParamInfo(GSM_GobitNfg, 6, "powLam", porINTEGER,
-			new numerical_Portion<gInteger>(1));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "start", porLIST | porDOUBLE,
-			new List_Portion);
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "start", porLIST | porFLOAT,
+			new ListValPortion);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Lemke");
   FuncObj->SetFuncInfo(GSM_Lemke, 4);
-  FuncObj->SetParamInfo(GSM_Lemke, 0, "nfg", porNFG_DOUBLE,
-		        _DefaultNfgShadow);
+  FuncObj->SetParamInfo(GSM_Lemke, 0, "nfg",
+			porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_VALUE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_Lemke, 1, "stopAfter", 
-			porINTEGER, new numerical_Portion<gInteger>(0));
+			porINTEGER, new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_Lemke, 2, "nPivots", 
-			porINTEGER, new numerical_Portion<gInteger>(0),
+			porINTEGER, new IntValPortion(0),
 		        PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Lemke, 3, "time", 
-			porDOUBLE, new numerical_Portion<double>(0),
+			porFLOAT, new FloatValPortion(0),
 			PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapNfg");
   FuncObj->SetFuncInfo(GSM_LiapNfg, 1);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "N", porNFG_FLOAT);
   gsm->AddFunction(FuncObj);
 
 /*
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayers, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayers, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_NumPlayers, 0, "N", porNFG_FLOAT);
   gsm->AddFunction(FuncObj);
   */
   FuncObj = new FuncDescObj("PureNash");
   FuncObj->SetFuncInfo(GSM_PureNash, 1);
-  FuncObj->SetParamInfo(GSM_PureNash, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_PureNash, 0, "N", porNFG_FLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Simpdiv");
   FuncObj->SetFuncInfo(GSM_Simpdiv, 1);
-  FuncObj->SetParamInfo(GSM_Simpdiv, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_Simpdiv, 0, "N", porNFG_FLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ReadNfg");
@@ -306,4 +310,4 @@ void Init_nfgfunc(GSM *gsm)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class Mixed_List_Portion<double>;
+TEMPLATE class Mixed_ListPortion<double>;

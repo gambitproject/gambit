@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #include "portion.h"
-#include "gsm.h"
+// #include "gsm.h"
 #include "gsmhash.h"
 
 #include "gambitio.h"
@@ -18,1424 +18,6 @@
 #include "extform.h"
 
 
-
-//---------------------------------------------------------------------
-//                          base class
-//---------------------------------------------------------------------
-
-
-// variable used to detect memory leakage
-#ifdef MEMCHECK
-int Portion::_NumPortions = 0;
-#endif // MEMCHECK
-
-
-Portion::Portion()
-{
-  _Static = false;
-  _ShadowOf = 0;
-
-  // The following two lines are for detecting memory leakage.
-#ifdef MEMCHECK
-  _NumPortions++;
-  gout << ">>> Portion ctor - count: " << _NumPortions << "\n";
-#endif // MEMCHECK
-}
-
-
-Portion::~Portion()
-{
-  _ShadowOf = 0;
-
-  // The following two lines are for detecting memory leakage.
-#ifdef MEMCHECK
-  _NumPortions--;
-  gout << ">>> Portion dtor - count: " << _NumPortions << "\n";
-#endif // MEMCHECK
-}
-
-
-
-Portion*& Portion::ShadowOf( void )
-{ return _ShadowOf; }
-
-
-List_Portion*& Portion::ParentList( void )
-{ return _ParentList; }
-
-
-Portion* Portion::Operation( Portion* p, OperationMode mode )
-{
-  delete p;
-  return new Error_Portion( _ErrorMessage( 1 ) );
-}
-
-
-
-
-
-//-----------------------------------------------------------------------
-//                          error type 
-//-----------------------------------------------------------------------
-
-
-
-Error_Portion::Error_Portion( const gString& value )
-     : _Value( value )
-{ }
-
-
-gString& Error_Portion::Value( void )
-{ return _Value; }
-
-PortionType Error_Portion::Type( void ) const
-{ return porERROR; }
-
-Portion* Error_Portion::Copy( bool new_data ) const
-{ return new Error_Portion( _Value ); }
-
-void Error_Portion::Output( gOutput& s ) const
-{
-  if( _Value == "" )
-    s << " (Error)";
-  else
-    s << _Value;
-}
-
-
-
-
-//-----------------------------------------------------------------------
-//                        numerical type 
-//-----------------------------------------------------------------------
-
-
-#ifdef MEMCHECK
-int numerical_Portion<double>::_NumObj = 0;
-int numerical_Portion<gInteger>::_NumObj = 0;
-int numerical_Portion<gRational>::_NumObj = 0;
-#endif // MEMCHECK
-
-
-template <class T> 
-numerical_Portion<T>::numerical_Portion( const T& value )
-{
-  _Value = new T( value );
-#ifdef MEMCHECK
-  _NumObj++;
-  gout << ">>> Numerical Dtor - " << _NumObj << "\n";
-#endif // MEMCHECK
-}
-
-
-template <class T> 
-numerical_Portion<T>::numerical_Portion( T& value, const bool var_static)
-{ 
-  _Static = var_static;
-  if( !_Static )
-  {
-    _Value = new T( value );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> Numerical Ctor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _Value = &value;
-  }
-}
-
-
-template <class T> numerical_Portion<T>::~numerical_Portion()
-{ 
-  if( !_Static )
-  {
-    delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> Numerical Dtor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-template <class T> T& numerical_Portion<T>::Value( void )
-{ return *_Value; }
-
-template <class T> PortionType numerical_Portion<T>::Type( void ) const
-{ return porUNKNOWN; }
-
-template <class T> Portion* numerical_Portion<T>::Copy( bool new_data ) const
-{ 
-  Portion* p;
-  p = new numerical_Portion<T>( *_Value ); 
-  return p;
-}
-
-
-template <class T> 
-Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
-{
-  Portion*  result = 0;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    case opNEGATE:
-      *_Value = - *_Value;
-      break;
-    default:
-      result = Portion::Operation( 0, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    T& p_value = *( ( (numerical_Portion<T>*) p )->_Value );
-    switch( mode )
-    {
-    case opADD:
-      *_Value += p_value;
-      break;
-    case opSUBTRACT:
-      *_Value -= p_value;
-      break;
-    case opMULTIPLY:
-      *_Value *= p_value;
-      break;
-    case opDIVIDE:
-      if( p_value != 0 )
-      {
-	*_Value /= p_value;
-      }
-      else
-      {
-	*_Value = 0;
-	result = new Error_Portion( _ErrorMessage( 2 ) );
-      }
-      break;
-
-    case opINTEGER_DIVIDE:
-      if( p_value != 0 )
-      {
-	if( Type() == porINTEGER )
-	{
-	  *_Value /= p_value;
-	}
-	else
-	{
-	  result = Portion::Operation( 0, mode );
-	}
-      }
-      else
-      {
-	*_Value = 0;
-	result = new Error_Portion( _ErrorMessage( 2 ) );
-      }
-      break;
-
-    case opMODULUS:
-      if( p_value != 0 )
-      {
-	if( Type() == porINTEGER )
-	{
-	  // This is coded as is because the compiler complains when 
-	  // instantiating for double and gRational types 
-	  // if the % operator is used.  This version is about as fast as
-	  // the original C operator %.
-	  *_Value = *_Value - *_Value / p_value * p_value;
-	}
-	else
-	{
-	  result = Portion::Operation( 0, mode );
-	}
-      }
-      else
-      {
-	*_Value = 0;
-	result = new Error_Portion( _ErrorMessage( 2 ) );
-      }
-      break;
-
-    case opEQUAL_TO:
-      result = new bool_Portion( *_Value == p_value );
-      break;
-    case opNOT_EQUAL_TO:
-      result = new bool_Portion( *_Value != p_value );
-      break;
-    case opGREATER_THAN:
-      result = new bool_Portion( *_Value > p_value );
-      break;
-    case opLESS_THAN:
-      result = new bool_Portion( *_Value < p_value );
-      break;
-    case opGREATER_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( *_Value >= p_value );
-      break;
-    case opLESS_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( *_Value <= p_value );
-      break;
-    default:
-      result = Portion::Operation( 0, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
-template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
-{
-  s << " " << *_Value;
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                            bool type
-//---------------------------------------------------------------------
-
-#ifdef MEMCHECK
-int bool_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-
-bool_Portion::bool_Portion( const bool& value )
-{
-  _Value = new bool( value );
-#ifdef MEMCHECK
-  _NumObj++;
-  gout << ">>> bool Ctor - " << _NumObj << "\n";
-#endif // MEMCHECK
-}
-
-
-bool_Portion::bool_Portion( bool& value, const bool var_static)
-{ 
-  _Static = var_static;
-  if( !_Static )
-  {
-    _Value = new bool( value );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> bool Ctor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _Value = &value;
-  }
-}
-
-
-bool_Portion::~bool_Portion()
-{ 
-  if( !_Static )
-  {
-    delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> bool Dtor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-bool& bool_Portion::Value( void )
-{ return *_Value; }
-
-PortionType bool_Portion::Type( void ) const
-{ return porBOOL; }
-
-Portion* bool_Portion::Copy( bool new_data ) const
-{ return new bool_Portion( *_Value ); }
-
-
-Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
-{
-  Portion* result = 0;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    case opLOGICAL_NOT:
-      *_Value = ! *_Value;
-      break;
-    default:
-      result = Portion::Operation( 0, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    bool& p_value = *( ( (bool_Portion*) p )->_Value );
-
-    switch( mode )
-    {
-    case opEQUAL_TO:
-      result = new bool_Portion( *_Value == p_value );
-      break;
-    case opNOT_EQUAL_TO:
-      result = new bool_Portion( *_Value != p_value );
-      break;
-
-    case opLOGICAL_AND:
-      *_Value = *_Value && p_value;
-      break;
-    case opLOGICAL_OR:
-      *_Value = *_Value || p_value;
-      break;
-    default:
-      result = Portion::Operation( 0, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
-void bool_Portion::Output( gOutput& s ) const
-{
-  if( *_Value == true )
-    s << " true";
-  else
-    s << " false";
-}
-
-
-
-//---------------------------------------------------------------------
-//                          gString type
-//---------------------------------------------------------------------
-
-
-#ifdef MEMCHECK
-int gString_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-gString_Portion::gString_Portion( const gString& value )
-{
-  _Value = new gString( value );
-#ifdef MEMCHECK
-  _NumObj++;
-  gout << ">>> gString Ctor - " << _NumObj << "\n";
-#endif // MEMCHECK
-}
-
-
-gString_Portion::gString_Portion( gString& value, const bool var_static)
-{ 
-  _Static = var_static;
-  if( !_Static )
-  {
-    _Value = new gString( value );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> gString Ctor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _Value = &value;
-  }
-}
-
-
-gString_Portion::~gString_Portion()
-{ 
-  if( !_Static )
-  {
-    delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> gString Dtor - " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-gString& gString_Portion::Value( void )
-{ return *_Value; }
-
-PortionType gString_Portion::Type( void ) const
-{ return porSTRING; }
-
-Portion* gString_Portion::Copy( bool new_data ) const
-{ return new gString_Portion( *_Value ); }
-
-
-Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
-{
-  Portion*  result = 0;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( 0, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    gString&  p_value = *( ( (gString_Portion*) p )->_Value );
-    switch( mode )
-    {
-    case opADD:
-      *_Value += p_value;
-      break;
-    case opEQUAL_TO:
-      result = new bool_Portion( *_Value == p_value );
-      break;
-    case opNOT_EQUAL_TO:
-      result = new bool_Portion( *_Value != p_value );
-      break;
-    case opGREATER_THAN:
-      result = new bool_Portion( *_Value > p_value );
-      break;
-    case opLESS_THAN:
-      result = new bool_Portion( *_Value < p_value );
-      break;
-    case opGREATER_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( *_Value >= p_value );
-      break;
-    case opLESS_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( *_Value <= p_value );
-      break;
-    default:
-      result = Portion::Operation( 0, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
-void gString_Portion::Output( gOutput& s ) const
-{
-  s << " \"" << *_Value << "\"";
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                          MixedProfile type
-//---------------------------------------------------------------------
-
-template <class T> 
-  Mixed_Portion<T>::Mixed_Portion( const MixedProfile<T>& value )
-    : _Value( value )
-{ }
-
-
-template <class T> MixedProfile<T>& Mixed_Portion<T>::Value( void )
-{ return _Value; }
-
-template <class T> PortionType Mixed_Portion<T>::Type( void ) const
-{ return porMIXED; }
-
-template <class T> Portion* Mixed_Portion<T>::Copy( bool new_data ) const
-{ return new Mixed_Portion<T>( _Value ); }
-
-template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
-{
-  _Value.Dump( s );
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                          BehavProfile type
-//---------------------------------------------------------------------
-
-template <class T> 
-  Behav_Portion<T>::Behav_Portion( const BehavProfile<T>& value )
-    : _Value( value )
-{ }
-
-
-template <class T> BehavProfile<T>& Behav_Portion<T>::Value( void )
-{ return _Value; }
-
-template <class T> PortionType Behav_Portion<T>::Type( void ) const
-{ return porBEHAV; }
-
-template <class T> Portion* Behav_Portion<T>::Copy( bool new_data ) const
-{ return new Behav_Portion<T>( _Value ); }
-
-template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
-{
-  _Value.Dump( s );
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                        Reference type
-//---------------------------------------------------------------------
-Reference_Portion::Reference_Portion( const gString& value )
-     : _Value( value )
-{ }
-
-
-gString& Reference_Portion::Value( void )
-{ return _Value; }
-
-PortionType Reference_Portion::Type( void ) const
-{ return porREFERENCE; }
-
-Portion* Reference_Portion::Copy( bool new_data ) const
-{ return new Reference_Portion( _Value ); }
-
-void Reference_Portion::Output( gOutput& s ) const
-{
-  s << "(Reference) \"" << _Value << "\"";
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                             List type
-//---------------------------------------------------------------------
-List_Portion::List_Portion( void )
-{
-  _DataType = porUNKNOWN;
-}
-
-
-List_Portion::List_Portion( const gBlock<Portion*>& value )
-{
-  int i;
-  int length;
-  int type_match;
-  int result;
-
-  _DataType = porUNKNOWN;
-
-  for( i = 1, length = value.Length(); i <= length; i++ )
-  {
-    result = Insert( value[ i ]->Copy(), i );
-    assert( result != 0 );
-  }
-}
-
-
-List_Portion::~List_Portion()
-{
-  Flush();
-}
-
-
-gBlock<Portion*>& List_Portion::Value( void )
-{ return _Value; }
-
-PortionType List_Portion::Type( void ) const
-{ return porLIST; }
-
-void List_Portion::SetDataType( PortionType data_type )
-{
-  assert( _DataType == porUNKNOWN );
-  _DataType = data_type;
-}
-
-PortionType List_Portion::DataType( void ) const
-{ return _DataType; }
-
-Portion* List_Portion::Copy( bool new_data ) const
-{ 
-  Portion* p;
-  p = new List_Portion( _Value ); 
-  ( (List_Portion*) p )->_DataType = _DataType;
-  return p;
-}
-
-
-bool List_Portion::TypeCheck( Portion* item )
-{
-  bool result = false;
-
-  if( item->Type() == _DataType )
-  {
-    result = true;
-  }
-  else if( item->Type() == porLIST )
-  {
-    if( ( (List_Portion*) item )->_DataType == _DataType )
-      result = true;
-  }
-  return result;
-}
-
-
-
-Portion* List_Portion::Operation( Portion* p, OperationMode mode )
-{
-  Portion*  result = 0;
-  int i;
-  int append_result;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( 0, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    gBlock<Portion*>& p_value = ( (List_Portion*) p )->_Value;
-    switch( mode )
-    {
-    case opADD:
-      for( i = 1; i <= p_value.Length(); i++ )
-      {
-	append_result = Append( p_value[ i ]->Copy() );
-	if( append_result == 0 )
-	{
-	  result = new Error_Portion( _ErrorMessage( 8 ) );
-	  break;
-	}
-      }
-      break;
-    default:
-      result = Portion::Operation( 0, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
-void List_Portion::Output( gOutput& s ) const
-{
-  int i;
-  int length = _Value.Length();
-
-  s << " {";
-  if( length >= 1 )
-  {
-    s << _Value[ 1 ];
-    for( i = 2; i <= length; i++ )
-    {
-      s << "," << _Value[ i ];
-    }
-  }
-  else
-  {
-    s << " empty";
-  }
-  s << " }";
-}
-
-
-
-int List_Portion::Append( Portion* item )
-{ return Insert( item, _Value.Length() + 1 ); }
-
-
-int List_Portion::Insert( Portion* item, int index )
-{
-  int result = 0;
-  int type_match;
-
-#ifndef NDEBUG
-  if( item->Type() == porREFERENCE )
-  {
-    gerr << "Portion Error:\n";
-    gerr << "  Attempted to insert a Reference_Portion into\n";
-    gerr << "  a List_Portion\n";
-  }
-  assert( item->Type() != porREFERENCE );
-#endif
-  
-  if( _Value.Length() == 0 )  // creating a new list
-  {
-    if( item->Type() == _DataType || _DataType == porUNKNOWN )
-    {
-      if( item->Type() == porLIST )
-	_DataType = ( (List_Portion*) item )->_DataType;
-      else
-	_DataType = item->Type();
-      item->ParentList() = this;
-      result = _Value.Insert( item, index );
-    }
-    else
-    {
-      delete item;
-    }
-  }
-  else  // inserting into an existing list
-  {
-    type_match = TypeCheck( item );
-    if( !type_match )
-    {
-      delete item;
-    }
-    else
-    {
-      item->ParentList() = this;
-      result = _Value.Insert( item, index );
-    }
-  }
-  return result;
-}
-
-
-Portion* List_Portion::Remove( int index )
-{ 
-  Portion* p;
-  if( index >= 1 && index <= _Value.Length() )
-  {
-    p = _Value.Remove( index );
-    p->ParentList() = 0;
-  }
-  else
-  {
-    p = new Error_Portion( _ErrorMessage( 6 ) );
-  }
-  return p;
-}
-
-int List_Portion::Length( void ) const
-{ return _Value.Length(); }
-
-
-void List_Portion::Flush( void )
-{
-  int i, length;
-  for( i = 1, length = _Value.Length(); i <= length; i++ )
-  {
-    delete Remove( 1 );
-  }
-  assert( _Value.Length() == 0 );
-}
-
-
-Portion* List_Portion::SetSubscript( int index, Portion *p )
-{
-  bool type_match;
-  Portion* result = 0;
-
-  type_match = TypeCheck( p );
-  if( type_match )
-  {
-    if( index >= 1 && index <= _Value.Length() )
-    {
-      delete _Value[ index ];
-      p->ParentList() = this;
-      _Value[ index ] = p;
-    }
-    else
-    {
-      result = new Error_Portion( _ErrorMessage( 6 ) );
-    }
-  }
-  else
-  {
-    result = new Error_Portion( _ErrorMessage( 7 ) );
-    delete p;
-  }
-  return result;
-}
-
-
-Portion* List_Portion::GetSubscript( int index ) const
-{
-  if( index >= 1 && index <= _Value.Length() )
-  {
-    return _Value[ index ];
-  }
-  else
-  {
-    return new Error_Portion( _ErrorMessage( 6 ) );
-  }
-}
-
-
-
-
-
-//---------------------------------------------------------------------
-//                            Nfg type
-//---------------------------------------------------------------------
-
-
-
-#ifdef MEMCHECK
-int BaseNfg_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-RefCountHashTable< BaseNormalForm* > BaseNfg_Portion::_RefCountTable;
-
-BaseNfg_Portion::BaseNfg_Portion( BaseNormalForm& value )
-{
-  _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
-  {
-    _RefCountTable.Define( _Value, 1 );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> BaseNormalForm Ctor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
-  }
-}
-
-BaseNfg_Portion::~BaseNfg_Portion()
-{
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
-  {
-    _RefCountTable.Remove( _Value );
-    delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> BaseNormalForm Dtor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-BaseNormalForm& BaseNfg_Portion::Value( void )
-{ return *_Value; }
-
-PortionType BaseNfg_Portion::Type( void ) const
-{ return porNFG; }
-
-void BaseNfg_Portion::Output( gOutput& s ) const
-{ s << "BaseNormalForm[ "; _Value->GetTitle(); s << ']'; }
-
-
-
-
-
-
-
-
-
-
-
-
-template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
-:BaseNfg_Portion( value )
-{ }
-
-template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
-{ return (NormalForm<T>&) *_Value; }
-
-template <class T> PortionType Nfg_Portion<T>::Type( void ) const
-{ return porUNKNOWN; }
-
-template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
-{ 
-  Portion* p;
-  NormalForm<T>* new_value;
-
-  if( new_data )
-  {
-    new_value = new NormalForm<T>( (NormalForm<T>&) *_Value );
-    p = new Nfg_Portion<T>( (NormalForm<T>&) *new_value );
-  }
-  else
-  {
-    p = new Nfg_Portion<T>( (NormalForm<T>&) *_Value ); 
-  }
-  return p;
-}
-
-
-template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
-{
-  s << "NormalForm[ "; _Value->GetTitle(); s << ']'; 
-  PrintPortionTypeSpec( s, Type() );
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Efg type
-//---------------------------------------------------------------------
-
-
-
-#ifdef MEMCHECK
-int BaseEfg_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-RefCountHashTable< BaseExtForm* > BaseEfg_Portion::_RefCountTable;
-
-BaseEfg_Portion::BaseEfg_Portion( BaseExtForm& value )
-{
-  _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
-  {
-    _RefCountTable.Define( _Value, 1 );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> BaseExtForm Ctor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
-  }
-}
-
-BaseEfg_Portion::~BaseEfg_Portion()
-{
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
-  {
-    _RefCountTable.Remove( _Value );
-    delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> BaseExtForm Dtor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-BaseExtForm& BaseEfg_Portion::Value( void )
-{ return *_Value; }
-
-PortionType BaseEfg_Portion::Type( void ) const
-{ return porEFG; }
-
-void BaseEfg_Portion::Output( gOutput& s ) const
-{ s << "BaseExtForm[ "; _Value->GetTitle(); s << ']'; }
-
-
-
-
-
-
-
-
-
-
-
-
-template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
-:BaseEfg_Portion( value )
-{ }
-
-template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
-{ return (ExtForm<T>&) *_Value; }
-
-template <class T> PortionType Efg_Portion<T>::Type( void ) const
-{ return porUNKNOWN; }
-
-template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
-{ 
-  Portion* p;
-  ExtForm<T>* new_value;
-
-  if( new_data )
-  {
-    new_value = new ExtForm<T>( (ExtForm<T>&) *_Value );
-    p = new Efg_Portion<T>( (ExtForm<T>&) *new_value );
-  }
-  else
-  {
-    p = new Efg_Portion<T>( (ExtForm<T>&) *_Value ); 
-  }
-  return p;
-}
-
-
-template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
-{
-  s << "ExtForm[ "; _Value->GetTitle(); s << ']';
-  PrintPortionTypeSpec( s, Type() );
-}
-
-
-
-
-//---------------------------------------------------------------------
-//                            Outcome type
-//---------------------------------------------------------------------
-Outcome_Portion::Outcome_Portion( Outcome* value ) 
-     : _Value( value )
-{ }
-
-
-Outcome*& Outcome_Portion::Value( void )
-{ return _Value; }
-
-PortionType Outcome_Portion::Type( void ) const
-{ return porOUTCOME; }
-
-Portion* Outcome_Portion::Copy( bool new_data ) const
-{ return new Outcome_Portion( _Value ); }
-
-void Outcome_Portion::Output( gOutput& s ) const
-{
-  s << " (Outcome) ";
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Player type
-//---------------------------------------------------------------------
-Player_Portion::Player_Portion( Player* value ) 
-     : _Value( value )
-{ }
-
-
-Player*& Player_Portion::Value( void )
-{ return _Value; }
-
-PortionType Player_Portion::Type( void ) const
-{ return porPLAYER; }
-
-Portion* Player_Portion::Copy( bool new_data ) const
-{ return new Player_Portion( _Value ); }
-
-void Player_Portion::Output( gOutput& s ) const
-{
-  s << " (Player) ";
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Infoset type
-//---------------------------------------------------------------------
-Infoset_Portion::Infoset_Portion( Infoset* value ) 
-     : _Value( value )
-{ }
-
-
-Infoset*& Infoset_Portion::Value( void )
-{ return _Value; }
-
-PortionType Infoset_Portion::Type( void ) const
-{ return porINFOSET; }
-
-Portion* Infoset_Portion::Copy( bool new_data ) const
-{ return new Infoset_Portion( _Value ); }
-
-void Infoset_Portion::Output( gOutput& s ) const
-{
-  s << " (Infoset) ";
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Action type
-//---------------------------------------------------------------------
-Action_Portion::Action_Portion( Action* value ) 
-     : _Value( value )
-{ }
-
-
-Action*& Action_Portion::Value( void )
-{ return _Value; }
-
-PortionType Action_Portion::Type( void ) const
-{ return porACTION; }
-
-Portion* Action_Portion::Copy( bool new_data ) const
-{ return new Action_Portion( _Value ); }
-
-void Action_Portion::Output( gOutput& s ) const
-{
-  s << " (Action) ";
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Node type
-//---------------------------------------------------------------------
-Node_Portion::Node_Portion( Node* value ) 
-     : _Value( value )
-{ }
-
-
-Node*& Node_Portion::Value( void )
-{ return _Value; }
-
-PortionType Node_Portion::Type( void ) const
-{ return porNODE; }
-
-Portion* Node_Portion::Copy( bool new_data ) const
-{ return new Node_Portion( _Value ); }
-
-void Node_Portion::Output( gOutput& s ) const
-{
-  s << " (Node) ";
-}
-
-
-
-
-
-//---------------------------------------------------------------------
-//                            Output type
-//---------------------------------------------------------------------
-
-#ifdef MEMCHECK
-int Output_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-RefCountHashTable< gOutput* > Output_Portion::_RefCountTable;
-
-Output_Portion::Output_Portion( gOutput& value, bool var_static )
-{
-  _Static = var_static;
-  _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
-  {
-    _RefCountTable.Define( _Value, 1 );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> gOutput Ctor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
-  }
-}
-
-Output_Portion::~Output_Portion()
-{
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
-  {
-    _RefCountTable.Remove( _Value );
-    if( !_Static )
-      delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> gOutput Dtor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-gOutput& Output_Portion::Value( void )
-{ return *_Value; }
-
-PortionType Output_Portion::Type( void ) const
-{ return porOUTPUT; }
-
-Portion* Output_Portion::Copy( bool new_data ) const
-{ return new Output_Portion( *_Value ); }
-
-
-void Output_Portion::Output( gOutput& s ) const
-{
-  s << " (Output) ";
-}
-
-
-
-//---------------------------------------------------------------------
-//                            Input type
-//---------------------------------------------------------------------
-
-#ifdef MEMCHECK
-int Input_Portion::_NumObj = 0;
-#endif // MEMCHECK
-
-RefCountHashTable< gInput* > Input_Portion::_RefCountTable;
-
-Input_Portion::Input_Portion( gInput& value, bool var_static )
-{
-  _Static = var_static;
-  _Value = &value;
-  if( !_RefCountTable.IsDefined( _Value ) )
-  {
-    _RefCountTable.Define( _Value, 1 );
-#ifdef MEMCHECK
-    _NumObj++;
-    gout << ">>> gInput Ctor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-  else
-  {
-    _RefCountTable( _Value )++;
-  }
-}
-
-Input_Portion::~Input_Portion()
-{
-  assert( _RefCountTable.IsDefined( _Value ) );
-  assert( _RefCountTable( _Value ) > 0 );
-  _RefCountTable( _Value )--;
-  if( _RefCountTable( _Value ) == 0 )
-  {
-    _RefCountTable.Remove( _Value );
-    if( !_Static )
-      delete _Value;
-#ifdef MEMCHECK
-    _NumObj--;
-    gout << ">>> gInput Dtor - count: " << _NumObj << "\n";
-#endif // MEMCHECK
-  }
-}
-
-
-gInput& Input_Portion::Value( void )
-{ return *_Value; }
-
-PortionType Input_Portion::Type( void ) const
-{ return porINPUT; }
-
-Portion* Input_Portion::Copy( bool new_data ) const
-{ return new Input_Portion( *_Value ); }
-
-
-void Input_Portion::Output( gOutput& s ) const
-{
-  s << " (Input) ";
-}
-
-
-
-
-
-
-//--------------------------------------------------------------------
-//                      _ErrorMessage
-//--------------------------------------------------------------------
-
-
-gString Portion::_ErrorMessage( const int error_num, const gString& str )
-{
-  gString result = "Portion Error:\n";
-  switch( error_num )
-  {
-  case 1:
-    result += "  Attempted to execute an unsupported operation\n";
-    break;
-  case 2:
-    result += "  Division by zero\n";
-    break;
-  case 6:
-    result += "  An out-of-range list subscript specified\n";
-    break;
-  case 7:
-    result += "  Attempted to set an element of a List_Portion\n";
-    result += "  to one with a conflicting Portion type\n";
-    break;
-  case 8:
-    result += "  Attempted to insert conflicting Portion\n";
-    result += "  types into a List_Portion.\n";
-    break;
-  }
-  return result;
-}
-
-
-
-//--------------------------------------------------------------------
-//             miscellaneous PortionType functions
-//--------------------------------------------------------------------
-
-
-
-void PrintPortionTypeSpec( gOutput& s, PortionType type )
-{
-  if( type == porERROR )
-  {
-    s << " porERROR";
-  }
-  else
-  {
-    if( type & porBOOL )
-      s << " porBOOL";
-    if( type & porDOUBLE )
-      s << " porDOUBLE";
-    if( type & porINTEGER )
-      s << " porINTEGER";
-    if( type & porRATIONAL )
-      s << " porRATIONAL";
-    if( type & porSTRING )
-      s << " porSTRING";
-    if( type & porLIST )
-      s << " porLIST";
-
-    if( type & porNFG_DOUBLE )
-      s << " porNFG_DOUBLE";
-    if( type & porNFG_RATIONAL )
-      s << " porNFG_RATIONAL";
-    if( type & porEFG_DOUBLE )
-      s << " porEFG_DOUBLE";
-    if( type & porEFG_RATIONAL )
-      s << " porEFG_RATIONAL";
-    if( type & porMIXED_DOUBLE )
-      s << " porMIXED_DOUBLE";
-    if( type & porMIXED_RATIONAL )
-      s << " porMIXED_RATIONAL";
-    if( type & porBEHAV_DOUBLE )
-      s << " porBEHAV_DOUBLE";
-    if( type & porBEHAV_RATIONAL )
-      s << " porBEHAV_RATIONAL";
-
-    if( type & porOUTCOME )
-      s << " porOUTCOME";
-    if( type & porPLAYER )
-      s << " porPLAYER";
-    if( type & porINFOSET )
-      s << " porINFOSET";
-    if( type & porNODE )
-      s << " porNODE";
-    if( type & porACTION )
-      s << " porACTION";
-
-    if( type & porOUTPUT )
-      s << " porOUTPUT";
-    if( type & porINPUT )
-      s << " porINPUT";
-
-    if( type & porREFERENCE )
-      s << " porREFERENCE";
-
-    if( type & porUNKNOWN )
-      s << " porUNKNOWN";
-  }
-}
-
-
-
-
-
-
-
-//----------------------------------------------------------------------
-//                         class instantiations
-//----------------------------------------------------------------------
-
-
-
-gOutput& operator << ( gOutput& s, Portion* p )
-{
-  p->Output( s );
-  return s;
-}
 
 
 
@@ -1450,57 +32,1305 @@ gOutput& operator << ( gOutput& s, Portion* p )
 
 
 
-TEMPLATE class numerical_Portion<double>;
-PortionType numerical_Portion<double>::Type( void ) const
-{ return porDOUBLE; }
 
-TEMPLATE class numerical_Portion<gInteger>;
-PortionType numerical_Portion<gInteger>::Type( void ) const
+//---------------------------------------------------------------------
+//                          base class
+//---------------------------------------------------------------------
+
+#ifdef MEMCHECK
+int Portion::_NumObj = 0;
+#endif
+
+Portion::Portion( void )
+{
+#ifdef MEMCHECK
+  _NumObj++;
+  gout << "--- Portion Ctor, count: " << _NumObj << "\n";
+#endif
+  _ReadOnly = false;
+}
+
+Portion::~Portion()
+{ 
+#ifdef MEMCHECK
+  _NumObj--;
+  gout << "--- Portion Dtor, count: " << _NumObj << "\n";
+#endif
+}
+
+
+//---------------------------------------------------------------------
+//                          Error class
+//---------------------------------------------------------------------
+
+ErrorPortion::ErrorPortion( const gString& value )
+: _Value( value )
+{ }
+
+ErrorPortion::~ErrorPortion()
+{ }
+
+gString ErrorPortion::Value( void )
+{ return _Value; }
+
+PortionType ErrorPortion::Type( void ) const
+{ return porERROR; }
+
+void ErrorPortion::Output( gOutput& s ) const
+{ s << "(Error) " << _Value; }
+
+Portion* ErrorPortion::ValCopy( void ) const
+{ return new ErrorPortion( _Value ); }
+
+Portion* ErrorPortion::RefCopy( void ) const
+{ return new ErrorPortion( _Value ); }
+
+void ErrorPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  _Value = ( (ErrorPortion*) p )->_Value;
+}
+
+
+//---------------------------------------------------------------------
+//                          Reference class
+//---------------------------------------------------------------------
+
+ReferencePortion::ReferencePortion( const gString& value )
+: _Value( value )
+{ }
+
+ReferencePortion::~ReferencePortion()
+{ }
+
+gString ReferencePortion::Value( void )
+{ return _Value; }
+
+PortionType ReferencePortion::Type( void ) const
+{ return porREFERENCE; }
+
+void ReferencePortion::Output( gOutput& s ) const
+{ s << "(Reference) \"" << _Value << "\""; }
+
+Portion* ReferencePortion::ValCopy( void ) const
+{ return new ReferencePortion( _Value ); }
+
+Portion* ReferencePortion::RefCopy( void ) const
+{ return new ReferencePortion( _Value ); }
+
+void ReferencePortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  _Value = ( (ReferencePortion*) p )->_Value;
+}
+
+
+
+//---------------------------------------------------------------------
+//                          int class
+//---------------------------------------------------------------------
+
+IntPortion::IntPortion( void )
+{ }
+
+IntPortion::~IntPortion()
+{ }
+
+long& IntPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType IntPortion::Type( void ) const
 { return porINTEGER; }
 
-TEMPLATE class numerical_Portion<gRational>;
-PortionType numerical_Portion<gRational>::Type( void ) const
+void IntPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* IntPortion::ValCopy( void ) const
+{ return new IntValPortion( *_Value ); }
+
+Portion* IntPortion::RefCopy( void ) const
+{ return new IntRefPortion( *_Value ); }
+
+void IntPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (IntPortion*) p )->_Value );
+}
+
+
+IntValPortion::IntValPortion( long value )
+{ _Value = new long( value ); }
+
+IntValPortion::~IntValPortion()
+{ delete _Value; }
+
+
+IntRefPortion::IntRefPortion( long& value )
+{ _Value = &value; }
+
+IntRefPortion::~IntRefPortion()
+{ }
+
+
+//---------------------------------------------------------------------
+//                          Float class
+//---------------------------------------------------------------------
+
+FloatPortion::FloatPortion( void )
+{ }
+
+FloatPortion::~FloatPortion()
+{ }
+
+double& FloatPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType FloatPortion::Type( void ) const
+{ return porFLOAT; }
+
+void FloatPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* FloatPortion::ValCopy( void ) const
+{ return new FloatValPortion( *_Value ); }
+
+Portion* FloatPortion::RefCopy( void ) const
+{ return new FloatRefPortion( *_Value ); }
+
+void FloatPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (FloatPortion*) p )->_Value );
+}
+
+
+FloatValPortion::FloatValPortion( double value )
+{ _Value = new double( value ); }
+
+FloatValPortion::~FloatValPortion()
+{ delete _Value; }
+
+FloatRefPortion::FloatRefPortion( double& value )
+{ _Value = &value; }
+
+FloatRefPortion::~FloatRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Rational class
+//---------------------------------------------------------------------
+
+RationalPortion::RationalPortion( void )
+{ }
+
+RationalPortion::~RationalPortion()
+{ }
+
+gRational& RationalPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType RationalPortion::Type( void ) const
 { return porRATIONAL; }
 
+void RationalPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* RationalPortion::ValCopy( void ) const
+{ return new RationalValPortion( *_Value ); }
+
+Portion* RationalPortion::RefCopy( void ) const
+{ return new RationalRefPortion( *_Value ); }
+
+void RationalPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (RationalPortion*) p )->_Value );
+}
 
 
-TEMPLATE class Mixed_Portion<double>;
-PortionType Mixed_Portion<double>::Type( void ) const
-{ return porMIXED_DOUBLE; }
+RationalValPortion::RationalValPortion( gRational value )
+{ _Value = new gRational( value ); }
 
-TEMPLATE class Mixed_Portion<gRational>;
-PortionType Mixed_Portion<gRational>::Type( void ) const
+RationalValPortion::~RationalValPortion()
+{ delete _Value; }
+
+
+RationalRefPortion::RationalRefPortion( gRational& value )
+{ _Value = &value; }
+
+RationalRefPortion::~RationalRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Text class
+//---------------------------------------------------------------------
+
+TextPortion::TextPortion( void )
+{ }
+
+TextPortion::~TextPortion()
+{ }
+
+gString& TextPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType TextPortion::Type( void ) const
+{ return porTEXT; }
+
+void TextPortion::Output( gOutput& s ) const
+{ s << "\"" << *_Value << "\""; }
+
+Portion* TextPortion::ValCopy( void ) const
+{ return new TextValPortion( *_Value ); }
+
+Portion* TextPortion::RefCopy( void ) const
+{ return new TextRefPortion( *_Value ); }
+
+void TextPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (TextPortion*) p )->_Value );
+}
+
+
+TextValPortion::TextValPortion( gString value )
+{ _Value = new gString( value ); }
+
+TextValPortion::~TextValPortion()
+{ delete _Value; }
+
+
+TextRefPortion::TextRefPortion( gString& value )
+{ _Value = &value; }
+
+TextRefPortion::~TextRefPortion()
+{ }
+
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Bool class
+//---------------------------------------------------------------------
+
+BoolPortion::BoolPortion( void )
+{ }
+
+BoolPortion::~BoolPortion()
+{ }
+
+bool& BoolPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType BoolPortion::Type( void ) const
+{ return porBOOL; }
+
+void BoolPortion::Output( gOutput& s ) const
+{ s << ( *_Value ? "true" : "false" ); }
+
+Portion* BoolPortion::ValCopy( void ) const
+{ return new BoolValPortion( *_Value ); }
+
+Portion* BoolPortion::RefCopy( void ) const
+{ return new BoolRefPortion( *_Value ); }
+
+void BoolPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (BoolPortion*) p )->_Value );
+}
+
+
+BoolValPortion::BoolValPortion( bool value )
+{ _Value = new bool( value ); }
+
+BoolValPortion::~BoolValPortion()
+{ delete _Value; }
+
+
+BoolRefPortion::BoolRefPortion( bool& value )
+{ _Value = &value; }
+
+BoolRefPortion::~BoolRefPortion()
+{ }
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Outcome class
+//---------------------------------------------------------------------
+
+
+
+OutcomePortion::OutcomePortion( void )
+{ }
+
+OutcomePortion::~OutcomePortion()
+{ }
+
+Outcome*& OutcomePortion::Value( void ) const
+{ return *_Value; }
+
+PortionType OutcomePortion::Type( void ) const
+{ return porOUTCOME; }
+
+void OutcomePortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* OutcomePortion::ValCopy( void ) const
+{ return new OutcomeValPortion( *_Value ); }
+
+Portion* OutcomePortion::RefCopy( void ) const
+{ return new OutcomeRefPortion( *_Value ); }
+
+void OutcomePortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (OutcomePortion*) p )->_Value );
+}
+
+
+OutcomeValPortion::OutcomeValPortion( Outcome* value )
+{ _Value = new Outcome*( value ); }
+
+OutcomeValPortion::~OutcomeValPortion()
+{ delete _Value; }
+
+
+OutcomeRefPortion::OutcomeRefPortion( Outcome*& value )
+{ _Value = &value; }
+
+OutcomeRefPortion::~OutcomeRefPortion()
+{ }
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          EfPlayer class
+//---------------------------------------------------------------------
+
+
+
+EfPlayerPortion::EfPlayerPortion( void )
+{ }
+
+EfPlayerPortion::~EfPlayerPortion()
+{ }
+
+Player*& EfPlayerPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType EfPlayerPortion::Type( void ) const
+{ return porEF_PLAYER; }
+
+void EfPlayerPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* EfPlayerPortion::ValCopy( void ) const
+{ return new EfPlayerValPortion( *_Value ); }
+
+Portion* EfPlayerPortion::RefCopy( void ) const
+{ return new EfPlayerRefPortion( *_Value ); }
+
+void EfPlayerPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (EfPlayerPortion*) p )->_Value );
+}
+
+
+EfPlayerValPortion::EfPlayerValPortion( Player* value )
+{ _Value = new Player*( value ); }
+
+EfPlayerValPortion::~EfPlayerValPortion()
+{ delete _Value; }
+
+
+EfPlayerRefPortion::EfPlayerRefPortion( Player*& value )
+{ _Value = &value; }
+
+EfPlayerRefPortion::~EfPlayerRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Infoset class
+//---------------------------------------------------------------------
+
+
+
+InfosetPortion::InfosetPortion( void )
+{ }
+
+InfosetPortion::~InfosetPortion()
+{ }
+
+Infoset*& InfosetPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType InfosetPortion::Type( void ) const
+{ return porINFOSET; }
+
+void InfosetPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* InfosetPortion::ValCopy( void ) const
+{ return new InfosetValPortion( *_Value ); }
+
+Portion* InfosetPortion::RefCopy( void ) const
+{ return new InfosetRefPortion( *_Value ); }
+
+void InfosetPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (InfosetPortion*) p )->_Value );
+}
+
+
+InfosetValPortion::InfosetValPortion( Infoset* value )
+{ _Value = new Infoset*( value ); }
+
+InfosetValPortion::~InfosetValPortion()
+{ delete _Value; }
+
+
+InfosetRefPortion::InfosetRefPortion( Infoset*& value )
+{ _Value = &value; }
+
+InfosetRefPortion::~InfosetRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Node class
+//---------------------------------------------------------------------
+
+
+
+NodePortion::NodePortion( void )
+{ }
+
+NodePortion::~NodePortion()
+{ }
+
+Node*& NodePortion::Value( void ) const
+{ return *_Value; }
+
+PortionType NodePortion::Type( void ) const
+{ return porNODE; }
+
+void NodePortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* NodePortion::ValCopy( void ) const
+{ return new NodeValPortion( *_Value ); }
+
+Portion* NodePortion::RefCopy( void ) const
+{ return new NodeRefPortion( *_Value ); }
+
+void NodePortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (NodePortion*) p )->_Value );
+}
+
+
+NodeValPortion::NodeValPortion( Node* value )
+{ _Value = new Node*( value ); }
+
+NodeValPortion::~NodeValPortion()
+{ delete _Value; }
+
+
+NodeRefPortion::NodeRefPortion( Node*& value )
+{ _Value = &value; }
+
+NodeRefPortion::~NodeRefPortion()
+{ }
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Action class
+//---------------------------------------------------------------------
+
+
+
+ActionPortion::ActionPortion( void )
+{ }
+
+ActionPortion::~ActionPortion()
+{ }
+
+Action*& ActionPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType ActionPortion::Type( void ) const
+{ return porACTION; }
+
+void ActionPortion::Output( gOutput& s ) const
+{ s << *_Value; }
+
+Portion* ActionPortion::ValCopy( void ) const
+{ return new ActionValPortion( *_Value ); }
+
+Portion* ActionPortion::RefCopy( void ) const
+{ return new ActionRefPortion( *_Value ); }
+
+void ActionPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (ActionPortion*) p )->_Value );
+}
+
+
+ActionValPortion::ActionValPortion( Action* value )
+{ _Value = new Action*( value ); }
+
+ActionValPortion::~ActionValPortion()
+{ delete _Value; }
+
+
+ActionRefPortion::ActionRefPortion( Action*& value )
+{ _Value = &value; }
+
+ActionRefPortion::~ActionRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Mixed class
+//---------------------------------------------------------------------
+
+#include "mixed.h"
+
+template <class T> MixedPortion<T>::MixedPortion( void )
+{ }
+
+template <class T> MixedPortion<T>::~MixedPortion()
+{ }
+
+template <class T> MixedProfile<T>& MixedPortion<T>::Value( void ) const
+{ return *_Value; }
+
+template <class T> PortionType MixedPortion<T>::Type( void ) const
+{ return porMIXED; }
+
+template <class T> void MixedPortion<T>::Output( gOutput& s ) const
+{ s << "(Mixed)"; }
+
+template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
+{
+  return new MixedValPortion<T>
+    ( * new MixedProfile<T>( * (MixedProfile<T>*) _Value ) ); 
+}
+
+template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
+{ return new MixedRefPortion<T>( *_Value ); }
+
+template <class T> void MixedPortion<T>::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (MixedPortion<T>*) p )->_Value );
+}
+
+
+template <class T> MixedValPortion<T>::MixedValPortion( MixedProfile<T>& value)
+{ _Value = &value; }
+
+template <class T> MixedValPortion<T>::~MixedValPortion()
+{ delete _Value; }
+
+
+template <class T> MixedRefPortion<T>::MixedRefPortion( MixedProfile<T>& value)
+{ _Value = &value; }
+
+template <class T> MixedRefPortion<T>::~MixedRefPortion()
+{ }
+
+
+
+TEMPLATE class MixedPortion< double >;
+TEMPLATE class MixedValPortion< double >;
+TEMPLATE class MixedRefPortion< double >;
+PortionType MixedPortion< double >::Type( void ) const
+{ return porMIXED_FLOAT; }
+
+TEMPLATE class MixedPortion< gRational >;
+TEMPLATE class MixedValPortion< gRational >;
+TEMPLATE class MixedRefPortion< gRational >;
+PortionType MixedPortion< gRational >::Type( void ) const
 { return porMIXED_RATIONAL; }
 
 
-TEMPLATE class Behav_Portion<double>;
-PortionType Behav_Portion<double>::Type( void ) const
-{ return porBEHAV_DOUBLE; }
 
-TEMPLATE class Behav_Portion<gRational>;
-PortionType Behav_Portion<gRational>::Type( void ) const
+
+
+//---------------------------------------------------------------------
+//                          Behav class
+//---------------------------------------------------------------------
+
+#include "behav.h"
+
+template <class T> BehavPortion<T>::BehavPortion( void )
+{ }
+
+template <class T> BehavPortion<T>::~BehavPortion()
+{ }
+
+template <class T> BehavProfile<T>& BehavPortion<T>::Value( void ) const
+{ return *_Value; }
+
+template <class T> PortionType BehavPortion<T>::Type( void ) const
+{ return porBEHAV; }
+
+template <class T> void BehavPortion<T>::Output( gOutput& s ) const
+{ s << "(Behav)"; }
+
+template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
+{
+  return new BehavValPortion<T>
+    ( * new BehavProfile<T>( * (BehavProfile<T>*) _Value ) ); 
+}
+
+template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
+{ return new BehavRefPortion<T>( *_Value ); }
+
+template <class T> void BehavPortion<T>::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (BehavPortion<T>*) p )->_Value );
+}
+
+
+template <class T> BehavValPortion<T>::BehavValPortion( BehavProfile<T>& value)
+{ _Value = &value; }
+
+template <class T> BehavValPortion<T>::~BehavValPortion()
+{ delete _Value; }
+
+
+template <class T> BehavRefPortion<T>::BehavRefPortion( BehavProfile<T>& value)
+{ _Value = &value; }
+
+template <class T> BehavRefPortion<T>::~BehavRefPortion()
+{ }
+
+
+
+TEMPLATE class BehavPortion< double >;
+TEMPLATE class BehavValPortion< double >;
+TEMPLATE class BehavRefPortion< double >;
+PortionType BehavPortion< double >::Type( void ) const
+{ return porBEHAV_FLOAT; }
+
+TEMPLATE class BehavPortion< gRational >;
+TEMPLATE class BehavValPortion< gRational >;
+TEMPLATE class BehavRefPortion< gRational >;
+PortionType BehavPortion< gRational >::Type( void ) const
 { return porBEHAV_RATIONAL; }
 
 
 
-TEMPLATE class Nfg_Portion<double>;
-PortionType Nfg_Portion<double>::Type( void ) const
-{ return porNFG_DOUBLE; }
 
-TEMPLATE class Nfg_Portion<gRational>;
-PortionType Nfg_Portion<gRational>::Type( void ) const
+//---------------------------------------------------------------------
+//                          BaseNfg class
+//---------------------------------------------------------------------
+
+
+BaseNfgPortion::BaseNfgPortion( void )
+{ }
+
+BaseNfgPortion::~BaseNfgPortion()
+{ }
+
+BaseNormalForm& BaseNfgPortion::Value( void ) const
+{ return *_Value; }
+
+void BaseNfgPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (BaseNfgPortion*) p )->_Value );
+}
+
+
+//---------------------------------------------------------------------
+//                          Nfg class
+//---------------------------------------------------------------------
+
+
+template <class T> NormalForm<T>& NfgPortion<T>::Value( void ) const
+{ return * (NormalForm<T>*) _Value; }
+
+template <class T> void NfgPortion<T>::Output( gOutput& s ) const
+{ s << "(Nfg)"; }
+
+template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
+{
+  return new NfgValPortion<T>
+    ( * new NormalForm<T>( * (NormalForm<T>*) _Value ) ); 
+}
+
+template <class T> Portion* NfgPortion<T>::RefCopy( void ) const
+{ return new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); }
+
+
+
+
+
+template <class T> NfgValPortion<T>::NfgValPortion( NormalForm<T>& value )
+{ _Value = &value; }
+
+template <class T> NfgValPortion<T>::~NfgValPortion()
+{ delete _Value; }
+
+template <class T> NfgRefPortion<T>::NfgRefPortion( NormalForm<T>& value)
+{ _Value = &value; }
+
+template <class T> NfgRefPortion<T>::~NfgRefPortion()
+{ }
+
+
+
+
+TEMPLATE class NfgPortion< double >;
+TEMPLATE class NfgValPortion< double >;
+TEMPLATE class NfgRefPortion< double >;
+PortionType NfgPortion<double>::Type( void ) const
+{ return porNFG_FLOAT; }
+
+TEMPLATE class NfgPortion< gRational >;
+TEMPLATE class NfgValPortion< gRational >;
+TEMPLATE class NfgRefPortion< gRational >;
+PortionType NfgPortion<gRational>::Type( void ) const
 { return porNFG_RATIONAL; }
 
 
-TEMPLATE class Efg_Portion<double>;
-PortionType Efg_Portion<double>::Type( void ) const
-{ return porEFG_DOUBLE; }
 
-TEMPLATE class Efg_Portion<gRational>;
-PortionType Efg_Portion<gRational>::Type( void ) const
+
+
+
+//---------------------------------------------------------------------
+//                          BaseEfg class
+//---------------------------------------------------------------------
+
+
+BaseEfgPortion::BaseEfgPortion( void )
+{ }
+
+BaseEfgPortion::~BaseEfgPortion()
+{ }
+
+BaseExtForm& BaseEfgPortion::Value( void ) const
+{ return *_Value; }
+
+void BaseEfgPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  *_Value = *( ( (BaseEfgPortion*) p )->_Value );
+}
+
+
+//---------------------------------------------------------------------
+//                          Efg class
+//---------------------------------------------------------------------
+
+
+template <class T> ExtForm<T>& EfgPortion<T>::Value( void ) const
+{ return * (ExtForm<T>*) _Value; }
+
+template <class T> void EfgPortion<T>::Output( gOutput& s ) const
+{ s << "(Efg)"; }
+
+template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
+{
+  return new EfgValPortion<T>
+    ( * new ExtForm<T>( * (ExtForm<T>*) _Value ) ); 
+}
+
+template <class T> Portion* EfgPortion<T>::RefCopy( void ) const
+{ return new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); }
+
+
+
+
+
+template <class T> EfgValPortion<T>::EfgValPortion( ExtForm<T>& value )
+{ _Value = &value; }
+
+template <class T> EfgValPortion<T>::~EfgValPortion()
+{ delete _Value; }
+
+template <class T> EfgRefPortion<T>::EfgRefPortion( ExtForm<T>& value)
+{ _Value = &value; }
+
+template <class T> EfgRefPortion<T>::~EfgRefPortion()
+{ }
+
+
+
+
+TEMPLATE class EfgPortion< double >;
+TEMPLATE class EfgValPortion< double >;
+TEMPLATE class EfgRefPortion< double >;
+PortionType EfgPortion<double>::Type( void ) const
+{ return porEFG_FLOAT; }
+
+TEMPLATE class EfgPortion< gRational >;
+TEMPLATE class EfgValPortion< gRational >;
+TEMPLATE class EfgRefPortion< gRational >;
+PortionType EfgPortion<gRational>::Type( void ) const
 { return porEFG_RATIONAL; }
 
 
+
+
+
+//---------------------------------------------------------------------
+//                          Output class
+//---------------------------------------------------------------------
+
+OutputPortion::OutputPortion( void )
+{ }
+
+OutputPortion::~OutputPortion()
+{ }
+
+gOutput& OutputPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType OutputPortion::Type( void ) const
+{ return porOUTPUT; }
+
+void OutputPortion::Output( gOutput& s ) const
+{ s << "(Output)"; }
+
+Portion* OutputPortion::ValCopy( void ) const
+{
+  return new ErrorPortion
+    ( (gString)
+     "OutputPortion::ValCopy() not available due to lack of copy\n" +
+     "constructor in class gOutput\n" );
+  // return new OutputValPortion( *_Value ); 
+}
+
+Portion* OutputPortion::RefCopy( void ) const
+{ return new OutputRefPortion( *_Value ); }
+
+void OutputPortion::AssignFrom( Portion* p )
+{
+  assert( 0 );
+/*
+  assert( p->Type() == Type() );
+  *_Value = *( ( (OutputPortion*) p )->_Value );
+*/
+}
+
+
+OutputValPortion::OutputValPortion( gOutput& value )
+{ _Value = &value; }
+
+OutputValPortion::~OutputValPortion()
+{ delete _Value; }
+
+
+OutputRefPortion::OutputRefPortion( gOutput& value )
+{ _Value = &value; }
+
+OutputRefPortion::~OutputRefPortion()
+{ }
+
+
+
+
+//---------------------------------------------------------------------
+//                          Input class
+//---------------------------------------------------------------------
+
+InputPortion::InputPortion( void )
+{ }
+
+InputPortion::~InputPortion()
+{ }
+
+gInput& InputPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType InputPortion::Type( void ) const
+{ return porINPUT; }
+
+void InputPortion::Output( gOutput& s ) const
+{ s << "(Input)"; }
+
+Portion* InputPortion::ValCopy( void ) const
+{ 
+  return new ErrorPortion
+    ( (gString)
+     "InputPortion::ValCopy() not available due to lack of copy\n" +
+     "constructor in class gInput\n" );
+  // return new InputValPortion( *_Value ); 
+}
+
+Portion* InputPortion::RefCopy( void ) const
+{ return new InputRefPortion( *_Value ); }
+
+void InputPortion::AssignFrom( Portion* p )
+{
+  assert( 0 );
+/*
+  assert( p->Type() == Type() );
+  *_Value = *( ( (InputPortion*) p )->_Value );
+*/
+}
+
+
+InputValPortion::InputValPortion( gInput& value )
+{ _Value = &value; }
+
+InputValPortion::~InputValPortion()
+{ delete _Value; }
+
+
+InputRefPortion::InputRefPortion( gInput& value )
+{ _Value = &value; }
+
+InputRefPortion::~InputRefPortion()
+{ }
+
+
+
+//---------------------------------------------------------------------
+//                          List class
+//---------------------------------------------------------------------
+
+#include "gblock.h"
+
+ListPortion::ListPortion( void )
+{ 
+  _DataType = porUNKNOWN;
+}
+
+ListPortion::~ListPortion()
+{ }
+
+gBlock< Portion* >& ListPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType ListPortion::Type( void ) const
+{ return porLIST; }
+
+Portion* ListPortion::ValCopy( void ) const
+{ return new ListValPortion( *_Value ); }
+
+Portion* ListPortion::RefCopy( void ) const
+{ return new ListRefPortion( *_Value ); }
+
+void ListPortion::AssignFrom( Portion* p )
+{
+  int i;
+  int length;
+  int type_match;
+  int result;
+  gBlock< Portion* >& value = *( ( (ListPortion*) p )->_Value );
+
+  assert( p->Type() == Type() );
+  assert( ( (ListPortion*) p )->_DataType == _DataType );
+
+  Flush();
+  delete _Value;
+  _Value = new gBlock< Portion* >;   
+  for( i = 1, length = value.Length(); i <= length; i++ )
+  {
+    result = Insert( value[ i ]->ValCopy(), i );
+    assert( result != 0 );
+  }
+}
+
+
+ListValPortion::ListValPortion( void )
+{ _Value = new gBlock< Portion* >; }
+
+ListValPortion::ListValPortion( gBlock< Portion* >& value )
+{ 
+  int i;
+  int length;
+  int type_match;
+  int result;
+
+  _Value = new gBlock< Portion* >; 
+
+  for( i = 1, length = value.Length(); i <= length; i++ )
+  {
+    result = Insert( value[ i ]->ValCopy(), i );
+    assert( result != 0 );
+  }
+}
+
+ListValPortion::~ListValPortion()
+{
+  Flush();
+  delete _Value;
+}
+
+
+ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
+{ _Value = &value; }
+
+ListRefPortion::~ListRefPortion()
+{ }
+
+
+
+
+
+
+
+
+
+
+
+
+void ListPortion::SetDataType( PortionType data_type )
+{
+  assert( _DataType == porUNKNOWN );
+  _DataType = data_type;
+}
+
+PortionType ListPortion::DataType( void ) const
+{ return _DataType; }
+
+
+bool ListPortion::TypeCheck( Portion* item )
+{
+  bool result = false;
+
+  if( item->Type() == _DataType )
+  {
+    result = true;
+  }
+  else if( item->Type() == porLIST )
+  {
+    if( ( (ListPortion*) item )->_DataType == _DataType )
+      result = true;
+  }
+  return result;
+}
+
+
+void ListPortion::Output( gOutput& s ) const
+{
+  int i;
+  int length = _Value->Length();
+
+  s << "{";
+  if( length >= 1 )
+  {
+    s << " " << (*_Value)[ 1 ];
+    for( i = 2; i <= length; i++ )
+    {
+      s << ", " << (*_Value)[ i ];
+    }
+  }
+  else
+  {
+    s << " empty";
+  }
+  s << " }";
+}
+
+
+
+int ListPortion::Append( Portion* item )
+{ return Insert( item, _Value->Length() + 1 ); }
+
+
+int ListPortion::Insert( Portion* item, int index )
+{
+  int result = 0;
+
+#ifndef NDEBUG
+  if( item->Type() == porREFERENCE )
+  {
+    gerr << "Portion Error:\n";
+    gerr << "  Attempted to insert a ReferencePortion into\n";
+    gerr << "  a ListPortion\n";
+  }
+  assert( item->Type() != porREFERENCE );
+#endif
+  
+  if( _Value->Length() == 0 )  // creating a new list
+  {
+    if( item->Type() == _DataType || _DataType == porUNKNOWN )
+    {
+      if( item->Type() == porLIST )
+	_DataType = ( (ListPortion*) item )->_DataType;
+      else
+	_DataType = item->Type();
+      result = _Value->Insert( item, index );
+    }
+    else
+    {
+      delete item;
+    }
+  }
+  else  // inserting into an existing list
+  {
+    if( TypeCheck( item ) )
+      result = _Value->Insert( item, index );
+    else
+      delete item;
+  }
+  return result;
+}
+
+
+Portion* ListPortion::Remove( int index )
+{ 
+  if( index >= 1 && index <= _Value->Length() )
+    return _Value->Remove( index );
+  else
+    return 0;
+}
+
+int ListPortion::Length( void ) const
+{ return _Value->Length(); }
+
+
+void ListPortion::Flush( void )
+{
+  int i, length;
+  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  {
+    delete Remove( 1 );
+  }
+  assert( _Value->Length() == 0 );
+}
+
+
+Portion* ListPortion::Subscript( int index ) const
+{
+  if( index >= 1 && index <= _Value->Length() )
+  {
+    assert( (*_Value)[ index ] != 0 );
+    return (*_Value)[ index ]->RefCopy();
+  }
+  else
+    return 0;
+}
+
+
+
+
+
+
+
+
+//--------------------------------------------------------------------
+//             miscellaneous PortionType functions
+//--------------------------------------------------------------------
+
+
+
+void PrintPortionTypeSpec( gOutput& s, PortionType type )
+{
+  if( type == porERROR )
+  {
+    s << " ERROR";
+  }
+  else
+  {
+    if( type & porBOOL )
+      s << " BOOLEAN";
+    if( type & porFLOAT )
+      s << " FLOAT";
+    if( type & porINTEGER )
+      s << " INTEGER";
+    if( type & porRATIONAL )
+      s << " RATIONAL";
+    if( type & porTEXT )
+      s << " TEXT";
+    if( type & porLIST )
+      s << " LIST";
+
+    if( type & porNFG_FLOAT )
+      s << " NFG_FLOAT";
+    if( type & porNFG_RATIONAL )
+      s << " NFG_RATIONAL";
+    if( type & porEFG_FLOAT )
+      s << " EFG_FLOAT";
+    if( type & porEFG_RATIONAL )
+      s << " EFG_RATIONAL";
+    if( type & porMIXED_FLOAT )
+      s << " MIXED_FLOAT";
+    if( type & porMIXED_RATIONAL )
+      s << " MIXED_RATIONAL";
+    if( type & porBEHAV_FLOAT )
+      s << " BEHAV_FLOAT";
+    if( type & porBEHAV_RATIONAL )
+      s << " BEHAV_RATIONAL";
+
+    if( type & porOUTCOME )
+      s << " OUTCOME";
+    if( type & porEF_PLAYER )
+      s << " EF_PLAYER";
+    if( type & porINFOSET )
+      s << " INFOSET";
+    if( type & porNODE )
+      s << " NODE";
+    if( type & porACTION )
+      s << " ACTION";
+
+    if( type & porOUTPUT )
+      s << " OUTPUT";
+    if( type & porINPUT )
+      s << " INPUT";
+
+    if( type & porREFERENCE )
+      s << " REFERENCE";
+
+    if( type & porUNKNOWN )
+      s << " UNKNOWN";
+  }
+}
+
+
+
+
+gOutput& operator << ( gOutput& s, Portion* p )
+{
+  p->Output( s );
+  return s;
+}
+
+
+
+
+
+//----------------------------------------------------------------------
+//                         class instantiations
+//----------------------------------------------------------------------
 
 
 
@@ -1511,5 +1341,6 @@ TEMPLATE class gArray<Portion *>;
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+
 
 

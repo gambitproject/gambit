@@ -10,20 +10,44 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
+#include "rational.h"
+#include "gblock.h"
+
+
 
 Portion* GSM_Assign( Portion** param )
 {
   Portion* result = 0;
-  if( param[ 0 ] != 0 )
+
+  if( param[ 0 ] != 0 && param[ 1 ] != 0 &&
+     param[ 0 ]->Type() == param[ 1 ]->Type() )
+  {
+    if( param[ 0 ]->Type() != porLIST )
+    {
+      param[ 0 ]->AssignFrom( param[ 1 ] );
+      result = param[ 0 ]->RefCopy();
+    }
+    else if( ( (ListPortion*) param[ 0 ] )->DataType() ==
+	    ( (ListPortion*) param[ 1 ] )->DataType() )
+    {
+      param[ 0 ]->AssignFrom( param[ 1 ] );
+      result = param[ 0 ]->RefCopy();
+    }
+    else
+    {
+      result = new ErrorPortion( "Attempted to change the type of a list\n" );
+    }
+  }
+  else
   {
     delete param[ 0 ];
+    param[ 0 ] = param[ 1 ]->ValCopy();
+    result = param[ 0 ]->RefCopy();
   }
-  param[ 0 ] = param[ 1 ]->Copy( true );
-
-  result = param[ 1 ]->Copy();
 
   return result;
 }
+
 
 
 //-------------------------------------------------------------------
@@ -36,21 +60,21 @@ Portion* GSM_Assign( Portion** param )
 Portion* GSM_Add_double( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<double>
+  result = new FloatValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() +
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() +
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_Add_gInteger( Portion** param )
+Portion* GSM_Add_int( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gInteger>
+  result = new IntValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() +
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() +
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -58,10 +82,10 @@ Portion* GSM_Add_gInteger( Portion** param )
 Portion* GSM_Add_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gRational>
+  result = new RationalValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() +
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -69,10 +93,10 @@ Portion* GSM_Add_gRational( Portion** param )
 Portion* GSM_Add_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new gString_Portion
+  result = new TextValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() +
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() +
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -83,19 +107,19 @@ Portion* GSM_Add_List( Portion** param )
   int i;
   int append_result;
 
-  gBlock<Portion*>& p_value = ( (List_Portion*) param[ 1 ] )->Value();
-  result = new List_Portion( ( (List_Portion*) param[ 0 ] )->Value() );
+  gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
+  result = new ListValPortion( ( (ListPortion*) param[ 0 ] )->Value() );
   for( i = 1; i <= p_value.Length(); i++ )
   {
-    append_result = ( (List_Portion*) result )->Append( p_value[ i ]->Copy() );
+    append_result = ( (ListPortion*) result )->Append( p_value[ i ]->ValCopy() );
     if( append_result == 0 )
     {
       delete result;
-      result = new Error_Portion
+      result = new ErrorPortion
 	( (gString)
 	 "GSM_Add Error:\n" +
 	 "  Attempted to insert conflicting Portion\n" +
-	 "  types into a List_Portion\n"
+	 "  types into a ListPortion\n"
 	 );
       break;
     }
@@ -110,21 +134,21 @@ Portion* GSM_Add_List( Portion** param )
 Portion* GSM_Subtract_double( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<double>
+  result = new FloatValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() -
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() -
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_Subtract_gInteger( Portion** param )
+Portion* GSM_Subtract_int( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gInteger>
+  result = new IntValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() -
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() -
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -132,10 +156,10 @@ Portion* GSM_Subtract_gInteger( Portion** param )
 Portion* GSM_Subtract_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gRational>
+  result = new RationalValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() -
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -147,21 +171,21 @@ Portion* GSM_Subtract_gRational( Portion** param )
 Portion* GSM_Multiply_double( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<double>
+  result = new FloatValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() *
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() *
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_Multiply_gInteger( Portion** param )
+Portion* GSM_Multiply_int( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gInteger>
+  result = new IntValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() *
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() *
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -169,10 +193,10 @@ Portion* GSM_Multiply_gInteger( Portion** param )
 Portion* GSM_Multiply_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gRational>
+  result = new RationalValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() *
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -184,17 +208,17 @@ Portion* GSM_Multiply_gRational( Portion** param )
 Portion* GSM_Divide_double( Portion** param )
 {
   Portion* result = 0;
-  if( ( (numerical_Portion<double>*) param[ 1 ] )->Value() != 0 )
+  if( ( (FloatPortion*) param[ 1 ] )->Value() != 0 )
   {
-    result = new numerical_Portion<double>
+    result = new FloatValPortion
       (
-       ( (numerical_Portion<double>*) param[ 0 ] )->Value() /
-       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+       ( (FloatPortion*) param[ 0 ] )->Value() /
+       ( (FloatPortion*) param[ 1 ] )->Value()
        );
   }
   else
   {
-    result = new Error_Portion
+    result = new ErrorPortion
       ( (gString)
        "GSM_Divide Error:\n" +
        "  Division by zero\n" 
@@ -203,20 +227,20 @@ Portion* GSM_Divide_double( Portion** param )
   return result;
 }
 
-Portion* GSM_Divide_gInteger( Portion** param )
+Portion* GSM_Divide_int( Portion** param )
 {
   Portion* result = 0;
-  if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
+  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
   {
-    result = new numerical_Portion<gInteger>
+    result = new IntValPortion
       (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       ( (IntPortion*) param[ 0 ] )->Value() /
+       ( (IntPortion*) param[ 1 ] )->Value()
        );
   }
   else
   {
-    result = new Error_Portion
+    result = new ErrorPortion
       ( (gString)
        "GSM_Divide Error:\n" +
        "  Division by zero\n" 
@@ -228,17 +252,17 @@ Portion* GSM_Divide_gInteger( Portion** param )
 Portion* GSM_Divide_gRational( Portion** param )
 {
   Portion* result = 0;
-  if( ( (numerical_Portion<gRational>*) param[ 1 ] )->Value() != 0 )
+  if( ( (RationalPortion*) param[ 1 ] )->Value() != 0 )
   {
-    result = new numerical_Portion<gRational>
+    result = new RationalValPortion
       (
-       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /
-       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+       ( (RationalPortion*) param[ 0 ] )->Value() /
+       ( (RationalPortion*) param[ 1 ] )->Value()
        );
   }
   else
   {
-    result = new Error_Portion
+    result = new ErrorPortion
       ( (gString)
        "GSM_Divide Error:\n" +
        "  Division by zero\n" 
@@ -252,14 +276,14 @@ Portion* GSM_Divide_gRational( Portion** param )
 
 Portion *GSM_Exp(Portion **param)
 {
-  return new numerical_Portion<double>
-    (exp(((numerical_Portion<double> *) param[0])->Value()));
+  return new FloatValPortion
+    (exp(((FloatPortion *) param[0])->Value()));
 }
 
 Portion *GSM_Log(Portion **param)
 {
-  return new numerical_Portion<double>
-    (log(((numerical_Portion<double> *) param[0])->Value()));
+  return new FloatValPortion
+    (log(((FloatPortion *) param[0])->Value()));
 }
 
 
@@ -268,19 +292,19 @@ Portion *GSM_Log(Portion **param)
 Portion* GSM_Negate_double( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<double>
+  result = new FloatValPortion
     (
-     -( (numerical_Portion<double>*) param[ 0 ] )->Value()
+     -( (FloatPortion*) param[ 0 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_Negate_gInteger( Portion** param )
+Portion* GSM_Negate_int( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gInteger>
+  result = new IntValPortion
     (
-     -( (numerical_Portion<gInteger>*) param[ 0 ] )->Value()
+     -( (IntPortion*) param[ 0 ] )->Value()
      );
   return result;
 }
@@ -288,9 +312,9 @@ Portion* GSM_Negate_gInteger( Portion** param )
 Portion* GSM_Negate_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new numerical_Portion<gRational>
+  result = new RationalValPortion
     (
-     -( (numerical_Portion<gRational>*) param[ 0 ] )->Value()
+     -( (RationalPortion*) param[ 0 ] )->Value()
      );
   return result;
 }
@@ -303,20 +327,20 @@ Portion* GSM_Negate_gRational( Portion** param )
 
 /*---------------------- GSM_Modulus ---------------------------*/
 
-Portion* GSM_Modulus_gInteger( Portion** param )
+Portion* GSM_Modulus_int( Portion** param )
 {
   Portion* result = 0;
-  if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
+  if( ( (IntPortion*) param[ 1 ] )->Value() != 0 )
   {
-    result = new numerical_Portion<gInteger>
+    result = new IntValPortion
       (
-       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %
-       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       ( (IntPortion*) param[ 0 ] )->Value() %
+       ( (IntPortion*) param[ 1 ] )->Value()
        );
   }
   else
   {
-    result = new Error_Portion
+    result = new ErrorPortion
       ( (gString)
        "GSM_Modulus Error:\n" +
        "  Division by zero\n" 
@@ -336,21 +360,21 @@ Portion* GSM_Modulus_gInteger( Portion** param )
 Portion* GSM_EqualTo_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() ==
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() ==
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_EqualTo_gInteger( Portion** param )
+Portion* GSM_EqualTo_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() ==
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() ==
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -358,10 +382,10 @@ Portion* GSM_EqualTo_gInteger( Portion** param )
 Portion* GSM_EqualTo_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() ==
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() ==
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -369,10 +393,10 @@ Portion* GSM_EqualTo_gRational( Portion** param )
 Portion* GSM_EqualTo_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() ==
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() ==
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -380,10 +404,10 @@ Portion* GSM_EqualTo_gString( Portion** param )
 Portion* GSM_EqualTo_bool( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (bool_Portion*) param[ 0 ] )->Value() ==
-     ( (bool_Portion*) param[ 1 ] )->Value()
+     ( (BoolPortion*) param[ 0 ] )->Value() ==
+     ( (BoolPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -394,21 +418,21 @@ Portion* GSM_EqualTo_bool( Portion** param )
 Portion* GSM_NotEqualTo_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() !=
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() !=
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_NotEqualTo_gInteger( Portion** param )
+Portion* GSM_NotEqualTo_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() !=
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() !=
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -416,10 +440,10 @@ Portion* GSM_NotEqualTo_gInteger( Portion** param )
 Portion* GSM_NotEqualTo_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() !=
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() !=
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -427,10 +451,10 @@ Portion* GSM_NotEqualTo_gRational( Portion** param )
 Portion* GSM_NotEqualTo_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() !=
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() !=
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -438,10 +462,10 @@ Portion* GSM_NotEqualTo_gString( Portion** param )
 Portion* GSM_NotEqualTo_bool( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (bool_Portion*) param[ 0 ] )->Value() !=
-     ( (bool_Portion*) param[ 1 ] )->Value()
+     ( (BoolPortion*) param[ 0 ] )->Value() !=
+     ( (BoolPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -452,21 +476,21 @@ Portion* GSM_NotEqualTo_bool( Portion** param )
 Portion* GSM_GreaterThan_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() >
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() >
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_GreaterThan_gInteger( Portion** param )
+Portion* GSM_GreaterThan_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() >
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -474,10 +498,10 @@ Portion* GSM_GreaterThan_gInteger( Portion** param )
 Portion* GSM_GreaterThan_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() >
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -485,10 +509,10 @@ Portion* GSM_GreaterThan_gRational( Portion** param )
 Portion* GSM_GreaterThan_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() >
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() >
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -499,21 +523,21 @@ Portion* GSM_GreaterThan_gString( Portion** param )
 Portion* GSM_LessThan_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() <
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() <
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_LessThan_gInteger( Portion** param )
+Portion* GSM_LessThan_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() <
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -521,10 +545,10 @@ Portion* GSM_LessThan_gInteger( Portion** param )
 Portion* GSM_LessThan_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() <
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -532,10 +556,10 @@ Portion* GSM_LessThan_gRational( Portion** param )
 Portion* GSM_LessThan_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() <
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() <
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -546,21 +570,21 @@ Portion* GSM_LessThan_gString( Portion** param )
 Portion* GSM_GreaterThanOrEqualTo_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() >=
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() >=
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_GreaterThanOrEqualTo_gInteger( Portion** param )
+Portion* GSM_GreaterThanOrEqualTo_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() >=
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() >=
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -568,10 +592,10 @@ Portion* GSM_GreaterThanOrEqualTo_gInteger( Portion** param )
 Portion* GSM_GreaterThanOrEqualTo_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() >=
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() >=
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -579,10 +603,10 @@ Portion* GSM_GreaterThanOrEqualTo_gRational( Portion** param )
 Portion* GSM_GreaterThanOrEqualTo_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() >=
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() >=
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -593,21 +617,21 @@ Portion* GSM_GreaterThanOrEqualTo_gString( Portion** param )
 Portion* GSM_LessThanOrEqualTo_double( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<double>*) param[ 0 ] )->Value() <=
-     ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+     ( (FloatPortion*) param[ 0 ] )->Value() <=
+     ( (FloatPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
 
-Portion* GSM_LessThanOrEqualTo_gInteger( Portion** param )
+Portion* GSM_LessThanOrEqualTo_int( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() <=
-     ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+     ( (IntPortion*) param[ 0 ] )->Value() <=
+     ( (IntPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -615,10 +639,10 @@ Portion* GSM_LessThanOrEqualTo_gInteger( Portion** param )
 Portion* GSM_LessThanOrEqualTo_gRational( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() <=
-     ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+     ( (RationalPortion*) param[ 0 ] )->Value() <=
+     ( (RationalPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -626,10 +650,10 @@ Portion* GSM_LessThanOrEqualTo_gRational( Portion** param )
 Portion* GSM_LessThanOrEqualTo_gString( Portion** param )
 {
   Portion* result = 0;
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (gString_Portion*) param[ 0 ] )->Value() <=
-     ( (gString_Portion*) param[ 1 ] )->Value()
+     ( (TextPortion*) param[ 0 ] )->Value() <=
+     ( (TextPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -649,10 +673,10 @@ Portion* GSM_AND( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (bool_Portion*) param[ 0 ] )->Value() &&
-     ( (bool_Portion*) param[ 1 ] )->Value()
+     ( (BoolPortion*) param[ 0 ] )->Value() &&
+     ( (BoolPortion*) param[ 1 ] )->Value()
      );
   return result;
 }
@@ -665,10 +689,10 @@ Portion* GSM_OR( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  result = new bool_Portion
+  result = new BoolValPortion
     (
-     ( (bool_Portion*) param[ 0 ] )->Value() ||
-     ( (bool_Portion*) param[ 1 ] )->Value()
+     ( (BoolPortion*) param[ 0 ] )->Value() ||
+     ( (BoolPortion*) param[ 1 ] )->Value()
      );
 
   return result;
@@ -682,7 +706,7 @@ Portion* GSM_NOT( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  result = new bool_Portion( !( (bool_Portion*) param[ 0 ] )->Value() );
+  result = new BoolValPortion( !( (BoolPortion*) param[ 0 ] )->Value() );
 
   return result;
 }
@@ -690,7 +714,7 @@ Portion* GSM_NOT( Portion** param )
 
 Portion *GSM_Paren(Portion **param)
 {
-  return param[0]->Copy();
+  return param[0]->ValCopy();
 }
 
 //-----------------------------------------------------------------
@@ -703,10 +727,10 @@ Portion* GSM_NewOutputStream( Portion** param )
   Portion* result = 0;
   gOutput* g;
   
-  assert( param[ 0 ]->Type() == porSTRING );
+  assert( param[ 0 ]->Type() == porTEXT );
 
-  g = new gFileOutput( ( (gString_Portion*) param[ 0 ] )->Value() );
-  result = new Output_Portion( *g );
+  g = new gFileOutput( ( (TextPortion*) param[ 0 ] )->Value() );
+  result = new OutputValPortion( *g );
   
   return result;
 }
@@ -717,10 +741,10 @@ Portion* GSM_NewInputStream( Portion** param )
   Portion* result = 0;
   gInput* g;
   
-  assert( param[ 0 ]->Type() == porSTRING );
+  assert( param[ 0 ]->Type() == porTEXT );
 
-  g = new gFileInput( ( (gString_Portion*) param[ 0 ] )->Value() );
-  result = new Input_Portion( *g );
+  g = new gFileInput( ( (TextPortion*) param[ 0 ] )->Value() );
+  result = new InputValPortion( *g );
   
   return result;
 }
@@ -737,7 +761,7 @@ void Init_gsmoper( GSM* gsm )
 
 
   /*---------------------- Assign ------------------------*/
-
+  /*
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Assign, 2 );
   FuncObj->SetParamInfo( GSM_Assign, 0, "x", 
@@ -746,7 +770,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Assign, 1, "y", 
 			porVALUE );
   gsm->AddFunction( FuncObj );
-
+  */
 
 
   /*-------------------- Plus ----------------------------*/
@@ -755,14 +779,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Add_double, 2 );
   FuncObj->SetParamInfo( GSM_Add_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_Add_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_Add_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_Add_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Add_int, 2 );
+  FuncObj->SetParamInfo( GSM_Add_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_Add_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Add_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_Add_gRational, 2 );
@@ -773,9 +797,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Add_gString, 2 );
   FuncObj->SetParamInfo( GSM_Add_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_Add_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   FuncObj->SetFuncInfo( GSM_Add_List, 2 );
   FuncObj->SetParamInfo( GSM_Add_List, 0, "x", 
@@ -791,14 +815,14 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Minus" );
   FuncObj->SetFuncInfo( GSM_Subtract_double, 2 );
   FuncObj->SetParamInfo( GSM_Subtract_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_Subtract_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_Subtract_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_Subtract_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Subtract_int, 2 );
+  FuncObj->SetParamInfo( GSM_Subtract_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_Subtract_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Subtract_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_Subtract_gRational, 2 );
@@ -816,14 +840,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Multiply_double, 2 );
   FuncObj->SetParamInfo( GSM_Multiply_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_Multiply_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_Multiply_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Multiply_int, 2 );
+  FuncObj->SetParamInfo( GSM_Multiply_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_Multiply_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Multiply_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_Multiply_gRational, 2 );
@@ -841,14 +865,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Divide_double, 2 );
   FuncObj->SetParamInfo( GSM_Divide_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_Divide_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_Divide_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_Divide_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Divide_int, 2 );
+  FuncObj->SetParamInfo( GSM_Divide_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_Divide_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Divide_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_Divide_gRational, 2 );
@@ -864,12 +888,12 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj = new FuncDescObj("Exp");
   FuncObj->SetFuncInfo(GSM_Exp, 1);
-  FuncObj->SetParamInfo(GSM_Exp, 0, "x", porDOUBLE);
+  FuncObj->SetParamInfo(GSM_Exp, 0, "x", porFLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Log");
   FuncObj->SetFuncInfo(GSM_Log, 1);
-  FuncObj->SetParamInfo(GSM_Log, 0, "x", porDOUBLE);
+  FuncObj->SetParamInfo(GSM_Log, 0, "x", porFLOAT);
   gsm->AddFunction(FuncObj);
 
 
@@ -879,10 +903,10 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_Negate_double, 1 );
   FuncObj->SetParamInfo( GSM_Negate_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_Negate_gInteger, 1 );
-  FuncObj->SetParamInfo( GSM_Negate_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Negate_int, 1 );
+  FuncObj->SetParamInfo( GSM_Negate_int, 0, "x", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_Negate_gRational, 1 );
@@ -892,14 +916,29 @@ void Init_gsmoper( GSM* gsm )
   gsm->AddFunction( FuncObj );
 
 
+
+  /*----------------------- IntegerDivide ------------------------*/
+
+  FuncObj = new FuncDescObj( (gString) "IntegerDivide" );
+
+  FuncObj->SetFuncInfo( GSM_Divide_int, 2 );
+  FuncObj->SetParamInfo( GSM_Divide_int, 0, "x", 
+			porINTEGER );
+  FuncObj->SetParamInfo( GSM_Divide_int, 1, "y", 
+			porINTEGER );
+
+  gsm->AddFunction( FuncObj );
+
+
+
   /*----------------------- Modulus ------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Modulus" );
 
-  FuncObj->SetFuncInfo( GSM_Modulus_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_Modulus_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_Modulus_int, 2 );
+  FuncObj->SetParamInfo( GSM_Modulus_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_Modulus_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_Modulus_int, 1, "y", 
 			porINTEGER );
 
   gsm->AddFunction( FuncObj );
@@ -914,14 +953,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_EqualTo_double, 2 );
   FuncObj->SetParamInfo( GSM_EqualTo_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_EqualTo_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_EqualTo_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_EqualTo_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_EqualTo_int, 2 );
+  FuncObj->SetParamInfo( GSM_EqualTo_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_EqualTo_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_EqualTo_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_EqualTo_gRational, 2 );
@@ -932,9 +971,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_EqualTo_gString, 2 );
   FuncObj->SetParamInfo( GSM_EqualTo_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_EqualTo_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   FuncObj->SetFuncInfo( GSM_EqualTo_bool, 2 );
   FuncObj->SetParamInfo( GSM_EqualTo_bool, 0, "x", 
@@ -951,14 +990,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_NotEqualTo_double, 2 );
   FuncObj->SetParamInfo( GSM_NotEqualTo_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_NotEqualTo_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_NotEqualTo_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_NotEqualTo_int, 2 );
+  FuncObj->SetParamInfo( GSM_NotEqualTo_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_NotEqualTo_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_NotEqualTo_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_NotEqualTo_gRational, 2 );
@@ -969,9 +1008,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_NotEqualTo_gString, 2 );
   FuncObj->SetParamInfo( GSM_NotEqualTo_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_NotEqualTo_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   FuncObj->SetFuncInfo( GSM_NotEqualTo_bool, 2 );
   FuncObj->SetParamInfo( GSM_NotEqualTo_bool, 0, "x", 
@@ -988,14 +1027,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_GreaterThan_double, 2 );
   FuncObj->SetParamInfo( GSM_GreaterThan_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_GreaterThan_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_GreaterThan_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_GreaterThan_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_GreaterThan_int, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThan_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_GreaterThan_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_GreaterThan_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_GreaterThan_gRational, 2 );
@@ -1006,9 +1045,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_GreaterThan_gString, 2 );
   FuncObj->SetParamInfo( GSM_GreaterThan_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_GreaterThan_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   gsm->AddFunction( FuncObj );
 
@@ -1019,14 +1058,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_LessThan_double, 2 );
   FuncObj->SetParamInfo( GSM_LessThan_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_LessThan_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_LessThan_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_LessThan_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_LessThan_int, 2 );
+  FuncObj->SetParamInfo( GSM_LessThan_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_LessThan_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_LessThan_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_LessThan_gRational, 2 );
@@ -1037,9 +1076,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_LessThan_gString, 2 );
   FuncObj->SetParamInfo( GSM_LessThan_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_LessThan_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   gsm->AddFunction( FuncObj );
 
@@ -1050,14 +1089,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_double, 2 );
   FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_int, 2 );
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gRational, 2 );
@@ -1068,9 +1107,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gString, 2 );
   FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_GreaterThanOrEqualTo_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   gsm->AddFunction( FuncObj );
 
@@ -1081,14 +1120,14 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_double, 2 );
   FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_double, 0, "x", 
-			porDOUBLE );
+			porFLOAT );
   FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_double, 1, "y", 
-			porDOUBLE );
+			porFLOAT );
 
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gInteger, 2 );
-  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gInteger, 0, "x", 
+  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_int, 2 );
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_int, 0, "x", 
 			porINTEGER );
-  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gInteger, 1, "y", 
+  FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_int, 1, "y", 
 			porINTEGER );
 
   FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gRational, 2 );
@@ -1099,9 +1138,9 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gString, 2 );
   FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gString, 0, "x", 
-			porSTRING );
+			porTEXT );
   FuncObj->SetParamInfo( GSM_LessThanOrEqualTo_gString, 1, "y", 
-			porSTRING );
+			porTEXT );
 
   gsm->AddFunction( FuncObj );
 
@@ -1148,13 +1187,13 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Output" );
   FuncObj->SetFuncInfo( GSM_NewOutputStream, 1 );
   FuncObj->SetParamInfo( GSM_NewOutputStream, 0, "file",
-			porSTRING );
+			porTEXT );
   gsm->AddFunction( FuncObj );
 
   FuncObj = new FuncDescObj( (gString) "Input" );
   FuncObj->SetFuncInfo( GSM_NewInputStream, 1 );
   FuncObj->SetParamInfo( GSM_NewInputStream, 0, "file",
-			porSTRING );
+			porTEXT );
   gsm->AddFunction( FuncObj );
 
 }
