@@ -53,7 +53,7 @@ protected:
     virtual Node *CreateNode(Node *parent) = 0;
 
     void SortInfosets(void);
-
+    void NumberNodes(Node *, int &);
   
 // These are auxiliary functions used by the .efg file reader code
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;

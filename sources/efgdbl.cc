@@ -11,9 +11,9 @@
 template class Efg<double>;
 DataType Efg<double>::Type(void) const    { return gDOUBLE; }
 
-template class TypedNode<double>;
 template class ChanceInfoset<double>;
 
+template class BehavNode<double>;
 template class BehavProfile<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
@@ -35,6 +35,10 @@ template class EfgContIter<double>;
 
 template class EfgFile<double>;
 template int ReadEfgFile(gInput &, Efg<double> *&);
+
+#include "garray.imp"
+
+template class gArray<BehavNode<double> *>;
 
 #include "glist.imp"
 

@@ -10,8 +10,9 @@
 template class Efg<gRational>;
 DataType Efg<gRational>::Type(void) const   { return gRATIONAL; }
 
-template class TypedNode<gRational>;
 template class ChanceInfoset<gRational>;
+
+template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 
@@ -34,6 +35,10 @@ template class EfgContIter<gRational>;
 
 template class EfgFile<gRational>;
 template int ReadEfgFile(gInput &, Efg<gRational> *&);
+
+#include "garray.imp"
+
+template class gArray<BehavNode<gRational> *>;
 
 #include "glist.imp"
 

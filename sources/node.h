@@ -28,6 +28,7 @@ class Node    {
   
   protected:
     bool mark;
+    int number;
     BaseEfg *E;
     gString name;
     Infoset *infoset;
@@ -37,9 +38,7 @@ class Node    {
     Node *whichbranch, *ptr, *gameroot;
 
     Node(BaseEfg *e, Node *p);
-    virtual ~Node();
-
-    virtual void Resize(int) = 0;
+    ~Node();
 
   public:
     BaseEfg *BelongsTo(void) const   { return E; }

@@ -113,7 +113,7 @@ void Infoset::RemoveAction(int which)
 //----------------------------------------------------------------------
 
 Node::Node(BaseEfg *e, Node *p)
-  : mark(false), E(e), infoset(0), parent(p), outcome(0),
+  : mark(false), number(0), E(e), infoset(0), parent(p), outcome(0),
     gameroot((p) ? p->gameroot : this)
 { }
 
@@ -240,6 +240,14 @@ void BaseEfg::Reindex(void)
     outcomes[i]->number = i;
 }
 
+
+void BaseEfg::NumberNodes(Node *n, int &index)
+{
+  n->number = index++;
+  for (int child = 1; child <= n->children.Length();
+       NumberNodes(n->children[child++], index));
+} 
+
 void BaseEfg::SortInfosets(void)
 {
   if (!sortisets)  return;
@@ -306,6 +314,9 @@ void BaseEfg::SortInfosets(void)
       }
     }
   }
+
+  int nodeindex = 1;
+  NumberNodes(root, nodeindex);
 }
   
 
