@@ -144,34 +144,34 @@ dialogMoveAdd::dialogMoveAdd(Efg &p_efg, const gText &p_title, EFPlayer *p_playe
 
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 25);
-  constraints->bottom.SameAs(this, wxBottom, 5);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  okButton->SetConstraints(constraints);
 
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 50);
-  constraints->bottom.SameAs(okButton, wxBottom);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  cancelButton->SetConstraints(constraints);
 
   wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
 					"Help");
   helpButton->SetClientData((char *) this);
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 75);
-  constraints->bottom.SameAs(okButton, wxBottom);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  helpButton->SetConstraints(constraints);
 
+  okButton->SetConstraints(new wxLayoutConstraints);
+  okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
+  okButton->GetConstraints()->top.SameAs(m_actionItem, wxBottom, 10);
+  okButton->GetConstraints()->width.AsIs();
+  okButton->GetConstraints()->height.AsIs();
+
+  cancelButton->SetConstraints(new wxLayoutConstraints);
+  cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  cancelButton->GetConstraints()->width.AsIs();
+  cancelButton->GetConstraints()->height.AsIs();
+
+  helpButton->SetConstraints(new wxLayoutConstraints);
+  helpButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
+  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  helpButton->GetConstraints()->width.AsIs();
+  helpButton->GetConstraints()->height.AsIs();
+
+  okButton->SetDefault();
   Fit();
   Show(TRUE);
 }
