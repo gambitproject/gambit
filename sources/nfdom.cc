@@ -136,10 +136,11 @@ NFSupport *NFSupport::Undominated(bool strong, const gArray<int> &players,
   
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
+    status.SetProgress(0, (gText("Eliminating strategies for player ") +
+			   ToText(players[i])));
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
     any |= Undominated(*newS, pl, strong, tracefile, status);
-// status.SetProgress((double)i/players.Length());
   }
 
   if (!any)  {
