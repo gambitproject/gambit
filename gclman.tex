@@ -180,7 +180,7 @@ AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 
 Car[l->LIST(T)] =: T	
 
-	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Finds the first element of the specified list of type T.
    -	Return value:  Returns a value of type T which is the first element of 
@@ -193,7 +193,7 @@ Car[l->LIST(T)] =: T
 
 Cdr[l->LIST(T)] =: LIST(T)
 
-	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Deletes the first element of the specified list of type 
 	T.
@@ -206,6 +206,8 @@ Cdr[l->LIST(T)] =: LIST(T)
 ----------
 
 Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
+
+	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Concatenates the two lists, placing the second list given
 	at the end of the first list.  Note the two lists must be of the same
@@ -223,7 +225,7 @@ Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
 
 Contains[e->T, l->LIST(T)] =: BOOLEAN
 
-	For T = BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
+	For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
 
    -	Description:  Finds whether the specified value of type T is contained 
 	in the indicated list of type T.
@@ -323,7 +325,7 @@ DisplayEfg[E->EFG]
 
 DisplayNfg[N->NFG, {sset->INTEGER}]
 
-   -	Description:  Prints specified normal form problem as a list of
+   -	Description:  Prints the specified normal form problem as a list of
 	contingencies and corresponding payoff vectors.  Uses the last strategy
 	set unless otherwise specified.
    -	Return value:  None.
@@ -392,7 +394,7 @@ ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
 
 Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
 
-	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Determines whether or not all the elements of the two
 	lists are equal.
@@ -499,8 +501,8 @@ GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
    -	Required parameters:
 	  *  E:  The problem in extensive form for which the outcome name is to
 		be found.
-	  *  outc:  The number assigned to the outcome whose name will be 
-		returned.
+	  *  outc:  The number corresponding to the outcome for which the name 
+		will be returned.
    -	Optional parameters:  None.
 
 ----------
@@ -585,7 +587,8 @@ Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 		30.
 	  *  delLam:  Specifies the rate at which the value of Lambda changes.
 		Has a default value of 1.01.
-	  *  tolOpt:  Specifies optimization tolerance.
+	  *  tolOpt:  Specifies optimization tolerance.  Has a default value of
+		XXXX .
 	  *  tolBrent:  XXXX .
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Can be used to redirect the output of this procedure to a
@@ -696,8 +699,8 @@ IsSuccessor[n->NODE, from->NODE] =: NODE
    -	Return value:  Returns True only if the first node indicated is a
 	successor of the second node given.
    -	Required parameters:
-	  *  n:  The node which, when it is the successor of the other node,
-		will result in the return value being True.
+	  *  n:  The node which, when it is a successor of the other node, will
+		result in the return value being True.
 	  *  of:  The node which, when it is succeeded by the other node, will
 		result in the return value being True.
    -	Optional parameters:  None.
@@ -746,7 +749,7 @@ LeaveInfoset[n->NODE] =: NODE
 
 Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
 
-   -	Descprition:  Searches for one solution of the specified normal form 
+   -	Description:  Searches for one solution of the specified normal form 
 	game specified using the Lemke-Howson algorithm.  
    -	Return value:  The list of solutions found.
    -	Required parameters:
@@ -762,7 +765,7 @@ Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
 
 Length[l->LIST(T)] =: INTEGER
 
-	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Finds the number of elements in the specified list of 
 	type T.
@@ -873,7 +876,8 @@ NewEfg[{type->DATATYPE}] =: EFG
    -	Return value:  The newly allocated problem in extensive form.
    -	Required parameters:  None.
    -	Optional parameters: 
-	  *  type:  Specifies the type of the new extensive form problem.
+	  *  type:  Specifies the type (Float or Rational) of the new extensive
+		form problem.
 
 ----------
 
@@ -1085,7 +1089,8 @@ RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, {type->DATATYPE}] =: NFG
 	  *  dim:  The desired dimensionality of the new problem.
    -	Optional parameters:
 	  *  seed:  Reseeds the random number generator with the given integer.
-	  *  type:  Specifies the type of the new normal form problem.
+	  *  type:  Specifies the type (Float or Rational) of the new normal 
+		form problem.
 
 ----------
 
@@ -1159,7 +1164,7 @@ Run[TEXT]
    -	Description:  Includes the commands in the specified file as commands 
 	in the running GCL program.  The program treats the command as if it 
 	were replaced by the contents of the file.
-   -	Return value:  XXXX .
+   -	Return value:  None.
    -	Required parameters:
 	  *  TEXT:  Any expression which evaluates to a text string which is a
 		valid filename.
@@ -1362,9 +1367,9 @@ StopWatch[] =: INTEGER
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
 
    -	Description:  Writes the given extensive form problem to the specified 
-	file.  Indicates in the file the type of the file(FOAT or RATIONAL) 
-	immediately following the title string.  If the type is FLOAT, the file
-	contains floating point numbers and if the type is RATIONAL, the file
+	file.  Indicates in the file the type of the file(Float or Rational) 
+	immediately following the title string.  If the type is Float, the file
+	contains floating point numbers and if the type is Rational, the file
 	contains rational numbers.  
    -	Return value:  Returns the same extensive form problem.
    -	Required parameters:
