@@ -1,13 +1,12 @@
 // File: wxmisc.cc -- a few general purpose functions that rely on and enhance
 // wxwin.
-// @(#)wxmisc.cc	1.13 4/16/96
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
 #pragma hdr_stop
 #define WXMISC_C
 #include "wxmisc.h"
-#include "general.h"
 //***************************************************************************
 //                       RANDOM USEFUL FUNCTIONS
 // These will hopefully be a part of wxwin some day.  These all belong in
@@ -20,6 +19,13 @@ for (int i=0;i<l->Number();i++)
 	if (strcmp((char *)l->Nth(i)->Data(),s)==0) return i;
 return -1;
 }
+// Find In Array function--finds an integer in an array of integers, returns index
+int FindIntArray(int *array,int num,int what)
+{
+for (int i=0;i<num;i++) if (array[i]==what) return i;
+return -1;
+}
+
 // Returns an wxStringList w/ string reps for integers 1..n
 wxStringList* wxStringListInts(int num,wxStringList *l)
 {
