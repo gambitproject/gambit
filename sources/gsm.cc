@@ -111,11 +111,20 @@ bool GSM::Push( const gString& data )
 }
 
 
-bool GSM::PushStream( const gString& data )
+bool GSM::PushOutput( const gString& data )
 {
   gOutput* g;
   g = new gFileOutput( data );
-  _StackStack->Peek()->Push( new Stream_Portion( *g ) );
+  _StackStack->Peek()->Push( new Output_Portion( *g ) );
+  return true;
+}
+
+
+bool GSM::PushInput( const gString& data )
+{
+  gInput* g;
+  g = new gFileInput( data );
+  _StackStack->Peek()->Push( new Input_Portion( *g ) );
   return true;
 }
 

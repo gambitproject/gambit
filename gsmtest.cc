@@ -1814,7 +1814,7 @@ int main( void )
 
 
   machine->PushRef( "x1" );
-  machine->PushStream( "stdout1" );
+  machine->PushOutput( "stdout1" );
   machine->Assign();
   machine->Dump();
 

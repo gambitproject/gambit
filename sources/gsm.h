@@ -84,7 +84,8 @@ public:
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
-  bool PushStream( const gString& data );
+  bool PushOutput( const gString& data );
+  bool PushInput ( const gString& data );
 
   bool PushList ( const int num_of_elements );
 

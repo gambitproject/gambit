@@ -102,6 +102,9 @@ TEMPLATE class gList< int >;
 TEMPLATE class gNode< gOutput* >;
 TEMPLATE class gList< gOutput* >;
 
+TEMPLATE class gNode< gInput* >;
+TEMPLATE class gList< gInput* >;
+
 
 
 TEMPLATE class gNode< BaseNormalForm* >;
@@ -120,7 +123,7 @@ TEMPLATE class gList< gList< Instruction* >* >;
 TEMPLATE class gNode< gList< Instruction* >* >;
 
 /* 
-   already declared in readefg.y
+   already instantiated in readefg.y
    TEMPLATE class gList< gString >;
    TEMPLATE class gNode< gString >;
    */
@@ -134,6 +137,8 @@ TEMPLATE class gNode< gList< Instruction* >* >;
 TEMPLATE class HashTable< gOutput*, int >;
 TEMPLATE class RefCountHashTable< gOutput* >;
 
+TEMPLATE class HashTable< gInput*, int >;
+TEMPLATE class RefCountHashTable< gInput* >;
 
 
 TEMPLATE class HashTable< BaseNormalForm*, int >;

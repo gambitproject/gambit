@@ -398,7 +398,7 @@ class Node_Portion : public Portion
 
 
 
-class Stream_Portion : public Portion
+class Output_Portion : public Portion
 {
  private:
   static int _NumObj;
@@ -406,10 +406,28 @@ class Stream_Portion : public Portion
   gOutput* _Value;
 
  public:
-  Stream_Portion( gOutput& value );
-  ~Stream_Portion();
+  Output_Portion( gOutput& value );
+  ~Output_Portion();
 
   gOutput&      Value          ( void );
+  Portion*      Copy           ( bool new_data ) const;
+  PortionType   Type           ( void ) const;
+  void          Output         ( gOutput& s ) const;
+};
+
+
+class Input_Portion : public Portion
+{
+ private:
+  static int _NumObj;
+  static RefCountHashTable< gInput* > _RefCountTable;
+  gInput* _Value;
+
+ public:
+  Input_Portion( gInput& value );
+  ~Input_Portion();
+
+  gInput&       Value          ( void );
   Portion*      Copy           ( bool new_data ) const;
   PortionType   Type           ( void ) const;
   void          Output         ( gOutput& s ) const;

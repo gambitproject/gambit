@@ -64,14 +64,13 @@ typedef unsigned int PortionType;
 #define  porNODE       ( 0x020000 )
 #define  porACTION     ( 0x040000 )
 
-#define  porSTREAM     ( 0x080000 )
+#define  porREFERENCE  ( 0x080000 )
 
-#define  porREFERENCE  ( 0x100000 )
+#define  porOUTPUT     ( 0x100000 )
+#define  porINPUT      ( 0x200000 )
 
-#define  porUNKNOWN    ( 0x200000 )
+#define  porUNKNOWN    ( 0x400000 )
 
-#define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
-				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
 #define  porALL        ( 0xFFFFFFFF )
 #define  porVALUE      ( porALL & ~porREFERENCE )

@@ -81,7 +81,7 @@ Portion *GSM_GobitNfg(Portion **param)
 {
   NFGobitParams<double> EP;
 
-  EP.pxifile = &((Stream_Portion *) param[1])->Value();
+  EP.pxifile = &((Output_Portion *) param[1])->Value();
   EP.minLam = ((numerical_Portion<double> *) param[2])->Value();
   EP.maxLam = ((numerical_Portion<double> *) param[3])->Value();
   EP.delLam = ((numerical_Portion<double> *) param[4])->Value();
@@ -166,7 +166,7 @@ Portion *GSM_ReadNfg(Portion **param)
 Portion *GSM_WriteNfg(Portion **param)
 {
   NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
-  gOutput *f = &((Stream_Portion *) param[1])->Value();
+  gOutput *f = &((Output_Portion *) param[1])->Value();
 
   N->WriteNfgFile(*f);
   return new numerical_Portion<gInteger>(1);
@@ -202,7 +202,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("GobitNfg");
   FuncObj->SetFuncInfo(GSM_GobitNfg, 10);
   FuncObj->SetParamInfo(GSM_GobitNfg, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porSTREAM,
+  FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
 			NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(GSM_GobitNfg, 2, "minLam", porDOUBLE,
 		        new numerical_Portion<double>(.01));
@@ -263,7 +263,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("WriteNfg");
   FuncObj->SetFuncInfo(GSM_WriteNfg, 2);
   FuncObj->SetParamInfo(GSM_WriteNfg, 0, "N", porNFG_DOUBLE, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "f", porOUTPUT, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 }
 

@@ -1187,16 +1187,16 @@ void Node_Portion::Output( gOutput& s ) const
 
 
 //---------------------------------------------------------------------
-//                            Stream type
+//                            Output type
 //---------------------------------------------------------------------
 
 #ifdef MEMCHECK
-int Stream_Portion::_NumObj = 0;
+int Output_Portion::_NumObj = 0;
 #endif // MEMCHECK
 
-RefCountHashTable< gOutput* > Stream_Portion::_RefCountTable;
+RefCountHashTable< gOutput* > Output_Portion::_RefCountTable;
 
-Stream_Portion::Stream_Portion( gOutput& value )
+Output_Portion::Output_Portion( gOutput& value )
 {
   _Value = &value;
   if( !_RefCountTable.IsDefined( _Value ) )
@@ -1213,7 +1213,7 @@ Stream_Portion::Stream_Portion( gOutput& value )
   }
 }
 
-Stream_Portion::~Stream_Portion()
+Output_Portion::~Output_Portion()
 {
   assert( _RefCountTable.IsDefined( _Value ) );
   assert( _RefCountTable( _Value ) > 0 );
@@ -1229,19 +1229,79 @@ Stream_Portion::~Stream_Portion()
 }
 
 
-gOutput& Stream_Portion::Value( void )
-{ return *( (gFileOutput*) _Value ); }
+gOutput& Output_Portion::Value( void )
+{ return *_Value; }
 
-PortionType Stream_Portion::Type( void ) const
-{ return porSTREAM; }
+PortionType Output_Portion::Type( void ) const
+{ return porOUTPUT; }
 
-Portion* Stream_Portion::Copy( bool new_data ) const
-{ return new Stream_Portion( *_Value ); }
+Portion* Output_Portion::Copy( bool new_data ) const
+{ return new Output_Portion( *_Value ); }
 
 
-void Stream_Portion::Output( gOutput& s ) const
+void Output_Portion::Output( gOutput& s ) const
 {
-  s << " (Stream) ";
+  s << " (Output) ";
+}
+
+
+
+//---------------------------------------------------------------------
+//                            Input type
+//---------------------------------------------------------------------
+
+#ifdef MEMCHECK
+int Input_Portion::_NumObj = 0;
+#endif // MEMCHECK
+
+RefCountHashTable< gInput* > Input_Portion::_RefCountTable;
+
+Input_Portion::Input_Portion( gInput& value )
+{
+  _Value = &value;
+  if( !_RefCountTable.IsDefined( _Value ) )
+  {
+    _RefCountTable.Define( _Value, 1 );
+#ifdef MEMCHECK
+    _NumObj++;
+    gout << ">>> gInput Ctor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+  else
+  {
+    _RefCountTable( _Value )++;
+  }
+}
+
+Input_Portion::~Input_Portion()
+{
+  assert( _RefCountTable.IsDefined( _Value ) );
+  assert( _RefCountTable( _Value ) > 0 );
+  _RefCountTable( _Value )--;
+  if( _RefCountTable( _Value ) == 0 )
+  {
+    delete _Value;
+#ifdef MEMCHECK
+    _NumObj--;
+    gout << ">>> gInput Dtor - count: " << _NumObj << "\n";
+#endif // MEMCHECK
+  }
+}
+
+
+gInput& Input_Portion::Value( void )
+{ return *_Value; }
+
+PortionType Input_Portion::Type( void ) const
+{ return porINPUT; }
+
+Portion* Input_Portion::Copy( bool new_data ) const
+{ return new Input_Portion( *_Value ); }
+
+
+void Input_Portion::Output( gOutput& s ) const
+{
+  s << " (Input) ";
 }
 
 
@@ -1337,8 +1397,10 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
     if( type & porACTION )
       s << "porACTION ";
 
-    if( type & porSTREAM )
-      s << "porSTREAM ";
+    if( type & porOUTPUT )
+      s << "porOUTPUT ";
+    if( type & porINPUT )
+      s << "porINPUT ";
 
     if( type & porREFERENCE )
       s << "porREFERENCE ";

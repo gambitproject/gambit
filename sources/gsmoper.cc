@@ -698,7 +698,7 @@ Portion *GSM_Paren(Portion **param)
 //-----------------------------------------------------------------
 
 
-Portion* GSM_NewStream( Portion** param )
+Portion* GSM_NewOutputStream( Portion** param )
 {
   Portion* result = 0;
   gOutput* g;
@@ -706,12 +706,24 @@ Portion* GSM_NewStream( Portion** param )
   assert( param[ 0 ]->Type() == porSTRING );
 
   g = new gFileOutput( ( (gString_Portion*) param[ 0 ] )->Value() );
-  result = new Stream_Portion( *g );
+  result = new Output_Portion( *g );
   
   return result;
 }
 
 
+Portion* GSM_NewInputStream( Portion** param )
+{
+  Portion* result = 0;
+  gInput* g;
+  
+  assert( param[ 0 ]->Type() == porSTRING );
+
+  g = new gFileInput( ( (gString_Portion*) param[ 0 ] )->Value() );
+  result = new Input_Portion( *g );
+  
+  return result;
+}
 
 
 
@@ -1133,9 +1145,15 @@ void Init_gsmoper( GSM* gsm )
 
   /*-------------------- NewStream -------------------------*/
 
-  FuncObj = new FuncDescObj( (gString) "NewStream" );
-  FuncObj->SetFuncInfo( GSM_NewStream, 1 );
-  FuncObj->SetParamInfo( GSM_NewStream, 0, "file",
+  FuncObj = new FuncDescObj( (gString) "NewOutput" );
+  FuncObj->SetFuncInfo( GSM_NewOutputStream, 1 );
+  FuncObj->SetParamInfo( GSM_NewOutputStream, 0, "file",
+			porSTRING, NO_DEFAULT_VALUE );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "NewInput" );
+  FuncObj->SetFuncInfo( GSM_NewOutputStream, 1 );
+  FuncObj->SetParamInfo( GSM_NewOutputStream, 0, "file",
 			porSTRING, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
