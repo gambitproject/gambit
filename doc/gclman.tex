@@ -41,7 +41,9 @@
 \title{GAMBIT COMMAND LANGUAGE\thanks{This is part of the Gambit
 Project, which was funded in part by National Science Foundation
 grants SBR-9308637 to the California Institute of Technology and
-SBR-9308862 to the University of Minnesota.}}
+SBR-9308862 to the University of Minnesota.  We are also grateful to
+the Intel Corporation for computer equipment grants to California
+Institute of Technology that facilitated this project}}
 
 \author{Richard D. McKelvey\\California Institute of
 Technology
@@ -54,7 +56,7 @@ Theodore Turocy\\Northwestern University
 Gary Wu\\California Institute of Technology
 }
 
-\date{Version 0.95\\ \today\\ \jobname.tex}
+\date{Version 0.96\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -2881,14 +2883,14 @@ OneNash & Weak & 2-person const sum & Lp & \\ \cline{3-5}
         &      & 2-person general  sum & Lcp& \\ \cline{3-5}
         &      & n person              & SimpDiv & \\
 \hline
-AllNash & Strong & 2 person       & EnumMixed &  \\ \cline{3-5}
+AllNash & Strong & 2 person       & EnumMixed & \\ \cline{3-5}
         &        & n person       & Liap      & Not guaranteed\\
 \hline
 \hline
 OnePerfect & Strong & 2 person     & Lcp    & \\ \cline{3-5}
            &        & n person     &     &Not implemented  \\
 \hline
-AllPerfect & Strong & 2 person      & Lcp & Not guaranteed \\ \cline{3-5}
+AllPerfect & Strong & 2 person      & EnumMixed & \\ \cline{3-5}
            &        & n person      &     & Not implemented\\
 \hline
 \multicolumn{5}{c}{\ }\\
@@ -7171,8 +7173,7 @@ Searches for all Perfect Nash equilibria of the normal form game
 \begin{verbatim}
 s:=ElimAllDom[n,strong->True];
 If[NumPlayers[n] = 2, 
-  << " Warning: may not find all";
-  LcpSolve[s,0,precision],
+  EnumMixedSolve[s,0,precision],
   << " Not implemented for n-person games";
   List[Centroid[Support[n]],0]
 ]
