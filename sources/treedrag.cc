@@ -245,4 +245,50 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
 }
 
 
+//--------------------
+// OutcomeDragger
+//--------------------
+
+TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_, Efg &ef_)
+    : ef(ef_), parent(parent_), drag_now(0), outcome(0),
+      outcome_cursor(new wxCursor("OUTCOMECUR"))
+{ }
+
+TreeWindow::OutcomeDragger::~OutcomeDragger()
+{ }
+
+int TreeWindow::OutcomeDragger::OnEvent(wxMouseEvent &ev,
+                                        Bool &outcomes_changed)
+{
+  int ret = (drag_now) ? DRAG_CONTINUE : DRAG_NONE;
+  if (ev.Dragging()) {
+    if (!drag_now) {
+      ev.Position(&x, &y); outcome = 0;
+      start_node = parent->GotObject(x, y, DRAG_OUTCOME_START);
+      if (start_node) {
+	outcome = start_node->GetOutcome();
+	if (outcome) {
+	  parent->SetCursor(outcome_cursor);
+	  drag_now = 1; ret = DRAG_START;
+	}
+      }
+    }
+  }
+  else if (drag_now) {
+    parent->SetCursor(wxSTANDARD_CURSOR);
+    ev.Position(&x, &y);
+    Bool c = ev.ControlDown();
+    ret = DRAG_STOP;
+    Node *end_node = parent->GotObject(x, y, DRAG_OUTCOME_END);
+    if (end_node) {
+      end_node->SetOutcome(outcome);
+      if (c) start_node->SetOutcome(0); // move
+      outcomes_changed = 1;
+      parent->OnPaint();
+    }
+    drag_now = 0;
+  }
+  return ret;
+}
+
 

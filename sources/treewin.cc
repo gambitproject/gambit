@@ -78,6 +78,8 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     iset_drag = new IsetDragger(this, ef);
     // Create provision for adding/creating braches by drag'n dropping
     branch_drag = new BranchDragger(this, ef);
+    // Create provision for copying/moving outcomes by drag'n'drop
+    outcome_drag = new OutcomeDragger(this, ef);
     // No node has been marked yet--mark_node is invalid
     mark_node = 0; old_mark_node = 0;
     // No isets are being hilighted
@@ -126,6 +128,7 @@ TreeWindow::~TreeWindow(void)
   delete node_drag;
   delete iset_drag;
   delete branch_drag;
+  delete outcome_drag;
   Show(FALSE);
 }
 
@@ -342,14 +345,21 @@ void TreeWindow::OnChar(wxKeyEvent& ch)
 void TreeWindow::OnEvent(wxMouseEvent& ev)
 {
     // Check all the draggers.  Note that they are mutually exclusive
-    if (!iset_drag->Dragging() && !branch_drag->Dragging()) 
+    if (!iset_drag->Dragging() && !branch_drag->Dragging() &&
+	!outcome_drag->Dragging())
       if (node_drag->OnEvent(ev, nodes_changed) != DRAG_NONE) return;
     
-    if (!node_drag->Dragging() && !branch_drag->Dragging())
+    if (!node_drag->Dragging() && !branch_drag->Dragging() &&
+	!outcome_drag->Dragging())
       if (iset_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
     
-    if (!node_drag->Dragging() && !iset_drag->Dragging())
+    if (!node_drag->Dragging() && !iset_drag->Dragging() &&
+	!outcome_drag->Dragging())
       if (branch_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
+    
+    if (!node_drag->Dragging() && !iset_drag->Dragging() &&
+        !branch_drag->Dragging())
+        if (outcome_drag->OnEvent(ev, outcomes_changed) != DRAG_NONE) return;
     
     // Implements the 'cutting' behavior
     if (ProcessShift(ev)) return;

@@ -103,6 +103,26 @@ public:
   int BranchNum(void) { return br; }
 };
 
+
+class TreeWindow::OutcomeDragger {
+private:
+  Efg &ef;
+  TreeWindow *parent;
+  int drag_now;
+  EFOutcome *outcome;
+  Node *start_node;
+  float x, y;
+  wxCursor *outcome_cursor;
+    
+public:
+  OutcomeDragger(TreeWindow *parent, Efg &ef);
+  ~OutcomeDragger();
+    
+  int Dragging(void) const { return drag_now; }
+  int OnEvent(wxMouseEvent &ev, Bool &outcomes_changed);
+};
+
+
 #endif  // TREEDRAG_H
 
 

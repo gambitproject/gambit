@@ -172,6 +172,9 @@ private:
     class BranchDragger;            // Class to take care of branch addition by
     BranchDragger *branch_drag;     // drag and dropping
 
+    class OutcomeDragger;           // Class to take care of outcome copy/move
+    OutcomeDragger *outcome_drag;   // by drag and dropping
+
     // Private Functions
     int   FillTable(const Node *n,int level);
     void  ProcessCursor(void);
