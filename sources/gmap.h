@@ -399,10 +399,12 @@ gBaseMap<K, T>::gBaseMap(const gBaseMap<K, T> &m) :
 length(m.length), _default(m._default)
 {
   keys = new K[length];
-  memcpy(keys, m.keys, length * sizeof(K));
-
   values = new T[length];
-  memcpy(values, m.values, length * sizeof(T));
+
+  for (int i = 0; i < length; i++)   {
+    keys[i] = m.keys[i];
+    values[i] = m.values[i];
+  }
 }
 
 template <class K, class T> INLINE
@@ -430,8 +432,10 @@ gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap<K,T> &M)
     if (M.length)   {
       keys = new K[M.length];
       values = new T[M.length];
-      memcpy(keys, M.keys, length * sizeof(K));
-      memcpy(values, M.values, length * sizeof(T));
+      for (int i = 0; i < length; i++)  {
+	keys[i] = M.keys[i];
+        values[i] = M.values[i];
+      }
     }
     else  {
       keys = 0;
@@ -450,11 +454,14 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
   T *new_values = new T[length + 1];
   
   if (length > 0)   {
-    memcpy(new_keys, keys, entry * sizeof(K));
-    memcpy(new_values, values, entry * sizeof(T));
-
-    memcpy(new_keys + entry + 1, keys + entry, (length - entry) * sizeof(K));
-    memcpy(new_values + entry + 1, values + entry, (length - entry) * sizeof(T));
+    for (int i = 0; i < entry; i++)   {
+      new_keys[i] = keys[i];
+      new_values[i] = values[i];
+    }
+    for (i++; i <= length; i++)   {
+      new_keys[i] = keys[i - 1];
+      new_values[i] = values[i - 1];
+    }
   }
 
   new_keys[entry] = key;
@@ -489,14 +496,16 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
     
   K *new_keys = new K[length - 1];
   T *new_values = new T[length - 1];
-    
-  memcpy(new_keys, keys, where * sizeof(K));
-  memcpy(new_values, values, where * sizeof(T));
 
-  memcpy(new_keys + where, keys + where + 1,
-	 (length - where - 1) * sizeof(K));
-  memcpy(new_values + where, values + where + 1,
-	 (length - where - 1) * sizeof(T));
+  for (int i = 0; i < where; i++)   {
+    new_keys[i] = keys[i];
+    new_values[i] = values[i];
+  }
+
+  for (i++; i < length; i++)  {
+    new_keys[i - 1] = keys[i];
+    new_values[i - 1] = values[i];
+  }
 
   delete keys;
   delete values;
