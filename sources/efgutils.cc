@@ -29,16 +29,15 @@ void NTNDoChild (Node *n, gList <Node *> &list)
     NTNDoChild ( n->GetChild(i), list);
 }
 
-int CountChildren (Node *n)
+// Public Functions
+ 
+int CountNodes (Node *n)
 {
   int num = 1;
   for (int i = 1; i <= n->NumChildren(); i++)
-    num += CountChildren (n->GetChild(i));
+    num += CountNodes (n->GetChild(i));
   return num;
 }
-
-
-// Public Functions
 
 void Nodes (const BaseEfg &befg, gList <Node *> &list)
 {
@@ -60,7 +59,7 @@ void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list)
 
 int NumNodes (const BaseEfg &befg)
 {
-  return (CountChildren(befg.RootNode()));
+  return (CountNodes(befg.RootNode()));
 }
 
 

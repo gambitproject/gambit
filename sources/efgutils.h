@@ -21,7 +21,15 @@ void TerminalNodes (const BaseEfg &befg, gList <Node *> &list);
 // returns a glist of the NonTerminal Nodes in the extensive form
 void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list);
 
-// returns the number of nods in the extensive form
+// returns the number of nodes in the extensive form
 int NumNodes (const BaseEfg &befg);
 
+// returns the number of nodes given a starting node
+int CountNodes (Node *n);
+
+
 #endif // EFGUTILS_H
+
+
+
+
