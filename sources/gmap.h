@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include "basic.h"
+#include "output.h"
 
 // What is the difference between a gMap and a gSet?
 // Essentially that a gMap allows arbitrary (integer) numbering, while a gSet
@@ -68,7 +69,7 @@ template <class T> class gMap  {
     int GetIndex(int i) const;
 
 	// DEBUGGING
-    void Dump(void) const;
+    void Dump(output&) const;
 };
 
 
@@ -79,6 +80,16 @@ template <class T> class gMap  {
 #else
 #error Unsupported compiler type
 #endif   // __GNUC__, __BORLANDC__
+
+/*****************************************************************************
+ *Defining the << operator for class output from class gMap                  *
+ *Arguments: class output, class gMap                                        *
+ *Returns: class output                                                      *
+ *****************************************************************************/
+
+template <class T> inline operator<<(output& to,gMap<T>& A){
+  A.Dump(to); return to;
+}
 
 template <class T> INLINE gMap<T>::gMap(const gMap<T> &m) : length(m.length)
 {
@@ -252,11 +263,11 @@ template <class T> inline int gMap<T>::GetIndex(int i) const
 
 
 
-template <class T> INLINE void gMap<T>::Dump(void) const
+template <class T> INLINE void gMap<T>::Dump(output& to) const
 {
   for (uint i = 0; i < length; i++)
-    printf("(%d) %d: %p\n", i + 1, numbers[i], contents[i]);
-  printf("\n");
+    to << "(" << i+1 << ") " << numbers[i] << ": " << contents[i];
+  to "\n";
 }
 
 #endif   // GMAP_H
