@@ -572,46 +572,6 @@ void NfgShow::SetFileName(const gText &s)
   SetTitle((char *) ("[" + filename + "] " + m_nfg.GetTitle()));
 }
 
-// how: 0-default, 1-saved, 2-query
-MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
-{
-  MixedProfile<gNumber> start(*m_currentSupport);
-
-  if (how == 0)
-    start.Centroid();
-
-#ifdef NOT_PORTED_YET
-  if (how == 1 || how == 2) {
-    if (starting_points.last == -1 || how == 2) {
-      MSolnSortFilterOptions sf_opts; // no sort, filter
-
-      if (starting_points.profiles.Length() == 0)
-	starting_points.profiles += start;
-
-      Nfg1SolnPicker *start_dialog = 
-	new Nfg1SolnPicker(starting_points.profiles, 
-			   nf.NumPlayers(), 
-			   gmax(nf.NumStrats()), 0, 
-			   draw_settings, sf_opts, this, m_table);
-      
-      m_table->Enable(FALSE);  // disable this window until the edit window is closed
-      
-      while (start_dialog->Completed() == wxRUNNING) 
-	wxYield();
-      
-      m_table->Enable(TRUE);
-      starting_points.last = start_dialog->Picked();
-      delete start_dialog;
-    }
-
-    if (starting_points.last)
-      start = starting_points.profiles[starting_points.last];
-  }
-#endif // NOT_PORTED_YET
-
-  return start;
-}
-
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
 {
   if (!InterfaceOk()) {  // we better have someone to send solutions to
@@ -991,16 +951,16 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (m_nfg.NumPlayers() == 2) {
 	if (IsConstSum(m_nfg))
-	  solver = new guinfgLp(*m_currentSupport, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLp(this, 1, dialog.Precision(), true);
 	else
-	  solver = new guinfgLcp(*m_currentSupport, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLcp(this, 1, dialog.Precision(), true);
       }
       else
-	solver = new guinfgSimpdiv(*m_currentSupport, this, 1, dialog.Precision(), true);
+	solver = new guinfgSimpdiv(this, 1, dialog.Precision(), true);
     }
     else {  // nfgSTANDARD_PERFECT
       if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*m_currentSupport, this, 1, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(this, 1, dialog.Precision(), true);
       }
       else {
 	wxMessageBox("One-Perfect only implemented for 2-player games",
@@ -1013,13 +973,13 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   case nfgSTANDARD_TWO:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (m_nfg.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*m_currentSupport, this, 2, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(this, 2, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*m_currentSupport, this, 2, 10, false);
+	solver = new guinfgLiap(this, 2, 10, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*m_currentSupport, this, 2, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(this, 2, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
       }
       else {
@@ -1032,14 +992,14 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   case nfgSTANDARD_ALL:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (m_nfg.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*m_currentSupport, this, 0, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(this, 0, dialog.Precision(), false);
       else {
-	solver = new guinfgPolEnum(*m_currentSupport, this, 0, false);
+	solver = new guinfgPolEnum(this, 0, false);
       }
     }
     else {  // nfgSTANDARD_PERFECT
       if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*m_currentSupport, this, 0, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(this, 0, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
       }
       else {
@@ -1054,12 +1014,12 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   wxBeginBusyCursor();
 
   try {
-    solver->Eliminate();
-    *m_solutionTable += solver->Solve();
+    NFSupport support = solver->Eliminate(*m_currentSupport);
+    *m_solutionTable += solver->Solve(support);
     wxEndBusyCursor();
   }
   catch (gException &E) {
-    guiExceptionDialog(E.Description(), Frame());
+    guiExceptionDialog(E.Description(), this);
     wxEndBusyCursor();
   }
     
@@ -1086,42 +1046,37 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 {
   int id = p_event.GetInt();
 
-  NFSupport *sup = (supports.Length() > 1) ? m_currentSupport : 0;
-
-  if (!sup)
-    sup = new NFSupport(m_nfg);
-
   int old_max_soln = m_solutionTable->Length();  // used for extensive update
 
   guiNfgSolution *solver;
 
   switch (id) {
   case NFG_SOLVE_CUSTOM_ENUMPURE:
-    solver = new guinfgEnumPure(*sup, this);
+    solver = new guinfgEnumPure(this);
     break;
   case NFG_SOLVE_CUSTOM_ENUMMIXED:
-    solver = new guinfgEnumMixed(*sup, this);
+    solver = new guinfgEnumMixed(this);
     break;
   case NFG_SOLVE_CUSTOM_LCP:      
-    solver = new guinfgLcp(*sup, this);
+    solver = new guinfgLcp(this);
     break;
   case NFG_SOLVE_CUSTOM_LP:       
-    solver = new guinfgLp(*sup, this);
+    solver = new guinfgLp(this);
     break;
   case NFG_SOLVE_CUSTOM_LIAP:
-    solver = new guinfgLiap(*sup, this);
+    solver = new guinfgLiap(this);
     break;
   case NFG_SOLVE_CUSTOM_SIMPDIV:
-    solver = new guinfgSimpdiv(*sup, this);
+    solver = new guinfgSimpdiv(this);
     break;
   case NFG_SOLVE_CUSTOM_POLENUM:
-    solver = new guinfgPolEnum(*sup, this);
+    solver = new guinfgPolEnum(this);
     break;
   case NFG_SOLVE_CUSTOM_QRE:
-    solver = new guinfgQre(*sup, this);
+    solver = new guinfgQre(this);
     break;
   case NFG_SOLVE_CUSTOM_QREGRID:
-    solver = new guinfgQreAll(*sup, this);
+    solver = new guinfgQreAll(this);
     break;
   default:
     // shouldn't happen.  we'll ignore silently
@@ -1134,13 +1089,13 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   try {
     if (go) {
-      solver->Eliminate();
-      *m_solutionTable += solver->Solve();
+      NFSupport support = solver->Eliminate(*m_currentSupport);
+      *m_solutionTable += solver->Solve(support);
     }
     wxEndBusyCursor();
   }
   catch (gException &E) {
-    guiExceptionDialog(E.Description(), Frame());
+    guiExceptionDialog(E.Description(), this);
     wxEndBusyCursor();
   }
     

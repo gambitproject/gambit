@@ -18,26 +18,29 @@
 //                     guiNfgSolution: Member functions
 //=========================================================================
 
-guiNfgSolution::guiNfgSolution(const NFSupport &p_support,
-			       NfgShowInterface *p_parent)
-  : m_nfg(p_support.Game()), m_support(p_support), m_parent(p_parent),
-    m_traceFile(&gnull), m_traceLevel(0)
+guiNfgSolution::guiNfgSolution(NfgShow *p_parent)
+  : m_parent(p_parent), m_traceFile(&gnull), m_traceLevel(0)
 { }
 
 #include "nfstrat.h"
 #include "nfdom.h"
 
-void guiNfgSolution::Eliminate(void)
+NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
 {
-  if (!m_eliminate)  return;
+  if (!m_eliminate) {
+    return p_support;
+  }
 
-  gArray<int> players(m_nfg.NumPlayers());
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++) 
+  NFSupport ret(p_support);
+  const Nfg &nfg = p_support.Game();
+
+  gArray<int> players(nfg.NumPlayers());
+  for (int i = 1; i <= nfg.NumPlayers(); i++) 
     players[i] = i;
 
   if (m_eliminateAll) {
     if (m_eliminateMixed) {
-      NFSupport *oldSupport = new NFSupport(m_support), *newSupport;
+      NFSupport *oldSupport = new NFSupport(ret), *newSupport;
       while ((newSupport = oldSupport->MixedUndominated(!m_eliminateWeak,
 							precRATIONAL,
 							players, gnull, gstatus)) != 0) {
@@ -45,40 +48,42 @@ void guiNfgSolution::Eliminate(void)
 	oldSupport = newSupport;
       }
       
-      m_support = *oldSupport;
+      ret = *oldSupport;
       delete oldSupport;
     }
     else {
-      NFSupport *oldSupport = new NFSupport(m_support), *newSupport;
+      NFSupport *oldSupport = new NFSupport(ret), *newSupport;
       while ((newSupport = oldSupport->Undominated(!m_eliminateWeak,
 						   players, gnull, gstatus)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
       }
       
-      m_support = *oldSupport;
+      ret = *oldSupport;
       delete oldSupport;
     }
   }
   else {
     if (m_eliminateMixed) {
       NFSupport *newSupport;
-      if ((newSupport = m_support.MixedUndominated(!m_eliminateWeak,
-						   precRATIONAL,
-						   players, gnull, gstatus)) != 0) {
-	m_support = *newSupport;
+      if ((newSupport = ret.MixedUndominated(!m_eliminateWeak,
+					     precRATIONAL,
+					     players, gnull, gstatus)) != 0) {
+	ret = *newSupport;
 	delete newSupport;
       }
     }
     else {
       NFSupport *newSupport;
-      if ((newSupport = m_support.Undominated(!m_eliminateWeak,
-					      players, gnull, gstatus)) != 0) {
-	m_support = *newSupport;
+      if ((newSupport = ret.Undominated(!m_eliminateWeak,
+					players, gnull, gstatus)) != 0) {
+	ret = *newSupport;
 	delete newSupport;
       }
     }
   }
+
+  return ret;
 }
 
 //=========================================================================
@@ -92,19 +97,18 @@ void guiNfgSolution::Eliminate(void)
 #include "nfgpure.h"
 #include "dlenumpure.h"
 
-guinfgEnumPure::guinfgEnumPure(const NFSupport &p_support,
-			       NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgEnumPure::guinfgEnumPure(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-gList<MixedSolution> guinfgEnumPure::Solve(void)
+gList<MixedSolution> guinfgEnumPure::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
+  wxStatus status(m_parent, "EnumPureSolve Progress");
 
   gList<MixedSolution> solutions;
 
   try {
-    FindPureNash(m_support, m_stopAfter, status, solutions);
+    FindPureNash(p_support, m_stopAfter, status, solutions);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -112,7 +116,7 @@ gList<MixedSolution> guinfgEnumPure::Solve(void)
 
 bool guinfgEnumPure::SolveSetup(void)
 {
-  dialogEnumPure dialog(m_parent->Frame(), false, true);
+  dialogEnumPure dialog(m_parent, false, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -134,16 +138,14 @@ bool guinfgEnumPure::SolveSetup(void)
 #include "dlenummixed.h"
 #include "enum.h"
 
-guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
-				 NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgEnumMixed::guinfgEnumMixed(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
-				 NfgShowInterface *p_parent,
+guinfgEnumMixed::guinfgEnumMixed(NfgShow *p_parent,
 				 int p_stopAfter, gPrecision p_precision, 
 				 bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent),
+  : guiNfgSolution(p_parent),
     m_stopAfter(p_stopAfter), m_precision(p_precision)
 {
   m_eliminate = true;
@@ -152,9 +154,9 @@ guinfgEnumMixed::guinfgEnumMixed(const NFSupport &p_support,
   m_eliminateMixed = false;
 }
 
-gList<MixedSolution> guinfgEnumMixed::Solve(void)
+gList<MixedSolution> guinfgEnumMixed::Solve(const NFSupport &p_support)
 {
-  wxEnumStatus status(m_parent->Frame());
+  wxEnumStatus status(m_parent);
 
   EnumParams params(status);
   params.stopAfter = m_stopAfter;
@@ -166,7 +168,7 @@ gList<MixedSolution> guinfgEnumMixed::Solve(void)
   double time;
   gList<MixedSolution> solutions;
   try {
-    Enum(m_support, params, solutions, npivots, time);
+    Enum(p_support, params, solutions, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -174,7 +176,7 @@ gList<MixedSolution> guinfgEnumMixed::Solve(void)
 
 bool guinfgEnumMixed::SolveSetup(void)
 {
-  dialogEnumMixed dialog(m_parent->Frame());
+  dialogEnumMixed dialog(m_parent);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -200,15 +202,14 @@ bool guinfgEnumMixed::SolveSetup(void)
 #include "dllcp.h"
 #include "lemke.h"
 
-guinfgLcp::guinfgLcp(const NFSupport &p_support,
-		     NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgLcp::guinfgLcp(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgLcp::guinfgLcp(const NFSupport &p_support, NfgShowInterface *p_parent,
+guinfgLcp::guinfgLcp(NfgShow *p_parent,
 		     int p_stopAfter, gPrecision p_precision, 
 		     bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent),
+  : guiNfgSolution(p_parent),
     m_stopAfter(p_stopAfter), m_precision(p_precision)
 {
   m_eliminate = true;
@@ -217,9 +218,9 @@ guinfgLcp::guinfgLcp(const NFSupport &p_support, NfgShowInterface *p_parent,
   m_eliminateMixed = false;
 }
 
-gList<MixedSolution> guinfgLcp::Solve(void)
+gList<MixedSolution> guinfgLcp::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "LcpSolve Progress");
+  wxStatus status(m_parent, "LcpSolve Progress");
 
   LemkeParams params(status);
   params.stopAfter = m_stopAfter;
@@ -231,7 +232,7 @@ gList<MixedSolution> guinfgLcp::Solve(void)
   double time;
   gList<MixedSolution> solutions;
   try {
-    Lemke(m_support, params, solutions, npivots, time);
+    Lemke(p_support, params, solutions, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -239,7 +240,7 @@ gList<MixedSolution> guinfgLcp::Solve(void)
 
 bool guinfgLcp::SolveSetup(void)
 {
-  dialogLcp dialog(m_parent->Frame(), false, true);
+  dialogLcp dialog(m_parent, false, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -265,14 +266,14 @@ bool guinfgLcp::SolveSetup(void)
 #include "dllp.h"
 #include "nfgcsum.h"
 
-guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgLp::guinfgLp(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent,
+guinfgLp::guinfgLp(NfgShow *p_parent,
 		   int p_stopAfter, gPrecision p_precision, 
 		   bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent),
+  : guiNfgSolution(p_parent),
     m_stopAfter(p_stopAfter), m_precision(p_precision)
 {
   m_eliminate = true;
@@ -281,9 +282,9 @@ guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent,
   m_eliminateMixed = false;
 }
 
-gList<MixedSolution> guinfgLp::Solve(void)
+gList<MixedSolution> guinfgLp::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "LpSolve Progress");
+  wxStatus status(m_parent, "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   ZSumParams params;
@@ -296,7 +297,7 @@ gList<MixedSolution> guinfgLp::Solve(void)
   double time;
   gList<MixedSolution> solutions;
   try {
-    ZSum(m_support, params, solutions, npivots, time);
+    ZSum(p_support, params, solutions, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -304,7 +305,7 @@ gList<MixedSolution> guinfgLp::Solve(void)
 
 bool guinfgLp::SolveSetup(void)
 {
-  dialogLp dialog(m_parent->Frame(), false, true);
+  dialogLp dialog(m_parent, false, true);
   
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -330,13 +331,13 @@ bool guinfgLp::SolveSetup(void)
 #include "dlliap.h"
 #include "nliap.h"
 
-guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgLiap::guinfgLiap(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent,
+guinfgLiap::guinfgLiap(NfgShow *p_parent,
 		       int p_stopAfter, int p_nTries, bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent),
+  : guiNfgSolution(p_parent),
     m_nTries(p_nTries), m_stopAfter(p_stopAfter)
 {
   m_eliminate = true;
@@ -348,9 +349,9 @@ guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent,
   m_startOption = 0;
 }
 
-gList<MixedSolution> guinfgLiap::Solve(void)
+gList<MixedSolution> guinfgLiap::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "Liap Algorithm");
+  wxStatus status(m_parent, "Liap Algorithm");
   NFLiapParams params(status);
   params.stopAfter = m_stopAfter;
   params.SetAccuracy(m_accuracy);
@@ -358,11 +359,11 @@ gList<MixedSolution> guinfgLiap::Solve(void)
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  MixedProfile<gNumber> start(m_parent->CreateStartProfile(m_startOption));
+  MixedProfile<gNumber> start(p_support);
   long nevals, nits;
   gList<MixedSolution> solutions;
   try {
-    Liap(m_nfg, params, start, solutions, nevals, nits);
+    Liap(p_support.Game(), params, start, solutions, nevals, nits);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -370,7 +371,7 @@ gList<MixedSolution> guinfgLiap::Solve(void)
 
 bool guinfgLiap::SolveSetup(void)
 {
-  dialogLiap dialog(m_parent->Frame(), false, true);
+  dialogLiap dialog(m_parent, false, true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -398,16 +399,14 @@ bool guinfgLiap::SolveSetup(void)
 #include "simpdiv.h"
 #include "dlsimpdiv.h"
 
-guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
-			     NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgSimpdiv::guinfgSimpdiv(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
-			     NfgShowInterface *p_parent,
+guinfgSimpdiv::guinfgSimpdiv(NfgShow *p_parent,
 			     int p_stopAfter, gPrecision p_precision, 
 			     bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent),
+  : guiNfgSolution(p_parent),
     m_stopAfter(p_stopAfter), m_nRestarts(36), m_leashLength(0),
     m_precision(p_precision)
 {
@@ -417,9 +416,9 @@ guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
   m_eliminateMixed = false;
 }
 
-gList<MixedSolution> guinfgSimpdiv::Solve(void)
+gList<MixedSolution> guinfgSimpdiv::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "SimpdivSolve Progress");
+  wxStatus status(m_parent, "SimpdivSolve Progress");
   SimpdivParams params(status);
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
@@ -433,7 +432,7 @@ gList<MixedSolution> guinfgSimpdiv::Solve(void)
   gList<MixedSolution> solutions;
 
   try {
-    Simpdiv(m_support, params, solutions, nevals, niters, time);
+    Simpdiv(p_support, params, solutions, nevals, niters, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -441,7 +440,7 @@ gList<MixedSolution> guinfgSimpdiv::Solve(void)
 
 bool guinfgSimpdiv::SolveSetup(void)
 {
-  dialogSimpdiv dialog(m_parent->Frame());
+  dialogSimpdiv dialog(m_parent);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -469,15 +468,13 @@ bool guinfgSimpdiv::SolveSetup(void)
 #include "dlpolenum.h"
 #include "nfgalleq.h"
 
-guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
-			     NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
-			     NfgShowInterface *p_parent,
+guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent,
 			     int p_stopAfter, bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+  : guiNfgSolution(p_parent), m_stopAfter(p_stopAfter)
 {
   m_eliminate = true;
   m_eliminateAll = true;
@@ -485,9 +482,9 @@ guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
   m_eliminateMixed = false;
 }
 
-gList<MixedSolution> guinfgPolEnum::Solve(void)
+gList<MixedSolution> guinfgPolEnum::Solve(const NFSupport &p_support)
 {
-  wxPolEnumStatus status(m_parent->Frame());
+  wxPolEnumStatus status(m_parent);
   PolEnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.trace = m_traceLevel;
@@ -499,7 +496,7 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
   gList<const NFSupport> singular_supports;
 
   try {
-    AllNashSolve(m_support, params, solutions, nevals, time, singular_supports);
+    AllNashSolve(p_support, params, solutions, nevals, time, singular_supports);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -507,7 +504,7 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
 
 bool guinfgPolEnum::SolveSetup(void)
 {
-  dialogPolEnum dialog(m_parent->Frame(), false, true);
+  dialogPolEnum dialog(m_parent, false, true);
   
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -532,13 +529,13 @@ bool guinfgPolEnum::SolveSetup(void)
 #include "dlqre.h"
 #include "ngobit.h"
 
-guinfgQre::guinfgQre(const NFSupport &p_support, NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgQre::guinfgQre(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-gList<MixedSolution> guinfgQre::Solve(void)
+gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "QreSolve Progress");
+  wxStatus status(m_parent, "QreSolve Progress");
   NFQreParams params(status);
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
@@ -549,12 +546,12 @@ gList<MixedSolution> guinfgQre::Solve(void)
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
 
-  MixedProfile<gNumber> start(m_parent->CreateStartProfile(m_startOption));
+  MixedProfile<gNumber> start(p_support);
 
   long nevals, nits;
   gList<MixedSolution> solutions;
   try {
-    Qre(m_nfg, params, start, solutions, nevals, nits);
+    Qre(p_support.Game(), params, start, solutions, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
@@ -569,7 +566,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
 
 bool guinfgQre::SolveSetup(void)
 {
-  dialogQre dialog(m_parent->Frame(), m_parent->Filename(), true);
+  dialogQre dialog(m_parent, m_parent->Filename(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -604,14 +601,13 @@ bool guinfgQre::SolveSetup(void)
 #include "dlqregrid.h"
 #include "grid.h"
 
-guinfgQreAll::guinfgQreAll(const NFSupport &p_support,
-			   NfgShowInterface *p_parent)
-  : guiNfgSolution(p_support, p_parent)
+guinfgQreAll::guinfgQreAll(NfgShow *p_parent)
+  : guiNfgSolution(p_parent)
 { }
 
-gList<MixedSolution> guinfgQreAll::Solve(void)
+gList<MixedSolution> guinfgQreAll::Solve(const NFSupport &p_support)
 {
-  wxStatus status(m_parent->Frame(), "QreGridSolve Progress");
+  wxStatus status(m_parent, "QreGridSolve Progress");
 
   GridParams params(status);
   params.minLam = m_minLam;
@@ -629,7 +625,7 @@ gList<MixedSolution> guinfgQreAll::Solve(void)
 
   gList<MixedSolution> solutions;
   try {
-    GridSolve(m_support, params, solutions);
+    GridSolve(p_support, params, solutions);
   }
   catch (gSignalBreak &) { }
   
@@ -643,7 +639,7 @@ gList<MixedSolution> guinfgQreAll::Solve(void)
 
 bool guinfgQreAll::SolveSetup(void)
 {
-  dialogQreGrid dialog(m_parent->Frame(), m_parent->Filename());
+  dialogQreGrid dialog(m_parent, m_parent->Filename());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();

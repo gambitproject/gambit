@@ -20,7 +20,6 @@
 #include "nfg.h"
 #include "nfgiter.h"
 #include "mixedsol.h"
-#include "nfgsolng.h"
 #include "solnlist.h"
 
 #include "efgnfgi.h"
@@ -36,8 +35,7 @@ typedef SolutionList<MixedSolution> MixedSolutionList;
 class NfgPanel;
 class NfgToolbar;
 
-class NfgShow : public wxFrame, 
-		public EfgNfgInterface, public NfgShowInterface {
+class NfgShow : public wxFrame, public EfgNfgInterface {
 private:
   Nfg &m_nfg;
   gList<NFSupport *> supports;
@@ -48,12 +46,6 @@ private:
   NfgProfileList *m_solutionTable;
 
   wxSashWindow *m_panelSashWindow, *m_solutionSashWindow;
-
-  struct StartingPoints {
-    MixedSolutionList profiles;
-    int last;
-    StartingPoints() : last(-1) { }
-  } starting_points;
 
   int cur_soln;
 
@@ -149,7 +141,6 @@ public:
   void RemoveSolutions(void);
   MixedSolution CreateSolution(void);
   void ChangeSolution(int sol);
-  MixedProfile<gNumber> CreateStartProfile(int how);
 
   int CurrentSolution(void) const { return cur_soln; }
 
@@ -161,7 +152,6 @@ public:
   const gText &Filename(void) const { return filename; }
 
   const Nfg &Game(void) const { return m_nfg; }  
-  wxFrame *Frame(void) { return this; }
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
 
