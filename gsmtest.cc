@@ -1821,7 +1821,7 @@ int main( void )
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x2" );
   machine->Bind();
-  machine->InitCallFunction( "NewStream" );
+  machine->InitCallFunction( "NewOutput" );
   machine->Push( "stdout2" );
   machine->Bind();
   machine->CallFunction();
@@ -2459,15 +2459,82 @@ int main( void )
 
   prog = new gList< Instruction* >;
   prog->Append( new PushRef( "a" ) );
-  prog->Append( new Dump );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Add );
+  prog->Append( new Assign );
 
   func = new FuncDescObj( "TestDump" );
-  func->SetFuncInfo( prog, 0 );
+  func->SetFuncInfo( prog, 1 );
+  func->SetParamInfo( prog, 0, "a", porSTRING,
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   machine->AddFunction( func );
 
-  machine->Push( (gInteger) 1 );
+  machine->PushRef( "yow" );
+  machine->Push( "yowser! " );
+  machine->Assign();
+  machine->Dump();
   machine->InitCallFunction( "TestDump" );
+  machine->PushRef( "yow" );
+  machine->Bind();
   machine->CallFunction();
+  machine->Dump();
+  machine->PushRef( "yow" );
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "temp" ) );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Assign );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new PushRef( "b" ) );
+  prog->Append( new Assign );
+  prog->Append( new PushRef( "b" ) );
+  prog->Append( new PushRef( "temp" ) );
+  prog->Append( new Assign );
+  prog->Append( new Flush );
+  prog->Append( new PushRef( "temp" ) );
+  
+  func = new FuncDescObj( "TestSwap" );
+  func->SetFuncInfo( prog, 2 );
+  func->SetParamInfo( prog, 0, "a", porVALUE,
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  func->SetParamInfo( prog, 1, "b", porVALUE,
+		     NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  machine->AddFunction( func );
+
+
+  machine->PushRef( "t1" );
+  machine->Push( "string1" );
+  machine->Assign();
+  machine->PushRef( "t2" );
+  machine->Push( "string2" );
+  machine->Assign();
+  machine->Flush();
+
+  gout << "Before TestSwap\n";
+  machine->PushRef( "t1" );
+  machine->PushRef( "t2" );
+  machine->Dump();
+
+  machine->InitCallFunction( "TestSwap" );
+  machine->PushRef( "t1" );
+  machine->Bind();
+  machine->PushRef( "t2" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Flush();
+
+  gout << "After TestSwap\n";
+  machine->PushRef( "t1" );
+  machine->PushRef( "t2" );
   machine->Dump();
 
 

@@ -1108,13 +1108,26 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
 
 
 
-Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program )
+Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program, 
+			      const FuncInfoType& func_info,
+			      Portion** param )
 {
   GSM_ReturnCode rc_result;
   Portion* result;
+  int i;
 
   _RefTableStack->Push( new RefHashTable );
   _StackStack->Push( new gGrowableStack< Portion* > );
+
+
+  for( i = 0; i < func_info.NumParams; i++ )
+  {
+    if( param[ i ] != 0 )
+    {
+      _VarDefine( func_info.ParamInfo[ i ].Name, param[ i ]->Copy() );
+    }
+  }
+
 
   rc_result = Execute( program, true );
 
@@ -1125,17 +1138,25 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program )
     {
     case 1:
       result = _StackStack->Peek()->Pop();
+      result = _ResolveRef( result );
+      if( result->Type() == porERROR )
+      {
+	delete result;
+	result = 0;
+      }
       break;
     case 0:
       result = new Error_Portion( (gString)
-				 "User-defined function Error:\n" +
-				 "  No return value\n" );
+				 "GSM Error 43 :\n" +
+				 "  User-defined function Error:\n" +
+				 "    No return value\n" );
       break;
     default:
       result = new Error_Portion( (gString)
-				 "User-defined function Error:\n" +
-				 "  Too many values left on stack;\n" +
-				 "  return value ambiguous\n" );
+				 "GSM Error 44 :\n" + 
+				 "  User-defined function Error:\n" +
+				 "    Too many values left on stack;\n" +
+				 "    return value ambiguous\n" );
     }
     break;
   case rcFAIL:
@@ -1143,10 +1164,22 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program )
     break;
   case rcQUIT:
     result = new Error_Portion( (gString)
-			       "User-defined function Error:\n" +
-			       "  Interruption by user\n" );
+			       "GSM Error 45 :\n" + 
+			       "  User-defined function Error:\n" +
+			       "    Interruption by user\n" );
     break;
   }
+
+
+  for( i = 0; i < func_info.NumParams; i++ )
+  {
+    if( param[ i ] != 0 && func_info.ParamInfo[ i ].PassByReference )
+    {
+      delete param[ i ];
+      param[ i ] = _VarValue( func_info.ParamInfo[ i ].Name )->Copy();
+    }
+  }
+
 
   Flush();
   delete _StackStack->Pop();
@@ -1435,6 +1468,11 @@ void GSM::_ErrorMessage
     break;
   case 42:
     s << "  Attempted to change the type of variable \"" << str1 << "\"\n";
+    break;
+  case 43:
+  case 44:
+  case 45:
+    s << "  User-defined function error\n";
     break;
   default:
     s << "  General error\n";

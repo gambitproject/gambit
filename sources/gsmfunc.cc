@@ -368,6 +368,14 @@ void FuncDescObj::_SetParamInfo
     gerr << "                   during initialization\n";
   }
   assert( !repeated_variable_declaration );
+
+  if( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name != "" )
+  {
+    gerr << "FuncDescObj Error: parameter #" << param_index << " of a\n";
+    gerr << "                   function in \"" << _FuncName << "\" was\n";
+    gerr << "                   declared multiple times\n";
+  }
+  assert( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name == "" );
 #endif // NDEBUG
   
   _FuncInfo[ f_index ].ParamInfo[ param_index ].Name = 
@@ -789,7 +797,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     if( !_FuncInfo[ _FuncIndex ].UserDefined )
       result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
     else
-      result = gsm->ExecuteUserFunc( *(_FuncInfo[_FuncIndex].FuncInstr) );
+      result = gsm->ExecuteUserFunc( *(_FuncInfo[ _FuncIndex ].FuncInstr), 
+				    _FuncInfo[ _FuncIndex ], _Param );
 
     if( result == 0 )
       _ErrorOccurred = true;

@@ -43,6 +43,7 @@ class ParamInfoType
 {
 friend FuncDescObj;
 friend CallFuncObj;
+friend GSM;
   
 private:
   gString      Name;
@@ -65,30 +66,7 @@ public:
   Type( param_info.Type ),
   DefaultValue( param_info.DefaultValue ),
   PassByReference( param_info.PassByReference )
-  {
-    /*
-    if( DefaultValue != NO_DEFAULT_VALUE )
-    {
-      DefaultValue = DefaultValue->Copy();
-    }
-    */
-  }
-
-  /*
-  operator = ( const ParamInfoType& param_info )
-  {
-    Name = param_info.Name;
-    Type = param_info.Type;
-    delete DefaultValue;
-    DefaultValue = param_info.DefaultValue;
-    PassByReference = param_info.PassByReference;
-    if( DefaultValue != NO_DEFAULT_VALUE )
-    {
-      DefaultValue = DefaultValue->Copy();
-    }
-  }
-  */
-
+  { }
 
   ParamInfoType
     ( 
@@ -102,20 +80,24 @@ public:
   Type( type ), 
   DefaultValue( default_value ), 
   PassByReference( pass_by_ref )
-  { 
-    /*
-    if( DefaultValue != NO_DEFAULT_VALUE )
-      DefaultValue = DefaultValue->Copy();
-      */
-  }
+  { }
 
   ~ParamInfoType()
-  {
-    /*
-    delete DefaultValue;
-    */
-  }
+  { }
 };
+
+
+
+class FuncInfoType
+{
+public:
+  bool                 UserDefined;
+  Portion*             (*FuncPtr)(Portion **);
+  gList<Instruction*>* FuncInstr;
+  int                  NumParams;
+  ParamInfoType*       ParamInfo;
+};
+
 
 
 class FuncDescObj
@@ -141,15 +123,6 @@ private:
      );
 
 protected:
-  struct FuncInfoType
-  {
-    bool                 UserDefined;
-    Portion*             (*FuncPtr)(Portion **);
-    gList<Instruction*>* FuncInstr;
-    int                  NumParams;
-    ParamInfoType*       ParamInfo;
-  };
-
   gString        _FuncName;
   int            _NumFuncs;
   FuncInfoType*  _FuncInfo;
@@ -188,7 +161,7 @@ public:
      const int         index, 
      const gString&    name,
      const PortionType type,
-     Portion*          default_value,
+     Portion*          default_value = NO_DEFAULT_VALUE,
      const bool        pass_by_reference = false
      );
   

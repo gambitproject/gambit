@@ -12,7 +12,7 @@
 
 #include "gsmincl.h"
 #include "gambitio.h"
-
+#include "gsmfunc.h"
 
 class Instruction;
 class FuncDescObj;
@@ -129,7 +129,9 @@ public:
 
   GSM_ReturnCode Execute( gList<Instruction*>& program, 
 			 bool user_func = false );
-  Portion* ExecuteUserFunc( gList<Instruction*>& program );
+  Portion* ExecuteUserFunc( gList<Instruction*>& program, 
+			   const FuncInfoType& func_info,
+			   Portion** param );
   
   void Output ( void );
   void Dump   ( void );
