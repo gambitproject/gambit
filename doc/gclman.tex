@@ -2604,7 +2604,7 @@ are {\em perfect} and {\em proper} equilibria for normal form games,
 and {\em subgame perfect} and {\em sequential} equilibria for
 extensive form games\footnote{Definitions of perfect and subgame perfect
 equilibria are from \cite{Selten:1975}, proper equilibrium from
-\cite{Myerson}, and sequential equilibrium from
+\cite{Myerson:78}, and sequential equilibrium from
 \cite{KrepsWilson:1982}.  See \cite{vanDamme:1987} or \cite{Mye:91}
 for general treatments of refinements.}
 
@@ -5968,14 +5968,20 @@ Returns the list of outcomes defined on \verb+nfg+.
 
 \item\lex{Output}
 \protect \large \begin{verbatim}
-Output[file->TEXT, {append->False}] =: OUTPUT 
+Output[file->TEXT, {append->False}, {close->True}] =: OUTPUT 
 \end{verbatim}\normalsize
 
 \bd
-Opens a new output stream for writing to \verb+file+.  By default,
-an existing file is overwritten; specifying \verb+append+ to be \verb+True+
-opens the file in append mode.  An error occurs if \verb+file+ is not
-able to be opened.
+
+Opens a new output stream for writing to \verb+file+.  An error occurs
+if \verb+file+ is not able to be opened.  By default, an existing file
+is overwritten; specifying \verb+append+ to be \verb+True+ opens the
+file in append mode.  Also, by default, the file is closed after every
+write operation to the file; specifying \verb+close+ to be
+\verb+False+ will leave the file open between write operations.  This
+may speed up output to a file, but will mean that the file is not
+closed until all references to the output stream are UnAssigned.
+
 \item [See also:] \verb+Input+, \verb+ListFormat+, \verb+Format+,
 \verb+Write+.
 \ed
