@@ -1,6 +1,6 @@
 
 %{
-/* @(#)efg.y	1.4 7/12/94 */
+/* $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
 #include <malloc.h>
@@ -14,16 +14,16 @@ double last_double;
 
 /* Here are some scratch variables... */
 
-int foo, bar;
+int playerNo, gameNo;
+gTuple<gNumber> *v;
 
-
-input *input_stream;
+gInput *input_stream;
 
 int efg_set_input(const gString &s)
 {
-  input_stream = new input((const char *) s);
+  input_stream = new gInput((const char *) s);
 
-  if (*input_stream == input((FILE *)0))  {
+  if (*input_stream == gInput((FILE *)0))  {
     delete input_stream;
     return 0;
   }
@@ -45,25 +45,12 @@ void efg_set_problem(Problem *p)
   the_problem = p;
 }
 
-void efg_yyerror(char *s)
+void yyerror(char *s)
 {
   fprintf(stderr, "Error: %s.\n", s);
 }
 
-int efg_yylex(void);
-
-
-// dirty nasty trick to have more than one yaccer in a binary
-#define yyerror   efg_yyerror
-#define yylex     efg_yylex
-#define yyparse   efg_yyparse
-#define yynerrs   efg_yynerrs
-#define yyval     efg_yyval
-#define yylval    efg_yylval
-#define yyerrflag efg_yyerrflag
-#define yychar    efg_yychar
-#define yydebug   efg_yydebug
-
+int yylex(void);
 %}
 
 
@@ -81,7 +68,7 @@ int efg_yylex(void);
 
 %%
 
-efgfile:    LBRACE NAME { the_problem->SetTitle(*last_name); }
+efgfile:    LBRACE NAME 
             players outcomes games RBRACE  { return 0; }
 
 /* Parsing the player list */
@@ -91,8 +78,10 @@ players:    LBRACE chance_name RBRACE
 
 chance_name:  NAME   { the_problem->SetPlayerName(0, *last_name); }
 
-player_names: NAME   { the_problem->AppendPlayer(*last_name); }
-            | player_names NAME   { the_problem->AppendPlayer(*last_name); }
+player_names: player_name
+            | player_names player_name
+
+player_name:  NAME   { the_problem->AppendPlayer(*last_name); }
 
 /* Parsing the outcome list */
            
@@ -102,34 +91,72 @@ outcomes:   LBRACE RBRACE
 outcome_list:  outcome
             |  outcome_list outcome
 
-outcome:    LBRACE INTEGER  { the_problem->CreateOutcome(bar = last_int); }
-            outcome_vector
-            NAME { the_problem->SetOutcomeName(bar, *last_name); }
+outcome:    LBRACE INTEGER  { the_problem->CreateOutcome(last_int);
+            v = new gTuple<gNumber>(1, the_problem->NumPlayers());
+            playerNo = 1; }
+            outcome_vector { the_problem->SetOutcomeValues(last_int, *v); }
+            NAME  { the_problem->SetOutcomeName(last_int, *last_name); }
             RBRACE
 
 outcome_vector:  LBRACE RBRACE
-              |  LBRACE { foo = 1; } outcome_values RBRACE
+              |  LBRACE outcome_values RBRACE
 
 outcome_values:  outcome_value
               |  outcome_values outcome_value
 
-outcome_value:   FLOAT
-                { if (foo <= the_problem->NumPlayers())
-                    the_problem->SetOutcomeValue(bar, foo++, last_double);
-		  else  YYERROR;
-                }
-
+outcome_value:   FLOAT   { (*v)[playerNo++] = last_double; }
 
 /* Parsing the game list */
 
 games:      game 
      |      games game
 
-game:       LBRACE INTEGER
-            NAME   { the_problem->CreateGame(last_int, 1);
-                     the_problem->SetGameName(last_int, *last_name);
-                     if (the_problem->ReadExtForm(last_int))  return 1;  }
+game:       LBRACE INTEGER  { gameNo = last_int;
+                              the_problem->CreateGame(gameNo); }
+            NAME  { the_problem->SetGameName(gameNo, *last_name); }
+            infosets nodes
             RBRACE
+
+infosets:   LBRACE { playerNo = 0; } players_isets RBRACE
+
+players_isets:  player_isets
+             |  players_isets player_isets
+
+
+player_isets:   LBRACE RBRACE   { playerNo++; }
+            |   LBRACE iset_list RBRACE   { playerNo++; }
+
+iset_list:      infoset
+         |      iset_list infoset
+
+infoset:        LBRACE NAME action_data RBRACE
+
+action_data:    action_list prob_list
+           |    action_list
+
+action_list:    LBRACE actions RBRACE
+
+actions:        action
+       |        actions action
+
+action:         NAME
+
+prob_list:      LBRACE probs RBRACE
+
+probs:          prob
+     |          probs prob
+
+prob:           FLOAT
+
+
+nodes:          LBRACE node_list RBRACE
+
+node_list:      node
+         |      node_list node
+
+node:           node_ID COLON node_ID INTEGER INTEGER INTEGER NAME
+
+node_ID:        LPAREN INTEGER COMMA INTEGER COMMA INTEGER RPAREN
 
 %%
 
