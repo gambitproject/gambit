@@ -174,8 +174,11 @@ void gWxOutput::OnClose(void)
 {
 if (frame)
 {
-	frame->Close();
+// this is needed to avoid infinite recursion due to gWxIOFrame::OnClose and
+// allow the frame to be closed manually by the windows manager. NOT NECESSARY ?!
+//	gWxIOFrame *tmp_frame=frame;
 	frame=0;
+//	tmp_frame->Close();
 }
 }
 

@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// $Id$
+// @(#)efgconst.h	1.20 11/20/96
 //
 
 #ifndef EFGCONST_H
@@ -97,7 +97,7 @@
 #define SUPPORTS_SUPPORTS				1800
 #define SUPPORTS_ELIMDOM				1810
 
-#define INSPECT_INSPECT					1850
+#define INSPECT_SOLUTIONS				1850
 #define INSPECT_REMOVE 					1855
 #define INSPECT_FEATURES				1860
 

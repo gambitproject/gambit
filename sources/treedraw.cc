@@ -242,7 +242,7 @@ case	NODE_RIGHT_LEGEND: legend_src=node_right_src; legend_id=node_right_label; b
 default: assert(0 && "Invalid legend");
 }
 int i=0;
-while (legend_src[i].l_id!=-1) legend_list->Add(node_above_src[i++].l_name);
+while (legend_src[i].l_id!=-1) legend_list->Add(legend_src[i++].l_name);
 strcpy(legend_str,legend_src[legend_id].l_name); // set the current value
 d->Add(wxMakeFormMessage("Legend For:"));
 d->Add(wxMakeFormMessage(legends_src[what]));

@@ -7,45 +7,39 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "grarray.h"
+#include "mixed.h"
 #include "gstatus.h"
 
-template <class T> class GridParams   {
-  public:
-    T minLam, maxLam, delLam, delp, tol;
-    int powLam, trace;
-    gOutput *tracefile, *pxifile;
-    gStatus &status;
+class GridParams   {
+	public:
+		double minLam, maxLam, delLam, delp, tol;
+		int powLam, trace;
+		gOutput *tracefile, *pxifile;
+		gStatus &status;
 
-    GridParams(void);
-    GridParams(const GridParams<T> &p);
-    GridParams(gStatus &st);
-    int Ok(void) const;	// check the validity of the paramters
+		GridParams(gStatus & = gstatus);
 };
 
-template <class T> class PayoffClass   {
-  public:
-    T row, col;
-};
-template <class T> gOutput &operator<<(gOutput &, const PayoffClass<T> &);
+class GridSolveModule  {
+	private:
+		const Nfg<double> &N;
+		const NFSupport &S;
+		const GridParams &params;
+		gArray<int> num_strats;
+		double lam;
+		int static_player;
 
-template <class T> class GridSolveModule  {
-  private:
-    const Nfg<T> &nf;
-    const NFSupport &support;
-    gVector<T> p, x, q_calc, y;
-    const GridParams<T> &params;
-    gRectArray<PayoffClass<T> > matrix;
-
-    int CheckEqu(gVector<T> &q,T l);
-    void OutputResult(gOutput &out,T l,T dist,gVector<T> &q,gVector<T> &p);
-    void OutputHeader(gOutput &out);
-
-  public:
-    GridSolveModule(const Nfg<T> &, const GridParams<T> &, const NFSupport &);
-    ~GridSolveModule();
-    int GridSolve(void);
+		gVector<double> UpdateFunc(const MixedProfile<double> &P,int pl,double lam);
+		bool CheckEqu(MixedProfile<double> P,double lam);
+		void OutputHeader(gOutput &out);
+		void OutputResult(gOutput &out,const MixedProfile<double> P,double lam,double obj_func);
+	protected:
+		// could use norms other then the simple one
+		virtual double Distance(const gVector<double> &a,const gVector<double> &b) const;
+	public:
+		GridSolveModule(const Nfg<double> &, const GridParams &, const NFSupport &);
+		~GridSolveModule();
+		void GridSolve(void);
 };
 
 #endif    // GRID_H
-

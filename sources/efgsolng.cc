@@ -1,6 +1,6 @@
 // File: efgsolng.cc -- definition of the class dealing with the GUI part of the
 // extensive form solutions.
-// @(#)efgsolng.cc	1.10 9/1/96
+// $Id$
 
 #include "wx.h"
 #include "wx_form.h"
@@ -718,18 +718,18 @@ public:
 GobitAllBySubgameG(const Efg<T> &E,ExtensiveShowInterf<T> *parent_):
 													BaseBySubgameG<T>(parent_,E)
 {
-GridParamsSettings<T> GSPD(parent->Filename());
+GridParamsSettings GSPD(parent->Filename());
 wxStatus status(parent->Frame(),"GobitAll Solve");
-GridParams<T> P(status);
+GridParams P(status);
 GSPD.GetParams(P);
 
 EFSupport ES=EFSupport(E);
 Nfg<T> *N = MakeReducedNfg((Efg<T> &)E,ES);
 NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
-GridSolveModule<T> M(*N,P,*S);
-int ok=M.GridSolve();
-if (ok) GSPD.RunPxi();
+GridSolveModule M(*N,P,*S);
+M.GridSolve();
+GSPD.RunPxi();
 delete N;
 delete S;
 }
@@ -752,7 +752,7 @@ return EmptyBehavList((T)1);;
 
 template <class T>
 void GobitAllG<T>::SolveSetup(void) const
-{GridSolveParamsDialog<T> GSPD(parent->Frame(),parent->Filename());}
+{GridSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
 
 TEMPLATE class GobitAllG<double>;
 

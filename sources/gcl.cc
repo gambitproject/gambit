@@ -1,13 +1,8 @@
 //
 // FILE: gcl.cc -- top level of the Gambit Command Line
 //
-// @(#)gcl.cc	1.18 12/29/96
+// @(#)gcl.cc	1.16 12/17/96
 //
-
-#include <signal.h>
-#include <values.h>
-#include <math.h>
-#include <assert.h>
 
 #include "rational.h"
 #include "gstring.h"
@@ -15,8 +10,9 @@
 #include "gsm.h"
 #include "gstack.h"
 #include "gcompile.h"
-
-
+#include <signal.h>
+#include <values.h>
+#include <math.h>
 
 typedef void (*fptr)(int);
 
@@ -73,49 +69,32 @@ return 1;	// we did not really fix anything, but want no more warnings
 
 GSM* _gsm;
 char* _SourceDir = NULL;
-char* _ExePath = NULL;
 
 int main( int /*argc*/, char* argv[] )
 {
-
-  _ExePath = new char[ strlen( argv[0] ) + 2 ];
-  strcpy( _ExePath, argv[0] );
-
-#ifdef __GNUG__
-  const char SLASH = '/';
-#elif defined __BORLANDC__
-  const char SLASH = '\\';
-#endif   // __GNUG__
-
-
   char* c = NULL;
-  c = strrchr( argv[0], SLASH );
-
-  _SourceDir = new char[ 256 ];
+  c = strrchr( argv[0], '\\' );
   if( c != NULL )
   {
-    int len = strlen( argv[0] ) - strlen( c );
-    assert( len < 256 );
-    strncpy( _SourceDir, argv[0], len );
-  }
-  else
-  {
-    strcpy( _SourceDir, "" );
+    _SourceDir = new char[ 256 ];
+    strcpy( _SourceDir, c+1 );
   }
     
   
   // Set up the error handling functions:
-  signal(SIGFPE, (fptr)SigFPEHandler);
-  
-  _gsm = new GSM(256);
-  GCLCompiler *C = new GCLCompiler;
-  
-  C->Parse();
+#ifndef __BORLANDC__ // For some reason this does not work w/ BC++ (crash on exit)
+	signal(SIGFPE, (fptr)SigFPEHandler);
+#endif
 
-  delete[] _SourceDir;
-  delete C;
-  delete _gsm;
-  
-  return 0;
+	_gsm = new GSM(256);
+	GCLCompiler *C = new GCLCompiler;
+
+	C->Parse();
+
+	delete[] _SourceDir;
+	delete C;
+	delete _gsm;
+
+	return 0;
 }
 

@@ -1,78 +1,168 @@
-//#
-//# FILE: grid.cc -- Grid-search solution module
-//#
-//# $Id$
-//#
+// File: grid.cc -- Implementation of the GridSolve algorithm
+// $Id$
+/*
+Here is how it should be done for three person games
+(extension to more players is done in an analagous fashion.)
 
-#include "gmisc.h"
-#include "rational.h"
-#include "gmatrix.h"
+Suppose p,q,and r are the probability vectors for players 1, 2, and 3,
+respectively.  Then the following equations give the updating rules
+for any one of these, given the other two.
+
+p = f_p(q,r)
+q = f_q(p,r)
+r = f_r(p,q)
+
+Here, f_p(q,r), etc.  are determined by the exponential rules similar
+to the two player case.  So, if p = (p_1,p_2,p_3), then
+
+p_j = (f_p(q,r))_j =
+			exp(lam*v_1j)/(exp(lam*v_11)+exp(lam*v_12)+exp(lam*v_13))
+
+where v_1j is the value of strategy j for player 1, when plugging in
+the probabilities q and r for players 2 and 3.  Similarly for the
+other players.
+
+To find the whole QRE correspondence, then pick n-1 players (say 1 and
+2), and then use a grid over their strategy spaces.  For any p,q on
+the grid, evaluate the following objective function:
+
+v(p,q) = | p - f_p(q,f_r(p,q)) | + | q - f_q(p,f_r(p,q)) |
+
+Then keep any values of (p,q,f_r(p,q)) where v(p,q) < tolerance.
+*/
+
+#include <math.h>
+#include "mixed.h"
+#include "grid1.h"
 #include "nfg.h"
-#include "nfgiter.h"
-#include "nfstrat.h"
-#include "probvect.h"
 #include "gwatch.h"
-#include "grid.h"
+
+// Probability Vector class.  This
+// class is used by the GridSolve algorithm to generate a uniform grid of
+// probabilities over n players w/ Si strategies each.  The class makes
+// sure that the sum of strategy probabilities for each player=MAX_PROB=1
+
+// Note that the grid can be generated for (n-1), not n players but setting
+// the static_player member to the nonzero integer corresponding to the
+// player whose probability space is NOT to be iterated over.  This is used
+// by GridSolve
+
+// The grid step is specified by the step parameter.
 
 
-template <class T>
-GridParams<T>::GridParams(void)
-  : minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
-    trace(0), tracefile(&gnull), pxifile(&gnull), status(gstatus)
-{ }
+static double eps=1e-8;	// epsilon to allow == operator for floating point
 
-template <class T>
-GridParams<T>::GridParams(const GridParams<T> &p)
-  : minLam(p.minLam), maxLam(p.maxLam), delLam(p.delLam), delp(p.delp),
-    tol(p.tol), powLam(p.powLam), trace(p.trace), tracefile(p.tracefile),
-    pxifile(p.pxifile), status(p.status)
-{ }
-
-template <class T>
-GridParams<T>::GridParams(gStatus &st)
-  : minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
-    trace(0), tracefile(&gnull), pxifile(&gnull), status(st)
-{ }
-
-template <class T>
-int GridParams<T>::Ok(void) const
+class MixedProfileGrid: public MixedProfile<double>
 {
-  return (pxifile && tracefile);
+private:
+	double step;
+	gArray<double> sums;
+	int static_player;
+	bool Inc1(int row);
+public:
+	MixedProfileGrid(const Nfg<double> &N,const NFSupport &S,double step);
+	MixedProfileGrid(const MixedProfileGrid &P);
+	bool Inc(void);
+	void SetStatic(int static_player);
+	int  GetStatic(void) const;
+};
+
+
+MixedProfileGrid::MixedProfileGrid(const Nfg<double> &N,const NFSupport &S, double step_):
+											MixedProfile<double>(N,S),step(step_)
+{
+int i;
+for (i=1;i<=svlen.Length();i++)
+	for (int j=1;j<=svlen[i];j++)
+		(*this)(i,j)=(j==svlen[i]) ? 1 : 0;
+sums=gArray<double>(svlen.Length());
+for (i=1;i<=svlen.Length();i++) sums[i]=0.0;
+static_player=0;
 }
 
-template <class T>
-GridSolveModule<T>::GridSolveModule(const Nfg<T> &n,
-				    const GridParams<T> &param,
-				    const NFSupport &s)
-  : nf(n), support(s), p(s.NumStrats(1)), x(s.NumStrats(1)),
-    q_calc(s.NumStrats(2)),
-    y(s.NumStrats(2)), params(param), matrix(s.NumStrats(1), s.NumStrats(2))
+MixedProfileGrid::MixedProfileGrid(const MixedProfileGrid &P) :
+	MixedProfile<double>(P),step(P.step),static_player(P.static_player),
+	sums(P.sums)
 { }
 
-template <class T>
-GridSolveModule<T>::~GridSolveModule(void)
+
+bool MixedProfileGrid::Inc1(int row)
+{
+int dim=svlen[row];
+if (dim!=1)		// dim==1 is an annoying special case
+{
+	double &sum=sums[row];
+	do
+	{
+		for (int i=1;i<=dim-1;i++)
+			if ((*this)(row,i)<1-step+eps)
+				{(*this)(row,i)+=step;sum+=step;break;}
+			else
+				{
+					sum-=(*this)(row,i);(*this)(row,i)=0;
+					if (i==dim-1) {(*this)(row,dim)=1;return false;}
+				}
+	} while (sum>1+eps);
+	(*this)(row,dim)=1-sum;
+	return true;
+}
+else	// dim==1
+{
+	return false;
+}
+}
+
+bool MixedProfileGrid::Inc(void)
+{
+for (int i=1;i<=svlen.Length();i++)
+{
+	if (i==static_player) continue;
+	if (Inc1(i))
+		return true;
+	else
+		if (i==svlen.Length()) return false;
+}
+return false; // return from here only when static_player==svlen.Length
+}
+
+void MixedProfileGrid::SetStatic(int static_player_)
+{static_player=static_player_;}
+
+int MixedProfileGrid::GetStatic(void) const
+{return static_player;}
+
+GridParams::GridParams(gStatus &st)
+	: minLam(.01), maxLam(30), delLam(.01), delp(.01), tol(.01), powLam(1),
+		trace(0), tracefile(&gnull), pxifile(&gnull), status(st)
 { }
+
+// ***************************************************************************
+// GRID SOLVE
+// ***************************************************************************
 
 // Output header
-template <class T>
-void GridSolveModule<T>::OutputHeader(gOutput &out)
+void GridSolveModule::OutputHeader(gOutput &out)
 {
-int st1=support.NumStrats(1),st2=support.NumStrats(2);
-int i;
-
 out<<"Dimensionality:\n";
-out<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
-if (st1==st2)
-{
-	out<<"Game:\n";
-	out<<"3 2 1\n";
-	for (i=1;i<=st1;i++)
+out<<N.NumPlayers()<<' ';
+for (int pl = 1; pl <= N.NumPlayers(); pl++) out << N.NumStrats(pl) << ' ';
+gout << '\n';
+if (N.NumPlayers()==2)		// output the matrix in case of a 2x2 square game
+	if (N.NumStrats(1)==N.NumStrats(2))
 	{
-		for (int j=1;j<=st2;j++)
-		out<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
-		out<<'\n';
+		out<<"Game:\n";
+		out<<"3 2 1\n";
+		gArray<int> profile(2);
+		for (int i=1;i<=N.NumStrats(1);i++)
+		{
+			for (int j=1;j<=N.NumStrats(2);j++)
+			{
+				profile[1]=i;profile[2]=j;
+				out<<N.Payoff(1,profile)<<' '<<N.Payoff(2,profile)<<' ';
+			}
+			out<<'\n';
+		}
 	}
-}
 out<<"Settings:\n";
 out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
 out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
@@ -81,151 +171,110 @@ out<<"Extra:\n";
 out<<1<<'\n'<<params.tol<<'\n'<<params.delp<<'\n';
 
 out<<"DataFormat:\n";
-int num_columns=st1+st2+2;
-out<<num_columns<<' '<<(num_columns-1)<<' '<<num_columns<<' ';
-for (i=1;i<=st1;i++) out<<i<<' ';
-for (i=1;i<=st2;i++) out<<(st1+i)<<' ';
+int numcols = N.ProfileLength() + 2;
+out << numcols<<' '; // Format: Lambda, ObjFunc, Prob1,0..1,n1 , Prob2,0..2,n2 , ...
+for (int i = 1; i <= numcols; i++) out << i << ' ';
+
 out<<'\n';
 
 out<<"Data:\n";
 }
 
-template <class T>
-void GridSolveModule<T>::OutputResult(gOutput &out,T l, T dist,gVector<T> &q,gVector<T> &p)
+void GridSolveModule::OutputResult(gOutput &out,const MixedProfile<double> P,
+																	 double lam,double obj_func)
 {
-	int i;
-	for (i = p.First(); i <= p.Last(); i++)  out << p[i] << ' ';
-	for (i = q.First(); i <= q.Last(); i++)  out << q[i] << ' ';
-	out << l << ' ' << dist << '\n';
+out << lam << ' ' << obj_func << ' ';
+for (int pl=1;pl<=num_strats.Length();pl++)
+	for (int st=1;st<=num_strats[pl];st++)
+		out << P(pl,st) << ' ';
+out << '\n';
 }
 
-template <class T>
-int GridSolveModule<T>::CheckEqu(gVector<T> &q, T l)
+double GridSolveModule::Distance(const gVector<double> &a,const gVector<double> &b) const
 {
-T denom;					// denominator of function
-bool ok;         	// was a solution found?
-T dist;   				// metric function--distance from the equ
-int i, j;
-int st1=support.NumStrats(1),st2=support.NumStrats(2);
-/*---------------------make X's---------------------*/
-x=(T)0;			// zero out the entire x-vector
-for (i=1;i<=st1;i++)
-	for (j=1;j<=st2;j++) x[i] += matrix(i,j).row*q[j];
-/*--------------------make P's----------------------*/
-denom=(T)0;
-for (i=1;i<=st1;i++) denom += exp(l*x[i]);
-for (i=1;i<=st1;i++) p[i] = ((T) exp(l*x[i])) / denom;
-/*--------------------make Y's----------------------*/
-y=(T)0;			// zero out the entire y-vector
-for (i=1;i<=st2;i++)
-	for (j=1;j<=st1;j++) y[i] += matrix(j,i).col*p[j]; // (i,j) or (j,i) ?!
-/*--------------------make Q_CALC's-----------------*/
-denom=(T)0;
-for (i=1;i<=st2;i++) denom+=exp(l*y[i]);
-for (i=1;i<=st2;i++) q_calc[i]=((T)exp(l*y[i])) / denom;
-
-/*--------------------check for equilibrium---------*/
-			 /* Note: this uses the very crude method for finding*
-			 * if two points are 'close enough.'  The correspon-*
-			 * ding coordinates of each point are subtracted and*
-			 * abs or result is compared to MERROR              *
-			 * A more precise way would be to use the Distance  *
-			 * function provided, but that would be very slow   *
-			 * if Distance is not used, value of ok is either   *
-			 * 1.0 or 0.0                                       */
-
-ok=true;dist=(T)0;
-for (i = 1; i <= st2; i++)
-{
-	dist += abs(q[i]-q_calc[i]);
-	if (abs(q[i]-q_calc[i])>=params.tol) ok=false;
+assert(a.Check(b)); // better be the same size
+double dist=0;
+for (int i=1;i<=a.Length();i++)	dist+=abs(a[i]-b[i]);
+return dist;
 }
 
-if (ok)
+
+gVector<double> GridSolveModule::UpdateFunc(const MixedProfile<double> &P,int pl,double lam)
 {
-	OutputResult(*params.pxifile,l,dist,q,p);
-	if (params.trace>1)	OutputResult(*params.tracefile,l,dist,q,p);
+gVector<double> r(num_strats[pl]);
+static gVector<double> tmp(100); // temporary storage [max(num_strats)]
+double denom;
+int strat;
+denom=0.0;
+for (strat=1;strat<=num_strats[pl];strat++)
+{
+	double p=P.Payoff(pl,pl,strat);
+	tmp[strat]=exp(lam*p);
+	denom+=tmp[strat];
+}
+for (strat=1;strat<=num_strats[pl];strat++)
+	r[strat]=tmp[strat]/denom;
+return r;
 }
 
-return (ok);
+
+// Note: static_player just refers to the player w/ the greatest # of strats.
+bool GridSolveModule::CheckEqu(MixedProfile<double> P,double lam)
+{
+P.SetRow(static_player,UpdateFunc(P,static_player,lam));
+
+MixedProfile<double> P_calc(N);
+int pl;
+for (pl=1;pl<=N.NumPlayers();pl++)
+	if (pl!=static_player) P_calc.SetRow(pl,UpdateFunc(P,pl,lam));
+
+double obj_func=0.0;
+
+for (pl=1;pl<=N.NumPlayers();pl++)
+{
+	if (pl!=static_player) obj_func+=Distance(P_calc.GetRow(pl),P.GetRow(pl));
+	if (obj_func>params.tol) return false;
+}
+// If we got here, objective function is < tolerance -- have an EQU point
+OutputResult(*params.pxifile,P,lam,obj_func); // Output it to file
+if (params.trace>0) OutputResult(*params.tracefile,P,lam,obj_func);
+return true;
 }
 
-// GridSolve--call to start
-template <class T> int GridSolveModule<T>::GridSolve(void)
-{
-int i,j;
-if (!params.Ok()) { *params.tracefile << "Param Error\n"; return 0; }
+GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P, const NFSupport &S_)
+										:N(N_),S(S_),params(P)
+{num_strats=S.SupportDimensions();}
 
+GridSolveModule::~GridSolveModule() { }
+
+void GridSolveModule::GridSolve(void)
+{
 params.status<<"Grid Solve algorithm\n";
-NfgIter<T> iter(&support);
-int	st1=support.NumStrats(1),st2=support.NumStrats(2);
-// Build a game matrix--this speeds things up enormously
-
-for (i=1;i<=st1;i++)
-	for (j=1;j<=st2;j++)
-	{
-		iter.Set(1,i);iter.Set(2,j);
-		matrix(i,j).row=iter.Payoff(1);
-		matrix(i,j).col=iter.Payoff(2);
-	}
-
 // Initialize the output file
 gWatch timer;timer.Start();
 OutputHeader(*params.pxifile);
 if (params.trace>0) OutputHeader(*params.tracefile);
-// Create the ProbVector to give us all sets of probability values
-ProbVect<T> *pv=new ProbVect<T>(st2,(int)((T)1.0/params.delp+(T)0.5));
 int num_steps;
 if (params.powLam==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
-	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+(T)1));
-T l=params.minLam;
+	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+1));
+MixedProfileGrid M(N,S,params.delp);
+static_player=N.NumPlayers();  // should set s.t. Sum[remaining] is min
+M.SetStatic(static_player);
+double lam=params.minLam;
 for (int step=1;step<num_steps && !params.status.Get();step++)
 {
-	if (params.powLam==0)  l=l+params.delLam; else l=l*(params.delLam+(T)1);
-	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),l);
-	pv->Reset();
+	if (params.powLam==0)  lam=lam+params.delLam; else lam=lam*(params.delLam+1);
+	do {CheckEqu(M,lam);} while (M.Inc())	;
 	params.status.SetProgress((double)step/(double)num_steps);
 }
 // Record the time taken and close the output file
+timer.Stop();
 *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 params.status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
-delete pv;
-return !params.status.Get();
+
+
+if (params.status.Get()) params.status.Reset();
+
 }
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-class gRectArray<double>;
-class gRectArray<gRational>;
-class gArray<long>;
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
-TEMPLATE class ProbVect<double>;
-TEMPLATE class ProbVect<gRational>;
-
-TEMPLATE class GridSolveModule<double>;
-TEMPLATE class GridSolveModule<gRational>;
-
-TEMPLATE class GridParams<double>;
-TEMPLATE class GridParams<gRational>;
-
-#include "grarray.imp"
-#include "garray.imp"
-
-TEMPLATE class PayoffClass<double>;
-TEMPLATE class PayoffClass<gRational>;
-
-TEMPLATE class gRectArray<PayoffClass<double> >;
-TEMPLATE class gRectArray<PayoffClass<gRational> >;
-
-TEMPLATE class gArray<PayoffClass<double> >;
-TEMPLATE class gArray<PayoffClass<gRational> >;
-
-
-gOutput &operator<<(gOutput &o, const PayoffClass<double> &) {return o;}
-gOutput &operator<<(gOutput &o, const PayoffClass<gRational> &) {return o;}
-
