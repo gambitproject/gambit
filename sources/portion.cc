@@ -2698,7 +2698,6 @@ PortionType TextToPortionType( const gString& text )
 int TextToPortionListDepth( const gString& text )
 {
   int result = 0;
-  gout << text << "\n";
   while( ( text.length() > result * 5 ) &&
 	( strstr((const char *) text.right(text.length()-result*5),
 		 (gString) "LIST(" ) ) )

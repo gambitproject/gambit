@@ -1307,7 +1307,7 @@ Portion* GSM_Write_numerical( Portion** param )
   GSM_SetFormat_gOutput( s );
 
   s << param[ 1 ];
-  return new OutputRefPortion( s );
+  return param[0]->RefCopy();
 }
 
 
@@ -1333,7 +1333,7 @@ Portion* GSM_Write_gString( Portion** param )
     s << '\"' << text << '\"';
   else
     s << text;
-  return new OutputRefPortion( s );
+  return param[0]->RefCopy();
 }
 
 
@@ -1354,7 +1354,7 @@ Portion* GSM_Write_Mixed( Portion** param )
   default:
     assert( 0 );
   }
-  return new OutputRefPortion( s );  
+  return param[0]->RefCopy();
 }
 
 
@@ -1375,7 +1375,7 @@ Portion* GSM_Write_Behav( Portion** param )
   default:
     assert( 0 );
   }
-  return new OutputRefPortion( s );  
+  return param[0]->RefCopy();
 }
 
 
@@ -1390,7 +1390,7 @@ Portion* GSM_Write_Nfg( Portion** param )
   s << "Temporary hack; still waiting for DisplayNfg() to finish\n";
   nfg->WriteNfgFile( s );
 
-  return new OutputRefPortion( s );  
+  return param[0]->RefCopy();
 }
 
 
@@ -1405,7 +1405,7 @@ Portion* GSM_Write_Efg( Portion** param )
   s << "Temporary hack; still waiting for DisplayEfg() to finish\n";
   efg->WriteEfgFile( s );
 
-  return new OutputRefPortion( s );  
+  return param[0]->RefCopy();
 }
 
 
@@ -1415,7 +1415,7 @@ Portion* GSM_Write_list( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   s << param[ 1 ];
-  return new OutputRefPortion( s );
+  return param[0]->RefCopy();
 }
 
 
@@ -1468,7 +1468,7 @@ Portion* GSM_Write_list_Text( Portion** param )
   }
   s << " }";
 
-  return new OutputRefPortion( s );
+  return param[0]->RefCopy();
 }
 
 
