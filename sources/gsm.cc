@@ -1791,20 +1791,90 @@ void GSM::Clear( void )
 }
 
 
+
+
 void GSM::Help(void)
 {
   Portion* p = _Pop();
   assert(p->Type() == porREFERENCE);
   gString funcname = ((ReferencePortion*) p)->Value();
-
+  int i;
+  int j;
+  int fk;
+  int ck;
+  bool match;
+  int found = 0;
+  gString curname;
+  const gList<FuncDescObj*>* funcs = _FuncTable->Value();
+  gList<FuncDescObj*> funclist;
   FuncDescObj *func;
+
   if( _FuncTable->IsDefined( funcname ) )
   {
     func = (*_FuncTable)( funcname );
     func->Dump(_StdOut);
   }
   else
-    _ErrorMessage(_StdErr, 62, 0, 0, funcname);
+  {
+    funcname = funcname.dncase();
+    for(i=0; i<_FuncTable->NumBuckets(); i++)
+      for(j=1; j<=funcs[i].Length(); j++)
+	funclist.Append(funcs[i][j]);
+    for(i=1; i<=funclist.Length(); i++)
+    {
+      match = true;
+      curname = funclist[i]->FuncName().dncase();
+      fk = 0; 
+      ck = 0;
+      while(match && (fk<funcname.length()) && (ck<curname.length()))
+      {
+	if(funcname[fk]=='*')
+	{
+	  if(fk+1==funcname.length())
+	    break;
+	  fk++;
+	  while(ck<curname.length() && funcname[fk]!=curname[ck])
+	    ck++;
+	  if(ck==curname.length())
+	  { match = false; break; }	  
+	}
+	
+	if(funcname[fk]==curname[ck])
+	{ fk++; ck++; }
+	else if(funcname[fk]=='?')
+	{ fk++; ck++; }
+	else
+	  match = false;
+      }
+
+      if((fk>=funcname.length()) != (ck>=curname.length()))	
+	match = false;
+      if(fk+1==funcname.length() && funcname[fk]=='*')
+	match = true;
+      if(match)
+      {	
+	_StdOut << ' ' << funclist[i]->FuncName() << "[]\n";
+	func = funclist[i];
+	found++;
+      }      
+    }
+    _StdOut << ' ' << found << " match(es) found\n";
+    if(found==1)
+      func->Dump(_StdOut);
+
+    delete p;
+
+    /*
+    gSortList<FuncDescObj*> funclist;
+    for(i=0; i<_FuncTable->NumBuckets(); i++)
+      for(j=1; j<=funcs[i].Length(); j++)
+	funclist.Append(funcs[i][j]);
+    gFuncListSorter funclist_s(funclist);
+    funclist_s.Sort();
+    for(i=1; i<=funclist.Length(); i++)
+      _StdOut << funclist[i]->FuncName() << "[]\n";
+      */
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -1886,6 +1956,8 @@ void GSM::_ErrorMessage
 
 
 #include "garray.imp"
+// #include "gslist.imp"
+
 
 
 #ifdef __GNUG__
@@ -1896,3 +1968,6 @@ void GSM::_ErrorMessage
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class gArray<Instruction*>;
+//TEMPLATE class gSortList<FuncDescObj*>;
+//TEMPLATE class gListSorter<FuncDescObj*>;
+

@@ -25,7 +25,6 @@ template <class K, class T> class HashTable
   T         illegal_value;
 
   int         ValidatedHash ( K key )        const;
-  virtual int NumBuckets    ( void )         const = 0;
   virtual int Hash          ( const K& key ) const = 0;
 
   //The derived classes need to define this function to do clean ups when
@@ -42,11 +41,13 @@ template <class K, class T> class HashTable
   HashTable();
   virtual ~HashTable();
 
+  virtual int NumBuckets    ( void )         const = 0;
   int  IsDefined  ( K key ) const;
   void Define     ( K key, T value );
   T    Remove     ( K key );
   T    operator() ( K key ) const;
   T&   operator() ( K key );
+  const gList<T>* Value() const;
 
   //This function should be called in the destructor of decendents classes
   void Flush( void );

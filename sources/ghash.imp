@@ -175,3 +175,8 @@ template <class K, class T> T& HashTable<K, T>::operator()( K key )
     return illegal_value;
   }
 }
+
+template <class K, class T> const gList<T>* HashTable<K, T>::Value() const
+{
+  return value_bucket;
+}

@@ -25,13 +25,14 @@ class gString;
 class RefHashTable : public HashTable<gString, Portion*>
 {
  private:
-  int NumBuckets( void ) const;
   int Hash( const gString& ref ) const;
   void DeleteAction( Portion* value );
   
  public:
   RefHashTable();
   ~RefHashTable();
+
+  int NumBuckets( void ) const;
 };
 
 
@@ -39,13 +40,14 @@ class RefHashTable : public HashTable<gString, Portion*>
 class FunctionHashTable : public HashTable<gString, FuncDescObj*>
 {
  private:
-  int NumBuckets() const;
   int Hash( const gString& funcname ) const;
   void DeleteAction( FuncDescObj* func );
 
  public:
   FunctionHashTable();
   ~FunctionHashTable();
+
+  int NumBuckets() const;
 };
 
 
@@ -54,13 +56,14 @@ class FunctionHashTable : public HashTable<gString, FuncDescObj*>
 template <class T> class RefCountHashTable : public HashTable<T, int>
 {
  private:
-  int NumBuckets( void ) const;
   int Hash( const T& ptr ) const;
   void DeleteAction( int value );
   
  public:
   RefCountHashTable();
   ~RefCountHashTable();
+
+  int NumBuckets( void ) const;
 };
 
 
