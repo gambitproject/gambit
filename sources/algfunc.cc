@@ -14,6 +14,7 @@
 #include "mixedsol.h"
 #include "behavsol.h"
 #include "nfg.h"
+#include "nfplayer.h"
 #include "efg.h"
 
 
@@ -965,112 +966,39 @@ Portion *GSM_Nfg_Rational(Portion **param)
 
 Portion* GSM_Payoff_BehavFloat(Portion** param)
 {
-  int i;
-  Portion* por = new ListValPortion;
   BehavSolution<double>* bp = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
-  for(i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++)
-  {
-    ((ListValPortion*) por)->Append(new FloatValPortion(bp->Payoff(i)));
-  }
-  return por;
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+
+  return new FloatValPortion(bp->Payoff(player->GetNumber()));
 }
 
- Portion* GSM_Payoff_BehavRational(Portion** param)
+Portion* GSM_Payoff_BehavRational(Portion** param)
 {
-  int i;
-  Portion* por = new ListValPortion;
   BehavSolution<gRational>* bp = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
-  for(i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++)
-  {
-    ((ListValPortion*) por)->Append(new RationalValPortion(bp->Payoff(i)));
-  }
-  return por;
-}
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
+  return new RationalValPortion(bp->Payoff(player->GetNumber()));
+}
 
 Portion* GSM_Payoff_MixedFloat(Portion** param)
 {
-  int i;
-  Portion* por = new ListValPortion;
-  MixedSolution<double>* bp = 
+  MixedSolution<double>* mp = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  for(i = 1; i <= bp->BelongsTo()->NumPlayers(); i++)
-  {
-    ((ListValPortion*) por)->Append(new FloatValPortion(bp->Payoff(i)));
-  }
-  return por;
+  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
+
+  return new FloatValPortion(mp->Payoff(player->GetNumber()));
 }
 
 Portion* GSM_Payoff_MixedRational(Portion** param)
 {
-  int i;
-  Portion* por = new ListValPortion;
-  MixedSolution<gRational>* bp = 
+  MixedSolution<gRational>* mp = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-  for(i = 1; i <= bp->BelongsTo()->NumPlayers(); i++)
-  {
-    ((ListValPortion*) por)->Append(new RationalValPortion(bp->Payoff(i)));
-  }
-  return por;
+  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
+
+  return new RationalValPortion(mp->Payoff(player->GetNumber()));
 }
-
-
-Portion* GSM_Payoff_NfgFloat(Portion** param)
-{
-  int i;
-  Portion* p;
-  Portion* por = new ListValPortion;
-  Nfg<double>* nfg = (Nfg<double>*) ((NfgPortion*) param[0])->Value();
-  gArray<int> Solution(((ListPortion*) param[1])->Length());
-  
-  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
-    return new ErrorPortion("Invalid number of players specified in \"list\"");
-  
-  for(i = 1; i <= nfg->NumPlayers() ; i++)
-  {
-    p = ((ListPortion*) param[1])->SubscriptCopy(i);
-    assert(p->Spec().Type == porINTEGER);
-    Solution[i] = ((IntPortion*) p)->Value();
-    delete p;
-  }
-  for(i = 1; i <= nfg->NumPlayers(); i++)
-  {
-    ((ListValPortion*) por)->
-      Append(new FloatValPortion(nfg->Payoff(i, Solution)));
-  }
-  return por;
-}
-
-Portion* GSM_Payoff_NfgRational(Portion** param)
-{
-  int i;
-  Portion* p;
-  Portion* por = new ListValPortion;
-  Nfg<gRational>* nfg = (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
-  gArray<int> Solution(((ListPortion*) param[1])->Length());
-  
-  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
-    return new ErrorPortion("Invalid number of players specified in \"list\"");
-  
-  for(i = 1; i <= nfg->NumPlayers() ; i++)
-  {
-    p = ((ListPortion*) param[1])->SubscriptCopy(i);
-    assert(p->Spec().Type == porINTEGER);
-    Solution[i] = ((IntPortion*) p)->Value();
-    delete p;
-  }
-  for(i = 1; i <= nfg->NumPlayers(); i++)
-  {
-    ((ListValPortion*) por)->
-      Append(new RationalValPortion(nfg->Payoff(i, Solution)));
-  }
-  return por;
-}
-
-
-
 
 //----------------
 // SimpDivSolve
@@ -1520,33 +1448,25 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Payoff", 6);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_BehavFloat, 
-				       PortionSpec(porFLOAT, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
+  FuncObj = new FuncDescObj("Payoff", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_BehavFloat, porFLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
+
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_BehavRational,
-				       PortionSpec(porRATIONAL, 1), 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porBEHAV_RATIONAL));
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Payoff_MixedFloat, 
-				       PortionSpec(porFLOAT, 1), 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("strategy", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Payoff_MixedFloat, porFLOAT, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_FLOAT));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("player", porNFPLAYER));
+  
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Payoff_MixedRational, 
-				       PortionSpec(porRATIONAL, 1), 1));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("strategy", porMIXED_RATIONAL));
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("profile", porMIXED_RATIONAL));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("player", porNFPLAYER));
 
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Payoff_NfgFloat, 
-				       PortionSpec(porFLOAT, 1), 2));
-  FuncObj->SetParamInfo(4, 0, ParamInfoType("nfg", porNFG_FLOAT, 
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(4, 1, ParamInfoType("list", 
-					    PortionSpec(porINTEGER,1)));
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Payoff_NfgRational, 
-				       PortionSpec(porRATIONAL, 1), 2));
-  FuncObj->SetParamInfo(5, 0, ParamInfoType("nfg", porNFG_RATIONAL, 
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("list", 
-					    PortionSpec(porINTEGER,1)));
   gsm->AddFunction(FuncObj);
 
 

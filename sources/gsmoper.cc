@@ -381,7 +381,7 @@ Portion* GSM_Multiply_gRational(Portion** param)
 }
 
 
-Portion* GSM_Multiply_MixedFloat1(Portion** param)
+Portion* GSM_Multiply_MixedFloat(Portion** param)
 {
   Portion* result = 0;
   if(((MixedPortion*) param[1])->Value() == 0)
@@ -393,20 +393,7 @@ Portion* GSM_Multiply_MixedFloat1(Portion** param)
   return result;
 }
 
-Portion* GSM_Multiply_MixedFloat2(Portion** param)
-{
-  Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0)
-    return new ErrorPortion("Cannot operate on a null Mixed value");
-  
-  result = param[0]->ValCopy();
-  (* (MixedSolution<double>*) ((MixedPortion*) result)->Value()) *=
-    ((FloatPortion*) param[1])->Value();
-  return result;
-}
-
-
-Portion* GSM_Multiply_MixedRational1(Portion** param)
+Portion* GSM_Multiply_MixedRational(Portion** param)
 {
   Portion* result = 0;
   if(((MixedPortion*) param[1])->Value() == 0)
@@ -418,20 +405,7 @@ Portion* GSM_Multiply_MixedRational1(Portion** param)
   return result;
 }
 
-Portion* GSM_Multiply_MixedRational2(Portion** param)
-{
-  Portion* result = 0;
-  if(((MixedPortion*) param[0])->Value() == 0)
-    return new ErrorPortion("Cannot operate on a null Mixed value");
-  
-  result = param[0]->ValCopy();
-  (* (MixedSolution<gRational>*) ((MixedPortion*) result)->Value()) *=
-    ((RationalPortion*) param[1])->Value();
-  return result;
-}
-
-
-Portion* GSM_Multiply_BehavFloat1(Portion** param)
+Portion* GSM_Multiply_BehavFloat(Portion** param)
 {
   Portion* result = 0;
   if(((BehavPortion*) param[1])->Value() == 0)
@@ -443,20 +417,7 @@ Portion* GSM_Multiply_BehavFloat1(Portion** param)
   return result;
 }
 
-Portion* GSM_Multiply_BehavFloat2(Portion** param)
-{
-  Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0)
-    return new ErrorPortion("Cannot operate on a null Behav value");
-  
-  result = param[0]->ValCopy();
-  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) *=
-    ((FloatPortion*) param[1])->Value();
-  return result;
-}
-
-
-Portion* GSM_Multiply_BehavRational1(Portion** param)
+Portion* GSM_Multiply_BehavRational(Portion** param)
 {
   Portion* result = 0;
   if(((BehavPortion*) param[1])->Value() == 0)
@@ -467,19 +428,6 @@ Portion* GSM_Multiply_BehavRational1(Portion** param)
     ((RationalPortion*) param[0])->Value();
   return result;
 }
-
-Portion* GSM_Multiply_BehavRational2(Portion** param)
-{
-  Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0)
-    return new ErrorPortion("Cannot operate on a null Behav value");
-  
-  result = param[0]->ValCopy();
-  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) *=
-    ((RationalPortion*) param[1])->Value();
-  return result;
-}
-
 
 
 //---------------------------- GSM_Divide -------------------------------
@@ -1323,7 +1271,7 @@ Portion* GSM_NOT(Portion** param)
 }
 
 
-Portion *GSM_Paren(Portion **param)
+Portion *GSM_Parentheses(Portion **param)
 {
   return param[0]->ValCopy();
 }
@@ -3161,41 +3109,25 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Multiply_gRational, 
 				       porRATIONAL, 2, xy_Rational));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Multiply_MixedFloat1, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Multiply_MixedFloat, 
 				       porMIXED_FLOAT, 2));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porFLOAT));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("y", porMIXED_FLOAT));
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Multiply_MixedFloat2, 
-				       porMIXED_FLOAT, 2));
-  FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porMIXED_FLOAT));
-  FuncObj->SetParamInfo(4, 1, ParamInfoType("y", porFLOAT));
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Multiply_MixedRational1, 
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Multiply_MixedRational, 
 				       porMIXED_RATIONAL, 2));
-  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porRATIONAL));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("y", porMIXED_RATIONAL));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Multiply_MixedRational2, 
-				       porMIXED_RATIONAL, 2));
-  FuncObj->SetParamInfo(6, 0, ParamInfoType("x", porMIXED_RATIONAL));
-  FuncObj->SetParamInfo(6, 1, ParamInfoType("y", porRATIONAL));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("y", porMIXED_RATIONAL));
 
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Multiply_BehavFloat1, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Multiply_BehavFloat, 
 				       porBEHAV_FLOAT, 2));
-  FuncObj->SetParamInfo(7, 0, ParamInfoType("x", porFLOAT));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType("y", porBEHAV_FLOAT));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Multiply_BehavFloat2, 
-				       porBEHAV_FLOAT, 2));
-  FuncObj->SetParamInfo(8, 0, ParamInfoType("x", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(8, 1, ParamInfoType("y", porFLOAT));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("y", porBEHAV_FLOAT));
 
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Multiply_BehavRational1, 
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Multiply_BehavRational, 
 				       porBEHAV_RATIONAL, 2));
-  FuncObj->SetParamInfo(9, 0, ParamInfoType("x", porRATIONAL));
-  FuncObj->SetParamInfo(9, 1, ParamInfoType("y", porBEHAV_RATIONAL));
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Multiply_BehavRational2, 
-					porBEHAV_RATIONAL, 2));
-  FuncObj->SetParamInfo(10, 0, ParamInfoType("x", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(10, 1, ParamInfoType("y", porRATIONAL));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("y", porBEHAV_RATIONAL));
 
   gsm->AddFunction(FuncObj);
 
@@ -3540,8 +3472,8 @@ void Init_gsmoper(GSM* gsm)
 
 
 
-  FuncObj = new FuncDescObj("Paren", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Paren, porANYTYPE, 1));
+  FuncObj = new FuncDescObj("Parentheses", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Parentheses, porANYTYPE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
