@@ -6,8 +6,6 @@
 
 #include "nfgshow.h"
 #include "nfplayer.h"
-#include "nfgoutcd.h"
-
 #include "gambit.h"
 
 #include "nfgconst.h"

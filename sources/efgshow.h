@@ -24,7 +24,6 @@
 class EfgSolnShow;
 class guiEfgShowToolBar;
 class EFSupportInspectDialog;
-class EfgOutcomeDialog;
 class NodeSolnShow;
 class TreeWindow;
 
@@ -57,8 +56,6 @@ private:
         StartingPoints() : last(-1) { }
     } starting_points;
     int cur_soln;
-
-    EfgOutcomeDialog *outcome_dialog;
 
     // We can display EF for one support, while working on a different support
     // disp_sup always corresponds to the support currently displayed.  cur_sup
@@ -119,7 +116,6 @@ public:
     void        InspectSolutions(int what);
     void        RemoveSolutions(void);
     void        ChangeSolution(int soln);
-    void        ChangeOutcomes(int what, const gText out_name = gText());
     void        OnSelectedMoved(const Node *n);
     BehavSolution CreateSolution(void);
 

@@ -575,38 +575,6 @@ void TreeWindow::EditOutcomeDelete(void)
   delete [] outcome_name;
 }  
 
-
-#define DRAG_OUTCOME_END      7
-
-void TreeWindow::node_outcome(int out, int x, int y)
-{
-  if (out > ef.NumOutcomes())
-    MyMessageBox("This outcome is not defined yet", "Outcome",
-		 EFG_OUTCOME_HELP, pframe);
-  else {
-    if (x != -1) { // dropped an outcome at the coordinates (x,y)
-      ScreenToClient(&x, &y); // x,y are absolute screen coordinates
-      float xf = x, yf = y;
-      Node *tmp = GotObject(xf, yf, DRAG_OUTCOME_END);
-      if (tmp)
-	SetCursorPosition(tmp);
-      else
-	return;
-    }
-    
-    if (out > 0)
-      Cursor()->SetOutcome(ef.Outcomes()[out]);
-
-    if (out == 0)
-      Cursor()->SetOutcome(0);
-
-    // if (out == -1) just update all outcomes
-    outcomes_changed = 1;
-    OnPaint();
-  }
-}
-
-
 //***********************************************************************
 //                       NODE-SET-MARK MENU HANDLER
 //***********************************************************************

@@ -28,7 +28,6 @@
 class NfgSolnShow;
 class NormalSpread;
 class NFSupportInspectDialog;
-class NfgOutcomeDialog;
 
 template <class T> class SolutionList: public gSortList<T>
 {
@@ -70,7 +69,6 @@ private:
   wxFrame     *pframe;
   NormalSpread    *spread;
   NFSupportInspectDialog *support_dialog;
-  NfgOutcomeDialog *outcome_dialog;
   int pl1, pl2;
   int rows, cols;
   NfgSolnShow *soln_show; // need to keep track of this to kill at the end
@@ -113,10 +111,6 @@ public:
   NFSupport *MakeSupport(void);
   void    DominanceSetup(void);
   
-  // Outcomes
-  void SetOutcome(int outc, int x = -1, int y = -1);
-  void ChangeOutcomes(int what);
-
   void OutcomeNew(void);
   void OutcomeDelete(void);
   void OutcomeAttach(void);

@@ -130,7 +130,7 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
     EfgNfgInterface(gEFG, p_nfg), 
     GuiObject(gText("EfgShow")),
-    parent(p_frame), ef(p_efg), cur_soln(0), outcome_dialog(0), 
+    parent(p_frame), ef(p_efg), cur_soln(0),
     support_dialog(0), soln_show(0), node_inspect(0), tw(0)
 {
   Show(FALSE);
@@ -453,23 +453,6 @@ void EfgShow::RemoveSolutions(void)
 BehavSolution EfgShow::CreateSolution(void)
 {
     return BehavSolution(BehavProfile<gNumber>(*cur_sup));
-}
-
-#include "efgoutcd.h"
-#define UPDATE1_DIALOG  4
-#define PARAMS_ADD_VAR  5       
-void EfgShow::ChangeOutcomes(int what, const gText out_name)
-{
-    if (what == CREATE_DIALOG && !outcome_dialog)
-    {
-        outcome_dialog = new EfgOutcomeDialog(ef, this);
-        if (out_name != "") outcome_dialog->SetOutcome(out_name);
-    }
-
-    if (what == DESTROY_DIALOG && outcome_dialog)
-    {
-        delete outcome_dialog; outcome_dialog = 0;
-    }
 }
 
 //************************************************************************
@@ -889,7 +872,6 @@ Bool EfgShow::OnClose(void)
       return FALSE;
     else {
       ChangeSupport(DESTROY_DIALOG);
-      ChangeOutcomes(DESTROY_DIALOG);
       InspectSolutions(DESTROY_DIALOG);
       Show(FALSE);
       return TRUE;

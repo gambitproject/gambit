@@ -1277,84 +1277,6 @@ int TreeWindow::BranchDragger::BranchNum(void)
 }
 
 
-
-//--------------------
-// OutcomeDragger
-//--------------------
-
-class TreeWindow::OutcomeDragger
-{
-private:
-    Efg &ef;
-    TreeWindow *parent;
-    int drag_now;
-    EFOutcome *outcome;
-    Node *start_node;
-    float x, y;
-    wxCursor *outcome_cursor;
-    
-public:
-    OutcomeDragger(TreeWindow *parent, Efg &ef);
-    ~OutcomeDragger();
-    
-    int Dragging(void) const;
-    int OnEvent(wxMouseEvent &ev, Bool &outcomes_changed);
-};
-
-TreeWindow::OutcomeDragger::OutcomeDragger(TreeWindow *parent_, Efg &ef_)
-    : ef(ef_), parent(parent_), drag_now(0), outcome(0),
-      outcome_cursor(new wxCursor("OUTCOMECUR"))
-{ }
-
-TreeWindow::OutcomeDragger::~OutcomeDragger()
-{ }
-
-int TreeWindow::OutcomeDragger::OnEvent(wxMouseEvent &ev,
-                                        Bool &outcomes_changed)
-{
-    int ret = (drag_now) ? DRAG_CONTINUE : DRAG_NONE;
-    if (ev.Dragging())
-    {
-        if (!drag_now)
-        {
-            ev.Position(&x, &y); outcome = 0;
-            start_node = parent->GotObject(x, y, DRAG_OUTCOME_START);
-            if (start_node)
-            {
-                outcome = start_node->GetOutcome();
-                if (outcome)
-                {
-                    parent->SetCursor(outcome_cursor);
-                    drag_now = 1; ret = DRAG_START;
-                }
-            }
-        }
-    }
-    else if (drag_now)
-    {
-        parent->SetCursor(wxSTANDARD_CURSOR);
-        ev.Position(&x, &y);
-        Bool c = ev.ControlDown();
-        ret = DRAG_STOP;
-        Node *end_node = parent->GotObject(x, y, DRAG_OUTCOME_END);
-        if (end_node)
-        {
-            end_node->SetOutcome(outcome);
-            if (c) start_node->SetOutcome(0); // move
-            outcomes_changed = 1;
-            parent->OnPaint();
-        }
-        drag_now = 0;
-    }
-    return ret;
-}
-
-int TreeWindow::OutcomeDragger::Dragging(void) const
-{
-    return drag_now;
-}
-
-
 //----------------------------------------------------------------------
 //                      TreeWindow: Member functions
 //----------------------------------------------------------------------
@@ -1382,8 +1304,6 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     iset_drag = new IsetDragger(this, ef);
     // Create provision for adding/creating braches by drag'n dropping
     branch_drag = new BranchDragger(this, ef);
-    // Create provision for copying/moving outcomes by drag'n dropping
-    outcome_drag = new OutcomeDragger(this, ef);
     // No node has been marked yet--mark_node is invalid
     mark_node = 0; old_mark_node = 0;
     // No isets are being hilighted
@@ -1429,11 +1349,10 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
 
 TreeWindow::~TreeWindow(void)
 {
-    delete node_drag;
-    delete iset_drag;
-    delete branch_drag;
-    delete outcome_drag;
-    Show(FALSE);
+  delete node_drag;
+  delete iset_drag;
+  delete branch_drag;
+  Show(FALSE);
 }
 
 void TreeWindow::MakeMenus(void)
@@ -1686,21 +1605,14 @@ Action *LastAction(Node *node);
 void TreeWindow::OnEvent(wxMouseEvent& ev)
 {
     // Check all the draggers.  Note that they are mutually exclusive
-    if (!iset_drag->Dragging() && !branch_drag->Dragging() 
-        && !outcome_drag->Dragging())
-        if (node_drag->OnEvent(ev, nodes_changed) != DRAG_NONE) return;
+    if (!iset_drag->Dragging() && !branch_drag->Dragging()) 
+      if (node_drag->OnEvent(ev, nodes_changed) != DRAG_NONE) return;
     
-    if (!node_drag->Dragging() && !branch_drag->Dragging() &&
-        !outcome_drag->Dragging())
-        if (iset_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
+    if (!node_drag->Dragging() && !branch_drag->Dragging())
+      if (iset_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
     
-    if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-        !outcome_drag->Dragging())
-        if (branch_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
-    
-    if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-        !branch_drag->Dragging())
-        if (outcome_drag->OnEvent(ev, outcomes_changed) != DRAG_NONE) return;
+    if (!node_drag->Dragging() && !iset_drag->Dragging())
+      if (branch_drag->OnEvent(ev, infosets_changed) != DRAG_NONE) return;
     
     // Implements the 'cutting' behavior
     if (ProcessShift(ev)) return;

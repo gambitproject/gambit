@@ -118,9 +118,6 @@ public:
   void OnChar(wxKeyEvent &);
 };
 
-
-class EfgOutcomeDialog;
-
 class TreeWindow : public TreeRender   
 {
     friend class ExtensivePrintout;
@@ -174,9 +171,6 @@ private:
     class BranchDragger;            // Class to take care of branch addition by
     BranchDragger *branch_drag;     // drag and dropping
 
-    class OutcomeDragger;           // Class to take care of outcome copy/move by
-    OutcomeDragger *outcome_drag;   // drag and dropping
-    
     // Private Functions
     int   FillTable(const Node *n,int level);
     void  ProcessCursor(void);
@@ -226,7 +220,6 @@ public:
     void node_delete(void);
     void node_set_mark(void);
     void node_goto_mark(void);
-    void node_outcome(int out,int x=-1,int y=-1);
     void EditOutcomeAttach(void);
     void EditOutcomeDetach(void);
     void EditOutcomeNew(void);

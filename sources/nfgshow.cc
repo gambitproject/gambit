@@ -9,7 +9,6 @@
 #include "nfgsoln.h"
 #include "nfgconst.h"
 #include "nfplayer.h" 
-#include "nfgoutcd.h"
 
 extern Bool LongStringConstraint(int type, char *value, char *label,
                  char *msg_buffer);
@@ -33,7 +32,6 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
 
   support_dialog = 0;  // no support dialog yet
   soln_show      = 0;  // no solution inspect window yet.
-  outcome_dialog = 0;  // no outcome dialog yet.
   SetPlayers(pl1, pl2, true);
 
   // Create the accelerators
@@ -207,19 +205,6 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
     nf_iter.Set(profile);
     UpdateContingencyProb(profile);
     UpdateVals();
-}
-
-
-void NfgShow::ChangeOutcomes(int what)
-{
-    if (what == CREATE_DIALOG && !outcome_dialog)
-        outcome_dialog = new NfgOutcomeDialog(nf, this);
-
-    if (what == DESTROY_DIALOG && outcome_dialog)
-    {
-        delete outcome_dialog;
-        outcome_dialog = 0;
-    }
 }
 
 Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
@@ -543,18 +528,14 @@ MixedSolution NfgShow::CreateSolution(void)
 
 void NfgShow::OnOk(void)
 {
-    if (soln_show)
-    {
-        soln_show->OnOk();
-    }
+  if (soln_show) {
+    soln_show->OnOk();
+  }
 
-    ChangeSupport(DESTROY_DIALOG);
+  ChangeSupport(DESTROY_DIALOG);
 
-    if (outcome_dialog)
-        delete outcome_dialog;
-
-    spread->Close();
-    delete &nf;
+  spread->Close();
+  delete &nf;
 }
 
 
@@ -1381,57 +1362,6 @@ void NfgShow::OutcomeLabel(void)
 
   UpdateVals();
 }
-
-
-//**************************** OUTCOMES STUFF *********************************
-#define UPDATE1_DIALOG  4
-#define PARAMS_ADD_VAR  5
-
-void NfgShow::SetOutcome(int out, int x, int y)
-{
-  if (out > nf.NumOutcomes()) {
-    MyMessageBox("This outcome is not defined yet", 
-		 "Outcome", NFG_OUTCOME_HELP, spread);
-    UpdateVals();
-  }
-  else {
-    gArray<int> cur_profile(spread->GetProfile());
-
-    if (x != -1) {    // dropped an outcome at the coordinates (x,y)
-      spread->GetSheet()->ScreenToClient(&x, &y);  
-      // Convert to logical coordinates.
-      // This takes into account the current scrollbar position.
-      x = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalX((float)x));
-      y = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalY((float)y));
-
-      int row, col;
-
-      if (spread->XYtoRowCol(x, y, &row, &col)) {
-	cur_profile[pl1] = row;
-	cur_profile[pl2] = col;
-	// MCV: commented this out because it makes the cursor
-	// jump around unnecessarily.
-        // spread->SetProfile(cur_profile);
-      }
-      else  {
-	return;
-      }
-    }
-
-    if (out > 0) {
-      nf.SetOutcome(cur_profile, nf.Outcomes()[out]);
-      RemoveSolutions();
-    }
-    else if (out == 0) {
-      nf.SetOutcome(cur_profile, 0);
-      RemoveSolutions();
-    }
-    else if (out == -1) { } // just update all outcomes
-
-    UpdateVals();
-  }
-}
-
 
 //**************************** DOMINATED STRATEGY STUFF ************************
 // SolveElimDom
