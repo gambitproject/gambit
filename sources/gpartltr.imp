@@ -1,0 +1,218 @@
+//
+// File: gpartltr.imp  
+//        -- Implementation of classes TreeOfPartials and ListOfPartialTrees
+// 
+// @(#)gpartltr.imp	1.6 01/24/98
+//
+
+#include "gpartltr.h"
+
+//---------------------------------------------------------------
+//                   class: TreeOfPartials
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+template <class T> TreeOfPartials<T>::TreeOfPartials(const gPoly<T>& given) 
+: PartialTree(given)
+{
+  TreeOfPartialsRECURSIVE(PartialTree, PartialTree.RootNode());  
+}
+
+//-------------------------------------------------------------------------
+// Recursive generation of all partial derivatives of the root polynomial
+//-------------------------------------------------------------------------
+
+template <class T>
+void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T> >& t,
+					  gTreeNode<gPoly<T> >* n) const
+{
+  if (n->GetData().Degree() >= 1) {
+    for (int i = 1; i <= n->GetData().Dmnsn(); i++) {
+      t.InsertAt(n->GetData().PartialDerivative(i),n);
+      TreeOfPartialsRECURSIVE(t,n->GetYoungest());
+    }
+  }
+}
+
+template<class T> TreeOfPartials<T>::TreeOfPartials(const TreeOfPartials& qs)
+: PartialTree(qs.PartialTree)
+{
+}
+
+template<class T> TreeOfPartials<T>::~TreeOfPartials()
+{
+}
+
+template <class T> 
+T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord, 
+					      const gVector<T>& p) const
+{
+  if (RootPoly().Degree() <= 0) return (T)0;
+  else {
+    int i = 1; 
+    gTreeNode<gPoly<T> >* node = RootNode()->GetEldest();
+    while (i < coord) {
+      i++;
+      node = node->GetNext();
+    }
+    T answer = node->GetData().Evaluate(p);
+    return answer;
+  }
+}
+
+template <class T> T
+TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
+					     const gTreeNode<gPoly<T> >* n,
+					     const gVector<T>& p,
+					     const gVector<T>& halvesoflengths,
+					     gVector<int>& wrtos) const
+{
+  T answer = (T)0;
+
+  if (n->GetEldest() != NULL) {
+    gList<gTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
+    for (int i = 1; i <= children.Length(); i++) {
+      wrtos[i]++;
+
+      T increment = children[i]->GetData().Evaluate(p);
+      if (increment < (T)0) increment = -increment;
+     	  
+      for (int j = 1; j <= p.Length(); j++) 
+	for (int k = 1; k <= wrtos[j]; k++) {
+	  increment *= halvesoflengths[j];
+	  increment /= (T)k;
+	}
+
+      answer += increment;
+
+      answer += MaximalNonconstantContributionRECURSIVE(children[i],
+							p,
+							halvesoflengths,
+							wrtos);
+      
+      wrtos[i]--;
+    }
+  }
+
+  return answer;
+}
+
+
+template <class T> T
+TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
+						  const gVector<T>& 
+						     halvesoflengths) const
+{
+  gVector<int> WithRespectTos(p.Length());
+  for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
+
+  return MaximalNonconstantContributionRECURSIVE(PartialTree.RootNode(),
+						 p,
+						 halvesoflengths,
+						 WithRespectTos); 
+}
+
+
+template <class T> gOutput& operator << (gOutput& output, 
+					 const TreeOfPartials<T>& /* x */)
+{
+  output << "Error: you shouldn't be printing a TreeOfPartials.\n";
+  exit(0);
+}
+
+
+//---------------------------------------------------------------
+//                    class: ListOfPartialTrees
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+template <class T> 
+ListOfPartialTrees<T>::ListOfPartialTrees(const gList<gPoly<T> >& given) 
+: PartialTreeList()
+{
+  for (int i = 1; i <= given.Length(); i++) 
+    PartialTreeList += TreeOfPartials<T>(given[i]);
+}
+
+template <class T> 
+ListOfPartialTrees<T>::ListOfPartialTrees(const gPolyList<T>& given) 
+: PartialTreeList()
+{
+  for (int i = 1; i <= given.Length(); i++) 
+    PartialTreeList += TreeOfPartials<T>(given[i]);
+}
+
+template<class T> 
+ListOfPartialTrees<T>::ListOfPartialTrees(const ListOfPartialTrees& qs)
+: PartialTreeList(qs.PartialTreeList)
+{
+}
+
+template<class T> ListOfPartialTrees<T>::~ListOfPartialTrees()
+{
+}
+
+template <class T> bool 
+ListOfPartialTrees<T>::operator ==(const ListOfPartialTrees<T>& rhs) const
+{
+  if (Length() != rhs.Length()) return false;
+  for (int i = 1; i <= Length(); i++)
+    if ((*this)[i] != rhs[i])
+      return false;
+  return true;
+}
+
+template <class T> bool 
+ListOfPartialTrees<T>::operator !=(const ListOfPartialTrees<T>& rhs) const
+{
+  return !(*this == rhs);
+}
+
+template <class T> 
+gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
+{
+  gMatrix<T> answer(Length(),Dmnsn());
+  int ii;
+  for (ii = 1; ii <= Length(); ii++)
+    for (int j = 1; j <= Dmnsn(); j++)
+      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
+  
+  return answer;
+}
+
+template <class T> gSquareMatrix<T> 
+ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
+{
+  assert (Length() >= Dmnsn());
+  gSquareMatrix<T> answer(Dmnsn());
+  int ii;
+  for (ii = 1; ii <= Dmnsn(); ii++)
+    for (int j = 1; j <= Dmnsn(); j++)
+      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
+ 
+  return answer;
+}
+
+template <class T> gVector<T> 
+ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point) const
+{
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
+
+  return answer;
+}
+
+
+template <class T> gOutput& operator << (gOutput& output, 
+					 const ListOfPartialTrees<T>& /* x */)
+{
+  output << "Error: you shouldn't be printing a ListOfPartialTrees.\n";
+  exit(0);
+}
