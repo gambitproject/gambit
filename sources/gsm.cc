@@ -2191,15 +2191,15 @@ bool GSM::Pop(void)
 
   if(_Depth() > 0)
   {
-    if( _Verbose )  {
-      Output();
-      delete _Pop();
-    }
-    else
-    {
+//    if( _Verbose )  {
+//     Output();
+//      delete _Pop();
+//    }
+//    else
+//    {
       p = _Pop();
       delete p;
-    }
+//    }
     result = true;
   }
   else
