@@ -466,8 +466,14 @@ bool GSM::Assign( void )
 	    if( PortionTypeMatch(( (ListPortion*) p1 )->DataType(),
 				 ( (ListPortion*) p2 )->DataType() ) ||
 	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
-	    {
-	      p1->AssignFrom( p2 );
+ 	    {
+	      p1->Original()->AssignFrom( p2 );
+	      delete p2;
+	      _Push( p1 );
+	    }
+	    else if( ( (ListPortion*) p2 )->Length() == 0 )
+ 	    {
+	      p1->Original()->AssignFrom( p2 );
 	      delete p2;
 	      _Push( p1 );
 	    }
@@ -489,7 +495,7 @@ bool GSM::Assign( void )
 	    break;
 	    
 	  default:
-	    p1->AssignFrom( p2 );
+	    p1->Original()->AssignFrom( p2 );
 	    delete p2;
 	    _Push( p1 );
 	  }
@@ -499,7 +505,7 @@ bool GSM::Assign( void )
       {
 	if( PortionTypeMatch( p1->Type(), p2->Type() ) )
 	{
-	  p1->AssignFrom( p2 );
+	  p1->Original()->AssignFrom( p2 );
 	  delete p2;
 	  _Push( p1 );
 	}

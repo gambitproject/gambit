@@ -660,15 +660,15 @@ int CallFuncObj::NumParams( void ) const
 
 bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
 {
-	bool        result = false;
+  bool        result = false;
   PortionType CalledType;
   PortionType ExpectedListType;
 
-	assert( p != 0 );
-
-	CalledType = p->Type();
-
-	if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
+  assert( p != 0 );
+  
+  CalledType = p->Type();
+  
+  if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
   {
     if( CalledType == porLIST )
     {
@@ -680,15 +680,23 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
       {
 	CalledType = ( (ListPortion*) p )->DataType();
 	ExpectedListType = ExpectedType & ~porLIST;
-	if (CalledType & ExpectedType) result=true; else result=false;
-			}
-		}
-	}
-	else // normal type checking
+	if(CalledType & ExpectedListType)
+	  result = true; 
+	else if( CalledType == porUNKNOWN )
 	{
-		if (CalledType & ExpectedType) result=true; else result=false;
+	  result = true;
+	  ( (ListPortion*) p )->SetDataType( ExpectedListType );
 	}
-	return result;
+	else
+	  result = false;
+      }
+    }
+  }
+  else // normal type checking
+  {
+    if (CalledType & ExpectedType) result=true; else result=false;
+  }
+  return result;
 }
 
 
@@ -935,75 +943,75 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
-	// Attempt to identify the function being called out of all the
-	// overloaded versions.
-
-	if( _FuncIndex == -1 && _NumFuncs == 1 )
-		_FuncIndex = 0;
-
-	if( _FuncIndex == -1 )
-	{
-		param_upper_bound = 0;
-		for( index = 0; index < _NumParams; index++ )
-		{
-			if( _Param[ index ] != 0 || _RunTimeParamInfo[ index ].Ref != 0 )
+  // Attempt to identify the function being called out of all the
+  // overloaded versions.
+  
+  if( _FuncIndex == -1 && _NumFuncs == 1 )
+    _FuncIndex = 0;
+  
+  if( _FuncIndex == -1 )
+  {
+    param_upper_bound = 0;
+    for( index = 0; index < _NumParams; index++ )
+    {
+      if( _Param[ index ] != 0 || _RunTimeParamInfo[ index ].Ref != 0 )
 	param_upper_bound = index;
-		}
-
-		param_sets_matched = 0;
-		for( f_index = 0; f_index < _NumFuncs; f_index++ )
-		{
-			match_ok = true;
-			if( param_upper_bound >= _FuncInfo[ f_index ].NumParams )
+    }
+    
+    param_sets_matched = 0;
+    for( f_index = 0; f_index < _NumFuncs; f_index++ )
+    {
+      match_ok = true;
+      if( param_upper_bound >= _FuncInfo[ f_index ].NumParams )
 	match_ok = false;
-
-			for( index = 0;
-		index < _FuncInfo[ f_index ].NumParams;
-		index++ )
-			{
+      
+      for( index = 0;
+	  index < _FuncInfo[ f_index ].NumParams;
+	  index++ )
+      {
 	if( _Param[ index ] != 0 )
 	{
-		// parameter is defined
-		if( !_TypeMatch( _Param[ index ],
-				_FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
-			match_ok = false;
+	  // parameter is defined
+	  if( !_TypeMatch( _Param[ index ],
+			  _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+	    match_ok = false;
 	}
 	else
 	{
-		// parameter is undefined
-		if( _RunTimeParamInfo[ index ].Ref != 0 )
-		{
-			// specified undefined variable
-			if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
-				match_ok = false;
-		}
-
-		if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
-			match_ok = false;
+	  // parameter is undefined
+	  if( _RunTimeParamInfo[ index ].Ref != 0 )
+	  {
+	    // specified undefined variable
+	    if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	      match_ok = false;
+	  }
+	  
+	  if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
+	    match_ok = false;
 	}
-			}
-
-			if( match_ok )
-			{
+      }
+      
+      if( match_ok )
+      {
 	curr_f_index = f_index;
 	param_sets_matched++;
-			}
-		}
-
-		if( param_sets_matched == 1 )
-		{
-			_FuncIndex = curr_f_index;
-		}
-		else
-		{
-			if( param_sets_matched > 1 )
+      }
+    }
+    
+    if( param_sets_matched == 1 )
+    {
+      _FuncIndex = curr_f_index;
+    }
+    else
+    {
+      if( param_sets_matched > 1 )
 	_ErrorMessage( _StdErr, 5, 0, _FuncName );
-			else
+      else
 	_ErrorMessage( _StdErr, 8, 0, _FuncName );
-			_ErrorOccurred = true;
-		}
+      _ErrorOccurred = true;
+    }
   }
-
+  
   
   if( _FuncIndex != -1 )
   {

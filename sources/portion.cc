@@ -2257,17 +2257,19 @@ void ListPortion::AssignFrom( Portion* p )
 
   assert( p->Type() == Type() );
   assert( PortionTypeMatch( ( (ListPortion*) p )->_DataType, _DataType ) || 
-	 _DataType == porUNKNOWN );
+	 _DataType == porUNKNOWN || 
+	 ( (ListPortion*) p )->_DataType == porUNKNOWN );
 
   RemoveDependency();
 
   Flush();
+
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
     result = Insert( value[ i ]->ValCopy(), i );
     assert( result != 0 );
   }
- 
+
   // SetOwner( p->Owner() );
 
   AddDependency();
@@ -2354,6 +2356,7 @@ bool ListRefPortion::IsReference( void ) const
 void ListPortion::SetDataType( PortionType data_type )
 {
   assert( _DataType == porUNKNOWN );
+  ( (ListPortion*) Original() )->_DataType = data_type;
   _DataType = data_type;
 }
 
@@ -2428,8 +2431,7 @@ int ListPortion::Insert( Portion* item, int index )
   }
   else  // inserting into an existing list
   {
-    if( PortionTypeMatch( item_type, _DataType ) || 
-       _DataType == porUNKNOWN )
+    if( PortionTypeMatch( item_type, _DataType ) )
       result = _Value->Insert( item, index );
     else
       delete item;
