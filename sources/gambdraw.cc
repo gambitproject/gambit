@@ -1,5 +1,5 @@
 //
-// FILE: gambdraw.cc 
+// FILE: gambdraw.cc -- Draw settings implementation
 //
 // $Id$
 //
@@ -103,94 +103,95 @@ void GambitDrawSettings::SaveOptions(char *s) const
     }
 }
 
+class dialogPlayerColor : public guiAutoDialog {
+private:
+  wxListBox *m_playerNames, *m_colorNames;
+  gBlock<int> m_colors;
+
+  static void CallbackPlayer(wxListBox &p_object, wxCommandEvent &)
+    { ((dialogPlayerColor *) p_object.wxEvtHandler::GetClientData())->
+	OnPlayer(); }
+  static void CallbackColor(wxListBox &p_object, wxCommandEvent &)
+    { ((dialogPlayerColor *) p_object.wxEvtHandler::GetClientData())->
+	OnColor(); }
+  
+
+  void OnPlayer(void);
+  void OnColor(void);
+
+public:
+  dialogPlayerColor(wxWindow *, const gArray<gText> &, const gBlock<int> &);
+  virtual ~dialogPlayerColor() { }
+
+  const gBlock<int> &GetColors(void) const { return m_colors; }
+};
+
+dialogPlayerColor::dialogPlayerColor(wxWindow *p_parent,
+				     const gArray<gText> &p_playerNames,
+				     const gBlock<int> &p_colors)
+  : guiAutoDialog(p_parent, "Edit Player Colors"), m_colors(p_colors)
+{
+  m_playerNames = new wxListBox(this, (wxFunction) CallbackPlayer, "Players");
+  for (int pl = 1; pl <= p_playerNames.Length(); pl++) {
+    m_playerNames->Append(ToText(pl) + ": " + p_playerNames[pl]);
+  }
+  m_playerNames->wxEvtHandler::SetClientData((char *) this);
+  m_playerNames->SetSelection(0);
+  m_playerNames->SetConstraints(new wxLayoutConstraints);
+  m_playerNames->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerNames->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerNames->GetConstraints()->width.AsIs();
+  m_playerNames->GetConstraints()->height.AsIs();
+
+  m_colorNames = new wxListBox(this, (wxFunction) CallbackColor, "Colors");
+  for (int i = 0; i < WX_COLOR_LIST_LENGTH; i++) {
+    m_colorNames->Append((char *) wx_color_list[i]);
+  }
+  m_colorNames->wxEvtHandler::SetClientData((char *) this);
+  m_colorNames->SetConstraints(new wxLayoutConstraints);
+  m_colorNames->GetConstraints()->top.SameAs(m_playerNames, wxTop);
+  m_colorNames->GetConstraints()->left.SameAs(m_playerNames, wxRight, 10);
+  m_colorNames->GetConstraints()->width.AsIs();
+  m_colorNames->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->top.SameAs(m_playerNames, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  OnPlayer();
+  Go();
+}
+
+void dialogPlayerColor::OnPlayer(void)
+{
+  m_colorNames->SetSelection(m_colors[m_playerNames->GetSelection() + 1] - 1);
+}
+
+void dialogPlayerColor::OnColor(void)
+{
+  int player = m_playerNames->GetSelection() + 1;
+  m_colors[player + 2] = m_colorNames->GetSelection();
+}
 
 // PlayerColorDialog: allows the user to change player colors graphically
 void GambitDrawSettings::PlayerColorDialog(gArray<gText> &player_names)
 {
-  /*
-    MyDialogBox *player_color_dialog = new MyDialogBox(0, "Edit Player Colors");
+  dialogPlayerColor dialog(0, player_names, player_colors);
 
-    // list of player names
-    wxStringList *name_list = new wxStringList;
-    name_list->Add("Chance");
-    int i;
-    for (i = 1; i <= player_names.Length(); i++) 
-        name_list->Add((char *)player_names[i]);
-
-    // list of color names
-    wxStringList *color_list = new wxStringList;
-    for (i = 0; i < WX_COLOR_LIST_LENGTH; i++) 
-        color_list->Add(wx_color_list[i]);
-
-    // Create listboxes.
-    char *name = new char[100];
-    wxFormItem *name_item = wxMakeFormString("Player", &name, wxFORM_SINGLE_LIST,
-                                             new wxList(wxMakeConstraintStrings(name_list), 0), 
-                                             NULL, wxVERTICAL);
-    player_color_dialog->Form()->Add(name_item);
-    char *color = new char[100];
-    wxFormItem *color_item = wxMakeFormString("Color", &color, wxFORM_SINGLE_LIST,
-                                              new wxList(wxMakeConstraintStrings(color_list), 0), 
-                                              NULL, wxVERTICAL);
-    player_color_dialog->Form()->Add(color_item);
-    player_color_dialog->Form()->Add(wxMakeFormNewLine());
-    Bool save_now = FALSE;
-    player_color_dialog->Form()->Add(wxMakeFormBool("Save now", &save_now));
-
-    // Associate the panel.
-    player_color_dialog->Form()->AssociatePanel(player_color_dialog);
-    wxListBox *name_listbox = (wxListBox *)name_item->GetPanelItem();
-    wxListBox *color_listbox = (wxListBox *)color_item->GetPanelItem();
-    name_listbox->Callback((wxFunction)player_color_callback);
-
-    player_color_struct pcs =
-    {
-        this, color_listbox
-    };
-
-    name_listbox->wxWindow::SetClientData((char *)&pcs);
-
-    // Init the first entry.
-    wxCommandEvent ev(wxEVENT_TYPE_CHOICE_COMMAND);
-    ev.commandInt = 0;
-    name_listbox->Command(ev);
-    player_color_dialog->Go1();
-
-    if (player_color_dialog->Completed() == wxOK)
-    {
-        SetPlayerColor(name_listbox->GetSelection(), color_listbox->GetSelection());
-
-        if (save_now) 
-            SaveOptions();
-    }
-
-    // Reset the first entry.
-    ev.commandInt = -1;
-    name_listbox->Command(ev);
-
-    delete [] name;
-    delete [] color;
-  */
+  if (dialog.Completed() == wxOK) {
+    player_colors = dialog.GetColors();
+  }
 }
 
-
-void GambitDrawSettings::player_color_callback(wxListBox &ob, wxCommandEvent &ev)
-{
-    static int prev_pos = -1;
-    int new_pos = ev.commandInt;
-
-    if (new_pos >= 0)
-    {
-        player_color_struct *pcs = 
-            (player_color_struct *)ob.wxWindow::GetClientData();
-
-        if (prev_pos >= 0)
-            pcs->parent->SetPlayerColor(prev_pos, pcs->color_item->GetSelection());
-
-        int color = pcs->parent->GetPlayerColor(new_pos);
-        pcs->color_item->SetSelection(color);
-    }
-
-    prev_pos = new_pos;
-}
 

@@ -11,36 +11,26 @@
 #include "gblock.h"
 #include "gtext.h"
 
-class GambitDrawSettings
-{
+class GambitDrawSettings {
 private:
-    void    UpdatePlayerColor(int pl);
-    static void player_color_callback(wxListBox &ob, wxCommandEvent &ev);
-
-    typedef struct 
-    {
-        GambitDrawSettings *parent;
-        wxListBox *color_item;
-    } player_color_struct;
+  void UpdatePlayerColor(int pl);
 
 protected:
-    static gBlock<int> player_colors;
+  static gBlock<int> player_colors;
 
 public:
-    // Constructor
-    GambitDrawSettings(void);
-    virtual ~GambitDrawSettings() { }
+  GambitDrawSettings(void);
+  virtual ~GambitDrawSettings() { }
 
-    // Controls the color each player gets
-    void    SetPlayerColor(int pl, int cl);
-    int     GetPlayerColor(int pl) const;
+  void SetPlayerColor(int pl, int color);
+  int GetPlayerColor(int pl) const;
 
-    // Allows to save/restore settings from file
-    void    SaveOptions(char *f = 0) const;
-    void    LoadOptions(char *f);
+  // Allows to save/restore settings from file
+  void SaveOptions(char *f = 0) const;
+  void LoadOptions(char *f);
 
-    // GUI Set colors
-    void    PlayerColorDialog(gArray<gText> &);
+  // GUI Set colors
+  void PlayerColorDialog(gArray<gText> &);
 };
 
 #define INIFILE     (gambitApp.ResourceFile())
