@@ -108,7 +108,8 @@ bool NumberEditor::IsAcceptedKey(wxKeyEvent& event)
 
     default:
       if ((keycode < 128) &&
-	  (isdigit(keycode) || keycode == '/' || keycode == '.')) {
+	  (isdigit(keycode) || 
+	   keycode == '-' || keycode == '/' || keycode == '.')) {
 	return true;
       }
     }
