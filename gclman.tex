@@ -29,8 +29,8 @@ such a program can be directed either to the screen or to a file specified by
 the user.  A text file can be read by the language as a program by placing an 
 input file command "<" followed by the name of the file, following the command 
 which enters the command language.  By using an output file command ">" 
-followed by the name of a previously non-existent file, the user can direct the
-output of the command language to an external text file.  For example:
+followed by the name of a file, the user can direct the output of the command
+language to an external text file.  For example:
 
 	> gcl_sun < input.gcl > output.out
 
@@ -194,6 +194,22 @@ Cdr[l->TEXTLIST] =: TEXTLIST
 
 ----------
 
+Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
+
+   -	Description:  Concatenates the two lists, placing the second list given
+	at the end of the first list.  Note the two lists must be of the same
+	type.
+   -	Return value:  Returns a new list (of the same type), which is a 
+	combination of the two given lists.
+   -	Required parameters:
+	  *  l1:  The list of type T which is to be placed in front of the
+		second list.
+	  *  l2:  The list of type T which is to be placed at the end of the
+		first list.
+   -	Optional parameters:  None.
+
+----------
+
 Contains[e->BOOLEAN, l->BOOLLIST] =: BOOLEAN
 Contains[e->INTEGER, l->INTLIST] =: BOOLEAN
 Contains[e->RATIONAL, l->RATLIST] =: BOOLEAN
@@ -295,7 +311,7 @@ DisplayEfg[E->EFG]
 
 ----------
 
-DisplayNfg[N->NFG, {SSET->INTEGER}]
+DisplayNfg[N->NFG, {sset->INTEGER}]
 
    -	Description:  Prints specified normal form problem as a list of
 	contingencies and corresponding payoff vectors.  Uses the last strategy
@@ -385,6 +401,21 @@ ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 
 ----------
 
+Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
+
+   -	Description:  Determines whether or not all the elements of the two
+	lists are equal.
+   -	Return value:  Returns True only if all the elements of the two lists
+	are equal.
+   -	Required parameters:  
+	  *  l1:  The first list of type T which is to be compared for 
+		equality.
+	  *  l2:  The second list of type T which is to be compared for 
+		equality.
+   -	Optional parameters:  None.
+
+----------
+
 GetActionName[n->NODE, br->INTEGER] =: TEXT
 
    -	Description:  Finds the name assigned to the action corresponding to 
@@ -405,6 +436,25 @@ GetActionProbs[n->NODE] =: RATLIST
    -	Return value:  Returns the vector of action probabilities for the node.
    -	Required parameters: 
 	  *  n:  The node for which the action probabilities are to be found.
+   -	Optional parameters:  None.
+
+----------
+
+GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
+
+   -	Description:  Determines the number of strategies which dominate the
+	specified strategy for the indicated player in the given problem in 
+	normal form.
+   -	Return value:  Returns the number of strategies which dominate the
+	specified strategy.  If the strategy is undominated, returns a value of
+	zero.  
+   -	Required parameters:
+	  *  N:  The problem in normal form in which the specified strategy of
+		the indicated player is to be tested for domination.
+	  *  pl:  The number corresponding to the player for whom the specified
+		strategy is to be tested for domination.
+	  *  st:  The number corresponding to the strategy belonging to the 
+		indicated player which is to be tested for domination.
    -	Optional parameters:  None.
 
 ----------
@@ -553,6 +603,32 @@ Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
 
 ----------
 
+GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
+	{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL}, 
+	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}] =: INTEGER
+
+   -	Description:  XXXX .
+   -	Return value:  XXXX .
+   -	Required parameters:
+	  *  N:  The problem in normal form which is to be operated on.
+   -	Optional parameters:
+	  *  plev:  XXXX .
+	  *  output:  Can be used to redirect the output of this procedure to a
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, output is directed to the screen.
+	  *  errors:  XXXX .
+	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
+		XXXX .
+	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
+		XXXX .
+	  *  delLam:  Specifies the rate at which the value of Lambda changes.
+		Has a default value of XXXX .
+	  *  type:  XXXX .
+	  *  delp:  XXXX .
+	  *  tol:  XXXX .
+
+----------
+
 HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
 
    -	Description:  Finds whether or not the specified problem in extensive 
@@ -596,6 +672,25 @@ InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 		will belong.  If the player specified is not already defined in
 		the game, the player is created automatically.
 	  *  br:  The number of branches which the new node will have.
+   -	Optional parameters:  None.
+
+----------
+
+IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
+
+   -	Description:  Determines if the strategy corresponding to the specified
+	number for the indicated player is dominated by another strategy in the
+	given problem in normal form.  Uses only strategies in the first 
+	strategy set.
+   -	Return value:  Returns True only if the specified strategy for the 
+	given player is dominated.  Returns false otherwise.
+   -	Required parameters:
+	  *  N:  The problem in normal form in which the specified strategy of
+		the indicated player is to be tested for domination.
+	  *  pl:  The number corresponding to the player for whom the specified
+		strategy is to be tested for domination.
+	  *  st:  The number corresponding to the strategy belonging to the 
+		indicated player which is to be tested for domination.
    -	Optional parameters:  None.
 
 ----------
@@ -692,6 +787,34 @@ Length[l->TEXTLIST] =: INTEGER
    -	Required parameters:
 	  *  l:  The list for which the number of elements is to be found.
    -	Optional parameters:  None.
+
+----------
+
+Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
+	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsDFP->RATIONAL},
+	{maxitsBrent->RATIONAL}, {tolDFP->RATIONAL}, {tolBrent->RATIONAL},
+	{time<->RATIONAL}] =: INTEGER
+
+   -	Description:  Searches for equilibria of the specified problem in 
+	normal form using the Liapunov algorithm.
+   -	Return value:  XXXX.
+   -	Required parameters
+	  *  N:  The problem in normal form for which the Liapunov solution is 
+		to be found.
+   -	Optional parameters:
+	  *  plev: XXXX .
+	  *  output:  Can be used to redirect the output of this procedure to a
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, output is directed to the screen.
+	  *  errors:  XXXX .
+	  *  ntries:  XXXX .
+	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
+		value of XXXX . 
+	  *  maxitsDFP:  XXXX.
+	  *  maxitsBrent:  XXXX .
+	  *  tolDFP:  XXXX . 
+	  *  tolBrent:  XXXX .
+	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
@@ -848,6 +971,24 @@ NumPlayers[E->EXTFORM] =: INTEGER
 	  *  E:  The problem in extensive form in which the number of players
 		is to be found.
    -	Optional parameters:  None.
+
+----------
+
+NumStrats[N->NFG, pl->INTEGER, {sset->INTEGER}] =: INTEGER
+
+   -	Description:  Finds the number of strategies for the specified player 
+	in the given problem in normal form.
+   -	Return value:  Returns the number of strategies found.
+   -	Required parameters:
+	  *  N:  The normal form problem in which the number of strategies for
+		the specified player is to be found.
+	  *  pl:  The number corresponding to the player in the given problem 
+		in normal form for whom the number of strategies is to be
+		found.
+   -	Optional parameters:
+	  *  sset:  The number of the strategy set in which strategies for the
+		specified player will be counted.  If not given the last
+		(smallest) strategy set is used.
 
 ----------
 
@@ -1155,6 +1296,29 @@ SetTitle[E->EXTFORM, title->TEXT] =: EXTFORM
 	  *  title:  The title which is to be assigned to the given problem in 
 		extensive form.
   -	Optional parameters:  None.
+
+----------
+
+SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
+	{number->INTEGER}, {ndivs->INTEGER}, {leash->INTEGER}, 
+	{nevals->INTEGER}, {time<->RATIONAL}] =: INTEGER
+
+   -	Description:  XXXX .
+   -	Return value:  XXXX .
+   -	Required parameters
+	  *  N:  The problem in normal form on which the operation will be 
+		performed.
+   -	Optional parameters:
+	  *  plev: XXXX .
+	  *  output:  Can be used to redirect the output of this procedure to a
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, output is directed to the screen.
+	  *  errors:  XXXX .
+	  *  number:  XXXX .
+	  *  ndivs:  XXXX .
+	  *  leash:  XXXX .
+	  *  nevals:  XXXX .
+	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
