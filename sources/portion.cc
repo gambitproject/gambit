@@ -74,7 +74,7 @@ Portion::~Portion()
 }
 
 
-bool Portion::operator == ( Portion* p ) const
+bool Portion::operator == ( Portion* ) const
 { return false; }
 
 
@@ -2040,7 +2040,7 @@ Portion* OutputPortion::RefCopy( void ) const
   return p;
 }
 
-void OutputPortion::AssignFrom( Portion* p )
+void OutputPortion::AssignFrom( Portion* )
 {
 /*
   assert( p->Type() == Type() );
@@ -2049,7 +2049,7 @@ void OutputPortion::AssignFrom( Portion* p )
   assert( 0 );
 }
 
-bool OutputPortion::operator == ( Portion *p ) const
+bool OutputPortion::operator == ( Portion * ) const
 {
 /*
   assert( p->Type() == Type() );
@@ -2110,7 +2110,7 @@ Portion* InputPortion::RefCopy( void ) const
   return p;
 }
 
-void InputPortion::AssignFrom( Portion* p )
+void InputPortion::AssignFrom( Portion* )
 {
 /*
   assert( p->Type() == Type() );
@@ -2119,7 +2119,7 @@ void InputPortion::AssignFrom( Portion* p )
   assert( 0 );
 }
 
-bool InputPortion::operator == ( Portion *p ) const
+bool InputPortion::operator == ( Portion *) const
 {
 /*
   assert( p->Type() == Type() );
