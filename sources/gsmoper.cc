@@ -76,7 +76,7 @@ static Portion *GSM_And(Portion** param)
 
   if (x == triTRUE && y == triTRUE)    
     return new BoolPortion(triTRUE);
-  else if (x == triFALSE && y == triFALSE)
+  else if (x == triFALSE || y == triFALSE)
     return new BoolPortion(triFALSE); 
   else
     return new BoolPortion(triUNKNOWN);  
