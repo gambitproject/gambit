@@ -128,6 +128,7 @@ bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
   while (i <= p_profile.Length()) {
     if (abs(m_profile[i] - (gNumber) p_profile[i]) > eps) 
       break;
+    i++;
   }
   return (i <= p_profile.Length());
 }
