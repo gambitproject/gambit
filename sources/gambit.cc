@@ -192,7 +192,7 @@ wxFrame *GambitApp::OnInit(void)
     // argc/argv list.
     // ----------------------------------------------------------------------
 
-    char usage[128];
+    char usage[256];
     sprintf(usage, "Usage: %s [-record <log-file>] [-playback <log-file>]\n" 
             "(only one of -record or -playback may be selected)", wxApp::argv[0]);
 
