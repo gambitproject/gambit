@@ -43,6 +43,8 @@ private:
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
+  
+  wxString m_script;
 
   void NodeInspect(bool insp);
 
@@ -136,6 +138,7 @@ private:
   void OnInspectInfosets(wxCommandEvent &);
   void OnInspectZoom(wxCommandEvent &);
   void OnInspectGameInfo(wxCommandEvent &);
+  void OnInspectScript(wxCommandEvent &);
 
   void OnPrefsZoomIn(wxCommandEvent &);
   void OnPrefsZoomOut(wxCommandEvent &);

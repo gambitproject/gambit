@@ -107,6 +107,7 @@ typedef enum {
   efgmenuINSPECT_INFOSETS = 1865,
   efgmenuINSPECT_ZOOM_WIN = 1880,
   efgmenuINSPECT_GAMEINFO = 1870,
+  efgmenuINSPECT_SCRIPT = 1871,
 
   efgmenuPREFS_INC_ZOOM = 1601,
   efgmenuPREFS_DEC_ZOOM = 1602,

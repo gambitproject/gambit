@@ -297,6 +297,36 @@ guiSliderDialog::guiSliderDialog(wxWindow *p_parent, const gText &p_caption,
   Layout();
 }
 
+//========================================================================
+//                  dialogTextWindow: Member functions
+//========================================================================
+
+dialogTextWindow::dialogTextWindow(wxWindow *p_parent,
+				   const wxString &p_title,
+				   const wxString &p_contents)
+  : wxDialog(p_parent, -1, p_title, wxDefaultPosition, wxDefaultSize)
+{
+  SetAutoLayout(true);
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+
+  wxTextCtrl *textCtrl = new wxTextCtrl(this, -1, p_contents,
+					wxDefaultPosition, wxSize(300, 200),
+					wxTE_MULTILINE | wxTE_READONLY);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(textCtrl, 0, wxALL, 5);
+  topSizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
+  Layout();
+}
+
+dialogTextWindow::~dialogTextWindow()
+{ }
+
 
 //***************************** BASIC KEYBOARD STUFF ****************
 

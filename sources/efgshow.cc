@@ -144,6 +144,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuINSPECT_INFOSETS, EfgShow::OnInspectInfosets)
   EVT_MENU(efgmenuINSPECT_ZOOM_WIN, EfgShow::OnInspectZoom)
   EVT_MENU(efgmenuINSPECT_GAMEINFO, EfgShow::OnInspectGameInfo)
+  EVT_MENU(efgmenuINSPECT_SCRIPT, EfgShow::OnInspectScript)
   EVT_MENU(efgmenuPREFS_INC_ZOOM, EfgShow::OnPrefsZoomIn)
   EVT_MENU(efgmenuPREFS_DEC_ZOOM, EfgShow::OnPrefsZoomOut)
   EVT_MENU(efgmenuPREFS_LEGEND, EfgShow::OnPrefsLegend)
@@ -679,6 +680,8 @@ void EfgShow::MakeMenus(void)
   inspect_menu->AppendSeparator();
   inspect_menu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
 		       "Information about this game");
+  inspect_menu->Append(efgmenuINSPECT_SCRIPT, "Scri&pt",
+		       "View GCL script log");
   
   wxMenu *prefs_menu = new wxMenu;
   wxMenu *prefsDisplayMenu = new wxMenu;
@@ -920,9 +923,31 @@ void EfgShow::OnEditNodeAdd(wxCommandEvent &)
     try {
       if (mode == NodeAddNew) { 
 	m_efg.AppendNode(Cursor(), player, branches);
+	m_script += "AddMove[RootNode[efg]";
+	gArray<int> path = m_efg.PathToNode(Cursor());
+	for (int i = 1; i <= path.Length(); i++) { 
+	  m_script += "#";
+	  m_script += (char *) ToText(path[i]);
+	}
+	m_script += ", Players[efg]_";
+	m_script += (char *) ToText(player->GetNumber());
+	m_script += ", ";
+	m_script += (char *) ToText(branches);
+	m_script += "];\n";
       }
       else {
 	m_efg.AppendNode(Cursor(), infoset);
+	m_script += "AddMove[RootNode[efg]";
+	gArray<int> path = m_efg.PathToNode(Cursor());
+	for (int i = 1; i <= path.Length(); i++) {
+	  m_script += "#";
+	  m_script += (char *) ToText(path[i]);
+	}
+	m_script += ", Infosets[Players[efg]_";
+	m_script += (char *) ToText(infoset->GetPlayer()->GetNumber());
+	m_script += "]_";
+	m_script += (char *) ToText(infoset->GetNumber());
+	m_script += "];\n";
       }
     }
     catch (gException &ex) {
@@ -1969,6 +1994,12 @@ void EfgShow::OnInspectGameInfo(wxCommandEvent &)
   tmp += "\n";
 
   wxMessageBox((char *) tmp, "Efg Game Info", wxOK, this);
+}
+
+void EfgShow::OnInspectScript(wxCommandEvent &)
+{
+  dialogTextWindow dialog(this, "GCL Script", m_script);
+  dialog.ShowModal();
 }
 
 const float ZOOM_DELTA = .1;

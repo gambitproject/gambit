@@ -65,6 +65,13 @@ public:
   int GetValue(void) const { return m_slider->GetValue(); }
 };
 
+class dialogTextWindow : public wxDialog {
+public:
+  dialogTextWindow(wxWindow *p_parent, const wxString &p_title,
+		   const wxString &p_contents);
+  virtual ~dialogTextWindow();
+};
+
 // Returns the position of s in the list l.  This is useful for finding
 // the selection # in a String form item w/ a list constraint
 int wxListFindString(wxList *l, char *s);
