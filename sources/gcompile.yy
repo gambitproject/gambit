@@ -810,7 +810,8 @@ bool GCLCompiler::DeleteFunction(void)
 
 int GCLCompiler::Execute(void)
 {
-  delete gsm.Execute(exprtree); 
+  Portion *result = gsm.Execute(exprtree);
+  if (result)  delete result;
   return rcSUCCESS;
 }
 
