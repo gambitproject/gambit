@@ -200,8 +200,7 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    //    attr.SetForegroundColour(m_parent->GetSettings().PlayerColor(m_rowPlayer));
-    attr.SetForegroundColour(*wxRED);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_rowPlayer));
     return attr;
   }
   else if (IsColLabelCell(p_coords)) {
@@ -210,8 +209,7 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    //    attr.SetForegroundColour(m_parent->GetSettings().PlayerColor(m_colPlayer));
-    attr.SetForegroundColour(*wxBLUE);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_colPlayer));
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
@@ -230,13 +228,11 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(TRUE);
   if (rowSubcell) {
-    //    attr.SetForegroundColour(m_parent->GetSettings().PlayerColor(m_rowPlayer));
-    attr.SetForegroundColour(*wxRED);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_rowPlayer));
     attr.SetReadOnly(FALSE);
   }
   else if (colSubcell) {
-    //    attr.SetForegroundColour(m_parent->GetSettings().PlayerColor(m_colPlayer));
-    attr.SetForegroundColour(*wxBLUE);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_colPlayer));
     attr.SetReadOnly(FALSE);
   }
   return attr;

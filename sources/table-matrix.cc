@@ -33,19 +33,6 @@
 
 #include "sheet.h"     // the wxSheet widget
 
-// We hard-code player colors for now; these should be properties
-// of the game document, and user-configurable.
-static wxColour s_colors[8] =
-  { wxColour(255, 0, 0),
-    wxColour(0, 0, 255),
-    wxColour(0, 128, 0),
-    wxColour(255, 128, 0),
-    wxColour(0, 0, 64),
-    wxColour(128, 0, 255),
-    wxColour(64, 0, 0),
-    wxColour(255, 128, 255)
-  };
-
 //-----------------------------------------------------------------------
 //                  class gbtPlayerLabelCtrl
 //-----------------------------------------------------------------------
@@ -106,11 +93,11 @@ void gbtPlayerLabelCtrl::OnDraw(wxDC &p_dc)
   wxColour color;
   if (m_rowPlayer) {
     label = m_view->GetDocument()->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetLabel().c_str();
-    color = s_colors[(m_view->GetRowPlayer() - 1) % 8];
+    color = m_view->GetDocument()->GetPlayerColor(m_view->GetRowPlayer());
   }
   else {
     label = m_view->GetDocument()->GetGame()->GetPlayer(m_view->GetColPlayer())->GetLabel().c_str();
-    color = s_colors[(m_view->GetColPlayer() - 1) % 8];
+    color = m_view->GetDocument()->GetPlayerColor(m_view->GetColPlayer());
   }
   
   p_dc.GetTextExtent(label, &width, &height);
@@ -234,7 +221,7 @@ void gbtTablePlayerCtrl::OnDraw(wxDC &p_dc)
   wxString label = (game->GetPlayer(player)->GetLabel() +
 		    " plays strategy " +
 		    game->GetPlayer(player)->GetStrategy(strat)->GetLabel()).c_str();
-  wxColour color = s_colors[(player - 1) % 8];
+  wxColour color = m_view->GetDocument()->GetPlayerColor(player);
   
   p_dc.GetTextExtent(label, &width, &height);
   p_dc.SetTextForeground(color);
@@ -294,7 +281,7 @@ private:
 
   void OnPaint(wxPaintEvent &);
   void OnSize(wxSizeEvent &);
-  
+
 public:
   gbtTableChoiceCtrl(gbtTableMatrix *p_parent);
 
@@ -340,6 +327,11 @@ void gbtTableChoiceCtrl::OnPaint(wxPaintEvent &)
   dc.DrawText("Choices:",
 	      (100 - textWidth) / 2,
 	      GetClientSize().GetHeight() / 2);
+
+  // Force refreshing of child windows as well
+  for (int pl = 0; pl < m_parent->GetDocument()->GetGame()->NumPlayers() - 2; pl++) {
+    m_players[pl]->Refresh();
+  }
 }
 
 void gbtTableChoiceCtrl::OnSize(wxSizeEvent &)
@@ -560,7 +552,7 @@ wxSheetCellAttr gbtMatrixSheet::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    attr.SetForegroundColour(s_colors[(m_view->GetRowPlayer() - 1) % 8]);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));
     return attr;
   }
   else if (IsColLabelCell(p_coords)) {
@@ -569,7 +561,7 @@ wxSheetCellAttr gbtMatrixSheet::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    attr.SetForegroundColour(s_colors[(m_view->GetColPlayer() - 1) % 8]);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetColPlayer()));
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
@@ -582,13 +574,13 @@ wxSheetCellAttr gbtMatrixSheet::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   switch (p_coords.GetCol() % m_doc->GetGame()->NumPlayers()) {
   case 0:
-    attr.SetForegroundColour(s_colors[(m_view->GetRowPlayer() - 1) % 8]);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));
     break;
   case 1:
-    attr.SetForegroundColour(s_colors[(m_view->GetColPlayer() - 1) % 8]);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetColPlayer()));
     break;
   default:
-    attr.SetForegroundColour(s_colors[(m_view->GetTablePlayer(p_coords.GetCol() % m_doc->GetGame()->NumPlayers() - 1) - 1) % 8]);
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetTablePlayer(p_coords.GetCol() % m_doc->GetGame()->NumPlayers() - 1)));
     break;
   }
 			   

@@ -24,11 +24,27 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+// Dependency on wxWidgets due to wxColour
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif  // WX_PRECOMP
+
+
 #include "game-document.h"
 
 gbtGameDocument::gbtGameDocument(const gbtGame &p_game)
   : m_game(p_game)
-{ }
+{
+  m_playerColor[0] = wxColour(255, 0, 0);
+  m_playerColor[1] = wxColour(0, 0, 255);
+  m_playerColor[2] = wxColour(0, 128, 0);
+  m_playerColor[3] = wxColour(255, 128, 0);
+  m_playerColor[4] = wxColour(0, 0, 64);
+  m_playerColor[5] = wxColour(128, 0, 255);
+  m_playerColor[6] = wxColour(64, 0, 0);
+  m_playerColor[7] = wxColour(255, 128, 255);
+}
 
 
 void gbtGameDocument::AddView(gbtGameView *p_view)
@@ -43,6 +59,17 @@ void gbtGameDocument::RemoveView(gbtGameView *p_view)
 void gbtGameDocument::UpdateViews(void)
 {
   for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate());
+}
+
+wxColour gbtGameDocument::GetPlayerColor(int p_player) const
+{
+  return m_playerColor[(p_player - 1) % 8];
+}
+
+void gbtGameDocument::SetPlayerColor(int p_player, const wxColour &p_color)
+{
+  m_playerColor[(p_player - 1) % 8] = p_color;
+  UpdateViews();
 }
 
 

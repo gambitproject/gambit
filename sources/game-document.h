@@ -36,6 +36,9 @@ class gbtGameDocument {
 private:
   gbtGame m_game;
 
+  // Properties
+  wxColour m_playerColor[8];
+
   // Management of view list
   gbtList<gbtGameView *> m_views;
   void AddView(gbtGameView *);
@@ -47,12 +50,17 @@ public:
 
   const gbtGame &GetGame(void) const { return m_game; }
 
-  // non-const member access to control updating of views;
+  // non-const member access to control updating of views
   gbtGameOutcome NewOutcome(void) 
     { gbtGameOutcome r = m_game->NewOutcome(); UpdateViews(); return r; }
   void SetPayoff(gbtGameOutcome p_outcome,
 		 const gbtGamePlayer &p_player, const gbtRational &p_value)
     { p_outcome->SetPayoff(p_player, p_value); UpdateViews(); }
+
+
+  // Various properties of the document
+  wxColour GetPlayerColor(int p_index) const;
+  void SetPlayerColor(int p_index, const wxColour &);
 };
 
 
