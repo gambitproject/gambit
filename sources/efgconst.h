@@ -56,6 +56,10 @@ typedef enum {
   efgmenuEDIT_TREE_MOVE = 1307,
   efgmenuEDIT_TREE_INFOSETS = 1310,
 
+  efgmenuEDIT_MASS_ALL = 1330,
+  efgmenuEDIT_MASS_ACTION = 1332,
+  efgmenuEDIT_MASS = 1331,
+
   efgmenuSUBGAME_MARKALL = 1350,
   efgmenuSUBGAME_MARK = 1351,
   efgmenuSUBGAME_UNMARKALL = 1352,

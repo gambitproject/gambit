@@ -105,6 +105,8 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_TREE_LABEL, EfgShow::OnEditTreeLabel)
   EVT_MENU(efgmenuEDIT_TREE_PLAYERS, EfgShow::OnEditTreePlayers)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
+  EVT_MENU(efgmenuEDIT_MASS_ALL, EfgShow::OnEditMassAll)
+  EVT_MENU(efgmenuEDIT_MASS_ACTION, EfgShow::OnEditMassAction)
   EVT_MENU(efgmenuSUBGAME_MARKALL, EfgShow::OnSubgamesMarkAll)
   EVT_MENU(efgmenuSUBGAME_MARK, EfgShow::OnSubgamesMark)
   EVT_MENU(efgmenuSUBGAME_UNMARKALL, EfgShow::OnSubgamesUnMarkAll)
@@ -558,6 +560,17 @@ void EfgShow::MakeMenus(void)
 		    "Edit outcomes and payoffs");
   edit_menu->Append(efgmenuEDIT_TREE, "&Tree", tree_menu,
 		    "Edit the tree");
+  edit_menu->AppendSeparator();
+
+  wxMenu *massAddMenu = new wxMenu;
+  massAddMenu->Append(efgmenuEDIT_MASS_ALL, "&All",
+		      "Append to all terminal nodes");
+  massAddMenu->Append(efgmenuEDIT_MASS_ACTION, "A&fter action",
+		      "Append after a given action");
+
+  edit_menu->Append(efgmenuEDIT_MASS, "Mass add...", massAddMenu,
+		    "Mass append operations");
+  
 
   wxMenu *subgame_menu = new wxMenu;
   subgame_menu->Append(efgmenuSUBGAME_MARKALL, "Mark &All",
@@ -1334,6 +1347,90 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 {
   dialogInfosets dialog(m_efg, this);
   dialog.ShowModal();
+}
+
+void EfgShow::OnEditMassAll(wxCommandEvent &)
+{
+  static int branches = 2; // make this static so it remembers the last entry
+  static EFPlayer *player = 0;
+  static Infoset *infoset = 0;
+  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+
+  if (last_ef != &m_efg)  {
+    player = 0;
+    infoset = 0;
+    last_ef = &m_efg;
+  }
+    
+  dialogMoveAdd dialog(this, m_efg, "Add move to all terminal nodes",
+		       player, infoset, branches);
+
+  if (dialog.ShowModal() == wxID_OK)  {
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
+
+    if (mode == NodeAddNew) {
+      infoset = m_efg.CreateInfoset(player, branches);
+    }
+    try {
+      gList<Node *> terminals = m_efg.TerminalNodes();
+
+      for (int i = 1; i <= terminals.Length(); i++) {
+	m_efg.AppendNode(terminals[i], infoset);
+      }
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
+}
+
+void EfgShow::OnEditMassAction(wxCommandEvent &)
+{
+  static int branches = 2; // make this static so it remembers the last entry
+  static EFPlayer *player = 0;
+  static Infoset *infoset = 0;
+  static Efg *last_ef = 0; // need this to make sure player,infoset are valid
+
+  if (m_efg.NumPlayerInfosets() == 0) {
+    return;
+  }
+
+  if (last_ef != &m_efg)  {
+    player = 0;
+    infoset = 0;
+    last_ef = &m_efg;
+  }
+    
+  dialogMoveAddAfterAction dialog(this, m_efg,
+				  "Add move after an action",
+				  player, infoset, branches);
+
+  if (dialog.ShowModal() == wxID_OK)  {
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
+    Action *ancestor = dialog.GetAncestor();
+
+    if (mode == NodeAddNew) {
+      infoset = m_efg.CreateInfoset(player, branches);
+    }
+    try {
+      gList<Node *> terminals = m_efg.TerminalNodes();
+
+      for (int i = 1; i <= terminals.Length(); i++) {
+	if (terminals[i]->GetAction() == ancestor) {
+	  m_efg.AppendNode(terminals[i], infoset);
+	}
+      }
+    }
+    catch (gException &ex) {
+      guiExceptionDialog(ex.Description(), this);
+    }
+  }
 }
 
 void EfgShow::OnSubgamesMarkAll(wxCommandEvent &)

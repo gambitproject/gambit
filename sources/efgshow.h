@@ -107,6 +107,9 @@ private:
   void OnEditTreePlayers(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
+  void OnEditMassAll(wxCommandEvent &);
+  void OnEditMassAction(wxCommandEvent &);
+
   void OnSubgamesMarkAll(wxCommandEvent &);
   void OnSubgamesMark(wxCommandEvent &);
   void OnSubgamesUnMarkAll(wxCommandEvent &);
