@@ -25,4 +25,4 @@ public:
   int Length(void) {return equs.Length();}
 };
 
-#endif
+#endif //  EQUTRAC_H

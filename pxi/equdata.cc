@@ -13,7 +13,8 @@ FileHeader::FileHeader(const FileHeader &F):
   merror(F.merror),q_step(F.q_step),e_step(F.e_step),e_start(F.e_start),e_stop(F.e_stop),data_type(F.data_type),
   strategies(F.strategies),num_columns(F.num_columns),num_infosets(F.num_infosets),
   e_column(F.e_column),delta_column(F.delta_column),prob_cols(F.prob_cols),
-  matrix((F.matrix) ? new NormalMatrix(*F.matrix) : 0),file_name(F.file_name),
+  //  matrix((F.matrix) ? new NormalMatrix(*F.matrix) : 0),file_name(F.file_name),
+  file_name(F.file_name),
   data_max(F.data_max),data_min(F.data_min)
 { }
 
@@ -23,7 +24,7 @@ FileHeader &FileHeader::operator=(const FileHeader &F)
   strategies=F.strategies;
   num_columns=F.num_columns;num_infosets=F.num_infosets;
   e_column=F.e_column;delta_column=F.delta_column;prob_cols=F.prob_cols;
-  matrix=(F.matrix) ? new NormalMatrix(*F.matrix) : 0;
+  //  matrix=(F.matrix) ? new NormalMatrix(*F.matrix) : 0;
   file_name=F.file_name;
   data_max=F.data_max;data_min=F.data_min;
   return (*this);
@@ -54,11 +55,13 @@ void FileHeader::Init(gInput &in)
   // Get the optional data
   // Get the game matrix if available
   ok=FindStringInFile(in,"Game:");
+  /*
   // The game matrix reading is only implemented for 2 player square games.
   if (ok && num_infosets==2 && strategies[1]==strategies[2]) 
     matrix=new NormalMatrix(in); 
   else matrix=0;
   // Get the extra data if available
+  */
   ok=FindStringInFile(in,"Extra:");
   if (ok) in>>ok;	// Check ReadExtra
   if (ok) in>>merror>>q_step;
@@ -75,8 +78,10 @@ gOutput &operator<<(gOutput &op,const FileHeader &f)
   // Output the x/y data settings/scales
   op<<"Settings:\n";
   op<<f.e_start<<'\n'<<f.e_stop<<'\n'<<f.e_step<<'\n'<<f.data_min<<'\n'<<f.data_max<<'\n'<<f.data_type<<'\n';
+  /*
   // Output the game matrix if we have it
-  if (f.matrix) {op<<"Game:\n";f.matrix->WriteMatrix(op);}
+  //  if (f.matrix) {op<<"Game:\n";f.matrix->WriteMatrix(op);}
+  */
   // Output the extra stuff if we have it
   if (f.merror>0) op<<"Extra:\n"<<f.merror<<'\n'<<f.q_step<<'\n';
   // Output the data format

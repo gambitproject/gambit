@@ -16,21 +16,22 @@ double EquTracker::Distance(const PointNd &first,const PointNd &second)
 }
 
 /*************************** CLOSEST **************************************/
+
 int EquTracker::Closest(const DataLine &this_line)
 {
-  int			i,j;
-  double	temp;
-  double 	least_so_far=LARGE_NUMBER,least_pos=1;
+  int i,j;
+  double temp;
+  double least_so_far=LARGE_NUMBER,least_pos=1;
   
   // Find which curve this point is closest to: find the distance to each curve
   for (i=1;i<=equs.Length();i++) {
-    if (equs[i].NumInfosets()==this_line.NumInfosets())	// if not, there is no way i is the right equ #
-      {
-	temp=0.0;
-	for (j=1;j<=this_line.NumInfosets();j++)
-	  temp+=Distance(equs[i][j],this_line[j]);
-	if (temp<least_so_far) {least_so_far=temp;least_pos=i;}
-      }
+	// if not, there is no way i is the right equ #
+    if (equs[i].NumInfosets()==this_line.NumInfosets()) {
+      temp=0.0;
+      for (j=1;j<=this_line.NumInfosets();j++)
+	temp+=Distance(equs[i][j],this_line[j]);
+      if (temp<least_so_far) {least_so_far=temp;least_pos=i;}
+    }
   }
   if (least_so_far<merror)
     return least_pos;
@@ -47,12 +48,12 @@ int EquTracker::Check_Equ(const DataLine &dl,int *new_equ,DataLine *prev_point)
    */
   /*-------------------find closest curve---------------*/
   int equ_num=0;
-  int	found_new=0;
+  int found_new=0;
   if (new_equ)	(*new_equ)=FALSE;
   if ((equ_num=Closest(dl))==0) {
     equs.Append(dl);
     equ_num=equs.Length();
-    if (new_equ)	(*new_equ)=TRUE;
+    if (new_equ) (*new_equ)=TRUE;
     found_new=1;
   }
   // If we just found a new equilibrium, return this point as the previous point 

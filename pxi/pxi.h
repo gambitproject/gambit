@@ -1,4 +1,6 @@
+//
 // Program: PXI.  [Plot X V2.0]
+//
 // This program is designed to plot data from simulations/experiments on
 // normal form games [support for other types of generic infoset/player games
 // is now being implemented].  The basic structure of the file contains the
@@ -44,7 +46,6 @@
 #define	PXI_DISPLAY_OPTIONS   128
 
 #define PXI_DATA_GRID         205
-#define PXI_DATA_ONEDOT       210
 #define PXI_DATA_OVERLAY_DATA 215
 #define PXI_DATA_OVERLAY_FILE 220
 
@@ -277,9 +278,6 @@ public:
 
   void LoadFile(const wxString &);
 
-  void MakeOneDot(char *in_filename=NULL,char *out_filename=NULL);
-  //  char *MakeDataFile(void);
-
   DECLARE_EVENT_TABLE()
 };
 
@@ -292,7 +290,6 @@ private:
   void OnGrid(wxCommandEvent &);
   void OnOverlayData(wxCommandEvent &);
   void OnOverlayFile(wxCommandEvent &);
-  void OnOneDot(wxCommandEvent &);
   void OnFileDetail(wxCommandEvent &);
   void OnFileOutput(wxCommandEvent &);
   void OnDisplayOptions(wxCommandEvent &);

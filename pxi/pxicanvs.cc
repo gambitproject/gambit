@@ -14,10 +14,8 @@
 #include "general.h"
 #include "gambitio.h"
 #include "arrays.h"
-#include "equtrac.h"
-#include "normequs.h"
 #include "expdata.h"
-#include "onedot.h"
+#include "equtrac.h"
 #include "pxi.h"
 #include "axis.h"
 

@@ -52,10 +52,7 @@
 #include "general.h"
 #include "gambitio.h"
 #include "arrays.h"
-#include "equtrac.h"
-#include "normequs.h"
 #include "expdata.h"
-#include "onedot.h"
 #include "pxi.h"
 #include "axis.h"
 
@@ -289,7 +286,6 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_DATA_GRID, PxiChild::OnGrid)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
-  EVT_MENU(PXI_DATA_ONEDOT, PxiChild::OnOneDot)
   EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
   EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
   EVT_MENU(PXI_ABOUT, PxiChild::OnHelpAbout)
@@ -313,10 +309,6 @@ void PxiChild::OnOverlayFile(wxCommandEvent &)
   canvas->MakeOverlayFile();
   wxClientDC dc(this);
   canvas->Update(dc,PXI_UPDATE_SCREEN);
-}
-
-void PxiChild::OnOneDot(wxCommandEvent &)
-{
 }
 
 void PxiChild::OnFileDetail(wxCommandEvent &)
@@ -392,7 +384,6 @@ void PxiChild::MakeMenus(void)
   data_menu->Append(PXI_DATA_GRID,"&GridSolver","Create a new file");
   data_menu->Append(PXI_DATA_OVERLAY_DATA, "&Overlay Data");
   data_menu->Append(PXI_DATA_OVERLAY_FILE, "&Overlay File");
-  data_menu->Append(PXI_DATA_ONEDOT, "One&Dot");
   
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(PXI_ABOUT,"&About PlotX");
@@ -459,6 +450,7 @@ void PxiCanvas::ShowDetail(void)
     sprintf(tempstr,"Margin of error:      %4.4f\n",header.MError());
     message+=tempstr;
   }
+  /*
   if (header.Matrix()) {
     sprintf(tempstr,"Matrix dimensions:    %d x %d\n",header.Matrix()->DimX(),header.Matrix()->DimY());
     message+=tempstr;
@@ -471,6 +463,7 @@ void PxiCanvas::ShowDetail(void)
       message+='\n';
     }
   }
+*/
   wxMessageBox(message,"File Details",wxOK);
 }
 
@@ -513,25 +506,6 @@ void PxiCanvas::MakeOverlayFile(void)
     else
       headers.Append(temp_header);
   }
-}
-
-void PxiFrame::MakeOneDot(char *in_filename,char *out_filename)
-{
-  char *inname,*outname;
-  if (!in_filename) {
-    const char *s=wxFileSelector("Enter Input File", NULL, NULL, NULL, "*.out");
-    if (s) inname=copystring(s); else return;
-  }
-  else inname=copystring(in_filename);
-  if (!out_filename) {
-    const char *s=wxFileSelector("Enter Output File", NULL, NULL, NULL, "*.out");
-    if (s) outname=copystring(s); else return;
-  }
-  else outname=copystring(out_filename);
-  OneDot one_dot;
-  one_dot.Go(inname,outname);
-  delete [] outname;
-  delete [] inname;
 }
 
 void PxiCanvas::OnChar(wxKeyEvent &ev)
@@ -808,54 +782,6 @@ unsigned long calc_num_steps(int dim,int steps)
   for (temp=steps+dim-1;temp>steps;temp--) temp1*=temp;
   return (temp1/factorial(dim-1));
 }
-
-#ifdef UNUSED
-char *PxiFrame::MakeDataFile(void)
-{
-  char *out_file_name=NULL;
-  // Create the settings dialog, get the settings
-  NormalCalcSettings *settings=new NormalCalcSettings;
-  // Create the normal form game calculator, and solve the game
-  if (settings->Completed()==wxOK) {
-    if (settings->GotMatrix()) {
-      NormalEquSolver *solver=new NormalEquSolver(settings->GetMatrix(),
-						  settings->GetLStart(),settings->GetLStop(),settings->GetLStep(),
-						  settings->GetPStep(),settings->GetMError(),settings->GetDataType(),
-						  settings->GetFileName());
-      solver->SetUpdateFunc(solver_update_func);
-      
-      double bench=bench_mark();
-      bench=0.00015;
-      double l_steps;
-      double num_steps;
-      num_steps=(double)calc_num_steps(settings->GetMatrix()->Dim(),(int)(1.0/settings->GetPStep()+0.03));
-      if (settings->GetDataType()==DATA_TYPE_ARITH)
-	l_steps=(settings->GetLStop()-settings->GetLStart())/settings->GetLStep();
-      else
-	l_steps=log(settings->GetLStop()/settings->GetLStart())/log(settings->GetLStep());
-      long total_time=(long)(bench*(double)settings->GetMatrix()->Dim()*l_steps*num_steps);
-      long secs=total_time;
-      sprintf(tempstr,"This will take approximately %02ld:%02ld",secs/60,secs%60);
-      int go=wxMessageBox(tempstr,"Time projection",wxOK|wxCANCEL|wxCENTRE);
-      if (go==wxOK) {
-	wxProgressIndicator1 *progress=new wxProgressIndicator1();
-	solver_update_func1((int)(l_steps+0.03),progress);
-	solver->Go();
-	delete progress;
-	// Get the output file name and clean up
-	out_file_name=copystring(solver->GetOutFileName());
-	if (settings->OneDot())	MakeOneDot(out_file_name,out_file_name);
-      }
-      delete solver;
-    }
-    else {
-      wxMessageBox("No game defined or entered","Error",wxOK | wxCENTRE);
-    }
-  }
-  delete settings;
-  return (out_file_name);
-}
-#endif // UNUSED
 
 void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
