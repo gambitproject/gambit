@@ -787,48 +787,38 @@ static Portion *GSM_Parentheses(Portion **param)
 }
 
 
-//-----------------------------------------------------------------
-//    NewStream function - possibly belong somewhere else
-//-----------------------------------------------------------------
+//----------
+// Output
+//----------
 
-
-Portion* GSM_NewOutputStream(Portion** param)
+Portion* GSM_Output(Portion** param)
 {
-  Portion* result = 0;
-  gOutput* g;
-  
   gText filename = ((TextPortion*) param[0])->Value();
   bool append = ((BoolPortion*) param[1])->Value();
 
-  try{
-    g = new gFileOutput(filename, append);
-    result = new OutputPortion(*g);    
+  try  {
+    return new OutputPortion(*new gFileOutput(filename, append));
   }
-  catch(gFileInput::OpenFailed &) {
-    result = new ErrorPortion((gText) "Error opening file \"" + 
+  catch (gFileInput::OpenFailed &) {
+    return new ErrorPortion((gText) "Error opening file \"" +
 			      ((TextPortion*) param[0])->Value() + "\"");
   }
-  return result;
 }
 
 
-Portion* GSM_NewInputStream(Portion** param)
-{
-  Portion* result = 0;
-  gInput* g;
-  
-  assert(param[0]->Spec().Type == porTEXT);
+//--------
+// Input
+//--------
 
+Portion* GSM_Input(Portion** param)
+{
   try {
-  g = new gFileInput(((TextPortion*) param[0])->Value());
-  result = new InputPortion(*g);
+    return new InputPortion(*new gFileInput(((TextPortion*) param[0])->Value()));
   }
-  catch(gFileInput::OpenFailed &) {
-    result = new ErrorPortion((gText) "Error opening file \"" + 
+  catch (gFileInput::OpenFailed &) {
+    return new ErrorPortion((gText) "Error opening file \"" +
 			      ((TextPortion*) param[0])->Value() + "\"");
   }
-
-  return result;
 }
 
 
@@ -1179,11 +1169,9 @@ Portion* GSM_Read_Text(Portion** param)
 Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 		       Portion* (*func) (Portion**), bool ListFormat)
 {
-  Portion* p = NULL;
   Portion* sub_param[2];
-  ListPortion* list = NULL;
-  int i = 0;
-  char c = ' ';  
+  ListPortion* list;
+  char c = ' ';
   gInput& input = ((InputPortion*) param[0])->Value();
   list = ((ListPortion*) param[1]);
   long old_pos = input.getpos();
@@ -1215,8 +1203,10 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 
 
 
-  for(i=1; i <= list->Length(); i++)
+  for(int i=1; i <= list->Length(); i++)
   {
+    Portion* p;
+
     assert((*list)[i]->Spec().Type==spec.Type);
     sub_param[0] = param[0];
     sub_param[1] = (*list)[i];
@@ -1257,11 +1247,10 @@ Portion* GSM_Read_List(Portion** param, PortionSpec spec,
       //   correct...
       assert( p == param[0] );
       assert( sub_param[0] != param[0] );
-      
+
       // delete and swap
       delete sub_param[0];
       sub_param[0] = p;
-      p = NULL;
     }
   }
 
@@ -1484,7 +1473,7 @@ Portion* GSM_Manual(Portion** param)
 	while(true) {
 	  char* s;
 	  int idx;
-	  int numchars = 0;
+	  int numchars;
 	  if((s=strstr((char *) line_out, "\\bd")) != 0)
 	    numchars = 3;
 	  else if((s=strstr((char *) line_out, "\\ed")) != 0)
@@ -1581,11 +1570,9 @@ Portion* GSM_SetEnv( Portion** param )
   if( ((TextPortion*) param[0])->Value().Length() == 0 )
     return new ErrorPortion( "Invalid environment variable name" );
 
-  int result = 0;
-  result = System::SetEnv( ((TextPortion*) param[0])->Value(),
-			   ((TextPortion*) param[1])->Value() );
-  if( result == 0 )
-    return new BoolPortion( true );
+  if (System::SetEnv(((TextPortion*) param[0])->Value(),
+			               ((TextPortion*) param[1])->Value()) == 0)
+    return new BoolPortion(true);
   else
     return new ErrorPortion( "Insufficient environment space" );
 }
@@ -1595,9 +1582,7 @@ Portion* GSM_UnSetEnv( Portion** param )
   if( ((TextPortion*) param[0])->Value().Length() == 0 )
     return new ErrorPortion( "Invalid environment variable name" );
 
-  int result = 0;
-  result = System::UnSetEnv( ((TextPortion*) param[0])->Value() );
-  if( result == 0 )
+  if (System::UnSetEnv(((TextPortion*) param[0])->Value()) == 0)
     return new BoolPortion( true );
   else
     return new ErrorPortion( "Insufficient environment space" );
@@ -1608,23 +1593,18 @@ Portion* GSM_Shell( Portion** param )
   gText str = ((TextPortion*) param[0])->Value();
   bool spawn = ((BoolPortion*) param[1])->Value();
 
-  int result = -1;
-  if( !spawn )
-  {
-    if( str.Length() > 0 )
-      result = System::Shell( str );
+  if (!spawn)  {
+    if (str.Length() > 0)
+      return new IntPortion(System::Shell(str));
     else
-      result = System::Shell( 0 );
+      return new IntPortion(System::Shell(0));
   }
-  else
-  {
-    if( str.Length() > 0 )
-      result = System::Spawn( str );
+  else  {
+    if (str.Length() > 0)
+      return new IntPortion(System::Spawn(str));
     else
-      result = System::Spawn( 0 );
+      return new IntPortion(System::Spawn(0));
   }
-
-  return new IntPortion( result );
 }
 
 
@@ -1920,19 +1900,17 @@ void Init_gsmoper(GSM* gsm)
   for (int i = 0; ftable[i].sig != 0; i++)
     gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func));
 
-  //-------------------- NewStream -------------------------
+  //-------------------- Streams -------------------------
 
   FuncObj = new FuncDescObj("Output", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutputStream, 
-				       porOUTPUT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Output, porOUTPUT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("append", porBOOL,
 					    new BoolPortion( false )));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Input", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInputStream, 
-				       porINPUT, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Input, porINPUT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
