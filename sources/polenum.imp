@@ -121,7 +121,7 @@ template <class T> int
 PolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
 {
   MixedProfile<double> profile(support);
-  int i,j,k,kk,index;
+  int i,j,k,kk,index=0;
   double sum;
 
   for(k=1;k<=list.Length();k++) {
