@@ -36,8 +36,8 @@ int main()
   gz = "1 - 5n4"; pz = gz;
 */
 
-/* simple test of root solving */
-  gw = "2 - 9n1 + 9n1^2"; pw = gw;
+/* simple test of root solving, jazzed up a bit */
+  gw = "2 - 9n1 + 9n1^2 + 5n1 * n2 * n3"; pw = gw;
   gx = "2 - 9n2 + 9n2^2"; px = gx;
   gy = "2 - 9n3 + 9n3^2"; py = gy;
   gz = "2 - 9n4 + 9n4^2"; pz = gz;
