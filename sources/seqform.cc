@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 
 SeqFormParams::SeqFormParams(gStatus &status_) 
-  : trace(0), stopAfter(0), precision(precDOUBLE),
+  : trace(0), stopAfter(0), maxdepth(0), precision(precDOUBLE),
     tracefile(&gnull), status(status_)
 { }
 
