@@ -112,125 +112,80 @@ void NfgShow::UpdateVals(void)
 }
 
 
-// ****************************** NORM SHOW::UPDATE Soln
-
-MixedProfile<gNumber> FitToSupport(const MixedProfile<gNumber> &from, const NFSupport &sup_to)
-{
-    const NFSupport &sup_from = from.Support();
-
-    if (sup_to == sup_from)
-        return from;
-
-    gArray<int> dim_from = sup_from.NumStrats();
-    gArray<int> dim_to = sup_to.NumStrats();
-    assert(dim_from.Length() == dim_to.Length());
-    MixedProfile<gNumber> to(sup_to);
-
-    for (int i = 1; i <= dim_to.Length(); i++)
-    {
-        for (int j = 1; j <= dim_to[i]; j++)
-        {
-            Strategy *s = sup_to.Strategies(i)[j];
-            int strat = sup_from.Strategies(i).Find(s);
-
-            if (strat)
-                to(i, j) = from(i, strat);
-            else 
-                to(i, j) = 0;
-        }
-    }
-
-    return to;
-}
-
-
 void NfgShow::UpdateSoln(void)
 {
-    if (!cur_soln)
-        return;
+  if (!cur_soln)  return;
 
-    // The profile is obvious for pure strategy: just set the display strat
-    // to the nonzero solution strategy.  However, for mixed equs, we set
-    // the display strategy to the highest soluton strat.  (Note that
-    // MixedSolution.Pure() is not yet implemented :( Add support for
-    // displaying solutions created for supports other than disp_sup
+  // The profile is obvious for pure strategy: just set the display strat
+  // to the nonzero solution strategy.  However, for mixed equs, we set
+  // the display strategy to the highest soluton strat.  (Note that
+  // MixedSolution.Pure() is not yet implemented :( Add support for
+  // displaying solutions created for supports other than disp_sup
 
-    MixedProfile<gNumber> soln = 
-        FitToSupport((const MixedProfile<gNumber> &)solns[cur_soln], *disp_sup);
-    gNumber t_max;
-    gArray<int> profile(nf.NumPlayers());
+  MixedSolution soln = solns[cur_soln];
+  gNumber t_max;
+  gArray<int> profile(nf.NumPlayers());
 
-    // Figure out the index in the disp_sup, then map it onto the full support
-    int pl;
+  // Figure out the index in the disp_sup, then map it onto the full support
+  for (int pl = 1; pl <= nf.NumPlayers(); pl++) {
+    profile[pl] = 1;
+    t_max = soln(nf.Players()[pl]->Strategies()[1]);
 
-    for (pl = 1; pl <= nf.NumPlayers(); pl++)
-    {
-        profile[pl] = 1;
-        t_max = soln(pl, 1);
-
-        for (int st1 = 1; st1 <= disp_sup->NumStrats(pl); st1++)
-        {
-            if (soln(pl, st1) > t_max)
-            {
-                profile[pl] = st1;
-                t_max = soln(pl, st1);
-            }
-        }
+    for (int st1 = 1; st1 <= disp_sup->NumStrats(pl); st1++) {
+      if (soln(disp_sup->Strategies(pl)[st1]) > t_max) {
+	profile[pl] = st1;
+	t_max = soln(disp_sup->Strategies(pl)[st1]);
+      }
     }
+  }
 
-    UpdateProfile(profile);
+  UpdateProfile(profile);
 
-    // Set the profile boxes to correct values if this is a pure equ
-    spread->SetProfile(profile);
+  // Set the profile boxes to correct values if this is a pure equ
+  spread->SetProfile(profile);
 
-    // Hilight the cells w/ nonzero prob
-    int st1;
-    gNumber eps;
-    gEpsilon(eps, spread->DrawSettings()->NumPrec()+1);
-
-    for (st1 = 1; st1 <= rows; st1++)
-    {
-        for (int st2 = 1; st2 <= cols; st2++)
-        {
-            if (soln(pl1, st1) > eps && soln(pl2, st2) > eps)
-                spread->HiLighted(st1, st2, 0, TRUE);
-            else
-                spread->HiLighted(st1, st2, 0, FALSE);
-        }
+  // Hilight the cells w/ nonzero prob
+  gNumber eps;
+  gEpsilon(eps, spread->DrawSettings()->NumPrec()+1);
+ 
+  for (int st1 = 1; st1 <= rows; st1++) {
+    for (int st2 = 1; st2 <= cols; st2++) {
+      if (soln(disp_sup->Strategies(pl1)[st1]) > eps
+	  && soln(disp_sup->Strategies(pl2)[st2]) > eps)
+	spread->HiLighted(st1, st2, 0, TRUE);
+      else
+	spread->HiLighted(st1, st2, 0, FALSE);
     }
+  }
 
 
-    if (spread->HaveProbs())
-    {
-        // Print out the probability in the next column/row
-        int i;
+  if (spread->HaveProbs()) {
+    // Print out the probability in the next column/row
+    for (int i = 1; i <= rows; i++)
+      spread->SetCell(i, cols+1,
+		      ToText(soln(disp_sup->Strategies(pl1)[i])));
 
-        for (i = 1; i <= rows; i++)
-            spread->SetCell(i, cols+1, ToText(soln(pl1, i)));
+    for (int i = 1; i <= cols; i++)
+      spread->SetCell(rows+1, i, 
+		      ToText(soln(disp_sup->Strategies(pl2)[i])));
+  }
 
-        for (i = 1; i <= cols; i++)
-            spread->SetCell(rows+1, i, ToText(soln(pl2, i)));
+  if (spread->HaveVal()) {
+    // Print out the probability in the last column/row
+    for (int i = 1; i <= rows; i++) {
+      spread->SetCell(i, cols+spread->HaveProbs()+spread->HaveDom()+1, 
+		      ToText(soln.Payoff(nf.Players()[pl1],
+					 disp_sup->Strategies(pl1)[i])));
     }
-
-    if (spread->HaveVal())
-    {
-        // Print out the probability in the last column/row
-        int i, j;
-
-        for (i = 1; i <= rows; i++)
-        {
-            spread->SetCell(i, cols+spread->HaveProbs()+spread->HaveDom()+1, 
-                            ToText(soln.Payoff(pl1, pl1, i)));
-        }
-
-        for (j = 1; j <= cols; j++)
-        {
-            spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1, j, 
-                            ToText(soln.Payoff(pl2, pl2, j)));
-        }
+    
+    for (int j = 1; j <= cols; j++) {
+      spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1, j, 
+		      ToText(soln.Payoff(nf.Players()[pl2],
+					 disp_sup->Strategies(pl2)[j])));
     }
+  }
 
-    spread->Repaint();
+  spread->Repaint();
 }
 
 
@@ -762,28 +717,28 @@ void NfgShow::Solve(int id)
 
   switch (id) {
   case NFG_SOLVE_CUSTOM_ENUMPURE:
-    solver = new NfgEnumPureG(nf, *cur_sup, this);
+    solver = new NfgEnumPureG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_ENUMMIXED:
-    solver = new NfgEnumG(nf, *cur_sup, this);
+    solver = new NfgEnumG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LCP:      
-    solver = new NfgLemkeG(nf, *cur_sup, this);
+    solver = new NfgLemkeG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LP:       
-    solver = new NfgZSumG(nf, *cur_sup, this);
+    solver = new NfgZSumG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LIAP:
-    solver = new NfgLiapG(nf, *cur_sup, this);
+    solver = new NfgLiapG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_SIMPDIV:
-    solver = new NfgSimpdivG(nf, *cur_sup, this);
+    solver = new NfgSimpdivG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_GOBIT:
-    solver = new NfgGobitG(nf, *cur_sup, this);
+    solver = new NfgGobitG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_GOBITGRID:
-    solver = new NfgGobitAllG(nf, *cur_sup, this);
+    solver = new NfgGobitAllG(nf, *sup, this);
     break;
   default:
     // shouldn't happen.  we'll ignore silently
