@@ -7,14 +7,15 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = E:\WX2
-BCCDIR = C:\BC5
+WXDIR = C:\WX2
+BCCDIR = C:\BORLAND\BCC55
+BISON = C:\CYGWIN\BIN\BISON
 
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
 # Define __BCC55__ if using Borland 5.5
-EXTRACPPFLAGS = -I$(BCCDIR)\include -I..\include -Ibase -Imath
+EXTRACPPFLAGS = -D__BCC55__ -I$(BCCDIR)\include -I..\include -Ibase -Imath
 EXTRALINKFLAGS = 
 
 !include make.filelist
@@ -80,13 +81,13 @@ wxgcl.res :      ..\winsrc\res\wxgcl.rc
     brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
 
 gcompile.cc:     gcompile.yy
-   ..\bisondos\bison -d -h gcompile.h -o gcompile.cc gcompile.yy 
+   $(BISON) -p gcl_yy -o gcompile.cc gcompile.yy
 
 readefg.cc:      readefg.yy
-   ..\bisondos\bison -d -h readefg.h -o readefg.cc readefg.yy
+   $(BISON) -p efg_yy -o readefg.cc readefg.yy
 
 readnfg.cc:      readnfg.yy
-   ..\bisondos\bison -d -h readnfg.h -o readnfg.cc readnfg.yy
+   $(BISON) -p nfg_yy -o readnfg.cc readnfg.yy
 
 clean:
         -erase *.obj
