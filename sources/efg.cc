@@ -1079,7 +1079,17 @@ template <class T> void ExtForm<T>::SetOutcomeValue(int outc, int pl, T value)
 
 template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
 {
-  f << "{ \"" << title << "\"\n\n{ ";
+  f << "{ \"" << title << "\" ";
+  switch (Type())   {
+    case DOUBLE:
+      f << "FLOAT";
+      break;
+    case RATIONAL:
+      f << "RATIONAL";
+      break;
+  }
+
+  f << "\n\n{ ";
   for (int i = 0; i <= players.Last(); i++)
     f << '"' << players[i] << '"' << ' ';
   f << "}\n\n";

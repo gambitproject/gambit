@@ -12,14 +12,15 @@
 
 %name EfgFileReader
 
-%define MEMBERS   gInput &infile;  ExtForm<double> *E;  \
+%define MEMBERS   gInput &infile;  BaseExtForm *E;  \
                   gString last_name;  int last_int;  double last_double; \
                   gRational last_rational; \
                   int playerNo, gameNo, isetNo, actNo, outcNo, errCode; \
                   Node node; \
                   struct nodeinfo info; \
-                  gVector<double> *outc; \
-                  gTuple<double> *v; \
+                  gVector<double> *outc_dbl; \
+                  gVector<gRational> *outc_rat; \
+                  gTuple<double> *prob_dbl;  gTuple<gRational> *prob_rat; \
                   gBlock<struct nodeinfo *> *nodelist; \
                             \
                   BaseExtForm *ReadEfgFile(void);
@@ -36,6 +37,9 @@
 %token RBRACE    262
 %token SLASH     263
 
+%token TYPEFLOAT 264
+%token TYPERAT   265
+
 %token NAME      270
 %token INTEGER   271
 %token FLOAT     272
@@ -43,9 +47,12 @@
 
 %%
 
-efgfile:    LBRACE NAME  { E = new ExtForm<double>(1);
-			   E->SetTitle(last_name); } 
+efgfile:    LBRACE NAME type { E->SetTitle(last_name); } 
             players outcomes games RBRACE  { return 0; }
+
+type:           { E = new ExtForm<double>(1); }
+    |       TYPEFLOAT    { E = new ExtForm<double>(1); }
+    |       TYPERAT      { E = new ExtForm<gRational>(1); }
 
 /* Parsing the player list */
 
@@ -69,10 +76,26 @@ outcome_list:  outcome
             |  outcome_list outcome
 
 outcome:    LBRACE INTEGER  { E->CreateOutcome(outcNo = last_int);
-            outc = new gVector<double>(E->NumPlayers());
+            switch (E->Type())   {
+              case DOUBLE:
+                outc_dbl = new gVector<double>(E->NumPlayers());
+		break;
+	      case RATIONAL:
+		outc_rat = new gVector<gRational>(E->NumPlayers());
+		break;
+	    }
             playerNo = 1; }
             outcome_vector
-            { E->SetOutcomeValues(outcNo, *outc);  delete outc; }
+            { switch (E->Type())   {
+   	        case DOUBLE:
+	          ((ExtForm<double> *) E)->SetOutcomeValues(outcNo, *outc_dbl);  delete outc_dbl;
+		  break;
+		case RATIONAL:
+		  ((ExtForm<gRational> *) E)->SetOutcomeValues(outcNo, *outc_rat);
+		  delete outc_rat;
+		  break;
+		}
+	    }
             NAME  { E->LabelOutcome(outcNo, last_name); }
             RBRACE
 
@@ -82,9 +105,36 @@ outcome_vector:  LBRACE RBRACE
 outcome_values:  outcome_value
               |  outcome_values outcome_value
 
-outcome_value:   FLOAT    { (*outc)[playerNo++] = last_double; }
-             |   INTEGER  { (*outc)[playerNo++] = last_int; }
-             |   RAT      { (*outc)[playerNo++] = (double) last_rational; }
+outcome_value:   FLOAT  
+          { switch (E->Type())   {
+              case DOUBLE:
+	        (*outc_dbl)[playerNo++] = last_double;
+	        break;
+	      case RATIONAL:
+	        (*outc_rat)[playerNo++] = last_double;
+	        break;
+            }
+	  }
+             |   INTEGER  
+          { switch (E->Type())   {
+   	      case DOUBLE:
+	        (*outc_dbl)[playerNo++] = last_int;
+		break;
+	      case RATIONAL:
+		(*outc_rat)[playerNo++] = last_int;
+		break;
+	      }
+	  }
+             |   RAT 
+          { switch (E->Type())   {
+ 	      case DOUBLE:
+	        (*outc_dbl)[playerNo++] = (double) last_rational;
+		break;
+	      case RATIONAL:
+		(*outc_rat)[playerNo++] = last_rational;
+		break;
+	      }
+	  }
 
 /* Parsing the game list */
 
@@ -125,16 +175,52 @@ action:         NAME
                E->LabelAction(gameNo, playerNo, isetNo, actNo++, last_name); }
 
 prob_list:      LBRACE
-            { v = new gTuple<double>(1, actNo - 1); actNo = 1; }
+            { switch (E->Type())   {
+	        case DOUBLE:
+	          prob_dbl = new gTuple<double>(1, actNo - 1);
+		  break;
+		case RATIONAL:
+		  prob_rat = new gTuple<gRational>(1, actNo - 1);
+		  break;
+	      }
+	      actNo = 1;
+	    }
                 probs RBRACE
-            { E->SetActionProbs(gameNo, isetNo, *v);
-              delete v;  }
+            { switch (E->Type())   {
+	        case DOUBLE:
+	          ((ExtForm<double> *) E)->SetActionProbs(gameNo, isetNo, *prob_dbl);
+		  delete prob_dbl;
+		  break;
+		case RATIONAL:
+		  ((ExtForm<gRational> *) E)->SetActionProbs(gameNo, isetNo, *prob_rat);
+		  delete prob_rat;
+		  break;
+                }
+	    }
 
 probs:          prob
      |          probs prob
 
-prob:           FLOAT  { (*v)[actNo++] = last_double; }
-    |           RAT   { (*v)[actNo++] = (double) last_rational; }
+prob:           FLOAT  { 
+                  switch (E->Type())  {
+		    case DOUBLE:
+		      (*prob_dbl)[actNo++] = last_double;
+		      break;
+		    case RATIONAL:
+		      (*prob_rat)[actNo++] = last_double;
+		      break;
+                  }
+		}
+    |           RAT   {
+                  switch (E->Type())  {
+		    case DOUBLE:
+		      (*prob_dbl)[actNo++] = (double) last_rational;
+		      break;
+		    case RATIONAL:
+		      (*prob_rat)[actNo++] = last_rational;
+		      break;
+		    }
+		}
 
 nodes:          LBRACE { nodelist = new gBlock<struct nodeinfo *>; } node_list
                 RBRACE
@@ -198,7 +284,13 @@ int EfgFileReader::yylex(void)
   
   if (isalpha(c) || c == '"')  {
     infile.unget(c);
-    infile >> last_name;
+    gString s;
+    infile >> s;
+
+    if (s == "FLOAT")    return TYPEFLOAT;
+    else if (s == "RATIONAL")   return TYPERAT;
+
+    last_name = s;
 
     return NAME;
   }
