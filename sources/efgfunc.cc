@@ -138,7 +138,6 @@ Portion *GSM_AppendNode(Portion **param)
 
   if (n->BelongsTo() != s->BelongsTo()) 
     return new ErrorPortion("Node and information set from different games\n");
-  return 0;
   n->BelongsTo()->AppendNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetChild(1));
