@@ -1,7 +1,7 @@
 //#
 //# FILE: eliap.cc -- Extensive Form Liapunov module
 //#
-//# @(#)eliap.cc	1.20 12/19/95
+//# $Id$
 //#
 
 #define MAXIT 10
