@@ -174,3 +174,4 @@ gOutput &operator <<(gOutput &o,const ParameterSet &) {return o;}
 // @@ For gcc's benefit only.  Avoids ambiguity in == operator 
 int gList<ParameterSet>::Find(const ParameterSet &) const {return 0;} 
 template class gList<ParameterSet>;
+template class gNode<ParameterSet>;

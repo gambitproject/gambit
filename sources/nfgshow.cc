@@ -911,6 +911,7 @@ else
 
 */
 
+template class SolutionList<MixedSolution>;
 
 //******************** NORMAL FORM GUI ******************************
 #include "nfggui.h"
