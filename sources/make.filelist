@@ -1,0 +1,78 @@
+# File list for gambit makefiles 
+
+GLIB_SOURCES = gmisc.cc gstream.cc garray.cc gblock.cc gtext.cc integer.cc \
+               rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc \
+               grarray.cc gmatrix.cc gsmatrix.cc gwatch.cc \
+               glist.cc gfuncmin.cc gfunc.cc system.cc gnumber.cc \
+               grblock.cc gnarray.cc gpool.cc
+
+GLIB_OBJECTS = $(GLIB_SOURCES:.cc=.o)
+
+
+GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
+                poly.cc complex.cc quiksolv.cc gpartltr.cc gsolver.cc \
+                odometer.cc rectangl.cc gtree.cc ideal.cc gpolylst.cc \
+                linrcomb.cc sfstrat.cc sfg.cc 
+
+GPOLY_OBJECTS = $(GPOLY_OBJECTS:.cc=.o)
+
+
+GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfginst.cc nfgutils.cc \
+               efg.cc efginst.cc readefg.cc efgnfg.cc efgnfgd.cc \
+               efgnfgr.cc efgutils.cc efstrat.cc mixedsol.cc behavsol.cc
+
+GAME_OBJECTS = $(GAME_SOURCES:.cc=.o)
+
+
+EALG_SOURCES = egobit.cc eliap.cc seqform.cc subsolve.cc efgpure.cc efdom.cc \
+               efgcsum.cc efbasis.cc epolenum.cc seqeq.cc
+
+EALG_OBJECTS = $(EALG_SOURCES:.cc=.o)
+
+ENALG_SOURCES = csumsub.cc psnesub.cc enumsub.cc simpsub.cc liapsub.cc \
+                lemkesub.cc polensub.cc
+
+ENALG_OBJECTS = $(ENALG_SOURCES:.cc=.o)
+
+NALG_SOURCES = bfs.cc lemke.cc nliap.cc ngobit.cc enum.cc simpdiv.cc \
+               tableau.cc ludecomp.cc nfgpure.cc lhtab.cc lemketab.cc grid.cc \
+               nfgcsum.cc lpsolve.cc nfdom.cc nfdommix.cc vertenum.cc \
+               polenum.cc clique.cc
+
+NALG_OBJECTS = $(NALG_SOURCES:.cc=.o)
+
+GCL_SOURCES = gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gsminstr.cc portion.cc \
+              nfgfunc.cc efgfunc.cc listfunc.cc algfunc.cc solfunc.cc \
+              gsmutils.cc gcompile.cc gsmincl.cc gio.cc gcmdline.cc \
+              gpreproc.cc gclinst.cc gclsig.cc gcl.cc gclstats.cc 
+
+GCL_OBJECTS = $(GCL_SOURCES:.cc=.o)
+
+ALLGCL_SOURCES = $(GPOLY_SOURCES) $(GAME_SOURCES) $(GLIB_SOURCES)\
+                 $(EALG_SOURCES) $(NALG_SOURCES) $(ENALG_SOURCES) \
+                 $(GCL_SOURCES)
+
+ALLGCL_OBJECTS = $(ALLGCL_SOURCES:.cc=.o)
+
+GUI_SOURCES = gambit.cc treewin.cc treewin1.cc twflash.cc treedraw.cc \
+              wxmisc.cc spread.cc efgshow.cc efgshow1.cc \
+              spreadim.cc efgsolng.cc wxstatus.cc algdlgs.cc \
+              bsolnsf.cc efgoutcd.cc efgsoln.cc accels.cc nfgshow.cc \
+              nfgshow1.cc nfgsoln.cc nfgsolng.cc msolnsf.cc nfgoutcd.cc \
+              gambdraw.cc wxio.cc guipb.cc guirec.cc guirecdb.cc guiobj.cc \
+              gclstats.cc
+
+GUI_OBJECTS = $(GUI_SOURCES:.cc=.o)
+
+ALLGUI_SOURCES = $(GAME_SOURCES) $(EALG_SOURCES) $(GLIB_SOURCES)\
+                 $(NALG_SOURCES) $(ENALG_SOURCES) $(GUI_SOURCES) \
+                 $(GPOLY_SOURCES)
+
+ALLGUI_OBJECTS = $(ALLGUI_SOURCES:.cc=.o)
+
+SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(EALG_SOURCES)\
+	$(ENALG_SOURCES) $(NALG_SOURCES) $(GCL_SOURCES)\
+	$(GUI_SOURCES) $(GPOLY_SOURCES)
+
+OBJECTS = $(SOURCES:.cc=.o)
+
