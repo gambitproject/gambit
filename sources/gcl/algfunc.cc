@@ -35,21 +35,21 @@
 #include "game/nfg.h"
 #include "game/efg.h"
 
-#include "nash/subsolve.h"
+#include "nash/efgsubsolve.h"
 #include "nash/nfgpure.h"
 #include "nash/efgpure.h"
 #include "nash/enum.h"
 #include "nash/lemke.h"
-#include "nash/seqform.h"
+#include "nash/efglcp.h"
 #include "nash/nliap.h"
-#include "nash/eliap.h"
+#include "nash/efgliap.h"
 #include "nash/nfgcsum.h"
-#include "nash/efgcsum.h"
+#include "nash/efglp.h"
 #include "nash/nfgalleq.h"
-#include "nash/efgalleq.h"
+#include "nash/efgpoly.h"
 #include "nash/nfgqregrid.h"
 #include "nash/nfgqre.h"
-#include "nash/efgqre.h"
+#include "nash/efglogit.h"
 #include "nash/simpdiv.h"
 #include "nash/yamamoto.h"
 
@@ -263,7 +263,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
   }
 
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
   algorithm->SetAlgorithm(nfgAlgorithm);
 
   gsm.StartAlgorithmMonitor("EnumMixedSolve Progress");
@@ -326,7 +326,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
     try {
       nfgEnumPure *nfgAlgorithm = new nfgEnumPure;
       nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
-      SubgameSolver algorithm;
+      gbtEfgNashSubgames algorithm;
       algorithm.SetAlgorithm(nfgAlgorithm);
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     }
@@ -338,7 +338,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
   }
   else  {
     try {
-      efgEnumPure algorithm;
+      gbtEfgNashEnumPure algorithm;
       algorithm.SetStopAfter(AsNumber(param[2]));
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     }
@@ -406,16 +406,16 @@ static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-static efgNashAlgorithm *GSM_Lcp_Efg_Double(int p_stopAfter)
+static gbtEfgNashAlgorithm *GSM_Lcp_Efg_Double(int p_stopAfter)
 {
-  efgLcp<double> *algorithm = new efgLcp<double>;
+  gbtEfgNashLcp<double> *algorithm = new gbtEfgNashLcp<double>;
   algorithm->SetStopAfter(p_stopAfter);
   return algorithm;
 }
 
-static efgNashAlgorithm *GSM_Lcp_Efg_Rational(int p_stopAfter)
+static gbtEfgNashAlgorithm *GSM_Lcp_Efg_Rational(int p_stopAfter)
 {
-  efgLcp<gRational> *algorithm = new efgLcp<gRational>;
+  gbtEfgNashLcp<gRational> *algorithm = new gbtEfgNashLcp<gRational>;
   algorithm->SetStopAfter(p_stopAfter);
   return algorithm;
 }
@@ -429,7 +429,7 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
     throw gclRuntimeError("Only valid for two-person games");
   }
 
-  SubgameSolver algorithm;
+  gbtEfgNashSubgames algorithm;
   
   if (AsBool(param[1])) {
     if (((PrecisionPortion *) param[3])->Value() == precDOUBLE) {
@@ -512,8 +512,6 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 // LiapSolve
 //-------------
 
-#include "nash/eliap.h"
-
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
   const BehavProfile<gNumber> &start = *AsBehav(param[0]).Profile();
@@ -522,7 +520,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
   
   gsm.StartAlgorithmMonitor("LiapSolve Progress");
 
-  SubgameSolver algorithm;
+  gbtEfgNashSubgames algorithm;
 
   if (AsBool(param[1])) {
     nfgLiap *nfgAlgorithm = new nfgLiap;
@@ -531,7 +529,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
     algorithm.SetAlgorithm(nfgAlgorithm);
   }
   else {
-    efgLiap *efgAlgorithm = new efgLiap;
+    gbtEfgNashLiap *efgAlgorithm = new gbtEfgNashLiap;
     efgAlgorithm->SetStopAfter(AsNumber(param[2]));
     efgAlgorithm->SetNumTries(AsNumber(param[3]));
     algorithm.SetAlgorithm(efgAlgorithm);
@@ -678,17 +676,17 @@ Portion* GSM_Lp_List(GSM &gsm, Portion** param)
   }
 }
 
-static efgNashAlgorithm *GSM_Lp_Efg_Double(void)
+static gbtEfgNashAlgorithm *GSM_Lp_Efg_Double(void)
 {
-  efgLcp<double> *algorithm = new efgLcp<double>;
-  algorithm->SetStopAfter(1);
+  gbtEfgNashLp<double> *algorithm = new gbtEfgNashLp<double>;
+  //  algorithm->SetStopAfter(1);
   return algorithm;
 }
 
-static efgNashAlgorithm *GSM_Lp_Efg_Rational(void)
+static gbtEfgNashAlgorithm *GSM_Lp_Efg_Rational(void)
 {
-  efgLcp<gRational> *algorithm = new efgLcp<gRational>;
-  algorithm->SetStopAfter(1);
+  gbtEfgNashLp<gRational> *algorithm = new gbtEfgNashLp<gRational>;
+  //  algorithm->SetStopAfter(1);
   return algorithm;
 }
 
@@ -706,7 +704,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
   }
 
-  SubgameSolver algorithm;
+  gbtEfgNashSubgames algorithm;
   
   if (AsBool(param[1])) {
     if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
@@ -776,14 +774,14 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
   gsm.StartAlgorithmMonitor("PolEnumSolve Progress");
 
   gList<BehavSolution> solutions;
-  SubgameSolver algorithm;
+  gbtEfgNashSubgames algorithm;
   if (AsBool(param[1])) {
     nfgPolEnum *nfgAlgorithm = new nfgPolEnum;
     nfgAlgorithm->SetStopAfter(AsNumber(param[2]));
     algorithm.SetAlgorithm(nfgAlgorithm);
   }
   else {
-    efgPolEnum *efgAlgorithm = new efgPolEnum;
+    gbtEfgNashEnumPoly *efgAlgorithm = new gbtEfgNashEnumPoly;
     efgAlgorithm->SetStopAfter(AsNumber(param[2]));
     algorithm.SetAlgorithm(efgAlgorithm);
   }
@@ -929,7 +927,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
-    efgQre algorithm;
+    gbtEfgNashLogit algorithm;
     algorithm.SetMaxLambda(AsNumber(param[3]));
     algorithm.SetFullGraph(AsNumber(param[6]));
     
@@ -1041,7 +1039,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 
-  SubgameSolver algorithm;
+  gbtEfgNashSubgames algorithm;
   algorithm.SetAlgorithm(nfgAlgorithm);
 
   gsm.StartAlgorithmMonitor("SimpDivSolve Progress");

@@ -25,15 +25,57 @@
 //
 
 #include "game/efgensup.h"
-#include "efgalleq.h"
-#include "epolenum.h"
+#include "efgpoly.imp"
 
-efgPolEnum::efgPolEnum(void)
+//---------------------------------------------------------------------------
+//                        EfgPolEnumParams: member functions
+//---------------------------------------------------------------------------
+
+EfgPolEnumParams::EfgPolEnumParams(void)
+  : stopAfter(0)
+{ }
+
+//---------------------------------------------------------------------------
+//                    EfgPolEnum: nontemplate functions
+//---------------------------------------------------------------------------
+
+template class EfgPolEnumModule<gDouble>;
+
+int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
+	       gList<BehavSolution> &solutions, gStatus &p_status,
+	       long &nevals, double &time, bool &is_singular)
+{
+  EfgPolEnumModule<gDouble> module(support, params);
+  module.EfgPolEnum(p_status);
+  nevals = module.NumEvals();
+  time = module.Time();
+  solutions = module.GetSolutions();
+  is_singular = module.IsSingular();
+
+  return 1;
+}
+
+BehavSolution PolishEquilibrium(const EFSupport &support, 
+				const BehavSolution &sol, 
+				bool &is_singular)
+{
+  EfgPolEnumParams params;
+  EfgPolEnumModule<gDouble> module(support, params);
+  gVector<gDouble> vec = module.SolVarsFromBehavProfile(*(sol.Profile()));
+  module.PolishKnownRoot(vec);
+  return module.ReturnPolishedSolution(vec);
+}
+
+//=======================================================================
+//                    class gbtEfgNashEnumPoly
+//=======================================================================
+
+gbtEfgNashEnumPoly::gbtEfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gList<BehavSolution> efgPolEnum::Solve(const EFSupport &p_support,
-				       gStatus &p_status)
+gList<BehavSolution> gbtEfgNashEnumPoly::Solve(const EFSupport &p_support,
+					       gStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";

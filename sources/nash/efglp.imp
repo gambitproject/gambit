@@ -24,19 +24,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "efgcsum.h"
+#include "efglp.h"
 
 //-------------------------------------------------------------------------
-//                      efgLp<T>: Member functions
+//                     gbtEfgNashLp<T>: Member functions
 //-------------------------------------------------------------------------
 
 template <class T>
-efgLp<T>::efgLp(void)
+gbtEfgNashLp<T>::gbtEfgNashLp(void)
 { }
 
 template <class T> 
-gList<BehavSolution> efgLp<T>::Solve(const EFSupport &p_support,
-				     gStatus &p_status)
+gList<BehavSolution> gbtEfgNashLp<T>::Solve(const EFSupport &p_support,
+					    gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   
@@ -85,7 +85,7 @@ gList<BehavSolution> efgLp<T>::Solve(const EFSupport &p_support,
 }
 
 
-template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
+template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 {
   BFS<T> cbfs((T) 0);
 
@@ -99,11 +99,11 @@ template <class T> int efgLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 
 
 
-template <class T> void efgLp<T>::GetProfile(const EFSupport &p_support,
-					     gDPVector<T> &v,
-					     const BFS<T> &sol,
-					     const Node *n,
-					     int s1,int s2) const
+template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
+						    gDPVector<T> &v,
+						    const BFS<T> &sol,
+						    const Node *n,
+						    int s1,int s2) const
 {
   
   int i,pl,inf,snew;
@@ -156,9 +156,9 @@ template <class T> void efgLp<T>::GetProfile(const EFSupport &p_support,
 
 
 template <class T>
-void efgLp<T>::FillTableau(const EFSupport &p_support,
-			   gMatrix<T> &A, const Node *n, T prob,
-			   int s1, int s2, int i1, int i2)
+void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
+				  gMatrix<T> &A, const Node *n, T prob,
+				  int s1, int s2, int i1, int i2)
 {
   int i,snew;
   if (!n->Game()->GetOutcome(n).IsNull()) {
@@ -199,8 +199,8 @@ void efgLp<T>::FillTableau(const EFSupport &p_support,
 }
 
 template <class T>
-void efgLp<T>::GetSolutions(const EFSupport &p_support,
-			    gList<BehavSolution> &solutions) const
+void gbtEfgNashLp<T>::GetSolutions(const EFSupport &p_support,
+				   gList<BehavSolution> &solutions) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
     BehavProfile<T> profile(p_support);

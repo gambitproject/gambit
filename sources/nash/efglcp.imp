@@ -26,19 +26,19 @@
 //
 
 #include "base/base.h"
-#include "seqform.h"
+#include "efglcp.h"
 #include "lhtab.h"
 
 //---------------------------------------------------------------------------
-//                        efgLcp: member functions
+//                     gbtEfgNashLcp: member functions
 //---------------------------------------------------------------------------
 
 template <class T>
-efgLcp<T>::efgLcp(void)
+gbtEfgNashLcp<T>::gbtEfgNashLcp(void)
   : m_stopAfter(1), m_maxDepth(0)
 { } 
 
-template <class T> efgLcp<T>::~efgLcp()
+template <class T> gbtEfgNashLcp<T>::~gbtEfgNashLcp()
 { }
 
 //
@@ -48,8 +48,8 @@ template <class T> efgLcp<T>::~efgLcp()
 //
 
 template <class T> 
-gList<BehavSolution> efgLcp<T>::Solve(const EFSupport &p_support,
-				      gStatus &p_status)
+gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const EFSupport &p_support,
+					     gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   int i, j;
@@ -119,7 +119,7 @@ gList<BehavSolution> efgLcp<T>::Solve(const EFSupport &p_support,
   return solutions;
 }
 
-template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
+template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs((T) 0);
   gVector<T> v(tableau.MinRow(), tableau.MaxRow());
@@ -143,10 +143,10 @@ template <class T> int efgLcp<T>::Add_BFS(const LTableau<T> &tableau)
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-efgLcp<T>::All_Lemke(const EFSupport &p_support,
-		     int j, LTableau<T> &B, int depth,
-		     gMatrix<T> &A, gList<BehavSolution> &p_solutions,
-		     gStatus &p_status)
+gbtEfgNashLcp<T>::All_Lemke(const EFSupport &p_support,
+			    int j, LTableau<T> &B, int depth,
+			    gMatrix<T> &A, gList<BehavSolution> &p_solutions,
+			    gStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return 1;
@@ -212,7 +212,7 @@ efgLcp<T>::All_Lemke(const EFSupport &p_support,
 }
 
 template <class T>
-void efgLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
+void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
 				   const Node *n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
@@ -266,7 +266,7 @@ void efgLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
 
 
 template <class T>
-void efgLcp<T>::GetProfile(const EFSupport &p_support,
+void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
 				  const LTableau<T> &tab, 
 				  gDPVector<T> &v, const gVector<T> &sol,
 				  const Node *n, int s1,int s2)

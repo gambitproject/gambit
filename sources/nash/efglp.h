@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Trace a branch of the agent QRE correspondence
+// Interface to algorithm to solve efgs via linear programming
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,44 +24,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGQRE_H
-#define EFGQRE_H
+#ifndef EFGLP_H
+#define EFGLP_H
 
+#include "numerical/tableau.h"
+#include "numerical/lpsolve.h"
 #include "efgalgorithm.h"
 
-//
-// Computes a branch of the agent logistic quantal response equilibrium 
-// correspondence.
-//
-// Currently, only starting from the centroid at lambda = 0 is supported.
-// Eventually, starting from a Nash equilibrium at lambda = infinity will
-// be added.
-//
-
-class efgQre : public efgNashAlgorithm {
+template <class T> class gbtEfgNashLp : public gbtEfgNashAlgorithm {
 private:
-  double m_maxLam, m_stepSize;
-  bool m_fullGraph;
+  T maxpay, minpay;
+  int ns1,ns2,ni1,ni2;
+  gList<BFS<T> > List;
+  gList<Infoset *> isets1, isets2;
+
+  void FillTableau(const EFSupport &,
+		   gMatrix<T> &, const Node *, T ,int ,int , int ,int );
+  void GetSolutions(const EFSupport &, gList<BehavSolution> &) const;
+  int Add_BFS(/*const*/ LPSolve<T> &B);
+  
+  void GetProfile(const EFSupport &, gDPVector<T> &v, const BFS<T> &sol,
+		  const Node *n, int s1,int s2) const;
 
 public:
-  efgQre(void);
-  virtual ~efgQre() { }
+  gbtEfgNashLp(void);
+  virtual ~gbtEfgNashLp() { }
 
-  double GetMaxLambda(void) const { return m_maxLam; }
-  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
-
-  double GetStepSize(void) const { return m_stepSize; }
-  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
-
-  bool GetFullGraph(void) const { return m_fullGraph; }
-  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
-
-  gText GetAlgorithm(void) const { return "Qre"; }
+  gText GetAlgorithm(void) const { return "Lp[EFG]"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
 
-#endif   // EFGQRE_H
 
+#endif  // EFGLP_H
 
 
 

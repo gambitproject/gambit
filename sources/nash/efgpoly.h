@@ -4,8 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of algorithm to solve extensive forms using linear
-// complementarity program from sequence form
+// Enumerates all Nash equilibrium of a game, via polynomial equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -25,19 +24,27 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "seqform.imp"
-#include "math/rational.h"
+#ifndef EFGPOLY_H
+#define EFGPOLY_H
 
-template class efgLcp<double>;
-template class efgLcp<gRational>;
+#include "efgalgorithm.h"
 
+class gbtEfgNashEnumPoly : public gbtEfgNashAlgorithm {
+private:
+  int m_stopAfter;
 
+public:
+  gbtEfgNashEnumPoly(void);
+  virtual ~gbtEfgNashEnumPoly() { }
 
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-
-
-
-
+  gText GetAlgorithm(void) const { return "PolEnum[EFG]"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+  
+#endif  // EFGPOLY_H
 
 
 

@@ -45,7 +45,7 @@
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
 #include "game/nfg.h"
-#include "nash/efgqre.h"
+#include "nash/efglogit.h"
 
 #include "efgconst.h"
 #include "treewin.h"
@@ -1500,7 +1500,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
   dialogEfgNash dialog(this, *m_currentSupport);
 
   if (dialog.ShowModal() == wxID_OK) {
-    efgNashAlgorithm *algorithm = dialog.GetAlgorithm();
+    gbtEfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
 
     if (!algorithm) {
       return;
@@ -1544,7 +1544,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 void EfgShow::OnToolsQre(wxCommandEvent &)
 {
   try {
-    efgQre algorithm;
+    gbtEfgNashLogit algorithm;
     algorithm.SetFullGraph(true);
     algorithm.SetMaxLambda(10000000);
 

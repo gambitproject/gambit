@@ -32,8 +32,8 @@
 #include "game/efgciter.h"
 #include "behavsol.h"
 
-gList<BehavSolution> efgEnumPure::Solve(const EFSupport &p_support,
-					gStatus &p_status)
+gList<BehavSolution> gbtEfgNashEnumPure::Solve(const EFSupport &p_support,
+					       gStatus &p_status)
 {
   gList<BehavSolution> solutions;
 

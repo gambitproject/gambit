@@ -23,13 +23,13 @@
 //
 
 #include "base/base.h"
-#include "subsolve.h"
+#include "efgsubsolve.h"
 
 //-----------------------------------------------------------------------
-//               SubgameSolver: Private member functions
+//              gbtEfgNashSubgames: Private member functions
 //-----------------------------------------------------------------------
 
-void SubgameSolver::FindSubgames(const EFSupport &p_support,
+void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 				 gStatus &p_status,
 				 Node *n,
 				 gList<BehavSolution> &solns,
@@ -238,10 +238,10 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
 }
 
 //-----------------------------------------------------------------------
-//                      SubgameSolver: Lifecycle
+//                      gbtEfgNashSubgames: Lifecycle
 //-----------------------------------------------------------------------
 
-SubgameSolver::~SubgameSolver()
+gbtEfgNashSubgames::~gbtEfgNashSubgames()
 {
   if (m_efgAlgorithm) {
     delete m_efgAlgorithm;
@@ -252,10 +252,10 @@ SubgameSolver::~SubgameSolver()
 }
 
 //-----------------------------------------------------------------------
-//               SubgameSolver: Public member functions
+//               gbtEfgNashSubgames: Public member functions
 //-----------------------------------------------------------------------
 
-gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
+gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
 					  gStatus &p_status)
 {
   gWatch watch;
@@ -303,7 +303,7 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
   return solutions;
 }
 
-gText SubgameSolver::GetAlgorithm(void) const
+gText gbtEfgNashSubgames::GetAlgorithm(void) const
 {
   if (m_efgAlgorithm) {
     return m_efgAlgorithm->GetAlgorithm();

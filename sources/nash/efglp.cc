@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Enumerates all Nash equilibrium of a game, via polynomial equations
+// Instantiation of algorithms to solve efgs via linear programming
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,29 +24,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGALLEQ_H
-#define EFGALLEQ_H
+#include "efglp.imp"
+#include "math/rational.h"
 
-#include "efgalgorithm.h"
-
-class efgPolEnum : public efgNashAlgorithm {
-private:
-  int m_stopAfter;
-
-public:
-  efgPolEnum(void);
-  virtual ~efgPolEnum() { }
-
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gText GetAlgorithm(void) const { return "PolEnum[EFG]"; }
-  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
-};
-  
+template class gbtEfgNashLp<double>;
+template class gbtEfgNashLp<gRational>;
 
 
-#endif    // EFGALLEQ_H
+
+
 
 
 

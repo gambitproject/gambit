@@ -4,7 +4,8 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via solving polynomial equations
+// Instantiation of algorithm to solve extensive forms using linear
+// complementarity program from sequence form
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,30 +25,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EPOLENUM_H
-#define EPOLENUM_H
+#include "efglcp.imp"
+#include "math/rational.h"
 
-#include "base/base.h"
-#include "game/efg.h"
-#include "game/behav.h"
-#include "behavsol.h"
-
-class EfgPolEnumParams {
-public:
-  int stopAfter;
-
-  EfgPolEnumParams(void);
-};
+template class gbtEfgNashLcp<double>;
+template class gbtEfgNashLcp<gRational>;
 
 
-int EfgPolEnum(const EFSupport &, const EfgPolEnumParams &, 
-	       gList<BehavSolution> &, gStatus &, long &nevals, double &time,
-	       bool &is_singular);
 
-BehavSolution PolishEquilibrium(const EFSupport &, const BehavSolution &, 
-				bool &is_singular);
 
-#endif    // EPOLENUM_H
+
+
+
+
 
 
 

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Trace a branch of the agent QRE correspondence
+// Trace a branch of the agent logit QRE correspondence
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -28,7 +28,7 @@
 #include "base/gnullstatus.h"
 #include "math/gmath.h"
 #include "math/gsmatrix.h"
-#include "efgqre.h"
+#include "efglogit.h"
 
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
@@ -429,12 +429,12 @@ static void TracePath(const BehavProfile<double> &p_start,
   }
 }
 
-efgQre::efgQre(void)
+gbtEfgNashLogit::gbtEfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<BehavSolution> efgQre::Solve(const EFSupport &p_support,
-				   gStatus &p_status)
+gList<BehavSolution> gbtEfgNashLogit::Solve(const EFSupport &p_support,
+					    gStatus &p_status)
 {
   gList<BehavSolution> solutions;
   BehavProfile<double> start(p_support);

@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "eliap.h"
+#include "efgliap.h"
 #include "math/gmatrix.h"
 #include "numerical/gfuncmin.h"
 
@@ -129,13 +129,13 @@ static void PickRandomProfile(BehavProfile<double> &p)
   }
 }
 
-efgLiap::efgLiap(void)
+gbtEfgNashLiap::gbtEfgNashLiap(void)
   : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
-				    gStatus &p_status)
+gList<BehavSolution> gbtEfgNashLiap::Solve(const EFSupport &p_support,
+					   gStatus &p_status)
 {
   static const double ALPHA = .00000001;
 

@@ -33,20 +33,20 @@
 
 #include "base/gnullstatus.h"
 
-#include "nash/subsolve.h"
+#include "nash/efgsubsolve.h"
 
 #include "nash/efgpure.h"
 #include "nash/nfgpure.h"
 #include "nash/enum.h"
-#include "nash/seqform.h"
+#include "nash/efglcp.h"
 #include "nash/lemke.h"
-#include "nash/efgcsum.h"
+#include "nash/efglp.h"
 #include "nash/nfgcsum.h"
-#include "nash/eliap.h"
+#include "nash/efgliap.h"
 #include "nash/nliap.h"
-#include "nash/efgalleq.h"
+#include "nash/efgpoly.h"
 #include "nash/nfgalleq.h"
-#include "nash/efgqre.h"
+#include "nash/efglogit.h"
 #include "nash/simpdiv.h"
 
 const int idCHECKBOX_FINDALL = 2000;
@@ -56,14 +56,14 @@ class panelEfgNashAlgorithm : public wxPanel {
 public:
   panelEfgNashAlgorithm(wxWindow *p_parent) : wxPanel(p_parent, -1) { }
 
-  virtual efgNashAlgorithm *GetAlgorithm(void) const = 0;
+  virtual gbtEfgNashAlgorithm *GetAlgorithm(void) const = 0;
 };
 
 //========================================================================
 //                         class efgOneNash
 //========================================================================
 
-class efgOneNash : public efgNashAlgorithm {
+class efgOneNash : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OneNash"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -84,15 +84,15 @@ gList<BehavSolution> efgOneNash::Solve(const EFSupport &p_support,
     EFSupport support = p_support.Undominated(false, true,
 					      players, gnull, status);
     
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
       if (p_support.GetGame().IsConstSum()) {
-	algorithm.SetAlgorithm(new efgLp<double>);
+	algorithm.SetAlgorithm(new gbtEfgNashLp<double>);
       }
       else {
-	efgLcp<double> *subAlgorithm = new efgLcp<double>;
+	gbtEfgNashLcp<double> *subAlgorithm = new gbtEfgNashLcp<double>;
 	subAlgorithm->SetStopAfter(1);
 	algorithm.SetAlgorithm(subAlgorithm);
       }
@@ -116,7 +116,7 @@ class panelEfgOneNash : public panelEfgNashAlgorithm {
 public:
   panelEfgOneNash(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgOneNash::panelEfgOneNash(wxWindow *p_parent)
@@ -145,7 +145,7 @@ panelEfgOneNash::panelEfgOneNash(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgOneNash::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgOneNash::GetAlgorithm(void) const
 {
   return new efgOneNash;
 }
@@ -154,7 +154,7 @@ efgNashAlgorithm *panelEfgOneNash::GetAlgorithm(void) const
 //                         class efgTwoNash
 //========================================================================
 
-class efgTwoNash : public efgNashAlgorithm {
+class efgTwoNash : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoNash"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -185,7 +185,7 @@ gList<BehavSolution> efgTwoNash::Solve(const EFSupport &p_support,
       }
     }
 
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
 
     if (p_support.GetGame().NumPlayers() == 2) {
@@ -194,7 +194,7 @@ gList<BehavSolution> efgTwoNash::Solve(const EFSupport &p_support,
       algorithm.SetAlgorithm(subAlgorithm);
     }
     else {
-      efgPolEnum *subAlgorithm = new efgPolEnum;
+      gbtEfgNashEnumPoly *subAlgorithm = new gbtEfgNashEnumPoly;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -214,7 +214,7 @@ class panelEfgTwoNash : public panelEfgNashAlgorithm {
 public:
   panelEfgTwoNash(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgTwoNash::panelEfgTwoNash(wxWindow *p_parent)
@@ -243,7 +243,7 @@ panelEfgTwoNash::panelEfgTwoNash(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgTwoNash::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgTwoNash::GetAlgorithm(void) const
 {
   return new efgTwoNash;
 }
@@ -252,7 +252,7 @@ efgNashAlgorithm *panelEfgTwoNash::GetAlgorithm(void) const
 //                         class efgAllNash
 //========================================================================
 
-class efgAllNash : public efgNashAlgorithm {
+class efgAllNash : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllNash"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -283,7 +283,7 @@ gList<BehavSolution> efgAllNash::Solve(const EFSupport &p_support,
       }
     }
 
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
 
     if (p_support.GetGame().NumPlayers() == 2) {
@@ -292,7 +292,7 @@ gList<BehavSolution> efgAllNash::Solve(const EFSupport &p_support,
       algorithm.SetAlgorithm(subAlgorithm);
     }
     else {
-      efgPolEnum *subAlgorithm = new efgPolEnum;
+      gbtEfgNashEnumPoly *subAlgorithm = new gbtEfgNashEnumPoly;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -312,7 +312,7 @@ class panelEfgAllNash : public panelEfgNashAlgorithm {
 public:
   panelEfgAllNash(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgAllNash::panelEfgAllNash(wxWindow *p_parent)
@@ -340,7 +340,7 @@ panelEfgAllNash::panelEfgAllNash(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgAllNash::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgAllNash::GetAlgorithm(void) const
 {
   return new efgAllNash;
 }
@@ -349,7 +349,7 @@ efgNashAlgorithm *panelEfgAllNash::GetAlgorithm(void) const
 //                         class efgOnePerfect
 //========================================================================
 
-class efgOnePerfect : public efgNashAlgorithm {
+class efgOnePerfect : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OnePerfect"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -370,15 +370,15 @@ gList<BehavSolution> efgOnePerfect::Solve(const EFSupport &p_support,
     EFSupport support = p_support.Undominated(false, true,
 					      players, gnull, status);
     
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
       if (p_support.GetGame().IsConstSum()) {
-	algorithm.SetAlgorithm(new efgLp<double>);
+	algorithm.SetAlgorithm(new gbtEfgNashLp<double>);
       }
       else {
-	efgLcp<double> *subAlgorithm = new efgLcp<double>;
+	gbtEfgNashLcp<double> *subAlgorithm = new gbtEfgNashLcp<double>;
 	subAlgorithm->SetStopAfter(1);
 	algorithm.SetAlgorithm(subAlgorithm);
       }
@@ -402,7 +402,7 @@ class panelEfgOnePerfect : public panelEfgNashAlgorithm {
 public:
   panelEfgOnePerfect(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgOnePerfect::panelEfgOnePerfect(wxWindow *p_parent)
@@ -432,7 +432,7 @@ panelEfgOnePerfect::panelEfgOnePerfect(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgOnePerfect::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgOnePerfect::GetAlgorithm(void) const
 {
   return new efgOnePerfect;
 }
@@ -441,7 +441,7 @@ efgNashAlgorithm *panelEfgOnePerfect::GetAlgorithm(void) const
 //                         class efgTwoPerfect
 //========================================================================
 
-class efgTwoPerfect : public efgNashAlgorithm {
+class efgTwoPerfect : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoPerfect"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -472,7 +472,7 @@ gList<BehavSolution> efgTwoPerfect::Solve(const EFSupport &p_support,
       }
     }
 
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
@@ -481,7 +481,7 @@ gList<BehavSolution> efgTwoPerfect::Solve(const EFSupport &p_support,
       algorithm.SetAlgorithm(subAlgorithm);
     }
     else {
-      efgPolEnum *subAlgorithm = new efgPolEnum;
+      gbtEfgNashEnumPoly *subAlgorithm = new gbtEfgNashEnumPoly;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -501,7 +501,7 @@ class panelEfgTwoPerfect : public panelEfgNashAlgorithm {
 public:
   panelEfgTwoPerfect(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgTwoPerfect::panelEfgTwoPerfect(wxWindow *p_parent)
@@ -531,7 +531,7 @@ panelEfgTwoPerfect::panelEfgTwoPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgTwoPerfect::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgTwoPerfect::GetAlgorithm(void) const
 {
   return new efgTwoPerfect;
 }
@@ -540,7 +540,7 @@ efgNashAlgorithm *panelEfgTwoPerfect::GetAlgorithm(void) const
 //                         class efgAllPerfect
 //========================================================================
 
-class efgAllPerfect : public efgNashAlgorithm {
+class efgAllPerfect : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllPerfect"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -571,7 +571,7 @@ gList<BehavSolution> efgAllPerfect::Solve(const EFSupport &p_support,
       }
     }
 
-    SubgameSolver algorithm;
+    gbtEfgNashSubgames algorithm;
     p_support.GetGame().MarkSubgames();
 
     if (p_support.GetGame().NumPlayers() == 2) {
@@ -580,7 +580,7 @@ gList<BehavSolution> efgAllPerfect::Solve(const EFSupport &p_support,
       algorithm.SetAlgorithm(subAlgorithm);
     }
     else {
-      efgPolEnum *subAlgorithm = new efgPolEnum;
+      gbtEfgNashEnumPoly *subAlgorithm = new gbtEfgNashEnumPoly;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
     }
@@ -600,7 +600,7 @@ class panelEfgAllPerfect : public panelEfgNashAlgorithm {
 public:
   panelEfgAllPerfect(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgAllPerfect::panelEfgAllPerfect(wxWindow *p_parent)
@@ -630,7 +630,7 @@ panelEfgAllPerfect::panelEfgAllPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgAllPerfect::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgAllPerfect::GetAlgorithm(void) const
 {
   return new efgAllPerfect;
 }
@@ -639,7 +639,7 @@ efgNashAlgorithm *panelEfgAllPerfect::GetAlgorithm(void) const
 //                       class efgOneSequential
 //========================================================================
 
-class efgOneSequential : public efgNashAlgorithm {
+class efgOneSequential : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OneSequential"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -649,7 +649,7 @@ gList<BehavSolution> efgOneSequential::Solve(const EFSupport &p_support,
 					     gStatus &p_status)
 {
   try {
-    efgQre algorithm;
+    gbtEfgNashLogit algorithm;
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
@@ -665,7 +665,7 @@ class panelEfgOneSequential : public panelEfgNashAlgorithm {
 public:
   panelEfgOneSequential(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgOneSequential::panelEfgOneSequential(wxWindow *p_parent)
@@ -694,7 +694,7 @@ panelEfgOneSequential::panelEfgOneSequential(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgOneSequential::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgOneSequential::GetAlgorithm(void) const
 {
   return new efgOneSequential;
 }
@@ -703,7 +703,7 @@ efgNashAlgorithm *panelEfgOneSequential::GetAlgorithm(void) const
 //                       class efgTwoSequential
 //========================================================================
 
-class efgTwoSequential : public efgNashAlgorithm {
+class efgTwoSequential : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoSequential"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -714,8 +714,8 @@ gList<BehavSolution> efgTwoSequential::Solve(const EFSupport &p_support,
 {
   try {
     p_support.GetGame().MarkSubgames();
-    SubgameSolver algorithm;
-    efgLiap *subAlgorithm = new efgLiap;
+    gbtEfgNashSubgames algorithm;
+    gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(2);
     algorithm.SetAlgorithm(subAlgorithm);
     return algorithm.Solve(p_support, p_status);
@@ -733,7 +733,7 @@ class panelEfgTwoSequential : public panelEfgNashAlgorithm {
 public:
   panelEfgTwoSequential(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgTwoSequential::panelEfgTwoSequential(wxWindow *p_parent)
@@ -762,7 +762,7 @@ panelEfgTwoSequential::panelEfgTwoSequential(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgTwoSequential::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgTwoSequential::GetAlgorithm(void) const
 {
   return new efgTwoSequential;
 }
@@ -771,7 +771,7 @@ efgNashAlgorithm *panelEfgTwoSequential::GetAlgorithm(void) const
 //                       class efgAllSequential
 //========================================================================
 
-class efgAllSequential : public efgNashAlgorithm {
+class efgAllSequential : public gbtEfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllSequential"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
@@ -782,8 +782,8 @@ gList<BehavSolution> efgAllSequential::Solve(const EFSupport &p_support,
 {
   try {
     p_support.GetGame().MarkSubgames();
-    SubgameSolver algorithm;
-    efgLiap *subAlgorithm = new efgLiap;
+    gbtEfgNashSubgames algorithm;
+    gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(0);
     algorithm.SetAlgorithm(subAlgorithm);
     return algorithm.Solve(p_support, p_status);
@@ -801,7 +801,7 @@ class panelEfgAllSequential : public panelEfgNashAlgorithm {
 public:
   panelEfgAllSequential(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgAllSequential::panelEfgAllSequential(wxWindow *p_parent)
@@ -830,7 +830,7 @@ panelEfgAllSequential::panelEfgAllSequential(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgAllSequential::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgAllSequential::GetAlgorithm(void) const
 {
   return new efgAllSequential;
 }
@@ -851,7 +851,7 @@ private:
 public:
   panelEfgEnumPure(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -909,12 +909,12 @@ void panelEfgEnumPure::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-efgNashAlgorithm *panelEfgEnumPure::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgEnumPure::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
   
   if (m_solveUsing->GetSelection() == 0) {
-    efgEnumPure *subAlgorithm = new efgEnumPure;
+    gbtEfgNashEnumPure *subAlgorithm = new gbtEfgNashEnumPure;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -944,7 +944,7 @@ private:
 public:
   panelEfgEnumMixed(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1011,9 +1011,9 @@ void panelEfgEnumMixed::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-efgNashAlgorithm *panelEfgEnumMixed::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgEnumMixed::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_precision->GetSelection() == 0) {
     nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
@@ -1050,7 +1050,7 @@ private:
 public:
   panelEfgLcp(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1148,13 +1148,13 @@ void panelEfgLcp::OnLimitDepth(wxCommandEvent &)
   m_maxDepth->Enable(m_limitDepth->GetValue());
 }
 
-efgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_solveUsing->GetSelection() == 0) {
     if (m_precision->GetSelection() == 0) {
-      efgLcp<double> *subAlgorithm = new efgLcp<double>;
+      gbtEfgNashLcp<double> *subAlgorithm = new gbtEfgNashLcp<double>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1162,7 +1162,7 @@ efgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(subAlgorithm);
     }
     else {
-      efgLcp<gRational> *subAlgorithm = new efgLcp<gRational>;
+      gbtEfgNashLcp<gRational> *subAlgorithm = new gbtEfgNashLcp<gRational>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1208,7 +1208,7 @@ private:
 public:
   panelEfgLp(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1276,16 +1276,16 @@ void panelEfgLp::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-efgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_solveUsing->GetSelection() == 0) {
     if (m_precision->GetSelection() == 0) {
-      algorithm->SetAlgorithm(new efgLp<double>);
+      algorithm->SetAlgorithm(new gbtEfgNashLp<double>);
     }
     else {
-      algorithm->SetAlgorithm(new efgLp<gRational>);
+      algorithm->SetAlgorithm(new gbtEfgNashLp<gRational>);
     }
   }
   else {
@@ -1316,7 +1316,7 @@ private:
 public:
   panelEfgLiap(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1397,12 +1397,12 @@ void panelEfgLiap::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-efgNashAlgorithm *panelEfgLiap::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgLiap::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_solveUsing->GetSelection() == 0) {
-    efgLiap *subAlgorithm = new efgLiap;
+    gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     subAlgorithm->SetNumTries(m_numTries->GetValue());
@@ -1437,7 +1437,7 @@ private:
 public:
   panelEfgPolEnum(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1495,12 +1495,12 @@ void panelEfgPolEnum::OnFindAll(wxCommandEvent &)
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-efgNashAlgorithm *panelEfgPolEnum::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgPolEnum::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_solveUsing->GetSelection() == 0) {
-    efgPolEnum *subAlgorithm = new efgPolEnum;
+    gbtEfgNashEnumPoly *subAlgorithm = new gbtEfgNashEnumPoly;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -1522,7 +1522,7 @@ class panelEfgQre : public panelEfgNashAlgorithm {
 public:
   panelEfgQre(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
 panelEfgQre::panelEfgQre(wxWindow *p_parent)
@@ -1552,9 +1552,9 @@ panelEfgQre::panelEfgQre(wxWindow *p_parent)
   Show(false);
 }
 
-efgNashAlgorithm *panelEfgQre::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgQre::GetAlgorithm(void) const
 {
-  efgQre *algorithm = new efgQre;
+  gbtEfgNashLogit *algorithm = new gbtEfgNashLogit;
   algorithm->SetFullGraph(false);
   algorithm->SetMaxLambda(1000000000);
   return algorithm;
@@ -1579,7 +1579,7 @@ private:
 public:
   panelEfgSimpdiv(wxWindow *);
 
-  efgNashAlgorithm *GetAlgorithm(void) const;
+  gbtEfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
@@ -1659,9 +1659,9 @@ void panelEfgSimpdiv::OnUseLeash(wxCommandEvent &)
   m_leashLength->Enable(m_useLeash->GetValue());
 }
 
-efgNashAlgorithm *panelEfgSimpdiv::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *panelEfgSimpdiv::GetAlgorithm(void) const
 {
-  SubgameSolver *algorithm = new SubgameSolver;
+  gbtEfgNashSubgames *algorithm = new gbtEfgNashSubgames;
 
   if (m_precision->GetSelection() == 0) {
     nfgSimpdiv<double> *subAlgorithm = new nfgSimpdiv<double>;
@@ -1834,7 +1834,7 @@ void dialogEfgNash::OnItemCollapsing(wxTreeEvent &p_event)
   p_event.Veto();
 }
 
-efgNashAlgorithm *dialogEfgNash::GetAlgorithm(void) const
+gbtEfgNashAlgorithm *dialogEfgNash::GetAlgorithm(void) const
 {
   if (m_algorithms(m_algorithmTree->GetSelection())) {
     return m_algorithms(m_algorithmTree->GetSelection())->GetAlgorithm();

@@ -19,13 +19,14 @@ libnash_a_SOURCES = \
 	behavextend.cc \
 	behavsol.cc \
 	clique.cc \
-	efgalleq.cc \
-	efgcsum.cc \
+	efglcp.cc \
+	efgliap.cc \
+	efglogit.cc \
+	efglp.cc \
+	efgpoly.cc \
 	efgpure.cc \
-	efgqre.cc \
-	eliap.cc \
+	efgsubsolve.cc \
 	enum.cc \
-	epolenum.cc \
 	lemke.cc \
 	lhtab.cc \
 	mixedsol.cc \
@@ -36,9 +37,7 @@ libnash_a_SOURCES = \
 	nfgqregrid.cc \
 	nliap.cc \
 	polenum.cc \
-	seqform.cc \
-	simpdiv.cc \
-	subsolve.cc
+	simpdiv.cc
 
 OBJECTS = $(libnash_a_SOURCES:.cc=.obj)
 

@@ -4,7 +4,8 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via Lyapunov function minimization
+// Interface to algorithm to solve extensive forms using linear
+// complementarity program from sequence form
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,48 +25,46 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef ELIAP_H
-#define ELIAP_H
+#ifndef EFGLCP_H
+#define EFGLCP_H
 
 #include "efgalgorithm.h"
+#include "numerical/lemketab.h"
 
-class efgLiap : public efgNashAlgorithm {
+template <class T> class gbtEfgNashLcp : public gbtEfgNashAlgorithm {
 private:
-  int m_stopAfter, m_numTries, m_maxits1, m_maxitsN;
-  double m_tol1, m_tolN;
+  int m_stopAfter, m_maxDepth;
+
+  int ns1,ns2,ni1,ni2;
+  T maxpay,eps;
+  gList<BFS<T> > List;
+  gList<Infoset *> isets1, isets2;
+
+  void FillTableau(const EFSupport &, gMatrix<T> &, const Node *, T,
+		   int, int, int, int);
+  int Add_BFS(const LTableau<T> &tab);
+  int All_Lemke(const EFSupport &, int dup, LTableau<T> &B,
+		int depth, gMatrix<T> &, gList<BehavSolution> &, gStatus &);
+  
+  void GetProfile(const EFSupport &, const LTableau<T> &tab, 
+		  gDPVector<T> &, const gVector<T> &, 
+		  const Node *n, int,int);
 
 public:
-  efgLiap(void);
-  virtual ~efgLiap() { }
-
+  gbtEfgNashLcp(void);
+  virtual ~gbtEfgNashLcp();
+  
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  int NumTries(void) const { return m_numTries; }
-  void SetNumTries(int p_numTries) { m_numTries = p_numTries; }
+  int MaxDepth(void) const { return m_maxDepth; }
+  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  int Maxits1(void) const { return m_maxits1; }
-  void SetMaxits1(int p_maxits1) { m_maxits1 = p_maxits1; }
-
-  double Tol1(void) const { return m_tol1; }
-  void SetTol1(double p_tol1) { m_tol1 = p_tol1; }
-
-  int MaxitsN(void) const { return m_maxitsN; }
-  void SetMaxitsN(int p_maxitsN) { m_maxitsN = p_maxitsN; }
-
-  double TolN(void) const { return m_tolN; }
-  void SetTolN(double p_tolN) { m_tolN = p_tolN; }
-
-  gText GetAlgorithm(void) const { return "Liap[EFG]"; }
+  gText GetAlgorithm(void) const { return "Lcp[EFG]"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
 
-
-#endif    // ELIAP_H
-
-
-
-
+#endif  // EFGLCP_H
 
 
 

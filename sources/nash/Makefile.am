@@ -14,23 +14,25 @@ libnash_a_SOURCES = \
 	clique.cc \
 	clique.h \
 	efgalgorithm.h \
-	efgalleq.cc \
-	efgalleq.h \
-	efgcsum.cc \
-	efgcsum.h \
-	efgcsum.imp \
+	efglcp.cc \
+	efglcp.h \
+	efglcp.imp \
+	efgliap.cc \
+	efgliap.h \
+	efglogit.cc \
+	efglogit.h \
+	efglp.cc \
+	efglp.h \
+	efglp.imp \
+	efgpoly.cc \
+	efgpoly.h \
 	efgpure.cc \
 	efgpure.h \
-	efgqre.cc \
-	efgqre.h \
-	eliap.cc \
-	eliap.h \
+	efgsubsolve.cc \
+	efgsubsolve.h \
 	enum.cc \
 	enum.h \
 	enum.imp \
-	epolenum.cc \
-	epolenum.h \
-	epolenum.imp \
 	lemke.cc \
 	lemke.h \
 	lemke.imp \
@@ -55,14 +57,9 @@ libnash_a_SOURCES = \
 	nliap.h \
 	polenum.cc \
 	polenum.h \
-	seqform.cc \
-	seqform.h \
-	seqform.imp \
 	simpdiv.cc \
 	simpdiv.h \
 	simpdiv.imp \
-	subsolve.cc \
-	subsolve.h \
 	yamamoto.cc \
 	yamamoto.h
 

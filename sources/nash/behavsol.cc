@@ -32,9 +32,9 @@
 // we probably want to break this out into another file (rdm)
 
 #include "base/gnullstatus.h"
-#include "nash/subsolve.h"
+#include "nash/efgsubsolve.h"
 
-class SubgamePerfectChecker : public SubgameSolver  {
+class SubgamePerfectChecker : public gbtEfgNashSubgames  {
 private:
   int subgame_number;
   gNumber eps;

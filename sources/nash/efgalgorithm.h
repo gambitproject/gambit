@@ -30,9 +30,9 @@
 #include "game/efg.h"
 #include "behavsol.h"
 
-class efgNashAlgorithm {
+class gbtEfgNashAlgorithm {
 public:
-  virtual ~efgNashAlgorithm() { }
+  virtual ~gbtEfgNashAlgorithm() { }
 
   virtual gText GetAlgorithm(void) const = 0;
   virtual gList<BehavSolution> Solve(const EFSupport &, gStatus &) = 0;
