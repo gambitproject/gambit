@@ -37,7 +37,7 @@ struct PortionSpecTextType
 
 
 #define NUM_PortionSpecs 26
-#define NUM_CompositePortionSpecs 0
+#define NUM_CompositePortionSpecs 2
 
 PortionSpecTextType _PortionSpecText[] =
 {
@@ -63,8 +63,6 @@ PortionSpecTextType _PortionSpecText[] =
 
   { porNULL,               "NULL" },
 
-  { porUNDEFINED,          "UNDEFINED" },
-
   { porNFG,                "NFG" },
   { porEFG,                "EFG" },
   { porEFOUTCOME,          "EFOUTCOME" },
@@ -75,6 +73,8 @@ PortionSpecTextType _PortionSpecText[] =
 
   { porMIXED,              "MIXED" },
   { porBEHAV,              "BEHAV" },
+
+  { porUNDEFINED,          "UNDEFINED" },
 
   { porANYTYPE,            "ANYTYPE" }
 };
@@ -143,6 +143,7 @@ PortionSpec TextToPortionSpec(const gString& text)
       if(t.left(1) == " ")
 	t.remove(0);
     }
+
   return result;
 }
 
