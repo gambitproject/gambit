@@ -1,7 +1,7 @@
 #include "wx.h"
 #include "wxstatus.h"
 
-char tmp_str[200];
+static char tmp_str[200];
 
 wxStatus::wxStatus(wxFrame *frame,const char *title, int x, int y, int w, int h):
 	wxDialogBox(frame,(char *)title,FALSE,-1,-1,300,250)
