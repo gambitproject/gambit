@@ -172,6 +172,110 @@ necessary).  Now check OK to run algorithm. When algorithm completes,
 the gui crashes with notice that program has performed an illegal
 operation.
 
+//------------------------------
+
+Bug D19: Problems with Standard Solution output.  
+
+There are numerous problems with the GUI Standard Solutions output:
+ 
+  All Sequential finds none on coord3.efg
+
+  AllNash finds none on 2x2x2.efg
+
+  AllNash crashes the GUI on 2x2x2.nfg
+
+  TwoNash only finds one on 2x2x2.nfg also on winkels.nfg
+
+  One Perfect Rational finds 3 on 2x2x2.nfg
+
+  All perfect only finds one on 2x2x2.nfg
+
+  Two Sequential finds only one on coord3.efg (after previously 
+  solving for solutions and deleting them).
+
+Note:
+  Rational precision should be greyed out in standard solution settings
+  where not appropriate
+
+//------------------------------
+
+Bug D20: Problems with custom algorithms
+
+  Solve Custom LCP on 2x2x2.efg -- It acts like it's solving and finds
+  no solutions.  It should say "only valid on 2-person games".
+
+  PolEnum algorithm does not find any solutions on 2x2x2.efg.  
+
+//------------------------------
+
+Bug D21: Problems with progress displays
+
+  No progress display for PolEnum algorithms.  
+
+  Convert Caro2-efg to nfg, and run All Nash.  Hit Cancel on 
+  progress display -- causes crash.
+
+//------------------------------
+
+Bug D22: Problems with outcome window
+
+Sometimes, the focus from the outcome window is inexplicably lost,
+going to the EF or NF window instead, and it is impossible to get it
+back, even to dismiss the window.  
+
+Note: -- The following comment in spread.h may provide a resolution to
+these problems:
+
+// Note: on some platforms (msw,motif?), after any item on the panel has been
+// accessed, the keyboard focus switches to the panel.  This can cause
+// undesirable behavior (i.e. can not enter data, arrow keys do not work). It
+// is advisable to call CanvasFocus member after processing any panel item
+// events.
+
+//------------------------------
+
+Bug D23: Problems with Inspect Cursor dialog. 
+
+Load coord2ts.efg Run Solve->Standard->AllNash. Do
+Inspect->Info->InspectCursor.  Get Internal error in Gambit, Divide by
+zero in gNumber.  Dismiss this, and move cursor in tree window.  The
+gui crashes.  This seems to be a problem in the first solution found,
+which is incomplete, as it does not reach the subgame, and no
+strategies are specified there.
+
+//------------------------------
+
+Bug D24: Calculator toolbar button not hooked up. 
+
+
+Calculator toolbar button on NFG Gui gives "unknown" dialog.
+
+//------------------------------
+
+Bug D25: Problems with editing. 
+
+Edit mixed solution from the NF solution display.  The editor does not
+allow to enter '/' for rational values.
+
+
+//------------------------------
+
+Bug D26: Icons not correct. 
+
+The icon that is displayed on the window manager and the file list for
+the gcl and gui are frequently wrong (Gui should display gambit.ico
+and the gcl should display gcl.ico.  Also, the icons displayed in the
+upper left hand corner of the frames for the gui are not always
+correct.  For example, the EF Gui should display efg.ico, and the NF
+Gui should display nfg.ico.
+
+//------------------------------
+
+Bug D27: Solution Numbering
+
+Numbering of solutions should begin afresh when solutions are deleted
+in the solution display windows
+
 -------------  older bugs that still remain ---------------
 
 //------------------------------
