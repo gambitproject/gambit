@@ -1,5 +1,5 @@
 //
-// FILE: gnullsts.cc instantiation of a null gStatus.  This gStatus does NOTHING!
+// FILE: gnullsts.cc -- Implementation of a placebo gStatus object
 //
 // $Id$
 //
@@ -9,34 +9,33 @@
 class gNullStatus : public gStatus  {
 public:
   ~gNullStatus(void) { }
-  // functions for gProgress::gOutput
-  int GetWidth(void) const { }
-  gOutput &SetWidth(int w) { }
-  int GetPrec(void) const { }
-  gOutput &SetPrec(int p) { }
-  gOutput &SetExpMode(void) { }
-  gOutput &SetFloatMode(void) { }
-  char GetRepMode(void) const { }
 
-  gOutput &operator<<(int x) { }
-  gOutput &operator<<(unsigned int x) { }
-  gOutput &operator<<(bool x) { }
-  gOutput &operator<<(long x) { }
-  gOutput &operator<<(char x) { }
-  gOutput &operator<<(double x) { }
-  gOutput &operator<<(float x) { }
-  gOutput &operator<<(const char *x) { }
-  gOutput &operator<<(const void *x) { }
+  int GetWidth(void) const { return 0; }
+  gOutput &SetWidth(int) { return *this; }
+  int GetPrec(void) const { return 0; }
+  gOutput &SetPrec(int) { return *this; }
+  gOutput &SetExpMode(void) { return *this; }
+  gOutput &SetFloatMode(void) { return *this; }
+  char GetRepMode(void) const { return 'f'; }
 
-  bool IsValid(void) const { }
-  // functions for gProgress
-  void SetProgress(double p) { }
-  // functions for gSignal
+  gOutput &operator<<(int) { return *this; }
+  gOutput &operator<<(unsigned int) { return *this; }
+  gOutput &operator<<(bool) { return *this; }
+  gOutput &operator<<(long) { return *this; }
+  gOutput &operator<<(char) { return *this; }
+  gOutput &operator<<(double) { return *this; }
+  gOutput &operator<<(float) { return *this; }
+  gOutput &operator<<(const char *) { return *this; }
+  gOutput &operator<<(const void *) { return *this; }
+
+  bool IsValid(void) const { return true; }
+  void SetProgress(double) { }
+
   void Get(void) const { }
   void Reset(void) { }
 };
 
 gNullStatus _gstatus;
-gStatus &gstatus=_gstatus;
+gStatus &gstatus = _gstatus;
 
 
