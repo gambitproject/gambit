@@ -8,7 +8,7 @@
 #define EQUISOLV_H
 
 #include "quiksolv.h"
-#include "gsimplex.h"
+#include "gsmpltpe.h"
 
 
 // ***********************
@@ -17,11 +17,28 @@
 
 template <class T> class EquiSolv {
  private:
+// New Data Members
+  const gList<gPolyList<T> >                 UtilityLists;
+  const gList<gPolyList<gDouble> >           gDoubleULists;
+  const gList<ListOfPartialTrees<gDouble> >  ListsOfTreesOfPartials;
+
+// Old Data Members
   const gPolyList<T>                 System;
   const gPolyList<gDouble>           gDoubleSystem;
-  const ListOfPartialTrees<gDouble>  TreesOfPartials;
+  const ListOfPartialTrees<gDouble> TreesOfPartials;
+
+// Retained Data Members
         bool                         HasBeenSolved;
         gList<gVector<gDouble> >     Roots;
+
+  // FUNCTIONS USED IN CONSTRUCTOR INITITALIZATIONS
+
+  const gList<gPolyList<T> > CopyGivenLists(const gList<gPolyList<T> >&)
+                                                                      const;
+  const gPolyList<T>                 DerivedEquationSystem()          const;
+  const gList<gPolyList<gDouble> > ListsTogDouble(const gList<gPolyList<T> >&)
+                                                                      const;
+  const gList<ListOfPartialTrees<gDouble> > GenerateTreesOfPartials() const;
 
   // SUPPORTING CALCULATIONS - conceptually, some of these belong elsewhere
 
@@ -31,6 +48,7 @@ template <class T> class EquiSolv {
    bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
 				 const int&)                             const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
+   bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
 
   // Ask whether Newton's method leads to a root without leaving the rectangle
    bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
@@ -65,7 +83,7 @@ template <class T> class EquiSolv {
    bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, 
 			            gVector<gDouble>&) const;
 
-  // Recursive part of recursive method
+  // Recursive part of recursive method //ORIG
   void               FindRootsRecursion(      gList<gVector<gDouble> >*,
 					const gRectangle<gDouble>&, 
 					const int&,
@@ -74,8 +92,16 @@ template <class T> class EquiSolv {
 					const int&,
 					      int*)                  const;
 
+  // Recursive part of recursive method
+  void               FindRootsRecursion(      gList<gVector<gDouble> >*,
+					const gSimpletope<gDouble>&, 
+					const int&,
+					      int&,
+					const int&,
+					      int*)                  const;
+
  public:
-   EquiSolv(const gPolyList<T> &);  
+   EquiSolv(const gList<gPolyList<T> > &);  
    EquiSolv(const EquiSolv<T> &);
    ~EquiSolv();
 
@@ -104,8 +130,10 @@ template <class T> class EquiSolv {
   // The grand calculation - returns true if successful
    bool     FindCertainNumberOfRoots  (const gRectangle<gDouble>&, 
 				       const int&,
-				       const int&);
-   bool     FindRoots  (const gRectangle<gDouble>&, const int&);
+				       const int&); //ORIG
+   bool     FindCertainNumberOfRoots  (const int&, const int&);
+   bool     FindRoots  (const gRectangle<gDouble>&, const int&); //ORIG
+   bool     FindRoots  (const int&);
 
 friend gOutput& operator << (gOutput& output, const EquiSolv<T>& x);
 };  

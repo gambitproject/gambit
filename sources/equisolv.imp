@@ -1,6 +1,6 @@
 //
 // File: equisolv.imp  
-//        -- Implementation of class gPolyList
+//        -- Implementation of class EquiSolv
 // 
 // @(#)EquiSolv.imp	1.6 01/24/98
 //
@@ -16,16 +16,27 @@
 // Constructors / Destructors
 //---------------------------
 
-template <class T> EquiSolv<T>::EquiSolv(const gPolyList<T>& given) 
-: System(given), 
-  gDoubleSystem(given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()),
+template <class T> EquiSolv<T>::EquiSolv(const gList<gPolyList<T> >& given) 
+: UtilityLists(CopyGivenLists(given)),
+  gDoubleULists(ListsTogDouble(given)),
+  ListsOfTreesOfPartials(GenerateTreesOfPartials()),
+  System(DerivedEquationSystem()
+//given
+), 
+  gDoubleSystem(given[1].AmbientSpace(),
+		given[1].TermOrder(),
+		given[1].ListTogDouble()
+//given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()
+),
   TreesOfPartials(gDoubleSystem),
   HasBeenSolved(false), Roots()
 {
 }
 
 template<class T> EquiSolv<T>::EquiSolv(const EquiSolv& qs)
-: System(qs.System), 
+: UtilityLists(qs.UtilityLists),
+  gDoubleULists(qs.gDoubleULists),
+  System(qs.System), 
   gDoubleSystem(qs.gDoubleSystem),
   TreesOfPartials(qs.TreesOfPartials), 
   HasBeenSolved(qs.HasBeenSolved), 
@@ -35,6 +46,50 @@ template<class T> EquiSolv<T>::EquiSolv(const EquiSolv& qs)
 
 template<class T> EquiSolv<T>::~EquiSolv()
 {
+}
+
+//-----------------------------------------------------------
+//      Functions Used in Initialization in Constructors
+//-----------------------------------------------------------
+
+template <class T> const gList<gPolyList<T> >
+EquiSolv<T>::CopyGivenLists(const gList<gPolyList<T> >& given) const
+{
+  gList<gPolyList<T> > answer;
+  for (int i = 1; i <= given.Length(); i++)
+    answer += given[i];
+  return answer;
+}
+
+template <class T> 
+const gPolyList<T> EquiSolv<T>::DerivedEquationSystem() const
+{
+  gList<gPoly<T> > polylist;
+  for (int i = 1; i <= UtilityLists.Length(); i++)
+    for (int j = 2; j <= UtilityLists[i].Length(); j++)
+      polylist += UtilityLists[i][j] - UtilityLists[i][1];
+  return gPolyList<T>(UtilityLists[1].AmbientSpace(),
+		UtilityLists[1].TermOrder(),polylist);
+}
+
+template <class T> const gList<gPolyList<gDouble> >
+EquiSolv<T>::ListsTogDouble(const gList<gPolyList<T> >& given) const
+{
+  gList<gPolyList<gDouble> > answer;
+  for (int i = 1; i <= given.Length(); i++)
+    answer += gPolyList<gDouble>(given[i].AmbientSpace(),
+				 given[i].TermOrder(),
+				 given[i].ListTogDouble());
+  return answer;
+}
+
+template <class T> const gList<ListOfPartialTrees<gDouble> >
+EquiSolv<T>::GenerateTreesOfPartials() const
+{
+  gList<ListOfPartialTrees<gDouble> > answer;
+  for (int i = 1; i <= gDoubleULists.Length(); i++)
+    answer += ListOfPartialTrees<gDouble>(gDoubleULists[i]);
+  return answer;
 }
 
 //----------------------------------
@@ -106,6 +161,41 @@ bool EquiSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
       }
       return true; 
     }
+  return false;
+}
+
+template<class T> 
+bool EquiSolv<T>::SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)  const
+{
+  gVector<gDouble> center = r.Center();
+  for (int i = 1; i <= gDoubleULists.Length(); i++) {
+
+    gDouble min = gDoubleULists[i][1].Evaluate(center); int mindex = 1;
+    gDouble max = gDoubleULists[i][1].Evaluate(center); int maxdex = 1;
+
+    for (int j = 2; j <= gDoubleULists[i].Length(); j++) {
+      if (gDoubleULists[i][j].Evaluate(center) < min) {
+	min = gDoubleULists[i][j].Evaluate(center);
+	mindex = j;
+      }
+      if (gDoubleULists[i][j].Evaluate(center) > max) {
+	max = gDoubleULists[i][j].Evaluate(center);
+	maxdex = j;
+      }
+    }
+
+    if (mindex == maxdex) return false;
+
+    gVector<gDouble> HalvesOfSideLengths(r.Dmnsn());
+    for (int k = 1; k <= r.Dmnsn(); k++)
+      HalvesOfSideLengths[k] = r.HeightInCoord(k) / (gDouble)2.0;
+    gDouble ncdiff = 
+      ListsOfTreesOfPartials[i][maxdex].MaximalNonconstantDifference(
+	       ListsOfTreesOfPartials[i][mindex],center,HalvesOfSideLengths);
+    if (max - min > ncdiff) 
+      return true;
+  }
+
   return false;
 }
 
@@ -393,6 +483,13 @@ EquiSolv<T>::FindRoots(const gRectangle<gDouble>& r,
 }
 
 template<class T> bool
+EquiSolv<T>::FindRoots(const int& max_iterations) 
+{
+  int zero = 0;
+  return FindCertainNumberOfRoots(max_iterations,zero);
+}
+
+template<class T> bool
 EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<gDouble>& r, 
 				      const int& max_iterations,
 				      const int& max_no_roots) 
@@ -441,8 +538,35 @@ EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<gDouble>& r,
   return true;
 }
 
+template<class T> bool
+EquiSolv<T>::FindCertainNumberOfRoots(const int& max_iterations,
+				      const int& max_no_roots) 
+{
+  gList<gVector<gDouble> >* rootlistptr = new gList<gVector<gDouble> >();
 
-template <class T> void // gList<gVector<gDouble> >  
+  int iterations = 0;
+
+  gList<gSimplex<gDouble> > simpletope;
+
+  int* no_found = new int(0);
+  FindRootsRecursion(rootlistptr,
+		     simpletope,
+		     max_iterations, 
+		     iterations,
+		     max_no_roots,
+		     no_found);
+
+  if (iterations < max_iterations) { 
+    Roots = *rootlistptr; 
+    HasBeenSolved = true; 
+    return true; 
+  }
+
+  return false;
+}
+
+
+template <class T> void //ORIG
 EquiSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 				const gRectangle<gDouble>& r, 
 				const int& max_iterations,
@@ -487,6 +611,54 @@ EquiSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
     }
   }
 
+  return; 
+}
+
+
+template <class T> void 
+EquiSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
+				const gSimpletope<gDouble>& s, 
+				const int& max_iterations,
+				      int& iterations,
+				const int& max_no_roots,
+				      int* roots_found)    const
+{
+  if ( SystemHasNoEquilibriaIn(s.BoundingRectangle()) ) 
+    return; 
+/*
+  gVector<gDouble> point = r.Center();
+  if ( NewtonRootIsOnlyInRct(r, point) ) {
+    for (int i = Dmnsn() + 1; i <= System.Length(); i++)
+      if (TreesOfPartials[i].ValueOfRootPoly(point) < (gDouble)0)
+	return;
+    bool already_found = false;
+    for (int i = 1; i <= rootlistptr->Length(); i++)
+      if (point == (*rootlistptr)[i])
+	already_found = true;
+    if (!already_found) {
+      *rootlistptr += point;
+      (*roots_found)++; 
+    }
+    return; 
+  }
+
+  int i = 1;
+  while (i <= r.NumberOfCellsInSubdivision() && 
+                 (max_no_roots == 0 || *roots_found < max_no_roots)) {
+    if (iterations >= max_iterations) return;
+    else {
+      iterations++;
+      FindRootsRecursion(rootlistptr,
+			 r.SubdivisionCell(i),
+			 max_iterations, 
+			 precedence, 
+			 iterations,
+			 max_no_roots,
+			 roots_found);
+      i++;
+    }
+  }
+*/
   return; 
 }
 
