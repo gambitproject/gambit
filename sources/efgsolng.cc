@@ -21,9 +21,9 @@
 //                     guiEfgSolution: Member functions
 //=========================================================================
 
-guiEfgSolution::guiEfgSolution(const Efg &p_efg, const EFSupport &p_support,
+guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 			       EfgShowInterface *p_parent)
-  : ef(p_efg), sup(p_support), parent(p_parent)
+  : m_efg(p_support.Game()), m_support(p_support), m_parent(p_parent)
 { }
 
 //=========================================================================
@@ -128,98 +128,46 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 //                     Algorithm-specific classes
 //=========================================================================
 
+//========================================================================
+//                               LcpSolve
+//========================================================================
+
 #include "nliap.h"
 #include "eliap.h"
 #include "liapsub.h"
 #include "liapprm.h"
-
-LiapParamsSettings::LiapParamsSettings(void)
-{
-  wxGetResource(PARAMS_SECTION,"Liap-Ntries",&nTries,defaults_file);
-  wxGetResource(PARAMS_SECTION,"Func-tolN",&tolN,defaults_file);
-  wxGetResource(PARAMS_SECTION,"Func-tol1",&tol1,defaults_file);
-  wxGetResource(PARAMS_SECTION,"Func-maxitsN",&maxitsN,defaults_file);
-  wxGetResource(PARAMS_SECTION,"Func-maxits1",&maxits1,defaults_file);
-  wxGetResource(PARAMS_SECTION,"Start-Option",&start_option,defaults_file);
-}
-
-void LiapParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Func-tolN",tolN,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Func-tol1",tol1,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Func-maxitsN",maxitsN,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Func-maxits1",maxits1,defaults_file);
-  wxWriteResource(PARAMS_SECTION,"Start-Option",start_option,defaults_file);
-}
-
-LiapParamsSettings::~LiapParamsSettings(void)
-{ SaveDefaults(); }
-
-void LiapParamsSettings::GetParams(EFLiapParams &p_params)
-{
-  p_params.tol1 = tol1;
-  p_params.tolN = tolN;
-  p_params.maxits1 = maxits1;
-  p_params.maxitsN = maxitsN;
-  p_params.stopAfter = StopAfter();
-  p_params.nTries = nTries;
-
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-void LiapParamsSettings::GetParams(NFLiapParams &p_params)
-{
-  p_params.tol1 = tol1;
-  p_params.tolN = tolN;
-  p_params.maxits1 = maxits1;
-  p_params.maxitsN = maxitsN;
-  p_params.stopAfter = StopAfter();
-  p_params.nTries = nTries;
-
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
 
 LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames, bool p_vianfg)
   : OutputParamsDialog("LiapSolve Parameters", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-
-  Add(wxMakeFormShort("Max # Tries", &nTries, wxFORM_DEFAULT, NULL, NULL,
-		      wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormFloat("Tolerance n-D", &tolN, wxFORM_DEFAULT, NULL, NULL,
-		      wxVERTICAL, 100));
-  Add(wxMakeFormFloat("Tolerance 1-D", &tol1, wxFORM_DEFAULT, NULL, NULL,
-		      wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormShort("Iterations n-D", &maxitsN, wxFORM_DEFAULT, NULL, NULL,
-		      wxVERTICAL, 100));
-  Add(wxMakeFormShort("Iterations 1-D", &maxits1, wxFORM_DEFAULT, NULL, NULL,
-		      wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-  wxStringList *start_option_list=new wxStringList("Default", "Saved",
-						   "Prompt", 0);
-  char *start_option_str = new char[20];
-  strcpy(start_option_str,
-	 (char *) start_option_list->Nth(start_option)->Data());
-  Add(wxMakeFormString("Start", &start_option_str, wxFORM_RADIOBOX, 
-		       new wxList(wxMakeConstraintStrings(start_option_list),
-				  0), 0, wxVERTICAL));
-  Add(wxMakeFormNewLine());
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
-  Go();
-
-  start_option = wxListFindString(start_option_list, start_option_str);
-  delete [] start_option_str;
-  delete start_option_list;
 }
 
+LiapSolveParamsDialog::~LiapSolveParamsDialog()
+{
+}
+
+void LiapSolveParamsDialog::AlgorithmFields(void)
+{
+  m_nTries = new wxText(this, 0, "nTries");
+  NewLine();
+  m_tolND = new wxText(this, 0, "Tol n-D");
+  NewLine();
+  m_tol1D = new wxText(this, 0, "Tol 1-D");
+  NewLine();
+  m_maxitsND = new wxText(this, 0, "Iterations n-D");
+  NewLine();
+  m_maxits1D = new wxText(this, 0, "Iterations 1-D");
+  NewLine();
+
+  char *startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+				 3, startOptions);
+  NewLine();
+
+  Go();
+}
 
 //---------------------
 // Liapunov on efg
@@ -241,37 +189,49 @@ public:
     { }
 };
 
-guiEfgSolveLiap::guiEfgSolveLiap(const Efg &p_efg, const EFSupport &p_support,
-				 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
+			     EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> guiEfgSolveLiap::Solve(void) const
+gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 {
-  LiapParamsSettings LPS;
-  wxStatus status(parent->Frame(), "LiapSolve");
-  BehavProfile<gNumber> start = parent->CreateStartProfile(LPS.StartOption());
-  EFLiapParams P(status);
-  LPS.GetParams(P);
+  wxStatus status(m_parent->Frame(), "LiapSolve Progress");
+  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
+
+  EFLiapParams params(status);
+  params.tol1 = m_tol1D;
+  params.tolN = m_tolND;
+  params.maxits1 = m_maxits1D;
+  params.maxitsN = m_maxitsND;
+  params.nTries = m_nTries;
+
   try {
-    EFLiapBySubgameG M(ef, P, start, LPS.MaxSolns(), parent);
-    return M.Solve(EFSupport(ef));
+    return EFLiapBySubgameG(m_efg, params, start,
+			    0, m_parent).Solve(EFSupport(m_efg));
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool guiEfgSolveLiap::SolveSetup(void) const
+bool guiefgLiapEfg::SolveSetup(void)
 { 
-  LiapSolveParamsDialog LSPD(parent->Frame(), true);
+  LiapSolveParamsDialog dialog(m_parent->Frame(), true);
 
-  if (LSPD.Completed() == wxOK) {
-    eliminate = LSPD.Eliminate();
-    all = LSPD.EliminateAll();
-    domType = LSPD.DominanceType();
-    domMethod = LSPD.DominanceMethod();
-    markSubgames = LSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_tol1D = dialog.Tol1D();
+    m_tolND = dialog.TolND();
+    m_maxits1D = dialog.Maxits1D();
+    m_maxitsND = dialog.MaxitsND();
+    m_nTries = dialog.NumTries();
+    m_startOption = dialog.StartOption();
 
     return true;
   }
@@ -303,43 +263,54 @@ public:
     { }
 };
 
-EfgNLiapG::EfgNLiapG(const Efg &p_efg, const EFSupport &p_support, 
-		     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLiapNfg::guiefgLiapNfg(const EFSupport &p_support, 
+			     EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgNLiapG::Solve(void) const
+gList<BehavSolution> guiefgLiapNfg::Solve(void) const
 {
-  LiapParamsSettings LPS;
-  wxStatus status(parent->Frame(), "Liap Algorithm");
-  BehavProfile<gNumber> start = parent->CreateStartProfile(LPS.StartOption());
-  NFLiapParams P(status);
-  LPS.GetParams(P);
+  wxStatus status(m_parent->Frame(), "LiapSolve Progress");
+  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
+
+  NFLiapParams params(status);
+  params.tol1 = m_tol1D;
+  params.tolN = m_tolND;
+  params.maxits1 = m_maxits1D;
+  params.maxitsN = m_maxitsND;
+  params.nTries = m_nTries;
+  
   try {
-    NFLiapBySubgameG M(ef, P, start, Eliminate(), EliminateAll(),
-		       DominanceType(), LPS.MaxSolns(), parent);
-    return M.Solve(EFSupport(ef));
+    return NFLiapBySubgameG(m_efg, params, start, Eliminate(), EliminateAll(),
+			    EliminateWeak(), 0, m_parent).Solve(EFSupport(m_efg));
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgNLiapG::SolveSetup(void) const
+bool guiefgLiapNfg::SolveSetup(void)
 {
-  LiapSolveParamsDialog LSPD(parent->Frame(), true);
+  LiapSolveParamsDialog dialog(m_parent->Frame(), true);
 
-  if (LSPD.Completed() == wxOK)  {
-    eliminate = LSPD.Eliminate();
-    all = LSPD.EliminateAll();
-    domType = LSPD.DominanceType();
-    domMethod = LSPD.DominanceMethod();
-    markSubgames = LSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_tol1D = dialog.Tol1D();
+    m_tolND = dialog.TolND();
+    m_maxits1D = dialog.Maxits1D();
+    m_maxitsND = dialog.MaxitsND();
+    m_nTries = dialog.NumTries();
+    m_startOption = dialog.StartOption();
+
     return true;
   }
   else
     return false;
-    
 }
 
 //========================================================================
@@ -353,119 +324,24 @@ bool EfgNLiapG::SolveSetup(void) const
 #include "seqform.h"
 #include "seqfprm.h"
 
-#ifdef UNUSED
-SeqFormParamsSettings::SeqFormParamsSettings(void)
+LcpSolveDialog::LcpSolveDialog(wxWindow *p_parent, bool p_subgames,
+			       bool p_vianfg)
+  : OutputParamsDialog("LcpSolve Parameters", p_parent)
 {
-  wxGetResource(PARAMS_SECTION, "SeqForm-dup_strat", &dup_strat, 
-		defaults_file);
-  wxGetResource(PARAMS_SECTION, "SeqForm-maxdepth", &maxdepth, defaults_file);
-}
-
-void SeqFormParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "SeqForm-dup_strat" ,dup_strat,
-		  defaults_file);
-  wxWriteResource(PARAMS_SECTION, "SeqForm-maxdepth", maxdepth, defaults_file);
-}
-
-SeqFormParamsSettings::~SeqFormParamsSettings(void)
-{ SaveDefaults(); }
-
-void SeqFormParamsSettings::GetParams(SeqFormParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.maxdepth = maxdepth;
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
-					 bool p_subgames /* = false */)
-  : OutputParamsDialog("LcpSolve Params", p_parent)
-{
-  MakeCommonFields(true, p_subgames, false);
-
-  Add(wxMakeFormBool("All Solutions", &dup_strat));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormShort("Max depth", &maxdepth));
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
+  MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
 }
-#endif  // UNUSED
 
-efgLcpSolveDialog::efgLcpSolveDialog(wxWindow *p_parent, bool /*p_subgames*/)
-  : wxDialogBox(p_parent, "LcpSolve Parameters", TRUE)
+void LcpSolveDialog::AlgorithmFields(void)
 {
-  new wxGroupBox(this, "Elimination of dominated behavior strategies",
-		 10, 10, 250, 105);
-  char *depthChoices[3] = { "None", "Once", "Iterative" };
-  m_dominanceDepth = new wxRadioBox(this, 0, "Depth", 20, 20, -1, -1,
-				    3, depthChoices);
-  char *typeChoices[2] = { "Weak", "Strong" };
-  m_dominanceType = new wxRadioBox(this, 0, "Type", 20, 65, -1, -1,
-				   2, typeChoices);
-
-  new wxGroupBox(this, "Algorithm behavior", 10, 120, 350, 100);
   char *precisionChoices[2] = { "Float", "Rational" };
-  m_precisionChoice = new wxRadioBox(this, 0, "Precision", 20, 135, -1, -1,
-				     2, precisionChoices);
-  m_maxDepth = new wxText(this, 0, "Max depth", "", 240, 150, 100, -1);
-  char *stopAfterChoices[2] = { "All solutions", "Some solutions" };
-  m_stopAfterChoice = new wxRadioBox(this, 0, "Find", 20, 170, -1, -1,
-				     2, stopAfterChoices);
-  m_maxSolutions = new wxText(this, 0, "Stop after", "", 240, 185, 100, -1);
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
   NewLine();
-
-  new wxGroupBox(this, "Subgames", 10, 230, 300, 80);
-  m_markSubgames = new wxCheckBox(this, 0, "Mark all subgames", 20, 250);
-  m_selectSolutions = new wxCheckBox(this, 0, "Select subgame solutions",
-				     20, 270);
-
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok",
-				    100, 335, 60);
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel", 200, 335, 60);
-  cancelButton->SetClientData((char *) this);
-  
-  Fit();
-  Show(TRUE);
-}
-
-void efgLcpSolveDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void efgLcpSolveDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool efgLcpSolveDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-int efgLcpSolveDialog::StopAfter(void) const
-{
-  if (m_stopAfterChoice->GetSelection() == 0)
-    return 0;
-  else
-    return (int) ToDouble(m_maxSolutions->GetValue());
-}
-
-gPrecision efgLcpSolveDialog::Precision(void) const
-{
-  return (m_precisionChoice->GetSelection() == 0) ? precDOUBLE : precRATIONAL;
+  m_maxDepth = new wxText(this, 0, "Max depth");
+  NewLine();
+  m_stopAfter = new wxText(this, 0, "Stop after");
+  NewLine();
 }
 
 class SeqFormBySubgameG : public efgLcpSolve, public BaseBySubgameG {
@@ -483,39 +359,51 @@ public:
     { }
 };
 
-EfgSeqFormG::EfgSeqFormG(const Efg &p_efg, const EFSupport &p_support, 
-			 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support, 
+			   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgSeqFormG::Solve(void) const
+gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 {
-  if (ef.NumPlayers() != 2) {
+  if (m_efg.NumPlayers() != 2) {
     wxMessageBox("Only valid for two-player games");
     return gList<BehavSolution>();
   }
 
-  efgLcpSolveDialog dialog(parent->Frame(), true);
+  wxStatus status(m_parent->Frame(), "LcpSolve Progress");
+  SeqFormParams params(status);
+  params.stopAfter = m_stopAfter;
+  params.maxdepth = m_maxDepth;
+  params.precision = m_precision;
 
-  if (dialog.Completed() == wxOK) {
-    wxStatus status(parent->Frame(), "LcpSolve Progress");
-    SeqFormParams params(status);
-    params.stopAfter = dialog.StopAfter();
-    params.maxdepth = dialog.MaxDepth();
-    params.precision = dialog.Precision();
-
-    try {
-      SeqFormBySubgameG(ef, sup, params, 0, parent).Solve(sup);
-    }
-    catch (gSignalBreak &) { }
+  try {
+    return SeqFormBySubgameG(m_efg, m_support, params,
+			     0, m_parent).Solve(m_support);
   }
+  catch (gSignalBreak &) { }
 
   return gList<BehavSolution>();
 }
 
-bool EfgSeqFormG::SolveSetup(void) const
+bool guiefgLcpEfg::SolveSetup(void)
 { 
-  return true;
+  LcpSolveDialog dialog(m_parent->Frame(), true);
+
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
+    m_maxDepth = dialog.MaxDepth();
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -524,33 +412,6 @@ bool EfgSeqFormG::SolveSetup(void) const
 //---------------------
 
 #include "lemkesub.h"
-#include "lemkeprm.h"
-
-LemkeParamsSettings::LemkeParamsSettings(void)
-{ }
-
-void LemkeParamsSettings::SaveDefaults(void)
-{ }
-
-void LemkeParamsSettings::GetParams(LemkeParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *p_parent /* = 0 */,
-					       bool p_subgames /* = false */,
-					       bool p_vianfg /* = false */)
-  : OutputParamsDialog("LcpSolve Params", p_parent, LCP_HELP)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
-  Go();
-}
 
 class LemkeBySubgameG : public efgLcpNfgSolve, public BaseBySubgameG {
 protected:
@@ -570,44 +431,49 @@ public:
     { }
 };
 
-EfgLemkeG::EfgLemkeG(const Efg &p_efg, const EFSupport &p_support, 
-		     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLcpNfg::guiefgLcpNfg(const EFSupport &p_support, 
+			   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgLemkeG::Solve(void) const
+gList<BehavSolution> guiefgLcpNfg::Solve(void) const
 {
-  wxStatus status(parent->Frame(), "LCP Algorithm");
-
-  if (ef.NumPlayers() != 2)  {
+  if (m_efg.NumPlayers() != 2)  {
     wxMessageBox("LCP algorithm only works on 2 player games.",
-					 "Algorithm Error");
-    return solns;
+		 "Algorithm Error");
+    return gList<BehavSolution>();
   }
 
-  LemkeParamsSettings LPS;
-  LemkeParams P(status);
-  LPS.GetParams(P);
+  wxStatus status(m_parent->Frame(), "LcpSolve Progress");
+
+  LemkeParams params(status);
+  params.stopAfter = m_stopAfter;
+  params.precision = m_precision;
+
   try {
-    LemkeBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
-		      LPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    LemkeBySubgameG M(m_efg, m_support, params, Eliminate(), EliminateAll(),
+		      EliminateWeak(), 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &)  {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgLemkeG::SolveSetup(void) const
+bool guiefgLcpNfg::SolveSetup(void)
 {
-  LemkeSolveParamsDialog LSPD(parent->Frame(), true, true); 
+  LcpSolveDialog dialog(m_parent->Frame(), true, true); 
 
-  if (LSPD.Completed() == wxOK) {
-    eliminate = LSPD.Eliminate();
-    all = LSPD.EliminateAll();
-    domType = LSPD.DominanceType();
-    domMethod = LSPD.DominanceMethod();
-    markSubgames = LSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
+    m_maxDepth = dialog.MaxDepth();
     return true;
   }
   else
@@ -619,10 +485,6 @@ bool EfgLemkeG::SolveSetup(void) const
 //                            EnumPureSolve
 //========================================================================
 
-//---------------------
-// EnumPure on nfg
-//---------------------
-
 #include "psnesub.h"
 #include "purenprm.h"
 
@@ -632,11 +494,18 @@ PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
   : OutputParamsDialog("EnumPureSolve Params", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
 }
+
+void PureNashSolveParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  m_stopAfter = new wxText(this, 0, "Stop after");
+}
+
+//---------------------
+// EnumPure on nfg
+//---------------------
 
 class PureNashBySubgameG : public efgEnumPureNfgSolve, public BaseBySubgameG {
 protected:
@@ -655,37 +524,37 @@ public:
     { }
 };
 
-EfgPureNashG::EfgPureNashG(const Efg &p_efg, const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgEnumPureNfg::guiefgEnumPureNfg(const EFSupport &p_support, 
+				     EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgPureNashG::Solve(void) const
+gList<BehavSolution> guiefgEnumPureNfg::Solve(void) const
 {
-  PureNashParamsSettings PNPS;
-  wxStatus status(parent->Frame(), "EnumPure Algorithm");
+  wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   try {
-    PureNashBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
-			 DominanceType(), PNPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    PureNashBySubgameG M(m_efg, m_support, Eliminate(), EliminateAll(),
+			 EliminateWeak(), 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgPureNashG::SolveSetup(void) const
+bool guiefgEnumPureNfg::SolveSetup(void)
 {
-  PureNashSolveParamsDialog PNPD(parent->Frame(), true, true); 
+  PureNashSolveParamsDialog dialog(m_parent->Frame(), true, true); 
 
-  if (PNPD.Completed() == wxOK) {
-    eliminate = PNPD.Eliminate();
-    all = PNPD.EliminateAll();
-    domType = PNPD.DominanceType();
-    domMethod = PNPD.DominanceMethod();
-    markSubgames = PNPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+    m_stopAfter = dialog.StopAfter();
     return true;
   }
   else
@@ -712,36 +581,35 @@ public:
     { }
 };
 
-EfgEPureNashG::EfgEPureNashG(const Efg &p_efg, const EFSupport &p_support, 
-			     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgEnumPureEfg::guiefgEnumPureEfg(const EFSupport &p_support, 
+				     EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgEPureNashG::Solve(void) const
+gList<BehavSolution> guiefgEnumPureEfg::Solve(void) const
 {
-  PureNashParamsSettings PNPS;
-  wxStatus status(parent->Frame(), "Efg PureNash");
+  wxStatus status(m_parent->Frame(), "EnumPureSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   try {
-    EPureNashBySubgameG M(ef, sup, PNPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    EPureNashBySubgameG M(m_efg, m_support, 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgEPureNashG::SolveSetup(void) const
+bool guiefgEnumPureEfg::SolveSetup(void)
 {
-  PureNashSolveParamsDialog PNPD(parent->Frame(), true);
+  PureNashSolveParamsDialog PNPD(m_parent->Frame(), true);
 
   if (PNPD.Completed() == wxOK) {
-    eliminate = PNPD.Eliminate();
-    all = PNPD.EliminateAll();
-    domType = PNPD.DominanceType();
-    domMethod = PNPD.DominanceMethod();
-    markSubgames = PNPD.MarkSubgames();
+    m_eliminate = PNPD.Eliminate();
+    m_eliminateAll = PNPD.EliminateAll();
+    m_eliminateWeak = PNPD.EliminateWeak();
+    m_eliminateMixed = PNPD.EliminateMixed();
+    m_markSubgames = PNPD.MarkSubgames();
     return true;
   }
   else
@@ -754,32 +622,30 @@ bool EfgEPureNashG::SolveSetup(void) const
 
 #include "enumprm.h"
 
-EnumParamsSettings::EnumParamsSettings(void)
-{ }
-
-void EnumParamsSettings::SaveDefaults(void)
-{ }
-
-void EnumParamsSettings::GetParams(EnumParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames,
 					     bool p_vianfg)
   : OutputParamsDialog("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-
-  Add(wxMakeFormNewLine());
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
+}
+
+EnumSolveParamsDialog::~EnumSolveParamsDialog()
+{
+}
+
+void EnumSolveParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters:");
+  NewLine();
+
+  m_stopAfter = new wxText(this, 0, "Stop after");
+  NewLine();
+  char *precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
+  NewLine();
 }
 
 
@@ -823,38 +689,41 @@ public:
     { }
 };
 
-EfgEnumG::EfgEnumG(const Efg &p_efg, const EFSupport &p_support,
-		   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgEnumMixedNfg::guiefgEnumMixedNfg(const EFSupport &p_support,
+				       EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgEnumG::Solve(void) const
+gList<BehavSolution> guiefgEnumMixedNfg::Solve(void) const
 {
-  EnumParamsSettings EPS;
-  wxEnumStatus status(parent->Frame());
-  EnumParams P(status);
-  EPS.GetParams(P);
+  wxEnumStatus status(m_parent->Frame());
+  EnumParams params(status);
+  params.stopAfter = m_stopAfter;
+  params.precision = m_precision;
 
   try {
-    EnumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
-		     DominanceType(), EPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    EnumBySubgameG M(m_efg, m_support, params, Eliminate(), EliminateAll(),
+		     EliminateWeak(), 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgEnumG::SolveSetup(void) const
+bool guiefgEnumMixedNfg::SolveSetup(void)
 {
-  EnumSolveParamsDialog ESPD(parent->Frame(), true); 
+  EnumSolveParamsDialog dialog(m_parent->Frame(), true); 
 
-  if (ESPD.Completed() == wxOK) {
-    eliminate = ESPD.Eliminate();
-    all = ESPD.EliminateAll();
-    domType = ESPD.DominanceType();
-    domMethod = ESPD.DominanceMethod();
-    markSubgames = ESPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
     return true;
   }
   else
@@ -870,38 +739,29 @@ bool EfgEnumG::SolveSetup(void) const
 #include "efgcsum.h"
 #include "csumprm.h"
 
-LPParamsSettings::LPParamsSettings(void)
-{ }
-
-void LPParamsSettings::SaveDefaults(void)
-{ }
-
-void LPParamsSettings::GetParams(ZSumParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-void LPParamsSettings::GetParams(CSSeqFormParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames,
 					 bool p_vianfg)
-  : OutputParamsDialog("LpSolve Params", p_parent, LP_HELP)
+  : OutputParamsDialog("LpSolve Parameters", p_parent, LP_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Add(wxMakeFormNewLine());
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
+}
+
+LPSolveParamsDialog::~LPSolveParamsDialog()
+{
+}
+
+void LPSolveParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm Parameters:");
+  NewLine();
+
+  m_stopAfter = new wxText(this, 0, "Stop after");
+  NewLine();
+  char *precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
+  NewLine();
 }
 
 //---------------------
@@ -927,44 +787,47 @@ public:
     { }
 };
 
-EfgZSumG::EfgZSumG(const Efg &p_efg, const EFSupport &p_support,
-		   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLpNfg::guiefgLpNfg(const EFSupport &p_support,
+			 EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgZSumG::Solve(void) const
+gList<BehavSolution> guiefgLpNfg::Solve(void) const
 {
-  if (ef.NumPlayers() > 2 || !ef.IsConstSum()) {
+  if (m_efg.NumPlayers() > 2 || !m_efg.IsConstSum()) {
     wxMessageBox("Only valid for two-person zero-sum games");
-    return solns;
+    return gList<BehavSolution>();
   }
 
-  LPParamsSettings LPPS;
-  wxStatus status(parent->Frame(), "LPSolve Algorithm");
+  wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
-  ZSumParams P;
-  LPPS.GetParams(P);
+  ZSumParams params;
+  params.stopAfter = m_stopAfter;
+  params.precision = m_precision;
 
   try {
-    ZSumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
-		     LPPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    ZSumBySubgameG M(m_efg, m_support, params, Eliminate(), EliminateAll(),
+		     EliminateWeak(), 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgZSumG::SolveSetup(void) const
+bool guiefgLpNfg::SolveSetup(void)
 {
-  LPSolveParamsDialog ZSPD(parent->Frame(), true, true); 
+  LPSolveParamsDialog dialog(m_parent->Frame(), true, true); 
 
-  if (ZSPD.Completed() == wxOK) {
-    eliminate = ZSPD.Eliminate();
-    all = ZSPD.EliminateAll();
-    domType = ZSPD.DominanceType();
-    domMethod = ZSPD.DominanceMethod();
-    markSubgames = ZSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
     return true;
   }
   else
@@ -990,43 +853,47 @@ public:
     { }
 };
 
-EfgCSumG::EfgCSumG(const Efg &p_efg, const EFSupport &p_support,
-		   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
+			 EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgCSumG::Solve(void) const
+gList<BehavSolution> guiefgLpEfg::Solve(void) const
 {
-  if (ef.NumPlayers() > 2 || !ef.IsConstSum()) {
+  if (m_efg.NumPlayers() > 2 || !m_efg.IsConstSum()) {
     wxMessageBox("Only valid for two-person zero-sum games");
-    return solns;
+    return gList<BehavSolution>();
   }
   
-  LPParamsSettings LPPS;
-  wxStatus status(parent->Frame(), "LP Algorithm");
+  wxStatus status(m_parent->Frame(), "LpSolve Progress");
   status << "Progress not implemented\n" << "Cancel button disabled\n";
-  CSSeqFormParams P(status);
-  LPPS.GetParams(P);
+
+  CSSeqFormParams params(status);
+  params.stopAfter = m_stopAfter;
+  params.precision = m_precision;
  
   try {
-    EfgCSumBySubgameG M(ef, sup, P, LPPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    EfgCSumBySubgameG M(m_efg, m_support, params, 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgCSumG::SolveSetup(void) const
+bool guiefgLpEfg::SolveSetup(void)
 {
-  LPSolveParamsDialog ZSPD(parent->Frame(), true);
+  LPSolveParamsDialog dialog(m_parent->Frame(), true);
 
-  if (ZSPD.Completed() == wxOK) {
-    eliminate = ZSPD.Eliminate();
-    all = ZSPD.EliminateAll();
-    domType = ZSPD.DominanceType();
-    domMethod = ZSPD.DominanceMethod();
-    markSubgames = ZSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
     return true;
   }
   else
@@ -1044,46 +911,27 @@ bool EfgCSumG::SolveSetup(void) const
 #include "simpsub.h"
 #include "simpprm.h"
 
-SimpdivParamsSettings::SimpdivParamsSettings(void)
-{
-  wxGetResource(PARAMS_SECTION, "Simpdiv-nRestarts", &nRestarts,
-		defaults_file);
-  wxGetResource(PARAMS_SECTION, "Simpdiv-leashLength", &leashLength,
-		defaults_file);
-}
-
-void SimpdivParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "Simpdiv-nRestarts", nRestarts,
-		  defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Simpdiv-leashLength", leashLength,
-		  defaults_file);
-}
-
-void SimpdivParamsSettings::GetParams(SimpdivParams &p_params)
-{
-  p_params.nRestarts = nRestarts;
-  p_params.leashLength = leashLength;
-  p_params.stopAfter = StopAfter();
-  p_params.precision = Precision();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
 SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
   : OutputParamsDialog("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
 {
   MakeCommonFields(true, p_subgames, true);
-
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormShort("# Restarts", &nRestarts));
-  Add(wxMakeFormShort("Leash", &leashLength));
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
 }
+
+void SimpdivSolveParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  m_nRestarts = new wxText(this, 0, "# restarts");
+  NewLine();
+  m_leashLength = new wxText(this, 0, "Leash");
+  NewLine();
+  m_stopAfter = new wxText(this, 0, "Stop after");
+  NewLine();
+  char *precisionChoices[2] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
+}  
 
 class SimpdivBySubgameG : public efgSimpDivNfgSolve, public BaseBySubgameG {
 protected:
@@ -1103,38 +951,47 @@ public:
     { }
 };
 
-EfgSimpdivG::EfgSimpdivG(const Efg &p_efg, const EFSupport &p_support, 
-			 EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgSimpdivNfg::guiefgSimpdivNfg(const EFSupport &p_support, 
+				   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgSimpdivG::Solve(void) const
+gList<BehavSolution> guiefgSimpdivNfg::Solve(void) const
 {
-  SimpdivParamsSettings SPS;
-  wxStatus status(parent->Frame(), "Simpdiv Algorithm");
-  SimpdivParams P(status);
-  SPS.GetParams(P);
+  wxStatus status(m_parent->Frame(), "SimpdivSolve Progress");
+
+  SimpdivParams params(status);
+  params.stopAfter = m_stopAfter;
+  params.precision = m_precision;
+  params.nRestarts = m_nRestarts;
+  params.leashLength = m_leashLength;
 
   try {
-    SimpdivBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
-			DominanceType(), SPS.MaxSolns(), parent);
-    return M.Solve(sup);
+    SimpdivBySubgameG M(m_efg, m_support, params, Eliminate(), EliminateAll(),
+			EliminateWeak(), 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool EfgSimpdivG::SolveSetup(void) const
+bool guiefgSimpdivNfg::SolveSetup(void)
 {
-  SimpdivSolveParamsDialog SDPD(parent->Frame(), true); 
+  SimpdivSolveParamsDialog dialog(m_parent->Frame(), true); 
 
-  if (SDPD.Completed() == wxOK) {
-    eliminate = SDPD.Eliminate();
-    all = SDPD.EliminateAll();
-    domType = SDPD.DominanceType();
-    domMethod = SDPD.DominanceMethod();
-    markSubgames = SDPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
+    m_precision = dialog.Precision();
+    m_nRestarts = dialog.NumRestarts();
+    m_leashLength = dialog.LeashLength();
+
     return true;
   }
   else
@@ -1149,30 +1006,21 @@ bool EfgSimpdivG::SolveSetup(void) const
 #include "polenum.h"
 #include "polensub.h"
 
-guiPolEnumParamsSettings::guiPolEnumParamsSettings(void)
-{ }
-
-void guiPolEnumParamsSettings::SaveDefaults(void)
-{ }
-
-void guiPolEnumParamsSettings::GetParams(PolEnumParams &p_params)
-{
-  p_params.stopAfter = StopAfter();
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
 guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
 					       bool p_subgames,
 					       bool p_vianfg)
-  : OutputParamsDialog("PolEnumSolve Parameters", p_parent, LP_HELP)
+  : OutputParamsDialog("PolEnumSolve Parameters", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
-  Add(wxMakeFormNewLine());
-
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
-		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
+}
+
+void guiPolEnumParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  NewLine();
+  m_stopAfter = new wxText(this, 0, "Stop after");
+  NewLine();
 }
 
 //------------------
@@ -1195,38 +1043,39 @@ public:
     { }
 };
 
-guiPolEnumEfgNfg::guiPolEnumEfgNfg(const EFSupport &p_support, 
+guiefgPolEnumNfg::guiefgPolEnumNfg(const EFSupport &p_support, 
 				   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support.Game(), p_support, p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> guiPolEnumEfgNfg::Solve(void) const
+gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
 {
-  guiPolEnumParamsSettings PES;
-  wxStatus status(parent->Frame(), "PolEnum Algorithm");
+  wxStatus status(m_parent->Frame(), "PolEnum Algorithm");
   status.SetProgress(0.0);
-  PolEnumParams P(status);
-  PES.GetParams(P);
+  PolEnumParams params(status);
+  params.stopAfter = m_stopAfter;
 
   try {
-    guiPolEnumEfgByNfgSubgame M(ef, sup, P, PES.MaxSolns(), parent);
-    return M.Solve(sup);
+    guiPolEnumEfgByNfgSubgame M(m_efg, m_support, params, 0, m_parent);
+    return M.Solve(m_support);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
   }
 }
 
-bool guiPolEnumEfgNfg::SolveSetup(void) const
+bool guiefgPolEnumNfg::SolveSetup(void)
 {
-  guiPolEnumParamsDialog D(parent->Frame(), true, true); 
+  guiPolEnumParamsDialog dialog(m_parent->Frame(), true, true); 
 
-  if (D.Completed() == wxOK) {
-    eliminate = D.Eliminate();
-    all = D.EliminateAll();
-    domType = D.DominanceType();
-    domMethod = D.DominanceMethod();
-    markSubgames = D.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_stopAfter = dialog.StopAfter();
     return true;
   }
   else
@@ -1237,26 +1086,26 @@ bool guiPolEnumEfgNfg::SolveSetup(void) const
 // PolEnum on efg
 //------------------
 
-guiPolEnumEfg::guiPolEnumEfg(const EFSupport &p_support, 
-			     EfgShowInterface *p_parent)
-  : guiEfgSolution(p_support.Game(), p_support, p_parent)
+guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support, 
+				   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> guiPolEnumEfg::Solve(void) const
+gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 {
   return gList<BehavSolution>();
 }
 
-bool guiPolEnumEfg::SolveSetup(void) const
+bool guiefgPolEnumEfg::SolveSetup(void)
 {
-  guiPolEnumParamsDialog D(parent->Frame(), true); 
+  guiPolEnumParamsDialog dialog(m_parent->Frame(), true); 
 
-  if (D.Completed() == wxOK) {
-    eliminate = D.Eliminate();
-    all = D.EliminateAll();
-    domType = D.DominanceType();
-    domMethod = D.DominanceMethod();
-    markSubgames = D.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
     return true;
   }
   else
@@ -1271,151 +1120,72 @@ bool guiPolEnumEfg::SolveSetup(void) const
 #include "ngobit.h"
 #include "egobit.h"
 
-QreParamsSettings::QreParamsSettings(const char *p_filename)
-  : PxiParamsSettings("Qre", p_filename)
-{
-  wxGetResource(PARAMS_SECTION, "Qre-minLam", &minLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Qre-maxLam", &maxLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Qre-delLam", &delLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Func-tolN", &tolN, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Func-tol1", &tol1, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Func-maxitsN", &maxitsN, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Func-maxits1", &maxits1, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Start-Option", &start_option, defaults_file);
-}
-
-void QreParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "Qre-minLam", minLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Qre-maxLam", maxLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Qre-delLam", delLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Func-tolN", tolN, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Func-tol1", tol1, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Func-maxitsN", maxitsN, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Func-maxits1", maxits1, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Start-Option", start_option, defaults_file);
-}
-
-QreParamsSettings::~QreParamsSettings(void)
-{ SaveDefaults(); }
-
-void QreParamsSettings::GetParams(EFQreParams &p_params)
-{
-  p_params.minLam = minLam;
-  p_params.maxLam = maxLam;
-  p_params.delLam = delLam;
-  p_params.tol1 = tol1;
-  p_params.tolN = tolN;
-  p_params.maxits1 = maxits1;
-  p_params.maxitsN = maxitsN;
-
-  p_params.powLam = PxiType();
-  p_params.pxifile = PxiFile();
-
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-void QreParamsSettings::GetParams(NFQreParams &p_params)
-{
-  p_params.minLam = minLam;
-  p_params.maxLam = maxLam;
-  p_params.delLam = delLam;
-  p_params.tol1 = tol1;
-  p_params.tolN = tolN;
-  p_params.maxits1 = maxits1;
-  p_params.maxitsN = maxitsN;
-
-  p_params.powLam = PxiType();
-  p_params.pxifile = PxiFile();
-
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-
 QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
 					   const gText p_filename,
 					   bool p_vianfg)
-  : PxiParamsDialog("Qre","QRESolve Params", p_filename, p_parent,
-		    QRE_HELP),
-    QreParamsSettings(p_filename), PxiParamsSettings("Qre", p_filename)
+  : PxiParamsDialog("Qre","QRESolve Params", p_filename, p_parent, QRE_HELP)
 {
   MakeCommonFields(true, false, p_vianfg);
-
-  Add(wxMakeFormFloat("minLam", &minLam, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormFloat("maxLam", &maxLam, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormFloat("delLam", &delLam, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormFloat("Tolerance n-D", &tolN, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormFloat("Tolerance 1-D", &tol1, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormShort("Iterations n-D", &maxitsN, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormShort("Iterations 1-D", &maxits1, wxFORM_DEFAULT,
-		      NULL, NULL, wxVERTICAL, 100));
-  Add(wxMakeFormNewLine());
-
-  wxStringList *start_option_list = new wxStringList("Default", "Saved",
-						     "Prompt", 0);
-  char *start_option_str = new char[20];
-  strcpy(start_option_str,
-	 (char *)start_option_list->Nth(start_option)->Data());
-  Add(wxMakeFormString("Start", &start_option_str, wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(start_option_list),
-				  0), 0, wxVERTICAL));
-
-  MakePxiFields();
-  MakeOutputFields();
   Go();
-
-  start_option = wxListFindString(start_option_list, start_option_str);
-  delete [] start_option_str;
-  delete start_option_list;
 }
+
+void QreSolveParamsDialog::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  m_minLam = new wxText(this, 0, "minLam");
+  m_maxLam = new wxText(this, 0, "maxLam");
+  m_delLam = new wxText(this, 0, "delLam");
+  NewLine();
+
+  m_tolN = new wxText(this, 0, "Tolerance n-D");
+  m_tol1 = new wxText(this, 0, "Tolerance 1-D");
+  NewLine();
+
+  m_maxitsN = new wxText(this, 0, "Iterations n-D");
+  m_maxits1 = new wxText(this, 0, "Iterations 1-D");
+  NewLine();
+
+  char *startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+				 3, startOptions);
+  NewLine();
+}  
 
 //---------------------
 // Qre on nfg
 //---------------------
 
-EfgNQreG::EfgNQreG(const Efg &p_efg, const EFSupport &p_support, 
-		       EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgQreNfg::guiefgQreNfg(const EFSupport &p_support, 
+			   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgNQreG::Solve(void) const
+gList<BehavSolution> guiefgQreNfg::Solve(void) const
 {
-  QreParamsSettings GSPD(parent->Filename());
-  wxStatus status(parent->Frame(), "QRE Algorithm");
+  wxStatus status(m_parent->Frame(), "QreSolve Progress");
 
-  NFQreParams P(status);
-  GSPD.GetParams(P);
+  NFQreParams params(status);
 
-  Nfg *N = MakeReducedNfg(EFSupport(ef));
+  Nfg *N = MakeReducedNfg(EFSupport(m_efg));
 
-  BehavProfile<gNumber> startb = parent->CreateStartProfile(GSPD.StartOption());
+  BehavProfile<gNumber> startb = m_parent->CreateStartProfile(m_startOption);
   MixedProfile<gNumber> startm(*N);
 
-  BehavToMixed(ef, startb, *N, startm);
+  BehavToMixed(m_efg, startb, *N, startm);
   
   long nevals, nits;
   gList<MixedSolution> nfg_solns;
 
   try {
-    Qre(*N, P, startm, nfg_solns, nevals, nits);
-    GSPD.RunPxi();
+    Qre(*N, params, startm, nfg_solns, nevals, nits);
+    //GSPD.RunPxi();
   }
   catch (gSignalBreak &) { }
 
   gList<BehavSolution> solutions;
 
   for (int i = 1; i <= nfg_solns.Length(); i++) {
-    MixedToBehav(*N, nfg_solns[i], ef, startb);
+    MixedToBehav(*N, nfg_solns[i], m_efg, startb);
     solutions.Append(BehavSolution(startb, EfgAlg_QRE));
   }
 
@@ -1424,16 +1194,18 @@ gList<BehavSolution> EfgNQreG::Solve(void) const
   return solutions;
 }
 
-bool EfgNQreG::SolveSetup(void) const
+bool guiefgQreNfg::SolveSetup(void)
 {
-  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename(), true);
+  QreSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename(), true);
 
-  if (GSPD.Completed() == wxOK) {
-    eliminate = GSPD.Eliminate();
-    all = GSPD.EliminateAll();
-    domType = GSPD.DominanceType();
-    domMethod = GSPD.DominanceMethod();
-    markSubgames = GSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_startOption = dialog.StartOption();
     return true;
   }
   else
@@ -1444,44 +1216,45 @@ bool EfgNQreG::SolveSetup(void) const
 // Qre on efg
 //---------------------
 
-EfgEQreG::EfgEQreG(const Efg &p_efg, const EFSupport &p_support, 
-		   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support, 
+			   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgEQreG::Solve(void) const
+gList<BehavSolution> guiefgQreEfg::Solve(void) const
 {
-  QreParamsSettings GSPD(parent->Filename());
-  wxStatus status(parent->Frame(), "QRE Algorithm");
-  BehavProfile<gNumber> start = parent->CreateStartProfile(GSPD.StartOption());
+  wxStatus status(m_parent->Frame(), "QreSolve Progress");
+  BehavProfile<gNumber> start = m_parent->CreateStartProfile(m_startOption);
   EFQreParams P(status);
-  GSPD.GetParams(P);
   long nevals, nits;
   gList<BehavSolution> solns;
 
   try {
-    Qre(ef, P, start, solns, nevals, nits);
+    Qre(m_efg, P, start, solns, nevals, nits);
     if (!solns[1].IsSequential()) {
       wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
 		   "Returning last value.\n");
     }
-    GSPD.RunPxi();
+    //dialog.RunPxi();
   }
   catch (gSignalBreak &) { }
 
   return solns;
 }
 
-bool EfgEQreG::SolveSetup(void) const
+bool guiefgQreEfg::SolveSetup(void)
 { 
-  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
+  QreSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename()); 
 
-  if (GSPD.Completed() == wxOK) {
-    eliminate = GSPD.Eliminate();
-    all = GSPD.EliminateAll();
-    domType = GSPD.DominanceType();
-    domMethod = GSPD.DominanceMethod();
-    markSubgames = GSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate =dialog.Eliminate();
+    m_eliminateAll = dialog.EliminateAll();
+    m_eliminateWeak = dialog.EliminateWeak();
+    m_eliminateMixed = dialog.EliminateMixed();
+    m_markSubgames = dialog.MarkSubgames();
+
+    m_startOption = dialog.StartOption();
+
     return true;
   }
   else
@@ -1499,60 +1272,17 @@ bool EfgEQreG::SolveSetup(void) const
 #include "grid.h"
 #include "gridprm.h"
 
-GridParamsSettings::GridParamsSettings(const char *fn)
-  : PxiParamsSettings("grid", fn)
-{
-  wxGetResource(PARAMS_SECTION, "Grid-minLam", &minLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-maxLam", &maxLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-delLam", &delLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-delp1", &delp1, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-tol1", &tol1, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-delp2", &delp2, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-tol2", &tol2, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Grid-multigrid", &multi_grid, defaults_file);
-}
-
-void GridParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "Grid-minLam", minLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-maxLam", maxLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-delLam", delLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-delp1", delp1, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-tol1", tol1, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-delp2", delp2, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-tol2", tol2, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Grid-multigrid", multi_grid, defaults_file);
-}
-
-GridParamsSettings::~GridParamsSettings(void)
-{
-  SaveDefaults();
-}
-
-void GridParamsSettings::GetParams(GridParams &p_params)
-{
-  p_params.minLam = minLam;
-  p_params.maxLam = maxLam;
-  p_params.delLam = delLam;
-  p_params.tol1 = tol1;
-  p_params.delp1 = delp1;
-  p_params.tol2 = tol2;
-  p_params.delp2 = delp2;
-  p_params.multi_grid = multi_grid;
-
-  p_params.powLam = PxiType();
-  p_params.pxifile = PxiFile();
-
-  p_params.trace = TraceLevel();
-  p_params.tracefile = OutFile();
-}
-
-
 GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
-					     const gText &p_filename)
-  : MyDialogBox(p_parent, "QREGridSolve Params", QRE_HELP),
-    GridParamsSettings(p_filename), PxiParamsSettings("Grid", p_filename)
+					     const gText &/*p_filename*/)
+  : OutputParamsDialog("QreAllSolve Params", p_parent, QRE_HELP)
 {
+  MakeCommonFields(true, false, true);
+  Go();
+}
+
+void GridSolveParamsDialog::AlgorithmFields(void)
+{
+#ifdef UNUSED
   SetLabelPosition(wxVERTICAL);
   wxText *minLamt = new wxText(this, 0, "minLam", "", 24, 11, 104, 50, 
 			       wxVERTICAL_LABEL, "minLam");
@@ -1600,13 +1330,13 @@ GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
   delp2t->SetValue(ToText(delp2));
   tol1t->SetValue(ToText(tol1));
   tol2t->SetValue(ToText(tol2));
-  tracefilet->SetValue(outname);
-  tracet->SetStringSelection(trace_str);
-  pxitypet->SetStringSelection(type_str);
-  pxifilet->SetValue(pxiname);
-  next_typet->SetStringSelection(name_option_str);
-  pxi_commandt->SetValue(pxi_command);
-  run_boxt->SetValue(run_pxi);
+  //tracefilet->SetValue(outname);
+  //tracet->SetStringSelection(trace_str);
+  //pxitypet->SetStringSelection(type_str);
+  //pxifilet->SetValue(pxiname);
+  //next_typet->SetStringSelection(name_option_str);
+  //pxi_commandt->SetValue(pxi_command);
+  //run_boxt->SetValue(run_pxi);
   multigridt->SetValue(multi_grid);
   Go();
 
@@ -1619,16 +1349,18 @@ GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
     delp2  = strtod(delp2t->GetValue(),  0);
     tol2   = strtod(tol2t->GetValue(),   0);
 
-    strcpy(outname,         tracefilet->GetValue());
-    strcpy(trace_str,       tracet->GetStringSelection());
-    strcpy(type_str,        pxitypet->GetStringSelection());
-    strcpy(pxiname,         pxifilet->GetValue());
-    strcpy(name_option_str, next_typet->GetStringSelection());
-    strcpy(pxi_command,     pxi_commandt->GetValue());
+    //strcpy(outname,         tracefilet->GetValue());
+    //strcpy(trace_str,       tracet->GetStringSelection());
+    //strcpy(type_str,        pxitypet->GetStringSelection());
+    //strcpy(pxiname,         pxifilet->GetValue());
+    //strcpy(name_option_str, next_typet->GetStringSelection());
+    //strcpy(pxi_command,     pxi_commandt->GetValue());
     
-    run_pxi    = run_boxt->GetValue();
+    //run_pxi    = run_boxt->GetValue();
     multi_grid = multigridt->GetValue();
   }
+
+#endif // UNUSED
 }
 
 class QreAllBySubgameG : public BaseBySubgameG {
@@ -1638,7 +1370,7 @@ protected:
 
 public:
   QreAllBySubgameG(const Efg &, const EFSupport &, bool p_eliminate,
-		     bool p_iterative, bool p_strong, EfgShowInterface *);
+		   bool p_iterative, bool p_strong, EfgShowInterface *);
 
 };
 
@@ -1649,10 +1381,8 @@ QreAllBySubgameG::QreAllBySubgameG(const Efg &p_efg,
 				       EfgShowInterface *p_parent)
   : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
-  GridParamsSettings GSPD(m_parent->Filename());
-  wxStatus status(m_parent->Frame(), "QRE All Solve");
-  GridParams P(status);
-  GSPD.GetParams(P);
+  wxStatus status(m_parent->Frame(), "QreAllSolve Progress");
+  GridParams params(status);
 
   Nfg *N = MakeReducedNfg(p_support);
   NFSupport *S = new NFSupport(*N);
@@ -1660,37 +1390,37 @@ QreAllBySubgameG::QreAllBySubgameG(const Efg &p_efg,
 
   gList<MixedSolution> solns;
   try {
-    GridSolve(*S, P, solns);
+    GridSolve(*S, params, solns);
   }
   catch (gSignalBreak &) { }
 
-  GSPD.RunPxi();
+  //dialog.RunPxi();
   delete N;
   delete S;
 }
 
-EfgQreAllG::EfgQreAllG(const Efg &p_efg, const EFSupport &p_support, 
-			   EfgShowInterface *p_parent)
-  : guiEfgSolution(p_efg, p_support, p_parent)
+guiefgQreAllNfg::guiefgQreAllNfg(const EFSupport &p_support, 
+				 EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgQreAllG::Solve(void) const
+gList<BehavSolution> guiefgQreAllNfg::Solve(void) const
 {
-  QreAllBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
-		       DominanceType(), parent);
-  return solns;
+  QreAllBySubgameG M(m_efg, m_support, Eliminate(), EliminateAll(),
+		     EliminateWeak(), m_parent);
+  return gList<BehavSolution>();
 }
 
-bool EfgQreAllG::SolveSetup(void) const
+bool guiefgQreAllNfg::SolveSetup(void)
 {
-  GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
+  GridSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename()); 
 
-  if (GSPD.Completed() == wxOK) {
-    eliminate = GSPD.Eliminate();
-    all = GSPD.EliminateAll();
-    domType = GSPD.DominanceType();
-    domMethod = GSPD.DominanceMethod();
-    markSubgames = GSPD.MarkSubgames();
+  if (dialog.Completed() == wxOK) {
+    m_eliminate = false;
+    m_eliminateAll = false;
+    m_eliminateWeak = false;
+    m_eliminateMixed = false;
+    m_markSubgames = false;
     return true;
   }
   else

@@ -26,181 +26,243 @@ public:
 
 class guiEfgSolution {
 protected:
-  const Efg &ef;
-  const EFSupport &sup;
-  EfgShowInterface *parent;
-  gList<BehavSolution> solns;
+  const Efg &m_efg;
+  const EFSupport &m_support;
+  EfgShowInterface *m_parent;
 
-  mutable bool eliminate, all;
-  mutable int domType, domMethod;
-  mutable bool markSubgames;
+  bool m_eliminate, m_eliminateAll, m_eliminateWeak, m_eliminateMixed;
+  bool m_markSubgames;
 
 public:
-  guiEfgSolution(const Efg &E, const EFSupport &S, EfgShowInterface *parent);
+  guiEfgSolution(const EFSupport &S, EfgShowInterface *parent);
   virtual ~guiEfgSolution()  { }
+
   virtual gList<BehavSolution> Solve(void) const = 0;
-  virtual bool SolveSetup(void) const = 0;
+  virtual bool SolveSetup(void) = 0;
 
-  bool Eliminate(void) const { return eliminate; }
-  bool EliminateAll(void) const { return all; }
-  int DominanceType(void) const { return domType; }
-  int DominanceMethod(void) const { return domMethod; }
+  bool Eliminate(void) const { return m_eliminate; }
+  bool EliminateAll(void) const { return m_eliminateAll; }
+  bool EliminateWeak(void) const { return m_eliminateWeak; }
+  bool EliminateMixed(void) const { return m_eliminateMixed; }
 
-  bool MarkSubgames(void) const { return markSubgames; }
+  bool MarkSubgames(void) const { return m_markSubgames; }
 };
 
+//------------
+// EnumPure
+//------------
 
-//-------------------------------------------------------------------------
-//                              LiapSolve
-//-------------------------------------------------------------------------
-
-class guiEfgSolveLiap : public guiEfgSolution {
+class guiefgEnumPureEfg : public guiEfgSolution {
 public:
-  guiEfgSolveLiap(const Efg &, const EFSupport &, EfgShowInterface *);
-  virtual ~guiEfgSolveLiap()  { }
+  guiefgEnumPureEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgEnumPureEfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class EfgNLiapG : public guiEfgSolution {
+class guiefgEnumPureNfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+
 public:
-  EfgNLiapG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgNLiapG()  { }
+  guiefgEnumPureNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgEnumPureNfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                              LcpSolve
-//-------------------------------------------------------------------------
+//-------------
+// EnumMixed
+//-------------
 
-class EfgSeqFormG : public guiEfgSolution {
+class guiefgEnumMixedNfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
+
 public:
-  EfgSeqFormG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgSeqFormG()   { }
+  guiefgEnumMixedNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgEnumMixedNfg()   { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class EfgLemkeG : public guiEfgSolution {
+//------
+// Lp
+//------
+
+class guiefgLpEfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
+
 public:
-  EfgLemkeG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgLemkeG()   { } 
+  guiefgLpEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLpEfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                            EnumPureSolve
-//-------------------------------------------------------------------------
+class guiefgLpNfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
 
-class EfgPureNashG : public guiEfgSolution {
 public:
-  EfgPureNashG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgPureNashG()  { }
+  guiefgLpNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLpNfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class EfgEPureNashG : public guiEfgSolution {
+//-------
+// Lcp
+//-------
+
+class guiefgLcpEfg : public guiEfgSolution {
+private:
+  int m_stopAfter, m_maxDepth;
+  gPrecision m_precision;
+
 public:
-  EfgEPureNashG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgEPureNashG()   { }
+  guiefgLcpEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLcpEfg()   { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                           EnumMixedSolve
-//-------------------------------------------------------------------------
+class guiefgLcpNfg : public guiEfgSolution {
+private:
+  int m_stopAfter, m_maxDepth;
+  gPrecision m_precision;
 
-class EfgEnumG : public guiEfgSolution {
 public:
-  EfgEnumG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgEnumG()   { }
+  guiefgLcpNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLcpNfg()   { } 
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                             LcpSolve
-//-------------------------------------------------------------------------
+//--------
+// Liap 
+//--------
 
-class EfgZSumG : public guiEfgSolution {
+class guiefgLiapEfg : public guiEfgSolution {
+private:
+  double m_tolND, m_tol1D;
+  int m_maxitsND, m_maxits1D, m_nTries;
+  int m_startOption;
+
 public:
-  EfgZSumG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgZSumG()  { }
+  guiefgLiapEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLiapEfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
+class guiefgLiapNfg : public guiEfgSolution {
+private:
+  double m_tolND, m_tol1D;
+  int m_maxitsND, m_maxits1D, m_nTries;
+  int m_startOption;
 
-class EfgCSumG : public guiEfgSolution {
 public:
-  EfgCSumG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgCSumG()  { }
+  guiefgLiapNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgLiapNfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                            SimpdivSolve
-//-------------------------------------------------------------------------
+//-----------
+// Simpdiv
+//-----------
 
-class EfgSimpdivG : public guiEfgSolution {
+class guiefgSimpdivNfg : public guiEfgSolution {
+private:
+  int m_stopAfter, m_nRestarts, m_leashLength;
+  gPrecision m_precision;
+
 public:
-  EfgSimpdivG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgSimpdivG()  { } 
+  guiefgSimpdivNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgSimpdivNfg()  { } 
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                            PolEnumSolve
-//-------------------------------------------------------------------------
+//-----------
+// PolEnum
+//-----------
 
-class guiPolEnumEfg : public guiEfgSolution {
+class guiefgPolEnumEfg : public guiEfgSolution {
 public:
-  guiPolEnumEfg(const EFSupport &, EfgShowInterface *);
-  virtual ~guiPolEnumEfg() { }
+  guiefgPolEnumEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgPolEnumEfg() { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class guiPolEnumEfgNfg : public guiEfgSolution {
+class guiefgPolEnumNfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+
 public:
-  guiPolEnumEfgNfg(const EFSupport &, EfgShowInterface *);
-  virtual ~guiPolEnumEfgNfg() { }
+  guiefgPolEnumNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgPolEnumNfg() { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-//-------------------------------------------------------------------------
-//                             QreSolve
-//-------------------------------------------------------------------------
+//------
+// Qre 
+//------
 
-class EfgQreAllG : public guiEfgSolution {
+class guiefgQreEfg : public guiEfgSolution {
+private:
+  int m_startOption;
+
 public:
-  EfgQreAllG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgQreAllG()  { }
+  guiefgQreEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgQreEfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class EfgNQreG : public guiEfgSolution {
+class guiefgQreNfg : public guiEfgSolution {
+private:
+  int m_startOption;
+
 public:
-  EfgNQreG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgNQreG()  { }
+  guiefgQreNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgQreNfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class EfgEQreG : public guiEfgSolution {
+//----------
+// QreAll
+//----------
+
+class guiefgQreAllNfg : public guiEfgSolution {
 public:
-  EfgEQreG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgEQreG()  { }
+  guiefgQreAllNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiefgQreAllNfg()  { }
+
   virtual gList<BehavSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 #endif  // EFGSOLNG_H

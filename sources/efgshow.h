@@ -10,8 +10,8 @@
 #include "efgnfgi.h"
 #include "gambit.h"
 #include "accels.h"
-#include "efgsolng.h"
 #include "bsolnsf.h"
+#include "efgsolng.h"
 #include "efgconst.h"
 
 // For gui logging ------------

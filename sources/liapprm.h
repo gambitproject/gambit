@@ -6,34 +6,34 @@
 
 #ifndef LIAPPRM_H
 #define LIAPPRM_H
+
 #include "algdlgs.h"
 
-class NFLiapParams;
-class EFLiapParams;
+class LiapSolveParamsDialog : public OutputParamsDialog {
+private:
+  wxText *m_tol1D, *m_tolND, *m_maxits1D, *m_maxitsND, *m_nTries;
+  wxRadioBox *m_startOption;
 
-class LiapParamsSettings : public virtual OutputParamsSettings {
-protected:
-  float tol1, tolN;
-  int maxits1,maxitsN,nTries;
-  bool subgames;
-  int  start_option; // 0-default,1-saved,2-query
-  void SaveDefaults(void);
+  void AlgorithmFields(void);
 
-public:
-  LiapParamsSettings(void);
-  ~LiapParamsSettings();
-  void GetParams(EFLiapParams &);
-  void GetParams(NFLiapParams &);
-  int StartOption(void) const { return start_option; }
-};
-
-class LiapSolveParamsDialog : public OutputParamsDialog,
-			      public LiapParamsSettings {
 public:
   LiapSolveParamsDialog(wxWindow *p_parent, bool p_subgames = false,
 			bool p_vianfg = false);
-  //	~LiapSolveParamsDialog(void);
+  virtual ~LiapSolveParamsDialog();
+
+  double Tol1D(void) const
+    { return ToNumber(m_tol1D->GetValue()); }
+  double TolND(void) const
+    { return ToNumber(m_tolND->GetValue()); }
+  int Maxits1D(void) const
+    { return (int) ToNumber(m_maxits1D->GetValue()); }
+  int MaxitsND(void) const
+    { return (int) ToNumber(m_maxitsND->GetValue()); }
+  int NumTries(void) const
+    { return (int) ToNumber(m_nTries->GetValue()); }
+
+  int StartOption(void) const
+    { return m_startOption->GetSelection(); }
 };
 
-
-#endif
+#endif  // LIAPPRM_H

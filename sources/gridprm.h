@@ -9,22 +9,34 @@
 
 #include "algdlgs.h"
 
-class GridParamsSettings : public virtual PxiParamsSettings {
-protected:
-  float minLam, maxLam, delLam, delp1, tol1, delp2, tol2;
-  int multi_grid;
-  void SaveDefaults(void);
+class GridSolveParamsDialog : public OutputParamsDialog {
+private:
+  wxText *m_minLam, *m_maxLam, *m_delLam, *m_delp1, *m_tol1, *m_delp2, *m_tol2;
+  wxCheckBox *m_multiGrid;
 
-public:
-  GridParamsSettings(const char *fn);
-  ~GridParamsSettings();
-  void GetParams(GridParams &);
-};
+  void AlgorithmFields(void);
 
-class GridSolveParamsDialog : public MyDialogBox, public GridParamsSettings {
 public:
   GridSolveParamsDialog(wxWindow *p_parent, const gText &p_filename);
-  //  ~GridSolveParamsDialog(void);
+  virtual ~GridSolveParamsDialog() { }
+
+  double MinLam(void) const
+    { return ToNumber(m_minLam->GetValue()); }
+  double MaxLam(void) const
+    { return ToNumber(m_maxLam->GetValue()); }
+  double DelLam(void) const
+    { return ToNumber(m_delLam->GetValue()); }
+  double Tol1(void) const
+    { return ToNumber(m_tol1->GetValue()); }
+  double DelP1(void) const
+    { return ToNumber(m_delp1->GetValue()); }
+  double Tol2(void) const
+    { return ToNumber(m_tol2->GetValue()); }
+  double DelP2(void) const
+    { return ToNumber(m_delp2->GetValue()); }
+
+  bool MultiGrid(void) const
+    { return m_multiGrid->GetValue(); }
 };
 
 #endif // GRIDPRM_H

@@ -9,32 +9,36 @@
 
 #include "algdlgs.h"
 
-#define DATA_TYPE_LOG 1
+class QreSolveParamsDialog : public PxiParamsDialog {
+private:
+  wxText *m_minLam, *m_maxLam, *m_delLam, *m_tol1, *m_tolN;
+  wxText *m_maxits1, *m_maxitsN;
+  wxRadioBox *m_startOption;
 
-class EFQreParams;
-class NFQreParams;
+  void AlgorithmFields(void);
 
-class QreParamsSettings : public virtual PxiParamsSettings {
-protected:
-  float minLam, maxLam, delLam, tol1, tolN;
-  int maxits1,maxitsN;
-  int  start_option; // 0-default,1-saved,2-query
-  void SaveDefaults(void);
-
-public:
-  QreParamsSettings(const char *fn);
-  ~QreParamsSettings();
-  void GetParams(EFQreParams &);
-  void GetParams(NFQreParams &);
-  int StartOption(void) const { return start_option; }
-};
-
-class QreSolveParamsDialog : public PxiParamsDialog,
-			       public QreParamsSettings {
 public:
   QreSolveParamsDialog(wxWindow *parent, const gText filename,
 		       bool p_vianfg = false);
-  //	~QreSolveParamsDialog(void);
+  virtual ~QreSolveParamsDialog() { }
+
+  double MinLam(void) const
+    { return ToNumber(m_minLam->GetValue()); }
+  double MaxLam(void) const
+    { return ToNumber(m_maxLam->GetValue()); }
+  double DelLam(void) const
+    { return ToNumber(m_delLam->GetValue()); }
+  double Tol1D(void) const
+    { return ToNumber(m_tol1->GetValue()); }
+  double TolND(void) const
+    { return ToNumber(m_tolN->GetValue()); }
+  int Maxits1D(void) const
+    { return (int) ToNumber(m_maxits1->GetValue()); }
+  int MaxitsND(void) const
+    { return (int) ToNumber(m_maxitsN->GetValue()); }
+
+  int StartOption(void) const
+    { return m_startOption->GetSelection(); }
 };
 
 #endif  // GOBITPRM_H

@@ -223,19 +223,19 @@ void EfgShow::SolveStandard(void)
   if (!ESS.ViaNfg()) {
     switch (ESS.GetEfgAlgorithm()) {
     case EFG_PURENASH_SOLUTION:
-      solver = new EfgEPureNashG(ef, *cur_sup, this);
+      solver = new guiefgEnumPureEfg(*cur_sup, this);
       break;
     case EFG_LCP_SOLUTION:
-      solver = new EfgSeqFormG(ef, *cur_sup, this);
+      solver = new guiefgLcpEfg(*cur_sup, this);
       break;
     case EFG_CSUM_SOLUTION:
-      solver = new EfgCSumG(ef, *cur_sup, this);
+      solver = new guiefgLpEfg(*cur_sup, this);
       break;
     case EFG_LIAP_SOLUTION:
-      solver = new guiEfgSolveLiap(ef, *cur_sup, this);
+      solver = new guiefgLiapEfg(*cur_sup, this);
       break;
     case EFG_QRE_SOLUTION:
-      solver = new EfgEQreG(ef, *cur_sup, this);
+      solver = new guiefgQreEfg(*cur_sup, this);
       break;
     default:
       return;
@@ -244,28 +244,28 @@ void EfgShow::SolveStandard(void)
   else {
     switch (ESS.GetNfgAlgorithm()) {
     case NFG_ENUMPURE_SOLUTION:
-      solver = new EfgPureNashG(ef, *cur_sup, this);
+      solver = new guiefgEnumPureNfg(*cur_sup, this);
       break;
     case NFG_ENUMMIXED_SOLUTION:
-      solver = new EfgEnumG(ef, *cur_sup, this);
+      solver = new guiefgEnumMixedNfg(*cur_sup, this);
       break;
     case NFG_LCP_SOLUTION:
-      solver = new EfgLemkeG(ef, *cur_sup, this);
+      solver = new guiefgLcpNfg(*cur_sup, this);
       break;
     case NFG_LP_SOLUTION:
-      solver = new EfgZSumG(ef, *cur_sup, this);
+      solver = new guiefgLpNfg(*cur_sup, this);
       break;
     case NFG_LIAP_SOLUTION:
-      solver = new EfgNLiapG(ef, *cur_sup, this);
+      solver = new guiefgLiapNfg(*cur_sup, this);
       break;
     case NFG_SIMPDIV_SOLUTION:
-      solver = new EfgSimpdivG(ef, *cur_sup, this);
+      solver = new guiefgSimpdivNfg(*cur_sup, this);
       break;
     case NFG_QRE_SOLUTION:
-      solver = new EfgNQreG(ef, *cur_sup, this);
+      solver = new guiefgQreNfg(*cur_sup, this);
       break;
     case NFG_QREALL_SOLUTION:
-      solver = new EfgQreAllG(ef, *cur_sup, this);
+      solver = new guiefgQreAllNfg(*cur_sup, this);
       break;
     default:
       return;
@@ -303,8 +303,7 @@ void EfgShow::Solve(int p_algorithm)
   if (ef.TotalNumInfosets() == 0)  return;
 
   // check that the game is perfect recall, if not give a warning
-  Infoset *bad1, *bad2;
-  if (!IsPerfectRecall(ef, bad1, bad2)) {
+  if (!IsPerfectRecall(ef)) {
     int completed = wxMessageBox("This game is not perfect recall\n"
 				 "Do you wish to continue?", 
 				 "Solve Warning", 
@@ -312,7 +311,6 @@ void EfgShow::Solve(int p_algorithm)
     if (completed != wxOK) return;
   }
     
-  //  EfgSolveSettings ESS(ef);
   // do not want users doing anything while solving
   Enable(FALSE);
 
@@ -320,50 +318,50 @@ void EfgShow::Solve(int p_algorithm)
 
   switch (p_algorithm) {
   case efgmenuSOLVE_CUSTOM_EFG_ENUMPURE:
-    solver = new EfgEPureNashG(ef, *cur_sup, this);
+    solver = new guiefgEnumPureEfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LCP:
-    solver = new EfgSeqFormG(ef, *cur_sup, this);
+    solver = new guiefgLcpEfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LP:
-    solver = new EfgCSumG(ef, *cur_sup, this);
+    solver = new guiefgLpEfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_LIAP:
-    solver = new guiEfgSolveLiap(ef, *cur_sup, this);
+    solver = new guiefgLiapEfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_POLENUM:
-    solver = new guiPolEnumEfg(*cur_sup, this);
+    solver = new guiefgPolEnumEfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_EFG_QRE:
-    solver = new EfgEQreG(ef, *cur_sup, this);
+    solver = new guiefgQreEfg(*cur_sup, this);
     break;
 
   case efgmenuSOLVE_CUSTOM_NFG_ENUMPURE: 
-    solver = new EfgPureNashG(ef, *cur_sup, this);
+    solver = new guiefgEnumPureNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_ENUMMIXED:
-    solver = new EfgEnumG(ef, *cur_sup, this);
+    solver = new guiefgEnumMixedNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LCP: 
-    solver = new EfgLemkeG(ef, *cur_sup, this);
+    solver = new guiefgLcpNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LP:
-    solver = new EfgZSumG(ef, *cur_sup, this);
+    solver = new guiefgLpNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_LIAP: 
-    solver = new EfgNLiapG(ef, *cur_sup, this);
+    solver = new guiefgLiapNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_SIMPDIV:
-    solver = new EfgSimpdivG(ef, *cur_sup, this);
+    solver = new guiefgSimpdivNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_POLENUM:
-    solver = new guiPolEnumEfgNfg(*cur_sup, this);
+    solver = new guiefgPolEnumNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_QRE:
-    solver = new EfgNQreG(ef, *cur_sup, this);
+    solver = new guiefgQreNfg(*cur_sup, this);
     break;
   case efgmenuSOLVE_CUSTOM_NFG_QREGRID: 
-    solver = new EfgQreAllG(ef, *cur_sup, this);
+    solver = new guiefgQreAllNfg(*cur_sup, this);
     break;
   default:
     // internal error, we'll just ignore silently

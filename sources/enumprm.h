@@ -1,5 +1,5 @@
 //
-// FILE: enumprm.h -- Dialog boxes for parameters to EnumSolve
+// FILE: enumprm.h -- Dialog boxes for parameters to EnumMixedSolve
 //
 // $Id$
 //
@@ -10,25 +10,26 @@
 #include "algdlgs.h"
 #include "enum.h"
 
-class EnumParamsSettings : public virtual OutputParamsSettings {
-protected:
-  void SaveDefaults(void);
+class EnumSolveParamsDialog : public OutputParamsDialog {
+private:
+  wxText *m_stopAfter;
+  wxRadioBox *m_precision;
 
-public:
-  EnumParamsSettings(void);
-  ~EnumParamsSettings() { SaveDefaults(); }
-  void GetParams(EnumParams &);
-};
+  void AlgorithmFields(void);
 
-class EnumSolveParamsDialog : public OutputParamsDialog,
-			      public EnumParamsSettings {
 public:
   EnumSolveParamsDialog(wxWindow *parent = 0, bool subgames = false,
 			bool vianfg = false);
+  virtual ~EnumSolveParamsDialog();
+
+  int StopAfter(void) const
+    { return (int) ToDouble(m_stopAfter->GetValue()); }
+  gPrecision Precision(void) const
+    { return (m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
 };
 
 //
-// Customized progress indicator for wxEnumStatus
+// Customized progress indicator
 //
 class wxEnumStatus : public wxStatus {
 private:

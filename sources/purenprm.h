@@ -9,20 +9,19 @@
 
 #include "algdlgs.h"
 
-class PureNashParamsSettings : public virtual OutputParamsSettings {
-protected:
-  void SaveDefaults(void) { }
-public:
-  PureNashParamsSettings(void) { };
-  ~PureNashParamsSettings() { SaveDefaults(); } 
-  void GetParams(int &p_stopAfter) { p_stopAfter = StopAfter(); }
-};
+class PureNashSolveParamsDialog : public OutputParamsDialog {
+private:
+  wxText *m_stopAfter;
 
-class PureNashSolveParamsDialog : public OutputParamsDialog,
-				  public PureNashParamsSettings {
+  void AlgorithmFields(void);
+
 public:
   PureNashSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false,
 			    bool p_vianfg = false);
+  virtual ~PureNashSolveParamsDialog() { }
+
+  int StopAfter(void) const
+    { return (int) ToDouble(m_stopAfter->GetValue()); }
 };
 
 #endif  // PURENPRM_H

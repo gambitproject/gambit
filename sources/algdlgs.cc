@@ -26,196 +26,93 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
   return ok;
 }
 
-//========================================================================
-//            OutputParamsSettings: Member function definitions
-//========================================================================
-
 #define SOLN_SECT           "Soln-Defaults"
-
-OutputParamsSettings::OutputParamsSettings(void)
-{
-  defaults_file = "gambit.ini";
-  
-  // read in the defaults
-  outname = new char[250];
-  wxGetResourceStr(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
-  errname = new char[250];
-  wxGetResourceStr(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
-  trace_str = new char[10];
-  wxGetResourceStr(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Stop-After", &m_stopAfter, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Max-Solns", &m_maxSolns, defaults_file);
-  m_precisionStr = new char[10];
-  wxGetResourceStr(PARAMS_SECTION, "Precision", m_precisionStr,
-           defaults_file);
-  wxGetResource(SOLN_SECT, "Efg-Interactive-Solns", &m_select,
-		defaults_file);
-  trace_list = wxStringListInts(4, NULL, 0);
-  m_precisionList = new wxStringList;
-  m_precisionList->Add("Float");
-  m_precisionList->Add("Rational");
-  outfile = 0;
-  errfile = 0;
-
-  m_domDepthStr = new char[20];
-  wxGetResourceStr(SOLN_SECT,"Nfg-ElimDom-Depth", m_domDepthStr,
-           defaults_file);
-  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
-  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Method",&dom_method,defaults_file);
-
-  wxGetResource(SOLN_SECT, "Efg-Mark-Subgames", &markSubgames, defaults_file);
-}
-
-OutputParamsSettings::~OutputParamsSettings(void)
-{
-  SaveDefaults();
-  delete [] outname;
-  delete [] errname;
-  delete [] trace_str;
-  delete [] m_domDepthStr;
-  delete trace_list;
-
-  delete [] m_precisionStr;
-  delete m_precisionList;
-
-  if (outfile && outfile != wout && outfile != &gnull)
-    delete outfile;
-
-  if (errfile && errfile != wout && errfile != &gnull) 
-    delete errfile;
-}
-
-void OutputParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Stop-After", m_stopAfter, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Max-Solns", m_maxSolns, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr, defaults_file);
-
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Depth",m_domDepthStr,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
-  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Method",dom_method,defaults_file);
-
-  wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", markSubgames,
-          defaults_file);
-  wxWriteResource(SOLN_SECT, "Efg-Interactive-Solns", m_select,
-		  defaults_file);
-}
-
-//
-// Make output file.  If a real file was created, it is saved in outp,
-// if the default output window is used outp is not modified.
-//
-gOutput *OutputParamsSettings::MakeOutputFile(const char *s,
-                          gOutput *&outp) const
-{
-  if (!s) 
-    return &gnull;
-
-  if (strcmp(s, "gnull") == 0) 
-    return &gnull;
-
-  if (strcmp(s, gWXOUT) == 0) {
-    if (!wout) 
-      wout = new gWxOutput(gWXOUT);
-    
-    return wout;
-  }
-  else {
-    outp = new gFileOutput(s);
-    return outp;
-  }
-}
-
-gOutput *OutputParamsSettings::OutFile(void) const
-{
-  if (strcmp(trace_str, "0") != 0) 
-    return MakeOutputFile(outname, outfile);
-  else 
-    return 0;
-}
-
-gOutput *OutputParamsSettings::ErrFile(void) const
-{
-  if (strcmp(trace_str, "0") != 0) 
-    return MakeOutputFile(errname, errfile);
-  else 
-    return 0;
-}
-
-int OutputParamsSettings::TraceLevel(void) const
-{
-  return wxListFindString(trace_list, trace_str);
-}
-
-gPrecision OutputParamsSettings::Precision(void) const
-{
-  return ((wxListFindString(m_precisionList, m_precisionStr) == 1) ?
-      precRATIONAL : precDOUBLE);
-}
-
 
 //========================================================================
 //            OutputParamsDialog: Member function definitions
 //========================================================================
 
-OutputParamsDialog::OutputParamsDialog(const char *label,
+OutputParamsDialog::OutputParamsDialog(const gText &label,
                                        wxWindow *parent, 
-                                       const char *help_str)
-  : MyDialogBox(parent, (char *)label, help_str)
+                                       const char */*help_str*/)
+  : wxDialogBox(parent, label, TRUE), m_depthChoice(0), m_typeChoice(0),
+    m_methodChoice(0), m_markSubgames(0)
 { }
 
 OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
-void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames,
-					  bool p_vianfg)
+void OutputParamsDialog::OnOK(void)
 {
-  if (p_dominance) {
-    if (p_subgames && p_vianfg)
-      Add(wxMakeFormMessage("Dominance elimination on normal forms:"));
-    else
-      Add(wxMakeFormMessage("Dominance elimination:"));
-    Add(wxMakeFormNewLine());
+  m_completed = wxOK;
+  Show(FALSE);
+}
 
-    m_domDepthList = new wxStringList("None", "Once", "Iterative", 0);
-    Add(wxMakeFormString("Depth", &m_domDepthStr, wxFORM_RADIOBOX,
-             new wxList(wxMakeConstraintStrings(m_domDepthList),
-                    0), 0, wxVERTICAL));
-    Add(wxMakeFormNewLine());
+void OutputParamsDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
 
-    dom_type_list = new wxStringList("Weak", "Strong", 0);
-    dom_type_str = new char[20];
-    strcpy(dom_type_str, (char *) dom_type_list->Nth(dom_type)->Data());
-    Add(wxMakeFormString("Type", &dom_type_str, wxFORM_RADIOBOX,
-             new wxList(wxMakeConstraintStrings(dom_type_list), 0),
-             0, wxVERTICAL));
+Bool OutputParamsDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void OutputParamsDialog::DominanceFields(bool p_mixed)
+{
+  (void) new wxMessage(this, "Dominance elimination:");
+  NewLine();
   
-    dom_method_list = new wxStringList("Pure", "Mixed", 0);
-    dom_method_str = new char[20];
-    strcpy(dom_method_str, (char *) dom_method_list->Nth(dom_method)->Data());
-    Add(wxMakeFormString("Method", &dom_method_str, wxFORM_RADIOBOX,
-             new wxList(wxMakeConstraintStrings(dom_method_list),
-                    0), 0, wxVERTICAL));
+  char *depthChoices[] = { "None", "Once", "Iterative" };
+  m_depthChoice = new wxRadioBox(this, 0, "Depth", -1, -1, -1, -1,
+				 3, depthChoices);
+  NewLine();
 
-    Add(wxMakeFormNewLine());
-  }
-  
-  if (p_subgames) {
-    Add(wxMakeFormMessage("Subgames:"));
-    Add(wxMakeFormNewLine());
-    Add(wxMakeFormBool("Mark subgames before solving", &markSubgames));
-    Add(wxMakeFormNewLine());
-  }
+  char *typeChoices[] = { "Weak", "Strong" };
+  m_typeChoice = new wxRadioBox(this, 0, "Type", -1, -1, -1, -1,
+				2, typeChoices);
+  NewLine();
 
-  Add(wxMakeFormMessage("Algorithm behavior:"));
-  Add(wxMakeFormNewLine());
+  if (p_mixed) {
+    char *methodChoices[] = { "Pure", "Mixed" };
+    m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
+				    2, methodChoices);
+    NewLine();
+  }
+}
+
+void OutputParamsDialog::SubgameFields(void)
+{
+  (void) new wxMessage(this, "Subgames:");
+  NewLine();
+
+  m_markSubgames = new wxCheckBox(this, 0, "Mark subgames before solving");
+  NewLine();
+  m_selectSolutions = new wxCheckBox(this, 0,
+				     "Interactively select subgame solutions");
+  NewLine();
+}
+
+void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames,
+					  bool/* p_vianfg*/)
+{
+  if (p_dominance)   DominanceFields(false);
+  if (p_subgames)    SubgameFields();
+  AlgorithmFields();
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
 }
 
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
+  /*
   Add(wxMakeFormNewLine());
   if (fields & PRECISION_FIELD) {
     Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
@@ -263,147 +160,24 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
                new wxList(wxMakeConstraintStrings(trace_list), 0),
                0, wxVERTICAL));
   Add(wxMakeFormNewLine());
+  */
 }
 
-
-//****************************  PXI PARAMS **************************************
-#define DEFAULT_NAME    0
-#define SAVED_NAME      1
-#define PROMPT_NAME     2
-
-int PxiParamsSettings::naming_option = DEFAULT_NAME;
-
-PxiParamsSettings::PxiParamsSettings(const char *alg, const char *fn)
-{
-  algname = new char[20];
-  strcpy(algname, ((alg) ? alg : "Pxi"));
-  filename = new char[250];
-  strcpy(filename, fn);
-  type_str = new char[20];
-  char tmp_str[100];
-  sprintf(tmp_str, "%s-Plot-Type", algname);
-  wxGetResourceStr(PARAMS_SECTION, tmp_str, type_str, defaults_file);
-  pxiname = new char[250];
-
-  if (naming_option == SAVED_NAME)
-    wxGetResourceStr(PARAMS_SECTION, "Pxi-Saved-Name", pxiname, defaults_file);
-  
-  if (naming_option == DEFAULT_NAME)
-    strcpy(pxiname, (const char *)gFileNameFromPath(wxOutputFile(filename)));
-  
-  if (naming_option == PROMPT_NAME) {
-    if (FromDialog()) { // will be set later.  this is just the dialog settings
-      strcpy(pxiname, "PROMPT");
-    }
-    else {
-      char *s = wxGetTextFromUser("Pxi data output file",
-				  "Enter File Name", wxOutputFile(filename));
-      if (!s)
-	s = "junk.pxi";
-      
-      strcpy(pxiname, s);
-    }
-  }
-  
-  name_option_str = new char[20];
-  pxi_command = new char[250];
-  wxGetResourceStr(PARAMS_SECTION, "Pxi-Command", pxi_command, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Run-Pxi", &run_pxi, defaults_file);
-
-  type_list = new wxStringList("Lin", "Log", 0);
-  name_option_list = new wxStringList("Default", "Saved", "Prompt", 0);
-  strcpy(name_option_str, (char *)name_option_list->Nth(naming_option)->Data());
-
-  pxifile = 0;
-}
-
-
-// Pxi File
-gOutput *PxiParamsSettings::PxiFile(void)
-{
-    return MakeOutputFile(pxiname, pxifile);
-}
-
-
-// Pxi Type
-int PxiParamsSettings::PxiType(void)
-{
-    return wxListFindString(type_list, type_str);
-}
-
-
-// Run Pxi
-int PxiParamsSettings::RunPxi(void)
-{
-  if (pxifile && run_pxi && pxi_command && pxiname)
-    {
-      // first of all, close the pxifile
-      delete pxifile;
-      pxifile = 0;
-      
-      // shell out the pxi command
-      gText pxi_run(pxi_command);
-      pxi_run += " ";
-      gText pxifilename(pxiname);
-      pxi_run += pxifilename;
-      Bool ok = wxExecute((char *)pxi_run);
-      
-      if (!ok) wxMessageBox("PXI could not run!\nIt was either not found or\n"
-			    " there was insufficient memory/resources.\n"
-			    "Please check the path and free memory.",
-			    "PXI Error");
-      return ok;
-    }
-  else
-    {
-      return 0;
-    }
-}
-
-
-// Save Defaults
-void PxiParamsSettings::SaveDefaults(void)
-{
-  wxWriteResource(PARAMS_SECTION, "Pxi-Command", pxi_command, defaults_file);
-  if(naming_option==SAVED_NAME)
-    wxWriteResource(PARAMS_SECTION, "Pxi-Saved-Name", pxiname, defaults_file);
-  naming_option = wxListFindString(name_option_list, name_option_str);
-  char tmp_str[100];
-  sprintf(tmp_str, "%s-Plot-Type", algname);
-  wxWriteResource(PARAMS_SECTION, tmp_str, type_str, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Run-Pxi", run_pxi, defaults_file);
-}
-
-// Pxi Params Settings Destructor
-PxiParamsSettings::~PxiParamsSettings(void)
-{
-  SaveDefaults();
-  delete [] algname;
-  delete [] filename;
-  delete [] pxiname;
-  delete [] type_str;
-  delete [] pxi_command;
-  delete [] name_option_str;
-  delete type_list;
-  delete name_option_list;
-  
-  if (pxifile)
-    delete pxifile;
-  // could have been deleted in RunPxi
-};
-
-
+//=======================================================================
+//                class PxiParamsDialog: Member functions
+//=======================================================================
 
 // Constructor
 PxiParamsDialog::PxiParamsDialog(const char *alg, const char *label, 
                                  const char *fn, wxWindow *parent,
                                  const char *help_str)
-  : OutputParamsDialog(label, parent, help_str), PxiParamsSettings(alg, fn)
+  : OutputParamsDialog(label, parent, help_str)
 { }
 
 // Make Pxi Fields
 void PxiParamsDialog::MakePxiFields(void)
 {
+  /*
   Form()->Add(wxMakeFormNewLine());
   
   Form()->Add(wxMakeFormString("Plot Type", &type_str, wxFORM_RADIOBOX,
@@ -422,6 +196,7 @@ void PxiParamsDialog::MakePxiFields(void)
   Form()->Add(wxMakeFormString("PXI Command", &pxi_command,
 			       wxFORM_DEFAULT, NULL, NULL, 0,
 			       300));
+  */
 }
 
 // Destructor

@@ -31,32 +31,43 @@ public:
   NfgSolutionG(const Nfg &E,const NFSupport &S,NfgShowInterface *parent);
   virtual ~NfgSolutionG()   { }
   virtual gList<MixedSolution> Solve(void) const = 0;
-  virtual bool SolveSetup(void) const = 0;
+  virtual bool SolveSetup(void) = 0;
 };
 
-// Extensive Form Liap
-class NfgLiapG : public NfgSolutionG   {
- public:
-  NfgLiapG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgLiapG()   { }
+class guinfgLiap : public NfgSolutionG   {
+private:
+  double m_tolND, m_tol1D;
+  int m_maxitsND, m_maxits1D, m_nTries;
+  int m_startOption;
+
+public:
+  guinfgLiap(const Nfg &, const NFSupport &, NfgShowInterface *);
+  virtual ~guinfgLiap()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
-class NfgLemkeG : public NfgSolutionG   {
- public:
-  NfgLemkeG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgLemkeG()   { }
+class guinfgLcp : public NfgSolutionG   {
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
+
+public:
+  guinfgLcp(const Nfg &, const NFSupport &, NfgShowInterface *);
+  virtual ~guinfgLcp()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgEnumPureG : public NfgSolutionG  {
- public:
+private:
+  int m_stopAfter;
+
+public:
   NfgEnumPureG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgEnumPureG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgQreAllG : public NfgSolutionG  {
@@ -64,47 +75,65 @@ class NfgQreAllG : public NfgSolutionG  {
   NfgQreAllG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgQreAllG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgQreG : public NfgSolutionG   {
- public:
+private:
+  int m_startOption;
+
+public:
   NfgQreG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgQreG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgSimpdivG : public NfgSolutionG   {
- public:
+private:
+  int m_stopAfter, m_nRestarts, m_leashLength;
+  gPrecision m_precision;
+
+public:
   NfgSimpdivG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgSimpdivG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgEnumG : public NfgSolutionG  {
- public:
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
+
+public:
   NfgEnumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgEnumG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class guiPolEnumNfg : public NfgSolutionG {
+private:
+  int m_stopAfter;
+
 public:
   guiPolEnumNfg(const Nfg &, const NFSupport &, NfgShowInterface *);
   virtual ~guiPolEnumNfg() { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 class NfgZSumG : public NfgSolutionG   {
- public:
-  NfgZSumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+private:
+  int m_stopAfter;
+  gPrecision m_precision;
+
+public:
+  NfgZSumG(const Nfg &, const NFSupport &, NfgShowInterface *);
   virtual ~NfgZSumG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual bool SolveSetup(void) const;
+  virtual bool SolveSetup(void);
 };
 
 #endif  // NFGSOLNG_H

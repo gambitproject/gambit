@@ -468,13 +468,13 @@ void NfgShow::Solve(int id)
     solver = new NfgEnumG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LCP:      
-    solver = new NfgLemkeG(nf, *sup, this);
+    solver = new guinfgLcp(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LP:       
     solver = new NfgZSumG(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_LIAP:
-    solver = new NfgLiapG(nf, *sup, this);
+    solver = new guinfgLiap(nf, *sup, this);
     break;
   case NFG_SOLVE_CUSTOM_SIMPDIV:
     solver = new NfgSimpdivG(nf, *sup, this);
@@ -561,13 +561,13 @@ void NfgShow::SolveStandard(void)
     solver = new NfgEnumG(nf, *sup, this);
     break;
   case NFG_LCP_SOLUTION:
-    solver = new NfgLemkeG(nf, *sup, this);
+    solver = new guinfgLcp(nf, *sup, this);
     break;
   case NFG_LP_SOLUTION:
     solver = new NfgZSumG(nf, *sup, this);
     break;
   case NFG_LIAP_SOLUTION:
-    solver = new NfgLiapG(nf, *sup, this);
+    solver = new guinfgLiap(nf, *sup, this);
     break;
   case NFG_SIMPDIV_SOLUTION:
     solver = new NfgSimpdivG(nf, *sup, this);

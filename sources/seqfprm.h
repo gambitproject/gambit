@@ -7,33 +7,26 @@
 #ifndef SEQFPRM_H
 #define SEQFPRM_H
 
-class efgLcpSolveDialog : public wxDialogBox {
+#include "algdlgs.h"
+
+class LcpSolveDialog : public OutputParamsDialog {
 private:
-  int m_completed;
-  wxRadioBox *m_dominanceDepth, *m_dominanceType, *m_precisionChoice,
-             *m_stopAfterChoice;
-  wxText *m_maxDepth, *m_maxSolutions;
-  wxCheckBox *m_markSubgames, *m_selectSolutions;
+  wxText *m_maxDepth, *m_stopAfter;
+  wxRadioBox *m_precision;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((efgLcpSolveDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((efgLcpSolveDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
+  void AlgorithmFields(void);
 
 public:
-  efgLcpSolveDialog(wxWindow *p_parent = 0, bool p_subgames = false);
-  virtual ~efgLcpSolveDialog() { }
+  LcpSolveDialog(wxWindow *p_parent = 0, bool p_subgames = false,
+		 bool p_vianfg = false);
+  virtual ~LcpSolveDialog() { }
 
-  int Completed(void) const { return m_completed; }
-
-  int StopAfter(void) const;
   int MaxDepth(void) const
     { return (int) ToDouble(m_maxDepth->GetValue()); }
-  gPrecision Precision(void) const;
+  int StopAfter(void) const
+    { return (int) ToDouble(m_stopAfter->GetValue()); }
+  gPrecision Precision(void) const
+    { return (m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
 };
 
 #endif  // SEQFPRM_H
