@@ -20,15 +20,8 @@
 //                 dialogAlgorithm: Class declaration
 //=========================================================================
 
-class dialogAlgorithm : public wxDialogBox {
+class dialogAlgorithm : public guiAutoDialog {
 private:
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &p_object, wxEvent &)
-    { ((dialogAlgorithm *) p_object.GetClientData())->OnHelp(); }
-
   static void CallbackDepth(wxRadioBox &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnDepth(); }
   static void CallbackAll(wxCheckBox &p_object, wxEvent &)
@@ -36,18 +29,13 @@ private:
   static void CallbackTrace(wxButton &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnTrace(); }
 
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-  void OnHelp(void);
-
   void OnDepth(void);
   void OnAll(void);
   void OnTrace(void);
 
 protected:
   bool m_usesNfg, m_subgames;
-  int m_completed, m_traceDest, m_traceLevel;
+  int m_traceDest, m_traceLevel;
   gText m_traceFile;
   wxGroupBox *m_dominanceGroup, *m_subgamesGroup, *m_algorithmGroup;
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
@@ -57,8 +45,6 @@ protected:
   wxCheckBox *m_findAll;
   wxRadioBox *m_precision;
 
-  wxButton *m_okButton;
-
   void DominanceFields(bool p_mixed);
   void SubgameFields(void);
 
@@ -66,17 +52,12 @@ protected:
   void PrecisionField(void);
 
   virtual void AlgorithmFields(void) { }
-  virtual gText HelpTopic(void) const  { return "Solutions of Games"; }
+  const char *HelpTopic(void) const  { return "Solutions of Games"; }
   void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);
 
-  void Go(void) { Fit(); Show(TRUE); }
-
 public:
-  dialogAlgorithm(const gText &, bool, wxWindow *parent = 0, 
-		  const char *help_str = 0);
+  dialogAlgorithm(const gText &, bool, wxWindow *parent = 0); 
   virtual ~dialogAlgorithm();
-
-  int Completed(void) const { return m_completed; }
 
   bool MarkSubgames(void) const 
     { return (m_markSubgames && m_markSubgames->GetValue()); }
@@ -118,7 +99,7 @@ protected:
 
 public:
   dialogPxi(const char *p_label = 0, const char *p_filename = "pxi.out",
-	    wxWindow *p_parent = 0, const char *p_helpStr = 0);
+	    wxWindow *p_parent = 0);
   virtual ~dialogPxi();
 
   bool LinearPlot(void) const 

@@ -35,25 +35,15 @@ Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
 //                  dialogTrace auxiliary dialog class
 //========================================================================
 
-class dialogTrace : public wxDialogBox {
+class dialogTrace : public guiAutoDialog {
 private:
-  int m_completed;
   wxRadioBox *m_traceDest;
   wxText *m_traceFile;
   wxIntegerItem *m_traceLevel;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogTrace *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogTrace *) p_object.GetClientData())->OnCancel(); }
-
   static void CallbackTrace(wxRadioBox &p_object, wxEvent &)
     { ((dialogTrace *) p_object.GetClientData())->OnTrace(); }
 
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
   void OnTrace(void);
 
 public:
@@ -61,7 +51,6 @@ public:
               int p_TraceLevel);
   virtual ~dialogTrace();
 
-  int Completed(void) const  { return m_completed; }
   int TraceDest(void) const  { return m_traceDest->GetSelection(); }
   gText TraceFile(void) const  { return m_traceFile->GetValue(); }
   int TraceLevel(void) const { return m_traceLevel->GetInteger(); }
@@ -70,70 +59,58 @@ public:
 dialogTrace::dialogTrace(wxWindow *p_parent,
                          int p_traceDest, const gText &p_traceFile,
                          int p_traceLevel)
-  : wxDialogBox(p_parent, "Tracing Parameters", TRUE)
+  : guiAutoDialog(p_parent, "Tracing Parameters")
 {
-  SetAutoLayout(TRUE);
-
   char *traceChoices[] = { "None", "Window", "File" };
   m_traceDest = new wxRadioBox(this, (wxFunction) CallbackTrace,
 			       "Destination", 1, 1, -1, -1,
 			       3, traceChoices);
   m_traceDest->SetSelection(p_traceDest);
   m_traceDest->SetClientData((char *) this);
-  NewLine();
-  m_traceFile = new wxText(this, 0, "Filename");
+
+  m_traceFile = new wxText(this, 0, "Filename", "", 1, 1);
   m_traceFile->SetValue(p_traceFile);
   m_traceFile->Enable(p_traceDest == 2);
+
   m_traceLevel = new wxIntegerItem(this, "Level", 0, 1, 1, 100, -1);
   m_traceLevel->SetInteger(p_traceLevel);
   m_traceLevel->Enable(p_traceDest > 0);
-  NewLine();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK", 1, 1);
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
+  m_traceDest->SetConstraints(new wxLayoutConstraints);
+  m_traceDest->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_traceDest->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_traceDest->GetConstraints()->width.AsIs();
+  m_traceDest->GetConstraints()->height.AsIs();
 
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel", 1, 1);
-  cancelButton->SetClientData((char *) this);
+  m_traceFile->SetConstraints(new wxLayoutConstraints);
+  m_traceFile->GetConstraints()->top.SameAs(m_traceDest, wxBottom, 10);
+  m_traceFile->GetConstraints()->left.SameAs(m_traceDest, wxLeft);
+  m_traceFile->GetConstraints()->width.AsIs();
+  m_traceFile->GetConstraints()->height.AsIs();
 
-  okButton->SetConstraints(new wxLayoutConstraints);
-  okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  okButton->GetConstraints()->top.SameAs(m_traceLevel, wxBottom, 10);
-  okButton->GetConstraints()->height.AsIs();
-  okButton->GetConstraints()->width.SameAs(cancelButton, wxWidth);
+  m_traceLevel->SetConstraints(new wxLayoutConstraints);
+  m_traceLevel->GetConstraints()->top.SameAs(m_traceFile, wxTop);
+  m_traceLevel->GetConstraints()->left.SameAs(m_traceFile, wxRight, 10);
+  m_traceLevel->GetConstraints()->width.AsIs();
+  m_traceLevel->GetConstraints()->height.AsIs();
 
-  cancelButton->SetConstraints(new wxLayoutConstraints);
-  cancelButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
-  cancelButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
-  cancelButton->GetConstraints()->height.AsIs();
-  cancelButton->GetConstraints()->width.AsIs();
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->top.SameAs(m_traceLevel, wxBottom, 10);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
 
-  Fit();
-  Show(TRUE);
+  m_cancelButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.AsIs();
+
+  m_helpButton->Show(FALSE);
+
+  Go();
 }
 
 dialogTrace::~dialogTrace()
 { }
-
-void dialogTrace::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogTrace::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogTrace::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
 
 void dialogTrace::OnTrace(void)
 {
@@ -146,9 +123,8 @@ void dialogTrace::OnTrace(void)
 //========================================================================
 
 dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
-				 wxWindow *p_parent,
-				 const char */*help_str*/)
-  : wxDialogBox(p_parent, p_label, TRUE),
+				 wxWindow *p_parent)
+  : guiAutoDialog(p_parent, p_label),
     m_usesNfg(p_usesNfg), m_traceDest(0), m_traceLevel(0), m_traceFile(""),
     m_dominanceGroup(0), m_subgamesGroup(0), m_algorithmGroup(0),
     m_depthChoice(0), m_typeChoice(0),
@@ -158,7 +134,7 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 
 dialogAlgorithm::~dialogAlgorithm(void)
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     if (m_usesNfg) {
       wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
 		      m_depthChoice->GetSelection(), gambitApp.ResourceFile());
@@ -198,30 +174,6 @@ dialogAlgorithm::~dialogAlgorithm(void)
   }
 }
 
-void dialogAlgorithm::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogAlgorithm::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogAlgorithm::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogAlgorithm::OnHelp(void)
-{
-  wxHelpContents(HelpTopic());
-}
-
 void dialogAlgorithm::OnDepth(void)
 {
   m_typeChoice->Enable(m_depthChoice->GetSelection() > 0);
@@ -248,8 +200,6 @@ void dialogAlgorithm::OnTrace(void)
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
   int depth = 0, type = 0, method = 0;
-
-  SetAutoLayout(TRUE);
 
   if (p_usesNfg) {
     m_dominanceGroup = new wxGroupBox(this, "Eliminate dominated mixed strategies");
@@ -372,48 +322,30 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
 
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  m_okButton->SetClientData((char *) this);
-  m_okButton->SetDefault();
-
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
   wxButton *traceButton = new wxButton(this, (wxFunction) CallbackTrace,
 					"Trace...");
   traceButton->SetClientData((char *) this);
 
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-					"Help");
-  helpButton->SetClientData((char *) this);
-
-  m_okButton->SetConstraints(new wxLayoutConstraints);
-  m_okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
   m_okButton->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
   m_okButton->GetConstraints()->height.AsIs();
   m_okButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 
-  cancelButton->SetConstraints(new wxLayoutConstraints);
-  cancelButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
-  cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  cancelButton->GetConstraints()->height.AsIs();
-  cancelButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
+  m_cancelButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 
   traceButton->SetConstraints(new wxLayoutConstraints);
-  traceButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
+  traceButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
   traceButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   traceButton->GetConstraints()->height.AsIs();
   traceButton->GetConstraints()->width.AsIs();
 
-  helpButton->SetConstraints(new wxLayoutConstraints);
-  helpButton->GetConstraints()->left.SameAs(traceButton, wxRight, 10);
-  helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  helpButton->GetConstraints()->height.AsIs();
-  helpButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
-
-  Layout();
-  Fit();
+  m_helpButton->GetConstraints()->left.SameAs(traceButton, wxRight, 10);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->width.SameAs(traceButton, wxWidth);
 }
 
 void dialogAlgorithm::StopAfterField(void)
@@ -528,8 +460,7 @@ int dialogEnumPure::StopAfter(void) const
 #include "dlenummixed.h"
 
 dialogEnumMixed::dialogEnumMixed(wxWindow *p_parent, bool p_subgames)
-  : dialogAlgorithm("EnumMixedSolve Parameters", true, p_parent,
-		    ENUMMIXED_HELP)
+  : dialogAlgorithm("EnumMixedSolve Parameters", true, p_parent)
 {
   MakeCommonFields(true, p_subgames, true);
   Go();
@@ -610,7 +541,7 @@ void wxEnumStatus::SetProgress(double p_value)
 #include "dllp.h"
 
 dialogLp::dialogLp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent, LP_HELP)
+  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -724,7 +655,7 @@ dialogLiap::dialogLiap(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
 
 dialogLiap::~dialogLiap()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
 		    gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Liap-accuracy", Accuracy(),
@@ -813,14 +744,15 @@ int dialogLiap::StopAfter(void) const
 #include "dlsimpdiv.h"
 
 dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
-  : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent, SIMPDIV_HELP)
+  : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent)
 {
   MakeCommonFields(true, p_subgames, true);
   Go();
 }
+
 dialogSimpdiv::~dialogSimpdiv()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     wxWriteResource("Algorithm Params", "Simpdiv-nRestarts", NumRestarts(),
 		    gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Simpdiv-leashLength", LeashLength(),
@@ -980,15 +912,15 @@ static char *wxOutputFile(const char *name)
 }
 
 dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
-		     wxWindow *p_parent, const char *p_helpStr)
-  : dialogAlgorithm(p_label, false, p_parent, p_helpStr)
+		     wxWindow *p_parent)
+  : dialogAlgorithm(p_label, false, p_parent)
 { 
   m_defaultPxiFile = wxOutputFile(p_filename);
 }
 
 dialogPxi::~dialogPxi()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
 		    m_plotType->GetSelection(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Run-Pxi",
@@ -1070,18 +1002,16 @@ gOutput *dialogPxi::PxiFile(void) const
 
 dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 		     bool p_vianfg)
-  : dialogPxi("QreSolve Parameters", p_filename, p_parent, QRE_HELP)
+  : dialogPxi("QreSolve Parameters", p_filename, p_parent)
 {
   MakeCommonFields(true, false, p_vianfg);
   m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
-  Layout();
-  Fit();
   Go();
 }
 
 dialogQre::~dialogQre()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     wxWriteResource("Algorithm Params", "Qre-minLam",
 		    m_minLam->GetValue(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "Qre-maxLam",
@@ -1194,18 +1124,16 @@ void dialogQre::AlgorithmFields(void)
 
 dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 			     const gText &p_filename)
-  : dialogPxi("QreGridSolve Parameters", p_filename, p_parent, QRE_HELP)
+  : dialogPxi("QreGridSolve Parameters", p_filename, p_parent)
 {
   MakeCommonFields(true, false, true);
   m_okButton->GetConstraints()->top.SameAs(m_pxiGroup, wxBottom, 10);
-  Layout();
-  Fit();
   Go();
 }
 
 dialogQreGrid::~dialogQreGrid()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     wxWriteResource("Algorithm Params", "QreGrid-minLam",
 		    (float) m_minLam->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-maxLam",
