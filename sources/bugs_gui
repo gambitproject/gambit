@@ -284,6 +284,51 @@ down would also appear in the GCL, so this is more of a GCL bug than
 a GUI bug, apparently.  (It is possible similar problems could occur
 in the GUI as well though.)
 
+//------------------------------
+
+Bug D32: Sort/Filter does not work for Normal form solutions.  
+
+None of the Sort/Filter functionality seems to work on the normal form
+solution window.  All of the sort/Filter capabilities works
+correctly on the Extensive form solution window.  The Normal form
+functionality should match this.
+
+Also, double clicking on the column heading in the solution window
+does not sort the solutions by that column.  Also, the default
+ordering of solution IDs is opposite of numbering in Extensive form
+solution window.  The numbering in Extensive form solution window is
+preferred ordering, since newly computed solutions are visible.
+
+//------------------------------
+
+Bug D33: Incorrect handling of games of imperfect recall.  
+
+On Myerson.efg, EnumPure finds 2 solutions that it claims are Nash.
+Also, standard Solution All Nash finds one solution that it claims is
+Nash.  But the game has no Nash equilibria.  
+
+In the same game, if you convert to normal form and solve for a mixed
+strategy equilibrium, and then convert back to a behav strategy, the
+resulting strategy is not even a behav strategy.  Probs add to more
+than one on last infoset for player 1.  The problem is that the mixed
+nash equilibrium for the normal form game has no realization
+equivalent behavior strategy.  What should happen is that a warning
+should be issued that since the game is not perfect recall, it is not
+be possible to convert themixed to an equivalent behav.
+
+//------------------------------
+
+Bug D34: Zoom window focus problem
+
+When the focus is in the zoom window, the arrow keys do not move the
+cursor around the tree.  Same problem for the Inspect Cursor window. 
+
+//------------------------------
+
+Bug D35: Editing a normal form does not invalidate solutions.  
+
+It should invalidate all solutions when you make any changes to the
+normal form.
 
 -------------  older bugs that still remain ---------------
 
