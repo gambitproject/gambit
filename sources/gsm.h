@@ -12,9 +12,7 @@
 #include "gambitio.h"
 #include "gstring.h"
 #include "gsmincl.h"
-//#include "gsmfunc.h"
 
-//class NewInstr;
 class NewInstr;
 class FuncDescObj;
 class CallFuncObj;
@@ -37,7 +35,7 @@ template <class T> class gStack;
 template <class T> class RefCountHashTable;
 
 
-#define GCL_VERSION   0.94
+#define GCL_VERSION   0.95
 
 class GSM
 {
@@ -62,9 +60,6 @@ private:
   FunctionHashTable*                             _FuncTable;
 
   Portion* _ResolveRef             ( Portion* p );
-
-  bool _UnaryOperation  ( const gString& funcname );
-  bool _BinaryOperation ( const gString& funcname );
 
   void _BindCheck ( void ) const;
   bool _Bind ( const gString& param_name ) const;
@@ -123,36 +118,6 @@ public:
   bool Assign   ( void );
   bool UnAssign ( void );
 
-
-  bool Add      ( void );
-  bool Subtract ( void );
-  bool Multiply ( void );
-  bool Dot      ( void );
-  bool Divide   ( void );
-  bool Negate   ( void );
-  bool Power    ( void );
-
-  bool Concat   ( void );
-
-  bool IntegerDivide ( void );
-  bool Modulus       ( void );
-
-  bool EqualTo              ( void );
-  bool NotEqualTo           ( void );
-  bool GreaterThan          ( void );
-  bool LessThan             ( void );
-  bool GreaterThanOrEqualTo ( void );
-  bool LessThanOrEqualTo    ( void );
-  
-  bool AND ( void );
-  bool OR  ( void );
-  bool NOT ( void );
-  
-  bool Subscript ( void );
-  bool Child ( void );
-  bool Read ( void );
-  bool Write ( void );
-  
   bool AddFunction( FuncDescObj* func );
   bool DeleteFunction( FuncDescObj* func );
 
@@ -169,7 +134,6 @@ public:
 			   const FuncInfoType& func_info,
 			   Portion** param );
   
-  void Output ( void );
   void Dump   ( void );
 
   bool Pop    ( void );

@@ -266,7 +266,9 @@ include:      INCLUDE LBRACK TEXT RBRACK
 
 conditional:  IF { gcmdline.SetPrompt( false ); }
               LBRACK CRLFopt expression CRLFopt COMMA 
-              { emit(new NewInstr(iNOT)); emit(0);
+              { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
+                emit(new NewInstr(iBIND));
+                emit(new NewInstr(iCALL_FUNCTION));  emit(0);
                 labels.Push(ProgLength()); } statements 
               { emit(0);
 		if (function)
@@ -297,7 +299,9 @@ CRLFs:     CRLF | CRLFs CRLF
 
 whileloop:    WHILE { gcmdline.SetPrompt( false ); }
               LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
-              expression { emit(new NewInstr(iNOT)); emit(0);
+              expression { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
+                           emit(new NewInstr(iBIND));
+                           emit(new NewInstr(iCALL_FUNCTION));  emit(0);
 			   labels.Push(ProgLength()); }
               CRLFopt COMMA statements RBRACK 
               { if (function)
@@ -316,7 +320,9 @@ forloop:      FOR { gcmdline.SetPrompt( false ); }
               { labels.Push(ProgLength() + 1); }
               expression CRLFopt COMMA CRLFopt
               {  index = labels.Pop();   // index is loc of begin of guard eval
-                 emit(new NewInstr(iNOT));
+                 emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
+                 emit(new NewInstr(iBIND));
+                 emit(new NewInstr(iCALL_FUNCTION)); 
                  // slot for guard-false jump
                  emit(0); labels.Push(ProgLength());
                  // push location of increment 
@@ -356,8 +362,15 @@ exprlist:     expression  { emit(new NewInstr(iPOP)); }
         |     exprlist SEMI expression  { emit(new NewInstr(iPOP)); }
 
 expression:   Ea
-          |   WRITE { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }  
-          |   WRITE expression  { emit(new NewInstr(iOUTPUT)); }
+          |   WRITE
+                { emit(new NewInstr(iPUSH_BOOL, true));
+                  emit(new NewInstr(iINIT_CALL_FUNCTION, "Print"));
+                  emit(new NewInstr(iBIND));
+                  emit(new NewInstr(iCALL_FUNCTION)); }
+          |   WRITE expression  
+                { emit(new NewInstr(iINIT_CALL_FUNCTION, "Print"));
+                  emit(new NewInstr(iBIND));
+                  emit(new NewInstr(iCALL_FUNCTION)); }
           |   Ea ASSIGN expression { emit(new NewInstr(iASSIGN)); }
           |   Ea ASSIGN { emit(new NewInstr(iUNASSIGN)); }
           |   conditional
@@ -369,57 +382,94 @@ expression:   Ea
           ;
 
 Ea:           E0
-  |           Ea WRITE E0   { emit(new NewInstr(iWRITE)); }
-  |           Ea READ E0    { emit(new NewInstr(iREAD)); }
+  |           Ea IOop   { emit(new NewInstr(iBIND)); }
+                   E0   { emit(new NewInstr(iBIND));
+                          emit(new NewInstr(iCALL_FUNCTION));  }
   ; 
 
+IOop:         WRITE   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Write")); }
+    |         READ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Read")); }
+    ;   
+
 E0:           E1
-  |           E0 LOR E1  { emit(new NewInstr(iOR)); }
+  |           E0 LOR  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Or"));
+                        emit(new NewInstr(iBIND));  }
+                  E1  { emit(new NewInstr(iBIND));
+                        emit(new NewInstr(iCALL_FUNCTION)); }
   ;
 
 E1:           E2
-  |           E1 LAND E2  { emit(new NewInstr(iAND)); } 
+  |           E1 LAND  { emit(new NewInstr(iINIT_CALL_FUNCTION, "And"));
+                         emit(new NewInstr(iBIND));  }
+                   E2  { emit(new NewInstr(iBIND));
+                         emit(new NewInstr(iCALL_FUNCTION)); }
   ;
 
 E2:           E3
-  |           LNOT E2     { emit(new NewInstr(iNOT)); }
+  |           LNOT E2   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Not"));
+                          emit(new NewInstr(iBIND));
+                          emit(new NewInstr(iCALL_FUNCTION));  }
   ;
 
 E3:           E4       
-  |           E3 EQU E4    { emit(new NewInstr(iEQU)); } 
-  |           E3 NEQ E4    { emit(new NewInstr(iNEQ)); }
-  |           E3 LTN E4    { emit(new NewInstr(iLTN)); }
-  |           E3 LEQ E4    { emit(new NewInstr(iLEQ)); }
-  |           E3 GTN E4    { emit(new NewInstr(iGTN)); } 
-  |           E3 GEQ E4    { emit(new NewInstr(iGEQ)); }
+  |           E3 relop { emit(new NewInstr(iBIND)); }
+                    E4 { emit(new NewInstr(iBIND));
+                         emit(new NewInstr(iCALL_FUNCTION)); }
+  ;
+
+relop:        EQU    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Equal")); } 
+  |           NEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "NotEqual")); }
+  |           LTN    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Less")); }
+  |           LEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "LessEqual")); }
+  |           GTN    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Greater")); } 
+  |           GEQ    { emit(new NewInstr(iINIT_CALL_FUNCTION, "GreaterEqual")); }
   ;
 
 E4:           E5
-  |           E4 PLUS E5   { emit(new NewInstr(iADD)); }
-  |           E4 MINUS E5  { emit(new NewInstr(iSUB)); }
-  |           E4 AMPER E5  { emit(new NewInstr(iCONCAT)); }
+  |           E4 addop { emit(new NewInstr(iBIND)); }
+                    E5 { emit(new NewInstr(iBIND));
+                         emit(new NewInstr(iCALL_FUNCTION)); }
   ;
 
+addop:        PLUS   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Plus")); }
+     |        MINUS  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Minus")); }
+     |        AMPER  { emit(new NewInstr(iINIT_CALL_FUNCTION, "Concat")); }
+     ;
+
 E5:           E6
-  |           E5 STAR E6    { emit(new NewInstr(iMUL)); }
-  |           E5 SLASH E6   { emit(new NewInstr(iDIV)); }
-  |           E5 PERCENT E6 { emit(new NewInstr(iMOD)); }
-  |           E5 DIV E6     { emit(new NewInstr(iINTDIV)); }
-  |           E5 DOT E6     { emit(new NewInstr(iDOT)); }
-  |           E5 CARET E6   { emit(new NewInstr(iPOWER)); } 
+  |           E5 mulop { emit(new NewInstr(iBIND)); } 
+                    E6 { emit(new NewInstr(iBIND));
+                         emit(new NewInstr(iCALL_FUNCTION)); }
+  ;
+
+mulop:        STAR       { emit(new NewInstr(iINIT_CALL_FUNCTION, "Times")); }
+  |           SLASH      { emit(new NewInstr(iINIT_CALL_FUNCTION, "Divide")); }
+  |           PERCENT    { emit(new NewInstr(iINIT_CALL_FUNCTION, "Modulus")); }
+  |           DIV        { emit(new NewInstr(iINIT_CALL_FUNCTION, "IntegerDivide")); }
+  |           DOT        { emit(new NewInstr(iINIT_CALL_FUNCTION, "Dot")); }
+  |           CARET      { emit(new NewInstr(iINIT_CALL_FUNCTION, "Power")); } 
   ;
 
 E6:           PLUS E7
-  |           MINUS E7      { emit(new NewInstr(iNEG)); }
+  |           MINUS   { emit(new NewInstr(iINIT_CALL_FUNCTION, "Negate")); }
+                    E7    { emit(new NewInstr(iBIND));
+                            emit(new NewInstr(iCALL_FUNCTION));  }
   |           E7
+  ;
 
 E7:           E8
-  |           E7 HASH E8   { emit(new NewInstr(iCHILD)); }
+  |           E7 indexop  { emit(new NewInstr(iBIND)); }
+                      E8  { emit(new NewInstr(iBIND));
+                            emit(new NewInstr(iCALL_FUNCTION)); }
   |           E7 DBLLBRACK expression RBRACK RBRACK 
-                 { emit(new NewInstr(iSUBSCRIPT)); }
-  |           E7 UNDERSCORE E8
-		 { emit(new NewInstr(iSUBSCRIPT)); }
+                 { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthElement"));
+                   emit(new NewInstr(iBIND));
+                   emit(new NewInstr(iBIND));
+		   emit(new NewInstr(iCALL_FUNCTION)); }
   ;
+
+indexop:      HASH     { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthChild")); }
+       |      UNDERSCORE { emit(new NewInstr(iINIT_CALL_FUNCTION, "NthElement")); }
 
 E8:           E9   
   |           LPAREN expression RPAREN
