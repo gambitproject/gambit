@@ -11,65 +11,16 @@
 // DumbTableau definitions
 
 template <class T> DumbTableau<T>::DumbTableau(void)
-  : A() , b(), n1(0), n2(0)
+  : A() , b()
 { }
 
 template <class T> DumbTableau<T>::
-DumbTableau(const NormalForm<T> &NF) 
-  : A(NF.NumStrats(1) + NF.NumStrats(2),
-      NF.NumStrats(1) + NF.NumStrats(2)), 
-      b(NF.NumStrats(1) + NF.NumStrats(2)),
-     n1(NF.NumStrats(1)), n2(NF.NumStrats(2)) 
-{ 
-
-  NormalIter<T>
-    iter(NF); T min = (T) 0, x; int i;
-  
-  for (i = 1; i <= n1; i++)   {
-    for (int j = 1; j <= n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-
-  min-=(T)1;
-  
-  for (i = 1; i <= n1; i++) 
-    for (int j = 1; j <= n1; j++) 
-      A(i, j) = (T)0;
-  
-  for (i = n1 + 1; i <= n1 + n2; i++)
-    for (int j = n1 + 1; j <= n1 + n2; j++)
-      A(i, j) = (T)0;
-  
-  for (i = 1; i <= n1; i++)  {
-    for (int j = 1; j <= n2; j++)  {
-      A(i, n1 + j) = iter.Payoff(1) - min;
-      A(n1 + j, i) = iter.Payoff(2) - min;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-  for (i = 1; i <= n1 + n2; i++) 
-    b[i]=-1.0;
-//  A.Dump(gout);
-//  b.Dump(gout);
-
-}
-
-
-
-template <class T> DumbTableau<T>::DumbTableau(int n1, int n2)
-  : A(1,n1,1,n2), b(1,n1), n1(0), n2(0)
-{ }
+DumbTableau(int rl,int rh, int cl, int ch ) 
+  : A(rl,rh,cl,ch) , b(rl,rh) { }
 
 template <class T> DumbTableau<T>
 ::DumbTableau(const gMatrix<T>& A, const gVector<T>& b) 
-  : A(A) , b(b), n1(0), n2(0)
+  : A(A) , b(b)
 { }
 
 template <class T>DumbTableau<T>::~DumbTableau(void)
@@ -95,6 +46,16 @@ template <class T> int DumbTableau<T>::MaxCol(void) const
 return A.MaxCol();
 }
 
+template <class T> T &DumbTableau<T>::Set_A(int r, int c)
+{
+return A(r,c);
+}
+
+template <class T> T &DumbTableau<T>::Set_b(int r)
+{
+return b[r];
+}
+
 
 // Tableau method definitions
 
@@ -102,45 +63,43 @@ template <class T>
 Tableau<T>::Tableau(DumbTableau<T> &tab)
 : dtab(&tab),
   basis(tab),
-  B(tab.A.MinRow(), tab.A.MaxRow()),
-  solution(tab.A.MinRow(),tab.A.MaxRow()),
-  dual(tab.A.MinRow(),tab.A.MaxRow()),
-  unitcost(tab.A.MinRow(),tab.A.MaxRow()),
-	cost(tab.A.MinCol(),tab.A.MaxCol()),
-  costdefined(0),creator(0)
+  B(tab.MinRow(), tab.MaxRow()),
+  solution(tab.MinRow(),tab.MaxRow()),creator(0)
+//  dual(tab.MinRow(),tab.MaxRow()),
+//  unitcost(tab.MinRow(),tab.MaxRow()),
+//	cost(tab.MinCol(),tab.MaxCol()),
+//  costdefined(0)
 {
   B.refactor(tab.A, basis.label);
   B.solve(tab.b, solution);
 };
 
 template <class T>
-Tableau<T>::Tableau(const NormalForm<T> &NF)
-:  B(1,  NF.NumStrats(1) + NF.NumStrats(2)), 
- solution(1,  NF.NumStrats(1) + NF.NumStrats(2)), 
- dual(1,  NF.NumStrats(1) + NF.NumStrats(2)), 
- unitcost(1,  NF.NumStrats(1) + NF.NumStrats(2)), 
- cost(1,  NF.NumStrats(1) + NF.NumStrats(2)), 
-  costdefined(0), creator(1)
-{ 
-  dtab = new DumbTableau<T>(NF);
-  Basis<T> tmp(*dtab);
+Tableau<T>::Tableau(int rl, int rh, int cl, int ch)
+  : basis(rl,rh), B(rl,rh),
+  solution(rl,rh), creator(1)
+//  dual(tab.MinRow(),tab.MaxRow()),
+//  unitcost(tab.MinRow(),tab.MaxRow()),
+//	cost(tab.MinCol(),tab.MaxCol()),
+//  costdefined(0)
+{
+  dtab = new DumbTableau<T>(rl,rh,cl,ch);
   basis.dtab=dtab;
-  basis = tmp;
-  B.refactor(dtab->A, basis.label);
-  B.solve(dtab->b, solution);
+//  B.refactor(dtab->A, basis.label);
+//  B.solve(dtab->b, solution);
 };
 
 template <class T>
 Tableau<T>::Tableau(DumbTableau<T> &tab, const Basis<T> &code)
 : dtab(&tab),
   basis(code),
-  B(tab.A.MinRow(), tab.A.MaxRow()),
-  solution(tab.A.MinRow(),tab.A.MaxRow()),
-  dual(tab.A.MinRow(),tab.A.MaxRow()),
-  unitcost(tab.A.MinRow(),tab.A.MaxRow()),
-  cost(tab.A.MinCol(),tab.A.MaxCol()),
-  costdefined(0), creator(0)
-// , tmpcol(tab.A.MinRow(),tab.A.MaxRow())
+  B(tab.MinRow(), tab.MaxRow()),
+  solution(tab.MinRow(),tab.MaxRow()),creator(0)
+//  dual(tab.MinRow(),tab.MaxRow()),
+//  unitcost(tab.MinRow(),tab.MaxRow()),
+//  cost(tab.MinCol(),tab.MaxCol()),
+//  costdefined(0)
+// , tmpcol(tab.MinRow(),tab.MaxRow())
 {
   B.refactor(tab.A, code.label);
   B.solve(tab.b, solution);
@@ -150,21 +109,21 @@ template <class T>
 Tableau<T>::Tableau(DumbTableau<T> &tab, const gVector<T> &c, const Basis<T> &code)
 : dtab(&tab),
   basis(code),
-  B(tab.A.MinRow(), tab.A.MaxRow()),
-  solution(tab.A.MinRow(),tab.A.MaxRow()),
-  unitcost(tab.A.MinRow(),tab.A.MaxRow()),
-  cost(c),
-  dual(tab.A.MinRow(),tab.A.MaxRow()),
-	costdefined(1), creator(0)
-// , tmpcol(tab.A.MinRow(),tab.A.MaxRow())
+  B(tab.MinRow(), tab.MaxRow()),
+  solution(tab.MinRow(),tab.MaxRow()),creator(0)
+//  unitcost(tab.MinRow(),tab.MaxRow()),
+//  cost(c),
+//  dual(tab.MinRow(),tab.MaxRow()),
+//	costdefined(1)
+// , tmpcol(tab.MinRow(),tab.MaxRow())
 {
-  assert( c.First()==tab.A.MinCol() && c.Last()==tab.A.MaxCol() );
+  assert( c.First()==tab.MinCol() && c.Last()==tab.MaxCol() );
 
   B.refactor(tab.A, code.label);
   B.solve(tab.b, solution);
 
-  unitcost= (T)0;
-  SolveDual();
+//  unitcost= (T)0;
+//  SolveDual();
 }
 
 template <class T>
@@ -174,13 +133,13 @@ Tableau<T>::Tableau(DumbTableau<T> &tab,
 		const Basis<T> &code)
 : dtab(&tab),
   basis(code),
-  B(tab.A.MinRow(), tab.A.MaxRow()),
-  solution(tab.A.MinRow(),tab.A.MaxRow()),
-  unitcost(uc),
-  cost(c),
-  dual(tab.A.MinRow(),tab.A.MaxRow()),
-  costdefined(1), creator(0)
-// , tmpcol(tab.A.MinRow(),tab.A.MaxRow())
+  B(tab.MinRow(), tab.MaxRow()),
+  solution(tab.MinRow(),tab.MaxRow()), creator(0)
+//  unitcost(uc),
+//  cost(c),
+//  dual(tab.MinRow(),tab.MaxRow()),
+//  costdefined(1)
+// , tmpcol(tab.MinRow(),tab.MaxRow())
 {
   assert( uc.First()==MinRow() && uc.Last()==MaxRow() );
   assert( c.First()==MinCol() && c.Last()==MaxCol() );
@@ -188,7 +147,7 @@ Tableau<T>::Tableau(DumbTableau<T> &tab,
   B.refactor(tab.A, code.label);
   B.solve(tab.b, solution);
 
-  SolveDual();
+//  SolveDual();
 }
 
 
@@ -198,10 +157,10 @@ Tableau<T>::Tableau(const Tableau<T> &orig)
   basis(orig.basis),
   B(orig.B),
   solution(orig.solution),
-  unitcost(orig.unitcost),
-  cost(orig.cost),
-  dual(orig.dual),
-  costdefined(orig.costdefined),
+//  unitcost(orig.unitcost),
+//  cost(orig.cost),
+//  dual(orig.dual),
+//  costdefined(orig.costdefined),
   creator(0) // copy does not create new dtab
 // , tmpcol(orig.tmpcol)
 {
@@ -214,10 +173,10 @@ Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
   basis= orig.basis;
   B= orig.B;
   solution= orig.solution;
-  unitcost= orig.unitcost;
-  cost= orig.cost;
-  dual= orig.dual;
-  costdefined= orig.costdefined;
+//  unitcost= orig.unitcost;
+//  cost= orig.cost;
+//  dual= orig.dual;
+//  costdefined= orig.costdefined;
   creator=0; // copy does not create new dtab
 }
 
@@ -255,7 +214,7 @@ bool Tableau<T>::RowIndex(int x) const
 
 
 // cost-based functions
-
+/*
 template <class T>
 void Tableau<T>::SetCost(const gVector<T>& c)
 {
@@ -344,6 +303,7 @@ void Tableau<T>::SolveDual()
   basis.BasisSelect(unitcost,cost,tmpcol);
   B.solveT(tmpcol,dual);
 }
+*/
 
 // non-cost-based functions
 
@@ -378,6 +338,16 @@ void Tableau<T>::SetBasis(const Basis<T> &in)
     SolveDual();
 }
 */
+
+template <class T> void Tableau<T>::Refactor()
+{
+  B.refactor(dtab->A, basis.label);
+  B.solve(dtab->b, solution);
+//  if( costdefined )
+//    SolveDual();
+}
+
+
 template <class T>
 void Tableau<T>::GetBasis(Basis<T> &out) const
 {
@@ -419,8 +389,8 @@ void Tableau<T>::Pivot(int outrow,int inlabel)
   B.update(outrow, tmpcol);
 
   B.solve(dtab->b, solution);
-  if( costdefined )
-    SolveDual();
+//  if( costdefined )
+//    SolveDual();
 }
 
 
@@ -497,6 +467,10 @@ void Tableau<T>::Dump(gOutput &to) const
 { basis.Dump(to);solution.Dump(to); }
 
 template <class T>
+void DumbTableau<T>::Dump(gOutput &to) const
+{ A.Dump(to);b.Dump(to); }
+
+template <class T>
 bool Tableau<T>::Member(int i) const
 { return basis.member(i);}
 
@@ -519,8 +493,16 @@ Basis<T>::Basis(void)
 { }
 
 template <class T>
+Basis<T>::Basis(int min, int max)
+:  label(min,max), dtab(0)
+{ 
+  for(int i=label.First(); i<=label.Last(); i++)
+    label[i]= -i;
+}
+
+template <class T>
 Basis<T>::Basis(const DumbTableau<T> &tab)
-:  label(tab.A.MinRow(),tab.A.MaxRow())
+:  label(tab.MinRow(),tab.MaxRow())
 {
   dtab= &tab;
 
@@ -530,7 +512,7 @@ Basis<T>::Basis(const DumbTableau<T> &tab)
 
 template <class T>
 Basis<T>::Basis(const DumbTableau<T> &tab, const gBlock<int> &v)
-: label(tab.A.MinRow(),tab.A.MaxRow()),
+: label(tab.MinRow(),tab.MaxRow()),
   dtab(&tab)
 {
   assert( v.First()==label.First() && v.Last()==label.Last() );
