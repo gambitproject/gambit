@@ -28,12 +28,14 @@
 
 extern PyObject *gbt_new_efg(PyObject *, PyObject *);
 extern PyObject *gbt_read_efg(PyObject *, PyObject *); 
+extern PyObject *gbt_new_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_read_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_nash_logit_nfg(PyObject *, PyObject *);
 
 static struct PyMethodDef gambit_methods[] = {
   { "LogitSolve", gbt_nash_logit_nfg, 1 },
   { "NewEfg", gbt_new_efg, 1 },
+  { "NewNfg", gbt_new_nfg, 1 },
   { "ReadEfg", gbt_read_efg, 1 },
   { "ReadNfg", gbt_read_nfg, 1 },
   { NULL, NULL }
@@ -41,6 +43,7 @@ static struct PyMethodDef gambit_methods[] = {
 
 extern void initbehav(void);
 extern void initefg(void);
+extern void initefgsupport(void);
 extern void initinfoset(void);
 extern void initmixed(void);
 extern void initnash(void);
@@ -58,6 +61,7 @@ initgambit(void)
 
   initbehav();
   initefg();
+  initefgsupport();
   initinfoset();
   initmixed();
   initnash();

@@ -279,6 +279,34 @@ nfg_print(nfgobject *self, FILE *fp, int flags)
  ************************************************************************/
 
 PyObject *
+gbt_new_nfg(PyObject *self, PyObject *args)
+{
+  PyObject *list;
+
+  if (!PyArg_ParseTuple(args, "O", &list)) {
+    return NULL;
+  }
+
+  if (!PyList_Check(list)) {
+    return NULL;
+  }
+
+  gArray<int> dim(PyList_Size(list));
+  for (int pl = 1; pl <= dim.Length(); pl++) {
+    if (!PyInt_Check(PyList_GetItem(list, pl - 1))) {
+      return NULL;
+    }
+    else {
+      dim[pl] = PyInt_AsLong(PyList_GetItem(list, pl - 1));
+    }
+  }
+
+  nfgobject *nfg = newnfgobject();
+  nfg->m_nfg = new gbtNfgGame(dim);
+  return (PyObject *) nfg;
+}
+
+PyObject *
 gbt_read_nfg(PyObject *self, PyObject *args)
 {
   char *filename;
