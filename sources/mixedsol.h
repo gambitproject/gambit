@@ -19,7 +19,7 @@ typedef enum {
   algorithmNfg_USER,
   algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
   algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
-  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
+  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM, algorithmNfg_NFGALLNASH,
   algorithmNfg_QRE, algorithmNfg_QREALL
 } NfgAlgType;
 
