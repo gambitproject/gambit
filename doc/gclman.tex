@@ -1955,7 +1955,7 @@ the standard UDF, \tindex{Nfg} to create the game directly from a payoff
 list:
 
 \begin{verbatim}
-GCL1:= n:=Nfg[Number[{{{9,9},{0,10}},{{10,0},{1,1}}}]]
+GCL1:= n:=Nfg[{{{9,9},{0,10}},{{10,0},{1,1}}}]
 GCL2:= << Payoffs[n]
 { { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
   { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
@@ -2052,8 +2052,8 @@ number of players and strategies:
 \begin{verbatim}
 NewFunction[StagHuntNfg[n->INTEGER,maxeff->INTEGER,cost->NUMBER]=:NFG,
   strats:=List[1,maxeff,1];
-  effort:=Number[CartesianProd[List[strats,n]]];
-  Nfg[Number[Min[effort]]-cost*effort];
+  effort:=CartesianProd[List[strats,n]];
+  Nfg[Min[effort]-cost*effort];
 ];
 \end{verbatim}
 
@@ -2651,7 +2651,7 @@ interpreted as the probability with which a player adopts the
 corresponding action or strategy.  However, the data for \verb+MIXED+
 need not be legitimate probabilities.  For example, it would be valid
 to create a mixed profile using the command
-\verb+Mixed[n,Number[{{1,2,3},{4,5}}]]+.  Probabilities are not
+\verb+Mixed[n,{{1,2,3},{4,5}}]+.  Probabilities are not
 required to add up to one, or even to be positive.  This feature is
 especially useful in econometric analysis, as the \verb+MIXED+ and
 \verb+BEHAV+ data types can be used to represent choice frequencies of
@@ -3288,7 +3288,6 @@ appreciate getting feedback on this.
 # Float 
   Integer 
 # ListForm 
-  Number 
   Text 
 \end{verbatim}
 \end{multicols}
@@ -4336,6 +4335,16 @@ a one-dimensional list; the optional parameter \verb+levels+ may be
 used to limit the flattening to the topmost \verb+levels+.
 \ed
 
+\item\lex{Float}
+\protect \large \begin{verbatim}
+Float[x->NUMBER] =: NUMBER
+\end{verbatim} \normalsize
+
+\bd
+Converts \verb+x+ into a number with floating-point precision.
+\item [See also:] \verb+Rational+.
+\ed
+
 \item\lex{For}
 \protect \large \begin{verbatim}
 *For[statement-list, boolean-expression, 
@@ -4964,7 +4973,6 @@ Integer[x->NUMBER] =: INTEGER
 
 \bd
 Converts \verb+x+ into an integer value by truncation.
-\item [See also:] \verb+Number+.
 \ed
 
 \item\lex{IntegerDivide} 
@@ -5901,17 +5909,6 @@ Null[x->T] =: T*
 Returns a null object of type \verb+T+.  
 \ed
 
-\item\lex{Number}
-\protect \large \begin{verbatim}
-Number[x->NUMBER] =: NUMBER 
-\end{verbatim} \normalsize
-
-\marginpar{Name?}
-\bd
-Converts \verb+x+ into a value of type \verb+NUMBER+.
-\item [See also:] \verb+Float+, \verb+Number+.
-\ed
-
 \item\lex{NumChars}
 \protect \large \begin{verbatim}
 NumChars[text->TEXT] =: INTEGER 
@@ -6240,6 +6237,16 @@ Randomize[x->NUMBER, {seed->0}] =: NUMBER
 \bd 
 Returns a random number of type \verb+INTEGER+.  The return value
 is uniform between 1 and \verb+MAXINT=214748367+.  
+\ed
+
+\item\lex{Rational}
+\protect \large \begin{verbatim}
+Rational[x->NUMBER] =: NUMBER
+\end{verbatim}\normalsize
+
+\bd
+Converts \verb+x+ to a number with rational precision.
+\item [See also:] \verb+Float+.
 \ed
 
 \item\lex{Read}
