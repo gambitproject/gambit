@@ -42,6 +42,7 @@ template <class T> class LemkeTableau
   : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
     const NFRep<T> &rep;
+    int num_strats;
     BFS_List List;
     
     int Lemke_Step(int);
@@ -72,7 +73,7 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
 {
      // On entry the n + 1 column should be all zero.
      // To begin with we put a 1 in the row'th entry of this column
-  Tableau(row, Num_Strats + 1) = 1;
+  Tableau(row, num_strats + 1) = 1;
 
      // Now pivot.
   Tableau.Pivot(row, col);
@@ -87,8 +88,8 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
 
      // Now switch the col column and the Num_Strat + 1 (scratch) column,
      // then set the row'th entry to 0, making the whole column zero.
-  Tableau.SwitchColumns(col, Num_Strats + 1);
-  Tableau(row, Num_Strats + 1) = 0;
+  Tableau.SwitchColumns(col, num_strats + 1);
+  Tableau(row, num_strats + 1) = 0;
 }
 
 //
@@ -108,7 +109,7 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     All_Lemke(List, 0);
   else  {
     Lemke_Step(Duplicate_Label);
-    for (i = 1; i <= Num_Strats; i++)
+    for (i = 1; i <= num_strats; i++)
       if (Row_Labels[i] > 0)
 	cbfs.Define(Row_Labels[i], Tableau(i,0));
     List.Append(cbfs);
@@ -187,14 +188,14 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
   BFS<T> cbfs((T) 0);
   int i;
 
-  for (i = 1; i <= Num_Strats; i++)
+  for (i = 1; i <= num_strats; i++)
     if (Row_Labels[i] > 0)
       cbfs.Define(Row_Labels[i], Tableau(i,0));
 
   if (printlevel >= 3)  {
     output << "\npath " << j ;
     output << " Basis:  " ;
-    for (i = 1; i <= Num_Strats; i++)
+    for (i = 1; i <= num_strats; i++)
       output << Row_Labels[i] << " " ;
     output << "\n";	
   }
@@ -207,7 +208,7 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
 
   if (printlevel >= 3)  {
     output << "\npath " << j << " Basis:  " ;
-    for (i = 1; i <= Num_Strats; i++)
+    for (i = 1; i <= num_strats; i++)
       output << Row_Labels[i] << " " ;
   }
 
@@ -217,7 +218,7 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j)
   if (printlevel >= 3)
     Dump(output);
 
-  for (i = 1; i <= Num_Strats; i++)
+  for (i = 1; i <= num_strats; i++)
     if (i != j)  {
       LemkeTableau<T> Tcopy(*this);
       Tcopy.Lemke_Step(i);
@@ -243,7 +244,7 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   T ratio, tempmax;
 
   // Find all row indices for which column col has positive entries.
-  for (i = 1; i <= Num_Strats; i++)
+  for (i = 1; i <= num_strats; i++)
     if (Tableau(i, col) > (T) 0)
       BestSet.Append(i);
   assert(BestSet.Length() > 0);
@@ -255,7 +256,7 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   c = 0;
   while (BestSet.Length() > 1)   {
               // Initialize tempmax.
-    assert(c <= Num_Strats); 	
+    assert(c <= num_strats); 	
     c_col = Col_Labels.Find(-c);
     if (c_col > 0 || c == 0)   {
       tempmax = Tableau(BestSet[1], c_col) / Tableau(BestSet[1], col);
@@ -328,14 +329,23 @@ template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
 template <class T>
 LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
 			      gOutput &ofile, gOutput &efile, int plev)
-     : gTableau<T>(r.NumStrats(1) + r.NumStrats(2)), 
-       SolutionModule(ofile, efile, plev), rep(r)
+     : gTableau<T>(1, r.NumStrats(1) + r.NumStrats(2),
+		   r.NumStrats(1) + r.NumStrats(2),
+		   0, r.NumStrats(1) + r.NumStrats(2) + 1,
+		   r.NumStrats(1) + r.NumStrats(2)), 
+       SolutionModule(ofile, efile, plev), rep(r),
+       num_strats(r.NumStrats(1) + r.NumStrats(2))
 {
   NormalIter<T> iter(r);
   T min = (T) 0, x;
   int n1 = r.NumStrats(1), n2 = r.NumStrats(2);
 
-  for (int i = 1; i <= n1; i++)   {
+  for (int i = 1; i <= n1 + n2; i++)  {
+    Col_Labels[i] = i;
+    Row_Labels[i] = -i;
+  }
+
+  for (i = 1; i <= n1; i++)   {
     for (int j = 1; j <= n2; j++)  {
       x = iter.Evaluate(1);
       if (x < min)   min = x;
