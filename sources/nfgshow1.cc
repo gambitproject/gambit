@@ -658,7 +658,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddSeparator();
     AddTool(NFG_EDIT_OUTCOMES, ToolbarPayoffBitmap);
     AddSeparator();
-    AddTool(NFG_SOLVE_SOLVE_MENU, ToolbarSolveBitmap);
+    AddTool(NFG_SOLVE_STANDARD_MENU, ToolbarSolveBitmap);
     AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);
     AddSeparator();
     AddTool(OPTIONS_MENU, ToolbarOptionsBitmap);
