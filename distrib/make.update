@@ -6,7 +6,7 @@
 # and automatically place them onto the primary GAMBIT ftp site.
 
 # Usage: 
-# make -f make.update TARGET=[gambit, gcl, src, guidoc, gcldoc, all] 
+# make -f make.update TARGET=[gambit, src, guidoc, gcldoc, all] 
 #                     SYSTYPE=[Linux, SunOS_5_6, HPUX, all] 
 #                     GUI=[motif, xt, all] 
 #
