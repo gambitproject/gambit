@@ -288,7 +288,7 @@ template <class T> T MixedProfile<T>::MaxRegret(void) const
   int i;
   T maxgripe = (T)0;
 
-  gPVector<T> v(*this);
+  gPVector<T> v(N->Dimensionality());
   Regret(v);
   for(i=v.First(); i<=v.Last(); i++)
     if(v[i] > maxgripe) maxgripe = v[i];
