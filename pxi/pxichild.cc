@@ -20,6 +20,8 @@
 #include "gui/valnumber.h"
 
 #include "pxichild.h"
+#include "pxiplotn.h"
+
 #include "dlgpxi.h"
 #include "dlformataxis.h"
 #include "dlformattitle.h"
@@ -88,10 +90,11 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 			      wxDefaultSize, wxNB_BOTTOM);
   
   for (int i = 1; i <= m_fileHeader.NumInfosets(); i++) {
-    PxiCanvas *canvas = new PxiCanvas(m_plotBook,
-				      wxPoint(0, 0), wxSize(width, height),
-				      m_fileHeader, i);
-    m_plotBook->AddPage(canvas, wxString::Format("Plot %d", i));
+    PxiPlot *plot = new PxiPlotN(m_plotBook,
+				   wxPoint(0, 0), wxSize(width, height),
+				   m_fileHeader, i);
+    m_plotBook->AddPage(plot, wxString::Format("Plot %d", i));
+    plot->Render();
   }
 
   Show(true);
@@ -192,9 +195,9 @@ void PxiChild::MakeToolbar(void)
 //              class PxiChild: General private members
 //=========================================================================
 
-PxiCanvas *PxiChild::GetShownCanvas(void) const
+PxiPlot *PxiChild::GetShownPlot(void) const
 {
-  return ((PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection()));
+  return ((PxiPlot *) m_plotBook->GetPage(m_plotBook->GetSelection()));
 }
 
 //=========================================================================
@@ -221,12 +224,12 @@ void PxiChild::OnFilePageSetup(wxCommandEvent &)
 
 void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
+  PxiPlot *plot = GetShownPlot();
 
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview 
-    = new wxPrintPreview(new PxiPrintout(*canvas, "PXI printout"), 
-			 new PxiPrintout(*canvas, "PXI printout"), &data);
+    = new wxPrintPreview(new PxiPrintout(*plot, "PXI printout"), 
+			 new PxiPrintout(*plot, "PXI printout"), &data);
 
   if (!preview->Ok()) {
     delete preview;
@@ -243,11 +246,11 @@ void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 
 void PxiChild::OnFilePrint(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
+  PxiPlot *plot = GetShownPlot();
 
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  PxiPrintout printout(*canvas, "PXI printout");
+  PxiPrintout printout(*plot, "PXI printout");
 
   if (!printer.Print(this, &printout, TRUE)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -304,26 +307,26 @@ void PxiChild::OnViewDetail(wxCommandEvent &)
 
 void PxiChild::OnViewZoomIn(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  double scale = canvas->GetScale();
+  PxiPlot *plot = GetShownPlot();
+  double scale = plot->GetScale();
   scale += 0.1;
   if (scale > 2.0) {
     scale = 2.0;
   }
-  canvas->SetScale(scale);
-  canvas->Render();
+  plot->SetScale(scale);
+  plot->Render();
 }
 
 void PxiChild::OnViewZoomOut(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  double scale = canvas->GetScale();
+  PxiPlot *plot = GetShownPlot();
+  double scale = plot->GetScale();
   scale -= 0.1;
   if (scale < 0.1) {
     scale = 0.1;
   }
-  canvas->SetScale(scale);
-  canvas->Render();
+  plot->SetScale(scale);
+  plot->Render();
 }
 
 class dialogZoom : public wxDialog {
@@ -371,21 +374,21 @@ dialogZoom::dialogZoom(wxWindow *p_parent, int p_default, int p_min, int p_max)
 
 void PxiChild::OnViewZoom(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  double scale = canvas->GetScale();
+  PxiPlot *plot = GetShownPlot();
+  double scale = plot->GetScale();
   
   dialogZoom dialog(this, (int) (scale * 100), 10, 200);
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->SetScale((double) dialog.GetValue() / 100.0);
-    canvas->Render();
+    plot->SetScale((double) dialog.GetValue() / 100.0);
+    plot->Render();
   }
 }
 
 void PxiChild::OnViewOptions(wxCommandEvent &)
 {
 #ifdef NOT_PORTED_YET
-  canvas->DrawSettings()->SetOptions(this);
-  canvas->Render();
+  plot->DrawSettings()->SetOptions(this);
+  plot->Render();
 #endif  // NOT_PORTED_YET
 }
 
@@ -396,10 +399,10 @@ void PxiChild::OnViewOptions(wxCommandEvent &)
 
 void PxiChild::OnDataOverlayData(wxCommandEvent &)
 {
-  //  dialogOverlayData dialog(this, canvas);
-  //  canvas->Render();
+  //  dialogOverlayData dialog(this, plot);
+  //  plot->Render();
   //  wxClientDC dc(this);
-  //  canvas->Update(dc,PXI_UPDATE_SCREEN);
+  //  plot->Update(dc,PXI_UPDATE_SCREEN);
 }
 
 void PxiChild::OnDataOverlayFile(wxCommandEvent &)
@@ -408,14 +411,14 @@ void PxiChild::OnDataOverlayFile(wxCommandEvent &)
   char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
   if (s) {
     FileHeader temp_header(s);
-    if ( (temp_header.NumStrategies()!=(canvas->Header(1)).NumStrategies()) ||
-	 (temp_header.NumInfosets()!=(canvas->Header(1)).NumInfosets()) )
+    if ( (temp_header.NumStrategies()!=(plot->Header(1)).NumStrategies()) ||
+	 (temp_header.NumInfosets()!=(plot->Header(1)).NumInfosets()) )
       wxMessageBox("These data files do not\nhave the same structure!");
     else
-      canvas->AppendHeader(temp_header);
+      plot->AppendHeader(temp_header);
   }
   wxClientDC dc(this);
-  canvas->Update(dc,PXI_UPDATE_SCREEN);
+  plot->Update(dc,PXI_UPDATE_SCREEN);
 #endif  // NOT_PORTED_YET
 }
 
@@ -435,45 +438,45 @@ void PxiChild::OnFormatColors(wxCommandEvent &)
 
 void PxiChild::OnFormatLambdaAxis(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  dialogFormatAxis dialog(this, canvas->GetLambdaAxisProperties());
+  PxiPlot *plot = GetShownPlot();
+  dialogFormatAxis dialog(this, plot->GetLambdaAxisProperties());
 
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->GetLambdaAxisProperties() = dialog.GetProperties();
-    canvas->Render();
+    plot->GetLambdaAxisProperties() = dialog.GetProperties();
+    plot->Render();
   }
 }
 
 void PxiChild::OnFormatProfileAxis(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  dialogFormatAxis dialog(this, canvas->GetProbAxisProperties());
+  PxiPlot *plot = GetShownPlot();
+  dialogFormatAxis dialog(this, plot->GetProbAxisProperties());
 
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->GetProbAxisProperties() = dialog.GetProperties();
-    canvas->Render();
+    plot->GetProbAxisProperties() = dialog.GetProperties();
+    plot->Render();
   }
 }
 
 void PxiChild::OnFormatTitle(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  dialogFormatTitle dialog(this, canvas->GetTitleProperties());
+  PxiPlot *plot = GetShownPlot();
+  dialogFormatTitle dialog(this, plot->GetTitleProperties());
 
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->GetTitleProperties() = dialog.GetProperties();
-    canvas->Render();
+    plot->GetTitleProperties() = dialog.GetProperties();
+    plot->Render();
   }
 }
 
 void PxiChild::OnFormatLegend(wxCommandEvent &)
 {
-  PxiCanvas *canvas = GetShownCanvas();
-  dialogFormatLegend dialog(this, canvas->GetLegendProperties());
+  PxiPlot *plot = GetShownPlot();
+  dialogFormatLegend dialog(this, plot->GetLegendProperties());
   
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->GetLegendProperties() = dialog.GetProperties();
-    canvas->Render();
+    plot->GetLegendProperties() = dialog.GetProperties();
+    plot->Render();
   }
 }
 
@@ -481,12 +484,12 @@ void PxiChild::OnFormatOverlay(wxCommandEvent &)
 {
 #ifdef NOT_PORTED_YET
   wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetOverlayFont());  
+  data.SetInitialFont(plot->draw_settings->GetOverlayFont());  
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
-    canvas->Render();
+    plot->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
+    plot->Render();
   }
 #endif  // NOT_PORTED_YET
 }

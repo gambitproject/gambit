@@ -3,7 +3,6 @@
 //
 
 #include "dlgpxi.h"
-#include "axis.h"
 #include "pxichild.h"
 
 // ----------------------------------------------------------------------
@@ -17,8 +16,8 @@ BEGIN_EVENT_TABLE(dialogOverlayData, wxDialog)
   EVT_BUTTON(idEXPDATA_BROWSE2_BUTTON, dialogOverlayData::OnBrowseExp)
 END_EVENT_TABLE()
 
-dialogOverlayData::dialogOverlayData(PxiChild *parent, PxiCanvas *p_canvas)
-  :guiAutoDialog(parent,"Likelihood"), canvas(p_canvas), frame(parent),
+dialogOverlayData::dialogOverlayData(PxiChild *parent, PxiPlot *p_canvas)
+  : guiAutoDialog(parent,"Likelihood"), canvas(p_canvas), frame(parent),
    likename("like.out"), pxiname(p_canvas->PxiName()), 
    expname(""),  likefile(0), expfile(0),pxifile(0)
 {

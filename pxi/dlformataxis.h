@@ -10,7 +10,7 @@
 #ifndef DLFORMATAXIS_H
 #define DLFORMATAXIS_H
 
-#include "pxicanvas.h"    // for PxiAxisProperties
+#include "pxiplot.h"    // for PxiAxisProperties
 
 class dialogFormatAxis : public wxDialog {
 private:

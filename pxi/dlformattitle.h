@@ -10,7 +10,7 @@
 #ifndef DLFORMATTITLE_H
 #define DLFORMATTITLE_H
 
-#include "pxicanvas.h"   // for PxiTitleProperties
+#include "pxiplot.h"   // for PxiTitleProperties
 
 class dialogFormatTitle : public wxDialog {
 private:

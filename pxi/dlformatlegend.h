@@ -10,7 +10,7 @@
 #ifndef DLFORMATLEGEND_H
 #define DLFORMATLEGEND_H
 
-#include "pxicanvas.h"   // for PxiTitleProperties
+#include "pxiplot.h"   // for PxiTitleProperties
 
 class dialogFormatLegend : public wxDialog {
 private:

@@ -113,15 +113,15 @@ typedef enum {
 } PxiColorMode;
 */
 
-class PxiCanvas;
+class PxiPlot;
 
 class PxiPrintout: public wxPrintout
 {
 private:
-  PxiCanvas &canvas;
+  PxiPlot &canvas;
   
 public:
-  PxiPrintout(PxiCanvas &canvas, char *title = "PXI printout");
+  PxiPrintout(PxiPlot &canvas, char *title = "PXI printout");
   ~PxiPrintout();
   bool OnPrintPage(int page);
   bool HasPage(int page);

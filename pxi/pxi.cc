@@ -59,7 +59,6 @@
 #include "dlgpxi.h"
 #include "pxi.h"
 #include "pxichild.h"
-#include "axis.h"
 
 #include "new.h"
 #include "wx/sizer.h"
@@ -68,7 +67,7 @@
 #include "wx/print.h"
 #include "wx/printdlg.h"
 
-gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
+gOutput &operator<<(gOutput &op,const PxiPlot::LABELSTRUCT &l) 
   //{op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
 { return op; }
 
@@ -286,7 +285,7 @@ bool PlotInfo::operator==(const PlotInfo &p)
 }
 
 
-PxiPrintout::PxiPrintout(PxiCanvas &c, char *title)
+PxiPrintout::PxiPrintout(PxiPlot &c, char *title)
   : wxPrintout(title), canvas(c)
 { }
 
@@ -300,7 +299,6 @@ bool PxiPrintout::OnPrintPage(int page)
     dc->SetDeviceOrigin(0, 0);
     dc->SetUserScale(1.0, 1.0);
     
-    canvas.SetPage(page);
     canvas.Update(*dc,PXI_UPDATE_PRINTER);
     
     return true;
@@ -571,8 +569,8 @@ template class gBlock<FileHeader>;
 template class gArray<ExpData::BEST_POINT>;
 template class gBlock<ExpData::BEST_POINT>;
 
-template class gArray<PxiCanvas::LABELSTRUCT>;
-template class gBlock<PxiCanvas::LABELSTRUCT>;
+template class gArray<PxiPlot::LABELSTRUCT>;
+template class gBlock<PxiPlot::LABELSTRUCT>;
 
 template class gArray<DataLine>;
 template class gBlock<DataLine>;

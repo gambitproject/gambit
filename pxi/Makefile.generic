@@ -61,7 +61,8 @@ LIBDIR = $(WXLIBDIR) $(XLIBDIR)
 INCDIR = -I. -I../include -I../base -I../math -I../sources $(WXINCDIR) $(XINCDIR) -Ibitmaps
 GUILIBS = $(WXLIB) $(XLIB)
 
-GUISOURCES = pxi.cc axis.cc pxicanvas.cc wxmisc.cc dlabout.cc pxichild.cc \
+GUISOURCES = pxi.cc wxmisc.cc dlabout.cc pxichild.cc \
+	     pxiplot.cc pxiplotn.cc pxiplot2.cc pxiplot3.cc \
              pxiconf.cc valinteger.cc valnumber.cc \
              dlformataxis.cc dlformattitle.cc dlformatlegend.cc
 

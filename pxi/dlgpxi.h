@@ -1,16 +1,21 @@
 //
-// File: expdprm.c -- definitions for experiment data dialog class
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION: 
+// Dialogs for PXI
 //
 
-#ifndef EXPDPRM_H
-#define EXPDPRM_H
+#ifndef DLGPXI_H
+#define DLGPXI_H
 
 #include "wx/slider.h"
 
 #include "wxmisc.h"
 #include "base/gstream.h"
 #include "pxi.h"
-#include "pxicanvas.h"
+#include "pxiplot.h"
 #include "expdata.h"
 
 // ----------------------------------------------------------------------
@@ -21,7 +26,7 @@
 
 class dialogOverlayData: public guiAutoDialog {
 private:
-  PxiCanvas *canvas;
+  PxiPlot *canvas;
   PxiChild *frame;
   
   wxString likename, pxiname, expname;
@@ -38,7 +43,7 @@ private:
   void Run(void);
 public:
   // Constructor
-  dialogOverlayData(PxiChild *, PxiCanvas *);
+  dialogOverlayData(PxiChild *, PxiPlot *);
   ~dialogOverlayData(void);
   
   // Data access
