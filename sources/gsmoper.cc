@@ -36,13 +36,13 @@ extern GSM* _gsm;
 
 
 
-//---------------------------------------
-//           IsFloat
-//---------------------------------------
+//-------------
+// Precision
+//-------------
 
-Portion* GSM_IsFloat(Portion** param)
+Portion* GSM_Precision(Portion** param)
 {
-  return new BoolPortion(((NumberPortion*) param[0])->Value().GetPrecision() == precDOUBLE);
+  return new PrecisionPortion(((NumberPortion *) param[0])->Value().GetPrecision());
 }
 
 //---------------------------------------
@@ -2032,8 +2032,8 @@ void Init_gsmoper(GSM* gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("IsFloat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsFloat, porBOOL, 1));
+  FuncObj = new FuncDescObj("Precision", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Precision, porPRECISION, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER));
 
   gsm->AddFunction(FuncObj);
