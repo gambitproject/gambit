@@ -39,7 +39,7 @@ Output
 
 Output can be produced by a program or command using the following command:
 
-	Output[{expression1}, {expression2}, . . . ];
+	Output[{expression1}, {expression2}, . . . ]
 
 The command produces a line of output containing the values or strings 
 specified by the expressions.  An expression can be a variable of any type or 
@@ -59,28 +59,31 @@ A variable can be of the following types:
 	INTEGER		Evaluates to an integer of arbitrary size
 	RATIONAL	Evaluates to a rational number of arbitrary precision
 	TEXT		String of arbitrary length enclosed in quotation marks
-	EXTFORM		Game in extensive form (created or read)
-	NORFORM		Game in normal form (created or read)
+	EFG		Game in extensive form (created or read)
+	NFG		Game in normal form (created or read)
 	NODE		A node (may only be a subvariable of an extensive form
 			problem)
 	DATATYPE	Defines precision (constants:  Float or Rational)
+	MIXED	Profile of mixed strategies.  Can only be a subvariable
+			of a normal form.
 
-Additionally, variables of type BOOLEAN, INTEGER, RATIONAL, and TEXT can be 
-contained in lists of arbitrary length.  Lists are defined similarly to the 
-above variables, except that the expression to the right of the ":=" symbol
-contains a vector of variables of the same type enclosed in brackets and
-separated by commas.  For example:
+Additionally, variables of type BOOLEAN, INTEGER, MIXED, RATIONAL, and TEXT 
+can be contained in lists of arbitrary length.  Variables of type LIST are 
+defined similarly to the above variables, except that the expression to the 
+right of the ":=" symbol contains a vector of variables of the same type 
+enclosed in brackets and separated by commas.  For example:
 
-	BOOLLIST := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
+	LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
 
 The elements of a list are indexed sequentially.  Therefore, the ith element of
 a list is defined as:
 
-	BOOLLIST[[i]]	which evaluates to a single variable of type BOOLEAN
+	LIST(BOOLEAN)[[i]]	which evaluates to a single variable of type 
+				BOOLEAN.
 
-In the same manner, list variables of type INTLIST, RATLIST, and TEXTLIST can
-be created and accessed for variables of type INTEGER, RATIONAL, and TEXT, 
-respectively.
+In the same manner, list variables of type LIST(INTEGER), LIST(MIXED), 
+LIST(RATIONAL), and LIST(TEXT) can be created and accessed for variables of 
+type INTEGER, MIXED, RATIONAL, and TEXT, respectively.
 
 
 Flow Control
@@ -88,20 +91,31 @@ Flow Control
 Gambit Command Language also contains mechanisms which allow flow control 
 within a program in one of three manners.
 
-While[BOOLEAN, {series of commands}];	Evaluates the BOOLEAN expression or
+While[BOOLEAN, {series of commands}]	Evaluates the BOOLEAN expression or
 					variable.  As long as it evaluates to
 					TRUE, the series of commands are 
 					performed.  Each command must be 
-					followed by a semi-colon.  If the
-					BOOLEAN evaluates to FALSE, the loop
-					ends without performing the commands.
+					followed by a semi-colon or carriage
+					return.  If the BOOLEAN evaluates to 
+					FALSE, the loop ends without performing
+					the commands.
 
-If[BOOLEAN, {series of commands}];	Evaluates the BOOLEAN expression once.
+If[BOOLEAN, {series of commands}]	Evaluates the BOOLEAN expression once.
 					If it evaluates to TRUE, the series of
 					commands are performed.  Each command
-					must be followed by a semi-colon.  If
-					the BOOLEAN evaluates to FALSE, none
-					of the commands are performed.
+					must be followed by a semi-colon or
+					carriage return.  If the BOOLEAN 
+					evaluates to FALSE, none of the 
+					commands are performed.
+
+If{BOOLEAN, {series of commands},	Evaluates the BOOLEAN expression once.
+{series of commands}]			If it evaluates to TRUE, the first 
+					series of commands are performed.  Each
+					command must be followed by a semi-
+					colon or carriage return.  If the 
+					BOOLEAN evaluates to FALSE, the second
+					series of commands are performed.
+	
 
 	NOTE:	The While command functions as a loop.  That is, it continues
 		to perform the series of commands as long as the expression
@@ -123,17 +137,6 @@ value (if any exists) produced by the procedure.
 
 Paremeters enclosed in brackets "{ }" represent optional parameters which
 are not necessary for the procedure to function.
-
-----------
-
-AllLemke[N->NORFORM] =: NORFORM
-
-   -	Description:  Searches for all solutions of the specified normal form
-	problem using the Lemke-Howson algorithm.
-   -	Return value:  Returns the same problem in normal form.
-   -	Required parameters:
-	  *  N:  The problem normal form for which solutions are to be found.
-   -	Optional parameters:  None.
 
 ----------
 
@@ -168,28 +171,29 @@ AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 
 ----------
 
-Car[l->BOOLLIST] =: BOOLEAN
-Car[l->INTLIST] =: INTEGER
-Car[l->RATLIST] =: RATIONAL
-Car[l->TEXTLIST] =: TEXT
+Car[l->LIST(T)] =: T	
 
-   -	Description:  Finds the first element of the specified list.
-   -	Return value:  The first element of the list.
+	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+
+   -	Description:  Finds the first element of the specified list of type T.
+   -	Return value:  Returns a value of type T which is the first element of 
+	the list.
    -	Required parameters:
-	  *  l:  The list on which the procedure is to be performed.
+	  *  l:  The list of type T on which the procedure is to be performed.
    -	Optional parameters:  None.
 
 ----------
 
-Cdr[l->BOOLLIST] =: BOOLLIST
-Cdr[l->INTLIST] =: INTLIST
-Cdr[l->RATLIST] =: RATLIST
-Cdr[l->TEXTLIST] =: TEXTLIST
+Cdr[l->LIST(T)] =: LIST(T)
 
-   -	Description:  Deletes the first element of the specified list.
-   -	Return value:  The list minus the first element.
+	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+
+   -	Description:  Deletes the first element of the specified list of type 
+	T.
+   -	Return value:  A list of type T which is the specified list minus its
+	first element.
    -	Required parameters:
-	  *  l:  The list on which the procedure is to be performed.
+	  *  l:  The list of type T on which the procedure is to be performed.
    -	Optional parameters:  None.
 
 ----------
@@ -210,17 +214,16 @@ Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
 
 ----------
 
-Contains[e->BOOLEAN, l->BOOLLIST] =: BOOLEAN
-Contains[e->INTEGER, l->INTLIST] =: BOOLEAN
-Contains[e->RATIONAL, l->RATLIST] =: BOOLEAN
-Contains[e->TEXT, l->TEXTLIST] =: BOOLEAN
+Contains[e->T, l->LIST(T)] =: BOOLEAN
 
-   -	Description:  Finds whether the specified value is contained in the 
-	indicated list.
+	For T = BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
+
+   -	Description:  Finds whether the specified value of type T is contained 
+	in the indicated list of type T.
    -	Return value:  True when the specified value is contained in the list.
    -	Required parameters:
-	  *  e:  The value to be searched for.
-	  *  l:  The list which is to be searched in.
+	  *  e:  The value of type T to be searched for.
+	  *  l:  The list of type T which is to be searched in.
    -	Optional parameters:  None.
 
 ----------
@@ -326,10 +329,10 @@ DisplayNfg[N->NFG, {sset->INTEGER}]
 
 ----------
 
-EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
+EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
 
    -	Description:  Converts a problem in extensive form to the same problem
-	as a normal form game.
+	as a reduced normal form game.
    -	Return value:  The new normal form game.  
    -	Required parameters:
 	  *  E:  The problem in extensive form to be converted to extensive 
@@ -351,35 +354,11 @@ ElapsedTime[] =: RATIONAL
 
 ----------
 
-ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}, {output->TEXT}] 
-	=: INTEGER
+ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
+	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
 
-   -	Description:  Iteratively eliminates dominated strategies for all 
-	players.
-   -	Return value:  The number of the new strategy set.  The original full
-	strategy set is numbered 1.  Each iteration creates a new strategy set
-	with an integer value one greater than that of the previous strategy 
-	set.  Therefore, if no dominated strategies are found, the return value
-	is equal to 1.
-   -	Required parameters:
-	  *  N:  The problem in normal form for which dominated strategies are
-	     to be eliminated.
-   -	Optional parameters:
-	  *  strong:  Determines the type of dominance used.  The default value
-	     is False, which signifies that weak dominance is used.  If 
-	     `strong` is specified to be True, strong dominance is used.  
-	  *  time:  Returns the elapsed time for the operation.
-	  *  output:  Redirects the output of the procedure to a specified 
-	     file.  Directing output to ``/dev/null'' under Unix turns output
-	     off.  By default, it directs output to the screen.
-
-----------
-
-ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
-	{output->TEXT}] =: INTEGER
-
-   -	Description:  Performs one iteration of eliminating dominated 
-	strategies for the list of players specified.  
+   -	Description:  Performs iterated (unless otherwise specified) deletion 
+	of dominated strategies for the list of players specified.  
    -	Return value:  The number of the new strategy set.  The original full
 	strategy set is numbered 1.  Each iteration creates a new strategy set
 	with an integer value one greater than that of the previous strategy 
@@ -398,10 +377,15 @@ ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 	  *  output:  Redirects the output of the procedure to a specified 
 		file.  Directing output to ``/dev/null'' under Unix turns 
 		output off.  By default, it directs output to the screen.
+	  *  NIT:  The number of iterations to be performed by the procedure.
+		If not specified, it has a default value of zero which means 
+		that all dominated strategies are iteratively deleted.
 
 ----------
 
 Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
+
+	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
    -	Description:  Determines whether or not all the elements of the two
 	lists are equal.
@@ -428,7 +412,7 @@ GetActionName[n->NODE, br->INTEGER] =: TEXT
 
 ----------
 
-GetActionProbs[n->NODE] =: RATLIST
+GetActionProbs[n->NODE] =: LIST(RATIONAL)
 
    -	Description:  Finds the vector of probabilities for the actions at the
 	specified node.  This is only meaninful for nodes in information sets 
@@ -481,7 +465,7 @@ GetNextSibling[n->NODE] =: NODE
 
 ----------
 
-GetOutcome[E->EXTFORM, outc->INTEGER] =: RATLIST
+GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
 
    -	Description:  Finds the vector of payoffs to the players for the 
 	outcome with the indicated number in the specified problem in extensive
@@ -498,7 +482,7 @@ GetOutcome[E->EXTFORM, outc->INTEGER] =: RATLIST
 
 ---------
 
-GetOutcomeName[E->EXTFORM, outc->INTEGER] =: TEXT
+GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
 
    -	Description:  Finds the name of the specified outcome in the indicated
 	problem in extensive form.  If the outcome is not defined, an error is
@@ -514,7 +498,7 @@ GetOutcomeName[E->EXTFORM, outc->INTEGER] =: TEXT
 
 ----------
 
-GetPlayerName[E->EXTFORM, pl->INTEGER] =: TEXT
+GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
 
    -	Description:  Finds the name of the indicated player in the given 
 	problem in extensive form.
@@ -558,7 +542,7 @@ GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
 
 ----------
 
-GetTitle[E->EXTFORM] =: TEXT
+GetTitle[E->EFG] =: TEXT
 
    -	Description:  Finds the title of the indicated problem in extensive 
 	form.
@@ -570,7 +554,7 @@ GetTitle[E->EXTFORM] =: TEXT
 
 ----------
 
-Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
+Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsDFP->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, {output->TEXT}] =: INTEGER
@@ -626,20 +610,6 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	  *  type:  XXXX .
 	  *  delp:  XXXX .
 	  *  tol:  XXXX .
-
-----------
-
-HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
-
-   -	Description:  Finds whether or not the specified problem in extensive 
-	form contains an outcome with the given number.  
-   -	Return value:  True only when there exists an outcome with the given 
-	number in the specified problem.  Returns False otherwise.
-   -	Required parameters:
-	  *  E:  The problem in extensive form which is to be searched for the
-		outcome.
-	  *  outc:  The number of the outcome which is to be searched for.
-   -	Optional parameters:  None.
 
 ----------
 
@@ -765,27 +735,31 @@ LeaveInfoset[n->NODE] =: NODE
 
 ----------
 
-Lemke[N->NORFORM] =: NORFORM
+Lemke[N->NFG, {nequilib->INTEGER}] =: LIST(MIXED)
 
    -	Descprition:  Searches for one solution of the specified normal form 
 	game specified using the Lemke-Howson algorithm.  
-   -	Return value:  The same problem in normal form.	
+   -	Return value:  The list of solutions found.
    -	Required parameters:
 	  *  N:  The problem in normal form for which the solution is to be 
 		searched.
-   -	Optional parameters:  None.
+   -	Optional parameters: 
+	  *  nequilib:  Specifies the number of equilibria to find.  If not
+		given the default value is zero, which means that all 
+		equilibria are to be found.
 
 ----------
 
-Length[l->BOOLLIST] =: INTEGER
-Length[l->INTLIST] =: INTEGER
-Length[l->RATLIST] =: INTEGER
-Length[l->TEXTLIST] =: INTEGER
+Length[l->LIST(T)] =: INTEGER
 
-   -	Description:  Finds the number of elements in the specified list.
+	For T = BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+
+   -	Description:  Finds the number of elements in the specified list of 
+	type T.
    -	Return value:  The number of elements found in the list.
    -	Required parameters:
-	  *  l:  The list for which the number of elements is to be found.
+	  *  l:  The list of type T for which the number of elements is to be 
+		found.
    -	Optional parameters:  None.
 
 ----------
@@ -793,11 +767,11 @@ Length[l->TEXTLIST] =: INTEGER
 Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
 	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsDFP->RATIONAL},
 	{maxitsBrent->RATIONAL}, {tolDFP->RATIONAL}, {tolBrent->RATIONAL},
-	{time<->RATIONAL}] =: INTEGER
+	{time<->RATIONAL}] =: LIST(MIXED)
 
    -	Description:  Searches for equilibria of the specified problem in 
 	normal form using the Liapunov algorithm.
-   -	Return value:  XXXX.
+   -	Return value:  Returns the list of solutions found.
    -	Required parameters
 	  *  N:  The problem in normal form for which the Liapunov solution is 
 		to be found.
@@ -855,7 +829,7 @@ NameOf[n->NODE] =: TEXT
 
 ----------
 
-NewEfg[] =: EXTFORM
+NewEfg[] =: EFG
 
    -	Description:  Allocates and returns a new extensive form game.
    -	Return value:  The newly allocated problem in extensive form.
@@ -864,7 +838,7 @@ NewEfg[] =: EXTFORM
 
 ----------
 
-NewOutcome[E->EXTFORM, {outc->INTEGER}] =: INTEGER
+NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 
    -	Description:  Creates and assigns a number to a new outcome within the
 	specified problem in extensive form.  
@@ -911,7 +885,7 @@ NumChildren[n->NODE] := INTEGER
 
 ----------
 
-NumInfosets[E->EXTFORM, pl->INTEGER] =: INTEGER
+NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
 
    -	Description:  Finds the number of information sets belonging to the
 	specified player in the given problem in extensive form.
@@ -927,7 +901,7 @@ NumInfosets[E->EXTFORM, pl->INTEGER] =: INTEGER
 
 ----------
 
-NumNodes[E->EXTFORM] =: INTEGER
+NumNodes[E->EFG] =: INTEGER
 
    -	Description:  Finds the number of nodes (including terminal nodes) in 
 	the specified problem in extensive form.
@@ -939,7 +913,7 @@ NumNodes[E->EXTFORM] =: INTEGER
 
 ----------
 
-NumOutcomes[E->EXTFORM] =: INTEGER
+NumOutcomes[E->EFG] =: INTEGER
 
    -	Description:  Finds the number of outcomes in the specified problem in
 	extensive form.
@@ -950,7 +924,7 @@ NumOutcomes[E->EXTFORM] =: INTEGER
    -	Optional parameters:  None.
 
 
-NumOutcomes[N->NORFORM] =: INTEGER
+NumOutcomes[N->NFG] =: INTEGER
 
    -	Description:  Finds the number of outcomes in the specified problem in
 	normal form.
@@ -962,7 +936,7 @@ NumOutcomes[N->NORFORM] =: INTEGER
 
 ----------
 
-NumPlayers[E->EXTFORM] =: INTEGER
+NumPlayers[E->EFG] =: INTEGER
 
    -	Description:  Finds the number of players in the specified problem in
 	extensive form.
@@ -1028,7 +1002,7 @@ PlayerOf[n->NODE] =: INTEGER
 
 ----------
 
-PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
+PureNash[N->NFG, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	 =: INTEGER
 
    -	Description:  Finds the weak pure strategy Nash equilibria in the 
@@ -1058,7 +1032,7 @@ Quit
 
 ----------
 
-RandomNfg[dim->INTLIST, {seed->INTEGER}] =: NORFORM
+RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}] =: NFG
 
    -	Description:  Constructs a random new problem in normal form with the 
 	specified dimensionality.
@@ -1070,7 +1044,7 @@ RandomNfg[dim->INTLIST, {seed->INTEGER}] =: NORFORM
 
 ----------
 
-ReadEfgFile[file->TEXT] =: EXTFORM
+ReadEfgFile[file->TEXT] =: EFG
 
    -	Description:  Creates a new problem whose contents are the extensive 
 	form game stored in the specified file.
@@ -1083,7 +1057,7 @@ ReadEfgFile[file->TEXT] =: EXTFORM
 
 ----------
 
-ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NORFORM
+ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NFG
 
    -	Description:  Creates a new problem whose contents are the normal form
 	game stored in the specified file.  The file is read as a floating-
@@ -1100,7 +1074,7 @@ ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NORFORM
 
 ----------
 
-RemoveOutcome[E->EXTFORM, outc->INTEGER] =: EXTFORM
+RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
 
    -	Description:  Removes the specified outcome from the given problem in
 	extensive form.  All nodes with the specified outcome attached are 
@@ -1120,7 +1094,7 @@ RemoveOutcome[E->EXTFORM, outc->INTEGER] =: EXTFORM
 
 ----------
 
-RootNode[E->EXTFORM, {game->INTEGER}] =: NODE
+RootNode[E->EFG, {game->INTEGER}] =: NODE
 
    -	Description:  Finds the root node of specified game in the given 
 	problem in extensive form.  If a game is not specified, the first game 
@@ -1162,7 +1136,7 @@ SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
 
 ----------
 
-SetActionProbs[n->NODE, probs->RATLIST] =: NODE
+SetActionProbs[n->NODE, probs->LIST(RATIONAL)] =: NODE
 
    -	Description:  Sets the action probabilities to the specified values 
 	for the given node.  This is only meaninful for nodes in information
@@ -1202,8 +1176,8 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 
 ----------
 
-SetOutcome[E->EXTFORM, outc->INTEGER, value->INTLIST] =: EXTFORM
-SetOutcome[E->EXTFORM, outc->INTEGER, value->RATLIST] =: EXTFORM
+SetOutcome[E->EFG, outc->INTEGER, value->LIST(INTEGER)] =: EFG
+SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
 
    -	Description:  Sets the value of the indicated outcome in the give 
 	problem in extensive form, to the values in the specified vector.
@@ -1221,8 +1195,8 @@ SetOutcome[E->EXTFORM, outc->INTEGER, value->RATLIST] =: EXTFORM
    -	Optional parameters:  None.
 
 
-SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->INTEGER] =: EXTFORM
-SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EXTFORM
+SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->INTEGER] =: EFG
+SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
 
    -	Description:  Sets the payoff to the player specified for the indicated
 	outcome in the given problem in extensive form to the given value.
@@ -1240,7 +1214,7 @@ SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EXTFORM
 
 ----------
 
-SetOutcomeName[E->EXTFORM, outc->INTEGER, name->TEXT] =: EXTFORM
+SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
 
    -	Description:  Assigns to the outcome with the specified number the 
 	given title.
@@ -1255,7 +1229,7 @@ SetOutcomeName[E->EXTFORM, outc->INTEGER, name->TEXT] =: EXTFORM
 
 ----------
 
-SetPlayerName[E->EXTFORM, pl->INTEGER, name->TEXT] =: EXTFORM
+SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
 
    -	Description:  Assigns to the player with the specified number the given
 	name.
@@ -1286,7 +1260,7 @@ SetStratName[N->NFG, pl->INTEGER, st->INTEGER, name->TEXT] =: NFG
 
 ----------
 
-SetTitle[E->EXTFORM, title->TEXT] =: EXTFORM
+SetTitle[E->EFG, title->TEXT] =: EFG
 
    -	Description:  Assigns the specified title to the given problem in 
 	extensive form.
@@ -1340,7 +1314,7 @@ StopWatch[] =: INTEGER
 
 ----------
 
-WriteEfgFile[E->EXTFORM, file->TEXT] =: EXTFORM
+WriteEfgFile[E->EFG, file->TEXT] =: EFG
 
    -	Description:  Writes the given extensive form problem to the specified 
 	file.  
@@ -1353,7 +1327,7 @@ WriteEfgFile[E->EXTFORM, file->TEXT] =: EXTFORM
 
 ----------
 
-WriteNfgFile[N->NORFORM, file->TEXT] =: NORFORM
+WriteNfgFile[N->NFG, file->TEXT] =: NFG
 
    -	Description:  Writes the given normal form problem to the specified 
 	file.  
