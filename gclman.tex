@@ -162,7 +162,7 @@ The built-in data types for the GCL are the following:
 
 \begin{tabular} {|l||l|} \hline
 Type name	& Description \\ \hline
-{\tt BOOL} 	& boolean \\
+{\tt BOOLEAN} 	& boolean \\
 {\tt INTEGER} 	& integer \\ 
 {\tt FLOAT} 	& floating-point number \\
 {\tt RATIONAL} 	& rational number with arbitrary precision \\
@@ -188,14 +188,14 @@ Type name	& Description \\ \hline
 \medskip
 
 The remainder of this section details the rules concerning the types
-{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
+{\tt BOOLEAN}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
 {\tt INPUT} and {\tt OUTPUT}, as well as general rules for typing.
 The extensive form and normal form types, and their related types, are
 detailed later in special sections.
 
 \subsubsection{Boolean}
 
-The {\tt BOOL} type represents boolean values, that is to say, ``true'' and
+The {\tt BOOLEAN} type represents boolean values, that is to say, ``true'' and
 ``false''.  The command language predefines two constant values to
 represent these, {\tt True} and {\tt False}.
 
@@ -963,7 +963,7 @@ variables.  After the last statement,
 \verb+i+ is an \verb+INTEGER+ with value \verb+25+, 
 \verb+r+ is a \verb+RATIONAL+ with value \verb+1/3+, 
 \verb+t+ is a \verb+TEXT+ with value \verb+"This is a text string!"+, 
-\verb+b+ is a \verb+BOOL+ with value \verb+False+, 
+\verb+b+ is a \verb+BOOLEAN+ with value \verb+False+, 
 \verb+f+ is a \verb+FLOAT+ with value \verb+3.14159+, 
 \verb+l+ is a \verb+LIST(LIST(INTEGER))+ with value \verb+{{1,0},{0,1}}+, and 
 \verb+x+ is a \verb+LIST(INTEGER)+ with value \verb+{1,2,3,4,5}+.  
@@ -1389,7 +1389,7 @@ prior to version 0.92.
 
 \begin{verbatim}
 Concat[x->LIST(T), y->LIST(T)] =: LIST(T)
-Contains[list->LIST(T), x->T] =: BOOL
+Contains[list->LIST(T), x->T] =: BOOLEAN
 Length[list->LIST(T)] =: INTEGER
 NthElement[list->LIST(T),n->INTEGER] =: T 
 Remove[list->LIST(T), n->INTEGER] =: LIST(T)
@@ -1403,11 +1403,11 @@ prior to version 0.92.
 
 \begin{verbatim}
 Concat[x->TEXT, y->TEXT] =: TEXT
-Greater[x->TEXT, y->TEXT] =: BOOL
-GreaterEqual[x->TEXT, y->TEXT] =: BOOL
+Greater[x->TEXT, y->TEXT] =: BOOLEAN
+GreaterEqual[x->TEXT, y->TEXT] =: BOOLEAN
 NumChars[text->TEXT] =: INTEGER
-Less[x->TEXT, y->TEXT] =: BOOL
-LessEqual[x->TEXT, y->TEXT] =: BOOL
+Less[x->TEXT, y->TEXT] =: BOOLEAN
+LessEqual[x->TEXT, y->TEXT] =: BOOLEAN
 NthChar[text->TEXT, n->INTEGER] =: TEXT
 \end{verbatim}
 
@@ -1420,15 +1420,16 @@ LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
 Read[input->INPUT, x<->T] =: INPUT  
-      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
+      for T = BEHAV,BOOLEAN,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
-SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
-                {quote->BOOL}, {listBraces->BOOL},
-                {listCommas->BOOL}, {listLF->INTEGER},
-                {listIndent->INTEGER} ] := BOOL
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOLEAN},
+                {quote->BOOLEAN}, {listBraces->BOOLEAN},
+                {listCommas->BOOLEAN}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOLEAN
 Write[output->OUTPUT, x->T] =: OUTPUT  
-      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
+      for T = BEHAV,BOOLEAN,EFSUPPORT,FLOAT,INTEGER,
+              NFSUPPORT,MIXED,RATIONAL,STRATEGY,TEXT,LIST(T)
 Write[output->OUTPUT, x<->T] =: OUTPUT 
       for T = EFG, NFG
 \end{verbatim}
@@ -1436,11 +1437,11 @@ Write[output->OUTPUT, x<->T] =: OUTPUT
 \subsection{Logic}
 
 \begin{verbatim}
-And[x->BOOL, y->BOOL] =: BOOL
-Equal[x->T, y->T] =: BOOL
-Not[x->BOOL] =: BOOL
-NotEqual[x->T, y->T] =: BOOL
-Or[x->BOOL, y->BOOL] =: BOOL
+And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
+Equal[x->T, y->T] =: BOOLEAN
+Not[x->BOOLEAN] =: BOOLEAN
+NotEqual[x->T, y->T] =: BOOLEAN
+Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim}
 
 \subsection{Arithmetic}
@@ -1453,14 +1454,14 @@ Divide[x->T, y->T] =: T
 Dot[x->LIST(T), y->LIST(T)] =: T
        for T = FLOAT, INTEGER, RATIONAL
 Exp[x->FLOAT] =: FLOAT
-Greater[x->T, y->T] =: BOOL
+Greater[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
-GreaterEqual[x->T, y->T] =: BOOL
+GreaterEqual[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
-Less[x->T, y->T] =: BOOL
+Less[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
-LessEqual[x->FLOAT, y->FLOAT] =: BOOL
+LessEqual[x->FLOAT, y->FLOAT] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 Log[x->FLOAT] =: FLOAT
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
@@ -1494,7 +1495,7 @@ AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
 CopyTree[from->NODE, to->NODE] =: NODE
 DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
 DeleteNode[node->NODE, keep->NODE] =: NODE
-DeleteOutcome[outc->OUTCOME] =: BOOL
+DeleteOutcome[outc->OUTCOME] =: BOOLEAN
 DeleteTree[node->NODE] =: NODE
 DetachOutcome[node->NODE] =: NODE
 InsertAction[infoset->INFOSET, at->ACTION] =: ACTION
@@ -1503,11 +1504,11 @@ JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 LeaveInfoset[node->NODE] =: INFOSET
 MarkSubgames[efg<->EFG] =: LIST(NODE)
 MarkSubgames[node->NODE] =: LIST(NODE)
-MarkThisSubgame[node->NODE] =: BOOL
+MarkThisSubgame[node->NODE] =: BOOLEAN
 MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET
 MoveTree[from->NODE, to->NODE] =: NODE
-NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
+NewEfg[{rational->BOOLEAN}, {players->LIST(TEXT)}] =: EFG
 NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
            {name->TEXT}] =: INFOSET
 NewInfoset[player->EFPLAYER, actions->INTEGER,
@@ -1539,7 +1540,7 @@ UnmarkThisSubgame[node->NODE] =: NODE
 
 \begin{verbatim}
 AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
-NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
+NewNfg[dim->LIST(INTEGER), {rational->BOOLEAN}] =: NFG
 RandomNfg[nfg<->NFG, {seed->INTEGER}] =: NFG
 RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT
 SetName[x<->NFG, name->TEXT] =: NFG
@@ -1551,25 +1552,34 @@ Support[nfg<->NFG] =: NFSUPPORT
 \subsection{Mixed and Behavior Strategies}
 
 \begin{verbatim}
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(FLOAT)
+ActionValues[strategy->BEHAV, 
+             infoset->INFOSET] =: LIST(RATIONAL)
 Behav[efg<->EFG | support->EFSUPPORT, 
       {list->LIST(LIST(LIST(FLOAT)))}] =: BEHAV
 Behav[efg<->EFG | support->EFSUPPORT, 
       {list->LIST(LIST(LIST(RATIONAL)))}] =: BEHAV
 Behav[mixed->MIXED] =: BEHAV
+Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
 GobitLambda[x->BEHAV(T) | MIXED(T)] =: T
 GobitValue[x->BEHAV(T) | MIXED(T)] =: T
 Gripe[behav->BEHAV(T)] =: LIST(LIST(LIST(T)))
 Gripe[mixed->BEHAV(T)] =: LIST(LIST(T))
-IsNash[strategy->MIXED] =: BOOL
-IsNash[strategy->BEHAV] =: BOOL
-IsPerfect[strategy->MIXED] =: BOOL
-IsProper[strategy->MIXED] =: BOOL
-IsSequential[strategy->BEHAV] =: BOOL
-IsSubgamePerfect[strategy->BEHAV] =: BOOL
-IsntPerfect[strategy->MIXED] =: BOOL
-IsntProper[strategy->MIXED] =: BOOL
-IsntSequential[strategy->BEHAV] =: BOOL
-IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+InfosetProbs[strategy->BEHAV] =: LIST(FLOAT)
+InfosetProbs[strategy->BEHAV] =: LIST(RATIONAL)
+IsNash[strategy->MIXED] =: BOOLEAN
+IsNash[strategy->BEHAV] =: BOOLEAN
+IsPerfect[strategy->MIXED] =: BOOLEAN
+IsProper[strategy->MIXED] =: BOOLEAN
+IsSequential[strategy->BEHAV] =: BOOLEAN
+IsSubgamePerfect[strategy->BEHAV] =: BOOLEAN
+IsntNash[strategy->MIXED] =: BOOLEAN
+IsntNash[strategy->BEHAV] =: BOOLEAN
+IsntPerfect[strategy->MIXED] =: BOOLEAN
+IsntProper[strategy->MIXED] =: BOOLEAN
+IsntSequential[strategy->BEHAV] =: BOOLEAN
+IsntSubgamePerfect[strategy->BEHAV] =: BOOLEAN
 LiapValue[strategy->BEHAV(T) | MIXED(T)] =: T
 ListForm[behav->BEHAV] =: LIST(LIST(LIST(T)))
 ListForm[mixed->MIXED] =: LIST(LIST(T))
@@ -1577,8 +1587,15 @@ Mixed[nfg<->NFG, list->LIST(LIST(FLOAT))] =: MIXED
 Mixed[nfg<->NFG, list->LIST(LIST(RATIONAL))] =: MIXED
 Mixed[support->NFSUPPORT, {list->LIST(LIST(FLOAT))}] =: MIXED
 Mixed[support->NFSUPPORT, {list->LIST(LIST(RATIONAL))}] =: MIXED
+NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(FLOAT)
+NodeValues[strategy->BEHAV, player->EFPLAYER] =: LIST(RATIONAL)
+Payoff[strategy->BEHAV] =: LIST(T)
+Payoff[strategy->MIXED] =: LIST(T)
+RealizProbs[strategy->BEHAV(T)] =: LIST(T)
 SetComponent[mixed<->MIXED, player->PLAYER, list->LIST(T)] =: MIXED 
 SetComponent[behav<->BEHAV, infoset->INFOSET, list->LIST(T)] =: BEHAV 
+Support[strategy->MIXED] =: NFSUPPORT
+Support[strategy->BEHAV] =: EFSUPPORT
 \end{verbatim}
 
 \subsection{Conversions}
@@ -1607,28 +1624,28 @@ Text[x->TEXT] =: TEXT
 \subsection{Solving and analyzing games}
 
 \begin{verbatim}
-ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOLEAN}, 
         {time<->FLOAT} =: NFSUPPORT
-ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOLEAN}, 
         {time<->FLOAT} =: NFSUPPORT
-EnumMixedSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-EnumPureSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+EnumPureSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
               {time<->FLOAT}] =: LIST(BEHAV)
 EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
 GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
            {minLam->FLOAT}, {maxLam->FLOAT},
            {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {fullGraph->BOOLEAN}, {maxitsN->INTEGER}, {tolN->FLOAT},
            {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
            {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
 GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
            {minLam->FLOAT}, {maxLam->FLOAT},
            {delLam->FLOAT}, {powLam->INTEGER},
-           {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+           {fullGraph->BOOLEAN}, {maxitsN->INTEGER}, {tolN->FLOAT},
            {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
            {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
 GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
@@ -1636,11 +1653,11 @@ GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
               {delLam->FLOAT}, {powLam->INTEGER}, 
               {delp->FLOAT}, {tol->FLOAT},
               {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LcpSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOL},
+LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOLEAN},
           {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
@@ -1664,21 +1681,23 @@ SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 
 \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION)
-Beliefs[strategy<->BEHAV(T)] =: LIST(LIST(LIST((T)))
 Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
-HasOutcome[node->NODE] =: BOOL
+HasOutcome[node->NODE] =: BOOLEAN
 Help[x->TEXT] =: LIST(TEXT)
 HelpVars[x->TEXT] =: LIST(TEXT)
 Infoset[node->NODE] =: INFOSET
 Infosets[player->EFPLAYER] =: LIST(INFOSET)
-IsPredecessor[node->NODE, of->NODE] =: BOOL
-IsRoot[node->NODE] =: BOOL
-IsSuccessor[node->NODE, from->NODE] =: BOOL
+IsConstSum[efg<->EFG] =: BOOLEAN
+IsConstSum[nfg<->NFG] =: BOOLEAN
+IsPerfectRecall[efg<->EFG] =: BOOLEAN
+IsPredecessor[node->NODE, of->NODE] =: BOOLEAN
+IsRoot[node->NODE] =: BOOLEAN
+IsSuccessor[node->NODE, from->NODE] =: BOOLEAN
 LastAction[node->NODE] =: ACTION
-Manual[x->TEXT,{y->OUTPUT}] =: BOOL
+Manual[x->TEXT,{y->OUTPUT}] =: BOOLEAN
 Members[infoset->INFOSET] =: LIST(NODE)
 Name[x->ACTION] =: TEXT
 Name[x<->EFG] =: TEXT
@@ -1706,17 +1725,12 @@ Outcome[node->NODE] =: OUTCOME
 Outcomes[efg<->EFG] =: LIST(OUTCOME)
 Parent[node->NODE] =: NODE
 Payoff[outcome->OUTCOME] =: LIST(T)
-Payoff[strategy->BEHAV] =: LIST(T)
-Payoff[strategy->MIXED] =: LIST(T)
 Player[infoset->INFOSET] =: EFPLAYER
 Player[node->NODE] =: EFPLAYER
 Players[efg<->EFG] =: LIST(EFPLAYER)
 Players[nfg<->NFG] =: LIST(NFPLAYER)
 PriorSibling[node->NODE] =: NODE
-RealizProbs[strategy->BEHAV(T)] =: LIST(T)
 RootNode[efg<->EFG] =: NODE
-Support[strategy->MIXED] =: NFSUPPORT
-Support[strategy->BEHAV] =: EFSUPPORT
 TerminalNodes[efg<->EFG] =: LIST(NODE)
 Version[] =: FLOAT
 \end{verbatim}
@@ -1725,7 +1739,7 @@ Version[] =: FLOAT
 
 \begin{verbatim}
 ElapsedTime[] =: FLOAT
-IsWatchRunning[] =: BOOL
+IsWatchRunning[] =: BOOLEAN
 StartWatch[] =: FLOAT
 StopWatch[] =: FLOAT
 \end{verbatim}
@@ -1820,7 +1834,7 @@ Returns the agent normal form associated with the extensive form game
 
 \item 
 \protect \large \begin{verbatim}
-And[x->BOOL, y->BOOL] =: BOOL
+And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
@@ -2039,7 +2053,7 @@ and \verb+y+.
 
 \item
 \protect \large \begin{verbatim}
-Contains[list->LIST(T), x->T] =: BOOL
+Contains[list->LIST(T), x->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2108,7 +2122,7 @@ The kept node \verb+keep+ is returned.
 
 \item
 \protect \large \begin{verbatim}
-DeleteOutcome[outcome->OUTCOME] =: BOOL
+DeleteOutcome[outcome->OUTCOME] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2192,7 +2206,7 @@ the stopwatch was running.
 
 \item
 \protect \large \begin{verbatim}
-ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOLEAN}, 
         {time<->FLOAT} =: NFSUPPORT
 \end{verbatim} \normalsize
 
@@ -2205,7 +2219,7 @@ elimination is possible.  Operation and parameters are the same as in
 
 \item
 \protect \large \begin{verbatim}
-ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOLEAN}, 
         {time<->FLOAT} =: NFSUPPORT
 \end{verbatim} \normalsize
 
@@ -2226,7 +2240,7 @@ other {\em pure} strategies are eliminated.)
 
 \item
 \protect \large \begin{verbatim}
-EnumMixedSolve[efg<->EFG, {asNfg->BOOL}, 
+EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, 
                {stopAfter->INTEGER}, {nPivots<->INTEGER}, 
                {time<->FLOAT}] =: LIST(BEHAV)
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, 
@@ -2273,7 +2287,7 @@ item
 
 \item
 \protect \large \begin{verbatim}
-EnumPureSolve[efg<->EFG, {asNfg->BOOL},
+EnumPureSolve[efg<->EFG, {asNfg->BOOLEAN},
         {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 EnumPureSolve[nfg<->NFG | support->NFSUPPORT,
         {stopAfter->INTEGER}, {time<->FLOAT}] =: LIST(MIXED) 
@@ -2304,7 +2318,7 @@ of the algorithm.
 
 \item
 \protect \large \begin{verbatim}
-Equal[x->T, y->T] =: BOOL
+Equal[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2421,13 +2435,13 @@ computed by the GobitSolve[] algorithm.
 GobitSolve[efg<->EFG | start->BEHAV, {pxifile->TEXT},
          {minLam->FLOAT}, {maxLam->FLOAT},
          {delLam->FLOAT}, {powLam->INTEGER},
-         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {fullGraph->BOOLEAN}, {maxitsN->INTEGER}, {tolN->FLOAT},
          {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(BEHAV)
 GobitSolve[nfg<->NFG | start->MIXED, {pxifile->TEXT},
          {minLam->FLOAT}, {maxLam->FLOAT},
          {delLam->FLOAT}, {powLam->INTEGER},
-         {fullGraph->BOOL}, {maxitsN->INTEGER}, {tolN->FLOAT},
+         {fullGraph->BOOLEAN}, {maxitsN->INTEGER}, {tolN->FLOAT},
          {maxits1->INTEGER}, {tol1->FLOAT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -2503,7 +2517,7 @@ computed by the GobitSolve[] algorithm.
 
 \item
 \protect \large \begin{verbatim}
-Greater[x->T, y->T] =: BOOL
+Greater[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
@@ -2518,7 +2532,7 @@ that of \verb+y+.
 
 \item
 \protect \large \begin{verbatim}
-Greater[x->TEXT, y->TEXT] =: BOOL
+Greater[x->TEXT, y->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2532,7 +2546,7 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-GreaterEqual[x->T, y->T] =: BOOL
+GreaterEqual[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
@@ -2547,7 +2561,7 @@ Returns whether the value of \verb+x+ is at least that of
 
 \item
 \protect \large \begin{verbatim}
-GreaterEqual[x->TEXT, y->TEXT] =: BOOL
+GreaterEqual[x->TEXT, y->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2584,7 +2598,7 @@ equilibrium if and only if the gripe vector is identically zero.
 
 \item
 \protect \large \begin{verbatim}
-HasOutcome[node->NODE] =: BOOL
+HasOutcome[node->NODE] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
@@ -2759,18 +2773,20 @@ towards zero.
 
 \item
 \protect \large \begin{verbatim}
-IsConstSum[efg<->EFG] =: BOOL
-IsConstSum[nfg<->NFG] =: BOOL
+IsConstSum[efg<->EFG] =: BOOLEAN
+IsConstSum[nfg<->NFG] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
 Returns whether an extensive form game \verb+efg+ or a normal form
 game \verb+nfg+ game, as appropriate, is constant sum.
+\item
+[See also:] \verb+IsPerfectRecall+.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-IsLegalSubgame[node->NODE] =: BOOL
+IsLegalSubgame[node->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2782,18 +2798,28 @@ Returns whether \verb+node+ is the root of a subgame
 
 \item
 \protect \large \begin{verbatim}
-IsNash[strategy->MIXED] =: BOOL
-IsNash[strategy->BEHAV] =: BOOL
+IsNash[strategy->MIXED] =: BOOLEAN
+IsNash[strategy->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
-\bd 
-Returns whether the mixed or behavior strategy profile
-\verb+strategy+ is a Nash equilibrium of the corresponding game.  
+\bd Returns whether the mixed or behavior strategy profile
+\verb+strategy+ is known by Gambit to be a Nash equilibrium of the
+corresponding game.  If a profile is complete (probabilities sum to
+one for every player, and every information set), then there is a
+definitive test for Nash equilibrium.  However if the profile is
+incomplete (i. e., it does not specify actions at off the equilibrium
+path information sets), then it is possible that a profile (or set
+of all completions of the profile) may be Nash, but \verb+IsNash+
+returns \verb+False+, because it is not known by Gambit to be Nash.
+If the answer is not known to Gambit, then \verb+IsntNash+ should also
+return \verb+False+.
+\item
+[See also:] {\tt IsntNash}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-IsPerfect[strategy->MIXED] =: BOOL
+IsPerfect[strategy->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd 
@@ -2810,7 +2836,21 @@ equilibria, which are marked as such.
 
 \item
 \protect \large \begin{verbatim}
-IsPredecessor[node->NODE, of->NODE] =: BOOL
+IsPerfectRecall[efg<->EFG] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd 
+Returns \verb+True+ if \verb+efg+ is a game of perfect recall, and
+\verb+False+ otherwise.  
+\item
+[See also:] {\tt IsConstSum}.
+\ed
+
+
+
+\item
+\protect \large \begin{verbatim}
+IsPredecessor[node->NODE, of->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2823,7 +2863,7 @@ a node is considered its own predecessor.
 
 \item
 \protect \large \begin{verbatim}
-IsProper[strategy->MIXED] =: BOOL
+IsProper[strategy->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
@@ -2837,7 +2877,7 @@ perfect equilibrium to return \verb+False+.
 
 \item
 \protect \large \begin{verbatim}
-IsRoot[node->NODE] =: BOOL
+IsRoot[node->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2849,7 +2889,7 @@ extensive form.
 
 \item
 \protect \large \begin{verbatim}
-IsSequential[strategy->BEHAV] =: BOOL
+IsSequential[strategy->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd 
@@ -2866,7 +2906,7 @@ form game which is computed via the \verb+LiapSolve+ or
 
 \item
 \protect \large \begin{verbatim}
-IsSubgamePerfect[strategy->BEHAV] =: BOOL
+IsSubgamePerfect[strategy->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the behavior strategy profile
@@ -2882,7 +2922,7 @@ perfect equilibrium.
 
 \item
 \protect \large \begin{verbatim}
-IsSuccessor[node->NODE, from->NODE] =: BOOL
+IsSuccessor[node->NODE, from->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2895,7 +2935,7 @@ a node is considered its own successor.
 
 \item
 \protect \large \begin{verbatim}
-IsWatchRunning[] =: BOOL
+IsWatchRunning[] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -2906,7 +2946,20 @@ Returns whether the system stopwatch is currently running.
 
 \item
 \protect \large \begin{verbatim}
-IsntPerfect[strategy->MIXED] =: BOOL
+IsntNash[strategy->MIXED] =: BOOLEAN
+IsntNash[strategy->BEHAV] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd Returns \verb+True+ if the mixed or behavior strategy profile
+\verb+strategy+ is known by Gambit not to be a Nash equilibrium of the
+corresponding game.  
+\item
+[See also:] {\tt IsNash}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsntPerfect[strategy->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
@@ -2918,7 +2971,7 @@ otherwise.
 
 \item
 \protect \large \begin{verbatim}
-IsntProper[strategy->MIXED] =: BOOL
+IsntProper[strategy->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the mixed strategy profile \verb+strategy+
@@ -2930,7 +2983,7 @@ otherwise.
 
 \item
 \protect \large \begin{verbatim}
-IsntSequential[strategy->BEHAV] =: BOOL
+IsntSequential[strategy->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the behavior strategy profile
@@ -2942,7 +2995,7 @@ equilibrium, and \verb+False+ otherwise.
 
 \item
 \protect \large \begin{verbatim}
-IsntSubgamePerfect[strategy->BEHAV] =: BOOL
+IsntSubgamePerfect[strategy->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Returns \verb+True+ if the behavior strategy profile
@@ -2987,7 +3040,7 @@ the root node of the tree and thus has no such action.
 
 \item
 \protect \large \begin{verbatim}
-LcpSolve[efg<->EFG, {asNfg->BOOL}, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
@@ -3047,7 +3100,7 @@ Returns the number of elements in the list \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-Less[x->T, y->T] =: BOOL
+Less[x->T, y->T] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
@@ -3062,7 +3115,7 @@ Returns whehter the value of \verb+x+ is less than that of
 
 \item
 \protect \large \begin{verbatim}
-Less[x->TEXT, y->TEXT] =: BOOL
+Less[x->TEXT, y->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -3076,7 +3129,7 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LessEqual[x->FLOAT, y->FLOAT] =: BOOL
+LessEqual[x->FLOAT, y->FLOAT] =: BOOLEAN
        for T = FLOAT, INTEGER, RATIONAL
 \end{verbatim}\normalsize
 
@@ -3091,7 +3144,7 @@ of \verb+y+.
 
 \item
 \protect \large \begin{verbatim}
-LessEqual[x->TEXT, y->TEXT] =: BOOL
+LessEqual[x->TEXT, y->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -3105,7 +3158,7 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOL},
+LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOLEAN},
           {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
@@ -3272,7 +3325,7 @@ reduced normal form for computation of equilibrium.
 
 \item
 \protect \large \begin{verbatim}
-Manual[x->TEXT,{y->OUTPUT}] =: BOOL
+Manual[x->TEXT,{y->OUTPUT}] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd Writes the manual entry for \verb+x+ to the output stream
@@ -3301,7 +3354,7 @@ subgames after the operation.
 
 \item
 \protect \large \begin{verbatim}
-MarkThisSubgame[node->NODE] =: BOOL
+MarkThisSubgame[node->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -3426,7 +3479,7 @@ Returns $-x$.
 
 \item
 \protect \large \begin{verbatim} 
-NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
+NewEfg[{rational->BOOLEAN}, {players->LIST(TEXT)}] =: EFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3474,7 +3527,7 @@ information set is returned.
 
 \item
 \protect \large \begin{verbatim}
-NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
+NewNfg[dim->LIST(INTEGER), {rational->BOOLEAN}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3578,7 +3631,7 @@ game \verb+efg+ in prefix-traversal order of the tree.
 
 \item
 \protect \large \begin{verbatim}
-Not[x->BOOL] =: BOOL
+Not[x->BOOLEAN] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -3589,7 +3642,7 @@ Returns the boolean inverse of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-NotEqual[x->T, y->T] =: BOOL
+NotEqual[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -3770,7 +3823,7 @@ for \verb+player+ in that support is returned instead.
 
 \item 
 \protect \large \begin{verbatim}
-Or[x->BOOL, y->BOOL] =: BOOL
+Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
   
 \bd
@@ -4051,7 +4104,7 @@ to {\tt RATIONAL}.
 \item
 \protect \large \begin{verbatim}
 Read[input->INPUT, x<->T] =: INPUT  
-      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
+      for T = BEHAV,BOOLEAN,FLOAT,INTEGER,MIXED,
               RATIONAL,TEXT,LIST(T)
 \end{verbatim}\normalsize
 
@@ -4231,10 +4284,10 @@ player.  Returns \verb+infoset+.
 
 \item
 \protect \large \begin{verbatim}
-SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
-                {quote->BOOL}, {listBraces->BOOL},
-                {listCommas->BOOL}, {listLF->INTEGER},
-                {listIndent->INTEGER} ] := BOOL
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOLEAN},
+                {quote->BOOLEAN}, {listBraces->BOOLEAN},
+                {listCommas->BOOLEAN}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOLEAN
 \end{verbatim}\normalsize
 
 \bd Sets the formatting style for output on output streams.  The
@@ -4317,7 +4370,7 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
-SimpDivSolve[efg<->EFG, {asNfg->BOOL}, 
+SimpDivSolve[efg<->EFG, {asNfg->BOOLEAN}, 
        {stopAfter->INTEGER}, {nRestarts->INTEGER}, 
        {leashLength->INTEGER}, {nEvals<->INTEGER}, 
        {time<->FLOAT}] =: LIST(BEHAV)
@@ -4582,8 +4635,8 @@ See the section on control structures for complete information.
 \item
 \protect \large \begin{verbatim}
 Write[output->OUTPUT, x->T] =: OUTPUT  
-      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
-              RATIONAL,TEXT,LIST(T)
+      for T = BEHAV,BOOLEAN,EFSUPPORT,FLOAT,INTEGER,
+              NFSUPPORT,MIXED,RATIONAL,STRATEGY,TEXT,LIST(T)
 Write[output->OUTPUT, x<->T] =: OUTPUT 
       for T = EFG, NFG
 \end{verbatim}\normalsize
@@ -5243,7 +5296,7 @@ i:=1;
 While[i<=NumPlayers[e] && p != list[[i]],i:=i+1;];
 i;]
 
-NewFunction[MultiStageChainStore[ efg<->EFG, node->NODE, strong->BOOL, list->LIST],
+NewFunction[MultiStageChainStore[ efg<->EFG, node->NODE, strong->BOOLEAN, list->LIST],
 // build tree
 inc_iset:=list[[1]];
 ent_iset:=list[[2]];
