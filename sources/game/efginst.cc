@@ -41,8 +41,11 @@ template class gBlock<gbt_efg_infoset_rep *>;
 template class gArray<gbtEfgInfoset>;
 template class gBlock<gbtEfgInfoset>;
 
-template class gArray<Node *>;
-template class gBlock<Node *>;
+template class gArray<gbt_efg_node_rep *>;
+template class gBlock<gbt_efg_node_rep *>;
+
+template class gArray<gbtEfgNode>;
+template class gBlock<gbtEfgNode>;
 
 template class gArray<gbt_efg_action_rep *>;
 template class gBlock<gbt_efg_action_rep *>;
@@ -67,7 +70,7 @@ class EFActionArray;
 template class gArray<EFActionSet *>;
 template class gArray<EFActionArray *>;
 
-template class gList<Node *>;
+template class gList<gbtEfgNode>;
 template class gList<gbtEfgAction>;
 template class gList<gbtEfgInfoset>;
 

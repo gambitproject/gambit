@@ -29,7 +29,7 @@
 
 class dialogEditNode : public wxDialog {
 private:
-  Node *m_node;
+  gbtEfgNode m_node;
   wxTextCtrl *m_nodeName;
   wxCheckBox *m_markedSubgame;
   wxChoice *m_outcome, *m_infoset;
@@ -37,7 +37,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditNode(wxWindow *p_parent, Node *p_node);
+  dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName(void) const { return m_nodeName->GetValue(); }

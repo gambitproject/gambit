@@ -38,6 +38,50 @@ class Lexicon;
 
 template <class T> class BehavAssessment;
 
+class gbtEfgNode {
+friend class efgGame;
+friend class Lexicon;
+protected:
+  struct gbt_efg_node_rep *rep;
+
+public:
+  gbtEfgNode(void);
+  gbtEfgNode(gbt_efg_node_rep *);
+  gbtEfgNode(const gbtEfgNode &);
+  ~gbtEfgNode();
+
+  gbtEfgNode &operator=(const gbtEfgNode &);
+
+  bool operator==(const gbtEfgNode &) const;
+  bool operator!=(const gbtEfgNode &) const;
+
+  bool IsNull(void) const;
+  int GetId(void) const;
+  efgGame *GetGame(void) const;
+  gText GetLabel(void) const;
+  void SetLabel(const gText &);
+
+  int NumChildren(void) const;
+  int NumberInInfoset(void) const;
+  gbtEfgInfoset GetInfoset(void) const;
+  bool IsTerminal(void) const { return (NumChildren() == 0); }
+  bool IsNonterminal(void) const { return !IsTerminal(); }
+  gbtEfgPlayer GetPlayer(void) const;
+  gbtEfgAction GetAction(void) const; // returns null if root node
+  gbtEfgNode GetChild(int i) const;
+  gbtEfgNode GetChild(const gbtEfgAction &) const; 
+  gbtEfgNode GetParent(void) const;
+  gbtEfgNode GetSubgameRoot(void) const;
+  gbtEfgNode NextSibling(void) const;
+  gbtEfgNode PriorSibling(void) const;
+
+  gbtEfgOutcome GetOutcome(void) const;
+  void SetOutcome(const gbtEfgOutcome &);
+};
+
+gOutput &operator<<(gOutput &, const gbtEfgNode &);
+
+#ifdef UNUSED
 class Node    {
   friend class efgGame;
   friend class BehavProfile<double>;
@@ -70,7 +114,7 @@ class Node    {
     int NumChildren(void) const    { return children.Length(); }
     int GetId(void) const { return number; }
     int NumberInInfoset(void) const;
-    gbtEfgInfoset GetInfoset(void) const;
+    gbtEfgNode GetInfoset(void) const;
     bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
     gbtEfgPlayer GetPlayer(void) const;
@@ -88,6 +132,7 @@ class Node    {
     gbtEfgOutcome GetOutcome(void) const;
     void SetOutcome(const gbtEfgOutcome &);
 };
+#endif  // UNUSED
 
 #endif   // NODE_H
 

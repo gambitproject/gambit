@@ -29,18 +29,18 @@
 
 class dialogEfgDelete : public wxDialog {
 private:
-  Node *m_node;
+  gbtEfgNode m_node;
   wxRadioBox *m_deleteTree;
   wxListBox *m_branchList;
 
   void OnDeleteTree(wxCommandEvent &);
 
 public:
-  dialogEfgDelete(wxWindow *, Node *);
+  dialogEfgDelete(wxWindow *, gbtEfgNode);
   virtual ~dialogEfgDelete() { }
 
-  Node *KeepNode(void) const
-    { return m_node->GetChild(m_branchList->GetSelection() + 1); }
+  gbtEfgNode KeepNode(void) const
+    { return m_node.GetChild(m_branchList->GetSelection() + 1); }
   bool DeleteTree(void) const 
     { return (m_deleteTree->GetSelection() == 0); }
 

@@ -43,7 +43,7 @@ private:
   gArray<gArray<gbtEfgInfoset> *> infosets;
 
   void FindSubgames(const EFSupport &, gStatus &, 
-		    Node *, gList<BehavSolution> &, gList<gbtEfgOutcome> &);
+		    gbtEfgNode, gList<BehavSolution> &, gList<gbtEfgOutcome> &);
   
 public:
   gbtEfgNashSubgames(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }

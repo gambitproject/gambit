@@ -994,11 +994,6 @@ void GSM::UnAssignEfgElement( efgGame *game, PortionSpec spec, void* data )
 	    if( ((EfBasisPortion*) varslist[i])->Value() == data )
 	      _RefTableStack->Peek()->Remove( varslist[i] );
 	  }
-	  if( spec.Type & porNODE )
-	  {
-	    if( ((NodePortion*) varslist[i])->Value() == data )
-	      _RefTableStack->Peek()->Remove( varslist[i] );
-	  }
 	}
       }
       else // varslist[i] is a list
@@ -1066,23 +1061,6 @@ void GSM::UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &data)
     _RefTableStack->Push(tempRefTableStack.Pop());    
   }
 }
-
-
-
-void GSM::UnAssignEfgInfoset(efgGame * game, Infoset* infoset )
-{
-  UnAssignEfgElement( game, porINFOSET, infoset );  
-}
-
-
-void GSM::UnAssignEfgSubTree( efgGame * game, Node* node )
-{
-  for (int i = 1; i <= node->NumChildren(); i++)  {
-    UnAssignEfgSubTree( game, node->GetChild( i ) );
-  }
-  UnAssignEfgElement( game, porNODE, node );
-}
-
 
 void GSM::GlobalVarDefine     ( const gText& var_name, Portion* p )
 {

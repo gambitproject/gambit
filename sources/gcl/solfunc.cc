@@ -109,8 +109,8 @@ static Portion *GSM_Behav(GSM &, Portion **param)
 static Portion *GSM_Belief(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  Node* n = ((NodePortion*) param[1])->Value();
-  gbtEfgInfoset s = n->GetInfoset();
+  gbtEfgNode n = AsEfgNode(param[1]);
+  gbtEfgInfoset s = n.GetInfoset();
   if (s.IsNull()) {
     return new NullPortion(porNUMBER);
   }
@@ -340,7 +340,7 @@ static Portion *GSM_NodeValue(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
-  Node* n = ((NodePortion*) param[2])->Value();
+  gbtEfgNode n = AsEfgNode(param[2]);
 
   return new NumberPortion(bp->NodeValue(n)[player.GetId()]);
 }
@@ -352,7 +352,7 @@ static Portion *GSM_NodeValue(GSM &, Portion **param)
 static Portion *GSM_RealizProb(GSM &, Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  Node* n = ((NodePortion*) param[1])->Value();
+  gbtEfgNode n = AsEfgNode(param[1]);
   
   return new NumberPortion(bp->RealizProb(n)); 
 }  

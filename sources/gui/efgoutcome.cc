@@ -181,15 +181,15 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
 void EfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
 {
-  m_menu->Enable(idPOPUP_ATTACH, m_parent->Cursor());
-  m_menu->Enable(idPOPUP_DETACH, m_parent->Cursor());
+  m_menu->Enable(idPOPUP_ATTACH, !m_parent->Cursor().IsNull());
+  m_menu->Enable(idPOPUP_DETACH, !m_parent->Cursor().IsNull());
   PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 
 void EfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 {
-  m_menu->Enable(idPOPUP_ATTACH, m_parent->Cursor());
-  m_menu->Enable(idPOPUP_DETACH, m_parent->Cursor());
+  m_menu->Enable(idPOPUP_ATTACH, !m_parent->Cursor().IsNull());
+  m_menu->Enable(idPOPUP_DETACH, !m_parent->Cursor().IsNull());
   PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 
@@ -221,14 +221,14 @@ void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 void EfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Cursor()->SetOutcome(m_parent->Game()->GetOutcome(GetGridCursorRow() + 1));
+    m_parent->Cursor().SetOutcome(m_parent->Game()->GetOutcome(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_parent->Cursor()->SetOutcome(0);
+  m_parent->Cursor().SetOutcome(0);
   m_parent->OnOutcomesEdited();
 }
 

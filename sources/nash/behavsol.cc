@@ -41,7 +41,7 @@ private:
   gTriState isSubgamePerfect;
   gPVector<int> infoset_subgames;
   BehavProfile<gNumber> start;
-  gList<Node *> oldroots;
+  gList<gbtEfgNode> oldroots;
   
   void SolveSubgame(const efgGame &, const EFSupport &,
 		    gList<BehavSolution> &, gStatus &);
@@ -633,7 +633,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfil
     isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(E, oldroots);
-  gList<Node *> subroots;
+  gList<gbtEfgNode> subroots;
   LegalSubgameRoots(E,subroots);
   for (int i = 1; i <= subroots.Length(); i++) {
     (start.GetGame()).MarkSubgame(subroots[i]);
@@ -645,10 +645,10 @@ SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfil
       int index;
       
       gbtEfgInfoset infoset = player.GetInfoset(iset);
-      Node *member = infoset.GetMember(1);
+      gbtEfgNode member = infoset.GetMember(1);
       
-      for (index = 1; index <= subroots.Length() &&
-	     member->GetSubgameRoot() != subroots[index]; index++);
+      for (index = 1; (index <= subroots.Length() &&
+		       member.GetSubgameRoot() != subroots[index]); index++);
       
       infoset_subgames(pl, iset) = index;
     }

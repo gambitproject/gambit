@@ -38,7 +38,7 @@ class efgGame;
 
 class gbtEfgOutcome {
 friend class efgGame;
-friend class Node; 
+friend class gbtEfgNode;
 protected:
   struct gbt_efg_outcome_rep *rep;
 

@@ -38,10 +38,10 @@
 class EFNodeArrays   {
 friend class EFNodeSet;
 protected:
-  gBlock<Node *> nodes;
+  gBlock<gbtEfgNode> nodes;
   
 public:
-  EFNodeArrays ( const gArray <Node *> &a);
+  EFNodeArrays(const gArray<gbtEfgNode> &a);
   EFNodeArrays ( const EFNodeArrays &a);
   virtual ~EFNodeArrays();
   EFNodeArrays &operator=( const EFNodeArrays &a);
@@ -52,7 +52,7 @@ public:
 // EFNodeArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFNodeArrays::EFNodeArrays(const gArray<Node *> &n)
+EFNodeArrays::EFNodeArrays(const gArray<gbtEfgNode> &n)
   : nodes(n.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
@@ -114,28 +114,28 @@ public:
   //--------------------
 
   // Append a Node to an infoset;
-  void AddNode(int iset, Node *);
+  void AddNode(int iset, const gbtEfgNode &);
 
   // Insert a Node in a particular place in an infoset;
-  void AddNode(int iset, Node *, int index);
+  void AddNode(int iset, const gbtEfgNode &, int index);
 
 
   // Remove a Node at int i, returns the removed Node pointer
-  Node *RemoveNode(int iset, int i);
+  gbtEfgNode RemoveNode(int iset, int i);
 
   // Remove a Node from an infoset . 
   // Returns true if the Node was successfully removed, false otherwise.
-  bool RemoveNode(int iset, Node *);
+  bool RemoveNode(int iset, const gbtEfgNode &);
 
   // Get a garray of the Nodes in an Infoset
-  const gArray<Node *> &NodeList(int iset) const
+  const gArray<gbtEfgNode> &NodeList(int iset) const
      { return infosets[iset]->nodes; }
   
   // Get a Node
-  Node *GetNode(int iset, int index);
+  gbtEfgNode GetNode(int iset, int index);
 
   // returns the index of the Node if it is in the NodeSet
-  int Find(Node *) const;
+  int Find(const gbtEfgNode &) const;
 
   // Number of Nodes in a particular infoset
   int NumNodes(int iset) const;
@@ -156,7 +156,7 @@ EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
-    gArray<Node *> members(p.GetInfoset(i).NumMembers());
+    gArray<gbtEfgNode> members(p.GetInfoset(i).NumMembers());
     for (int j = 1; j <= members.Length(); j++) {
       members[j] = p.GetInfoset(i).GetMember(j);
     }
@@ -207,27 +207,27 @@ bool EFNodeSet::operator==(const EFNodeSet &s) const
 //------------------------------------------
 
 // Append a Node to a particular infoset;
-void EFNodeSet::AddNode(int iset, Node *s) 
+void EFNodeSet::AddNode(int iset, const gbtEfgNode &s)
 { 
   infosets[iset]->nodes.Append(s); 
 }
 
 // Insert a Node  to a particular infoset at a particular place;
-void EFNodeSet::AddNode(int iset, Node *s, int index) 
+void EFNodeSet::AddNode(int iset, const gbtEfgNode &s, int index) 
 { 
   infosets[iset]->nodes.Insert(s,index); 
 }
 
 // Remove a Node from infoset iset at int i, 
 // returns the removed Infoset pointer
-Node* EFNodeSet::RemoveNode(int iset, int i) 
+gbtEfgNode EFNodeSet::RemoveNode(int iset, int i) 
 { 
   return (infosets[iset]->nodes.Remove(i)); 
 }
 
 // Removes a Node from infoset iset . Returns true if the 
 //Node was successfully removed, false otherwise.
-bool EFNodeSet::RemoveNode(int  iset, Node *s ) 
+bool EFNodeSet::RemoveNode(int iset, const gbtEfgNode &s)
 { 
   int t = infosets[iset]->nodes.Find(s); 
   if (t>0) infosets[iset]->nodes.Remove(t); 
@@ -235,7 +235,7 @@ bool EFNodeSet::RemoveNode(int  iset, Node *s )
 } 
 
 // Get a Node
-Node *EFNodeSet::GetNode(int iset, int index)
+gbtEfgNode EFNodeSet::GetNode(int iset, int index)
 {
   return (infosets[iset]->nodes)[index];
 }
@@ -252,9 +252,9 @@ gbtEfgPlayer EFNodeSet::GetPlayer(void) const
   return efp;
 }
 
-int EFNodeSet::Find(Node *n) const
+int EFNodeSet::Find(const gbtEfgNode &n) const
 {
-  return (infosets[n->GetInfoset().GetId()]->nodes.Find(n));
+  return (infosets[n.GetInfoset().GetId()]->nodes.Find(n));
 }
 
 // checks for a valid EFNodeSet
@@ -328,21 +328,21 @@ int EFBasis::NumNodes(int pl, int iset) const
   return nodes[pl]->NumNodes(iset);
 }
 
-const gArray<Node *> &EFBasis::Nodes(int pl, int iset) const
+const gArray<gbtEfgNode> &EFBasis::Nodes(int pl, int iset) const
 {
   return nodes[pl]->NodeList(iset);
 }
 
-Node *EFBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
+gbtEfgNode EFBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
 {
   return nodes[infoset.GetPlayer().GetId()]->GetNode(infoset.GetId(), index);
 }
 
-int EFBasis::Find(Node *n) const
+int EFBasis::Find(const gbtEfgNode &n) const
 {
-  if (n->GetInfoset().GetGame() != m_efg)   return 0;
+  if (n.GetInfoset().GetGame() != m_efg)   return 0;
 
-  int pl = n->GetInfoset().GetPlayer().GetId();
+  int pl = n.GetInfoset().GetPlayer().GetId();
 
   return nodes[pl]->Find(n);
 }
@@ -372,40 +372,40 @@ gPVector<int> EFBasis::NumNodes(void) const
   return bar;
 }  
 
-bool EFBasis::RemoveNode(Node *n)
+bool EFBasis::RemoveNode(const gbtEfgNode &n)
 {
-  gbtEfgInfoset infoset = n->GetInfoset();
+  gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
 
   return nodes[player.GetId()]->RemoveNode(infoset.GetId(), n);
 }
 
-bool EFBasis::IsReachable(Node *n) const
+bool EFBasis::IsReachable(gbtEfgNode n) const
 {
   if (n == m_efg->RootNode()) {
     return true;
   }
 
   while (n != m_efg->RootNode()) {
-    if (!n->GetParent()->GetInfoset().IsChanceInfoset()) {
+    if (!n.GetParent().GetInfoset().IsChanceInfoset()) {
       if (!EFSupport::Contains(LastAction(*m_efg, n))) {
 	return false;
       }
     }
-    n = n->GetParent();
+    n = n.GetParent();
   }
   return true;
 }
 
-void EFBasis::AddNode(Node *n)
+void EFBasis::AddNode(const gbtEfgNode &n)
 {
-  gbtEfgInfoset infoset = n->GetInfoset();
+  gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
 
   nodes[player.GetId()]->AddNode(infoset.GetId(), n);
 }
 
-bool EFBasis::IsConsistent()
+bool EFBasis::IsConsistent(void) const
 {
   bigbasis = new EFBasis(*m_efg);
   nodeIndex = new gDPVector<int>(bigbasis->NumNodes());
@@ -459,7 +459,7 @@ bool EFBasis::IsConsistent()
   return flag;
 }
 
-void EFBasis::MakeIndices()
+void EFBasis::MakeIndices(void) const
 {
   int i,j;
   int ind = 1;
@@ -490,7 +490,7 @@ void EFBasis::MakeIndices()
   MakeRowIndices();
 }
 
-void EFBasis::MakeRowIndices()
+void EFBasis::MakeRowIndices(void) const
 {
   int i,j,k,kk;
 
@@ -519,7 +519,7 @@ void EFBasis::MakeRowIndices()
     }
 }
 
-void EFBasis::MakeAb()
+void EFBasis::MakeAb(void) const
 {
   int i,j,k,kk;
   int eq = num_ineqs+1;
@@ -558,9 +558,9 @@ int EFBasis::Col(const gbtEfgAction &p_action) const
 		     (*bigbasis).EFSupport::GetIndex(p_action));
 }
 
-int EFBasis::Col(Node *n) const
+int EFBasis::Col(const gbtEfgNode &n) const
 {
-  gbtEfgInfoset iset = n->GetInfoset();
+  gbtEfgInfoset iset = n.GetInfoset();
   return (*nodeIndex)(iset.GetPlayer().GetId(), iset.GetId(),
 		      (*bigbasis).Find(n));
 }
@@ -572,7 +572,7 @@ void EFBasis::AddEquation1(int row, const gbtEfgAction &p_action) const
   (*b)[row] = -1.0;
 }
 
-void EFBasis::AddEquation2(int row,Node *n) const
+void EFBasis::AddEquation2(int row, gbtEfgNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
@@ -580,8 +580,8 @@ void EFBasis::AddEquation2(int row,Node *n) const
     gbtEfgAction act = LastAction(*m_efg,n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
-    while(n->GetParent() != m_efg->RootNode()) {
-      n = n->GetParent();
+    while(n.GetParent() != m_efg->RootNode()) {
+      n = n.GetParent();
       act = LastAction(*m_efg,n);
       if(Col(act))
 	(*A)(row,Col(act)) = -1.0;
@@ -589,7 +589,8 @@ void EFBasis::AddEquation2(int row,Node *n) const
   }
 }
 
-void EFBasis::AddEquation3(int row,Node *n1, Node *n2) const
+void EFBasis::AddEquation3(int row, const gbtEfgNode &n1, 
+			   const gbtEfgNode &n2) const
 {
   if(Col(n1))
     (*A)(row,Col(n1)) = 1.0;
@@ -597,7 +598,8 @@ void EFBasis::AddEquation3(int row,Node *n1, Node *n2) const
     (*A)(row,Col(n2)) = -1.0;
 }
 
-void EFBasis::AddEquation4(int row,Node *n1, Node *n2) const
+void EFBasis::AddEquation4(int row, const gbtEfgNode &n1,
+			   const gbtEfgNode &n2) const
 {
   if(Col(n1))
     (*A)(row,Col(n1)) = 1.0;
@@ -606,7 +608,7 @@ void EFBasis::AddEquation4(int row,Node *n1, Node *n2) const
   (*b)[row] = -1.0;
 }
 
-void EFBasis::GetConsistencySolution(const gVector<double> &x)
+void EFBasis::GetConsistencySolution(const gVector<double> &x) const
 {
   gDPVector<int> nodes(bigbasis->NumNodes());
   gDPVector<int> acts(bigbasis->NumActions());
@@ -645,8 +647,8 @@ void EFBasis::Dump(gOutput& s) const
       gbtEfgInfoset infoset = player.GetInfoset(j);
       s << '"' << infoset.GetLabel() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
-	Node *node = nodes[i]->NodeList(j)[k];
-	s << '"' << node->GetLabel() << "\" ";
+	gbtEfgNode node = nodes[i]->NodeList(j)[k];
+	s << '"' << node.GetLabel() << "\" ";
       }
       s << "} ";
     }

@@ -42,7 +42,7 @@ BEGIN_EVENT_TABLE(dialogEfgDelete, wxDialog)
   EVT_RADIOBOX(idRADIOBOX_DELETE_TREE, dialogEfgDelete::OnDeleteTree)
 END_EVENT_TABLE()
 
-dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
+dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
   : wxDialog(p_parent, -1, "Delete..."), m_node(p_node)
 {
   SetAutoLayout(true);
@@ -61,9 +61,9 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   actionSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
 		   0, wxCENTER | wxALL, 5);
   m_branchList = new wxListBox(this, -1);
-  for (int act = 1; act <= m_node->NumChildren(); act++) {
+  for (int act = 1; act <= m_node.NumChildren(); act++) {
     m_branchList->Append((char *) (ToText(act) + ": " + 
-				   m_node->GetInfoset().GetAction(act).GetLabel()));
+				   m_node.GetInfoset().GetAction(act).GetLabel()));
   }
   m_branchList->SetSelection(0);
   m_branchList->Enable(false);

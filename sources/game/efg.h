@@ -31,7 +31,6 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 
-class Node;
 class EFSupport;
 class Lexicon;
 class Nfg;
@@ -42,13 +41,13 @@ template <class T> class PureBehavProfile;
 #include "outcome.h"
 #include "infoset.h"
 #include "efplayer.h"
+#include "node.h"
 
 class efgGame {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
   friend class Nfg;
-  friend class Node;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -61,37 +60,41 @@ protected:
   gText title, comment;
   gBlock<gbt_efg_player_rep *> players;
   gBlock<gbt_efg_outcome_rep *> outcomes;
-  Node *root;
+  gbt_efg_node_rep *root;
   gbt_efg_player_rep *chance;
   mutable Nfg *afg;
   mutable Lexicon *lexicon;
   
   // this is for use with the copy constructor
-  void CopySubtree(Node *, Node *);
+  void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *);
 
-  void CopySubtree(Node *, Node *, Node *);
-  void MarkSubtree(Node *);
-  void UnmarkSubtree(Node *);
+  void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *,
+		   gbt_efg_node_rep *);
+  void MarkSubtree(gbt_efg_node_rep *);
+  void UnmarkSubtree(gbt_efg_node_rep *);
 
   void SortInfosets(void);
-  void NumberNodes(Node *, int &);
+  void NumberNodes(gbt_efg_node_rep *, int &);
   
   void DeleteLexicon(void) const;
 
   gbtEfgOutcome NewOutcome(int index);
 
-  void WriteEfgFile(gOutput &, Node *) const;
+  void WriteEfgFile(gOutput &, gbt_efg_node_rep *) const;
 
-  void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
-  void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gArray<gNumber> &) const;
+  void Payoff(gbt_efg_node_rep *n, gNumber,
+	      const gPVector<int> &, gVector<gNumber> &) const;
+  void Payoff(gbt_efg_node_rep *n, gNumber,
+	      const gArray<gArray<int> *> &, gArray<gNumber> &) const;
   
-  void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
+  void InfosetProbs(gbt_efg_node_rep *n, gNumber,
+		    const gPVector<int> &, gPVector<gNumber> &) const;
     
     
   // These are used in identification of subgames
-  void MarkTree(Node *, Node *);
-  bool CheckTree(Node *, Node *);
-  void MarkSubgame(Node *, Node *);
+  void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
 
   gbt_efg_infoset_rep *CreateInfoset(int n, gbtEfgPlayer, int br);
 
@@ -103,7 +106,7 @@ public:
   };
 
   efgGame(void);
-  efgGame(const efgGame &, Node * = 0);
+  efgGame(const efgGame &, gbtEfgNode = gbtEfgNode(0));
   virtual ~efgGame();
   
   // TITLE ACCESS AND MANIPULATION
@@ -124,9 +127,9 @@ public:
   gNumber MinPayoff(int pl = 0) const;
   gNumber MaxPayoff(int pl = 0) const;
   
-  Node *RootNode(void) const;
-  bool IsSuccessor(const Node *n, const Node *from) const;
-  bool IsPredecessor(const Node *n, const Node *of) const;
+  gbtEfgNode RootNode(void) const;
+  bool IsSuccessor(const gbtEfgNode &n, const gbtEfgNode &from) const;
+  bool IsPredecessor(const gbtEfgNode &n, gbtEfgNode of) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
@@ -141,25 +144,25 @@ public:
   void DeleteOutcome(gbtEfgOutcome &);
 
   // EDITING OPERATIONS
-  gbtEfgInfoset AppendNode(Node *n, gbtEfgPlayer, int br);
-  gbtEfgInfoset AppendNode(Node *n, gbtEfgInfoset s);
-  Node *DeleteNode(Node *n, Node *keep);
-  gbtEfgInfoset InsertNode(Node *n, gbtEfgPlayer, int br);
-  gbtEfgInfoset InsertNode(Node *n, gbtEfgInfoset s);
+  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgPlayer, int br);
+  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgInfoset s);
+  gbtEfgNode DeleteNode(gbtEfgNode n, gbtEfgNode keep);
+  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgPlayer, int br);
+  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgInfoset s);
 
   gbtEfgInfoset CreateInfoset(gbtEfgPlayer, int br);
   bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
-  gbtEfgInfoset JoinInfoset(gbtEfgInfoset, Node *n);
-  gbtEfgInfoset LeaveInfoset(Node *n);
-  gbtEfgInfoset SplitInfoset(Node *n);
+  gbtEfgInfoset JoinInfoset(gbtEfgInfoset, gbtEfgNode);
+  gbtEfgInfoset LeaveInfoset(gbtEfgNode);
+  gbtEfgInfoset SplitInfoset(gbtEfgNode);
   gbtEfgInfoset MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from);
 
   gbtEfgInfoset SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p);
   
-  Node *CopyTree(Node *src, Node *dest);
-  Node *MoveTree(Node *src, Node *dest);
-  Node *DeleteTree(Node *n);
+  gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
+  gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
+  gbtEfgNode DeleteTree(gbtEfgNode n);
 
   gbtEfgAction InsertAction(gbtEfgInfoset);
   gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
@@ -173,14 +176,14 @@ public:
 
   void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
   gNumber Payoff(const gbtEfgOutcome &, const gbtEfgPlayer &) const;
-  gNumber Payoff(const Node *, const gbtEfgPlayer &) const;
+  gNumber Payoff(const gbtEfgNode &, const gbtEfgPlayer &) const;
   gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 
-  bool IsLegalSubgame(Node *n);
+  bool IsLegalSubgame(const gbtEfgNode &);
   void MarkSubgames(void);
-  bool MarkSubgame(Node *n);
-  void UnmarkSubgame(Node *n);
-  void UnmarkSubgames(Node *n);
+  bool MarkSubgame(gbtEfgNode);
+  void UnmarkSubgame(gbtEfgNode);
+  void UnmarkSubgames(gbtEfgNode);
 
   int ProfileLength(void) const;
   int TotalNumInfosets(void) const;
@@ -216,8 +219,6 @@ public:
 
 //#include "behav.h"
 
-#include "node.h"
-
 efgGame *ReadEfgFile(gInput &);
 
 template <class T> class PureBehavProfile   {
@@ -228,8 +229,8 @@ template <class T> class PureBehavProfile   {
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
     // This aims at efficiency, but leads to a problem described in behav.imp
 
-    void Payoff(const Node *n, const T, gArray<T> &) const;
-    void InfosetProbs(Node *n, T, gPVector<T> &) const;
+    void Payoff(const gbtEfgNode &n, const T, gArray<T> &) const;
+    void InfosetProbs(const gbtEfgNode &n, T, gPVector<T> &) const;
 
   public:
     PureBehavProfile(const efgGame &);
@@ -250,7 +251,7 @@ template <class T> class PureBehavProfile   {
     const T Payoff(const gbtEfgOutcome &, const int &pl) const;
     const T ChanceProb(const gbtEfgInfoset &, const int &act) const;
     
-    const T Payoff(const Node *, const int &pl) const;
+    const T Payoff(const gbtEfgNode &, const int &pl) const;
   //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;

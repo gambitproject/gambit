@@ -637,21 +637,21 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 // the actual tree to be returned
 //
 
-static void BuildSubtree(efgGame *p_efg, Node *p_node,
+static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
-  p_node->SetLabel((*p_nodeData)->m_name);
+  p_node.SetLabel((*p_nodeData)->m_name);
 
   if ((*p_nodeData)->m_outcome > 0) {
     if (!p_treeData.GetOutcome((*p_nodeData)->m_outcome).IsNull()) {
-      p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
+      p_node.SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
       gbtEfgOutcome outcome = p_efg->NewOutcome();
       outcome.SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
-      p_node->SetOutcome(outcome);
+      p_node.SetOutcome(outcome);
       for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
 	p_efg->SetPayoff(outcome, pl, (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }
@@ -679,8 +679,8 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     }
 
     *(p_nodeData) = (*(p_nodeData))->m_next;
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      BuildSubtree(p_efg, p_node->GetChild(i), p_treeData, p_nodeData);
+    for (int i = 1; i <= p_node.NumChildren(); i++) {
+      BuildSubtree(p_efg, p_node.GetChild(i), p_treeData, p_nodeData);
     }
   }
   else if ((*p_nodeData)->m_player == 0) {
@@ -703,8 +703,8 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
     }
 
     *(p_nodeData) = (*(p_nodeData))->m_next;
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      BuildSubtree(p_efg, p_node->GetChild(i), p_treeData, p_nodeData);
+    for (int i = 1; i <= p_node.NumChildren(); i++) {
+      BuildSubtree(p_efg, p_node.GetChild(i), p_treeData, p_nodeData);
     }
   }
   else {

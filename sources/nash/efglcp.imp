@@ -213,51 +213,51 @@ gbtEfgNashLcp<T>::All_Lemke(const EFSupport &p_support,
 
 template <class T>
 void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
-				   const Node *n, T prob,
+				   const gbtEfgNode &n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
   int snew;
-  if (!n->GetOutcome().IsNull()) {
+  if (!n.GetOutcome().IsNull()) {
     A(s1,ns1+s2) = gNumber(A(s1,ns1+s2)) +
       gNumber(prob) * (p_support.GetGame().Payoff(n, p_support.GetGame().GetPlayer(1)) - gNumber(maxpay));
     A(ns1+s2,s1) = gNumber(A(ns1+s2,s1)) +
       gNumber(prob) * (p_support.GetGame().Payoff(n, p_support.GetGame().GetPlayer(2)) - gNumber(maxpay));
   }
-  if (!n->GetInfoset().IsNull()) {
-    if (n->GetPlayer().IsChance()) {
-      for (int i = 1; i <= n->NumChildren(); i++) {
-	FillTableau(p_support, A, n->GetChild(i),
-		    gNumber(prob) * p_support.GetGame().GetChanceProb(n->GetInfoset(), i),
+  if (!n.GetInfoset().IsNull()) {
+    if (n.GetPlayer().IsChance()) {
+      for (int i = 1; i <= n.NumChildren(); i++) {
+	FillTableau(p_support, A, n.GetChild(i),
+		    gNumber(prob) * p_support.GetGame().GetChanceProb(n.GetInfoset(), i),
 		    s1,s2,i1,i2);
       }
     }
-    int pl = n->GetPlayer().GetId();
+    int pl = n.GetPlayer().GetId();
     if (pl==1) {
-      i1=isets1.Find(n->GetInfoset());
+      i1=isets1.Find(n.GetInfoset());
       snew=1;
       for (int i = 1; i < i1; i++) {
 	snew+=p_support.NumActions(isets1[i]);
       }
       A(s1,ns1+ns2+i1+1) = -(T)1;
       A(ns1+ns2+i1+1,s1) = (T)1;
-      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
+      for (int i = 1; i <= p_support.NumActions(n.GetInfoset()); i++) {
 	A(snew+i,ns1+ns2+i1+1) = (T)1;
 	A(ns1+ns2+i1+1,snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),prob,snew+i,s2,i1,i2);
+	FillTableau(p_support, A, n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
-      i2=isets2.Find(n->GetInfoset());
+      i2=isets2.Find(n.GetInfoset());
       snew=1;
       for (int i = 1; i < i2; i++) {
 	snew+=p_support.NumActions(isets2[i]);
       }
       A(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       A(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
-      for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
+      for (int i = 1; i <= p_support.NumActions(n.GetInfoset()); i++) {
 	A(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
 	A(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),prob,s1,snew+i,i1,i2);
+	FillTableau(p_support, A, n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),prob,s1,snew+i,i1,i2);
       }
     }
     
@@ -269,21 +269,21 @@ template <class T>
 void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
 				  const LTableau<T> &tab, 
 				  gDPVector<T> &v, const gVector<T> &sol,
-				  const Node *n, int s1,int s2)
+				  const gbtEfgNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
-  if (!n->GetInfoset().IsNull()) {
-    if (n->GetPlayer().IsChance()) {
-      for (i = 1; i <= n->NumChildren();i++)
-	GetProfile(p_support, tab, v,sol,n->GetChild(i),s1,s2);
+  if (!n.GetInfoset().IsNull()) {
+    if (n.GetPlayer().IsChance()) {
+      for (i = 1; i <= n.NumChildren();i++)
+	GetProfile(p_support, tab, v, sol, n.GetChild(i), s1, s2);
     }
-    pl = n->GetPlayer().GetId();
+    pl = n.GetPlayer().GetId();
     if(pl==1) {
-      inf= isets1.Find(n->GetInfoset());
+      inf = isets1.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
 	snew+=p_support.NumActions(isets1[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(s1)) {
 	  ind = tab.Find(s1);
@@ -295,15 +295,15 @@ void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),snew+i,s2);
+	GetProfile(p_support, tab, v,sol,n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),snew+i,s2);
       }
     }
     if(pl==2) {
-      inf= isets2.Find(n->GetInfoset());
+      inf= isets2.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
 	snew+=p_support.NumActions(isets2[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(ns1+s2)) {
 	  ind = tab.Find(ns1+s2);
@@ -315,7 +315,7 @@ void gbtEfgNashLcp<T>::GetProfile(const EFSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),s1,snew+i);
+	GetProfile(p_support, tab, v,sol,n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),s1,snew+i);
       }
     }
   }

@@ -55,11 +55,11 @@ EfgNavigateWindow::EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   Show(true);
 }
 
-void EfgNavigateWindow::Set(const Node *p_cursor) 
+void EfgNavigateWindow::Set(gbtEfgNode p_cursor) 
 {
   m_cursor = p_cursor;
   
-  if (!m_cursor) { // no data available
+  if (m_cursor.IsNull()) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
       SetCellValue("", i, 0);
     }
@@ -68,21 +68,21 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) m_cursor->GetLabel(), 0, 0);
+    SetCellValue((char *) m_cursor.GetLabel(), 0, 0);
     SetCellValue((char *) m_parent->GetRealizProb(m_cursor), 1, 0);
     SetCellValue((char *) m_parent->GetNodeValue(m_cursor), 2, 0);
 
     gText tmpstr;
   
-    if (m_cursor->GetPlayer().IsNull()) {
+    if (m_cursor.GetPlayer().IsNull()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (m_cursor->GetPlayer().IsChance())
+      if (m_cursor.GetPlayer().IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(m_cursor->GetPlayer().GetId()) + "," +
-		  ToText(m_cursor->GetInfoset().GetId()) + ")");
+	tmpstr = ("(" + ToText(m_cursor.GetPlayer().GetId()) + "," +
+		  ToText(m_cursor.GetInfoset().GetId()) + ")");
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);
@@ -90,13 +90,13 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
     SetCellValue((char *) m_parent->GetBeliefProb(m_cursor), 5, 0);
     SetCellValue((char *) m_parent->GetInfosetValue(m_cursor), 6, 0);
 	
-    Node *p = m_cursor->GetParent();
+    gbtEfgNode p = m_cursor.GetParent();
 
-    if (p) {
+    if (!p.IsNull()) {
       int branch = 0;
-      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
+      for (branch = 1; p.GetChild(branch) != m_cursor; branch++);
 
-      SetCellValue((char *) m_cursor->GetAction().GetLabel(), 7, 0);
+      SetCellValue((char *) m_cursor.GetAction().GetLabel(), 7, 0);
       SetCellValue((char *) m_parent->GetActionProb(p, branch), 8, 0);
       SetCellValue((char *) m_parent->GetActionValue(p, branch), 9, 0);
     }

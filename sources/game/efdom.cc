@@ -73,7 +73,7 @@ bool EFSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
   }
 
   else {
-    gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    gList<gbtEfgNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this 
       // prior to entry

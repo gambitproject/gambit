@@ -71,22 +71,21 @@ protected:
   //
   // FUNCTIONS FOR DATA ACCESS
   //
-  // NOTE: These functions all assume that profile is installed, and that relevant 
-  // data has been computed.  
+  // NOTE: These functions all assume the cached data is up-to-date.
   // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
+  //
+  const T &RealizProb(const gbtEfgNode &node) const;
+  T &RealizProb(const gbtEfgNode &node);
 
-  const T &RealizProb(const Node *node) const;
-  T &RealizProb(const Node *node);
-
-  const T &BeliefProb(const Node *node) const;
-  T &BeliefProb(const Node *node);
+  const T &BeliefProb(const gbtEfgNode &node) const;
+  T &BeliefProb(const gbtEfgNode &node);
   
-  gVector<T> NodeValues(const Node *node) const
-    { return m_nodeValues.Row(node->number); }
-  const T &NodeValue(const Node *node, int pl) const
-    { return m_nodeValues(node->number, pl); }
-  T &NodeValue(const Node *node, int pl)
-    { return m_nodeValues(node->number, pl); }
+  gVector<T> NodeValues(const gbtEfgNode &node) const
+    { return m_nodeValues.Row(node.GetId()); }
+  const T &NodeValue(const gbtEfgNode &node, int pl) const
+    { return m_nodeValues(node.GetId(), pl); }
+  T &NodeValue(const gbtEfgNode &node, int pl)
+    { return m_nodeValues(node.GetId(), pl); }
 
   T IsetProb(const gbtEfgInfoset &iset) const;
 
@@ -109,16 +108,16 @@ protected:
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
-  void Payoff(Node *, T, int, T &) const;
+  void Payoff(const gbtEfgNode &, T, int, T &) const;
   T Payoff(const gbtEfgOutcome &, int pl) const;
   
-  void ComputeSolutionDataPass2(const Node *node);
-  void ComputeSolutionDataPass1(const Node *node);
+  void ComputeSolutionDataPass2(const gbtEfgNode &node);
+  void ComputeSolutionDataPass1(const gbtEfgNode &node);
   void ComputeSolutionData(void);
 
-  void BehaviorStrat(const efgGame &, int, Node *);
+  void BehaviorStrat(const efgGame &, int, const gbtEfgNode &);
   void RealizationProbs(const MixedProfile<T> &, const efgGame &,
-			int pl, const gArray<int> *const, Node *);
+			int pl, const gArray<int> *const, const gbtEfgNode &);
 
 public:
   class BadStuff : public gException  {
@@ -154,9 +153,9 @@ public:
   efgGame &GetGame(void) const   { return const_cast<efgGame &>(*m_efg); }
   const EFSupport &Support(void) const   { return m_support; }
   
-  const T &GetRealizProb(const Node *node);
-  const T &GetBeliefProb(const Node *node);
-  gVector<T> GetNodeValue(const Node *node);
+  const T &GetRealizProb(const gbtEfgNode &node);
+  const T &GetBeliefProb(const gbtEfgNode &node);
+  gVector<T> GetNodeValue(const gbtEfgNode &node);
   T GetIsetProb(const gbtEfgInfoset &iset);
   const T &GetIsetValue(const gbtEfgInfoset &iset);
   T GetActionProb(const gbtEfgAction &act) const;
@@ -173,8 +172,9 @@ public:
 
   T DiffActionValue(const gbtEfgAction &action, 
 		    const gbtEfgAction &oppAction) const;
-  T DiffRealizProb(const Node *node, const gbtEfgAction &oppAction) const;
-  T DiffNodeValue(const Node *node, const gbtEfgPlayer &player,
+  T DiffRealizProb(const gbtEfgNode &node,
+		   const gbtEfgAction &oppAction) const;
+  T DiffNodeValue(const gbtEfgNode &node, const gbtEfgPlayer &player,
 		  const gbtEfgAction &oppAction) const;
 
   void Dump(gOutput &) const;
@@ -232,7 +232,7 @@ protected:
   gDPVector<T> m_beliefs;
   
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
-  void CondPayoff(Node *, T,
+  void CondPayoff(const gbtEfgNode &, T,
 		  gPVector<T> &, gDPVector<T> &) const;
   
 public:

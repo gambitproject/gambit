@@ -35,6 +35,10 @@
 
 #include "lexicon.h"
 
+// For access to gbt_efg_node_rep
+#include "efgint.h"
+
+
 Lexicon::Lexicon(const efgGame &E)
   : N(0), strategies(E.NumPlayers())
 { }
@@ -72,53 +76,53 @@ void Lexicon::MakeStrategy(gbtEfgPlayer p)
 }
 
 void Lexicon::MakeReducedStrats(const EFSupport &S,
-				gbtEfgPlayer p, Node *n, Node *nn)
+				gbtEfgPlayer p, gbtEfgNode n, gbtEfgNode nn)
 {
   int i;
-  Node *m, *mm;
+  gbtEfgNode m, mm;
 
-  if (!n->parent)  n->ptr = 0;
+  if (n.GetParent().IsNull())  n.rep->m_ptr = 0;
 
-  if (n->NumChildren() > 0)  {
-    if (n->GetInfoset().GetPlayer() == p)  {
-      if (!n->GetInfoset().GetFlag())  {
+  if (n.NumChildren() > 0)  {
+    if (n.GetInfoset().GetPlayer() == p)  {
+      if (!n.GetInfoset().GetFlag())  {
 	// we haven't visited this infoset before
-	n->GetInfoset().SetFlag(true);
-	for (i = 1; i <= n->NumChildren(); i++)   {
-	  if (S.Contains(n->GetInfoset().GetAction(i)))  {
-	    Node *m = n->GetChild(i);
-	    n->whichbranch = m;
-	    n->GetInfoset().SetWhichBranch(i);
+	n.GetInfoset().SetFlag(true);
+	for (i = 1; i <= n.NumChildren(); i++)   {
+	  if (S.Contains(n.GetInfoset().GetAction(i)))  {
+	    gbtEfgNode m = n.GetChild(i);
+	    n.rep->m_whichbranch = m.rep;
+	    n.GetInfoset().SetWhichBranch(i);
 	    MakeReducedStrats(S, p, m, nn);
 	  }
 	}
-	n->GetInfoset().SetFlag(false);
+	n.GetInfoset().SetFlag(false);
       }
       else  {
 	// we have visited this infoset, take same action
-	MakeReducedStrats(S, p, n->children[n->GetInfoset().GetWhichBranch()], nn);
+	MakeReducedStrats(S, p, n.rep->m_children[n.GetInfoset().GetWhichBranch()], nn);
       }
     }
     else  {
-      n->ptr = NULL;
+      n.rep->m_ptr = NULL;
       if (nn != NULL)
-	n->ptr = nn->parent;
-      n->whichbranch = n->children[1];
-      if (n->infoset) 
-	n->GetInfoset().SetWhichBranch(0);
-      MakeReducedStrats(S, p, n->children[1], n->children[1]);
+	n.rep->m_ptr = nn.rep->m_parent;
+      n.rep->m_whichbranch = n.rep->m_children[1];
+      if (n.rep->m_infoset) 
+	n.GetInfoset().SetWhichBranch(0);
+      MakeReducedStrats(S, p, n.GetChild(1), n.GetChild(1));
     }
   }
-  else if (nn)  {
-    for (; ; nn = nn->parent->ptr->whichbranch)  {
-      m = nn->NextSibling();
-      if (m || nn->parent->ptr == NULL)   break;
+  else if (!nn.IsNull())  {
+    for (; ; nn = nn.rep->m_parent->m_ptr->m_whichbranch)  {
+      m = nn.NextSibling();
+      if (!m.IsNull() || nn.rep->m_parent->m_ptr == NULL)   break;
     }
-    if (m)  {
-      mm = m->parent->whichbranch;
-      m->parent->whichbranch = m;
+    if (!m.IsNull())  {
+      mm = m.rep->m_parent->m_whichbranch;
+      m.rep->m_parent->m_whichbranch = m.rep;
       MakeReducedStrats(S, p, m, m);
-      m->parent->whichbranch = mm;
+      m.rep->m_parent->m_whichbranch = mm.rep;
     }
     else
       MakeStrategy(p);

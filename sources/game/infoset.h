@@ -35,9 +35,9 @@
 
 #include "efplayer.h"
 
-class Node;
 class Lexicon;
 class gbtEfgInfoset;
+class gbtEfgNode;
 
 struct gbt_efg_action_rep;
 
@@ -63,7 +63,7 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
-  bool Precedes(const Node *) const;
+  bool Precedes(gbtEfgNode) const;
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgAction &);
@@ -102,10 +102,10 @@ public:
   gbtEfgAction GetAction(int act) const;
   int NumActions(void) const;
 
-  Node *GetMember(int m) const;
+  gbtEfgNode GetMember(int m) const;
   int NumMembers(void) const;
 
-  bool Precedes(const Node *) const;
+  bool Precedes(gbtEfgNode) const;
 
   bool GetFlag(void) const;
   void SetFlag(bool);
@@ -115,79 +115,5 @@ public:
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgInfoset &);
-
-#ifdef UNUSED
-class Infoset   {
-  friend class efgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
-  friend class Lexicon;
-
-  protected:
-    efgGame *E;
-    int number;
-    gText name;
-    gbt_efg_player_rep *player;
-    gBlock<gbt_efg_action_rep *> actions;
-    gBlock<Node *> members;
-    int flag, whichbranch;
-    
-    Infoset(efgGame *e, int n, gbt_efg_player_rep *p, int br);
-    virtual ~Infoset();  
-
-    virtual void PrintActions(gOutput &f) const;
-
-  public:
-    efgGame *Game(void) const   { return E; }
-
-    virtual bool IsChanceInfoset(void) const { return false; }
-    gbtEfgPlayer GetPlayer(void) const;
-
-    void SetLabel(const gText &s)    { name = s; }
-    const gText &GetLabel(void) const   { return name; }
-
-    virtual gbtEfgAction InsertAction(int where);
-    virtual void RemoveAction(int which);
-
-    gbtEfgAction GetAction(int act) const;
-    int NumActions(void) const   { return actions.Length(); }
-
-    Node *GetMember(int m) const { return members[m]; }
-    int NumMembers(void) const   { return members.Length(); }
-
-    int GetId(void) const    { return number; }
-
-    bool Precedes(const Node *) const;
-};
-
-class ChanceInfoset : public Infoset  {
-  friend class efgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
-  friend class PureBehavProfile<double>;
-  friend class PureBehavProfile<gRational>;
-  friend class PureBehavProfile<gNumber>;
-
-  private:
-    gBlock<gNumber> probs;
-
-    ChanceInfoset(efgGame *E, int n, gbt_efg_player_rep *p, int br);
-    virtual ~ChanceInfoset()    { }
-
-    void PrintActions(gOutput &f) const;
-
-  public:
-    bool IsChanceInfoset(void) const { return true; }
-
-    gbtEfgAction InsertAction(int where);
-    void RemoveAction(int which);
-
-    void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
-    const gNumber &GetActionProb(int i) const   { return probs[i]; }
-    const gArray<gNumber> &GetActionProbs(void) const  { return probs; }
-};
-#endif  // UNUSED
 
 #endif   //# INFOSET_H

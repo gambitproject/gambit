@@ -149,18 +149,18 @@ gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
   }
 }
 
-bool gbtEfgAction::Precedes(const Node *n) const
+bool gbtEfgAction::Precedes(gbtEfgNode n) const
 {
   if (!rep) {
     return false;
   }
 
-  while (n != n->GetGame()->RootNode() ) {
-    if (n->GetAction().rep == rep) {
+  while (n != n.GetGame()->RootNode() ) {
+    if (n.GetAction().rep == rep) {
       return true;
     }
     else {
-      n = n->GetParent();
+      n = n.GetParent();
     }
   }
   return false;
@@ -309,7 +309,7 @@ int gbtEfgInfoset::NumActions(void) const
   }
 }
 
-Node *gbtEfgInfoset::GetMember(int p_index) const
+gbtEfgNode gbtEfgInfoset::GetMember(int p_index) const
 {
   if (rep) {
     return rep->m_members[p_index];
@@ -354,14 +354,14 @@ efgGame *gbtEfgInfoset::GetGame(void) const
   }
 }
 
-bool gbtEfgInfoset::Precedes(const Node *p_node) const
+bool gbtEfgInfoset::Precedes(gbtEfgNode p_node) const
 {
-  while (p_node != p_node->GetGame()->RootNode()) {
-    if (p_node->GetInfoset() == *this) {
+  while (p_node != p_node.GetGame()->RootNode()) {
+    if (p_node.GetInfoset() == *this) {
       return true;
     }
     else {
-      p_node = p_node->GetParent();
+      p_node = p_node.GetParent();
     }
   }
   return false;

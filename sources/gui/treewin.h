@@ -45,7 +45,7 @@ private:
   wxMenu *m_nodeMenu, *m_gameMenu;
 
   wxDragImage *m_dragImage;
-  Node *m_dragSource;
+  gbtEfgNode m_dragSource;
   enum { dragCOPY, dragMOVE, dragOUTCOME } m_dragMode;
 
   // Private Functions
@@ -83,8 +83,8 @@ public:
   TreeDrawSettings &DrawSettings(void) { return m_drawSettings; }
   const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
   
-  void SetCursorPosition(Node *p_cursor);
-  void SetCutNode(Node *, bool);
+  void SetCursorPosition(gbtEfgNode p_cursor);
+  void SetCutNode(gbtEfgNode, bool);
     
   void UpdateMenus(void);
   
@@ -93,7 +93,7 @@ public:
   void FitZoom(void);
 
   // Access to the numeric values from the renderer
-  gText OutcomeAsString(const Node *n) const;
+  gText OutcomeAsString(const gbtEfgNode &n) const;
 
   DECLARE_EVENT_TABLE()
 };

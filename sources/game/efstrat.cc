@@ -504,13 +504,14 @@ int EFSupport::TotalNumSequences(void) const
   return total;
 }
 
-gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n) const
+gList<gbtEfgNode> 
+EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n) const
 {
-  gList<Node *> answer;
-  if (n->IsNonterminal()) {
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
-      Node *nn = n->GetChild(GetAction(n->GetInfoset(), i));
-      if (nn->IsNonterminal()) {
+  gList<gbtEfgNode> answer;
+  if (n.IsNonterminal()) {
+    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) {
+      gbtEfgNode nn = n.GetChild(GetAction(n.GetInfoset(), i));
+      if (nn.IsNonterminal()) {
 	answer += nn;
 	answer += ReachableNonterminalNodes(nn);
       }
@@ -519,12 +520,13 @@ gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n) const
   return answer;
 }
 
-gList<Node *> EFSupport::ReachableNonterminalNodes(const Node *n,
-						   const gbtEfgAction &a) const
+gList<gbtEfgNode> 
+EFSupport::ReachableNonterminalNodes(const gbtEfgNode &n,
+				     const gbtEfgAction &a) const
 {
-  gList<Node *> answer;
-  Node *nn = n->GetChild(a);
-  if (nn->IsNonterminal()) {
+  gList<gbtEfgNode> answer;
+  gbtEfgNode nn = n.GetChild(a);
+  if (nn.IsNonterminal()) {
     answer += nn;
     answer += ReachableNonterminalNodes(nn);
   }
@@ -543,23 +545,23 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgPlayer &p) const
   return answer;
 }
 
-gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const Node *n) const
+gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n) const
 {
   gList<gbtEfgInfoset> answer;
-  gList<Node *> nodelist = ReachableNonterminalNodes(n);
+  gList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n);
   for (int i = 1; i <= nodelist.Length(); i++)
-    answer += nodelist[i]->GetInfoset();
+    answer += nodelist[i].GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
 
-gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const Node *n, 
+gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n, 
 						  const gbtEfgAction &a) const
 {
   gList<gbtEfgInfoset> answer;
-  gList<Node *> nodelist = ReachableNonterminalNodes(n,a);
+  gList<gbtEfgNode> nodelist = ReachableNonterminalNodes(n,a);
   for (int i = 1; i <= nodelist.Length(); i++)
-    answer += nodelist[i]->GetInfoset();
+    answer += nodelist[i].GetInfoset();
   answer.RemoveRedundancies();
   return answer;
 }
@@ -569,14 +571,15 @@ bool EFSupport::AlwaysReaches(const gbtEfgInfoset &i) const
   return AlwaysReachesFrom(i, m_efg->RootNode());
 }
 
-bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, const Node *n) const
+bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
+				  const gbtEfgNode &n) const
 {
-  if (n->IsTerminal()) return false;
+  if (n.IsTerminal()) return false;
   else {
-    if (n->GetInfoset() == i) return true;
+    if (n.GetInfoset() == i) return true;
     else {
-      for (int j = 1; j <= NumActions(n->GetInfoset()); j++) {
-	if (!AlwaysReachesFrom(i, n->GetChild(GetAction(n->GetInfoset(), j)))){
+      for (int j = 1; j <= NumActions(n.GetInfoset()); j++) {
+	if (!AlwaysReachesFrom(i, n.GetChild(GetAction(n.GetInfoset(), j)))) {
 	  return false;
 	}
       }
@@ -595,16 +598,16 @@ bool EFSupport::MayReach(const gbtEfgInfoset &infoset) const
   return false;
 }
 
-bool EFSupport::MayReach(const Node *n) const
+bool EFSupport::MayReach(const gbtEfgNode &n) const
 {
   if (n == m_efg->RootNode())
     return true;
   else {
-    if (!Contains(n->GetAction())) {
+    if (!Contains(n.GetAction())) {
       return false;
     }
     else {
-      return MayReach(n->GetParent());
+      return MayReach(n.GetParent());
     }
   }
 }
@@ -677,18 +680,18 @@ EFSupportWithActiveInfo::infoset_has_active_nodes(const gbtEfgInfoset &i) const
   return infoset_has_active_nodes(i.GetPlayer().GetId(), i.GetId());
 }
 
-void EFSupportWithActiveInfo::activate(const Node *n)
+void EFSupportWithActiveInfo::activate(const gbtEfgNode &n)
 {
-  is_nonterminal_node_active[n->GetPlayer().GetId()]
-                            [n->GetInfoset().GetId()]
-                            [n->NumberInInfoset()] = true;
+  is_nonterminal_node_active[n.GetPlayer().GetId()]
+                            [n.GetInfoset().GetId()]
+                            [n.NumberInInfoset()] = true;
 }
 
-void EFSupportWithActiveInfo::deactivate(const Node *n)
+void EFSupportWithActiveInfo::deactivate(const gbtEfgNode &n)
 {
-  is_nonterminal_node_active[n->GetPlayer().GetId()]
-                            [n->GetInfoset().GetId()]
-                            [n->NumberInInfoset()] = false;
+  is_nonterminal_node_active[n.GetPlayer().GetId()]
+                            [n.GetInfoset().GetId()]
+                            [n.NumberInInfoset()] = false;
 }
 
 void EFSupportWithActiveInfo::activate(const gbtEfgInfoset &i)
@@ -701,35 +704,37 @@ void EFSupportWithActiveInfo::deactivate(const gbtEfgInfoset &i)
   is_infoset_active[i.GetPlayer().GetId()][i.GetId()] = false;
 }
 
-void EFSupportWithActiveInfo::activate_this_and_lower_nodes(const Node *n)
+void
+EFSupportWithActiveInfo::activate_this_and_lower_nodes(const gbtEfgNode &n)
 {
-  if (n->IsNonterminal()) {
+  if (n.IsNonterminal()) {
     activate(n); 
-    activate(n->GetInfoset());
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
-      activate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
+    activate(n.GetInfoset());
+    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) 
+      activate_this_and_lower_nodes(n.GetChild(GetAction(n.GetInfoset(), i)));
   }
 }
 
-void EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const Node *n)
+void
+EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const gbtEfgNode &n)
 {
-  if (n->IsNonterminal()) {  // THIS ALL LOOKS FISHY
+  if (n.IsNonterminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n->GetInfoset()) )
-      deactivate(n->GetInfoset());
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
-      deactivate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
+    if ( !infoset_has_active_nodes(n.GetInfoset()) )
+      deactivate(n.GetInfoset());
+    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) {
+      deactivate_this_and_lower_nodes(n.GetChild(GetAction(n.GetInfoset(), i)));
     }
   }
 }
 
 void EFSupportWithActiveInfo::
-deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n, 
+deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode &n, 
                                                 gList<gbtEfgInfoset> *list)
 {
-  if (n->IsNonterminal()) {
+  if (n.IsNonterminal()) {
     deactivate(n); 
-    if ( !infoset_has_active_nodes(n->GetInfoset()) ) {
+    if ( !infoset_has_active_nodes(n.GetInfoset()) ) {
 
       //DEBUG
       /*
@@ -737,11 +742,11 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n,
 	   << " with support \n" << *this << "\n";
       */
 
-      (*list) += n->GetInfoset(); 
-      deactivate(n->GetInfoset());
+      (*list) += n.GetInfoset(); 
+      deactivate(n.GetInfoset());
     }
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
-      deactivate_this_and_lower_nodes_returning_deactivated_infosets(n->GetChild(GetAction(n->GetInfoset(), i)), list);    
+    for (int i = 1; i <= NumActions(n.GetInfoset()); i++) 
+      deactivate_this_and_lower_nodes_returning_deactivated_infosets(n.GetChild(GetAction(n.GetInfoset(), i)), list);    
   }
 }
 
@@ -867,10 +872,10 @@ EFSupportWithActiveInfo::operator!=(const EFSupportWithActiveInfo &s) const
 }
 
 // Member Function
-gList<const Node *> 
+gList<gbtEfgNode> 
 EFSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
 {
-  gList<const Node *> answer;
+  gList<gbtEfgNode> answer;
   int pl = i.GetPlayer().GetId();
   int iset = i.GetId();
   for (int j = 1; j <= i.NumMembers(); j++)
@@ -879,10 +884,10 @@ EFSupportWithActiveInfo::ReachableNodesInInfoset(const gbtEfgInfoset &i) const
   return answer;
 }
 
-gList<const Node *>
+gList<gbtEfgNode>
 EFSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
-  gList<const Node *> answer;
+  gList<gbtEfgNode> answer;
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer p = GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= p.NumInfosets(); iset++) {
@@ -897,16 +902,16 @@ void EFSupportWithActiveInfo::AddAction(const gbtEfgAction &s)
 {
   EFSupport::AddAction(s);
 
-  gList<const Node *> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
 bool EFSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
 {
-  gList<const Node *> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
-    deactivate_this_and_lower_nodes(startlist[i]->GetChild(s));
+    deactivate_this_and_lower_nodes(startlist[i].GetChild(s));
 
   // the following returns false if s was not active
   return EFSupport::RemoveAction(s);
@@ -917,10 +922,10 @@ EFSupportWithActiveInfo::
 RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
 				     gList<gbtEfgInfoset> *list)
 {
-  gList<const Node *> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                           startlist[i]->GetChild(s),list);
+                           startlist[i].GetChild(s),list);
 
   // the following returns false if s was not active
   return EFSupport::RemoveAction(s);
@@ -958,11 +963,11 @@ bool EFSupportWithActiveInfo::NodeIsActive(const int pl,
   return is_nonterminal_node_active[pl][iset][node];
 }
 
-bool EFSupportWithActiveInfo::NodeIsActive(const Node *n) const
+bool EFSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
 {
-  return NodeIsActive(n->GetInfoset().GetPlayer().GetId(),
-		      n->GetInfoset().GetId(),
-		      n->NumberInInfoset());
+  return NodeIsActive(n.GetInfoset().GetPlayer().GetId(),
+		      n.GetInfoset().GetId(),
+		      n.NumberInInfoset());
 }
 
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()

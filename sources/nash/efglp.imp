@@ -102,25 +102,25 @@ template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
 						    gDPVector<T> &v,
 						    const BFS<T> &sol,
-						    const Node *n,
+						    const gbtEfgNode &n,
 						    int s1,int s2) const
 {
   
   int i,pl,inf,snew;
   T eps = (T)0;
 //  eps = tab->Epsilon();
-  if (!n->GetInfoset().IsNull()) {
-    if(n->GetPlayer().IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
-	GetProfile(p_support,v,sol,n->GetChild(i),s1,s2);
+  if (!n.GetInfoset().IsNull()) {
+    if(n.GetPlayer().IsChance()) {
+      for(i=1;i<=n.NumChildren();i++)
+	GetProfile(p_support,v,sol,n.GetChild(i),s1,s2);
     }
-    pl = n->GetPlayer().GetId();
+    pl = n.GetPlayer().GetId();
     if(pl==2) {
-    inf= isets2.Find(n->GetInfoset());
+    inf= isets2.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
 	snew+=p_support.NumActions(isets2[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(s1)) {
 	  if(sol(s1)>eps) {
@@ -130,15 +130,15 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support,v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),snew+i,s2);
+	GetProfile(p_support,v,sol,n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),snew+i,s2);
       }
     }
     if(pl==1) {
-    inf= isets1.Find(n->GetInfoset());
+    inf= isets1.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
 	snew+=p_support.NumActions(isets1[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(-s2)) {
 	  if(sol(-s2)>eps) {
@@ -148,7 +148,7 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support,v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),s1,snew+i);
+	GetProfile(p_support,v,sol,n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),s1,snew+i);
       }
     }
   }
@@ -157,42 +157,42 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const EFSupport &p_support,
 
 template <class T>
 void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
-				  gMatrix<T> &A, const Node *n, T prob,
+				  gMatrix<T> &A, const gbtEfgNode &n, T prob,
 				  int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (!n->GetOutcome().IsNull()) {
+  if (!n.GetOutcome().IsNull()) {
     A(s1,s2) = gNumber(A(s1,s2)) +
-      gNumber(prob) * n->GetGame()->Payoff(n, n->GetGame()->GetPlayer(1)) - gNumber(minpay);
+      gNumber(prob) * n.GetGame()->Payoff(n, n.GetGame()->GetPlayer(1)) - gNumber(minpay);
   }
-  if (!n->GetInfoset().IsNull()) {
-    if(n->GetPlayer().IsChance()) {
-      for(i=1;i<=n->NumChildren();i++)
-	FillTableau(p_support, A, n->GetChild(i),
-		    gNumber(prob) * n->GetGame()->GetChanceProb(n->GetInfoset(), i),
+  if (!n.GetInfoset().IsNull()) {
+    if (n.GetPlayer().IsChance()) {
+      for(i=1;i<=n.NumChildren();i++)
+	FillTableau(p_support, A, n.GetChild(i),
+		    gNumber(prob) * n.GetGame()->GetChanceProb(n.GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
-    int pl = n->GetPlayer().GetId();
+    int pl = n.GetPlayer().GetId();
     if(pl==1) {
-      i1=isets1.Find(n->GetInfoset());
+      i1=isets1.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
 	snew+=p_support.NumActions(isets1[i]);
       A(s1,ns2+i1+1) = (T) +1;
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	A(snew+i,ns2+i1+1) = (T) -1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),prob,snew+i,s2,i1,i2);
+	FillTableau(p_support, A, n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
-      i2=isets2.Find(n->GetInfoset());
+      i2=isets2.Find(n.GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=p_support.NumActions(isets2[i]);
       A(ns1+i2+1,s2) = (T) -1;
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support.NumActions(n.GetInfoset());i++) {
 	A(ns1+i2+1,snew+i) = (T) +1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i).GetId()),prob,s1,snew+i,i1,i2);
+	FillTableau(p_support, A, n.GetChild(p_support.GetAction(n.GetInfoset(), i).GetId()),prob,s1,snew+i,i1,i2);
       }
     }
   }

@@ -40,8 +40,8 @@ class efgGame;
 struct gbt_efg_outcome_rep;
 struct gbt_efg_action_rep;
 struct gbt_efg_infoset_rep;
+struct gbt_efg_node_rep;
 struct gbt_efg_player_rep;
-class Node;
 
 struct gbt_efg_outcome_rep {
   int m_id;
@@ -85,12 +85,32 @@ struct gbt_efg_infoset_rep {
   int m_refCount;
   gBlock<gbt_efg_action_rep *> m_actions;
   gBlock<gNumber> m_chanceProbs;
-  gBlock<Node *> m_members;
+  gBlock<gbt_efg_node_rep *> m_members;
   int m_flag, m_whichbranch;
 
   gbt_efg_infoset_rep(gbt_efg_player_rep *, int id, int br);
 
   void PrintActions(gOutput &) const;
+};
+
+struct gbt_efg_node_rep {
+  int m_id;
+  efgGame *m_efg;
+  bool m_deleted;
+  gText m_label;
+  int m_refCount;
+
+  bool m_mark;
+  gbt_efg_infoset_rep *m_infoset;
+  gbt_efg_node_rep *m_parent;
+  gbt_efg_outcome_rep *m_outcome;
+  gBlock<gbt_efg_node_rep *> m_children;
+  gbt_efg_node_rep *m_whichbranch, *m_ptr, *m_gameroot;
+
+  gbt_efg_node_rep(efgGame *, gbt_efg_node_rep *);
+  ~gbt_efg_node_rep();
+
+  void DeleteOutcome(gbt_efg_outcome_rep *outc);
 };
 
 #endif  // EFGINT_H

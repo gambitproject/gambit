@@ -43,9 +43,6 @@ class gclSignature;
 class gText;
 class gRational;
 
-class Node;
-class Infoset;
-
 template <class T> class gList;
 template <class T> class gStack;
 
@@ -123,13 +120,6 @@ public:
   void UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &outcome);
   // Unassigns a SINGLE given element of an Efg
   void UnAssignEfgElement(efgGame *game, PortionSpec spec, void* data );
-
-  // This function will unassign an infoset and all associated actions
-  void UnAssignEfgInfoset(efgGame *game, Infoset* infoset );
-
-  // This function will unassign the subtree rooted by the given node
-  void UnAssignEfgSubTree(efgGame *game, Node* node ); 
-
 
   void GlobalVarDefine     ( const gText& var_name, Portion* p );
   bool GlobalVarIsDefined  ( const gText& var_name ) const;

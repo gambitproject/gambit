@@ -31,35 +31,37 @@
 #include "node.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes (const efgGame &befg, gList <Node *> &list);
+void Nodes (const efgGame &befg, gList<gbtEfgNode> &list);
 
-void Nodes (const efgGame &befg, Node *n, gList <Node *> &list);
+void Nodes (const efgGame &befg, const gbtEfgNode &n, gList<gbtEfgNode> &list);
 
 // returns the number of nodes in the extensive form
 int NumNodes (const efgGame &befg);
 
 // returns the number of nodes given a starting node
-int CountNodes (const efgGame &e, Node *n);
+int CountNodes (const efgGame &e, const gbtEfgNode &);
 
 // Returns the terminal nodes in a subtree rooted at 'p_node'
-void TerminalNodes(Node *, gList<Node *> &);
+void TerminalNodes(const gbtEfgNode &, gList<gbtEfgNode> &);
 
 // returns the action leading up to the node
-gbtEfgAction LastAction(const efgGame &e, Node *node);
+gbtEfgAction LastAction(const efgGame &e, const gbtEfgNode &node);
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const efgGame &efg, gList<Node *> &list);
+void MarkedSubgameRoots(const efgGame &efg, gList<gbtEfgNode> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const efgGame &efg, gList<Node *> &list);
-void LegalSubgameRoots(const efgGame &efg, Node *, gList<Node *> &);
+void LegalSubgameRoots(const efgGame &efg, gList<gbtEfgNode> &list);
+void LegalSubgameRoots(const efgGame &efg, const gbtEfgNode &,
+		       gList<gbtEfgNode> &);
 bool HasSubgames(const efgGame &efg);
-bool HasSubgames(const efgGame &, Node *n);
+bool HasSubgames(const efgGame &, const gbtEfgNode &n);
 
 bool AllSubgamesMarked(const efgGame &efg);
 
 // returns the list of nodes which are roots of child subgames
-void ChildSubgames(const efgGame &, Node *, gList<Node *> &);
+void ChildSubgames(const efgGame &, const gbtEfgNode &, 
+		   gList<gbtEfgNode> &);
 
 // determines if a game is perfect recall.  
 // if not, returns a pair of infosets violating the definition

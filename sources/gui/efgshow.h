@@ -48,7 +48,7 @@ class EfgShow : public wxFrame {
 private:
   efgGame &m_efg;
   TreeWindow *m_treeWindow;
-  Node *m_cursor, *m_copyNode, *m_cutNode;
+  gbtEfgNode m_cursor, m_copyNode, m_cutNode;
 
   int m_currentProfile;
   gList<BehavSolution> m_profiles;
@@ -169,14 +169,14 @@ public:
   gText UniqueSupportName(void) const;
   void OnSupportsEdited(void);
 
-  gText GetRealizProb(const Node *) const;
-  gText GetBeliefProb(const Node *) const;
-  gText GetNodeValue(const Node *) const;
-  gText GetInfosetProb(const Node *) const;
-  gText GetInfosetValue(const Node *) const;
-  gText GetActionValue(const Node *, int act) const;
-  gText GetActionProb(const Node *, int act) const;
-  gNumber ActionProb(const Node *n, int br) const;
+  gText GetRealizProb(const gbtEfgNode &) const;
+  gText GetBeliefProb(const gbtEfgNode &) const;
+  gText GetNodeValue(const gbtEfgNode &) const;
+  gText GetInfosetProb(const gbtEfgNode &) const;
+  gText GetInfosetValue(const gbtEfgNode &) const;
+  gText GetActionValue(const gbtEfgNode &, int act) const;
+  gText GetActionProb(const gbtEfgNode &, int act) const;
+  gNumber ActionProb(const gbtEfgNode &, int br) const;
 
   efgGame *Game(void) { return &m_efg; }
 
@@ -189,10 +189,10 @@ public:
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
-  void SetCursor(Node *m_node);
-  Node *Cursor(void) const { return m_cursor; }
-  Node *CopyNode(void) const { return m_copyNode; }
-  Node *CutNode(void) const { return m_cutNode; }
+  void SetCursor(gbtEfgNode m_node);
+  gbtEfgNode Cursor(void) const { return m_cursor; }
+  gbtEfgNode CopyNode(void) const { return m_copyNode; }
+  gbtEfgNode CutNode(void) const { return m_cutNode; }
 
   void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

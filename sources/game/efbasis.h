@@ -38,23 +38,24 @@ class EFBasis : public EFSupport {
 protected:
   gArray <EFNodeSet *> nodes;
 
-  // This is scratch stuff for consistency computation:
-  EFBasis *bigbasis;
-  gMatrix<double> *A;
-  gVector<double> *b,*c;
-  gDPVector<int> *actIndex, *nodeIndex;
-  int num_eqs, num_ineqs, num_act_vars,num_node_vars;
+  // This is scratch stuff for consistency computation.
+  // FIXME: These shouldn't be members!!
+  mutable EFBasis *bigbasis;
+  mutable gMatrix<double> *A;
+  mutable gVector<double> *b,*c;
+  mutable gDPVector<int> *actIndex, *nodeIndex;
+  mutable int num_eqs, num_ineqs, num_act_vars,num_node_vars;
 
-  void MakeIndices();
-  void MakeRowIndices();
-  void MakeAb();
+  void MakeIndices(void) const;
+  void MakeRowIndices(void) const;
+  void MakeAb(void) const;
   void AddEquation1(int, const gbtEfgAction &) const;
-  void AddEquation2(int,Node *) const;
-  void AddEquation3(int,Node *,Node *) const;
-  void AddEquation4(int,Node *,Node *) const;
+  void AddEquation2(int, gbtEfgNode) const;
+  void AddEquation3(int, const gbtEfgNode &, const gbtEfgNode &) const;
+  void AddEquation4(int, const gbtEfgNode &, const gbtEfgNode &) const;
   int Col(const gbtEfgAction &) const;
-  int Col(Node *) const;
-  void GetConsistencySolution(const gVector<double> &x);
+  int Col(const gbtEfgNode &) const;
+  void GetConsistencySolution(const gVector<double> &x) const;
   
 public:
   EFBasis(const efgGame &);
@@ -69,19 +70,19 @@ public:
   int NumNodes(const gbtEfgInfoset &) const;
   gPVector<int> NumNodes(void) const;
 
-  bool RemoveNode(Node *);
-  void AddNode(Node *);
-  bool IsReachable(Node *) const;
+  bool RemoveNode(const gbtEfgNode &);
+  void AddNode(const gbtEfgNode &);
+  bool IsReachable(gbtEfgNode) const;
 
   // Returns the position of the node in the support.  Returns zero
   // if it is not there.
-  int Find(Node *) const;
+  int Find(const gbtEfgNode &) const;
 
-  const gArray<Node *> &Nodes(int pl, int iset) const;
-  Node *GetNode(const gbtEfgInfoset &, int index) const;
+  const gArray<gbtEfgNode> &Nodes(int pl, int iset) const;
+  gbtEfgNode GetNode(const gbtEfgInfoset &, int index) const;
 
   bool IsValid(void) const;
-  bool IsConsistent();
+  bool IsConsistent(void) const;
   void Dump(gOutput &) const;
 };
 

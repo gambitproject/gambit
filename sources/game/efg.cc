@@ -44,12 +44,12 @@ efgGame::efgGame(void)
     m_outcome_revision(-1), title("UNTITLED"),
     chance(new gbt_efg_player_rep(this, 0)), afg(0), lexicon(0)
 {
-  root = new Node(this, 0);
+  root = new gbt_efg_node_rep(this, 0);
 
   SortInfosets();
 }
 
-efgGame::efgGame(const efgGame &E, Node *n /* = 0 */)
+efgGame::efgGame(const efgGame &E, gbtEfgNode n /* = null */)
   : sortisets(false), m_dirty(false), m_revision(0), 
     m_outcome_revision(-1), title(E.title), comment(E.comment),
     players(E.players.Length()), outcomes(0, E.outcomes.Last()),
@@ -86,10 +86,10 @@ efgGame::efgGame(const efgGame &E, Node *n /* = 0 */)
     outcomes[outc]->m_payoffs = E.outcomes[outc]->m_payoffs;
   }
 
-  root = new Node(this, 0);
-  CopySubtree(root, (n ? n : E.RootNode()));
+  root = new gbt_efg_node_rep(this, 0);
+  CopySubtree(root, (n.rep ? n.rep : E.root));
   
-  if (n)   {
+  if (n.rep)   {
     for (int pl = 1; pl <= players.Length(); pl++)  {
       for (int i = 1; i <= players[pl]->m_infosets.Length(); i++)  {
 	if (players[pl]->m_infosets[i]->m_members.Length() == 0)
@@ -164,11 +164,11 @@ void efgGame::Reindex(void)
 }
 
 
-void efgGame::NumberNodes(Node *n, int &index)
+void efgGame::NumberNodes(gbt_efg_node_rep *n, int &index)
 {
-  n->number = index++;
-  for (int child = 1; child <= n->children.Length();
-       NumberNodes(n->children[child++], index));
+  n->m_id = index++;
+  for (int child = 1; child <= n->m_children.Length();
+       NumberNodes(n->m_children[child++], index));
 } 
 
 void efgGame::SortInfosets(void)
@@ -178,7 +178,7 @@ void efgGame::SortInfosets(void)
   int pl;
 
   for (pl = 0; pl <= players.Length(); pl++)  {
-    gList<Node *> nodes;
+    gList<gbtEfgNode> nodes;
 
     Nodes(*this, nodes);
 
@@ -209,17 +209,17 @@ void efgGame::SortInfosets(void)
 	player->m_infosets[i]->m_id = 0;
   
     for (i = 1; i <= nodes.Length(); i++)  {
-      Node *n = nodes[i];
-      if (n->GetPlayer() == player && n->infoset->m_id == 0)  {
-	n->infoset->m_id = ++isets;
-	player->m_infosets[isets] = n->infoset;
+      gbtEfgNode n = nodes[i];
+      if (n.GetPlayer() == player && n.GetInfoset().GetId() == 0)  {
+	n.rep->m_infoset->m_id = ++isets;
+	player->m_infosets[isets] = n.rep->m_infoset;
       }
     }  
   }
 
   // Now, we sort the nodes within the infosets
   
-  gList<Node *> nodes;
+  gList<gbtEfgNode> nodes;
   Nodes(*this, nodes);
 
   for (pl = 0; pl <= players.Length(); pl++)  {
@@ -228,8 +228,8 @@ void efgGame::SortInfosets(void)
     for (int iset = 1; iset <= player->m_infosets.Length(); iset++)  {
       gbt_efg_infoset_rep *s = player->m_infosets[iset];
       for (int i = 1, j = 1; i <= nodes.Length(); i++)  {
-	if (nodes[i]->infoset == s)
-	  s->m_members[j++] = nodes[i];
+	if (nodes[i].rep->m_infoset == s)
+	  s->m_members[j++] = nodes[i].rep;
       }
     }
   }
@@ -251,31 +251,31 @@ gbtEfgOutcome efgGame::CreateOutcomeByIndex(int index)
   return outcomes[outcomes.Last()];
 }
 
-void efgGame::CopySubtree(Node *n, Node *m)
+void efgGame::CopySubtree(gbt_efg_node_rep *n, gbt_efg_node_rep *m)
 {
-  n->name = m->name;
+  n->m_label = m->m_label;
 
-  if (m->gameroot == m)
-    n->gameroot = n;
+  if (m->m_gameroot == m)
+    n->m_gameroot = n;
 
-  if (m->outcome) {
-    n->outcome = m->outcome;
+  if (m->m_outcome) {
+    n->m_outcome = m->m_outcome;
   }
 
-  if (m->infoset)   {
+  if (m->m_infoset)   {
     gbt_efg_player_rep *p;
-    if (m->infoset->m_player->m_id) {
-      p = players[m->infoset->m_player->m_id];
+    if (m->m_infoset->m_player->m_id) {
+      p = players[m->m_infoset->m_player->m_id];
     }
     else {
       p = chance;
     }
 
-    gbt_efg_infoset_rep *s = p->m_infosets[m->infoset->m_id];
+    gbt_efg_infoset_rep *s = p->m_infosets[m->m_infoset->m_id];
     AppendNode(n, s);
 
-    for (int i = 1; i <= n->children.Length(); i++)
-      CopySubtree(n->children[i], m->children[i]);
+    for (int i = 1; i <= n->m_children.Length(); i++)
+      CopySubtree(n->m_children[i], m->m_children[i]);
   }
 }
 
@@ -308,16 +308,16 @@ const gText &efgGame::GetComment(void) const
 //                    Efg: Writing data files
 //------------------------------------------------------------------------
 
-void efgGame::WriteEfgFile(gOutput &f, Node *n) const
+void efgGame::WriteEfgFile(gOutput &f, gbt_efg_node_rep *n) const
 {
-  if (n->children.Length() == 0)   {
-    f << "t \"" << EscapeQuotes(n->name) << "\" ";
-    if (n->outcome)  {
-      f << n->outcome->m_id << " \"" <<
-	EscapeQuotes(n->outcome->m_label) << "\" ";
+  if (n->m_children.Length() == 0)   {
+    f << "t \"" << EscapeQuotes(n->m_label) << "\" ";
+    if (n->m_outcome)  {
+      f << n->m_outcome->m_id << " \"" <<
+	EscapeQuotes(n->m_outcome->m_label) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->m_payoffs[pl];
+	f << n->m_outcome->m_payoffs[pl];
 	if (pl < NumPlayers())
 	  f << ", ";
 	else
@@ -328,19 +328,19 @@ void efgGame::WriteEfgFile(gOutput &f, Node *n) const
       f << "0\n";
   }
 
-  else if (n->infoset->m_player->m_id)   {
-    f << "p \"" << EscapeQuotes(n->name) << "\" " <<
-      n->infoset->m_player->m_id << ' ';
-    f << n->infoset->m_id << " \"" <<
-      EscapeQuotes(n->infoset->m_label) << "\" ";
-    n->infoset->PrintActions(f);
+  else if (n->m_infoset->m_player->m_id)   {
+    f << "p \"" << EscapeQuotes(n->m_label) << "\" " <<
+      n->m_infoset->m_player->m_id << ' ';
+    f << n->m_infoset->m_id << " \"" <<
+      EscapeQuotes(n->m_infoset->m_label) << "\" ";
+    n->m_infoset->PrintActions(f);
     f << " ";
-    if (n->outcome)  {
-      f << n->outcome->m_id << " \"" <<
-	EscapeQuotes(n->outcome->m_label) << "\" ";
+    if (n->m_outcome)  {
+      f << n->m_outcome->m_id << " \"" <<
+	EscapeQuotes(n->m_outcome->m_label) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->m_payoffs[pl];
+	f << n->m_outcome->m_payoffs[pl];
 	if (pl < NumPlayers())
 	  f << ", ";
 	else
@@ -352,17 +352,17 @@ void efgGame::WriteEfgFile(gOutput &f, Node *n) const
   }
 
   else   {    // chance node
-    f << "c \"" << n->name << "\" ";
-    f << n->infoset->m_id << " \"" <<
-      EscapeQuotes(n->infoset->m_label) << "\" ";
-    n->infoset->PrintActions(f);
+    f << "c \"" << n->m_label << "\" ";
+    f << n->m_infoset->m_id << " \"" <<
+      EscapeQuotes(n->m_infoset->m_label) << "\" ";
+    n->m_infoset->PrintActions(f);
     f << " ";
-    if (n->outcome)  {
-      f << n->outcome->m_id << " \"" <<
-	EscapeQuotes(n->outcome->m_label) << "\" ";
+    if (n->m_outcome)  {
+      f << n->m_outcome->m_id << " \"" <<
+	EscapeQuotes(n->m_outcome->m_label) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)  {
-	f << n->outcome->m_payoffs[pl];
+	f << n->m_outcome->m_payoffs[pl];
         if (pl < NumPlayers()) 
           f << ", ";
         else
@@ -373,8 +373,8 @@ void efgGame::WriteEfgFile(gOutput &f, Node *n) const
       f << "0\n";
   }
 
-  for (int i = 1; i <= n->children.Length(); i++)
-    WriteEfgFile(f, n->children[i]);
+  for (int i = 1; i <= n->m_children.Length(); i++)
+    WriteEfgFile(f, n->m_children[i]);
 }
 
 void efgGame::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
@@ -484,14 +484,15 @@ gNumber efgGame::Payoff(const gbtEfgOutcome &p_outcome,
   return p_outcome.rep->m_payoffs[p_player.rep->m_id];
 }
 
-gNumber efgGame::Payoff(const Node *p_node, const gbtEfgPlayer &p_player) const
+gNumber efgGame::Payoff(const gbtEfgNode &p_node,
+			const gbtEfgPlayer &p_player) const
 {
   if (p_player.IsNull()) {
     return gNumber(0);
   }
 
-  return ((p_node->outcome) ? 
-	  p_node->outcome->m_payoffs[p_player.rep->m_id] : gNumber(0));
+  return ((p_node.rep->m_outcome) ? 
+	  p_node.rep->m_outcome->m_payoffs[p_player.rep->m_id] : gNumber(0));
 }
 
 gArray<gNumber> efgGame::Payoff(const gbtEfgOutcome &p_outcome) const
@@ -569,15 +570,17 @@ gNumber efgGame::MaxPayoff(int pl) const
   return maxpay;
 }
 
-Node *efgGame::RootNode(void) const
+gbtEfgNode efgGame::RootNode(void) const
 { return root; }
 
-bool efgGame::IsSuccessor(const Node *n, const Node *from) const
+bool efgGame::IsSuccessor(const gbtEfgNode &n, const gbtEfgNode &from) const
 { return IsPredecessor(from, n); }
 
-bool efgGame::IsPredecessor(const Node *n, const Node *of) const
+bool efgGame::IsPredecessor(const gbtEfgNode &n, gbtEfgNode of) const
 {
-  while (of && n != of)    of = of->parent;
+  while (!of.IsNull() && n != of) {
+    of = of.GetParent();
+  }
 
   return (n == of);
 }
@@ -599,41 +602,46 @@ gbtEfgPlayer efgGame::GetChance(void) const
   return chance;
 }
 
-gbtEfgInfoset efgGame::AppendNode(Node *n, gbtEfgPlayer p, int count)
+gbtEfgInfoset efgGame::AppendNode(gbtEfgNode n, gbtEfgPlayer p, int count)
 {
-  if (!n || p.IsNull() || count == 0)
+  if (n.IsNull() || p.IsNull() || count == 0)
     throw Exception();
 
   m_revision++;
   m_dirty = true;
 
-  if (n->children.Length() == 0)   {
-    n->infoset = CreateInfoset(p.rep->m_infosets.Length() + 1, p.rep, count);
-    n->infoset->m_members.Append(n);
-    while (count--)
-      n->children.Append(new Node(this, n));
+  if (n.NumChildren() == 0)   {
+    n.rep->m_infoset = CreateInfoset(p.rep->m_infosets.Length() + 1,
+				     p.rep, count);
+    n.rep->m_infoset->m_members.Append(n.rep);
+    while (count--) {
+      n.rep->m_children.Append(new gbt_efg_node_rep(this, n.rep));
+    }
   }
 
   DeleteLexicon();
   SortInfosets();
-  return n->infoset;
+  return n.rep->m_infoset;
 }  
 
-gbtEfgInfoset efgGame::AppendNode(Node *n, gbtEfgInfoset s)
+gbtEfgInfoset efgGame::AppendNode(gbtEfgNode n, gbtEfgInfoset s)
 {
-  if (!n || s.IsNull())   throw Exception();
+  if (n.IsNull() || s.IsNull())   throw Exception();
   
   // Can't bridge subgames...
-  if (s.rep->m_members.Length() > 0 && n->gameroot != s.rep->m_members[1]->gameroot)
+  if (s.rep->m_members.Length() > 0 &&
+      n.rep->m_gameroot != s.rep->m_members[1]->m_gameroot) {
     return 0;
+  }
 
-  if (n->children.Length() == 0)   {
+  if (n.rep->m_children.Length() == 0)   {
     m_revision++;
     m_dirty = true;
-    n->infoset = s.rep;
-    s.rep->m_members.Append(n);
-    for (int i = 1; i <= s.rep->m_actions.Length(); i++)
-      n->children.Append(new Node(this, n));
+    n.rep->m_infoset = s.rep;
+    s.rep->m_members.Append(n.rep);
+    for (int i = 1; i <= s.rep->m_actions.Length(); i++) {
+      n.rep->m_children.Append(new gbt_efg_node_rep(this, n.rep));
+    }
   }
 
   DeleteLexicon();
@@ -641,29 +649,32 @@ gbtEfgInfoset efgGame::AppendNode(Node *n, gbtEfgInfoset s)
   return s;
 }
   
-Node *efgGame::DeleteNode(Node *n, Node *keep)
+gbtEfgNode efgGame::DeleteNode(gbtEfgNode n, gbtEfgNode keep)
 {
-  if (!n || !keep)   throw Exception();
+  if (n.IsNull() || keep.IsNull())   throw Exception();
 
-  if (keep->parent != n)   return n;
+  if (keep.rep->m_parent != n.rep)   return n;
 
-  if (n->gameroot == n)
-    MarkSubgame(keep, keep);
+  if (n.rep->m_gameroot == n.rep) {
+    MarkSubgame(keep.rep, keep.rep);
+  }
 
   m_revision++;
   m_dirty = true;
   // turn infoset sorting off during tree deletion -- problems will occur
   sortisets = false;
 
-  n->children.Remove(n->children.Find(keep));
-  DeleteTree(n);
-  keep->parent = n->parent;
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = keep;
-  else
-    root = keep;
+  n.rep->m_children.Remove(n.rep->m_children.Find(keep.rep));
+  DeleteTree(n.rep);
+  keep.rep->m_parent = n.rep->m_parent;
+  if (n.rep->m_parent) {
+    n.rep->m_parent->m_children[n.rep->m_parent->m_children.Find(n.rep)] = keep.rep;
+  }
+  else {
+    root = keep.rep;
+  }
 
-  delete n;
+  delete n.rep;
   DeleteLexicon();
 
   sortisets = true;
@@ -672,59 +683,64 @@ Node *efgGame::DeleteNode(Node *n, Node *keep)
   return keep;
 }
 
-gbtEfgInfoset efgGame::InsertNode(Node *n, gbtEfgPlayer p, int count)
+gbtEfgInfoset efgGame::InsertNode(gbtEfgNode n, gbtEfgPlayer p, int count)
 {
-  if (!n || p.IsNull() || count <= 0)  {
+  if (n.IsNull() || p.IsNull() || count <= 0)  {
     throw Exception();
   }
 
   m_revision++;
   m_dirty = true;
 
-  Node *m = new Node(this, n->parent);
-  m->infoset = CreateInfoset(p.rep->m_infosets.Length() + 1, p, count);
-  m->infoset->m_members.Append(m);
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = m;
-  else
+  gbt_efg_node_rep *m = new gbt_efg_node_rep(this, n.rep->m_parent);
+  m->m_infoset = CreateInfoset(p.rep->m_infosets.Length() + 1, p, count);
+  m->m_infoset->m_members.Append(m);
+  if (n.rep->m_parent) {
+    n.rep->m_parent->m_children[n.rep->m_parent->m_children.Find(n.rep)] = m;
+  }
+  else {
     root = m;
-  m->children.Append(n);
-  n->parent = m;
-  while (--count)
-    m->children.Append(new Node(this, m));
+  }
+  m->m_children.Append(n.rep);
+  n.rep->m_parent = m;
+  while (--count) {
+    m->m_children.Append(new gbt_efg_node_rep(this, m));
+  }
 
   DeleteLexicon();
   SortInfosets();
-  return m->infoset;
+  return m->m_infoset;
 }
 
-gbtEfgInfoset efgGame::InsertNode(Node *n, gbtEfgInfoset s)
+gbtEfgInfoset efgGame::InsertNode(gbtEfgNode n, gbtEfgInfoset s)
 {
-  if (!n || s.IsNull())  throw Exception();
+  if (n.IsNull() || s.IsNull())  throw Exception();
 
   // can't bridge subgames
-  if (s.rep->m_members.Length() > 0 && n->gameroot != s.rep->m_members[1]->gameroot)
+  if (s.rep->m_members.Length() > 0 &&
+      n.rep->m_gameroot != s.rep->m_members[1]->m_gameroot)
     return 0;
   
   m_revision++;
   m_dirty = true;
 
-  Node *m = new Node(this, n->parent);
-  m->infoset = s.rep;
+  gbt_efg_node_rep *m = new gbt_efg_node_rep(this, n.rep->m_parent);
+  m->m_infoset = s.rep;
   s.rep->m_members.Append(m);
-  if (n->parent)
-    n->parent->children[n->parent->children.Find(n)] = m;
+  if (n.rep->m_parent)
+    n.rep->m_parent->m_children[n.rep->m_parent->m_children.Find(n.rep)] = m;
   else
     root = m;
-  m->children.Append(n);
-  n->parent = m;
+  m->m_children.Append(n.rep);
+  n.rep->m_parent = m;
   int count = s.rep->m_actions.Length();
-  while (--count)
-    m->children.Append(new Node(this, m));
+  while (--count) {
+    m->m_children.Append(new gbt_efg_node_rep(this, m));
+  }
 
   DeleteLexicon();
   SortInfosets();
-  return m->infoset;
+  return m->m_infoset;
 }
 
 gbtEfgInfoset efgGame::CreateInfoset(gbtEfgPlayer p, int br)
@@ -737,67 +753,70 @@ gbtEfgInfoset efgGame::CreateInfoset(gbtEfgPlayer p, int br)
   return CreateInfoset(p.rep->m_infosets.Length() + 1, p.rep, br);
 }
 
-gbtEfgInfoset efgGame::JoinInfoset(gbtEfgInfoset s, Node *n)
+gbtEfgInfoset efgGame::JoinInfoset(gbtEfgInfoset s, gbtEfgNode n)
 {
-  if (!n || s.IsNull())  throw Exception();
+  if (n.IsNull() || s.IsNull())  throw Exception();
 
   // can't bridge subgames
-  if (s.rep->m_members.Length() > 0 && n->gameroot != s.rep->m_members[1]->gameroot)
+  if (s.rep->m_members.Length() > 0 &&
+      n.rep->m_gameroot != s.rep->m_members[1]->m_gameroot)
     return 0;
   
-  if (!n->infoset)   return 0; 
-  if (n->infoset == s.rep)   return s;
-  if (s.rep->m_actions.Length() != n->children.Length())  return n->infoset;
+  if (!n.rep->m_infoset)   return 0; 
+  if (n.rep->m_infoset == s.rep)   return s;
+  if (s.rep->m_actions.Length() != n.rep->m_children.Length())  {
+    return n.rep->m_infoset;
+  }
 
   m_revision++;
   m_dirty = true;
 
-  gbt_efg_infoset_rep *t = n->infoset;
+  gbt_efg_infoset_rep *t = n.rep->m_infoset;
 
-  t->m_members.Remove(t->m_members.Find(n));
-  s.rep->m_members.Append(n);
+  t->m_members.Remove(t->m_members.Find(n.rep));
+  s.rep->m_members.Append(n.rep);
 
-  n->infoset = s.rep;
+  n.rep->m_infoset = s.rep;
 
   DeleteLexicon();
   SortInfosets();
   return s;
 }
 
-gbtEfgInfoset efgGame::LeaveInfoset(Node *n)
+gbtEfgInfoset efgGame::LeaveInfoset(gbtEfgNode n)
 {
-  if (!n)  throw Exception();
+  if (n.IsNull())  throw Exception();
 
-  if (!n->infoset)   return 0;
+  if (!n.rep->m_infoset)   return 0;
 
-  gbt_efg_infoset_rep *s = n->infoset;
+  gbt_efg_infoset_rep *s = n.rep->m_infoset;
   if (s->m_members.Length() == 1)   return s;
 
   m_revision++;
   m_dirty = true;
 
   gbt_efg_player_rep *p = s->m_player;
-  s->m_members.Remove(s->m_members.Find(n));
-  n->infoset = CreateInfoset(p->m_infosets.Length() + 1, p,
-			     n->children.Length());
-  n->infoset->m_label = s->m_label;
-  n->infoset->m_members.Append(n);
+  s->m_members.Remove(s->m_members.Find(n.rep));
+  n.rep->m_infoset = CreateInfoset(p->m_infosets.Length() + 1, p,
+				   n.rep->m_children.Length());
+  n.rep->m_infoset->m_label = s->m_label;
+  n.rep->m_infoset->m_members.Append(n.rep);
   for (int i = 1; i <= s->m_actions.Length(); i++) {
-    n->infoset->m_actions[i]->m_label = s->m_actions[i]->m_label;
+    n.rep->m_infoset->m_actions[i]->m_label = s->m_actions[i]->m_label;
   }
 
   DeleteLexicon();
   SortInfosets();
-  return n->infoset;
+  return n.rep->m_infoset;
 }
 
-gbtEfgInfoset efgGame::SplitInfoset(Node *n)
+gbtEfgInfoset efgGame::SplitInfoset(gbtEfgNode n)
 {
-  if (!n)  throw Exception();
+  if (n.IsNull())  throw Exception();
 
-  if (!n->infoset)   return 0;
+  if (!n.rep->m_infoset)   return 0;
 
-  gbt_efg_infoset_rep *s = n->infoset;
+  gbt_efg_infoset_rep *s = n.rep->m_infoset;
   if (s->m_members.Length() == 1)   return s;
 
   m_revision++;
@@ -805,12 +824,12 @@ gbtEfgInfoset efgGame::SplitInfoset(Node *n)
 
   gbt_efg_player_rep *p = s->m_player;
   gbt_efg_infoset_rep *ns = CreateInfoset(p->m_infosets.Length() + 1, p,
-					  n->children.Length());
+					  n.rep->m_children.Length());
   ns->m_label = s->m_label;
-  for (int i = s->m_members.Length(); i > s->m_members.Find(n); i--)   {
-    Node *nn = s->m_members.Remove(i);
+  for (int i = s->m_members.Length(); i > s->m_members.Find(n.rep); i--)   {
+    gbt_efg_node_rep *nn = s->m_members.Remove(i);
     ns->m_members.Append(nn);
-    nn->infoset = ns;
+    nn->m_infoset = ns;
   }
   for (int i = 1; i <= s->m_actions.Length(); i++) {
     ns->m_actions[i]->m_label = s->m_actions[i]->m_label;
@@ -820,7 +839,7 @@ gbtEfgInfoset efgGame::SplitInfoset(Node *n)
   }
   DeleteLexicon();
   SortInfosets();
-  return n->infoset;
+  return n.rep->m_infoset;
 }
 
 gbtEfgInfoset efgGame::MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from)
@@ -832,15 +851,16 @@ gbtEfgInfoset efgGame::MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from)
     return from;
   }
 
-  if (to.rep->m_members[1]->gameroot != from.rep->m_members[1]->gameroot) 
+  if (to.rep->m_members[1]->m_gameroot != from.rep->m_members[1]->m_gameroot) 
     return from;
 
   m_revision++;
   m_dirty = true;
 
   to.rep->m_members += from.rep->m_members;
-  for (int i = 1; i <= from.rep->m_members.Length(); i++)
-    from.rep->m_members[i]->infoset = to.rep;
+  for (int i = 1; i <= from.rep->m_members.Length(); i++) {
+    from.rep->m_members[i]->m_infoset = to.rep;
+  }
 
   from.rep->m_members.Flush();
 
@@ -896,42 +916,43 @@ gbtEfgInfoset efgGame::SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p)
   return s;
 }
 
-void efgGame::CopySubtree(Node *src, Node *dest, Node *stop)
+void efgGame::CopySubtree(gbt_efg_node_rep *src, gbt_efg_node_rep *dest,
+			  gbt_efg_node_rep *stop)
 {
   if (src == stop) {
-    dest->outcome = src->outcome;
+    dest->m_outcome = src->m_outcome;
     return;
   }
 
-  if (src->children.Length())  {
-    AppendNode(dest, src->infoset);
-    for (int i = 1; i <= src->children.Length(); i++)
-      CopySubtree(src->children[i], dest->children[i], stop);
+  if (src->m_children.Length())  {
+    AppendNode(dest, src->m_infoset);
+    for (int i = 1; i <= src->m_children.Length(); i++)
+      CopySubtree(src->m_children[i], dest->m_children[i], stop);
   }
 
-  dest->name = src->name;
-  dest->outcome = src->outcome;
+  dest->m_label = src->m_label;
+  dest->m_outcome = src->m_outcome;
 }
 
 //
 // MarkSubtree: sets the Node::mark flag on all children of p_node
 //
-void efgGame::MarkSubtree(Node *p_node)
+void efgGame::MarkSubtree(gbt_efg_node_rep *p_node)
 {
-  p_node->mark = true;
-  for (int i = 1; i <= p_node->children.Length(); i++) {
-    MarkSubtree(p_node->children[i]);
+  p_node->m_mark = true;
+  for (int i = 1; i <= p_node->m_children.Length(); i++) {
+    MarkSubtree(p_node->m_children[i]);
   }
 }
 
 //
 // UnmarkSubtree: clears the Node::mark flag on all children of p_node
 //
-void efgGame::UnmarkSubtree(Node *p_node)
+void efgGame::UnmarkSubtree(gbt_efg_node_rep *p_node)
 {
-  p_node->mark = false;
-  for (int i = 1; i <= p_node->children.Length(); i++) {
-    UnmarkSubtree(p_node->children[i]);
+  p_node->m_mark = false;
+  for (int i = 1; i <= p_node->m_children.Length(); i++) {
+    UnmarkSubtree(p_node->m_children[i]);
   }
 }
 
@@ -949,21 +970,22 @@ void efgGame::Reveal(gbtEfgInfoset where, gbtEfgPlayer who)
 
   for (int i = 1; i <= where.rep->m_actions.Length(); i++) {
     for (int j = 1; j <= where.rep->m_members.Length(); j++) { 
-      MarkSubtree(where.rep->m_members[j]->children[i]);
+      MarkSubtree(where.rep->m_members[j]->m_children[i]);
     }
 
     for (int k = 1; k <= who.rep->m_infosets.Length(); k++) {
       // iterate over each member of information set 'k'
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
-      gArray<Node *> members = who.rep->m_infosets[k]->m_members;
+      const gArray<gbt_efg_node_rep *> &members = 
+	who.rep->m_infosets[k]->m_members;
       gbtEfgInfoset newiset = 0;
       
       for (int m = 1; m <= members.Length(); m++) {
-	Node *n = members[m];
-	if (n->mark) {
+	gbt_efg_node_rep *n = members[m];
+	if (n->m_mark) {
 	  // If node is marked, is descendant of action 'i'
-	  n->mark = false;   // unmark so tree is clean at end
+	  n->m_mark = false;   // unmark so tree is clean at end
 	  if (newiset.IsNull()) {
 	    newiset = LeaveInfoset(n);
 	  }
@@ -978,19 +1000,20 @@ void efgGame::Reveal(gbtEfgInfoset where, gbtEfgPlayer who)
   Reindex();
 }
 
-Node *efgGame::CopyTree(Node *src, Node *dest)
+gbtEfgNode efgGame::CopyTree(gbtEfgNode src, gbtEfgNode dest)
 {
-  if (!src || !dest)  throw Exception();
-  if (src == dest || dest->children.Length())   return src;
-  if (src->gameroot != dest->gameroot)  return src;
+  if (src.IsNull() || dest.IsNull())  throw Exception();
+  if (src == dest || dest.rep->m_children.Length())   return src;
+  if (src.rep->m_gameroot != dest.rep->m_gameroot)  return src;
 
-  if (src->children.Length())  {
+  if (src.rep->m_children.Length())  {
     m_revision++;
     m_dirty = true;
 
-    AppendNode(dest, src->infoset);
-    for (int i = 1; i <= src->children.Length(); i++)
-      CopySubtree(src->children[i], dest->children[i], dest);
+    AppendNode(dest, src.rep->m_infoset);
+    for (int i = 1; i <= src.rep->m_children.Length(); i++) {
+      CopySubtree(src.rep->m_children[i], dest.rep->m_children[i], dest.rep);
+    }
 
     DeleteLexicon();
     SortInfosets();
@@ -999,56 +1022,56 @@ Node *efgGame::CopyTree(Node *src, Node *dest)
   return dest;
 }
 
-Node *efgGame::MoveTree(Node *src, Node *dest)
+gbtEfgNode efgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
 {
-  if (!src || !dest)  throw Exception();
-  if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
+  if (src.IsNull() || dest.IsNull())  throw Exception();
+  if (src == dest || dest.rep->m_children.Length() || IsPredecessor(src, dest))
     return src;
-  if (src->gameroot != dest->gameroot)  return src;
+  if (src.rep->m_gameroot != dest.rep->m_gameroot)  return src;
 
   m_revision++;
   m_dirty = true;
 
-  if (src->parent == dest->parent) {
-    int srcChild = src->parent->children.Find(src);
-    int destChild = src->parent->children.Find(dest);
-    src->parent->children[srcChild] = dest;
-    src->parent->children[destChild] = src;
+  if (src.rep->m_parent == dest.rep->m_parent) {
+    int srcChild = src.rep->m_parent->m_children.Find(src.rep);
+    int destChild = src.rep->m_parent->m_children.Find(dest.rep);
+    src.rep->m_parent->m_children[srcChild] = dest.rep;
+    src.rep->m_parent->m_children[destChild] = dest.rep;
   }
   else {
-    Node *parent = src->parent; 
-    parent->children[parent->children.Find(src)] = dest;
-    dest->parent->children[dest->parent->children.Find(dest)] = src;
-    src->parent = dest->parent;
-    dest->parent = parent;
+    gbt_efg_node_rep *parent = src.rep->m_parent; 
+    parent->m_children[parent->m_children.Find(src.rep)] = dest.rep;
+    dest.rep->m_parent->m_children[dest.rep->m_parent->m_children.Find(dest.rep)] = src.rep;
+    src.rep->m_parent = dest.rep->m_parent;
+    dest.rep->m_parent = parent;
   }
 
-  dest->name = "";
-  dest->outcome = 0;
+  dest.rep->m_label = "";
+  dest.rep->m_outcome = 0;
   
   DeleteLexicon();
   SortInfosets();
   return dest;
 }
 
-Node *efgGame::DeleteTree(Node *n)
+gbtEfgNode efgGame::DeleteTree(gbtEfgNode n)
 {
-  if (!n)  throw Exception();
+  if (n.IsNull())  throw Exception();
 
   m_revision++;
   m_dirty = true;
 
-  while (n->NumChildren() > 0)   {
-    DeleteTree(n->children[1]);
-    delete n->children.Remove(1);
+  while (n.NumChildren() > 0)   {
+    DeleteTree(n.rep->m_children[1]);
+    delete n.rep->m_children.Remove(1);
   }
   
-  if (n->infoset)  {
-    n->infoset->m_members.Remove(n->infoset->m_members.Find(n));
-    n->infoset = 0;
+  if (n.rep->m_infoset)  {
+    n.rep->m_infoset->m_members.Remove(n.rep->m_infoset->m_members.Find(n.rep));
+    n.rep->m_infoset = 0;
   }
-  n->outcome = 0;
-  n->name = "";
+  n.rep->m_outcome = 0;
+  n.rep->m_label = "";
 
   DeleteLexicon();
   SortInfosets();
@@ -1063,7 +1086,7 @@ gbtEfgAction efgGame::InsertAction(gbtEfgInfoset s)
   m_dirty = true;
   gbtEfgAction action = s.InsertAction(s.NumActions() + 1);
   for (int i = 1; i <= s.NumMembers(); i++) {
-    s.rep->m_members[i]->children.Append(new Node(this, s.rep->m_members[i]));
+    s.rep->m_members[i]->m_children.Append(new gbt_efg_node_rep(this, s.rep->m_members[i]));
   }
   DeleteLexicon();
   SortInfosets();
@@ -1084,7 +1107,7 @@ gbtEfgAction efgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
   if (where > s.rep->m_actions.Length())   return 0;
   gbtEfgAction action = s.InsertAction(where);
   for (int i = 1; i <= s.NumActions(); i++)
-    s.rep->m_members[i]->children.Insert(new Node(this, s.rep->m_members[i]), where);
+    s.rep->m_members[i]->m_children.Insert(new gbt_efg_node_rep(this, s.rep->m_members[i]), where);
 
   DeleteLexicon();
   SortInfosets();
@@ -1105,8 +1128,8 @@ gbtEfgInfoset efgGame::DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a)
     return s;
   s.RemoveAction(where);
   for (int i = 1; i <= s.rep->m_members.Length(); i++)   {
-    DeleteTree(s.rep->m_members[i]->children[where]);
-    delete s.rep->m_members[i]->children.Remove(where);
+    DeleteTree(s.rep->m_members[i]->m_children[where]);
+    delete s.rep->m_members[i]->m_children.Remove(where);
   }
   DeleteLexicon();
   SortInfosets();
@@ -1140,91 +1163,92 @@ gNumber efgGame::GetChanceProb(const gbtEfgAction &a) const
 //                     Subgame-related functions
 //---------------------------------------------------------------------
 
-void efgGame::MarkTree(Node *n, Node *base)
+void efgGame::MarkTree(gbt_efg_node_rep *n, gbt_efg_node_rep *base)
 {
-  n->ptr = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MarkTree(n->GetChild(i), base);
+  n->m_ptr = base;
+  for (int i = 1; i <= n->m_children.Length(); i++) {
+    MarkTree(n->m_children[i], base);
+  }
 }
 
-bool efgGame::CheckTree(Node *n, Node *base)
+bool efgGame::CheckTree(gbt_efg_node_rep *n, gbt_efg_node_rep *base)
 {
   int i;
 
-  if (n->NumChildren() == 0)   return true;
+  if (n->m_children.Length() == 0)   return true;
 
-  for (i = 1; i <= n->NumChildren(); i++)
-    if (!CheckTree(n->GetChild(i), base))  return false;
+  for (i = 1; i <= n->m_children.Length(); i++)
+    if (!CheckTree(n->m_children[i], base))  return false;
 
-  if (n->GetPlayer().IsChance())   return true;
+  if (n->m_infoset->m_player->m_id == 0)   return true;
 
-  for (i = 1; i <= n->GetInfoset().NumMembers(); i++)
-    if (n->GetInfoset().GetMember(i)->ptr != base)
+  for (i = 1; i <= n->m_infoset->m_members.Length(); i++)
+    if (n->m_infoset->m_members[i]->m_ptr != base)
       return false;
 
   return true;
 }
 
-bool efgGame::IsLegalSubgame(Node *n)
+bool efgGame::IsLegalSubgame(const gbtEfgNode &n)
 {
-  if (n->NumChildren() == 0)  
+  if (n.NumChildren() == 0)  
     return false;
 
-  MarkTree(n, n);
-  return CheckTree(n, n);
+  MarkTree(n.rep, n.rep);
+  return CheckTree(n.rep, n.rep);
 }
 
-bool efgGame::MarkSubgame(Node *n)
+bool efgGame::MarkSubgame(gbtEfgNode n)
 {
-  if(n->gameroot == n) return true;
+  if (n.rep->m_gameroot == n.rep) return true;
 
-  if (n->gameroot != n && IsLegalSubgame(n))  {
-    n->gameroot = 0;
-    MarkSubgame(n, n);
+  if (n.rep->m_gameroot != n.rep && IsLegalSubgame(n))  {
+    n.rep->m_gameroot = 0;
+    MarkSubgame(n.rep, n.rep);
     return true;
   }
 
   return false;
 }
 
-void efgGame::UnmarkSubgame(Node *n)
+void efgGame::UnmarkSubgame(gbtEfgNode n)
 {
-  if (n->gameroot == n && n->parent)  {
-    n->gameroot = 0;
-    MarkSubgame(n, n->parent->gameroot);
+  if (n.rep->m_gameroot == n.rep && n.rep->m_parent)  {
+    n.rep->m_gameroot = 0;
+    MarkSubgame(n.rep, n.rep->m_parent->m_gameroot);
   }
 }
   
 
-void efgGame::MarkSubgame(Node *n, Node *base)
+void efgGame::MarkSubgame(gbt_efg_node_rep *n, gbt_efg_node_rep *base)
 {
-  if (n->gameroot == n)  return;
-  n->gameroot = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MarkSubgame(n->GetChild(i), base);
+  if (n->m_gameroot == n)  return;
+  n->m_gameroot = base;
+  for (int i = 1; i <= n->m_children.Length(); i++)
+    MarkSubgame(n->m_children[i], base);
 }
 
 void efgGame::MarkSubgames(void)
 {
-  gList<Node *> subgames;
+  gList<gbtEfgNode> subgames;
   LegalSubgameRoots(*this, subgames);
 
   for (int i = 1; i <= subgames.Length(); i++)  {
-    subgames[i]->gameroot = 0;
-    MarkSubgame(subgames[i], subgames[i]);
+    subgames[i].rep->m_gameroot = 0;
+    MarkSubgame(subgames[i].rep, subgames[i].rep);
   }
 }
 
-void efgGame::UnmarkSubgames(Node *n)
+void efgGame::UnmarkSubgames(gbtEfgNode n)
 {
-  if (n->NumChildren() == 0)   return;
+  if (n.NumChildren() == 0)   return;
 
-  for (int i = 1; i <= n->NumChildren(); i++)
-    UnmarkSubgames(n->GetChild(i));
+  for (int i = 1; i <= n.NumChildren(); i++)
+    UnmarkSubgames(n.GetChild(i));
   
-  if (n->gameroot == n && n->parent)  {
-    n->gameroot = 0;
-    MarkSubgame(n, n->parent->gameroot);
+  if (n.rep->m_gameroot == n.rep && n.rep->m_parent)  {
+    n.rep->m_gameroot = 0;
+    MarkSubgame(n.rep, n.rep->m_parent->m_gameroot);
   }
 }
 
@@ -1321,41 +1345,44 @@ gPVector<int> efgGame::NumMembers(void) const
 //                       Efg: Payoff computation
 //------------------------------------------------------------------------
 
-void efgGame::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
-		 gVector<gNumber> &payoff) const
+void efgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
+		     const gPVector<int> &profile,
+		     gVector<gNumber> &payoff) const
 {
-  if (n->outcome)  {
+  if (n->m_outcome)  {
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->m_payoffs[i];
+      payoff[i] += prob * n->m_outcome->m_payoffs[i];
   }
 
-  if (n->infoset && n->infoset->m_player->m_id == 0) {
-    for (int i = 1; i <= n->children.Length(); i++) {
-      Payoff(n->children[i],
-	     prob * GetChanceProb(n->infoset, i),
+  if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
+    for (int i = 1; i <= n->m_children.Length(); i++) {
+      Payoff(n->m_children[i],
+	     prob * GetChanceProb(n->m_infoset, i),
 	     profile, payoff);
     }
   }
-  else if (n->infoset) {
-    Payoff(n->children[profile(n->infoset->m_player->m_id, n->infoset->m_id)],
+  else if (n->m_infoset) {
+    Payoff(n->m_children[profile(n->m_infoset->m_player->m_id,
+				 n->m_infoset->m_id)],
 	   prob, profile, payoff);
   }
 }
 
-void efgGame::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
-			  gPVector<gNumber> &probs) const
+void efgGame::InfosetProbs(gbt_efg_node_rep *n, gNumber prob,
+			   const gPVector<int> &profile,
+			   gPVector<gNumber> &probs) const
 {
-  if (n->infoset && n->infoset->m_player->m_id == 0) {
-    for (int i = 1; i <= n->children.Length(); i++) {
-      InfosetProbs(n->children[i],
-		   prob * GetChanceProb(n->infoset, i),
+  if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
+    for (int i = 1; i <= n->m_children.Length(); i++) {
+      InfosetProbs(n->m_children[i],
+		   prob * GetChanceProb(n->m_infoset, i),
 		   profile, probs);
     }
   }
-  else if (n->infoset)  {
-    probs(n->infoset->m_player->m_id, n->infoset->m_id) += prob;
-    InfosetProbs(n->children[profile(n->infoset->m_player->m_id, 
-				     n->infoset->m_id)],
+  else if (n->m_infoset)  {
+    probs(n->m_infoset->m_player->m_id, n->m_infoset->m_id) += prob;
+    InfosetProbs(n->m_children[profile(n->m_infoset->m_player->m_id, 
+				       n->m_infoset->m_id)],
 		 prob, profile, probs);
   }
 }
@@ -1373,23 +1400,24 @@ void efgGame::InfosetProbs(const gPVector<int> &profile,
   InfosetProbs(root, 1, profile, probs);
 }
 
-void efgGame::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
-		    gArray<gNumber> &payoff) const
+void efgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
+		     const gArray<gArray<int> *> &profile,
+		     gArray<gNumber> &payoff) const
 {
-  if (n->outcome)   {
+  if (n->m_outcome)   {
     for (int i = 1; i <= players.Length(); i++)
-      payoff[i] += prob * n->outcome->m_payoffs[i];
+      payoff[i] += prob * n->m_outcome->m_payoffs[i];
   }
   
-  if (n->infoset && n->infoset->m_player->m_id == 0) {
-    for (int i = 1; i <= n->children.Length(); i++) {
-      Payoff(n->children[i],
-	     prob * GetChanceProb(n->infoset, i),
+  if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
+    for (int i = 1; i <= n->m_children.Length(); i++) {
+      Payoff(n->m_children[i],
+	     prob * GetChanceProb(n->m_infoset, i),
 	     profile, payoff);
     }
   }
-  else if (n->infoset) {
-    Payoff(n->children[(*profile[n->infoset->m_player->m_id])[n->infoset->m_id]],
+  else if (n->m_infoset) {
+    Payoff(n->m_children[(*profile[n->m_infoset->m_player->m_id])[n->m_infoset->m_id]],
 	   prob, profile, payoff);
   }
 }

@@ -34,7 +34,7 @@
 
 class NodeEntry {
 private:
-  Node *m_node;        // the corresponding node in the game
+  gbtEfgNode m_node;        // the corresponding node in the game
   NodeEntry *m_parent; // parent node
   int m_x, m_y;        // Cartesian coordinates of node
   NodeEntry *m_nextMember;  // entry of next information set member 
@@ -62,9 +62,9 @@ private:
   wxFont m_branchAboveFont, m_branchBelowFont;
 
 public:
-  NodeEntry(Node *p_parent);
+  NodeEntry(gbtEfgNode p_parent);
 
-  Node *GetNode(void) const { return m_node; }
+  gbtEfgNode GetNode(void) const { return m_node; }
 
   NodeEntry *GetParent(void) const { return m_parent; }
   void SetParent(NodeEntry *p_parent) { m_parent = p_parent; }
@@ -179,15 +179,16 @@ private:
 
   const int c_leftMargin, c_topMargin;
 
-  NodeEntry *GetEntry(Node *) const;
+  NodeEntry *GetEntry(const gbtEfgNode &) const;
 
   NodeEntry *NextInfoset(NodeEntry *);
   void CheckInfosetEntry(NodeEntry *);
 
-  void BuildNodeList(Node *, const EFSupport &, int);
+  void BuildNodeList(const gbtEfgNode &, const EFSupport &, int);
 
-  int LayoutSubtree(Node *, const EFSupport &, int &, int &, int &);
-  void FillInfosetTable(Node *, const EFSupport &);
+  int LayoutSubtree(const gbtEfgNode &, const EFSupport &,
+		    int &, int &, int &);
+  void FillInfosetTable(const gbtEfgNode &, const EFSupport &);
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
@@ -203,27 +204,27 @@ public:
   efgTreeLayout(efgGame &, TreeWindow *);
   virtual ~efgTreeLayout() { }
 
-  Node *PriorSameLevel(Node *) const;
-  Node *NextSameLevel(Node *) const;
+  gbtEfgNode PriorSameLevel(const gbtEfgNode &) const;
+  gbtEfgNode NextSameLevel(const gbtEfgNode &) const;
 
   void BuildNodeList(const EFSupport &);
   void Layout(const EFSupport &);
   void GenerateLabels(void);
 
-  void SetCutNode(Node *, bool);
+  void SetCutNode(const gbtEfgNode &, bool);
 
   // The following member functions are for temporary compatibility only
-  NodeEntry *GetNodeEntry(Node *p_node) const
+  NodeEntry *GetNodeEntry(const gbtEfgNode &p_node) const
     { return GetEntry(p_node); }
-  NodeEntry *GetValidParent(Node *);
-  NodeEntry *GetValidChild(Node *);
+  NodeEntry *GetValidParent(const gbtEfgNode &);
+  NodeEntry *GetValidChild(const gbtEfgNode &);
 
   int MaxX(void) const { return m_maxX; }
   int MaxY(void) const { return m_maxY; }
 
-  Node *NodeHitTest(int, int) const;
-  Node *BranchHitTest(int, int) const;
-  Node *InfosetHitTest(int, int) const;
+  gbtEfgNode NodeHitTest(int, int) const;
+  gbtEfgNode BranchHitTest(int, int) const;
+  gbtEfgNode InfosetHitTest(int, int) const;
 
   void Render(wxDC &) const;
 };

@@ -110,7 +110,7 @@ class EfgConditionalContIter    {
     int NextContingency(void);   // Needs rewriting
   
     gNumber Payoff(int pl) const;
-    gNumber Payoff(const Node *, int pl) const;
+    gNumber Payoff(const gbtEfgNode &, int pl) const;
   
     void Dump(gOutput &) const;
 };

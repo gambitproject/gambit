@@ -44,9 +44,9 @@ private:
   gPVector<int> isetFlag,isetRow;
   gArray<gList<gbtEfgInfoset> > infosets;
 
-  void MakeSequenceForm(const Node *, gNumber,gArray<int>, 
+  void MakeSequenceForm(const gbtEfgNode &, gNumber,gArray<int>, 
 			gArray<gbtEfgInfoset>, gArray<Sequence *>);
-  void GetSequenceDims(const Node *);
+  void GetSequenceDims(const gbtEfgNode &);
 
 public:
   Sfg(const EFSupport &);

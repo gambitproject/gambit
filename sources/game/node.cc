@@ -35,6 +35,258 @@
 // a game tree.
 //
 
+gbt_efg_node_rep::gbt_efg_node_rep(efgGame *p_efg, gbt_efg_node_rep *p_parent)
+  : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(1),
+    m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
+    m_whichbranch(0), m_ptr(0),
+    m_gameroot((p_parent) ? p_parent->m_gameroot : this)
+{ }
+
+gbt_efg_node_rep::~gbt_efg_node_rep()
+{
+  for (int i = m_children.Length(); i; delete m_children[i--]);
+}
+
+void gbt_efg_node_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
+{
+  if (p_outcome == m_outcome) {
+    m_outcome = 0;
+  }
+  for (int i = 1; i <= m_children.Length(); i++) {
+    m_children[i]->DeleteOutcome(p_outcome);
+  }
+}
+
+gbtEfgNode::gbtEfgNode(void)
+  : rep(0)
+{ }
+
+gbtEfgNode::gbtEfgNode(gbt_efg_node_rep *p_rep)
+  : rep(p_rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtEfgNode::gbtEfgNode(const gbtEfgNode &p_action)
+  : rep(p_action.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtEfgNode::~gbtEfgNode()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0) {
+      delete rep;
+    }
+  }
+}
+
+gbtEfgNode &gbtEfgNode::operator=(const gbtEfgNode &p_action)
+{
+  if (this == &p_action) {
+    return *this;
+  }
+
+  if (rep && --rep->m_refCount == 0) {
+    delete rep;
+  }
+
+  if ((rep = p_action.rep) != 0) {
+    rep->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtEfgNode::operator==(const gbtEfgNode &p_action) const
+{
+  return (rep == p_action.rep);
+} 
+
+bool gbtEfgNode::operator!=(const gbtEfgNode &p_action) const
+{
+  return (rep != p_action.rep);
+} 
+
+bool gbtEfgNode::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+int gbtEfgNode::GetId(void) const
+{
+  return (rep) ? rep->m_id : -1;
+}
+
+gText gbtEfgNode::GetLabel(void) const
+{
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
+}
+
+void gbtEfgNode::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    rep->m_label = p_label;
+  }
+}
+
+gbtEfgInfoset gbtEfgNode::GetInfoset(void) const
+{
+  if (rep) {
+    return rep->m_infoset;
+  }
+  else {
+    return 0;
+  }
+}
+
+efgGame *gbtEfgNode::GetGame(void) const
+{
+  if (rep) {
+    return rep->m_efg;
+  }
+  else {
+    return 0;
+  }
+}
+
+gbtEfgNode gbtEfgNode::GetParent(void) const
+{
+  if (rep) {
+    return rep->m_parent;
+  }
+  else {
+    return 0;
+  }
+}
+
+gbtEfgNode gbtEfgNode::GetSubgameRoot(void) const
+{
+  if (rep) {
+    return rep->m_gameroot;
+  }
+  else {
+    return 0;
+  }
+}
+
+gbtEfgNode gbtEfgNode::GetChild(const gbtEfgAction &p_action) const
+{
+  if (!rep || p_action.GetInfoset() != rep->m_infoset) {
+    return 0;
+  }
+  else {
+    return rep->m_children[p_action.GetId()];
+  }
+}
+
+gbtEfgNode gbtEfgNode::GetChild(int p_child) const
+{
+  if (rep) {
+    return rep->m_children[p_child];
+  }
+  else {
+    return 0;
+  }
+}
+
+int gbtEfgNode::NumChildren(void) const
+{
+  if (rep) {
+    return rep->m_children.Length();
+  }
+  else {
+    return 0;
+  }
+}
+
+gbtEfgOutcome gbtEfgNode::GetOutcome(void) const
+{
+  if (rep) {
+    return rep->m_outcome;
+  }
+  else {
+    return 0;
+  }
+}
+
+void gbtEfgNode::SetOutcome(const gbtEfgOutcome &p_outcome)
+{
+  if (rep) {
+    rep->m_outcome = p_outcome.rep;
+  }
+}
+
+int gbtEfgNode::NumberInInfoset(void) const
+{
+  for (int i = 1; i <= GetInfoset().NumMembers(); i++) {
+    if (GetInfoset().GetMember(i) == *this) {
+      return i;
+    }
+  }
+  //  This could be sped up by adding a member to keep track of this
+  throw efgGame::Exception();
+}
+
+gbtEfgNode gbtEfgNode::NextSibling(void) const  
+{
+  if (!rep || !rep->m_parent)   return 0;
+  if (rep->m_parent->m_children.Find(rep) == rep->m_parent->m_children.Length())
+    return 0;
+  else
+    return rep->m_parent->m_children[rep->m_parent->m_children.Find(rep) + 1];
+}
+
+gbtEfgNode gbtEfgNode::PriorSibling(void) const
+{ 
+  if (!rep || !rep->m_parent)   return 0;
+  if (!rep->m_parent->m_children.Find(rep) == 1)
+    return 0;
+  else
+    return rep->m_parent->m_children[rep->m_parent->m_children.Find(rep) - 1];
+
+}
+
+gbtEfgAction gbtEfgNode::GetAction(void) const
+{
+  if (*this == GetGame()->RootNode()) {
+    return gbtEfgAction();
+  }
+  
+  gbtEfgInfoset infoset = GetParent().GetInfoset();
+  for (int i = 1; i <= infoset.NumActions(); i++) {
+    if (*this == GetParent().GetChild(infoset.GetAction(i))) {
+      return infoset.GetAction(i);
+    }
+  }
+
+  return 0;
+}
+
+
+gbtEfgPlayer gbtEfgNode::GetPlayer(void) const
+{
+  if (!rep || !rep->m_infoset) {
+    return 0;
+  }
+  else {
+    return rep->m_infoset->m_player;
+  }
+}
+
+gOutput &operator<<(gOutput &p_stream, const gbtEfgNode &)
+{ return p_stream; }
+
+#ifdef UNUSED
 //----------------------------------------------------------------------
 //                    class Node: Member functions
 //----------------------------------------------------------------------
@@ -44,97 +296,6 @@ Node::Node(efgGame *e, Node *p)
     gameroot((p) ? p->gameroot : this)
 { }
 
-Node::~Node()
-{
-  for (int i = children.Length(); i; delete children[i--]);
-}
 
 
-int Node::NumberInInfoset(void) const
-{
-  for (int i = 1; i <= GetInfoset().NumMembers(); i++)
-    if (GetInfoset().GetMember(i) == this)
-      return i;
-  //  This could be speeded up by adding a member to Node to keep track of this
-  throw efgGame::Exception();
-}
-
-gbtEfgInfoset Node::GetInfoset(void) const
-{
-  return infoset;
-}
-
-Node *Node::NextSibling(void) const  
-{
-  if (!parent)   return 0;
-  if (parent->children.Find((Node * const) this) == parent->children.Length())
-    return 0;
-  else
-    return parent->children[parent->children.Find((Node * const)this) + 1];
-}
-
-Node *Node::PriorSibling(void) const
-{ 
-  if (!parent)   return 0;
-  if (parent->children.Find((Node * const)this) == 1)
-    return 0;
-  else
-    return parent->children[parent->children.Find((Node * const)this) - 1];
-
-}
-
-gbtEfgAction Node::GetAction(void) const
-{
-  if (this == GetGame()->RootNode()) {
-    return gbtEfgAction();
-  }
-  
-  gbtEfgInfoset infoset = GetParent()->GetInfoset();
-  for (int i = 1; i <= infoset.NumActions(); i++) {
-    if (this == GetParent()->GetChild(infoset.GetAction(i))) {
-      return infoset.GetAction(i);
-    }
-  }
-
-  return 0;
-}
-
-void Node::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
-{
-  if (p_outcome == outcome) {
-    outcome = 0;
-  }
-  for (int i = 1; i <= children.Length(); i++) {
-    children[i]->DeleteOutcome(p_outcome);
-  }
-}
-
-gbtEfgPlayer Node::GetPlayer(void) const
-{
-  if (!infoset) {
-    return 0;
-  }
-  else {
-    return infoset->m_player;
-  }
-}
-
-Node *Node::GetChild(const gbtEfgAction &p_action) const
-{
-  if (p_action.GetInfoset() != infoset) {
-    return 0;
-  }
-  else {
-    return children[p_action.GetId()];
-  }
-}
-
-gbtEfgOutcome Node::GetOutcome(void) const
-{
-  return outcome;
-}
-
-void Node::SetOutcome(const gbtEfgOutcome &p_outcome)
-{
-  outcome = p_outcome.rep;
-}
+#endif  // UNUSED

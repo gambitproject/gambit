@@ -62,24 +62,6 @@ Portion *ArrayToList(const gArray<gNumber> &A)
 }
 
 template<>
-Portion *ArrayToList(const gArray<Node *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NodePortion(A[i]));
-  return ret;
-}
-
-template<>
-Portion *ArrayToList(const gList<Node *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NodePortion(A[i]));
-  return ret;
-}
-
-template<>
 Portion *ArrayToList(const gList<const EFSupport> &A)
 {
   ListPortion *ret = new ListPortion;

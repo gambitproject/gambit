@@ -40,7 +40,7 @@ private:
   gList<BFS<T> > List;
   gList<gbtEfgInfoset> isets1, isets2;
 
-  void FillTableau(const EFSupport &, gMatrix<T> &, const Node *, T,
+  void FillTableau(const EFSupport &, gMatrix<T> &, const gbtEfgNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
   int All_Lemke(const EFSupport &, int dup, LTableau<T> &B,
@@ -48,7 +48,7 @@ private:
   
   void GetProfile(const EFSupport &, const LTableau<T> &tab, 
 		  gDPVector<T> &, const gVector<T> &, 
-		  const Node *n, int,int);
+		  const gbtEfgNode &n, int,int);
 
 public:
   gbtEfgNashLcp(void);

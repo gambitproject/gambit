@@ -39,12 +39,12 @@ private:
   gList<gbtEfgInfoset> isets1, isets2;
 
   void FillTableau(const EFSupport &,
-		   gMatrix<T> &, const Node *, T ,int ,int , int ,int );
+		   gMatrix<T> &, const gbtEfgNode &, T ,int ,int , int ,int );
   void GetSolutions(const EFSupport &, gList<BehavSolution> &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
   void GetProfile(const EFSupport &, gDPVector<T> &v, const BFS<T> &sol,
-		  const Node *n, int s1,int s2) const;
+		  const gbtEfgNode &n, int s1,int s2) const;
 
 public:
   gbtEfgNashLp(void);

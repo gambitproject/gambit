@@ -391,7 +391,7 @@ gNumber EfgConditionalContIter::Payoff(int pl) const
   return _payoff[pl];
 }
 
-gNumber EfgConditionalContIter::Payoff(const Node *n, int pl) const
+gNumber EfgConditionalContIter::Payoff(const gbtEfgNode &n, int pl) const
 {
   return _profile.Payoff(n,pl);
 }

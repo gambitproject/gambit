@@ -120,11 +120,11 @@ public:
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
   
   // DATA ACCESS
-  gNumber RealizProb(const Node *node) const
+  gNumber RealizProb(const gbtEfgNode &node) const
     { return m_profile->GetRealizProb(node); }
-  gNumber BeliefProb(const Node *node) const
+  gNumber BeliefProb(const gbtEfgNode &node) const
     { return m_profile->GetBeliefProb(node); }
-  gVector<gNumber> NodeValue(const Node *node) const
+  gVector<gNumber> NodeValue(const gbtEfgNode &node) const
     { return m_profile->GetNodeValue(node); }
   gNumber IsetProb(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetProb(iset); }

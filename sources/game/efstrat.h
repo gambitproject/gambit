@@ -79,15 +79,17 @@ public:
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gList<Node *> ReachableNonterminalNodes(const Node *) const;
-  gList<Node *> ReachableNonterminalNodes(const Node *, const gbtEfgAction &) const;
-  gList<gbtEfgInfoset> ReachableInfosets(const Node *) const;
-  gList<gbtEfgInfoset> ReachableInfosets(const Node *, const gbtEfgAction &) const;
+  gList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
+  gList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &,
+					      const gbtEfgAction &) const;
+  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
+  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &,
+					 const gbtEfgAction &) const;
   gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
 
   bool AlwaysReaches(const gbtEfgInfoset &) const;
-  bool AlwaysReachesFrom(const gbtEfgInfoset &, const Node *) const;
-  bool MayReach(const Node *) const;
+  bool AlwaysReachesFrom(const gbtEfgInfoset &, const gbtEfgNode &) const;
+  bool MayReach(const gbtEfgNode &) const;
   bool MayReach(const gbtEfgInfoset &) const;
 
   bool Dominates(const gbtEfgAction &, const gbtEfgAction &,
@@ -121,16 +123,16 @@ protected:
   void InitializeActiveListsToAllInactive();
   void InitializeActiveLists();
 
-  void activate(const Node *);
-  void deactivate(const Node *);
+  void activate(const gbtEfgNode &);
+  void deactivate(const gbtEfgNode &);
   void activate(const gbtEfgInfoset &);
   void deactivate(const gbtEfgInfoset &);
   bool infoset_has_active_nodes(const int pl, const int iset) const;
   bool infoset_has_active_nodes(const gbtEfgInfoset &) const;
-  void activate_this_and_lower_nodes(const Node *);
-  void deactivate_this_and_lower_nodes(const Node *);
+  void activate_this_and_lower_nodes(const gbtEfgNode &);
+  void deactivate_this_and_lower_nodes(const gbtEfgNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
-                                                 const Node *,
+                                                 const gbtEfgNode &,
 						 gList<gbtEfgInfoset> *);
 
 public:
@@ -145,8 +147,8 @@ public:
   bool operator!=(const EFSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  gList<const Node *> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
-  gList<const Node *> ReachableNonterminalNodes() const;
+  gList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
+  gList<gbtEfgNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
   void AddAction(const gbtEfgAction &);
@@ -161,7 +163,7 @@ public:
   int  NumActiveNodes(const int pl, const int iset) const;
   int  NumActiveNodes(const gbtEfgInfoset &) const;
   bool NodeIsActive(const int pl, const int iset, const int node) const;
-  bool NodeIsActive(const Node *) const;
+  bool NodeIsActive(const gbtEfgNode &) const;
 
   bool HasActiveActionsAtActiveInfosets();
   bool HasActiveActionsAtActiveInfosetsAndNoOthers();

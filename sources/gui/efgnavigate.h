@@ -33,7 +33,7 @@
 class EfgNavigateWindow : public wxGrid {
 private:
   EfgShow *m_parent;
-  const Node *m_cursor;
+  gbtEfgNode m_cursor;
 
   void OnEditorShown(wxGridEvent &);
 
@@ -41,7 +41,7 @@ public:
   EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~EfgNavigateWindow() { }
 
-  void Set(const Node *p_cursor);
+  void Set(gbtEfgNode p_cursor);
 };
 
 #endif  // EFGNAVIGATE_H

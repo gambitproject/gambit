@@ -1197,48 +1197,49 @@ bool InfosetPortion::IsReference(void) const
 
 gPool NodePortion::pool(sizeof(NodePortion));
 
-NodePortion::NodePortion(Node *value)
-  : _Value(new Node *(value)), _ref(false)
+NodePortion::NodePortion(gbtEfgNode p_value)
+  : m_value(new gbtEfgNode(p_value)), m_ref(false)
 {
-  SetGame(value->GetGame());
+  SetGame(p_value.GetInfoset().GetGame());
 }
 
-NodePortion::NodePortion(Node *&value, bool ref)
-  : _Value(&value), _ref(ref)
+NodePortion::NodePortion(gbtEfgNode *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->GetGame());
+  if (!p_ref) {
+    SetGame(p_value->GetInfoset().GetGame());
   }
-}  
+}
 
 NodePortion::~NodePortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-Node *NodePortion::Value(void) const
-{ return *_Value; }
+gbtEfgNode NodePortion::Value(void) const
+{ return *m_value; }
 
-void NodePortion::SetValue(Node *value)
+void NodePortion::SetValue(gbtEfgNode p_value)
 {
-  if (_ref) {
-    ((NodePortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((NodePortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->GetGame());
-    *_Value = value;
+    SetGame(p_value.GetInfoset().GetGame());
+    *m_value = p_value;
   }
 }
 
 PortionSpec NodePortion::Spec(void) const
-{ return PortionSpec(porNODE); }
+{ return porNODE; }
 
 void NodePortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(Node) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetLabel() << "\""; 
+  s << "(Node) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText NodePortion::OutputString(void) const
@@ -1248,20 +1249,18 @@ gText NodePortion::OutputString(void) const
 
 Portion* NodePortion::ValCopy(void) const
 {
-  return new NodePortion(*_Value); 
+  return new NodePortion(*m_value); 
 }
 
 Portion* NodePortion::RefCopy(void) const
 {
-  Portion* p = new NodePortion(*_Value, true); 
+  Portion *p = new NodePortion((gbtEfgNode *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool NodePortion::IsReference(void) const
-{
-  return _ref;
-}
+{ return m_ref; }
 
 //-----------
 // Action
@@ -1850,10 +1849,6 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
       }
       if (spec.Type & porEFBASIS)  {
 	if (((EfBasisPortion*) (*rep->value)[i])->Value() == data)
-	  return true;
-      }
-      if (spec.Type & porNODE)  {
-	if (((NodePortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
     }
