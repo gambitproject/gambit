@@ -116,7 +116,7 @@ template <class T> int EnumModule<T>::Enum(void)
 
   gWatch watch;
 
-  gTuple<int> target(rows+cols);
+  gBlock<int> target(rows+cols);
   for(int i=1;i<=target.Length();i++) 
     target[i]=i;
 
@@ -144,7 +144,7 @@ template <class T> int EnumModule<T>::Enum(void)
 
 
 template <class T> void EnumModule<T>
-::SubSolve(int pr, int pcl, Basis<T> &B1, gTuple<int> &targ1)
+::SubSolve(int pr, int pcl, Basis<T> &B1, gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
@@ -152,7 +152,7 @@ template <class T> void EnumModule<T>
   Basis<T> B2(B1);
 
       // construct new target basis
-  gTuple<int> targ2(targ1);  
+  gBlock<int> targ2(targ1);  
   pc = targ1.Find(pcl);
   targ2[pc] = targ2[pr];
   targ2[pr] = pcl;
@@ -235,7 +235,7 @@ template <class T> void EnumModule<T>
 template <class T>
 gList<gPVector<T> > &EnumTableau<T>::AddSolution(void) const
 {
-  gTuple<int> dim(2);
+  gArray<int> dim(2);
   dim[1] = n1;
   dim[2] = n2;
   
@@ -295,7 +295,7 @@ template <class T> gList<gPVector<T> > &EnumModule<T>
 //  solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    gTuple<int> dim(2);
+    gArray<int> dim(2);
     dim[1] = rows;
     dim[2] = cols;
 

@@ -62,7 +62,7 @@ public:
   EnumModule(const NormalForm<T> &N, const EnumParams &p); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, Basis<T> &B1, gTuple<int> &targ1);
+  void SubSolve(int pr, int pcl, Basis<T> &B1, gBlock<int> &targ1);
   
   int NumPivots(void) const;
   gRational Time(void) const;
