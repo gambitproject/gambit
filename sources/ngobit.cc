@@ -55,7 +55,7 @@ public:
   void Output(gOutput &f, int format = 0) const;
   long NumIters(void) const;
   long NumEvals(void) const;
-  const gPVector<T> &GetProfile(void) const;
+  const MixedProfile<T> &GetProfile(void) const;
 };
 
 
@@ -69,7 +69,6 @@ NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P)
     niters(0), nevals(0), p(NF), pp(NF), N(NF)
 { 
   Init();
-  N.Centroid(pp);
 }
 
 template <class T>
@@ -105,7 +104,7 @@ template <class T> NFGobitFunc<T>::~NFGobitFunc()
   delete (scratch2 + 1);
 }
 
-template <class T> const gPVector<T> &NFGobitFunc<T>::GetProfile(void) const
+template <class T> const MixedProfile<T> &NFGobitFunc<T>::GetProfile(void) const
 {
   return pp;
 }

@@ -62,9 +62,7 @@ template <class T>
 NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P)
   : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), N(NF),
     p(NF), pp(NF)
-{
-  N.Centroid(pp);
-}
+{ }
 
 
 template <class T>
