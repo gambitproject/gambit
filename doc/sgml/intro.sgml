@@ -138,10 +138,12 @@ on the semester system), for the benefit of those who like to use Gambit
 for instructional purposes.  So, for example, version 0.97.0.1 was released
 on September 1, 2002; this is a stable release, and any future releases of
 0.97.0.z will correspond to bug fixes and patches.
-At some point in the fall, releases numbered 0.97.1.z will begin to appear;
-these will contain relatively major innovations and changes relative
-to the 0.97.0 series.  Finally, when the 0.97.1 series stabilizes, it
-will be released, hopefully over the holidays, as version 0.97.2.0.
+</para>
+
+<para>
+In September 2003, the initial release of the &quot;development&quot; series
+0.97.1.z appeared.  This series of releases is for testing and feedback
+purposes, and may be unstable.
 </para>
 
 <para>
@@ -173,6 +175,48 @@ with rebuilt graphical interface, new implementations of
 a new windowed interface for the command language.
 </para>
 </listitem>
+<listitem>
+<para>Version 0.97.0.2, released September 26, 2002: general bug fixes.
+</para>
+</listitem>
+<listitem>
+<para>Version 0.97.0.3, released October 8, 2002: general bug fixes.
+</para>
+</listitem>
+<listitem>
+<para>Version 0.97.1.0, released September 10, 2003.  Initial release of
+the &quot;development&quot; series 0.97.1.  Major features:
+<itemizedlist>
+<listitem>
+<para>Substantial restructuring of internal game representation code.
+</para>
+</listitem>
+<listitem>
+<para>Initial implementation of Python API</para>
+</listitem>
+<listitem>
+<para>Working towards bringing documentation, Python, and C++ APIs in
+line with each other
+</para>
+</listitem>
+<listitem>
+<para>Restructuring of several GUI windows for more flexible display
+</para>
+</listitem>
+<listitem>
+<para>Implementation of Yamamoto's algorithm to compute one proper
+Nash equilibrium in normal form games
+</para>
+</listitem>
+<listitem>
+<para>Improvements to constrained optimization in
+<function>LiapSolve</function>, which now finds equilibria on the
+boundaries of the space of mixed strategies much more readily.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</listitem>
 </itemizedlist>
 </para>
 
@@ -187,19 +231,19 @@ on the following platforms:
 <itemizedlist>
 <listitem>
 <para>
-Microsoft Windows 95, 98 and NT, using the free Borland C++ 5.5
-compiler.  The binary distributions for Windows should work on
-other versions of Windows, but may not be tested.  Reports are
-always welcome.
+Linux, using wxWindows, the GTK toolkit and
+<application>gcc</application>.  The wxWindows library
+also supports Motif/Lesstif, and the code should compile
+on other flavors of Unix. Reports and patches so that
+Gambit will run on other flavors are welcome!
 </para>
 </listitem>
 <listitem>
 <para>
-RedHat Linux 6.x and 7.x, using wxWindows, the GTK toolkit and
-<application>gcc</application>.  The wxWindows library
-also supports Motif/Lesstif, and the code should compile
-on other flavors of Linux and Unix; again, however, these
-may not be tested.  Again, reports are always welcome.
+Microsoft Windows, using the free Borland C++ 5.5
+compiler.  The binary distributions for Windows should work on
+other versions of Windows, but may not be tested.  Reports are
+always welcome.
 </para>
 </listitem>
 </itemizedlist>
