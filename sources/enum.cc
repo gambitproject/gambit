@@ -164,6 +164,7 @@ template <class T> int EnumModule<T>::Enum(void)
 template <class T> bool EnumModule<T>::EqZero(T x) const
 {
   if(x <= eps && x >= -eps) return 1;
+  return 0;
 }     
 
 template <class T> long EnumModule<T>::NumPivots(void) const
