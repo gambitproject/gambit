@@ -1515,196 +1515,7 @@ Portion* GSM_Write_list_Text( Portion** param )
 
 //------------------------------ Read --------------------------//
 
-Portion* GSM_Read_Parse( gString s );
-Portion* GSM_Read_Parse_List( gString s );
 
-Portion* GSM_Read( Portion** param )
-{
-  gInput& input = ((InputPortion*) param[0])->Value();
-  char c;
-  gString s;
-  int braces = 0;
-  Portion* result;
-
-  c = ' ';
-  while( c == ' ' && !input.eof() )
-  {
-    input.get( c );
-  }
-  if( input.eof() )
-    return new ErrorPortion( "End of file reached" );
-
-  if( c == '\"' )
-  {
-    c = ' ';
-    while( !input.eof() && c != '\"' )
-    {
-      input.get( c );
-      if( c != '\"' )
-	s += c;
-    }
-    result = new TextValPortion( s );
-  }
-  else if( c == '{' )
-  {
-    s = "{";
-    braces = 1;
-    while( !input.eof() && braces > 0 )
-    {
-      input.get( c );
-      s += c;
-      if( c == '{' )
-	braces++;
-      else if( c == '}' )
-	braces--;
-    }
-    result = GSM_Read_Parse_List( s );
-  }
-  else
-  {
-    s += c;
-    while( !input.eof() && c != ' ' && c != '\"' )
-    {
-      input.get( c );
-      if( c != ' ' && c != '\"' )
-	s += c;
-    }
-    if( c == '\"' )
-      input.unget( c );
-    result = GSM_Read_Parse( s );
-  }
-  return result;
-}
-
-
-Portion* GSM_Read_Parse( gString s )
-{
-  bool all_digits = true;
-  int decimals = 0;
-  int divisions = 0;
-  int i;
-  int index;
-
-
-  for( i = 0; i < s.length(); i++ )
-  {
-    if( !isdigit( s[i] ) && s[i]!='.' && s[i]!='/' )
-      all_digits = false;
-    if( s[i] == '.' )
-    {
-      decimals++;
-      index = i;
-    }
-    if( s[i] == '/' )
-    {
-      divisions++;
-      index = i;
-    }
-  }
-
-  if( all_digits && ( decimals + divisions <= 1 ) )
-  {
-    if( decimals == 1 )
-      return new FloatValPortion( atof( s ) );
-    else if( divisions == 1 )
-    {
-      gString numerator = s.left( index );
-      gString denominator = s.right( s.length() - index - 1 );
-      return new RationalValPortion( ( (gRational) atoi( numerator ) ) /
-				    ( (gRational) atoi( denominator ) ) );
-    }
-    else
-      return new IntValPortion( atoi( s ) );
-  }
-  else
-    return new TextValPortion( s );
-}
-
-
-Portion* GSM_Read_Parse_List( gString s )
-{
-  Portion* por = new ListValPortion();
-  Portion* element;
-  assert( s[0] == '{' );
-  int i = 1;
-  int token_first = 1;
-  int token_last = 0;
-  bool error_occurred = false;
-  gString substring;
-  int result;
-  int braces;
-
-  while( i < s.length() )
-  {
-    if( s[i] == ' ' && token_first == 1 )
-    {
-      token_first = i + 1;
-    }
-    else if( s[i] == ',' || s[i] == '}' )
-    {
-      token_last = i - 1;
-      if( token_last < token_first )
-	error_occurred = true;
-      else
-      {
-	substring = s.mid( token_last - token_first + 1, token_first + 1 );
-	gout << "orig:\"" << s << "\"\n";
-	gout << "first:" << token_first << "\n";
-	gout << "last:" << token_last << "\n";
-	gout << "sub:\"" << substring << "\"\n";
-	element = GSM_Read_Parse( substring );
-	if( element != 0 )
-	{
-	  result = ((ListPortion*) por )->Append( element );
-	  if( result == 0 )
-	    error_occurred = true;
-	}
-	else
-	  error_occurred = true;
-      }
-
-      if( s[i] == '}' )
-	break;
-
-      token_first = i + 1;
-    }
-    else if( s[i] == '{' )
-    {
-      substring = s.right( s.length() - i );
-      element = GSM_Read_Parse_List( substring );
-      if( element != 0 )
-      {
-	result = ((ListPortion*) por )->Append( element );
-	if( result == 0 )
-	  error_occurred = true;
-      }
-      else
-	error_occurred = true;
-      
-      braces = 1;
-      while( i < s.length() && braces > 0 )
-      {
-	i++;
-	if( s[i] == '{' )
-	  braces++;
-	else if( s[i] == '}' )
-	  braces--;
-      }
-      token_first = i + 1;
-      token_last = token_first - 1;
-    }
-
-    i++;
-  }
-
-  if( !error_occurred )
-    return por;
-  else
-  {
-    delete por;
-    return 0;
-  }
-}
 
 
 
@@ -1778,6 +1589,11 @@ Portion* GSM_Read_Integer( Portion** param )
   {
     input.setpos( old_pos );
     return new ErrorPortion( "Type mismatch: expected INTEGER, got RATIONAL" );
+  }
+  else if( c == '.' )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "Type mismatch: expected INTEGER, got FLOAT" );
   }
   else
     input.unget(c);
@@ -2161,6 +1977,57 @@ Portion* GSM_Read_BehavRational( Portion** param )
   return result;
 }
 
+
+
+
+Portion* GSM_Read_Undefined( Portion** param )
+{
+  /* will go through and try to read the input as different format until
+     it succeeds */
+
+  assert( param[1] == 0 );
+  Portion* result = 0;
+
+  param[1] = new BoolValPortion( false );
+  result = GSM_Read_Bool( param );
+  if( result->Type() == porERROR )
+  {
+    delete param[1];
+    delete result;
+    param[1] = new IntValPortion( 0 );
+    result = GSM_Read_Integer( param );    
+  }
+  if( result->Type() == porERROR )
+  {
+    delete param[1];
+    delete result;
+    param[1] = new FloatValPortion( 0 );
+    result = GSM_Read_Float( param );    
+  }
+  if( result->Type() == porERROR )
+  {
+    delete param[1];
+    delete result;
+    param[1] = new RationalValPortion( 0 );
+    result = GSM_Read_Rational( param );    
+  }
+  if( result->Type() == porERROR )
+  {
+    delete param[1];
+    delete result;
+    param[1] = new TextValPortion( (gString) "" );
+    result = GSM_Read_Text( param );    
+  }
+  if( result->Type() == porERROR )
+  {
+    delete param[1];
+    delete result;
+    param[1] = 0;
+    result = new ErrorPortion( "Cannot determine data type" );
+  }
+
+  return result;
+}
 
 
 
@@ -2762,6 +2629,14 @@ void Init_gsmoper( GSM* gsm )
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
   FuncObj->SetParamInfo( GSM_Read_BehavRational, 0, "input", porINPUT );
   FuncObj->SetParamInfo( GSM_Read_BehavRational, 1, "x", porBEHAV_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+
+
+
+  FuncObj->SetFuncInfo( GSM_Read_Undefined, 2, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
+  FuncObj->SetParamInfo( GSM_Read_Undefined, 0, "input", porINPUT );
+  FuncObj->SetParamInfo( GSM_Read_Undefined, 1, "x", porUNDEFINED, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
 

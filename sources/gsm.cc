@@ -381,158 +381,10 @@ bool GSM::PushRef( const gString& ref )
 }
 
 
+
 bool GSM::Assign( void )
 {
-
   return _BinaryOperation( "Assign" );
-
-
-  Portion*  p2_copy;
-  Portion*  p2;
-  Portion*  p1;
-  bool      result = true;
-  PortionType p1_type;
-  PortionType p2_type;
-
-  
-#ifndef NDEBUG
-  if( _Depth() < 2 )
-  {
-    gerr << "  Not enough operands to execute Assign()\n";
-  }
-  assert( _Depth() >= 2 );
-#endif // NDEBUG
-
-
-  p2 = _Pop();
-  p1 = _Pop();
-
-  p2 = _ResolveRef( p2 );
-  p2_type = p2->Type();
-
-  p1_type = p1->Type();
-
-  if( p2->Type() == porREFERENCE )
-  {
-    _ErrorMessage( _StdErr, 13, 0, 0, ( (ReferencePortion*) p2 )->Value() );
-    result = false;
-    _Push( new ErrorPortion );
-    delete p1;
-    delete p2;
-    return result;
-  }
-
-  if( !p2->IsValid() )
-  {
-    _ErrorMessage( _StdErr, 58 );
-    result = false;
-    _Push( new ErrorPortion );
-    delete p1;
-    delete p2;
-    return result;
-  }
-
-  p1 = _ResolveRef( p1 );
-  
-  if ( p1->Type() == porREFERENCE )
-  {
-    if( p2->IsReference() )
-    {
-      p2_copy = p2->ValCopy();
-      result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2_copy );
-      delete p1;
-      delete p2;
-      _Push( p2_copy->RefCopy() );
-    }
-    else
-    {
-      result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2 );
-      delete p1;
-      _Push( p2->RefCopy() );
-    }
-  }
-  
-  else // ( p1->Type() != porREFERENCE )
-  {
-    if( p1->IsReference() )
-    {
-      if( p1->Type() == p2->Type() )
-      {
-	if( p1->Original() == p2->Original() )
-	{
-	  delete p2;
-	  _Push( p1 );
-	}
-	else
-	{
-	  switch( p1->Type() )
-	  {
-	  case porLIST:
-	    if( PortionTypeMatch(( (ListPortion*) p1 )->DataType(),
-				 ( (ListPortion*) p2 )->DataType() ) ||
-	       ( (ListPortion*) p1 )->DataType() == porUNDEFINED )
- 	    {
-	      p1->Original()->AssignFrom( p2 );
-	      delete p2;
-	      _Push( p1 );
-	    }
-	    else if( ( (ListPortion*) p2 )->Length() == 0 )
- 	    {
-	      p1->Original()->AssignFrom( p2 );
-	      delete p2;
-	      _Push( p1 );
-	    }
-	    else
-	    {
-	      _ErrorMessage( _StdErr, 56 );
-	      _Push( p2 );
-	      result = false;
-	      delete p1;
-	    }
-	    break;
-	    
-	  case porOUTPUT:
-	  case porINPUT:	
-	    _ErrorMessage( _StdErr, 52 );
-	    _Push( p2 );
-	    result = false;
-	    delete p1;
-	    break;
-	    
-	  default:
-	    p1->Original()->AssignFrom( p2 );
-	    delete p2;
-	    _Push( p1 );
-	  }
-	}
-      }
-      else
-      {
-	if( PortionTypeMatch( p1->Type(), p2->Type() ) )
-	{
-	  p1->Original()->AssignFrom( p2 );
-	  delete p2;
-	  _Push( p1 );
-	}
-	else
-	{
-	  _ErrorMessage( _StdErr, 48 );
-	  _Push( p2 );
-	  result = false;
-	  delete p1;
-	}
-      }
-    }
-    else
-    {
-      _ErrorMessage( _StdErr, 57 );
-      _Push( p1 );
-      delete p2;
-      result = false;
-    }
-  }
-
-  return result;
 }
 
 
@@ -707,12 +559,6 @@ bool GSM::Dot ( void )
 bool GSM::Divide ( void )
 { 
   return _BinaryOperation( "Divide" ); 
-/*
-  if( _StackStack->Peek()->Peek()->Type() == porINTEGER )
-    return _BinaryOperation( "IntegerDivide" ); 
-  else
-    return _BinaryOperation( "Divide" ); 
-*/
 }
 
 bool GSM::Negate( void )
@@ -772,12 +618,6 @@ bool GSM::Subscript ( void )
 {
   Portion* p2;
   Portion* p1;
-  Portion* element;
-
-  gString  old_string;
-  gString  new_string;
-  int      subscript;
-  bool     result = true;
 
   assert( _Depth() >= 2 );
   p2 = _Pop();
@@ -786,126 +626,19 @@ bool GSM::Subscript ( void )
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
 
-  if( p2->Type() == porINTEGER )
-  {
-    subscript = ( (IntPortion*) p2 )->Value();
-    delete p2;
-  }
-  else
-  {
-    _ErrorMessage( _StdErr, 37 );
-    delete p1;
-    delete p2;
-    _Push( new ErrorPortion );
-    result = false;
-    return result;
-  }
+  _Push( p1 );
+  _Push( p2 );
 
-
-  if( p1->Type() == porLIST )
-  {
-    element = ( (ListPortion* ) p1 )->Subscript( subscript );
-    if( element != 0 )
-    {
-      _Push( element );
-    }
-    else
-    {
-      _ErrorMessage( _StdErr, 36 );
-      _Push( new ErrorPortion );
-    }
-    delete p1;
-  }
-  else if( p1->Type() == porTEXT )
-  {
-    old_string = ( (TextPortion*) p1 )->Value();
-    if( subscript >= 1 && subscript <= old_string.length() )
-    {
-      new_string = old_string[ subscript - 1 ];
-      delete p1;
-      p1 = new TextValPortion( new_string );
-      _Push( p1 );
-    }
-    else
-    {
-      _ErrorMessage( _StdErr, 36 );
-      delete p1;
-      _Push( new ErrorPortion );
-      result = false;
-    }
-  }
+  if( p1->Type() == porTEXT )
+    return _BinaryOperation( "NthChar" );
   else
-  {
-    _ErrorMessage( _StdErr, 20 );
-    delete p1;
-    _Push( new ErrorPortion );
-    result = false;
-  }
-  
-  return result;
+    return _BinaryOperation( "NthElement" );
 }
 
 
 bool GSM::Child ( void )
 {
-  Portion* p2;
-  Portion* p1;
-  Portion* old_p1;
-
-  Node* old_node;
-  Node* new_node;
-  
-  int      subscript;
-  bool     result = true;
-
-  assert( _Depth() >= 2 );
-  p2 = _Pop();
-  p1 = _Pop();
-
-  p2 = _ResolveRef( p2 );
-  p1 = _ResolveRef( p1 );
-
-  if( p1->Type() == porNODE )
-  {
-    if( p2->Type() == porINTEGER )
-    {
-      subscript = ( (IntPortion*) p2 )->Value();
-      old_node = ( (NodePortion*) p1 )->Value();
-      old_p1 = p1;
-      if( subscript >= 1 && subscript <= old_node->NumChildren() )
-      {
-	new_node = old_node->GetChild( subscript );
-	p1 = new NodeValPortion( new_node );
-	p1->SetOwner( old_p1->Owner() );
-	p1->AddDependency();
-	_Push( p1 );
-      }
-      else
-      {
-	_ErrorMessage( _StdErr, 40 );
-	_Push( new ErrorPortion );
-	result = false;
-      }
-      delete old_p1;
-    }
-    else
-    {
-      _ErrorMessage( _StdErr, 38 );
-      delete p1;
-      _Push( new ErrorPortion );
-      result = false;
-    }
-  }
-  else
-  {
-    _ErrorMessage( _StdErr, 39 );
-    delete p1;
-    _Push( new ErrorPortion );
-    result = false;
-  }
-
-  delete p2;
-  return result;
+  return _BinaryOperation( "NthChild" );
 }
 
 
