@@ -68,8 +68,8 @@ GuiRecorder::~GuiRecorder()
 {
     if (recording == true)
     {
-        gerr << "Warning: GuiRecorder going out of scope.  Closing log file: " 
-             << filename << "\n";
+        gerr << gText("Warning: GuiRecorder going out of scope.  Closing log file: ")
+             << filename << gText("\n");
         closeFile();
     }
 }
@@ -143,7 +143,7 @@ void GuiRecorder::writeToFile(const gText& object, const gText& command)
     printf("Recording to log file: %s, %s\n", (char *)object, (char *)command);
 #endif
 
-    (*file) << object << ", " << command << ", ";
+    (*file) << object << gText(", ") << command << gText(", ");
 }
 
 // This is the same as the previous function except that it adds a
@@ -161,7 +161,7 @@ void GuiRecorder::writeToFile_newline(const gText& object, const gText& command)
     printf("Recording to log file: %s, %s\n", (char *)object, (char *)command);
 #endif
 
-    (*file) << object << ", " << command << "\n";
+    (*file) << object << gText(", ") << command << gText("\n");
 }
 
 
@@ -178,7 +178,7 @@ void GuiRecorder::writeArgsToFile(const gText& args)
     printf("Recording to log file: %s\n", (char *)args);
 #endif
 
-    (*file) << args << ", ";
+    (*file) << args << gText(", ");
 }
 
 
@@ -196,7 +196,7 @@ void GuiRecorder::writeArgsToFile_newline(const gText& args)
     printf("Recording to log file: %s\n", (char *)args);
 #endif
 
-    (*file) << args << "\n";
+    (*file) << args << gText("\n");
 }
 
 
