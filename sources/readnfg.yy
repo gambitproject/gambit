@@ -1,6 +1,6 @@
 
 %{
-/* $Id$ */
+/* @(#)readnfg.yy	1.3 12/19/95 */
 #include <ctype.h>
 #include "gmisc.h"
 #include "gambitio.h"
