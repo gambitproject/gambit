@@ -28,7 +28,7 @@ protected:
 	char *trace_str;
 	int stopAfter,max_solns; // max solutions_per_subgame, max total solutions
 	char *defaults_file;
-	gOutput *MakeOutputFile(const char *s);
+	gOutput *MakeOutputFile(const char *s,gOutput *&outp);
 	void SaveDefaults(void);// Called automatically in the destructor
 public:
 	OutputParamsSettings(void);

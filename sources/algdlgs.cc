@@ -1,7 +1,7 @@
 //****************************************************************************
 // Classes that are often used for the algorithm params dialogs.
 //****************************************************************************
-// @$Id$
+// @(#)algdlgs.cc	1.15 5/15/96
 //
 
 #include "gambitio.h"
@@ -32,6 +32,8 @@ delete [] outname;
 delete [] errname;
 delete [] trace_str;
 delete trace_list;
+if (outfile) delete outfile;
+if (errfile) delete errfile;
 }
 
 void OutputParamsSettings::SaveDefaults(void)
@@ -44,8 +46,9 @@ wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
 }
 
 
-// Make Output file
-gOutput *OutputParamsSettings::MakeOutputFile(const char *s)
+// Make Output file.  If a real file was created, it is saved in outp,
+// if the default output window is used outp is not modified.
+gOutput *OutputParamsSettings::MakeOutputFile(const char *s,gOutput *&outp)
 {
 if (!s) return &gnull;
 if (strcmp(s,gWXOUT)==0)
@@ -54,16 +57,19 @@ if (strcmp(s,gWXOUT)==0)
 	return wout;
 }
 else
-	return (new gFileOutput(outname));
+{
+	outp=new gFileOutput(s);
+	return outp;
+}
 }
 
 // Out File
 gOutput *OutputParamsSettings::OutFile(void)
-{if (strcmp(trace_str,"0")!=0) return MakeOutputFile(outname); else return 0;}
+{if (strcmp(trace_str,"0")!=0) return MakeOutputFile(outname,outfile); else return 0;}
 
 // Err File
 gOutput *OutputParamsSettings::ErrFile(void)
-{if (strcmp(trace_str,"0")!=0) return MakeOutputFile(errname); else return 0;}
+{if (strcmp(trace_str,"0")!=0) return MakeOutputFile(errname,errfile); else return 0;}
 
 // Trace Level
 int OutputParamsSettings::TraceLevel(void)
@@ -159,7 +165,7 @@ pxifile=0;
 
 // Pxi File
 gOutput *PxiParamsSettings::PxiFile(void)
-{return MakeOutputFile(pxiname);}
+{return MakeOutputFile(pxiname,pxifile);}
 
 // Pxi Type
 int PxiParamsSettings::PxiType(void)
@@ -209,6 +215,7 @@ wxWriteResource(PARAMS_SECTION,"Pxi-Saved-Name",pxiname,defaults_file);
 naming_option=wxListFindString(name_option_list,name_option_str);
 char tmp_str[100];sprintf(tmp_str,"%s-Plot-Type",algname);
 wxWriteResource(PARAMS_SECTION,tmp_str,type_str,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Run-Pxi",run_pxi,defaults_file);
 }
 
 // Pxi Params Settings Destructor
