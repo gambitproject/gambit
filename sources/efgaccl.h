@@ -8,7 +8,7 @@
 #define EFGACCL_H
 
 #include "accels.h"
-#define 	NUM_EFG_EVENTS	43
+#define 	NUM_EFG_EVENTS	46
 AccelEvent efg_events[NUM_EFG_EVENTS]=
 {
 AccelEvent("AddNode",NODE_ADD),
@@ -24,7 +24,10 @@ AccelEvent("Players",TREE_PLAYERS),
 AccelEvent("CopyTree",TREE_COPY),
 AccelEvent("PruneTree",TREE_DELETE),
 AccelEvent("MoveTree",TREE_MOVE),
-AccelEvent("Outcomes",TREE_OUTCOMES),
+AccelEvent("OutcomeAttach",TREE_OUTCOMES_ATTACH),
+AccelEvent("OutcomeDetach",TREE_OUTCOMES_DETACH),
+AccelEvent("OutcomeLabel",TREE_OUTCOMES_LABEL),
+AccelEvent("OutcomePayoffs",TREE_OUTCOMES_PAYOFFS),
 AccelEvent("JoinIset",INFOSET_JOIN),
 AccelEvent("BreakIset",INFOSET_BREAK),
 AccelEvent("SplitIset",INFOSET_SPLIT),
