@@ -32,6 +32,10 @@ void Gobit(const Efg &, EFGobitParams &,
 	   const BehavProfile<gNumber> &, gList<BehavSolution > &,
 	   long &nevals, long &nits);
 
+void KGobit(const Efg &E, EFGobitParams &params,
+	    const BehavProfile<gNumber> &start,
+	    gList<BehavSolution> &solutions, 
+	    long &nevals, long &nits);
 
 #endif    // NGOBIT_H
 
