@@ -278,6 +278,20 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 }
 
 
+
+// This function put in to facilitate error-detection in MixedToBehav[]
+
+BaseNfg* AssociatedNfg( BaseEfg* E )
+{
+  if( E->lexicon )
+    return E->lexicon->N;
+  else
+    return 0;
+}
+
+
+
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__

@@ -642,6 +642,8 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
   return s;
 }
 
+
+
 //========================================================================
 
 //---------------------------------------------------------------------------
@@ -682,5 +684,4 @@ const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const
 {
   return E->PlayerList()[p]->InfosetList()[iset]->GetActionName(act);
 }
-
 

@@ -16,6 +16,7 @@ class Infoset;
 class Node;
 class Action;
 class Lexicon;
+class BaseNfg;
 
 class BaseEfg     {
   
@@ -117,6 +118,9 @@ class BaseEfg     {
     Infoset *DeleteAction(Infoset *s, Action *a);
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
+
+    // This function put in to facilitate error-detection in MixedToBehav[]
+    friend BaseNfg* AssociatedNfg( BaseEfg* E );
 };
 
 

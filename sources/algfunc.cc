@@ -32,8 +32,15 @@ Portion *GSM_BehavFloat(Portion **param)
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[1])->Value();
   Nfg<double> &N = *mp.BelongsTo(); 
 
-  BehavProfile<double> *bp = new BehavProfile<double>(E);
-  MixedToBehav(N, mp, E, *bp);
+  BehavProfile<double>* bp;
+
+  if( AssociatedNfg( &E ) != &N )  
+    return new ErrorPortion("Normal and extensive form games not associated");
+  else
+  {
+    bp = new BehavProfile<double>(E);
+    MixedToBehav(N, mp, E, *bp);
+  }
 
   Portion* por = new BehavValPortion(bp);
   por->SetOwner( param[ 1 ]->Original() );
@@ -43,12 +50,20 @@ Portion *GSM_BehavFloat(Portion **param)
 
 Portion *GSM_BehavRational(Portion **param)
 {
-  MixedProfile<gRational> &mp = * (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  MixedProfile<gRational> &mp = 
+    * (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[1])->Value();
   Nfg<gRational> &N = *mp.BelongsTo(); 
 
-  BehavProfile<gRational> *bp = new BehavProfile<gRational>(E);
-  MixedToBehav(N, mp, E, *bp);
+  BehavProfile<gRational>* bp;
+
+  if( AssociatedNfg( &E ) != &N )  
+    return new ErrorPortion("Normal and extensive form games not associated");
+  else
+  {
+    bp = new BehavProfile<gRational>(E);
+    MixedToBehav(N, mp, E, *bp);
+  }
 
   Portion* por = new BehavValPortion(bp);
   por->SetOwner( param[ 1 ]->Original() );
