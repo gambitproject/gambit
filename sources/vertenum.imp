@@ -1,7 +1,7 @@
 //
 // FILE: vertenum.imp -- Implementation of Vertex Enumerator
 //
-// @(#)vertenum.imp	2.5 5/25/97 
+//  $Id$ 
 //
 
 #include "vertenum.h"
@@ -262,7 +262,7 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
                                             // the current row to the total;
     }
     total +=  d[k];
-    if (total == 0)
+    if (total == (T)0)
     {
       if (C1Count <= C1.MaxRow()) // If there is room left in C1
       {
@@ -321,7 +321,7 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   }
 
     // Make sure determinant is not 0 before inverting
-  if (C1.Determinant() == 0)
+  if (C1.Determinant() == (T)0)
   {
     gout << "We're sorry, C1 cannot be inverted.\n\n";
     return;
