@@ -56,6 +56,9 @@ template <class T> class gDPVector : public gPVector<T>  {
     void Dump(gOutput &) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
+//template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
 
 #endif   // GDPVECTOR_H
+
+
+

@@ -95,10 +95,15 @@ public:
   int Last(void) const;
   int Length(void) const;
 
-  void Dump(gOutput &) const;
+  virtual void Dump(gOutput &) const;
 };
 
-template <class T>
-gOutput& operator<<(gOutput &to, const gVector<T> &);
+#ifdef __GNUG__
+#include "rational.h"
+gOutput &operator<<(gOutput &, const gVector<double> &);
+gOutput &operator<<(gOutput &, const gVector<gRational> &);
+#elif defined __BORLANDC__
+template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
+#endif   // __GNUG__, __BORLANDC__
 
 #endif   //# GVECTOR_H

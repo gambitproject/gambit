@@ -67,7 +67,7 @@ template <class T> class gPVector : public gVector<T> {
   void Dump(gOutput &) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
+//template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
 
 #endif   //# GPVECTOR_H
 
