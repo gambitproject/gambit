@@ -1808,8 +1808,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("Concat", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Concat_Text, porTEXT, 2, 0,
-				       funcNONLISTABLE));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Concat_Text, porTEXT, 2)); 
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("y", porTEXT));
   gsm->AddFunction(FuncObj);
