@@ -81,11 +81,11 @@ NALG_OBJECTS = lemke.o nliap.o ngobit.o enum.o simpdiv.o tableau.o ludecomp.o \
 
 AGCL_SOURCES = gsmutils.cc gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc \
                gsminstr.cc portion.cc nfgfunc.cc efgfunc.cc listfunc.cc \
-               algfunc.cc gcl.cc gclsig.cc solfunc.cc gsmincl.cc gcompile.cc
+               algfunc.cc gcompile.cc gcl.cc gclsig.cc solfunc.cc gsmincl.cc
 
 AGCL_OBJECTS = gsmutils.o gsm.o gsmfunc.o gsmoper.o gsmhash.o \
                gsminstr.o portion.o nfgfunc.o efgfunc.o listfunc.o \
-               algfunc.o gcl.o gclsig.o solfunc.o gsmincl.o gcompile.o
+               algfunc.o gcompile.o gcl.o gclsig.o solfunc.o gsmincl.o
 
 # Gui stuff for the extensive form
 EGUI_SOURCES = extshow.cc treewin.cc btreewn.cc btreewn1.cc treedraw.cc \
