@@ -1,4 +1,8 @@
 \documentstyle[12pt,widetext]{manual}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+
+\pagestyle{plain}
 \begin{document}
 
 \title{Gambit Command Language}
@@ -64,7 +68,7 @@ the variable. A variable can be of the following types:
 
 \medskip
 
-\begin{tabular}{lp{3.5in}}
+\begin{tabular}{lp{4in}}
 BOOLEAN & Boolean (evaluates to constants:  True or False)\\
 INTEGER & Evaluates to an integer of arbitrary size \\
 RATIONA & Evaluates to a rational number of arbitrary precision\\
@@ -117,24 +121,27 @@ within a program in one of three manners.
 
 \medskip
 
-\begin{tabular}{lp{3.5in}}
-While [BOOLEAN, \{series of commands\}] & Evaluates the BOOLEAN
+\begin{tabular}{lp{4in}}
+While [BOOLEAN, &\\
+\{series of commands\}] & Evaluates the BOOLEAN
 expression or variable.  As long as it evaluates to TRUE, the series
 of commands are performed.  Each command must be followed by a
 semi-colon or carriage return.  If the BOOLEAN evaluates to FALSE, the
 loop ends without performing the commands.\\
-If [BOOLEAN, \{series of commands\}] & Evaluates the BOOLEAN expression
+If [BOOLEAN, & \\
+\{series of commands\}] & Evaluates the BOOLEAN expression
 once. If it evaluates to TRUE, the series of commands are performed.
 Each command must be followed by a semi-colon or carriage return.  If
 the BOOLEAN evaluates to FALSE, none of the commands are performed.\\
-If [BOOLEAN, \{series of commands\}], & Evaluates the BOOLEAN expression
+If [BOOLEAN, & \\
+\{series of commands\}], & Evaluates the BOOLEAN expression
 once. If it evaluates to TRUE, the first series of commands are
 performed.  Each command must be followed by a semi-
 colon or carriage return.  If the BOOLEAN evaluates to FALSE, the second
 series of commands are performed. \\
 \end{tabular}	
 
-\begin{tabular}{lp{3.5in}}
+\begin{tabular}{lp{4in}}
 NOTE: & The While command functions as a loop.  That is, it continues
 to perform the series of commands as long as the expression
 evaluates to TRUE.  The If statement, however, only performs the
@@ -156,15 +163,13 @@ Paremeters enclosed in brackets {\tt "{ }"} represent optional parameters which
 are not necessary for the procedure to function.
 
 \begin{itemize}
-
 \item
+
 \begin{verbatim}
-
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
-
 \end{verbatim}
 
-\begin{description}
+\bd
 \item
 - Description:  Appends the number of branches specified to the
 indicated terminal node and places the node in a new information set
@@ -173,7 +178,8 @@ for the given player.
 - Return value: Returns the node to which new branches have been appended.
 \item
 - Required parameters:
-\begin{description}
+
+\bd
 \item
 *  n:  The terminal node to which branches are to be added.
 \item
@@ -182,159 +188,270 @@ If the player specified is not already defined in the game, the player
 is created automatically. 
 \item
 *  br:  The number of branches to be appended to the node.
-\end{description}
-\item
-- Optional parameters:  None.
-\end{description}
+\ed
 
 \item
+- Optional parameters:  None.
+\ed
+
 \begin{verbatim}
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 \end{verbatim}
-\begin{description}
+
+\bd
 \item
 - Description:  Attaches the indicated outcome to the specified node.
 \item
 - Return value:  Returns the node to which the outcome is attached.
 \item
 - Required parameters:
-\begin{description}
+
+\bd
 \item
 *  n:  The node to which the outcome is to be attached.  Note that the
 node need not be terminal in order to have an outcome attached.
 \item
 *  outc:  The number of the outcome to be attached.  If no outcome
 with the indicated number exists, no action is taken.  
-\end{description}
+\ed
+
 \item
 - Optional parameters:  None.
-\end{description}
+\ed
 
 \end{itemize}
 
-Car[l->LIST(T)] =: T	\\
+\begin{verbatim}
+Car[l->LIST(T)] =: T	
+\end{verbatim}
 
+For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT 
 
-	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+\bd
+\item
+- Description:  Finds the first element of the specified list of type T.
+\item
+- Return value:  Returns a value of type T which is the first element
+of the list.
+\item - Required parameters:
+	
+\bd
+\item
+* l:  The list of type T on which the procedure is to be performed.
+\ed
 
-   -	Description:  Finds the first element of the specified list of type T.
-   -	Return value:  Returns a value of type T which is the first element of 
-	the list.
-   -	Required parameters:
-	  *  l:  The list of type T on which the procedure is to be performed.
-   -	Optional parameters:  None.
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\begin{verbatim}
 Cdr[l->LIST(T)] =: LIST(T)
+\end{verbatim}
 
-	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
-   -	Description:  Deletes the first element of the specified list of type 
-	T.
-   -	Return value:  A list of type T which is the specified list minus its
-	first element.
-   -	Required parameters:
-	  *  l:  The list of type T on which the procedure is to be performed.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Deletes the first element of the specified list of type T.
+\item -	Return value:  A list of type T which is the specified list minus its
+first element.
+\item   
+- Required parameters:
+
+\bd
+\item
+*  l:  The list of type T on which the procedure is to be performed.
+\ed
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\begin{verbatim}
 Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
+\end{verbatim}
 
-	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
-   -	Description:  Concatenates the two lists, placing the second list given
-	at the end of the first list.  Note the two lists must be of the same
-	type.
-   -	Return value:  Returns a new list (of the same type), which is a 
-	combination of the two given lists.
-   -	Required parameters:
-	  *  l1:  The list of type T which is to be placed in front of the
-		second list.
-	  *  l2:  The list of type T which is to be placed at the end of the
-		first list.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Concatenates the two lists, placing the second list given
+at the end of the first list.  Note the two lists must be of the same type.
+\item -Return value:  Returns a new list (of the same type), which is a 
+combination of the two given lists.
+\item
+- Required parameters:
+
+\bd
+\item
+*  l1:  The list of type T which is to be placed in front of the second list.
+\item 
+* l2:  The list of type T which is to be placed at the end of the first list.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\begin{verbatim}
 Contains[e->T, l->LIST(T)] =: BOOLEAN
+\end{verbatim}
 
-	For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
+For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
 
-   -	Description:  Finds whether the specified value of type T is contained 
-	in the indicated list of type T.
-   -	Return value:  True when the specified value is contained in the list.
-   -	Required parameters:
-	  *  e:  The value of type T to be searched for.
-	  *  l:  The list of type T which is to be searched in.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds whether the specified value of type T is
+contained in the indicated list of type T.
+\item 
+-Return value:  True when the specified value is contained in the list.
+\item
+-Required parameters:
+	
+\bd
+\item	
+*  e:  The value of type T to be searched for.
+\item
+*  l:  The list of type T which is to be searched in.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\begin{verbatim}
 CopyTree[n->NODE, to->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Copies the subtree rooted at the specified node to the 
-	indicated node.
-   -	Return value:  XXXX.
-   -	Required parameters:
-	  *  n:  The node at which the subtree to be copied is rooted.
-	  *  to:  The node to which the subtree is to be copied.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Copies the subtree rooted at the specified node to the
+indicated node.
+\item
+- Return value:  XXXX.
+\item
+- Required parameters:
+
+\bd
+\item	
+*  n:  The node at which the subtree to be copied is rooted.
+\item
+*  to:  The node to which the subtree is to be copied.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\begin{verbatim}
 CrunchNfg[N->NFG] =: NFG
+\end{verbatim}
 
-   -	Description:  Creates a new problem in normal form for which the 
-	strategies are those of the smallest strategy set of the specified 
-	normal form problem and which contains only those payoff elements
-	corresponding to those strategies.
-   -	Return value:  Returns the new normal form problem.
-   -	Required parameters:
-	  *  N:  The problem in normal form from which the new normal form 
-		problem is to be created.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Creates a new problem in normal form for which the 
+strategies are those of the smallest strategy set of the specified
+normal form problem and which contains only those payoff elements 
+corresponding to those strategies.
+\item
+- Return value:  Returns the new normal form problem.
+\item
+- Required parameters:
+	
+\bd
+\item
+*  N:  The problem in normal form from which the new normal form
+problem is to be created.
+\ed
 
+\item  
+- Optional parameters:  None.
+\ed
 ----------
 
+\begin{verbatim}
 DeleteAction[n->NODE, br->INTEGER] =: NODE
+\end{verbatim}
 
-   -	Description:  Deletes the indicated action number from the information
-	set containing the specified node.
-   -	Return value:  The given node.
-   -	Required parameters:
-	  *  n:  The node belonging to the information set from which the 
-		action is to be deleted.
-	  *  br:  The number of the branch to be deleted.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Deletes the indicated action number from the information
+set containing the specified node.
+\item
+- Return value:  The given node.
+- Required parameters:
+	
+\bd
+\item
+*  n:  The node belonging to the information set from which the action
+is to be deleted.
+\item *  br:  The number of the branch to be deleted.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\begin{verbatim}
 DeleteNode[n->NODE, keep->INTEGER] =: NODE
+\end{verbatim}
 
-   -	Description:  Deletes the indicated node from the tree.  The specified
-	child of the deleted node is kept and replaces the node in its spot in
-	the tree.  The subtrees associated with all other children of the 
-	deleted node are deleted.
-   -	Return value:  The node which replaces the deleted node.
-   -	Required parameters:
-	  *  n:  The node to be deleted.
-	  *  keep:  The child of the deleted node which is to be kept.
-   -	Optional parameters:  None.
+\bd
+\item   
+- Description:  Deletes the indicated node from the tree.  The specified
+child of the deleted node is kept and replaces the node in its spot in
+the tree.  The subtrees associated with all other children of the
+deleted node are deleted.
+\item
+- Return value:  The node which replaces the deleted node.
+\item
+- Required parameters:
+	
+\bd
+\item
+*  n:  The node to be deleted.
+\item
+*  keep:  The child of the deleted node which is to be kept.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\begin{verbatim}
 DeleteTree[n->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Deletes the subtree rooted at the specified node.  This 
-	node then becomes a terminal node.
-   -	Return value:  The indicated node which is now a terminal node.
-   -	Required parameters:
-	  *  n:  The node where the subtree to be deleted is rooted.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Deletes the subtree rooted at the specified node.
+This node then becomes a terminal node.
+\item
+- Return value:  The indicated node which is now a terminal node.
+\item
+- Required parameters:
+
+\bd
+\item  
+*  n:  The node where the subtree to be deleted is rooted.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
+
+
 
 DetachOutcome[n->NODE] =: NODE
 
