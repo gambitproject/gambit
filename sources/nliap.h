@@ -20,13 +20,13 @@ template <class T> class NFLiapParams : public LiapParams<T>  {
 template <class T> class NFLiapModule : public LiapModule<T>  {
   private:
     const Nfg<T> &N;
+    MixedProfile<T> S;
     gList<MixedProfile<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
     void AddSolution(const LiapFunc<T> *const);
 
   public:
-    NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p); 
     NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p, MixedProfile<T> &s); 
     virtual ~NFLiapModule();
     const gList<MixedProfile<T> > &GetSolutions(void) const;

@@ -37,7 +37,6 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     T LiapDerivValue(int i, int j, const MixedProfile<T> &p) const;
 
   public:
-    NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P); 
     NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P, 
 	       const MixedProfile<T> &s); 
     virtual ~NFLiapFunc();
@@ -56,23 +55,12 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 //               NFLiapFunc<T>: Constructor and destructor
 //------------------------------------------------------------------------
 
-
-
-template <class T>
-NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), N(NF),
-    p(NF), pp(NF)
-{ }
-
-
 template <class T>
 NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P,
 			  const MixedProfile<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0),
-    N(NF), p(NF), pp(NF)
-{
-  pp = s;
-}
+  : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0),
+    N(NF), p(s), pp(s)
+{ }
 
 template <class T> NFLiapFunc<T>::~NFLiapFunc()
 { }
@@ -116,7 +104,7 @@ template <class T> void NFLiapFunc<T>::Randomize(void)
 
   for (int i = 1; i <= N.NumPlayers(); i++)  {
     sum = (T) 0;
-    for (int j = 1; j < N.NumStrats(i); j++)  {
+    for (int j = 1; j < pp.GetNFSupport().NumStrats(i); j++)  {
       do
 	tmp = (T) Uniform();
       while (tmp + sum > (T) 1);
@@ -145,20 +133,20 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
     tmp.CopyRow(i, payoff);
     avg = sum = (T) 0;
 	// then for each strategy for that player set it to 1 and evaluate
-    for (int j = 1; j <= N.NumStrats(i); j++) {
+    for (int j = 1; j <= p.GetNFSupport().NumStrats(i); j++) {
       tmp(i, j) = (T) 1;
       x = p(i, j);
       payoff(i, j) = tmp.Payoff(i);
       avg += x * payoff(i, j);
       sum += x;
-			if (x>(T)0) x=0;
+      if (x>(T)0) x=0;
       result += BIG1*x*x;         // add penalty for neg probabilities
       tmp(i,j) = (T) 0;
     }
     tmp.CopyRow(i, p);
-    for(j=1;j<=N.NumStrats(i);j++) {
+    for(j=1;j<=p.GetNFSupport().NumStrats(i);j++) {
       x=payoff(i,j)-avg;
-			if (x<=(T)0) x=(T)0;
+      if (x<=(T)0) x=(T)0;
       result += x*x;          // add penalty if not best response
     }
     x=sum - ((T) 1);
@@ -175,14 +163,14 @@ template <class T> int NFLiapFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
   
   for(i1=1,ii=1;i1<=N.NumPlayers();i1++) {
     avg=(T)0;
-    for(j1=1;j1<=N.NumStrats(i1);j1++) {
+    for(j1=1;j1<=p.GetNFSupport().NumStrats(i1);j1++) {
       d[ii]=LiapDerivValue(i1,j1,p);
       avg+=d[ii];
       ii++;
     }
-    avg/=(T)N.NumStrats(i1);
-    ii-=N.NumStrats(i1);
-    for(j1=1;j1<=N.NumStrats(i1);j1++) {
+    avg/=(T)p.GetNFSupport().NumStrats(i1);
+    ii-=p.GetNFSupport().NumStrats(i1);
+    for(j1=1;j1<=p.GetNFSupport().NumStrats(i1);j1++) {
       d[ii]-=avg;
       ii++;
     }
@@ -199,7 +187,7 @@ T NFLiapFunc<T>::LiapDerivValue(int i1, int j1, const MixedProfile<T> &p) const
   x=(T)0;
   for(i=1;i<=N.NumPlayers();i++) {
     psum=(T)0.0;
-    for(j=1;j<=N.NumStrats(i);j++) {
+    for(j=1;j<=p.GetNFSupport().NumStrats(i);j++) {
       psum+=p(i,j);
       x1=p.Payoff(i,i,j)-p.Payoff(i);
       if(i1==i) {
@@ -225,15 +213,10 @@ template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 //                    NFLiapModule<T>: Member functions
 //------------------------------------------------------------------------
 
-template <class T> 
-NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p)
-  : LiapModule<T>(p), N(N)
-{ }
-
 template <class T>
 NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p,
 			      MixedProfile<T> &s)
-  : LiapModule<T>(p,s), N(N)
+  : LiapModule<T>(p), N(N), S(s)
 { }
 
 template <class T> NFLiapModule<T>::~NFLiapModule()
@@ -248,18 +231,13 @@ const gList<MixedProfile<T> > &NFLiapModule<T>::GetSolutions(void) const
 template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 {
 //  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
-  if(start) {
-    MixedProfile<T> s(N);
-    ((gVector<T> &) s).operator=(*start);
-    return new NFLiapFunc<T>(N, params, s);
-  }
-  return new NFLiapFunc<T>(N, params);
+  return new NFLiapFunc<T>(N, params, S);
 }
 
 template <class T>
 void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 {
-  solutions.Append(MixedProfile<T>(N, ((NFLiapFunc<T> *) F)->GetProfile()));
+  solutions.Append(MixedProfile<T>(((NFLiapFunc<T> *) F)->GetProfile()));
 }
 
 

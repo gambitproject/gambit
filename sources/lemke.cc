@@ -31,6 +31,7 @@ template <class T> class LemkeTableau : public gTableau<T>
 {
   private:
     const Nfg<T> &N;
+    const NFSupport &support;
     int num_strats;
     gOutput &output;
     int printlevel;
@@ -44,7 +45,7 @@ template <class T> class LemkeTableau : public gTableau<T>
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const Nfg<T> &, gOutput &ofile, int trace);
+    LemkeTableau(const Nfg<T> &, const NFSupport &, gOutput &ofile, int trace);
     virtual ~LemkeTableau();
 
     int Lemke(int);
@@ -58,20 +59,20 @@ template <class T> class LemkeTableau : public gTableau<T>
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF,
+LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF, const NFSupport &S,
 			      gOutput &ofile, int trace)
-     : gTableau<T>(1, NF.NumStrats(1) + NF.NumStrats(2),
-		   NF.NumStrats(1) + NF.NumStrats(2),
-		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
-		   NF.NumStrats(1) + NF.NumStrats(2)),
-		   N(NF), num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
+     : gTableau<T>(1, S.NumStrats(1) + S.NumStrats(2),
+		   S.NumStrats(1) + S.NumStrats(2),
+		   0, S.NumStrats(1) + S.NumStrats(2) + 1,
+		   S.NumStrats(1) + S.NumStrats(2)),
+		   N(NF), support(S),
+		   num_strats(S.NumStrats(1) + S.NumStrats(2)),
 		   output(ofile), printlevel(trace),
 		   npivots(0)
 {
-  NFSupport S(N);
   NfgIter<T> iter(&S);
   T min = (T) 0, x;
-  int n1 = N.NumStrats(1), n2 = N.NumStrats(2);
+  int n1 = S.NumStrats(1), n2 = S.NumStrats(2);
 
   for (int i = 1; i <= n1 + n2; i++)  {
     Col_Labels[i] = i;
@@ -360,29 +361,29 @@ void LemkeTableau<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(N);
+    MixedProfile<T> profile(N, support);
     T sum = (T) 0;
 
-    for (int j = 1; j <= N.NumStrats(1); j++)
+    for (int j = 1; j <= support.NumStrats(1); j++)
       if (List[i].IsDefined(j))   sum += List[i](j);
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= N.NumStrats(1); j++) 
+    for (j = 1; j <= support.NumStrats(1); j++) 
       if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
       else  profile(1, j) = (T) 0;
 
     sum = (T) 0;
 
-    for (j = 1; j <= N.NumStrats(2); j++)
-      if (List[i].IsDefined(N.NumStrats(1) + j))  
-	sum += List[i](N.NumStrats(1) + j);
+    for (j = 1; j <= support.NumStrats(2); j++)
+      if (List[i].IsDefined(support.NumStrats(1) + j))  
+	sum += List[i](support.NumStrats(1) + j);
 
     if (sum == (T) 0)  continue;
 
-    for (j = 1; j <= N.NumStrats(2); j++)
-      if (List[i].IsDefined(N.NumStrats(1) + j))
-	profile(2, j) = List[i](N.NumStrats(1) + j) / sum;
+    for (j = 1; j <= support.NumStrats(2); j++)
+      if (List[i].IsDefined(support.NumStrats(1) + j))
+	profile(2, j) = List[i](support.NumStrats(1) + j) / sum;
       else
 	profile(2, j) = (T) 0;
 
@@ -415,8 +416,9 @@ class LemkeTableau<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p)
-  : nf(N), params(p), npivots(0)
+LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p,
+			    const NFSupport &S)
+  : nf(N), support(S), params(p), npivots(0)
 { }
 
 template <class T> LemkeModule<T>::~LemkeModule()
@@ -428,7 +430,7 @@ template <class T> int LemkeModule<T>::Lemke(void)
 
   gWatch watch;
 
-  LemkeTableau<T> LT(nf, *params.output, params.trace);
+  LemkeTableau<T> LT(nf, support, *params.output, params.trace);
   LT.Lemke((params.stopAfter == 1) ? 1 : 0);
 
   time = watch.Elapsed();
@@ -474,7 +476,8 @@ int Lemke(const Nfg<T> &N, const LemkeParams &p,
 	  gList<MixedProfile<T> > &solutions,
 	  long &npivots, double &time)
 {
-  LemkeModule<T> LM(N, p);
+  NFSupport S(N);
+  LemkeModule<T> LM(N, p, S);
   int result = LM.Lemke();
 
   npivots = LM.NumPivots();

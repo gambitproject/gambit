@@ -44,7 +44,6 @@ private:
   T GobitDerivValue(int i, int j, const MixedProfile<T> &v);
   
 public:
-  NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P);
   NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
 	      const MixedProfile<T> &s);
   virtual ~NFGobitFunc();
@@ -64,21 +63,12 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength()), 
-    niters(0), nevals(0), p(NF), pp(NF), N(NF)
-{ 
-  Init();
-}
-
-template <class T>
 NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
 			    const MixedProfile<T> &s)
-  : gBC2FunctMin<T>(NF.ProfileLength()), niters(0), nevals(0), 
-    p(NF), pp(NF), N(NF)
+  : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0), 
+    p(s), pp(s), N(NF)
 {
   Init();
-  pp = s;
 }
 
 template <class T> void NFGobitFunc<T>::Init(void)
@@ -88,8 +78,8 @@ template <class T> void NFGobitFunc<T>::Init(void)
   scratch1 = new gVector<T> *[N.NumPlayers()] - 1;
   scratch2 = new gVector<T> *[N.NumPlayers()] - 1;
   for (int i = 1; i <= N.NumPlayers(); i++)  {
-    scratch1[i] = new gVector<T>(N.NumStrats(i));
-    scratch2[i] = new gVector<T>(N.NumStrats(i));
+    scratch1[i] = new gVector<T>(pp.GetNFSupport().GetStrategy(i).Length());
+    scratch2[i] = new gVector<T>(pp.GetNFSupport().GetStrategy(i).Length());
   }
 }
 
@@ -100,11 +90,12 @@ template <class T> NFGobitFunc<T>::~NFGobitFunc()
     delete scratch2[i];
   }
 
-  delete (scratch1 + 1);
-  delete (scratch2 + 1);
+  delete [] (scratch1 + 1);
+  delete [] (scratch2 + 1);
 }
 
-template <class T> const MixedProfile<T> &NFGobitFunc<T>::GetProfile(void) const
+template <class T> 
+const MixedProfile<T> &NFGobitFunc<T>::GetProfile(void) const
 {
   return pp;
 }
@@ -136,7 +127,7 @@ int NFGobitFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
   
   for (int pl = 1, index = 1; pl <= N.NumPlayers(); pl++)  {
     avg = (T) 0;
-    int nstrats = N.NumStrats(pl);
+    int nstrats = pp.GetNFSupport().GetStrategy(pl).Length();
     for (int st = 1; st <= nstrats;
 	 avg += (d[index++] = GobitDerivValue(pl, st++, p)));
     avg /= (T) nstrats;
@@ -154,9 +145,8 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const MixedProfile<T> &v)
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     gVector<T> &payoff = *scratch1[pl];
     v.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= N.NumStrats(pl); st++)  {
+    for (int st = 2; st <= pp.GetNFSupport().GetStrategy(pl).Length(); st++)  {
       dv =(T)log(v(pl, 1)) - (T)log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
-//      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)              x += dv / v(pl, 1);
 	else if (j == st)        x -= dv / v(pl, st);
@@ -179,9 +169,8 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     gVector<T> &payoff = *scratch1[pl];
     p.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= N.NumStrats(pl); st++)  {
+    for (int st = 2; st <= pp.GetNFSupport().GetStrategy(pl).Length(); st++)  {
       z = (T)log(p(pl, 1)) - (T)log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
-//      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
   }
@@ -202,23 +191,23 @@ template <class T> void NFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 
 template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 {
-      // Header information
-	if(format==3) {
-		f<<"Dimensionality:\n";
-		N.WriteNfgFile(f);
-	}
-	else if(format==2) {
-		int numcols = 2+N.ProfileLength();
-		f<<"DataFormat:\n";
-		f << numcols;
-		for(int i=1;i<=numcols;i++) f << " " << i;
+  // Header information
+  if(format==3) {
+    f<<"Dimensionality:\n";
+    N.WriteNfgFile(f);
+  }
+  else if(format==2) {
+    int numcols = 2+N.ProfileLength();
+    f<<"DataFormat:\n";
+    f << numcols;
+    for(int i=1;i<=numcols;i++) f << " " << i;
     f<<"\nData:\n";
-		}
-			// PXI output
-	else if(format==1) {
-		f<< " ";
-		for (int pl = 1; pl <= N.NumPlayers(); pl++)
-      for (int strat = 1; strat <= N.NumStrats(pl); strat++)  
+  }
+  // PXI output
+  else if(format==1) {
+    f<< " ";
+    for (int pl = 1; pl <= N.NumPlayers(); pl++)
+      for (int strat = 1; strat <= pp.GetNFSupport().GetStrategy(pl).Length(); strat++)  
 	f << pp(pl,strat) << " ";
   }
   else  f << " pp = " << pp;
@@ -230,13 +219,9 @@ template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 //-------------------------------------------------------------------------
 
 template <class T>
-NFGobitModule<T>::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p) 
-  : GobitModule<T>(p), N(NF)
-{ }
-
-template <class T>NFGobitModule<T>
-::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p, MixedProfile<T> &s)
-  : GobitModule<T>(p,s), N(NF)
+NFGobitModule<T>::NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p,
+				MixedProfile<T> &s)
+  : GobitModule<T>(p), N(NF), S(s)
 { }
 
 template <class T> NFGobitModule<T>::~NFGobitModule()
@@ -250,12 +235,7 @@ const gList<MixedProfile<T> > &NFGobitModule<T>::GetSolutions(void) const
 
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
-
-  if (start) {
-    return new NFGobitFunc<T>(N, params, (MixedProfile<T> &) *start); 
-  }
-  return new NFGobitFunc<T>(N, params);
-
+  return new NFGobitFunc<T>(N, params, S); 
 }
 
 template <class T>

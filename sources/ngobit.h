@@ -24,11 +24,12 @@ template <class T> class NFGobitModule : public GobitModule<T>   {
   protected:
     const Nfg<T> &N;
     gList<MixedProfile<T> > solutions;
+    MixedProfile<T> S;
 
     GobitFunc<T> *CreateFunc(void);
     void AddSolution(const GobitFunc<T> *const);
+
   public:
-    NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p);
     NFGobitModule(const Nfg<T> &NF, NFGobitParams<T> &p,
 		  MixedProfile<T> &s);
     virtual ~NFGobitModule();
