@@ -17,6 +17,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
+  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
@@ -34,6 +35,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
+  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
@@ -50,6 +52,7 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
+  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
@@ -66,6 +69,7 @@ BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
+  _Epsilon(0),
   _GobitLambda(-1),
   _GobitValue(-1),
   _LiapValue(-1),
@@ -82,6 +86,7 @@ template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
   _IsNash(b._IsNash),
   _IsSubgamePerfect(b._IsSubgamePerfect),
   _IsSequential(b._IsSequential),
+  _Epsilon(0),
   _GobitLambda(b._GobitLambda),
   _GobitValue(b._GobitValue),
   _LiapValue(b._LiapValue),
@@ -104,7 +109,7 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
     _IsSequential = T_DONTKNOW;
 
   if( _IsNash == T_DONTKNOW )
-    if(BehavProfile<T>::IsNash())
+    if(MaxGripe() < _Epsilon)
       _IsNash = T_YES;
     else
       _IsNash = T_NO;
@@ -159,6 +164,14 @@ template <class T> void BehavSolution<T>::SetGobit(T lambda, T value)
 
 template <class T> T BehavSolution<T>::GobitLambda(void) const
 { return _GobitLambda; }
+
+template <class T> void BehavSolution<T>::SetEpsilon(T value)
+{
+  _Epsilon = value;
+}
+
+template <class T> T BehavSolution<T>::Epsilon(void) const
+{ return _Epsilon; }
 
 template <class T> T BehavSolution<T>::GobitValue(void) const
 { return _GobitValue; }

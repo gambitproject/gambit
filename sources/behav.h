@@ -76,7 +76,6 @@ template <class T> class BehavProfile
 ;
 
     T LiapValue(void) const;
-    bool IsNash(void) const;
     void Gripe(gDPVector<T> &value) const;
     T MaxGripe(void) const;
 

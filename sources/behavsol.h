@@ -43,6 +43,7 @@ protected:
   TriState _IsNash;
   TriState _IsSubgamePerfect;
   TriState _IsSequential;
+  T _Epsilon;
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
@@ -70,6 +71,9 @@ public:
   TriState IsSubgamePerfect(void) const; // Is it Subgame Perfect? Y/N/DK
   void SetIsSequential(TriState);
   TriState IsSequential(void) const; // Is it Sequential? Y/N/DK
+
+  void SetEpsilon(T value);
+  T Epsilon(void) const; // lambda from gobit alg
 
   void SetGobit(T lambda, T value);
   T GobitLambda(void) const; // lambda from gobit alg

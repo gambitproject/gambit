@@ -520,11 +520,6 @@ template <class T> T BehavProfile<T>::MaxGripe(void) const
   return maxgripe;
 }
 
-template <class T> bool BehavProfile<T>::IsNash(void) const
-{
-  return (MaxGripe() == (T) 0);
-}
-
 template <class T>
 const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
 {
