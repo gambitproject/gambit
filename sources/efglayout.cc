@@ -597,7 +597,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
 
   UpdateTableParents();
 
-  m_maxX += draw_settings.NodeLength() + draw_settings.OutcomeLength() * 3;
+  m_maxX += draw_settings.NodeLength() + draw_settings.OutcomeLength();
   m_maxY = maxy + 25;
 }
 

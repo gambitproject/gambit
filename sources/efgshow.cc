@@ -144,8 +144,8 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuINSPECT_ZOOM_WIN, EfgShow::OnInspectZoom)
   EVT_MENU(efgmenuINSPECT_GAMEINFO, EfgShow::OnInspectGameInfo)
   EVT_MENU(efgmenuINSPECT_SCRIPT, EfgShow::OnInspectScript)
-  EVT_MENU(efgmenuPREFS_INC_ZOOM, EfgShow::OnPrefsZoomIn)
-  EVT_MENU(efgmenuPREFS_DEC_ZOOM, EfgShow::OnPrefsZoomOut)
+  EVT_MENU(efgmenuPREFS_ZOOMIN, EfgShow::OnPrefsZoomIn)
+  EVT_MENU(efgmenuPREFS_ZOOMOUT, EfgShow::OnPrefsZoomOut)
   EVT_MENU(efgmenuPREFS_LEGEND, EfgShow::OnPrefsLegend)
   EVT_MENU(efgmenuPREFS_FONTS_ABOVENODE, EfgShow::OnPrefsFontsAboveNode)
   EVT_MENU(efgmenuPREFS_FONTS_BELOWNODE, EfgShow::OnPrefsFontsBelowNode)
@@ -194,14 +194,16 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
 
   CreateStatusBar();
 
-  wxAcceleratorEntry entries[6];
+  wxAcceleratorEntry entries[8];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
   entries[2].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
   entries[3].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
   entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
-  wxAcceleratorTable accel(6, entries);
+  entries[6].Set(wxACCEL_NORMAL, (int) '+', efgmenuPREFS_ZOOMIN);
+  entries[7].Set(wxACCEL_NORMAL, (int) '-', efgmenuPREFS_ZOOMOUT);
+  wxAcceleratorTable accel(8, entries);
   SetAcceleratorTable(accel);
 
   MakeMenus();
@@ -254,6 +256,9 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
 #ifdef ZOOM_WINDOW
   m_treeZoomWindow = new TreeZoomWindow(this, m_treeWindow);
 #endif  // ZOOM_WINDOW
+
+  AdjustSizes();
+  m_treeWindow->FitZoom();
 
   Show(true);
 }
@@ -682,16 +687,15 @@ void EfgShow::MakeMenus(void)
   inspect_menu->Append(efgmenuINSPECT_SCRIPT, "Scri&pt",
 		       "View GCL script log");
   
-  wxMenu *prefs_menu = new wxMenu;
+  wxMenu *prefsMenu = new wxMenu;
   wxMenu *prefsDisplayMenu = new wxMenu;
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_LAYOUT, "&Layout",
 			   "Set tree layout parameters");
-  prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display", prefsDisplayMenu,
+  prefsMenu->Append(efgmenuPREFS_DISPLAY, "&Display", prefsDisplayMenu,
 		     "Set display options");
-
-  prefs_menu->Append(efgmenuPREFS_LEGEND, "&Legends...",
+  prefsMenu->Append(efgmenuPREFS_LEGEND, "&Legends...",
 		     "Set legends");
 
   wxMenu *prefsFontsMenu = new wxMenu;
@@ -705,14 +709,19 @@ void EfgShow::MakeMenus(void)
 			 "Font for label above branches");
   prefsFontsMenu->Append(efgmenuPREFS_FONTS_BELOWBRANCH, "Below Branch",
 			 "Font for label below branches");
-  prefs_menu->Append(efgmenuPREFS_FONTS, "&Fonts", prefsFontsMenu,
+  prefsMenu->Append(efgmenuPREFS_FONTS, "&Fonts", prefsFontsMenu,
 		     "Set display fonts");
 
-  prefs_menu->Append(efgmenuPREFS_COLORS, "&Colors",
+  prefsMenu->Append(efgmenuPREFS_COLORS, "&Colors",
 		     "Set player colors");
-  prefs_menu->AppendSeparator();
-  prefs_menu->Append(efgmenuPREFS_SAVE, "&Save");
-  prefs_menu->Append(efgmenuPREFS_LOAD, "&Load");
+  prefsMenu->AppendSeparator();
+  prefsMenu->Append(efgmenuPREFS_ZOOMIN, "Zoom &in\t+",
+		    "Increase display magnification");
+  prefsMenu->Append(efgmenuPREFS_ZOOMOUT, "Zoom &out\t-",
+		    "Decrease display magnification");
+  prefsMenu->AppendSeparator();
+  prefsMenu->Append(efgmenuPREFS_SAVE, "&Save");
+  prefsMenu->Append(efgmenuPREFS_LOAD, "&Load");
   
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
@@ -725,7 +734,7 @@ void EfgShow::MakeMenus(void)
   menu_bar->Append(supports_menu, "S&upports");
   menu_bar->Append(solve_menu,    "&Solve");
   menu_bar->Append(inspect_menu,  "&Inspect");
-  menu_bar->Append(prefs_menu,    "&Prefs");
+  menu_bar->Append(prefsMenu,     "&Prefs");
   menu_bar->Append(help_menu,     "&Help");
 
   // Set the menu bar

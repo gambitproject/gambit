@@ -281,34 +281,34 @@ void TreeWindow::AdjustScrollbarSteps(void)
   int width, height;
   GetClientSize(&width, &height);
 
-  if (width < m_layout.MaxX() * m_zoom || height < m_layout.MaxY() * m_zoom) {
-    int scrollX, scrollY;
-    GetViewStart(&scrollX, &scrollY);
+  int scrollX, scrollY;
+  GetViewStart(&scrollX, &scrollY);
 
-    SetScrollbars(50, 50,
-		  m_layout.MaxX() * m_zoom / 50 + 1,
-		  m_layout.MaxY() * m_zoom / 50 + 1,
-		  scrollX, scrollY);
-  }
+  SetScrollbars(50, 50,
+		(m_layout.MaxX() + draw_settings.NodeLength() + 
+		 draw_settings.OutcomeLength()) * m_zoom / 50 + 1,
+		m_layout.MaxY() * m_zoom / 50 + 1,
+		scrollX, scrollY);
 }
 
 void TreeWindow::FitZoom(void)
 {
   int width, height;
   GetClientSize(&width, &height);
-    
+
   double zoomx = (double) width / (double) m_layout.MaxX();
   double zoomy = (double) height / (double) m_layout.MaxY();
-    
+
   zoomx = gmin(zoomx, 1.0); 
   zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
-  m_zoom = gmin(zoomx, zoomy);
+  m_zoom = gmin(zoomx, zoomy) * .9;
 }
 
 void TreeWindow::SetZoom(float p_zoom)
 {
   m_zoom = p_zoom;
   AdjustScrollbarSteps();
+  EnsureCursorVisible();
   Refresh();
 }
 
@@ -338,37 +338,39 @@ void TreeWindow::EnsureCursorVisible(void)
   GetViewStart(&xScroll, &yScroll);
   int width, height;
   GetClientSize(&width, &height);
-  width = (int) (width / m_zoom);
-  height = (int) (height / m_zoom);
-  int xSteps = (int) (m_layout.MaxX() * m_zoom / 50) + 1;
-  int ySteps = (int) (m_layout.MaxY() * m_zoom / 50) + 1;
 
-  if (entry->x < xScroll * 50) {
-    xScroll = entry->x / 50 - 1;
+  int xx, yy;
+  CalcScrolledPosition(entry->x * m_zoom - 20, entry->y * m_zoom, &xx, &yy);
+  if (xx < 0) {
+    xScroll -= -xx / 50 + 1;
   }
-  if (entry->x + draw_settings.NodeLength() > xScroll * 50 + width) {
-    xScroll = ((entry->x + draw_settings.NodeLength()) / 50 +
-	       (width / 2) / 50);
+  CalcScrolledPosition(entry->x * m_zoom + draw_settings.NodeLength() +
+		       draw_settings.OutcomeLength(),
+		       entry->y * m_zoom, &xx, &yy);
+  if (xx > width) {
+    xScroll += (xx - width) / 50 + 1;
   }
   if (xScroll < 0) {
     xScroll = 0;
   }
-  if (xScroll > xSteps) {
-    xScroll = xSteps;
+  else if (xScroll > GetScrollRange(wxHORIZONTAL)) {
+    xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  if (entry->y - 10 < yScroll * 50) {
-    yScroll = (entry->y - 10) / 50 - 1;
+  CalcScrolledPosition(entry->x * m_zoom, entry->y * m_zoom - 20, &xx, &yy);
+  if (yy < 0) {
+    yScroll -= -yy / 50 + 1;
   }
-  if (entry->y + 10 > yScroll * 50 + height) {
-    yScroll = (entry->y + 10) / 50 - height / 50;
+  CalcScrolledPosition(entry->x * m_zoom, entry->y * m_zoom + 20, &xx, &yy);
+  if (yy > height) {
+    yScroll += (yy - height) / 50 + 1;
   }
   if (yScroll < 0) {
     yScroll = 0;
   }
-  if (yScroll > ySteps) {
-    yScroll = ySteps;
-  }
+  else if (yScroll > GetScrollRange(wxVERTICAL)) {
+    yScroll = GetScrollRange(wxVERTICAL);
+  } 
 
   Scroll(xScroll, yScroll);
 }

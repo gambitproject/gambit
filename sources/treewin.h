@@ -45,7 +45,6 @@ private:
   float m_zoom;
 
   // Private Functions
-  void FitZoom(void);
   void MakeFlasher(void);
   void UpdateCursor(void);
   void ProcessCursor(void);
@@ -120,8 +119,10 @@ public:
   
   // Check if a drag'n'drop object has been activated
   Node *GotObject(long &mx, long &my, int what);
+
   float GetZoom(void) const { return m_zoom; }
   void SetZoom(float p_zoom);
+  void FitZoom(void);
 
   // Access to the numeric values from the renderer
   gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
