@@ -534,8 +534,10 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 					const int &i,
 					const int &j) const
 {
+  /*
   //DEBUG
   gout << "pl = " << pl << " while infoset = " << i << " and action = " << j << ".\n";
+  */
 
   while (tempnode != Game().RootNode()) {
 
@@ -549,12 +551,14 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
 	  if (j != last_action->GetNumber()) {
 
+	    /*
 	    //DEBUG
 	    gout << "Eliminated (pl,i,j) = (" <<
 	      last_infoset->GetPlayer()->GetNumber() << "," <<
 	      last_infoset->GetNumber() << "," <<
 	      last_action->GetNumber() 
 		 << ") because wrong deviation.\n";
+	    */
 	    
 	    return false;
 	  }
@@ -564,12 +568,14 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 	    node_prob *= (gDouble)Profile()->GetValue(last_action);
 	  else {
 
+	    /*
 	    //DEBUG
 	    gout << "Eliminated (pl,i,j) = (" <<
 	      last_infoset->GetPlayer()->GetNumber() << "," <<
 	      last_infoset->GetNumber() << "," <<
 	      last_action->GetNumber() 
 		 << ") because action is inactive.\n";
+	    */
 	    
 	    return false;
 	  }
@@ -619,11 +625,13 @@ BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 
 	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
 
+	      /*
 	      //DEBUG
 	      gout << "\nTerminal node " << n << " with outcome " <<
 	    	terminal_nodes[n]->GetOutcome()->GetName();
 	      gout << " has payoff " << 
 		Game().Payoff(terminal_nodes[n]->GetOutcome(),pl) << ".\n";
+	      */
 
 	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
 	      if (NodeProbabilityPoly(node_prob,
@@ -635,15 +643,18 @@ BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 		node_prob *= 
 		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
 		next_poly += node_prob;
-
+		/*
 		//DEBUG
 		gout << "It's contribution is " << node_prob << ".\n";
+		*/
 	      }
 	    }
 
+	    /*
 	    //DEBUG
 	    gout << "The player's payoff is " 
 		 << (gDouble)Payoff(pl) << ".\n\n";
+	    */
 
 	    answer += -next_poly + (gDouble)Payoff(pl);
 	  }
@@ -691,12 +702,14 @@ bool BehavSolution::ExtendsToNash(gStatus &m_status) const
 						       var_index);
   num_vars = inequalities.Dmnsn();
 
+  /*
   //DEBUG
   gout << "The behav_profile is\n" << *(this->Profile()) << "\n"
        << "with support\n" << Support() << "\n";
 
   gout << "The dimension is " << inequalities.Dmnsn()
        << " and the system is\n" << inequalities << "\n";
+  */
 
   // set up the rectangle of search
   gVector<gDouble> bottoms(num_vars), tops(num_vars);
