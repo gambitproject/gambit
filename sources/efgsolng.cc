@@ -5,7 +5,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "wxmisc.h"
 #include "wxstatus.h"
 #include "gnullstatus.h"

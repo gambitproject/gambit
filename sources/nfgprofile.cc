@@ -4,7 +4,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "nfgprofile.h"
 #include "nfgconst.h"
 

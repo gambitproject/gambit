@@ -10,6 +10,11 @@
 #include "math/gdpvect.h"
 #include "math/gmatrix.h"
 
+template <class T> Portion *ArrayToList(const gArray<T> &);
+template <class T> Portion *ArrayToList(const gList<T> &);
+template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
+
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<double> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -18,6 +23,7 @@ Portion *ArrayToList(const gArray<double> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<gRational> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -26,6 +32,7 @@ Portion *ArrayToList(const gArray<gRational> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<gNumber> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -34,6 +41,7 @@ Portion *ArrayToList(const gArray<gNumber> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Action *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -42,6 +50,7 @@ Portion *ArrayToList(const gArray<Action *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<EFPlayer *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -50,6 +59,7 @@ Portion *ArrayToList(const gArray<EFPlayer *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Infoset *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -58,6 +68,7 @@ Portion *ArrayToList(const gArray<Infoset *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<EFOutcome *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -66,6 +77,7 @@ Portion *ArrayToList(const gArray<EFOutcome *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Node *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -74,6 +86,7 @@ Portion *ArrayToList(const gArray<Node *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<NFPlayer *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -82,6 +95,7 @@ Portion *ArrayToList(const gArray<NFPlayer *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<NFOutcome *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -90,6 +104,7 @@ Portion *ArrayToList(const gArray<NFOutcome *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Strategy *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -98,6 +113,7 @@ Portion *ArrayToList(const gArray<Strategy *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gList<Node *> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -106,6 +122,7 @@ Portion *ArrayToList(const gList<Node *> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gList<const EFSupport> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -116,6 +133,7 @@ Portion *ArrayToList(const gList<const EFSupport> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gList<const NFSupport> &A)
 {
   ListPortion *ret = new ListPortion;
@@ -126,6 +144,7 @@ Portion *ArrayToList(const gList<const NFSupport> &A)
   return ret;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion *gDPVectorToList(const gDPVector<double> &A)
 {
   ListPortion* p;
@@ -147,6 +166,7 @@ Portion *gDPVectorToList(const gDPVector<double> &A)
   return p;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion* gDPVectorToList(const gDPVector<gRational> &A)
 {
   ListPortion* p;
@@ -168,6 +188,7 @@ Portion* gDPVectorToList(const gDPVector<gRational> &A)
   return p;
 }
 
+TEMPLATE_SPECIALIZATION()
 Portion* gDPVectorToList(const gDPVector<gNumber> &A)
 {
   ListPortion* p;

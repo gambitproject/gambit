@@ -169,11 +169,11 @@ public:
   //---------------
 
  // Print polynomial in SOP form
-  friend gOutput &operator<< (gOutput &f, const gPoly<T> &y);
   void Output(gText &) const;
 };
 
 template <class T> gText &operator<< (gText &, const gPoly<T> &);
+template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
 
   //-------------
   // Conversion:

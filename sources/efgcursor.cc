@@ -4,12 +4,16 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "efgcursor.h"
 
 
 const int EfgCursorWindow::s_numFeatures = 8;
-char *EfgCursorWindow::s_featureNames[s_numFeatures+1] = 
+static const int s_numFeatures = 8;
+char *EfgCursorWindow::s_featureNames[9] = 
 { "BlankEntry", "Infoset", "RealizProb", "IsetProb", "BeliefProb", "NodeValue",
   "IsetValue", "BranchProb", "BranchValue" };
 

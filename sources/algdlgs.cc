@@ -5,6 +5,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "base/gstream.h"
 #include "system.h"
 #include "wxio.h"

@@ -4,7 +4,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "wx/dcps.h"
 #include "wx/dragimag.h"
 #include "wxmisc.h"

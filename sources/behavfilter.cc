@@ -4,6 +4,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "behavfilter.h"
 
 static EfgAlgType filter_cr_id[NUM_BCREATORS] =

@@ -4,15 +4,14 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 #ifdef __GNUG__
 #pragma implementation "valinteger.h"
 #endif  // __GNUG__
-
-#include "wx/wx.h"
-
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif  // __BORLANDC__
 
 #include "valinteger.h"
 

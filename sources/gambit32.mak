@@ -7,14 +7,14 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = E:\WX2
-BCCDIR = C:\BC5
+WXDIR = C:\TED\WX2
+BCCDIR = C:\BORLAND\BCC55
 
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -v -I..\include -Ibase -Imath
-EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
+EXTRACPPFLAGS = -D__BCC55__ -I$(BCCDIR)\include -I..\include -Ibase -Imath
+EXTRALINKFLAGS = 
 
 !include make.filelist
 
@@ -22,8 +22,6 @@ CFG = gambit32.cfg
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm
 WXINC = -I$(WXDIR)\include
-
-OPT = -Od
 
 .path.cc = .;base;math
 
@@ -33,13 +31,13 @@ $(SOURCE_SUFFIX).obj:
 .c.obj:
 	bcc32 $(CPPFLAGS) -P- -c {$< }
 
-GUILIBS=$(WXLIB) cw32mti import32 ole2w32
+GUILIBS=$(WXLIB) cw32mt import32 ole2w32
 GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
 
 
-LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
+LINKFLAGS= /v /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
-DEBUG_FLAGS= -v
+DEBUG_FLAGS=
 
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
@@ -64,7 +62,7 @@ gcl:   $(TTYGCL_OBJECTS)
 c0x32.obj $(TTYGCL_OBJECTS)
 gcl
 nul
-cw32mti import32 base\gambit_base math\gambit_math
+cw32mti import32
 !
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res

@@ -7,11 +7,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif // __BORLANDC__
-
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "wx/wizard.h"
 
 #include "gambit.h"

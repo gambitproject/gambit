@@ -7,8 +7,6 @@
 #ifndef BEHAVFILTER_H
 #define BEHAVFILTER_H
 
-#include "wx/wx.h"
-
 #include "base/base.h"
 #include "behavsol.h"
 

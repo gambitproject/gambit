@@ -90,9 +90,9 @@ template <class T> class gPolyList
    // Conversion
    gList<gPoly<gDouble> > ListTogDouble()  const;
    gList<gPoly<gDouble> > NormalizedList() const;
-
-friend gOutput& operator << (gOutput& output, const gPolyList<T>& x);
 };  
+
+template <class T> gOutput &operator<<(gOutput &, const gPolyList<T> &);
 
 #endif GPOLYLST_H
 

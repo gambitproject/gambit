@@ -4,7 +4,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "mixedfilter.h"
 
 NfgAlgType filter_cr_id[NUM_MCREATORS] =

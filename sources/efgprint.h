@@ -7,7 +7,6 @@
 #ifndef EFGPRINT_H
 #define EFGPRINT_H
 
-#include "wx/wx.h"
 #include "wx/print.h"
 
 #include "treewin.h"

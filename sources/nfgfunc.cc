@@ -21,11 +21,8 @@
 //
 // Implementations of these are provided as necessary in gsmutils.cc
 //
-Portion *ArrayToList(const gArray<int> &);
-Portion *ArrayToList(const gArray<NFPlayer *> &);
-Portion *ArrayToList(const gArray<NFOutcome *> &);
-Portion *ArrayToList(const gArray<Strategy *> &);
-Portion *ArrayToList(const gList<const NFSupport> &);
+template <class T> Portion *ArrayToList(const gArray<T> &);
+template <class T> Portion *ArrayToList(const gList<T> &);
 
 //---------------
 // AddStrategy

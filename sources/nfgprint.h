@@ -7,7 +7,6 @@
 #ifndef NFGPRINT_H
 #define NFGPRINT_H
 
-#include "wx/wx.h"
 #include "wx/print.h"
 
 #include "nfgshow.h"

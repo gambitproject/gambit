@@ -4,7 +4,10 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "wxstatus.h"
 
 wxStatus::wxStatus(wxWindow *p_parent, const gText &p_caption)

@@ -4,12 +4,11 @@
 // $Id$
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
 #include "wxmisc.h"
-
-#ifdef __BORLANDC__
-#pragma hdrstop
-#endif  // __BORLANDC__
 
 #include "gambit.h"
 #include "gambdraw.h"

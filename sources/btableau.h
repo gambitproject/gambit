@@ -23,11 +23,13 @@ public:
     virtual ~BadDim();
     gText Description(void) const;
   };
+
   class BadPivot : public gException  {
   public:
-    virtual ~BadPivot();
-    gText Description(void) const;
+    virtual ~BadPivot() { }
+    gText Description(void) const { return "Bad Pivot in BaseTableau"; }
   };
+
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   bool ValidIndex(int) const;

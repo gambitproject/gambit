@@ -43,6 +43,7 @@ void SigSegFaultHandler(int)
   exit(1);
 }
 
+#ifdef UNUSED
 #ifdef __BORLANDC__ // this handler is defined differently windows
 #define MATH_CONTINUE    0
 #define	MATH_IGNORE	 1
@@ -94,7 +95,7 @@ int matherr(struct exception *e)
   return 1;	// we did not really fix anything, but want no more warnings
 }
 #endif
-
+#endif  // UNUSED
 
 char* _SourceDir = NULL;
 char* _ExePath = NULL;

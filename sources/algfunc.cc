@@ -20,9 +20,7 @@
 
 #include "vertenum.h"
 
-extern Portion *ArrayToList(const gArray<int> &A);
-extern Portion *ArrayToList(const gArray<double> &A);
-extern Portion *ArrayToList(const gArray<gRational> &A);
+template <class T> Portion *ArrayToList(const gArray<T> &);
 extern gVector<double>* ListToVector_Float(ListPortion* list);
 extern gVector<gRational>* ListToVector_Rational(ListPortion* list);
 extern gMatrix<double>* ListToMatrix_Float(ListPortion* list);
