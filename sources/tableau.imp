@@ -104,7 +104,7 @@ Basis<T>::Basis(const Tableau<T> &tab,
 
 
 template <class T>
-Basis<T>::Basis(Basis<T> &orig)
+Basis<T>::Basis(const Basis<T> &orig)
 : tableau(orig.tableau),
   columns(orig.columns),
   B(orig.B),
@@ -118,7 +118,7 @@ Basis<T>::Basis(Basis<T> &orig)
 }
 
 template <class T>
-Basis<T>& Basis<T>::operator=(Basis<T> &orig)
+Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
 {
   assert( tableau==orig.tableau );
   columns= orig.columns;
@@ -131,7 +131,7 @@ Basis<T>& Basis<T>::operator=(Basis<T> &orig)
 }
 
 template <class T>
-Basis<T>::~Basis()
+virtual Basis<T>::~Basis()
 {
 }
 
@@ -462,6 +462,10 @@ template <class T>
 bool Basis<T>::Member(int i,bool flag) const
 { return columns.member(i,flag);}
 
+template <class T>
+int Basis<T>::Label(int i) const
+{ return columns.Label(i);}
+
 
 
 
@@ -723,21 +727,24 @@ int BasisCode<T>::find(bool flag, int col)
 }
 
 template <class T>
-void BasisCode<T>::FindColumn(int basisnum, int &index) const
+int BasisCode<T>::Label(int basisnum) const
 {
   assert(NegOK());
+  int index;
 
   if( unitflag[basisnum] )
     index= -column[basisnum];
   else
     index= column[basisnum];
+  return index;
 }
 
 template <class T>
-void BasisCode<T>::FindColumn(int basisnum, bool &flag, int &col) const
+int BasisCode<T>::Label(int basisnum, bool &flag) const
 {
   flag= unitflag[basisnum];
-  col= column[basisnum];
+  int col= column[basisnum];
+  return col;
 }
 
 template <class T>
@@ -783,7 +790,17 @@ template <class T> gOutput &operator<<(gOutput &to, const BasisCode<T> &v)
 
 template <class T>
 void BasisCode<T>::Dump(gOutput &to) const
-{ column.Dump(to);unitflag.Dump(to); }
+{ 
+  to << "{";
+  for(int i=column.First();i<=column.Last();i++) {
+    if(unitflag[i]) 
+      to << " " << -column[i];
+    else 
+      to << "  " << column[i];  
+  }
+  to << " }";
+}
+
 
 
 

@@ -38,7 +38,7 @@ class BasisCode {
  protected:
   const Tableau<T> *tableau;
   gBlock<bool> unitflag;
-  gBlock<int> column;
+  gBlock<int> column;    
  public:
   BasisCode(const Tableau<T> &); // initial basis is unit matrix
   BasisCode(const Tableau<T> &, const gBlock<int> &);
@@ -67,9 +67,9 @@ class BasisCode {
   int find(bool unitflag, int column) const;
     // finds basis index corresponding to column number,
     // fails assert if column not in basis
-  void FindColumn(int basisnum, int &index) const;
-  void FindColumn(int basisnum, bool &unitflag, int &column) const;
-    // finds column number corresponding to basis index
+  int Label(int basisnum) const;
+  int Label(int basisnum, bool &unitflag) const;
+    // finds label of variable corresponding to basis index
   void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;
     // select row elements according to basis (unit column elements are 0)
   void BasisSelect(const gVector<T>&unitv,
@@ -86,13 +86,7 @@ template <class T> class Basis {
   void SolveDual();
 
   bool NegOK() const;
-
-  int MinRow() const;
-  int MaxRow() const;
   bool ColIndex(int) const;
-
-  int MinCol() const;
-  int MaxCol() const;
   bool RowIndex(int) const;
  protected:
   const Tableau<T> *tableau;
@@ -114,9 +108,14 @@ template <class T> class Basis {
 	const gVector<T> &unitcost,
 	const gVector<T> &cost,
 	const BasisCode<T> &); // unit column cost given
-  Basis(Basis<T>&);
-  Basis<T>& operator=(Basis<T>&);
-  ~Basis();
+  Basis(const Basis<T>&);
+  Basis<T>& operator=(const Basis<T>&);
+  virtual ~Basis();
+
+  int MinCol() const;
+  int MaxCol() const;
+  int MinRow() const;
+  int MaxRow() const;
 
   // cost-based functions
   void SetCost(const gVector<T>& ); // unit column cost := 0
@@ -136,6 +135,7 @@ template <class T> class Basis {
     // tableau column in terms of basis
   bool Member(int i) const;
   bool Member(int i,bool flag) const;
+  int Label(int i) const;   // return variable in i'th position of basis
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int inlabel);
   void Pivot(int outrow, bool inflag,int inlabel);
