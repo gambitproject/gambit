@@ -247,17 +247,15 @@ Node ExtForm::DeleteTree(const Node &n)
   return ret;
 }
 
-
 void ExtForm::WriteToFile(output &f) const
 {
-  f << "{ \"" << name << '"' << '\n';
-  f << "  {\n";
+  f << "{ " << efg_no << " \"" << name << '"' << '\n';
+  f << "  {";
   for (int i = 0; i <= players.NumPlayers(); i++)   {
-    f << "    {";
+    f << ((i == 0) ? " {" : "    {");
     for (int j = 1; j <= players.NumInfosets(i, efg_no); j++)  {
       f << ((j == 1) ? " " : "\n      ");
-      f << "{ \"" << players.GetInfosetName(i, efg_no, j) << "\" "
-        << nodes.NumNodes(i, j) << " {";
+      f << "{ \"" << players.GetInfosetName(i, efg_no, j) << "\" {";
       for (int k = 1; k <= players.NumBranches(i, efg_no, j); k++)
 	f << " \"" << players.GetBranchName(i, efg_no, j, k) << '"';
       f << " }";
@@ -273,10 +271,15 @@ void ExtForm::WriteToFile(output &f) const
     }
     f << " }\n";
   }
-  f << "  }\n";  
+  f << "  }\n\n";  
 
   nodes.WriteToFile(f);
   
   f << "}\n";
+}
+
+int ExtForm::yyparse(void)
+{
+  return nodes.yyparse();
 }
 

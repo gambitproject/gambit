@@ -85,6 +85,10 @@ class Infoset   {
 	// add a branch to the infoset
     void InsertBranch(int br)
       { branches.Insert(new Branch, br); }
+
+	// append a branch to the infoset
+    void AppendBranch(void)
+      { branches.Append(new Branch); }
 };
 
 

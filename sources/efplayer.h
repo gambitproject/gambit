@@ -109,6 +109,13 @@ class Player   {
     void InsertBranch(int game, int iset, int br)
       { infosets(game, iset)->InsertBranch(br); }
 
+	// append a branch in an infoset
+    void AppendBranch(int game, int iset, const gString &name = "")
+      { infosets(game, iset)->AppendBranch();
+        infosets(game,iset)->SetBranchName(infosets(game,iset)->NumBranches(),
+					   name);
+      }
+
 	// NAMING OPERATIONS
 	// set the player's name
     void SetPlayerName(const gString &s)   { name = s; }
@@ -130,7 +137,7 @@ class PlayerSet   {
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
 	// initialize the default PlayerSet
-    PlayerSet(void);
+    PlayerSet(int from_file = 0);
 	// copy constructor
     PlayerSet(const PlayerSet &);
 	// clean up after a PlayerSet
@@ -140,9 +147,14 @@ class PlayerSet   {
 	// assignment operator
     PlayerSet &operator=(const PlayerSet &);
 
+    int yyparse(int game);
+
 	// OPERATIONS ON PLAYERS
 	// add player number p to the set
     void AddPlayer(int p);
+
+	// append a player to the player set, with name name
+    void AddPlayer(const gString &name); 
 
 	// returns the number of players in the set (not including
 	//   dummy or chance)
@@ -159,7 +171,7 @@ class PlayerSet   {
 
 	// OPERATIONS ON GAMES
 	// create game number game in all players in the PlayerSet
-    void CreateGame(int game);
+    void CreateGame(int game, int trivial = 1);
 
 	// remove game number game from all players in the PlayerSet
     void RemoveGame(int game);
@@ -231,6 +243,10 @@ class PlayerSet   {
 	// insert a branch in an infoset
     void InsertBranch(int p, int game, int iset, int br)
       { players[p + 2]->InsertBranch(game, iset, br); }
+
+	// append a branch in an infoset
+    void AppendBranch(int p, int game, int iset, const gString &name = "")
+      { players[p + 2]->AppendBranch(game, iset, name); }
 
 };
 #endif    // PLAYER_H

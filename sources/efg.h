@@ -18,20 +18,21 @@ class ExtForm    {
     NodeSet nodes;
     PlayerSet &players;
 
-    void AddPlayer(int);
     int CreateInfoset(int, int, int);
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
-    ExtForm(int number, PlayerSet &p) : 
-      efg_no(number), players(p), nodes(number)   { }
+    ExtForm(int number, PlayerSet &p, int from_file = 0) : 
+      efg_no(number), players(p), nodes(number, from_file)   { }
     ExtForm(const ExtForm &ef) : nodes(ef.nodes), players(ef.players)  { }
     ~ExtForm()  { }
 
 	// OPERATOR OVERLOADING
     ExtForm &operator=(const ExtForm &);
+
+    int yyparse(void);
 
 	// HIGH-LEVEL OPERATIONS
     Node AddNode(const Node &n, int player, int child_count);
@@ -103,6 +104,8 @@ class ExtForm    {
       { return nodes.GetNodeName(n); }
     int GetOutcome(const Node &n) const
       { return nodes.GetOutcome(n); }
+
+    void AddPlayer(int);
 
 	// FILE OPERATIONS
     void WriteToFile(output &f) const;
