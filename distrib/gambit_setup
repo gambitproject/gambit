@@ -28,8 +28,9 @@ cd ..
 
 echo 
 echo Now executing gambit GUI startup script \(gui-init\).
-./misc/gui-init
-
+cd misc
+gui-init
+cd ..
 
 #
 # Set up the appropriate environment variables.
