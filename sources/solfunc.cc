@@ -33,9 +33,8 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 // ActionProb
 //----------------
 
-Portion *GSM_ActionProb_Float(Portion **param)
+static Portion *GSM_ActionProb_Float(Portion **param)
 {
-  Portion *por;
   BehavSolution<double>* profile = 
     (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
@@ -43,23 +42,19 @@ Portion *GSM_ActionProb_Float(Portion **param)
   EFPlayer* player = infoset->GetPlayer();
   
   if (player->IsChance())
-    por = new FloatValPortion(((ChanceInfoset<double> *) infoset)->
-			      GetActionProbs()[action->GetNumber()]);  
+    return new FloatValPortion(((ChanceInfoset<double> *) infoset)->
+			       GetActionProbs()[action->GetNumber()]);  
   else if (profile->GetEFSupport().Find(action))
-    por = new FloatValPortion((*profile)
-			      (player->GetNumber(),
-			       infoset->GetNumber(),
-			       profile->GetEFSupport().Find(action)));
+    return new FloatValPortion((*profile)
+			       (player->GetNumber(),
+				infoset->GetNumber(),
+				profile->GetEFSupport().Find(action)));
   else
-    por = new FloatValPortion(0.0);
-  
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+    return new FloatValPortion(0.0);
 }
 
 static Portion *GSM_ActionProb_Rational(Portion **param)
 {
-  Portion *por;
   BehavSolution<gRational>* profile = 
     (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
@@ -67,17 +62,14 @@ static Portion *GSM_ActionProb_Rational(Portion **param)
   EFPlayer* player = infoset->GetPlayer();
   
   if (player->IsChance())
-    por = new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->
-				 GetActionProbs()[action->GetNumber()]);  
+    return new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->
+				  GetActionProbs()[action->GetNumber()]);  
   else if (profile->GetEFSupport().Find(action))
-    por = new RationalValPortion((*profile)(player->GetNumber(),
-					    infoset->GetNumber(),
-					    profile->GetEFSupport().Find(action)));
+    return new RationalValPortion((*profile)(player->GetNumber(),
+					     infoset->GetNumber(),
+					     profile->GetEFSupport().Find(action)));
   else
-    por = new RationalValPortion(0);
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
+    return new RationalValPortion(0);
 }
 
 
@@ -102,9 +94,13 @@ static Portion *GSM_ActionValue_Float(Portion **param)
 
     profile->CondPayoff(values, probs);
   
-    return new FloatValPortion(values(infoset->GetPlayer()->GetNumber(), 
-				      infoset->GetNumber(),
-				      profile->GetEFSupport().Find(action)));
+    if (probs(infoset->GetPlayer()->GetNumber(),
+	      infoset->GetNumber()) > 0.0)
+      return new FloatValPortion(values(infoset->GetPlayer()->GetNumber(), 
+					infoset->GetNumber(),
+					profile->GetEFSupport().Find(action)));
+    else
+      return new NullPortion(porFLOAT);
   }
   else
     return new ErrorPortion("Not implemented yet for non-support actions");
@@ -127,9 +123,13 @@ static Portion *GSM_ActionValue_Rational(Portion **param)
 
     profile->CondPayoff(values, probs);
   
-    return new RationalValPortion(values(infoset->GetPlayer()->GetNumber(), 
-					 infoset->GetNumber(),
-					 profile->GetEFSupport().Find(action)));
+    if (probs(infoset->GetPlayer()->GetNumber(),
+	      infoset->GetNumber()) > (gRational) 0)
+      return new RationalValPortion(values(infoset->GetPlayer()->GetNumber(), 
+					   infoset->GetNumber(),
+					   profile->GetEFSupport().Find(action)));
+    else
+      return new NullPortion(porRATIONAL);
   }
   else
     return new ErrorPortion("Not implemented yet for non-support actions");
