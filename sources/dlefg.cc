@@ -63,11 +63,11 @@ dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance,
   m_helpButton->GetConstraints()->height.AsIs();
 
   m_playerNameList->SetConstraints(new wxLayoutConstraints);
-  m_playerNameList->GetConstraints()->left.SameAs(m_okButton, wxLeft);
-  m_playerNameList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
+  m_playerNameList->GetConstraints()->centreX.SameAs(this, wxCentreX);
   m_playerNameList->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerNameList->GetConstraints()->width.AsIs();
   m_playerNameList->GetConstraints()->height.AsIs();
-
+  
   Go();
 }
 
