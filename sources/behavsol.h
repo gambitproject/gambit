@@ -48,6 +48,7 @@ protected:
   T _GobitValue;
   T _LiapValue;
   gDPVector<T> *_Beliefs;
+  static unsigned long _Id;
   void EvalEquilibria();
 
 public:
