@@ -622,7 +622,6 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
-  Nfg& N = P->Game();
   
   if (((ListPortion*) param[2])->Length() != player->NumStrats()) {
     delete P;
