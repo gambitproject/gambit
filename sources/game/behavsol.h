@@ -11,7 +11,7 @@
 #include "math/gnumber.h"
 #include "behav.h"
 #include "efg.h"
-#include "algutils.h"  // needed for gFact
+#include "nash/algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmEfg_USER,
@@ -134,10 +134,6 @@ public:
     { return m_profile->GetActionValue(act); }
   gNumber Regret(const Action *act) const
     { return m_profile->GetRegret(act); }
-
-  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO NASH, ANF NASH
-  bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
-  bool ExtendsToANFNash(const EFSupport &, const EFSupport &, gStatus &) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

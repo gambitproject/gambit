@@ -14,11 +14,10 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "algpolenum.h"
-#include "efgalleq.h"  // for extensive-form algorithm
-#include "polensub.h"  // for efg via nfg
-#include "nfgalleq.h"  // for normal-form algorithm
+#include "nash/efgalleq.h"  // for extensive-form algorithm
+#include "nash/polensub.h"  // for efg via nfg
+#include "nash/nfgalleq.h"  // for normal-form algorithm
 
 
 //========================================================================

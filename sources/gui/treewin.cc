@@ -16,7 +16,7 @@
 #include "guishare/wxmisc.h"
 
 #include "base/gmisc.h"
-#include "math/math.h"
+#include "math/gmath.h"
 #include "game/efg.h"
 #include "treewin.h"
 #include "efgshow.h"

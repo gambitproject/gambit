@@ -14,11 +14,10 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "alglcp.h"
-#include "seqform.h"  // for extensive-form algorithm
-#include "lemkesub.h"  // for efg via nfg
-#include "lemke.h"  // for normal-form algorithm
+#include "nash/seqform.h"  // for extensive-form algorithm
+#include "nash/lemkesub.h"  // for efg via nfg
+#include "nash/lemke.h"  // for normal-form algorithm
 
 
 //========================================================================

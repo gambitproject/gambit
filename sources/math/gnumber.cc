@@ -12,8 +12,8 @@
 #include <float.h>
 #include <ctype.h>
 #include "base/base.h"
-#include "math/math.h"
-#include "math/gnumber.h"
+#include "gmath.h"
+#include "gnumber.h"
 
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }

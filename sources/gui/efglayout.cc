@@ -13,7 +13,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "guishare/wxmisc.h"
-#include "math/math.h"
+#include "math/gmath.h"
 
 #include "game/efg.h"
 

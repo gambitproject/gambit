@@ -17,14 +17,13 @@
 #include "guishare/wxmisc.h"
 #include "guishare/wxstatus.h"
 
-#include "math/math.h"
+#include "math/gmath.h"
 #include "game/efg.h"
 #include "game/infoset.h"
 #include "game/node.h"
 #include "game/efplayer.h"
 #include "game/efgutils.h"
 #include "game/behavsol.h"
-#include "efdom.h"
 #include "game/nfg.h"
 
 #include "efgconst.h"
@@ -174,7 +173,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
 #ifdef __WXMSW__
   SetIcon(wxIcon("efg_icn"));
 #else
-#include "efg.xbm"
+#include "bitmaps/efg.xbm"
   SetIcon(wxIcon(efg_bits, efg_width, efg_height));
 #endif
 

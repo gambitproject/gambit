@@ -4,15 +4,14 @@
 // $Id$
 //
 
-#include "math/math.h"
+#include "math/gmath.h"
 #include "behavsol.h"
-#include "behavextend.h"  // for testing extensions to Nash
 #include "lexicon.h"  // needed for ReducedNormalFormRegrets
 
 // we probably want to break this out into another file (rdm)
 
-#include "gnullstatus.h"
-#include "subsolve.h"
+#include "base/gnullstatus.h"
+#include "nash/subsolve.h"
 
 class SubgamePerfectChecker : public SubgameSolver  {
 private:
@@ -219,6 +218,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 
 gTriState BehavSolution::GetANFNash(void) const
 {
+#ifdef UNUSED
   gNullStatus status;
   gTriState answer = ((ExtendsToANFNash(Support(), Support(), status)) ?
 		      triTRUE : triFALSE);
@@ -228,6 +228,8 @@ gTriState BehavSolution::GetANFNash(void) const
     m_Sequential.Set(triFALSE);
   }
   return answer;
+#endif  // UNUSED
+  return triUNKNOWN;
 }
 
 gTriState BehavSolution::GetNash(void) const
@@ -242,17 +244,22 @@ gTriState BehavSolution::GetNash(void) const
     answer = m_Nash.Answer();
   else {
     // use reduced normal form regrets for complete profiles
-    if(IsComplete()) 
+    if (IsComplete()) {
       answer = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
-    //  else let Andy figure it out
-    // Is perfect recall needed here, Andy?
-    else 
+    }
+    else {
+      //  else let Andy figure it out
+      // Is perfect recall needed here, Andy?
+#ifdef UNUSED
       if (IsPerfectRecall(m_profile->GetGame())) { 
 	// not sure MaxRegret does the right thing here
 	gNullStatus status;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
 		    ExtendsToNash(Support(),Support(),status)) ? triTRUE:triFALSE;
       }
+#endif  // UNUSED
+      answer = triUNKNOWN;
+    }
   }
   // Done.  Now mark other obvious inferences 
   
@@ -485,12 +492,13 @@ const gTriState &BehavSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
-#include "epolenum.h"
-
 BehavSolution BehavSolution::PolishEq(void) const
 {
+#ifdef UNUSED
   bool is_singular = false;
   return PolishEquilibrium(m_support,*this,is_singular);
+#endif // UNUSED
+  return *this;
 }
 
 const gTriState &BehavSolution::IsANFNash(void) const
@@ -609,33 +617,6 @@ const gNumber BehavSolution::MaxRNFRegret(void) const
 
   return ret;
 }
-
-//----------------------------------------
-// Restriction to Support Extends to Nash
-//----------------------------------------
-
-bool BehavSolution::ExtendsToNash(const EFSupport &p_smallSupport,
-				  const EFSupport &p_largeSupport,
-				  gStatus &p_status) const
-{
-  CheckIsValid();
-  algExtendsToNash algorithm;
-
-  return algorithm.ExtendsToNash(*this, p_smallSupport,
-				 p_largeSupport, p_status);
-}
-
-bool BehavSolution::ExtendsToANFNash(const EFSupport &p_smallSupport,
-				     const EFSupport &p_largeSupport,
-				     gStatus &p_status) const
-{
-  CheckIsValid();
-  algExtendsToAgentNash algorithm;
-  
-  return algorithm.ExtendsToAgentNash(*this, p_smallSupport,
-				      p_largeSupport, p_status);
-}
-
 
 //----------
 // Output

@@ -4,9 +4,11 @@
 // $Id$
 //
 
-#include "math/math.h"
+#include "math/gmath.h"
 #include "mixedsol.h"
 #include "nfdom.h"
+#include "nash/polenum.h"   // need to fix this dependency!!!
+
 
 gText ToText(NfgAlgType p_algorithm)
 {
@@ -296,8 +298,6 @@ const gTriState &MixedSolution::IsNash(void) const
     m_Nash.Set(GetNash());
   return m_Nash.Answer();
 }
-
-#include "polenum.h"
 
 MixedSolution MixedSolution::PolishEq(void) const
 {

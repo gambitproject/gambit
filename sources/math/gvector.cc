@@ -4,9 +4,9 @@
 // $Id$
 //
 
-#include "math/gvector.imp"
-#include "math/gnumber.h"
-#include "math/complex.h"
+#include "gvector.imp"
+#include "gnumber.h"
+#include "complex.h"
 
 template class gVector<int>;
 template class gVector<long>;

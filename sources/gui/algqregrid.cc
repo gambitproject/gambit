@@ -14,7 +14,7 @@
 #include "guishare/valnumber.h"
 #include "guishare/wxstatus.h"
 #include "algqregrid.h"
-#include "nfgqregrid.h"
+#include "nash/nfgqregrid.h"
 
 //========================================================================
 //                 dialogQreGrid: Parameter-setting dialog

@@ -10,9 +10,9 @@
 #include "math/gpvector.h"
 #include "math/gdpvect.imp"
 #include "math/gmatrix.h"
-#include "gnullstatus.h"
+#include "base/gnullstatus.h"
 #include "game/efgutils.h"
-#include "lpsolve.h"
+#include "numerical/lpsolve.h"   
 
 class EFNodeArrays   {
 friend class EFNodeSet;

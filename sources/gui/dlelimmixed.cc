@@ -12,7 +12,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "base/base.h"
-#include "math/math.h"
+#include "math/gmath.h"
 #include "dlelimmixed.h"
 
 //=========================================================================

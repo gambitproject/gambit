@@ -12,7 +12,7 @@
 #include "mixed.h"
 #include "nfplayer.h"
 #include "nfg.h"
-#include "algutils.h"  // needed for gFact
+#include "nash/algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmNfg_USER,

@@ -4,9 +4,9 @@
 //  $Id$
 //
 
-#include "math/gsmatrix.h"
 #include "base/base.h"
-#include "math/math.h"   // for abs(double)
+#include "gsmatrix.h"
+#include "math.h"   // for abs(double)
 
 //-----------------------------------------------------------------------------
 //     gSquareMatrix<T>: Constructors, destructor, constructive operators

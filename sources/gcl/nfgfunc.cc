@@ -5,6 +5,7 @@
 //
 
 #include "base/base.h"
+#include "base/gstatus.h"
 
 #include "gsm.h"
 #include "portion.h"
@@ -12,11 +13,9 @@
 
 #include "game/nfg.h"
 #include "game/nfplayer.h"
-#include "nfdom.h"
-
+#include "game/nfdom.h"
 #include "game/mixed.h"
 
-#include "gstatus.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -328,7 +327,7 @@ static Portion *GSM_Players(GSM &, Portion **param)
 // PossibleNashSupports
 //------------------------
 
-#include "nfgensup.h"
+#include "game/nfgensup.h"
 
 static Portion *GSM_PossibleNashSupportsNFG(GSM &gsm, Portion **param)
 {

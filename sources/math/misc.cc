@@ -4,8 +4,8 @@
 // $Id$
 //
 
-#include "math/math.h"
-#include "math/double.h"
+#include "gmath.h"
+#include "double.h"
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions

@@ -14,10 +14,9 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "algenumpure.h"
-#include "enumsub.h"  // for efg via nfg
-#include "enum.h"  // for normal-form algorithm
+#include "nash/enumsub.h"  // for efg via nfg
+#include "nash/enum.h"  // for normal-form algorithm
 
 
 //========================================================================

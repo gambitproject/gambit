@@ -14,8 +14,8 @@
 #include "guishare/valnumber.h"
 #include "guishare/wxstatus.h"
 #include "algqre.h"
-#include "efgqre.h"
-#include "nfgqre.h"
+#include "nash/efgqre.h"
+#include "nash/nfgqre.h"
 
 //========================================================================
 //                  dialogQre: Parameter-setting dialog

@@ -4,9 +4,9 @@
 // $Id$
 //
 
-#include "math/gsmatrix.imp"
-#include "math/rational.h"
-#include "math/double.h"
+#include "gsmatrix.imp"
+#include "rational.h"
+#include "double.h"
 
 
 template class gSquareMatrix<double>;

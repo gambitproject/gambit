@@ -8,8 +8,8 @@
 #define NFSTRAT_H
 
 #include "base/base.h"
+#include "base/gstatus.h"
 #include "math/gnumber.h"
-#include "gstatus.h"
 #include "nfplayer.h"
 
 class NFPlayer;

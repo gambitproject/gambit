@@ -7,7 +7,7 @@
 #ifndef GCLSTATUS_H
 #define GCLSTATUS_H
 
-#include "gstatus.h"
+#include "base/gstatus.h"
 
 class gclStatus : public gStatus  {
 friend class gsmConsole;

@@ -9,7 +9,7 @@
 
 #include "wx/wx.h"
 #include "wx/progdlg.h"
-#include "gstatus.h"
+#include "base/gstatus.h"
 
 class wxStatus : public wxProgressDialog, public gStatus {
 protected:

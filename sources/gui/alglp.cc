@@ -14,11 +14,10 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "alglp.h"
-#include "efgcsum.h"  // for extensive-form algorithm
-#include "csumsub.h"  // for efg via nfg algorithm
-#include "nfgcsum.h"  // for normal-form algorithm
+#include "nash/efgcsum.h"  // for extensive-form algorithm
+#include "nash/csumsub.h"  // for efg via nfg algorithm
+#include "nash/nfgcsum.h"  // for normal-form algorithm
 
 
 //========================================================================

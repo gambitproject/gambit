@@ -11,14 +11,11 @@
 #endif  // WX_PRECOMP
 #include "wx/config.h"  // for config
 
-#include "math/math.h"
-
 #ifdef __BORLANDC__
 #pragma hdr_stop
 #endif  // __BORLANDC__
 
 #include "base/gmisc.h"
-#include "system.h"
 #include "wxmisc.h"
 
 //========================================================================

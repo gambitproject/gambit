@@ -8,9 +8,9 @@
 #define EFSTRAT_H
 
 #include "base/base.h"
+#include "base/gstatus.h"
 #include "math/gpvector.h"
 #include "efg.h"
-#include "gstatus.h"
 
 class Action;
 class EFPlayer;

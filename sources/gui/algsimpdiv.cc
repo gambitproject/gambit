@@ -14,10 +14,9 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "algsimpdiv.h"
-#include "simpsub.h"  // for efg via nfg
-#include "simpdiv.h"  // for normal-form algorithm
+#include "nash/simpsub.h"  // for efg via nfg
+#include "nash/simpdiv.h"  // for normal-form algorithm
 
 
 //========================================================================

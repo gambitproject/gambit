@@ -5,10 +5,9 @@
 //
 
 
-#include "gstatus.h"
-
-#include "gsminstr.h"
+#include "base/gstatus.h"
 #include "base/gstream.h"
+#include "gsminstr.h"
 #include "gcmdline.h"
 
 #include "gsm.h"

@@ -7,13 +7,13 @@
 #ifndef NFDOM_H
 #define NFDOM_H
 
-#include "game/nfg.h"
-#include "game/nfstrat.h"
-#include "game/nfgciter.h"
+#include "base/gstatus.h"
 #include "math/rational.h"
-#include "gstatus.h"
-#include "game/nfplayer.h"
-#include "game/mixed.h"
+#include "nfg.h"
+#include "nfstrat.h"
+#include "nfgciter.h"
+#include "nfplayer.h"
+#include "mixed.h"
 
 bool IsMixedDominated(const NFSupport &S,Strategy *str,
 		      bool strong, gPrecision precision,

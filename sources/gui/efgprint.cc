@@ -9,7 +9,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "efgprint.h"
-#include "math/math.h"
+#include "math/gmath.h"
 
 EfgPrintout::EfgPrintout(TreeWindow *t, const char *title)
   : wxPrintout((char *) title), tree(t)

@@ -10,12 +10,11 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "gstatus.h"
-
+#include "base/gstatus.h"
 #include "game/efg.h"
 #include "game/efgutils.h"
-
 #include "game/efbasis.h"
+#include "game/sfg.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -844,7 +843,7 @@ static Portion *GSM_Players(GSM &, Portion **param)
 // PossibleNashSupports
 //------------------------
 
-#include "efgensup.h"
+#include "game/efgensup.h"
 
 static Portion *GSM_PossibleNashSupports(GSM &gsm, Portion **param)
 {
@@ -982,8 +981,6 @@ static Portion *GSM_SaveEfg(GSM &, Portion **param)
 //-------------
 // WriteSequenceForm
 //-------------
-
-#include "sfg.h"
 
 static Portion *GSM_WriteSfg(GSM &, Portion **param)
 {

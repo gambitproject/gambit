@@ -27,7 +27,6 @@
 #include "game/efgutils.h"
 #include "game/behavsol.h"
 #include "game/nfplayer.h"
-#include "nfdom.h"
 #include "game/nfgciter.h"
 
 #include "gambit.h"
@@ -139,7 +138,7 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
 #else
-#include "nfg.xbm"
+#include "bitmaps/nfg.xbm"
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 

@@ -5,12 +5,12 @@
 //
 
 #include "base/gstream.h"
-#include "game/nfg.h"
-#include "game/nfgiter.h"
-#include "game/nfgciter.h"
-#include "game/nfstrat.h"
-#include "lpsolve.h"
-#include "gstatus.h"
+#include "base/gstatus.h"
+#include "numerical/lpsolve.h"
+#include "nfg.h"
+#include "nfgiter.h"
+#include "nfgciter.h"
+#include "nfstrat.h"
 #include "nfdom.h"
 
 #include "nfdommix.imp"

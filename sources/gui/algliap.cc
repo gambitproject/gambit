@@ -14,11 +14,10 @@
 #include "wx/notebook.h"
 #include "guishare/valinteger.h"
 #include "guishare/wxstatus.h"
-#include "gnullstatus.h"
 #include "algliap.h"
-#include "eliap.h"  // for extensive-form algorithm
-#include "liapsub.h"  // for efg via nfg
-#include "nliap.h"  // for normal-form algorithm
+#include "nash/eliap.h"  // for extensive-form algorithm
+#include "nash/liapsub.h"  // for efg via nfg
+#include "nash/nliap.h"  // for normal-form algorithm
 
 
 //========================================================================

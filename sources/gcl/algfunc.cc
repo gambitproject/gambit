@@ -18,7 +18,7 @@
 #include "game/nfplayer.h"
 #include "game/efg.h"
 
-#include "vertenum.h"
+#include "numerical/vertenum.h"
 
 template <class T> Portion *ArrayToList(const gArray<T> &);
 extern gVector<double>* ListToVector_Float(ListPortion* list);
@@ -180,7 +180,7 @@ static Portion *GSM_Behav(GSM &, Portion **param)
 // EnumMixedSolve
 //------------------
 
-#include "enum.h"
+#include "nash/enum.h"
 
 static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 {
@@ -214,7 +214,7 @@ static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-#include "enumsub.h"
+#include "nash/enumsub.h"
 
 static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 {
@@ -258,7 +258,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 // EnumPureSolve
 //-----------------
 
-#include "nfgpure.h"
+#include "nash/nfgpure.h"
 
 static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 {
@@ -284,8 +284,8 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-#include "efgpure.h"
-#include "psnesub.h"
+#include "nash/efgpure.h"
+#include "nash/psnesub.h"
 
 static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
@@ -331,7 +331,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 // QreGridSolve
 //------------------
 
-#include "nfgqregrid.h"
+#include "nash/nfgqregrid.h"
 
 static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 {
@@ -398,8 +398,8 @@ static Portion *GSM_Qre_Dynamics(GSM &p_gsm, Portion **p_param)
 // QreSolve
 //---------------
 
-#include "nfgqre.h"
-#include "efgqre.h"
+#include "nash/nfgqre.h"
+#include "nash/efgqre.h"
 
 static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 {
@@ -578,7 +578,7 @@ static Portion *GSM_KQre_Start(GSM &gsm, Portion **param)
 // LcpSolve
 //------------
 
-#include "lemke.h"
+#include "nash/lemke.h"
 
 static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 {
@@ -613,8 +613,8 @@ static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-#include "seqform.h"
-#include "lemkesub.h"
+#include "nash/seqform.h"
+#include "nash/lemkesub.h"
 
 static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
 {
@@ -679,7 +679,7 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
   }
 }
 
-#include "lemketab.h"
+#include "numerical/lemketab.h"
 
 Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 {
@@ -729,8 +729,8 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 // LiapSolve
 //-------------
 
-#include "liapsub.h"
-#include "eliap.h"
+#include "nash/liapsub.h"
+#include "nash/eliap.h"
 
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
@@ -805,7 +805,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
   }
 }
 
-#include "nliap.h"
+#include "nash/nliap.h"
 
 static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 {
@@ -847,7 +847,7 @@ static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 // LpSolve
 //------------
 
-#include "nfgcsum.h"
+#include "nash/nfgcsum.h"
 
 static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 {
@@ -883,7 +883,7 @@ static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 }
 
 
-#include "lpsolve.h"
+#include "numerical/lpsolve.h"
 
 Portion* GSM_Lp_List(GSM &gsm, Portion** param)
 {
@@ -942,8 +942,8 @@ Portion* GSM_Lp_List(GSM &gsm, Portion** param)
 }
 
 
-#include "csumsub.h"
-#include "efgcsum.h"
+#include "nash/csumsub.h"
+#include "nash/efgcsum.h"
 
 static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 {
@@ -1012,7 +1012,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 //  PolEnumSolve (was AllNashSolve)
 //------------------
 
-#include "nfgalleq.h"
+#include "nash/nfgalleq.h"
 
 static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 {
@@ -1067,8 +1067,8 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
-#include "efgalleq.h"
-#include "polensub.h"
+#include "nash/efgalleq.h"
+#include "nash/polensub.h"
 
 static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 {
@@ -1234,7 +1234,7 @@ Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 // SimpDivSolve
 //----------------
 
-#include "simpdiv.h"
+#include "nash/simpdiv.h"
 
 static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 {
@@ -1289,7 +1289,7 @@ static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
   }
 }
 
-#include "simpsub.h"
+#include "nash/simpsub.h"
 
 static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
 {
@@ -1370,31 +1370,6 @@ static Portion *GSM_VertEnum(GSM &gsm, Portion** param)
     
     return list;
   }
-}
-
-//------------------
-// YamamotoSolve
-//------------------
-
-#include "yamamoto.h"
-
-static Portion *GSM_YamamotoSolve(GSM &gsm, Portion **param)
-{
-  NFSupport *support = ((NfSupportPortion*) param[0])->Value();
-  gList<MixedSolution> solutions;
-
-  try {
-    gsm.StartAlgorithmMonitor("YamamotoSolve");
-    Yamamoto(*support, gsm.GetStatusMonitor(), solutions);
-  }
-  catch (gSignalBreak &) { }
-  catch (...) {
-    gsm.EndAlgorithmMonitor();
-    throw;
-  }
-
-  gsm.EndAlgorithmMonitor();
-  return new Mixed_ListPortion(solutions);
 }
 
 void Init_algfunc(GSM *gsm)
@@ -1898,11 +1873,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
 					    new PrecisionPortion(precDOUBLE)));
   gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new gclFunction(*gsm, "YamamotoSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_YamamotoSolve,
-				       PortionSpec(porMIXED, 1), 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
-  gsm->AddFunction(FuncObj);
 }
+
+

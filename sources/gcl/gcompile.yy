@@ -22,7 +22,7 @@
 #include "gsmfunc.h"
 #include "portion.h"
 
-#include "system.h"
+#include "base/system.h"
 
 gStack<gText> GCL_InputFileNames(4);
 
@@ -820,7 +820,7 @@ gclExpression *DeleteFunction(void)
   return new gclDeleteFunction(func);
 }
 
-#include "gstatus.h"
+#include "base/gstatus.h"
 #include "gsm.h"
 
 int Execute(void)

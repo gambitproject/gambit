@@ -20,7 +20,6 @@
 #include "splash.h"
 #include "efgshow.h"
 #include "nfgshow.h"
-#include "system.h"
 #include <signal.h>
 #include <math.h>
 

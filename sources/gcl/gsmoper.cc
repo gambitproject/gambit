@@ -26,7 +26,7 @@
 #include "game/nfg.h"
 #include "game/efg.h"
 
-#include "system.h"
+#include "base/system.h"
 #include "base/base.h"
 
 
