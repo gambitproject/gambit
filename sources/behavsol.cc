@@ -176,6 +176,7 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
     m_rnfRegret(p_solution.m_rnfRegret), 
+    m_name(p_solution.m_name),
     m_revision(p_solution.m_revision)
 { }
 
