@@ -106,35 +106,16 @@ void LUdecomp<T>::refactor(const gMatrix<T> &M)
 }
 
 template<class T>
-void LUdecomp<T>::refactor(const gMatrix<T> &M, const gBlock<int> &basis)
-{
-  assert(mat.MinCol()==basis.First() && mat.MaxCol()==basis.Last());
-
-  gVector<T> column(mat.MinRow(),mat.MaxRow());
-  for(int i=basis.First(); i<=basis.Last(); i++)
-    {
-      M.GetColumn(basis[i], column);
-      mat.SetColumn(i, column);
-    }
-  null_rpp();
-  updates.Flush();
-  factor();
-}
-
-template<class T>
-void LUdecomp<T>::refactor(
-  const gMatrix<T> &M,
-  const gBlock<bool> &unitflag,
+void LUdecomp<T>::refactor( const gMatrix<T> &M,
   const gBlock<int> &index)
 {
   assert(mat.MinCol()==index.First() && mat.MaxCol()==index.Last());
-  assert(mat.MinCol()==unitflag.First() && mat.MaxCol()==unitflag.Last());
 
   gVector<T> column(mat.MinRow(),mat.MaxRow());
   for(int i=index.First(); i<=index.Last(); i++)
     {
-      if(unitflag[i])
-	{ column=(T)0; column[index[i]]=(T)1; }
+      if(index[i]<0)
+	{ column=(T)0; column[-index[i]]=(T)1; }
       else
 	M.GetColumn(index[i],column);
       mat.SetColumn(i,column);

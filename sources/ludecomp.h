@@ -71,9 +71,7 @@ template <class T> class LUdecomp {
   void update(int, const gVector<T>&); // replace (update) column with vector
   void refactor(const gMatrix<T>&); // factor a new matrix
   void refactor(const gMatrix<T>&, const gBlock<int>&);
-    // reinitialize /w selected columns
-  void refactor( const gMatrix<T>&, const gBlock<bool>&, const gBlock<int>&);
-    // reinitialize /w selected unit and matrix columns
+    // reinitialize /w selected indices -- rows (neg) or columns (pos) 
   void solve(const gVector<T>&, gVector<T>&) const; // solve:  M x = b
   void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct
   void reconstruct(gMatrix<T>&) const; // reconstruct M from decomposition
