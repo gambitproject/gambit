@@ -9,13 +9,13 @@
 /*****************************TREE NODE CURSOR*****************************/
 TreeNodeCursor::TreeNodeCursor(wxDC *_dc)
 {
-SetType(myCURSOR);
+SetType(myCursor);
 old_x_s=-1;old_x_e=-1;old_y_s=-1;old_y_e=-1;dc=_dc;
 SetFlashNode(-1,-1,-1,-1);
 SetFlashing(TRUE);
 }
 TreeNodeCursor::~TreeNodeCursor(void)
-{dc=NULL,flashing=FALSE;}
+{dc=NULL;flashing=FALSE;}
 
 void TreeNodeCursor::SetFlashNode(int _x_s,int _y_s,int _x_e,int _y_e)
 {x_s=_x_s;y_s=_y_s;x_e=_x_e;y_e=_y_e;}
@@ -27,7 +27,7 @@ char		*cur_clr;
 if (flashing && dc && x_s!=-1)
 {
 	// Alternate between black and white colors
-	if (__mytype==myFLASHER)
+	if (__mytype==myFlasher)
   {
 		cur_color=(cur_color+1)%2;
 		if (cur_color==0) cur_clr="BLACK"; else cur_clr="WHITE";
@@ -54,8 +54,11 @@ if (flashing && dc && x_s!=-1)
 
 /*************************** TREE NODE FLASHER ****************************/
 TreeNodeFlasher::TreeNodeFlasher(wxDC *_dc):wxTimer(),TreeNodeCursor(_dc)
-{SetType(myFLASHER);SetFlashing(TRUE);}
-TreeNodeFlasher::~TreeNodeFlasher(void) {}
+{SetType(myFlasher);SetFlashing(TRUE);}
+TreeNodeFlasher::~TreeNodeFlasher(void)
+{
+Stop();
+}
 
 #define FLASHDELAY 200
 void TreeNodeFlasher::SetFlashing(Bool _flashing)
