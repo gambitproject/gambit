@@ -593,13 +593,13 @@ void NfgSolnShow::UpdateValues(void)
             SetCell(cur_pos, FeaturePos(MSOLN_CREATOR), NameNfgAlgType(cur_vector.Creator()));
 
         if (features[MSOLN_ISNASH])
-            SetCell(cur_pos, FeaturePos(MSOLN_ISNASH), NameTriState(cur_vector.IsNash()));
+            SetCell(cur_pos, FeaturePos(MSOLN_ISNASH), Name(cur_vector.IsNash()));
 
         if (features[MSOLN_ISPERF])
-            SetCell(cur_pos, FeaturePos(MSOLN_ISPERF), NameTriState(cur_vector.IsPerfect()));
+            SetCell(cur_pos, FeaturePos(MSOLN_ISPERF), Name(cur_vector.IsPerfect()));
 
         if (features[MSOLN_ISPROP])
-            SetCell(cur_pos, FeaturePos(MSOLN_ISPROP), NameTriState(cur_vector.IsProper()));
+            SetCell(cur_pos, FeaturePos(MSOLN_ISPROP), Name(cur_vector.IsProper()));
 
         if (features[MSOLN_GLAMBDA])
         {
@@ -649,8 +649,8 @@ void NfgSolnShow::UpdateValues(void)
                 {
                     tmp_str = "\\C{" + ToText(norm_draw_settings.GetPlayerColor(j)) + "}";
 
-                    if (sup.Strategies(j)[k]->name != "")
-                        tmp_str += sup.Strategies(j)[k]->name;
+                    if (sup.Strategies(j)[k]->Name() != "")
+                        tmp_str += sup.Strategies(j)[k]->Name();
                     else
                         tmp_str += ToText(k);
 
