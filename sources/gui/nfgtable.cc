@@ -46,23 +46,23 @@ NfgGridTable::NfgGridTable(NfgTable *p_table, Nfg *p_nfg)
 
 int NfgGridTable::GetNumberRows(void)
 {
-  return (m_nfg->NumStrats(m_table->GetRowPlayer()) +
+  return (m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() +
 	  m_table->ShowValues());
 }
 
 int NfgGridTable::GetNumberCols(void)
 {
-  return (m_nfg->NumStrats(m_table->GetColPlayer()) +
+  return (m_table->GetSupport().NumStrats(m_table->GetColPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() + 
 	  m_table->ShowValues());
 }
 
 wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
-  int numStrats = m_nfg->NumStrats(m_table->GetRowPlayer());
+  int numStrats = m_table->GetSupport().NumStrats(m_table->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return (char *) m_nfg->Strategies(m_table->GetRowPlayer())[p_row+1]->Name();
+    return (char *) m_table->GetSupport().Strategies(m_table->GetRowPlayer())[p_row+1]->Name();
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -78,9 +78,9 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
 
 wxString NfgGridTable::GetColLabelValue(int p_col)
 {
-  int numStrats = m_nfg->NumStrats(m_table->GetColPlayer());
+  int numStrats = m_table->GetSupport().NumStrats(m_table->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return (char *) m_nfg->Strategies(m_table->GetColPlayer())[p_col+1]->Name();
+    return (char *) m_table->GetSupport().Strategies(m_table->GetColPlayer())[p_col+1]->Name();
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -106,7 +106,13 @@ wxString NfgGridTable::GetValue(int row, int col)
     gArray<int> strategy(m_table->GetProfile());
     strategy[m_table->GetRowPlayer()] = row + 1;
     strategy[m_table->GetColPlayer()] = col + 1;
-    NFOutcome *outcome = m_nfg->GetOutcome(strategy);
+    
+    StrategyProfile profile(*m_nfg);
+    for (int pl = 1; pl <= strategy.Length(); pl++) {
+      profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
+    }
+
+    NFOutcome *outcome = m_nfg->GetOutcome(profile);
     if (m_table->OutcomeValues()) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
@@ -233,12 +239,12 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col)
 {
   wxGridCellAttr *attr = new wxGridCellAttr;
 
-  if (row >= m_nfg->NumStrats(m_table->GetRowPlayer()) &&
-      col >= m_nfg->NumStrats(m_table->GetColPlayer())) {
+  if (row >= m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) &&
+      col >= m_table->GetSupport().NumStrats(m_table->GetColPlayer())) {
     attr->SetBackgroundColour(*wxBLACK);
   }
-  else if (row >= m_nfg->NumStrats(m_table->GetRowPlayer()) ||
-	   col >= m_nfg->NumStrats(m_table->GetColPlayer())) {
+  else if (row >= m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) ||
+	   col >= m_table->GetSupport().NumStrats(m_table->GetColPlayer())) {
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
@@ -423,32 +429,23 @@ gArray<int> NfgTable::GetProfile(void) const
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 { 
   m_grid->BeginBatch();
-  int oldRowPlayer = m_rowPlayer;
   m_rowPlayer = p_rowPlayer;
-
-  if (m_nfg.NumStrats(oldRowPlayer) > m_nfg.NumStrats(p_rowPlayer)) {
-    m_grid->DeleteRows(0,
-		       m_nfg.NumStrats(oldRowPlayer) - 
-		       m_nfg.NumStrats(p_rowPlayer));
-  }
-  else if (m_nfg.NumStrats(oldRowPlayer) < m_nfg.NumStrats(p_rowPlayer)) {
-    m_grid->InsertRows(0,
-		       m_nfg.NumStrats(p_rowPlayer) - 
-		       m_nfg.NumStrats(oldRowPlayer));
-  }
-
-  int oldColPlayer = m_colPlayer;
   m_colPlayer = p_colPlayer;
+  int stratRows = m_grid->GetRows() - m_showProb - m_showDom - m_showValue;
+  int stratCols = m_grid->GetCols() - m_showProb - m_showDom - m_showValue;
 
-  if (m_nfg.NumStrats(oldColPlayer) > m_nfg.NumStrats(p_colPlayer)) {
-    m_grid->DeleteCols(0,
-		       m_nfg.NumStrats(oldColPlayer) -
-		       m_nfg.NumStrats(p_colPlayer));
+  if (m_support.NumStrats(p_rowPlayer) < stratRows) {
+    m_grid->DeleteRows(0, stratRows - m_support.NumStrats(p_rowPlayer));
   }
-  else if (m_nfg.NumStrats(oldColPlayer) < m_nfg.NumStrats(p_colPlayer)) {
-    m_grid->InsertCols(0,
-		       m_nfg.NumStrats(p_colPlayer) -
-		       m_nfg.NumStrats(oldColPlayer));
+  else if (m_support.NumStrats(p_rowPlayer) > stratRows) {
+    m_grid->InsertRows(0, m_support.NumStrats(p_rowPlayer) - stratRows); 
+  }
+
+  if (m_support.NumStrats(p_colPlayer) < stratCols) {
+    m_grid->DeleteCols(0, stratCols - m_support.NumStrats(p_colPlayer));
+  }
+  else if (m_support.NumStrats(p_colPlayer) > stratCols) {
+    m_grid->InsertCols(0, m_support.NumStrats(p_colPlayer) - stratCols);
   }
 
   ((NfgShow *) m_parent)->SetStrategy(m_rowPlayer, 1);
