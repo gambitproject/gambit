@@ -1,0 +1,333 @@
+<sect1 id="apiref.player">
+<title>Players</title>
+
+<para>
+Players represent the strategic actors in a game.  Additionally,
+in extensive form games, a player object is used to represent the
+nonstrategic &quot;chance&quot; or &quot;nature&quot; player used to
+indicate exogenous randomizations. 
+</para>
+
+<para>
+Players in extensive form games are considered different objects than
+those in normal form games, even when the normal form game is another
+representation of an extensive form game (for example, if the normal
+form is created by computing the reduced normal form of an extensive
+form).  This limitation is intended to disappear in future versions.
+</para>
+
+<para>
+Players in extensive form games are of type <type>gbtEfgPlayer</type>
+in C++; in Python and the GCL, this type is referred to as
+<type>EFPLAYER</type>.  Players in normal form games are of
+type <type>gbtNfgPlayer</type> in C++; in Python and the GCL, this
+type is referred to as <type>NFPLAYER</type>.
+</para>
+
+
+<sect2 id="apiref.player.getgame">
+<title>GetGame -- The game in which the player acts</title>
+<indexterm><primary>GetGame</primary></indexterm>
+<indexterm><primary>Game (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgGame gbtEfgPlayer::GetGame(void) const
+gbtNfgGame gbtNfgPlayer::GetGame(void) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Game[player->EFPLAYER] =: EFG
+Game[player->NFPLAYER] =: NFG
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetGame</function> (or <function>Game</function> in the GCL)
+returns the extensive or normal form game to which the player belongs.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.player.getinfoset">
+<title>GetInfoset -- Access an information set of a player</title>
+<indexterm><primary>GetInfoset</primary></indexterm>
+<indexterm><primary>Infosets (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetInfoset</function> returns the information set numbered
+<parameter>p_index</parameter> from the list of information sets at
+which the player has the decision.  Each player's information sets are
+numbered sequentially beginning at one.  An exception is thrown if the
+index is out of range.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Infosets[player->EFPLAYER] =: LIST(INFOSET) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Infosets</function>
+returns the list of information sets at which the
+<parameter>player</parameter> has the decision.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.player.getlabel">
+<title>GetLabel -- Returns the text label of a player</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gText gbtEfgPlayer::GetLabel(void) const
+</synopsis>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Name[x->INFOSET*] =: TEXT
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the player.  
+The empty string is returned if the player object is null.
+</para>
+
+</sect2>
+
+
+<sect2>
+<title>GetStrategy -- Access a strategy of a player</title>
+<indexterm><primary>GetStrategy</primary></indexterm>
+<indexterm><primary>Strategies (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtNfgStrategy gbtNfgPlayer::GetStrategy(int p_index) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetStrategy</function> returns the strategy numbered
+<parameter>p_index</parameter> from the list of strategies for the
+player.  Each player's strategies are numbered sequentially beginning
+at one.  An exception is thown if the index is out of range.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Strategies</function>
+returns the list of strategies from which <parameter>player</parameter> may choose
+in <parameter>support</parameter>.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.player.ischance">
+<title>IsChance -- Returns whether the player represents the nature player</title>
+<indexterm><primary>IsChance</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+bool gbtEfgPlayer::IsChance(void) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>IsChance</function> returns <literal>True</literal> (nonzero)
+if the player is the chance player, and <literal>False</literal> (zero)
+if the player is a personal player.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<function>IsChance</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[IsChance[player->EFPLAYER] =: BOOLEAN,
+  GetChance[Game[player]] = player
+];
+</programlisting>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.player.isnull">
+<title>IsNull -- Returns whether the player is the null player</title>
+<indexterm><primary>IsNull</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+bool gbtEfgPlayer::IsNull(void) const
+bool gbtNfgPlayer::IsNull(void) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+IsNull[x->EFPLAYER*] =: BOOLEAN 
+IsNull[x->NFPLAYER*] =: BOOLEAN
+</synopsis>
+</formalpara>
+
+<para>
+<function>IsNull</function>
+returns <literal>True</literal> (nonzero) if the player object is
+null, and <literal>False</literal> (zero) if it is null.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.player.newinfoset">
+<title>NewInfoset -- Create a new information set for a player</title>
+<indexterm><primary>NewInfoset</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
+</synopsis>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+NewInfoset[player->EFPLAYER, actions->INTEGER] =: INFOSET 
+</synopsis>
+</formalpara>
+
+<para>
+<function>NewInfoset</function>
+creates a new information set belonging to <parameter>player</parameter>, with
+<parameter>actions</parameter> actions. 
+The newly created information set has no members.
+</para>
+
+<para>
+It is an error if <parameter>actions</parameter> is not
+positive.  The newly created information set is returned.
+</para>
+
+</sect2>
+
+
+<sect2>
+<title>NumInfosets -- How many information sets belong to a player</title>
+<indexterm><primary>NumInfosets</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+int gbtEfgPlayer::NumInfosets(void) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>NumInfosets</function> returns how many information
+sets are defined where the player has the decision.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<function>NumInfosets</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[NumInfosets[player->EFPLAYER] =: INTEGER,
+  Length[Infosets[player]]
+];
+</programlisting>
+</para>
+
+</sect2>
+
+<sect2>
+<title>NumStrategies -- How many strategies belong to a player</title>
+<indexterm><primary>NumStrategies</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+int gbtNfgPlayer::NumStrategies(void) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>NumStrategies</function> returns how many strategies the
+player has in the game.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<function>NumStrategies</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[NumStrategies[player->NFPLAYER] =: INTEGER,
+  Length[Strategiess[player]]
+];
+</programlisting>
+</para>
+
+</sect2>
+
+
+<sect2>
+<title>SetLabel -- Set the text label of a player</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+void gbtEfgPlayer::SetLabel(const gText &amp;p_label)
+void gbtNfgPlayer::SetLabel(const gText &amp;p_label)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+SetName[x->EFPLAYER, name->TEXT] =: EFPLAYER
+SetName[x->NFPLAYER, name->TEXT] =: NFPLAYER
+</synopsis>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the player.  The GCL version returns the player.
+</para>
+
+</sect2>
+
+</sect1>
+

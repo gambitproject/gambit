@@ -123,6 +123,34 @@ efplayer_ischance(efplayerobject *self, PyObject *args)
 }
 
 static PyObject *
+efplayer_isnull(efplayerobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", self->m_efplayer->IsNull());
+}
+
+static PyObject *
+efplayer_newinfoset(efplayerobject *self, PyObject *args)
+{
+  int actions;
+
+  if (!PyArg_ParseTuple(args, "i", &actions)) {
+    return NULL;
+  }
+
+  if (actions < 1) {
+    return NULL;
+  }
+  
+  infosetobject *infoset = newinfosetobject();
+  *infoset->m_infoset = self->m_efplayer->NewInfoset(actions);
+  return (PyObject *) infoset;
+}
+
+static PyObject *
 efplayer_numinfosets(efplayerobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -151,6 +179,8 @@ static struct PyMethodDef efplayer_methods[] = {
   { "GetInfoset", (PyCFunction) efplayer_getinfoset, 1 },
   { "GetLabel", (PyCFunction) efplayer_getlabel, 1 },
   { "IsChance", (PyCFunction) efplayer_ischance, 1 },
+  { "IsNull", (PyCFunction) efplayer_isnull, 1 },
+  { "NewInfoset", (PyCFunction) efplayer_newinfoset, 1 },
   { "NumInfosets", (PyCFunction) efplayer_numinfosets, 1 },
   { "SetLabel", (PyCFunction) efplayer_setlabel, 1 },
   { NULL, NULL }
@@ -289,6 +319,16 @@ nfplayer_getstrategy(nfplayerobject *self, PyObject *args)
 }
 
 static PyObject *
+nfplayer_isnull(nfplayerobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", self->m_nfplayer->IsNull());
+}
+
+static PyObject *
 nfplayer_numstrategies(nfplayerobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -316,6 +356,7 @@ static struct PyMethodDef nfplayer_methods[] = {
   { "GetGame", (PyCFunction) nfplayer_getgame, 1 }, 
   { "GetLabel", (PyCFunction) nfplayer_getlabel, 1 },
   { "GetStrategy", (PyCFunction) nfplayer_getstrategy, 1 }, 
+  { "IsNull", (PyCFunction) nfplayer_isnull, 1 }
   { "NumStrategies", (PyCFunction) nfplayer_numstrategies, 1 },
   { "SetLabel", (PyCFunction) nfplayer_setlabel, 1 },
   { NULL, NULL }

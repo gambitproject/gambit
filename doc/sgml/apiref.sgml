@@ -54,21 +54,7 @@
 
 </sect1>
 
-
-<sect1 id="apiref.player">
-<title>Players</title>
-
-<para>
-</para>
-
-&bifgame;
-&bifinfosets;
-&bifname;
-&bifnewinfoset;
-&bifsetname;
-&bifstrategies;
-
-</sect1>
+&apirefplayer;
 
 <sect1 id="apiref.outcome">
 <title>Outcomes</title>
