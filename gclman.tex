@@ -5978,6 +5978,17 @@ If \verb+infoset+ is null, the null player is returned.
 \item [See also:] \verb+Infosets+.
 \ed
 
+\item\lex{Player}
+\protect \large \begin{verbatim}
+Player[strategy->STRATEGY*] =: NFPLAYER
+\end{verbatim}\normalsize
+
+\bd
+Returns the player to whom the \verb+strategy+ belongs.
+If \verb+strategy+ is null, the null player is returned.
+\item [See also:] \verb+Strategies+.
+\ed
+
 \item\lex{Players}
 \protect \large \begin{verbatim}
 Players[efg->EFG(T)] =: LIST(EFPLAYER)
@@ -6666,6 +6677,7 @@ Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)
 \bd
 Returns the list of strategies from which  \verb+player+ may choose
 in \verb+support+.
+\item [See also:] \verb+Player+. 
 \ed
 
 \item\lex{StrategyProb}
