@@ -1790,14 +1790,19 @@ void TreeWindow::EditOutcomeNew(void)
   dialogEfgPayoffs dialog(ef, 0, false, pframe);
 
   if (dialog.Completed() == wxOK) {
-    EFOutcome *outc = ef.NewOutcome();
-    gArray<gNumber> payoffs(dialog.Payoffs());
+    try {
+      EFOutcome *outc = ef.NewOutcome();
+      gArray<gNumber> payoffs(dialog.Payoffs());
 
-    for (int pl = 1; pl <= ef.NumPlayers(); pl++)
-      ef.SetPayoff(outc, pl, payoffs[pl]);
-    outc->SetName(dialog.Name());
-
-    outcomes_changed = true;
+      for (int pl = 1; pl <= ef.NumPlayers(); pl++)
+	ef.SetPayoff(outc, pl, payoffs[pl]);
+      outc->SetName(dialog.Name());
+      
+      outcomes_changed = true;
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
 }
 
@@ -1810,9 +1815,14 @@ void TreeWindow::EditOutcomeDelete(void)
   dialogEfgOutcomeSelect dialog(ef, pframe);
   
   if (dialog.Completed() == wxOK) {
-    ef.DeleteOutcome(dialog.GetOutcome());
-    outcomes_changed = true;
-    OnPaint();
+    try {
+      ef.DeleteOutcome(dialog.GetOutcome());
+      outcomes_changed = true;
+      OnPaint();
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
 }  
 
