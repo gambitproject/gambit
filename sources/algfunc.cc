@@ -767,27 +767,43 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
   return new Mixed_ListPortion(solutions);
 }
 
+#include "epolenum.h"
 #include "polensub.h"
 
 static Portion *GSM_PolEnum_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion *) param[0])->Value();
-
-  if (!((BoolPortion *) param[1])->Value())
-    return new ErrorPortion("algorithm not implemented for extensive forms");
-
-  PolEnumParams params;
-  params.stopAfter = ((IntPortion *) param[2])->Value();
-  params.precision = ((PrecisionPortion *) param[3])->Value();
-  params.tracefile = &((OutputPortion *) param[6])->Value();
-  params.trace = ((IntPortion *) param[7])->Value();
-
-  gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+  
   double time;
   gList<BehavSolution> solutions;
-  PolEnum(support, params, values, solutions,
-       ((IntPortion *) param[4])->Value(), time);
+  
+  if ( ((BoolPortion *) param[1])->Value() ) {
+    PolEnumParams params;
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
+
+    gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
+    PolEnum(support, params, values, solutions,
+	    ((IntPortion *) param[4])->Value(), time);
+  }
+  else {
+    EfgPolEnumParams params;
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
+
+    gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
+    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
+    EfgPolEnum(support, params, values, solutions,
+	    ((IntPortion *) param[4])->Value(), time);
+  }
+
   ((NumberPortion *) param[5])->Value() = time;
 
   return new Behav_ListPortion(solutions);
