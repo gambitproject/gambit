@@ -503,139 +503,132 @@ void guiPagedDialog::SetValue(int p_index, const gText &p_value)
     m_dataFields[(p_index - 1) % s_itemsPerPage]->SetValue(p_value);
 }
 
-// Implementation for a font selector
-FontDialogBox::FontDialogBox(wxWindow *parent, wxFont *def) 
-    : MyDialogBox(parent, "Font Selection")
+
+//========================================================================
+//                     FontDialogBox: Member functions
+//========================================================================
+
+FontDialogBox::FontDialogBox(wxWindow *p_parent, wxFont *p_default) 
+  : guiAutoDialog(p_parent, "Select Font")
 {
-    // wxWindows fonts...
-    f_names[0] = wxSWISS;
-    f_names[1] = wxROMAN;
-    f_names[2] = wxDECORATIVE;
-    f_names[3] = wxMODERN;
-    f_names[4] = wxSCRIPT;
-    f_styles[0] = wxNORMAL;
-    f_styles[1] = wxITALIC;
-    f_styles[2] = wxSLANT;
-    f_weights[0] = wxNORMAL;
-    f_weights[1] = wxLIGHT;
-    f_weights[2] = wxBOLD;
-    f_names_str[0] = "Swiss";
-    f_names_str[1] = "Roman";
-    f_names_str[2] = "Decorative";
-    f_names_str[3] = "Modern";
-    f_names_str[4] = "Script";
-    f_styles_str[0] = "Normal";
-    f_styles_str[1] = "Italic";
-    f_styles_str[2] = "Slant";
-    f_weights_str[0] = "Normal";
-    f_weights_str[1] = "Light";
-    f_weights_str[2] = "Bold";
-    
-    // Init some vars
-    int  i;
-    char *f_name_str = new char[20];
-    char *f_size_str = new char[20];
-    char *f_weight_str = new char[20];
-    char *f_style_str = new char[20];
-    char *f_tempstr = new char[20];
-    Bool temp_f_under;
-    f_name = f_size = f_style = f_weight = -1;
-    f_under = FALSE;
-    
-    if (def == NULL)        // if creating font from scratch--no default
-    {
-        strcpy(f_name_str, "Swiss");
-        strcpy(f_size_str, "12");
-        strcpy(f_weight_str, "Normal");
-        strcpy(f_style_str, "Normal");
-        temp_f_under = FALSE;
+  char *nameChoices[] = { "Swiss", "Roman", "Decorative", "Modern",
+			  "Script" };
+  m_nameItem = new wxChoice(this, 0, "Name", 1, 1, -1, -1,
+			    5, nameChoices);
+  if (p_default) {
+    switch (p_default->GetFamily()) {
+    case wxSWISS: m_nameItem->SetSelection(0);  break;
+    case wxROMAN: m_nameItem->SetSelection(1);  break;
+    case wxDECORATIVE: m_nameItem->SetSelection(2);  break;
+    case wxMODERN: m_nameItem->SetSelection(3);  break;
+    case wxSCRIPT: m_nameItem->SetSelection(4);  break;
+    default:   break;
     }
-    else    // if modifying an existing font--default exists
-    {
-        strcpy(f_name_str, f_names_str[FindIntArray(f_names, 5, def->GetFamily())]);
-        sprintf(f_tempstr, "%d", def->GetPointSize());
-        strcpy(f_size_str, f_tempstr);
-        strcpy(f_weight_str, f_weights_str[FindIntArray(f_weights, 3, def->GetWeight())]);
-        strcpy(f_style_str, f_styles_str[FindIntArray(f_styles, 3, def->GetStyle())]);
-        temp_f_under = def->GetUnderlined();
+  }
+  m_nameItem->SetConstraints(new wxLayoutConstraints);
+  m_nameItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_nameItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_nameItem->GetConstraints()->width.AsIs();
+  m_nameItem->GetConstraints()->height.AsIs();
+
+  char *sizeChoices[] = { "8", "10", "12", "14", "18", "24", "28" };
+  m_sizeItem = new wxChoice(this, 0, "Size", 1, 1, -1, -1,
+			    7, sizeChoices);
+  if (p_default) {
+    switch (p_default->GetPointSize()) {
+    case 8: m_sizeItem->SetSelection(0);  break;
+    case 10: m_sizeItem->SetSelection(1);  break;
+    case 12: m_sizeItem->SetSelection(2);  break;
+    case 14: m_sizeItem->SetSelection(3);  break;
+    case 18: m_sizeItem->SetSelection(4);  break;
+    case 24: m_sizeItem->SetSelection(5);  break;
+    case 28: m_sizeItem->SetSelection(6);  break;
+    default:  break;
     }
+  }
+  m_sizeItem->SetConstraints(new wxLayoutConstraints);
+  m_sizeItem->GetConstraints()->left.SameAs(m_nameItem, wxRight, 10);
+  m_sizeItem->GetConstraints()->top.SameAs(m_nameItem, wxTop);
+  m_sizeItem->GetConstraints()->width.AsIs();
+  m_sizeItem->GetConstraints()->height.AsIs();
 
-    // Create the string list for name
-    wxStringList *f_name_list = new wxStringList;
-    for (i = 0; i < 5; i++) f_name_list->Add(f_names_str[i]);
-
-    // Create the string list for point size
-    wxStringList *f_size_list = new wxStringList;
-
-    for (i = 8; i < 30; i++)
-    {
-        sprintf(f_tempstr, "%d", i);
-        f_size_list->Add(f_tempstr);
+  char *styleChoices[] = { "Normal", "Italic", "Slant" };
+  m_styleItem = new wxRadioBox(this, 0, "Style", 1, 1, -1, -1,
+			       3, styleChoices);
+  if (p_default) {
+    switch (p_default->GetStyle()) {
+    case wxNORMAL: m_styleItem->SetSelection(0);  break;
+    case wxITALIC: m_styleItem->SetSelection(1);  break;
+    case wxSLANT: m_styleItem->SetSelection(2);  break;
+    default:  break;
     }
+  }
+  m_styleItem->SetConstraints(new wxLayoutConstraints);
+  m_styleItem->GetConstraints()->left.SameAs(m_nameItem, wxLeft);
+  m_styleItem->GetConstraints()->top.SameAs(m_nameItem, wxBottom, 10);
+  m_styleItem->GetConstraints()->width.AsIs();
+  m_styleItem->GetConstraints()->height.AsIs();
 
-    // Create the string list for style
-    wxStringList *f_style_list = new wxStringList;
-
-    for (i = 0; i < 3; i++) 
-        f_style_list->Add(f_styles_str[i]);
-
-    // Create the string list for weight
-    wxStringList *f_weight_list = new wxStringList;
-
-    for (i = 0; i < 3; i++) 
-        f_weight_list->Add(f_weights_str[i]);
-
-    // Build the dialog
-    Form()->Add(wxMakeFormString("Name", &f_name_str, wxFORM_CHOICE,
-                                 new wxList(wxMakeConstraintStrings(f_name_list), 0), 
-                                 NULL, wxVERTICAL));
-    Form()->Add(wxMakeFormString("Size", &f_size_str, wxFORM_CHOICE,
-                                 new wxList(wxMakeConstraintStrings(f_size_list), 0), 
-                                 NULL, wxVERTICAL));
-    Form()->Add(wxMakeFormNewLine());
-    Form()->Add(wxMakeFormString("Style", &f_style_str, wxFORM_RADIOBOX,
-                                 new wxList(wxMakeConstraintStrings(f_style_list), 0), 
-                                 NULL, wxVERTICAL));
-    Form()->Add(wxMakeFormNewLine());
-    Form()->Add(wxMakeFormString("Weight", &f_weight_str, wxFORM_RADIOBOX,
-                                 new wxList(wxMakeConstraintStrings(f_weight_list), 0), 
-                                 NULL, wxVERTICAL));
-    Form()->Add(wxMakeFormNewLine());
-    Form()->Add(wxMakeFormBool("Underline", &temp_f_under));
-    Go();
-
-    // Process results of the dialog
-    if (Completed() == wxOK)
-    {
-        f_name = wxListFindString(f_name_list, f_name_str);
-        f_size = wxListFindString(f_size_list, f_size_str)+8;
-        f_style = wxListFindString(f_style_list, f_style_str);
-        f_weight = wxListFindString(f_weight_list, f_weight_str);
-        f_under = temp_f_under;
+  char *weightChoices[] = { "Normal", "Light", "Bold" };
+  m_weightItem = new wxRadioBox(this, 0, "Weight", 1, 1, -1, -1,
+				3, weightChoices);
+  if (p_default) {
+    switch (p_default->GetWeight()) {
+    case wxNORMAL: m_weightItem->SetSelection(0);  break;
+    case wxLIGHT: m_weightItem->SetSelection(1);  break;
+    case wxBOLD: m_weightItem->SetSelection(2);  break;
+    default:  break;
     }
+  }
+  m_weightItem->SetConstraints(new wxLayoutConstraints);
+  m_weightItem->GetConstraints()->left.SameAs(m_styleItem, wxLeft);
+  m_weightItem->GetConstraints()->top.SameAs(m_styleItem, wxBottom, 10);
+  m_weightItem->GetConstraints()->width.AsIs();
+  m_weightItem->GetConstraints()->height.AsIs();
 
-    delete [] f_name_str;
-    delete [] f_size_str;
-    delete [] f_style_str;
-    delete [] f_weight_str;
-    delete [] f_tempstr;
+  m_underlineItem = new wxCheckBox(this, 0, "Underline", 1, 1, -1, -1);
+  if (p_default) {
+    m_underlineItem->SetValue(p_default->GetUnderlined());
+  }
+  m_underlineItem->SetConstraints(new wxLayoutConstraints);
+  m_underlineItem->GetConstraints()->left.SameAs(m_weightItem, wxLeft);
+  m_underlineItem->GetConstraints()->top.SameAs(m_weightItem, wxBottom, 10);
+  m_underlineItem->GetConstraints()->width.AsIs();
+  m_underlineItem->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->top.SameAs(m_underlineItem, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->top.AsIs();
+  m_helpButton->GetConstraints()->left.AsIs();
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->Show(FALSE);
+
+  Go();
 }
-
 
 wxFont *FontDialogBox::MakeFont(void)
 {
-    if (f_name != -1)
-    {
-        return (new wxFont(f_size, f_names[f_name], f_styles[f_style],
-                           f_weights[f_weight], f_under));
-    }
+  static int sizes[] = { 8, 10, 12, 14, 18, 24, 28 };
+  static int names[] = { wxSWISS, wxROMAN, wxDECORATIVE, wxMODERN, wxSCRIPT };
+  static int styles[] = { wxNORMAL, wxITALIC, wxSLANT };
+  static int weights[] = { wxNORMAL, wxLIGHT, wxBOLD };
 
-    return NULL;
+  return new wxFont(sizes[m_sizeItem->GetSelection()],
+		    names[m_nameItem->GetSelection()],
+		    styles[m_styleItem->GetSelection()],
+		    weights[m_weightItem->GetSelection()],
+		    m_underlineItem->GetValue());
 }
 
-
-FontDialogBox::~FontDialogBox(void)
-{ }
 
 
 //************************ OUTPUT DIALOG ***************************

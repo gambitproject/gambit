@@ -163,32 +163,17 @@ public:
   void SetValue(int p_index, const gText &p_value);
 };
 
-class FontDialogBox: public MyDialogBox
-{
+class FontDialogBox : public guiAutoDialog {
 private:
-    int     f_name;
-    int     f_size;
-    int     f_style;
-    int     f_weight;
-    Bool    f_under;
-    int     f_names[5];         // {wxSWISS,  wxROMAN,  wxDECORATIVE, wxMODERN, wxSCRIPT};
-    int     f_styles[3];        // {wxNORMAL, wxITALIC, wxSLANT};
-    int     f_weights[3];       // {wxNORMAL, wxLIGHT,  wxBOLD};
-    char   *f_names_str[5];     // {wxSWISS,  wxROMAN,  wxDECORATIVE, wxMODERN, wxSCRIPT};
-    char   *f_styles_str[3];    // {wxNORMAL, wxITALIC, wxSLANT};
-    char   *f_weights_str[3];   // {wxNORMAL, wxLIGHT,  wxBOLD};
-    
-    
-public:
-    FontDialogBox(wxWindow *parent, wxFont *def = 0);
-    ~FontDialogBox(void);
+  wxChoice *m_nameItem, *m_sizeItem;
+  wxRadioBox *m_styleItem, *m_weightItem;
+  wxCheckBox *m_underlineItem;
 
-    int      FontName(void)    { return f_name;   }
-    int      FontSize(void)    { return f_size;   }
-    int      FontStyle(void)   { return f_style;  }
-    int      FontWeight(void)  { return f_weight; }
-    int      FontUnder(void)   { return f_under;  }
-    wxFont  *MakeFont(void);
+public:
+  FontDialogBox(wxWindow *parent, wxFont *def = 0);
+  virtual ~FontDialogBox() { }
+
+  wxFont  *MakeFont(void);
 };
 
 
