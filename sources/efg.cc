@@ -1188,54 +1188,69 @@ void FullEfg::CopySubtree(Node *src, Node *dest, Node *stop)
   dest->outcome = src->outcome;
 }
 
-void FullEfg::MarkSubtree(Node *n)
+//
+// MarkSubtree: sets the Node::mark flag on all children of p_node
+//
+void FullEfg::MarkSubtree(Node *p_node)
 {
-  n->mark=true;
-  for(int i=1;i<=n->children.Length();i++)
-    MarkSubtree(n->children[i]);
+  p_node->mark = true;
+  for (int i = 1; i <= p_node->children.Length(); i++) {
+    MarkSubtree(p_node->children[i]);
+  }
 }
 
-void FullEfg::UnmarkSubtree(Node *n)
+//
+// UnmarkSubtree: clears the Node::mark flag on all children of p_node
+//
+void FullEfg::UnmarkSubtree(Node *p_node)
 {
-  n->mark=false;
-  for(int i=1;i<=n->children.Length();i++)
-    UnmarkSubtree(n->children[i]);
+  p_node->mark = false;
+  for (int i = 1; i <= p_node->children.Length(); i++) {
+    UnmarkSubtree(p_node->children[i]);
+  }
 }
 
 void FullEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
 {
-  int i,j,k,m;
-  bool flag;
-  gBlock<Node*> OldMembers;
-  Node *n;
-  Infoset *newiset = 0;
+  if (where->actions.Length() <= 1)  {
+    // only one action; nothing to reveal!
+    return;
+  }
 
-  if(where->actions.Length()<=1)return;
   UnmarkSubtree(root);  // start with a clean tree
   
   m_revision++;
   m_dirty = true;
-  for(i=1;i<=where->actions.Length();i++) {
-    for(j=1;j<=where->members.Length();j++) 
+
+  for (int i = 1; i <= where->actions.Length(); i++) {
+    for (int j = 1; j <= where->members.Length(); j++) { 
       MarkSubtree(where->members[j]->children[i]);
-    for(j=who.First();j<=who.Last();j++)
-      for(k=1;k<=who[j]->infosets.Length();k++) {
-	    // make copy to iterate correctly 
-	OldMembers = who[j]->infosets[k]->members;
-	flag=false;
-	for(m=1;m<=OldMembers.Length();m++) {
-	  n = OldMembers[m];
-	  if(n->mark) {
-	   n->mark=false;
-	   if(!flag) {
-	     newiset = LeaveInfoset(n);
-	     flag=true;
-	   }
-	   else 
-	     JoinInfoset(newiset,n);
-	 }	    
+    }
+
+    for (int j = who.First(); j <= who.Last(); j++) {
+      // iterate over each information set of player 'j' in the list
+      for (int k = 1; k <= who[j]->infosets.Length(); k++) {
+	// iterate over each member of information set 'k'
+	// make copy of members to iterate correctly 
+	// (since the information set may be changed in the process)
+	gArray<Node *> members = who[j]->infosets[k]->members;
+	Infoset *newiset = 0;
+
+	for (int m = 1; m <= members.Length(); m++) {
+	  Node *n = members[m];
+	  if (n->mark) {
+	    // If node is marked, is descendant of action 'i'
+	    n->mark = false;   // unmark so tree is clean at end
+	    if (!newiset) {
+	      newiset = LeaveInfoset(n);
+	    }
+	    else {
+	      JoinInfoset(newiset, n);
+	    }
+	  } 
 	}
       }
+    }
   }
 
   Reindex();
