@@ -497,7 +497,7 @@ gbtNfgGame::~gbtNfgGame()
     if (rep->m_efg)  {
       // FIXME: Work on efg<->nfg integration
     }
-    delete rep;
+    //    delete rep;
   }
 }
 
@@ -505,7 +505,7 @@ gbtNfgGame &gbtNfgGame::operator=(const gbtNfgGame &p_nfg)
 {
   if (this != &p_nfg) {
     if (rep && --rep->m_refCount == 0) {
-      delete rep;
+      //  delete rep;
     }
 
     if ((rep = p_nfg.rep) != 0) {

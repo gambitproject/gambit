@@ -38,7 +38,7 @@
 #include "nfgint.h"
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_infoset_rep: Member functions
+//            struct gbt_efg_game_rep: Member functions
 //----------------------------------------------------------------------
 
 gbt_efg_game_rep::gbt_efg_game_rep(void)
@@ -254,7 +254,7 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
     efg.rep->outcomes[outc]->m_payoffs = rep->outcomes[outc]->m_payoffs;
   }
 
-  efg.CopySubtree(efg.rep->root, (n.rep ? n.rep : rep->root));
+  efg.CopySubtree(efg.rep, efg.rep->root, (n.rep ? n.rep : rep->root));
   
   if (n.rep)   {
     for (int pl = 1; pl <= efg.rep->players.Length(); pl++)  {
@@ -290,7 +290,7 @@ gbtEfgGame::gbtEfgGame(gbt_efg_game_rep *p_rep)
 gbtEfgGame::~gbtEfgGame()
 {
   if (rep && --rep->m_refCount == 0) {
-    delete rep;
+    //    delete rep;
   }
 }
 
@@ -298,7 +298,7 @@ gbtEfgGame &gbtEfgGame::operator=(const gbtEfgGame &p_efg)
 {
   if (this != &p_efg) {
     if (rep && --rep->m_refCount == 0) {
-      delete rep;
+      // delete rep;
     }
 
     if ((rep = p_efg.rep) != 0) {
@@ -322,31 +322,34 @@ bool gbtEfgGame::operator!=(const gbtEfgGame &p_efg) const
 //                  Efg: Private member functions
 //------------------------------------------------------------------------
 
-void gbtEfgGame::CopySubtree(gbt_efg_node_rep *n, gbt_efg_node_rep *m)
+void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
+			     gbt_efg_node_rep *n, gbt_efg_node_rep *m)
 {
   n->m_label = m->m_label;
 
-  if (m->m_gameroot == m)
+  if (m->m_gameroot == m) {
     n->m_gameroot = n;
+  }
 
   if (m->m_outcome) {
-    n->m_outcome = m->m_outcome;
+    n->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
   }
 
   if (m->m_infoset)   {
     gbt_efg_player_rep *p;
     if (m->m_infoset->m_player->m_id) {
-      p = rep->players[m->m_infoset->m_player->m_id];
+      p = p_newEfg->players[m->m_infoset->m_player->m_id];
     }
     else {
-      p = rep->chance;
+      p = p_newEfg->chance;
     }
 
     gbt_efg_infoset_rep *s = p->m_infosets[m->m_infoset->m_id];
-    rep->AppendMove(n, s);
+    p_newEfg->AppendMove(n, s);
 
-    for (int i = 1; i <= n->m_children.Length(); i++)
-      CopySubtree(n->m_children[i], m->m_children[i]);
+    for (int i = 1; i <= n->m_children.Length(); i++) {
+      CopySubtree(p_newEfg, n->m_children[i], m->m_children[i]);
+    }
   }
 }
 

@@ -24,8 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "math/gdpvect.h"
 #include "efgutils.h"
 #include "efstrat.h"
+
 
 // recursive functions
 
@@ -269,6 +271,36 @@ CompressEfg(const gbtEfgGame & efg, const EFSupport & S)
   return newefg;
 }
 
+void CompressEfgInPlace(gbtEfgGame p_efg, const EFSupport &p_support)
+{
+  // Do this to avoid problems with p_efg and p_support being incompatible
+  // after deletions
+  gDPVector<int> support(p_support.NumActions());
+  support = 0;
+  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_efg.GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = 1; act <= infoset.NumActions(); act++) {
+	if (p_support.Contains(infoset.GetAction(act))) {
+	  support(pl, iset, act) = 1;
+	}
+      }
+    }
+  }
+
+  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_efg.GetPlayer(pl);
+    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int act = infoset.NumActions(); act >= 1; act--) {
+	if (!support(pl, iset, act)) {
+          p_efg.DeleteAction(infoset, infoset.GetAction(act));
+        }
+      }
+    }
+  }
+}
 
 #include "math/rational.h"
 // prototype in efg.h

@@ -61,7 +61,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
 
-  m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg(EFSupport(*m_efg)));
+  m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
   m_curNfgSupport->SetName("Full Support");
   m_nfgSupports.Append(m_curNfgSupport);
 }
@@ -122,7 +122,7 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
       delete m_nfgSupports.Remove(1);
     }
     
-    m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg(EFSupport(*m_efg)));
+    m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
     m_curNfgSupport->SetName("Full Support");
     m_nfgSupports.Append(m_curNfgSupport);
   }
@@ -491,7 +491,7 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
 gbtNfgGame gbtGameDocument::GetNfg(void) const
 {
   if (m_efg) {
-    return m_efg->GetReducedNfg(EFSupport(*m_efg));
+    return m_efg->GetReducedNfg();
   }
   else {
     return *m_nfg;

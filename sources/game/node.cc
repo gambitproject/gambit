@@ -97,9 +97,9 @@ gbtEfgNode::~gbtEfgNode()
     if (--rep->m_refCount == 0 && rep->m_deleted) {
       // delete rep;
     }
-    else if (--rep->m_efg->m_refCount == 0) {
+    // else if (--rep->m_efg->m_refCount == 0) {
       // delete rep->m_efg;
-    }
+    //    }
   }
 }
 

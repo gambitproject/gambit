@@ -138,7 +138,9 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 	sol = m_efgAlgorithm->Solve(subsupport, p_status);
       }
       else if (m_nfgAlgorithm) {
-	gbtNfgGame nfg = foo.GetReducedNfg(subsupport);
+	CompressEfgInPlace(foo, subsupport);
+	subsupport = EFSupport(foo);
+	gbtNfgGame nfg = foo.GetReducedNfg();
 	gbtNfgSupport support(nfg);
 
 	gList<MixedSolution> nfgSolutions;
@@ -263,7 +265,7 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
   solution = new BehavProfile<gNumber>(p_support);
   ((gVector<gNumber> &) *solution).operator=(gNumber(0));
 
-  gbtEfgGame efg = p_support.GetGame();
+  gbtEfgGame efg = p_support.GetGame().Copy();
   infosets = gArray<gArray<gbtEfgInfoset> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++) {

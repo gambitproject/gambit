@@ -328,8 +328,8 @@ void MixedProfile<T>::InitPayoffs(void) const
 
 template <class T>
 MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
-  : gPVector<T>(p_profile.GetGame().GetReducedNfg(p_profile.Support()).NumStrats()),
-    m_nfg(p_profile.GetGame().GetReducedNfg(p_profile.Support())), support(m_nfg)
+  : gPVector<T>(p_profile.GetGame().GetReducedNfg().NumStrats()),
+    m_nfg(p_profile.GetGame().GetReducedNfg()), support(m_nfg)
 {
   InitPayoffs();
   

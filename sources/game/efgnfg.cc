@@ -63,7 +63,6 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
 }
 
 static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
-			      const EFSupport &S,
 			      gbt_efg_player_rep *p,
 			      gbt_efg_node_rep *n,
 			      gbt_efg_node_rep *nn)
@@ -76,18 +75,16 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
 	// we haven't visited this infoset before
 	n->m_infoset->m_flag = true;
 	for (int i = 1; i <= n->m_children.Length(); i++)   {
-	  if (S.Contains(n->m_infoset->m_actions[i]))  {
-	    gbt_efg_node_rep *m = n->m_children[i];
-	    n->m_whichbranch = m;
-	    n->m_infoset->m_whichbranch = i;
-	    MakeReducedStrats(p_nfg, S, p, m, nn);
-	  }
+	  gbt_efg_node_rep *m = n->m_children[i];
+	  n->m_whichbranch = m;
+	  n->m_infoset->m_whichbranch = i;
+	  MakeReducedStrats(p_nfg, p, m, nn);
 	}
 	n->m_infoset->m_flag = false;
       }
       else  {
 	// we have visited this infoset, take same action
-	MakeReducedStrats(p_nfg, S, p,
+	MakeReducedStrats(p_nfg, p,
 			  n->m_children[n->m_infoset->m_whichbranch],
 			  nn);
       }
@@ -101,7 +98,7 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
       if (n->m_infoset) { 
 	n->m_infoset->m_whichbranch = 0;
       }
-      MakeReducedStrats(p_nfg, S, p, n->m_children[1], n->m_children[1]);
+      MakeReducedStrats(p_nfg, p, n->m_children[1], n->m_children[1]);
     }
   }
   else if (nn)  {
@@ -113,7 +110,7 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
     if (m)  {
       gbt_efg_node_rep *mm = m->m_parent->m_whichbranch;
       m->m_parent->m_whichbranch = m;
-      MakeReducedStrats(p_nfg, S, p, m, m);
+      MakeReducedStrats(p_nfg, p, m, m);
       m->m_parent->m_whichbranch = mm;
     }
     else {
@@ -125,7 +122,7 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
   }
 }
 
-gbtNfgGame gbtEfgGame::GetReducedNfg(const EFSupport &p_support) const
+gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
 {
   if (rep->m_reducedNfg) {
     return rep->m_reducedNfg;
@@ -137,7 +134,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(const EFSupport &p_support) const
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
     nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
-    MakeReducedStrats(nfg, p_support, rep->players[pl], rep->root, NULL);
+    MakeReducedStrats(nfg, rep->players[pl], rep->root, NULL);
     nfg->m_dimensions[pl] = nfg->m_players[pl]->m_strategies.Length();
   }
   return (rep->m_reducedNfg = nfg);

@@ -69,7 +69,10 @@ bool IsPerfectRecall(const gbtEfgGame &);
 bool IsPerfectRecall(const gbtEfgGame &, gbtEfgInfoset &, gbtEfgInfoset &);
 
 void RandomEfg(const gbtEfgGame &);
+
 gbtEfgGame CompressEfg(const gbtEfgGame &, const EFSupport &);
+// An "in-place" version of the above
+void CompressEfgInPlace(gbtEfgGame, const EFSupport &);
 
 #endif // EFGUTILS_H
 

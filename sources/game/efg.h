@@ -82,7 +82,8 @@ protected:
   struct gbt_efg_game_rep *rep;
   
   // this is for use with the copy constructor
-  void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *);
+  void CopySubtree(gbt_efg_game_rep *,
+		   gbt_efg_node_rep *, gbt_efg_node_rep *);
 
   void CopySubtree(gbt_efg_node_rep *, gbt_efg_node_rep *,
 		   gbt_efg_node_rep *);
@@ -196,7 +197,7 @@ public:
 
   void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
     
-  gbtNfgGame GetReducedNfg(const EFSupport &) const;
+  gbtNfgGame GetReducedNfg(void) const;
   bool HasReducedNfg(void) const;
   gbtNfgGame AssociatedAfg(void) const;
 

@@ -541,7 +541,7 @@ void BehavSolution::Invalidate(void) const
 gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
 {
   gbtEfgGame efg = GetGame();
-  gbtNfgGame nfg = efg.GetReducedNfg(EFSupport(efg));
+  gbtNfgGame nfg = efg.GetReducedNfg();
   
   gPVector<gNumber> regret(nfg.NumStrats());
   
