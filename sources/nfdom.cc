@@ -1,15 +1,10 @@
 //
-// FILE: nfdom.cc -- Compute dominated strategies on normal form
+// FILE: nfdom.cc -- Implementation of dominance functions of nfdom.h
 //
 // $Id$
 //
 
-#include "nfg.h"
-#include "nfstrat.h"
-#include "nfgciter.h"
-#include "rational.h"
-#include "gstatus.h"
-#include "nfplayer.h"
+#include "nfdom.h"
 
 gRectArray<gNumber> *paytable;
 
@@ -49,14 +44,14 @@ bool Dominates(const Nfg &,
 
 
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
-		     gStatus &status)
+	       const gStatus &status)
 {
   return Dominates(S.Game(),S,s->Player()->GetNumber(),
 		   s->Number(),t->Number(),strong);
 }
 
 
-bool IsDominated(const NFSupport &S, Strategy *s, bool strong, gStatus &status)
+bool IsDominated(const NFSupport &S, Strategy *s, bool strong, const gStatus &status)
 {
   for (int i = 1; i <= s->Player()->NumStrats(); i++)
     if (i != s->Number())
