@@ -12,9 +12,7 @@
 \title{GAMBIT COMMAND LANGUAGE\thanks{This is part of the Gambit
 Project, which was funded in part by National Science Foundation
 grants SBR-9308637 to the California Institute of Technology and
-SBR-9308862 to the University of Minnesota.  We are grateful to Rob
-Weber for help in compiling this manual and testing parts of the
-language.}}
+SBR-9308862 to the University of Minnesota.}}
 
 \author{Richard D. McKelvey\\California Institute of
 Technology
@@ -64,7 +62,9 @@ contributed to the Gambit Command Language and to the Gambit Project
 more generally: Among these are Bruce Bell, Anand Chelian, Nelson
 Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and Gary Wu.  We
 are particularly grateful to Gary Wu for his work on the stack machine
-used by the command language.
+used by the command language, to Bruce Bell and Nelson Escobar for
+work on data structures, and to Rob Weber for help in compiling this
+manual and testing parts of the language.
 
 \section{Installation}
 
@@ -162,15 +162,51 @@ from an extended command language job.
 
 \subsection{Variables}
 
+A variable stores one object of the corresponding data type, and
+returns it when called.  To create a user defined variable, or to give
+a new value to an existing variable, one can use the built-in
+function,
+\verb+Assign+, which has the syntax:
+\begin{verbatim}
+Assign[x<->T, y->T]
+\end{verbatim}
+
+If the \verb+x+ parameter is a name which is not a currently visible
+variable name, a new variable of the type is created and the value of
+the expression passed to \verb+y+ is ``assigned'' to \verb+x+.  If
+\verb+Assign+ is called with an argument \verb+varname+ which is a
+currently visible variable, it results in an error if the data type
+which \verb+y+ evaluates to is different that the current data type of
+\verb+x+.  On the other hand, if the data types match, then
+\verb+varname+ is ``modified:'' \verb+varname+ is first deleted from
+the list of visible functions and then
+\verb+Assign+ is executed.  
+
+The Assign function is used so frequently, it has the following short form
+representation:
+\begin{verbatim}
+name := expression
+\end{verbatim}
+
+Once a variable has been assigned, it can be reassigned only if it is
+assigned a value which evaluates to the same data type.  Assigning a
+variable to have a new data type will result in run time error.  To
+change the data type of a variable, it must be unassigned, by using
+the UnAssign[] function.
+
+A variable can be thought of as a constant function with no arguments.
+However, the scoping and visibility rules for variables are different
+than for functions.  Variables have local scope and visibility.  
+
+
 \subsection{Lists}
 
-Additionally, variables of any type can be contained in lists of arbitrary
-length.
-Variables of type {\tt LIST} are defined similarly to the above variables,
-except that the expression to the right of the {\tt ":="} symbol
-contains a vector of variables of the same type enclosed in curly braces
-and separated by commas.  For example, the following is a list containing
-the first five integers:
+Variables of any type can be contained in lists of arbitrary length.
+Variables of type {\tt LIST} are defined similarly to the above
+variables, except that the expression to the right of the {\tt ":="}
+symbol contains a vector of variables of the same type enclosed in
+curly braces and separated by commas.  For example, the following is a
+list containing the first five integers:
 
 \begin{verbatim}
 { 1, 2, 3, 4, 5 }
@@ -529,6 +565,12 @@ third parameter expressions in a fashion similar to the While command.
 
 \subsection{Including files}
 
+The Include[TEXT] function can be used to insert an external file into
+your GCl program.  This command is useful to avoid unneccessary typing
+of often used sequences of commands or definitions of user defined
+functions.  Such commands can be put in a file, and included whenever
+they are needed.
+  
 \subsection{User defined functions}
 
 As GCL programs become more and more complex, frequently there are complicated
@@ -629,22 +671,43 @@ always 13, regardless of the value of \verb+i+ outside of the function.
 
 \section{Solving games}
 
+\subsection{Enum}
 
+The two {\tt Enum} functions can be used to enumerate the pure or
+mixed Nash equilibria for a normal form game. 
+
+The {\tt EnumPureSolve} function enumerates all pure strategy Nash
+equilibria in the support of a normal form game.  This
+algorithm simply investigates all pure strategy profiles, checking
+each for the Nash equilibrium conditions.  By default, the algorithm
+finds all pure strategy Nash equilibrium.  Optionally it can be set to
+find the first \verb+k+ Nash equilibria.  This algorithm will work on
+any normal form game.  
+
+The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure and
+mixed) for a given support of a two person normal form
+game.  More precisely, it finds the set of extreme points of the
+components of the set of Nash equilibria.  The procedure is to
+enumerate the set of complementary basic feasible solutions. (See, eg
+\cite[1964]{Man:64}.)  By default, all equilibria are found.
+Optionally, it can be set to find the first \verb+k+ equilibria.  
+This algorithm works only on two-person normal form games.  
 
 \subsection{Gobit}
 
 The {\tt GobitSolve} function computes a branch of the logistic
 quantal response equilibrium correspondence (as described in
-\cite[1995]{McKPal:95a} for normal form games, and in
-\cite[1995b]{McKPal:95b} for extensive form games.  The branch is
+\cite{McKPal:95a} for normal form games, and in
+\cite{McKPal:95b} for extensive form games.  The branch is
 computed for values of $\lambda$ between $\underline{\lambda}$ and
 $\bar{\lambda}.$ The algorithm starts at $\lambda_0 =
 \underline{\lambda}$ if $\delta>0,$ or $\lambda_0 = \bar{\lambda}$ if
 $\delta<0$. It then increments according to the formula
 $$
 \lambda_{t+1} = \lambda_t +\delta \lambda_t^a,
-$$ where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
-parameters described below. In the computation for the first value of
+$$ 
+where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
+parameters that can be specified.  In the computation for the first value of
 $\lambda_0$, the algorithm begins its search for a solution at some
 starting point.  At each
 successive value of $\lambda_t,$ the algorithm begins its search at
@@ -662,6 +725,105 @@ the quantal response mapping converges to a unique selection from the
 set of sequential equilibria as $\lambda$ goes to infinity.  Hence, in
 extensive form games, this algorithm can be used to compute an
 approximation to a sequential equilibrium.
+
+The {\tt GobitGridSolve} function performs a grid search to compute
+the {\em complete} logistic quantal response correspondence.  Points
+are evaluated in terms of the value of an objective function, that
+measures the distance between the original point, and the best
+response to the best response (under the logistic best response
+function.)  Points that are close (within 'tol') to being fixed points
+are kept, others are discarded.  Values of the probabilities are
+evaluated on a grid of mesh 'delp.'  This procedure is very
+computationally intensive, and is only feasible for small two-person
+normal form games.
+
+\subsection{LCP}
+
+The {\tt LCPSolve} function formulates and solves the game as a Linear
+complementarity problem.  This algorithm works for two person
+games in either extensive or normal form.  
+ 
+For a normal form game, the game is set up as a linear complementarity
+problem, and solved via the Lemke-Howson Algorithm.  (See, eg.,
+\cite{LemHow:64}) using lexicographic rule for insuring
+termination, as developed in \cite{Eav:71}.  This algorithm can also
+be used to find the set of {\em accessible} Nash equilibria, by
+tracing out the pattern of connectedness of the complemenary basic
+feasible solutions, as described in \cite{Sha:74}.  The set of
+accessible equilibria is frequently the same as the set of all Nash
+equilibria, but this is not always so.
+
+For an extensive form game, this algorithm implements Koller, Megiddo
+and von Stengel's {\em sequence form} (\cite{KolMegSte:94}. The
+sequence form is a formulation of the set of Nash equilibria as the
+solution to a non linear complementarity problem in variables that
+correspond to ``sequences'' in the extensive form, which they show can
+be solved by Lemke's algorithm for Linear complementarity problems.
+The method has nice properties in terms of its computational
+complexity, as it only grows linearly in the size of the extensive
+form game.  
+
+\subsection{Liap}
+
+The {\tt LiapSolve} function finds Nash equilibria via the Lyapunov
+function method described in \cite{McK:91}.  This method works on
+either the extensive or normal form.  This algorithm casts the problem
+as a function minimization problem by use of a Lyapunov function for
+Nash equilibria.  This is a continuously differentiable non negative
+function whose zeros coincide with the set of Nash equilibria of the
+game.  A standard descent algorithm is used to find a constrained
+local minimum of the function from any given starting location.  Since
+a local minimum need not be a global minimum (with value 0,) the
+algorithm is not guaranteed to find a Nash equilibrium from any fixed
+starting point.  The algorithm thus incorporates the capability of
+restarting.  The algorithm starts from the initial starting point
+determined by the parameter 'start'.  If a Nash equilibrium is not
+found, it will keep searching from new randomly chosen starting points
+until a Nash equilibrium has been found or the maximum number of tries
+(parameter 'ntries') is exceeded, whichever comes first.
+
+\subsection{LP}
+
+Finds the minmimax solution (a Nash equilibrium) for a two person
+constant-sum game in normal form, by solving it as a Linear Program.
+
+\subsection{SimpDiv}
+
+Computes a Nash equilibrium to a normal form game based on a
+simplicial subdivision algorithm.  The algorithm implemented is that
+of \cite{VTH:1987}.  The algorithm is a simplicial subdivision
+algorithm which can start at any point in the simplex.  The algorithm
+starts with a given grid size, follows a path of almost completely
+labeled subsimplexes, and converges to a completely labeled
+sub-simplex that approximates the solution.  Additional accuracy is
+obtained by refining the grid size and restarting from the previously
+found point.  The idea is that by restarting at a close approximation
+to the solution, each successive increase in accuracy will yield a
+short path, and hence be quick.
+
+In its pure form, the algorithm is guaranteed to find at least one
+mixed strategy equilibrium to any n-person game.  Experience shows
+that the algorithm works well, and is acceptably fast for many
+moderate size problems.  But in some examples it can be quite slow.
+The reason for this is that sometimes after restarting with a refined
+grid size, even though the starting point is a good approximation to
+the solution, the algorithm will go to the boundary of the simplex
+before converging back to a point that is close to the original
+starting point.  When this occurs, each halving of the grid size will
+take twice as long to converge as the previous grid size.  If a high
+degree of accuracy is required, or if the normal form is large, this
+can result in the algorithm taking a long time to converge.
+
+In order to combat the above difficulty, a parameter 'leash' has been
+added to the algorithm which places a limit on the distance which the
+algorithm can wander from the restart point. (Setting this parameter
+to 0 results in no limit, and gives the pure form of the algorithm.)
+With this parameter set to a non trivial value, the algorithm is no
+longer guaranteed to converge, and setting small values of the
+parameter will sometimes yield lack of convergence.  However,
+experience shows that values of the parameter on the order of 10
+generally do not destroy convergence, and yield much faster
+convergence.
 
 \section{Function Reference, by Category}
 
@@ -1359,14 +1521,12 @@ EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 \end{verbatim}\normalsize
 
 \bd
-Returns all Nash equilibria (pure and mixed) for a given support
-\verb+support+ of a two person normal form game.  More precisely, it
-finds the set of extreme points of the components of the set of Nash
-equilibria.  The procedure is to enumerate the set of complementary
-basic feasible solutions. (See, eg \cite[1964]{Man:64}.)  By default,
-all equilibria are found; the optional parameter \verb+stopAfter+ may
-be used to specify a maximum number of equilibria.  Upon completion,
-\verb+nPivots+ returns the number of pivots done by the algorithm, and
+Returns the extreme points of the set of all Nash equilibria (pure or
+mixed) for a given support, \verb+support+, of a two person normal form
+game.  By default, all equilibria are found; the optional parameter
+\verb+stopAfter+ may be used to specify a maximum number of
+equilibria.  Upon completion, \verb+nPivots+ returns the number of
+pivots done by the algorithm, and
 \verb+time+ returns the amount of time consumed by the function.
 \item
 [See also:] {\tt EnumPureSolve}.
@@ -1379,8 +1539,8 @@ EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 \end{verbatim}\normalsize
 
 \bd
-Returns all pure strategy Nash equilibria in the support \verb+support+
-normal form game.  By default, all equilibria are found; the optional
+Returns all pure strategy Nash equilibria in the support, \verb+support+,
+of a normal form game.  By default, all equilibria are found; the optional
 parameter \verb+stopAfter+ may be used to specify a maximum number of
 equilibria.  Upon completion, \verb+time+ returns the amount of time
 consumed by the function. 
@@ -1525,20 +1685,13 @@ GobitGridSolve[nfg<->NFG | support->NFSUPPORT, {pxifile->TEXT},
 \end{verbatim}\normalsize
 
 \bd
-Performs a grid search to compute the complete logistic
-quantal response correspondence for a (small) two-person normal form
-game.  The correspondence is computed for values of $\lambda$ between
-$\underline{\lambda}$ and $\bar{\lambda}.$ Points are evaluated in
-terms of the value of an objective function, that measures the
-distance between the original point, and the best response to the best
-response (under the logistic best response function.)  Points that are
-close (within 'tol') to being fixed points are kept, others are
-discarded.  Values of the probabilities are evaluated on a grid of
-mesh 'delp.'
+Computes the complete logistic quantal response correspondence for a
+(small) two-person normal form game, for values of $\lambda$ between
+$\underline{\lambda}$ and $\bar{\lambda}.$ 
 
 \item
 [Return value:] The List of Mixed (or Behavior) profiles found -- one
-profile for each value of $\lambda_t$. 
+profile for each value of $\lambda_t$, from lowest to highest. 
 
 \item
 [Required parameters:]\hfil\null
@@ -1553,10 +1706,11 @@ profile for each value of $\lambda_t$.
 
 \bd
 \item
-[delp:] Grid size for search over probability space.  Default is XXXX .
+[delp:] Grid size for search over probability space.  Default is $0.02$ .
 \item
 [tol:] The tolerance on the objective function.  Values of $p$ for
-which the objective function is less this value are kept.  
+which the objective function is less this value are kept.  The default
+is $0.02$.  
 \ed
 \ed
 
@@ -1821,20 +1975,9 @@ LCPSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 \end{verbatim}\normalsize
 
 \bd
-For a normal form game, the game is set up as a linear complementarity
-problem, and solved via the Lemke-Howson Algorithm.  (See, eg.,
-\cite[1964]{LemHow:64}) using lexicographic rule for insuring
-termination, as developed in \cite[1971]{Eav:71}.
-
-For an extensive form game, this algorithm implements Koller, Megiddo
-and von Stengel's {\em sequence form} (\cite[1994]{KolMegSte:94}. The
-sequence form is a formulation of the set of Nash equilibria as the
-solution to a non linear complementarity problem in variables that
-correspond to ``sequences'' in the extensive form, which they show can
-be solved by Lemke's algorithm for Linear complementarity problems.
-The method has nice properties in terms of its computational
-complexity, as it only grows linearly in the size of the extensive
-form game.  
+Solves the game as a Linear Complementarity Problem, using the
+Lemke-Howson Algorithm for normal form games, and the
+Koller-Meggiddo-Stengel Sequence form for extensive form games.  
 
 \item
 [Required parameters:]\hfil\null
@@ -1977,23 +2120,15 @@ LiapSolve[nfg<->NFG | start->MIXED,
 
 
 \bd
-\item
-[] Finds Nash equilibria via the Lyapunov function method
-described in \cite[1991]{McK:91}.  Works on either the
-extensive or normal form.  This algorithm casts the problem as a
-function minimization problem by use of a Lyapunov function for Nash
-equilibria.  This is a continuously differentiable non negative
-function whose zeros coincide with the set of Nash equilibria of the
-game.  A standard descent algorithm is used to find a constrained
-local minimum of the function from any given starting location.  Since
-a local minimum need not be a global minimum (with value 0,) the
-algorithm is not guaranteed to find a Nash equilibrium from any fixed
-starting point.  The algorithm thus incorporates the capability of
-restarting.  The algorithm starts from the initial starting point
-determined by the parameter 'start'.  If a Nash equilibrium is not
-found, it will keep searching from new randomly chosen starting points
-until a Nash equilibrium has been found or the maximum number of tries
-(parameter 'ntries') is exceeded, whichever comes first.
+Searches for a Nash by minimizing a Lyapunov function which is zero
+exactly at Nash equilibria.  The algorithm starts from the initial
+starting point determined by the parameter 'start'.  The algorithm is
+not guaranteed to find a Nash equilibrium from any fixed starting
+point.  The algorithm thus incorporates the capability of restarting.
+If a Nash equilibrium is not found, it will keep searching from new
+randomly chosen starting points until a Nash equilibrium has been
+found or the maximum number of tries (parameter 'ntries') is exceeded,
+whichever comes first.
 \item
 [Return value:] Returns the list of solutions found.
 \item
@@ -3023,39 +3158,8 @@ SimpDivSolve[nfg->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 
 \bd
 Computes a Nash equilibrium to a normal form game based
-on a simplicial subdivision algorithm.  The algorithm implemented is
-that of \cite{VTH:1987}.  The 
-algorithm is a simplicial subdivision algorithm which can start at any
-point in the simplex.  The algorithm starts with a given grid size,
-follows a path of almost completely labeled subsimplexes, and
-converges to a completely labeled sub-simplex that approximates the
-solution.  Additional accuracy is obtained by refining the grid size
-and restarting from the previously found point.  The idea is that by
-restarting at a close approximation to the solution, each successive
-increase in accuracy will yield a short path, and hence be quick.
+on a simplicial subdivision algorithm.  
 
-In its pure form, the algorithm is guaranteed to find at least one
-mixed strategy equilibrium to any n-person game.  Experience shows
-that the algorithm works well, and is acceptably fast for many
-moderate size problems.  But in some examples it can be quite slow.
-The reason for this is that sometimes after restarting with a refined
-grid size, even though the starting point is a good approximation to
-the solution, the algorithm will go to the boundary of the simplex
-before converging back to a point that is close to the original
-starting point.  When this occurs, each halving of the grid size will
-take twice as long to converge as the previous grid size.  If a high
-degree of accuracy is required, or if the normal form is large, this
-can result in the algorithm taking a long time to converge.
-
-In order to combat the above difficulty, a parameter 'leash' has been
-added to the algorithm which places a limit on the distance which the
-algorithm can wander from the restart point. (Setting this parameter
-to 0 results in no limit, and gives the pure form of the algorithm.)
-With this parameter set to a non trivial value, the algorithm is no
-longer guaranteed to converge, and setting small values of the
-parameter will sometimes yield lack of convergence.  However,
-experience shows that values of the parameter on the order of 10
-generally do not destroy convergence, and yield much faster
 convergence.
 
 \item
@@ -3081,7 +3185,8 @@ triangulation is halved.  So this parameter determines the final mesh
 by the formula ${1/2}^{ndivs}$.
 \item
 [leashLength:] Sets the leashlength. Default is 0, which results in no
-constraint, or no leash.  
+constraint, or no leash.  Note that if this parameter is set to a value
+different from 0, the algorithm is no longer guaranteed to converge.
 \item
 [time:] Returns the elapsed time for the operation.
 \ed
@@ -3241,3 +3346,107 @@ file; the default is \verb+False+.
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{gambit}
 \end{document}
+
+
+
+\section{Language Description}
+
+\subsection{Grammar and syntax}
+
+The central paradigm of the GCL is that we can think of every legal
+statement as a function call, which operates on some set of parameters and
+returns a value.  Many commonly used functions have a more convenient
+``short form'' format for additional terseness and readability.
+
+Each function is identified by its \verb+FunctionName+, which is a
+unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
+case letters or numbers beginning with a letter.  The set of all
+built-in functions is listed in the Function Reference section of this
+manual.
+
+A statement in the GCL has the
+following syntax
+\begin{verbatim}
+FunctionName[ArgumentList]
+\end{verbatim}
+where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
+a sequence of arguments, separated by commas, each of which takes one
+of the following two forms:
+\begin{verbatim}
+ArgumentName->argval
+\end{verbatim}
+or
+\begin{verbatim}
+ArgumentName<->argref
+\end{verbatim}
+
+Each function, when originally created, is given a list of formal
+argument names, and each formal argument is assigned a data type,
+which is one of the allowable data types listed in the section below
+on data types.  For each of the built in functions, the formal
+arguments and their data types are listed in the entry for that
+function in the Function Reference section.  In the above syntax,
+\verb+ArgumentName+, must be one of the list of possible formal
+arguments for the given function, and \verb+argval+ or \verb+argref+
+is any function that evaluates to correct data type for the
+corresponding argument. 
+
+The arguments to a function can be either optional or required.
+Required arguments must be specified in \verb+ArgumentList+ when the
+function is called.  Each optional argument has a default value, which
+is also determined when the function is created.  Optional arguments
+need only be specified when the default is to be changed.
+
+The arguments to a function can be specified in any order, as long as
+the above syntax for the \verb+ArgumentList+ is used.  However, the
+argument list for a function can also be called without specifying the 
+prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as the 
+arguments are specified in the correct order.  In fact a mixture is 
+allowed in which the prefix is specified for some arguments and not
+specified for others as long as all of the arguments which do not
+include the prefix preceed those that do.  In this case, it is assumed
+that those that do not include a prefix are in the correct order.  
+
+Arguments can be passed in one of two ways, either by value or by
+reference.  To pass an argument by value, the syntax is
+\verb+ArgumentName->argval+.  If an argument is passed by value, then the
+function whose name is specified in \verb+argval+ cannot be called
+or changed by the function \verb+FunctionName+ unless it is in some
+other way made visible to the function (specifically, if it is called
+by reference in a different argument to the same function, or if it is a
+funcion of global scope -- described below).  To pass by reference,
+the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
+by reference, then the function whose name is specified in
+\verb+argref+ can be called and changed by the function
+\verb+FunctionName+.  
+
+Finally, a function with no required arguments can be called by just
+specifying the function name.  That function is then called with
+default values for all optional arguments (if there are any.)
+
+Summarizing, a rough description of the formal grammar of the GCL
+follows:
+
+\begin{verbatim}
+Name: [A-Za-z]([A-Za-z0-9_])
+
+Statement: FunctionName
+        | FunctionName[ArgumentList]
+
+FunctionName: Name
+
+ArgumentList: Argument
+        | Argument, Argumentlist
+
+Argument: ArgumentName -> Statement
+        | ArgumentName <-> Statement
+        | Statement
+
+ArgumentName: Name
+\end{verbatim}
+
+\subsection{Variables}
+
+
+
+
