@@ -5,9 +5,10 @@
 // $Id$
 //
 
+#include <ctype.h>
+
 #include "gpreproc.h"
 #include "system.h"
-
 
 //-------------------------------------------------------------------------
 //            gPreprocessor: private auxiliary member functions
@@ -244,6 +245,8 @@ gText gPreprocessor::GetLine(void)
 
 	  while (!m_InputStack.Peek()->eof() && !EOL(c))
 	    GetChar(c);
+
+	  line += '\n';
 	}
 	else if (line.Right(2) == "/*") {
 	  // In a C style comment.  Ignore everything until
