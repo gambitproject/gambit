@@ -28,7 +28,7 @@
 
 class NfgNavigateWindow : public wxPanel {
 private:
-  NfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxStaticText **m_playerNames;
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
 
@@ -40,7 +40,7 @@ private:
   void OnColPlayerChange(wxCommandEvent &);
 
 public:
-  NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgNavigateWindow();
   
   void SetProfile(const gArray<int> &profile);

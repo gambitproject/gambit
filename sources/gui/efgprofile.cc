@@ -70,7 +70,7 @@ void EfgProfileList::UpdateValues(void)
   InsertColumn(5, "Liap Value");
   InsertColumn(6, "Qre Lambda");
 
-  gbtEfgGame efg = m_doc->m_efgShow->GetGame();
+  gbtEfgGame efg = m_doc->GetEfg();
   int maxColumn = 6;
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
@@ -84,8 +84,8 @@ void EfgProfileList::UpdateValues(void)
     }
   }
 
-  for (int i = 1; i <= m_doc->m_efgShow->Profiles().Length(); i++) {
-    const BehavSolution &profile = m_doc->m_efgShow->Profiles()[i];
+  for (int i = 1; i <= m_doc->AllBehavProfiles().Length(); i++) {
+    const BehavSolution &profile = m_doc->AllBehavProfiles()[i];
     InsertItem(i - 1, (char *) profile.GetName());
     SetItem(i - 1, 1, (char *) profile.Creator());
     SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
@@ -112,7 +112,7 @@ void EfgProfileList::UpdateValues(void)
     }
   }    
 
-  if (m_doc->m_efgShow->Profiles().Length() > 0) {
+  if (m_doc->AllBehavProfiles().Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
     item.m_itemId = m_doc->m_efgShow->CurrentProfile() - 1;
@@ -134,8 +134,8 @@ void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 wxString EfgProfileList::GetReport(void) const
 {
   wxString report;
-  const gList<BehavSolution> &profiles = m_doc->m_efgShow->Profiles();
-  gbtEfgGame efg = m_doc->m_efgShow->GetGame();
+  const gList<BehavSolution> &profiles = m_doc->AllBehavProfiles();
+  gbtEfgGame efg = m_doc->GetEfg();
 
   report += wxString::Format("Behavior strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) efg.GetTitle(),

@@ -29,7 +29,7 @@
 
 class NfgOutcomeWindow : public wxGrid {
 private:
-  NfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   void OnChar(wxKeyEvent &);
@@ -43,7 +43,7 @@ private:
   void OnPopupOutcomeDetach(wxCommandEvent &);
 
 public:
-  NfgOutcomeWindow(NfgShow *p_efgShow, wxWindow *p_parent);
+  NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgOutcomeWindow() { }
 
   void UpdateValues(void);

@@ -40,12 +40,13 @@ BEGIN_EVENT_TABLE(NfgNavigateWindow, wxPanel)
   EVT_CHOICE(idCOLPLAYER_CHOICE, NfgNavigateWindow::OnColPlayerChange)
 END_EVENT_TABLE()
 
-NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
+NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
+				     wxWindow *p_parent)
   : wxPanel(p_parent, -1), 
-    m_parent(p_nfgShow), m_rowPlayer(1), m_colPlayer(2),
-    m_support(p_nfgShow->GetGame())
+    m_doc(p_doc), m_rowPlayer(1), m_colPlayer(2),
+    m_support(*m_doc->m_nfg)
 {
-  gbtNfgGame nfg = p_nfgShow->GetGame();
+  gbtNfgGame nfg = *m_doc->m_nfg;
 
   wxStaticBoxSizer *playerViewSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "View players"),
@@ -174,7 +175,7 @@ void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
 
 void NfgNavigateWindow::OnStrategyChange(wxCommandEvent &)
 {
-  m_parent->SetProfile(GetProfile());
+  m_doc->m_nfgShow->SetProfile(GetProfile());
 }
 
 void NfgNavigateWindow::OnRowPlayerChange(wxCommandEvent &)
@@ -188,10 +189,10 @@ void NfgNavigateWindow::OnRowPlayerChange(wxCommandEvent &)
 
   if (newRowPlayer == m_colChoice->GetSelection() + 1) {
     m_colChoice->SetSelection(oldRowPlayer - 1);
-    m_parent->SetPlayers(newRowPlayer, oldRowPlayer);
+    m_doc->m_nfgShow->SetPlayers(newRowPlayer, oldRowPlayer);
   }
   else {
-    m_parent->SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
+    m_doc->m_nfgShow->SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
   }
 }
 
@@ -206,16 +207,16 @@ void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
 
   if (newColPlayer == m_rowChoice->GetSelection() + 1) {
     m_rowChoice->SetSelection(oldColPlayer - 1);
-    m_parent->SetPlayers(oldColPlayer, newColPlayer);
+    m_doc->m_nfgShow->SetPlayers(oldColPlayer, newColPlayer);
   }
   else {
-    m_parent->SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
+    m_doc->m_nfgShow->SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
   }
 }
 
 void NfgNavigateWindow::UpdateLabels(void)
 {
-  gbtNfgGame nfg = m_parent->GetGame();
+  gbtNfgGame nfg = m_doc->m_nfgShow->GetGame();
 
   int rowSelection = m_rowChoice->GetSelection();
   int colSelection = m_colChoice->GetSelection();

@@ -58,8 +58,7 @@ public:
 
 class NfgTable : public wxPanel {
 private:
-  gbtNfgGame m_nfg;
-  wxWindow *m_parent;
+  gbtGameDocument *m_doc;
   wxGrid *m_grid;
   bool m_editable, m_cursorMoving;
   int m_rowPlayer, m_colPlayer;
@@ -76,7 +75,7 @@ private:
   void OnLabelLeftClick(wxGridEvent &);
 
 public:
-  NfgTable(gbtNfgGame, wxWindow *);
+  NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgTable() { }
 
   void SetContingency(const gArray<int> &profile);

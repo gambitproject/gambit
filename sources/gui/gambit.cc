@@ -142,9 +142,8 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	  nfg.SetOutcome(iter.Profile(), outcome);
 	} while (iter.NextContingency());
       }
-      NfgShow *nfgShow = new NfgShow(nfg, 0);
+      NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
       nfgShow->SetFilename("");
-      AddGame(nfg, nfgShow);
     }
   }
 }
@@ -180,7 +179,7 @@ void GambitApp::OnFileImportComLab(wxWindow *p_parent)
     try {
       gFileInput infile(dialog.GetPath().c_str());
       gbtNfgGame nfg = ReadComLabSfg(infile);
-      NfgShow *nfgShow = new NfgShow(nfg, 0);
+      NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
       nfgShow->SetFilename(dialog.GetPath().c_str());
       AddGame(nfg, nfgShow);
     }
@@ -215,9 +214,8 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gFileInput infile(p_filename);
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    NfgShow *nfgShow = new NfgShow(nfg, 0);
+    NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
     nfgShow->SetFilename(p_filename);
-    AddGame(nfg, nfgShow);
     SetFilename(nfgShow, p_filename);
     return;
   }
@@ -272,19 +270,6 @@ void GambitApp::AddGame(gbtNfgGame p_nfg, NfgShow *p_nfgShow)
   gbtGameDocument *game = new gbtGameDocument(p_nfg);
   game->m_nfgShow = p_nfgShow;
   m_gameList.Append(game);
-  m_fileHistory.UseMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
-  m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
-}
-
-void GambitApp::AddGame(gbtEfgGame p_efg, gbtNfgGame p_nfg, NfgShow *p_nfgShow)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (*m_gameList[i]->m_efg == p_efg) {
-      m_gameList[i]->m_nfg = new gbtNfgGame(p_nfg);
-      m_gameList[i]->m_nfgShow = p_nfgShow;
-      break;
-    }
-  }
   m_fileHistory.UseMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
   m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
 }

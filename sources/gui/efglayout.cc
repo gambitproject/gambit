@@ -360,11 +360,11 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
   case NODE_ABOVE_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_ABOVE_REALIZPROB:
-    return (const char *) m_doc->m_efgShow->GetRealizProb(n);
+    return (const char *) m_doc->GetRealizProb(n);
   case NODE_ABOVE_BELIEFPROB:
-    return (const char *) m_doc->m_efgShow->GetBeliefProb(n);
+    return (const char *) m_doc->GetBeliefProb(n);
   case NODE_ABOVE_VALUE:
-    return (const char *) m_doc->m_efgShow->GetNodeValue(n);
+    return (const char *) m_doc->GetNodeValue(n);
   default:
     return "";
   }
@@ -394,11 +394,11 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
   case NODE_BELOW_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_BELOW_REALIZPROB:
-    return (const char *) m_doc->m_efgShow->GetRealizProb(n);
+    return (const char *) m_doc->GetRealizProb(n);
   case NODE_BELOW_BELIEFPROB:
-    return (const char *) m_doc->m_efgShow->GetBeliefProb(n);
+    return (const char *) m_doc->GetBeliefProb(n);
   case NODE_BELOW_VALUE:
-    return (const char *) m_doc->m_efgShow->GetNodeValue(n);
+    return (const char *) m_doc->GetNodeValue(n);
   default:
     return "";
   }
@@ -430,11 +430,11 @@ wxString efgTreeLayout::CreateBranchAboveLabel(const NodeEntry *p_entry) const
   case BRANCH_ABOVE_LABEL:
     return (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_ABOVE_PROBS:
-    return (const char *) m_doc->m_efgShow->GetActionProb(parent,
-							    p_entry->GetChildNumber());
+    return (const char *) m_doc->GetActionProb(parent,
+					       p_entry->GetChildNumber());
   case BRANCH_ABOVE_VALUE:
-    return (const char *) m_doc->m_efgShow->GetActionValue(parent,
-							     p_entry->GetChildNumber());
+    return (const char *) m_doc->GetActionValue(parent,
+						p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -450,11 +450,11 @@ wxString efgTreeLayout::CreateBranchBelowLabel(const NodeEntry *p_entry) const
   case BRANCH_BELOW_LABEL:
     return (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel();
   case BRANCH_BELOW_PROBS:
-    return (const char *) m_doc->m_efgShow->GetActionProb(parent,
-							    p_entry->GetChildNumber());
+    return (const char *) m_doc->GetActionProb(parent,
+					       p_entry->GetChildNumber());
   case BRANCH_BELOW_VALUE:
-    return (const char *) m_doc->m_efgShow->GetActionValue(parent,
-							     p_entry->GetChildNumber());
+    return (const char *) m_doc->GetActionValue(parent,
+						p_entry->GetChildNumber());
   default:
     return "";
   }
@@ -796,8 +796,8 @@ void efgTreeLayout::GenerateLabels(void)
       entry->SetBranchAboveFont(settings.BranchAboveFont());
       entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
       entry->SetBranchBelowFont(settings.BranchBelowFont());
-      entry->SetActionProb(m_doc->m_efgShow->ActionProb(entry->GetNode().GetParent(),
-							  entry->GetChildNumber()));
+      entry->SetActionProb(m_doc->ActionProb(entry->GetNode().GetParent(),
+					     entry->GetChildNumber()));
     }
   }
 }

@@ -36,10 +36,10 @@ BEGIN_EVENT_TABLE(NfgProfileList, wxListCtrl)
   EVT_RIGHT_DOWN(NfgProfileList::OnRightClick)
 END_EVENT_TABLE()
 
-NfgProfileList::NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent)
+NfgProfileList::NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxListCtrl(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
 	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
-    m_parent(p_nfgShow)
+    m_doc(p_doc)
 {
   m_menu = new wxMenu("Profiles");
   m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
@@ -67,7 +67,7 @@ void NfgProfileList::UpdateValues(void)
   InsertColumn(4, "Liap Value");
   InsertColumn(5, "Qre Lambda");
   
-  gbtNfgGame nfg = m_parent->GetGame();
+  gbtNfgGame nfg = m_doc->m_nfgShow->GetGame();
   int maxColumn = 5;
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
@@ -78,8 +78,8 @@ void NfgProfileList::UpdateValues(void)
     }
   }
 
-  for (int i = 1; i <= m_parent->Profiles().Length(); i++) {
-    const MixedSolution &profile = m_parent->Profiles()[i];
+  for (int i = 1; i <= m_doc->m_nfgShow->Profiles().Length(); i++) {
+    const MixedSolution &profile = m_doc->m_nfgShow->Profiles()[i];
     InsertItem(i - 1, (char *) profile.GetName());
     SetItem(i - 1, 1, (char *) profile.Creator());
     SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
@@ -102,10 +102,10 @@ void NfgProfileList::UpdateValues(void)
     }    
   }
 
-  if (m_parent->Profiles().Length() > 0) {
+  if (m_doc->m_nfgShow->Profiles().Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_parent->CurrentProfile() - 1;
+    item.m_itemId = m_doc->m_nfgShow->CurrentProfile() - 1;
     item.m_state = wxLIST_STATE_SELECTED;
     item.m_stateMask = wxLIST_STATE_SELECTED;
     SetItem(item);
@@ -114,22 +114,22 @@ void NfgProfileList::UpdateValues(void)
 
 void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_DELETE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(GBT_NFG_MENU_PROFILES_REPORT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_DUPLICATE, m_doc->m_nfgShow->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_DELETE, m_doc->m_nfgShow->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_PROPERTIES, m_doc->m_nfgShow->CurrentProfile() > 0);
+  m_menu->Enable(GBT_NFG_MENU_PROFILES_REPORT, m_doc->m_nfgShow->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 
 wxString NfgProfileList::GetReport(void) const
 {
   wxString report;
-  const gList<MixedSolution> &profiles = m_parent->Profiles();
-  gbtNfgGame nfg = m_parent->GetGame();
+  const gList<MixedSolution> &profiles = m_doc->m_nfgShow->Profiles();
+  gbtNfgGame nfg = m_doc->m_nfgShow->GetGame();
 
   report += wxString::Format("Mixed strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) nfg.GetTitle(),
-			     m_parent->Filename().c_str());
+			     m_doc->m_nfgShow->Filename().c_str());
 
   report += wxString::Format("Number of profiles: %d\n", profiles.Length());
 

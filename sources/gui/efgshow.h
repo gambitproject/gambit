@@ -151,28 +151,12 @@ public:
   void RemoveProfiles(void);
   void ChangeProfile(int);
   int CurrentProfile(void) const { return m_doc->m_curBehavProfile; }
-  const BehavSolution &GetCurrentProfile(void) const;
-  const gList<BehavSolution> &Profiles(void) const
-    { return m_doc->m_behavProfiles; }
   gText UniqueProfileName(void) const;
 
   // SUPPORT ACCESS AND MANIPULATION
-  EFSupport *GetSupport(void);
-  const gList<EFSupport *> &Supports(void) const
-    { return m_doc->m_efgSupports; }
   void SetSupportNumber(int p_number);
   void OnSupportsEdited(void);
 
-  gText GetRealizProb(const gbtEfgNode &) const;
-  gText GetBeliefProb(const gbtEfgNode &) const;
-  gText GetNodeValue(const gbtEfgNode &) const;
-  gText GetInfosetProb(const gbtEfgNode &) const;
-  gText GetInfosetValue(const gbtEfgNode &) const;
-  gText GetActionValue(const gbtEfgNode &, int act) const;
-  gText GetActionProb(const gbtEfgNode &, int act) const;
-  gNumber ActionProb(const gbtEfgNode &, int br) const;
-
-  gbtEfgGame GetGame(void) { return *m_doc->m_efg; }
 
   void UpdateMenus(void);
   int NumDecimals(void) const;

@@ -70,8 +70,8 @@ void EfgNavigateWindow::Set(gbtEfgNode p_cursor)
   // if we got here, the node is valid.
   try {
     SetCellValue((char *) m_cursor.GetLabel(), 0, 0);
-    SetCellValue((char *) m_doc->m_efgShow->GetRealizProb(m_cursor), 1, 0);
-    SetCellValue((char *) m_doc->m_efgShow->GetNodeValue(m_cursor), 2, 0);
+    SetCellValue((char *) m_doc->GetRealizProb(m_cursor), 1, 0);
+    SetCellValue((char *) m_doc->GetNodeValue(m_cursor), 2, 0);
 
     gText tmpstr;
   
@@ -87,9 +87,9 @@ void EfgNavigateWindow::Set(gbtEfgNode p_cursor)
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_doc->m_efgShow->GetInfosetProb(m_cursor), 4, 0);
-    SetCellValue((char *) m_doc->m_efgShow->GetBeliefProb(m_cursor), 5, 0);
-    SetCellValue((char *) m_doc->m_efgShow->GetInfosetValue(m_cursor), 6, 0);
+    SetCellValue((char *) m_doc->GetInfosetProb(m_cursor), 4, 0);
+    SetCellValue((char *) m_doc->GetBeliefProb(m_cursor), 5, 0);
+    SetCellValue((char *) m_doc->GetInfosetValue(m_cursor), 6, 0);
 	
     gbtEfgNode p = m_cursor.GetParent();
 
@@ -98,8 +98,8 @@ void EfgNavigateWindow::Set(gbtEfgNode p_cursor)
       for (branch = 1; p.GetChild(branch) != m_cursor; branch++);
 
       SetCellValue((char *) m_cursor.GetAction().GetLabel(), 7, 0);
-      SetCellValue((char *) m_doc->m_efgShow->GetActionProb(p, branch), 8, 0);
-      SetCellValue((char *) m_doc->m_efgShow->GetActionValue(p, branch), 9, 0);
+      SetCellValue((char *) m_doc->GetActionProb(p, branch), 8, 0);
+      SetCellValue((char *) m_doc->GetActionValue(p, branch), 9, 0);
     }
     else {
       SetCellValue("N/A (root)", 7, 0);

@@ -471,16 +471,16 @@ BEGIN_EVENT_TABLE(NfgTable, wxPanel)
   EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
 END_EVENT_TABLE()
 
-NfgTable::NfgTable(gbtNfgGame p_nfg, wxWindow *p_parent)
-  : wxPanel(p_parent, -1), m_nfg(p_nfg), m_parent(p_parent), 
+NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxPanel(p_parent, -1), m_doc(p_doc),
     m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
-    m_support(m_nfg), m_profile(0),
+    m_support(*m_doc->m_nfg), m_profile(0),
     m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  m_grid->SetTable(new NfgGridTable(this, m_nfg), true);
+  m_grid->SetTable(new NfgGridTable(this, *m_doc->m_nfg), true);
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
   m_grid->SetDefaultCellFont(m_settings.GetDataFont());
@@ -512,7 +512,7 @@ void NfgTable::SetContingency(const gArray<int> &p_profile)
 
 gArray<int> NfgTable::GetContingency(void) const
 {
-  return ((NfgShow *) m_parent)->GetContingency();
+  return m_doc->GetContingency();
 }
 
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
@@ -537,8 +537,8 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
     m_grid->InsertCols(0, m_support.NumStrats(p_colPlayer) - stratCols);
   }
 
-  ((NfgShow *) m_parent)->SetStrategy(m_rowPlayer, 1);
-  ((NfgShow *) m_parent)->SetStrategy(m_colPlayer, 1);
+  m_doc->m_nfgShow->SetStrategy(m_rowPlayer, 1);
+  m_doc->m_nfgShow->SetStrategy(m_colPlayer, 1);
   m_grid->AutoSizeRows();
   m_grid->AutoSizeColumns();
   m_grid->EndBatch();
@@ -644,8 +644,8 @@ void NfgTable::OnCellSelect(wxGridEvent &p_event)
   }
   else {
     m_cursorMoving = true;  // this prevents re-entry
-    ((NfgShow *) m_parent)->SetStrategy(GetRowPlayer(), p_event.GetRow() + 1);
-    ((NfgShow *) m_parent)->SetStrategy(GetColPlayer(), p_event.GetCol() + 1);
+    m_doc->m_nfgShow->SetStrategy(GetRowPlayer(), p_event.GetRow() + 1);
+    m_doc->m_nfgShow->SetStrategy(GetColPlayer(), p_event.GetCol() + 1);
     m_cursorMoving = false;
     // now continue with the default behavior (i.e., highlight the new cell)
     p_event.Skip(); 
@@ -659,7 +659,7 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
       p_event.GetCol() < m_support.NumStrats(GetColPlayer())) {
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_NFG_MENU_EDIT_CONTINGENCY);
-    m_parent->AddPendingEvent(event);
+    GetParent()->AddPendingEvent(event);
   }
 }
 

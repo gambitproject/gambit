@@ -61,12 +61,11 @@ END_EVENT_TABLE()
 
 TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
-    m_efg(*p_doc->m_efg), m_doc(p_doc),
-    m_layout(m_doc, this),
+    m_doc(p_doc), m_layout(m_doc, this),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   // Make sure that Chance player has a name
-  m_efg.GetChance().SetLabel("Chance");
+  m_doc->GetEfg().GetChance().SetLabel("Chance");
 
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
@@ -206,14 +205,14 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 
 void TreeWindow::RefreshTree(void)
 {
-  m_layout.BuildNodeList(*m_doc->m_efgShow->GetSupport());
-  m_layout.Layout(*m_doc->m_efgShow->GetSupport());
+  m_layout.BuildNodeList(*m_doc->GetEfgSupport());
+  m_layout.Layout(*m_doc->GetEfgSupport());
   AdjustScrollbarSteps();
 }
 
 void TreeWindow::RefreshLayout(void)
 {
-  m_layout.Layout(*m_doc->m_efgShow->GetSupport());
+  m_layout.Layout(*m_doc->GetEfgSupport());
   AdjustScrollbarSteps();
 }
 
@@ -270,7 +269,7 @@ void TreeWindow::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-      m_doc->m_efgShow->SetCursor(m_efg.RootNode());
+      m_doc->m_efgShow->SetCursor(m_doc->GetEfg().RootNode());
     }
     
     UpdateCursor();
@@ -349,7 +348,7 @@ void TreeWindow::ProcessCursor(void)
   if (!m_doc->GetCursor().IsNull()) {
     NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
     if (!entry) {
-      m_doc->m_efgShow->SetCursor(m_efg.RootNode());
+      m_doc->m_efgShow->SetCursor(m_doc->GetEfg().RootNode());
       entry = m_layout.GetNodeEntry(m_doc->GetCursor());
     }
     
@@ -448,11 +447,11 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
     if (!node.IsNull() && node.NumChildren() == 0) {
       try {
 	if (m_dragMode == dragCOPY) {
-	  m_efg.CopyTree(m_dragSource, node);
+	  m_doc->GetEfg().CopyTree(m_dragSource, node);
 	  m_doc->m_efgShow->OnTreeChanged(true, false);
 	}
 	else if (m_dragMode == dragMOVE) {
-	  m_efg.MoveTree(m_dragSource, node);
+	  m_doc->GetEfg().MoveTree(m_dragSource, node);
 	  m_doc->m_efgShow->OnTreeChanged(true, false);
 	  RefreshTree();
 	}
@@ -567,15 +566,18 @@ void TreeWindow::UpdateMenus(void)
 		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
 
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		     (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor) &&
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor) &&
 		      !cursor.GetParent().IsNull()));
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor)));
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor)));
   m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && m_efg.IsLegalSubgame(cursor)));
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor)));
   m_nodeMenu->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
 		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-			m_efg.IsLegalSubgame(cursor) &&
+			m_doc->GetEfg().IsLegalSubgame(cursor) &&
 			cursor.GetSubgameRoot() == cursor) ?
 		       "Unmark subgame" : "Mark subgame");
 }
@@ -587,7 +589,7 @@ void TreeWindow::UpdateMenus(void)
 void TreeWindow::OnSize(wxSizeEvent &p_event)
 {
   if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
-    m_layout.Layout(*m_doc->m_efgShow->GetSupport());
+    m_layout.Layout(*m_doc->GetEfgSupport());
   }
 
   // This extra check because wxMSW seems to generate OnSize events

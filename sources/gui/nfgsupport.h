@@ -33,7 +33,7 @@
 
 class NfgSupportWindow : public wxPanel {
 private:
-  NfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_strategyTree;
@@ -46,7 +46,7 @@ private:
   void OnTreeItemCollapse(wxTreeEvent &);
 
 public:
-  NfgSupportWindow(NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgSupportWindow() { }
 
   void UpdateValues(void);

@@ -142,23 +142,23 @@ void EfgSupportWindow::UpdateValues(void)
 {
   m_supportList->Clear();
 
-  const gList<EFSupport *> &supports = m_doc->m_efgShow->Supports();
+  const gList<EFSupport *> &supports = m_doc->AllEfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_doc->m_efgShow->GetSupport());
+  int supportIndex = supports.Find(m_doc->GetEfgSupport());
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_doc->m_efgShow->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_doc->m_efgShow->GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_doc->m_efgShow->GetGame().GetPlayer(pl);
+  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport()->GetName());
+  for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
 					       (char *) player.GetLabel());
@@ -171,7 +171,7 @@ void EfgSupportWindow::UpdateValues(void)
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action.GetLabel());
-	if (m_doc->m_efgShow->GetSupport()->Contains(action)) {
+	if (m_doc->GetEfgSupport()->Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -218,13 +218,13 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->m_efgShow->GetSupport()->Contains(action) &&
-      m_doc->m_efgShow->GetSupport()->NumActions(action.GetInfoset()) > 1) {
-    m_doc->m_efgShow->GetSupport()->RemoveAction(action);
+  if (m_doc->GetEfgSupport()->Contains(action) &&
+      m_doc->GetEfgSupport()->NumActions(action.GetInfoset()) > 1) {
+    m_doc->GetEfgSupport()->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_doc->m_efgShow->GetSupport()->AddAction(action);
+    m_doc->GetEfgSupport()->AddAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxBLACK);
   }
 

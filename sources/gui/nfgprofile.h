@@ -32,7 +32,7 @@
 
 class NfgProfileList : public wxListCtrl {
 private:
-  NfgShow *m_parent;
+  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   // Event handlers
@@ -40,7 +40,7 @@ private:
   void OnColumnClick(wxListEvent &);
 
 public:
-  NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgProfileList();
 
   void UpdateValues(void);

@@ -291,11 +291,6 @@ void EfgShow::RemoveProfiles(void)
   }
 }
 
-const BehavSolution &EfgShow::GetCurrentProfile(void) const
-{
-  return m_doc->m_behavProfiles[m_doc->m_curBehavProfile];
-}
-
 void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
 {
   if (p_profile.GetName() == "") {
@@ -335,114 +330,6 @@ gText EfgShow::UniqueProfileName(void) const
   }
 }
 
-gText EfgShow::GetRealizProb(const gbtEfgNode &p_node) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull()) {
-    return "";
-  }
-  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].RealizProb(p_node),
-		NumDecimals());
-}
-
-gText EfgShow::GetBeliefProb(const gbtEfgNode &p_node) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull()) {
-    return "";
-  }
-  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].BeliefProb(p_node),
-		NumDecimals());
-}
-
-gText EfgShow::GetNodeValue(const gbtEfgNode &p_node) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull()) {
-    return "";
-  }
-  gText tmp = "(";
-  for (int pl = 1; pl <= m_doc->m_efg->NumPlayers(); pl++) {
-    tmp += ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].NodeValue(p_node)[pl], 
-		  NumDecimals());
-    if (pl < m_doc->m_efg->NumPlayers()) {
-      tmp += ",";
-    }
-    else {
-      tmp += ")";
-    }
-  }
-  return tmp;
-}
-
-gText EfgShow::GetInfosetProb(const gbtEfgNode &p_node) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull()) {
-    return "";
-  }
-  return ToText(m_doc->m_behavProfiles[m_doc->m_curBehavProfile].IsetProb(p_node.GetInfoset()),
-		NumDecimals());
-}
-
-gText EfgShow::GetInfosetValue(const gbtEfgNode &p_node) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
-    return "";
-  }
-  if (GetCurrentProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
-    return ToText(GetCurrentProfile().IsetValue(p_node.GetInfoset()),
-		  NumDecimals());
-  }
-  else {
-    // this is due to a bug in the value computation
-    return "";
-  }
-}
-
-gText EfgShow::GetActionProb(const gbtEfgNode &p_node, int p_act) const
-{
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
-    return ToText(p_node.GetInfoset().GetChanceProb(p_act),
-		  NumDecimals());
-  }
-
-  if (m_doc->m_curBehavProfile == 0 || p_node.GetPlayer().IsNull()) {
-    return "";
-  }
-
-  return ToText(GetCurrentProfile().ActionProb(p_node.GetInfoset().GetAction(p_act)),
-		NumDecimals());
-}
-
-gText EfgShow::GetActionValue(const gbtEfgNode &p_node, int p_act) const
-{
-  if (m_doc->m_curBehavProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
-    return "";
-  }
-
-  if (GetCurrentProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
-    return ToText(GetCurrentProfile().ActionValue(p_node.GetInfoset().GetAction(p_act)),
-		  NumDecimals());
-  }
-  else  {
-    // this is due to a bug in the value computation
-    return "";
-  }
-}
-
-gNumber EfgShow::ActionProb(const gbtEfgNode &p_node, int p_action) const
-{
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
-    return p_node.GetInfoset().GetChanceProb(p_action);
-  }
-
-  if (m_doc->m_curBehavProfile && !p_node.GetInfoset().IsNull()) {
-    return m_doc->m_behavProfiles[m_doc->m_curBehavProfile](p_node.GetInfoset().GetAction(p_action));
-  }
-  return -1;
-}
-
 //---------------------------------------------------------------------
 //            EfgShow: Coordinating updates of child windows
 //---------------------------------------------------------------------
@@ -475,11 +362,6 @@ void EfgShow::SetFilename(const wxString &p_name)
     SetTitle(wxString::Format("Gambit - %s", (char *) m_doc->m_efg->GetTitle()));
   }
   wxGetApp().SetFilename(this, p_name.c_str());
-}
-
-EFSupport *EfgShow::GetSupport(void)
-{
-  return m_doc->m_curEfgSupport;
 }
 
 void EfgShow::SetSupportNumber(int p_number)
@@ -799,7 +681,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gFileOutput file(m_filename);
-    gbtEfgGame efg = CompressEfg(*m_doc->m_efg, *GetSupport());
+    gbtEfgGame efg = CompressEfg(*m_doc->m_efg, *m_doc->GetEfgSupport());
     efg.WriteEfgFile(file, 6);
     m_doc->m_efg->SetIsDirty(false);
   }
@@ -1632,19 +1514,17 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
 
   try {
     gbtNfgGame nfg = MakeReducedNfg(*m_doc->m_curEfgSupport);
-
-    NfgShow *nfgShow = new NfgShow(nfg, m_parent);
-    nfgShow->SetFilename("");
-    wxGetApp().AddGame(*m_doc->m_efg, nfg, nfgShow);
+    m_doc->m_nfgShow = new NfgShow(m_doc, m_parent);
+    m_doc->m_nfgShow->SetFilename("");
 
     for (int i = 1; i <= m_doc->m_behavProfiles.Length(); i++) {
       BehavProfile<gNumber> profile(*m_doc->m_behavProfiles[i].Profile());
       MixedProfile<gNumber> mixed(profile);
-      nfgShow->AddProfile(MixedSolution(mixed, m_doc->m_behavProfiles[i].Creator()), false);
+      m_doc->m_nfgShow->AddProfile(MixedSolution(mixed, m_doc->m_behavProfiles[i].Creator()), false);
     }
 
     if (m_doc->m_behavProfiles.Length() > 0) {
-      nfgShow->ChangeProfile(m_doc->m_curBehavProfile);
+      m_doc->m_nfgShow->ChangeProfile(m_doc->m_curBehavProfile);
     }
   }
   catch (...) {
@@ -1659,6 +1539,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
 
 void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 {
+#ifdef UNUSED
   // check that the game is perfect recall, if not give a warning
   if (!IsPerfectRecall(*m_doc->m_efg)) {
     if (wxMessageBox("This game is not perfect recall\n"
@@ -1671,7 +1552,7 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 
   try {
     gbtNfgGame nfg = MakeAfg(*m_doc->m_efg);
-    (void) new NfgShow(nfg, m_parent);
+    (void) new NfgShow(m_doc, m_parent);
   }
   catch (...) {
     wxMessageDialog msgDialog(this,
@@ -1680,6 +1561,7 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
     msgDialog.ShowModal();
     return;
   }
+#endif  // UNUSED
 }
 
 //----------------------------------------------------------------------
