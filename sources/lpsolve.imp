@@ -6,22 +6,22 @@
 
 #include "lpsolve.h"
 
-template <class T> int NumNegs(const gVector<T> &b) 
+template <class T> gBlock<int> Artificials(const gVector<T> &b) 
 {
-  int j;
+  gBlock<int> ret;
   for(int i=b.First();i<=b.Last();i++)
-    if(b[i]<(T)0) j++; 
-  return j;
+    if(b[i]<(T)0) ret.Append(i);
+  return ret;
 }
 
 template <class T>
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 		    const gVector<T> &c, int nequals, gStatus &s) 
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
-    nvars(c.Length()),neqns(b.Length()), nequals(nequals),total_cost(0),tmin(0),
-     opt_bfs((T)0),  dual_bfs((T)0) , tab(A,b), 
-     UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
-     y(b.Length()),x(b.Length()),d(b.Length()), status(s)
+    nvars(c.Length()),neqns(b.Length()), nequals(nequals),
+    total_cost(0),tmin(0), opt_bfs((T)0),  dual_bfs((T)0) , 
+    tab(A,Artificials(b),b), UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
+    y(b.Length()),x(b.Length()),d(b.Length()), status(s)
 {
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
@@ -34,8 +34,10 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
     well_formed = 0;
     return;
   }
-  //$ gout << "\n--- Begin LPSolve ---\n";
-  
+  // gout << "\n--- Begin LPSolve ---\n";
+
+  // tab.BigDump(gout);
+
   // initialize data
   int i,j,num_inequals,xlab,num_artific;
   
@@ -45,9 +47,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   //$ gout << " Num inequalities = " << num_inequals;
   //$ gout << " Num equalities = " << nequals;
   
-  num_artific=0;
-  for(i=b.First();i<=b.Last();i++)
-    if(b[i]<(T)0) num_artific++; 
+  num_artific=Artificials(b).Length();
   nvars+=num_artific;
   status.SetProgress(0.0);
   
@@ -63,10 +63,6 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   xx = new gVector<T>(nvars+neqns);
   cost = new gVector<T>(nvars+neqns);
 
-  for(j=b.First();j<=b.Last();j++)  // install artificial variables for b[j]<0
-    if(b[j] < (T)0) {
-      tab.AppendArtificial(j);
-    }
   for(j=(*UB).First();j<=(*UB).Last();j++) {
     (*UB)[j] = false; (*LB)[j] = false;
     (*ub)[j] = (T)0; (*lb)[j] = (T)0;

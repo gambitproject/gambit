@@ -60,8 +60,12 @@ protected:
   gVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
+  gBlock<int> artificial;  // artificial variables
+
 public:
   TableauInterface(const gMatrix<T> &A, const gVector<T> &b); 
+  TableauInterface(const gMatrix<T> &A, const gBlock<int> &art, 
+		   const gVector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
 
@@ -114,6 +118,7 @@ public:
   bool LeZero(T x) const;
   bool GeZero(T x) const;
   T Epsilon(int i = 2) const;
+  bool IsArtifColumn(int col) const;
 };
 
 #endif     // BTABLEAU_H

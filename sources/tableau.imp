@@ -18,6 +18,13 @@ Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
   Solve(b, solution);
 };
 
+Tableau<double>::Tableau(const gMatrix<double> &A, const gBlock<int> &art, 
+			 const gVector<double> &b)
+  : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
+{
+  Solve(b, solution);
+};
+
 
 Tableau<double>::Tableau(const Tableau<double> &orig)
   : TableauInterface<double>(orig), B(orig.B,*this), tmpcol(orig.tmpcol)
@@ -173,29 +180,64 @@ gInteger find_lcd(const gVector<gRational> &vec)
 
 // Constructors and Destructor
  
-Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b) 
-  : TableauInterface<gRational>(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
+Tableau<gRational>::Tableau(const gMatrix<gRational> &A, 
+			    const gVector<gRational> &b) 
+  : TableauInterface<gRational>(A,b), 
+    Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
-    nonbasic(A.MinCol(),A.MaxCol()){
-
+    nonbasic(A.MinCol(),A.MaxCol())
+{
   int j;
-  for(j=A.MinCol();j<=A.MaxCol();j++) 
+  for(j=MinCol();j<=MaxCol();j++) 
     nonbasic[j] = j;
-
+  
   totdenom = lcm(find_lcd(A),find_lcd(b));
   assert(totdenom>0);
-
+  
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
     assert(x.denominator() == 1);
     Coeff[i] = x.numerator();
   }
-  for (int i = A.MinRow();i<=A.MaxRow();i++) 
-    for (int j = A.MinCol();j<=A.MaxCol();j++) {
+  for (int i = MinRow();i<=MaxRow();i++) 
+    for (int j = MinCol();j<=MaxCol();j++) {
       gRational x = A(i,j)*(gRational)totdenom;
       assert(x.denominator() == 1);
       Tabdat(i,j) = x.numerator();
     }
+  for (int i = b.First();i<=b.Last();i++) 
+    solution[i] = (gRational)Coeff[i];
+}
+
+Tableau<gRational>::Tableau(const gMatrix<gRational> &A, 
+			    const gBlock<int> &art, 
+			    const gVector<gRational> &b) 
+  : TableauInterface<gRational>(A,art,b), 
+    Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),
+    Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
+    nonbasic(A.MinCol(),A.MaxCol()+art.Length())
+{
+  int j;
+  for(j=MinCol();j<=MaxCol();j++) 
+    nonbasic[j] = j;
+  
+  totdenom = lcm(find_lcd(A),find_lcd(b));
+  assert(totdenom>0);
+  
+  for (int i = b.First();i<=b.Last();i++) {
+    gRational x = b[i]*(gRational)totdenom;
+    assert(x.denominator() == 1);
+    Coeff[i] = x.numerator();
+  }
+  for (int i = MinRow();i<=MaxRow();i++) {
+    for (int j = MinCol();j<=A.MaxCol();j++) {
+      gRational x = A(i,j)*(gRational)totdenom;
+      assert(x.denominator() == 1);
+      Tabdat(i,j) = x.numerator();
+    }
+    for (int j = A.MaxCol()+1;j<=MaxCol();j++)
+      Tabdat(artificial[j],j) = totdenom;
+  }
   for (int i = b.First();i<=b.Last();i++) 
     solution[i] = (gRational)Coeff[i];
 }

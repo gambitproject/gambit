@@ -31,6 +31,8 @@ private:
 public:
       // constructors and destructors
   Tableau(const gMatrix<double> &A, const gVector<double> &b); 
+  Tableau(const gMatrix<double> &A, const gBlock<int> &art, 
+	  const gVector<double> &b); 
   Tableau(const Tableau<double>&);
   virtual ~Tableau();
   
@@ -80,6 +82,8 @@ protected:
 public:
       // constructors and destructors
   Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b); 
+  Tableau(const gMatrix<gRational> &A, const gBlock<int> &art, 
+	  const gVector<gRational> &b); 
   Tableau(const Tableau<gRational>&);
   virtual ~Tableau();
   

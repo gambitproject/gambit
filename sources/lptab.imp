@@ -12,14 +12,15 @@
 template <class T>
 LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
   : Tableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
-    unitcost(A.MinRow(),A.MaxRow()),
-    cost(A.MinCol(),A.MaxCol())
-{
-  // the following is already done in Tableau constructor.  Should be able to delete.
-  //  B.refactor(A, basis.label);
-  //  Solve(b, solution);
-};
+    unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol())
+{ };
 
+template <class T>
+LPTableau<T>::LPTableau(const gMatrix<T> &A, const gBlock<int> &art, 
+			const gVector<T> &b)
+  : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
+    unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())
+{ };
 
 template <class T>
 LPTableau<T>::LPTableau(const LPTableau<T> &orig)
@@ -652,39 +653,10 @@ BFS<T> LPTableau<T>::DualBFS() const
   return cbfs;
 }
 
-int LPTableau<double>::AppendArtificial( int art )
-{
-  /*
-  cost.Append(0);
-  return basis.AppendArtificial( art );
-  */
-  return 1;
-}
-
-int LPTableau<gRational>::AppendArtificial( int art )
-{
-  /*
-  cost.Append(0);
-  gout << "\nnonbasic: " << nonbasic;
-  nonbasic.Append(MaxCol()+1);
-  gout << "\nnonbasic: " << nonbasic;
-  int ret = basis.AppendArtificial( art );
-  BigDump(gout);
-  return ret;
-  */
-  return 1;
-}
-
-template <class T>
-void LPTableau<T>::RemoveArtificial( int col )
-{
-  //  basis.RemoveArtificial( col );
-}
-
 template <class T>
 int LPTableau<T>::LastLabel( void )
 {
-  return basis.MaxCol();
+  return artificial.Last();
 }
 
 template <class T>
@@ -694,8 +666,10 @@ void LPTableau<T>::BigDump(gOutput &to)
 
   to << "\nBasis:";
   basis.Dump(to);
+  to << "\nMinCol(): " << MinCol(); 
   to << "\nMaxCol(): " << MaxCol(); 
   to << "\nLastlabel(): " << LastLabel(); 
+  to << "\nNumRows(): " << (*A).NumRows(); 
   gMatrix<T> AA(MinRow(),MaxRow(),MinCol(),LastLabel()+(*A).NumRows());
   gVector<T> bb(MinRow(), MaxRow());
 
@@ -742,4 +716,3 @@ void LPTableau<T>::BasisSelect(const gBlock<T> &unitv,
       colv[i]= rowv[basis.Label(i)];
   }
 }
-

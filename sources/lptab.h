@@ -21,6 +21,7 @@ private:
   void SolveDual();
 public:
   LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
+  LPTableau(const gMatrix<T> &A, const gBlock<int> &art, const gVector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
@@ -43,12 +44,6 @@ public:
   void DualReversePivots(gList<gArray<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
-
-  // Appends an artificial variable
-  int AppendArtificial( int art );
-
-  // Removes an artificial variable located at col.
-  void RemoveArtificial( int col );
 
   // returns the label of the index of the last artificial variable
   int LastLabel( void );
