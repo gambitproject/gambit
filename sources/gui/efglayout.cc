@@ -118,6 +118,8 @@ void NodeEntry::SetCursor(bool p_cursor)
 //
 void NodeEntry::Draw(wxDC &p_dc) const
 {
+  DrawIncomingBranch(p_dc);
+
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
 					     wxSOLID));
   if (m_token == tokenLINE) {
@@ -134,8 +136,6 @@ void NodeEntry::Draw(wxDC &p_dc) const
     p_dc.DrawRectangle(GetX() - 3, y - 3, 7, 7);
     p_dc.DrawRectangle(GetX() + m_size - 3, y - 3, 7, 7);
   }      
-
-  DrawIncomingBranch(p_dc);
 
   int textWidth, textHeight;
   p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);

@@ -68,7 +68,6 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
-  RefreshLayout();
 }
 
 TreeWindow::~TreeWindow()

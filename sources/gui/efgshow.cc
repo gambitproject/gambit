@@ -264,6 +264,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
 
   m_treeWindow = new TreeWindow(this, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
+  m_treeWindow->RefreshLayout();
 
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
@@ -414,13 +415,13 @@ gText EfgShow::GetInfosetValue(const Node *p_node) const
 
 gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
 {
-  if (m_currentProfile == 0 || !p_node->GetPlayer()) {
-    return "";
-  }
-
-  if (p_node->GetPlayer()->IsChance()) {
+  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     return ToText(m_efg.GetChanceProb(p_node->GetInfoset(), p_act),
 		  NumDecimals());
+  }
+
+  if (m_currentProfile == 0 || !p_node->GetPlayer()) {
+    return "";
   }
 
   return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->Actions()[p_act]),
