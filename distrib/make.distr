@@ -1,43 +1,126 @@
+#
 # Makefile to create distribution time items.
-# $Id$
-# edit these!
-WXDIR=/home/gostek/gambit/wxwin
-GUI=none
+#
+
+#
+# NOTE: when unzipping the zip files do
+# unzip -o <zipfile> to suppress queries 
+# about overwriting.
+#
+
+# Edit these if necessary.
+# GMAKEFILE is the generic Makefile.
+
+#WXWINDIR  = /home/mill/gambit/wxwin
+WXWINDIR  = /home/mill/gambit/wxwin-new
+GUI       = none
+GMAKEFILE = Makefile2.generic
+#FTPDIR    = /home/mill/ftp/pub/gambit/ver96
+FTPDIR    = /home/ftp/pub/gambit/ver96
+#FTPDIR    = /home/mill/mvanier/ftp
+SRCDIR    = ./gambit/sources
 
 all:
-	@echo Specify a target: gcll, gui, src.
-	@echo If specifying gui, make sure to add GUI=ol/motif
-gui:
-	@echo Updating gambit_$(GUI)_$(HOST) on ftp server
-	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
-	-strip gui_$(GUI)_$(HOST)
-	cp $(WXDIR)/utils/wxhelp2/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
-	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp ./manual/* \
-		./efg/*.efg ./nfg/*.nfg gambit.ini gui-init
-	ftp_put gambit_$(GUI)_$(HOST).zip
-	rm gambit_$(GUI)_$(HOST).zip
-gcl:	
-	@echo Updating gcl_$(HOST) on ftp server
-	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST) GET=$(GET)
-	-strip gcl_$(HOST)
-	zip gcl_$(HOST) gcl_$(HOST) *.gcl ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
-	ftp_put gcl_$(HOST).zip
-	rm gcl_$(HOST).zip
+	@echo Specify a target: gcl, gui, src.
+	@echo If specifying gui, make sure to add GUI=xt/motif
+
+gambit:
+	@echo
+	@echo -------------------------------------------------------
+	@echo Updating gambit_$(GUI)_$(SYSNAME) and \
+		gcl_$(SYSNAME) on ftp server
+	@echo -------------------------------------------------------
+	@echo 
+
+	@# Set up the ../bin and ../misc directories.
+
+	if [ ! -d ../bin ]; then mkdir ../bin; fi 
+	if [ ! -d ../misc ]; then mkdir ../misc; fi 
+
+	@echo
+	@echo ------------------------
+	@echo Making gcl...
+	@echo ------------------------
+	@echo
+
+	cd ../sources; \
+	make -f $(GMAKEFILE) gcl SYSNAME=$(SYSNAME); \
+	mv gcl_$(SYSNAME) ../bin; \
+	strip ../bin/gcl_$(SYSNAME); \
+	cd ../distrib
+
+	@echo
+	@echo ------------------------
+	@echo Making gambit gui...
+	@echo ------------------------
+	@echo
+
+	cd ../sources; \
+	make -f $(GMAKEFILE) gui GUI=$(GUI) SYSNAME=$(SYSNAME); \
+	mv gui_$(SYSNAME)_$(GUI) ../bin/gambit_$(SYSNAME)_$(GUI); \
+	strip ../bin/gambit_$(SYSNAME)_$(GUI); \
+	cp $(WXWINDIR)/bin/wxhelp_$(SYSNAME)_$(GUI) ../bin; \
+	cd ../distrib
+
+	@# Copy the setup and initialization files to gambit/misc
+	cp ../sources/gambit.ini ./gambit_setup ../sources/*.gcl ../misc
+	cp ./gambit_setup ../..
+
+	@echo
+	@echo ------------------------
+	@echo Making the gambit zip file...
+	@echo ------------------------
+	@echo
+
+	cd ../..; \
+	if [ -f gambit_$(SYSNAME)_$(GUI).zip ]; \
+	then rm gambit_$(SYSNAME)_$(GUI).zip; fi; \
+	zip gambit_$(SYSNAME)_$(GUI).zip \
+	  ./gambit/bin/gcl_$(SYSNAME) \
+	  ./gambit/bin/gambit_$(SYSNAME)_$(GUI) \
+	  ./gambit/bin/wxhelp \
+	  ./gambit/efg/*.efg \
+	  ./gambit/nfg/*.nfg \
+	  ./gambit/gcl/*.gcl \
+	  ./gambit/misc/* \
+	  ./gambit_setup
+
+	cp ../../gambit_$(SYSNAME)_$(GUI).zip $(FTPDIR); \
+	rm -f ../../gambit_$(SYSNAME)_$(GUI).zip
+
 src:
-	@echo Updating source code on ftp server
-	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.yy \
-		Makefile ../bisondos/* ./bin32/dummy ./bitmaps/* ./wx_fake/* \
-		make.go make.site* 
-	ftp_put gambsrc.zip
-	rm gambsrc.zip
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating gambit source code on ftp server 
+	@echo ------------------------------------------------------
+	@echo
+
+	@# FIXME: Have to figure out what to do about bison++ ...
+
+	cd ../..; \
+	zip gambsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
+	$(SRCDIR)/*.yy $(SRCDIR)/Makefile.generic  $(SRCDIR)/gambit.ini \
+	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
+	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
+	$(SRCDIR)/make.filelist 
+
+	cp ../../gambsrc.zip $(FTPDIR)
+	rm ../../gambsrc.zip
+
 wxwin:
-	@echo Updating libwx_$(GUI)_$(HOST) on ftp server 
-	-rm -f wx_$(GUI)_$(HOST).zip
-	cd $(WXDIR) ; \
-	zip $(HOME)/distrib/wx_$(GUI)_$(HOST) ./include/base/* ./include/x/* \
-		./lib/libwx_$(GUI)_$(HOST).a
-	ftp_put wx_$(GUI)_$(HOST).zip
-	rm -f wx_$(GUI)_$(HOST).zip
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating libwx_$(SYSNAME)_$(GUI) on ftp server 
+	@echo ------------------------------------------------------
+	@echo
+
+	cd $(WXWINDIR) ; \
+	zip ./include/base/* ./include/x/* ./lib/libwx_$(SYSNAME)_$(GUI).a
+	cp wx_$(SYSNAME)_$(GUI).zip $(FTPDIR)
+	rm -f wx_$(SYSNAME)_$(GUI).zip
+
+doc:
+	@# FIXME! put something here...
 
 
 
