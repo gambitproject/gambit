@@ -1,0 +1,29 @@
+// Constants for display legends.  See legend.h
+#define	LEGEND_END							-1
+#define NODE_ABOVE_NOTHING			0
+#define NODE_ABOVE_LABEL				1
+#define	NODE_ABOVE_PLAYER				2
+#define	NODE_ABOVE_INFOSET			3
+#define NODE_ABOVE_OUTCOME			4
+
+#define NODE_BELOW_NOTHING			0
+#define NODE_BELOW_LABEL				1
+#define	NODE_BELOW_PLAYER				2
+#define	NODE_BELOW_INFOSET			3
+#define NODE_BELOW_OUTCOME			4
+
+#define BRANCH_ABOVE_NOTHING		0
+#define BRANCH_ABOVE_LABEL			1
+#define	BRANCH_ABOVE_PLAYER			2
+#define	BRANCH_ABOVE_INFOSET		3
+#define BRANCH_ABOVE_PROBS			4
+
+#define BRANCH_BELOW_NOTHING		0
+#define BRANCH_BELOW_LABEL			1
+#define	BRANCH_BELOW_PLAYER			2
+#define	BRANCH_BELOW_INFOSET		3
+#define BRANCH_BELOW_PROBS			4
+
+#define	NODE_TERMINAL_NOTHING		0
+#define	NODE_TERMINAL_OUTCOME		1
+#define	NODE_TERMINAL_NAME			2
