@@ -193,16 +193,11 @@ Note:
 
 //------------------------------
 
-Bug D20: Problems with custom algorithms
+Bug D20: PolEnum on extensive forms
 
-  Solve Custom LCP on 2x2x2.efg -- It acts like it's solving and finds
-  no solutions.  It should say "only valid on 2-person games".
-
-  PolEnum algorithm does not find any solutions on 2x2x2.efg.  
-
-COMMENT (magyar, 1/2/99):  The first one is fixed.  The second occurs because
-the algorithm is not enabled since at last I was aware, Efg->PolEnum was
-not certain to be included in this release.
+  Although there is a menu item for this algorithm, it has not been
+implemented in the GUI until a final decision is made whether it is
+complete and stable enough for this release.
 
 //------------------------------
 
@@ -229,14 +224,6 @@ these problems:
 // undesirable behavior (i.e. can not enter data, arrow keys do not work). It
 // is advisable to call CanvasFocus member after processing any panel item
 // events.
-
-//------------------------------
-
-Bug D25: Problems with editing. 
-
-Edit mixed solution from the NF solution display.  The editor does not
-allow to enter '/' for rational values.
-
 
 //------------------------------
 
