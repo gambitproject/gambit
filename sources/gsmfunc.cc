@@ -808,6 +808,8 @@ PortionSpec ToSpec(gString &str, int num /* =0 */)
     return PortionSpec(porSTRATEGY, num);
   else if (str == "ACTION")
     return PortionSpec(porACTION, num);
+  else if (str == "ANYTYPE")
+    return PortionSpec(porANYTYPE, num);
   else if (str == "EFSUPPORT")
     return PortionSpec(porEFSUPPORT, num);
   else if (str == "NFSUPPORT")
