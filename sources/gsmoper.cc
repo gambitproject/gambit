@@ -35,6 +35,8 @@ extern GSM* _gsm;
 
 
 
+
+
 //---------------------------------------
 //           IsFloat
 //---------------------------------------
@@ -2312,6 +2314,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadGlobalVar, porANYTYPE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
   gsm->AddFunction(FuncObj);
+
 
 }
 

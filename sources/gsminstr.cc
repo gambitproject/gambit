@@ -293,21 +293,15 @@ gclAssignment::~gclAssignment()
 Portion *gclAssignment::Evaluate(void)
 {
   Portion *lhs = variable->Evaluate();
-  if (lhs->Spec().Type == porERROR)  return lhs;
-  Portion *rhs = value->Evaluate();  
-  if (rhs->Spec().Type == porERROR)  return rhs;
+  if (lhs->Spec().Type == porERROR)
+    return lhs;
   
-  if (lhs->Spec().Type == porREFERENCE)   {
-    rhs = _gsm._ResolveRef(rhs);
-    if (rhs->Spec().Type == porREFERENCE)
-      return new ErrorPortion("Undefined variable " +
-                              ((ReferencePortion *) rhs)->Value());
-    _gsm.VarDefine(((ReferencePortion *) lhs)->Value(), rhs->ValCopy());
-  }
-  else
-    _gsm.Assign(lhs, rhs);
+  Portion *rhs = value->Evaluate();  
+  if (rhs->Spec().Type == porERROR)
+    return rhs;
 
-  return lhs;
+  // Assign() will delete lhs and rhs
+  return _gsm.Assign(lhs, rhs);
 }
 
 
@@ -379,7 +373,8 @@ Portion *gclListConstant::Evaluate(void)
     Portion *v = values[i]->Evaluate();
     if (v->Spec().Type == porERROR)
       ErrorOccurred = true;
-    index = ret->Append(_gsm._ResolveRef(v));
+    _gsm._ResolveRef(v);
+    index = ret->Append(v);
     if( index == 0 )
       ErrorOccurred = true;
   }
@@ -426,7 +421,7 @@ Portion *gclConditional::Evaluate(void)
   Portion *guardval = guard->Evaluate();
   if (guardval->Spec().Type == porERROR)
     return guardval;
-  guardval = _gsm._ResolveRef(guardval);
+  _gsm._ResolveRef(guardval);
   if (guardval->Spec().Type != porBOOL ||
       guardval->Spec().ListDepth > 0)
     return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
@@ -458,7 +453,7 @@ Portion *gclWhileExpr::Evaluate(void)
     Portion *guardval = guard->Evaluate();
     if (guardval->Spec().Type == porERROR)
       return guardval;
-    guardval = _gsm._ResolveRef(guardval);
+    _gsm._ResolveRef(guardval);
     if (guardval->Spec().Type != porBOOL ||
 	guardval->Spec().ListDepth > 0)
       return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
@@ -505,7 +500,7 @@ Portion *gclForExpr::Evaluate(void)
 
     if (guardval->Spec().Type == porERROR)
       return guardval;
-    guardval = _gsm._ResolveRef(guardval);
+    _gsm._ResolveRef(guardval);
     if (guardval->Spec().Type != porBOOL ||
 	guardval->Spec().ListDepth > 0)
       return new ErrorPortion("Guard must evaluate to BOOLEAN"); 

@@ -192,7 +192,7 @@ bool GSM::VarDefine(const gString& var_name, Portion* p)
 
   assert(var_name != "");
 
-  p = _ResolveRef(p);
+  _ResolveRef( p );
 
   if(_RefTableStack->Peek()->IsDefined(var_name))
   {
@@ -262,48 +262,42 @@ Portion* GSM::_VarRemove(const gString& var_name)
 //---------------------------------------------------------------------
 
 
-bool GSM::Assign(Portion *p1, Portion *p2)
+Portion* GSM::Assign( Portion* p1, Portion* p2 )
 {
-  Portion* p_old;
-  bool result = true;
+  Portion* result = 0;
   gString varname;
 
   if(p1->Spec().Type == porREFERENCE)
     varname = ((ReferencePortion*) p1)->Value();
 
-  p2 = _ResolveRef(p2);
-  p1 = _ResolveRef(p1);
+  _ResolveRef( p2 );
+  _ResolveRef( p1 );
 
-  // deals with problems with assigning a variable to itself
-  if(p1->Original() == p2->Original())
-  {
-    delete p2;
-    return p1;
-  }
 
   PortionSpec p1Spec(p1->Spec());
   PortionSpec p2Spec(p2->Spec());
-  
-  if(p2Spec.Type == porREFERENCE)
+
+  if(p1->Original() == p2->Original())  // assigning a variable to itself
   {
-    _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
-    result = false;
+    delete p2;
+    result = p1;
+  }  
+  else if(p2Spec.Type == porREFERENCE) // assigning from undefined variable
+  {
+    result = new ErrorPortion("Undefined variable " +
+			      ((ReferencePortion *) p2)->Value());
   }
-  else if(p1Spec.Type == porREFERENCE)
-  {
-    if(p2->IsReference())
-    {
-      p_old = p2;
-      p2 = p2->ValCopy();
-      delete p_old;
-    }      
+  else if(p1Spec.Type == porREFERENCE) // assigning to a new variable
+  {    
     delete p1;
-/*
-    if( _VarDefine(varname, p2) )
-      _Push(p2->RefCopy());
+    if( p2->IsReference() )
+    {
+      VarDefine( varname, p2->ValCopy() );
+      delete p2;
+    }
     else
-      _Push( new ErrorPortion );
-    */
+      VarDefine( varname, p2 );
+    result = VarValue( varname )->RefCopy();
   }
   else if( p1Spec == p2Spec && 
 	   p1Spec.Type != porNULL && 
@@ -312,7 +306,8 @@ bool GSM::Assign(Portion *p1, Portion *p2)
   {
     if(p1Spec.ListDepth == 0) // not a list
     {
-      result = true;
+      result = p1;
+
       switch(p1Spec.Type)
       {
       case porINTEGER:
@@ -370,19 +365,17 @@ bool GSM::Assign(Portion *p1, Portion *p2)
 
       case porINPUT:
       case porOUTPUT:
-	_ErrorMessage(_StdErr, 64);
-	result = false;
+	result = new ErrorPortion("Cannot assign from INPUT/OUTPUT variable" );
+	delete p1;
 	break;
 
       default:
 	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
 	assert(0);
       }
-      if(result)
-      {
-//	_Push(p1);
-	delete p2;
-      }
+
+      delete p2;
+      // result already assigned on top of this block
     }
     // both p1 and p2 are lists
     else if((p1Spec.Type == p2Spec.Type) ||
@@ -391,19 +384,21 @@ bool GSM::Assign(Portion *p1, Portion *p2)
       if(!(p1Spec.Type & (porINPUT|porOUTPUT)))
       {
 	((ListPortion*) p1)->AssignFrom(p2);
-//	_Push(p1);
 	delete p2;
+	result = p1;
       }
       else // error: assigning to (list of) INPUT or OUTPUT
       {
-	_ErrorMessage(_StdErr, 64);
-	result = false;
+	result = new ErrorPortion("Cannot assign from INPUT/OUTPUT variable" );
+	delete p2;
+	delete p1;
       }
     }
     else // error: changing the type of a list
     {
-      _ErrorMessage(_StdErr, 65);
-      result = false;
+      result = new ErrorPortion("Cannot change list type");
+      delete p2;
+      delete p1;
     }
   }
   else if(varname != "") // make sure variable is associated with a var name
@@ -417,38 +412,34 @@ bool GSM::Assign(Portion *p1, Portion *p2)
        (p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
 	p2Spec.ListDepth > 0))
     {
-      if(p2->IsReference())
-      {
-	p_old = p2;
-	p2 = p2->ValCopy();
-	delete p_old;
-      }
-      assert(varname != "");
       delete p1;
-/*
-      if( _VarDefine(varname, p2) )
-	_Push(p2->RefCopy());
+      if( p2->IsReference() )
+      {
+	VarDefine( varname, p2->ValCopy() );
+	delete p2;
+      }
       else
-	_Push( new ErrorPortion );
-      */
+	VarDefine( varname, p2 );
+      result = VarValue( varname )->RefCopy();
     }
     else // error: changing the type of variable
     {
       _ErrorMessage(_StdErr, 66, 0, 0, varname, 
 		    PortionSpecToText(p1Spec),
 		    PortionSpecToText(p2Spec));
-      result = false;
+      result = new ErrorPortion;
+      delete p2;
+      delete p1;
     }
   }
   else
   {
-    _ErrorMessage(_StdErr, 71);
-    result = false;
+    result = new ErrorPortion("Must assign to a variable");
+    delete p2;
+    delete p1;
   }
 
-//  if(!result)
-//  { delete p2; delete p1; }
-
+  assert( result );
   return result;
 }
 
@@ -515,7 +506,7 @@ Portion* GSM::UnAssignExt(Portion *p)
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
-Portion* GSM::_ResolveRef(Portion* p)
+void GSM::_ResolveRef( Portion*& p )
 {
   Portion*  result = 0;
   gString ref;
@@ -551,7 +542,8 @@ Portion* GSM::_ResolveRef(Portion* p)
   {
     result = p;
   }
-  return result;
+
+  p = result;
 }
 
 
@@ -642,7 +634,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
   result = Execute(&program, true);
 
-  result = _ResolveRef(result);
+  _ResolveRef( result );
   result_copy = result->ValCopy();
   delete result;
   result = result_copy;
@@ -1187,21 +1179,12 @@ void GSM::_ErrorMessage
   case 63:
     s << "Undefined variable " << str1 << " passed to Assign[]\n";
     break;
-  case 64:
-    s << "Cannot assign from an INPUT or OUTPUT variable\n";
-    break;
-  case 65:
-    s << "Attempted to change the type of a list\n";
-    break;
   case 66:
     s << "Cannot change the type of variable \"" << str1 << "\" from ";
     s << str2 << " to " << str3 << '\n';
     break;
   case 67:
     s << "Assigning to an unknown type: " << str1 << "\n";
-    break;
-  case 71:
-    s << "Cannot assign to a value not directly associated with a variable\n";
     break;
   case 72:
     s << "No matching function prototype found\n";

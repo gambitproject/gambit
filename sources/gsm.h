@@ -91,14 +91,16 @@ public:
   static int& GameRefCount(void*);
 
   bool PushRef  ( const gString& ref );
-  Portion* _ResolveRef             ( Portion* p );
+  void _ResolveRef ( Portion*& p );
 
-  bool Assign   ( Portion *, Portion * );
-  bool VarDefine  ( const gString& var_name, Portion* p );
-  bool VarIsDefined ( const gString& var_name ) const;
+
+  // Assign() will delete lhs and rhs
+  Portion* Assign       ( Portion* lhs, Portion* rhs );
+  bool     VarDefine    ( const gString& var_name, Portion* p );
+  bool     VarIsDefined ( const gString& var_name ) const;
   Portion* VarValue     ( const gString& var_name ) const;
-  bool UnAssign ( Portion * );
-  Portion* UnAssignExt( Portion * );
+  bool     UnAssign     ( Portion * );
+  Portion* UnAssignExt  ( Portion * );
 
   bool AddFunction( FuncDescObj* func );
   bool DeleteFunction( FuncDescObj* func );
