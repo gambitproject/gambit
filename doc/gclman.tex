@@ -5013,6 +5013,17 @@ IsConstSum[efg->EFG] =: BOOLEAN
 Returns \verb+True+ when the game \verb+efg+ or \verb+nfg+ is constant sum.
 \ed
 
+\item\lex{IsEof}
+\protect \large \begin{verbatim}
+IsEof[input->INPUT] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+Returns \verb+True+ when the input stream \verb+Input+ has reached the
+end of file.
+\item [See also:] \verb+Read+.
+\ed
+
 \item\lex{IsList}
 \protect \large \begin{verbatim}
 IsList[x->T] =: BOOLEAN 
@@ -6231,7 +6242,7 @@ Read[input<->INPUT, x<->T] =: INPUT
 Read[input<->INPUT, x<->LIST(T)] =: INPUT
 \end{verbatim}\normalsize
 
-{\it for} {\tt T = BOOLEAN, INTEGER, NUMBER, TEXT}
+{\it for} {\tt T = BOOLEAN, NUMBER, TEXT}
 \bd
 Reads data of type \verb+T+ from the input stream and assigns it to
 \verb+x+.  If \verb+x+ is undefined, an error is generated.  If
@@ -6251,7 +6262,7 @@ first character is a \verb+{+, then the exposed data consists of all
 the characters up until the next matching \verb+}+.  Otherwise, the
 exposed data consists of all characters until the next whitespace.
 \item [Short form:] \verb+input >> x+
-\item [See also:] \verb+Input+, \verb+Write+.
+\item [See also:] \verb+Input+, \verb+IsEof+, \verb+Write+.
 \ed
 
 \item\lex{RealizProbs}

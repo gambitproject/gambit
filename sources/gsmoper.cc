@@ -365,6 +365,15 @@ static Portion *GSM_IntegerDivide(Portion** param)
     return new NullPortion(porNUMBER);
 }
 
+//--------
+// IsEof
+//--------
+
+static Portion *GSM_IsEof(Portion **param)
+{
+  return new BoolPortion(((InputPortion *) param[0])->Value().eof());
+}
+
 //---------
 // IsNull
 //---------
@@ -2080,6 +2089,10 @@ void Init_gsmoper(GSM* gsm)
 					   REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("IsEof", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsEof, porBOOLEAN, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("input", porINPUT));
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Help", 1);
