@@ -1280,23 +1280,25 @@ void NfgShow::EditAccelerators(void)
 
 template class SolutionList<MixedSolution>;
 
-//******************** NORMAL FORM GUI ******************************
+//=========================================================================
+//                       class NfgGUI: Member functions
+//=========================================================================
+
 #include "nfggui.h"
+
 NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
 	       wxFrame *parent)
 {
   // an already created normal form has been passed
 
   if (nf == 0)  {  // must create a new normal form, from scratch or from file
-    gArray<int> dimensionality;
-    gArray<gText> names;
-
     if (infile_name == "") {  // from scratch
-      if (GetNFParams(dimensionality, names, parent)) {
-	nf = new Nfg(dimensionality);
-
-	for (int i = 1; i <= names.Length(); i++) 
-	  nf->Players()[i]->SetName(names[i]);
+      int numPlayers = GetPlayers(parent);
+      if (numPlayers >= 2) {
+	gArray<int> dimensionality(numPlayers);
+	if (GetStrategies(dimensionality, parent)) {
+	  nf = new Nfg(dimensionality);
+	}
       }
     }
     else {   // from data file
@@ -1333,77 +1335,56 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
     nf_show->SetFileName(infile_name);
 }
 
-// Create a normal form
-#define MAX_PLAYERS 100
-#define MAX_STRATEGIES  100
-#define NUM_PLAYERS_PER_LINE 8
-int NfgGUI::GetNFParams(gArray<int> &dimensionality, gArray<gText> &names, wxFrame *parent)
+class dialogDimensionality : public guiPagedDialog {
+public:
+  dialogDimensionality(wxWindow *p_parent, int p_numPlayers);
+  virtual ~dialogDimensionality() { }
+};
+
+dialogDimensionality::dialogDimensionality(wxWindow *p_parent,
+					   int p_numPlayers)
+  : guiPagedDialog(p_parent, "Number of Strategies", p_numPlayers)
 {
-  int num_players = 2;
-  // Get the number of players first
-  MyDialogBox *make_nf_p = new MyDialogBox(parent, "Normal Form Parameters");
-  make_nf_p->Form()->Add(wxMakeFormShort("How many players", &num_players, wxFORM_TEXT,
-					 new wxList(wxMakeConstraintRange(2, MAX_PLAYERS), 0), 
-					 NULL, 0, 220));
-  make_nf_p->Go();
-  int ok = make_nf_p->Completed();
-  delete make_nf_p;
-  
-  if (ok != wxOK || num_players < 1)
-    return 0;
-  
-  // if we got a valid # of players, go on to get the dimensionality
-  MyDialogBox *make_nf_dim = new MyDialogBox(parent, "Normal Form Parameters");
-  make_nf_dim->Add(wxMakeFormMessage("How many strategies for\neach player?"));
-  dimensionality = gArray<int>(num_players);
-  
-  for (int i = 1; i <= num_players; i++) {
-    dimensionality[i] = 2;  // Why 2?  why not?
-    make_nf_dim->Add(wxMakeFormShort(ToText(i), &dimensionality[i], wxFORM_TEXT,
-				     new wxList(wxMakeConstraintRange(1, MAX_STRATEGIES), 0), 
-				     NULL, 0, 70));
-    
-    if (i % NUM_PLAYERS_PER_LINE == 0)
-      make_nf_dim->Add(wxMakeFormNewLine());
+  for (int pl = 1; pl <= p_numPlayers; pl++) {
+    SetValue(pl, "2");
   }
-  
-  make_nf_dim->Go();
-  ok = make_nf_dim->Completed();
-  delete make_nf_dim;
-  
-  if (ok != wxOK)
-    return 0;
+  Go();
+}
 
-  // Now get player names
-  MyDialogBox *make_nf_names = new MyDialogBox(parent, "Player Names");
-  names = gArray<gText>(num_players);
-  char **names_str = new char*[num_players+1];
+int NfgGUI::GetPlayers(wxFrame *p_parent)
+{
+  int numPlayers = 2;
 
-  for (int i = 1; i <= num_players; i++) {
-    names_str[i] = new char[20];
-    strcpy(names_str[i], "Player"+ToText(i));
-    make_nf_names->Add(wxMakeFormString(ToText(i), &names_str[i], wxFORM_TEXT,
-					NULL, NULL, 0, 140));
-    
-    if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
-      make_nf_names->Add(wxMakeFormNewLine());
+  char *label = wxGetTextFromUser("Number of players",
+				  "Create new normal form",
+				  ToText(numPlayers));
+  if (label) {
+    numPlayers = ToNumber(label);
+    if (numPlayers < 1) {
+      return 0;
+    }
+    else {
+      return numPlayers;
+    }
   }
-
-  make_nf_names->Go();
-  ok = make_nf_names->Completed();
-  delete make_nf_names;
-    
-  if (ok != wxOK)
+  else {
     return 0;
-
-  for (int i = 1; i <= num_players; i++) {
-    names[i] = names_str[i];
-    delete [] names_str[i];
   }
-
-  delete [] names_str;
+}
+ 
+int NfgGUI::GetStrategies(gArray<int> &p_dimensionality, wxFrame *p_parent)
+{
+  dialogDimensionality dialog(p_parent, p_dimensionality.Length());
   
-  return 1;
+  if (dialog.Completed() == wxOK) {
+    for (int pl = 1; pl <= p_dimensionality.Length(); pl++) {
+      p_dimensionality[pl] = ToNumber(dialog.GetValue(pl));
+    }
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
 
 //**********************************************************************
