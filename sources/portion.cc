@@ -1520,11 +1520,16 @@ bool EfgPortion::IsReference(void) const
 //                          Output class
 //---------------------------------------------------------------------
 
-OutputPortion::OutputPortion(void)
+OutputPortion::OutputPortion(gOutput& value)
+  : _Value(&value), _ref(false)
+{ }
+
+OutputPortion::OutputPortion(gOutput& value, bool ref)
+  : _Value(&value), _ref(ref)
 { }
 
 OutputPortion::~OutputPortion()
-{ }
+{ if (!_ref)   delete _Value; }
 
 gOutput& OutputPortion::Value(void) const
 { return *_Value; }
@@ -1548,32 +1553,13 @@ Portion* OutputPortion::ValCopy(void) const
 
 Portion* OutputPortion::RefCopy(void) const
 { 
-  Portion* p = new OutputRefPortion(*_Value); 
+  Portion* p = new OutputPortion(*_Value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
-
-
-OutputValPortion::OutputValPortion(gOutput& value)
-{ _Value = &value; }
-
-OutputValPortion::~OutputValPortion()
-{ delete _Value; }
-
-bool OutputValPortion::IsReference(void) const
-{ return false; }
-
-
-OutputRefPortion::OutputRefPortion(gOutput& value)
-{ _Value = &value; }
-
-OutputRefPortion::~OutputRefPortion()
-{ }
-
-bool OutputRefPortion::IsReference(void) const
-{ return true; }
-
+bool OutputPortion::IsReference(void) const
+{ return _ref; }
 
 
 
@@ -1581,11 +1567,18 @@ bool OutputRefPortion::IsReference(void) const
 //                          Input class
 //---------------------------------------------------------------------
 
-InputPortion::InputPortion(void)
+
+
+InputPortion::InputPortion(gInput &value)
+  : _Value(&value), _ref(false)
+{ }
+
+InputPortion::InputPortion(gInput &value, bool ref)
+  : _Value(&value), _ref(ref)
 { }
 
 InputPortion::~InputPortion()
-{ }
+{ if (!_ref)  delete _Value; }
 
 gInput& InputPortion::Value(void) const
 { return *_Value; }
@@ -1609,52 +1602,47 @@ Portion* InputPortion::ValCopy(void) const
 
 Portion* InputPortion::RefCopy(void) const
 { 
-  Portion* p = new InputRefPortion(*_Value); 
+  Portion* p = new InputPortion(*_Value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
-
-
-InputValPortion::InputValPortion(gInput& value)
-{ _Value = &value; }
-
-InputValPortion::~InputValPortion()
-{ delete _Value; }
-
-bool InputValPortion::IsReference(void) const
-{ return false; }
-
-
-InputRefPortion::InputRefPortion(gInput& value)
-{ _Value = &value; }
-
-InputRefPortion::~InputRefPortion()
-{ }
-
-bool InputRefPortion::IsReference(void) const
-{ return true; }
-
+bool InputPortion::IsReference(void) const
+{ return _ref; }
 
 
 //---------------------------------------------------------------------
 //                          List class
 //---------------------------------------------------------------------
 
-// #include "gblock.h"
 #include "glist.h"
 
 ListPortion::ListPortion(void)
-{ 
-  _ContainsListsOnly = true;
-  _DataType = porUNDEFINED;
+  : _Value(new gList<Portion *>), _ref(false), _ContainsListsOnly(true),
+    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
+{ }
 
-  _IsNull = false;
-  _ListDepth = 1;
+ListPortion::ListPortion(gList<Portion *> &value)
+  : _Value(new gList<Portion *>), _ref(false), _ContainsListsOnly(true),
+    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
+{ 
+  for (int i = 1, length = value.Length(); i <= length; i++) 
+    Insert(value[i]->ValCopy(), i);
 }
 
+ListPortion::ListPortion(gList<Portion *> &value, bool ref)
+  : _Value(&value), _ref(ref), _ContainsListsOnly(true),
+    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
+{ _Value = &value; }
+
+
 ListPortion::~ListPortion()
-{ }
+{
+  if (!_ref)  {
+    Flush();
+    delete _Value;
+  }
+}
 
 
 bool ListPortion::BelongsToGame( void* game ) const
@@ -1755,7 +1743,7 @@ Precision ListPortion::SubType( void ) const
 
 Portion* ListPortion::ValCopy(void) const
 { 
-  ListPortion* p = new ListValPortion(*_Value); 
+  ListPortion* p = new ListPortion(*_Value); 
   if(p->_DataType == porUNDEFINED)
     p->_DataType = _DataType;
   return p;
@@ -1763,7 +1751,7 @@ Portion* ListPortion::ValCopy(void) const
 
 Portion* ListPortion::RefCopy(void) const
 { 
-  ListPortion* p = new ListRefPortion(*_Value); 
+  ListPortion* p = new ListPortion(*_Value, true); 
   ((ListPortion*) p)->_DataType = _DataType;
   p->SetOriginal(Original());
   return p;
@@ -1833,90 +1821,6 @@ bool ListPortion::operator == (Portion* p) const
   return result;
 }
 
-
-ListValPortion::ListValPortion(void)
-{ 
-  // _Value = new gBlock< Portion* >;
-  _Value = new gList< Portion* >;
-}
-
-ListValPortion::ListValPortion(gList< Portion* >& value)
-{ 
-  int i;
-  int length;
-  int result;
-
-  _Value = new gList< Portion* >; 
-
-  for(i = 1, length = value.Length(); i <= length; i++)
-  {
-    result = Insert(value[i]->ValCopy(), i);
-    assert(result != 0);
-  }
-}
-
-ListValPortion::~ListValPortion()
-{
-  Flush();
-  delete _Value;
-}
-
-bool ListValPortion::IsReference(void) const
-{ return false; }
-
-
-// ListRefPortion::ListRefPortion(gBlock< Portion* >& value)
-ListRefPortion::ListRefPortion(gList< Portion* >& value)
-{ _Value = &value; }
-
-ListRefPortion::~ListRefPortion()
-{ }
-
-bool ListRefPortion::IsReference(void) const
-{ return true; }
-
-
-
-
-
-
-/*
-bool ListPortion::_IsNull(void) const
-{
-  int i;
-  bool null = false;
-
-  if(Length() > 0)
-  {
-    for(i=1; i<=Length(); i++)
-    {
-      assert(i>=1 && i<=Length());
-      null = null | operator[](i)->Spec().Null;
-    }
-  }
-
-  return null;
-}
-
-int ListPortion::_ListDepth(void) const
-{
-  int i;
-  int Depth = 1;
-
-  if(Length() > 0)
-  {
-    Depth = operator[](1)->Spec().ListDepth + 1;
-    for(i=2; i<=Length(); i++)
-    {
-      assert(i>=0 && i<=Length());
-      if(operator[](i)->Spec().ListDepth + 1 < Depth)
-	Depth = operator[](i)->Spec().ListDepth + 1;
-    }
-  }
-
-  return Depth;
-}
-*/
 
 bool ListPortion::ContainsListsOnly(void) const
 {
@@ -2031,19 +1935,6 @@ int ListPortion::Insert(Portion* item, int index)
   }
 
 
-  /*
-  if(item->Spec().Type == porNULL) // inserting a null object
-  {
-    if(_DataType == porUNDEFINED)
-    {
-      _DataType = ((NullPortion*) item)->DataType();
-      ((ListPortion*) Original())->_DataType = _DataType;
-    }
-    delete item;
-    result = -1;
-  }
-  else 
-  */
   if(_DataType == porUNDEFINED) // inserting into an empty list
   {
     _DataType = item_type.Type;
@@ -2178,6 +2069,13 @@ Portion* ListPortion::SubscriptCopy(int index) const
   else
     return 0;
 }
+
+
+bool ListPortion::IsReference(void) const
+{
+  return _ref;
+}
+
 //-------------------------------------------------------------------
 //--------------------------------------------------------------------
 

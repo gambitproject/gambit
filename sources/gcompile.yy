@@ -308,11 +308,11 @@ constant:        BOOLEAN
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
         |        STDIN
-          { $$ = new gclConstExpr(new InputRefPortion(gin)); }
+          { $$ = new gclConstExpr(new InputPortion(gin, true)); }
         |        STDOUT
-          { $$ = new gclConstExpr(new OutputRefPortion(gout)); }
+          { $$ = new gclConstExpr(new OutputPortion(gout, true)); }
         |        gNULL
-          { $$ = new gclConstExpr(new OutputRefPortion(gnull)); }
+          { $$ = new gclConstExpr(new OutputPortion(gnull, true)); }
         |        MACHINEPREC
           { $$ = new gclConstExpr(new PrecisionPortion(precDOUBLE)); }
         |        RATIONALPREC

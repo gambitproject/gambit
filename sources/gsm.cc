@@ -741,7 +741,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
   {
     func = (*_FuncTable)(funcname);
     gList<gString> list = func->FuncList( udf, bif, getdesc );
-    result = new ListValPortion();
+    result = new ListPortion();
     for(i=1; i<=list.Length(); i++)
       ((ListPortion*) result)->Append(new TextPortion(list[i]));
   }
@@ -806,14 +806,14 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
     if(found==1)
     {
       gList<gString> list = func->FuncList( udf, bif, getdesc );
-      result = new ListValPortion();
+      result = new ListPortion();
       for(i=1; i<=list.Length(); i++)
 	((ListPortion*) result)->Append(new TextPortion(list[i]));
     }
     else
     {
       sorter.Sort();
-      result = new ListValPortion();
+      result = new ListPortion();
       for(i=1; i<=funcslist.Length(); i++)
 	((ListPortion*) result)->
 	  Append(new TextPortion(funcslist[i]->FuncName()));
@@ -844,7 +844,7 @@ Portion* GSM::HelpVars(gString varname)
 
   if(_RefTableStack->Peek()->IsDefined(varname))
   {
-    result = new ListValPortion();
+    result = new ListPortion();
     ((ListPortion*) result)->Append(new TextPortion(varname + ":" + 
       PortionSpecToText((*(_RefTableStack->Peek()))(varname)->Spec())));
   }
@@ -903,7 +903,7 @@ Portion* GSM::HelpVars(gString varname)
 
     gTextListSorter sorter(varslist);
     sorter.Sort();
-    result = new ListValPortion();
+    result = new ListPortion();
     for(i=1; i<=varslist.Length(); i++)
       ((ListPortion*) result)->Append(new TextPortion(varslist[i] + ":" + 
 	PortionSpecToText((*(_RefTableStack->Peek()))(varslist[i])->Spec())));

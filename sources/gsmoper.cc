@@ -189,7 +189,7 @@ Portion* GSM_Concat_List(Portion** param)
 
   // gBlock<Portion*>& p_value = ((ListPortion*) param[1])->Value();
   gList<Portion*>& p_value = ((ListPortion*) param[1])->Value();
-  result = new ListValPortion(((ListPortion*) param[0])->Value());
+  result = new ListPortion(((ListPortion*) param[0])->Value());
   for(i = 1; i <= p_value.Length(); i++)
   {
     append_result = ((ListPortion*) result)->Append(p_value[i]->ValCopy());
@@ -978,7 +978,7 @@ Portion* GSM_NewOutputStream(Portion** param)
   g = new gFileOutput(filename, append);
   
   if(g->IsValid())
-    result = new OutputValPortion(*g);    
+    result = new OutputPortion(*g);    
   else
     result = new ErrorPortion((gString) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
@@ -996,7 +996,7 @@ Portion* GSM_NewInputStream(Portion** param)
   g = new gFileInput(((TextPortion*) param[0])->Value());
 
   if(g->IsValid())
-    result = new InputValPortion(*g);
+    result = new InputPortion(*g);
   else
     result = new ErrorPortion((gString) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
@@ -1638,19 +1638,19 @@ Portion *GSM_ListForm_Mixed(Portion **param)
 
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
 
-  por = new ListValPortion();
+  por = new ListPortion();
 
   for(i = 1; i <= P->Lengths().Length(); i++)
   {
-    p1 = new ListValPortion();
+    p1 = new ListPortion();
 
     for(j = 1; j <= P->Lengths()[i]; j++)
     {
       p2 = new NumberPortion((*P)(i, j));
-      ((ListValPortion*) p1)->Append(p2);
+      ((ListPortion*) p1)->Append(p2);
     }
 
-    ((ListValPortion*) por)->Append(p1);
+    ((ListPortion*) por)->Append(p1);
   }
 
   return por;
@@ -1885,7 +1885,7 @@ Portion* GSM_Read_Undefined(Portion** param)
     return new ErrorPortion("End of file reached");
   if(c == '{')
   {
-    param[1] = new ListValPortion();
+    param[1] = new ListPortion();
 
     bool read_success = true;
 
@@ -3207,7 +3207,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Manual, porBOOL, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("y", porOUTPUT,
-					    new OutputRefPortion(gout)));
+					    new OutputPortion(gout, true)));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("HelpVars", 1);

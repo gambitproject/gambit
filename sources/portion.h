@@ -761,13 +761,15 @@ public:
 //                          Output class
 //---------------------------------------------------------------------
 
-class OutputPortion : public Portion
-{
+class OutputPortion : public Portion  {
 protected:
-  gOutput* _Value;
-  OutputPortion(void);
+  gOutput *_Value;
+  bool _ref;
 
 public:
+  OutputPortion(gOutput &value);
+  OutputPortion(gOutput &value, bool);
+
   virtual ~OutputPortion();
 
   gOutput& Value(void) const;
@@ -778,21 +780,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class OutputValPortion : public OutputPortion
-{
-public:
-  OutputValPortion(gOutput& value);
-  virtual ~OutputValPortion();
-  bool IsReference(void) const;
-};
-
-class OutputRefPortion : public OutputPortion
-{
-public:
-  OutputRefPortion(gOutput& value);
-  virtual ~OutputRefPortion();
   bool IsReference(void) const;
 };
 
@@ -803,13 +791,14 @@ public:
 //                          Input class
 //---------------------------------------------------------------------
 
-class InputPortion : public Portion
-{
+class InputPortion : public Portion  {
 protected:
   gInput* _Value;
-  InputPortion(void);
+  bool _ref;
 
 public:
+  InputPortion(gInput &value);
+  InputPortion(gInput &value, bool);
   virtual ~InputPortion();
 
   gInput& Value(void) const;
@@ -820,21 +809,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class InputValPortion : public InputPortion
-{
-public:
-  InputValPortion(gInput& value);
-  virtual ~InputValPortion();
-  bool IsReference(void) const;
-};
-
-class InputRefPortion : public InputPortion
-{
-public:
-  InputRefPortion(gInput& value);
-  virtual ~InputRefPortion();
   bool IsReference(void) const;
 };
 
@@ -844,14 +819,12 @@ public:
 //                          List class
 //---------------------------------------------------------------------
 
-// template <class T> class gBlock;
 template <class T> class gList;
 
-class ListPortion : public Portion
-{
+class ListPortion : public Portion  {
 protected:
   gList< Portion* >* _Value;
-  ListPortion(void);
+  bool _ref;
 
   bool _ContainsListsOnly;
   unsigned long _DataType;
@@ -859,10 +832,11 @@ protected:
   bool _IsNull;
   int _ListDepth;
 
-  // bool _IsNull(void) const;
-  // int _ListDepth(void) const;
+  ListPortion(gList<Portion *> &value, bool);
 
 public:
+  ListPortion(void);
+  ListPortion(gList<Portion *> &value);
   virtual ~ListPortion();
 
   bool BelongsToGame( void* game ) const;  
@@ -901,28 +875,9 @@ public:
   // Warning: SubscriptCopy() already makes a copy; 
   //          don't calling ValCopy() or RefCopy() on Subscript() !
   Portion* SubscriptCopy(int index) const;
-};
 
-class ListValPortion : public ListPortion
-{
-public:
-  ListValPortion(void);
-  // ListValPortion(gBlock< Portion* >& value);
-  ListValPortion(gList< Portion* >& value);
-  virtual ~ListValPortion();
   bool IsReference(void) const;
 };
-
-class ListRefPortion : public ListPortion
-{
-public:
-  ListRefPortion(gList< Portion* >& value);
-  virtual ~ListRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
 
 
 //-----------------------------------------------------------------
@@ -935,7 +890,7 @@ gOutput& operator << (gOutput& s, Portion* p);
 bool PortionEqual(Portion* p1, Portion* p2, bool& type_found);
 
 
-#endif // PORTION_H
+#endif   // PORTION_H
 
 
 

@@ -12,7 +12,7 @@
 
 Portion *ArrayToList(const gArray<int> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new IntPortion(A[i]));
   return ret;
@@ -20,7 +20,7 @@ Portion *ArrayToList(const gArray<int> &A)
 
 Portion *ArrayToList(const gArray<double> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NumberPortion(A[i]));
   return ret;
@@ -28,7 +28,7 @@ Portion *ArrayToList(const gArray<double> &A)
 
 Portion *ArrayToList(const gArray<gRational> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NumberPortion(A[i]));
   return ret;
@@ -36,7 +36,7 @@ Portion *ArrayToList(const gArray<gRational> &A)
 
 Portion *ArrayToList(const gArray<gNumber> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NumberPortion(A[i]));
   return ret;
@@ -44,7 +44,7 @@ Portion *ArrayToList(const gArray<gNumber> &A)
 
 Portion *ArrayToList(const gArray<Action *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new ActionPortion(A[i]));
   return ret;
@@ -52,7 +52,7 @@ Portion *ArrayToList(const gArray<Action *> &A)
 
 Portion *ArrayToList(const gArray<EFPlayer *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new EfPlayerPortion(A[i]));
   return ret;
@@ -60,7 +60,7 @@ Portion *ArrayToList(const gArray<EFPlayer *> &A)
 
 Portion *ArrayToList(const gArray<Infoset *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new InfosetPortion(A[i]));
   return ret;
@@ -68,7 +68,7 @@ Portion *ArrayToList(const gArray<Infoset *> &A)
 
 Portion *ArrayToList(const gArray<EFOutcome *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new EfOutcomePortion(A[i]));
   return ret;
@@ -76,7 +76,7 @@ Portion *ArrayToList(const gArray<EFOutcome *> &A)
 
 Portion *ArrayToList(const gArray<Node *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NodePortion(A[i]));
   return ret;
@@ -84,7 +84,7 @@ Portion *ArrayToList(const gArray<Node *> &A)
 
 Portion *ArrayToList(const gArray<NFPlayer *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NfPlayerPortion(A[i]));
   return ret;
@@ -92,7 +92,7 @@ Portion *ArrayToList(const gArray<NFPlayer *> &A)
 
 Portion *ArrayToList(const gArray<NFOutcome *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NfOutcomePortion(A[i]));
   return ret;
@@ -100,7 +100,7 @@ Portion *ArrayToList(const gArray<NFOutcome *> &A)
 
 Portion *ArrayToList(const gArray<Strategy *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new StrategyPortion(A[i]));
   return ret;
@@ -108,7 +108,7 @@ Portion *ArrayToList(const gArray<Strategy *> &A)
 
 Portion *ArrayToList(const gList<Node *> &A)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
     ret->Append(new NodePortion(A[i]));
   return ret;
@@ -119,12 +119,12 @@ Portion *gDPVectorToList(const gDPVector<double> &A)
   ListPortion* p;
   ListPortion* s1;
   ListPortion* s2;
-  p = new ListValPortion();
+  p = new ListPortion();
   int l = 1;
   for (int i = 1; i <= A.DPLengths().Length(); i++)  {
-    s1 = new ListValPortion();
+    s1 = new ListPortion();
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
-      s2 = new ListValPortion();
+      s2 = new ListPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
 	s2->Append(new NumberPortion(A(i, j, k)));
       l++;
@@ -140,12 +140,12 @@ Portion* gDPVectorToList(const gDPVector<gRational> &A)
   ListPortion* p;
   ListPortion* s1;
   ListPortion* s2;
-  p = new ListValPortion();
+  p = new ListPortion();
   int l = 1;
   for (int i = 1; i <= A.DPLengths().Length(); i++)  {
-    s1 = new ListValPortion();
+    s1 = new ListPortion();
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
-      s2 = new ListValPortion();
+      s2 = new ListPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
 	s2->Append(new NumberPortion(A(i, j, k)));
       l++;
@@ -161,12 +161,12 @@ Portion* gDPVectorToList(const gDPVector<gNumber> &A)
   ListPortion* p;
   ListPortion* s1;
   ListPortion* s2;
-  p = new ListValPortion();
+  p = new ListPortion();
   int l = 1;
   for (int i = 1; i <= A.DPLengths().Length(); i++)  {
-    s1 = new ListValPortion();
+    s1 = new ListPortion();
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
-      s2 = new ListValPortion();
+      s2 = new ListPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
 	s2->Append(new NumberPortion(A(i, j, k)));
       l++;

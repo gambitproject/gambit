@@ -32,7 +32,7 @@ extern gMatrix<gRational>* ListToMatrix_Rational(ListPortion* list);
 //
 // Useful utilities for creation of lists of profiles
 //
-class Mixed_ListPortion : public ListValPortion   {
+class Mixed_ListPortion : public ListPortion   {
   public:
     Mixed_ListPortion(const gList<MixedSolution> &);
     virtual ~Mixed_ListPortion()   { }
@@ -45,7 +45,7 @@ Mixed_ListPortion::Mixed_ListPortion(const gList<MixedSolution> &list)
     Append(new MixedPortion(new MixedSolution(list[i])));
 }
 
-class Behav_ListPortion : public ListValPortion   {
+class Behav_ListPortion : public ListPortion   {
   public:
     Behav_ListPortion(const gList<BehavSolution> &);
     virtual ~Behav_ListPortion()   { }
@@ -807,7 +807,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   return new Behav_ListPortion(solutions);
 }
 
-Portion* GSM_VertEnum_Float( Portion** param )
+Portion* GSM_VertEnum( Portion** param )
 {
   gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
   gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
@@ -832,48 +832,9 @@ Portion* GSM_VertEnum_Float( Portion** param )
   delete b;
   delete start;
 
-  ListPortion* list = new ListValPortion();
-  int i = 0;
-  for( i = 1; i <= verts.Length(); ++i )
-  {
+  ListPortion* list = new ListPortion();
+  for (int i = 1; i <= verts.Length(); i++)  
     list->Append( ArrayToList( verts[i] ) );
-  }
-
-  return list;
-}
-
-
-Portion* GSM_VertEnum_Rational( Portion** param )
-{
-  gMatrix<gRational>* A = ListToMatrix_Rational((ListPortion*) param[0]);
-  gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
-  gVector<gRational>* start = ListToVector_Rational((ListPortion*) param[2]);
-
-  gList< gVector< gRational > > verts;
-
-  if( start->Length() == 0 ) {
-    VertEnum< gRational >* vertenum = NULL;
-    vertenum = new VertEnum< gRational >( *A, *b );
-    vertenum->Vertices( verts );
-    delete vertenum;
-  }
-  else {
-    NewVertEnum< gRational >* vertenum = NULL;
-    vertenum = new NewVertEnum< gRational >( *A, *b, *start );
-    vertenum->Vertices( verts );
-    delete vertenum;
-  }
-
-  delete A;
-  delete b;
-  delete start;
-
-  ListPortion* list = new ListValPortion();
-  int i = 0;
-  for( i = 1; i <= verts.Length(); ++i )
-  {
-    list->Append( ArrayToList( verts[i] ) );
-  }
 
   return list;
 }
@@ -911,7 +872,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -930,7 +891,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -948,7 +909,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -965,7 +926,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -999,7 +960,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 12, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputRefPortion(gnull),
+					     new OutputPortion(gnull, true),
 					     BYREF));
   FuncObj->SetParamInfo(0, 13, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1039,7 +1000,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porINTEGER,
 					     new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputRefPortion(gnull), 
+					     new OutputPortion(gnull, true), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1079,7 +1040,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porINTEGER,
 					     new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputRefPortion(gnull), 
+					     new OutputPortion(gnull, true), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1100,7 +1061,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull),
+					    new OutputPortion(gnull, true),
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1133,7 +1094,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(3, 5, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(3, 6, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(3, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1164,7 +1125,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 9, ParamInfoType("nEvals", porINTEGER,
 					    new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 10, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputRefPortion(gnull), 
+					     new OutputPortion(gnull, true), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 11, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1189,7 +1150,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 8, ParamInfoType("nEvals", porINTEGER,
 					    new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(1, 9, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 10, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1208,7 +1169,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull),
+					    new OutputPortion(gnull, true),
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1225,7 +1186,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1288,7 +1249,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 7, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull),
+					    new OutputPortion(gnull, true),
 					    BYREF));
   FuncObj->SetParamInfo(0, 8, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1311,7 +1272,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 7, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 8, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull),
+					    new OutputPortion(gnull, true),
 					    BYREF));
   FuncObj->SetParamInfo(1, 9, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1320,24 +1281,15 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("VertEnum", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum_Float,
+  FuncObj = new FuncDescObj("VertEnum", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_VertEnum,
 				       PortionSpec(porNUMBER, 2), 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("A", PortionSpec(porNUMBER,2),
 					    REQUIRED, BYVAL));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYVAL));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("start", PortionSpec(porNUMBER,1),
-					    new ListValPortion(), BYVAL));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_VertEnum_Rational,
-				       PortionSpec(porNUMBER, 2), 3));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("A", PortionSpec(porNUMBER,2),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("start", PortionSpec(porNUMBER,1),
-					    new ListValPortion(), BYVAL));
+					    new ListPortion(), BYVAL));
   gsm->AddFunction(FuncObj);
 
 }

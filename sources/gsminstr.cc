@@ -333,7 +333,7 @@ void gclListConstant::Append(gclExpression *expr)
 
 Portion *gclListConstant::Evaluate(void)
 {
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
   
   for (int i = 1; i <= values.Length(); i++)  {
     Portion *v = values[i]->Evaluate();

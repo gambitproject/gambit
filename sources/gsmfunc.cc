@@ -178,7 +178,7 @@ Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 
 
   CurrParam = new Portion*[NumParams];
-  p = new ListValPortion();
+  p = new ListPortion();
 
   assert(Source != 0);
 

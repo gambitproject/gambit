@@ -37,7 +37,7 @@ extern GSM *_gsm;
 static Portion *GSM_Actions(Portion **param)
 {
   if( param[0]->Spec().Type == porNULL )
-    return new ListValPortion;
+    return new ListPortion;
 
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
@@ -112,7 +112,7 @@ static Portion *GSM_Children(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   int child;
-  Portion* por = new ListValPortion();
+  Portion* por = new ListPortion();
   for(child=1; child <= n->NumChildren(); child++)
     ((ListPortion*) por)->Append(new NodePortion(n->GetChild(child)));
   return por;
@@ -473,7 +473,7 @@ static Portion *GSM_MarkedSubgame(Portion **param)
 static Portion *GSM_Members(Portion **param)
 {
   if (param[0]->Spec().Type == porNULL)
-    return new ListValPortion();
+    return new ListPortion();
 
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
@@ -1119,7 +1119,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
+					    new OutputPortion(gnull, true), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1261,7 +1261,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NewEfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewEfg, porEFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("players", PortionSpec(porTEXT,1),
-					    new ListValPortion));
+					    new ListPortion));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewInfoset", 1);

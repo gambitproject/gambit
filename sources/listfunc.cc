@@ -26,7 +26,7 @@
 Portion* GSM_Index( Portion** param )
 {
   int i = 0;
-  ListPortion* result = new ListValPortion();
+  ListPortion* result = new ListPortion();
   ListPortion& list = *(ListPortion*) param[0];
   bool type_found = false;
   for( i = 1; i <= list.Length(); i++ )
@@ -88,7 +88,7 @@ void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth,
       else
       {
 	ListPortion* oldsublist = (ListPortion*) result->Remove(i);
-	ListPortion* newsublist = new ListValPortion();
+	ListPortion* newsublist = new ListPortion();
 	GSM_Flatten_Top(oldsublist, 0, depth+1, newsublist);
 	result->Insert(newsublist, i);
 	delete oldsublist;
@@ -111,7 +111,7 @@ Portion* GSM_Flatten(Portion** param)
   int levels = ((IntPortion*) param[1])->Value();
   if(levels >= 0)
   {
-    list = new ListValPortion();
+    list = new ListPortion();
     GSM_Flatten_Top((ListPortion*) param[0], levels, 0, list);
   }
   else
@@ -148,7 +148,7 @@ ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
 {
   int i;
   int length = p0->Length();
-  ListPortion* list = new ListValPortion();
+  ListPortion* list = new ListPortion();
   for(i=1; i<=length; i++)
     if((*p0)[i]->Spec().ListDepth == 0)
     {
@@ -425,7 +425,7 @@ Portion* GSM_List( Portion** param )
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
@@ -441,7 +441,7 @@ Portion* GSM_List_List( Portion** param )
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
@@ -457,7 +457,7 @@ Portion* GSM_List_Integer( Portion** param )
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new IntPortion( ((IntPortion*) param[0])->Value()+ 
@@ -473,7 +473,7 @@ Portion* GSM_List_Number( Portion** param )
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new NumberPortion( ((NumberPortion*) param[0])->Value()+
@@ -493,7 +493,7 @@ Portion* GSM_List_Nfg( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
 
   Nfg& nfg =
@@ -514,7 +514,7 @@ Portion* GSM_List_Efg( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
 
-  p = new ListValPortion();
+  p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
 
   Efg& efg =
@@ -663,10 +663,10 @@ Portion* GSM_Transpose( Portion** param )
       if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != width )
 	return new ErrorPortion( "Bad dimensionality" );
   }
-  p = new ListValPortion();
+  p = new ListPortion();
   for( i = 1; i <= width; i++ )
   {
-    s = new ListValPortion();
+    s = new ListPortion();
     for( j = 1; j <= length; j++ )
     {
       s->Append( (*(ListPortion*)(*(ListPortion*) param[0])[j])[i]->ValCopy());

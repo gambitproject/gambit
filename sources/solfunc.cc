@@ -63,13 +63,13 @@ static Portion *GSM_ActionProbs(Portion **param)
   const EFSupport *support = &profile->Support();
   const Efg &efg = support->Game();
 
-  ListPortion *por = new ListValPortion;
+  ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     EFPlayer *player = efg.Players()[pl];
-    ListPortion *p1 = new ListValPortion;
+    ListPortion *p1 = new ListPortion;
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
-      ListPortion *p2 = new ListValPortion;
+      ListPortion *p2 = new ListPortion;
       for (int act = 1; act <= infoset->NumActions(); act++)   {
 	if (support->Find(infoset->Actions()[act]))
 	  p2->Append(new NumberPortion(
@@ -132,7 +132,7 @@ static Portion *GSM_ActionValues(Portion **param)
 
   const EFSupport &support = bp->Support(); 
   Efg *E = &bp->Game();
-  ListPortion *por = new ListValPortion; 
+  ListPortion *por = new ListPortion; 
   
   gDPVector<gNumber> values(E->NumActions());
   gPVector<gNumber> probs(E->NumInfosets());
@@ -141,10 +141,10 @@ static Portion *GSM_ActionValues(Portion **param)
   
   for (int pl = 1; pl <= E->NumPlayers(); pl++)  {
     EFPlayer *player = E->Players()[pl];
-    ListPortion *p1 = new ListValPortion;
+    ListPortion *p1 = new ListPortion;
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
-      ListPortion *p2 = new ListValPortion;
+      ListPortion *p2 = new ListPortion;
  
       gVector<double> ret(infoset->NumActions());
       for (int act = 1; act <= infoset->NumActions(); act++)  {
@@ -322,7 +322,7 @@ static Portion *GSM_InfosetProbs(Portion **param)
 
   bp->CondPayoff(values, probs);
 
-  ListPortion *ret = new ListValPortion;
+  ListPortion *ret = new ListPortion;
 
   for (int i = 1; i <= E->NumPlayers(); i++)
     ret->Append(ArrayToList(probs.GetRow(i)));
@@ -566,10 +566,10 @@ static Portion *GSM_Regrets_Mixed(Portion **param)
 
   profile->Regret(v);
 
-  ListPortion *por = new ListValPortion;
+  ListPortion *por = new ListPortion;
   
   for (int pl = 1; pl <= profile->Lengths().Length(); pl++)  {
-    ListPortion *p1 = new ListValPortion;
+    ListPortion *p1 = new ListPortion;
 
     for (int st = 1; st <= profile->Lengths()[pl]; st++)
       p1->Append(new NumberPortion(v(pl, st)));
@@ -719,10 +719,10 @@ static Portion *GSM_StrategyProbs(Portion **param)
   const NFSupport *support = &profile->Support();
   const Nfg &nfg = support->Game();
 
-  ListPortion *por = new ListValPortion;
+  ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
     NFPlayer *player = nfg.Players()[pl];
-    ListPortion *p1 = new ListValPortion;
+    ListPortion *p1 = new ListPortion;
 
     for (int st = 1; st <= player->NumStrats(); st++)   {
       if (support->Find(player->Strategies()[st]))
