@@ -44,7 +44,7 @@ void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
 	prob = (T) 0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = E.GetChanceProb(node->GetInfoset(), i);
+      prob = (gRational) E.GetChanceProb(node->GetInfoset(), i);
     }
 
     BehavNode<T> *child = n->children[i];
@@ -75,7 +75,7 @@ void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
 
 template <class T> void ClearNodeProbs(BehavNode<T> *n)
 {
-  n->nval = 0;
+  n->nval = (T) 0;
   for (int i = 1; i <= n->children.Length(); i++)
     ClearNodeProbs(n->children[i]);
 }

@@ -145,7 +145,7 @@ const T PureBehavProfile<T>::Payoff(const EFOutcome *o, const int &pl) const
   if (o)
     return (*payoffs)(o->GetNumber(), pl);
   else
-    return (T) 0.0;
+    return (T) 0;
 }
 
 template <class T>
