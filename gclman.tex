@@ -166,6 +166,7 @@ Type name	& Description \\ \hline
 {\tt FLOAT} 	& floating-point number \\
 {\tt RATIONAL} 	& rational number with arbitrary precision \\
 {\tt TEXT}	& string of arbitrary length \\
+{\tt INPUT}	& output stream \\
 {\tt OUTPUT}	& output stream \\ \hline
 {\tt EFG}	& extensive form game \\
 {\tt EFPLAYER}	& a player in an extensive form game \\
@@ -186,10 +187,10 @@ Type name	& Description \\ \hline
 \medskip
 
 The remainder of this section details the rules concerning the types
-{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT}, and
-{\tt OUTPUT}, as well as general rules for typing.  The extensive form
-and normal form types, and their related types, are detailed later in
-special sections.
+{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
+{\tt INPUT} and {\tt OUTPUT}, as well as general rules for typing.
+The extensive form and normal form types, and their related types, are
+detailed later in special sections.
 
 \subsubsection{Boolean}
 
@@ -230,11 +231,16 @@ is not required.  To specify a {\tt TEXT} constant, surround the
 text with double-quote characters ({\tt "}).  Constants may not span
 more than one input line.
 
+\subsubsection{Input}
+
+The {\tt INPUT} type is a reference to an input stream, generally a file
+on disk.  Its principal use is to read in external data. 
+
 \subsubsection{Output}
 
-The {\tt OUTPUT} type is a reference to an output stream, generally a file
-on disk.  Its principal use is as a logging file for formatting output
-from an extended command language job.
+The {\tt OUTPUT} type is a reference to an output stream, generally a
+file on disk.  Its principal use is as a logging file for writing
+formatting output from an extended command language job.  
 
 \subsubsection{List}
 
@@ -531,7 +537,9 @@ Or[x, y]		& x || y, x OR y \\
 Paren[x]		& (x) \\ 
 Plus[x, y]		& x + y \\
 Power[x, y]	 	& x $\wedge$ y \\
+Read[in,x]		& in >> x \\
 Times[x, y]		& x * y \\
+Write[out,x]		& out << x \\
 \end{tabular}
 }
 
@@ -561,6 +569,8 @@ The order of precedence for built-in functions is as follows:
 \verb+()+
 \item
 \verb+:=+
+\item
+\verb+>> <<+
 \item
 \verb+||+
 \item
@@ -737,9 +747,11 @@ This can be particularly useful in conjunction with user defined functions, in t
 a library of useful functions can be constructed and included into the program
 asily.
 
-The {\tt Include} directive may only appear at the ``top level'' of the
-program.  That is to say, it cannot be used inside a loop, function declaration, or expression.  However, files may be nested arbitrarily deep using
-{\tt Include}, so you can include a file which in turn includes other files.
+The {\tt Include} directive may only appear at the ``top level'' of
+the program.  That is to say, it cannot be used inside a loop,
+function declaration, or expression.  However, files may be nested
+arbitrarily deep using {\tt Include}, so you can include a file which
+in turn includes other files.
   
 \subsection{User defined functions}
 
@@ -894,6 +906,62 @@ read GCL programs, and in addition the programs typically run much
 faster than they would if flow control satements were used instead.
 This is because listable calls to functions are executed in compiled
 code, while flow control statements are executed in interpreted code.
+
+\subsection{Input and Output}
+
+Data can be read from an input stream by the use of the Read[]
+function.  Thus, the following commands 
+
+\begin{verbatim}
+in:=Input["file.dat"]
+x:=0/1;y:={0.0,0.0}
+Read[in,x]
+Read[in,y]
+\end{verbatim}
+
+creates an input stream, \verb+in+, and then reads in a RATIONAL
+number, followed by a list of two FLOATs.  The second argument is
+passed by reference, but currently Read[] only works when the second
+argument is a defined variable.  Thus the assignments before the
+Read[] statements are needed to define \verb+x+ and \verb+y+.  If the
+data encountered in the input stream is not of the correct type, a run
+time error is returned.  \verb+Read[in,x]+ has the short form \verb+in
+>> x+.  Since the return value of Read[] is \verb+in+, these commands
+can be chained.  So the two lines reading in \verb+x+ and \verb+y+ in
+the above example could be written instead
+
+\begin{verbatim}
+in >> x >> y
+\end{verbatim}
+ 
+Data can be written to an output stream by the use of the Write[]
+function.  Thus, the following commands 
+
+\begin{verbatim}
+out:=Output["file.out"]
+x:=0/1;y:={0.0,0.0}
+Write[out,x]
+Write[out,y]
+\end{verbatim}
+
+creates an output stream, \verb+out+, and then writes out a RATIONAL
+number, followed by a list of two FLOATs.  \verb+Write[out,x]+ has the
+short form \verb+out >> x+.  Since the return value of Write[] is
+\verb+out+, these commands can be chained.  So the two lines writing out
+\verb+x+ and \verb+y+ in the above example could be written instead
+
+\begin{verbatim}
+out << x << y
+\end{verbatim}
+ 
+The SetFormat[] function can be used to control the formatting of data
+written to an output stream.  Note that the Read[] and Write[]
+functions are not listable.
+
+The Read[] and Write[] functions can only be used with certain data
+types (see function documentation).  Reading and writing of EFG and
+NFG from external files can be done with the LoadEfg[], SaveEfg[],
+LoadNfg[] and SaveNfg[] functions.  
 
 \subsection{Extensive forms}
 
@@ -1313,7 +1381,7 @@ LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
 Read[input->INPUT, x<->T] =: INPUT  
-      for T = BOOL,FLOAT,INTEGER,RATIONAL,TEXT,LIST(T)
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
@@ -3616,13 +3684,16 @@ type {\tt RATIONAL}.
 \item
 \protect \large \begin{verbatim}
 Read[input->INPUT, x<->T] =: INPUT  
-      for T = BOOL,FLOAT,INTEGER,RATIONAL,TEXT,LIST(T)
+      for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,
+              RATIONAL,TEXT,LIST(T)
 \end{verbatim}\normalsize
 
 \bd
 Reads data of type T from the input stream and assigns it to \verb+x+.
 Causes a run time error if the data at the input stream is of the
 incorrect type. 
+\item
+[Short form:] \verb+input >> x+
 \item
 [Note:] This function is not listable
 \item
@@ -4106,6 +4177,8 @@ Write[output->OUTPUT, x<->T] =: OUTPUT
 \bd
 Does a formatted write of the object \verb+x+ to the
 output stream \verb+output+.
+\item
+[Short form:] \verb+output << x+
 \item
 [Note:] This function is not listable
 \item
