@@ -2356,6 +2356,65 @@ int main( void )
   machine->Dump();
 #endif // CRASHTEST
 
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+  machine->PushRef( "L" );
+  machine->Push( (gInteger) 1 );
+  machine->Push( (gInteger) 2 );
+  machine->PushList( 2 );
+  machine->Assign();
+  machine->Dump();
+  machine->PushRef( "L" );
+  machine->Dump();
+
+  machine->PushRef( "M" );
+  machine->InitCallFunction( "Remove" );
+  machine->PushRef( "L" );
+  machine->Bind();
+  machine->Push( (gInteger) 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+  machine->PushRef( "M" );
+  machine->Dump();
+
+  machine->PushRef( "N" );
+  machine->InitCallFunction( "Remove" );
+  machine->PushRef( "M" );
+  machine->Bind();
+  machine->Push( (gInteger) 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+  machine->PushRef( "N" );
+  machine->Dump();
+
+
+  machine->PushRef( "N" );
+  machine->PushRef( "M" );
+  machine->PushRef( "L" );
+  machine->Dump();
+
+
+
+  machine->PushRef( "L" );
+  machine->PushList( 0 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "L" );
+  machine->Dump();
+
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 

@@ -615,10 +615,13 @@ List_Portion::List_Portion( void )
 List_Portion::List_Portion( const gBlock<Portion*>& value )
 {
   int i;
+  int length;
   int type_match;
   int result;
 
-  for( i = 1; i <= value.Length(); i++ )
+  _DataType = porERROR;
+
+  for( i = 1, length = value.Length(); i <= length; i++ )
   {
     result = Insert( value[ i ]->Copy(), i );
     assert( result != 0 );
@@ -718,7 +721,7 @@ void List_Portion::Output( gOutput& s ) const
   }
   else
   {
-    s << "empty";
+    s << " empty";
   }
   s << " }";
 }
@@ -746,7 +749,8 @@ int List_Portion::Insert( Portion* item, int index )
   
   if( _Value.Length() == 0 )  // creating a new list
   {
-    if( item->Type() != porERROR )
+    if( item->Type() != porERROR && 
+       ( item->Type() == _DataType || _DataType == porERROR ) )
     {
       if( item->Type() == porLIST )
 	_DataType = ( (List_Portion*) item )->_DataType;
@@ -773,7 +777,6 @@ int List_Portion::Insert( Portion* item, int index )
       result = _Value.Insert( item, index );
     }
   }
-
   return result;
 }
 
@@ -781,8 +784,15 @@ int List_Portion::Insert( Portion* item, int index )
 Portion* List_Portion::Remove( int index )
 { 
   Portion* p;
-  p = _Value.Remove( index );
-  p->ParentList() = 0;
+  if( index >= 1 && index <= _Value.Length() )
+  {
+    p = _Value.Remove( index );
+    p->ParentList() = 0;
+  }
+  else
+  {
+    p = new Error_Portion( _ErrorMessage( 6 ) );
+  }
   return p;
 }
 
@@ -795,9 +805,9 @@ void List_Portion::Flush( void )
   int i, length;
   for( i = 1, length = _Value.Length(); i <= length; i++ )
   {
-    delete _Value[ i ];
+    delete Remove( 1 );
   }
-  _Value.Flush();
+  assert( _Value.Length() == 0 );
 }
 
 
