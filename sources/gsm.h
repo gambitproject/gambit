@@ -35,7 +35,10 @@ class GSM
   int unary_operation( OperationMode mode );
   int binary_operation( OperationMode mode );
 
+
+  // This function is located in gsmfunc.cc
   static void InitFunctions( void );
+
 
  public:
   GSM( int size );

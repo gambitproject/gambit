@@ -9,7 +9,6 @@
 #include "hash.imp"
 
 
-#include "gclmath.h"
 
 
 
@@ -93,8 +92,10 @@ GSM::GSM( int size )
   RefTable = new RefHashTable;
 
   if( !FunctionsInitialized )
-    InitFunctions();
-
+  {
+    InitFunctions();           // This function is located in gsmfunc.cc
+    FunctionsInitialized = true;
+  }
   assert( stack != 0 );
 }
 
