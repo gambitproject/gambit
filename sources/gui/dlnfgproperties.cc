@@ -97,7 +97,7 @@ public:
 
   virtual bool Validate(void);
 
-  int NumPlayers(void) const { return m_playerList->Number(); }
+  int NumPlayers(void) const { return m_playerList->GetCount(); }
   wxString GetPlayerName(int pl) const
   { return m_playerList->GetString(pl - 1); }
 

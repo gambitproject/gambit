@@ -102,7 +102,7 @@ public:
 
   virtual bool Validate(void);
 
-  int NumPlayers(void) const { return m_playerList->Number(); }
+  int NumPlayers(void) const { return m_playerList->GetCount(); }
   wxString GetPlayerName(int pl) const
   { return m_playerList->GetString(pl - 1); }
 
@@ -164,8 +164,8 @@ void panelEfgPlayers::OnNewPlayer(wxCommandEvent &)
 {
   m_playerList->SetString(m_lastSelection, m_playerName->GetValue());
   m_playerList->Append(wxString::Format("Player%d", 
-					m_playerList->Number() + 1));
-  m_lastSelection = m_playerList->Number() - 1;
+					m_playerList->GetCount() + 1));
+  m_lastSelection = m_playerList->GetCount() - 1;
   m_playerList->SetSelection(m_lastSelection);
   m_playerName->SetValue(m_playerList->GetStringSelection());
 }

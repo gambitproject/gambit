@@ -109,13 +109,13 @@ void dialogNewGame::OnNumPlayers(wxSpinEvent &)
 {
   int numPlayers = m_numPlayers->GetValue();
 
-  while (m_strategyList->Number() > numPlayers) {
-    m_strategyList->Delete(m_strategyList->Number() - 1);
+  while (m_strategyList->GetCount() > numPlayers) {
+    m_strategyList->Delete(m_strategyList->GetCount() - 1);
     m_strategies.Remove(m_strategies.Length());
   }
-  while (m_strategyList->Number() < numPlayers) {
+  while (m_strategyList->GetCount() < numPlayers) {
     m_strategyList->Append(wxString::Format("Player%d: 2 strategies",
-					    m_strategyList->Number() + 1));
+					    m_strategyList->GetCount() + 1));
     m_strategies.Append(2);
   }
 }

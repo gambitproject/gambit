@@ -126,7 +126,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
   m_deleteButton = new wxButton(this, idBUTTON_ACTION_DELETE,
 				"Delete action");
   addRemoveSizer->Add(m_deleteButton, 0, wxALL | wxEXPAND, 5);
-  m_deleteButton->Enable(m_actionList->Number() > 1);
+  m_deleteButton->Enable(m_actionList->GetCount() > 1);
   rhsSizer->Add(addRemoveSizer, 0, wxALL | wxCENTER, 5);
 
   actionBoxSizer->Add(rhsSizer, 0, wxALL, 5);
@@ -230,13 +230,13 @@ void dialogEditMove::OnDeleteAction(wxCommandEvent &)
   }
   m_actions.Remove(m_actionList->GetSelection() + 1);
   m_actionList->Delete(m_actionList->GetSelection());
-  if (m_lastSelection >= m_actionList->Number()) {
-    m_lastSelection = m_actionList->Number() - 1;
+  if (m_lastSelection >= m_actionList->GetCount()) {
+    m_lastSelection = m_actionList->GetCount() - 1;
   }
   m_actionList->SetSelection(m_lastSelection);
   m_actionName->SetValue((const char *)
 			 m_actionNames[m_actionList->GetSelection() + 1]);
-  m_deleteButton->Enable(m_actionList->Number() > 1);
+  m_deleteButton->Enable(m_actionList->GetCount() > 1);
 }
 
 void dialogEditMove::OnOK(wxCommandEvent &p_event)

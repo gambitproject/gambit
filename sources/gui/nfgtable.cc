@@ -409,7 +409,7 @@ void ColoredStringRenderer::Draw(wxGrid& grid,
   rect.Inflate(-1);
 
   wxCoord x, y;
-  grid.DrawTextRectangle(dc, "(", rect);
+  grid.DrawTextRectangle(dc, wxString("("), rect);
   dc.GetTextExtent("(", &x, &y);
   rect.x += x;
 
@@ -419,7 +419,7 @@ void ColoredStringRenderer::Draw(wxGrid& grid,
     if (text[i] == ',') {
       wxColour color = dc.GetTextForeground();
       dc.SetTextForeground(*wxBLACK);
-      grid.DrawTextRectangle(dc, ",", rect);
+      grid.DrawTextRectangle(dc, wxString(","), rect);
       dc.GetTextExtent(",", &x, &y);
       rect.x += x;
 
@@ -431,14 +431,14 @@ void ColoredStringRenderer::Draw(wxGrid& grid,
       }
     }
     else {
-      grid.DrawTextRectangle(dc, text[i], rect);
+      grid.DrawTextRectangle(dc, wxString(text[i]), rect);
       dc.GetTextExtent(text[i], &x, &y);
       rect.x += x;
     }
   }
   
   dc.SetTextForeground(*wxBLACK);
-  grid.DrawTextRectangle(dc, ")", rect); 
+  grid.DrawTextRectangle(dc, wxString(")"), rect); 
 }
 
 //======================================================================
