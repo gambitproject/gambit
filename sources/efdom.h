@@ -5,10 +5,19 @@
 //
 
 #include "efg.h"
-#include "efgciter.h"
-#include "rational.h"
 #include "gstatus.h"
-#include "gsm.h"
+
+class efgDominanceException : public gException {
+private:
+  gText m_description;
+
+public:
+  efgDominanceException(const gText &);
+  virtual ~efgDominanceException();
+
+  gText Description(void) const;
+};
+
 
 // The following computes whether action a dominates action b.
 // If `conditional' is false, then the computation is with respect

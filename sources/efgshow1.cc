@@ -642,32 +642,28 @@ void EfgShow::ChangeSupport(int what)
 }
 
 #include "wxstatus.h"
-EFSupport *ComputeDominated(EFSupport &S, bool strong,
-                            const gArray<int> &players, gOutput &tracefile, gStatus &status);
-
 #include "elimdomd.h"
+#include "efdom.h"
+
 void EfgShow::SolveElimDom(void)
 {
     ElimDomParamsDialog EDPD(ef.NumPlayers(), this);
 
-    if (EDPD.Completed() == wxOK)
-    {
-        EFSupport *sup = cur_sup;
-        wxStatus status(this, "Dominance Elimination");
+    if (EDPD.Completed() == wxOK) {
+      EFSupport *sup = cur_sup;
+      wxStatus status(this, "Dominance Elimination");
 
-        if (!EDPD.DomMixed())
-        {
-            if (EDPD.FindAll())
-            {
-                while ((sup = ComputeDominated(*sup, EDPD.DomStrong(), 
-                                               EDPD.Players(), gnull, status)))
-                {
+      if (!EDPD.DomMixed()) {
+	if (EDPD.FindAll()) {
+	  while ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false,
+						  EDPD.Players(), gnull, status)))
+	    {
                     supports.Append(sup);
                 }
             }
             else
             {
-                if ((sup = ComputeDominated(*sup, EDPD.DomStrong(), 
+                if ((sup = SupportWithoutDominatedOfPlayerList(*sup, EDPD.DomStrong(), false, 
                                             EDPD.Players(), gnull, status)))
                 {
                     supports.Append(sup);

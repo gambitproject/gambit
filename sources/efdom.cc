@@ -5,6 +5,20 @@
 //
 
 #include "efdom.h"
+#include "efgciter.h"
+
+efgDominanceException::efgDominanceException(const gText &p_description)
+  : m_description(p_description)
+{ }
+
+efgDominanceException::~efgDominanceException()
+{ }
+
+gText efgDominanceException::Description(void) const
+{
+  return m_description;
+}
+
 
 bool Dominates(const EFSupport &S, 
 	       const int pl, 
@@ -100,7 +114,7 @@ bool Dominates(const EFSupport &S,
 {
   const Infoset *infoset = a->BelongsTo();
   if (infoset != b->BelongsTo())
-    throw gclRuntimeError("Dominates(..) needs actions in same infoset.\n");
+    throw efgDominanceException("Dominates(..) needs actions in same infoset.\n");
   const EFPlayer *player = infoset->GetPlayer();
 
   return Dominates(S,player->GetNumber(),infoset->GetNumber(),
