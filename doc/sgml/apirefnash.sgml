@@ -1,0 +1,483 @@
+<sect1 id="apiref.nash">
+<title>Computing Nash equilibria</title>
+
+<para>
+</para>
+
+
+<sect2 id="apiref.nash.enummixedsolve">
+<title>EnumMixedSolve</title>
+<indexterm><primary>EnumMixedSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+EnumMixedSolve[support->NFSUPPORT, {stopAfter->0}, 
+               {precision->Float}, {nPivots<->0}, 
+               {time<->0.000000}, {traceFile<->(Output)}, 
+               {traceLevel->0}, {cliques->False}] =: LIST(MIXED) 
+EnumMixedSolve[support->EFSUPPORT, {asNfg->False}, 
+               {stopAfter->0}, {precision->Float}, 
+               {nPivots<->0}, {time<->0.000000}, 
+               {traceFile<->(Output)}, {traceLevel->0},
+               {cliques->False}] =: LIST(BEHAV) 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>EnumMixedSolve</function> returns the extreme points of the set
+of all Nash equilibria (pure or
+mixed) for a two person game using <parameter>support</parameter>.
+</para>
+
+<para>
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>:
+By default, this is <literal>False</literal>.  If it is specified to be
+<literal>True</literal>, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.  Note that this algorithm
+is only implemented on the normal form, so this parameter
+must always be specified and <literal>True</literal>. 
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>:
+By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>:
+Determines the precision of the computation. Default is
+floating point precision (<literal>Float</literal>). 
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>cliques</parameter>:
+If <literal>True</literal>, then the connected components and their maximal
+cliques are computed.  The output is printed to the console.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nash.enumpuresolve">
+<title>EnumPureSolve</title>
+<indexterm><primary>EnumPureSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+EnumPureSolve[support->NFSUPPORT, {stopAfter->0}, 
+              {time<->0.000000}, {traceFile<->(Output)},
+              {traceLevel->0}] =: LIST(MIXED) 
+EnumPureSolve[support->EFSUPPORT, {asNfg->False}, 
+              {stopAfter->0}, {precision->Float}, 
+              {time<->0.000000}, {traceFile<->(Output)}, 
+              {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+Returns all pure strategy Nash equilibria of a game using the given
+<function>support</function>.  The behavior
+of the algorithm may be modified by the following optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, this is <literal>False</literal>.  If it is specified to be
+<literal>True</literal>, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>:
+By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nash.lcpsolve">
+<title>LcpSolve</title>
+<indexterm><primary>LcpSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LcpSolve[support->NFSUPPORT, {stopAfter->1}, {precision->Float}, 
+         {nPivots<->0}, {time<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(MIXED) 
+LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->1}, 
+         {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LcpSolve</function>
+solves a game as a linear complementarity problem, using the
+Lemke-Howson algorithm for normal form games, and the
+Koller-Megiddo-von Stengel sequence form for extensive form games.  
+</para>
+
+<para>
+The behavior of the algorithm may be modified by the following
+optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter> By default, extensive forms are solved by the sequence form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the extensive
+form is converted to its corresponding reduced normal form, solved
+via Lemke-Howson, and the mixed strategy solutions converted back into
+behavior profiles.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Specifies the maximum number of equilibria to find.  The
+default is one. If set to zero then all equilibria reachable by the
+algorithm will be found.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter> Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nash.liapsolve">
+<title>LiapSolve</title>
+<indexterm><primary>LiapSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LiapSolve[start->BEHAV, {asNfg->False}, {stopAfter->1}, 
+          {nTries->10}, {accuracy->0.000000}, {time<->0}, 
+          {nEvals<->0}, {traceFile<->(Output)}, 
+          {traceLevel->0}] =: LIST(BEHAV)
+LiapSolve[start->MIXED, {stopAfter->1}, {nTries->10}, 
+          {accuracy->0.000000}, {time<->0}, {nEvals<->0}, 
+          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LiapSolve</function>
+searches for a Nash equilibrium by minimizing a Lyapunov function
+which is zero exactly at Nash equilibria.  The algorithm starts from
+the initial starting point determined by the parameter 
+<parameter>start</parameter>.
+The algorithm is not guaranteed to find a Nash equilibrium from any
+fixed starting point.  The algorithm thus incorporates the capability
+of restarting.  If a Nash equilibrium is not found, it will keep
+searching from new randomly chosen starting points until a Nash
+equilibrium has been found or the maximum number of tries (parameter
+<parameter>nTries</parameter>) is exceeded, whichever comes first.  The list of
+solutions found is returned.
+</para>
+
+<para>
+The behavior of the algorithm may be modified by specifying the following
+optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameteR> By default, extensive forms are solved in the extensive form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form game,
+solved, and the overall behavior profile reconstructed from these
+solutions.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>nTries</parameter>: Sets the maximum number of attempts at finding an
+equilibrium. Default is 10.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Sets the number of equilibria to find.  Default is 1.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>accuracy</parameter>: Resulting solutions are ``epsilon equilibria'' to at least
+this accuracy.  I. e., no unilateral deviation by any player will
+result in an improvement of more than the accuracy.  Default is
+1.0e-8.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nash.lpsolve">
+<title>LpSolve</title>
+<indexterm><primary>LpSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LpSolve[support->NFSUPPORT, {precision->Float}, {nPivots<->0}, 
+        {time<->0.000000}, {traceFile<->(Output)}, 
+        {traceLevel->0}] =: LIST(MIXED) 
+LpSolve[support->EFSUPPORT, {asNfg->False}, {precision->Float}, 
+        {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) L
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LpSolve</function>
+solves a two-person, constant-sum game for a Nash equilibrium as a linear
+program.  For extensive form games, the Koller-Megiddo-von Stengel
+sequence form is used; games not of perfect recall return the empty
+list of solutions.
+</para>
+
+<para>
+The behavior of the algorithm may be modified by the following optional
+parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, extensive forms are solved by the sequence form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form,
+solved as a linear program, and the mixed strategy solutions converted back
+into behavior profiles.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nash.polenumsolve">
+<title>PolEnumSolve</title>
+<indexterm><primary>PolEnumSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+PolEnumSolve[support->NFSUPPORT, {stopAfter->0}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
+PolEnumSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}, {singularSupps<->{  }}, 
+             {recurse->True}] =: LIST(BEHAV)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>PolEnumSolve</function>
+solves for all totally mixed Nash equilibrium on <parameter>support</parameter>.
+If
+<parameter>recurse</parameter> is <literal>True</literal>, the algorithm iterates through all
+sub-supports of <parameter>support</parameter> to find the full support equilibria on
+each sub-support.  Supports with singular solutions are reported in
+<parameter>singularSupps</parameter>.  These supports are skipped by the algorithm
+when determined to have singular solutions.
+</para>
+
+<para>
+On each sub-support, the algorithm starts with a cube containing the
+space of possible solutions and proceeds recursively.  The recursion
+step begins with a subcube.  The subcube is discarded if the cube is
+irrelevant in the sense of lying outside the space of possible
+solutions.  Otherwise a modified Newton's method is used to search for
+a solution in the subcube.  In the event that such a solution is
+found, Taylor's series information at the solution is used to inquire
+whether the solution is necessarily the unique solution in the
+subcube.  If Newton's method leaves the subcube before finding a
+solution, Taylor's series information at the center is used to inquire
+whether we can be sure that the subcube contains no solutions.  If
+neither of these procedures resolves the issue, the subcube is
+subdivided and this recursion is performed on each smaller subcube.
+</para>
+
+<para>
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>stopAfter</parameter> By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>asNfg</parameter> Only applicable to the extensive form version.  By default,
+this is <literal>False</literal>.  If it is specified to be <literal>True</literal>, the
+extensive form game is solved by recursively converting its marked
+subgames into normal form, solving, and reconstructing the solution as
+a behavior profile.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>singularSupps</parameter>:
+Returns a list of the supports which have singular solutions. 
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>recurse</parameter>: Recurses to find totally mixed equilibria on all
+subsupports of <parameter>support</parameter>.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nash.possiblenashsupports">
+<title>PossibleNashSupports</title>
+<indexterm><primary>PossibleNashSupports</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT) 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>PossibleNashSupports</function>
+returns the list of supports that could be the supports of Nash
+equilibria.  Specifically, the supports returned are those in which no
+pure strategy is weakly dominated by another strategy in the support,
+since such a pure strategy would have a lower expected payoff for any
+mixed strategy vector that assigned positive probability to all
+elements of the support and no other strategies, and no pure strategy
+in the support is strictly dominated (relative to the support) by a
+pure strategy outside the support.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nash.simpdivsolve">
+<title>SimpDivSolve</title>
+<indexterm><primary>SimpDivSolve</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SimpDivSolve[support->NFSUPPORT, {stopAfter->1}, 
+             {nRestarts->1}, {leashLength->0}, 
+             {precision->Float}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+SimpDivSolve[support->EFSUPPORT, {asNfg->False}, 
+             {stopAfter->1}, {nRestarts->1}, {leashLength->0}, 
+             {precision->Float}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SimpDivSolve</function>
+computes a Nash equilibrium for a game using a simplicial subdivision
+algorithm. 
+The behavior of the algorithm may be modified by several optional
+parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, this is <literal>False</literal>.
+If it is specified to be
+<literal>True</literal>, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.  Note that currently simplicial
+subdivision is only implemented on the normal form, so this parameter
+must always be specified and <literal>True</literal>.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Maximum number of equilibria to find. 
+Default is 1.  
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>nRestarts</parameter>: Number of restarts.  At each restart the mesh of the
+triangulation is halved. 
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>leashLength</parameter>: Sets the leash length. Default is 0, which results in no
+constraint, or no leash.  Note that if this parameter is set to a value
+different from 0, the algorithm is no longer guaranteed to converge.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+</sect1>
+

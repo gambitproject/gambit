@@ -96,23 +96,7 @@ information and plans.
 
 &apirefnfgsupport;
 
-<sect1 id="apiref.nash">
-<title>Computing Nash equilibria</title>
-
-<para>
-</para>
-
-&bifenummixedsolve;
-&bifenumpuresolve;
-&bifliapsolve;
-&biflpsolve;
-&biflcpsolve;
-&bifpolenumsolve;
-&bifpossiblenashsupports;
-&bifqresolve;
-&bifsimpdivsolve;
-
-</sect1>
+&apirefnash;
 
 <sect1 id="apiref.qre">
 <title>Computing quantal response equilibria</title>
