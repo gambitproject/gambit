@@ -1,7 +1,7 @@
 //#
 //# FILE: node.h -- Declaration of Node class
 //#
-//# $Id$
+//# @(#)node.h	1.2 6/5/95
 //#
 
 #ifndef NODE_H
@@ -39,11 +39,11 @@ class Node    {
     Node *GetParent(void) const    { return parent; }
     Node *NextSibling(void) const  
       { if (!parent)   return 0;
-	if (parent->children.Find(this) == parent->children.Length())
-	  return 0;
+	if (parent->children.Find((Node * const)this) == parent->children.Length())
+		return 0;
 	else
-	  return parent->children[parent->children.Find(this) + 1];
-      }
+		return parent->children[parent->children.Find((Node * const)this) + 1];
+			}
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
