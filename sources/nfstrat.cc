@@ -123,7 +123,7 @@ NFStrategySet &NFStrategySet::operator=(const NFStrategySet &s)
 
 bool NFStrategySet::operator==(const NFStrategySet &s)
 {
-  assert( strategies.Length() == s.strategies.Length());
+  if ( strategies.Length() != s.strategies.Length()) return (false);
   for (int i = 1; i <= strategies. Length() 
        && strategies[i] == s.strategies[i]; i++);
   if (i > strategies.Length()) return (true);
