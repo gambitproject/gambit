@@ -783,6 +783,7 @@ Portion* List_Portion::Remove( int index )
   Portion* p;
   p = _Value.Remove( index );
   p->ParentList() = 0;
+  return p;
 }
 
 int List_Portion::Length( void ) const
