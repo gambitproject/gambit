@@ -1798,7 +1798,7 @@ bool ListPortion::IsInteger(void) const
     Portion *p = (*rep->value)[i];
     if (p->Spec().ListDepth > 0)
       result = result && ((ListPortion *) p)->IsInteger();
-    else
+    else if (p->Spec().Type != porNULL)
       result = result && ((NumberPortion *) p)->Value().IsInteger();
   }
   return result;
