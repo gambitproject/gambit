@@ -1,8 +1,8 @@
-//#
-//# FILE: glist.h -- A generic array container class
-//#
-//# $Id$
-//#
+//
+// FILE: glist.h -- A generic array container class
+//
+// $Id$
+//
 
 #ifndef GLIST_H
 #define GLIST_H
@@ -10,10 +10,12 @@
 #include "gambitio.h"
 
 template <class T> class gList;
+template <class T> class gListIter;
 template <class T> class gSortList;
 
 template <class T> class gNode   {
 	friend class gList<T>;
+	friend class gListIter<T>;
 	friend class gSortList<T>;
 		private:
 		T data;
@@ -39,6 +41,7 @@ template <class T> class gNode   {
 //
 //
 template <class T> class gList  {
+  friend class gListIter<T>;
 	protected:
 		int length;
 		gNode<T> *head, *tail;
