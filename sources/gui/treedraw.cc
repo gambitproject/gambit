@@ -53,7 +53,7 @@ void TreeDrawSettings::SaveFont(const wxString &p_prefix,
 void TreeDrawSettings::LoadFont(const wxString &p_prefix,
 				const wxConfig &p_config, wxFont &p_font)
 {
-  int size, family, style, weight;
+  long size, family, style, weight;
   wxString face;
   p_config.Read(p_prefix + "Size", &size, 10);
   p_config.Read(p_prefix + "Family", &family, wxMODERN);
@@ -76,7 +76,7 @@ void TreeDrawSettings::SaveColor(const wxString &p_prefix,
 void TreeDrawSettings::LoadColor(const wxString &p_prefix,
 				 const wxConfig &p_config, wxColour &p_color)
 {
-  int red, green, blue;
+  long red, green, blue;
   p_config.Read(p_prefix + "Red", &red, p_color.Red());
   p_config.Read(p_prefix + "Green", &green, p_color.Green());
   p_config.Read(p_prefix + "Blue", &blue, p_color.Blue());

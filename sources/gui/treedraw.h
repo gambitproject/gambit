@@ -76,23 +76,23 @@ const int BRANCH_BELOW_VALUE = 3;
 class TreeDrawSettings {
 private:
   // Node styling
-  int m_nodeSize, m_terminalSpacing;
-  int m_chanceToken, m_playerToken, m_terminalToken;
+  long m_nodeSize, m_terminalSpacing;
+  long m_chanceToken, m_playerToken, m_terminalToken;
   bool m_rootReachable;
 
   // Branch styling
-  int m_branchLength, m_tineLength;
-  int m_branchStyle, m_branchLabels;
+  long m_branchLength, m_tineLength;
+  long m_branchStyle, m_branchLabels;
 
   // Information set styling
-  int m_infosetConnect, m_infosetJoin;
+  long m_infosetConnect, m_infosetJoin;
 
   // Subgame styling
-  int m_subgameStyle;
+  long m_subgameStyle;
 
   // Legend styling
-  int m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
-  int m_branchAboveLabel, m_branchBelowLabel;
+  long m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
+  long m_branchAboveLabel, m_branchBelowLabel;
 
   // Fonts for legends
   wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
@@ -102,7 +102,7 @@ private:
   wxColour m_chanceColor, m_terminalColor, m_playerColor[8];
 
   // Decimal places to display
-  int m_numDecimals;
+  long m_numDecimals;
 
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
   static void SaveFont(const wxString &, wxConfig &, const wxFont &);
@@ -115,67 +115,67 @@ public:
   TreeDrawSettings(void);
   
   // Node styling
-  int NodeSize(void) const { return m_nodeSize; }
-  void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
+  long NodeSize(void) const { return m_nodeSize; }
+  void SetNodeSize(long p_nodeSize) { m_nodeSize = p_nodeSize; }
 
-  int TerminalSpacing(void) const { return m_terminalSpacing; }
-  void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
+  long TerminalSpacing(void) const { return m_terminalSpacing; }
+  void SetTerminalSpacing(long p_spacing) { m_terminalSpacing = p_spacing; }
 
-  int ChanceToken(void) const { return m_chanceToken; }
-  void SetChanceToken(int p_token) { m_chanceToken = p_token; }
+  long ChanceToken(void) const { return m_chanceToken; }
+  void SetChanceToken(long p_token) { m_chanceToken = p_token; }
 
-  int PlayerToken(void) const { return m_playerToken; }
-  void SetPlayerToken(int p_token) { m_playerToken = p_token; }
+  long PlayerToken(void) const { return m_playerToken; }
+  void SetPlayerToken(long p_token) { m_playerToken = p_token; }
 
-  int TerminalToken(void) const { return m_terminalToken; }
-  void SetTerminalToken(int p_token) { m_terminalToken = p_token; }
+  long TerminalToken(void) const { return m_terminalToken; }
+  void SetTerminalToken(long p_token) { m_terminalToken = p_token; }
 
   bool RootReachable(void) const { return m_rootReachable; }
   void SetRootReachable(bool p_reachable) { m_rootReachable = p_reachable; }
 
 
   // Branch styling
-  int BranchLength(void) const { return m_branchLength; }
-  void SetBranchLength(int p_length) { m_branchLength = p_length; }
+  long BranchLength(void) const { return m_branchLength; }
+  void SetBranchLength(long p_length) { m_branchLength = p_length; }
 
-  int TineLength(void) const { return m_tineLength; }
-  void SetTineLength(int p_length) { m_tineLength = p_length; }
+  long TineLength(void) const { return m_tineLength; }
+  void SetTineLength(long p_length) { m_tineLength = p_length; }
 
-  int BranchStyle(void) const { return m_branchStyle; }
-  void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
+  long BranchStyle(void) const { return m_branchStyle; }
+  void SetBranchStyle(long p_style) { m_branchStyle = p_style; }
 
-  int BranchLabels(void) const { return m_branchLabels; }
-  void SetBranchLabels(int p_labels) { m_branchLabels = p_labels; }
+  long BranchLabels(void) const { return m_branchLabels; }
+  void SetBranchLabels(long p_labels) { m_branchLabels = p_labels; }
 
 
   // Information set styling
-  int InfosetConnect(void) const { return m_infosetConnect; }
-  void SetInfosetConnect(int p_connect) { m_infosetConnect = p_connect; }
+  long InfosetConnect(void) const { return m_infosetConnect; }
+  void SetInfosetConnect(long p_connect) { m_infosetConnect = p_connect; }
 
-  int InfosetJoin(void) const { return m_infosetJoin; }
-  void SetInfosetJoin(int p_join) { m_infosetJoin = p_join; }
+  long InfosetJoin(void) const { return m_infosetJoin; }
+  void SetInfosetJoin(long p_join) { m_infosetJoin = p_join; }
 
 
   // Subgame styling
-  int SubgameStyle(void) const { return m_subgameStyle; }
-  void SetSubgameStyle(int p_style) { m_subgameStyle = p_style; }
+  long SubgameStyle(void) const { return m_subgameStyle; }
+  void SetSubgameStyle(long p_style) { m_subgameStyle = p_style; }
 
 
   // Legends
-  int NodeAboveLabel(void) const { return m_nodeAboveLabel; }
-  void SetNodeAboveLabel(int p_label) { m_nodeAboveLabel = p_label; }
+  long NodeAboveLabel(void) const { return m_nodeAboveLabel; }
+  void SetNodeAboveLabel(long p_label) { m_nodeAboveLabel = p_label; }
 
-  int NodeBelowLabel(void) const { return m_nodeBelowLabel; }
-  void SetNodeBelowLabel(int p_label) { m_nodeBelowLabel = p_label; }
+  long NodeBelowLabel(void) const { return m_nodeBelowLabel; }
+  void SetNodeBelowLabel(long p_label) { m_nodeBelowLabel = p_label; }
 
-  int NodeRightLabel(void) const { return m_nodeRightLabel; }
-  void SetNodeRightLabel(int p_label) { m_nodeRightLabel = p_label; }
+  long NodeRightLabel(void) const { return m_nodeRightLabel; }
+  void SetNodeRightLabel(long p_label) { m_nodeRightLabel = p_label; }
 
-  int BranchAboveLabel(void) const { return m_branchAboveLabel; }
-  void SetBranchAboveLabel(int p_label) { m_branchAboveLabel = p_label; }
+  long BranchAboveLabel(void) const { return m_branchAboveLabel; }
+  void SetBranchAboveLabel(long p_label) { m_branchAboveLabel = p_label; }
 
-  int BranchBelowLabel(void) const { return m_branchBelowLabel; }
-  void SetBranchBelowLabel(int p_label) { m_branchBelowLabel = p_label; }
+  long BranchBelowLabel(void) const { return m_branchBelowLabel; }
+  void SetBranchBelowLabel(long p_label) { m_branchBelowLabel = p_label; }
 
   // Fonts 
   const wxFont &NodeAboveFont(void) const { return m_nodeAboveFont; }
@@ -200,13 +200,13 @@ public:
   const wxColour &TerminalColor(void) const { return m_terminalColor; }
   void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
 
-  const wxColour &PlayerColor(int pl) const { return m_playerColor[pl-1]; }
-  void SetPlayerColor(int pl, const wxColour &p_color)
+  const wxColour &PlayerColor(long pl) const { return m_playerColor[pl-1]; }
+  void SetPlayerColor(long pl, const wxColour &p_color)
   { m_playerColor[pl-1] = p_color; }
 
   // Decimals
-  int NumDecimals(void) const { return m_numDecimals; }
-  void SetNumDecimals(int p_decimals) { m_numDecimals = p_decimals; }
+  long NumDecimals(void) const { return m_numDecimals; }
+  void SetNumDecimals(long p_decimals) { m_numDecimals = p_decimals; }
 
   // Read and write config files
   void SaveOptions(void) const;
