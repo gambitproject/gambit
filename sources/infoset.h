@@ -29,10 +29,9 @@ class Action   {
     int number;
     gText name;
     Infoset *owner;
-    void *solution;
 
     Action(int br, const gText &n, Infoset *s)
-      : number(br), name(n), owner(s), solution(0)   { }
+      : number(br), name(n), owner(s)  { }
     ~Action()   { }
 
   public:
@@ -60,7 +59,6 @@ class Infoset   {
     gBlock<Action *> actions;
     gBlock<Node *> members;
     int flag, whichbranch;
-    void *solution;
     
     Infoset(FullEfg *e, int n, EFPlayer *p, int br);
     virtual ~Infoset();  

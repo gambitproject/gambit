@@ -32,26 +32,22 @@ class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
   friend BehavSolution;
-public:
-  struct BehavInfoset;
-  struct BehavAction;
 protected:
   const Efg::Game *m_efg;
   EFSupport m_support;
-  gArray<BehavInfoset *> m_isets;
   mutable bool m_cached_data;
 
-  // structures for storing cached data
+  // structures for storing cached data: nodes
   mutable gVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
   mutable gMatrix<T> m_nodeValues;
 
-  //
-  // FUNCTIONS FOR INSTALLATION AND INITIALIZATION
-  //
-  // Installation sets back-pointers in EFG to point to relevant 
-  // stuff in BehavProfile
+  // structures for storing cached data: information sets
+  mutable gPVector<T> m_infosetValues;
 
-  void InstallMe(void) const;  
+  // structures for storing cached data: actions
+  mutable gDPVector<T> m_actionValues;   // aka conditional payoffs
+  mutable gDPVector<T> m_gripe;
+
   void InitPayoffs(void) const;
   void InitProfile(void);
 
@@ -75,21 +71,21 @@ protected:
   T &NodeValue(const Node *node, int pl)
     { return m_nodeValues(node->number, pl); }
 
-  const T &IsetProb(const Infoset *iset) const;
-  T &IsetProb(const Infoset *iset);
+  T IsetProb(const Infoset *iset) const;
 
   const T &IsetValue(const Infoset *iset) const;
   T &IsetValue(const Infoset *iset);
 
-  inline const T &ActionValue(const Action * act) const 
-    { return ((BehavAction *)(act->solution))->condPayoff;}	
-  inline T &ActionValue(const Action * act)
-    { return ((BehavAction *)(act->solution))->condPayoff;}
+  const T &ActionValue(const Action *act) const 
+    { return m_actionValues(act->BelongsTo()->GetPlayer()->GetNumber(),
+			    act->BelongsTo()->GetNumber(),
+			    act->number); }
+  T &ActionValue(const Action *act)
+    { return m_actionValues(act->BelongsTo()->GetPlayer()->GetNumber(),
+			    act->BelongsTo()->GetNumber(),
+			    act->number); }
   
-  inline const T &ActionProb(const Action *act) const 
-    { return *(((BehavAction *)(act->solution))->probability);}	
-  inline T &ActionProb(const Action *act) 
-    { return *(((BehavAction *)(act->solution))->probability);}	
+  T ActionProb(const Action *act) const;
 
   const T &Regret(const Action * act) const;
   T &Regret(const Action *);
@@ -114,27 +110,6 @@ public:
     gText Description(void) const;
   };
 
-  //
-  // STRUCTS FOR STORING SOLUTION DATA
-  //
-
-  struct BehavInfoset {
-    Infoset *iset;
-    gArray<BehavAction *> actions;
-    T value, prob;
-    
-    BehavInfoset(const EFSupport &s, Infoset *i, int pl);
-    ~BehavInfoset();
-  };
-  struct BehavAction {
-    Action *action;
-    T *probability;
-    T condPayoff, gripe;
-    
-    BehavAction(Action *act, int pl);
-    ~BehavAction();
-  };
-
   // CONSTRUCTORS, DESTRUCTOR
 
   BehavProfile(const EFSupport &);
@@ -151,9 +126,7 @@ public:
 
   bool operator==(const BehavProfile<T> &) const;
 
-  // INSTALLATION, INITIALIZATION, VALIDATION
-
-  bool IsInstalled(void) const;  
+  // INITIALIZATION, VALIDATION
   inline void Invalidate(void) const {m_cached_data=false;}
   virtual bool IsAssessment(void) const { return false; }
   void Centroid(void) const;
@@ -166,9 +139,9 @@ public:
   const T &GetRealizProb(const Node *node);
   const T &GetBeliefProb(const Node *node);
   gVector<T> GetNodeValue(const Node *node);
-  const T &GetIsetProb(const Infoset *iset);
+  T GetIsetProb(const Infoset *iset);
   const T &GetIsetValue(const Infoset *iset);
-  const T &GetActionProb(const Action *act) const;
+  T GetActionProb(const Action *act) const;
   const T &GetActionValue(const Action *act);
   const T &GetRegret(const Action *act);
 

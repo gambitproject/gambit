@@ -92,8 +92,7 @@ bool Infoset::Precedes(const Node * n) const
 }
 
 Infoset::Infoset(FullEfg *e, int n, EFPlayer *p, int br)
-  : E(e), number(n), player(p), actions(br), flag(0), 
-    solution(0) 
+  : E(e), number(n), player(p), actions(br), flag(0) 
 {
   while (br)   {
     actions[br] = new Action(br, "", this);
@@ -747,6 +746,7 @@ void FullEfg::SetPayoff(const Efg::Outcome &p_outcome, int pl,
   m_revision++;
   m_dirty = true;
   outcomes[GetOutcomeID(p_outcome)]->m_payoffs[pl] = value;
+  outcomes[GetOutcomeID(p_outcome)]->m_doublePayoffs[pl] = (double) value;
 }
 
 gNumber FullEfg::Payoff(const Efg::Outcome &p_outcome,
@@ -1778,17 +1778,6 @@ void FullEfg::Payoff(const gArray<gArray<int> *> &profile,
   for (int i = 1; i <= payoff.Length(); i++)
     payoff[i] = 0;
   Payoff(root, 1, profile, payoff);
-}
-
-void FullEfg::InitPayoffs(void) const 
-{
-  if (m_outcome_revision == RevisionNumber()) return;
-
-  for (int outc = 1; outc <= NumOutcomes(); outc++) {
-    for (int pl = 1; pl <= NumPlayers(); pl++) {
-      outcomes[outc]->m_doublePayoffs[pl] = outcomes[outc]->m_payoffs[pl];
-    }
-  }
 }
 
 Nfg *FullEfg::AssociatedNfg(void) const

@@ -417,14 +417,16 @@ const gNumber &BehavSolution::operator()(Action *p_action) const
 		      p_action->GetNumber());
 }
 
-const gNumber &BehavSolution::operator[](Action *p_action) const
+gNumber BehavSolution::operator[](Action *p_action) const
 {
   return m_profile->ActionProb(p_action);
 }
 
 gNumber &BehavSolution::operator[](Action *p_action)
 {
-  return m_profile->ActionProb(p_action);
+  return (*m_profile)(p_action->BelongsTo()->GetPlayer()->GetNumber(),
+		      p_action->BelongsTo()->GetNumber(),
+		      p_action->GetNumber());
 }
 
 BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)

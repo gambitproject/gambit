@@ -46,17 +46,6 @@ template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
 
 template class PureBehavProfile<gNumber>;
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
-template class gArray<BehavProfile<double>::BehavAction *>;
-template class gArray<BehavProfile<gRational>::BehavAction *>;
-template class gArray<BehavProfile<gNumber>::BehavAction *>;
-
-template class gArray<BehavProfile<double>::BehavInfoset *>;
-template class gArray<BehavProfile<gRational>::BehavInfoset *>;
-template class gArray<BehavProfile<gNumber>::BehavInfoset *>;
-
 #include "base/glist.imp"
 
 template class gList<BehavProfile<double> >;

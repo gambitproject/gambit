@@ -72,7 +72,7 @@ public:
   void Set(Action *, const gNumber &);
   void Set(int, int, int, const gNumber &);
   const gNumber &operator()(Action *) const;
-  const gNumber &operator[](Action *) const;
+  gNumber operator[](Action *) const;
   gNumber &operator[](Action *);
 
   BehavSolution &operator+=(const BehavSolution &);

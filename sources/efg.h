@@ -53,16 +53,10 @@ namespace Efg {
     { return p_file; }
 
   class Game {
-    friend class BehavProfile<double>;
-    friend class BehavProfile<gRational>;
-    friend class BehavProfile<gNumber>;
   protected:
     int GetOutcomeID(const Outcome &p_outcome) const
       { return p_outcome.GetID(); }
 
-    // currently "installed" profile
-    mutable void *m_profile;
-    
   public:
     class Exception : public gException   {
     public:
@@ -70,7 +64,6 @@ namespace Efg {
       gText Description(void) const    { return "Efg error"; }
     };
 
-    Game(void) : m_profile(0) { }
     virtual ~Game() { }
     
     virtual const gText &GetTitle(void) const = 0;
@@ -122,7 +115,6 @@ namespace Efg {
     virtual gNumber MinPayoff(int pl = 0) const = 0;
     virtual gNumber MaxPayoff(int pl = 0) const = 0;
     virtual bool IsConstSum(void) const = 0;
-    virtual void InitPayoffs(void) const = 0;
 
     virtual void SetPayoff(const Outcome &, int pl, const gNumber &value) = 0;
     virtual gNumber Payoff(const Outcome &, const EFPlayer *) const = 0;
