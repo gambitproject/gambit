@@ -678,6 +678,9 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       player->AddInfoset((*p_nodeData)->m_infoset, infoset);
     }
 
+    // Do this because of the semantics of InsertMove()
+    p_node = p_node.GetParent();
+
     *(p_nodeData) = (*(p_nodeData))->m_next;
     for (int i = 1; i <= p_node.NumChildren(); i++) {
       BuildSubtree(p_efg, p_node.GetChild(i), p_treeData, p_nodeData);
@@ -701,6 +704,9 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
 			    (*p_nodeData)->m_infosetData->m_probs[act]);
       }
     }
+
+    // Do this because of the semantics of InsertMove()
+    p_node = p_node.GetParent();
 
     *(p_nodeData) = (*(p_nodeData))->m_next;
     for (int i = 1; i <= p_node.NumChildren(); i++) {
