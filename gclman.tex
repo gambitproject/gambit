@@ -7,6 +7,7 @@
 \renewcommand{\baselinestretch}{.9}
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
+\input{psfig}
 \begin{document}
 
 
@@ -1185,7 +1186,7 @@ will save the normal form game \verb+n+ to the file
 \verb+filename.nfg+.  It is recommended that the
 filename extension \verb+.nfg+ be used when saving normal form games, as
 the Gambit Graphics user interface recognizes this extension as
-containing normal form games.  Once a noirmal form game has been
+containing normal form games.  Once a normal form game has been
 saved to an external file, it can be loaded by the command
 \verb+LoadNfg+, as follows:
 
@@ -4602,6 +4603,707 @@ output stream \verb+output+.
 %--Z--
 
 \end{itemize}
+
+\newpage
+\section{Sample GCL Programs}
+
+
+\subsection{A GCL program to build and solve the holdout game}
+
+The following GCL program, in the file ``holdout.gcl'' defines a user
+defined function
+
+\protect \large \begin{verbatim}
+  CreateHoldout[ stages->INTEGER, prob1->FLOAT, prob2->FLOAT, 
+                 disc->FLOAT, b->FLOAT] =: EFG
+\end{verbatim} \normalsize
+
+\noindent
+which can be used to create a finite horizon version of the
+``holdout'' game studied in McKelvey and Palfrey, ``Endogeneity of
+alternating offers in a bargaining game,'' forthcoming, JET.  To use
+the function, include the file ``holdout.gcl'' and then type
+\verb+CreateHoldout[n,r1,r2,d,b]+, where \verb+n+ is the number of
+stages, \verb+r1+ and \verb+r2+ are the prior probabilities that
+players 1 and 2 are a low benefit type, \verb+d+ is the common
+discount factor, and \verb+b+ is the common benefit of giving in to
+the high type.  For example, the following sequence of commands
+
+\begin{verbatim}
+  Include["holdout.gcl"]
+  e:= CreateHoldout[1, .5, .5, .9, .5]
+  SaveEfg[e,"holdout1.efg"]
+  e:= CreateHoldout[7, .5, .5, .9, .5]
+  SaveEfg[e,"holdout7.efg"]
+\end{verbatim}
+
+\noindent
+creates and saves a one stage holdout game and a seven stage holdout
+game. These can be loaded by the GUI, and Figures 1 and 2 display the
+resulting games, as displayed by the GUI.  The subsequent file
+``eaotest.gcl'' contains a GCL program that changes the parameters
+\verb+r1+ and \verb+r2+, and then solves for {\bf all} Nash equilibria
+of the resulting seven stage game to check various theoretical predictions.
+
+\begin{figure}[htp]
+\psfig{figure=gclfig1.ps,height=3in,width=6in}
+\caption{One stage holdout game}
+\end{figure}
+\begin{figure}[htp]
+\psfig{figure=gclfig2.ps,height=3.5in}
+\caption{Seven stage holdout game}
+\end{figure}
+
+\newpage
+\noindent
+This is the contents of the file "holdout.gcl" which defines the
+function ``CreateHoldout[]'' used in the above programs.
+
+\begin{verbatim}
+//
+// A gcl program to construct a multi stage holdout game
+//
+
+NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(ISET), \
+out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
+  // build tree
+i1:=isets[[1]];
+i2:=isets[[2]];
+AppendNode[node, i1 ];
+AppendNode[node#1, i2 ];
+If[NumActions[i1]>1, AppendNode[node#2,i2] ];
+  // attach outcomes
+AttachOutcome[node#1#1, out[[1]] ]; 
+If[NumActions[i2]>1, AttachOutcome[node#1#2, out[[2]] ] ];
+If[NumActions[i1]>1, 
+  AttachOutcome[node#2#1, out[[3]] ];
+  If[NumActions[i2]>1, AttachOutcome[node#2#2, out[[4]] ] ];
+  ];
+  // recurse to next stage
+If[NumActions[i1]>1 || NumActions[i2]>1,
+  If[stages>1,
+    stages;
+    diset := NewInfoset[Chance[efg], {"",""} , "Discount"];
+    SetChanceProbs[diset,{1.0-disc,disc}];
+    AppendNode[node#1#1,diset];
+    MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc];
+    ];
+  ];
+]
+
+NewFunction[CreateHoldout[ stages->INTEGER,
+  prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
+e := NewEfg[];
+n := RootNode[e];
+  // create chance moves
+ciset1 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 1's type"];
+ciset2 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 2's type"];
+SetChanceProbs[ciset1,{prob1,1.0-prob1}];
+SetChanceProbs[ciset2,{prob2,1.0-prob2}];
+AppendNode[n, ciset1 ];
+AppendNode[n#1, ciset2 ];
+AppendNode[n#2, ciset2 ];
+  // Define players, actions, and outcomes
+pl1 := NewPlayer[e,"Player 1"];
+pl2 := NewPlayer[e,"Player 2"];
+is1w := NewInfoset[ pl1 , {"H", "G"} ];
+is1s := NewInfoset[ pl1 , {"H"} ];
+is2w := NewInfoset[ pl2 , {"H", "G"} ];
+is2s := NewInfoset[ pl2 , {"H"} ];
+out1:= SetPayoff[NewOutcome[e],{0.0, 0.0}];
+out2:= SetPayoff[NewOutcome[e],{1.0, b}];
+out3:= SetPayoff[NewOutcome[e],{b, 1.0}];
+out4:= SetPayoff[NewOutcome[e],{b,b}];
+outs:={out1,out2,out3,out4};
+
+  // Create multi stage games
+MultiStageHoldout[ e, n#1#1, {is1w,is2w}, outs, stages, disc];
+MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
+MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
+MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
+nonterm:=NonterminalNodes[e];
+  // Make perfect recall 
+For[i:=1,i<=Length[nonterm],i:=i+1,
+  p:=Player[nonterm[[i]] ];
+  If[p!=Chance[e],
+    Reveal[Infoset[nonterm[[i]] ],{p}]; ];
+  ];	
+e
+]
+\end{verbatim}
+
+\newpage
+\noindent
+This program solves for all equilibria of the seven stage holdout game
+illustrated in Figure 2, using various parameters for the chance
+moves, to check various theoretical predictions. 
+\begin{verbatim}
+  //
+  // A gcl program to check theoretical results from McKelvey Palfrey 
+  // paper "Endogeneity of Alternating Offers,"  forthcoming JET.  
+  //
+
+  // Include["holdout.gcl"]
+
+  // First define function to compute all Nash equilibria for 
+  // two person extensive form game
+
+  NewFunction[AllNash[e<->EFG],
+    n:=Nfg[e];
+    s:=ElimAllDom[n,strong->True];
+    m:=EnumMixedSolve[s,stopAfter->0];
+    b:=Behav[m,e];
+  ];
+
+  // Create seven stage holdout game
+
+  b:=.5;
+  del:=.9;
+  e:= CreateHoldout[7, .5, .5, del, b]
+
+  // set variables to refer to the chance moves, 
+
+  n:=RootNode[e];
+  i1:=Infoset[n];
+  i2:=Infoset[n#1];
+
+  // open outfile and set output format
+
+  o:=Output["eaotest.out"];
+  SetFormat[listLF->2,precis->3,listCommas->False,listIndent->0];
+
+  // define the constants demarcating the regions of equilibria
+
+  R := (1.0-b)/(1.0-del*b);
+  Q := (del-b) / (del*(1.0-del*b));
+
+  o << "\nb: " << b << " del: " << del;
+  o << " R: " << R << " Q: " << Q << "\n";
+
+  // Now, check various regions to make sure they have the right 
+  // kinds of equilibria predicted by the theorems.  
+
+  o << "\nIn these regions there should be just one equilibrium,";
+  o << "\nwith full alternating offers, lasting J innings:\n ";
+
+  For[J:=2,J<=4,J:=J+1,
+    r1:=(Q^J+Q^(J-1))/2.0;
+    r2:=(R*Q^(J-1))/2.0;
+    SetChanceProbs[i1,{1.0-r1,r1}];
+    SetChanceProbs[i2,{1.0-r2,r2}];
+    s:=AllNash[e];
+    o << "\nJ: " << J << " r1: " << r1 << "  r2: " << r2;
+    o << "\ns: " << s;
+  ];
+
+  o << "\n\nIn these regions there may be multiple equilibria. At least ";
+  o << "\none should be full simultaneous offer, lasting M innings:\n";
+
+  For[M:=3,M<=4,M:=M+1,
+    r1:=(R^(M+1)+R^M)/2.0;
+    r2:=r1;
+    SetChanceProbs[i1,{1.0-r1,r1}];
+    SetChanceProbs[i2,{1.0-r2,r2}];
+    s:=AllNash[e];
+    o << "\nM: " << M << " r1: " << r1 << "  r2: " << r2;
+    o << "\ns: " << s;
+  ];
+\end{verbatim}
+
+\newpage
+\noindent
+Following is the output from running the above program:
+\begin{verbatim}
+b: 0.500 del: 0.900 R: 0.909 Q: 0.808
+
+In these regions there should be just one equilibrium,
+with full alternating offers, lasting J innings:
+ 
+J: 2 r1: 0.731  r2: 0.367
+s: {
+(Behav) { { 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 0.000 1.000
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+{ { 0.138 0.862 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+}
+J: 3 r1: 0.590  r2: 0.270
+s: {
+(Behav) { { 1.000 0.000 }{ 0.532 0.468 }{ 1.000 0.000 }{ 0.288 0.712
+}{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 }{ 1.000 } }
+{ { 0.196 0.804 }{ 1.000 0.000 }{ 0.447 0.553 }{ 1.000 0.000 
+}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+}
+J: 4 r1: 0.477  r2: 0.198
+s: {
+(Behav) { { 1.000 0.000 }{ 0.633 0.367 }{ 1.000 0.000 }{ 0.532 0.468
+}{ 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 1.000 } }
+{ { 0.605 0.395 }{ 1.000 0.000 }{ 0.730 0.270 }{ 1.000 0.000 
+}{ 0.701 0.299 }{ 1.000 0.000 }{ 0.000 1.000 }{ 1.000 } } 
+}
+
+In these regions there may be multiple equilibria. At least 
+one should be full simultaneous offer, lasting M innings:
+
+M: 3 r1: 0.717  r2: 0.717
+s: {
+(Behav) { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+{ { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+(Behav) { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+{ { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000 
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+(Behav) { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+{ { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000 
+}{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+}
+M: 4 r1: 0.652  r2: 0.652
+s: {
+(Behav) { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688
+}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
+{ { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688 
+}{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
+}
+\end{verbatim}
+
+\newpage
+\subsection{A GCL program for econometric estimation}  
+
+This section gives a GCL program for doing maximum likelihood fits of
+experimental data to the quantal response equilibrium (QRE) and one
+sided error model (OSEM).  The following files define a GCL function 
+
+\protect \large \begin{verbatim}
+  EGobit[filename->TEXT] 
+\end{verbatim} \normalsize
+
+\noindent
+which takes as input an extensive form in the file ``filename.efg'',
+and experimental data from the file ``filename.agg'', and produces as
+output ``filename.out'' and ``filename.pxi''.  The file
+``filename.out'' contains the maximum likelihood estimates of the data
+for the QRE and the OSEM models, along with 95\% confidence intervals
+on the parameters of the models, $\lambda$ and $\gamma$, respectively.
+The file ``filename.pxi'' contains the ``pxi'' file of the QRE
+correspondence, which can be viewed and printed to a postscript file
+by the separate program PXI program, written by Eugene Grayver.  
+
+The program is illustrated on an experiment (Game 3) of Brandts and
+Holt, ``Adjustment patterns and equilibrium selection in experimental
+signaling games,'' IJGT 22 (1993): 279-302.  The extensive form of the
+game in ``bhg3.efg'' is displayed in Figure 3:
+
+\begin{figure}[htp]
+\centerline{\psfig{figure=gclfig3.ps,height=4in,width=5in}}
+\caption{Brandts Holt Experimental Game 3}
+\end{figure}
+
+\noindent
+The input data file ``bhg.agg'' follows:
+
+\begin{verbatim}
+  .01 0.70 .01
+  1.0 0.0  1.0 0.0  1.0 0.0 0.0  0.0 1.0 0.0 
+  1
+  32 1 18 21 48 2 0  4 18 0
+\end{verbatim}
+\noindent
+The program is run by typing 
+
+\begin{verbatim}
+  Include["egobit.gcl"]
+  EGobit["bhg3"]
+\end{verbatim}
+
+\noindent
+Figure 4 displays the pxi file, and the following output is in
+``bhg3.out'':
+
+\begin{verbatim}
+  Using Nash: (Behav) { { 1.000000 0.000000 }{ 1.000000 0.000000 } }
+  { { 1.000000 0.000000 0.000000 }{ 0.000000 1.000000 0.000000 } }
+
+  minLam: 0.010000 maxLam: 0.700000 delLam: 0.010000
+  delGam: 0.001000 eps: 0.000000
+
+
+    Player  Infoset   n         f       QRE      OSEM
+
+        1      1     32      0.9697    0.9462    0.8375
+        1      1      1      0.0303    0.0538    0.1625
+        1      2     18      0.4615    0.6014    0.8375
+        1      2     21      0.5385    0.3986    0.1625
+        2      1     48      0.9600    0.6860    0.7833
+        2      1      2      0.0400    0.1779    0.1083
+        2      1      0      0.0000    0.1361    0.1083
+        2      2      4      0.1818    0.1086    0.1083
+        2      2     18      0.8182    0.7186    0.7833
+        2      2      0      0.0000    0.1728    0.1083
+  Lam\Gam                    0.0000    0.1078    0.6750
+  Lam\Gam_lo                           0.0957    0.5590
+  Lam\Gam_hi                           0.1252    0.7730
+  LogLik                              -69.529   -78.295
+\end{verbatim}
+
+
+\newpage
+\begin{figure}[htp]
+\centerline{\psfig{figure=gclfig4a.ps,height=3.5in,width=5.5in}}
+\vspace{.5in}
+\centerline{\psfig{figure=gclfig4b.ps,height=3.25in,width=6.5in}}
+\caption{BH (1993) Game 3. Sequential vs. Intuitive}
+\end{figure}
+
+\newpage
+\noindent
+The program is contained in three files, whose contents follow.  First
+is the contents of ``egobit.gcl'':
+
+\begin{verbatim}
+  //
+  //  This gcl program estimates the principal branch of
+  //  the QRE and corresponding OSEM for a given extensive 
+  //  form game, finds MLE fits to experimental data 
+  //  and computes 95% confidence intervals for each model. 
+  //
+  //  The extensive form is assumed to be in filename.efg
+  //  and the data is in filename.agg.  The first line
+  //  in the agg file should contain the bounds for lambda 
+  //  The second line should contain an equilibrium selection 
+  //  to be used by the OSEM model. The third line gives 
+  //  the number of data sets
+  //  for which the estimation is to be conducted.  This 
+  //  should be followed by at least that many sets of data.
+  //
+  //  The output is put in filename.out, and the pxifile is put in
+  //  filename.pxi
+  //
+  
+  Include["egobitml.gcl"];
+
+  NewFunction[EGobit[filename->TEXT],
+    //  Load efg and open agg file for reading
+    e := LoadEfg[filename&".efg"]
+    in := Input[filename&".agg"]
+
+    // read in range of lambdas for QRE estimation
+    in >> min >> max >> del;
+
+    // read in nash equilibrium selection to be used for OSEM model
+    nash :=Centroid[e];
+    datlist := Integer[ListForm[nash]];
+    in >> nash;
+
+    //  Load data into dat
+    in >> ndat;
+    dat := {};
+    For[i := 1, i <= ndat, i := i+1,
+      dat := dat & {datlist};
+      in >> dat[[i]];
+    ];
+
+    pxi := filename&".pxi";
+    out := filename&".out";
+
+    EGobitML[e,dat,min,max,del,out,pxi,nash];
+  ];
+\end{verbatim}
+
+\newpage
+\noindent
+Following is the contents of ``egobitml.gcl'':
+
+\begin{verbatim}
+//
+// A gcl program to estimate the principal branch of the 
+// QRE for an extensive form game, and find the maximum likelihood 
+// estimate of lambda for a list of aggregate experimental data
+// 
+// e is the normal form game
+// dat is a list of observations.  Each observation is in the form of  
+//      a LIST(LIST(LIST(INTEGER))), where the integers correspond to
+//	the number times the corresponding action (for that player in
+//	that information set) was chosen.  So for a 2 player game where
+//	each player has two information sets with two actions each, the 
+//      element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
+//	used to indicate that player 1 chose the first action at the
+//	first information set 43 times, etc.  
+// min is the minimum value for Lambda used by GobitSolve[]
+// max is the maximum value for Lambda used by GobitSolve[]
+// del is the increment for Lambda used by GobitSolve[]
+// out is the name of a file in which the results will be written
+// pxi is the name of a file where the pxi file is written
+// nash is a Nash equilibrium selection that is passed for use
+//     in estimating the OSEM model 
+
+Include["loglike.gcl"];
+
+NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
+  del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
+  o := Output[out];
+  gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+    pxifile->pxi];
+
+  size := Length[gob];
+
+  eps:=0.0000000001;
+  For[i := size , i>=1 , i:=i-1,
+    If[GobitValue[gob[[i]]] > eps, 
+      o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob[[i]]];
+      gob:=Remove[gob,i]; 
+    ];
+  ];
+  lamlist:=GobitLambda[gob];
+  size := Length[gob];
+
+  goblist := ListForm[gob];
+  exdat := Float[dat];
+
+  numactions := Length[ListForm[nash]];
+  numisets := Length[numactions];
+  numplayers := Length[numisets];
+
+  o << "\nUsing Nash: " << nash << "\n";
+  o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
+
+  delgam := .001;
+  o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
+
+  gamsize := Integer[1./delgam] - 1;
+  gamlist := List[delgam, gamsize, delgam];
+  
+  c := Centroid[e];
+  n := nash
+  osem := (1.0-gamlist)*c + gamlist*n;
+  osemlist := ListForm[osem];
+
+  // compute maximum likelihoods and pretty-print results to output file
+
+  SetFormat[quote->False];
+
+  ldat := Length[Length[Length[Length[dat]]]];
+
+  For[ii:=1, ii<=ldat, ii:=ii+1,
+    goblogl := LogLike[exdat[[ii]],gob];
+    osemlogl := LogLike[exdat[[ii]], osem];
+    header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
+    o << header;
+
+    gobllmax := ArgMax[goblogl];
+    osemllmax := ArgMax[osemlogl];
+    For[i:=1, i<=numplayers, i:=i+1,
+      For[j:=1, j<=numisets[[i]], j:=j+1,
+        sum:=Sum[exdat[[ii]][[i]][[j]]];
+        For[k:=1,k<=numactions[[i]][[j]],k:=k+1,
+          nob:=exdat[[ii]][[i]][[j]][[k]];
+          SetFormat[precis->0,width->7];
+          o << "\n" << i << j << nob;
+          SetFormat[precis->4,width->10];
+          If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
+          o << goblist[[gobllmax]][[i]][[j]][[k]];
+          o << osemlist[[osemllmax]][[i]][[j]][[k]];
+        ];
+      ];
+    ];
+    LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
+    GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
+    o << "\nLam\Gam                " << 0.0 <<  lamlist[[gobllmax]] << gamlist[[osemllmax]];
+    o << "\nLam\Gam_lo                       " << LamCI[[1]] << GamCI[[1]];
+    o << "\nLam\Gam_hi                       " << LamCI[[2]] << GamCI[[2]];
+    SetFormat[precis->3, width->10];
+    o << "\nLogLik                           " << goblogl[[gobllmax]] << osemlogl[[osemllmax]] << "\n";
+  ];
+];
+\end{verbatim}
+
+\noindent
+Following is the contents of ``loglike.gcl'':
+
+\begin{verbatim}
+//
+// Some user defined functions for maximum likelihood estimation
+// 
+
+// sum of components of a vector
+
+NewFunction[ Sum[l->LIST(FLOAT)], Dot[l,List[1.0,Length[l] ]];];
+
+// log likelihood of the data for a given solution
+// note that the data must be of type MIXED
+// So if data is LIST(LIST(INTEGER)), then call function by  
+// LogLik[Mixed[n,Float[data]],sol]
+
+NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
+
+NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
+
+// log likelihood of the data for a given solution
+// note that the data must be of type BEHAV
+// So if data is LIST(LIST(LIST(INTEGER))), then call function by  
+// LogLik[Behav[n,Float[data]],sol]
+
+NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+// This function computes confidence intervals for a solution
+// Here list is the list of likelihood values, lam is the list of parameters
+// (assumed to have the same length as list, range is 1/2 of the chi^2 value
+// (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
+// maximum (assumed correct) 
+
+NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER],
+  newlist := list -(list[[llmaxind]]-range);
+  t1:={};
+  t2:={};
+  llsize := Length[lam];
+  For[z:=2, z<=llsize, z:=z+1,
+    If[newlist[[z]]>=0.0, 
+    t1:=t1&{z}; 
+    t2:=t2&{lam[[z]]};];
+  ];
+  flag := True;
+  t1:=t1-(t1[[1]]-1);
+  s1:=Length[t1];
+  If[s1 != t1[[s1]], flag:=False];
+  lhilo:={t2[[1]],t2[[s1]]};
+];
+
+\end{verbatim}
+
+\newpage
+\subsection{A GCL program to build the chain store game}
+
+The following GCL program, in the file ``cs.gcl'' defines a user
+defined function
+
+\protect \large \begin{verbatim}
+CreateChainStore[num_stages->INTEGER,prob->FLOAT] =: EFG
+\end{verbatim} \normalsize
+
+\noindent
+which can be used to create a chain store game with any number of
+stages (entrants) and any probability of the incumbent being tough.
+To use the function, include the file ``cs.gcl'' and they type
+\verb+CreateChainStore[n,p]+, where For \verb+n+ is the number of
+entrants, and \verb+p+ is the probability of the incumbent being
+tough. For example, 
+
+\begin{verbatim}
+Include["cs.gcl"]
+e:= CreateChainStore[2,0.5]
+SaveEfg[e,"cs2.efg"]
+e:= CreateChainStore[3,0.5]
+SaveEfg[e,"cs3.efg"]
+\end{verbatim}
+
+\noindent
+creates and saves a two stage chainstore game and a three stage
+chainstore game, with probability .5 of being tough. Figures 5 and 6
+display the resulting games, as displayed by the GUI. 
+
+\begin{verbatim}
+//
+// A gcl program to construct a n-stage chain store game
+//
+
+NewFunction[PlayerNumber[e<->EFG, p->EF_PLAYER],
+list:=Players[e];
+i:=1;
+While[i<=NumPlayers[e] && p != list[[i]],i:=i+1;];
+i;]
+
+NewFunction[MultiStageChainStore[ efg<->EFG, node->NODE, strong->BOOL, list->LIST],
+// build tree
+inc_iset:=list[[1]];
+ent_iset:=list[[2]];
+incumbent:=Player[inc_iset];
+entrant:=Player[ent_iset];
+AppendNode[node, ent_iset ];
+AppendNode[node#1, inc_iset ];
+AppendNode[node#2, NewInfoset[incumbent,{""} ] ];
+// attach outcomes 
+AttachOutcome[node#1#1,NewOutcome[efg]];
+AttachOutcome[node#1#2,NewOutcome[efg]];
+AttachOutcome[node#2#1,NewOutcome[efg]];
+pay:=Payoff[Outcome[node#1#1]];
+entnum:=PlayerNumber[efg,entrant];
+incnum:=PlayerNumber[efg,incumbent];
+a:=0.5;b:=0.5;
+pay[[ entnum ]]:=b-1.;
+pay[[ incnum ]]:=-1.;
+If[strong, pay[[ incnum ]] := 0.;];
+SetPayoff[Outcome[node#1#1],pay];
+pay[[ entnum ]]:=b;
+pay[[ incnum ]]:=0.;
+If[strong, pay[[ incnum ]] := -1.;];
+SetPayoff[Outcome[node#1#2],pay];
+pay[[ entnum ]]:=0.;
+pay[[ incnum ]]:=a;
+SetPayoff[Outcome[node#2#1],pay];
+// recurse down the tree
+list:=Remove[list,2];
+If[Length[list] > 1,
+  MultiStageChainStore[efg, node#1#1, strong, list];
+  MultiStageChainStore[efg, node#1#2, strong, list];
+  MultiStageChainStore[efg, node#2#1, strong, list];
+  ];
+]
+
+NewFunction[CreateChainStore[ num_stages->INTEGER, prob -> FLOAT],
+e := NewEfg[];
+n := RootNode[e];
+iset := NewInfoset[Chance[e], {"Strong", "Weak"} , "Chance move"];
+AppendNode[n, iset ];
+inc := NewPlayer[e,"Incumbent"];
+isinc := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
+lpl := { inc };
+lisets := { isinc }; 
+For[i:=1,i<=num_stages,i:=i+1,
+  lpl := lpl & { NewPlayer[e,"Entrant"&Text[i]] };
+  lisets := lisets & {NewInfoset[lpl[[i+1]],  {"Enter", "Out"}] };
+  ];
+MultiStageChainStore[ e, n#1, True, lisets];
+MultiStageChainStore[ e, n#2, False, lisets];
+
+nonterm:=NonterminalNodes[e];
+For[i:=1,i<=Length[nonterm],i:=i+1,
+  If[Player[ nonterm[[i]] ]!=Chance[e],
+    Reveal[Infoset[nonterm[[i]] ],lpl]; ];
+  ];	
+Reveal[iset,{inc}];
+e;
+];
+
+\end{verbatim}
+
+\newpage
+\begin{figure}[h]
+\centerline{\psfig{figure=gclfig5.ps,height=4in}}
+\caption{Two stage chain store game}
+\end{figure}
+
+\newpage
+\begin{figure}[h]
+\centerline{\psfig{figure=gclfig6.ps,height=6in}}
+\caption{Three stage chain store game}
+\end{figure}
+
+\newpage
 \bibliographystyle{chicagob}
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{gambit}
