@@ -52,10 +52,13 @@
 #include <stdlib.h>
 
 #include "wxmisc.h"
+#include "gui/dlabout.h"
+
 #include "gmisc.h"
 #include "expdata.h"
 #include "dlgpxi.h"
 #include "pxi.h"
+#include "pxichild.h"
 #include "axis.h"
 
 #include "new.h"
@@ -83,17 +86,6 @@ bool PxiApp::OnInit(void)
   wxString helpDir = wxGetWorkingDirectory();
   config.Read("Help-Directory", &helpDir);
   
-  wxInitHelp(wxString(helpDir.c_str()) + "/gambit", 
-	     "PXI(Plus or Minus), Version 0.97.3\n"
-	     "Based on Eugene Grayver's PXI, version .94\n\n"
-	     "Built with " wxVERSION_STRING "\n\n"
-	     "Part of the Gambit Project\n"
-	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
-	     "gambit@hss.caltech.edu\n\n"
-	     "Copyright (C) 1999-2000\n"
-	     "California Institute of Technology\n"
-	     "Funding provided by the National Science Foundation");
-  
   set_new_handler(mem_handler);
 
   pxiFrame->Show(true);
@@ -115,21 +107,24 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
 {
   SetIcon(wxICON(pxi));
     
-  wxMenu *file_menu = new wxMenu;
-  wxMenu *help_menu = new wxMenu;
-  file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load file");
-  file_menu->Append(PXI_QUIT, "&Quit", "Exit PXI");
-  help_menu->Append(PXI_HELP_ABOUT,"&About", "About Plot X");
-  help_menu->Append(PXI_HELP_CONTENTS,"&Contents", "Table of Contents");
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(PXI_LOAD_FILE, "&Load file", "Load file");
+  fileMenu->Append(wxID_EXIT, "E&xit", "Exit PXI");
+
+  wxMenu *helpMenu = new wxMenu;
+  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
+  helpMenu->AppendSeparator();
+  helpMenu->Append(wxID_ABOUT, "&About", "About PXI");
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(help_menu, "&Help");
+  menu_bar->Append(fileMenu, "&File");
+  menu_bar->Append(helpMenu, "&Help");
   SetMenuBar(menu_bar);
 
   wxConfig config("PXI");
   m_fileHistory.Load(config);
-  m_fileHistory.UseMenu(file_menu);
+  m_fileHistory.UseMenu(fileMenu);
   m_fileHistory.AddFilesToMenu();
 
   CreateStatusBar();
@@ -145,10 +140,10 @@ PxiFrame::~PxiFrame()
 
 BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
   EVT_MENU(PXI_LOAD_FILE, PxiFrame::OnFileLoad) 
-  EVT_MENU(PXI_QUIT, wxWindow::Close)
+  EVT_MENU(wxID_EXIT, PxiFrame::OnCloseWindow)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, PxiFrame::OnMRUFile)
-  EVT_MENU(PXI_HELP_ABOUT, PxiFrame::OnHelpAbout)
-  EVT_MENU(PXI_HELP_CONTENTS, PxiFrame::OnHelpContents)
+  EVT_MENU(wxID_ABOUT, PxiFrame::OnHelpAbout)
+  EVT_MENU(wxID_HELP_CONTENTS, PxiFrame::OnHelpContents)
   EVT_CLOSE(PxiFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -171,12 +166,14 @@ void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
 
 void PxiFrame::OnHelpAbout(wxCommandEvent &)
 {
-  wxHelpAbout(); 
+  dialogAbout dialog(this, "About PXI...",
+		     "PXI Quantal Response Plotting Program",
+		     "Version 0.97 (alpha)");
+  dialog.ShowModal();
 }
 
 void PxiFrame::OnHelpContents(wxCommandEvent &)
 {
-  wxHelpContents(PXI_GUI_HELP);
 }
 
 void PxiFrame::LoadFile(const wxString &p_filename)
@@ -210,701 +207,18 @@ void PxiFrame::MakeToolbar(void)
   toolBar->SetMargins(4, 4);
 
   toolBar->AddTool(PXI_LOAD_FILE, wxBITMAP(open), wxNullBitmap, false,
-		   -1, -1, 0, "Open file", "Open a saved datafile");
+		   -1, -1, 0, "Open", "Open a saved datafile");
   toolBar->AddSeparator();
-  toolBar->AddTool(PXI_HELP_ABOUT, wxBITMAP(help), wxNullBitmap, false,
+  toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();
   toolBar->SetRows(1);
 }
 
-//=====================================================================
-//                          class PxiChildToolbar
-//=====================================================================
-
-const int PXI_CHILD_TOOLBAR_ID = 2102;
-
-class PxiChildToolbar : public wxToolBar {
-private:
-  wxFrame *m_parent;
-
-  // Event handlers
-  void OnMouseEnter(wxCommandEvent &);
-
-public:
-  PxiChildToolbar(wxFrame *p_frame, wxWindow *p_parent);
-  ~PxiChildToolbar() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(PxiChildToolbar, wxToolBar)
-  EVT_TOOL_ENTER(PXI_CHILD_TOOLBAR_ID, PxiChildToolbar::OnMouseEnter)
-END_EVENT_TABLE()
-
-PxiChildToolbar::PxiChildToolbar(wxFrame *p_frame, wxWindow *p_parent)
-  : wxToolBar(p_parent, PXI_CHILD_TOOLBAR_ID, wxDefaultPosition, 
-	      wxDefaultSize, wxTB_DOCKABLE), m_parent(p_frame)
-{
-#ifdef __WXMSW__
-  wxBitmap printBitmap("PRINT_BITMAP");
-  wxBitmap zoominBitmap("ZOOMIN_BITMAP");
-  wxBitmap zoomoutBitmap("ZOOMOUT_BITMAP");
-  wxBitmap helpBitmap("HELP_BITMAP");
-  wxBitmap optionsBitmap("OPTIONS_BITMAP");
-  wxBitmap inspectBitmap("INSPECT_BITMAP");
-#else
-#include "../sources/bitmaps/print.xpm"
-#include "../sources/bitmaps/zoomin.xpm"
-#include "../sources/bitmaps/zoomout.xpm"
-#include "../sources/bitmaps/help.xpm"
-#include "../sources/bitmaps/options.xpm"
-#include "../sources/bitmaps/inspect.xpm"
-  wxBitmap printBitmap(print_xpm);
-  wxBitmap zoominBitmap(zoomin_xpm);
-  wxBitmap zoomoutBitmap(zoomout_xpm);
-  wxBitmap helpBitmap(help_xpm);
-  wxBitmap optionsBitmap(options_xpm);
-  wxBitmap inspectBitmap(inspect_xpm);
-#endif  // __WXMSW__
-    
-  SetMargins(2, 2);
-#ifdef __WXMSW__
-  SetToolBitmapSize(wxSize(33, 30));
-#endif // _WXMSW__
-  AddTool(wxID_PREVIEW, printBitmap, "", "");
-  AddSeparator();
-  AddTool(PXI_DISPLAY_OPTIONS, inspectBitmap, "", "");
-  AddSeparator();
-  AddTool(PXI_PREFS_ZOOM_IN, zoominBitmap, "", "");
-  AddTool(PXI_PREFS_ZOOM_OUT, zoomoutBitmap, "", "");
-  AddTool(PXI_PREFS_COLORS, optionsBitmap, "", "");
-  AddSeparator();
-  AddTool(PXI_HELP_ABOUT, helpBitmap, "", "");
-
-  Realize();
-}
-
-void PxiChildToolbar::OnMouseEnter(wxCommandEvent &p_event)
-{
-  if (p_event.GetSelection() > 0) {
-    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
-  }
-  else {
-    m_parent->SetStatusText("");
-  }
-}
-
-BEGIN_EVENT_TABLE(PxiChild, wxFrame)
-  //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
-  //  EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
-  EVT_MENU(wxID_PRINT, PxiChild::OnPrint)
-  EVT_MENU(wxID_PREVIEW, PxiChild::OnPrintPreview)
-  EVT_MENU(PXI_CHILD_CLOSE, PxiChild::Close)
-  EVT_MENU(PXI_CHILD_QUIT, PxiChild::OnQuit)
-  EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
-  EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
-  EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
-  EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
-  EVT_MENU(PXI_PREFS_FONT_AXIS, PxiChild::OnPrefsFontAxis)
-  EVT_MENU(PXI_PREFS_FONT_LABEL, PxiChild::OnPrefsFontLabel)
-  EVT_MENU(PXI_PREFS_FONT_OVERLAY, PxiChild::OnPrefsFontOverlay)
-  EVT_MENU(PXI_PREFS_ZOOM_IN, PxiChild::OnPrefsZoomIn)
-  EVT_MENU(PXI_PREFS_ZOOM_OUT, PxiChild::OnPrefsZoomOut)
-  //  EVT_MENU(PXI_PREFS_SCALE, PxiChild::OnPrefsScaleMenu)
-  EVT_MENU_RANGE(PXI_PREFS_SCALE_1, PXI_PREFS_SCALE_8, PxiChild::OnPrefsScale)
-  EVT_MENU(PXI_PREFS_COLORS, PxiChild::OnPrefsColors)
-  EVT_MENU(PXI_PAGE_NEXT, PxiChild::OnNextPage)
-  EVT_MENU(PXI_PAGE_PREV, PxiChild::OnPreviousPage)
-  EVT_MENU(PXI_HELP_ABOUT, PxiChild::OnHelpAbout)
-  EVT_MENU(PXI_HELP_CONTENTS, PxiChild::OnHelpContents)
-  EVT_SIZE(PxiChild::OnSize)
-  EVT_CLOSE(PxiChild::OnCloseWindow)
-  EVT_CHAR_HOOK(PxiChild::OnChar)
-  EVT_LEFT_DOWN(PxiChild::OnEvent)
-END_EVENT_TABLE()
-
-void PxiChild::OnQuit(wxCommandEvent &)
-{
-  GetParent()->Close();
-}
-
-void PxiChild::OnOverlayData(wxCommandEvent &)
-{
-  dialogOverlayData dialog(this, canvas);
-  canvas->Render();
-  //  wxClientDC dc(this);
-  //  canvas->Update(dc,PXI_UPDATE_SCREEN);
-}
-
-void PxiChild::OnOverlayFile(wxCommandEvent &)
-{
-  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
-  if (s) {
-    FileHeader temp_header(s);
-    if ( (temp_header.NumStrategies()!=(canvas->Header(1)).NumStrategies()) ||
-	 (temp_header.NumInfosets()!=(canvas->Header(1)).NumInfosets()) )
-      wxMessageBox("These data files do not\nhave the same structure!");
-    else
-      canvas->AppendHeader(temp_header);
-  }
-  wxClientDC dc(this);
-  canvas->Update(dc,PXI_UPDATE_SCREEN);
-}
-
-void PxiChild::OnFileDetail(wxCommandEvent &)
-{
-  canvas->ShowDetail();
-}
-
-#ifdef UNUSED
-void PxiChild::OnFileOutput(wxCommandEvent &)
-{
-  wxOutputDialogBox dialog(0,this);
-  if (dialog.ShowModal() == wxID_OK) 
-    switch (dialog.GetMedia()) {
-    case wxMEDIA_PRINTER: print(dialog.GetOption()); break;
-    case wxMEDIA_PS:print_eps(dialog.GetOption()); break;
-    case wxMEDIA_CLIPBOARD:print_mf(dialog.GetOption()); break;
-    case wxMEDIA_METAFILE: print_mf(dialog.GetOption(), true); break;
-    case wxMEDIA_PREVIEW: print(dialog.GetOption(), true); break;
-    default:
-      // We'll ignore this silently
-      break;
-    }
-}
-#endif // UNUSED
-
-void PxiChild::OnNextPage(wxCommandEvent &)
-{
-  canvas->SetNextPage();
-  canvas->Render();
-}
-
-void PxiChild::OnPreviousPage(wxCommandEvent &)
-{
-  canvas->SetPreviousPage();
-  canvas->Render();
-}
-
-void PxiChild::OnPrefsColors(wxCommandEvent &)
-{
-  wxColourData data;
-  wxColourDialog dialog(this, &data);
- 
-  if (dialog.ShowModal() == wxID_OK) {
-    // dialog.GetColourData().GetColour();
-  }
-}
-
-void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
-{
-  wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetLabelFont());  
-  wxFontDialog dialog(this, &data);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    canvas->Render();
-  }
-}
-
-void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
-{
-  wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetAxisFont());  
-  wxFontDialog dialog(this, &data);
-  if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
-    canvas->Render();
-  }
-}
-
-void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
-{
-  wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetOverlayFont());  
-  wxFontDialog dialog(this, &data);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
-    canvas->Render();
-  }
-}
-
-
-void PxiChild::OnPrefsZoomOut(wxCommandEvent &event)
-{
-  double scale = canvas->GetScale();
-  int i=1;
-  while(scale > scaleValues[i] && i< scaleValues.Length()) {i++;}
-  if(i>1)i--;
-  canvas->SetScale(scaleValues[i]);
-  MarkScaleMenu();
-  canvas->Render();
-}
-
-void PxiChild::OnPrefsZoomIn(wxCommandEvent &event)
-{
-  double scale = canvas->GetScale();
-  int i=scaleValues.Length();
-  while(scale < scaleValues[i] && i>1) {i--;}
-  if(i<scaleValues.Length())i++;
-  canvas->SetScale(scaleValues[i]);
-  MarkScaleMenu();
-  canvas->Render();
-}
-
-void PxiChild::OnPrefsScale(wxCommandEvent &event)
-{
-  double scale = scaleValues[event.GetSelection() - PXI_PREFS_SCALE_1+1];
-  canvas->SetScale(scale);
-  MarkScaleMenu();
-  canvas->Render();
-}
-
-void PxiChild::MarkScaleMenu(void)
-{
-  for(int i=0;i<8;i++) {
-    GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,false);
-    if(canvas->GetScale() == scaleValues[i+1])
-      GetMenuBar()->Check(PXI_PREFS_SCALE_1+i,true);
-  }
-}
-
-void PxiChild::OnHelpAbout(wxCommandEvent &)
-{
-  wxHelpAbout();
-}
-
-void PxiChild::OnHelpContents(wxCommandEvent &)
-{
-  wxHelpContents(PXI_GUI_HELP);
-}
-
-void PxiChild::OnDisplayOptions(wxCommandEvent &)
-{
-  canvas->DrawSettings()->SetOptions(this);
-  canvas->Render();
-}
-
-PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
-  wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480), 
-	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent),
-  	  m_toolbar(0)
-{
-  scaleValues=gBlock<double>(8);
-  for(int i=1;i<=scaleValues.Length();i++)
-    scaleValues[i]=.25*i;
-  
-  m_printData = new wxPrintData;
-  m_pageSetupData = new wxPageSetupDialogData;
-
-// perhaps can be deleted -- compatability with old system.
-#if defined(__WXGTK__) || defined(__WXMOTIF__)
-    (*m_printData) = * wxThePrintSetupData;
-#endif
-
-    
-  SetSizeHints(300, 300);
-
-  // Give the frame an icon
-#ifdef __WXMSW__
-  SetIcon(wxIcon("pxi_icn"));
-#else
-#include "pxi.xpm"
-  SetIcon(wxIcon(pxi_xpm));
-#endif
-
-  CreateStatusBar();
-  MakeMenus();
-  m_toolbar = new PxiChildToolbar(this, this);
-
-  int width, height;
-  GetClientSize(&width, &height);
-    // save the canvas in subframe
-  canvas = new PxiCanvas(this, wxPoint(0, 0), wxSize(width, height),wxRETAINED,p_filename);
-  SetToolBar(m_toolbar);
-  MarkScaleMenu();
-  Show(true);
-}
-
-PxiChild::~PxiChild(void)
-{ }
-
-void PxiChild::MakeMenus(void)
-{
-  wxMenu *file_menu = new wxMenu;
-  file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load new data file");
-  file_menu->Append(PXI_CHILD_CLOSE, "&Close", "Close child window");
-  file_menu->Append(wxID_PRINT, "Output", "Output to file or printer");
-  file_menu->Append(wxID_PREVIEW, "Preview", "Print Preview");
-  file_menu->AppendSeparator();
-  file_menu->Append(PXI_CHILD_QUIT, "&Quit", "Quit Program");
-  wxMenu *data_menu= new wxMenu;
-  data_menu->Append(PXI_DATA_OVERLAY_DATA, "&Overlay Data", "Overlay experiment data on plot");
-  data_menu->Append(PXI_DATA_OVERLAY_FILE, "&Overlay File", "Overlay another pxi file");
-  
-  wxMenu *prefs_menu = new wxMenu;
-  wxMenu *prefs_font_menu = new wxMenu;
-  wxMenu *prefs_scale_menu = new wxMenu;
-
-  prefs_font_menu->Append(PXI_PREFS_FONT_AXIS,"&Axes", "Change Axes Font");
-  prefs_font_menu->Append(PXI_PREFS_FONT_LABEL,"&Label", "Change Lable Font");
-  prefs_font_menu->Append(PXI_PREFS_FONT_OVERLAY,"&Overlay", "Change Overlay Font");
-
-  prefs_menu->Append(PXI_PREFS_FONTS, "&Fonts", prefs_font_menu,
-		     "Set display fonts");
-
-  prefs_menu->Append(PXI_PREFS_COLORS,"&Colors", "Change Colors");
-
- 
-  for(int i=0;i<8;i++) {
-    wxString tmp;
-    tmp.Printf("%4.2f",scaleValues[i+1]);
-    prefs_scale_menu->Append(PXI_PREFS_SCALE_1+i,tmp,tmp,true);
-  }  
-  prefs_menu->Append(PXI_PREFS_SCALE, "&Scale", prefs_scale_menu,
-		     "Set display scale");
-
-  prefs_menu->AppendSeparator();
-  prefs_menu->Append(PXI_PREFS_ZOOM_OUT,"Zoom &Out", "Zoom Out");
-  prefs_menu->Append(PXI_PREFS_ZOOM_IN,"Zoom &In", "Zoom In");
-  
-  wxMenu *page_menu = new wxMenu;
-  page_menu->Append(PXI_PAGE_PREV,"&Previous (PgUp)", "Previous Page");
-  page_menu->Append(PXI_PAGE_NEXT,"&Next     (PgDn)", "Next Page");
-
-  wxMenu *help_menu = new wxMenu;
-  help_menu->Append(PXI_HELP_ABOUT,"&About", "About Plot X");
-  help_menu->Append(PXI_HELP_CONTENTS,"&Contents", "Table of Contents");
-  wxMenu *display_menu = new wxMenu;
-  display_menu->Append(PXI_FILE_DETAIL,"&Details", "File Details");
-  display_menu->Append(PXI_DISPLAY_OPTIONS,"&Options...", "Change plot options");
-  wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(data_menu, "&Data");
-  menu_bar->Append(display_menu, "&Display");
-  menu_bar->Append(prefs_menu, "&Prefs");
-  menu_bar->Append(page_menu, "P&age");
-  menu_bar->Append(help_menu, "&Help");
-
-  // Associate the menu bar with the frame
-  SetMenuBar(menu_bar);
-}
-
-
-// Show details
-
-void PxiCanvas::ShowDetail(void)
-{
-  char tempstr[200];
-  FileHeader header=headers[1];
-  wxString message;
-  int		i1,i;
-  sprintf(tempstr,"Detail for: %s\n",(const char *)FileNameFromPath(header.FileName()));
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) step:  %4.4f\n",header.EStep());
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) start: %4.4f\n",header.EStart());
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) stop : %4.4f\n",header.EStop());
-  message+=tempstr;
-  sprintf(tempstr,"Minimum data value  : %4.4f\n",header.DataMin());
-  message+=tempstr;
-  sprintf(tempstr,"Maximum data value  : %4.4f\n",header.DataMax());
-  message+=tempstr;
-  sprintf(tempstr,"Data type:  %s\n",(header.DataType()==DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
-  message+=tempstr;
-  message+="\n";
-  if (header.MError()>-.99) {
-    sprintf(tempstr,"Probability step :    %4.4f\n",header.QStep());
-    message+=tempstr;
-    sprintf(tempstr,"Margin of error:      %4.4f\n",header.MError());
-    message+=tempstr;
-  }
-  wxMessageBox(message,"File Details",wxOK);
-}
-
-void PxiCanvas::StopIt(void)
-{
-#ifdef NOT_IMPLEMENTED
-  if (draw_settings->GetStopMax()==draw_settings->GetMaxL()) {
-    //	if (updating) draw_settings->SetStopMax(cur_e);
-  }
-  else {
-    //	if (!updating)
-    {
-      draw_settings->ResetSetStop();
-      Render();
-    }
-  }
-#endif // NOT_IMPLEMENTED
-}
-
-void PxiCanvas::NewExpData(ExpDataParams &P) 
-{ 
-  if(exp_data) delete exp_data;
-  exp_data = NULL;
-  exp_data = new ExpData(P); 
-}
-
-void PxiCanvas::OnChar(wxKeyEvent &ev)
-{
-  switch(ev.KeyCode()) {
-  case WXK_PRIOR:
-    SetPreviousPage();
-    Render();
-    break;
-  case WXK_NEXT:
-    SetNextPage();
-    Render();
-    break;
-  case PXI_KEY_STOP:
-    StopIt();
-    break;
-  default:
-    wxScrolledWindow::OnChar(ev);
-    break;
-  }
-}
-
-void PxiCanvas::OnEvent(wxMouseEvent &ev)
-{
-  if (ev.ShiftDown() && ev.ButtonDown()) {  // use shift mouse click to add a label
-    int w,h;
-    GetClientSize(&w,&h);
-    label_struct tmp_label;
-    //    tmp_label.x=ev.x/w;tmp_label.y=ev.y/h;
-    tmp_label.x=ev.GetX()/w;tmp_label.y=ev.GetY()/h;
-    // Check if clicked on an already existing text
-    int clicked_on=0;
-    for (int i=1;i<=labels.Length();i++)
-      if (labels[i].x+TEXT_MARGIN>tmp_label.x && labels[i].x-TEXT_MARGIN<tmp_label.x &&
-	  labels[i].y+TEXT_MARGIN>tmp_label.y && labels[i].y-TEXT_MARGIN<tmp_label.y)
-	clicked_on=i;
-    const char * junk = (clicked_on) ? (const char *)labels[clicked_on].label : "";
-    tmp_label.label=wxGetTextFromUser("Enter Label","Enter Label", (char *)junk);
-    //					  (clicked_on) ? (char *)labels[clicked_on].label : "");
-    if (!clicked_on)
-      labels.Append(tmp_label);
-    else {
-      tmp_label.x=labels[clicked_on].x;
-      tmp_label.y=labels[clicked_on].y;
-      labels[clicked_on]=tmp_label;
-    }
-    Render();
-  }
-}
-
-BEGIN_EVENT_TABLE(PxiCanvas, wxScrolledWindow)
-  EVT_PAINT(PxiCanvas::OnPaint)
-END_EVENT_TABLE()
-
-// Define a constructor for my canvas
-PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
-		     const wxSize &p_size, int style,const char *file_name):
-  wxScrolledWindow(frame, -1, p_position, p_size, style),
-  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false), 
-  m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
-  m_ppu(25)
-{
-  headers.Append(FileHeader(file_name));
-  draw_settings=new PxiDrawSettings(headers[1]);
-  frame->SetTitle(headers[1].FileName());
-
-  // fit to 8 1/2 x 11 inch  
-  SetScale(1.0);
-
-  Show(true);
-}
-
-#include "wx/printdlg.h"
-
-void PxiChild::OnPrint(wxCommandEvent& event)
-{
-  wxPrintDialogData printDialogData(* m_printData);
-  
-  wxPrinter printer(& printDialogData);
-  PxiPrintout printout(*canvas, "PXI printout");
-  if (!printer.Print(this, &printout, TRUE))
-    wxMessageBox("There was a problem printing.\nPerhaps your current printer is not set correctly?", "Printing", wxOK);
-  else {
-    (*m_printData) = printer.GetPrintDialogData().GetPrintData();
-  }
-}
-
-void PxiChild::OnPrintPreview(wxCommandEvent& event)
-{
-  // Pass two printout objects: for preview, and possible printing.
-  wxPrintDialogData printDialogData(* m_printData);
-  wxPrintPreview *preview 
-    = new wxPrintPreview(new PxiPrintout(*canvas, "PXI printout"), 
-			 new PxiPrintout(*canvas, "PXI printout"), & printDialogData);
-  if (!preview->Ok()) {
-    delete preview;
-    wxMessageBox("There was a problem previewing.\nPerhaps your current printer is not set correctly?", 
-		 "Previewing", wxOK);
-    return;
-  }
-  
-  wxPreviewFrame *frame 
-    = new wxPreviewFrame(preview, 
-			 this, "PXI Print Preview", wxPoint(100, 100), wxSize(600, 650));
-  frame->Centre(wxBOTH);
-  frame->Initialize();
-  frame->Show(TRUE);
-}
-
-#ifdef UNUSED
-void PxiChild::print(wxOutputOption fit, bool preview)
-{
-
-/*
-	wxPrintData data;
-	wxPrintDialogData dd(data);
-	dd.SetMaxPage(canvas->draw_settings->GetMaxPage());
-	wxPrintDialog dialog(this,&dd);
-*/
-  wxPrintDialog dialog(this);
-  dialog.GetPrintDialogData().SetMaxPage(canvas->draw_settings->GetMaxPage());
-  if(dialog.ShowModal() == wxID_OK) {
-    wxDC *dc(dialog.GetPrintDC());
-    if (dc->Ok()) {
-      if(dialog.GetPrintDialogData().GetPrintToFile())
-	//			if(dd.GetPrintToFile())
-	dc->StartDoc("PXI printout");
-      dc->StartPage();
-      this->canvas->Update(*dc,PXI_UPDATE_PRINTER);
-      dc->EndPage();
-      dc->EndDoc();
-    }
-    this->canvas->Update(*dc,PXI_UPDATE_SCREEN);
-  }
-
-}
-
-void PxiChild::print(wxOutputOption fit, bool preview)
-{
-  if (!preview)
-    wxMessageBox("Print preview not supported under X");
-  else
-    print_eps(fit);
-}
-#endif
-
-
-
-#ifdef __WXMSW__
-#include "wx/dcclient.h"
-#include "wx/dc.h"
-#include "wx/dcps.h"
-#include "wx/dcprint.h"
-#include "wx/cmndata.h"
-void PxiChild::print_eps(wxOutputOption fit)
-{
-  /*
-// can't get this to work !!
-  wxPrintData data;
-  wxPostScriptDC dc(data);
-  if (dc.Ok()) {
-    dc.StartDoc("Pxi printout");
-    dc.StartPage();
-    canvas->Update(dc,PXI_UPDATE_FILE);
-    dc.EndPage();
-    dc.EndDoc();
-  }
-  */
-}
-#else
-void PxiChild::print_eps(wxOutputOption fit)
-{
-  wxPostScriptDC dc("junk.ps",true, this);
-  if (dc.Ok()) {
-    dc.StartDoc("Pxi printout");
-    dc.StartPage();
-    canvas->Update(dc,PXI_UPDATE_FILE);
-    dc.EndPage();
-    dc.EndDoc();
-  }
-}
-#endif // __WXMSW__
-
-#ifdef __WXMSW__
-
-#include "wx/metafile.h"
-void PxiChild::print_mf(wxOutputOption fit, bool save_mf)
-{
-  wxMetaFileDC dc;
-  if (dc.Ok()) {
-    canvas->Update(dc,PXI_UPDATE_METAFILE);
-    wxMetaFile *mf = dc.Close();
-    if (mf) {
-      mf->SetClipboard((int)(dc.MaxX()+10),(int)(dc.MaxY()+10));
-      delete mf;
-    }
-  }
-  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
-}
-#else
-void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
-{
-  wxMessageBox("Metafiles are not supported under X");
-}
-#endif // __WXMSW__
-
-#ifdef __WXMSW__
-#include "wx/gdicmn.h"
-void PxiChild::save_mf(wxOutputOption fit, bool save_mf)
-{
-  char *s=copystring(wxFileSelector("Save Metafile",NULL,NULL,NULL,"*.wmf"));
-  if (s) {
-    wxMetaFileDC dc(s);
-    if (dc.Ok()) {
-      canvas->Update(dc,PXI_UPDATE_METAFILE);
-      wxMetaFile *mf = dc.Close();
-      if (mf) {
-	delete mf;
-//	::wxMakeMetaFilePlaceable(s,dc.MinX(),dc.MinY(),dc.MaxX(),dc.MaxY());
-      }
-    }
-    delete [] s;
-    canvas->Update(dc,PXI_UPDATE_SCREEN);
-  }
-}
-#else
-void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
-{
-  wxMessageBox("Metafiles are not supported under X");
-}
-#endif // __WXMSW__
-
-// Define the repainting behaviour
-void PxiCanvas::OnPaint(wxPaintEvent &)
-{
-  if (painting) 
-    return; // prevent re-entry
-  painting = true;
-  wxPaintDC dc(this);
-  Update(dc,PXI_UPDATE_SCREEN);
-  painting = false;
-}
-
-// Define the behaviour for the frame closing
-
 void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
-  wxKillHelp();
   Destroy();
-}
-
-void PxiCanvas::SetScale(double x) 
-{
-  m_scale = x; 
-  SetScrollbars((int) m_ppu, (int) m_ppu,
-		(int) (GetScale()*Width()/m_ppu),
-		(int) (GetScale()*Height()/m_ppu));
 }
 
 //*************************************************************************
@@ -1327,7 +641,12 @@ int FindStringInFile(gInput &in,const char *s)
   char fsif_str[200];
   in.seekp(0L);	// go to the start of the file
   do {
-      in>>fsif_str;
+    try {
+      in >> fsif_str;
+    }
+    catch (gFileInput::ReadFailed &) {
+      return 0;
+    }
   } while (strcmp(fsif_str,s)!=0 && !in.eof() /* && in.IsValid() */);
   if (in.eof() /*|| !in.IsValid()*/) return 0; else return 1;
 }
@@ -1341,10 +660,15 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/grarray.imp"
 
 template class gArray<PlotInfo>;
+
 template class gArray<FileHeader>;
+template class gBlock<FileHeader>;
 
 template class gArray<ExpData::BEST_POINT>;
 template class gBlock<ExpData::BEST_POINT>;
+
+template class gArray<PxiCanvas::LABELSTRUCT>;
+template class gBlock<PxiCanvas::LABELSTRUCT>;
 
 template class gArray<DataLine>;
 template class gBlock<DataLine>;

@@ -5,11 +5,13 @@
 #ifndef EXPDPRM_H
 #define EXPDPRM_H
 
+#include "wx/slider.h"
+
 #include "wxmisc.h"
 #include "base/gstream.h"
 #include "pxi.h"
+#include "pxicanvas.h"
 #include "expdata.h"
-#include "wx/slider.h"
 
 // ----------------------------------------------------------------------
 //
@@ -17,8 +19,7 @@
 //
 // ----------------------------------------------------------------------
 
-class dialogOverlayData: public guiAutoDialog
-{
+class dialogOverlayData: public guiAutoDialog {
 private:
   PxiCanvas *canvas;
   PxiChild *frame;

@@ -120,15 +120,21 @@ void DataLine::Init(void)
 //************************** INPUT/OUTPUT FOR DATALINE *******************
 int DataLine::Read(gInput &in)
 {
-  int i;
-  gBlock<double>	data_cols(header.NumColumns());
-  for (i=1;i<=header.NumColumns();i++) in>>data_cols[i];
+  gBlock<double> data_cols(header.NumColumns());
+  try {
+    for (int i = 1; i <= header.NumColumns(); i++)  {
+      in >> data_cols[i];
+    }
+  }
+  catch (gFileInput::ReadFailed &) {
+    return 1;
+  }
   e=data_cols[header.ECol()];
   if (header.DeltaCol()) delta=data_cols[header.DeltaCol()];
   double sum;
   for (int iset=1;iset<=header.NumInfosets();iset++) {
     sum=0.0;
-    for (i=1;i<=header.NumStrategies(iset);i++) {
+    for (int i = 1; i <= header.NumStrategies(iset); i++) {
       if (header.Col(iset,i)) {
 	data[iset][i]=data_cols[header.Col(iset,i)];
 	sum+=data[iset][i];

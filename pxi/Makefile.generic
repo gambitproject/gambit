@@ -16,7 +16,7 @@ GUI = gtk
 # define directory where object files are put
 OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
-vpath %.cc  ../sources/base:../sources/math
+vpath %.cc  ../sources/base:../sources/math:../sources/gui
 
 # rule for creating .o (object) files from .cc files
 
@@ -58,10 +58,10 @@ WXLIB = -lwx_gtk
 # Combine the site dependent and independent data
 
 LIBDIR = $(WXLIBDIR) $(XLIBDIR)
-INCDIR = -I. -I../include -I../base -I../math $(WXINCDIR) $(XINCDIR) -Ibitmaps
+INCDIR = -I. -I../include -I../base -I../math -I../sources $(WXINCDIR) $(XINCDIR) -Ibitmaps
 GUILIBS = $(WXLIB) $(XLIB)
 
-GUISOURCES = pxi.cc axis.cc pxicanvs.cc wxmisc.cc
+GUISOURCES = pxi.cc axis.cc pxicanvas.cc wxmisc.cc dlabout.cc pxichild.cc
 
 DATASOURCES = equtrac.cc equdata.cc probvect.cc expdata.cc dlgpxi.cc
 

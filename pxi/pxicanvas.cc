@@ -1,3 +1,12 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of PXI plotting canvas window
+//
+
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -8,6 +17,8 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
+
+#include "pxicanvas.h"
 
 #include "gmisc.h"
 #include "wxmisc.h"
@@ -581,5 +592,147 @@ void PxiCanvas::DoPlot_3(wxDC& dc, const PlotInfo &thisplot,
   dc.SetPen(*wxBLACK_PEN);
   PlotAxis_3(dc,thisplot,x0,y0,cw,ch,labels);
   PlotData_3(dc,thisplot,x0,y0,cw,ch,headers[level], level);
+}
+
+void PxiCanvas::ShowDetail(void)
+{
+  char tempstr[200];
+  FileHeader header=headers[1];
+  wxString message;
+  int		i1,i;
+  sprintf(tempstr,"Detail for: %s\n",(const char *)FileNameFromPath(header.FileName()));
+  message+=tempstr;
+  sprintf(tempstr,"Error (lambda) step:  %4.4f\n",header.EStep());
+  message+=tempstr;
+  sprintf(tempstr,"Error (lambda) start: %4.4f\n",header.EStart());
+  message+=tempstr;
+  sprintf(tempstr,"Error (lambda) stop : %4.4f\n",header.EStop());
+  message+=tempstr;
+  sprintf(tempstr,"Minimum data value  : %4.4f\n",header.DataMin());
+  message+=tempstr;
+  sprintf(tempstr,"Maximum data value  : %4.4f\n",header.DataMax());
+  message+=tempstr;
+  sprintf(tempstr,"Data type:  %s\n",(header.DataType()==DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
+  message+=tempstr;
+  message+="\n";
+  if (header.MError()>-.99) {
+    sprintf(tempstr,"Probability step :    %4.4f\n",header.QStep());
+    message+=tempstr;
+    sprintf(tempstr,"Margin of error:      %4.4f\n",header.MError());
+    message+=tempstr;
+  }
+  wxMessageBox(message,"File Details",wxOK);
+}
+
+void PxiCanvas::StopIt(void)
+{
+#ifdef NOT_IMPLEMENTED
+  if (draw_settings->GetStopMax()==draw_settings->GetMaxL()) {
+    //	if (updating) draw_settings->SetStopMax(cur_e);
+  }
+  else {
+    //	if (!updating)
+    {
+      draw_settings->ResetSetStop();
+      Render();
+    }
+  }
+#endif // NOT_IMPLEMENTED
+}
+
+void PxiCanvas::NewExpData(ExpDataParams &P) 
+{ 
+  if(exp_data) delete exp_data;
+  exp_data = NULL;
+  exp_data = new ExpData(P); 
+}
+
+void PxiCanvas::OnChar(wxKeyEvent &ev)
+{
+  switch(ev.KeyCode()) {
+  case WXK_PRIOR:
+    SetPreviousPage();
+    Render();
+    break;
+  case WXK_NEXT:
+    SetNextPage();
+    Render();
+    break;
+  case PXI_KEY_STOP:
+    StopIt();
+    break;
+  default:
+    wxScrolledWindow::OnChar(ev);
+    break;
+  }
+}
+
+void PxiCanvas::OnEvent(wxMouseEvent &ev)
+{
+  if (ev.ShiftDown() && ev.ButtonDown()) {  // use shift mouse click to add a label
+    int w,h;
+    GetClientSize(&w,&h);
+    label_struct tmp_label;
+    //    tmp_label.x=ev.x/w;tmp_label.y=ev.y/h;
+    tmp_label.x=ev.GetX()/w;tmp_label.y=ev.GetY()/h;
+    // Check if clicked on an already existing text
+    int clicked_on=0;
+    for (int i=1;i<=labels.Length();i++)
+      if (labels[i].x+TEXT_MARGIN>tmp_label.x && labels[i].x-TEXT_MARGIN<tmp_label.x &&
+	  labels[i].y+TEXT_MARGIN>tmp_label.y && labels[i].y-TEXT_MARGIN<tmp_label.y)
+	clicked_on=i;
+    const char * junk = (clicked_on) ? (const char *)labels[clicked_on].label : "";
+    tmp_label.label=wxGetTextFromUser("Enter Label","Enter Label", (char *)junk);
+    //					  (clicked_on) ? (char *)labels[clicked_on].label : "");
+    if (!clicked_on)
+      labels.Append(tmp_label);
+    else {
+      tmp_label.x=labels[clicked_on].x;
+      tmp_label.y=labels[clicked_on].y;
+      labels[clicked_on]=tmp_label;
+    }
+    Render();
+  }
+}
+
+BEGIN_EVENT_TABLE(PxiCanvas, wxScrolledWindow)
+  EVT_PAINT(PxiCanvas::OnPaint)
+END_EVENT_TABLE()
+
+// Define a constructor for my canvas
+PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
+		     const wxSize &p_size, int style,const char *file_name):
+  wxScrolledWindow(frame, -1, p_position, p_size, style),
+  exp_data(NULL),draw_settings(NULL), probs(file_name), painting(false), 
+  m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
+  m_ppu(25)
+{
+  headers.Append(FileHeader(file_name));
+  draw_settings=new PxiDrawSettings(headers[1]);
+  frame->SetTitle(headers[1].FileName());
+
+  // fit to 8 1/2 x 11 inch  
+  SetScale(1.0);
+
+  Show(true);
+}
+
+// Define the repainting behaviour
+void PxiCanvas::OnPaint(wxPaintEvent &)
+{
+  if (painting) 
+    return; // prevent re-entry
+  painting = true;
+  wxPaintDC dc(this);
+  Update(dc,PXI_UPDATE_SCREEN);
+  painting = false;
+}
+
+void PxiCanvas::SetScale(double x) 
+{
+  m_scale = x; 
+  SetScrollbars((int) m_ppu, (int) m_ppu,
+		(int) (GetScale()*Width()/m_ppu),
+		(int) (GetScale()*Height()/m_ppu));
 }
 

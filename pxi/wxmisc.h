@@ -1,7 +1,10 @@
 //
-// FILE: wxmisc.h -- Defines some generic stuff that should be in wxWin
+// $Source$
+// $Date$
+// $Revision$
 //
-// @(#)wxmisc.h	1.1 6/6/94
+// DESCRIPTION:
+// Miscellaneous functions extending wxWindows
 //
 
 #ifndef WXMISC_H
@@ -39,11 +42,6 @@ public:
 int wxListFindString(wxList *l,char *s);
 char *wxFontToString(wxFont *f);
 wxFont *wxStringToFont(char *s);
-
-void wxInitHelp(const char *file_name, const char *help_about_str = 0);
-void wxHelpContents(const char *name);
-void wxHelpAbout(const char *help_str = 0);
-void wxKillHelp(void);
 
 class wxIntegerItem : public wxTextCtrl {
 private:

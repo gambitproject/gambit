@@ -47,87 +47,6 @@ wxFont *wxStringToFont(char *s)
   return (new wxFont(si,f,st,w,u));
 }
 
-//------------------------
-// Help system functions
-//------------------------
-
-wxHelpController *s_helpController = 0;
-
-void wxInitHelp(const char *name, const char *help_about_str)
-{
-  if (!s_helpController) {
-    s_helpController = new wxHelpController;
-    s_helpController->Initialize((char *) name);
-  }
-
-  if (help_about_str) {
-    wxHelpAbout(help_about_str);
-  }
-}
-
-void wxHelpContents(const char *section)
-{
-#ifdef NOT_PORTED_YET
-#ifdef __GNUG__
-  // get topic
-  gText topic;
-  if(!section || section == "") 
-    topic = "GAMBIT GUI"; 
-  else 
-    topic = section;
-
-  // get html Directory
-  gText htmlDir = System::GetEnv("GAMBITHOME");
-  htmlDir+="/doc/html";
-  wxGetResourceStr("Install", "HTML-Dir", htmlDir,"gambitrc");
-
-  // search for html file corresponding to section.  
-  System::Shell("grep -l '<title>"+topic+"<' "+htmlDir+"/*.html > junk.hlp");
-  gFileInput file("junk.hlp");
-  char a;
-  gText html_file;
-  while (!file.eof()) {
-    file >> a;
-    if(a != '\n') html_file += a;
-  }
-  int last = html_file.Length()-1;
-  if(html_file[last]!='l') html_file.Remove(last); // get rid of line feed
-  System::Shell("rm junk.hlp");
-
-  // display on netscape.
-  // Use -install flag when launching netscape to install private color map
-  // Otherwise gambit and netscape cannot run simultaneously.  
-  if(System::Shell("netscape -remote 'OpenFile("+html_file+")'")) {
-    System::Shell("echo Launching Netscape");
-    System::Shell("netscape -install "+html_file+" &");
-  }
-#else
-  s_helpController->LoadFile();
-#endif  // __GNUG__
-#endif  // NOT_PORTED_YET
-}
-
-void wxHelpAbout(const char *helpstr)
-{
-  static char *help_str = "Product based on wxWin";
-    
-  if (helpstr) {    // init with a new string
-    help_str = strdup(helpstr);
-  }
-  else {
-    wxMessageBox(help_str, "Help About");
-  }
-}
-
-void wxKillHelp(void)
-{
-  if (s_helpController) {
-    s_helpController->Quit();
-    delete s_helpController;
-    s_helpController = 0;
-  }
-}
-
 //------------------------------------------------------------------------
 //                 class wxNumberItem: Member functions
 //------------------------------------------------------------------------
@@ -210,7 +129,7 @@ void guiAutoDialog::Go(void)
 
 void guiAutoDialog::OnHelp(void)
 {
-wxHelpContents(HelpString());
+
 }
 
 //========================================================================
