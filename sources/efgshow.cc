@@ -64,6 +64,7 @@ const int idTREEWINDOW = 999;
 const int idNODEWINDOW = 998;
 const int idTOOLWINDOW = 997;
 const int idSOLUTIONWINDOW = 996;
+const int idZOOM_COMBOBOX = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
@@ -166,6 +167,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnSolutionSelected)
+  EVT_COMBOBOX(idZOOM_COMBOBOX, EfgShow::OnSetZoom)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -743,6 +745,7 @@ void EfgShow::MakeMenus(void)
 #include "bitmaps/save.xpm"
 #include "bitmaps/preview.xpm"
 #include "bitmaps/print.xpm"
+#include "bitmaps/table.xpm"
 #include "bitmaps/help.xpm"
 
 void EfgShow::MakeToolbar(void)
@@ -764,6 +767,18 @@ void EfgShow::MakeToolbar(void)
 		   "View a preview of the game printout");
   toolBar->AddTool(efgmenuFILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
 		   -1, -1, 0, "Print", "Print this game");
+  toolBar->AddSeparator();
+
+  toolBar->AddTool(efgmenuSOLVE_NFG_REDUCED, wxBITMAP(table), wxNullBitmap,
+		   false, -1, -1, 0, "Normal form",
+		   "Generate reduced normal form");
+  wxComboBox *combo = new wxComboBox(toolBar, idZOOM_COMBOBOX);
+  combo->Append("100%");
+  combo->Append("75%");
+  combo->Append("50%");
+  combo->Append("25%");
+  combo->Append("10%");
+  toolBar->AddControl(combo);
   toolBar->AddSeparator();
 
   toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
@@ -1948,6 +1963,14 @@ void EfgShow::OnInspectGameInfo(wxCommandEvent &)
 const float ZOOM_DELTA = .1;
 const float ZOOM_MAX = 1;
 const float ZOOM_MIN = .2;
+
+void EfgShow::OnSetZoom(wxCommandEvent &p_event)
+{
+  double zoom = (double) ToNumber(p_event.GetString().c_str()) / 100.0;
+
+  m_treeWindow->SetZoom(zoom);
+  m_treeWindow->Refresh();
+}
 
 void EfgShow::OnPrefsZoomIn(wxCommandEvent &)
 {

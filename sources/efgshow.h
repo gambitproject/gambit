@@ -64,6 +64,8 @@ private:
 
   void OnSolutionSelected(wxListEvent &);
 
+  void OnSetZoom(wxCommandEvent &);
+
   // Menu event handlers
   void OnFileSave(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
