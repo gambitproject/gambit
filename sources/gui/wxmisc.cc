@@ -50,7 +50,7 @@ guiAutoDialog::~guiAutoDialog()
 
 void guiAutoDialog::OnHelp(void)
 {
-  wxGetApp().HelpController().DisplaySection(HelpString());
+  //  wxGetApp().HelpController().DisplaySection(HelpString());
 }
 
 //========================================================================
