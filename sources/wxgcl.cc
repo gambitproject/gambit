@@ -363,7 +363,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
     m_environment->OutputStream() << "Computation interrupted!\n";
   }
   catch (gclQuitOccurred &) {
-
+    Close(true);
   }
   catch (gException &w)  {
     m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description()
@@ -536,7 +536,7 @@ void GclFrame::OnTextEnter(wxCommandEvent &)
     m_environment->OutputStream() << "Computation interrupted!\n";
   }
   catch (gclQuitOccurred &) {
-
+    Close(true);
   }
   catch (gException &w)  {
     m_environment->OutputStream() << "GCL EXCEPTION:" << w.Description() 
