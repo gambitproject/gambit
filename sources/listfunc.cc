@@ -161,17 +161,32 @@ Portion* GSM_List( Portion** param )
 {
   ListPortion* p;
   int i;
-  assert( p->Type() != porERROR );
+  assert( param[0]->Type() != porERROR );  
 
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
-  p->SetDataType( param[0]->Type() );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
   return p;
 }
+
+Portion* GSM_List_List( Portion** param )
+{
+  ListPortion* p;
+  int i;
+  assert( param[0]->Type() != porERROR );  
+
+  if( ((IntPortion*) param[1])->Value() < 0 )
+    return new ErrorPortion( "Invalid list length" );
+
+  p = new ListValPortion();
+  for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+    p->Append( param[0]->ValCopy() );
+  return p;
+}
+
 
 Portion* GSM_List_Integer( Portion** param )
 {
@@ -534,25 +549,32 @@ void Init_listfunc(GSM *gsm)
   FuncObj = new FuncDescObj("List");
   FuncObj->SetFuncInfo(GSM_List, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
   FuncObj->SetParamInfo(GSM_List, 0, "x", porANYTYPE & ~porLIST &
-			~(porINTEGER|porFLOAT|porRATIONAL) );
+			~(porINTEGER|porFLOAT|porRATIONAL));
   FuncObj->SetParamInfo(GSM_List, 1, "length", porINTEGER, 
 			new IntValPortion(1));
 
-  FuncObj->SetFuncInfo(GSM_List_Integer, 3);
+  FuncObj->SetFuncInfo(GSM_List_List, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
+  FuncObj->SetParamInfo(GSM_List_List, 0, "x", porANYLIST);
+  FuncObj->SetParamInfo(GSM_List_List, 1, "length", porINTEGER, 
+			new IntValPortion(1));
+
+  FuncObj->SetFuncInfo(GSM_List_Integer, 3, 
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE);
   FuncObj->SetParamInfo(GSM_List_Integer, 0, "x", porINTEGER);
   FuncObj->SetParamInfo(GSM_List_Integer, 1, "length", porINTEGER, 
 			new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_List_Integer, 2, "delta", porINTEGER, 
 			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_List_Float, 3);
+  FuncObj->SetFuncInfo(GSM_List_Float, 3, NO_PREDEFINED_PARAMS, NON_LISTABLE);
   FuncObj->SetParamInfo(GSM_List_Float, 0, "x", porFLOAT);
   FuncObj->SetParamInfo(GSM_List_Float, 1, "length", porINTEGER, 
 			new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_List_Float, 2, "delta", porFLOAT, 
 			new FloatValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_List_Rational, 3);
+  FuncObj->SetFuncInfo(GSM_List_Rational, 3,
+		       NO_PREDEFINED_PARAMS, NON_LISTABLE);
   FuncObj->SetParamInfo(GSM_List_Rational, 0, "x", porRATIONAL);
   FuncObj->SetParamInfo(GSM_List_Rational, 1, "length", porINTEGER, 
 			new IntValPortion(1));
