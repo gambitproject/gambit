@@ -81,28 +81,6 @@ static Portion *GSM_AddMove(Portion **param)
   return por;
 }
 
-//----------------
-// AttachOutcome
-//----------------
-static Portion *GSM_DetachOutcome(Portion **param);
-
-static Portion *GSM_AttachOutcome(Portion **param)
-{
-  if (param[1]->Spec().Type == porNULL)
-    return GSM_DetachOutcome(param);
-
-  Node *n = ((NodePortion *) param[0])->Value();
-  Outcome *c = ((OutcomePortion *) param[1])->Value();
-
-  n->SetOutcome(c);
-  
-  _gsm->InvalidateGameProfile(n->BelongsTo(), true);
-
-  Portion* por = new OutcomeValPortion(c);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
 //--------------
 // Chance
 //--------------
@@ -292,23 +270,6 @@ static Portion *GSM_DeleteTree(Portion **param)
   n->BelongsTo()->DeleteTree(n);
 
   Portion* por = new NodeValPortion(n);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//----------------
-// DetachOutcome
-//----------------
-
-static Portion *GSM_DetachOutcome(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  Outcome* outc = n->GetOutcome();
-  n->SetOutcome(0);
-
-  _gsm->InvalidateGameProfile(n->BelongsTo(), true);
-
-  Portion* por = new OutcomeValPortion( outc );
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -1181,6 +1142,28 @@ static Portion *GSM_SetName_EfgElements(Portion **param)
 
 
 //----------------
+// SetOutcome
+//----------------
+
+static Portion *GSM_SetOutcome(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Outcome *c = ((OutcomePortion *) param[1])->Value();
+
+  n->SetOutcome(c);
+
+  _gsm->InvalidateGameProfile(n->BelongsTo(), true);
+  
+  if (c)  {
+    Portion* por = new OutcomeValPortion(c);
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+    return por;
+  }
+  else 
+    return new NullPortion(porOUTCOME);
+}
+
+//----------------
 // SetPayoff
 //----------------
 
@@ -1293,15 +1276,6 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("AttachOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AttachOutcome, porOUTCOME, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", 
-			      PortionSpec(porOUTCOME, 0, porNULLSPEC) ));
-  gsm->AddFunction(FuncObj);
-
-
   FuncObj = new FuncDescObj("Chance", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Chance, porEFPLAYER, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
@@ -1364,12 +1338,6 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("DeleteTree", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteTree, porNODE, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("DetachOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DetachOutcome, porOUTCOME, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
@@ -1708,6 +1676,15 @@ void Init_efgfunc(GSM *gsm)
 					    porEFPLAYER | porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetOutcome", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetOutcome, porOUTCOME, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", 
+			      PortionSpec(porOUTCOME, 0, porNULLSPEC) ));
+  gsm->AddFunction(FuncObj);
+
 
   FuncObj = new FuncDescObj("SetPayoff", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porOUTCOME, 3,
