@@ -84,7 +84,8 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
 }
 
 
-NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong)
+NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
+				gOutput &tracefile)
 {
   NFStrategySet *SS = S.GetNFStrategySet(pl);
 
@@ -105,13 +106,11 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong)
       
       for (int inc = min + 1; inc <= dis; )  {
 	if (Dominates(S, pl, set[min+1], set[dis+1], strong))  {
-          gout << SS->GetStrategy(set[dis+1])->number << " dominated by " << SS->GetStrategy(set[min+1])->number << '\n'; 
-//	  MarkAsDominated(pl, set[dis+1], set[min+1]);
+          tracefile << SS->GetStrategy(set[dis+1])->number << " dominated by " << SS->GetStrategy(set[min+1])->number << '\n'; 
 	  dis--;
 	}
 	else if (Dominates(S, pl, set[dis+1], set[min+1], strong))  {
-	  gout << SS->GetStrategy(set[min+1])->number << " dominated by " << SS->GetStrategy(set[dis+1])->number << '\n';
-//	  MarkAsDominated(pl, set[min+1], set[dis+1]);
+	  tracefile << SS->GetStrategy(set[min+1])->number << " dominated by " << SS->GetStrategy(set[dis+1])->number << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;
@@ -141,13 +140,13 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong)
 }
 
 
-NFSupport *ComputeDominated(NFSupport &S, bool strong)
+NFSupport *ComputeDominated(NFSupport &S, bool strong, gOutput &tracefile)
 {
   NFSupport *T = new NFSupport(S);
   bool any = false;
   
   for (int pl = 1; pl <= S.BelongsTo().NumPlayers(); pl++)   {
-    gout << "Player " << pl << '\n';
+    tracefile << "Dominated strategies for player " << pl << ":\n";
     NFStrategySet *SS = ComputeDominated(S, pl, strong);
     if (SS)   {
       delete T->GetNFStrategySet(pl);
