@@ -302,12 +302,12 @@ template <class T> int LPSolve<T>::Enter()
 	z = y[i-nvars];
 //      gout << "\n i = " << i << " cost: " << (*cost)[i] << " z: " << z << " test: " << test;
       if((*cost)[i]-z > test) 
-	if((*UB)[i]==0 || ((*UB)[i]==1 && (*xx)[i] - (*ub)[i]) < -eps1) {
+	if((*UB)[i]==0 || ((*UB)[i]==1 && (*xx)[i] - (*ub)[i] < -eps1)) {
 	  {test=(*cost)[i]-z;in = lab;flag = -1;}
 //	  gout << "\nflag: -1  in: " << in << " test: " << test;
 	}
       if(z - (*cost)[i] > test) 
-	if((*LB)[i]==0 || ((*LB)[i]==1 && (*xx)[i] - (*lb)[i]) > eps1) {
+	if((*LB)[i]==0 || ((*LB)[i]==1 && (*xx)[i] - (*lb)[i] > eps1)) {
 	  {test=z-(*cost)[i];in=lab;flag = 1;}
 //	  gout << "\nflag: +1  in: " << in << " test: " << test;
 	}
