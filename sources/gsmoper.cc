@@ -2564,47 +2564,40 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( "Write" );
   FuncObj->SetFuncInfo( GSM_Write_numerical, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT, 
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_numerical, 1, "x", 
 			porBOOL | porINTEGER | porFLOAT | porRATIONAL );
 
   FuncObj->SetFuncInfo( GSM_Write_gString, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_gString, 1, "x", porTEXT );
 
   FuncObj->SetFuncInfo( GSM_Write_Mixed, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_Mixed, 1, "x", porMIXED );
 
   FuncObj->SetFuncInfo( GSM_Write_Behav, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_Behav, 1, "x", porBEHAV );
 
   FuncObj->SetFuncInfo( GSM_Write_Nfg, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Write_Efg, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo( GSM_Write_list, 2, 
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_list, 1, "x", 
 			porLIST | porBOOL | porINTEGER | porFLOAT | porTEXT |
 			porRATIONAL | porMIXED | porBEHAV );
@@ -2612,8 +2605,7 @@ void Init_gsmoper( GSM* gsm )
   /*
   FuncObj->SetFuncInfo( GSM_Write_list_Text, 2,
 		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_list_Text, 0, "output", porOUTPUT,
-			new OutputRefPortion( gout ) );
+  FuncObj->SetParamInfo( GSM_Write_list_Text, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo( GSM_Write_list_Text, 1, "x", 
 			porLIST | porTEXT );
 			*/
