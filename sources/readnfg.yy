@@ -45,7 +45,7 @@ nfgfile:      header
 		names.Flush();  numbers.Flush();  stratnames.Flush();
 	        N->SetTitle(title);
               }              
-              body
+              body  { return 0; }
 
 header:       NAME { title = last_name; pl = 0; }  playerlist  stratlist
 
