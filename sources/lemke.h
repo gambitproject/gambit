@@ -22,7 +22,7 @@ class LemkeParams     {
 //
 // The general-purpose interface to the solver routines
 //
-template <class T> class LemkeSolver  {
+template <class T> class LemkeModule  {
   private:
     const NormalForm<T> &nf;
     const LemkeParams &params;
@@ -31,7 +31,8 @@ template <class T> class LemkeSolver  {
     gList<gPVector<T> > solutions;
 
   public:
-    LemkeSolver(const NormalForm<T> &N, const LemkeParams &p); 
+    LemkeModule(const NormalForm<T> &N, const LemkeParams &p);
+    virtual ~LemkeModule();
 
     int Lemke(void);
     

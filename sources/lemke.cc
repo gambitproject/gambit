@@ -24,42 +24,16 @@ LemkeParams::LemkeParams(void)
 { }
 
 //---------------------------------------------------------------------------
-//               BaseLemke: class definition and implementation
-//---------------------------------------------------------------------------
-
-class BaseLemke    {
-  protected:
-    int num_pivots;
-    
-    BaseLemke(void);
-
-  public:
-    virtual int Lemke(int) = 0;
-    virtual ~BaseLemke();
-    
-    int NumPivots(void) const;
-};
-
-BaseLemke::BaseLemke(void) : num_pivots(0)   { }
-
-BaseLemke::~BaseLemke()
-{ }
-
-int BaseLemke::NumPivots(void) const
-{
-  return num_pivots;
-}
-
-//---------------------------------------------------------------------------
 //                    LemkeTableau<T>: class definition
 //---------------------------------------------------------------------------
 
-template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
+template <class T> class LemkeTableau : public gTableau<T> 
+{
   private:
     const NormalForm<T> &N;
     int num_strats;
     gOutput &output;
-    int printlevel;
+    int printlevel,num_pivots;
     BFS_List List;
    
     int Lemke_Step(int);
@@ -73,6 +47,7 @@ template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
     virtual ~LemkeTableau();
 
     int Lemke(int);
+    int NumPivots(void) const;
     void GetSolutions(gList<gPVector<T> > &) const;
 };
 
@@ -88,7 +63,8 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
 		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
 		   NF.NumStrats(1) + NF.NumStrats(2)),
 		   N(NF), output(ofile), printlevel(plev),
-		   num_strats(NF.NumStrats(1) + NF.NumStrats(2))
+		   num_strats(NF.NumStrats(1) + NF.NumStrats(2)),
+		   num_pivots(0)
 {
   NormalIter<T> iter(N);
   T min = (T) 0, x;
@@ -414,6 +390,11 @@ void LemkeTableau<T>::GetSolutions(gList<gPVector<T> > &solutions) const
   }
 }
 
+template <class T> int LemkeTableau<T>::NumPivots(void) const
+{
+  return num_pivots;
+}
+
 #ifdef __GNUG__
 template class LemkeTableau<double>;
 template class LemkeTableau<gRational>;
@@ -425,15 +406,18 @@ class LemkeTableau<gRational>;
 #endif   // __GNUG__
 
 //-------------------------------------------------------------------------
-//                    LemkeSolver<T>: Member functions
+//                    LemkeModule<T>: Member functions
 //-------------------------------------------------------------------------
 
 template <class T>
-LemkeSolver<T>::LemkeSolver(const NormalForm<T> &N, const LemkeParams &p)
+LemkeModule<T>::LemkeModule(const NormalForm<T> &N, const LemkeParams &p)
   : nf(N), params(p)
 { }
 
-template <class T> int LemkeSolver<T>::Lemke(void)
+template <class T> LemkeModule<T>::~LemkeModule()
+{ }
+
+template <class T> int LemkeModule<T>::Lemke(void)
 {
   if (nf.NumPlayers() != 2 || !params.output)   return 0;
 
@@ -453,29 +437,29 @@ template <class T> int LemkeSolver<T>::Lemke(void)
   return 1;
 }
 
-template <class T> int LemkeSolver<T>::NumPivots(void) const
+template <class T> int LemkeModule<T>::NumPivots(void) const
 {
   return npivots;
 }
 
-template <class T> double LemkeSolver<T>::Time(void) const
+template <class T> double LemkeModule<T>::Time(void) const
 {
   return time;
 }
 
 template <class T>
-const gList<gPVector<T> > &LemkeSolver<T>::GetSolutions(void) const
+const gList<gPVector<T> > &LemkeModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
 
 #ifdef __GNUG__
-template class LemkeSolver<double>;
-template class LemkeSolver<gRational>;
+template class LemkeModule<double>;
+template class LemkeModule<gRational>;
 #elif defined __BORLANDC__
 #pragma option -Jgd
-class LemkeSolver<double>;
-class LemkeSolver<gRational>;
+class LemkeModule<double>;
+class LemkeModule<gRational>;
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 
@@ -489,13 +473,13 @@ int Lemke(const NormalForm<T> &N, const LemkeParams &p,
 	  gList<gPVector<T> > &solutions,
 	  int &npivots, gRational &time)
 {
-  LemkeSolver<T> LS(N, p);
-  int result = LS.Lemke();
+  LemkeModule<T> LM(N, p);
+  int result = LM.Lemke();
 
-  npivots = LS.NumPivots();
-  time = LS.Time();
+  npivots = LM.NumPivots();
+  time = LM.Time();
   
-  solutions = LS.GetSolutions();
+  solutions = LM.GetSolutions();
 
   return result;
 }
