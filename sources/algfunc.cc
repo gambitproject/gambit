@@ -343,6 +343,8 @@ Portion *GSM_GobitEfg_EfgFloat(Portion **param)
   Funct_maxitsBrent = old_Funct_maxitsBrent;
   Funct_tolBrent = old_Funct_tolBrent;
 
+  if (EP.pxifile != &gnull)  delete EP.pxifile;
+
   Portion* por = new Behav_ListPortion<double>(M.GetSolutions());
   por->SetOwner( param[ 0 ]->Original() );
   por->AddDependency();
