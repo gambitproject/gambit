@@ -33,32 +33,20 @@ dnl------------------------
 dnl Checking for wxWindows
 dnl------------------------
 
-dnl Check for wx-related options (--wx-prefix, --wx-exec-prefix, --wx-config)
-AM_OPTIONS_WXCONFIG
-
-dnl check for wx-config and wxWindows version
-AM_PATH_WXCONFIG(2.3.2, WX232=1)
-
-if test "$WX232" != 1; then
-   AC_MSG_ERROR([
-	   Gambit requires wxWindows to be installed on your system,
-	   but a new enough version could not be found.
-
-	   Please check that wx-config is in path, the directory
-	   where wxWindows libraries are installed (returned by
-	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.3.2 or above.
-
-           wxWindows can be obtained at http://www.wxwindows.org.
-   ])
+dnl check for wx-config
+WX_PATH_WXCONFIG(2.3.2, WXCONFIG=1)
+if test "$WXCONFIG" != 1; then
+    AC_MSG_ERROR([
+            Please check that wx-config is in path, the directory
+            where wxWindows libraries are installed (returned by
+            'wx-config --libs' command) is in LD_LIBRARY_PATH or
+            equivalent variable and wxWindows is version 2.2.1 or above.
+    ])
 fi
 
-dnl Set all flags; remove -fno-exceptions if present
-CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CPPFLAGS=`echo $CPPFLAGS | sed 's/-fno-exceptions//g'`
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+CXXFLAGS="${CXXFLAGS} ${WX_CFLAGS}"
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
-CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+LDFLAGS="${LDFLAGS} ${WX_LIBS}"
 
 GUI_LIBS="$WX_LIBS"
 AC_SUBST(GUI_LIBS)

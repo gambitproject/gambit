@@ -7,7 +7,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources
 include filelist.in
 
 gambit_LDADD = \
-	$(top_builddir)/sources/guishare/libguishare.a \
 	$(top_builddir)/sources/nash/libnash.a \
 	$(top_builddir)/sources/game/libgame.a \
 	$(top_builddir)/sources/poly/libpoly.a \
