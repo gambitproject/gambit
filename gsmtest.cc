@@ -2159,6 +2159,15 @@ int main( void )
   machine->Output();
 
 
+  machine->InitCallFunction( "Plus" );
+  machine->Push( "hi!" );
+  machine->Bind();
+  machine->Push( "hi!" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
