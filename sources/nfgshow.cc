@@ -992,8 +992,10 @@ NFSupport *NfgShow::MakeSupport(void)
                                    TRUE, -1, -1, 80, 100,
                                    num_strats, strats);
 
+#ifndef LINUX_WXXT
         for (j = 0; j < num_strats; j++) 
             players[i]->SetSelection(j, TRUE);
+#endif
 
         for (j = 0; j < num_strats; j++) 
             delete [] strats[j];
@@ -1110,7 +1112,9 @@ nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(const Nfg &p_nfg,
   }
 
   m_outcomePayoffs[0]->SetFocus();
+#ifndef LINUX_WXXT
   m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
+#endif
 
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
