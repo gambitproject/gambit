@@ -78,6 +78,10 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
     for(j=1;j<support.NumStrats(i);j++) 
       equations+=Equation(i,j,j+1);
 
+  for( i=1;i<=NF.NumPlayers();i++)
+    if(support.NumStrats(i)>2) 
+      equations+=Prob(i,support.NumStrats(i));
+
   // set up the rectangle of search
   gVector<T> bottoms(num_vars), tops(num_vars);
   bottoms = (T)0;
@@ -94,7 +98,7 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;
   }  
-  if(quickie.FindRoots(Cube,22,2000)) {
+  if(quickie.FindRoots(Cube,2000)) {
     if(params.trace>0) {
       (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
 	<< num_vars << " :\n" << quickie.RootList();
