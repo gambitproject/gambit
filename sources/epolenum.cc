@@ -15,7 +15,8 @@ EfgPolEnumParams::EfgPolEnumParams(gStatus &status_)
 { }
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
-	       gList<BehavSolution> & solutions, long &nevals, double &time)
+	       gList<BehavSolution> & solutions, long &nevals, double &time,
+	       bool &is_singular)
 {
   if (params.precision == precDOUBLE)  {
     EfgPolEnumModule<gDouble> module(support, params);
@@ -23,6 +24,7 @@ int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
+    is_singular = module.IsSingular();
   }
   else if (params.precision == precRATIONAL)  {
     EfgPolEnumModule<gRational> module(support, params);
@@ -30,6 +32,7 @@ int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
     nevals = module.NumEvals();
     time = module.Time();
     solutions = module.GetSolutions();
+    is_singular = module.IsSingular();
   }
 
   return 1;

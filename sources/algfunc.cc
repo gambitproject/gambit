@@ -87,6 +87,36 @@ void NfSupport_ListPortion::SetValue(const gList<const NFSupport> &list)
 }
 
 
+class EfSupport_ListPortion : public ListPortion   {
+  public:
+    EfSupport_ListPortion(const gList<const EFSupport> &);
+    EfSupport_ListPortion();
+    virtual ~EfSupport_ListPortion()   { }
+
+  void SetValue(const gList<const EFSupport> &);
+};
+
+EfSupport_ListPortion::EfSupport_ListPortion(const gList<const 
+					                 EFSupport> &list)
+{
+  rep->_DataType = porEFSUPPORT;
+  for (int i = 1; i <= list.Length(); i++)
+    Append(new EfSupportPortion(new EFSupport(list[i])));
+}
+
+EfSupport_ListPortion::EfSupport_ListPortion()
+{
+  rep->_DataType = porEFSUPPORT;
+}
+
+void EfSupport_ListPortion::SetValue(const gList<const EFSupport> &list)
+{
+  for (int i = 1; i <= list.Length(); i++)
+    Append(new EfSupportPortion(new EFSupport(list[i])));
+}
+
+
+
 //-------------
 // AgentForm
 //-------------
@@ -986,6 +1016,7 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
   
   double time;
   gList<BehavSolution> solutions;
+  bool is_singular(false);
   
   if (((BoolPortion *) param[1])->Value()) {
     PolEnumParams params;
@@ -1010,7 +1041,7 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 
     try {
       long npivots;
-      EfgPolEnum(support, params, solutions, npivots, time);
+      EfgPolEnum(support, params, solutions, npivots, time,is_singular);
       ((NumberPortion *) param[3])->SetValue(npivots);
     }
     catch (gSignalBreak &) {
@@ -1020,6 +1051,57 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
 
   ((NumberPortion *) param[4])->SetValue(time);
 
+  return new Behav_ListPortion(solutions);
+}
+
+//------------------
+//  AllEFNashSolve
+//------------------
+
+#include "efgalleq.h"
+
+static Portion *GSM_AllEFNashSolve_Efg(Portion **param)
+{
+  const EFSupport &S = *((EfSupportPortion*) param[0])->Value();
+  EfgPolEnumParams params;
+  params.stopAfter = ((NumberPortion *) param[1])->Value();
+  params.tracefile = &((OutputPortion *) param[4])->Value();
+  params.trace = ((NumberPortion *) param[5])->Value();
+  bool recurse = ((BoolPortion *) param[7])->Value();
+  gList<BehavSolution> solutions;
+  gList<const EFSupport> singular_supports;
+
+  if(recurse) {
+    try {
+      long nevals = 0;
+      double time = 0.0;
+      AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
+      
+      ((NumberPortion *) param[2])->SetValue(nevals);
+      ((NumberPortion *) param[3])->SetValue(time);
+      ((EfSupport_ListPortion *) param[6])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+  }
+  else {
+    bool is_singular = false;
+    try {
+      long nevals;
+      double time;
+      EfgPolEnum(S, params, solutions, nevals, time, is_singular);
+      //      EfgPolEnum(S, params, solutions, nevals, time);
+      ((NumberPortion *) param[2])->SetValue(nevals);
+      ((NumberPortion *) param[3])->SetValue(time);
+      if(is_singular)
+	singular_supports.Append(S);
+      ((EfSupport_ListPortion *) param[6])->SetValue(singular_supports);
+    }
+    catch (gSignalBreak &) {
+      params.status.Reset();
+    }
+  }
   return new Behav_ListPortion(solutions);
 }
 
@@ -1658,6 +1740,29 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("singularsubsupps", 
 					   PortionSpec(porNFSUPPORT,1),
 					   new NfSupport_ListPortion(), 
+					   BYREF));
+  FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
+					   new BoolPortion(true)));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("AllEFNashSolve", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_AllEFNashSolve_Efg, 
+				       PortionSpec(porBEHAV, 1), 8));
+  FuncObj->SetParamInfo(0, 0, gclParameter("supersupport", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
+					    new NumberPortion(0), BYREF));
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 6, gclParameter("singularsubsupps", 
+					   PortionSpec(porEFSUPPORT,1),
+					   new EfSupport_ListPortion(), 
 					   BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("recurse",porBOOLEAN, 
 					   new BoolPortion(true)));

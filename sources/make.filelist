@@ -26,7 +26,8 @@ GAME_OBJECTS = $(GAME_SOURCES:.cc=.o)
 
 
 EALG_SOURCES = egobit.cc eliap.cc seqform.cc subsolve.cc efgpure.cc efdom.cc \
-               efgcsum.cc efbasis.cc epolenum.cc efgensup.cc seqeq.cc
+               efgcsum.cc efbasis.cc epolenum.cc efgensup.cc seqeq.cc \
+	       efgalleq.cc
 
 EALG_OBJECTS = $(EALG_SOURCES:.cc=.o)
 

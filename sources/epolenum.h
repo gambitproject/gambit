@@ -26,7 +26,8 @@ public:
 
 
 int EfgPolEnum(const EFSupport &, const EfgPolEnumParams &, 
-	       gList<BehavSolution> &, long &nevals, double &time);
+	       gList<BehavSolution> &, long &nevals, double &time,
+	       bool &is_singular);
 
 #endif    // EPOLENUM_H
 

@@ -25,6 +25,7 @@ private:
   double time;
   gList<BehavSolution> solutions;
   const Sfg SF;
+  bool is_singular;
 
 //  bool EqZero(T x) const;
   
@@ -52,6 +53,7 @@ public:
   
   long NumEvals(void) const;
   double Time(void) const;
+  bool IsSingular(void) const;
 
 //  void SequentialEquilibrium(const EFSupport &B, const EFBasis &b); 
   
@@ -68,7 +70,8 @@ public:
 template <class T>
 EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
 				      const EfgPolEnumParams &p)
-  : EF(S.Game()), support(S), params(p), count(0), nevals(0), SF(S)
+  : EF(S.Game()), support(S), params(p), count(0), nevals(0), SF(S),
+    is_singular(false)
 { 
 //  gEpsilon(eps,12);
 
@@ -136,21 +139,27 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
 
   // 2147483647 = 2^31-1 = MaxInt
 
-  if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
+  try {
+    if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
+      if(params.trace>0) {
+	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
+			    << num_vars << " :\n" << quickie.RootList();
+      }
+    }
+    else
+      if(params.trace>0) {
+	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
+			    << " could not be resolved by FindRoots.\n";
+      }
+    timer.Stop();
     if(params.trace>0) {
-      (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-	<< num_vars << " :\n" << quickie.RootList();
+      (*params.tracefile)  << "The QuikSolv computation of roots took " 
+			   << (int)timer.Elapsed() << " seconds.\n\n";
     }
   }
-  else
-    if(params.trace>0) {
-      (*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
-	<< " could not be resolved by FindRoots.\n";
-    }
-  timer.Stop();
-  if(params.trace>0) {
-    (*params.tracefile)  << "The QuikSolv computation of roots took " 
-      << (int)timer.Elapsed() << " seconds.\n\n";
+  catch (gSignalBreak &) { }
+  catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+    is_singular = true;
   }
 
   int index = SaveSolutions(quickie.RootList());
@@ -207,6 +216,11 @@ template <class T> long EfgPolEnumModule<T>::NumEvals(void) const
 template <class T> double EfgPolEnumModule<T>::Time(void) const
 {
   return time;
+}
+
+template <class T> bool EfgPolEnumModule<T>::IsSingular(void) const
+{
+  return is_singular;
 }
 
 template <class T> EfgPolEnumParams &EfgPolEnumModule<T>::Parameters(void)
