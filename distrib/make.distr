@@ -59,14 +59,13 @@ gambit:
 
 	cd ../sources; \
 	make -f $(GMAKEFILE) gui GUI=$(GUI) SYSNAME=$(SYSNAME); \
-	mv gui_$(SYSNAME)_$(GUI) ../bin/gambit_$(SYSNAME)_$(GUI); \
-	strip ../bin/gambit_$(SYSNAME)_$(GUI); \
-	cp $(WXWINDIR)/bin/wxhelp_$(SYSNAME)_$(GUI) ../bin; \
+	mv gui_$(GUI)_$(SYSNAME) ../bin/gambit_$(GUI)_$(SYSNAME); \
+	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
+	cp $(WXWINDIR)/bin/wxhelp_$(GUI)_$(SYSNAME) ../bin; \
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
-	cp ../sources/gambit.ini ./gambit_setup ./gui-init \
-	  ../sources/*.gcl ../misc
+	cp ./gambit_setup ./gui-init ../misc
 	cp ./gambit_setup ../..
 
 	@echo
@@ -76,19 +75,21 @@ gambit:
 	@echo
 
 	cd ../..; \
-	if [ -f gambit_$(SYSNAME)_$(GUI).zip ]; \
-	then rm gambit_$(SYSNAME)_$(GUI).zip; fi; \
-	zip gambit_$(SYSNAME)_$(GUI).zip \
+	if [ -f gambit_$(GUI)_$(SYSNAME).zip ]; \
+	then rm gambit_$(GUI)_$(SYSNAME).zip; fi; \
+	zip gambit_$(GUI)_$(SYSNAME).zip \
 	  ./gambit0.96/bin/gcl_$(SYSNAME) \
-	  ./gambit0.96/bin/gambit_$(SYSNAME)_$(GUI) \
-	  ./gambit0.96/bin/wxhelp_$(SYSNAME)_$(GUI) \
+	  ./gambit0.96/bin/*.gcl \
+	  ./gambit0.96/bin/gcl.man \
+	  ./gambit0.96/bin/gambit_$(GUI)_$(SYSNAME) \
+	  ./gambit0.96/bin/wxhelp_$(GUI)_$(SYSNAME) \
 	  ./gambit0.96/efg/*.efg \
 	  ./gambit0.96/nfg/*.nfg \
 	  ./gambit0.96/gcl/*.gcl \
 	  ./gambit0.96/misc/* \
 	  ./gambit_setup
 
-	mv ../../gambit_$(SYSNAME)_$(GUI).zip $(FTPDIR) 
+	mv ../../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 
 src:
 	@echo
@@ -111,14 +112,14 @@ src:
 wxwin:
 	@echo
 	@echo ------------------------------------------------------
-	@echo Updating libwx_$(SYSNAME)_$(GUI) on ftp server 
+	@echo Updating libwx_$(GUI)_$(SYSNAME) on ftp server 
 	@echo ------------------------------------------------------
 	@echo
 
 	cd $(WXWINDIR) ; \
-	zip wx_$(SYSNAME)_$(GUI).zip \
-	  ./include/base/* ./include/x/* ./lib/libwx_$(SYSNAME)_$(GUI).a; \
-	mv wx_$(SYSNAME)_$(GUI).zip $(FTPDIR)
+	zip wx_$(GUI)_$(SYSNAME).zip \
+	  ./include/base/* ./include/x/* ./lib/libwx_$(GUI)_$(SYSNAME).a; \
+	mv wx_$(GUI)_$(SYSNAME).zip $(FTPDIR)
 
 doc:
 	@echo
