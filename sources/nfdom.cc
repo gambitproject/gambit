@@ -8,7 +8,7 @@
 
 gRectArray<gNumber> *paytable;
 
-bool Dominates(const Nfg &,
+bool Dominates(const Nfg &n,
 	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
   NfgContIter A(S), B(S);
@@ -20,8 +20,9 @@ bool Dominates(const Nfg &,
 
   if (strong)  {
     do  {
-      gNumber ap = (A.GetOutcome()) ? (*paytable)(A.GetOutcome()->GetNumber(), pl) : gNumber(0);
-      gNumber bp = (B.GetOutcome()) ? (*paytable)(B.GetOutcome()->GetNumber(), pl) : gNumber(0);
+
+      gNumber ap = (A.GetOutcome()) ? n.Payoff(A.GetOutcome(), pl) : gNumber(0);
+      gNumber bp = (B.GetOutcome()) ? n.Payoff(B.GetOutcome(), pl) : gNumber(0);
       if (ap <= bp)  return false;
       A.NextContingency();
     } while (B.NextContingency());
@@ -32,8 +33,8 @@ bool Dominates(const Nfg &,
   bool equal = true;
   
   do   {
-    gNumber ap = (A.GetOutcome()) ? (*paytable)(A.GetOutcome()->GetNumber(), pl) : gNumber(0);
-    gNumber bp = (B.GetOutcome()) ? (*paytable)(B.GetOutcome()->GetNumber(), pl) : gNumber(0);
+    gNumber ap = (A.GetOutcome()) ? n.Payoff(A.GetOutcome(), pl) : gNumber(0);
+    gNumber bp = (B.GetOutcome()) ? n.Payoff(B.GetOutcome(), pl) : gNumber(0);
     if (ap < bp)   return false;
     else if (ap > bp)  equal = false;
     A.NextContingency();
@@ -46,17 +47,66 @@ bool Dominates(const Nfg &,
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 	       const gStatus &status)
 {
-  return Dominates(S.Game(),S,s->Player()->GetNumber(),
-		   s->Number(),t->Number(),strong);
+  //DEBUG
+  bool answer;
+
+  const Nfg* n = S.GamePtr();
+
+  NfgContIter A(S), B(S);
+
+  A.Freeze(s->Player());
+  A.Set(s);
+  B.Freeze(s->Player());
+  B.Set(t);  
+
+  if (strong)  {
+    do  {
+      gNumber ap = (A.GetOutcome()) ? 
+      n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
+      gNumber bp = (B.GetOutcome()) ? 
+      n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
+
+      if (ap <= bp)  answer = true; // return false;
+      A.NextContingency();
+    } while (B.NextContingency());
+	
+    answer = true; // return true;
+  }
+
+  bool equal = true;
+  
+  do   {
+    gNumber ap = (A.GetOutcome()) ? 
+    n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
+    gNumber bp = (B.GetOutcome()) ? 
+    n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
+
+    if (ap < bp)   return false;
+    else if (ap > bp)  equal = false;
+    A.NextContingency();
+  } while (B.NextContingency());
+
+  answer = !equal; // return (!equal);
+
+  /*
+  if (answer != Dominates(S.Game(),S,s->Player()->GetNumber(),
+		   s->Number(),t->Number(),strong))
+    { gout << "Bloody murder!\n"; exit(0); }
+  */
+
+  return answer;
 }
 
 
-bool IsDominated(const NFSupport &S, Strategy *s, bool strong, const gStatus &status)
+bool IsDominated(const NFSupport &S, Strategy *s, bool strong, 
+		 const gStatus &status)
 {
-  for (int i = 1; i <= s->Player()->NumStrats(); i++)
-    if (i != s->Number())
-      if (Dominates(S.Game(),S,s->Player()->GetNumber(),i,s->Number(),strong))
+  for (int i = 1; i <= S.NumStrats(s->Player()->GetNumber()); i++) {
+    if (i != s->Number()) 
+      if (Dominates(S,S.Strategies(s->Player()->GetNumber())[i],s,
+		    strong,status))
 	return true;
+  }
   return false;
 }
 
