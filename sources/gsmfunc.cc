@@ -50,25 +50,10 @@ void GSM::InitFunctions( void )
 
 void Init_userfunc( GSM* gsm )
 {
+/*
   gList< Instruction* >* prog;
   FuncDescObj* func;
-
-  prog = new gList< Instruction* >;
-  prog->Append( new PushRef( "x" ) );
-  prog->Append( new PushRef( "y" ) );
-  prog->Append( new Assign );
-  
-  /*
-  func = new FuncDescObj( "Assign" );
-  func->SetFuncInfo( prog, 2 );
-  func->SetParamInfo( prog, 0, "x", 
-		     porANYTYPE, NO_DEFAULT_VALUE,
-		     PASS_BY_REFERENCE );
-  func->SetParamInfo( prog, 1, "y", 
-		     porANYTYPE );
-  gsm->AddFunction( func );
-  */
-
+*/
 }
 
 

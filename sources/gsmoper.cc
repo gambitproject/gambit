@@ -32,7 +32,10 @@ Portion* GSM_Assign_Undefined( Portion** param )
 	new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
   }
   else
-    param[0] = param[1]->ValCopy();
+  {
+    param[0] = param[1];
+    param[1] = param[0]->RefCopy();
+  }
   return param[0]->RefCopy();
 }
 
