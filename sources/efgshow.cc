@@ -1666,8 +1666,12 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
 	gFileInput infile(p_filename);
 	ReadEfgFile(infile, p_efg);
                 
-	if (!p_efg) 
+	if (!p_efg) {
 	  wxMessageBox(p_filename + " is not a valid .efg file");
+	}
+	else {
+	  gambitApp.AddFileToHistory(p_filename);
+	}
       }
       catch (gFileInput::OpenFailed &) { 
 	wxMessageBox("Could not open " + p_filename + " for reading");

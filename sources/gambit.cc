@@ -246,6 +246,10 @@ wxFrame *GambitApp::OnInit(void)
   file_menu->Append(FILE_LOAD,   "&Open",                "Open a file");
   file_menu->Append(FILE_QUIT,   "&Quit",                "Quit program");
 
+  m_recentFiles = new wxFileHistory(5);
+  m_recentFiles->FileHistoryLoad(m_resourceFile, "Gambit");
+  m_recentFiles->FileHistoryUseMenu(file_menu);
+
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents",   "Table of contents");
   help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",      "About this program");
@@ -303,6 +307,7 @@ int GambitApp::OnExit(void)
     wx_frame->OnClose();
 #endif
 
+  m_recentFiles->FileHistorySave(ResourceFile(), "Gambit");
   return TRUE;
 }
 
@@ -324,26 +329,26 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 void GambitFrame::LoadFile(char *s)
 {    
   if (!s) {
-      Enable(FALSE); // Don't allow anything while the dialog is up.
+    Enable(FALSE); // Don't allow anything while the dialog is up.
 
-      s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
-			 NULL, NULL, "*.?fg");
+    s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
+		       NULL, NULL, "*.?fg");
 
-      Enable(TRUE);
+    Enable(TRUE);
 
-      if (!s)
-	return;
+    if (!s)
+      return;
 
-      // Save the current directory.
-      // WARNING: since wxFileSelector returns the address of
-      // a global buffer in wxxt, we have to copy s to a new
-      // location.  This is probably also a memory leak.
-      char *new_s = copystring(s);
-      gText path(gPathOnly(s));
-      gambitApp.SetCurrentDir(path);
-      s = new_s;
+    // Save the current directory.
+    // WARNING: since wxFileSelector returns the address of
+    // a global buffer in wxxt, we have to copy s to a new
+    // location.  This is probably also a memory leak.
+    char *new_s = copystring(s);
+    gText path(gPathOnly(s));
+    gambitApp.SetCurrentDir(path);
+    s = new_s;
   }
-    
+  
   if (strcmp(s, "") != 0) {
     gText filename(gFileNameFromPath(s));
     filename = filename.Dncase();
@@ -358,7 +363,7 @@ void GambitFrame::LoadFile(char *s)
       EfgGUI(0, s, 0, this);
       return;
     }
-
+    
     wxMessageBox("Unknown file type");
   }
 
@@ -412,13 +417,13 @@ extern void wxFlushResources(void);
 
 Bool GambitFrame::OnClose()
 {
-    Show(FALSE);
+  Show(FALSE);
 #ifdef wx_x
-    wxFlushResources();
+  wxFlushResources();
 #endif
-    wxKillHelp();
-    wout->OnClose(); werr->OnClose();
-    return TRUE;
+  wxKillHelp();
+  wout->OnClose(); werr->OnClose();
+  return TRUE;
 }
 
 

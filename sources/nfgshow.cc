@@ -1328,6 +1328,9 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
 	if (!nf) {
 	  wxMessageBox(infile_name + " is not a valid .nfg file");
 	}
+	else {
+	  gambitApp.AddFileToHistory(infile_name);
+	}
       }
       catch (gFileInput::OpenFailed &) {
 	wxMessageBox("Could not open " + infile_name + " for reading");

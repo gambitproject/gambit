@@ -9,6 +9,7 @@
 
 #include "gtext.h"
 #include "wx.h"
+#include "wx_doc.h"
 
 class GambitFrame;
 extern GambitFrame *main_gambit_frame;
@@ -20,6 +21,7 @@ class GambitApp : public wxApp {
 private:
   gText m_currentDir; /* Current position in directory tree. */
   gText m_resourceFile;  /* path to resource file */
+  wxFileHistory *m_recentFiles;
 
 public:
   wxFrame *OnInit(void);
@@ -29,6 +31,9 @@ public:
   void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
 
   const gText &ResourceFile(void)  { return m_resourceFile; }
+
+  void AddFileToHistory(const gText &p_name)
+    { m_recentFiles->AddFileToHistory(p_name); }
 };
 
 extern GambitApp gambitApp;
