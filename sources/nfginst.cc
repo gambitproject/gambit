@@ -1,0 +1,48 @@
+//
+// FILE: nfginst.cc -- Instantiation of normal form template classes
+//
+// 
+//
+
+#include "mixed.imp"
+#include "rational.h"
+
+template class MixedProfile<double>;
+template gOutput &operator<<(gOutput &, const MixedProfile<double> &);
+
+template class MixedProfile<gRational>;
+template gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);
+
+template class MixedProfile<gNumber>;
+template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
+
+
+#include "glist.imp"
+
+template class gList<MixedProfile<double> >;
+template class gList<MixedProfile<gRational> >;
+template class gList<MixedProfile<gNumber> >;
+
+#include "grblock.imp"
+
+template class gRectBlock<double>;
+template class gRectBlock<gRational>;
+template class gRectBlock<gNumber>;
+
+
+#include "garray.imp"
+#include "gblock.imp"
+
+template class gArray<NFStrategySet *>;
+template class gArray<Strategy *>;
+template class gArray<NFOutcome *>;
+
+template class gArray<NFPlayer *>;
+template class gBlock<Strategy *>;
+
+template class gArray<NFOutcome *>;
+template class gBlock<NFOutcome *>;
+
+template class gList<MixedSolution>;
+
+
