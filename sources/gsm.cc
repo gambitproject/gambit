@@ -1346,7 +1346,7 @@ bool GSM::Pop( void )
   Portion* p;
   bool result = false;
 
-  if( _Depth() >= 0 )
+  if( _Depth() > 0 )
   {
     p = _Pop();
     delete p;
@@ -1354,7 +1354,8 @@ bool GSM::Pop( void )
   }
   else
   {
-    _ErrorMessage( _StdErr, 34 );
+    result = true;
+    // _ErrorMessage( _StdErr, 34 );
   }
   return result;
 }
