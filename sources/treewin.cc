@@ -203,13 +203,6 @@ static Node *NextSameIset(const Node *n)
 //
 void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 {
-  // Accelerators:
-  // Note that accelerators are provided for in the wxwin code but only for the
-  // windows platform.  In order to make this more portable, accelerators for
-  // this program are coded in the header file and processed in OnChar
-    
-  m_parent->CheckAccelerators(p_event);
-    
   if (!p_event.ShiftDown()) {
     bool c = false;   // set to true if cursor position has changed
     switch (p_event.KeyCode()) {
