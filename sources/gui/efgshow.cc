@@ -231,7 +231,9 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 }
 
 EfgShow::~EfgShow()
-{ }
+{
+  wxGetApp().GetFileHistory().RemoveMenu(GetMenuBar()->GetMenu(0));
+}
 
 //---------------------------------------------------------------------
 //            EfgShow: Coordinating updates of child windows
@@ -426,8 +428,9 @@ void EfgShow::MakeMenus(void)
   menuBar->Append(toolsMenu, "&Tools");
   menuBar->Append(helpMenu, "&Help");
 
-  // Set the menu bar
   SetMenuBar(menuBar);
+  wxGetApp().GetFileHistory().UseMenu(menuBar->GetMenu(0));
+  wxGetApp().GetFileHistory().AddFilesToMenu(menuBar->GetMenu(0));
 }
 
 #include "bitmaps/new.xpm"

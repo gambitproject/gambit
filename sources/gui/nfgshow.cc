@@ -200,7 +200,9 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 }
 
 NfgShow::~NfgShow()
-{ }
+{
+  wxGetApp().GetFileHistory().RemoveMenu(GetMenuBar()->GetMenu(0));
+}
 
 void NfgShow::OnUpdate(gbtGameView *)
 {
@@ -225,7 +227,7 @@ void NfgShow::OnUpdate(gbtGameView *)
 
 void NfgShow::OnProfileSelected(wxListEvent &p_event)
 {
-  m_doc->SetCurrentProfile(p_event.GetIndex());
+  m_doc->SetCurrentProfile(p_event.GetIndex() + 1);
 }
  
 //----------------------------------------------------------------------
@@ -743,6 +745,7 @@ void NfgShow::OnFormatFontData(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetDataFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
     m_doc->UpdateViews(0, false, true);
   }
 }
@@ -755,6 +758,7 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetPreferences().SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_doc->GetPreferences().SaveOptions();
     m_doc->UpdateViews(0, false, true);
   }
 }

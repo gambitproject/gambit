@@ -168,7 +168,7 @@ void gbtPreferences::LoadOptions(void)
 
   config.Read("/TreeDisplay/NodeAboveLabel", &m_nodeAboveLabel, 1);
   config.Read("/TreeDisplay/NodeBelowLabel", &m_nodeBelowLabel, 4);
-  config.Read("/TreeDisplay/OutcomeLabel", &m_outcomeLabel, 1);
+  config.Read("/TreeDisplay/OutcomeLabel", &m_outcomeLabel, 0);
   config.Read("/TreeDisplay/BranchAboveLabel", &m_branchAboveLabel, 1);
   config.Read("/TreeDisplay/BranchBelowLabel", &m_branchBelowLabel, 2);
 

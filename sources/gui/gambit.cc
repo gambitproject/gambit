@@ -82,8 +82,7 @@ bool GambitApp::OnInit(void)
     efg.NewPlayer().SetLabel("Player 1");
     efg.NewPlayer().SetLabel("Player 2");
     efg.SetTitle("Untitled Extensive Form Game");
-    gbtGameDocument *doc = new gbtGameDocument(efg);
-    (void) new EfgShow(doc, 0);
+    (void) new EfgShow(new gbtGameDocument(efg), 0);
   }
 
   // Set up the help system.
@@ -200,7 +199,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gFileInput infile(p_filename);
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    (void) new NfgShow(new gbtGameDocument(nfg), 0);
+    (void) new NfgShow(new gbtGameDocument(nfg, p_filename), 0);
     return;
   }
   catch (gFileInput::OpenFailed &) {
@@ -217,7 +216,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gFileInput infile(p_filename);
     gbtEfgGame efg = ReadEfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    (void) new EfgShow(new gbtGameDocument(efg), 0);
+    (void) new EfgShow(new gbtGameDocument(efg, p_filename), 0);
   }
   catch (gFileInput::OpenFailed &) { 
     wxMessageBox(wxString::Format("Could not open '%s' for reading",

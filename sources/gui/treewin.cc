@@ -204,7 +204,9 @@ void TreeWindow::OnUpdate(gbtGameView *)
 {
   m_layout.BuildNodeList(*m_doc->GetEfgSupport());
   m_layout.Layout(*m_doc->GetEfgSupport());
-  m_layout.SetCutNode(m_doc->GetCutNode());
+  if (!m_doc->GetCutNode().IsNull()) {
+    m_layout.SetCutNode(m_doc->GetCutNode());
+  }
   AdjustScrollbarSteps();
 
   gbtEfgNode cursor = m_doc->GetCursor();

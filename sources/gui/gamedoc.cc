@@ -41,8 +41,8 @@
 #include "efgshow.h"
 #include "nfgshow.h"
 
-gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
-  : m_modified(false),
+gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
+  : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
     m_rowPlayer(1), m_colPlayer(2),
     m_efg(new gbtEfgGame(p_efg)), 
@@ -61,8 +61,8 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
   m_efgSupports.Append(m_curEfgSupport);
 }
 
-gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg)
-  : m_modified(false),
+gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
+  : m_filename(p_filename), m_modified(false),
     m_curProfile(0),
     m_rowPlayer(1), m_colPlayer(2),
     m_contingency(p_nfg.NumPlayers()),
@@ -413,6 +413,8 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
 void gbtGameDocument::MakeReducedNfg(void)
 {
   m_nfg = new gbtNfgGame(::MakeReducedNfg(*m_curEfgSupport));
+  m_contingency = gArray<int>(m_nfg->NumPlayers());
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
   (void) new NfgShow(this, 0);
 
   m_mixedProfiles.Flush();

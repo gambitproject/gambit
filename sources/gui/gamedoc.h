@@ -70,8 +70,8 @@ public:
   gbtNfgSupport *m_curNfgSupport;
   gList<gbtNfgSupport *> m_nfgSupports;
 
-  gbtGameDocument(gbtEfgGame);
-  gbtGameDocument(gbtNfgGame);
+  gbtGameDocument(gbtEfgGame, wxString = "");
+  gbtGameDocument(gbtNfgGame, wxString = "");
   ~gbtGameDocument();
 
   gbtEfgGame GetEfg(void) const { return *m_efg; }

@@ -450,6 +450,9 @@ NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
 
 void NfgTable::OnUpdate(gbtGameView *)
 { 
+  m_grid->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  m_grid->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+
   const gbtNfgSupport &support = *m_doc->GetNfgSupport();
   int rowPlayer = m_doc->GetRowPlayer(), colPlayer = m_doc->GetColPlayer();
   m_grid->BeginBatch();

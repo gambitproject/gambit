@@ -100,7 +100,7 @@ void NfgProfileList::OnUpdate(gbtGameView *)
     }    
   }
 
-  if (m_doc->IsProfileSelected() > 0) {
+  if (m_doc->IsProfileSelected()) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
     item.m_itemId = m_doc->AllMixedProfiles().Find(m_doc->GetMixedProfile()) - 1;
