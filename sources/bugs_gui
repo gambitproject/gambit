@@ -250,6 +250,8 @@ either an nfg or an efg, you get an error window that says "Unknown
 file type".  On the other hand, if you load the file from the command
 line ("gui foo.efg") it works.
 
+MCV: The above bug has now gone away.  It's dead, whatever it was.  (2/1/99)
+
 //------------------------------
 
 Bug D31: Default normal form game is buggy
@@ -269,6 +271,16 @@ remember to check more thoroughly.  However, all the problems I tracked
 down would also appear in the GCL, so this is more of a GCL bug than
 a GUI bug, apparently.  (It is possible similar problems could occur
 in the GUI as well though.)
+
+//-------------------------------
+
+Bug D32: Warning message on Linux/wxxt port
+
+When loading up 8x8.nfg in the wxxt version of gambit, we get this:
+
+panel: cannot resize frame to ZERO width or height
+
+No harm seems to come of this.
 
 -------------  older bugs that still remain ---------------
 
