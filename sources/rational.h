@@ -27,92 +27,92 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "integer.h"
 #include <math.h>
 
-class Rational
+class gRational
 {
 protected:
-  Integer          num;
-  Integer          den;
+  gInteger          num;
+  gInteger          den;
 
   void             normalize();
 
 public:
-                   Rational();
-                   Rational(double);
-                   Rational(int n);
-                   Rational(long n);
-                   Rational(int n, int d);
-                   Rational(long n, long d);
-                   Rational(long n, unsigned long d);
-                   Rational(unsigned long n, long d);
-                   Rational(unsigned long n, unsigned long d);
-                   Rational(const Integer& n);
-                   Rational(const Integer& n, const Integer& d);
-                   Rational(const Rational&);
+                   gRational();
+                   gRational(double);
+                   gRational(int n);
+                   gRational(long n);
+                   gRational(int n, int d);
+                   gRational(long n, long d);
+                   gRational(long n, unsigned long d);
+                   gRational(unsigned long n, long d);
+                   gRational(unsigned long n, unsigned long d);
+                   gRational(const gInteger& n);
+                   gRational(const gInteger& n, const gInteger& d);
+                   gRational(const gRational&);
 
-                  ~Rational();
+                  ~gRational();
 
-  void             operator =  (const Rational& y);
+  void             operator =  (const gRational& y);
 
-  friend int       operator == (const Rational& x, const Rational& y);
-  friend int       operator != (const Rational& x, const Rational& y);
-  friend int       operator <  (const Rational& x, const Rational& y);
-  friend int       operator <= (const Rational& x, const Rational& y);
-  friend int       operator >  (const Rational& x, const Rational& y);
-  friend int       operator >= (const Rational& x, const Rational& y);
+  friend int       operator == (const gRational& x, const gRational& y);
+  friend int       operator != (const gRational& x, const gRational& y);
+  friend int       operator <  (const gRational& x, const gRational& y);
+  friend int       operator <= (const gRational& x, const gRational& y);
+  friend int       operator >  (const gRational& x, const gRational& y);
+  friend int       operator >= (const gRational& x, const gRational& y);
 
-  friend Rational  operator +  (const Rational& x, const Rational& y);
-  friend Rational  operator -  (const Rational& x, const Rational& y);
-  friend Rational  operator *  (const Rational& x, const Rational& y);
-  friend Rational  operator /  (const Rational& x, const Rational& y);
+  friend gRational  operator +  (const gRational& x, const gRational& y);
+  friend gRational  operator -  (const gRational& x, const gRational& y);
+  friend gRational  operator *  (const gRational& x, const gRational& y);
+  friend gRational  operator /  (const gRational& x, const gRational& y);
 
-  void             operator += (const Rational& y);
-  void             operator -= (const Rational& y);
-  void             operator *= (const Rational& y);
-  void             operator /= (const Rational& y);
+  void             operator += (const gRational& y);
+  void             operator -= (const gRational& y);
+  void             operator *= (const gRational& y);
+  void             operator /= (const gRational& y);
 
 #ifdef __GNUG__
-  friend Rational  operator <? (const Rational& x, const Rational& y); // min
-  friend Rational  operator >? (const Rational& x, const Rational& y); // max
+  friend gRational  operator <? (const gRational& x, const gRational& y); // min
+  friend gRational  operator >? (const gRational& x, const gRational& y); // max
 #endif
 
-  friend Rational  operator - (const Rational& x);
+  friend gRational  operator - (const gRational& x);
 
 
-// builtin Rational functions
+// builtin gRational functions
 
 
   void             negate();                      // x = -x
   void             invert();                      // x = 1/x
 
-  friend int       sign(const Rational& x);             // -1, 0, or +1
-  friend Rational  abs(const Rational& x);              // absolute value
-  friend Rational  sqr(const Rational& x);              // square
-  friend Rational  pow(const Rational& x, long y);
-  friend Rational  pow(const Rational& x, const Integer& y);
-  const Integer&   numerator() const;
-  const Integer&   denominator() const;
+  friend int       sign(const gRational& x);             // -1, 0, or +1
+  friend gRational  abs(const gRational& x);              // absolute value
+  friend gRational  sqr(const gRational& x);              // square
+  friend gRational  pow(const gRational& x, long y);
+  friend gRational  pow(const gRational& x, const gInteger& y);
+  const gInteger&   numerator() const;
+  const gInteger&   denominator() const;
 
 // coercion & conversion
 
                    operator double() const;
-  friend Integer   floor(const Rational& x);
-  friend Integer   ceil(const Rational& x);
-  friend Integer   trunc(const Rational& x);
-  friend Integer   round(const Rational& x);
+  friend gInteger   floor(const gRational& x);
+  friend gInteger   ceil(const gRational& x);
+  friend gInteger   trunc(const gRational& x);
+  friend gInteger   round(const gRational& x);
 
-  friend gInput&    operator >> (gInput& s, Rational& y);
-  friend gOutput&   operator << (gOutput& s, const Rational& y);
+  friend gInput&    operator >> (gInput& s, gRational& y);
+  friend gOutput&   operator << (gOutput& s, const gRational& y);
 
   int		   fits_in_float() const;
   int		   fits_in_double() const;
 
 // procedural versions of operators
 
-  friend int       compare(const Rational& x, const Rational& y);
-  friend void      add(const Rational& x, const Rational& y, Rational& dest);
-  friend void      sub(const Rational& x, const Rational& y, Rational& dest);
-  friend void      mul(const Rational& x, const Rational& y, Rational& dest);
-  friend void      div(const Rational& x, const Rational& y, Rational& dest);
+  friend int       compare(const gRational& x, const gRational& y);
+  friend void      add(const gRational& x, const gRational& y, gRational& dest);
+  friend void      sub(const gRational& x, const gRational& y, gRational& dest);
+  friend void      mul(const gRational& x, const gRational& y, gRational& dest);
+  friend void      div(const gRational& x, const gRational& y, gRational& dest);
 
 // error detection
 
@@ -121,116 +121,117 @@ public:
 
 };
 
-typedef Rational RatTmp; // backwards compatibility
+typedef gRational RatTmp; // backwards compatibility
+typedef gRational Rational;
 
-inline Rational::Rational() : num(&_ZeroRep), den(&_OneRep) {}
-inline Rational::~Rational() {}
+inline gRational::gRational() : num(&_ZeroRep), den(&_OneRep) {}
+inline gRational::~gRational() {}
 
-inline Rational::Rational(const Rational& y) :num(y.num), den(y.den) {}
+inline gRational::gRational(const gRational& y) :num(y.num), den(y.den) {}
 
-inline Rational::Rational(const Integer& n) :num(n), den(&_OneRep) {}
+inline gRational::gRational(const gInteger& n) :num(n), den(&_OneRep) {}
 
-inline Rational::Rational(const Integer& n, const Integer& d) :num(n),den(d)
+inline gRational::gRational(const gInteger& n, const gInteger& d) :num(n),den(d)
 {
   normalize();
 }
 
-inline Rational::Rational(long n) :num(n), den(&_OneRep) { }
+inline gRational::gRational(long n) :num(n), den(&_OneRep) { }
 
-inline Rational::Rational(int n) :num(n), den(&_OneRep) { }
+inline gRational::gRational(int n) :num(n), den(&_OneRep) { }
 
-inline Rational::Rational(long n, long d) :num(n), den(d) { normalize(); }
-inline Rational::Rational(int n, int d) :num(n), den(d) { normalize(); }
-inline Rational::Rational(long n, unsigned long d) :num(n), den(d)
+inline gRational::gRational(long n, long d) :num(n), den(d) { normalize(); }
+inline gRational::gRational(int n, int d) :num(n), den(d) { normalize(); }
+inline gRational::gRational(long n, unsigned long d) :num(n), den(d)
 {
   normalize();
 }
-inline Rational::Rational(unsigned long n, long d) :num(n), den(d)
+inline gRational::gRational(unsigned long n, long d) :num(n), den(d)
 {
   normalize();
 }
-inline Rational::Rational(unsigned long n, unsigned long d) :num(n), den(d)
+inline gRational::gRational(unsigned long n, unsigned long d) :num(n), den(d)
 {
   normalize();
 }
 
-inline  void Rational::operator =  (const Rational& y)
+inline  void gRational::operator =  (const gRational& y)
 {
   num = y.num;  den = y.den;
 }
 
-inline int operator == (const Rational& x, const Rational& y)
+inline int operator == (const gRational& x, const gRational& y)
 {
   return compare(x.num, y.num) == 0 && compare(x.den, y.den) == 0;
 }
 
-inline int operator != (const Rational& x, const Rational& y)
+inline int operator != (const gRational& x, const gRational& y)
 {
   return compare(x.num, y.num) != 0 || compare(x.den, y.den) != 0;
 }
 
-inline int operator <  (const Rational& x, const Rational& y)
+inline int operator <  (const gRational& x, const gRational& y)
 {
   return compare(x, y) <  0; 
 }
 
-inline int operator <= (const Rational& x, const Rational& y)
+inline int operator <= (const gRational& x, const gRational& y)
 {
   return compare(x, y) <= 0; 
 }
 
-inline int operator >  (const Rational& x, const Rational& y)
+inline int operator >  (const gRational& x, const gRational& y)
 {
   return compare(x, y) >  0; 
 }
 
-inline int operator >= (const Rational& x, const Rational& y)
+inline int operator >= (const gRational& x, const gRational& y)
 {
   return compare(x, y) >= 0; 
 }
 
-inline int sign(const Rational& x)
+inline int sign(const gRational& x)
 {
   return sign(x.num);
 }
 
-inline void Rational::negate()
+inline void gRational::negate()
 {
   num.negate();
 }
 
 
-inline void Rational::operator += (const Rational& y) 
+inline void gRational::operator += (const gRational& y) 
 {
   add(*this, y, *this);
 }
 
-inline void Rational::operator -= (const Rational& y) 
+inline void gRational::operator -= (const gRational& y) 
 {
   sub(*this, y, *this);
 }
 
-inline void Rational::operator *= (const Rational& y) 
+inline void gRational::operator *= (const gRational& y) 
 {
   mul(*this, y, *this);
 }
 
-inline void Rational::operator /= (const Rational& y) 
+inline void gRational::operator /= (const gRational& y) 
 {
   div(*this, y, *this);
 }
 
-inline const Integer& Rational::numerator() const { return num; }
-inline const Integer& Rational::denominator() const { return den; }
-inline Rational::operator double() const { return ratio(num, den); }
+inline const gInteger& gRational::numerator() const { return num; }
+inline const gInteger& gRational::denominator() const { return den; }
+inline gRational::operator double() const { return ratio(num, den); }
 
 #ifdef __GNUG__
-inline Rational operator <? (const Rational& x, const Rational& y)
+inline gRational operator <? (const gRational& x, const gRational& y)
 {
   if (compare(x, y) <= 0) return x; else return y;
 }
 
-inline Rational operator >? (const Rational& x, const Rational& y)
+inline gRational operator >? (const gRational& x, const gRational& y)
 {
   if (compare(x, y) >= 0) return x; else return y;
 }
@@ -238,47 +239,49 @@ inline Rational operator >? (const Rational& x, const Rational& y)
 
 #if defined(__GNUG__) && !defined(NO_NRV)
 
-inline Rational operator + (const Rational& x, const Rational& y) return r
+inline gRational operator + (const gRational& x, const gRational& y) return r
 {
   add(x, y, r);
 }
 
-inline Rational operator - (const Rational& x, const Rational& y) return r
+inline gRational operator - (const gRational& x, const gRational& y) return r
 {
   sub(x, y, r);
 }
 
-inline Rational operator * (const Rational& x, const Rational& y) return r
+inline gRational operator * (const gRational& x, const gRational& y) return r
 {
   mul(x, y, r);
 }
 
-inline Rational operator / (const Rational& x, const Rational& y) return r
+inline gRational operator / (const gRational& x, const gRational& y) return r
 {
   div(x, y, r);
 }
 
 #else /* NO_NRV */
 
-inline Rational operator + (const Rational& x, const Rational& y) 
+inline gRational operator + (const gRational& x, const gRational& y) 
 {
-  Rational r; add(x, y, r); return r;
+  gRational r; add(x, y, r); return r;
 }
 
-inline Rational operator - (const Rational& x, const Rational& y)
+inline gRational operator - (const gRational& x, const gRational& y)
 {
-  Rational r; sub(x, y, r); return r;
+  gRational r; sub(x, y, r); return r;
 }
 
-inline Rational operator * (const Rational& x, const Rational& y)
+inline gRational operator * (const gRational& x, const gRational& y)
 {
-  Rational r; mul(x, y, r); return r;
+  gRational r; mul(x, y, r); return r;
 }
 
-inline Rational operator / (const Rational& x, const Rational& y)
+inline gRational operator / (const gRational& x, const gRational& y)
 {
-  Rational r; div(x, y, r); return r;
+  gRational r; div(x, y, r); return r;
 }
 #endif
 
+
 #endif
+

@@ -25,15 +25,15 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <float.h>
 #include <assert.h>
 
-void Rational::error(const char* msg) const
+void gRational::error(const char* msg) const
 {
-  gerr << "Rational class error: " << msg << '\n';
+  gerr << "gRational class error: " << msg << '\n';
   assert(0);
 }
 
-static const Integer _Int_One(1);
+static const gInteger _Int_One(1);
 
-void Rational::normalize()
+void gRational::normalize()
 {
   int s = sign(den);
   if (s == 0)
@@ -44,7 +44,7 @@ void Rational::normalize()
     num.negate();
   }
 
-  Integer g = gcd(num, den);
+  gInteger g = gcd(num, den);
   if (ucompare(g, _Int_One) != 0)
   {
     num /= g;
@@ -52,7 +52,7 @@ void Rational::normalize()
   }
 }
 
-void      add(const Rational& x, const Rational& y, Rational& r)
+void      add(const gRational& x, const gRational& y, gRational& r)
 {
   if (&r != &x && &r != &y)
   {
@@ -63,7 +63,7 @@ void      add(const Rational& x, const Rational& y, Rational& r)
   }
   else
   {
-    Integer tmp;
+    gInteger tmp;
     mul(x.den, y.num, tmp);
     mul(x.num, y.den, r.num);
     add(r.num, tmp, r.num);
@@ -72,7 +72,7 @@ void      add(const Rational& x, const Rational& y, Rational& r)
   r.normalize();
 }
 
-void      sub(const Rational& x, const Rational& y, Rational& r)
+void      sub(const gRational& x, const gRational& y, gRational& r)
 {
   if (&r != &x && &r != &y)
   {
@@ -83,7 +83,7 @@ void      sub(const Rational& x, const Rational& y, Rational& r)
   }
   else
   {
-    Integer tmp;
+    gInteger tmp;
     mul(x.den, y.num, tmp);
     mul(x.num, y.den, r.num);
     sub(r.num, tmp, r.num);
@@ -92,14 +92,14 @@ void      sub(const Rational& x, const Rational& y, Rational& r)
   r.normalize();
 }
 
-void      mul(const Rational& x, const Rational& y, Rational& r)
+void      mul(const gRational& x, const gRational& y, gRational& r)
 {
   mul(x.num, y.num, r.num);
   mul(x.den, y.den, r.den);
   r.normalize();
 }
 
-void      div(const Rational& x, const Rational& y, Rational& r)
+void      div(const gRational& x, const gRational& y, gRational& r)
 {
   if (&r != &x && &r != &y)
   {
@@ -108,7 +108,7 @@ void      div(const Rational& x, const Rational& y, Rational& r)
   }
   else
   {
-    Integer tmp;
+    gInteger tmp;
     mul(x.num, y.den, tmp);
     mul(y.num, x.den, r.den);
     r.num = tmp;
@@ -119,9 +119,9 @@ void      div(const Rational& x, const Rational& y, Rational& r)
 
 
 
-void Rational::invert()
+void gRational::invert()
 {
-  Integer tmp = num;  
+  gInteger tmp = num;  
   num = den;  
   den = tmp;  
   int s = sign(den);
@@ -134,7 +134,7 @@ void Rational::invert()
   }
 }
 
-int compare(const Rational& x, const Rational& y)
+int compare(const gRational& x, const gRational& y)
 {
   int xsgn = sign(x.num);
   int ysgn = sign(y.num);
@@ -143,7 +143,7 @@ int compare(const Rational& x, const Rational& y)
   return d;
 }
 
-Rational::Rational(double x)
+gRational::gRational(double x)
 {
   num = 0;
   den = 1;
@@ -181,13 +181,13 @@ Rational::Rational(double x)
 }
 
 
-Integer trunc(const Rational& x)
+gInteger trunc(const gRational& x)
 {
   return x.num / x.den ;
 }
 
 
-Rational pow(const Rational& x, const Integer& y)
+gRational pow(const gRational& x, const gInteger& y)
 {
   long yy = y.as_long();
   return pow(x, yy);
@@ -195,41 +195,41 @@ Rational pow(const Rational& x, const Integer& y)
 
 #if defined(__GNUG__) && !defined(NO_NRV)
 
-Rational operator - (const Rational& x) return r(x)
+gRational operator - (const gRational& x) return r(x)
 {
   r.negate();
 }
 
-Rational abs(const Rational& x) return r(x)
+gRational abs(const gRational& x) return r(x)
 {
   if (sign(r.num) < 0) r.negate();
 }
 
 
-Rational sqr(const Rational& x) return r
+gRational sqr(const gRational& x) return r
 {
   mul(x.num, x.num, r.num);
   mul(x.den, x.den, r.den);
   r.normalize();
 }
 
-Integer floor(const Rational& x) return q
+gInteger floor(const gRational& x) return q
 {
-  Integer r;
+  gInteger r;
   divide(x.num, x.den, q, r);
   if (sign(x.num) < 0 && sign(r) != 0) --q;
 }
 
-Integer ceil(const Rational& x) return q
+gInteger ceil(const gRational& x) return q
 {
-  Integer  r;
+  gInteger  r;
   divide(x.num, x.den, q, r);
   if (sign(x.num) >= 0 && sign(r) != 0) ++q;
 }
 
-Integer round(const Rational& x) return q
+gInteger round(const gRational& x) return q
 {
-  Integer r;
+  gInteger r;
   divide(x.num, x.den, q, r);
   r <<= 1;
   if (ucompare(r, x.den) >= 0)
@@ -243,7 +243,7 @@ Integer round(const Rational& x) return q
 
 // power: no need to normalize since num & den already relatively prime
 
-Rational pow(const Rational& x, long y) return r
+gRational pow(const gRational& x, long y) return r
 {
   if (y >= 0)
   {
@@ -265,50 +265,50 @@ Rational pow(const Rational& x, long y) return r
 
 #else
 
-Rational operator - (const Rational& x) 
+gRational operator - (const gRational& x) 
 {
-  Rational r(x); r.negate(); return r;
+  gRational r(x); r.negate(); return r;
 }
 
-Rational abs(const Rational& x) 
+gRational abs(const gRational& x) 
 {
-  Rational r(x);
+  gRational r(x);
   if (sign(r.num) < 0) r.negate();
   return r;
 }
 
 
-Rational sqr(const Rational& x)
+gRational sqr(const gRational& x)
 {
-  Rational r;
+  gRational r;
   mul(x.num, x.num, r.num);
   mul(x.den, x.den, r.den);
   r.normalize();
   return r;
 }
 
-Integer floor(const Rational& x)
+gInteger floor(const gRational& x)
 {
-  Integer q;
-  Integer r;
+  gInteger q;
+  gInteger r;
   divide(x.num, x.den, q, r);
   if (sign(x.num) < 0 && sign(r) != 0) --q;
   return q;
 }
 
-Integer ceil(const Rational& x)
+gInteger ceil(const gRational& x)
 {
-  Integer q;
-  Integer  r;
+  gInteger q;
+  gInteger  r;
   divide(x.num, x.den, q, r);
   if (sign(x.num) >= 0 && sign(r) != 0) ++q;
   return q;
 }
 
-Integer round(const Rational& x) 
+gInteger round(const gRational& x) 
 {
-  Integer q;
-  Integer r;
+  gInteger q;
+  gInteger r;
   divide(x.num, x.den, q, r);
   r <<= 1;
   if (ucompare(r, x.den) >= 0)
@@ -321,9 +321,9 @@ Integer round(const Rational& x)
   return q;
 }
 
-Rational pow(const Rational& x, long y)
+gRational pow(const gRational& x, long y)
 {
-  Rational r;
+  gRational r;
   if (y >= 0)
   {
     pow(x.num, y, r.num);
@@ -345,7 +345,7 @@ Rational pow(const Rational& x, long y)
 
 #endif
 
-gOutput& operator << (gOutput& s, const Rational& y)
+gOutput& operator << (gOutput& s, const gRational& y)
 {
   if (y.denominator() == 1L)
     s << y.numerator();
@@ -358,65 +358,30 @@ gOutput& operator << (gOutput& s, const Rational& y)
   return s;
 }
 
-gInput &operator>>(gInput &f, Rational &y)
+gInput &operator>>(gInput &f, gRational &y)
 {
-  Integer num = 0, den = 1;
+  gInteger num = 0, den = 1;
   f >> num;
 
   char ch;
   f >> ch;
   if (ch == '/')   f >> den;
   else if (ch == '.')  {
-    Integer x;
+    gInteger x;
     f >> x;
-    Integer z = 1;
+    gInteger z = 1;
     while (x / z > 0)   z *= 10;
-    y = Rational(x, z) + Rational(num);
+    y = gRational(x, z) + gRational(num);
     return f;
   }
   else
     f.unget(ch);
 
-  y = Rational(num, den);
+  y = gRational(num, den);
   return f;
 }
 
-
-/*
-istream& operator >> (istream& s, Rational& y)
-{
-#ifdef _OLD_STREAMS
-  if (!s.good())
-  {
-    return s;
-  }
-#else
-  if (!s.ipfx(0))
-  {
-    s.clear(ios::failbit|s.rdstate()); // Redundant if using GNU iostreams.
-    return s;
-  }
-#endif
-  Integer n = 0;
-  Integer d = 1;
-  if (s >> n)
-  {
-    char ch = 0;
-    s.get(ch);
-    if (ch == '/')
-    {
-      s >> d;
-    }
-    else
-    {
-      s.putback(ch);
-    }
-  }
-  y = Rational(n, d);
-  return s;
-}
-*/
-int Rational::OK() const
+int gRational::OK() const
 {
   int v = num.OK() && den.OK(); // have valid num and denom
   if (v)
@@ -429,13 +394,13 @@ int Rational::OK() const
 }
 
 int
-Rational::fits_in_float() const
+gRational::fits_in_float() const
 {
-    return Rational (FLT_MIN) <= *this && *this <= Rational (FLT_MAX);
+    return gRational (FLT_MIN) <= *this && *this <= gRational (FLT_MAX);
 }
 
 int
-Rational::fits_in_double() const
+gRational::fits_in_double() const
 {
-    return Rational (DBL_MIN) <= *this && *this <= Rational (DBL_MAX);
+    return gRational (DBL_MIN) <= *this && *this <= gRational (DBL_MAX);
 }

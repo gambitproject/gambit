@@ -474,9 +474,9 @@ int Iisdouble(const IntRep* rep)
 
 // real division of num / den
 
-double ratio(const Integer& num, const Integer& den)
+double ratio(const gInteger& num, const gInteger& den)
 {
-  Integer q, r;
+  gInteger q, r;
   divide(num, den, q, r);
   double d1 = q.as_double();
  
@@ -1213,7 +1213,7 @@ IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1265,7 +1265,7 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1330,13 +1330,13 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
 }
 
 
-void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
+void divide(const gInteger& Ix, long y, gInteger& Iq, long& rem)
 {
   const IntRep* x = Ix.rep;
   nonnil(x);
   IntRep* q = Iq.rep;
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1415,7 +1415,7 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
 }
 
 
-void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
+void divide(const gInteger& Ix, const gInteger& Iy, gInteger& Iq, gInteger& Ir)
 {
   const IntRep* x = Ix.rep;
   nonnil(x);
@@ -1427,7 +1427,7 @@ void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
   int xl = x->len;
   int yl = y->len;
   /* if (yl == 0)
-    (*lib_error_handler)("Integer", "attempted division by zero");
+    (*lib_error_handler)("gInteger", "attempted division by zero");
   */
   assert(yl != 0);
 
@@ -1496,7 +1496,7 @@ IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1547,7 +1547,7 @@ IntRep* mod(const IntRep* x, long y, IntRep* r)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("Integer", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1833,7 +1833,7 @@ IntRep*  compl(const IntRep* src, IntRep* r)
   return r;
 }
 
-void (setbit)(Integer& x, long b)
+void (setbit)(gInteger& x, long b)
 {
   if (b >= 0)
   {
@@ -1847,7 +1847,7 @@ void (setbit)(Integer& x, long b)
   }
 }
 
-void clearbit(Integer& x, long b)
+void clearbit(gInteger& x, long b)
 {
   if (b >= 0)
     {
@@ -1864,7 +1864,7 @@ void clearbit(Integer& x, long b)
   }
 }
 
-int testbit(const Integer& x, long b)
+int testbit(const gInteger& x, long b)
 {
   if (x.rep != 0 && b >= 0)
   {
@@ -2054,14 +2054,14 @@ IntRep* negate(const IntRep* src, IntRep* dest)
 
 #if defined(__GNUG__) && !defined(NO_NRV)
 
-Integer sqrt(const Integer& x) return r(x)
+gInteger sqrt(const gInteger& x) return r(x)
 {
   int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative Integer");
+  if (s < 0) x.error("Attempted square root of negative gInteger");
   if (s != 0)
   {
     r >>= (lg(x) / 2); // get close
-    Integer q;
+    gInteger q;
     div(x, r, q);
     while (q < r)
     {
@@ -2073,11 +2073,11 @@ Integer sqrt(const Integer& x) return r(x)
   return;
 }
 
-Integer lcm(const Integer& x, const Integer& y) return r
+gInteger lcm(const gInteger& x, const gInteger& y) return r
 {
   if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized Integer");
-  Integer g;
+    x.error("operation on uninitialized gInteger");
+  gInteger g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2087,15 +2087,15 @@ Integer lcm(const Integer& x, const Integer& y) return r
 }
 
 #else 
-Integer sqrt(const Integer& x) 
+gInteger sqrt(const gInteger& x) 
 {
-  Integer r(x);
+  gInteger r(x);
   int s = sign(x);
-  if (s < 0) x.error("Attempted square root of negative Integer");
+  if (s < 0) x.error("Attempted square root of negative gInteger");
   if (s != 0)
   {
     r >>= (lg(x) / 2); // get close
-    Integer q;
+    gInteger q;
     div(x, r, q);
     while (q < r)
     {
@@ -2107,12 +2107,12 @@ Integer sqrt(const Integer& x)
   return r;
 }
 
-Integer lcm(const Integer& x, const Integer& y) 
+gInteger lcm(const gInteger& x, const gInteger& y) 
 {
-  Integer r;
+  gInteger r;
   if (!x.initialized() || !y.initialized())
-    x.error("operation on uninitialized Integer");
-  Integer g;
+    x.error("operation on uninitialized gInteger");
+  gInteger g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2175,24 +2175,7 @@ char* Itoa(const IntRep* x, int base, int width)
   return f;
 }
 
-/*
-ostream& operator << (ostream& s, const Integer& y)
-{
-#ifdef _OLD_STREAMS
-  return s << Itoa(y.rep);
-#else
-  if (s.opfx())
-    {
-      int base = (s.flags() & ios::oct) ? 8 : (s.flags() & ios::hex) ? 16 : 10;
-      int width = s.width();
-      y.printon(s, base, width);
-    }
-  return s;
-#endif
-}
-*/
-
-gOutput& operator<<(gOutput &s, const Integer &y)
+gOutput& operator<<(gOutput &s, const gInteger &y)
 {
   return s << Itoa(y.rep);
 }
@@ -2288,17 +2271,17 @@ char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
   }
 }
 
-char* dec(const Integer& x, int width)
+char* dec(const gInteger& x, int width)
 {
   return Itoa(x, 10, width);
 }
 
-char* oct(const Integer& x, int width)
+char* oct(const gInteger& x, int width)
 {
   return Itoa(x, 8, width);
 }
 
-char* hex(const Integer& x, int width)
+char* hex(const gInteger& x, int width)
 {
   return Itoa(x, 16, width);
 }
@@ -2308,7 +2291,7 @@ char* hex(const Integer& x, int width)
 // work with the input/output classes later...
 //
 
-gInput &operator>>(gInput& s, Integer& y)
+gInput &operator>>(gInput& s, gInteger& y)
 {
   int got_one = 0;
   char sgn = 0;
@@ -2351,7 +2334,7 @@ gInput &operator>>(gInput& s, Integer& y)
   return s;
 }
 
-int Integer::OK() const
+int gInteger::OK() const
 {
   if (rep != 0)
     {
@@ -2369,8 +2352,8 @@ int Integer::OK() const
   return 0;
 }
 
-void Integer::error(const char* msg) const
+void gInteger::error(const char* msg) const
 {
-  // (*lib_error_handler)("Integer", msg);
+  // (*lib_error_handler)("gInteger", msg);
 }
 

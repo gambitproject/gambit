@@ -79,21 +79,21 @@ extern long     lg(const IntRep*);
 
 extern IntRep _ZeroRep, _OneRep, _MinusOneRep;
 
-class Integer
+class gInteger
 {
 protected:
   IntRep*         rep;
 public:
-                  Integer();
-                  Integer(int);
-                  Integer(long);
-                  Integer(unsigned long);
-                  Integer(IntRep*);
-                  Integer(const Integer&);
+                  gInteger();
+                  gInteger(int);
+                  gInteger(long);
+                  gInteger(unsigned long);
+                  gInteger(IntRep*);
+                  gInteger(const gInteger&);
 
-                  ~Integer();
+                  ~gInteger();
 
-  void            operator =  (const Integer&);
+  void            operator =  (const gInteger&);
   void            operator =  (long);
 
 // unary operations to self
@@ -106,16 +106,16 @@ public:
 
 // assignment-based operations
 
-  void            operator += (const Integer&);
-  void            operator -= (const Integer&);
-  void            operator *= (const Integer&);
-  void            operator /= (const Integer&);
-  void            operator %= (const Integer&);
-  void            operator <<=(const Integer&);
-  void            operator >>=(const Integer&);
-  void            operator &= (const Integer&);
-  void            operator |= (const Integer&);
-  void            operator ^= (const Integer&);
+  void            operator += (const gInteger&);
+  void            operator -= (const gInteger&);
+  void            operator *= (const gInteger&);
+  void            operator /= (const gInteger&);
+  void            operator %= (const gInteger&);
+  void            operator <<=(const gInteger&);
+  void            operator >>=(const gInteger&);
+  void            operator &= (const gInteger&);
+  void            operator |= (const gInteger&);
+  void            operator ^= (const gInteger&);
 
   void            operator += (long);
   void            operator -= (long);
@@ -131,70 +131,70 @@ public:
 // (constructive binary operations are inlined below)
 
 #ifdef __GNUG__
-  friend Integer operator <? (const Integer& x, const Integer& y); // min
-  friend Integer operator >? (const Integer& x, const Integer& y); // max
+  friend gInteger operator <? (const gInteger& x, const gInteger& y); // min
+  friend gInteger operator >? (const gInteger& x, const gInteger& y); // max
 #endif
 
 // builtin Integer functions that must be friends
 
-  friend long     lg (const Integer&); // floor log base 2 of abs(x)
-  friend double   ratio(const Integer& x, const Integer& y);
+  friend long     lg (const gInteger&); // floor log base 2 of abs(x)
+  friend double   ratio(const gInteger& x, const gInteger& y);
                   // return x/y as a double
 
-  friend Integer  gcd(const Integer&, const Integer&);
-  friend int      even(const Integer&); // true if even
-  friend int      odd(const Integer&); // true if odd
-  friend int      sign(const Integer&); // returns -1, 0, +1
+  friend gInteger  gcd(const gInteger&, const gInteger&);
+  friend int      even(const gInteger&); // true if even
+  friend int      odd(const gInteger&); // true if odd
+  friend int      sign(const gInteger&); // returns -1, 0, +1
 
-  friend void     (setbit)(Integer& x, long b);   // set b'th bit of x
-  friend void     clearbit(Integer& x, long b); // clear b'th bit
-  friend int      testbit(const Integer& x, long b);  // return b'th bit
+  friend void     (setbit)(gInteger& x, long b);   // set b'th bit of x
+  friend void     clearbit(gInteger& x, long b); // clear b'th bit
+  friend int      testbit(const gInteger& x, long b);  // return b'th bit
 
 // procedural versions of operators
 
-  friend void     abs(const Integer& x, Integer& dest);
-  friend void     negate(const Integer& x, Integer& dest);
-  friend void     complement(const Integer& x, Integer& dest);
+  friend void     abs(const gInteger& x, gInteger& dest);
+  friend void     negate(const gInteger& x, gInteger& dest);
+  friend void     complement(const gInteger& x, gInteger& dest);
 
-  friend int      compare(const Integer&, const Integer&);  
-  friend int      ucompare(const Integer&, const Integer&); 
-  friend void     add(const Integer& x, const Integer& y, Integer& dest);
-  friend void     sub(const Integer& x, const Integer& y, Integer& dest);
-  friend void     mul(const Integer& x, const Integer& y, Integer& dest);
-  friend void     div(const Integer& x, const Integer& y, Integer& dest);
-  friend void     mod(const Integer& x, const Integer& y, Integer& dest);
-  friend void     divide(const Integer& x, const Integer& y, 
-                         Integer& q, Integer& r);
-  friend void     and(const Integer& x, const Integer& y, Integer& dest);
-  friend void     or(const Integer& x, const Integer& y, Integer& dest);
-  friend void     xor(const Integer& x, const Integer& y, Integer& dest);
-  friend void     lshift(const Integer& x, const Integer& y, Integer& dest);
-  friend void     rshift(const Integer& x, const Integer& y, Integer& dest);
-  friend void     pow(const Integer& x, const Integer& y, Integer& dest);
+  friend int      compare(const gInteger&, const gInteger&);  
+  friend int      ucompare(const gInteger&, const gInteger&); 
+  friend void     add(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     sub(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     mul(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     div(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     mod(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     divide(const gInteger& x, const gInteger& y, 
+                         gInteger& q, gInteger& r);
+  friend void     and(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     or(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     xor(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     lshift(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     rshift(const gInteger& x, const gInteger& y, gInteger& dest);
+  friend void     pow(const gInteger& x, const gInteger& y, gInteger& dest);
 
-  friend int      compare(const Integer&, long);  
-  friend int      ucompare(const Integer&, long); 
-  friend void     add(const Integer& x, long y, Integer& dest);
-  friend void     sub(const Integer& x, long y, Integer& dest);
-  friend void     mul(const Integer& x, long y, Integer& dest);
-  friend void     div(const Integer& x, long y, Integer& dest);
-  friend void     mod(const Integer& x, long y, Integer& dest);
-  friend void     divide(const Integer& x, long y, Integer& q, long& r);
-  friend void     and(const Integer& x, long y, Integer& dest);
-  friend void     or(const Integer& x, long y, Integer& dest);
-  friend void     xor(const Integer& x, long y, Integer& dest);
-  friend void     lshift(const Integer& x, long y, Integer& dest);
-  friend void     rshift(const Integer& x, long y, Integer& dest);
-  friend void     pow(const Integer& x, long y, Integer& dest);
+  friend int      compare(const gInteger&, long);  
+  friend int      ucompare(const gInteger&, long); 
+  friend void     add(const gInteger& x, long y, gInteger& dest);
+  friend void     sub(const gInteger& x, long y, gInteger& dest);
+  friend void     mul(const gInteger& x, long y, gInteger& dest);
+  friend void     div(const gInteger& x, long y, gInteger& dest);
+  friend void     mod(const gInteger& x, long y, gInteger& dest);
+  friend void     divide(const gInteger& x, long y, gInteger& q, long& r);
+  friend void     and(const gInteger& x, long y, gInteger& dest);
+  friend void     or(const gInteger& x, long y, gInteger& dest);
+  friend void     xor(const gInteger& x, long y, gInteger& dest);
+  friend void     lshift(const gInteger& x, long y, gInteger& dest);
+  friend void     rshift(const gInteger& x, long y, gInteger& dest);
+  friend void     pow(const gInteger& x, long y, gInteger& dest);
 
-  friend int      compare(long, const Integer&);  
-  friend int      ucompare(long, const Integer&); 
-  friend void     add(long x, const Integer& y, Integer& dest);
-  friend void     sub(long x, const Integer& y, Integer& dest);
-  friend void     mul(long x, const Integer& y, Integer& dest);
-  friend void     and(long x, const Integer& y, Integer& dest);
-  friend void     or(long x, const Integer& y, Integer& dest);
-  friend void     xor(long x, const Integer& y, Integer& dest);
+  friend int      compare(long, const gInteger&);  
+  friend int      ucompare(long, const gInteger&); 
+  friend void     add(long x, const gInteger& y, gInteger& dest);
+  friend void     sub(long x, const gInteger& y, gInteger& dest);
+  friend void     mul(long x, const gInteger& y, gInteger& dest);
+  friend void     and(long x, const gInteger& y, gInteger& dest);
+  friend void     or(long x, const gInteger& y, gInteger& dest);
+  friend void     xor(long x, const gInteger& y, gInteger& dest);
 
 // coercion & conversion
 
@@ -209,12 +209,12 @@ public:
   long		  as_long() const { return Itolong(rep); }
   double	  as_double() const { return Itodouble(rep); }
 
-  friend char*    Itoa(const Integer& x, int base = 10, int width = 0);
-  friend Integer  atoI(const char* s, int base = 10);
+  friend char*    Itoa(const gInteger& x, int base = 10, int width = 0);
+  friend gInteger  atoI(const char* s, int base = 10);
 //  void		  printon(ostream& s, int base = 10, int width = 0) const;
   
-  friend gInput& operator >> (gInput &s, Integer& y);
-  friend gOutput& operator << (gOutput &s, const Integer& y);
+  friend gInput& operator >> (gInput &s, gInteger& y);
+  friend gOutput& operator << (gOutput &s, const gInteger& y);
 
 // error detection
 
@@ -226,276 +226,276 @@ public:
 
 //  (These are declared inline)
 
-  int      operator == (const Integer&, const Integer&);
-  int      operator == (const Integer&, long);
-  int      operator != (const Integer&, const Integer&);
-  int      operator != (const Integer&, long);
-  int      operator <  (const Integer&, const Integer&);
-  int      operator <  (const Integer&, long);
-  int      operator <= (const Integer&, const Integer&);
-  int      operator <= (const Integer&, long);
-  int      operator >  (const Integer&, const Integer&);
-  int      operator >  (const Integer&, long);
-  int      operator >= (const Integer&, const Integer&);
-  int      operator >= (const Integer&, long);
-  Integer  operator -  (const Integer&);
-  Integer  operator ~  (const Integer&);
-  Integer  operator +  (const Integer&, const Integer&);
-  Integer  operator +  (const Integer&, long);
-  Integer  operator +  (long, const Integer&);
-  Integer  operator -  (const Integer&, const Integer&);
-  Integer  operator -  (const Integer&, long);
-  Integer  operator -  (long, const Integer&);
-  Integer  operator *  (const Integer&, const Integer&);
-  Integer  operator *  (const Integer&, long);
-  Integer  operator *  (long, const Integer&);
-  Integer  operator /  (const Integer&, const Integer&);
-  Integer  operator /  (const Integer&, long);
-  Integer  operator %  (const Integer&, const Integer&);
-  Integer  operator %  (const Integer&, long);
-  Integer  operator << (const Integer&, const Integer&);
-  Integer  operator << (const Integer&, long);
-  Integer  operator >> (const Integer&, const Integer&);
-  Integer  operator >> (const Integer&, long);
-  Integer  operator &  (const Integer&, const Integer&);
-  Integer  operator &  (const Integer&, long);
-  Integer  operator &  (long, const Integer&);
-  Integer  operator |  (const Integer&, const Integer&);
-  Integer  operator |  (const Integer&, long);
-  Integer  operator |  (long, const Integer&);
-  Integer  operator ^  (const Integer&, const Integer&);
-  Integer  operator ^  (const Integer&, long);
-  Integer  operator ^  (long, const Integer&);
+  int      operator == (const gInteger&, const gInteger&);
+  int      operator == (const gInteger&, long);
+  int      operator != (const gInteger&, const gInteger&);
+  int      operator != (const gInteger&, long);
+  int      operator <  (const gInteger&, const gInteger&);
+  int      operator <  (const gInteger&, long);
+  int      operator <= (const gInteger&, const gInteger&);
+  int      operator <= (const gInteger&, long);
+  int      operator >  (const gInteger&, const gInteger&);
+  int      operator >  (const gInteger&, long);
+  int      operator >= (const gInteger&, const gInteger&);
+  int      operator >= (const gInteger&, long);
+  gInteger  operator -  (const gInteger&);
+  gInteger  operator ~  (const gInteger&);
+  gInteger  operator +  (const gInteger&, const gInteger&);
+  gInteger  operator +  (const gInteger&, long);
+  gInteger  operator +  (long, const gInteger&);
+  gInteger  operator -  (const gInteger&, const gInteger&);
+  gInteger  operator -  (const gInteger&, long);
+  gInteger  operator -  (long, const gInteger&);
+  gInteger  operator *  (const gInteger&, const gInteger&);
+  gInteger  operator *  (const gInteger&, long);
+  gInteger  operator *  (long, const gInteger&);
+  gInteger  operator /  (const gInteger&, const gInteger&);
+  gInteger  operator /  (const gInteger&, long);
+  gInteger  operator %  (const gInteger&, const gInteger&);
+  gInteger  operator %  (const gInteger&, long);
+  gInteger  operator << (const gInteger&, const gInteger&);
+  gInteger  operator << (const gInteger&, long);
+  gInteger  operator >> (const gInteger&, const gInteger&);
+  gInteger  operator >> (const gInteger&, long);
+  gInteger  operator &  (const gInteger&, const gInteger&);
+  gInteger  operator &  (const gInteger&, long);
+  gInteger  operator &  (long, const gInteger&);
+  gInteger  operator |  (const gInteger&, const gInteger&);
+  gInteger  operator |  (const gInteger&, long);
+  gInteger  operator |  (long, const gInteger&);
+  gInteger  operator ^  (const gInteger&, const gInteger&);
+  gInteger  operator ^  (const gInteger&, long);
+  gInteger  operator ^  (long, const gInteger&);
 
-  Integer  abs(const Integer&); // absolute value
-  Integer  sqr(const Integer&); // square
+  gInteger  abs(const gInteger&); // absolute value
+  gInteger  sqr(const gInteger&); // square
 
-  Integer  pow(const Integer& x, const Integer& y);
-  Integer  pow(const Integer& x, long y);
-  Integer  Ipow(long x, long y); // x to the y as Integer 
-
-
-extern char*    dec(const Integer& x, int width = 0);
-extern char*    oct(const Integer& x, int width = 0);
-extern char*    hex(const Integer& x, int width = 0);
-extern Integer  sqrt(const Integer&); // floor of square root
-extern Integer  lcm(const Integer& x, const Integer& y); // least common mult
+  gInteger  pow(const gInteger& x, const gInteger& y);
+  gInteger  pow(const gInteger& x, long y);
+  gInteger  Ipow(long x, long y); // x to the y as gInteger 
 
 
-typedef Integer IntTmp; // for backward compatibility
+extern char*    dec(const gInteger& x, int width = 0);
+extern char*    oct(const gInteger& x, int width = 0);
+extern char*    hex(const gInteger& x, int width = 0);
+extern gInteger  sqrt(const gInteger&); // floor of square root
+extern gInteger  lcm(const gInteger& x, const gInteger& y); // least common mult
 
-inline Integer::Integer() :rep(&_ZeroRep) {}
 
-inline Integer::Integer(IntRep* r) :rep(r) {}
+typedef gInteger IntTmp; // for backward compatibility
 
-inline Integer::Integer(int y) :rep(Icopy_long(0, (long)y)) {}
+inline gInteger::gInteger() :rep(&_ZeroRep) {}
 
-inline Integer::Integer(long y) :rep(Icopy_long(0, y)) {}
+inline gInteger::gInteger(IntRep* r) :rep(r) {}
 
-inline Integer::Integer(unsigned long y) :rep(Icopy_ulong(0, y)) {}
+inline gInteger::gInteger(int y) :rep(Icopy_long(0, (long)y)) {}
 
-inline Integer::Integer(const Integer&  y) :rep(Icopy(0, y.rep)) {}
+inline gInteger::gInteger(long y) :rep(Icopy_long(0, y)) {}
 
-inline Integer::~Integer() { if (rep && !STATIC_IntRep(rep)) delete rep; }
+inline gInteger::gInteger(unsigned long y) :rep(Icopy_ulong(0, y)) {}
 
-inline void  Integer::operator = (const Integer&  y)
+inline gInteger::gInteger(const gInteger&  y) :rep(Icopy(0, y.rep)) {}
+
+inline gInteger::~gInteger() { if (rep && !STATIC_IntRep(rep)) delete rep; }
+
+inline void  gInteger::operator = (const gInteger&  y)
 {
   rep = Icopy(rep, y.rep);
 }
 
-inline void Integer::operator = (long y)
+inline void gInteger::operator = (long y)
 {
   rep = Icopy_long(rep, y); 
 }
 
-inline int Integer::initialized() const
+inline int gInteger::initialized() const
 {
   return rep != 0;
 }
 
 // procedural versions
 
-inline int compare(const Integer& x, const Integer& y)
+inline int compare(const gInteger& x, const gInteger& y)
 {
   return compare(x.rep, y.rep);
 }
 
-inline int ucompare(const Integer& x, const Integer& y)
+inline int ucompare(const gInteger& x, const gInteger& y)
 {
   return ucompare(x.rep, y.rep);
 }
 
-inline int compare(const Integer& x, long y)
+inline int compare(const gInteger& x, long y)
 {
   return compare(x.rep, y);
 }
 
-inline int ucompare(const Integer& x, long y)
+inline int ucompare(const gInteger& x, long y)
 {
   return ucompare(x.rep, y);
 }
 
-inline int compare(long x, const Integer& y)
+inline int compare(long x, const gInteger& y)
 {
   return -compare(y.rep, x);
 }
 
-inline int ucompare(long x, const Integer& y)
+inline int ucompare(long x, const gInteger& y)
 {
   return -ucompare(y.rep, x);
 }
 
-inline void  add(const Integer& x, const Integer& y, Integer& dest)
+inline void  add(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = add(x.rep, 0, y.rep, 0, dest.rep);
 }
 
-inline void  sub(const Integer& x, const Integer& y, Integer& dest)
+inline void  sub(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = add(x.rep, 0, y.rep, 1, dest.rep);
 }
 
-inline void  mul(const Integer& x, const Integer& y, Integer& dest)
+inline void  mul(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = multiply(x.rep, y.rep, dest.rep);
 }
 
-inline void  div(const Integer& x, const Integer& y, Integer& dest)
+inline void  div(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = div(x.rep, y.rep, dest.rep);
 }
 
-inline void  mod(const Integer& x, const Integer& y, Integer& dest)
+inline void  mod(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = mod(x.rep, y.rep, dest.rep);
 }
 
-inline void  and(const Integer& x, const Integer& y, Integer& dest)
+inline void  and(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y.rep, dest.rep, '&');
 }
 
-inline void  or(const Integer& x, const Integer& y, Integer& dest)
+inline void  or(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y.rep, dest.rep, '|');
 }
 
-inline void  xor(const Integer& x, const Integer& y, Integer& dest)
+inline void  xor(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y.rep, dest.rep, '^');
 }
 
-inline void  lshift(const Integer& x, const Integer& y, Integer& dest)
+inline void  lshift(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
 }
 
-inline void  rshift(const Integer& x, const Integer& y, Integer& dest)
+inline void  rshift(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, y.rep, 1, dest.rep);
 }
 
-inline void  pow(const Integer& x, const Integer& y, Integer& dest)
+inline void  pow(const gInteger& x, const gInteger& y, gInteger& dest)
 {
   dest.rep = power(x.rep, Itolong(y.rep), dest.rep); // not incorrect
 }
 
-inline void  add(const Integer& x, long y, Integer& dest)
+inline void  add(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = add(x.rep, 0, y, dest.rep);
 }
 
-inline void  sub(const Integer& x, long y, Integer& dest)
+inline void  sub(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = add(x.rep, 0, -y, dest.rep);
 }
 
-inline void  mul(const Integer& x, long y, Integer& dest)
+inline void  mul(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = multiply(x.rep, y, dest.rep);
 }
 
-inline void  div(const Integer& x, long y, Integer& dest)
+inline void  div(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = div(x.rep, y, dest.rep);
 }
 
-inline void  mod(const Integer& x, long y, Integer& dest)
+inline void  mod(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = mod(x.rep, y, dest.rep);
 }
 
-inline void  and(const Integer& x, long y, Integer& dest)
+inline void  and(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y, dest.rep, '&');
 }
 
-inline void  or(const Integer& x, long y, Integer& dest)
+inline void  or(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y, dest.rep, '|');
 }
 
-inline void  xor(const Integer& x, long y, Integer& dest)
+inline void  xor(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = bitop(x.rep, y, dest.rep, '^');
 }
 
-inline void  lshift(const Integer& x, long y, Integer& dest)
+inline void  lshift(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, y, dest.rep);
 }
 
-inline void  rshift(const Integer& x, long y, Integer& dest)
+inline void  rshift(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = lshift(x.rep, -y, dest.rep);
 }
 
-inline void  pow(const Integer& x, long y, Integer& dest)
+inline void  pow(const gInteger& x, long y, gInteger& dest)
 {
   dest.rep = power(x.rep, y, dest.rep);
 }
 
-inline void abs(const Integer& x, Integer& dest)
+inline void abs(const gInteger& x, gInteger& dest)
 {
   dest.rep = abs(x.rep, dest.rep);
 }
 
-inline void negate(const Integer& x, Integer& dest)
+inline void negate(const gInteger& x, gInteger& dest)
 {
   dest.rep = negate(x.rep, dest.rep);
 }
 
-inline void complement(const Integer& x, Integer& dest)
+inline void complement(const gInteger& x, gInteger& dest)
 {
   dest.rep = compl(x.rep, dest.rep);
 }
 
-inline void  add(long x, const Integer& y, Integer& dest)
+inline void  add(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = add(y.rep, 0, x, dest.rep);
 }
 
-inline void  sub(long x, const Integer& y, Integer& dest)
+inline void  sub(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = add(y.rep, 1, x, dest.rep);
 }
 
-inline void  mul(long x, const Integer& y, Integer& dest)
+inline void  mul(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = multiply(y.rep, x, dest.rep);
 }
 
-inline void  and(long x, const Integer& y, Integer& dest)
+inline void  and(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(y.rep, x, dest.rep, '&');
 }
 
-inline void  or(long x, const Integer& y, Integer& dest)
+inline void  or(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(y.rep, x, dest.rep, '|');
 }
 
-inline void  xor(long x, const Integer& y, Integer& dest)
+inline void  xor(long x, const gInteger& y, gInteger& dest)
 {
   dest.rep = bitop(y.rep, x, dest.rep, '^');
 }
@@ -503,229 +503,229 @@ inline void  xor(long x, const Integer& y, Integer& dest)
 
 // operator versions
 
-inline int operator == (const Integer&  x, const Integer&  y)
+inline int operator == (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) == 0; 
 }
 
-inline int operator == (const Integer&  x, long y)
+inline int operator == (const gInteger&  x, long y)
 {
   return compare(x, y) == 0; 
 }
 
-inline int operator != (const Integer&  x, const Integer&  y)
+inline int operator != (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) != 0; 
 }
 
-inline int operator != (const Integer&  x, long y)
+inline int operator != (const gInteger&  x, long y)
 {
   return compare(x, y) != 0; 
 }
 
-inline int operator <  (const Integer&  x, const Integer&  y)
+inline int operator <  (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) <  0; 
 }
 
-inline int operator <  (const Integer&  x, long y)
+inline int operator <  (const gInteger&  x, long y)
 {
   return compare(x, y) <  0; 
 }
 
-inline int operator <= (const Integer&  x, const Integer&  y)
+inline int operator <= (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) <= 0; 
 }
 
-inline int operator <= (const Integer&  x, long y)
+inline int operator <= (const gInteger&  x, long y)
 {
   return compare(x, y) <= 0; 
 }
 
-inline int operator >  (const Integer&  x, const Integer&  y)
+inline int operator >  (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) >  0; 
 }
 
-inline int operator >  (const Integer&  x, long y)
+inline int operator >  (const gInteger&  x, long y)
 {
   return compare(x, y) >  0; 
 }
 
-inline int operator >= (const Integer&  x, const Integer&  y)
+inline int operator >= (const gInteger&  x, const gInteger&  y)
 {
   return compare(x, y) >= 0; 
 }
 
-inline int operator >= (const Integer&  x, long y)
+inline int operator >= (const gInteger&  x, long y)
 {
   return compare(x, y) >= 0; 
 }
 
 
-inline void  Integer::operator += (const Integer& y)
+inline void  gInteger::operator += (const gInteger& y)
 {
   add(*this, y, *this);
 }
 
-inline void  Integer::operator += (long y)
+inline void  gInteger::operator += (long y)
 {
   add(*this, y, *this);
 }
 
-inline void Integer::operator ++ ()
+inline void gInteger::operator ++ ()
 {
   add(*this, 1, *this);
 }
 
 
-inline void  Integer::operator -= (const Integer& y)
+inline void  gInteger::operator -= (const gInteger& y)
 {
   sub(*this, y, *this);
 }
 
-inline void  Integer::operator -= (long y)
+inline void  gInteger::operator -= (long y)
 {
   sub(*this, y, *this);
 }
 
-inline void Integer::operator -- ()
+inline void gInteger::operator -- ()
 {
   add(*this, -1, *this);
 }
 
 
 
-inline void Integer::operator *= (const Integer& y)
+inline void gInteger::operator *= (const gInteger& y)
 {
   mul(*this, y, *this);
 }
 
-inline void Integer::operator *= (long y)
+inline void gInteger::operator *= (long y)
 {
   mul(*this, y, *this);
 }
 
 
-inline void  Integer::operator &= (const Integer& y)
+inline void  gInteger::operator &= (const gInteger& y)
 {
   and(*this, y, *this);
 }
 
-inline void  Integer::operator &= (long y)
+inline void  gInteger::operator &= (long y)
 {
   and(*this, y, *this);
 }
 
-inline void  Integer::operator |= (const Integer& y)
+inline void  gInteger::operator |= (const gInteger& y)
 {
   or(*this, y, *this);
 }
 
-inline void  Integer::operator |= (long y)
+inline void  gInteger::operator |= (long y)
 {
   or(*this, y, *this);
 }
 
 
-inline void  Integer::operator ^= (const Integer& y)
+inline void  gInteger::operator ^= (const gInteger& y)
 {
   xor(*this, y, *this);
 }
 
-inline void  Integer::operator ^= (long y)
+inline void  gInteger::operator ^= (long y)
 {
   xor(*this, y, *this);
 }
 
 
 
-inline void Integer::operator /= (const Integer& y)
+inline void gInteger::operator /= (const gInteger& y)
 {
   div(*this, y, *this);
 }
 
-inline void Integer::operator /= (long y)
+inline void gInteger::operator /= (long y)
 {
   div(*this, y, *this);
 }
 
 
-inline void Integer::operator <<= (const Integer&  y)
+inline void gInteger::operator <<= (const gInteger&  y)
 {
   lshift(*this, y, *this);
 }
 
-inline void Integer::operator <<= (long  y)
+inline void gInteger::operator <<= (long  y)
 {
   lshift(*this, y, *this);
 }
 
 
-inline void Integer::operator >>= (const Integer&  y)
+inline void gInteger::operator >>= (const gInteger&  y)
 {
   rshift(*this, y, *this);
 }
 
-inline void  Integer::operator >>= (long y)
+inline void  gInteger::operator >>= (long y)
 {
   rshift(*this, y, *this);
 }
 
 #ifdef __GNUG__
-inline Integer operator <? (const Integer& x, const Integer& y)
+inline gInteger operator <? (const gInteger& x, const gInteger& y)
 {
   return (compare(x.rep, y.rep) <= 0) ? x : y;
 }
 
-inline Integer operator >? (const Integer& x, const Integer& y)
+inline gInteger operator >? (const gInteger& x, const gInteger& y)
 {
   return (compare(x.rep, y.rep) >= 0)?  x : y;
 }
 #endif
 
 
-inline void Integer::abs()
+inline void gInteger::abs()
 {
   ::abs(*this, *this);
 }
 
-inline void Integer::negate()
+inline void gInteger::negate()
 {
   ::negate(*this, *this);
 }
 
 
-inline void Integer::complement()
+inline void gInteger::complement()
 {
   ::complement(*this, *this);
 }
 
 
-inline int sign(const Integer& x)
+inline int sign(const gInteger& x)
 {
   return (x.rep->len == 0) ? 0 : ( (x.rep->sgn == 1) ? 1 : -1 );
 }
 
-inline int even(const Integer& y)
+inline int even(const gInteger& y)
 {
   return y.rep->len == 0 || !(y.rep->s[0] & 1);
 }
 
-inline int odd(const Integer& y)
+inline int odd(const gInteger& y)
 {
   return y.rep->len > 0 && (y.rep->s[0] & 1);
 }
 
-inline char* Itoa(const Integer& y, int base, int width)
+inline char* Itoa(const gInteger& y, int base, int width)
 {
   return Itoa(y.rep, base, width);
 }
 
 
 
-inline long lg(const Integer& x) 
+inline long lg(const gInteger& x) 
 {
   return lg(x.rep);
 }
@@ -734,371 +734,380 @@ inline long lg(const Integer& x)
 
 #if defined(__GNUG__) && !defined(NO_NRV)
 
-inline Integer  operator +  (const Integer& x, const Integer& y) return r
+inline gInteger  operator +  (const gInteger& x, const gInteger& y) return r
 {
   add(x, y, r);
 }
 
-inline Integer  operator +  (const Integer& x, long y) return r
+inline gInteger  operator +  (const gInteger& x, long y) return r
 {
   add(x, y, r);
 }
 
-inline Integer  operator +  (long  x, const Integer& y) return r
+inline gInteger  operator +  (long  x, const gInteger& y) return r
 {
   add(x, y, r);
 }
 
-inline Integer  operator -  (const Integer& x, const Integer& y) return r
+inline gInteger  operator -  (const gInteger& x, const gInteger& y) return r
 {
   sub(x, y, r);
 }
 
-inline Integer  operator -  (const Integer& x, long y) return r
+inline gInteger  operator -  (const gInteger& x, long y) return r
 {
   sub(x, y, r);
 }
 
-inline Integer  operator -  (long  x, const Integer& y) return r
+inline gInteger  operator -  (long  x, const gInteger& y) return r
 {
   sub(x, y, r);
 }
 
-inline Integer  operator *  (const Integer& x, const Integer& y) return r
+inline gInteger  operator *  (const gInteger& x, const gInteger& y) return r
 {
   mul(x, y, r);
 }
 
-inline Integer  operator *  (const Integer& x, long y) return r
+inline gInteger  operator *  (const gInteger& x, long y) return r
 {
   mul(x, y, r);
 }
 
-inline Integer  operator *  (long  x, const Integer& y) return r
+inline gInteger  operator *  (long  x, const gInteger& y) return r
 {
   mul(x, y, r);
 }
 
-inline Integer sqr(const Integer& x) return r
+inline gInteger sqr(const gInteger& x) return r
 {
   mul(x, x, r);
 }
 
-inline Integer  operator &  (const Integer& x, const Integer& y) return r
+inline gInteger  operator &  (const gInteger& x, const gInteger& y) return r
 {
   and(x, y, r);
 }
 
-inline Integer  operator &  (const Integer& x, long y) return r
+inline gInteger  operator &  (const gInteger& x, long y) return r
 {
   and(x, y, r);
 }
 
-inline Integer  operator &  (long  x, const Integer& y) return r
+inline gInteger  operator &  (long  x, const gInteger& y) return r
 {
   and(x, y, r);
 }
 
-inline Integer  operator |  (const Integer& x, const Integer& y) return r
+inline gInteger  operator |  (const gInteger& x, const gInteger& y) return r
 {
   or(x, y, r);
 }
 
-inline Integer  operator |  (const Integer& x, long y) return r
+inline gInteger  operator |  (const gInteger& x, long y) return r
 {
   or(x, y, r);
 }
 
-inline Integer  operator |  (long  x, const Integer& y) return r
+inline gInteger  operator |  (long  x, const gInteger& y) return r
 {
   or(x, y, r);
 }
 
-inline Integer  operator ^  (const Integer& x, const Integer& y) return r
+inline gInteger  operator ^  (const gInteger& x, const gInteger& y) return r
 {
   xor(x, y, r);
 }
 
-inline Integer  operator ^  (const Integer& x, long y) return r
+inline gInteger  operator ^  (const gInteger& x, long y) return r
 {
   xor(x, y, r);
 }
 
-inline Integer  operator ^  (long  x, const Integer& y) return r
+inline gInteger  operator ^  (long  x, const gInteger& y) return r
 {
   xor(x, y, r);
 }
 
-inline Integer  operator /  (const Integer& x, const Integer& y) return r
+inline gInteger  operator /  (const gInteger& x, const gInteger& y) return r
 {
   div(x, y, r);
 }
 
-inline Integer operator /  (const Integer& x, long y) return r
+inline gInteger operator /  (const gInteger& x, long y) return r
 {
   div(x, y, r);
 }
 
-inline Integer operator %  (const Integer& x, const Integer& y) return r
+inline gInteger operator %  (const gInteger& x, const gInteger& y) return r
 {
   mod(x, y, r);
 }
 
-inline Integer operator %  (const Integer& x, long y) return r
+inline gInteger operator %  (const gInteger& x, long y) return r
 {
   mod(x, y, r);
 }
 
-inline Integer operator <<  (const Integer& x, const Integer& y) return r
+inline gInteger operator <<  (const gInteger& x, const gInteger& y) return r
 {
   lshift(x, y, r);
 }
 
-inline Integer operator <<  (const Integer& x, long y) return r
+inline gInteger operator <<  (const gInteger& x, long y) return r
 {
   lshift(x, y, r);
 }
 
-inline Integer operator >>  (const Integer& x, const Integer& y) return r;
+inline gInteger operator >>  (const gInteger& x, const gInteger& y) return r;
 {
   rshift(x, y, r);
 }
 
-inline Integer operator >>  (const Integer& x, long y) return r
+inline gInteger operator >>  (const gInteger& x, long y) return r
 {
   rshift(x, y, r);
 }
 
-inline Integer pow(const Integer& x, long y) return r
+inline gInteger pow(const gInteger& x, long y) return r
 {
   pow(x, y, r);
 }
 
-inline Integer Ipow(long x, long y) return r(x)
+inline gInteger Ipow(long x, long y) return r(x)
 {
   pow(r, y, r);
 }
 
-inline Integer pow(const Integer& x, const Integer& y) return r
+inline gInteger pow(const gInteger& x, const gInteger& y) return r
 {
   pow(x, y, r);
 }
 
 
 
-inline Integer abs(const Integer& x) return r
+inline gInteger abs(const gInteger& x) return r
 {
   abs(x, r);
 }
 
-inline Integer operator - (const Integer& x) return r
+inline gInteger operator - (const gInteger& x) return r
 {
   negate(x, r);
 }
 
-inline Integer operator ~ (const Integer& x) return r
+inline gInteger operator ~ (const gInteger& x) return r
 {
   complement(x, r);
 }
 
-inline Integer  atoI(const char* s, int base) return r
+inline gInteger  atoI(const char* s, int base) return r
 {
   r.rep = atoIntRep(s, base);
 }
 
-inline Integer  gcd(const Integer& x, const Integer& y) return r
+inline gInteger  gcd(const gInteger& x, const gInteger& y) return r
 {
   r.rep = gcd(x.rep, y.rep);
 }
 
 #else /* NO_NRV */
 
-inline Integer  operator +  (const Integer& x, const Integer& y) 
+inline gInteger  operator +  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; add(x, y, r); return r;
+  gInteger r; add(x, y, r); return r;
 }
 
-inline Integer  operator +  (const Integer& x, long y) 
+inline gInteger  operator +  (const gInteger& x, long y) 
 {
-  Integer r; add(x, y, r); return r;
+  gInteger r; add(x, y, r); return r;
 }
 
-inline Integer  operator +  (long  x, const Integer& y) 
+inline gInteger  operator +  (long  x, const gInteger& y) 
 {
-  Integer r; add(x, y, r); return r;
+  gInteger r; add(x, y, r); return r;
 }
 
-inline Integer  operator -  (const Integer& x, const Integer& y) 
+inline gInteger  operator -  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; sub(x, y, r); return r;
+  gInteger r; sub(x, y, r); return r;
 }
 
-inline Integer  operator -  (const Integer& x, long y) 
+inline gInteger  operator -  (const gInteger& x, long y) 
 {
-  Integer r; sub(x, y, r); return r;
+  gInteger r; sub(x, y, r); return r;
 }
 
-inline Integer  operator -  (long  x, const Integer& y) 
+inline gInteger  operator -  (long  x, const gInteger& y) 
 {
-  Integer r; sub(x, y, r); return r;
+  gInteger r; sub(x, y, r); return r;
 }
 
-inline Integer  operator *  (const Integer& x, const Integer& y) 
+inline gInteger  operator *  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; mul(x, y, r); return r;
+  gInteger r; mul(x, y, r); return r;
 }
 
-inline Integer  operator *  (const Integer& x, long y) 
+inline gInteger  operator *  (const gInteger& x, long y) 
 {
-  Integer r; mul(x, y, r); return r;
+  gInteger r; mul(x, y, r); return r;
 }
 
-inline Integer  operator *  (long  x, const Integer& y) 
+inline gInteger  operator *  (long  x, const gInteger& y) 
 {
-  Integer r; mul(x, y, r); return r;
+  gInteger r; mul(x, y, r); return r;
 }
 
-inline Integer sqr(const Integer& x) 
+inline gInteger sqr(const gInteger& x) 
 {
-  Integer r; mul(x, x, r); return r;
+  gInteger r; mul(x, x, r); return r;
 }
 
-inline Integer  operator &  (const Integer& x, const Integer& y) 
+inline gInteger  operator &  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; and(x, y, r); return r;
+  gInteger r; and(x, y, r); return r;
 }
 
-inline Integer  operator &  (const Integer& x, long y) 
+inline gInteger  operator &  (const gInteger& x, long y) 
 {
-  Integer r; and(x, y, r); return r;
+  gInteger r; and(x, y, r); return r;
 }
 
-inline Integer  operator &  (long  x, const Integer& y) 
+inline gInteger  operator &  (long  x, const gInteger& y) 
 {
-  Integer r; and(x, y, r); return r;
+  gInteger r; and(x, y, r); return r;
 }
 
-inline Integer  operator |  (const Integer& x, const Integer& y) 
+inline gInteger  operator |  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; or(x, y, r); return r;
+  gInteger r; or(x, y, r); return r;
 }
 
-inline Integer  operator |  (const Integer& x, long y) 
+inline gInteger  operator |  (const gInteger& x, long y) 
 {
-  Integer r; or(x, y, r); return r;
+  gInteger r; or(x, y, r); return r;
 }
 
-inline Integer  operator |  (long  x, const Integer& y) 
+inline gInteger  operator |  (long  x, const gInteger& y) 
 {
-  Integer r; or(x, y, r); return r;
+  gInteger r; or(x, y, r); return r;
 }
 
-inline Integer  operator ^  (const Integer& x, const Integer& y) 
+inline gInteger  operator ^  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; xor(x, y, r); return r;
+  gInteger r; xor(x, y, r); return r;
 }
 
-inline Integer  operator ^  (const Integer& x, long y) 
+inline gInteger  operator ^  (const gInteger& x, long y) 
 {
-  Integer r; xor(x, y, r); return r;
+  gInteger r; xor(x, y, r); return r;
 }
 
-inline Integer  operator ^  (long  x, const Integer& y) 
+inline gInteger  operator ^  (long  x, const gInteger& y) 
 {
-  Integer r; xor(x, y, r); return r;
+  gInteger r; xor(x, y, r); return r;
 }
 
-inline Integer  operator /  (const Integer& x, const Integer& y) 
+inline gInteger  operator /  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; div(x, y, r); return r;
+  gInteger r; div(x, y, r); return r;
 }
 
-inline Integer operator /  (const Integer& x, long y) 
+inline gInteger operator /  (const gInteger& x, long y) 
 {
-  Integer r; div(x, y, r); return r;
+  gInteger r; div(x, y, r); return r;
 }
 
-inline Integer operator %  (const Integer& x, const Integer& y) 
+inline gInteger operator %  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; mod(x, y, r); return r;
+  gInteger r; mod(x, y, r); return r;
 }
 
-inline Integer operator %  (const Integer& x, long y) 
+inline gInteger operator %  (const gInteger& x, long y) 
 {
-  Integer r; mod(x, y, r); return r;
+  gInteger r; mod(x, y, r); return r;
 }
 
-inline Integer operator <<  (const Integer& x, const Integer& y) 
+inline gInteger operator <<  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; lshift(x, y, r); return r;
+  gInteger r; lshift(x, y, r); return r;
 }
 
-inline Integer operator <<  (const Integer& x, long y) 
+inline gInteger operator <<  (const gInteger& x, long y) 
 {
-  Integer r; lshift(x, y, r); return r;
+  gInteger r; lshift(x, y, r); return r;
 }
 
-inline Integer operator >>  (const Integer& x, const Integer& y) 
+inline gInteger operator >>  (const gInteger& x, const gInteger& y) 
 {
-  Integer r; rshift(x, y, r); return r;
+  gInteger r; rshift(x, y, r); return r;
 }
 
-inline Integer operator >>  (const Integer& x, long y) 
+inline gInteger operator >>  (const gInteger& x, long y) 
 {
-  Integer r; rshift(x, y, r); return r;
+  gInteger r; rshift(x, y, r); return r;
 }
 
-inline Integer pow(const Integer& x, long y) 
+inline gInteger pow(const gInteger& x, long y) 
 {
-  Integer r; pow(x, y, r); return r;
+  gInteger r; pow(x, y, r); return r;
 }
 
-inline Integer Ipow(long x, long y) 
+inline gInteger Ipow(long x, long y) 
 {
-  Integer r(x); pow(r, y, r); return r;
+  gInteger r(x); pow(r, y, r); return r;
 }
 
-inline Integer pow(const Integer& x, const Integer& y) 
+inline gInteger pow(const gInteger& x, const gInteger& y) 
 {
-  Integer r; pow(x, y, r); return r;
+  gInteger r; pow(x, y, r); return r;
 }
 
 
 
-inline Integer abs(const Integer& x) 
+inline gInteger abs(const gInteger& x) 
 {
-  Integer r; abs(x, r); return r;
+  gInteger r; abs(x, r); return r;
 }
 
-inline Integer operator - (const Integer& x) 
+inline gInteger operator - (const gInteger& x) 
 {
-  Integer r; negate(x, r); return r;
+  gInteger r; negate(x, r); return r;
 }
 
-inline Integer operator ~ (const Integer& x) 
+inline gInteger operator ~ (const gInteger& x) 
 {
-  Integer r; complement(x, r); return r;
+  gInteger r; complement(x, r); return r;
 }
 
-inline Integer  atoI(const char* s, int base) 
+inline gInteger  atoI(const char* s, int base) 
 {
-  Integer r; r.rep = atoIntRep(s, base); return r;
+  gInteger r; r.rep = atoIntRep(s, base); return r;
 }
 
-inline Integer  gcd(const Integer& x, const Integer& y) 
+inline gInteger  gcd(const gInteger& x, const gInteger& y) 
 {
-  Integer r; r.rep = gcd(x.rep, y.rep); return r;
+  gInteger r; r.rep = gcd(x.rep, y.rep); return r;
 }
 
 #endif  /* NO_NRV */
 
-inline void Integer::operator %= (const Integer& y)
+inline void gInteger::operator %= (const gInteger& y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-inline void Integer::operator %= (long y)
+inline void gInteger::operator %= (long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
-#endif /* !_Integer_h */
+
+//
+// This is for backward compatibility, and may be removed at any time
+//
+typedef gInteger Integer;
+
+#endif /* _Integer_h */
+
+
+

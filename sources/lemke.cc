@@ -398,8 +398,8 @@ int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err)
       break;
 
     case RATIONAL:
-      T = new LemkeTableau<Rational>((NFRep<Rational> &) *data,
-				     out, err, plev);
+      T = new LemkeTableau<gRational>((NFRep<gRational> &) *data,
+				      out, err, plev);
       break;
   }
 
@@ -409,6 +409,9 @@ int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err)
 
   PrintSolutions(gout);
 }
+
+
+
 
 
 
