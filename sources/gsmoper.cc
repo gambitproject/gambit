@@ -36,6 +36,15 @@ extern GSM* _gsm;
 
 
 //---------------------------------------
+//           IsFloat
+//---------------------------------------
+
+Portion* GSM_IsFloat(Portion** param)
+{
+  return new BoolPortion(((NumberPortion*) param[0])->Value().GetPrecision() == precDOUBLE);
+}
+
+//---------------------------------------
 //           IsNull
 //---------------------------------------
 
@@ -73,20 +82,6 @@ Portion* GSM_Randomize_Integer(Portion** param)
   v = ran1(&_idum);
   return new IntPortion(v);
 }
-
-Portion* GSM_Randomize_Number(Portion** param)
-{
-  long _RandomSeed = ((IntPortion*) param[1])->Value();
-  if(_RandomSeed > 0)
-    _RandomSeed = -_RandomSeed;
-  double v;
-  if(_RandomSeed != 0)
-    _idum = _RandomSeed;
-  v = ran1(&_idum) / IM;
-  return new NumberPortion(v);
-}
-
-
 
 
 //-------------------------------------------------------------------
@@ -2173,17 +2168,18 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Randomize", 2);
+  FuncObj = new FuncDescObj("Randomize", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_Integer, porINTEGER, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porINTEGER));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("seed", porINTEGER,
 					    new IntPortion(0)));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Randomize_Number, porNUMBER, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNUMBER));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("seed", porINTEGER,
-					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("IsFloat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsFloat, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER));
+
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("IsNull", 1);
