@@ -62,14 +62,22 @@ Portion *GSM_CentroidNfgFloat(Portion **param)
 {
   NormalForm<double> &N = * (NormalForm<double>*) ((NfgPortion*) param[0])->Value();
   MixedProfile<double> *P = new MixedProfile<double>(N);
-  return new MixedValPortion(P);
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_CentroidNfgRational(Portion **param)
 {
   NormalForm<gRational> &N = * (NormalForm<gRational>*) ((NfgPortion*) param[0])->Value();
   MixedProfile<gRational> *P = new MixedProfile<gRational>(N);
-  return new MixedValPortion(P);
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_NumPlayersNfg(Portion **param)
@@ -165,7 +173,11 @@ Portion *GSM_ConstSumFloat(Portion **param)
 
   gList<MixedProfile<double> > solns;
   ZM.GetSolutions(solns);
-  return new Mixed_ListPortion<double>(solns);
+
+  Portion* por = new Mixed_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_ConstSumRational(Portion **param)
@@ -181,7 +193,11 @@ Portion *GSM_ConstSumRational(Portion **param)
 
   gList<MixedProfile<gRational> > solns;
   ZM.GetSolutions(solns);
-  return new Mixed_ListPortion<gRational>(solns);
+
+  Portion* por = new Mixed_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "enum.h"
@@ -200,7 +216,10 @@ Portion *GSM_EnumFloat(Portion **param)
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
-  return new Mixed_ListPortion<double>(EM.GetSolutions());
+  Portion* por = new Mixed_ListPortion<double>(EM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_EnumRational(Portion **param)
@@ -217,7 +236,10 @@ Portion *GSM_EnumRational(Portion **param)
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
-  return new Mixed_ListPortion<gRational>(EM.GetSolutions());
+  Portion* por = new Mixed_ListPortion<gRational>(EM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "ngobit.h"
@@ -245,7 +267,10 @@ Portion *GSM_GobitNfg(Portion **param)
   ((IntPortion *) param[3])->Value() = M.NumEvals();
   ((IntPortion *) param[4])->Value() = M.NumIters();
 
-  return new Mixed_ListPortion<double>(M.GetSolutions());
+  Portion* por = new Mixed_ListPortion<double>(M.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "grid.h"
@@ -270,7 +295,11 @@ Portion *GSM_GridSolveFloat(Portion **param)
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
   gList<MixedProfile<double> > solns;
-  return new Mixed_ListPortion<double>(solns);
+
+  Portion* por = new Mixed_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_GridSolveRational(Portion **param)
@@ -293,7 +322,11 @@ Portion *GSM_GridSolveRational(Portion **param)
 //  ((FloatPortion *) param[9])->Value() = GM.Time();
 
   gList<MixedProfile<gRational> > solns;
-  return new Mixed_ListPortion<gRational>(solns);
+
+  Portion* por = new Mixed_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "lemke.h"
@@ -311,7 +344,10 @@ Portion *GSM_LemkeNfgFloat(Portion **param)
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
   ((FloatPortion *) param[3])->Value() = LS.Time();
 
-  return new Mixed_ListPortion<double>(LS.GetSolutions());
+  Portion* por = new Mixed_ListPortion<double>(LS.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_LemkeNfgRational(Portion **param)
@@ -327,7 +363,10 @@ Portion *GSM_LemkeNfgRational(Portion **param)
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
   ((FloatPortion *) param[3])->Value() = LS.Time();
 
-  return new Mixed_ListPortion<gRational>(LS.GetSolutions());
+  Portion* por = new Mixed_ListPortion<gRational>(LS.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "nliap.h"
@@ -349,7 +388,10 @@ Portion *GSM_LiapNfg(Portion **param)
   ((FloatPortion *) param[1])->Value() = LM.Time();
   ((IntPortion *) param[2])->Value() = LM.NumEvals();
 
-  return new Mixed_ListPortion<double>(LM.GetSolutions());
+  Portion* por = new Mixed_ListPortion<double>(LM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "simpdiv.h"
@@ -369,7 +411,10 @@ Portion *GSM_SimpdivFloat(Portion **param)
   ((IntPortion *) param[4])->Value() = SM.NumEvals();
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
-  return new Mixed_ListPortion<double>(SM.GetSolutions());
+  Portion* por = new Mixed_ListPortion<double>(SM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_SimpdivRational(Portion **param)
@@ -387,7 +432,10 @@ Portion *GSM_SimpdivRational(Portion **param)
   ((IntPortion *) param[4])->Value() = SM.NumEvals();
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
-  return new Mixed_ListPortion<gRational>(SM.GetSolutions());
+  Portion* por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 #include "purenash.h"
@@ -404,7 +452,10 @@ Portion *GSM_PureNashFloat(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  return new Mixed_ListPortion<double>(solns);
+  Portion* por = new Mixed_ListPortion<double>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_PureNashRational(Portion **param)
@@ -419,7 +470,10 @@ Portion *GSM_PureNashRational(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  return new Mixed_ListPortion<gRational>(solns);
+  Portion* por = new Mixed_ListPortion<gRational>(solns);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
 }
  
 Portion *GSM_ReadNfg(Portion **param)

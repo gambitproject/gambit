@@ -883,7 +883,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  index < _FuncInfo[ _FuncIndex ].NumParams; 
 	  index++ )
       {
-	if( _Param[ index ] == 0 && _RunTimeParamInfo[ index ].Ref )
+	if( _Param[ index ] == 0 )
 	{
 	  switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Option )
 	  {
