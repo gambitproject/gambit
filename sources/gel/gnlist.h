@@ -55,6 +55,7 @@ public:
     // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
     // construct a "scalar" (0-dimensional) list
   gNestedList(void) { m_Dim.Append(0); m_Data.Append(0); }
+  gNestedList(const T &x)  { m_Dim.Append(0); m_Data.Append(x); }
     // construct a "real" list
   gNestedList(const gList<int>& dim);
   gNestedList(const gList<T> &data, const gList<int> &dim)
@@ -73,8 +74,6 @@ public:
   bool Contains(const gNestedList<T> &) const;
 
   void Remove( int i );
-  void Append(const T &);
-  void Append(const gList<T> &);
   int Depth(void) const;
 
   bool operator==(const gNestedList<T> &b) const;

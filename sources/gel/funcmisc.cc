@@ -244,7 +244,13 @@ gWatch _gelStopwatch(false);
 // ElapsedTime
 //---------------
 
-DECLARE_NOPARAM(gelfuncElapsedTime, gNumber *)
+class gelfuncElapsedTime : public gelExpression<gNumber *>
+{
+public:
+  gelfuncElapsedTime(void) { }
+  virtual ~gelfuncElapsedTime() { }
+  gNestedList<gNumber *> Evaluate(gelVariableTable *) const;
+};
 
 gNestedList<gNumber *> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
 {
@@ -257,7 +263,13 @@ gNestedList<gNumber *> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
 // IsWatchRunning
 //------------------
 
-DECLARE_NOPARAM(gelfuncIsWatchRunning, gTriState *)
+class gelfuncIsWatchRunning : public gelExpression<gTriState *>
+{
+public:
+  gelfuncIsWatchRunning(void) { }
+  virtual ~gelfuncIsWatchRunning() { }
+  gNestedList<gTriState *> Evaluate(gelVariableTable *) const;
+};
 
 gNestedList<gTriState *> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
 {
@@ -270,7 +282,13 @@ gNestedList<gTriState *> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) con
 // StartWatch
 //---------------
 
-DECLARE_NOPARAM(gelfuncStartWatch, gNumber *)
+class gelfuncStartWatch : public gelExpression<gNumber *>
+{
+public:
+  gelfuncStartWatch(void) { }
+  virtual ~gelfuncStartWatch() { }
+  gNestedList<gNumber *> Evaluate(gelVariableTable *) const;
+};
 
 gNestedList<gNumber *> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
@@ -284,7 +302,13 @@ gNestedList<gNumber *> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 // StopWatch
 //--------------
 
-DECLARE_NOPARAM(gelfuncStopWatch, gNumber *)
+class gelfuncStopWatch : public gelExpression<gNumber *>
+{
+public:
+  gelfuncStopWatch(void) { }
+  virtual ~gelfuncStopWatch() { }
+  gNestedList<gNumber *> Evaluate(gelVariableTable *) const;
+};
 
 gNestedList<gNumber *> gelfuncStopWatch::Evaluate(gelVariableTable *) const
 {

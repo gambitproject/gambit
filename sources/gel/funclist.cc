@@ -34,9 +34,9 @@ gelfuncConcatNumber::Evaluate( gelVariableTable *vt ) const
 
   gNestedList< gNumber *> ret( dim );
   for (int i = 1; i <= list1.Data().Length(); ++i )
-    ret.Append( list1.Data()[i] );
+    ret[i] = list1.Data()[i];
   for (int i = 1; i <= list2.Data().Length(); ++i )
-    ret.Append( list2.Data()[i] );
+    ret[i + list1.Data().Length()] = list2.Data()[i];
   return ret;
 }
 
@@ -52,12 +52,7 @@ gelfuncContainsNumber::Evaluate(gelVariableTable *vt) const
 {
   gNestedList<gNumber *> list1 = op1->Evaluate(vt);
   gNestedList<gNumber *> x = op2->Evaluate(vt);
-  gNestedList<gTriState *> ret;
-  if (list1.Contains(x))
-    ret.Append(new gTriState(triTRUE));
-  else
-    ret.Append(new gTriState(triFALSE));
-  return ret;
+  return gNestedList<gTriState *>(new gTriState((list1.Contains(x) ? triTRUE : triFALSE)));
 }
 
 
@@ -105,9 +100,9 @@ gelfuncListNumber::Evaluate( gelVariableTable *vt ) const
   dim.Append( 1 );
   dim.Append( -(length + 1) );
 
-  gNestedList<gNumber *> ret( dim );
-  for (int i = 0; i < length; i++)
-    ret.Append(new gNumber(x));
+  gNestedList<gNumber *> ret(dim);
+  for (int i = 1; i <= length; i++)
+    ret[i] = new gNumber(x);
   return ret;
 }
 
@@ -140,9 +135,7 @@ gNestedList<gNumber *>
 gelfuncNumElementsNumber::Evaluate( gelVariableTable *vt ) const
 {
   gNestedList< gNumber *> list = op1->Evaluate( vt );
-  gNestedList< gNumber *> ret;
-  ret.Append(new gNumber(list.NumElements()));
-  return ret;
+  return gNestedList<gNumber *>(new gNumber(list.NumElements()));
 }
 
 

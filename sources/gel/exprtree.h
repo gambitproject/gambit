@@ -180,20 +180,6 @@ public:
 #include "funcmisc.h"
 
 
-
-
-
-
-#define DECLARE_NOPARAM( funcclass, T )               \
-class funcclass : public gelExpression<T>             \
-{                                                     \
-public:                                               \
-  funcclass(void) {}                                  \
-  virtual ~funcclass() {}                             \
-  gNestedList<T> Evaluate(gelVariableTable *) const;  \
-};
-
-
 // This one is for listed functions
 #define DECLARE_UNARY( funcclass, type1, T )          \
 class funcclass : public gelExpression<T>             \

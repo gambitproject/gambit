@@ -113,16 +113,6 @@ void gNestedList<T>::GetElementInfo( int el,
 
 }
 
-
-template <class T> void gNestedList<T>::Append(const T &value)
-{
-  if (m_Dim[1] == 0)  // not a list
-    throw InternalError(__LINE__);
-  
-  m_Data.Append(value);
-  m_Dim[m_Dim.Length()]--;
-}
-
 template <class T> 
 void gNestedList<T>::Output( gOutput& out ) const 
 {
