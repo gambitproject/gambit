@@ -84,6 +84,49 @@ Portion *ArrayToList(const gList<Node *> &A)
   return ret;
 }
 
+Portion* gDPVectorToList(const gDPVector<double>& A)
+{
+  ListPortion* p;
+  ListPortion* s1;
+  ListPortion* s2;
+  p = new ListValPortion();
+  int l = 1;
+  for (int i = 1; i <= A.DPLengths().Length(); i++)  {
+    s1 = new ListValPortion();
+    for (int j = 1; j <= A.DPLengths()[i]; j++)  {
+      s2 = new ListValPortion();
+      for (int k = 1; k <= A.Lengths()[l]; k++)
+	s2->Append(new FloatValPortion(A(i, j, k)));
+      l++;
+      s1->Append(s2);
+    }
+    p->Append(s1);
+  }
+  return p;
+}
+
+Portion* gDPVectorToList(const gDPVector<gRational>& A)
+{
+  ListPortion* p;
+  ListPortion* s1;
+  ListPortion* s2;
+  p = new ListValPortion();
+  int l = 1;
+  for (int i = 1; i <= A.DPLengths().Length(); i++)  {
+    s1 = new ListValPortion();
+    for (int j = 1; j <= A.DPLengths()[i]; j++)  {
+      s2 = new ListValPortion();
+      for (int k = 1; k <= A.Lengths()[l]; k++)
+	s2->Append(new RationalValPortion(A(i, j, k)));
+      l++;
+      s1->Append(s2);
+    }
+    p->Append(s1);
+  }
+  return p;
+}
+
+
 //
 // Implementation of extensive form editing functions, in alpha order
 //
@@ -603,8 +646,6 @@ Portion *GSM_SetNameInfoset(Portion **param)
   return param[0]->ValCopy();
 }
 
-extern Portion *GSM_SetNameNfg(Portion **);
-
 Portion *GSM_SetNameNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -866,10 +907,6 @@ Portion *GSM_CentroidEFSupport(Portion **param)
 }
 
 
-extern Portion *GSM_CentroidNfgFloat(Portion **);
-extern Portion *GSM_CentroidNfgRational(Portion **);
-extern Portion *GSM_CentroidNFSupport(Portion **);
-
 Portion *GSM_Chance(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
@@ -947,9 +984,6 @@ Portion *GSM_IsConstSumEfg(Portion **param)
   return new BoolValPortion(E.IsConstSum());
 }
 
-// This function currently lives in with the normal form stuff...
-extern Portion *GSM_IsConstSumNfg(Portion **);
-
 Portion *GSM_IsPredecessor(Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
@@ -1019,8 +1053,6 @@ Portion *GSM_NamePlayer(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
   return new TextValPortion(p->GetName());
 }
-
-extern Portion *GSM_NameNfg(Portion **);
 
 Portion *GSM_NameNode(Portion **param)
 {
@@ -1150,10 +1182,6 @@ Portion *GSM_NumPlayersEfg(Portion **param)
   return new IntValPortion(E.NumPlayers());
 }
 
-// This function currently lives in with the normal form stuff...
-extern Portion*GSM_NumPlayersNfg(Portion **);
-
-
 Portion *GSM_Outcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
@@ -1241,8 +1269,6 @@ Portion *GSM_PlayersEfg(Portion **param)
   p->AddDependency();
   return p;
 }
-
-extern Portion *GSM_PlayersNfg(Portion **);
 
 Portion *GSM_PriorSibling(Portion **param)
 {
@@ -2016,6 +2042,144 @@ Portion *GSM_LiapValue_BehavRational(Portion **param)
   return new RationalValPortion(P->LiapValue());
 }
 
+Portion *GSM_ActionValuesFloat(Portion **param)
+{
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (s->BelongsTo() != bp->BelongsTo())
+    return new ErrorPortion("Solution and infoset must belong to same game");
+  
+  if (s->GetPlayer()->IsChance())
+    return new ErrorPortion("Infoset must belong to personal player");
+
+  Efg<double> *E = bp->BelongsTo();
+
+  gDPVector<double> values(E->Dimensionality());
+  gPVector<double> probs(E->Dimensionality().Lengths());
+
+  // E->CondPayoff(*bp, values, probs);
+  bp->CondPayoff(values, probs);
+  
+  gVector<double> ret(s->NumActions());
+  for (int i = 1; i <= s->NumActions(); i++)
+    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
+
+  return ArrayToList(ret);
+}
+
+Portion *GSM_ActionValuesRational(Portion **param)
+{
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+
+  if (s->BelongsTo() != bp->BelongsTo())
+    return new ErrorPortion("Solution and infoset must belong to same game");
+  
+  if (s->GetPlayer()->IsChance())
+    return new ErrorPortion("Infoset must belong to personal player");
+
+  Efg<gRational> *E = bp->BelongsTo();
+
+  gDPVector<gRational> values(E->Dimensionality());
+  gPVector<gRational> probs(E->Dimensionality().Lengths());
+
+  bp->CondPayoff(values, probs);
+  
+  gVector<gRational> ret(s->NumActions());
+  for (int i = 1; i <= s->NumActions(); i++)
+    ret[i] = values(s->GetPlayer()->GetNumber(), s->GetNumber(), i);
+
+  return ArrayToList(ret);
+}
+
+Portion *GSM_BeliefsFloat(Portion **param)
+{
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  return gDPVectorToList(bp->Beliefs());
+}
+
+Portion *GSM_BeliefsRational(Portion **param)
+{
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  return gDPVectorToList(bp->Beliefs());
+}
+
+Portion *GSM_InfosetProbsFloat(Portion **param)
+{
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+
+  Efg<double> *E = bp->BelongsTo();
+
+  gDPVector<double> values(E->Dimensionality());
+  gPVector<double> probs(E->Dimensionality().Lengths());
+
+  bp->CondPayoff(values, probs);
+
+  ListPortion *ret = new ListValPortion;
+
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    ret->Append(ArrayToList(probs.GetRow(i)));
+
+  return ret;
+}
+
+Portion *GSM_InfosetProbsRational(Portion **param)
+{
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+
+  Efg<gRational> *E = bp->BelongsTo();
+
+  gDPVector<gRational> values(E->Dimensionality());
+  gPVector<gRational> probs(E->Dimensionality().Lengths());
+
+  bp->CondPayoff(values, probs);
+
+  ListPortion *ret = new ListValPortion;
+
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    ret->Append(ArrayToList(probs.GetRow(i)));
+
+  return ret;
+}
+
+Portion *GSM_NodeValuesFloat(Portion **param)
+{
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
+
+  if (bp->BelongsTo() != p->BelongsTo())
+    return new ErrorPortion("Solution and player are from different games");
+
+  return ArrayToList(bp->NodeValues(p->GetNumber()));
+}
+
+Portion *GSM_NodeValuesRational(Portion **param)
+{
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
+
+  if (bp->BelongsTo() != p->BelongsTo())
+    return new ErrorPortion("Solution and player are from different games");
+
+  return ArrayToList(bp->NodeValues(p->GetNumber()));
+}
+ 
+Portion *GSM_RealizProbsFloat(Portion **param)
+{
+  BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
+  
+  return ArrayToList(bp->NodeRealizProbs());
+}  
+  
+Portion *GSM_RealizProbsRational(Portion **param)
+{
+  BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
+  
+  return ArrayToList(bp->NodeRealizProbs());
+}
+  
+  
 
 
 
@@ -2245,11 +2409,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNameInfoset, 0, "x", porINFOSET);
   FuncObj->SetParamInfo(GSM_SetNameInfoset, 1, "name", porTEXT);
 
-  FuncObj->SetFuncInfo(GSM_SetNameNfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
-
   FuncObj->SetFuncInfo(GSM_SetNameNode, 2);
   FuncObj->SetParamInfo(GSM_SetNameNode, 0, "x", porNODE);
   FuncObj->SetParamInfo(GSM_SetNameNode, 1, "name", porTEXT);
@@ -2332,17 +2491,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_CentroidEFSupport, 0, "support",
 			porEF_SUPPORT);
 
-  FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
-			porNF_SUPPORT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Chance");
@@ -2375,9 +2523,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("IsConstSum");
   FuncObj->SetFuncInfo(GSM_IsConstSumEfg, 1);
   FuncObj->SetParamInfo(GSM_IsConstSumEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsConstSumNfg, 1);
-  FuncObj->SetParamInfo(GSM_IsConstSumNfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -2423,10 +2568,6 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
   FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porPLAYER_EFG);
-
-  FuncObj->SetFuncInfo(GSM_NameNfg, 1);
-  FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo(GSM_NameNode, 1);
   FuncObj->SetParamInfo(GSM_NameNode, 0, "x", porNODE);
@@ -2532,9 +2673,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_NumPlayersEfg, 1);
   FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_NumPlayersNfg, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayersNfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Outcome");
@@ -2572,10 +2710,6 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Players");
   FuncObj->SetFuncInfo(GSM_PlayersEfg, 1);
   FuncObj->SetParamInfo(GSM_PlayersEfg, 0, "efg", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_PlayersNfg, 1);
-  FuncObj->SetParamInfo(GSM_PlayersNfg, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -2716,6 +2850,59 @@ void Init_efgfunc(GSM *gsm)
 			0, "behav", porBEHAV_RATIONAL );
   gsm->AddFunction( FuncObj );
 
-}
 
+  FuncObj = new FuncDescObj("ActionValues");
+  FuncObj->SetFuncInfo(GSM_ActionValuesFloat, 2);
+  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 0, "strategy",
+			porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 1, "infoset", porINFOSET);
+
+  FuncObj->SetFuncInfo(GSM_ActionValuesRational, 2);
+  FuncObj->SetParamInfo(GSM_ActionValuesRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  FuncObj->SetParamInfo(GSM_ActionValuesRational, 1, "infoset", porINFOSET);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Beliefs");
+  FuncObj->SetFuncInfo(GSM_BeliefsFloat, 1);
+  FuncObj->SetParamInfo(GSM_BeliefsFloat, 0, "strategy", 
+			porBEHAV_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_BeliefsRational, 1);
+  FuncObj->SetParamInfo(GSM_BeliefsRational, 0, "strategy",
+			porBEHAV_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("InfosetProbs");
+  FuncObj->SetFuncInfo(GSM_InfosetProbsFloat, 1);
+  FuncObj->SetParamInfo(GSM_InfosetProbsFloat, 0, "strategy", porBEHAV_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_InfosetProbsRational, 1);
+  FuncObj->SetParamInfo(GSM_InfosetProbsRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NodeValues");
+  FuncObj->SetFuncInfo(GSM_NodeValuesFloat, 2);
+  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 0, "strategy", porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 1, "player", porPLAYER_EFG);
+
+  FuncObj->SetFuncInfo(GSM_NodeValuesRational, 2);
+  FuncObj->SetParamInfo(GSM_NodeValuesRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  FuncObj->SetParamInfo(GSM_NodeValuesRational, 1, "player", porPLAYER_EFG);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RealizProbs");
+  FuncObj->SetFuncInfo(GSM_RealizProbsFloat, 1);
+  FuncObj->SetParamInfo(GSM_RealizProbsFloat, 0, "strategy", porBEHAV_FLOAT);
+
+  FuncObj->SetFuncInfo(GSM_RealizProbsRational, 1);
+  FuncObj->SetParamInfo(GSM_RealizProbsRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+}
 
