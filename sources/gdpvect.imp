@@ -112,6 +112,14 @@ template <class T> gDPVector<T> &gDPVector<T>::operator=(const gVector<T> &v)
   return *this;
 }
 
+template <class T> gDPVector<T> &gDPVector<T>::operator=(T c)
+{
+  gPVector<T>::operator=(c);
+  return *this;
+}
+
+
+
 //--------------------------------------------------------------------------
 //                    gDPVector<T>: Operator definitions
 //--------------------------------------------------------------------------
@@ -220,6 +228,22 @@ template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
 {
   return !(*this == v);
 }
+
+//-------------------------------------------------------------------------
+//                 gDPVector<T>: General data access
+//-------------------------------------------------------------------------
+
+template <class T> void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
+{
+  assert(dvlen == v.dvlen);
+  assert(dvlen.First() <= row && row <= dvlen.Last());
+  assert(1 <= col && col <= dvlen[row]);
+
+  for (int i = 1; i <= svlen[dvidx[row]+col-1]; i++)
+    dvptr[row][col][i] = v.dvptr[row][col][i];
+}
+
+
 
 template <class T> const gTuple<int> &gDPVector<T>::DPLengths(void) const
 {

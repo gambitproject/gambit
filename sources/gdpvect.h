@@ -29,9 +29,13 @@ template <class T> class gDPVector : public gPVector<T>  {
     T &operator()(int a, int b, int c);
     const T &operator()(int a, int b, int c) const;
 
+	// extract a subvector
+    void CopySubRow(int row, int col,  const gDPVector<T> &v);
+
     gDPVector<T> &operator=(const gDPVector<T> &v);
     gDPVector<T> &operator=(const gPVector<T> &v);
     gDPVector<T> &operator=(const gVector<T> &v);
+    gDPVector<T> &operator=(T c);
 
     gDPVector<T> operator+(const gDPVector<T> &v) const;
     gDPVector<T> &operator+=(const gDPVector<T> &v);
