@@ -20,7 +20,7 @@ template class gStack<Node *>;
 %name EfgFileReader
 
 %define MEMBERS    gInput &infile; \
-                   gString last_name;  gRational last_rational;  \
+                   gString last_name;  gNumber last_number;  \
                    int last_int, iset_idx; \
                    Efg *& E; \
                    gStack<Node *> path; \
@@ -29,15 +29,16 @@ template class gStack<Node *>;
                    EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
-                   virtual EFOutcome *NewOutcome(void) = 0; \
-                   virtual void SetOutcome(EFOutcome *, \
-					   const gList<gNumber> &) = 0; \
-                   virtual void SetActionProbs(Infoset *, \
-					       const gList<gNumber> &) = 0; \
-                   virtual bool CheckActionProbs(Infoset *, \
-						 const gList<gNumber> &)=0;\
-                   virtual bool CheckOutcome(EFOutcome *, \
-					     const gList<gNumber> &) = 0;
+                   EFOutcome *NewOutcome(void); \
+                   void SetOutcome(EFOutcome *, \
+			           const gList<gNumber> &); \
+                   void SetActionProbs(Infoset *, \
+			               const gList<gNumber> &); \
+                   bool CheckActionProbs(Infoset *, \
+					 const gList<gNumber> &);\
+                   bool CheckOutcome(EFOutcome *, \
+				     const gList<gNumber> &); \
+		   int Parse(void);
 
 
 %define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
@@ -101,16 +102,16 @@ node_name:         NAME     { path.Peek()->SetName(last_name); }
          ;
 
 player_number:     NUMBER
-                   { if (last_rational.denominator() != 1)  YYERROR;
-		     last_int = last_rational.numerator().as_long();
+                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
+		     last_int = ((gRational) last_number).numerator().as_long();
 		     if (last_int <= 0 || last_int > E->NumPlayers()) YYERROR;
 		     player = E->Players()[last_int];
 		   }
              ;
 
 infoset_number:    NUMBER
-                   { if (last_rational.denominator() != 1)  YYERROR;
-		     iset_idx = last_rational.numerator().as_long();
+                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
+		     iset_idx = ((gRational) last_number).numerator().as_long();
 		     infoset = E->GetInfosetByIndex(player, iset_idx);
 		   }
               ; 
@@ -179,12 +180,12 @@ actionproblist:    actionprob
               ;
 
 actionprob:        NAME NUMBER
-                   { actions.Append(last_name); values.Append(last_rational); }
+                   { actions.Append(last_name); values.Append(last_number); }
           ;
  
 outcome_number:    NUMBER
-                   { if (last_rational.denominator() != 1)  YYERROR;
-		     last_int = last_rational.numerator().as_long();
+                   { if (((gRational) last_number).denominator() != 1)  YYERROR;
+		     last_int = ((gRational) last_number).numerator().as_long();
 		     if (last_int > 0)  
 		       outcome = E->GetOutcomeByIndex(last_int);
 		   }
@@ -212,7 +213,7 @@ payofflist:        payoff
           |        payofflist payoff
           ;
 
-payoff:            NUMBER  { values.Append(last_rational); }   
+payoff:            NUMBER  { values.Append(last_number); }   
       ;
 
 %%
@@ -264,7 +265,7 @@ int EfgFileReader::yylex(void)
   }
   else if (isdigit(c) || c == '-')   {
     infile.unget(c);
-    infile >> last_rational;
+    infile >> last_number;
     return NUMBER;
   }
   
@@ -278,64 +279,38 @@ int EfgFileReader::yylex(void)
 EfgFileReader::~EfgFileReader()   { }
 
 
-
-class EfgFile : public EfgFileReader    {
-  public:
-    EfgFile(gInput &, Efg *&);
-    virtual ~EfgFile();
-
-    int Parse(void);
-
-    EFOutcome *NewOutcome(void);
-    void SetOutcome(EFOutcome *, const gList<gNumber> &);
-    void SetActionProbs(Infoset *, const gList<gNumber> &);
-    bool CheckActionProbs(Infoset *, const gList<gNumber> &);
-    bool CheckOutcome(EFOutcome *, const gList<gNumber> &);
-};
-
-EfgFile::EfgFile(gInput &f, Efg *& E)
-  : EfgFileReader(f, E)
-{ }
-
-EfgFile::~EfgFile()
-{ }
-
-EFOutcome *EfgFile::NewOutcome(void)
+EFOutcome *EfgFileReader::NewOutcome(void)
 {
   return E->NewOutcome();
 }
 
-void EfgFile::SetOutcome(EFOutcome *c,
-			 const gList<gNumber> &p)
+void EfgFileReader::SetOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetPayoff(c, i, gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()));
 }
 
-void EfgFile::SetActionProbs(Infoset *s,
-			     const gList<gNumber> &p)
+void EfgFileReader::SetActionProbs(Infoset *s, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     E->SetChanceProb(s, i, p[i]);
 }
 
-bool EfgFile::CheckActionProbs(Infoset *s,
-			       const gList<gNumber> &p)
+bool EfgFileReader::CheckActionProbs(Infoset *s, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->GetChanceProb(s, i) != p[i])  return false;
   return true;
 }
 
-bool EfgFile::CheckOutcome(EFOutcome *c,
-			   const gList<gNumber> &p)
+bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
     if (E->Payoff(c, i) != gPoly<gNumber>(E->Parameters(), p[i], E->ParamOrder()))   return false;
   return true;
 }
 
-int EfgFile::Parse(void)
+int EfgFileReader::Parse(void)
 {
   infile.seekp(0);
   static char *prologue = { "EFG 2 " };
@@ -358,7 +333,7 @@ int ReadEfgFile(gInput &f, Efg *& E)
   ORD_PTR ord = &lex;
   E = new Efg(space, new term_order(space, ord));
 
-  EfgFile R(f, E);
+  EfgFileReader R(f, E);
   
   if (R.Parse())  {
     if (E)  {  delete E;  E = 0; }
