@@ -238,7 +238,7 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 {
   BehavProfile<gNumber> b(efsupp);
 
-  b.gDPVector<gNumber>::operator=((gNumber)0);
+  b = (gNumber) 0;
 
   Sequence *sij;
   const Sequence *parent;

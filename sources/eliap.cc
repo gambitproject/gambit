@@ -138,11 +138,12 @@ bool Liap(const Efg::Game &E, EFLiapParams &params,
     if(params.trace>0)
       *params.tracefile << "\nTry #: " << i << " p: ";
     
-    if (Powell(p, xi, F, value, iter,
-		       params.maxits1, params.tol1, params.maxitsN, 
-		       params.tolN,*params.tracefile, params.trace-1, true, 
-		       p_status)) {
-      
+    gPVector<double> pvect(p.GetPVector());
+    if (Powell(pvect, xi, F, value, iter,
+	       params.maxits1, params.tol1, params.maxitsN, 
+	       params.tolN,*params.tracefile, params.trace-1, true, 
+	       p_status)) {
+      p = pvect;
       bool add = true;
       int ii=1;
       while(ii<=solutions.Length() && add == true) {

@@ -30,7 +30,7 @@ class BehavSolution;
 //  the game payoffs or probabilities may change.  
 // 
 
-template <class T> class BehavProfile : public gDPVector<T>  {
+template <class T> class BehavProfile : private gDPVector<T>  {
   friend BehavSolution;
 protected:
   const Efg::Game *m_efg;
@@ -122,9 +122,11 @@ public:
 
   BehavProfile<T> &operator=(const BehavProfile<T> &);
   inline BehavProfile<T> &operator=(const gVector<T> &p)
-    {Invalidate(); gVector<T>::operator=(p); return *this;}
+    { Invalidate(); gVector<T>::operator=(p); return *this;}
 
   bool operator==(const BehavProfile<T> &) const;
+  bool operator!=(const BehavProfile<T> &x) const
+    { return !(operator==(x)); }  
 
   // INITIALIZATION, VALIDATION
   inline void Invalidate(void) const {m_cached_data=false;}
@@ -159,6 +161,46 @@ public:
 		  const Action *oppAction) const;
 
   void Dump(gOutput &) const;
+
+  // IMPLEMENTATION OF gDPVector OPERATIONS
+  // These are reimplemented here to correctly handle invalidation
+  // of cached information.
+  const T &operator()(int a, int b, int c) const
+    { return gDPVector<T>::operator()(a, b, c); }
+  T &operator()(int a, int b, int c) 
+    { Invalidate();  return gDPVector<T>::operator()(a, b, c); }
+  const T &operator[](int a) const
+    { return gArray<T>::operator[](a); }
+  T &operator[](int a)
+    { Invalidate();  return gArray<T>::operator[](a); }
+
+  BehavProfile<T> &operator=(const T &x)  
+    { Invalidate();  gDPVector<T>::operator=(x);  return *this; }
+
+  bool operator==(const gDPVector<T> &x) const
+    { return gDPVector<T>::operator==(x); }
+  bool operator!=(const gDPVector<T> &x) const
+    { return gDPVector<T>::operator!=(x); }
+
+  BehavProfile<T> &operator+=(const BehavProfile<T> &x)
+    { Invalidate();  gDPVector<T>::operator+=(x);  return *this; }
+  BehavProfile<T> &operator+=(const gDPVector<T> &x)
+    { Invalidate();  gDPVector<T>::operator+=(x);  return *this; }
+  BehavProfile<T> &operator-=(const BehavProfile<T> &x)
+    { Invalidate();  gDPVector<T>::operator-=(x);  return *this; }
+  BehavProfile<T> &operator*=(const T &x)
+    { Invalidate();  gDPVector<T>::operator*=(x);  return *this; }
+
+  int Length(void) const
+    { return gArray<T>::Length(); }
+  const gArray<int> &Lengths(void) const
+    { return gPVector<T>::Lengths(); }
+  int First(void) const { return gArray<T>::First(); }
+  int Last(void) const { return gArray<T>::Last(); }
+
+  const gPVector<T> &GetPVector(void) const { return *this; }
+  const gDPVector<T> &GetDPVector(void) const { return *this; }
+  gDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
 };
 
 

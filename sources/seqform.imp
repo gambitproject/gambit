@@ -123,7 +123,7 @@ template <class T> int SeqFormModule<T>::Lemke(gStatus &p_status)
 
     Add_BFS(*tab);
     tab->BasisVector(sol);
-    GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
+    GetProfile(*tab, profile.GetDPVector(),sol,EF.RootNode(),1,1);
     solutions.Flush();
     solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG));
   }
@@ -221,7 +221,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth,
       if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
+	GetProfile(BCopy, profile.GetDPVector(),sol,EF.RootNode(),1,1);
 	if(newsol) {
 	  solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG)); 
 	}

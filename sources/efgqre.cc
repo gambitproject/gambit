@@ -204,10 +204,12 @@ void QreOptimization(const Efg::Game &E, EFQreParams &params,
 		      Lambda <= params.maxLam && Lambda >= params.minLam)   {
       p_status.Get();
       F.SetLambda(Lambda);
-
-      FoundSolution = Powell(p, xi, F, value, iter,
+      
+      gPVector<double> pvect(p.GetPVector());
+      FoundSolution = Powell(pvect, xi, F, value, iter,
 		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		      *params.tracefile, params.trace-1,true, p_status);
+      p = pvect;
       bool derr = F.DomainErr();      
       // dist = dist to last good point
       // dsave = dist to last saved point
@@ -439,12 +441,10 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
   double initialsign = (p_efg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
 
   try {
-    // The EXPLICIT calls to BehavProfile<double>::Invalidate() are
-    // there to make sure that the internal cached data is updated
-    // after changes.  This is a (hopefully temporary) bug in the class.
     while (lambda <= params.maxLam) {
       // Use a first-order Runge-Kutta style method
-      gDPVector<double> delta1(profile), delta2(profile);
+      gDPVector<double> delta1(profile.GetDPVector());
+      gDPVector<double> delta2(profile.GetDPVector());
       double lambdainc1, lambdainc2;
 
       QreJacobian(p_efg, profile, lambda, H);
@@ -454,7 +454,6 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
       BehavProfile<double> profile2(profile);
       delta1 *= 0.5;
       profile2 += delta1;
-      profile2.Invalidate();
       QreJacobian(p_efg, profile2, lambda + lambdainc1 * 0.5, H);
       QreComputeStep(p_efg, profile, H,
 		     delta2, lambdainc2, initialsign, stepsize);
@@ -463,7 +462,6 @@ void QreHomotopy(const Efg::Game &p_efg, EFQreParams &params,
       delta2 *= 0.5;
       profile += delta2; 
       lambda += 0.5 * (lambdainc1 + lambdainc2);
-      profile.Invalidate();
 
       // Write out the QreValue as 0 in the PXI file; not generally
       // going to be the case, but QreValue is suspect for large lambda 
@@ -570,10 +568,12 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
   InitMatrix(xi, _p.Lengths());
   
   gNullStatus status;
-  Powell(_p, xi, F, value, iter,
+  gPVector<double> pvect(_p.GetPVector());
+  Powell(pvect, xi, F, value, iter,
 	 params.maxits1, params.tol1, params.maxitsN, params.tolN,
 	 *params.tracefile, params.trace-4,true,status);
-  
+  _p = pvect;
+
   _nevals = F.NumEvals();
   
   // now compute objective function for KQre 
