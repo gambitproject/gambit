@@ -2,7 +2,7 @@
 // File: quiksolv.cc  
 //        -- Instantiations of classes 
 // 
-// $Id$
+// @(#)quiksolv.cc	1.1 1/7/98
 //
 
 #include "quiksolv.imp"
@@ -26,3 +26,12 @@ TEMPLATE gOutput &operator<<(gOutput &f, const QuikSolv<double> &y);
 
 TEMPLATE class QuikSolv<gDouble>;
 TEMPLATE gOutput &operator<<(gOutput &f, const QuikSolv<gDouble> &y);
+
+#include "glist.imp"
+
+//Experimental, eventually should preceed QuikSolv
+TEMPLATE class TreeOfPartials<gDouble>;
+TEMPLATE gOutput &operator<<(gOutput &f, const TreeOfPartials<gDouble> &y);
+TEMPLATE class gList<TreeOfPartials<gDouble> >;
+TEMPLATE class gNode<TreeOfPartials<gDouble> >;
+TEMPLATE class ListOfPartialTrees<gDouble>;
