@@ -263,8 +263,7 @@ Portion *gclFunctionCall::Evaluate(void)
     for (int index = 0; index < call.NumParams(); index++)   {
       ReferencePortion *refp = call.GetParamRef(index);
       if (refp != 0)  {
-	_gsm.VarDefine(refp->Value(), param[index]);
-	delete refp;
+	_gsm.VarDefine(refp->Value(), param[index]->ValCopy());
       }
     }
 
