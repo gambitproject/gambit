@@ -225,7 +225,7 @@ NFSupport &NFSupport::operator=(const NFSupport &s)
 bool NFSupport::operator==(const NFSupport &s)
 {
   assert(sups.Length() == s.sups.Length());
-  for (int i = 1; i <= sups.Length() && sups[i] == s.sups[i]; i++);
+  for (int i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
   if (i > sups.Length()) return (true);
   else return (false);
 }
