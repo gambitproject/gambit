@@ -160,7 +160,7 @@ public:
   int NumOutcomes(void) const   { return gameform->NumOutcomes(); }
 
   void SetPayoff(NFOutcome *, int pl, const T &value);
-  const T &Payoff(NFOutcome *, int pl) const;
+  T Payoff(NFOutcome *, int pl) const;
 
   void WriteNfgFile(gOutput &) const;
 

@@ -4,8 +4,10 @@
 // $Id$
 //
 
+#include "garray.h"
+#include "glist.h"
 #include "rational.h"
-#include "nfg.h"
+#include "gstring.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -19,8 +21,6 @@ class gList<gRational>;
 template <class T> class gNode;
 class gNode<gString>;
 class gNode<gRational>;
-
-class Nfg<gRational>;
 
 #define TEMPLATE
 #pragma option -Jgd

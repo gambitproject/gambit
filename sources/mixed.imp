@@ -73,9 +73,12 @@ template <class T> void Nfg<T>::SetPayoff(NFOutcome *outcome,
   if (outcome)   payoffs(outcome->GetNumber(), pl) = value;
 }
 
-template <class T> const T &Nfg<T>::Payoff(NFOutcome *outcome, int pl) const
+template <class T> T Nfg<T>::Payoff(NFOutcome *outcome, int pl) const
 {
-  return ((outcome) ? payoffs(outcome->GetNumber(), pl) : NullPayoff());
+  if (outcome)
+	  return payoffs(outcome->GetNumber(), pl);
+  else
+	  return (T) 0;
 }
 
 
@@ -330,77 +333,77 @@ template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &p)
 // Private Mixed Profile Members
 //--------------------------------------
 
-template <class T> 
+template <class T>
 T MixedProfile<T>::PPayoff(int pl, int index,
 			  int i) const
 {
   Strategy *s;
   int pindex = 0;
-  
+
   if (i > N->NumPlayers())  {
-    if (N->GameForm().GetOutcome(index))
-      return N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
-    else
-      return (T) 0;
+	 if (N->GameForm().GetOutcome(index))
+		return N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
+	 else
+		return (T) 0;
   }
   T sum = (T) 0;
   for (int j = 1; j <= support.NumStrats(i); j++) {
-    s = support.Strategies(i)[j];
-    if ((*this)(i, j) != (T) 0) {
-      index += s->index - pindex; 
-      pindex = s->index;
-      sum += (*this)(i, j) * PPayoff(pl, index, i + 1);
-    }
-    
+	 s = support.Strategies(i)[j];
+	 if ((*this)(i, j) != (T) 0) {
+		index += s->index - pindex;
+		pindex = s->index;
+		sum += (*this)(i, j) * PPayoff(pl, index, i + 1);
+	 }
+
   }
   return sum;
 }
 
 template <class T>
 void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
-			   int cur_pl, long index, T prob, T &value) const
+				int cur_pl, long index, T prob, T &value) const
 {
   Strategy *s;
 
   if (cur_pl == const_pl)
-    PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
-	   prob, value);
+	 PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
+		prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob *
-        ((N->GameForm().GetOutcome(index)) ?
-	N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl) : (T) 0); 
+	 if (N->GameForm().GetOutcome(index))
+		 value += prob *
+	N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
   else   {
-    for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
-      s = support.Strategies(cur_pl)[j];
-      if ((*this)(cur_pl, j) > (T) 0)
+	 for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
+		s = support.Strategies(cur_pl)[j];
+		if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, const_st, cur_pl + 1,
-	       index + s->index, prob * (*this)(cur_pl, j), value);
-    }
+			 index + s->index, prob * (*this)(cur_pl, j), value);
+	 }
   }
-} 
+}
 
 
 template <class T>
 void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
-			   int const_pl2, int const_st2,
-			   int cur_pl, long index, T prob, T &value) const
+				int const_pl2, int const_st2,
+				int cur_pl, long index, T prob, T &value) const
 {
   Strategy *s;
 
   if (cur_pl == const_pl1 || cur_pl == const_pl2)
-    PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
-	   cur_pl + 1, index,prob, value);
+	 PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
+		cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())
-    value += prob * 
-        ((N->GameForm().GetOutcome(index)) ?
-	 N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl) :(T) 0); 
+	 if (N->GameForm().GetOutcome(index))
+		value += prob *
+	 N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
   else   {
-    for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
-      s = support.Strategies(cur_pl)[j];
-      if ((*this)(cur_pl, j) > (T) 0)
+	 for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
+		s = support.Strategies(cur_pl)[j];
+		if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
-	       cur_pl + 1, index + s->index, prob * (*this)(cur_pl, j), 
-	       value);
+			 cur_pl + 1, index + s->index, prob * (*this)(cur_pl, j),
+			 value);
     }
   }
 }
@@ -417,17 +420,16 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   else if (cur_pl > N->NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.Strategies(const_pl)[j];
-      value[j] += prob * 
-	((N->GameForm().GetOutcome(index + s->index)) ?
-	 N->payoffs(N->GameForm().GetOutcome(index + s->index)->GetNumber(), pl) : (T) 0); 
-    }
+		if (N->GameForm().GetOutcome(index + s->index))
+		  value[j] += prob * N->payoffs(N->GameForm().GetOutcome(index + s->index)->GetNumber(), pl);
+	 }
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++) {
       s = support.Strategies(cur_pl)[j];
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, cur_pl + 1,
-	       index + s->index, prob * (*this)(cur_pl, j), value);
+			 index + s->index, prob * (*this)(cur_pl, j), value);
     }
   }
 }

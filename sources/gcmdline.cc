@@ -1,14 +1,22 @@
 
 
 #include <assert.h>
-#include <unistd.h>
 #include <ctype.h>
+
+#ifdef __GNUG__
+#include <unistd.h>
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
 #include "gcmdline.h"
 
 
 int gCmdLineInput::s_NumInstances = 0;
+#ifdef __GNUC__
 struct termios gCmdLineInput::s_TermAttr;
-
+#endif // __GNUC__
 
 void gCmdLineInput::SaveTermAttr( void )
 {
@@ -36,12 +44,12 @@ void gCmdLineInput::SetRawTermAttr( void )
 
   // system( "stty raw -echo opost" );
   /*
-     stty [-]raw 
-     Same  as  -ignbrk  -brkint  -ignpar  -parmrk -inpck
-     -istrip -inlcr -igncr -icrnl  -ixon  -ixoff  -iuclc
-     -ixany  -imaxbel  -opost -isig -icanon -xcase min 1
-     time 0.  With `-', same as cooked.
-     */
+	  stty [-]raw
+	  Same  as  -ignbrk  -brkint  -ignpar  -parmrk -inpck
+	  -istrip -inlcr -igncr -icrnl  -ixon  -ixoff  -iuclc
+	  -ixany  -imaxbel  -opost -isig -icanon -xcase min 1
+	  time 0.  With `-', same as cooked.
+	  */
 
   rawTerm.c_iflag &= ~IGNBRK;
   rawTerm.c_iflag &= ~BRKINT;
@@ -125,7 +133,7 @@ void gCmdLineInput::GetCmdExec( void )
     }
     else
     {
-      if( numInvoke < m_HistoryDepth )
+		if( numInvoke < m_HistoryDepth )
 	sprintf( buf, "GCL%d:= ", numInvoke );
       else
 	sprintf( buf, "GCL%d:=; GCL%d:= ",
@@ -149,7 +157,7 @@ void gCmdLineInput::GetCmdExec( void )
 
   for( ; ; ) // infinite loop
   {
-    assert( 0 <= curPos );
+	 assert( 0 <= curPos );
     assert( curPos <= cmdBuf.length() );
     
     gin.get( c );
@@ -189,7 +197,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  gout << '\r';
 #else
 	  for( i = 0; i < curPos; ++i )
-	    gout << '\b';
+		 gout << '\b';
 #endif
 	  for( i = 0; i < cmdBuf.length(); ++i )
 	    gout << ' ';
@@ -237,7 +245,7 @@ void gCmdLineInput::GetCmdExec( void )
 	  if( historyPos <= m_History.Length() )
 	    cmdBuf = m_History[historyPos];
 	  else // restore the latest line
-	    cmdBuf = cmdBufOld;
+		 cmdBuf = cmdBufOld;
 	  curPos = cmdBuf.length();
 	  
 	  // display the new line
@@ -261,7 +269,7 @@ void gCmdLineInput::GetCmdExec( void )
 
 	  // reposition the cursor
 	  for( i = 0; i < cmdBuf.length() - curPos + 1; ++i )
-	    gout << '\b';
+		 gout << '\b';
 	}
 	else // nothing to delete, beep
 	  gout << '\a';
@@ -269,7 +277,7 @@ void gCmdLineInput::GetCmdExec( void )
 
       default: // bad escape sequence, beep
 	gout << '\a';
-      }
+		}
     }
     else if( c == 'R' - 'A' + 1 ) // ^R, refreshes the line
     {
@@ -293,7 +301,7 @@ void gCmdLineInput::GetCmdExec( void )
 	for( i = 0; i < cmdBuf.length() - curPos + 1; ++i )
 	  gout << '\b';
       }
-      else // nothing to delete, beep
+		else // nothing to delete, beep
 	gout << '\a';
     }
     else if( isprint( c ) )// normal characters
@@ -316,7 +324,7 @@ void gCmdLineInput::GetCmdExec( void )
   if( c == EOF )
     m_EOF = true;
   m_History.Append( cmdBuf );
-  m_CmdExec = cmdBuf + '\n';
+  m_CmdExec = cmdBuf + "\n";
   gout << '\n';
 
   // if the history is too long now, get rid of the first one
@@ -341,7 +349,7 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
 
   // the second char must be '[' in an escape sequence
   if( !gin.eof() )
-    gin.get( c1 );
+	 gin.get( c1 );
   if( c1 != '[' )
     return ESC_ERROR;
 
@@ -357,7 +365,7 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   case 68: // left arrow
     return ESC_LEFT;
   case 67: // right arrow
-    return ESC_RIGHT;
+	 return ESC_RIGHT;
 
   case 51: // delete key, if followed by 126
     if( !gin.eof() )
@@ -365,7 +373,7 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
     if( c3 == 126 )
       return ESC_DELETE;
     else
-      return ESC_ERROR;
+		return ESC_ERROR;
     break;
 
   default:
@@ -413,7 +421,7 @@ gInput& gCmdLineInput::operator >> (unsigned int &x)
     assert( m_CmdExec.length() > 0 );
     
     int num = 0;
-    tokens = sscanf( m_CmdExec.stradr(), "%d%n", &x, &num );
+	 tokens = sscanf( m_CmdExec.stradr(), "%d%n", &x, &num );
     EatSpace( num );
   }
   return *this; 
@@ -429,7 +437,7 @@ gInput& gCmdLineInput::operator >> (long &x)
     
     int num = 0;
     tokens = sscanf( m_CmdExec.stradr(), "%ld%n", &x, &num );
-    EatSpace( num );
+	 EatSpace( num );
   }
   return *this; 
 }
@@ -461,7 +469,7 @@ gInput& gCmdLineInput::operator >> (double &x)
     tokens = sscanf( m_CmdExec.stradr(), "%lf%n", &x, &num );
     EatSpace( num );
   }
-  return *this; 
+  return *this;
 }
 
 gInput& gCmdLineInput::operator >> (float &x)
@@ -485,8 +493,8 @@ gInput& gCmdLineInput::operator >> (char *x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.length() > 0 );
-    
+	 assert( m_CmdExec.length() > 0 );
+
     int num = 0;
     tokens = sscanf( m_CmdExec.stradr(), "%s%n", x, &num );
     EatSpace( num );
@@ -500,13 +508,6 @@ gCmdLineInput _gcmdline( 20 );
 gCmdLineInput& gcmdline( _gcmdline );
 
 
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
 #include "gstack.imp"
 

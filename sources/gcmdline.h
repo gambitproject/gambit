@@ -5,7 +5,11 @@
 
 
 #include <stdlib.h>
+#ifdef __GNUG__
 #include <termios.h>
+#elif defined __BORLANDC__
+// what goes here ?
+#endif   // __GNUG__, __BORLANDC__
 
 #include "gambitio.h"
 #include "gstring.h"

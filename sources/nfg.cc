@@ -5,6 +5,15 @@
 // $Id$
 //
 
+#include "rational.h"
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
 #include <assert.h>
 #include "nfg.h"
 #include "nfstrat.h"
@@ -29,7 +38,7 @@ NFGameForm::NFGameForm(const NFPayoffs &pay, const gArray<int> &dim)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
-    players[pl]->name = ToString(pl);
+	 players[pl]->name = ToString(pl);
     for (int st = 1; st <= players[pl]->NumStrats(); st++)
       players[pl]->strategies[st]->name = ToString(st);
   }
@@ -154,7 +163,7 @@ NFOutcome *NFGameForm::GetOutcome(const gArray<int> &profile) const
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++)
-    index += players[i]->strategies[profile[i]]->index;
+	 index += players[i]->strategies[profile[i]]->index;
   return results[index];
 }
 
@@ -179,7 +188,7 @@ void NFGameForm::IndexStrategies(void)
       s->number = j;
       s->index = (j - 1) * offset;
     }
-    assert(j - 1 == NumStrats(i));
+	 assert(j - 1 == NumStrats(i));
     offset *= (j - 1);
   }
 }
@@ -234,14 +243,6 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
 
 #include "nfgiter.imp"
 #include "nfgciter.imp"
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "garray.imp"
 #include "gblock.imp"

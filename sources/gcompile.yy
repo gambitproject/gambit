@@ -41,6 +41,7 @@ TEMPLATE class gStack<gString>;
 TEMPLATE class gStack<int>;
 TEMPLATE class gStack<char>;
 TEMPLATE class gStack<gInput *>;
+TEMPLATE class gStack<unsigned int>;
 
 #include "glist.imp"
 
