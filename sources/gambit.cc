@@ -7,6 +7,7 @@
 
 #include "wx.h"
 #include "wx_form.h"
+#include "wx_help.h"
 #include "extform.h"
 #include "display.h"
 #include "problem.h"
@@ -15,6 +16,7 @@
 #include "gambit.h"
 
 GambitFrame   *gambit_frame = NULL;
+wxHelpInstance *help_instance = NULL;
 wxList 		my_children;
 wxCursor *arrow_cursor;
 GambitApp gambitApp;
@@ -53,9 +55,13 @@ wxIcon *test_icon;
 	file_menu->Append(FILE_NEW,"&New",										"Create new file");
   file_menu->Append(FILE_LOAD,"&Open",									"Open a file");
 	file_menu->Append(FILE_QUIT, "&Quit",                	"Quit program");
+	wxMenu *help_menu = new wxMenu;
+	help_menu->Append(HELP_GAMBIT,"&Contents",					"Table of contents");
+	help_menu->Append(HELP_ABOUT,"&About",								"About this program");
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, "&File");
+  menu_bar->Append(help_menu,	"&Help");
 
   // Associate the menu bar with the frame
   gambit_frame->SetMenuBar(menu_bar);
@@ -116,14 +122,28 @@ void GambitFrame::OnMenuCommand(int id)
       file_load();
       break;
 		case FILE_NEW:
-		{
-			ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,500,300,wxDEFAULT_FRAME);
+			ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME);
 			break;
-		}
+		case HELP_ABOUT:
+			(void)wxMessageBox("Gambit Front End\nAuthor: Eugene Grayver egrayver@cco.caltech.edu\n(c) Caltech EPS, 1994", "About Gambit");
+			break;
+		case HELP_GAMBIT:
+			if (help_instance==NULL)
+			{
+				help_instance = new wxHelpInstance(TRUE);
+				help_instance->Initialize("gambit");
+			}
+			help_instance->LoadFile("gambit");
+      help_instance->DisplayContents();
+      break;
+		default:
+			(void)wxMessageBox("Internal Error!\nContact the author\negrayver@cco.caltech.edu","Error");
+			break;
 	}
 }
 
 Bool GambitFrame::OnClose()
 {
+	if (help_instance) help_instance->Quit();
 	return TRUE;
 }

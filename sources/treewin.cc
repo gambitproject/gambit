@@ -17,6 +17,14 @@
 #include "treewin.h"
 
 
+// To do:
+// Graphical representation of infosets
+// Graphical representation of outcomes
+// Accelerators																DONE
+// Help system																DONE
+// Pretty dialog boxes
+// Fix the zoom scrolling bug
+// Add save/load functionality
 #define BAD_NODE Node(-1,-1,-1,-1)
 extern GambitFrame *gambit_frame;
 
@@ -112,6 +120,9 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 	wxMenu *display_menu=new wxMenu;
 		display_menu->Append(DISPLAY_SET_ZOOM,"&Zoom...");
 		display_menu->Append(DISPLAY_SET_OPTIONS,"&Options...");
+	wxMenu *help_menu = new wxMenu;
+		help_menu->Append(HELP_CONTENTS,"&Contents",					"Table of contents");
+		help_menu->Append(HELP_ABOUT,"&About",								"About this program");
 
 	wxMenuBar *menu_bar=new wxMenuBar;
 	menu_bar->Append(file_menu,"&File");
@@ -121,9 +132,12 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 	menu_bar->Append(infoset_menu,"&Infoset");
 	menu_bar->Append(solve_menu,"&Solve");
   menu_bar->Append(display_menu,"&Display");
-	this->SetMenuBar(menu_bar);
+	menu_bar->Append(help_menu,	"&Help");
 
-  // Create the canvas(TreeWindow) on which to draw the tree
+	SetMenuBar(menu_bar);
+	// Create the accelerators (to add an accelerator, see const.h)
+  accelerators=MakeAccelerators();
+	// Create the canvas(TreeWindow) on which to draw the tree
 	tw = new TreeWindow(this, 0, 0, w, h,p);
 	// Give it scrollbars
   tw->SetScrollbars(20, 20, 60, 60, 4, 4);
@@ -137,9 +151,11 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 
 }
 
+
 ExtensiveFrame::~ExtensiveFrame()
 {
-  delete tw;
+	delete tw;
+	delete accelerators;
 }
 
 Bool ExtensiveFrame::OnClose(void)
@@ -268,7 +284,7 @@ void ExtensiveFrame::OnMenuCommand(int id)
 //                TREEWINDOW: CONSTRUCTOR AND DESTRUCTOR
 //---------------------------------------------------------------------
 
-TreeWindow::TreeWindow(wxFrame *_frame,int x,int y,int w,int h,Problem *p,int style):
+TreeWindow::TreeWindow(ExtensiveFrame *_frame,int x,int y,int w,int h,Problem *p,int style):
 								wxCanvas(_frame, x, y, w, h, style)
 {
 	frame=_frame;				// store the parent frame
@@ -278,16 +294,16 @@ TreeWindow::TreeWindow(wxFrame *_frame,int x,int y,int w,int h,Problem *p,int st
   else
     the_problem = new Problem;	// create the problem
 // $$$
-	Node r=the_problem->RootNode();
-	the_problem->AddNode(r, 1, 3);
-
 	node_list = new wxList;
 // $$$  node_list->DeleteContents(TRUE);	// make sure the client data is also deleted
 	zoom_factor=1.0;
 	draw_settings.SetWindow(gRect(0,0,w,h));
 
+  // Create the iterator to process cursor movement
 	iterator=new TreeWinIter(the_problem);
+  // Create the flasher to flash the cursor
 	flasher=new TreeNodeFlasher(GetDC());
+	// No node has been marked yet--mark_node is invalid
 	mark_node=BAD_NODE;
 
 	label_font=new wxFont(10,wxSWISS,wxNORMAL,wxNORMAL);
@@ -333,9 +349,15 @@ void TreeWindow::OnPaint(void)
 // coordinates data after redrawing.
 void TreeWindow::OnChar(wxKeyEvent& ch)
 {
+//---------------------------------- Accelerators --------------------------
+// Note that accelerators are provided for in the wxwin code but only for the
+// windows platform.  In order to make this more portable, accelerators for
+// this program are coded in the header file and processed in OnChar
+frame->CheckAccelerators(ch.KeyCode());
+//--------------------------------Cursor Code----------------------------
 if (ch.ShiftDown()==FALSE)
 	switch (ch.KeyCode())
-  {
+	{
 		case WXK_LEFT:
 		{
 			iterator->GoParent();
@@ -365,7 +387,6 @@ if (ch.ShiftDown()==FALSE)
 			ProcessCursor();
 			break;
 		}
-
 	}
 else
 {
@@ -473,8 +494,10 @@ void TreeWindow::RenderSubtree(wxDC &dc,const Node &n, wxList *node_list)
 			entry->x + draw_settings.NodeLength(), entry->y,entry->color);
 
 	if (n==mark_node)
-		::DrawLine(dc,entry->x-4, entry->y+4,
-				entry->x + draw_settings.NodeLength(), entry->y+4,::ColorNum(draw_settings.CursorColor()));
+	{
+		dc.SetPen(wxThePenList->FindOrCreatePen(draw_settings.CursorColor(),2,wxSOLID));
+		dc.DrawEllipse(entry->x-4, entry->y-4,8,8);
+  }
 
   if (draw_settings.ShowLabels())
 		::DrawText(dc,the_problem->GetNodeLabel(n).stradr(),entry->x, entry->y+3, entry->color);
@@ -511,7 +534,7 @@ void TreeWindow::Render(wxDC &dc)
 		if (iterator != NULL)
 		{
 			NodeEntry *entry=GetNodeEntry(iterator->Cursor());
-			flasher->SetFlashNode(entry->x-4,entry->y-4,
+			flasher->SetFlashNode(entry->x+5,entry->y-4,
 													entry->x+draw_settings.NodeLength(),entry->y-4);
 		}
   }
@@ -562,7 +585,7 @@ if (iterator != NULL)
 			y_start=(entry->y*zoom_factor-height/2)/(PIXELS_PER_SCROLL*zoom_factor)-1;
 			if (y_start<0) y_start=0;
 	// now update the flasher
-		flasher->SetFlashNode(entry->x-4,entry->y-4,
+		flasher->SetFlashNode(entry->x+5,entry->y-4,
 													entry->x+draw_settings.NodeLength(),entry->y-4);
 
 }
@@ -621,3 +644,26 @@ Add(wxMakeFormString("Cursor Color",&(object->draw_settings.cursor_color),wxFORM
 AssociatePanel(panel);
 }
 
+wxList *ExtensiveFrame::MakeAccelerators(void)
+{
+	wxList *t=new wxList(wxKEY_INTEGER);
+	int i=0;
+	while (Accels[i].code!=-1)
+	{
+		t->Append(Accels[i].key,(wxObject *)(&Accels[i]));
+		i++;
+  }
+  return t;
+}
+
+Bool ExtensiveFrame::CheckAccelerators(int ch)
+{
+	wxNode *n=accelerators->Find(ch);
+	if (n)
+	{
+		OnMenuCommand(((Accel *)n->Data())->code);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}

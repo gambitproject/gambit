@@ -73,13 +73,13 @@ typedef struct   {
 		Node n;
 }  NodeEntry;
 
-
+class ExtensiveFrame;
 class TreeWindow : public wxCanvas
 {
 friend class DisplayOptionsForm;
 		// Private variables
 		Problem *the_problem;
-		wxFrame *frame;								// parent frame
+		ExtensiveFrame *frame;								// parent frame
 		Node mark_node;								// Used in mark/goto node operations
 		TreeDrawParams draw_settings;	// Stored drawing parameters
     TreeWinIter *iterator;				// Used to process cursor keys
@@ -92,9 +92,9 @@ friend class DisplayOptionsForm;
 		int 	FillTable(wxList *node_list,const Node &n, int level);
 		void 	ProcessCursor(void);
 		void 	ProcessClick(int x,int y);
-    NodeEntry *GetNodeEntry(const Node &n);
+		NodeEntry *GetNodeEntry(const Node &n);
 	public:
-		TreeWindow(wxFrame *frame, int x, int y, int w, int h, Problem *p = NULL,int style = wxRETAINED);
+		TreeWindow(ExtensiveFrame *frame, int x, int y, int w, int h, Problem *p = NULL,int style = wxRETAINED);
 		void OnPaint(void);
 		void OnEvent(wxMouseEvent& event);
     void OnChar(wxKeyEvent& ch);
@@ -139,13 +139,15 @@ friend class DisplayOptionsForm;
 class ExtensiveFrame : public wxFrame
 {
 	private:
-
-  public:
+		wxList *accelerators;					// Used to process accelerator keys
+	public:
 		TreeWindow *tw;                                                                          
 		ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type, Problem *p=NULL);
-		Bool OnClose(void);
-		void OnMenuCommand(int id);
-    ~ExtensiveFrame();
+		Bool 		OnClose(void);
+		wxList 	*MakeAccelerators(void);
+		Bool		CheckAccelerators(int ch);
+		void 		OnMenuCommand(int id);
+		~ExtensiveFrame();
 };
 
 class DisplayOptionsForm: public wxForm
