@@ -28,6 +28,8 @@ template <class T> Portion *ArrayToList(const gList<T> &);
 template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 
+extern GSM *_gsm;
+
 //-------------
 // Actions
 //-------------
@@ -77,6 +79,9 @@ Portion *GSM_AppendNode(Portion **param)
     return new ErrorPortion("Node and information set from different games");
   n->BelongsTo()->AppendNode(n, s);
 
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porEF_SUPPORT);
+
   Portion* por = new NodeValPortion(n->GetChild(1));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -95,6 +100,8 @@ Portion *GSM_AttachOutcome(Portion **param)
     return new ErrorPortion("Node and outcome from different games");
   n->SetOutcome(c);
   
+  _gsm->InvalidateGameProfile(n->BelongsTo(), true);
+
   Portion* por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -185,6 +192,9 @@ Portion *GSM_CopyTree(Portion **param)
   if (n1->BelongsTo() != n2->BelongsTo())
     return new ErrorPortion("n1 and n2 belong to different trees");
 
+  _gsm->UnAssignGameElement(n1->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(n1->BelongsTo(), true, porEF_SUPPORT);
+
   Portion* por = new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -204,6 +214,10 @@ Portion *GSM_DeleteAction(Portion **param)
 
   infoset->BelongsTo()->DeleteAction(infoset, action);
 
+  _gsm->UnAssignGameElement(infoset->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(infoset->BelongsTo(), true, porEF_SUPPORT);
+  _gsm->UnAssignEfgElement(infoset->BelongsTo(), porACTION, action);
+
   Portion* por = new InfosetValPortion(infoset);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -216,6 +230,10 @@ Portion *GSM_DeleteAction(Portion **param)
 Portion *GSM_DeleteEmptyInfoset(Portion **param)
 {
   Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+
+  _gsm->UnAssignGameElement(infoset->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(infoset->BelongsTo(), true, porEF_SUPPORT);
+  _gsm->UnAssignEfgElement(infoset->BelongsTo(), porINFOSET, infoset);
 
   return new BoolValPortion(infoset->BelongsTo()->DeleteEmptyInfoset(infoset));
 }
@@ -234,6 +252,13 @@ Portion *GSM_DeleteNode(Portion **param)
   if (keep->GetParent() != n)
     return new ErrorPortion("keep is not a child of node");
 
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porEF_SUPPORT);
+  for (int i = 1; i <= n->NumChildren(); i++) 
+    if (n->GetChild(i) != keep)
+      _gsm->UnAssignEfgSubTree(n->BelongsTo(), n->GetChild(i));
+  _gsm->UnAssignEfgElement(n->BelongsTo(), porNODE, n);
+
   Portion* por = new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -247,6 +272,9 @@ Portion *GSM_DeleteOutcome(Portion **param)
 {
   Outcome *outc = ((OutcomePortion *) param[0])->Value();
   outc->BelongsTo()->DeleteOutcome(outc);
+
+  _gsm->InvalidateGameProfile(outc->BelongsTo(), true);
+  _gsm->UnAssignEfgElement(outc->BelongsTo(), porOUTCOME, outc);
   return new BoolValPortion(true);
 }
 
@@ -258,6 +286,10 @@ Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   n->BelongsTo()->DeleteTree(n);
+
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(n->BelongsTo(), true, porEF_SUPPORT);
+  _gsm->UnAssignEfgSubTree(n->BelongsTo(), n);
 
   Portion* por = new NodeValPortion(n);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -272,6 +304,8 @@ Portion *GSM_DetachOutcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   n->SetOutcome(0);
+
+  _gsm->InvalidateGameProfile(n->BelongsTo(), true);
 
   Portion* por = new NodeValPortion(n);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -357,7 +391,6 @@ Portion *GSM_Infoset_Node(Portion **param)
 
   if (!n->GetInfoset())
     return new NullPortion(porINFOSET);
-  //return new ErrorPortion("Terminal nodes have no information set");
 
   Portion* por = new InfosetValPortion(n->GetInfoset());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -398,6 +431,10 @@ Portion *GSM_Infosets(Portion **param)
 Portion *GSM_InsertAction(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
+
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porEF_SUPPORT);
+
   Portion *por = new ActionValPortion(s->BelongsTo()->InsertAction(s));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -407,6 +444,10 @@ Portion *GSM_InsertActionAt(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   Action *a = ((ActionPortion *) param[1])->Value();
+
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porEF_SUPPORT);
+
   Portion *por = new ActionValPortion(s->BelongsTo()->InsertAction(s, a));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -424,6 +465,9 @@ Portion *GSM_InsertNode(Portion **param)
   if (n->BelongsTo() != s->BelongsTo()) 
     return new ErrorPortion("Node and information set from different games");
   n->BelongsTo()->InsertNode(n, s);
+
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porEF_SUPPORT);
 
   Portion* por = new NodeValPortion(n->GetParent());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -591,6 +635,9 @@ Portion *GSM_MergeInfosets(Portion **param)
     return new ErrorPortion("Information sets from different games");
   s1->BelongsTo()->MergeInfoset(s1, s2);
   
+  _gsm->UnAssignGameElement(s1->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s1->BelongsTo(), true, porEF_SUPPORT);
+
   Portion* por = new InfosetValPortion(s1);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -609,6 +656,9 @@ Portion *GSM_MoveToInfoset(Portion **param)
     return new ErrorPortion("Information set and node from different games");
   s->BelongsTo()->JoinInfoset(s, n);
   
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porEF_SUPPORT);
+
   Portion* por = new InfosetValPortion(s);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -625,6 +675,9 @@ Portion *GSM_MoveTree(Portion **param)
 
   if (n1->BelongsTo() != n2->BelongsTo())
     return new ErrorPortion("n1 and n2 belong to different trees");
+
+  _gsm->UnAssignGameElement(n1->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(n1->BelongsTo(), true, porEF_SUPPORT);
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -699,6 +752,9 @@ Portion *GSM_NewInfoset(Portion **param)
   Infoset *s = p->BelongsTo()->CreateInfoset(p, n);
   s->SetName(name);
 
+  _gsm->UnAssignGameElement(p->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(p->BelongsTo(), true, porEF_SUPPORT);
+
   Portion* por = new InfosetValPortion(s);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -737,6 +793,9 @@ Portion *GSM_NewPlayer(Portion **param)
   EFPlayer *p = E.NewPlayer();
   p->SetName(name);
 
+  _gsm->UnAssignGameElement(&E, true, porBEHAV);
+  _gsm->UnAssignGameElement(&E, true, porEF_SUPPORT);
+
   Portion* por = new EfPlayerValPortion(p);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -751,7 +810,6 @@ Portion *GSM_NextSibling(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value()->NextSibling();
   if (!n)
     return new NullPortion(porNODE);
-  //return new ErrorPortion("Node is the last sibling");
   
   Portion* por = new NodeValPortion(n);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -784,7 +842,6 @@ Portion *GSM_NthChild(Portion **param)
   int child = ((IntPortion *) param[1])->Value();
   if (child < 1 || child > n->NumChildren())  
     return new NullPortion(porNODE);
-  //return new ErrorPortion("Child number out of range");
 
   Portion* por = new NodeValPortion(n->GetChild(child));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -808,7 +865,6 @@ Portion *GSM_Outcome(Portion **param)
     default:
       assert(0);
     }
-  //return new ErrorPortion("No outcome attached to node");
 
   Portion* por = new OutcomeValPortion(n->GetOutcome());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -1020,6 +1076,9 @@ Portion *GSM_Reveal(Portion **param)
   
   s->BelongsTo()->Reveal(s, player);
 
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porBEHAV);
+  _gsm->UnAssignGameElement(s->BelongsTo(), true, porEF_SUPPORT);
+
   Portion *por = new InfosetValPortion(s);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -1053,7 +1112,7 @@ Portion *GSM_SaveEfg(Portion **param)
 
   E->WriteEfgFile(f);
 
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 //-------------------
@@ -1089,6 +1148,8 @@ Portion *GSM_SetChanceProbs(Portion **param)
    	  (i, ((RationalPortion *) (*p)[i])->Value());
       break;
   }
+
+  _gsm->InvalidateGameProfile(s->BelongsTo(), true);
 
   Portion* por = new InfosetValPortion(s);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -1144,6 +1205,8 @@ Portion *GSM_SetPayoff_Float(Portion **param)
 
   (*c)[player->GetNumber()] = value;
 
+  _gsm->InvalidateGameProfile(c->BelongsTo(), true);
+
   Portion* por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -1157,6 +1220,8 @@ Portion *GSM_SetPayoff_Rational(Portion **param)
   gRational value = ((RationalPortion *) param[2])->Value();
 
   (*c)[player->GetNumber()] = value;
+
+  _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
   Portion* por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
