@@ -476,6 +476,7 @@ protected:
 
 public:
   EfSupportPortion(EFSupport *);
+  EfSupportPortion(EFSupport &);
   virtual ~EfSupportPortion();
 
   EFSupport *Value(void) const;
