@@ -14,7 +14,20 @@ template <class T> class gMatrix: private gBMatrix<T> {
 
   // OPERATOR OVERLOADING
   // assignment
-  gBMatrix<T>::operator=;
+  void operator=(const gMatrix<T> &M)
+    { if(Height()==M.Height() && Width()==M.Width()) {
+	printf("equality overloading\n");
+	for(int i=1;i<=Height();i++) {
+	  printf("[ ");
+	  for(int j=1;j<=Width();j++){
+	    (*this)(i,j) = M(i,j);
+	    printf("%lf ",M(i,j)); }
+	  printf("]\n");
+	}
+      }
+      else gBMatrix<T>::operator=(M);
+    }
+      
 
   // equality
   gBMatrix<T>::operator==;
@@ -135,12 +148,17 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
 {
   assert(Width() == M.Height());
   gMatrix out(Height(),M.Width());
-  for(int i=1;i<=Height();i++)
+  printf("matrix multiplication\n");
+  for(int i=1;i<=Height();i++){
+    printf("[ ");
     for(int j=1;j<=M.Width();j++)
       {
 	for(int k=1;k<=Width();k++)
 	  out(i,j) += (*this)(i,k) * M(k,j);
+	printf("%lf ",out(i,j));
       }
+    printf(" ]\n");
+  }
   return out;
 }
 
