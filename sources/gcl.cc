@@ -131,19 +131,18 @@ int main( int /*argc*/, char* argv[] )
 #endif   // __GNUG__
     
     
-    char *c = strrchr( argv[0], SLASH );
+    char *c = strrchr( _ExePath, SLASH );
     
     _SourceDir = new char[256];
     if (c != NULL)  {
-      int len = strlen(argv[0]) - strlen(c);
+      int len = strlen(_ExePath) - strlen(c);
       if (len >= 256)  len = 255;
-      strncpy(_SourceDir, argv[0], len);
+      strncpy(_SourceDir, _ExePath, len);
     }
     else   {
       strcpy(_SourceDir, "");
     }
     
-  
     // Set up the error handling functions:
 #ifndef __BORLANDC__
     signal(SIGFPE, (fptr) SigFPEHandler);
