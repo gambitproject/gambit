@@ -124,7 +124,7 @@ void EfgShow::MakeMenus(void)
                  "Solve by linear program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
                  "Liapunov function minimization");
-  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_GOBIT, "QRE",
+  solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_QRE, "QRE",
                  "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
               solveCustomEfgMenu,
@@ -143,9 +143,9 @@ void EfgShow::MakeMenus(void)
                  "Liapunov function minimization");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
                  "Simplicial subdivision");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBIT, "QRE",
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_QRE, "QRE",
                  "Compute quantal response equilibria");
-  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBITGRID, "QRE Grid",
+  solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_QREGRID, "QRE Grid",
                  "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_NFG, "Normal form",
               solveCustomNfgMenu,
@@ -418,15 +418,15 @@ void EfgShow::OnMenuCommand(int id)
     case SOLVE_CUSTOM_EFG_LCP:
     case SOLVE_CUSTOM_EFG_LP:
     case SOLVE_CUSTOM_EFG_LIAP:
-    case SOLVE_CUSTOM_EFG_GOBIT:
+    case SOLVE_CUSTOM_EFG_QRE:
     case SOLVE_CUSTOM_NFG_ENUMPURE:
     case SOLVE_CUSTOM_NFG_ENUMMIXED:
     case SOLVE_CUSTOM_NFG_LCP:
     case SOLVE_CUSTOM_NFG_LP:
     case SOLVE_CUSTOM_NFG_LIAP:
     case SOLVE_CUSTOM_NFG_SIMPDIV:
-    case SOLVE_CUSTOM_NFG_GOBIT:
-    case SOLVE_CUSTOM_NFG_GOBITGRID:
+    case SOLVE_CUSTOM_NFG_QRE:
+    case SOLVE_CUSTOM_NFG_QREGRID:
       GUI_RECORD("SOLVE:SOLVE");
       Solve(id);
       break;

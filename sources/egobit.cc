@@ -11,14 +11,14 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-EFGobitParams::EFGobitParams(gStatus &s)
+EFQreParams::EFQreParams(gStatus &s)
   : trace(0), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
     fullGraph(false), tracefile(&gnull), pxifile(&gnull),
     status(s)
 { }
 
-EFGobitParams::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
+EFQreParams::EFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
   : trace(0), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
     fullGraph(false), tracefile(&out), pxifile(&pxi),
@@ -26,7 +26,7 @@ EFGobitParams::EFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
 { }
 
 
-class EFGobitFunc : public gFunction<double>   {
+class EFQreFunc : public gFunction<double>   {
   private:
     long _nevals;
     bool _domain_err;
@@ -39,8 +39,8 @@ class EFGobitFunc : public gFunction<double>   {
     double Value(const gVector<double> &);
 
   public:
-    EFGobitFunc(const Efg &, const BehavProfile<gNumber> &);
-    virtual ~EFGobitFunc();
+    EFQreFunc(const Efg &, const BehavProfile<gNumber> &);
+    virtual ~EFQreFunc();
     
     gVector<double> GetLambda()   { return _Lambda; }
     void SetLambda(double l)   { _Lambda = l; }
@@ -49,7 +49,7 @@ class EFGobitFunc : public gFunction<double>   {
     bool DomainErr(void) const { return _domain_err;}
 };
 
-EFGobitFunc::EFGobitFunc(const Efg &E,
+EFQreFunc::EFQreFunc(const Efg &E,
 			 const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), 
     _Lambda(E.NumPlayers()),_probs(E.NumInfosets()),
@@ -67,7 +67,7 @@ EFGobitFunc::EFGobitFunc(const Efg &E,
   }
 }
 
-EFGobitFunc::~EFGobitFunc()
+EFQreFunc::~EFQreFunc()
 {
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
     int nisets = (_efg.Players()[pl])->NumInfosets();
@@ -79,7 +79,7 @@ EFGobitFunc::~EFGobitFunc()
 }
 
 
-double EFGobitFunc::Value(const gVector<double> &v)
+double EFQreFunc::Value(const gVector<double> &v)
 {
   static const double PENALTY = 10000.0;
 
@@ -130,7 +130,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 
 
 static void WritePXIHeader(gOutput &pxifile, const Efg &E,
-			   const EFGobitParams &params)
+			   const EFQreParams &params)
 {
   int pl, iset, nisets = 0;
 
@@ -160,8 +160,8 @@ static void AddSolution(gList<BehavSolution> &solutions,
 			double lambda,
 			double value)
 {
-  int i = solutions.Append(BehavSolution(profile, EfgAlg_GOBIT));
-  solutions[i].SetGobit(lambda, value);
+  int i = solutions.Append(BehavSolution(profile, EfgAlg_QRE));
+  solutions[i].SetQre(lambda, value);
   solutions[i].SetEpsilon(0.0001);
   if(solutions[i].IsNash() == triTRUE) {
     solutions[i].SetIsSubgamePerfect(triTRUE);
@@ -191,12 +191,12 @@ extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 
 
 
-void Gobit(const Efg &E, EFGobitParams &params,
+void Qre(const Efg &E, EFQreParams &params,
 	   const BehavProfile<gNumber> &start,
 	   gList<BehavSolution> &solutions,
 	   long &nevals, long &nits)
 {
-  EFGobitFunc F(E, start);
+  EFQreFunc F(E, start);
 
   int iter = 0, nit;
   double Lambda, value = 0.0;
@@ -271,7 +271,7 @@ void Gobit(const Efg &E, EFGobitParams &params,
   nits = 0;
 }
 
-class EFKGobitFunc : public gFunction<double>   {
+class EFKQreFunc : public gFunction<double>   {
 private:
   long _nevals;
   bool _domain_err;
@@ -280,13 +280,13 @@ private:
   gPVector<double> _probs;
   BehavProfile<double> _p, _cpay;
   gVector<double> ***_scratch;
-  EFGobitFunc F;
-  const EFGobitParams & params;
+  EFQreFunc F;
+  const EFQreParams & params;
   
 public:
-  EFKGobitFunc(const Efg &, const BehavProfile<gNumber> &, 
-		  const EFGobitParams & params);
-  virtual ~EFKGobitFunc();
+  EFKQreFunc(const Efg &, const BehavProfile<gNumber> &, 
+		  const EFQreParams & params);
+  virtual ~EFKQreFunc();
   
   double Value(const gVector<double> &);
   
@@ -297,9 +297,9 @@ public:
 };
 
 
-EFKGobitFunc::EFKGobitFunc(const Efg &E,
+EFKQreFunc::EFKQreFunc(const Efg &E,
 				 const BehavProfile<gNumber> &start, 
-				 const EFGobitParams & p)
+				 const EFQreParams & p)
   :_nevals(0L), _domain_err(false), _efg(E), _K(1.0),
    _probs(E.NumInfosets()),
    _p(start.Support()), _cpay(start.Support()),
@@ -317,7 +317,7 @@ EFKGobitFunc::EFKGobitFunc(const Efg &E,
   }
 }
 
-EFKGobitFunc::~EFKGobitFunc()
+EFKQreFunc::~EFKQreFunc()
 {
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
     int nisets = (_efg.Players()[pl])->NumInfosets();
@@ -328,7 +328,7 @@ EFKGobitFunc::~EFKGobitFunc()
   delete [] (_scratch + 1);
 }
 
-double EFKGobitFunc::Value(const gVector<double> &lambda)
+double EFKQreFunc::Value(const gVector<double> &lambda)
 {
   int iter = 0;
   double value = 0.0;
@@ -339,7 +339,7 @@ double EFKGobitFunc::Value(const gVector<double> &lambda)
     *params.tracefile << "\n   EFKGobFunc start: " << _p << " Lambda = " << F.GetLambda();
   }
   
-  // first find Gobit solution of p for given lambda vector
+  // first find Qre solution of p for given lambda vector
   
   
   gMatrix<double> xi(_p.Length(), _p.Length());
@@ -351,7 +351,7 @@ double EFKGobitFunc::Value(const gVector<double> &lambda)
   
   _nevals = F.NumEvals();
   
-  // now compute objective function for KGobit 
+  // now compute objective function for KQre 
   
   value = 0.0;
   
@@ -384,10 +384,10 @@ extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		      int maxits1, double tol1, int maxitsN, double tolN,
 		      gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
 
-void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &start,
+void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
 	    gList<BehavSolution> &solutions, long &nevals, long &nits)
 {
-  EFKGobitFunc F(E, start, params);
+  EFKQreFunc F(E, start, params);
   int i;
   int iter = 0, nit;
   double K, K_old = 0.0, value = 0.0;
@@ -413,7 +413,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
   xi.MakeIdent();
   
   if (params.trace> 0 )  {
-    *params.tracefile << "\nin EFKGobit";
+    *params.tracefile << "\nin EFKQre";
     *params.tracefile << " traceLevel: " << params.trace;
     *params.tracefile << "\np: " << p << "\nxi: " << xi;
   }
@@ -433,7 +433,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
     F.Get_p(p);
 /*
   if (params.trace>0)  {
-    *params.tracefile << "\nKGobit iter: " << nit << " val = ";
+    *params.tracefile << "\nKQre iter: " << nit << " val = ";
     params.tracefile->SetExpMode();
     *params.tracefile << value;
     params.tracefile->SetFloatMode();
@@ -443,7 +443,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
     */
     if(powell && !F.DomainErr()) {
       if (params.trace>0)  {
-	*params.tracefile << "\nKGobit iter: " << nit << " val = ";
+	*params.tracefile << "\nKQre iter: " << nit << " val = ";
 	params.tracefile->SetExpMode();
 	*params.tracefile << value;
 	params.tracefile->SetFloatMode();
@@ -465,8 +465,8 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
       }
       
       if (params.fullGraph) {
-	i = solutions.Append(BehavSolution(p, EfgAlg_GOBIT));      
-	solutions[i].SetGobit(K, value);
+	i = solutions.Append(BehavSolution(p, EfgAlg_QRE));      
+	solutions[i].SetQre(K, value);
       }
       K_old=K;                              // keep last good solution
       lam_old=lambda;                            
@@ -479,8 +479,8 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
   
   if (!params.fullGraph)
     {
-      i = solutions.Append(BehavSolution(p, EfgAlg_GOBIT));
-      solutions[i].SetGobit(K_old, value);
+      i = solutions.Append(BehavSolution(p, EfgAlg_QRE));
+      solutions[i].SetQre(K_old, value);
     }
   
   nevals = F.NumEvals();

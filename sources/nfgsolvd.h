@@ -40,8 +40,8 @@
 typedef enum
 {
     NFG_NO_SOLUTION = -1, NFG_ENUMPURE_SOLUTION, NFG_ENUMMIXED_SOLUTION,
-    NFG_LP_SOLUTION, NFG_LCP_SOLUTION, NFG_GOBIT_SOLUTION, 
-    NFG_GOBITALL_SOLUTION, NFG_LIAP_SOLUTION, NFG_SIMPDIV_SOLUTION, NFG_NUM_SOLUTIONS
+    NFG_LP_SOLUTION, NFG_LCP_SOLUTION, NFG_QRE_SOLUTION, 
+    NFG_QREALL_SOLUTION, NFG_LIAP_SOLUTION, NFG_SIMPDIV_SOLUTION, NFG_NUM_SOLUTIONS
 } NfgSolutionT;
 
 // This mini-class is necessary to allow the extensive form solution dialog
@@ -60,8 +60,8 @@ public:
         nfg_algorithm_list[NFG_ENUMMIXED_SOLUTION] = "EnumMixed";
         nfg_algorithm_list[NFG_LP_SOLUTION] = "LP";
         nfg_algorithm_list[NFG_LCP_SOLUTION] = "LCP";
-        nfg_algorithm_list[NFG_GOBIT_SOLUTION] = "Gobit";
-        nfg_algorithm_list[NFG_GOBITALL_SOLUTION] = "GobitAll";
+        nfg_algorithm_list[NFG_QRE_SOLUTION] = "Qre";
+        nfg_algorithm_list[NFG_QREALL_SOLUTION] = "QreAll";
         nfg_algorithm_list[NFG_LIAP_SOLUTION] = "Liap";
         nfg_algorithm_list[NFG_SIMPDIV_SOLUTION] = "SimpDiv";
         wxRadioBox *nfg_algorithm_box = new wxRadioBox(parent, func, 

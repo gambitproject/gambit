@@ -228,7 +228,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 
 #include "grid.h"
 
-static Portion *GSM_GobitGrid_Support(Portion **param)
+static Portion *GSM_QreGrid_Support(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
 
@@ -277,13 +277,13 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 #include "ngobit.h"
 #include "egobit.h"
 
-static Portion *GSM_Gobit_Start(Portion **param)
+static Portion *GSM_Qre_Start(Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
-    NFGobitParams NP;
+    NFQreParams NP;
     if (((TextPortion *) param[1])->Value() != "")
       NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
     else
@@ -306,7 +306,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
     try {
       long nevals, niters;
       gWatch watch;
-      Gobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+      Qre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
       ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[12])->SetValue(nevals);
@@ -327,7 +327,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
-    EFGobitParams EP;
+    EFQreParams EP;
     if(((TextPortion*) param[1])->Value() != "")
       EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
     else
@@ -351,7 +351,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
       long nevals, niters;
       gWatch watch;
     
-      Gobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+      Qre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
       ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[12])->SetValue(nevals);
@@ -376,13 +376,13 @@ static Portion *GSM_Gobit_Start(Portion **param)
 // KQreSolve
 //---------------
 
-static Portion *GSM_KGobit_Start(Portion **param)
+static Portion *GSM_KQre_Start(Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
-    NFGobitParams NP;
+    NFQreParams NP;
     if (((TextPortion *) param[1])->Value() != "")
       NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
     else
@@ -405,7 +405,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
     try {
       long nevals, niters;
       gWatch watch;
-      KGobit(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+      KQre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
       ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[12])->SetValue(nevals);
@@ -426,7 +426,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
     BehavSolution &start = *((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
-    EFGobitParams EP;
+    EFQreParams EP;
     if(((TextPortion*) param[1])->Value() != "")
       EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
     else
@@ -450,7 +450,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
       long nevals, niters;
       gWatch watch;
     
-      KGobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+      KQre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
       ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[12])->SetValue(nevals);
@@ -1233,7 +1233,7 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("QreGridSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_GobitGrid_Support, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_QreGrid_Support, 
 				       PortionSpec(porMIXED, 1), 14));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
@@ -1268,7 +1268,7 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("QreSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Gobit_Start, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
 				       PortionSpec(porMIXED | porBEHAV, 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
@@ -1308,7 +1308,7 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("KQreSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_KGobit_Start, 
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
 				       PortionSpec(porMIXED | porBEHAV , 1), 16));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));

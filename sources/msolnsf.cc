@@ -13,15 +13,15 @@
 
 char *MSolnSortFilterOptions::filter_cr_str[NUM_MCREATORS+1] =
 {
-    "Error", "PureNash", "Lemke", "Liap", "GobitGrid", "Gobit",
+    "Error", "PureNash", "Lemke", "Liap", "QreGrid", "Qre",
     "Simpdiv", "Enum", "ZSum", "User"
 };
 
 
 NfgAlgType MSolnSortFilterOptions::filter_cr_id[NUM_MCREATORS+1] =
 {
-    NfgAlg_USER, NfgAlg_PURENASH, NfgAlg_LEMKE, NfgAlg_LIAP, NfgAlg_GOBITGRID, 
-    NfgAlg_GOBIT, NfgAlg_SIMPDIV, NfgAlg_ENUM, NfgAlg_ZSUM, NfgAlg_USER
+    NfgAlg_USER, NfgAlg_PURENASH, NfgAlg_LEMKE, NfgAlg_LIAP, NfgAlg_QREGRID, 
+    NfgAlg_QRE, NfgAlg_SIMPDIV, NfgAlg_ENUM, NfgAlg_ZSUM, NfgAlg_USER
 };
 
 char *MSolnSortFilterOptions::filter_tri_str[3+1] = { "E", "Yes", "No", "DK" };
@@ -193,10 +193,10 @@ bool MSolnSorterFilter::LessThan(const MixedSolution &a,
         return (a.IsProper() < b.IsProper());
 
     case MSORT_BY_GVALUE:
-        return (a.GobitValue() < b.GobitValue());
+        return (a.QreValue() < b.QreValue());
 
     case MSORT_BY_GLAMBDA:
-        return (a.GobitLambda() < b.GobitLambda());
+        return (a.QreLambda() < b.QreLambda());
 
     case MSORT_BY_LVALUE:
         return (a.LiapValue() < b.LiapValue());

@@ -11,8 +11,8 @@ gText NameEfgAlgType(EfgAlgType p_algorithm)
   switch (p_algorithm) {
   case EfgAlg_USER:
     return "User"; 
-  case EfgAlg_GOBIT:
-    return "Gobit"; 
+  case EfgAlg_QRE:
+    return "Qre"; 
   case EfgAlg_LIAP: 
     return "Liap"; 
   case EfgAlg_PURENASH: 
@@ -61,7 +61,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_precision(precDOUBLE), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_epsilon(0.0),
-    m_gobitLambda(-1), m_gobitValue(-1),
+    m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -86,7 +86,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
+    m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -110,7 +110,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
+    m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -136,8 +136,8 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_isNash(p_solution.m_isNash),
     m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
     m_isSequential(p_solution.m_isSequential), m_epsilon(p_solution.m_epsilon),
-    m_gobitLambda(p_solution.m_gobitLambda),
-    m_gobitValue(p_solution.m_gobitValue),
+    m_qreLambda(p_solution.m_qreLambda),
+    m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
     m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -165,8 +165,8 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
     m_isSequential = p_solution.m_isSequential;
-    m_gobitLambda = p_solution.m_gobitLambda;
-    m_gobitValue = p_solution.m_gobitValue;
+    m_qreLambda = p_solution.m_qreLambda;
+    m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
     if (m_beliefs)   delete m_beliefs;
     if (p_solution.m_beliefs)
@@ -351,8 +351,8 @@ void BehavSolution::Invalidate(void) const
   m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;
-  m_gobitLambda = -1;
-  m_gobitValue = -1;
+  m_qreLambda = -1;
+  m_qreValue = -1;
   m_liapValue = -1;
 
   if (m_beliefs) { 
@@ -404,8 +404,8 @@ void BehavSolution::DumpInfo(gOutput &p_file) const
   p_file << " IsNash:" << m_isNash;
   p_file << " IsSubgamePerfect:" << m_isSubgamePerfect;
   p_file << " IsSequential:" << m_isSequential;
-  p_file << " GobitLambda:" << m_gobitLambda;
-  p_file << " GobitValue:" << m_gobitValue;
+  p_file << " QreLambda:" << m_qreLambda;
+  p_file << " QreValue:" << m_qreValue;
   p_file << " LiapValue:" << m_liapValue;
   if (m_beliefs)
     p_file << " Beliefs:" << *m_beliefs;

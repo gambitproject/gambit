@@ -12,8 +12,8 @@ gText NameNfgAlgType(NfgAlgType p_algorithm)
   switch (p_algorithm) {
   case NfgAlg_USER:
     return "User"; 
-  case NfgAlg_GOBIT: // GobitSolve
-    return "Gobit"; 
+  case NfgAlg_QRE: // QreSolve
+    return "Qre"; 
   case NfgAlg_LIAP: // LiapSolve
     return "Liap"; 
   case NfgAlg_LEMKE: // LcpSolve
@@ -22,8 +22,8 @@ gText NameNfgAlgType(NfgAlgType p_algorithm)
     return "LP(ZSum)"; 
   case NfgAlg_ENUM: // EnumMixedSolve
     return "Enum"; 
-  case NfgAlg_GOBITGRID: // GobitGridSOlve
-    return "GobitGrid"; 
+  case NfgAlg_QREGRID: // QreGridSOlve
+    return "QreGrid"; 
   case NfgAlg_SIMPDIV:  // SimpDivSolve
     return "SimpDiv"; 
   case NfgAlg_PURENASH: // EnumPureSolve
@@ -52,7 +52,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
   : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
     m_isProper(triUNKNOWN), m_epsilon(0.0),
-    m_gobitLambda(-1), m_gobitValue(-1),
+    m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -71,7 +71,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
-    m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
+    m_isProper(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -90,7 +90,7 @@ MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
-    m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
+    m_isProper(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -111,8 +111,8 @@ MixedSolution::MixedSolution(const MixedSolution &p_solution)
     m_precision(p_solution.m_precision), m_creator(p_solution.m_creator), 
     m_isNash(p_solution.m_isNash), m_isPerfect(p_solution.m_isPerfect),
     m_isProper(p_solution.m_isProper), m_epsilon(p_solution.m_epsilon),
-    m_gobitLambda(p_solution.m_gobitLambda),
-    m_gobitValue(p_solution.m_gobitValue), 
+    m_qreLambda(p_solution.m_qreLambda),
+    m_qreValue(p_solution.m_qreValue), 
     m_liapValue(p_solution.m_liapValue), m_id(p_solution.m_id)
 { }
 
@@ -129,8 +129,8 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
     m_isPerfect = p_solution.m_isPerfect;
     m_isProper = p_solution.m_isProper;
     m_epsilon = p_solution.m_epsilon;
-    m_gobitLambda = p_solution.m_gobitLambda;
-    m_gobitValue = p_solution.m_gobitValue;
+    m_qreLambda = p_solution.m_qreLambda;
+    m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
     m_id = p_solution.m_id;
   }
@@ -288,8 +288,8 @@ void MixedSolution::Invalidate(void) const
   m_creator = NfgAlg_USER;
   m_isNash = triUNKNOWN;
   m_isProper = triUNKNOWN;
-  m_gobitLambda = -1;
-  m_gobitValue = -1;
+  m_qreLambda = -1;
+  m_qreValue = -1;
   m_liapValue = -1;
 }
 
@@ -317,8 +317,8 @@ void MixedSolution::DumpInfo(gOutput &p_file) const
   p_file << " IsNash:" << m_isNash;
   p_file << " IsPerfect:" << m_isPerfect;
   p_file << " IsProper:" << m_isProper;
-  p_file << " GobitLambda:" << m_gobitLambda;
-  p_file << " GobitValue:" << m_gobitValue;
+  p_file << " QreLambda:" << m_qreLambda;
+  p_file << " QreValue:" << m_qreValue;
   p_file << " LiapValue:" << m_liapValue;
 }
 

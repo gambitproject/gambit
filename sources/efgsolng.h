@@ -136,26 +136,26 @@ public:
   virtual bool SolveSetup(void) const;
 };
 
-class EfgGobitAllG : public guiEfgSolution {
+class EfgQreAllG : public guiEfgSolution {
 public:
-  EfgGobitAllG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgGobitAllG()  { }
+  EfgQreAllG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
+  virtual ~EfgQreAllG()  { }
   virtual gList<BehavSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };
 
-class EfgNGobitG : public guiEfgSolution {
+class EfgNQreG : public guiEfgSolution {
 public:
-  EfgNGobitG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgNGobitG()  { }
+  EfgNQreG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
+  virtual ~EfgNQreG()  { }
   virtual gList<BehavSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };
 
-class EfgEGobitG : public guiEfgSolution {
+class EfgEQreG : public guiEfgSolution {
 public:
-  EfgEGobitG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-  virtual ~EfgEGobitG()  { }
+  EfgEQreG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
+  virtual ~EfgEQreG()  { }
   virtual gList<BehavSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };

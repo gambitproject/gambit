@@ -1065,19 +1065,19 @@ bool EfgSimpdivG::SolveSetup(void) const
 }
 
 //========================================================================
-//                               GobitSolve
+//                               QreSolve
 //========================================================================
 
 #include "gobitprm.h"
 #include "ngobit.h"
 #include "egobit.h"
 
-GobitParamsSettings::GobitParamsSettings(const char *p_filename)
-  : PxiParamsSettings("GobitSolve", p_filename)
+QreParamsSettings::QreParamsSettings(const char *p_filename)
+  : PxiParamsSettings("QreSolve", p_filename)
 {
-  wxGetResource(PARAMS_SECTION, "Gobit-minLam", &minLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Gobit-maxLam", &maxLam, defaults_file);
-  wxGetResource(PARAMS_SECTION, "Gobit-delLam", &delLam, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Qre-minLam", &minLam, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Qre-maxLam", &maxLam, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Qre-delLam", &delLam, defaults_file);
   wxGetResource(PARAMS_SECTION, "Func-tolN", &tolN, defaults_file);
   wxGetResource(PARAMS_SECTION, "Func-tol1", &tol1, defaults_file);
   wxGetResource(PARAMS_SECTION, "Func-maxitsN", &maxitsN, defaults_file);
@@ -1085,11 +1085,11 @@ GobitParamsSettings::GobitParamsSettings(const char *p_filename)
   wxGetResource(PARAMS_SECTION, "Start-Option", &start_option, defaults_file);
 }
 
-void GobitParamsSettings::SaveDefaults(void)
+void QreParamsSettings::SaveDefaults(void)
 {
-  wxWriteResource(PARAMS_SECTION, "Gobit-minLam", minLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Gobit-maxLam", maxLam, defaults_file);
-  wxWriteResource(PARAMS_SECTION, "Gobit-delLam", delLam, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Qre-minLam", minLam, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Qre-maxLam", maxLam, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Qre-delLam", delLam, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Func-tolN", tolN, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Func-tol1", tol1, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Func-maxitsN", maxitsN, defaults_file);
@@ -1097,10 +1097,10 @@ void GobitParamsSettings::SaveDefaults(void)
   wxWriteResource(PARAMS_SECTION, "Start-Option", start_option, defaults_file);
 }
 
-GobitParamsSettings::~GobitParamsSettings(void)
+QreParamsSettings::~QreParamsSettings(void)
 { SaveDefaults(); }
 
-void GobitParamsSettings::GetParams(EFGobitParams &p_params)
+void QreParamsSettings::GetParams(EFQreParams &p_params)
 {
   p_params.minLam = minLam;
   p_params.maxLam = maxLam;
@@ -1117,7 +1117,7 @@ void GobitParamsSettings::GetParams(EFGobitParams &p_params)
   p_params.tracefile = OutFile();
 }
 
-void GobitParamsSettings::GetParams(NFGobitParams &p_params)
+void QreParamsSettings::GetParams(NFQreParams &p_params)
 {
   p_params.minLam = minLam;
   p_params.maxLam = maxLam;
@@ -1135,11 +1135,11 @@ void GobitParamsSettings::GetParams(NFGobitParams &p_params)
 }
 
 
-GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *p_parent,
+QreSolveParamsDialog::QreSolveParamsDialog(wxWindow *p_parent,
 					       const gText p_filename)
-  : PxiParamsDialog("Gobit","QRESolve Params", p_filename, p_parent,
-		    GOBIT_HELP),
-    GobitParamsSettings(p_filename), PxiParamsSettings("Gobit", p_filename)
+  : PxiParamsDialog("Qre","QRESolve Params", p_filename, p_parent,
+		    QRE_HELP),
+    QreParamsSettings(p_filename), PxiParamsSettings("Qre", p_filename)
 {
   MakeDominanceFields();
 
@@ -1180,7 +1180,7 @@ GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *p_parent,
 }
 
 //---------------------
-// Gobit on nfg
+// Qre on nfg
 //---------------------
 
 //
@@ -1188,7 +1188,7 @@ GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *p_parent,
 // derive a solution class from the BaseBySubgameG to maintain uniformity.
 //
 
-class NGobitBySubgameG : public BaseBySubgameG {
+class NQreBySubgameG : public BaseBySubgameG {
 private:
   gList<BehavSolution> m_solutions;
 
@@ -1197,21 +1197,21 @@ protected:
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  NGobitBySubgameG(const Efg &, bool p_eliminate, bool p_iterative,
+  NQreBySubgameG(const Efg &, bool p_eliminate, bool p_iterative,
 		   bool p_strong, EfgShowInterface * = 0);
 
   gList<BehavSolution> GetSolutions(void) const { return m_solutions; }
 };
 
-NGobitBySubgameG::NGobitBySubgameG(const Efg &p_efg,
+NQreBySubgameG::NQreBySubgameG(const Efg &p_efg,
 				   bool p_eliminate, bool p_iterative,
 				   bool p_strong,
 				   EfgShowInterface *p_parent /*= 0*/)
   : BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
 {
-  GobitParamsSettings GSPD(m_parent->Filename());
+  QreParamsSettings GSPD(m_parent->Filename());
   wxStatus status(m_parent->Frame(), "QRE Algorithm");
-  NFGobitParams P(status);
+  NFQreParams P(status);
   GSPD.GetParams(P);
 
   EFSupport ES = EFSupport(p_efg);
@@ -1228,7 +1228,7 @@ NGobitBySubgameG::NGobitBySubgameG(const Efg &p_efg,
   gList<MixedSolution> nfg_solns;
 
   try {
-    Gobit(*N, P, startm, nfg_solns, nevals, nits);
+    Qre(*N, P, startm, nfg_solns, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
@@ -1236,28 +1236,28 @@ NGobitBySubgameG::NGobitBySubgameG(const Efg &p_efg,
 
   for (int i = 1; i <= nfg_solns.Length(); i++) {
     MixedToBehav(*N, nfg_solns[i], p_efg, startb);
-    m_solutions.Append(BehavSolution(startb, EfgAlg_GOBIT));
+    m_solutions.Append(BehavSolution(startb, EfgAlg_QRE));
   }
 
   delete N;
   delete S;
 }
 
-EfgNGobitG::EfgNGobitG(const Efg &p_efg, const EFSupport &p_support, 
+EfgNQreG::EfgNQreG(const Efg &p_efg, const EFSupport &p_support, 
 		       EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgNGobitG::Solve(void) const
+gList<BehavSolution> EfgNQreG::Solve(void) const
 {
   // exception handler is located in the ctor
-  NGobitBySubgameG M(ef, Eliminate(), EliminateAll(), DominanceType(), parent);
+  NQreBySubgameG M(ef, Eliminate(), EliminateAll(), DominanceType(), parent);
   return M.GetSolutions();
 }
 
-bool EfgNGobitG::SolveSetup(void) const
+bool EfgNQreG::SolveSetup(void) const
 {
-  GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
 
   if (GSPD.Completed() == wxOK) {
     eliminate = GSPD.Eliminate();
@@ -1272,26 +1272,26 @@ bool EfgNGobitG::SolveSetup(void) const
 }
 
 //---------------------
-// Gobit on efg
+// Qre on efg
 //---------------------
 
-EfgEGobitG::EfgEGobitG(const Efg &p_efg, const EFSupport &p_support, 
+EfgEQreG::EfgEQreG(const Efg &p_efg, const EFSupport &p_support, 
 		       EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgEGobitG::Solve(void) const
+gList<BehavSolution> EfgEQreG::Solve(void) const
 {
-  GobitParamsSettings GSPD(parent->Filename());
+  QreParamsSettings GSPD(parent->Filename());
   wxStatus status(parent->Frame(), "QRE Algorithm");
   BehavProfile<gNumber> start = parent->CreateStartProfile(GSPD.StartOption());
-  EFGobitParams P(status);
+  EFQreParams P(status);
   GSPD.GetParams(P);
   long nevals, nits;
   gList<BehavSolution> solns;
 
   try {
-    Gobit(ef, P, start, solns, nevals, nits);
+    Qre(ef, P, start, solns, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
@@ -1304,9 +1304,9 @@ gList<BehavSolution> EfgEGobitG::Solve(void) const
   return solns;
 }
 
-bool EfgEGobitG::SolveSetup(void) const
+bool EfgEQreG::SolveSetup(void) const
 { 
-  GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
+  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
 
   if (GSPD.Completed() == wxOK) {
     eliminate = GSPD.Eliminate();
@@ -1321,7 +1321,7 @@ bool EfgEGobitG::SolveSetup(void) const
 }
 
 //========================================================================
-//                           GobitGridSolve
+//                           QreGridSolve
 //========================================================================
 
 //---------------------
@@ -1382,7 +1382,7 @@ void GridParamsSettings::GetParams(GridParams &p_params)
 
 GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
 					     const gText &p_filename)
-  : MyDialogBox(p_parent, "QREGridSolve Params", GOBIT_HELP),
+  : MyDialogBox(p_parent, "QREGridSolve Params", QRE_HELP),
     GridParamsSettings(p_filename), PxiParamsSettings("Grid", p_filename)
 {
   SetLabelPosition(wxVERTICAL);
@@ -1463,18 +1463,18 @@ GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
   }
 }
 
-class GobitAllBySubgameG : public BaseBySubgameG {
+class QreAllBySubgameG : public BaseBySubgameG {
 protected:
   void ViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
     { BaseViewNormal(p_nfg, p_support); }
 
 public:
-  GobitAllBySubgameG(const Efg &, const EFSupport &, bool p_eliminate,
+  QreAllBySubgameG(const Efg &, const EFSupport &, bool p_eliminate,
 		     bool p_iterative, bool p_strong, EfgShowInterface *);
 
 };
 
-GobitAllBySubgameG::GobitAllBySubgameG(const Efg &p_efg, 
+QreAllBySubgameG::QreAllBySubgameG(const Efg &p_efg, 
 				       const EFSupport &p_support,
 				       bool p_eliminate, bool p_iterative,
 				       bool p_strong,
@@ -1501,19 +1501,19 @@ GobitAllBySubgameG::GobitAllBySubgameG(const Efg &p_efg,
   delete S;
 }
 
-EfgGobitAllG::EfgGobitAllG(const Efg &p_efg, const EFSupport &p_support, 
+EfgQreAllG::EfgQreAllG(const Efg &p_efg, const EFSupport &p_support, 
 			   EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgGobitAllG::Solve(void) const
+gList<BehavSolution> EfgQreAllG::Solve(void) const
 {
-  GobitAllBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
+  QreAllBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
 		       DominanceType(), parent);
   return solns;
 }
 
-bool EfgGobitAllG::SolveSetup(void) const
+bool EfgQreAllG::SolveSetup(void) const
 {
   GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
 

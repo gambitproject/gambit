@@ -14,7 +14,7 @@
 #include "efg.h"
 #include "behavsol.h"
 
-class EFGobitParams   {
+class EFQreParams   {
   public:
     int trace, powLam, maxits1, maxitsN;
     double minLam, maxLam, delLam, tol1, tolN;
@@ -22,16 +22,16 @@ class EFGobitParams   {
     gOutput *tracefile, *pxifile;
     gStatus &status;
 
-    EFGobitParams(gStatus & = gstatus);
-    EFGobitParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
+    EFQreParams(gStatus & = gstatus);
+    EFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
 };
 
 
-void Gobit(const Efg &, EFGobitParams &,
+void Qre(const Efg &, EFQreParams &,
 	   const BehavProfile<gNumber> &, gList<BehavSolution > &,
 	   long &nevals, long &nits);
 
-void KGobit(const Efg &E, EFGobitParams &params,
+void KQre(const Efg &E, EFQreParams &params,
 	    const BehavProfile<gNumber> &start,
 	    gList<BehavSolution> &solutions, 
 	    long &nevals, long &nits);

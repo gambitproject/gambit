@@ -227,40 +227,40 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 // QreLambda
 //---------------
 
-static Portion *GSM_GobitLambda_Behav(Portion** param)
+static Portion *GSM_QreLambda_Behav(Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if(bs->Creator() != EfgAlg_GOBIT)
+  if(bs->Creator() != EfgAlg_QRE)
     return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->GobitLambda());
+  return new NumberPortion(bs->QreLambda());
 }
 
-static Portion *GSM_GobitLambda_Mixed(Portion** param)
+static Portion *GSM_QreLambda_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if(bs->Creator() != NfgAlg_GOBIT)
+  if(bs->Creator() != NfgAlg_QRE)
     return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->GobitLambda());
+  return new NumberPortion(bs->QreLambda());
 }
 
 //--------------
 // QreValue
 //--------------
 
-static Portion *GSM_GobitValue_Behav(Portion** param)
+static Portion *GSM_QreValue_Behav(Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if(bs->Creator() != EfgAlg_GOBIT)
+  if(bs->Creator() != EfgAlg_QRE)
     return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->GobitValue());
+  return new NumberPortion(bs->QreValue());
 }
 
-static Portion *GSM_GobitValue_Mixed(Portion** param)
+static Portion *GSM_QreValue_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if(bs->Creator() != NfgAlg_GOBIT)
+  if(bs->Creator() != NfgAlg_QRE)
     return new NullPortion(porNUMBER);
-  return new NumberPortion(bs->GobitValue());
+  return new NumberPortion(bs->QreValue());
 }
 
 
@@ -730,10 +730,10 @@ void Init_solfunc(GSM *gsm)
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
       { "Game[support->EFSUPPORT] =: EFG", GSM_Game_EfgTypes },
       { "Game[basis->EFBASIS] =: EFG", GSM_Game_EfgTypes },
-      { "QreLambda[profile->MIXED] =: NUMBER", GSM_GobitLambda_Mixed },
-      { "QreLambda[profile->BEHAV] =: NUMBER", GSM_GobitLambda_Behav },
-      { "QreValue[profile->MIXED] =: NUMBER", GSM_GobitValue_Mixed },
-      { "QreValue[profile->BEHAV] =: NUMBER", GSM_GobitValue_Behav },
+      { "QreLambda[profile->MIXED] =: NUMBER", GSM_QreLambda_Mixed },
+      { "QreLambda[profile->BEHAV] =: NUMBER", GSM_QreLambda_Behav },
+      { "QreValue[profile->MIXED] =: NUMBER", GSM_QreValue_Mixed },
+      { "QreValue[profile->BEHAV] =: NUMBER", GSM_QreValue_Behav },
       { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetProb },
       { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 

@@ -11,14 +11,14 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-NFGobitParams::NFGobitParams(gStatus &s)
+NFQreParams::NFQreParams(gStatus &s)
   : trace(0), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
     fullGraph(false), tracefile(&gnull), pxifile(&gnull),
     status(s)
 { }
 
-NFGobitParams::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
+NFQreParams::NFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
   : trace(0), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
     fullGraph(false), tracefile(&out), pxifile(&pxi),
@@ -26,7 +26,7 @@ NFGobitParams::NFGobitParams(gOutput &out, gOutput &pxi, gStatus &s)
 { }
 
 
-class NFGobitFunc : public gC2Function<double>  {
+class NFQreFunc : public gC2Function<double>  {
   private:
     long _nevals;
     const Nfg &_nfg;
@@ -36,14 +36,14 @@ class NFGobitFunc : public gC2Function<double>  {
 
     double Value(const gVector<double> &);
     
-    double GobitDerivValue(int, int, const MixedProfile<double> &);
+    double QreDerivValue(int, int, const MixedProfile<double> &);
 
     bool Deriv(const gVector<double> &, gVector<double> &);
     bool Hessian(const gVector<double> &, gMatrix<double> &);
 
   public:
-    NFGobitFunc(const Nfg &, const MixedProfile<gNumber> &);
-    virtual ~NFGobitFunc();
+    NFQreFunc(const Nfg &, const MixedProfile<gNumber> &);
+    virtual ~NFQreFunc();
     
     gVector<double> GetLambda()   { return _Lambda; }
     void SetLambda(double l)   { _Lambda = l; }
@@ -52,7 +52,7 @@ class NFGobitFunc : public gC2Function<double>  {
 };
 
 
-NFGobitFunc::NFGobitFunc(const Nfg &N,
+NFQreFunc::NFQreFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
   : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()), _p(start.Support())
 {
@@ -65,7 +65,7 @@ NFGobitFunc::NFGobitFunc(const Nfg &N,
     _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
 }
 
-NFGobitFunc::~NFGobitFunc()
+NFQreFunc::~NFQreFunc()
 {
   for (int i = 1; i <= _nfg.NumPlayers(); i++) 
     delete _scratch[i];
@@ -73,12 +73,12 @@ NFGobitFunc::~NFGobitFunc()
   delete [] (_scratch + 1);
 }
 
-bool NFGobitFunc::Hessian(const gVector<double> &, gMatrix<double> &)
+bool NFQreFunc::Hessian(const gVector<double> &, gMatrix<double> &)
 {
   return true;
 }
 
-double NFGobitFunc::GobitDerivValue(int i, int j,
+double NFQreFunc::QreDerivValue(int i, int j,
 				    const MixedProfile<double> &v)
 {
   double x = 0.0, dv;
@@ -103,7 +103,7 @@ double NFGobitFunc::GobitDerivValue(int i, int j,
 }
 
 
-bool NFGobitFunc::Deriv(const gVector<double> &v, gVector<double> &d)
+bool NFQreFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 {
   ((gVector<double> &) _p).operator=(v);
   
@@ -112,13 +112,13 @@ bool NFGobitFunc::Deriv(const gVector<double> &v, gVector<double> &d)
     int st;
 
     for (st = 1; st <= nstrats;
-	 d[index++] = GobitDerivValue(pl, st++, _p));
+	 d[index++] = QreDerivValue(pl, st++, _p));
   }
 
   return true;
 }
   
-double NFGobitFunc::Value(const gVector<double> &v)
+double NFQreFunc::Value(const gVector<double> &v)
 {
   _nevals++;
   ((gVector<double> &) _p).operator=(v);
@@ -140,7 +140,7 @@ double NFGobitFunc::Value(const gVector<double> &v)
 
 
 static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
-			   const NFGobitParams &params)
+			   const NFQreParams &params)
 {
   pxifile << "Dimensionality:\n";
   pxifile << N.NumPlayers() << " ";
@@ -170,12 +170,12 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		gStatus &status = gstatus);
 
 
-void Gobit(const Nfg &N, NFGobitParams &params,
+void Qre(const Nfg &N, NFQreParams &params,
 	   const MixedProfile<gNumber> &start,
 	   gList<MixedSolution> &solutions,
 	   long &nevals, long &nits)
 {
-  NFGobitFunc F(N, start);
+  NFQreFunc F(N, start);
 
   int i;
   int iter = 0, nit;
@@ -221,8 +221,8 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     
     if (params.fullGraph) 
     {
-      i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));      
-      solutions[i].SetGobit(Lambda, value);
+      i = solutions.Append(MixedSolution(p, NfgAlg_QRE));      
+      solutions[i].SetQre(Lambda, value);
     }
 
     Lambda += params.delLam * pow(Lambda, (long)params.powLam);
@@ -232,15 +232,15 @@ void Gobit(const Nfg &N, NFGobitParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
-    solutions[i].SetGobit(Lambda, value);
+    i = solutions.Append(MixedSolution(p, NfgAlg_QRE));
+    solutions[i].SetQre(Lambda, value);
   }
 
   nevals = F.NumEvals();
   nits = 0;
 }
 
-class NFKGobitFunc : public gFunction<double>   {
+class NFKQreFunc : public gFunction<double>   {
 private:
   long _nevals;
   bool _domain_err;
@@ -248,13 +248,13 @@ private:
   double _K;
   gVector<double> **_scratch;
   MixedProfile<double> _p;
-  NFGobitFunc F;
-  const NFGobitParams & params;
+  NFQreFunc F;
+  const NFQreParams & params;
   
 public:
-  NFKGobitFunc(const Nfg &, const MixedProfile<gNumber> &, 
-		  const NFGobitParams & params);
-  virtual ~NFKGobitFunc();
+  NFKQreFunc(const Nfg &, const MixedProfile<gNumber> &, 
+		  const NFQreParams & params);
+  virtual ~NFKQreFunc();
   
   double Value(const gVector<double> &);
   
@@ -265,9 +265,9 @@ public:
 };
 
 
-NFKGobitFunc::NFKGobitFunc(const Nfg &N,
+NFKQreFunc::NFKQreFunc(const Nfg &N,
 				 const MixedProfile<gNumber> &start, 
-				 const NFGobitParams & p)
+				 const NFQreParams & p)
   :_nevals(0L), _domain_err(false), _nfg(N), _K(1.0),
    _p(start.Support()), F(N,start), params(p)
 {
@@ -280,7 +280,7 @@ NFKGobitFunc::NFKGobitFunc(const Nfg &N,
     _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
 }
 
-NFKGobitFunc::~NFKGobitFunc()
+NFKQreFunc::~NFKQreFunc()
 {
   for (int i = 1; i <= _nfg.NumPlayers(); i++) 
     delete _scratch[i];
@@ -288,7 +288,7 @@ NFKGobitFunc::~NFKGobitFunc()
   delete [] (_scratch + 1);
 }
 
-double NFKGobitFunc::Value(const gVector<double> &lambda)
+double NFKQreFunc::Value(const gVector<double> &lambda)
 {
   int iter = 0;
   double value = 0.0;
@@ -301,7 +301,7 @@ double NFKGobitFunc::Value(const gVector<double> &lambda)
     *params.tracefile << "\n   NFKGobFunc start: " << _p << " Lambda = " << F.GetLambda();
   }
   
-  // first find Gobit solution of p for given lambda vector
+  // first find Qre solution of p for given lambda vector
 
   DFP(_p, F, value, iter,
       params.maxits1, params.tol1, params.maxitsN, params.tolN,
@@ -309,7 +309,7 @@ double NFKGobitFunc::Value(const gVector<double> &lambda)
 
   _nevals = F.NumEvals();
 
- // now compute objective function for KGobit 
+ // now compute objective function for KQre 
 
   value = 0.0;
   for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
@@ -337,12 +337,12 @@ extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		   int maxits1, double tol1, int maxitsN, double tolN,
 		   gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
 
-void KGobit(const Nfg &N, NFGobitParams &params,
+void KQre(const Nfg &N, NFQreParams &params,
 	   const MixedProfile<gNumber> &start,
 	   gList<MixedSolution> &solutions, 
 	   long &nevals, long &nits)
 {
-  NFKGobitFunc F(N, start, params);
+  NFKQreFunc F(N, start, params);
   int i;
   int iter = 0, nit;
   double K, K_old = 0.0, value = 0.0;
@@ -368,7 +368,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
   xi.MakeIdent();
 
   if (params.trace> 0 )  {
-    *params.tracefile << "\nin NFKGobit";
+    *params.tracefile << "\nin NFKQre";
     *params.tracefile << " traceLevel: " << params.trace;
     *params.tracefile << "\np: " << p << "\nxi: " << xi;
   }
@@ -388,7 +388,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
     F.Get_p(p);
 /*
     if (params.trace>0)  {
-	*params.tracefile << "\nKGobit iter: " << nit << " val = ";
+	*params.tracefile << "\nKQre iter: " << nit << " val = ";
 	params.tracefile->SetExpMode();
 	*params.tracefile << value;
 	params.tracefile->SetFloatMode();
@@ -398,7 +398,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
 */
     if(powell && !F.DomainErr()) {
       if (params.trace>0)  {
-	*params.tracefile << "\nKGobit iter: " << nit << " val = ";
+	*params.tracefile << "\nKQre iter: " << nit << " val = ";
 	params.tracefile->SetExpMode();
 	*params.tracefile << value;
 	params.tracefile->SetFloatMode();
@@ -417,8 +417,8 @@ void KGobit(const Nfg &N, NFGobitParams &params,
       }
       
       if (params.fullGraph) {
-	i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));      
-	solutions[i].SetGobit(K, value);
+	i = solutions.Append(MixedSolution(p, NfgAlg_QRE));      
+	solutions[i].SetQre(K, value);
       }
       K_old=K;                              // keep last good solution
       lam_old=lambda;                            
@@ -431,8 +431,8 @@ void KGobit(const Nfg &N, NFGobitParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
-    solutions[i].SetGobit(K_old, value);
+    i = solutions.Append(MixedSolution(p, NfgAlg_QRE));
+    solutions[i].SetQre(K_old, value);
   }
 
   nevals = F.NumEvals();

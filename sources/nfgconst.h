@@ -30,8 +30,8 @@
 #define NFG_SOLVE_CUSTOM_LP             503
 #define NFG_SOLVE_CUSTOM_LIAP           504
 #define NFG_SOLVE_CUSTOM_SIMPDIV        505
-#define NFG_SOLVE_CUSTOM_GOBIT          506
-#define NFG_SOLVE_CUSTOM_GOBITGRID      507
+#define NFG_SOLVE_CUSTOM_QRE          506
+#define NFG_SOLVE_CUSTOM_QREGRID      507
 
 #define NFG_DISPLAY_COLORS              200
 #define NFG_DISPLAY_ACCELS              202
@@ -71,7 +71,7 @@
 #define LCP_HELP                        "LCP"
 #define SIMPDIV_HELP                    "SimpDiv"
 #define LIAP_HELP                       "Liap"
-#define GOBIT_HELP                      "Gobit"
+#define QRE_HELP                      "Qre"
 
 // Section names for the defaults file
 #define MSOLN_SHOW_SECT                 "Mixed-Soln-Show"

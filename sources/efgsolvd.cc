@@ -147,7 +147,7 @@ void EfgSolveStandardDialog::StandardSettings(void)
     if (perf)
       algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
     else
-      algorithm=EFG_GOBIT_SOLUTION;
+      algorithm=EFG_QRE_SOLUTION;
     stopAfter=1;max_solns=1;
     use_elimdom=true;all=true;dom_type=DOM_WEAK;
     subgames=TRUE;
@@ -209,7 +209,7 @@ void EfgSolveStandardDialog::StandardSettings(void)
     if (perf)
       algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
     else
-      algorithm=EFG_GOBIT_SOLUTION;
+      algorithm=EFG_QRE_SOLUTION;
     stopAfter=1;max_solns=1;
     use_elimdom=true;all=true;dom_type=DOM_WEAK;
     subgames=TRUE;
@@ -267,7 +267,7 @@ void EfgSolveStandardDialog::StandardSettings(void)
 	
   // One Sequential
   if (m_standardType==efgSTANDARD_SEQUENTIAL && m_standardNum==efgSTANDARD_ONE) {
-    use_nfg=FALSE;algorithm=EFG_GOBIT_SOLUTION;
+    use_nfg=FALSE;algorithm=EFG_QRE_SOLUTION;
     stopAfter=1;max_solns=1;
     use_elimdom=false;all=true;dom_type=DOM_STRONG;
     subgames=FALSE;

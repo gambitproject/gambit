@@ -589,16 +589,16 @@ void NfgSolnShow::UpdateValues(void)
 
         if (features[MSOLN_GLAMBDA])
         {
-            if (cur_vector.Creator() == NfgAlg_GOBIT)
-                SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.GobitLambda()));
+            if (cur_vector.Creator() == NfgAlg_QRE)
+                SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.QreLambda()));
             else
                 SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), "---------");
         }
 
         if (features[MSOLN_GVALUE])
         {
-            if (cur_vector.Creator() == NfgAlg_GOBIT)
-                SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.GobitValue()));
+            if (cur_vector.Creator() == NfgAlg_QRE)
+                SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.QreValue()));
             else
                 SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), "---------");
         }

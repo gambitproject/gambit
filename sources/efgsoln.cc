@@ -819,16 +819,16 @@ void EfgSolnShow::UpdateValues(void)
 
         if (features[BSOLN_GLAMBDA])
         {
-            if (cur.Creator() == EfgAlg_GOBIT)
-                SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.GobitLambda()));
+            if (cur.Creator() == EfgAlg_QRE)
+                SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.QreLambda()));
             else
                 SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), "---------");
         }
 
         if (features[BSOLN_GVALUE])
         {
-            if (cur.Creator() == EfgAlg_GOBIT)
-                SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.GobitValue()));
+            if (cur.Creator() == EfgAlg_QRE)
+                SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.QreValue()));
             else
                 SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), "---------");
         }

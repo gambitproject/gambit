@@ -14,7 +14,7 @@
 #include "nfg.h"
 #include "mixedsol.h"
 
-class NFGobitParams  {
+class NFQreParams  {
   public:
     int trace, powLam, maxits1, maxitsN;
     double minLam, maxLam, delLam, tol1, tolN;
@@ -22,17 +22,17 @@ class NFGobitParams  {
     gOutput *tracefile, *pxifile;
     gStatus &status;
 
-    NFGobitParams(gStatus & = gstatus);
-    NFGobitParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
+    NFQreParams(gStatus & = gstatus);
+    NFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
 };
 
 
-void Gobit(const Nfg &, NFGobitParams &,
+void Qre(const Nfg &, NFQreParams &,
 	   const MixedProfile<gNumber> &, gList<MixedSolution> &,
 	   long &nevals, long &nits);
 
 
-void KGobit(const Nfg &N, NFGobitParams &params,
+void KQre(const Nfg &N, NFQreParams &params,
 	    const MixedProfile<gNumber> &start,
 	    gList<MixedSolution> &solutions, 
 	    long &nevals, long &nits);

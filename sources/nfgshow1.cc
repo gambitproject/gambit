@@ -263,9 +263,9 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			  "Minimization of liapunov function");
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_SIMPDIV, "Simpdiv",
 			  "Solve via simplicial subdivision");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_GOBIT, "QRE",
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QRE, "QRE",
 			  "Compute quantal response equilibrium");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_GOBITGRID, "QREGrid",
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QREGRID, "QREGrid",
 			  "Compute quantal response equilibrium");
   solve_menu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
 		     "Solve with a particular algorithm");
@@ -517,8 +517,8 @@ void NormalSpread::OnMenuCommand(int id)
   case NFG_SOLVE_CUSTOM_LP:
   case NFG_SOLVE_CUSTOM_LIAP:
   case NFG_SOLVE_CUSTOM_SIMPDIV:
-  case NFG_SOLVE_CUSTOM_GOBIT:
-  case NFG_SOLVE_CUSTOM_GOBITGRID:
+  case NFG_SOLVE_CUSTOM_QRE:
+  case NFG_SOLVE_CUSTOM_QREGRID:
     parent->Solve(id);
     break;
 

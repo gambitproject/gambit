@@ -12,13 +12,13 @@
 // corresponding ids Note that the indexing should start from 1, not 0
 char *BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS+1] =
 {
-    "Error", "Gobit", "ELiap", "NLiap", "SeqForm", "PureNash", "Lemke",
+    "Error", "Qre", "ELiap", "NLiap", "SeqForm", "PureNash", "Lemke",
     "SimpDiv", "Enum", "ZSum", "User"
 };
 
 EfgAlgType BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS+1] =
 {
-    EfgAlg_USER, EfgAlg_GOBIT, EfgAlg_ELIAPSUB, EfgAlg_NLIAPSUB, 
+    EfgAlg_USER, EfgAlg_QRE, EfgAlg_ELIAPSUB, EfgAlg_NLIAPSUB, 
     EfgAlg_SEQFORMSUB, EfgAlg_PURENASHSUB, EfgAlg_LEMKESUB,
     EfgAlg_SIMPDIVSUB, EfgAlg_ENUMSUB, EfgAlg_ZSUMSUB, EfgAlg_USER
 };
@@ -196,10 +196,10 @@ bool BSolnSorterFilter::LessThan(const BehavSolution &a,
         return (a.IsSequential() < b.IsSequential());
 
     case BSORT_BY_GVALUE:
-        return (a.GobitValue() < b.GobitValue());
+        return (a.QreValue() < b.QreValue());
 
     case BSORT_BY_GLAMBDA:
-        return (a.GobitLambda() < b.GobitLambda());
+        return (a.QreLambda() < b.QreLambda());
 
     case BSORT_BY_LVALUE:
         return (a.LiapValue() < b.LiapValue());

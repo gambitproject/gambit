@@ -226,53 +226,53 @@ bool NfgSimpdivG::SolveSetup(void) const
 }
 
 //----------
-// Gobit
+// Qre
 //----------
 
 #include "ngobit.h"
 #include "gobitprm.h"
 
-NfgGobitG::NfgGobitG(const Nfg &p_nfg, const NFSupport &p_support,
+NfgQreG::NfgQreG(const Nfg &p_nfg, const NFSupport &p_support,
 		     NfgShowInterface *p_parent)
   : NfgSolutionG(p_nfg, p_support, p_parent)
 { }
 
-gList<MixedSolution> NfgGobitG::Solve(void) const
+gList<MixedSolution> NfgQreG::Solve(void) const
 {
-  GobitParamsSettings GSPD(parent->Filename());
+  QreParamsSettings GSPD(parent->Filename());
   wxStatus *status = new wxStatus(parent->Frame(), "QRE Algorithm");
-  NFGobitParams P(*status);
+  NFQreParams P(*status);
   GSPD.GetParams(P);
 
   MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
 
   long nevals, nits;
-  Gobit(nf, P, start, solns, nevals, nits);
+  Qre(nf, P, start, solns, nevals, nits);
 
   delete status;
   GSPD.RunPxi();
   return solns;
 }
 
-bool NfgGobitG::SolveSetup(void) const
+bool NfgQreG::SolveSetup(void) const
 {
-  GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+  QreSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
   return (GSPD.Completed() == wxOK);
 }
 
 //-------------
-// GobitGrid
+// QreGrid
 //-------------
 
 #include "grid.h"
 #include "gridprm.h"
 
-NfgGobitAllG::NfgGobitAllG(const Nfg &p_nfg, const NFSupport &p_support,
+NfgQreAllG::NfgQreAllG(const Nfg &p_nfg, const NFSupport &p_support,
 			   NfgShowInterface *p_parent)
   : NfgSolutionG(p_nfg, p_support, p_parent)
 { }
 
-gList<MixedSolution> NfgGobitAllG::Solve(void) const
+gList<MixedSolution> NfgQreAllG::Solve(void) const
 {
   GridParamsSettings GSPD(parent->Filename());
   wxStatus *status = new wxStatus(parent->Frame(), "QRE Grid Solve");
@@ -284,7 +284,7 @@ gList<MixedSolution> NfgGobitAllG::Solve(void) const
   return solns;
 }
 
-bool NfgGobitAllG::SolveSetup(void) const
+bool NfgQreAllG::SolveSetup(void) const
 {
   GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
   return (GSPD.Completed() == wxOK);

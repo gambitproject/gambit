@@ -720,11 +720,11 @@ void NfgShow::Solve(int id)
   case NFG_SOLVE_CUSTOM_SIMPDIV:
     solver = new NfgSimpdivG(nf, *sup, this);
     break;
-  case NFG_SOLVE_CUSTOM_GOBIT:
-    solver = new NfgGobitG(nf, *sup, this);
+  case NFG_SOLVE_CUSTOM_QRE:
+    solver = new NfgQreG(nf, *sup, this);
     break;
-  case NFG_SOLVE_CUSTOM_GOBITGRID:
-    solver = new NfgGobitAllG(nf, *sup, this);
+  case NFG_SOLVE_CUSTOM_QREGRID:
+    solver = new NfgQreAllG(nf, *sup, this);
     break;
   default:
     // shouldn't happen.  we'll ignore silently
@@ -795,12 +795,12 @@ void NfgShow::SolveSetup(int what)
                 NfgLiapG(nf, *cur_sup, this).SolveSetup();
                 break;
 
-            case NFG_GOBITALL_SOLUTION: 
-                NfgGobitAllG(nf, *cur_sup, this).SolveSetup();
+            case NFG_QREALL_SOLUTION: 
+                NfgQreAllG(nf, *cur_sup, this).SolveSetup();
                 break;
 
-            case NFG_GOBIT_SOLUTION:     
-                NfgGobitG(nf, *cur_sup, this).SolveSetup();
+            case NFG_QRE_SOLUTION:     
+                NfgQreG(nf, *cur_sup, this).SolveSetup();
                 break;
 
             case NFG_SIMPDIV_SOLUTION:   

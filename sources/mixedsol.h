@@ -18,12 +18,12 @@
 typedef enum 
 {
   NfgAlg_USER,
-  NfgAlg_GOBIT,
+  NfgAlg_QRE,
   NfgAlg_LIAP,
   NfgAlg_LEMKE,
   NfgAlg_ZSUM,
   NfgAlg_ENUM,
-  NfgAlg_GOBITGRID,
+  NfgAlg_QREGRID,
   NfgAlg_SIMPDIV,
   NfgAlg_PURENASH,
   NfgAlg_SEQFORM,
@@ -41,7 +41,7 @@ protected:
   gPrecision m_precision;
   mutable NfgAlgType m_creator;
   mutable gTriState m_isNash, m_isPerfect, m_isProper;
-  mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
+  mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   gArray<gNumber> m_payoff;
   unsigned int m_id;
   
@@ -83,8 +83,8 @@ public:
   gTriState IsPerfect(void) const;
   gTriState IsProper(void) const;
   const gNumber &Epsilon(void) const { return m_epsilon; }
-  const gNumber &GobitLambda(void) const { return m_gobitLambda; }
-  const gNumber &GobitValue(void) const { return m_gobitValue; }
+  const gNumber &QreLambda(void) const { return m_qreLambda; }
+  const gNumber &QreValue(void) const { return m_qreValue; }
   const gNumber &LiapValue(void) const;
 
   void SetId(unsigned int p_id) { m_id = p_id; }
@@ -93,8 +93,8 @@ public:
   void SetIsPerfect(gTriState p_isPerfect) { m_isPerfect = p_isPerfect; }
   void SetIsProper(gTriState p_isProper) { m_isProper = p_isProper; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
-  void SetGobit(const gNumber &p_gobitLambda, const gNumber &p_gobitValue)
-    { m_gobitLambda = p_gobitLambda; m_gobitValue = p_gobitValue; }
+  void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
+    { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
   void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
   
   // Force the invalidation of cached quantities

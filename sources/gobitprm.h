@@ -1,5 +1,5 @@
 //
-// FILE: gobitprm.h -- Parameter selection for GobitSolve
+// FILE: gobitprm.h -- Parameter selection for QreSolve
 //
 // $Id$
 //
@@ -11,10 +11,10 @@
 
 #define DATA_TYPE_LOG 1
 
-class EFGobitParams;
-class NFGobitParams;
+class EFQreParams;
+class NFQreParams;
 
-class GobitParamsSettings : public virtual PxiParamsSettings {
+class QreParamsSettings : public virtual PxiParamsSettings {
 protected:
   float minLam, maxLam, delLam, tol1, tolN;
   int maxits1,maxitsN;
@@ -22,18 +22,18 @@ protected:
   void SaveDefaults(void);
 
 public:
-  GobitParamsSettings(const char *fn);
-  ~GobitParamsSettings();
-  void GetParams(EFGobitParams &);
-  void GetParams(NFGobitParams &);
+  QreParamsSettings(const char *fn);
+  ~QreParamsSettings();
+  void GetParams(EFQreParams &);
+  void GetParams(NFQreParams &);
   int StartOption(void) const { return start_option; }
 };
 
-class GobitSolveParamsDialog : public PxiParamsDialog,
-			       public GobitParamsSettings {
+class QreSolveParamsDialog : public PxiParamsDialog,
+			       public QreParamsSettings {
 public:
-  GobitSolveParamsDialog(wxWindow *parent,const gText filename);
-  //	~GobitSolveParamsDialog(void);
+  QreSolveParamsDialog(wxWindow *parent,const gText filename);
+  //	~QreSolveParamsDialog(void);
 };
 
 #endif  // GOBITPRM_H

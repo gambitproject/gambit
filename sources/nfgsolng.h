@@ -59,18 +59,18 @@ class NfgEnumPureG : public NfgSolutionG  {
   virtual bool SolveSetup(void) const;
 };
 
-class NfgGobitAllG : public NfgSolutionG  {
+class NfgQreAllG : public NfgSolutionG  {
  public:
-  NfgGobitAllG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgGobitAllG()   { }
+  NfgQreAllG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+  virtual ~NfgQreAllG()   { }
   virtual gList<MixedSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };
 
-class NfgGobitG : public NfgSolutionG   {
+class NfgQreG : public NfgSolutionG   {
  public:
-  NfgGobitG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
-  virtual ~NfgGobitG()   { }
+  NfgQreG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+  virtual ~NfgQreG()   { }
   virtual gList<MixedSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };

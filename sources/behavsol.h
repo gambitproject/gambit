@@ -19,7 +19,7 @@ typedef enum
 {
   EfgAlg_USER,
   EfgAlg_LIAP,
-  EfgAlg_GOBIT,
+  EfgAlg_QRE,
   EfgAlg_PURENASH,
   EfgAlg_SEQFORM,
   EfgAlg_LEMKESUB,
@@ -44,7 +44,7 @@ protected:
   gPrecision m_precision;
   mutable EfgAlgType m_creator;
   mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
-  mutable gNumber m_epsilon, m_gobitLambda, m_gobitValue, m_liapValue;
+  mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   unsigned int m_id;
 
@@ -88,8 +88,8 @@ public:
   gTriState IsSubgamePerfect(void) const;
   gTriState IsSequential(void) const;
   const gNumber &Epsilon(void) const { return m_epsilon; }
-  const gNumber &GobitLambda(void) const { return m_gobitLambda; }
-  const gNumber &GobitValue(void) const { return m_gobitValue; }
+  const gNumber &QreLambda(void) const { return m_qreLambda; }
+  const gNumber &QreValue(void) const { return m_qreValue; }
   const gNumber &LiapValue(void) const;
   const gDPVector<gNumber> &Beliefs(void) const;
   const gDPVector<gNumber> &Regret(void) const;
@@ -102,8 +102,8 @@ public:
   void SetIsSequential(gTriState p_isSequential)
     { m_isSequential = p_isSequential; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
-  void SetGobit(const gNumber &p_gobitLambda, const gNumber &p_gobitValue)
-    { m_gobitLambda = p_gobitLambda; m_gobitValue = p_gobitValue; }
+  void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
+    { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
   void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
 	 
   // Force the invalidation of cached quantities

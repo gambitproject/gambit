@@ -156,8 +156,8 @@ void EfgShow::SolveStandard(void)
     case EFG_LIAP_SOLUTION:
       solver = new guiEfgSolveLiap(ef, *cur_sup, this);
       break;
-    case EFG_GOBIT_SOLUTION:
-      solver = new EfgEGobitG(ef, *cur_sup, this);
+    case EFG_QRE_SOLUTION:
+      solver = new EfgEQreG(ef, *cur_sup, this);
       break;
     default:
       return;
@@ -183,11 +183,11 @@ void EfgShow::SolveStandard(void)
     case NFG_SIMPDIV_SOLUTION:
       solver = new EfgSimpdivG(ef, *cur_sup, this);
       break;
-    case NFG_GOBIT_SOLUTION:
-      solver = new EfgNGobitG(ef, *cur_sup, this);
+    case NFG_QRE_SOLUTION:
+      solver = new EfgNQreG(ef, *cur_sup, this);
       break;
-    case NFG_GOBITALL_SOLUTION:
-      solver = new EfgGobitAllG(ef, *cur_sup, this);
+    case NFG_QREALL_SOLUTION:
+      solver = new EfgQreAllG(ef, *cur_sup, this);
       break;
     default:
       return;
@@ -252,8 +252,8 @@ void EfgShow::Solve(int p_algorithm)
   case SOLVE_CUSTOM_EFG_LIAP:
     solver = new guiEfgSolveLiap(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_EFG_GOBIT:
-    solver = new EfgEGobitG(ef, *cur_sup, this);
+  case SOLVE_CUSTOM_EFG_QRE:
+    solver = new EfgEQreG(ef, *cur_sup, this);
     break;
 
   case SOLVE_CUSTOM_NFG_ENUMPURE: 
@@ -274,11 +274,11 @@ void EfgShow::Solve(int p_algorithm)
   case SOLVE_CUSTOM_NFG_SIMPDIV:
     solver = new EfgSimpdivG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_GOBIT:
-    solver = new EfgNGobitG(ef, *cur_sup, this);
+  case SOLVE_CUSTOM_NFG_QRE:
+    solver = new EfgNQreG(ef, *cur_sup, this);
     break;
-  case SOLVE_CUSTOM_NFG_GOBITGRID: 
-    solver = new EfgGobitAllG(ef, *cur_sup, this);
+  case SOLVE_CUSTOM_NFG_QREGRID: 
+    solver = new EfgQreAllG(ef, *cur_sup, this);
     break;
   default:
     // internal error, we'll just ignore silently

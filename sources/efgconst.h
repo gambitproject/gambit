@@ -75,15 +75,15 @@
 #define SOLVE_CUSTOM_EFG_LCP                1507
 #define SOLVE_CUSTOM_EFG_LP                 1508
 #define SOLVE_CUSTOM_EFG_LIAP               1509
-#define SOLVE_CUSTOM_EFG_GOBIT              1510
+#define SOLVE_CUSTOM_EFG_QRE              1510
 #define SOLVE_CUSTOM_NFG_ENUMPURE           1511
 #define SOLVE_CUSTOM_NFG_ENUMMIXED          1512
 #define SOLVE_CUSTOM_NFG_LCP                1513
 #define SOLVE_CUSTOM_NFG_LP                 1514
 #define SOLVE_CUSTOM_NFG_LIAP               1515
 #define SOLVE_CUSTOM_NFG_SIMPDIV            1516
-#define SOLVE_CUSTOM_NFG_GOBIT              1517
-#define SOLVE_CUSTOM_NFG_GOBITGRID          1518
+#define SOLVE_CUSTOM_NFG_QRE              1517
+#define SOLVE_CUSTOM_NFG_QREGRID          1518
 
 #define SOLVE_NFG_REDUCED                   1504
 #define SOLVE_NFG_AGENT                     1519
