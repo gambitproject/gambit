@@ -17,8 +17,8 @@ template <class T>
 Basis<T>::Basis(const gMatrix<T> &mat)
 : A(&mat), label( mat.MinRow(), mat.MaxRow() ), 
   cols( mat.MinCol(), mat.MaxCol() ), slacks( mat.MinRow(), mat.MaxRow() ), 
-  arts(), artUnitEntry(),colBlocked(mat.MinCol(), mat.MaxCol() ),
-  rowBlocked( mat.MinRow(), mat.MaxRow() )
+  arts(mat.MaxCol()+1,mat.MaxCol()), artUnitEntry(mat.MaxCol()+1,mat.MaxCol()),
+  colBlocked(mat.MinCol(), mat.MaxCol() ), rowBlocked( mat.MinRow(), mat.MaxRow() )
 {
 
   int i;
@@ -75,19 +75,14 @@ int Basis<T>::Pivot(int outindex, int col)
 {
   int outlabel = label[outindex];
  
-  if ( -col >= label.First() && -col <= label.Last() ) slacks[-col] = outindex;
-  else if ( col >= cols.First() && col <= cols.Last() ) cols[col] = outindex;
-  else if ( col > cols.Last() && col <= cols.Last() + arts.Length() ) 
-    arts[col - cols.Last()] = outindex;
+  if (IsSlackColumn(col)) slacks[-col] = outindex;
+  else if (IsRegColumn(col)) cols[col] = outindex;
+  else if (IsArtifColumn(col)) arts[col] = outindex;
   else assert(0); // not a valid column to pivot in.
   
-  if ( -outlabel >= label.First() && -outlabel <= label.Last() ) 
-    slacks[-outlabel] = 0;
-  else if ( outlabel >= cols.First() && outlabel <= cols.Last() ) 
-    cols[outlabel] = 0;
-  else if ( outlabel > cols.Last() && 
-	   outlabel <= cols.Last() + arts.Length() ) 
-    arts[outlabel - cols.Last()] = 0;
+  if (IsSlackColumn(outlabel)) slacks[-outlabel] = 0;
+  else if (IsRegColumn(outlabel)) cols[outlabel] = 0;
+  else if (IsArtifColumn(outlabel)) arts[outlabel] = 0;
   else assert(0); // not a valid column to pivot in.
   
   label[outindex] = col;
@@ -101,10 +96,9 @@ bool Basis<T>::Member( int col ) const
 {
   int ret;
 
-  if ( -col >= label.First() && -col <= label.Last() ) ret = slacks[-col];
-  else if ( col >= cols.First() && col <= cols.Last() ) ret = cols[col];
-  else if ( col > cols.Last() && col <= cols.Last() + arts.Length() ) 
-    ret = arts[col - cols.Last()];
+  if (IsSlackColumn(col)) ret = slacks[-col];
+  else if (IsRegColumn(col)) ret = cols[col];
+  else if (IsArtifColumn(col)) ret = arts[col];
   else ret = 0;
 
   return (ret != 0);
@@ -116,10 +110,9 @@ int Basis<T>::Find( int col ) const
 {
   int ret;
 
-  if ( -col >= label.First() && -col <= label.Last() ) ret = slacks[-col];
-  else if ( col >= cols.First() && col <= cols.Last() ) ret = cols[col];
-  else if ( col > cols.Last() && col <= cols.Last() + arts.Length() ) 
-    ret = arts[col - cols.Last()];
+  if ( IsSlackColumn(col)) ret = slacks[-col];
+  else if (IsRegColumn(col)) ret = cols[col];
+  else if (IsArtifColumn(col)) ret = arts[col];
   else ret = 0;
   
   assert (ret != 0);
@@ -135,33 +128,27 @@ int Basis<T>::Label(int index) const
 template <class T>
 void Basis<T>::Mark(int col )
 {
-  if ( -col >= label.First() && -col <= label.Last() ) 
-    rowBlocked[-col] = true;
-  else if ( col >= cols.First() && col <= cols.Last() ) 
-    colBlocked[col] = true;
+  if (IsSlackColumn(col)) rowBlocked[-col] = true;
+  else if (IsRegColumn(col)) colBlocked[col] = true;
 }
 
 template <class T>
 void Basis<T>::UnMark(int col )
 {
-  if ( -col >= label.First() && -col <= label.Last() ) 
-    rowBlocked[-col] = false;
-  else if ( col >= cols.First() && col <= cols.Last() ) 
-    colBlocked[col] = false;
+  if (IsSlackColumn(col)) rowBlocked[-col] = false;
+  else if (IsRegColumn(col)) colBlocked[col] = false;
 }
 
 template <class T>
 bool Basis<T>::IsBlocked(int col) const
 {
-  if ( -col >= label.First() && -col <= label.Last() ) 
-    return rowBlocked[-col];
-  else if ( col >= cols.First() && col <= cols.Last() ) 
-    return colBlocked[col];
+  if (IsSlackColumn(col)) return rowBlocked[-col];
+  else if (IsRegColumn(col)) return colBlocked[col];
   return false;
 }
 
 template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
+void Basis<T>::BasisSelect(const gBlock<T> &rowv, gVector<T> &colv) const
 {
   assert(A->CheckColumn(colv) && A->CheckRow(rowv));
 
@@ -174,13 +161,12 @@ void Basis<T>::BasisSelect(const gVector<T> &rowv, gVector<T> &colv) const
 }
 
 template <class T>
-void Basis<T>::BasisSelect(const gVector<T> &unitv,
-			   const gVector<T> &rowv,
+void Basis<T>::BasisSelect(const gBlock<T> &unitv,
+			   const gBlock<T> &rowv,
 			   gVector<T> &colv ) const
 {
-  assert(A->CheckColumn(colv)
-	 && A->CheckColumn(unitv)
-	 && A->CheckRow(rowv) );
+  // assert(A->CheckColumn(colv) && A->CheckColumn(unitv)
+  //	 && A->CheckRow(rowv) );
   
   for(int i=label.First(); i<=label.Last(); i++) {
     if(label[i]<0)
@@ -190,52 +176,41 @@ void Basis<T>::BasisSelect(const gVector<T> &unitv,
   }
 }
 
-template <class T> 
-bool Basis<T>::IsSpecialColumn( int col ) const
-{
-  return ( (-col >= label.First() && -col <= label.Last()) ||
-	  ( col > cols.Last() && col <= cols.Last() + arts.Length()) ); 
-}
- 
 template <class T>
 void Basis<T>::GetColumn( int col, gVector<T> &ret ) const
 {
-  
-  if ( IsSpecialColumn( col ) ) {
-    if ( col < 0 ) {
-      ret = (T) 0;
-      ret[-col] = (T) 1;
-    }
-    else { // its an artificial variable
-      ret = (T) 0;
-      ret[artUnitEntry[col - cols.Last()]] = (T) 1;
-    }
-  }
-  else 
+  if(IsRegColumn(col))
     A->GetColumn(col, ret);
-  
+  else if (IsSlackColumn(col)) {
+    ret = (T) 0;
+    ret[-col] = (T) 1;
+  }
+  else if (IsArtifColumn(col)) {
+    ret = (T) 0;
+    ret[artUnitEntry[col]] = (T) 1;
+  }
 }
 
 
 template <class T>
 void Basis<T>::InsertArtificial( int art, int col )
 {
-  arts.Insert( 0, col - cols.Last() );
-  artUnitEntry.Insert( art, col - cols.Last() );
+  arts.Insert( 0, col);
+  artUnitEntry.Insert( art, col);
 }
 
 template <class T>
 int Basis<T>::AppendArtificial( int art )
 {
   arts.Append(0);
-  return artUnitEntry.Append(art) + cols.Last();
+  return artUnitEntry.Append(art);
 }
 
 template <class T>
 void Basis<T>::RemoveArtificial( int col )
 {
-  arts.Remove(col-cols.Last());
-  artUnitEntry.Remove( col - cols.Last() );
+  arts.Remove(col);
+  artUnitEntry.Remove( col);
 }
 
 template <class T>
@@ -248,7 +223,7 @@ void Basis<T>::FlushArtificial()
 template <class T>
 int Basis<T>::LastArtificial()
 {
-  return ( artUnitEntry.Last() + cols.Last() );
+  return artUnitEntry.Last();
 }
 
 template <class T> 
@@ -270,31 +245,11 @@ void Basis<T>::Dump(gOutput &to) const
 template<class T>
 void Basis<T>::CheckBasis() 
 {
-  int i;
   bool check = true;
 
-  for ( i =label.First(); i <= label.Last() && check != false; 
-       i++){
-    check = check && ( label[i] == -i  || ( label[i] == i + cols.Last() ));
-  }
-
-//  if ( !check ) {
-//    check = true;
-//    for ( i = label.First(); i <= label.Last() && check != false; i++ ) {
-//      if (basis[i] > 0) {
-//	for ( j = (*A).MinRow(); j <= (*A).MaxRow() && check != false; j++ ) {
-//	  if ( i == j ) {
-//	    check = check && ( (*A)(j,label[i])  == (T) 1 );
-//	  }
-//	  else {
-//	    check = check && ( (*A)(j,label[i])  == (T) 0 );
-//	  }
-//	}
-//      }
-//      else if (label[i] != -i ) check = false;
-//    }
-//  }
-
+  for (int i =label.First(); i <= label.Last() && check; i++)
+    if(label[i] != -i) check = false;
+  
   IsBasisIdent = check;
 }
 
@@ -303,5 +258,3 @@ bool Basis<T>::IsIdent()
 {
   return IsBasisIdent;
 }
-
-

@@ -33,6 +33,18 @@ protected:
   gArray<bool> rowBlocked;
   bool IsBasisIdent;
 
+  // returns true if the column is slack
+  inline bool IsSlackColumn( int col ) const 
+    {return  -col >= label.First() && -col <= label.Last();} 
+  
+  // returns true if the column is artificial
+  inline bool IsArtifColumn( int col ) const
+    {return col > cols.Last() && col <= cols.Last() + arts.Length();} 
+
+  // returns true if the column is a regular column
+  inline bool IsRegColumn( int col ) const
+    {return col >= cols.First() && col <= cols.Last();} 
+  
 public:
 
   //-------------------------------------------
@@ -71,11 +83,11 @@ public:
   bool IsBlocked(int label) const;
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gVector<T>&rowv, gVector<T> &colv) const;
+  void BasisSelect(const gBlock<T>&rowv, gVector<T> &colv) const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const gVector<T>&unitv,
-		   const gVector<T>&rowv,
+  void BasisSelect(const gBlock<T>&unitv,
+		   const gBlock<T>&rowv,
 		   gVector<T>&colv
 		   ) const; 
   
@@ -83,9 +95,6 @@ public:
   // returns whether the basis is the identity matrix
   bool IsIdent();
 
-  // returns true if the column is special in some way
-  bool IsSpecialColumn( int col ) const; 
-  
   // returns a column from the matrix  
   void GetColumn( int col, gVector<T> & ) const;
   
@@ -117,3 +126,4 @@ public:
 };
 
 #endif // BASIS_H
+

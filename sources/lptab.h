@@ -13,8 +13,8 @@
 template <class T> class LPTableau : public Tableau<T> {
 private:
   gVector<T> dual;
-  gVector<T> unitcost;
-  gVector<T> cost;
+  gBlock<T> unitcost;
+  gBlock<T> cost;
   gBlock<bool> UB,LB;  // does col have upper/lower bound?
   gBlock<T> ub,lb;   // upper/lower bound
   

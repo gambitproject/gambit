@@ -34,16 +34,16 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
     well_formed = 0;
     return;
   }
-   // gout << "\n--- Begin LPSolve ---\n";
+  //$ gout << "\n--- Begin LPSolve ---\n";
   
   // initialize data
   int i,j,num_inequals,xlab,num_artific;
   
   num_inequals = A.NumRows() - nequals;
-   // gout << "\nnvars = " << nvars;
-   // gout << " neqns = " << neqns;
-   // gout << " Num inequalities = " << num_inequals;
-   // gout << " Num equalities = " << nequals;
+  //$ gout << "\nnvars = " << nvars;
+  //$ gout << " neqns = " << neqns;
+  //$ gout << " Num inequalities = " << num_inequals;
+  //$ gout << " Num equalities = " << nequals;
   
   num_artific=0;
   for(i=b.First();i<=b.Last();i++)
@@ -51,10 +51,10 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   nvars+=num_artific;
   status.SetProgress(0.0);
   
-   // gout << "\n--- Begin Phase I ---\n";
+  //$ gout << "\n--- Begin Phase I ---\n";
   
-   // gout << "\n nartific = " << num_artific;
-   // gout << " nvars = " << nvars << "\n";
+  //$ gout << "\n nartific = " << num_artific;
+  //$ gout << " nvars = " << nvars << "\n";
   
   UB = new gArray<bool>(nvars+neqns);
   LB = new gArray<bool>(nvars+neqns);
@@ -63,11 +63,9 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   xx = new gVector<T>(nvars+neqns);
   cost = new gVector<T>(nvars+neqns);
 
-  // index=1;
   for(j=b.First();j<=b.Last();j++)  // install artificial variables for b[j]<0
     if(b[j] < (T)0) {
       tab.AppendArtificial(j);
-      // index++;
     }
   for(j=(*UB).First();j<=(*UB).Last();j++) {
     (*UB)[j] = false; (*LB)[j] = false;
@@ -97,26 +95,27 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
       if(i > num_inequals) (*cost)[nvars+i] = -(T)1;
   }
   
-   // gout << "\nUB = " <<  *UB << " " << "\nLB = " << *LB;
-   // gout << "\nub = " <<  *ub << " " << "\nlb = " << *lb;
-   // gout << "\ncost = " <<  (*cost);
+  //$ gout << "\nUB = " <<  *UB << " " << "\nLB = " << *LB;
+  
+  //$ gout << "\nub = " <<  *ub << " " << "\nlb = " << *lb;
+  //$ gout << "\ncost = " <<  (*cost);
   
   
   // Initialize the tableau
   
-   // gout << "\nA: ";
-   // A.Dump(gout);
-   // gout << "b: ";
-   // b.Dump(gout);
-   // gout << "\ncost: ";
-   // (*cost).Dump(gout);
+  //$ gout << "\nA: ";
+  //$ A.Dump(gout);
+  //$ gout << "b: ";
+  //$ b.Dump(gout);
+  //$ gout << "\ncost: ";
+  //$ (*cost).Dump(gout);
   
   tab.SetCost((*cost));
   
    // gout << "\nInitial Tableau = \n";
    // tab.Dump(gout);
   
-  
+  // set xx to be initial feasible solution to phase II  
   for(i=1;i<=(*xx).Length();i++) {
     if((*LB)[i]) (*xx)[i]=(*lb)[i];
     else if((*UB)[i]) (*xx)[i]=(*ub)[i];
@@ -128,34 +127,35 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
     if(xlab<0) xlab=nvars-xlab;
     (*xx)[xlab]=x[i];
   }
-   // gout << "\nxx: " << (*xx);
+  //$ gout << "\nxx: " << (*xx);
+
   
   Solve(1);
   
-   // gout << "\nFinal tableau: ";
-   // tab.Dump(gout); 
+  //$ gout << "\nFinal tableau: ";
+  //$ tab.Dump(gout); 
   total_cost = tab.TotalCost();
-   // gout << ", cost: " << total_cost;
+  //$ gout << ", cost: " << total_cost;
 
-   // gout << "\n--- End Phase I ---\n";
+  //$ gout << "\n--- End Phase I ---\n";
   
   if(!bounded) {
-      // gout << "\nPhase 1 Unbounded\n";
+    //$ gout << "\nPhase 1 Unbounded\n";
   }
   assert(bounded);
   
   // which eps should be used here?  
   if(total_cost < -eps1) {   
     feasible = 0;
-     // gout << "\nProblem Infeasible\n\n";
+    //$ gout << "\nProblem Infeasible\n\n";
     return;
   }
   
-   // gout << "\n--- Begin Phase II ---\n";
+  //$ gout << "\n--- Begin Phase II ---\n";
 
 // Define Phase II upper and lower bounds for slack variables
   
-   // gout << "\nxx: " << (*xx);
+  //$ gout << "\nxx: " << (*xx);
 
   for(i=num_inequals+1;i<=neqns;i++) 
     (*UB)[nvars+i] = true;
@@ -170,28 +170,28 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   for(i=c.Last()+1;i<=nvars+neqns;i++)
     (*cost)[i] = (T)0;
   
-   // gout << "\nUB = " <<  *UB << " " << " LB = " << *LB;
-   // gout << "\nub = " <<  *ub << " " << " lb = " << *lb;
-   // gout << "\nc = " <<  (*cost);
+  //$ gout << "\nUB = " <<  *UB << " " << " LB = " << *LB;
+  //$ gout << "\nub = " <<  *ub << " " << " lb = " << *lb;
+  //$ gout << "\nc = " <<  (*cost);
   
   tab.SetCost((*cost));
   
-   // gout << "\nInitial basis: ";
-   // tab.Dump(gout);   gout << '\n';
+  //$ gout << "\nInitial basis: ";
+  //$ tab.Dump(gout);   gout << '\n';
   
   Solve(2);
   
-   // gout << "\n--- End Phase II ---\n";
+  //$ gout << "\n--- End Phase II ---\n";
 
   if(!bounded) {
-     // gout << "\nPhase II Unbounded\n";
+    //$ gout << "\nPhase II Unbounded\n";
   }
-   // gout << "\nFinal basis: ";
-   // tab.Dump(gout);   gout << '\n';
+  //$ gout << "\nFinal basis: ";
+  //$ tab.Dump(gout);   gout << '\n';
   total_cost = tab.TotalCost();
-   // gout << "\ncost: " << total_cost;
+  //$ gout << "\ncost: " << total_cost;
   tab.DualVector(y);
-//  gout << "DualVector = " << y << "\n";
+  // gout << "DualVector = " << y << "\n";
   opt_bfs = tab.GetBFS();
 //   gout << "\nopt_bfs:\n";
 //  opt_bfs.Dump(gout);
@@ -202,7 +202,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
     if(dual_bfs.IsDefined(-i))
       opt_bfs.Define(-i,dual_bfs(-i));
 
-   // gout << "\n--- End LPSolve ---\n";
+  //$ gout << "\n--- End LPSolve ---\n";
 }
 
 //template <class T> LPSolve<T>::

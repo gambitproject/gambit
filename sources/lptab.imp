@@ -50,10 +50,9 @@ template <class T>
 void LPTableau<T>::SetCost(const gVector<T>& c)
 {
   int i;
-  if(cost.Check(c)) {
-    unitcost= (T)0;
-    cost= c;
-    //** added for gRational
+  if(cost.First()==c.First() && cost.Last()==c.Last()) {
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i];
+    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (T)0;
     Refactor();
     SolveDual();
     return;
@@ -75,9 +74,11 @@ void LPTableau<T>::SetCost(const gVector<T>& c)
 template <class T>
 void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 {
-  assert(unitcost.Check(uc) && cost.Check(c));
-  unitcost= uc;
-  cost= c;
+  assert(cost.First()==c.First() && cost.Last()==c.Last());
+  assert(unitcost.First()==uc.First() && unitcost.Last()==uc.Last());
+  int i;
+  for(i=cost.First();i<=cost.Last();i++) cost[i]=c[i];
+  for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i]=uc[i];
   SolveDual();
 }
 
@@ -85,14 +86,20 @@ void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 template <class T>
 gVector<T> LPTableau<T>::GetCost(void) const
 {
-  return cost; 
+  gVector<T> x(cost.First(),cost.Last());
+  for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
+  return x;
+  //  return cost; 
 }
 
 
 template <class T>
 gVector<T> LPTableau<T>::GetUnitCost(void) const
 {
-  return unitcost; 
+  gVector<T> x(unitcost.First(),unitcost.Last());
+  for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
+  return x;
+  //  return unitcost; 
 }
 
 
@@ -595,6 +602,7 @@ void LPTableau<T>::InsertArtificial( int art, int col )
 template <class T>
 int LPTableau<T>::AppendArtificial( int art )
 {
+  cost.Append(0);
   return basis.AppendArtificial( art );
 }
 
