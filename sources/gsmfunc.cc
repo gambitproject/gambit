@@ -847,7 +847,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	}
 	else
 	{
-	  if( _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	  if( _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference &&
+	     _RunTimeParamInfo[ index ].Ref != 0 )
 	    params_matched++;
 	}
 
