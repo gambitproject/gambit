@@ -471,30 +471,40 @@ Bool dialogActionSelect::OnClose(void)
 //                   dialogActionProbs: Member functions
 //=========================================================================
 
-dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
-    m_lastSelection(0), m_actionProbs(p_infoset->NumActions())
-{
-  SetLabelPosition(wxVERTICAL);
-  m_actionList = new wxListBox(this, (wxFunction) CallbackAction, "Actions");
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    m_actionList->Append(ToText(act) + ": " +
-			 p_infoset->Actions()[act]->GetName());
-    m_actionProbs[act] = p_infoset->Game()->GetChanceProb(p_infoset, act);
-  }
-  m_actionList->wxEvtHandler::SetClientData((char *) this);
-  m_actionList->SetSelection(0);
+int dialogActionProbs::s_actionsPerDialog = 8;
 
-  m_actionProb = new wxText(this, 0, "Probability");
-  m_actionProb->SetValue(ToText(m_actionProbs[1]));
-  
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Action Probabilities", TRUE), m_infoset(p_infoset),
+    m_pageNumber(0), m_actionProbs(p_infoset->NumActions())
+{
+  for (int act = 1; act <= m_infoset->NumActions(); act++)
+    m_actionProbs[act] = 
+      m_infoset->Game()->GetChanceProb(m_infoset->Actions()[act]);
+
+  m_probItems = new wxNumberItem *[gmin(m_infoset->NumActions(),
+					s_actionsPerDialog)];
+  for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
+       act++) {
+    m_probItems[act-1] = new wxNumberItem(this, ToText(act) + "  ", 
+					  m_actionProbs[act]);
+    NewLine();
+  }
+
+  if (m_infoset->NumActions() >= s_actionsPerDialog) {
+    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
+					"<< Back");
+    m_backButton->SetClientData((char *) this);
+    m_backButton->Enable(FALSE);
+    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
+					"Next >>");
+    m_nextButton->SetClientData((char *) this);
+  }
+
+  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  m_okButton->SetClientData((char *) this);
+  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_cancelButton->SetClientData((char *) this);
 
   Fit();
   Show(TRUE);
@@ -503,7 +513,11 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
 void dialogActionProbs::OnOK(void)
 {
   m_completed = wxOK;
-  m_actionProbs[m_actionList->GetSelection() + 1] = ToNumber(m_actionProb->GetValue());
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
+		  m_infoset->NumActions()); act++, entry++)
+    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
   Show(FALSE);
 }
 
@@ -520,13 +534,65 @@ Bool dialogActionProbs::OnClose(void)
   return FALSE;
 }
 
-void dialogActionProbs::OnAction(int p_action)
+void dialogActionProbs::OnBack(void)
 {
-  if (p_action == m_lastSelection)  return;
-  m_actionList->SetSelection(p_action);
-  m_actionProbs[m_lastSelection + 1] = ToNumber(m_actionProb->GetValue());
-  m_actionProb->SetValue(ToText(m_actionProbs[p_action + 1]));
-  m_lastSelection = p_action;
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
+		  m_infoset->NumActions()); act++, entry++)
+    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
+
+  m_pageNumber--;
+  entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
+    m_probItems[entry]->Show(FALSE);
+    m_probItems[entry]->SetNumber(m_actionProbs[act + 1]);
+    m_probItems[entry]->SetValue(ToText(m_actionProbs[act + 1]));
+    m_probItems[entry]->SetLabel(ToText(act + 1));
+  }
+  m_backButton->Show(FALSE);
+  m_nextButton->Show(FALSE);
+  m_okButton->Show(FALSE);
+  m_cancelButton->Show(FALSE);
+  
+  // This gyration ensures the tabbing order remains the same
+  m_cancelButton->Show(TRUE);
+  m_okButton->Show(TRUE);
+  m_nextButton->Show(TRUE);
+  m_backButton->Show(TRUE);
+  for (entry = s_actionsPerDialog - 1; entry >= 0; entry--)
+    m_probItems[entry]->Show(TRUE);
+  
+  m_probItems[0]->SetFocus();
+  m_backButton->Enable(m_pageNumber > 0);
+  m_nextButton->Enable(TRUE);
+}
+
+void dialogActionProbs::OnNext(void)
+{
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++)
+    m_actionProbs[act + 1] = m_probItems[entry]->GetNumber();
+
+  m_pageNumber++;
+  entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
+    if (act < m_infoset->NumActions()) {
+      m_probItems[entry]->SetNumber(m_actionProbs[act + 1]);
+      m_probItems[entry]->SetValue(ToText(m_actionProbs[act + 1]));
+      m_probItems[entry]->SetLabel(ToText(act + 1));
+    }
+    else
+      m_probItems[entry]->Show(FALSE);
+  }
+
+  m_probItems[0]->SetFocus();
+  m_backButton->Enable(TRUE);
+  m_nextButton->Enable((m_pageNumber + 1) * s_actionsPerDialog <=
+		       m_infoset->NumActions());
 }
 
 //=========================================================================

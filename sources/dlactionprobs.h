@@ -1,7 +1,7 @@
 //
 // FILE: dlactionprobs.h -- Dialog for Edit->Action->Probabilities
 //
-//
+// $Id$
 //
 
 #ifndef DLACTIONPROBS_H
@@ -10,23 +10,27 @@
 class dialogActionProbs : public wxDialogBox {
 private:
   Infoset *m_infoset;
-  int m_completed, m_lastSelection;
+  int m_completed, m_pageNumber;
+  static int s_actionsPerDialog;
+  wxNumberItem **m_probItems;
   gArray<gNumber> m_actionProbs;
-  wxListBox *m_actionList;
-  wxText *m_actionProb;
+  wxButton *m_okButton, *m_cancelButton, *m_backButton, *m_nextButton;
 
+  static void CallbackNext(wxButton &p_object, wxEvent &)
+    { ((dialogActionProbs *) p_object.GetClientData())->OnNext(); }
+  static void CallbackBack(wxButton &p_object, wxEvent &)
+    { ((dialogActionProbs *) p_object.GetClientData())->OnBack(); }
   static void CallbackOK(wxButton &p_object, wxEvent &)
     { ((dialogActionProbs *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogActionProbs *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackAction(wxListBox &p_object, wxCommandEvent &p_event)
-    { ((dialogActionProbs *) p_object.wxEvtHandler::GetClientData())->
-	OnAction(p_event.commandInt); }
 
   void OnOK(void);
   void OnCancel(void);
-  void OnAction(int);
   Bool OnClose(void);
+
+  void OnNext(void);
+  void OnBack(void);
 
 public:
   dialogActionProbs(Infoset *, wxWindow *);
