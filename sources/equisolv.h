@@ -10,6 +10,27 @@
 #include "quiksolv.h"
 #include "gsmpltpe.h"
 
+/* 
+
+   The solver in this class is intended to be a general stationary
+point solver, meaning that there is assumed to be some sort of
+complementarity relation between the facets of the product of polytopes
+and the equality conditions that define equilibrium.  In particular,
+it is intended that there be some form of descent to problems on the
+boundary.
+   At this point I see the following agenda:
+
+1.  Figuring out how this actually works for the sequence form.
+
+2.  Little fix to get compiling.  DONE
+
+3.  Figure out how far along the rest of it is.
+
+THIS IS BEING ABANDONED.  NOT MUCH PROGRESS HAS BEEN MADE, AND IT
+SEEMS LIKE THE WRONG WAY TO PROCEED  (3.24.98)
+
+*/
+
 
 // ***********************
 //      class EquiSolv

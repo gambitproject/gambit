@@ -106,6 +106,9 @@ EquiSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r,
 {
   gVector<gDouble> center = r.Center();
 
+  //DEBUG
+  gout << "The index is now " << index << ".\n";
+
   gDouble constant = 
     TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
   if (constant < (gDouble)0) constant = - constant;
@@ -212,7 +215,8 @@ bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
   gVector<gDouble> zero(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) zero[i] = (gDouble)0;
 
-  gVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point);
+  gVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
+							     System.Length());
 
   if ( oldevals == zero ) 
     if (r.Contains(point)) return true;
@@ -228,7 +232,8 @@ bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     if ( !bigr.Contains(point + Del) ) return false;
     point += Del;
 
-    gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point);
+    gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point,
+							     System.Length());
 
     if (newevals * newevals > oldevals * oldevals) return false;
     if ( newevals == zero )
