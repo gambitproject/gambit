@@ -569,6 +569,10 @@ void gbtGameFrame::OnViewNfg(wxCommandEvent &)
     return;
   }
 
+  // TODO: Generate reduced strategies in another thread that can be
+  // stopped, in case user tries to generate them for a game that's
+  // just way too big.
+
   // At this point, we know that there must be a tree view to hide
   GetSizer()->Show(m_treeDisplay, false);
   if (m_doc->GetGame()->NumPlayers() == 2) {

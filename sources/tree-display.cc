@@ -70,6 +70,48 @@ void gbtTreeLayout::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node) const
 		  m_ycoords[p_node->GetChild(i)->GetId()]);
     p_dc.DrawLine(point.x, point.y, child.x, child.y);
     DrawSubtree(p_dc, p_node->GetChild(i));
+
+    // The "centerpoint" of the branch
+    int xbar = (point.x + child.x) / 2;
+    int ybar = (point.y + child.y) / 2;
+
+    int textWidth, textHeight;
+    p_dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxNORMAL));
+    p_dc.SetTextForeground(color);
+
+    // Draw the label above the branch
+    wxString label = wxString::Format(wxT("%s"),
+				      p_node->GetInfoset()->GetAction(i)->GetLabel().c_str());
+    p_dc.GetTextExtent(label, &textWidth, &textHeight);
+    
+    if (point.y >= child.y) {
+      p_dc.DrawText(label, xbar - textWidth / 2, 
+		    ybar - textHeight + 
+		    textWidth / 2 * (child.y - point.y) / (child.x - point.x));
+    }
+    else {
+      p_dc.DrawText(label, xbar - textWidth / 2, 
+		    ybar - textHeight - 
+		    textWidth / 2 * (child.y - point.y) / (child.x - point.x));
+    }
+
+    // Draw the label below the branch
+    if (!p_node->GetInfoset()->GetPlayer()->IsChance()) {
+      continue;
+    }
+
+    label = wxString::Format(wxT("%s"),
+			     ToText(p_node->GetInfoset()->GetAction(i)->GetChanceProb()).c_str());
+    p_dc.GetTextExtent(label, &textWidth, &textHeight);
+    
+    if (point.y >= child.y) {
+      p_dc.DrawText(label, xbar - textWidth / 2,
+		    ybar - textWidth/2 * (child.y - point.y) / (child.x - point.x));
+    }
+    else {
+      p_dc.DrawText(label, xbar - textWidth / 2,
+		    ybar + textWidth/2 * (child.y - point.y) / (child.x - point.x));
+    }
   }
 
   if (p_node->NumChildren() > 0 && p_node->GetMemberId() > 1) {
