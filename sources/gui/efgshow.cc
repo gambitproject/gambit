@@ -196,8 +196,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 
   m_treeWindow = new TreeWindow(m_doc, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
-  m_treeWindow->RefreshTree();
-  m_treeWindow->RefreshLayout();
 
   m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
@@ -207,7 +205,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
 
   m_outcomeWindow = new EfgOutcomeWindow(m_doc, m_infoNotebook);
-  m_outcomeWindow->UpdateValues();
   m_navigateWindow->SetSize(200, 200);
   m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
@@ -237,7 +234,6 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   // Force this at end to make sure item is unchecked; under MSW,
   // the ordering of events in creating the window leaves this checked
   GetMenuBar()->Check(GBT_EFG_MENU_VIEW_NAVIGATION, false);
-  UpdateMenus();
 }
 
 EfgShow::~EfgShow()
@@ -246,42 +242,45 @@ EfgShow::~EfgShow()
 }
 
 //---------------------------------------------------------------------
-//               EfgShow: Manipulation of profile list
-//---------------------------------------------------------------------
-
-void EfgShow::OnChangeProfile(void)
-{
-  m_treeWindow->RefreshLabels();
-  if (m_navigateWindow) {
-    m_navigateWindow->Set(m_doc->GetCursor());
-  }
-  if (m_profileTable) {
-    m_profileTable->UpdateValues();
-  }
-}
-
-//---------------------------------------------------------------------
 //            EfgShow: Coordinating updates of child windows
 //---------------------------------------------------------------------
 
-void EfgShow::OnProfilesEdited(void)
+void EfgShow::OnUpdate(gbtGameView *)
 {
-  m_profileTable->UpdateValues();
-  UpdateMenus();
-}
+  gbtEfgNode cursor = m_doc->GetCursor();
+  wxMenuBar *menuBar = GetMenuBar();
 
-void EfgShow::OnOutcomesEdited(void)
-{
-  m_treeWindow->RefreshLabels();
-  m_treeWindow->Refresh();
-  m_outcomeWindow->UpdateValues();
-  m_profileTable->UpdateValues();
-}
+  menuBar->Enable(wxID_COPY, !cursor.IsNull());
+  menuBar->Enable(wxID_CUT, !cursor.IsNull());
+  menuBar->Enable(wxID_PASTE, (!m_doc->GetCutNode().IsNull() || 
+			       !m_doc->GetCopyNode().IsNull()));
 
-void EfgShow::OnSupportsEdited(void)
-{
-  m_treeWindow->SupportChanged();
-  m_supportWindow->UpdateValues();
+  menuBar->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
+  menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
+  menuBar->Enable(GBT_EFG_MENU_EDIT_REVEAL, 
+		  !cursor.GetInfoset().IsNull());
+
+  menuBar->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor) &&
+		   !cursor.GetParent().IsNull()));
+  menuBar->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
+  menuBar->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
+		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
+  menuBar->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
+		     m_doc->m_efg->IsLegalSubgame(cursor) &&
+		     cursor.GetSubgameRoot() == cursor) ?
+		    "Unmark &subgame" : "Mark &subgame");
+
+  menuBar->Enable(GBT_EFG_MENU_EDIT_NODE, !cursor.IsNull());
+  menuBar->Enable(GBT_EFG_MENU_EDIT_MOVE,
+		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
+
+  if (m_treeWindow) {
+    menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
+		   m_treeWindow->DrawSettings().RootReachable());
+  }
 }
 
 void EfgShow::SetFilename(const wxString &p_name)
@@ -301,40 +300,8 @@ void EfgShow::SetSupportNumber(int p_number)
 {
   if (p_number >= 1 && p_number <= m_doc->m_efgSupports.Length()) {
     m_doc->m_curEfgSupport = m_doc->m_efgSupports[p_number];
-    OnSupportsEdited();
+    m_doc->UpdateViews(this, true, false);
   }
-}
-
-int EfgShow::NumDecimals(void) const
-{
-  return m_treeWindow->DrawSettings().NumDecimals();
-}
-
-void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
-{
-  if (p_infosetsChanged) {
-    while (m_doc->m_efgSupports.Length()) { 
-      delete m_doc->m_efgSupports.Remove(1);
-    }
-
-    m_doc->m_curEfgSupport = new EFSupport(*m_doc->m_efg);
-    m_doc->m_efgSupports.Append(m_doc->m_curEfgSupport);
-    m_doc->m_curEfgSupport->SetName("Full Support");
-    OnSupportsEdited();
-  }
-
-  if (p_infosetsChanged || p_nodesChanged) {
-    // It would be nice to relax this, but be conservative for now
-    m_doc->m_copyNode = 0;
-    if (!m_doc->GetCutNode().IsNull()) {
-      m_treeWindow->SetCutNode(m_doc->m_cutNode, false);
-      m_doc->m_cutNode = 0;
-    }
-    m_treeWindow->RefreshTree();
-    m_treeWindow->Refresh();
-  }
-  
-  UpdateMenus();
 }
 
 void EfgShow::SetCursor(gbtEfgNode p_node)
@@ -346,7 +313,7 @@ void EfgShow::SetCursor(gbtEfgNode p_node)
     m_navigateWindow->Set(p_node);
   }
   m_doc->m_cursor = p_node;
-  UpdateMenus();
+  m_doc->UpdateViews(this, true, false);
 }
 
 
@@ -496,46 +463,6 @@ void EfgShow::MakeMenus(void)
 
   // Set the menu bar
   SetMenuBar(menuBar);
-}
-
-void EfgShow::UpdateMenus(void)
-{
-  gbtEfgNode cursor = m_doc->GetCursor();
-  wxMenuBar *menuBar = GetMenuBar();
-
-  menuBar->Enable(wxID_COPY, !cursor.IsNull());
-  menuBar->Enable(wxID_CUT, !cursor.IsNull());
-  menuBar->Enable(wxID_PASTE, (!m_doc->GetCutNode().IsNull() || 
-			       !m_doc->GetCopyNode().IsNull()));
-
-  menuBar->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
-  menuBar->Enable(GBT_EFG_MENU_EDIT_DELETE, cursor.NumChildren() > 0);
-  menuBar->Enable(GBT_EFG_MENU_EDIT_REVEAL, 
-		  !cursor.GetInfoset().IsNull());
-
-  menuBar->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor) &&
-		   !cursor.GetParent().IsNull()));
-  menuBar->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
-  menuBar->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && m_doc->m_efg->IsLegalSubgame(cursor)));
-  menuBar->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		    (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-		     m_doc->m_efg->IsLegalSubgame(cursor) &&
-		     cursor.GetSubgameRoot() == cursor) ?
-		    "Unmark &subgame" : "Mark &subgame");
-
-  menuBar->Enable(GBT_EFG_MENU_EDIT_NODE, !cursor.IsNull());
-  menuBar->Enable(GBT_EFG_MENU_EDIT_MOVE,
-		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
-
-  if (m_treeWindow) {
-    menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
-		   m_treeWindow->DrawSettings().RootReachable());
-  }
-
-  m_treeWindow->UpdateMenus();
 }
 
 #include "bitmaps/new.xpm"
@@ -852,7 +779,7 @@ void EfgShow::OnEditPaste(wxCommandEvent &)
     else {
       m_doc->m_efg->MoveTree(m_doc->GetCutNode(), m_doc->GetCursor());
     }
-    OnTreeChanged(true, true);
+    m_doc->UpdateViews(this, true, false);
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -868,11 +795,11 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
       if (dialog.GetInfoset().IsNull()) {
 	gbtEfgInfoset infoset = dialog.GetPlayer().NewInfoset(dialog.GetActions());
 	m_doc->GetCursor().InsertMove(infoset);
-	OnTreeChanged(true, true);
+	m_doc->OnTreeChanged(true, true);
       }
       else {
 	m_doc->GetCursor().InsertMove(dialog.GetInfoset());
-	OnTreeChanged(true, false);
+	m_doc->OnTreeChanged(true, false);
       }
     }
     catch (gException &ex) {
@@ -896,7 +823,7 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
 								 keep));
       }
       m_doc->m_efg->DeleteEmptyInfosets();
-      OnTreeChanged(true, true);
+      m_doc->OnTreeChanged(true, true);
     }
   }
   catch (gException &ex) {
@@ -916,7 +843,7 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
 			       m_doc->m_efg->GetPlayer(pl));
 	}
       }
-      OnTreeChanged(true, true);
+      m_doc->OnTreeChanged(true, true);
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -988,11 +915,9 @@ void EfgShow::OnEditNode(wxCommandEvent &)
       else {
 	m_doc->m_efg->JoinInfoset(dialog.GetInfoset(), m_doc->GetCursor());
       }
-      OnTreeChanged(true, true);
+      m_doc->OnTreeChanged(true, true);
     }
-    m_treeWindow->RefreshTree();
-    m_treeWindow->Refresh();
-    UpdateMenus();
+    m_doc->UpdateViews(this, true, false);
   }
 }
 
@@ -1047,9 +972,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 	}
       }
     }
-    OnTreeChanged(true, true);
-    m_treeWindow->Refresh();
-    UpdateMenus();
+    m_doc->OnTreeChanged(true, true);
   }
 }
 
@@ -1068,9 +991,7 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 	m_doc->m_efg->GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
       }
     }
-    m_outcomeWindow->UpdateValues();
-    m_supportWindow->UpdateValues();
-    m_treeWindow->RefreshLabels();
+    m_doc->UpdateViews(this, true, false);
   }
 }
 
@@ -1290,7 +1211,7 @@ void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
 						  dialog.GetPlayerColor(pl));
     }
     m_treeWindow->DrawSettings().SaveOptions();
-    m_treeWindow->RefreshTree();
+    m_doc->UpdateViews(this, true, false);
   }
 }
 
@@ -1350,8 +1271,7 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
     
     if (*m_doc->m_curEfgSupport != support) {
       m_doc->m_curEfgSupport = m_doc->m_efgSupports[m_doc->m_efgSupports.Length()]; 
-      OnSupportsEdited();
-      UpdateMenus();
+      m_doc->UpdateViews(this, true, false);
     }
   }
 }
@@ -1387,8 +1307,6 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 	GetMenuBar()->Check(GBT_EFG_MENU_VIEW_PROFILES, true);
 	AdjustSizes();
       }
-      
-      UpdateMenus();
     }
     catch (gException &ex) {
       wxMessageDialog msgDialog(this, (char *) ex.Description(),
@@ -1504,14 +1422,14 @@ void EfgShow::OnSupportDuplicate(wxCommandEvent &)
   newSupport->SetName(m_doc->UniqueEfgSupportName());
   m_doc->m_efgSupports.Append(newSupport);
   m_doc->m_curEfgSupport = newSupport;
-  OnSupportsEdited();
+  m_doc->UpdateViews(this, true, false);
 }
 
 void EfgShow::OnSupportDelete(wxCommandEvent &)
 {
   delete m_doc->m_efgSupports.Remove(m_doc->m_efgSupports.Find(m_doc->m_curEfgSupport));
   m_doc->m_curEfgSupport = m_doc->m_efgSupports[1];
-  OnSupportsEdited();
+  m_doc->UpdateViews(this, true, false);
 }
 
 //----------------------------------------------------------------------

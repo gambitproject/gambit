@@ -147,18 +147,11 @@ public:
   EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgShow();
 
-  // PROFILE ACCESS AND MANIPULATION
-  void OnProfilesEdited(void);
-  void OnChangeProfile(void);
+  // OVERRIDING DOCUMENT MEMBERS
+  void OnUpdate(gbtGameView *);
 
   // SUPPORT ACCESS AND MANIPULATION
   void SetSupportNumber(int p_number);
-  void OnSupportsEdited(void);
-
-  void UpdateMenus(void);
-  int NumDecimals(void) const;
-
-  void OnOutcomesEdited(void);
 
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
@@ -166,7 +159,6 @@ public:
   void SetCursor(gbtEfgNode m_node);
 
   void OnEditNode(wxCommandEvent &);
-  void OnTreeChanged(bool, bool);
 
   DECLARE_EVENT_TABLE()
 };

@@ -203,11 +203,39 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 //                   TreeWindow: Drawing functions
 //---------------------------------------------------------------------
 
-void TreeWindow::RefreshTree(void)
+void TreeWindow::OnUpdate(gbtGameView *)
 {
   m_layout.BuildNodeList(*m_doc->GetEfgSupport());
   m_layout.Layout(*m_doc->GetEfgSupport());
   AdjustScrollbarSteps();
+
+  gbtEfgNode cursor = m_doc->GetCursor();
+
+  m_nodeMenu->Enable(wxID_COPY, !cursor.IsNull());
+  m_nodeMenu->Enable(wxID_CUT, !cursor.IsNull());
+  m_nodeMenu->Enable(wxID_PASTE, (!m_doc->GetCopyNode().IsNull() || 
+				  !m_doc->GetCutNode().IsNull()));
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_REVEAL,
+		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MOVE, 
+		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
+
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor) &&
+		      !cursor.GetParent().IsNull()));
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor)));
+  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
+		     (!cursor.IsNull() && 
+		      m_doc->GetEfg().IsLegalSubgame(cursor)));
+  m_nodeMenu->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
+		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
+			m_doc->GetEfg().IsLegalSubgame(cursor) &&
+			cursor.GetSubgameRoot() == cursor) ?
+		       "Unmark subgame" : "Mark subgame");
 }
 
 void TreeWindow::RefreshLayout(void)
@@ -448,15 +476,17 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
       try {
 	if (m_dragMode == dragCOPY) {
 	  m_doc->GetEfg().CopyTree(m_dragSource, node);
-	  m_doc->m_efgShow->OnTreeChanged(true, false);
+	  m_doc->OnTreeChanged(true, false);
+	  m_doc->UpdateViews(this, true, false);
 	}
 	else if (m_dragMode == dragMOVE) {
 	  m_doc->GetEfg().MoveTree(m_dragSource, node);
-	  m_doc->m_efgShow->OnTreeChanged(true, false);
-	  RefreshTree();
+	  m_doc->OnTreeChanged(true, false);
+	  m_doc->UpdateViews(this, true, false);
 	}
 	else if (m_dragMode == dragOUTCOME) { 
 	  node.SetOutcome(m_dragSource.GetOutcome());
+	  m_doc->UpdateViews(this, true, false);
 	}
       }
       catch (gException &ex) {
@@ -534,52 +564,12 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
   }
 }
 
-void TreeWindow::SupportChanged(void)
-{
-  if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-    m_doc->m_efgShow->SetCursor(0);
-  }
-  RefreshTree();
-  Refresh();
-}
-
 void TreeWindow::SetCursorPosition(gbtEfgNode p_cursor)
 {
   if (!m_doc->GetCursor().IsNull()) {
     m_layout.GetNodeEntry(m_doc->GetCursor())->SetCursor(false);
     m_layout.GetNodeEntry(m_doc->GetCursor())->SetSelected(false);
   }
-}
-
-void TreeWindow::UpdateMenus(void)
-{
-  gbtEfgNode cursor = m_doc->GetCursor();
-
-  m_nodeMenu->Enable(wxID_COPY, !cursor.IsNull());
-  m_nodeMenu->Enable(wxID_CUT, !cursor.IsNull());
-  m_nodeMenu->Enable(wxID_PASTE, (!m_doc->GetCopyNode().IsNull() || 
-				  !m_doc->GetCutNode().IsNull()));
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_INSERT, !cursor.IsNull());
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_REVEAL,
-		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MOVE, 
-		     (!cursor.IsNull() && !cursor.GetInfoset().IsNull()));
-
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor) &&
-		      !cursor.GetParent().IsNull()));
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_MARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor)));
-  m_nodeMenu->Enable(GBT_EFG_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && 
-		      m_doc->GetEfg().IsLegalSubgame(cursor)));
-  m_nodeMenu->SetLabel(GBT_EFG_MENU_EDIT_TOGGLE_SUBGAME,
-		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
-			m_doc->GetEfg().IsLegalSubgame(cursor) &&
-			cursor.GetSubgameRoot() == cursor) ?
-		       "Unmark subgame" : "Mark subgame");
 }
 
 //-----------------------------------------------------------------------

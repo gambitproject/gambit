@@ -46,12 +46,11 @@ private:
 
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
-  
+  void OnUpdate(gbtGameView *);
+    
 public:
   EfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgOutcomeWindow() { }
-
-  void UpdateValues(void);
 
   DECLARE_EVENT_TABLE()
 };

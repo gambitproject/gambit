@@ -66,6 +66,7 @@ private:
 
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
+  void OnUpdate(gbtGameView *);
     
 public:
   TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
@@ -74,11 +75,8 @@ public:
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);
 
-  void RefreshTree(void);
   void RefreshLayout(void);
   void RefreshLabels(void);
-  
-  void SupportChanged(void);
   
   TreeDrawSettings &DrawSettings(void) { return m_drawSettings; }
   const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
@@ -86,8 +84,6 @@ public:
   void SetCursorPosition(gbtEfgNode p_cursor);
   void SetCutNode(gbtEfgNode, bool);
     
-  void UpdateMenus(void);
-  
   double GetZoom(void) const { return m_zoom; }
   void SetZoom(double p_zoom);
   void FitZoom(void);

@@ -53,13 +53,12 @@ EfgProfileList::EfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
 		 "View and edit properties of this profile");
   m_menu->Append(GBT_EFG_MENU_PROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
-  UpdateValues();
 }
 
 EfgProfileList::~EfgProfileList()
 { }
 
-void EfgProfileList::UpdateValues(void)
+void EfgProfileList::OnUpdate(gbtGameView *)
 {
   ClearAll();
   InsertColumn(0, "Name");

@@ -118,7 +118,6 @@ EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
 			      wxDefaultPosition, wxSize(30, 30));
   m_actionTree = new widgetActionTree(this);
-  UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
@@ -138,7 +137,7 @@ EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgSupportWindow::UpdateValues(void)
+void EfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 

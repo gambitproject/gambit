@@ -66,6 +66,26 @@ gbtGameDocument::~gbtGameDocument()
   }
 }
 
+void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
+				    bool p_infosetsChanged)
+{
+  if (p_infosetsChanged) {
+    while (m_efgSupports.Length()) { 
+      delete m_efgSupports.Remove(1);
+    }
+
+    m_curEfgSupport = new EFSupport(*m_efg);
+    m_efgSupports.Append(m_curEfgSupport);
+    m_curEfgSupport->SetName("Full Support");
+  }
+
+  if (p_infosetsChanged || p_nodesChanged) {
+    // It would be nice to relax this, but be conservative for now
+    m_copyNode = 0;
+    m_cutNode = 0;
+  }
+}
+
 
 //==========================================================================
 //                 gbtGameDocument: Operations on outcomes
@@ -158,42 +178,25 @@ void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
     m_nfgShow->OnProfilesEdited();
   }
 
-  m_efgShow->OnProfilesEdited();
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::SetCurrentProfile(int p_index)
 {
   m_curProfile = p_index;
-  if (m_efgShow) {
-    m_efgShow->OnChangeProfile();
-  }
-  if (m_nfgShow) {
-    m_nfgShow->OnChangeProfile();
-  }
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::SetCurrentProfile(const BehavSolution &p_profile)
 {
   m_behavProfiles[m_curProfile] = p_profile;
-
-  if (m_efgShow) {
-    m_efgShow->OnChangeProfile();
-  }
-  if (m_nfgShow) {
-    m_nfgShow->OnChangeProfile();
-  }
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::SetCurrentProfile(const MixedSolution &p_profile)
 {
   m_mixedProfiles[m_curProfile] = p_profile;
-
-  if (m_efgShow) {
-    m_efgShow->OnChangeProfile();
-  }
-  if (m_nfgShow) {
-    m_nfgShow->OnChangeProfile();
-  }
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::RemoveProfile(int p_index)
@@ -209,12 +212,7 @@ void gbtGameDocument::RemoveProfile(int p_index)
     m_curProfile = 0;
   }
 
-  if (m_efgShow) {
-    m_efgShow->OnChangeProfile();
-  }
-  if (m_nfgShow) {
-    m_nfgShow->OnChangeProfile();
-  }
+  UpdateViews(0, true, true);
 }
 
 //==========================================================================
@@ -383,10 +381,9 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
 
   if (m_efg) {
     m_behavProfiles.Append(BehavProfile<gNumber>(*p_profile.Profile()));
-    m_efgShow->OnProfilesEdited();
   }
 
-  m_nfgShow->OnProfilesEdited();
+  UpdateViews(0, true, true);
 }
 
 gArray<int> gbtGameDocument::GetContingency(void) const
@@ -402,6 +399,7 @@ gArray<int> gbtGameDocument::GetContingency(void) const
 void gbtGameDocument::AddView(gbtGameView *p_view)
 {
   m_views.Append(p_view);
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::RemoveView(gbtGameView *p_view)

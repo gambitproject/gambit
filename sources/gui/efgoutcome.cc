@@ -81,7 +81,7 @@ EfgOutcomeWindow::EfgOutcomeWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgOutcomeWindow::UpdateValues(void)
+void EfgOutcomeWindow::OnUpdate(gbtGameView *)
 {
   gbtEfgGame efg = m_doc->GetEfg();
 
@@ -152,8 +152,7 @@ void EfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
     for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
       SetCellEditor(GetRows() - 1, pl, new NumberEditor);
     }
-    m_doc->m_efgShow->OnOutcomesEdited();
-    UpdateValues();
+    m_doc->UpdateViews(this, true, false);
     SetGridCursor(GetRows() - 1, 0);
   }
   else {
@@ -177,7 +176,7 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 		      ToNumber(GetCellValue(row, col).c_str()));
   }
 
-  m_doc->m_efgShow->OnOutcomesEdited();
+  m_doc->UpdateViews(this, true, false);
 }
 
 void EfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
@@ -205,8 +204,7 @@ void EfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
     outcome.SetPayoff(m_doc->GetEfg().GetPlayer(pl), gNumber(0));
     SetCellEditor(GetRows() - 1, pl, new NumberEditor);
   }
-  m_doc->m_efgShow->OnOutcomesEdited();
-  UpdateValues();
+  m_doc->UpdateViews(this, true, false);
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
@@ -214,23 +212,22 @@ void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
     gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(GetGridCursorRow() + 1);
     m_doc->GetEfg().DeleteOutcome(outcome);
-    m_doc->m_efgShow->OnOutcomesEdited();
   }
-  UpdateValues();
+  m_doc->UpdateViews(this, true, false);
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
     m_doc->GetCursor().SetOutcome(m_doc->GetEfg().GetOutcome(GetGridCursorRow() + 1));
-    m_doc->m_efgShow->OnOutcomesEdited();
+    m_doc->UpdateViews(this, true, false);
   }
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
   m_doc->GetCursor().SetOutcome(0);
-  m_doc->m_efgShow->OnOutcomesEdited();
+  m_doc->UpdateViews(this, true, false);
 }
 
 

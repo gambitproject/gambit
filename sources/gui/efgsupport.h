@@ -50,12 +50,11 @@ private:
 
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
+  void OnUpdate(gbtGameView *);
 
 public:
   EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgSupportWindow() { }
-
-  void UpdateValues(void);
 
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);

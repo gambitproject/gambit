@@ -45,7 +45,6 @@ private:
 
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);
-  void UpdateViews(gbtGameView *, bool, bool);
 
   int m_curProfile;
   gList<BehavSolution> m_behavProfiles;
@@ -72,6 +71,9 @@ public:
   ~gbtGameDocument();
 
   gbtEfgGame GetEfg(void) const { return *m_efg; }
+
+  void UpdateViews(gbtGameView *, bool, bool);
+  void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
 
   // MARKED NODES
   gbtEfgNode GetCursor(void) const { return m_cursor; }

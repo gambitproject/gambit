@@ -41,11 +41,11 @@ private:
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
 
+  void OnUpdate(gbtGameView *);
+
 public:
   EfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~EfgProfileList();
-
-  void UpdateValues(void);
 
   wxString GetReport(void) const;
 
