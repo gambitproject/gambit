@@ -518,6 +518,24 @@ Portion *GSM_IsSuccessor(Portion **param)
   return new BoolValPortion(n1->BelongsTo()->IsSuccessor(n1, n2));
 }
 
+
+//-----------
+// LegalSubgames
+//-----------
+
+Portion *GSM_LegalSubgames_Efg(Portion **param)
+{
+  BaseEfg& E = *((EfgPortion*) param[0])->Value();
+  gList<Node *> list;
+  LegalSubgameRoots(E, list);
+
+  Portion *por = ArrayToList(list);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;  
+}
+
+
+
 //-----------
 // LoadEfg
 //-----------
@@ -1798,8 +1816,14 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Subgames", 1);
+  FuncObj = new FuncDescObj("MarkedSubgames", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SubgameRoots, 
+				       PortionSpec(porNODE, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Subgames", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LegalSubgames_Efg, 
 				       PortionSpec(porNODE, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
