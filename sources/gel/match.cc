@@ -153,12 +153,12 @@ gelParamInfo::gelParamInfo(const gText &s)
       m_DefaultVal.bval = new gTriState(triMAYBE);
       m_Type = gelBOOLEAN;
     }
-    else if (m_Default == "Stdout")  {
-      m_DefaultVal.oval = new gFileOutput(stdout);
+    else if (m_Default == "StdOut")  {
+      m_DefaultVal.oval = &gout;
       m_Type = gelOUTPUT;
     }
-    else if (m_Default == "Stderr")  {
-      m_DefaultVal.oval = new gFileOutput(stderr);
+    else if (m_Default == "NullOut")  {
+      m_DefaultVal.oval = &gnull;
       m_Type = gelOUTPUT;
     }
     else if (isdigit(m_Default[0]) || m_Default[0] == '-' || m_Default[0] == '.') {
@@ -189,8 +189,7 @@ gelParamInfo::~gelParamInfo()
       delete m_DefaultVal.nval;
     else if (m_Type == gelTEXT)
       delete m_DefaultVal.tval;
-    else if (m_Type == gelOUTPUT)
-      delete m_DefaultVal.oval;
+    // don't delete the output streams!
   }
 }
 
