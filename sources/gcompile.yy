@@ -109,8 +109,7 @@
 %%
 
 
-program:      EOC   { return 1; }
-       |      statements EOC 
+program:      statements EOC 
               { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
        |      error EOC   { return 1; }
        |      error CRLF  { return 1; }
@@ -120,9 +119,8 @@ statements:   statement
           |   funcdecl
 
 sep:          SEMI    { semi = true;  emit(new Pop); }
-   |          CRLFs    { semi = false; 
+   |          CRLF    { semi = false; 
                         if (!triv)  { emit(new Display); emit(new Pop); } }
-   |          SEMI CRLFs  { semi = true;  emit(new Pop); }
 
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
@@ -142,7 +140,7 @@ binding:      RARROW    { refs.Append(false); }
        |      DBLARROW  { refs.Append(true); }
 
 statement:    { triv = true; }
-              expression { triv = false; }
+         |    expression { triv = false; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
@@ -366,8 +364,10 @@ I_dont_believe_Im_doing_this:
     if (c == '/')  {
       if ((d = nextchar()) == '/')  {
 	while ((d = nextchar()) != CR);
-	gout << "return CRLF\n";
-	return CRLF;
+	if (matching.Depth())
+	  return CRLF;
+	else
+	  return EOC;
       }
       else if (d == '*')  {
 	int done = 0;
