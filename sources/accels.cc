@@ -90,7 +90,7 @@ SetLabelPosition(wxHORIZONTAL);
 wxButton *add_button = new wxButton(this, (wxFunction)add_func, "Add", 23, 242, -1, -1, 0, "add_button");
 wxButton *delete_button = new wxButton(this, (wxFunction)delete_func, "Delete", 114, 242, 80, -1, 0, "delete_button");
 wxButton *close_button = new wxButton(this, (wxFunction)close_func, "Close", 214, 242, -1, -1, 0, "close_button");
-wxButton *help_button = new wxButton(this, (wxFunction)close_func, "Help", 294, 242, -1, -1, 0, "help_button");
+                         new wxButton(this, (wxFunction)close_func, "Help", 294, 242, -1, -1, 0, "help_button");
 key_ctrl = new wxRadioBox(this, NULL, "Ctrl", 23, 78, -1, -1, 3, accel_state_str, 3, wxHORIZONTAL, "ctrl_state");
 key_shift = new wxRadioBox(this, NULL, "Shift", 22, 143, -1, -1, 3,accel_state_str, 3, wxHORIZONTAL, "shift_state");
 
@@ -129,7 +129,7 @@ return 0;
 
 // The purpose of this function is to just limit the entry to 1 char and
 // to set key_choice to selection 0
-void EditAccelDialog::key_text_func(wxText& ob, wxCommandEvent& ev)
+void EditAccelDialog::key_text_func(wxText& ob, wxCommandEvent& )
 {
 char *v=ob.GetValue();
 if (v)
@@ -142,7 +142,7 @@ if (v)
 }
 
 // This function just sets the key_text to nothing
-void EditAccelDialog::key_choice_func(wxChoice &ob,wxCommandEvent &ev)
+void EditAccelDialog::key_choice_func(wxChoice &ob,wxCommandEvent &)
 {
 wxText *key_text=(wxText *)ob.GetClientData();
 key_text->SetValue("");
@@ -159,7 +159,7 @@ for (i=1;i<=acc.Length();i++)
 		if (!Key2Name(acc[i].key))	// if this is not a 'special' key, its just ASCII
 		{
 			char tmp_str[2];
-			sprintf(tmp_str,"%c",acc[i].key);
+			sprintf(tmp_str,"%c",(char)acc[i].key);
 			key_text->SetValue(tmp_str);
 			key_choice->SetStringSelection(BLANK_STR);
 		}
@@ -179,7 +179,7 @@ key_ctrl->SetSelection(0);
 key_shift->SetSelection(0);
 }
 
-void EditAccelDialog::event_func(wxChoice& ob, wxCommandEvent& ev)
+void EditAccelDialog::event_func(wxChoice& ob, wxCommandEvent& )
 {
 EditAccelDialog *parent=(EditAccelDialog *)ob.GetClientData();
 parent->OnEventFunc(ob.GetStringSelection());
@@ -207,7 +207,7 @@ temp.key=RealKey();temp.id=id;
 if (acc_id) acc[acc_id]=temp; else acc+=temp;
 }
 
-void EditAccelDialog::add_func(wxButton& ob, wxCommandEvent& ev)
+void EditAccelDialog::add_func(wxButton& ob, wxCommandEvent& )
 {
 EditAccelDialog *parent=(EditAccelDialog *)ob.GetClientData();
 parent->OnAddFunc();
@@ -219,18 +219,18 @@ int id=GetEventId(event_choice->GetStringSelection());
 for (int i=1;i<=acc.Length();i++)	if (acc[i].id==id) acc.Remove(i);
 }
 
-void EditAccelDialog::delete_func(wxButton& ob, wxCommandEvent& ev)
+void EditAccelDialog::delete_func(wxButton& ob, wxCommandEvent& )
 {
 EditAccelDialog *parent=(EditAccelDialog *)ob.GetClientData();
 parent->OnDeleteFunc();
 }
 
-void EditAccelDialog::close_func(wxButton& ob, wxCommandEvent& ev)
+void EditAccelDialog::close_func(wxButton& ob, wxCommandEvent& )
 {
 EditAccelDialog *parent=(EditAccelDialog *)ob.GetClientData();
 parent->Show(FALSE);
 }
-void EditAccelDialog::help_func(wxButton& ob, wxCommandEvent& ev)
+void EditAccelDialog::help_func(wxButton& , wxCommandEvent& )
 {wxHelpContents(ACCELERATORS_HELP);}
 
 //**************************************************************************

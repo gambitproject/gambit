@@ -6,7 +6,7 @@
 
 #include "algdlgs.h"
 
-class SeqFormParamsSettings: public OutputParamsSettings
+class SeqFormParamsSettings: public virtual OutputParamsSettings
 {
 protected:
 	int plev,maxdepth,dup_strat;

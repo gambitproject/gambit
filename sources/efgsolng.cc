@@ -33,10 +33,16 @@ gList<BehavProfile<gRational> > &EmptyBehavList(gRational )
 void doubles_only(void)
 {wxMessageBox("Due to efficiency reasons, this algorithm is only implemented\nin doubles.\nPlease use doubles if you wish to run it");}
 
+TEMPLATE class ExtensiveShowInterf<double>;
+TEMPLATE class ExtensiveShowInterf<gRational>;
+
 /************************** EXTENSIVE SOLUTION G ***************************/
 template <class T> ExtensiveSolutionG<T>::ExtensiveSolutionG(const Efg<T> &E,ExtensiveShowInterf<T> *parent_)
 												:ef(E),parent(parent_)
 { }
+
+TEMPLATE class ExtensiveSolutionG<double>;
+TEMPLATE class  ExtensiveSolutionG<gRational>;
 
 /*************************** BY SUBGAME G **********************************/
 #define	SELECT_SUBGAME_NUM	10000
@@ -160,16 +166,14 @@ void EFLiapG<T>::SolveSetup(void) const
 
 TEMPLATE class EFLiapG<double>;
 
-
 EFLiapG<gRational>::EFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
-
 { }
-
 void EFLiapG<gRational>::SolveSetup(void) const
 {doubles_only();}
 gList<BehavProfile<gRational> > EFLiapG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
 
+TEMPLATE class EFLiapG<gRational>;
 // Normal Form Liap
 template <class T> class NFLiapBySubgameG:
 						public NFLiapBySubgame<T>,public BaseBySubgameG<T>
@@ -213,12 +217,12 @@ TEMPLATE class NFLiapG<double>;
 
 NFLiapG<gRational>::NFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
-
 void NFLiapG<gRational>::SolveSetup(void) const
 {doubles_only();}
 gList<BehavProfile<gRational> > NFLiapG<gRational>::Solve(void) const
-{doubles_only();empty_behav_list_r;}
+{doubles_only();return empty_behav_list_r;}
 
+TEMPLATE class NFLiapG<gRational>;
 
 // SeqForm
 #define SEQF_PRM_INST
@@ -491,26 +495,16 @@ void SimpdivG<T>::SolveSetup(void) const
 TEMPLATE class SimpdivG<double>;
 TEMPLATE class SimpdivG<gRational>;
 
-
 // NF Gobit
-
 // This algorithm does not support solving by subgames.  However I will still
-
 // derive a solution class from the BaseBySubgameG to maintain uniformity.
-
 // Note that we are defining the gRational and double functions separately
-
 // since Gobit is not meant to be implemented in gRationals at all
-
 #include "egobit.h"
-
 #include "ngobit.h"
-
 #define GOBIT_PRM_INST
-
 #include "gobitprm.h"
 template <class T> class NGobitBySubgameG:
-
 													public BaseBySubgameG<T>
 {
 private:
@@ -568,11 +562,13 @@ void NGobitG<double>::SolveSetup(void) const
 
 NGobitG<gRational>::NGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
-
 void NGobitG<gRational>::SolveSetup(void) const
 {doubles_only();}
 gList<BehavProfile<gRational> > NGobitG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
+
+TEMPLATE class NGobitG<double>;
+TEMPLATE class NGobitG<gRational>;
 
 // EF Gobit
 // This algorithm does not support solving by subgames.
@@ -600,11 +596,13 @@ void EGobitG<double>::SolveSetup(void) const
 
 EGobitG<gRational>::EGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
-
 void EGobitG<gRational>::SolveSetup(void) const
 {doubles_only();}
 gList<BehavProfile<gRational> > EGobitG<gRational>::Solve(void) const
 {doubles_only();return empty_behav_list_r;}
+
+TEMPLATE class EGobitG<double>;
+TEMPLATE class EGobitG<gRational>;
 
 // Gobit All
 // This algorithm does not support solving by subgames.  However I will still
@@ -664,9 +662,9 @@ TEMPLATE class GobitAllG<double>;
 
 GobitAllG<gRational>::GobitAllG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
-
 void GobitAllG<gRational>::SolveSetup(void) const
 {doubles_only();}
 gList<BehavProfile<gRational> > GobitAllG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
 
+TEMPLATE class GobitAllG<gRational>;
