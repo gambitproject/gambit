@@ -16,7 +16,6 @@
 #include "pxi.h"
 #include "axis.h"
 
-extern wxBrush		*exp_data_brush;
 #define NUM_COLORS	11
 char *equ_colors[NUM_COLORS+1]={"BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MAGENTA","ORANGE",
 				"PURPLE","PALE GREEN","BROWN","BLACK"}; // not pretty
@@ -26,7 +25,7 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
 {
   dc.SetTextForeground(*wxBLACK);
   //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(*(draw_settings->GetLabelFont()));
+  dc.SetFont(draw_settings->GetLabelFont());
   for (int i=1;i<=labels.Length();i++)
     dc.DrawText(labels[i].label,labels[i].x*cw,labels[i].y*ch);
 }
@@ -100,21 +99,20 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int ch,int 
 {
   exp_data_struct	*s=0;
   double x,y;
-  gBlock<int> point_nums;
-  
+  gBlock<int> point_nums;  
   point_nums=exp_data->HaveL(cur_e);
   for (int i=1;i<=point_nums.Length();i++) {
     s=(*exp_data)[point_nums[i]];
     
     y=CalcY_X((*s).probs[iset][st],ch,plot);
     x=CalcX_X(s->e,cw);
-    dc.SetBrush(*exp_data_brush);
+    dc.SetBrush(draw_settings->GetDataBrush());
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN)
       DrawToken(dc,x,y,st);
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
@@ -225,13 +223,13 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,int pl2,int
     
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(*exp_data_brush);
+      dc.SetBrush(draw_settings->GetDataBrush());
       dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
@@ -334,13 +332,13 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,in
     x=CalcX_3((*s).probs[iset][st1],(*s).probs[iset][st2],ch,cw,plot);
     if (draw_settings->GetOverlaySym()==OVERLAY_TOKEN) {
       int ts=draw_settings->GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(*exp_data_brush);
+      dc.SetBrush(draw_settings->GetDataBrush());
       dc.DrawEllipse(x-ts,y-ts,2*ts,2*ts);
     }
     else {
       char tmp[10];
       sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(*(draw_settings->GetOverlayFont()));
+      dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
       dc.DrawText(tmp,x-3,y-6);
     }
@@ -411,11 +409,14 @@ void PxiCanvas::PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
 
 
 /******************************* UPDATE ***********************************/
+
 void PxiCanvas::Update(wxDC& dc,int device)
 {
-  int		cw,ch;
+  int cw,ch;
+  const wxFont &font = draw_settings->GetAxisFont(); 
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
+
   if (device==PXI_UPDATE_SCREEN) {
     dc.SetBackground(*wxWHITE_BRUSH);
     dc.Clear();
@@ -437,6 +438,12 @@ void PxiCanvas::Update(wxDC& dc,int device)
       dc.SetBackgroundMode(wxTRANSPARENT);
     }
   }
+
+  dc.SetFont(font);
+  dc.SetTextForeground(draw_settings->GetAxisTextColor());
+  dc.SetPen(*wxBLACK_PEN);
+  dc.SetBrush(draw_settings->GetClearBrush());
+ 
   if (draw_settings->GetPlotMode()==PXI_PLOT_X) {
     PlotAxis_X(dc,draw_settings->GetStopMin(),draw_settings->GetStopMax(),draw_settings->GetDataMin(),
 	       draw_settings->GetDataMax(),ch,cw,draw_settings->GetNumPlots(),
@@ -451,7 +458,6 @@ void PxiCanvas::Update(wxDC& dc,int device)
     PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures());
     for (int i=1;i<=headers.Length();i++) PlotData_3(dc,ch,cw,headers[i],i);
   }
-  //  if (draw_settings->GetShowGame()) ShowGame(dc,cw,ch,headers[1]);
   wxEndBusyCursor();
 }
 

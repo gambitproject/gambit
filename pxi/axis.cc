@@ -12,9 +12,6 @@
 #define XGRID			(cw-2*XOFF)/XGRIDS
 #define YGRID			(ch-ch/2*num_plots-2*XOFF)/YGRIDS
 
-extern wxFont *axis_font;
-extern wxColour	*axis_text_color;
-extern wxBrush *clear_brush;
 /***************************** PLOT AXIS X ********************************/
 void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
 		float y_end,int ch,int cw,int num_plots,int plot_type,
@@ -27,9 +24,6 @@ void PlotAxis_X(wxDC& dc, float x_start,float x_end,float y_start,
   
   assert(num_plots==1 || num_plots==2);
   num_plots-=1;	       // convert from 1,2 to 0,1
-  dc.SetFont(*axis_font);
-  dc.SetTextForeground(*axis_text_color);
-  dc.SetPen(*wxBLACK_PEN);
   for (int i=0;i<=num_plots;i++) {
     if (features&DRAW_AXIS) {
       dc.DrawLine(XOFF,XOFF+(ch/2)*num_plots*i,XOFF,(ch-XOFF)-(ch/2)*num_plots*(1-i));
@@ -94,10 +88,6 @@ void PlotAxis_2(wxDC& dc,float x_start,float x_end,float y_start,
   int side=gmin(ch,cw);	// maintain square aspect ration that fits in this window
   ch=side;cw=side;
   
-  dc.SetFont(*axis_font);
-  dc.SetTextForeground(*axis_text_color);
-  dc.SetPen(*wxBLACK_PEN);
-  dc.SetBrush(*clear_brush);
   if (features&DRAW_AXIS)
     if (features&DRAW_SQUARE)
       dc.DrawRectangle(XOFF,XOFF,side-2*XOFF,side-2*XOFF);
@@ -150,7 +140,6 @@ void PlotAxis_3(wxDC& dc, int ch,int cw,int num_plots,
   else
     side=((ch-2*XOFF)/TAN60)*2;
   
-  dc.SetPen(*wxBLACK_PEN);
   for (i=0;i<num_plots;i++) {      	// draw the two triangles
     dc.DrawLine(XOFF+cw/2*i,ch-XOFF,XOFF+side+cw/2*i,ch-XOFF);
     dc.DrawLine(XOFF+cw/2*i,ch-XOFF,XOFF+side/2+cw/2*i,ch-XOFF-PXI_3_HEIGHT);
@@ -161,7 +150,6 @@ void PlotAxis_3(wxDC& dc, int ch,int cw,int num_plots,
       dc.DrawLine(XOFF+side/2+cw/2*i,ch-XOFF-PXI_3_HEIGHT,XOFF+side/2+cw/2*i,ch-XOFF);
     }
     if (features&DRAW_LABELS) {
-      dc.SetFont(*(wxTheFontList->FindOrCreateFont(8, wxSWISS, wxNORMAL, wxNORMAL)));
       dc.DrawText("3",XOFF-GRID_H+cw/2*i,ch-XOFF+GRID_H);
       dc.DrawText("1",XOFF+side/2-GRID_H+cw/2*i,ch-XOFF-PXI_3_HEIGHT-3*GRID_H);
       dc.DrawText("2",XOFF+side-GRID_H+cw/2*i,ch-XOFF+GRID_H);

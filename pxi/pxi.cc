@@ -62,22 +62,14 @@
 
 #include "new.h"
 #include "wx/sizer.h"
+#include "wx/fontdlg.h"
+#include "wx/colordlg.h"
 
 gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
 {op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
 
 void mem_handler(void)
 {wxFatalError("Memory Error");}
-
-char tempstr[200];
-
-// Must initialise these in OnInit, not statically
-wxCursor	*arrow_cursor;
-wxCursor	*wait_cursor;
-wxColour	*axis_text_color;
-wxFont		*axis_font;
-wxBrush		*clear_brush;
-wxBrush		*exp_data_brush;
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
@@ -92,7 +84,8 @@ bool PxiApp::OnInit(void)
   config.Read("Help-Directory", &helpDir);
 
   wxInitHelp(wxString(helpDir.c_str()) + "/gambit", 
-	     "PXI, Version 0.97.3\n"
+	     "PXI(Plus or Minus), Version 0.97.3\n"
+	     "Based on Eugene Grayver's PXI, version .94\n\n"
 	     "Built with " wxVERSION_STRING "\n\n"
 	     "Part of the Gambit Project\n"
 	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
@@ -102,16 +95,6 @@ bool PxiApp::OnInit(void)
 	     "Funding provided by the National Science Foundation");
   
   set_new_handler(mem_handler);
-  // Create needed cursors
-  arrow_cursor = new wxCursor(wxCURSOR_ARROW);
-  wait_cursor = new wxCursor(wxCURSOR_WAIT);
-  // Create the rest of the resources
-  axis_font = new wxFont(8, wxSWISS, wxNORMAL, wxNORMAL);
-  axis_text_color=new wxColour("BLUE");
-  clear_brush = new wxBrush("BLACK",wxTRANSPARENT);
-  exp_data_brush=new wxBrush("BLACK",wxSOLID);
-
-  // pxiFrame->SetCursor(arrow_cursor);
 
   pxiFrame->Show(true);
   if (argc>1) pxiFrame->LoadFile( (wxString) (argv[1]));
@@ -134,7 +117,7 @@ private:
   void OnMouseEnter(wxCommandEvent &);
     
 public:
-  PxiToolbar(wxFrame *, const wxPoint &, const wxSize &);
+  PxiToolbar(wxFrame *p_frame);
   virtual ~PxiToolbar() { }
 
   DECLARE_EVENT_TABLE()
@@ -144,9 +127,8 @@ BEGIN_EVENT_TABLE(PxiToolbar, wxToolBar)
   EVT_TOOL_ENTER(PXI_TOOLBAR_ID, PxiToolbar::OnMouseEnter)
 END_EVENT_TABLE()
 
-PxiToolbar::PxiToolbar(wxFrame *p_parent, const wxPoint &p_position,
-			     const wxSize &p_size)
-  : wxToolBar(p_parent, PXI_TOOLBAR_ID, p_position, p_size),
+PxiToolbar::PxiToolbar(wxFrame *p_parent)
+  : wxToolBar(p_parent, PXI_TOOLBAR_ID),
     m_parent(p_parent)
 {
 #ifdef __WXMSW__
@@ -165,7 +147,7 @@ PxiToolbar::PxiToolbar(wxFrame *p_parent, const wxPoint &p_position,
 #endif  // __WXMSW__
   AddTool(PXI_LOAD_FILE, loadBitmap);
   AddSeparator();
-  AddTool(PXI_ABOUT, helpBitmap);
+  AddTool(PXI_HELP_ABOUT, helpBitmap);
 
   Realize();
 }
@@ -196,16 +178,14 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
 #endif
     
   wxMenu *file_menu = new wxMenu;
-  wxMenu *data_menu = new wxMenu;
   wxMenu *help_menu = new wxMenu;
   file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load file");
   file_menu->Append(PXI_QUIT, "&Quit", "Exit PXI");
-  data_menu->Append(PXI_DATA_GRID,"&GridSolver","Create a new file");
-  help_menu->Append(PXI_ABOUT,"&About PlotX");
+  help_menu->Append(PXI_HELP_ABOUT,"&About", "About Plot X");
+  help_menu->Append(PXI_HELP_CONTENTS,"&Contents", "Table of Contents");
 
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(help_menu, "&Help");
   SetMenuBar(menu_bar);
 
@@ -216,7 +196,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
 
   CreateStatusBar();
 
-  (void) new PxiToolbar(this, wxPoint(0, 0), wxSize(200, 40));
+  SetToolBar(new PxiToolbar(this));
 }
 
 PxiFrame::~PxiFrame()
@@ -229,8 +209,8 @@ BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
   EVT_MENU(PXI_LOAD_FILE, PxiFrame::OnFileLoad) 
   EVT_MENU(PXI_QUIT, wxWindow::Close)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, PxiFrame::OnMRUFile)
-  EVT_MENU(PXI_DATA_GRID, PxiFrame::OnDataGridSolve)
-  EVT_MENU(PXI_ABOUT, PxiFrame::OnHelpAbout)
+  EVT_MENU(PXI_HELP_ABOUT, PxiFrame::OnHelpAbout)
+  EVT_MENU(PXI_HELP_CONTENTS, PxiFrame::OnHelpContents)
   EVT_CLOSE(PxiFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -249,10 +229,6 @@ void PxiFrame::OnFileLoad(wxCommandEvent &)
   LoadFile(filename);
 }
 
-void PxiFrame::OnDataGridSolve(wxCommandEvent &)
-{
-}
-
 void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
 {
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetSelection() - wxID_FILE1).c_str());
@@ -261,6 +237,11 @@ void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
 void PxiFrame::OnHelpAbout(wxCommandEvent &)
 {
   wxHelpAbout(); 
+}
+
+void PxiFrame::OnHelpContents(wxCommandEvent &)
+{
+  wxHelpContents(PXI_GUI_HELP);
 }
 
 void PxiFrame::LoadFile(const wxString &p_filename)
@@ -287,30 +268,38 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_OUTPUT, PxiChild::OnFileOutput)
   EVT_MENU(PXI_CHILD_QUIT, PxiChild::Close)
   EVT_MENU(PXI_QUIT, PxiChild::Close)
-  EVT_MENU(PXI_DATA_GRID, PxiChild::OnGrid)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
   EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
   EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
-  EVT_MENU(PXI_ABOUT, PxiChild::OnHelpAbout)
+  EVT_MENU(PXI_PREFS_FONT_AXIS, PxiChild::OnPrefsFontAxis)
+  EVT_MENU(PXI_PREFS_FONT_LABEL, PxiChild::OnPrefsFontLabel)
+  EVT_MENU(PXI_PREFS_FONT_OVERLAY, PxiChild::OnPrefsFontOverlay)
+  EVT_MENU(PXI_PREFS_COLORS, PxiChild::OnPrefsColors)
+  EVT_MENU(PXI_HELP_ABOUT, PxiChild::OnHelpAbout)
+  EVT_MENU(PXI_HELP_CONTENTS, PxiChild::OnHelpContents)
   EVT_SIZE(PxiChild::OnSize)
   EVT_CLOSE(PxiChild::OnCloseWindow)
 END_EVENT_TABLE()
 
-void PxiChild::OnGrid(wxCommandEvent &)
-{
-}
-
 void PxiChild::OnOverlayData(wxCommandEvent &)
 {
-  canvas->MakeOverlayData();
+  dialogOverlayData dialog(this, canvas);
   wxClientDC dc(this);
   canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 
 void PxiChild::OnOverlayFile(wxCommandEvent &)
 {
-  canvas->MakeOverlayFile();
+  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
+  if (s) {
+    FileHeader temp_header(s);
+    if ( (temp_header.NumStrategies()!=(canvas->Header(1)).NumStrategies()) ||
+	 (temp_header.NumInfosets()!=(canvas->Header(1)).NumInfosets()) )
+      wxMessageBox("These data files do not\nhave the same structure!");
+    else
+      canvas->AppendHeader(temp_header);
+  }
   wxClientDC dc(this);
   canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
@@ -336,9 +325,54 @@ void PxiChild::OnFileOutput(wxCommandEvent &)
     }
 }
 
+void PxiChild::OnPrefsColors(wxCommandEvent &)
+{
+  wxColourData data;
+  wxColourDialog dialog(this, &data);
+ 
+  if (dialog.ShowModal() == wxID_OK) {
+    // dialog.GetColourData().GetColour();
+  }
+}
+
+void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
+  }
+}
+
+void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
+  }
+}
+
+void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
+  }
+}
+
 void PxiChild::OnHelpAbout(wxCommandEvent &)
 {
   wxHelpAbout();
+}
+
+void PxiChild::OnHelpContents(wxCommandEvent &)
+{
+  wxHelpContents(PXI_GUI_HELP);
 }
 
 void PxiChild::OnDisplayOptions(wxCommandEvent &)
@@ -348,8 +382,9 @@ void PxiChild::OnDisplayOptions(wxCommandEvent &)
   this->canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 
-PxiChild::PxiChild(wxFrame *p_parent, const wxString &p_filename) :
-  wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480)), parent(p_parent)
+PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
+  wxFrame(p_parent, -1, p_filename, wxPoint(0,0),wxSize(480,480), 
+	  wxDEFAULT_FRAME_STYLE | wxFRAME_FLOAT_ON_PARENT), parent(p_parent)
 {
   SetSizeHints(300, 300);
 
@@ -379,25 +414,36 @@ PxiChild::~PxiChild(void)
 void PxiChild::MakeMenus(void)
 {
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(PXI_LOAD_FILE, "&Load file");
-  file_menu->Append(PXI_CHILD_QUIT, "&Close");
-  file_menu->Append(PXI_OUTPUT, "Output");
+  file_menu->Append(PXI_LOAD_FILE, "&Load file", "Load new data file");
+  file_menu->Append(PXI_CHILD_QUIT, "&Close", "Close child window");
+  file_menu->Append(PXI_OUTPUT, "Output", "Output to file or printer");
   file_menu->AppendSeparator();
-  file_menu->Append(PXI_QUIT, "&Quit");
+  file_menu->Append(PXI_QUIT, "&Quit", "Quit Program");
   wxMenu *data_menu= new wxMenu;
-  data_menu->Append(PXI_DATA_GRID,"&GridSolver","Create a new file");
-  data_menu->Append(PXI_DATA_OVERLAY_DATA, "&Overlay Data");
-  data_menu->Append(PXI_DATA_OVERLAY_FILE, "&Overlay File");
+  data_menu->Append(PXI_DATA_OVERLAY_DATA, "&Overlay Data", "Overlay experiment data on plot");
+  data_menu->Append(PXI_DATA_OVERLAY_FILE, "&Overlay File", "Overlay another pxi file");
   
+  wxMenu *prefs_menu = new wxMenu;
+  wxMenu *prefs_font_menu = new wxMenu;
+
+  prefs_font_menu->Append(PXI_PREFS_FONT_AXIS,"&Axes", "Change Axes Font");
+  prefs_font_menu->Append(PXI_PREFS_FONT_LABEL,"&Label", "Change Lable Font");
+  prefs_font_menu->Append(PXI_PREFS_FONT_OVERLAY,"&Overlay", "Change Overlay Font");
+  prefs_menu->Append(PXI_PREFS_FONTS, "&Fonts", prefs_font_menu,
+		     "Set display fonts");
+
+  prefs_menu->Append(PXI_PREFS_COLORS,"&Colors", "Change Colors");
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(PXI_ABOUT,"&About PlotX");
+  help_menu->Append(PXI_HELP_ABOUT,"&About", "About Plot X");
+  help_menu->Append(PXI_HELP_CONTENTS,"&Contents", "Table of Contents");
   wxMenu *display_menu = new wxMenu;
-  display_menu->Append(PXI_FILE_DETAIL,"File &Detail");
-  display_menu->Append(PXI_DISPLAY_OPTIONS,"&Options...");
+  display_menu->Append(PXI_FILE_DETAIL,"&Details", "File Details");
+  display_menu->Append(PXI_DISPLAY_OPTIONS,"&Options...", "Change plot options");
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, "&File");
   menu_bar->Append(data_menu, "&Data");
   menu_bar->Append(display_menu, "&Display");
+  menu_bar->Append(prefs_menu, "&Prefs");
   menu_bar->Append(help_menu, "&Help");
 
   // Associate the menu bar with the frame
@@ -405,31 +451,11 @@ void PxiChild::MakeMenus(void)
 }
 
 
-#ifdef UNUSED
-// Intercept menu commands
-void PxiFrame::OnMenuCommand(int id)
-{
-  switch (id) {
-  case PXI_QUIT:	{Close();break;}
-  case PXI_LOAD_FILE: {MakeChild();break;}
-  case PXI_DATA_ONEDOT: {MakeOneDot();break;}
-  case PXI_DATA_GRID: {
-    char *data_file_name=MakeDataFile();
-    if (data_file_name)	MakeChild(data_file_name);
-    break;
-  }
-  case PXI_ABOUT: {
-    (void)wxMessageBox("PlotX: n-Dimensional Data Plotter\nAuthor: Eugene Grayver"
-		       " egrayver@cco.caltech.edu\n(c) Caltech EPS, 1995,1996\n"
-		       "To register send $25 to\nEugene Grayver\n12030 Rochester #214"
-		       "\nLos Angeles, CA 90025", "About PlotX");break;}
-  }
-}
-#endif //UNUSED
-
 // Show details
+
 void PxiCanvas::ShowDetail(void)
 {
+  char tempstr[200];
   FileHeader header=headers[1];
   wxString message;
   int		i1,i;
@@ -454,20 +480,6 @@ void PxiCanvas::ShowDetail(void)
     sprintf(tempstr,"Margin of error:      %4.4f\n",header.MError());
     message+=tempstr;
   }
-  /*
-  if (header.Matrix()) {
-    sprintf(tempstr,"Matrix dimensions:    %d x %d\n",header.Matrix()->DimX(),header.Matrix()->DimY());
-    message+=tempstr;
-    sprintf(tempstr,"_______MATRIX_______\n");
-    for (i1=0;i1<header.Matrix()->DimY();i1++) {
-      for (i=0;i<header.Matrix()->DimX();i++) {
-	sprintf(tempstr,"%2.1lf,%2.1lf ",(*header.Matrix())(i1,i).row,(*header.Matrix())(i1,i).col);
-	message+=tempstr;
-      }
-      message+='\n';
-    }
-  }
-*/
   wxMessageBox(message,"File Details",wxOK);
 }
 
@@ -486,29 +498,11 @@ void PxiCanvas::StopIt(void)
   }
 }
 
-void PxiCanvas::MakeOverlayData(void)
-{
-  if (exp_data) {delete exp_data;exp_data=NULL;}
-  dialogExpData dialog(headers[1].FileName(),(PxiFrame *)this->GetParent());
-  if (dialog.ShowModal() == wxID_OK) {
-    ExpDataParams P;
-    dialog.GetParams(P);
-    exp_data=new ExpData(P);
-    dialog.LoadNow();
-  }
-}
-
-void PxiCanvas::MakeOverlayFile(void)
-{
-  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
-  if (s) {
-    FileHeader temp_header(s);
-    if ( (temp_header.NumStrategies()!=headers[1].NumStrategies()) ||
-	 (temp_header.NumInfosets()!=headers[1].NumInfosets()) )
-      wxMessageBox("These data files do not\nhave the same structure!");
-    else
-      headers.Append(temp_header);
-  }
+void PxiCanvas::NewExpData(ExpDataParams &P) 
+{ 
+  if(exp_data) delete exp_data;
+  exp_data = NULL;
+  exp_data = new ExpData(P); 
 }
 
 void PxiCanvas::OnChar(wxKeyEvent &ev)
@@ -522,8 +516,6 @@ void PxiCanvas::OnChar(wxKeyEvent &ev)
     break;
   }
 }
-
-#define TEXT_MARGIN	.05
 
 void PxiCanvas::OnEvent(wxMouseEvent &ev)
 {
@@ -598,6 +590,8 @@ void PxiChild::print(wxOutputOption /*fit*/, bool preview)
 
 void PxiChild::print_eps(wxOutputOption fit)
 {
+#ifdef __WXMSW__
+#else
   wxPostScriptDC dc("junk.pxi",true, this);
   if (dc.Ok()) {
     dc.StartDoc("Pxi printout");
@@ -606,9 +600,10 @@ void PxiChild::print_eps(wxOutputOption fit)
     dc.EndPage();
     dc.EndDoc();
   }
+#endif // __WXMSW__
 }
 
-#ifdef wx_msw
+#ifdef __WXMSW__
 void PxiChild::print_mf(wxOutputOption fit, bool save_mf)
 {
   wxMetaFileDC dc;
@@ -627,9 +622,9 @@ void PxiChild::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 {
   wxMessageBox("Metafiles are not supported under X");
 }
-#endif
+#endif __WXMSW__
 
-#ifdef wx_msw
+#ifdef __WXMSW__
 void PxiChild::save_mf(wxOutputOption fit, bool save_mf)
 {
   char *s=copystring(wxFileSelector("Save Metafile",NULL,NULL,NULL,"*.wmf"));
@@ -652,139 +647,7 @@ void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 {
   wxMessageBox("Metafiles are not supported under X");
 }
-#endif
-
-#ifdef UNUSED
-// Intercept menu commands
-void PxiChild::OnMenuCommand(int id)
-{
-  switch (id) {
-  case PXI_PRINT_EPS:         // To use the special wxWindows EPS driver
-    // under Windows 3.1, specify "PostScript"
-    {
-      wxPostScriptDC dc(NULL,TRUE);
-      if (dc.Ok()) {
-	dc.StartDoc("Pxi printout");
-	dc.StartPage();
-	this->canvas->Update(dc,PXI_UPDATE_FILE);
-	dc.EndPage();
-	dc.EndDoc();
-      }
-      break;
-    }
-#ifdef wx_msw
-  case PXI_PRINT: {
-    wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
-    // normal Windows printing under Win 3.1
-    if (dc.Ok()) {
-      dc.StartDoc("PXI printout");
-      dc.StartPage();
-      this->canvas->Update(dc,PXI_UPDATE_PRINTER);
-      dc.EndPage();
-      dc.EndDoc();
-    }
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-    break;
-  }
-  case PXI_COPY_MF: {
-    wxMetaFileDC dc;
-    if (dc.Ok()) {
-      this->canvas->Update(dc,PXI_UPDATE_METAFILE);
-      wxMetaFile *mf = dc.Close();
-      if (mf) {
-	mf->SetClipboard((int)(dc.MaxX()+10),(int)(dc.MaxY()+10));
-	delete mf;
-      }
-    }
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-    break;
-  }
-  case PXI_SAVE_MF: {
-    char *s=copystring(wxFileSelector("Save Metafile",NULL,NULL,NULL,"*.wmf"));
-    if (s) {
-      wxMetaFileDC dc(s);
-      if (dc.Ok()) {
-	this->canvas->Update(dc,PXI_UPDATE_METAFILE);
-        wxMetaFile *mf = dc.Close();
-        if (mf) {
-	  delete mf;
-	  wxMakeMetaFilePlaceable(s,dc.MinX(),dc.MinY(),dc.MaxX(),dc.MaxY());
-        }
-      }
-      delete [] s;
-      this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-      break;
-    }
-  }
-#endif
-  case PXI_CHILD_QUIT:	Close(); break;
-  case PXI_FILE_DETAIL:		canvas->ShowDetail();	break;
-  case PXI_DISPLAY_OPTIONS:
-    canvas->DrawSettings()->SetOptions(this);
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-    break;
-  case PXI_DATA_OVERLAY_DATA:
-    this->canvas->MakeOverlayData();
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-    break;
-  case PXI_DATA_OVERLAY_FILE:
-    this->canvas->MakeOverlayFile();
-    this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
-    break;
-  default:
-    frame->OnMenuCommand(id);
-    break;
-  }
-}
-#endif // UNUSED
-
-
-#ifdef NOT_IMPLEMENTED
-void solver_update_func1(int total=-1,wxProgressIndicator1 *_p=NULL)
-{
-  static wxProgressIndicator1 *p;
-  if (total!=-1) {	// initialization
-    p=_p;
-    p->SetMax(total);
-  }
-  else
-    p->Update();
-}
-
-// solver update func--a function to periodically relinquish the control of the CPU
-void solver_update_func(void)
-{wxYield();solver_update_func1();}
-#endif // NOT_IMPLEMENTED
-
-// bench mark function--tests how long it takes this cpu to calculate one equ
-double bench_mark(void)
-{
-  double a=3.34343;
-  wxStartTimer();
-  // do 10000 tests for equ;
-  for (int i=0;i<10000;i++) {a=exp(a)*exp(a/a)*exp(a*a)*exp(a+1);a=3.34343;}
-  return (((double)wxGetElapsedTime())/10000.0);
-}
-
-// calc num steps.  this calculates the number of combinations possible with
-// 'num' integers, 0..'max', such that their sum is <='max'  See any math book
-// for explanation of this formula:
-// total_num=( n+k-1 )
-//           (  k-1  )
-// (num+max-1)!/(max!(num-1)!)
-unsigned long factorial(unsigned long num)
-{
-  unsigned long temp=1;
-  for (unsigned long i=num;i>0;i--) temp*=i;
-  return temp;
-}
-
-unsigned long calc_num_steps(int dim,int steps)
-{
-  unsigned long temp,temp1=1;
-  for (temp=steps+dim-1;temp>steps;temp--) temp1*=temp;
-  return (temp1/factorial(dim-1));
-}
+#endif // __WXMSW__
 
 void PxiFrame::OnCloseWindow(wxCloseEvent &)
 {
@@ -809,16 +672,21 @@ void PxiCanvas::OnPaint(wxPaintEvent &)
 //*************************************************************************
 //************************* DRAW SETTINGS *********************************
 //*************************************************************************
+
 PxiDrawSettings::PxiDrawSettings(FileHeader &header)
+  : overlay_font(8,wxSWISS,wxNORMAL,wxBOLD),
+    label_font(8,wxSWISS,wxNORMAL,wxBOLD), 
+    axis_font(8,wxSWISS,wxNORMAL,wxBOLD),
+    clear_brush("BLACK",wxTRANSPARENT),
+    exp_data_brush("BLACK",wxSOLID), 
+    axis_text_color("BLUE")
 {
   int i,j;
-  overlay_font=new wxFont(8,wxSWISS,wxNORMAL,wxBOLD);
   overlay_symbol=OVERLAY_NUMBER;
   overlay_lines=FALSE;
   overlay_token_size=DEF_TOKEN_SIZE;
   color_mode=COLOR_EQU;
   restart_overlay_colors=TRUE;
-  label_font=new wxFont(10,wxSWISS,wxNORMAL,wxNORMAL);
   connect_dots=FALSE;
   data_mode=header.DataType();
   plot_mode=PXI_PLOT_X;
@@ -904,141 +772,18 @@ Bool PxiDrawSettings::CheckPlot2Mode(void)
   return TRUE;
 }
 
-#define DELTA			1e-9
-
 void PxiDrawSettings::SetOptions(wxWindow *parent)
 {
   dialogDrawSettings dialog(parent, *this);
-  if(dialog.ShowModal() == wxID_OK){ 
-    stop_min = strtod(dialog.GetMinLam(),NULL);
-    stop_max = strtod(dialog.GetMaxLam(),NULL);
-    data_min = strtod(dialog.GetMinY(),NULL);
-    data_max = strtod(dialog.GetMaxY(),NULL);
-
-    int mode = dialog.GetPlotMode();
-    if(mode==0)plot_mode=PXI_PLOT_X;
-    if(mode==1)plot_mode=PXI_PLOT_2;
-    if(mode==2)plot_mode=PXI_PLOT_3;
-
-    mode = dialog.GetColorMode();
-    if(mode==0)color_mode=COLOR_EQU;
-    if(mode==1)color_mode=COLOR_PROB;
-    if(mode==2)color_mode=COLOR_NONE;
-
-    one_or_two=1;
-    if(dialog.GetTwoPlots()) one_or_two = 2;
-    connect_dots = dialog.GetConnectDots();
-    restart_overlay_colors = dialog.GetRestartColors();
-  };
 }
 
-void PxiDrawSettings::overlay_func(wxButton &ob,wxEvent &)
+void PxiDrawSettings::SetPlotFeatures(unsigned int feat)
 {
-#ifdef NOT_IMPLEMENTED
-  PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
-  MyDialogBox *overlay_dialog=new MyDialogBox(NULL,"Overlay Options");
-  wxStringList *overlay_token_list=new wxStringList;
-  overlay_token_list->Add("Numbers");overlay_token_list->Add("Tokens");
-  char *overlay_token_str=new char[20];
-  if (draw_settings->GetOverlaySym()==OVERLAY_NUMBER)
-    strcpy(overlay_token_str,"Numbers"); else strcpy(overlay_token_str,"Tokens");
-  overlay_dialog->Form()->Add(wxMakeFormString("Overlay Token",&overlay_token_str,wxFORM_RADIOBOX,
-					       new wxList(wxMakeConstraintStrings(overlay_token_list), 0),NULL,wxVERTICAL));
-  overlay_dialog->Form()->Add(wxMakeFormNewLine());
-  Bool	overlay_connect=draw_settings->GetOverlayLines();
-  overlay_dialog->Form()->Add(wxMakeFormBool("Connect points",&overlay_connect));
-  overlay_dialog->Form()->Add(wxMakeFormNewLine());
-  wxFormItem	*overlay_font_button=wxMakeFormButton("Overlay Font",(wxFunction)PxiDrawSettings::overlay_font_func);
-  overlay_dialog->Form()->Add(overlay_font_button);
-  overlay_dialog->Form()->Add(wxMakeFormNewLine());
-  int token_size=draw_settings->GetTokenSize();
-  overlay_dialog->Form()->Add(wxMakeFormShort("Token Size",&token_size,wxFORM_SLIDER,
-					      new wxList(wxMakeConstraintRange(MIN_TOKEN_SIZE,MAX_TOKEN_SIZE), 0)));
-  
-  overlay_dialog->Form()->AssociatePanel(overlay_dialog);
-  ((wxButton *)overlay_font_button->GetPanelItem())->SetClientData((char *)draw_settings);
-  overlay_dialog->Go1();
-  if (overlay_dialog->Completed()==wxOK) {
-    draw_settings->SetOverlayLines(overlay_connect);
-    int overlay_token=wxListFindString(overlay_token_list,overlay_token_str);
-    if (overlay_token==0)
-      draw_settings->SetOverlaySym(OVERLAY_NUMBER);
-    else {
-      draw_settings->SetOverlaySym(OVERLAY_TOKEN);
-      draw_settings->SetTokenSize(token_size);
-    }
-    
-  }
-  delete overlay_dialog;
-#endif // NOT_IMPLEMENTED
-}
-void PxiDrawSettings::plot_features_func(wxButton &ob,wxEvent &)
-{((PxiDrawSettings *)ob.GetClientData())->AskPlotFeatures();}
-
-
-void PxiDrawSettings::AskPlotFeatures(void)
-{
-#ifdef NOT_IMPLEMENTED
-  MyDialogBox *plot_feat_dialog;
-  unsigned int feat=PlotFeatures();
   switch (plot_mode) {
-  case	PXI_PLOT_3: {
-    plot_feat_dialog=new MyDialogBox(0,"Plot3 Options");
-    Bool draw_axis=(feat&DRAW_AXIS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Axis",&draw_axis));
-    Bool draw_labels=(feat&DRAW_LABELS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Labels",&draw_labels));
-    plot_feat_dialog->Go();
-    if (plot_feat_dialog->Completed()==wxOK) {
-      feat=0;
-      if (draw_axis) feat|=DRAW_AXIS;
-      if (draw_labels) feat|=DRAW_LABELS;
-    }
-    break;
+  case PXI_PLOT_3: plot3_features=feat;break;
+  case PXI_PLOT_X: plotx_features=feat;break;
+  case PXI_PLOT_2: plot2_features=feat;break;
   }
-  case	PXI_PLOT_X: {
-    plot_feat_dialog=new MyDialogBox(0,"PlotX Options");
-    Bool draw_axis=(feat&DRAW_AXIS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Axis",&draw_axis));
-    Bool draw_ticks=(feat&DRAW_TICKS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Ticks",&draw_ticks));
-    plot_feat_dialog->Form()->Add(wxMakeFormNewLine());
-    Bool draw_nums=(feat&DRAW_NUMS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Nums",&draw_nums));
-    plot_feat_dialog->Go();
-    if (plot_feat_dialog->Completed()==wxOK) {
-      feat=0;
-      if (draw_axis) feat|=DRAW_AXIS;
-      if (draw_ticks) feat|=DRAW_TICKS;
-      if (draw_nums) feat|=DRAW_NUMS;
-    }
-    break;
-  }
-  case	PXI_PLOT_2: {
-    plot_feat_dialog=new MyDialogBox(0,"Plot2 Options");
-    Bool draw_axis=(feat&DRAW_AXIS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Axis",&draw_axis));
-    Bool draw_ticks=(feat&DRAW_TICKS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Ticks",&draw_ticks));
-    plot_feat_dialog->Form()->Add(wxMakeFormNewLine());
-    Bool draw_nums=(feat&DRAW_NUMS) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Draw Nums",&draw_nums));
-    Bool draw_square=(feat&DRAW_SQUARE) ? TRUE : FALSE;
-    plot_feat_dialog->Form()->Add(wxMakeFormBool("Square Axis",&draw_square));
-    plot_feat_dialog->Go();
-    if (plot_feat_dialog->Completed()==wxOK) {
-      feat=0;
-      if (draw_axis) feat|=DRAW_AXIS;
-      if (draw_ticks) feat|=DRAW_TICKS;
-      if (draw_nums) feat|=DRAW_NUMS;
-      if (draw_square) feat|=DRAW_SQUARE;
-    }
-    break;
-  }
-  }
-  SetPlotFeatures(feat);
-  delete plot_feat_dialog;
-#endif // NOT_IMPLEMENTED
 }
 
 unsigned int PxiDrawSettings::PlotFeatures(void)
@@ -1050,27 +795,6 @@ unsigned int PxiDrawSettings::PlotFeatures(void)
   }
 }
 
-void PxiDrawSettings::label_font_func(wxButton &ob,wxEvent &)
-{
-#ifdef NOT_IMPLEMENTED
-  PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
-  FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetLabelFont());
-  if (f->Completed()==wxOK)
-    draw_settings->SetLabelFont(f->MakeFont());
-  delete f;
-#endif // NOT_IMPLEMENTED
-}
-
-void PxiDrawSettings::overlay_font_func(wxButton &ob,wxEvent &)
-{
-#ifdef NOT_IMPLEMENTED
-  PxiDrawSettings	*draw_settings=(PxiDrawSettings *)ob.GetClientData();
-  FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetOverlayFont());
-  if (f->Completed()==wxOK)
-    draw_settings->SetOverlayFont(f->MakeFont());
-  delete f;
-#endif // NOT_IMPLEMENTED
-}
 //
 // A general-purpose dialog box to display the description of the exception
 //
@@ -1082,260 +806,4 @@ void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
   wxMessageBox(message, "PXI Error", p_style, p_parent);
 }
 
-const int idSETTINGS_WHICH_PLOT_LISTBOX = 2018;
-const int idSETTINGS_WHICH_INFOSET_LISTBOX = 2019;
-const int idSETTINGS_INFOSET_LISTBOX = 2020;
-const int idSETTINGS_ACTION_LISTBOX = 2021;
-const int idSETTINGS_OVERLAY_BUTTON = 2022;
-const int idSETTINGS_FONT_BUTTON = 2023;
-const int idSETTINGS_PLOT_BUTTON = 2024;
-
-BEGIN_EVENT_TABLE(dialogDrawSettings, guiAutoDialog)
-  EVT_LISTBOX(idSETTINGS_WHICH_PLOT_LISTBOX, dialogDrawSettings::OnWhichPlot)
-  EVT_LISTBOX(idSETTINGS_WHICH_INFOSET_LISTBOX, dialogDrawSettings::OnWhichInfoset)
-  EVT_LISTBOX(idSETTINGS_INFOSET_LISTBOX, dialogDrawSettings::OnInfoset)
-  EVT_LISTBOX(idSETTINGS_ACTION_LISTBOX, dialogDrawSettings::OnAction)
-  EVT_BUTTON(idSETTINGS_OVERLAY_BUTTON, dialogDrawSettings::OnOverlay)
-  EVT_BUTTON(idSETTINGS_FONT_BUTTON, dialogDrawSettings::OnFont)
-  EVT_BUTTON(idSETTINGS_PLOT_BUTTON, dialogDrawSettings::OnPlot)
-END_EVENT_TABLE()
-
-dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
-  : guiAutoDialog(p_parent, "Draw Settings"), 
-    draw_settings(s)
-{
-  int num_plots = 1;
-  if(draw_settings.one_or_two==2) num_plots = 2;
-  
-  m_whichPlotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
-  for (int i = 1; i <= num_plots; i++) {
-    char tmp[80];
-    sprintf(tmp, "Plot %d", i);
-    m_whichPlotItem->Append(tmp);
-  }
-  m_whichPlotItem->SetSelection(0);
-  
-  m_whichIsetItem = new wxListBox(this, idSETTINGS_WHICH_INFOSET_LISTBOX, 
-				  wxDefaultPosition, wxDefaultSize,0,0,
-#ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
-				  wxLB_EXTENDED
-#else
-				  wxLB_MULTIPLE
-#endif // __WXGTK__
-				  );
-  wxCommandEvent event;
-  OnWhichPlot(event);
-  
-  m_infosetItem = new wxListBox(this, idSETTINGS_INFOSET_LISTBOX);
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    char tmp[80];
-    sprintf(tmp, "Infoset %d", iset);
-    m_infosetItem->Append(tmp);
-  }
-  m_infosetItem->SetSelection(0);
-  
-  m_actionItem = new wxListBox(this, idSETTINGS_ACTION_LISTBOX, 
-			       wxDefaultPosition, wxDefaultSize,0,0,
-#ifdef __WXGTK__  // the wxGTK multiple-selection listbox is flaky (2.1.11)
-			       wxLB_EXTENDED
-#else
-                               wxLB_MULTIPLE
-#endif // __WXGTK__
-			       );
-  OnInfoset(event);
-  
-  char tmp[80];
-  sprintf(tmp, "%f", draw_settings.stop_min);
-  m_minLam = new wxNumberItem(this, "minLam", tmp);
-  sprintf(tmp, "%f", draw_settings.stop_max);
-  m_maxLam = new wxNumberItem(this, "maxLam", tmp);
-  sprintf(tmp, "%f", draw_settings.data_min);
-  m_minY = new wxNumberItem(this, "minLam", tmp);
-  sprintf(tmp, "%f", draw_settings.data_max);
-  m_maxY = new wxNumberItem(this, "maxLam", tmp);
-  
-  wxBoxSizer *lambdaSizer = new wxBoxSizer(wxHORIZONTAL);
-  lambdaSizer->Add(new wxStaticText(this, -1, "X Min"),
-		   0, wxALL | wxCENTER, 5);
-  lambdaSizer->Add(m_minLam, 0, wxALL, 5);
-  lambdaSizer->Add(new wxStaticText(this, -1, "X Max"),
-		   0, wxALL | wxCENTER, 5);
-  lambdaSizer->Add(m_maxLam, 0, wxALL, 5);
-  
-  wxBoxSizer *dataSizer = new wxBoxSizer(wxHORIZONTAL);
-  dataSizer->Add(new wxStaticText(this, -1, "Y Min"),
-		   0, wxALL | wxCENTER, 5);
-  dataSizer->Add(m_minY, 0, wxALL, 5);
-  dataSizer->Add(new wxStaticText(this, -1, "Y Max"),
-		   0, wxALL | wxCENTER, 5);
-  dataSizer->Add(m_maxY, 0, wxALL, 5);
-  
-  wxBoxSizer *plotSizer = new wxBoxSizer(wxHORIZONTAL);
-  plotSizer->Add(m_whichPlotItem, 0, wxCENTRE | wxALL, 5);
-  plotSizer->Add(m_whichIsetItem, 0, wxCENTRE | wxALL, 5);
-  
-  wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
-  selectSizer->Add(m_infosetItem, 0, wxCENTRE | wxALL, 5);
-  selectSizer->Add(m_actionItem, 0, wxCENTRE | wxALL, 5);
-  
-  wxString plotModeChoices[] = { "Plot X", "Plot 2", "Plot 3" };
-  m_plotMode = new wxRadioBox(this, -1, "Plot Mode",
-			      wxDefaultPosition, wxDefaultSize,
-			      3, plotModeChoices, 0, wxRA_SPECIFY_ROWS);
-  
-  if (draw_settings.plot_mode == PXI_PLOT_X) 
-    m_plotMode->SetSelection(0);
-  else if (draw_settings.plot_mode == PXI_PLOT_2) 
-    m_plotMode->SetSelection(1);
-  else if (draw_settings.plot_mode == PXI_PLOT_3) 
-    m_plotMode->SetSelection(2);
-  
-  wxString colorModeChoices[] = { "Equ", "Prob", "None" };
-  m_colorMode = new wxRadioBox(this, -1, "Color Mode",
-			       wxDefaultPosition, wxDefaultSize,
-			       3, colorModeChoices, 0, wxRA_SPECIFY_ROWS);
-  
-  if (draw_settings.color_mode == PXI_PLOT_X) 
-    m_colorMode->SetSelection(0);
-  else if (draw_settings.color_mode == PXI_PLOT_2) 
-    m_colorMode->SetSelection(1);
-  else if (draw_settings.color_mode == PXI_PLOT_3) 
-    m_colorMode->SetSelection(2);
-  
-  wxBoxSizer *modeSizer = new wxBoxSizer(wxHORIZONTAL);
-  modeSizer->Add(m_plotMode, 0, wxALL, 5);
-  modeSizer->Add(m_colorMode, 0, wxALL, 5);
-  
-  m_overlayButton = new wxButton(this, idSETTINGS_OVERLAY_BUTTON, "Overlay");
-  m_fontButton = new wxButton(this, idSETTINGS_FONT_BUTTON, "Font");
-  m_plotButton = new wxButton(this, idSETTINGS_PLOT_BUTTON, "Plot");
-  
-  m_twoPlots = new wxCheckBox(this, -1, "Two Plots");
-  if(draw_settings.one_or_two==2)
-    m_twoPlots->SetValue(true);
-  else
-    m_twoPlots->SetValue(false);
-
-  m_connectDots = new wxCheckBox(this, -1, "Connect Dots");
-  m_connectDots->SetValue(draw_settings.ConnectDots());
-
-  m_restartColors = new wxCheckBox(this, -1, "Restart Colors");
-  m_restartColors->SetValue(draw_settings.restart_overlay_colors);
-
-  wxBoxSizer *miscSizer = new wxBoxSizer(wxHORIZONTAL);
-  miscSizer->Add(m_twoPlots, 0, wxALL, 5);
-  miscSizer->Add(m_connectDots, 0, wxALL, 5);
-  miscSizer->Add(m_restartColors, 0, wxALL, 5);
-
-  wxBoxSizer *botSizer = new wxBoxSizer(wxHORIZONTAL);
-  botSizer->Add(m_overlayButton, 0, wxALL, 5);
-  botSizer->Add(m_fontButton, 0, wxALL, 5);
-  botSizer->Add(m_plotButton, 0, wxALL, 5);
-
-  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-  allSizer->Add(new wxStaticText(this, -1, "Display Range:"), 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(lambdaSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(dataSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(plotSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(selectSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(modeSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(miscSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(botSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetSizer(allSizer); 
-  allSizer->Fit(this);
-  allSizer->SetSizeHints(this); 
-  Layout();
-}
-
-dialogDrawSettings::~dialogDrawSettings()
-{ }
-
-void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
-{
-  int i = m_whichPlotItem->GetSelection()+1; 
-
-  m_whichIsetItem->Clear();
-  for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-    char tmp[80];
-    sprintf(tmp, "Infoset %d", iset);
-    m_whichIsetItem->Append(tmp);
-  }
-  if(i==1)
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      if (draw_settings.plot_top.Contains(iset)) 
-	m_whichIsetItem->SetSelection(iset-1, true);
-    }
-  else
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      if (draw_settings.plot_bottom.Contains(iset)) 
-	m_whichIsetItem->SetSelection(iset-1, true);
-    }
-}
-
-void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
-{
-  int i = m_whichPlotItem->GetSelection()+1; 
-
-  if(i==1)
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      bool flag = m_whichIsetItem->Selected(iset-1);
-      bool member = draw_settings.plot_top.Contains(iset);
-      if (flag && !member) 
-	draw_settings.plot_top.Append(iset);
-      else if (!flag && member) 
-	draw_settings.plot_top.Remove(draw_settings.plot_top.Find(iset));
-    }
-  else 
-    for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
-      bool flag = m_whichIsetItem->Selected(iset-1);
-      bool member = draw_settings.plot_bottom.Contains(iset);
-      if (flag && !member) 
-	draw_settings.plot_bottom.Append(iset);
-      else if(!flag && member)
-	draw_settings.plot_bottom.Remove(draw_settings.plot_bottom.Find(iset));
-    }
-}
-
-void dialogDrawSettings::OnInfoset(wxCommandEvent &)
-{
-  int iset = m_infosetItem->GetSelection()+1; 
-
-  m_actionItem->Clear();
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
-    char tmp[80];
-    sprintf(tmp, "Action %d", act);
-    m_actionItem->Append(tmp);
-  }
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) {
-    if(draw_settings.strategy_show[iset][act])
-      m_actionItem->SetSelection(act - 1, true);
-  }
-  m_actionItem->Enable(true);
-}
-
-void dialogDrawSettings::OnAction(wxCommandEvent &)
-{ 
-  int iset = m_infosetItem->GetSelection()+1; 
-
-  for (int act = 1; act <= draw_settings.strategy_show[iset].Length(); act++) 
-    draw_settings.strategy_show[iset][act] = m_actionItem->Selected(act-1);
-  
-}
-
-void dialogDrawSettings::OnOverlay(wxCommandEvent &)
-{
-  //  draw_settings.overlay_func();
-}
-
-void dialogDrawSettings::OnFont(wxCommandEvent &)
-{ 
-  //  draw_settings.label_font_func();
-}
-
-void dialogDrawSettings::OnPlot(wxCommandEvent &)
-{ 
-  //  draw_settings.plot_features_func();
-}
 

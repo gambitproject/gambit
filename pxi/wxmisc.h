@@ -57,16 +57,17 @@ public:
 
 class wxNumberItem : public wxTextCtrl {
 private:
-  double m_value;
   wxString m_data;
+  double m_value; 
 
 public:
   wxNumberItem(wxPanel *p_parent, char *p_label, const wxString &p_default,
-	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
-  virtual ~wxNumberItem() { }
+	       const wxPoint &pos = wxDefaultPosition, 
+	       const wxSize &size = wxDefaultSize);
+  virtual ~wxNumberItem();
 
   void SetNumber(const double &p_value);
-  double GetNumber(void) const { return m_value; }
+  double GetNumber(void);
 };
 
 typedef enum {

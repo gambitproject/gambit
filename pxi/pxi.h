@@ -27,8 +27,9 @@
 #include "expdata.h"
 
 #define PXI_QUIT              100
-#define PXI_OUTPUT             101
-#define PXI_ABOUT             108
+#define PXI_OUTPUT            101
+#define PXI_HELP_ABOUT        108
+#define PXI_HELP_CONTENTS     109
 #define PXI_LOAD_FILE         111
 #define	PXI_NEW_WINDOW	      117
 #define	PXI_CHILD_QUIT	      118
@@ -39,6 +40,12 @@
 #define	PXI_UPDATE_PRINTER    121
 #define	PXI_UPDATE_METAFILE   122
 #define	PXI_FILE_DETAIL	      123
+#define	PXI_PREFS_COLORS      124
+#define	PXI_PREFS_FONTS    125
+#define	PXI_PREFS_FONT_AXIS    131
+#define	PXI_PREFS_FONT_OVERLAY  132
+#define	PXI_PREFS_FONT_LABEL    133
+
 #define	PXI_PLOT_X              0
 #define	PXI_PLOT_3              1
 #define PXI_PLOT_2              2
@@ -47,7 +54,6 @@
 #define	PXI_KEY_STOP          WXK_SPACE
 #define	PXI_DISPLAY_OPTIONS   128
 
-#define PXI_DATA_GRID         205
 #define PXI_DATA_OVERLAY_DATA 215
 #define PXI_DATA_OVERLAY_FILE 220
 
@@ -63,11 +69,15 @@
 
 #define TOP_PLOT        0
 #define	BOTTOM_PLOT     1
+#define TEXT_MARGIN	.05
+#define DELTA           1e-9
+
 
 #define	COLOR_EQU       1
 #define COLOR_PROB      2
 #define COLOR_NONE      3
 
+#define PXI_GUI_HELP  "Extensive Form GUI"
 
 /*********************** PXI.H ******************************************/
 
@@ -104,30 +114,27 @@ private:
   friend	gOutput &operator<<(gOutput &op,const show_player_strategies &p);
   gBlock<show_player_strategies>	strategy_show;
   gBlock<int>	plot_top,plot_bottom;
-  //	int		plot_left,plot_right;
   float		stop_min,stop_max,data_min,data_max;
   double	l_start,l_stop,l_step;
-  wxFont	*overlay_font;
-  wxFont	*label_font;
+  wxFont	overlay_font, label_font, axis_font;
+  wxBrush       clear_brush, exp_data_brush;
+  wxColour      axis_text_color;
   int		overlay_symbol;
   Bool		overlay_lines;
   int		overlay_token_size;
   unsigned int plot3_features,plotx_features,plot2_features;
   Bool CheckPlot3Mode(void);
   Bool CheckPlot2Mode(void);
-  void AskPlotFeatures(void);
-  static void plot_features_func(wxButton &ob,wxEvent &);
 public:
-  static void overlay_func(wxButton &ob,wxEvent &);
-  static void overlay_font_func(wxButton &ob,wxEvent &);
-  static void label_font_func(wxButton &ob,wxEvent &);
   PxiDrawSettings(FileHeader &header);
+
   // Get* functions
+
   // PlotMode, returns the type of plot currently selected:
-  // one of PLOT_X | PLOT_3 | PLOT_2
+  //   one of PLOT_X | PLOT_3 | PLOT_2
   int 	GetPlotMode(void) {return plot_mode;}
   // NumPlots, returns either 1 or 2, corresponding to # of grids/plots per page
-  // currently only works for PlotX
+  //   currently only works for PlotX
   int	GetNumPlots(void) {return one_or_two;}
   // DataMode, returns one of DATA_TYPE_ARITH | DATA_TYPE_LOG indicating data type
   int	GetDataMode(void) {return data_mode;}
@@ -150,29 +157,27 @@ public:
   // DataMax, returns the largest value of y to plot
   double GetDataMax(void) {return data_max;}
   // If called with no arguments or 0, returns the total # of players to be
-  // displayed on the top plot for PlotX mode, or the left triangle for
-  // Plot3 mode.  If called with an argument, returns the actual player #
+  //   displayed on the top plot for PlotX mode, or the left triangle for
+  //   Plot3 mode.  If called with an argument, returns the actual player #
   int	GetPlotTop(int i=0)
     {if (i==0) return plot_top.Length(); else return plot_top[i];}
   // PlotBottom, see PlotTop
   int	GetPlotBottom(int i=0)
     {if (i==0) return plot_bottom.Length(); else return plot_bottom[i];}
-  // PlotLeft,
-  //	int GetPlotLeft(void) {return plot_left;}
-  //	int GetPlotRight(void) {return plot_right;}
   // OverlayFont, if the experimental data overlay is done using the number
-  // of the point in the file, this font is used to display that number
-  wxFont *GetOverlayFont(void) {return overlay_font;}
+  //   of the point in the file, this font is used to display that number
+  const wxFont &GetOverlayFont(void) const {return overlay_font;}
   // LabelFont, returns the font to be used for labels [created w/ Shift-Click]
-  wxFont *GetLabelFont(void) {return label_font;}
+  const wxFont &GetLabelFont(void) const {return label_font;}
   // OverlaySym, returns one of : OVERLAY_CIRCLE | OVERLAY_NUMBER, indicating
-  // if the experimental data overlay points will be plotted using little circles
-  // or their number in the data file
-  int GetOverlaySym(void) {return overlay_symbol;}
+  //   if the experimental data overlay points will be plotted using little circles
+  //   or their number in the data file
+  const int GetOverlaySym(void) const {return overlay_symbol;}
   // OverlaySize, determines the size of the tokens use for overlay
-  int GetTokenSize(void) {return overlay_token_size;}
+  const int GetTokenSize(void) const {return overlay_token_size;}
   // OverlayLines, determines if the experimental data overlay dots will be connected
-  Bool GetOverlayLines(void) {return overlay_lines;}
+  const Bool GetOverlayLines(void) const {return overlay_lines;}
+
   // ConnectDots, determines if the regular data file dots will be connected
   Bool ConnectDots(void) {return connect_dots;}
   // RestartOverlayColors, determines if the colors used for the equilibria
@@ -185,23 +190,32 @@ public:
   Bool RangeY(double y) {return (y>data_min && y<data_max);}
   // PlotFeatures determines if axis and labels,etc. are to be drawn
   unsigned int PlotFeatures(void);
+
   // Set* functions
-  void	SetOptions(wxWindow *parent);
-  void	SetStopMax(double sm) {stop_max=sm;}
-  void	SetStopMin(double sm) {stop_min=sm;}
-  void	ResetSetStop(void) {stop_min=l_start;stop_max=l_stop;}
+
+  void SetPlotFeatures(unsigned int feat);
+  void SetOptions(wxWindow *parent);
+  void SetStopMax(double sm) {stop_max=sm;}
+  void SetStopMin(double sm) {stop_min=sm;}
+  void ResetSetStop(void) {stop_min=l_start;stop_max=l_stop;}
   
-  void	SetOverlayFont(wxFont *f) {overlay_font=f;}
-  void	SetOverlaySym(int s) {overlay_symbol=s;}
-  void	SetOverlayLines(Bool l)	{overlay_lines=l;}
-  void	SetTokenSize(int s) {overlay_token_size=s;}
-  void	SetLabelFont(wxFont *f)	{label_font=f;}
+  void SetOverlaySym(int s) {overlay_symbol=s;}
+  void SetOverlayLines(Bool l)	{overlay_lines=l;}
+  void SetTokenSize(int s) {overlay_token_size=s;}
+  void SetAxisFont(const wxFont &f) {axis_font=f;}
+  void SetLabelFont(const wxFont &f) {label_font=f;}
+  void SetOverlayFont(const wxFont &f) {overlay_font=f;}
+  const wxFont &GetAxisFont(void) {return axis_font;}
+  const wxBrush &GetDataBrush(void) {return exp_data_brush;}
+  const wxBrush &GetClearBrush(void) {return clear_brush;}
+  const wxColour &GetAxisTextColor(void) {return axis_text_color;}
 };
 
 // Define a new canvas
 
 class PxiCanvas: public wxScrolledWindow
 {
+friend class PxiChild;
 public:
   typedef struct LABELSTRUCT {
     friend gOutput &operator<<(gOutput &op,const LABELSTRUCT &l);
@@ -229,15 +243,18 @@ private:
   void PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header);
   void PlotLabels(wxDC &dc,int ch,int cw);
   
-  void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int ch,int cw,int plot);
+  void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,
+		      int ch,int cw,int plot);
   double CalcY_X(double y,int ch,int plot);
   double CalcX_X(double x,int cw);
   
-  void DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,int ch,int cw,int plot);
+  void DrawExpPoint_3(wxDC &dc,double cur_e,int iset,
+		      int st1,int st2,int ch,int cw,int plot);
   double CalcY_3(double p1,int ch,int cw);
   double CalcX_3(double p1,double p2,int ch,int cw,int plot);
   
-  void DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,int pl2,int st2,int side);
+  void DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,
+		      int pl2,int st2,int side);
   
   void DrawToken(wxDC &dc,double x,double y,int st);
 public:
@@ -249,10 +266,12 @@ public:
   void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
   void StopIt(void);
-  void MakeOverlayData(void);
-  void MakeOverlayFile(void);
-  void AddFileOverlay(void);
+
   PxiDrawSettings *DrawSettings(void) {return draw_settings;}
+  void NewExpData(ExpDataParams &P);
+  wxString PxiName(void) const {return headers[1].FileName();}
+  const FileHeader &Header(int i) {return headers[i];}
+  void  AppendHeader(const FileHeader &h) {headers.Append(h);}
 
   DECLARE_EVENT_TABLE()
 };
@@ -269,13 +288,15 @@ private:
   void OnMRUFile(wxCommandEvent &);
   void OnDataGridSolve(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
+  void OnHelpContents(wxCommandEvent &);
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
 
 public:
   PxiFrame(wxFrame *frame,  const wxString &p_filename,
-	   const wxPoint &p_position, const wxSize &p_size, long p_style = wxDEFAULT_FRAME_STYLE);
+	   const wxPoint &p_position, const wxSize &p_size, 
+	   long p_style = wxDEFAULT_FRAME_STYLE);
   virtual ~PxiFrame();
 
   void LoadFile(const wxString &);
@@ -286,7 +307,7 @@ public:
 class PxiChild: public wxFrame
 {
 private:
-  wxFrame *parent;
+  PxiFrame *parent;
   PxiCanvas *canvas;
 
   void OnGrid(wxCommandEvent &);
@@ -295,11 +316,16 @@ private:
   void OnFileDetail(wxCommandEvent &);
   void OnFileOutput(wxCommandEvent &);
   void OnDisplayOptions(wxCommandEvent &);
+  void OnPrefsFontAxis(wxCommandEvent &);
+  void OnPrefsFontLabel(wxCommandEvent &);
+  void OnPrefsFontOverlay(wxCommandEvent &);
+  void OnPrefsColors(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
+  void OnHelpContents(wxCommandEvent &);
 
   void MakeMenus(void);
 public:
-  PxiChild(wxFrame *p_parent, const wxString &p_title);
+  PxiChild(PxiFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);
 
   void  print_eps(wxOutputOption fit);                 // output to postscript file
@@ -307,48 +333,7 @@ public:
   void  print_mf(wxOutputOption fit,bool save_mf=false);  // copy to clipboard (WIN Only)
   void  save_mf(wxOutputOption fit,bool save_mf=false);  // save clipboard (WIN Only)
 
-
-  DECLARE_EVENT_TABLE()
-};
-
-class dialogDrawSettings : public guiAutoDialog {
-private:
-  PxiDrawSettings &draw_settings;       // draw settings, see above
-  wxListBox *m_infosetItem, *m_actionItem, *m_whichPlotItem, *m_whichIsetItem;
-  wxNumberItem *m_minLam, *m_maxLam, *m_minY, *m_maxY;
-  wxButton *m_overlayButton, *m_fontButton, *m_plotButton;
-  wxRadioBox *m_plotMode, *m_colorMode;
-  wxCheckBox *m_twoPlots, *m_connectDots, *m_restartColors;
-
-  void OnWhichPlot(wxCommandEvent &);
-  void OnWhichInfoset(wxCommandEvent &);
-  void OnInfoset(wxCommandEvent &);
-  void OnAction(wxCommandEvent &);
-  void OnOverlay(wxCommandEvent &);
-  void OnFont(wxCommandEvent &);
-  void OnPlot(wxCommandEvent &);
-public:
-  dialogDrawSettings(wxWindow *, PxiDrawSettings &);
-  virtual ~dialogDrawSettings();
-
-  const wxString GetMinLam() const 
-    { return m_minLam->GetValue(); }
-  const wxString GetMaxLam() const 
-    { return m_maxLam->GetValue(); }
-  const wxString GetMinY() const 
-    { return m_minY->GetValue(); }
-  const wxString GetMaxY() const 
-    { return m_maxY->GetValue(); }
-  int GetPlotMode() const 
-    { return m_plotMode->GetSelection(); }
-  int GetColorMode() const 
-    { return m_colorMode->GetSelection(); }
-  bool GetTwoPlots() const 
-    { return m_twoPlots->GetValue(); }
-  bool GetConnectDots() const 
-    { return m_connectDots->GetValue(); }
-  bool GetRestartColors() const 
-    { return m_restartColors->GetValue(); }
+  void  LoadFile(const wxString &file) {parent->LoadFile(file);}
 
   DECLARE_EVENT_TABLE()
 };

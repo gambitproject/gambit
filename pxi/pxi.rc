@@ -1,0 +1,20 @@
+/****************************************************************************
+
+
+pxi.rc
+
+produced by Borland Resource Workshop
+
+
+*****************************************************************************/
+
+#define IDI_ICON1	1
+
+IDI_ICON1 ICON "../winsrc/res/pxi.ico"
+
+HELP_BITMAP BITMAP "help.bmp"
+
+
+OPEN_BITMAP BITMAP "open.bmp"
+
+

@@ -129,22 +129,32 @@ void wxKillHelp(void)
 //------------------------------------------------------------------------
 
 wxNumberItem::wxNumberItem(wxPanel *p_parent, char *p_label,
-			   const wxString &p_default,
-			   int p_x, int p_y, int p_width, int p_height)
-  : wxTextCtrl(p_parent, -1, "",
-	       wxPoint(p_x, p_y), wxSize(p_width, p_height), 0,
-	       wxTextValidator(wxFILTER_NUMERIC, &m_data)),
-    m_value(strtod(p_default.c_str(),NULL)), m_data(p_default)
+			   const wxString &p_default, const wxPoint &pos, 
+			   const wxSize &size)
+  : wxTextCtrl(p_parent, -1, "", pos, size, 0, 
+#ifdef __WXMSW__ // apperent bug in wxwin2 for MSW
+	       wxTextValidator(wxFILTER_ASCII, &m_data)), 
+#else
+	       wxTextValidator(wxFILTER_NUMERIC, &m_data)), 
+#endif
+    m_data(p_default)
 {
-  //  m_data = (char *) p_default;
   SetValue((const char *) p_default);
 }
 
+wxNumberItem::~wxNumberItem()
+{ }
+
 void wxNumberItem::SetNumber(const double &p_value)
 {
-  m_value = p_value;
+   m_data.Printf("%f",p_value);
 }
 
+double wxNumberItem::GetNumber(void)
+{
+  m_data.ToDouble(&m_value);
+  return m_value;
+}
 
 #include "gmisc.h"
 
@@ -215,23 +225,24 @@ wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
     for (int i = 0; i < p_extraMedia->Number(); i++)
       mediaList.Add((const char *)(p_extraMedia->Nth(i)->Data()));
   }
-  m_mediaBox = new wxRadioBox(this, 0, "Media", wxDefaultPosition, wxDefaultSize,
+  m_mediaBox = new wxRadioBox(this, 0, "Media", wxDefaultPosition, 
+#ifdef __WXMOTIF__ // bug in wxmotif
+			      wxSize(250,25),
+#else
+			      
+			      wxDefaultSize,
+#endif
 			      mediaList.Number(), (const wxString *)mediaList.ListToArray(), 
 			      (int)(mediaList.Number()/2));
   
-  /*  wxString mediaList[] = {"Printer", "PostScript", "Clipboard", "Metafile", "Print Preview"};
-      m_mediaBox = new wxRadioBox(this, 0, "Media", 
-      wxDefaultPosition, wxDefaultSize,
-      5, mediaList, 3);
-  */
   m_fitBox = new wxCheckBox(this, 0, "Fit to page");
   
-#ifdef wx_x // Printer, Clipboard, and MetaFiles are not yet supp'ed
+#ifdef __WXMSW__ // Printer, Clipboard, and MetaFiles are not yet supp'ed
   m_mediaBox->Enable(0, false);
   m_mediaBox->Enable(2, false);
   m_mediaBox->Enable(3, false);
   m_fitBox->Enable(false);
-#endif  // wx_x
+#endif  // __WXMSW__
 
   wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
 
