@@ -8,7 +8,7 @@
 
 \author{\ \ \\
 Division of Humanities \& Social Sciences\\
-California Institute of Technology}
+California Institute of Technology }
 
 \date{\today\\ \time \jobname.tex}
 
@@ -985,7 +985,7 @@ the title has not been assigned, the empty string is returned.
 \begin{verbatim}
 Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
-	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
+	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolOpt->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
 	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
 \end{verbatim}
@@ -1020,9 +1020,9 @@ value of 1.
 	
 \bd
 \item
-0 means $Lambda_t = Lambda_{t-1}$ + delLam
+0 means $Lambda_t = Lambda_{t-1}$ * delLam
 \item 
-1 means $Lambda_t = Lambda_{t-1}$ * delLam
+1 means $Lambda_t = Lambda_{t-1}$ + delLam
 \ed
 
 \item
