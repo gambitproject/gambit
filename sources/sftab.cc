@@ -34,6 +34,9 @@ template <class T> int NumInfosets(int j, const ExtForm<T> &E)
   return E.PlayerList()[j]->InfosetList().Length();
 }
 
+template <class T> gMatrix<T> Make_A(const ExtForm<T> &E)
+
+
 //---------------------------------------------------------------------------
 //                        Sequence Form  Tableau: member functions
 //---------------------------------------------------------------------------
@@ -63,26 +66,26 @@ template <class T> SFTableau<T>::SFTableau(const ExtForm<T> &E)
   T prob = (T)1;
   for(i=MinRow();i<=MaxRow();i++)
     for(j=MinCol();j<=MaxCol();j++)
-      dtab->Set_A(i,j) = (T)0;
+      A(i,j) = (T)0;
 
   FillTableau(E.RootNode(),prob,1,1,0,0);
   for(i=MinRow();i<=MaxRow();i++)
-    dtab->Set_A(i,0) = -(T)1;
-  dtab->Set_A(1,ns1+ns2+1) = -(T)1;
-  dtab->Set_A(1,ns1+ns2+ni1+1) = (T)1;
-  dtab->Set_A(ns1+ns2+1,1) = (T)1;
-  dtab->Set_A(ns1+ns2+ni1+1,1) = -(T)1;
-  dtab->Set_A(ns1+1,ns1+ns2+ni1+ni1+1) = -(T)1;
-  dtab->Set_A(ns1+1,ns1+ns2+ni1+ni1+ni2+1) = (T)1;
-  dtab->Set_A(ns1+ns2+ni1+ni1+1,ns1+1) = (T)1;
-  dtab->Set_A(ns1+ns2+ni1+ni1+ni2+1,ns1+1) = -(T)1;
-  dtab->Set_b(ns1+ns2+1) = -(T)1;
-  dtab->Set_b(ns1+ns2+ni1+1) = (T)1;
-  dtab->Set_b(ns1+ns2+ni1+ni1+1) = -(T)1;
-  dtab->Set_b(ns1+ns2+ni1+ni1+ni2+1) = (T)1;
+    A(i,0) = -(T)1;
+  A(1,ns1+ns2+1) = -(T)1;
+  A(1,ns1+ns2+ni1+1) = (T)1;
+  A(ns1+ns2+1,1) = (T)1;
+  A(ns1+ns2+ni1+1,1) = -(T)1;
+  A(ns1+1,ns1+ns2+ni1+ni1+1) = -(T)1;
+  A(ns1+1,ns1+ns2+ni1+ni1+ni2+1) = (T)1;
+  A(ns1+ns2+ni1+ni1+1,ns1+1) = (T)1;
+  A(ns1+ns2+ni1+ni1+ni2+1,ns1+1) = -(T)1;
+  b(ns1+ns2+1) = -(T)1;
+  b(ns1+ns2+ni1+1) = (T)1;
+  b(ns1+ns2+ni1+ni1+1) = -(T)1;
+  b(ns1+ns2+ni1+ni1+ni2+1) = (T)1;
 //  gout.SetWidth(1).SetPrec(3);
 //  gout << "\n";
-//  dtab->Dump(gout);
+//  Dump(gout);
   Refactor();
   Pivot(ns1+ns2+ni1+1,0);
 }
@@ -100,9 +103,9 @@ template <class T> void SFTableau<T>
 //  gout << " prob = " << prob;
   int i,snew;
   if(n->GetOutcome()) {
-    dtab->Set_A(s1,ns1+s2) = dtab->Get_A(s1,ns1+s2) +
+    A(s1,ns1+s2) = A(s1,ns1+s2) +
        prob*(((OutcomeVector<T> &) *n->GetOutcome())[1] -maxpay);
-    dtab->Set_A(ns1+s2,s1) = dtab->Get_A(ns1+s2,s1) +
+    A(ns1+s2,s1) = A(ns1+s2,s1) +
        prob*(((OutcomeVector<T> &) *n->GetOutcome())[2] -maxpay);
   }
   if(n->GetInfoset()) {
@@ -118,15 +121,15 @@ template <class T> void SFTableau<T>
       snew=1;
       for(i=1;i<i1;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      dtab->Set_A(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
-      dtab->Set_A(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
-      dtab->Set_A(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
-      dtab->Set_A(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
+      A(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
+      A(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
+      A(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
+      A(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
       for(i=1;i<=n->NumChildren();i++) {
-	dtab->Set_A(snew+i,ns1+ns2+i1+1) = -(T)1;
-	dtab->Set_A(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
-	dtab->Set_A(ns1+ns2+i1+1,snew+i) = (T)1;
-	dtab->Set_A(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
+	A(snew+i,ns1+ns2+i1+1) = -(T)1;
+	A(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
+	A(ns1+ns2+i1+1,snew+i) = (T)1;
+	A(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
 	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
       }
     }
@@ -135,15 +138,15 @@ template <class T> void SFTableau<T>
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
-      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
-      dtab->Set_A(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
-      dtab->Set_A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
+      A(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
+      A(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
+      A(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
+      A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
       for(i=1;i<=n->NumChildren();i++) {
-	dtab->Set_A(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
-	dtab->Set_A(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
-	dtab->Set_A(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
-	dtab->Set_A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
+	A(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
+	A(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
+	A(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
+	A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
 	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
       }
     }
