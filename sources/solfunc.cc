@@ -125,7 +125,8 @@ Portion *GSM_ActionValue_Float(Portion **param)
     return new ErrorPortion("Solution and infoset must belong to same game");
 
   if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player");
+    return new NullPortion(porFLOAT);
+  //return new ErrorPortion("Infoset must belong to personal player");
 
   Efg<double> *E = bp->BelongsTo();
 
@@ -148,7 +149,8 @@ Portion *GSM_ActionValue_Rational(Portion **param)
     return new ErrorPortion("Solution and infoset must belong to same game");
   
   if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player");
+    return new NullPortion(porRATIONAL);
+  //return new ErrorPortion("Infoset must belong to personal player");
 
   Efg<gRational> *E = bp->BelongsTo();
 
@@ -173,8 +175,14 @@ Portion *GSM_ActionValuesFloat(Portion **param)
   if (s->BelongsTo() != bp->BelongsTo())
     return new ErrorPortion("Solution and infoset must belong to same game");
 
-  if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player");
+  if(s->GetPlayer()->IsChance())
+  {
+    ListPortion* por = new ListValPortion();
+    for(int i = 1; i <= s->NumActions(); i++)
+      por->Append(new NullPortion(porFLOAT));
+    return por;
+    //return new ErrorPortion("Infoset must belong to personal player");
+  }
 
   Efg<double> *E = bp->BelongsTo();
 
@@ -199,7 +207,13 @@ Portion *GSM_ActionValuesRational(Portion **param)
     return new ErrorPortion("Solution and infoset must belong to same game");
 
   if (s->GetPlayer()->IsChance())
-    return new ErrorPortion("Infoset must belong to personal player");
+  {
+    ListPortion* por = new ListValPortion();
+    for(int i = 1; i <= s->NumActions(); i++)
+      por->Append(new NullPortion(porRATIONAL));
+    return por;
+    //return new ErrorPortion("Infoset must belong to personal player");
+  }
 
   Efg<gRational> *E = bp->BelongsTo();
 
