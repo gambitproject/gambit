@@ -49,12 +49,14 @@ int gWatch::IsRunning(void) const
 
 void gWatch::Start(void)
 {
+  running = 1;
+
 #ifdef __GNUG__
   struct tms buffer;
   times(&buffer);
   start = buffer.tms_utime;
 #elif defined __BORLANDC__
-#error Implement me!
+
 #endif   // __GNUG__, __BORLANDC__
 }  
 
@@ -62,28 +64,31 @@ void gWatch::Stop(void)
 {
   if (!running)   return;
 
+  running = 0;
+
 #ifdef __GNUG__
   struct tms buffer;
   times(&buffer);
   stop = buffer.tms_utime;
 #elif defined __BORLANDC__
-#error Implement me!
+
 #endif   // __GNUG__, __BORLANDC__
 }
 
 double gWatch::Elapsed(void) const
 {
-  if (running)   {
 #ifdef __GNUG__
+  if (running)   {
     struct tms buffer;
     times(&buffer);
     return (((double) (buffer.tms_utime - start)) / ((double) (CLK_TCK))); 
-#elif defined __BORLANDC__
-#error Implement me!
-#endif   // __GNUG__, __BORLANDC__
   }
 
   return (((double) (stop - start)) / ((double) (CLK_TCK)));
+#elif defined __BORLANDC__
+
+  return (double) 0.0;
+#endif  // __GNUG__, __BORLANDC__
 }
 
 char *const gWatch::ElapsedStr(void)
