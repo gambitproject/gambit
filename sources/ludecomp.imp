@@ -119,7 +119,7 @@ void LUdecomp<T>::PermuteColumn(const gVector<T> &in, gVector<T> &out) const
 
   // out <- permute(in)
   for(int i=min; i<=max; i++)
-    out[rpp[i]]= in[i];
+    out[i]= in[rpp[i]];
 } // end PermuteColumn
 
 template<class T>
@@ -264,6 +264,7 @@ void LUdecomp<T>::factor()
 	}
       if( pindex != k )
 	{
+	  // permute rows k and pindex
 	  mat.SwitchRows(k,pindex);
 	  int tmp= rpp[k];
 	  rpp[k]= rpp[pindex];
@@ -302,7 +303,7 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
   Lsolve(temp,Ucol); // Ucol is new U column
   mat.GetColumn(column,temp); // temp is temp. storage for L column
   mat.RotateLeft(column,max); // shift columns over
-  mat.SetColumn(mat.MaxCol(),Ucol); // insert new U column
+  mat.SetColumn(max,Ucol); // insert new U column
 
   LUupdate<T> update(column, mat.MaxCol()-1);
   T tmp, alpha;
