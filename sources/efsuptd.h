@@ -44,7 +44,7 @@ private:
 	disp_item->SetSelection(cur_sup-1);
 	}
 	void OnDisp(int disp_sup)
-	{disp_dim->SetValue(gpvect_to_string(sups[disp_sup]->Dimensionality(false)));}
+	{disp_dim->SetValue(gpvect_to_string(sups[disp_sup]->Dimensionality()));}
 
 // Utility funcs
 	static gString gpvect_to_string(const gPVector<int> &a)
