@@ -17,7 +17,6 @@
 #include "nfg.h"
 #include "glist.h"
 #include "gstatus.h"
-#include "lhtab.h"
 #include "mixed.h"
 #include "mixedsol.h"
 #include "vertenum.h"
