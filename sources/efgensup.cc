@@ -87,6 +87,10 @@ void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
 { 
   (*list) += sact->UnderlyingSupport();
 
+  //DEBUG
+  gout << "The action under consideration is " 
+       << c->GetAction()->GetName() << ".\n";
+
   ActionCursorForSupport place_holder(*c);
 
   do {
@@ -94,18 +98,25 @@ void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
       gList<Infoset *> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(c->GetAction(),
 						 &deactivated_infosets);
+      bool recurse = true;
+
+      //DEBUG
+      if (deactivated_infosets.Length() > 0)
+	gout << "Currently the support is " << *sact << ".\n";
+
       for (int i = 1; i <= deactivated_infosets.Length(); i++) {
+
+
 	if (c->GetInfoset()->GetNumber() >= 
 	                              deactivated_infosets[i]->GetNumber()) {
 	  if (!sact->AllActionsInSupportAtInfosetAreActive(*s,
 		  			        deactivated_infosets[i])) {
-	    sact->AddAction(c->GetAction());
-	    return;
+	    recurse = false;
 	  }
 	}
       }
 
-      AllInequivalentSubsupportsRECURSIVE(s,sact,c,list);
+      if (recurse) AllInequivalentSubsupportsRECURSIVE(s,sact,c,list);
       sact->AddAction(c->GetAction());
     }
   } while (c->GoToNext()) ;
@@ -206,6 +217,9 @@ ActionCursorForSupport::IsLast() const
 
 void AndyTest(const EFSupport &S)
 {
+  //DEBUG
+  // gout << "We got to go.\n";
+
   gList<const EFSupport> list = AllInequivalentSubsupports(S);
   for (int i = 1; i <= list.Length(); i++)
     gout << list[i] << "\n";

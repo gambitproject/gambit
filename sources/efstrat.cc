@@ -336,6 +336,24 @@ const gArray<Action *> &EFSupport::Actions(const Infoset &i) const
 
 const gArray<Action *> &EFSupport::Actions(const Infoset *i) const
 {
+  /*
+  //DEBUG
+  gout << "In Actions, i->GetNumber() = " << i->GetNumber() << ".\n";
+  gout << "In Actions, i->GetPlayer() = " << i->GetPlayer() << ".\n";
+  gout << "In Actions, i->GetPlayer()->GetNumber() = " << i->GetPlayer()->GetNumber() << ".\n";
+
+  if (i->GetPlayer()->IsChance()) {
+    gout << "Got in 1.\n";
+    return i->Actions();
+    gout << "Got out 1.\n";
+  }
+  else {
+    gout << "Got in 2.\n";
+    return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
+    gout << "Got out 2.\n";
+  }
+  */
+
   if (i->GetPlayer()->IsChance())
     return i->Actions();
   else
