@@ -64,6 +64,12 @@ class GSM
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
+  bool Push ( Outcome* data );
+  bool Push ( Player*  data );
+  bool Push ( Infoset* data );
+  bool Push ( Action*  data );
+  bool Push ( Node*    data );
+
   bool PushList ( const int num_of_elements );
 
   bool PushRef  ( const gString& ref );

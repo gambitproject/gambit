@@ -55,13 +55,19 @@ typedef unsigned int PortionType;
 #define  porBEHAV_RATIONAL ( 0x2000 )
 #define  porBEHAV          ( porBEHAV_DOUBLE | porBEHAV_RATIONAL )
 
-#define  porREFERENCE  ( 0x8000 )
+#define  porOUTCOME    ( 0x4000 )
+#define  porPLAYER     ( 0x8000 )
+#define  porINFOSET    ( 0x010000 )
+#define  porNODE       ( 0x020000 )
+#define  porACTION     ( 0x040000 )
+
+#define  porREFERENCE  ( 0x080000 )
 
 #define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
 				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
-#define  porVALUE      ( 0x7FFF )
-#define  porALL        ( 0xFFFF )
+#define  porALL        ( 0xFFFFFFFF )
+#define  porVALUE      ( porALL & ~porREFERENCE )
 
 
 
@@ -332,6 +338,106 @@ template <class T> class Efg_Portion : public Portion
   bool        IsDefined  ( const gString& ref ) const;
   Portion*    operator() ( const gString& ref ) const;
 };
+
+
+
+
+#include "outcome.h"
+
+class Outcome_Portion : public Portion
+{
+ private:
+  Outcome* _Value;
+
+ public:
+  Outcome_Portion( Outcome* value );
+
+  Outcome*&   Value     ( void );
+  Outcome*    Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  bool        Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
+};
+
+
+
+#include "player.h"
+
+class Player_Portion : public Portion
+{
+ private:
+  Player* _Value;
+
+ public:
+  Player_Portion( Player* value );
+
+  Player*&    Value     ( void );
+  Player*     Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  bool        Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
+};
+
+
+
+#include "infoset.h"
+
+class Infoset_Portion : public Portion
+{
+ private:
+  Infoset* _Value;
+
+ public:
+  Infoset_Portion( Infoset* value );
+
+  Infoset*&   Value     ( void );
+  Infoset*    Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  bool        Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
+};
+
+
+class Action_Portion : public Portion
+{
+ private:
+  Action* _Value;
+
+ public:
+  Action_Portion( Action* value );
+
+  Action*&    Value     ( void );
+  Action*     Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  bool        Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
+};
+
+
+
+#include "node.h"
+
+class Node_Portion : public Portion
+{
+ private:
+  Node* _Value;
+
+ public:
+  Node_Portion( Node* value );
+
+  Node*&      Value     ( void );
+  Node*       Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  bool        Operation ( Portion* p, OperationMode mode );
+  void        Output    ( gOutput& s ) const;
+};
+
+
 
 
 

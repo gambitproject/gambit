@@ -1092,6 +1092,282 @@ template <class T>
 
 
 
+//---------------------------------------------------------------------
+//                            Outcome type
+//---------------------------------------------------------------------
+Outcome_Portion::Outcome_Portion( Outcome* value ) 
+     : _Value( value )
+{ }
+
+
+Outcome* Outcome_Portion::Value( void ) const
+{ return _Value; }
+
+Outcome*& Outcome_Portion::Value( void )
+{ return _Value; }
+
+PortionType Outcome_Portion::Type( void ) const
+{ return porOUTCOME; }
+
+Portion* Outcome_Portion::Copy( void ) const
+{ return new Outcome_Portion( _Value ); }
+
+
+bool Outcome_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Outcome*&  p_value = ( (Outcome_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Outcome_Portion::Output( gOutput& s ) const
+{
+  s << " (Outcome) ";
+}
+
+
+
+//---------------------------------------------------------------------
+//                            Player type
+//---------------------------------------------------------------------
+Player_Portion::Player_Portion( Player* value ) 
+     : _Value( value )
+{ }
+
+
+Player* Player_Portion::Value( void ) const
+{ return _Value; }
+
+Player*& Player_Portion::Value( void )
+{ return _Value; }
+
+PortionType Player_Portion::Type( void ) const
+{ return porPLAYER; }
+
+Portion* Player_Portion::Copy( void ) const
+{ return new Player_Portion( _Value ); }
+
+
+bool Player_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Player*&  p_value = ( (Player_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Player_Portion::Output( gOutput& s ) const
+{
+  s << " (Player) ";
+}
+
+
+
+//---------------------------------------------------------------------
+//                            Infoset type
+//---------------------------------------------------------------------
+Infoset_Portion::Infoset_Portion( Infoset* value ) 
+     : _Value( value )
+{ }
+
+
+Infoset* Infoset_Portion::Value( void ) const
+{ return _Value; }
+
+Infoset*& Infoset_Portion::Value( void )
+{ return _Value; }
+
+PortionType Infoset_Portion::Type( void ) const
+{ return porINFOSET; }
+
+Portion* Infoset_Portion::Copy( void ) const
+{ return new Infoset_Portion( _Value ); }
+
+
+bool Infoset_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Infoset*&  p_value = ( (Infoset_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Infoset_Portion::Output( gOutput& s ) const
+{
+  s << " (Infoset) ";
+}
+
+
+
+//---------------------------------------------------------------------
+//                            Action type
+//---------------------------------------------------------------------
+Action_Portion::Action_Portion( Action* value ) 
+     : _Value( value )
+{ }
+
+
+Action* Action_Portion::Value( void ) const
+{ return _Value; }
+
+Action*& Action_Portion::Value( void )
+{ return _Value; }
+
+PortionType Action_Portion::Type( void ) const
+{ return porACTION; }
+
+Portion* Action_Portion::Copy( void ) const
+{ return new Action_Portion( _Value ); }
+
+
+bool Action_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Action*&  p_value = ( (Action_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Action_Portion::Output( gOutput& s ) const
+{
+  s << " (Action) ";
+}
+
+
+
+//---------------------------------------------------------------------
+//                            Node type
+//---------------------------------------------------------------------
+Node_Portion::Node_Portion( Node* value ) 
+     : _Value( value )
+{ }
+
+
+Node* Node_Portion::Value( void ) const
+{ return _Value; }
+
+Node*& Node_Portion::Value( void )
+{ return _Value; }
+
+PortionType Node_Portion::Type( void ) const
+{ return porNODE; }
+
+Portion* Node_Portion::Copy( void ) const
+{ return new Node_Portion( _Value ); }
+
+
+bool Node_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Node*&  p_value = ( (Node_Portion*) p )->_Value;
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Node_Portion::Output( gOutput& s ) const
+{
+  s << " (Node) ";
+}
+
+
+
+
+
+
+
+
+
 
 //--------------------------------------------------------------------
 //             miscellaneous PortionType functions

@@ -120,6 +120,61 @@ bool GSM::Push( const gString& data )
 }
 
 
+bool GSM::Push( Outcome* data )
+{
+  Portion*  p;
+
+  p = new Outcome_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
+bool GSM::Push( Player* data )
+{
+  Portion*  p;
+
+  p = new Player_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
+bool GSM::Push( Infoset* data )
+{
+  Portion*  p;
+
+  p = new Infoset_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
+bool GSM::Push( Action* data )
+{
+  Portion*  p;
+
+  p = new Action_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
+bool GSM::Push( Node* data )
+{
+  Portion*  p;
+
+  p = new Node_Portion( data );
+  _Stack->Push( p );
+
+  return true;
+}
+
+
 bool GSM::PushList( const int num_of_elements )
 { 
   int            i;
