@@ -3,14 +3,36 @@
 # and automatically place them onto the primary GAMBIT ftp site.
 
 # Usage: 
-#update TARGET=[gui,gcl,src,guidoc,gcldoc] HOST=[sun4,aix,hp] GUI=[motif,xview]
-#       SCCS=[true,false]
+#update TARGET=[gui,gcl,src,guidoc,gcldoc,all] 
+#       HOST=[sun4,rs6000,solaris,hp,all] 
+#       GUI=[motif,xview,all] SCCS=[true,false]
+# update is an alias for 'make -f make.update'
+# The SCCS argument should always be set to 'true' unless an update is desired
+# using out-of-date files.
 # This can be started on any of the hss machines and it will update the files
-# on the appropriate platform using rsh.
+# on the appropriate platform using rsh.  Due to some SCCS weirdness, it is
+# best to run the first update on HOST=sun4.  Since the GUI argument is not 
+# used for any target except gui, it may be left out in other cases.  However,
+# to save a LOT of disk space and some time by avoiding recompiling all the
+# on-gui common files, it is better to set GUI=motif if it is not used. One
+# problem with this approach is that the file 'gambitio.o' must be removed
+# between the gui/gcl compiles (it is shared but not identical).
 
 # A site configuration file must exist in the same directory.  It must be
 # called make.site_$(GUI)_$(HOST) where GUI and HOST are appropriate to the
-# machine.  If a nongui target is being built, _$(GUI) is set to 'none'. 
+# machine.  If a nongui target is being built, _$(GUI) is set to 'none', or
+# to 'motif' (see note above).
+
+# Note that specifying 'all' for any of the parameters will attempt to build
+# targets with the parameter set to each of its possible values succesively.
+# This may produce some duplicate combinations if more than one of the 
+# parameters is set to all.  Duplicate builds take very little time and are
+# not a problem.  Thus, to rebuild ALL of the components the command would be:
+# update HOST=all TARGET=all GUI=all SCCS=true
+
+# Note on  Gambit source distribution.  The windows versions of gui&gcl require
+# a few non-ascii files that can not be checked into SCCS.  These files
+# (*.ide *.ico) must be placed in the distrib directory manually.
 
 #Default machines for each platform 
 MACHINE_sun4=dosh.hum.caltech.edu
