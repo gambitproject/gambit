@@ -7,70 +7,78 @@
 # Main makefile for Borland C++
 #
 
-GAMBIT_TOP = d:\gambit
-
 all:  base math numerical pelican poly game nash gcl gui wxgcl
 
 base:
-	cd $(GAMBIT_TOP)\sources\base
+	cd base
 	make -f borland
+	cd ..
 
 math:
-	cd $(GAMBIT_TOP)\sources\math
+	cd math
 	make -f borland
+	cd ..
 
 numerical:
-	cd $(GAMBIT_TOP)\sources\numerical
+	cd numerical
 	make -f borland
+	cd ..
 
 pelican:
-	cd $(GAMBIT_TOP)\sources\pelican
+	cd pelican
 	make -f borland
+	cd ..
 
 poly:
-	cd $(GAMBIT_TOP)\sources\poly
+	cd poly
 	make -f borland
+	cd ..
 
 game:
-	cd $(GAMBIT_TOP)\sources\game
+	cd game
 	make -f borland
+	cd ..
 
 nash:
-	cd $(GAMBIT_TOP)\sources\nash
+	cd nash
 	make -f borland
+	cd ..
 
 gcl:
-	cd $(GAMBIT_TOP)\sources\gcl
+	cd gcl
 	make -f borland
+	cd ..
 
 gui:
-	cd $(GAMBIT_TOP)\sources\gui
+	cd gui
 	make -f borland
+	cd ..
 
 wxgcl:
-	cd $(GAMBIT_TOP)\sources\wxgcl
+	cd wxgcl
 	make -f borland
+	cd ..
 
 clean:
-	cd $(GAMBIT_TOP)\sources\base
+	cd base
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\math
+	cd ..\math
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\numerical
+	cd ..\numerical
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\pelican
+	cd ..\pelican
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\poly
+	cd ..\poly
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\game
+	cd ..\game
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\nash
+	cd ..\nash
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\gcl
+	cd ..\gcl
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\gui
+	cd ..\gui
 	make -f borland clean
-	cd $(GAMBIT_TOP)\sources\wxgcl
+	cd ..\wxgcl
 	make -f borland clean
 
 
