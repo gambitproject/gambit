@@ -140,7 +140,7 @@ void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
 {
   assert(CheckRow(in) && CheckColumn(out));
   for (int i = minrow; i <= maxrow; i++)   {
-    T sum = (T) 0;
+    T sum = (T)0;
 
     T *src1 = data[i] + mincol;
     T *src2 = in.data + mincol;
@@ -179,7 +179,7 @@ template <class T>
 void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 {
   assert(CheckColumn(in) && CheckRow(out));
-  out= (T) 0;
+  out= (T)0;
   for(int i = minrow; i <= maxrow; i++)  {
     T k = in[i];
 
