@@ -39,10 +39,7 @@ template class gStack<unsigned int>;
 #include "glist.imp"
 
 template class gList<bool>;
-template class gNode<bool>;
-
 template class gList<gclExpression *>;
-template class gNode<gclExpression *>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
 gStack<gText> GCL_InputFileNames(4);

@@ -12,17 +12,13 @@
 #include "rational.h"
 #include "glist.h"
 #include "glist.imp"
-template class gNode<SpreadSheet> ;
 template class gList<SpreadSheet> ;
 
 class NFSupport;
 template class gList<NFSupport *>;
-template class gNode<NFSupport *>;
 
 class EFSupport;
 template class gList<EFSupport *>;
-template class gNode<EFSupport *>;
-
 
 #include "grarray.imp"
 template class gRectArray<SpreadDataCell> ;

@@ -32,18 +32,10 @@ template gOutput& operator << (gOutput& output, const gMono<gDouble>& x);
 #endif   // GDOUBLE
 
 template class gList< gMono<int> >;
-template class gNode< gMono<int> >;
-
 template class gList< gMono<double> >;
-template class gNode< gMono<double> >;
-
 template class gList< gMono<gRational> >;
-template class gNode< gMono<gRational> >;
-
 template class gList< gMono<gNumber> >;
-template class gNode< gMono<gNumber> >;
 
 #ifdef GDOUBLE
 template class gList< gMono<gDouble> >;
-template class gNode< gMono<gDouble> >;
 #endif   // GDOUBLE

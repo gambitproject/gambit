@@ -279,7 +279,6 @@ gOutput& operator<<(gOutput& s, const SFSupport& n)
 }
 
 template class gList<Action *>;
-template class gNode<Action *>;
 template class gBlock<Sequence *>;
 template class gArray<Sequence *>;
 template class gArray<SFSequenceSet *>;

@@ -26,5 +26,4 @@ template gOutput &operator<<(gOutput &f, const QuikSolv<gDouble> &y);
 template class TreeOfPartials<gDouble>;
 template gOutput &operator<<(gOutput &f, const TreeOfPartials<gDouble> &y);
 template class gList<TreeOfPartials<gDouble> >;
-template class gNode<TreeOfPartials<gDouble> >;
 template class ListOfPartialTrees<gDouble>;

@@ -50,4 +50,3 @@ template class gArray<BehavNode<gRational> *>;
 #include "glist.imp"
 
 template class gList<BehavProfile<gRational> >;
-template class gNode<BehavProfile<gRational> >;

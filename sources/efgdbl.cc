@@ -4,9 +4,6 @@
 // $Id$
 //
 
-#include "rational.h"
-
-
 #include "efg.imp"
 
 template class BehavNode<double>;
@@ -22,7 +19,6 @@ template class gArray<BehavNode<double> *>;
 #include "glist.imp"
 
 template class gList<BehavProfile<double> >;
-template class gNode<BehavProfile<double> >;
 
 
 

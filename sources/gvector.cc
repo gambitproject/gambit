@@ -30,9 +30,7 @@ template gVector<gDouble> TogDouble(const gVector<gDouble>&);
 #include "glist.imp"
 
 template class gList<gVector<double> >;
-template class gNode<gVector<double> >;
 template class gList<gVector<gRational> >;
-template class gNode<gVector<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gVector<gRational> >&);
 

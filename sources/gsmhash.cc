@@ -21,14 +21,8 @@ template <class T> class gNode;
 #include "glist.imp"
 
 template class gList< void* >;
-template class gNode< void* >;
-
 template class gList< Portion* >;
-template class gNode< Portion* >;
-
 template class gList< FuncDescObj* >;
-template class gNode< FuncDescObj* >;
-
 
 #include "hash.imp"
 
@@ -40,11 +34,6 @@ template class HashTable< void*, int >;
 
 
 #include "gsmhash.h"
-
-
-
-
-
 
 int RefHashTable::NumBuckets( void ) const
 { return 26; }

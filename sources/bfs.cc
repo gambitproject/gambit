@@ -55,8 +55,6 @@ template class gBlock<BFS<double> >;
 template class gBlock<BFS<gRational> >;
 template class gList<BFS<double> >;
 template class gList<BFS<gRational> >;
-template class gNode<BFS<double> >;
-template class gNode<BFS<gRational> >;
 
 template class gBaseMap<int, double>;
 template class gOrdMap<int, double>;

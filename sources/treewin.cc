@@ -2096,8 +2096,6 @@ void TreeWindow::tree_outcomes(const gText out_name)
 {frame->ChangeOutcomes(CREATE_DIALOG,out_name);}
 
 #include "glist.imp"
-template class gNode<NODEENTRY *>;
 template class gList<NODEENTRY *>;
 template class gList<TreeWindow::SUBGAMEENTRY>;
-template class gNode<TreeWindow::SUBGAMEENTRY>;
 gOutput &operator<<(gOutput &o,const TreeWindow::SUBGAMEENTRY &) { return o;}

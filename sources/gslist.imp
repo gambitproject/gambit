@@ -23,16 +23,16 @@ void gSortList<T>::Swap(int a,int b)
 assert(a >= 1 && a <= length);assert(b >= 1 && b <= length);
 if (a==b) return;
 
-gNode<T> *na,*nb;
+gNode *na,*nb;
 int i;
 for (i = 1, na = head; i < a; i++, na = na->next);
 for (i = 1, nb = head; i < b; i++, nb = nb->next);
 
-gNode<T> /* nb1=*nb, */ na1=*na;
+gNode /* nb1=*nb, */ na1=*na;
 
 if (na->next==nb || nb->next==na) // adjacent
 {
-	if (nb->next==na) {gNode<T> *t=nb;nb=na;na=t;}
+	if (nb->next==na) {gNode *t=nb;nb=na;na=t;}
 	na->next=nb->next;na->prev=nb;
 	nb->next=na;nb->prev=na1.prev;
 	if (nb->prev) nb->prev->next=nb; else head=nb;

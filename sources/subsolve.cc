@@ -31,12 +31,7 @@ template gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
 #include "glist.imp"
 
 template class gList<EFOutcome *>;
-template class gNode<EFOutcome *>;
-
 template class gList<gArray<EFOutcome *> >;
-template class gNode<gArray<EFOutcome *> >;
-
 template class gList<BehavProfile<gNumber> >;
-template class gNode<BehavProfile<gNumber> >;
 
 

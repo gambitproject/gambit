@@ -24,7 +24,6 @@ template class gPolyList<gDouble>;
 template gOutput &operator<<(gOutput &f, const gPolyList<gDouble> &y);
 
 template class gList<index_pair>;
-template class gNode<index_pair>;
 
 /*
 #include "objcount.imp"

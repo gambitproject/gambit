@@ -251,7 +251,6 @@ gDouble TOgDouble(const gText &s)
 }
 
 template class gList<gDouble>;
-template class gNode<gDouble>;
 template class gVector<gDouble>;
 template class gArray<gDouble>;
 template class gBlock<gDouble>;
@@ -266,7 +265,6 @@ template class gMono<gDouble>;
 template gOutput & operator<< (gOutput&, const gMono<gDouble>&);
 
 template class gList<gMono<gDouble> >;
-template class gNode<gMono<gDouble> >;
 #endif  // ! GDouble
 
 /*

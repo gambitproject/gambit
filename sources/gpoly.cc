@@ -160,41 +160,28 @@ template class gArray< Variable * >;
 template class gBlock<Variable *>;
 
 template class gList< gPoly<int> * >;
-template class gNode< gPoly<int> * >;
 template class gList< gPoly<gRational> * >;
-template class gNode< gPoly<gRational> * >;
 template class gList< gPoly<double> * >;
-template class gNode< gPoly<double> * >;
 template class gList<gPoly<gRational> >;
-template class gNode<gPoly<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<gRational> >&);
 
 template class gList<gPoly<gRational> >;
-template class gNode<gPoly<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<gRational> >&);
 
 template class gList<gPoly<double> >;
-template class gNode<gPoly<double> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<double> >&);
 
 #ifdef GDOUBLE
 template class gList< gPoly<gDouble> * >;
-template class gNode< gPoly<gDouble> * >;
 template class gList< gPoly<gDouble> >;
-template class gNode< gPoly<gDouble> >;
 template class gList<gVector<gDouble> >;
-template class gNode<gVector<gDouble> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gVector<gDouble> >&);
 
 #endif   // GDOUBLE
-
-//template class gList< gPoly<long> * >;
-//template class gNode< gPoly<long> * >;
-
 
 
 

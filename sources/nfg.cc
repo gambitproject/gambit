@@ -354,5 +354,4 @@ template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
 #include "mixedsol.imp"
 
 template class gList<MixedSolution>;
-template class gNode<MixedSolution>;
 

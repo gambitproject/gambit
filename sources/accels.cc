@@ -11,7 +11,6 @@
 #include "glist.imp"
 #include "accels.h"
 template class gList<Accel>;
-template class gNode<Accel>;
 #include "garray.imp"
 template class gArray<AccelEvent>;
 

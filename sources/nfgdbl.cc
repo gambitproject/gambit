@@ -12,7 +12,6 @@ template gOutput &operator<<(gOutput &, const MixedProfile<double> &);
 #include "glist.imp"
 
 template class gList<MixedProfile<double> >;
-template class gNode<MixedProfile<double> >;
 
 #include "grblock.imp"
 

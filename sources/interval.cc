@@ -11,25 +11,22 @@
 
 template class gInterval<gRational>;
 template class gList< gInterval<gRational> >;
-template class gNode< gInterval<gRational> >;
 template gOutput& operator << (gOutput& output, const gInterval<gRational>& x);
 
 template class gInterval<int>;
 template class gList< gInterval<int> >;
-template class gNode< gInterval<int> >;
 template gOutput& operator << (gOutput& output, const gInterval<int>& x);
 
 template class gInterval<double>;
 template class gList< gInterval<double> >;
-template class gNode< gInterval<double> >;
 template gOutput& operator << (gOutput& output, const gInterval<double>& x);
 
 template class gInterval<gDouble>;
 template class gList< gInterval<gDouble> >;
-template class gNode< gInterval<gDouble> >;
 template gOutput& operator << (gOutput& output, const gInterval<gDouble>& x);
 
 template class gInterval<gNumber>;
 template class gList< gInterval<gNumber> >;
-template class gNode< gInterval<gNumber> >;
 template gOutput& operator << (gOutput& output, const gInterval<gNumber>& x);
+
+

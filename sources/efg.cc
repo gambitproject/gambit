@@ -42,7 +42,6 @@ template class gArray<EFActionArrays *>;
 #include "glist.imp"
 
 template class gList<Node *>;
-template class gNode<Node *>;
 
 
 #ifdef __GNUG__
@@ -1378,5 +1377,4 @@ template class gArray<BehavNode<gNumber> *>;
 #include "behavsol.imp"
 
 template class gList<BehavSolution>;
-template class gNode<BehavSolution>;
 

@@ -10,28 +10,23 @@
 #include "gmisc.h"
 #include "gstream.h"
 
-template <class T> class gList;
-template <class T> class gSortList;
-
-template <class T> class gNode   {
-  friend class gList<T>;
-  friend class gSortList<T>;
-  private:
-    T data;
-    gNode<T> *prev, *next;
-
- public:
-    // Constructor
-    gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next);
-};
-
 template <class T> class gList  {
   protected:
+
+  class gNode   {
+  public:
+    T data;
+    gNode *prev, *next;
+ 
+    // CONSTRUCTOR
+    gNode(const T &_data, gNode *_prev, gNode *_next);
+  };
+
     int length;
-    gNode<T> *head, *tail;
+    gNode *head, *tail;
 
     int CurrIndex;
-    gNode<T> *CurrNode;
+    gNode *CurrNode;
 
     int InsertAt(const T &t, int where);
 

@@ -241,7 +241,6 @@ Nfg *MakeAfg(const Efg &E)
 #include "garray.imp"
 
 template class gList<Correspondence *>;
-template class gNode<Correspondence *>;
 template gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
 template class gArray<gList<Correspondence *> >;
 
