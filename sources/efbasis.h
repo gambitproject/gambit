@@ -24,7 +24,7 @@ protected:
   gMatrix<double> *A;
   gVector<double> *b,*c;
   gDPVector<int> *actIndex, *nodeIndex;
-  int num_eqs, num_ineqs, num_act_vars,num_node_vars;;
+  int num_eqs, num_ineqs, num_act_vars,num_node_vars;
 
   void MakeIndices();
   void MakeRowIndices();
