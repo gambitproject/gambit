@@ -15,7 +15,7 @@ double last_double;
 
 /* Here are some scratch variables... */
 
-int playerNo, gameNo, isetNo, actNo, outcNo;
+int playerNo, gameNo, isetNo, actNo, outcNo, errCode;
 Node node;
 struct nodeinfo info;
 gTuple<gNumber> *v;
@@ -157,8 +157,10 @@ probs:          prob
 prob:           FLOAT  { (*v)[actNo++] = last_double; }
 
 nodes:          LBRACE { nodes = new gBlock<struct nodeinfo *>; } node_list
-                RBRACE   { p->games(gameNo)->InputFromFile(*nodes);  
-        while (nodes->Length())  delete nodes->Remove(1);  delete nodes; }
+                RBRACE
+      { errCode = p->games(gameNo)->InputFromFile(*nodes);
+        while (nodes->Length())  delete nodes->Remove(1);  delete nodes;
+        if (errCode)   YYERROR;  }
 
 node_list:      node
          |      node_list node
