@@ -404,9 +404,6 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
 template <class T> 
 polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 {
-//DEBUG
-//gout << "Entering UnivariateEquivalent(), " << *this << ".\n";
-
   assert(UniqueActiveVariable() >= 0);
 
   gList<T> coefs;
