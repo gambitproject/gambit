@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <iostream.h>
 #include <fstream.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "rational.h"
 #include "dualtope.h"
 

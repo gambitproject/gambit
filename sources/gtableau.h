@@ -10,7 +10,7 @@
 
 #include <assert.h>
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "gmatrix.h"
 #include "gblock.h"
 #include "gmap.h"
