@@ -17,7 +17,7 @@
 
 class NFLiapParams : public FuncMinParams  {
 public:
-  int nTries, stopAfter;
+  int nTries;
   
   NFLiapParams(gStatus & = gstatus);
 };

@@ -9,7 +9,7 @@
 #include "gfunc.h"
 
 NFLiapParams::NFLiapParams(gStatus &s)
-  : FuncMinParams(s), nTries(10), stopAfter(1)
+  : FuncMinParams(s), nTries(10)
 { }
 
 class NFLiapFunc : public gC2Function<double>   {
