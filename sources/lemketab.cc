@@ -89,12 +89,12 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
       // looking at ratios with other columns, 
       // eliminating nonmaximizers of 
       // a similar ratio, until only one candidate remains.
-  c = 0;
+  c = MinRow()-1;
   BasisVector(col);
 //  gout << "\nLength = " <<  BestSet.Length() << "\n b = " << col;
   while (BestSet.Length() > 1)   {
     assert(c <= MaxRow());
-    if(c!=0) {
+    if(c>=MinRow()) {
       SolveColumn(-c,col);
 //      gout << "\n-c = " << -c << " col = " << col;
     }
