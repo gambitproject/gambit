@@ -27,12 +27,16 @@
 #include "table-game.h"
 #include "table-contingency.h"
 
-//---------------------------------------------------------------------------
-//            Implementation of gbtNfgContingencyTable
-//---------------------------------------------------------------------------
+//======================================================================
+//          Implementation of class gbtTableContingencyRep
+//======================================================================
 
-gbtNfgContingencyTable::gbtNfgContingencyTable(gbtTableGameRep *p_nfg)
-  : m_nfg(p_nfg), m_index(0L), m_profile(m_nfg->NumPlayers())
+//----------------------------------------------------------------------
+//      class gbtTableContingencyRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTableContingencyRep::gbtTableContingencyRep(gbtTableGameRep *p_nfg)
+  : m_refCount(0), m_nfg(p_nfg), m_index(0L), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
     m_profile[pl] = m_nfg->m_players[pl]->m_infosets[1]->m_actions[1];
@@ -40,9 +44,9 @@ gbtNfgContingencyTable::gbtNfgContingencyTable(gbtTableGameRep *p_nfg)
   }
 }
 
-gbtNfgContingencyRep *gbtNfgContingencyTable::Copy(void) const
+gbtGameContingencyRep *gbtTableContingencyRep::Copy(void) const
 {
-  gbtNfgContingencyTable *rep = new gbtNfgContingencyTable(m_nfg);
+  gbtTableContingencyRep *rep = new gbtTableContingencyRep(m_nfg);
 
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     rep->m_profile[pl] = m_profile[pl];
@@ -51,8 +55,33 @@ gbtNfgContingencyRep *gbtNfgContingencyTable::Copy(void) const
   return rep;
 }
 
+//----------------------------------------------------------------------
+//   class gbtTableContingencyRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableContingencyRep::Reference(void)
+{
+  m_refCount++;
+  m_nfg->m_refCount++;
+}
+
+bool gbtTableContingencyRep::Dereference(void)
+{
+  if (--m_nfg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_nfg;
+  }
+  return (--m_refCount == 0);
+}
+
+//----------------------------------------------------------------------
+//        class gbtTableContingencyRep: Accessing the state
+//----------------------------------------------------------------------
+
 gbtGameStrategy
-gbtNfgContingencyTable::GetStrategy(const gbtGamePlayer &p_player) const
+gbtTableContingencyRep::GetStrategy(const gbtGamePlayer &p_player) const
 {
   if (p_player.IsNull())  throw gbtGameNullException();
   gbtTablePlayerRep *player = 
@@ -62,7 +91,7 @@ gbtNfgContingencyTable::GetStrategy(const gbtGamePlayer &p_player) const
 }
 
 
-void gbtNfgContingencyTable::SetStrategy(const gbtGameStrategy &p_strategy)
+void gbtTableContingencyRep::SetStrategy(const gbtGameStrategy &p_strategy)
 {
   if (p_strategy.IsNull())  throw gbtGameNullException();
   gbtTableStrategyRep *strategy =
@@ -75,7 +104,7 @@ void gbtNfgContingencyTable::SetStrategy(const gbtGameStrategy &p_strategy)
   m_profile[strategy->m_infoset->m_player->m_id] = strategy;
 }
 
-void gbtNfgContingencyTable::SetOutcome(const gbtGameOutcome &p_outcome)
+void gbtTableContingencyRep::SetOutcome(const gbtGameOutcome &p_outcome)
 {
   if (p_outcome.IsNull()) {
     m_nfg->m_results[m_index + 1] = 0;
@@ -88,13 +117,13 @@ void gbtNfgContingencyTable::SetOutcome(const gbtGameOutcome &p_outcome)
   }
 }
 
-gbtGameOutcome gbtNfgContingencyTable::GetOutcome(void) const
+gbtGameOutcome gbtTableContingencyRep::GetOutcome(void) const
 {
   return m_nfg->m_results[m_index + 1];
 }
 
 gbtRational 
-gbtNfgContingencyTable::GetPayoff(const gbtGamePlayer &p_player) const
+gbtTableContingencyRep::GetPayoff(const gbtGamePlayer &p_player) const
 {
   if (p_player.IsNull())  throw gbtGameNullException();
   gbtTablePlayerRep *player = 
@@ -109,3 +138,137 @@ gbtNfgContingencyTable::GetPayoff(const gbtGamePlayer &p_player) const
   }
 }
 
+//======================================================================
+//       Implementation of class gbtTableContingencyIteratorRep
+//======================================================================
+
+//----------------------------------------------------------------------
+//    class gbtTableContingencyIteratorRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTableContingencyIteratorRep::gbtTableContingencyIteratorRep(gbtTableGameRep *p_nfg)
+  : m_refCount(0), m_frozen(0), m_nfg(p_nfg), 
+    m_index(0L), m_profile(m_nfg->NumPlayers())
+{
+  First();
+}
+
+gbtTableContingencyIteratorRep::gbtTableContingencyIteratorRep(gbtTableGameRep *p_nfg, gbtTableStrategyRep *p_strategy)
+  : m_refCount(0), m_frozen(p_strategy->m_infoset->m_player->m_id),
+    m_nfg(p_nfg), m_index(p_strategy->m_index), m_profile(m_nfg->NumPlayers())
+{
+  m_profile[m_frozen] = p_strategy;
+  First();
+}
+
+gbtTableContingencyIteratorRep::~gbtTableContingencyIteratorRep()
+{ }
+
+gbtGameContingencyIteratorRep *
+gbtTableContingencyIteratorRep::Copy(void) const
+{
+  gbtTableContingencyIteratorRep *ret = 
+    new gbtTableContingencyIteratorRep(m_nfg);
+  ret->m_frozen = m_frozen;
+  ret->m_profile = m_profile;
+  ret->m_index = m_index;
+  return ret;
+}
+
+//----------------------------------------------------------------------
+// class gbtTableContingencyIteratorRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTableContingencyIteratorRep::Reference(void)
+{
+  m_refCount++;
+  m_nfg->m_refCount++;
+}
+
+bool gbtTableContingencyIteratorRep::Dereference(void)
+{
+  if (--m_nfg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_nfg;
+  }
+  return (--m_refCount == 0);
+}
+
+//----------------------------------------------------------------------
+//         class gbtTableContingencyIteratorRep: Iteration
+//----------------------------------------------------------------------
+
+void gbtTableContingencyIteratorRep::First(void)
+{
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    if (pl != m_frozen) {
+      if (m_profile[pl])  m_index -= m_profile[pl]->m_index;
+      m_profile[pl] = m_nfg->m_players[pl]->m_infosets[1]->m_actions[1];
+      m_index += m_profile[pl]->m_index;
+    }
+  }	
+}
+
+bool gbtTableContingencyIteratorRep::NextContingency(void)
+{
+  int pl = m_nfg->NumPlayers();
+
+  while (1)   {
+    if (pl == m_frozen) {
+      pl--;
+      continue;
+    }
+
+    int st = m_profile[pl]->m_id;
+    if (st < m_nfg->m_players[pl]->m_infosets[1]->m_actions.Length()) {
+      m_index -= m_profile[pl]->m_index;
+      m_profile[pl] = m_nfg->m_players[pl]->m_infosets[1]->m_actions[st+1];
+      m_index += m_profile[pl]->m_index;
+      return true;
+    }
+
+    m_index -= m_profile[pl]->m_index;
+    m_profile[pl] = m_nfg->m_players[pl]->m_infosets[1]->m_actions[1];
+    m_index += m_profile[pl]->m_index;
+    if (--pl == 0) {
+      return false;
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+//     class gbtTableContingencyIteratorRep: Accessing the state
+//----------------------------------------------------------------------
+
+gbtGameStrategy 
+gbtTableContingencyIteratorRep::GetStrategy(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTablePlayerRep *player = 
+    dynamic_cast<gbtTablePlayerRep *>(p_player.Get());
+  if (!player || player->m_nfg != m_nfg) throw gbtGameMismatchException();
+  return m_profile[player->m_id];
+}
+  
+gbtGameOutcome gbtTableContingencyIteratorRep::GetOutcome(void) const
+{
+  return m_nfg->m_results[m_index + 1];
+}
+
+gbtRational 
+gbtTableContingencyIteratorRep::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTablePlayerRep *player = 
+    dynamic_cast<gbtTablePlayerRep *>(p_player.Get());
+  if (!player || player->m_nfg != m_nfg)  throw gbtGameMismatchException();
+
+  if (m_nfg->m_results[m_index + 1]) {
+    return m_nfg->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
+  }
+  else {
+    return gbtRational(0);
+  }
+}

@@ -325,7 +325,7 @@ to create the profile object.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNfgContingency gbtGame::NewContingency(void) const
+gbtGameContingency gbtGame::NewContingency(void) const
 </synopsis>
 </para>
 </formalpara>

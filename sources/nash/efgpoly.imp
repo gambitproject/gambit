@@ -55,7 +55,7 @@ private:
   gbtList<gbtBehavProfile<double> > solutions;
   const gbtSfgGame SF;
   bool is_singular;
-  gbtArray<gbtArray<int> * > var;
+  gbtArray<gbtArray<int> > var;
 
   // The strategy is to develop the gbtPolyUni for each agent's expected
   // payoff as a function of the behavior strategies on the support,
@@ -128,14 +128,14 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtGame &p_efg,
   int tnv = 0;
 
   for(int i=1;i<=m_efg->NumPlayers();i++) {
-    var[i] = new gbtArray<int>(SF.NumSequences(i));
-    (*(var[i]))[1] = 0;
+    var[i] = gbtArray<int>(SF.NumSequences(i));
+    var[i][1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
       int act  = SF.ActionNumber(i,seq);
       if(act < SF.GetInfoset(i,seq)->NumActions())
-	(*(var[i]))[seq] = ++tnv;
+	var[i][seq] = ++tnv;
       else
-	(*(var[i]))[seq] = 0;
+	var[i][seq] = 0;
 
     }
     kk+=(SF.NumSequences(i)-SF.NumInfosets(i)-1);
@@ -146,8 +146,6 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtGame &p_efg,
 template <class T>
 EfgPolEnumModule<T>::~EfgPolEnumModule()
 { 
-  for(int i=1;i<=m_efg->NumPlayers();i++)
-    delete var[i];
   delete Lex;
   delete Space;
 }
@@ -161,7 +159,7 @@ gbtPolyMulti<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
   
   int isetrow = SF.InfosetRowNumber(p,seq);
   int act  = SF.ActionNumber(p,seq);
-  int varno = (*(var[p]))[seq];
+  int varno = var[p][seq];
 
   if(seq==1) {
     exps=0;
@@ -396,7 +394,7 @@ NumProbOfSequence(int p,int seq, const gbtVector<double> &x) const
 
   int isetrow = SF.InfosetRowNumber(p,seq);
   int act  = SF.ActionNumber(p,seq);
-  int varno = (*(var[p]))[seq];
+  int varno = var[p][seq];
 
   if(seq==1)
     return (double)1;
@@ -478,7 +476,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
       int act  = SF.ActionNumber(pl,seq);
       if(act<SF.GetInfoset(pl,seq)->NumActions()) {
 	count++;
-	int varno = (*(var[pl]))[seq];
+	int varno = var[pl][seq];
 	v[count] = (double)x[varno];
       }
     }

@@ -17,7 +17,6 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 libgame_a_SOURCES = \
 	"efgiter.cc" \
 	"game-file.cc" \
-	"nfgiter.cc" \
 	"sfg.cc" \
 	"sfstrat.cc" \
 	"table-mixed-double.cc" \

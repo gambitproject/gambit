@@ -26,81 +26,73 @@
 
 #include "lhtab.h"
 #include "game/game.h"
-#include "game/nfgiter.h"
 
 //---------------------------------------------------------------------------
 //                        LemkeHowson gbtTableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gbtMatrix<T> Make_A1(const gbtGame &N,
-                                      const T &)
+template <class T> gbtMatrix<T> Make_A1(const gbtGame &N, const T &)
 {
-  int i,j;
   int n1 = N->GetPlayer(1)->NumStrategies();
   int n2 = N->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A1(1,n1,n1+1,n1+n2);
-  gbtNfgIterator iter(N); 
+  gbtGameContingencyIterator iter = N->NewContingencyIterator(); 
 
   T min = N->GetMinPayoff() - gbtRational(1);
   T max = N->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
-  for (i = 1; i <= n1; i++)  {
-    for (j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = iter.GetPayoff(N->GetPlayer(1)) - gbtRational(min);
-      A1(i, n1 + j) *= fac;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
+  do {
+    int i = iter->GetStrategy(N->GetPlayer(1))->GetId();
+    int j = iter->GetStrategy(N->GetPlayer(2))->GetId();
+    A1(i, n1 + j) = iter->GetPayoff(N->GetPlayer(1)) - gbtRational(min);
+    A1(i, n1 + j) *= fac;
+  } while (iter->NextContingency());
+
   return A1;
 }
 
-template <class T> gbtMatrix<T> Make_A2(const gbtGame &N,
-                                      const T &)
+template <class T> gbtMatrix<T> Make_A2(const gbtGame &N, const T &)
 {
-  int i,j;
   int n1 = N->GetPlayer(1)->NumStrategies();
   int n2 = N->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A2(n1+1,n1+n2,1,n1);
-  gbtNfgIterator iter(N); 
+  gbtGameContingencyIterator iter = N->NewContingencyIterator(); 
 
   T min = N->GetMinPayoff() - gbtRational(1);
   T max = N->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
-  for (i = 1; i <= n1; i++)  {
-    for (j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = iter.GetPayoff(N->GetPlayer(2)) - gbtRational(min);
-      A2(n1 + j, i) *= fac;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
+  do {
+    int i = iter->GetStrategy(N->GetPlayer(1))->GetId();
+    int j = iter->GetStrategy(N->GetPlayer(2))->GetId();
+    A2(n1 + j, i) = iter->GetPayoff(N->GetPlayer(2)) - gbtRational(min);
+    A2(n1 + j, i) *= fac;
+  } while (iter->NextContingency());
+
   return A2;
 }
 
-template <class T> gbtVector<T> Make_b1(const gbtGame &N,
-				      const T &)
+template <class T> gbtVector<T> Make_b1(const gbtGame &N, const T &)
 {
   int n1 = N->GetPlayer(1)->NumStrategies();
   gbtVector<T> b1(1,n1);
 
-  for (int i = 1; i <= n1; i++) 
-    b1[i]=-(T)1;
+  for (int i = 1; i <= n1; i++) {
+    b1[i] = (T) -1;
+  }
   return b1;
 }
 
-template <class T> gbtVector<T> Make_b2(const gbtGame &N,
-				          const T &)
+template <class T> gbtVector<T> Make_b2(const gbtGame &N, const T &)
 {
-  int i;
   int n1 = N->GetPlayer(1)->NumStrategies();
   int n2 = N->GetPlayer(2)->NumStrategies();
   gbtVector<T> b2(n1+1,n1+n2);
 
-  for (i = n1+1; i <= n1+n2; i++) 
-    b2[i]=-(T)1;
+  for (int i = n1+1; i <= n1+n2; i++) {
+    b2[i] = (T) -1;
+  }
   return b2;
 }
 

@@ -34,15 +34,24 @@
 //! New contingencies are created using gbtGameRep::NewContingency()
 //! Contingencies are manipulated using the gbtGameSingleHandle idiom.
 //!
-class gbtNfgContingencyRep  {
-  friend class gbtGameSingleHandle<gbtNfgContingencyRep>;
+class gbtGameContingencyRep : public gbtGameObject {
+  friend class gbtGameSingleHandle<gbtGameContingencyRep>;
 
 public:
-  virtual ~gbtNfgContingencyRep() { }
-  
+  //!
+  //! @name Constructors and destructor
+  //!
+  //@{
+  /// Destructor
+  virtual ~gbtGameContingencyRep() { }
   /// Create a copy of the contingency.  Equivalent to a copy constructor.
-  virtual gbtNfgContingencyRep *Copy(void) const = 0;
+  virtual gbtGameContingencyRep *Copy(void) const = 0;
+  //@}
 
+  //!
+  //! @name Accessing the state
+  //!
+  //@{
   /// Return the strategy specified for the player
   virtual gbtGameStrategy GetStrategy(const gbtGamePlayer &) const = 0;
 
@@ -57,8 +66,51 @@ public:
 
   /// Returns the payoff to a player at the contingency.
   virtual gbtRational GetPayoff(const gbtGamePlayer &) const = 0;
+  //@}
 };
 
-typedef gbtGameSingleHandle<gbtNfgContingencyRep> gbtNfgContingency;
+typedef gbtGameSingleHandle<gbtGameContingencyRep> gbtGameContingency;
+
+
+//!
+//! This class sequentially visits all the contingencies (configurations
+//! of individual strategies) in a game.
+//!
+class gbtGameContingencyIteratorRep : public gbtGameObject  {
+public:
+  //!
+  //! @name Constructors and destructor
+  //!
+  //@{
+  /// Creates a copy of the iterator
+  virtual gbtGameContingencyIteratorRep *Copy(void) const = 0;
+  //@}
+
+  //!
+  //! @name Iteration
+  //!
+  //@{
+  /// Sets the iterator to the first contingency
+  virtual void First(void) = 0;
+  /// Advances the iterator to the next contingency; returns true if done
+  virtual bool NextContingency(void) = 0;
+  //@}
+
+  //!
+  //! @name Accessing the state
+  //!
+  //@{
+  /// Get the strategy for the player at the current contingency
+  virtual gbtGameStrategy GetStrategy(const gbtGamePlayer &) const = 0;
+  /// Get the outcome associated with the current contingency
+  virtual gbtGameOutcome GetOutcome(void) const = 0;
+  /// Get the payoff to the player at the current contingency
+  virtual gbtRational GetPayoff(const gbtGamePlayer &p_player) const = 0;
+  //@}
+};
+
+typedef 
+gbtGameSingleHandle<gbtGameContingencyIteratorRep> gbtGameContingencyIterator;
+
 
 #endif  // GAME_CONTINGENCY_H

@@ -6,12 +6,12 @@
 %}
 
 %nodefault;
-class gbtNfgContingency {
+class gbtGameContingency {
 public:
-  virtual ~gbtNfgContingency();
+  virtual ~gbtGameContingency();
 };
 
-%extend gbtNfgContingency {
+%extend gbtGameContingency {
   gbtGameStrategy GetStrategy(const gbtGamePlayer &p) const
     { return (*self)->GetStrategy(p); }
   void SetStrategy(const gbtGameStrategy &s)

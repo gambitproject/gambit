@@ -15,7 +15,7 @@ for accessing entries in the normal form.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGameOutcome gbtNfgContingency::GetOutcome(void) const
+gbtGameOutcome gbtGameContingency::GetOutcome(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -36,7 +36,7 @@ strategy profile.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGameStrategy gbtNfgContingency::GetStrategy(gbtGamePlayer p_player)
+gbtGameStrategy gbtGameContingency::GetStrategy(gbtGamePlayer p_player)
 </synopsis>
 </para>
 </formalpara>

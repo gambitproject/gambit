@@ -98,7 +98,9 @@ public:
 
   /// @name Information about the game table
   //@{
-  gbtNfgContingency NewContingency(void) const;
+  gbtGameContingency NewContingency(void) const;
+  gbtGameContingencyIterator NewContingencyIterator(void) const;
+  gbtGameContingencyIterator NewContingencyIterator(const gbtGameStrategy &) const;
   //@}
 
   /// @name Manipulation of players in the game
@@ -147,19 +149,12 @@ public:
   void NumberNodes(gbtTreeNodeRep *);
   void OnStrategiesChanged(void);
 
-  void Payoff(gbtTreeNodeRep *n, const gbtRational &prob,
-	      const gbtPVector<int> &profile,
-	      gbtVector<gbtRational> &payoff) const;
-  void Payoff(gbtTreeNodeRep *n, const gbtRational &prob,
-	      const gbtArray<gbtArray<int> *> &profile,
-	      gbtArray<gbtRational> &payoff) const;
-  void InfosetProbs(gbtTreeNodeRep *n, const gbtRational &prob,
-		    const gbtPVector<int> &profile,
-		    gbtPVector<gbtRational> &probs) const;
+  gbtRational GetPayoff(gbtTreePlayerRep *, gbtTreeNodeRep *n, 
+			const gbtArray<gbtTreeStrategyRep *> &profile) const;
+  gbtRational GetPayoff(gbtTreePlayerRep *, 
+			const gbtArray<gbtTreeStrategyRep *> &) const; 
+
   bool IsPerfectRecall(gbtGameInfoset &, gbtGameInfoset &) const;
-  void Payoff(const gbtPVector<int> &, gbtVector<gbtRational> &) const;
-  void Payoff(const gbtArray<gbtArray<int> *> &, gbtArray<gbtRational> &) const;
-  void InfosetProbs(const gbtPVector<int> &, gbtPVector<gbtRational> &) const;
 
   void BuildReducedNfg(void) const;
   //@}

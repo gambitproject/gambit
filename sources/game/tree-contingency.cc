@@ -26,23 +26,28 @@
 
 #include "tree-game.h"
 #include "tree-contingency.h"
-#include "table-game.h"
 
-//---------------------------------------------------------------------------
-//            Implementation of gbtNfgContingencyTree
-//---------------------------------------------------------------------------
+//======================================================================
+//          Implementation of class gbtTreeContingencyRep
+//======================================================================
 
-gbtNfgContingencyTree::gbtNfgContingencyTree(gbtTreeGameRep *p_efg)
-  : m_efg(p_efg), m_profile(m_efg->NumPlayers())
+//----------------------------------------------------------------------
+//      class gbtTreeContingencyRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTreeContingencyRep::gbtTreeContingencyRep(gbtTreeGameRep *p_efg)
+  : m_refCount(0), m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
+  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)   {
     m_profile[pl] = m_efg->m_players[pl]->m_strategies[1];
   }
 }
 
-gbtNfgContingencyRep *gbtNfgContingencyTree::Copy(void) const
+gbtGameContingencyRep *gbtTreeContingencyRep::Copy(void) const
 {
-  gbtNfgContingencyTree *rep = new gbtNfgContingencyTree(m_efg);
+  gbtTreeContingencyRep *rep = new gbtTreeContingencyRep(m_efg);
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     rep->m_profile[pl] = m_profile[pl];
@@ -50,8 +55,33 @@ gbtNfgContingencyRep *gbtNfgContingencyTree::Copy(void) const
   return rep;
 }
 
+//----------------------------------------------------------------------
+//   class gbtTreeContingencyRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeContingencyRep::Reference(void)
+{
+  m_refCount++;
+  m_efg->m_refCount++;
+}
+
+bool gbtTreeContingencyRep::Dereference(void)
+{
+  if (--m_efg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_efg;
+  }
+  return (--m_refCount == 0);
+}
+
+//----------------------------------------------------------------------
+//        class gbtTreeContingencyRep: Accessing the state
+//----------------------------------------------------------------------
+
 gbtGameStrategy 
-gbtNfgContingencyTree::GetStrategy(const gbtGamePlayer &p_player) const
+gbtTreeContingencyRep::GetStrategy(const gbtGamePlayer &p_player) const
 {
   if (p_player.IsNull())  throw gbtGameNullException();
   gbtTreePlayerRep *player = 
@@ -60,7 +90,7 @@ gbtNfgContingencyTree::GetStrategy(const gbtGamePlayer &p_player) const
   return m_profile[player->m_id];
 }
 
-void gbtNfgContingencyTree::SetStrategy(const gbtGameStrategy &p_strategy)
+void gbtTreeContingencyRep::SetStrategy(const gbtGameStrategy &p_strategy)
 {
   if (p_strategy.IsNull())  throw gbtGameNullException();
   gbtTreeStrategyRep *strategy = 
@@ -72,25 +102,150 @@ void gbtNfgContingencyTree::SetStrategy(const gbtGameStrategy &p_strategy)
   m_profile[strategy->m_player->m_id] = strategy;
 }
 
-void gbtNfgContingencyTree::SetOutcome(const gbtGameOutcome &outcome)
+void gbtTreeContingencyRep::SetOutcome(const gbtGameOutcome &outcome)
 {
   throw gbtGameUndefinedException();
 }
 
-gbtGameOutcome gbtNfgContingencyTree::GetOutcome(void) const
+gbtGameOutcome gbtTreeContingencyRep::GetOutcome(void) const
 {
   throw gbtGameUndefinedException();
 }
 
 gbtRational 
-gbtNfgContingencyTree::GetPayoff(const gbtGamePlayer &p_player) const
+gbtTreeContingencyRep::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  gbtArray<gbtArray<int> *> behav(m_efg->NumPlayers());
-  for (int pl = 1; pl <= behav.Length(); pl++) {
-    behav[pl] = &m_profile[pl]->m_behav;
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_efg) {
+    throw gbtGameMismatchException();
   }
-  gbtVector<gbtRational> payoff(m_efg->NumPlayers());
-  m_efg->Payoff(behav, payoff);
-  return payoff[p_player->GetId()];
+
+  return m_efg->GetPayoff(player, m_profile);
+}
+
+//======================================================================
+//       Implementation of class gbtTreeContingencyIteratorRep
+//======================================================================
+
+//----------------------------------------------------------------------
+//    class gbtTreeContingencyIteratorRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTreeContingencyIteratorRep::gbtTreeContingencyIteratorRep(gbtTreeGameRep *p_efg)
+  : m_refCount(0), m_efg(p_efg), m_profile(m_efg->NumPlayers()),
+    m_frozen(0)
+{
+  First();
+}
+
+gbtTreeContingencyIteratorRep::gbtTreeContingencyIteratorRep(gbtTreeGameRep *p_efg, gbtTreeStrategyRep *p_strategy)
+  : m_refCount(0), m_efg(p_efg), m_profile(m_efg->NumPlayers()),
+    m_frozen(p_strategy->m_player->m_id)
+{
+  m_profile[m_frozen] = p_strategy;
+  First();
+}
+
+gbtTreeContingencyIteratorRep::~gbtTreeContingencyIteratorRep()
+{ }
+
+gbtGameContingencyIteratorRep *
+gbtTreeContingencyIteratorRep::Copy(void) const
+{
+  gbtTreeContingencyIteratorRep *ret = 
+    new gbtTreeContingencyIteratorRep(m_efg);
+  ret->m_profile = m_profile;
+  ret->m_frozen = m_frozen;
+  return ret;
+}
+
+//----------------------------------------------------------------------
+// class gbtTreeContingencyIteratorRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeContingencyIteratorRep::Reference(void)
+{
+  m_refCount++;
+  m_efg->m_refCount++;
+}
+
+bool gbtTreeContingencyIteratorRep::Dereference(void)
+{
+  if (--m_efg->m_refCount == 0) {
+    // Note that if this condition is true, this profile must be the
+    // last reference to the game, so m_refCount will also be one
+    // (and this function will return true)
+    delete m_efg;
+  }
+  return (--m_refCount == 0);
+}
+
+//----------------------------------------------------------------------
+//          class gbtTreeContingencyIteratorRep: Iteration
+//----------------------------------------------------------------------
+
+void gbtTreeContingencyIteratorRep::First(void)
+{
+  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+
+  for (int pl = 1; pl <= m_efg->m_players.Length(); pl++) {
+    if (pl != m_frozen) {
+      m_profile[pl] = m_efg->m_players[pl]->m_strategies[1];
+    }
+  }	
+}
+
+bool gbtTreeContingencyIteratorRep::NextContingency(void)
+{
+  int pl = m_efg->m_players.Length();
+
+  while (1)   {
+    if (pl == m_frozen) {
+      pl--;
+      continue;
+    }
+
+    int st = m_profile[pl]->m_id;
+    if (st < m_efg->m_players[pl]->m_strategies.Length()) {
+      m_profile[pl] = m_efg->m_players[pl]->m_strategies[st + 1];
+      return true;
+    }
+    m_profile[pl] = m_efg->m_players[pl]->m_strategies[1];
+    if (--pl == 0) {
+      return false;
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+//     class gbtTreeContingencyIteratorRep: Accessing the state
+//----------------------------------------------------------------------
+
+gbtGameStrategy 
+gbtTreeContingencyIteratorRep::GetStrategy(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = 
+    dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_efg) throw gbtGameMismatchException();
+  return m_profile[player->m_id];
+}
+
+gbtGameOutcome gbtTreeContingencyIteratorRep::GetOutcome(void) const
+{
+  throw gbtGameUndefinedException();
+}
+
+gbtRational 
+gbtTreeContingencyIteratorRep::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_efg) {
+    throw gbtGameMismatchException();
+  }
+
+  return m_efg->GetPayoff(player, m_profile);
 }
 

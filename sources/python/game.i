@@ -197,7 +197,7 @@ public:
   //--------------------------------------------------------------------
   //                Information about the game table
   //--------------------------------------------------------------------
-  gbtNfgContingency NewContingency(void) const 
+  gbtGameContingency NewContingency(void) const 
     { return (*self)->NewContingency(); }
 
   //--------------------------------------------------------------------

@@ -29,8 +29,6 @@
 #include "base/base.h"
 #include "base/gnullstatus.h"
 #include "game/game.h"
-#include "game/nfgiter.h"
-#include "game/nfgciter.h"
 
 class gbtNfgNashEnumPure {
 private:
@@ -51,7 +49,7 @@ gbtList<gbtMixedProfile<gbtRational> >
 gbtNfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
   gbtList<gbtMixedProfile<gbtRational> > solutions;
-  gbtNfgContIterator citer(p_game);
+  gbtGameContingencyIterator citer = p_game->NewContingencyIterator();
 
   int ncont = 1;
   for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -60,18 +58,21 @@ gbtNfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 
   int contNumber = 1;
   try {
+    gbtGameContingency cont = p_game->NewContingency();
     do  {
       p_status.Get();
       p_status.SetProgress((double) contNumber / (double) ncont);
 
       bool flag = true;
-      gbtNfgIterator niter(citer);
     
       for (int pl = 1; flag && pl <= p_game->NumPlayers(); pl++)  {
-	gbtRational current = citer.GetPayoff(p_game->GetPlayer(pl));
-	for (int i = 1; i <= p_game->GetPlayer(pl)->NumStrategies(); i++)  {
-	  niter.Next(pl);
-	  if (niter.GetPayoff(p_game->GetPlayer(pl)) > current)  {
+	for (int i = 1; i <= p_game->NumPlayers(); i++) {
+	  cont->SetStrategy(citer->GetStrategy(p_game->GetPlayer(i)));
+	}
+	gbtRational current = citer->GetPayoff(p_game->GetPlayer(pl));
+	for (int st = 1; st <= p_game->GetPlayer(pl)->NumStrategies(); st++)  {
+	  cont->SetStrategy(p_game->GetPlayer(pl)->GetStrategy(st));
+	  if (cont->GetPayoff(p_game->GetPlayer(pl)) > current)  {
 	    flag = false;
 	    break;
 	  }
@@ -83,7 +84,7 @@ gbtNfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
 	  gbtGamePlayer player = p_game->GetPlayer(pl);
 	  for (int st = 1; st <= player->NumStrategies(); st++) {
-	    if (citer.GetProfile()->GetStrategy(player)->GetId() == st) {
+	    if (citer->GetStrategy(player)->GetId() == st) {
 	      soln(pl, st) = 1;
 	    }
 	    else {
@@ -95,7 +96,7 @@ gbtNfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
       }
       contNumber++;
     }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
-	      citer.NextContingency());
+	      citer->NextContingency());
   }
   catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)

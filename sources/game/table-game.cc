@@ -29,10 +29,6 @@
 #include "table-game.h"
 #include "table-contingency.h"
 #include "table-strategy-mixed.h"
-#include "tree-game.h"
-
-#include "nfgiter.h"
-#include "nfgciter.h"
 
 //======================================================================
 //             Implementation of class gbtTableGameRep
@@ -168,8 +164,25 @@ gbtRational gbtTableGameRep::GetMaxPayoff(void) const
 //               class gbtTableGameRep: Game table
 //----------------------------------------------------------------------
 
-gbtNfgContingency gbtTableGameRep::NewContingency(void) const
-{ return new gbtNfgContingencyTable(const_cast<gbtTableGameRep *>(this)); }
+gbtGameContingency gbtTableGameRep::NewContingency(void) const
+{ return new gbtTableContingencyRep(const_cast<gbtTableGameRep *>(this)); }
+
+gbtGameContingencyIterator
+gbtTableGameRep::NewContingencyIterator(void) const
+{ return new gbtTableContingencyIteratorRep(const_cast<gbtTableGameRep *>(this)); }
+
+gbtGameContingencyIterator
+gbtTableGameRep::NewContingencyIterator(const gbtGameStrategy &p_strategy) const
+{
+  if (p_strategy.IsNull())  throw gbtGameNullException();
+  gbtTableStrategyRep *strategy = 
+    dynamic_cast<gbtTableStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_infoset->m_player->m_nfg != this) {
+    throw gbtGameMismatchException();
+  }
+
+  return new gbtTableContingencyIteratorRep(const_cast<gbtTableGameRep *>(this), strategy); 
+}
 
 //----------------------------------------------------------------------
 //               class gbtTableGameRep: Players
@@ -239,20 +252,20 @@ gbtTableGameRep::NewBehavProfile(const gbtRational &) const
 //----------------------------------------------------------------------
 
 static void WriteNfg(const gbtTableGameRep *p_game,
-		     gbtNfgIterator &p_iter, int pl, std::ostream &p_file)
+		     gbtGameContingency &p_cont, int pl, std::ostream &p_file)
 {
-  p_iter.Set(pl, 1);
-  do {
+  for (int st = 1; st <= p_game->GetPlayer(pl)->NumStrategies(); st++) {
+    p_cont->SetStrategy(p_game->GetPlayer(pl)->GetStrategy(st));
     if (pl == 1) {
       for (int p = 1; p <= p_game->NumPlayers(); p++) {
-	p_file << p_iter.GetPayoff(p_game->GetPlayer(p)) << ' ';
+	p_file << p_cont->GetPayoff(p_game->GetPlayer(p)) << ' ';
       }
       p_file << '\n';
     }
     else {
-      WriteNfg(p_game, p_iter, pl - 1, p_file);
+      WriteNfg(p_game, p_cont, pl - 1, p_file);
     }
-  } while (p_iter.Next(pl));
+  }
 } 
 
 void gbtTableGameRep::WriteNfg(std::ostream &p_file) const
@@ -307,8 +320,8 @@ void gbtTableGameRep::WriteNfg(std::ostream &p_file) const
     p_file << "\n";
   }
   else {
-    gbtNfgIterator iter(const_cast<gbtTableGameRep *>(this));
-    ::WriteNfg(this, iter, NumPlayers(), p_file);
+    gbtGameContingency cont = NewContingency();
+    ::WriteNfg(this, cont, NumPlayers(), p_file);
   }
 }
 

@@ -34,8 +34,6 @@
 #include "tree-strategy-mixed.h"
 #include "tree-behav-mixed.h"
 
-#include "table-game.h"
-
 //======================================================================
 //              Implementation of class gbtTreeGameRep
 //======================================================================
@@ -231,10 +229,27 @@ int gbtTreeGameRep::NumNodes(void) const
 //               class gbtTreeGameRep: Game table
 //----------------------------------------------------------------------
 
-gbtNfgContingency gbtTreeGameRep::NewContingency(void) const
+gbtGameContingency gbtTreeGameRep::NewContingency(void) const
 {
   if (!m_hasStrategies)   BuildReducedNfg();
-  return new gbtNfgContingencyTree(const_cast<gbtTreeGameRep *>(this));
+  return new gbtTreeContingencyRep(const_cast<gbtTreeGameRep *>(this));
+}
+
+gbtGameContingencyIterator
+gbtTreeGameRep::NewContingencyIterator(void) const
+{ return new gbtTreeContingencyIteratorRep(const_cast<gbtTreeGameRep *>(this)); }
+
+gbtGameContingencyIterator
+gbtTreeGameRep::NewContingencyIterator(const gbtGameStrategy &p_strategy) const
+{
+  if (p_strategy.IsNull())  throw gbtGameNullException();
+  gbtTreeStrategyRep *strategy = 
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_player->m_efg != this) {
+    throw gbtGameMismatchException();
+  }
+
+  return new gbtTreeContingencyIteratorRep(const_cast<gbtTreeGameRep *>(this), strategy); 
 }
 
 //----------------------------------------------------------------------
@@ -659,90 +674,35 @@ void gbtTreeGameRep::SortInfosets(void)
   }
 }
 
-void gbtTreeGameRep::Payoff(gbtTreeNodeRep *n, const gbtRational &prob,
-			    const gbtPVector<int> &profile,
-			    gbtVector<gbtRational> &payoff) const
+gbtRational 
+gbtTreeGameRep::GetPayoff(gbtTreePlayerRep *player,
+			  gbtTreeNodeRep *n, 
+			  const gbtArray<gbtTreeStrategyRep *> &profile) const
 {
-  if (n->m_outcome)  {
-    for (int i = 1; i <= m_players.Length(); i++) {
-      payoff[i] += prob * n->m_outcome->m_payoffs[i];
-    }
-  }
-
-  if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
-    for (int i = 1; i <= n->m_children.Length(); i++) {
-      Payoff(n->m_children[i],
-	     prob * n->m_infoset->m_chanceProbs[i],
-	     profile, payoff);
-    }
-  }
-  else if (n->m_infoset) {
-    Payoff(n->m_children[profile(n->m_infoset->m_player->m_id,
-				 n->m_infoset->m_id)],
-	   prob, profile, payoff);
-  }
-}
-
-void gbtTreeGameRep::InfosetProbs(gbtTreeNodeRep *n, const gbtRational &prob,
-				  const gbtPVector<int> &profile,
-				  gbtPVector<gbtRational> &probs) const
-{
-  if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
-    for (int i = 1; i <= n->m_children.Length(); i++) {
-      InfosetProbs(n->m_children[i],
-		   prob * n->m_infoset->m_chanceProbs[i],
-		   profile, probs);
-    }
-  }
-  else if (n->m_infoset)  {
-    probs(n->m_infoset->m_player->m_id, n->m_infoset->m_id) += prob;
-    InfosetProbs(n->m_children[profile(n->m_infoset->m_player->m_id, 
-				       n->m_infoset->m_id)],
-		 prob, profile, probs);
-  }
-}
-
-void gbtTreeGameRep::Payoff(const gbtPVector<int> &profile, 
-			    gbtVector<gbtRational> &payoff) const
-{
-  ((gbtVector<gbtRational> &) payoff).operator=((gbtRational) 0);
-  Payoff(m_root, 1, profile, payoff);
-}
-
-void gbtTreeGameRep::InfosetProbs(const gbtPVector<int> &profile,
-				  gbtPVector<gbtRational> &probs) const
-{
-  ((gbtVector<gbtRational> &) probs).operator=((gbtRational) 0);
-  InfosetProbs(m_root, 1, profile, probs);
-}
-
-void gbtTreeGameRep::Payoff(gbtTreeNodeRep *n, const gbtRational &prob,
-			    const gbtArray<gbtArray<int> *> &profile,
-			    gbtArray<gbtRational> &payoff) const
-{
-  if (n->m_outcome)   {
-    for (int i = 1; i <= m_players.Length(); i++)
-      payoff[i] += prob * n->m_outcome->m_payoffs[i];
+  gbtRational payoff(0);
+  if (n->m_outcome) {
+    payoff += n->m_outcome->m_payoffs[player->m_id];
   }
   
   if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
     for (int i = 1; i <= n->m_children.Length(); i++) {
-      Payoff(n->m_children[i],
-	     prob * n->m_infoset->m_chanceProbs[i],
-	     profile, payoff);
+      payoff += (n->m_infoset->m_chanceProbs[i] * 
+		 GetPayoff(player, n->m_children[i], profile));
     }
   }
   else if (n->m_infoset) {
-    Payoff(n->m_children[(*profile[n->m_infoset->m_player->m_id])[n->m_infoset->m_id]],
-	   prob, profile, payoff);
+    payoff = GetPayoff(player,
+		       n->m_children[profile[n->m_infoset->m_player->m_id]->m_behav[n->m_infoset->m_id]],
+		       profile);
   }
+  return payoff;
 }
 
-void gbtTreeGameRep::Payoff(const gbtArray<gbtArray<int> *> &profile,
-			    gbtArray<gbtRational> &payoff) const
+gbtRational
+gbtTreeGameRep::GetPayoff(gbtTreePlayerRep *player,
+			  const gbtArray<gbtTreeStrategyRep *> &profile) const
 {
-  for (int i = 1; i <= payoff.Length(); payoff[i++] = 0);
-  Payoff(m_root, 1, profile, payoff);
+  return GetPayoff(player, m_root, profile);
 }
 
 //-------------------------------------------------------------------------

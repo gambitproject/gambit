@@ -19,9 +19,6 @@ libgambit_game_la_SOURCES = \
 	game-player.h \
 	game-strategy.h \
 	game-strategy-mixed.h \
-	nfgciter.h \
-	nfgiter.cc \
-	nfgiter.h \
 	sfg.cc \
 	sfg.h \
 	sfstrat.cc \

@@ -172,8 +172,14 @@ typedef gbtGameObjectHandle<gbtGameOutcomeRep> gbtGameOutcome;
 class gbtGameNodeRep;
 typedef gbtGameObjectHandle<gbtGameNodeRep> gbtGameNode;
 
-class gbtNfgContingencyRep;
-typedef gbtGameSingleHandle<gbtNfgContingencyRep> gbtNfgContingency;
+class gbtGameStrategyRep;
+typedef gbtGameObjectHandle<gbtGameStrategyRep> gbtGameStrategy;
+
+class gbtGameContingencyRep;
+typedef gbtGameSingleHandle<gbtGameContingencyRep> gbtGameContingency;
+
+class gbtGameContingencyIteratorRep;
+typedef gbtGameSingleHandle<gbtGameContingencyIteratorRep> gbtGameContingencyIterator;
 
 template <class T> class gbtBehavProfile;
 template <class T> class gbtMixedProfile;
@@ -241,7 +247,11 @@ public:
   //!
   //@{
   /// Returns an object representing a contingency in the game.
-  virtual gbtNfgContingency NewContingency(void) const = 0;
+  virtual gbtGameContingency NewContingency(void) const = 0;
+  /// Returns an object that iterates over all contingencies
+  virtual gbtGameContingencyIterator NewContingencyIterator(void) const = 0;
+  /// Returns an object that iterates holding fixed the strategy
+  virtual gbtGameContingencyIterator NewContingencyIterator(const gbtGameStrategy &) const = 0;
   //@}
 
   //!
@@ -325,6 +335,9 @@ typedef gbtGameObjectHandle<gbtGameRep> gbtGame;
 #include "game-node.h"
 #include "game-strategy.h"
 #include "game-contingency.h"
+#include "game-behav-mixed.h"
+#include "tree-behav-pure.h"
+#include "game-strategy-mixed.h"
 
 gbtGame NewEfg(void);
 gbtGame ReadEfg(std::istream &);
@@ -347,9 +360,6 @@ public:
   std::string GetDescription(void) const { return "Not a valid .nfg file"; }
 };
 
-#include "game-behav-mixed.h"
-#include "tree-behav-pure.h"
-#include "game-strategy-mixed.h"
 
 
 #endif   // GAME_H

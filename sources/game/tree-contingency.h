@@ -36,20 +36,74 @@
 //! Note that GetOutcome() and SetOutcome() are not well-defined for
 //! trees, and throw the gbtGameUndefined exception if called.
 //!
-class gbtNfgContingencyTree : public gbtNfgContingencyRep {
+class gbtTreeContingencyRep : public gbtGameContingencyRep {
 public:
+  int m_refCount;
   gbtTreeGameRep *m_efg;
   gbtArray<gbtTreeStrategyRep *> m_profile;
 
-  gbtNfgContingencyTree(gbtTreeGameRep *);
+  /// @name Constructors and destructor
+  //@{
+  gbtTreeContingencyRep(gbtTreeGameRep *);
+  gbtGameContingencyRep *Copy(void) const;
+  //@}
 
-  gbtNfgContingencyRep *Copy(void) const;
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  bool IsDeleted(void) const { return false; }
+  //@}
+
+  /// @name Accessing the state
+  //@{
   gbtGameStrategy GetStrategy(const gbtGamePlayer &) const;
   void SetStrategy(const gbtGameStrategy &);
   void SetOutcome(const gbtGameOutcome &);
   gbtGameOutcome GetOutcome(void) const;
-
   gbtRational GetPayoff(const gbtGamePlayer &) const;
+  //@}
 };
+
+//!
+//! This class sequentially visits all the contingencies (configurations
+//! of individual strategies) in a game.
+//!
+class gbtTreeContingencyIteratorRep : public gbtGameContingencyIteratorRep {
+public:
+  int m_refCount;
+  gbtTreeGameRep *m_efg;
+  gbtArray<gbtTreeStrategyRep *> m_profile;
+  int m_frozen;
+
+  /// @name Constructor and destructor
+  //@{
+  gbtTreeContingencyIteratorRep(gbtTreeGameRep *);
+  gbtTreeContingencyIteratorRep(gbtTreeGameRep *, gbtTreeStrategyRep *);
+  virtual ~gbtTreeContingencyIteratorRep();
+  gbtGameContingencyIteratorRep *Copy(void) const;
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  bool IsDeleted(void) const { return false; }
+  //@}
+
+  /// @name Iteration
+  //@{
+  void First(void);
+  bool NextContingency(void);
+  //@}
+
+  /// @name Accessing the state
+  //@{
+  gbtGameStrategy GetStrategy(const gbtGamePlayer &) const;
+  gbtGameOutcome GetOutcome(void) const;
+  gbtRational GetPayoff(const gbtGamePlayer &p_player) const;
+  //@}
+};
+
 
 #endif  // TREE_CONTINGENCY_H

@@ -93,7 +93,9 @@ public:
 
   /// @name Information about the game table
   //@{
-  gbtNfgContingency NewContingency(void) const;
+  gbtGameContingency NewContingency(void) const;
+  gbtGameContingencyIterator NewContingencyIterator(void) const;
+  gbtGameContingencyIterator NewContingencyIterator(const gbtGameStrategy &) const;
   //@}
 
   /// @name Manipulation of players in the game

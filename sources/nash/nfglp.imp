@@ -24,7 +24,6 @@
 
 #include "base/gnullstatus.h"
 #include "nfglp.h"
-#include "game/nfgiter.h"
 #include "numerical/lpsolve.h"
 
 template <class T> class gbtNfgNashLp {
@@ -63,26 +62,22 @@ gbtNfgNashLp<T>::Solve(const gbtGame &p_game, gbtStatus &p_status)
   
   gbtList<gbtBasicFeasibleSolution<T> > bfsList;
   
-  int i,j,m,k;
-  
-  m = p_game->GetPlayer(1)->NumStrategies();
-  k = p_game->GetPlayer(2)->NumStrategies();
+  int m = p_game->GetPlayer(1)->NumStrategies();
+  int k = p_game->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A(1,k+1,1,m+1);
   gbtVector<T> b(1,k+1);
   gbtVector<T> c(1,m+1);
-  gbtNfgIterator iter(p_game);
+  gbtGameContingencyIterator iter = p_game->NewContingencyIterator();
 
   T minpay = p_game->GetMinPayoff() - gbtRational(1);
 
-  for (i = 1; i <= k; i++)  {
-    for (j = 1; j <= m; j++)  {
-      A(i, j) = gbtRational(minpay) - iter.GetPayoff(p_game->GetPlayer(1));
-      iter.Next(1);
-    }
-    A(i,m+1) = (T)1;
-    iter.Next(2);
-  }
-  for (j = 1;j<=m;j++)  {
+  do {
+    int i = iter->GetStrategy(p_game->GetPlayer(2))->GetId();
+    int j = iter->GetStrategy(p_game->GetPlayer(1))->GetId();
+    A(i, j) = gbtRational(minpay) - iter->GetPayoff(p_game->GetPlayer(1));
+  } while (iter->NextContingency());
+
+  for (int j = 1; j <= m; j++)  {
     A(k+1,j)= (T)1;
   }
   A(k+1,m+1) = (T)0;

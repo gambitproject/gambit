@@ -27,7 +27,6 @@
 
 #include "base/gnullstatus.h"
 #include "game/game.h"
-#include "game/nfgciter.h"
 #include "poly/quiksolv.h"
 #include "nfgpoly.h"
 
@@ -236,27 +235,24 @@ gbtPolyMulti<double> PolEnumModule::Prob(int p, int strat) const
 gbtPolyMulti<double> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
-  gbtNfgContingency profile = m_nfg->NewContingency();
+  gbtGameContingencyIterator A = m_nfg->NewContingencyIterator(m_nfg->GetPlayer(i)->GetStrategy(strat1));
+  gbtGameContingencyIterator B = m_nfg->NewContingencyIterator(m_nfg->GetPlayer(i)->GetStrategy(strat2));
 
-  gbtNfgContIterator A(m_nfg), B(m_nfg);
-  A.Freeze(m_nfg->GetPlayer(i)->GetStrategy(strat1));
-  B.Freeze(m_nfg->GetPlayer(i)->GetStrategy(strat2));
   gbtPolyMulti<double> equation(&Space,&Lex);
   do {
     gbtPolyMulti<double> term(&Space,(double)1,&Lex);
-    profile = A.GetProfile();
     int k;
     for(k=1;k<=m_nfg->NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k, profile->GetStrategy(m_nfg->GetPlayer(k))->GetId());
+	term*=Prob(k, A->GetStrategy(m_nfg->GetPlayer(k))->GetId());
     double coeff,ap,bp;
-    ap = (double) A.GetPayoff(m_nfg->GetPlayer(i));
-    bp = (double) B.GetPayoff(m_nfg->GetPlayer(i));
+    ap = (double) A->GetPayoff(m_nfg->GetPlayer(i));
+    bp = (double) B->GetPayoff(m_nfg->GetPlayer(i));
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
-    A.NextContingency();
-  } while (B.NextContingency());
+    A->NextContingency();
+  } while (B->NextContingency());
   return equation;
 }
 

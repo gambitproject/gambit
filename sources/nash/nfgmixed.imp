@@ -27,7 +27,6 @@
 #include "base/base.h"
 #include "base/gnullstatus.h"
 #include "game/game.h"
-#include "game/nfgiter.h"
 #include "numerical/vertenum.h"
 
 #include "nfgmixed.h"
@@ -72,8 +71,6 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtGame &p_game, gbtStatus &p_status)
   
   gbtList<gbtMixedProfile<T> > solutions;
 
-  gbtNfgIterator iter(p_game); 
-
   T min = p_game->GetMinPayoff() - gbtRational(1);
   T max = p_game->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
@@ -84,16 +81,16 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtGame &p_game, gbtStatus &p_status)
   gbtMatrix<T> A2(1, p_game->GetPlayer(2)->NumStrategies(), 
 		  1, p_game->GetPlayer(1)->NumStrategies());
 
-  for (int i = 1; i <= p_game->GetPlayer(1)->NumStrategies(); i++) {
-    for (int j = 1; j <= p_game->GetPlayer(2)->NumStrategies(); j++) {
-      A1(i, j) = iter.GetPayoff(p_game->GetPlayer(1)) - gbtRational(min);
-      A2(j, i) = iter.GetPayoff(p_game->GetPlayer(2)) - gbtRational(min);
-      A1(i, j) *= fac;
-      A2(j, i) *= fac;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
+  gbtGameContingencyIterator iter = p_game->NewContingencyIterator(); 
+
+  do {
+    int i = iter->GetStrategy(p_game->GetPlayer(1))->GetId();
+    int j = iter->GetStrategy(p_game->GetPlayer(2))->GetId();
+    A1(i, j) = iter->GetPayoff(p_game->GetPlayer(1)) - gbtRational(min);
+    A2(j, i) = iter->GetPayoff(p_game->GetPlayer(2)) - gbtRational(min);
+    A1(i, j) *= fac;
+    A2(j, i) *= fac;
+  } while (iter->NextContingency());
 
   // Construct vectors b1, b2
   gbtVector<T> b1(1, p_game->GetPlayer(1)->NumStrategies());
