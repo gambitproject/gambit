@@ -1,0 +1,24 @@
+/*
+ * $Source$
+ * $Date$
+ * $Revision$
+ *
+ * DESCRIPTION:
+ * Resource file for PXI under MSW
+ */
+
+
+pxi_icn   ICON ..\winsrc\res\pxi.ico 
+
+rcinclude wx\msw\wx.rc
+rcinclude wx\html\msw\wxhtml.rc
+
+gambit   BITMAP ..\bitmaps\gambit.bmp
+help     BITMAP ..\bitmaps\help.bmp
+open     BITMAP ..\bitmaps\open.bmp
+preview  BITMAP ..\bitmaps\preview.bmp
+print    BITMAP ..\bitmaps\print.bmp
+zoomin   BITMAP ..\bitmaps\zoomin.bmp
+zoomout  BITMAP ..\bitmaps\zoomout.bmp
+
+

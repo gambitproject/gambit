@@ -54,9 +54,13 @@ EFActionArray &EFActionArray::operator=( const EFActionArray &a)
 #ifdef __BORLANDC__
 bool operator==(const gArray<Action *> &a, const gArray<Action *> &b)
 {
-  if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
-  for (int i = a.mindex; i <= a.maxdex; i++)
+  if (a.First() != b.First() || a.Last() != b.Last())  {
+    return false;
+  }
+
+  for (int i = a.First(); i <= a.Last(); i++) {
     if (a[i] != b[i])   return false;
+  }
   return true;
 }
 #endif

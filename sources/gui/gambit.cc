@@ -176,7 +176,7 @@ public:
 GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
 			 const wxPoint &p_position, const wxSize &p_size)
   : wxFrame(p_parent, -1, p_title, p_position, p_size),
-    m_fileHistory(5)
+    m_fileHistory(5), m_gameListCtrl(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("gambit_icn"));
@@ -231,6 +231,13 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   m_gameListCtrl->InsertColumn(1, "Filename");
   m_gameListCtrl->InsertColumn(2, "Efg");
   m_gameListCtrl->InsertColumn(3, "Nfg");
+
+  SetAutoLayout(true);
+  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+  sizer->Add(m_gameListCtrl, 1, wxALL | wxEXPAND, 0);
+  SetSizer(sizer);
+  sizer->SetSizeHints(this);
+  Layout();
 }
 
 GambitFrame::~GambitFrame()
@@ -673,12 +680,14 @@ void GambitFrame::OnCloseWindow(wxCloseEvent &)
 
 void GambitFrame::OnSize(wxSizeEvent &)
 {
-  m_gameListCtrl->SetSize(GetClientSize());
-  int listWidth = GetClientSize().GetWidth();
-  m_gameListCtrl->SetColumnWidth(0, listWidth / 2);
-  m_gameListCtrl->SetColumnWidth(1, listWidth / 4);
-  m_gameListCtrl->SetColumnWidth(2, listWidth / 8);
-  m_gameListCtrl->SetColumnWidth(3, listWidth / 8);
+  if (m_gameListCtrl) {
+    m_gameListCtrl->SetSize(GetClientSize());
+    int listWidth = GetClientSize().GetWidth();
+    m_gameListCtrl->SetColumnWidth(0, listWidth / 2);
+    m_gameListCtrl->SetColumnWidth(1, listWidth / 4);
+    m_gameListCtrl->SetColumnWidth(2, listWidth / 8);
+    m_gameListCtrl->SetColumnWidth(3, listWidth / 8);
+  }
 }
 
 void GambitFrame::UpdateGameList(void)

@@ -54,9 +54,12 @@ EFNodeArrays &EFNodeArrays::operator=( const EFNodeArrays &n)
 #ifdef __BORLANDC__
 bool operator==(const gArray<Node *> &a, const gArray<Node *> &b)
 {
-  if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
-  for (int i = a.mindex; i <= a.maxdex; i++)
+  if (a.First() != b.First() || a.Last() != b.Last())  {
+    return false;
+  }
+  for (int i = a.First(); i <= a.Last(); i++) {
     if (a[i] != b[i])   return false;
+  }
   return true;
 }
 #endif

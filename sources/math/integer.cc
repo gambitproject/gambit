@@ -3124,47 +3124,47 @@ gInteger sqr(const gInteger& x)
 
 gInteger  operator &  (const gInteger& x, const gInteger& y) 
 {
-  gInteger r; and(x, y, r); return r;
+  gInteger r; And(x, y, r); return r;
 }
 
 gInteger  operator &  (const gInteger& x, long y) 
 {
-  gInteger r; and(x, y, r); return r;
+  gInteger r; And(x, y, r); return r;
 }
 
 gInteger  operator &  (long  x, const gInteger& y) 
 {
-  gInteger r; and(x, y, r); return r;
+  gInteger r; And(x, y, r); return r;
 }
 
 gInteger  operator |  (const gInteger& x, const gInteger& y) 
 {
-  gInteger r; or(x, y, r); return r;
+  gInteger r; Or(x, y, r); return r;
 }
 
 gInteger  operator |  (const gInteger& x, long y) 
 {
-  gInteger r; or(x, y, r); return r;
+  gInteger r; Or(x, y, r); return r;
 }
 
 gInteger  operator |  (long  x, const gInteger& y) 
 {
-  gInteger r; or(x, y, r); return r;
+  gInteger r; Or(x, y, r); return r;
 }
 
 gInteger  operator ^  (const gInteger& x, const gInteger& y) 
 {
-  gInteger r; xor(x, y, r); return r;
+  gInteger r; Xor(x, y, r); return r;
 }
 
 gInteger  operator ^  (const gInteger& x, long y) 
 {
-  gInteger r; xor(x, y, r); return r;
+  gInteger r; Xor(x, y, r); return r;
 }
 
 gInteger  operator ^  (long  x, const gInteger& y) 
 {
-  gInteger r; xor(x, y, r); return r;
+  gInteger r; Xor(x, y, r); return r;
 }
 
 gInteger  operator /  (const gInteger& x, const gInteger& y) 

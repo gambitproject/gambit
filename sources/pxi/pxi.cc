@@ -51,6 +51,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 #include "gui/dlabout.h"
 
 #include "expdata.h"
@@ -58,7 +63,6 @@
 #include "pxi.h"
 #include "pxichild.h"
 
-#include "new.h"
 #include "wx/sizer.h"
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
@@ -93,7 +97,7 @@ bool PxiApp::OnInit(void)
 
 IMPLEMENT_APP(PxiApp)
 
-#include "pxi.xpm"
+#include "../bitmaps/pxi.xpm"
 
 //=====================================================================
 //                       class PxiFrame

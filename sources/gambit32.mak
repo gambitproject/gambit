@@ -25,7 +25,7 @@ WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
-.path.cc = .;base;math;gui
+.path.cc = .;base;math;gui;pxi
 
 $(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
@@ -82,8 +82,8 @@ $(GUILIBS)
 pxi.res
 !
 
-pxi.res :      pxi.rc
-   brc32 -r -fo.\pxi.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include pxi
+pxi.res :      pxi\pxi.rc
+   brc32 -r -fo.\pxi.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include pxi\pxi
 
 
 #
