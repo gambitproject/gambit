@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "gambitio.h"
 
 class GuiGclIo: public gInput, public gOutput

@@ -116,9 +116,10 @@ public:
 	ElimDomParamsDialog(int numplayers,wxWindow *parent=NULL)
 	{
 	num_players=numplayers;
-	all=FALSE,compress=FALSE;
+	compress=FALSE;
 	d=new wxDialogBox(parent,"ElimDom Parameters",TRUE);
 	all_box=new wxCheckBox(d,0,"Iterative Eliminate");
+	all_box->SetValue(all);
 	compress_box=new wxCheckBox(d,0,"Compress");
 	d->NewLine();
 	char *dom_type_list[2]={"Weak","Strong"};

@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// $Id$
+// @(#)treewin.h	1.43 8/16/96
 //
 
 #ifndef TREEWINDOW_H
@@ -56,6 +56,7 @@ private:
 protected:
 	const TreeDrawSettings &draw_settings;		// Stores drawing parameters
 	TreeNodeCursor *flasher;			// Used to flash/display the cursor
+  bool painting;								// Used to prevent re-entry.
 public:
 	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,

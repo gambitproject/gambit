@@ -3,7 +3,7 @@
 // Update: this dialog box now also includes the NormalForm solution
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
-// $Id$
+// @(#)efgsolvd.h	1.23 8/5/96
 
 #define NFG_ALGORITHM_LIST	// we do not need all of nfgsolvd.h
 #include "nfgsolvd.h"
@@ -110,6 +110,7 @@ protected:
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subgames=TRUE;
+	Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
 	}
 	// Two Subgame Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && ef.NumPlayers()!=2)
@@ -119,6 +120,7 @@ protected:
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subgames=TRUE;
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+	Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
 	}
 	// All Subgame Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
