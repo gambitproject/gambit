@@ -1,7 +1,7 @@
 //#
 //# FILE: enum.cc -- Enum module
 //#
-//# @(#)enum.cc	1.36 3/2/95
+//# $Id$
 //#
 
 #include "rational.h"
