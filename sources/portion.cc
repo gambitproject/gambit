@@ -8,28 +8,33 @@
 
 
 
+#include <assert.h>
+#include "basic.h"
+#include "gambitio.h"
+
+
 #include "portion.h"
+#include "gsmhash.h"
 
 
 
-//--------------------------------------------------------------------
-// implementation of Portion base and descendent classes
-//--------------------------------------------------------------------
 
-//--------------------------- base type -------------------------------
+//---------------------------------------------------------------------
+//                          base class
+//---------------------------------------------------------------------
 
 
 // variable used to detect memory leakage
 #ifdef MEMCHECK
-int Portion::num_of_Portions = 0;
+int Portion::_NumPortions = 0;
 #endif
 
 Portion::Portion()
 {
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
-  num_of_Portions++;
-  gout << "num of Portions: " << num_of_Portions << "\n";
+  _NumPortions++;
+  gout << ">>> Portion ctor -- count: " << _NumPortions << "\n";
 #endif
 }
 
@@ -38,8 +43,8 @@ Portion::~Portion()
 {
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
-  num_of_Portions--;
-  gout << "num of Portions: " << num_of_Portions << "\n";
+  _NumPortions--;
+  gout << ">>> Portion dtor -- count: " << _NumPortions << "\n";
 #endif
 }
 
@@ -52,27 +57,26 @@ bool Portion::Operation( Portion *p, OperationMode mode )
 }
 
 
+
 //-----------------------------------------------------------------------
 //                        numerical type 
 //-----------------------------------------------------------------------
-template <class T> 
-  numerical_Portion<T>::numerical_Portion( const T& new_value )
-     : value( new_value )
-{
-}
+template <class T> numerical_Portion<T>::numerical_Portion( const T& value )
+     : _Value( value )
+{ }
 
 
 template <class T> T numerical_Portion<T>::Value( void ) const
-{ return value; }
+{ return _Value; }
 
 template <class T> T& numerical_Portion<T>::Value( void )
-{ return value; }
+{ return _Value; }
 
 template <class T> PortionType numerical_Portion<T>::Type( void ) const
 { return porERROR; }
 
 template <class T> Portion* numerical_Portion<T>::Copy( void ) const
-{ return new numerical_Portion<T>( value ); }
+{ return new numerical_Portion<T>( _Value ); }
 
 
 template <class T> bool numerical_Portion<T>::Operation
@@ -82,14 +86,14 @@ template <class T> bool numerical_Portion<T>::Operation
    )
 {
   bool  result = true;
-  T&    p_value = ( (numerical_Portion<T>*) p )->Value();
+  T&    p_value = ( (numerical_Portion<T>*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
     switch( mode )
     {
     case opNEGATE:
-      value = -value;
+      _Value = - _Value;
       break;
     default:
       result = Portion::Operation( p, mode );      
@@ -100,34 +104,34 @@ template <class T> bool numerical_Portion<T>::Operation
     switch( mode )
     {
     case opADD:
-      value += p_value;
+      _Value += p_value;
       break;
     case opSUBTRACT:
-      value -= p_value;
+      _Value -= p_value;
       break;
     case opMULTIPLY:
-      value *= p_value;
+      _Value *= p_value;
       break;
     case opDIVIDE:
-      value /= p_value;
+      _Value /= p_value;
       break;
     case opEQUAL_TO:
-      result = ( value == p_value );
+      result = ( _Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = ( value != p_value );
+      result = ( _Value != p_value );
       break;
     case opGREATER_THAN:
-      result = ( value > p_value );
+      result = ( _Value > p_value );
       break;
     case opLESS_THAN:
-      result = ( value < p_value );
+      result = ( _Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = ( value >= p_value );
+      result = ( _Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = ( value <= p_value );
+      result = ( _Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -154,7 +158,7 @@ template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
   default:
     s << " (unknown numerical) ";
   }
-  s << value << "\n";
+  s << _Value << "\n";
 }
 
 
@@ -163,36 +167,35 @@ template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                            bool type
 //---------------------------------------------------------------------
-bool_Portion::bool_Portion( const bool& new_value )
-     : value( new_value )
-{
-}
+bool_Portion::bool_Portion( const bool& value ) 
+     : _Value( value )
+{ }
 
 
 bool bool_Portion::Value( void ) const
-{ return value; }
+{ return _Value; }
 
 bool& bool_Portion::Value( void )
-{ return value; }
+{ return _Value; }
 
 PortionType bool_Portion::Type( void ) const
 { return porBOOL; }
 
 Portion* bool_Portion::Copy( void ) const
-{ return new bool_Portion( value ); }
+{ return new bool_Portion( _Value ); }
 
 
 bool bool_Portion::Operation( Portion* p, OperationMode mode )
 {
   bool   result = true;
-  bool&  p_value = ( (bool_Portion*) p )->Value();
+  bool&  p_value = ( (bool_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
     switch( mode )
     {
     case opLOGICAL_NOT:
-      value = !value;
+      _Value = ! _Value;
       break;
     default:
       result = Portion::Operation( p, mode );      
@@ -203,10 +206,10 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
     switch( mode )
     {
     case opLOGICAL_AND:
-      value = ( value && p_value );
+      _Value = ( _Value && p_value );
       break;
     case opLOGICAL_OR:
-      value = ( value || p_value );
+      _Value = ( _Value || p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -220,7 +223,7 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
 void bool_Portion::Output( gOutput& s ) const
 {
   s << " (bool) ";
-  if( value == true )
+  if( _Value == true )
     s << "true\n";
   else
     s << "false\n";
@@ -231,29 +234,28 @@ void bool_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                          gString type
 //---------------------------------------------------------------------
-gString_Portion::gString_Portion( const gString& new_value )
-     : value( new_value )
-{
-}
+gString_Portion::gString_Portion( const gString& value )
+     : _Value( value )
+{ }
 
 
 gString gString_Portion::Value( void ) const
-{ return value; }
+{ return _Value; }
 
 gString& gString_Portion::Value( void )
-{ return value; }
+{ return _Value; }
 
 PortionType gString_Portion::Type( void ) const
 { return porSTRING; }
 
 Portion* gString_Portion::Copy( void ) const
-{ return new gString_Portion( value ); }
+{ return new gString_Portion( _Value ); }
 
 
 bool gString_Portion::Operation( Portion* p, OperationMode mode )
 {
   bool      result = true;
-  gString&  p_value = ( (gString_Portion*) p )->Value();
+  gString&  p_value = ( (gString_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
@@ -268,25 +270,25 @@ bool gString_Portion::Operation( Portion* p, OperationMode mode )
     switch( mode )
     {
     case opCONCATENATE:
-      value += p_value;
+      _Value += p_value;
       break;
     case opEQUAL_TO:
-      result = ( value == p_value );
+      result = ( _Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = ( value != p_value );
+      result = ( _Value != p_value );
       break;
     case opGREATER_THAN:
-      result = ( value > p_value );
+      result = ( _Value > p_value );
       break;
     case opLESS_THAN:
-      result = ( value < p_value );
+      result = ( _Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = ( value >= p_value );
+      result = ( _Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = ( value <= p_value );
+      result = ( _Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -299,7 +301,7 @@ bool gString_Portion::Operation( Portion* p, OperationMode mode )
 
 void gString_Portion::Output( gOutput& s ) const
 {
-  s << " (gString) " << value << "\n";
+  s << " (gString) " << _Value << "\n";
 }
 
 
@@ -308,27 +310,37 @@ void gString_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                        Reference type
 //---------------------------------------------------------------------
-Reference_Portion::Reference_Portion( const gString& new_value )
-     : value( new_value )
-{
-}
+Reference_Portion::Reference_Portion( const gString& value )
+     : _Value( value ), _SubValue( "" )
+{ }
 
+Reference_Portion::Reference_Portion( const gString& value, 
+				     const gString& subvalue )
+     : _Value( value ), _SubValue( subvalue )
+{ }
 
-gString Reference_Portion::Value( void ) const
-{ return value; }
 
 gString& Reference_Portion::Value( void )
-{ return value; }
+{ return _Value; }
+
+gString Reference_Portion::Value( void ) const
+{ return _Value; }
+
+gString& Reference_Portion::SubValue( void )
+{ return _SubValue; }
+
+gString Reference_Portion::SubValue( void ) const
+{ return _SubValue; }
 
 PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
 
 Portion* Reference_Portion::Copy( void ) const
-{ return new Reference_Portion( value ); }
+{ return new Reference_Portion( _Value ); }
 
 void Reference_Portion::Output( gOutput& s ) const
 {
-  s << " (Reference) " << value << "\n";
+  s << " (Reference) " << _Value << "\n";
 }
 
 
@@ -339,27 +351,19 @@ void Reference_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 List_Portion::List_Portion( void )
 {
-  data_type = porERROR;
+  _DataType = porERROR;
 }
 
 
-List_Portion::List_Portion( const gBlock<Portion*>& new_value )
-     : value( new_value )
+List_Portion::List_Portion( const gBlock<Portion*>& value )
 {
   int i;
   int length;
   int type_match;
 
-  data_type = new_value[ 1 ]->Type();
-  for( i = 2, length = new_value.Length(); i <= length; i++ )
+  for( i = 1, length = value.Length(); i <= length; i++ )
   {
-    type_match = TypeCheck( new_value[ i ] );
-    if( !type_match )
-    {
-      gerr << "Portion Error: attempted to initialize a List_Portion with a\n";
-      gerr << "               gBlock<Portion*> that contains mixed types\n";
-      assert(0);
-    }
+    Insert( value[ i ]->Copy(), i );
   }
 }
 
@@ -371,32 +375,32 @@ List_Portion::~List_Portion()
 
 
 gBlock<Portion*> List_Portion::Value( void ) const
-{ return value; }
+{ return _Value; }
 
 gBlock<Portion*>& List_Portion::Value( void )
-{ return value; }
+{ return _Value; }
 
 PortionType List_Portion::Type( void ) const
 { return porLIST; }
 
 PortionType List_Portion::DataType( void ) const
-{ return data_type; }
+{ return _DataType; }
 
 Portion* List_Portion::Copy( void ) const
-{ return new List_Portion( value ); }
+{ return new List_Portion( _Value ); }
 
 
 int List_Portion::TypeCheck( Portion* item )
 {
   int result = false;
 
-  if( item->Type() == data_type )
+  if( item->Type() == _DataType )
   {
     result = true;
   }
   else if( item->Type() == porLIST )
   {
-    if( ( (List_Portion*) item )->data_type == data_type )
+    if( ( (List_Portion*) item )->_DataType == _DataType )
       result = true;
   }
   return result;
@@ -406,7 +410,7 @@ int List_Portion::TypeCheck( Portion* item )
 bool List_Portion::Operation( Portion* p, OperationMode mode )
 {
   bool               result = true;
-  gBlock<Portion*>&  p_value = ( (List_Portion*) p )->Value();
+  gBlock<Portion*>&  p_value = ( (List_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
@@ -436,10 +440,10 @@ void List_Portion::Output( gOutput& s ) const
 
   s << " (List)\n"; 
   s << "  {\n";
-  for( i = 1, length = value.Length(); i <= length; i++ )
+  for( i = 1, length = _Value.Length(); i <= length; i++ )
   {
     s << "    list item " << i << " : ";
-    value[i]->Output( s );
+    _Value[i]->Output( s );
   }
   s << "  }\n";
 }
@@ -447,13 +451,13 @@ void List_Portion::Output( gOutput& s ) const
 
 Portion* List_Portion::operator[] ( int index )
 {
-  return value[ index ];
+  return _Value[ index ];
 }
 
 
 int List_Portion::Append( Portion* item )
 {
-  return Insert( item, value.Length() + 1 );
+  return Insert( item, _Value.Length() + 1 );
 }
 
 
@@ -464,16 +468,17 @@ int List_Portion::Insert( Portion* item, int index )
 
   if( item->Type() == porREFERENCE )
   {
-    gerr << "Portion Error: attempted to insert a Reference into a List_Portion\n";
+    gerr << "Portion Error: attempted to insert a Reference_Portion into\n";
+    gerr << "               a List_Portion\n";
     assert(0);
   }
 
-  if( value.Length() == 0 )  // creating a new list
+  if( _Value.Length() == 0 )  // creating a new list
   {
     if( item->Type() == porLIST )
-      data_type = ( (List_Portion*) item )->data_type;
+      _DataType = ( (List_Portion*) item )->_DataType;
     else
-      data_type = item->Type();
+      _DataType = item->Type();
   }
   else  // inserting into an existing list
   {
@@ -485,33 +490,171 @@ int List_Portion::Insert( Portion* item, int index )
       assert(0);
     }
   }
-  result = value.Insert( item, index );
+  result = _Value.Insert( item, index );
   return result;
 }
 
 
 Portion* List_Portion::Remove( int index )
 {
-  return value.Remove( index );
+  return _Value.Remove( index );
 }
 
 
 int List_Portion::Length( void ) const
 {
-  return value.Length();
+  return _Value.Length();
 }
 
 
 void List_Portion::Flush( void )
 {
   int i, length;
-  for( i = 1, length = value.Length(); i <= length; i++ )
+  for( i = 1, length = _Value.Length(); i <= length; i++ )
   {
-    delete value[ i ];
+    delete _Value[ i ];
   }
-  value.Flush();
+  _Value.Flush();
 }
 
+
+
+//---------------------------------------------------------------------
+//                            Nfg type
+//---------------------------------------------------------------------
+
+
+Nfg_Portion::Nfg_Portion( const double& value )
+{
+  _RefTable = new RefHashTable;
+  _Value = new Nfg;
+  _Value->value = value;
+}
+
+Nfg_Portion::Nfg_Portion( Nfg& value )
+{
+  _RefTable = new RefHashTable;
+  _Value = new Nfg;
+  _Value = &value;
+}
+
+Nfg_Portion::Nfg_Portion( const Nfg_Portion& value )
+     : _Value( value._Value )
+{
+  _RefTable = new RefHashTable;
+  _Value->refs++;
+}
+
+Nfg_Portion::~Nfg_Portion()
+{
+  delete _RefTable;
+  _Value->refs--;
+
+#ifndef NDEBUG
+  if( _Value->refs < 0 )
+    gerr << "Nfg_Portion Critical Error\n";
+  assert( _Value->refs >= 0 );
+#endif // NDEBUG
+
+  if( _Value->refs == 0 )
+    delete _Value;
+}
+
+
+Nfg Nfg_Portion::Value( void ) const
+{ return *_Value; }
+
+Nfg& Nfg_Portion::Value( void )
+{ return *_Value; }
+
+PortionType Nfg_Portion::Type( void ) const
+{ return porNFG; }
+
+Portion* Nfg_Portion::Copy( void ) const
+{ return new Nfg_Portion( *this ); }
+
+
+bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
+{
+  bool   result = true;
+  Nfg&   p_value = *( ( (Nfg_Portion*) p )->_Value );
+
+  if( p == 0 )      // unary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );      
+    }
+  }
+  else               // binary operations
+  {
+    switch( mode )
+    {
+    default:
+      result = Portion::Operation( p, mode );
+    }
+    delete p;
+  }
+  return result;
+}
+
+
+void Nfg_Portion::Output( gOutput& s ) const
+{
+  s << " (Nfg) " << _Value->value;
+#ifdef MEMCHECK
+  s << ", refs: " << _Value->refs;
+#endif
+  s << "\n";
+}
+
+
+
+//---------------------------------------------------------------------
+//     Assign() and UnAssign() for Nfg_Portion
+//---------------------------------------------------------------------
+
+bool Nfg_Portion::Assign( const gString& ref, Portion *p )
+{
+  assert( p->Type() != porREFERENCE );
+  
+  _RefTable->Define( ref, p );
+  
+  return true;
+}
+
+
+bool Nfg_Portion::UnAssign( const gString& ref )
+{
+  if( _RefTable->IsDefined( ref ) )
+  {
+    _RefTable->Remove( ref );
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+Portion* Nfg_Portion::operator()( const gString& ref ) const
+{
+  Portion* result = 0;
+
+#ifndef NDEBUG
+  if( !_RefTable->IsDefined( ref ) )
+  {
+    gerr << "Portion Error: attempted to access an undefined reference\n";
+    gerr << "               \"" << ref << "\"\n";
+  }
+  assert( _RefTable->IsDefined( ref ) );
+#endif // NDEBUG
+
+  result = (*_RefTable)( ref );
+  return result;
+}
 
 
 //----------------------------------------------------------------------
@@ -541,6 +684,13 @@ PortionType numerical_Portion<gInteger>::Type( void ) const
 TEMPLATE class numerical_Portion<gRational>;
 PortionType numerical_Portion<gRational>::Type( void ) const
 { return porRATIONAL; }
+
+
+
+
+#include "hash.imp"
+
+TEMPLATE class HashTable< gString, Portion* >;
 
 
 

@@ -26,8 +26,9 @@ int main( void )
   gString *name;
   GSM *machine;
 
+
   machine = new GSM( 32 );
-  
+
 
   gout << "\n";
   machine->Push( d_1 );
@@ -66,14 +67,6 @@ int main( void )
   machine->Negate();
   machine->Dump();
 
-/*
-  gout << "Attempt to add different types()\n";
-  machine->Push( d_1 );
-  machine->Push( d_2 );
-  machine->Push( i_1 );
-  machine->Add();
-  machine->Dump();
-*/
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -119,6 +112,12 @@ int main( void )
   machine->Divide();
   machine->Add();
   machine->Dump();
+
+  machine->PushRef( "z" );
+  machine->Push( "hi!!" );
+  machine->Assign();
+  machine->Dump();
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -316,25 +315,6 @@ int main( void )
   
   gout << "\nCrash testing CallFunction()\n\n";
 
-/*
-  machine->Flush();
-  machine->PushRef( x );
-  machine->InitCallFunction( (gString) "Angle" );
-  machine->InitCallFunction( (gString) "Sqr" );
-  machine->PushRef( x );
-  machine->PushRef( x );
-  machine->Multiply();
-  machine->Bind( "n" );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Bind( "x" );
-  machine->PushRef( y );
-  machine->Bind( "y" );
-  machine->CallFunction();
-  machine->Dump();
-*/
-
-
   machine->InitCallFunction( (gString) "Angle" );
   machine->CallFunction();
   machine->Dump();
@@ -345,16 +325,6 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-/*
-  machine->InitCallFunction( (gString) "Sqr" );
-  machine->CallFunction();
-  machine->Dump();
-*/
-/*
-  machine->InitCallFunction( (gString) "Sqr" );
-  machine->CallFunction();
-  machine->Dump();
-*/
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
@@ -440,14 +410,7 @@ int main( void )
   machine->PushRef( (gString) "y1" );
   machine->OR();
   machine->Dump();
-/*
-  machine->Flush();
-  machine->PushRef( (gString) "x1" );
-  machine->PushRef( (gString) "y1" );
-  machine->Push( (bool) true );
-  machine->PushList( 3 );
-  machine->Dump();
-*/
+
   machine->Flush();
   machine->Push( (gInteger) 11 );
   machine->Push( (gInteger) 13 );
@@ -481,74 +444,6 @@ int main( void )
   machine->GreaterThan();
   machine->PushList( 10 );
   machine->Dump();
-
-
-/*
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-
-  gout << "Testing (double) 1 * 10000 using Add()\n";
-  machine->Flush();
-  machine->Push( (double) 1 );
-  for( i = 2; i <= 10000; i++ )
-  {
-    machine->Push( (double) 1 );
-    machine->Add();
-  }
-  machine->Dump();
-
-  
-  gout << "Testing CallFunction( \"Sqr\" ) on (double) 99 ^ 99 for 10 times\n";
-  machine->Flush();
-  machine->Push( (double) 99 );
-  for( i = 2; i <= 99; i++ )
-  {
-    machine->Push( (double) 99 );
-    machine->Multiply();
-  }
-  for( i = 1; i <= 10; i++ )
-  {
-    machine->CallFunction( (gString) "Sqr" );
-  }
-  machine->Dump();
-
-  
-  machine->Flush();
-  gout << "Testing (gRational) ( 11 / 17 ) ^ 32\n";
-  gRational t = ( (gRational) 11 )/( (gRational) 17 );
-  for( i = 1; i <= 32; i++ )
-  {
-    machine->Push( t );  
-  }
-  for( i = 1; i <= 31; i++ )
-  {
-    machine->Multiply();  
-  }
-  machine->Dump();
-
-
-  gout << "Testing (gRational) 99 ^ 99\n";
-  machine->Flush();
-  machine->Push( (gRational) 99 );
-  for( i = 2; i <= 99; i++ )
-  {
-    machine->Push( (gRational) 99 );
-    machine->Multiply();
-  }
-  machine->Dump();
-
-  gout << "Testing (gRational) 1 ^ 10000\n";
-  machine->Flush();
-  machine->Push( (gRational) 1 );
-  for( i = 2; i <= 10000; i++ )
-  {
-    machine->Push( (gRational) 1 );
-    machine->Multiply();
-  }
-  machine->Dump();
-
-*/
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -683,13 +578,114 @@ int main( void )
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
 
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
 
 
 
-  delete machine;
 
-  gout << "\nnewing and deleting another GSM\n";
-  machine = new GSM( 256 );
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 100 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "y" );
+  machine->PushRef( "x" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "z" );
+  machine->GenerateNfg( 200 );
+  machine->Assign();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->PushRef( "z" );
+  machine->PushRef( "z" );
+  machine->PushRef( "z" );
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->PushList( 6 );
+  machine->PushRef( "z" );
+  machine->PushRef( "z" );
+  machine->PushRef( "z" );
+  machine->PushRef( "x" );
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 100 );
+  machine->Assign();
+  machine->Dump();
+
+  gout << "machine->PushRef( \"x\", \"a\" );\n";
+  machine->PushRef( "x", "a" );
+  gout <<  "machine->Push( (double) 200 );\n";
+  machine->Push( (double) 200 );
+  gout << "machine->Assign();\n";
+  machine->Assign();
+  machine->Dump();
+
+
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+  machine->PushRef( "x", "x" );
+  machine->Push( (double) 300 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "y", "a" );
+  machine->Push( (double) 300 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "x" );
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+
+  machine->GenerateNfg( 100 );
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->GenerateNfg( 100 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "a" );
+  machine->Push( (gInteger) 20 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+
+
+
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  gout << "Deleting machine\n";
   delete machine;
 
   return 0;

@@ -8,25 +8,21 @@
 #ifndef GSM_H
 #define GSM_H
 
-#include "rational.h"
+#include "glist.h"
 #include "gstack.h"
 
-#include "glist.h"
 #include "portion.h"
 #include "gsmfunc.h"
 #include "gsminstr.h"
+#include "gsmhash.h"
 
 
 int FuncParamCheck( const PortionType stack_param_type, 
 		    const PortionType func_param_type );
 
 
-class Instruction;
-
-// These classes implemented in gsm.cc
 class FunctionHashTable;
-class RefHashTable;
-
+class Instruction;
 
 class GSM
 {
@@ -36,7 +32,8 @@ class GSM
   RefHashTable*            _RefTable;
   FunctionHashTable*       _FuncTable;
 
-  Portion* resolve_ref( Reference_Portion* p );
+  Portion* resolve_ref    ( Reference_Portion* p );
+  Portion* resolve_subref ( Reference_Portion* p );
 
   bool unary_operation  ( OperationMode mode );
   bool binary_operation ( OperationMode mode );
@@ -60,9 +57,12 @@ class GSM
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
+  bool GenerateNfg ( const double& data );
+
   bool PushList ( const int num_of_elements );
 
-  bool PushRef  ( const gString& data );
+  bool PushRef  ( const gString& ref );
+  bool PushRef  ( const gString& ref, const gString& subref );
   bool Assign   ( void );
   bool UnAssign ( const gString& ref );
 

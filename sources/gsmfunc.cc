@@ -198,8 +198,8 @@ void FuncDescObj::SetParamInfo
   if( repeated_variable_declaration )
   {
     gerr << "FuncDescObj Error: multiple parameters of a functions were\n";
-    gerr << "                   declared with the same formal name \"";
-    gerr << param_name << "\"\n";
+    gerr << "                   declared with the same formal name ";
+    gerr << "\"" << param_name << "\"\n";
     gerr << "                   during initialization\n";
   }
   assert( !repeated_variable_declaration );

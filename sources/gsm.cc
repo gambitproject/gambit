@@ -1,5 +1,5 @@
 //#
-//# FILE: gsm.cc  implementation of GSM (_Stack machine)
+//# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
 //# $Id$
 //#
@@ -8,84 +8,12 @@
 #include <assert.h>
 #include "gambitio.h"
 
+
 #include "gsm.h"
-#include "hash.h"
 
 
 //--------------------------------------------------------------------
-//                     date structures used by GSM
-//-------------------------------------------------------------------
-
-
-class FunctionHashTable : public HashTable<gString, FuncDescObj*>
-{
- private:
-  int NumBuckets() const 
-  { 
-    return 26; 
-  }
-  
-  int Hash( const gString& funcname ) const 
-  { 
-    return (int)( funcname[0] % 26 ); 
-  }
-
-  void DeleteAction( FuncDescObj* func ) 
-  { 
-    delete func; 
-  }
-
- public:
-  FunctionHashTable() 
-  { 
-    Init(); 
-  }
-
-  ~FunctionHashTable() 
-  { 
-    Flush(); 
-  }  
-};
-
-
-
-
-class RefHashTable : public HashTable<gString, Portion*>
-{
- private:
-  int NumBuckets( void ) const 
-  { 
-    return 26; 
-  }
-  
-  int Hash( const gString& ref ) const 
-  { 
-    return (int)( ref[0] % 26 ); 
-  }
-  
-  void DeleteAction( Portion* value ) 
-  { 
-    delete value; 
-  }
-  
- public:
-  RefHashTable() 
-  { 
-    Init(); 
-  }
-  
-  ~RefHashTable() 
-  { 
-    Flush(); 
-  }
-};
-
-
-
-
-
-//--------------------------------------------------------------------
-//              implementation of GSM (_Stack machine)
+//              implementation of GSM (Stack machine)
 //--------------------------------------------------------------------
 
 GSM::GSM( int size )
@@ -93,8 +21,8 @@ GSM::GSM( int size )
 #ifndef NDEBUG
   if( size <= 0 )
   {
-    gerr << "GSM Error: illegal _Stack size specified during initialization\n";
-    gerr << "           _Stack size requested: " << size << "\n";
+    gerr << "GSM Error: illegal stack size specified during initialization\n";
+    gerr << "           stack size requested: " << size << "\n";
   }
   assert( size > 0 );
 #endif // NDEBUG
@@ -149,7 +77,7 @@ bool GSM::Push( const bool& data )
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
@@ -168,7 +96,7 @@ bool GSM::Push( const double& data )
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
@@ -187,7 +115,7 @@ bool GSM::Push( const gInteger& data )
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
@@ -206,7 +134,7 @@ bool GSM::Push( const gRational& data )
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
@@ -225,11 +153,40 @@ bool GSM::Push( const gString& data )
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool GSM::GenerateNfg( const double& data )
+{
+  Portion* p;
+  p = new Nfg_Portion( data );
+  _Stack->Push( p );
+  return true;
+}
+
+
+
+
+
+
+
+
+
 
 
 bool GSM::PushList( const int num_of_elements )
@@ -260,6 +217,8 @@ bool GSM::PushList( const int num_of_elements )
   for( i = 1; i <= num_of_elements; i++ )
   {
     p = _Stack->Pop();
+    if( p->Type() == porREFERENCE )
+      p = resolve_ref( (Reference_Portion*) p );
     list->Insert( p, 1 );
   }
   _Stack->Push( list );
@@ -273,19 +232,38 @@ bool GSM::PushList( const int num_of_elements )
 //     Reference related functions: PushRef(), Assign(), UnAssign()
 //---------------------------------------------------------------------
 
-bool GSM::PushRef( const gString& data )
+bool GSM::PushRef( const gString& ref )
 {
   Portion*  p;
   bool      result = true;
   
   if( _Stack->Depth() < _Stack->MaxDepth() )
   {
-    p = new Reference_Portion( data );
+    p = new Reference_Portion( ref );
     _Stack->Push( p );
   }
   else
   {
-    gerr << "GSM Error: out of Stack space\n";
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
+}
+
+
+bool GSM::PushRef( const gString& ref, const gString& subref )
+{
+  Portion*  p;
+  bool      result = true;
+  
+  if( _Stack->Depth() < _Stack->MaxDepth() )
+  {
+    p = new Reference_Portion( ref, subref );
+    _Stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
     result = false;
   }
   return result;
@@ -296,6 +274,8 @@ bool GSM::Assign( void )
 {
   Portion*  p2;
   Portion*  p1;
+  Portion*  p;
+  gString   p1_subvalue;
   bool      result = true;
 
 #ifndef NDEBUG
@@ -314,11 +294,32 @@ bool GSM::Assign( void )
     if( p2->Type() == porREFERENCE )
       p2 = resolve_ref( (Reference_Portion*) p2 );
     
-    _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
-    delete p2;
-    
-    p1 = resolve_ref( (Reference_Portion*) p1 );
-    _Stack->Push( p1 );
+    p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
+    if( p1_subvalue == "" )
+    {
+      _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
+      delete p2;
+      
+      p1 = resolve_ref( (Reference_Portion*) p1 );
+      _Stack->Push( p1 );
+    }
+    else
+    {
+      p = resolve_subref( (Reference_Portion*) p1 );
+      switch( p->Type() )
+      {
+      case porNFG:
+	( (Nfg_Portion*) p )->Assign( p1_subvalue, p2->Copy() );
+	break;
+      default:
+	gerr << "GSM Error: attempted to assign a subreference to a type\n";
+	gerr << "           that doesn't support it\n";
+      }
+      delete p2;
+      
+      p1 = resolve_ref( (Reference_Portion*) p1 );
+      _Stack->Push( p1 );
+    }
   }
   else // ( p1->Type() != porREFERENCE )
   {
@@ -348,15 +349,16 @@ bool GSM::UnAssign( const gString& ref )
 
 
 
-
 //---------------------------------------------------------------------
-//                        operation functions
+//                        resolve_ref functions
 //-----------------------------------------------------------------------
 
 Portion* GSM::resolve_ref( Reference_Portion* p )
 {
   Portion*  result = 0;
+  Portion*  temp;
   gString&  ref = p->Value();
+  gString   subvalue;
 
 #ifndef NDEBUG
   if( !_RefTable->IsDefined( ref ) )
@@ -367,9 +369,41 @@ Portion* GSM::resolve_ref( Reference_Portion* p )
   assert( _RefTable->IsDefined( ref ) );
 #endif // NDEBUG
 
-  result = (*_RefTable)( ref )->Copy();
+  subvalue = ( (Reference_Portion*) p )->SubValue();
+  if( subvalue == "" )
+  {
+    result = (*_RefTable)( ref )->Copy();
+  }
+  else
+  {
+    result = (*_RefTable)( ref );
+    result = ((Nfg_Portion*) result )->operator()( subvalue );
+    assert( result != 0 );
+    result = result->Copy();
+  }
   delete p;
 
+  return result;
+}
+
+
+Portion* GSM::resolve_subref( Reference_Portion* p )
+{
+  Portion*  result = 0;
+  Portion*  temp;
+  gString&  ref = p->Value();
+  gString   subvalue;
+
+#ifndef NDEBUG
+  if( !_RefTable->IsDefined( ref ) )
+  {
+    gerr << "GSM Error: attempted to resolve an undefined reference\n";
+    gerr << "           \"" << ref << "\"\n";
+  }
+  assert( _RefTable->IsDefined( ref ) );
+#endif // NDEBUG
+
+  result = (*_RefTable)( ref );
   return result;
 }
 
@@ -660,8 +694,8 @@ bool GSM::Bind( const gString& param_name )
     }
     else // ( new_index < func->GetCurrParamIndex() )
     {
-      gerr << "GSM Error: multiple definitions found for parameter \"";
-      gerr << param_name << "\" while executing\n";
+      gerr << "GSM Error: multiple definitions found for parameter ";
+      gerr << "\"" << param_name << "\" while executing\n";
       gerr << "           CallFunction( \"" << func->FuncName() << "\", ... )\n";
       result = false;
     }
@@ -804,8 +838,8 @@ void GSM::Flush( void )
 
 #include "hash.imp"
 
-TEMPLATE class HashTable< gString, Portion* >;
 TEMPLATE class HashTable< gString, FuncDescObj* >;
+
 
 
 #include "glist.imp"
