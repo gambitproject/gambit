@@ -52,7 +52,7 @@ template <class T> class EquiSolv {
 // Old Data Members
   const gPolyList<T>                 System;
   const gPolyList<gDouble>           gDoubleSystem;
-  const ListOfPartialTrees<gDouble> TreesOfPartials;
+  const ListOfPartialTrees<gDouble>  TreesOfPartials;
 
 // Retained Data Members
         bool                         HasBeenSolved;
@@ -60,33 +60,34 @@ template <class T> class EquiSolv {
 
   // FUNCTIONS USED IN CONSTRUCTOR INITITALIZATIONS
 
-  const gList<gPolyList<T> > CopyGivenLists(const gList<gPolyList<T> >&)
-                                                                      const;
-  const gPolyList<T>                 DerivedEquationSystem()          const;
-  const gPolyList<gDouble>        ListTogDouble(const gPolyList<T>&)  const;
-  const gList<gPolyList<gDouble> > ListsTogDouble(const gList<gPolyList<T> >&)
-                                                                      const;
-  const gList<ListOfPartialTrees<gDouble> > GenerateTreesOfPartials() const;
+  const gList<gPolyList<T> > 
+        CopyGivenLists(const gList<gPolyList<T> >&)                   const;
+  const gPolyList<T>                 
+        DerivedEquationSystem()                                       const;
+  const gPolyList<gDouble>        
+        ListTogDouble(const gPolyList<T>&)                            const;
+  const gList<gPolyList<gDouble> > 
+        ListsTogDouble(const gList<gPolyList<T> >&)                   const;
+  const gList<ListOfPartialTrees<gDouble> > 
+        GenerateTreesOfPartials()                                     const;
   const gList<gList<gList<TreeOfPartials<gDouble> > > > 
-                                            UtilityDiffPartialTrees() const;
+        UtilityDiffPartialTrees()                                     const;
 
   // SUPPORTING CALCULATIONS - conceptually, some of these belong elsewhere
 
   // Check whether roots are impossible
-
    bool PolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)         const;
-   bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
-				 const int&)                             const;
+   bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, const int&) const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
-//   bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
+// bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
 
   // Ask whether Newton's method leads to a root without leaving the rectangle
    gSquareMatrix<gDouble> DerivativeMatrix(const gVector<gDouble>&)      const;
    gVector<gDouble>       UtilityDiffs(const gVector<gDouble>&)          const;
-   bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
-			            gVector<gDouble>&) const;
-   bool NewtonEquiInRectangle(const gRectangle<gDouble>&, 
-			            gVector<gDouble>&) const;
+   bool                   NewtonRootInRectangle(const gRectangle<gDouble>&, 
+						gVector<gDouble>&)       const;
+   bool                   NewtonEquiInRectangle(const gRectangle<gDouble>&, 
+						gVector<gDouble>&)       const;
 
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
