@@ -283,6 +283,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
     try {
       file.seekg(0);
       game = ReadEfg(file);
+      game->Canonicalize();
       if (file.bad()) {
 	wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
 				      (const char *) dialog.GetPath().mb_str()),
@@ -342,6 +343,7 @@ void gbtGameFrame::OnFileMRU(wxCommandEvent &p_event)
   try {
     file.seekg(0);
     game = ReadEfg(file);
+    game->Canonicalize();
     if (file.bad()) {
       wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
 				    (const char *) filename.mb_str()),

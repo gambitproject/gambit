@@ -37,10 +37,9 @@
 
 void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const gbtGameNode &p_node) const
 {
-  wxPoint point = m_nodeLocations[p_node->GetId()];
-  point.x += 20;
+  wxPoint point(GetX(p_node) + 20, m_ycoords[p_node->GetId()]);
 
-  p_dc.SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
+  p_dc.SetFont(wxFont(9, wxSWISS, wxNORMAL, wxBOLD));
 
   gbtGameOutcome outcome = p_node->GetOutcome();
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
@@ -56,7 +55,7 @@ void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const gbtGameNode &p_node) const
 
 void gbtTreeLayout::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node) const
 {
-  const wxPoint &point = m_nodeLocations[p_node->GetId()];
+  wxPoint point(GetX(p_node), m_ycoords[p_node->GetId()]);
   wxColour color;
   if (!p_node->GetPlayer().IsNull()) {
     color = m_doc->GetPlayerColor(p_node->GetPlayer()->GetId());
@@ -66,15 +65,23 @@ void gbtTreeLayout::DrawSubtree(wxDC &p_dc, const gbtGameNode &p_node) const
   }
 
   for (int i = 1; i <= p_node->NumChildren(); i++) {
-    p_dc.SetPen(wxPen(color, 1, wxSOLID));
-    const wxPoint &child = m_nodeLocations[p_node->GetChild(i)->GetId()];
+    p_dc.SetPen(wxPen(color, 3, wxSOLID));
+    wxPoint child(GetX(p_node->GetChild(i)),
+		  m_ycoords[p_node->GetChild(i)->GetId()]);
     p_dc.DrawLine(point.x, point.y, child.x, child.y);
     DrawSubtree(p_dc, p_node->GetChild(i));
   }
 
+  if (p_node->NumChildren() > 0 && p_node->GetMemberId() > 1) {
+    p_dc.SetPen(wxPen(color, 1, wxSOLID));
+    gbtGameNode m = p_node->GetInfoset()->GetMember(p_node->GetMemberId() - 1);
+    wxPoint member(GetX(m), m_ycoords[m->GetId()]);
+    p_dc.DrawLine(point.x, point.y, member.x, member.y);
+  }
+
   p_dc.SetPen(wxPen(color, 1, wxSOLID));
   p_dc.SetBrush(wxBrush(color, wxSOLID));
-  p_dc.DrawCircle(point.x, point.y, 5);
+  p_dc.DrawCircle(point.x, point.y, 7);
 
   if (!p_node->GetOutcome().IsNull()) {
     DrawOutcome(p_dc, p_node);
@@ -86,24 +93,53 @@ void gbtTreeLayout::DrawTree(wxDC &p_dc) const
   DrawSubtree(p_dc, m_doc->GetGame()->GetRoot());
 }
 
-void gbtTreeLayout::LayoutSubtree(const gbtGameNode &p_node, int p_depth)
+int gbtTreeLayout::GetX(const gbtGameNode &p_node) const
 {
-  if (p_node->NumChildren() > 0) {
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      LayoutSubtree(p_node->GetChild(i), p_depth + 1);
-    }
+  return (m_levels[m_nodeLevels[p_node->GetId()]] + 
+	  15 * m_nodeSublevels[p_node->GetId()]);
+}
 
-    int yMin = m_nodeLocations[p_node->GetChild(1)->GetId()].y;
-    int yMax = m_nodeLocations[p_node->GetChild(p_node->NumChildren())->GetId()].y;
-    m_nodeLocations[p_node->GetId()] = wxPoint(30 + p_depth * 50, (yMin + yMax) / 2);
+void gbtTreeLayout::LayoutSubtree(const gbtGameNode &p_node, int p_depth,
+				  gbtBlock<int> &p_sublevels)
+{
+  if (p_depth > p_sublevels.Length()) {
+    p_sublevels.Append(0);
+  }
+
+  m_nodeLevels[p_node->GetId()] = p_depth;
+
+  if (p_node->NumChildren() == 0 || p_node->GetInfoset()->NumMembers() == 1) {
+    m_nodeSublevels[p_node->GetId()] = 0;
+  }
+  else if (p_node->GetMemberId() == 1) {
+    m_nodeSublevels[p_node->GetId()] = ++p_sublevels[p_depth];
   }
   else {
-    m_nodeLocations[p_node->GetId()] = wxPoint(30 + p_depth * 50, m_maxY);
-    m_maxY += 50;
+    m_nodeSublevels[p_node->GetId()] = 0;
+    for (int i = 1; i < p_node->GetMemberId(); i++) {
+      int id = p_node->GetInfoset()->GetMember(i)->GetId();
+      if (m_nodeLevels[id] == p_depth) {
+	m_nodeSublevels[p_node->GetId()] = m_nodeSublevels[id];
+	break;
+      }
+    }
+    if (m_nodeSublevels[p_node->GetId()] == 0) {
+      m_nodeSublevels[p_node->GetId()] = ++ p_sublevels[p_depth];
+    }
   }
 
-  if (30 + p_depth * 50 > m_maxX) {
-    m_maxX = 30 + p_depth * 50;
+  if (p_node->NumChildren() > 0) {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      LayoutSubtree(p_node->GetChild(i), p_depth + 1, p_sublevels);
+    }
+
+    int yMin = m_ycoords[p_node->GetChild(1)->GetId()];
+    int yMax = m_ycoords[p_node->GetChild(p_node->NumChildren())->GetId()];
+    m_ycoords[p_node->GetId()] = (yMin + yMax) / 2;
+  }
+  else {
+    m_ycoords[p_node->GetId()] = m_maxY;
+    m_maxY += 50;
   }
 }
 
@@ -111,9 +147,18 @@ void gbtTreeLayout::LayoutTree(void)
 {
   m_maxX = 0;
   m_maxY = 30;    // initial margin
-  m_nodeLocations = gbtArray<wxPoint>(m_doc->GetGame()->NumNodes());
-  LayoutSubtree(m_doc->GetGame()->GetRoot(), 0);
-  m_maxX += 50;   // right margin, to allow for outcome display
+  m_nodeLevels = gbtArray<int>(m_doc->GetGame()->NumNodes());
+  m_nodeSublevels = gbtArray<int>(m_doc->GetGame()->NumNodes());
+  m_ycoords = gbtArray<int>(m_doc->GetGame()->NumNodes());
+  gbtBlock<int> sublevels;
+  LayoutSubtree(m_doc->GetGame()->GetRoot(), 0, sublevels);
+  m_levels = gbtArray<int>(0, sublevels.Length());
+  m_levels[0] = 30;
+  m_levels[1] = 50;
+  for (int i = 2; i <= m_levels.Last(); i++) {
+    m_levels[i] = m_levels[i - 1] + 50 + 15 * sublevels[i - 1];
+  } 
+  m_maxX += m_levels[m_levels.Last()] + 50;   // right margin, to allow for outcome display
 }
 
 //--------------------------------------------------------------------------
