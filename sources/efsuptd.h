@@ -7,7 +7,7 @@
 class EFSupportInspectDialog:public wxDialogBox
 {
 private:
-	BaseExtensiveShow *bes;
+	EfgShow *es;
 	gList<EFSupport *> &sups;
 	int init_disp,init_cur;
 	wxText *cur_dim,*disp_dim;
@@ -28,14 +28,14 @@ private:
 	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
-	{((BaseExtensiveShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
+	{((EfgShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
 	static void remove_sup_func(wxButton &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnRemoveSupport();}
 
 // High level event handlers
 	void OnNewSupport(void)
 	{
-	if (bes->MakeSupport())
+	if (es->MakeSupport())
 	{
 		disp_item->Append(ToString(sups.Length()));
 		disp_item->SetSize(-1,-1,-1,-1);
@@ -46,7 +46,7 @@ private:
 	void OnRemoveSupport(void);
 	void OnChangeSupport(void)
 	{
-	bes->SupportInspect(SUPPORT_CHANGE);init_disp=DispSup();init_cur=CurSup();
+	es->SupportInspect(SUPPORT_CHANGE);init_disp=DispSup();init_cur=CurSup();
 	}
 	void OnCur(int cur_sup)
 	{
@@ -71,8 +71,8 @@ private:
 	}
 public:
 	EFSupportInspectDialog(gList<EFSupport *> &sups_,int cur_sup,
-											int disp_sup,BaseExtensiveShow *bes_,wxWindow *parent=0)
-		: wxDialogBox(parent,"Supports"),bes(bes_),sups(sups_)
+											int disp_sup,EfgShow *es_,wxWindow *parent=0)
+		: wxDialogBox(parent,"Supports"),es(es_),sups(sups_)
 	{
   init_disp=disp_sup;init_cur=cur_sup;
 	wxForm *f=new wxForm(0);
@@ -119,7 +119,7 @@ public:
 	((wxButton *)rmvsup_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
-	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bes);
+	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)es);
 	root_item=(wxCheckBox *)root_fitem->GetPanelItem();
 	Fit();
 	Show(TRUE);
@@ -155,7 +155,7 @@ for (i=1;i<=sups.Length();i++)
 	{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
 disp_item->SetSelection(0);cur_item->SetSelection(0);
-if (revert) bes->SupportInspect(SUPPORT_CHANGE);
+if (revert) es->SupportInspect(SUPPORT_CHANGE);
 }
 }
 #endif

@@ -5,142 +5,145 @@
 #ifndef EFGSOLNG_H
 #define EFGSOLNG_H
 #include "behavsol.h"
+typedef BehavSolution<gNumber> BehavSolutionT;
+typedef BehavProfile<gNumber> BehavProfileT;
+
 // An interface class between ExtensiveSolutionG (and related) and ExtensiveShow
-template <class T> class ExtensiveShowInterf
+class EfgShowInterface
 {
 public:
-	virtual void PickSolutions(const Efg<T> &,gList<BehavSolution<T> > &) = 0;
-	virtual BehavProfile<T> CreateStartProfile(int how) = 0;
+	virtual void PickSolutions(const Efg &,gList<BehavSolutionT > &) = 0;
+	virtual BehavProfileT CreateStartProfile(int how) = 0;
 	virtual void SetPickSubgame(const Node *n) = 0;
 	virtual const gString &Filename(void) const = 0;
 	virtual wxFrame *Frame(void) = 0;
 };
 
-template <class T> class ExtensiveSolutionG
+class ExtensiveSolutionG
 {
 protected:
-	const Efg<T> &ef;
+	const Efg &ef;
 	const EFSupport &sup;
-	ExtensiveShowInterf<T> *parent;
+	EfgShowInterface *parent;
 public:
-	ExtensiveSolutionG(const Efg<T> &E,const EFSupport &S,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const = 0;
+	ExtensiveSolutionG(const Efg &E,const EFSupport &S,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const = 0;
 	virtual void SolveSetup(void) const = 0;
 };
 
 // Extensive Form Liap
-template <class T> class EFLiapG : public ExtensiveSolutionG<T>
+class EFLiapG : public ExtensiveSolutionG
 {
 public:
-	EFLiapG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	EFLiapG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Normal Form Liap
-template <class T> class NFLiapG : public ExtensiveSolutionG<T>
+class NFLiapG : public ExtensiveSolutionG
 {
 public:
-	NFLiapG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	NFLiapG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Seq Form
-template <class T> class SeqFormG : public ExtensiveSolutionG<T>
+class SeqFormG : public ExtensiveSolutionG
 {
 public:
-	SeqFormG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	SeqFormG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Lemke
-template <class T> class LemkeG : public ExtensiveSolutionG<T>
+class LemkeG : public ExtensiveSolutionG
 {
 public:
-	LemkeG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	LemkeG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Enum Pure
-template <class T> class PureNashG : public ExtensiveSolutionG<T>
+class PureNashG : public ExtensiveSolutionG
 {
 public:
-	PureNashG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	PureNashG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 // Efg Pure Nash
-template <class T> class EPureNashG : public ExtensiveSolutionG<T>
+class EPureNashG : public ExtensiveSolutionG
 {
 public:
-	EPureNashG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	EPureNashG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Enum Mixed
-template <class T> class EnumG : public ExtensiveSolutionG<T>
+class EnumG : public ExtensiveSolutionG
 {
 public:
-	EnumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	EnumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // LP (ZSum)
-template <class T> class ZSumG : public ExtensiveSolutionG<T>
+class ZSumG : public ExtensiveSolutionG
 {
 public:
-	ZSumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	ZSumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // EfgCSum
-template <class T> class EfgCSumG : public ExtensiveSolutionG<T>
+class EfgCSumG : public ExtensiveSolutionG
 {
 public:
-	EfgCSumG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	EfgCSumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Simpdiv
-template <class T> class SimpdivG : public ExtensiveSolutionG<T>
+class SimpdivG : public ExtensiveSolutionG
 {
 public:
-	SimpdivG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	SimpdivG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // Gobit All
-template <class T> class GobitAllG : public ExtensiveSolutionG<T>
+class GobitAllG : public ExtensiveSolutionG
 {
 public:
-	GobitAllG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	GobitAllG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // NGobit
-template <class T> class NGobitG : public ExtensiveSolutionG<T>
+class NGobitG : public ExtensiveSolutionG
 {
 public:
-	NGobitG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	NGobitG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
 // EGobit
-template <class T> class EGobitG : public ExtensiveSolutionG<T>
+class EGobitG : public ExtensiveSolutionG
 {
 public:
-	EGobitG(const Efg<T> &E,const EFSupport &sup,ExtensiveShowInterf<T> *parent);
-	virtual gList<BehavSolution<T> > Solve(void) const;
+	EGobitG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
+	virtual gList<BehavSolutionT > Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 

@@ -2,7 +2,7 @@
 // FILE: nfgsolvd.h -- the main dialog for running NormalForm solution
 //                     algorithms.
 //
-// $Id$
+// @(#)nfgsolvd.h	2.4 6/22/97
 //
 
 // You must add an entry here for each new algorithm.
@@ -83,7 +83,7 @@ protected:
 	bool	solving;
 protected:
 	char *defaults_file;
-	const NFGameForm &nf;
+	const Nfg &nf;
 		// call this to convert standard settings to actual solution parameters
 	void StandardSettings(void)
 	{
@@ -92,7 +92,7 @@ protected:
 	// a separate case for each of the possible alg/num/game combinations
 	// One Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
-	{algorithm=(nf.PayoffTable()->IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	{algorithm=(IsConstSum(nf)) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
 	 stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// One Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && nf.NumPlayers()!=2)
@@ -114,21 +114,21 @@ protected:
 	 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);}
 	// One Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
-	{algorithm=(nf.PayoffTable()->IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	{algorithm=(IsConstSum(nf)) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
 	 stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// One Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()!=2)
 	{Warn("One Perfect not implemented for n person games\nUsing current settings\n");}
 	// Two Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()==2)
-	{algorithm=(nf.PayoffTable()->IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	{algorithm=(IsConstSum(nf)) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
 	 stopAfter=2;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// Two Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()!=2)
 	{Warn("Two Perfect not implemented for n person games\nUsing current settings\n");}
 	// All Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && nf.NumPlayers()==2)
-	{algorithm=(nf.PayoffTable()->IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	{algorithm=(IsConstSum(nf)) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
 	 stopAfter=0;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;
 	 Warn("Not guaranteed to find all solutions for 'All Perfect' 2-person games\n");}
 
@@ -146,7 +146,7 @@ protected:
 virtual void Warn(const char *warning) // only warn when solving
 {if (solving) wxMessageBox((char *)warning,"Standard Solution");}
 public:
-	NfgSolveSettings(const NFGameForm &nf_,bool solving_=true):solving(solving_),nf(nf_)
+	NfgSolveSettings(const Nfg &nf_,bool solving_=true):solving(solving_),nf(nf_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -213,11 +213,11 @@ private:
 
 public:
 // Constructor
-	NfgSolveParamsDialog(const NFGameForm &nf,int have_efg,wxWindow *parent=0)
+	NfgSolveParamsDialog(const Nfg &nf,int have_efg,wxWindow *parent=0)
 						:NfgSolveSettings(nf,false)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
-		nfg_algorithm_box=MakeNfgAlgorithmList(nf.NumPlayers(),nf.PayoffTable()->IsConstSum(),d,(wxFunction)nfg_algorithm_box_func);
+		nfg_algorithm_box=MakeNfgAlgorithmList(nf.NumPlayers(),IsConstSum(nf),d,(wxFunction)nfg_algorithm_box_func);
 		nfg_algorithm_box->SetClientData((char *)this);
 		nfg_algorithm_box->SetSelection(algorithm);
 		d->NewLine();
@@ -249,7 +249,7 @@ private:
 	char *standard_type_str,*standard_num_str;
 	wxStringList *standard_type_list,*standard_num_list;
 public:
-	NfgSolveStandardDialog(const NFGameForm &nf,wxWindow *parent):
+	NfgSolveStandardDialog(const Nfg &nf,wxWindow *parent):
 				NfgSolveSettings(nf,false),MyDialogBox(parent,"Standard Solution",NFG_STANDARD_HELP)
 	{
 	standard_type_list=new wxStringList("Nash","Perfect",0);

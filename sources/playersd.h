@@ -10,7 +10,7 @@
 class PlayerNamesDialog: public MyDialogBox
 {
 private:
-	BaseEfg	&ef;
+	Efg	&ef;
 	// keep track of panel items
 	wxChoice	*name_item;
 	wxText		*new_name_item;
@@ -24,7 +24,7 @@ private:
 	void			UpdateName(void);
 public:
 	// Constructor
-	PlayerNamesDialog(BaseEfg &ef_,wxWindow *parent=0);
+	PlayerNamesDialog(Efg &ef_,wxWindow *parent=0);
 	// Override default OnOk behavior
 	void OnOk(void);
 	// Returns the last selected player
@@ -32,10 +32,10 @@ public:
 };
 
 #ifdef PLAYERSD_INST // instantiate only once
-EFPlayer *EfgGetPlayer(const BaseEfg &ef,const gString &name);
+EFPlayer *EfgGetPlayer(const Efg &ef,const gString &name);
 
 //************************************** CONSTRUCTOR **************************
-PlayerNamesDialog::PlayerNamesDialog(BaseEfg &ef_,wxWindow *parent)
+PlayerNamesDialog::PlayerNamesDialog(Efg &ef_,wxWindow *parent)
 												:ef(ef_),MyDialogBox(parent,"Player Names",EFG_TREE_HELP)
 {
 wxStringList *player_list=new wxStringList;char *player_name=new char[20];

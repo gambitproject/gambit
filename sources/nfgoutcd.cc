@@ -4,7 +4,7 @@
 #include "wxmisc.h"
 #include "spread.h"
 #include "nfg.h"
-#include "normshow.h"
+#include "nfgshow.h"
 #include "nfgoutcd.h"
 #include "nfplayer.h"
 
@@ -13,13 +13,12 @@
 ****************************************************************************/
 #define NFG_OUTCOME_HELP	"Outcomes GUI"
 
-class BaseNFOutcomeDialogC: public SpreadSheet3D
+class NfgOutcomeDialogC: public SpreadSheet3D
 {
-private:
-	BaseNFOutcomeDialog *parent;
-	NFGameForm &nf;
 protected:
-	BaseNormShow *bns;
+	NfgOutcomeDialog *parent;
+	Nfg &nf;
+	NfgShow *bns;
 	int prev_outc_num;
 	class OutcomeDragger;
 	OutcomeDragger *outcome_drag;
@@ -31,12 +30,13 @@ protected:
 	void OnDetach(void);
 	virtual void OnDelete(void);
 	void OnSettings(void);
-	virtual void UpdateValues(void) = 0;
+	virtual void UpdateValues(void);
+	void CheckOutcome(int outc_num);
 	virtual void PayoffPos(int outc_num,int player,int *row,int *col) = 0;
 	virtual void NamePos(int outc_num,int *row,int *col) = 0;
 	virtual Bool OnEventNew(wxMouseEvent &ev);
 public:
-	BaseNFOutcomeDialogC(int rows,int cols,NFGameForm &nf,BaseNormShow *bns,BaseNFOutcomeDialog *parent);
+	NfgOutcomeDialogC(int rows,int cols,Nfg &nf,NfgShow *bns,NfgOutcomeDialog *parent);
 	void SetCurOutcome(const gString &out_name);
 	void OnHelp(int );
 	// This implements the behavior that a new row is created automatically
@@ -53,21 +53,21 @@ extern wxCursor *outcome_cursor; // defined in efgoutcd.cc
 #define DRAG_START			1
 #define DRAG_CONTINUE   2
 #define DRAG_STOP       3
-class BaseNFOutcomeDialogC::OutcomeDragger
+class NfgOutcomeDialogC::OutcomeDragger
 {
 private:
-	BaseNFOutcomeDialogC *parent;
-	BaseNormShow *bns;
+	NfgOutcomeDialogC *parent;
+	NfgShow *bns;
 	int drag_now;
 	int outcome;
 	int x,y;
 public:
-	OutcomeDragger(BaseNFOutcomeDialogC *parent,BaseNormShow *bns);
+	OutcomeDragger(NfgOutcomeDialogC *parent,NfgShow *bns);
 	int OnEvent(wxMouseEvent &ev);
 };
 
-BaseNFOutcomeDialogC::OutcomeDragger::OutcomeDragger(BaseNFOutcomeDialogC *parent_,
-			BaseNormShow *bns_):parent(parent_),bns(bns_),drag_now(0)
+NfgOutcomeDialogC::OutcomeDragger::OutcomeDragger(NfgOutcomeDialogC *parent_,
+			NfgShow *bns_):parent(parent_),bns(bns_),drag_now(0)
 {
 if (!outcome_cursor)
 {
@@ -80,7 +80,7 @@ if (!outcome_cursor)
 }
 }
 
-int BaseNFOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
+int NfgOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
 {
 int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
 if (ev.Dragging())
@@ -111,8 +111,8 @@ return ret;
 
 
 // Constructor
-BaseNFOutcomeDialogC::BaseNFOutcomeDialogC(int rows,int cols,NFGameForm &ef_,
-																BaseNormShow *bns_,BaseNFOutcomeDialog *parent_)
+NfgOutcomeDialogC::NfgOutcomeDialogC(int rows,int cols,Nfg &ef_,
+																NfgShow *bns_,NfgOutcomeDialog *parent_)
 						:SpreadSheet3D(rows,cols,1,"Outcomes [S]",0/*(wxFrame *)bns_->GetParent()*/,ANY_BUTTON),
 						 parent(parent_),nf(ef_),bns(bns_)
 {
@@ -127,22 +127,22 @@ outcome_drag=new OutcomeDragger(this,bns);
 }
 
 // Handler functions -> stubs to actual functions
-void BaseNFOutcomeDialogC::outcome_attach_func(wxButton &ob,wxEvent &)
-{((BaseNFOutcomeDialogC *)ob.GetClientData())->OnAttach();}
-void BaseNFOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
-{((BaseNFOutcomeDialogC *)ob.GetClientData())->OnDetach();}
-void BaseNFOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
-{((BaseNFOutcomeDialogC *)ob.GetClientData())->OnDelete();}
-void BaseNFOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
-{((BaseNFOutcomeDialogC *)ob.GetClientData())->OnSettings();}
+void NfgOutcomeDialogC::outcome_attach_func(wxButton &ob,wxEvent &)
+{((NfgOutcomeDialogC *)ob.GetClientData())->OnAttach();}
+void NfgOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
+{((NfgOutcomeDialogC *)ob.GetClientData())->OnDetach();}
+void NfgOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
+{((NfgOutcomeDialogC *)ob.GetClientData())->OnDelete();}
+void NfgOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
+{((NfgOutcomeDialogC *)ob.GetClientData())->OnSettings();}
 // OnAttach
-void BaseNFOutcomeDialogC::OnAttach(void)
+void NfgOutcomeDialogC::OnAttach(void)
 {bns->SetOutcome(OutcomeNum());CanvasFocus();}
 // OnDetach
-void BaseNFOutcomeDialogC::OnDetach(void)
+void NfgOutcomeDialogC::OnDetach(void)
 {bns->SetOutcome(0);CanvasFocus();}
 // OnDelete
-void BaseNFOutcomeDialogC::OnDelete(void)
+void NfgOutcomeDialogC::OnDelete(void)
 {
 char tmp_str[256];
 int outc_num=OutcomeNum();
@@ -161,14 +161,14 @@ if (wxMessageBox(tmp_str,"Confirm",wxOK|wxCANCEL)==wxOK)
 CanvasFocus();
 }
 // OnSettings
-void BaseNFOutcomeDialogC::OnSettings(void)
+void NfgOutcomeDialogC::OnSettings(void)
 {
 MyDialogBox *options_dialog=new MyDialogBox(this,"Outcome Settings",NFG_OUTCOME_HELP);
 wxStringList *opt_list=new wxStringList("Compact Format","Long Entries",0);
 char *opt_str=new char[25];
 int dialog_type;
 char *defaults_file="gambit.ini";
-wxGetResource("Gambit","NFOutcome-Dialog-Type",&dialog_type,defaults_file);
+wxGetResource("Gambit","NfgOutcome-Dialog-Type",&dialog_type,defaults_file);
 strcpy(opt_str,(char *)opt_list->Nth(dialog_type)->Data());
 options_dialog->Add(wxMakeFormString("Dialog Type",&opt_str,wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(opt_list), 0)));
@@ -179,19 +179,19 @@ if (options_dialog->Completed()==wxOK)
 	if (new_dialog_type!=dialog_type)
 	{
 		wxMessageBox("New dialog type will be used\nnext time the outcome window is created","Outcome Display",wxOK|wxCENTRE,this);
-		wxWriteResource("Gambit","NFOutcome-Dialog-Type",new_dialog_type,defaults_file);
+		wxWriteResource("Gambit","NfgOutcome-Dialog-Type",new_dialog_type,defaults_file);
 	}
 }
 delete options_dialog;
 }
 
 // OnHelp
-void BaseNFOutcomeDialogC::OnHelp(int )
+void NfgOutcomeDialogC::OnHelp(int )
 {wxHelpContents(NFG_OUTCOME_HELP);}
 
 
 // SetCurOutcome
-void BaseNFOutcomeDialogC::SetCurOutcome(const gString &out_name)
+void NfgOutcomeDialogC::SetCurOutcome(const gString &out_name)
 {
 int out=0;
 if (out_name!="")
@@ -206,46 +206,23 @@ if (out)
 }
 }
 // OnOk -- check if the current outcome has changed
-void BaseNFOutcomeDialogC::OnOk(void)
-{parent->OnOk();}
+void NfgOutcomeDialogC::OnOk(void)
+{
+CheckOutcome(OutcomeNum(CurRow(),CurCol()));
+parent->OnOk();
+}
 // OnClose -- close the window, as if OK was pressed.
-Bool BaseNFOutcomeDialogC::OnClose(void)
+Bool NfgOutcomeDialogC::OnClose(void)
 {OnOk();return FALSE;}
 
 // OnEvent -- check if we are dragging an outcome
-Bool BaseNFOutcomeDialogC::OnEventNew(wxMouseEvent &ev)
+Bool NfgOutcomeDialogC::OnEventNew(wxMouseEvent &ev)
 {
 if (outcome_drag->OnEvent(ev)!=DRAG_NONE) return TRUE;
 return FALSE;
 }
 
-
-
-/****************************************************************************
-											 COMMON OUTCOME DIALOG
-****************************************************************************/
-
-template <class T>
-class NFOutcomeDialogC : public BaseNFOutcomeDialogC
-{
-protected:
-	Nfg<T> &nf;
-	virtual void UpdateValues(void);
-	void CheckOutcome(int outc_num);
-	NFOutcomeDialogC(int rows,int cols,Nfg<T> &nf,BaseNormShow *bns,BaseNFOutcomeDialog *parent);
-public:
-	virtual void OnOk(void);
-};
-
-template <class T>
-NFOutcomeDialogC<T>::NFOutcomeDialogC(int rows,int cols, Nfg<T> &nf_,BaseNormShow *bns_,
-																		BaseNFOutcomeDialog *parent_)
-							: BaseNFOutcomeDialogC(rows,cols,nf_.GameForm(),bns_,parent_),nf(nf_)
-{}
-
-
-template <class T>
-void NFOutcomeDialogC<T>::UpdateValues(void)
+void NfgOutcomeDialogC::UpdateValues(void)
 {
 int row,col;
 NFOutcome *tmp;
@@ -262,17 +239,16 @@ for (int i=1;i<=nf.NumOutcomes();i++)
 }
 }
 
-template <class T>
-void NFOutcomeDialogC<T>::CheckOutcome(int outc_num)
+
+void NfgOutcomeDialogC::CheckOutcome(int outc_num)
 {
 assert(outc_num>0 && outc_num<=nf.NumOutcomes()+1);
 bool outcomes_changed=false;
-T payoff;
 NFOutcome *tmp;
 // if a new outcome has created, append it to the list of outcomes
 if (outc_num>nf.NumOutcomes())
 {
-	tmp=nf.GameForm().NewOutcome();
+	tmp=nf.NewOutcome();
 	tmp->SetName("Outcome "+ToString(nf.NumOutcomes()));
 }
 else
@@ -280,10 +256,11 @@ else
 assert(tmp);
 // check if the values have changed
 int prow,pcol;
+
 for (int j=1;j<=nf.NumPlayers();j++)
 {
 	PayoffPos(outc_num,j,&prow,&pcol);
-	FromString(GetCell(prow,pcol),payoff);
+	gPoly<gNumber> payoff(nf.Parameters(),GetCell(prow,pcol),nf.ParamOrder());
 	if (nf.Payoff(tmp, j)!=payoff)	{
 		nf.SetPayoff(tmp, j, payoff);
 		outcomes_changed=true;
@@ -306,19 +283,10 @@ if (new_name!=tmp->GetName())
 if (outcomes_changed) bns->SetOutcome(-1);
 }
 
-template <class T>
-void NFOutcomeDialogC<T>::OnOk(void)
-{
-CheckOutcome(OutcomeNum(CurRow(),CurCol()));
-BaseNFOutcomeDialogC::OnOk();
-}
-
 /****************************************************************************
 												SHORT ENTRY OUTCOME DIALOG
 ****************************************************************************/
-
-template <class T>
-class NFOutcomeDialogShort: public NFOutcomeDialogC<T>
+class NfgOutcomeDialogShort: public NfgOutcomeDialogC
 {
 protected:
 	void OnDelete(void);
@@ -326,15 +294,14 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NFOutcomeDialogShort(Nfg<T> &nf,BaseNormShow *bns,BaseNFOutcomeDialog *parent);
+	NfgOutcomeDialogShort(Nfg &nf,NfgShow *bns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-template <class T>
-NFOutcomeDialogShort<T>::NFOutcomeDialogShort(Nfg<T> &nf_,BaseNormShow *bns_,
-																				BaseNFOutcomeDialog *parent_)
-						: NFOutcomeDialogC<T>((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
+NfgOutcomeDialogShort::NfgOutcomeDialogShort(Nfg &nf_,NfgShow *bns_,
+																				NfgOutcomeDialog *parent_)
+						: NfgOutcomeDialogC((nf_.NumOutcomes()) ? nf_.NumOutcomes() : 1,
 														nf_.NumPlayers()+1,nf_,bns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
@@ -358,10 +325,10 @@ Redraw();
 }
 
 // OnDelete
-template <class T>
-void NFOutcomeDialogShort<T>::OnDelete(void)
+
+void NfgOutcomeDialogShort::OnDelete(void)
 {
-BaseNFOutcomeDialogC::OnDelete();
+NfgOutcomeDialogC::OnDelete();
 int outc_num=OutcomeNum();
 DelRow(outc_num);
 Redraw();
@@ -370,8 +337,8 @@ Redraw();
 // This implements the behavior that a new row is created automatically
 // below the greatest ENTERED row.  Also, if we move to a new row, the
 // previous row is automatically saved in the nf.
-template <class T>
-void NFOutcomeDialogShort<T>::OnSelectedMoved(int row,int col,SpreadMoveDir )
+
+void NfgOutcomeDialogShort::OnSelectedMoved(int row,int col,SpreadMoveDir )
 {
 if (OutcomeNum(row,col)!=prev_outc_num)
 	{CheckOutcome(prev_outc_num);prev_outc_num=OutcomeNum(row,col);}
@@ -380,27 +347,27 @@ if (row==GetRows() && EnteredCell(row,1))
 }
 
 // Functions that determine the window layout
-template <class T>
-int NFOutcomeDialogShort<T>::OutcomeNum(int row,int )
+
+int NfgOutcomeDialogShort::OutcomeNum(int row,int )
 {
 if (row==0) row=CurRow();
 return row;
 }
 
-template <class T>
-void NFOutcomeDialogShort<T>::PayoffPos(int outc_num,int player,int *row,int *col)
+
+void NfgOutcomeDialogShort::PayoffPos(int outc_num,int player,int *row,int *col)
 {
 *row=outc_num;*col=player;
 }
 
-template <class T>
-void NFOutcomeDialogShort<T>::NamePos(int outc_num,int *row,int *col)
+
+void NfgOutcomeDialogShort::NamePos(int outc_num,int *row,int *col)
 {
 *row=outc_num;*col=nf.NumPlayers()+1;
 }
 
-template <class T>
-void NFOutcomeDialogShort<T>::OnOptionsChanged(unsigned int options)
+
+void NfgOutcomeDialogShort::OnOptionsChanged(unsigned int options)
 {
 if (options&S_PREC_CHANGED)
 {
@@ -415,8 +382,8 @@ if (options&S_PREC_CHANGED)
 												LONG ENTRY OUTCOME DIALOG
 ****************************************************************************/
 
-template <class T>
-class NFOutcomeDialogLong: public NFOutcomeDialogC<T>
+
+class NfgOutcomeDialogLong: public NfgOutcomeDialogC
 {
 protected:
 	void OnDelete(void);
@@ -424,15 +391,15 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	NFOutcomeDialogLong(Nfg<T> &nf,BaseNormShow *bns,BaseNFOutcomeDialog *parent);
+	NfgOutcomeDialogLong(Nfg &nf,NfgShow *bns,NfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-template <class T>
-NFOutcomeDialogLong<T>::NFOutcomeDialogLong(Nfg<T> &ef_,BaseNormShow *bns_,
-																				BaseNFOutcomeDialog *parent_)
-				:NFOutcomeDialogC<T>((ef_.NumOutcomes() ? ef_.NumOutcomes() : 1)*ef_.NumPlayers(),
+
+NfgOutcomeDialogLong::NfgOutcomeDialogLong(Nfg &ef_,NfgShow *bns_,
+																				NfgOutcomeDialog *parent_)
+				:NfgOutcomeDialogC((ef_.NumOutcomes() ? ef_.NumOutcomes() : 1)*ef_.NumPlayers(),
 												3,ef_,bns_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
@@ -443,7 +410,7 @@ DrawSettings()->SetColWidth(9,3); // "Outcome #"=9 chars : outcome name column
 SetLabelCol(1,"Player");
 SetLabelCol(2,"Payoff");
 SetLabelCol(3,"Name");
-if (nf.NumOutcomes()==0) nf.GameForm().NewOutcome();
+if (nf.NumOutcomes()==0) nf.NewOutcome();
 int i,j;
 for (i=1;i<=GetRows();i++)	SetType(i,2,gSpreadStr);
 for (j=1;j<=nf.NumOutcomes();j++)				// set player and outcome names
@@ -463,10 +430,10 @@ Redraw();
 }
 
 // OnDelete
-template <class T>
-void NFOutcomeDialogLong<T>::OnDelete(void)
+
+void NfgOutcomeDialogLong::OnDelete(void)
 {
-BaseNFOutcomeDialogC::OnDelete();
+NfgOutcomeDialogC::OnDelete();
 int outc_num=OutcomeNum();
 int i;
 for (i=1;i<=nf.NumPlayers();i++)
@@ -481,8 +448,8 @@ Redraw();
 // below the greatest ENTERED row.  Also, if we move to a new row, the
 // previous row is automatically saved in the nf. Also prevents the user
 // from going to non-modifiable cells (player name column,some outcome name cells)
-template <class T>
-void NFOutcomeDialogLong<T>::OnSelectedMoved(int row,int col,SpreadMoveDir how)
+
+void NfgOutcomeDialogLong::OnSelectedMoved(int row,int col,SpreadMoveDir how)
 {
 if (col==1) {SetCurCol(2);return;}	// player name column is off limits
 int outc_num=OutcomeNum(row,col);
@@ -527,27 +494,27 @@ if (row==GetRows() && EnteredCell(row,2))	// add an outcome
 }
 
 // Functions that determine the window layout
-template <class T>
-int NFOutcomeDialogLong<T>::OutcomeNum(int row,int )
+
+int NfgOutcomeDialogLong::OutcomeNum(int row,int )
 {
 if (row==0) row=CurRow();
 return (row-1)/nf.NumPlayers()+1;
 }
 
-template <class T>
-void NFOutcomeDialogLong<T>::PayoffPos(int outc_num,int player,int *row,int *col)
+
+void NfgOutcomeDialogLong::PayoffPos(int outc_num,int player,int *row,int *col)
 {
 *row=(outc_num-1)*nf.NumPlayers()+player;*col=2;
 }
 
-template <class T>
-void NFOutcomeDialogLong<T>::NamePos(int outc_num,int *row,int *col)
+
+void NfgOutcomeDialogLong::NamePos(int outc_num,int *row,int *col)
 {
 *row=(outc_num-1)*nf.NumPlayers()+1;*col=3;
 }
 
-template <class T>
-void NFOutcomeDialogLong<T>::OnOptionsChanged(unsigned int options)
+
+void NfgOutcomeDialogLong::OnOptionsChanged(unsigned int options)
 {
 if (options&S_PREC_CHANGED)
 {
@@ -561,37 +528,25 @@ if (options&S_PREC_CHANGED)
 /****************************************************************************
 															OUTCOME DIALOG
 ****************************************************************************/
-BaseNFOutcomeDialog::BaseNFOutcomeDialog(BaseNormShow *bns_):bns(bns_)
-{ }
-BaseNFOutcomeDialog::~BaseNFOutcomeDialog()
-{d->Show(FALSE);delete d;}
 
-void BaseNFOutcomeDialog::SetOutcome(const gString &outc_name)
-{d->SetCurOutcome(outc_name);d->SetFocus();}
-
-void BaseNFOutcomeDialog::OnOk(void)
-{bns->OutcomeDialogDied();}
-
-template <class T>
-NFOutcomeDialog<T>::NFOutcomeDialog(Nfg<T> &nf,BaseNormShow *bns):BaseNFOutcomeDialog(bns)
+NfgOutcomeDialog::NfgOutcomeDialog(Nfg &nf,NfgShow *ns_):ns(ns_)
 {
 int dialog_type;
 char *defaults_file="gambit.ini";
-wxGetResource("Gambit","NFOutcome-Dialog-Type",&dialog_type,defaults_file);
+wxGetResource("Gambit","NfgOutcome-Dialog-Type",&dialog_type,defaults_file);
 if (dialog_type==SHORT_ENTRY_OUTCOMES)
-	d=new NFOutcomeDialogShort<T>(nf,bns,this);
+	d=new NfgOutcomeDialogShort(nf,ns,this);
 else
-	d=new NFOutcomeDialogLong<T>(nf,bns,this);
+	d=new NfgOutcomeDialogLong(nf,ns,this);
 d->Show(TRUE);
 }
 
+NfgOutcomeDialog::~NfgOutcomeDialog()
+{d->Show(FALSE);delete d;}
 
-template class NFOutcomeDialogC<double>;
-template class NFOutcomeDialogShort<double>;
-template class NFOutcomeDialogLong<double>;
-template class NFOutcomeDialog<double>;
-#include "rational.h"
-template class NFOutcomeDialogC<gRational>;
-template class NFOutcomeDialogShort<gRational>;
-template class NFOutcomeDialogLong<gRational>;
-template class NFOutcomeDialog<gRational>;
+void NfgOutcomeDialog::SetOutcome(const gString &outc_name)
+{d->SetCurOutcome(outc_name);d->SetFocus();}
+
+void NfgOutcomeDialog::OnOk(void)
+{ns->OutcomeDialogDied();}
+

@@ -21,7 +21,7 @@
 #define	STANDARD_ALL				2
 
 #define PARAMS_SECTION	"Algorithm Params"		// section in .ini file
-bool IsPerfectRecall(const BaseEfg &, Infoset *&, Infoset *&);
+bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 class EfgSolveSettings
 {
 protected:
@@ -33,7 +33,7 @@ protected:
 	int result;
 	bool	solving;
 protected:
-	const BaseEfg &ef;
+	const Efg &ef;
 	// call this to convert standard settings to actual solution parameters
 	void StandardSettings(void)
 	{
@@ -201,7 +201,7 @@ protected:
 virtual void Warn(const char *warning) // only warn when solving
 {if (solving) wxMessageBox((char *)warning,"Standard Solution");}
 public:
-	EfgSolveSettings(const BaseEfg &ef_,bool solving_=true):solving(solving_),ef(ef_)
+	EfgSolveSettings(const Efg &ef_,bool solving_=true):solving(solving_),ef(ef_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -284,7 +284,7 @@ private:
 	use_nfg=usenf;
 	}
 public:
-	EfgSolveParamsDialog(const BaseEfg &ef,int have_nfg,wxWindow *parent=0)
+	EfgSolveParamsDialog(const Efg &ef,int have_nfg,wxWindow *parent=0)
 									:EfgSolveSettings(ef,false)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
@@ -360,7 +360,7 @@ private:
 	char *standard_type_str,*standard_num_str;
 	wxStringList *standard_type_list,*standard_num_list;
 public:
-	EfgSolveStandardDialog(const BaseEfg &ef,wxWindow *parent):
+	EfgSolveStandardDialog(const Efg &ef,wxWindow *parent):
 				EfgSolveSettings(ef,false),MyDialogBox(parent,"Standard Solution",EFG_STANDARD_HELP)
 	{
 	Bool expert=FALSE;char *defaults_file="gambit.ini";

@@ -55,9 +55,9 @@ const gArray<bool> &BSolnSortFilterOptions::FilterSeq(void) const {return filter
 												BEHAV SOLUTION SORTER FILTER
 ****************************************************************************/
 // Constructor
-template <class T>
-BSolnSorterFilter<T>::BSolnSorterFilter(gSortList<BehavSolution<T> > &solns,BSolnSortFilterOptions &options_):
-	gListSorter<BehavSolution<T> >(solns),gListFilter<BehavSolution<T> >(solns),
+
+BSolnSorterFilter::BSolnSorterFilter(gSortList<BehavSolutionT>  &solns,BSolnSortFilterOptions &options_):
+	gListSorter<BehavSolutionT>(solns),gListFilter<BehavSolutionT> (solns),
 	options(options_)
 {
 Filter();
@@ -65,11 +65,11 @@ Sort();
 }
 
 // Filtering function
-template <class T>
-bool BSolnSorterFilter<T>::Passes(const BehavSolution<T> &a_) const
+
+bool BSolnSorterFilter::Passes(const BehavSolutionT &a_) const
 {
 // casting away CONST @@
-BehavSolution<T> &a=(BehavSolution<T> &)a_;
+BehavSolutionT &a=(BehavSolutionT &)a_;
 
 int i;
 for (i=1;i<=NUM_BCREATORS;i++)
@@ -88,12 +88,12 @@ return true;
 }
 
 // Sorting function
-template <class T>
-CompareResult BSolnSorterFilter<T>::Compare(const BehavSolution<T> &a_,const BehavSolution<T> &b_) const
+
+CompareResult BSolnSorterFilter::Compare(const BehavSolutionT &a_,const BehavSolutionT &b_) const
 {
 // casting away CONST @@
-BehavSolution<T> &a=(BehavSolution<T> &)a_;
-BehavSolution<T> &b=(BehavSolution<T> &)b_;
+BehavSolutionT &a=(BehavSolutionT &)a_;
+BehavSolutionT &b=(BehavSolutionT &)b_;
 
 switch (options.SortBy())
 {
@@ -160,13 +160,7 @@ return Equal;
 
 #include "rational.h"
 #include "gslist.imp"
-template class gSortList<BehavSolution<double> >;
-template class gSortList<BehavSolution<gRational> >;
-template class gListSorter<BehavSolution<gRational> >;
-template class gListSorter<BehavSolution<double> >;
-template class  gListFilter<BehavSolution<gRational> >;
-template class  gListFilter<BehavSolution<double> >; 
-template class BSolnSorterFilter<double>;
-template class BSolnSorterFilter<gRational>;
-
+template class gSortList<BehavSolutionT>;
+template class gListSorter<BehavSolutionT>;
+template class gListFilter<BehavSolutionT>;
 

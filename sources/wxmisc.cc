@@ -1,6 +1,6 @@
 // File: wxmisc.cc -- a few general purpose functions that rely on and enhance
 // wxwin.
-// $Id$
+// @(#)wxmisc.cc	2.1 3/24/97
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
@@ -320,15 +320,35 @@ while (isdigit(s[*i]) && *i<s.length() && s[*i]!='}')	{tmp+=s[*i];(*i)++;}
 (*i)++;		// skip the closing }
 return atoi((char *)tmp);
 }
+// Hack to be able to parse gPolys (x^2 -> x\^2\~).  No error checking: a bad
+// input will cause a crash.
+gString gDrawTextPreParse(const gString &s)
+{
+if (((gString &)s).lastOccur('^')==0) return s;
+gString tmp;
+for (int n=0;n<s.length();n++)
+	if (s[n]!='^')
+   	tmp+=s[n];
+   else
+   {
+		tmp+="\\^";
+      while (isdigit(s[++n]) && n<s.length()) tmp+=s[n];
+      tmp+="\\~";
+      if (n<s.length()) tmp+=s[n];
+   }
+return tmp;
+}
+
 // gDrawText is an extension of the wxWindow's wxDC::DrawText function
 // Besides providing the same features, it also supports imbedded codes
 // to change the color of the output text.  The codes have the format
 // of: "text[/C{#}]", where # is the number of the color to select
 // from the wx_color_list.  To print a \, use a \\.
-void gDrawText(wxDC &dc,const gString &s,float x,float y)
+void gDrawText(wxDC &dc,const gString &s0,float x,float y)
 {
 int i=0,c;
 float dx,dy;
+gString s=gDrawTextPreParse(s0);
 gString tmp;
 //gString old_foreground(wxTheColourDatabase->FindName(dc.GetTextForeground()));
 gString old_foreground("BLACK");
@@ -361,7 +381,7 @@ while(i<s.length())
 				if (!old_size) old_size=old_font->GetPointSize();
 				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
 				dc.SetFont(small_font);
-				old_y=y;y-=dx/4;
+				old_y=y;y-=dy/4;
 				i++;
 				break;
 			case '_':		// Start subscript
@@ -369,7 +389,7 @@ while(i<s.length())
 				if (!old_size) old_size=old_font->GetPointSize();
 				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
 				dc.SetFont(small_font);
-				old_y=y;y+=dx*2/3;
+				old_y=y;y+=dy*2/3;
 				i++;
 				break;
 			case '~':		// Stop sub/super script

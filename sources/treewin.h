@@ -30,11 +30,11 @@ typedef struct NODEENTRY {
 																	 n(e.n),expanded(e.expanded) { }
 } NodeEntry;
 
-class BaseExtensiveShow;
-class BaseTreeWindow;
+class EfgShow;
+class TreeWindow;
 class TreeNodeCursor;
 // This class can render an extensive form tree using a pre-calculated
-// (in BaseTreeWindow) list of NodeEntry.  It is used for rendering
+// (in TreeWindow) list of NodeEntry.  It is used for rendering
 // functions for the main TreeWindow display and for the optional
 // 'unity zoom' zoom window.  Note that it does not have any data
 // members of its own, but just references to those of its parent. This
@@ -43,7 +43,7 @@ class TreeNodeCursor;
 class TreeRender : public wxCanvas
 {
 private:
-	const BaseTreeWindow *parent;
+	const TreeWindow *parent;
 	const gList<NodeEntry *> &node_list;
 	const Infoset * &hilight_infoset;		// Hilight infoset from the solution disp
 	const Infoset * &hilight_infoset1;	// Hilight infoset by pressing control
@@ -58,7 +58,7 @@ protected:
 	TreeNodeCursor *flasher;			// Used to flash/display the cursor
   bool painting;								// Used to prevent re-entry.
 public:
-	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
+	TreeRender(wxFrame *frame,const TreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
 						const TreeDrawSettings &draw_settings_);
@@ -81,7 +81,7 @@ private:
 // if we repaint due to events other than cursor movement.  See ::Render()
 	int xs,ys,xe,ye;
 public:
-	TreeZoomWindow(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
+	TreeZoomWindow(wxFrame *frame,const TreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
 						const TreeDrawSettings &draw_settings_,const NodeEntry *cursor_entry);
@@ -90,8 +90,8 @@ public:
 	virtual void UpdateCursor(const NodeEntry *entry);
 };
 
-class BaseOutcomeDialog;
-class BaseTreeWindow: public TreeRender
+class EfgOutcomeDialog;
+class TreeWindow: public TreeRender
 {
 friend class ExtensivePrintout;
 public:
@@ -110,9 +110,10 @@ typedef struct SUBGAMEENTRY {
 					friend gOutput &operator<<(gOutput &,const SUBGAMEENTRY &);
 					} SubgameEntry;
 private:
-	BaseEfg		&ef;
+	Efg		&ef;
 	EFSupport * &disp_sup;	// we only need to know the displayed sup
-	BaseExtensiveShow	*frame;
+	EfgShow	*frame;			// Actual extensive show
+   wxFrame *pframe;			// Our parent window
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
 	const Node	*subgame_node;		 		// Used to mark the 'picking' subgame root
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
@@ -154,20 +155,17 @@ private:
 	int PlayerNum(const EFPlayer *p) const ;
 	int IsetNum(const Infoset *i) const ;
 	static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
+   void MakeMenus(void);
 protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
 	Bool		outcomes_changed;
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
-	BaseOutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
+	EfgOutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
 public:
-	virtual double 	ProbAsDouble(const Node *n,int action) const =0;
-	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
-	virtual gString	OutcomeAsString(const Node *n) const =0;
-	virtual Bool JustRender(void) const;
 	// Constructor
-	BaseTreeWindow(BaseEfg &ef_,EFSupport * &disp, BaseExtensiveShow *frame);
+	TreeWindow(Efg &ef_,EFSupport * &disp, EfgShow *frame);
 	// Destructor
-	~BaseTreeWindow(void);
+	~TreeWindow(void);
 	// Event Handlers
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
@@ -184,7 +182,7 @@ public:
 	void action_label(void);
 	void action_insert(void);
 	void action_delete(void);
-	virtual void action_probs(void) =0;
+	void action_probs(void);
 
 	void tree_delete(void);
 	void tree_copy(void);
@@ -192,7 +190,7 @@ public:
 	void tree_label(void);
 	void tree_players(void);
 	void tree_infosets(void);
-	virtual void tree_outcomes(const gString out_name=gString()) =0;
+	void tree_outcomes(const gString out_name=gString());
 
 	void infoset_merge(void);
 	void infoset_break(void);
@@ -208,7 +206,7 @@ public:
 	void subgame_collapse_one(void);
 	void subgame_collapse_all(void);
 	void subgame_expand_one(void);
-  void subgame_expand_branch(void);
+	void subgame_expand_branch(void);
 	void subgame_expand_all(void);
 	void subgame_toggle(void);
 	void subgame_set(void);
@@ -220,23 +218,22 @@ public:
 	void display_save_options(Bool def=TRUE);
 	void display_load_options(Bool def=TRUE);
 	void display_set_zoom(float z=-1);
-  void display_zoom_fit(void);
+	void display_zoom_fit(void);
 	float display_get_zoom(void);
 	Bool display_zoom_win(void);
 
+ 	void	file_save(void);
 	void 	output(void);
 	void	print_eps(wxOutputOption fit);			// output to postscript file
 	void	print(wxOutputOption fit,bool preview=false);	// output to printer (WIN3.1 only)
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 	Bool	logging(void);
 
-	virtual void	file_save(void) =0 ;
-
 	gString Title(void) const;
 
 	virtual void Render(wxDC &dc);
 	void HilightInfoset(int pl,int iset);
-	// Used by parent BaseExtensiveShow when disp_sup changes
+	// Used by parent EfgShow when disp_sup changes
 	void SupportChanged(void);
 	// Gives access to the parent to the private draw_settings. Used for SolnShow
 	TreeDrawSettings &DrawSettings(void) {return draw_settings;}
@@ -245,34 +242,15 @@ public:
 	// Hilight the subgame root for the currently active subgame
 	void	SetSubgamePickNode(const Node *n);
 	// Check if a drag'n'drop object has been activated
-	Node *GotObject(float &mx,float &my,int what); 
+	Node *GotObject(float &mx,float &my,int what);
 	// Used by a child outcomes inspect when it is close
 	void OutcomeDialogDied(void);
-};
-
-template <class T> class ExtensiveShow;
-template <class T>
-class TreeWindow : public BaseTreeWindow
-{
-	// Private variables
-	Efg<T> &ef;
-	ExtensiveShow<T> *frame;			// parent frame
-	// The copy/assignment operators are private since they are NEVER
-	// used or implemented.  Perhaps later...
-	TreeWindow(const TreeWindow<T> &);
-	void operator=(const TreeWindow<T> &);
-public:
-	double 	ProbAsDouble(const Node *n,int action) const ;
+	virtual Bool JustRender(void) const;
+   // Access to the numeric values from the renderer
+ 	double 	ProbAsDouble(const Node *n,int action) const;
+	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
 	gString	OutcomeAsString(const Node *n) const;
-	// Constructor
-	TreeWindow(Efg<T> &ef_,EFSupport * &disp,ExtensiveShow<T> *frame);
-	// Destructor
-	~TreeWindow();
-		// Menu events
-	void tree_outcomes(const gString out_name=gString());
-	void action_probs(void);
-	void node_outcome(const gString out_name);
-	void	file_save(void);
+
 };
 
 #endif   // TREEWINDOW_H

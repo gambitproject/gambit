@@ -185,8 +185,11 @@ public:
 	void DelCol(int col) {col_width.Remove(col);}
 	// Data Access, Get* functions
 		// These functions control the dimentions of each cell i.e. Width X Height
-	int	GetRowHeight(void)	{return ((vert_fit) ? (th+2*TEXT_OFF) : row_height);}
+	int	GetRowHeight(void)	{return ((vert_fit) ? (th*5/4+2*TEXT_OFF) : row_height);}
 	int	GetColWidth(int col=0);
+   	// These functions tell about the size of the currently selected font
+   int	GetTextHeight(void)	{return th;}
+   int	GetTextWidth(void)	{return tw;}
 		// GetWidth/Height return the size of the virtual canvas if scrollbars are on (GetVirtualSize)
 	int GetWidth(void)			{return total_width;}
 	int GetHeight(void)			{return total_height;}

@@ -1,27 +1,20 @@
-// File: outcomed.h -- declaration of the EFG outcome editing dialog
+// File: efgoutcd.h -- declaration of the EFG outcome editing dialog
 // $Id$
-#ifndef OUTCOMED_H
-#define OUTCOMED_H
-class BaseOutcomeDialogC;
-class BaseOutcomeDialog
+#ifndef EFGOUTCD_H
+#define EFGOUTCD_H
+class EfgOutcomeDialogC;
+class EfgOutcomeDialog
 {
 protected:
-	BaseOutcomeDialogC *d;
-  BaseTreeWindow *tw;
+	EfgOutcomeDialogC *d;
+	TreeWindow *tw;
 public:
-	BaseOutcomeDialog(BaseTreeWindow *tw);
-	~BaseOutcomeDialog();
+	EfgOutcomeDialog(Efg &ef,TreeWindow *tw);
+	~EfgOutcomeDialog();
 	void SetOutcome(const gString &outc_name);
 	void OnOk(void);
 };
 
-template <class T>
-class OutcomeDialog: public BaseOutcomeDialog
-{
-public:
-	OutcomeDialog(Efg<T> &ef,BaseTreeWindow *tw);
-};
-
 #define SHORT_ENTRY_OUTCOMES	0
-#define LONG_ENTRY_OUTCOMES		1
+#define LONG_ENTRY_OUTCOMES	1
 #endif

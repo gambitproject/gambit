@@ -1,4 +1,4 @@
-// File: outcomed.cc -- code for the EFG outcome editing dialog
+// File: efgoutcd.cc -- code for the EFG outcome editing dialog
 // $Id$
 #include "wx.h"
 #include "wxmisc.h"
@@ -8,32 +8,33 @@
 #include "efgoutcd.h"
 
 /****************************************************************************
-												BASE OUTCOME DIALOG
+                     EFG OUTCOME DIALOG
 ****************************************************************************/
-class BaseOutcomeDialogC: public SpreadSheet3D
+class EfgOutcomeDialogC: public SpreadSheet3D
 {
 private:
-	BaseOutcomeDialog *parent;
-	BaseEfg	&ef;
-protected:
-	BaseTreeWindow *tw;
-	int prev_outc_num;
-	class OutcomeDragger;
-	OutcomeDragger *outcome_drag;
 	static void outcome_attach_func(wxButton &ob,wxEvent &);
 	static void outcome_detach_func(wxButton &ob,wxEvent &);
 	static void outcome_delete_func(wxButton &ob,wxEvent &);
 	static void settings_func(wxButton &ob,wxEvent &);
+protected:
+	Efg	&ef;
+	EfgOutcomeDialog *parent;
+	TreeWindow *tw;
+	int prev_outc_num;
+	class OutcomeDragger;
+	OutcomeDragger *outcome_drag;
 	void OnAttach(void);
 	void OnDetach(void);
 	virtual void OnDelete(void);
 	void OnSettings(void);
-	virtual void UpdateValues(void) = 0;
+	virtual void UpdateValues(void);
+	void CheckOutcome(int outc_num);
 	virtual void PayoffPos(int outc_num,int player,int *row,int *col) = 0;
 	virtual void NamePos(int outc_num,int *row,int *col) = 0;
 	virtual Bool OnEventNew(wxMouseEvent &ev);
 public:
-	BaseOutcomeDialogC(int rows,int cols,BaseEfg &ef,BaseTreeWindow *tw,BaseOutcomeDialog *parent);
+	EfgOutcomeDialogC(int rows,int cols,Efg &ef,TreeWindow *tw,EfgOutcomeDialog *parent);
 	void SetCurOutcome(const gString &out_name);
 	void OnHelp(int );
 	// This implements the behavior that a new row is created automatically
@@ -50,21 +51,21 @@ wxCursor *outcome_cursor;
 #define DRAG_START			1
 #define DRAG_CONTINUE   2
 #define DRAG_STOP       3
-class BaseOutcomeDialogC::OutcomeDragger
+class EfgOutcomeDialogC::OutcomeDragger
 {
 private:
-	BaseOutcomeDialogC *parent;
-	BaseTreeWindow *tw;
+	EfgOutcomeDialogC *parent;
+	TreeWindow *tw;
 	int drag_now;
 	int outcome;
 	int x,y;
 public:
-	OutcomeDragger(BaseOutcomeDialogC *parent_,BaseTreeWindow *tw_);
+	OutcomeDragger(EfgOutcomeDialogC *parent_,TreeWindow *tw_);
 	int OnEvent(wxMouseEvent &ev);
 };
 
-BaseOutcomeDialogC::OutcomeDragger::OutcomeDragger(BaseOutcomeDialogC *parent_,
-			BaseTreeWindow *tw_):parent(parent_),tw(tw_),drag_now(0)
+EfgOutcomeDialogC::OutcomeDragger::OutcomeDragger(EfgOutcomeDialogC *parent_,
+			TreeWindow *tw_):parent(parent_),tw(tw_),drag_now(0)
 {
 #ifdef wx_msw
  outcome_cursor=new wxCursor("OUTCOMECUR");
@@ -74,7 +75,7 @@ BaseOutcomeDialogC::OutcomeDragger::OutcomeDragger(BaseOutcomeDialogC *parent_,
 #endif
 }
 
-int BaseOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
+int EfgOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
 {
 int ret=(drag_now) ? DRAG_CONTINUE : DRAG_NONE;
 if (ev.Dragging())
@@ -98,17 +99,17 @@ if (ev.LeftUp() && drag_now)
 	int xi=(int)x,yi=(int)y;
 	parent->GetSheet()->ClientToScreen(&xi,&yi);
 	ret=DRAG_STOP;
-	tw->node_outcome(outcome,xi,yi);
+//@@	tw->node_outcome(outcome,xi,yi);
 }
 return ret;
 }
 
 
 // Constructor
-BaseOutcomeDialogC::BaseOutcomeDialogC(int rows,int cols,BaseEfg &ef_,
-																BaseTreeWindow *tw_,BaseOutcomeDialog *parent_)
-						:SpreadSheet3D(rows,cols,1,"Outcomes [S]",(wxFrame *)tw_->GetParent(),ANY_BUTTON),parent(parent_),ef(ef_),
-						 tw(tw_)
+EfgOutcomeDialogC::EfgOutcomeDialogC(int rows,int cols,Efg &ef_,
+																TreeWindow *tw_,EfgOutcomeDialog *parent_)
+				:SpreadSheet3D(rows,cols,1,"Outcomes [S]",(wxFrame *)tw_->GetParent(),ANY_BUTTON),parent(parent_),ef(ef_),
+				 tw(tw_)
 {
 MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
 AddButton("Opt",(wxFunction)settings_func);
@@ -121,22 +122,22 @@ outcome_drag=new OutcomeDragger(this,tw);
 }
 
 // Handler functions -> stubs to actual functions
-void BaseOutcomeDialogC::outcome_attach_func(wxButton &ob,wxEvent &)
-{((BaseOutcomeDialogC *)ob.GetClientData())->OnAttach();}
-void BaseOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
-{((BaseOutcomeDialogC *)ob.GetClientData())->OnDetach();}
-void BaseOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
-{((BaseOutcomeDialogC *)ob.GetClientData())->OnDelete();}
-void BaseOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
-{((BaseOutcomeDialogC *)ob.GetClientData())->OnSettings();}
+void EfgOutcomeDialogC::outcome_attach_func(wxButton &ob,wxEvent &)
+{((EfgOutcomeDialogC *)ob.GetClientData())->OnAttach();}
+void EfgOutcomeDialogC::outcome_detach_func(wxButton &ob,wxEvent &)
+{((EfgOutcomeDialogC *)ob.GetClientData())->OnDetach();}
+void EfgOutcomeDialogC::outcome_delete_func(wxButton &ob,wxEvent &)
+{((EfgOutcomeDialogC *)ob.GetClientData())->OnDelete();}
+void EfgOutcomeDialogC::settings_func(wxButton &ob,wxEvent &)
+{((EfgOutcomeDialogC *)ob.GetClientData())->OnSettings();}
 // OnAttach
-void BaseOutcomeDialogC::OnAttach(void)
+void EfgOutcomeDialogC::OnAttach(void)
 {tw->node_outcome(OutcomeNum());CanvasFocus();}
 // OnDetach
-void BaseOutcomeDialogC::OnDetach(void)
+void EfgOutcomeDialogC::OnDetach(void)
 {tw->node_outcome(0);CanvasFocus();}
 // OnDelete
-void BaseOutcomeDialogC::OnDelete(void)
+void EfgOutcomeDialogC::OnDelete(void)
 {
 char tmp_str[256];
 int outc_num=OutcomeNum();
@@ -156,7 +157,7 @@ if (wxMessageBox(tmp_str,"Confirm",wxOK|wxCANCEL)==wxOK)
 CanvasFocus();
 }
 // OnSettings
-void BaseOutcomeDialogC::OnSettings(void)
+void EfgOutcomeDialogC::OnSettings(void)
 {
 MyDialogBox *options_dialog=new MyDialogBox(this,"Outcome Settings",EFG_OUTCOME_HELP);
 wxStringList *opt_list=new wxStringList("Compact Format","Long Entries",0);
@@ -181,11 +182,11 @@ delete options_dialog;
 }
 
 // OnHelp
-void BaseOutcomeDialogC::OnHelp(int )
+void EfgOutcomeDialogC::OnHelp(int )
 {wxHelpContents(EFG_OUTCOME_HELP);}
 
 // SetCurOutcome
-void BaseOutcomeDialogC::SetCurOutcome(const gString &out_name)
+void EfgOutcomeDialogC::SetCurOutcome(const gString &out_name)
 {
 int out=0;
 if (out_name!="")
@@ -200,45 +201,23 @@ if (out)
 }
 }
 // OnOk -- check if the current outcome has changed
-void BaseOutcomeDialogC::OnOk(void)
-{parent->OnOk();}
+void EfgOutcomeDialogC::OnOk(void)
+{
+CheckOutcome(OutcomeNum(CurRow(),CurCol()));
+parent->OnOk();
+}
 // OnClose -- close the window, as if OK was pressed.
-Bool BaseOutcomeDialogC::OnClose(void)
+Bool EfgOutcomeDialogC::OnClose(void)
 {OnOk();return FALSE;}
 
 // OnEvent -- check if we are dragging an outcome
-Bool BaseOutcomeDialogC::OnEventNew(wxMouseEvent &ev)
+Bool EfgOutcomeDialogC::OnEventNew(wxMouseEvent &ev)
 {
 if (outcome_drag->OnEvent(ev)!=DRAG_NONE) return TRUE;
 return FALSE;
 }
 
-
-/****************************************************************************
-											 COMMON OUTCOME DIALOG
-****************************************************************************/
-
-template <class T>
-class OutcomeDialogC : public BaseOutcomeDialogC
-{
-protected:
-	Efg<T> &ef;
-	virtual void UpdateValues(void);
-	void CheckOutcome(int outc_num);
-	OutcomeDialogC(int rows,int cols,Efg<T> &ef,BaseTreeWindow *tw,BaseOutcomeDialog *parent);
-public:
-	virtual void OnOk(void);
-};
-
-template <class T>
-OutcomeDialogC<T>::OutcomeDialogC(int rows,int cols, Efg<T> &ef_,BaseTreeWindow *tw_,
-																		BaseOutcomeDialog *parent_)
-							: BaseOutcomeDialogC(rows,cols,ef_,tw_,parent_),ef(ef_)
-{}
-
-
-template <class T>
-void OutcomeDialogC<T>::UpdateValues(void)
+void EfgOutcomeDialogC::UpdateValues(void)
 {
 int row,col;
 EFOutcome *tmp;
@@ -255,12 +234,11 @@ for (int i=1;i<=ef.NumOutcomes();i++)
 }
 }
 
-template <class T>
-void OutcomeDialogC<T>::CheckOutcome(int outc_num)
+
+void EfgOutcomeDialogC::CheckOutcome(int outc_num)
 {
 assert(outc_num>0 && outc_num<=ef.NumOutcomes()+1);
 bool outcomes_changed=false;
-T payoff;
 EFOutcome *tmp;
 // if a new outcome has created, append it to the list of outcomes
 if (outc_num>ef.NumOutcomes())
@@ -276,7 +254,7 @@ int prow,pcol;
 for (int j=1;j<=ef.NumPlayers();j++)
 {
 	PayoffPos(outc_num,j,&prow,&pcol);
-	FromString(GetCell(prow,pcol),payoff);
+	gPoly<gNumber> payoff(ef.Parameters(),GetCell(prow,pcol),ef.ParamOrder());
 	if (ef.Payoff(tmp, j)!=payoff)	{
 		ef.SetPayoff(tmp, j, payoff);
 		outcomes_changed=true;
@@ -299,19 +277,13 @@ if (new_name!=tmp->GetName())
 if (outcomes_changed) tw->node_outcome(-1);
 }
 
-template <class T>
-void OutcomeDialogC<T>::OnOk(void)
-{
-CheckOutcome(OutcomeNum(CurRow(),CurCol()));
-BaseOutcomeDialogC::OnOk();
-}
 
 /****************************************************************************
 												SHORT ENTRY OUTCOME DIALOG
 ****************************************************************************/
 
-template <class T>
-class OutcomeDialogShort: public OutcomeDialogC<T>
+
+class EfgOutcomeDialogShort: public EfgOutcomeDialogC
 {
 protected:
 	void OnDelete(void);
@@ -319,15 +291,15 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	OutcomeDialogShort(Efg<T> &ef,BaseTreeWindow *tw,BaseOutcomeDialog *parent);
+	EfgOutcomeDialogShort(Efg &ef,TreeWindow *tw,EfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-template <class T>
-OutcomeDialogShort<T>::OutcomeDialogShort(Efg<T> &ef_,BaseTreeWindow *tw_,
-																				BaseOutcomeDialog *parent_)
-						: OutcomeDialogC<T>((ef_.NumOutcomes()) ? ef_.NumOutcomes() : 1,
+
+EfgOutcomeDialogShort::EfgOutcomeDialogShort(Efg &ef_,TreeWindow *tw_,
+																				EfgOutcomeDialog *parent_)
+						: EfgOutcomeDialogC((ef_.NumOutcomes()) ? ef_.NumOutcomes() : 1,
 														ef_.NumPlayers()+1,ef_,tw_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
@@ -351,10 +323,10 @@ Redraw();
 }
 
 // OnDelete
-template <class T>
-void OutcomeDialogShort<T>::OnDelete(void)
+
+void EfgOutcomeDialogShort::OnDelete(void)
 {
-BaseOutcomeDialogC::OnDelete();
+EfgOutcomeDialogC::OnDelete();
 int outc_num=OutcomeNum();
 DelRow(outc_num);
 Redraw();
@@ -363,8 +335,8 @@ Redraw();
 // This implements the behavior that a new row is created automatically
 // below the greatest ENTERED row.  Also, if we move to a new row, the
 // previous row is automatically saved in the ef.
-template <class T>
-void OutcomeDialogShort<T>::OnSelectedMoved(int row,int col,SpreadMoveDir )
+
+void EfgOutcomeDialogShort::OnSelectedMoved(int row,int col,SpreadMoveDir )
 {
 if (OutcomeNum(row,col)!=prev_outc_num)
 	{CheckOutcome(prev_outc_num);prev_outc_num=OutcomeNum(row,col);}
@@ -373,27 +345,27 @@ if (row==GetRows() && EnteredCell(row,1))
 }
 
 // Functions that determine the window layout
-template <class T>
-int OutcomeDialogShort<T>::OutcomeNum(int row,int )
+
+int EfgOutcomeDialogShort::OutcomeNum(int row,int )
 {
 if (row==0) row=CurRow();
 return row;
 }
 
-template <class T>
-void OutcomeDialogShort<T>::PayoffPos(int outc_num,int player,int *row,int *col)
+
+void EfgOutcomeDialogShort::PayoffPos(int outc_num,int player,int *row,int *col)
 {
 *row=outc_num;*col=player;
 }
 
-template <class T>
-void OutcomeDialogShort<T>::NamePos(int outc_num,int *row,int *col)
+
+void EfgOutcomeDialogShort::NamePos(int outc_num,int *row,int *col)
 {
 *row=outc_num;*col=ef.NumPlayers()+1;
 }
 
-template <class T>
-void OutcomeDialogShort<T>::OnOptionsChanged(unsigned int options)
+
+void EfgOutcomeDialogShort::OnOptionsChanged(unsigned int options)
 {
 if (options&S_PREC_CHANGED)
 {
@@ -408,8 +380,8 @@ if (options&S_PREC_CHANGED)
 												LONG ENTRY OUTCOME DIALOG
 ****************************************************************************/
 
-template <class T>
-class OutcomeDialogLong: public OutcomeDialogC<T>
+
+class EfgOutcomeDialogLong: public EfgOutcomeDialogC
 {
 protected:
 	void OnDelete(void);
@@ -417,15 +389,15 @@ protected:
 	void PayoffPos(int outc_num,int player,int *row,int *col);
 	void NamePos(int outc_num,int *row,int *col);
 public:
-	OutcomeDialogLong(Efg<T> &ef,BaseTreeWindow *tw,BaseOutcomeDialog *parent);
+	EfgOutcomeDialogLong(Efg &ef,TreeWindow *tw,EfgOutcomeDialog *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	virtual void OnOptionsChanged(unsigned int options=0);
 };
 
-template <class T>
-OutcomeDialogLong<T>::OutcomeDialogLong(Efg<T> &ef_,BaseTreeWindow *tw_,
-																				BaseOutcomeDialog *parent_)
-				:OutcomeDialogC<T>((ef_.NumOutcomes() ? ef_.NumOutcomes() : 1)*ef_.NumPlayers(),
+
+EfgOutcomeDialogLong::EfgOutcomeDialogLong(Efg &ef_,TreeWindow *tw_,
+														EfgOutcomeDialog *parent_)
+				:EfgOutcomeDialogC((ef_.NumOutcomes() ? ef_.NumOutcomes() : 1)*ef_.NumPlayers(),
 												3,ef_,tw_,parent_)
 {
 DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
@@ -456,10 +428,10 @@ Redraw();
 }
 
 // OnDelete
-template <class T>
-void OutcomeDialogLong<T>::OnDelete(void)
+
+void EfgOutcomeDialogLong::OnDelete(void)
 {
-BaseOutcomeDialogC::OnDelete();
+EfgOutcomeDialogC::OnDelete();
 int outc_num=OutcomeNum();
 int i;
 for (i=1;i<=ef.NumPlayers();i++)
@@ -474,8 +446,8 @@ Redraw();
 // below the greatest ENTERED row.  Also, if we move to a new row, the
 // previous row is automatically saved in the ef. Also prevents the user
 // from going to non-modifiable cells (player name column,some outcome name cells)
-template <class T>
-void OutcomeDialogLong<T>::OnSelectedMoved(int row,int col,SpreadMoveDir how)
+
+void EfgOutcomeDialogLong::OnSelectedMoved(int row,int col,SpreadMoveDir how)
 {
 if (col==1) {SetCurCol(2);return;}	// player name column is off limits
 int outc_num=OutcomeNum(row,col);
@@ -520,27 +492,27 @@ if (row==GetRows() && EnteredCell(row,2))	// add an outcome
 }
 
 // Functions that determine the window layout
-template <class T>
-int OutcomeDialogLong<T>::OutcomeNum(int row,int )
+
+int EfgOutcomeDialogLong::OutcomeNum(int row,int )
 {
 if (row==0) row=CurRow();
 return (row-1)/ef.NumPlayers()+1;
 }
 
-template <class T>
-void OutcomeDialogLong<T>::PayoffPos(int outc_num,int player,int *row,int *col)
+
+void EfgOutcomeDialogLong::PayoffPos(int outc_num,int player,int *row,int *col)
 {
 *row=(outc_num-1)*ef.NumPlayers()+player;*col=2;
 }
 
-template <class T>
-void OutcomeDialogLong<T>::NamePos(int outc_num,int *row,int *col)
+
+void EfgOutcomeDialogLong::NamePos(int outc_num,int *row,int *col)
 {
 *row=(outc_num-1)*ef.NumPlayers()+1;*col=3;
 }
 
-template <class T>
-void OutcomeDialogLong<T>::OnOptionsChanged(unsigned int options)
+
+void EfgOutcomeDialogLong::OnOptionsChanged(unsigned int options)
 {
 if (options&S_PREC_CHANGED)
 {
@@ -554,38 +526,25 @@ if (options&S_PREC_CHANGED)
 /****************************************************************************
 															OUTCOME DIALOG
 ****************************************************************************/
-BaseOutcomeDialog::BaseOutcomeDialog(BaseTreeWindow *tw_):tw(tw_)
-{ }
-BaseOutcomeDialog::~BaseOutcomeDialog()
-{d->Show(FALSE);delete d;}
-
-void BaseOutcomeDialog::SetOutcome(const gString &outc_name)
-{d->SetCurOutcome(outc_name);d->SetFocus();}
-
-void BaseOutcomeDialog::OnOk(void)
-{tw->OutcomeDialogDied();}
-
-template <class T>
-OutcomeDialog<T>::OutcomeDialog(Efg<T> &ef,BaseTreeWindow *tw):BaseOutcomeDialog(tw)
+EfgOutcomeDialog::EfgOutcomeDialog(Efg &ef,TreeWindow *tw_):tw(tw_)
 {
 int dialog_type;
 char *defaults_file="gambit.ini";
 wxGetResource("Gambit","Outcome-Dialog-Type",&dialog_type,defaults_file);
 if (dialog_type==SHORT_ENTRY_OUTCOMES)
-	d=new OutcomeDialogShort<T>(ef,tw,this);
+	d=new EfgOutcomeDialogShort(ef,tw,this);
 else
-	d=new OutcomeDialogLong<T>(ef,tw,this);
+	d=new EfgOutcomeDialogLong(ef,tw,this);
 d->Show(TRUE);
 }
 
+EfgOutcomeDialog::~EfgOutcomeDialog()
+{d->Show(FALSE);delete d;}
 
-template class OutcomeDialogC<double>;
-template class OutcomeDialogShort<double>;
-template class OutcomeDialogLong<double>;
-template class OutcomeDialog<double>;
-#include "rational.h"
-template class OutcomeDialogC<gRational>;
-template class OutcomeDialogShort<gRational>;
-template class OutcomeDialogLong<gRational>;
-template class OutcomeDialog<gRational>;
+void EfgOutcomeDialog::SetOutcome(const gString &outc_name)
+{d->SetCurOutcome(outc_name);d->SetFocus();}
+
+void EfgOutcomeDialog::OnOk(void)
+{tw->OutcomeDialogDied();}
+
 

@@ -3,24 +3,17 @@
 
 #ifndef NFGOUTCD_H
 #define NFGOUTCD_H
-class BaseNFOutcomeDialogC;
-class BaseNFOutcomeDialog
+class NfgOutcomeDialogC;
+class NfgOutcomeDialog
 {
 protected:
-	BaseNFOutcomeDialogC *d;
-	BaseNormShow *bns;
+	NfgOutcomeDialogC *d;
+	NfgShow *ns;
 public:
-	BaseNFOutcomeDialog(BaseNormShow *bns);
-	~BaseNFOutcomeDialog();
+	NfgOutcomeDialog(Nfg &nf,NfgShow *ns);
+	~NfgOutcomeDialog();
 	void SetOutcome(const gString &outc_name);
 	void OnOk(void);
-};
-
-template <class T>
-class NFOutcomeDialog: public BaseNFOutcomeDialog
-{
-public:
-	NFOutcomeDialog(Nfg<T> &nf,BaseNormShow *bns);
 };
 
 #define SHORT_ENTRY_OUTCOMES	0

@@ -9,7 +9,7 @@ typedef enum {NodeAddNew,NodeAddIset} NodeAddMode;
 class NodeAddDialog : public MyDialogBox
 {
 private:
-	BaseEfg &ef;
+	Efg &ef;
 	int		branches;
 	char	*player_name;
 	gArray<gString> player_names;
@@ -32,7 +32,7 @@ private:
 	void OnBranch(void);
 public:
 	// Constructor
-	NodeAddDialog(BaseEfg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=2,wxFrame *frame=0);
+	NodeAddDialog(Efg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=2,wxFrame *frame=0);
 	// Destructor
 	~NodeAddDialog(void);
 	// DataAccess
@@ -44,7 +44,7 @@ public:
 };
 
 //************************************** CONSTRUCTOR **************************
-NodeAddDialog::NodeAddDialog(BaseEfg &ef_,EFPlayer *player,Infoset *infoset,int branches_,wxFrame *frame)
+NodeAddDialog::NodeAddDialog(Efg &ef_,EFPlayer *player,Infoset *infoset,int branches_,wxFrame *frame)
 						:MyDialogBox(frame,"Add Node",EFG_NODE_HELP),ef(ef_),branches(branches_),player_names(ef_.NumPlayers())
 {
 set_names=TRUE;

@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// @(#)efgconst.h	1.20 11/20/96
+// $Id$
 //
 
 #ifndef EFGCONST_H
@@ -77,8 +77,8 @@
 #define	SOLVE_STANDARD					1540		// standard submenu
 #define SOLVE_STANDARD_TYPE			1550
 #define SOLVE_STANDARD_NUM			1560
-#define	SOLVE_DATATYPE					1570
 #define SOLVE_GAMEINFO					1580
+#define SOLVE_PARAMS						1585
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601

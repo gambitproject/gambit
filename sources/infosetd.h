@@ -10,7 +10,7 @@
 class InfosetDialog: public MyDialogBox
 {
 private:
-	BaseEfg	&ef;
+	Efg	&ef;
 	// keep track of panel items
 	wxListBox	*player_item,*iset_item;
 	wxText		*iset_name_item;
@@ -39,12 +39,12 @@ private:
 	void			RemoveInfoset(void);
 public:
 	// Constructor
-	InfosetDialog(BaseEfg &ef_,wxFrame *parent=0);
+	InfosetDialog(Efg &ef_,wxFrame *parent=0);
 	bool GameChanged(void);
 };
 
 //************************************** CONSTRUCTOR **************************
-InfosetDialog::InfosetDialog(BaseEfg &ef_,wxFrame *parent)
+InfosetDialog::InfosetDialog(Efg &ef_,wxFrame *parent)
 												:ef(ef_),MyDialogBox(parent,"Infosets Info",EFG_TREE_HELP)
 {
 SetLabelPosition(wxVERTICAL);

@@ -486,7 +486,8 @@ dc.SetClippingRegion(MaxX(col-1)+TEXT_OFF,
 if (draw_settings->UseGText())	// use possibly colored text
 gDrawText(dc,sheet->GetValue(row,col),
 					MaxX(col-1)+TEXT_OFF,
-					draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+TEXT_OFF);
+					draw_settings->YStart()+(row-1)*draw_settings->GetRowHeight()+
+               draw_settings->GetTextHeight()/4+TEXT_OFF);
 else
 gDrawText(dc,gPlainText(sheet->GetValue(row,col)),
 					MaxX(col-1)+TEXT_OFF,

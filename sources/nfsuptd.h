@@ -2,16 +2,16 @@
 // FILE: efsuptd.h -- Declarations of dialogs for dealing with NF
 // supports.
 //
-// @(#)nfsuptd.h	2.2 3/29/97
+// $Id$
 //
 
 #ifndef NFSUPTD_H
 #define NFSUPTD_H
-class BaseNormShow;
+class NfgShow;
 class NFSupportInspectDialog:public wxDialogBox
 {
 private:
-	BaseNormShow *bns;
+	NfgShow *bns;
 	gList<NFSupport *> &sups;
 	int init_disp,init_cur;
 	wxText *cur_dim,*disp_dim;
@@ -30,7 +30,7 @@ private:
 	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
-	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
+	{((NfgShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
 	static void remove_sup_func(wxButton &ob,wxEvent &)
 	{((NFSupportInspectDialog *)ob.GetClientData())->OnRemoveSupport();}
 // High level event handlers
@@ -67,7 +67,7 @@ private:
 	return tmp;
 	}
 public:
-	NFSupportInspectDialog(gList<NFSupport *> &sups_,int cur_sup,int disp_sup,BaseNormShow *bns_,wxWindow *parent=0)
+	NFSupportInspectDialog(gList<NFSupport *> &sups_,int cur_sup,int disp_sup,NfgShow *bns_,wxWindow *parent=0)
 		: wxDialogBox(parent,"Supports"),bns(bns_),sups(sups_)
 	{
   init_cur=cur_sup;init_disp=disp_sup;
