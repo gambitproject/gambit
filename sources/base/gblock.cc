@@ -27,8 +27,10 @@ template class gBlock<gBlock<double> >;
 template class gArray<gArray<gText> >;
 template class gBlock<gArray<gText> >;
 
+#ifndef __BCC55__
 template bool operator==(const gArray<gText> &, const gArray<gText> &);
 template bool operator!=(const gArray<gText> &, const gArray<gText> &);
+#endif  // __BCC55__
 
 template gOutput &operator<<(gOutput &, const gBlock<bool> &);
 #ifndef __BCC55__
