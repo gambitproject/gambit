@@ -16,7 +16,7 @@
 
 class SeqFormParams     {
   public:
-    int  plev, nequilib, maxdepth;
+    int  plev, stopAfter, maxdepth;
     gOutput *output;
     
     SeqFormParams(void);

@@ -23,7 +23,7 @@ void Epsilon(gRational &v) {v=(gRational)0; }
 //---------------------------------------------------------------------------
 
 SeqFormParams::SeqFormParams(void) 
-  :  plev(0), nequilib(0), output(&gnull)
+  :  plev(0), stopAfter(0), output(&gnull)
 { }
 
 
@@ -74,7 +74,7 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   (*b)[ns1+ns2+ni1+1] = (T)1;
   (*b)[ns1+ns2+ni1+ni1+1] = -(T)1;
   (*b)[ns1+ns2+ni1+ni1+ni2+1] = (T)1;
-//  gout.SetWidth(1).SetPrec(3);
+//  gout.SetWidth(1).SetPrec(1);
 //  gout << "\n";
 //  A->Dump(gout);
 //  b->Dump(gout);
@@ -82,6 +82,7 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   tab = new LTableau<T>(*A,*b);
 //  tab->Refactor();  // not necessary?
   tab->Pivot(ns1+ns2+ni1+1,0);
+//  tab->Dump(gout);
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -116,7 +117,9 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   }
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
   BehavProfile<T> profile(EF);
+//  gout << "\nsol = " << sol;
   tab->BasisVector(sol);
+//  gout << "\nsol = " << sol;
   GetProfile(profile,sol,EF.RootNode(),1,1);
 //  gout << "\nprofile = " << profile << "\n";
   solutions.Flush();
@@ -243,6 +246,8 @@ template <class T> void SeqFormModule<T>
 	       const Node *n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
+
+//  gout << "\nv = " << v;
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
@@ -250,18 +255,23 @@ template <class T> void SeqFormModule<T>
     }
     pl = n->GetPlayer()->GetNumber();
     inf= n->GetInfoset()->GetNumber();
+//    gout << "\niset: (" << pl << "," << inf << ")"; 
     if(pl==1) {
       snew=1;
       for(i=1;i<inf;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
+//	gout << "\n  v = " << v;
 	if(tab->Member(s1)) {
 	  ind = tab->Find(s1);
 	  if(sol[ind]!=(T)0) {
 	    if(tab->Member(snew+i)) {
 	      ind2 = tab->Find(snew+i);
 	      v(pl,inf,i) = sol[ind2]/sol[ind];
+//	      gout << "\nind: " << ind << " " << sol[ind] << " ";
+//	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
+//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
@@ -274,12 +284,16 @@ template <class T> void SeqFormModule<T>
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions(); 
       for(i=1;i<=n->NumChildren();i++) {
 	v(pl,inf,i) = (T)0;
+//	gout << "\n  v = " << v;
 	if(tab->Member(ns1+s2)) {
 	  ind = tab->Find(ns1+s2);
 	  if(sol[ind]!=(T)0) {
 	    if(tab->Member(ns1+snew+i)) {
 	      ind2 = tab->Find(ns1+snew+i);
 	      v(pl,inf,i) = sol[ind2]/sol[ind];
+//	      gout << "\nind: " << ind << " " << sol[ind] << " ";
+//	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
+//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
