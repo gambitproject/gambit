@@ -1,0 +1,49 @@
+<refentry id="bif.Modulus" xreflabel="Modulus">
+
+<refmeta>
+<indexterm>
+<primary>Modulus</primary>
+</indexterm>
+
+<refentrytitle>Modulus</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Modulus</refname>
+<refpurpose>
+Computes the remainder from integer division
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Modulus[x->INTEGER, y->INTEGER] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Modulus</function>
+computes the remainder from dividing <parameter>y</parameter> into <parameter>x</parameter>.  It is an
+error if <parameter>y</parameter> is zero.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x MOD y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IntegerDivide">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.MergeInfosets" xreflabel="MergeInfosets">
+
+<refmeta>
+<indexterm>
+<primary>MergeInfosets</primary>
+</indexterm>
+
+<refentrytitle>MergeInfosets</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>MergeInfosets</refname>
+<refpurpose>
+Combines two information sets
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+MergeInfosets[to->INFOSET, from->INFOSET] =: INFOSET
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>MergeInfosets</function>
+moves all the nodes from the information set <parameter>from</parameter> into
+<parameter>to</parameter>.
+It is an error if the number of actions is not the same at the
+two information sets, or if the information sets are not from the
+same extensive form game.  The information set <parameter>to</parameter>
+is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MoveToInfoset">.
+</para>
+</refsect1>
+
+</refentry>
+
+

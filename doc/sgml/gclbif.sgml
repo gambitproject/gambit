@@ -102,6 +102,16 @@ for a listing of functions by category.
 &bifloadnfg;
 &biflog;
 &biflpsolve;
+&bifmanual;
+&bifmarksubgame;
+&bifmarkedsubgame;
+&bifmembers;
+&bifmergeinfosets;
+&bifminus;
+&bifmixed;
+&bifmodulus;
+&bifmovetoinfoset;
+&bifmovetree;
 
 </sect1>
 

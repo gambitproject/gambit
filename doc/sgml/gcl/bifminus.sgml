@@ -1,0 +1,53 @@
+<refentry id="bif.Minus" xreflabel="Minus">
+
+<refmeta>
+<indexterm>
+<primary>Minus</primary>
+</indexterm>
+
+<refentrytitle>Minus</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Minus</refname>
+<refpurpose>
+Returns the difference of two numbers or profiles
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Minus[x->NUMBER, y->NUMBER] =: NUMBER 
+Minus[x->MIXED, y->MIXED] =: MIXED 
+Minus[x->BEHAV, y->BEHAV] =: BEHAV 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Minus</function>
+returns the difference of <parameter>x</parameter> and
+<parameter>y</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x - y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Divide">,
+<xref linkend="bif.Plus">,
+<xref linkend="bif.Times">.
+</para>
+</refsect1>
+
+</refentry>
+
+

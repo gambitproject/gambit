@@ -103,6 +103,16 @@
 <!ENTITY bifloadnfg SYSTEM "gcl/bifloadnfg.sgml">
 <!ENTITY biflog SYSTEM "gcl/biflog.sgml">
 <!ENTITY biflpsolve SYSTEM "gcl/biflpsolve.sgml">
+<!ENTITY bifmanual SYSTEM "gcl/bifmanual.sgml">
+<!ENTITY bifmarksubgame SYSTEM "gcl/bifmarksubgame.sgml">
+<!ENTITY bifmarkedsubgame SYSTEM "gcl/bifmarkedsubgame.sgml">
+<!ENTITY bifmembers SYSTEM "gcl/bifmembers.sgml">
+<!ENTITY bifmergeinfosets SYSTEM "gcl/bifmergeinfosets.sgml">
+<!ENTITY bifminus SYSTEM "gcl/bifminus.sgml">
+<!ENTITY bifmixed SYSTEM "gcl/bifmixed.sgml">
+<!ENTITY bifmodulus SYSTEM "gcl/bifmodulus.sgml">
+<!ENTITY bifmovetoinfoset SYSTEM "gcl/bifmovetoinfoset.sgml">
+<!ENTITY bifmovetree SYSTEM "gcl/bifmovetree.sgml">
 <!ENTITY algref SYSTEM "algref.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 

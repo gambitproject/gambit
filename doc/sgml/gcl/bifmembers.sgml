@@ -1,0 +1,42 @@
+<refentry id="bif.Members" xreflabel="Members">
+
+<refmeta>
+<indexterm>
+<primary>Members</primary>
+</indexterm>
+
+<refentrytitle>Members</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Members</refname>
+<refpurpose>
+Returns the node which belong to an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Members[infoset->INFOSET*] =: LIST(NODE) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Members</function>
+returns the list of nodes which are members of <parameter>infoset</parameter>.
+If <parameter>infoset</parameter> is null, the empty list is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Infoset">.
+</para>
+</refsect1>
+
+</refentry>
+
+

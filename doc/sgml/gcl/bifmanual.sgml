@@ -1,0 +1,45 @@
+<refentry id="bif.Manual" xreflabel="Manual">
+
+<refmeta>
+<indexterm>
+<primary>Manual</primary>
+</indexterm>
+
+<refentrytitle>Manual</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Manual</refname>
+<refpurpose>
+Prints the manual entry for a function
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Manual[x->TEXT, {y->(Output)}] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Manual</function>
+prints the manual entry for the function <parameter>x</parameter>.  If there is no
+entry for <parameter>x</parameter>, no output is generated. The parameter
+<parameter>y</parameter>, which is the null output by default, can be used to print
+the manual entry to an output stream.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Help">,
+<xref linkend="bif.HelpVars">.
+</para>
+</refsect1>
+
+</refentry>
+
+

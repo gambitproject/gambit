@@ -1,0 +1,42 @@
+<refentry id="bif.Mixed" xreflabel="Mixed">
+
+<refmeta>
+<indexterm>
+<primary>Mixed</primary>
+</indexterm>
+
+<refentrytitle>Mixed</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Mixed</refname>
+<refpurpose>
+Creates a mixed strategy profile on a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Mixed[support->NFSUPPORT] =: MIXED 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Mixed</function>
+returns a mixed strategy profile over <parameter>support</parameter> with equal
+probabilites for each strategy in the support.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Behav">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.MoveToInfoset" xreflabel="MoveToInfoset">
+
+<refmeta>
+<indexterm>
+<primary>MoveToInfoset</primary>
+</indexterm>
+
+<refentrytitle>MoveToInfoset</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>MoveToInfoset</refname>
+<refpurpose>
+Places a node in an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>MoveToInfoset</function>
+removes <parameter>node</parameter> from its current information set, and makes it a
+member of <parameter>infoset</parameter>. It is an error if the number of actions at
+<parameter>node</parameter> is not the same as the number of actions in
+<parameter>infoset</parameter>, or if <parameter>node</parameter> and 
+<parameter>infoset</parameter> are from
+different extensive form games.   
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MergeInfosets">.
+</para>
+</refsect1>
+
+</refentry>
+
+

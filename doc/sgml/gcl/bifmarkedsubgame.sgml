@@ -1,0 +1,44 @@
+<refentry id="bif.MarkedSubgame" xreflabel="MarkedSubgame">
+
+<refmeta>
+<indexterm>
+<primary>MarkedSubgame</primary>
+</indexterm>
+
+<refentrytitle>MarkedSubgame</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>MarkedSubgame</refname>
+<refpurpose>
+Returns whether a subgame root is marked
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+MarkedSubgame[node->NODE] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>MarkedSubgame</function>
+returns <literal>True</literal> if <parameter>node</parameter> is currently
+marked as a subgame. 
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MarkSubgame">,
+<xref linkend="bif.Subgames">,
+<xref linkend="bif.UnMarkSubgame">.
+</para>
+</refsect1>
+
+</refentry>
+
+

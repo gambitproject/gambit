@@ -1,0 +1,46 @@
+<refentry id="bif.MoveTree" xreflabel="MoveTree">
+
+<refmeta>
+<indexterm>
+<primary>MoveTree</primary>
+</indexterm>
+
+<refentrytitle>MoveTree</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>MoveTree</refname>
+<refpurpose>
+Moves an entire subtree in an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+MoveTree[from->NODE, to->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>MoveTree</function>
+moves the subtree rooted at <parameter>from</parameter> to
+the terminal node <parameter>to</parameter>.  The node <parameter>from</parameter> becomes a terminal node.
+Returns <parameter>to</parameter>.
+It is an error if <parameter>to</parameter> is not a terminal
+node, or if <parameter>from</parameter> and <parameter>to</parameter> are not from the same extensive
+form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.CopyTree">.
+</para>
+</refsect1>
+
+</refentry>
+
+
