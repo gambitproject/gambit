@@ -836,6 +836,7 @@ bool GCLCompiler::DeleteFunction(void)
   return false;
 }
 
+#include "gstatus.h"
 #include "gsm.h"
 
 int GCLCompiler::Execute(void)
@@ -853,6 +854,8 @@ int GCLCompiler::Execute(void)
   catch (gException &E) {
     gout << "EXCEPTION: " << E.Description() << '\n';
   }
+
+  gstatus.Reset();
 
   return rcSUCCESS;
 }
