@@ -498,19 +498,15 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 			      Portion** param, 
 			      const gText& funcname )
 {
-  Portion* result;
   Portion* result_copy;
-  int i;
 
   _RefTableStack->Push(new RefHashTable);
   _StackStack->Push(new gStack< Portion* >);
   _FuncNameStack->Push( funcname );
 
-  for(i = 0; i < func_info.NumParams; i++)
-  {
-    if(param[i] != 0 && param[i]->Spec().Type != porREFERENCE)
-    {
-      if( VarDefine(func_info.ParamInfo[i].Name, param[i]) )
+  for (int i = 0; i < func_info.NumParams; i++) {
+    if (param[i] != 0 && param[i]->Spec().Type != porREFERENCE) {
+      if (VarDefine(func_info.ParamInfo[i].Name, param[i]))
 	param[i] = param[i]->RefCopy();
       else
 	throw gclRuntimeError("Param matching error");
@@ -518,33 +514,37 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
   }
 
 
-  result = Execute(&program, true);
+  try {
+    Portion *result = Execute(&program, true);
   
-  if (result)   {
-    _ResolveRef( result );
-    if( result->IsReference() )  {
-      result_copy = result->ValCopy();
-      delete result;
-      result = result_copy;
-      result_copy = 0;
-    }
-
-    for(i = 0; i < func_info.NumParams; i++)
-      {
-	if(func_info.ParamInfo[i].PassByReference)
-	  {
-	    if(VarIsDefined(func_info.ParamInfo[i].Name))
-	      {
-		delete param[i];
-		param[i] = _VarRemove(func_info.ParamInfo[i].Name);
-	      }
+    if (result)   {
+      _ResolveRef(result);
+      if (result->IsReference())  {
+	result_copy = result->ValCopy();
+	delete result;
+	result = result_copy;
+	result_copy = 0;
+      }
+      
+      for (i = 0; i < func_info.NumParams; i++) {
+	if (func_info.ParamInfo[i].PassByReference) {
+	  if (VarIsDefined(func_info.ParamInfo[i].Name)) {
+	    delete param[i];
+	    param[i] = _VarRemove(func_info.ParamInfo[i].Name);
 	  }
+	}
       }
     
-    
+      delete _StackStack->Pop();
+      delete _RefTableStack->Pop();
+      _FuncNameStack->Pop();
+    }
+  }
+  catch (...) {
     delete _StackStack->Pop();
     delete _RefTableStack->Pop();
     _FuncNameStack->Pop();
+    throw;
   }
 
   return result;
