@@ -11,18 +11,16 @@
 #pragma interface
 #endif   // __GNUG__
 
-class Outcome   {
+class EFOutcome   {
   friend class BaseEfg;
-  friend class Efg<double>;
-  friend class Efg<gRational>;
 
   protected:
     int number;
     gString name;
     BaseEfg *E;
 
-    Outcome(BaseEfg *e, int n) : number(n), E(e)   { }
-    virtual ~Outcome()   { }
+    EFOutcome(BaseEfg *e, int n) : number(n), E(e)   { }
+    virtual ~EFOutcome()   { }
   
   public:
     BaseEfg *BelongsTo(void) const   { return E; }
@@ -30,26 +28,10 @@ class Outcome   {
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
+    int GetNumber(void) const   { return number; }
+
     virtual void Resize(int pl) = 0;
     virtual void PrintValues(gOutput &) const = 0;
-};
-
-#include "gvector.h"
-
-template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
-  friend class Efg<T>;
-
-  private:
-    OutcomeVector(BaseEfg *E, int n, int pl)
-      : Outcome(E, n), gVector<T>(pl)  { }
-    OutcomeVector(BaseEfg *E, const OutcomeVector<T> &v)
-      : Outcome(E, v.number), gVector<T>(v)   { name = v.name; }
-    ~OutcomeVector()    { }
-
-    void Resize(int pl);    
-
-    void PrintValues(gOutput &f) const
-      { Dump(f); }
 };
 
 #endif    // OUTCOME_H

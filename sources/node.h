@@ -32,7 +32,7 @@ class Node    {
     gString name;
     Infoset *infoset;
     Node *parent;
-    Outcome *outcome;
+    EFOutcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
 
@@ -61,9 +61,9 @@ class Node    {
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
-    Outcome *GetOutcome(void) const   { return outcome; }
-    void SetOutcome(Outcome *outc)    { outcome = outc; }
-    void DeleteOutcome(Outcome *outc);
+    EFOutcome *GetOutcome(void) const   { return outcome; }
+    void SetOutcome(EFOutcome *outc)    { outcome = outc; }
+    void DeleteOutcome(EFOutcome *outc);
 };
 
 #endif   // NODE_H

@@ -43,31 +43,6 @@ gOutput &operator<<(gOutput &, const gArray<gRational> &);
 
 #include "subsolve.imp"
 
-// Project the actions in the support 'from' in the subgame rooted at
-// 'n' to the support 'to' (assumed to belong to that subgame)
-
-void Project(const EFSupport &from, EFSupport &to, Node *n)
-{
-  const BaseEfg &E = from.BelongsTo();
-  
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    int isetno = 1;
-    for (int iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++)  {
-      Infoset *infoset = E.Players()[pl]->Infosets()[iset];
-      if (E.IsPredecessor(n, infoset->Members()[1]))  {
-	Infoset *newiset = to.BelongsTo().Players()[pl]->Infosets()[isetno];
-	for (int act = 1; act <= infoset->NumActions(); act++)  {
-	  if (!from.Find(infoset->Actions()[act]))
-	    to.RemoveAction(newiset->Actions()[act]);
-	} 
-	isetno++;
-      }
-      assert(isetno == to.BelongsTo().Players()[pl]->NumInfosets());
-    }
-  }
-}
-  
-
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -79,7 +54,7 @@ class gNode<gArray<int> >;
 class gList<gArray<int> >;
 
 
-bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
+bool operator==(const gArray<EFOutcome *> &a, const gArray<EFOutcome *> &b)
 {
 	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
 	for (int i = a.mindex; i <= a.maxdex; i++)
@@ -87,7 +62,7 @@ bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 	return true;
 }
 
-bool operator!=(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
+bool operator!=(const gArray<EFOutcome *> &a, const gArray<EFOutcome *> &b)
 {
 	return !(a == b);
 }
@@ -116,10 +91,10 @@ TEMPLATE class SubgameSolver<gRational>;
 
 TEMPLATE class gArray<gArray<Infoset *> *>;
 
-TEMPLATE bool operator==(const gArray<Outcome *> &, const gArray<Outcome *> &);
-TEMPLATE bool operator!=(const gArray<Outcome *> &, const gArray<Outcome *> &);
+TEMPLATE bool operator==(const gArray<EFOutcome *> &, const gArray<EFOutcome *> &);
+TEMPLATE bool operator!=(const gArray<EFOutcome *> &, const gArray<EFOutcome *> &);
 
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<Outcome *> &);
+TEMPLATE gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
 
 
 #include "glist.imp"
@@ -129,9 +104,9 @@ TEMPLATE class gNode<gVector<double> >;
 TEMPLATE class gList<gVector<gRational> >;
 TEMPLATE class gNode<gVector<gRational> >;
 
-TEMPLATE class gList<Outcome *>;
-TEMPLATE class gNode<Outcome *>;
+TEMPLATE class gList<EFOutcome *>;
+TEMPLATE class gNode<EFOutcome *>;
 
-TEMPLATE class gList<gArray<Outcome *> >;
-TEMPLATE class gNode<gArray<Outcome *> >;
+TEMPLATE class gList<gArray<EFOutcome *> >;
+TEMPLATE class gNode<gArray<EFOutcome *> >;
 

@@ -11,6 +11,25 @@
 #include "outcome.h"
 #include "efgutils.h"
 
+
+#include "gvector.h"
+
+template <class T> class OutcomeVector : public EFOutcome, private gVector<T>   {
+  friend class Efg<T>;
+
+  private:
+    OutcomeVector(BaseEfg *E, int n, int pl)
+      : EFOutcome(E, n), gVector<T>(pl)  { }
+    OutcomeVector(BaseEfg *E, const OutcomeVector<T> &v)
+      : EFOutcome(E, v.number), gVector<T>(v)   { name = v.name; }
+    ~OutcomeVector()    { }
+
+    void Resize(int pl);    
+
+    void PrintValues(gOutput &f) const
+      { Dump(f); }
+};
+
 template <class T> void OutcomeVector<T>::Resize(int pl)
 {
   T *newdata = new T[pl] - 1;
@@ -98,7 +117,7 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
     n->gameroot = n;
 
   if (m->outcome)
-    n->outcome = outcomes[m->outcome->number];
+    n->outcome = outcomes[m->outcome->GetNumber()];
 
   if (m->infoset)   {
     EFPlayer *p;
@@ -268,10 +287,12 @@ template <class T> Infoset *Efg<T>::CreateInfoset(EFPlayer *p, int br)
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
-template <class T> Outcome *Efg<T>::CreateOutcomeByIndex(int index)
+template <class T> EFOutcome *Efg<T>::CreateOutcomeByIndex(int index)
 {
-  OutcomeVector<T> *ret = NewOutcome();
-  ret->number = index;
+  OutcomeVector<T> *ret = new OutcomeVector<T>(this, index,
+					       players.Length());
+  for (int i = 1; i <= players.Length(); (*ret)[i++] = (T) 0);
+  outcomes.Append(ret);
   return ret;
 }
 
@@ -279,13 +300,28 @@ template <class T> Outcome *Efg<T>::CreateOutcomeByIndex(int index)
 //                 Efg<T>: Operations on outcomes
 //------------------------------------------------------------------------
 
-template <class T> OutcomeVector<T> *Efg<T>::NewOutcome(void)
+template <class T> EFOutcome *Efg<T>::NewOutcome(void)
 {
   OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
 					       players.Length());
   for (int i = 1; i <= players.Length(); (*ret)[i++] = (T) 0);
   outcomes.Append(ret);
   return ret;
+}
+
+template <class T> void Efg<T>::SetPayoff(EFOutcome *outc, int pl, const T &value)
+{
+  ((OutcomeVector<T> &) *outc)[pl] = value;
+}
+
+template <class T> T Efg<T>::Payoff(EFOutcome *outc, int pl) const
+{
+  return ((OutcomeVector<T> &) *outc)[pl];
+}
+
+template <class T> const gVector<T> &Efg<T>::Payoff(EFOutcome *outc) const
+{
+  return (gVector<T> &)(OutcomeVector<T> &) *outc;
 }
 
 template <class T> bool Efg<T>::IsConstSum(void) const
@@ -348,6 +384,7 @@ template <class T> T Efg<T>::MaxPayoff(int pl) const
   }
   return maxpay;
 }
+
 
 
 
@@ -599,7 +636,7 @@ template <class T>
 void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
 {
   if (n->outcome)
-    value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
+    value += prob * E->Payoff(n->outcome, pl);
   if (n->children.Length())  {
     if (n->infoset->player->number == 0)  {
       for (int i = 1; i <= n->children.Length(); i++)
@@ -636,9 +673,9 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
 {
   int pl = (n->infoset) ? n->infoset->player->number : -1;
   int iset = (n->infoset) ? n->infoset->number : 0;
-
-  if (n->outcome)
-    *((TypedNode<T> *) n)->scratch += (OutcomeVector<T> &) *n->outcome;
+  
+  if (n->outcome)  
+    *((TypedNode<T> *) n)->scratch += E->Payoff(n->outcome);
   int i, nc;
   for (i = 1, nc = n->children.Length(); i <= nc; i++)
     *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
@@ -833,7 +870,7 @@ void BehavProfile<T>::NodeValues(Node *n, int pl,
   int child, tindex = index;
 
   if (n->outcome)
-    ((TypedNode<T> *) n)->nval += ((OutcomeVector<T> &) *n->outcome)[pl];
+    ((TypedNode<T> *) n)->nval += E->Payoff(n->outcome, pl);
 
   for (child = 1; child <= n->children.Length(); child++)
     ((TypedNode<T> *) n->children[child])->nval = ((TypedNode<T> *) n)->nval;

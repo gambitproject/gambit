@@ -181,7 +181,7 @@ template <class T> void CSSeqFormModule<T>
 //    (*A)(s1,s2) = (*A)(s1,s2) -
 //       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
     (*A)(s1,s2) = (*A)(s1,s2) +
-       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
+       prob * EF.Payoff(n->GetOutcome(), 1) - minpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

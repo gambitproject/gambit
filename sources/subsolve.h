@@ -24,7 +24,7 @@ template <class T> class SubgameSolver   {
     gArray<gArray<Infoset *> *> infosets;
 
     void FindSubgames(Node *, gList<BehavSolution<T> > &,
-		      gList<Outcome *> &);
+		      gList<EFOutcome *> &);
 
   protected:
     virtual int SolveSubgame(const Efg<T> &, const EFSupport &,

@@ -159,9 +159,9 @@ template <class T> void SeqFormModule<T>
   int i,snew;
   if(n->GetOutcome()) {
     (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
-       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1] -maxpay);
+       prob * EF.Payoff(n->GetOutcome(), 1) - maxpay;
     (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
-       prob*(((OutcomeVector<T> &) *n->GetOutcome())[2] -maxpay);
+       prob * EF.Payoff(n->GetOutcome(), 2) - maxpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

@@ -12,11 +12,11 @@ Efg<gRational> *ConvertEfg(const Efg<double> &orig)
   Efg<gRational> *E = new Efg<gRational>((const BaseEfg &) orig);
 
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)   {
-    OutcomeVector<double> *c1 = (OutcomeVector<double> *) orig.Outcomes()[outc];
-    OutcomeVector<gRational> *c2 = (OutcomeVector<gRational> *) E->Outcomes()[outc];
+    EFOutcome *c1 = orig.Outcomes()[outc];
+    EFOutcome *c2 = E->Outcomes()[outc];
 
     for (int pl = 1; pl <= E->NumPlayers(); pl++)  
-      (*c2)[pl] = gRational((*c1)[pl]);
+      E->SetPayoff(c2, pl, gRational(orig.Payoff(c1, pl)));
   }
 
   EFPlayer *ochance = orig.GetChance();
@@ -39,11 +39,11 @@ Efg<double> *ConvertEfg(const Efg<gRational> &orig)
   Efg<double> *E = new Efg<double>((const BaseEfg &) orig);
   
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)   {
-    OutcomeVector<gRational> *c1 = (OutcomeVector<gRational> *) orig.Outcomes()[outc];
-    OutcomeVector<double> *c2 = (OutcomeVector<double> *) E->Outcomes()[outc];
+    EFOutcome *c1 = orig.Outcomes()[outc];
+    EFOutcome *c2 = E->Outcomes()[outc];
 
     for (int pl = 1; pl <= E->NumPlayers(); pl++)  
-      (*c2)[pl] = (double) (*c1)[pl];
+      E->SetPayoff(c2, pl, (double) orig.Payoff(c1, pl));
   }
 
   EFPlayer *ochance = orig.GetChance();

@@ -236,7 +236,7 @@ static Portion *GSM_DeleteMove(Portion **param)
 
 static Portion *GSM_DeleteOutcome(Portion **param)
 {
-  Outcome *outc = ((OutcomePortion *) param[0])->Value();
+  EFOutcome *outc = ((OutcomePortion *) param[0])->Value();
 
   gList<Node *> nodes;
   Nodes(*outc->BelongsTo(), nodes);
@@ -712,7 +712,7 @@ static Portion *GSM_NewInfoset(Portion **param)
 
 static Portion *GSM_NewOutcome(Portion **param)
 {
-  Outcome *c;
+  EFOutcome *c;
 
   if (param[0]->Spec().Type == porEFG_FLOAT)
     c = ((Efg<double> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
@@ -854,21 +854,21 @@ static Portion *GSM_Parent(Portion **param)
 
 static Portion *GSM_Payoff_Float(Portion **param)
 {
-  OutcomeVector<double> *c = 
-    (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  Efg<double> *efg = (Efg<double> *) player->BelongsTo();
 
-  Portion* por = new FloatValPortion((*c)[player->GetNumber()]);
+  Portion* por = new FloatValPortion(efg->Payoff(c, player->GetNumber()));
   return por;
 }
 
 static Portion *GSM_Payoff_Rational(Portion **param)
 {
-  OutcomeVector<gRational> *c = 
-    (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  Efg<gRational> *efg = (Efg<gRational> *) player->BelongsTo();
 
-  Portion* por = new RationalValPortion((*c)[player->GetNumber()]);
+  Portion* por = new RationalValPortion(efg->Payoff(c, player->GetNumber()));
   return por;
 }
 
@@ -1148,7 +1148,7 @@ static Portion *GSM_SetName_EfgElements(Portion **param)
 static Portion *GSM_SetOutcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Outcome *c = ((OutcomePortion *) param[1])->Value();
+  EFOutcome *c = ((OutcomePortion *) param[1])->Value();
 
   n->SetOutcome(c);
 
@@ -1169,12 +1169,12 @@ static Portion *GSM_SetOutcome(Portion **param)
 
 static Portion *GSM_SetPayoff_Float(Portion **param)
 {
-  OutcomeVector<double> *c = 
-    (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  Efg<double> *efg = (Efg<double> *) player->BelongsTo();
   double value = ((FloatPortion *) param[2])->Value();
 
-  (*c)[player->GetNumber()] = value;
+  efg->SetPayoff(c, player->GetNumber(), value);
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 
@@ -1185,12 +1185,12 @@ static Portion *GSM_SetPayoff_Float(Portion **param)
 
 static Portion *GSM_SetPayoff_Rational(Portion **param)
 {
-  OutcomeVector<gRational> *c = 
-    (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
+  EFOutcome *c = ((OutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  Efg<gRational> *efg = (Efg<gRational> *) player->BelongsTo();
   gRational value = ((RationalPortion *) param[2])->Value();
 
-  (*c)[player->GetNumber()] = value;
+  efg->SetPayoff(c, player->GetNumber(), value);
 
   _gsm->InvalidateGameProfile(c->BelongsTo(), true);
 

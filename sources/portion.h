@@ -382,18 +382,18 @@ public:
 //                          Outcome class
 //---------------------------------------------------------------------
 
-class Outcome;
+class EFOutcome;
 
 class OutcomePortion : public Portion
 {
 protected:
-  Outcome** _Value;
+  EFOutcome** _Value;
   OutcomePortion(void);
 
 public:
   virtual ~OutcomePortion();
 
-  Outcome*& Value(void) const;
+  EFOutcome*& Value(void) const;
   PortionSpec Spec(void) const;
   DataType SubType( void ) const;
 
@@ -407,7 +407,7 @@ public:
 class OutcomeValPortion : public OutcomePortion
 {
 public:
-  OutcomeValPortion(Outcome* value);
+  OutcomeValPortion(EFOutcome* value);
   virtual ~OutcomeValPortion();
   bool IsReference(void) const;
 };
@@ -415,7 +415,7 @@ public:
 class OutcomeRefPortion : public OutcomePortion
 {
 public:
-  OutcomeRefPortion(Outcome*& value);
+  OutcomeRefPortion(EFOutcome*& value);
   virtual ~OutcomeRefPortion();
   bool IsReference(void) const;
 };

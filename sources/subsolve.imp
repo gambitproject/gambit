@@ -12,7 +12,7 @@
 
 template <class T>
 void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
-						gList<Outcome *> &values)
+						gList<EFOutcome *> &values)
 {
   int i;
   int failed;
@@ -25,12 +25,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
   gList<Node *> subroots;
   ChildSubgames(n, subroots);
   
-  gList<gArray<Outcome *> > subrootvalues;
-  subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
+  gList<gArray<EFOutcome *> > subrootvalues;
+  subrootvalues.Append(gArray<EFOutcome *>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
     gList<BehavSolution<T> > subsolns;
-    gList<Outcome *> subvalues;
+    gList<EFOutcome *> subvalues;
     
     FindSubgames(subroots[i], subsolns, subvalues);
     
@@ -42,7 +42,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
     assert(subvalues.Length() == subsolns.Length());
     
     gList<BehavProfile<T> > newsolns;
-    gList<gArray<Outcome *> > newsubrootvalues;
+    gList<gArray<EFOutcome *> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length() &&
 	 (max_solns == 0 || newsolns.Length() <= max_solns);
@@ -179,12 +179,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (n->GetOutcome())
-	  subval[i] += ((OutcomeVector<T> &) *n->GetOutcome())[i];
+	  subval[i] += efg.Payoff(n->GetOutcome(), i);
       }
 
-      OutcomeVector<T> *ov = efg.NewOutcome();
+      EFOutcome *ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++)
-	(*ov)[i] = subval[i];
+	efg.SetPayoff(ov, i, subval[i]);
  
       values.Append(ov);
     }
@@ -257,7 +257,7 @@ void SubgameSolver<T>::Solve(void)
   solutions.Flush();
   subgame_number = 0;
 
-  gList<Outcome *> values;
+  gList<EFOutcome *> values;
 
   ((gVector<T> &) solution).operator=((T) 0);
 

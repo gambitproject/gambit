@@ -1,8 +1,8 @@
-//#
-//# FILE: readefg.imp -- Type-dependent file-reading code
-//#
-//# $Id$
-//#
+//
+// FILE: readefg.imp -- Type-dependent file-reading code
+//
+// $Id$
+//
 
 #include "gstack.h"
 #include "readefg.h"
@@ -15,11 +15,11 @@ template <class T> class EfgFile : public EfgFileReader    {
 
     int Parse(void);
 
-    Outcome *NewOutcome(void);
-    void SetOutcome(Outcome *, const gList<gRational> &);
+    EFOutcome *NewOutcome(void);
+    void SetOutcome(EFOutcome *, const gList<gRational> &);
     void SetActionProbs(Infoset *, const gList<gRational> &);
     bool CheckActionProbs(Infoset *, const gList<gRational> &);
-    bool CheckOutcome(Outcome *, const gList<gRational> &);
+    bool CheckOutcome(EFOutcome *, const gList<gRational> &);
 };
 
 template <class T> EfgFile<T>::EfgFile(gInput &f, Efg<T> *& E)
@@ -29,16 +29,16 @@ template <class T> EfgFile<T>::EfgFile(gInput &f, Efg<T> *& E)
 template <class T> EfgFile<T>::~EfgFile()
 { }
 
-template <class T> Outcome *EfgFile<T>::NewOutcome(void)
+template <class T> EFOutcome *EfgFile<T>::NewOutcome(void)
 {
   return ((Efg<T> *) E)->NewOutcome();
 }
 
-template <class T> void EfgFile<T>::SetOutcome(Outcome *c,
+template <class T> void EfgFile<T>::SetOutcome(EFOutcome *c,
 					       const gList<gRational> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    ((OutcomeVector<T> &) *c)[i] = p[i];
+    ((Efg<T> *) E)->SetPayoff(c, i, p[i]);
 }
 
 template <class T> void EfgFile<T>::SetActionProbs(Infoset *s,
@@ -56,11 +56,11 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
   return true;
 }
 
-template <class T> bool EfgFile<T>::CheckOutcome(Outcome *c,
+template <class T> bool EfgFile<T>::CheckOutcome(EFOutcome *c,
 						 const gList<gRational> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (((OutcomeVector<T> &) *c)[i] != (T) p[i])   return false;
+    if (((Efg<T> *) E)->Payoff(c, i) != (T) p[i])   return false;
   return true;
 }
 

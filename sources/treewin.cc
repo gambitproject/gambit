@@ -58,8 +58,8 @@ gString TreeWindow<T>::OutcomeAsString(const Node *n) const
 {
 if (n->GetOutcome())
 {
-	OutcomeVector<T> *tv=(OutcomeVector<T> *)n->GetOutcome();;
-	gVector<T> &v=*tv;
+	EFOutcome *tv = n->GetOutcome();
+	const gVector<T> &v=ef.Payoff(tv);
 //	ToStringPrecision(2);
 	gString tmp="(";
 	for (int i=v.First();i<=v.Last();i++)

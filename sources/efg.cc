@@ -8,7 +8,7 @@ class Node;
 class EFPlayer;
 class Infoset;
 class Action;
-class Outcome;
+class EFOutcome;
 #include "garray.h"
 #include "rational.h"
 #ifdef __GNUG__
@@ -40,8 +40,8 @@ TEMPLATE class gBlock<Node *>;
 TEMPLATE class gArray<Action *>;
 TEMPLATE class gBlock<Action *>;
 
-TEMPLATE class gArray<Outcome *>;
-TEMPLATE class gBlock<Outcome *>;
+TEMPLATE class gArray<EFOutcome *>;
+TEMPLATE class gBlock<EFOutcome *>;
 
 class EFActionSet;
 class EFActionArrays;
@@ -157,7 +157,7 @@ Node *Node::PriorSibling(void) const
 
 }
 
-void Node::DeleteOutcome(Outcome *outc)
+void Node::DeleteOutcome(EFOutcome *outc)
 { 
   if (outc == outcome)   outcome = 0;
   for (int i = 1; i <= children.Length(); i++)
@@ -241,7 +241,7 @@ void BaseEfg::ScrapInfoset(Infoset *s)
   dead_infosets.Append(s);
 }
 
-void BaseEfg::ScrapOutcome(Outcome *c)
+void BaseEfg::ScrapOutcome(EFOutcome *c)
 {
   dead_outcomes.Append(c);
 }
@@ -253,7 +253,7 @@ Infoset *BaseEfg::GetInfosetByIndex(EFPlayer *p, int index) const
   return 0;
 }
 
-Outcome *BaseEfg::GetOutcomeByIndex(int index) const
+EFOutcome *BaseEfg::GetOutcomeByIndex(int index) const
 {
   for (int i = 1; i <= outcomes.Length(); i++)
     if (outcomes[i]->number == index)   return outcomes[i];
@@ -436,7 +436,7 @@ int BaseEfg::NumPlayers(void) const
 int BaseEfg::NumOutcomes(void) const
 { return outcomes.Length(); }
 
-void BaseEfg::DeleteOutcome(Outcome *outc)
+void BaseEfg::DeleteOutcome(EFOutcome *outc)
 {
   root->DeleteOutcome(outc);
   outcomes.Remove(outcomes.Find(outc));

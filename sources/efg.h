@@ -14,7 +14,7 @@
 #include "gpvector.h"
 
 
-class Outcome;
+class EFOutcome;
 class EFPlayer;
 class Infoset;
 class Node;
@@ -33,13 +33,13 @@ protected:
     bool sortisets;
     gString title;
     gBlock<EFPlayer *> players;
-    gBlock<Outcome *> outcomes;
+    gBlock<EFOutcome *> outcomes;
     Node *root;
     EFPlayer *chance;
 
     gBlock<Node *> dead_nodes;
     gBlock<Infoset *> dead_infosets;
-    gBlock<Outcome *> dead_outcomes;
+    gBlock<EFOutcome *> dead_outcomes;
 
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
     BaseEfg(void);
@@ -57,7 +57,7 @@ protected:
 
     void ScrapNode(Node *);
     void ScrapInfoset(Infoset *);
-    void ScrapOutcome(Outcome *);
+    void ScrapOutcome(EFOutcome *);
 
     void SortInfosets(void);
 
@@ -65,8 +65,8 @@ protected:
 // These are auxiliary functions used by the .efg file reader code
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
     Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-    Outcome *GetOutcomeByIndex(int index) const;
-    virtual Outcome *CreateOutcomeByIndex(int index) = 0;
+    EFOutcome *GetOutcomeByIndex(int index) const;
+    virtual EFOutcome *CreateOutcomeByIndex(int index) = 0;
     void Reindex(void);
     
     virtual void DeleteLexicon(void) = 0;
@@ -105,8 +105,8 @@ protected:
 
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
-    const gArray<Outcome *> &Outcomes(void) const  { return outcomes; }
-    void DeleteOutcome(Outcome *c);  
+    const gArray<EFOutcome *> &Outcomes(void) const  { return outcomes; }
+    void DeleteOutcome(EFOutcome *c);  
  
        //# EDITING OPERATIONS
     Infoset *AppendNode(Node *n, EFPlayer *p, int br);
@@ -150,8 +150,6 @@ protected:
     gPVector<int> NumMembers(void) const;
 };
 
-
-template <class T> class OutcomeVector;
 #include "behav.h"
 
 template <class T> class Efg;
@@ -183,7 +181,7 @@ template <class T> class Efg : public BaseEfg   {
 
     Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
     Node *CreateNode(Node *parent);
-    Outcome *CreateOutcomeByIndex(int index);
+    EFOutcome *CreateOutcomeByIndex(int index);
 
 
     // this is for use with the copy constructor
@@ -207,9 +205,13 @@ template <class T> class Efg : public BaseEfg   {
     T MaxPayoff(int pl = 0) const;
 
         //# DATA ACCESS -- OUTCOMES
-    OutcomeVector<T> *NewOutcome(void);
+    EFOutcome *NewOutcome(void);
 
     Infoset *CreateInfoset(EFPlayer *pl, int br);
+
+    void SetPayoff(EFOutcome *, int pl, const T &value);
+    T Payoff(EFOutcome *, int pl) const;
+    const gVector<T> &Payoff(EFOutcome *) const;
 
         //# COMPUTING VALUES OF PROFILES
 

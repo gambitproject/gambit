@@ -34,17 +34,17 @@ TEMPLATE class gStack<Node *>;
                    gStack<Node *> path; \
                    gList<gString> actions; \
                    gList<gRational> values; \
-                   EFPlayer *player; Infoset *infoset; Outcome *outcome; \
+                   EFPlayer *player; Infoset *infoset; EFOutcome *outcome; \
                    int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
-                   virtual Outcome *NewOutcome(void) = 0; \
-                   virtual void SetOutcome(Outcome *, \
+                   virtual EFOutcome *NewOutcome(void) = 0; \
+                   virtual void SetOutcome(EFOutcome *, \
 					   const gList<gRational> &) = 0; \
                    virtual void SetActionProbs(Infoset *, \
 					       const gList<gRational> &) = 0; \
                    virtual bool CheckActionProbs(Infoset *, \
 						 const gList<gRational> &)=0;\
-                   virtual bool CheckOutcome(Outcome *, \
+                   virtual bool CheckOutcome(EFOutcome *, \
 					     const gList<gRational> &) = 0;
 
 

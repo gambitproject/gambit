@@ -58,7 +58,7 @@ Portion *ArrayToList(const gArray<Infoset *> &A)
   return ret;
 }
 
-Portion *ArrayToList(const gArray<Outcome *> &A)
+Portion *ArrayToList(const gArray<EFOutcome *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)

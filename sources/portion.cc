@@ -666,7 +666,7 @@ OutcomePortion::OutcomePortion(void)
 OutcomePortion::~OutcomePortion()
 { }
 
-Outcome*& OutcomePortion::Value(void) const
+EFOutcome*& OutcomePortion::Value(void) const
 { return *_Value; }
 
 PortionSpec OutcomePortion::Spec(void) const
@@ -725,8 +725,8 @@ Portion* OutcomePortion::RefCopy(void) const
 }
 
 
-OutcomeValPortion::OutcomeValPortion(Outcome* value)
-{ _Value = new Outcome*(value); }
+OutcomeValPortion::OutcomeValPortion(EFOutcome* value)
+{ _Value = new EFOutcome*(value); }
 
 OutcomeValPortion::~OutcomeValPortion()
 {
@@ -737,7 +737,7 @@ bool OutcomeValPortion::IsReference(void) const
 { return false; }
 
 
-OutcomeRefPortion::OutcomeRefPortion(Outcome*& value)
+OutcomeRefPortion::OutcomeRefPortion(EFOutcome*& value)
 { _Value = &value; }
 
 OutcomeRefPortion::~OutcomeRefPortion()
