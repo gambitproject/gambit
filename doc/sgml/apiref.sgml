@@ -180,12 +180,4 @@ are predefined in the command language.
 
 </sect1>
 
-<sect1 id="gcl.funccat">
-<title>Categorical listing of functions</title>
-
-&gclbifcat;
-
-</sect1>
-
-
 </chapter>
