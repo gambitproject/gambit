@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "gambitio.h"
 #include "gvector.h"
-#include "gset.h"
+#include "gtuple.h"
 
 //
 // Basic n-dimensional array
@@ -177,7 +177,7 @@ void gNArray<T>::ReadFrom(gInput &f, const gVector<int> &norder,
 
 template <class T> class gIndexedNArray : private gNArray<T>   {
   private:
-    gSet<long> *index;
+    gTuple<long> *index;
     
   public:
     gIndexedNArray(void);
@@ -209,7 +209,7 @@ gIndexedNArray<T>::gIndexedNArray(const gVector<int> &d)
 {
   long offset = 1;
 
-  index = new gSet<long>[dim.Length()];
+  index = new gTuple<long>[dim.Length()];
   for (int i = 1; i <= dim.Length(); i++)  {
     for (int j = 0; j < dim[i]; j++)
       index[i - 1] += j * offset;
@@ -221,7 +221,7 @@ template <class T>
 INLINE gIndexedNArray<T>::gIndexedNArray(const gIndexedNArray<T> &a)
   : gNArray<T>(a)
 {
-  index = new gSet<long>[dim.Length()];
+  index = new gTuple<long>[dim.Length()];
   for (int i = 0; i < dim.Length(); i++)
     index[i] = a.index[i];
 }
@@ -238,7 +238,7 @@ gIndexedNArray<T> &gIndexedNArray<T>::operator=(const gIndexedNArray<T> &a)
     gNArray<T>::operator=(a);
 
     if (index)   delete [] index;
-    index = new gSet<long>[dim.Length()];
+    index = new gTuple<long>[dim.Length()];
     for (int i = 0; i < dim.Length(); i++)
       index[i] = a.index[i];
   }
