@@ -131,8 +131,8 @@ protected:
     Node *MoveTree(Node *src, Node *dest);
     Node *DeleteTree(Node *n);
 
-    Infoset *AppendAction(Infoset *s);
-    Infoset *InsertAction(Infoset *s, Action *a);
+    Action *InsertAction(Infoset *s);
+    Action *InsertAction(Infoset *s, Action *at);
     Infoset *DeleteAction(Infoset *s, Action *a);
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);

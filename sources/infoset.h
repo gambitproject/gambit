@@ -82,7 +82,7 @@ class Infoset   {
     void SetName(const gString &s)    { name = s; }
     const gString &GetName(void) const   { return name; }
 
-    virtual void InsertAction(int where);
+    virtual Action *InsertAction(int where);
     virtual void RemoveAction(int which);
 
     void SetActionName(int i, const gString &s)
@@ -123,7 +123,7 @@ template <class T> class ChanceInfoset : public Infoset  {
     void PrintActions(gOutput &f) const;
 
   public:
-    void InsertAction(int where);
+    Action *InsertAction(int where);
     void RemoveAction(int which);
 
     void SetActionProb(int i, const T &value)  { probs[i] = value; }

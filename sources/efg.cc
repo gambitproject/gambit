@@ -120,11 +120,13 @@ void Infoset::PrintActions(gOutput &f) const
   f << "}";
 }
 
-void Infoset::InsertAction(int where)
-{ 
-  actions.Insert(new Action(where, "", this), where);
+Action *Infoset::InsertAction(int where)
+{
+  Action *action = new Action(where, "", this);
+  actions.Insert(action, where);
   for (; where <= actions.Length(); where++)
     actions[where]->number = where;
+  return action;
 }
 
 void Infoset::RemoveAction(int which)
@@ -852,29 +854,29 @@ Node *BaseEfg::DeleteTree(Node *n)
   return n;
 }
 
-Infoset *BaseEfg::AppendAction(Infoset *s)
+Action *BaseEfg::InsertAction(Infoset *s)
 {
   assert(s);
-  s->InsertAction(s->NumActions() + 1);
+  Action *action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(CreateNode(s->members[i]));
   DeleteLexicon();
-  return s;
+  return action;
 }
 
-Infoset *BaseEfg::InsertAction(Infoset *s, Action *a)
+Action *BaseEfg::InsertAction(Infoset *s, Action *a)
 {
   assert(a && s);
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
-  if (where > s->actions.Length())   return s;
-  s->InsertAction(where);
+  if (where > s->actions.Length())   return 0;
+  Action *action = s->InsertAction(where);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(CreateNode(s->members[i]), where);
 
   DeleteLexicon();
-  return s;
+  return action;
 }
 
 Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
@@ -883,7 +885,7 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
-  if (where > s->actions.Length())   return s;
+  if (where > s->actions.Length() || s->actions.Length() == 1)   return s;
   s->RemoveAction(where);
   for (int i = 1; i <= s->members.Length(); i++)   {
     DeleteTree(s->members[i]->children[where]);
