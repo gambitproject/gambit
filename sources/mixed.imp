@@ -66,32 +66,38 @@ template <class T> bool Nfg<T>::IsConstSum(void) const
   return true;
 }
 
-template <class T> void Nfg<T>::MinPayoff(gArray<T> &minpay) const
+template <class T> T Nfg<T>::MinPayoff(int pl) const
 {
-  int index, pl;
+  int index, p, p1, p2;
+  T minpay;
   
-  for (pl = 1; pl <= players.Length(); pl++)
-    minpay[pl] = payoffs[pl][0];
-  
+  if(pl) { p1=p2=pl;}
+  else {p1=1;p2=players.Length();}
+
+  minpay = payoffs[p1][1];
   for (index = 1; index < NumPayPerPlayer; index++)  {
-    for (pl = 1; pl <= players.Length(); pl++)
-      if (payoffs[pl][index] < minpay[pl])
-	minpay[pl] = payoffs[pl][index];
+    for (p = p1; p <= p2; p++)
+      if (payoffs[p][index] < minpay)
+	minpay = payoffs[p][index];
   }
+  return minpay;
 }
 
-template <class T> void Nfg<T>::MaxPayoff(gArray<T> &maxpay) const
+template <class T> T Nfg<T>::MaxPayoff(int pl) const
 {
-  int index, pl;
+  int index, p, p1, p2;
+  T maxpay;
 
-  for (pl = 1; pl <= players.Length(); pl++)
-    maxpay[pl] = payoffs[pl][0];
-  
+  if(pl) { p1=p2=pl;}
+  else {p1=1;p2=players.Length();}
+
+  maxpay = payoffs[p1][1];
   for (index = 1; index < NumPayPerPlayer; index++)  {
-    for (pl = 1; pl <= players.Length(); pl++)
-      if (payoffs[pl][index] > maxpay[pl])
-	maxpay[pl] = payoffs[pl][index];
+    for (p = p1; p <= p2; p++)
+      if (payoffs[p][index] > maxpay)
+	maxpay = payoffs[pl][index];
   }
+  return maxpay;
 }
 
 template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,

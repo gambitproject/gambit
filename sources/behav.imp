@@ -279,42 +279,40 @@ template <class T> bool Efg<T>::IsConstSum(void) const
   return true;
 }
 
-template <class T> void Efg<T>::MinPayoff(gArray<T> &minpay) const
+template <class T> T Efg<T>::MinPayoff(int pl) const
 {
-  int pl, index;
+  int index, p, p1, p2;
+  T minpay;
   
-  if (outcomes.Length() == 0)   {
-    for (pl = 1; pl <= players.Length(); minpay[pl++] = (T) 0);
-    return;
-  }
+  if(pl) { p1=p2=pl;}
+  else {p1=1;p2=players.Length();}
 
-  for (pl = 1; pl <= players.Length(); pl++)
-    minpay[pl] = ((OutcomeVector<T> &) *outcomes[1])[pl];
+  minpay = ((OutcomeVector<T> &) *outcomes[1])[p1];
   
-  for (index = 2; index <= outcomes.Length(); index++)  {
-    for (pl = 1; pl <= players.Length(); pl++)
-      if (((OutcomeVector<T> &) *outcomes[index])[pl] < minpay[pl])
-	minpay[pl] = ((OutcomeVector<T> &) *outcomes[index])[pl];
+  for (index = 1; index <= outcomes.Length(); index++)  {
+    for (p = p1; p <= p2; p++)
+      if (((OutcomeVector<T> &) *outcomes[index])[p] < minpay)
+	minpay = ((OutcomeVector<T> &) *outcomes[index])[p];
   }
+  return minpay;
 }
 
-template <class T> void Efg<T>::MaxPayoff(gArray<T> &maxpay) const
+template <class T> T Efg<T>::MaxPayoff(int pl) const
 {
-  int pl, index;
+  int index, p, p1, p2;
+  T maxpay;
   
-  if (outcomes.Length() == 0)   {
-    for (pl = 1; pl <= players.Length(); maxpay[pl++] = (T) 0);
-    return;
-  }
+  if(pl) { p1=p2=pl;}
+  else {p1=1;p2=players.Length();}
 
-  for (pl = 1; pl <= players.Length(); pl++)
-    maxpay[pl] = ((OutcomeVector<T> &) *outcomes[1])[pl];
-  
-  for (index = 2; index <= outcomes.Length(); index++)  {
-    for (pl = 1; pl <= players.Length(); pl++)
-      if (((OutcomeVector<T> &) *outcomes[index])[pl] > maxpay[pl])
-	maxpay[pl] = ((OutcomeVector<T> &) *outcomes[index])[pl];
+  maxpay = ((OutcomeVector<T> &) *outcomes[1])[p1];
+
+  for (index = 1; index <= outcomes.Length(); index++)  {
+    for (p = p1; p <= p2; p++)
+      if (((OutcomeVector<T> &) *outcomes[index])[p] > maxpay)
+	maxpay = ((OutcomeVector<T> &) *outcomes[index])[p];
   }
+  return maxpay;
 }
 
 
