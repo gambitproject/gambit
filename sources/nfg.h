@@ -10,36 +10,39 @@
 #include "garray.h"
 #include "gstring.h"
 
-class NFPlayer;
-class Strategy;
-class StrategyProfile;
-
-class BaseEfg;
+class BaseNfg;
 
 class NFOutcome   {
+  friend class BaseNfg;
   private:
     int number;
+    BaseNfg *nfg;
     gString name;
 
-  public:
-    NFOutcome(int n) : number(n)  { }
-    NFOutcome(int n, const NFOutcome &c) : number(n), name(c.name) { }
+    NFOutcome(int n, BaseNfg *N) : number(n), nfg(N)  { }
+    NFOutcome(int n, const NFOutcome &c) 
+      : number(n), nfg(c.nfg),name(c.name) { }
     ~NFOutcome() { }
 
+  public:
     int GetNumber(void) const    { return number; }
 
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)   { name = s; }
+
+    BaseNfg *BelongsTo(void) const   { return nfg; }
 };
 
 #include "glist.h"
 
+class NFPlayer;
+class Strategy;
+class StrategyProfile;
+
 template <class T> class Lexicon;
-template <class T> class Nfg;
 template <class T> class Efg;
 
 class BaseNfg {
-// these friend declarations are awful... but they get the job done for now
 protected:
   gString title;
   gArray<int> dimensions;
@@ -53,6 +56,8 @@ protected:
   virtual void BreakLink(void) = 0;
 
   int Product(const gArray<int> &);
+
+  NFOutcome *NewOutcome(void);
 
 public:
   

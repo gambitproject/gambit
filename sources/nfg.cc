@@ -34,7 +34,7 @@ BaseNfg::BaseNfg(const gArray<int> &dim)
   }
   IndexStrategies();
 
-  outcomes.Append(new NFOutcome(1));
+  outcomes.Append(new NFOutcome(1, this));
   for (int cont = 1; cont <= results.Length();
        results[cont++] = outcomes[1]);
 }
@@ -67,6 +67,14 @@ BaseNfg::~BaseNfg()
 //BaseNfg: Member Functions
 //-------------------------
 
+
+NFOutcome *BaseNfg::NewOutcome(void)
+{
+  NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
+  outcomes.Append(outcome);
+
+  return outcome;
+}
 
 const gArray<Strategy *> &BaseNfg::Strategies(int p) const
 {

@@ -104,8 +104,7 @@ template <class T> T Nfg<T>::MaxPayoff(int pl) const
 
 template <class T> NFOutcome *Nfg<T>::NewOutcome(void)
 {
-  NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1);
-  outcomes.Append(outcome);
+  NFOutcome *outcome = BaseNfg::NewOutcome();
 
   gVector<T> zeroes(NumPlayers());
   zeroes = (T) 0;
