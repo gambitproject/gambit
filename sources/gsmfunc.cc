@@ -120,7 +120,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
   int NumParams = _FuncInfo[_FuncIndex].NumParams;
   Portion** CurrParam = new Portion*[ NumParams ];
   bool* Listed = new bool[ NumParams ];
-  ListPortion* Source;  // source to look at to create dimentionality
+  ListPortion* Source;  // source to look at to create dimensionality
   bool recurse;
 
 
@@ -146,7 +146,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
     }
   }
 
-  // check that all dimentionalities match
+  // check that all dimensionalities match
   for( i = 0; i < NumParams; i++ )
   {
     for( j = i + 1; j < NumParams; j++ )
@@ -154,7 +154,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
       if( Listed[i] && Listed[j] )
 	if( ParamIn[i]->Type() == porLIST && ParamIn[j]->Type() == porLIST )
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
-	    return new ErrorPortion( "Mismatched dimentionalities" );
+	    return new ErrorPortion( "Mismatched dimensionalities" );
     }
   }
 
