@@ -1,0 +1,48 @@
+<refentry id="bif.InsertMove" xreflabel="InsertMove">
+
+<refmeta>
+<indexterm>
+<primary>InsertMove</primary>
+</indexterm>
+
+<refentrytitle>InsertMove</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>InsertMove</refname>
+<refpurpose>
+Inserts a node in an extensive form
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+InsertMove[infoset->INFOSET, node->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>InsertMove</function>
+inserts a new node in the tree at the location of <parameter>node</parameter>.
+The
+new node is made a member of <parameter>infoset</parameter>, and the
+corresponding number of branches are created from the new node.
+The node <parameter>node</parameter>
+becomes the first child of the new node.  Returns the new node.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddMove">,
+<xref linkend="bif.DeleteMove">,
+<xref linkend="bif.NewInfoset">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,47 @@
+<refentry id="bif.HelpVars" xreflabel="HelpVars">
+
+<refmeta>
+<indexterm>
+<primary>HelpVars</primary>
+</indexterm>
+
+<refentrytitle>HelpVars</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>HelpVars</refname>
+<refpurpose>
+Returns help on defined variables
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+HelpVars[x->TEXT] =: LIST(TEXT) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>HelpVars</function>
+returns a list of all variables matching <parameter>x</parameter>.
+The parmeter <parameter>x</parameter> can
+contain regular-expression style wildcards <literal>*</literal> and 
+<literal>?</literal>. 
+In this case,
+if there is not an exact match, a list of variables matching <literal>x</literal>
+is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Help">.
+</para>
+</refsect1>
+
+</refentry>
+
+

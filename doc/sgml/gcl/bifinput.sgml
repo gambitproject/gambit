@@ -1,0 +1,43 @@
+<refentry id="bif.Input" xreflabel="Input">
+
+<refmeta>
+<indexterm>
+<primary>Input</primary>
+</indexterm>
+
+<refentrytitle>Input</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Input</refname>
+<refpurpose>
+Opens an input stream for reading
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Input[file->TEXT] =: INPUT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Input</function>
+opens a new input stream for reading from the file <parameter>text</parameter>.
+An error occurs if the file is not able to be opened.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Output">,
+<xref linkend="bif.Read">.
+</para>
+</refsect1>
+
+</refentry>
+
+

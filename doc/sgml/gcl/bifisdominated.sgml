@@ -1,0 +1,79 @@
+<refentry id="bif.IsDominated" xreflabel="IsDominated">
+
+<refmeta>
+<indexterm>
+<primary>IsDominated</primary>
+</indexterm>
+
+<refentrytitle>IsDominated</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsDominated</refname>
+<refpurpose>
+Returns whether a strategy or action is dominated
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsDominated[strategy->STRATEGY, support->NFSUPPORT, {strong->False}, 
+            {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: BOOLEAN
+IsDominated[profile->MIXED, {strong->False}, {mixed->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: BOOLEAN,
+IsDominated[action->ACTION, support->EFSUPPORT, {strong->False}, 
+            {conditional->False}, {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: BOOLEAN }
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsDominated</function>
+determines if the <parameter>strategy</parameter> or 
+<parameter>action</parameter> is dominated in
+<parameter>support</parameter>, or if the <parameter>profile</parameter>
+is dominated in its
+support. The following optional parameters may be specified to modify
+the behavior of the elimination:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>strong</parameter>: By default, determines if the strategy or action is
+weakly dominated.  By specifying <literal>True</literal>, strong dominance is
+used.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>mixed</parameter>: By default, only checks for domination by pure
+strategies or actions.  If specified <literal>True</literal>, checks for domination
+by mixtures over other strategies.  Note that mixed domination is only
+implemented for normal form games (i.e, for the first function
+prototype above).
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>conditional</parameter>: If this is <literal>True</literal>,
+checks for conditional domination (only applicable to extensive form games (i. e., for the second function prototype above).
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Default precision is Rational.
+Note that the precision
+parameter is only applicable for mixed domination.  Pure strategy
+domination always uses Rational precision. 
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,50 @@
+<refentry id="bif.InfosetProb" xreflabel="InfosetProb">
+
+<refmeta>
+<indexterm>
+<primary>InfosetProb</primary>
+</indexterm>
+
+<refentrytitle>InfosetProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>InfosetProb</refname>
+<refpurpose>
+Returns the probability of reaching an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>InfosetProb</function>
+returns the probability of reaching <parameter>infoset</parameter> when
+all players
+follow <parameter>profile</parameter>. 
+The probability of reaching the null information
+set is defined to be null.  It is an error if <parameter>profile</parameter>
+and
+<parameter>infoset</parameter> are not defined on the same extensive form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionValue">,
+<xref linkend="bif.Belief">,
+<xref linkend="bif.NodeValue">,
+<xref linkend="bif.RealizProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,34 @@
+<refentry id="bif.Integer" xreflabel="Integer">
+
+<refmeta>
+<indexterm>
+<primary>Integer</primary>
+</indexterm>
+
+<refentrytitle>Integer</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Integer</refname>
+<refpurpose>
+Converts a number to an integer value
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Integer[x->NUMBER] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Integer</function>
+converts <parameter>x</parameter> to an integer value by truncation.
+</para>
+</refsect1>
+
+</refentry>
+
+

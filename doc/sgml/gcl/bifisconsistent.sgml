@@ -1,0 +1,37 @@
+<refentry id="bif.IsConsistent" xreflabel="IsConsistent">
+
+<refmeta>
+<indexterm>
+<primary>IsConsistent</primary>
+</indexterm>
+
+<refentrytitle>IsConsistent</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsConsistent</refname>
+<refpurpose>
+Checks whether a basis is consistent
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsConsistent[basis->EFBASIS] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsConsistent</function>
+returns <literal>True</literal> if <parameter>basis</parameter> is a 
+consistent basis -- i. e., if it
+is a basis which could be a support for a sequential
+equilibrium (<citation><xref linkend="KreWil82"></citation>).
+</para>
+</refsect1>
+
+</refentry>
+
+

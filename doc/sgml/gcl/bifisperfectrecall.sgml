@@ -1,0 +1,36 @@
+<refentry id="bif.IsPerfectRecall" xreflabel="IsPerfectRecall">
+
+<refmeta>
+<indexterm>
+<primary>IsPerfectRecall</primary>
+</indexterm>
+
+<refentrytitle>IsPerfectRecall</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsPerfectRecall</refname>
+<refpurpose>
+Returns whether an extensive form has perfect recall
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsPerfectRecall[profile->MIXED] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsPerfectRecall</function>
+returns <literal>True</literal> if <parameter>efg</parameter>
+is a game of perfect recall, and
+<parameter>False</parameter> otherwise.
+</para>
+</refsect1>
+
+</refentry>
+
+

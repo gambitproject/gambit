@@ -1,0 +1,50 @@
+<refentry id="bif.InfosetValue" xreflabel="InfosetValue">
+
+<refmeta>
+<indexterm>
+<primary>InfosetValue</primary>
+</indexterm>
+
+<refentrytitle>InfosetValue</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>InfosetValue</refname>
+<refpurpose>
+Returns the value of reaching an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+InfosetValue[profile->BEHAV, infoset->INFOSET*] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>InfosetValue</function>
+returns the value to the controlling player of reaching 
+<parameter>infoset</parameter>
+when all players follow <parameter>profile</parameter>.
+It is an error if
+<parameter>profile</parameter> and <parameter>infoset</parameter>
+are not defined on the same
+extensive form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionValue">,
+<xref linkend="bif.Belief">,
+<xref linkend="bif.NodeValue">,
+<xref linkend="bif.RealizProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

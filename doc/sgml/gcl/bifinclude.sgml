@@ -1,0 +1,41 @@
+<refentry id="bif.Include" xreflabel="Include">
+
+<refmeta>
+<indexterm>
+<primary>Include</primary>
+</indexterm>
+
+<refentrytitle>Include</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Include</refname>
+<refpurpose>
+Reads GCL expressions from a file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Include[file->TEXT] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Include</function>
+includes the contents in the specified file 
+in the running GCL program. The function returns <literal>True</literal>
+if <parameter>file</parameter> was successfully opened, and
+<literal>False</literal> otherwise. 
+<function>Include</function> may only be used
+at the top level, that is, it cannot be used inside of 
+<function>NewFunction</function>
+or flow control structures.
+</para>
+</refsect1>
+
+</refentry>
+
+

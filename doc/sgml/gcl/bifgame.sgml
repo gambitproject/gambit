@@ -1,0 +1,45 @@
+<refentry id="bif.Game" xreflabel="Game">
+
+<refmeta>
+<indexterm>
+<primary>Game</primary>
+</indexterm>
+
+<refentrytitle>Game</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Game</refname>
+<refpurpose>
+Returns the game to which an object belongs
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Game[player->NFPLAYER] =: NFG 
+Game[strategy->STRATEGY] =: NFG 
+Game[outcome->NFOUTCOME] =: NFG 
+Game[player->EFPLAYER] =: EFG 
+Game[node->NODE] =: EFG 
+Game[outcome->EFOUTCOME] =: EFG 
+Game[infoset->INFOSET] =: EFG 
+Game[profile->MIXED] =: NFG 
+Game[profile->BEHAV] =: EFG 
+Game[support->NFSUPPORT] =: NFG 
+Game[support->EFSUPPORT] =: EFG 
+Game[support->EFBASIS] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Game</function>
+returns the extensive or normal form game to which the parameter belongs.
+</para>
+</refsect1>
+
+</refentry>
+
+

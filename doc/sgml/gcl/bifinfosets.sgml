@@ -1,0 +1,42 @@
+<refentry id="bif.Infosets" xreflabel="Infosets">
+
+<refmeta>
+<indexterm>
+<primary>Infosets</primary>
+</indexterm>
+
+<refentrytitle>Infosets</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Infosets</refname>
+<refpurpose>
+Returns the information sets for a player
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Infosets[player->EFPLAYER] =: LIST(INFOSET) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Infosets</function>
+returns the list of information sets at which 
+<parameter>player</parameter> has the decision.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Player">.
+</para>
+</refsect1>
+
+</refentry>
+
+

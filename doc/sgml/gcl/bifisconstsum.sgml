@@ -1,0 +1,36 @@
+<refentry id="bif.IsConstSum" xreflabel="IsConstSum">
+
+<refmeta>
+<indexterm>
+<primary>IsConstSum</primary>
+</indexterm>
+
+<refentrytitle>IsConstSum</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsConstSum</refname>
+<refpurpose>
+Determines whether a game is constant sum
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsConstSum[nfg->NFG] =: BOOLEAN 
+IsConstSum[efg->EFG] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsConstSum</function>
+Returns <literal>True</literal> when the game 
+<parameter>efg</parameter> or <parameter>nfg</parameter> is constant sum.
+</para>
+</refsect1>
+
+</refentry>
+
+

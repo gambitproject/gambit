@@ -1,0 +1,41 @@
+<refentry id="bif.IsSequential" xreflabel="IsSequential">
+
+<refmeta>
+<indexterm>
+<primary>IsSequential</primary>
+</indexterm>
+
+<refentrytitle>IsSequential</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsSequential</refname>
+<refpurpose>
+Returns whether a profile is a sequential equilibrium
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsSequential[profile->BEHAV] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsSequential</function>
+returns <literal>True</literal> if <parameter>profile</parameter>
+is known by Gambit to be an approximation to a
+sequential Nash equilibrium, <parameter>False</parameter> if it is not,
+and <parameter>Unknown</parameter> if the answer is not known.  There is
+currently no definitive test in Gambit for whether an arbitrary
+profile is sequential.  However any Nash equilibrium of an extensive
+form game which is computed via the <function>LiapSolve</function> or
+<function>QreSolve</function> algorithms is sequential.
+</para>
+</refsect1>
+
+</refentry>
+
+

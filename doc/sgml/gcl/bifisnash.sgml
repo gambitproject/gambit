@@ -1,0 +1,47 @@
+<refentry id="bif.IsNash" xreflabel="IsNash">
+
+<refmeta>
+<indexterm>
+<primary>IsNash</primary>
+</indexterm>
+
+<refentrytitle>IsNash</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsNash</refname>
+<refpurpose>
+Returns whether a profile is a Nash equilibrium
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsNash[profile->BEHAV] =: BOOLEAN 
+IsNash[profile->MIXED] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsNash</function>
+returns <literal>True</literal> when <parameter>profile</parameter>
+is known by Gambit to be a
+Nash equilibrium of the corresponding game, and <parameter>False</parameter>
+if <parameter>profile</parameter> is known to not be Nash.
+Otherwise, the return value
+is <literal>Unknown</literal>. 
+If <parameter>profile</parameter> is complete (probabilities sum
+to one for every player, and every information set), then there is a
+definitive test for Nash equilibrium.  However if the profile is
+incomplete (i. e., it does not specify actions at off the equilibrium
+path information sets), then it is possible that a profile (or set of
+all completions of the profile) may be Nash, but is not known by
+Gambit to be Nash.
+</para>
+</refsect1>
+
+</refentry>
+
+

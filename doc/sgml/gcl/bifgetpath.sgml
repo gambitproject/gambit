@@ -1,0 +1,42 @@
+<refentry id="bif.GetPath" xreflabel="GetPath">
+
+<refmeta>
+<indexterm>
+<primary>GetPath</primary>
+</indexterm>
+
+<refentrytitle>GetPath</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GetPath</refname>
+<refpurpose>
+Returns the path of the currently-read input file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+GetPath[] =: TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>GetPath</function>
+returns the path to the file in which the command is included.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ExePath">,
+<xref linkend="bif.Include">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.IsWatchRunning" xreflabel="IsWatchRunning">
+
+<refmeta>
+<indexterm>
+<primary>IsWatchRunning</primary>
+</indexterm>
+
+<refentrytitle>IsWatchRunning</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsWatchRunning</refname>
+<refpurpose>
+Returns whether the stopwatch is running
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsWatchRunning[] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsWatchRunning</function>
+returns <literal>True</literal> when the system stopwatch is currently running.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ElapsedTime">,
+<xref linkend="bif.StartWatch">,
+<xref linkend="bif.StopWatch">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,36 @@
+<refentry id="bif.If" xreflabel="If">
+
+<refmeta>
+<indexterm>
+<primary>If</primary>
+</indexterm>
+
+<refentrytitle>If</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>If</refname>
+<refpurpose>
+Evaluates expressions conditionally
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+If[boolean-expression, statement-list]
+If[boolean-expression, statement-list, statement-list]
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>If</function>
+defines a block of statements to be executed under certain conditions.
+See the section on control structures for complete information. 
+</para>
+</refsect1>
+
+</refentry>
+
+

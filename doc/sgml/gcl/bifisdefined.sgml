@@ -1,0 +1,34 @@
+<refentry id="bif.IsDefined" xreflabel="IsDefined">
+
+<refmeta>
+<indexterm>
+<primary>IsDefined</primary>
+</indexterm>
+
+<refentrytitle>IsDefined</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsDefined</refname>
+<refpurpose>
+Returns whether a variable has been defined
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsDefined[x->T] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsDefined</function>
+returns <literal>True</literal> if <literal>x</literal> has been defined. 
+</para>
+</refsect1>
+
+</refentry>
+
+

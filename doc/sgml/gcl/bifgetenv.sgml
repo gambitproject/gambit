@@ -1,0 +1,42 @@
+<refentry id="bif.GetEnv" xreflabel="GetEnv">
+
+<refmeta>
+<indexterm>
+<primary>GetEnv</primary>
+</indexterm>
+
+<refentrytitle>GetEnv</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GetEnv</refname>
+<refpurpose>
+Returns the value of an environment variable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+GetEnv[name->TEXT] =: TEXT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>GetEnv</function> returns the string associated with
+environment variable <parameter>name</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetEnv">,
+<xref linkend="bif.UnSetEnv">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,42 @@
+<refentry id="bif.IsEof" xreflabel="IsEof">
+
+<refmeta>
+<indexterm>
+<primary>IsEof</primary>
+</indexterm>
+
+<refentrytitle>IsEof</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsEof</refname>
+<refpurpose>
+Returns whether the end of a file has been reached
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsEof[input->INPUT] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsEof</function>
+returns <literal>True</literal> when the input stream <parameter>input</parameter> has reached the
+end of file.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Read">.
+</para>
+</refsect1>
+
+</refentry>
+
+

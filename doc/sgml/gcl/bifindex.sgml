@@ -1,0 +1,43 @@
+<refentry id="bif.Index" xreflabel="Index">
+
+<refmeta>
+<indexterm>
+<primary>Index</primary>
+</indexterm>
+
+<refentrytitle>Index</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Index</refname>
+<refpurpose>
+Returns the indices at which a value appears in a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Index[list->NLIST(T), x->T] =: LIST(INTEGER) 
+Index[list->NLIST(T), x->LIST(T)] =: LIST(INTEGER) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Index</function>
+returns the list of indices in <parameter>list</parameter> where 
+<parameter>x</parameter> appears.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NthElement">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,34 @@
+<refentry id="bif.IsNull" xreflabel="IsNull">
+
+<refmeta>
+<indexterm>
+<primary>IsNull</primary>
+</indexterm>
+
+<refentrytitle>IsNull</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsNull</refname>
+<refpurpose>
+Returns whether a variable is null
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsNull[x->T*] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsNull</function>
+returns <literal>True</literal> if <parameter>x</parameter> is null.  
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,41 @@
+<refentry id="bif.IsPerfect" xreflabel="IsPerfect">
+
+<refmeta>
+<indexterm>
+<primary>IsPerfect</primary>
+</indexterm>
+
+<refentrytitle>IsPerfect</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsPerfect</refname>
+<refpurpose>
+Returns whether a profile is a perfect equilibrium
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsPerfect[profile->MIXED] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsPerfect</function>
+returns <literal>True</literal> if <parameter>profile</parameter>
+is known by Gambit to be a
+perfect Nash equilibrium, <literal>False</literal> if it is known to not be
+perfect, and <literal>Unknown</literal> otherwise.  There is currently no
+definitive test in Gambit for whether an arbitrary profile is perfect.
+However some of the algorithms (notably <function>LcpSolve</function>)
+will only
+return perfect equilibria, which are marked as such.   
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,51 @@
+<refentry id="bif.IntegerDivide" xreflabel="IntegerDivide">
+
+<refmeta>
+<indexterm>
+<primary>IntegerDivide</primary>
+</indexterm>
+
+<refentrytitle>IntegerDivide</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IntegerDivide</refname>
+<refpurpose>
+Returns the quotient of two integers
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IntegerDivide</function> returns the quotient
+<parameter>x</parameter> divided by <parameter>y</parameter>, rounded
+to the next integer towards zero.  It is an error to attempt to divide
+by zero.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x DIV y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Divide">,
+<xref linkend="bif.Modulus">.
+</para>
+</refsect1>
+
+</refentry>
+
+

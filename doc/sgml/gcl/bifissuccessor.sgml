@@ -1,0 +1,43 @@
+<refentry id="bif.IsSuccessor" xreflabel="IsSuccessor">
+
+<refmeta>
+<indexterm>
+<primary>IsSuccessor</primary>
+</indexterm>
+
+<refentrytitle>IsSuccessor</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsSuccessor</refname>
+<refpurpose>
+Returns whether one node succeeds another in a tree
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsSuccessor[node->NODE, from->NODE] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsSuccessor</function>
+returns <literal>True</literal> when <parameter>node</parameter> is a successor
+in the tree of the node <parameter>from</parameter>.
+A node is considered its own successor.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IsPredecessor">.
+</para>
+</refsect1>
+
+</refentry>
+
+

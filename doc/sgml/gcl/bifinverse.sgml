@@ -1,0 +1,35 @@
+<refentry id="bif.Inverse" xreflabel="Inverse">
+
+<refmeta>
+<indexterm>
+<primary>Inverse</primary>
+</indexterm>
+
+<refentrytitle>Inverse</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Inverse</refname>
+<refpurpose>
+Computes the inverse of a square matrix
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Inverse[x->LIST(LIST(NUMBER))] =: LIST(LIST(NUMBER))
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Inverse</function>
+returns the inverse of the matrix <parameter>x</parameter>.  It is an error if the
+matrix is not square or is singular.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.IsPredecessor" xreflabel="IsPredecessor">
+
+<refmeta>
+<indexterm>
+<primary>IsPredecessor</primary>
+</indexterm>
+
+<refentrytitle>IsPredecessor</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsPredecessor</refname>
+<refpurpose>
+Computes whether one node precedes another in a tree
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsPredecessor[node->NODE, of->NODE] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsPredecessor</function>
+returns <literal>True</literal> when <parameter>node</parameter> is a predecessor
+in the tree of the node <parameter>of</parameter>.
+A node is considered its own predecessor.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IsSuccessor">.
+</para>
+</refsect1>
+
+</refentry>
+
+

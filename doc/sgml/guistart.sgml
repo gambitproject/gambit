@@ -11,27 +11,32 @@ and can be found in the <filename class="directory">efg</filename>
 subdirectory
 of the directory in which Gambit is installed.  (For example, in the
 standard installation under Microsoft Windows, this would be
-<filename>c:/gambit/efg/poker.efg</filename>.)  By convention, files ending in
+<filename>c:/Program Files/Gambit/efg/poker.efg</filename>.)
+By convention, files ending in
 <filename>.efg</filename>
  store extensive form games, and files ending in
 <filename>.nfg</filename> store normal form games. 
 </para>
 
 <para>
-When launched, Gambit displays a window similar to that displayed in
-Figure XX.
+When launched, Gambit displays a window similar to this:
 <footnote>
 <para>
 All the screenshots contained in this manual were
-taken on a system running XXXXX.  If you use a different operating system,
+taken on a Linux system using the Sawfish window manager.
+If you use a different operating system or window manager,
 your windows may appear slightly differently.
 </para>
 </footnote>
+<screenshot>
+<graphic fileref="blankefg.png">
+</screenshot>
 This window contains
 a trivial extensive form game, containing exactly one node, which is both
-root and terminal.  Chapter XX describes how to use the extensive form
+root and terminal.  <xref linkend="gui.efg">
+describes how to use the extensive form
 window to construct and edit extensive form games.
-  </para>
+</para>
 
 <para>
 There are three equivalent ways to open a saved game from any window in Gambit:
@@ -59,7 +64,11 @@ Any of these actions leads to a dialog box for selecting a file to
 open.  Use the dialog to locate and select the 
 <filename>poker.efg</filename>
 file.  After doing so, Gambit will display the opened game in a new
-window, as shown in Figure XXX.  The screenshot in Figure XXX shows
+window:
+<screenshot>
+<graphic fileref="poker.png">
+</screenshot>
+The screenshot shows
 the game as rendered by Gambit using the default settings.  Many
 display options are available to customize the appearance of game trees;
 see <xref linkend="gui.efg.display"> for details.
@@ -81,24 +90,24 @@ branch.
 
 <para>
 The poker game begins with Chance selecting either a Red card or
-a Black card to deal to Player~1.  This is represented in the tree
+a Black card to deal to Player 1.  This is represented in the tree
 by the grey node and subsequent branches labeled &quot;Red&quot; and &quot;Black&quot;.
 The forks of the branches have superimposed black lines stretching
 halfway along the fork, indicating a probability of one-half that
-each card is chosen.  After each of the two possible draws, Player~1,
+each card is chosen.  After each of the two possible draws, Player 1,
 whose nodes are colored in red, has the option to either &quot;Raise&quot; or
-&quot;Fold&quot;.  If Player~1 folds, the game ends; if he raises, Player~2,
-with nodes colored in green,
+&quot;Fold&quot;.  If Player 1 folds, the game ends; if he raises, Player2,
+with nodes colored in blue,
 then has the option to either &quot;Meet&quot; or &quot;Pass&quot; in either case,
-the game ends after Player~2's choice.   All terminal nodes are drawn
-in black.
+the game ends after Player 2's choice.   All terminal nodes are drawn
+in black in this picture.
   </para>
 
 <para>
 In this game, outcomes are attached to each of the six terminal
 nodes, and payoffs to the two players are indicated to the right
-of the corresponding node, with Player~1's payoff listed first, then
-Player~2's.  Outcomes are indicated to the right of nodes, but may
+of the corresponding node, with Player 1's payoff listed first, then
+Player 2's.  Outcomes are indicated to the right of nodes, but may
 be attached to nonterminal nodes, in which case their payoffs are 
 interpreted as incremental payoffs.   Outcomes may also be displayed
 by textual name rather than by their payoff vector.
@@ -112,62 +121,147 @@ information set which is unique among that player's information sets.
 Whenever possible, information sets are also
 represented by vertical lines connecting the nodes that are members of
 the same information set.
-<footnote>
-      <para>
-	Eventually discuss somewhere &quot;lagged&quot; information sets.
-	</para>
-    </footnote>
-In this game, Player~1 observes which
+In this game, Player 1 observes which
 card he has drawn prior to making his choice to &quot;Raise&quot; or
 &quot;Fold&quot; ;
 therefore, the node following Chance's &quot;Red&quot; move is in a separate
 information set, numbered (1,1), from the node following Chance's
-&quot;Black&quot; move, which is in information set (1,2).  Player~2, on the
-other hand, does not observe Player~1's card, and so Player~2 has one
+&quot;Black&quot; move, which is in information set (1,2).  Player 2, on the
+other hand, does not observe Player 1's card, and so Player 2 has one
 information set, numbered (2,1), with two member nodes connected by
 a vertical line.
   </para>
 
 <para>
 The analytical features of Gambit are located on the <guimenu>Tools</guimenu>
-menu.  These include:
+menu.
+<screenshot>
+<graphic fileref="efgtools.png">
+</screenshot>
+These include:
 <itemizedlist>
-      <listitem
-	<para>
-	  <guisubmenu>Dominance</guisubmenu>,
-          which interfaces to routines for identifying and eliminating
-          dominanted actions. 
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  <guisubmenu>Equilibrium</guisubmenu>,
-          which contains items interfacing to the
-	  various algorithms provided by Gambit to compute Nash equilibria of
-	  the game.
-	</para>
-      </listitem>
-      <listitem>
-	<para>
-	  <guisubmenu>Normal form</guisubmenu>,
-          which contains items to create normal
-	  forms corresponding to the extensive form game.
-	  </para>
-      </listitem>
-    </itemizedlist>
-In the following analysis, each of these will be visited.
-  </para>
+<listitem>
+<para>
+<guimenuitem>Dominance</guimenuitem>,
+which interfaces to routines for identifying and eliminating
+dominanted actions; 
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>Equilibrium</guimenuitem>,
+which provedes access to
+algorithms provided by Gambit to compute Nash equilibria of
+the game;
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>Qre</guimenuitem>,
+which organizes Gambit's facilities for computing and manipulating
+quantal response equilibria;
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>Normal form</guimenuitem>,
+which contains items to create normal
+forms corresponding to the extensive form game.
+</para>
+</listitem>
+</itemizedlist>
+The <guimenuitem>Dominance</guimenuitem>, 
+<guimenuitem>Equilibrium</guimenuitem>, and
+<guimenuitem>Normal form</guimenuitem> items will be discussed in the
+next sections.
+</para>
 </sect1>
 
 <sect1><title>Finding Nash equilibria using the extensive form</title>
 <para>
 The analysis begins by searching for actions which might be dominated
-by other actions at the same move.     
+by other actions at the same move.  The <guimenuitem>Dominance</guimenuitem>
+item on the <guimenu>Tools</guimenu> menu presents a dialog box giving
+options for finding dominated actions:
+<screenshot>
+<graphic fileref="efgdom.png">
+</screenshot>
+</para>
 
-For an overview of the literature on algorithms to compute Nash
-equilibria, see <citation>McKMcL96</citation> and the references
-therein. 
-  </para>
+<para>
+There are four sets of options:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>Type</guilabel>: Actions can be removed based upon either
+strong (or strict) dominance, or weak dominance;
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Conditional</guilabel>: Chooses whether actions are considered
+dominated overall, or only conditional on their information set being
+reached;
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Depth</guilabel>: One round of dominance elimination can be
+performed; or, Gambit can continue to eliminate strategies until no
+more strategies are dominated;
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Players</guilabel>: Actions for all, or only some, of the players
+in the game may be considered in doing elimination.
+</para>
+</listitem>
+</itemizedlist>
+In this example, we will look for one Nash equilibrium of this game, so we
+will conditionally eliminat weakly dominated strategies iteratively
+for all players, as shown in the screenshot.
+<footnote>
+<para>
+For an overview of tips and techniques for finding Nash equilibria,
+see <xref linkend="app.alg.start">.
+</para>
+</footnote>
+</para>
+<para>
+After clicking <guilabel>OK</guilabel>, a progress dialog briefly
+appears, and then the game display appears like this:
+<screenshot>
+<graphic fileref="pokerelim.png">
+</screenshot>
+The action &quot;Fold&quot; is weakly dominated for Player 1 when he
+has the Red card; therefore, in this display, the &quot;Fold&quot; action
+is erased from the game tree.
+</para>
+<para>
+Gambit keeps track of all the sets of actions computed.  On the
+<guimenu>View</guimenu> menu is an item <guimenuitem>Supports</guimenuitem>.
+Selecting this item displays an additional panel on the extensive form
+display, as shown below.  (You may need to resize your window a bit to be
+able to see the whole tree as in this screenshot.)
+<screenshot>
+<graphic fileref="pokersupport.png">
+</screenshot>
+The <guilabel>Supports</guilabel> tab
+in the information pane on the left schematically displays
+the current support.  The action &quot;Fold&quot; in Fred's first information
+set is light grey, indicating it is not in the support called
+&quot;Support2&quot;.  All other actions are in black, indicating they are
+included in the support.  The drop-down box at the top of the support
+display lists all the supports that have been computed; if you click on
+it now, you'll see the support &quot;Full Support&quot;, which is the
+support containing all actions for all players, and &quot;Support2&quot;,
+the support we obtained by our dominance elimination.  If you select
+&quot;Full Support&quot; from the dropdown, the tree display will return
+to its original form, and the &quot;Fold&quot; action in Fred's first
+information set will appear in black in the schematic display.
+</para>
+
 </sect1>
 
 <sect1><title>Finding Nash equilibria using the normal form</title>

@@ -1,0 +1,54 @@
+<refentry id="bif.Help" xreflabel="Help">
+
+<refmeta>
+<indexterm>
+<primary>Help</primary>
+</indexterm>
+
+<refentrytitle>Help</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Help</refname>
+<refpurpose>
+Returns help on defined functions
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Help[x->TEXT, {udf->True}, {bif->True}] =: LIST(TEXT) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Help</function>
+returns a list of all function names or function prototypes matching
+<parameter>x</parameter>.  If <parameter>x</parameter> is an exact match 
+to a function name, a list of
+corresponding function prototypes is returned.  <parameter>x</parameter>
+can also
+contain the regular-expression style wildcards <literal>*</literal> and 
+<literal>?</literal>.
+In this case, if there is not an exact match, a list of function names
+matching <parameter>x</parameter> is returned. 
+The parameter <parameter>udf</parameter> determines if
+user defined functions are listed, and <parameter>bif</parameter> determines
+if built
+in functions are listed.  Both of these parameters are <literal>True</literal> by
+default.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.HelpVars">.
+</para>
+</refsect1>
+
+</refentry>
+
+

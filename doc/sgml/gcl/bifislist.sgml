@@ -1,0 +1,43 @@
+<refentry id="bif.IsList" xreflabel="IsList">
+
+<refmeta>
+<indexterm>
+<primary>IsList</primary>
+</indexterm>
+
+<refentrytitle>IsList</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsList</refname>
+<refpurpose>
+Determines whether a value is a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsList[x->T] =: BOOLEAN 
+IsList[list->NLIST(T)] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsList</function>
+returns <literal>True</literal> when <parameter>x</parameter>
+is a list or a nested list.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.List">.
+</para>
+</refsect1>
+
+</refentry>
+
+

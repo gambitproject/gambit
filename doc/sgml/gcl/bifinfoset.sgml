@@ -1,0 +1,46 @@
+<refentry id="bif.Infoset" xreflabel="Infoset">
+
+<refmeta>
+<indexterm>
+<primary>Infoset</primary>
+</indexterm>
+
+<refentrytitle>Infoset</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Infoset</refname>
+<refpurpose>
+Returns the information set to which an action or node belongs
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Infoset[action->ACTION*] =: INFOSET 
+Infoset[node->NODE*] =: INFOSET 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Infoset</function>
+returns the information set to which <parameter>action</parameter> or
+<parameter>node</parameter> belongs.
+The null
+action or node is assumed to belong to the null information set.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Actions">,
+<xref linkend="bif.Members">.
+</para>
+</refsect1>
+
+</refentry>
+
+

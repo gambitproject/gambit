@@ -1,0 +1,42 @@
+<refentry id="bif.IsSubgamePerfect" xreflabel="IsSubgamePerfect">
+
+<refmeta>
+<indexterm>
+<primary>IsSubgamePerfect</primary>
+</indexterm>
+
+<refentrytitle>IsSubgamePerfect</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>IsSubgamePerfect</refname>
+<refpurpose>
+Returns whether a profile is a subgame perfect equilibrium
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+IsSubgamePerfect[profile->BEHAV] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>IsSubgamePerfect</function>
+returns <literal>True</literal> if <parameter>profile</parameter>
+is known by Gambit to be a subgame perfect Nash
+equilibrium, <parameter>False</parameter> if it is known not to be a 
+subgame perfect equilibrium, and <parameter>Unknown</parameter> otherwise.
+There is currently no
+definitive test in Gambit for whether an arbitrary profile is subgame
+perfect.  However, any Nash equilibrium of an extensive form game which
+is computed when all subgames are marked will only return a subgame
+perfect equilibrium.  
+</para>
+</refsect1>
+
+</refentry>
+
+

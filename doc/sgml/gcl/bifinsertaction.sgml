@@ -1,0 +1,50 @@
+<refentry id="bif.InsertAction" xreflabel="InsertAction">
+
+<refmeta>
+<indexterm>
+<primary>InsertAction</primary>
+</indexterm>
+
+<refentrytitle>InsertAction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>InsertAction</refname>
+<refpurpose>
+Inserts an action at an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+InsertAction[infoset->INFOSET, at->ACTION] =: ACTION 
+InsertAction[infoset->INFOSET] =: ACTION 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>InsertAction</function>
+inserts a new action into <parameter>infoset</parameter>
+before the action <parameter>at</parameter>. 
+If <parameter>at</parameter> is not specified, the new action
+is appended to <parameter>infoset</parameter>'s
+actions.
+The corresponding new branch is created for
+each node belonging to <parameter>infoset</parameter>.
+Returns the newly created action.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Actions">,
+<xref linkend="bif.DeleteAction">.
+</para>
+</refsect1>
+
+</refentry>
+
+
