@@ -78,7 +78,6 @@ class Error_Portion : public Portion
   Error_Portion( const gString& value = "" );
 
   gString&    Value     ( void );
-  gString     Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
@@ -89,13 +88,15 @@ class Error_Portion : public Portion
 template <class T> class numerical_Portion : public Portion
 {
  private:
-  T _Value;
+  bool _Static;
+  T* _Value;
 
  public:
   numerical_Portion( const T& value );
-
+  numerical_Portion( T& value, bool var_static );
+  ~numerical_Portion();
+  
   T&          Value     ( void );
-  T           Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
@@ -112,7 +113,6 @@ class bool_Portion : public Portion
   bool_Portion( const bool& value );
 
   bool&       Value     ( void );
-  bool        Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
@@ -129,7 +129,6 @@ class gString_Portion : public Portion
   gString_Portion( const gString& value );
 
   gString&    Value     ( void );
-  gString     Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   Portion*    Operation ( Portion* p, OperationMode mode );
@@ -149,9 +148,7 @@ class Reference_Portion : public Portion
   Reference_Portion( const gString& value, const gString& subvalue );
 
   gString&    Value    ( void );
-  gString     Value    ( void ) const;
   gString&    SubValue ( void );
-  gString     SubValue ( void ) const;
   Portion*    Copy     ( bool new_data ) const;
   PortionType Type     ( void ) const;
   void        Output   ( gOutput& s ) const;
@@ -175,7 +172,6 @@ class List_Portion : public Portion
   ~List_Portion();
 
   gBlock<Portion*>& Value     ( void );
-  gBlock<Portion*>  Value     ( void ) const;
   Portion*          Copy      ( bool new_data ) const;
   PortionType       Type      ( void ) const;
   PortionType       DataType  ( void ) const;
@@ -207,7 +203,6 @@ template <class T> class Mixed_Portion : public Portion
   bool SetOwner( NormalForm<T>* owner );
 
   MixedProfile<T>& Value     ( void );
-  MixedProfile<T>  Value     ( void ) const;
   Portion*         Copy      ( bool new_data ) const;
   PortionType      Type      ( void ) const;
   void             Output    ( gOutput& s ) const;
@@ -228,7 +223,6 @@ template <class T> class Behav_Portion : public Portion
   bool SetOwner( ExtForm<T>* owner );
 
   BehavProfile<T>& Value     ( void );
-  BehavProfile<T>  Value     ( void ) const;
   Portion*         Copy      ( bool new_data ) const;
   PortionType      Type      ( void ) const;
   void             Output    ( gOutput& s ) const;
@@ -251,8 +245,6 @@ template <class T> class Nfg_Portion : public Portion
   Nfg_Portion( NormalForm<T>& value );
   ~Nfg_Portion();
 
-  // Only the passing by reference version of Value() is provided in 
-  // order to eliminate unecessary copying
   NormalForm<T>& Value          ( void );
   Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
@@ -282,8 +274,6 @@ template <class T> class Efg_Portion : public Portion
   Efg_Portion( ExtForm<T>& value );
   ~Efg_Portion();
 
-  // Only the passing by reference version of Value() is provided in 
-  // order to eliminate unecessary copying
   ExtForm<T>&    Value          ( void );
   Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
@@ -307,7 +297,6 @@ class Outcome_Portion : public Portion
   Outcome_Portion( Outcome* value );
 
   Outcome*&   Value     ( void );
-  Outcome*    Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
@@ -323,7 +312,6 @@ class Player_Portion : public Portion
   Player_Portion( Player* value );
 
   Player*&    Value     ( void );
-  Player*     Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
@@ -339,7 +327,6 @@ class Infoset_Portion : public Portion
   Infoset_Portion( Infoset* value );
 
   Infoset*&   Value     ( void );
-  Infoset*    Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
@@ -355,7 +342,6 @@ class Action_Portion : public Portion
   Action_Portion( Action* value );
 
   Action*&    Value     ( void );
-  Action*     Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;
@@ -371,7 +357,6 @@ class Node_Portion : public Portion
   Node_Portion( Node* value );
 
   Node*&      Value     ( void );
-  Node*       Value     ( void ) const;
   Portion*    Copy      ( bool new_data ) const;
   PortionType Type      ( void ) const;
   void        Output    ( gOutput& s ) const;

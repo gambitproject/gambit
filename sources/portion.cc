@@ -87,9 +87,6 @@ Error_Portion::Error_Portion( const gString& value )
 { }
 
 
-gString Error_Portion::Value( void ) const
-{ return _Value; }
-
 gString& Error_Portion::Value( void )
 { return _Value; }
 
@@ -114,16 +111,33 @@ void Error_Portion::Output( gOutput& s ) const
 //                        numerical type 
 //-----------------------------------------------------------------------
 
-template <class T> numerical_Portion<T>::numerical_Portion( const T& value )
-     : _Value( value )
-{ }
+template <class T> 
+numerical_Portion<T>::numerical_Portion( const T& value )
+{
+  _Static = true;
+  _Value = new T( value );
+}
+
+template <class T> 
+numerical_Portion<T>::numerical_Portion( T& value, const bool var_static)
+:_Static( var_static )
+{ 
+  if( !_Static )
+    _Value = new T( value );
+  else
+    _Value = &value;
+}
 
 
-template <class T> T numerical_Portion<T>::Value( void ) const
-{ return _Value; }
+template <class T> numerical_Portion<T>::~numerical_Portion()
+{ 
+  if( !_Static )
+    delete _Value;
+}
+
 
 template <class T> T& numerical_Portion<T>::Value( void )
-{ return _Value; }
+{ return *_Value; }
 
 template <class T> PortionType numerical_Portion<T>::Type( void ) const
 { return porERROR; }
@@ -131,7 +145,7 @@ template <class T> PortionType numerical_Portion<T>::Type( void ) const
 template <class T> Portion* numerical_Portion<T>::Copy( bool new_data ) const
 { 
   Portion* p;
-  p = new numerical_Portion<T>( _Value ); 
+  p = new numerical_Portion<T>( *_Value ); 
   return p;
 }
 
@@ -140,14 +154,13 @@ template <class T>
 Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 {
   Portion*  result = 0;
-  T&    p_value = ( (numerical_Portion<T>*) p )->_Value;
 
   if( p == 0 )      // unary operations
   {
     switch( mode )
     {
     case opNEGATE:
-      _Value = - _Value;
+      *_Value = - *_Value;
       break;
     default:
       result = Portion::Operation( p, mode );      
@@ -155,25 +168,26 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
   }
   else               // binary operations
   {
+    T& p_value = *( ( (numerical_Portion<T>*) p )->_Value );
     switch( mode )
     {
     case opADD:
-      _Value += p_value;
+      *_Value += p_value;
       break;
     case opSUBTRACT:
-      _Value -= p_value;
+      *_Value -= p_value;
       break;
     case opMULTIPLY:
-      _Value *= p_value;
+      *_Value *= p_value;
       break;
     case opDIVIDE:
       if( p_value != 0 )
       {
-	_Value /= p_value;
+	*_Value /= p_value;
       }
       else
       {
-	_Value = 0;
+	*_Value = 0;
 	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
@@ -183,7 +197,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
       {
 	if( Type() == porINTEGER )
 	{
-	  _Value /= p_value;
+	  *_Value /= p_value;
 	}
 	else
 	{
@@ -192,7 +206,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
       }
       else
       {
-	_Value = 0;
+	*_Value = 0;
 	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
@@ -206,7 +220,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 	  // instantiating for double and gRational types 
 	  // if the % operator is used.  This version is about as fast as
 	  // the original C operator %.
-	  _Value = _Value - _Value / p_value * p_value;
+	  *_Value = *_Value - *_Value / p_value * p_value;
 	}
 	else
 	{
@@ -215,28 +229,28 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
       }
       else
       {
-	_Value = 0;
+	*_Value = 0;
 	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
 
     case opEQUAL_TO:
-      result = new bool_Portion( _Value == p_value );
+      result = new bool_Portion( *_Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = new bool_Portion( _Value != p_value );
+      result = new bool_Portion( *_Value != p_value );
       break;
     case opGREATER_THAN:
-      result = new bool_Portion( _Value > p_value );
+      result = new bool_Portion( *_Value > p_value );
       break;
     case opLESS_THAN:
-      result = new bool_Portion( _Value < p_value );
+      result = new bool_Portion( *_Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( _Value >= p_value );
+      result = new bool_Portion( *_Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = new bool_Portion( _Value <= p_value );
+      result = new bool_Portion( *_Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -249,7 +263,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 
 template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 {
-  s << " " << _Value;
+  s << " " << *_Value;
 }
 
 
@@ -262,9 +276,6 @@ bool_Portion::bool_Portion( const bool& value )
      : _Value( value )
 { }
 
-
-bool bool_Portion::Value( void ) const
-{ return _Value; }
 
 bool& bool_Portion::Value( void )
 { return _Value; }
@@ -335,9 +346,6 @@ gString_Portion::gString_Portion( const gString& value )
      : _Value( value )
 { }
 
-
-gString gString_Portion::Value( void ) const
-{ return _Value; }
 
 gString& gString_Portion::Value( void )
 { return _Value; }
@@ -426,9 +434,6 @@ template <class T> bool Mixed_Portion<T>::SetOwner( NormalForm<T>* owner )
   return false;
 }
 
-template <class T> MixedProfile<T> Mixed_Portion<T>::Value( void ) const
-{ return _Value; }
-
 template <class T> MixedProfile<T>& Mixed_Portion<T>::Value( void )
 { return _Value; }
 
@@ -468,9 +473,6 @@ template <class T> bool Behav_Portion<T>::SetOwner( ExtForm<T>* owner )
   return false;
 }
 
-template <class T> BehavProfile<T> Behav_Portion<T>::Value( void ) const
-{ return _Value; }
-
 template <class T> BehavProfile<T>& Behav_Portion<T>::Value( void )
 { return _Value; }
 
@@ -504,13 +506,7 @@ Reference_Portion::Reference_Portion( const gString& value,
 gString& Reference_Portion::Value( void )
 { return _Value; }
 
-gString Reference_Portion::Value( void ) const
-{ return _Value; }
-
 gString& Reference_Portion::SubValue( void )
-{ return _SubValue; }
-
-gString Reference_Portion::SubValue( void ) const
 { return _SubValue; }
 
 PortionType Reference_Portion::Type( void ) const
@@ -556,9 +552,6 @@ List_Portion::~List_Portion()
   Flush();
 }
 
-
-gBlock<Portion*> List_Portion::Value( void ) const
-{ return _Value; }
 
 gBlock<Portion*>& List_Portion::Value( void )
 { return _Value; }
@@ -1001,9 +994,6 @@ Outcome_Portion::Outcome_Portion( Outcome* value )
 { }
 
 
-Outcome* Outcome_Portion::Value( void ) const
-{ return _Value; }
-
 Outcome*& Outcome_Portion::Value( void )
 { return _Value; }
 
@@ -1027,9 +1017,6 @@ Player_Portion::Player_Portion( Player* value )
      : _Value( value )
 { }
 
-
-Player* Player_Portion::Value( void ) const
-{ return _Value; }
 
 Player*& Player_Portion::Value( void )
 { return _Value; }
@@ -1055,9 +1042,6 @@ Infoset_Portion::Infoset_Portion( Infoset* value )
 { }
 
 
-Infoset* Infoset_Portion::Value( void ) const
-{ return _Value; }
-
 Infoset*& Infoset_Portion::Value( void )
 { return _Value; }
 
@@ -1082,9 +1066,6 @@ Action_Portion::Action_Portion( Action* value )
 { }
 
 
-Action* Action_Portion::Value( void ) const
-{ return _Value; }
-
 Action*& Action_Portion::Value( void )
 { return _Value; }
 
@@ -1108,9 +1089,6 @@ Node_Portion::Node_Portion( Node* value )
      : _Value( value )
 { }
 
-
-Node* Node_Portion::Value( void ) const
-{ return _Value; }
 
 Node*& Node_Portion::Value( void )
 { return _Value; }

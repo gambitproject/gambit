@@ -16,7 +16,7 @@
 
 
 
-#define CRASHTEST
+// #define CRASHTEST
 // #define INTERACTIVE
 
 
@@ -55,7 +55,7 @@ int main( void )
   gin >> cont;
 
 
-/*
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -2026,28 +2026,6 @@ int main( void )
 
 
 
-  machine->InitCallFunction( "VarTest" );
-  machine->CallFunction();
-  machine->Dump();
-  
-  machine->InitCallFunction( "VarTestChange" );
-  machine->Push( (double) 123 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-  
-  machine->InitCallFunction( "VarTest" );
-  machine->CallFunction();
-  machine->Dump();
-
-
-#ifdef INTERACTIVE
-  gout << "*********************** Press Return to continue ************";
-  gin >> cont;
-#endif
-
-*/
-
   gList< Instruction* >* prog;
   FuncDescObj* func;
 
@@ -2150,6 +2128,39 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+
+  machine->InitCallFunction( "VarTest" );
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "VarTestChange" );
+  machine->Push( (double) 123 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "VarTest" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "VarTestChange" );
+  machine->Push( (double) 456 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "VarTest" );
+  machine->CallFunction();
+  machine->Dump();
 
 
   gout << "*********************** Press Return to continue ************";
