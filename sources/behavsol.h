@@ -73,7 +73,7 @@ public:
   TriState IsSequential(void) const; // Is it Sequential? Y/N/DK
 
   void SetEpsilon(T value);
-  T Epsilon(void) const; // lambda from gobit alg
+  T Epsilon(void) const; // epsilon for zero tolerance
 
   void SetGobit(T lambda, T value);
   T GobitLambda(void) const; // lambda from gobit alg
