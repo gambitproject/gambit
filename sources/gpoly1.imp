@@ -11,7 +11,7 @@
 //---------------------------------------------------------------
 
 //---------------------------
-// Constructors / Destructors
+// Constructors / Destructor
 //---------------------------
 
 
@@ -25,9 +25,6 @@ template <class T> gPoly1<T>::gPoly1(const gSpace*     p,
 				     const term_order* o)
 : Space(p), Order(o), Terms()
 {
-//DEBUG
-gout << "The constant constructor is just now tested!\n";
-
   if (constant != (T)0)   Terms += gMono<T>(p,constant);
 }
 
@@ -43,9 +40,6 @@ template <class T> gPoly1<T>::gPoly1(const gSpace *p, int var_no, int exp,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
-//DEBUG
-gout << "The x_i^p constructor is just now tested!\n";
-
   Terms += gMono<T>((T)1,exp_vect(p,var_no,exp));
 }
 
@@ -55,9 +49,6 @@ template <class T> gPoly1<T>::gPoly1(const gSpace *p,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
-//DEBUG
-gout << "The constantXx^exps constructor is just now tested!\n";
-
   Terms += gMono<T>(coeff,exps);
 }
 
@@ -66,9 +57,6 @@ template <class T> gPoly1<T>::gPoly1(const gSpace *p,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
 {
-//DEBUG
-gout << "The mono constructor is just now tested!\n";
-
   Terms += mono;
 }
 
@@ -82,16 +70,70 @@ template <class T> gPoly1<T>::~gPoly1()
 {
 }
 
+
 //----------------------------------
 //        Operators
 //----------------------------------
-
 
 template<class T> gPoly1<T> &gPoly1<T>::operator=(const gPoly1<T> &p)
 {
   assert (Space == p.Space && Order == p.Order);
 
   Terms = p.Terms; return (*this);
+}
+
+template <class T> gPoly1<T>& gPoly1<T>::operator=(const gString &Hold)
+{
+  gList<gMono<T> > nullTerms;
+  Terms = nullTerms;           // get rid of old Terms
+
+  charnum = 0;
+  int contflag = 1;
+  T nega = 1;
+  gArray<int> PowArray(Space->Dmnsn());
+  TheString = Hold + " +";
+
+  GetChar();
+
+  while (charnum <= TheString.length() && contflag){
+    switch (charc) {
+    case '+' :
+    case ' ':
+      charnum++;
+      GetChar();
+      break;
+    case '-':
+      charnum++;
+      GetChar();
+      nega = -nega;
+      break;
+    case 0:  //Null termination of string
+      contflag = 0;
+      break;
+    default:
+      String_Term(nega);
+      nega = T (1);
+      break;
+    }
+  }
+
+  gList<gMono<T> > newTerms;
+  for (int i = 1; i <= Terms.Length(); i++) {
+    int low = 0; int high = newTerms.Length() + 1;
+    while (low +1 < high) {
+      int test = low + (high - low)/2;
+      if (1 <= test && test <= newTerms.Length()) 
+	assert (Terms[i].ExpV() != newTerms[test].ExpV());
+      if ( Order->Less(Terms[i].ExpV(),newTerms[test].ExpV()) )
+	high = test;
+      else
+	low = test;
+    }
+    newTerms.Insert(Terms[i],high);
+  }
+  Terms = newTerms;
+
+  return (*this);
 }
 
 template<class T> gPoly1<T> gPoly1<T>::operator-() const
@@ -155,6 +197,9 @@ template<class T> bool gPoly1<T>::operator==(gPoly1<T> &p) const
 {
   assert(Space == p.Space && Order == p.Order);
 
+  if (Terms.Length() != p.Terms.Length())           return false;
+  if (Terms.Length() == 0 && p.Terms.Length() == 0) return true;
+
   return (Terms == p.Terms);
 }
 
@@ -174,41 +219,6 @@ template<class T> void gPoly1<T>::operator*=(const T& val)
 { 
   for (int i = 1; i <= Terms.Length(); i++)
     Terms[i] *= val;
-}
-
-template <class T> gPoly1<T>& gPoly1<T>::operator=(const gString &Hold)
-{
-  charnum = 0;
-  int contflag = 1;
-  T nega = 1;
-  gArray<int> PowArray(Space->Dmnsn());
-  TheString = Hold + " +";
-
-  GetChar();
-
-  while (charnum <= TheString.length() && contflag){
-    switch (charc) {
-    case '+' :
-    case ' ':
-      charnum++;
-      GetChar();
-      break;
-    case '-':
-      charnum++;
-      GetChar();
-      nega = -nega;
-      break;
-    case 0:  //Null termination of string
-      contflag = 0;
-      break;
-    default:
-      String_Term(nega);
-      nega = T (1);
-      break;
-    }
-  }
-
-  return (*this);
 }
 
 
@@ -327,6 +337,11 @@ template <class T> const gSpace* gPoly1<T>::GetSpace(void) const
 {
   return (gSpace *) Space;  
 }
+  
+template <class T> const term_order* gPoly1<T>::GetOrder(void) const
+{
+  return (term_order *) Order;  
+}
 
 template <class T> int gPoly1<T>::DegreeOfVar(int var_no) const
 {
@@ -438,8 +453,11 @@ gList< gMono<T> > gPoly1<T>::Adder(const gList<gMono<T> >& One,
 	{ answer += One[i]; i++; }
       else if ( Order->Greater(One[i].ExpV(),Two[j].ExpV()) ) 
 	{ answer += Two[j]; j++; }
-      else
-	{ answer += One[i] + Two[j]; i++; j++; }
+      else {
+	if (One[i].Coef() + Two[j].Coef() != (T)0) 
+	  answer += One[i] + Two[j]; 
+	i++; j++; 
+      }
     }
   }
 
@@ -602,16 +620,16 @@ gPoly1<T> gPoly1<T>::LeadingCoefficient(int varnumber) const
 template <class T> 
 exp_vect gPoly1<T>::LeadingPowerProduct(const term_order & order) const
 {
-//DEBUG
-gout << "You have just tested LeadingPowerProduct.\n";
+  assert (Terms.Length() > 0);
 
   if (*Order == order) // worth a try ...
     return Terms[Terms.Length()].ExpV();
   else {
     int max = 1;
-    for (int i = 2; i <= Terms.Length(); i++)
+    for (int i = 2; i <= Terms.Length(); i++) {
       if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
 	max = i;
+    }
     return Terms[max].ExpV();
   }
 }
