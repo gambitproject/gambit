@@ -204,7 +204,9 @@ const gList<BehavProfile<T> > &EFLiapModule<T>::GetSolutions(void) const
 
 template <class T> LiapFunc<T> *EFLiapModule<T>::CreateFunc(void)
 {
-  return new EFLiapFunc<T>(E, params, start);
+  if(E.ProfileLength(true)) 
+    return new EFLiapFunc<T>(E, params, start);
+  return 0;
 }
 
 template <class T>
