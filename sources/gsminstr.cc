@@ -217,6 +217,13 @@ bool Neg::Execute( GSM &gsm ) const
 void Neg::Output( gOutput& s ) const
 { s << "Neg"; }
 
+Opcode Power::Type( void ) const
+{ return iPOWER; }
+bool Power::Execute( GSM &gsm ) const
+{ return gsm.Power(); }
+void Power::Output( gOutput& s ) const
+{ s << "Power"; }
+
 
 
 //---------------------------- integer math operators ---------------------
