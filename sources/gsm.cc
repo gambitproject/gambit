@@ -998,6 +998,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
 				" in source code" );
     else
       result = 0;
+    Dump();
     break;
   }
 
@@ -1082,7 +1083,7 @@ void GSM::Dump( void )
       Pop();
     }
   }
-  _StdOut << "\n";
+  //_StdOut << "\n";
   
   assert( _Depth() == 0 );
 }
