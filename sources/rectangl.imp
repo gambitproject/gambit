@@ -89,6 +89,24 @@ template<class T> const gVector<T> gRectangle<T>::UpperBound() const
   return answer;
 }
 
+template<class T> const T gRectangle<T>::LowerBoundOfCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].LowerBound();
+}
+
+template<class T> const T gRectangle<T>::UpperBoundOfCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].UpperBound();
+}
+
+template<class T> const T gRectangle<T>::HeightInCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].Length();
+}
+
 template<class T> 
 const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const 
 { 
@@ -161,6 +179,57 @@ template<class T> const gVector<T> gRectangle<T>::Center() const
 		                     / ((T)2);
   return answer;
 }
+
+template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const 
+{ 
+  return *this;
+}
+
+template<class T> const gList<gVector<T> > gRectangle<T>::VertexList() const 
+{ 
+  gList<gVector<T> > answer;
+
+  gArray<int> ListOfTwos(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
+  gIndexOdometer ListOfTopBottoms(ListOfTwos);
+
+  while (ListOfTopBottoms.Turn()) {
+    gVector<T> next(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (ListOfTopBottoms[i] == 1)
+	next[i] = LowerBoundOfCoord(i);
+      else 
+	next[i] = UpperBoundOfCoord(i);
+    answer += next;
+  }
+  return answer;
+}
+
+template<class T> 
+const int gRectangle<T>::NumberOfCellsInSubdivision() const 
+{ 
+  int answer = 1;
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer *= 2;
+  return answer;
+}
+
+template<class T> 
+const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const 
+{ 
+  int tmp = index;
+  gArray<int> updowns(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (tmp % 2 == 1) {
+      updowns[i] = 1; tmp--;
+    }
+    else
+      updowns[i] = 0;
+  tmp /= 2;
+  }
+  return Orthant(updowns);
+}
+
 //----------------------------------
 //           Conversion
 //----------------------------------
