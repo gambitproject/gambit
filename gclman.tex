@@ -250,11 +250,11 @@ supports user-defined functions, which allow for defining sections of code
 which may be called later.
 
 A new function can be created using the function
-\verb+DefineFunction+.  For example, one might define a function to compute
+\verb+NewFunction+.  For example, one might define a function to compute
 the absolute value of an INTEGER as such:
 
 \begin{verbatim}
-DefineFunction[Abs[n->INTEGER], INTEGER,
+NewFunction[Abs[n->INTEGER], INTEGER,
                  If[n > 0, n, If[n < 0, -n, 0]]]
 \end{verbatim}
 
@@ -282,7 +282,7 @@ passed to the function.  For example, it might
 be useful instead to define \verb+Abs+ as:
 
 \begin{verbatim}
-DefineFunction[Abs[n<->INTEGER], INTEGER,
+NewFunction[Abs[n<->INTEGER], INTEGER,
 		 If[n > 0, n, If[n < 0, n := -n, 0]]]
 \end{verbatim}
 
@@ -307,7 +307,7 @@ function.  For example, if the user typed in the following:
 
 \begin{verbatim}
 i := 4;
-DefineFunction[FooFunc[x->INTEGER], INTEGER, x * i]
+NewFunction[FooFunc[x->INTEGER], INTEGER, x * i]
 \end{verbatim}
 
 \noindent later execution of the \verb+FooFunc+ would yield an ``undefined
@@ -315,7 +315,7 @@ variable i'' error message, since \verb+i+ is never defined within the
 function.  If instead \verb+FooFunc+ had been defined as follows:
 
 \begin{verbatim}
-DefineFunction[FooFunc[x->INTEGER], INTEGER, i := 13, x * i]
+NewFunction[FooFunc[x->INTEGER], INTEGER, i := 13, x * i]
 \end{verbatim}
 
 \noindent \verb+FooFunc+ would always return 13 times the value of the
@@ -339,7 +339,7 @@ The built-in data types for the GCL are the following:
 \medskip
 
 \begin{tabular}{lp{4in}}
-BOOLEAN & Evaluates to either True or False. \\ 
+BOOL & Evaluates to either True or False. \\ 
 
 INTEGER & Evaluates to an integer of arbitrary size \\ 
 
@@ -349,20 +349,31 @@ FLOAT 	& Evaluates to a floating point number \\
 
 TEXT	& String of arbitrary length enclosed in quotation marks\\ 
 
+INPUT & Input stream \\
+
+OUTPUT & Output stream \\
+
 EFG	& Game in extensive form\\
 
 NFG	& Game in normal form\\
 
 NODE	& A node in an extensive form\\
 
-DATATYPE & Defines precision (constants: Float or
-Rational) \\ 
+INFOSET & An information set in an extensive form \\
 
-STRATEGY & In a normal form game, one of the options a player may adopt\\
+EFPLAYER & A player in an extensive form game \\
+
+ACTION & An action in an extensive form game \\
+
+OUTCOME & An outcome in an extensive form game \\
+
+NFPLAYER & A player in a normal form game \\
+
+STRATEGY & A strategy in a normal form game\\
 
 MIXED	& Profile of mixed strategies\\
 
-BEHAV	& Profile of behavioral strategies
+BEHAV	& Profile of behavioral strategies\\
 \end{tabular}
 
 \medskip
@@ -376,7 +387,7 @@ contains a vector of variables of the same type enclosed in curly braces
 and separated by commas.  For example:
 
 \begin{verbatim}
-LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
+LIST(BOOL) := { BOOL1, BOOL2, . . . . , BOOLn }
 \end{verbatim}
 
 The elements of a list are indexed sequentially, with the first element
@@ -410,13 +421,13 @@ is not, since the second element is a LIST(FLOAT).
 
 \subsubsection{Boolean}
 
-The BOOLEAN data type is used for logical operations
+The BOOL data type is used for logical operations
 
 \begin{itemize}
 \item
 Variables:
 
-There are two built-in BOOLEAN variables, \verb+True+  and \verb+False+, which
+There are two built-in BOOL variables, \verb+True+  and \verb+False+, which
 may not be modified: 
 
 \bd
@@ -430,7 +441,7 @@ may not be modified:
 \item
 Operators:
 
-Let \verb+a+ and \verb+b+ be statements evaluating to BOOLEAN. Then  
+Let \verb+a+ and \verb+b+ be statements evaluating to BOOL. Then  
 
 \bd
 \item
@@ -496,7 +507,7 @@ short form \verb+a DIV b+.
 \ed
 \item
 Relational operators take INTEGER arguments and
-return a BOOLEAN
+return a BOOL
 \bd
 \item
 \verb+Greater[a,b]+ returns \verb+True+ if \verb+a+$>$\verb+b+, and
@@ -821,23 +832,23 @@ change.
 \medskip
 
 \begin{tabular}{lp{4in}}
-If[BOOLEAN, & \\
-\{series of commands\}] & Evaluates the BOOLEAN expression
+If[BOOL, & \\
+\{series of commands\}] & Evaluates the BOOL expression
 once. If it evaluates to True, the series of commands are performed.
 Each command must be followed by a semi-colon or carriage return.  If
-the BOOLEAN evaluates to FALSE, none of the commands are performed.\\
-If[BOOLEAN, & \\
+the BOOL evaluates to FALSE, none of the commands are performed.\\
+If[BOOL, & \\
 \{series of commands\}, & \\
-\{series of commands\}] & Evaluates the BOOLEAN expression
+\{series of commands\}] & Evaluates the BOOL expression
 once. If it evaluates to True, the first series of commands are
 performed.  Each command must be followed by a semi- colon or carriage
-return.  If the BOOLEAN evaluates to FALSE, the second series of
+return.  If the BOOL evaluates to FALSE, the second series of
 commands are performed. \\
-While[BOOLEAN, &\\
-\{series of commands\}] & Evaluates the BOOLEAN
+While[BOOL, &\\
+\{series of commands\}] & Evaluates the BOOL
 expression or variable.  As long as it evaluates to True, the series
 of commands are performed.  Each command must be followed by a
-semi-colon or carriage return.  If the BOOLEAN evaluates to FALSE, the
+semi-colon or carriage return.  If the BOOL evaluates to FALSE, the
 loop ends without performing the commands.\\
 NOTE: & The While command functions as a
 loop.  That is, it continues to perform the series of commands as long
@@ -849,7 +860,7 @@ For[\{expressions\}, & \\
 \{expressions\}, & \\
 \{statements\}] & Evaluates the first set of expressions as initialization;
 afterwards, so long as the second parameter (which must evaluate to a 
-BOOLEAN value) remains True, executes the statement body followed by the
+BOOL value) remains True, executes the statement body followed by the
 third parameter expressions in a fashion similar to the While command.
 \end{tabular}
 
@@ -869,7 +880,7 @@ function.
 \end{verbatim} \normalsize
 
 \protect \large \begin{verbatim}
-*Include[TEXT]
+*Include[file->TEXT]
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -952,6 +963,14 @@ function.
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
+*LoadEfg[file->TEXT] =: EFG
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+*LoadNfg[file->TEXT] =: NFG
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
 *Output[file->TEXT] =: OUTPUT
 \end{verbatim}\normalsize
 
@@ -960,14 +979,20 @@ Read[input->INPUT] =: [FLOAT,INTEGER,RATIONAL,TEXT,LIST]
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*ReadEfg[file->INPUT] =: EFG
+*ReadEfg[input->INPUT] =: EFG
 \end{verbatim}\normalsize
-
 
 \protect \large \begin{verbatim}
-*ReadNfg[file->INPUT] =: NFG
+*ReadNfg[input->INPUT] =: NFG
 \end{verbatim}\normalsize
 
+\protect \large \begin{verbatim}
+*SaveEfg[file->TEXT,overWrite->BOOL] =: BOOL
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+*SaveNfg[file->TEXT,overWrite->BOOL] =: BOOL
+\end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
 SetFormat[output->OUTPUT,width->INTEGER, precis->INTEGER] =: OUTPUT
@@ -1135,6 +1160,10 @@ Write[output->OUTPUT, x->TEXT, {quoted->BOOL}] =: OUTPUT
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
+JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
 *LeaveInfoset[node->NODE] =: INFOSET
 \end{verbatim}\normalsize
 
@@ -1156,9 +1185,9 @@ MergeInfosets[n->LIST(NODE)] =: INFOSET  (infoset of n[[1]])
 
 
 \protect \large \begin{verbatim} 
-*NewInfoset[player->PLAYER, actions->LIST(TEXT),
+*NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
             {name->TEXT}] =: INFOSET
-*NewInfoset[player->PLAYER, actions->INTEGER,
+*NewInfoset[player->EFPLAYER, actions->INTEGER,
             {name->TEXT}] =: INFOSET
 \end{verbatim}\normalsize
 
@@ -1168,11 +1197,12 @@ NewOutcome[payoffs->LIST(T), {efg->EFG}, {name->TEXT}] =: OUTCOME
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*NewPlayer[{efg->EFG}, {name->TEXT}] =: PLAYER 
+*NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-Reveal[what->{TEXT,ACTION?},who->LIST[PLAYER]]] =: NODE     
+Reveal[infoset->INFOSET, who->LIST[EFPLAYER]],
+       {what->LIST(ACTIONS)}] =: INFOSET
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
@@ -1190,24 +1220,23 @@ Reveal[what->{TEXT,ACTION?},who->LIST[PLAYER]]] =: NODE
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*SetPayoff[outcome->OUTCOME, payoffs->LIST(T)] =: OUTCOME
+SetPayoff[outcome->OUTCOME, player->PLAYER, payoff->T] =: OUTCOME
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+*SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
 \end{verbatim}\normalsize
 
 \medskip
 \subsection{Normal Form Manipulation}
 
 \protect \large \begin{verbatim}
-AddStrategy[support->SUPPORT,LIST(STRATEGY)] =: SUPPORT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-CrunchNfg[{nfg->NFG}] =: NFG
+AddStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
 \end{verbatim}\normalsize
 
 \noindent {\bf Note}: type param not implemented yet...
 \protect \large \begin{verbatim}
-*NewNfg[dim->LIST(INTEGER), {random->BOOL}, {seed->INTEGER},
-        {type->DATATYPE}] =: NFG
+*NewNfg[dim->LIST(INTEGER), {type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1215,11 +1244,37 @@ NewSupport[nfg->NFG] =: SUPPORT
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-RemoveStrategy[support->SUPPORT,LIST(STRATEGY)] =: SUPPORT
+CompressNfg[nfg->NFG,{support->SUPPORT}] =: NFG
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-SetStratName[strategy->STRATEGY,name->TEXT] =: NFG
+RandomNfg[nfg->NFG, {random->BOOL}, {seed->INTEGER}] =: NFG
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+RandomEfg[efg->EFG, {random->BOOL}, {seed->INTEGER}] =: EFG
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+RemoveStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+SetPayoffNfg[list->LIST(STRATEGY), player->PLAYER, 
+	payoff->T] =: LIST(STRATEGY)
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+SetPayoffNf[list->LIST(INTEGER), player->PLAYER, 
+	payoff->T] =: LIST(INTEGER)
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+SetPayoffNfg[list->LIST(STRATEGY), payoffs->LIST(T)] =: LIST(STRATEGY)
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+SetPayoffNfg[list->LIST(INTEGER), payoffs->LIST(T)] =: LIST(INTEGER)
 \end{verbatim}\normalsize
 
 \medskip
@@ -1227,12 +1282,12 @@ SetStratName[strategy->STRATEGY,name->TEXT] =: NFG
 
 
 \protect \large \begin{verbatim}
-Afg[{efg->EFG},{time<->FLOAT}] =: NFG
+Afg[efg->EFG,{time<->FLOAT}] =: NFG
 \end{verbatim}\normalsize
 
 
 \protect \large \begin{verbatim}
-Efg[{nfg->NFG},{time<->FLOAT}] =: EFG
+Efg[nfg->NFG,{time<->FLOAT}] =: EFG
 \end{verbatim}\normalsize
 
 
@@ -1265,18 +1320,31 @@ Efg[{nfg->NFG},{time<->FLOAT}] =: EFG
 \subsection{Solution Modules}
 
 \protect \large \begin{verbatim}
-*Behav[mixed->MIXED, {efg->EFG}] =: BEHAV
+*Behav[mixed->MIXED] =: BEHAV
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-Behav[mixed->LIST(MIXED),{efg->EFG}] =: LIST(BEHAV)
+Behav[mixed->LIST(MIXED)] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*ElimDom[nfg<->NFG, {strong->BOOL}, {time<->FLOAT}] =: INTEGER
-ElimDom[nfg<->NFG, maxIter->INTEGER, {players->LIST(INTEGER)},
-        {strong->BOOL}, {time<->FLOAT}] =: INTEGER
+*ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
+	{mixed->BOOL}, {players->LIST(NFPLAYERS)}, 
+	{time<->FLOAT}] =: SUPPORT
+ElimAllDom[nfg<->NFG, {maxIter->INTEGER}, {strong->BOOL}, 
+	{mixed->BOOL},	{players->LIST(NFPLAYERS)},
+        {time<->FLOAT}] =: LIST(SUPPORT)
 \end{verbatim} \normalsize
+
+\protect \large \begin{verbatim}
+*EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
+      {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\protect \large \begin{verbatim}
+*EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
+          {time<->FLOAT}] =: LIST(MIXED) 
+\end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
 *LCPSolve[efg<->EFG, {stopAfter->INTEGER},
@@ -1307,7 +1375,7 @@ ElimDom[nfg<->NFG, maxIter->INTEGER, {players->LIST(INTEGER)},
 LqreSolve[efg->EFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
-         {fullGraph->BOOLEAN},
+         {fullGraph->BOOL},
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->BEHAV}] =: LIST(BEHAV)
@@ -1317,7 +1385,7 @@ LqreSolve[efg->EFG(FLOAT),
 LqreSolve[nfg->NFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
-         {fullGraph->BOOLEAN},
+         {fullGraph->BOOL},
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->MIXED}] =: LIST(MIXED)
@@ -1329,20 +1397,6 @@ LqreSolve[nfg->NFG(FLOAT),
            {delLam->T}, {powLam->INTEGER}, 
            {delp->T}, {tol->T},
            {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*MixedEnumSolve[nfg->NFG, {stopAfter->INTEGER},
-      {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-IsDominated[strategy->STRATEGY,{nfg->NFG}] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*PureEnumSolve[nfg->NFG, {stopAfter->INTEGER}, 
-          {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1363,12 +1417,12 @@ SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
-*Centroid[{efg->EFG}] =: BEHAV
-*Centroid[{nfg->NFG}] =: MIXED
+*Centroid[efg->EFG] =: BEHAV
+*Centroid[nfg->NFG,support->SUPPORT] =: MIXED
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*Chance[{efg->EFG}] =: PLAYER
+*Chance[efg->EFG] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1376,19 +1430,11 @@ SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-Dominator[strategy->STRATEGY] =: STRATEGY
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-Infoset[name->TEXT, {efg->EFG}] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 *Infoset[node->NODE] =: INFOSET
 \end{verbatim}\normalsize
 
-\protect \large \begin{verbatim} 
-Infosets[name->TEXT, {efg->EFG}] =: LIST(INFOSET)
+\protect \large \begin{verbatim}
+Infosets[player->EFPLAYER] =: LIST(INFOSET)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1443,7 +1489,7 @@ Name[x->STRATEGY] =: TEXT
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*NumInfosets[player->PLAYER] =: INTEGER
+*NumInfosets[player->EFPLAYER] =: INTEGER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1463,7 +1509,7 @@ Name[x->STRATEGY] =: TEXT
 \end{verbatim} \normalsize
 
 \protect \large \begin{verbatim}
-NumStrats[pl->INTEGER, {sset->INTEGER},{nfg->NFG}] =: INTEGER
+NumStrats[player->NFPLAYER,{support->SUPPORT}] =: INTEGER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1483,28 +1529,24 @@ NumStrats[pl->INTEGER, {sset->INTEGER},{nfg->NFG}] =: INTEGER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-PayoffEfg[strategy->BEHAV,{node->NODE}] =: LIST(T)
+Payoff[strategy->BEHAV] =: LIST(T)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-PayoffNfg[strategy->MIXED] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-Player[name->TEXT, {efg->EFG}] =: PLAYER
+Payoff[strategy->MIXED] =: LIST(T)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*Player[infoset->INFOSET] =: PLAYER
-*Player[node->NODE] =: PLAYER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-Players[name->TEXT] =: LIST(PLAYER}
+*Player[infoset->INFOSET] =: EFPLAYER
+*Player[node->NODE] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*Players[{efg->EFG}] =: LIST(PLAYER)
+*Players[efg->EFG] =: LIST(EFPLAYER)
+\end{verbatim} \normalsize
+
+\protect \large \begin{verbatim}
+*Players[nfg->NFG] =: LIST(NFPLAYER)
 \end{verbatim} \normalsize
 
 \protect \large \begin{verbatim}
@@ -1512,7 +1554,7 @@ Players[name->TEXT] =: LIST(PLAYER}
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-RealizProbs[strategy->BEHAV,node->NODE] =: LIST(T) (all nodes ?)
+RealizProbs[strategy->BEHAV] =: LIST(T)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1573,12 +1615,12 @@ parameters which are not necessary for the procedure to function.
 
 \item
 \protect \large \begin{verbatim}
-AddStrategy[support->SUPPORT,LIST(STRATEGY)] =: SUPPORT
+AddStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-Afg[{efg->EFG},{time<->FLOAT}] =: NFG
+Afg[efg->EFG,{time<->FLOAT}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -1592,7 +1634,7 @@ game in the corresponding agent normal form.
 
 \bd
 \item
-[E:] The game in extensive form to be converted to agent normal
+[efg:] The game in extensive form to be converted to agent normal
 form.
 \ed
 
@@ -1601,7 +1643,7 @@ form.
 	
 \bd
 \item
-[time:] Returns the elapsed time for the operation.
+[time:] Elapsed time for the operation.
 \ed
 \ed
 
@@ -1615,7 +1657,8 @@ form.
 \item
 [Description:] Logical And.
 \item
-[Return value:] Returns the minimum of $x$ and $y$.  
+[Return value:] Returns the \verb+True+ if both \verb+x+ and \verb+y+ are
+\verb+True+, else returns \verb+False+.  
 \item
 [Required parameters:]\hfil\null
 \bd
@@ -1634,6 +1677,26 @@ form.
 *AppendAction[infoset->INFOSET] =: INFOSET
 \end{verbatim}\normalsize
 
+\bd
+\item
+[Description:] Adds an action into the information set, as the last
+action. 
+\item
+[Return value:] Returns the information set. [Ted -- better to return action]
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[infoset:] The information set which is to have a new
+action appended to it.
+\ed
+
+\item
+[Optional parameters:] None.\hfill\null
+\ed
+
+
 \item
 \protect \large \begin{verbatim} 
 *AppendNode[node->NODE, infoset->INFOSET] =: NODE (first child)
@@ -1641,9 +1704,9 @@ form.
 
 \bd
 \item
-[Description:] Places the source node ``node'' into the information set
-``infoset.''  The result is the source node becomes a decision node,
-with number of branches equal to the number of actions in ``infoset.''
+[Description:] Places \verb+node+ into the information set
+\verb+infoset+.  The result is \verb+node+ becomes a decision node,
+with number of branches equal to the number of actions in \verb+infoset+.
 
 \item
 [Return value:] Returns the first child of the source node.
@@ -1694,7 +1757,7 @@ name from any previously existing function.
 \item
 [Description:] Attaches the indicated outcome to the specified node.
 \item
-[Return value:] Returns the outcome that is attached to the node. 
+[Return value:] The outcome that is attached to the node. 
 \item
 [Required parameters:]\hfil\null
 
@@ -1703,8 +1766,7 @@ name from any previously existing function.
 [node:] The node to which the outcome is to be attached.  Note that the
 node need not be terminal in order to have an outcome attached.
 \item
-[outcome:] The number of the outcome to be attached.  If no outcome with
-the indicated number exists, no action is taken.
+[outcome:] The outcome to be attached.  
 \ed
 
 \item
@@ -1715,18 +1777,16 @@ the indicated number exists, no action is taken.
 
 \item
 \protect \large \begin{verbatim}
-*Behav[mixed->MIXED, {efg->EFG}] =: BEHAV
+*Behav[mixed->MIXED] =: BEHAV
 \end{verbatim}\normalsize
-
-
 \protect \large \begin{verbatim}
-Behav[mixed->LIST(MIXED),{efg->EFG}] =: LIST(BEHAV)
+Behav[mixed->LIST(MIXED)] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
 \bd
 \item
 [Description:] Maps a specified mixed profile to a behavioral
-profile on the given extensive form game.
+profile on the associated extensive form game.
 \item
 [Return value:] Returns the behavioral profile.
 \item
@@ -1739,84 +1799,77 @@ profile.
 \ed
 
 \item
-[Optional parameters:] None.
-\bd
-\item
-[efg:] The game in extensive form of which the behavioral profile is
-to be a subvariable.
-\ed
+[Optional parameters:] None.\hfill\null
 \ed
 
 
 %--C--
 
 \item
-\protect \large \begin{verbatim}
-Car[l->LIST(T)] =: T
-\end{verbatim}\normalsize
-
-For all types T.
-
-\bd
-\item
-[Description:] Finds the first element of the specified list of type
-T.
-\item
-[Return value:] Returns a value of type T which is the first element
-of the list.
-\item 
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[l:] The list of type T on which the procedure is to be performed.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-
-\protect \large \begin{verbatim}
-Cdr[l->LIST(T)] =: LIST(T)
-\end{verbatim}\normalsize
-
-For all types T.
-
-\bd
-\item
-[Description:] Deletes the first element of the specified list of type
-T.
-\item 
-[Return value:] A list of type T which is the specified list minus its
-first element.
-\item   
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[l:] The list of type T on which the procedure is to be performed.
-\ed
-\item
-[Optional parameters:] None.
-\ed
-
-\item
 \protect \large \begin{verbatim} 
-*Centroid[{efg->EFG}] =: BEHAV
-*Centroid[{nfg->NFG}] =: MIXED
+*Centroid[efg->EFG] =: BEHAV
+*Centroid[nfg->NFG,support->SUPPORT] =: MIXED
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Chance[{efg->EFG}] =: PLAYER
+*Chance[efg->EFG] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
 *ChanceProbs[infoset->INFOSET] =: LIST(T)
 \end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Finds the vector of probabilities for the actions at
+the specified information set.  This is only meaninful for 
+information sets belonging to the player representing chance.
+\item
+[Return value:] Returns the vector of action probabilities for the
+information set.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[infoset:] The information set for which the action probabilities are to
+be found.
+\ed
+
+\item
+[Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+CompressNfg[nfg->NFG,{support->SUPPORT}] =: NFG
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Creates a new normal form game with support a subset of
+the support for the original game.  
+\item
+[Return value:] The new normal form game.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[nfg:] The game in normal form from which the new normal form game
+is to be created.
+\ed
+
+\item  
+[Optional parameters:]\hfill\null
+\bd
+\item
+[support:] The support which is to become the full profile of strategy
+sets for the reduced game.   
+\ed
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -1870,32 +1923,6 @@ indicated node.
 [Optional parameters:] None.
 \ed
 
-\item
-\protect \large \begin{verbatim}
-CrunchNfg[{nfg->NFG}] =: NFG
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Creates a new game in normal form for which the
-strategies are those of the smallest strategy set of the specified
-normal form game and which contains only those payoff elements
-corresponding to those strategies.
-\item
-[Return value:] Returns the new normal form game.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[N:] The game in normal form from which the new normal form game
-is to be created.
-\ed
-
-\item  
-[Optional parameters:] None.
-\ed
-
 %--D--
 
 \item
@@ -1905,7 +1932,7 @@ is to be created.
 
 \bd
 \item
-[Description:] Deletes the indicated action number from the
+[Description:] Deletes the indicated action from the
 information set containing the specified node.
 \item
 [Return value:] The infoset of the action.  [Required parameters:]\hfil\null
@@ -1922,7 +1949,7 @@ information set containing the specified node.
 
 \item
 \protect \large \begin{verbatim}
-DeleteNode[n->NODE, keep->INTEGER] =: NODE
+*DeleteNode[node->NODE, keep->NODE] =: NODE (parent ?)  
 \end{verbatim}\normalsize
 
 \bd
@@ -1938,7 +1965,7 @@ of the deleted node are deleted.
 	
 \bd
 \item
-[n:] The node to be deleted.
+[node:] The node to be deleted.
 \item
 [keep:] The child of the deleted node which is to be kept.
 \ed
@@ -1949,13 +1976,29 @@ of the deleted node are deleted.
 
 \item
 \protect \large \begin{verbatim}
-*DeleteNode[node->NODE, keep->NODE] =: NODE (parent ?)  
-\end{verbatim}\normalsize
-
-\item
-\protect \large \begin{verbatim}
 *DeleteOutcome[outc->OUTCOME] =: BOOL
 \end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Removes the specified outcome from the given game in
+extensive form.  All nodes with the specified outcome attached are
+reset to having no outcome attached.  If the outcome does not exist in
+the given game, no action is taken.  The outcomes remaining in the
+game are re-numbered, so that the number of the outcome removed is
+given to the outcome which previously had the next highest number, the
+number previously corresponding to this outcome is assigned to the
+outcome which previously had the next highest number, and so on.
+\item  
+[Return value:] Returns \verb+True+ on success, else \verb+False+.  
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[outc:] The outcome to be removed.  
+\ed
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2001,60 +2044,6 @@ null outcome.
 
 \item
 [Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-DisplayEfg[E->EFG]
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Prints the game tree of the specified extensive form
-game in outline form.
-\item
-[Return value:] None.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[E:] The game in extensive form which is to be displayed.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-DisplayNfg[N->NFG, {sset->INTEGER}]
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Prints the specified normal form game as a list of
-contingencies and corresponding payoff vectors.  Uses the last 
-strategy set unless otherwise specified.
-\item
-[Return value:] None.
-\item
-[Required parameters:]\hfil\null
-
-\bd	
-\item
-[N:] The game in normal form which is to be displayed.
-\ed
-
-\item
-[Optional parameters:]\hfil\null
-
-\bd
-\item
-[sset:] The number of the strategy set of the specified normal form
-game which is to be used in displaying the game.  If not
-specified, the last (smallest) strategy set is used.
-\ed
 \ed
 
 \item 
@@ -2108,17 +2097,40 @@ For T = FLOAT, RATIONAL
 [See also:] \verb+Modulus+.
 \ed
 
+\bd
 \item
-\protect \large \begin{verbatim}
-Dominator[strategy->STRATEGY] =: STRATEGY
-\end{verbatim}\normalsize
+[Description:] Determines the number of strategies which dominate the
+specified strategy for the indicated player in the given game in
+normal form.
+\item
+[Return value:] Returns the number of strategies which dominate the
+specified strategy.  If the strategy is undominated, returns a value
+of zero.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[N:] The game in normal form in which the specified strategy of the
+indicated player is to be tested for domination.
+\item
+[pl:] The number corresponding to the player for whom the specified
+strategy is to be tested for domination.
+\item
+[st:] The number corresponding to the strategy belonging to the
+indicated player which is to be tested for domination.
+\ed
+
+\item
+[Optional parameters:] None.
+\ed
 
 
 %--E--
 
 \item
 \protect \large \begin{verbatim}
-Efg[{nfg->NFG},{time<->FLOAT}] =: EFG
+Efg[nfg->NFG,{time<->FLOAT}] =: EFG
 \end{verbatim}\normalsize
 
 \item
@@ -2130,9 +2142,9 @@ Efg[{nfg->NFG},{time<->FLOAT}] =: EFG
 \bd
 \item
 [Description:] Calculates the time transpired since the last time
-StartWatch[] was used if the system stopwatch is currently running.
-Otherwise, calculates the time elapsed between the last StartWatch[] -
-StopWatch[] match.
+\verb+StartWatch[]+ was used if the system stopwatch is currently running.
+Otherwise, calculates the time elapsed between the last
+\verb+StartWatch[]+ - \verb+StopWatch[]+ match.
 \item
 [Return value:] Returns the time value given by the system stopwatch
 \item
@@ -2143,23 +2155,23 @@ StopWatch[] match.
 
 \item
 \protect \large \begin{verbatim}
-*ElimDom[nfg<->NFG, {strong->BOOL}, {time<->FLOAT}] =: INTEGER
-ElimDom[nfg<->NFG, maxIter->INTEGER, {players->LIST(INTEGER)},
-        {strong->BOOL}, {time<->FLOAT}] =: INTEGER
+*ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
+	{mixed->BOOL}, {players->LIST(NFPLAYERS)}, 
+	{time<->FLOAT}] =: SUPPORT
+ElimAllDom[nfg<->NFG, {maxIter->INTEGER}, {strong->BOOL}, 
+	{mixed->BOOL},	{players->LIST(NFPLAYERS)},
+        {time<->FLOAT}] =: LIST(SUPPORT)
 \end{verbatim} \normalsize
 
 \bd
 \item
-[Description:] Performs iterated (unless otherwise specified) deletion
-of dominated strategies for the list of players specified.
+[Description:] Computes all dominated strategies for the given list of
+players in the normal form game with the given support.  
 \item  
-[Return value:] The number of the new strategy set.  The original full
-strategy set is numbered 1.  Each iteration creates a new strategy set
-with an integer value one greater than that of the previous strategy
-set.  Therefore, if no dominated strategies are found, the return
-value is equal to 1.
+[Return value:] Returns a new support with the undominated strategies.
+
 \item
-[Required paremeters:] 
+[Required parameters:]\hfill\null 
 \bd
 \item
 [nfg:] The game in normal form for which dominated strategies are to
@@ -2170,25 +2182,100 @@ be eliminated.
 
 \bd
 \item
-[players:] Specifies the list of players for which the procedure is to be
-performed.  If unspecified, it defaults to all players.
+[start:] The initial support.  If unspecified, it defaults to the full
+strategy set for each player in the game.  
 \item
 [strong:] Determines the type of dominance used.  The default value is
 False, which signifies that weak dominance is used.  If `strong` is
 specified to be True, strong dominance is used.
 \item
+[mixed:] Determines if mixed strategies are used in determining if a
+given pure strategy is dominated.  The default value is False, meaning
+that only pure strategies are used. If \verb+strong+ is specified to
+be True, mixed strategies are used.
+\item
+[players:] A list of players for whom dominant strategies are
+computed.  Default is all players in the game.  
+\item
 [time:] Returns the elapsed time for the operation.
 \item
-[output:] Redirects the output of the procedure to a specified file.
-Directing output to ``/dev/null'' under Unix turns output off.  By
-default, it directs output to the screen.
-\item
-[NIT:] The number of iterations to be performed by the procedure.  If
+[maxIter:] The number of iterations to be performed by the procedure.  If
 not specified, it has a default value of zero which means that all
 dominated strategies are iteratively deleted.
 \ed
 \ed
 
+\item
+\protect \large \begin{verbatim}
+*EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
+      {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Finds all Nash equilibria (pure and mixed) for a two
+person game.  More precisely, it finds the set of extreme points of
+the components of the set of Nash equilibria.  The procedure is to
+enumerate the set of complementary basic feasible solutions. (See, eg
+\cite[1964]{Man:64}.)
+\item
+[Return value:] The list of equilibria found.
+\item
+[Required parameters:]
+\bd
+\item
+[nfg:] The game in normal form for which the solutions are to be found.  
+\ed
+\item
+[Optional parameters:]\hfil\null
+
+\bd
+\item
+[stopAfter:] Specifies the maximum number of equilibria to find.  If
+not specified, the default value is zero, which means that all
+equilibria are found.  To check if there is a unique Nash equilibrium,
+one could set this parameter to 2.
+\item
+[nPivots:] Number of pivots. 
+\item
+[time:] Returns the elapsed time for the operation.
+\item
+\ed
+\ed
+
+\item
+\protect \large \begin{verbatim}
+*EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
+          {time<->FLOAT}] =: LIST(MIXED) 
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Finds the pure strategy Nash equilibria in the
+specified normal form game.  
+\item
+[Return value:] The equilibria
+found.  
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[nfg:] The game in normal form for which the weak pure strategy Nash
+equilibria are to be found.
+\ed
+
+\item
+[Optional parameters:]\hfil\null
+	
+\bd
+\item
+[stopAfter:] Allows the user to set the maximum number of Nash equilibria to
+find.  Has a default value of 1.
+\item
+[time:] Returns the elapsed time for the operation.
+\ed
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2252,135 +2339,6 @@ until $test$ fails to give $True$.
 
 \item
 \protect \large \begin{verbatim}
-GetActionName[n->NODE, br->INTEGER] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the name assigned to the action corresponding to
-the indicated branch of the specified node.
-\item   
-[Return value:] The name of the action.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[n:] The node at which the action to be found exists.
-\item
-[br:] The branch which corresponds to the action to be found.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetActionProbs[n->NODE] =: LIST(RATIONAL)
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the vector of probabilities for the actions at
-the specified node.  This is only meaninful for nodes in information
-sets belonging to the player representing chance (player 0).
-\item
-[Return value:] Returns the vector of action probabilities for the
-node.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[n:] The node for which the action probabilities are to be found.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Determines the number of strategies which dominate the
-specified strategy for the indicated player in the given game in
-normal form.
-\item
-[Return value:] Returns the number of strategies which dominate the
-specified strategy.  If the strategy is undominated, returns a value
-of zero.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[N:] The game in normal form in which the specified strategy of the
-indicated player is to be tested for domination.
-\item
-[pl:] The number corresponding to the player for whom the specified
-strategy is to be tested for domination.
-\item
-[st:] The number corresponding to the strategy belonging to the
-indicated player which is to be tested for domination.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetInfosetName[n->NODE] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the name of the information set to which the
-specified node belongs.
-\item
-[Return value:] The name of the information set.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[n:] The node which belongs to the information set to be found.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetNextSibling[n->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the next sibling of the specified node.
-\item
-[Return value:] The node which is the next sibling of the specified
-node.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[n:] The node for which the next sibling is to be found.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
 GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
 
@@ -2407,119 +2365,6 @@ will be returned.
 
 \item
 [Optional paramteters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-
-\item
-[Description:] Finds the name of the specified outcome in the
-indicated game in extensive form.  If the outcome is not defined,
-an error is given.
-\item
-[Return value:] The name assigned to the indicated outcome.  By
-default, the name of an outcome is the empty string.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item	  
-[E:] The game in extensive form for which the outcome name is to be
-found.
-\item
-[outc:] The number corresponding to the outcome for which the name
-will be returned.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the name of the indicated player in the given
-game in extensive form.
-\item
-[Return value:] The name assigned to the indicated player.  If the
-indicated player has not been assigned a name or does not exist, the
-procedure returns the empty string.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item  
-[E:] The game in extensive form for which the player name is to be
-found.
-\item
-[pl:] The number assigned to the player whose name will be returned.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the name assigned to the specified strategy of
-the indicated player of the given game in normal form.
-\item
-[Return value:] Returns the name found.  If a name has not been
-assigned to the strategy, the empty string is returned.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[N:] The game in normal form in which the name assigned to the
-specified strategy of the indicated player is to be found.
-\item
-[pl:] The number corresponding to the player for which the name of the
-indicated strategy is to be found.
-\item
-[st:] The number corresponding to the strategy of the indicated player
-for which the name is to be found.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-GetTitle[E->EFG] =: TEXT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the title of the indicated game in extensive
-form.
-\item
-[Return value:] The title of the indicated extensive form game.  If
-the title has not been assigned, the empty string is returned.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[E:] The game in extensive form whose title is to be found.
-\ed
-
-\item
-[Optional parameters:] None.
 \ed
 
 \item
@@ -2608,22 +2453,36 @@ antecedent is false, returns value of $f$.
 
 \item
 \protect \large \begin{verbatim}
-*Include[TEXT]
+*Include[file->TEXT]
 \end{verbatim}\normalsize
 
+\bd
 \item
-\protect \large \begin{verbatim} 
-Infoset[name->TEXT, {efg->EFG}] =: INFOSET
-\end{verbatim}\normalsize
+[Description:] Includes the commands in the specified file as commands
+in the running GCL program.  The program treats the command as if it
+were replaced by the contents of the file.
+\item
+[Return value:] None.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[file:] Any expression which evaluates to a text string which is a
+valid filename.
+\ed
+
+\item
+[Optional parameters:] None.\hfil\null
+\ed
 
 \item
 \protect \large \begin{verbatim}
 *Infoset[node->NODE] =: INFOSET
 \end{verbatim}\normalsize
 
-\item
-\protect \large \begin{verbatim} 
-Infosets[name->TEXT, {efg->EFG}] =: LIST(INFOSET)
+\protect \large \begin{verbatim}
+Infosets[player->EFPLAYER] =: LIST(INFOSET)
 \end{verbatim}\normalsize
 
 \item
@@ -2633,35 +2492,36 @@ Infosets[name->TEXT, {efg->EFG}] =: LIST(INFOSET)
 
 \item
 \protect \large \begin{verbatim}
-InsertAction[n->NODE, as->1, br->3] =: NODE
+*InsertAction[infoset->INFOSET, at->ACTION] =: INFOSET 
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Inserts the indicated number of actions into the
-information set containing the specified node.
+[Description:] Inserts a new action into the information set before [Ted
+-- or after?] the indicated actions.  If no action is specified, it is
+inserted as the last action.
 \item
-[Return value:] Returns the specified node.
+[Return value:] Returns the information set. [Ted -- better to return action]
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[n:] The node which belongs to the information set which is to have
-actions inserted into it.
-\item
-[as:] The number which will correspond to the first inserted action.
-\item
-[br:] The number of actions to be inserted at the specified node.
+[infoset:] The information set which is to have a new
+action inserted into it.
 \ed
 
 \item
-[Optional parameters:] None.
+[Optional parameters:]\hfill\null
+\bd
+\item
+[at:] The number which will correspond to the first inserted action.
+\ed
 \ed
 
 \item
 \protect \large \begin{verbatim}
-*InsertNode[node->NODE, infoset->INFOSET] =: NODE (Ted -- which one?)
+*InsertNode[node->NODE, infoset->INFOSET] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -2670,7 +2530,7 @@ actions inserted into it.
 information set at the location of the specified node and moves that
 node to the end of the first branch of the new node.
 \item
-[Return value:] Returns the specified node.
+[Return value:] Returns the inserted node.
 \item
 [Required parameters:]\hfil\null
 
@@ -2685,36 +2545,6 @@ branch of the new node.
 
 \item
 [Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-IsDominated[strategy->STRATEGY,{nfg->NFG}] =: BOOL
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Determines if the strategy is dominated by another
-strategy in the given game in normal form.
-\item
-[Return value:] Returns True only if the specified strategy for the
-given player is dominated.  Returns false otherwise.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[strategy:] The number corresponding to the player for whom the specified
-strategy is to be tested for domination.
-\ed
-
-\item
-[Optional parameters:] \hfil\null
-\bd
-\item
-[nfg:] The game in normal form in which the specified strategy of the
-indicated player is to be tested for domination.
-\ed
 \ed
 
 \item
@@ -2799,14 +2629,14 @@ running.  Returns False otherwise.
 
 \item
 \protect \large \begin{verbatim}
-JoinInfoset[n->NODE, to->NODE] =: NODE
+JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Removes the first node specified from the information
-set to which it currently belongs and places it in the information set
-to which the second node given belongs.
+[Description:] Removes the fspecified node from the information set to
+which it currently belongs and places it in the specified information
+set.
 \item
 [Return value:] Returns the node $n$.
 \item
@@ -2814,7 +2644,7 @@ to which the second node given belongs.
 	  
 \bd
 \item
-[n:] The node which is to be removed from its current information set
+[node:] The node which is to be removed from its current information set
 and placed in the information set belonging to the second node given.
 \item
 [to:] The node belonging to the information set to which the first
@@ -2848,13 +2678,13 @@ LastAction[node->NODE] =: ACTION
 \item
 [Description:] For a normal form game, the game is set up as a linear
 complementarity problem, and solved via the Lemke-Howson Algorithm.
-(See, eg., Searches for equilibria of the specified normal form
-game specified using the Lemke-Howson algorithm, 
-\cite[1964]{LemHow:64} using Eaves' \cite[1971]{Eav:71}
-lexicographic rule for insuring termination.  
+(See, eg., Searches for equilibria of the specified normal form game
+specified using the Lemke-Howson algorithm (see
+\cite[1964]{LemHow:64}) using lexicographic rule for insuring
+termination, as developed in \cite[1971]{Eav:71}.
 
 For an extensive form game, this algorithm implements Koller, Megiddo
-and von Stengel's ``sequence form'' (\cite[1994]{KolMegSte:94}. The
+and von Stengel's {\em sequence form} (\cite[1994]{KolMegSte:94}. The
 sequence form is a formulation of the set of Nash equilibria as the
 solution to a non linear complementarity problem in variables that
 correspond to ``sequences'' in the extensive form, which they show can
@@ -3019,7 +2849,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 \bd
 \item
 [Description:] Finds Nash equilibria via the Lyapunov function method
-described in McKelvey \cite[1991]{McK:91}.  Works on either the
+described in \cite[1991]{McK:91}.  Works on either the
 extensive or normal form.  This algorithm casts the problem as a
 function minimization problem by use of a Lyapunov function for Nash
 equilibria.  This is a continuously differentiable non negative
@@ -3081,6 +2911,54 @@ Default is 2.0e-10.
 
 \item
 \protect \large \begin{verbatim}
+*LoadEfg[file->TEXT] =: EFG
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Loads an extensive form game (in standard format) from
+an external file.  
+\item
+[Return value:] The game in extensive form read from the file.
+\item
+
+[Required parameters:
+
+\bd
+\item
+[file:] The full path name of the file from which the extensive form game
+is to be read. \ed
+
+\item
+[Optional parameters:] None.\hfil\null
+\ed
+
+\item
+\protect \large \begin{verbatim}
+*LoadNfg[file->TEXT] =: NFG
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Loads a normal form game (in standard format) from
+an external file.  
+\item
+[Return value:] The normal form game read from the file.
+\item
+
+[Required parameters:
+
+\bd
+\item
+[file:] The full path name of the file from which the normal form game
+is to be read. \ed
+
+\item
+[Optional parameters:] None.\hfil\null
+\ed
+
+\item
+\protect \large \begin{verbatim}
 *Log[x->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
@@ -3118,7 +2996,7 @@ game is not two person, constant sum.
 LqreSolve[efg->EFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
-         {fullGraph->BOOLEAN},
+         {fullGraph->BOOL},
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->BEHAV}] =: LIST(BEHAV)
@@ -3128,7 +3006,7 @@ LqreSolve[efg->EFG(FLOAT),
 LqreSolve[nfg->NFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
-         {fullGraph->BOOLEAN},
+         {fullGraph->BOOL},
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->MIXED}] =: LIST(MIXED)
@@ -3167,8 +3045,8 @@ extensive form games, this algorithm can be used to compute an
 approximation to a sequential equilibrium.
 \item
 [Return value:] The List of Mixed (or Behavior) profiles found -- one
-profile for each value of $\lambda_t$.  If {\em fullGraph} is
-``False,'' then only the last value is returned.  
+profile for each value of $\lambda_t$.  If \verb+fullGraph+ is
+\verb+False+, then only the last value is returned.  
 \item 
 [Required parameters:]\hfil\null Exactly one of the following
 
@@ -3331,71 +3209,6 @@ For T = INTEGER, FLOAT, RATIONAL
 
 \item
 \protect \large \begin{verbatim}
-*MixedEnumSolve[nfg->NFG, {stopAfter->INTEGER},
-      {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds all Nash equilibria (pure and mixed) for a two
-person game.  More precisely, it finds the set of extreme points of
-the components of the set of Nash equilibria.  The procedure is to
-enumerate the set of complementary basic feasible solutions. (See, eg
-\cite[1964]{Man:64}.)
-\item
-[Return value:] The list of equilibria found.
-\item
-[Required parameters:]
-\bd
-\item
-[nfg:] The game in normal form for which the solutions are to be found.  
-\ed
-\item
-[Optional parameters:]\hfil\null
-
-\bd
-\item
-[stopAfter:] Specifies the maximum number of equilibria to find.  If
-not specified, the default value is zero, which means that all
-equilibria are found.  To check if there is a unique Nash equilibrium,
-one could set this parameter to 2.
-\item
-[nPivots:] Number of pivots. 
-\item
-[time:] Returns the elapsed time for the operation.
-\item
-\ed
-\ed
-
-\item
-\protect \large \begin{verbatim}
-MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Projects a specified vector of mixed profiles to a
-vector of behavioral profiles on the given extensive form game.
-\item
-[Return value:] Returns the vector of behavioral profiles.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[E:] The game in extensive form of which the vector of behavioral
-profiles is to be a subvariable.
-\item
-[mp:] The vector of mixed profiles which is to be projected to a
-vector of behavioral profiles.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-\protect \large \begin{verbatim}
 *Modulus[x->INTEGER, y->INTEGER] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -3462,74 +3275,39 @@ the second given node.
 Name[x->STRATEGY] =: TEXT
 \end{verbatim}\normalsize
 
-\item
-\protect \large \begin{verbatim}
-NameOf[n->NODE] =: TEXT
-\end{verbatim}\normalsize
-
 \bd
 \item
-[Description:] Returns the name of the specified node.
+[Description:] Finds the name of the specified object.
 \item
-[Return value:] The name of the specified node.
+[Return value:] The name of the object.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[n:] The node for which the name will be returned.
+[x:] The object whose name is to be found.
 \ed
 
 \item
 [Optional parameters:] None.
 \ed
 
-\item
-\protect \large \begin{verbatim} 
-*NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Allocates and returns a new extensive form game.
-\item
-[Return value:] The newly allocated game in extensive form.
-\item
-[Required parameters:] None.
-\item
-[Optional parameters:]\hfil\null
-
-\bd
-\item
-[players:] A list of players for the game.  If
-unspecified, the new game has only the chance player.
-\item
-[rational:] Specifies the type (Rational $=$ True, or Float $=$ False)
-of the new extensive form game.
-\ed
-\ed
 
 \item
 \protect \large \begin{verbatim} 
-*NewInfoset[player->PLAYER, actions->LIST(TEXT),
+*NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
             {name->TEXT}] =: INFOSET
-*NewInfoset[player->PLAYER, actions->INTEGER,
+*NewInfoset[player->EFPLAYER, actions->INTEGER,
             {name->TEXT}] =: INFOSET
 \end{verbatim}\normalsize
 
 
 \item   
 \protect \large \begin{verbatim}
-NewFunction[name->TEXT,arglist->LIST[ TEXT, BOOLEAN, TEXT], 
-            body->STATEMENTLIST] =: BOOLEAN
+*NewFunction[name[argument-list], body]
 \end{verbatim}\normalsize
 
 \bd
-\item
-[Short form:] 
-\protect \large \begin{verbatim}
-*NewFunction[name[argument-list], body]
-\end{verbatim}\normalsize
 \item
 [Description:] Creates a new function.  The return data type of the
 function is the return type of \verb+body+ on first evaluation.  It is
@@ -3547,8 +3325,30 @@ than all function names in current scope.
 \ed
 \item
 [Optional parameters:]\hfil\null
+\ed
+
+\item
+\protect \large \begin{verbatim} 
+*NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
+\end{verbatim}\normalsize
 
 \bd
+\item
+[Description:] Allocates and returns a new extensive form game.
+\item
+[Return value:] The newly allocated game in extensive form.
+\item
+[Required parameters:] None.\hfil\null
+\item
+[Optional parameters:]\hfil\null
+
+\bd
+\item
+[players:] A list of players for the game.  If
+unspecified, the new game has only the chance player.
+\item
+[rational:] Specifies the type (Rational $=$ True, or Float $=$ False)
+of the new extensive form game.
 \item
 [type:] Specifies the type (Float or Rational) of the new extensive
 form game.
@@ -3559,8 +3359,7 @@ form game.
 
 \noindent {\bf Note}: type param not implemented yet...
 \protect \large \begin{verbatim}
-*NewNfg[dim->LIST(INTEGER), {random->BOOL}, {seed->INTEGER},
-        {type->DATATYPE}] =: NFG
+*NewNfg[dim->LIST(INTEGER), {type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3584,17 +3383,10 @@ of a random normal form game with entries between 0 and 1.
 	
 \bd
 \item
-[random:] Setting to ``True'' generates a random game.  
-\item
-[seed:] Reseeds the random number generator with the given integer.  If the
-\verb+seed+ is unspecified, or is specified as 0, the created normal form
-has all zero entries.  Specifying the \verb+seed+ seeds the random number
-generator and generates a game with random payoffs.
-\item
-
 [type:] Specifies the type (Float or Rational) of the new normal form
 game.  This parameter defaults to \verb+Float+.
 \ed
+
 \ed
 
 \item
@@ -3633,13 +3425,32 @@ procedure returns a value of zero.  (Ted -- is there a default name?)
 
 \item
 \protect \large \begin{verbatim}
-*NewPlayer[{efg->EFG}, {name->TEXT}] =: PLAYER 
+*NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
 *NextSibling[node->NODE] =: NODE
 \end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Finds the next sibling of the specified node.
+\item
+[Return value:] The node which is the next sibling of the specified
+node.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[n:] The node for which the next sibling is to be found.
+\ed
+
+\item
+[Optional parameters:] None.
+\ed
+
 
 \item
 \protect \large \begin{verbatim}
@@ -3803,7 +3614,7 @@ which is to be found.
 
 \item
 \protect \large \begin{verbatim}
-*NumInfosets[player->PLAYER] =: INTEGER
+*NumInfosets[player->EFPLAYER] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -3904,13 +3715,14 @@ to be found.
 
 \item
 \protect \large \begin{verbatim}
-NumStrats[pl->INTEGER, {sset->INTEGER},{nfg->NFG}] =: INTEGER
+NumStrats[player->NFPLAYER,{support->SUPPORT}] =: INTEGER
 \end{verbatim}\normalsize
+
 \bd
 
 \item
 [Description:] Finds the number of strategies for the specified player
-in the given game in normal form.
+in the normal form game with given supports.
 \item
 [Return value:] Returns the number of strategies found.
 \item
@@ -3918,7 +3730,7 @@ in the given game in normal form.
 
 \bd
 \item
-[pl:] The number corresponding to the player in the given game in
+[player:] The number corresponding to the player in the given game in
 normal form for whom the number of strategies is to be found.
 \ed
 
@@ -3927,13 +3739,8 @@ normal form for whom the number of strategies is to be found.
 	
 \bd
 \item  
-[sset:] The number of the strategy set in which strategies for the
-specified player will be counted.  If not given the last (smallest)
-strategy set is used.
-\item
-[nfg:] The normal form game in which the number of strategies for the
-specified player is to be found.
-
+[support:] The support for the normal form game.  Default is all
+strategies for all players.  
 \ed
 \ed
 
@@ -4070,38 +3877,41 @@ node.
 
 \item
 \protect \large \begin{verbatim}
-PayoffEfg[strategy->BEHAV,{node->NODE}] =: LIST(T)
+Payoff[strategy->BEHAV] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-PayoffNfg[strategy->MIXED] =: LIST(T)
-\end{verbatim}\normalsize
-
-\item
-\protect \large \begin{verbatim} 
-Player[name->TEXT, {efg->EFG}] =: PLAYER
+Payoff[strategy->MIXED] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Player[infoset->INFOSET] =: PLAYER
-*Player[node->NODE] =: PLAYER
+*Player[infoset->INFOSET] =: EFPLAYER
 \end{verbatim}\normalsize
 
+\bd
 \item
-\protect \large \begin{verbatim} 
-Players[name->TEXT] =: LIST(PLAYER}
-\end{verbatim}\normalsize
+[Description:] Finds the player who makes the decision at the
+specified information set.
+\item
+[Return value:] Returns the number corresponding to the player found.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[infoset:] The information set for which the player making the
+decision is to be found.
+\ed
+
+\item
+[Optional parameters:] None.\hfil\null
+\ed
 
 \item
 \protect \large \begin{verbatim}
-*Players[{efg->EFG}] =: LIST(PLAYER)
-\end{verbatim} \normalsize
-
-\item
-\protect \large \begin{verbatim}
-PlayerOf[n->NODE] =: INTEGER
+*Player[node->NODE] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \bd
@@ -4115,7 +3925,7 @@ specified node.
 
 \bd
 \item
-[n:] The node for which the player making the decision is to be found.
+[node:] The node for which the player making the decision is to be found.
 \ed
 
 \item
@@ -4124,16 +3934,40 @@ specified node.
 
 \item
 \protect \large \begin{verbatim}
-PlayerList[E->EFG] =: LIST(PLAYER)
+*Players[efg->EFG] =: LIST(EFPLAYER)
 \end{verbatim} \normalsize
 
 \bd
 \item
-[Description:]
+[Description:] Finds the players of the given extensive form game. 
 \item
-[Return value:]
+[Return value:]  A list of players in the game
 \item
 [Required parameters:]
+\bd
+\item
+[efg:] The extensive form game for which to find the players.  
+\ed
+\item
+[Optional parameters:]
+\ed
+
+\item
+\protect \large \begin{verbatim}
+*Players[nfg->NFG] =: LIST(NFPLAYER)
+\end{verbatim} \normalsize
+
+\bd
+\item
+[Description:] Finds the players of the given normal form game. 
+\item
+[Return value:]  A list of players in the game
+\item
+[Required parameters:]
+\bd
+\item
+[nfg:] The normalform game for which to find the players.  
+\ed
 \item
 [Optional parameters:]
 \ed
@@ -4216,44 +4050,10 @@ node.
 \ed
 
 
-\item
-\protect \large \begin{verbatim}
-*PureEnumSolve[nfg->NFG, {stopAfter->INTEGER}, 
-          {time<->FLOAT}] =: LIST(MIXED) 
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Finds the pure strategy Nash equilibria in the
-specified normal form game.  
-\item
-[Return value:] The equilibria
-found.  
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[nfg:] The game in normal form for which the weak pure strategy Nash
-equilibria are to be found.
-\ed
-
-\item
-[Optional parameters:]\hfil\null
-	
-\bd
-\item
-[stopAfter:] Allows the user to set the maximum number of Nash equilibria to
-find.  Has a default value of 1.
-\item
-[time:] Returns the elapsed time for the operation.
-\ed
-\ed
-
-\item
-
 %--Q--
 
+
+\item
 \protect \large \begin{verbatim}
 Quit
 \end{verbatim}\normalsize
@@ -4274,6 +4074,14 @@ Quit
 
 \item
 \protect \large \begin{verbatim}
+RandomNfg[nfg->NFG, {random->BOOL}, {seed->INTEGER}] =: NFG
+\end{verbatim}\normalsize
+\protect \large \begin{verbatim}
+RandomEfg[efg->EFG, {random->BOOL}, {seed->INTEGER}] =: EFG
+\end{verbatim}\normalsize
+
+\item
+\protect \large \begin{verbatim}
 *Rational[x->INTEGER] =: RATIONAL
 *Rational[x->FLOAT] =: RATIONAL
 *Rational[x->RATIONAL] =: RATIONAL
@@ -4287,56 +4095,50 @@ Read[input->INPUT] =: [FLOAT,INTEGER,RATIONAL,TEXT,LIST]
 
 \item
 \protect \large \begin{verbatim}
-*ReadEfg[file->INPUT] =: EFG
+*ReadEfg[input->INPUT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Creates a new game whose contents are the extensive
-form game stored in the specified file.
+[Description:] Reads in an extensive form game from an input stream.  
 \item
-[Return value:] The game in extensive form read from the file.
+[Return value:] The game in extensive form read from the stream.
 \item
 
 [Required parameters:
 
 \bd
 \item
-[file:] Specifies the file from which the extensive form game is to be
-read.  If the file specified does not exist, an error message is
-returned.
+[input:] The input stream from which the extensive form game is to be
+read. 
 \ed
 
 \item
-[Optional parameters:] None.
+[Optional parameters:] None.\hfil\null
 \ed
 
 \item
 \protect \large \begin{verbatim}
-*ReadNfg[file->INPUT] =: NFG
+*ReadNfg[input->INPUT] =: NFG
 \end{verbatim}\normalsize
 \bd
 \item
-[Description:] Creates a new game whose contents are the normal
-form game stored in the specified file.  The file is read as a
-floating- point normal form unless otherwise specified by the user.
+[Description:] Reads a normal form game from an input stream.  
 \item
-[Return value:] The game in normal form read from the file.
+[Return value:] The game in normal form read from the stream.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[file:] Specifies the file from which the normal form game is to be
-read.  If the file specified does not exist, an error message is
-returned.
+[file:] The input stream from which the normal form game is to be
+read.  
 \ed
 
 \item
 [Optional parameters:]\hfil\null
-	
-
 \bd
+
 \item
 [type:] Indicates whether the file is to be read as a floating- point
 normal form or as a rational normal form.  If not given, the default
@@ -4346,7 +4148,7 @@ value is floating-point.
 
 \item
 \protect \large \begin{verbatim}
-RealizProbs[strategy->BEHAV,node->NODE] =: LIST(T) (all nodes ?)
+RealizProbs[strategy->BEHAV] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item
@@ -4356,45 +4158,46 @@ RealizProbs[strategy->BEHAV,node->NODE] =: LIST(T) (all nodes ?)
 
 \item
 \protect \large \begin{verbatim}
-RemoveStrategy[support->SUPPORT,LIST(STRATEGY)] =: SUPPORT
+RemoveStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
 \end{verbatim}\normalsize
 
 \item
-
 \protect \large \begin{verbatim}
-RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
+Reveal[infoset->INFOSET, who->LIST[EFPLAYER]], 
+	{what->LIST(ACTIONS)}] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Removes the specified outcome from the given game in
-extensive form.  All nodes with the specified outcome attached are
-reset to having no outcome attached.  If the outcome does not exist in
-the given game, no action is taken.  The outcomes remaining in the
-game are re-numbered, so that the number of the outcome removed is
-given to the outcome which previously had the next highest number, the
-number previously corresponding to this outcome is assigned to the
-outcome which previously had the next highest number, and so on.
-\item  
-[Return value:] Returns the modified extensive form game.
+[Description:] Reveals the list of actions at the given information
+set to the indicated players, refining their information partitions at
+all information sets in the extensive form game accordingly.  The list
+of actions is considered as a set Thus, it is indicated to the
+spceified players whether the set of actions in \verb+what+ or its
+complement has occurred.  If \verb+what+ is not specified, then all of
+the actions in the information set are individually revealed to
+the players specified.  
+\item
+[Return value:] Returns the information set \verb+infoset+.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The game in extensive form from which the specified outcome is
-to be removed.
-\item
-[outc:] The number corresponding to the outcome which is to be removed
-from the given game.  If no outcome with that number exists in the
-game, no action is taken.
-\ed
+[infoset:] The information set whose actions are to be revealed.  
 \ed
 
 \item
-\protect \large \begin{verbatim}
-Reveal[what->{TEXT,ACTION?},who->LIST[PLAYER]]] =: NODE     
-\end{verbatim}\normalsize
+[Optional parameters:]\hfil\null
+\bd
+\item
+[who:] The list of players to whom the actions are to be revealed.
+Default is all players. 
+\item
+[what:] The list of actions to be revealed.  
+\ed
+
+\ed
 
 
 \item
@@ -4422,84 +4225,87 @@ found.
 
 \ed
 
-\item
-
-\protect \large \begin{verbatim}
-Run[TEXT]
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Includes the commands in the specified file as commands
-in the running GCL program.  The program treats the command as if it
-were replaced by the contents of the file.
-\item
-[Return value:] None.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[TEXT:] Any expression which evaluates to a text string which is a
-valid filename.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
 %--S--
 
 \item
-
 \protect \large \begin{verbatim}
-SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
+*SaveEfg[file->TEXT,overWrite->BOOL] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Sets the name of the specified branch number of the
-indicated node to the name given.
+[Description:] Saves an extensive form game (in standard format) to an
+external file.  
 \item
-[Return value:] Returns the node specified.
+[Return value:] \verb+True+ on success, otherwise \verb+False+
 \item
-[Required parameters:]\hfil\null
-	
+
+[Required parameters:
+
 \bd
 \item
-[n:] The node at which the desired action occurs.
+[file:] The full path name of the file to which the extensive form game
+is to be saved. \ed
+
 \item
-[br:] The number of the branch or action ocurring at the given node
-which is to be assigned a name.
+[Optional parameters:]\hfil\null
+\bd
 \item
-[name:] The name which is to be assigned to the given action.
+[overWrite:] If \verb+True+, will overwrite the file.  If \verb+False+, will
+not overwrite an existing file.  
+\ed
 \ed
 
 \item
-[Optional parameters:] None.
-
-\ed
-
-\item
-
 \protect \large \begin{verbatim}
-SetActionProbs[n->NODE, probs->LIST(RATIONAL)] =: NODE
+*SaveNfg[file->TEXT,overWrite->BOOL] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Saves normal form game (in standard format) to an
+external file.  
+\item
+[Return value:] \verb+True+ on success, otherwise \verb+False+
+\item
+
+[Required parameters:
+
+\bd
+\item
+[file:] The full path name of the file to which the normal form game
+is to be saved. \ed
+
+\item
+[Optional parameters:]\hfil\null
+\bd
+\item
+[overWrite:] If \verb+True+, will overwrite the file.  If \verb+False+, will
+not overwrite an existing file.  
+\ed
+\ed
+
+\item
+
+\item
+\protect \large \begin{verbatim} 
+*SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
 \item
 [Description:] Sets the action probabilities to the specified values
 for the given node.  This is only meaninful for nodes in information
-sets belonging to the player representing chance (player 0).
+sets belonging to the chance player.
 \item
-[Return value:] Returns the node specified.
+[Return value:] Returns the information set specified.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[n:] The node at which the actions will be assigned the specified
-probabilities.
+[infoset:] The information set for chance at which the actions will be
+assigned the specified probabilities.
 \item
 [probs:] The vector of values which represent the probabilites which
 will be assigned to the actions at the indicated node.
@@ -4510,41 +4316,10 @@ will be assigned to the actions at the indicated node.
 \ed
 
 \item
-\protect \large \begin{verbatim} 
-*SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
-\end{verbatim}\normalsize
-
-\item
 \protect \large \begin{verbatim}
 SetFormat[output->OUTPUT,width->INTEGER, precis->INTEGER] =: OUTPUT
 \end{verbatim}\normalsize
 
-\item
-
-\protect \large \begin{verbatim}
-SetInfosetName[n->NODE, name->TEXT] =: NODE
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Assigns the given name given to the information set to
-which the indicated node belongs.
-\item
-[Return value:] Returns the node specified.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[n:] A node belonging to the information set which is to be assigned a
-name.
-\item
-[name:] The name which is to be assigned to the given information set.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -4558,229 +4333,93 @@ name.
 \end{verbatim}\normalsize
 
 \item
-
-\protect \large \begin{verbatim}
-SetNodeName[n->NODE, name->TEXT] =: NODE
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Assigns the given name to the specified node.
-\item
-[Return value:] Returns the specified node.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[n:] The node which is to have a name assigned.
-\item
-[name:] The name which is to be assigned to the specified node.
-\ed
-
-\item
-[Optional parameters:] None.
-\ed
-
-\item
 \protect \large \begin{verbatim}
 SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 \end{verbatim}\normalsize
 
+\item
+\protect \large \begin{verbatim}
+*SetPayoff[outcome->OUTCOME, player->PLAYER, payoff->T] =: OUTCOME
+\end{verbatim}\normalsize
 
+\bd
+\item
+[Description:] Sets the payoff  of the indicated outcome for the given
+player in extensive form, to the value specified.
+\item
+[Return value:] Returns the outcome.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[outcome:] The extensive form game in which the given outcome is to be
+assigned values.
+\ed
+
+\item
+[Optional parameters:] None.
+\bd
+\item
+[payoff:] The payoff which is to be assigned.
+\item
+[player:] The player whose payoff is to be set.  
+\ed
+\ed
 
 \item
 \protect \large \begin{verbatim}
-SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
+*SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
 \end{verbatim}\normalsize
-   
+
 \bd
 \item
-[Description:] Sets the value of the indicated outcome in the given
+[Description:] Sets the payoffs  of the indicated outcome in the given
 game in extensive form, to the values in the specified vector.
 \item
-[Return value:] Returns the modified game in extensive form.
+[Return value:] Returns the outcome.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The extensive form game in which the given outcome is to be
+[outcome:] The extensive form game in which the given outcome is to be
 assigned values.
-\item
-
-[outc:] The number corresponding to the outcome which is to be
-assigned values.  If no outcome with the given number exists, then it
-is created.
-\item
-[value:] The vector of payoffs (as a list of rationals) which are to
-be assigned to the outcome.  The length of `value` must match the
-number of players defined in the game.
 \ed
 
 \item
 [Optional parameters:] None.
-\ed
-
-\item
-
-\protect \large \begin{verbatim} 
-SetOutcome[E->EFG, outc->INTEGER,
-pl->INTEGER, value->RATIONAL] =: EFG
-\end{verbatim}\normalsize
-
 \bd
 \item
-[Description:] Sets the payoff to the player specified for the
-indicated outcome in the given game in extensive form to the given
-value.
-\item
-[Return value:] Returns the modified game in extensive form.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[E:] The extensive form game in which the given outcome is to be
-assigned a value for the specified player.
-\item
-[outc:] The number corresponding to the outcome which is to be
-assigned a value for the specified player.  If no outcome with the
-given number exists, no action is performed.
-\item
-[pl:] The player for which the payoff of the given outcome is to be
-set.
-\item
-[value:] The value (as a rational) which is to be assigned to the
-given outcome for the specified player.
+[payoffs:] The vector of payoffs which are to be assigned to the
+outcome.  The length of `value` must match the number of players
+defined in the game.
 \ed
-\ed
-
-\item
-
-\protect \large \begin{verbatim}
-SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Assigns to the outcome with the specified number the
-given title.
-\item
-[Return value:] Returns the modified game in extensive form.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[E:] The game in extensive form in which the indicated outcome is
-to be assigned the given title.
-\item
-[outc:] The number corresponding to the outcome which is to be
-assigned a title.
-\item
-[name:] The name which is to be assigned to the indicated outcome.
-\ed
-
-\item
-[Optional parameters:] None.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-*SetPayoff[outcome->OUTCOME, payoffs->LIST(T)] =: OUTCOME
+SetPayoffNfg[list->LIST(STRATEGY), player->PLAYER, 
+	payoff->T] =: LIST(STRATEGY)
 \end{verbatim}\normalsize
 
-
-
 \item
-
 \protect \large \begin{verbatim}
-SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
+SetPayoffNf[list->LIST(INTEGER), player->PLAYER, 
+	payoff->T] =: LIST(INTEGER)
 \end{verbatim}\normalsize
 
-\bd
 \item
-[Description:] Assigns to the player with the specified number the
-given name.
-\item
-[Return value:] Returns the modified game in extensive form.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[E:] The game in extensive form in which the indicated player is to
-be assigned a name.
-\item
-[pl:] The number corresponding to the player which is to be assigned a
-name.
-\item
-[name:] The name which is to be assigned to the specified player.
-\ed
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-
 \protect \large \begin{verbatim}
-SetStratName[N->NFG, pl->INTEGER, st->INTEGER,
-name->TEXT] =: NFG
+SetPayoffNfg[list->LIST(STRATEGY), payoffs->LIST(T)] =: LIST(STRATEGY)
 \end{verbatim}\normalsize
 
-\bd
 \item
-[Description:] Assigns the given name to the specified strategy of the
-indicated player in the given game in normal form.
-\item
-[Return value:] Returns the modified normal form game.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[N:] The game in normal form in which the given name is to be
-assigned to the specified strategy of the indicated player.
-\item
-[pl:] The number corresponding to the player for which the indicated
-strategy is to be assigned the given name.
-\item
-[st:] The number corresponding to the strategy of the indicated player
-to which the given name is to be assigned.
-\ed
-
-\item
-[Optional parameters:] None.
-
-\ed
-
-\item
-
 \protect \large \begin{verbatim}
-SetTitle[E->EFG, title->TEXT] =: EFG
+SetPayoffNfg[list->LIST(INTEGER), payoffs->LIST(T)] =: LIST(INTEGER)
 \end{verbatim}\normalsize
 
-\bd
-\item
-[Description:] Assigns the specified title to the given game in
-extensive form.
-\item
-[Return value:] Returns the modified game in extensive form.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[E:] The game in extensive form which is to be assigned a title.
-\item
-[title:] The title which is to be assigned to the given game in
-extensive form.
-\ed
 
-\item
-[Optional parameters:] None.
-\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -4969,27 +4608,21 @@ statement body, or NULL if the loop never executes.
 
 \item
 \protect \large \begin{verbatim}
+Write[output->OUTPUT, x->BEHAV] =: OUTPUT 
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
+Write[output->OUTPUT, x->EFG] =: OUTPUT
 Write[output->OUTPUT, x->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->FLOAT] =: OUTPUT
+Write[output->OUTPUT, x->MIXED] =: OUTPUT
+Write[output->OUTPUT, x->NFG] =: OUTPUT
 Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
 Write[output->OUTPUT, x->TEXT, {quoted->BOOL}] =: OUTPUT
 \end{verbatim}\normalsize
 
-
-\item
-
-\protect \large \begin{verbatim}
-*WriteEfg[{output->OUTPUT}, {efg->EFG}] =: OUTPUT
-\end{verbatim}\normalsize
-
 \bd
 \item
-[Description:] Writes the given extensive form game to the
-specified file.  Indicates in the file the type of the file(Float or
-Rational) immediately following the title string.  If the type is
-Float, the file contains floating point numbers and if the type is
-Rational, the file contains rational numbers.
+[Description:] Does a formatted write of the given object to an output
+stream. 
 \item
 [Return value:] Returns OUTPUT stream output
 \item
@@ -4997,37 +4630,9 @@ Rational, the file contains rational numbers.
 
 \bd
 \item
-[efg:] The game in extensive form which is to be written to the
-indicated file.
+[output:] The output stream to which the information is written.  
 \item
-[output:] The output file to which the extensive form game is to
-be written.
-\ed
-\ed
-
-\item
-
-\protect \large \begin{verbatim}
-*WriteNfg[{output->OUTPUT}, {nfg->NFG}, {sset->INTEGER}] =: OUTPUT
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Writes the given normal form game to the specified
-file.
-\item
-[Return value:] Returns the same normal form game.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[nfg:] The game in normal form which is to be written to the
-indicated file.
-
-\item
-[output:] The output stream to which the normal form game is to be
-written.
+[x:] The object which is to be written.  
 \ed
 \ed
 
