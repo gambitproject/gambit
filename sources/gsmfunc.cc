@@ -100,8 +100,18 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
       }
       else
       {
-	_FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
-	  func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->Copy();
+	if( func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
+	   ShadowOf() == 0 )
+	{
+	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
+	    func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->Copy();
+	}
+	else
+	{
+	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
+	    func._FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->
+	      ShadowOf()->Copy();
+	}
       }
       _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference =
 	func._FuncInfo[ f_index ].ParamInfo[ index ].PassByReference;
@@ -128,7 +138,11 @@ FuncDescObj::~FuncDescObj()
   {
     for( index = 0; index < _FuncInfo[ f_index ].NumParams; index ++ )
     {
-      delete _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue;
+      if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 &&
+	 _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->ShadowOf() == 0)
+      {
+	delete _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue;
+      }
     }
     if( _FuncInfo[ f_index ].UserDefined )
     {
@@ -759,8 +773,18 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	
 	if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	{
-	  _Param[ index ] = 
-	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
+	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+	     ShadowOf() == 0 )
+	  {
+	    _Param[ index ] = 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
+	  }
+	  else
+	  {
+	    _Param[ index ] = 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		ShadowOf()->Copy();
+	  }
 	}
 	else
 	{
@@ -785,9 +809,19 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  {
 	    if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	    {
-	      _Param[ index ] = 
-		_FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		  Copy();
+	      if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		 ShadowOf() == 0 )
+	      {
+		_Param[ index ] = 
+		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		    Copy();
+	      }
+	      else
+	      {
+		_Param[ index ] = 
+		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		    ShadowOf()->Copy();
+	      }
 	    }	  
 	  }
 	}

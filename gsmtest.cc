@@ -2538,6 +2538,82 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->InitCallFunction( "DefaultEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "ReadDefaultEfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "e02rat.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "ReadDefaultEfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->PushRef( "test_efg" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "e02rat.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "CopyDefaultEfg" );
+  machine->PushRef( "test_efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "DefaultEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestDefEfg" );
+  machine->CallFunction();
+  machine->Dump();
+
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 

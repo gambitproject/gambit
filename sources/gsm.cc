@@ -20,6 +20,15 @@
 #include "infoset.h"
 #include "node.h"
 
+#include "extform.h"
+
+
+//--------------------------------------------------------------------
+//                 global variables
+//--------------------------------------------------------------------
+
+Portion* _DefaultEfgShadow = 0;
+
 
 //--------------------------------------------------------------------
 //              implementation of GSM (Stack machine)
@@ -39,8 +48,12 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
   _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
   _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
-  _FuncTable     = new FunctionHashTable;
+ 
+  _DefaultEfgShadow = new Error_Portion;
+  _DefaultEfgShadow->ShadowOf() = 
+    new Efg_Portion<double>( * new ExtForm<double> );
   
+  _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
 }
 
@@ -49,6 +62,10 @@ GSM::~GSM()
 {
   Flush();
   delete _FuncTable;
+
+  delete _DefaultEfgShadow->ShadowOf();
+  delete _DefaultEfgShadow;
+
   assert( _RefTableStack->Depth() == 1 );
   delete _RefTableStack->Pop();
   delete _RefTableStack;

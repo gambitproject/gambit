@@ -123,13 +123,14 @@ private:
      );
 
 protected:
+  FuncDescObj( FuncDescObj& func );
+
   gString        _FuncName;
   int            _NumFuncs;
   FuncInfoType*  _FuncInfo;
 
   
 public:
-  FuncDescObj( FuncDescObj& func );
   FuncDescObj( const gString& func_name );
   virtual ~FuncDescObj();
 

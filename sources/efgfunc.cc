@@ -17,6 +17,80 @@ Portion *GSM_NewEfg(Portion **param)
   return new Efg_Portion<double>(*E);
 }
 
+
+
+
+extern Portion* _DefaultEfgShadow;
+
+Portion* GSM_DefaultEfg( Portion** param )
+{
+  return _DefaultEfgShadow->ShadowOf()->Copy();
+}
+
+Portion *GSM_ReadDefaultEfg(Portion **param)
+{
+  gInput &f = ((Input_Portion *) param[0])->Value();
+
+  if (f.IsValid())   {
+    DataType type;
+    bool valid;
+
+    EfgFileType(f, valid, type);
+    if (!valid)   return 0;
+    
+    switch (type)   {
+      case DOUBLE:  {
+	ExtForm<double> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+
+	if (E)
+	{
+	  delete _DefaultEfgShadow->ShadowOf();
+	  _DefaultEfgShadow->ShadowOf() = new Efg_Portion<double>(*E);
+	  return new bool_Portion( true );
+	}
+	else
+	  return 0;
+      }
+      case RATIONAL:   {
+	ExtForm<gRational> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+	
+	if (E)
+	{
+	  delete _DefaultEfgShadow->ShadowOf();
+	  _DefaultEfgShadow->ShadowOf() = new Efg_Portion<gRational>(*E);
+	  return new bool_Portion( true );
+	}
+	else
+	  return 0;
+      }
+    }
+  }
+  else
+    return 0;
+}
+
+
+Portion* GSM_CopyDefaultEfg( Portion** param )
+{
+  delete _DefaultEfgShadow->ShadowOf();
+  _DefaultEfgShadow->ShadowOf() = param[0]->Copy();
+  return param[0]->Copy();
+}
+
+
+Portion* GSM_TestDefEfg( Portion** param )
+{
+  return param[0]->Copy();
+}
+
+
+
+
+
+
+
 //
 // Utility functions for converting gArrays to List_Portions
 // (perhaps these are more generally useful and should appear elsewhere?
@@ -267,6 +341,28 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NewEfg");
   FuncObj->SetFuncInfo(GSM_NewEfg, 0);
   gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("DefaultEfg");
+  FuncObj->SetFuncInfo(GSM_DefaultEfg, 0);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ReadDefaultEfg");
+  FuncObj->SetFuncInfo(GSM_ReadDefaultEfg, 1);
+  FuncObj->SetParamInfo(GSM_ReadDefaultEfg, 0, "file", porINPUT);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("CopyDefaultEfg");
+  FuncObj->SetFuncInfo(GSM_CopyDefaultEfg, 1);
+  FuncObj->SetParamInfo(GSM_CopyDefaultEfg, 0, "efg", porEFG);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("TestDefEfg");
+  FuncObj->SetFuncInfo(GSM_TestDefEfg, 1);
+  FuncObj->SetParamInfo(GSM_TestDefEfg, 0, "efg", porEFG,
+			_DefaultEfgShadow );
+  gsm->AddFunction(FuncObj);
+
+
 
 //-----------------------------------------------------------
 

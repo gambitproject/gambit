@@ -1059,7 +1059,10 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
-{ s << "ExtForm[ "; _Value->GetTitle(); s << ']'; }
+{
+  s << "ExtForm[ "; _Value->GetTitle(); s << "] "; 
+  PrintPortionTypeSpec( s, Type() );
+}
 
 
 
@@ -1220,6 +1223,7 @@ Output_Portion::~Output_Portion()
   _RefCountTable( _Value )--;
   if( _RefCountTable( _Value ) == 0 )
   {
+    _RefCountTable.Remove( _Value );
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;
@@ -1280,6 +1284,7 @@ Input_Portion::~Input_Portion()
   _RefCountTable( _Value )--;
   if( _RefCountTable( _Value ) == 0 )
   {
+    _RefCountTable.Remove( _Value );
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;
