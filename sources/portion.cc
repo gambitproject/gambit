@@ -2387,6 +2387,7 @@ void ListPortion::Output( gOutput& s ) const
   int i;
   int length = _Value->Length();
 
+  s << PortionTypeToText( DataType() );
   s << "{";
   if( length >= 1 )
   {
@@ -2442,6 +2443,7 @@ int ListPortion::Insert( Portion* item, int index )
     if( _Value->Length() == 0 )
       _Owner = item->Original()->Owner();
     _DataType = item_type;
+    ((ListPortion*) Original())->_DataType = item_type;
     result = _Value->Insert( item, index );
   }
   else  // inserting into an existing list
@@ -2544,12 +2546,7 @@ Portion* ListPortion::Subscript( int index )
   else
     return 0;
 }
-
-
-
-
-//--------------------------------------------------------------------
-//             miscellaneous PortionType functions
+//-------------------------------------------------------------------
 //--------------------------------------------------------------------
 
 
