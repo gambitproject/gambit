@@ -642,7 +642,7 @@ gMatrix<T>::SetRow(int row, const gVector<T> &v)
 }
 
 template <class T> void
-gMatrix<T>::RotateUp(int lo, int hi)
+gMatrix<T>::RotateDown(int lo, int hi)
 {
   assert( CheckRow(lo) && CheckRow(hi) );
   assert(lo<=hi);
@@ -655,7 +655,7 @@ gMatrix<T>::RotateUp(int lo, int hi)
 }
 
 template <class T> void
-gMatrix<T>::RotateDown(int lo, int hi)
+gMatrix<T>::RotateUp(int lo, int hi)
 {
   assert( CheckRow(lo) && CheckRow(hi) );
   assert(lo<=hi);
@@ -667,6 +667,39 @@ gMatrix<T>::RotateDown(int lo, int hi)
   data[hi]=temp;
 }
 
+template <class T> void
+gMatrix<T>::RotateRight(int lo, int hi)
+{
+  assert( CheckColumn(lo) && CheckColumn(hi) );
+  assert(lo<=hi);
+
+  T temp;
+  for(int i=MinRow(); i<=MaxRow(); i++)
+    {
+      T *row= data[i];
+      temp= row[hi];
+      for(int j=hi; j>lo; j--)
+	row[j]= row[j-1];
+      row[lo]= row[hi];
+    }
+}
+
+template <class T> void
+gMatrix<T>::RotateLeft(int lo, int hi)
+{
+  assert( CheckColumn(lo) && CheckColumn(hi) );
+  assert(lo<=hi);
+
+  T temp;
+  for(int i=MinRow(); i<=MaxRow(); i++)
+    {
+      T *row= data[i];
+      temp= row[low];
+      for(int j=lo; j<hi; j++)
+	row[j]= row[j+1];
+      row[hi]= temp;
+    }
+}
 
 // column manipulation
 

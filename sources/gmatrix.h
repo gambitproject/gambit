@@ -125,6 +125,8 @@ public:
 //  void SwapRows(int, int); // use SwitchRows
   void RotateUp(int lo, int hi);
   void RotateDown(int lo, int hi);
+  void RotateLeft(int lo, int hi);
+  void RotateRight(int lo, int hi);
 
 };
 
