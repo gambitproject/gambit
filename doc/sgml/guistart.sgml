@@ -6,6 +6,14 @@ using a simplified game of poker to illustrate the main features and
 concepts.
 </para>
 
+<para>
+This section is written assuming you, the reader, are familiar with
+the basic concepts and terminology of noncooperative game theory.  Students
+learning game theory for the first time might want to have a reference
+or text handy for any unfamiliar terms.
+</para>
+
+
 <sect1 id="gui.poker">
 <title>A simple game of poker</title>
 <para>
@@ -187,8 +195,12 @@ next sections.
 
 <sect1 id="gui.start.efgnash">
 <title>Finding Nash equilibria using the extensive form</title>
+
+<sect2 id="gui.start.efgnash.dom">
+<title>Finding and eliminating dominated actions</title>
 <para>
-The analysis begins by searching for actions which might be dominated
+The analysis of the game might begin by searching for actions which are
+dominated
 by other actions at the same move.  The <guimenuitem>Dominance</guimenuitem>
 item on the <guimenu>Tools</guimenu> menu presents a dialog box giving
 options for finding dominated actions:
@@ -228,14 +240,22 @@ in the game may be considered in doing elimination.
 </listitem>
 </itemizedlist>
 In this example, we will look for one Nash equilibrium of this game, so we
-will conditionally eliminat weakly dominated strategies iteratively
+will conditionally eliminate weakly dominated actions iteratively
 for all players, as shown in the screenshot.
-<footnote>
+<tip>
 <para>
-For an overview of tips and techniques for finding Nash equilibria,
+Eliminating dominated actions or strategies is frequently a good idea
+before running algorithms, as the running time of most algorithms
+depends strongly on the size of the game, as measured by the number of
+actions or strategies.  Eliminating dominated actions or strategies,
+which cannot appear in a Nash equilibrium, can enhance algorithm
+performance greatly.
+</para>
+<para>
+For a general overview of tips and techniques for finding Nash equilibria,
 see <xref linkend="app.alg.start">.
 </para>
-</footnote>
+</tip>
 </para>
 <para>
 After clicking <guilabel>OK</guilabel>, a progress dialog briefly
@@ -270,6 +290,10 @@ the support we obtained by our dominance elimination.  If you select
 to its original form, and the &quot;Fold&quot; action in Fred's first
 information set will appear in black in the schematic display.
 </para>
+</sect2>
+
+<sect2 id="gui.start.efgnash.computing">
+<title>Computing Nash equilibria</title>
 
 <para>
 To compute Nash equilibria for the game, use the 
@@ -282,18 +306,22 @@ two-person constant-sum game, all the available algorithms are shown.
 </para>
 
 <para>
-Algorithms are divided into two groups:
+The choices in this dialog are divided into two groups.
 <itemizedlist>
 <listitem>
 <para>
 Standard algorithms.  These are algorithms and parameter settings 
-chosen as being recommended for computing the given number and type of
-equilibria shown.
+which are generically recommended for computing the given number and type of
+equilibria shown.  For example, &quot;One Nash equilibrium&quot; will
+select an algorithm which is generally suited for finding a single
+Nash equilibrium in a game.  These are easier-to-use front ends to the
+&quot;custom&quot; algorithms.
 </para>
 </listitem>
 <listitem>
 <para>
-Custom algorithms.  These are the actual algorithms implemented in
+Custom algorithms.  These are direct interfaces to the specific algorithms
+implemented by
 Gambit.  Selecting these displays a corresponding panel presenting the
 options available to configure the algorithm's behavior.
 </para>
@@ -385,7 +413,7 @@ by default, action probabilities are shown below each branch.  (Which
 labels are shown at nodes and actions can be customized using the
 dialog accessed from the <guimenuitem>Legends</guimenuitem> item on
 the <guisubmenu>Display</guisubmenu> submenu on the <guimenu>Format</guimenu>
-menu.
+menu.)
 </para>
 
 <para>
@@ -437,18 +465,748 @@ and display the normal form of the game.  The next section will cover how
 to view the normal form of the game, and how to compute Nash equilibria in
 mixed profiles.
 </para>
+</sect2>
 
 </sect1>
 
 <sect1 id="gui.start.nfgnash">
 <title>Finding Nash equilibria using the normal form</title>
+
+<para>
+If you are following along from the previous section, go ahead and
+close the window containing the poker game, and reload it afresh
+in a new window.  (Alternatively, you can right-click on the profile
+you computed before, and select <guimenuitem>Delete profile</guimenuitem>
+from the popup menu that appears.)
+</para>
+
 <para>
 Given an extensive form game, the (reduced) normal form is computed and
 displayed using the <guimenuitem>Reduced</guimenuitem> item on the
 <guisubmenu>Normal form</guisubmenu> submenu of the <guimenu>Tools</guimenu>
+menu.  The reduced normal form appears in a separate frame from the
+extensive form.
+<note>
+<para>
+The &quot;reduced normal form&quot; as constructed by Gambit is based only
+on the tree and information structure of the extensive form, and not on any
+payoff or outcome information.  Therefore, it is possible for a player to
+have multiple strategies which have identical payoffs in all contingencies
+depending on the payoff structure in the extensive form.  Note that this
+may differ from some definitions of &quot;reduced normal form&quot;.
+</para>
+</note>
+</para>
+
+<para>
+The general menu and feature layout of the normal form window is parallel
+to that of the extensive form, so analyzing the game in normal form will
+seem familiar after the previous section.
+</para>
+
+<sect2 id="gui.start.nfgnash.dom">
+<title>Finding and eliminating dominated strategies</title>
+<para>
+Once again, begin by looking for dominated strategies in the game.
+Dominated strategies can be eliminated from a support using 
+the <guimenuitem>Dominance</guimenuitem>
+item on the <guimenu>Tools</guimenu> menu, as in the extensive form.
+In the normal form, however, it is also possible to view dominated strategies
+directly on the game matrix.  Selecting <guimenuitem>Dominance</guimenuitem>
+from the <guimenu>View</guimenu> menu adds an additional row and column to
+the game matrix, indicating which strategies are dominated by other
+pure strategies in the matrix.  The letter <guilabel>S</guilabel> in
+this field indicates a strategy which is strictly dominated by another
+strategy; <guilabel>W</guilabel> one which is weakly dominated; and
+<guilabel>N</guilabel> one which is not dominated.  This column is toggled
+on and off at each selection of the menu item.
+</para>
+
+<para>
+In the case of this poker game, two strategies, labeled 
+<guilabel>21</guilabel> and <guilabel>22</guilabel>, are weakly dominated
+for the row player (Player 1).  The strategy <guilabel>21</guilabel>
+is where Player 1 plays his second action at his first information set
+(that is, <guilabel>Fold</guilabel> with the red card), and his first
+action at his second information set (that is, <guilabel>Raise</guilabel>
+with the black card).  In the extensive form, it was seen that 
+<guilabel>Fold</guilabel> was weakly dominated with the red card, and
+so the corresponding reduced normal form strategy is also weakly dominated.
+</para>
+
+<para>
+To actually prepare a support with dominated strategies eliminated,
+for subsequent use in computing equilibria,
+use the <guimenuitem>Dominance</guimenuitem> item on the
+<guimenu>Tools</guimenu> menu to
+present a dialog box giving
+options for finding dominated strategies, with 
+five sets of options:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>Type</guilabel>: Strategies can be removed based upon either
+strong (or strict) dominance, or weak dominance;
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Method</guilabel>: If <guilabel>Pure</guilabel> is selected,
+strategies are only compared to other pure strategies of the player
+to determine dominance.  For normal form games, elimination against
+mixed strategies is also available, which uses a
+linear programming formulation to locate strategies which are dominated by
+a mixture of other strategies.  Note that elimination by mixed strategies
+is generally significantly more computationally intensive than by pure
+strategies.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Precision</guilabel>: Only relevant if <guilabel>Method</guilabel>
+is set to <guilabel>Mixed</guilabel>; selects whether to solve the
+linear programming problem in the machine's floating-point 
+(<guilabel>Float</guilabel>) precision, or to use 
+(<guilabel>Rational</guilabel>) numbers, which is more exact, but much
+slower.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Depth</guilabel>: How many iterations to perform; either one
+round (<guilabel>One level</guilabel>) or repeat until no dominated
+strategies are found on the iteration (<guilabel>Iteratively</guilabel>).
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Players</guilabel>: Actions for all, or only some, of the players
+in the game may be considered in doing elimination.
+</para>
+</listitem>
+</itemizedlist>
+Once again we will look for one Nash equilibrium of this game, so we
+can safely eliminate weakly dominated strategies iteratively.
+</para>
+
+<para>
+After clicking <guilabel>OK</guilabel>, a progress dialog briefly
+appears, and then the game display presents a game table with strategies
+eliminated from the support hidden.
+</para>
+<para>
+As in the extensive from, Gambit tracks the computed supports generated
+during the dominance elimination.  These can be viewed either using the
+<guimenuitem>Supports</guimenuitem> item on the <guimenu>View</guimenu>
+menu, or by selecting the <guilabel>Supports</guilabel> tab on the
+navigation notebook at the left of the window.  The outline presentation
+of the support is similar to that in the extensive form.
+</para>
+</sect2>
+
+<sect2 id="gui.start.nfgnash.computing">
+<title>Computing Nash equilibria</title>
+
+<para>
+To compute Nash equilibria in mixed strategies for the game, use the 
+<guimenuitem>Equilibrium</guimenuitem> item on the <guimenu>Tools</guimenu>
+menu.  This dialog parallels the structure of the extensive form version,
+presenting both a list of suggested &quot;standard&quot; algorithm settings for
+use for particular purposes, and direct &quot;custom&quot;
+interfaces to the implemented algorithms.  The algorithms available
+may again depend on the details of the game.
+</para>
+
+<para>
+For this example, we will select &quot;one Nash equilibrium.&quot; 
+This also solves the game using a linear complementarity program
+(<function>LcpSolve</function>), this time using the algorithm of
+Lemke and Howson <citation><xref linkend="LemHow64"></citation>
+as refined by Eaves <citation><xref linkend="Eav71"></citation>.
+</para>
+
+<para>
+After clicking <guilabel>OK</guilabel>, a progress box briefly appears.
+When the algorithm completes, the profiles panel is now shown at the
+bottom of the tree window, with one profile shown.  
+The profile is also displayed in cells labeled <guilabel>Prob</guilabel>
+(for &quot;probability&quot;) on the game matrix.
+The presentation on the profiles panel is similar to the extensive form,
+including fields for:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>Name</guilabel>: A label for the profile.  This is automatically
+generated, and can be changed by double-clicking the profile's entry in
+the profile list to display the <guilabel>Properties</guilabel> dialog.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Creator</guilabel>: The algorithm which created the profile, or
+<guilabel>User</guilabel> if the profile was created or modified by the user.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Nash</guilabel>: Indicates if the profile is a Nash equilibrium; 
+in this case, this field displays <guilabel>Y</guilabel> to indicate it is.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Perfect</guilabel>: Indicates if the profile is a trembling-hand
+perfect Nash equilibrium; 
+in this case, this field displays <guilabel>Y</guilabel> to indicate it is.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Liap value</guilabel>: Displays the Lyapunov value (see
+<citation><xref linkend="McK91"></citation>) of the profile.  The
+Lyapunov value is zero exactly when the profile is a Nash equilibrium.
+</para>
+</listitem>
+</itemizedlist>
+The remaining fields in the profile list display the probabilities
+assigned to each action by the profile.  These are labeled in the format
+<guilabel>x:y</guilabel>, where <guilabel>x</guilabel> gives the
+player number, and <guilabel>y</guilabel> gives the strategy number.
+Strategies are numbered in the order in which they appear in the full
+support.
+</para>
+
+<para>
+This equilibrium involves Player 1 playing strategy <guilabel>11</guilabel>
+with probability one-third, and strategy <guilabel>12</guilabel> with
+probability two-thirds.  Player 2 plays strategy <guilabel>1</guilabel>
+with probability two-thirds, and strategy <guilabel>2</guilabel> with
+probability one-third.
+</para>
+
+<para>
+What is the behavior strategy equivalent of this mixed strategy profile?
+When both the extensive and normal form representations of a game are
+shown, Gambit automatically maps profiles computed in one representation
+to the (an) equivalent representation in the other.  Return to the
+extensive form window of the poker game, and select the
+<guimenuitem>Profiles</guimenuitem> item from the <guimenu>View</guimenu>
+menu.  The familiar profile list will appear, containing one entry, which
+is the behavior strategy representation of the mixed strategy computed
+in the normal form.
+</para>
+
+<para>
+Whenever both extensive and normal form views are open, Gambit keeps
+the profile lists synchronized, so additions, deletions, and changes
+to one list are reflected in the other window as well.  For mappings from
+mixed strategies to behavior strategies, Kuhn's Theorem is used; for
+mappings from behavior strategies to mixed strategies, a mixed strategy
+with that behavior strategy representation is used.  (Note that the
+latter representation need not be unique.)
+<footnote>
+<para>
+These mappings are only valid if the game is of perfect recall.  Gambit
+will still do the mapping for a game of imperfect recall, but the results
+may be unpredictable.
+</para>
+</footnote>
+</para>
+
+<para>
+The relationship between the extensive and normal form windows is kept
+so long as no changes are made to either game.  Gambit currently permits
+editing both the original extensive form while the normal form is shown,
+and editing of a generated normal form.  In either case, the relationship
+between the games is broken, and further edits to the profile lists are
+no longer mapped between the windows.
+</para>
+
+<warning>
+<para>
+For this reason, the relationship between the extensive and normal form
+views is a bit fragile in releases in the 0.97.0 series.  An improved
+interface for handling the relationship more cleanly is scheduled for
+the 0.97.1 releases.  In the meanwhile, it is recommended that you
+avoid editing games when both the extensive and normal form representations
+are displayed.  If you want to edit an extensive form game, close the
+normal form view first, make your edits, and regenerate the normal form.
+If you want to edit the generated normal form, save it to a file first,
+then reload it in a new independent window.
+</para>
+
+<para>
+Some of the internal restrictions in Gambit which cause this are in
+the process of being removed, after which the interface for editing
+games in this situation should be more streamlined.
+</para>
+</warning>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="gui.poker.build">
+<title>Creating the poker game from scratch</title>
+
+<para>
+Suppose you didn't have access to the poker game file, and wanted to
+build it yourself.  This section describes one way to build the game
+using the graphical interface.  There are in general many ways to
+construct a game tree in Gambit; this section illustrates one way with
+the goals of demonstrating most of the common tree-building operations,
+and to show how games with repeated structure can be constructed
+with relative ease using the available operations.
+</para>
+
+<sect2 id="gui.poker.build.newgame">
+<title>Creating an extensive form game</title>
+
+<para>
+When you launch Gambit fresh, a window containing a trivial extensive
+form game with only a root node and no outcomes appears.  You can also
+create a new extensive form game by selecting the
+<guimenuitem>New</guimenuitem> item on the <guimenu>File</guimenu>
+menu in any Gambit window.  The following dialog appears:
+<screenshot>
+<graphic fileref="newgame.png">
+</screenshot>
+Since we want to create an extensive form, select the
+<guilabel>Extensive form</guilabel> option under 
+<guilabel>Representation</guilabel>.  Our game has two players, so the
+number of players is already set correctly.  Pressing the
+<guilabel>OK</guilabel> button dismisses the dialog, and a new 
+trivial extensive form game is presented in its own window.
+<note>
+<para>
+In the current Gambit implementation, players may be added to an extensive
+form game after creation.  However, players cannot be added to a normal
+form game after this step.
+</para>
+</note>
+</para>
+</sect2>
+
+<sect2 id="gui.poker.build.title">
+<title>Setting the game's title</title>
+
+<para>
+First, you might want to set the game's title, which is
+used to identify the game in the caption of the frame.  General properties
+of the game are edited in the <guilabel>Game properties</guilabel> dialog,
+corresponding to the <guimenuitem>Game</guimenuitem> item on the
+<guimenu>Edit</guimenu> menu.  This dialog also features a
+<guilabel>Comment</guilabel> field, which permits free-form text comments
+(useful for citations or other notes, for example).
+</para>
+
+<para>
+It is also generally a Good Idea to save your work frequently, especially
+if you're working on a larger game.  To save the game for the first time,
+use the <guimenuitem>Save</guimenuitem> or <guimenuitem>Save as</guimenuitem>
+items on the <guimenu>File</guimenu> menu, or the floppy disk icon on
+the toolbar.  These call your windowing system's native file dialog and
+prompt you for the location of the file to save.
+</para>
+
+<para>
+Once you've saved your game the first time, subsequent visits to
+the <guimenuitem>Save</guimenuitem> item, or clicks on the save icon on
+the toolbar, save a copy of the game in the same location.  To save
+the game in a different file, use <guimenuitem>Save as</guimenuitem> to
+show the file dialog to select a new path and file.
+<note>
+<para>
+Some users on Windows have reported problems saving files to a floppy
+disk using versions 0.97.0.x of Gambit.  We're trying to figure out what
+the problem might be, as it's not always reproducible.  For now, a
+good workaround is to copy files to a fixed disk for editing, then
+move them to the floppy afterwards.
+</para>
+</note>  
+</para>
+
+</sect2>
+
+<sect2 id="gui.poker.build.rootnode">
+<title>Adding the root node</title>
+
+<para>
+We'll begin by adding the root node of the tree, which is a move by
+Chance to deal Player 1 a red card or a black card with equal
+probabilities.  To add this move, left click on the root node.
+Clicking on a node selects it, which is indicated by the node being
+drawn in a thicker line, and makes it the target for subsequent 
+operations.  To change the selected node, simply click on a different
+node; to unselect all nodes, click anywhere on the tree window that isn't
+a node.
+</para>
+
+<para>
+With the root node selected, next choose
+<guimenuitem>Insert</guimenuitem> from the <guimenu>Edit</guimenu>
+menu.   Equivalently, one can right click on the root node, and select
+<guimenuitem>Insert move</guimenuitem> from the context menu that appears.
+</para>
+
+<para>
+In this dialog, select <guilabel>Chance</guilabel> as the player who
+will have the move at this node.  There are no information sets in the
+game at this point, so <guilabel>New</guilabel> will be selected in
+the <guilabel>Information set</guilabel> list.  The 
+<guilabel>Number of actions</guilabel> will be set to 2, since Chance has
+two actions at this move.  When all selections are made, the dialog
+appears like
+<screenshot>
+<graphic fileref="insertmove.png">
+</screenshot>
+Click <guilabel>OK</guilabel> to add the node to the tree.  The tree is
+redisplayed, sporting its new Chance move:
+<screenshot>
+<graphic fileref="poker-step1.png">
+</screenshot>
+By default, chance moves are given equal probabilities of one-half, as
+displayed below the branches.  These actions are not yet labeled; to
+give them labels, select the root node and either choose the
+<guimenuitem>Move</guimenuitem> item from the <guimenu>Edit</guimenu>
+menu, or right-click on the root node and select
+<guimenuitem>Edit move</guimenuitem>.  Either method presents the a
+dialog for modifying properties of the selected move: 
+<screenshot>
+<graphic fileref="editmove.png">
+</screenshot>
+To label the first action (the one displayed uppermost on the tree)
+<guilabel>Red</guilabel>, click on the first row of the 
+<guilabel>Actions</guilabel> list, and enter the text <guilabel>Red</guilabel>
+in the <guilabel>Action name</guilabel> box.  Since in this game, the
+probability a red card is drawn is one-half, we can leave the 
+<guilabel>Probability</guilabel> field set to <guilabel>1/2</guilabel>.
+To add the label for the second action, click on the second row of the
+<guilabel>Actions</guilabel> list.  The list is automatically updated with
+the label <guilabel>Red</guilabel> for the first action.  Enter the
+text <guilabel>Black</guilabel> into the <guilabel>Action name</guilabel>
+box to label the second action.  If you then click again on the first
+row (for the <guilabel>Red</guilabel> action), the
+<guilabel>Action name</guilabel> box is updated with the text
+<guilabel>Red</guilabel> to be edited.  Clicking <guilabel>OK</guilabel> 
+accepts the edits and change the extensive form; <guilabel>Cancel</guilabel>
+discards the edits and leaves the tree unchanged.
+</para>
+<note>
+<para>
+Which labels are displayed where on the tree is configurable by the
+user, using the <guimenu>Format</guimenu> menu.
+See <xref linkend="gui.efg.display"> for details on available options.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="gui.poker.build.player">
+<title>Adding player moves</title>
+
+<para>
+Player 1 has two actions, &quot;raise&quot; and &quot;fold&quot; at
+each of two locations in the tree.  We could add these moves separately
+using the same technique as before, but instead we will take advantage of
+the structure of the game to simplify construction of the tree.
+</para>
+
+<para>
+Select the terminal node following Chance's <guilabel>Red</guilabel>
+action, and add a move for Player 1, with actions labeled 
+<guilabel>Raise</guilabel> and <guilabel>Fold</guilabel>.  Then, select
+the terminal node following Player 1's choice of <guilabel>Raise</guilabel>,
+and add a move for Player 2, with actions labeled
+<guilabel>Meet</guilabel> or <guilabel>Pass</guilabel>.  For both of these,
+you can repeat the techniques of the previous section to add the nodes
+to the tree.  After doing so, the tree will appear like this:
+<screenshot>
+<graphic fileref="poker-step2.png">
+</screenshot>
+</para>
+
+<para>
+What we will exploit is that the subtree following Chance's choice of
+<guilabel>Red</guilabel> is identical in structure to that following
+the choice of <guilabel>Black</guilabel>.  The information structure and
+payoffs will differ, but not the sequence of moves and nodes.  Since
+this happens frequently in games, Gambit provides a facility for copying
+entire subtrees around a game, which is described in the next section.
+</para>
+
+</sect2>
+
+<sect2 id="gui.poker.build.copy">
+<title>Copying a subtree</title>
+
+<para>
+Entire subtrees may be copied in two ways in Gambit:
+<itemizedlist>
+<listitem>
+<para>
+Using the <guimenuitem>Copy</guimenuitem> and <guimenuitem>Paste</guimenuitem>
+items on the <guimenu>Edit</guimenu> menu (or, equivalently, the corresponding
+items on the menu which appears when right-clicking a node);
+</para>
+</listitem>
+<listitem>
+<para>
+A drag-and-drop approach: while holding down the <keycap>Control</keycap>
+key, drag the root of the subtree to be copied to the desired terminal
+node.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+We can try both approaches.  First, select Player 1's decision node
+following Chance's <guilabel>Red</guilabel> action.  Select the
+<guimenuitem>Copy</guimenuitem> item on the <guimenu>Edit</guimenu>
+menu.  Next, select the terminal node that follows Chance's
+<guilabel>Black</guilabel> action, and choose the 
+<guimenuitem>Paste</guimenuitem> item from the <guimenu>Edit</guimenu>
+menu.  The resulting tree looks like this:
+<screenshot>
+<graphic fileref="poker-step3.png">
+</screenshot>
+</para>
+
+<para>
+This is now close to what we want; the only problem is that both
+of Player 1's nodes appear in the same information set, while in the
+final game they should be separate.  When making a copy of a subtree,
+Gambit puts the copied nodes in the same information set as the
+original nodes.  This is often not exactly what we want; however,
+once the tree is built, it is easy to adjust the information structure of
+the game.
+</para>
+
+<para>
+We will address getting the information structure right in the next
+section; for now,
+we'll experiment with the drag-and-drop method for tree copying.
+Since Gambit doesn't (yet!) have an &quot;undo&quot; feature, we can
+manually undo the tree copy by deleting the subtree we just created. 
+This can be accomplished by selecting the root of the subtree we
+want to delete, and using the <guimenuitem>Delete</guimenuitem>
+item on the <guimenu>Edit</guimenu> menu.  In the dialog that appears,
+select <guilabel>Delete entire subtree</guilabel>, and click 
+<guilabel>OK</guilabel>.  The game then returns to its pre-copy state.
+</para>
+
+<note>
+<para>
+Because Gambit does not yet have the ability to undo actions, be especially
+careful when using deleting operations, as there's no easy way to get
+what you've deleted back.  We hope to remedy this weakness in the near
+future.
+</para>
+</note>
+
+<para>
+Try repeating the process using the drag-and-drop approach.  Holding
+down the <keycap>Control</keycap> key, drag from the node where
+Player 1 moves towards the terminal node after Chance's
+<guilabel>Black</guilabel> action.  
+While dragging, the text <guilabel>Copy subtree</guilabel> appears near
+the mouse pointer to indicate copying is taking place.
+Drag the pointer to the target node, and release the button.
+After releasing the mouse button,
+the tree should again appear as it does in the above picture.
+</para>
+
+<note>
+<para>
+Unix users: 
+if you have the <keycap>Control</keycap>-mouseclick combination mapped
+to some action in your window manager, the drag-and-drop method may
+not work for you.
+</para>
+</note>
+
+<para>
+If you omit holding down the <keycap>Control</keycap> key while dragging,
+Gambit will move the subtree instead of creating a copy.  You'll be
+able to tell the difference because <guilabel>Move subtree</guilabel>
+will appear near the mouse pointer in this case.  A parallel menu-based
+approach to moving subtrees can be done using the
+<guimenuitem>Cut</guimenuitem> operation instead of
+<guimenuitem>Copy</guimenuitem> on the <guimenu>Edit</guimenu> menu.
+</para>
+
+</sect2>
+
+<sect2 id="gui.poker.build.infoset">
+<title>Setting up the information sets</title>
+
+<para>
+To finish up the tree structure itself, we need to place Player 1's
+two moves in separate information sets.  We'll look at two ways to accomplish
+this.
+</para>
+
+<para>
+The first method is to edit one of the nodes and place it in a new information
+set of its own.  Select the node following Chance's 
+<guilabel>Black</guilabel> action, and choose <guimenuitem>Node</guimenuitem>
+from the <guimenu>Edit</guimenu> menu, or use the right-click menu and
+select <guimenuitem>Edit node</guimenuitem>.  The <guilabel>Node
+properties</guilabel> dialog is displayed:
+<screenshot>
+<graphic fileref="editnode.png">
+</screenshot>
+</para>
+
+<para>
+In this dialog, the <guilabel>Information set</guilabel> dropdown lists
+all information sets in the game which are &quot;compatible&quot; with
+the node, in the sense that they have the same number of actions.  It is
+set by defaut to the current information set to which the node belongs.
+In this dropdown there is an additional choice, 
+<guilabel>New information set</guilabel>, which will create a new
+information set, with this node as its only member, taking action
+labels from the current information set of the node.  This is what
+we want here; after selecting <guilabel>New information set</guilabel>
+in the dropdown, click <guilabel>OK</guilabel>, and the tree now
+structurally appears the same as our final desired product.
+</para>
+
+<para>
+Another, and sometimes easier, way to set up information structure is
+through the use of the <guimenuitem>Reveal</guimenuitem> action on
+the <guimenu>Edit</guimenu> menu.  This command, as its name suggests,
+reveals the action taken at an information set to some or all of the
+players.  This is a higher-level idea, and often comes closer to how we
+might think about a game mentally before writing down a tree.
+</para>
+
+<para>
+To try out the reveal method, we'll first need to revert the tree to
+its prior format.  Lacking an undo feature, to merge Player 1's two
+nodes back into one information set, revisit the <guilabel>Node
+properties</guilabel> dialog, and use the <guilabel>Information
+set</guilabel> dropdown to change the information set of the node
+following <guilabel>Black</guilabel> to the information set of the
+node following <guilabel>Red</guilabel>: namely, change the
+information set from &quot;Player 1, Infoset 2&quot; to &quot;Player
+1, Infoset 1&quot;.  Now, both nodes are once again in the same
+information set.
+</para>
+
+<para>
+Now, we'll try out the <guimenuitem>Reveal</guimenuitem> feature.
+The choice that is revealed in this game is Chance's choice of card,
+and it is revealed to Player 1 only.  To capture this, select the
+Chance node, and click on <guimenuitem>Reveal</guimenuitem> on the
+<guimenu>Edit</guimenu> menu.  The <guilabel>Reveal move</guilabel>
+dialog appears, listing the players in the game beside corresponding
+checkboxes.  By default, these are all checked, which would correspond
+to revealing the result of the move to all players.  Since we only
+want to reveal the card to Player 1, click on the Player 2 checkbox
+to uncheck it, and then click <guilabel>OK</guilabel>.  The tree should
+now once again feature Player 1's nodes in separate information sets, while
+Player 2's nodes remain in the same information set.
+</para>
+
+<note>
+<para>
+The <guimenuitem>Reveal</guimenuitem> operation only has an effect at the
+time it is done.  The fact that Player 1 has &quot;seen&quot; whether
+the card is red or black is not preserved if nodes are added to the
+tree after the <guimenuitem>Reveal</guimenuitem> operation takes place.
+If the tree is later edited, you will need to redo all the
+<guimenuitem>Reveal</guimenuitem> operations; therefore, it's recommended
+that you wait until you're happy with the structure of the tree before
+proceeding to use <guimenuitem>Reveal</guimenuitem>.
+</para>
+
+<para>
+Hopefully, future versions will have a more convenient interface for
+managing information structure in games.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="gui.poker.build.outcomes">
+<title>Creating and attaching outcomes</title>
+
+<para>
+The last task to finish up the game is to create outcomes and attach
+them to the corresponding nodes.  Gambit's concept of outcomes allows
+the same outcome to be attached to multiple nodes, making it easy to
+group terminal nodes together by outcomes which are conceptually
+equivalent.
+</para>
+
+<para>
+The list of defined outcomes on a game can be displayed by checking
+the <guimenuitem>Outcomes</guimenuitem> item on the 
+<guimenu>View</guimenu> menu.  The outcomes of the game are listed in
+a spreadsheet format, giving the outcome's label as well as the payoff
+of the outcome to each player.
+</para>
+
+<para>
+When created, games have only a &quot;null&quot; outcome, which is
+attached to all nodes and has a payoff of zero to all players.  To
+add an outcome, right-click in the outcomes window to pop up the
+<guimenu>Outcomes</guimenu>, and select <guimenuitem>New outcome</guimenuitem>.
+A new line will appear in the outcomes list, which is an outcome with
+an automatically generated name, and zero payoffs for all players.
+<note>
+<para>
+When there are no outcome rows in the table, you will need to right-click
+on the column headers in order to obtain the <guimenu>Outcomes</guimenu>
 menu.
 </para>
+</note>
+</para>
+
+<para>
+Editing outcomes works similarly to a spreadsheet; just click in the
+cell corresponding to a player's payoff, and enter the new payoff.
+The <keycap>Tab</keycap> key moves the selected cell to the right, and
+pressing <keycap>Enter</keycap> when on the last line of the grid 
+is a fast way to create a new outcome, so once the first outcome is
+created, typing in all outcomes can usually be done rapidly.
+After the four outcomes are entered, the outcomes table will look like
+this:
+<screenshot>
+<graphic fileref="poker-outcomes.png">
+</screenshot>
+</para>
+
+<para>
+Now we are ready to attach the outcomes to the corresponding nodes.
+There are two ways to do this:
+<itemizedlist>
+<listitem>
+<para>
+Using the <guilabel>Node properties</guilabel> dialog, select the outcome
+from the <guilabel>Outcome</guilabel> dropdown list;
+</para>
+</listitem>
+<listitem>
+<para>
+Select a node, right-click on the outcome you wish to attach, and select
+<guimenuitem>Attach outcome</guimenuitem> from the pop-up
+<guimenu>Outcomes</guimenu> menu that appears.
+</para>
+</listitem>
+</itemizedlist>
+You can use either method to match up the outcomes with their corresponding
+terminal nodes.
+</para>
+
+</sect2>
+
 </sect1>
 
 
+
+
 </chapter>
+
