@@ -26,8 +26,8 @@ EfgAlgType BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS+1] =
 char *BSolnSortFilterOptions::filter_tri_str[3+1] = 
 { "E", "Yes", "No", "DK" };
 
-TriState BSolnSortFilterOptions::filter_tri_id[3+1] = 
-{ T_DONTKNOW, T_YES, T_NO, T_DONTKNOW};
+gTriState BSolnSortFilterOptions::filter_tri_id[3+1] = 
+{ triMAYBE, triTRUE, triFALSE, triMAYBE };
 
 // Constructor
 BSolnSortFilterOptions::BSolnSortFilterOptions(void)

@@ -21,7 +21,7 @@ public:
     static char *filter_cr_str[];
     static EfgAlgType   filter_cr_id[];
     static char *filter_tri_str[];
-    static TriState  filter_tri_id[];
+    static gTriState  filter_tri_id[];
 
     // Contructor
     BSolnSortFilterOptions(void);
