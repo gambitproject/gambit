@@ -41,7 +41,7 @@ void Lexicon::MakeLink(const Efg::Game *efg, Nfg *nfg)
 
 void Lexicon::MakeStrategy(EFPlayer *p)
 {
-  Correspondence *c = new Correspondence(p->NumInfosets());
+  lexCorrespondence *c = new lexCorrespondence(p->NumInfosets());
   
   for (int i = 1; i <= p->NumInfosets(); i++)  {
     if (p->Infosets()[i]->flag == 1)
@@ -249,9 +249,9 @@ Nfg *MakeAfg(const Efg::Game &E)
 #include "base/glist.imp"
 #include "base/garray.imp"
 
-template class gList<Correspondence *>;
-template gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
-template class gArray<gList<Correspondence *> >;
+template class gList<lexCorrespondence *>;
+template gOutput &operator<<(gOutput &, const gList<lexCorrespondence *> &);
+template class gArray<gList<lexCorrespondence *> >;
 
 
 

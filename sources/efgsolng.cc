@@ -1205,12 +1205,19 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
   MixedProfile<gNumber> startm(startb);
   
   long nevals, nits;
-  gList<MixedSolution> nfg_solns;
+
+  Correspondence<double, MixedSolution> qreCorresp;
 
   try {
-    Qre(*N, params, startm, nfg_solns, status, nevals, nits);
+    Qre(*N, params, startm, qreCorresp, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
+
+  gList<MixedSolution> nfg_solns;
+  for (int i = 1; i <= qreCorresp.NumPoints(1); i++) {
+    nfg_solns.Append(qreCorresp.GetPoint(i, 1));
+  }
+
 
   if (m_runPxi) {
     if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {

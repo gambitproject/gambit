@@ -270,8 +270,8 @@ void QreComputeStep(const Nfg &p_nfg, const MixedProfile<double> &p_profile,
 
 void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
 		 const MixedProfile<gNumber> &p_start,
-		 gList<MixedSolution> &p_solutions, gStatus &p_status,
-		 long &nevals, long &nits)
+		 Correspondence<double, MixedSolution> &p_corresp,
+		 gStatus &p_status, long &nevals, long &nits)
 {
   gMatrix<long double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
   MixedProfile<double> profile(p_start);
@@ -280,8 +280,6 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
   // Pick the direction to follow the path so that lambda starts out
   // increasing
   double initialsign = (p_nfg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
-
-  p_solutions.Flush();
 
   try {
     while (lambda <= params.maxLam) {
@@ -304,10 +302,7 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
       lambda += 0.5 * (lambdainc1 + lambdainc2);
 
       if (params.fullGraph) { 
-	p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
-	NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
-	qreValue.SetLambda(lambda);
-	p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+	p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
       }
 
       p_status.Get();
@@ -317,18 +312,12 @@ void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
     }
   }
   catch (...) {
-    p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
-    NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
-    qreValue.SetLambda(lambda);
-    p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+    p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
     throw;
   }
   
   if (!params.fullGraph) { 
-    p_solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
-    NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
-    qreValue.SetLambda(lambda);
-    p_solutions[p_solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+    p_corresp.Append(1, lambda, MixedSolution(profile, algorithmNfg_QRE));
   }
 }
 
@@ -366,8 +355,8 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 
 static void QreOptimization(const Nfg &N, NFQreParams &params,
 			    const MixedProfile<gNumber> &start,
-			    gList<MixedSolution> &solutions, gStatus &p_status,
-			    long &nevals, long &nits)
+			    Correspondence<double, MixedSolution> &p_corresp,
+			    gStatus &p_status, long &nevals, long &nits)
 {
   static const double ALPHA = .00000001;
 
@@ -455,9 +444,7 @@ static void QreOptimization(const Nfg &N, NFQreParams &params,
 	  }
 	  
 	  if (params.fullGraph) {
-	    int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
-	    solutions[index].SetQre(Lambda, value);
-	    solutions[index].SetEpsilon(params.Accuracy());
+	    p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE)); 
 	  }
 
 	  psave = p;
@@ -506,9 +493,7 @@ static void QreOptimization(const Nfg &N, NFQreParams &params,
     }
 
     if (!params.fullGraph) {
-      int index = solutions.Append(MixedSolution(pold, algorithmNfg_QRE));
-      solutions[index].SetQre(Lambda, value);
-      solutions[index].SetEpsilon(params.Accuracy());
+      p_corresp.Append(1, Lambda, MixedSolution(pold, algorithmNfg_QRE));
     }
 
     nevals = F.NumEvals();
@@ -516,18 +501,14 @@ static void QreOptimization(const Nfg &N, NFQreParams &params,
   }
   catch (gSignalBreak &E) {
     if (!params.fullGraph) {
-      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
-      solutions[index].SetQre(Lambda, value);
-      solutions[index].SetEpsilon(params.Accuracy());
+      p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE));
     }
     throw;
   }
   catch (gFuncMinError &E) {
     if (!params.fullGraph) {
-      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
-      solutions[index].SetQre(Lambda, value);
-      solutions[index].SetEpsilon(params.Accuracy());
-    }
+      p_corresp.Append(1, Lambda, MixedSolution(p, algorithmNfg_QRE));
+     }
     // This should be re-thrown, but wait til we have better exception handling downstream
     //    throw;
   }
@@ -727,14 +708,13 @@ void KQre(const Nfg &N, NFQreParams &params,
 
 void Qre(const Nfg &p_nfg, NFQreParams &params,
 	 const MixedProfile<gNumber> &start,
-	 gList<MixedSolution> &solutions, gStatus &p_status,
-	 long &nevals, long &nits)
+	 Correspondence<double, MixedSolution> &p_corresp,
+	 gStatus &p_status, long &nevals, long &nits)
 {
   if (params.m_method == qreOPTIMIZE) {
-    QreOptimization(p_nfg, params, start, solutions, p_status, nevals, nits);
+    QreOptimization(p_nfg, params, start, p_corresp, p_status, nevals, nits);
   }
   else {
-    QreHomotopy(p_nfg, params, start, solutions, p_status, nevals, nits);
+    QreHomotopy(p_nfg, params, start, p_corresp, p_status, nevals, nits);
   }
 }
-

@@ -9,6 +9,7 @@
 
 #include "base/base.h"
 #include "algutils.h"
+#include "corresp.h"
 
 #include "nfg.h"
 #include "mixedsol.h"
@@ -31,7 +32,8 @@ public:
 
 
 void Qre(const Nfg &, NFQreParams &,
-	 const MixedProfile<gNumber> &, gList<MixedSolution> &, gStatus &,
+	 const MixedProfile<gNumber> &,
+	 Correspondence<double, MixedSolution> &, gStatus &,
 	 long &nevals, long &nits);
 
 

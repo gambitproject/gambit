@@ -557,11 +557,16 @@ gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
   MixedProfile<gNumber> start(p_support);
 
   long nevals, nits;
-  gList<MixedSolution> solutions;
+  Correspondence<double, MixedSolution> qreCorresp;
   try {
-    Qre(p_support.Game(), params, start, solutions, status, nevals, nits);
+    Qre(p_support.Game(), params, start, qreCorresp, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
+
+  gList<MixedSolution> solutions;
+  for (int i = 1; i <= qreCorresp.NumPoints(1); i++) {
+    solutions.Append(qreCorresp.GetPoint(1, i));
+  }
 
   if (m_runPxi) {
     if (!wxExecute((char *) (m_pxiCommand + " " + m_pxiFilename))) {

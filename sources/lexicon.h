@@ -9,13 +9,13 @@
 
 #include "base/base.h"
 
-typedef gArray<int> Correspondence;
+typedef gArray<int> lexCorrespondence;
 class Nfg;
 
 class Lexicon   {
   public:
     Nfg *N;
-    gArray<gList<Correspondence *> > strategies;
+    gArray<gList<lexCorrespondence *> > strategies;
 
     Lexicon(const Efg::Game &);
     ~Lexicon();
