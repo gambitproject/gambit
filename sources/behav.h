@@ -63,6 +63,8 @@ public:
   // OPERATOR OVERLOADING
   bool operator==(const BehavProfile<T> &) const;
 
+  void Dump(gOutput &) const;
+
   // COMPUTATION OF INTERESTING QUANTITIES
   T Payoff(int p_player) const;
 
