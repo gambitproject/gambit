@@ -16,7 +16,7 @@
 #include "normal.h"
 #include "normiter.h"
 #include "rational.h"
-#include "mixed.h"
+#include "gpvector.h"
 #include "solution.h"
 #include "gfunct.h"
 #include "liap.h"
@@ -43,9 +43,9 @@ public:
   int Liap(int) ;
   virtual ~LiapModule() {}
 
-  T LiapValue(const MixedProfile<T> &p) const;
+  T LiapValue(const gPVector<T> &p) const;
   T operator()(const gVector<T> &x);
-  int Liap(MixedProfile<T> &p);
+  int Liap(gPVector<T> &p);
   int Nevals(void) {return nevals;}
   int Nits(void) {return nits;}
 };
@@ -56,9 +56,15 @@ template <class T> int LiapModule<T>::Liap(int number)
 {
   int n=0;
   T tmp,sum;
-  MixedProfile<T> p(rep.Centroid());
+//  gPVector<T> p(rep.Centroid());
+  gPVector<T> p(rep.Dimensionality());
+  for(int i=1;i<=rep.NumPlayers();i++)
+    for(int j= 1;j<= rep.NumStrats(i);j++)
+      p(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+
   n+=(Liap(p));
   gout << " n = " << n;
+
   int it = 0;
   while(n<number && it < MAXIT) {
     it++;
@@ -67,34 +73,22 @@ template <class T> int LiapModule<T>::Liap(int number)
       for(int j=1;j<rep.NumStrats(i);j++) {
 	tmp=(T)(2);
 	while (tmp + sum > ((T)(1)) ) tmp = (T)((T)rand()/(T)INT_MAX);
-	p[i][j]=tmp;
+	p(i,j)=tmp;
 	sum+= tmp;
       }
-      p[i][j]=(T)(1)-sum;
+      p(i,j)=(T)(1)-sum;
     }
     n+=(Liap(p));
   }
   return n;
 };
 
-template <class T> int LiapModule<T>::Liap(MixedProfile<T> &p)
+template <class T> int LiapModule<T>::Liap(gPVector<T> &p)
 {
-  gVector<T> v(rep.ProfileLength());
-  int k=1;
-
-  
-  for(int i=1;i<=rep.NumPlayers();i++)
-    {
-      for(int j=1;j<=rep.NumStrats(i);j++) {
-	v[k]=p[i][j];
-	k++;
-      }
-    }
-  if(plev>=3)
-    gout << "\nv= " << v;
+  if(plev>=3) gout << "\np= " << p;
   T val; 
-  val = MinPowell(v);
-  gout << "\nv= " << v << " f = " << val;
+  val = MinPowell(p);
+  gout << "\np= " << p << " f = " << val;
   if(val < (T) ( (T)(1) / (T)(100000) ) ) return 1;
   return 0;
 };
@@ -104,17 +98,8 @@ T LiapModule<T>::operator()(const gVector<T> &x)
 {
   assert(x.Length()==rep.ProfileLength());
 
-  MixedProfile<T> m(rep);
-
-  int k=1;
-  for(int i=1;i<=rep.NumPlayers();i++)
-    {
-      m[i] = gVector<T>(rep.NumStrats(i));
-      for(int j=1;j<=rep.NumStrats(i);j++){
-	m[i][j]=x[k];
-	k++;
-      }
-    }
+  gPVector<T> m(rep.Dimensionality());
+  m = x;
   return LiapValue(m);
   
 };
@@ -123,35 +108,34 @@ T LiapModule<T>::operator()(const gVector<T> &x)
 #define BIG2 ((T) 100)
 
 template <class T>  
-T LiapModule<T>::LiapValue(const MixedProfile<T> &p) const
+T LiapModule<T>::LiapValue(const gPVector<T> &p) const
 {
   int i,j,num;
-  MixedProfile<T> tmp(p);
-  gVector<T> payoff;
+  gPVector<T> tmp(p);
+  gPVector<T> payoff(p);
   T x,result,avg,sum;
-  
+  payoff = (T) (0);
+
   result= (T) 0;
   for(i=1;i<=rep.NumPlayers();i++) {
-    payoff = gVector<T>(rep.NumStrats(i));
-    payoff=(T) 0;
-    tmp[i]=(T) 0;
+    tmp.SetRow(i,payoff.GetRow(i));
     avg=sum= (T) 0;
 	// then for each strategy for that player set it to 1 and evaluate
     for(j = 1; j <= rep.NumStrats(i); j++) {
-      tmp[i][j]= (T) 1;
-      x=p[i][j];
-      payoff[j] = rep.Payoff(i,tmp);
-//      gout << "\np[" << i << "][" << j << "] = " << payoff[j];
+      tmp(i,j)= (T) 1;
+      x=p(i,j);
+      payoff(i,j) =  rep.Payoff(i,tmp);
+//      gout << "\np[" << i << "][" << j << "] = " << payoff(i,j);
 //      gout << "\ntmp = " << tmp;
-      avg+=x*payoff[j];
+      avg+=x*payoff(i,j);
       sum+=x;
       x= (x > ((T) 0)  ? ((T) 0)  : x);
       result += BIG1*x*x;         // add penalty for neg probabilities
-      tmp[i][j]= (T) 0;
+      tmp(i,j) = (T) 0;
     }
-    tmp[i]=p[i];
+    tmp.SetRow(i,p.GetRow(i));
     for(j=1;j<=rep.NumStrats(i);j++) {
-      x=payoff[j]-avg;
+      x=payoff(i,j)-avg;
       x = (x > 0 ? x : 0);
       result += x*x;          // add penalty if not best response
     }
@@ -205,7 +189,161 @@ int LiapSolver::Liap(void)
 
 }
 
+#if 0
 
+double funct(double *p)
+	{
+	get_y(p);
+	return val(l_y);
+	}
+
+void dfunct(double *p, double *x)
+	{
+	int i;
+
+    get_y(p);
+	get_grad(l_y);
+	for(i=1;i<=ndim;i++)x[i]=dp[i];
+	}
+
+void get_grad(double **p)
+	{
+    int i1,j1,ii;
+	double avg;
+
+	for(i1=1,ii=1;i1<=nplayers;i1++)
+		{
+
+		avg=(double)0.0;
+		for(j1=1;j1<=nstrats[i1];j1++)
+			{
+			dp[ii]=deriv_val(i1,j1,p);
+			avg+=dp[ii];
+			ii++;
+			}
+		avg/=(double)nstrats[i1];
+
+		ii-=nstrats[i1];
+		for(j1=1;j1<=nstrats[i1];j1++)
+			{
+			dp[ii]-=avg;
+			ii++;
+			}
+
+		}
+
+	}
+
+
+void get_hess(double **p)
+	{
+    int i1,i2,j1,j2,ii,iii;
+
+	for(i1=1,ii=1;i1<=nplayers;i1++)
+		for(j1=1;j1<=nstrats[i1];j1++)
+			{
+			for(i2=1,iii=1;i2<=nplayers;i2++)
+				for(j2=1;j2<=nstrats[i2];j2++)
+					{
+					if(iii<ii)dp2[ii][iii]=dp2[iii][ii];
+					else dp2[ii][iii]=deriv2_val(i1,j1,i2,j2,p);
+					iii++;
+					}
+			ii++;
+			}
+
+	}
+
+
+double val(double **p)
+	{
+	int i,j;
+	double v,psum,v1;
+
+	v=(double)0.0;
+	for(i=1;i<=nplayers;i++)
+		{
+		psum=(double)0.0;
+		for(j=1;j<=nstrats[i];j++)
+			{
+			v1=M1(i,i,j,p)-M0(i,p);
+			if(v1>(double)0.0)v+=pow(v1,(double)2.0);
+			if(p[i][j]<(double)0.0)v+=pow(p[i][j],(double)2.0);
+			psum+=p[i][j];
+			}
+		v+=pow((double)1.0-psum,(double)2.0);
+		}
+	return v;
+	}
+
+double deriv_val(int i1, int j1, double **p)
+	{
+	int i, j;
+	double x, x1,psum;
+
+	x=(double)0.0;
+	for(i=1;i<=nplayers;i++)
+		{
+		psum=(double)0.0;
+		for(j=1;j<=nstrats[i];j++)
+			{
+			psum+=p[i][j];
+			x1=M1(i,i,j,p)-M0(i,p);
+			if(x1>0)x+=x1*(M2(i,i,j,i1,j1,p)-M1(i,i1,j1,p));
+
+/*			if(x1>0 && l_plev>=3)
+				printf("\n%d %d %d %d %8.3f %8.3f %8.3f",
+					i1,j1,i,j,x1,M2(i,i,j,i1,j1,p),-M1(i,i1,j1,p));
+			if(x1>0 && l_flev>=3)
+				fprintf(outfl,"\n%d %d %d %d %10.5f %10.5f %10.5f",
+					i1,j1,i,j,x1,M2(i,i,j,i1,j1,p),-M1(i,i1,j1,p));
+*/
+			}
+		if(i==i1)x+=psum-(double)1.0;
+		}
+	if(p[i1][j1]<(double)0.0)x+=p[i1][j1];
+	return (double)2.0*x;
+	}
+
+double deriv2_val(int i1, int j1, int i2, int j2, double **p)
+	{
+	int i, j;
+	double psum,x, x1;
+
+	x=(double)0.0;
+	psum=(double)0.0;
+	for(i=1;i<=nplayers;i++)
+		for(j=1;j<=nstrats[i];j++)
+			{
+			x1=M1(i,i,j,p)-M0(i,p);
+			if(x1>=0)x+=(x1*(M3(i,i,j,i1,j1,i2,j2,p)-M2(i,i1,j1,i2,j2,p))
+				+(M2(i,i,j,i2,j2,p)-M1(i,i2,j2,p))
+				*(M2(i,i,j,i1,j1,p)-M1(i,i1,j1,p)));
+
+/*			if(x1>0 && l_plev>=3)
+				printf("\n%d %d %d %d %d %d %8.3f %8.3f %8.3f %8.3f",
+					i1,j1,i2,j2,i,j,x1,M3(i,i,j,i1,j1,i2,j2,p)-M2(i,i1,j1,i2,j2,p),
+					M2(i,i,j,i2,j2,p)-M1(i,i2,j2,p),
+					M2(i,i,j,i1,j1,p)-M1(i,i1,j1,p));
+			if(x1>0 && l_flev>=3)
+				fprintf(outfl,"\n%d %d %d %d %d %d %10.5f %10.5f %10.5f %10.5f",
+					i1,j1,i2,j2,i,j,x1,M3(i,i,j,i1,j1,i2,j2,p)-M2(i,i1,j1,i2,j2,p),
+					M2(i,i,j,i2,j2,p)-M1(i,i2,j2,p),
+					M2(i,i,j,i1,j1,p)-M1(i,i1,j1,p));
+			if(x1>0 && l_plev>=3)pause1();
+*/
+			if(i==i1)psum+=p[i][j];
+
+			}
+    if(i1==i2)x+=(double)1.0;
+	if(i1==12 && j1==j2 && p[i1][j1]<(double)0.0)x+=(double)1.0;
+	return (double)2.0*x;
+	}
+
+
+
+
+#endif
 
 
 
