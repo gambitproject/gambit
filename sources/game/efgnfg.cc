@@ -85,7 +85,7 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 	// we haven't visited this infoset before
 	n->infoset->flag = 1;
 	for (i = 1; i <= S.GetGame().NumChildren(n); i++)   {
-	  if (S.Find(n->infoset->Actions()[i]))  {
+	  if (S.Contains(n->infoset->Actions()[i]))  {
 	    Node *m = n->GetChild(i);
 	    n->whichbranch = m;
 	    n->infoset->whichbranch = i;

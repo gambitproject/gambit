@@ -57,7 +57,7 @@ static Portion *GSM_ActionNumber(GSM &, Portion **param)
   Action *a = ((ActionPortion *) param[0])->Value();
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
 
-  return new NumberPortion(support->Find(a));
+  return new NumberPortion(support->GetIndex(a));
 }
 
 static Portion *GSM_BasisActionNumber(GSM &, Portion **param)
@@ -65,7 +65,7 @@ static Portion *GSM_BasisActionNumber(GSM &, Portion **param)
   Action *a = ((ActionPortion *) param[0])->Value();
   EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
 
-  return new NumberPortion(basis->EFSupport::Find(a));
+  return new NumberPortion(basis->EFSupport::GetIndex(a));
 }
 
 //-------------

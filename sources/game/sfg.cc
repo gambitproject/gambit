@@ -143,7 +143,7 @@ Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 	flag =true;
       }
       for(i=1;i<=EF.NumChildren(n);i++) {
-	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
+	if(efsupp.Contains(n->GetInfoset()->Actions()[i])) {
 	  snew[pl]+=1;
 	  if(flag) {
 	    Sequence* child;
@@ -185,7 +185,7 @@ GetSequenceDims(const Node *n)
 	flag =true;
       }
       for(i=1;i<=EF.NumChildren(n);i++) {
-	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
+	if(efsupp.Contains(n->GetInfoset()->Actions()[i])) {
 	  if(flag) {
 	    seq[pl]++;
 	  }
@@ -239,7 +239,7 @@ int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
   int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return efsupp.Find(pl,isetnum,(Action *)GetAction(pl,j));
+  return efsupp.GetIndex((Action *)GetAction(pl,j));
 }
 
 const Infoset*  Sfg::GetInfoset(int pl, int j) const 
@@ -279,7 +279,7 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
       else
 	value = (gNumber)0;
 
-      b(i,sij->GetInfoset()->GetNumber(),efsupp.Find(sij->GetAction()))= value;
+      b(i,sij->GetInfoset()->GetNumber(),efsupp.GetIndex(sij->GetAction()))= value;
     }
   return b;
 }

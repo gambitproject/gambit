@@ -28,8 +28,6 @@
 #include "efplayer.h"
 #include "efstrat.h"
 
-#include "base/glist.imp"
-
 class EFActionArray   {
   friend class EFActionSet;
 protected:
@@ -387,16 +385,7 @@ const gArray<Action *> &EFSupport::Actions(const Infoset *i) const
     return m_players[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
-gList<Action *> EFSupport::ListOfActions(const Infoset *i) const
-{
-  gArray<Action *> actions = Actions(i);
-  gList<Action *> answer;
-  for (int i = 1; i <= actions.Length(); i++)
-    answer += actions[i];
-  return answer;
-}
-
-int EFSupport::Find(const Action *a) const
+int EFSupport::GetIndex(const Action *a) const
 {
   if (a->BelongsTo()->Game() != m_efg)  assert(0);
 
@@ -405,16 +394,8 @@ int EFSupport::Find(const Action *a) const
   return m_players[pl]->Find(a);
 }
 
-int EFSupport::Find(int p_player, int p_infoset, Action *p_action) const
+bool EFSupport::Contains(const Action *a) const
 {
-  return m_players[p_player]->Find(p_infoset, p_action);
-}
-
-bool EFSupport::ActionIsActive(Action *a) const
-{
-  //DEBUG
-  //  if (a == NULL) { gout << "Action* is null.\n"; exit(0); }
-
   if (a->BelongsTo()->Game() != m_efg)   
     return false;
 
@@ -429,24 +410,9 @@ bool EFSupport::ActionIsActive(Action *a) const
     return true;
 }
 
-bool EFSupport::ActionIsActive(const int pl,
-			       const int iset, 
-			       const int act) const
+bool EFSupport::Contains(int pl, int iset, int act) const
 {
-  return 
-    ActionIsActive(GetGame().Players()[pl]->GetInfoset(iset)->GetAction(act));
-}
-
-bool 
-EFSupport::AllActionsInSupportAtInfosetAreActive(const EFSupport &S,
-						 const Infoset *infset) const
-{
-  gArray<Action *> support_actions = S.Actions(infset);
-  for (int i = 1; i <= support_actions.Length(); i++) {
-    if (!ActionIsActive(support_actions[i]))
-      return false;
-  }
-  return true;
+  return Contains(GetGame().Players()[pl]->GetInfoset(iset)->GetAction(act));
 }
 
 bool EFSupport::HasActiveActionAt(const Infoset *infoset) const
@@ -623,10 +589,12 @@ bool EFSupport::MayReach(const Node *n) const
   if (n == m_efg->RootNode())
     return true;
   else {
-    if (!ActionIsActive((Action*)n->GetAction()))
+    if (!Contains((Action *)n->GetAction())) {
       return false;
-    else 
+    }
+    else {
       return MayReach(n->GetParent());
+    }
   }
 }
 
@@ -834,7 +802,7 @@ EFSupportWithActiveInfo::EFSupportWithActiveInfo(const EFSupport& given)
 
 EFSupportWithActiveInfo::EFSupportWithActiveInfo(
 				  const EFSupportWithActiveInfo& given)
-  : EFSupport(given.UnderlyingSupport()), 
+  : EFSupport(given), 
     //is_infoset_active(0,given.GetGame().NumPlayers()), 
         is_infoset_active(is_infoset_active), 
     is_nonterminal_node_active(given.is_nonterminal_node_active)
@@ -1065,7 +1033,16 @@ gOutput& operator<<(gOutput&s, const EFSupportWithActiveInfo& e)
 
 
 // Instantiations
+#include "base/glist.imp"
+
 template class gList<EFSupport>;
 template class gList<const EFSupport>;
 template class gList<const EFSupportWithActiveInfo>;
 
+#include "math/gvector.imp"
+#include "math/gpvector.imp"
+#include "math/gdpvect.imp"
+
+template class gVector<bool>;
+template class gPVector<bool>;
+template class gDPVector<bool>;

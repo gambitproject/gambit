@@ -220,8 +220,9 @@ efgGame *CompressEfg(const efgGame &efg, const EFSupport &S)
       Infoset *infoset = player->Infosets()[iset];
       for (int act = infoset->NumActions(); act >= 1; act--)  {
 	Action *oldact = efg.Players()[pl]->Infosets()[iset]->Actions()[act];
-	if (!S.Find(oldact))
+	if (!S.Contains(oldact)) {
 	  newefg->DeleteAction(infoset, infoset->Actions()[act]);
+	}
       }
     }
   }

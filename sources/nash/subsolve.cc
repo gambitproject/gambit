@@ -122,8 +122,9 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
 	assert(index <= infosets[pl]->Length());
 	for (int act = 1; act <= p->Infosets()[iset]->NumActions();
 	     act++)  {
-          if (!p_support.Find(pl, index, (*infosets[pl])[index]->Actions()[act]))
+          if (!p_support.Contains((*infosets[pl])[index]->Actions()[act])) {
             subsupport.RemoveAction(p->Infosets()[iset]->Actions()[act]);
+	  }
 	}
       }
     }
@@ -277,9 +278,11 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
     EFPlayer *player = p_support.GetGame().Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++) 
-	if (!p_support.Find(infoset->Actions()[act]))
+      for (int act = 1; act <= infoset->NumActions(); act++) { 
+	if (!p_support.Contains(infoset->Actions()[act])) {
 	  support.RemoveAction(efg.Players()[pl]->Infosets()[iset]->Actions()[act]);
+	}
+      }
     }
   }
 

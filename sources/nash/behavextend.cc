@@ -204,7 +204,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	  }
 	}
 	else
-	  if (dsupp.ActionIsActive((Action *)last_action)) {
+	  if (dsupp.Contains((Action *)last_action)) {
 	    if ( last_action->BelongsTo()->GetPlayer() !=
 		         act->BelongsTo()->GetPlayer()     ||
 		 !act->Precedes(tempnode) )
@@ -254,7 +254,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
       if (little_supp.MayReach(isets_for_pl[i])) {
 	const gArray<Action *> acts_for_iset = isets_for_pl[i]->Actions();
 	for (int j = 1; j <= acts_for_iset.Length(); j++)
-	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
+	  if ( !little_supp.Contains(acts_for_iset[j]) ) {
 	    gList<Infoset *> isetlist = DeviationInfosets(big_supp, 
 							  players[pl],
 							  isets_for_pl[i],
@@ -408,7 +408,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 	    return false;
 	}
 	else
-	  if (big_supp.ActionIsActive((Action *)last_action))
+	  if (big_supp.Contains((Action *)last_action))
 	    node_prob *= (gDouble) p_solution.ActionProb(last_action);
 	  else 
 	    return false;
@@ -451,7 +451,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
       Infoset *infoset = p_solution.GetGame().Players()[pl]->Infosets()[i];
       if (little_supp.MayReach(infoset)) 
 	for (int j = 1; j <= infoset->NumActions(); j++)
-	  if (!little_supp.ActionIsActive(pl,i,j)) {
+	  if (!little_supp.Contains(pl,i,j)) {
 	
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 

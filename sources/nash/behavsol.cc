@@ -72,7 +72,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	int index = p_profile.Support().GetIndex(infoset->Actions()[act]);
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
@@ -98,7 +98,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	int index = p_profile.Support().GetIndex(infoset->Actions()[act]);
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
@@ -122,7 +122,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile.Support().Find(infoset->Actions()[act]);
+	int index = p_profile.Support().GetIndex(infoset->Actions()[act]);
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else

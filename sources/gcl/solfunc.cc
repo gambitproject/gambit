@@ -59,14 +59,15 @@ static Portion *GSM_ActionProb(GSM &, Portion **param)
   Infoset* infoset = action->BelongsTo();
   EFPlayer* player = infoset->GetPlayer();
   
-  if (player->IsChance())
-    //    return new NumberPortion(infoset->Game()->GetChanceProb(infoset, action->GetNumber()));
+  if (player->IsChance()) {
     return new NumberPortion(profile->ActionProb(action));
-  else if (profile->Support().Find(action))
-    //    return new NumberPortion((*profile)(action));
+  }
+  else if (profile->Support().Contains(action)) {
     return new NumberPortion(profile->ActionProb(action));
-  else
+  }
+  else {
     return new NumberPortion(0.0);
+  }
 }
 
 //------------------
@@ -81,7 +82,7 @@ static Portion *GSM_ActionValue(GSM &, Portion **param)
 
   if (infoset->GetPlayer()->IsChance())
     return new NullPortion(porNUMBER);
-  else if (profile->Support().Find(action))  {
+  else if (profile->Support().Contains(action))  {
     if(profile->IsetProb(infoset)>gNumber(0.0))
       return new NumberPortion(profile->ActionValue(action));
     else

@@ -66,20 +66,13 @@ public:
   bool HasActiveActionAt(const Infoset *) const;
   bool HasActiveActionsAtAllInfosets(void) const;
 
-  // Returns the position of the action in the support. 
-  // Returns zero if the action is not contained in the support
-  int Find(const Action *) const;
-  int Find(int, int, Action *) const;
-
-  bool ActionIsActive(const int pl, const int iset, const int act) const;
-  bool ActionIsActive(Action *) const;
-  bool AllActionsInSupportAtInfosetAreActive(const EFSupport &,
-					     const Infoset *) const;
+  bool Contains(const Action *) const;
+  bool Contains(int pl, int iset, int act) const;
+  int GetIndex(const Action *) const;
 
   // Find the active actions at an infoset
   const gArray<Action *> &Actions(int pl, int iset) const;
   const gArray<Action *> &Actions(const Infoset *) const;
-  gList<Action *> ListOfActions(const Infoset *) const;
 
   // Action editing functions
   virtual void AddAction(const Action *);
@@ -174,8 +167,6 @@ public:
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
 
-  inline  EFSupport UnderlyingSupport() const { return (EFSupport)(*this); }
-
   bool HasActiveActionsAtActiveInfosets();
   bool HasActiveActionsAtActiveInfosetsAndNoOthers();
 
@@ -185,7 +176,7 @@ public:
 gOutput &operator<<(gOutput &f, const EFSupportWithActiveInfo &);
 
 
-#endif  //# EFSTRAT_H
+#endif  // EFSTRAT_H
 
 
 

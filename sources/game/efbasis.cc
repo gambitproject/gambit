@@ -367,14 +367,19 @@ bool EFBasis::RemoveNode(Node *n)
 
 bool EFBasis::IsReachable(Node *n) const
 {
-  if(n == m_efg->RootNode()) return true;
+  if (n == m_efg->RootNode()) {
+    return true;
+  }
 
   while (n != m_efg->RootNode()) {
-    if(!n->GetParent()->GetInfoset()->IsChanceInfoset())
-      if(!EFSupport::Find(LastAction(*m_efg,n))) return false;
+    if (!n->GetParent()->GetInfoset()->IsChanceInfoset()) {
+      if (!EFSupport::Contains(LastAction(*m_efg, n))) {
+	return false;
+      }
+    }
     n = n->GetParent();
   }
-return true;
+  return true;
 }
 
 void EFBasis::AddNode(Node *n)
@@ -447,7 +452,7 @@ void EFBasis::MakeIndices()
   for(i=1;i<=m_efg->NumPlayers();i++)
     for(j=1;j<=(m_efg->NumInfosets())[i];j++) 
       for(k=1;k<=bigbasis->NumActions(i,j);k++)
-	if(EFSupport::Find(bigbasis->Actions(i,j)[k]))
+	if(EFSupport::Contains(bigbasis->Actions(i,j)[k]))
 	  (*actIndex)(i,j,k)=0;
 	else 
 	  (*actIndex)(i,j,k) = ind++;
@@ -529,7 +534,7 @@ int EFBasis::Col(Action *a) const
 {
   Infoset *iset = a->BelongsTo();
   return (*actIndex)(iset->GetPlayer()->GetNumber(),iset->GetNumber(),
-		  (*bigbasis).EFSupport::Find(a));
+		     (*bigbasis).EFSupport::GetIndex(a));
 }
 
 int EFBasis::Col(Node *n) const

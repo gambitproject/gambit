@@ -170,7 +170,7 @@ void EfgSupportWindow::UpdateValues(void)
 	Action *action = infoset->Actions()[act];
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action->GetName());
-	if (m_parent->GetSupport()->Find(action)) {
+	if (m_parent->GetSupport()->Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -217,7 +217,7 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_parent->GetSupport()->Find(action) &&
+  if (m_parent->GetSupport()->Contains(action) &&
       m_parent->GetSupport()->NumActions(action->BelongsTo()) > 1) {
     m_parent->GetSupport()->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);

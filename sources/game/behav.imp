@@ -363,13 +363,13 @@ T BehavProfile<T>::ActionProb(const Action *action) const
   if (action->BelongsTo()->GetPlayer()->IsChance()) {
     return m_efg->GetChanceProb(action);
   }
-  else if (!m_support.Find(action)) {
+  else if (!m_support.Contains(action)) {
     return (T) 0.0;
   }
   else {
     return (*this)(action->BelongsTo()->GetPlayer()->GetNumber(),
 		   action->BelongsTo()->GetNumber(),
-		   m_support.Find(action));
+		   m_support.GetIndex(action));
   }
 }
 
@@ -740,7 +740,7 @@ void BehavProfile<T>::BehaviorStrat(const efgGame &E, int pl,
 	  m_nvals[child->number] > (T) 0)  {
 	(*this)(n->GetPlayer()->GetNumber(),
 		n->GetInfoset()->GetNumber(), 
-		Support().Find(n->GetInfoset()->Actions()[i])) =
+		Support().GetIndex(n->GetInfoset()->Actions()[i])) =
 	  m_nvals[child->number] / m_nvals[n->number];
       }
     BehaviorStrat(E, pl, child);
@@ -764,7 +764,7 @@ void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
 	else
 	  prob = tremble / (T) E.NumChildren(node);
       }
-      else if (Support().Find(node->GetInfoset()->Actions()[i]))
+      else if (Support().Contains(node->GetInfoset()->Actions()[i]))
 	prob = (T) 1 / (T) Support().NumActions(node->GetPlayer()->GetNumber(),
 						node->GetInfoset()->GetNumber());
       else
@@ -1032,7 +1032,7 @@ void BehavAssessment<T>::CondPayoff(Node *p_node,
     // path.  So, we must traverse the whole tree, and cannot ignore
     // the (zero-probability) actions which do not appear in the support
     for (int child = 1; child <= m_efg->NumChildren(p_node); child++) {
-      int act = m_support.Find(p_node->GetInfoset()->Actions()[child]);
+      int act = m_support.GetIndex(p_node->GetInfoset()->Actions()[child]);
       T newprob;
       if (act)
 	newprob = (*this)(npl, iset, act);
