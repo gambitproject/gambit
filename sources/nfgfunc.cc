@@ -4,7 +4,17 @@
 //# $Id$
 //#
 
+
 #include "gsm.h"
+#include "portion.h"
+#include "gsmfunc.h"
+
+#include "normal.h"
+
+#include "glist.h"
+
+
+
 
 Portion *GSM_DisplayNfg(Portion **param)
 {

@@ -4,11 +4,17 @@
 //# $Id$
 //#
 
+
 #include "gsm.h"
+#include "portion.h"
+#include "gsmfunc.h"
+
 #include "extform.h"
 
 #include "egobit.h"
 #include "eliap.h"
+
+
 
 template <class T> class Behav_List_Portion : public List_Portion   {
   public:
