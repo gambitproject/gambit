@@ -548,7 +548,7 @@ gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
     {
     answer += gPoly<T>(Space,
 	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
-	       Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
+	       ((T) Terms[i].Coef())* ((T) pow(val,(long int)Terms[i].ExpV()[varnumber])), 
 		       Order);
 
 //DEBUG
