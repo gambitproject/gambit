@@ -1,7 +1,7 @@
 //#
 //# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
-//# $Id$
+//# @(#)gsm.cc	1.162 8/5/96
 //#
 
 
@@ -9,6 +9,37 @@ class Portion;
 class CallFuncObj;
 class RefHashTable;
 template <class T> class gStack;
+
+//-----------------------------------------------------------------------
+//                       Template instantiations
+//-----------------------------------------------------------------------
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+
+#include "gstack.imp"
+
+TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< gStack< Portion* >* >;
+TEMPLATE class gStack< CallFuncObj* >;
+TEMPLATE class gStack< RefHashTable* >;
+
+#include "garray.imp"
+#include "gslist.imp"
+class NewInstr;
+TEMPLATE class gArray<NewInstr*>;
+class FuncDescObj;
+TEMPLATE class gSortList<FuncDescObj*>;
+TEMPLATE class gListSorter<FuncDescObj*>;
+#include "gstring.h"
+TEMPLATE class gSortList<gString>;
+TEMPLATE class gListSorter<gString>;
+
+
+#pragma option -Jgx
 
 #include "gsm.h"
 
@@ -32,16 +63,18 @@ template <class T> class gStack;
 #include "gslist.h"
 #include "garray.h"
 
+
+
 class gFuncListSorter : public gListSorter<FuncDescObj*>
 {
 protected:
-  CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
-  {
-    if((a->FuncName()) < (b->FuncName()))
-      return GreaterThan;
-    else if((a->FuncName()) > (b->FuncName()))
+	CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
+	{
+		if((a->FuncName()) < (b->FuncName()))
+			return GreaterThan;
+		else if((a->FuncName()) > (b->FuncName()))
       return LessThan;
-    else
+		else
       return Equal;
   }
 public:
@@ -408,7 +441,7 @@ bool GSM::Assign( void )
   {
     if(varname != "")
     {
-      if(p2->IsReference())
+			if(p2->IsReference())
       {
 	_VarDefine(varname, p2->ValCopy());
 	delete p2;
@@ -2458,37 +2491,6 @@ void GSM::_ErrorMessage
 }
 
 
-
-
-//-----------------------------------------------------------------------
-//                       Template instantiations
-//-----------------------------------------------------------------------
-
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
-
-#include "gstack.imp"
-
-TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gStack< Portion* >* >;
-TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< RefHashTable* >;
-
-
-#include "garray.imp"
-#include "gslist.imp"
-
-TEMPLATE class gArray<NewInstr*>;
-TEMPLATE class gSortList<FuncDescObj*>;
-TEMPLATE class gListSorter<FuncDescObj*>;
-TEMPLATE class gSortList<gString>;
-TEMPLATE class gListSorter<gString>;
 
 
 

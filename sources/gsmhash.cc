@@ -24,6 +24,10 @@ template <class T> class gNode;
 
 TEMPLATE class gList< gString >;
 TEMPLATE class gNode< gString >;
+TEMPLATE class gList< int >;
+TEMPLATE class gNode< int >;
+TEMPLATE class gList< NewInstr* >;
+TEMPLATE class gNode< NewInstr* >;
 
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
