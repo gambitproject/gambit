@@ -7,7 +7,7 @@
 
 # Usage: 
 # make -f make.update TARGET=[gambit, src, guidoc, gcldoc, all] 
-#                     SYSTYPE=[Linux, SunOS_5_6, HPUX, all] 
+#                     SYSTYPE=[Linux, SunOS_5.6, HPUX, all] 
 #                     GUI=[motif, xt, all] 
 #
 # This can be started on any of the hss machines and it will update the files
@@ -30,7 +30,7 @@
 #MACHINE_sun4      = dosh.hum.caltech.edu
 #MACHINE_rs6000    = billandal.hum.caltech.edu
 #MACHINE_HPUX      = jilt.hum.caltech.edu
-MACHINE_SunOS_5_6 = koo.caltech.edu
+MACHINE_SunOS_5.6 = koo.caltech.edu
 MACHINE_Linux     = mill.caltech.edu
 MACHINE_latex     = mill.caltech.edu
 
@@ -82,11 +82,11 @@ endif
 # Check which SYSNAMEs to build on.
 ifeq ($(SYSNAME),none)
 	@make -f make.update error \
-		ERRORNAME='Must specify a SYSNAME [Linux, SunOS_5_6, HPUX]'
+		ERRORNAME='Must specify a SYSNAME [Linux, SunOS_5.6, HPUX]'
 endif
 ifeq ($(SYSNAME),all)
 	@make -f make.update TARGET=$(TARGET) SYSNAME=Linux     GUI=$(GUI)
-	@make -f make.update TARGET=$(TARGET) SYSNAME=SunOS_5_6 GUI=$(GUI)
+	@make -f make.update TARGET=$(TARGET) SYSNAME=SunOS_5.6 GUI=$(GUI)
 	#@make -f make.update TARGET=$(TARGET) SYSNAME=HPUX      GUI=$(GUI) 
 endif
 

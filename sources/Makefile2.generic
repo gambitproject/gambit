@@ -9,7 +9,7 @@
 # Executable are named gcl_$(SYSNAME) and gui_$(GUI)_$(SYSNAME), 
 # where SYSNAME represents the OS and GUI represents the X libraries 
 # (motif/xt/none) that are available on the system (e.g. gui_Linux_xt or
-# gcl_SunOS_5_6).  SYSNAME and GUI must be passed to this makefile
+# gcl_SunOS_5.6).  SYSNAME and GUI must be passed to this makefile
 # e.g. "make -f Makefile2.generic SYSNAME=solaris GUI=motif".
 #
 # Object files are put in platform-specific subdirectories so that 
@@ -80,7 +80,7 @@ WXLIB = -lwx_motif_$(SYSNAME)
 #   XLIBDIR = location of X libraries
 #   XLIB    = any X libraries used
 
-ifeq ($(SYSNAME), SunOS_5_6)
+ifeq ($(SYSNAME), SunOS_5.6)
 XINCDIR = -I/usr/local/X11R6.4/include/X11
 XLIBDIR = -L/usr/local/X11R6.4/lib 
 XLIB = -lsocket -lnsl -lX11 -lXm -lXmu -lXt -lgen -lm
