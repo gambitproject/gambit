@@ -192,9 +192,9 @@ template <class T> void CSSeqFormModule<T>
       snew=1;
       for(i=1;i<i1;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      (*A)(s1,ns2+i1+1) = +(T)1;
+      (*A)(s1,ns2+i1+1) = (T) +1;
       for(i=1;i<=n->NumChildren();i++) {
-	(*A)(snew+i,ns2+i1+1) = -(T)1;
+	(*A)(snew+i,ns2+i1+1) = (T) -1;
 	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
       }
     }
@@ -203,9 +203,9 @@ template <class T> void CSSeqFormModule<T>
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      (*A)(ns1+i2+1,s2) = -(T)1;
+      (*A)(ns1+i2+1,s2) = (T) -1;
       for(i=1;i<=n->NumChildren();i++) {
-	(*A)(ns1+i2+1,snew+i) = +(T)1;
+	(*A)(ns1+i2+1,snew+i) = (T) +1;
 	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
       }
     }
