@@ -3087,16 +3087,16 @@ Some of the more important functions are given in Table 7.
 Function Name	& Description \\ 
 \hline
 \verb+  ActionProb[b,a]+ & Prob of action \verb+a+ for profile \verb+b+\\
-\verb+  ActionProbs[b]+ & Nested list of all action probs for \verb+b+ \\ 
+\verb+# ActionProbs[b]+ & Nested list of all action probs for \verb+b+ \\ 
 \verb+  ActionValue[b,a]+ & Value of action \verb+a+ for profile \verb+b+\\ 
-\verb+  ActionValues[b]+ & Nested list of all action values for \verb+b+ \\ 
+\verb+# ActionValues[b]+ & Nested list of all action values for \verb+b+ \\ 
 \verb+  Belief[b,n]+ & Prob of node \verb+n+ conditional on its
 infoset under \verb+b+\\ 
-\verb+  Beliefs[b]+ & Nested list of all beliefs under \verb+b+\\ 
+\verb+# Beliefs[b]+ & Nested list of all beliefs under \verb+b+\\ 
 \verb+  Behav[m]+ & \verb+Behav profile associated with mixed profile \verb+m+\\
 \verb+  InfosetProb[b,i]+ & Probability of information set \verb+i+
 under \verb+b+\\ 
-\verb+  InfosetProbs[b]+ & Nested list of all infoset probabilities
+\verb+# InfosetProbs[b]+ & Nested list of all infoset probabilities
 for \verb+b+\\ 
 \verb+  IsNash[p]+ &\verb+True+ if \verb+p+ is known to be Nash\\
 \verb+  IsPerfect[m]+ &\verb+True+ if \verb+m+ is known to be perfect\\
@@ -3105,11 +3105,11 @@ for \verb+b+\\
 \verb+  NodeValue[b,p,n]+ & Value of \verb+b+ to player \verb+p+ at
 node \verb+n+\\ 
 \verb+# NodeValues[b,n]+ & List of values of \verb+b+ to all players at node \verb+n+\\
-\verb+  NodeValues[b,p]+ & List of values of \verb+b+ to player \verb+p+ at all nodes\\
+\verb+# NodeValues[b,p]+ & List of values of \verb+b+ to player \verb+p+ at all nodes\\
 \verb+  Payoff[p,pl]+ & Payoff of profile \verb+p+ for player \verb+pl+\\
 \verb+# Payoffs[p]+ & List of payoffs to all players of profile \verb+p+\\
 \verb+  RealizProb[b,n]+ & Probability of reaching node \verb+n+ under \verb+b+\\
-\verb+  RealizProbs[b]+ & Realization probabilites of all nodes under \verb+b+\\ 
+\verb+# RealizProbs[b]+ & Realization probabilites of all nodes under \verb+b+\\ 
 \verb+  SetActionProbs[b,i.v]+ & Sets action probabilies of \verb+b+ at infoset \verb+i+ to \verb+v+\\
 \verb+  SetStrategyProbs[m,p,v]+ & Sets strategy probs of \verb+m+ for
 player \verb+p+ to \verb+v+\\
@@ -3606,18 +3606,18 @@ appreciate getting feedback on this.
 \begin{verbatim}
   Accuracy
   ActionProb 
-  ActionProbs 
+# ActionProbs 
   ActionValue 
-  ActionValues 
+# ActionValues 
   Behav 
 # Behav 
   Belief 
-  Beliefs 
+# Beliefs 
   Creator
   QreLambda 
   QreValue 
   InfosetProb 
-  InfosetProbs 
+# InfosetProbs 
   IsNash 
   IsPerfect 
   IsSequential 
@@ -3626,14 +3626,13 @@ appreciate getting feedback on this.
   Mixed
 # Mixed
   NodeValue 
-  NodeValues 
 # NodeValues 
   Payoff 
 # Payoffs 
   RealizProb 
-  RealizProbs 
+# RealizProbs 
   Regret
-  Regrets
+# Regrets
   SetActionProbs 
   SetStrategyProb 
   SetStrategyProbs 
@@ -3698,22 +3697,7 @@ the action is returned.  If the probability is not specified by the
 profile, the null value is returned.  It is an error if \verb+profile+
 and \verb+action+ are not from the same extensive form game.
 
-\item [See also:] \verb+ActionProbs+, \verb+SetActionProbs+.
-\ed
-
-\item\lex{ActionProbs}
-\protect \large \begin{verbatim}
-ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER))) 
-\end{verbatim}\normalsize
-
-\bd 
-Returns a nested list of probabilities for each action under
-\verb+profile+.  The \verb+(i,j,k)+th entry is the probability of
-player \verb+i+, information set \verb+j+, action \verb+k+, where the
-index numbers correspond to the output of \verb+Players+, \verb+Infosets+,
-and \verb+Actions+, respectively. 
-
-\item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
+\item [See also:] \verb+# ActionProbs+, \verb+SetActionProbs+.
 \ed
 
 \item\lex{ActionValue}
@@ -3730,24 +3714,7 @@ well-defined, the null value is returned.  It is an error if
 game, or if \verb+action+ is an action at an information set owned by
 the chance player.
 
-\item [See also:] \verb+ActionValues+, \verb+Belief+,
-\verb+InfosetProb+, \verb+NodeValue+, \verb+RealizProb+.  
-\ed
-
-\item\lex{ActionValues}
-\protect \large \begin{verbatim}
-ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER))) 
-\end{verbatim}\normalsize
-
-\bd
-Returns a list of expected payoffs of each action (to the player
-who chooses that action).  The null value is returned for actions for
-which this value is not well-defined.  The \verb+(i,j,k)+th entry is
-the expected payoff to player \verb+i+ at information set \verb+j+, of
-action \verb+k+, where the index numbers correspond to the output of
-\verb+Players+, \verb+Infosets+, and \verb+Actions+, respectively.
-
-\item [See also:] \verb+ActionValue+, \verb+Belief+,
+\item [See also:] \verb+# ActionValues+, \verb+Belief+,
 \verb+InfosetProb+, \verb+NodeValue+, \verb+RealizProb+.  
 \ed
 
@@ -3938,24 +3905,7 @@ information set, assuming all players follow \verb+profile+.  The null
 value is returned if the belief value is not well-defined, or if
 \verb+node+ is terminal.  It is an error if \verb+profile+ and \verb+node+
 are not from the same extensive form game.
-\item [See also:] \verb+ActionValue+, \verb+Beliefs+, \verb+InfosetProb+,
-\verb+NodeValue+, \verb+RealizProb+.
-\ed
-
-\item\lex{Beliefs}
-\protect \large \begin{verbatim}
-Beliefs[profile->BEHAV] =: LIST(NUMBER) 
-\end{verbatim}\normalsize
-
-\bd 
-Returns a nested list of
-beliefs of being at each node of each information set under
-\verb+profile+. The \verb+(i,j,k)+th element of the list corresponds
-to player \verb+i+, information set \verb+j+, and member node
-\verb+k+. The null value is returned for nodes where beliefs are
-undefined.
-
-\item [See also:] \verb+ActionValue+, \verb+Belief+, \verb+InfosetProb+,
+\item [See also:] \verb+ActionValue+, \verb+# Beliefs+, \verb+InfosetProb+,
 \verb+NodeValue+, \verb+RealizProb+.
 \ed
 
@@ -4782,21 +4732,6 @@ terminal nodes and the null node, belong to the null information set.
 \item\lex{InfosetProb}
 \protect \large \begin{verbatim}
 InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd
-Returns the probability of reaching \verb+infoset+ when all players
-follow \verb+profile+.  The probability of reaching the null information
-set is defined to be null.  It is an error if \verb+profile+ and
-\verb+infoset+ are not defined on the same extensive form game.
-\item
-[See also:] \verb+ActionValue+, \verb+Belief+, \verb+NodeValue+,
-\verb+RealizProb+.
-\ed
-
-\item\lex{InfosetProbs}
-\protect \large \begin{verbatim}
-InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER)) 
 \end{verbatim}\normalsize
 
 \bd
@@ -5716,18 +5651,6 @@ that all players are following \verb+profile+.
 \verb+RealizProb+.
 \ed
 
-\item\lex{NodeValues}
-\protect \large \begin{verbatim}
-NodeValues[profile->BEHAV, player->EFPLAYER] =: LIST(NUMBER) 
-\end{verbatim}\normalsize
-
-\bd 
-Returns the expected payoff to \verb+player+ at all nodes in the
-game, given that all players are following \verb+profile+.  The nodes
-are in indexed traversal order.
-\item [See also:] \verb+NodeValue+.  
-\ed
-
 \item\lex{Nodes}
 \protect \large \begin{verbatim}
 Nodes[efg->EFG] =: LIST(NODE) 
@@ -6464,7 +6387,7 @@ second signature reads \verb+n+ characters from \verb+input+.
 \item [See also:] \verb+Input+, \verb+IsEof+, \verb+Read+, \verb+Write+.
 \ed
 
-\item\lex{RealizProbs}
+\item\lex{RealizProb}
 \protect \large \begin{verbatim}
 RealizProb[profile->BEHAV, node->NODE] =: NUMBER 
 \end{verbatim}\normalsize
@@ -6475,19 +6398,6 @@ are following \verb+profile+.  It is an error if \verb+profile+ and
 \verb+node+ are not from the same extensive form game.
 \item [See also:] \verb+ActionValue+, \verb+Belief+, \verb+InfosetProb+,
 \verb+NodeValue+.
-\ed
-
-\item\lex{RealizProbs}
-\protect \large \begin{verbatim}
-RealizProbs[profile->BEHAV] =: LIST(NUMBER) 
-\end{verbatim}\normalsize
-
-\bd
-
-Returns a list of the realization probabilities generated by
-\verb+profile+ for all nodes in the game tree.  The nodes are in the
-same order as returned by \verb+Nodes+.
-\item [See also:] \verb+Nodes+, \verb+RealizProb+, 
 \ed
 
 \item\lex{Regret}
@@ -6511,17 +6421,6 @@ Returns the gain to a player for deviating to \verb+strategy+, assuming
 all players are following \verb+profile+.  The strategy profile is
 a Nash equilibrium if and only if the regrets of all strategies are
 identically zero.
-\ed
-
-\item\lex{Regrets}
-\protect \large \begin{verbatim}
-Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER))) 
-\end{verbatim} \normalsize
-
-\bd
-Returns a nested list of the regrets generated for each action by
-\verb+profile+.  The \verb+(i,j,k)+th entry is the regret for player
-\verb+i+, infoset \verb+j+, action \verb+k+.
 \ed
 
 \item\lex{Regrets}
@@ -7307,6 +7206,47 @@ Returns the action number of \verb+a+.
 \end{verbatim} 
 \ed
 
+\item\lex{ActionProbs}
+\protect \large \begin{verbatim}
+ActionProbs[behav->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}\normalsize
+
+\bd 
+Returns a nested list of probabilities for each action under
+\verb+behav+.  The \verb+(i,j,k)+th entry is the probability of
+player \verb+i+, information set \verb+j+, action \verb+k+, where the
+index numbers correspond to the output of \verb+Players+, \verb+Infosets+,
+and \verb+Actions+, respectively. 
+
+\item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
+
+\begin{verbatim}
+  ActionProb[behav,Actions[Game[behav]]]
+\end{verbatim} 
+\ed
+
+\item\lex{ActionValues}
+\protect \large \begin{verbatim}
+ActionValues[behav->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of expected payoffs of each action (to the player
+who chooses that action).  The null value is returned for actions for
+which this value is not well-defined.  The \verb+(i,j,k)+th entry is
+the expected payoff to player \verb+i+ at information set \verb+j+, of
+action \verb+k+, where the index numbers correspond to the output of
+\verb+Players+, \verb+Infosets+, and \verb+Actions+, respectively.
+
+\item [See also:] \verb+ActionValue+, \verb+Belief+,
+\verb+InfosetProb+, \verb+NodeValue+, \verb+RealizProb+.  
+
+\begin{verbatim}
+  ActionValue[behav,Actions[Game[behav]]]
+\end{verbatim} 
+
+\ed
+
 \item\lex{Actions}
 \protect \large \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION) 
@@ -7520,6 +7460,28 @@ profile for the game \verb+efg+.
 \begin{verbatim}
   SetProbs[Behav[Support[efg]],list]
 \end{verbatim} 
+\ed
+
+\item\lex{Beliefs}
+\protect \large \begin{verbatim}
+Beliefs[behav->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}\normalsize
+
+\bd 
+Returns a nested list of
+beliefs of being at each node of each information set under
+\verb+behav+. The \verb+(i,j,k)+th element of the list corresponds
+to player \verb+i+, information set \verb+j+, and member node
+\verb+k+. The null value is returned for nodes where beliefs are
+undefined.
+
+\item [See also:] \verb+ActionValue+, \verb+Belief+, \verb+InfosetProb+,
+\verb+NodeValue+, \verb+RealizProb+.
+
+\begin{verbatim}
+  Belief[behav,Members[Game[behav]]]
+\end{verbatim}
+
 \ed
 
 %--C--
@@ -7907,6 +7869,28 @@ an infinite loop.  Used by the standard solution algorithms
 \end{verbatim} 
 \ed
 
+\item\lex{InfosetProbs}
+\protect \large \begin{verbatim}
+InfosetProbs[behav->BEHAV]=:LIST(LIST(NUMBER))
+\end{verbatim}\normalsize
+
+\bd
+
+Returns a nested list of the probabilities of reaching each
+information set.  The \verb+(i,j)+th element is the probability of
+reaching player \verb+i+'s \verb+j+th information set. The probability
+of reaching the null information set is defined to be null.  
+
+\item
+[See also:] \verb+ActionValue+, \verb+Belief+, \verb+NodeValue+,
+\verb+RealizProb+.
+
+\begin{verbatim}
+  InfosetProb[behav,Infosets[Game[behav]]]
+\end{verbatim}
+
+\ed
+
 \item\lex{Infosets}
 \protect \large \begin{verbatim}
 Infosets[efg->EFG] =: LIST(LIST(INFOSET)) 
@@ -8081,7 +8065,7 @@ ListForm[behav->BEHAV] =: LIST(LIST(LIST(NUMBER)))
 
 \bd 
 This function is provided for backwards compatibility only.  It
-provides the same output as \verb+ActionProbs+.
+provides the same output as the standard user defined function \verb+ActionProbs+.
 \begin{verbatim}
   ActionProb[behav,Actions[Game[behav]]]
 \end{verbatim} 
@@ -8486,6 +8470,40 @@ of being at \verb+node+ under \verb+behav+.
 \begin{verbatim}
   NodeValue[behav,Players[Game[behav]],node]
 \end{verbatim} 
+\ed
+
+\item\lex{NodeValues}
+\protect \large \begin{verbatim}
+NodeValues[behav->BEHAV,player->EFPLAYER]=:LIST(NUMBER)
+\end{verbatim}\normalsize
+
+\bd 
+Returns a list of the expected payoff to \verb+player+ at
+all nodes in the game, given that all players are following
+\verb+behav+.  The nodes are in indexed traversal order.
+\item [See also:] \verb+NodeValue+.  
+
+\begin{verbatim}
+  NodeValue[behav,player,Nodes[Game[behav]]]
+\end{verbatim}
+
+\ed
+
+\item\lex{NodeValues}
+\protect \large \begin{verbatim}
+NodeValues[behav->BEHAV]=:LIST(NUMBER)
+\end{verbatim}\normalsize
+
+\bd 
+Returns a nested list of payofff vectors to the players of being
+at \verb+node+ under \verb+behav+.  The nodes are in indexed traversal
+order.
+\item [See also:] \verb+NodeValue+.  
+
+\begin{verbatim}
+  NodeValues[behav,Nodes[Game[behav]]]
+\end{verbatim}
+
 \ed
 
 \item\lex{NonterminalNodes}
@@ -8993,6 +9011,38 @@ for any element of the list, a file read error will be returned.
   input
 \end{verbatim} 
 \ed
+
+\item\lex{RealizProbs}
+\protect \large \begin{verbatim}
+RealizProbs[behav->BEHAV]=:LIST(NUMBER)
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of the realization probabilities generated by
+\verb+behav+ for all nodes in the game tree.  The nodes are in indexed
+traversal order.
+\item [See also:] \verb+Nodes+, \verb+RealizProb+, 
+
+\begin{verbatim}
+  RealizProb[behav,Nodes[Game[behav]]]
+\end{verbatim}
+
+\ed
+
+\item\lex{Regrets}
+\protect \large \begin{verbatim}
+Regrets[behav->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim} \normalsize
+
+\bd
+Returns a nested list of the regrets generated for each action by
+\verb+behav+.  The \verb+(i,j,k)+th entry is the regret for player
+\verb+i+, infoset \verb+j+, action \verb+k+.
+\ed
+
+\begin{verbatim}
+  Regret[behav,Actions[Game[behav]]]
+\end{verbatim}
 
 %--S--
 
