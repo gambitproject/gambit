@@ -18,6 +18,8 @@ class Node;
 
 class Action   {
   friend class BaseExtForm;
+  friend class ExtForm<double>;
+  friend class ExtForm<gRational>;
   friend class Infoset;
 
   private:

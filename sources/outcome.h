@@ -9,11 +9,14 @@
 
 class Outcome   {
   friend class BaseExtForm;
+  friend class ExtForm<double>;
+  friend class ExtForm<gRational>;
 
   protected:
+    int number;
     gString name;
 
-    Outcome(void)   { }
+    Outcome(int n) : number(n)   { }
     virtual ~Outcome()   { }
   
   public:
@@ -29,7 +32,7 @@ template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
   friend class ExtForm<T>;
 
   private:
-    OutcomeVector(int pl) : gVector<T>(pl)  { }
+    OutcomeVector(int n, int pl) : Outcome(n), gVector<T>(pl)  { }
     ~OutcomeVector()    { }
 
     void Resize(int pl)    { }

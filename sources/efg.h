@@ -30,6 +30,7 @@ class BaseExtForm     {
 
        //# PROTECTED CONSTRUCTORS -- FOR DERIVED CLASS USE ONLY
     BaseExtForm(void);
+    BaseExtForm(const BaseExtForm &);
 
     void CopySubtree(Node *, Node *, Node *);
 
@@ -98,34 +99,29 @@ class BaseExtForm     {
 };
 
 
-#include "outcome.h"
+template <class T> class OutcomeVector;
 #include "behav.h"
 
 template <class T> class ExtForm : public BaseExtForm   {
   private:
-//
-// These are being defined privately for now so they are not accidentally
-// used.  They will be implemented later.
-//+grp
-    ExtForm(const ExtForm<T> &);
     ExtForm<T> &operator=(const ExtForm<T> &);
-//-grp
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
 		    gPVector<T> &, gDPVector<T> &) const;
-//    gVector<T> CondPayoff(Node *n, T prob, const gVector<T> &,
-//			  const BehavProfile<T> &, gPVector<T> &,
-//			  gDPVector<T> &) const;
 
     Infoset *CreateInfoset(int n, Player *pl, int br);
     Node *CreateNode(Node *parent);
 
+    // this is for use with the copy constructor
+    void CopySubtree(Node *, Node *);
+
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
     ExtForm(void);
+    ExtForm(const ExtForm<T> &);
     virtual ~ExtForm(); 
 
 	//# DATA ACCESS -- GENERAL INFORMATION
@@ -151,7 +147,7 @@ template <class T> class ExtForm : public BaseExtForm   {
 #include "player.h"
 #include "infoset.h"
 #include "node.h"
-
+#include "outcome.h"
 
 // These functions are provided in readefg.y/readefg.cc
 template <class T> int ReadEfgFile(gInput &, ExtForm<T> *&);

@@ -43,7 +43,51 @@ template <class T> void TypedNode<T>::Resize(int pl)
 //------------------------------------------------------------------------
 
 template <class T> ExtForm<T>::ExtForm(void)
-{ root = new TypedNode<T>(this, 0, 0); }
+{ (root = new TypedNode<T>(this, 0, 0))->name = "ROOT"; }
+
+template <class T> void ExtForm<T>::CopySubtree(Node *n, Node *m)
+{
+  n->name = m->name;
+  if (m->outcome)
+    n->outcome = outcomes[m->outcome->number];
+
+  if (m->infoset)   {
+    Player *p;
+    if (m->infoset->player->number)
+      p = players[m->infoset->player->number];
+    else 
+      p = chance;
+
+    Infoset *s = p->infosets[m->infoset->number];
+    AppendNode(n, s);
+    for (int i = 1; i <= n->children.Length(); i++)
+      CopySubtree(n->children[i], m->children[i]);
+  }
+}
+
+template <class T> ExtForm<T>::ExtForm(const ExtForm<T> &E)
+  : BaseExtForm(E)
+{
+  int i;
+
+  for (i = 1; i <= E.outcomes.Length(); i++)
+    outcomes.Append(new OutcomeVector<T>((OutcomeVector<T> &) *E.outcomes[i]));
+  
+  for (i = 1; i <= E.chance->infosets.Length(); i++)   {
+    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.chance->infosets[i];
+    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
+					       t->actions.Length());
+    s->name = t->name;
+    for (int j = 1; j <= s->probs.Length(); j++)  {
+      s->probs[j] = t->probs[j];
+      s->actions[j]->name = t->actions[j]->name;
+    }
+    chance->infosets.Append(s);
+  }
+
+  root = new TypedNode<T>(this, 0, 0);
+  CopySubtree(root, E.root);
+}
 
 template <class T> ExtForm<T>::~ExtForm()
 { }
@@ -73,7 +117,8 @@ template <class T> Node *ExtForm<T>::CreateNode(Node *parent)
 
 template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
 {
-  OutcomeVector<T> *ret = new OutcomeVector<T>(players.Length());
+  OutcomeVector<T> *ret = new OutcomeVector<T>(outcomes.Length() + 1,
+					       players.Length());
   outcomes.Append(ret);
   ret->name = "Outcome " + ToString(outcomes.Length());
   return ret;
