@@ -8,7 +8,7 @@
 #define TABLEAU_H
 
 #include "rational.h"
-#include "ludecomp.h"
+#include "qrdecomp.h"
 #include "bfs.h"
 
 template <class T> class Basis;
@@ -88,7 +88,7 @@ protected:
   const gMatrix<T> *A;
   const gVector<T> *b;
   Basis<T> basis;
-  LUdecomp<T> B;
+  QRdecomp<T> B;
   gVector<T> solution;
 public:
       // constructors and destructors
@@ -123,12 +123,20 @@ public:
   void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void SolveColumn(int, gVector<T> &);
+  void SetConst(const gVector<T> &bnew);
 //  void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
       // miscellaneous functions
+  bool EqZero(T x) const;
+  bool LtZero(T x) const;
+  bool GtZero(T x) const;
+  bool LeZero(T x) const;
+  bool GeZero(T x) const;
   bool IsNash(void) const; // this does not belong here
-  BFS<T> GetBFS(void) const;
+  bool IsLexMin();
+  BFS<T> GetBFS1(void) const; 
+  BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
   void Dump(gOutput &) const;
 };
 
@@ -157,6 +165,8 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
+  bool IsReversePivot(int i, int j);
+  bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 };
 

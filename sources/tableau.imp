@@ -326,6 +326,15 @@ void Tableau<T>::SolveColumn(int col, gVector<T> &out)
   B.solve(tmpcol2,out);
 }
 
+
+template <class T>
+void Tableau<T>::SetConst(const gVector<T> &bnew)
+{
+  assert(bnew.First()==b->First() && bnew.Last()==b->Last());
+  b=&bnew;
+  B.solve(*b, solution);
+}
+
 /*
 template <class T>
 void Tableau<T>::SetBasis(const Basis<T> &in)
@@ -353,10 +362,63 @@ bool Tableau<T>::IsNash() const
   return 1;
 }
 
-template <class T>
-BFS<T> Tableau<T>::GetBFS() const
+template <class T> bool Tableau<T>::EqZero(T x) const
+{ 
+  return (LeZero(x) && GeZero(x));
+}
+
+template <class T> bool Tableau<T>::LtZero(T x) const
+{ 
+  return !GeZero(x);
+}
+
+template <class T> bool Tableau<T>::GtZero(T x) const
+{ 
+  return !LeZero(x);
+}
+
+template <class T> bool Tableau<T>::LeZero(T x) const
+{ 
+  if(x <=eps2) return 1;
+  return 0;
+}
+
+template <class T> bool Tableau<T>::GeZero(T x) const
+{ 
+  if(x >= -eps2) return 1;
+  return 0;
+}
+
+template <class T> bool Tableau<T>::IsLexMin()
+{
+  int i,j,k;
+  for(i=MinRow();i<=MaxRow();i++)
+    if(EqZero(solution[i]))
+      for(j=-MaxRow();j<Label(i);j++) if(j!=0){
+	SolveColumn(j,tmpcol);
+	if(LtZero(tmpcol[i]))
+	  return 0;
+      }
+  return 1;
+}
+
+template <class T> BFS<T> Tableau<T>::GetBFS() const
 {
   BFS<T> cbfs((T) 0);
+  for(int i=MinCol();i<=MaxCol();i++) {
+    if(Member(i)) 
+      cbfs.Define(i,solution[basis.Find(i)]);
+  }
+  return cbfs;
+}
+
+template <class T> BFS<T> Tableau<T>::GetBFS1() const
+{
+  BFS<T> cbfs((T) 0);
+  for(int i=-MaxRow();i<=-MinRow();i++) {
+    if(Member(i)) 
+      cbfs.Define(i,solution[basis.Find(i)]);
+  }
   for(int i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
@@ -458,7 +520,7 @@ template <class T>
 void LPTableau<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
 {
   uc= unitcost;
-  c=cost;
+  c=cost; 
 }
 
 template <class T>
@@ -479,7 +541,7 @@ template <class T>
 T LPTableau<T>::RelativeCost(int col) const
 {
   if( col<0 ) {
-    return cost[-col] - dual[-col];
+    return unitcost[-col] - dual[-col];
   }
   else {
 //      gVector<T> tmpcol(MinRow(),MaxRow());
@@ -522,6 +584,268 @@ void LPTableau<T>::Pivot(int outrow,int col)
   SolveDual();
 }
 
+template <class T>
+bool LPTableau<T>::IsReversePivot(int i, int j)
+{
+  // first check that pivot preserves primal feasibility
+  
+  // gout << "\nin IsReversePivot, i= " << i << " j = "<< j;
+  SolveColumn(j,tmpcol);
+  // gout << "\ncurrentPivCol = " << tmpcol;
+  // gout << "\ncurrentSolCol = " << solution;
+  if(LeZero(tmpcol[i])) { 
+    // gout << "\nPrior tableau not primal feasible: currentPivCol[i] <= 0";
+    return 0;
+  }
+  int k;
+  T ratio = solution[i]/tmpcol[i];
+  // gout << "\nratio = " << ratio;
+  
+  for(k=tmpcol.First();k<=tmpcol.Last();k++)
+    if(GtZero(tmpcol[k]) && GtZero(solution[k]/tmpcol[k]-ratio)) {
+      // gout << "\nPrior tableau not primal feasible: i not min ratio";
+      return 0;
+    }
+  // check that j would be the row to exit in prior tableau
+  
+  gVector<T> priorPivCol(MinRow(),MaxRow());
+  gVector<T> priorSolCol(solution);
+  priorPivCol = (T)0;
+  priorPivCol[i] = (T)1;
+  T x1,x2;
+  x1= priorPivCol[i]/tmpcol[i];
+  x2= priorSolCol[i]/tmpcol[i];
+  
+  for(k=b->First();k<=b->Last();k++) 
+    if(k!=i) {
+      priorPivCol[k] = priorPivCol[k] - x1 * tmpcol[k];
+      priorSolCol[k] = priorSolCol[k] - x2 * tmpcol[k];
+    }
+  priorPivCol[i] = x1;
+  priorSolCol[i] = x2;
+  // gout << "\npriorPivCol = " << priorPivCol;
+  // gout << "\npriorSolCol = " << priorSolCol;
+  
+  if(LeZero(priorPivCol[i])) {
+    // gout << "\nj not row to exit in prior tableau: priorPivotCol[i] <= 0";
+    return 0;
+  }
+  ratio = priorSolCol[i]/priorPivCol[i];
+  // gout << "\nprior ratio = " << ratio;
+  
+  for(k=tmpcol.First();k<=tmpcol.Last();k++) if(k!=i) {
+    if(GtZero(priorPivCol[k]) && GtZero(priorSolCol[k]/priorPivCol[k]-ratio)) {
+      // gout << "\nj not row to exit in prior tableau: ";
+      // gout << "higher ratio at row= " << k;
+      return 0;
+    }
+    if(GtZero(priorPivCol[k]) && EqZero(priorSolCol[k]/priorPivCol[k]-ratio) 
+       && Label(k)<j) {
+      // gout << "\nj not row to exit in prior tableau: ";
+      // gout << "same ratio,lower lex at k= " << k;
+      return 0;
+    }
+  }
+  
+  // check that i would be the column to enter in prior tableau
+  
+  int enter = Label(i);
+  // gout << "\nenter = " << enter;
+  
+  gVector<T> tmpdual(MinRow(),MaxRow());
+  tmpcol = (T)0;
+  tmpcol[i]=(T)1;
+  B.solveT(tmpcol,tmpdual);
+  // gout << "\neps_i = " << tmpcol;
+  // gout << "\ntmpdual = " << tmpdual;
+  
+  T a_ij,a_ik,c_j,c_k,d,c_jo;
+  
+  if( j<0 )
+    { tmpcol=(T)0; tmpcol[-j]=(T)1; }
+  else
+    A->GetColumn(j,tmpcol);
+  
+  // gout << "\ncol j = " << tmpcol;
+  a_ij = tmpdual*tmpcol;
+  c_j = RelativeCost(j);
+  if(EqZero(a_ij)) {
+    // gout << "\ni not col to enter in prior tableau: ";
+    // gout << "a_ij=0";
+    return 0;
+  }
+  d = c_j/a_ij;
+  
+  // gout << "\na_ij,c_j,d:" << a_ij << " " << c_j << " "  << d;
+  
+  if(enter<0) 
+    a_ik = tmpdual[-enter];
+  else {
+    A->GetColumn(enter,tmpcol);
+    a_ik = tmpdual*tmpcol;
+  }
+  c_k = RelativeCost(enter);
+  c_jo = c_k - a_ik * d; 
+  if(GeZero(c_jo)) {
+    // gout << "\ni not col to enter in prior tableau: ";
+    // gout << "c_jo<0";
+    return 0;
+  }
+  // gout << "\nk(enter),a_ik,c_k,c_jo:" << enter << " " << a_ik << " ";
+  // gout << c_k << " "  << c_jo;
+  
+  for(k=-b->Last();k<enter;k++) if(k!=0) {
+    if(k<0) 
+      a_ik=tmpdual[-k];
+    else {
+      A->GetColumn(k,tmpcol);
+      a_ik = tmpdual*tmpcol;
+    }
+    c_k = RelativeCost(k);
+    c_jo = c_k - a_ik * d; 
+    
+    // gout << "\nk,a_ik,c_k,c_jo:" << k << " " << a_ik << " ";
+    // gout << c_k << " "  << c_jo;
+    if(LtZero(c_jo)) { 
+      // gout << "\ni not col to enter in prior tableau: ";
+      // gout << "c_jo < 0 for k = " << k;
+      return 0;
+    }
+  }
+  // gout << "\nValid Reverse pivot at i = " << i << " j =  " << j;
+  return 1;
+}
+
+template <class T>
+bool LPTableau<T>::IsDualReversePivot(int i, int j)
+{
+  // first check that pivot preserves dual feasibility
+  
+  // gout << "\nin IsDualReversePivot, i= " << i << " j = "<< j;
+
+  int k;
+  gVector<T> tmpdual(MinRow(),MaxRow());
+  tmpcol = (T)0;
+  tmpcol[i]=(T)1;
+  B.solveT(tmpcol,tmpdual);
+  // gout << "\neps_i = " << tmpcol;
+  // gout << "\ntmpdual = " << tmpdual;
+
+  T a_ij,a_ik,c_j,c_k,ratio,c_jo;
+
+  if( j<0 )
+    { tmpcol=(T)0; tmpcol[-j]=(T)1; }
+  else
+    A->GetColumn(j,tmpcol);
+  
+  // gout << "\ncol j = " << tmpcol;
+  a_ij = tmpdual*tmpcol;
+  c_j = RelativeCost(j);
+  if(GeZero(a_ij)) {
+    // gout << "\nPrior tableau not dual feasible: ";
+    // gout << "a_ij>=0";
+    return 0;
+  }
+  ratio = c_j/a_ij;
+  
+  // gout << "\na_ij,c_j,ratio:" << a_ij << " " << c_j << " "  << ratio;
+  
+  for(k=-b->Last();k<=cost.Last();k++) if(k!=0) {
+    if(k<0) 
+      a_ik=tmpdual[-k];
+    else {
+      A->GetColumn(k,tmpcol);
+      a_ik = tmpdual*tmpcol;
+    }
+    c_k = RelativeCost(k);
+    
+    if(LtZero(a_ik) && GtZero(c_k/a_ik-ratio)) { 
+      // gout << "\nPrior tableau not dual feasible: ";
+      // gout << "\nhigher ratio for k = " << k;
+      // gout << " : a_ik,c_k,ratio:" << a_ik << " " << c_k << " "  << c_k/a_ik;
+      return 0;
+    }
+  }
+
+  // check that i would be the column to enter in prior tableau
+
+  int enter = Label(i);
+  // gout << "\nenter = " << enter;
+
+  if(enter<0) 
+    a_ik = tmpdual[-enter];
+  else {
+    A->GetColumn(enter,tmpcol);
+    a_ik = tmpdual*tmpcol;
+  }
+  a_ik = a_ik/a_ij;
+  c_k = RelativeCost(enter);
+  c_k -= a_ik * c_j; 
+
+  if(GeZero(a_ik)) {
+    // gout << "\ni not col to enter in prior tableau: ";
+    // gout << "a_ik>=0";
+    return 0;
+  }
+  ratio = c_k/a_ik;
+
+  // gout << "\nk(enter),a_ik,c_k,ratio:" << enter << " " << a_ik << " ";
+  // gout << c_k << " "  << ratio;
+
+  for(k=-b->Last();k<=cost.Last();k++) if(k!=0) {
+    if(k<0) 
+      a_ik=tmpdual[-k];
+    else {
+    A->GetColumn(k,tmpcol);
+    a_ik = tmpdual*tmpcol;
+    }
+    a_ik = a_ik/a_ij;
+    c_k = RelativeCost(k);
+    c_k -= a_ik * c_j; 
+    
+    // gout << "\nk,a_ik,c_k,ratio:" << k << " " << a_ik << " ";
+    // gout << c_k << " "  << ratio;
+    if(LtZero(a_ik) && GtZero(c_k/a_ik- ratio)) { 
+      // gout << "\ni not col to enter in prior tableau: ";
+      // gout << "\nhigher ratio for k = " << k;
+      // gout << " : a_ik,c_k,ratio:" << a_ik << " " << c_k << " " << c_k/a_ik;
+      return 0;
+    }
+    if(k<enter && LtZero(a_ik) && EqZero(c_k/a_ik - ratio)) { 
+      // gout << "\ni not col to enter in prior tableau: ";
+      // gout << "\nsame ratio and lower lex for k = " << k;
+      // gout << " : a_ik,c_k,ratio:" << a_ik << " " << c_k << " " << c_k/a_ik;
+      return 0;
+    }
+  }
+
+  // check that j would be the row to exit in prior tableau
+
+  SolveColumn(j,tmpcol);
+  // gout << "\ncurrentPivCol = " << tmpcol;
+  // gout << "\ncurrentSolCol = " << solution;
+
+  T b_k,b_i;
+  b_i= solution[i]/tmpcol[i];
+  if(LeZero(b_i)) {
+    // gout << "\nj not row to exit in prior tableau: ";
+    // gout << "b_i<=0";
+    return 0;
+    }
+
+  
+  for(k=b->First();k<=b->Last();k++) 
+    if(k!=i) {
+      b_k = solution[k] -  b_i * tmpcol[k];
+      if(GtZero(b_k) && Label(k)<j) {
+	// gout << "\nj not row to exit in prior tableau: ";
+	// gout << "same ratio,lower lex at k= " << k;
+	return 0;
+      }
+    }
+  // gout << "\nValid Reverse pivot at i = " << i << " j =  " << j;
+  return 1;
+}
 
 template <class T>
 BFS<T> LPTableau<T>::DualBFS() const
@@ -536,4 +860,3 @@ BFS<T> LPTableau<T>::DualBFS() const
 
 
   
-
