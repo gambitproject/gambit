@@ -196,6 +196,7 @@ bool GSM::Assign( void )
   Portion*  primary_ref;
   gString   p1_subvalue;
   bool      result = true;
+  List_Portion* curr_list;
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 2 )
@@ -292,11 +293,24 @@ bool GSM::Assign( void )
   }
   else // ( p1->Type() != porREFERENCE )
   {
-    gerr << "GSM Error: no reference found to be assigned\n";
-    delete p1;
-    delete p2;
-    _Stack->Push( new Error_Portion );
-    result = false;
+    int index = 0;
+    if( p1->ShadowOf() != 0 )
+      index = p1->ShadowOf()->ParentList()->Value().Find( p1->ShadowOf() );
+    if( index > 0 )
+    {
+      p1->ShadowOf()->ParentList()->SetSubscript( index, p2 );
+      delete p1;
+      _Stack->Push( p2->Copy() );
+      result = true;
+    }
+    else
+    {
+      gerr << "GSM Error: no reference found to be assigned\n";
+      delete p1;
+      delete p2;
+      _Stack->Push( new Error_Portion );
+      result = false;
+    }
   }
   return result;
 }
@@ -313,7 +327,7 @@ bool GSM::UnAssign( void )
 #ifndef NDEBUG
   if( _Stack->Depth() < 1 )
   {
-    gerr << "GSM Error: not enough operands to execute Assign()\n";
+    gerr << "GSM Error: not enough operands to execute UnAssign()\n";
   }
   assert( _Stack->Depth() >= 1 );
 #endif // NDEBUG
@@ -558,43 +572,8 @@ bool GSM::_BinaryOperation( OperationMode mode )
     p2 = _ResolveRef( (Reference_Portion*) p2 );
   
   if( p1->Type() == porREFERENCE )
-  {
-    if( mode == opSUBSCRIPT )
-    {
-      p = p1->Copy();
-    }
     p1 = _ResolveRef( (Reference_Portion*) p1 );
 
-    // SPECIAL CASE HANDLING - Subscript operator for Lists
-    if( p1->Type() == porLIST && mode == opSUBSCRIPT )
-    {
-      if( p2->Type() == porINTEGER )
-      {
-	delete p1;
-	p1 = p;
-	( (Reference_Portion*) p1 )->SubValue() = 
-	  Itoa( ( (numerical_Portion<gInteger>*) p2 )->Value() );
-	delete p2;
-	_Stack->Push( p1 );
-	return true;
-      }
-      else
-      {
-	gerr << "GSM Error: a non-integer list index specified\n";
-	gerr << "           for the Subscript() operator\n";
-	delete p;
-	delete p1;
-	delete p2;
-	p1 = new Error_Portion;
-	_Stack->Push( p1 );
-	return false;
-      }
-    }
-    if( mode == opSUBSCRIPT )
-    {
-      delete p;
-    }
-  }
 
   if( p1->Type() == p2->Type() )
   {
@@ -739,7 +718,85 @@ bool GSM::NOT ( void )
 
 
 bool GSM::Subscript ( void )
-{ return _BinaryOperation( opSUBSCRIPT ); }
+{
+  Portion* p2;
+  Portion* p1;
+  Portion* refp;
+  Portion* real_list;
+  Portion* element;
+  Portion* shadow;
+  bool result = false;
+
+  assert( _Stack->Depth() >= 2 );
+  p2 = _Stack->Pop();
+  p1 = _Stack->Pop();
+
+  if( p1->Type() == porREFERENCE )
+  {
+    refp = p1;
+    if( _RefTable->IsDefined( ( (Reference_Portion*) refp )->Value() ) )
+      p1 = (*_RefTable)( ( (Reference_Portion*) refp )->Value() );
+    else
+      p1 = 0;
+       
+    if( p1 != 0 && p1->Type() == porLIST )
+    {
+      delete refp;
+    }
+    else
+    {
+      p1 = refp;
+    }
+  }
+
+  if( p1->Type() == porLIST )
+  {
+    if( p2->Type() == porINTEGER )
+    {
+      if( p1->ShadowOf() == 0 )
+      {
+	real_list = p1;
+      }
+      else
+      {
+	real_list = p1->ShadowOf();
+	delete p1;
+      }
+      element = ( (List_Portion* ) real_list )->
+	GetSubscript( ((numerical_Portion<gInteger>*)p2 )->Value().as_long() );
+      if( element != 0 )
+      {
+	shadow = element->Copy();
+	shadow->ShadowOf() = element;
+	_Stack->Push( shadow );
+      }
+      else
+      {
+	_Stack->Push( new Error_Portion );
+      }
+    }
+    else
+    {
+      gerr << "GSM Error: a non-integer element number passed as the\n";
+      gerr << "           subscript of a List\n";
+      _Stack->Push( new Error_Portion );
+      result = false;
+    }
+  }
+  else
+  {
+    gerr << "GSM Error: attempted to take the subscript of a non-List\n";
+    gerr << "           Portion type\n";
+    delete p1;
+    _Stack->Push( new Error_Portion );
+    result = false;
+  }
+
+  delete p2;
+  return result;
+
+  //  return _BinaryOperation( opSUBSCRIPT ); 
+}
 
 
 
@@ -853,26 +910,7 @@ bool GSM::InitCallFunction( const gString& funcname )
 
 bool GSM::Bind( void )
 {
-  CallFuncObj*  func;
-  PortionType          curr_param_type;
-  Portion*             param;
-  gString              funcname;
-  bool                 result = true;
-  gString ref;
-  Reference_Portion* refp;
-
-#ifndef NDEBUG
-  _BindCheck();
-#endif // NDEBUG
-
-/*
-  func = _CallFuncStack->Peek();
-  param = _Stack->Peek();
-*/
-
-  result = BindRef();
-
-  return result;
+  return BindRef();
 }
 
 
@@ -898,17 +936,7 @@ bool GSM::BindVal( void )
   if( param->Type() == porREFERENCE )
     param = _ResolveRef( (Reference_Portion *)param );
 
-/*
-  result = _FuncParamCheck( func, param->Type() );
-  if( result == true )
-  {
-  }
-  else
-  {
-    delete param;
-    func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
-  }
-*/
+  param->ShadowOf() = 0;
   result = func->SetCurrParam( param ); 
 
   if( !result )  // == false
@@ -958,45 +986,19 @@ bool GSM::BindRef( void )
   }
   else // ( param->Type() != porREFERENCE )
   {
-    _CallFuncStack->Push( func );
-    _Stack->Push( param );
-    result = BindVal();
-    return result;
+    if( param->ShadowOf() == 0 )
+    {
+      _CallFuncStack->Push( func );
+      _Stack->Push( param );
+      result = BindVal();
+      return result;
+    }
   }
 
-/*
-  else // ( !func->GetCurrParamPassByRef() )
-  {
-    gerr << "GSM Error: called BindRef() on a parameter that is specified\n";
-    gerr << "           to be passed by value only\n";
-    _CallFuncStack->Push( func );
-    _Stack->Push( param );
-    result = BindVal();
-  }
-*/
   
   if( result )  // == true
   {
-    if( param != 0 )
-    {
-      /*
-      result = _FuncParamCheck( func, param->Type() );
-      if( result == true )
-      {
-      }
-      else
-      {
-	delete param;
-	func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
-      }
-      */
-      result = func->SetCurrParam( param );
-    }
-    else
-    {
-      result = func->SetCurrParam( param );
-      //func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
-    }
+    result = func->SetCurrParam( param );
   }
 
   if( !result )  // == false
@@ -1139,7 +1141,30 @@ bool GSM::CallFunction( void )
       else // ( !( refp != 0 && param[ index ] != 0 ) )
       {
 	if( ( refp == 0 ) && ( param[ index ] != 0 ) )
+	{
+	  int listindex = 0;
+	  Portion* shadowof;
+	  shadowof = func->GetCurrParamShadowOf();
+	  if( shadowof != 0 )
+	  {
+	    listindex = shadowof->ParentList()->Value().Find( shadowof );
+	    if( listindex > 0 )
+	    {
+	      shadowof->ParentList()->SetSubscript( listindex, 
+						   param[index]->Copy() );
+	    }
+#ifndef NDEBUG
+	    else
+	    {
+	      gerr << "GSM Fatal Error:\n";
+	      gerr << "          returning function parameter information\n";
+	      gerr << "          (regarding lists) is invalid\n";
+	      assert(0);
+	    }
+#endif // NDEBUG
+	  }
 	  delete param[ index ];
+	}
 #ifndef NDEBUG
 	else if( ( refp != 0 ) && ( param[ index ] == 0 ) )
 	{
@@ -1364,12 +1389,14 @@ TEMPLATE class gNode< FuncDescObj* >;
 
 TEMPLATE class gStack< Portion* >;
 TEMPLATE class gStack< CallFuncObj* >;
+TEMPLATE class gStack< List_Portion* >;
 
 
 #include "ggrstack.imp"
 
 TEMPLATE class gGrowableStack< Portion* >;
 TEMPLATE class gGrowableStack< CallFuncObj* >;
+TEMPLATE class gGrowableStack< List_Portion* >;
 
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )

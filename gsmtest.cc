@@ -8,7 +8,7 @@
 
 
 
-#define CRASHTEST
+// #define CRASHTEST
 
 
 int main( void )
@@ -41,7 +41,8 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-/*
+
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -883,6 +884,7 @@ int main( void )
   machine->Subscript();
   machine->Dump();
 
+
   machine->PushRef( "x" );
   machine->Push( (gInteger) 0 );
   machine->Subscript();
@@ -892,11 +894,11 @@ int main( void )
   machine->PushRef( "x" );
   machine->Push( (gInteger) 10 );
   machine->Subscript();
+
   machine->PushRef( "x" );
   machine->Push( (double) 6 );
   machine->Subscript();  
   machine->Dump();
-
 
 
 
@@ -990,6 +992,7 @@ int main( void )
   machine->PushRef( "x" );
   machine->Push( (gInteger) 3 );
   machine->Subscript();
+  gout << "1.2\n";
   machine->Dump();
 
   machine->PushRef( "x" );
@@ -1008,9 +1011,9 @@ int main( void )
 #endif
 
 
+
   gout << "*********************** press return to continue ************";
   gin >> cont;
-
 
 
   machine->InitCallFunction( "Assign" );
@@ -1490,7 +1493,10 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-*/
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 
 
   machine->PushRef( "x" );
@@ -1499,7 +1505,14 @@ int main( void )
 
   machine->Push( (gInteger) 11 );
   machine->Push( (gInteger) 12 );
-  machine->Push( (gInteger) 13 );
+
+  machine->Push( (gInteger) 21 );
+  machine->Push( (gInteger) 22 );
+  machine->Push( (gInteger) 23 );
+  machine->Push( (gInteger) 24 );
+  machine->Push( (gInteger) 25 );
+  machine->PushList( 5 );
+
   machine->Push( (gInteger) 14 );
   machine->Push( (gInteger) 15 );
   machine->PushList( 5 );
@@ -1509,6 +1522,100 @@ int main( void )
   machine->PushList( 5 );
   machine->Assign();
   machine->Dump();
+
+
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 33 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Bind();
+  machine->Push( (gInteger) 43 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Bind();
+  machine->Push( (gInteger) 53 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 2 );
+  machine->Subscript();
+  machine->Bind();
+  machine->Push( (gInteger) 52 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+
+#ifdef CRASHTEST
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Push( (gInteger) 1 );
+  machine->Subscript();
+  machine->Bind();
+  machine->Push( (double) 62 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+#endif // CRASHTEST
+
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;

@@ -65,6 +65,7 @@ typedef unsigned int PortionType;
 
 class RefHashTable;
 class GSM;
+class List_Portion;
 
 
 class Portion
@@ -75,12 +76,17 @@ class Portion
 
  protected:
   bool       _Temporary;
+  // the following two are only used by List operations (so far)
+  Portion*       _ShadowOf;
+  List_Portion*  _ParentList;
 
  public:
   Portion();
   virtual ~Portion();
 
   bool&               Temporary      ( void );
+  Portion*&           ShadowOf       ( void );
+  List_Portion*&      ParentList     ( void );
   virtual PortionType Type           ( void ) const = 0;
   virtual Portion*    Copy           ( void ) const = 0;
   virtual void        MakeCopyOfData ( Portion* p );
@@ -193,7 +199,6 @@ class List_Portion : public Portion
   bool              Operation ( Portion* p, OperationMode mode );
   void              Output    ( gOutput& s ) const;
 
-  Portion* operator[] ( int index );
   int      Append     ( Portion* item );
   int      Insert     ( Portion* item, int index );
   Portion* Remove     ( int index );

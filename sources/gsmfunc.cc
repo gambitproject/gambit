@@ -332,6 +332,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
     _Param[ index ] = NO_DEFAULT_VALUE;
     _RunTimeParamInfo[ index ].Defined = false;
     _RunTimeParamInfo[ index ].Ref = 0;
+    _RunTimeParamInfo[ index ].ShadowOf = 0;
   }
 }
 
@@ -445,6 +446,8 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	  }
 	  _Param[ _CurrParamIndex ] = param;
 	  _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
+	  if( param )
+	    _RunTimeParamInfo[ _CurrParamIndex ].ShadowOf = param->ShadowOf();
 	  _CurrParamIndex++;
 	  _NumParamsDefined++;
 	}
@@ -525,6 +528,12 @@ bool CallFuncObj::GetCurrParamPassByRef( void ) const
 Reference_Portion* CallFuncObj::GetCurrParamRef( void ) const
 {
   return _RunTimeParamInfo[ _CurrParamIndex ].Ref;
+}
+
+
+Portion* CallFuncObj::GetCurrParamShadowOf( void ) const
+{
+  return _RunTimeParamInfo[ _CurrParamIndex ].ShadowOf;
 }
 
 

@@ -77,6 +77,7 @@ class CallFuncObj : public FuncDescObj
   {
     bool               Defined;
     Reference_Portion* Ref;
+    Portion*           ShadowOf;
   };
   int                   _FuncIndex;
   int                   _NumParams;
@@ -106,6 +107,7 @@ class CallFuncObj : public FuncDescObj
   PortionType GetCurrParamType            ( void ) const;
   bool        GetCurrParamPassByRef ( void ) const;
   Reference_Portion* GetCurrParamRef ( void ) const;
+  Portion*    GetCurrParamShadowOf ( void ) const;
 
   Portion*    CallFunction      ( Portion** param );
 };

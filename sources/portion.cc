@@ -26,6 +26,7 @@ int Portion::_NumPortions = 0;
 Portion::Portion()
 {
   _Temporary = true;
+  _ShadowOf = 0;
 
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
@@ -37,6 +38,8 @@ Portion::Portion()
 
 Portion::~Portion()
 {
+  _ShadowOf = 0;
+
   // The following two lines are for detecting memory leakage.
 #ifdef MEMCHECK
   _NumPortions--;
@@ -47,6 +50,14 @@ Portion::~Portion()
 
 bool& Portion::Temporary( void )
 { return _Temporary; }
+
+
+Portion*& Portion::ShadowOf( void )
+{ return _ShadowOf; }
+
+
+List_Portion*& Portion::ParentList( void )
+{ return _ParentList; }
 
 
 void Portion::MakeCopyOfData( Portion* p )
@@ -602,8 +613,6 @@ void List_Portion::Output( gOutput& s ) const
 }
 
 
-Portion* List_Portion::operator[] ( int index )
-{ return _Value[ index ]; }
 
 int List_Portion::Append( Portion* item )
 { return Insert( item, _Value.Length() + 1 ); }
@@ -629,6 +638,7 @@ int List_Portion::Insert( Portion* item, int index )
 	_DataType = ( (List_Portion*) item )->_DataType;
       else
 	_DataType = item->Type();
+      item->ParentList() = this;
       result = _Value.Insert( item, index );
     }
     else
@@ -651,6 +661,7 @@ int List_Portion::Insert( Portion* item, int index )
     }
     else
     {
+      item->ParentList() = this;
       result = _Value.Insert( item, index );
     }
   }
@@ -660,7 +671,11 @@ int List_Portion::Insert( Portion* item, int index )
 
 
 Portion* List_Portion::Remove( int index )
-{ return _Value.Remove( index ); }
+{ 
+  Portion* p;
+  p = _Value.Remove( index );
+  p->ParentList() = 0;
+}
 
 int List_Portion::Length( void ) const
 { return _Value.Length(); }
@@ -679,19 +694,33 @@ void List_Portion::Flush( void )
 
 bool List_Portion::SetSubscript( int index, Portion *p )
 {
-  if( index >= 1 && index <= _Value.Length() )
+  bool type_match;
+  bool result = false;
+
+  type_match = TypeCheck( p );
+  if( type_match )
   {
-    delete _Value[ index ];
-    _Value[ index ] = p;
-    return true;
+    if( index >= 1 && index <= _Value.Length() )
+    {
+      delete _Value[ index ];
+      p->ParentList() = this;
+      _Value[ index ] = p;
+      result = true;
+    }
+    else
+    {
+      gerr << "List_Portion Error: an out-of-range subscript specified\n";
+      gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
+      gerr << "       Subscript specified: " << index << "\n";
+    }
   }
   else
   {
-    gerr << "List_Portion Error: an out-of-range subscript specified\n";
-    gerr << "       Valid range: " << 1 << " to " << _Value.Length() << "\n";
-    gerr << "       Subscript specified: " << index << "\n";
-    return false;
+    gerr << "Portion Error: attempted to set an element of a List_Portion\n";
+    gerr << "               to one with a conflicting Portion type\n";
+    delete p;
   }
+  return result;
 }
 
 
