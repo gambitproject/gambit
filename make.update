@@ -1,4 +1,4 @@
-# @(#)make.update	1.7 6/19/96
+# $Id$
 # An update script/makefile combination to create/update GAMBIT components
 # and automatically place them onto the primary GAMBIT ftp site.
 
@@ -39,14 +39,16 @@ MACHINE_sun4=dosh.hum.caltech.edu
 MACHINE_solaris=minimax.caltech.edu
 MACHINE_rs6000=billandal.hum.caltech.edu
 MACHINE_hp=jilt.hum.caltech.edu
+MACHINE_linux=eeps1.caltech.edu
 MACHINE_latex=hss.caltech.edu
+
 #Default values--these must be specified on commandline
 HOST=none
 GUI=none
 TARGET=none
 SCCS=none
 #Values controlling SCCS updates.  
-GET_false=/home/ironbark/gambit/distrib/fake_get # used to avoid SCCS updates
+GET_false=/home/gostek/gambit/distrib/fake_get # used to avoid SCCS updates
 GET_true=$(GET)
 
 all:
@@ -76,6 +78,7 @@ endif
 ifeq ($(GUI),all)
 	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif SCCS=$(SCCS)
 	@$(MAKE) -f make.update TARGET=gui HOST=sun4 GUI=xview SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=gui HOST=linux GUI=xt SCCS=$(SCCS)
 endif
 endif
 #Check which hosts to build on
@@ -88,6 +91,7 @@ ifeq ($(HOST),all)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=solaris GUI=$(GUI) SCCS=$(SCCS)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=rs6000 GUI=$(GUI) SCCS=$(SCCS)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=hp GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=linux GUI=$(GUI) SCCS=$(SCCS)
 endif
 
 #Do the actual building
