@@ -54,8 +54,8 @@ void LiapSolveParamsDialog<T>::SaveDefaults(void)
 if (!Default()) return;
 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Liap-stopAfter",stopAfter,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolN",ToString(tolOpt),defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolBrent",ToString(tolBrent),defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolN",tolOpt,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolBrent",tolBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsOpt",maxitsOpt,defaults_file);
 }

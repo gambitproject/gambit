@@ -56,8 +56,8 @@ if (!Default()) return;
 wxWriteResource(PARAMS_SECTION,"Gobit-minLam",minLam,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Gobit-maxLam",maxLam,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Gobit-delLam",delLam,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolN",ToString(tolOpt),defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolBrent",ToString(tolBrent),defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolN",tolOpt,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolBrent",tolBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsOpt",maxitsOpt,defaults_file);
 }
