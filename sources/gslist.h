@@ -28,6 +28,7 @@ public:
   // DATA MANIPULATION
   void Swap(int a, int b);
   virtual T Remove(int);
+  virtual void Flush(void);
 
   // DATA ACCESS
   int VisibleLength(void) const;

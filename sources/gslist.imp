@@ -98,6 +98,11 @@ template <class T> T gSortList<T>::Remove(int a)
   }
 }
 
+template <class T> void gSortList<T>::Flush(void)
+{
+  gList<T>::Flush();
+  vis_length = -1;
+}
 
 //--------------------------------------------------------------------
 //                  gListSorter<T>: Member functions

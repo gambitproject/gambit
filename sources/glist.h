@@ -67,7 +67,7 @@ template <class T> class gList  {
     bool Contains(const T &t) const;
     int Length(void) const;
 
-    void Flush(void);
+    virtual void Flush(void);
     void Dump(gOutput &) const;
 };
 

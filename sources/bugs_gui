@@ -186,14 +186,6 @@ panel: cannot resize frame to ZERO width or height
 
 No harm seems to come of this.
 
-//-------------------------------
-
-Bug D33: Errors after editing an extensive form game.  
-
-Load poker.efg.  Connect the two infosets for player 1 (red).  Solve
-using Standard All Nash Float.  Now split the infoset again and
-resolve.  The display will go blank and the gui will crash.
-
 //--------------------------------
 
 Bug D34: Elimination by mixed strategies crash
