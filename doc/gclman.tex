@@ -1009,11 +1009,12 @@ form'' equivalents:
 And[x,y]            x && y, x AND y 
 Assign[x,y]         x := y 
 Concat[x,y]         x \ y 
-Divide[x,y]         x / y, x DIV y 
+Divide[x,y]         x / y
 Dot[x,y]            x . y 
 Equal[x,y]          x = y 
 Greater[x,y]        x > y 
-GreaterEqual[x,y]   x >= y 
+GreaterEqual[x,y]   x >= y
+IntegerDivide[x,y]  x DIV y 
 Less[x,y]           x < y 
 LessEqual[x,y]      x <= y 
 Minus[x,y]          x - y 
@@ -4078,17 +4079,6 @@ Returns the quotient $x / y$.
 \item [See also:] \verb+IntegerDivide+.
 \ed
 
-\item\lex{Divide}
-\protect \large \begin{verbatim}
-Divide[x->INTEGER, y->INTEGER] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd
-Divides \verb+y+ into \verb+x+ by forming the equivalent rational number.
-\item [Short form:] \verb+x / y+
-\item [See also:] \verb+IntegerDivide+.
-\ed
-
 \item\lex{Dot}
 \protect \large \begin{verbatim}
 Dot[x->LIST(NUMBER), y->LIST(NUMBER)] =: NUMBER 
@@ -4310,8 +4300,10 @@ Returns the value of the function ${\rm e}^{x}$.
 
 \item\lex{Filter}
 \protect \large \begin{verbatim}
-Filter[x->NLIST(ANYTYPE*), y->NLIST(BOOLEAN)] =: LIST(ANYTYPE) 
+Filter[x->NLIST(T*), y->NLIST(BOOLEAN)] =: LIST(T)
 \end{verbatim} \normalsize
+
+{\it for all types} {\tt T}
 
 \bd
 Returns a list with the same dimension structure as \verb+list+, with the
@@ -4323,9 +4315,10 @@ dimensionality.
 
 \item\lex{Flatten}
 \protect \large \begin{verbatim}
-Flatten[x->NLIST(ANYTYPE*), {levels->0}] =: LIST(ANYTYPE) 
+Flatten[x->NLIST(T*), {levels->0}] =: LIST(T) 
 \end{verbatim} \normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns a list with the same elements as \verb+x+, with the nesting
 structure flattened.  By default, all levels are flattened, returning
@@ -4821,10 +4814,11 @@ user defined function; not documented in \verb+Help+ or \verb+Manual+.
 
 \item\lex{Index}
 \protect \large \begin{verbatim}
-Index[list->NLIST(ANYTYPE), x->ANYTYPE] =: LIST(INTEGER) 
-Index[list->NLIST(ANYTYPE), x->LIST(ANYTYPE)] =: LIST(INTEGER) 
+Index[list->NLIST(T), x->T] =: LIST(INTEGER) 
+Index[list->NLIST(T), x->LIST(T)] =: LIST(INTEGER) 
 \end{verbatim} \normalsize
 
+{\tt for all types} {\tt T}
 \bd
 Returns the list of indices in \verb+list+ where \verb+x+ appears.
 \ed
@@ -5891,17 +5885,16 @@ Returns the number of characters in \verb+text+.
 
 \item\lex{NumElements}
 \protect \large \begin{verbatim}
-NumElements[list->LIST(ANYTYPE*)] =: INTEGER 
+NumElements[list->NLIST(T*)] =: INTEGER 
 \end{verbatim}\normalsize
 
+{\for all types} {\tt T}
 \bd
 Returns the number of elements in \verb+list+.  The difference between
 this function and \verb+Length+ is that this function is not listable,
 while \verb+Length+ is.  
 \item
 [See also:] \verb+NthChar+, \verb+Length+.
-\item
-[Note:] This function is not listable. 
 \ed
 
 
@@ -6801,9 +6794,10 @@ Computes the product of \verb+x+ and \verb+y+.
 
 \item\lex{Transpose}
 \protect \large \begin{verbatim} 
-Transpose[x->LIST(LIST(ANYTYPE))] =: LIST(LIST(ANYTYPE)) 
+Transpose[x->LIST(LIST(T))] =: LIST(LIST(T)) 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns the transpose of a rectangular matrix.  It is an error if \verb+list+
 is not rectangular.
