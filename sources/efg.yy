@@ -3,35 +3,28 @@
 /* $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
-#include <malloc.h>
 #include "gstring.h"
 #include "node.h"
 #include "extform.h"
 #include "outcome.h"
 
-gString last_name;
-int last_int;
-double last_double;
-
-/* Here are some scratch variables... */
-
-int playerNo, gameNo, isetNo, actNo, outcNo, errCode;
-Node node;
-struct nodeinfo info;
-gVector<double> *outc;
-gTuple<double> *v;
-gBlock<struct nodeinfo *> *nodelist;
-
-gInput *efg_input_stream;
-
-void yyerror(char *s)
-{
-  fprintf(stderr, "Error: %s.\n", s);
-}
-
-int yylex(void);
 %}
 
+%name EfgFileReader
+
+%define MEMBERS   gInput &infile;  ExtForm<double> *E;  \
+                  gString last_name;  int last_int;  double last_double; \
+                  gRational last_rational; \
+                  int playerNo, gameNo, isetNo, actNo, outcNo, errCode; \
+                  Node node; \
+                  struct nodeinfo info; \
+                  gVector<double> *outc; \
+                  gTuple<double> *v; \
+                  gBlock<struct nodeinfo *> *nodelist;
+
+%define CONSTRUCTOR_PARAM  gInput &f, ExtForm<double> *EFG
+
+%define CONSTRUCTOR_INIT   : infile(f), E(EFG)
 
 %token LPAREN    257
 %token RPAREN    258
@@ -44,10 +37,11 @@ int yylex(void);
 %token NAME      270
 %token INTEGER   271
 %token FLOAT     272
+%token RAT       273
 
 %%
 
-efgfile:    LBRACE NAME  { title = last_name; } 
+efgfile:    LBRACE NAME  { E->SetTitle(last_name); } 
             players outcomes games RBRACE  { return 0; }
 
 /* Parsing the player list */
@@ -55,13 +49,13 @@ efgfile:    LBRACE NAME  { title = last_name; }
 players:    LBRACE chance_name RBRACE
        |    LBRACE chance_name player_names RBRACE
 
-chance_name:  NAME   { players[0] = last_name; }
+chance_name:  NAME   { E->players[0] = last_name; }
 
 player_names: player_name
             | player_names player_name
 
 player_name:  NAME 
-           { players.Expand(1);  players[players.Last()] = last_name; }
+           { E->players.Expand(1);  E->players[E->players.Last()] = last_name; }
 
 /* Parsing the outcome list */
            
@@ -71,12 +65,12 @@ outcomes:   LBRACE RBRACE
 outcome_list:  outcome
             |  outcome_list outcome
 
-outcome:    LBRACE INTEGER  { CreateOutcome(outcNo = last_int);
-            outc = new gVector<double>(NumPlayers());
+outcome:    LBRACE INTEGER  { E->CreateOutcome(outcNo = last_int);
+            outc = new gVector<double>(E->NumPlayers());
             playerNo = 1; }
             outcome_vector
-            { SetOutcomeValues(outcNo, *outc);  delete outc; }
-            NAME  { LabelOutcome(outcNo, last_name); }
+            { E->SetOutcomeValues(outcNo, *outc);  delete outc; }
+            NAME  { E->LabelOutcome(outcNo, last_name); }
             RBRACE
 
 outcome_vector:  LBRACE RBRACE
@@ -87,6 +81,7 @@ outcome_values:  outcome_value
 
 outcome_value:   FLOAT    { (*outc)[playerNo++] = last_double; }
              |   INTEGER  { (*outc)[playerNo++] = last_int; }
+             |   RAT      { (*outc)[playerNo++] = (double) last_rational; }
 
 /* Parsing the game list */
 
@@ -94,8 +89,8 @@ games:      game
      |      games game
 
 game:       LBRACE INTEGER  { gameNo = last_int;
-                              CreateSubgame(gameNo, 1); }
-            NAME  { LabelSubgame(gameNo, last_name); }
+                              E->CreateSubgame(gameNo, 1); }
+            NAME  { E->LabelSubgame(gameNo, last_name); }
             infosets nodes
             RBRACE
 
@@ -111,8 +106,8 @@ player_isets:   LBRACE { isetNo = 1; } RBRACE   { playerNo++; }
 iset_list:      infoset
          |      iset_list infoset
 
-infoset:        LBRACE { CreateInfoset(playerNo, gameNo, 0); }
-                NAME { LabelInfoset(gameNo, playerNo, isetNo, last_name); } action_data RBRACE  { isetNo++; }
+infoset:        LBRACE { E->CreateInfoset(playerNo, gameNo, 0); }
+                NAME { E->LabelInfoset(gameNo, playerNo, isetNo, last_name); } action_data RBRACE  { isetNo++; }
 
 action_data:    action_list prob_list
            |    action_list
@@ -123,23 +118,24 @@ actions:        action
        |        actions action
 
 action:         NAME
-             { AppendAction(gameNo, playerNo, isetNo);
-               LabelAction(gameNo, playerNo, isetNo, actNo++, last_name); }
+             { E->AppendAction(gameNo, playerNo, isetNo);
+               E->LabelAction(gameNo, playerNo, isetNo, actNo++, last_name); }
 
 prob_list:      LBRACE
             { v = new gTuple<double>(1, actNo - 1); actNo = 1; }
                 probs RBRACE
-            { SetActionProbs(gameNo, isetNo, *v);
+            { E->SetActionProbs(gameNo, isetNo, *v);
               delete v;  }
 
 probs:          prob
      |          probs prob
 
 prob:           FLOAT  { (*v)[actNo++] = last_double; }
+    |           RAT   { (*v)[actNo++] = (double) last_rational; }
 
 nodes:          LBRACE { nodelist = new gBlock<struct nodeinfo *>; } node_list
                 RBRACE
-      { errCode = nodes(gameNo)->InputFromFile(*nodelist);
+      { errCode = E->nodes(gameNo)->InputFromFile(*nodelist);
         while (nodelist->Length())  delete nodelist->Remove(1); 
         delete nodelist;
         if (errCode)   YYERROR;  }
@@ -151,7 +147,7 @@ node:           node_ID   { info.my_ID = node; } COLON
                 node_ID   { info.parent_ID = node; }
                 INTEGER   { info.child_no = last_int; }
                 INTEGER   { info.nextgame = last_int; }
-                INTEGER   { info.outcome = outcomes(last_int); }
+                INTEGER   { info.outcome = (last_int) ? E->outcomes(last_int) : 0; }
                 NAME      { info.name = last_name;
                             nodelist->Append(new struct nodeinfo(info)); }
 
@@ -162,34 +158,34 @@ node_ID:        LPAREN INTEGER { node[1] = last_int; } COMMA
 
 %%
 
-int yylex(void)
+int EfgFileReader::yylex(void)
 {
   char c, d;
 
   while (1)  {
     do  {
-      *efg_input_stream >> c;
+      infile >> c;
     }  while (isspace(c));
  
     if (c == '/')   {
-      *efg_input_stream >> d;
+      infile >> d;
       if (d == '/')  {
 	do  {
-	  *efg_input_stream >> d;
+	  infile >> d;
 	}  while (d != '\n');
       }
       else if (d == '*')  {
 	int done = 0;
 	while (!done)  {
 	  do {
-	    *efg_input_stream >> d;
+	    infile >> d;
 	  }  while (d != '*');
-	  *efg_input_stream >> d;
+	  infile >> d;
 	  if (d == '/')   done = 1;
 	}
       }
       else  {
-	efg_input_stream->unget(d);
+	infile.unget(d);
 	return SLASH;
       }
     }
@@ -198,38 +194,53 @@ int yylex(void)
   }
   
   if (isalpha(c) || c == '"')  {
-    efg_input_stream->unget(c);
-    *efg_input_stream >> last_name;
+    infile.unget(c);
+    infile >> last_name;
 
     return NAME;
   }
   else if (isdigit(c) || c == '-')   {
     gString s(c);
 
-    *efg_input_stream >> c;
+    infile >> c;
 
-    if (!isdigit(c) && s == "-")  { efg_input_stream->unget(c);  return '-';  }
+    if (!isdigit(c) && s == "-")  { infile.unget(c);  return '-';  }
 
     while (isdigit(c))   {
       s += c;
-      *efg_input_stream >> c;
+      infile >> c;
     }
 
     if (c == '.')   {    // floating-point number
       s += c;
 
-      *efg_input_stream >> c;
+      infile >> c;
 
       while (isdigit(c))   {
 	s += c;
-	*efg_input_stream >> c;
+	infile >> c;
       }
-      efg_input_stream->unget(c);
+      infile.unget(c);
       last_double = atof((const char *) s);
       return FLOAT;
     }
+    else if (c == '/')  {    // rational number
+      int num = atoi((const char *) s);
+   
+      s = "";
+      
+      infile >> c;
+      while (isdigit(c))   {
+	s += c;
+	infile >> c;
+      }
+      infile.unget(c);
+      last_int = atoi((const char *) s);
+      last_rational = gRational(num, last_int);
+      return RAT;
+    }
     else   {   // integer number
-      efg_input_stream->unget(c);
+      infile.unget(c);
       last_int = atoi((const char *) s);
       return INTEGER;
     }
@@ -245,3 +256,9 @@ int yylex(void)
     default:   return c;
   }
 }
+
+void EfgFileReader::yyerror(char *s)
+{
+  fprintf(stderr, "Error: %s.\n", s);
+}
+

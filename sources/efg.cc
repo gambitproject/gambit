@@ -836,7 +836,7 @@ template <class T> void ExtForm<T>::SetOutcomeValue(int outc, int pl, T value)
 //#                    ExtForm: Input/Output Operations
 //#--------------------------------------------------------------------------
 
-extern gInput *efg_input_stream;
+#include "efgyacc.h"
 
 template <class T> void ExtForm<T>::ReadEfgFile(gInput &f)
 {
@@ -856,9 +856,9 @@ template <class T> void ExtForm<T>::ReadEfgFile(gInput &f)
 
   players = gTuple<gString>(0, 0);
 
-  efg_input_stream = &f;
+  EfgFileReader effile(f, this);
 
-  if (EfgYaccer())   {
+  if (effile.yyparse())   {
     gSparseSetIter<GameEl<T> *> nodeiter(nodes);
     for (nodeiter.GoFirst(); !nodeiter.PastEnd();
 	 delete nodes.Remove(nodeiter.GetKey()));
@@ -930,6 +930,12 @@ template <class T> void ExtForm<T>::WriteEfgFile(gOutput &f) const
   }
   
   f << "\n}\n";
+}
+
+template <class T> void ExtForm<T>::DisplayTree(gOutput &f, int game) const
+{
+  if (nodes.IsDefined(game))
+    nodes(game)->DisplayTree(f, nodes(game)->RootNode(), 1);
 }
 
 //#--------------------------------------------------------------------------

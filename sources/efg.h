@@ -29,6 +29,7 @@ template <class T> class GameEl;
 // any number; they need not be consecutive.
 //
 template <class T> class ExtForm    {
+  friend class EfgFileReader;
   private:
     gString title;
     gTuple<gString> players;
@@ -49,8 +50,6 @@ template <class T> class ExtForm    {
     ExtForm &operator=(const ExtForm &);
 //-grp
 
-    int EfgYaccer(void);
-
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
     ExtForm(void);
@@ -64,6 +63,8 @@ template <class T> class ExtForm    {
         //# READING AND WRITING DATA FILES
     void ReadEfgFile(gInput &f);
     void WriteEfgFile(gOutput &f) const;
+
+    void DisplayTree(gOutput &, int game = 1) const;
 
 	//# DATA ACCESS -- GENERAL INFORMATION
     DataType Type(void) const;
