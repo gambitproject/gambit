@@ -39,7 +39,7 @@ extern void guiExceptionDialog(const gbtText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
-class GambitApp : public wxApp {
+class gbtApplication : public wxApp {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory;
@@ -47,8 +47,8 @@ private:
   bool OnInit(void);
 
 public:
-  GambitApp(void);
-  virtual ~GambitApp();
+  gbtApplication(void);
+  virtual ~gbtApplication();
   
   const wxString &CurrentDir(void)  { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
@@ -67,7 +67,7 @@ public:
   void OnHelpAbout(wxWindow *);
 };
 
-DECLARE_APP(GambitApp)
+DECLARE_APP(gbtApplication)
 
 const int wxID_HELP_INDEX = 1310;
 

@@ -127,7 +127,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(m_lastInfoset.GetAction(act)))),
 			     act - 1, 0);
-    m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
+    m_probGrid->SetCellEditor(act - 1, 0, new gbtNumberEditor);
   }
   m_probGrid->SetMargins(0, 0);
   m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
@@ -207,7 +207,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
       m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 						(char *) ToText(m_profile(m_lastInfoset.GetAction(act)))),
 			       act - 1, 0);
-      m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
+      m_probGrid->SetCellEditor(act - 1, 0, new gbtNumberEditor);
     }
   }
   else {

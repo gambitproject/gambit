@@ -32,7 +32,7 @@
 
 class TreeWindow;
 
-class EfgShow : public wxFrame, public gbtGameView {
+class gbtEfgFrame : public wxFrame, public gbtGameView {
 private:
   TreeWindow *m_treeWindow;
 
@@ -118,11 +118,10 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgShow();
+  gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtEfgFrame();
 
   DECLARE_EVENT_TABLE()
 };
 
 #endif // EFGSHOW_H
-

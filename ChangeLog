@@ -4,7 +4,7 @@
 	accept '.' as first key
 
 	* gui/dleditbehav.cc, gui/dleditmixed.cc: General fixup of feel for
-	editing; use NumberEditor in grid.
+	editing; use gbtNumberEditor in grid.
 
 2002-09-30  Ted Turocy  <arbiter@econ.tamu.edu>
 
@@ -41,8 +41,8 @@
 
 2002-09-12  Ted Turocy  <arbiter@econ.tamu.edu>
 
-	* gui/?fgoutcome.cc, gui/numberedit.cc: Added NumberEditor to payoffs
-	for new outcomes; modified NumberEditor to select text on editing.
+	* gui/?fgoutcome.cc, gui/numberedit.cc: Added gbtNumberEditor to payoffs
+	for new outcomes; modified gbtNumberEditor to select text on editing.
 
 	* gui/nfgshow.cc: Update strategy lists in contingency choice 
 	dropdowns in navigation window when support edited.

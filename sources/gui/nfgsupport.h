@@ -31,7 +31,7 @@
 #include "nfgshow.h"
 #include "base/gmap.h"
 
-class NfgSupportWindow : public wxPanel, public gbtGameView {
+class gbtNfgSupportWindow : public wxPanel, public gbtGameView {
 private:
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
@@ -49,8 +49,8 @@ private:
   bool IsNfgView(void) const { return true; }
 
 public:
-  NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~NfgSupportWindow() { }
+  gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgSupportWindow() { }
 
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);
@@ -62,7 +62,7 @@ public:
 
 class gbtNfgSupportFrame : public wxFrame, public gbtGameView {
 private:
-  NfgSupportWindow *m_panel;
+  gbtNfgSupportWindow *m_panel;
 
   // Event handlers
   void OnClose(wxCloseEvent &);

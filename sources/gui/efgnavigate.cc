@@ -30,7 +30,7 @@
 #endif  // WX_PRECOMP
 #include "efgnavigate.h"
 
-EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
+gbtEfgNavigateWindow::gbtEfgNavigateWindow(gbtGameDocument *p_doc,
 				     wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_doc(p_doc)
@@ -67,7 +67,7 @@ EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgNavigateWindow::OnUpdate(void)
+void gbtEfgNavigateWindow::OnUpdate(void)
 {
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
@@ -155,7 +155,7 @@ gbtEfgNavigateFrame::gbtEfgNavigateFrame(gbtGameDocument *p_doc,
   : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 200)),
     gbtGameView(p_doc)
 {
-  m_grid = new EfgNavigateWindow(p_doc, this);
+  m_grid = new gbtEfgNavigateWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));

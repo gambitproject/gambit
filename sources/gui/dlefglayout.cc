@@ -35,13 +35,13 @@
 //                  class dialogLayout: Implementation
 //==========================================================================
 
-class panelNodes : public wxPanel {
+class gbtDialogLayoutNodes : public wxPanel {
 private:
   wxRadioBox *m_chanceToken, *m_playerToken, *m_terminalToken;
   wxSpinCtrl *m_nodeSize, *m_terminalSpacing;
 
 public:
-  panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs);
+  gbtDialogLayoutNodes(wxWindow *p_parent, const gbtPreferences &p_prefs);
 
   int NodeSize(void) const { return m_nodeSize->GetValue(); }
   int TerminalSpacing(void) const { return m_terminalSpacing->GetValue(); }
@@ -52,7 +52,7 @@ public:
 };
 
 
-panelNodes::panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
+gbtDialogLayoutNodes::gbtDialogLayoutNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
   const int NODE_LENGTH_MIN = 20;
@@ -114,13 +114,13 @@ panelNodes::panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
   Layout();
 }
 
-class panelBranches : public wxPanel {
+class gbtDialogLayoutBranches : public wxPanel {
 private:
   wxRadioBox *m_branchStyle, *m_branchLabels;
   wxSpinCtrl *m_branchLength, *m_tineLength;
 
 public:
-  panelBranches(wxWindow *p_parent, const gbtPreferences &);
+  gbtDialogLayoutBranches(wxWindow *p_parent, const gbtPreferences &);
 
   int BranchLength(void) const { return m_branchLength->GetValue(); }
   int TineLength(void) const { return m_tineLength->GetValue(); }
@@ -129,7 +129,7 @@ public:
   int BranchLabels(void) const { return m_branchLabels->GetSelection(); }
 };
 
-panelBranches::panelBranches(wxWindow *p_parent,
+gbtDialogLayoutBranches::gbtDialogLayoutBranches(wxWindow *p_parent,
 			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
@@ -188,18 +188,18 @@ panelBranches::panelBranches(wxWindow *p_parent,
   Layout();
 }
 
-class panelInfosets : public wxPanel {
+class gbtDialogLayoutInfosets : public wxPanel {
 private:
   wxRadioBox *m_infosetConnect, *m_infosetJoin;
 
 public:
-  panelInfosets(wxWindow *p_parent, const gbtPreferences &);
+  gbtDialogLayoutInfosets(wxWindow *p_parent, const gbtPreferences &);
 
   int InfosetConnect(void) const { return m_infosetConnect->GetSelection(); }
   int InfosetJoin(void) const { return m_infosetJoin->GetSelection(); }
 };
 
-panelInfosets::panelInfosets(wxWindow *p_parent,
+gbtDialogLayoutInfosets::gbtDialogLayoutInfosets(wxWindow *p_parent,
 			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
@@ -232,17 +232,17 @@ panelInfosets::panelInfosets(wxWindow *p_parent,
   Layout();
 }
 
-class panelSubgames : public wxPanel {
+class gbtDialogLayoutSubgames : public wxPanel {
 private:
   wxRadioBox *m_subgameStyle;
 
 public:
-  panelSubgames(wxWindow *, const gbtPreferences &);
+  gbtDialogLayoutSubgames(wxWindow *, const gbtPreferences &);
 
   int SubgameStyle(void) const { return m_subgameStyle->GetSelection(); }
 };
 
-panelSubgames::panelSubgames(wxWindow *p_parent, 
+gbtDialogLayoutSubgames::gbtDialogLayoutSubgames(wxWindow *p_parent, 
 			     const gbtPreferences &p_prefs)
   : wxPanel(p_parent, -1)
 {
@@ -271,11 +271,11 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
 
   m_notebook = new wxNotebook(this, -1, wxDefaultPosition, wxDefaultSize);
   wxNotebookSizer *notebookSizer = new wxNotebookSizer(m_notebook);
-  m_notebook->AddPage(new panelNodes(m_notebook, p_prefs), _("Nodes"));
-  m_notebook->AddPage(new panelBranches(m_notebook, p_prefs), _("Branches"));
-  m_notebook->AddPage(new panelInfosets(m_notebook, p_prefs),
+  m_notebook->AddPage(new gbtDialogLayoutNodes(m_notebook, p_prefs), _("Nodes"));
+  m_notebook->AddPage(new gbtDialogLayoutBranches(m_notebook, p_prefs), _("Branches"));
+  m_notebook->AddPage(new gbtDialogLayoutInfosets(m_notebook, p_prefs),
 		      _("Information sets"));
-  m_notebook->AddPage(new panelSubgames(m_notebook, p_prefs), _("Subgames"));
+  m_notebook->AddPage(new gbtDialogLayoutSubgames(m_notebook, p_prefs), _("Subgames"));
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
@@ -298,24 +298,23 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
 
 void dialogLayout::GetPreferences(gbtPreferences &p_prefs)
 {
-  panelNodes *nodes = (panelNodes *) m_notebook->GetPage(0);
+  gbtDialogLayoutNodes *nodes = (gbtDialogLayoutNodes *) m_notebook->GetPage(0);
   p_prefs.SetNodeSize(nodes->NodeSize());
   p_prefs.SetTerminalSpacing(nodes->TerminalSpacing());
   p_prefs.SetChanceToken(nodes->ChanceToken());
   p_prefs.SetPlayerToken(nodes->PlayerToken());
   p_prefs.SetTerminalToken(nodes->TerminalToken());
 
-  panelBranches *branches = (panelBranches *) m_notebook->GetPage(1);
+  gbtDialogLayoutBranches *branches = (gbtDialogLayoutBranches *) m_notebook->GetPage(1);
   p_prefs.SetBranchLength(branches->BranchLength());
   p_prefs.SetTineLength(branches->TineLength());
   p_prefs.SetBranchStyle(branches->BranchStyle());
   p_prefs.SetBranchLabels(branches->BranchLabels());
 
-  panelInfosets *infosets = (panelInfosets *) m_notebook->GetPage(2);
+  gbtDialogLayoutInfosets *infosets = (gbtDialogLayoutInfosets *) m_notebook->GetPage(2);
   p_prefs.SetInfosetConnect(infosets->InfosetConnect());
   p_prefs.SetInfosetJoin(infosets->InfosetJoin());
 
-  panelSubgames *subgames = (panelSubgames *) m_notebook->GetPage(3);
+  gbtDialogLayoutSubgames *subgames = (gbtDialogLayoutSubgames *) m_notebook->GetPage(3);
   p_prefs.SetSubgameStyle(subgames->SubgameStyle());
 }
-

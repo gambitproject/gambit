@@ -30,13 +30,13 @@
 #include "wx/print.h"
 #include "treewin.h"
 
-class EfgPrintout : public wxPrintout {
+class gbtEfgPrintout : public wxPrintout {
 private:
   TreeWindow *m_treeWindow;
     
 public:
-  EfgPrintout(TreeWindow *, const wxString &);
-  virtual ~EfgPrintout() { }
+  gbtEfgPrintout(TreeWindow *, const wxString &);
+  virtual ~gbtEfgPrintout() { }
 
   bool OnPrintPage(int page);
   bool HasPage(int page);

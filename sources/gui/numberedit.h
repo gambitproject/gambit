@@ -28,7 +28,7 @@
 #ifndef NUMBEREDIT_H
 #define NUMBEREDIT_H
 
-class NumberEditor : public wxGridCellTextEditor {
+class gbtNumberEditor : public wxGridCellTextEditor {
 private:
   wxString m_valueOld;
 
@@ -37,7 +37,7 @@ protected:
   wxString GetString() const;
 
 public:
-  NumberEditor(void);
+  gbtNumberEditor(void);
 
   virtual void Create(wxWindow* parent, wxWindowID id,
 		      wxEvtHandler* evtHandler);
@@ -50,11 +50,10 @@ public:
   virtual void StartingKey(wxKeyEvent& event);
 
   virtual wxGridCellEditor *Clone() const
-  { return new NumberEditor; }
+  { return new gbtNumberEditor; }
 
   // parameters string format is "width,precision"
   virtual void SetParameters(const wxString& params);
 };
 
 #endif  // NUMBEREDIT_H
-

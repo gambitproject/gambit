@@ -191,7 +191,7 @@ void gbtOutcomeWindow::OnUpdate(void)
 
       for (int row = 0; row < GetRows(); row++) {
 	for (int col = 1; col < GetCols(); col++) {
-	  SetCellEditor(row, col, new NumberEditor);
+	  SetCellEditor(row, col, new gbtNumberEditor);
 	}
       }
     }
@@ -242,7 +242,7 @@ void gbtOutcomeWindow::OnUpdate(void)
 
       for (int row = 0; row < GetRows(); row++) {
 	for (int col = 1; col < GetCols(); col++) {
-	  SetCellEditor(row, col, new NumberEditor);
+	  SetCellEditor(row, col, new gbtNumberEditor);
 	}
       }
     }

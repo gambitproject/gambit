@@ -31,7 +31,7 @@
 #include "efgsupport.h"
 #include "id.h"
 
-class EfgSupportWindow : public wxPanel, public gbtGameView {
+class gbtEfgSupportWindow : public wxPanel, public gbtGameView {
 private:
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
@@ -51,8 +51,8 @@ private:
   bool IsNfgView(void) const { return false; }
 
 public:
-  EfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgSupportWindow() { }
+  gbtEfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtEfgSupportWindow() { }
 
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);
@@ -66,7 +66,7 @@ const int idACTIONTREE = 8003;
 
 class widgetActionTree : public wxTreeCtrl {
 private:
-  EfgSupportWindow *m_parent;
+  gbtEfgSupportWindow *m_parent;
   wxMenu *m_menu;
 
   void OnRightClick(wxTreeEvent &);
@@ -74,7 +74,7 @@ private:
   void OnKeypress(wxTreeEvent &);
 
 public:
-  widgetActionTree(EfgSupportWindow *p_parent);
+  widgetActionTree(gbtEfgSupportWindow *p_parent);
 
   DECLARE_EVENT_TABLE()
 };
@@ -85,7 +85,7 @@ BEGIN_EVENT_TABLE(widgetActionTree, wxTreeCtrl)
   EVT_TREE_ITEM_RIGHT_CLICK(idACTIONTREE, widgetActionTree::OnRightClick)
 END_EVENT_TABLE()
 
-widgetActionTree::widgetActionTree(EfgSupportWindow *p_parent)
+widgetActionTree::widgetActionTree(gbtEfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
@@ -121,21 +121,21 @@ void widgetActionTree::OnMiddleClick(wxTreeEvent &p_event)
 }
 
 //===========================================================================
-//                       class EfgSupportWindow 
+//                       class gbtEfgSupportWindow 
 //===========================================================================
 
 const int idSUPPORTLISTCHOICE = 8000;
 const int idSUPPORTPREVBUTTON = 8001;
 const int idSUPPORTNEXTBUTTON = 8002;
 
-BEGIN_EVENT_TABLE(EfgSupportWindow, wxPanel)
-  EVT_CHOICE(idSUPPORTLISTCHOICE, EfgSupportWindow::OnSupportList)
-  EVT_BUTTON(idSUPPORTPREVBUTTON, EfgSupportWindow::OnSupportPrev)
-  EVT_BUTTON(idSUPPORTNEXTBUTTON, EfgSupportWindow::OnSupportNext)
-  EVT_TREE_ITEM_COLLAPSING(idACTIONTREE, EfgSupportWindow::OnTreeItemCollapse)
+BEGIN_EVENT_TABLE(gbtEfgSupportWindow, wxPanel)
+  EVT_CHOICE(idSUPPORTLISTCHOICE, gbtEfgSupportWindow::OnSupportList)
+  EVT_BUTTON(idSUPPORTPREVBUTTON, gbtEfgSupportWindow::OnSupportPrev)
+  EVT_BUTTON(idSUPPORTNEXTBUTTON, gbtEfgSupportWindow::OnSupportNext)
+  EVT_TREE_ITEM_COLLAPSING(idACTIONTREE, gbtEfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
-EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
+gbtEfgSupportWindow::gbtEfgSupportWindow(gbtGameDocument *p_doc,
 				   wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     gbtGameView(p_doc), m_map(gbtEfgAction())
@@ -169,7 +169,7 @@ EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
   Show(true);
 }
 
-void EfgSupportWindow::OnUpdate(void)
+void gbtEfgSupportWindow::OnUpdate(void)
 {
   m_supportList->Clear();
 
@@ -222,30 +222,30 @@ void EfgSupportWindow::OnUpdate(void)
 
 }
 
-void EfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
+void gbtEfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
   m_doc->SetEfgSupport(p_event.GetSelection() + 1);
 }
 
-void EfgSupportWindow::OnSupportPrev(wxCommandEvent &)
+void gbtEfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
   m_doc->SetEfgSupport(m_supportList->GetSelection());
 }
 
-void EfgSupportWindow::OnSupportNext(wxCommandEvent &)
+void gbtEfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
   m_doc->SetEfgSupport(m_supportList->GetSelection() + 2);
 
 }
 
-void EfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
+void gbtEfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
 {
   if (p_event.GetItem() == m_actionTree->GetRootItem()) {
     p_event.Veto();
   }
 }
 
-void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
+void gbtEfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 {
   gbtEfgAction action = m_map(p_id);
   if (action.IsNull()) {
@@ -279,7 +279,7 @@ gbtEfgSupportFrame::gbtEfgSupportFrame(gbtGameDocument *p_doc,
   : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 300)),
     gbtGameView(p_doc)
 {
-  m_panel = new EfgSupportWindow(p_doc, this);
+  m_panel = new gbtEfgSupportWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));

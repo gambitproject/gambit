@@ -317,7 +317,7 @@ void TreeWindow::EnsureCursorVisible(void)
     return;
   }
 
-  NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
+  gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
   int width, height;
@@ -367,7 +367,7 @@ void TreeWindow::EnsureCursorVisible(void)
 void TreeWindow::ProcessCursor(void)
 {
   if (!m_doc->GetCursor().IsNull()) {
-    NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
+    gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
     if (!entry) {
       m_doc->SetCursor(m_doc->GetEfg().GetRoot());
       entry = m_layout.GetNodeEntry(m_doc->GetCursor());
@@ -381,7 +381,7 @@ void TreeWindow::ProcessCursor(void)
 
 void TreeWindow::UpdateCursor(void)
 {
-  NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor());
+  gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor());
 
   if (entry) {
     entry->SetCursor(true);
@@ -589,4 +589,4 @@ void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)
   p_doc->OnTreeChanged(false, false);
 }
 
-template class gbtList<NodeEntry *>;
+template class gbtList<gbtEfgLayoutNode *>;

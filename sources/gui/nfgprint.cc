@@ -89,7 +89,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
   return theHtml;
 }
 
-NfgPrintout::NfgPrintout(const gbtNfgGame &p_nfg,
+gbtNfgPrintout::gbtNfgPrintout(const gbtNfgGame &p_nfg,
 			 int p_rowPlayer, int p_colPlayer,
 			 const wxString &p_title)
   : wxHtmlPrintout(p_title)

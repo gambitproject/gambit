@@ -261,17 +261,17 @@ void gbtSchellingRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
 
 
 //---------------------------------------------------------------------
-//                       class NfgGridTable
+//                       class gbtNfgGridTable
 //---------------------------------------------------------------------
 
-class NfgGridTable : public wxGridTableBase {
+class gbtNfgGridTable : public wxGridTableBase {
 private:
   gbtGameDocument *m_doc;
   gbtNfgTable *m_table;
 
 public:
-  NfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc);
-  virtual ~NfgGridTable() { }
+  gbtNfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc);
+  virtual ~gbtNfgGridTable() { }
 
   int GetNumberRows(void);
   int GetNumberCols(void);
@@ -292,25 +292,25 @@ public:
   wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind);
 };
 
-NfgGridTable::NfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc)
+gbtNfgGridTable::gbtNfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc)
   : m_doc(p_doc), m_table(p_table)
 { }
 
-int NfgGridTable::GetNumberRows(void)
+int gbtNfgGridTable::GetNumberRows(void)
 {
   return (m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() +
 	  m_table->ShowValues());
 }
 
-int NfgGridTable::GetNumberCols(void)
+int gbtNfgGridTable::GetNumberCols(void)
 {
   return (m_doc->GetNfgSupport().NumStrats(m_doc->GetColPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() + 
 	  m_table->ShowValues());
 }
 
-wxString NfgGridTable::GetRowLabelValue(int p_row)
+wxString gbtNfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
@@ -328,7 +328,7 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
   }
 }
 
-wxString NfgGridTable::GetColLabelValue(int p_col)
+wxString gbtNfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_doc->GetNfgSupport().NumStrats(m_doc->GetColPlayer());
   if (p_col + 1 <= numStrats) {
@@ -346,7 +346,7 @@ wxString NfgGridTable::GetColLabelValue(int p_col)
   }
 }
 
-wxString NfgGridTable::GetValue(int row, int col)
+wxString gbtNfgGridTable::GetValue(int row, int col)
 {
   int rowPlayer = m_doc->GetRowPlayer();
   int colPlayer = m_doc->GetColPlayer();
@@ -450,13 +450,13 @@ wxString NfgGridTable::GetValue(int row, int col)
   return wxT("");
 }
 
-void NfgGridTable::SetValue(int row, int col, const wxString &)
+void gbtNfgGridTable::SetValue(int row, int col, const wxString &)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_REQUEST_VIEW_GET_VALUES, row, col);
   GetView()->ProcessTableMessage(msg);
 }
 	
-bool NfgGridTable::InsertRows(size_t pos, size_t numRows)
+bool gbtNfgGridTable::InsertRows(size_t pos, size_t numRows)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
 			 pos, numRows);
@@ -464,14 +464,14 @@ bool NfgGridTable::InsertRows(size_t pos, size_t numRows)
   return true;
 }
 
-bool NfgGridTable::AppendRows(size_t numRows)
+bool gbtNfgGridTable::AppendRows(size_t numRows)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, numRows);
   GetView()->ProcessTableMessage(msg);
   return true;
 }
 
-bool NfgGridTable::DeleteRows(size_t pos, size_t numRows)
+bool gbtNfgGridTable::DeleteRows(size_t pos, size_t numRows)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
 			 pos, numRows);
@@ -479,7 +479,7 @@ bool NfgGridTable::DeleteRows(size_t pos, size_t numRows)
   return true;
 }
 
-bool NfgGridTable::InsertCols(size_t pos, size_t numCols)
+bool gbtNfgGridTable::InsertCols(size_t pos, size_t numCols)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_INSERTED,
 			 pos, numCols);
@@ -487,14 +487,14 @@ bool NfgGridTable::InsertCols(size_t pos, size_t numCols)
   return true;
 }
 
-bool NfgGridTable::AppendCols(size_t numCols)
+bool gbtNfgGridTable::AppendCols(size_t numCols)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, numCols);
   GetView()->ProcessTableMessage(msg);
   return true;
 }
 
-bool NfgGridTable::DeleteCols(size_t pos, size_t numCols)
+bool gbtNfgGridTable::DeleteCols(size_t pos, size_t numCols)
 {
   wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
 			 pos, numCols);
@@ -502,7 +502,7 @@ bool NfgGridTable::DeleteCols(size_t pos, size_t numCols)
   return true;
 }
 
-wxGridCellAttr *NfgGridTable::GetAttr(int row, int col,
+wxGridCellAttr *gbtNfgGridTable::GetAttr(int row, int col,
 				      wxGridCellAttr::wxAttrKind /*any*/)
 {
   wxGridCellAttr *attr = new wxGridCellAttr;
@@ -547,7 +547,7 @@ gbtNfgTable::gbtNfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  SetTable(new NfgGridTable(this, m_doc), true);
+  SetTable(new gbtNfgGridTable(this, m_doc), true);
   SetGridCursor(0, 0);
   SetEditable(false);
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());

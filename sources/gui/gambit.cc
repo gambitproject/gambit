@@ -46,11 +46,11 @@
 #include "efgshow.h"
 #include "nfgshow.h"
 
-GambitApp::GambitApp(void)
+gbtApplication::gbtApplication(void)
   : m_fileHistory(5)
 { }
 
-bool GambitApp::OnInit(void)
+bool gbtApplication::OnInit(void)
 {
 #include "bitmaps/gambit.xpm"
   wxConfig config(wxT("Gambit"));
@@ -82,7 +82,7 @@ bool GambitApp::OnInit(void)
     efg.NewPlayer().SetLabel("Player 1");
     efg.NewPlayer().SetLabel("Player 2");
     efg.SetLabel("Untitled Extensive Form Game");
-    (void) new EfgShow(new gbtGameDocument(efg), 0);
+    (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
   }
 
   // Set up the help system.
@@ -91,13 +91,13 @@ bool GambitApp::OnInit(void)
   return true;
 }
 
-GambitApp::~GambitApp()
+gbtApplication::~gbtApplication()
 {
   wxConfig config(wxT("Gambit"));
   m_fileHistory.Save(config);
 }
 
-void GambitApp::OnFileNew(wxWindow *p_parent)
+void gbtApplication::OnFileNew(wxWindow *p_parent)
 {
   dialogNewGame dialog(p_parent);
 
@@ -108,7 +108,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
 	efg.NewPlayer().SetLabel(gbtText("Player") + ToText(pl));
       }
-      (void) new EfgShow(new gbtGameDocument(efg), 0);
+      (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
     }
     else {
       gbtNfgGame nfg(dialog.NumStrategies());
@@ -130,12 +130,12 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	  iter.SetOutcome(outcome);
 	} while (iter.NextContingency());
       }
-      (void) new NfgShow(new gbtGameDocument(nfg), 0);
+      (void) new gbtNfgFrame(new gbtGameDocument(nfg), 0);
     }
   }
 }
 
-void GambitApp::OnFileOpen(wxWindow *p_parent)
+void gbtApplication::OnFileOpen(wxWindow *p_parent)
 {
   wxFileDialog dialog(p_parent, _("Choose file"), CurrentDir(), wxT(""), 
 		      _("Extensive form games (*.efg)|*.efg|"
@@ -151,20 +151,20 @@ void GambitApp::OnFileOpen(wxWindow *p_parent)
   }
 }
 
-void GambitApp::OnFileMRUFile(wxCommandEvent &p_event)
+void gbtApplication::OnFileMRUFile(wxCommandEvent &p_event)
 {
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1));
 }
 
-void GambitApp::OnHelpContents(void)
+void gbtApplication::OnHelpContents(void)
 {
 }
 
-void GambitApp::OnHelpIndex(void)
+void gbtApplication::OnHelpIndex(void)
 {
 }
 
-void GambitApp::OnHelpAbout(wxWindow *p_parent)
+void gbtApplication::OnHelpAbout(wxWindow *p_parent)
 {
   dialogAbout dialog(p_parent, _("About Gambit..."),
 		     _("Gambit Graphical User Interface"),
@@ -172,13 +172,13 @@ void GambitApp::OnHelpAbout(wxWindow *p_parent)
   dialog.ShowModal();
 }
 
-void GambitApp::LoadFile(const wxString &p_filename)
+void gbtApplication::LoadFile(const wxString &p_filename)
 {    
   try {
     gbtFileInput infile(p_filename.mb_str());
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    (void) new NfgShow(new gbtGameDocument(nfg, p_filename), 0);
+    (void) new gbtNfgFrame(new gbtGameDocument(nfg, p_filename), 0);
     return;
   }
   catch (gbtFileInput::OpenFailed &) {
@@ -195,7 +195,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gbtFileInput infile(p_filename.mb_str());
     gbtEfgGame efg = ReadEfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    (void) new EfgShow(new gbtGameDocument(efg, p_filename), 0);
+    (void) new gbtEfgFrame(new gbtGameDocument(efg, p_filename), 0);
   }
   catch (gbtFileInput::OpenFailed &) { 
     wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
@@ -213,7 +213,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
 }
 
 
-IMPLEMENT_APP(GambitApp)
+IMPLEMENT_APP(gbtApplication)
 
 //
 // A general-purpose dialog box to display the description of the exception

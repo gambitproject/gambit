@@ -31,7 +31,7 @@
 #include "efgprint.h"
 #include "math/gmath.h"
 
-EfgPrintout::EfgPrintout(TreeWindow *p_treeWindow, const wxString &p_title)
+gbtEfgPrintout::gbtEfgPrintout(TreeWindow *p_treeWindow, const wxString &p_title)
   : wxPrintout(p_title), m_treeWindow(p_treeWindow)
 { }
 
@@ -40,7 +40,7 @@ EfgPrintout::EfgPrintout(TreeWindow *p_treeWindow, const wxString &p_title)
 // for a full-page printout.
 // This code is based on the code in the printing sample from wxWindows
 //
-bool EfgPrintout::OnPrintPage(int)
+bool gbtEfgPrintout::OnPrintPage(int)
 {
   wxDC *dc = GetDC();
   if (!dc) return false;
@@ -82,12 +82,12 @@ bool EfgPrintout::OnPrintPage(int)
   return true;
 }
 
-bool EfgPrintout::HasPage(int page)
+bool gbtEfgPrintout::HasPage(int page)
 {
   return (page <= 1);
 }
 
-bool EfgPrintout::OnBeginDocument(int startPage, int endPage)
+bool gbtEfgPrintout::OnBeginDocument(int startPage, int endPage)
 {
   if (!wxPrintout::OnBeginDocument(startPage, endPage))
     return false;
@@ -98,7 +98,7 @@ bool EfgPrintout::OnBeginDocument(int startPage, int endPage)
 // Since we can not get at the actual device context in this function, we
 // have no way to tell how many pages will be used in the wysiwyg mode. So,
 // we have no choice but to disable the From:To page selection mechanism.
-void EfgPrintout::GetPageInfo(int *minPage, int *maxPage,
+void gbtEfgPrintout::GetPageInfo(int *minPage, int *maxPage,
 			      int *selPageFrom, int *selPageTo)
 {
   *minPage = 1;
@@ -106,5 +106,3 @@ void EfgPrintout::GetPageInfo(int *minPage, int *maxPage,
   *selPageFrom = 1;
   *selPageTo = 1;
 }
-
-

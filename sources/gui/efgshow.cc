@@ -71,7 +71,7 @@
 
 
 //=====================================================================
-//                 Implementation of class EfgShow
+//                 Implementation of class gbtEfgFrame
 //=====================================================================
 
 const int idTREEWINDOW = 999;
@@ -79,70 +79,70 @@ const int idNODEWINDOW = 998;
 const int idTOOLWINDOW = 997;
 const int idINFONOTEBOOK = 995;
 
-BEGIN_EVENT_TABLE(EfgShow, wxFrame)
-  EVT_MENU(wxID_NEW, EfgShow::OnFileNew)
-  EVT_MENU(wxID_OPEN, EfgShow::OnFileOpen)
-  EVT_MENU(wxID_CLOSE, EfgShow::Close)
-  EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
-  EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, EfgShow::OnFileExportBMP)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, EfgShow::OnFileExportJPEG)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, EfgShow::OnFileExportPNG)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, EfgShow::OnFileExportPS)
-  EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
-  EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
-  EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
-  EVT_MENU(wxID_EXIT, EfgShow::OnFileExit)
-  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
-  EVT_MENU(wxID_CUT, EfgShow::OnEditCut)
-  EVT_MENU(wxID_COPY, EfgShow::OnEditCopy)
-  EVT_MENU(wxID_PASTE, EfgShow::OnEditPaste)
-  EVT_MENU(GBT_MENU_EDIT_INSERT, EfgShow::OnEditInsert)
-  EVT_MENU(GBT_MENU_EDIT_DELETE, EfgShow::OnEditDelete)
-  EVT_MENU(GBT_MENU_EDIT_REVEAL, EfgShow::OnEditReveal)
-  EVT_MENU(GBT_MENU_EDIT_TOGGLE_SUBGAME, EfgShow::OnEditToggleSubgame)
-  EVT_MENU(GBT_MENU_EDIT_MARK_SUBGAME_TREE, EfgShow::OnEditMarkSubgameTree)
-  EVT_MENU(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, EfgShow::OnEditUnmarkSubgameTree)
-  EVT_MENU(GBT_MENU_EDIT_NODE, EfgShow::OnEditNode)
-  EVT_MENU(GBT_MENU_EDIT_MOVE, EfgShow::OnEditMove)
-  EVT_MENU(GBT_MENU_EDIT_GAME, EfgShow::OnEditGame)
-  EVT_MENU(GBT_MENU_VIEW_NFG_REDUCED, EfgShow::OnViewNfgReduced)
-  EVT_MENU(GBT_MENU_VIEW_PROFILES, EfgShow::OnViewProfiles)
-  EVT_MENU(GBT_MENU_VIEW_NAVIGATION, EfgShow::OnViewCursor)
-  EVT_MENU(GBT_MENU_VIEW_OUTCOMES, EfgShow::OnViewOutcomes)
-  EVT_MENU(GBT_MENU_VIEW_SUPPORTS, EfgShow::OnViewSupports)
-  EVT_MENU(GBT_MENU_VIEW_ZOOMIN, EfgShow::OnViewZoomIn)
-  EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, EfgShow::OnViewZoomOut)
-  EVT_MENU(GBT_MENU_VIEW_SUPPORT_REACHABLE, EfgShow::OnViewSupportReachable)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVENODE, EfgShow::OnFormatFontsAboveNode)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWNODE, EfgShow::OnFormatFontsBelowNode)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_AFTERNODE, EfgShow::OnFormatFontsAfterNode)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVEBRANCH, EfgShow::OnFormatFontsAboveBranch)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWBRANCH, EfgShow::OnFormatFontsBelowBranch)
-  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LAYOUT, EfgShow::OnFormatDisplayLayout)
-  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LEGEND, EfgShow::OnFormatDisplayLegend)
-  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_COLORS, EfgShow::OnFormatDisplayColors)
-  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
-  EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, EfgShow::OnToolsDominance)
-  EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
-  EVT_MENU(GBT_MENU_TOOLS_QRE, EfgShow::OnToolsQre)
-  EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
-  EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, EfgShow::OnSupportDuplicate)
-  EVT_MENU(GBT_MENU_SUPPORTS_DELETE, EfgShow::OnSupportDelete)
-  EVT_MENU(GBT_MENU_PROFILES_NEW, EfgShow::OnProfilesNew)
-  EVT_MENU(GBT_MENU_PROFILES_DUPLICATE, EfgShow::OnProfilesDuplicate)
-  EVT_MENU(GBT_MENU_PROFILES_DELETE, EfgShow::OnProfilesDelete)
-  EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
-  EVT_MENU(GBT_MENU_PROFILES_REPORT, EfgShow::OnProfilesReport)
-  EVT_SET_FOCUS(EfgShow::OnFocus)
-  EVT_CLOSE(EfgShow::OnCloseWindow)
+BEGIN_EVENT_TABLE(gbtEfgFrame, wxFrame)
+  EVT_MENU(wxID_NEW, gbtEfgFrame::OnFileNew)
+  EVT_MENU(wxID_OPEN, gbtEfgFrame::OnFileOpen)
+  EVT_MENU(wxID_CLOSE, gbtEfgFrame::Close)
+  EVT_MENU(wxID_SAVE, gbtEfgFrame::OnFileSave)
+  EVT_MENU(wxID_SAVEAS, gbtEfgFrame::OnFileSave)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, gbtEfgFrame::OnFileExportBMP)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, gbtEfgFrame::OnFileExportJPEG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtEfgFrame::OnFileExportPNG)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, gbtEfgFrame::OnFileExportPS)
+  EVT_MENU(wxID_PRINT_SETUP, gbtEfgFrame::OnFilePageSetup)
+  EVT_MENU(wxID_PREVIEW, gbtEfgFrame::OnFilePrintPreview)
+  EVT_MENU(wxID_PRINT, gbtEfgFrame::OnFilePrint)
+  EVT_MENU(wxID_EXIT, gbtEfgFrame::OnFileExit)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtEfgFrame::OnFileMRUFile)
+  EVT_MENU(wxID_CUT, gbtEfgFrame::OnEditCut)
+  EVT_MENU(wxID_COPY, gbtEfgFrame::OnEditCopy)
+  EVT_MENU(wxID_PASTE, gbtEfgFrame::OnEditPaste)
+  EVT_MENU(GBT_MENU_EDIT_INSERT, gbtEfgFrame::OnEditInsert)
+  EVT_MENU(GBT_MENU_EDIT_DELETE, gbtEfgFrame::OnEditDelete)
+  EVT_MENU(GBT_MENU_EDIT_REVEAL, gbtEfgFrame::OnEditReveal)
+  EVT_MENU(GBT_MENU_EDIT_TOGGLE_SUBGAME, gbtEfgFrame::OnEditToggleSubgame)
+  EVT_MENU(GBT_MENU_EDIT_MARK_SUBGAME_TREE, gbtEfgFrame::OnEditMarkSubgameTree)
+  EVT_MENU(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, gbtEfgFrame::OnEditUnmarkSubgameTree)
+  EVT_MENU(GBT_MENU_EDIT_NODE, gbtEfgFrame::OnEditNode)
+  EVT_MENU(GBT_MENU_EDIT_MOVE, gbtEfgFrame::OnEditMove)
+  EVT_MENU(GBT_MENU_EDIT_GAME, gbtEfgFrame::OnEditGame)
+  EVT_MENU(GBT_MENU_VIEW_NFG_REDUCED, gbtEfgFrame::OnViewNfgReduced)
+  EVT_MENU(GBT_MENU_VIEW_PROFILES, gbtEfgFrame::OnViewProfiles)
+  EVT_MENU(GBT_MENU_VIEW_NAVIGATION, gbtEfgFrame::OnViewCursor)
+  EVT_MENU(GBT_MENU_VIEW_OUTCOMES, gbtEfgFrame::OnViewOutcomes)
+  EVT_MENU(GBT_MENU_VIEW_SUPPORTS, gbtEfgFrame::OnViewSupports)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtEfgFrame::OnViewZoomIn)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtEfgFrame::OnViewZoomOut)
+  EVT_MENU(GBT_MENU_VIEW_SUPPORT_REACHABLE, gbtEfgFrame::OnViewSupportReachable)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVENODE, gbtEfgFrame::OnFormatFontsAboveNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWNODE, gbtEfgFrame::OnFormatFontsBelowNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_AFTERNODE, gbtEfgFrame::OnFormatFontsAfterNode)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_ABOVEBRANCH, gbtEfgFrame::OnFormatFontsAboveBranch)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_BELOWBRANCH, gbtEfgFrame::OnFormatFontsBelowBranch)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LAYOUT, gbtEfgFrame::OnFormatDisplayLayout)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_LEGEND, gbtEfgFrame::OnFormatDisplayLegend)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_COLORS, gbtEfgFrame::OnFormatDisplayColors)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_DECIMALS, gbtEfgFrame::OnFormatDisplayDecimals)
+  EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, gbtEfgFrame::OnToolsDominance)
+  EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, gbtEfgFrame::OnToolsEquilibrium)
+  EVT_MENU(GBT_MENU_TOOLS_QRE, gbtEfgFrame::OnToolsQre)
+  EVT_MENU(wxID_ABOUT, gbtEfgFrame::OnHelpAbout)
+  EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, gbtEfgFrame::OnSupportDuplicate)
+  EVT_MENU(GBT_MENU_SUPPORTS_DELETE, gbtEfgFrame::OnSupportDelete)
+  EVT_MENU(GBT_MENU_PROFILES_NEW, gbtEfgFrame::OnProfilesNew)
+  EVT_MENU(GBT_MENU_PROFILES_DUPLICATE, gbtEfgFrame::OnProfilesDuplicate)
+  EVT_MENU(GBT_MENU_PROFILES_DELETE, gbtEfgFrame::OnProfilesDelete)
+  EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, gbtEfgFrame::OnProfilesProperties)
+  EVT_MENU(GBT_MENU_PROFILES_REPORT, gbtEfgFrame::OnProfilesReport)
+  EVT_SET_FOCUS(gbtEfgFrame::OnFocus)
+  EVT_CLOSE(gbtEfgFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
-//               EfgShow: Constructor and destructor
+//               gbtEfgFrame: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtEfgFrame::gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, wxT(""), wxPoint(0, 0), wxSize(600, 400)),
     gbtGameView(p_doc),
     m_treeWindow(0)
@@ -184,22 +184,22 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   
   (void) new gbtProfileFrame(m_doc, this);
 
-  (void) new NfgShow(m_doc, this);
+  (void) new gbtNfgFrame(m_doc, this);
 
   Show(true);
   m_doc->UpdateViews();
 }
 
-EfgShow::~EfgShow()
+gbtEfgFrame::~gbtEfgFrame()
 {
   wxGetApp().GetFileHistory().RemoveMenu(GetMenuBar()->GetMenu(0));
 }
 
 //---------------------------------------------------------------------
-//            EfgShow: Coordinating updates of child windows
+//            gbtEfgFrame: Coordinating updates of child windows
 //---------------------------------------------------------------------
 
-void EfgShow::OnUpdate(gbtGameView *)
+void gbtEfgFrame::OnUpdate(gbtGameView *)
 {
   gbtEfgNode cursor = m_doc->GetCursor();
   wxMenuBar *menuBar = GetMenuBar();
@@ -250,10 +250,10 @@ void EfgShow::OnUpdate(gbtGameView *)
 }
 
 //--------------------------------------------------------------------
-//          EfgShow: Creating and updating menus and toolbar
+//          gbtEfgFrame: Creating and updating menus and toolbar
 //--------------------------------------------------------------------
 
-void EfgShow::MakeMenus(void)
+void gbtEfgFrame::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_NEW, _("&New\tCtrl-N"), _("Create a new game"));
@@ -399,7 +399,7 @@ void EfgShow::MakeMenus(void)
 #include "bitmaps/zoomout.xpm"
 #include "bitmaps/help.xpm"
 
-void EfgShow::MakeToolbar(void)
+void gbtEfgFrame::MakeToolbar(void)
 {
   wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE |
 				     wxTB_HORIZONTAL);
@@ -436,20 +436,20 @@ void EfgShow::MakeToolbar(void)
 }
 
 //----------------------------------------------------------------------
-//               EfgShow: Menu handlers - File menu
+//               gbtEfgFrame: Menu handlers - File menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnFileNew(wxCommandEvent &)
+void gbtEfgFrame::OnFileNew(wxCommandEvent &)
 {
   wxGetApp().OnFileNew(this);
 }
 
-void EfgShow::OnFileOpen(wxCommandEvent &)
+void gbtEfgFrame::OnFileOpen(wxCommandEvent &)
 {
   wxGetApp().OnFileOpen(this);
 }
 
-void EfgShow::OnFileSave(wxCommandEvent &p_event)
+void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == wxT("")) {
     wxFileDialog dialog(this, _("Choose file"), 
@@ -489,7 +489,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 }
 
-void EfgShow::OnFilePageSetup(wxCommandEvent &)
+void gbtEfgFrame::OnFilePageSetup(wxCommandEvent &)
 {
   wxPageSetupDialog dialog(this, &m_pageSetupData);
   if (dialog.ShowModal() == wxID_OK) {
@@ -498,14 +498,14 @@ void EfgShow::OnFilePageSetup(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFilePrintPreview(wxCommandEvent &)
+void gbtEfgFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new EfgPrintout(m_treeWindow,
+    new wxPrintPreview(new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
 							(char *) m_doc->GetEfg().GetLabel())),
-		       new EfgPrintout(m_treeWindow,
+		       new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
 							(char *) m_doc->GetEfg().GetLabel())),
 		       &data);
@@ -523,11 +523,11 @@ void EfgShow::OnFilePrintPreview(wxCommandEvent &)
   frame->Show(true);
 }
 
-void EfgShow::OnFilePrint(wxCommandEvent &)
+void gbtEfgFrame::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  EfgPrintout printout(m_treeWindow, 
+  gbtEfgPrintout printout(m_treeWindow, 
 		       wxString::Format(wxT("%s"),
 					(char *) m_doc->GetEfg().GetLabel()));
 
@@ -543,7 +543,7 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFileExportBMP(wxCommandEvent &)
+void gbtEfgFrame::OnFileExportBMP(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().CurrentDir(), wxT(""),
@@ -563,7 +563,7 @@ void EfgShow::OnFileExportBMP(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFileExportJPEG(wxCommandEvent &)
+void gbtEfgFrame::OnFileExportJPEG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().CurrentDir(), wxT(""),
@@ -584,7 +584,7 @@ void EfgShow::OnFileExportJPEG(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFileExportPNG(wxCommandEvent &)
+void gbtEfgFrame::OnFileExportPNG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().CurrentDir(), wxT(""),
@@ -604,7 +604,7 @@ void EfgShow::OnFileExportPNG(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFileExportPS(wxCommandEvent &)
+void gbtEfgFrame::OnFileExportPS(wxCommandEvent &)
 {
 #if wxUSE_POSTSCRIPT
   wxPrintData printData(m_printData);
@@ -664,33 +664,33 @@ void EfgShow::OnFileExportPS(wxCommandEvent &)
 #endif  // wxUSE_POSTSCRIPT
 }
 
-void EfgShow::OnFileExit(wxCommandEvent &)
+void gbtEfgFrame::OnFileExit(wxCommandEvent &)
 {
   while (wxGetApp().GetTopWindow()) {
     delete wxGetApp().GetTopWindow();
   }
 }
 
-void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
+void gbtEfgFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
   wxGetApp().OnFileMRUFile(p_event);
 }
 
 //----------------------------------------------------------------------
-//                EfgShow: Menu handlers - Edit menu
+//                gbtEfgFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnEditCut(wxCommandEvent &)
+void gbtEfgFrame::OnEditCut(wxCommandEvent &)
 {
   m_doc->SetCutNode(m_doc->GetCursor());
 }
 
-void EfgShow::OnEditCopy(wxCommandEvent &)
+void gbtEfgFrame::OnEditCopy(wxCommandEvent &)
 {
   m_doc->SetCopyNode(m_doc->GetCursor());
 }
 
-void EfgShow::OnEditPaste(wxCommandEvent &)
+void gbtEfgFrame::OnEditPaste(wxCommandEvent &)
 {
   if (!m_doc->GetCopyNode().IsNull()) {
     m_doc->Submit(new gbtCmdCopyTree(m_doc->GetCopyNode(),
@@ -702,7 +702,7 @@ void EfgShow::OnEditPaste(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditInsert(wxCommandEvent &)
+void gbtEfgFrame::OnEditInsert(wxCommandEvent &)
 { 
   dialogInsertMove dialog(this, m_doc);
 
@@ -711,7 +711,7 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditDelete(wxCommandEvent &)
+void gbtEfgFrame::OnEditDelete(wxCommandEvent &)
 {
   try {
     dialogEfgDelete dialog(this, m_doc->GetCursor());
@@ -734,7 +734,7 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditReveal(wxCommandEvent &)
+void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
 {
   dialogInfosetReveal dialog(this, m_doc->GetEfg());
 
@@ -753,7 +753,7 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
+void gbtEfgFrame::OnEditToggleSubgame(wxCommandEvent &)
 {
   if (m_doc->GetCursor().GetSubgameRoot() == m_doc->GetCursor()) {
     m_doc->GetEfg().UnmarkSubgame(m_doc->GetCursor());
@@ -764,7 +764,7 @@ void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
   m_doc->UpdateViews();
 }
 
-void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
+void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
 {
   gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
@@ -774,7 +774,7 @@ void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
   m_doc->UpdateViews();
 }
 
-void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
+void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
 {
   gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
@@ -784,7 +784,7 @@ void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
   m_doc->UpdateViews();
 }
 
-void EfgShow::OnEditNode(wxCommandEvent &)
+void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, m_doc->GetCursor());
   if (dialog.ShowModal() == wxID_OK) {
@@ -820,7 +820,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditMove(wxCommandEvent &)
+void gbtEfgFrame::OnEditMove(wxCommandEvent &)
 {
   gbtEfgInfoset infoset = m_doc->GetCursor().GetInfoset();
 
@@ -874,7 +874,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditGame(wxCommandEvent &)
+void gbtEfgFrame::OnEditGame(wxCommandEvent &)
 {
   gbtDialogEditGame dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
@@ -883,30 +883,30 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                EfgShow: Menu handlers - View menu
+//                gbtEfgFrame: Menu handlers - View menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnViewNfgReduced(wxCommandEvent &)
+void gbtEfgFrame::OnViewNfgReduced(wxCommandEvent &)
 {
   m_doc->SetShowNfg(!m_doc->ShowNfg());
 }
 
-void EfgShow::OnViewProfiles(wxCommandEvent &)
+void gbtEfgFrame::OnViewProfiles(wxCommandEvent &)
 {
   m_doc->SetShowProfiles(!m_doc->ShowProfiles());
 }
 
-void EfgShow::OnViewCursor(wxCommandEvent &)
+void gbtEfgFrame::OnViewCursor(wxCommandEvent &)
 {
   m_doc->SetShowEfgNavigate(!m_doc->ShowEfgNavigate());
 }
 
-void EfgShow::OnViewOutcomes(wxCommandEvent &)
+void gbtEfgFrame::OnViewOutcomes(wxCommandEvent &)
 {
   m_doc->SetShowOutcomes(!m_doc->ShowOutcomes());
 }
 
-void EfgShow::OnViewSupports(wxCommandEvent &)
+void gbtEfgFrame::OnViewSupports(wxCommandEvent &)
 {
   m_doc->SetShowEfgSupports(!m_doc->ShowEfgSupports());
 }
@@ -915,31 +915,31 @@ const double ZOOM_DELTA = .1;
 const double ZOOM_MAX = 1;
 const double ZOOM_MIN = .2;
 
-void EfgShow::OnViewZoomIn(wxCommandEvent &)
+void gbtEfgFrame::OnViewZoomIn(wxCommandEvent &)
 {
   double zoom = m_treeWindow->GetZoom();
   zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
   m_treeWindow->SetZoom(zoom);
 }
 
-void EfgShow::OnViewZoomOut(wxCommandEvent &)
+void gbtEfgFrame::OnViewZoomOut(wxCommandEvent &)
 {
   double zoom = m_treeWindow->GetZoom();
   zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
   m_treeWindow->SetZoom(zoom);
 }
 
-void EfgShow::OnViewSupportReachable(wxCommandEvent &)
+void gbtEfgFrame::OnViewSupportReachable(wxCommandEvent &)
 {
   m_doc->GetPreferences().SetRootReachable(!m_doc->GetPreferences().RootReachable());
   m_doc->UpdateViews();
 }
 
 //----------------------------------------------------------------------
-//               EfgShow: Menu handlers - Format menu
+//               gbtEfgFrame: Menu handlers - Format menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
+void gbtEfgFrame::OnFormatFontsAboveNode(wxCommandEvent &)
 {
   wxFontData data;
   data.SetInitialFont(m_doc->GetPreferences().NodeAboveFont());
@@ -952,7 +952,7 @@ void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatFontsBelowNode(wxCommandEvent &)
+void gbtEfgFrame::OnFormatFontsBelowNode(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -964,7 +964,7 @@ void EfgShow::OnFormatFontsBelowNode(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatFontsAfterNode(wxCommandEvent &)
+void gbtEfgFrame::OnFormatFontsAfterNode(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -976,7 +976,7 @@ void EfgShow::OnFormatFontsAfterNode(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatFontsAboveBranch(wxCommandEvent &)
+void gbtEfgFrame::OnFormatFontsAboveBranch(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -988,7 +988,7 @@ void EfgShow::OnFormatFontsAboveBranch(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
+void gbtEfgFrame::OnFormatFontsBelowBranch(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -1000,7 +1000,7 @@ void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
+void gbtEfgFrame::OnFormatDisplayLayout(wxCommandEvent &)
 {
   gbtPreferences &prefs = m_doc->GetPreferences();
 
@@ -1013,7 +1013,7 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatDisplayLegend(wxCommandEvent &)
+void gbtEfgFrame::OnFormatDisplayLegend(wxCommandEvent &)
 {
   dialogLegend dialog(this, m_doc->GetPreferences());
 
@@ -1028,7 +1028,7 @@ void EfgShow::OnFormatDisplayLegend(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
+void gbtEfgFrame::OnFormatDisplayColors(wxCommandEvent &)
 {
   dialogEfgColor dialog(this, m_doc->GetPreferences());
 
@@ -1043,7 +1043,7 @@ void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
+void gbtEfgFrame::OnFormatDisplayDecimals(wxCommandEvent &)
 {
   dialogSpinCtrl dialog(this, _("Decimal places"), 0, 25,
 			m_doc->GetPreferences().NumDecimals());
@@ -1056,10 +1056,10 @@ void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//             EfgShow: Menu handler - Tools->Dominance
+//             gbtEfgFrame: Menu handler - Tools->Dominance
 //----------------------------------------------------------------------
 
-void EfgShow::OnToolsDominance(wxCommandEvent &)
+void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 {
   gbtArray<gbtText> playerNames(m_doc->GetEfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
@@ -1104,10 +1104,10 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//            EfgShow: Menu handlers - Tools->Equilibrium
+//            gbtEfgFrame: Menu handlers - Tools->Equilibrium
 //----------------------------------------------------------------------
 
-void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
+void gbtEfgFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   dialogEfgNash dialog(this, m_doc->GetEfgSupport());
 
@@ -1147,7 +1147,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnToolsQre(wxCommandEvent &)
+void gbtEfgFrame::OnToolsQre(wxCommandEvent &)
 {
   try {
     gbtEfgNashLogit algorithm;
@@ -1170,7 +1170,7 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
 
 }
 
-void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
+void gbtEfgFrame::OnToolsNormalAgent(wxCommandEvent &)
 {
 #ifdef UNUSED
   // check that the game is perfect recall, if not give a warning
@@ -1185,7 +1185,7 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 
   try {
     gbtNfgGame nfg = MakeAfg(m_doc->GetEfg());
-    (void) new NfgShow(m_doc, m_parent);
+    (void) new gbtNfgFrame(m_doc, m_parent);
   }
   catch (...) {
     wxMessageDialog msgDialog(this,
@@ -1198,19 +1198,19 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                 EfgShow: Menu handlers - Help menu
+//                 gbtEfgFrame: Menu handlers - Help menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnHelpAbout(wxCommandEvent &)
+void gbtEfgFrame::OnHelpAbout(wxCommandEvent &)
 {
   wxGetApp().OnHelpAbout(this);
 }
 
 //----------------------------------------------------------------------
-//               EfgShow: Menu handlers - Support menu
+//               gbtEfgFrame: Menu handlers - Support menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnSupportDuplicate(wxCommandEvent &)
+void gbtEfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
   gbtEfgSupport *newSupport = new gbtEfgSupport(m_doc->GetEfgSupport());
   newSupport->SetLabel(m_doc->UniqueEfgSupportName());
@@ -1218,16 +1218,16 @@ void EfgShow::OnSupportDuplicate(wxCommandEvent &)
   m_doc->SetEfgSupport(m_doc->AllEfgSupports().Length());
 }
 
-void EfgShow::OnSupportDelete(wxCommandEvent &)
+void gbtEfgFrame::OnSupportDelete(wxCommandEvent &)
 {
   m_doc->DeleteEfgSupport();
 }
 
 //----------------------------------------------------------------------
-//              EfgShow: Menu handlers - Profiles menu
+//              gbtEfgFrame: Menu handlers - Profiles menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnProfilesNew(wxCommandEvent &)
+void gbtEfgFrame::OnProfilesNew(wxCommandEvent &)
 {
   BehavSolution profile = gbtBehavProfile<gbtNumber>(gbtEfgSupport(m_doc->GetEfg()));
 
@@ -1238,7 +1238,7 @@ void EfgShow::OnProfilesNew(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
+void gbtEfgFrame::OnProfilesDuplicate(wxCommandEvent &)
 {
   BehavSolution profile(m_doc->GetBehavProfile());
 
@@ -1249,12 +1249,12 @@ void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnProfilesDelete(wxCommandEvent &)
+void gbtEfgFrame::OnProfilesDelete(wxCommandEvent &)
 {
   m_doc->RemoveProfile(m_doc->AllBehavProfiles().Find(m_doc->GetBehavProfile()));
 }
 
-void EfgShow::OnProfilesProperties(wxCommandEvent &)
+void gbtEfgFrame::OnProfilesProperties(wxCommandEvent &)
 {
   if (m_doc->IsProfileSelected()) {
     dialogEditBehav dialog(this, m_doc->GetBehavProfile());
@@ -1265,17 +1265,17 @@ void EfgShow::OnProfilesProperties(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnProfilesReport(wxCommandEvent &)
+void gbtEfgFrame::OnProfilesReport(wxCommandEvent &)
 {
   //  dialogReport dialog(this, m_profileTable->GetReport());
   // dialog.ShowModal();
 }
 
 //----------------------------------------------------------------------
-//                  EfgShow: Non-menu event handlers
+//                  gbtEfgFrame: Non-menu event handlers
 //----------------------------------------------------------------------
 
-void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
+void gbtEfgFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
     if (wxMessageBox(_("Game has been modified.  Close anyway?"), _("Warning"),
@@ -1289,7 +1289,7 @@ void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
   Destroy();
 }
 
-void EfgShow::OnFocus(wxFocusEvent &)
+void gbtEfgFrame::OnFocus(wxFocusEvent &)
 {
   if (m_treeWindow) {
     m_treeWindow->SetFocus();

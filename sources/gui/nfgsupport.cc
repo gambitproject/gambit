@@ -35,7 +35,7 @@ const int idSTRATEGYTREE = 8003;
 
 class widgetStrategyTree : public wxTreeCtrl {
 private:
-  NfgSupportWindow *m_parent;
+  gbtNfgSupportWindow *m_parent;
   wxMenu *m_menu;
 
   void OnRightClick(wxTreeEvent &);
@@ -43,7 +43,7 @@ private:
   void OnKeypress(wxTreeEvent &);
 
 public:
-  widgetStrategyTree(NfgSupportWindow *p_parent);
+  widgetStrategyTree(gbtNfgSupportWindow *p_parent);
 
   DECLARE_EVENT_TABLE()
 };
@@ -54,7 +54,7 @@ BEGIN_EVENT_TABLE(widgetStrategyTree, wxTreeCtrl)
   EVT_TREE_ITEM_RIGHT_CLICK(idSTRATEGYTREE, widgetStrategyTree::OnRightClick)
 END_EVENT_TABLE()
 
-widgetStrategyTree::widgetStrategyTree(NfgSupportWindow *p_parent)
+widgetStrategyTree::widgetStrategyTree(gbtNfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idSTRATEGYTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
@@ -95,14 +95,14 @@ const int idSUPPORTLISTCHOICE = 8000;
 const int idSUPPORTPREVBUTTON = 8001;
 const int idSUPPORTNEXTBUTTON = 8002;
 
-BEGIN_EVENT_TABLE(NfgSupportWindow, wxPanel)
-  EVT_CHOICE(idSUPPORTLISTCHOICE, NfgSupportWindow::OnSupportList)
-  EVT_BUTTON(idSUPPORTPREVBUTTON, NfgSupportWindow::OnSupportPrev)
-  EVT_BUTTON(idSUPPORTNEXTBUTTON, NfgSupportWindow::OnSupportNext)
-  EVT_TREE_ITEM_COLLAPSING(idSTRATEGYTREE, NfgSupportWindow::OnTreeItemCollapse)
+BEGIN_EVENT_TABLE(gbtNfgSupportWindow, wxPanel)
+  EVT_CHOICE(idSUPPORTLISTCHOICE, gbtNfgSupportWindow::OnSupportList)
+  EVT_BUTTON(idSUPPORTPREVBUTTON, gbtNfgSupportWindow::OnSupportPrev)
+  EVT_BUTTON(idSUPPORTNEXTBUTTON, gbtNfgSupportWindow::OnSupportNext)
+  EVT_TREE_ITEM_COLLAPSING(idSTRATEGYTREE, gbtNfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
-NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtNfgSupportWindow::gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     gbtGameView(p_doc), m_map(gbtNfgStrategy())
 {
@@ -135,7 +135,7 @@ NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   Show(true);
 }
 
-void NfgSupportWindow::OnUpdate(gbtGameView *)
+void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 
@@ -181,29 +181,29 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
   Layout();
 }
 
-void NfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
+void gbtNfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
   m_doc->SetNfgSupport(p_event.GetSelection() + 1);
 }
 
-void NfgSupportWindow::OnSupportPrev(wxCommandEvent &)
+void gbtNfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
   m_doc->SetNfgSupport(m_supportList->GetSelection());
 }
 
-void NfgSupportWindow::OnSupportNext(wxCommandEvent &)
+void gbtNfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
   m_doc->SetNfgSupport(m_supportList->GetSelection() + 2);
 }
 
-void NfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
+void gbtNfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
 {
   if (p_event.GetItem() == m_strategyTree->GetRootItem()) {
     p_event.Veto();
   }
 }
 
-void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
+void gbtNfgSupportWindow::ToggleItem(wxTreeItemId p_id)
 {
   gbtNfgStrategy strategy = m_map(p_id);
   if (strategy.IsNull()) {
@@ -237,7 +237,7 @@ gbtNfgSupportFrame::gbtNfgSupportFrame(gbtGameDocument *p_doc,
   : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 300)),
     gbtGameView(p_doc)
 {
-  m_panel = new NfgSupportWindow(p_doc, this);
+  m_panel = new gbtNfgSupportWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));

@@ -45,24 +45,24 @@
 const int idCHECKBOX_FINDALL = 2000;
 const int idSPINCTRL_STOPAFTER = 2001;
 
-class panelNfgNashAlgorithm : public wxPanel {
+class gbtPanelNfgNashAlgorithm : public wxPanel {
 public:
-  panelNfgNashAlgorithm(wxWindow *p_parent) : wxPanel(p_parent, -1) { }
+  gbtPanelNfgNashAlgorithm(wxWindow *p_parent) : wxPanel(p_parent, -1) { }
 
   virtual gbtNfgNashAlgorithm *GetAlgorithm(void) const = 0;
 };
 
 //========================================================================
-//                         class nfgOneNash
+//                         class gbtNfgNashOneNash
 //========================================================================
 
-class nfgOneNash : public gbtNfgNashAlgorithm {
+class gbtNfgNashOneNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OneNash"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashOneNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -98,18 +98,18 @@ gbtList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                       class panelNfgOneNash
+//                       class gbtPanelNfgOneNash
 //========================================================================
 
-class panelNfgOneNash : public panelNfgNashAlgorithm {
+class gbtPanelNfgOneNash : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgOneNash(wxWindow *);
+  gbtPanelNfgOneNash(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgOneNash::gbtPanelNfgOneNash(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -135,22 +135,22 @@ panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgOneNash::GetAlgorithm(void) const
 {
-  return new nfgOneNash;
+  return new gbtNfgNashOneNash;
 }
 
 //========================================================================
-//                         class nfgTwoNash
+//                         class gbtNfgNashTwoNash
 //========================================================================
 
-class nfgTwoNash : public gbtNfgNashAlgorithm {
+class gbtNfgNashTwoNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoNash"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashTwoNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -192,18 +192,18 @@ gbtList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                       class panelNfgTwoNash
+//                       class gbtPanelNfgTwoNash
 //========================================================================
 
-class panelNfgTwoNash : public panelNfgNashAlgorithm {
+class gbtPanelNfgTwoNash : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgTwoNash(wxWindow *);
+  gbtPanelNfgTwoNash(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgTwoNash::gbtPanelNfgTwoNash(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -229,22 +229,22 @@ panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgTwoNash::GetAlgorithm(void) const
 {
-  return new nfgTwoNash;
+  return new gbtNfgNashTwoNash;
 }
 
 //========================================================================
-//                         class nfgAllNash
+//                         class gbtNfgNashAllNash
 //========================================================================
 
-class nfgAllNash : public gbtNfgNashAlgorithm {
+class gbtNfgNashAllNash : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllNash"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashAllNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -286,18 +286,18 @@ gbtList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                       class panelNfgAllNash
+//                       class gbtPanelNfgAllNash
 //========================================================================
 
-class panelNfgAllNash : public panelNfgNashAlgorithm {
+class gbtPanelNfgAllNash : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgAllNash(wxWindow *);
+  gbtPanelNfgAllNash(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgAllNash::gbtPanelNfgAllNash(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -322,22 +322,22 @@ panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgAllNash::GetAlgorithm(void) const
 {
-  return new nfgAllNash;
+  return new gbtNfgNashAllNash;
 }
 
 //========================================================================
-//                         class nfgOnePerfect
+//                         class gbtNfgNashOnePerfect
 //========================================================================
 
-class nfgOnePerfect : public gbtNfgNashAlgorithm {
+class gbtNfgNashOnePerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "OnePerfect"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashOnePerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -361,18 +361,18 @@ gbtList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                     class panelNfgOnePerfect
+//                     class gbtPanelNfgOnePerfect
 //========================================================================
 
-class panelNfgOnePerfect : public panelNfgNashAlgorithm {
+class gbtPanelNfgOnePerfect : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgOnePerfect(wxWindow *);
+  gbtPanelNfgOnePerfect(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgOnePerfect::gbtPanelNfgOnePerfect(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -397,22 +397,22 @@ panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgOnePerfect::GetAlgorithm(void) const
 {
-  return new nfgOnePerfect;
+  return new gbtNfgNashOnePerfect;
 }
 
 //========================================================================
-//                         class nfgTwoPerfect
+//                         class gbtNfgNashTwoPerfect
 //========================================================================
 
-class nfgTwoPerfect : public gbtNfgNashAlgorithm {
+class gbtNfgNashTwoPerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "TwoPerfect"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashTwoPerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -436,18 +436,18 @@ gbtList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                     class panelNfgTwoPerfect
+//                     class gbtPanelNfgTwoPerfect
 //========================================================================
 
-class panelNfgTwoPerfect : public panelNfgNashAlgorithm {
+class gbtPanelNfgTwoPerfect : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgTwoPerfect(wxWindow *);
+  gbtPanelNfgTwoPerfect(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgTwoPerfect::gbtPanelNfgTwoPerfect(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -472,22 +472,22 @@ panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgTwoPerfect::GetAlgorithm(void) const
 {
-  return new nfgTwoPerfect;
+  return new gbtNfgNashTwoPerfect;
 }
 
 //========================================================================
-//                         class nfgAllPerfect
+//                         class gbtNfgNashAllPerfect
 //========================================================================
 
-class nfgAllPerfect : public gbtNfgNashAlgorithm {
+class gbtNfgNashAllPerfect : public gbtNfgNashAlgorithm {
 public:
   gbtText GetAlgorithm(void) const { return "AllPerfect"; }
   gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gbtList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
+gbtList<MixedSolution> gbtNfgNashAllPerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
   gbtArray<int> players(p_support.GetGame().NumPlayers());
@@ -511,18 +511,18 @@ gbtList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
 }
 
 //========================================================================
-//                     class panelNfgAllPerfect
+//                     class gbtPanelNfgAllPerfect
 //========================================================================
 
-class panelNfgAllPerfect : public panelNfgNashAlgorithm {
+class gbtPanelNfgAllPerfect : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgAllPerfect(wxWindow *);
+  gbtPanelNfgAllPerfect(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgAllPerfect::gbtPanelNfgAllPerfect(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -547,16 +547,16 @@ panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgAllPerfect::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgAllPerfect::GetAlgorithm(void) const
 {
-  return new nfgAllPerfect;
+  return new gbtNfgNashAllPerfect;
 }
 
 //========================================================================
-//                      class panelNfgEnumPure
+//                      class gbtPanelNfgEnumPure
 //========================================================================
 
-class panelNfgEnumPure : public panelNfgNashAlgorithm {
+class gbtPanelNfgEnumPure : public gbtPanelNfgNashAlgorithm {
 private:
   wxCheckBox *m_findAll;
   wxSpinCtrl *m_stopAfter;
@@ -565,19 +565,19 @@ private:
   void OnFindAll(wxCommandEvent &);
 
 public:
-  panelNfgEnumPure(wxWindow *);
+  gbtPanelNfgEnumPure(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgEnumPure, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgEnumPure::OnFindAll)
+BEGIN_EVENT_TABLE(gbtPanelNfgEnumPure, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgEnumPure::OnFindAll)
 END_EVENT_TABLE()
 
-panelNfgEnumPure::panelNfgEnumPure(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgEnumPure::gbtPanelNfgEnumPure(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -614,12 +614,12 @@ panelNfgEnumPure::panelNfgEnumPure(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgEnumPure::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgEnumPure::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgEnumPure::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgEnumPure::GetAlgorithm(void) const
 {
   gbtNfgNashEnumPure *algorithm = new gbtNfgNashEnumPure;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
@@ -628,10 +628,10 @@ gbtNfgNashAlgorithm *panelNfgEnumPure::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                      class panelNfgEnumMixed
+//                      class gbtPanelNfgEnumMixed
 //========================================================================
 
-class panelNfgEnumMixed : public panelNfgNashAlgorithm {
+class gbtPanelNfgEnumMixed : public gbtPanelNfgNashAlgorithm {
 private:
   wxRadioBox *m_precision;
   wxCheckBox *m_findAll;
@@ -641,19 +641,19 @@ private:
   void OnFindAll(wxCommandEvent &);
 
 public:
-  panelNfgEnumMixed(wxWindow *);
+  gbtPanelNfgEnumMixed(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgEnumMixed, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgEnumMixed::OnFindAll)
+BEGIN_EVENT_TABLE(gbtPanelNfgEnumMixed, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgEnumMixed::OnFindAll)
 END_EVENT_TABLE()
 
-panelNfgEnumMixed::panelNfgEnumMixed(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgEnumMixed::gbtPanelNfgEnumMixed(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -696,12 +696,12 @@ panelNfgEnumMixed::panelNfgEnumMixed(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgEnumMixed::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgEnumMixed::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgEnumMixed::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
     gbtNfgNashEnumMixed<double> *algorithm = new gbtNfgNashEnumMixed<double>;
@@ -718,12 +718,12 @@ gbtNfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                         class panelNfgLcp
+//                         class gbtPanelNfgLcp
 //========================================================================
 
 const int idCHECKBOX_LIMITDEPTH = 2002;
 
-class panelNfgLcp : public panelNfgNashAlgorithm {
+class gbtPanelNfgLcp : public gbtPanelNfgNashAlgorithm {
 private:
   wxRadioBox *m_precision;
   wxCheckBox *m_findAll, *m_limitDepth;
@@ -735,21 +735,21 @@ private:
   void OnLimitDepth(wxCommandEvent &);
 
 public:
-  panelNfgLcp(wxWindow *);
+  gbtPanelNfgLcp(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgLcp, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgLcp::OnFindAll)
-  EVT_SPINCTRL(idSPINCTRL_STOPAFTER, panelNfgLcp::OnStopAfter)
-  EVT_CHECKBOX(idCHECKBOX_LIMITDEPTH, panelNfgLcp::OnLimitDepth)
+BEGIN_EVENT_TABLE(gbtPanelNfgLcp, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgLcp::OnFindAll)
+  EVT_SPINCTRL(idSPINCTRL_STOPAFTER, gbtPanelNfgLcp::OnStopAfter)
+  EVT_CHECKBOX(idCHECKBOX_LIMITDEPTH, gbtPanelNfgLcp::OnLimitDepth)
 END_EVENT_TABLE()
 
-panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgLcp::gbtPanelNfgLcp(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -808,7 +808,7 @@ panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgLcp::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgLcp::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
   m_limitDepth->Enable(m_findAll->GetValue() || 
@@ -817,18 +817,18 @@ void panelNfgLcp::OnFindAll(wxCommandEvent &)
 		     m_limitDepth->GetValue());
 }
 
-void panelNfgLcp::OnStopAfter(wxSpinEvent &)
+void gbtPanelNfgLcp::OnStopAfter(wxSpinEvent &)
 {
   m_limitDepth->Enable(m_stopAfter->GetValue() > 1);
   m_maxDepth->Enable(m_stopAfter->GetValue() > 1 && m_limitDepth->GetValue());
 }
 
-void panelNfgLcp::OnLimitDepth(wxCommandEvent &)
+void gbtPanelNfgLcp::OnLimitDepth(wxCommandEvent &)
 {
   m_maxDepth->Enable(m_limitDepth->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgLcp::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
     gbtNfgNashLcp<double> *algorithm = new gbtNfgNashLcp<double>;
@@ -849,10 +849,10 @@ gbtNfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                         class panelNfgLp
+//                         class gbtPanelNfgLp
 //========================================================================
 
-class panelNfgLp : public panelNfgNashAlgorithm {
+class gbtPanelNfgLp : public gbtPanelNfgNashAlgorithm {
 private:
   wxRadioBox *m_precision;
   wxCheckBox *m_findAll;
@@ -862,19 +862,19 @@ private:
   void OnFindAll(wxCommandEvent &);
 
 public:
-  panelNfgLp(wxWindow *);
+  gbtPanelNfgLp(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgLp, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgLp::OnFindAll)
+BEGIN_EVENT_TABLE(gbtPanelNfgLp, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgLp::OnFindAll)
 END_EVENT_TABLE()
 
-panelNfgLp::panelNfgLp(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgLp::gbtPanelNfgLp(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -920,12 +920,12 @@ panelNfgLp::panelNfgLp(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgLp::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgLp::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgLp::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
     gbtNfgNashLp<double> *algorithm = new gbtNfgNashLp<double>;
@@ -938,10 +938,10 @@ gbtNfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                        class panelNfgLiap
+//                        class gbtPanelNfgLiap
 //========================================================================
 
-class panelNfgLiap : public panelNfgNashAlgorithm {
+class gbtPanelNfgLiap : public gbtPanelNfgNashAlgorithm {
 private:
   wxCheckBox *m_findAll;
   wxSpinCtrl *m_stopAfter, *m_numTries;
@@ -951,19 +951,19 @@ private:
   void OnFindAll(wxCommandEvent &);
 
 public:
-  panelNfgLiap(wxWindow *);
+  gbtPanelNfgLiap(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgLiap, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgLiap::OnFindAll)
+BEGIN_EVENT_TABLE(gbtPanelNfgLiap, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgLiap::OnFindAll)
 END_EVENT_TABLE()
 
-panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgLiap::gbtPanelNfgLiap(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -1025,12 +1025,12 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgLiap::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgLiap::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgLiap::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgLiap::GetAlgorithm(void) const
 {
   gbtNfgNashLiap *algorithm = new gbtNfgNashLiap;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
@@ -1041,10 +1041,10 @@ gbtNfgNashAlgorithm *panelNfgLiap::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                      class panelNfgPolEnum
+//                      class gbtPanelNfgEnumPoly
 //========================================================================
 
-class panelNfgPolEnum : public panelNfgNashAlgorithm {
+class gbtPanelNfgEnumPoly : public gbtPanelNfgNashAlgorithm {
 private:
   wxCheckBox *m_findAll;
   wxSpinCtrl *m_stopAfter;
@@ -1053,19 +1053,19 @@ private:
   void OnFindAll(wxCommandEvent &);
 
 public:
-  panelNfgPolEnum(wxWindow *);
+  gbtPanelNfgEnumPoly(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgPolEnum, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgPolEnum::OnFindAll)
+BEGIN_EVENT_TABLE(gbtPanelNfgEnumPoly, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, gbtPanelNfgEnumPoly::OnFindAll)
 END_EVENT_TABLE()
 
-panelNfgPolEnum::panelNfgPolEnum(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgEnumPoly::gbtPanelNfgEnumPoly(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -1102,12 +1102,12 @@ panelNfgPolEnum::panelNfgPolEnum(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgPolEnum::OnFindAll(wxCommandEvent &)
+void gbtPanelNfgEnumPoly::OnFindAll(wxCommandEvent &)
 {
   m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgPolEnum::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgEnumPoly::GetAlgorithm(void) const
 {
   gbtNfgNashEnumPoly *algorithm = new gbtNfgNashEnumPoly;
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
@@ -1116,18 +1116,18 @@ gbtNfgNashAlgorithm *panelNfgPolEnum::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                         class panelNfgQre
+//                         class gbtPanelNfgLogit
 //========================================================================
 
-class panelNfgQre : public panelNfgNashAlgorithm {
+class gbtPanelNfgLogit : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgQre(wxWindow *);
+  gbtPanelNfgLogit(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgQre::panelNfgQre(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgLogit::gbtPanelNfgLogit(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -1153,7 +1153,7 @@ panelNfgQre::panelNfgQre(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgLogit::GetAlgorithm(void) const
 {
   gbtNfgNashLogit *algorithm = new gbtNfgNashLogit;
   algorithm->SetFullGraph(false);
@@ -1162,12 +1162,12 @@ gbtNfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                       class panelNfgSimpdiv
+//                       class gbtPanelNfgSimpdiv
 //========================================================================
 
 const int idCHECKBOX_USELEASH = 2002;
 
-class panelNfgSimpdiv : public panelNfgNashAlgorithm {
+class gbtPanelNfgSimpdiv : public gbtPanelNfgNashAlgorithm {
 private:
   wxRadioBox *m_precision;
   wxCheckBox *m_useLeash;
@@ -1178,19 +1178,19 @@ private:
   void OnUseLeash(wxCommandEvent &);
 
 public:
-  panelNfgSimpdiv(wxWindow *);
+  gbtPanelNfgSimpdiv(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(panelNfgSimpdiv, panelNfgNashAlgorithm)
-  EVT_CHECKBOX(idCHECKBOX_USELEASH, panelNfgSimpdiv::OnUseLeash)
+BEGIN_EVENT_TABLE(gbtPanelNfgSimpdiv, gbtPanelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_USELEASH, gbtPanelNfgSimpdiv::OnUseLeash)
 END_EVENT_TABLE()
 
-panelNfgSimpdiv::panelNfgSimpdiv(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgSimpdiv::gbtPanelNfgSimpdiv(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -1248,12 +1248,12 @@ panelNfgSimpdiv::panelNfgSimpdiv(wxWindow *p_parent)
   Show(false);
 }
 
-void panelNfgSimpdiv::OnUseLeash(wxCommandEvent &)
+void gbtPanelNfgSimpdiv::OnUseLeash(wxCommandEvent &)
 {
   m_leashLength->Enable(m_useLeash->GetValue());
 }
 
-gbtNfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgSimpdiv::GetAlgorithm(void) const
 {
   if (m_precision->GetSelection() == 0) {
     gbtNfgNashSimpdiv<double> *algorithm = new gbtNfgNashSimpdiv<double>;
@@ -1272,18 +1272,18 @@ gbtNfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
 }
 
 //========================================================================
-//                      class panelNfgYamamoto
+//                      class gbtPanelNfgYamamoto
 //========================================================================
 
-class panelNfgYamamoto : public panelNfgNashAlgorithm {
+class gbtPanelNfgYamamoto : public gbtPanelNfgNashAlgorithm {
 public:
-  panelNfgYamamoto(wxWindow *);
+  gbtPanelNfgYamamoto(wxWindow *);
 
   gbtNfgNashAlgorithm *GetAlgorithm(void) const;
 };
 
-panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
-  : panelNfgNashAlgorithm(p_parent)
+gbtPanelNfgYamamoto::gbtPanelNfgYamamoto(wxWindow *p_parent)
+  : gbtPanelNfgNashAlgorithm(p_parent)
 {
   SetAutoLayout(true);
 
@@ -1301,7 +1301,7 @@ panelNfgYamamoto::panelNfgYamamoto(wxWindow *p_parent)
   Show(false);
 }
 
-gbtNfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
+gbtNfgNashAlgorithm *gbtPanelNfgYamamoto::GetAlgorithm(void) const
 {
   return new gbtNfgNashYamamoto;
 }
@@ -1366,26 +1366,26 @@ int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
 						      _("Standard algorithms"));
   m_algorithmTree->SetItemBold(standard);
   // This is added to silence some BC warnings
-  panelNfgNashAlgorithm *panel;
+  gbtPanelNfgNashAlgorithm *panel;
   id = m_algorithmTree->AppendItem(standard, _("One Nash equilibrium"));
-  m_algorithms.Define(id, panel = new panelNfgOneNash(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgOneNash(this));
   wxTreeItemId init = id;
   
   id = m_algorithmTree->AppendItem(standard, _("Two Nash equilibria"));
-  m_algorithms.Define(id, panel = new panelNfgTwoNash(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgTwoNash(this));
 
   id = m_algorithmTree->AppendItem(standard, _("All Nash equilibria"));
-  m_algorithms.Define(id, panel = new panelNfgAllNash(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgAllNash(this));
 
   if (p_nfg.NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(standard, _("One perfect equilibrium"));
-    m_algorithms.Define(id, panel = new panelNfgOnePerfect(this));
+    m_algorithms.Define(id, panel = new gbtPanelNfgOnePerfect(this));
 
     id = m_algorithmTree->AppendItem(standard, _("Two perfect equilibria"));
-    m_algorithms.Define(id, panel = new panelNfgTwoPerfect(this));
+    m_algorithms.Define(id, panel = new gbtPanelNfgTwoPerfect(this));
 
     id = m_algorithmTree->AppendItem(standard, _("All perfect equilibria"));
-    m_algorithms.Define(id, panel = new panelNfgAllPerfect(this));
+    m_algorithms.Define(id, panel = new gbtPanelNfgAllPerfect(this));
   }
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root,
@@ -1393,35 +1393,35 @@ int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
   m_algorithmTree->SetItemBold(custom);
 
   id = m_algorithmTree->AppendItem(custom, wxT("EnumPureSolve"));
-  m_algorithms.Define(id, panel = new panelNfgEnumPure(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgEnumPure(this));
 
   if (p_nfg.NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(custom, wxT("EnumMixedSolve"));
-    m_algorithms.Define(id, panel = new panelNfgEnumMixed(this));
+    m_algorithms.Define(id, panel = new gbtPanelNfgEnumMixed(this));
 
     id = m_algorithmTree->AppendItem(custom, wxT("LcpSolve"));
-    m_algorithms.Define(id, panel = new panelNfgLcp(this));
+    m_algorithms.Define(id, panel = new gbtPanelNfgLcp(this));
 
     if (p_nfg.IsConstSum()) {
       id = m_algorithmTree->AppendItem(custom, wxT("LpSolve"));
-      m_algorithms.Define(id, panel = new panelNfgLp(this));
+      m_algorithms.Define(id, panel = new gbtPanelNfgLp(this));
     }
   }
 
   id = m_algorithmTree->AppendItem(custom, wxT("LiapSolve"));
-  m_algorithms.Define(id, panel = new panelNfgLiap(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgLiap(this));
 
   id = m_algorithmTree->AppendItem(custom, wxT("PolEnumSolve"));
-  m_algorithms.Define(id, panel = new panelNfgPolEnum(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgEnumPoly(this));
   
   id = m_algorithmTree->AppendItem(custom, wxT("QreSolve"));
-  m_algorithms.Define(id, panel = new panelNfgQre(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgLogit(this));
 
   id = m_algorithmTree->AppendItem(custom, wxT("SimpdivSolve"));
-  m_algorithms.Define(id, panel = new panelNfgSimpdiv(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgSimpdiv(this));
 
   id = m_algorithmTree->AppendItem(custom, wxT("YamamotoSolve"));
-  m_algorithms.Define(id, panel = new panelNfgYamamoto(this));
+  m_algorithms.Define(id, panel = new gbtPanelNfgYamamoto(this));
 
   m_algorithmTree->Expand(standard);
   m_algorithmTree->Expand(custom);
@@ -1471,5 +1471,5 @@ static gbtOutput &operator<<(gbtOutput &p_stream, wxTreeItemId)
 { return p_stream; }
 
 #include "base/gmap.imp"
-template class gbtBaseMap<wxTreeItemId, panelNfgNashAlgorithm *>;
-template class gbtOrdMap<wxTreeItemId, panelNfgNashAlgorithm *>;
+template class gbtBaseMap<wxTreeItemId, gbtPanelNfgNashAlgorithm *>;
+template class gbtOrdMap<wxTreeItemId, gbtPanelNfgNashAlgorithm *>;

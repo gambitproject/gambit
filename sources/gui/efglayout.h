@@ -31,12 +31,12 @@
 #include "game/efg.h"
 #include "gamedoc.h"
 
-class NodeEntry {
+class gbtEfgLayoutNode {
 private:
   gbtEfgNode m_node;        // the corresponding node in the game
-  NodeEntry *m_parent; // parent node
+  gbtEfgLayoutNode *m_parent; // parent node
   int m_x, m_y;        // Cartesian coordinates of node
-  NodeEntry *m_nextMember;  // entry of next information set member 
+  gbtEfgLayoutNode *m_nextMember;  // entry of next information set member 
   bool m_inSupport;    // true if node reachable in current support
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
@@ -61,20 +61,20 @@ private:
   wxFont m_branchAboveFont, m_branchBelowFont;
 
 public:
-  NodeEntry(gbtEfgNode p_parent);
+  gbtEfgLayoutNode(gbtEfgNode p_parent);
 
   gbtEfgNode GetNode(void) const { return m_node; }
 
-  NodeEntry *GetParent(void) const { return m_parent; }
-  void SetParent(NodeEntry *p_parent) { m_parent = p_parent; }
+  gbtEfgLayoutNode *GetParent(void) const { return m_parent; }
+  void SetParent(gbtEfgLayoutNode *p_parent) { m_parent = p_parent; }
 
   int X(void) const { return m_x; }
   void SetX(int p_x) { m_x = p_x; }
   int Y(void) const { return m_y; }
   void SetY(int p_y) { m_y = p_y; }
 
-  NodeEntry *GetNextMember(void) const { return m_nextMember; }
-  void SetNextMember(NodeEntry *p_member) { m_nextMember = p_member; }
+  gbtEfgLayoutNode *GetNextMember(void) const { return m_nextMember; }
+  void SetNextMember(gbtEfgLayoutNode *p_member) { m_nextMember = p_member; }
 
   bool InSupport(void) const { return m_inSupport; }
   void SetInSupport(bool p_inSupport) { m_inSupport = p_inSupport; }
@@ -168,19 +168,19 @@ public:
 
 class TreeWindow;
 
-class efgTreeLayout {
+class gbtEfgLayout {
 private:
   gbtGameDocument *m_doc;
-  gbtList<NodeEntry *> m_nodeList;
+  gbtList<gbtEfgLayoutNode *> m_nodeList;
   int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;
 
   const int c_leftMargin, c_topMargin;
 
-  NodeEntry *GetEntry(const gbtEfgNode &) const;
+  gbtEfgLayoutNode *GetEntry(const gbtEfgNode &) const;
 
-  NodeEntry *NextInfoset(NodeEntry *);
-  void CheckInfosetEntry(NodeEntry *);
+  gbtEfgLayoutNode *NextInfoset(gbtEfgLayoutNode *);
+  void CheckInfosetEntry(gbtEfgLayoutNode *);
 
   void BuildNodeList(const gbtEfgNode &, const gbtEfgSupport &, int);
 
@@ -190,15 +190,15 @@ private:
   void UpdateTableInfosets(void);
   void UpdateTableParents(void);
 
-  wxString CreateNodeLabel(const NodeEntry *, int) const;
-  wxString CreateOutcomeLabel(const NodeEntry *) const;
-  wxString CreateBranchLabel(const NodeEntry *, int) const;
+  wxString CreateNodeLabel(const gbtEfgLayoutNode *, int) const;
+  wxString CreateOutcomeLabel(const gbtEfgLayoutNode *) const;
+  wxString CreateBranchLabel(const gbtEfgLayoutNode *, int) const;
 
   void RenderSubtree(wxDC &dc) const;
 
 public:
-  efgTreeLayout(gbtGameDocument *p_doc);
-  virtual ~efgTreeLayout() { }
+  gbtEfgLayout(gbtGameDocument *p_doc);
+  virtual ~gbtEfgLayout() { }
 
   gbtEfgNode PriorSameLevel(const gbtEfgNode &) const;
   gbtEfgNode NextSameLevel(const gbtEfgNode &) const;
@@ -210,10 +210,10 @@ public:
   void SetCutNode(const gbtEfgNode &);
 
   // The following member functions are for temporary compatibility only
-  NodeEntry *GetNodeEntry(const gbtEfgNode &p_node) const
+  gbtEfgLayoutNode *GetNodeEntry(const gbtEfgNode &p_node) const
     { return GetEntry(p_node); }
-  NodeEntry *GetValidParent(const gbtEfgNode &);
-  NodeEntry *GetValidChild(const gbtEfgNode &);
+  gbtEfgLayoutNode *GetValidParent(const gbtEfgNode &);
+  gbtEfgLayoutNode *GetValidChild(const gbtEfgNode &);
 
   int MaxX(void) const { return m_maxX; }
   int MaxY(void) const { return m_maxY; }

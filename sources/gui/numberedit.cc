@@ -33,17 +33,17 @@
 #include "wx/grid.h"
 #include "numberedit.h"
 
-NumberEditor::NumberEditor(void)
+gbtNumberEditor::gbtNumberEditor(void)
 { }
 
-void NumberEditor::Create(wxWindow* parent,
+void gbtNumberEditor::Create(wxWindow* parent,
 			  wxWindowID id,
 			  wxEvtHandler* evtHandler)
 {
   wxGridCellTextEditor::Create(parent, id, evtHandler);
 }
 
-void NumberEditor::BeginEdit(int row, int col, wxGrid* grid)
+void gbtNumberEditor::BeginEdit(int row, int col, wxGrid* grid)
 {
   // first get the value
   wxGridTableBase *table = grid->GetTable();
@@ -53,18 +53,18 @@ void NumberEditor::BeginEdit(int row, int col, wxGrid* grid)
   ((wxTextCtrl *) GetControl())->SetSelection(0, 1000);
 }
 
-bool NumberEditor::EndEdit(int row, int col, wxGrid* grid)
+bool gbtNumberEditor::EndEdit(int row, int col, wxGrid* grid)
 {
   grid->GetTable()->SetValue(row, col, Text()->GetValue());
   return true;
 }
 
-void NumberEditor::Reset()
+void gbtNumberEditor::Reset()
 {
   DoReset(GetString());
 }
 
-void NumberEditor::StartingKey(wxKeyEvent &event)
+void gbtNumberEditor::StartingKey(wxKeyEvent &event)
 {
   int keycode = (int)event.KeyCode();
   if (isdigit(keycode) ||
@@ -76,15 +76,15 @@ void NumberEditor::StartingKey(wxKeyEvent &event)
   event.Skip();
 }
 
-void NumberEditor::SetParameters(const wxString &/*params*/)
+void gbtNumberEditor::SetParameters(const wxString &/*params*/)
 { }
 
-wxString NumberEditor::GetString(void) const
+wxString gbtNumberEditor::GetString(void) const
 {
   return m_valueOld;
 }
 
-bool NumberEditor::IsAcceptedKey(wxKeyEvent& event)
+bool gbtNumberEditor::IsAcceptedKey(wxKeyEvent& event)
 {
   if (wxGridCellEditor::IsAcceptedKey(event)) {
     int keycode = event.GetKeyCode();
@@ -118,4 +118,3 @@ bool NumberEditor::IsAcceptedKey(wxKeyEvent& event)
 
   return false;
 }
-

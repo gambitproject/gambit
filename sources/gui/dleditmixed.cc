@@ -85,7 +85,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(firstPlayer.GetStrategy(st)))),
 			     st - 1, 0);
-    m_probGrid->SetCellEditor(st - 1, 0, new NumberEditor);
+    m_probGrid->SetCellEditor(st - 1, 0, new gbtNumberEditor);
   }
   m_probGrid->SetMargins(0, 0);
   m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
@@ -144,7 +144,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(m_profile(player.GetStrategy(st)))),
 			     st - 1, 0);
-    m_probGrid->SetCellEditor(st - 1, 0, new NumberEditor);
+    m_probGrid->SetCellEditor(st - 1, 0, new gbtNumberEditor);
   }
 
   m_selection = p_event.GetSelection() + 1;

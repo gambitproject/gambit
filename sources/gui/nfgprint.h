@@ -37,13 +37,13 @@ wxString gbtBuildHtml(const gbtNfgGame &, int, int);
 //
 // For normal forms, we will print grids by creating corresponding HTML.
 // 
-class NfgPrintout : public wxHtmlPrintout {
+class gbtNfgPrintout : public wxHtmlPrintout {
 private:
   gbtNfgTable *m_table;
 
 public:
-  NfgPrintout(const gbtNfgGame &, int, int, const wxString &);
-  virtual ~NfgPrintout() { }
+  gbtNfgPrintout(const gbtNfgGame &, int, int, const wxString &);
+  virtual ~gbtNfgPrintout() { }
 };
 
 #endif  // NFGPRINT_H

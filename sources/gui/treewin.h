@@ -31,13 +31,13 @@
 #include "efglayout.h"
 #include "gamedoc.h"
 
-class EfgShow;
+class gbtEfgFrame;
 
 class TreeWindow : public wxScrolledWindow, public gbtGameView {
-friend class EfgPrintout;
-friend class EfgShow;
+friend class gbtEfgPrintout;
+friend class gbtEfgFrame;
 private:
-  efgTreeLayout m_layout;
+  gbtEfgLayout m_layout;
   double m_zoom;
   wxMenu *m_nodeMenu, *m_gameMenu;
 
@@ -134,4 +134,3 @@ public:
 
 
 #endif   // TREEWIN_H
-

@@ -66,59 +66,59 @@
 #include "nash/nfgch.h"
 
 //=====================================================================
-//                 Implementation of class NfgShow
+//                 Implementation of class gbtNfgFrame
 //=====================================================================
 
-BEGIN_EVENT_TABLE(NfgShow, wxFrame)
-  EVT_MENU(wxID_NEW, NfgShow::OnFileNew)
-  EVT_MENU(wxID_OPEN, NfgShow::OnFileOpen)
-  EVT_MENU(wxID_CLOSE, NfgShow::Close)
-  EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
-  EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
-  EVT_MENU(GBT_MENU_FILE_EXPORT_HTML, NfgShow::OnFileExportHTML)
-  EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
-  EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
-  EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
-  EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
-  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
-  EVT_MENU(GBT_MENU_EDIT_STRATS, NfgShow::OnEditStrategies)
-  EVT_MENU(GBT_MENU_EDIT_CONTINGENCY, NfgShow::OnEditContingency)
-  EVT_MENU(GBT_MENU_EDIT_GAME, NfgShow::OnEditGame)
-  EVT_MENU(GBT_MENU_VIEW_PROFILES, NfgShow::OnViewProfiles)
-  EVT_MENU(GBT_MENU_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
-  EVT_MENU(GBT_MENU_VIEW_SUPPORTS, NfgShow::OnViewSupports)
-  EVT_MENU(GBT_MENU_VIEW_DOMINANCE, NfgShow::OnViewDominance)
-  EVT_MENU(GBT_MENU_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
-  EVT_MENU(GBT_MENU_VIEW_VALUES, NfgShow::OnViewValues)
-  EVT_MENU(GBT_MENU_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
-  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_COLORS, NfgShow::OnFormatDisplayColors)
+BEGIN_EVENT_TABLE(gbtNfgFrame, wxFrame)
+  EVT_MENU(wxID_NEW, gbtNfgFrame::OnFileNew)
+  EVT_MENU(wxID_OPEN, gbtNfgFrame::OnFileOpen)
+  EVT_MENU(wxID_CLOSE, gbtNfgFrame::Close)
+  EVT_MENU(wxID_SAVE, gbtNfgFrame::OnFileSave)
+  EVT_MENU(wxID_SAVEAS, gbtNfgFrame::OnFileSave)
+  EVT_MENU(GBT_MENU_FILE_EXPORT_HTML, gbtNfgFrame::OnFileExportHTML)
+  EVT_MENU(wxID_PRINT_SETUP, gbtNfgFrame::OnFilePageSetup)
+  EVT_MENU(wxID_PREVIEW, gbtNfgFrame::OnFilePrintPreview)
+  EVT_MENU(wxID_PRINT, gbtNfgFrame::OnFilePrint)
+  EVT_MENU(wxID_EXIT, gbtNfgFrame::OnFileExit)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtNfgFrame::OnFileMRUFile)
+  EVT_MENU(GBT_MENU_EDIT_STRATS, gbtNfgFrame::OnEditStrategies)
+  EVT_MENU(GBT_MENU_EDIT_CONTINGENCY, gbtNfgFrame::OnEditContingency)
+  EVT_MENU(GBT_MENU_EDIT_GAME, gbtNfgFrame::OnEditGame)
+  EVT_MENU(GBT_MENU_VIEW_PROFILES, gbtNfgFrame::OnViewProfiles)
+  EVT_MENU(GBT_MENU_VIEW_OUTCOMES, gbtNfgFrame::OnViewOutcomes)
+  EVT_MENU(GBT_MENU_VIEW_SUPPORTS, gbtNfgFrame::OnViewSupports)
+  EVT_MENU(GBT_MENU_VIEW_DOMINANCE, gbtNfgFrame::OnViewDominance)
+  EVT_MENU(GBT_MENU_VIEW_PROBABILITIES, gbtNfgFrame::OnViewProbabilities)
+  EVT_MENU(GBT_MENU_VIEW_VALUES, gbtNfgFrame::OnViewValues)
+  EVT_MENU(GBT_MENU_VIEW_OUTCOME_LABELS, gbtNfgFrame::OnViewOutcomeLabels)
+  EVT_MENU(GBT_MENU_FORMAT_DISPLAY_COLORS, gbtNfgFrame::OnFormatDisplayColors)
   EVT_MENU(GBT_MENU_FORMAT_DISPLAY_DECIMALS, 
-	   NfgShow::OnFormatDisplayDecimals)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_DATA, NfgShow::OnFormatFontData)
-  EVT_MENU(GBT_MENU_FORMAT_FONTS_LABELS, NfgShow::OnFormatFontLabels)
-  EVT_MENU(GBT_MENU_FORMAT_AUTOSIZE, NfgShow::OnFormatAutosize)
-  EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
-  EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
-  EVT_MENU(GBT_MENU_TOOLS_QRE, NfgShow::OnToolsQre)
-  // EVT_MENU(GBT_MENU_TOOLS_CH, NfgShow::OnToolsCH)
-  EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
-  EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, NfgShow::OnSupportDuplicate)
-  EVT_MENU(GBT_MENU_SUPPORTS_DELETE, NfgShow::OnSupportDelete)
-  EVT_MENU(GBT_MENU_PROFILES_NEW, NfgShow::OnProfilesNew)
-  EVT_MENU(GBT_MENU_PROFILES_DUPLICATE, NfgShow::OnProfilesDuplicate)
-  EVT_MENU(GBT_MENU_PROFILES_DELETE, NfgShow::OnProfilesDelete)
-  EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
-  EVT_MENU(GBT_MENU_PROFILES_REPORT, NfgShow::OnProfilesReport)
-  EVT_SIZE(NfgShow::OnSize)
-  EVT_CLOSE(NfgShow::OnCloseWindow)
-  EVT_SET_FOCUS(NfgShow::OnSetFocus)
+	   gbtNfgFrame::OnFormatDisplayDecimals)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_DATA, gbtNfgFrame::OnFormatFontData)
+  EVT_MENU(GBT_MENU_FORMAT_FONTS_LABELS, gbtNfgFrame::OnFormatFontLabels)
+  EVT_MENU(GBT_MENU_FORMAT_AUTOSIZE, gbtNfgFrame::OnFormatAutosize)
+  EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, gbtNfgFrame::OnToolsDominance)
+  EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, gbtNfgFrame::OnToolsEquilibrium)
+  EVT_MENU(GBT_MENU_TOOLS_QRE, gbtNfgFrame::OnToolsQre)
+  // EVT_MENU(GBT_MENU_TOOLS_CH, gbtNfgFrame::OnToolsCH)
+  EVT_MENU(wxID_ABOUT, gbtNfgFrame::OnHelpAbout)
+  EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, gbtNfgFrame::OnSupportDuplicate)
+  EVT_MENU(GBT_MENU_SUPPORTS_DELETE, gbtNfgFrame::OnSupportDelete)
+  EVT_MENU(GBT_MENU_PROFILES_NEW, gbtNfgFrame::OnProfilesNew)
+  EVT_MENU(GBT_MENU_PROFILES_DUPLICATE, gbtNfgFrame::OnProfilesDuplicate)
+  EVT_MENU(GBT_MENU_PROFILES_DELETE, gbtNfgFrame::OnProfilesDelete)
+  EVT_MENU(GBT_MENU_PROFILES_PROPERTIES, gbtNfgFrame::OnProfilesProperties)
+  EVT_MENU(GBT_MENU_PROFILES_REPORT, gbtNfgFrame::OnProfilesReport)
+  EVT_SIZE(gbtNfgFrame::OnSize)
+  EVT_CLOSE(gbtNfgFrame::OnCloseWindow)
+  EVT_SET_FOCUS(gbtNfgFrame::OnSetFocus)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
-//               NfgShow: Constructor and destructor
+//               gbtNfgFrame: Constructor and destructor
 //----------------------------------------------------------------------
 
-NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtNfgFrame::gbtNfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(800, 500)),
     gbtGameView(p_doc),
     m_table(0)
@@ -160,12 +160,12 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_doc->UpdateViews();
 }
 
-NfgShow::~NfgShow()
+gbtNfgFrame::~gbtNfgFrame()
 {
   wxGetApp().GetFileHistory().RemoveMenu(GetMenuBar()->GetMenu(0));
 }
 
-void NfgShow::OnUpdate(gbtGameView *)
+void gbtNfgFrame::OnUpdate(gbtGameView *)
 {
   if (!m_doc->ShowNfg()) {
     Show(false);
@@ -197,10 +197,10 @@ void NfgShow::OnUpdate(gbtGameView *)
 }
 
 //----------------------------------------------------------------------
-//           NfgShow: Creating and updating menus and toolbar
+//           gbtNfgFrame: Creating and updating menus and toolbar
 //----------------------------------------------------------------------
 
-void NfgShow::MakeMenus(void)
+void gbtNfgFrame::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
   if (!m_doc->HasEfg()) {
@@ -333,7 +333,7 @@ void NfgShow::MakeMenus(void)
 #include "bitmaps/print.xpm"
 #include "bitmaps/help.xpm"
 
-void NfgShow::MakeToolbar(void)
+void gbtNfgFrame::MakeToolbar(void)
 {
   wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE |
 				     wxTB_HORIZONTAL);
@@ -362,20 +362,20 @@ void NfgShow::MakeToolbar(void)
 }
 
 //----------------------------------------------------------------------
-//               NfgShow: Menu handlers - File menu
+//               gbtNfgFrame: Menu handlers - File menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnFileNew(wxCommandEvent &)
+void gbtNfgFrame::OnFileNew(wxCommandEvent &)
 {
   wxGetApp().OnFileNew(this);
 }
 
-void NfgShow::OnFileOpen(wxCommandEvent &)
+void gbtNfgFrame::OnFileOpen(wxCommandEvent &)
 {
   wxGetApp().OnFileOpen(this);
 }
 
-void NfgShow::OnFileSave(wxCommandEvent &p_event)
+void gbtNfgFrame::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == wxT("")) {
     wxFileDialog dialog(this, _("Choose file"),
@@ -414,7 +414,7 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 }
 
-void NfgShow::OnFileExportHTML(wxCommandEvent &)
+void gbtNfgFrame::OnFileExportHTML(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"),
 		      wxGetApp().CurrentDir(), wxT(""),
@@ -447,7 +447,7 @@ void NfgShow::OnFileExportHTML(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFilePageSetup(wxCommandEvent &)
+void gbtNfgFrame::OnFilePageSetup(wxCommandEvent &)
 {
   wxPageSetupDialog dialog(this, &m_pageSetupData);
   if (dialog.ShowModal() == wxID_OK) {
@@ -456,15 +456,15 @@ void NfgShow::OnFilePageSetup(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFilePrintPreview(wxCommandEvent &)
+void gbtNfgFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
-    new wxPrintPreview(new NfgPrintout(m_doc->GetNfg(),
+    new wxPrintPreview(new gbtNfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(), 
 				       m_doc->GetColPlayer(),
 				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetLabel())),
-		       new NfgPrintout(m_doc->GetNfg(),
+		       new gbtNfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(),
 				       m_doc->GetColPlayer(),
 				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetLabel())),
@@ -483,11 +483,11 @@ void NfgShow::OnFilePrintPreview(wxCommandEvent &)
   frame->Show(true);
 }
 
-void NfgShow::OnFilePrint(wxCommandEvent &)
+void gbtNfgFrame::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  NfgPrintout printout(m_doc->GetNfg(),
+  gbtNfgPrintout printout(m_doc->GetNfg(),
 		       m_doc->GetRowPlayer(), m_doc->GetColPlayer(),
 		       wxString::Format(wxT("%s"),
 					(char *) m_doc->GetNfg().GetLabel()));
@@ -504,23 +504,23 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFileExit(wxCommandEvent &)
+void gbtNfgFrame::OnFileExit(wxCommandEvent &)
 {
   while (wxGetApp().GetTopWindow()) {
     delete wxGetApp().GetTopWindow();
   }
 }
 
-void NfgShow::OnFileMRUFile(wxCommandEvent &p_event)
+void gbtNfgFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
   wxGetApp().OnFileMRUFile(p_event);
 }
 
 //----------------------------------------------------------------------
-//                NfgShow: Menu handlers - Edit menu
+//                gbtNfgFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnEditStrategies(wxCommandEvent &)
+void gbtNfgFrame::OnEditStrategies(wxCommandEvent &)
 {
   dialogStrategies dialog(this, m_doc->GetNfg());
 
@@ -535,7 +535,7 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnEditContingency(wxCommandEvent &)
+void gbtNfgFrame::OnEditContingency(wxCommandEvent &)
 {
   dialogEditContingency dialog(this, m_doc->GetNfg(), m_doc->GetContingency());
 
@@ -555,7 +555,7 @@ void NfgShow::OnEditContingency(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnEditGame(wxCommandEvent &)
+void gbtNfgFrame::OnEditGame(wxCommandEvent &)
 {
   gbtDialogEditGame dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
@@ -565,51 +565,51 @@ void NfgShow::OnEditGame(wxCommandEvent &)
 
 
 //----------------------------------------------------------------------
-//                NfgShow: Menu handlers - View menu
+//                gbtNfgFrame: Menu handlers - View menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnViewProfiles(wxCommandEvent &)
+void gbtNfgFrame::OnViewProfiles(wxCommandEvent &)
 {
   m_doc->SetShowProfiles(!m_doc->ShowProfiles());
 }
 
-void NfgShow::OnViewOutcomes(wxCommandEvent &)
+void gbtNfgFrame::OnViewOutcomes(wxCommandEvent &)
 {
   m_doc->SetShowOutcomes(!m_doc->ShowOutcomes());
 }
 
-void NfgShow::OnViewSupports(wxCommandEvent &)
+void gbtNfgFrame::OnViewSupports(wxCommandEvent &)
 {
   m_doc->SetShowNfgSupports(!m_doc->ShowNfgSupports());
 }
 
 
-void NfgShow::OnViewDominance(wxCommandEvent &)
+void gbtNfgFrame::OnViewDominance(wxCommandEvent &)
 {
   m_table->ToggleDominance();
 }
 
-void NfgShow::OnViewProbabilities(wxCommandEvent &)
+void gbtNfgFrame::OnViewProbabilities(wxCommandEvent &)
 {
   m_table->ToggleProbs();
 }
 
-void NfgShow::OnViewValues(wxCommandEvent &)
+void gbtNfgFrame::OnViewValues(wxCommandEvent &)
 {
   m_table->ToggleValues();
 }
 
-void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
+void gbtNfgFrame::OnViewOutcomeLabels(wxCommandEvent &)
 {
   m_doc->GetPreferences().SetOutcomeLabel(1 - m_doc->GetPreferences().OutcomeLabel());
   m_doc->UpdateViews();
 }
 
 //----------------------------------------------------------------------
-//               NfgShow: Menu handlers - Format menu
+//               gbtNfgFrame: Menu handlers - Format menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnFormatDisplayColors(wxCommandEvent &)
+void gbtNfgFrame::OnFormatDisplayColors(wxCommandEvent &)
 {
   dialogEfgColor dialog(this, m_doc->GetPreferences());
 
@@ -624,7 +624,7 @@ void NfgShow::OnFormatDisplayColors(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
+void gbtNfgFrame::OnFormatDisplayDecimals(wxCommandEvent &)
 {
   dialogSpinCtrl dialog(this, _("Decimal places"), 0, 25,
 			m_doc->GetPreferences().NumDecimals());
@@ -636,7 +636,7 @@ void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFormatFontData(wxCommandEvent &)
+void gbtNfgFrame::OnFormatFontData(wxCommandEvent &)
 {
   wxFontData data;
   data.SetInitialFont(m_doc->GetPreferences().GetDataFont());
@@ -649,7 +649,7 @@ void NfgShow::OnFormatFontData(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFormatFontLabels(wxCommandEvent &)
+void gbtNfgFrame::OnFormatFontLabels(wxCommandEvent &)
 {
   wxFontData data;
   data.SetInitialFont(m_doc->GetPreferences().GetLabelFont());
@@ -662,7 +662,7 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnFormatAutosize(wxCommandEvent &)
+void gbtNfgFrame::OnFormatAutosize(wxCommandEvent &)
 {
   m_table->AutoSizeRows();
   m_table->AutoSizeColumns();
@@ -680,10 +680,10 @@ void NfgShow::OnFormatAutosize(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                 NfgShow: Menu handlers - Tools
+//                 gbtNfgFrame: Menu handlers - Tools
 //----------------------------------------------------------------------
 
-void NfgShow::OnToolsDominance(wxCommandEvent &)
+void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
 {
   gbtArray<gbtText> playerNames(m_doc->GetNfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
@@ -739,7 +739,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
+void gbtNfgFrame::OnToolsEquilibrium(wxCommandEvent &)
 { 
   dialogNfgNash dialog(this, m_doc->GetNfgSupport());
 
@@ -772,7 +772,7 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnToolsQre(wxCommandEvent &)
+void gbtNfgFrame::OnToolsQre(wxCommandEvent &)
 {
   dialogNfgQre dialog(this, m_doc->GetNfgSupport());
 
@@ -825,7 +825,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 #ifdef UNUSED
 // Commented out for now, until this gets implemented
 
-void NfgShow::OnToolsCH(wxCommandEvent &)
+void gbtNfgFrame::OnToolsCH(wxCommandEvent &)
 {
   dialogNfgCH dialog(this, m_doc->GetNfgSupport());
 
@@ -864,19 +864,19 @@ void NfgShow::OnToolsCH(wxCommandEvent &)
 
 
 //----------------------------------------------------------------------
-//                NfgShow: Menu handlers - Help menu
+//                gbtNfgFrame: Menu handlers - Help menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnHelpAbout(wxCommandEvent &)
+void gbtNfgFrame::OnHelpAbout(wxCommandEvent &)
 {
   wxGetApp().OnHelpAbout(this);
 }
 
 //----------------------------------------------------------------------
-//               NfgShow: Menu handlers - Support menu
+//               gbtNfgFrame: Menu handlers - Support menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnSupportDuplicate(wxCommandEvent &)
+void gbtNfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
   gbtNfgSupport *newSupport = new gbtNfgSupport(m_doc->GetNfgSupport());
   newSupport->SetLabel(m_doc->UniqueNfgSupportName());
@@ -884,16 +884,16 @@ void NfgShow::OnSupportDuplicate(wxCommandEvent &)
   m_doc->SetNfgSupport(m_doc->AllNfgSupports().Length());
 }
 
-void NfgShow::OnSupportDelete(wxCommandEvent &)
+void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 {
   m_doc->DeleteNfgSupport();
 }
 
 //----------------------------------------------------------------------
-//              NfgShow: Menu handlers - Profiles menu
+//              gbtNfgFrame: Menu handlers - Profiles menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnProfilesNew(wxCommandEvent &)
+void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 {
   MixedSolution profile = gbtMixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetNfg()));
 
@@ -904,7 +904,7 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
+void gbtNfgFrame::OnProfilesDuplicate(wxCommandEvent &)
 {
   MixedSolution profile(m_doc->GetMixedProfile());
   
@@ -915,12 +915,12 @@ void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnProfilesDelete(wxCommandEvent &)
+void gbtNfgFrame::OnProfilesDelete(wxCommandEvent &)
 {
   m_doc->RemoveProfile(m_doc->AllMixedProfiles().Find(m_doc->GetMixedProfile()));
 }
 
-void NfgShow::OnProfilesProperties(wxCommandEvent &)
+void gbtNfgFrame::OnProfilesProperties(wxCommandEvent &)
 {
   if (m_doc->IsProfileSelected()) {
     dialogEditMixed dialog(this, m_doc->GetMixedProfile());
@@ -931,7 +931,7 @@ void NfgShow::OnProfilesProperties(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnProfilesReport(wxCommandEvent &)
+void gbtNfgFrame::OnProfilesReport(wxCommandEvent &)
 {
   // FIXME: Report should be generated by document class
   // dialogReport dialog(this, m_profileGrid->GetReport());
@@ -939,10 +939,10 @@ void NfgShow::OnProfilesReport(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                  NfgShow: Non-menu event handlers
+//                  gbtNfgFrame: Non-menu event handlers
 //----------------------------------------------------------------------
 
-void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
+void gbtNfgFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (m_doc->HasEfg()) {
     // Simply hide the window, don't actually destroy it
@@ -963,12 +963,12 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
   Destroy();
 }
 
-void NfgShow::OnSetFocus(wxFocusEvent &)
+void gbtNfgFrame::OnSetFocus(wxFocusEvent &)
 {
   m_table->SetFocus();
 }
 
-void NfgShow::OnSize(wxSizeEvent &)
+void gbtNfgFrame::OnSize(wxSizeEvent &)
 {
   wxSize size = GetClientSize();
 

@@ -31,7 +31,7 @@
 #include "efgshow.h"
 #include "gamedoc.h"
 
-class EfgNavigateWindow : public wxGrid {
+class gbtEfgNavigateWindow : public wxGrid {
 private:
   gbtGameDocument *m_doc;
 
@@ -39,15 +39,15 @@ private:
   bool IsNfgView(void) const { return false; }
 
 public:
-  EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgNavigateWindow() { }
+  gbtEfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtEfgNavigateWindow() { }
 
   void OnUpdate(void);
 };
 
 class gbtEfgNavigateFrame : public wxFrame, public gbtGameView {
 private:
-  EfgNavigateWindow *m_grid;
+  gbtEfgNavigateWindow *m_grid;
 
   // Event handlers
   void OnClose(wxCloseEvent &);

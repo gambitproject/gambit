@@ -32,11 +32,11 @@
 #include "gamedoc.h"
 #include "base/gmap.h"
 
-class EfgSupportWindow;
+class gbtEfgSupportWindow;
 
 class gbtEfgSupportFrame : public wxFrame, public gbtGameView {
 private:
-  EfgSupportWindow *m_panel;
+  gbtEfgSupportWindow *m_panel;
 
   // Event handlers
   void OnClose(wxCloseEvent &);

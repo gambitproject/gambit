@@ -41,7 +41,7 @@
 
 class gbtNfgTable;
 
-class NfgShow : public wxFrame, public gbtGameView {
+class gbtNfgFrame : public wxFrame, public gbtGameView {
 private:
   wxGrid *m_nav;
   gbtNfgTable *m_table;
@@ -108,14 +108,11 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  NfgShow(gbtGameDocument *, wxWindow *p_window);
-  virtual ~NfgShow();
+  gbtNfgFrame(gbtGameDocument *, wxWindow *p_window);
+  virtual ~gbtNfgFrame();
 
   DECLARE_EVENT_TABLE()
 };
 
 
 #endif  // NFGSHOW_H
-
-
-

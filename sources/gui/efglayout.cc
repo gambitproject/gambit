@@ -68,10 +68,10 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 }
 
 //-----------------------------------------------------------------------
-//                   class NodeEntry: Member functions
+//                   class gbtEfgLayoutNode: Member functions
 //-----------------------------------------------------------------------
 
-NodeEntry::NodeEntry(gbtEfgNode p_node)
+gbtEfgLayoutNode::gbtEfgLayoutNode(gbtEfgNode p_node)
   : m_node(p_node), m_parent(0),
     m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
     m_selected(false), m_cursor(false), m_cut(false),
@@ -83,7 +83,7 @@ NodeEntry::NodeEntry(gbtEfgNode p_node)
     m_sublevel(0), m_actionProb(0)
 { }
 
-int NodeEntry::GetChildNumber(void) const
+int gbtEfgLayoutNode::GetChildNumber(void) const
 {
   if (!m_node.GetParent().IsNull()) {
     return m_node.GetPriorAction().GetId();
@@ -93,7 +93,7 @@ int NodeEntry::GetChildNumber(void) const
   }
 }
 
-void NodeEntry::SetCursor(bool p_cursor)
+void gbtEfgLayoutNode::SetCursor(bool p_cursor)
 {
   m_cursor = p_cursor;
   if (m_cursor) {
@@ -105,7 +105,7 @@ void NodeEntry::SetCursor(bool p_cursor)
 // Draws the node token itself, as well as the incoming branch
 // (if not the root node)
 //
-void NodeEntry::Draw(wxDC &p_dc) const
+void gbtEfgLayoutNode::Draw(wxDC &p_dc) const
 {
   if (!m_node.GetParent().IsNull() && m_inSupport) {
     DrawIncomingBranch(p_dc);
@@ -172,7 +172,7 @@ void NodeEntry::Draw(wxDC &p_dc) const
   }
 }
 
-void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
+void gbtEfgLayoutNode::DrawIncomingBranch(wxDC &p_dc) const
 {
   int xStart = m_parent->m_x + m_parent->m_size;
   int xEnd = m_x;
@@ -284,7 +284,7 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
   }
 }
 
-bool NodeEntry::NodeHitTest(int p_x, int p_y) const
+bool gbtEfgLayoutNode::NodeHitTest(int p_x, int p_y) const
 {
   if (p_x < m_x || p_x >= m_x + m_size) {
     return false;
@@ -300,15 +300,15 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 }
 
 //-----------------------------------------------------------------------
-//                class efgTreeLayout: Member functions
+//                class gbtEfgLayout: Member functions
 //-----------------------------------------------------------------------
 
-efgTreeLayout::efgTreeLayout(gbtGameDocument *p_doc)
+gbtEfgLayout::gbtEfgLayout(gbtGameDocument *p_doc)
   : m_doc(p_doc), 
     m_infosetSpacing(40), c_leftMargin(20), c_topMargin(40)
 { }
 
-gbtEfgNode efgTreeLayout::NodeHitTest(int p_x, int p_y) const
+gbtEfgNode gbtEfgLayout::NodeHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
@@ -318,11 +318,11 @@ gbtEfgNode efgTreeLayout::NodeHitTest(int p_x, int p_y) const
   return 0;
 }
 
-gbtEfgNode efgTreeLayout::BranchHitTest(int p_x, int p_y) const
+gbtEfgNode gbtEfgLayout::BranchHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
-    NodeEntry *parent_entry = GetNodeEntry(entry->GetNode().GetParent());
+    gbtEfgLayoutNode *entry = m_nodeList[i];
+    gbtEfgLayoutNode *parent_entry = GetNodeEntry(entry->GetNode().GetParent());
 
     if (parent_entry) {
       if (p_x > (parent_entry->X() + m_doc->GetPreferences().NodeSize() + 
@@ -347,10 +347,10 @@ gbtEfgNode efgTreeLayout::BranchHitTest(int p_x, int p_y) const
 }
 
 
-gbtEfgNode efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
+gbtEfgNode gbtEfgLayout::InfosetHitTest(int p_x, int p_y) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
+    gbtEfgLayoutNode *entry = m_nodeList[i];
     if (entry->GetNextMember() && !entry->GetNode().GetInfoset().IsNull()) {
       if (p_x > entry->X() + entry->GetSublevel() * m_infosetSpacing - 2 &&
 	  p_x < entry->X() + entry->GetSublevel() * m_infosetSpacing + 2) {
@@ -368,7 +368,7 @@ gbtEfgNode efgTreeLayout::InfosetHitTest(int p_x, int p_y) const
   return 0;
 }
 
-wxString efgTreeLayout::CreateNodeLabel(const NodeEntry *p_entry,
+wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
 					int p_which) const
 {
   gbtEfgNode n = p_entry->GetNode();
@@ -415,7 +415,7 @@ wxString efgTreeLayout::CreateNodeLabel(const NodeEntry *p_entry,
   }
 }    
 
-wxString efgTreeLayout::CreateOutcomeLabel(const NodeEntry *p_entry) const
+wxString gbtEfgLayout::CreateOutcomeLabel(const gbtEfgLayoutNode *p_entry) const
 {    
   gbtEfgNode node = p_entry->GetNode();
 
@@ -430,7 +430,7 @@ wxString efgTreeLayout::CreateOutcomeLabel(const NodeEntry *p_entry) const
   }
 }
 
-wxString efgTreeLayout::CreateBranchLabel(const NodeEntry *p_entry,
+wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
 					  int p_which) const
 {
   gbtEfgNode parent = p_entry->GetParent()->GetNode();
@@ -454,9 +454,9 @@ wxString efgTreeLayout::CreateBranchLabel(const NodeEntry *p_entry,
   }
 }
 
-NodeEntry *efgTreeLayout::GetValidParent(const gbtEfgNode &e)
+gbtEfgLayoutNode *gbtEfgLayout::GetValidParent(const gbtEfgNode &e)
 {
-  NodeEntry *n = GetNodeEntry(e.GetParent());
+  gbtEfgLayoutNode *n = GetNodeEntry(e.GetParent());
   if (n) {
     return n;
   }
@@ -465,10 +465,10 @@ NodeEntry *efgTreeLayout::GetValidParent(const gbtEfgNode &e)
   }
 }
 
-NodeEntry *efgTreeLayout::GetValidChild(const gbtEfgNode &e)
+gbtEfgLayoutNode *gbtEfgLayout::GetValidChild(const gbtEfgNode &e)
 {
   for (int i = 1; i <= e.NumChildren(); i++)  {
-    NodeEntry *n = GetNodeEntry(e.GetChild(i));
+    gbtEfgLayoutNode *n = GetNodeEntry(e.GetChild(i));
     if (n) {
       return n;
     }
@@ -480,7 +480,7 @@ NodeEntry *efgTreeLayout::GetValidChild(const gbtEfgNode &e)
   return 0;
 }
 
-NodeEntry *efgTreeLayout::GetEntry(const gbtEfgNode &p_node) const
+gbtEfgLayoutNode *gbtEfgLayout::GetEntry(const gbtEfgNode &p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     if (m_nodeList[i]->GetNode() == p_node) {
@@ -490,9 +490,9 @@ NodeEntry *efgTreeLayout::GetEntry(const gbtEfgNode &p_node) const
   return 0;
 }
 
-gbtEfgNode efgTreeLayout::PriorSameLevel(const gbtEfgNode &p_node) const
+gbtEfgNode gbtEfgLayout::PriorSameLevel(const gbtEfgNode &p_node) const
 {
-  NodeEntry *entry = GetEntry(p_node);
+  gbtEfgLayoutNode *entry = GetEntry(p_node);
   if (entry) {
     for (int i = m_nodeList.Find(entry) - 1; i >= 1; i--) {
       if (m_nodeList[i]->GetLevel() == entry->GetLevel())
@@ -502,9 +502,9 @@ gbtEfgNode efgTreeLayout::PriorSameLevel(const gbtEfgNode &p_node) const
   return 0;
 }
 
-gbtEfgNode efgTreeLayout::NextSameLevel(const gbtEfgNode &p_node) const
+gbtEfgNode gbtEfgLayout::NextSameLevel(const gbtEfgNode &p_node) const
 {
-  NodeEntry *entry = GetEntry(p_node);
+  gbtEfgLayoutNode *entry = GetEntry(p_node);
   if (entry) {
     for (int i = m_nodeList.Find(entry) + 1; i <= m_nodeList.Length(); i++) {
       if (m_nodeList[i]->GetLevel() == entry->GetLevel()) { 
@@ -515,14 +515,14 @@ gbtEfgNode efgTreeLayout::NextSameLevel(const gbtEfgNode &p_node) const
   return 0;
 }
 
-int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node, 
+int gbtEfgLayout::LayoutSubtree(const gbtEfgNode &p_node, 
 				 const gbtEfgSupport &p_support,
 				 int &p_maxy, int &p_miny, int &p_ycoord)
 {
   int y1 = -1, yn = 0;
   const gbtPreferences &prefs = m_doc->GetPreferences();
     
-  NodeEntry *entry = m_nodeList[p_node.GetId()];
+  gbtEfgLayoutNode *entry = m_nodeList[p_node.GetId()];
   entry->SetNextMember(0);
   if (p_node.NumChildren() > 0) {
     for (int i = 1; i <= p_node.NumChildren(); i++) {
@@ -593,12 +593,12 @@ int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node,
 // Checks if there are any nodes in the same infoset as e that are either
 // on the same level (if SHOWISET_SAME) or on any level (if SHOWISET_ALL)
 //
-NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
+gbtEfgLayoutNode *gbtEfgLayout::NextInfoset(gbtEfgLayoutNode *e)
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
   
   for (int pos = m_nodeList.Find(e) + 1; pos <= m_nodeList.Length(); pos++) {
-    NodeEntry *e1 = m_nodeList[pos];
+    gbtEfgLayoutNode *e1 = m_nodeList[pos];
     // infosets are the same and the nodes are on the same level
     if (e->GetNode().GetInfoset() == e1->GetNode().GetInfoset()) {
       if (prefs.InfosetConnect() == GBT_INFOSET_CONNECT_ALL) {
@@ -618,10 +618,10 @@ NodeEntry *efgTreeLayout::NextInfoset(NodeEntry *e)
 // infoset node+1.  Also lengthens the nodes by the amount of space taken up
 // by the infoset lines.
 //
-void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
+void gbtEfgLayout::CheckInfosetEntry(gbtEfgLayoutNode *e)
 {
   int pos;
-  NodeEntry *infoset_entry, *e1;
+  gbtEfgLayoutNode *infoset_entry, *e1;
   // Check if the infoset this entry belongs to (on this level) has already
   // been processed.  If so, make this entry->num the same as the one already
   // processed and return
@@ -659,11 +659,11 @@ void efgTreeLayout::CheckInfosetEntry(NodeEntry *e)
   e->SetNextMember(infoset_entry);
 }
 
-void efgTreeLayout::FillInfosetTable(const gbtEfgNode &n,
+void gbtEfgLayout::FillInfosetTable(const gbtEfgNode &n,
 				     const gbtEfgSupport &cur_sup)
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
-  NodeEntry *entry = GetNodeEntry(n);
+  gbtEfgLayoutNode *entry = GetNodeEntry(n);
   if (n.NumChildren() > 0) {
     for (int i = 1; i <= n.NumChildren(); i++) {
       bool in_sup = true;
@@ -682,7 +682,7 @@ void efgTreeLayout::FillInfosetTable(const gbtEfgNode &n,
   }
 }
 
-void efgTreeLayout::UpdateTableInfosets(void)
+void gbtEfgLayout::UpdateTableInfosets(void)
 {
   // Note that levels are numbered from 0, not 1.
   // create an array to hold max num for each level
@@ -691,7 +691,7 @@ void efgTreeLayout::UpdateTableInfosets(void)
   for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0);
   // find the max e->num for each level
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    NodeEntry *entry = m_nodeList[pos];
+    gbtEfgLayoutNode *entry = m_nodeList[pos];
     nums[entry->GetLevel()] = gmax(entry->GetSublevel() + 1,
 				   nums[entry->GetLevel()]);
   }
@@ -703,7 +703,7 @@ void efgTreeLayout::UpdateTableInfosets(void)
   // now add the needed length to each level, and set maxX accordingly
   m_maxX = 0;
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    NodeEntry *entry = m_nodeList[pos];
+    gbtEfgLayoutNode *entry = m_nodeList[pos];
     if (entry->GetLevel() != 0) {
       entry->SetX(entry->X() + 
 		  (nums[entry->GetLevel()-1] +
@@ -713,16 +713,16 @@ void efgTreeLayout::UpdateTableInfosets(void)
   }
 }
 
-void efgTreeLayout::UpdateTableParents(void)
+void gbtEfgLayout::UpdateTableParents(void)
 {
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    NodeEntry *e = m_nodeList[pos];
+    gbtEfgLayoutNode *e = m_nodeList[pos];
     e->SetParent((e->GetNode() == m_doc->GetEfg().GetRoot()) ? 
 		 e : GetValidParent(e->GetNode()));
   }
 }
 
-void efgTreeLayout::Layout(const gbtEfgSupport &p_support)
+void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
 {
   // Kinda kludgey; probably should query draw prefs whenever needed.
   m_infosetSpacing = 
@@ -752,11 +752,11 @@ void efgTreeLayout::Layout(const gbtEfgSupport &p_support)
   m_maxY = maxy + 25;
 }
 
-void efgTreeLayout::BuildNodeList(const gbtEfgNode &p_node, 
+void gbtEfgLayout::BuildNodeList(const gbtEfgNode &p_node, 
 				  const gbtEfgSupport &p_support,
 				  int p_level)
 {
-  NodeEntry *entry = new NodeEntry(p_node);
+  gbtEfgLayoutNode *entry = new gbtEfgLayoutNode(p_node);
   m_nodeList += entry;
   entry->SetLevel(p_level);
   if (p_node.NumChildren() > 0) {
@@ -767,7 +767,7 @@ void efgTreeLayout::BuildNodeList(const gbtEfgNode &p_node,
   m_maxLevel = gmax(p_level, m_maxLevel);
 }
 
-void efgTreeLayout::BuildNodeList(const gbtEfgSupport &p_support)
+void gbtEfgLayout::BuildNodeList(const gbtEfgSupport &p_support)
 {
   while (m_nodeList.Length() > 0) {
     delete m_nodeList.Remove(1);
@@ -778,11 +778,11 @@ void efgTreeLayout::BuildNodeList(const gbtEfgSupport &p_support)
 }
 
 
-void efgTreeLayout::GenerateLabels(void)
+void gbtEfgLayout::GenerateLabels(void)
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    NodeEntry *entry = m_nodeList[i];
+    gbtEfgLayoutNode *entry = m_nodeList[i];
     entry->SetNodeAboveLabel(CreateNodeLabel(entry, prefs.NodeAboveLabel()));
     entry->SetNodeAboveFont(prefs.NodeAboveFont());
     entry->SetNodeBelowLabel(CreateNodeLabel(entry, prefs.NodeBelowLabel()));
@@ -815,13 +815,13 @@ void efgTreeLayout::GenerateLabels(void)
 // performance will require a more sophisticated solution to the
 // problem.  (TLT 5/2001)
 //
-void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
+void gbtEfgLayout::RenderSubtree(wxDC &p_dc) const
 {
   const gbtPreferences &prefs = m_doc->GetPreferences();
 
   for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    NodeEntry *entry = m_nodeList[pos];  
-    NodeEntry *parentEntry = entry->GetParent();
+    gbtEfgLayoutNode *entry = m_nodeList[pos];  
+    gbtEfgLayoutNode *parentEntry = entry->GetParent();
         
     if (entry->GetChildNumber() == 1) {
       parentEntry->Draw(p_dc);
@@ -896,12 +896,12 @@ void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
   }
 }
 
-void efgTreeLayout::Render(wxDC &p_dc) const
+void gbtEfgLayout::Render(wxDC &p_dc) const
 { 
   RenderSubtree(p_dc);
 }
 
-void efgTreeLayout::SetCutNode(const gbtEfgNode &p_node)
+void gbtEfgLayout::SetCutNode(const gbtEfgNode &p_node)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     m_nodeList[i]->SetCut(p_node.IsPredecessorOf(m_nodeList[i]->GetNode()));

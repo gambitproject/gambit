@@ -31,14 +31,14 @@
 #include "base/gmap.h"
 #include "nash/efgalgorithm.h"
 
-class panelEfgNashAlgorithm;
+class gbtPanelEfgNashAlgorithm;
 
 class dialogEfgNash : public wxDialog {
 private:
   wxTreeCtrl *m_algorithmTree;
   wxPanel *m_currentPanel;
   wxBoxSizer *m_algPanelSizer;
-  gbtOrdMap<wxTreeItemId, panelEfgNashAlgorithm *> m_algorithms;
+  gbtOrdMap<wxTreeItemId, gbtPanelEfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
   int LoadAlgorithms(const gbtEfgGame &);
