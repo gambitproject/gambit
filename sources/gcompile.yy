@@ -131,7 +131,6 @@ gStack<gText> GCL_InputFileNames(4);
 %token INTEGER
 %token FLOAT
 %token TEXT
-%token STDIN
 %token STDOUT
 %token gNULL
 %token FLOATPREC
@@ -301,8 +300,6 @@ constant:        BOOLEAN
           { $$ = new gclConstExpr(new NumberPortion(dval)); }
         |        TEXT
           { $$ = new gclConstExpr(new TextPortion(tval)); }
-        |        STDIN
-          { $$ = new gclConstExpr(new InputPortion(gin)); }
         |        STDOUT
           { $$ = new gclConstExpr(new OutputPortion(gout)); }
         |        gNULL
@@ -446,9 +443,6 @@ static struct tokens toktable[] =
     case TEXT:
       gerr << "text string " << tval << '\n';
       break;
-    case STDIN:
-      gerr << "StdIn\n";
-      break;
     case STDOUT:
       gerr << "StdOut\n";
       break;
@@ -493,7 +487,6 @@ int GCLCompiler::yylex(void)
       bval = triUNKNOWN;
       return BOOLEAN;
     }
-    else if (s == "StdIn")  return STDIN;
     else if (s == "StdOut") return STDOUT;
     else if (s == "NullOut")   return gNULL;
     else if (s == "AND")    return LAND;

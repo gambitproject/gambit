@@ -112,17 +112,6 @@ Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
   In function LpSolve[], in file "console" at line 2:
   GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
 
-//--------------------------------------
-
-Bug C20: Read[StdIn,x] hangs the machine (it had to be killed remotely)
-
-  GCL1:= << Read[StdIn,x]
-  GCL: Parameter 2 undefined in call to Read
-  GCL2:= << x:=0
-  0
-  GCL3:= << Read[StdIn,x]
-  Killed
-
 //------------------------------
 
 Bug C21: Algorithms producing nonsense on games of imperfect recall
