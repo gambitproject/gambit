@@ -28,7 +28,6 @@ int strcasecmp _G_ARGS((const char*, const char*));
 #endif   // __GNUG__
 
 
-#include <stddef.h>
 #include <math.h>
 
 #ifdef __GNUG__

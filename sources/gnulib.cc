@@ -7,7 +7,7 @@
 
 #include <assert.h>
 #include <values.h>
-#include <new.h>
+//#include <new.h>
 #include "gnulib.h"
 
 Obstack::Obstack(int size, int alignment)

@@ -36,7 +36,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include <new.h>
+//#include <new.h>
 #include <assert.h>
 
 long lg(unsigned long x)
