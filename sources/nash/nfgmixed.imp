@@ -57,11 +57,13 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2
-  gbtMatrix<T> A1(1, p_support->NumStrats(1), 1, p_support->NumStrats(2));
-  gbtMatrix<T> A2(1, p_support->NumStrats(2), 1, p_support->NumStrats(1));
+  gbtMatrix<T> A1(1, p_support->GetPlayer(1)->NumStrategies(),
+		  1, p_support->GetPlayer(2)->NumStrategies());
+  gbtMatrix<T> A2(1, p_support->GetPlayer(2)->NumStrategies(),
+		  1, p_support->GetPlayer(1)->NumStrategies());
 
-  for (int i = 1; i <= p_support->NumStrats(1); i++) {
-    for (int j = 1; j <= p_support->NumStrats(2); j++) {
+  for (int i = 1; i <= p_support->GetPlayer(1)->NumStrategies(); i++) {
+    for (int j = 1; j <= p_support->GetPlayer(2)->NumStrategies(); j++) {
       A1(i, j) = iter.GetPayoff(p_support->GetPlayer(1)) - gbtNumber(min);
       A2(j, i) = iter.GetPayoff(p_support->GetPlayer(2)) - gbtNumber(min);
       A1(i, j) *= fac;
@@ -72,7 +74,8 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
   }
 
   // Construct vectors b1, b2
-  gbtVector<T> b1(1, p_support->NumStrats(1)), b2(1, p_support->NumStrats(2));
+  gbtVector<T> b1(1, p_support->GetPlayer(1)->NumStrategies());
+  gbtVector<T> b2(1, p_support->GetPlayer(2)->NumStrategies());
   b1 = (T) -1;
   b2 = (T) -1;
 
@@ -121,13 +124,13 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	// check if solution is nash 
 	// need only check complementarity, since it is feasible
 	bool nash = true;
-	for (int k = 1; nash && k <= p_support->NumStrats(1); k++) {
+	for (int k = 1; nash && k <= p_support->GetPlayer(1)->NumStrategies(); k++) {
 	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
 	  }
 	}
 	
-	for (int k = 1; nash && k <= p_support->NumStrats(2); k++) {
+	for (int k = 1; nash && k <= p_support->GetPlayer(2)->NumStrategies(); k++) {
 	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
 	  }
@@ -136,7 +139,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	if (nash) {
 	  gbtMixedProfile<T> profile(p_support);
 	  T sum = (T) 0;
-	  for (int k = 1; k <= p_support->NumStrats(1); k++) {
+	  for (int k = 1; k <= p_support->GetPlayer(1)->NumStrategies(); k++) {
 	    profile(1, k) = (T) 0;
 	    if (bfs1.IsDefined(k)) {
 	      profile(1,k) = -bfs1(k);
@@ -144,14 +147,14 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_support->NumStrats(1); k++) {
+	  for (int k = 1; k <= p_support->GetPlayer(1)->NumStrategies(); k++) {
 	    if (bfs1.IsDefined(k)) { 
 	      profile(1,k) /= sum;
 	    }
 	  }
 
 	  sum = (T) 0;
-	  for (int k = 1; k <= p_support->NumStrats(2); k++) {
+	  for (int k = 1; k <= p_support->GetPlayer(2)->NumStrategies(); k++) {
 	    profile(2,k) = (T) 0;
 	    if (bfs2.IsDefined(k)) {
 	      profile(2,k) =-bfs2(k);
@@ -159,7 +162,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 	    }
 	  } 
 	
-	  for (int k = 1; k <= p_support->NumStrats(2); k++) {
+	  for (int k = 1; k <= p_support->GetPlayer(2)->NumStrategies(); k++) {
 	    if (bfs2.IsDefined(k)) { 
 	      profile(2,k) /= sum;
 	    }

@@ -40,7 +40,7 @@ gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 
   int ncont = 1;
   for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
-    ncont *= p_support->NumStrats(pl);
+    ncont *= p_support->GetPlayer(pl)->NumStrategies();
   }
 
   int contNumber = 1;
@@ -54,7 +54,7 @@ gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     
       for (int pl = 1; flag && pl <= p_support->NumPlayers(); pl++)  {
 	gbtNumber current = citer.GetPayoff(p_support->GetPlayer(pl));
-	for (int i = 1; i <= p_support->NumStrats(pl); i++)  {
+	for (int i = 1; i <= p_support->GetPlayer(pl)->NumStrategies(); i++)  {
 	  niter.Next(pl);
 	  if (niter.GetPayoff(p_support->GetPlayer(pl)) > current)  {
 	    flag = false;

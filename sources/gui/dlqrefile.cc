@@ -59,7 +59,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   int maxColumn = 0;
   const gbtNfgSupport &support = p_profiles[1].Support();
   for (int pl = 1; pl <= support->NumPlayers(); pl++) {
-    for (int st = 1; st <= support->NumStrats(pl); st++) {
+    for (int st = 1; st <= support->GetPlayer(pl)->NumStrategies(); st++) {
       m_qreList->InsertColumn(++maxColumn,
 			      wxString::Format(wxT("%d:%d"), pl, st));
     }
@@ -182,7 +182,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << "Dimensionality:\n";
 	file << m_mixedProfiles[1].GetGame()->NumPlayers() << ' ';
 	for (int pl = 1; pl <= m_mixedProfiles[1].GetGame()->NumPlayers(); pl++) {
-	  file << m_mixedProfiles[1].Support()->NumStrats(pl) << ' ';
+	  file << m_mixedProfiles[1].Support()->GetPlayer(pl)->NumStrategies() << ' ';
 	}
 	file << "\n";
 	

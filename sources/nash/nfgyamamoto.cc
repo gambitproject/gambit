@@ -55,7 +55,7 @@ static int FirstMember(const gbtMatrix<int> &p_partition, int p_index)
 static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 		     const gbtMatrix<int> &p_partition, int p_index)
 {
-  for (int st = 1; st <= p_profile.GetSupport()->NumStrats(p_player); st++) {
+  for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies(); st++) {
     if (p_partition(p_index, st) > 0) {
       return p_profile.Payoff(p_player, p_profile.GetSupport()->GetStrategy(p_player, st));
     }
@@ -69,8 +69,8 @@ static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 static gbtMatrix<int> RankStrategies(const gbtMixedProfile<double> &p_profile,
 				   int p_player)
 {
-  gbtVector<double> payoffs(p_profile.GetSupport()->NumStrats(p_player));
-  gbtArray<int> strategies(p_profile.GetSupport()->NumStrats(p_player));
+  gbtVector<double> payoffs(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
+  gbtArray<int> strategies(p_profile.GetSupport()->GetPlayer(p_player)->NumStrategies());
   p_profile.Payoff(p_player, p_player, payoffs);
 
   for (int i = 1; i <= strategies.Length(); i++) {
@@ -130,7 +130,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 
 	int colno = 0;
 	for (int pl2 = 1; pl2 <= p_profile.NumPlayers(); pl2++) {
-	  for (int st2 = 1; st2 <= p_profile.GetSupport()->NumStrats(pl2); st2++) {
+	  for (int st2 = 1; st2 <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); st2++) {
 	    colno++;
 	    if (pl != pl2) {
 	      continue;
@@ -138,7 +138,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 
 	    if (p_partition[pl](part, st2) > 0) {
 	    // strategy number st2 is in this partition
-	      for (int i = 1; i <= p_profile.GetSupport()->NumStrats(pl); i++) {
+	      for (int i = 1; i <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); i++) {
 		p_matrix(rowno, colno) += pow(p_lambda, (double) (i-1));
 	      }
 	    }
@@ -148,13 +148,13 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	// The final column is the derivative wrt lambda
 	colno++;
 	double totalprob = 0.0;
-	for (int st = 1; st <= p_profile.GetSupport()->NumStrats(pl); st++) {
+	for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
 	  if (p_partition[pl](part, st) > 0) {
 	    totalprob += p_profile(pl, st);
 	  }
 	}
 
-	for (int i = 1; i <= p_profile.GetSupport()->NumStrats(pl); i++) {
+	for (int i = 1; i <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); i++) {
 	  p_matrix(rowno, colno) += ((double) (i - 1)) * pow(p_lambda, (double) (i-2)) * totalprob;
 	}
 
@@ -167,13 +167,13 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	// We need to have #members - 1 equations
 	int st1 = FirstMember(p_partition[pl], part);
 
-	for (int st = st1 + 1; st <= p_profile.GetSupport()->NumStrats(pl); st++) {
+	for (int st = st1 + 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
 	  if (p_partition[pl](part, st) > 0) {
 	    rowno++;
 
 	    int colno = 0;
 	    for (int pl2 = 1; pl2 <= p_profile.NumPlayers(); pl2++) {
-	      for (int st2 = 1; st2 <= p_profile.GetSupport()->NumStrats(pl2); st2++) {
+	      for (int st2 = 1; st2 <= p_profile.GetSupport()->GetPlayer(pl2)->NumStrategies(); st2++) {
 		colno++;
 		if (pl == pl2) {
 		  continue;
@@ -207,7 +207,7 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
   }
 
   for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->NumStrats(pl); st++) {
+    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
       rowno++;
       p_delta(pl, st) = sign * M.Determinant();   
       sign *= -1.0;
@@ -225,14 +225,14 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
 
   double norm = 0.0;
   for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->NumStrats(pl); st++) {
+    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
       norm += p_delta(pl, st) * p_delta(pl, st);
     }
   }
   norm += p_lambdainc * p_lambdainc; 
   
   for (int pl = 1; pl <= p_profile.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.GetSupport()->NumStrats(pl); st++) {
+    for (int st = 1; st <= p_profile.GetSupport()->GetPlayer(pl)->NumStrategies(); st++) {
       p_delta(pl, st) /= sqrt(norm / p_stepsize);
     }
   }
@@ -327,14 +327,14 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
     // Check for inequalities
     for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
       int strats = 0;
-      for (int part = 1; part < p_support->NumStrats(pl); part++) {
+      for (int part = 1; part < p_support->GetPlayer(pl)->NumStrategies(); part++) {
 	if (NumMembers(partitions[pl], part) > 0 &&
 	    NumMembers(partitions[pl], part + 1) > 0) {
 	  if (Payoff(profile, pl, partitions[pl], part) <=
 	      Payoff(profile, pl, partitions[pl], part + 1)) {
 	    // Combine partitions part and part+1
 	    partitions[pl].SetRow(part, partitions[pl].Row(part) + partitions[pl].Row(part+1));
-	    for (int p = part + 1; p < p_support->NumStrats(pl); p++) {
+	    for (int p = part + 1; p < p_support->GetPlayer(pl)->NumStrategies(); p++) {
 	      partitions[pl].SetRow(p, partitions[pl].Row(p+1));
 	    }  
 	    for (int col = 1; col <= partitions[pl].NumColumns(); col++) {
@@ -353,11 +353,11 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 					      part);
 	    double totX = 0.0, totP = 0.0;
 	    for (int i = 1; i < sortstrats.Length(); i++) {
-	      totP += pow(lambda, (double) (strats + i - 1)) / PDenom(lambda, p_support->NumStrats(pl));
+	      totP += pow(lambda, (double) (strats + i - 1)) / PDenom(lambda, p_support->GetPlayer(pl)->NumStrategies());
 	      totX += profile(pl, sortstrats[i]);
 	      if (totX >= totP) {
 		//		gout << pl << " " << part << " " << totP << " " << totX << "Xaler!\n";
-		for (int p = part + 1; p < p_support->NumStrats(pl); p++) {
+		for (int p = part + 1; p < p_support->GetPlayer(pl)->NumStrategies(); p++) {
 		  partitions[pl].SetRow(p+1, partitions[pl].Row(p));
 		}  
 		for (int col = 1; col <= partitions[pl].NumColumns(); col++) {

@@ -29,6 +29,47 @@
 #include "gamebase.h"
 
 //==========================================================================
+//                      class gbtNfgSupportPlayerRep
+//==========================================================================
+
+//
+// A gbtNfgSupportPlayerRep represents a player in the "view" of a game
+// afforded by a gbtNfgSupport.  In particular, the number and indexing
+// of strategies (potentially) differs from the full game.
+//
+class gbtNfgSupportPlayerRep : public gbtGamePlayerRep {
+private:
+  gbtGamePlayer m_player;
+  const gbtNfgSupportBase *m_support;
+  
+public:
+  gbtNfgSupportPlayerRep(const gbtNfgSupportBase *p_support, int pl)
+    : m_player(p_support->GetGame()->GetPlayer(pl)),
+      m_support(p_support) { }
+  virtual ~gbtNfgSupportPlayerRep() { }
+
+  gbtGame GetGame(void) const { return m_player->GetGame(); }
+  gbtText GetLabel(void) const { return m_player->GetLabel(); }
+  void SetLabel(const gbtText &p_label) { m_player->SetLabel(p_label); }
+  int GetId(void) const { return m_player->GetId(); }
+
+  bool IsChance(void) const { return (GetId() == 0); }
+
+  int NumInfosets(void) const { return m_player->NumInfosets(); }
+  gbtGameInfoset NewInfoset(int p_actions)
+  { throw gbtGameException(); }
+  gbtGameInfoset GetInfoset(int p_index) const
+  { return m_player->GetInfoset(p_index); }
+
+  int NumStrategies(void) const { return m_support->NumStrats(m_player->GetId()); }
+  gbtGameStrategy GetStrategy(int p_index) const 
+  { return m_support->GetStrategy(m_player->GetId(), p_index); }
+};
+
+
+
+
+//==========================================================================
 //                         class gbtNfgSupportBase
 //==========================================================================
 
@@ -67,6 +108,15 @@ bool gbtNfgSupportBase::operator==(const gbtNfgSupportRep &p_support) const
   return true;
 }
   
+//--------------------------------------------------------------------------
+//            class gbtNfgSupportBase: Data access -- players
+//--------------------------------------------------------------------------
+
+gbtGamePlayer gbtNfgSupportBase::GetPlayer(int pl) const
+{
+  return new gbtNfgSupportPlayerRep(this, pl);
+}
+
 //--------------------------------------------------------------------------
 //            class gbtNfgSupportBase: Data access -- strategies
 //--------------------------------------------------------------------------

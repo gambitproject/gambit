@@ -718,12 +718,12 @@ void gbtNfgFrame::OnFormatAutosize(wxCommandEvent &)
   // the narrowest width which fits all the entries
   int max = 0, colPlayer = m_doc->GetColPlayer();
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
-  for (int col = 0; col < support->NumStrats(colPlayer); col++) {
+  for (int col = 0; col < support->GetPlayer(colPlayer)->NumStrategies(); col++) {
     if (m_table->GetColSize(col) > max) {
       max = m_table->GetColSize(col);
     }
   }
-  for (int col = 0; col < support->NumStrats(colPlayer); col++) {
+  for (int col = 0; col < support->GetPlayer(colPlayer)->NumStrategies(); col++) {
     m_table->SetColSize(col, max);
   }
 }

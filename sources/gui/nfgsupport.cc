@@ -298,7 +298,7 @@ void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
 
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
   if (support->Contains(strategy) &&
-      support->NumStrats(strategy->GetPlayer()) > 1) {
+      support->GetPlayer(strategy->GetPlayer()->GetId())->NumStrategies() > 1) {
     m_doc->Submit(new gbtCmdRemoveStrategy(strategy));
   }
   else {

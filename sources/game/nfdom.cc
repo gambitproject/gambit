@@ -69,9 +69,10 @@ bool gbtNfgSupportRep::Dominates(gbtGameStrategy s, gbtGameStrategy t,
 
 bool gbtNfgSupportRep::IsDominated(gbtGameStrategy s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s->GetPlayer()->GetId()); i++) {
-    if (i != s->GetId()) {
-      if (Dominates(GetStrategy(s->GetPlayer()->GetId(), i), s, strong)) {
+  gbtGamePlayer player = GetPlayer(s->GetPlayer()->GetId());
+  for (int i = 1; i <= player->NumStrategies(); i++) {
+    if (player->GetStrategy(i) != s) {
+      if (Dominates(player->GetStrategy(i), s, strong)) {
 	return true;
       }
     }
@@ -83,16 +84,16 @@ bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
 				   gbtOutput &tracefile, 
 				   gbtStatus &status) const
 {
-  gbtArray<int> set(NumStrats(pl));
+  gbtArray<int> set(GetPlayer(pl)->NumStrategies());
   int i;
   for (i = 1; i <= set.Length(); i++)
     set[i] = i;
 
   int min, dis;
   double d1,d2;
-  d1 = (double)(pl-1) / (double) GetGame()->NumPlayers();
-  d2 = (double)pl / (double) GetGame()->NumPlayers();
-  for (min = 0, dis = NumStrats(pl) - 1; min <= dis; )  {
+  d1 = (double)(pl-1) / (double) NumPlayers();
+  d2 = (double)pl / (double) NumPlayers();
+  for (min = 0, dis = GetPlayer(pl)->NumStrategies() - 1; min <= dis; )  {
     status.Get();
     int pp;
     double s1 = (double)min/(double)(dis+1);
@@ -133,9 +134,9 @@ bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
     }
   }
     
-  if (min + 1 <= NumStrats(pl))   {
-    for (i = min + 1; i <= NumStrats(pl); i++) {
-      newS->RemoveStrategy(GetStrategy(pl, set[i]));
+  if (min + 1 <= GetPlayer(pl)->NumStrategies())   {
+    for (i = min + 1; i <= GetPlayer(pl)->NumStrategies(); i++) {
+      newS->RemoveStrategy(GetPlayer(pl)->GetStrategy(set[i]));
     }
     
     return true;

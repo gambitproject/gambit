@@ -92,7 +92,7 @@ public:
   gbtBlock<gbtGameStrategyBase *> m_strategies;
 
   gbtGamePlayerBase(gbtGameBase *, int);
-  ~gbtGamePlayerBase();
+  virtual ~gbtGamePlayerBase();
 
   gbtGame GetGame(void) const;
   gbtText GetLabel(void) const { return m_label; }
@@ -463,7 +463,7 @@ public:
   bool IsMatrix(void) const { return m_nfg->IsMatrix(); }
   
   int NumPlayers(void) const { return m_nfg->NumPlayers(); }
-  gbtGamePlayer GetPlayer(int index) const { return m_nfg->GetPlayer(index); }
+  gbtGamePlayer GetPlayer(int index) const; 
   
   int NumOutcomes(void) const { return m_nfg->NumOutcomes(); }
   gbtGameOutcome GetOutcome(int index) const 

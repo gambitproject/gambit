@@ -38,8 +38,8 @@ template <class T> gbtMatrix<T> Make_A1(const gbtGame &N,
                                       const T &)
 {
   int n1, n2, i,j;
-  n1=S->NumStrats(1);
-  n2=S->NumStrats(2);
+  n1=S->GetPlayer(1)->NumStrategies();
+  n2=S->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A1(1,n1,n1+1,n1+n2);
   gbtNfgIterator iter(S); 
   T min; 
@@ -64,8 +64,8 @@ template <class T> gbtMatrix<T> Make_A2(const gbtGame &N,
                                       const T &)
 {
   int n1, n2, i,j;
-  n1=S->NumStrats(1);
-  n2=S->NumStrats(2);
+  n1=S->GetPlayer(1)->NumStrategies();
+  n2=S->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A2(n1+1,n1+n2,1,n1);
   gbtNfgIterator iter(S); 
   T min; 
@@ -89,7 +89,7 @@ template <class T> gbtVector<T> Make_b1(const gbtGame &,
 				      const gbtNfgSupport &S,
 				      const T &)
 {
-  int n1 = S->NumStrats(1);
+  int n1 = S->GetPlayer(1)->NumStrategies();
   gbtVector<T> b1(1,n1);
 
   for (int i = 1; i <= n1; i++) 
@@ -101,8 +101,8 @@ template <class T> gbtVector<T> Make_b2(const gbtGame &,
 				      const gbtNfgSupport &S, const T &)
 {
   int n1, n2, i;
-  n1=S->NumStrats(1);
-  n2=S->NumStrats(2);
+  n1=S->GetPlayer(1)->NumStrategies();
+  n2=S->GetPlayer(2)->NumStrategies();
   gbtVector<T> b2(n1+1,n1+n2);
 
   for (i = n1+1; i <= n1+n2; i++) 

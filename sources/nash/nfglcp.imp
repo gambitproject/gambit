@@ -138,8 +138,8 @@ gbtList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_sup
 					     const T &epsilon)
 {
   int i,j;
-  int n1 = p_support->NumStrats(1);
-  int n2 = p_support->NumStrats(2);
+  int n1 = p_support->GetPlayer(1)->NumStrategies();
+  int n2 = p_support->GetPlayer(2)->NumStrategies();
   gbtList<MixedSolution> solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {

@@ -51,9 +51,6 @@ public:
   virtual bool operator!=(const gbtNfgSupportRep &) const = 0;
 
   // DATA ACCESS: STRATEGIES
-  virtual int NumStrats(int pl) const = 0;
-  virtual int NumStrats(const gbtGamePlayer &p_player) const = 0; 
-
   virtual gbtGameStrategy GetStrategy(int pl, int st) const = 0;
   virtual int GetIndex(gbtGameStrategy) const = 0;
   virtual bool Contains(gbtGameStrategy) const = 0;
@@ -63,7 +60,6 @@ public:
   virtual void RemoveStrategy(gbtGameStrategy) = 0;
   
   // DATA ACCESS: PROPERTIES
-  //  virtual bool IsSubset(const gbtNfgSupport &s) const = 0;
   virtual bool IsValid(void) const = 0;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES

@@ -161,18 +161,19 @@ static void QreLHS(const gbtNfgSupport &p_support,
   p_lhs = (T) 0.0;
   int rowno = 0;
 
-  for (int pl = 1; pl <= p_support->GetGame()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_support->GetPlayer(pl);
     rowno++;
-    for (int st = 1; st <= p_support->NumStrats(pl); st++) {
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       p_lhs[rowno] += profile(pl, st);
     }
     p_lhs[rowno] -= 1.0;
 
-    for (int st = 2; st <= p_support->NumStrats(pl); st++) {
+    for (int st = 2; st <= player->NumStrategies(); st++) {
       p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
-		       (profile.Payoff(pl, p_support->GetStrategy(pl, st)) -
-			profile.Payoff(pl, p_support->GetStrategy(pl, 1))));
+		       (profile.Payoff(pl, player->GetStrategy(st)) -
+			profile.Payoff(pl, player->GetStrategy(1))));
       p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
@@ -203,7 +204,8 @@ static void QreJacobian(const gbtNfgSupport &p_support,
     // First, do the "sum to one" equation
     int colno = 0;
     for (int pl2 = 1; pl2 <= p_support->NumPlayers(); pl2++) {
-      for (int st2 = 1; st2 <= p_support->NumStrats(pl2); st2++) {
+      for (int st2 = 1; st2 <= p_support->GetPlayer(pl2)->NumStrategies();
+	   st2++) {
 	colno++;
 	if (pl1 == pl2) {
 	  p_matrix(colno, rowno) = 1.0;
@@ -215,12 +217,14 @@ static void QreJacobian(const gbtNfgSupport &p_support,
     }
     p_matrix(p_matrix.NumRows(), rowno) = 0.0;
 
-    for (int st1 = 2; st1 <= p_support->NumStrats(pl1); st1++) {
+    for (int st1 = 2; st1 <= p_support->GetPlayer(pl1)->NumStrategies();
+	 st1++) {
       rowno++;
       int colno = 0;
 
       for (int pl2 = 1; pl2 <= p_support->NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_support->NumStrats(pl2); st2++) {
+	for (int st2 = 1; st2 <= p_support->GetPlayer(pl2)->NumStrategies();
+	     st2++) {
 	  colno++;
 	  if (pl1 == pl2) {
 	    if (st2 == 1) {
@@ -421,7 +425,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 	gbtNfgSupport newSupport(p_start.GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
-	  for (int st = 1; st <= newSupport->NumStrats(pl); st++) {
+	  for (int st = 1; st <= newSupport->GetPlayer(pl)->NumStrategies(); st++) {
 	    if (index++ == i) {
 	      newSupport->RemoveStrategy(newSupport->GetStrategy(pl, st));
 	    }

@@ -31,29 +31,29 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 			   int pl, bool strong, T /*junk*/,
 			   gbtOutput &tracefile, gbtStatus &status)
 {
-  gbtGame nfg = S->GetGame();
   gbtNfgContIterator s(S);
 
   double d1,d2;
-  d1 = (double) (pl-1) / (double) nfg->NumPlayers();
-  d2 = (double) pl / (double) nfg->NumPlayers();
+  d1 = (double) (pl-1) / (double) S->NumPlayers();
+  d2 = (double) pl / (double) S->NumPlayers();
   
-  gbtArray<bool> dom(S->NumStrats(pl));
+  gbtArray<bool> dom(S->GetPlayer(pl)->NumStrategies());
   
   T eps;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S->NumStrats(pl));
+  gbtVector<T> dominator(S->GetPlayer(pl)->NumStrategies());
   
   int st,i,k,n;
   
   if (strong)   {
     T COpt;
     bool ret = false;
-    int strats = S->NumStrats(pl);
+    int strats = S->GetPlayer(pl)->NumStrategies();
     int contingencies = 1;
-    for(k=1;k<=nfg->NumPlayers();k++)
-      if(k!=pl) contingencies*=S->NumStrats(k);
+    for (k = 1; k <= S->NumPlayers(); k++) {
+      if(k!=pl) contingencies*=S->GetPlayer(k)->NumStrategies();
+    }
     
     gbtMatrix<T> A(1,contingencies+1,1,strats);
     gbtVector<T> B(1,contingencies+1);
@@ -71,10 +71,10 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     s.First();
     for (n = 1; n <= contingencies; n++) {
       s.Freeze(S->GetStrategy(pl, 1));
-      B[n] = -s.GetPayoff(nfg->GetPlayer(pl));
+      B[n] = -s.GetPayoff(S->GetPlayer(pl));
       for (k = 2; k <= strats; k++) {
-	s.Next(nfg->GetPlayer(pl));
-	A(n, k - 1) = -s.GetPayoff(nfg->GetPlayer(pl));
+	s.Next(S->GetPlayer(pl));
+	A(n, k - 1) = -s.GetPayoff(S->GetPlayer(pl));
       }
       A(n, strats) = (T) 1;
       s.NextContingency();
@@ -130,10 +130,13 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
   else  {    // look for weak domination
     T C0 = (T) 0, COpt, TmpC;
     bool ret = false;
-    int strats = S->NumStrats(pl);
+    int strats = S->GetPlayer(pl)->NumStrategies();
     int contingencies = 1;
-    for(k=1;k<=nfg->NumPlayers();k++)
-      if(k!=pl) contingencies*=S->NumStrats(k);
+    for (k = 1; k <= S->NumPlayers(); k++) {
+      if (k != pl) {
+	contingencies *= S->GetPlayer(k)->NumStrategies();
+      }
+    }
     
     gbtMatrix<T> A(1,contingencies+1,1,strats-1);
     gbtVector<T> B(1,contingencies+1);
@@ -149,11 +152,11 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
     s.First();
     for(n=1;n<=contingencies;n++) {
       s.Freeze(S->GetStrategy(pl, 1));
-      B[n]=-s.GetPayoff(nfg->GetPlayer(pl));
+      B[n]=-s.GetPayoff(S->GetPlayer(pl));
       C0 -= B[n];
       for(k=2;k<=strats;k++) {
-	s.Next(nfg->GetPlayer(pl));
-	A(n,k-1)=-s.GetPayoff(nfg->GetPlayer(pl));
+	s.Next(S->GetPlayer(pl));
+	A(n,k-1)=-s.GetPayoff(S->GetPlayer(pl));
 	C[k-1]-=A(n,k-1);
       }
       s.NextContingency();
@@ -221,23 +224,24 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtGameStrategy str,
 		      gbtOutput &tracefile)
 {
   int pl = str->GetPlayer()->GetId();
-  gbtGame nfg = str->GetPlayer()->GetGame();
   int whichstrat = str->GetId();
-  int strats = S->NumStrats(pl);
+  int strats = S->GetPlayer(pl)->NumStrategies();
 
   gbtNfgContIterator s(S);
     
   T eps;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S->NumStrats(pl));
+  gbtVector<T> dominator(S->GetPlayer(pl)->NumStrategies());
   
   int st,i,k,n;
   bool ret = false;
   int contingencies = 1;
-  for(k=1;k<=nfg->NumPlayers();k++)
-    if(k!=pl) contingencies*=S->NumStrats(k);
-  
+  for (k = 1; k <= S->NumPlayers(); k++) {
+    if (k != pl) {
+      contingencies *= S->GetPlayer(k)->NumStrategies();
+    }
+  }  
   
   if (strong)   {
     T COpt;
@@ -256,16 +260,16 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtGameStrategy str,
     
     s.First();
     for (n = 1; n <= contingencies; n++) {
-      s.Freeze(S->GetStrategy(pl, whichstrat));
-      B[n] = -s.GetPayoff(nfg->GetPlayer(pl));
+      s.Freeze(S->GetPlayer(pl)->GetStrategy(whichstrat));
+      B[n] = -s.GetPayoff(S->GetPlayer(pl));
       for (k = 1; k <= strats; k++) 
 	if (k< whichstrat) {
 	  s.Freeze(S->GetStrategy(pl, k));
-	  A(n, k) = -s.GetPayoff(nfg->GetPlayer(pl));
+	  A(n, k) = -s.GetPayoff(S->GetPlayer(pl));
 	}
 	else if (k > whichstrat) {
 	  s.Freeze(S->GetStrategy(pl, k));
-	  A(n, k - 1) = -s.GetPayoff(nfg->GetPlayer(pl));
+	  A(n, k - 1) = -s.GetPayoff(S->GetPlayer(pl));
 	}
       A(n, strats) = (T) 1;
       s.NextContingency();
@@ -319,17 +323,17 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtGameStrategy str,
     s.First();
     for(n=1;n<=contingencies;n++) {
       s.Freeze(S->GetStrategy(pl, whichstrat));
-      B[n]=-s.GetPayoff(nfg->GetPlayer(pl));
+      B[n]=-s.GetPayoff(S->GetPlayer(pl));
       C0 -= B[n];
       for(k=1;k<=strats;k++) 
 	if(k<whichstrat) {
 	  s.Freeze(S->GetStrategy(pl, k));
-	  A(n,k)=-s.GetPayoff(nfg->GetPlayer(pl));
+	  A(n,k)=-s.GetPayoff(S->GetPlayer(pl));
 	  C[k]-=A(n,k);
 	}
 	else if (k > whichstrat) {
 	  s.Freeze(S->GetStrategy(pl, k));
-	  A(n,k-1)=-s.GetPayoff(nfg->GetPlayer(pl));
+	  A(n,k-1)=-s.GetPayoff(S->GetPlayer(pl));
 	  C[k-1]-=A(n,k-1);
 	}
       s.NextContingency();
@@ -381,7 +385,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 {
   gbtNfgSupport S = pr.GetSupport();
   gbtGame nfg = pr.GetGame();
-  int strats = S->NumStrats(pl);
+  int strats = S->GetPlayer(pl)->NumStrategies();
   gbtVector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
 
@@ -390,13 +394,13 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
   T eps,x;
   gEpsilon(eps);
   
-  gbtVector<T> dominator(S->NumStrats(pl));
+  gbtVector<T> dominator(S->GetPlayer(pl)->NumStrategies());
   
   int st,i,k,n;
   bool ret = false;
   int contingencies = 1;
   for(k=1;k<=nfg->NumPlayers();k++)
-    if(k!=pl) contingencies*=S->NumStrats(k);
+    if(k!=pl) contingencies*=S->GetPlayer(k)->NumStrategies();
   
   
   if (strong)   {

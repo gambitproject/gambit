@@ -135,7 +135,7 @@ void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
   }
   else if (p_event.GetCol() == 4) {
     gbtArray<int> cont = m_doc->GetContingency();
-    if (cont[player] < m_doc->GetNfgSupportList().GetCurrent()->NumStrats(player)) {
+    if (cont[player] < m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(player)->NumStrategies()) {
       cont[player]++;
     }
     m_doc->SetContingency(cont);

@@ -47,8 +47,8 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   
   int i,j,m,k;
   
-  m = p_support->NumStrats(1);
-  k = p_support->NumStrats(2);
+  m = p_support->GetPlayer(1)->NumStrategies();
+  k = p_support->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A(1,k+1,1,m+1);
   gbtVector<T> b(1,k+1);
   gbtVector<T> c(1,m+1);
@@ -108,8 +108,8 @@ void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
 				   const T &p_epsilon) const
 {
   int index;
-  int n1 = p_support->NumStrats(1);
-  int n2 = p_support->NumStrats(2);
+  int n1 = p_support->GetPlayer(1)->NumStrategies();
+  int n2 = p_support->GetPlayer(2)->NumStrategies();
   solutions.Flush();
 
   for (int i = 1; i <= p_list.Length(); i++)    {

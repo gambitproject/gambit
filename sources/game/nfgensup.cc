@@ -74,7 +74,7 @@ void AllValidSubsupportsRECURSIVE(const gbtNfgSupport &s,
   gbtStrategyIterator c_copy(*c);
 
   do {
-    if ( sact->NumStrats(c_copy.GetPlayerId()) > 1 ) {
+    if ( sact->GetPlayer(c_copy.GetPlayerId())->NumStrategies() > 1 ) {
       gbtGameStrategy str_ptr = c_copy.GetStrategy();
       sact->RemoveStrategy(str_ptr); 
       AllValidSubsupportsRECURSIVE(s,sact,&c_copy,list);
@@ -156,7 +156,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
     
     do {
       if ( sact->Contains(c_copy.GetStrategy()) &&
-	   sact->NumStrats(c_copy.GetPlayerId()) > 1 ) {
+	   sact->GetPlayer(c_copy.GetPlayerId())->NumStrategies() > 1 ) {
 
 	gbtGameStrategy str_ptr = c_copy.GetStrategy();
 	sact->RemoveStrategy(str_ptr); 
@@ -245,7 +245,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
     do {
       gbtGameStrategy str_ptr = c_copy.GetStrategy();
       if (sact->Contains(str_ptr) &&
-	  sact->NumStrats(str_ptr->GetPlayer()) > 1 ) {
+	  sact->GetPlayer(str_ptr->GetPlayer()->GetId())->NumStrategies() > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
 	sact->AddStrategy(str_ptr);

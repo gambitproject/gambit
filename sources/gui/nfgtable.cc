@@ -298,21 +298,21 @@ gbtNfgGridTable::gbtNfgGridTable(gbtNfgTable *p_table, gbtGameDocument *p_doc)
 
 int gbtNfgGridTable::GetNumberRows(void)
 {
-  return (m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer()) +
+  return (m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies() +
 	  m_table->ShowProbs() + m_table->ShowDominance() +
 	  m_table->ShowValues());
 }
 
 int gbtNfgGridTable::GetNumberCols(void)
 {
-  return (m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer()) +
+  return (m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies() +
 	  m_table->ShowProbs() + m_table->ShowDominance() + 
 	  m_table->ShowValues());
 }
 
 wxString gbtNfgGridTable::GetRowLabelValue(int p_row)
 {
-  int numStrats = m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer());
+  int numStrats = m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies();
   if (p_row + 1 <= numStrats) {
     return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetStrategy(m_doc->GetRowPlayer(), p_row+1)->GetLabel());
   }
@@ -330,7 +330,7 @@ wxString gbtNfgGridTable::GetRowLabelValue(int p_row)
 
 wxString gbtNfgGridTable::GetColLabelValue(int p_col)
 {
-  int numStrats = m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer());
+  int numStrats = m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies();
   if (p_col + 1 <= numStrats) {
     return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetStrategy(m_doc->GetColPlayer(), p_col+1)->GetLabel());
   }
@@ -351,8 +351,8 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   int rowPlayer = m_doc->GetRowPlayer();
   int colPlayer = m_doc->GetColPlayer();
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
-  int numRowStrats = support->NumStrats(rowPlayer);
-  int numColStrats = support->NumStrats(colPlayer);
+  int numRowStrats = support->GetPlayer(rowPlayer)->NumStrategies();
+  int numColStrats = support->GetPlayer(colPlayer)->NumStrategies();
 
   if (row < numRowStrats && col < numColStrats) {
     gbtArray<int> strategy(m_doc->GetContingency());
@@ -507,12 +507,12 @@ wxGridCellAttr *gbtNfgGridTable::GetAttr(int row, int col,
 {
   wxGridCellAttr *attr = new wxGridCellAttr;
 
-  if (row >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer()) &&
-      col >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer())) {
+  if (row >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies() &&
+      col >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies()) {
     attr->SetBackgroundColour(*wxBLACK);
   }
-  else if (row >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer()) ||
-	   col >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer())) {
+  else if (row >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies() ||
+	   col >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies()) {
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
@@ -580,18 +580,18 @@ void gbtNfgTable::OnUpdate(gbtGameView *)
   int stratRows = GetRows() - m_showProb - m_showDom - m_showValue;
   int stratCols = GetCols() - m_showProb - m_showDom - m_showValue;
 
-  if (support->NumStrats(rowPlayer) < stratRows) {
-    DeleteRows(0, stratRows - support->NumStrats(rowPlayer));
+  if (support->GetPlayer(rowPlayer)->NumStrategies() < stratRows) {
+    DeleteRows(0, stratRows - support->GetPlayer(rowPlayer)->NumStrategies());
   }
-  else if (support->NumStrats(rowPlayer) > stratRows) {
-    InsertRows(0, support->NumStrats(rowPlayer) - stratRows); 
+  else if (support->GetPlayer(rowPlayer)->NumStrategies() > stratRows) {
+    InsertRows(0, support->GetPlayer(rowPlayer)->NumStrategies() - stratRows); 
   }
 
-  if (support->NumStrats(colPlayer) < stratCols) {
-    DeleteCols(0, stratCols - support->NumStrats(colPlayer));
+  if (support->GetPlayer(colPlayer)->NumStrategies() < stratCols) {
+    DeleteCols(0, stratCols - support->GetPlayer(colPlayer)->NumStrategies());
   }
-  else if (support->NumStrats(colPlayer) > stratCols) {
-    InsertCols(0, support->NumStrats(colPlayer) - stratCols);
+  else if (support->GetPlayer(colPlayer)->NumStrategies() > stratCols) {
+    InsertCols(0, support->GetPlayer(colPlayer)->NumStrategies() - stratCols);
   }
 
 #ifdef UNUSED
@@ -676,8 +676,8 @@ void gbtNfgTable::ToggleValues(void)
 
 void gbtNfgTable::OnLeftClick(wxGridEvent &p_event)
 {
-  if (p_event.GetRow() >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer()) ||
-      p_event.GetCol() >= m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer())) {
+  if (p_event.GetRow() >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies() ||
+      p_event.GetCol() >= m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies()) {
     p_event.Veto();
   }
   else {
@@ -692,8 +692,8 @@ void gbtNfgTable::OnLeftClick(wxGridEvent &p_event)
 void gbtNfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
 {
   if (m_editable &&
-      p_event.GetRow() < m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetRowPlayer()) &&
-      p_event.GetCol() < m_doc->GetNfgSupportList().GetCurrent()->NumStrats(m_doc->GetColPlayer())) {
+      p_event.GetRow() < m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies() &&
+      p_event.GetCol() < m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies()) {
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_MENU_EDIT_CONTINGENCY);
     GetParent()->AddPendingEvent(event);
