@@ -576,13 +576,7 @@ void gbtNfgFrame::OnEditStrategies(wxCommandEvent &)
   dialogStrategies dialog(this, m_doc->GetNfg());
 
   if (dialog.ShowModal() == wxID_OK) {
-    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-      gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
-      for (int st = 1; st <= player.NumStrategies(); st++) {
-	player.GetStrategy(st).SetLabel(dialog.GetStrategyName(pl, st));
-      }
-    }
-    m_doc->UpdateViews();
+    m_doc->Submit(dialog.GetCommand());
   }
 }
 

@@ -320,11 +320,12 @@ MixedSolution MixedSolution::PolishEq(void) const
   return PolishEquilibrium(m_support,*this,is_singular);
 }
 
-const gbtTriState &MixedSolution::IsPerfect(void) const
+const gbtTriState &MixedSolution::IsPerfect(bool p_compute /*=false*/) const
 {
   CheckIsValid();
-  if(!m_Perfect.Checked())
+  if (!m_Perfect.Checked() && p_compute) {
     m_Perfect.Set(GetPerfect());
+  }
   return m_Perfect.Answer();
 }
 

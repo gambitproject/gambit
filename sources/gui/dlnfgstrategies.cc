@@ -24,9 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
 
 #include "game/nfg.h"
@@ -37,113 +37,166 @@
 //                    dialogStrategies: Member functions
 //=========================================================================
 
-const int idCHOICE_PLAYER = 2000;
-const int idLISTBOX_STRATEGIES = 2001;
+const int GBT_PLAYER_LIST = 2000;
+const int GBT_EDIT_GRID = 2001;
 
 BEGIN_EVENT_TABLE(dialogStrategies, wxDialog)
-  EVT_CHOICE(idCHOICE_PLAYER, dialogStrategies::OnPlayerChanged)
-  EVT_LISTBOX(idLISTBOX_STRATEGIES, dialogStrategies::OnStrategyChanged)
+  EVT_LISTBOX(GBT_PLAYER_LIST, dialogStrategies::OnSelChanged)
   EVT_BUTTON(wxID_OK, dialogStrategies::OnOK)
 END_EVENT_TABLE()
 
 dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
-  : wxDialog(p_parent, -1, _("Strategies"), wxDefaultPosition), 
-    m_nfg(p_nfg), m_lastPlayer(0), m_lastStrategy(0)
+  : wxDialog(p_parent, -1, _("Strategy Labels"), wxDefaultPosition), 
+    m_nfg(p_nfg), m_selection(1)
 {
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    _("Strategies for player")),
-		   0, wxALL, 5);
-  m_player = new wxChoice(this, idCHOICE_PLAYER);
-  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    gbtNfgPlayer player = p_nfg.GetPlayer(pl);
-    m_player->Append(wxString::Format(wxT("%d: %s"), pl,
-				      (char *) player.GetLabel())); 
+  wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxBoxSizer *playerSizer = new wxBoxSizer(wxVERTICAL);
+  playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Players:")),
+		   0, wxALL | wxCENTER, 5);
+  m_playerList = new wxListBox(this, GBT_PLAYER_LIST);
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_nfg.GetPlayer(pl);
+    m_playerList->Append(wxString::Format(wxT("%s"),
+					  (char *) (ToText(pl) + ": " +
+						    player.GetLabel())));
     m_strategyNames.Append(gbtArray<gbtText>(player.NumStrategies()));
     for (int st = 1; st <= player.NumStrategies(); st++) {
       m_strategyNames[pl][st] = player.GetStrategy(st).GetLabel();
     }
-  } 
-  m_player->SetSelection(0);
-  playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 5);
-
-  wxStaticBoxSizer *strategyBoxSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Strategies")),
-			 wxHORIZONTAL);
-  m_strategyList = new wxListBox(this, idLISTBOX_STRATEGIES);
-  for (int st = 1; st <= m_nfg.GetPlayer(1).NumStrategies(); st++) {
-    m_strategyList->Append(wxString::Format(wxT("%d: %s"), st,
-					    (char *) m_strategyNames[1][st]));
   }
-  m_strategyList->SetSelection(0);
-  strategyBoxSizer->Add(m_strategyList, 0, wxALL, 5);
+  m_playerList->SetSelection(0);
+  playerSizer->Add(m_playerList, 0, wxALL, 5);
+  editSizer->Add(playerSizer, 0, wxALL, 5);
 
-  wxBoxSizer *editSizer = new wxBoxSizer(wxVERTICAL);
-  editSizer->Add(new wxStaticText(this, wxID_STATIC, _("Strategy name")),
-		 0, wxALL | wxCENTER, 5);
-  m_strategyName = new wxTextCtrl(this, -1, 
-				  wxString::Format(wxT("%s"),
-						   (char *) m_strategyNames[1][1]));
-  editSizer->Add(m_strategyName, 0, wxALL | wxCENTER, 5);
-  strategyBoxSizer->Add(editSizer, 0, wxALL, 5);
-
-  topSizer->Add(strategyBoxSizer, 0, wxALL | wxEXPAND, 5);
+  gbtNfgPlayer firstPlayer = m_nfg.GetPlayer(1);
+  m_editGrid = new wxGrid(this, GBT_EDIT_GRID,
+			  wxDefaultPosition, wxDefaultSize);
+  m_editGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
+  m_editGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_editGrid->SetLabelValue(wxHORIZONTAL, _("Label"), 0);
+  for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
+    m_editGrid->SetLabelValue(wxVERTICAL, wxString::Format(wxT("%d"), st), 
+			      st - 1);
+    m_editGrid->SetCellValue(wxString::Format(wxT("%s"),
+					      (char *) firstPlayer.GetStrategy(st).GetLabel()),
+			     st - 1, 0);
+    if (st % 2 == 0) {
+      m_editGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
+    }
+    else {
+      m_editGrid->SetCellBackgroundColour(st - 1, 0, wxColour(225, 225, 225));
+    }
+  }
+  m_editGrid->SetMargins(0, 0);
+  m_editGrid->SetSize(wxSize(m_editGrid->GetRowLabelSize() + 
+			     m_editGrid->GetColSize(0), 200));
+  editSizer->Add(m_editGrid, 0, wxALL, 5);
+  topSizer->Add(editSizer, 0, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
-  
-  SetSizer(topSizer); 
+
+  SetSizer(topSizer);
   topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
+  topSizer->SetSizeHints(this);
   Layout();
   CenterOnParent();
 }
 
-void dialogStrategies::OnPlayerChanged(wxCommandEvent &)
+void dialogStrategies::OnSelChanged(wxCommandEvent &p_event)
 {
-  m_strategyNames[m_lastPlayer+1][m_lastStrategy+1] =
-    m_strategyName->GetValue().mb_str();
-  m_strategyList->Clear();
-  int player = m_player->GetSelection() + 1;
-  for (int st = 1; st <= m_strategyNames[player].Length(); st++) {
-    m_strategyList->Append(wxString::Format(wxT("%d: %s"), st,
-					    (char *) m_strategyNames[player][st]));
+  if (m_editGrid->IsCellEditControlEnabled()) {
+    m_editGrid->SaveEditControlValue();
+    m_editGrid->HideCellEditControl();
   }
-  m_strategyList->SetSelection(0);
-  m_strategyName->SetValue(wxString::Format(wxT("%s"),
-					    (char *) m_strategyNames[player][1]));
-  m_lastPlayer = m_player->GetSelection();
-  m_lastStrategy = 0;
-}
 
-void dialogStrategies::OnStrategyChanged(wxCommandEvent &)
-{
-  int player = m_player->GetSelection() + 1;
-  m_strategyNames[player][m_lastStrategy+1] =
-    m_strategyName->GetValue().mb_str();
-  m_strategyList->SetString(m_lastStrategy,
-			    wxString::Format(wxT("%d: %s"), m_lastStrategy + 1,
-					     m_strategyName->GetValue().c_str()));
-  m_lastStrategy = m_strategyList->GetSelection();
-  m_strategyName->SetValue(wxString::Format(wxT("%s"),
-					    (char *) m_strategyNames[player][m_lastStrategy+1]));
+  gbtNfgPlayer oldPlayer = m_nfg.GetPlayer(m_selection);
+
+  for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
+    m_strategyNames[m_selection][st] = gbtText(m_editGrid->GetCellValue(st - 1, 0).mb_str());
+  }
+
+  gbtNfgPlayer player = m_nfg.GetPlayer(p_event.GetSelection() + 1);
+
+  if (oldPlayer.NumStrategies() > player.NumStrategies()) {
+    m_editGrid->DeleteRows(0,
+			   oldPlayer.NumStrategies() - player.NumStrategies());
+  }
+  else if (oldPlayer.NumStrategies() < player.NumStrategies()) {
+    m_editGrid->InsertRows(0,
+			   player.NumStrategies() - oldPlayer.NumStrategies());
+  }
+
+  m_selection = p_event.GetSelection() + 1;
+
+  for (int st = 1; st <= player.NumStrategies(); st++) {
+    m_editGrid->SetLabelValue(wxVERTICAL, wxString::Format(wxT("%d"), st),
+			      st - 1);
+    m_editGrid->SetCellValue(wxString::Format(wxT("%s"),
+					      (char *) m_strategyNames[m_selection][st]),
+			     st - 1, 0);
+    if (st % 2 == 0) {
+      m_editGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
+    }
+    else {
+      m_editGrid->SetCellBackgroundColour(st - 1, 0, wxColour(225, 225, 225));
+    }
+  }
+ 
+  m_editGrid->AdjustScrollbars();
 }
 
 void dialogStrategies::OnOK(wxCommandEvent &p_event)
 {
-  // Copy any edited data into the blocks
-  int player = m_player->GetSelection() + 1;
-  m_strategyNames[player][m_lastStrategy+1] =
-    m_strategyName->GetValue().mb_str();
-  // Go on with usual processing
+  if (m_editGrid->IsCellEditControlEnabled()) {
+    m_editGrid->SaveEditControlValue();
+    m_editGrid->HideCellEditControl();
+  }
+
+  gbtNfgPlayer player = m_nfg.GetPlayer(m_selection);
+
+  for (int st = 1; st <= player.NumStrategies(); st++) {
+    m_strategyNames[m_selection][st] = (char *) m_editGrid->GetCellValue(st - 1, 0).mb_str();
+  }
+
   p_event.Skip();
+}
+
+
+class gbtCmdEditStrategies : public gbtGameCommand {
+private:
+  gbtBlock<gbtArray<gbtText> > m_strategies;
+
+public:
+  gbtCmdEditStrategies(const gbtBlock<gbtArray<gbtText> > &p_strategies)
+    : m_strategies(p_strategies) { }
+  virtual ~gbtCmdEditStrategies() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdEditStrategies::Do(gbtGameDocument *p_doc)
+{
+  for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
+    gbtNfgPlayer player = p_doc->GetNfg().GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      player.GetStrategy(st).SetLabel(m_strategies[pl][st]);
+    }
+  }
+}
+
+gbtGameCommand *dialogStrategies::GetCommand(void) const
+{
+  return new gbtCmdEditStrategies(m_strategyNames);
 }

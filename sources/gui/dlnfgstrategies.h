@@ -27,18 +27,19 @@
 #ifndef DLNFGSTRATEGIES_H
 #define DLNFGSTRATEGIES_H
 
+#include <wx/grid.h>
+#include "gamedoc.h"
+
 class dialogStrategies : public wxDialog {
 private:
-  const gbtNfgGame &m_nfg;
-  wxChoice *m_player;
-  wxListBox *m_strategyList;
-  wxTextCtrl *m_strategyName;
+  gbtNfgGame m_nfg;
+  wxListBox *m_playerList;
+  wxGrid *m_editGrid;
+  int m_selection;
   gbtBlock<gbtArray<gbtText> > m_strategyNames;
-  int m_lastPlayer, m_lastStrategy;
 
   // Event handlers
-  void OnPlayerChanged(wxCommandEvent &);
-  void OnStrategyChanged(wxCommandEvent &);
+  void OnSelChanged(wxCommandEvent &);
   void OnOK(wxCommandEvent &);
 
 public:
@@ -46,8 +47,7 @@ public:
   dialogStrategies(wxWindow *, const gbtNfgGame &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  const gbtText &GetStrategyName(int pl, int st) const
-    { return m_strategyNames[pl][st]; }
+  gbtGameCommand *GetCommand(void) const;
 
   DECLARE_EVENT_TABLE()
 };

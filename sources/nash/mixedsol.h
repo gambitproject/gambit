@@ -92,7 +92,7 @@ public:
   const gbtText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   const gbtNfgSupport &Support(void) const { CheckIsValid(); return m_support; }
   const gbtTriState &IsNash(void) const;
-  const gbtTriState &IsPerfect(void) const;
+  const gbtTriState &IsPerfect(bool p_compute = false) const;
   const gbtTriState &IsProper(void) const;
   const gbtNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
   const gbtNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
