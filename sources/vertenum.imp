@@ -187,11 +187,11 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   k = C.NumRows();
 
     // Print out some handy info
-  /*gout << "\n";*/
-  /*gout << "d is: "     << d      << "\n\n";*/
-  /*gout << "start: "    << start  << "\n\n";*/
-  /*gout << "C is: \n"   << C      << "\n"  ;*/
-  /*gout << "n is "      << n      << ", k is " << k << "\n\n";*/
+  // gout << "\n";
+  // gout << "d is: "     << d      << "\n\n";
+  // gout << "start: "    << start  << "\n\n";
+  // gout << "C is: \n"   << C      << "\n"  ;
+  // gout << "n is "      << n      << ", k is " << k << "\n\n";
 
     // Create A and b to be of the proper dimensions
   A = new gMatrix<T>(k-n,n);
@@ -207,18 +207,6 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
     return;
   }
 
-    // Check that all d are less than or equal to zero
-    // (No longer necessary?)
-  int i; // Counter int
-  /*for (i=d.First(); i<=d.Last(); i++)*/
-  /*{*/
-    /*if (d[i] > (T)0)*/
-    /*{*/
-      /*gout << "The value for the second argument should always be <= to 0.\n\n";*/
-      /*return;*/
-    /*}*/
-  /*}*/
-  
     // C1 stores ineq's which go through start, C2 holds the rest of them.
   gSquareMatrix<T> C1(n);
   gMatrix<T> C2(k-n,n);
@@ -235,6 +223,7 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 
     // RS keeps track of where the rows of C go.
   gVector<int> RS(k);
+  int i;
 
     // W gets negative start   (gVect's unary minus doesn't like me)
   for (i=start.First(); i<=start.Last(); i++)
@@ -243,7 +232,7 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   }
   
     // Print out W
-  /*gout << "W: " << W << "\n\n";*/
+  // gout << "W: " << W << "\n\n";
 
     // Keeps total for each row
   T total = 0;  
@@ -275,11 +264,11 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
         RS[i] = 1;
 
           // Lets me know which rows go through start
-        /*gout << "Row " << i << " hits the starting point.\n";*/
+        // gout << "Row " << i << " hits the starting point.\n";
 
           // Spits out current state of C1
-        /*gout << "\n C1 is now: \n";*/
-        /*C1.Dump( gout );*/
+        // gout << "\n C1 is now: \n";
+        // C1.Dump( gout );
 
         C1Count++;
       } else  // If we are out of room in C1
@@ -308,8 +297,8 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
         RS[i] = 2;
 
           // Spits current state of C2
-        /*gout << " C2 is now: \n";*/
-        /*C2.Dump( gout );*/
+        // gout << " C2 is now: \n";
+        // C2.Dump( gout );
 
         C2Count++;
       } else  // We are out of room in C2
@@ -331,15 +320,8 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
     // Invert C1
   gSquareMatrix<T> CInv = ( C1.Inverse());
 
-    // Set CINV to be -CINV (unary minus operator for matrix class doesn't work)
-/*  for ( i=CInv.MinRow();i<=CInv.MaxRow();i++)
-  {
-    for ( j=CInv.MinCol();j<=CInv.MaxCol();j++)
-    {
-      CInv(i,j) = -CInv(i,j);
-    }
-  }
-  */
+    // Set CINV to be -CINV 
+
   CInv = -CInv;
 
     // Set D to be elements of d which correspond to C2
@@ -352,23 +334,20 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
     }
   }
 
-    // Set A
-  /**A = (C * (CInv) );*/
-  *A = (C2 * (CInv) );
+    // Set A and b (or D)
 
-    // Set b (or D)
-  /**b = C * start + d;*/
+  *A = (C2 * (CInv) );
   *b = (C2 * start) + D;
 
     // Spit out some useful information
-  /*gout << "\n";*/
-  /*gout << " C1 is: \n"     << C1           << "\n\n";*/
-  /*gout << " C2 is: \n"     << C2           << "\n\n";*/
-  /*gout << " C1^-1 is: \n"  << C1.Invert()  << "\n\n";*/
-  /*gout << " D is: \n"      << D            << "\n\n";*/
-  /*gout << " RS is: \n"     << RS           << "\n\n";*/
-  /*gout << " A is: \n"      << *A           << "\n\n";*/
-  /*gout << " b is: \n"      << *b            << "\n\n";*/
+  // gout << "\n";
+  // gout << " C1 is: \n"     << C1           << "\n\n";
+  // gout << " C2 is: \n"     << C2           << "\n\n";
+  // gout << " C1^-1 is: \n"  << C1.Invert()  << "\n\n";
+  // gout << " D is: \n"      << D            << "\n\n";
+  // gout << " RS is: \n"     << RS           << "\n\n";
+  // gout << " A is: \n"      << *A           << "\n\n";
+  // gout << " b is: \n"      << *b            << "\n\n";
 
     // Here I create a new VertEnum with the normalized info.  It calculates
     // the vertices in the normalized frame, which I retrieve with the
@@ -394,9 +373,9 @@ NewVertEnum<T>::NewVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
   }
 
     // Spit out Verts for debugging purposes
-  /*gout << "\n Verts is:\n";*/
-  /*gout << Verts;*/
-  /*gout << "\n So there.\n";*/
+  // gout << "\n Verts is:\n";
+  // gout << Verts;
+  // gout << "\n So there.\n";
 
     // Sets Vertsmod to the un-normalized vertices
   for(i=Verts.MinRow();i<=Verts.MaxRow();i++) 
