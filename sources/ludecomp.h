@@ -45,7 +45,7 @@ template <class T> class LUdecomp {
 private:
 
   Tableau<T> &tab;
-  Basis<T> &basis;
+  Basis &basis;
 
   gList< EtaMatrix<T> > L;
   gList< EtaMatrix<T> > U;

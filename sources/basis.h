@@ -3,7 +3,6 @@
 //
 //
 
-
 #ifndef BASIS_H
 #define BASIS_H
 
@@ -15,11 +14,10 @@
 // Class Basis
 //---------------------------------------------------------------------------
 
-template <class T> class Basis {
+class Basis {
 
 protected:
 
-  const gMatrix<T> *A;
   gBlock<int> label;        // labels of variables in basis (neg for slacks)
   gBlock<int> cols;         // location of col in basis (0 if not in basis)
   gBlock<int> slacks;       // location of slacks in basis
@@ -35,17 +33,15 @@ public:
       gText Description(void) const;
     };
 
-
   //-------------------------------------------
   // Constructors, Destructor, Operators
   //-------------------------------------------
   
-
-  Basis(const gMatrix<T> &A);
-  Basis(const Basis<T> &);
+  Basis(int first, int last, int firstlabel, int lastlabel);
+  Basis(const Basis &);
   virtual ~Basis();
   
-  Basis<T>& operator=(const Basis<T>&);
+  Basis& operator=(const Basis&);
 
   //------------------------------
   // Public Members
@@ -66,7 +62,7 @@ public:
   
   // returns true if the column is artificial
   inline bool IsArtifColumn( int col ) const
-    {return col > (*A).MaxCol() && col <= cols.Last();} 
+    {return col >= artUnitEntry.First() && col <= cols.Last();} 
 
   inline int UnitEntry(int col ) const
     {assert(IsArtifColumn(col)); return artUnitEntry[col]; }

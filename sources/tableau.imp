@@ -40,7 +40,8 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
  
 template <class T> 
 TableauInterface<T>::TableauInterface(const gMatrix<T> &A, const gVector<T> &b)
-  : A(&A), b(&b), basis(A), solution(A.MinRow(),A.MaxRow()), npivots(0)
+  : A(&A), b(&b), basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
+    solution(A.MinRow(),A.MaxRow()), npivots(0)
 { 
   // These are the values recommended by Murtagh (1981) for 15 digit 
   // accuracy in LP problems 
@@ -87,7 +88,7 @@ template <class T>
 int TableauInterface<T>::MaxCol() const { return A->MaxCol(); }
 
 template <class T>
-Basis<T> & TableauInterface<T>::GetBasis(void) {return basis; }
+Basis & TableauInterface<T>::GetBasis(void) {return basis; }
 
 template <class T>
 const gMatrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
@@ -145,7 +146,7 @@ void TableauInterface<T>::GetColumn(int col, gVector<T> &ret) const
 }
 
 template <class T>
-void TableauInterface<T>::GetBasis(Basis<T> &out) const
+void TableauInterface<T>::GetBasis(Basis &out) const
 {
   out= basis;
 }
@@ -358,7 +359,7 @@ void Tableau<double>::SetConst(const gVector<double> &bnew)
 }
 
 //** this function is not currently used.  Drop it?
-void Tableau<double>::SetBasis(const Basis<double> &in)
+void Tableau<double>::SetBasis(const Basis &in)
 {
   basis= in;
   B.refactor();

@@ -60,7 +60,7 @@ template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
   const gMatrix<T> *A;  // should this be private?
   const gVector<T> *b;  // should this be private?
-  Basis<T> basis; 
+  Basis basis; 
   gVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
@@ -78,7 +78,7 @@ public:
   int MinCol() const;
   int MaxCol() const;
 
-  Basis<T> & GetBasis(void);
+  Basis & GetBasis(void);
   const gMatrix<T> & Get_A(void) const;
   const gVector<T> & Get_b(void) const;
   
@@ -95,7 +95,7 @@ public:
   
   virtual void BasisVector(gVector<T> &x) const = 0; // solve M x = (*b)
   void GetColumn( int , gVector<T> &) const;  // raw column
-  void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
+  void GetBasis( Basis & ) const; // return Basis for current Tableau
 
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void);  // used in lpsolve for some reason
@@ -158,7 +158,7 @@ public:
   void SetRefactor(int);
 
   void SetConst(const gVector<double> &bnew);
-  void SetBasis( const Basis<double> &); // set new Tableau
+  void SetBasis( const Basis &); // set new Tableau
   
   bool IsFeasible();
   bool IsLexMin();
@@ -174,11 +174,11 @@ public:
 #include "rational.h"
 gOutput &operator<<(gOutput &, const Tableau<double> &);
 gOutput &operator<<(gOutput &, const Tableau<gRational> &);
-gOutput &operator<<(gOutput &, const Basis<double> &);
-gOutput &operator<<(gOutput &, const Basis<gRational> &);
+//gOutput &operator<<(gOutput &, const Basis<double> &);
+//gOutput &operator<<(gOutput &, const Basis<gRational> &);
 #elif defined __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &, const Tableau<T> &);
-template <class T> gOutput &operator<<(gOutput &, const Basis<T> &);
+//template <class T> gOutput &operator<<(gOutput &, const Basis<T> &);
 #endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H

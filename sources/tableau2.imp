@@ -113,8 +113,11 @@ int Tableau<gRational>::CanPivot(int outlabel, int col)
 
 void Tableau<gRational>::Pivot(int outrow,int in_col)
 {
+  // gout << "\nIn Tableau<gRational>::Pivot() ";
+  // gout << " outrow:" << outrow;
+  // gout << " inlabel: " << in_col;
   assert( RowIndex(outrow) );
-  assert( ValidIndex(in_col) );
+  // assert( ValidIndex(in_col) );
   int outlabel = Label(outrow);
 
   // gout << "\noutrow:" << outrow;
@@ -223,7 +226,7 @@ void Tableau<gRational>::MySolveColumn(int in_col, gVector<gRational> &out)
 
 void Tableau<gRational>::GetColumn(int col, gVector<gRational> &out) const
 {
-  GetColumn(col,out);
+  TableauInterface<gRational>::GetColumn(col,out);
   if(col>=0) out*=gRational(totdenom);
 
 }
@@ -280,7 +283,7 @@ void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
 
 
 //** this function is not currently used.  Drop it?
-void Tableau<gRational>::SetBasis(const Basis<gRational> &in)
+void Tableau<gRational>::SetBasis(const Basis &in)
 {
   basis= in;
   //** this has to be changed -- Need to start over and pivot to new basis.  

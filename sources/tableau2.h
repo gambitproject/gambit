@@ -13,7 +13,7 @@ private:
 
   gMatrix<gInteger> Tabdat;  // This caries the full tableau
   gVector<gInteger> Coeff;   // and coeffieient vector
-  gVector<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
+  gBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
   gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
   gInteger denom;  // This is the denominator for the simplex
 
@@ -41,7 +41,7 @@ public:
   void SetRefactor(int);
 
   void SetConst(const gVector<gRational> &bnew);
-  void SetBasis( const Basis<gRational> &); // set new Tableau
+  void SetBasis( const Basis &); // set new Tableau
   void Solve(const gVector<gRational> &b, gVector<gRational> &x);  // solve M x = b
   void SolveT(const gVector<gRational> &c, gVector<gRational> &y);  // solve y M = c
   
