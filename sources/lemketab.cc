@@ -23,8 +23,12 @@ template <class T> LTableau<T>::~LTableau(void)
 
 template <class T> int LTableau<T>::PivotIn(int inlabel)
 { 
+//  gout << "\n inlabel = " << inlabel;
   int outindex = ExitIndex(inlabel);
   int outlabel = Label(outindex);
+  if(outlabel==0)return 0;
+//  gout << "\n outlabel = " << outlabel;
+//  gout << " outindex = " << outindex << "\n\n";
   Pivot(outindex,inlabel);
   return outlabel;
 }
@@ -40,6 +44,8 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 //    (*params.output) << "\nbegin path " << dup << "\n";
 //    Dump(*params.output); 
 //  }
+//    (gout) << "\nbegin path " << dup << "\n";
+//    Dump(gout); 
   enter = dup;
   if (Member(dup))
     enter = -dup;
@@ -48,11 +54,13 @@ template <class T> int LTableau<T>::LemkePath(int dup)
     exit = PivotIn(enter);
 //    if(params.plev >=2) 
 //      Dump(*params.output);
+//      Dump(gout);
 
     enter = -exit;
   } while ((exit != dup) && (exit != -dup));
       // Quit when at a CBFS.
 //  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
+//  gout << "\nend of path " << dup;
   return 1;
 }
 
@@ -78,6 +86,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel) const
   for (i = MinRow(); i <= MaxRow(); i++)
     if (incol[i] > (T) 0)
       BestSet.Append(i);
+  if(BestSet.Length()==0 && incol[Find(0)]==(T)0)
+    return Find(0);
   assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
