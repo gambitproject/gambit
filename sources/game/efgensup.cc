@@ -26,18 +26,70 @@
 
 #include "efgensup.h"
 
+//
+// These two static functions were formerly members of the class
+// gbtActionIterator.  They were removed in converting that class
+// to a more general iterator, since these aren't truly appropriate
+// for member functions.
+// They still need better names, though!
+//
+static bool
+DeletionsViolateActiveCommitments(gbtActionIterator &cursor,
+				  const EFSupportWithActiveInfo *S,
+				  const gList<Infoset *> *infosetlist)
+{
+  for (int i = 1; i <= infosetlist->Length(); i++) {
+    const Infoset *infoset = (*infosetlist)[i];
+    if (infoset->GetPlayer()->GetNumber() < cursor.GetPlayerId() ||
+	( infoset->GetPlayer()->GetNumber() == cursor.GetPlayerId() &&
+	  infoset->GetNumber() < cursor.GetInfosetId()) )
+      if (S->NumActions(infoset) > 0)
+	return true;
+    if (infoset->GetPlayer()->GetNumber() == cursor.GetPlayerId() &&
+	infoset->GetNumber() == cursor.GetInfosetId() )
+      for (int act = 1; act < cursor.GetActionId(); act++)
+	if ( S->Contains(infoset->GetPlayer()->GetNumber(),
+			 infoset->GetNumber(),
+			 act) )
+	  return true;
+  }
+  return false;
+}
+
+
+static bool
+InfosetGuaranteedActiveByPriorCommitments(gbtActionIterator &cursor,
+					  const EFSupportWithActiveInfo *S,
+					  const Infoset *infoset)
+{
+  const gArray<Node *> &members = infoset->Members();
+  for (int i = 1; i <= members.Length(); i++) {
+    const Node* current = members[i];
+    if ( current == S->GetGame().RootNode() )
+      return true;
+    else
+      while ( S->Contains((Action *)current->GetAction()) &&
+	      cursor.IsSubsequentTo(current->GetAction()) ) {
+	current = current->GetParent();
+	if ( current == S->GetGame().RootNode() )
+	  return true;
+      }
+  }
+  return false;
+}
+
 // We build a series of functions of increasing complexity.  The
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
 void AllSubsupportsRECURSIVE(const EFSupport *s,
 			     EFSupportWithActiveInfo *sact,
-			     ActionCursorForSupport *c,
+			     gbtActionIterator *c,
 			     gList<const EFSupport> *list)
 { 
   (*list) += *sact;
 
-  ActionCursorForSupport c_copy(*c);
+  gbtActionIterator c_copy(*c);
 
   do {
     if ( sact->Contains((Action *)c_copy.GetAction()) ) {
@@ -52,7 +104,7 @@ gList<const EFSupport> AllSubsupports(const EFSupport &S)
 {
   gList<const EFSupport> answer;
   EFSupportWithActiveInfo SAct(S);
-  ActionCursorForSupport cursor(S);
+  gbtActionIterator cursor(S);
 
   AllSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
 
@@ -69,14 +121,14 @@ gList<const EFSupport> AllSubsupports(const EFSupport &S)
 
 void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 ActionCursorForSupport *c,
+					 gbtActionIterator *c,
 					 gList<const EFSupport> *list)
 { 
   if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers()) {
     (*list) += *sact;
   }
 
-  ActionCursorForSupport c_copy(*c);
+  gbtActionIterator c_copy(*c);
 
   do {
     if ( sact->Contains((Action *)c_copy.GetAction()) ) {
@@ -85,8 +137,8 @@ void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
       sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						 &deactivated_infosets); 
 
-      if (!c_copy.DeletionsViolateActiveCommitments(sact,
-						    &deactivated_infosets))
+      if (!DeletionsViolateActiveCommitments(c_copy, sact,
+					     &deactivated_infosets))
 	AllInequivalentSubsupportsRECURSIVE(s,sact,&c_copy,list);
       sact->AddAction(c_copy.GetAction());
     }
@@ -97,7 +149,7 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S)
 {
   gList<const EFSupport> answer;
   EFSupportWithActiveInfo SAct(S);
-  ActionCursorForSupport cursor(S);
+  gbtActionIterator cursor(S);
 
   AllInequivalentSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
 
@@ -106,7 +158,7 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S)
 
 void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 ActionCursorForSupport *c,
+					 gbtActionIterator *c,
 					const bool strong,
 					const bool conditional,
 					 gList<const EFSupport> *list,
@@ -118,7 +170,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
   if (sact->HasActiveActionsAtActiveInfosets()) 
     check_domination = true;
   gList<Action *> deletion_list;
-  ActionCursorForSupport scanner(*s);
+  gbtActionIterator scanner(*s);
 
   // First we collect all the actions that can be deleted.
   do {
@@ -152,7 +204,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
 	
-      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
+      if (DeletionsViolateActiveCommitments(*c,sact,&deactivated_infosets))
 	abort = true;
     }
 
@@ -175,7 +227,7 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
       (*list) += *sact;
     }
     
-    ActionCursorForSupport c_copy(*c);
+    gbtActionIterator c_copy(*c);
     
     do {
       if ( sact->Contains((Action *)c_copy.GetAction()) ) {
@@ -184,8 +236,8 @@ void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
 	
-	if (!c_copy.DeletionsViolateActiveCommitments(sact,
-						      &deactivated_infosets))
+	if (!DeletionsViolateActiveCommitments(c_copy, sact,
+					       &deactivated_infosets))
 	  AllUndominatedSubsupportsRECURSIVE(s,
 					     sact,
 					     &c_copy,
@@ -207,7 +259,7 @@ gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
 {
   gList<const EFSupport> answer;
   EFSupportWithActiveInfo sact(S);
-  ActionCursorForSupport cursor(S);
+  gbtActionIterator cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(&S,
 				     &sact,
@@ -222,7 +274,7 @@ gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
 
 void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 					    EFSupportWithActiveInfo *sact,
-				            ActionCursorForSupport *c,
+				            gbtActionIterator *c,
 				            gList<const EFSupport> *list,
 				      const gStatus &status)
 { 
@@ -235,7 +287,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
   if (sact->HasActiveActionsAtActiveInfosets()) 
     check_domination = true;
   gList<Action *> deletion_list;
-  ActionCursorForSupport scanner(*s);
+  gbtActionIterator scanner(*s);
 
   do {
     Action *this_action = (Action *)scanner.GetAction();
@@ -249,7 +301,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	  if ( sact->IsDominated(this_action,true,true) ||
 	       sact->IsDominated(this_action,true,false) ) {
 	    add_support = false;
-	    if ( c->InfosetGuaranteedActiveByPriorCommitments(sact,
+	    if (InfosetGuaranteedActiveByPriorCommitments(*c, sact,
 						   this_action->BelongsTo()) )
 	      delete_this_action = true;
 	  }
@@ -268,7 +320,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
       gList<Infoset *> deactivated_infosets;
       sact->RemoveActionReturningDeletedInfosets(deletion_list[i],
 						   &deactivated_infosets); 
-      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
+      if (DeletionsViolateActiveCommitments(*c,sact,&deactivated_infosets))
 	abort = true;
     }
 
@@ -285,14 +337,14 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
     if (add_support && sact->HasActiveActionsAtActiveInfosetsAndNoOthers()) {
       (*list) += *sact;
     }
-    ActionCursorForSupport c_copy(*c);
+    gbtActionIterator c_copy(*c);
     do {
       if ( sact->Contains((Action *)c_copy.GetAction()) ) {
 	gList<Infoset *> deactivated_infosets;
 	sact->RemoveActionReturningDeletedInfosets(c_copy.GetAction(),
 						   &deactivated_infosets); 
-	if (!c_copy.DeletionsViolateActiveCommitments(sact,
-						      &deactivated_infosets))
+	if (!DeletionsViolateActiveCommitments(c_copy,sact,
+					       &deactivated_infosets))
 	  PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
 
 	sact->AddAction(c_copy.GetAction());
@@ -350,7 +402,7 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 {
   gList<const EFSupport> answer;
   EFSupportWithActiveInfo sact(S);
-  ActionCursorForSupport cursor(S);
+  gbtActionIterator cursor(S);
 
   status.SetProgress(0);
   PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
@@ -365,7 +417,7 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
     status.SetProgress((2.0-((double)i/(double)answer.Length()))/2.0);
     status.Get();
     EFSupportWithActiveInfo current(answer[i]);
-    ActionCursorForSupport crsr(S);
+    gbtActionIterator crsr(S);
     bool remove = false;
     do {
       const Action *act = crsr.GetAction();
@@ -396,179 +448,5 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
   return SortSupportsBySize(answer);
 }
 
-//----------------------------------------------------
-//                ActionCursorForSupport
-// ---------------------------------------------------
 
-ActionCursorForSupport::ActionCursorForSupport(const EFSupport &S)
-  : support(&S), pl(1), iset(1), act(1)
-{}
-
-ActionCursorForSupport::ActionCursorForSupport(
-                  const ActionCursorForSupport &ac)
-  : support(ac.support), pl(ac.pl), iset(ac.iset), act(ac.act)
-{}
-
-ActionCursorForSupport::~ActionCursorForSupport()
-{}
-
-ActionCursorForSupport& 
-ActionCursorForSupport::operator=(const ActionCursorForSupport &rhs)
-{
-  if (this != &rhs) {
-    support = rhs.support;
-    pl = rhs.pl;
-    iset = rhs.iset;
-    act = rhs.act;
-  }
-  return *this;
-}
-
-bool 
-ActionCursorForSupport::operator==(const ActionCursorForSupport &rhs) const
-{
-  if (support != rhs.support ||
-      pl      != rhs.pl      ||
-      iset    != rhs.iset    ||
-      act != rhs.act)
-    return false;
-  return true;
-}
-
-bool 
-ActionCursorForSupport::operator!=(const ActionCursorForSupport &rhs) const
-{
- return (!(*this==rhs));
-}
-
-bool
-ActionCursorForSupport::GoToNext()
-{
-  if (act != support->NumActions(pl,iset))
-    { act++; return true; }
-  
-  int temppl(pl);
-  int tempiset(iset);
-  tempiset ++; 
-
-  while (temppl <= support->GetGame().NumPlayers()) {
-    while (tempiset <= support->GetGame().Players()[temppl]->NumInfosets()) {
-      if (support->NumActions(temppl,tempiset) > 0) {
-	pl = temppl;
-	iset = tempiset;
-	act = 1;
-	return true;
-      }
-      else
-	tempiset++;
-    }
-    tempiset = 1;
-    temppl++;
-  }
-  return false;
-}
-
-const Action *ActionCursorForSupport::GetAction() const
-{
-  return support->Actions(pl,iset)[act];
-}
-
-int ActionCursorForSupport::ActionIndex() const
-{
-  return act;
-}
-
-
-const Infoset *ActionCursorForSupport::GetInfoset() const
-{
-  return support->GetGame().Players()[pl]->Infosets()[iset];
-}
-
-int ActionCursorForSupport::InfosetIndex() const
-{
-  return iset;
-}
-
-const EFPlayer *ActionCursorForSupport::GetPlayer() const
-{
-  return support->GetGame().Players()[pl];
-}
-
-int ActionCursorForSupport::PlayerIndex() const
-{
-  return pl;
-}
-
-bool 
-ActionCursorForSupport::IsLast() const
-{
-  if (pl == support->GetGame().NumPlayers())
-    if (iset == support->GetGame().Players()[pl]->NumInfosets())
-      if (act == support->NumActions(pl,iset))
-	return true;
-  return false;
-}
-
-bool 
-ActionCursorForSupport::IsSubsequentTo(const Action *a) const
-{
-  if (pl > a->BelongsTo()->GetPlayer()->GetNumber())
-    return true; 
-  else if (pl < a->BelongsTo()->GetPlayer()->GetNumber())
-    return false;
-  else
-    if (iset > a->BelongsTo()->GetNumber())
-      return true; 
-    else if (iset < a->BelongsTo()->GetNumber())
-      return false;
-    else 
-      if (act > a->GetNumber())
-	return true;
-      else
-	return false;
-}
-
-
-bool ActionCursorForSupport::
-DeletionsViolateActiveCommitments(const EFSupportWithActiveInfo *S,
-				   const gList<Infoset *> *infosetlist)
-{
-  for (int i = 1; i <= infosetlist->Length(); i++) {
-    const Infoset *infoset = (*infosetlist)[i];
-    if (infoset->GetPlayer()->GetNumber() < PlayerIndex() ||
-	( infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
-	  infoset->GetNumber() < InfosetIndex()) )
-      if (S->NumActions(infoset) > 0)
-	return true;
-    if (infoset->GetPlayer()->GetNumber() == PlayerIndex() &&
-	infoset->GetNumber() == InfosetIndex() )
-      for (int act = 1; act < ActionIndex(); act++)
-	if ( S->Contains(infoset->GetPlayer()->GetNumber(),
-			 infoset->GetNumber(),
-			 act) )
-	  return true;
-  }
-  return false;
-}
-
-
-bool ActionCursorForSupport::
-InfosetGuaranteedActiveByPriorCommitments(const EFSupportWithActiveInfo *S,
-					  const Infoset *infoset)
-{
-  const gArray<Node *> &members = infoset->Members();
-  for (int i = 1; i <= members.Length(); i++) {
-    const Node* current = members[i];
-    if ( current == S->GetGame().RootNode() )
-      return true;
-    else
-      while ( S->Contains((Action *)current->GetAction()) &&
-	      IsSubsequentTo(current->GetAction()) ) {
-	current = current->GetParent();
-	if ( current == S->GetGame().RootNode() )
-	  return true;
-      }
-  }
-  return false;
-}
 

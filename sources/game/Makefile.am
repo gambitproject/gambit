@@ -5,6 +5,8 @@ noinst_LIBRARIES = libgame.a
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 libgame_a_SOURCES = \
+        actiter.cc \
+        actiter.h \
 	behav.h \
 	behav.imp \
 	behavinst.cc \

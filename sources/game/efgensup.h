@@ -28,8 +28,7 @@
 #include "math/rational.h"
 #include "efg.h"
 #include "efgciter.h"
-
-class ActionCursorForSupport;
+#include "actiter.h"
 
 // We build a series of functions of increasing complexity.  The
 // final one, which is our goal, is the undominated support function.
@@ -37,7 +36,7 @@ class ActionCursorForSupport;
 
 void AllSubsupportsRECURSIVE(const EFSupport *s,
 			     EFSupportWithActiveInfo *sact,
-			     ActionCursorForSupport *c,
+			     gbtActionIterator *c,
 			     gList<const EFSupport> *list);
 
 gList<const EFSupport> AllSubsupports(const EFSupport &S);
@@ -51,7 +50,7 @@ gList<const EFSupport> AllSubsupports(const EFSupport &S);
 
 void AllInequivalentSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 ActionCursorForSupport *c,
+					 gbtActionIterator *c,
 					 gList<const EFSupport> *list);
 
 gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S);
@@ -67,7 +66,7 @@ gList<const EFSupport> AllInequivalentSubsupports(const EFSupport &S);
 
 void AllUndominatedSubsupportsRECURSIVE(const EFSupport *s,
 					 EFSupportWithActiveInfo *sact,
-					 ActionCursorForSupport *c,
+					 gbtActionIterator *c,
 					const bool strong,
 					const bool conditional,
 					 gList<const EFSupport> *list,
@@ -91,7 +90,7 @@ gList<const EFSupport> AllUndominatedSubsupports(const EFSupport &S,
 
 void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 					    EFSupportWithActiveInfo *sact,
-				            ActionCursorForSupport *c,
+				            gbtActionIterator *c,
 					    gList<const EFSupport> *list,
 				      const gStatus &status);
 
@@ -100,49 +99,5 @@ gList<const EFSupport> SortSupportsBySize(gList<const EFSupport> &);
 gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 					       gStatus &status);
 
-///////////////// Utility Cursor Class /////////////////////
-
-class ActionCursorForSupport {
-protected:
-  const EFSupport *support;
-        int pl;
-        int iset;
-        int act;
-
-public:
-  //Constructors and dtor
-  ActionCursorForSupport(const EFSupport &S);
-  ActionCursorForSupport(const ActionCursorForSupport &a);
-  ~ActionCursorForSupport();
-
-  // Operators
-  ActionCursorForSupport &operator =(const ActionCursorForSupport &);
-  bool                    operator==(const ActionCursorForSupport &) const;
-  bool                    operator!=(const ActionCursorForSupport &) const;
-
-  // Manipulation
-  bool GoToNext();
-
-  // Information
-  const Action *GetAction() const;
-  int ActionIndex() const;
-  const Infoset *GetInfoset() const;
-  int InfosetIndex() const;
-  const EFPlayer *GetPlayer() const;
-  int PlayerIndex() const;
-
-  bool IsLast() const;
-  bool IsSubsequentTo(const Action *) const;
-
-  // Special
-  bool InfosetGuaranteedActiveByPriorCommitments(const 
-						     EFSupportWithActiveInfo *,
-						 const Infoset *);
-  bool DeletionsViolateActiveCommitments(const EFSupportWithActiveInfo *,
-					 const gList<Infoset *> *);
-};
 
 
-//////////////////////Testing////////////////////
-
-void AndyTest(const EFSupport &S, gStatus &status);

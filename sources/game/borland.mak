@@ -15,6 +15,7 @@ EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libgame_a_SOURCES = \
+        actiter.cc \
 	behavinst.cc \
 	efbasis.cc \
 	efdom.cc \
