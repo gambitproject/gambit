@@ -224,54 +224,59 @@ Portion *gclFunctionCall::Evaluate(void)
 
   gstatus.Get();
 
-  CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name), 
-				      m_line, m_file);
+  CallFuncObj call((*_gsm._FuncTable)(name), m_line, m_file);
   
-  try {
-    for (int i = 1; i <= params->req->NumParams(); i++)   {
-      Portion *val = (*params->req)[i]->Evaluate();
-      if (val->Spec().Type == porREFERENCE)   {
-	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
-	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
-	else  {
-	  call->SetCurrParam(val, AUTO_VAL_OR_REF);
-	}
+  for (int i = 1; i <= params->req->NumParams(); i++)   {
+    Portion *val = (*params->req)[i]->Evaluate();
+    if (val->Spec().Type == porREFERENCE)   {
+      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
+	call.SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
+      else  {
+	call.SetCurrParam(val, AUTO_VAL_OR_REF);
       }
-      else  
-	call->SetCurrParam(val, AUTO_VAL_OR_REF);
     }
+    else  
+      call.SetCurrParam(val, AUTO_VAL_OR_REF);
+  }
   
-    for (int i = 1; i <= params->opt->NumParams(); i++)  {
-      call->SetCurrParamIndex(params->opt->FormalName(i));
-      Portion *val = (*params->opt)[i]->Evaluate();
-      if (val->Spec().Type == porREFERENCE)   {
-	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
-	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
-	else  {
-	  call->SetCurrParam(val);
-	}
+  for (int i = 1; i <= params->opt->NumParams(); i++)  {
+    call.SetCurrParamIndex(params->opt->FormalName(i));
+    Portion *val = (*params->opt)[i]->Evaluate();
+    if (val->Spec().Type == porREFERENCE)   {
+      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
+	call.SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
+      else  {
+	call.SetCurrParam(val);
       }
-      else  
-	call->SetCurrParam(val);
     }
+    else  
+      call.SetCurrParam(val);
+  }
     
-    Portion **param = new Portion *[call->NumParams()];
-    Portion *ret = call->CallFunction(&_gsm, param);
+  Portion **param = 0;
+  Portion *ret = 0;
+
+  try {
+    param = new Portion *[call.NumParams()];
+    ret = call.CallFunction(&_gsm, param);
       
-    for (int index = 0; index < call->NumParams(); index++)   {
-      ReferencePortion *refp = call->GetParamRef(index);
+    for (int index = 0; index < call.NumParams(); index++)   {
+      ReferencePortion *refp = call.GetParamRef(index);
       if (refp != 0)  {
 	_gsm.VarDefine(refp->Value(), param[index]);
 	delete refp;
       }
     }
 
-    return ret;
+    delete [] param;
   }
   catch (...) {
-    delete call;
+    if (param)  delete [] param;
+    if (ret)    delete ret;
     throw;
   }
+
+  return ret;
 }
 
 
