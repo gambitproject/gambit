@@ -20,7 +20,7 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
 	 gList<MixedSolution> &solutions, long &nevals, double &time)
 {
   if (params.precision == precDOUBLE)  {
-    PolEnumModule<double> module(support, params, values);
+    PolEnumModule<gDouble> module(support, params, values);
     module.PolEnum();
     nevals = module.NumEvals();
     time = module.Time();
