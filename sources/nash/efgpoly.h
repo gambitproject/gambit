@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Enumerates all Nash equilibrium of a game, via polynomial equations
+// Enumerates all Nash equilibrium of a game, via gbtPolyUni equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project

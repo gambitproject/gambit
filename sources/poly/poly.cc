@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of polynomial classes
+// Instantiation of gbtPolyUni classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -28,39 +28,39 @@
 #include "math/double.h"
 #include "math/gnumber.h"
 
-template class polynomial<gbtRational>;
+template class gbtPolyUni<gbtRational>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gbtRational>& x);
+			       const gbtPolyUni<gbtRational>& x);
 
-template class polynomial<int>;
+template class gbtPolyUni<int>;
 template gbtOutput& operator << (gbtOutput& output,
-			       const polynomial<int>& x);
+			       const gbtPolyUni<int>& x);
 
-template class polynomial<double>;
+template class gbtPolyUni<double>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<double>& x);
+			       const gbtPolyUni<double>& x);
 
-template class polynomial<gbtDouble>;
+template class gbtPolyUni<gbtDouble>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gbtDouble>& x);
+			       const gbtPolyUni<gbtDouble>& x);
 
-template class polynomial<gbtNumber>;
+template class gbtPolyUni<gbtNumber>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gbtNumber>& x);
+			       const gbtPolyUni<gbtNumber>& x);
 
 #include "base/glist.imp"
-template class gbtList< polynomial<gbtRational> >;
+template class gbtList< gbtPolyUni<gbtRational> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<polynomial<gbtRational> >&);
+			       const gbtList<gbtPolyUni<gbtRational> >&);
 
-template class gbtList< polynomial<int> >;
+template class gbtList< gbtPolyUni<int> >;
 
-template class gbtList< polynomial<double> >;
+template class gbtList< gbtPolyUni<double> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<polynomial<double> >&);
+			       const gbtList<gbtPolyUni<double> >&);
 
-template class gbtList< polynomial<gbtDouble> >;
+template class gbtList< gbtPolyUni<gbtDouble> >;
 
-template class gbtList< polynomial<gbtNumber> >;
+template class gbtList< gbtPolyUni<gbtNumber> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<polynomial<gbtNumber> >&);
+			       const gbtList<gbtPolyUni<gbtNumber> >&);

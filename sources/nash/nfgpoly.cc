@@ -5,7 +5,7 @@
 //
 // DESCRIPTION:
 // Enumerates all Nash equilibria in a normal form game, via solving
-// systems of polynomial equations
+// systems of gbtPolyUni equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -43,8 +43,8 @@ private:
   gbtNfgGame m_nfg;
   const gbtNfgSupport &support;
   PolEnumParams params;
-  gSpace Space;
-  term_order Lex;
+  gbtPolySpace Space;
+  gbtPolyTermOrder Lex;
   int num_vars;
   long count,nevals;
   double time;
@@ -53,17 +53,17 @@ private:
 
   bool EqZero(gbtDouble x) const;
   
-  // p_i_j as a gPoly, with last prob in terms of previous probs
-  gPoly<gbtDouble> Prob(int i,int j) const;
+  // p_i_j as a gbtPolyMulti, with last prob in terms of previous probs
+  gbtPolyMulti<gbtDouble> Prob(int i,int j) const;
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
-  gPoly<gbtDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
-  gPolyList<gbtDouble>   IndifferenceEquations()                 const;
-  gPolyList<gbtDouble>   LastActionProbPositiveInequalities()    const;
-  gPolyList<gbtDouble>   NashOnSupportEquationsAndInequalities() const;
+  gbtPolyMulti<gbtDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
+  gbtPolyMultiList<gbtDouble>   IndifferenceEquations()                 const;
+  gbtPolyMultiList<gbtDouble>   LastActionProbPositiveInequalities()    const;
+  gbtPolyMultiList<gbtDouble>   NashOnSupportEquationsAndInequalities() const;
   gbtList<gbtVector<gbtDouble> > 
-               NashOnSupportSolnVectors(const gPolyList<gbtDouble> &equations,
+               NashOnSupportSolnVectors(const gbtPolyMultiList<gbtDouble> &equations,
 					const gRectangle<gbtDouble> &Cube,
 					gbtStopWatch &timer,
 					gbtStatus &p_status);
@@ -107,7 +107,7 @@ PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
 int PolEnumModule::PolEnum(gbtStatus &p_status)
 {
   gbtStopWatch watch;
-  gPolyList<gbtDouble> equations = NashOnSupportEquationsAndInequalities();
+  gbtPolyMultiList<gbtDouble> equations = NashOnSupportEquationsAndInequalities();
 
   /*
   // equations for equality of strat j to strat j+1
@@ -127,7 +127,7 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
  
   gRectangle<gbtDouble> Cube(bottoms, tops); 
 
-  // start QuikSolv
+  // start gbtPolyQuickSolve
   gbtStopWatch timer;
   timer.Start();
 
@@ -193,9 +193,9 @@ const gbtList<MixedSolution> &PolEnumModule::GetSolutions(void) const
   return solutions;
 }
 
-gPoly<gbtDouble> PolEnumModule::Prob(int p, int strat) const
+gbtPolyMulti<gbtDouble> PolEnumModule::Prob(int p, int strat) const
 {
-  gPoly<gbtDouble> equation(&Space,&Lex);
+  gbtPolyMulti<gbtDouble> equation(&Space,&Lex);
   gbtVector<int> exps(num_vars);
   int i,j,kk = 0;
   
@@ -205,30 +205,30 @@ gPoly<gbtDouble> PolEnumModule::Prob(int p, int strat) const
   if(strat<support.NumStrats(p)) {
     exps=0;
     exps[strat+kk]=1;
-    exp_vect const_exp(&Space,exps);
-    gMono<gbtDouble> const_term((gbtDouble)1,const_exp);
-    gPoly<gbtDouble> new_term(&Space,const_term,&Lex);
+    gbtPolyExponent const_exp(&Space,exps);
+    gbtMonomial<gbtDouble> const_term((gbtDouble)1,const_exp);
+    gbtPolyMulti<gbtDouble> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   else {
     for(j=1;j<support.NumStrats(p);j++) {
       exps=0;
       exps[j+kk]=1;
-      exp_vect exponent(&Space,exps);
-      gMono<gbtDouble> term((gbtDouble)(-1),exponent);
-      gPoly<gbtDouble> new_term(&Space,term,&Lex);
+      gbtPolyExponent exponent(&Space,exps);
+      gbtMonomial<gbtDouble> term((gbtDouble)(-1),exponent);
+      gbtPolyMulti<gbtDouble> new_term(&Space,term,&Lex);
       equation+=new_term;
     }
     exps=0;
-    exp_vect const_exp(&Space,exps);
-    gMono<gbtDouble> const_term((gbtDouble)1,const_exp);
-    gPoly<gbtDouble> new_term(&Space,const_term,&Lex);
+    gbtPolyExponent const_exp(&Space,exps);
+    gbtMonomial<gbtDouble> const_term((gbtDouble)1,const_exp);
+    gbtPolyMulti<gbtDouble> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   return equation;
 }
 
-gPoly<gbtDouble> 
+gbtPolyMulti<gbtDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   gbtNfgContingency profile(m_nfg);
@@ -236,9 +236,9 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
   gbtNfgContIterator A(support), B(support);
   A.Freeze(support.GetStrategy(i, strat1));
   B.Freeze(support.GetStrategy(i, strat2));
-  gPoly<gbtDouble> equation(&Space,&Lex);
+  gbtPolyMulti<gbtDouble> equation(&Space,&Lex);
   do {
-    gPoly<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
+    gbtPolyMulti<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
     profile = A.GetProfile();
     int k;
     for(k=1;k<=m_nfg.NumPlayers();k++) 
@@ -256,9 +256,9 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 }
 
 
-gPolyList<gbtDouble>   PolEnumModule::IndifferenceEquations()  const
+gbtPolyMultiList<gbtDouble>   PolEnumModule::IndifferenceEquations()  const
 {
-  gPolyList<gbtDouble> equations(&Space,&Lex);
+  gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=m_nfg.NumPlayers();pl++) 
     for(int j=1;j<support.NumStrats(pl);j++) 
@@ -267,9 +267,9 @@ gPolyList<gbtDouble>   PolEnumModule::IndifferenceEquations()  const
   return equations;
 }
  
-gPolyList<gbtDouble> PolEnumModule::LastActionProbPositiveInequalities() const
+gbtPolyMultiList<gbtDouble> PolEnumModule::LastActionProbPositiveInequalities() const
 {
-  gPolyList<gbtDouble> equations(&Space,&Lex);
+  gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=m_nfg.NumPlayers();pl++)
     if(support.NumStrats(pl)>2) 
@@ -278,9 +278,9 @@ gPolyList<gbtDouble> PolEnumModule::LastActionProbPositiveInequalities() const
   return equations;
 }
 
-gPolyList<gbtDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
+gbtPolyMultiList<gbtDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 {
-  gPolyList<gbtDouble> equations(&Space,&Lex);
+  gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
   
   equations += IndifferenceEquations();
   equations += LastActionProbPositiveInequalities();
@@ -290,12 +290,12 @@ gPolyList<gbtDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() cons
 
 
 gbtList<gbtVector<gbtDouble> > 
-PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gbtDouble> &equations,
+PolEnumModule::NashOnSupportSolnVectors(const gbtPolyMultiList<gbtDouble> &equations,
 					      const gRectangle<gbtDouble> &Cube,
 					      gbtStopWatch &timer,
 					      gbtStatus &p_status)
 {  
-  QuikSolv<gbtDouble> quickie(equations, p_status);
+  gbtPolyQuickSolve<gbtDouble> quickie(equations, p_status);
   //  p_status.SetProgress(0);
 
   try {
@@ -410,7 +410,7 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
     gbtStopWatch watch;
     
     // equations for equality of strat j to strat j+1
-    gPolyList<gbtDouble> equations(&Space,&Lex);
+    gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
     equations += IndifferenceEquations();
 
     //DEBUG
@@ -418,9 +418,9 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
     //  << Space->Dmnsn() << " and equations = \n"
     //	 << equations << "\n";
     
-    // start QuikSolv
+    // start gbtPolyQuickSolve
     gbtNullStatus gstatus;
-    QuikSolv<gbtDouble> quickie(equations, gstatus);
+    gbtPolyQuickSolve<gbtDouble> quickie(equations, gstatus);
     
     //DEBUG
     //    gout << "We constructed quickie.\n";

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiations of polynomial list types
+// Instantiations of gbtPolyUni list types
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -32,38 +32,38 @@
 #include "math/gnumber.h"
 #include "math/gmatrix.imp"
 
-//template class gPolyList<int>;
-//template gbtOutput &operator<<(gbtOutput &f, const gPolyList<int> &y);
+//template class gbtPolyMultiList<int>;
+//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<int> &y);
 
-template class gPolyList<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gbtRational> &y);
+template class gbtPolyMultiList<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<gbtRational> &y);
 
-//template class gPolyList<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const gPolyList<double> &y);
+//template class gbtPolyMultiList<double>;
+//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<double> &y);
 
-template class gPolyList<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gbtDouble> &y);
+template class gbtPolyMultiList<gbtDouble>;
+template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<gbtDouble> &y);
 
 template class gbtList<gbtIndexPair>;
 
 /*
 #include "objcount.imp"
 
-template class Counted<gPolyList<gbtDouble> >;
-int Counted<gPolyList<gbtDouble> >::numObjects = 0;
+template class Counted<gbtPolyMultiList<gbtDouble> >;
+int Counted<gbtPolyMultiList<gbtDouble> >::numObjects = 0;
 
-template class Counted<gPolyList<double> >;
-int Counted<gPolyList<double> >::numObjects = 0;
+template class Counted<gbtPolyMultiList<double> >;
+int Counted<gbtPolyMultiList<double> >::numObjects = 0;
 
-template class Counted<gPolyList<gbtRational> >;
-int Counted<gPolyList<gbtRational> >::numObjects = 0;
+template class Counted<gbtPolyMultiList<gbtRational> >;
+int Counted<gbtPolyMultiList<gbtRational> >::numObjects = 0;
 */
 
-template class gbtRectArray<gPoly<gbtDouble>*>;
-template class gbtArray<gPoly<gbtDouble>*>;
+template class gbtRectArray<gbtPolyMulti<gbtDouble>*>;
+template class gbtArray<gbtPolyMulti<gbtDouble>*>;
 
-template class gbtRectArray<gPoly<gbtRational>*>;
-//template class gbtArray<gPoly<gbtRational>*>;
+template class gbtRectArray<gbtPolyMulti<gbtRational>*>;
+//template class gbtArray<gbtPolyMulti<gbtRational>*>;
 
-//template class gbtRectArray<gPoly<double>*>;
-//template class gbtArray<gPoly<double>*>;
+//template class gbtRectArray<gbtPolyMulti<double>*>;
+//template class gbtArray<gbtPolyMulti<double>*>;

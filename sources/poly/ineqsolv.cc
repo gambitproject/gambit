@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of IneqSolv classes
+// Instantiation of gbtPolyIneqSolve classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -28,11 +28,11 @@
 #include "math/double.h"
 #include "base/grarray.imp"
 
-template class IneqSolv<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gbtRational> &y);
+template class gbtPolyIneqSolve<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<gbtRational> &y);
 
-//template class IneqSolv<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<double> &y);
+//template class gbtPolyIneqSolve<double>;
+//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<double> &y);
 
-template class IneqSolv<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gbtDouble> &y);
+template class gbtPolyIneqSolve<gbtDouble>;
+template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<gbtDouble> &y);

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of polynomial classes
+// Declaration of gbtPolyUni classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -34,7 +34,7 @@
 
 /*  This file supplies the template class
 
-    polynomial
+    gbtPolyUni
 
 These are univariate polynomials with coefficients of class T.
 Polynomials are implemented as gbtList's of coefficients.  There is no 
@@ -42,44 +42,44 @@ attempt to maintain sparseness.
 
 */
 
-template <class T> class polynomial {
+template <class T> class gbtPolyUni {
 
 private:
   gbtList<T> coeflist; 
 
 public: 
     // constructors and destructor
-  polynomial(const int=-1);
-  polynomial(const polynomial<T> &);
-  polynomial(const gbtList<T> &);
-  polynomial(const gbtVector<T> &);
-  polynomial(const T&, const int&);
-  ~polynomial();
+  gbtPolyUni(const int=-1);
+  gbtPolyUni(const gbtPolyUni<T> &);
+  gbtPolyUni(const gbtList<T> &);
+  gbtPolyUni(const gbtVector<T> &);
+  gbtPolyUni(const T&, const int&);
+  ~gbtPolyUni();
 
     // unary operators
-         polynomial<T>    operator -  () const;
-         polynomial<T>    Derivative  () const;
+         gbtPolyUni<T>    operator -  () const;
+         gbtPolyUni<T>    Derivative  () const;
 
     // binary operators
-         polynomial<T>&     operator =  (const polynomial<T>& y);
-         bool               operator == (const polynomial<T>& y) const;
-         bool               operator != (const polynomial<T>& y) const;
+         gbtPolyUni<T>&     operator =  (const gbtPolyUni<T>& y);
+         bool               operator == (const gbtPolyUni<T>& y) const;
+         bool               operator != (const gbtPolyUni<T>& y) const;
          const T&           operator [] (const int index)        const;
-         polynomial<T>      operator +  (const polynomial<T>& y) const;
-         polynomial<T>      operator -  (const polynomial<T>& y) const;
-         polynomial<T>      operator *  (const polynomial<T>& y) const;
-         polynomial<T>      operator /  (const polynomial<T>& y) const;
-         polynomial<T>&     operator += (const polynomial<T>& y);
-         polynomial<T>&     operator -= (const polynomial<T>& y);
-         polynomial<T>&     operator *= (const polynomial<T>& y);
-         polynomial<T>&     operator /= (const polynomial<T>& y);
-         polynomial<T>      operator %  (const polynomial<T>& y) const;
+         gbtPolyUni<T>      operator +  (const gbtPolyUni<T>& y) const;
+         gbtPolyUni<T>      operator -  (const gbtPolyUni<T>& y) const;
+         gbtPolyUni<T>      operator *  (const gbtPolyUni<T>& y) const;
+         gbtPolyUni<T>      operator /  (const gbtPolyUni<T>& y) const;
+         gbtPolyUni<T>&     operator += (const gbtPolyUni<T>& y);
+         gbtPolyUni<T>&     operator -= (const gbtPolyUni<T>& y);
+         gbtPolyUni<T>&     operator *= (const gbtPolyUni<T>& y);
+         gbtPolyUni<T>&     operator /= (const gbtPolyUni<T>& y);
+         gbtPolyUni<T>      operator %  (const gbtPolyUni<T>& y) const;
 
   // manipulation
   void                   ToMonic()                                         ;
-//  polynomial<gbtDouble>    Togdouble()                                  const;
+//  gbtPolyUni<gbtDouble>    Togdouble()                                  const;
 
-  polynomial<gbtDouble>         TogDouble()                       const;
+  gbtPolyUni<gbtDouble>         TogDouble()                       const;
 
   // information
   bool                   IsZero()                                     const;
@@ -87,7 +87,7 @@ public:
   int                    Degree()                                     const;
   T                      LeadingCoefficient()                         const;
   gbtList<T>               CoefficientList()                            const;
-  polynomial<T>          GcdWith(const polynomial<T>&)                const;
+  gbtPolyUni<T>          GcdWith(const gbtPolyUni<T>&)                const;
   bool                   IsQuadratfrei()                              const;
   bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
   gbtList< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
@@ -98,7 +98,7 @@ public:
   void Output(gbtOutput &) const;
 };
 
-template <class T> gbtOutput& operator <<(gbtOutput &, const polynomial<T> &);
+template <class T> gbtOutput& operator <<(gbtOutput &, const gbtPolyUni<T> &);
 
 
 /*                       REMARKS
@@ -117,37 +117,37 @@ and the RHS will be positive whenever
 
 */
 
-class complexpoly {
+class gbtPolyComplex {
 
 private:
   gbtList<gbtComplex> coeflist; 
 
 public: 
     // constructors and destructor
-  complexpoly(const int=-1);
-  complexpoly(const complexpoly &);
-  complexpoly(const gbtList<gbtComplex> &);
-  complexpoly(const gbtComplex&, const int&);
-  ~complexpoly();
+  gbtPolyComplex(const int=-1);
+  gbtPolyComplex(const gbtPolyComplex &);
+  gbtPolyComplex(const gbtList<gbtComplex> &);
+  gbtPolyComplex(const gbtComplex&, const int&);
+  ~gbtPolyComplex();
 
     // unary operators
-  complexpoly   operator -  ()                               const;
-  complexpoly   Derivative  ()                               const;
+  gbtPolyComplex   operator -  ()                               const;
+  gbtPolyComplex   Derivative  ()                               const;
 
     // binary operators
-  complexpoly&  operator =  (const complexpoly& y);
-  bool                    operator == (const complexpoly& y) const;
-  bool                    operator != (const complexpoly& y) const;
+  gbtPolyComplex&  operator =  (const gbtPolyComplex& y);
+  bool                    operator == (const gbtPolyComplex& y) const;
+  bool                    operator != (const gbtPolyComplex& y) const;
   const gbtComplex&         operator [] (const int index)      const;
-  complexpoly             operator +  (const complexpoly& y) const;
-  complexpoly             operator -  (const complexpoly& y) const;
-  complexpoly             operator *  (const complexpoly& y) const;
-  complexpoly             operator /  (const complexpoly& y) const;
-  complexpoly&            operator += (const complexpoly& y);
-  complexpoly&            operator -= (const complexpoly& y);
-  complexpoly&            operator *= (const complexpoly& y);
-  complexpoly&            operator /= (const complexpoly& y);
-  complexpoly             operator %  (const complexpoly& y) const;
+  gbtPolyComplex             operator +  (const gbtPolyComplex& y) const;
+  gbtPolyComplex             operator -  (const gbtPolyComplex& y) const;
+  gbtPolyComplex             operator *  (const gbtPolyComplex& y) const;
+  gbtPolyComplex             operator /  (const gbtPolyComplex& y) const;
+  gbtPolyComplex&            operator += (const gbtPolyComplex& y);
+  gbtPolyComplex&            operator -= (const gbtPolyComplex& y);
+  gbtPolyComplex&            operator *= (const gbtPolyComplex& y);
+  gbtPolyComplex&            operator /= (const gbtPolyComplex& y);
+  gbtPolyComplex             operator %  (const gbtPolyComplex& y) const;
   
   // manipulation
   void                   ToMonic()                                         ;
@@ -157,10 +157,10 @@ public:
   gbtComplex               EvaluationAt(const gbtComplex& arg)            const;  
   int                    Degree()                                     const;
   gbtComplex               LeadingCoefficient()                         const;
-  complexpoly            GcdWith(const complexpoly&)                  const;
+  gbtPolyComplex            GcdWith(const gbtPolyComplex&)                  const;
   bool                   IsQuadratfrei()                              const;
   gbtList<gbtComplex>        Roots()                                      const;
   
   // output
-friend gbtOutput&        operator << (gbtOutput& output, const complexpoly& x);
+friend gbtOutput&        operator << (gbtOutput& output, const gbtPolyComplex& x);
 };

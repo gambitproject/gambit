@@ -38,7 +38,7 @@
 
 class PelView {
  private:
-  gPolyList<gbtDouble>        input;
+  gbtPolyMultiList<gbtDouble>        input;
 
   gbtList<gbtVector<gbtComplex> > complexroots;
   gbtList<gbtVector<gbtDouble> >  realroots;
@@ -52,10 +52,10 @@ class PelView {
   void        Initialize_Idf_T_Gen_node(const Gen_node &node, 
 					const char * label)             const;
   Gen_node    CreateRing(const int numvar)                              const;
-  polynomial1 GamPolyToPelPoly(const gPoly<gbtDouble> &p, 
+  polynomial1 GamPolyToPelPoly(const gbtPolyMulti<gbtDouble> &p, 
 			       const int n, 
 			       const Pring ring)                        const;
-  Gen_node    CreatePelicanVersionOfSystem(const gPolyList<gbtDouble> &input,
+  Gen_node    CreatePelicanVersionOfSystem(const gbtPolyMultiList<gbtDouble> &input,
 					   const Pring ring)            const;
   int         GutsOfGetMixedVolume(      node A, 
 		   	                 node norms, 
@@ -84,7 +84,7 @@ class PelView {
   bool        CheckSolutions(const Gen_node g)                          const;
 
  public:
-  PelView(const gPolyList<gbtDouble> &mylist);
+  PelView(const gbtPolyMultiList<gbtDouble> &mylist);
   PelView(const PelView &);
   ~PelView();
 

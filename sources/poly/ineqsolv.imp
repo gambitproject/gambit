@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of IneqSolv
+// Implementation of gbtPolyIneqSolve
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -27,14 +27,14 @@
 #include "ineqsolv.h"
 
 //---------------------------------------------------------------
-//                      class: IneqSolv
+//                      class: gbtPolyIneqSolve
 //---------------------------------------------------------------
 
 //---------------------------
 // Constructors / Destructors
 //---------------------------
 
-template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
+template <class T> gbtPolyIneqSolve<T>::gbtPolyIneqSolve(const gbtPolyMultiList<T>& given,
 					 gbtStatus &p_status) 
   : System(given), 
     TreesOfPartials(given),
@@ -46,7 +46,7 @@ template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
     m_status(p_status)
 { }
 
-template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
+template<class T> gbtPolyIneqSolve<T>::gbtPolyIneqSolve(const gbtPolyIneqSolve& qs)
   : System(qs.System), 
     TreesOfPartials(qs.TreesOfPartials), 
     Epsilon(qs.Epsilon),
@@ -56,7 +56,7 @@ template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
     m_status(qs.m_status)
 { }
 
-template<class T> IneqSolv<T>::~IneqSolv()
+template<class T> gbtPolyIneqSolve<T>::~gbtPolyIneqSolve()
 { }
 
 //----------------------------------
@@ -64,7 +64,7 @@ template<class T> IneqSolv<T>::~IneqSolv()
 //----------------------------------
 
 template<class T> 
-IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
+gbtPolyIneqSolve<T>& gbtPolyIneqSolve<T>::operator=(const gbtPolyIneqSolve<T> & rhs)
 {
   assert (System == rhs.System);
 
@@ -75,7 +75,7 @@ IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
 }
 
 template<class T>  
-bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
+bool gbtPolyIneqSolve<T>::operator==(const gbtPolyIneqSolve<T> & rhs) const
 {
     if (System  != rhs.System || Epsilon != rhs.Epsilon)
          return false;
@@ -83,7 +83,7 @@ bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
 }
 
 template<class T>  
-bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
+bool gbtPolyIneqSolve<T>::operator!=(const gbtPolyIneqSolve<T> & rhs) const
 {
   return !(*this == rhs);
 }
@@ -94,7 +94,7 @@ bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
 //---------------------------
 
 template<class T> 
-bool IneqSolv<T>::IsASolution(const gbtVector<T>& v) const
+bool gbtPolyIneqSolve<T>::IsASolution(const gbtVector<T>& v) const
 {
   bool answer(true);
   for (int i = 1; i <= System.Length() && answer; i++)
@@ -104,7 +104,7 @@ bool IneqSolv<T>::IsASolution(const gbtVector<T>& v) const
 }
 
 template<class T> 
-bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
+bool gbtPolyIneqSolve<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 					      gbtArray<int>& precedence) const
 {
   for (int i = 1; i <= System.Length(); i++) {
@@ -113,7 +113,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 
       /*
       //DEBUG
-      gout << "The polynomial " << System[precedence[i]] 
+      gout << "The gbtPolyUni " << System[precedence[i]] 
 	   << " has no roots in ";
       gRectangle<T> newrect(r);
       gout << newrect;
@@ -133,7 +133,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 }
 
 template <class T> const bool
-IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
+gbtPolyIneqSolve<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
 				            gbtVector<T>& sample,
 				            gbtArray<int>& precedence) const
 {
@@ -166,7 +166,7 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
 }
 
 template <class T> const bool
-IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gbtVector<T>& sample)
+gbtPolyIneqSolve<T>::ASolutionExists (const gRectangle<T>& r, gbtVector<T>& sample)
 {
      // precedence orders search for everywhere negative poly
   gbtArray<int> precedence(System.Length());  
@@ -186,14 +186,14 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gbtVector<T>& sample)
 //           Printing
 //----------------------------------
 
-template <class T> void IneqSolv<T>::Output(gbtOutput &output) const
+template <class T> void gbtPolyIneqSolve<T>::Output(gbtOutput &output) const
 {
   output << "The system is\n" << System << "\nwith error tolerance " <<
     Epsilon << ".\n";
 }
 
 template <class T> gbtOutput &operator<<(gbtOutput &p_file,
-				       const IneqSolv<T> &p_solver)
+				       const gbtPolyIneqSolve<T> &p_solver)
 {
   p_solver.Output(p_file);
   return p_file;

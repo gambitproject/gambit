@@ -29,36 +29,36 @@
 
 // This file provides the template class
 //
-//              gMono
+//              gbtMonomial
 //
 // whose objects are monomials in several variables
 // with coefficients of class T and nonnegative exponents. 
-// This role of this class is to support the class gPoly. 
+// This role of this class is to support the class gbtPolyMulti. 
 
 
-template<class T> class gMono {
+template<class T> class gbtMonomial {
 private:
     T        coef;
-    exp_vect exps;
+    gbtPolyExponent exps;
 
 public:
     // constructors
-    gMono(const gSpace*, const T&);
-    gMono(const T&, const exp_vect&);
-    gMono(const gMono<T>&);
-    ~gMono();
+    gbtMonomial(const gbtPolySpace*, const T&);
+    gbtMonomial(const T&, const gbtPolyExponent&);
+    gbtMonomial(const gbtMonomial<T>&);
+    ~gbtMonomial();
 
     // operators
-          gMono<T>& operator =  (const gMono<T>&);
+          gbtMonomial<T>& operator =  (const gbtMonomial<T>&);
 
-          bool      operator == (const gMono<T>&) const;
-          bool      operator != (const gMono<T>&) const;
-          gMono<T>  operator *  (const gMono<T>&) const;
-          gMono<T>  operator /  (const gMono<T>&) const;
-          gMono<T>  operator +  (const gMono<T>&) const; // assert exps ==
-          gMono<T>& operator += (const gMono<T>&);       // assert exps ==
-          gMono<T>& operator *= (const T&);      
-          gMono<T>  operator -  ()                const; 
+          bool      operator == (const gbtMonomial<T>&) const;
+          bool      operator != (const gbtMonomial<T>&) const;
+          gbtMonomial<T>  operator *  (const gbtMonomial<T>&) const;
+          gbtMonomial<T>  operator /  (const gbtMonomial<T>&) const;
+          gbtMonomial<T>  operator +  (const gbtMonomial<T>&) const; // assert exps ==
+          gbtMonomial<T>& operator += (const gbtMonomial<T>&);       // assert exps ==
+          gbtMonomial<T>& operator *= (const T&);      
+          gbtMonomial<T>  operator -  ()                const; 
 
     // information
     const T &       Coef()                      const;
@@ -66,9 +66,9 @@ public:
     int             TotalDegree()               const;
     bool            IsConstant()                const;
     bool            IsMultiaffine()             const;
-    const exp_vect& ExpV()                      const;
+    const gbtPolyExponent& ExpV()                      const;
     T               Evaluate(const gbtArray<T>&)  const;
     T               Evaluate(const gbtVector<T>&) const;
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gMono<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtMonomial<T> &);

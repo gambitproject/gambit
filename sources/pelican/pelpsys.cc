@@ -141,7 +141,7 @@ N=aset_dim(A)-1;
 
 /*
 ** psys_binsolve 
-**       Input: a  polynomial vector P.
+**       Input: a  gbtPolyUni vector P.
 **      Output: On success a matrix of solutions.
 **              On failure the null pointer (and an error message)
 **              
@@ -1323,7 +1323,7 @@ psys psys_lead(psys sys)
     FORALL_POLY(sys,
     /*
     ** find lowest exponent m of deformation parameter in current
-    ** polynomial of input system sys - and copy monomials having
+    ** gbtPolyUni of input system sys - and copy monomials having
     ** this value over to the output system res
     */
       psys_start_mon(sys);
@@ -1407,7 +1407,7 @@ psys psys_saturate(psys sys)
 
 /*
 ** psys_norm_sub
-**      input: a polynomial systm sys (psys)
+**      input: a gbtPolyUni systm sys (psys)
 **             a normal           norm (Ivector)
 **      output: original system after transform
 **              x_i->x_i*t^n_i. (and then removing common powers of t)
@@ -1451,9 +1451,9 @@ psys psys_norm_sub(psys sys,Ivector norm)
 ** scale.c             Birk Huber                    created 4-8-1995
 ** All Rights Reserved
 **
-** Very simple program for polynomial system scaling.
+** Very simple program for gbtPolyUni system scaling.
 **
-**   Given a system F_1,...,F_n of polynomial equations
+**   Given a system F_1,...,F_n of gbtPolyUni equations
 **   in variables X_1,...,X_n  calculates constants d_i
 **   and c_i so that the new equations
 **      10^{d_i}F_i(10^{c_1}X_1,...,10^{c_n}X_n)
@@ -1486,7 +1486,7 @@ psys psys_norm_sub(psys sys,Ivector norm)
 
 /*
 ** Scale
-**      Input: a polynomial system Sys (n-variables n-equations).
+**      Input: a gbtPolyUni system Sys (n-variables n-equations).
 **     Output: Vector whoose ith coordinate is the inverse 10^{-c_i}
 **             of the variable scaling factor for the i-th variable
 **     Side Effect: Sys gets scaled.

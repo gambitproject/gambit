@@ -5,7 +5,7 @@
 //
 // DESCRIPTION:
 // Enumerates all Nash equilibria in a normal form game, via solving
-// systems of polynomial equations
+// systems of gbtPolyUni equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project

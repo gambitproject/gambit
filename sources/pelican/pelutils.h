@@ -73,7 +73,7 @@ dependencies on the rest of the code.
   #define INT  210  /* an int (will one always fit in a (char *)*/
   #define DBL  220  /* a double (will it fit ) */
   #define CMPX 230  /* NOT SET UP YET a complex  */
-  #define POLY 240  /* NOT SET UP YET a pointer to a polynomial */
+  #define POLY 240  /* NOT SET UP YET a pointer to a gbtPolyUni */
   /* Vector Types */
   #define NMTX 300  /* a pntr to a mtrx of nodeptrs */
   #define IMTX 310  /* a pointer to an integer matrix (Imatrix)*/

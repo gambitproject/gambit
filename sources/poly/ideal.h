@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of gIdeal
+// Declaration of gbtPolyIdeal
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -44,48 +44,48 @@ the same.
  */
 
 // ***********************
-//      class gIdeal
+//      class gbtPolyIdeal
 // ***********************
 
-template <class T> class gIdeal {
+template <class T> class gbtPolyIdeal {
  private:
-   const gSpace*      Space;
-   const term_order*  order;
-         gPolyList<T> basis;
+   const gbtPolySpace*      Space;
+   const gbtPolyTermOrder*  order;
+         gbtPolyMultiList<T> basis;
    
  public:
-  gIdeal(const gSpace *, const term_order *); // Null gIdeal constructor
-  gIdeal(const gSpace *, const term_order *,
-	      const gbtList< gPoly<T> *> &);
-  gIdeal(const term_order *, const gPolyList<T> &);
-  gIdeal(const gIdeal<T> &);
+  gbtPolyIdeal(const gbtPolySpace *, const gbtPolyTermOrder *); // Null gbtPolyIdeal constructor
+  gbtPolyIdeal(const gbtPolySpace *, const gbtPolyTermOrder *,
+	      const gbtList< gbtPolyMulti<T> *> &);
+  gbtPolyIdeal(const gbtPolyTermOrder *, const gbtPolyMultiList<T> &);
+  gbtPolyIdeal(const gbtPolyIdeal<T> &);
 
-  ~gIdeal();
+  ~gbtPolyIdeal();
 
    // Operators
-   gIdeal<T>& operator=(const gIdeal<T> &);
+   gbtPolyIdeal<T>& operator=(const gbtPolyIdeal<T> &);
 
-   bool      operator==(const gIdeal<T> &) const;
-   bool      operator!=(const gIdeal<T> &) const;
-   gIdeal<T> operator+ (const gIdeal<T> &) const;
-   gIdeal<T> operator* (const gIdeal<T> &) const;
+   bool      operator==(const gbtPolyIdeal<T> &) const;
+   bool      operator!=(const gbtPolyIdeal<T> &) const;
+   gbtPolyIdeal<T> operator+ (const gbtPolyIdeal<T> &) const;
+   gbtPolyIdeal<T> operator* (const gbtPolyIdeal<T> &) const;
 
    // Information
    inline int               Dmnsn()            const { return Space->Dmnsn(); }
-   inline const gSpace*     TheSpace()         const { return Space         ; }
+   inline const gbtPolySpace*     TheSpace()         const { return Space         ; }
    inline int               NoBasisElements()  const { return basis.Length(); }
-   inline const term_order* Order()            const { return order; }
-   inline gPolyList<T>      CanonicalBasis()   const { return basis; }
-          gIdeal<T>         MonomialIdeal()    const;
-          gbtList<exp_vect>   MonomialBasis()    const;
-                // This returns a monomial basis of the ring of polynomial
+   inline const gbtPolyTermOrder* Order()            const { return order; }
+   inline gbtPolyMultiList<T>      CanonicalBasis()   const { return basis; }
+          gbtPolyIdeal<T>         MonomialIdeal()    const;
+          gbtList<gbtPolyExponent>   MonomialBasis()    const;
+                // This returns a monomial basis of the ring of gbtPolyUni
                 // functions on the variety V(I), where I is the given ideal.
                 // It fails if the variety is not zero dimensional.
           bool              IsRoot(const gbtVector<T>&) const;
 
    bool ZeroDimensional()    const;
    bool IsEntireRing()       const;
-   bool Contains(gPoly<T> &) const;
+   bool Contains(gbtPolyMulti<T> &) const;
 };  
 
 #endif //# IDEAL_H

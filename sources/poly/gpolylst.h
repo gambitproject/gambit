@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of polynomial list type
+// Declaration of gbtPolyUni list type
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -32,86 +32,86 @@
 #include "gpoly.h"
 
 // ***********************
-//      class gPolyList
+//      class gbtPolyMultiList
 // ***********************
 
-template <class T> class gPolyList
-//  : private Counted<gPolyList<T> >
+template <class T> class gbtPolyMultiList
+//  : private Counted<gbtPolyMultiList<T> >
 { 
  private:
-   const gSpace*      Space;
-   const term_order*  Order;
-   gbtList< gPoly<T> *> List;
+   const gbtPolySpace*      Space;
+   const gbtPolyTermOrder*  Order;
+   gbtList< gbtPolyMulti<T> *> List;
    
    // SubProcedures of ToSortedReducedGrobner   
-   void        Sort(const term_order &);
+   void        Sort(const gbtPolyTermOrder &);
    void        CriterionTwo(      gbtList<gbtIndexPair>&, 
 			    const gbtList<gbtIndexPair>&, 
 			    const int&,
-			    const term_order&) const;
+			    const gbtPolyTermOrder&) const;
                      // See Adams and Loustaunau, p. 130
-   void        Grobnerize(const term_order &);
-   void        GrobnerToMinimalGrobner(const term_order &);
-   void        MinimalGrobnerToReducedGrobner(const term_order &);
+   void        Grobnerize(const gbtPolyTermOrder &);
+   void        GrobnerToMinimalGrobner(const gbtPolyTermOrder &);
+   void        MinimalGrobnerToReducedGrobner(const gbtPolyTermOrder &);
 
  public:
-   gPolyList(const gSpace *, const term_order*);  
-   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> *> &);
-   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> > &);
-   gPolyList(const gPolyList<T> &);
+   gbtPolyMultiList(const gbtPolySpace *, const gbtPolyTermOrder*);  
+   gbtPolyMultiList(const gbtPolySpace *, const gbtPolyTermOrder*, const gbtList< gbtPolyMulti<T> *> &);
+   gbtPolyMultiList(const gbtPolySpace *, const gbtPolyTermOrder*, const gbtList< gbtPolyMulti<T> > &);
+   gbtPolyMultiList(const gbtPolyMultiList<T> &);
 
-   ~gPolyList();                 // Deletes all pointees
+   ~gbtPolyMultiList();                 // Deletes all pointees
 
    // Operators
-   gPolyList<T>& operator= (const gPolyList<T> &);
+   gbtPolyMultiList<T>& operator= (const gbtPolyMultiList<T> &);
 
-   bool       operator==(const gPolyList<T> &) const;
-   bool       operator!=(const gPolyList<T> &) const;
-   void       operator+=(const gPoly<T> &); 
-   void       operator+=(const gPolyList<T> &); 
+   bool       operator==(const gbtPolyMultiList<T> &) const;
+   bool       operator!=(const gbtPolyMultiList<T> &) const;
+   void       operator+=(const gbtPolyMulti<T> &); 
+   void       operator+=(const gbtPolyMultiList<T> &); 
 
-   void       operator+=(      gPoly<T> *); // NB - Doesn't copy pointee
+   void       operator+=(      gbtPolyMulti<T> *); // NB - Doesn't copy pointee
                               // This can save a copy when one must create a
-                              // polynomial, then do something in order to 
+                              // gbtPolyUni, then do something in order to 
                               // decide whether it should be added to the List
 
-   gPoly<T>   operator[](const int)         const;
+   gbtPolyMulti<T>   operator[](const int)         const;
 
    // Residue of repeated reduction by members of the list
-   gPoly<T>    ReductionOf(const gPoly<T> &, const term_order &) const;
-   bool        SelfReduction(const int &, const term_order &);
+   gbtPolyMulti<T>    ReductionOf(const gbtPolyMulti<T> &, const gbtPolyTermOrder &) const;
+   bool        SelfReduction(const int &, const gbtPolyTermOrder &);
 
    // Transform to canonical basis for associated ideal
-   gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
+   gbtPolyMultiList<T>&  ToSortedReducedGrobner(const gbtPolyTermOrder &);
 
   // New Coordinate Systems
-   gPolyList<T> TranslateOfSystem(const gbtVector<T>&)            const;
-   gPolyList<T> SystemInNewCoordinates(const gbtSquareMatrix<T>&) const;
+   gbtPolyMultiList<T> TranslateOfSystem(const gbtVector<T>&)            const;
+   gbtPolyMultiList<T> SystemInNewCoordinates(const gbtSquareMatrix<T>&) const;
 
   // Truncations
-   gPolyList<T> InteriorSegment(int, int)                       const;
+   gbtPolyMultiList<T> InteriorSegment(int, int)                       const;
 
    // Information
-   const gSpace*            AmbientSpace()                            const;
-   const term_order*        TermOrder()                               const;
+   const gbtPolySpace*            AmbientSpace()                            const;
+   const gbtPolyTermOrder*        TermOrder()                               const;
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
-   gbtList<gPoly<T> >         UnderlyingbtList()                          const;
+   gbtList<gbtPolyMulti<T> >         UnderlyingbtList()                          const;
    const gbtVector<T>         Evaluate(const gbtVector<T>&)               const;
    const bool               IsRoot(const gbtVector<T>&)                 const;
-   const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
-   const gPoly<T>           DetOfDerivativeMatrix()                   const;
+   const gbtRectArray<gbtPolyMulti<T>*> DerivativeMatrix()                     const;
+   const gbtPolyMulti<T>           DetOfDerivativeMatrix()                   const;
    const gbtMatrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
    const gbtSquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
 
-//  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
+//  inline int static Count() { return Counted<gbtPolyMultiList<T> >::objCount(); }
 
    // Conversion
-   gbtList<gPoly<gbtDouble> > ListTogDouble()  const;
-   gbtList<gPoly<gbtDouble> > NormalizedList() const;
+   gbtList<gbtPolyMulti<gbtDouble> > ListTogDouble()  const;
+   gbtList<gbtPolyMulti<gbtDouble> > NormalizedList() const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gPolyList<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtPolyMultiList<T> &);
 
 #endif // GPOLYLST_H

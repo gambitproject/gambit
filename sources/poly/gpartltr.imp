@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of TreeOfPartials
+// Implementation of gbtPolyPartialTree
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -27,26 +27,26 @@
 #include "gpartltr.h"
 
 //---------------------------------------------------------------
-//                   class: TreeOfPartials
+//                   class: gbtPolyPartialTree
 //---------------------------------------------------------------
 
 //---------------------------
 // Constructors / Destructors
 //---------------------------
 
-template <class T> TreeOfPartials<T>::TreeOfPartials(const gPoly<T>& given) 
+template <class T> gbtPolyPartialTree<T>::gbtPolyPartialTree(const gbtPolyMulti<T>& given) 
 : PartialTree(given)
 {
   TreeOfPartialsRECURSIVE(PartialTree, PartialTree.RootNode());  
 }
 
 //-------------------------------------------------------------------------
-// Recursive generation of all partial derivatives of the root polynomial
+// Recursive generation of all partial derivatives of the root gbtPolyUni
 //-------------------------------------------------------------------------
 
 template <class T>
-void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gbtTree<gPoly<T> >& t,
-					  gbtTreeNode<gPoly<T> >* n) const
+void gbtPolyPartialTree<T>::TreeOfPartialsRECURSIVE(gbtTree<gbtPolyMulti<T> >& t,
+					  gbtTreeNode<gbtPolyMulti<T> >* n) const
 {
   if (n->GetData().Degree() >= 1) {
     for (int i = 1; i <= n->GetData().Dmnsn(); i++) {
@@ -56,23 +56,23 @@ void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gbtTree<gPoly<T> >& t,
   }
 }
 
-template<class T> TreeOfPartials<T>::TreeOfPartials(const TreeOfPartials& qs)
+template<class T> gbtPolyPartialTree<T>::gbtPolyPartialTree(const gbtPolyPartialTree& qs)
 : PartialTree(qs.PartialTree)
 {
 }
 
-template<class T> TreeOfPartials<T>::~TreeOfPartials()
+template<class T> gbtPolyPartialTree<T>::~gbtPolyPartialTree()
 {
 }
 
 template <class T> 
-T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord, 
+T gbtPolyPartialTree<T>::ValueOfPartialOfRootPoly(const int& coord, 
 					      const gbtVector<T>& p) const
 {
   if (RootPoly().Degree() <= 0) return (T)0;
   else {
     int i = 1; 
-    gbtTreeNode<gPoly<T> >* node = RootNode()->GetEldest();
+    gbtTreeNode<gbtPolyMulti<T> >* node = RootNode()->GetEldest();
     while (i < coord) {
       i++;
       node = node->GetNext();
@@ -83,7 +83,7 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord,
 }
 
 template <class T>
-gbtVector<T> TreeOfPartials<T>::VectorOfPartials(const gbtVector<T>& point) const
+gbtVector<T> gbtPolyPartialTree<T>::VectorOfPartials(const gbtVector<T>& point) const
 {
   gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++)
@@ -92,8 +92,8 @@ gbtVector<T> TreeOfPartials<T>::VectorOfPartials(const gbtVector<T>& point) cons
 }
 
 template <class T> T
-TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
-					     const gbtTreeNode<gPoly<T> >* n,
+gbtPolyPartialTree<T>::MaximalNonconstantContributionRECURSIVE(
+					     const gbtTreeNode<gbtPolyMulti<T> >* n,
 					     const gbtVector<T>& p,
 					     const gbtVector<T>& halvesoflengths,
 					     gbtVector<int>& wrtos) const
@@ -101,7 +101,7 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
   T answer = (T)0;
 
   if (n->GetEldest() != NULL) {
-    gbtList<gbtTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
+    gbtList<gbtTreeNode<gbtPolyMulti<T> >*> children = PartialTree.Children(n);
     for (int i = 1; i <= children.Length(); i++) {
       wrtos[i]++;
 
@@ -129,9 +129,9 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 }
 
 template <class T> T
-TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
-					     const gbtTreeNode<gPoly<T> >* n1,
-					     const gbtTreeNode<gPoly<T> >* n2,
+gbtPolyPartialTree<T>::MaximalNonconstantDifferenceRECURSIVE(
+					     const gbtTreeNode<gbtPolyMulti<T> >* n1,
+					     const gbtTreeNode<gbtPolyMulti<T> >* n2,
 					     const gbtVector<T>& p,
 					     const gbtVector<T>& halvesoflengths,
 					     gbtVector<int>& wrtos) const
@@ -139,8 +139,8 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   T answer = (T)0;
 
   if (n1->GetEldest() != NULL && n2->GetEldest() != NULL) {
-    gbtList<gbtTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
-    gbtList<gbtTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    gbtList<gbtTreeNode<gbtPolyMulti<T> >*> children1 = PartialTree.Children(n1);
+    gbtList<gbtTreeNode<gbtPolyMulti<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -167,7 +167,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() != NULL && n2->GetEldest() == NULL) {
-    gbtList<gbtTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    gbtList<gbtTreeNode<gbtPolyMulti<T> >*> children1 = PartialTree.Children(n1);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -192,7 +192,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() == NULL && n2->GetEldest() != NULL) {
-    gbtList<gbtTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    gbtList<gbtTreeNode<gbtPolyMulti<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children2.Length(); i++) {
       wrtos[i]++;
 
@@ -221,7 +221,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
 
 
 template <class T> T
-TreeOfPartials<T>::MaximalNonconstantContribution(const gbtVector<T>& p,
+gbtPolyPartialTree<T>::MaximalNonconstantContribution(const gbtVector<T>& p,
 						  const gbtVector<T>& 
 						     halvesoflengths) const
 {
@@ -235,7 +235,7 @@ TreeOfPartials<T>::MaximalNonconstantContribution(const gbtVector<T>& p,
 }
 
 template <class T> T
-TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
+gbtPolyPartialTree<T>::MaximalNonconstantDifference(const gbtPolyPartialTree<T>& other,
 						const gbtVector<T>& p,
 						const gbtVector<T>& 
 						   halvesoflengths) const
@@ -252,27 +252,27 @@ TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
 
 
 template <class T>
-T TreeOfPartials<T>::EvaluateRootPoly(const gbtVector<T>& point) const 
+T gbtPolyPartialTree<T>::EvaluateRootPoly(const gbtVector<T>& point) const 
 {
   return RootNode()->GetData().Evaluate(point); 
 }
 
 template <class T>
-T TreeOfPartials<T>::ValueOfRootPoly(const gbtVector<T>& point) const 
+T gbtPolyPartialTree<T>::ValueOfRootPoly(const gbtVector<T>& point) const 
 { 
   return RootPoly().Evaluate(point); 
 }
 
 
 template <class T> gbtOutput& operator << (gbtOutput& output, 
-					 const TreeOfPartials<T>& /* x */)
+					 const gbtPolyPartialTree<T>& /* x */)
 {
   // Changed to just return silently.
   return output;
 }
 
 template <class T> bool
-TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T>& r) const
+gbtPolyPartialTree<T>::PolyHasNoRootsIn(const gRectangle<T>& r) const
 {
   if (this->RootNode()->GetData().IsMultiaffine())
     return MultiaffinePolyHasNoRootsIn(r);
@@ -296,7 +296,7 @@ TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T>& r) const
 }
 
 template <class T> bool 
-TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
+gbtPolyPartialTree<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
 {
   int sign;
   if (this->RootNode()->GetData().Evaluate(r.Center()) > (T)0)
@@ -331,7 +331,7 @@ TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
 
 
 template<class T> bool
-TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
+gbtPolyPartialTree<T>::MultiaffinePolyEverywhereNegativeIn(
 					        const gRectangle<T>& r) const
 { 
   if (Dmnsn() == 0) {
@@ -366,7 +366,7 @@ TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
 }
 
 template<class T> bool
-TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
+gbtPolyPartialTree <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
 {
   if (this->RootNode()->GetData().IsMultiaffine())
     return MultiaffinePolyEverywhereNegativeIn(r);
@@ -391,7 +391,7 @@ TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
 
 
 //---------------------------------------------------------------
-//                    class: ListOfPartialTrees
+//                    class: gbtPolyPartialTreeList
 //---------------------------------------------------------------
 
 //---------------------------
@@ -399,33 +399,33 @@ TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
 //---------------------------
 
 template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gbtList<gPoly<T> >& given) 
+gbtPolyPartialTreeList<T>::gbtPolyPartialTreeList(const gbtList<gbtPolyMulti<T> >& given) 
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList += TreeOfPartials<T>(given[i]);
+    PartialTreeList += gbtPolyPartialTree<T>(given[i]);
 }
 
 template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gPolyList<T>& given) 
+gbtPolyPartialTreeList<T>::gbtPolyPartialTreeList(const gbtPolyMultiList<T>& given) 
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList += TreeOfPartials<T>(given[i]);
+    PartialTreeList += gbtPolyPartialTree<T>(given[i]);
 }
 
 template<class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const ListOfPartialTrees& qs)
+gbtPolyPartialTreeList<T>::gbtPolyPartialTreeList(const gbtPolyPartialTreeList& qs)
 : PartialTreeList(qs.PartialTreeList)
 {
 }
 
-template<class T> ListOfPartialTrees<T>::~ListOfPartialTrees()
+template<class T> gbtPolyPartialTreeList<T>::~gbtPolyPartialTreeList()
 {
 }
 
 template <class T> bool 
-ListOfPartialTrees<T>::operator ==(const ListOfPartialTrees<T>& rhs) const
+gbtPolyPartialTreeList<T>::operator ==(const gbtPolyPartialTreeList<T>& rhs) const
 {
   if (Length() != rhs.Length()) return false;
   for (int i = 1; i <= Length(); i++)
@@ -435,13 +435,13 @@ ListOfPartialTrees<T>::operator ==(const ListOfPartialTrees<T>& rhs) const
 }
 
 template <class T> bool 
-ListOfPartialTrees<T>::operator !=(const ListOfPartialTrees<T>& rhs) const
+gbtPolyPartialTreeList<T>::operator !=(const gbtPolyPartialTreeList<T>& rhs) const
 {
   return !(*this == rhs);
 }
 
 template <class T> 
-gbtMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) const
+gbtMatrix<T> gbtPolyPartialTreeList<T>::DerivativeMatrix(const gbtVector<T>& p) const
 {
   gbtMatrix<T> answer(Length(),Dmnsn());
   int i;
@@ -453,7 +453,7 @@ gbtMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) cons
 }
 
 template <class T> gbtMatrix<T> 
-ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p,
+gbtPolyPartialTreeList<T>::DerivativeMatrix(const gbtVector<T>& p,
 					const int& NoEquations) const
 {
   gbtMatrix<T> answer(NoEquations,Dmnsn());
@@ -466,7 +466,7 @@ ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p,
 }
 
 template <class T> gbtSquareMatrix<T> 
-ListOfPartialTrees<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
+gbtPolyPartialTreeList<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 {
   assert (Length() >= Dmnsn());
   gbtSquareMatrix<T> answer(Dmnsn());
@@ -479,7 +479,7 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 }
 
 template <class T> gbtVector<T> 
-ListOfPartialTrees<T>::ValuesOfRootPolys(const gbtVector<T>& point,
+gbtPolyPartialTreeList<T>::ValuesOfRootPolys(const gbtVector<T>& point,
 					 const int& NoEquations) const
 {
   gbtVector<T> answer(NoEquations);
@@ -490,7 +490,7 @@ ListOfPartialTrees<T>::ValuesOfRootPolys(const gbtVector<T>& point,
 }
 
 template <class T> T  
-ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
+gbtPolyPartialTreeList<T>::MaximalNonconstantDifference(const int& i,
 						    const int& j,
 						    const gbtVector<T>& point, 
 				  const gbtVector<T>& halvesoflengths)    const
@@ -501,7 +501,7 @@ ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
 }
 
 template <class T> gbtOutput& operator << (gbtOutput& output, 
-					 const ListOfPartialTrees<T>& /* x */)
+					 const gbtPolyPartialTreeList<T>& /* x */)
 {
   // Changed to just return silently.
   return output;

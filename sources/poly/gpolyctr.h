@@ -29,49 +29,49 @@
 
 #include "gpoly.h"
 
-template <class T> class gPolyArray  {
+template <class T> class gbtPolyMultiArray  {
   protected:
     int mindex, maxdex;
-    gPoly<T> **data;
+    gbtPolyMulti<T> **data;
 
   public:
-    gPolyArray(const gSpace *, const term_order *, int len = 0);
-    gPolyArray(const gSpace *, const term_order *, int lo, int hi);
-    gPolyArray(const gPolyArray<T> &);
-    virtual ~gPolyArray();
+    gbtPolyMultiArray(const gbtPolySpace *, const gbtPolyTermOrder *, int len = 0);
+    gbtPolyMultiArray(const gbtPolySpace *, const gbtPolyTermOrder *, int lo, int hi);
+    gbtPolyMultiArray(const gbtPolyMultiArray<T> &);
+    virtual ~gbtPolyMultiArray();
 
-    gPolyArray<T> &operator=(const gPolyArray<T> &);
+    gbtPolyMultiArray<T> &operator=(const gbtPolyMultiArray<T> &);
     int Length(void) const;
 
     int First(void) const;
     int Last(void) const;
 
-    const gPoly<T> &operator[](int index) const;
-    gPoly<T> &operator[](int index);
+    const gbtPolyMulti<T> &operator[](int index) const;
+    gbtPolyMulti<T> &operator[](int index);
     virtual void Dump(gbtOutput &) const;
 };
 
-template <class T> class gPolyBlock : public gPolyArray<T>   {
+template <class T> class gbtPolyMultiBlock : public gbtPolyMultiArray<T>   {
   private:
-    int InsertAt(const gPoly<T> &t, int where);
+    int InsertAt(const gbtPolyMulti<T> &t, int where);
 
   public:
-    gPolyBlock(const gSpace *, const term_order *, int len = 0);
-    gPolyBlock(const gSpace *, const term_order *, int lo, int hi);
-    gPolyBlock(const gPolyBlock<T> &);
-    virtual ~gPolyBlock();
+    gbtPolyMultiBlock(const gbtPolySpace *, const gbtPolyTermOrder *, int len = 0);
+    gbtPolyMultiBlock(const gbtPolySpace *, const gbtPolyTermOrder *, int lo, int hi);
+    gbtPolyMultiBlock(const gbtPolyMultiBlock<T> &);
+    virtual ~gbtPolyMultiBlock();
 
-    gPolyBlock<T> &operator=(const gPolyBlock<T> &);
+    gbtPolyMultiBlock<T> &operator=(const gbtPolyMultiBlock<T> &);
 
-    bool operator==(const gPolyBlock<T> &b) const;
-    bool operator!=(const gPolyBlock<T> &b) const;
+    bool operator==(const gbtPolyMultiBlock<T> &b) const;
+    bool operator!=(const gbtPolyMultiBlock<T> &b) const;
 
-    int Append(const gPoly<T> &);
-    int Insert(const gPoly<T> &, int);
-    gPoly<T> Remove(int);
+    int Append(const gbtPolyMulti<T> &);
+    int Insert(const gbtPolyMulti<T> &, int);
+    gbtPolyMulti<T> Remove(int);
 
-    int Find(const gPoly<T> &) const;
-    int Contains(const gPoly<T> &t) const;
+    int Find(const gbtPolyMulti<T> &) const;
+    int Contains(const gbtPolyMulti<T> &t) const;
     void Flush(void);
 };
 

@@ -35,7 +35,7 @@ bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
 #include "base/glist.imp"
 
 //-----------------------------------------------------------
-//                      gSpace
+//                      gbtPolySpace
 //-----------------------------------------------------------
 
 
@@ -43,7 +43,7 @@ bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
 // Constructors/Destructors
 //-------------------------
 
-gSpace::gSpace(int nvars)
+gbtPolySpace::gbtPolySpace(int nvars)
 : Variables()
 {
   Variable *newvar;
@@ -58,7 +58,7 @@ gSpace::gSpace(int nvars)
   }
 }
 
-gSpace::gSpace(const gSpace &p)
+gbtPolySpace::gbtPolySpace(const gbtPolySpace &p)
 : Variables()
 {
   Variable *newvar;
@@ -70,7 +70,7 @@ gSpace::gSpace(const gSpace &p)
   }
 } 
 
-gSpace::~gSpace()
+gbtPolySpace::~gbtPolySpace()
 {
   for (int i = 1; i <= Variables.Length(); i++) delete Variables[i]; 
 }
@@ -79,7 +79,7 @@ gSpace::~gSpace()
 // Member Functions
 //-----------------
 
-gSpace& gSpace::operator=(const gSpace & rhs)
+gbtPolySpace& gbtPolySpace::operator=(const gbtPolySpace & rhs)
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc7\n";//**
 
@@ -89,29 +89,29 @@ gSpace& gSpace::operator=(const gSpace & rhs)
   return *this;
 }
 
-int gSpace::Dmnsn(void) const
+int gbtPolySpace::Dmnsn(void) const
 {
   return Variables.Length();
 }
 
-Variable * gSpace::VariableWithNumber(int i) const
+Variable * gbtPolySpace::VariableWithNumber(int i) const
 {
   return Variables[i];
 }
 
-const gbtText & gSpace::GetVariableName(int i) const
+const gbtText & gbtPolySpace::GetVariableName(int i) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
 
   return ((Variables[i])->Name);
 }
 
-void gSpace::SetVariableName(int i, const gbtText &s)
+void gbtPolySpace::SetVariableName(int i, const gbtText &s)
 {
   (Variables[i])->Name = s;
 }
 
-void gSpace::CreateVariables (int nvars )
+void gbtPolySpace::CreateVariables (int nvars )
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc12\n";//**
 
@@ -127,20 +127,20 @@ void gSpace::CreateVariables (int nvars )
   }
 }
 
-gSpace gSpace::WithVariableAppended() const
+gbtPolySpace gbtPolySpace::WithVariableAppended() const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc14\n";//**
- gSpace enlarged(*this);
+ gbtPolySpace enlarged(*this);
  enlarged.CreateVariables(1);
  return enlarged;
 }
 
-Variable* gSpace::operator[](int i) const
+Variable* gbtPolySpace::operator[](int i) const
 {
   return VariableWithNumber(i);
 }
 
-bool gSpace::operator==(const gSpace & rhs) const
+bool gbtPolySpace::operator==(const gbtPolySpace & rhs) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc15\n";//**
 
@@ -151,7 +151,7 @@ bool gSpace::operator==(const gSpace & rhs) const
     return false;
 }
 
-bool gSpace::operator!=(const gSpace & rhs) const
+bool gbtPolySpace::operator!=(const gbtPolySpace & rhs) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc16\n";//**
 
@@ -159,10 +159,10 @@ bool gSpace::operator!=(const gSpace & rhs) const
 }
 
 // - RESTORE WHEN NEEDED
-// gSpace gSpace::NewFamilyWithoutVariable(int var)
+// gbtPolySpace gbtPolySpace::NewFamilyWithoutVariable(int var)
 // {gout<<"IF OK, ZAP ME:prepoly.cc17\n";//**
 
-//   gSpace result(NoOfVars - 1);
+//   gbtPolySpace result(NoOfVars - 1);
 //   for (int i = 1; i <= NoOfVars; i++)
 //     {gout<<"IF OK, ZAP ME:prepoly.cc18\n";//**
 
@@ -174,7 +174,7 @@ bool gSpace::operator!=(const gSpace & rhs) const
 //   return result;
 // }
 
-void gSpace::Dump(gbtOutput &f) const
+void gbtPolySpace::Dump(gbtOutput &f) const
 {
   f << "No of Variable: " << Variables.Length() << "\n";
   for (int i=1; i<=Variables.Length(); i++) {
@@ -186,7 +186,7 @@ void gSpace::Dump(gbtOutput &f) const
 
 
 //------------------------------------------------------
-//                      exp_vect
+//                      gbtPolyExponent
 //------------------------------------------------------
 
 
@@ -194,48 +194,48 @@ void gSpace::Dump(gbtOutput &f) const
 // Constructors/Destructors
 //-------------------------
 
-exp_vect::exp_vect(const gSpace* p) 
+gbtPolyExponent::gbtPolyExponent(const gbtPolySpace* p) 
 : Space(p), components(p->Dmnsn())     
 {
   for (int i = 1; i <= p->Dmnsn(); i++) components[i] = 0;
 }
 
-exp_vect::exp_vect(const gSpace* p, const int& var, const int& exp)
+gbtPolyExponent::gbtPolyExponent(const gbtPolySpace* p, const int& var, const int& exp)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = 0;
   components[var] = exp;
 }
 
-exp_vect::exp_vect(const gSpace* p, int* exponents)
+gbtPolyExponent::gbtPolyExponent(const gbtPolySpace* p, int* exponents)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i-1];
 }
 
-exp_vect::exp_vect(const gSpace* p, gbtVector<int> exponents)
+gbtPolyExponent::gbtPolyExponent(const gbtPolySpace* p, gbtVector<int> exponents)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i];
 }
 
-exp_vect::exp_vect(const gSpace* p, gbtArray<int> exponents)
+gbtPolyExponent::gbtPolyExponent(const gbtPolySpace* p, gbtArray<int> exponents)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i];
 }
 
-exp_vect::exp_vect(const exp_vect* p)
+gbtPolyExponent::gbtPolyExponent(const gbtPolyExponent* p)
 : Space(p->Space), components(p->components)
 {
 }
 
-exp_vect::exp_vect(const exp_vect & p)
+gbtPolyExponent::gbtPolyExponent(const gbtPolyExponent & p)
 : Space(p.Space), components(p.components)
 {
 }
 
-exp_vect::~exp_vect()
+gbtPolyExponent::~gbtPolyExponent()
 {
   //  gout << "Gotcha!\n";
 }
@@ -246,7 +246,7 @@ exp_vect::~exp_vect()
 //        Operators
 //-------------------------
 
-exp_vect& exp_vect::operator=(const exp_vect & RHS)
+gbtPolyExponent& gbtPolyExponent::operator=(const gbtPolyExponent & RHS)
 {
   if (*this == RHS) return *this;
 
@@ -256,13 +256,13 @@ exp_vect& exp_vect::operator=(const exp_vect & RHS)
 }
 
 
-int exp_vect::operator[](int index) const
+int gbtPolyExponent::operator[](int index) const
 {
   return components[index];
 }
 
 
-bool exp_vect::operator==(const exp_vect & RHS) const
+bool gbtPolyExponent::operator==(const gbtPolyExponent & RHS) const
 {
   assert (Space == RHS.Space);
 
@@ -272,12 +272,12 @@ bool exp_vect::operator==(const exp_vect & RHS) const
     return false;
 }
 
-bool exp_vect::operator!=(const exp_vect & RHS) const
+bool gbtPolyExponent::operator!=(const gbtPolyExponent & RHS) const
 {
   return !(*this == RHS);
 }
 
-bool exp_vect::operator<=(const exp_vect & RHS) const
+bool gbtPolyExponent::operator<=(const gbtPolyExponent & RHS) const
 {
   assert (Space == RHS.Space);
 
@@ -288,7 +288,7 @@ bool exp_vect::operator<=(const exp_vect & RHS) const
   return true;
 }
  
-bool exp_vect::operator>=(const exp_vect & RHS) const
+bool gbtPolyExponent::operator>=(const gbtPolyExponent & RHS) const
 {
   assert (Space == RHS.Space);
 
@@ -299,48 +299,48 @@ bool exp_vect::operator>=(const exp_vect & RHS) const
   return true;
 }
 
-bool exp_vect::operator< (const exp_vect & RHS) const
+bool gbtPolyExponent::operator< (const gbtPolyExponent & RHS) const
 {
   return !(*this >= RHS);
 }
 
-bool exp_vect::operator> (const exp_vect & RHS) const
+bool gbtPolyExponent::operator> (const gbtPolyExponent & RHS) const
 {
   return !(*this <= RHS);
 }
 
-exp_vect exp_vect::operator- () const
+gbtPolyExponent gbtPolyExponent::operator- () const
 {
-  exp_vect tmp(Space);
+  gbtPolyExponent tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
     tmp.components[i] = -components[i];
 
   return tmp;
 }
 
-exp_vect  exp_vect::operator+ (const exp_vect & credit) const
+gbtPolyExponent  gbtPolyExponent::operator+ (const gbtPolyExponent & credit) const
 {
   assert (Space == credit.Space);
 
-  exp_vect tmp(Space);
+  gbtPolyExponent tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
     tmp.components[i] = components[i] + credit.components[i];
 
   return tmp;
 }
 
-exp_vect  exp_vect::operator- (const exp_vect & debit) const
+gbtPolyExponent  gbtPolyExponent::operator- (const gbtPolyExponent & debit) const
 {
   assert (Space == debit.Space);
 
-  exp_vect tmp(Space);
+  gbtPolyExponent tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
     tmp.components[i] = components[i] - debit.components[i];
 
   return tmp;
 }
 
-void exp_vect::operator+=(const exp_vect & credit) 
+void gbtPolyExponent::operator+=(const gbtPolyExponent & credit) 
 {
 
   assert (Space == credit.Space);
@@ -349,7 +349,7 @@ void exp_vect::operator+=(const exp_vect & credit)
     components[i] += credit.components[i];
 }
 
-void exp_vect::operator-=(const exp_vect & debit) 
+void gbtPolyExponent::operator-=(const gbtPolyExponent & debit) 
 {
   assert (Space == debit.Space);
 
@@ -362,11 +362,11 @@ void exp_vect::operator-=(const exp_vect & debit)
 //        Other Operations
 //----------------------------
 
-exp_vect  exp_vect::LCM(const exp_vect & arg2) const
+gbtPolyExponent  gbtPolyExponent::LCM(const gbtPolyExponent & arg2) const
 {
   assert (Space == arg2.Space);
 
-  exp_vect tmp(Space);
+  gbtPolyExponent tmp(Space);
   for (int i = 1; i <= Dmnsn(); i++)
     if (components[i] < arg2.components[i])
       tmp.components[i] = arg2.components[i];
@@ -376,9 +376,9 @@ exp_vect  exp_vect::LCM(const exp_vect & arg2) const
   return tmp;
 }
 
-exp_vect  exp_vect::WithVariableAppended(const gSpace* EnlargedSpace) const
+gbtPolyExponent  gbtPolyExponent::WithVariableAppended(const gbtPolySpace* EnlargedSpace) const
 {
-  exp_vect tmp(EnlargedSpace);
+  gbtPolyExponent tmp(EnlargedSpace);
 
   for (int i = 1; i <= Dmnsn(); i++)
     tmp.components[i] = components[i];
@@ -387,16 +387,16 @@ exp_vect  exp_vect::WithVariableAppended(const gSpace* EnlargedSpace) const
   return tmp;
 }
 
-exp_vect  exp_vect::AfterZeroingOutExpOfVariable(int& varnumber) const
+gbtPolyExponent  gbtPolyExponent::AfterZeroingOutExpOfVariable(int& varnumber) const
 {
-  exp_vect tmp(*this);
+  gbtPolyExponent tmp(*this);
   tmp.components[varnumber] = 0;
   return tmp;
 }
 
-exp_vect  exp_vect::AfterDecrementingExpOfVariable(int& varnumber) const
+gbtPolyExponent  gbtPolyExponent::AfterDecrementingExpOfVariable(int& varnumber) const
 {
-  exp_vect tmp(*this);
+  gbtPolyExponent tmp(*this);
   tmp.components[varnumber]--;
   return tmp;
 }
@@ -406,12 +406,12 @@ exp_vect  exp_vect::AfterDecrementingExpOfVariable(int& varnumber) const
 //        Information
 //--------------------------
 
-int exp_vect::Dmnsn() const
+int gbtPolyExponent::Dmnsn() const
 {
   return Space->Dmnsn();
 }
 
-bool exp_vect::IsPositive() const
+bool gbtPolyExponent::IsPositive() const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc40\n";//**
 
@@ -422,7 +422,7 @@ bool exp_vect::IsPositive() const
   return true;
 }
 
-bool exp_vect::IsNonnegative() const
+bool gbtPolyExponent::IsNonnegative() const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc41\n";//**
 
@@ -433,21 +433,21 @@ bool exp_vect::IsNonnegative() const
   return true;
 }
 
-bool  exp_vect::IsConstant() const
+bool  gbtPolyExponent::IsConstant() const
 {
   for (int i = 1; i <= Dmnsn(); i++)
     if ((*this)[i] > 0) return false;
   return true;
 }
 
-bool  exp_vect::IsMultiaffine() const
+bool  gbtPolyExponent::IsMultiaffine() const
 {
   for (int i = 1; i <= Dmnsn(); i++)
     if ((*this)[i] > 1) return false;
   return true;
 }
 
-bool  exp_vect::IsUnivariate() const
+bool  gbtPolyExponent::IsUnivariate() const
 {
   int no_active_variables = 0;
 
@@ -458,7 +458,7 @@ bool  exp_vect::IsUnivariate() const
   else                          return false;
 }
 
-int  exp_vect::SoleActiveVariable() const
+int  gbtPolyExponent::SoleActiveVariable() const
 {
   int sole_active_variable = 0;
 
@@ -472,7 +472,7 @@ int  exp_vect::SoleActiveVariable() const
   return sole_active_variable;
 }
 
-int  exp_vect::TotalDegree() const
+int  gbtPolyExponent::TotalDegree() const
 {
   int exp_sum = 0;
   for (int i = 1; i <= Dmnsn(); i++) 
@@ -480,7 +480,7 @@ int  exp_vect::TotalDegree() const
   return exp_sum;
 }
 
-bool  exp_vect::Divides(const exp_vect& n) const
+bool  gbtPolyExponent::Divides(const gbtPolyExponent& n) const
 {
   for (int i = 1; i <= Dmnsn(); i++)
     if ((*this)[i] > n[i])
@@ -488,7 +488,7 @@ bool  exp_vect::Divides(const exp_vect& n) const
   return true;
 }
 
-bool  exp_vect::UsesDifferentVariablesThan(const exp_vect& n) const
+bool  gbtPolyExponent::UsesDifferentVariablesThan(const gbtPolyExponent& n) const
 {
   for (int i = 1; i <= Dmnsn(); i++)
     if ( ((*this)[i] > 0) && (n[i] > 0) )
@@ -500,14 +500,14 @@ bool  exp_vect::UsesDifferentVariablesThan(const exp_vect& n) const
 //        Manipulation
 //--------------------------
 
-void  exp_vect::SetExp(int varno, int pow)
+void  gbtPolyExponent::SetExp(int varno, int pow)
 {
   assert (1 <= varno && varno <= Dmnsn() && 0 <= pow);
 
   components[varno] = pow;
 }
 
-void  exp_vect::ToZero()
+void  gbtPolyExponent::ToZero()
 {
   for (int i = 1; i <= Dmnsn(); i++)
     components[i] = 0;
@@ -518,7 +518,7 @@ void  exp_vect::ToZero()
 //--------------------------
 
 
-gbtOutput& operator<<(gbtOutput &f, const exp_vect& vect)
+gbtOutput& operator<<(gbtOutput &f, const gbtPolyExponent& vect)
 {
   f << "(";
   for (int i = 1; i < vect.Dmnsn(); i++)
@@ -529,7 +529,7 @@ gbtOutput& operator<<(gbtOutput &f, const exp_vect& vect)
 
 
 //------------------------------------------------------
-//                      term_order
+//                      gbtPolyTermOrder
 //------------------------------------------------------
 
 
@@ -537,7 +537,7 @@ gbtOutput& operator<<(gbtOutput &f, const exp_vect& vect)
 // Possible Orderings
 //-------------------
 
-bool lex(const exp_vect & LHS, const exp_vect & RHS)
+bool lex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   for (int i = 1; i <= LHS.Dmnsn(); i++)
     if (LHS[i] < RHS[i]) return true;
@@ -545,7 +545,7 @@ bool lex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
-bool reverselex(const exp_vect & LHS, const exp_vect & RHS)
+bool reverselex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   for (int i = LHS.Dmnsn(); i >= 1; i--)
     if (LHS[i] < RHS[i]) return true;
@@ -553,7 +553,7 @@ bool reverselex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
-bool deglex(const exp_vect & LHS, const exp_vect & RHS)
+bool deglex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   if      (LHS.TotalDegree() < RHS.TotalDegree()) return true;
   else if (LHS.TotalDegree() > RHS.TotalDegree()) return false;
@@ -564,7 +564,7 @@ bool deglex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
-bool reversedeglex(const exp_vect & LHS, const exp_vect & RHS)
+bool reversedeglex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   if      (LHS.TotalDegree() < RHS.TotalDegree()) return true;
   else if (LHS.TotalDegree() > RHS.TotalDegree()) return false;
@@ -575,7 +575,7 @@ bool reversedeglex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
-bool degrevlex(const exp_vect & LHS, const exp_vect & RHS)
+bool degrevlex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   if      (LHS.TotalDegree() < RHS.TotalDegree()) return true;
   else if (LHS.TotalDegree() > RHS.TotalDegree()) return false;
@@ -586,7 +586,7 @@ bool degrevlex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
-bool reversedegrevlex(const exp_vect & LHS, const exp_vect & RHS)
+bool reversedegrevlex(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS)
 {
   if      (LHS.TotalDegree() < RHS.TotalDegree()) return true;
   else if (LHS.TotalDegree() > RHS.TotalDegree()) return false;
@@ -602,17 +602,17 @@ bool reversedegrevlex(const exp_vect & LHS, const exp_vect & RHS)
 // Constructors/Destructors
 //-------------------------
 
-term_order::term_order(const gSpace* p, ORD_PTR act_ord) 
+gbtPolyTermOrder::gbtPolyTermOrder(const gbtPolySpace* p, ORD_PTR act_ord) 
 : Space(p), actual_order(act_ord)
 {
 }
 
-term_order::term_order(const term_order & p)
+gbtPolyTermOrder::gbtPolyTermOrder(const gbtPolyTermOrder & p)
 : Space(p.Space), actual_order(p.actual_order)
 {
 }
 
-term_order::~term_order()
+gbtPolyTermOrder::~gbtPolyTermOrder()
 {
   //  gout << "Sihonara, sucker ... \n";
 }
@@ -623,7 +623,7 @@ term_order::~term_order()
 //        Operators
 //-------------------------
 
-term_order& term_order::operator=(term_order & RHS) 
+gbtPolyTermOrder& gbtPolyTermOrder::operator=(gbtPolyTermOrder & RHS) 
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc50\n";//**
 
@@ -635,12 +635,12 @@ term_order& term_order::operator=(term_order & RHS)
 }
 
 
-bool term_order::operator==(const term_order & RHS) const
+bool gbtPolyTermOrder::operator==(const gbtPolyTermOrder & RHS) const
 {
   return (Space == RHS.Space && actual_order == RHS.actual_order);
 }
 
-bool term_order::operator!=(const term_order & RHS) const
+bool gbtPolyTermOrder::operator!=(const gbtPolyTermOrder & RHS) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc52\n";//**
 
@@ -652,23 +652,23 @@ bool term_order::operator!=(const term_order & RHS) const
 //        Comparisons
 //-------------------------
 
-bool term_order::Less(const exp_vect & LHS, const exp_vect & RHS) const
+bool gbtPolyTermOrder::Less(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS) const
 {
   return (*actual_order)(LHS, RHS);
 }
 
-bool term_order::LessOrEqual(const exp_vect & LHS, const exp_vect & RHS) const
+bool gbtPolyTermOrder::LessOrEqual(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS) const
 {
   return ((*actual_order)(LHS, RHS) || LHS == RHS);
 }
 
-bool term_order::Greater(const exp_vect & LHS, const exp_vect & RHS) const
+bool gbtPolyTermOrder::Greater(const gbtPolyExponent & LHS, const gbtPolyExponent & RHS) const
 {
   return !(LessOrEqual(LHS, RHS));
 }
 
-bool term_order::GreaterOrEqual(const exp_vect & LHS, 
-				const exp_vect & RHS) const
+bool gbtPolyTermOrder::GreaterOrEqual(const gbtPolyExponent & LHS, 
+				const gbtPolyExponent & RHS) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc56\n";//**
 
@@ -680,17 +680,17 @@ bool term_order::GreaterOrEqual(const exp_vect & LHS,
 //        Manipulation and Information
 //-------------------------------------------
 
-term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
+gbtPolyTermOrder gbtPolyTermOrder::WithVariableAppended(const gbtPolySpace* ExtendedSpace) const
 {
-  return term_order(ExtendedSpace,actual_order);
+  return gbtPolyTermOrder(ExtendedSpace,actual_order);
 }
 
 
 
-template class gbtList<exp_vect>;
-template gbtOutput& operator << (gbtOutput& output, const gbtList<exp_vect>&);
+template class gbtList<gbtPolyExponent>;
+template gbtOutput& operator << (gbtOutput& output, const gbtList<gbtPolyExponent>&);
 
-template class gbtList<exp_vect*>;
+template class gbtList<gbtPolyExponent*>;
 
 #include "base/garray.imp"
 #include "base/gblock.imp"

@@ -2892,7 +2892,7 @@ int read_mark(int timeset){
 
 /* 
 ** An Aset is an r-tupple of point configurations. It represents
-** the support set of a polynomial system, and is a presentation for
+** the support set of a gbtPolyUni system, and is a presentation for
 ** the minkowski sum of the convex hulls of its constituent
 ** point configurations. 
 ** 

@@ -56,25 +56,25 @@ singular roots.
 */
 
 /*
-   The main constructor for this takes a gPolyList<T>.  The list must
+   The main constructor for this takes a gbtPolyMultiList<T>.  The list must
 be at least as long as the dimension Dmnsn() of the space of the
 system.  The first Dmnsn() polynomials are interpreted as equations,
 while remaining polynomials are interpreted as inequalities in the
-sense that the polynomial is required to be nonnegative.
+sense that the gbtPolyUni is required to be nonnegative.
 */
 
 
 // ***********************
-//      class QuikSolv
+//      class gbtPolyQuickSolve
 // ***********************
 
-template <class T> class QuikSolv {
+template <class T> class gbtPolyQuickSolve {
  private:
-  const gPolyList<T>                 System;
-  const gPolyList<gbtDouble>           gDoubleSystem;
+  const gbtPolyMultiList<T>                 System;
+  const gbtPolyMultiList<gbtDouble>           gDoubleSystem;
   const int                          NoEquations;
   const int                          NoInequalities;
-  const ListOfPartialTrees<gbtDouble>  TreesOfPartials;
+  const gbtPolyPartialTreeList<gbtDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
         gbtList<gbtVector<gbtDouble> >     Roots;
   const bool                         isMultiaffine;
@@ -87,7 +87,7 @@ template <class T> class QuikSolv {
 
   // Get Roots Using Pelican
 
-  bool AllRealRootsFromPelican(const gPolyList<gbtDouble> &, 
+  bool AllRealRootsFromPelican(const gbtPolyMultiList<gbtDouble> &, 
 			             gbtList<gbtVector<gbtDouble> > &)         const;
   bool PelicanRoots(const gRectangle<T> &, 
 		          gbtList<gbtVector<gbtDouble> > &)                    const;
@@ -145,24 +145,24 @@ template <class T> class QuikSolv {
     virtual ~NewtonError();
     gbtText Description(void) const;   
   };
-   QuikSolv(const gPolyList<T> &, gbtStatus &);  
-   QuikSolv(const gPolyList<T> &, const int &, gbtStatus &);  
-   QuikSolv(const QuikSolv<T> &);
-   ~QuikSolv();
+   gbtPolyQuickSolve(const gbtPolyMultiList<T> &, gbtStatus &);  
+   gbtPolyQuickSolve(const gbtPolyMultiList<T> &, const int &, gbtStatus &);  
+   gbtPolyQuickSolve(const gbtPolyQuickSolve<T> &);
+   ~gbtPolyQuickSolve();
 
    // Operators
-   QuikSolv<T>& operator= (const QuikSolv<T> &);
-   bool         operator==(const QuikSolv<T> &) const;
-   bool         operator!=(const QuikSolv<T> &) const;
+   gbtPolyQuickSolve<T>& operator= (const gbtPolyQuickSolve<T> &);
+   bool         operator==(const gbtPolyQuickSolve<T> &) const;
+   bool         operator!=(const gbtPolyQuickSolve<T> &) const;
 
    // Information
-   inline const gSpace*                  AmbientSpace()              const 
+   inline const gbtPolySpace*                  AmbientSpace()              const 
      { return System.AmbientSpace(); }
-   inline const term_order*              TermOrder()                 const 
+   inline const gbtPolyTermOrder*              TermOrder()                 const 
      { return System.TermOrder(); }
    inline const int                      Dmnsn()                     const 
      { return System.Dmnsn(); }
-   inline const gPolyList<T>             UnderlyingEquations()       const 
+   inline const gbtPolyMultiList<T>             UnderlyingEquations()       const 
      { return System; }
    inline const bool                     WasSolved()                 const
      { return HasBeenSolved; }
@@ -189,6 +189,6 @@ template <class T> class QuikSolv {
    void Output(gbtOutput &) const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &output, const QuikSolv<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &output, const gbtPolyQuickSolve<T> &);
 
 #endif // QUIKSOLV_H

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of IneqSolv 
+// Declaration of gbtPolyIneqSolve 
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -40,27 +40,27 @@
 /*
     The class described in this file is a method of determining whether a
 system of weak inequalities has a solution (a point where all are satisfied)
-in a given rectangle.  Ir is modeled on QuikSolv, but simpler.  There is
+in a given rectangle.  Ir is modeled on gbtPolyQuickSolve, but simpler.  There is
 no Newton search, only repeated subdivision, queries at the center, and
 tests against whether one of the inequalities is provably everywhere 
 negative in the rectangle.
 */
 
 /*
-   The main constructor for this takes a gPolyList<T>, interpreted as 
+   The main constructor for this takes a gbtPolyMultiList<T>, interpreted as 
 inequalities in the sense that, at a solution, all the polynomials
 are required to be nonnegative.
 */
 
 
 // ***********************
-//      class IneqSolv
+//      class gbtPolyIneqSolve
 // ***********************
 
-template <class T> class IneqSolv {
+template <class T> class gbtPolyIneqSolve {
  private:
-  const gPolyList<T>                 System;
-  const ListOfPartialTrees<T>        TreesOfPartials;
+  const gbtPolyMultiList<T>                 System;
+  const gbtPolyPartialTreeList<T>        TreesOfPartials;
         T                            Epsilon;
   //        bool                         HasBeenSolved;
   //        gbtTriState                    HasASolution;
@@ -78,23 +78,23 @@ template <class T> class IneqSolv {
 				            gbtArray<int>&)          const;
 
  public:
-   IneqSolv(const gPolyList<T> &, gbtStatus &);  
-   IneqSolv(const IneqSolv<T> &);
-   ~IneqSolv();
+   gbtPolyIneqSolve(const gbtPolyMultiList<T> &, gbtStatus &);  
+   gbtPolyIneqSolve(const gbtPolyIneqSolve<T> &);
+   ~gbtPolyIneqSolve();
 
    // Operators
-   IneqSolv<T>& operator= (const IneqSolv<T> &);
-   bool         operator==(const IneqSolv<T> &) const;
-   bool         operator!=(const IneqSolv<T> &) const;
+   gbtPolyIneqSolve<T>& operator= (const gbtPolyIneqSolve<T> &);
+   bool         operator==(const gbtPolyIneqSolve<T> &) const;
+   bool         operator!=(const gbtPolyIneqSolve<T> &) const;
 
    // Information
-   inline const gSpace*                  AmbientSpace()              const 
+   inline const gbtPolySpace*                  AmbientSpace()              const 
      { return System.AmbientSpace(); }
-   inline const term_order*              TermOrder()                 const 
+   inline const gbtPolyTermOrder*              TermOrder()                 const 
      { return System.TermOrder(); }
    inline const int                      Dmnsn()                     const 
      { return System.Dmnsn(); }
-   inline const gPolyList<T>             UnderlyingEquations()       const 
+   inline const gbtPolyMultiList<T>             UnderlyingEquations()       const 
      { return System; }
    inline const T                        ErrorTolerance()            const
      { return Epsilon; }
@@ -105,5 +105,5 @@ template <class T> class IneqSolv {
   void Output(gbtOutput &) const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &output, const IneqSolv<T> &x);
+template <class T> gbtOutput &operator<<(gbtOutput &output, const gbtPolyIneqSolve<T> &x);
 #endif // INEQSOLV_H

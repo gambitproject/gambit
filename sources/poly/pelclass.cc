@@ -120,7 +120,7 @@ Gen_node PelView::CreateRing(const int numvar) const
   return a1;
 }
 
-polynomial1 PelView::GamPolyToPelPoly(const gPoly<gbtDouble> &p, 
+polynomial1 PelView::GamPolyToPelPoly(const gbtPolyMulti<gbtDouble> &p, 
 				      const int n, 
 				      const Pring ring) const
 {
@@ -198,7 +198,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gbtDouble> &p,
 }  
 
 Gen_node 
-PelView::CreatePelicanVersionOfSystem(const gPolyList<gbtDouble> &input, 
+PelView::CreatePelicanVersionOfSystem(const gbtPolyMultiList<gbtDouble> &input, 
 				      const Pring ring) const
 {
   Gen_node a;
@@ -560,12 +560,12 @@ bool PelView::CheckSolutions(const Gen_node g) const
   return 1;
 }
 
-PelView::PelView(const gPolyList<gbtDouble> &mylist):input(mylist)
+PelView::PelView(const gbtPolyMultiList<gbtDouble> &mylist):input(mylist)
 {
   InitializePelicanMemory();
   
 #ifdef PELVIEW_DEBUG
-  //  gout << "We begin with the polynomial list\n" << mylist << "\n";
+  //  gout << "We begin with the gbtPolyUni list\n" << mylist << "\n";
 #endif
 
   Pring ring = MakePring(input.Length());  
@@ -755,24 +755,24 @@ int old_main()
  //stuff for Gambit-text to Gambit-data
   for (int loop = 1; loop <= 3; loop++) {
 
-  gSpace Space(4); 
+  gbtPolySpace Space(4); 
   ORD_PTR ptr = &lex;
-  term_order Lex(&Space, ptr);
+  gbtPolyTermOrder Lex(&Space, ptr);
   ptr =  &reversedeglex;
-  term_order  ReverseDegLex(&Space, ptr);
+  gbtPolyTermOrder  ReverseDegLex(&Space, ptr);
   ptr = &reverselex;
-  term_order ReverseLex(&Space, ptr);
+  gbtPolyTermOrder ReverseLex(&Space, ptr);
   
   //Default system
   gbtText gx = " 2 + n2 ";
   gbtText gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
   gbtText gz = " 3 + n3 + n4";
   gbtText gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
-  gPoly<gbtDouble> px(&Space,gx,&Lex);
-  gPoly<gbtDouble> py(&Space,gy,&Lex); 
-  gPoly<gbtDouble> pz(&Space,gz,&Lex);
-  gPoly<gbtDouble> pu(&Space,gu,&Lex);
-  gPolyList<gbtDouble> mylist(&Space, &ReverseDegLex);
+  gbtPolyMulti<gbtDouble> px(&Space,gx,&Lex);
+  gbtPolyMulti<gbtDouble> py(&Space,gy,&Lex); 
+  gbtPolyMulti<gbtDouble> pz(&Space,gz,&Lex);
+  gbtPolyMulti<gbtDouble> pu(&Space,gu,&Lex);
+  gbtPolyMultiList<gbtDouble> mylist(&Space, &ReverseDegLex);
   mylist += px;
   mylist += py;
   mylist += pz;
@@ -781,22 +781,22 @@ int old_main()
   PelView atlast(mylist);
 
 
-  gSpace NewSpace(3); 
+  gbtPolySpace NewSpace(3); 
   ptr = &lex;
-  term_order NewLex(&NewSpace, ptr);
+  gbtPolyTermOrder NewLex(&NewSpace, ptr);
   ptr =  &reversedeglex;
-  term_order  NewReverseDegLex(&NewSpace, ptr);
+  gbtPolyTermOrder  NewReverseDegLex(&NewSpace, ptr);
   ptr = &reverselex;
-  term_order NewReverseLex(&NewSpace, ptr);
+  gbtPolyTermOrder NewReverseLex(&NewSpace, ptr);
   
   //Default system
   gbtText newgx = " 2 + n2 ";
   gbtText newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
   gbtText newgz = " 3 + n3";
-  gPoly<gbtDouble> newpx(&NewSpace,newgx,&NewLex);
-  gPoly<gbtDouble> newpy(&NewSpace,newgy,&NewLex); 
-  gPoly<gbtDouble> newpz(&NewSpace,newgz,&NewLex);
-  gPolyList<gbtDouble> mynewlist(&NewSpace, &NewReverseDegLex);
+  gbtPolyMulti<gbtDouble> newpx(&NewSpace,newgx,&NewLex);
+  gbtPolyMulti<gbtDouble> newpy(&NewSpace,newgy,&NewLex); 
+  gbtPolyMulti<gbtDouble> newpz(&NewSpace,newgz,&NewLex);
+  gbtPolyMultiList<gbtDouble> mynewlist(&NewSpace, &NewReverseDegLex);
   mynewlist += newpx;
   mynewlist += newpy;
   mynewlist += newpz;

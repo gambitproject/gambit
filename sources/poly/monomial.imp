@@ -28,119 +28,119 @@
 
 
 //--------------------------------------------------------------------------
-//                 gMono -- constructors and destructor
+//                 gbtMonomial -- constructors and destructor
 //--------------------------------------------------------------------------
 
-template<class T> gMono<T>::gMono(const gSpace* p, const T& x) 
+template<class T> gbtMonomial<T>::gbtMonomial(const gbtPolySpace* p, const T& x) 
 : coef(x), exps(p)
 { 
 }
 
-template<class T> gMono<T>::gMono(const T& x, const exp_vect& e) 
+template<class T> gbtMonomial<T>::gbtMonomial(const T& x, const gbtPolyExponent& e) 
 : coef(x), exps(e)
 { 
   if (x == (T)0) exps.ToZero();
 }
 
-template<class T> gMono<T>::gMono(const gMono<T>& y) 
+template<class T> gbtMonomial<T>::gbtMonomial(const gbtMonomial<T>& y) 
 : coef(y.coef), exps(y.exps)
 {
 }
 
-template<class T> gMono<T>::~gMono() 
+template<class T> gbtMonomial<T>::~gbtMonomial() 
 {
 }
 
 //--------------------------------------------------------------------------
-//                             gMono -- operators
+//                             gbtMonomial -- operators
 //--------------------------------------------------------------------------
 
-template<class T> gMono<T>& gMono<T>::operator = (const gMono<T>& y)
+template<class T> gbtMonomial<T>& gbtMonomial<T>::operator = (const gbtMonomial<T>& y)
 {
   if (this != &y) { coef = y.coef; exps = y.exps; }
   return *this;
 }
 
-template<class T> bool gMono<T>::operator == (const gMono<T>& y) const
+template<class T> bool gbtMonomial<T>::operator == (const gbtMonomial<T>& y) const
 {
   return (coef == y.coef && exps == y.exps);
 }
 
-template<class T> bool gMono<T>::operator != (const gMono<T>& y) const
+template<class T> bool gbtMonomial<T>::operator != (const gbtMonomial<T>& y) const
 {
   return !(*this == y);
 }
 
-template<class T> gMono<T> gMono<T>::operator * (const gMono<T> & y) const
+template<class T> gbtMonomial<T> gbtMonomial<T>::operator * (const gbtMonomial<T> & y) const
 {
-  return gMono<T>(coef * y.coef,exps + y.exps);
+  return gbtMonomial<T>(coef * y.coef,exps + y.exps);
 }
 
-template<class T> gMono<T> gMono<T>::operator / (const gMono<T>& y) const
+template<class T> gbtMonomial<T> gbtMonomial<T>::operator / (const gbtMonomial<T>& y) const
 {
   assert ( y.coef != (T)0);
-  return gMono<T>(coef / y.coef,exps - y.exps);
+  return gbtMonomial<T>(coef / y.coef,exps - y.exps);
 }
 
-template<class T> gMono<T> gMono<T>::operator + (const gMono<T> & y) const
+template<class T> gbtMonomial<T> gbtMonomial<T>::operator + (const gbtMonomial<T> & y) const
 {
   assert (exps == y.exps);
-  return gMono<T>(coef + y.coef,exps);
+  return gbtMonomial<T>(coef + y.coef,exps);
 }
 
-template<class T> gMono<T>& gMono<T>::operator += (const gMono<T> & y) 
+template<class T> gbtMonomial<T>& gbtMonomial<T>::operator += (const gbtMonomial<T> & y) 
 {
   assert (exps == y.exps);
   coef += y.coef;
   return *this;
 }
 
-template<class T> gMono<T>& gMono<T>::operator *= (const T& val) 
+template<class T> gbtMonomial<T>& gbtMonomial<T>::operator *= (const T& val) 
 {
   coef *= val;
   return *this;
 }
 
-template<class T> gMono<T> gMono<T>::operator - () const
+template<class T> gbtMonomial<T> gbtMonomial<T>::operator - () const
 {
-  return gMono<T>(-coef,exps);
+  return gbtMonomial<T>(-coef,exps);
 }
 
 //--------------------------------------------------------------------------
-//                             gMono -- information
+//                             gbtMonomial -- information
 //--------------------------------------------------------------------------
 
-template<class T> const T &gMono<T>::Coef() const 
+template<class T> const T &gbtMonomial<T>::Coef() const 
 { 
   return coef; 
 }
 
-template<class T> int gMono<T>::Dmnsn() const 
+template<class T> int gbtMonomial<T>::Dmnsn() const 
 { 
   return exps.Dmnsn(); 
 }
 
-template<class T> int gMono<T>::TotalDegree() const 
+template<class T> int gbtMonomial<T>::TotalDegree() const 
 { 
   return exps.TotalDegree(); 
 }
 
-template<class T> const exp_vect &gMono<T>::ExpV() const 
+template<class T> const gbtPolyExponent &gbtMonomial<T>::ExpV() const 
 { 
   return exps; 
 }
 
-template<class T> bool gMono<T>::IsConstant() const 
+template<class T> bool gbtMonomial<T>::IsConstant() const 
 { 
   return exps.IsConstant(); 
 }
 
-template<class T> bool gMono<T>::IsMultiaffine() const 
+template<class T> bool gbtMonomial<T>::IsMultiaffine() const 
 { 
   return exps.IsMultiaffine(); 
 }
 
-template<class T> T gMono<T>::Evaluate(const gbtArray<T>& vals) const 
+template<class T> T gbtMonomial<T>::Evaluate(const gbtArray<T>& vals) const 
 { 
   T answer = Coef();
 
@@ -151,7 +151,7 @@ template<class T> T gMono<T>::Evaluate(const gbtArray<T>& vals) const
   return answer;
 }
 
-template<class T> T gMono<T>::Evaluate(const gbtVector<T>& vals) const 
+template<class T> T gbtMonomial<T>::Evaluate(const gbtVector<T>& vals) const 
 { 
   T answer = Coef();
 
@@ -163,10 +163,10 @@ template<class T> T gMono<T>::Evaluate(const gbtVector<T>& vals) const
 }
 
 //--------------------------------------------------------------------------
-//                             gMono -- printing
+//                             gbtMonomial -- printing
 //--------------------------------------------------------------------------
 
-template<class T> gbtOutput& operator << (gbtOutput& output, const gMono<T>& x)
+template<class T> gbtOutput& operator << (gbtOutput& output, const gbtMonomial<T>& x)
 {
     output << x.Coef() << x.ExpV();    return output;
 }

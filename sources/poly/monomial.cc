@@ -31,24 +31,24 @@
 #include "base/gblock.imp"
 #include "math/gnumber.h"
 
-template class gMono<int>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<int>& x);
+template class gbtMonomial<int>;
+template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<int>& x);
 
-template class gMono<double>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<double>& x);
+template class gbtMonomial<double>;
+template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<double>& x);
 
-template class gMono<gbtRational>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gbtRational>& x);
+template class gbtMonomial<gbtRational>;
+template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtRational>& x);
 
-template class gMono<gbtNumber>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gbtNumber>& x);
+template class gbtMonomial<gbtNumber>;
+template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtNumber>& x);
 
-template class gMono<gbtDouble>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gbtDouble>& x);
+template class gbtMonomial<gbtDouble>;
+template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtDouble>& x);
 
-template class gbtList< gMono<int> >;
-template class gbtList< gMono<double> >;
-template class gbtList< gMono<gbtRational> >;
-template class gbtList< gMono<gbtNumber> >;
+template class gbtList< gbtMonomial<int> >;
+template class gbtList< gbtMonomial<double> >;
+template class gbtList< gbtMonomial<gbtRational> >;
+template class gbtList< gbtMonomial<gbtNumber> >;
 
-template class gbtList< gMono<gbtDouble> >;
+template class gbtList< gbtMonomial<gbtDouble> >;

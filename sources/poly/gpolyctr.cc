@@ -27,34 +27,34 @@
 #include "gpolyctr.h"
 
 template <class T>
-gPolyArray<T>::gPolyArray(const gSpace *s, const term_order *t, int len)
+gbtPolyMultiArray<T>::gbtPolyMultiArray(const gbtPolySpace *s, const gbtPolyTermOrder *t, int len)
   : mindex(1), maxdex(len)
 {
   assert(len>=0);
-  data = (len) ? new gPoly<T>*[len] - 1 : 0;
+  data = (len) ? new gbtPolyMulti<T>*[len] - 1 : 0;
   for (int i = mindex; i <= maxdex; i++)
-    data[i] = new gPoly<T>(s, t);
+    data[i] = new gbtPolyMulti<T>(s, t);
 }
 
 template <class T>
-gPolyArray<T>::gPolyArray(const gSpace *s, const term_order *t, int lo, int hi)
+gbtPolyMultiArray<T>::gbtPolyMultiArray(const gbtPolySpace *s, const gbtPolyTermOrder *t, int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
   assert(maxdex + 1 >= mindex);
-  data = (maxdex>=mindex) ? new gPoly<T>*[maxdex-mindex+1] - mindex : 0;
+  data = (maxdex>=mindex) ? new gbtPolyMulti<T>*[maxdex-mindex+1] - mindex : 0;
   for (int i = mindex; i <= maxdex; i++)
-    data[i] = new gPoly<T>(s, t);
+    data[i] = new gbtPolyMulti<T>(s, t);
 }
 
-template <class T> gPolyArray<T>::gPolyArray(const gPolyArray<T> &a)
+template <class T> gbtPolyMultiArray<T>::gbtPolyMultiArray(const gbtPolyMultiArray<T> &a)
   : mindex(a.mindex), maxdex(a.maxdex)
 {
-  data = (maxdex>=mindex) ? new gPoly<T>*[maxdex-mindex+1] - mindex : 0;
+  data = (maxdex>=mindex) ? new gbtPolyMulti<T>*[maxdex-mindex+1] - mindex : 0;
   for (int i = mindex; i <= maxdex; i++)
-    data[i] = new gPoly<T>(*a.data[i]);
+    data[i] = new gbtPolyMulti<T>(*a.data[i]);
 }
 
-template <class T> gPolyArray<T>::~gPolyArray()
+template <class T> gbtPolyMultiArray<T>::~gbtPolyMultiArray()
 {
   if (maxdex>=mindex)  {
     for (int i = mindex; i <= maxdex; delete data[i++]);
@@ -63,7 +63,7 @@ template <class T> gPolyArray<T>::~gPolyArray()
 }
 
 template <class T>
-gPolyArray<T> &gPolyArray<T>::operator=(const gPolyArray<T> &a)
+gbtPolyMultiArray<T> &gbtPolyMultiArray<T>::operator=(const gbtPolyMultiArray<T> &a)
 {
   if (this != &a) {
     // We only reallocate if necessary.  This should be somewhat faster
@@ -77,42 +77,42 @@ gPolyArray<T> &gPolyArray<T>::operator=(const gPolyArray<T> &a)
         delete [] (data + mindex);
       }
       mindex = a.mindex;   maxdex = a.maxdex;
-      data = (maxdex >= mindex) ? new gPoly<T>*[maxdex - mindex + 1] - mindex : 0;
+      data = (maxdex >= mindex) ? new gbtPolyMulti<T>*[maxdex - mindex + 1] - mindex : 0;
     }
     for (int i = mindex; i <= maxdex; i++)
-      data[i] = new gPoly<T>(*a.data[i]);
+      data[i] = new gbtPolyMulti<T>(*a.data[i]);
   }
   return *this;
 }
 
-template <class T> int gPolyArray<T>::Length(void) const
+template <class T> int gbtPolyMultiArray<T>::Length(void) const
 {
   return maxdex - mindex + 1;
 }	
 
-template <class T> int gPolyArray<T>::First(void) const
+template <class T> int gbtPolyMultiArray<T>::First(void) const
 {
   return mindex;
 }	
 
-template <class T> int gPolyArray<T>::Last(void) const
+template <class T> int gbtPolyMultiArray<T>::Last(void) const
 {
   return maxdex;
 }	
 
-template <class T> const gPoly<T> &gPolyArray<T>::operator[](int index) const
+template <class T> const gbtPolyMulti<T> &gbtPolyMultiArray<T>::operator[](int index) const
 {
   assert(index >= mindex && index <= maxdex);
   return *data[index];
 }	
 
-template <class T> gPoly<T> &gPolyArray<T>::operator[](int index)
+template <class T> gbtPolyMulti<T> &gbtPolyMultiArray<T>::operator[](int index)
 {
   assert(index >= mindex && index <= maxdex);
   return *data[index];
 }
 
-template <class T> void gPolyArray<T>::Dump(gbtOutput &f) const
+template <class T> void gbtPolyMultiArray<T>::Dump(gbtOutput &f) const
 {
   f << "{ ";
   for (int i = mindex; i <= maxdex; i++)
@@ -121,25 +121,25 @@ template <class T> void gPolyArray<T>::Dump(gbtOutput &f) const
 }
 
 template <class T>
-gPolyBlock<T>::gPolyBlock(const gSpace *s, const term_order *t, int len)
-  : gPolyArray<T>(s, t, len)   { }
+gbtPolyMultiBlock<T>::gbtPolyMultiBlock(const gbtPolySpace *s, const gbtPolyTermOrder *t, int len)
+  : gbtPolyMultiArray<T>(s, t, len)   { }
 
 template <class T>
-gPolyBlock<T>::gPolyBlock(const gSpace *s, const term_order *t, int lo, int hi)
-  : gPolyArray<T>(s, t, lo, hi)   { }
+gbtPolyMultiBlock<T>::gbtPolyMultiBlock(const gbtPolySpace *s, const gbtPolyTermOrder *t, int lo, int hi)
+  : gbtPolyMultiArray<T>(s, t, lo, hi)   { }
 
 template <class T>
-gPolyBlock<T>::gPolyBlock(const gPolyBlock<T> &b) : gPolyArray<T>(b)  { }
+gbtPolyMultiBlock<T>::gbtPolyMultiBlock(const gbtPolyMultiBlock<T> &b) : gbtPolyMultiArray<T>(b)  { }
 
-template <class T> gPolyBlock<T>::~gPolyBlock()   { }
+template <class T> gbtPolyMultiBlock<T>::~gbtPolyMultiBlock()   { }
 
-template <class T> gPolyBlock<T> &gPolyBlock<T>::operator=(const gPolyBlock<T> &b)
+template <class T> gbtPolyMultiBlock<T> &gbtPolyMultiBlock<T>::operator=(const gbtPolyMultiBlock<T> &b)
 {
-  gPolyArray<T>::operator=(b);
+  gbtPolyMultiArray<T>::operator=(b);
   return *this;
 }
 
-template <class T> bool gPolyBlock<T>::operator==(const gPolyBlock<T> &b) const
+template <class T> bool gbtPolyMultiBlock<T>::operator==(const gbtPolyMultiBlock<T> &b) const
 {
   if (mindex != b.mindex || maxdex != b.maxdex) return 0;
   for (int i = mindex; i <= maxdex; i++) 
@@ -147,19 +147,19 @@ template <class T> bool gPolyBlock<T>::operator==(const gPolyBlock<T> &b) const
   return 1;
 }
 
-template <class T> bool gPolyBlock<T>::operator!=(const gPolyBlock<T> &b) const
+template <class T> bool gbtPolyMultiBlock<T>::operator!=(const gbtPolyMultiBlock<T> &b) const
 {
   return !(*this == b);
 }
 
-template <class T> int gPolyBlock<T>::InsertAt(const gPoly<T> &t, int n)
+template <class T> int gbtPolyMultiBlock<T>::InsertAt(const gbtPolyMulti<T> &t, int n)
 {
   assert(mindex <=n && n <=maxdex+1);
-  gPoly<T> **new_data = new gPoly<T>*[++maxdex-mindex+1] - mindex;
+  gbtPolyMulti<T> **new_data = new gbtPolyMulti<T>*[++maxdex-mindex+1] - mindex;
 
   int i;
   for (i = mindex; i <= n - 1; i++)       new_data[i] = data[i];
-  new_data[i++] = new gPoly<T>(t);
+  new_data[i++] = new gbtPolyMulti<T>(t);
   for (; i <= maxdex; i++)       new_data[i] = data[i - 1];
 
   if (data)   delete [] (data + mindex);
@@ -168,23 +168,23 @@ template <class T> int gPolyBlock<T>::InsertAt(const gPoly<T> &t, int n)
   return n;
 }
 
-template <class T> int gPolyBlock<T>::Append(const gPoly<T> &t)
+template <class T> int gbtPolyMultiBlock<T>::Append(const gbtPolyMulti<T> &t)
 {
   return InsertAt(t, maxdex + 1);
 }
 
-template <class T> int gPolyBlock<T>::Insert(const gPoly<T> &t, int n)
+template <class T> int gbtPolyMultiBlock<T>::Insert(const gbtPolyMulti<T> &t, int n)
 {
   return InsertAt(t, (n < mindex) ? mindex : ((n > maxdex + 1) ? maxdex + 1 : n));
 }
 
-template <class T> gPoly<T> gPolyBlock<T>::Remove(int n)
+template <class T> gbtPolyMulti<T> gbtPolyMultiBlock<T>::Remove(int n)
 {
   assert(n >= mindex && n <= maxdex);
 
-  gPoly<T> ret(*data[n]);
+  gbtPolyMulti<T> ret(*data[n]);
 
-  gPoly<T> **new_data = (--maxdex>=mindex) ? new gPoly<T>*[maxdex-mindex+1] - mindex : 0;
+  gbtPolyMulti<T> **new_data = (--maxdex>=mindex) ? new gbtPolyMulti<T>*[maxdex-mindex+1] - mindex : 0;
 
   int i;
   for (i = mindex; i < n; i++)      new_data[i] = data[i];
@@ -197,14 +197,14 @@ template <class T> gPoly<T> gPolyBlock<T>::Remove(int n)
   return ret;
 }
 
-template <class T> int gPolyBlock<T>::Find(const gPoly<T> &t) const
+template <class T> int gbtPolyMultiBlock<T>::Find(const gbtPolyMulti<T> &t) const
 {
   int i;
   for (i = mindex; i <= maxdex && *data[i] != t; i++);
   return (i <= maxdex) ? i : 0;
 } 
 
-template <class T> int gPolyBlock<T>::Contains(const gPoly<T> &t) const
+template <class T> int gbtPolyMultiBlock<T>::Contains(const gbtPolyMulti<T> &t) const
 { return Find(t); }
 
 template <class T> void gbtBlock<T>::Flush(void)
@@ -216,10 +216,10 @@ template <class T> void gbtBlock<T>::Flush(void)
 
 #include "math/gnumber.h"
 
-template class gPolyArray<gbtNumber>;
-template class gPolyBlock<gbtNumber>;
+template class gbtPolyMultiArray<gbtNumber>;
+template class gbtPolyMultiBlock<gbtNumber>;
 
 
 #include "base/glist.imp"
 
-template class gbtList<gPoly<gbtNumber> >;
+template class gbtList<gbtPolyMulti<gbtNumber> >;

@@ -1075,7 +1075,7 @@ gbtPanelNfgEnumPoly::gbtPanelNfgEnumPoly(wxWindow *p_parent)
 					   wxT("PolEnumSolve"));
   wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
   centerSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    _("Find Nash equilibria via solving polynomial equations")),
+				    _("Find Nash equilibria via solving gbtPolyUni equations")),
 		   0, wxALL | wxCENTER, 5);
 
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of polynomial class
+// Implementation of gbtPolyUni class
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -27,19 +27,19 @@
 #include "poly.h"
 
 //--------------------------------------------------------------------------
-//                      class: polynomial<T>
+//                      class: gbtPolyUni<T>
 //--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>::polynomial(const polynomial<T>& x) 
+template <class T> gbtPolyUni<T>::gbtPolyUni(const gbtPolyUni<T>& x) 
 : coeflist(x.coeflist)
 { 
 }
 
-template <class T> polynomial<T>::polynomial(const T& coeff, const int& deg) 
+template <class T> gbtPolyUni<T>::gbtPolyUni(const T& coeff, const int& deg) 
 { 
   if (coeff != (T)0) {
     for (int i = 0; i < deg; i++)
@@ -49,29 +49,29 @@ template <class T> polynomial<T>::polynomial(const T& coeff, const int& deg)
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gbtList<T>& coefficientlist) 
+gbtPolyUni<T>::gbtPolyUni(const gbtList<T>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gbtVector<T>& coefficientvector) 
+gbtPolyUni<T>::gbtPolyUni(const gbtVector<T>& coefficientvector) 
 : coeflist()
 { 
   for (int i = 1; i <= coefficientvector.Length(); i++)
     coeflist += coefficientvector[i];
 }
 
-template <class T> polynomial<T>::polynomial(const int deg) 
+template <class T> gbtPolyUni<T>::gbtPolyUni(const int deg) 
 : coeflist()
 { 
   if (deg >= 0) { 
-    //gout << "Error is polynomial int constructor.\n"; 
+    //gout << "Error is gbtPolyUni int constructor.\n"; 
     exit(1);
   }
 }
 
-template <class T> polynomial<T>::~polynomial()
+template <class T> gbtPolyUni<T>::~gbtPolyUni()
 {
 }
 
@@ -79,8 +79,8 @@ template <class T> polynomial<T>::~polynomial()
 //                             operators
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>& 
-                   polynomial<T>::operator= (const polynomial<T>& y)
+template <class T> gbtPolyUni<T>& 
+                   gbtPolyUni<T>::operator= (const gbtPolyUni<T>& y)
 {
   if (this!=&y) coeflist = y.coeflist;
 
@@ -88,7 +88,7 @@ template <class T> polynomial<T>&
 }
 
 template <class T> 
-bool polynomial<T>::operator== (const polynomial<T>& y) const
+bool gbtPolyUni<T>::operator== (const gbtPolyUni<T>& y) const
 {
   if (Degree() != y.Degree()) return false;
   else
@@ -98,28 +98,28 @@ bool polynomial<T>::operator== (const polynomial<T>& y) const
 }
 
 template <class T> 
-bool polynomial<T>::operator!= (const polynomial<T>& y) const
+bool gbtPolyUni<T>::operator!= (const gbtPolyUni<T>& y) const
 {
   return !(*this == y); 
 }
 
-template <class T> const T& polynomial<T>::operator[](const int index) const
+template <class T> const T& gbtPolyUni<T>::operator[](const int index) const
 { 
   return coeflist[index+1];
 }
 
-template <class T> polynomial<T> 
-                   polynomial<T>::operator+(const polynomial<T>& y) const
+template <class T> gbtPolyUni<T> 
+                   gbtPolyUni<T>::operator+(const gbtPolyUni<T>& y) const
 {
-  if      (  Degree() < 0) return polynomial<T>(y); 
-  else if (y.Degree() < 0) return polynomial<T>(*this);
+  if      (  Degree() < 0) return gbtPolyUni<T>(y); 
+  else if (y.Degree() < 0) return gbtPolyUni<T>(*this);
 
   int max_degree;
 
   if (Degree() > y.Degree()) {max_degree =   Degree();}
   else                       {max_degree = y.Degree();}
 
-  polynomial<T> sum;
+  gbtPolyUni<T> sum;
   for (int i = 0; i <= max_degree; i++) {
     sum.coeflist += (T)0;
     if (i <=   Degree()) sum.coeflist[i+1] +=   coeflist[i+1];
@@ -133,21 +133,21 @@ template <class T> polynomial<T>
   return sum;
 }
 
-template <class T> polynomial<T> 
-                   polynomial<T>::operator-(const polynomial<T>& y) const
+template <class T> gbtPolyUni<T> 
+                   gbtPolyUni<T>::operator-(const gbtPolyUni<T>& y) const
 {
-  return polynomial<T>(*this+(-y));
+  return gbtPolyUni<T>(*this+(-y));
 }
 
-template <class T> polynomial<T> 
-                   polynomial<T>::operator*(const polynomial<T> &y) const
+template <class T> gbtPolyUni<T> 
+                   gbtPolyUni<T>::operator*(const gbtPolyUni<T> &y) const
 {
-  if      (Degree() == -1) return polynomial<T>(*this); 
-  else if (y.Degree() == -1) return polynomial<T>(y);
+  if      (Degree() == -1) return gbtPolyUni<T>(*this); 
+  else if (y.Degree() == -1) return gbtPolyUni<T>(y);
 
   int tot_degree = Degree() + y.Degree();
 
-  polynomial<T> product;
+  gbtPolyUni<T> product;
   for (int t = 0; t <= tot_degree; t++) 
     product.coeflist += (T)0;
   for (int i = 0; i <= Degree(); i++)
@@ -157,78 +157,78 @@ template <class T> polynomial<T>
   return product;
 }
 
-template <class T> polynomial<T> 
-                   polynomial<T>::operator/(const polynomial<T> &q) const
+template <class T> gbtPolyUni<T> 
+                   gbtPolyUni<T>::operator/(const gbtPolyUni<T> &q) const
 {
   assert(q.Degree() >= 0);
 
-  polynomial<T> ans;
-  polynomial<T> r = *this;
+  gbtPolyUni<T> ans;
+  gbtPolyUni<T> r = *this;
   while (r.Degree() >= q.Degree()) {
-    polynomial<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
+    gbtPolyUni<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
 		    r.Degree() - q.Degree());
     ans += x;
     r-=q*x;
   }
-  return polynomial<T>(ans);
+  return gbtPolyUni<T>(ans);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator+=(const polynomial<T>& y) 
+template <class T> gbtPolyUni<T>&
+                   gbtPolyUni<T>::operator+=(const gbtPolyUni<T>& y) 
 {
   return ((*this)=(*this)+y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator-=(const polynomial<T>& y)
+template <class T> gbtPolyUni<T>&
+                   gbtPolyUni<T>::operator-=(const gbtPolyUni<T>& y)
 {
   return ((*this)=(*this)-y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator*=(const polynomial<T>& y)
+template <class T> gbtPolyUni<T>&
+                   gbtPolyUni<T>::operator*=(const gbtPolyUni<T>& y)
 {
   return ((*this)=(*this)*y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator/=(const polynomial<T>& y)
+template <class T> gbtPolyUni<T>&
+                   gbtPolyUni<T>::operator/=(const gbtPolyUni<T>& y)
 {
   return ((*this)=(*this)/y);
 }
 
-template <class T> polynomial<T> 
-                   polynomial<T>::operator%(const polynomial<T> &q) const
+template <class T> gbtPolyUni<T> 
+                   gbtPolyUni<T>::operator%(const gbtPolyUni<T> &q) const
 {
   assert (q.Degree() != -1);
 
-  polynomial<T> ans;
-  polynomial<T> r = *this;
+  gbtPolyUni<T> ans;
+  gbtPolyUni<T> r = *this;
 
   while (r.Degree() >= q.Degree())
     {
-      polynomial<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
+      gbtPolyUni<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
 		      r.Degree() - q.Degree());
       ans += x;
       r-=q*x;
     }
-  return polynomial<T>(r);
+  return gbtPolyUni<T>(r);
 }
 
-template <class T> polynomial<T> polynomial<T>::operator- () const
+template <class T> gbtPolyUni<T> gbtPolyUni<T>::operator- () const
 {
-  polynomial<T> negation;
+  gbtPolyUni<T> negation;
   for (int i = 0; i <= Degree(); i++)
     negation.coeflist += -coeflist[i+1];
 
   return negation;
 }
 
-template <class T> polynomial<T> polynomial<T>::Derivative() const 
+template <class T> gbtPolyUni<T> gbtPolyUni<T>::Derivative() const 
 {
-  if (Degree() <= 0) return polynomial<T>(-1);
+  if (Degree() <= 0) return gbtPolyUni<T>(-1);
 
-  polynomial<T> derivative; 
+  gbtPolyUni<T> derivative; 
   for (int i = 1; i <= Degree(); i++)
     derivative.coeflist += (T)i * coeflist[i+1];
 
@@ -239,7 +239,7 @@ template <class T> polynomial<T> polynomial<T>::Derivative() const
 //                             manipulation
 //--------------------------------------------------------------------------
 
-template <class T>  void polynomial<T>::ToMonic() 
+template <class T>  void gbtPolyUni<T>::ToMonic() 
 {
   assert (!IsZero());
 
@@ -249,26 +249,26 @@ template <class T>  void polynomial<T>::ToMonic()
 }
 
 template<class T>  
-polynomial<gbtDouble>  polynomial<T>::TogDouble() const
+gbtPolyUni<gbtDouble>  gbtPolyUni<T>::TogDouble() const
 {
   gbtList<gbtDouble> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
     newcoefs += (gbtDouble)coeflist[i];
   }
-  return polynomial<gbtDouble>(newcoefs);
+  return gbtPolyUni<gbtDouble>(newcoefs);
 }
 
 //--------------------------------------------------------------------------
 //                              information
 //--------------------------------------------------------------------------
 
-template <class T>  bool polynomial<T>::IsZero() const
+template <class T>  bool gbtPolyUni<T>::IsZero() const
 {
   if (coeflist.Length() == 0) return true;
   else                        return false;
 }
 
-template <class T>  T polynomial<T>::EvaluationAt(const T& arg) const
+template <class T>  T gbtPolyUni<T>::EvaluationAt(const T& arg) const
 {
   T answer;
 
@@ -284,32 +284,32 @@ template <class T>  T polynomial<T>::EvaluationAt(const T& arg) const
   return answer;
 }
 
-template <class T> int polynomial<T>::Degree() const
+template <class T> int gbtPolyUni<T>::Degree() const
 {
   return coeflist.Length() - 1;
 }
 
-template <class T> T polynomial<T>::LeadingCoefficient() const
+template <class T> T gbtPolyUni<T>::LeadingCoefficient() const
 {
   if (Degree() < 0) return (T)0;
   else              return coeflist[Degree() + 1];
 }
 
-template <class T> gbtList<T> polynomial<T>::CoefficientList() const
+template <class T> gbtList<T> gbtPolyUni<T>::CoefficientList() const
 {
   return coeflist;
 }
 
 template <class T> 
-polynomial<T> polynomial<T>::GcdWith(const polynomial<T>& that) const
+gbtPolyUni<T> gbtPolyUni<T>::GcdWith(const gbtPolyUni<T>& that) const
 {
   assert( !this->IsZero() && !that.IsZero() );
 
-  polynomial<T> numerator(*this);
+  gbtPolyUni<T> numerator(*this);
   numerator.ToMonic();
-  polynomial<T> denominator(that);
+  gbtPolyUni<T> denominator(that);
   denominator.ToMonic();
-  polynomial<T> remainder(numerator % denominator);
+  gbtPolyUni<T> remainder(numerator % denominator);
 
   while (!remainder.IsZero()) {
     remainder.ToMonic();
@@ -322,16 +322,16 @@ polynomial<T> polynomial<T>::GcdWith(const polynomial<T>& that) const
 }
 
 template <class T> 
-bool polynomial<T>::IsQuadratfrei() const
+bool gbtPolyUni<T>::IsQuadratfrei() const
 {
-  polynomial<T> Df(Derivative());
+  gbtPolyUni<T> Df(Derivative());
   if (Df.Degree() <= 0)             return true;
   if ( GcdWith(Df).Degree() <= 1 ) return true;
   else                              return false;
 }
 
 template <class T> 
-bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
+bool gbtPolyUni<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 {
   // get rid of easy cases
   if      (Degree() == -1) return false;
@@ -339,7 +339,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   else if (EvaluationAt(I.LowerBound()) == (T)0) return false;
 
   // generate list of derivatives
-  gbtList< polynomial<T> > derivs;
+  gbtList< gbtPolyUni<T> > derivs;
   derivs += Derivative();
   int i;
   for (i = 2; i <= Degree(); i++) derivs += derivs[i-1].Derivative();
@@ -376,10 +376,10 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 
 
 template <class T> gbtList< gInterval<T> >
-polynomial<T>::RootSubintervals(const gInterval<T>& I) const
+gbtPolyUni<T>::RootSubintervals(const gInterval<T>& I) const
 { assert ( Degree() >= 0 && IsQuadratfrei() );
 
-  polynomial<T> Df = Derivative();
+  gbtPolyUni<T> Df = Derivative();
 
   gbtList< gInterval<T> > answer;
 
@@ -432,7 +432,7 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 }
 
 template <class T> gInterval<T>
-polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
+gbtPolyUni<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
 {
   gbtList< gInterval<T> > intrvls; intrvls += I;
   while (intrvls[intrvls.Length()].Length() >= error) {
@@ -460,7 +460,7 @@ polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
 }
 
 template <class T> gbtList< gInterval<T> >
-polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
+gbtPolyUni<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
 {
   gbtList< gInterval<T> > coarse = RootSubintervals(I);
   gbtList< gInterval<T> > fine;
@@ -472,17 +472,17 @@ polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
 }
 
 template <class T> gbtList<T>
-polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
+gbtPolyUni<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 {
   gbtList<T> roots;
 
-  polynomial<T> p(*this), factor(*this);
+  gbtPolyUni<T> p(*this), factor(*this);
 
   while ( p.Degree() > 0 ) {
 
     int depth = 1;
-    polynomial<T> probe(p.Derivative());
-    polynomial<T> current_gcd( p.GcdWith(probe) );
+    gbtPolyUni<T> probe(p.Derivative());
+    gbtPolyUni<T> current_gcd( p.GcdWith(probe) );
     while ( current_gcd.Degree() > 0 ) { 
       depth++; 
       factor = current_gcd; 
@@ -511,7 +511,7 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //                                printing
 //--------------------------------------------------------------------------
 
-template <class T> void polynomial<T>::Output(gbtOutput &output) const
+template <class T> void gbtPolyUni<T>::Output(gbtOutput &output) const
 {
   if (Degree() < 0) output << "0";
   else {
@@ -525,26 +525,26 @@ template <class T> void polynomial<T>::Output(gbtOutput &output) const
 }
 
 template <class T> gbtOutput &operator<<(gbtOutput &p_file,
-				       const polynomial<T> &p_poly)
+				       const gbtPolyUni<T> &p_poly)
 {
   p_poly.Output(p_file);
   return p_file;
 }
 
 //--------------------------------------------------------------------------
-//                      class: complexpoly
+//                      class: gbtPolyComplex
 //--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-complexpoly::complexpoly(const complexpoly& x) 
+gbtPolyComplex::gbtPolyComplex(const gbtPolyComplex& x) 
 : coeflist(x.coeflist)
 { 
 }
 
-complexpoly::complexpoly(const gbtComplex& coeff, const int& deg) 
+gbtPolyComplex::gbtPolyComplex(const gbtComplex& coeff, const int& deg) 
 { 
   if (coeff != (gbtComplex)0) {
     for (int i = 0; i < deg; i++)
@@ -554,21 +554,21 @@ complexpoly::complexpoly(const gbtComplex& coeff, const int& deg)
 }
 
  
-complexpoly::complexpoly(const gbtList<gbtComplex>& coefficientlist) 
+gbtPolyComplex::gbtPolyComplex(const gbtList<gbtComplex>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
 
-complexpoly::complexpoly(const int deg) 
+gbtPolyComplex::gbtPolyComplex(const int deg) 
 : coeflist()
 { 
   if (deg >= 0) { 
-    //gout << "Error is complexpoly int constructor.\n"; 
+    //gout << "Error is gbtPolyComplex int constructor.\n"; 
     exit(1);
   }
 }
 
-complexpoly::~complexpoly()
+gbtPolyComplex::~gbtPolyComplex()
 {
 }
 
@@ -576,14 +576,14 @@ complexpoly::~complexpoly()
 //                             operators
 //--------------------------------------------------------------------------
 
-complexpoly& complexpoly::operator= (const complexpoly& y)
+gbtPolyComplex& gbtPolyComplex::operator= (const gbtPolyComplex& y)
 {
   if (this!=&y) coeflist = y.coeflist;
 
   return *this;
 }
  
-bool complexpoly::operator== (const complexpoly& y) const
+bool gbtPolyComplex::operator== (const gbtPolyComplex& y) const
 {
   if (Degree() != y.Degree()) return false;
   else
@@ -592,27 +592,27 @@ bool complexpoly::operator== (const complexpoly& y) const
   return true;
 }
  
-bool complexpoly::operator!= (const complexpoly& y) const
+bool gbtPolyComplex::operator!= (const gbtPolyComplex& y) const
 {
   return !(*this == y); 
 }
 
-const gbtComplex& complexpoly::operator[](const int index) const
+const gbtComplex& gbtPolyComplex::operator[](const int index) const
 { 
   return coeflist[index+1];
 }
 
-complexpoly complexpoly::operator+(const complexpoly& y) const
+gbtPolyComplex gbtPolyComplex::operator+(const gbtPolyComplex& y) const
 {
-  if      (  Degree() < 0) return complexpoly(y); 
-  else if (y.Degree() < 0) return complexpoly(*this);
+  if      (  Degree() < 0) return gbtPolyComplex(y); 
+  else if (y.Degree() < 0) return gbtPolyComplex(*this);
 
   int max_degree;
 
   if (Degree() > y.Degree()) {max_degree =   Degree();}
   else                       {max_degree = y.Degree();}
 
-  complexpoly sum;
+  gbtPolyComplex sum;
   for (int i = 0; i <= max_degree; i++) {
     sum.coeflist += (gbtComplex)0;
     if (i <=   Degree()) sum.coeflist[i+1] +=   coeflist[i+1];
@@ -626,19 +626,19 @@ complexpoly complexpoly::operator+(const complexpoly& y) const
   return sum;
 }
 
-complexpoly complexpoly::operator-(const complexpoly& y) const
+gbtPolyComplex gbtPolyComplex::operator-(const gbtPolyComplex& y) const
 {
-  return complexpoly(*this+(-y));
+  return gbtPolyComplex(*this+(-y));
 }
 
-complexpoly complexpoly::operator*(const complexpoly &y) const
+gbtPolyComplex gbtPolyComplex::operator*(const gbtPolyComplex &y) const
 {
-  if      (Degree() == -1) return complexpoly(*this); 
-  else if (y.Degree() == -1) return complexpoly(y);
+  if      (Degree() == -1) return gbtPolyComplex(*this); 
+  else if (y.Degree() == -1) return gbtPolyComplex(y);
 
   int tot_degree = Degree() + y.Degree();
 
-  complexpoly product;
+  gbtPolyComplex product;
   for (int t = 0; t <= tot_degree; t++) 
     product.coeflist += (gbtComplex)0;
   for (int i = 0; i <= Degree(); i++)
@@ -648,72 +648,72 @@ complexpoly complexpoly::operator*(const complexpoly &y) const
   return product;
 }
 
-complexpoly complexpoly::operator/(const complexpoly &q) const
+gbtPolyComplex gbtPolyComplex::operator/(const gbtPolyComplex &q) const
 {
   assert(q.Degree() >= 0);
 
-  complexpoly ans;
-  complexpoly r = *this;
+  gbtPolyComplex ans;
+  gbtPolyComplex r = *this;
   while (r.Degree() >= q.Degree()) {
-    complexpoly x(r.LeadingCoefficient()/q.LeadingCoefficient(),
+    gbtPolyComplex x(r.LeadingCoefficient()/q.LeadingCoefficient(),
 		    r.Degree() - q.Degree());
     ans += x;
     r-=q*x;
   }
-  return complexpoly(ans);
+  return gbtPolyComplex(ans);
 }
 
-complexpoly& complexpoly::operator+=(const complexpoly& y) 
+gbtPolyComplex& gbtPolyComplex::operator+=(const gbtPolyComplex& y) 
 {
   return ((*this)=(*this)+y);
 }
 
-complexpoly& complexpoly::operator-=(const complexpoly& y)
+gbtPolyComplex& gbtPolyComplex::operator-=(const gbtPolyComplex& y)
 {
   return ((*this)=(*this)-y);
 }
 
-complexpoly& complexpoly::operator*=(const complexpoly& y)
+gbtPolyComplex& gbtPolyComplex::operator*=(const gbtPolyComplex& y)
 {
   return ((*this)=(*this)*y);
 }
 
-complexpoly& complexpoly::operator/=(const complexpoly& y)
+gbtPolyComplex& gbtPolyComplex::operator/=(const gbtPolyComplex& y)
 {
   return ((*this)=(*this)/y);
 }
 
-complexpoly complexpoly::operator%(const complexpoly &q) const
+gbtPolyComplex gbtPolyComplex::operator%(const gbtPolyComplex &q) const
 {
   assert (q.Degree() != -1);
 
-  complexpoly ans;
-  complexpoly r = *this;
+  gbtPolyComplex ans;
+  gbtPolyComplex r = *this;
 
   while (r.Degree() >= q.Degree())
     {
-      complexpoly x(r.LeadingCoefficient()/q.LeadingCoefficient(),
+      gbtPolyComplex x(r.LeadingCoefficient()/q.LeadingCoefficient(),
 		      r.Degree() - q.Degree());
       ans += x;
       r-=q*x;
     }
-  return complexpoly(r);
+  return gbtPolyComplex(r);
 }
 
-complexpoly complexpoly::operator- () const
+gbtPolyComplex gbtPolyComplex::operator- () const
 {
-  complexpoly negation;
+  gbtPolyComplex negation;
   for (int i = 0; i <= Degree(); i++)
     negation.coeflist += -coeflist[i+1];
 
   return negation;
 }
 
-complexpoly complexpoly::Derivative() const 
+gbtPolyComplex gbtPolyComplex::Derivative() const 
 {
-  if (Degree() <= 0) return complexpoly(-1);
+  if (Degree() <= 0) return gbtPolyComplex(-1);
 
-  complexpoly derivative; 
+  gbtPolyComplex derivative; 
   for (int i = 1; i <= Degree(); i++)
     derivative.coeflist += (gbtComplex)i * coeflist[i+1];
 
@@ -724,7 +724,7 @@ complexpoly complexpoly::Derivative() const
 //                             manipulation
 //--------------------------------------------------------------------------
 
-void complexpoly::ToMonic() 
+void gbtPolyComplex::ToMonic() 
 {
   assert (!IsZero());
 
@@ -738,13 +738,13 @@ void complexpoly::ToMonic()
 //                              information
 //--------------------------------------------------------------------------
 
-bool complexpoly::IsZero() const
+bool gbtPolyComplex::IsZero() const
 {
   if (coeflist.Length() == 0) return true;
   else                        return false;
 }
 
-gbtComplex complexpoly::EvaluationAt(const gbtComplex& arg) const
+gbtComplex gbtPolyComplex::EvaluationAt(const gbtComplex& arg) const
 {
   gbtComplex answer;
 
@@ -757,27 +757,27 @@ gbtComplex complexpoly::EvaluationAt(const gbtComplex& arg) const
   return answer;
 }
 
-int complexpoly::Degree() const
+int gbtPolyComplex::Degree() const
 {
   return coeflist.Length() - 1;
 }
 
-gbtComplex complexpoly::LeadingCoefficient() const
+gbtComplex gbtPolyComplex::LeadingCoefficient() const
 {
   if (Degree() < 0) return (gbtComplex)0;
   else              return coeflist[Degree() + 1];
 }
 
  
-complexpoly complexpoly::GcdWith(const complexpoly& that) const
+gbtPolyComplex gbtPolyComplex::GcdWith(const gbtPolyComplex& that) const
 {
   assert( !this->IsZero() && !that.IsZero() );
 
-  complexpoly numerator(*this);
+  gbtPolyComplex numerator(*this);
   numerator.ToMonic();
-  complexpoly denominator(that);
+  gbtPolyComplex denominator(that);
   denominator.ToMonic();
-  complexpoly remainder(numerator % denominator);
+  gbtPolyComplex remainder(numerator % denominator);
 
   while (!remainder.IsZero()) {
     remainder.ToMonic();
@@ -790,16 +790,16 @@ complexpoly complexpoly::GcdWith(const complexpoly& that) const
 }
 
  
-bool complexpoly::IsQuadratfrei() const
+bool gbtPolyComplex::IsQuadratfrei() const
 {
-  complexpoly Df(Derivative());
+  gbtPolyComplex Df(Derivative());
   if (Df.Degree() <= 0)             return true;
   if ( GcdWith(Df).Degree() <= 1 ) return true;
   else                              return false;
 }
 
 
-gbtList<gbtComplex> complexpoly::Roots() const 
+gbtList<gbtComplex> gbtPolyComplex::Roots() const 
 {
   assert (!IsZero());
 
@@ -808,7 +808,7 @@ gbtList<gbtComplex> complexpoly::Roots() const
   if (Degree() == 0) 
     return answer;
 
-  complexpoly deriv(Derivative());
+  gbtPolyComplex deriv(Derivative());
 
   gbtComplex guess(1.3,0.314159);
 
@@ -825,7 +825,7 @@ gbtList<gbtComplex> complexpoly::Roots() const
 	else done = true;
       }
     if (count == 10) { 
-      //      gout << "Failure in complexpoly::Roots().\n";
+      //      gout << "Failure in gbtPolyComplex::Roots().\n";
       exit(1);
     }
 
@@ -837,8 +837,8 @@ gbtList<gbtComplex> complexpoly::Roots() const
   gbtList<gbtComplex> lin_form_coeffs;
   lin_form_coeffs += guess;
   lin_form_coeffs += gbtComplex(-1.0,0.0);
-  complexpoly linear_form(lin_form_coeffs);
-  complexpoly quotient = *this/linear_form;
+  gbtPolyComplex linear_form(lin_form_coeffs);
+  gbtPolyComplex quotient = *this/linear_form;
   answer += quotient.Roots();
 
   for (int i = 1; i <= answer.Length(); i++) { // "Polish" each root twice
@@ -853,7 +853,7 @@ gbtList<gbtComplex> complexpoly::Roots() const
 //                                printing
 //--------------------------------------------------------------------------
 
-gbtOutput& operator << (gbtOutput& output, const complexpoly& x)
+gbtOutput& operator << (gbtOutput& output, const gbtPolyComplex& x)
 {
   if (x.Degree() < 0) output << "0";
   else {

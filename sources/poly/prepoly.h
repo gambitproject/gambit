@@ -34,9 +34,9 @@
 
 /*
    The classes in this file are prior to the notion of a 
-multivariate polynomial.  First of all, one needs a space which the
-polynomials refer to.  This is given by the notion of a gSpace.
-A polynomial is a sum of monomials, where each monomial is a
+multivariate gbtPolyUni.  First of all, one needs a space which the
+polynomials refer to.  This is given by the notion of a gbtPolySpace.
+A gbtPolyUni is a sum of monomials, where each monomial is a
 coefficient multiplied by a power product, and each power product is
 the vector of variables "raised" by an exponent vector.  The exponent
 vectors play a special role in many algorithms, especially those
@@ -49,7 +49,7 @@ built on top of a pointer to a function for computing an order.
 
 
 // *************************
-// gSpace declaration
+// gbtPolySpace declaration
 // *************************
 
 struct Variable  { 
@@ -57,27 +57,27 @@ struct Variable  {
   int number;
 };
 
-class gSpace {
+class gbtPolySpace {
 private:  
   gbtBlock < Variable * > Variables;
 
 public:
-  gSpace(int nvars = 0);
-  gSpace(const gSpace &);
-  ~gSpace();
+  gbtPolySpace(int nvars = 0);
+  gbtPolySpace(const gbtPolySpace &);
+  ~gbtPolySpace();
 
   // operators
-  gSpace&         operator=(const gSpace & rhs);
+  gbtPolySpace&         operator=(const gbtPolySpace & rhs);
 
   Variable*       operator[](int)              const;
-  bool            operator==(const gSpace & rhs) const;
-  bool            operator!=(const gSpace & rhs) const;
+  bool            operator==(const gbtPolySpace & rhs) const;
+  bool            operator!=(const gbtPolySpace & rhs) const;
   
   // information
   int             Dmnsn(void)              const;
   Variable*       VariableWithNumber(int)  const;
   const gbtText&  GetVariableName(int)     const;
-  gSpace          WithVariableAppended()   const;
+  gbtPolySpace          WithVariableAppended()   const;
 
   // manipulation
   void            SetVariableName(int, const gbtText &);
@@ -88,7 +88,7 @@ public:
 
 
 // ***********************
-// class exp_vect 
+// class gbtPolyExponent 
 // ***********************
 
 /*
@@ -97,45 +97,45 @@ public:
    but not inner or scalar products.
 */
 
-class exp_vect {
+class gbtPolyExponent {
 
 private:
-  const gSpace* Space;
+  const gbtPolySpace* Space;
   gbtVector<int> components;
 
 public:
-  exp_vect(const gSpace*);
-  exp_vect(const gSpace*, const int&, const int&);   // x_i^j
-  exp_vect(const gSpace*, int*);
-  exp_vect(const gSpace*, gbtVector<int>);
-  exp_vect(const gSpace*, gbtArray<int>);
-  exp_vect(const exp_vect*);
-  exp_vect(const exp_vect&);
-  ~exp_vect();
+  gbtPolyExponent(const gbtPolySpace*);
+  gbtPolyExponent(const gbtPolySpace*, const int&, const int&);   // x_i^j
+  gbtPolyExponent(const gbtPolySpace*, int*);
+  gbtPolyExponent(const gbtPolySpace*, gbtVector<int>);
+  gbtPolyExponent(const gbtPolySpace*, gbtArray<int>);
+  gbtPolyExponent(const gbtPolyExponent*);
+  gbtPolyExponent(const gbtPolyExponent&);
+  ~gbtPolyExponent();
 
 // Operators
-  exp_vect& operator=(const exp_vect & RHS);
+  gbtPolyExponent& operator=(const gbtPolyExponent & RHS);
 
   int  operator[](int index)           const;
 
-  bool operator==(const exp_vect& RHS) const;
-  bool operator!=(const exp_vect& RHS) const;
-  bool operator<=(const exp_vect& RHS) const;
-  bool operator>=(const exp_vect& RHS) const;
-  bool operator< (const exp_vect& RHS) const;
-  bool operator> (const exp_vect& RHS) const;
+  bool operator==(const gbtPolyExponent& RHS) const;
+  bool operator!=(const gbtPolyExponent& RHS) const;
+  bool operator<=(const gbtPolyExponent& RHS) const;
+  bool operator>=(const gbtPolyExponent& RHS) const;
+  bool operator< (const gbtPolyExponent& RHS) const;
+  bool operator> (const gbtPolyExponent& RHS) const;
 
-  exp_vect  operator -  ()                 const;
-  exp_vect  operator +  (const exp_vect &) const;
-  exp_vect  operator -  (const exp_vect &) const;
-  void      operator += (const exp_vect &);
-  void      operator -= (const exp_vect &);
+  gbtPolyExponent  operator -  ()                 const;
+  gbtPolyExponent  operator +  (const gbtPolyExponent &) const;
+  gbtPolyExponent  operator -  (const gbtPolyExponent &) const;
+  void      operator += (const gbtPolyExponent &);
+  void      operator -= (const gbtPolyExponent &);
 
 // Other operations
-  exp_vect  LCM(const exp_vect &)                    const;
-  exp_vect  WithVariableAppended(const gSpace*)      const;
-  exp_vect  AfterZeroingOutExpOfVariable(int&)       const;
-  exp_vect  AfterDecrementingExpOfVariable(int&)     const;
+  gbtPolyExponent  LCM(const gbtPolyExponent &)                    const;
+  gbtPolyExponent  WithVariableAppended(const gbtPolySpace*)      const;
+  gbtPolyExponent  AfterZeroingOutExpOfVariable(int&)       const;
+  gbtPolyExponent  AfterDecrementingExpOfVariable(int&)     const;
 
 // Information
   int  Dmnsn()                                     const;
@@ -146,19 +146,19 @@ public:
   bool IsUnivariate()                              const;
   int  SoleActiveVariable()                        const;
   int  TotalDegree()                               const;
-  bool Divides(const exp_vect&)                    const;
-  bool UsesDifferentVariablesThan(const exp_vect&) const;
+  bool Divides(const gbtPolyExponent&)                    const;
+  bool UsesDifferentVariablesThan(const gbtPolyExponent&) const;
 
 // Manipulation
   void SetExp(int varno, int pow);
   void ToZero();
 
-  friend gbtOutput& operator<<(gbtOutput&, const exp_vect&);
+  friend gbtOutput& operator<<(gbtOutput&, const gbtPolyExponent&);
 };
 
 
 // ***********************
-// class term_order
+// class gbtPolyTermOrder
 // ***********************
 
 /*
@@ -174,40 +174,40 @@ pointers to functions.
 */
 
 // THE FOLLOWING FUNCTIONS SHOULD BE VIEWED AS PRIVATE MEMBERS OF 
-// class term_order  I WAS BAFFLED AS TO HOW TO HAVE A MEMBER THAT
+// class gbtPolyTermOrder  I WAS BAFFLED AS TO HOW TO HAVE A MEMBER THAT
 // IS A POINTER-TO-OTHER-MEMBER-FUNCTION
-typedef  bool (*ORD_PTR)(const exp_vect &, const exp_vect &);
-  bool lex(const exp_vect &, const exp_vect &);
-  bool reverselex(const exp_vect &, const exp_vect &);
-  bool deglex(const exp_vect &, const exp_vect &);
-  bool reversedeglex(const exp_vect &, const exp_vect &);
-  bool degrevlex(const exp_vect &, const exp_vect &);
-  bool reversedegrevlex(const exp_vect &, const exp_vect &);
+typedef  bool (*ORD_PTR)(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool lex(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool reverselex(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool deglex(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool reversedeglex(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool degrevlex(const gbtPolyExponent &, const gbtPolyExponent &);
+  bool reversedegrevlex(const gbtPolyExponent &, const gbtPolyExponent &);
 
-class term_order {
+class gbtPolyTermOrder {
 private:
-  const gSpace* Space;
+  const gbtPolySpace* Space;
   ORD_PTR actual_order;
 
 public:
-  term_order(const gSpace*, ORD_PTR);
-  term_order(const term_order &);
-  ~term_order();
+  gbtPolyTermOrder(const gbtPolySpace*, ORD_PTR);
+  gbtPolyTermOrder(const gbtPolyTermOrder &);
+  ~gbtPolyTermOrder();
 
 // Operators
-  term_order& operator=(term_order & RHS);
+  gbtPolyTermOrder& operator=(gbtPolyTermOrder & RHS);
 
-  bool operator==(const term_order & RHS) const;
-  bool operator!=(const term_order & RHS) const;
+  bool operator==(const gbtPolyTermOrder & RHS) const;
+  bool operator!=(const gbtPolyTermOrder & RHS) const;
 
 // Comparisons invoking the underlying order
-  bool Less          (const exp_vect &, const exp_vect &) const;
-  bool LessOrEqual   (const exp_vect &, const exp_vect &) const;
-  bool Greater       (const exp_vect &, const exp_vect &) const;
-  bool GreaterOrEqual(const exp_vect &, const exp_vect &) const;
+  bool Less          (const gbtPolyExponent &, const gbtPolyExponent &) const;
+  bool LessOrEqual   (const gbtPolyExponent &, const gbtPolyExponent &) const;
+  bool Greater       (const gbtPolyExponent &, const gbtPolyExponent &) const;
+  bool GreaterOrEqual(const gbtPolyExponent &, const gbtPolyExponent &) const;
 
 // Manipulation and Information
-  term_order WithVariableAppended(const gSpace*) const;
+  gbtPolyTermOrder WithVariableAppended(const gbtPolySpace*) const;
 };
 
 #endif  // PREPOLY_H

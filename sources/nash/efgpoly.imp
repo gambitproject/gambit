@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Compute Nash equilibria via solving polynomial equations
+// Compute Nash equilibria via solving gbtPolyUni equations
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -48,8 +48,8 @@ private:
   gbtEfgGame m_efg;
   const gbtEfgSupport &support;
   EfgPolEnumParams params;
-  gSpace *Space;
-  term_order *Lex;
+  gbtPolySpace *Space;
+  gbtPolyTermOrder *Lex;
   int num_vars;
   long count,nevals;
   double time;
@@ -58,19 +58,19 @@ private:
   bool is_singular;
   gbtArray<gbtArray<int> * > var;
 
-  // The strategy is to develop the polynomial for each agent's expected
+  // The strategy is to develop the gbtPolyUni for each agent's expected
   // payoff as a function of the behavior strategies on the support,
   // eliminating the last last action probability for each information set.
   // The system is obtained by requiring that all of the partial
   // derivatives vanish, and that the sum of action probabilities at
   // each information set be less than one.
-  gPoly<T>     ProbOfSequence(int pl,int seq)          const;
-  gPoly<T>     Payoff(int pl)                          const;
-  gPolyList<T> IndifferenceEquations()                 const;
-  gPolyList<T> LastActionProbPositiveInequalities()    const;
-  gPolyList<T> NashOnSupportEquationsAndInequalities() const;
+  gbtPolyMulti<T>     ProbOfSequence(int pl,int seq)          const;
+  gbtPolyMulti<T>     Payoff(int pl)                          const;
+  gbtPolyMultiList<T> IndifferenceEquations()                 const;
+  gbtPolyMultiList<T> LastActionProbPositiveInequalities()    const;
+  gbtPolyMultiList<T> NashOnSupportEquationsAndInequalities() const;
   gbtList<gbtVector<gbtDouble> > 
-               NashOnSupportSolnVectors(const gPolyList<T> &equations,
+               NashOnSupportSolnVectors(const gbtPolyMultiList<T> &equations,
 					const gRectangle<T> &Cube,
 					gbtStopWatch &timer,
 					gbtStatus &p_status);
@@ -123,8 +123,8 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S,
 
   num_vars = SF.TotalNumSequences()-SF.NumPlayerInfosets()-SF.NumPlayers();
 
-  Space = new gSpace(num_vars);
-  Lex = new term_order(Space, lex);
+  Space = new gbtPolySpace(num_vars);
+  Lex = new gbtPolyTermOrder(Space, lex);
 
   int kk=0;
   int tnv = 0;
@@ -155,9 +155,9 @@ EfgPolEnumModule<T>::~EfgPolEnumModule()
 }
 
 template <class T> 
-gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
+gbtPolyMulti<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
 {
-  gPoly<T> equation(Space,Lex);
+  gbtPolyMulti<T> equation(Space,Lex);
   gbtVector<int> exps(num_vars);
   int j = 0;
   
@@ -167,9 +167,9 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
 
   if(seq==1) {
     exps=0;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
+    gbtPolyExponent const_exp(Space,exps);
+    gbtMonomial<T> const_term((T)1,const_exp);
+    gbtPolyMulti<T> new_term(Space,const_term,Lex);
     equation+=new_term;
   }
   else if(act<support.NumActions(SF.GetInfoset(p,seq))) { 
@@ -177,9 +177,9 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
     assert (varno<=exps.Last());
     exps=0;
     exps[varno]=1;
-    exp_vect const_exp(Space,exps);
-    gMono<T> const_term((T)1,const_exp);
-    gPoly<T> new_term(Space,const_term,Lex);
+    gbtPolyExponent const_exp(Space,exps);
+    gbtMonomial<T> const_term((T)1,const_exp);
+    gbtPolyMulti<T> new_term(Space,const_term,Lex);
     equation+=new_term;
   }
   else {
@@ -193,17 +193,17 @@ gPoly<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
   return equation;
 }
 
-template <class T> gPoly<T> 
+template <class T> gbtPolyMulti<T> 
 EfgPolEnumModule<T>::Payoff(int pl) const
 {
   gbtIndexOdometer index(SF.NumSequences());
   gbtNumber pay;
 
-  gPoly<T> equation(Space,Lex);
+  gbtPolyMulti<T> equation(Space,Lex);
   while (index.Turn()) {
     pay=SF.Payoff(index.CurrentIndices(),pl);
     if( pay !=(gbtNumber)0) {
-      gPoly<T> term(Space,(T)pay,Lex);
+      gbtPolyMulti<T> term(Space,(T)pay,Lex);
       int k;
       for(k=1;k<=m_efg.NumPlayers();k++) 
 	term*=ProbOfSequence(k,(index.CurrentIndices())[k]);
@@ -214,13 +214,13 @@ EfgPolEnumModule<T>::Payoff(int pl) const
 }
 
 template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::IndifferenceEquations() const
+gbtPolyMultiList<T> EfgPolEnumModule<T>::IndifferenceEquations() const
 {
-  gPolyList<T> equations(Space,Lex);
+  gbtPolyMultiList<T> equations(Space,Lex);
 
   int kk = 0;
   for (int pl = 1; pl <= SF.NumPlayers(); pl++) {
-    gPoly<T> payoff = Payoff(pl);
+    gbtPolyMulti<T> payoff = Payoff(pl);
     int n_vars = SF.NumSequences(pl) - SF.NumInfosets(pl) - 1; 
     for (int j = 1; j <= n_vars; j++) 
       equations += payoff.PartialDerivative(kk+j);
@@ -231,9 +231,9 @@ gPolyList<T> EfgPolEnumModule<T>::IndifferenceEquations() const
 }
 
 template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
+gbtPolyMultiList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
 {
-  gPolyList<T> equations(Space,Lex);
+  gbtPolyMultiList<T> equations(Space,Lex);
 
   for (int i = 1; i <= SF.NumPlayers(); i++) 
     for (int j = 2; j <= SF.NumSequences(i); j++) {
@@ -246,9 +246,9 @@ gPolyList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() const
 }
 
 template <class T>  
-gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
+gbtPolyMultiList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
 {
-  gPolyList<T> equations(Space,Lex);
+  gbtPolyMultiList<T> equations(Space,Lex);
   
   equations += IndifferenceEquations();
   equations += LastActionProbPositiveInequalities();
@@ -258,12 +258,12 @@ gPolyList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities() const
 
 
 template <class T> gbtList<gbtVector<gbtDouble> > 
-EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
+EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gbtPolyMultiList<T> &equations,
 					      const gRectangle<T> &Cube,
 					      gbtStopWatch &timer,
 					      gbtStatus &p_status)
 {
-  QuikSolv<T> quickie(equations, p_status);
+  gbtPolyQuickSolve<T> quickie(equations, p_status);
 #ifdef UNUSED
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
@@ -292,7 +292,7 @@ EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
     timer.Stop();
 #ifdef UNUSED
     if(params.trace>0) {
-      (*params.tracefile)  << "The QuikSolv computation of roots took " 
+      (*params.tracefile)  << "The gbtPolyQuickSolve computation of roots took " 
 			   << (int)timer.Elapsed() << " seconds.\n\n";
     }
 #endif  // UNUSED
@@ -307,7 +307,7 @@ EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 
 template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gbtStatus &p_status)
 {
-  gPolyList<T> equations = NashOnSupportEquationsAndInequalities();
+  gbtPolyMultiList<T> equations = NashOnSupportEquationsAndInequalities();
 
   // set up the rectangle of search
   gbtVector<T> bottoms(num_vars), tops(num_vars);
@@ -536,7 +536,7 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gbtDouble> &point) cons
     
     
     gbtStopWatch watch;
-    gPolyList<T> equations(Space,Lex);
+    gbtPolyMultiList<T> equations(Space,Lex);
     
     // equations for equality of strat j to strat j+1
     
@@ -553,9 +553,9 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gbtDouble> &point) cons
     //  << Space->Dmnsn() << " and equations = \n"
     //	 << equations << "\n";
     
-    // start QuikSolv
+    // start gbtPolyQuickSolve
     gbtNullStatus gstatus;
-    QuikSolv<T> quickie(equations, gstatus);
+    gbtPolyQuickSolve<T> quickie(equations, gstatus);
     
     //DEBUG
     //    gout << "We constructed quickie.\n";

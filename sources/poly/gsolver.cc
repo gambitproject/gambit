@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of gSolver classes
+// Instantiation of gbtPolyMultiSolver classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -26,5 +26,5 @@
 
 #include "gsolver.imp"
 
-template class gSolver<gbtRational>;
-template class gSolver<gbtDouble>;
+template class gbtPolyMultiSolver<gbtRational>;
+template class gbtPolyMultiSolver<gbtDouble>;

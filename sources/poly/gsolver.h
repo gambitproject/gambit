@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of gSolver
+// Declaration of gbtPolyMultiSolver
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -32,18 +32,18 @@
 #include "numerical/linrcomb.h"
 #include "gpolylst.h"
 
-template <class T> class gSolver {
+template <class T> class gbtPolyMultiSolver {
 
 private:
-  const gPolyList<T>& InputList;
-  const gIdeal<T>     TheIdeal;
+  const gbtPolyMultiList<T>& InputList;
+  const gbtPolyIdeal<T>     TheIdeal;
 
 // Conversion
-  gbtList<gPoly<gbtDouble> > BasisTogDouble() const;
+  gbtList<gbtPolyMulti<gbtDouble> > BasisTogDouble() const;
 
 // Recursive Call in Solver
   gbtList<gbtVector<gbtDouble> >  
-    ContinuationSolutions(const gbtList<gPoly<gbtDouble> >& list,
+    ContinuationSolutions(const gbtList<gbtPolyMulti<gbtDouble> >& list,
 			  const int dmnsn,
 			  const int curvar,
 			  const gbtVector<gbtDouble>& knownvals);
@@ -51,9 +51,9 @@ private:
 public:
 
 // Constructor and Destructor
-  gSolver(const term_order* Order,const gPolyList<T>& Inputs);
-  gSolver(const gSolver<T>&);
-  ~gSolver();
+  gbtPolyMultiSolver(const gbtPolyTermOrder* Order,const gbtPolyMultiList<T>& Inputs);
+  gbtPolyMultiSolver(const gbtPolyMultiSolver<T>&);
+  ~gbtPolyMultiSolver();
 
   bool                     IsZeroDimensional();
   gbtList<gbtVector<gbtDouble> > Roots();
