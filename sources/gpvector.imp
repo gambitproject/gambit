@@ -178,14 +178,14 @@ template <class T> gPVector<T> gPVector<T>::operator/(T c)
   return tmp;
 }
 
-template <class T> int gPVector<T>::operator==(const gPVector<T> &v) const
+template <class T> bool gPVector<T>::operator==(const gPVector<T> &v) const
 {
   if (!Check(v))   throw BadDim();
 
   return (*this).gVector<T>::operator==(v);
 }
 
-template <class T> int gPVector<T>::operator!=(const gPVector<T> &v) const
+template <class T> bool gPVector<T>::operator!=(const gPVector<T> &v) const
 { return !((*this)==v); }
 
 //-------------------------------------------------------------------------

@@ -56,8 +56,8 @@ template <class T> class gPVector : public gVector<T> {
   gPVector<T>& operator*=(const T c);
   gPVector<T> operator/(T c);
 
-  int operator==(const gPVector<T> &v) const;
-  int operator!=(const gPVector<T> &v) const;
+  bool operator==(const gPVector<T> &v) const;
+  bool operator!=(const gPVector<T> &v) const;
 
   // parameter access functions
   const gArray<int>& Lengths(void) const;
