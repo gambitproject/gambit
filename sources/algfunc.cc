@@ -166,7 +166,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("GobitEfg");
   FuncObj->SetFuncInfo(GSM_GobitEfg, 8);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_EFG );
+			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
 			new OutputRefPortion(gnull));
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porFLOAT,
@@ -186,7 +186,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LiapEfg");
   FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_EFG );
+			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_LiapEfg, 1, "stopAfter", porINTEGER,
 		        new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nTries", porINTEGER,
@@ -203,12 +203,12 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_SequenceD, 1);
   FuncObj->SetParamInfo(GSM_SequenceD, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, 
-			PASS_BY_VALUE, DEFAULT_EFG );
+			PASS_BY_REFERENCE, DEFAULT_EFG );
 
   FuncObj->SetFuncInfo(GSM_SequenceR, 1);
   FuncObj->SetParamInfo(GSM_SequenceR, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, 
-			PASS_BY_VALUE, DEFAULT_EFG );
+			PASS_BY_REFERENCE, DEFAULT_EFG );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOptions");
@@ -227,7 +227,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_Nfg, 2);
   FuncObj->SetParamInfo(GSM_Nfg, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_EFG );
+			PASS_BY_REFERENCE, DEFAULT_EFG );
   FuncObj->SetParamInfo(GSM_Nfg, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
