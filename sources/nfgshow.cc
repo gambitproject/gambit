@@ -572,9 +572,9 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_TWO:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*sup, this, 2, true);
+	solver = new guinfgLiap(*sup, this, 2, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
@@ -594,9 +594,9 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_ALL:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*sup, this, 0, true);
+	solver = new guinfgLiap(*sup, this, 0, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
