@@ -29,10 +29,6 @@
 # Note: If files are moved or renamed, this makefile can get "stuck".  
 #       In this case do 'rm *.d' or 'make clean'
 
-# Name of this makefile.
-
-MYNAME = Makefile.generic
-
 # define compiler and flags
 
 CC = g++ 
@@ -79,14 +75,14 @@ ifeq ($(GUI), xt)
 ifneq ($(SYSNAME), Linux)
 @echo Error! Xt interface only works with Linux!
 else
-WXDIR = /home/mill/gambit/wxxt/wxxt-1.67
+WXDIR = /users/gambit/wxxt/wxxt-1.67
 WXLIBDIR = -L$(WXDIR)/lib/linux
 WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/linux -I$(WXDIR)/src/xt-widgets \
            -DLINUX_WXXT
 WXLIB = -lwx_xt -lwx_xtwidgets
 endif
 else # motif
-WXDIR = /home/mill/gambit/wxwin
+WXDIR = /users/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
 WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
 WXLIB = -lwx_motif_$(SYSNAME)
@@ -150,11 +146,11 @@ gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
 
 gcl:	
 ifndef SYSNAME
-	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a SYSNAME e.g. linux, solaris, hp
 	@exit 1
 endif
-	make -f $(MYNAME) gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
+	make gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
 
 gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
@@ -163,17 +159,17 @@ gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 
 gui:
 ifndef SYSNAME
-	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a SYSNAME e.g. linux, solaris, hp
 	@exit 1
 endif
 ifndef GUI
-	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a GUI e.g. xt, motif
 	@echo \(xt only supported on linux\)
 	@exit 1
 endif
-	make -f $(MYNAME) gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
+	make gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
