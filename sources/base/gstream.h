@@ -228,79 +228,75 @@ public:
 };
 
 class gbtFileOutput : public gbtOutput  {
-  private:
-    FILE *f;
-    const gbtText filename; 
-    bool keepClosed;
-    int Width, Prec;
-    char Represent;
+private:
+  FILE *f;
+  int Width, Prec;
+  char Represent;
 
-    gbtFileOutput(const gbtFileOutput &);
-    gbtFileOutput &operator=(const gbtFileOutput &);
-    void Open(void);
-    void Close(void);
+  gbtFileOutput(const gbtFileOutput &);
+  gbtFileOutput &operator=(const gbtFileOutput &);
 
+public:
+  class OpenFailed : public gbtException   {
   public:
-    class OpenFailed : public gbtException   {
-    public:
-      virtual ~OpenFailed()   { }
-      gbtText Description(void) const;
-    };
+    virtual ~OpenFailed()   { }
+    gbtText Description(void) const;
+  };
 
-    class WriteFailed : public gbtException   {
-    public:
-      virtual ~WriteFailed()   { }
-      gbtText Description(void) const;
-    };
+  class WriteFailed : public gbtException   {
+  public:
+    virtual ~WriteFailed()   { }
+    gbtText Description(void) const;
+  };
 
-    gbtFileOutput(const char *, bool append = false, bool close = true);
-    virtual ~gbtFileOutput();
+  gbtFileOutput(const char *, bool append = false);
+  virtual ~gbtFileOutput();
 
-    int GetWidth(void) const;
-    gbtOutput &SetWidth(int w);
-    int GetPrec(void) const;
-    gbtOutput &SetPrec(int p);
-    gbtOutput &SetExpMode(void);
-    gbtOutput &SetFloatMode(void);
-    char GetRepMode(void) const;
+  int GetWidth(void) const;
+  gbtOutput &SetWidth(int w);
+  int GetPrec(void) const;
+  gbtOutput &SetPrec(int p);
+  gbtOutput &SetExpMode(void);
+  gbtOutput &SetFloatMode(void);
+  char GetRepMode(void) const;
 
-    gbtOutput &operator<<(int x);
-    gbtOutput &operator<<(unsigned int x);
-    gbtOutput &operator<<(bool x);
-    gbtOutput &operator<<(long x);
-    gbtOutput &operator<<(char x);
-    gbtOutput &operator<<(double x);
-    gbtOutput &operator<<(float x);
-    gbtOutput &operator<<(const char *x);
-    gbtOutput &operator<<(const void *x);
+  gbtOutput &operator<<(int x);
+  gbtOutput &operator<<(unsigned int x);
+  gbtOutput &operator<<(bool x);
+  gbtOutput &operator<<(long x);
+  gbtOutput &operator<<(char x);
+  gbtOutput &operator<<(double x);
+  gbtOutput &operator<<(float x);
+  gbtOutput &operator<<(const char *x);
+  gbtOutput &operator<<(const void *x);
 };
 
 class gbtNullOutput : public gbtOutput  {
-  private:
-    gbtNullOutput(const gbtNullOutput &);
-    gbtNullOutput &operator=(const gbtNullOutput &);
+private:
+  gbtNullOutput(const gbtNullOutput &);
+  gbtNullOutput &operator=(const gbtNullOutput &);
 
-  public:
-    gbtNullOutput(void);
-    virtual ~gbtNullOutput();
+public:
+  gbtNullOutput(void);
+  virtual ~gbtNullOutput();
 
-    int GetWidth(void) const;
-    gbtOutput &SetWidth(int w);
-    int GetPrec(void) const;
-    gbtOutput &SetPrec(int p);
-    gbtOutput &SetExpMode(void);
-    gbtOutput &SetFloatMode(void);
-    char GetRepMode(void) const;
+  int GetWidth(void) const;
+  gbtOutput &SetWidth(int w);
+  int GetPrec(void) const;
+  gbtOutput &SetPrec(int p);
+  gbtOutput &SetExpMode(void);
+  gbtOutput &SetFloatMode(void);
+  char GetRepMode(void) const;
 
-    gbtOutput &operator<<(int x);
-    gbtOutput &operator<<(unsigned int x);
-    gbtOutput &operator<<(bool x);
-    gbtOutput &operator<<(long x);
-    gbtOutput &operator<<(char x);
-    gbtOutput &operator<<(double x);
-    gbtOutput &operator<<(float x);
-    gbtOutput &operator<<(const char *x);
-    gbtOutput &operator<<(const void *x);
+  gbtOutput &operator<<(int x);
+  gbtOutput &operator<<(unsigned int x);
+  gbtOutput &operator<<(bool x);
+  gbtOutput &operator<<(long x);
+  gbtOutput &operator<<(char x);
+  gbtOutput &operator<<(double x);
+  gbtOutput &operator<<(float x);
+  gbtOutput &operator<<(const char *x);
+  gbtOutput &operator<<(const void *x);
 };
 
 #endif   // GSTREAM_H

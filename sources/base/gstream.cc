@@ -442,10 +442,9 @@ gbtText gbtFileOutput::WriteFailed::Description(void) const
   return "Write failed in gbtFileOutput";
 }
 
-gbtFileOutput::gbtFileOutput(const char *out, bool append /* = false */, bool close /* = true */)
-  : f(fopen(out, (append) ? "a" : "w")), filename(out), 
-    keepClosed(close), Width(0), 
-    Prec(6), Represent('f')
+gbtFileOutput::gbtFileOutput(const char *out, bool append /* = false */)
+  : f(fopen(out, (append) ? "a" : "w")),
+    Width(0), Prec(6), Represent('f')
 {
   if (!f)   throw OpenFailed();
 }
@@ -453,19 +452,6 @@ gbtFileOutput::gbtFileOutput(const char *out, bool append /* = false */, bool cl
 gbtFileOutput::~gbtFileOutput()
 {
   if (f)   fclose(f);
-}
-
-void gbtFileOutput::Open(void)
-{
-  if(!f) { 
-    f=fopen(filename,"a");
-    if (!f) throw OpenFailed();
-  }
-}
-
-void gbtFileOutput::Close(void)
-{
-  if(keepClosed) { fclose(f);f=0;} 
 }
 
 int gbtFileOutput::GetWidth(void) const
@@ -509,47 +495,36 @@ char gbtFileOutput::GetRepMode(void) const
 
 gbtOutput &gbtFileOutput::operator<<(int x)
 {
-  Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(unsigned int x)
 {
-  Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(bool x)
 {
-  Open();
   if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(long x)
 {
-  Open();
   if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(char x)
 {
-  Open();
   if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(double x)
 {
-  Open();
   if (Represent == 'f')   {
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0)  
       throw WriteFailed();
@@ -558,13 +533,11 @@ gbtOutput &gbtFileOutput::operator<<(double x)
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(float x)
 {
-  Open();
   if (Represent == 'f')   {
     if (fprintf(f, "%*.*f", Width, Prec, x) < 0) 
       throw WriteFailed();
@@ -573,23 +546,18 @@ gbtOutput &gbtFileOutput::operator<<(float x)
     if (fprintf(f, "%*.*e", Width, Prec, x) < 0) 
       throw WriteFailed();
   }
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(const char *x)
 {
-  Open();
   if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
 gbtOutput &gbtFileOutput::operator<<(const void *x)
 {
-  Open();
   if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
-  Close();
   return *this;
 }
 
