@@ -119,7 +119,35 @@ void wxInitHelp(const char *name, const char *help_about_str)
 
 void wxHelpContents(const char *section)
 {
-  s_helpInstance->LoadFile();
+#ifdef __GNUG__
+  if(!section || section == "") return; 
+  gText text(section);
+
+  // get html Directory
+  gText htmlDir = System::GetEnv("GAMBITHOME");
+  htmlDir+="/doc/html";
+  wxGetResourceStr("Install", "HTML-Dir", htmlDir,"gambitrc");
+
+  // search for html file corresponding to section.  
+  System::Shell("grep -l '<title>"+text+"' "+htmlDir+"/*.html > junk.hlp");
+  gFileInput file("junk.hlp");
+  char a;
+  gText html_file;
+  while (!file.eof()) {
+    file >> a;
+    if(a != '\n') html_file += a;
+  }
+  int last = html_file.Length()-1;
+
+
+  // display on netscape.
+  // Use -install flag when launching netscape to install private color map
+  // Otherwise gambit and netscape cannot run simultaneously.  
+  if(html_file[last]!='l') html_file.Remove(last); // get rid of line feed
+  if(System::Shell("netscape -remote 'OpenFile("+html_file+")'"))
+    System::Shell("netscape -install "+html_file+" &");
+#else
+    s_helpInstance->LoadFile();
     
   if (!section) {
     s_helpInstance->DisplayContents();
@@ -127,6 +155,7 @@ void wxHelpContents(const char *section)
   else {
     s_helpInstance->KeywordSearch((char *) section);
   }
+#endif
 }
 
 void wxHelpAbout(const char *helpstr)
@@ -237,7 +266,7 @@ Bool guiAutoDialog::OnClose(void)
 
 void guiAutoDialog::OnHelp(void)
 {
-  wxHelpContents(HelpString());
+wxHelpContents(HelpString());
 }
 
 //========================================================================
