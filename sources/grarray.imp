@@ -14,7 +14,7 @@
 
 template <class T> bool gRectArray<T>::Check(int row, int col) const
 {
-  return (row >= 1 && row <= nrows && col >= 1 && col <= ncols);
+  return (row >= minrow && row <= maxrow && col >= mincol && col <= maxcol);
 }
 
 //------------------------------------------------------------------------
@@ -22,37 +22,48 @@ template <class T> bool gRectArray<T>::Check(int row, int col) const
 //------------------------------------------------------------------------
 
 template <class T> gRectArray<T>::gRectArray(int rows, int cols)
-  : nrows(rows), ncols(cols)
+  : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
 {
   assert(rows > 0 && cols > 0);
-  data = new T *[nrows] - 1;
-  for (int i = 1; i <= nrows; data[i++] = new T[ncols] - 1);
+  data = new T *[maxrow] - 1;
+  for (int i = 1; i <= maxrow; data[i++] = new T[maxcol] - 1);
+}
+
+template <class T>
+gRectArray<T>::gRectArray(int minr, int maxr, int minc, int maxc)
+  : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc)
+{
+  assert(maxrow >= minrow && maxcol >= mincol);
+  data = new T *[maxrow - minrow + 1] - minrow;
+  for (int i = minrow; i <= maxrow;
+       data[i++] = new T[maxcol - mincol + 1] - mincol);
 }
 
 template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
-  : nrows(a.nrows), ncols(a.ncols)
+  : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
 {
-  data = new T *[nrows] - 1;
-  for (int i = 1; i <= nrows; i++)  {
-    data[i] = new T[ncols] - 1;
-    for (int j = 1; j <= ncols; j++)
+  data = new T *[maxrow - minrow + 1] - minrow;
+  for (int i = minrow; i <= maxrow; i++)  {
+    data[i] = new T[maxcol - mincol + 1] - mincol;
+    for (int j = mincol; j <= maxcol; j++)
       data[i][j] = a.data[i][j];
   }
 }
 
 template <class T> gRectArray<T>::~gRectArray()
 {
-  for (int i = 1; i <= nrows; delete [] (data[i++] + 1));
-  delete [] (data + 1);
+  for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
+  delete [] (data + minrow);
 }
 
 template <class T>
 gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 {
-  assert(nrows == a.nrows && ncols == a.ncols);
+  assert(minrow == a.minrow && maxrow == a.maxrow &&
+	 mincol == a.mincol && maxcol == a.maxcol);
 
-  for (int i = 1; i <= nrows; i++)
-    for (int j = 1; j <= ncols; j++)
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxcol; j++)
       data[i][j] = a.data[i][j];
 
   return *this;
@@ -62,8 +73,16 @@ gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 //                          Data access members
 //------------------------------------------------------------------------
 
-template <class T> int gRectArray<T>::NumRows(void) const     { return nrows; }
-template <class T> int gRectArray<T>::NumColumns(void) const  { return ncols; }
+template <class T> int gRectArray<T>::NumRows(void) const
+{ return maxrow - minrow + 1; }
+
+template <class T> int gRectArray<T>::NumColumns(void) const
+{ return maxcol - mincol + 1; }
+
+template <class T> int gRectArray<T>::MinRow(void) const    { return minrow; }
+template <class T> int gRectArray<T>::MaxRow(void) const    { return maxrow; }
+template <class T> int gRectArray<T>::MinColumn(void) const { return mincol; }
+template <class T> int gRectArray<T>::MaxColumn(void) const { return maxcol; }
 
 template <class T> T &gRectArray<T>::operator()(int r, int c)
 {
@@ -80,10 +99,10 @@ template <class T> const T &gRectArray<T>::operator()(int r, int c) const
 template <class T> void gRectArray<T>::Dump(gOutput &f) const
 {
   f << "{ ";
-  for (int i = 1; i <= nrows; i++)  {
+  for (int i = minrow; i <= maxrow; i++)  {
     if (i > 1)  f << "\n  ";
     f << "{ ";
-    for (int j = 1; j <= ncols; j++)
+    for (int j = mincol; j <= maxcol; j++)
       f << data[i][j] << ' ';
     f << "}";
   }
@@ -101,7 +120,7 @@ template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
 
 template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 {
-  assert(lo >= 1 && hi >= lo && nrows >= hi);
+  assert(lo >= minrow && hi >= lo && maxrow >= hi);
   T *temp = data[lo];
   for (int k = lo; k < hi; k++)
     data[k] = data[k + 1];
@@ -110,7 +129,7 @@ template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
 
 template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 {
-  assert(lo >= 1 && hi >= lo && nrows >= hi);
+  assert(lo >= minrow && hi >= lo && maxrow >= hi);
   T *temp = data[hi];
   for (int k = hi; k > lo; k--)
     data[k] = data[k - 1];
@@ -119,7 +138,7 @@ template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
 
 template <class T> void gRectArray<T>::SwitchRows(int i, int j)
 {
-  assert(i >= 1 && i <= nrows && j >= 1 && j <= nrows);
+  assert(i >= minrow && i <= maxrow && j >= minrow && j <= maxrow);
   T *temp = data[j];
   data[j] = data[i];
   data[i] = temp;

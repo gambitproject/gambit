@@ -11,13 +11,14 @@
 
 template <class T> class gRectArray    {
   protected:
-    int nrows, ncols;
+    int minrow, maxrow, mincol, maxcol;
     T **data;
 
     bool Check(int row, int col) const;
 
   public:
     gRectArray(int nrows, int ncols);
+    gRectArray(int minr, int maxr, int minc, int maxc);
     gRectArray(const gRectArray<T> &);
     virtual ~gRectArray();
 
@@ -25,6 +26,10 @@ template <class T> class gRectArray    {
 
     int NumRows(void) const;
     int NumColumns(void) const;
+    int MinRow(void) const;
+    int MaxRow(void) const;
+    int MinColumn(void) const;
+    int MaxColumn(void) const;
     
     T &operator()(int r, int c);
     const T &operator()(int r, int c) const;
