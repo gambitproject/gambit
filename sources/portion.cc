@@ -196,8 +196,11 @@ void Portion::SetGame(void* game, bool efg)
 	    else
 	      delete (Nfg<gRational> *) _Game;
 	  }
-	else
-	  delete (BaseEfg*) _Game;
+// Removed to temporarily solve a problem somewhere with reference counting
+// of efgs.  Of course, note that this causes a memory leak!  This needs
+// to be tracked down in the near future.
+//	else
+//	  delete (BaseEfg*) _Game;
 	_Game = 0;
       }
     }
@@ -1893,8 +1896,8 @@ BaseEfg *EfgPortion::Value(void) const
 
 void EfgPortion::SetValue(BaseEfg *value)
 {
-  SetGame(value, true);
   *_Value = value;
+  SetGame(*_Value, true);
 }
 
 PortionSpec EfgPortion::Spec(void) const
