@@ -20,7 +20,7 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 CFG = gambit32.cfg
 WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32
+WXLIB = wx32 xpm
 WXINC = -I$(WXDIR)\include
 
 OPT = -Od
