@@ -122,7 +122,8 @@ template <class T> int SeqFormModule<T>::Lemke(int dup)
   
 //  if(params.plev >= 1)
 //    (*params.output) << "\nN Pivots = " << npivots << "\n";
-  
+
+  npivots=tab->NumPivots();
   time = watch.Elapsed();
   return List.Length();
 }

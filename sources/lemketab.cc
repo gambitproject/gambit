@@ -6,10 +6,21 @@
 
 #include "lemketab.h"
 
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
+void Epsilon_LTab(double &v, int i)
+{
+  if(i==1)v=(double)1.0e-5;
+  if(i==2)v=(double)1.0e-8;
+  if(i==3)v=(double)1.0e-6;
+}
+
+void Epsilon_LTab(gRational &v, int i) { v = (gRational)0;}
+
 //---------------------------------------------------------------------------
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
- 
+
 // template <class T> LTableau<T>::LTableau(void)
 //   : Tableau<T>()
 // { } 
@@ -17,11 +28,15 @@
 template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
 					 const gVector<T> &b)
   : Tableau<T>(A,b)
-{ } 
+{ 
+  Epsilon_LTab(eps2,2);
+} 
 
 template <class T> LTableau<T>::LTableau(Tableau<T> &tab)
   : Tableau<T>(tab) 
-{ }
+{
+  Epsilon_LTab(eps2,2);
+}
 
 template <class T> LTableau<T>::~LTableau(void) 
 { }
@@ -58,9 +73,11 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 //  gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
   for (i = MinRow(); i <= MaxRow(); i++)
-    if (incol[i] > (T) 0)
+    if (incol[i] > eps2)
       BestSet.Append(i);
-  if(BestSet.Length()==0 && incol[Find(0)]==(T)0)
+  if(BestSet.Length()==0  
+     && incol[Find(0)]<=eps2 
+     && incol[Find(0)] >= (-eps2) )
     return Find(0);
   assert(BestSet.Length() > 0);
   
