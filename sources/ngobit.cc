@@ -278,17 +278,6 @@ void Qre(const Nfg &N, NFQreParams &params,
 	prog = abs(log(Lambda/LambdaStart));
       params.status.SetProgress(prog/max_prog);
 
-      gout << "\ndelta: " << delta;
-      gout << " Lam: " << Lambda;
-      gout << " Found: " << FoundSolution;
-      gout << " Err: " << derr;
-      gout << " dist: " << dist;
-      gout << " val: ";
-      gout.SetExpMode();
-      gout << value;
-      gout.SetFloatMode();
-      gout << " p: " << p;
-
       LambdaOld = Lambda;
       Lambda += delta * pow(Lambda, (long)params.powLam);
     }
