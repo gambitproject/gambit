@@ -18,6 +18,7 @@ class BaseBehavProfile   {
     bool truncated;
 
     BaseBehavProfile(const BaseExtForm &, bool trunc);
+    BaseBehavProfile(const BaseBehavProfile &);
     BaseBehavProfile &operator=(const BaseBehavProfile &);
 
   public:
@@ -44,6 +45,7 @@ template <class T> class BehavProfile
   public:
     BehavProfile(const ExtForm<T> &, bool truncated = false);
     BehavProfile(const ExtForm<T> &, const gDPVector<T> &);
+    BehavProfile(const BehavProfile<T> &);
     ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);

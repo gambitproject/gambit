@@ -333,6 +333,10 @@ template <class T> BehavProfile<T>::BehavProfile(const ExtForm<T> &EF,
   : BaseBehavProfile(EF, false), gDPVector<T>(profile)
 { }
 
+template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
+  : BaseBehavProfile(p), gDPVector<T>(p)
+{ }
+
 template <class T> BehavProfile<T>::~BehavProfile()   { }
 
 template <class T>

@@ -17,6 +17,7 @@ class BaseMixedProfile     {
     bool truncated;
 
     BaseMixedProfile(const BaseNormalForm &, bool trunc);
+    BaseMixedProfile(const BaseMixedProfile &);
     BaseMixedProfile &operator=(const BaseMixedProfile &);
 
   public:
@@ -38,6 +39,7 @@ template <class T> class MixedProfile
   public:
     MixedProfile(const NormalForm<T> &, bool truncated = false);
     MixedProfile(const NormalForm<T> &, const gPVector<T> &);
+    MixedProfile(const MixedProfile<T> &);
     ~MixedProfile();
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);

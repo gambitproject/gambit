@@ -548,6 +548,9 @@ Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
 BaseBehavProfile::BaseBehavProfile(const BaseExtForm &EF, bool trunc)
   : E(&EF), truncated(trunc)  { }
 
+BaseBehavProfile::BaseBehavProfile(const BaseBehavProfile &p)
+  : E(p.E), truncated(p.truncated)   { }
+
 BaseBehavProfile::~BaseBehavProfile()   { }
 
 BaseBehavProfile &BaseBehavProfile::operator=(const BaseBehavProfile &p)
