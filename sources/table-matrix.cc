@@ -301,6 +301,7 @@ gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
   DisableDragColSize();
   SetCursorCellHighlightColour(*wxWHITE);
 
+  /*
   AutoSizeRows();
   AutoSizeColumns();
   for (int col = 0; col <= GetNumberCols(); col++) {
@@ -308,6 +309,7 @@ gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
       SetColWidth(col, GetRowHeight(col));
     }
   }
+  */
   AdjustScrollbars();
 }
 
@@ -607,6 +609,7 @@ void gbtMatrixSheet::OnUpdate(void)
     InsertCols(0, dim - stratCols);
   }
 
+  /*
   AutoSizeRows();
   AutoSizeColumns();
   for (int col = 0; col <= GetNumberCols(); col++) {
@@ -614,6 +617,7 @@ void gbtMatrixSheet::OnUpdate(void)
       SetColWidth(col, GetRowHeight(col));
     }
   }
+  */
   EndBatch();
   AdjustScrollbars();
 }
