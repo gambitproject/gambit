@@ -80,6 +80,42 @@ class GSM;
 
 
 
+
+
+
+
+
+
+
+
+
+
+class ReferenceCounter
+{
+private:
+  int _RefCount;
+
+public:
+  ReferenceCounter( void );
+  int& RefCount( void );
+};
+
+
+
+class gStreamOutput : public gFileOutput, public ReferenceCounter
+{
+public:
+  gStreamOutput( const gString& filename );
+};
+
+
+
+
+
+
+
+
+
 class Portion
 {
  private:
@@ -449,19 +485,6 @@ class Node_Portion : public Portion
 
 
 
-class gStreamOutput : public gFileOutput
-{
- private:
-  int _RefCount;
-  static int _NumStreams;
-
- public:
-  gStreamOutput( const gString& filename );
-  ~gStreamOutput();
-  int& RefCount( void );
-};
-
-
 class Stream_Portion : public Portion
 {
  private:
@@ -490,3 +513,4 @@ gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H
+

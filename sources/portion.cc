@@ -13,6 +13,31 @@
 #include "gsm.h"
 #include "gsmhash.h"
 
+
+
+
+
+
+
+ReferenceCounter::ReferenceCounter( void )
+{
+  _RefCount = 1;
+}
+
+int& ReferenceCounter::RefCount( void )
+{
+  return _RefCount;
+}
+
+
+
+gStreamOutput::gStreamOutput( const gString& filename ) 
+:gFileOutput( filename ), ReferenceCounter()
+{
+}
+
+
+
 //---------------------------------------------------------------------
 //                          base class
 //---------------------------------------------------------------------
@@ -744,6 +769,7 @@ int List_Portion::Insert( Portion* item, int index )
     Error( "               a List_Portion\n" );
     result = 0;
   }
+  assert( item->Type() != porREFERENCE );
   
   if( _Value.Length() == 0 )  // creating a new list
   {
@@ -1417,36 +1443,6 @@ void Node_Portion::Output( gOutput& s ) const
 //                            Stream type
 //---------------------------------------------------------------------
 
-#ifdef MEMCHECK
-int gStreamOutput::_NumStreams = 0;
-#endif // MEMCHECK
-
-gStreamOutput::gStreamOutput( const gString& filename )
-     : gFileOutput( filename )
-{
-  _RefCount = 1;
-#ifdef MEMCHECK
-  _NumStreams++;
-  gout << ">>> gStreamOutput ctor -- count: " << _NumStreams << "\n";
-#endif // MEMCHECK
-}
-
-int& gStreamOutput::RefCount( void )
-{
-  return _RefCount;
-}
-
-gStreamOutput::~gStreamOutput()
-{
-#ifdef MEMCHECK
-  _NumStreams--;
-  gout << ">>> gStreamOutput dtor -- count: " << _NumStreams << "\n";
-#endif // MEMCHECK
-}
-
-
-//--------------------- Stream_Portion ------------------
-
 
 Stream_Portion::Stream_Portion( const gString& filename )
 {
@@ -1474,12 +1470,7 @@ PortionType Stream_Portion::Type( void ) const
 { return porSTREAM; }
 
 Portion* Stream_Portion::Copy( void ) const
-{ 
-  Portion* p;
-  p = new Stream_Portion( *_Value );
-  p->Temporary() = true;
-  return p;
-}
+{ return new Stream_Portion( *_Value ); }
 
 
 
