@@ -8,7 +8,6 @@
 #define GVECTOR_H
 
 #include "gmisc.h"
-#include "double.h"
 #include "gstream.h"
 #include "garray.h"
 
@@ -81,6 +80,8 @@ template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
 #endif
 
 #ifdef GDOUBLE
+#include "double.h"
+
 template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
 #endif // GDOUBLE
 
