@@ -85,35 +85,35 @@ char gWinOutput::GetRepMode(void)
 
 gOutput &gWinOutput::operator<<(int x)
 {
-  if (sprintf(m_Buffer, "%*d", Width,  x)!=1) throw WriteFailed();
+  if (sprintf(m_Buffer, "%*d", Width,  x)<0) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(unsigned int x)
 {
-  if (sprintf(m_Buffer, "%*d", Width,  x)!=1) throw WriteFailed();
+  if (sprintf(m_Buffer, "%*d", Width,  x)<0) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(bool x)
 {
-  if(sprintf(m_Buffer, "%c", (x) ? 'T' : 'F')!=1) throw WriteFailed();
+  if(sprintf(m_Buffer, "%c", (x) ? 'T' : 'F')<0) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(long x)
 {
-  if( sprintf(m_Buffer, "%*ld", Width, x)!=1) throw WriteFailed();
+  if( sprintf(m_Buffer, "%*ld", Width, x)<0) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
 
 gOutput &gWinOutput::operator<<(char x)
 {
-  if(sprintf(m_Buffer, "%c", x)!=1) throw WriteFailed();
+  if(sprintf(m_Buffer, "%c", x)<0) throw WriteFailed();
   OutputString( m_Buffer );
   return *this;
 }
@@ -123,11 +123,11 @@ gOutput &gWinOutput::operator<<(double x)
   switch (Represent) {
     case 'f':
       //      c = sprintf(m_Buffer, "%*.*f", Width, Prec, x);
-      if(sprintf(m_Buffer, "%*.*f", Width, Prec, x)!=1) throw WriteFailed();
+      if(sprintf(m_Buffer, "%*.*f", Width, Prec, x)<0) throw WriteFailed();
       break;
     case 'e':
       //      c = sprintf(m_Buffer, "%*.*e", Width, Prec, x);
-      if(sprintf(m_Buffer, "%*.*e", Width, Prec, x)!=1) throw WriteFailed();
+      if(sprintf(m_Buffer, "%*.*e", Width, Prec, x)<0) throw WriteFailed();
       break;
     }
   OutputString( m_Buffer );
