@@ -33,18 +33,6 @@ public:
   bool DomMixed(void) const { return (dom_method == DOM_MIXED); }
 };
 
-
-class DominanceSettingsDialog : public MyDialogBox, public DominanceSettings {
-private:
-  char *dom_type_str, *dom_method_str;
-  wxStringList *dom_type_list, *dom_method_list;
-
-public:
-  DominanceSettingsDialog(wxWindow *parent);
-  ~DominanceSettingsDialog();
-};
-
-
 class ElimDomParamsDialog : public DominanceSettings {
   // Can not use MyDialogBox due to wxMULTIPLE
 private:

@@ -110,7 +110,6 @@ public:
   int SolveElimDom(void);
   void ChangeSupport(int what);
   NFSupport *MakeSupport(void);
-  void    DominanceSetup(void);
   
   void OutcomeNew(void);
   void OutcomeDelete(void);

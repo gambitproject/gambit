@@ -32,37 +32,6 @@ DominanceSettings::~DominanceSettings()
 }
 
 //=========================================================================
-//            class DominanceSettingsDialog: Member functions
-//=========================================================================
-
-DominanceSettingsDialog::DominanceSettingsDialog(wxWindow *parent)
-  : MyDialogBox(parent,"Dominance Defaults")
-{
-  Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
-  Add(wxMakeFormNewLine());
-  Add(wxMakeFormBool("Iterative Eliminate",&all));
-  Add(wxMakeFormNewLine());
-  dom_type_list=new wxStringList("Weak","Strong",0);
-  dom_type_str=new char[20];
-  strcpy(dom_type_str,(char *)dom_type_list->Nth(dom_type)->Data());
-  Add(wxMakeFormString("Dom Type",&dom_type_str,wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(dom_type_list), 0),0,wxVERTICAL));
-  Add(wxMakeFormNewLine());
-  dom_method_list=new wxStringList("Pure","Mixed",0);
-  dom_method_str=new char[20];
-  strcpy(dom_method_str,(char *)dom_method_list->Nth(dom_method)->Data());
-  Add(wxMakeFormString("Dom Type",&dom_method_str,wxFORM_RADIOBOX,
-		       new wxList(wxMakeConstraintStrings(dom_method_list), 0),0,wxVERTICAL));
-  Go();
-}
-
-DominanceSettingsDialog::~DominanceSettingsDialog()
-{
-  dom_type=wxListFindString(dom_type_list,dom_type_str);
-  dom_method=wxListFindString(dom_method_list,dom_method_str);
-}
-
-//=========================================================================
 //               class ElimDomParamsDialog: Member functions
 //=========================================================================
 

@@ -1016,13 +1016,6 @@ int NfgShow::SolveElimDom(void)
   return 0;
 }
 
-
-void NfgShow::DominanceSetup(void)
-{
-    DominanceSettingsDialog EDPD(spread);
-}
-
-
 // Support Inspect
 void NfgShow::ChangeSupport(int what)
 {
@@ -1971,10 +1964,6 @@ void NormalSpread::OnMenuCommand(int id)
       
     case NFG_SOLVE_STANDARD_MENU: 
       parent->SolveStandard();
-      break;
-
-    case NFG_SOLVE_DOMINANCE_MENU: 
-      parent->DominanceSetup();
       break;
 
     case NFG_SOLVE_GAMEINFO_MENU: 
