@@ -184,9 +184,10 @@ public:
 };
 
 efgNodeDeleteDialog::efgNodeDeleteDialog(Node *p_node, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Branch", TRUE), m_node(p_node)
+  : wxDialogBox(p_parent, "Delete Node", TRUE), m_node(p_node)
 {
-  m_branchList = new wxListBox(this, 0, "Keep branch");
+  SetLabelPosition(wxVERTICAL);
+  m_branchList = new wxListBox(this, 0, "Keep subtree at branch");
   for (int act = 1; act <= p_node->NumChildren(); act++) {
     m_branchList->Append(ToText(act) + ": " +
 			 p_node->GetInfoset()->Actions()[act]->GetName());
