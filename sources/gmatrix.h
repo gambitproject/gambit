@@ -139,7 +139,7 @@ template <class T> class gMatrix: public gBaseMatrix<T>
     { return minimum_col; }
 
   gMatrix<T> GetSlice(int, int, int, int) const;
-  gMatrix<T> GetSubMatrix(const gSet<int> &, const gSet<int> &)
+  gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &)
     const;
 
   gMatrix<T> Invert(void) const;
@@ -326,8 +326,8 @@ gMatrix<T>::GetSlice(int minrow, int maxrow,
 }
 
 template <class T> gMatrix<T>
-gMatrix<T>::GetSubMatrix(const gSet<int> &Rows,
-			 const gSet<int> &Cols) const
+gMatrix<T>::GetSubMatrix(const gBlock<int> &Rows,
+			 const gBlock<int> &Cols) const
 {
   int rows = Rows.Length();
   int cols = Cols.Length();
@@ -418,7 +418,7 @@ gMatrix<T>::Determinant(void) const
       gMatrix<T> tmp;
       int i, j;
       int l = 1;
-      gSet<int> rows, cols;
+      gBlock<int> rows, cols;
       for(i = MinIndex() + 1; i <= Width(); i++)
         rows.Append(i);
      for(i = MinIndex(); i <= Width(); i++)
