@@ -22,10 +22,14 @@ template class gBlock<gBlock<int> >;
 template class gBlock<gBlock<double> >;
 
 template gOutput &operator<<(gOutput &, const gBlock<bool> &);
+#ifndef __BCC55__
 template gOutput &operator<<(gOutput &, const gBlock<int> &);
+#endif  // __BCC55__
 template gOutput &operator<<(gOutput &, const gBlock<long> &);
 template gOutput &operator<<(gOutput &, const gBlock<float> &);
+#ifndef __BCC55__
 template gOutput &operator<<(gOutput &, const gBlock<double> &);
+#endif  // __BCC55__
 template gOutput &operator<<(gOutput &, const gBlock<gText> &);
 template gOutput &operator<<(gOutput &, const gArray<gBlock<int> > &);
 template gOutput &operator<<(gOutput &, const gArray<gBlock<double> > &);

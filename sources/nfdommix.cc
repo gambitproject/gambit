@@ -106,6 +106,7 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
 
 // Note: junk is dummy arg so the functions can be templated. 
 // There is probably a cleaner way to do this.  
+#ifndef __BCC55__
 template bool 
 ComputeMixedDominated(const NFSupport &S, NFSupport &R,int pl, bool strong, 
 		      gRational junk, gOutput &tracefile, gStatus &status);
@@ -127,7 +128,7 @@ IsMixedDominated(const MixedProfile<gRational> &pr, int pl,
 template bool 
 IsMixedDominated(const MixedProfile<double> &pr, int pl,
 		 bool strong, gOutput &tracefile);
-
+#endif  // __BCC55__
 
 
 

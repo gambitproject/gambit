@@ -10,6 +10,8 @@ int Is_Numeric(int t){
                    case Sys_T: return TRUE; break;
           default: return FALSE;
     }
+
+    return FALSE;
   }
 
 

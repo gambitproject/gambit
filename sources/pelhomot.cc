@@ -3377,7 +3377,7 @@ Pvector psys_to_Pvec(psys sys){
 #ifdef __BORLANDC__ 
 double drand48()
 {
-  rand();
+  return rand();
 }
 #endif // __BORLANDC__
 

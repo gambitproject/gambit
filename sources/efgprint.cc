@@ -36,7 +36,9 @@ bool EfgPrintout::OnPrintPage(int)
   float pageScaleX = (float)w/pageWidth;
   float pageScaleY = (float)h/pageHeight;
   
+#ifdef UNUSED
   if (true) { // fit to page
+#endif  // UNUSED
     int maxX = tree->m_layout.MaxX();
     int maxY = tree->m_layout.MaxY();
     // Figure out the 'fake' window zoom
@@ -56,6 +58,7 @@ bool EfgPrintout::OnPrintPage(int)
         
     dc->SetUserScale(real_zoom, real_zoom);
     dc->SetDeviceOrigin(marginX*pageScaleX, marginY*pageScaleY);
+#ifdef UNUSED
   }
   else {  // WYSIWYG
     int ppiScreenX, ppiScreenY;
@@ -87,6 +90,7 @@ bool EfgPrintout::OnPrintPage(int)
     float real_zoom = gmax(zoom_x, zoom_y);
     dc->SetUserScale(real_zoom, real_zoom);
   }
+#endif  // UNUSED
     
   tree->OnDraw(*dc);
     

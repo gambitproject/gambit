@@ -310,6 +310,7 @@ empty_symbol_table();
 if(Def_Ring!=0) free_Pring(Def_Ring);
 node_free_store();
 exit(0);
+return g;
 }
 
 Gen_node Set_Ring(Gen_node g)

@@ -674,10 +674,11 @@ void    qh_printstatistics (FILE *fp, char *string);
 #define qh_RANDOMseed_(seed) srandom(seed);
 #else
 /* #define qh_RANDOMmax ((realT)32767) */  /* 15 bits (System 5) */
-#define qh_RANDOMmax 2147483647  /* Kludge added, ignorantly, by AMM */
 
 #ifdef __BORLANDC__ 
-#define qh_RANDOMmax 1073741823  /* Counter Kludge added, even more ignorantly, by RDM to get to compile on BCC */
+#define qh_RANDOMmax 1073741823 
+#else
+#define qh_RANDOMmax 2147483647  /* Kludge added, ignorantly, by AMM */
 #endif // __BORLANDC__
 
                                 /* WARNING: Sun produces 31 bits from rand() */

@@ -354,6 +354,7 @@ node node_new()
 #endif
 ;
     abort();
+    return node_new();
 }
 
 /*
@@ -3315,6 +3316,7 @@ int numericP(int t){
                 break;
       default: return FALSE;
    }
+   return FALSE;
 }
 
 /* end Types.c */

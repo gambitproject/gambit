@@ -72,7 +72,9 @@ template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gRational>&);
 
 template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
+#ifndef __BCC55__
 template gText &operator<<(gText &, const gPoly<gRational> &);
+#endif  // __BCC55__
 
 template class gPoly<gNumber>;
 template gPoly<gNumber> operator*(const gNumber val, const gPoly<gNumber> &poly);
@@ -82,7 +84,9 @@ template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gNumber>&);
 
 template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
+#ifndef __BCC55__
 template gText &operator<<(gText &, const gPoly<gNumber> &);
+#endif  // __BCC55__
 
 #ifdef UNUSED
 template class gPoly<double>;
@@ -99,7 +103,9 @@ template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val)
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
+#ifndef __BCC55__
 template gText &operator<<(gText &, const gPoly<gDouble> &);
+#endif  // __BCC55__
 
 gText ToText(const gPoly<gNumber> &p)
 {

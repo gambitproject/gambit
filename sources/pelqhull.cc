@@ -184,8 +184,10 @@ void qh_meminit (FILE *ferr) {
   memset((char *)&qhmem, 0, sizeof qhmem);  /* every field is 0, FALSE, NULL */
   qhmem.ferr= ferr;
 
+#ifndef __BCC55__
+  // This condition is always false under BCC55
   if (sizeof(void*) < sizeof(int)) qhull_fatal(4);
-
+#endif  // __BCC55__
 } /* meminit */
 
 /*-------------------------------------------------
@@ -7993,7 +7995,10 @@ void qh_initqhull_globals (coordT *points, int numpoints, int dim, boolT ismallo
   qh RANDOMa= 2.0 * qh RANDOMfactor/qh_RANDOMmax;
   qh RANDOMb= 1.0 - qh RANDOMfactor;
 
+#ifndef __BCC55__
+  // This condition is always false under BCC55
   if (qh_HASHfactor < 1.1) qhull_fatal(71);
+#endif  // __BCC55__
 
   if (numpoints+extra < pointsneeded) qhull_fatal(72);
 
@@ -8561,16 +8566,22 @@ At %d:%d:%d & %2.5g CPU secs, qhull has created %d facets and merged %d.\n\
       qh furthest_id, qh vertex_id, qh num_facets, dist,
       facet->id, qh num_outside+1, cpu);
   }
+#ifndef __BCC55__
+  // This condition is always false under BCC55
   if (qh visit_id > (unsigned) INT_MAX) {
     qh visit_id= 0;
     FORALLfacets
       facet->visitid= qh visit_id;
   }
+#endif  // __BCC55__
+#ifndef __BCC55__
+  // This condition is always false under BCC55
   if (qh vertex_visit > (unsigned) INT_MAX) {
     qh vertex_visit= 0;
     FORALLvertices
       vertex->visitid= qh vertex_visit;
   }
+#endif  // __BCC55__
 } /* buildtracing */
 
 /*-------------------------------------------

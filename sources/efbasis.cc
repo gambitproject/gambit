@@ -615,4 +615,6 @@ gOutput& operator<<(gOutput&s, const EFBasis& e)
 template class gArray<EFNodeSet *>;
 template class gArray<EFNodeArrays *>;
 template class gDPVector<int>;
+#ifndef __BCC55__
 template gOutput & operator<< (gOutput&, const gDPVector<int>&);
+#endif  // __BCC55__

@@ -54,13 +54,16 @@ template class gTreeNode<gPoly<gRational> >;
 template class gList<gTreeNode<gPoly<gRational> >*>;
 template class gTree<gPoly<gRational> >;
 template class gList<gTree<gPoly<gRational> > >;
+#ifndef __BCC55__
 template gOutput& operator << (gOutput& output, 
 			       const gTree<gPoly<gRational> >&);
+#endif  // __BCC55__
 
 template class gTreeNode<gPoly<gDouble> >;
 template class gList<gTreeNode<gPoly<gDouble> >*>;
 template class gTree<gPoly<gDouble> >;
 template class gList<gTree<gPoly<gDouble> > >;
+#ifndef __BCC55__
 template gOutput& operator << (gOutput& output, 
 			       const gTree<gPoly<gDouble> >&);
-
+#endif  // __BCC55__

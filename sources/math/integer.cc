@@ -376,11 +376,14 @@ long Itolong(const IntRep* rep)
   else if ((unsigned)(rep->len) < (unsigned)(SHORT_PER_LONG))
   {
     unsigned long a = rep->s[rep->len-1];
-	 if (SHORT_PER_LONG > 2) // normally optimized out
+#ifndef __BCC55__
+    // This condition is always false under BCC55
+    if (SHORT_PER_LONG > 2) // normally optimized out
     {
 		for (int i = rep->len - 2; i >= 0; --i)
 		  a = up(a) | rep->s[i];
     }
+#endif  // __BCC55__
     return (rep->sgn == I_POSITIVE)? a : -((long)a);
   }
   else 
@@ -391,11 +394,14 @@ long Itolong(const IntRep* rep)
     else
     {
       a = up(a) | rep->s[SHORT_PER_LONG - 2];
-		if (SHORT_PER_LONG > 2)
+#ifndef __BCC55__
+      // This condition is always false under BCC55
+      if (SHORT_PER_LONG > 2)
       {
 		  for (int i = SHORT_PER_LONG - 3; i >= 0; --i)
 			 a = up(a) | rep->s[i];
       }
+#endif  // __BCC55__
       return (rep->sgn == I_POSITIVE)? a : -((long)a);
     }
   }
