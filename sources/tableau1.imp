@@ -180,21 +180,21 @@ void TableauInterface<T>::BigDump(gOutput &to)
 { 
   to << "\nBasis:\n";
   basis.Dump(to);
-  gMatrix<T> AA((*A).MinRow(),(*A).MaxRow(),(*A).MinCol(),(*A).MaxCol()+(*A).NumRows());
-  gVector<T> bb(*b);
+  gMatrix<T> AA(MinRow(),MaxRow(),MinCol(),MaxCol()+(*A).NumRows());
+  gVector<T> bb(MinRow(), MaxRow());
 
   BasisVector(bb);
   to << "\nBasisVector:\n" << bb;
 
-  for(int j=(*A).MinCol();j<=(*A).MaxCol();j++) {
+  for(int j=MinCol();j<=MaxCol();j++) {
     SolveColumn(j, bb);
     for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
       AA(i,j) = bb[i];
   }
-  for(int j=AA.MinRow();j<=AA.MaxRow();j++) {
+  for(int j=MinRow();j<=MaxRow();j++) {
     SolveColumn(-j, bb);
     for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
-      AA(i,(*A).MaxCol()+j) = bb[i];
+      AA(i,MaxCol()+j) = bb[i];
   }
   to << "\nTableau:\n" << AA;
 }
@@ -340,12 +340,12 @@ void Tableau<double>::SetBasis(const Basis<double> &in)
   Solve(*b, solution);
 }
 
-void Tableau<double>::Solve(const gVector<double> &b, gVector<double> &x) const
+void Tableau<double>::Solve(const gVector<double> &b, gVector<double> &x)
 {
   B.solve(b,x);
 }
 
-void Tableau<double>::SolveT(const gVector<double> &c, gVector<double> &y) const
+void Tableau<double>::SolveT(const gVector<double> &c, gVector<double> &y)
 {
   B.solveT(c,y);
   //** gout << "\nTableau<double>::SolveT(), y: " << y;
@@ -471,7 +471,7 @@ gVector<T> LPTableau<T>::GetUnitCost(void) const
 template <class T>
 T LPTableau<T>::TotalCost()
 {
-  gVector<T> tmpcol((*b).First(),(*b).Last());
+  gVector<T> tmpcol(MinRow(),MaxRow());
   basis.BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
@@ -487,7 +487,7 @@ void LPTableau<T>::DualVector(gVector<T> &L) const
 template <class T>
 T LPTableau<T>::RelativeCost(int col) const
 {
-  gVector<T> tmpcol((*b).First(),(*b).Last());
+  gVector<T> tmpcol(MinRow(),MaxRow());
   if( col<0 ) {
     return unitcost[-col] - dual[-col];
   }
@@ -539,7 +539,7 @@ void LPTableau<T>::Pivot(int outrow,int col)
 template <class T>
 void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 {
-  gVector<T> tmpcol((*b).First(),(*b).Last());
+  gVector<T> tmpcol(MinRow(),MaxRow());
   // gout << "\nIn LPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
@@ -698,7 +698,7 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 template <class T>
 bool LPTableau<T>::IsReversePivot(int i, int j)
 {
-  gVector<T> tmpcol((*b).First(),(*b).Last());
+  gVector<T> tmpcol(MinRow(),MaxRow());
 
   // first check that pivot preserves primal feasibility
   
@@ -824,7 +824,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   // gout << "\nin IsDualReversePivot, i= " << i << " j = "<< j;
 
   int k;
-  gVector<T> tmpcol((*b).First(),(*b).Last());
+  gVector<T> tmpcol(MinRow(),MaxRow());
   gVector<T> tmpdual(MinRow(),MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;

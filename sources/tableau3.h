@@ -10,6 +10,7 @@
 class Tableau<gRational> : public TableauInterface<gRational>{
 private:
   gRational Det;
+  gRational totdenom;
   gMatrix<gRational> InvDat;
 
   gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
@@ -35,12 +36,12 @@ public:
 
   void SetConst(const gVector<gRational> &bnew);
   void SetBasis( const Basis<gRational> &); // set new Tableau
-  void Solve(const gVector<gRational> &b, gVector<gRational> &x) const;  // solve M x = b
-  void SolveT(const gVector<gRational> &c, gVector<gRational> &y) const;  // solve y M = c
+  void Solve(const gVector<gRational> &b, gVector<gRational> &x);  // solve M x = b
+  void SolveT(const gVector<gRational> &c, gVector<gRational> &y);  // solve y M = c
   
   bool IsFeasible();
   bool IsLexMin();
 };
 
-#endif     // TABLEAU2_H
+#endif     // TABLEAU3_H
 

@@ -105,8 +105,8 @@ public:
   virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
   virtual void SolveColumn(int, gVector<T> &) = 0;  // column in new basis 
-  virtual void Solve(const gVector<T> &b, gVector<T> &x) const = 0;  // solve M x = b
-  virtual void SolveT(const gVector<T> &c, gVector<T> &y) const= 0;  // solve y M = c
+  virtual void Solve(const gVector<T> &b, gVector<T> &x) = 0;  // solve M x = b
+  virtual void SolveT(const gVector<T> &c, gVector<T> &y) = 0;  // solve y M = c
 
   virtual void Refactor() = 0;
   virtual void SetRefactor(int) = 0;
@@ -148,8 +148,8 @@ public:
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, gVector<double> &);  // column in new basis 
-  void Solve(const gVector<double> &b, gVector<double> &x) const;  // solve M x = b
-  void SolveT(const gVector<double> &c, gVector<double> &y) const;  // solve y M = c
+  void Solve(const gVector<double> &b, gVector<double> &x);  // solve M x = b
+  void SolveT(const gVector<double> &c, gVector<double> &y);  // solve y M = c
   
   // raw Tableau functions
 
