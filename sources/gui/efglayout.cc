@@ -37,6 +37,35 @@
 #include "efgshow.h"
 
 //-----------------------------------------------------------------------
+//                       Local utility functions
+//-----------------------------------------------------------------------
+
+//
+// OutcomeAsString: Returns the outcome payoffs at node 'n' as a text string
+//
+wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
+{
+  gbtEfgOutcome outcome = p_node.GetOutcome();
+  if (!outcome.IsNull()) {
+    const gArray<gNumber> &payoffs = outcome.GetPayoff();
+    wxString tmp = "(";
+
+    for (int pl = payoffs.First(); pl <= payoffs.Last(); pl++) {
+      if (pl != 1) { 
+	tmp += ",";
+      }
+      tmp += (const char *) ToText(payoffs[pl], p_numDecimals);
+    }
+    tmp += ")";
+        
+    return tmp;
+  }
+  else {
+    return "";
+  }
+}
+
+//-----------------------------------------------------------------------
 //                   class NodeEntry: Member functions
 //-----------------------------------------------------------------------
 
@@ -271,8 +300,8 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 //                class efgTreeLayout: Member functions
 //-----------------------------------------------------------------------
 
-efgTreeLayout::efgTreeLayout(gbtGameDocument *p_doc, TreeWindow *p_parent)
-  : m_doc(p_doc), m_parent(p_parent),
+efgTreeLayout::efgTreeLayout(gbtGameDocument *p_doc)
+  : m_doc(p_doc), 
     m_infosetSpacing(40), c_leftMargin(20), c_topMargin(40)
 { }
 
@@ -358,7 +387,7 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
 	     ("(" + ToText(n.GetPlayer().GetId()) +
 	      "," + ToText(n.GetInfoset().GetId()) + ")") : gText("")));
   case NODE_ABOVE_OUTCOME:
-    return (const char *) m_parent->OutcomeAsString(n);
+    return OutcomeAsString(n, m_doc->GetPreferences().NumDecimals());
   case NODE_ABOVE_REALIZPROB:
     return (const char *) m_doc->GetRealizProb(n);
   case NODE_ABOVE_BELIEFPROB:
@@ -392,7 +421,7 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
 	     ("(" + ToText(n.GetPlayer().GetId()) +
 	      "," + ToText(n.GetInfoset().GetId()) + ")") : gText("")));
   case NODE_BELOW_OUTCOME:
-    return (const char *) m_parent->OutcomeAsString(n);
+    return OutcomeAsString(n, m_doc->GetPreferences().NumDecimals());
   case NODE_BELOW_REALIZPROB:
     return (const char *) m_doc->GetRealizProb(n);
   case NODE_BELOW_BELIEFPROB:
@@ -412,7 +441,7 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
   case NODE_RIGHT_NOTHING:
     return "";
   case NODE_RIGHT_OUTCOME:
-    return (const char *) m_parent->OutcomeAsString(node);
+    return OutcomeAsString(node, m_doc->GetPreferences().NumDecimals());
   case NODE_RIGHT_NAME:
     return (const char *) node.GetOutcome().GetLabel();
   default:
@@ -901,11 +930,9 @@ void efgTreeLayout::Render(wxDC &p_dc) const
   RenderSubtree(p_dc);
 }
 
-void efgTreeLayout::SetCutNode(const gbtEfgNode &p_node, bool p_cut)
+void efgTreeLayout::SetCutNode(const gbtEfgNode &p_node)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (p_node.IsPredecessor(m_nodeList[i]->GetNode())) {
-      m_nodeList[i]->SetCut(p_cut);
-    }
+    m_nodeList[i]->SetCut(p_node.IsPredecessor(m_nodeList[i]->GetNode()));
   }
 }

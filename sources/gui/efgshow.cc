@@ -717,11 +717,7 @@ void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 
 void EfgShow::OnEditCut(wxCommandEvent &)
 {
-  if (!m_doc->GetCutNode().IsNull()) {
-    m_treeWindow->SetCutNode(m_doc->GetCutNode(), false);
-  }
   m_doc->m_cutNode = m_doc->GetCursor();
-  m_treeWindow->SetCutNode(m_doc->m_cutNode, true);
   m_doc->m_copyNode = 0;
   m_doc->UpdateViews(0, true, true);
 }
@@ -729,10 +725,7 @@ void EfgShow::OnEditCut(wxCommandEvent &)
 void EfgShow::OnEditCopy(wxCommandEvent &)
 {
   m_doc->m_copyNode = m_doc->GetCursor();
-  if (!m_doc->m_cutNode.IsNull()) {
-    m_treeWindow->SetCutNode(m_doc->GetCutNode(), false);
-    m_doc->m_cutNode = 0;
-  }
+  m_doc->m_cutNode = 0;
   m_doc->UpdateViews(0, true, true);
 }
 

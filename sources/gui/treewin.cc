@@ -61,7 +61,7 @@ END_EVENT_TABLE()
 
 TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxScrolledWindow(p_parent), gbtGameView(p_doc),
-    m_layout(p_doc, this),
+    m_layout(p_doc),
     m_zoom(1.0), m_dragImage(0), m_dragSource(0)
 {
   SetBackgroundColour(*wxWHITE);
@@ -204,6 +204,7 @@ void TreeWindow::OnUpdate(gbtGameView *)
 {
   m_layout.BuildNodeList(*m_doc->GetEfgSupport());
   m_layout.Layout(*m_doc->GetEfgSupport());
+  m_layout.SetCutNode(m_doc->GetCutNode());
   AdjustScrollbarSteps();
 
   gbtEfgNode cursor = m_doc->GetCursor();
@@ -234,11 +235,6 @@ void TreeWindow::OnUpdate(gbtGameView *)
 			cursor.GetSubgameRoot() == cursor) ?
 		       "Unmark subgame" : "Mark subgame");
   Refresh();
-}
-
-void TreeWindow::SetCutNode(gbtEfgNode p_node, bool p_cut)
-{
-  m_layout.SetCutNode(p_node, p_cut);
 }
 
 void TreeWindow::AdjustScrollbarSteps(void)
@@ -380,34 +376,6 @@ void TreeWindow::UpdateCursor(void)
   if (entry) {
     entry->SetCursor(true);
   }
-}
-
-gText TreeWindow::OutcomeAsString(const gbtEfgNode &n) const
-{
-  gbtEfgOutcome outcome = n.GetOutcome();
-  if (!outcome.IsNull()) {
-    const gArray<gNumber> &v = outcome.GetPayoff();
-    gText tmp = "(";
-
-    for (int i = v.First(); i <= v.Last(); i++) {
-      if (i != 1) 
-	tmp += ",";
-      /*      
-      if (DrawSettings().ColorCodedOutcomes())
-	tmp += ("\\C{"+ToText(DrawSettings().GetPlayerColor(i))+"}");
-      */
-      tmp += ToText(v[i], m_doc->GetPreferences().NumDecimals());
-    }
-    /*
-    if (DrawSettings().ColorCodedOutcomes()) 
-      tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
-    */
-    tmp += ")";
-        
-    return tmp;
-  }
-  else
-    return "";
 }
 
 //#include "bitmaps/copy.xpm"

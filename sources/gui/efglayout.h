@@ -173,7 +173,6 @@ class TreeWindow;
 class efgTreeLayout {
 private:
   gbtGameDocument *m_doc;
-  TreeWindow *m_parent;
   gList<NodeEntry *> m_nodeList;
   int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;
@@ -202,7 +201,7 @@ private:
   void RenderSubtree(wxDC &dc) const;
 
 public:
-  efgTreeLayout(gbtGameDocument *p_doc, TreeWindow *p_parent);
+  efgTreeLayout(gbtGameDocument *p_doc);
   virtual ~efgTreeLayout() { }
 
   gbtEfgNode PriorSameLevel(const gbtEfgNode &) const;
@@ -212,7 +211,7 @@ public:
   void Layout(const EFSupport &);
   void GenerateLabels(void);
 
-  void SetCutNode(const gbtEfgNode &, bool);
+  void SetCutNode(const gbtEfgNode &);
 
   // The following member functions are for temporary compatibility only
   NodeEntry *GetNodeEntry(const gbtEfgNode &p_node) const

@@ -73,14 +73,9 @@ public:
   virtual void OnDraw(wxDC &dc);
   void OnDraw(wxDC &, double);
 
-  void SetCutNode(gbtEfgNode, bool);
-    
   double GetZoom(void) const { return m_zoom; }
   void SetZoom(double p_zoom);
   void FitZoom(void);
-
-  // Access to the numeric values from the renderer
-  gText OutcomeAsString(const gbtEfgNode &n) const;
 
   DECLARE_EVENT_TABLE()
 };
