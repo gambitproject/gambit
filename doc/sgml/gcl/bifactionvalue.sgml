@@ -39,7 +39,6 @@ the chance player.
 
 <refsect1><title>See also</title>
 <para>
-<xref linkend="udf.ActionValues">,
 <xref linkend="bif.Belief">,
 <xref linkend="bif.InfosetProb">,
 <xref linkend="bif.NodeValue">,

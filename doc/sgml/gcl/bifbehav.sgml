@@ -81,7 +81,6 @@ in each same information set.
 <refsect1>
 <title>See also</title>
 <para>
-<xref linkend="bif.Centroid">,
 <xref linkend="bif.Mixed">.
 </para>
 </refsect1>

@@ -43,7 +43,6 @@ formatted according to the current settings determined by the
 <title>See also</title>
 <para>
 <xref linkend="bif.ListFormat">,
-<xref linkend="bif.SetVerbose">,
 <xref linkend="bif.Write">.
 </para>
 </refsect1>

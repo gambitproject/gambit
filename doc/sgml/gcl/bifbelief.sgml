@@ -41,7 +41,6 @@ are not from the same extensive form game.
 <title>See also</title>
 <para>
 <xref linkend="bif.ActionValue">,
-<xref linkend="udf.Beliefs">,
 <xref linkend="bif.InfosetProb">,
 <xref linkend="bif.NodeValue">,
 <xref linkend="bif.RealizProb">.

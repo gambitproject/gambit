@@ -37,8 +37,7 @@ are not from the same extensive form game.
 
 <refsect1><title>See also</title>
 <para>
-<xref linkend="udf.actionprobs">,
-<xref linkend="bif.setactionprobs">.
+<xref linkend="bif.SetActionProbs">.
 </para>
 </refsect1>
 
