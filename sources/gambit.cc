@@ -189,9 +189,9 @@ gambit_frame->SetIcon(frame_icon);
 // Make a menubar
 wxMenu *file_menu = new wxMenu;
 	wxMenu *new_menu=new wxMenu;
-		new_menu->Append(FILE_NEW_NFG,"Normal",						"Normal Form file");
-		new_menu->Append(FILE_NEW_EFG,"Extensive",					"Extensive Form file");
-	file_menu->Append(FILE_NEW,"&New",new_menu,						"Create new file");
+		new_menu->Append(FILE_NEW_NFG,"Normal",						"Normal form game");
+		new_menu->Append(FILE_NEW_EFG,"Extensive",					"Extensive form game");
+	file_menu->Append(FILE_NEW,"&New",new_menu,						"Create a new game");
 	file_menu->Append(FILE_LOAD,"&Open",									"Open a file");
 	file_menu->Append(FILE_QUIT, "&Quit",                	"Quit program");
 wxMenu *help_menu = new wxMenu;
