@@ -71,12 +71,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 
     Efg<T> foo(efg, n);
 
-    ViewSubgame(foo);
+    ViewSubgame(n, foo);
 
     gList<BehavProfile<T> > sol;
     SolveSubgame(foo, sol);
 
-    SelectSolutions(foo, sol);
+    SelectSolutions(n, foo, sol);
 
     // put behav profile in "total" solution here...
 
@@ -147,7 +147,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 // isn't generally useful.
 
 template <class T>
-void SubgameSolver<T>::ViewSubgame(const Efg<T> &)
+void SubgameSolver<T>::ViewSubgame(Node *, const Efg<T> &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -167,7 +167,7 @@ void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport &)
 // Caveat utor!
 
 template <class T>
-void SubgameSolver<T>::SelectSolutions(const Efg<T> &,
+void SubgameSolver<T>::SelectSolutions(Node *, const Efg<T> &,
 				       gList<BehavProfile<T> > &)
 { }
 
