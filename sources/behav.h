@@ -38,7 +38,7 @@ template <class T> class BehavProfile : public gDPVector<T>  {
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
-    Efg<T> &BelongsTo(void) const   { return (Efg<T> &) E; }
+    Efg<T> &BelongsTo(void) const   { return const_cast< Efg<T>& >( *E ); }
 
     const T &GetValue(Infoset *s, int act) const;
 
