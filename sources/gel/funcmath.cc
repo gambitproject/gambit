@@ -20,8 +20,7 @@ DECLARE_BINARY(gelfuncAnd, gTriState *, gTriState *, gTriState *)
 gTriState *gelfuncAnd::EvalItem(gTriState *x1, gTriState *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = TriStateAnd(*x1, *x2);
-  return x1;
+  return new gTriState(TriStateAnd(*x1, *x2));
 }
 
 //----------
@@ -33,8 +32,7 @@ DECLARE_BINARY(gelfuncDivide, gNumber *, gNumber *, gNumber *)
 gNumber *gelfuncDivide::EvalItem(gNumber *x1, gNumber *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = *x1 / *x2;
-  return x1;
+  return new gNumber(*x1 / *x2);
 }
 
 
@@ -155,8 +153,7 @@ DECLARE_BINARY(gelfuncMinus, gNumber *, gNumber *, gNumber *)
 gNumber *gelfuncMinus::EvalItem(gNumber *x1, gNumber *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = *x1 - *x2;
-  return x1;
+  return new gNumber(*x1 - *x2);
 }
 
 //----------
@@ -167,7 +164,7 @@ DECLARE_UNARY(gelfuncNegate, gNumber *, gNumber *)
 
 gNumber *gelfuncNegate::EvalItem(gNumber *x1) const
 {
-  return (x1) ? &(*x1 = -*x1) : 0;
+  return (x1) ? new gNumber(-*x1) : 0;
 }
 
 //--------
@@ -178,7 +175,7 @@ DECLARE_UNARY(gelfuncNot, gTriState *, gTriState *)
 
 gTriState *gelfuncNot::EvalItem(gTriState *x1) const
 {
-  return (x1) ? &(*x1 = TriStateNot(*x1)) : 0;
+  return (x1) ? new gTriState(TriStateNot(*x1)) : 0;
 }
 
 //------------
@@ -251,8 +248,7 @@ DECLARE_BINARY(gelfuncOr, gTriState *, gTriState *, gTriState *)
 gTriState *gelfuncOr::EvalItem(gTriState *x1, gTriState *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = TriStateOr(*x1, *x2);
-  return x1;
+  return new gTriState(TriStateOr(*x1, *x2));
 }
 
 //-------
@@ -264,8 +260,7 @@ DECLARE_BINARY(gelfuncPlus, gNumber *, gNumber *, gNumber *)
 gNumber *gelfuncPlus::EvalItem(gNumber *x1, gNumber *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = *x1 + *x2;
-  return x1;
+  return new gNumber(*x1 + *x2);
 }
 
 
@@ -278,8 +273,7 @@ DECLARE_BINARY(gelfuncTimes, gNumber *, gNumber *, gNumber *)
 gNumber *gelfuncTimes::EvalItem(gNumber *x1, gNumber *x2) const
 {
   if (!x1 || !x2)   return 0;
-  *x1 = *x1 * *x2;
-  return x1;
+  return new gNumber(*x1 * *x2);
 }
 
 
