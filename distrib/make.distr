@@ -32,11 +32,12 @@ gambit:
 	@echo -------------------------------------------------------
 	@echo 
 
-	@# Set up the ../bin and ../misc directories.
+	@# Set up the ../bin, ../misc and ../doc/html directories.
 
 	if [ ! -d ../bin ]; then mkdir ../bin; fi 
 	if [ ! -d ../misc ]; then mkdir ../misc; fi 
 	if [ ! -d ../doc ]; then mkdir ../doc; fi 
+	if [ ! -d ../doc/html ]; then mkdir ../doc/html; fi 
 
 	@# Make sure gui-init and gambit_setup are executable.
 	chmod +x ./gui-init ./gambit_setup
@@ -142,13 +143,13 @@ winsrc:
 	$(WSRCDIR)/res/*.ico $(WSRCDIR)/res/*.bmp \
 	$(WSRCDIR)/obj bisondos/bison.exe 
 
-	cd ..; ftp_put gwinsrc.zip
-#	mv ../gwinsrc.zip $(FTPDIR)
+#	cd ..; ftp_put gwinsrc.zip
+	mv ../gwinsrc.zip $(FTPDIR)
 
 winmisc:
 	@echo
 	@echo ------------------------------------------------------
-	@echo Updating gambit miscellaneous files on rdms machine
+	@echo Updating gambit miscellaneous files
 	@echo ------------------------------------------------------
 	@echo
 
@@ -159,7 +160,8 @@ winmisc:
 	gcl/*.efg gcl/*.nfg  gcl/*.agg gcl/*.prm misc/*.* \
 	bin/gclini.gcl bin/stdudfs.gcl bin/gcl.man
 
-	cd ..; ftp_put gwinmisc.zip
+#	cd ..; ftp_put gwinmisc.zip
+	mv ../gwinmisc.zip $(FTPDIR)
 
 wxwin:
 	@echo
