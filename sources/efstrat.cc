@@ -809,3 +809,6 @@ bool EFSupportWithActiveInfo::NodeIsActive(const Node *n) const
 		      n->GetInfoset()->GetNumber(),
 		      n->NumberInInfoset());
 }
+
+// Instantiations
+template class gList<const EFSupport>;
