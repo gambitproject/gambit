@@ -19,7 +19,11 @@
 #ifndef PXI_H
 #define PXI_H
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 #include "wx/dc.h"
 #include "wx/dcps.h"
 #include "wx/config.h"    // for wxConfig
@@ -98,8 +102,7 @@
 extern void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
-class PxiApp: public wxApp
-{
+class PxiApp: public wxApp {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
   
@@ -450,6 +453,8 @@ private:
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
 
+  void MakeToolbar(void);
+
 public:
   PxiFrame(wxFrame *frame,  const wxString &p_filename,
 	   const wxPoint &p_position, const wxSize &p_size, 
@@ -511,7 +516,5 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
-
-
 
 #endif // PXI_H

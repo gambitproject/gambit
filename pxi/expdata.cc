@@ -50,13 +50,13 @@ void ExpData::Go(void)		// Fit to the calculated data file
   }
   double cur_e=calc_probs.E();
   
-  while (!calc_probs.Done() && P.pxifile->IsValid()) { // read til the end of the file
+  while (!calc_probs.Done() && !P.pxifile->eof()) { // read til the end of the file
     for (j=1;j<=num_points;j++) {
       // Calculate the likelihood function
       like=0.0;
       for (iset=1;iset<=calc_probs.NumInfosets();iset++)
 	for (i=1;i<=calc_probs.NumStrategies(iset);i++)
-	  like+=probs[j][iset][i]*log(gmax(calc_probs[iset][i],ALMOST_ZERO));
+	  like+=probs(j,iset)[i]*log(gmax(calc_probs[iset][i],ALMOST_ZERO));
       like=-like;	// taking -log of like.... Minimum is the best fit
       if (points[j].like>like) {points[j].like=like;points[j].e=calc_probs.E();}
       if (P.likefile) like_m[j]=gmin(like_m[j],like);
@@ -101,18 +101,18 @@ ExpData::ExpData(ExpDataParams &params):P(params)
   for (iset=1;iset<=num_infosets;iset++)	*P.expfile>>strategies[iset];
   
   *P.expfile>>num_points;
-  probs=gMatrix1<PointNd>(num_points,num_infosets);
+  probs=gRectArray<PointNd>(num_points,num_infosets);
   
   for (j=1;j<=num_points;j++)
     for (iset=1;iset<=num_infosets;iset++)
-      probs[j][iset]=PointNd(strategies[iset]);
+      probs(j,iset)=PointNd(strategies[iset]);
   
   points=gBlock<best_point_struct>(num_points);
   
   for (j=1;j<=num_points;j++)
     for (iset=1;iset<=num_infosets;iset++)
       for (i=1;i<=strategies[iset];i++)
-	*P.expfile>>(probs[j][iset])[i];
+	*P.expfile>>(probs(j,iset))[i];
   // Start the actual Calculation
   Go();
   // Normalize the probs (experimental data) to be used for plotting.  Is this right?!
@@ -121,8 +121,8 @@ ExpData::ExpData(ExpDataParams &params):P(params)
     for (iset=1;iset<=num_infosets;iset++) {
       sum=0;
       for (i=1;i<=strategies[iset];i++)
-	sum+=probs[j][iset][i];
+	sum+=probs(j,iset)[i];
       for (i=1;i<=strategies[iset];i++)
-	probs[j][iset][i]/=sum;
+	probs(j,iset)[i]/=sum;
     }
 }

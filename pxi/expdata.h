@@ -31,8 +31,8 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "gambitio.h"
-#include "gblockm.h"
+#include "base/gstream.h"
+#include "base/grarray.h"
 #include "equdata.h"
 
 #ifndef	BOOL_DEFINED
@@ -87,7 +87,7 @@ private:
   Bool	solved;
   int num_points;
   gBlock<best_point_struct> points;
-  gMatrix1<PointNd> probs;
+  gRectArray<PointNd> probs;
   ExpDataParams &P;
   // functions
   void Go(void);
@@ -106,7 +106,9 @@ public:
     {
       assert(i>0 && i<=num_points);
       assert(solved);
-      return (new exp_data_struct(probs[i],points[i].e));
+      gBlock<PointNd> row(probs.NumColumns());
+      probs.GetRow(i, row);
+      return (new exp_data_struct(row,points[i].e));
     }
 };
 #endif

@@ -51,10 +51,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#pragma hdrstop
 #include "wxmisc.h"
 #include "gmisc.h"
-#include "arrays.h"
 #include "expdata.h"
 #include "dlgpxi.h"
 #include "pxi.h"
@@ -66,7 +64,6 @@
 #include "wx/colordlg.h"
 #include "wx/print.h"
 #include "wx/printdlg.h"
-
 
 gOutput &operator<<(gOutput &op,const PxiCanvas::LABELSTRUCT &l) 
 {op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
@@ -106,65 +103,7 @@ bool PxiApp::OnInit(void)
 
 IMPLEMENT_APP(PxiApp)
 
-//=====================================================================
-//                       class PxiToolbar
-//=====================================================================
-
-const int PXI_TOOLBAR_ID = 1101;
-
-class PxiToolbar : public wxToolBar {
-private:
-  wxFrame *m_parent;
-
-  // Event handlers
-  void OnMouseEnter(wxCommandEvent &);
-    
-public:
-  PxiToolbar(wxFrame *p_frame);
-  virtual ~PxiToolbar() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(PxiToolbar, wxToolBar)
-  EVT_TOOL_ENTER(PXI_TOOLBAR_ID, PxiToolbar::OnMouseEnter)
-END_EVENT_TABLE()
-
-PxiToolbar::PxiToolbar(wxFrame *p_parent)
-  : wxToolBar(p_parent, PXI_TOOLBAR_ID, wxDefaultPosition, 
-	      wxDefaultSize, wxTB_DOCKABLE),
-    m_parent(p_parent)
-{
-#ifdef __WXMSW__
-  wxBitmap loadBitmap("OPEN_BITMAP");
-  wxBitmap helpBitmap("HELP_BITMAP");
-#else
-#include "../sources/bitmaps/open.xpm"
-#include "../sources/bitmaps/help.xpm"
-  wxBitmap loadBitmap(open_xpm);
-  wxBitmap helpBitmap(help_xpm);
-#endif  // __WXMSW__
-  
-  SetMargins(2, 2);
-#ifdef __WXMSW__
-  SetToolBitmapSize(wxSize(33, 30));
-#endif  // __WXMSW__
-  AddTool(PXI_LOAD_FILE, loadBitmap);
-  AddSeparator();
-  AddTool(PXI_HELP_ABOUT, helpBitmap);
-
-  Realize();
-}
-
-void PxiToolbar::OnMouseEnter(wxCommandEvent &p_event)
-{
-  if (p_event.GetSelection() > 0) {
-    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
-  }
-  else {
-    m_parent->SetStatusText("");
-  }
-}
+#include "pxi.xpm"
 
 //=====================================================================
 //                       class PxiFrame
@@ -174,12 +113,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size, long p_style) :
   wxFrame(p_parent, -1, p_title, p_position, p_size,p_style)
 {
-#ifdef __WXMSW__
-  SetIcon(wxIcon("pxi_icn"));
-#else
-#include "pxi.xpm"
-  SetIcon(wxIcon(pxi_xpm));
-#endif
+  SetIcon(wxICON(pxi));
     
   wxMenu *file_menu = new wxMenu;
   wxMenu *help_menu = new wxMenu;
@@ -199,8 +133,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
   m_fileHistory.AddFilesToMenu();
 
   CreateStatusBar();
-
-  SetToolBar(new PxiToolbar(this));
+  MakeToolbar();
 }
 
 
@@ -221,14 +154,11 @@ END_EVENT_TABLE()
 
 void PxiFrame::OnFileLoad(wxCommandEvent &)
 {
-  Enable(false); // Don't allow anything while the dialog is up.
-
   wxString filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
 				  NULL, NULL, "*.pxi").c_str();
-  Enable(true);
-
-  if(filename == "") 
+  if (filename == "") {
     return;
+  }
 
   wxGetApp().SetCurrentDir(wxPathOnly(filename));
   LoadFile(filename);
@@ -264,8 +194,29 @@ void PxiFrame::LoadFile(const wxString &p_filename)
     }
     PxiChild *subframe = new PxiChild(this,p_filename);
   }
-  else
+  else {
     wxMessageBox("Unknown file type");
+  }
+}
+
+#include "../sources/bitmaps/open.xpm"
+#include "../sources/bitmaps/help.xpm"
+
+void PxiFrame::MakeToolbar(void)
+{
+  wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE |
+				     wxTB_HORIZONTAL);
+
+  toolBar->SetMargins(4, 4);
+
+  toolBar->AddTool(PXI_LOAD_FILE, wxBITMAP(open), wxNullBitmap, false,
+		   -1, -1, 0, "Open file", "Open a saved datafile");
+  toolBar->AddSeparator();
+  toolBar->AddTool(PXI_HELP_ABOUT, wxBITMAP(help), wxNullBitmap, false,
+		   -1, -1, 0, "Help", "Table of contents");
+
+  toolBar->Realize();
+  toolBar->SetRows(1);
 }
 
 //=====================================================================
@@ -322,15 +273,15 @@ PxiChildToolbar::PxiChildToolbar(wxFrame *p_frame, wxWindow *p_parent)
 #ifdef __WXMSW__
   SetToolBitmapSize(wxSize(33, 30));
 #endif // _WXMSW__
-  AddTool(wxID_PREVIEW, printBitmap);
+  AddTool(wxID_PREVIEW, printBitmap, "", "");
   AddSeparator();
-  AddTool(PXI_DISPLAY_OPTIONS, inspectBitmap);
+  AddTool(PXI_DISPLAY_OPTIONS, inspectBitmap, "", "");
   AddSeparator();
-  AddTool(PXI_PREFS_ZOOM_IN, zoominBitmap);
-  AddTool(PXI_PREFS_ZOOM_OUT, zoomoutBitmap);
-  AddTool(PXI_PREFS_COLORS, optionsBitmap);
+  AddTool(PXI_PREFS_ZOOM_IN, zoominBitmap, "", "");
+  AddTool(PXI_PREFS_ZOOM_OUT, zoomoutBitmap, "", "");
+  AddTool(PXI_PREFS_COLORS, optionsBitmap, "", "");
   AddSeparator();
-  AddTool(PXI_HELP_ABOUT, helpBitmap);
+  AddTool(PXI_HELP_ABOUT, helpBitmap, "", "");
 
   Realize();
 }
@@ -1095,6 +1046,8 @@ PlotInfo &PlotInfo::operator=(const PlotInfo &p)
       strategies[i] = p.strategies[i];
     }
   }
+
+  return *this;
 }
 
 bool PlotInfo::operator==(const PlotInfo &p)
@@ -1102,6 +1055,7 @@ bool PlotInfo::operator==(const PlotInfo &p)
   assert(0);  //needed for gBlock<T>, but lets see if it's ever used
   //      if isets != p.isets return false;
   //      if strategies != p.strategies return false;
+  return false;
 }
 
 
@@ -1353,4 +1307,50 @@ void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))
 }
 #endif
 #endif // UNUSED
+
+//
+// From old gmisc.cc
+//
+
+// Find String In File -- uses a file pointer to find a string in the file.
+// This is useful for quickly getting to the section of the file you need
+int FindStringInFile(gInput &in,const char *s)
+{
+  char fsif_str[200];
+  in.seekp(0L);	// go to the start of the file
+  do {
+      in>>fsif_str;
+  } while (strcmp(fsif_str,s)!=0 && !in.eof() /* && in.IsValid() */);
+  if (in.eof() /*|| !in.IsValid()*/) return 0; else return 1;
+}
+
+//
+// Template instantiations (for now, should be moved -- TLT)
+//
+
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/grarray.imp"
+
+template class gArray<PlotInfo>;
+template class gArray<FileHeader>;
+
+template class gArray<ExpData::BEST_POINT>;
+template class gBlock<ExpData::BEST_POINT>;
+
+template class gArray<DataLine>;
+template class gBlock<DataLine>;
+
+gOutput &operator<<(gOutput &p_file, const gBlock<double> &)
+{ return p_file; }
+
+gOutput &operator<<(gOutput &p_file, const gBlock<int> &)
+{ return p_file; }
+
+gOutput &operator<<(gOutput &p_file, const PlotInfo &)
+{ return p_file; }
+
+template class gRectArray<gBlock<double> >;
+
+
 

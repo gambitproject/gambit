@@ -1,16 +1,16 @@
-#include "wx/wx.h"
-#include "wx/dc.h"
-
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#pragma hdrstop
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 #include "gmisc.h"
 #include "wxmisc.h"
-#include "arrays.h"
 #include "expdata.h"
 #include "equtrac.h"
 #include "pxi.h"
@@ -182,7 +182,7 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
     }
   }
   
-  while (!probs.Done() && f.IsValid()) {
+  while (!probs.Done() && !f.eof()) {
     //---------------------------if cur_e is in active range ------------
     if (thisplot.RangeX(probs.E())) {
       x=CalcX_X(probs.E(),x0,cw,thisplot);
@@ -282,7 +282,7 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
       if (thisplot.GetStrategyShow(j,i))
 	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
   
-  while (!probs.Done() && f.IsValid())
+  while (!probs.Done() && !f.eof())
     {
       //------------------- if the cur_e is in range, display it -----------
       if (probs.E()<thisplot.GetMaxY() && probs.E()>thisplot.GetMinY()) {
@@ -392,7 +392,7 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
     dc.DrawText(title, x0+cw/2-tw/2, y0-ch-th);
   }
 
-  while (!probs.Done() && f.IsValid()) {
+  while (!probs.Done() && !f.eof()) {
     //------------------- if the cur_e is in range, display it -----------
     if (thisplot.RangeX(probs.E())) {
       point_color=(draw_settings->GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;

@@ -10,7 +10,11 @@
 #define	wxRUNNING 12345
 #endif
 #include <stdio.h>
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 
 //
 // A generic standard dialog box featuring automatic layout, frame control

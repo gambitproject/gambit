@@ -7,8 +7,8 @@
 
 #include <math.h>
 
-#include "gambitio.h"
-#include "gtuple.h"
+#include "base/gstream.h"
+#include "base/gblock.h"
 #include "equdata.h"
 
 #define	LARGE_NUMBER	100.00

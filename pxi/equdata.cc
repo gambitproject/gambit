@@ -137,7 +137,7 @@ int DataLine::Read(gInput &in)
 	data[iset][i]=1.0-sum;
     }
   }
-  return (in.eof() || !in.IsValid());
+  return (in.eof() /* || !in.IsValid() */);
 }
 
 void DataLine::Write(gOutput &out) const

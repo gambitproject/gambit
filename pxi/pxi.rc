@@ -1,20 +1,19 @@
-/****************************************************************************
+/*
+ * $Source$
+ * $Date$
+ * $Revision$
+ *
+ * DESCRIPTION:
+ * Resource file for PXI under MSW
+ */
 
 
-pxi.rc
+pxi_icn   ICON ..\winsrc\res\pxi.ico 
 
-produced by Borland Resource Workshop
+rcinclude wx\msw\wx.rc
+rcinclude wx\html\msw\wxhtml.rc
 
-
-*****************************************************************************/
-
-#define IDI_ICON1	1
-
-IDI_ICON1 ICON "../winsrc/res/pxi.ico"
-
-HELP_BITMAP BITMAP "help.bmp"
-
-
-OPEN_BITMAP BITMAP "open.bmp"
+help     BITMAP ..\sources\bitmaps\help.bmp
+open     BITMAP ..\sources\bitmaps\open.bmp
 
 

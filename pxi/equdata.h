@@ -13,9 +13,9 @@
 
 #include <stdio.h>
 
-#include "gambitio.h"
+#include "base/gstream.h"
+#include "base/gblock.h"
 #include "wx/wx.h"
-#include "gblock.h"
 
 #define	DATA_TYPE_ARITH	0		// these MUST be the same as in normequs.h
 

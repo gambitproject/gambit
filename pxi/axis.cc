@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
 #include "wx/wx.h"
-#pragma	hdrstop
+#endif  // WX_PRECOMP
+
 #include <assert.h>
 #include "axis.h"
 #include "gmisc.h"

@@ -7,7 +7,7 @@
 
 #include <stdio.h>		// for the ?printf and ?scanf functions
 #include <stdlib.h>		// for the strtod functions
-#include "gstring.h"
+#include "base/gstream.h"
 
 int FindStringInFile(gInput &in,const char *s);
 //--------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 #define EXPDPRM_H
 
 #include "wxmisc.h"
-#include "gambitio.h"
+#include "base/gstream.h"
 #include "pxi.h"
 #include "expdata.h"
 #include "wx/slider.h"
