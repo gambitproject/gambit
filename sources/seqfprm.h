@@ -7,26 +7,33 @@
 #ifndef SEQFPRM_H
 #define SEQFPRM_H
 
-#include "algdlgs.h"
+class efgLcpSolveDialog : public wxDialogBox {
+private:
+  int m_completed;
+  wxRadioBox *m_dominanceDepth, *m_dominanceType, *m_precisionChoice,
+             *m_stopAfterChoice;
+  wxText *m_maxDepth, *m_maxSolutions;
+  wxCheckBox *m_markSubgames, *m_selectSolutions;
 
-class SeqFormParamsSettings: public virtual OutputParamsSettings {
-protected:
-  int plev, maxdepth, dup_strat;
-  void SaveDefaults(void);
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((efgLcpSolveDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((efgLcpSolveDialog *) p_object.GetClientData())->OnCancel(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  Bool OnClose(void);
 
 public:
-  SeqFormParamsSettings(void);
-  ~SeqFormParamsSettings();
+  efgLcpSolveDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  virtual ~efgLcpSolveDialog() { }
 
-  void GetParams(SeqFormParams &P);
-  int DupStrat(void) const { return dup_strat; }
+  int Completed(void) const { return m_completed; }
+
+  int StopAfter(void) const;
+  int MaxDepth(void) const
+    { return (int) ToDouble(m_maxDepth->GetValue()); }
+  gPrecision Precision(void) const;
 };
 
-class SeqFormParamsDialog : public OutputParamsDialog,
-			    public SeqFormParamsSettings {
-public:
-  SeqFormParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
-  //	~SeqFormParamsDialog(void);
-};
-
-#endif
+#endif  // SEQFPRM_H

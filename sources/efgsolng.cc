@@ -353,6 +353,7 @@ bool EfgNLiapG::SolveSetup(void) const
 #include "seqform.h"
 #include "seqfprm.h"
 
+#ifdef UNUSED
 SeqFormParamsSettings::SeqFormParamsSettings(void)
 {
   wxGetResource(PARAMS_SECTION, "SeqForm-dup_strat", &dup_strat, 
@@ -393,6 +394,79 @@ SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
 		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
 }
+#endif  // UNUSED
+
+efgLcpSolveDialog::efgLcpSolveDialog(wxWindow *p_parent, bool /*p_subgames*/)
+  : wxDialogBox(p_parent, "LcpSolve Parameters", TRUE)
+{
+  new wxGroupBox(this, "Elimination of dominated behavior strategies",
+		 10, 10, 250, 105);
+  char *depthChoices[3] = { "None", "Once", "Iterative" };
+  m_dominanceDepth = new wxRadioBox(this, 0, "Depth", 20, 20, -1, -1,
+				    3, depthChoices);
+  char *typeChoices[2] = { "Weak", "Strong" };
+  m_dominanceType = new wxRadioBox(this, 0, "Type", 20, 65, -1, -1,
+				   2, typeChoices);
+
+  new wxGroupBox(this, "Algorithm behavior", 10, 120, 350, 100);
+  char *precisionChoices[2] = { "Float", "Rational" };
+  m_precisionChoice = new wxRadioBox(this, 0, "Precision", 20, 135, -1, -1,
+				     2, precisionChoices);
+  m_maxDepth = new wxText(this, 0, "Max depth", "", 240, 150, 100, -1);
+  char *stopAfterChoices[2] = { "All solutions", "Some solutions" };
+  m_stopAfterChoice = new wxRadioBox(this, 0, "Find", 20, 170, -1, -1,
+				     2, stopAfterChoices);
+  m_maxSolutions = new wxText(this, 0, "Stop after", "", 240, 185, 100, -1);
+  NewLine();
+
+  new wxGroupBox(this, "Subgames", 10, 230, 300, 80);
+  m_markSubgames = new wxCheckBox(this, 0, "Mark all subgames", 20, 250);
+  m_selectSolutions = new wxCheckBox(this, 0, "Select subgame solutions",
+				     20, 270);
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok",
+				    100, 335, 60);
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel", 200, 335, 60);
+  cancelButton->SetClientData((char *) this);
+  
+  Fit();
+  Show(TRUE);
+}
+
+void efgLcpSolveDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void efgLcpSolveDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool efgLcpSolveDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+int efgLcpSolveDialog::StopAfter(void) const
+{
+  if (m_stopAfterChoice->GetSelection() == 0)
+    return 0;
+  else
+    return (int) ToDouble(m_maxSolutions->GetValue());
+}
+
+gPrecision efgLcpSolveDialog::Precision(void) const
+{
+  return (m_precisionChoice->GetSelection() == 0) ? precDOUBLE : precRATIONAL;
+}
 
 class SeqFormBySubgameG : public efgLcpSolve, public BaseBySubgameG {
 protected:
@@ -421,33 +495,27 @@ gList<BehavSolution> EfgSeqFormG::Solve(void) const
     return gList<BehavSolution>();
   }
 
-  wxStatus status(parent->Frame(), "LCP Algorithm");
-  SeqFormParamsSettings SFPS;
-  SeqFormParams P(status);
-  SFPS.GetParams(P);
-  try {
-    SeqFormBySubgameG M(ef, sup, P, SFPS.MaxSolns(), parent);
-    return M.Solve(sup);
+  efgLcpSolveDialog dialog(parent->Frame(), true);
+
+  if (dialog.Completed() == wxOK) {
+    wxStatus status(parent->Frame(), "LcpSolve Progress");
+    SeqFormParams params(status);
+    params.stopAfter = dialog.StopAfter();
+    params.maxdepth = dialog.MaxDepth();
+    params.precision = dialog.Precision();
+
+    try {
+      SeqFormBySubgameG(ef, sup, params, 0, parent).Solve(sup);
+    }
+    catch (gSignalBreak &) { }
   }
-  catch (gSignalBreak &) {
-    return gList<BehavSolution>();
-  }
+
+  return gList<BehavSolution>();
 }
 
 bool EfgSeqFormG::SolveSetup(void) const
 { 
-  SeqFormParamsDialog SFPD(parent->Frame(), true);
-
-  if (SFPD.Completed() == wxOK)  {
-    eliminate = SFPD.Eliminate();
-    all = SFPD.EliminateAll();
-    domType = SFPD.DominanceType();
-    domMethod = SFPD.DominanceMethod();
-    markSubgames = SFPD.MarkSubgames();
-    return true;
-  }
-  else
-    return false;
+  return true;
 }
 
 
