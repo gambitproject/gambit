@@ -15,9 +15,6 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gTableau<double>;
-TEMPLATE class gTableau<gRational>;
-
 TEMPLATE class gLPTableau3<double>;
 TEMPLATE class gLPTableau3<gRational>;
 
