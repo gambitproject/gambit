@@ -22,6 +22,13 @@
 #include "wx_tbar.h"
 #endif
 
+// GUI recorder.
+
+#include "guirecorder.h"
+#include "guirecorder_db.h"
+#include "guiplayback.h"
+
+
 class EfgShowToolBar:
 #ifdef wx_msw
     public wxButtonBar
@@ -377,6 +384,7 @@ void EfgShow::OnMenuCommand(int id)
         break;
 
     case SOLVE_SOLVE: 
+        GUI_RECORD_N("SOLVE:SOLVE");
         Solve();
         break;
 
@@ -814,18 +822,19 @@ EfgGUI::EfgGUI(Efg *ef, const gText infile_name,
         }
         else                        // from data file
         {
-	  try { 
-            gFileInput infile(infile_name);
-            ReadEfgFile(infile, ef);
-	    
-            if (!ef) 
-	      wxMessageBox("ReadFailed::Check the file");
-	  }
-	  catch(gFileInput::OpenFailed &) {
-	    wxMessageBox("ReadFailed::Check the file");
-	    return;
-	  }
-	  
+			try 
+			{ 
+				gFileInput infile(infile_name);
+				ReadEfgFile(infile, ef);
+				
+				if (!ef) 
+					wxMessageBox("ReadFailed::Check the file");
+			}
+			catch(gFileInput::OpenFailed &) 
+			{
+				wxMessageBox("ReadFailed::Check the file");
+				return;
+			}
         }
     }
 

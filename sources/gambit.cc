@@ -32,6 +32,12 @@
 #include "bitmaps/efg.xpm"
 #include "bitmaps/nfg.xpm"
 
+// GUI recorder.
+
+#include "guirecorder.h"
+#include "guirecorder_db.h"
+#include "guiplayback.h"
+
 #ifndef wx_msw
 #include "bitmaps/gambi.xpm"
 #endif
@@ -40,9 +46,26 @@
 extern wxApp *wxTheApp = 1;
 #endif
 
+#undef  DEBUG
+// Uncomment the next line to run with debugging statements:
+//#define DEBUG
+
+
 GambitApp gambitApp;
 
 typedef void (*fptr)(int);
+
+
+// ----------------------------------------
+// For GUI logging:
+// ----------------------------------------
+
+gText GambitFrame::GuiLogRootName  = "GambitFrame#";
+int   GambitFrame::GuiLogNameCount = 1;
+
+// ----------------------------------------
+
+
 
 void SigFPEHandler(int type)
 {
@@ -181,13 +204,94 @@ wxFrame *GambitApp::OnInit(void)
         wxMessageBox("Gambit is unable to locate a current configuration file.\n"
                      "Please make sure that the program was installed correctly",
                      "Config Error");
-        return 0;
+        return NULL;
     }
-    
+
+    // ----------------------------------------------------------------------
+    // Check command-line options.  These are used in the GUI record/playback
+    // system.  If relevant options are found, they are removed from the 
+    // argc/argv list.
+    // ----------------------------------------------------------------------
+
+    char usage[128];
+    sprintf(usage, "Usage: %s [-record <log-file>] [-playback <log-file>]\n" 
+            "(only one of -record or -playback may be selected)", wxApp::argv[0]);
+
+    gText playback_filename;
+    bool  playback_requested = false;
+    bool  record_requested   = false;
+    bool  options_found      = false;
+
+    int rpindex;  // index into argc/argv list for record/playback options.
+
+    for (int i = 0; i < wxApp::argc; i++)
+    {
+        if (strcmp(argv[i], "-record") == 0)
+        {
+            if (i == (wxApp::argc - 1)) // No log file in argument list.
+            {
+                wxMessageBox(usage);
+                return NULL;
+            }
+
+            rpindex = i;
+            i++;
+
+            gui_recorder.openFile(argv[i]);
+
+            record_requested = true;
+            options_found = true;
+        }
+        else if (strcmp(argv[i], "-playback") == 0)
+        {
+            if (i == (wxApp::argc - 1)) // No log file in argument list.
+            {
+                wxMessageBox(usage);
+                return NULL;
+            }
+
+            rpindex = i;
+            i++;
+
+            playback_filename  = wxApp::argv[i];
+            playback_requested = true;
+            options_found = true;
+        }
+
+        // Ignore other command-line options here.
+    }
+
+    // Signal an error if both playback and record were requested.
+
+    if (playback_requested && record_requested)
+    {
+        wxMessageBox("Error! Record and playback options cannot both be selected!");
+        return NULL;
+    }
+
+    // If options have been found they have to be removed from the 
+    // argc/argv list.
+
+    if (options_found)
+    {
+        assert(rpindex >= 1);
+
+        for (int j = rpindex; j < wxApp::argc - 2; j++)
+        {
+            wxApp::argv[j] = wxApp::argv[j + 2];
+        }
+
+        wxApp::argc -= 2;
+    }
+
+    // ----------------------------------------------------------------------
+    // End of command-line options-handling code.
+    // ----------------------------------------------------------------------
+
     // Create the main frame window.
     GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 
                                                 0, 0, 200, 150, wxDEFAULT_FRAME);
-    
+
     // Give it an icon.
     wxIcon *frame_icon;
     
@@ -242,8 +346,27 @@ wxFrame *GambitApp::OnInit(void)
     
     // Process command line arguments, if any.
     if (argc > 1) 
-		gambit_frame->LoadFile(argv[1]);
-    
+        gambit_frame->LoadFile(argv[1]);
+
+    // If playing back a log file, read in the log file and
+    // execute the log file commands one by one.
+
+#ifdef DEBUG
+    gambit_frame->GambitFrame_hello();
+#endif
+
+    if (playback_requested)
+    {
+        try
+        {
+            gui_playback.Playback(playback_filename);
+        }
+        catch (gException &e)
+        {
+            gout << "EXCEPTION: " << e.Description() << '\n';
+        }
+    }
+
     // Return the main frame window.
     return gambit_frame;
 }
@@ -251,9 +374,9 @@ wxFrame *GambitApp::OnInit(void)
 
 int GambitApp::OnExit(void)
 {
-#ifndef _LINUX // there is no global wx_frame in wxxt(linux)
+#ifndef LINUX_WXXT // there is no global wx_frame in wxxt(linux)
     if (wx_frame) 
-		wx_frame->OnClose();
+        wx_frame->OnClose();
 #endif
     return TRUE;
 }
@@ -262,7 +385,14 @@ int GambitApp::OnExit(void)
 // Define my frame constructor.
 GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int ):
     wxFrame(frame, title, x, y, w, h)
-{}
+{
+    // Give the object a unique name usable by the GUI playback system,
+    // and add it to the database.
+
+    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
+    GuiLogNameCount++;
+    GUI_RECORDER_ADD_TO_DB(GuiLogName, GAMBIT_FRAME, (void *)this);
+}
 
 
 //--------------------------------------------------------------------
@@ -279,6 +409,8 @@ void GambitFrame::LoadFile(char *s)
     
     if (!s)
         s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+
+    GUI_RECORD_AN(s);
     
     Enable(TRUE);
     if (!s) return;
@@ -321,31 +453,37 @@ void GambitFrame::OnMenuCommand(int id)
     switch (id)
     {
     case FILE_QUIT:
+        GUI_RECORD_N("FILE:QUIT");
+        GUI_RECORDER_CLOSE
         Close();    
         break;
         
     case FILE_LOAD:
+        GUI_RECORD("FILE:LOAD");
         LoadFile(); 
         break;
         
 #ifndef EFG_ONLY
     case FILE_NEW_NFG: 
+        GUI_RECORD_N("FILE:NEW_NFG");
         NfgGUI(0, gText(), 0, this);   
         break;
 #endif
         
 #ifndef NFG_ONLY
     case FILE_NEW_EFG: 
+        GUI_RECORD_N("FILE:NEW_EFG");
         EfgGUI(0, gText(), 0, this); 
         break;
 #endif
         
     case GAMBIT_HELP_ABOUT:
+        // No logging for help system.
         wxHelpAbout(); 
         break;
         
     case GAMBIT_HELP_CONTENTS: 
-        wxHelpContents(GAMBIT_GUI_HELP);    
+        wxHelpContents(GAMBIT_GUI_HELP);
         break;
         
     default: 
@@ -369,5 +507,20 @@ Bool GambitFrame::OnClose()
     wxKillHelp();
     wout->OnClose(); werr->OnClose();
     return TRUE;
+}
+
+
+// Debugging functions.
+
+bool GambitFrame::is_GambitFrame() const
+{
+    return true;
+}
+
+
+void GambitFrame::GambitFrame_hello() const
+{
+    printf("instance of class GambitFrame accessed at %x\n", (unsigned int)this);
+    printf("Log name: %s\n", (char *)GuiLogName);
 }
 

@@ -4,14 +4,15 @@
 //  $Id$
 //
 
-#ifndef EXTSHOW_H
-#define EXTSHOW_H
+#ifndef EFGSHOW_H
+#define EFGSHOW_H
 
 #include "efgnfgi.h"
 #include "gambit.h"
 #include "accels.h"
 #include "efgsolng.h"
 #include "bsolnsf.h"
+#include "efgconst.h"
 
 class EfgSolnShow;
 class EfgShowToolBar;
@@ -39,6 +40,19 @@ class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface
 private:
     wxFrame *parent;
     Efg &ef;
+
+    // ---------------------------------------
+    // For gui logging:
+    // ---------------------------------------
+    
+    // Class variables: 
+    static gText GuiLogRootName;
+    static int   GuiLogNameCount;
+    
+    // Instance variables:
+    gText GuiLogName;
+
+    // ---------------------------------------
 
     // Solution routines
     BehavSolutionList solns;
@@ -158,7 +172,12 @@ public:
     void         SetFileName(void);
     void         SetFileName(const gText &s);
     const gText &Filename(void) const;
+
+    // Debugging.
+    bool is_EfgShow() const;
+    void EfgShow_hello() const;
 };
+
 
 // Solution constants
 typedef enum
@@ -168,4 +187,5 @@ typedef enum
     EFG_NUM_SOLUTIONS
 } EfgSolutionT;
 
-#endif
+#endif // EFGSHOW_H
+

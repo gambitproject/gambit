@@ -15,6 +15,21 @@
 #include "efgnfgi.h"
 #include "behavsol.h"
 
+// GUI recorder.
+
+#include "guirecorder.h"
+#include "guirecorder_db.h"
+#include "guiplayback.h"
+
+// ----------------------------------------
+// For GUI logging:
+// ----------------------------------------
+
+gText EfgShow::GuiLogRootName  = "EfgShow#";
+int   EfgShow::GuiLogNameCount = 1;
+
+// ----------------------------------------
+
 //=====================================================================
 //                   EfgShow MEMBER FUNCTIONS
 //=====================================================================
@@ -50,7 +65,16 @@ EfgShow::EfgShow(Efg &ef_, EfgNfgInterface *nfg, int , wxFrame *frame,
     : wxFrame(frame, (char *)title, x, y, w, h, type), 
       EfgNfgInterface(gEFG, nfg), parent(frame), ef(ef_), tw(0)
 {
+    // Give the object a unique name usable by the GUI playback system,
+	// and add it to the database.
+  
+    GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
+    GuiLogNameCount++;
+    GUI_RECORDER_ADD_TO_DB(GuiLogName, EFG_SHOW, (void *)this);
+
     Show(FALSE);
+
+
     //--------------Define all the menus----------------------------
     // Give the frame an icon
     wxIcon *frame_icon;
@@ -661,4 +685,18 @@ void EfgShowToolBar::OnMouseEnter(int tool)
     parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));
 }
 
+
+// Debugging functions.
+
+bool EfgShow::is_EfgShow() const
+{
+    return true;
+}
+
+
+void EfgShow::EfgShow_hello() const
+{
+    printf("instance of class EfgShow accessed at %x\n", (unsigned int)this);
+	printf("Log name: %s\n", (char *)GuiLogName);
+}
 
