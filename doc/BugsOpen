@@ -842,38 +842,13 @@ calls should either be removed, or directed to a tracefile.
 
 ---------------
 
-
 ITEM 0035:  LiapSolve not setting solutions to Nash
 
 DATE:     9/8/1999 by TLT/RDM
 AFFECTS:  GCL; a
-STATUS:   OPEN
+STATUS:   CLOSED 9/9/1999 by TLT
 SEVERITY: CRUCIAL
-DETAILS:
 
-
-GCL1:= << e:=LoadEfg["../efg/e01.efg"
-GCL2:= << AllNash[e]                  
- Warning: Entering infinite loop.  Use Ctl-C to exit.
-{ (Behav) { { 1.000000 0.000000 } }{ { 0.999998 0.000002 } }{ { 0.248126 0.751874 } },
-  (Behav) { { 1.000001 0.000000 } }{ { 0.999992 0.000008 } }{ { 0.231082 0.768918 } },
-  (Behav) { { 1.000000 0.000000 } }{ { 1.000000 0.000000 } }{ { 0.247619 0.752381 } },
-  (Behav) { { 1.000001 0.000000 } }{ { 0.999991 0.000009 } }{ { 0.246676 0.753324 } },
-  (Behav) { { 1.000001 0.000000 } }{ { 0.999991 0.000009 } }{ { 0.249250 0.750750 } },
-  (Behav) { { 1.000000 0.000000 } }{ { 0.999994 0.000006 } }{ { 0.234463 0.765537 } },
-  (Behav) { { 1.000001 0.000000 } }{ { 0.999994 0.000006 } }{ { 0.238701 0.761299 } },
-  (Behav) { { 1.000000 0.000000 } }{ { 0.999999 0.000001 } }{ { 0.246528 0.753472 } },
-  (Behav) { { 0.999992 0.000008 } }{ { 0.999985 0.000015 } }{ { 0.249969 0.750031 } } }
-GCL3:= << IsNash[GCL2]
-{ Unknown,
-  Unknown,
-  Unknown,
-  Unknown,
-  Unknown,
-  Unknown,
-  Unknown,
-  Unknown,
-  Unknown }
 
 
 
