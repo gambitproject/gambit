@@ -94,9 +94,6 @@ public:
   // returns whether the basis is the identity matrix
   bool IsIdent();
 
-  // returns a column from the matrix  
-  void GetColumn( int col, gVector<T> & ) const;
-  
   // Append an artificial variable.  Returns the last col index
   // ( ie where the artificial variable was appended ).
   int AppendArtificial( int art );

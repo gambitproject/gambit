@@ -78,6 +78,7 @@ public:
   int MinCol() const;
   int MaxCol() const;
 
+  Basis<T> & GetBasis(void);
   const gMatrix<T> & Get_A(void) const;
   const gVector<T> & Get_b(void) const;
   

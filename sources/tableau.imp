@@ -87,6 +87,9 @@ template <class T>
 int TableauInterface<T>::MaxCol() const { return A->MaxCol(); }
 
 template <class T>
+Basis<T> & TableauInterface<T>::GetBasis(void) {return basis; }
+
+template <class T>
 const gMatrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
 
 template <class T>
@@ -129,7 +132,6 @@ bool TableauInterface<T>::IsBlocked(int label) const
 template <class T>
 void TableauInterface<T>::GetColumn(int col, gVector<T> &ret) const
 {
-  //   basis.GetColumn(col,out);
   if(basis.IsRegColumn(col))
     A->GetColumn(col, ret);
   else if (basis.IsSlackColumn(col)) {
@@ -266,14 +268,14 @@ T TableauInterface<T>::Epsilon(int i) const
 // Constructors and Destructor
  
 Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
-  : TableauInterface<double>(A,b), B(basis), tmpcol(b.First(),b.Last())
+  : TableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
 
 Tableau<double>::Tableau(const Tableau<double> &orig)
-  : TableauInterface<double>(orig), B(orig.B,basis), tmpcol(orig.tmpcol)
+  : TableauInterface<double>(orig), B(orig.B,*this), tmpcol(orig.tmpcol)
 { }
 
 Tableau<double>::~Tableau()
@@ -283,7 +285,7 @@ Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
 {
   TableauInterface<double>::operator=(orig);
   if(this!= &orig) {
-    B.Copy(orig.B,basis);
+    B.Copy(orig.B,*this);
     tmpcol = orig.tmpcol;
   }
   return *this;
@@ -323,7 +325,7 @@ void Tableau<double>::SolveColumn(int col, gVector<double> &out)
 {
   //** can we use tmpcol here, instead of allocating new vector?
   gVector<double> tmpcol2(MinRow(),MaxRow());
-  basis.GetColumn(col,tmpcol2);
+  GetColumn(col,tmpcol2);
   Solve(tmpcol2,out);
 }
 

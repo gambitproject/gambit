@@ -14,6 +14,8 @@
 #include "gstream.h"
 #include "basis.h"
 
+template <class T> class Tableau;
+
 // ---------------------------------------------------------------------------
 // Class EtaMatrix
 // ---------------------------------------------------------------------------
@@ -42,6 +44,7 @@ template <class T> class LUdecomp {
 
 private:
 
+  Tableau<T> &tab;
   Basis<T> &basis;
 
   gList< EtaMatrix<T> > L;
@@ -67,16 +70,16 @@ public:
     
 
   // don't use this copy constructor
-  LUdecomp( const LUdecomp<T> &a) : basis(a.basis) { assert(0); };
+  LUdecomp( const LUdecomp<T> &a) : tab(a.tab), basis(a.basis) { assert(0); };
 
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
   //        the original before the copy has been deleted, refactored
   //        Or set to something else.
-  LUdecomp( const LUdecomp<T> &, Basis<T> & );
+  LUdecomp( const LUdecomp<T> &, Tableau<T> & );
 
   // Decompose given matrix
-  LUdecomp( Basis<T> &, int rfac = 0 ); 
+  LUdecomp( Tableau<T> &, int rfac = 0 ); 
 
   // Destructor
   ~LUdecomp();
@@ -90,7 +93,7 @@ public:
   // --------------------
 
   // copies the LUdecomp given (expect for the basis &).
-  void Copy( const LUdecomp<T> &, Basis<T> & );
+  void Copy( const LUdecomp<T> &, Tableau<T> & );
 
   // replace (update) the column given with the vector given.
   void update( int, int matcol ); // matcol is the column number in the matrix
