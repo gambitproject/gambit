@@ -33,6 +33,10 @@ private:
 
   gString           m_StartupString;
 
+
+
+  gInput* LoadInput( gString& name );
+  bool ExpectText( const char* text );
   
   bool EOL( char c ) const { return ( c == '\n' || c == '\r' ); }
 
@@ -57,6 +61,7 @@ private:
 	++m_LineNumberStack.Peek();
     }
   }
+
 
 
 public:

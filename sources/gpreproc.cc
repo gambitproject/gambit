@@ -8,7 +8,7 @@
 
 
 #include "gpreproc.h"
-
+#include "system.h"
 
 
 
@@ -99,10 +99,11 @@ gString gPreprocessor::GetLine( void )
 	{
 	  // If brackets are matched, turn prompt back on.
 	  --bracket;
-	  if( bracket < 0 )
-	    bracket = 0;
 	  if( bracket == 0 )
 	    SetPrompt( true );	  
+
+	  if( bracket < 0 )
+	    bracket = 0;
 
 	}
 	else if( c == '\"' )
@@ -154,6 +155,8 @@ gString gPreprocessor::GetLine( void )
 	  SetPrompt( true );
 
 	}
+
+	//------------------- Include -------------------------------
 	else if( line.right( 7 ) == "Include" )
 	{
 	  // Process Include[] calls.
@@ -209,9 +212,11 @@ gString gPreprocessor::GetLine( void )
 	    break;
 	  }
 
-	  gInput* input = new gFileInput( filename );
-	  if( input->IsValid() )
+	  // note: filename might be changed after this call
+	  gInput* input = LoadInput( filename );
+	  if( input )
 	  {
+	    assert( input->IsValid() );
 	    line += "True";
 	    m_InputStack.Push( input );
 	    m_FileNameStack.Push( filename );
@@ -226,7 +231,151 @@ gString gPreprocessor::GetLine( void )
 
 	  break;
 	  
-	}
+	} // "Include"
+
+	//------------------- GetPath -------------------------------
+	else if( line.right( 7 ) == "GetPath" )
+	{
+	  // Process GetPath[] calls.
+
+	  bool text_found = false;
+	  bool closed_bracket = false;
+	  bool file = true;
+	  bool path = true;
+
+	  line = line.left( line.length() - 7 );
+
+	  c = ' ';
+	  while( !m_InputStack.Peek()->eof() && c == ' ' )
+	    GetChar( c );
+	  if( c != '[' )
+	  {
+	    line += "\"\"";
+	    errorMsg = "GetPath[] syntax error; opening '[' not found";
+	    error = true;
+	    break;
+	  }
+
+	  c = ' ';
+	  while( !m_InputStack.Peek()->eof() && c == ' ' )
+	    GetChar( c );
+	  text_found = false;
+	  if( c == 'T' ) // True
+	  {
+	    text_found = ExpectText( "rue" );
+	    if( text_found )
+	      file = true;
+	  }
+	  else if( c == 'F' )
+	  {
+	    text_found = ExpectText( "alse" );
+	    if( text_found )
+	      file = false;
+	  }
+	  else if ( c == ']' )
+	  {
+	    text_found = true;
+	    closed_bracket = true;
+	  }
+	  if( !text_found )
+	  {
+	    line += "\"\"";
+	    errorMsg = "GetPath[] syntax error (1)";
+	    error = true;
+	    break;
+	  }
+
+	  if( !closed_bracket )
+	  {
+	    c = ' ';
+	    while( !m_InputStack.Peek()->eof() && c == ' ' )
+	      GetChar( c );
+	    text_found = false;
+	    if( c == ',' )
+	    {
+	      text_found = true;
+	    }
+	    else if( c == ']' )
+	    {
+	      text_found = true;
+	      closed_bracket = true;
+	    }
+	    if( !text_found )
+	    {
+	      line += "\"\"";
+	      errorMsg = "GetPath[] syntax error (2)";
+	      error = true;
+	      break;
+	    }
+	  }
+
+	  if( !closed_bracket )
+	  {
+	    c = ' ';
+	    while( !m_InputStack.Peek()->eof() && c == ' ' )
+	      GetChar( c );
+	    text_found = false;
+	    if( c == 'T' ) // True
+	    {
+	      text_found = ExpectText( "rue" );
+	      if( text_found )
+		path = true;
+	    }
+	    else if( c == 'F' )
+	    {
+	      text_found = ExpectText( "alse" );
+	      if( text_found )
+		path = false;
+	    }
+	    if( !text_found )
+	    {
+	      line += "\"\"";
+	      errorMsg = "GetPath[] syntax error (3)";
+	      error = true;
+	      break;
+	    }
+	  }
+
+	  if( !closed_bracket )
+	  {
+	    c = ' ';
+	    while( !m_InputStack.Peek()->eof() && c == ' ' )
+	      GetChar( c );
+	    if( c != ']' )
+	    {
+	      line += "\"\"";
+	      errorMsg = "GetPath[] syntax error; closing ']' not found";
+	      error = true;
+	      break;
+	    }
+	  }
+
+	  // now the file and path variables are defined,
+	  //   determine return value
+	  gString txt = GetFileName();
+	  const char SLASH = System::Slash();
+
+	  if( file && path )
+	  {
+	  }
+	  else if( file )
+	  {
+	    if( txt.lastOccur( SLASH ) > 0 )
+	      txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+	  }
+	  else if( path )
+	  {
+	    if( txt.lastOccur( SLASH ) > 0 )
+	      txt = txt.left( txt.lastOccur( SLASH ) );
+	    else
+	      txt = "";
+	  }
+	  else
+	    txt = "";
+	  
+	  line += (gString) '\"' + txt + '\"';
+
+	} // "GetPath"
 
       }
     }
@@ -256,10 +405,102 @@ gString gPreprocessor::GetLine( void )
   }
 
 
-
+  
   return line;
 }
 
 
 
 
+
+
+// note: filename might be changed after this call
+gInput* gPreprocessor::LoadInput( gString& name )
+{
+  gInput* _Input = NULL;
+  extern char* _SourceDir;
+  const char* SOURCE = _SourceDir; 
+  assert( SOURCE );
+  
+  const char SLASH = System::Slash();
+  
+  bool search = false;
+  if( strchr( name, SLASH ) == NULL )
+    search = true;
+  gString IniFileName;
+  
+  IniFileName = name;
+  _Input = new gFileInput( IniFileName );
+  if( _Input->IsValid() )
+  {
+    name = IniFileName;
+    return _Input;
+  }
+  else
+    delete _Input;
+
+  if( search )
+  {
+    if( System::GetEnv( "HOME" ) != NULL )
+    {
+      IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      _Input = new gFileInput( IniFileName );
+      if( _Input->IsValid() )
+      {
+	name = IniFileName;
+	return _Input;
+      }
+      else
+	delete _Input;
+    }
+
+    if( System::GetEnv( "GCLLIB" ) != NULL )
+    {
+      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      _Input = new gFileInput( IniFileName );
+      if( _Input->IsValid() )
+      {
+	name = IniFileName;
+	return _Input;
+      }
+      else
+	delete _Input;
+    }
+
+    if( SOURCE != NULL )
+    {
+      IniFileName = (gString) SOURCE + SLASH + name;
+      _Input = new gFileInput( IniFileName );
+      if( _Input->IsValid() )
+      {
+	name = IniFileName;
+	return _Input;
+      }
+      else
+	delete _Input;
+    }
+  }
+
+  return NULL;
+}
+
+
+
+
+bool gPreprocessor::ExpectText( const char* text )
+{
+  int length = strlen( text );
+  int i = 0;
+  char c = 0;
+
+  if( m_InputStack.Peek()->eof() )
+    return false;
+
+  for( i = 0; i < length; ++i )
+  {
+    GetChar( c );
+    if( m_InputStack.Peek()->eof() || c != text[i] )
+      return false;
+  }
+  return true;
+}

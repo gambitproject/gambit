@@ -24,6 +24,10 @@ public:
   static const char* GetCmdInterpreter( void );
   static int Shell( const char* command );
   static int Spawn( const char* command );
+
+  // This returns the slash character for the system;
+  //   forward '/' for UNIX, backward '\' for DOS/Windows
+  static char Slash( void );
   
 };
 

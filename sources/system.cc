@@ -117,3 +117,15 @@ int System::Spawn( const char* command )
     return 0;
 #endif   // __GNUG__, __BORLANDC__
 }
+
+
+// This returns the slash character for the system;
+//   forward '/' for UNIX, backward '\' for DOS/Windows
+char System::Slash( void )
+{
+#ifdef __GNUG__
+  return '/';
+#elif defined __BORLANDC__
+  return '\\';
+#endif   // __GNUG__, __BORLANDC__  
+}
