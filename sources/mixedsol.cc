@@ -295,10 +295,12 @@ const gTriState &MixedSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
+#include "polenum.h"
 
 MixedSolution MixedSolution::PolishEq(void) const
 {
-  return *this;
+  bool is_singular = false;
+  return PolishEquilibrium(m_support,*this,is_singular);
 }
 
 const gTriState &MixedSolution::IsPerfect(void) const

@@ -21,7 +21,8 @@ typedef enum {
   algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
   algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
   algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
-  algorithmNfg_QRE, algorithmNfg_QREALL
+  algorithmNfg_QRE, algorithmNfg_QREALL,
+  algorithmNfg_POLISH_NASH
 } NfgAlgType;
 
 gText ToText(NfgAlgType);
@@ -72,6 +73,7 @@ public:
   // GENERAL DATA ACCESS
   Nfg &Game(void) const { return m_profile.Game(); }
   gPrecision Precision(void) const { return m_precision; }
+  const MixedProfile<gNumber> *Profile(void) const { return &m_profile; }
 
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
