@@ -12,7 +12,7 @@
 
 #ifdef __GNUC__
 #define INLINE inline
-#elif definded(__BORLANDC__)
+#elif defined(__BORLANDC__)
 #define INLINE 
 #else
 #error Unsupported compiler type
@@ -89,10 +89,11 @@ template <class T> class gMatrix: public gBaseMatrix<T>
 
 //
 // Multiplication of matricies by other matricies and constants.  In matrix
-// multiplication it is checked that the matricies are of the correct size,
-// and a matrix beginning at one is released.
+// multiplication it is checked that the matricies are conformable for 
+// multiplication
 //+grp
   gMatrix<T> operator*(const gMatrix<T> &) const;
+  gVector<T> operator*(const gVector<T> &) const;
   gMatrix<T> operator*(T) const;
   gMatrix<T> operator*=(const gMatrix<T> &M)
     { 
@@ -137,6 +138,8 @@ template <class T> class gMatrix: public gBaseMatrix<T>
     { return data[MinIndex()].Last(); }
   int MinCol(void) const
     { return minimum_col; }
+  int MaxCol(void) const
+    { return data[MinIndex()].Last(); }
 
   gMatrix<T> GetSlice(int, int, int, int) const;
   gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &)
@@ -194,13 +197,31 @@ template <class T> gMatrix<T>
 gMatrix<T>::operator*(const gMatrix<T> &M) const
 {
   assert(NumColumns() == M.NumRows());
-  gMatrix<T> out(NumRows(), M.NumColumns());
+  gMatrix<T> out(M.NumRows(), M.NumColumns());
+  T outij;
   for(int i = 0; i < NumRows(); i++)
-    for(int j = 0; j < M.NumColumns(); j++)
-      for(int k = 0; k < NumColumns(); k++)
-	out(i + out.MinIndex(), j + out.MinCol()) += 
-	  (*this)(i + MinIndex(), k + MinCol()) *
-	    M(k + M.MinIndex(), j + M.MinCol());
+    for(int j = 0; j < M.NumColumns(); j++){
+	outij = (T)0;
+	for(int k = 0; k < NumColumns(); k++) 
+	  outij +=(*this)(i + MinIndex(), k + MinCol()) *
+	  M(k + M.MinIndex(), j + M.MinCol());
+	out(i + out.MinIndex(), j + out.MinCol()) =outij;
+      }
+  return out;
+}
+
+template <class T> gVector<T>
+gMatrix<T>::operator*(const gVector<T> &M) const
+{
+  assert(NumColumns() == M.Length());
+  gVector<T> out(1, NumRows());
+  T outi;
+  for(int i = 0; i < NumRows(); i++)  {
+    outi = (T)0;
+    for(int k = 0; k < NumColumns(); k++)
+      outi += (*this)(i + MinIndex(), k + MinCol()) *
+      M[k + M.First()];
+    out[i+out.First()]=outi;}
   return out;
 }
 
