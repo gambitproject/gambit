@@ -92,40 +92,6 @@ Portion* GSM_Add_gRational( Portion** param )
   return result;
 }
 
-Portion* GSM_Add_gString( Portion** param )
-{
-  Portion* result = 0;
-  result = new TextValPortion
-    (
-     ( (TextPortion*) param[ 0 ] )->Value() +
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
-  return result;
-}
-
-Portion* GSM_Add_List( Portion** param )
-{
-  Portion* result = 0;
-  int i;
-  int append_result;
-
-  gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
-  result = new ListValPortion( ( (ListPortion*) param[ 0 ] )->Value() );
-  for( i = 1; i <= p_value.Length(); i++ )
-  {
-    append_result = ( (ListPortion*) result )->Append( p_value[ i ]->ValCopy() );
-    if( append_result == 0 )
-    {
-      delete result;
-      result = new ErrorPortion
-	( "Attempted concatenating lists of different types" );
-      break;
-    }
-  }
-  return result;
-}
-
-
 Portion* GSM_Add_MixedFloat( Portion** param )
 {
   Portion* result = 0;
@@ -176,6 +142,42 @@ Portion* GSM_Add_BehavRational( Portion** param )
   result = param[ 0 ]->ValCopy();
   ( * (BehavProfile<gRational>*) ( (BehavPortion*) result )->Value() ) +=
     ( * (BehavProfile<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() );
+  return result;
+}
+
+
+//--------------------- Concat ---------------------------
+
+Portion* GSM_Concat_gString( Portion** param )
+{
+  Portion* result = 0;
+  result = new TextValPortion
+    (
+     ( (TextPortion*) param[ 0 ] )->Value() +
+     ( (TextPortion*) param[ 1 ] )->Value()
+     );
+  return result;
+}
+
+Portion* GSM_Concat_List( Portion** param )
+{
+  Portion* result = 0;
+  int i;
+  int append_result;
+
+  gBlock<Portion*>& p_value = ( (ListPortion*) param[ 1 ] )->Value();
+  result = new ListValPortion( ( (ListPortion*) param[ 0 ] )->Value() );
+  for( i = 1; i <= p_value.Length(); i++ )
+  {
+    append_result = ( (ListPortion*) result )->Append( p_value[ i ]->ValCopy() );
+    if( append_result == 0 )
+    {
+      delete result;
+      result = new ErrorPortion
+	( "Attempted concatenating lists of different types" );
+      break;
+    }
+  }
   return result;
 }
 
@@ -407,7 +409,20 @@ Portion* GSM_Multiply_BehavRational2( Portion** param )
   return result;
 }
 
+Portion* GSM_Dot_Integer(Portion **param)
+{
+  return new ErrorPortion("Not implemented yet");
+}
 
+Portion* GSM_Dot_Rational(Portion **param)
+{
+  return new ErrorPortion("Not implemented yet");
+}
+
+Portion* GSM_Dot_Float(Portion **param)
+{
+  return new ErrorPortion("Not implemented yet");
+}
 
 
 //---------------------------- GSM_Divide -------------------------------
@@ -1778,14 +1793,19 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetFuncInfo( GSM_Add_double, 2, xy_Float );
   FuncObj->SetFuncInfo( GSM_Add_int, 2, xy_Int );
   FuncObj->SetFuncInfo( GSM_Add_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_Add_gString, 2, xy_Text );
-  FuncObj->SetFuncInfo( GSM_Add_List, 2, xy_List );
   FuncObj->SetFuncInfo( GSM_Add_MixedFloat, 2, xy_MixedFloat );
   FuncObj->SetFuncInfo( GSM_Add_MixedRational, 2, xy_MixedRational );
   FuncObj->SetFuncInfo( GSM_Add_BehavFloat, 2, xy_BehavFloat );
   FuncObj->SetFuncInfo( GSM_Add_BehavRational, 2, xy_BehavRational );
   gsm->AddFunction( FuncObj );
 
+  //-------------------- Concat -------------------------
+  
+  FuncObj = new FuncDescObj("Concat");
+
+  FuncObj->SetFuncInfo( GSM_Concat_gString, 2, xy_Text );
+  FuncObj->SetFuncInfo( GSM_Concat_List, 2, xy_List );
+  gsm->AddFunction(FuncObj);
 
   //----------------------- Minus ------------------------
 
@@ -1842,6 +1862,20 @@ void Init_gsmoper( GSM* gsm )
 
   gsm->AddFunction( FuncObj );
 
+  FuncObj = new FuncDescObj("Dot");
+  
+  FuncObj->SetFuncInfo(GSM_Dot_Integer, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 0, "x", porLIST | porINTEGER);
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 1, "y", porLIST | porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_Dot_Float, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Float, 0, "x", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_Dot_Float, 1, "y", porLIST | porFLOAT);
+  
+  FuncObj->SetFuncInfo(GSM_Dot_Rational, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", porLIST | porRATIONAL);
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", porLIST | porRATIONAL);
+  gsm->AddFunction(FuncObj);
 
   //----------------------- Divide -------------------------
 

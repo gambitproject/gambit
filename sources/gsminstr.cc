@@ -193,12 +193,28 @@ void Sub::Output( gOutput& s ) const
 { s << "Sub"; }
 
 
+Opcode Concat::Type( void ) const
+{ return iCONCAT; }
+bool Concat::Execute( GSM &gsm ) const
+{ return gsm.Concat(); }
+void Concat::Output( gOutput& s ) const
+{ s << "Concat"; }
+
+
 Opcode Mul::Type( void ) const
 { return iMUL; }
 bool Mul::Execute( GSM &gsm ) const
 { return gsm.Multiply(); }
 void Mul::Output( gOutput& s ) const
 { s << "Mul"; }
+
+
+Opcode Dot::Type( void ) const
+{ return iDOT; }
+bool Dot::Execute( GSM &gsm ) const
+{ return gsm.Dot(); }
+void Dot::Output( gOutput& s ) const
+{ s << "Dot"; }
 
 
 Opcode Div::Type( void ) const

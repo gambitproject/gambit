@@ -286,7 +286,7 @@ E3:           E4
 E4:           E5
   |           E4 PLUS E5   { emit(new Add); }
   |           E4 MINUS E5  { emit(new Sub); }
-/*  |           E4 AMPER E5  { emit(new Concat); } */
+  |           E4 AMPER E5  { emit(new Concat); }
   ;
 
 E5:           E6
@@ -294,7 +294,7 @@ E5:           E6
   |           E5 SLASH E6   { emit(new Div); }
   |           E5 PERCENT E6 { emit(new Mod); }
   |           E5 DIV E6     { emit(new IntDiv); }
-/*  |           E5 DOT E6     { emit(new Dot); } */
+  |           E5 DOT E6     { emit(new Dot); }
   |           E5 CARET E6   { emit(new Power); } 
   ;
 

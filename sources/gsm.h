@@ -110,6 +110,7 @@ public:
   bool Add      ( void );
   bool Subtract ( void );
   bool Multiply ( void );
+  bool Dot      ( void );
   bool Divide   ( void );
   bool Negate   ( void );
   bool Power    ( void );

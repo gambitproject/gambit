@@ -696,6 +696,9 @@ bool GSM::Subtract ( void )
 bool GSM::Multiply ( void )
 { return _BinaryOperation( "Times" ); }
 
+bool GSM::Dot ( void )
+{ return _BinaryOperation( "Dot" ); }
+
 bool GSM::Divide ( void )
 { return _BinaryOperation( "Divide" ); }
 
