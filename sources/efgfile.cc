@@ -196,9 +196,9 @@ void mark_nodes(void)
 	 p = p->nextplayer)  {
       int iset = 1;
 
-      for (struct iset *s = p->firstiset; s != NULLiset;
-	   s = s->nextplyriset)  {
-	if (s->firstmember->game == g->gamenumber)  {
+      for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
+	   s = s->nextiset)  {
+	if (s->playr == p && s->firstmember->game == g->gamenumber)  {
 	  int member = 1;
 	  for (struct node *n = s->firstmember; n != NULLnode;
 	       n = n->nextmember, member++)  {
@@ -224,7 +224,6 @@ void mark_nodes(void)
 	n->index = 1;
       }
     }
-
   }
 }
 
@@ -319,8 +318,9 @@ void write_nodes(FILE *f, int game)
       // finally, the "real" player nodes
   for (struct plyr *p = whichpblm->firstplayer; p != NULLplyr;
        p = p->nextplayer) 
-    for (struct iset *s = p->firstiset; s != NULLiset; s = s->nextplyriset) 
-      if (s->firstmember->game == game)
+    for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
+	 s = s->nextiset) 
+      if (s->playr == p && s->firstmember->game == game)
 	for (n = s->firstmember; n != NULLnode; n = n->nextmember)
 	  write_node(f, n);
   
