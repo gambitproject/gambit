@@ -18,9 +18,11 @@
 #include "dllegends.h"
 
 TreeDrawSettings::TreeDrawSettings(void)
-  : m_nodeAboveFont(*wxNORMAL_FONT), m_nodeBelowFont(*wxNORMAL_FONT),
-    m_nodeRightFont(*wxNORMAL_FONT), m_branchAboveFont(*wxNORMAL_FONT),
-    m_branchBelowFont(*wxNORMAL_FONT)
+  : m_nodeAboveFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
+    m_nodeBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
+    m_nodeRightFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
+    m_branchAboveFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL)),
+    m_branchBelowFont(*wxTheFontList->FindOrCreateFont(10, wxDEFAULT, wxNORMAL, wxNORMAL))
 {
   LoadOptions();
 }
@@ -196,13 +198,9 @@ void TreeDrawSettings::LoadFont(const wxString &p_prefix,
   p_config.Read(p_prefix + "Face", &face, "");
   p_config.Read(p_prefix + "Style", &style, wxNORMAL);
   p_config.Read(p_prefix + "Weight", &weight, wxNORMAL);
-  p_font.SetPointSize(size);
-  p_font.SetFamily(family);
-  p_font.SetStyle(style);
-  p_font.SetWeight(weight);
-  if (face != "") {
-    p_font.SetFaceName(face);
-  }
+
+  p_font = *wxTheFontList->FindOrCreateFont(size, family, style, weight,
+					    false, face);
 }
 
 void TreeDrawSettings::SaveOptions(void)

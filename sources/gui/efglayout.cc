@@ -33,34 +33,34 @@ int MAX_TH = 20;
 inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
                      const wxColour &color, int thick = 0)
 {
-  dc.SetPen(wxPen(color, (thick) ? 8 : 2, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, (thick) ? 8 : 2, wxSOLID));
   dc.DrawLine((int) x_s, (int) y_s, (int) x_e, (int) y_e);
 }
 
 inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,
                           const wxColour &color)
 {
-  dc.SetPen(wxPen(color, 2, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 2, wxSOLID));
   dc.DrawRectangle(x_s, y_s, w, h);
 }
 
 inline void DrawThinLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
                          const wxColour &color)
 {
-  dc.SetPen(wxPen(color, 1, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 1, wxSOLID));
   dc.DrawLine(x_s, y_s, x_e, y_e);
 }
 
 inline void DrawDashedLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
 			   const wxColour &color)
 {
-  dc.SetPen(wxPen(color, 1, wxSHORT_DASH));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 1, wxSHORT_DASH));
   dc.DrawLine(x_s, y_s, x_e, y_e);
 }
 
 inline void DrawCircle(wxDC &dc, int x, int y, int r, const wxColour &color)
 {
-  dc.SetPen(wxPen(color, 3, wxSOLID));
+  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxSOLID));
   dc.DrawEllipse(x-r, y-r, 2*r, 2*r);
 }
 
