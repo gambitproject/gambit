@@ -66,7 +66,6 @@ gbtText ToText(int);
 gbtText ToText(long);
 gbtText ToText(double);
 gbtText ToText(double p_number, int p_precision);
-gbtText ToText(long double);
 gbtText ToText(gbtTriState);
 
 double ToDouble(const gbtText &);

@@ -30,7 +30,6 @@
 #include "mpfloat.h"
 
 template class gbtVector<int>;
-template class gbtVector<long>;
 template class gbtVector<double>;
 template class gbtVector<gbtInteger>;
 template class gbtVector<gbtRational>;
@@ -38,7 +37,6 @@ template class gbtVector<gbtComplex>;
 template class gbtVector<gbtNumber>;
 
 template gbtOutput &operator<<(gbtOutput &, const gbtVector<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<long> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtVector<double> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtInteger> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtRational> &);
@@ -59,5 +57,5 @@ template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtDouble>&);
 template class gbtList<gbtVector<double> >;
 template class gbtList<gbtVector<gbtRational> >;
 template class gbtList<gbtVector<gbtComplex> >;
-template gbtOutput& operator << (gbtOutput& output, 
+template gbtOutput &operator<<(gbtOutput& output, 
 			       const gbtList<gbtVector<gbtRational> >&);

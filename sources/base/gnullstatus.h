@@ -47,7 +47,6 @@ public:
   gbtOutput &operator<<(long) { return *this; }
   gbtOutput &operator<<(char) { return *this; }
   gbtOutput &operator<<(double) { return *this; }
-  gbtOutput &operator<<(long double) { return *this; }
   gbtOutput &operator<<(float) { return *this; }
   gbtOutput &operator<<(const char *) { return *this; }
   gbtOutput &operator<<(const void *) { return *this; }

@@ -29,7 +29,6 @@
 
 template class gbtRectArray<int>;
 template class gbtRectArray<double>;
-template class gbtRectArray<long double>;
 template class gbtRectArray<gbtText>;
 
 template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<int> &);

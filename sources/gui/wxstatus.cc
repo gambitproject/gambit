@@ -98,13 +98,6 @@ gbtOutput &gbtProgressDialog::operator<<(double x)
   return *this;
 }
 
-gbtOutput &gbtProgressDialog::operator<<(long double x)
-{
-  m_buffer += wxString::Format(wxT("%Lf"), x);
-  wxGetApp().Yield();
-  return *this;
-}
-
 gbtOutput &gbtProgressDialog::operator<<(float x)
 {
   m_buffer += wxString::Format(wxT("%f"), x);

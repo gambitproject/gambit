@@ -29,38 +29,15 @@
 #include "garray.imp"
 #include "gblock.imp"
 
-template class gbtBlock<bool>;
 template class gbtBlock<int>;
-template class gbtBlock<long>;
-template class gbtBlock<float>;
 template class gbtBlock<double>;
 template class gbtBlock<gbtText>;
 
-template class gbtArray<gbtBlock<int> >;
-template class gbtArray<gbtBlock<double> >;
-template class gbtBlock<gbtArray<int> *>;
-template class gbtBlock<gbtBlock<int> >;
-template class gbtBlock<gbtBlock<double> >;
-template class gbtArray<gbtArray<gbtText> >;
 template class gbtBlock<gbtArray<gbtText> >;
 
 #ifndef __BCC55__
-template bool operator==(const gbtArray<gbtText> &, const gbtArray<gbtText> &);
-template bool operator!=(const gbtArray<gbtText> &, const gbtArray<gbtText> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBlock<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBlock<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtText> &);
 #endif  // __BCC55__
 
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<bool> &);
-#ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<int> &);
-#endif  // __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<long> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<float> &);
-#ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<double> &);
-#endif  // __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtText> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtBlock<int> > &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtBlock<double> > &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtArray<int> *> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtBlock<int> > &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtBlock<double> > &);

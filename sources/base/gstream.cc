@@ -402,19 +402,6 @@ gbtOutput &gbtStandardOutput::operator<<(double x)
   return *this;
 }
 
-gbtOutput &gbtStandardOutput::operator<<(long double x)
-{
-  if (Represent == 'f')   {
-    if (printf("%*.*Lf", Width, Prec, x) < 0)  
-      throw WriteFailed();
-  }
-  else   {   // Represent == 'e'
-    if (printf("%*.*Le", Width, Prec, x) < 0) 
-      throw WriteFailed();
-  }
-  return *this;
-}
-
 gbtOutput &gbtStandardOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
@@ -575,21 +562,6 @@ gbtOutput &gbtFileOutput::operator<<(double x)
   return *this;
 }
 
-gbtOutput &gbtFileOutput::operator<<(long double x)
-{
-  Open();
-  if (Represent == 'f')   {
-    if (fprintf(f, "%*.*Lf", Width, Prec, x) < 0)  
-      throw WriteFailed();
-  }
-  else   {   // Represent == 'e'
-    if (fprintf(f, "%*.*Le", Width, Prec, x) < 0) 
-      throw WriteFailed();
-  }
-  Close();
-  return *this;
-}
-
 gbtOutput &gbtFileOutput::operator<<(float x)
 {
   Open();
@@ -655,8 +627,6 @@ gbtOutput &gbtNullOutput::operator<<(long)   { return *this; }
 gbtOutput &gbtNullOutput::operator<<(char)   { return *this; }
 
 gbtOutput &gbtNullOutput::operator<<(double)   { return *this; }
-
-gbtOutput &gbtNullOutput::operator<<(long double) { return *this; }
 
 gbtOutput &gbtNullOutput::operator<<(float)    { return *this; }
 

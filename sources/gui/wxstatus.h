@@ -59,7 +59,6 @@ public:
   gbtOutput &operator<<(long x);
   gbtOutput &operator<<(char x);
   gbtOutput &operator<<(double x);
-  gbtOutput &operator<<(long double x);
   gbtOutput &operator<<(float x);
   gbtOutput &operator<<(const char *x);
   gbtOutput &operator<<(const void *x);

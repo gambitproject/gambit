@@ -29,17 +29,15 @@
 
 template class gbtArray<bool>;
 template class gbtArray<int>;
-template class gbtArray<long>;
-template class gbtArray<float>;
 template class gbtArray<double>;
-template class gbtArray<long double>;
 template class gbtArray<gbtText>;
-template class gbtArray<gbtArray<int> >;
-template class gbtArray<gbtArray<int> *>;
-template class gbtArray<gbtArray<double> >;
-template class gbtArray<void *>;
+
+template class gbtArray<gbtArray<gbtText> >;
 template class gbtArray<gbtList<bool> >;
 template class gbtArray<gbtList<gbtList<bool> > >;
+
+template class gbtArray<gbtArray<int> *>;
+
 template bool operator==(const gbtArray<int> &, const gbtArray<int> &);
 template bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
 template bool operator==(const gbtArray<gbtList<bool> > &, 
@@ -52,14 +50,7 @@ template bool operator!=(const gbtArray<gbtList<gbtList<bool> > > &,
 			 const gbtArray<gbtList<gbtList<bool> > > &);
 
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<bool> &);
-#ifndef __BCC55__
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<int> &);
-#endif  // __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<long> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<float> &);
-#ifndef __BCC55__
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<double> &);
-#endif  // __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<int> > &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<int> *> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<double> > &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtText> &);
+

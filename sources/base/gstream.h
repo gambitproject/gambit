@@ -171,7 +171,6 @@ class gbtOutput  {
     virtual gbtOutput &operator<<(long x) = 0;
     virtual gbtOutput &operator<<(char x) = 0;
     virtual gbtOutput &operator<<(double x) = 0;
-    virtual gbtOutput &operator<<(long double x) = 0;
     virtual gbtOutput &operator<<(float x) = 0;
     virtual gbtOutput &operator<<(const char *x) = 0;
     virtual gbtOutput &operator<<(const void *x) = 0;
@@ -223,7 +222,6 @@ public:
   gbtOutput &operator<<(long x);
   gbtOutput &operator<<(char x);
   gbtOutput &operator<<(double x);
-  gbtOutput &operator<<(long double x);
   gbtOutput &operator<<(float x);
   gbtOutput &operator<<(const char *x);
   gbtOutput &operator<<(const void *x);
@@ -272,7 +270,6 @@ class gbtFileOutput : public gbtOutput  {
     gbtOutput &operator<<(long x);
     gbtOutput &operator<<(char x);
     gbtOutput &operator<<(double x);
-    gbtOutput &operator<<(long double x);
     gbtOutput &operator<<(float x);
     gbtOutput &operator<<(const char *x);
     gbtOutput &operator<<(const void *x);
@@ -301,7 +298,6 @@ class gbtNullOutput : public gbtOutput  {
     gbtOutput &operator<<(long x);
     gbtOutput &operator<<(char x);
     gbtOutput &operator<<(double x);
-    gbtOutput &operator<<(long double x);
     gbtOutput &operator<<(float x);
     gbtOutput &operator<<(const char *x);
     gbtOutput &operator<<(const void *x);
