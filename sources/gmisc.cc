@@ -200,8 +200,6 @@ double ToDouble(const gString &s)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-#include "rational.h"
-
 TEMPLATE int gmin(const int &a, const int &b);
 TEMPLATE float gmin(const float &a, const float &b);
 TEMPLATE double gmin(const double &a, const double &b);
