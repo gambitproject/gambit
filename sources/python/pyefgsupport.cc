@@ -129,7 +129,7 @@ efsupport_getattr(efsupportobject *self, char *name)
 }
 
 static int
-efsupport_print(efsupportobject *self, FILE *fp, int flags)
+efsupport_print(efsupportobject * /*self*/, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{efsupport}>");
   return 0;

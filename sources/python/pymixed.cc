@@ -295,7 +295,7 @@ mixed_getattr(mixedobject *self, char *name)
 }
 
 static int
-mixed_print(mixedobject *self, FILE *fp, int flags)
+mixed_print(mixedobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{mixed} ");
 

@@ -405,7 +405,7 @@ behav_getattr(behavobject *self, char *name)
 }
 
 static int
-behav_print(behavobject *self, FILE *fp, int flags)
+behav_print(behavobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{behav} ");
 

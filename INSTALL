@@ -106,6 +106,18 @@ usual build chain yet.  To build it, cd to sources/python and issue a
 
 python setup.py build
 
+For Windows users, to use the Borland C++ 5.5 compiler (which is what Gambit
+is currently tested with), you'll do
+
+python setup.py build --compiler=bcpp
+
+Note that you may need to take a few additional steps up front for this
+to work; see http://www.python.org/doc/current/inst/non-ms-compilers.html
+for details.  Also, if you do not have Borland C++ 5.5 installed in its
+usual location of C:\BORLAND\BCC55, you'll need to edit the file
+gambit/sources/python/setup.py to point the compiler and linker to the
+correct include and library directories, respectively.
+
 Hopefully, assuming Python is correctly installed on your system, this 
 should build without a problem.  (Windows users will probably need to
 specify an extra flag indicating the compiler to use.)  You can then try

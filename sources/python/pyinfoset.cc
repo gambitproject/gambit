@@ -188,7 +188,7 @@ action_compare(actionobject *obj1, actionobject *obj2)
 }
 
 static int
-action_print(actionobject *self, FILE *fp, int flags)
+action_print(actionobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{action} \"%s\">", (char *) self->m_action->GetLabel());
   return 0;
@@ -358,7 +358,7 @@ infoset_compare(infosetobject *obj1, infosetobject *obj2)
 }
 
 static int
-infoset_print(infosetobject *self, FILE *fp, int flags)
+infoset_print(infosetobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{infoset} \"%s\">", (char *) self->m_infoset->GetLabel());
   return 0;

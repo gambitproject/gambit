@@ -34,7 +34,7 @@
  ************************************************************************/
 
 PyObject *
-gbt_nash_logit_nfg(PyObject *self, PyObject *args)
+gbt_nash_logit_nfg(PyObject */*self*/, PyObject *args)
 {
   PyObject *nfg;
 

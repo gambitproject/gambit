@@ -25,12 +25,25 @@
 #
 
 from distutils.core import setup, Extension
+import os
+from os.path import normcase
 
 libs = [ 'nash', 'game', 'poly', 'pelican', 'numerical', 'math', 'base' ]
 
-libdirs = [ '.', '../base', '../math', '../numerical',
-            '../game', '../nash', '../poly', '../pelican' ]
+libdirs = [ '.',
+	    normcase('../base'),
+	    normcase('../math'),
+	    normcase('../numerical'),
+            normcase('../game'), 
+            normcase('../nash'), 
+            normcase('../poly'),
+            normcase('../pelican') ]
+if os.name == 'nt':
+	libdirs += [ 'c:\\borland\\bcc55\\lib' ]
 
+incdirs = [ '..' ]
+if os.name == 'nt':
+	incdirs += [ 'c:/borland/bcc55/include' ]
 
 ext = Extension('gambit', [ 'pybehav.cc', 'pyefg.cc', 'pyefgsupport.cc',
                             'pygambit.cc', 'pyinfoset.cc', 'pymixed.cc',
@@ -38,7 +51,7 @@ ext = Extension('gambit', [ 'pybehav.cc', 'pyefg.cc', 'pyefgsupport.cc',
                             'pynode.cc',
                             'pyoutcome.cc', 'pyplayer.cc',
                             'pystrategy.cc' ],
-                include_dirs=[ '..' ],
+                include_dirs=incdirs,
                 library_dirs=libdirs,
                 libraries=libs,
                 extra_compile_args=['-O'],

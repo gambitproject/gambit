@@ -204,9 +204,6 @@ nfg_writenfg(nfgobject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
   }
-
-  Py_INCREF(Py_None);
-  return Py_None;
 }
 
 static struct PyMethodDef nfg_methods[] = {
@@ -268,7 +265,7 @@ nfg_compare(nfgobject *obj1, nfgobject *obj2)
 }
 
 static int
-nfg_print(nfgobject *self, FILE *fp, int flags)
+nfg_print(nfgobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{nfg} \"%s\">", (char *) self->m_nfg->GetTitle());
   return 0;
@@ -279,7 +276,7 @@ nfg_print(nfgobject *self, FILE *fp, int flags)
  ************************************************************************/
 
 PyObject *
-gbt_new_nfg(PyObject *self, PyObject *args)
+gbt_new_nfg(PyObject */*self*/, PyObject *args)
 {
   PyObject *list;
 
@@ -307,7 +304,7 @@ gbt_new_nfg(PyObject *self, PyObject *args)
 }
 
 PyObject *
-gbt_read_nfg(PyObject *self, PyObject *args)
+gbt_read_nfg(PyObject */*self*/, PyObject *args)
 {
   char *filename;
 

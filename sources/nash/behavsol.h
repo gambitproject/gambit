@@ -124,7 +124,7 @@ public:
   // Obsolescent version
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
 
-  gNumber GetPayoff(gbtEfgPlayer p_player) const
+  gNumber GetPayoff(const gbtEfgPlayer &p_player) const
     { return m_profile->Payoff(p_player.GetId()); }
   
   // DATA ACCESS
@@ -133,8 +133,7 @@ public:
   gNumber GetBelief(const gbtEfgNode &node) const
     { return m_profile->GetBeliefProb(node); }
   gNumber GetNodeValue(const gbtEfgNode &p_node,
-		       const gbtEfgPlayer &p_player) const
-    { return m_profile->GetNodeValue(p_node)[p_player.GetId()]; }
+		       const gbtEfgPlayer &p_player) const;
   gVector<gNumber> NodeValue(const gbtEfgNode &node) const
     { return m_profile->GetNodeValue(node); }
   gNumber GetInfosetProb(const gbtEfgInfoset &iset) const

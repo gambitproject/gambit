@@ -317,12 +317,14 @@ gTriState BehavSolution::GetSequential(void) const
     return IsSubgamePerfect();
 }
 
-/*
-gNumber BehavSolution::GetLiapValue(void)
+//
+// This function no longer inlined to satisfy a Borland C++ warning
+//
+gNumber BehavSolution::GetNodeValue(const gbtEfgNode &p_node,
+				    const gbtEfgPlayer &p_player) const
 { 
-  return m_profile->LiapValue();
+  return m_profile->GetNodeValue(p_node)[p_player.GetId()];
 }
-*/
 
 void BehavSolution::LevelPrecision(void)
 {

@@ -264,9 +264,6 @@ efg_writeefg(efgobject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
   }
-
-  Py_INCREF(Py_None);
-  return Py_None;
 }
 
 static struct PyMethodDef efg_methods[] = {
@@ -333,7 +330,7 @@ efg_compare(efgobject *obj1, efgobject *obj2)
 }
 
 static int
-efg_print(efgobject *self, FILE *fp, int flags)
+efg_print(efgobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg->GetLabel());
   return 0;
@@ -356,7 +353,7 @@ gbt_new_efg(PyObject *self, PyObject *args)
 }
 
 PyObject *
-gbt_read_efg(PyObject *self, PyObject *args)
+gbt_read_efg(PyObject */*self*/, PyObject *args)
 {
   char *filename;
 

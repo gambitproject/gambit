@@ -212,7 +212,7 @@ efoutcome_compare(efoutcomeobject *obj1, efoutcomeobject *obj2)
 }
 
 static int
-efoutcome_print(efoutcomeobject *self, FILE *fp, int flags)
+efoutcome_print(efoutcomeobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{efoutcome} \"%s\">", (char *) self->m_efoutcome->GetLabel());
   return 0;

@@ -57,8 +57,6 @@ extern void initstrategy(void);
 extern "C" void
 initgambit(void)
 {
-  PyObject *m;
-
   initbehav();
   initefg();
   initefgsupport();
@@ -72,7 +70,7 @@ initgambit(void)
   initplayer();
   initstrategy();
 
-  m = Py_InitModule("gambit", gambit_methods);
+  Py_InitModule("gambit", gambit_methods);
 
   if (PyErr_Occurred()) {
     Py_FatalError("can't initialize module gambit");

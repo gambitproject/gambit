@@ -129,7 +129,7 @@ nfsupport_getattr(nfsupportobject *self, char *name)
 }
 
 static int
-nfsupport_print(nfsupportobject *self, FILE *fp, int flags)
+nfsupport_print(nfsupportobject */*self*/, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{nfsupport}>");
   return 0;

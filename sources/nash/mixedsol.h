@@ -68,7 +68,7 @@ public:
 
   void SetStrategyProb(gbtNfgStrategy, const gNumber &);
   const gNumber &operator()(gbtNfgStrategy) const;
-  const gNumber &GetStrategyProb(gbtNfgStrategy p_strategy) const
+  const gNumber &GetStrategyProb(const gbtNfgStrategy &p_strategy) const
     { return (*this)(p_strategy); }
 
   MixedSolution &operator+=(const MixedSolution &);

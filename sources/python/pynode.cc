@@ -354,7 +354,7 @@ node_compare(nodeobject *obj1, nodeobject *obj2)
 }
 
 static int
-node_print(nodeobject *self, FILE *fp, int flags)
+node_print(nodeobject *self, FILE *fp, int /*flags*/)
 {
   fprintf(fp, "<{node} \"%s\">", (char *) self->m_node->GetLabel());
   return 0;
