@@ -994,7 +994,8 @@ static Portion* GSM_Randomize(Portion** param)
   if(_RandomSeed != 0)
     _idum = _RandomSeed;
   v = ran1(&_idum);
-  return new NumberPortion(v);
+  gRational x(v,(long)IM);
+  return new NumberPortion(x);
 }
 
 //--------
