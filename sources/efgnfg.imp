@@ -24,7 +24,7 @@ void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
 		      int pl, const gArray<int> *const actions,
 		      BehavNode<T> *n)
 {
-  static const T tremble = (T) 0.0;
+  static const T tremble = (T) 0;
   T prob;
 
   Node *node = n->node;
@@ -33,15 +33,15 @@ void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
     if (node->GetPlayer() && !node->GetPlayer()->IsChance())   {
       if (node->GetPlayer()->GetNumber() == pl)  {
 	if ((*actions)[node->GetInfoset()->GetNumber()] == i)
-	  prob = (T) 1.0 - tremble + tremble / (T) node->NumChildren();
+	  prob = (T) 1 - tremble + tremble / (T) node->NumChildren();
 	else
 	  prob = tremble / (T) node->NumChildren();
       }
       else if (bp.Support().Find(node->GetInfoset()->Actions()[i]))
-	prob = (T) 1.0 / (T) bp.Support().NumActions(node->GetPlayer()->GetNumber(),
+	prob = (T) 1 / (T) bp.Support().NumActions(node->GetPlayer()->GetNumber(),
 							  node->GetInfoset()->GetNumber());
       else
-	prob = (T) 0.0;
+	prob = (T) 0;
     }
     else  {   // n.GetPlayer() == 0
       prob = E.GetChanceProb(node->GetInfoset(), i);
@@ -63,7 +63,7 @@ void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
   for (int i = 1; i <= n->children.Length(); i++)   {
     BehavNode<T> *child = n->children[i];
     if (n->node->GetPlayer() && n->node->GetPlayer()->GetNumber() == pl)
-      if (n->nval > (T) 0.0 && child->nval > (T) 0.0)  {
+      if (n->nval > (T) 0 && child->nval > (T) 0)  {
 	bp(n->node->GetPlayer()->GetNumber(),
 	   n->node->GetInfoset()->GetNumber(), 
 	   bp.Support().Find(n->node->GetInfoset()->Actions()[i])) =
@@ -75,7 +75,7 @@ void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
 
 template <class T> void ClearNodeProbs(BehavNode<T> *n)
 {
-  n->nval = 0.0;
+  n->nval = 0;
   for (int i = 1; i <= n->children.Length(); i++)
     ClearNodeProbs(n->children[i]);
 }
@@ -104,7 +104,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       int snum = support.Strategies(pl)[st]->number;
-      if (mp(pl, st) > (T) 0.0)  {
+      if (mp(pl, st) > (T) 0)  {
 	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
 
 	n->bval = mp(pl, st);
@@ -113,7 +113,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
       }
     }
     
-    bp.root->nval = (T) 1.0;
+    bp.root->nval = (T) 1;
     BehaviorStrat(E, bp, pl, n);
   }
 }
@@ -131,7 +131,7 @@ void BehavToMixed(const Efg &E, const BehavProfile<T> &bp,
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     for (int st = 1; st <= N.NumStrats(pl); st++)  {
-      T prob = (T) 1.0;
+      T prob = (T) 1;
 
       for (int iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++) {
 	if ((*E.lexicon->strategies[pl][st])[iset] > 0)
