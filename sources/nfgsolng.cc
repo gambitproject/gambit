@@ -605,8 +605,8 @@ bool guinfgQre::SolveSetup(void)
 // QreGrid
 //-------------
 
+#include "dlqregrid.h"
 #include "grid.h"
-#include "gridprm.h"
 
 guinfgQreAll::guinfgQreAll(const NFSupport &p_support,
 			   NfgShowInterface *p_parent)
@@ -615,22 +615,40 @@ guinfgQreAll::guinfgQreAll(const NFSupport &p_support,
 
 gList<MixedSolution> guinfgQreAll::Solve(void)
 {
+  wxStatus status(m_parent->Frame(), "QreGridSolve Progress");
+
+  GridParams params(status);
+  params.minLam = m_minLam;
+  params.maxLam = m_maxLam;
+  params.delLam = m_delLam;
+  params.tol1 = m_tol1;
+  params.tol2 = m_tol2;
+  params.delp1 = m_delp1;
+  params.delp2 = m_delp2;
+  params.powLam = m_powLam;
+  params.multi_grid = m_multiGrid;
+  params.pxifile = m_pxiFile;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
+
+  gList<MixedSolution> solutions;
   try {
-    wxStatus status(m_parent->Frame(), "QreAllSolve Progress");
-    GridParams params(status);
-    gList<MixedSolution> solutions;
     GridSolve(m_support, params, solutions);
-    //GSPD.RunPxi();
-    return solutions;
   }
-  catch (gSignalBreak &) {
-    return gList<MixedSolution>();
+  catch (gSignalBreak &) { }
+
+  if (m_runPxi) {
+    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+      wxMessageBox("Unable to launch PXI successfully");
+    }
   }
+
+  return solutions;
 }
 
 bool guinfgQreAll::SolveSetup(void)
 {
-  GridSolveParamsDialog dialog(m_parent->Frame(), m_parent->Filename());
+  dialogQreGrid dialog(m_parent->Frame(), m_parent->Filename());
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -638,6 +656,24 @@ bool guinfgQreAll::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
 
+    m_startOption = dialog.StartOption();
+    m_minLam = dialog.MinLam();
+    m_maxLam = dialog.MaxLam();
+    m_delLam = dialog.DelLam();
+    m_tol1 = dialog.Tol1();
+    m_tol2 = dialog.Tol2();
+    m_delp1 = dialog.DelP1();
+    m_delp2 = dialog.DelP2();
+    m_powLam = (dialog.LinearPlot()) ? 0 : 1;
+    m_multiGrid = dialog.MultiGrid();
+
+    m_pxiFile = dialog.PxiFile();
+    m_pxiFilename = dialog.PxiFilename();
+    m_runPxi = dialog.RunPxi();
+    m_pxiCommand = dialog.PxiCommand();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

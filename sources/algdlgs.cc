@@ -696,7 +696,22 @@ dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 dialogQre::~dialogQre()
 {
   if (m_completed == wxOK) {
-
+    wxWriteResource("Algorithm Params", "Qre-minLam",
+		    (float) m_minLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Qre-maxLam",
+		    (float) m_maxLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Qre-delLam",
+		    (float) m_delLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tolND",
+		    (float) m_tolN->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tol1D",
+		    (float) m_tol1->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-maxitsND",
+		    m_maxitsN->GetInteger(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-maxits1D",
+		    m_maxits1->GetInteger(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Qre-startOption",
+		    m_startOption->GetSelection(), "gambit.ini");
   }
 }
 
@@ -728,11 +743,97 @@ void dialogQre::AlgorithmFields(void)
   m_maxits1 = new wxIntegerItem(this, "Iterations 1-D", maxits1);
   NewLine();
 
+  int startOption;
+  wxGetResource("Algorithm Params", "Qre-startOption",
+		&startOption, "gambit.ini");
   char *startOptions[] = { "Default", "Saved", "Prompt" };
   m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
 				 3, startOptions);
+  if (startOption >= 0 && startOption <= 2)
+    m_startOption->SetSelection(startOption);
   NewLine();
 
   PxiFields();
 }  
+
+//=======================================================================
+//                    dialogQreGrid: Member functions
+//=======================================================================
+
+#include "dlqregrid.h"
+
+dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
+			     const gText &p_filename)
+  : dialogPxi("QreGridSolve Params", p_filename, p_parent, QRE_HELP)
+{
+  MakeCommonFields(true, false, true);
+  Go();
+}
+
+dialogQreGrid::~dialogQreGrid()
+{
+  if (m_completed == wxOK) {
+    wxWriteResource("Algorithm Params", "QreGrid-minLam",
+		    (float) m_minLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-maxLam",
+		    (float) m_maxLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-delLam",
+		    (float) m_delLam->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Parmas", "QreGrid-delp1",
+		    (float) m_delp1->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-delp2",
+		    (float) m_delp2->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-tol1",
+		    (float) m_tol1->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-tol2",
+		    (float) m_tol2->GetNumber(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-startOption",
+		    m_startOption->GetSelection(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
+		    m_multiGrid->GetValue(), "gambit.ini");
+  }
+}
+
+void dialogQreGrid::AlgorithmFields(void)
+{
+  float minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
+  wxGetResource("Algorithm Params", "QreGrid-minLam", &minLam, "gambit.ini");
+  wxGetResource("Algorithm Params", "QreGrid-maxLam", &maxLam, "gambit.ini");
+  wxGetResource("Algorithm Params", "QreGrid-delLam", &delLam, "gambit.ini");
+  wxGetResource("Algorithm Parmas", "QreGrid-delp1", &delp1, "gambit.ini");
+  wxGetResource("Algorithm Params", "QreGrid-delp2", &delp2, "gambit.ini");
+  wxGetResource("Algorithm Params", "QreGrid-tol1", &tol1, "gambit.ini");
+  wxGetResource("Algorithm Params", "QreGrid-tol2", &tol2, "gambit.ini");
+
+  m_minLam = new wxNumberItem(this, "minLam", minLam);
+  m_maxLam = new wxNumberItem(this, "maxLam", maxLam);
+  m_delLam = new wxNumberItem(this, "delLam", delLam);
+  NewLine();
+
+  m_delp1 = new wxNumberItem(this, "Grid 1 Del", delp1);
+  m_tol1 = new wxNumberItem(this, "Grid 1 Tol", tol1);
+  NewLine();
+  m_delp2 = new wxNumberItem(this, "Grid 2 Del", delp2);
+  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2);
+  NewLine();
+
+  Bool multiGrid;
+  wxGetResource("Algorithm Params", "QreGrid-multiGrid",
+		&multiGrid, "gambit.ini");
+  m_multiGrid = new wxCheckBox(this, 0, "Use MultiGrid");
+  m_multiGrid->SetValue(multiGrid);
+  NewLine();
+
+  int startOption;
+  wxGetResource("Algorithm Params", "Qre-GridstartOption",
+		&startOption, "gambit.ini");
+  char *startOptions[] = { "Default", "Saved", "Prompt" };
+  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
+				 3, startOptions);
+  if (startOption >= 0 && startOption <= 2)
+    m_startOption->SetSelection(startOption);
+  NewLine();
+
+  PxiFields();
+}
 
