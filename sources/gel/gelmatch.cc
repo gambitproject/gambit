@@ -429,17 +429,49 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard, gelExpr *iftrue)
   switch (iftrue->Type())   {
     case gelBOOLEAN:
       return new gelConditional<gTriState *>((gelExpression<gTriState *> *) guard, 
-	    	   		           (gelExpression<gTriState *> *) iftrue,
-					   new gelConstant<gTriState *>(new gTriState(triFALSE)));
+					     (gelExpression<gTriState *> *) iftrue);
     case gelNUMBER:
       return new gelConditional<gNumber *>((gelExpression<gTriState *> *) guard, 
-	    	   		         (gelExpression<gNumber *> *) iftrue,
-					 new gelConstant<gNumber *>(0));
+					   (gelExpression<gNumber *> *) iftrue);
     case gelTEXT:
       return new gelConditional<gText *>((gelExpression<gTriState *> *) guard, 
-	    	   		       (gelExpression<gText *> *) iftrue,
-				       new gelConstant<gText *>(new gText("")));
-
+					 (gelExpression<gText *> *) iftrue);
+    case gelEFG:
+      return new gelConditional<Efg *>((gelExpression<gTriState *> *) guard,
+				       (gelExpression<Efg *> *) iftrue);
+    case gelACTION:
+      return new gelConditional<Action *>((gelExpression<gTriState *> *) guard,
+					  (gelExpression<Action *> *) iftrue);
+    case gelINFOSET:
+      return new gelConditional<Infoset *>((gelExpression<gTriState *> *) guard,
+					   (gelExpression<Infoset *> *) iftrue);
+    case gelNODE:
+      return new gelConditional<Node *>((gelExpression<gTriState *> *) guard,
+					(gelExpression<Node *> *) iftrue);
+    case gelEFPLAYER:
+      return new gelConditional<EFPlayer *>((gelExpression<gTriState *> *) guard,
+					    (gelExpression<EFPlayer *> *) iftrue);
+    case gelEFOUTCOME:
+      return new gelConditional<EFOutcome *>((gelExpression<gTriState *> *) guard,
+					     (gelExpression<EFOutcome *> *) iftrue);
+    case gelNFG:
+      return new gelConditional<Nfg *>((gelExpression<gTriState *> *) guard,
+				       (gelExpression<Nfg *> *) iftrue);
+    case gelSTRATEGY:
+      return new gelConditional<Strategy *>((gelExpression<gTriState *> *) guard,
+					    (gelExpression<Strategy *> *) iftrue);
+    case gelNFPLAYER:
+      return new gelConditional<NFPlayer *>((gelExpression<gTriState *> *) guard,
+					    (gelExpression<NFPlayer *> *) iftrue);
+    case gelNFOUTCOME:
+      return new gelConditional<NFOutcome *>((gelExpression<gTriState *> *) guard,
+					     (gelExpression<NFOutcome *> *) iftrue);
+    case gelINPUT:
+      return new gelConditional<gInput *>((gelExpression<gTriState *> *) guard,
+					  (gelExpression<gInput *> *) iftrue);
+    case gelOUTPUT:
+      return new gelConditional<gOutput *>((gelExpression<gTriState *> *) guard,
+					   (gelExpression<gOutput *> *) iftrue);
     default:
       delete guard;
       delete iftrue;

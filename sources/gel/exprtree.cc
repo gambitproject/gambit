@@ -189,8 +189,13 @@ gNestedList<T> gelConditional<T>::Evaluate(gelVariableTable *vt) const
 {
   if (*guard->Evaluate(vt).Data()[1] == triTRUE)
     return truebr->Evaluate(vt);
-  else
+  else if (falsebr)
     return falsebr->Evaluate(vt);
+  else   {
+    gNestedList<T> ret;
+    ret.Data().Append(0);
+    return ret;
+  }
 }
 
 template class gelConditional<gNumber *>;
