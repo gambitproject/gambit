@@ -197,7 +197,7 @@ template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
     int n=N.NumPlayers();
     f << n << " ";
     for(int i=1;i<=n;i++)
-      f << N.NumStrats(i);
+      f << N.NumStrats(i) << " ";
     f << "\n";
 //    N.WriteNfgFile(f);
   }
