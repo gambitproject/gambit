@@ -71,8 +71,6 @@ public:
   int operator!=( T s ) const;
 
   // manipulation functions
-  void AddRow(const gVector<T> &);
-  void RemoveRow(int);
   void SwitchRow(int, const gVector<T> &); // redundant (identical to SetRow)
   void SwitchRowWithVector(int, gVector<T> &);
   void SwitchRows(int, int);
@@ -81,8 +79,6 @@ public:
   void SetRow(int, const gVector<T>&);
   void MakeIdent(void);  // set matrix to identity matrix
 
-  void AddColumn(const gVector<T> &);
-  void RemoveColumn(int);
   void SwitchColumn(int, const gVector<T> &); // redundant (identical to SetColumn)
   void SwitchColumnWithVector(int, gVector<T> &);
   void SwitchColumns(int, int);
@@ -90,8 +86,6 @@ public:
   void GetColumn(int, gVector<T>&) const;
   void SetColumn(int, const gVector<T>&);
 
-  gMatrix<T> GetSlice(int, int, int, int) const;
-  gMatrix<T> GetSubMatrix(const gBlock<int> &, const gBlock<int> &) const;
   gMatrix<T> Invert(void) const;
   gMatrix<T> ExternalPivot(int, int) const;
   void Pivot(int, int);

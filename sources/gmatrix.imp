@@ -542,36 +542,6 @@ gMatrix<T>::operator==(T s) const
 
 
 // row manipulation
-template <class T> void
-gMatrix<T>::AddRow(const gVector<T> &v)
-{
-  assert( CheckRow(v) );
-  maxrow++;
-  T* newrow= AllocateRow();
-  for( int i=mincol; i<=maxcol; i++ )
-    newrow[i]= v[i];
-  T** newidx= AllocateIndex();
-  for( i=minrow; i<maxrow; i++ )
-    newidx[i]= data[i];
-  newidx[maxrow]= newrow;
-  DeleteIndex(data);
-  data= newidx;
-}
-
-template <class T> void
-gMatrix<T>::RemoveRow(int row)
-{
-  assert( CheckRow(row) );
-  maxrow--;
-  T** newidx= AllocateIndex();
-  for(int i=minrow; i<row; i++ )
-    newidx[i]= data[i];
-  DeleteRow(data[i]);
-  for( ; i<=maxrow; i++ )
-    newidx[i]= data[i+1];
-  DeleteIndex(data);
-  data= newidx;
-}
 
 // note:  this is redundant (identical to SetRow)
 template <class T> void
@@ -712,38 +682,6 @@ gMatrix<T>::RotateLeft(int lo, int hi)
 
 // column manipulation
 
-template<class T> void
-gMatrix<T>::AddColumn(const gVector<T> &v)
-{
-  assert( CheckColumn(v) );
-  maxcol++;
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T* newrow= AllocateRow();
-      T* oldrow= data[i];
-      for(int j=mincol; j<=maxcol; j++)
-	newrow[j]= oldrow[j];
-      newrow[maxcol]= v.data[i];
-      DeleteRow(oldrow);
-      data[i]= newrow;
-    }
-}
-
-template<class T> void
-gMatrix<T>::RemoveColumn(int col)
-{
-  // note: RemoveColumn does not reallocate memory --
-  // it shrinks the rows in place.
-  assert( CheckColumn(col) );
-  maxcol--;
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T* row= data[i];
-      for(int j=col; j<=maxcol; j++)
-	row[j]= row[j+1];
-    }
-}
-
 // note: this is redundant (identical to SetColumn)
 template<class T> void
 gMatrix<T>::SwitchColumn(int col, const gVector<T> &v)
@@ -811,6 +749,13 @@ gMatrix<T>::SetColumn(int col, const gVector<T> &v)
 
 // more complex functions
 
+#ifdef UNUSED
+
+//
+// These probably aren't useful, but I'll leave them in here for the time
+// being just in case...
+//
+
 template<class T> gMatrix<T>
 gMatrix<T>::GetSlice(int rl, int rh, int cl, int ch) const
 {
@@ -857,6 +802,8 @@ gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
     }
   return m;
 }
+
+#endif   // UNUSED
 
 template<class T> gMatrix<T>
 gMatrix<T>::Invert(void) const
