@@ -17,8 +17,10 @@
 
 TEMPLATE class gTableau<double>;
 TEMPLATE class gTableau<gRational>;
+TEMPLATE class gTableau<gDouble>;
 
 TEMPLATE class gLPTableau<double>;
 TEMPLATE class gLPTableau<gRational>;
+TEMPLATE class gLPTableau<gDouble>;
 
 

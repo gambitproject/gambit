@@ -6,7 +6,7 @@
 
 #include "glpsolv3.imp"
 #include "rational.h"
-#include "gtableau.imp"
+#include "glpsolve.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -16,6 +16,7 @@
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class gLPTableau3<double>;
+TEMPLATE class gLPTableau3<gDouble>;
 TEMPLATE class gLPTableau3<gRational>;
 
 
