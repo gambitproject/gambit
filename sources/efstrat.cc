@@ -314,7 +314,7 @@ int EFSupport::Find(Action *a) const
 
 bool EFSupport::IsValid(void) const
 {
-  if (sets.Length() == 0)   return false;
+  if (sets.Length() != befg->NumPlayers())   return false;
   for (int i = 1; i <= sets.Length(); i++)
     if (!sets[i]->IsValid())  return false;
 
