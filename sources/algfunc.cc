@@ -715,6 +715,9 @@ Portion *GSM_Liap_MixedFloat(Portion **param)
   params.maxits1 = ((IntPortion *) param[5])->Value();
   params.tol1 = ((FloatPortion *) param[6])->Value();
  
+  params.tracefile = &((OutputPortion *) param[9])->Value();
+  params.trace = ((IntPortion *) param[10])->Value();
+
   long niters;
   gWatch watch;
   gList<MixedSolution<double> > solutions;
