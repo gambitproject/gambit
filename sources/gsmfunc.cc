@@ -91,14 +91,19 @@ bool CallFuncObj::_ListDimMatch( ListPortion* p1, ListPortion* p2 )
     s2 = (*p2)[i];
     if( s1->Type() == porLIST && s2->Type() == porLIST )
     {
+      /*
       if( ((ListPortion*) s1)->ContainsListsOnly() !=
 	 ((ListPortion*) s2)->ContainsListsOnly() )
 	result = false;
-      else if( !_ListDimMatch((ListPortion*) s1, (ListPortion*) s2 ))
+      else 
+      */
+      if( !_ListDimMatch((ListPortion*) s1, (ListPortion*) s2 ))
 	result = false;
     }
+    /*
     else if( s1->Type() == porLIST || s2->Type() == porLIST )
       result = false;
+      */
   }
 
   return result;
