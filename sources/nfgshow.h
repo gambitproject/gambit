@@ -110,6 +110,7 @@ public:
   void SupportDelete(void);
   void SupportSelect(void);
   NFSupport *MakeSupport(void);
+  NFSupport *CurrentSupport(void) const { return cur_sup; }
   
   void OutcomeNew(void);
   void OutcomeDelete(void);
@@ -146,6 +147,8 @@ public:
   MixedProfile<gNumber> CreateStartProfile(int how);
 
   int NumSolutions(void) const { return solns.Length(); }
+  int CurrentSolution(void) const { return cur_soln; }
+  const MixedSolutionList &Solutions(void) const { return solns; }
 
   // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);

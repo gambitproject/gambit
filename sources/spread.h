@@ -683,7 +683,7 @@ protected:
 
 public:
     // Constructor
-    SpreadSheet3D(int rows, int cols, int levels, char *title,
+    SpreadSheet3D(int rows, int cols, int levels, int status, char *title,
                   wxFrame *parent = NULL, 
                   unsigned int _features = OK_BUTTON | CANCEL_BUTTON,
                   SpreadSheetDrawSettings *drs = NULL, 

@@ -51,7 +51,7 @@ char *NodeSolnShow::feature_names[NUM_FEATURES+1] =
 #define BRANCHVALUE     8
 
 NodeSolnShow::NodeSolnShow(int num_players, const EfgShow *parent_)
-  : SpreadSheet3D(2, 1, 1, "Inspect Node", (wxFrame *)parent_, 0), 
+  : SpreadSheet3D(2, 1, 1, 2, "Inspect Node", (wxFrame *)parent_, 0), 
     parent(parent_), features(NUM_FEATURES)
 {
   // Read in the defaults
@@ -483,7 +483,7 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
                          int cur_soln_, const GambitDrawSettings &draw_settings_,
                          BSolnSortFilterOptions &sf_options_,
                          EfgShow *parent_, unsigned int opts_)
-    : SpreadSheet3D(1+soln.Length()*ef_.TotalNumInfosets(), 4, 1, "Solutions", parent_, ANY_BUTTON),
+    : SpreadSheet3D(1+soln.Length()*ef_.TotalNumInfosets(), 4, 1, 2, "Solutions", parent_, ANY_BUTTON),
       ef(ef_), parent(parent_), gamb_draw_settings(draw_settings_),
       solns(soln), dim(ef_.NumActions()),
       num_players(ef_.NumPlayers()), num_isets(ef_.TotalNumInfosets()),
@@ -1274,7 +1274,7 @@ BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
                              int iset_disp, wxFrame *parent)
     : SpreadSheet3D(soln_.Game().TotalNumInfosets()+1,
                     gmax(EFSupport(soln_.Game()).NumActions())+2,
-                    1, "Edit Behav Solution", parent, ANY_BUTTON),
+                    1, 2, "Edit Behav Solution", parent, ANY_BUTTON),
       soln(soln_), dim(EFSupport(soln_.Game()).NumActions())
 {
   num_isets = soln.Game().TotalNumInfosets();

@@ -171,7 +171,7 @@ NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_, int num_players_,
                          int max_strats, int cur_soln_, NormalDrawSettings &ds,
                          MSolnSortFilterOptions &sf_options_, NfgShow *parent_,
                          wxFrame *parent_frame, unsigned int opts)
-    : SpreadSheet3D(1 + num_players_*solns_.Length(), 2 + max_strats, 1, 
+    : SpreadSheet3D(1 + num_players_*solns_.Length(), 2 + max_strats, 1, 2, 
                     "Solutions", parent_frame, ANY_BUTTON),
       parent(parent_), solns(solns_), num_players(num_players_),
       cur_soln(cur_soln_), num_solutions(solns_.Length()),
@@ -838,7 +838,7 @@ public:
 MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
   :  SpreadSheet3D(soln_.Game().NumPlayers() + 1,
 		   gmax(NFSupport(soln_.Game()).NumStrats()) + 1,
-		   1, "Edit Mixed Solution", parent, ANY_BUTTON),
+		   1, 2, "Edit Mixed Solution", parent, ANY_BUTTON),
      soln(soln_)
 {
   Show(FALSE);

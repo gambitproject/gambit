@@ -1493,7 +1493,8 @@ void SpreadSheet::Output(gOutput &o) const
 //****************************************************************************
 //*                           SPREAD SHEET 3D                                *
 //****************************************************************************
-SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
+SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, int status,
+			     char *title,
                              wxFrame *parent, unsigned int _features, 
                              SpreadSheetDrawSettings *drs,
                              SpreadSheetDataSettings *dts)
@@ -1540,7 +1541,7 @@ SpreadSheet3D::SpreadSheet3D(int rows, int cols, int _levels, char *title,
         features |= ANY_BUTTON; // we need a panel for the slider
 
     MakeFeatures();
-    CreateStatusLine(2);
+    CreateStatusLine(status);
 
     // Size this frame according to the sheet dimensions
     Resize();

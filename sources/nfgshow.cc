@@ -1482,7 +1482,7 @@ public:
 // SpreadSheet3D constructor, except for the panel.
 
 NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p, wxFrame *pframe) 
-    : SpreadSheet3D(sup->NumStrats(_pl1), sup->NumStrats(_pl2), 1, "", pframe, ANY_BUTTON),
+    : SpreadSheet3D(sup->NumStrats(_pl1), sup->NumStrats(_pl2), 1, 3, "", pframe, ANY_BUTTON),
       strat_profile(sup->Game().NumPlayers()), 
       parent(p), pl1(_pl1), pl2(_pl2),
       dimensionality(sup->NumStrats())
@@ -1769,6 +1769,15 @@ void NormalSpread::UpdateMenus(void)
 
   menu->Enable(NFG_VIEW_PROBABILITIES, parent->NumSolutions() > 0);
   menu->Enable(NFG_VIEW_VALUES, parent->NumSolutions() > 0);
+
+  SetStatusText("Support: " + parent->CurrentSupport()->GetName(), 1);
+  if (parent->CurrentSolution() > 0) {
+    SetStatusText("Solution: " + 
+		  ToText((int) parent->Solutions()[parent->CurrentSolution()].Id()), 2);
+  }
+  else {
+    SetStatusText("No solution displayed", 2);
+  }
 }
 
 Bool NormalSpread::OnClose(void)
