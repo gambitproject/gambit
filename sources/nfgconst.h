@@ -8,9 +8,9 @@
 #define NFGCONST_H
 
 // must make sure that none of the menus are a power of two
-#define NFG_SOLVE_SOLVE_MENU            100
+//#define NFG_SOLVE_SOLVE_MENU            100
 #define NFG_SOLVE_INSPECT_MENU          101
-#define NFG_SOLVE_REMOVE_MENU           103
+//#define NFG_SOLVE_REMOVE_MENU           103
 #define NFG_SOLVE_COMPRESS_MENU         104
 #define NFG_SOLVE_SUPPORTS_MENU         105
 #define NFG_SOLVE_FEATURES_MENU         110
