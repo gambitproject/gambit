@@ -1185,10 +1185,10 @@ void EfgShow::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetLabel(dialog.GetNodeName().c_str());
     if (dialog.GetOutcome() > 0) {
-      m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+      Cursor()->SetOutcome(m_efg.GetOutcome(dialog.GetOutcome()));
     }
     else {
-      m_efg.SetOutcome(Cursor(), 0);
+      Cursor()->SetOutcome(0);
     }
 
     if (m_efg.IsLegalSubgame(Cursor()) && Cursor()->GetParent()) {

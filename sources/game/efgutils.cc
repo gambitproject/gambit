@@ -81,6 +81,18 @@ void Nodes (const efgGame &efg, Node *n, gList <Node *> &list)
   NDoChild(efg,n, list);
 }
 
+void TerminalNodes(Node *p_node, gList<Node *> &p_list)
+{
+  if (p_node->NumChildren() == 0) {
+    p_list.Append(p_node);
+  }
+  else {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      TerminalNodes(p_node->GetChild(i), p_list);
+    }
+  }
+}
+
 void MarkedSubgameRoots(const efgGame &efg, gList<Node *> &list)
 {
   list.Flush();

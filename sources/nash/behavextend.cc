@@ -241,7 +241,8 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<Node *> terminal_nodes = p_solution.GetGame().TerminalNodes();
+  gList<Node *> terminal_nodes;
+  TerminalNodes(p_solution.GetGame().RootNode(), terminal_nodes);
 
   for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = p_solution.GetGame().GetPlayer(pl);
@@ -438,7 +439,8 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<Node *> terminal_nodes = p_solution.GetGame().TerminalNodes();
+  gList<Node *> terminal_nodes;
+  TerminalNodes(p_solution.GetGame().RootNode(), terminal_nodes);
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame());
        !player.End(); player++) { 

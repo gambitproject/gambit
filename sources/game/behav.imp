@@ -154,7 +154,7 @@ void PureBehavProfile<T>::Payoff(const Node *n, const T prob,
 {
   if (n->IsTerminal()) {
     for (int pl = 1; pl <= E->NumPlayers(); pl++) {
-      payoff[pl] += prob * E->Payoff(E->GetOutcome(n))[pl];
+      payoff[pl] += prob * E->Payoff(n->GetOutcome())[pl];
     }
   }
   else {

@@ -38,6 +38,7 @@ class efgGame;
 
 class gbtEfgOutcome {
 friend class efgGame;
+friend class Node; 
 protected:
   struct gbt_efg_outcome_rep *rep;
 
@@ -56,6 +57,7 @@ public:
   int GetId(void) const;
   efgGame *GetGame(void) const;
   gText GetLabel(void) const;
+  void SetLabel(const gText &);
 
   gNumber GetPayoff(int p_playerId) const;
   double GetPayoffDouble(int p_playerId) const;

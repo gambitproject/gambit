@@ -635,7 +635,9 @@ SubgamePerfectChecker::SubgamePerfectChecker(const efgGame &E, const BehavProfil
   MarkedSubgameRoots(E, oldroots);
   gList<Node *> subroots;
   LegalSubgameRoots(E,subroots);
-  (start.GetGame()).MarkSubgames(subroots);
+  for (int i = 1; i <= subroots.Length(); i++) {
+    (start.GetGame()).MarkSubgame(subroots[i]);
+  }
   
   for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
     gbtEfgPlayer player = E.GetPlayer(pl);
@@ -696,7 +698,9 @@ void SubgamePerfectChecker::SolveSubgame(const efgGame &E,
 
 SubgamePerfectChecker::~SubgamePerfectChecker() { 
   (start.GetGame()).UnmarkSubgames((start.GetGame()).RootNode());
-  (start.GetGame()).MarkSubgames(oldroots);
+  for (int i = 1; i <= oldroots.Length(); i++) {
+    start.GetGame().MarkSubgame(oldroots[i]);
+  }
 }
 
 #include "base/glist.imp"

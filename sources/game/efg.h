@@ -93,14 +93,6 @@ protected:
   bool CheckTree(Node *, Node *);
   void MarkSubgame(Node *, Node *);
 
-  // Recursive calls
-  void DescendantNodes(const Node *, const EFSupport &, 
-		       gList<Node *> &) const;
-  void NonterminalDescendants(const Node *, const EFSupport&, 
-			      gList<const Node*> &) const;
-  void TerminalDescendants(const Node *, const EFSupport&, 
-			   gList<Node *> &) const;
-
   gbt_efg_infoset_rep *CreateInfoset(int n, gbtEfgPlayer, int br);
 
 public:
@@ -135,14 +127,6 @@ public:
   Node *RootNode(void) const;
   bool IsSuccessor(const Node *n, const Node *from) const;
   bool IsPredecessor(const Node *n, const Node *of) const;
-  //    const Node* Consequence(const Node&, Action&) const;
-  gList<Node *> DescendantNodes(const Node&, const EFSupport&) const;
-  gList<const Node*> NonterminalDescendants(const Node&, 
-					    const EFSupport&) const;
-  gList<Node *> TerminalDescendants(const Node&, 
-				    const EFSupport&) const;
-  gList<Node *> TerminalNodes(void) const;
-  gList<gbtEfgInfoset> DescendantInfosets(const Node&, const EFSupport&) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
@@ -156,10 +140,6 @@ public:
   gbtEfgOutcome NewOutcome(void);
   void DeleteOutcome(gbtEfgOutcome &);
 
-  gbtEfgOutcome GetOutcome(const Node *const) const;
-  void SetOutcome(Node *, const gbtEfgOutcome &);
-  void SetLabel(gbtEfgOutcome &, const gText &);
- 
   // EDITING OPERATIONS
   gbtEfgInfoset AppendNode(Node *n, gbtEfgPlayer, int br);
   gbtEfgInfoset AppendNode(Node *n, gbtEfgInfoset s);
@@ -196,11 +176,8 @@ public:
   gNumber Payoff(const Node *, const gbtEfgPlayer &) const;
   gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 
-  void InitPayoffs(void) const;
-  
   bool IsLegalSubgame(Node *n);
   void MarkSubgames(void);
-  void MarkSubgames(const gList<Node *> &list);
   bool MarkSubgame(Node *n);
   void UnmarkSubgame(Node *n);
   void UnmarkSubgames(Node *n);

@@ -85,6 +85,8 @@ class Node    {
     const gText &GetLabel(void) const   { return name; }
     void SetLabel(const gText &s)       { name = s; }
 
+    gbtEfgOutcome GetOutcome(void) const;
+    void SetOutcome(const gbtEfgOutcome &);
 };
 
 #endif   // NODE_H

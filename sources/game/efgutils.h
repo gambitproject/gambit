@@ -41,6 +41,9 @@ int NumNodes (const efgGame &befg);
 // returns the number of nodes given a starting node
 int CountNodes (const efgGame &e, Node *n);
 
+// Returns the terminal nodes in a subtree rooted at 'p_node'
+void TerminalNodes(Node *, gList<Node *> &);
+
 // returns the action leading up to the node
 gbtEfgAction LastAction(const efgGame &e, Node *node);
 

@@ -84,13 +84,13 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
   
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
     for (i = 1; i <= subroots.Length(); i++) {
-      efg.SetOutcome(subroots[i], subrootvalues[soln][i]);
+      subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
     
     efgGame foo(efg, n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo.SetOutcome(foo.RootNode(), 0);
+    foo.RootNode()->SetOutcome(0);
 
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
@@ -216,8 +216,8 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
-	if (!efg.GetOutcome(n).IsNull())  {
-	  subval[i] += efg.Payoff(efg.GetOutcome(n), efg.GetPlayer(i));
+	if (!n->GetOutcome().IsNull())  {
+	  subval[i] += efg.Payoff(n->GetOutcome(), efg.GetPlayer(i));
         }
       }
 

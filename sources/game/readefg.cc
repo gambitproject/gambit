@@ -644,14 +644,14 @@ static void BuildSubtree(efgGame *p_efg, Node *p_node,
 
   if ((*p_nodeData)->m_outcome > 0) {
     if (!p_treeData.GetOutcome((*p_nodeData)->m_outcome).IsNull()) {
-      p_efg->SetOutcome(p_node, p_treeData.GetOutcome((*p_nodeData)->m_outcome));
+      p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
       gbtEfgOutcome outcome = p_efg->NewOutcome();
-      p_efg->SetLabel(outcome, (*p_nodeData)->m_outcomeData->m_name);
+      outcome.SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
-      p_efg->SetOutcome(p_node, outcome);
+      p_node->SetOutcome(outcome);
       for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
 	p_efg->SetPayoff(outcome, pl, (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }

@@ -127,7 +127,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
     }
 
     m_outcome->Append((const char *) item);
-    if (efg.GetOutcome(m_node) == outcome) {
+    if (m_node->GetOutcome() == outcome) {
       m_outcome->SetSelection(outc);
     }
   }

@@ -217,7 +217,7 @@ void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
 				   int s1, int s2, int i1, int i2)
 {
   int snew;
-  if (!p_support.GetGame().GetOutcome(n).IsNull()) {
+  if (!n->GetOutcome().IsNull()) {
     A(s1,ns1+s2) = gNumber(A(s1,ns1+s2)) +
       gNumber(prob) * (p_support.GetGame().Payoff(n, p_support.GetGame().GetPlayer(1)) - gNumber(maxpay));
     A(ns1+s2,s1) = gNumber(A(ns1+s2,s1)) +

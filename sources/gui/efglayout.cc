@@ -414,7 +414,7 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
   case NODE_RIGHT_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(node);
   case NODE_RIGHT_NAME:
-    return (const char *) node->GetGame()->GetOutcome(node).GetLabel();
+    return (const char *) node->GetOutcome().GetLabel();
   default:
     return "";
   }

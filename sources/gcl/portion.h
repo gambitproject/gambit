@@ -333,6 +333,9 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+inline gbtEfgOutcome AsEfgOutcome(Portion *portion)
+{ return (dynamic_cast<EfOutcomePortion *>(portion))->Value(); }
+
 //------------
 // NfPlayer
 //------------

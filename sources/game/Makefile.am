@@ -31,6 +31,7 @@ libgame_a_SOURCES = \
 	efstrat.h \
 	gnarray.h \
 	gnarray.imp \
+	infoset.cc \
 	infoset.h \
 	lexicon.h \
 	mixed.h \
@@ -48,10 +49,13 @@ libgame_a_SOURCES = \
 	nfgiter.cc \
 	nfgiter.h \
 	nfgutils.cc \
-	nfplayer.h \
 	nfstrat.cc \
 	nfstrat.h \
+	node.cc \
 	node.h \
+	outcome.cc \
+	outcome.h \
+	player.cc \
         player.h \
 	readefg.cc \
 	readnfg.cc \
