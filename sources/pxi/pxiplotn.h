@@ -19,19 +19,19 @@ private:
   // Implementing virtual functions
   void DoPlot(wxDC& dc,
 	      int x0, int y0, int cw,int ch, int level=1);
-  void PlotData_X(wxDC& dc,
-		  int x0, int y0, int cw,int ch,
-		  const FileHeader &f_header);
-  void DrawExpPoint_X(wxDC &dc,
-		      double cur_e,int iset,int st,
-		      int x0, int y0, int ch,int cw);
-  void PlotAxis_X(wxDC& dc, int x0, int y0, int cw,int ch,
-		  const PxiAxisProperties &p_horizProps, 
-		  const PxiAxisProperties &p_vertProps,
-		  float log_step);
+  void PlotData(wxDC& dc,
+		int x0, int y0, int cw,int ch,
+		const FileHeader &f_header);
+  void DrawExpPoint(wxDC &dc,
+		    double cur_e,int iset,int st,
+		    int x0, int y0, int ch,int cw);
+  void PlotAxis(wxDC& dc, int x0, int y0, int cw,int ch,
+		const PxiAxisProperties &p_horizProps, 
+		const PxiAxisProperties &p_vertProps,
+		float log_step);
 
-  double CalcY_X(double y,int x0, int ch);
-  double CalcX_X(double x,int y0, int cw);
+  double CalcY(double y, int x0, int ch);
+  double CalcX(double x, int y0, int cw);
   
   // Event handlers
   void OnEvent(wxMouseEvent &);

@@ -30,10 +30,10 @@ static char *equ_colors[NUM_COLORS+1] = {
   "BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MAGENTA","ORANGE",
   "PURPLE","PALE GREEN","BROWN","BLACK"}; // not pretty
 
-void PxiPlotN::PlotAxis_X(wxDC& dc, int x0, int y0, int cw,int ch,
-			  const PxiAxisProperties &p_horizProps, 
-			  const PxiAxisProperties &p_vertProps,
-			  float log_step)
+void PxiPlotN::PlotAxis(wxDC& dc, int x0, int y0, int cw,int ch,
+			const PxiAxisProperties &p_horizProps, 
+			const PxiAxisProperties &p_vertProps,
+			float log_step)
 {
   const int GRID_H = 5;
   int i1;
@@ -121,9 +121,7 @@ void PxiPlotN::PlotAxis_X(wxDC& dc, int x0, int y0, int cw,int ch,
   }
 }
 
-
-/******************************** CALC Y X************************************/
-double PxiPlotN::CalcY_X(double y,int y0,int ch)
+double PxiPlotN::CalcY(double y,int y0,int ch)
 {
   y = gmax(y, m_probAxisProp.m_scale.GetMinimum());
   y = gmin(y, m_probAxisProp.m_scale.GetMaximum());
@@ -134,9 +132,7 @@ double PxiPlotN::CalcY_X(double y,int y0,int ch)
   return y;
 }
 
-/******************************** CALC X X************************************/
-
-double PxiPlotN::CalcX_X(double x,int x0, int cw)
+double PxiPlotN::CalcX(double x,int x0, int cw)
 {
   double min = m_lambdaAxisProp.m_scale.GetMinimum();
   double max = m_lambdaAxisProp.m_scale.GetMaximum();
@@ -155,27 +151,24 @@ double PxiPlotN::CalcX_X(double x,int x0, int cw)
   return x;
 }
 
-
-// Draws a little # or a token corresponding to the point # in the experimental
-// data overlay
-void PxiPlotN::DrawExpPoint_X(wxDC &dc, 
-			      double p_lambda, int iset, int st,
-			      int x0, int y0, int cw, int ch)
+void PxiPlotN::DrawExpPoint(wxDC &dc, 
+			    double p_lambda, int iset, int st,
+			    int x0, int y0, int cw, int ch)
 {
   try {
     gBlock<int> points(m_expData.FitPoints(p_lambda)); 
     for (int i = 1; i <= points.Length(); i++) {
-      double y = CalcY_X(m_expData.GetDataPoint(points[i], iset, st),
-			 y0, ch);
-      double x = CalcX_X(m_expData.MLELambda(points[i]), x0, cw);
+      double y = CalcY(m_expData.GetDataPoint(points[i], iset, st),
+		       y0, ch);
+      double x = CalcX(m_expData.MLELambda(points[i]), x0, cw);
       // dc.SetBrush(m_drawSettings.GetDataBrush());
       dc.SetBrush(*wxBLACK_BRUSH);
       DrawToken(dc, (int) x, (int) y, points[i]);
 
       if (m_overlayProp.m_lines && st!=1) {
 	dc.SetBrush(*wxBLACK_BRUSH);
-	int y1 = (int) CalcY_X(m_expData.GetDataPoint(points[i], iset, st-1),
-			       y0, ch);
+	int y1 = (int) CalcY(m_expData.GetDataPoint(points[i], iset, st-1),
+			     y0, ch);
 	dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
       }
     }
@@ -183,8 +176,8 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc,
   catch (...) { }
 }
 
-void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0, 
-			  int cw,int ch,const FileHeader &f_header)
+void PxiPlotN::PlotData(wxDC& dc, int x0, int y0, 
+			int cw, int ch, const FileHeader &f_header)
   /* This function plots n-dimensional data on a rectangular grid.  The x-axis
    * are error value
    */
@@ -222,11 +215,11 @@ void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0,
 
       for (int i = 1; i <= f_header.GetData().Length(); i++) {
 	const DataLine &probs = *f_header.GetData()[i];
-	int x = (int) CalcX_X(probs.Lambda(), x0, cw);
+	int x = (int) CalcX(probs.Lambda(), x0, cw);
 
 	if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
 	    probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
-	  int y = (int) CalcY_X(probs[m_page][st],y0, ch);
+	  int y = (int) CalcY(probs[m_page][st], y0, ch);
 	  
 	  // Must set pen each time for now, since DrawExpPoint might
 	  // reset it
@@ -237,7 +230,7 @@ void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0,
 	  }
 	  dc.DrawPoint(x, y);
 	    
-	  DrawExpPoint_X(dc,probs.Lambda(), m_page, st, x0, y0, ch, cw);
+	  DrawExpPoint(dc, probs.Lambda(), m_page, st, x0, y0, cw, ch);
 
 	  prevX = x;
 	  prevY = y;
@@ -252,9 +245,8 @@ void PxiPlotN::DoPlot(wxDC& dc,
   // This function plots n-dimensional data on a rectangular grid.  The x-axis
   //  are error value
 {
-  PlotAxis_X(dc,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp,
-	     m_header.EStep());
-  PlotData_X(dc,x0,y0,cw,ch, m_header);
+  PlotAxis(dc,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp, m_header.EStep());
+  PlotData(dc,x0,y0,cw,ch, m_header);
 }
 
 void PxiPlotN::OnEvent(wxMouseEvent &ev)
