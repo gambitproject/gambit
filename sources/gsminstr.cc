@@ -260,16 +260,21 @@ gclAssignment::~gclAssignment()
 
 Portion *gclAssignment::Evaluate(void)
 {
-// this only works with variables, not indexed, etc.
   Portion *lhs = variable->Evaluate();
   if (lhs->Spec().Type == porERROR)  return lhs;
   Portion *rhs = value->Evaluate();  
   if (rhs->Spec().Type == porERROR)  return rhs;
   
-  if (lhs->Spec().Type == porREFERENCE) 
+  if (lhs->Spec().Type == porREFERENCE)   {
+    rhs = _gsm._ResolveRef(rhs);
+    if (rhs->Spec().Type == porREFERENCE)
+      return new ErrorPortion("Undefined variable " +
+                              ((ReferencePortion *) rhs)->Value());
     _gsm.VarDefine(((ReferencePortion *) lhs)->Value(), rhs);
+  }
   else
     _gsm.Assign(lhs, rhs);
+
   return lhs;
 }
 
