@@ -39,24 +39,6 @@ public:
   virtual ~guiAutoDialog();
 };
 
-int wxListFindString(wxList *l,char *s);
-char *wxFontToString(wxFont *f);
-wxFont *wxStringToFont(char *s);
-
-class wxIntegerItem : public wxTextCtrl {
-private:
-  int m_value;
-  wxString m_data;
-
-public:
-  wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default = 0,
-		int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
-  virtual ~wxIntegerItem() { }
-
-  void SetInteger(int p_value);
-  int GetInteger(void) const { return m_value; }
-};
-
 class wxNumberItem : public wxTextCtrl {
 private:
   wxString m_data;
@@ -72,35 +54,7 @@ public:
   double GetNumber(void);
 };
 
-typedef enum {
-  wxWYSIWYG, wxFITTOPAGE
-} wxOutputOption;
-
-typedef enum {
-  wxMEDIA_PRINTER = 0, wxMEDIA_PS, wxMEDIA_CLIPBOARD, 
-  wxMEDIA_METAFILE, wxMEDIA_PREVIEW, wxMEDIA_NUM
-} wxOutputMedia;
-
-class wxOutputDialogBox : public guiAutoDialog {
-private:
-  wxRadioBox *m_mediaBox;
-  wxCheckBox *m_fitBox;
-
-public:
-  wxOutputDialogBox(wxStringList *extra_media = 0, wxWindow *parent = 0);
-  virtual ~wxOutputDialogBox() { }
-
-  /** Returns one of the built-in media types */
-  wxOutputMedia GetMedia(void) const;
-  /** Returns the additional media type given in extra_media, if any */
-  int GetExtraMedia(void) const;
-  /** Returns true if the selection was an extra_media */
-  bool ExtraMedia(void) const;
-  /** Returns either wysiwyg or fit to page if appropriate */
-  wxOutputOption GetOption(void) const;
-};
-
-#endif //WXMISC_H
+#endif // WXMISC_H
 
 
 
