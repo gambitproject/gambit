@@ -202,7 +202,7 @@ may not be tested.  Again, reports are always welcome.
 <para>
 The latest stable and unstable releases of Gambit can always
 be found at the Gambit website at
-<ulink url="http://www.hss.caltech.edu/gambit">http://www.hss.caltech.edu/gambit</ulink>.
+<ulink url="http://econweb.tamu.edu/gambit">http://econweb.tamu.edu/gambit</ulink>.
 You can build Gambit from source, in which case you will need one
 of the compilers mentioned above, and the appropriate version of 
 wxWindows.  Build instructions are found in the file INSTALL in the
@@ -217,7 +217,7 @@ for *nix.
 <title>Contacting or contributing to the Gambit Project</title>
 <para>
 All email correspondence to the Gambit Project can be addressed to
-<literal>gambit (at) hss (dot) caltech (dot) edu</literal>.
+<literal>gambit (at) econmail (dot) tamu (dot) edu</literal>.
 We welcome all manner of
 suggestions, including feature requests, documentation improvements,
 bug reports, bug fixes, and interest in contributing new code to
