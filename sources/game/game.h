@@ -165,6 +165,7 @@ public:
 };
 
 class gbtConstEfgRep : public virtual gbtConstGameRep {
+  friend class gbtEfgGame;
 public:
   // DATA ACCESS -- GENERAL
   virtual bool IsPerfectRecall(void) const = 0;
@@ -197,6 +198,43 @@ public:
   virtual gbtBehavProfile<double> NewBehavProfile(double) const = 0;
   virtual gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const = 0;
   virtual gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const = 0;
+};
+
+class gbtEfgGame {
+private:
+  gbtConstEfgRep *m_rep;
+
+public:
+  gbtEfgGame(void) : m_rep(0) { }
+  gbtEfgGame(gbtConstEfgRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgGame(const gbtEfgGame &p_efg)
+    : m_rep(p_efg.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+  
+  gbtEfgGame &operator=(const gbtEfgGame &p_efg) {
+    if (this != &p_efg) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_efg.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtEfgGame &p_efg) const
+  { return (m_rep == p_efg.m_rep); }
+  bool operator!=(const gbtEfgGame &p_efg) const
+  { return (m_rep != p_efg.m_rep); }
+  
+  gbtConstEfgRep *operator->(void) 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+  const gbtConstEfgRep *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+
+  gbtConstEfgRep *Get(void) const { return m_rep; }
+  
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 class gbtGameRep : public gbtConstNfgRep, public gbtConstEfgRep {

@@ -185,7 +185,7 @@ NashNodeProbabilityPoly(const gbtBehavProfile<gbtNumber> &p_solution,
 			const gbtGameInfoset &iset,
 			const gbtGameAction &act)
 {
-  while (tempnode != p_solution->GetGame()->GetRoot()) {
+  while (tempnode != p_solution->GetRoot()) {
     gbtGameAction last_action = tempnode->GetPriorAction();
     gbtGameInfoset last_infoset = last_action->GetInfoset();
     
@@ -241,7 +241,7 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution->GetGame()->GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution->GetRoot(), terminal_nodes);
 
   for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
     gbtGamePlayer player = p_solution->GetPlayer(pl);
@@ -330,11 +330,11 @@ bool algExtendsToNash::ExtendsToNash(const gbtBehavProfile<gbtNumber> &p_solutio
   int num_vars(0);
   gbtList<gbtList<int> > var_index;
 
-  for (gbtGamePlayerIterator player(p_solution->GetGame()); 
-       !player.End(); player++) {
+  for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
     gbtList<int> list_for_pl;
+    gbtGamePlayer player = p_solution->GetPlayer(pl);
 
-    for (gbtGameInfosetIterator infoset(*player); !infoset.End(); infoset++) {
+    for (gbtGameInfosetIterator infoset(player); !infoset.End(); infoset++) {
       list_for_pl += num_vars;
       if (!big_supp->HasActiveActionAt(*infoset)) {
 	num_vars += (*infoset)->NumActions() - 1;
@@ -388,7 +388,7 @@ static bool ANFNodeProbabilityPoly(const gbtBehavProfile<gbtNumber> &p_solution,
 				   const int &i,
 				   const int &j)
 {
-  while (tempnode != p_solution->GetGame()->GetRoot()) {
+  while (tempnode != p_solution->GetRoot()) {
     gbtGameAction last_action = tempnode->GetPriorAction();
     gbtGameInfoset last_infoset = last_action->GetInfoset();
     
@@ -438,14 +438,14 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution->GetGame()->GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution->GetRoot(), terminal_nodes);
 
-  for (gbtGamePlayerIterator player(p_solution->GetGame());
-       !player.End(); player++) { 
-    for (gbtGameInfosetIterator infoset(*player); !infoset.End(); infoset++) {
+  for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_solution->GetPlayer(pl);
+    for (gbtGameInfosetIterator infoset(player); !infoset.End(); infoset++) {
       if (little_supp->MayReach(*infoset)) 
 	for (int j = 1; j <= (*infoset)->NumActions(); j++)
-	  if (!little_supp->Contains((*player)->GetId(),
+	  if (!little_supp->Contains(player->GetId(),
 				     (*infoset)->GetId(), j)) {
 	
 	    // This will be the utility difference between the
@@ -461,14 +461,14 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 					 big_supp,
 					 var_index,
 					 terminal_nodes[n],
-					 (*player)->GetId(),
+					 player->GetId(),
 					 (*infoset)->GetId(), j)) {
 		node_prob *= 
-		  (gbtDouble) terminal_nodes[n]->GetOutcome()->GetPayoff(*player);
+		  (gbtDouble) terminal_nodes[n]->GetOutcome()->GetPayoff(player);
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gbtDouble) p_solution->Payoff((*player)->GetId());
+	    answer += -next_poly + (gbtDouble) p_solution->Payoff(player->GetId());
 	  }
     }
   }
@@ -512,11 +512,11 @@ algExtendsToAgentNash::ExtendsToAgentNash(const gbtBehavProfile<gbtNumber> &p_so
   int num_vars(0);
   gbtList<gbtList<int> > var_index;
 
-  for (gbtGamePlayerIterator player(p_solution->GetGame());
-       !player.End(); player++) {
+  for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_solution->GetPlayer(pl);
     gbtList<int> list_for_pl;
 
-    for (gbtGameInfosetIterator infoset(*player); !infoset.End(); infoset++) {
+    for (gbtGameInfosetIterator infoset(player); !infoset.End(); infoset++) {
       list_for_pl += num_vars;
       if (!big_supp->HasActiveActionAt(*infoset)) {
 	num_vars += (*infoset)->NumActions() - 1;

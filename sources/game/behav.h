@@ -59,7 +59,6 @@ public:
   virtual void Centroid(void) = 0;
 
   // GENERAL DATA ACCESS
-  virtual gbtGame GetGame(void) const = 0;
   virtual gbtEfgSupport GetSupport(void) const = 0;
   
   virtual const T &operator()(const gbtGameAction &) const = 0;
@@ -162,6 +161,8 @@ public:
 
   operator gbtMixedProfile<T>(void) const 
   { return (gbtMixedProfile<T>) *m_rep; }
+
+  operator gbtEfgGame(void) const { return m_rep; }
 
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }
