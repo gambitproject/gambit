@@ -28,30 +28,7 @@
 #define TREE_DISPLAY_H
 
 #include "game-document.h"
-
-class gbtTreeLayout {
-private:
-  gbtGameDocument *m_doc;
-  int m_maxX, m_maxY;
-  gbtArray<int> m_nodeLevels, m_nodeSublevels, m_ycoords;
-  gbtArray<int> m_levels;
-
-  int GetX(const gbtGameNode &) const;
-
-  void LayoutSubtree(const gbtGameNode &, int, gbtBlock<int> &);
-  void DrawOutcome(wxDC &, const gbtGameNode &) const;
-  void DrawSubtree(wxDC &, const gbtGameNode &) const;
-
-public:
-  gbtTreeLayout(gbtGameDocument *p_doc)
-    : m_doc(p_doc) { } 
-
-  void LayoutTree(void);
-  void DrawTree(wxDC &) const;
-
-  int GetMaxX(void) const { return m_maxX; }
-  int GetMaxY(void) const { return m_maxY; }
-};
+#include "tree-layout.h"
 
 class gbtTreeDisplay : public wxScrolledWindow, public gbtGameView {
 private:

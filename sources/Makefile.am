@@ -42,6 +42,8 @@ gambit_SOURCES = \
 	thread-nash-mixed.h \
 	tree-display.cc \
 	tree-display.h \
+	tree-layout.cc \
+	tree-layout.h \
 	tree-print.cc \
 	tree-print.h \
 	wx24defs.h

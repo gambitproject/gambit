@@ -28,6 +28,7 @@
 #define GAME_DOCUMENT_H
 
 #include <libgambit/libgambit.h>
+#include "tree-layout.h"
 
 class gbtGameView;
 
@@ -43,6 +44,7 @@ private:
   gbtBlock<wxString> m_redoFiles, m_redoDescriptions;
   wxString m_filename;
   double m_treeZoom;
+  gbtTreeLayoutOptions m_treeOptions;
 
   // Management of view list
   gbtList<gbtGameView *> m_views;
@@ -96,6 +98,13 @@ public:
 
   void Load(const wxString &);
   void Save(const wxString &) const;
+
+
+  const gbtTreeLayoutOptions &GetTreeOptions(void) const 
+    { return m_treeOptions; }
+  void SetTreeOptions(const gbtTreeLayoutOptions &p_options)
+    { m_treeOptions = p_options;  UpdateViews(); }
+
 };
 
 

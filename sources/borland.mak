@@ -36,6 +36,7 @@ gambit_SOURCES = \
 	"text-window.cc" \
 	"thread-nash-mixed.cc" \
 	"tree-display.cc" \
+        "tree-layout.cc" \
 	"tree-print.cc"
 
 OBJECTS = $(gambit_SOURCES:.cc=.obj)
