@@ -1,0 +1,172 @@
+//#
+//# FILE: grblock.imp -- Implementation of resizable 2-D rect array class
+//#
+//# $Id$
+//#
+
+#include "grblock.h"
+#include "garray.h"
+
+
+//------------------------------------------------------------------------
+//            Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> gRectBlock<T>::gRectBlock(int nrows, int ncols)
+     : gRectArray<T>(nrows, ncols)
+{
+}
+
+template <class T> 
+gRectBlock<T>::gRectBlock(int minr, int maxr, int minc, int maxc)
+     : gRectArray<T>(minr, maxr, minc, maxc)
+{
+}
+
+template <class T> gRectBlock<T>::gRectBlock(const gRectBlock<T> &r)
+     : gRectArray<T>(r)
+{
+}
+
+template <class T> gRectBlock<T>::~gRectBlock()
+{
+}
+
+template <class T>
+gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
+{
+ gRectArray<T>::operator=(a);
+}
+
+//------------------------------------------------------------------------
+//             The members
+//------------------------------------------------------------------------
+
+template <class T> void 
+gRectBlock<T>::AddRow(const gArray<T> &v)
+{
+  assert( v.First() == minrow && v.Last() == maxrow);
+  maxrow++;
+
+  T* p = new T[maxcol - mincol + 1];
+  assert(p);
+  T* newrow= p - mincol;
+
+  for( int i=mincol; i<=maxcol; i++ )
+    newrow[i]= v[i];
+
+  T** pp = new T*[maxcol - mincol + 1];
+  assert(pp);
+  T** newidx= pp - minrow;
+
+  for( i=minrow; i<maxrow; i++ )
+    newidx[i]= data[i];
+  newidx[maxrow]= newrow;
+  delete[] (data + minrow);
+  data= newidx;
+}
+
+template <class T> void
+gRectBlock<T>::RemoveRow(int row)
+{
+  assert( minrow <= row && row <= maxrow);
+  maxrow--;
+
+  T** pp = new T*[maxcol - mincol + 1];
+  assert(pp);
+  T** newidx= pp - minrow;
+
+  for(int i=minrow; i<row; i++ )
+    newidx[i]= data[i];
+  delete [] (data[i] + mincol);
+  for( ; i<=maxrow; i++ )
+    newidx[i]= data[i+1];
+  delete [] (data + minrow);
+  data= newidx;
+}
+
+template<class T> void
+gRectBlock<T>::AddColumn(const gArray<T> &v)
+{
+  assert( v.First() == minrow && v.Last() == maxrow);
+  maxcol++;
+  for(int i=minrow; i<=maxrow; i++)
+    {
+      T* p = new T[maxcol - mincol + 1];
+      assert(p);
+      T* newrow= p - mincol;
+
+      T* oldrow= data[i];
+      for(int j=mincol; j<=maxcol; j++)
+	newrow[j]= oldrow[j];
+      newrow[maxcol]= v[i];
+      delete [] (oldrow + mincol);
+      data[i]= newrow;
+    }
+}
+
+template<class T> void
+gRectBlock<T>::RemoveColumn(int col)
+{
+  // note: RemoveColumn does not reallocate memory --
+  // it shrinks the rows in place.
+  assert( mincol <= col && col <= maxcol);
+  maxcol--;
+  for(int i=minrow; i<=maxrow; i++)
+    {
+      T* row= data[i];
+      for(int j=col; j<=maxcol; j++)
+	row[j]= row[j+1];
+    }
+}
+
+template<class T> void
+gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
+{
+  assert( v.First() == minrow && v.Last() == maxrow);
+  assert( minrow <= row && row <= maxrow);
+  maxrow++;
+
+  T* p = new T[maxcol - mincol + 1];
+  assert (p);
+  T* newrow = p - mincol;
+  
+  for (int i=mincol; i<=maxcol; i++)
+    newrow[i] = v[i];
+
+  T** pp = new T*[maxcol - mincol + 1];
+  assert(pp);
+  T** newidx = pp - minrow;
+  
+  for (i = minrow; i<row; i++)
+    newidx[i] = data[i];
+  newidx[row] = newrow;
+  for (i=row+1 ; i<=maxrow; i++)
+    newidx[i] = data[i-1];
+  delete[] (data + minrow);
+  data = newidx;
+}
+
+template<class T> void
+gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
+{
+  assert (v.First() == minrow && v.Last() == maxrow);
+  assert (mincol <= col && col <= maxcol);
+  maxcol ++;
+  for (int i=minrow; i<=maxrow; i++)
+    {
+      T* p = new T[maxcol - mincol + 1];
+      assert(p);
+      T* newrow = p - mincol;
+      
+      T* oldrow = data[i];
+      for (int j=mincol; j<col; j++)
+	newrow[j] = oldrow[j];
+      newrow[col] = v[i];
+      for (j=col+1; j<= maxcol; j++)
+	newrow[j] = oldrow[j-1];
+      delete [] (oldrow + mincol);
+      data[i] = newrow;
+    }
+}
+
