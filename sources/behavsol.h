@@ -47,6 +47,7 @@ protected:
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void CheckIsNash(void) const;
+  void CheckIsSubgamePerfect(void) const;
   void CheckIsANFNash(void) const;
   void LevelPrecision(void);
 
@@ -166,6 +167,8 @@ public:
   const gDPVector<gNumber> &Beliefs(void) const;
   const gDPVector<gNumber> &Regret(void) const;
   const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
+  const gNumber MaxRegret(void) const;
+  const gNumber MaxRNFRegret(void) const;
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }

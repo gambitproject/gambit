@@ -19,10 +19,10 @@ private:
   gPVector<int> infoset_subgames;
   BehavProfile<gNumber> start;
   gList<Node *> oldroots;
-    
+  
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
-
+  
 public:
   SubgamePerfectChecker(const Efg &, const BehavProfile<gNumber> &, const gNumber & epsilon);
   virtual ~SubgamePerfectChecker();
@@ -259,29 +259,84 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 void BehavSolution::CheckIsNash(void) const
 {
   if (m_checkedNash == false) {
-    if (IsPerfectRecall(m_profile->Game())) {
-      gStatus &m_status = gstatus;
-      m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
-		  ExtendsToNash(Support(),Support(),m_status)) ? 
-		     triTRUE:triFALSE;
+    bool decomposes = HasSubgames(Game());
+    // check subgame perfection if game decomposes (its faster)
+    if(decomposes) 
+      CheckIsSubgamePerfect();
+    // and if it wasn't settled in that call, ...
+    if (m_checkedNash == false) { 
+      // use reduced normal form regrets for complete profiles
+      if(IsComplete()) 
+	m_isNash = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
+      // else let Andy figure it out
+      // Is perfect recall needed here, Andy?
+      else if (IsPerfectRecall(m_profile->Game())) { 
+	gStatus &m_status = gstatus;
+	// not sure MaxGripe does the right thing here
+	m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
+		    ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
+      }
     }
+    m_checkedNash = true;
+
+    // Done.  Now mark other obvious inferences 
+
     if (m_isNash == triFALSE) {
       m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
       m_isSequential = triFALSE; m_checkedSequential = true;
     }
     if (m_isNash == triTRUE) {
       m_isANFNash = triTRUE; m_checkedANFNash = true;
+      if(!decomposes) { 
+	m_isSubgamePerfect = triTRUE; m_checkedSubgamePerfect = true;
+      }
     }
-    m_checkedNash = true;
+  }
+}
+
+void BehavSolution::CheckIsSubgamePerfect(void) const
+{
+  if(m_checkedSubgamePerfect == false) {
+    // Note -- HasSubgames should be cached in Efg
+    bool decomposes = HasSubgames(Game());
+    if(!decomposes) CheckIsNash();
+    // if it is not yet resolved, ... 
+    if(m_checkedSubgamePerfect == false) {
+      // for complete profiles, use subgame perfect checker.  
+      if(IsComplete()) {
+	BehavProfile<gNumber> p(*this);
+	SubgamePerfectChecker checker(p.Game(),p, Epsilon());
+	checker.Solve(p.Support());
+	m_isSubgamePerfect = checker.IsSubgamePerfect();
+      }
+      // else, for now, we require complete profiles for subgame perfection.  
+      // but we may want to turn over to Andy here. 
+      else 
+	m_isSubgamePerfect = triFALSE;
+    }
+    m_checkedSubgamePerfect = true;
+
+    // Done.  Now mark other obvious inferences 
+
+    if(m_isSubgamePerfect) {
+      m_isNash = triTRUE; m_checkedNash = triTRUE;
+      m_isANFNash = triTRUE; m_checkedANFNash = true;
+    }
+    if(!m_isSubgamePerfect) {
+      m_isSequential = triFALSE; m_checkedSequential = triFALSE;
+      if(!decomposes) { 
+	m_isNash = triFALSE; m_checkedNash = true;
+      }
+    }
   }
 }
 
 void BehavSolution::CheckIsANFNash(void) const
 {
   if (m_checkedANFNash == false) {
-      gStatus &m_status = gstatus;
+    gStatus &m_status = gstatus;
     m_isANFNash = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
-                        triTRUE:triFALSE;
+      triTRUE:triFALSE;
     if (m_isANFNash == triFALSE) {
       m_isNash = triFALSE; m_checkedNash = true;
       m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
@@ -434,21 +489,7 @@ gTriState BehavSolution::IsANFNash(void) const
 
 gTriState BehavSolution::IsSubgamePerfect(void) const
 {
-  CheckIsNash();
-  if(m_checkedSubgamePerfect == false) {
-    if(IsComplete()) {
-      BehavProfile<gNumber> p(*this);
-      SubgamePerfectChecker checker(p.Game(),p, Epsilon());
-      checker.Solve(p.Support());
-      m_isSubgamePerfect = checker.IsSubgamePerfect();
-    }
-    else {
-      m_isSubgamePerfect = triFALSE;
-      m_isSequential = triFALSE;
-      m_checkedSequential = true;
-    }
-    m_checkedSubgamePerfect = true;
-  }
+  CheckIsSubgamePerfect();
   return m_isSubgamePerfect;
 }
 
@@ -541,9 +582,10 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
   if (!m_rnf_regret)  {
+    gout << "\ncomputing RNFRegret(), first time";
     const Efg& E = Game(); 
     Lexicon L(E);  // we use the lexicon without allocating normal form.  
-
+    
     for (int i = 1; i <= E.NumPlayers(); i++)
       L.MakeReducedStrats(m_support, E.Players()[i], E.RootNode(), NULL);
     
@@ -571,6 +613,27 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
     }
   }
   return *m_rnf_regret;
+}
+
+const gNumber BehavSolution::MaxRegret(void) const
+{
+  Regret();
+  gNumber ret = 0;
+  for(int i=m_regret->First();i<=m_regret->Last();i++)
+    if((*m_regret)[i]>=ret)ret = (*m_regret)[i];
+  return ret;
+}
+
+const gNumber BehavSolution::MaxRNFRegret(void) const
+{
+  ReducedNormalFormRegret();
+  gNumber ret = 0;
+  for(int i=m_rnf_regret->First();i<=m_rnf_regret->Last();i++)
+    if((*m_rnf_regret)[i]>=ret)ret = (*m_rnf_regret)[i];
+
+  gout << "\nrnf_regret: " << *m_rnf_regret;
+
+  return ret;
 }
 
 //----------------------------------------
@@ -1137,40 +1200,40 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
 }
 
 SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gNumber> &s,
-				     const gNumber & epsilon)
-  : SubgameSolver(1), subgame_number(0), eps(epsilon), isSubgamePerfect(triTRUE),
-    infoset_subgames(E.NumInfosets()), start(s)
+					     const gNumber & epsilon)
+  : SubgameSolver(1), subgame_number(0), eps(epsilon),  
+    isSubgamePerfect(triTRUE), infoset_subgames(E.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(E, oldroots);
   gList<Node *> subroots;
   LegalSubgameRoots(E,subroots);
   (start.Game()).MarkSubgames(subroots);
-
+  
   for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
     EFPlayer *player = E.Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       int index;
-
+      
       Infoset *infoset = player->Infosets()[iset];
       Node *member = infoset->Members()[1];
-
+      
       for (index = 1; index <= subroots.Length() &&
-	   member->GetSubgameRoot() != subroots[index]; index++);
-
+	     member->GetSubgameRoot() != subroots[index]; index++);
+      
       infoset_subgames(pl, iset) = index;
     }
   }   
 }
- 
+
 void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
-				gList<BehavSolution> &solns)
+					 gList<BehavSolution> &solns)
 {
   BehavProfile<gNumber> bp(sup);
   
   subgame_number++;
-
+  
   gArray<int> infosets(infoset_subgames.Lengths());
-
+  
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     int niset = 1;
     for (int iset = 1; iset <= infosets[pl]; iset++)  {
@@ -1186,15 +1249,24 @@ void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
   // for now, we do the following, which may give wrong answer if player can deviate at
   // multiple isets simultaneously.  :
   gTriState x = triFALSE;
-  if(bp.MaxGripe() <= eps) x = triTRUE;
-
+  BehavSolution bs(bp);
+  
+  gout << "\nin SolveSubgame()";
+  gout << "\nsup: " << sup;
+  gout << "\nbp: " << bp;
+  //  gout << "\nbs: " << bs;
+  
+  if(bs.MaxRNFRegret() <= eps) x = triTRUE;
+  
+  //  if(bp.MaxGripe() <= eps) x = triTRUE;
+  
   if(isSubgamePerfect == triTRUE &&  x == triTRUE) 
     isSubgamePerfect = triTRUE;
   else if(isSubgamePerfect == triFALSE ||  x == triFALSE) 
     isSubgamePerfect = triFALSE;
   else 
     isSubgamePerfect = triUNKNOWN;
-
+  
   int index = solns.Append(BehavSolution(bp,AlgorithmID()));
   solns[index].SetEpsilon(eps);
 }

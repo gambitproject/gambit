@@ -566,7 +566,7 @@ static Portion *GSM_Regrets_Behav(Portion **param)
   return gDPVectorToList(bp->Regret());
 }
 
-static Portion *GSM_RnfRegrets_Behav(Portion **param)
+static Portion *GSM_NfgRegrets_Behav(Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gPVector<gNumber> v((*bp).ReducedNormalFormRegret());
@@ -584,54 +584,6 @@ static Portion *GSM_RnfRegrets_Behav(Portion **param)
 
   return por;
 }
-
-/*
-
-#include "lexicon.h"
-
-static Portion *GSM_RnfRegrets_Behav(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-
-  gPVector<gNumber> regrets((*bp).ReducedNormalFormRegret());
-
-  const Efg& E = bp->Game(); 
-  const EFSupport &support = bp->Support(); 
-
-  int i;
-  Lexicon *L = new Lexicon(E);
-  for (i = 1; i <= E.NumPlayers(); i++)
-    L->MakeReducedStrats(bp->Support(), E.Players()[i], E.RootNode(), NULL);
-
-  ListPortion *por = new ListPortion;
-
-  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
-    ListPortion *p1 = new ListPortion;
-    gNumber pay = (*bp).Payoff(pl);
-
-    for (int st = 1; st <= ((*L).strategies[pl]).Length(); st++) {
-
-      BehavProfile<gNumber> scratch(*bp);
-      const gArray<int> *const actions = (*L).strategies[pl][st];
-      gout << "\nstrat: " << st << " actions: " << *actions;
-      
-      for(int j = 1;j<=(*actions).Length();j++) {
-      	int a = (*actions)[j];
-	for (int k = 1;k<=support.NumActions(pl,j);k++)
-	  scratch(pl,j,k) = (gNumber)0;
-      	if(a>0)scratch(pl,j,a) = (gNumber)1;
-      }
-      gout << " scratch: " << scratch;
-      gNumber pay2 = scratch.Payoff(pl);
-      gNumber regret = (pay2 < pay) ? (gNumber)0 : pay2 - pay ;
-      p1->Append(new NumberPortion(regret));
-    }
-    por->Append(p1);
-  }
-
-  return por;
-}
-*/
 
 //-------------------
 // SetActionProb
@@ -872,8 +824,8 @@ void Init_solfunc(GSM *gsm)
 	GSM_Regret_Mixed },
       { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
 	GSM_Regrets_Behav },
-      { "RnfRegrets[profile->BEHAV] =: LIST(NUMBER)", 
-	GSM_RnfRegrets_Behav },
+      { "NfgRegrets[profile->BEHAV] =: LIST(NUMBER)", 
+	GSM_NfgRegrets_Behav },
       { "Regrets[profile->MIXED] =: LIST(LIST(NUMBER))", GSM_Regrets_Mixed },
       { "SetActionProb[profile<->BEHAV, action->ACTION, value->NUMBER =: BEHAV", GSM_SetActionProb },
       { "SetActionProbs[profile<->BEHAV, infoset->INFOSET, value->LIST(NUMBER) =: BEHAV", GSM_SetActionProbs },

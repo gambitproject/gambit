@@ -104,6 +104,22 @@ void LegalSubgameRoots(Node *n, gList<Node *> &list)
   LSRDoChild(n, list);
 }
 
+bool HasSubgames(const Efg &efg)
+{
+  gList<Node *> list;
+  LegalSubgameRoots(efg, list);
+  return list.Length()>1;
+}
+
+bool HasSubgames(Node * n)
+{
+  gList<Node *> list;
+  LegalSubgameRoots(n, list);
+  if(n->Game()->IsLegalSubgame(n))
+    return list.Length()>1;
+  return list.Length()>0;
+}
+
 bool AllSubgamesMarked(const Efg &efg)
 {
   gList<Node *> marked, valid;

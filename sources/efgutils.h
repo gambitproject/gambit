@@ -38,6 +38,8 @@ void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list);
 // returns the list of nodes which are valid roots of subgames
 void LegalSubgameRoots(const Efg &efg, gList<Node *> &list);
 void LegalSubgameRoots(Node *, gList<Node *> &);
+bool HasSubgames(const Efg &efg);
+bool HasSubgames(Node * n);
 
 bool AllSubgamesMarked(const Efg &efg);
 
