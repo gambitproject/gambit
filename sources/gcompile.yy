@@ -501,35 +501,35 @@ int GCLCompiler::yylex(void)
 	case '\"':
 	case '\?':
 	case '\\':
-          tval = tval.left( tval.length() - 2 ) + c;
+          tval = tval.left( tval.length() - 2 ) + gString(c);
           check_digraph = false;
           break;
         case 'a':
-          tval = tval.left( tval.length() - 2 ) + '\a';
+          tval = tval.left( tval.length() - 2 ) + gString('\a');
           check_digraph = false;
           break;            
         case 'b':
-          tval = tval.left( tval.length() - 2 ) + '\b';
+          tval = tval.left( tval.length() - 2 ) + gString('\b');
           check_digraph = false;
           break;            
         case 'f':
-          tval = tval.left( tval.length() - 2 ) + '\f';
+          tval = tval.left( tval.length() - 2 ) + gString('\f');
           check_digraph = false;
           break;            
         case 'n':
-          tval = tval.left( tval.length() - 2 ) + '\n';
+          tval = tval.left( tval.length() - 2 ) + gString('\n');
           check_digraph = false;
           break;            
         case 'r':
-          tval = tval.left( tval.length() - 2 ) + '\r';
+          tval = tval.left( tval.length() - 2 ) + gString('\r');
           check_digraph = false;
           break;            
         case 't':
-          tval = tval.left( tval.length() - 2 ) + '\t';
+          tval = tval.left( tval.length() - 2 ) + gString('\t');
           check_digraph = false;
           break;            
         case 'v':
-          tval = tval.left( tval.length() - 2 ) + '\v';
+          tval = tval.left( tval.length() - 2 ) + gString('\v');
           check_digraph = false;
           break;            
         } // switch( c )

@@ -390,7 +390,7 @@ gString gPreprocessor::GetLine( void )
 	  else
 	    txt = "";
 	  
-	  line += (gString) '\"' + txt + '\"';
+	  line += (gString) '\"' + (gString) txt + (gString) '\"';
 
 	} // "GetPath"
 
@@ -440,7 +440,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
   const char SLASH = System::Slash();
   
   bool search = false;
-  if( strchr( name, SLASH ) == NULL )
+  if( strchr( (char *) name, SLASH ) == NULL )
     search = true;
   gString IniFileName;
   
@@ -458,7 +458,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
   {
     if( System::GetEnv( "HOME" ) != NULL )
     {
-      IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      IniFileName = (gString) System::GetEnv( "HOME" ) + (gString) SLASH + (gString) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {
@@ -471,7 +471,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
 
     if( System::GetEnv( "GCLLIB" ) != NULL )
     {
-      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + (gString) SLASH + (gString) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {
@@ -484,7 +484,7 @@ gInput* gPreprocessor::LoadInput( gString& name )
 
     if( SOURCE != NULL )
     {
-      IniFileName = (gString) SOURCE + SLASH + name;
+      IniFileName = (gString) SOURCE + (gString) SLASH + (gString) name;
       _Input = new gFileInput( IniFileName );
       if( _Input->IsValid() )
       {
