@@ -13,6 +13,64 @@
 #include "nfgtable.h"
 #include "nfgconst.h"
 
+//-----------------------------------------------------------------------
+//               class NfgTableSettings: Member functions
+//-----------------------------------------------------------------------
+
+NfgTableSettings::NfgTableSettings(void)
+{
+  LoadSettings();
+}
+
+void NfgTableSettings::SaveFont(const wxString &p_prefix, 
+				wxConfig &p_config, const wxFont &p_font)
+{
+  p_config.Write(p_prefix + "Size", (long) p_font.GetPointSize());
+  p_config.Write(p_prefix + "Family", (long) p_font.GetFamily());
+  p_config.Write(p_prefix + "Face", p_font.GetFaceName());
+  p_config.Write(p_prefix + "Style", (long) p_font.GetStyle());
+  p_config.Write(p_prefix + "Weight", (long) p_font.GetWeight());
+}
+
+void NfgTableSettings::LoadFont(const wxString &p_prefix,
+				const wxConfig &p_config, wxFont &p_font)
+{
+  int size, family, style, weight;
+  wxString face;
+  p_config.Read(p_prefix + "Size", &size, 10);
+  p_config.Read(p_prefix + "Family", &family, wxMODERN);
+  p_config.Read(p_prefix + "Face", &face, "");
+  p_config.Read(p_prefix + "Style", &style, wxNORMAL);
+  p_config.Read(p_prefix + "Weight", &weight, wxNORMAL);
+
+  p_font = *wxTheFontList->FindOrCreateFont(size, family, style, weight,
+					    false, face);
+}
+
+void NfgTableSettings::LoadSettings(void)
+{
+  wxConfig config("Gambit");
+  config.Read("/NfgDisplay/DisplayPrecision", &m_decimals, 2);
+  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, 1);
+
+  LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
+  LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);
+}
+
+void NfgTableSettings::SaveSettings(void) const
+{
+  wxConfig config("Gambit");
+  config.Write("/NfgDisplay/DisplayPrecision", (long) m_decimals);
+  config.Write("/NfgDisplay/OutcomeValues", (long) m_outcomeValues);
+
+  SaveFont("/NfgDisplay/DataFont", config, m_dataFont);
+  SaveFont("/NfgDisplay/LabelFont", config, m_labelFont);
+}
+
+//---------------------------------------------------------------------
+//                       class NfgGridTable
+//---------------------------------------------------------------------
+
 class NfgGridTable : public wxGridTableBase {
 private:
   Nfg *m_nfg;
@@ -113,12 +171,12 @@ wxString NfgGridTable::GetValue(int row, int col)
     }
 
     NFOutcome *outcome = m_nfg->GetOutcome(profile);
-    if (m_table->OutcomeValues()) {
+    if (m_table->GetSettings().OutcomeValues()) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",
 				(char *) ToText(m_nfg->Payoff(outcome, pl),
-						m_table->GetDecimals()));
+						m_table->GetSettings().GetDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxString(",");
 	}
@@ -407,7 +465,8 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   m_grid->SetEditable(false);
   m_grid->DisableDragRowSize();
   m_grid->AdjustScrollbars();
-  //  m_grid->SetDefaultRenderer(new ColoredStringRenderer);
+  m_grid->SetDefaultCellFont(m_settings.GetDataFont());
+  m_grid->SetLabelFont(m_settings.GetLabelFont());
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_grid, 1, wxALL | wxEXPAND | wxALIGN_RIGHT, 5);
@@ -593,30 +652,4 @@ void NfgTable::RefreshTable(void)
   }
 }
 
-//-----------------------------------------------------------------------
-//               class NfgTable::Settings: Member functions
-//-----------------------------------------------------------------------
-
-NfgTable::Settings::Settings(void)
-  : m_decimals(2)
-{
-  LoadSettings();
-}
-
-NfgTable::Settings::~Settings()
-{ }
-
-void NfgTable::Settings::LoadSettings(void)
-{
-  wxConfig config("Gambit");
-  config.Read("NfgDisplay/Display-Precision", &m_decimals, 2);
-  config.Read("NfgDisplay/Outcome-Values", &m_outcomeValues, 1);
-}
-
-void NfgTable::Settings::SaveSettings(void) const
-{
-  wxConfig config("Gambit");
-  config.Write("NfgDisplay/Display-Precision", (long) m_decimals);
-  config.Write("NfgDisplay/Outcome-Values", (long) m_outcomeValues);
-}
 

@@ -38,6 +38,40 @@ const int SUBGAME_HIDDEN = 0;
 const int SUBGAME_ARC = 1;
 
 
+const int NODE_ABOVE_NOTHING = 0;
+const int NODE_ABOVE_LABEL = 1;
+const int NODE_ABOVE_PLAYER = 2;
+const int NODE_ABOVE_ISETLABEL = 3;
+const int NODE_ABOVE_ISETID = 4;
+const int NODE_ABOVE_OUTCOME = 5;
+const int NODE_ABOVE_REALIZPROB = 6;
+const int NODE_ABOVE_BELIEFPROB	= 7;
+const int NODE_ABOVE_VALUE = 8;
+
+const int NODE_BELOW_NOTHING = 0;
+const int NODE_BELOW_LABEL = 1;
+const int NODE_BELOW_PLAYER = 2;
+const int NODE_BELOW_ISETLABEL = 3;
+const int NODE_BELOW_ISETID = 4;
+const int NODE_BELOW_OUTCOME = 5;
+const int NODE_BELOW_REALIZPROB = 6;
+const int NODE_BELOW_BELIEFPROB = 7;
+const int NODE_BELOW_VALUE = 8;
+
+const int NODE_RIGHT_NOTHING = 0;
+const int NODE_RIGHT_OUTCOME = 1;
+const int NODE_RIGHT_NAME = 2;
+
+const int BRANCH_ABOVE_NOTHING = 0;
+const int BRANCH_ABOVE_LABEL = 1;
+const int BRANCH_ABOVE_PROBS = 2;
+const int BRANCH_ABOVE_VALUE = 3;
+
+const int BRANCH_BELOW_NOTHING = 0;
+const int BRANCH_BELOW_LABEL = 1;
+const int BRANCH_BELOW_PROBS = 2;
+const int BRANCH_BELOW_VALUE = 3;
+
 
 class TreeDrawSettings {
 private:

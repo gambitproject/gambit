@@ -42,8 +42,8 @@
 #include "dleditnode.h"
 #include "dleditmove.h"
 #include "dleditefg.h"
-#include "dllayout.h"
-#include "dllegends.h"
+#include "dlefglayout.h"
+#include "dlefglegend.h"
 #include "dlelimbehav.h"
 #include "dlefgnash.h"
 #include "dleditbehav.h"
@@ -94,8 +94,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFORMAT_FONTS_BELOWBRANCH, EfgShow::OnFormatFontsBelowBranch)
   EVT_MENU(efgmenuFORMAT_DISPLAY_LAYOUT, EfgShow::OnFormatDisplayLayout)
   EVT_MENU(efgmenuFORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
-  EVT_MENU(efgmenuFORMAT_SAVE, EfgShow::OnFormatSave)
-  EVT_MENU(efgmenuFORMAT_LOAD, EfgShow::OnFormatLoad)
   EVT_MENU(efgmenuTOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
@@ -606,9 +604,6 @@ void EfgShow::MakeMenus(void)
 			 "Font for label below branches");
   formatMenu->Append(efgmenuFORMAT_FONTS, "&Fonts", formatFontsMenu,
 		     "Set display fonts");
-  formatMenu->AppendSeparator();
-  formatMenu->Append(efgmenuFORMAT_SAVE, "&Save");
-  formatMenu->Append(efgmenuFORMAT_LOAD, "&Load");
   
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
@@ -1145,7 +1140,7 @@ void EfgShow::OnViewSupportReachable(wxCommandEvent &)
 
 void EfgShow::OnFormatLegend(wxCommandEvent &)
 {
-  dialogLegends dialog(this, m_treeWindow->DrawSettings());
+  dialogLegend dialog(this, m_treeWindow->DrawSettings());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeAboveLabel(dialog.GetNodeAbove());
@@ -1153,6 +1148,7 @@ void EfgShow::OnFormatLegend(wxCommandEvent &)
     m_treeWindow->DrawSettings().SetNodeRightLabel(dialog.GetNodeAfter());
     m_treeWindow->DrawSettings().SetBranchAboveLabel(dialog.GetBranchAbove());
     m_treeWindow->DrawSettings().SetBranchBelowLabel(dialog.GetBranchBelow());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1165,6 +1161,7 @@ void EfgShow::OnFormatFontsAboveNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1176,6 +1173,7 @@ void EfgShow::OnFormatFontsBelowNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1187,6 +1185,7 @@ void EfgShow::OnFormatFontsAfterNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1198,6 +1197,7 @@ void EfgShow::OnFormatFontsAboveBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1209,6 +1209,7 @@ void EfgShow::OnFormatFontsBelowBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLabels();
   }
 }
@@ -1221,6 +1222,7 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     dialog.GetSettings(settings);
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->RefreshLayout();
     m_treeWindow->Refresh();
   }
@@ -1233,18 +1235,9 @@ void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
+    m_treeWindow->DrawSettings().SaveOptions();
     m_treeWindow->Refresh();
   }
-}
-
-void EfgShow::OnFormatSave(wxCommandEvent &)
-{
-  m_treeWindow->DrawSettings().SaveOptions();
-}
-
-void EfgShow::OnFormatLoad(wxCommandEvent &)
-{
-  m_treeWindow->DrawSettings().LoadOptions();
 }
 
 //----------------------------------------------------------------------

@@ -1,7 +1,10 @@
 //
-// FILE: nfgshow.h -- Declaration of normal form display class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to class representing normal form viewing frame
 //
 
 #ifndef NFGSHOW_H
@@ -82,13 +85,9 @@ private:
   void OnViewValues(wxCommandEvent &);
   void OnViewOutcomeLabels(wxCommandEvent &);
 
-  void OnFormatDisplayColumns(wxCommandEvent &);
   void OnFormatDisplayDecimals(wxCommandEvent &);
   void OnFormatFontData(wxCommandEvent &);
   void OnFormatFontLabels(wxCommandEvent &);
-  void OnFormatColors(wxCommandEvent &);
-  void OnFormatSave(wxCommandEvent &);
-  void OnFormatLoad(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);

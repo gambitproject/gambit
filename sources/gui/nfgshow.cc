@@ -75,13 +75,9 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
   EVT_MENU(NFG_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
-  EVT_MENU(NFG_FORMAT_DISPLAY_COLUMNS, NfgShow::OnFormatDisplayColumns)
   EVT_MENU(NFG_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
   EVT_MENU(NFG_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
   EVT_MENU(NFG_FORMAT_FONT_LABELS, NfgShow::OnFormatFontLabels)
-  EVT_MENU(NFG_FORMAT_COLORS, NfgShow::OnFormatColors)
-  EVT_MENU(NFG_FORMAT_SAVE, NfgShow::OnFormatSave)
-  EVT_MENU(NFG_FORMAT_LOAD, NfgShow::OnFormatLoad)
   EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(NFG_TOOLS_QRE, NfgShow::OnToolsQre)
@@ -178,7 +174,8 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
   m_table->SetSize(0, 0, 200, 200);
 
   m_nfg.SetIsDirty(false);
-  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, !m_table->OutcomeValues());
+  GetMenuBar()->Check(NFG_VIEW_OUTCOMES,
+		      !m_table->GetSettings().OutcomeValues());
   UpdateMenus();
   m_table->SetFocus();
 
@@ -361,8 +358,6 @@ void NfgShow::MakeMenus(void)
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
-  formatDisplayMenu->Append(NFG_FORMAT_DISPLAY_COLUMNS, "&Column Width",
-			   "Set column width");
   formatDisplayMenu->Append(NFG_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
 
@@ -372,10 +367,6 @@ void NfgShow::MakeMenus(void)
   formatFontMenu->Append(NFG_FORMAT_FONT_DATA, "&Data", "Set data font");
   formatFontMenu->Append(NFG_FORMAT_FONT_LABELS, "&Labels", "Set label font");
   formatMenu->Append(NFG_FORMAT_FONT, "&Font", formatFontMenu, "Set fonts");
-  formatMenu->Append(NFG_FORMAT_COLORS, "&Colors", "Set player colors");
-  formatMenu->AppendSeparator();
-  formatMenu->Append(NFG_FORMAT_SAVE, "&Save", "Save current configuration");
-  formatMenu->Append(NFG_FORMAT_LOAD, "&Load", "Load configuration");
 
   wxMenu *toolsMenu = new wxMenu;
   toolsMenu->Append(NFG_TOOLS_DOMINANCE, "&Dominance",
@@ -713,7 +704,8 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
-  m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
+  m_table->GetSettings().SetOutcomeValues(1 - m_table->GetSettings().OutcomeValues());
+  m_table->GetSettings().SaveSettings();
   m_table->RefreshTable();
 }
 
@@ -721,24 +713,15 @@ void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 //               NfgShow: Menu handlers - Format menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
-{
-  dialogSpinCtrl dialog(this, "Column width", 0, 100, 20);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    //    for (int i = 1; i <= m_currentSupport->NumStrats(m_); i++) {
-    //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
-    //    }
-  }
-}
-
 void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
-  dialogSpinCtrl dialog(this, "Decimal places", 0, 25, m_table->GetDecimals());
+  dialogSpinCtrl dialog(this, "Decimal places", 0, 25,
+			m_table->GetSettings().GetDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
-    m_table->SetDecimals(dialog.GetValue());
-    m_table->Refresh();
+    m_table->GetSettings().SetDecimals(dialog.GetValue());
+    m_table->GetSettings().SaveSettings();
+    m_table->RefreshTable();
   }
 }
 
@@ -748,9 +731,8 @@ void NfgShow::OnFormatFontData(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
-    m_table->SetCellFont(dialog.GetFontData().GetChosenFont());
-    m_table->Refresh();
+    m_table->SetDataFont(dialog.GetFontData().GetChosenFont());
+    m_table->RefreshTable();
   }
 }
 
@@ -760,24 +742,9 @@ void NfgShow::OnFormatFontLabels(wxCommandEvent &)
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
-    // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
     m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    m_table->Refresh();
+    m_table->RefreshTable();
   }
-}
-
-void NfgShow::OnFormatColors(wxCommandEvent &)
-{
-}
-
-void NfgShow::OnFormatSave(wxCommandEvent &)
-{
-  m_table->SaveSettings();
-}
-
-void NfgShow::OnFormatLoad(wxCommandEvent &)
-{
-  m_table->LoadSettings();
 }
 
 //----------------------------------------------------------------------

@@ -10,7 +10,7 @@
 #ifndef NFGCONST_H
 #define NFGCONST_H
 
-#define NFG_EDIT_STRATS                 301
+const int NFG_EDIT_STRATS = 301;
 const int NFG_EDIT_CONTINGENCY = 309;
 const int NFG_EDIT_GAME = 310;
 
@@ -23,15 +23,11 @@ const int NFG_VIEW_PROBABILITIES = 111;
 const int NFG_VIEW_VALUES = 112;
 const int NFG_VIEW_OUTCOME_LABELS = 120;
 
-#define NFG_FORMAT_DISPLAY               204
-#define NFG_FORMAT_DISPLAY_COLUMNS       205
-#define NFG_FORMAT_DISPLAY_DECIMALS      207
-#define NFG_FORMAT_FONT                  212
-#define NFG_FORMAT_FONT_DATA             208
-#define NFG_FORMAT_FONT_LABELS           203
-#define NFG_FORMAT_COLORS                200
-#define NFG_FORMAT_SAVE                  209
-#define NFG_FORMAT_LOAD                  210
+const int NFG_FORMAT_DISPLAY = 204;
+const int NFG_FORMAT_DISPLAY_DECIMALS = 207;
+const int NFG_FORMAT_FONT = 212;
+const int NFG_FORMAT_FONT_DATA = 208;
+const int NFG_FORMAT_FONT_LABELS = 203;
 
 const int NFG_TOOLS_DOMINANCE = 160;
 const int NFG_TOOLS_EQUILIBRIUM = 498;

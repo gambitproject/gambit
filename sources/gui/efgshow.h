@@ -98,8 +98,6 @@ private:
   void OnFormatFontsBelowBranch(wxCommandEvent &);
   void OnFormatDisplayLayout(wxCommandEvent &);
   void OnFormatDisplayDecimals(wxCommandEvent &);
-  void OnFormatSave(wxCommandEvent &);
-  void OnFormatLoad(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);

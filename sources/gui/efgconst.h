@@ -30,8 +30,6 @@ typedef enum {
   efgmenuVIEW_SUPPORT_REACHABLE = 1814,
 
   efgmenuFORMAT_LEGEND = 1604,
-  efgmenuFORMAT_SAVE = 1605,
-  efgmenuFORMAT_LOAD = 1606,
   efgmenuFORMAT_FONTS = 1612,
   efgmenuFORMAT_FONTS_ABOVENODE = 1613,
   efgmenuFORMAT_FONTS_BELOWNODE = 1614,

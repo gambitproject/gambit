@@ -18,7 +18,6 @@
 
 #include "treewin.h"
 #include "efgshow.h"
-#include "legend.h"
 
 //-----------------------------------------------------------------------
 //                   class NodeEntry: Member functions

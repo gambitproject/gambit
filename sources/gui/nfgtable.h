@@ -1,13 +1,45 @@
 //
-// FILE: nfgtable.h -- Declaration of normal form table class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Panel to display normal form games in tabular format
 //
 
 #ifndef NFGTABLE_H
 #define NFGTABLE_H
 
 #include "wx/grid.h"
+
+class NfgTableSettings {
+private:
+  int m_decimals, m_outcomeValues;
+  wxFont m_dataFont, m_labelFont;
+
+  static void LoadFont(const wxString &, const wxConfig &, wxFont &);
+  static void SaveFont(const wxString &, wxConfig &, const wxFont &);
+
+public:
+  NfgTableSettings(void);
+
+  void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
+  int GetDecimals(void) const { return m_decimals; }
+
+  void SetOutcomeValues(bool p_outcomeValues) 
+    { m_outcomeValues = p_outcomeValues; }
+  bool OutcomeValues(void) const { return m_outcomeValues; }
+
+  void SetDataFont(const wxFont &p_font) { m_dataFont = p_font; }
+  const wxFont &GetDataFont(void) const { return m_dataFont; }
+
+  void SetLabelFont(const wxFont &p_font) { m_labelFont = p_font; }
+  const wxFont &GetLabelFont(void) const { return m_labelFont; }
+
+  void LoadSettings(void);
+  void SaveSettings(void) const;
+};
+
 
 class NfgTable : public wxPanel {
 private:
@@ -21,26 +53,7 @@ private:
 
   int m_showProb, m_showDom, m_showValue;
 
-  class Settings {
-  private:
-    int m_decimals, m_outcomeValues;
-
-  public:
-    Settings(void);
-    virtual ~Settings();
-
-    void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
-    int GetDecimals(void) const { return m_decimals; }
-    void SetOutcomeValues(bool p_outcomeValues) 
-      { m_outcomeValues = p_outcomeValues; }
-    bool OutcomeValues(void) const { return m_outcomeValues; }
-
-    void LoadSettings(void);
-    void SaveSettings(void) const;
-  };
-
-  Settings m_settings;
-
+  NfgTableSettings m_settings;
 
   // Event handlers
   void OnCellSelect(wxGridEvent &);
@@ -67,17 +80,13 @@ public:
   void ToggleValues(void);
   int ShowValues(void) const { return m_showValue; }
 
-  bool OutcomeValues(void) const { return m_settings.OutcomeValues(); }
-  void SetOutcomeValues(bool p_outcomeValues) 
-    { m_settings.SetOutcomeValues(p_outcomeValues); }
-  int GetDecimals(void) const { return m_settings.GetDecimals(); }
-  void SetDecimals(int p_decimals) { m_settings.SetDecimals(p_decimals); }
-  void SaveSettings(void) const { m_settings.SaveSettings(); }
-  void LoadSettings(void) { m_settings.LoadSettings(); }
+  const NfgTableSettings &GetSettings(void) const { return m_settings; }
+  NfgTableSettings &GetSettings(void) { return m_settings; }
 
-  void SetCellFont(const wxFont &p_font) 
-    { m_grid->SetDefaultCellFont(p_font); }
-  void SetLabelFont(const wxFont &p_font) { m_grid->SetLabelFont(p_font); }
+  void SetDataFont(const wxFont &p_font) 
+    { m_settings.SetDataFont(p_font); m_grid->SetDefaultCellFont(p_font); }
+  void SetLabelFont(const wxFont &p_font) 
+    { m_settings.SetLabelFont(p_font); m_grid->SetLabelFont(p_font); }
 
   void SetSupport(const NFSupport &);
   const NFSupport &GetSupport(void) const { return m_support; }
