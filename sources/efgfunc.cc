@@ -493,6 +493,35 @@ Portion *GSM_RandomEfgSeedRational(Portion **param)
   return param[0]->RefCopy();
 }  
 
+
+
+extern Efg<double> *ConvertEfg(const Efg<gRational> &);
+
+Portion *GSM_FloatEfg(Portion **param)
+{
+  Efg<gRational> &orig = * (Efg<gRational> *) ((EfgPortion *) param[0])->Value();
+  Efg<double> *E = ConvertEfg(orig);
+
+  if (E)
+    return new EfgValPortion(E);
+  else
+    return new ErrorPortion("Conversion failed.");
+}
+
+extern Efg<gRational> *ConvertEfg(const Efg<double> &);
+
+Portion *GSM_RationalEfg(Portion **param)
+{
+  Efg<double> &orig = * (Efg<double> *) ((EfgPortion *) param[0])->Value();
+  Efg<gRational> *E = ConvertEfg(orig);
+
+  if (E)
+    return new EfgValPortion(E);
+  else
+    return new ErrorPortion("Conversion failed.");
+}
+   
+
 Portion *GSM_Reveal(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
@@ -2171,6 +2200,18 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 1, "seed", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Float");
+  FuncObj->SetFuncInfo(GSM_FloatEfg, 1);
+  FuncObj->SetParamInfo(GSM_FloatEfg, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Rational");
+  FuncObj->SetFuncInfo(GSM_RationalEfg, 1);
+  FuncObj->SetParamInfo(GSM_RationalEfg, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Reveal");

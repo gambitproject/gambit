@@ -75,6 +75,35 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
   }
 }
 
+template <class T> Efg<T>::Efg(const BaseEfg &E)
+  : BaseEfg(E)
+{
+  int i;
+  
+  for (i = 1; i <= E.NumOutcomes(); i++)  {
+    OutcomeVector<T> *c = new OutcomeVector<T>(this, i, E.NumPlayers());
+    c->name = E.OutcomeList()[i]->GetName();
+    outcomes.Append(c);
+  }
+
+  
+  for (i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
+    ChanceInfoset<T> *t = (ChanceInfoset<T> *) E.GetChance()->InfosetList()[i];
+    ChanceInfoset<T> *s = new ChanceInfoset<T>(this, i, chance,
+					       t->NumActions());
+    s->name = t->GetName();
+    for (int act = 1; act <= s->probs.Length(); act++)
+      s->actions[act]->name = t->actions[act]->name;
+    chance->infosets.Append(s);
+  }
+
+  root = new TypedNode<T>(this, 0, E.NumPlayers());
+  CopySubtree(root, E.RootNode());
+
+  sortisets = true;
+  SortInfosets();
+}
+
 template <class T> Efg<T>::Efg(const Efg<T> &E)
   : BaseEfg(E)
 {

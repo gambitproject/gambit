@@ -176,6 +176,7 @@ template <class T> class Efg : public BaseEfg   {
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
     Efg(void);
+    Efg(const BaseEfg &);
     Efg(const Efg<T> &);
     Efg(const Efg<T> &, Node *);
     virtual ~Efg(); 
