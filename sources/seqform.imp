@@ -48,10 +48,10 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   (*b)[ns1+ns2+1] = (T)1;
   (*b)[ns1+ns2+ni1+1] = (T)1;
 //  gout.SetWidth(1).SetPrec(1);
-  gout << "\nA";
-  A->Dump(gout);
-  gout << "\nb";
-  b->Dump(gout);
+//  gout << "\nA";
+//  A->Dump(gout);
+//  gout << "\nb";
+//  b->Dump(gout);
 
   tab = new LTableau<T>(*A,*b);
   eps = tab->Epsilon();
