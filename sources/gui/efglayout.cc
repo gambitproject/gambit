@@ -541,11 +541,9 @@ int gbtEfgLayout::LayoutSubtree(const gbtGameNode &p_node,
   if (prefs.SubgameStyle() == GBT_SUBGAME_ARC &&
       p_node->IsSubgameRoot()) {
     entry->SetSubgameRoot(true);
-    entry->SetSubgameMarked(p_node->GetSubgameRoot() == p_node);
   }
   else {
     entry->SetSubgameRoot(false);
-    entry->SetSubgameMarked(p_node->GetSubgameRoot() == p_node);
   }
   p_maxy = gmax(entry->Y(), p_maxy);
   p_miny = gmin(entry->Y(), p_miny);

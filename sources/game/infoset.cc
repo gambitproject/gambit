@@ -213,11 +213,6 @@ void gbtGameInfosetBase::MergeInfoset(gbtGameInfoset p_from)
     return;
   }
 
-  // FIXME: Can't bridge subgames
-  if (m_members[1]->m_gameroot != from->m_members[1]->m_gameroot) {
-    return;
-  }
-
   m_player->m_efg->MergeInfoset(this, from);
 }
 

@@ -42,7 +42,9 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   ((gbtVector<gbtNumber> &) thissolns[1]).operator=(gbtNumber(0));
   
   gbtList<gbtGameNode> subroots;
-  ChildSubgames(p_support->GetTree(), n, subroots);
+  for (int child = 1; child <= n->NumChildren(); child++) {
+    subroots += n->GetChild(child)->GetChildSubgames();
+  }
   
   gbtList<gbtArray<gbtGameOutcome> > subrootvalues;
   subrootvalues.Append(gbtArray<gbtGameOutcome>(subroots.Length()));

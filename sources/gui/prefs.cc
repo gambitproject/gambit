@@ -168,7 +168,7 @@ void gbtPreferences::LoadOptions(void)
   config.Read(wxT("/TreeDisplay/InfosetConnect"), &m_infosetConnect, 2);
   config.Read(wxT("/TreeDisplay/InfosetJoin"), &m_infosetJoin, 1);
 
-  config.Read(wxT("/TreeDisplay/SubgameStyle"), &m_subgameStyle, 1);
+  config.Read(wxT("/TreeDisplay/SubgameStyle"), &m_subgameStyle, 0);
 
   config.Read(wxT("/TreeDisplay/ProfileStyle"), &m_profileStyle, 
 	      GBT_PROFILES_MYERSON);

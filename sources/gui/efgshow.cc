@@ -214,39 +214,6 @@ void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)
 }
 
 //---------------------------------------------------------------------
-//                    class gbtCmdMarkSubgame
-//---------------------------------------------------------------------
-
-//
-// Marks or unmarks a node as a marked subgame.
-//
-class gbtCmdMarkSubgame : public gbtGameCommand {
-private:
-  gbtGameNode m_node;
-  bool m_mark; 
-
-public:
-  gbtCmdMarkSubgame(gbtGameNode p_node, bool p_mark)
-    : m_node(p_node), m_mark(p_mark) { }
-  virtual ~gbtCmdMarkSubgame() { }
-
-  void Do(gbtGameDocument *);
-
-  bool ModifiesGame(void) const { return false; }
-  bool ModifiesPayoffs(void) const { return false; }
-};
-
-void gbtCmdMarkSubgame::Do(gbtGameDocument *p_doc)  
-{
-  if (m_mark) {
-    p_doc->GetGame()->MarkSubgame(m_node);
-  }
-  else {
-    p_doc->GetGame()->UnmarkSubgame(m_node);
-  }
-}
-
-//---------------------------------------------------------------------
 //                   class gbtCmdAddEfgSupport
 //---------------------------------------------------------------------
 
@@ -321,9 +288,6 @@ BEGIN_EVENT_TABLE(gbtEfgFrame, wxFrame)
   EVT_MENU(GBT_MENU_EDIT_INSERT, gbtEfgFrame::OnEditInsert)
   EVT_MENU(GBT_MENU_EDIT_DELETE, gbtEfgFrame::OnEditDelete)
   EVT_MENU(GBT_MENU_EDIT_REVEAL, gbtEfgFrame::OnEditReveal)
-  EVT_MENU(GBT_MENU_EDIT_TOGGLE_SUBGAME, gbtEfgFrame::OnEditToggleSubgame)
-  EVT_MENU(GBT_MENU_EDIT_MARK_SUBGAME_TREE, gbtEfgFrame::OnEditMarkSubgameTree)
-  EVT_MENU(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, gbtEfgFrame::OnEditUnmarkSubgameTree)
   EVT_MENU(GBT_MENU_EDIT_NODE, gbtEfgFrame::OnEditNode)
   EVT_MENU(GBT_MENU_EDIT_MOVE, gbtEfgFrame::OnEditMove)
   EVT_MENU(GBT_MENU_EDIT_GAME, gbtEfgFrame::OnEditGame)
@@ -435,19 +399,6 @@ void gbtEfgFrame::OnUpdate(gbtGameView *)
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, 
 		  !cursor.IsNull() && !cursor->GetInfoset().IsNull());
 
-  menuBar->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		  (!cursor.IsNull() && cursor->IsSubgameRoot() &&
-		   !cursor->GetParent().IsNull()));
-  menuBar->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && cursor->IsSubgameRoot()));
-  menuBar->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		  (!cursor.IsNull() && cursor->IsSubgameRoot()));
-  menuBar->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		    (!cursor.IsNull() && !cursor->GetParent().IsNull() &&
-		     cursor->IsSubgameRoot() &&
-		     cursor->GetSubgameRoot() == cursor) ?
-		    _("Unmark &subgame") : _("Mark &subgame"));
-
   menuBar->Enable(GBT_MENU_EDIT_NODE, !cursor.IsNull());
   menuBar->Enable(GBT_MENU_EDIT_MOVE,
 		  !cursor.IsNull() && !cursor->GetInfoset().IsNull());
@@ -516,14 +467,6 @@ void gbtEfgFrame::MakeMenus(void)
 		   _("Delete an object"));
   editMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), 
 		   _("Reveal choice at node"));
-  editMenu->AppendSeparator();
-  editMenu->Append(GBT_MENU_EDIT_TOGGLE_SUBGAME, _("Mark &subgame"),
-		   _("Mark or unmark the subgame at this node"));
-  editMenu->Append(GBT_MENU_EDIT_MARK_SUBGAME_TREE, _("Mar&k subgame tree"),
-		   _("Mark all subgames in this subtree"));
-  editMenu->Append(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		   _("&Unmark subgame tree"),
-		   _("Unmark all subgames in this subtree"));
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_NODE, _("&Node"),
 		   _("Edit properties of the node"));
@@ -970,34 +913,6 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
   }
 }
 
-void gbtEfgFrame::OnEditToggleSubgame(wxCommandEvent &)
-{
-  if (m_doc->GetCursor()->GetSubgameRoot() == m_doc->GetCursor()) {
-    m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(), false));
-  }
-  else {
-    m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(), true));
-  }
-}
-
-void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
-{
-  gbtList<gbtGameNode> subgames;
-  LegalSubgameRoots(m_doc->GetGame(), m_doc->GetCursor(), subgames);
-  for (int i = 1; i <= subgames.Length(); i++) {
-    m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], true));
-  }
-}
-
-void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
-{
-  gbtList<gbtGameNode> subgames;
-  LegalSubgameRoots(m_doc->GetGame(), m_doc->GetCursor(), subgames);
-  for (int i = 1; i <= subgames.Length(); i++) {
-    m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], false));
-  }
-}
-
 void gbtEfgFrame::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, m_doc->GetGame(), m_doc->GetCursor());
@@ -1009,12 +924,6 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
     }
     else {
       m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), 0));
-    }
-
-    if (m_doc->GetCursor()->IsSubgameRoot() &&
-	!m_doc->GetCursor()->GetParent().IsNull()) {
-      m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(),
-					  dialog.MarkedSubgame()));
     }
 
     if (m_doc->GetCursor()->NumChildren() > 0 &&

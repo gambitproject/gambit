@@ -140,14 +140,6 @@ void gbtTreeView::MakeMenus(void)
   m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("Reveal move"),
 		     _("Reveal this move"));
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_MENU_EDIT_TOGGLE_SUBGAME, _("Mark subgame"),
-		     _("Mark or unmark this subgame"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_MARK_SUBGAME_TREE, _("Mark subgame tree"),
-		     _("Mark all subgames in this tree"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		     _("Unmark subgame tree"), 
-		     _("Unmark all subgames in this tree"));
-  m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("Edit node"),
 		     _("View and change node properties"));
   m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("Edit move"),
@@ -242,22 +234,6 @@ void gbtTreeView::OnUpdate(gbtGameView *)
 		     (!cursor.IsNull() && !cursor->GetInfoset().IsNull()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, 
 		     (!cursor.IsNull() && !cursor->GetInfoset().IsNull()));
-
-  m_nodeMenu->Enable(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		     (!cursor.IsNull() && 
-		      cursor->IsSubgameRoot() &&
-		      !cursor->GetParent().IsNull()));
-  m_nodeMenu->Enable(GBT_MENU_EDIT_MARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && 
-		      cursor->IsSubgameRoot()));
-  m_nodeMenu->Enable(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
-		     (!cursor.IsNull() && 
-		      cursor->IsSubgameRoot()));
-  m_nodeMenu->SetLabel(GBT_MENU_EDIT_TOGGLE_SUBGAME,
-		       (!cursor.IsNull() && !cursor->GetParent().IsNull() &&
-			cursor->IsSubgameRoot() &&
-			cursor->GetSubgameRoot() == cursor) ?
-		       _("Unmark subgame") : _("Mark subgame"));
   Refresh();
 }
 

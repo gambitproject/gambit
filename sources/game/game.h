@@ -268,11 +268,6 @@ public:
   virtual gbtGameAction InsertAction(gbtGameInfoset, const gbtGameAction &at) = 0;
 
   virtual void SetChanceProb(gbtGameInfoset, int, const gbtNumber &) = 0;
-
-  virtual void MarkSubgames(void) = 0;
-  virtual bool MarkSubgame(gbtGameNode) = 0;
-  virtual void UnmarkSubgame(gbtGameNode) = 0;
-  virtual void UnmarkSubgames(gbtGameNode) = 0;
 };
 
 

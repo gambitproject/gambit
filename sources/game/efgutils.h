@@ -43,22 +43,6 @@ int CountNodes(const gbtGame &, const gbtGameNode &);
 // Returns the terminal nodes in a subtree rooted at 'p_node'
 void TerminalNodes(const gbtGameNode &, gbtList<gbtGameNode> &);
 
-// returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const gbtGame &, gbtList<gbtGameNode> &list);
-
-// returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const gbtGame &, gbtList<gbtGameNode> &list);
-void LegalSubgameRoots(const gbtGame &, const gbtGameNode &,
-		       gbtList<gbtGameNode> &);
-bool HasSubgames(const gbtGame &);
-bool HasSubgames(const gbtGame &, const gbtGameNode &n);
-
-bool AllSubgamesMarked(const gbtGame &efg);
-
-// returns the list of nodes which are roots of child subgames
-void ChildSubgames(const gbtGame &, const gbtGameNode &, 
-		   gbtList<gbtGameNode> &);
-
 gbtGame CompressEfg(const gbtGame &, const gbtEfgSupport &);
 // An "in-place" version of the above
 void CompressEfgInPlace(gbtGame, const gbtEfgSupport &);

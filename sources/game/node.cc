@@ -30,6 +30,23 @@
 
 #include "gamebase.h"
 
+
+gbtList<gbtGameNode> gbtGameNodeRep::GetChildSubgames(void) const
+{
+  gbtList<gbtGameNode> ret;
+
+  if (IsSubgameRoot()) {
+    ret += const_cast<gbtGameNodeRep *>(this);
+  }
+  else {
+    for (int child = 1; child <= NumChildren(); child++) {
+      ret += GetChild(child)->GetChildSubgames();
+    }
+  }
+
+  return ret;
+}
+
 //
 // This file contains the implementation of the API for nodes in
 // a game tree.
@@ -39,8 +56,7 @@ gbtGameNodeBase::gbtGameNodeBase(gbtGameBase *p_efg,
 			       gbtGameNodeBase *p_parent)
   : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(0),
     m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
-    m_whichbranch(0), m_ptr(0),
-    m_gameroot((p_parent) ? p_parent->m_gameroot : this)
+    m_whichbranch(0), m_ptr(0)
 { }
 
 gbtGameNodeBase::~gbtGameNodeBase()
@@ -139,11 +155,6 @@ gbtGameNode gbtGameNodeBase::GetParent(void) const
   return m_parent;
 }
 
-gbtGameNode gbtGameNodeBase::GetSubgameRoot(void) const
-{
-  return m_gameroot;
-}
-
 gbtGameNode gbtGameNodeBase::GetChild(const gbtGameAction &p_action) const
 {
   if (p_action->GetInfoset() != GetInfoset()) {
@@ -240,11 +251,6 @@ gbtGameNode gbtGameNodeBase::InsertMove(gbtGameInfoset p_infoset)
   }
 
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());
-  // FIXME: For the moment, can't bridge subgames
-  if (infoset->m_members.Length() > 0 &&
-      m_gameroot != infoset->m_members[1]->m_gameroot) {
-    return 0;
-  }  
 
   m_efg->InsertMove(this, infoset);
   return GetParent();
@@ -256,10 +262,6 @@ void gbtGameNodeBase::DeleteMove(void)
     return;
   }
 
-  // FIXME: Unmarking all subgames to be conservative.
-  // Is this necessary?  (Or, more likely, will be moot once subgame
-  // implementation is improved!)
-  gbtGame(m_efg)->UnmarkSubgames(gbtGameNode(this));
   m_efg->DeleteMove(this);
 }
 
@@ -277,11 +279,6 @@ void gbtGameNodeBase::JoinInfoset(gbtGameInfoset p_infoset)
   }
 
   gbtGameInfosetBase *infoset = dynamic_cast<gbtGameInfosetBase *>(p_infoset.Get());
-  // FIXME: can't bridge subgames
-  if (infoset->m_members.Length() > 0 &&
-      m_gameroot != infoset->m_members[1]->m_gameroot) {
-    return;
-  }
   
   if (!m_infoset ||
       m_infoset == infoset ||

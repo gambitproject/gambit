@@ -39,36 +39,6 @@ NDoChild(const gbtGame & e, const gbtGameNode & n, gbtList < gbtGameNode > &list
     NDoChild(e, n->GetChild(i), list);
 }
 
-static void
-MSRDoChild(const gbtGame & e, const gbtGameNode & n,
-           gbtList < gbtGameNode > &list)
-{
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MSRDoChild(e, n->GetChild(i), list);
-  if (n->GetSubgameRoot() == n)
-    list.Append(n);
-}
-
-static void
-LSRDoChild(const gbtGame & e, const gbtGameNode & n,
-           gbtList < gbtGameNode > &list)
-{
-  for (int i = 1; i <= n->NumChildren(); i++)
-    LSRDoChild(e, n->GetChild(i), list);
-  if (n->IsSubgameRoot())
-    list.Append(n);
-}
-
-static void
-CSDoChild(const gbtGame & e, gbtGameNode n, gbtList < gbtGameNode > &list)
-{
-  if (n->GetSubgameRoot() == n)
-    list.Append(n);
-  else
-    for (int i = 1; i <= n->NumChildren(); i++)
-      CSDoChild(e, n->GetChild(i), list);
-}
-
 // Public Functions
 
 int
@@ -105,67 +75,6 @@ TerminalNodes(const gbtGameNode & p_node, gbtList < gbtGameNode > &p_list)
       TerminalNodes(p_node->GetChild(i), p_list);
     }
   }
-}
-
-void
-MarkedSubgameRoots(const gbtGame & efg, gbtList < gbtGameNode > &list)
-{
-  list.Flush();
-  MSRDoChild(efg, efg->GetRoot(), list);
-}
-
-void
-LegalSubgameRoots(const gbtGame & efg, gbtList < gbtGameNode > &list)
-{
-  list.Flush();
-  LSRDoChild(efg, efg->GetRoot(), list);
-}
-
-void
-LegalSubgameRoots(const gbtGame & efg, const gbtGameNode & n,
-                  gbtList < gbtGameNode > &list)
-{
-  list.Flush();
-  LSRDoChild(efg, n, list);
-}
-
-bool
-HasSubgames(const gbtGame & efg)
-{
-  gbtList < gbtGameNode > list;
-  LegalSubgameRoots(efg, list);
-  return list.Length() > 1;
-}
-
-bool
-HasSubgames(const gbtGame & e, gbtGameNode n)
-{
-  gbtList < gbtGameNode > list;
-  LegalSubgameRoots(e, n, list);
-  if (n->IsSubgameRoot())
-    return list.Length() > 1;
-  return list.Length() > 0;
-}
-
-bool
-AllSubgamesMarked(const gbtGame & efg)
-{
-  gbtList < gbtGameNode > marked, valid;
-
-  LegalSubgameRoots(efg, valid);
-  MarkedSubgameRoots(efg, marked);
-
-  return (marked == valid);
-}
-
-
-void
-ChildSubgames(const gbtGame & efg, const gbtGameNode &n,
-	      gbtList < gbtGameNode > &list)
-{
-  list.Flush();
-  for (int i = 1; i <= n->NumChildren(); i++)
-    CSDoChild(efg, n->GetChild(i), list);
 }
 
 int

@@ -471,18 +471,6 @@ bool gbtGameBase::CheckTree(const gbtGameNodeBase *n,
   return true;
 }
 
-void gbtGameBase::MarkSubgame(gbtGameNodeBase *n, gbtGameNodeBase *base)
-{
-  if (n->m_gameroot == n) {
-    return;
-  }
-  n->m_gameroot = base;
-  for (int i = 1; i <= n->m_children.Length(); i++) {
-    MarkSubgame(n->m_children[i], base);
-  }
-}
-
-
 //------------------------------------------------------------------------
 //       Efg: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
@@ -576,10 +564,6 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
 
     newParent->m_label = m->m_label;
     
-    if (m->m_gameroot == m) {
-      newParent->m_gameroot = newParent;
-    }
-
     if (m->m_outcome) {
       newParent->m_outcome = p_newEfg->m_outcomes[m->m_outcome->m_id];
     }
@@ -590,7 +574,6 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
   }
   else {
     n->m_label = m->m_label;
-    n->m_gameroot = 0;
     if (m->m_outcome) {
       n->m_outcome = p_newEfg->m_outcomes[m->m_outcome->m_id];
     }
@@ -927,7 +910,6 @@ gbtGameNode gbtGameBase::CopyTree(gbtGameNode p_src, gbtGameNode p_dest)
 
   gbtGameNodeBase *src = dynamic_cast<gbtGameNodeBase *>(p_src.Get());
   gbtGameNodeBase *dest = dynamic_cast<gbtGameNodeBase *>(p_dest.Get());
-  if (src->m_gameroot != dest->m_gameroot)  return src;
 
   if (src->m_children.Length())  {
     InsertMove(dest, src->m_infoset);
@@ -954,7 +936,6 @@ gbtGameNode gbtGameBase::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
   if (src == dest || dest->m_children.Length() ||
       src->IsPredecessorOf(dest))
     return src;
-  if (src->m_gameroot != dest->m_gameroot)  return src;
 
   if (src->m_parent == dest->m_parent) {
     int srcChild = src->m_parent->m_children.Find(src);
@@ -1025,63 +1006,6 @@ void gbtGameBase::SetChanceProb(gbtGameInfoset infoset,
     infoset->SetChanceProb(act, value);
   }
 }
-
-//---------------------------------------------------------------------
-//                     Subgame-related functions
-//---------------------------------------------------------------------
-
-bool gbtGameBase::MarkSubgame(gbtGameNode p_node)
-{
-  gbtGameNodeBase *n = dynamic_cast<gbtGameNodeBase *>(p_node.Get());
-
-  if (n->m_gameroot == n) return true;
-
-  if (n->m_gameroot != n && n->IsSubgameRoot())  {
-    n->m_gameroot = 0;
-    MarkSubgame(n, n);
-    return true;
-  }
-
-  return false;
-}
-
-void gbtGameBase::UnmarkSubgame(gbtGameNode p_node)
-{
-  gbtGameNodeBase *n = dynamic_cast<gbtGameNodeBase *>(p_node.Get());
-
-  if (n->m_gameroot == n && n->m_parent)  {
-    n->m_gameroot = 0;
-    MarkSubgame(n, n->m_parent->m_gameroot);
-  }
-}
-  
-
-void gbtGameBase::MarkSubgames(void)
-{
-  gbtList<gbtGameNode> subgames;
-  LegalSubgameRoots(gbtGame(this), subgames);
-
-  for (int i = 1; i <= subgames.Length(); i++)  {
-    gbtGameNodeBase *n = dynamic_cast<gbtGameNodeBase *>(subgames[i].Get());
-    n->m_gameroot = 0;
-    MarkSubgame(n, n);
-  }
-}
-
-void gbtGameBase::UnmarkSubgames(gbtGameNode p_node)
-{
-  if (p_node->NumChildren() == 0)   return;
-
-  for (int i = 1; i <= p_node->NumChildren(); i++)
-    UnmarkSubgames(p_node->GetChild(i));
-  
-  gbtGameNodeBase *n = dynamic_cast<gbtGameNodeBase *>(p_node.Get());
-  if (n->m_gameroot == n && n->m_parent)  {
-    n->m_gameroot = 0;
-    MarkSubgame(n, n->m_parent->m_gameroot);
-  }
-}
-
 
 int gbtGameBase::BehavProfileLength(void) const
 {

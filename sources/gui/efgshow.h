@@ -68,10 +68,6 @@ private:
   void OnEditDelete(wxCommandEvent &);
   void OnEditReveal(wxCommandEvent &);
 
-  void OnEditToggleSubgame(wxCommandEvent &);
-  void OnEditMarkSubgameTree(wxCommandEvent &);
-  void OnEditUnmarkSubgameTree(wxCommandEvent &);
-
   void OnEditMove(wxCommandEvent &);
   void OnEditNode(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);

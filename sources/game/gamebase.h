@@ -195,7 +195,7 @@ public:
   gbtGameNodeBase *m_parent;
   gbtGameOutcomeBase *m_outcome;
   gbtBlock<gbtGameNodeBase *> m_children;
-  mutable gbtGameNodeBase *m_whichbranch, *m_ptr, *m_gameroot;
+  mutable gbtGameNodeBase *m_whichbranch, *m_ptr;
 
   gbtGameNodeBase(gbtGameBase *, gbtGameNodeBase *);
   virtual ~gbtGameNodeBase();
@@ -219,7 +219,6 @@ public:
 
   gbtGamePlayer GetPlayer(void) const;
 
-  gbtGameNode GetSubgameRoot(void) const;
   bool IsSubgameRoot(void) const;
 
   gbtGameOutcome GetOutcome(void) const;
@@ -384,9 +383,6 @@ public:
   void SetChanceProb(gbtGameInfoset, int, const gbtNumber &);
 
   void MarkSubgames(void);
-  bool MarkSubgame(gbtGameNode);
-  void UnmarkSubgame(gbtGameNode);
-  void UnmarkSubgames(gbtGameNode);
 
   int BehavProfileLength(void) const;
   int MixedProfileLength(void) const;

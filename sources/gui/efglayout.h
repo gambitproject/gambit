@@ -87,9 +87,6 @@ public:
   bool IsSubgameRoot(void) const { return m_subgameRoot; }
   void SetSubgameRoot(bool p_root) { m_subgameRoot = p_root; }
   
-  bool IsSubgameMarked(void) const { return m_subgameMarked; }
-  void SetSubgameMarked(bool p_marked) { m_subgameMarked = p_marked; }
-
   int GetSize(void) const { return m_size; }
   void SetSize(int p_size) { m_size = p_size; }
 

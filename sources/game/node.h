@@ -53,7 +53,6 @@ public:
 
   virtual gbtGamePlayer GetPlayer(void) const = 0;
 
-  virtual gbtGameNode GetSubgameRoot(void) const = 0;
   virtual bool IsSubgameRoot(void) const = 0;
 
   virtual gbtGameOutcome GetOutcome(void) const = 0;
@@ -75,6 +74,8 @@ public:
 
   virtual void JoinInfoset(gbtGameInfoset) = 0;
   virtual gbtGameInfoset LeaveInfoset(void) = 0;
+
+  gbtList<gbtGameNode> GetChildSubgames(void) const;
 };
 
 class gbtGameNode {

@@ -85,7 +85,7 @@ gbtBehavNashSet gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
 						   players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
 
     if (p_support->NumPlayers() == 2) {
       if (p_support->IsConstSum()) {
@@ -187,7 +187,7 @@ gbtBehavNashSet gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->UnmarkSubgames(p_support->GetRoot());
+    //    p_support->GetTree()->UnmarkSubgames(p_support->GetRoot());
 
     if (p_support->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -286,7 +286,7 @@ gbtBehavNashSet gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->UnmarkSubgames(p_support->GetRoot());
+    //    p_support->GetTree()->UnmarkSubgames(p_support->GetRoot());
 
     if (p_support->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -374,7 +374,7 @@ gbtBehavNashSet gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_support,
 						   players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
 
     if (p_support->NumPlayers() == 2) {
       if (p_support->IsConstSum()) {
@@ -475,7 +475,7 @@ gbtBehavNashSet gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
 
     if (p_support->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -573,7 +573,7 @@ gbtBehavNashSet gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
 
     if (p_support->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -713,7 +713,7 @@ gbtBehavNashSet gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
   try {
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(2);
@@ -781,7 +781,7 @@ gbtBehavNashSet gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
   try {
-    p_support->GetTree()->MarkSubgames();
+    //    p_support->GetTree()->MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(0);

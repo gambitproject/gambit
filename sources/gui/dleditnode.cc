@@ -95,9 +95,6 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtGame p_game,
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC,
 				       _("This is the root of a proper subgame")),
 		      0, wxALL | wxCENTER, 5);
-    m_markedSubgame = new wxCheckBox(this, -1, _("Subgame is marked"));
-    m_markedSubgame->SetValue(p_node->GetSubgameRoot() == p_node);
-    subgameSizer->Add(m_markedSubgame, 0, wxALL | wxCENTER, 0);
   }
   topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, 5);
 
