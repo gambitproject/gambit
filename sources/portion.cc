@@ -1550,7 +1550,7 @@ ListPortion::ListPortion(void)
     _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
 { }
 
-ListPortion::ListPortion(gList<Portion *> &value)
+ListPortion::ListPortion(const gList<Portion *> &value)
   : _Value(new gList<Portion *>), _ref(false), _ContainsListsOnly(true),
     _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
 { 
@@ -1637,7 +1637,7 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
 
 
 
-gList< Portion* >& ListPortion::Value(void) const
+const gList<Portion *> &ListPortion::Value(void) const
 { return *_Value; }
 
 
@@ -1646,25 +1646,6 @@ PortionSpec ListPortion::Spec(void) const
 { 
   return PortionSpec(_DataType, _ListDepth, _IsNull); 
 }
-
-Precision ListPortion::SubType( void ) const
-{
-  Precision subtype = precERROR;
-  int i = 0;
-  for( i = 1; i <= Length(); i++ )
-  {
-    Precision el_subtype = operator[]( i )->SubType();
-    if( el_subtype != precERROR )
-    {
-      if( subtype == precERROR )
-	subtype = el_subtype;
-      else if( subtype != el_subtype )
-	subtype = precMIXED;
-    }
-  }
-  return subtype;
-}
-
 
 Portion* ListPortion::ValCopy(void) const
 { 

@@ -69,7 +69,6 @@ public:
   virtual ~Portion();
 
   virtual PortionSpec Spec(void) const = 0;
-  virtual Precision SubType( void ) const { return precERROR; }
 
   virtual void Output(gOutput& s) const;
   virtual gString OutputString( void ) const = 0;
@@ -862,7 +861,7 @@ protected:
 
 public:
   ListPortion(void);
-  ListPortion(gList<Portion *> &value);
+  ListPortion(const gList<Portion *> &value);
   virtual ~ListPortion();
 
   bool BelongsToGame( void* game ) const;  
@@ -870,12 +869,9 @@ public:
 
   bool ContainsListsOnly(void) const;
 
-
-  // gBlock< Portion* >& Value(void) const;
-  gList< Portion* >& Value(void) const;
+  const gList<Portion *> &Value(void) const;
   void SetDataType(unsigned long type);
   PortionSpec Spec(void) const;
-  Precision SubType( void ) const;
 
   void Output(gOutput& s) const;
   void Output(gOutput& s, long ListLF) const;
@@ -899,7 +895,7 @@ public:
 
   // Use SubscriptCopy() when you want to extract a copy of an element
   // Warning: SubscriptCopy() already makes a copy; 
-  //          don't calling ValCopy() or RefCopy() on Subscript() !
+  //          don't call ValCopy() or RefCopy() on Subscript() !
   Portion* SubscriptCopy(int index) const;
 
   bool IsReference(void) const;
