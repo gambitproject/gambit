@@ -1,5 +1,5 @@
 //
-// File gnullsts: instantiation of a null gStatus.  This gStatus does NOTHING!
+// FILE: gnullsts.cc instantiation of a null gStatus.  This gStatus does NOTHING!
 //
 // $Id$
 //
@@ -32,7 +32,7 @@ public:
   // functions for gProgress
   void SetProgress(double p) { }
   // functions for gSignal
-  bool Get(void) const { return false; }
+  void Get(void) const { }
   void Reset(void) { }
 };
 
