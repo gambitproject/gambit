@@ -28,6 +28,7 @@ class Action   {
 
   public:
     const gString &GetName(void) const   { return name; }
+    void SetName(const gString &s)       { name = s; }
 };
 
 class Infoset   {
