@@ -491,8 +491,7 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
   gArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
 
-//  for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)  && !IsBlocked(j)) {
-  for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)) {
+  for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)  && !IsBlocked(j)) {
     SolveColumn(j,tmpcol);
     // gout << "\nColumn " << j;
     // gout << "\nPivCol = " << tmpcol;
