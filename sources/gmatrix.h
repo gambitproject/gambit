@@ -267,7 +267,9 @@ gMatrix<T>::CopyData(const gMatrix<T> &M)
 // copy operator
 template <class T> gMatrix<T>&
 gMatrix<T>::operator=(const gMatrix<T> &M)
-{ if(this != &M)
+{
+  assert( CheckBounds(M) );
+  if(this != &M)
     {
       DeleteData();
       CopyData(M);

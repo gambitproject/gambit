@@ -1,7 +1,7 @@
 //#
-//# FILE: gvector1.h -- Implementation of vector classes
+//# FILE: gvector.h -- Implementation of vector classes
 //#
-//# @(#)gvector.h	1.6 9/12/94
+//* $Id$
 //#
 
 #ifndef GVECTOR_H
@@ -38,7 +38,7 @@ protected:
   }
 
   // check vector for identical boundaries
-  virtual int Check(const gVector<T> &v) const;
+  int Check(const gVector<T> &v) const;
 
   T* Allocate(void) {
     T* p = new T[max-min+1];
@@ -106,6 +106,7 @@ public:
 
 // = operators  
   gVector<T>& operator=(const gVector<T>& V) {
+    assert(check(V));
     DeleteData();
     CopyData(V);
   }
