@@ -24,6 +24,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <values.h>
 #include <float.h>
 #include <assert.h>
+#include <ctype.h>
 
 void gRational::error(const char* msg) const
 {
@@ -360,24 +361,47 @@ gOutput& operator << (gOutput& s, const gRational& y)
 
 gInput &operator>>(gInput &f, gRational &y)
 {
-  gInteger num = 0, den = 1;
-  f >> num;
+  char ch = ' ';
+  int sign = 1;
+  Integer num = 0, denom = 1;
 
-  char ch;
-  f >> ch;
-  if (ch == '/')   f >> den;
-  else if (ch == '.')  {
-    gInteger x;
-    f >> x;
-    gInteger z = 1;
-    while (x / z > 0)   z *= 10;
-    y = gRational(x, z) + gRational(num);
-    return f;
+  while (isspace(ch))    f >> ch;
+  
+  if (ch == '-')  { 
+    sign = -1;
+    f >> ch;
   }
-  else
-    f.unget(ch);
+  
+  while (ch >= '0' && ch <= '9')   {
+    num *= 10;
+    num += (int) (ch - '0');
+    f >> ch;
+  }
+  
+  if (ch == '/')  {
+    denom = 0;
+    f >> ch;
+    while (ch >= '0' && ch <= '9')  {
+      denom *= 10;
+      denom += (int) (ch - '0');
+      f >> ch;
+    }
+  }
+  else if (ch == '.')  {
+    denom = 1;
+    f >> ch;
+    while (ch >= '0' && ch <= '9')  {
+      denom *= 10;
+      num *= 10;
+      num += (int) (ch - '0');
+      f >> ch;
+    }
+  }
 
-  y = gRational(num, den);
+  f.unget(ch);
+
+  y = Rational(sign * num, denom);
+
   return f;
 }
 
