@@ -1738,7 +1738,10 @@ extern Portion* GSM_Mixed_NfgFloat(Portion **param);
 Portion* GSM_Read_MixedFloat(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
-  Portion* owner = param[1]->Owner();
+  //Portion* owner = param[1]->Owner();
+  Portion* owner = 
+    new NfgValPortion(((MixedSolution<double>*) 
+		       ((MixedPortion*) param[1])->Value())->BelongsTo());
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_MixedFloat(sub_param);
@@ -1752,6 +1755,7 @@ Portion* GSM_Read_MixedFloat(Portion** param)
     (*((MixedSolution<double>*) ((MixedPortion*) p)->Value()));
   delete list;
   delete p;
+  delete owner;
   delete[] sub_param;
   return result;
 }
@@ -1763,7 +1767,10 @@ extern Portion* GSM_Mixed_NfgRational(Portion **param);
 Portion* GSM_Read_MixedRational(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
-  Portion* owner = param[1]->Owner();
+  //Portion* owner = param[1]->Owner();
+  Portion* owner = 
+    new NfgValPortion(((MixedSolution<gRational>*) 
+		       ((MixedPortion*) param[1])->Value())->BelongsTo());
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_MixedRational(sub_param);
@@ -1777,6 +1784,7 @@ Portion* GSM_Read_MixedRational(Portion** param)
     (*((MixedSolution<gRational>*) ((MixedPortion*) p)->Value()));
   delete list;
   delete p;
+  delete owner;
   delete[] sub_param;
   return result;
 }
@@ -1789,7 +1797,10 @@ extern Portion* GSM_Behav_EfgFloat(Portion **param);
 Portion* GSM_Read_BehavFloat(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
-  Portion* owner = param[1]->Owner();
+  //Portion* owner = param[1]->Owner();
+  Portion* owner = 
+    new EfgValPortion(((BehavSolution<double>*) 
+		       ((BehavPortion*) param[1])->Value())->BelongsTo());
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_BehavFloat(sub_param);
@@ -1814,7 +1825,10 @@ extern Portion* GSM_Behav_EfgRational(Portion **param);
 Portion* GSM_Read_BehavRational(Portion** param)
 {
   Portion** sub_param = new Portion*[2];
-  Portion* owner = param[1]->Owner();
+  //Portion* owner = param[1]->Owner();
+  Portion* owner = 
+    new EfgValPortion(((BehavSolution<gRational>*) 
+		       ((BehavPortion*) param[1])->Value())->BelongsTo());
   sub_param[0] = param[1];
   sub_param[1] = 0;
   Portion* list = GSM_ListForm_BehavRational(sub_param);

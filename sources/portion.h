@@ -44,9 +44,9 @@ private:
   static int _NumObj;
 
 protected:
-  bool _IsValid;
-  Portion* _Owner;
   Portion* _Original;
+  void* _Game;
+  bool _GameIsEfg;
 
   Portion(void);
 
@@ -74,15 +74,6 @@ public:
 
   virtual ~Portion();
 
-  virtual bool IsValid(void) const;
-  void SetIsValid(bool is_valid);
-
-  virtual void AddDependency(void);
-  virtual void RemoveDependency(void);
-
-  virtual void SetOwner(Portion* p);
-  Portion* Owner(void) const;
-
   void SetOriginal(const Portion* p);
   Portion* Original(void) const;
 
@@ -91,6 +82,12 @@ public:
   virtual Portion* ValCopy(void) const = 0;
   virtual Portion* RefCopy(void) const = 0;
   virtual bool IsReference(void) const = 0;
+
+  //bool IsValid(void) const { return true; }
+
+  void* Game(void) const;
+  bool GameIsEfg(void) const;
+  virtual void SetGame(void* game, bool efg);
 };
 
 
@@ -625,7 +622,6 @@ protected:
 public:
   virtual ~InfosetPortion();
 
-  bool IsValid(void) const;
   Infoset*& Value(void) const;
   PortionSpec Spec(void) const;
   void Output(gOutput& s) const;
@@ -666,7 +662,6 @@ protected:
 public:
   virtual ~NodePortion();
 
-  bool IsValid(void) const;
   Node*& Value(void) const;
   PortionSpec Spec(void) const;
   void Output(gOutput& s) const;
@@ -834,7 +829,6 @@ class NfgPortion : public Portion
 {
 protected:
   BaseNfg** _Value;
-  gList< Portion* >* _Dependent;
   NfgPortion(void);
 
 public:
@@ -845,10 +839,6 @@ public:
   void Output(gOutput& s) const;
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-
-  void AddDependent(Portion* p);
-  void RemoveDependent(Portion* p);
-  void RemoveAllDependents(void);
 };
 
 
@@ -881,7 +871,6 @@ class EfgPortion : public Portion
 {
 protected:
   BaseEfg** _Value;
-  gList< Portion* >* _Dependent;
   EfgPortion(void);
 
 public:
@@ -892,10 +881,6 @@ public:
   void Output(gOutput& s) const;
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-
-  void AddDependent(Portion* p);
-  void RemoveDependent(Portion* p);
-  void RemoveAllDependents(void);
 };
 
 
@@ -1016,14 +1001,9 @@ protected:
 public:
   virtual ~ListPortion();
 
+  virtual void SetGame(void* game, bool efg);
   bool ContainsListsOnly(void) const;
 
-  bool IsValid(void) const;
-
-  void AddDependency(void);
-  void RemoveDependency(void);
-
-  void SetOwner(Portion* p);
 
   // gBlock< Portion* >& Value(void) const;
   gList< Portion* >& Value(void) const;
@@ -1047,10 +1027,10 @@ public:
   // Use operator[] when you just want to check the info on an element;
   Portion* operator[](int index) const;
 
-  // Use Subscript() when you want to extract a copy of an element
-  // Warning: Subscript() already makes a copy; 
+  // Use SubscriptCopy() when you want to extract a copy of an element
+  // Warning: SubscriptCopy() already makes a copy; 
   //          don't calling ValCopy() or RefCopy() on Subscript() !
-  Portion* Subscript(int index) const;
+  Portion* SubscriptCopy(int index) const;
 };
 
 class ListValPortion : public ListPortion

@@ -10,7 +10,6 @@
 #include <string.h>
 
 
-
 //----------------------------------------------------------------------
 //                         class instantiations
 //----------------------------------------------------------------------
@@ -51,6 +50,12 @@ class Portion;
 
 #include "mixedsol.h"
 #include "behavsol.h"
+
+
+#include "gsm.h"
+
+extern GSM* _gsm;  // defined at the end of gsm.cc
+
 
 
 //---------------------------------------------------------------------
@@ -107,80 +112,107 @@ int Portion::_NumObj = 0;
 
 Portion::Portion(void)
 {
-  _IsValid = true;
-  _Owner = 0;
   _Original = 0;
+  _Game = 0;
+  _GameIsEfg = false;
 
 #ifdef MEMCHECK
   _NumObj++;
-  printf("--- Portion Ctor, count: %ld\n", _NumObj);
+  printf("--- Portion Ctor, count: %d\n", _NumObj);
 #endif
 }
 
 Portion::~Portion()
 { 
+  SetGame(0, false);
+
 #ifdef MEMCHECK
   _NumObj--;
-  printf("--- Portion Dtor, count: %ld\n", _NumObj);
+  printf("--- Portion Dtor, count: %d\n", _NumObj);
 #endif
 }
 
-bool Portion::IsValid(void) const
-{ return Original()->_IsValid; }
-
-
-void Portion::SetIsValid(bool is_valid)
-{ 
-  Original()->_IsValid = is_valid; 
-  if(!IsValid()) 
-    SetOwner(0);
-}
-
-
-void Portion::SetOwner(Portion* p)
-{ 
-  if(p) 
-    assert(p->Spec().Type & (porNFG|porEFG));
-  Original()->_Owner = p; 
-}
-
-Portion* Portion::Owner(void) const
-{ return Original()->_Owner; }
-
 
 void Portion::SetOriginal(const Portion* p)
-{ _Original = (Portion*) p; }
+{ 
+  _Original = (Portion*) p;
+}
 
 Portion* Portion::Original(void) const
 { 
-  if(!IsReference() || _Original == 0)
-    return (Portion*) this;
-  else
-    return _Original; 
-}
-
-
-
-void Portion::AddDependency(void)
-{
-  if(Owner() != 0)
+  if(!IsReference())
   {
-    if(Owner()->Spec().Type & porNFG)
-      ((NfgPortion*) Owner())->AddDependent(Original());
-    else if(Owner()->Spec().Type & porEFG)
-      ((EfgPortion*) Owner())->AddDependent(Original());
+    assert(!_Original);
+    return (Portion*) this;
+  }
+  else
+  {
+    return _Original; 
   }
 }
 
 
-void Portion::RemoveDependency(void)
+
+void* Portion::Game(void) const
 {
-  if(Owner() != 0)
+  if(Spec().ListDepth == 0)
+    switch(Spec().Type)
+    {
+    case porNFG_FLOAT:
+    case porNFG_RATIONAL:
+      return ((NfgPortion*) this)->Value();
+    case porEFG_FLOAT:
+    case porEFG_RATIONAL:
+      return ((EfgPortion*) this)->Value();
+    default:
+      return _Game;
+    }
+  else
+    // lists aren't owned by games; only the elements are.
+    return 0;
+}
+
+bool Portion::GameIsEfg(void) const
+{
+  switch(Spec().Type)
   {
-    if(Owner()->Spec().Type & porNFG)
-      ((NfgPortion*) Owner())->RemoveDependent(Original());
-    else if(Owner()->Spec().Type & porEFG)
-      ((EfgPortion*) Owner())->RemoveDependent(Original());
+  case porNFG_FLOAT:
+  case porNFG_RATIONAL:
+    return false;
+  case porEFG_FLOAT:
+  case porEFG_RATIONAL:
+    return true;
+  default:
+    return _GameIsEfg;
+  }
+}
+
+void Portion::SetGame(void* game, bool efg)
+{
+  if(game != _Game)
+  {
+    if(_Game)
+    {
+      _gsm->GameRefCount(_Game)--;
+      gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
+      if(_gsm->GameRefCount(_Game) == 0)
+      {
+	if(!_GameIsEfg)
+	  delete (BaseNfg*) _Game;
+	else
+	  delete (BaseEfg*) _Game;
+	_Game = 0;
+      }
+    }
+    
+    _Game = game;
+    _GameIsEfg = efg;
+    
+    if(_Game)
+    {
+      _gsm->GameRefCount(_Game)++;
+      gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
+    }
   }
 }
 
@@ -473,10 +505,10 @@ void TextPortion::Output(gOutput& s) const
   gString text = *_Value;
   int i;
   for(i = 0; i < text.length(); i++)
-    if(text[ i ] == '\\' && text[ i + 1 ] == 'n')
+    if(text[i] == '\\' && text[i + 1] == 'n')
     {
       text.remove(i);
-      text[ i ] = '\n';
+      text[i] = '\n';
     }
 
   if(_WriteQuoted) s << "\"";
@@ -623,18 +655,16 @@ void OutcomePortion::Output(gOutput& s) const
 
 Portion* OutcomePortion::ValCopy(void) const
 { 
-  Portion* p = new OutcomeValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  Portion* p = new OutcomeValPortion(*_Value);
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* OutcomePortion::RefCopy(void) const
 { 
   Portion* p = new OutcomeRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -644,7 +674,6 @@ OutcomeValPortion::OutcomeValPortion(Outcome* value)
 
 OutcomeValPortion::~OutcomeValPortion()
 {
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -694,17 +723,15 @@ void NfPlayerPortion::Output(gOutput& s) const
 Portion* NfPlayerPortion::ValCopy(void) const
 {
   Portion* p = new NfPlayerValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfPlayerPortion::RefCopy(void) const
 {
   Portion* p = new NfPlayerRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -714,7 +741,6 @@ NfPlayerValPortion::NfPlayerValPortion(NFPlayer* value)
 
 NfPlayerValPortion::~NfPlayerValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -773,17 +799,15 @@ void StrategyPortion::Output(gOutput& s) const
 Portion* StrategyPortion::ValCopy(void) const
 {
   Portion* p = new StrategyValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* StrategyPortion::RefCopy(void) const
 {
   Portion* p = new StrategyRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -793,7 +817,6 @@ StrategyValPortion::StrategyValPortion(Strategy* value)
 
 StrategyValPortion::~StrategyValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -844,17 +867,15 @@ void NfSupportPortion::Output(gOutput& s) const
 Portion* NfSupportPortion::ValCopy(void) const
 {
   Portion* p = new NfSupportValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfSupportPortion::RefCopy(void) const
 {
   Portion* p = new NfSupportRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -864,7 +885,6 @@ NfSupportValPortion::NfSupportValPortion(NFSupport* value)
 
 NfSupportValPortion::~NfSupportValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -913,17 +933,15 @@ void EfSupportPortion::Output(gOutput& s) const
 Portion* EfSupportPortion::ValCopy(void) const
 {
   Portion* p = new EfSupportValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* EfSupportPortion::RefCopy(void) const
 {
   Portion* p = new EfSupportRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -933,7 +951,6 @@ EfSupportValPortion::EfSupportValPortion(EFSupport* value)
 
 EfSupportValPortion::~EfSupportValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -983,17 +1000,15 @@ void EfPlayerPortion::Output(gOutput& s) const
 Portion* EfPlayerPortion::ValCopy(void) const
 {
   Portion* p = new EfPlayerValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* EfPlayerPortion::RefCopy(void) const
 {
   Portion* p = new EfPlayerRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1003,7 +1018,6 @@ EfPlayerValPortion::EfPlayerValPortion(EFPlayer* value)
 
 EfPlayerValPortion::~EfPlayerValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -1035,13 +1049,6 @@ InfosetPortion::InfosetPortion(void)
 InfosetPortion::~InfosetPortion()
 { }
 
-bool InfosetPortion::IsValid(void) const
-{ 
-  if(*_Value)
-    return Portion::IsValid() && (*_Value)->IsValid();
-  else
-    return Portion::IsValid();
-}
 
 Infoset*& InfosetPortion::Value(void) const
 { return *_Value; }
@@ -1060,17 +1067,15 @@ void InfosetPortion::Output(gOutput& s) const
 Portion* InfosetPortion::ValCopy(void) const
 { 
   Portion* p = new InfosetValPortion(*_Value);
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* InfosetPortion::RefCopy(void) const
 {
   Portion* p = new InfosetRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1080,7 +1085,6 @@ InfosetValPortion::InfosetValPortion(Infoset* value)
 
 InfosetValPortion::~InfosetValPortion()
 {
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -1112,14 +1116,6 @@ NodePortion::NodePortion(void)
 NodePortion::~NodePortion()
 { }
 
-bool NodePortion::IsValid(void) const
-{ 
-  if(*_Value)
-    return Portion::IsValid() && (*_Value)->IsValid();
-  else
-    return Portion::IsValid();
-}
-
 Node*& NodePortion::Value(void) const
 { return *_Value; }
 
@@ -1137,17 +1133,15 @@ void NodePortion::Output(gOutput& s) const
 Portion* NodePortion::ValCopy(void) const
 {
   Portion* p = new NodeValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NodePortion::RefCopy(void) const
 {
   Portion* p = new NodeRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1157,7 +1151,6 @@ NodeValPortion::NodeValPortion(Node* value)
 
 NodeValPortion::~NodeValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -1208,17 +1201,15 @@ void ActionPortion::Output(gOutput& s) const
 Portion* ActionPortion::ValCopy(void) const
 {
   Portion* p = new ActionValPortion(*_Value); 
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* ActionPortion::RefCopy(void) const
 {
   Portion* p = new ActionRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1228,7 +1219,6 @@ ActionValPortion::ActionValPortion(Action* value)
 
 ActionValPortion::~ActionValPortion()
 { 
-  RemoveDependency();
   delete _Value; 
 }
 
@@ -1346,17 +1336,15 @@ Portion* MixedPortion::ValCopy(void) const
       assert(0);
     }
   }
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* MixedPortion::RefCopy(void) const
 { 
   Portion* p = new MixedRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1366,7 +1354,6 @@ MixedValPortion::MixedValPortion(BaseMixedProfile* value)
 
 MixedValPortion::~MixedValPortion()
 { 
-  RemoveDependency();
   delete *_Value;
   delete _Value; 
 }
@@ -1486,17 +1473,15 @@ Portion* BehavPortion::ValCopy(void) const
       assert(0);
     }
   }
-  p->SetOwner(Owner());
-  p->SetIsValid(IsValid());
-  p->AddDependency();
+  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* BehavPortion::RefCopy(void) const
 { 
   Portion* p = new BehavRefPortion(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
 
@@ -1506,7 +1491,6 @@ BehavValPortion::BehavValPortion(BaseBehavProfile* value)
 
 BehavValPortion::~BehavValPortion()
 { 
-  RemoveDependency();
   delete *_Value;
   delete _Value; 
 }
@@ -1539,7 +1523,6 @@ bool BehavRefPortion::IsReference(void) const
 
 NfgPortion::NfgPortion(void)
 { 
-  _Dependent = 0;
 }
 
 NfgPortion::~NfgPortion()
@@ -1572,6 +1555,12 @@ void NfgPortion::Output(gOutput& s) const
 
 Portion* NfgPortion::ValCopy(void) const
 { 
+  Portion* p = new NfgValPortion(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
+  return p;
+
+  /*
   switch((*_Value)->Type())
   {
   case DOUBLE:
@@ -1586,55 +1575,29 @@ Portion* NfgPortion::ValCopy(void) const
     assert(0);
   }
   return 0;
+  */
 }
 
 Portion* NfgPortion::RefCopy(void) const
 { 
   Portion* p = new NfgRefPortion(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
 }
-
-
-void NfgPortion::RemoveAllDependents(void)
-{
-  while(((NfgPortion*) Original())->_Dependent->Length() > 0)
-    ((NfgPortion*) Original())->_Dependent->Remove(1)->SetIsValid(false);
-}
-
-
-
-void NfgPortion::AddDependent(Portion* p)
-{
-  if(! ((NfgPortion*) Original())->_Dependent->Find(p))
-    (* ((NfgPortion*) Original())->_Dependent) += p;
-}
-
-
-void NfgPortion::RemoveDependent(Portion* p)
-{
-  int index;
-  index = ((NfgPortion*) Original())->_Dependent->Find(p);
-  if(index)
-    ((NfgPortion*) Original())->_Dependent->Remove(index);
-}
-
 
 
 
 NfgValPortion::NfgValPortion(BaseNfg* value)
 {
-  _Value = new BaseNfg*(value); 
-  _Dependent = new gList< Portion* >;
+  _Value = new BaseNfg*(value);
+  SetGame(*_Value, false);
 }
 
 NfgValPortion::~NfgValPortion()
 { 
-  while(_Dependent->Length() > 0)
-    _Dependent->Remove(1)->SetIsValid(false);
-  delete _Dependent;
-  delete *_Value;
+  //delete *_Value;
   delete _Value; 
 }
 
@@ -1643,7 +1606,10 @@ bool NfgValPortion::IsReference(void) const
 
 
 NfgRefPortion::NfgRefPortion(BaseNfg*& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame(*_Value, false);
+}
 
 NfgRefPortion::~NfgRefPortion()
 { }
@@ -1667,7 +1633,6 @@ bool NfgRefPortion::IsReference(void) const
 
 EfgPortion::EfgPortion(void)
 {
-  _Dependent = 0;
 }
 
 EfgPortion::~EfgPortion()
@@ -1700,6 +1665,12 @@ void EfgPortion::Output(gOutput& s) const
 
 Portion* EfgPortion::ValCopy(void) const
 { 
+  Portion* p = new EfgValPortion(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
+  return p;
+
+  /*
   switch((*_Value)->Type())
   {
   case DOUBLE:
@@ -1714,36 +1685,16 @@ Portion* EfgPortion::ValCopy(void) const
     assert(0);
   }
   return 0;
+  */
 }
 
 Portion* EfgPortion::RefCopy(void) const
 { 
   Portion* p = new EfgRefPortion(*_Value); 
+  // don't call SetGame() here because they are called in constructor
+  // p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
-  p->SetOwner(Owner());
   return p;
-}
-
-
-void EfgPortion::RemoveAllDependents(void)
-{
-  while(((EfgPortion*) Original())->_Dependent->Length() > 0)
-    ((EfgPortion*) Original())->_Dependent->Remove(1)->SetIsValid(false);
-}
-
-void EfgPortion::AddDependent(Portion* p)
-{
-  if(! ((EfgPortion*) Original())->_Dependent->Find(p))
-    (* ((EfgPortion*) Original())->_Dependent) += p;
-}
-
-
-void EfgPortion::RemoveDependent(Portion* p)
-{
-  int index;
-  index = ((EfgPortion*) Original())->_Dependent->Find(p);
-  if(index)
-    ((EfgPortion*) Original())->_Dependent->Remove(index);
 }
 
 
@@ -1751,15 +1702,12 @@ void EfgPortion::RemoveDependent(Portion* p)
 EfgValPortion::EfgValPortion(BaseEfg* value)
 { 
   _Value = new BaseEfg*(value); 
-  _Dependent = new gList< Portion* >;
+  SetGame(*_Value, true);
 }
 
 EfgValPortion::~EfgValPortion()
 { 
-  while(_Dependent->Length() > 0)
-    _Dependent->Remove(1)->SetIsValid(false);
-  delete _Dependent;
-  delete *_Value;
+  //delete *_Value;
   delete _Value; 
 }
 
@@ -1768,7 +1716,10 @@ bool EfgValPortion::IsReference(void) const
 
 
 EfgRefPortion::EfgRefPortion(BaseEfg*& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(*_Value, true);
+}
 
 EfgRefPortion::~EfgRefPortion()
 { }
@@ -1907,68 +1858,17 @@ ListPortion::~ListPortion()
 { }
 
 
+void ListPortion::SetGame(void* game, bool efg)
+{
+  int i;
+  for(i=1; i<=_Value->Length(); i++)
+    (*_Value)[i]->SetGame(game, efg);
+}
+
+
+
 gList< Portion* >& ListPortion::Value(void) const
 { return *_Value; }
-
-
-bool ListPortion::IsValid(void) const
-{
-  
-  bool result;
-  int i;
-  int length = _Value->Length();
-
-  // Portion::AddDependency();
-  if(length > 0)
-  {
-    result = false;
-    for(i = 1; i <= length; i++)
-    {
-      result = result || (*_Value)[ i ]->IsValid();
-    }
-  }
-  else
-    result = true;
-  
-  return result && Portion::IsValid();
-}
-
-
-void ListPortion::AddDependency(void)
-{ 
-  int i;
-  int length;
-
-  // Portion::AddDependency();
-  for(i = 1, length = _Value->Length(); i <= length; i++)
-  {
-    (*_Value)[ i ]->AddDependency();
-  }
-}
-
-void ListPortion::RemoveDependency(void)
-{ 
-  int i;
-  int length;
-
-  // Portion::RemoveDependency();
-  for(i = 1, length = _Value->Length(); i <= length; i++)
-  {
-    (*_Value)[ i ]->RemoveDependency();
-  }
-}
-
-void ListPortion::SetOwner(Portion* p)
-{ 
-  int i;
-  int length;
-
-  // Portion::SetOwner(p);
-  for(i = 1, length = _Value->Length(); i <= length; i++)
-  {
-    (*_Value)[ i ]->SetOwner(p);
-  }
-}
 
 
 
@@ -1977,11 +1877,9 @@ PortionSpec ListPortion::Spec(void) const
 
 Portion* ListPortion::ValCopy(void) const
 { 
-  ListPortion* p =new ListValPortion(*_Value); 
-  // p->SetOwner(Owner());
+  ListPortion* p = new ListValPortion(*_Value); 
   if(p->_DataType == porUNDEFINED)
     p->_DataType = _DataType;
-  p->AddDependency();
   return p;
 }
 
@@ -1990,7 +1888,6 @@ Portion* ListPortion::RefCopy(void) const
   ListPortion* p = new ListRefPortion(*_Value); 
   ((ListPortion*) p)->_DataType = _DataType;
   p->SetOriginal(Original());
-  // p->SetOwner(Owner());
   return p;
 }
 
@@ -2000,7 +1897,6 @@ void ListPortion::AssignFrom(Portion* p)
   int i;
   int length;
   int result;
-  //gBlock< Portion* >& value = *(((ListPortion*) p)->_Value);
   gList< Portion* >& value = *(((ListPortion*) p)->_Value);
 
   assert(p->Spec() == Spec());
@@ -2008,21 +1904,16 @@ void ListPortion::AssignFrom(Portion* p)
 	 _DataType == porUNDEFINED || 
 	 ((ListPortion*) p)->_DataType == porUNDEFINED);
 
-  RemoveDependency();
 
   Flush();
 
   for(i = 1, length = value.Length(); i <= length; i++)
   {
-    result = Insert(value[ i ]->ValCopy(), i);
+    result = Insert(value[i]->ValCopy(), i);
     assert(result != 0);
   }
   if(_DataType == porUNDEFINED)
     _DataType = ((ListPortion*) p)->_DataType;
-
-  // SetOwner(p->Owner());
-
-  AddDependency();
 }
 
 bool ListPortion::operator == (Portion* p) const
@@ -2080,14 +1971,13 @@ ListValPortion::ListValPortion(gList< Portion* >& value)
 
   for(i = 1, length = value.Length(); i <= length; i++)
   {
-    result = Insert(value[ i ]->ValCopy(), i);
+    result = Insert(value[i]->ValCopy(), i);
     assert(result != 0);
   }
 }
 
 ListValPortion::~ListValPortion()
 {
-  RemoveDependency();
   Flush();
   delete _Value;
 }
@@ -2177,17 +2067,12 @@ void ListPortion::Output(gOutput& s, long ListLF) const
       else
 	if(_WriteListLF > ListLF) 
 	  s << ' ';
-      if((*_Value)[ i ]->IsValid())
-      {
-	if(_WriteListLF <= ListLF)
-	  s << ' ';
-	if((*_Value)[ i ]->Spec().ListDepth == 0)
-	  s << (*_Value)[ i ];
-	else
-	  ((ListPortion*) (*_Value)[ i ])->Output(s, ListLF + 1);
-      }
+      if(_WriteListLF <= ListLF)
+	s << ' ';
+      if((*_Value)[i]->Spec().ListDepth == 0)
+	s << (*_Value)[i];
       else
-	s << " (undefined)";
+	((ListPortion*) (*_Value)[i])->Output(s, ListLF + 1);
     }
   }
   else
@@ -2251,8 +2136,6 @@ int ListPortion::Insert(Portion* item, int index)
   */
   if(_DataType == porUNDEFINED) // inserting into an empty list
   {
-    if(_Value->Length() == 0)
-      _Owner = item->Original()->Owner();
     _DataType = item_type.Type;
     ((ListPortion*) Original())->_DataType = _DataType;
     result = _Value->Insert(item, index);
@@ -2261,14 +2144,10 @@ int ListPortion::Insert(Portion* item, int index)
   {
     if(PortionSpecMatch(item_type.Type, _DataType))
     {
-      if(_Value->Length() == 0)
-	_Owner = item->Original()->Owner();
       result = _Value->Insert(item, index);
     }
     else if(item_type.Type == porUNDEFINED) // inserting an empty list
     {
-      if(_Value->Length() == 0)
-	_Owner = item->Original()->Owner();
       result = _Value->Insert(item, index);
       assert(item->Spec().ListDepth > 0);
       ((ListPortion*) item)->_DataType = _DataType;
@@ -2340,8 +2219,8 @@ Portion* ListPortion::operator[](int index) const
 {
   if(index >= 1 && index <= _Value->Length())
   {
-    assert((*_Value)[ index ] != 0);
-    return (*_Value)[ index ];
+    assert((*_Value)[index] != 0);
+    return (*_Value)[index];
   }
   else
     return 0;
@@ -2349,19 +2228,18 @@ Portion* ListPortion::operator[](int index) const
 
 
 
-Portion* ListPortion::Subscript(int index) const
+Portion* ListPortion::SubscriptCopy(int index) const
 {
   Portion* p;
   if(index >= 1 && index <= _Value->Length())
   {
-    assert((*_Value)[ index ] != 0);
+    assert((*_Value)[index] != 0);
 
     if(IsReference())
-      p = (*_Value)[ index ]->RefCopy();
+      p = (*_Value)[index]->RefCopy();
     else
-      p = (*_Value)[ index ]->ValCopy();
+      p = (*_Value)[index]->ValCopy();
       
-    p->SetIsValid((*_Value)[ index ]->IsValid());
     return p;
   }
   else

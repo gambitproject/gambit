@@ -49,9 +49,9 @@ TEMPLATE class gListSorter<gString>;
 #include "gstack.h"
 
 #include "portion.h"
+#include "gsmhash.h"
 #include "gsmfunc.h"
 #include "gsminstr.h"
-#include "gsmhash.h"
 
 #include "gblock.h"
 
@@ -63,6 +63,29 @@ TEMPLATE class gListSorter<gString>;
 #include "gslist.h"
 #include "garray.h"
 
+
+
+
+//----------------------------------------------------------------
+//        declaration of the game reference counter
+//----------------------------------------------------------------
+
+RefCountHashTable< void* > GSM::_GameRefCount;
+int& GSM::GameRefCount(void* game)
+{
+  if(_GameRefCount.IsDefined(game))
+    return _GameRefCount(game);
+  else
+  {
+    _GameRefCount.Define(game, 0);
+    return _GameRefCount(game);
+  }
+}
+
+
+//----------------------------------------------------------------
+//       function list sorting functions
+//----------------------------------------------------------------
 
 
 class gFuncListSorter : public gListSorter<FuncDescObj*>
@@ -300,7 +323,7 @@ bool GSM::_VarIsDefined(const gString& var_name) const
 
 bool GSM::_VarDefine(const gString& var_name, Portion* p)
 {
-  Portion* old_value;
+  Portion* old_value = 0;
   bool type_match = true;
   bool read_only = false;
   bool result = true;
@@ -370,12 +393,13 @@ Portion* GSM::_VarValue(const gString& var_name) const
 
 Portion* GSM::_VarRemove(const gString& var_name)
 {
-  Portion* result;
+  Portion* p;
 
   assert(var_name != "");
 
-  result = _RefTableStack->Peek()->Remove(var_name);
-  return result;
+  p = _RefTableStack->Peek()->Remove(var_name);
+  assert(p);
+  return p;
 }
 
 
@@ -457,6 +481,7 @@ bool GSM::Assign(void)
   {
     if(p1Spec.ListDepth == 0) // not a list
     {
+      result = true;
       switch(p1Spec.Type)
       {
       case porINTEGER:
@@ -476,124 +501,96 @@ bool GSM::Assign(void)
 	break;
       case porOUTCOME_FLOAT:
       case porOUTCOME_RATIONAL:
-	p1->RemoveDependency();
 	((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porPLAYER_NFG:
-	p1->RemoveDependency();
 	((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porSTRATEGY:
-	p1->RemoveDependency();
 	((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porNF_SUPPORT:
-	p1->RemoveDependency();
 	((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porEF_SUPPORT:
-	p1->RemoveDependency();
 	((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porPLAYER_EFG:
-	p1->RemoveDependency();
 	((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porINFOSET:
-	p1->RemoveDependency();
 	((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porNODE:
-	p1->RemoveDependency();
 	((NodePortion*) p1)->Value() = ((NodePortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porACTION:
-	p1->RemoveDependency();
 	((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porMIXED_FLOAT:
-	p1->RemoveDependency();
 	(*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
 	  (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porMIXED_RATIONAL:
-	p1->RemoveDependency();
 	(*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) = 
 	  (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porBEHAV_FLOAT:
-	p1->RemoveDependency();
 	(*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
 	  (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
       case porBEHAV_RATIONAL:
-	p1->RemoveDependency();
 	(*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) = 
 	  (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-	p1->SetOwner(p2->Owner());
-	p1->SetIsValid(p2->IsValid());
-	p1->AddDependency();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
 
+	/*
       case porNFG_FLOAT:
-	((NfgPortion*) p1)->RemoveAllDependents();
 	delete ((NfgPortion*) p1)->Value();
 	((NfgPortion*) p1)->Value() = new Nfg<double>
 	  (*((Nfg<double>*) ((NfgPortion*) p2)->Value())); 
 	break;
       case porNFG_RATIONAL:
-	((NfgPortion*) p1)->RemoveAllDependents();
 	delete ((NfgPortion*) p1)->Value();
 	((NfgPortion*) p1)->Value() =  new Nfg<gRational>
 	  (*((Nfg<gRational>*) ((NfgPortion*) p2)->Value())); 
 	break;
       case porEFG_FLOAT:
-	((EfgPortion*) p1)->RemoveAllDependents();
 	delete ((EfgPortion*) p1)->Value();
 	((EfgPortion*) p1)->Value() = new Efg<double>
 	  (*(Efg<double>*) ((EfgPortion*) p2)->Value()); 
 	break;
       case porEFG_RATIONAL:
-	((EfgPortion*) p1)->RemoveAllDependents();
 	delete ((EfgPortion*) p1)->Value();
 	((EfgPortion*) p1)->Value() =  new Efg<gRational>
 	  (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
+	break;
+	*/
+
+      case porNFG_FLOAT:
+      case porNFG_RATIONAL:
+	((NfgPortion*) p1)->Value() = ((NfgPortion*) p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	p1->Original()->SetGame(p2->Game(), false);
+	break;
+      case porEFG_FLOAT:
+      case porEFG_RATIONAL:
+	((EfgPortion*) p1)->Value() = ((EfgPortion*) p2)->Value();
+	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	p1->Original()->SetGame(p2->Game(), true);
 	break;
 
       case porINPUT:
@@ -608,7 +605,7 @@ bool GSM::Assign(void)
       }
       if(result)
       {
-	_Push(p1->RefCopy()); 
+	_Push(p1); 
 	delete p2;
       }
     }
@@ -619,7 +616,7 @@ bool GSM::Assign(void)
       if(!(p1Spec.Type & (porINPUT|porOUTPUT)))
       {
 	((ListPortion*) p1)->AssignFrom(p2);
-	_Push(p1->RefCopy());
+	_Push(p1);
 	delete p2;
       }
       else // error: assigning to (list of) INPUT or OUTPUT
@@ -777,6 +774,10 @@ Portion* GSM::_ResolveRef(Portion* p)
     }
     else
     {
+      result = _VarValue(ref)->RefCopy();
+      delete p;
+
+      /* temporary
       if(_VarValue(ref)->IsValid())
       {
 	result = _VarValue(ref)->RefCopy();
@@ -787,6 +788,7 @@ Portion* GSM::_ResolveRef(Portion* p)
 	delete _VarRemove(ref);
 	result = p;
       }
+      */
     }
   }
   else
@@ -1438,7 +1440,7 @@ bool GSM::Subscript (void)
     }
     else
     {
-      _Push(((ListPortion*) p1)->Subscript(n));
+      _Push(((ListPortion*) p1)->SubscriptCopy(n));
       result = true;
     }
     delete p1;
@@ -1499,7 +1501,7 @@ bool GSM::Child (void)
     }
     else
     {
-      _Push(((ListPortion*) p1)->Subscript(n));
+      _Push(((ListPortion*) p1)->SubscriptCopy(n));
       result = true;
     }
     delete p1;
@@ -1632,6 +1634,12 @@ bool GSM::BindVal(const gString& param_name)
   {
     param = _ResolveRef(_Pop());
 
+    if(param->Spec().Type != porREFERENCE)
+      result = _CallFuncStack->Peek()->SetCurrParam(param->ValCopy());
+    else
+      result = _CallFuncStack->Peek()->SetCurrParam(0);
+
+    /* temporary
     if(param->IsValid())
     {
       if(param->Spec().Type != porREFERENCE)
@@ -1645,6 +1653,8 @@ bool GSM::BindVal(const gString& param_name)
       _ErrorMessage(_StdErr, 61);
       result = false;
     }
+    */
+
     delete param;
   }
 
@@ -1668,6 +1678,9 @@ bool GSM::BindRef(const gString& param_name, bool auto_val_or_ref)
   {
     param = _ResolveRef(_Pop());
 
+    result = _CallFuncStack->Peek()->SetCurrParam(param, auto_val_or_ref);
+
+    /*
     if(param->IsValid())
     {
       result = _CallFuncStack->Peek()->SetCurrParam(param, auto_val_or_ref);
@@ -1679,6 +1692,7 @@ bool GSM::BindRef(const gString& param_name, bool auto_val_or_ref)
       delete param;
       result = false;
     }
+    */
   }
 
   return result;
@@ -2166,6 +2180,12 @@ void GSM::Output(void)
     p = _Pop();
     p = _ResolveRef(p);
 
+    p->Output(_StdOut);
+    if(p->Spec().Type == porREFERENCE)
+      _StdOut << " (undefined)";
+    _StdOut << "\n";
+    
+    /*
     if(p->IsValid())
     {
       p->Output(_StdOut);
@@ -2177,6 +2197,7 @@ void GSM::Output(void)
     {
       _StdOut << "(undefined)\n";
     }
+    */
     
     _Push(p);
   }

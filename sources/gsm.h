@@ -30,12 +30,17 @@ class gRational;
 template <class T> class gList;
 template <class T> class gStack;
 
+template <class T> class RefCountHashTable;
+
+
 #define GCL_VERSION   0.94
 
 class GSM
 {
 private:
   static int _NumObj;
+
+  static RefCountHashTable< void* > _GameRefCount;
 
   gInput&  _StdIn;
   gOutput& _StdOut;
@@ -93,9 +98,7 @@ public:
   int MaxDepth ( void ) const;
 
 
-  Portion*& DefaultNfg( void );
-  Portion*& DefaultEfg( void );
-
+  static int& GameRefCount(void*);
 
 
   bool Push(Portion* data);

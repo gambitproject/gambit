@@ -1,5 +1,5 @@
 //
-// FILE: efgfunc.cc -- Extensive form editing builtins
+// File: efgfunc.cc -- Extensive form editing builtins
 //
 // $Id$
 //
@@ -59,8 +59,7 @@ Portion *GSM_Actions(Portion **param)
 	((ListPortion*) por)->
 	  Append(new ActionValPortion(s->GetActionList()[i]));
   }
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -95,8 +94,7 @@ Portion *GSM_AppendAction(Portion **param)
   s->BelongsTo()->AppendAction(s);
 
   Portion* por = new ActionValPortion(s->GetActionList()[s->NumActions()]);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -114,8 +112,7 @@ Portion *GSM_AppendNode(Portion **param)
   n->BelongsTo()->AppendNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetChild(1));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -133,8 +130,7 @@ Portion *GSM_AttachOutcome(Portion **param)
   n->SetOutcome(c);
   
   Portion* por = new OutcomeValPortion(c);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -147,8 +143,7 @@ Portion *GSM_Chance(Portion **param)
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
   Portion* por = new EfPlayerValPortion(E.GetChance());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -176,8 +171,7 @@ Portion *GSM_ChanceProbs(Portion **param)
       return 0;
   }
 
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -192,8 +186,7 @@ Portion *GSM_Children(Portion **param)
   Portion* por = new ListValPortion();
   for(child=1; child <= n->NumChildren(); child++)
     ((ListPortion*) por)->Append(new NodeValPortion(n->GetChild(child)));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -210,8 +203,7 @@ Portion *GSM_CopyTree(Portion **param)
     return new ErrorPortion("n1 and n2 belong to different trees");
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -226,8 +218,7 @@ Portion *GSM_DeleteAction(Portion **param)
   s->BelongsTo()->DeleteAction(s, a);
 
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -246,8 +237,7 @@ Portion *GSM_DeleteNode(Portion **param)
     return new ErrorPortion("keep is not a child of node");
 
   Portion* por = new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -272,8 +262,7 @@ Portion *GSM_DeleteTree(Portion **param)
   n->BelongsTo()->DeleteTree(n);
 
   Portion* por = new NodeValPortion(n);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -287,8 +276,7 @@ Portion *GSM_DetachOutcome(Portion **param)
   n->SetOutcome(0);
 
   Portion* por = new NodeValPortion(n);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -314,7 +302,7 @@ Portion *GSM_ElimAllDom_EfSupport(Portion **param)
 
   EFSupport* new_T = S;
   EFSupport* old_T = S;
-  while( new_T )
+  while(new_T)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
@@ -323,16 +311,15 @@ Portion *GSM_ElimAllDom_EfSupport(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  Portion *por = new EfSupportValPortion( old_T );
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  Portion *por = new EfSupportValPortion(old_T);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_ElimAllDom_Efg(Portion **param)
 {
-  EFSupport *S = new EFSupport( * ((EfgPortion *) param[0])->Value() );
+  EFSupport *S = new EFSupport(* ((EfgPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   
   gWatch watch;
@@ -342,7 +329,7 @@ Portion *GSM_ElimAllDom_Efg(Portion **param)
 
   EFSupport* new_T = S;
   EFSupport* old_T = S;
-  while( new_T )
+  while(new_T)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
@@ -351,9 +338,8 @@ Portion *GSM_ElimAllDom_Efg(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  Portion *por = new EfSupportValPortion( old_T );
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  Portion *por = new EfSupportValPortion(old_T);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -379,15 +365,14 @@ Portion *GSM_ElimDom_EfSupport(Portion **param)
   
   Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_ElimDom_Efg(Portion **param)
 {
-  EFSupport *S = new EFSupport( * ((EfgPortion *) param[0])->Value() );
+  EFSupport *S = new EFSupport(* ((EfgPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   
   gWatch watch;
@@ -403,8 +388,7 @@ Portion *GSM_ElimDom_Efg(Portion **param)
   
   Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
 
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -432,7 +416,7 @@ Portion *GSM_FloatEfg(Portion **param)
 Portion *GSM_HasOutcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  return new BoolValPortion( n->GetOutcome() != 0 );
+  return new BoolValPortion(n->GetOutcome() != 0);
 }
 
 //-------------
@@ -448,8 +432,7 @@ Portion *GSM_Infoset_Node(Portion **param)
   //return new ErrorPortion("Terminal nodes have no information set");
 
   Portion* por = new InfosetValPortion(n->GetInfoset());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -463,8 +446,7 @@ Portion *GSM_Infoset_Action(Portion **param)
   //return new ErrorPortion("Terminal nodes have no information set");
 
   Portion* por = new InfosetValPortion(a->BelongsTo());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -477,8 +459,7 @@ Portion *GSM_Infosets(Portion **param)
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
 
   Portion* por = ArrayToList(p->InfosetList());
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -493,8 +474,7 @@ Portion *GSM_InsertAction(Portion **param)
   s->BelongsTo()->InsertAction(s, a);
 
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -512,8 +492,7 @@ Portion *GSM_InsertNode(Portion **param)
   n->BelongsTo()->InsertNode(n, s);
 
   Portion* por = new NodeValPortion(n->GetParent());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -573,8 +552,7 @@ Portion *GSM_JoinInfoset(Portion **param)
   s->BelongsTo()->JoinInfoset(s, n);
   
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -582,17 +560,16 @@ Portion *GSM_JoinInfoset(Portion **param)
 // LastAction
 //--------------
 
-Portion *GSM_LastAction( Portion** param )
+Portion *GSM_LastAction(Portion** param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Action* a = LastAction( n );
-  if( a == 0 )
+  Action* a = LastAction(n);
+  if(a == 0)
     return new NullPortion(porACTION);
-  //return new ErrorPortion( "called on a root node" );
+  //return new ErrorPortion("called on a root node");
 
-  Portion* por = new ActionValPortion( a );
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  Portion* por = new ActionValPortion(a);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -605,8 +582,7 @@ Portion *GSM_LeaveInfoset(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
 
   Portion* por = new InfosetValPortion(n->BelongsTo()->LeaveInfoset(n));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -671,8 +647,7 @@ Portion *GSM_MarkSubgames_Efg(Portion **param)
   MarkedSubgameRoots(E, roots);
 
   Portion *por = ArrayToList(roots);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -688,8 +663,7 @@ Portion *GSM_MarkSubgames_Node(Portion **param)
   MarkedSubgameRoots(*n->BelongsTo(), roots);
   
   Portion *por = ArrayToList(roots);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -736,8 +710,7 @@ Portion *GSM_Members(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
   Portion* por = ArrayToList(s->GetMemberList());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -755,8 +728,7 @@ Portion *GSM_MergeInfosets(Portion **param)
   s1->BelongsTo()->MergeInfoset(s1, s2);
   
   Portion* por = new InfosetValPortion(s1);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -773,8 +745,7 @@ Portion *GSM_MoveTree(Portion **param)
     return new ErrorPortion("n1 and n2 belong to different trees");
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -820,14 +791,14 @@ Portion *GSM_NewEfg(Portion **param)
     Efg<gRational> *E = new Efg<gRational>;
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
-      E->NewPlayer()->SetName(((TextPortion *)players->Subscript(i))->Value());
+      E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
     return new EfgValPortion(E);
   }
   else  {
     Efg<double> *E = new Efg<double>;
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
-      E->NewPlayer()->SetName(((TextPortion *)players->Subscript(i))->Value());
+      E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
     return new EfgValPortion(E);
   }
 }
@@ -848,8 +819,7 @@ Portion *GSM_NewInfoset1(Portion **param)
   s->SetName(name);
 
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
  
@@ -865,11 +835,10 @@ Portion *GSM_NewInfoset2(Portion **param)
   Infoset *s = p->BelongsTo()->CreateInfoset(p, actions->Length());
   s->SetName(name);
   for (int i = 1; i <= actions->Length(); i++)
-    s->SetActionName(i, ((TextPortion *) actions->Subscript(i))->Value());
+    s->SetActionName(i, ((TextPortion *) (*actions)[i])->Value());
 
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -890,8 +859,7 @@ Portion *GSM_NewOutcome(Portion **param)
   c->SetName(name);
 
   Portion *por = new OutcomeValPortion(c);
-  por->SetOwner( param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -908,8 +876,7 @@ Portion *GSM_NewPlayer(Portion **param)
   p->SetName(name);
 
   Portion* por = new EfPlayerValPortion(p);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -920,11 +887,9 @@ Portion *GSM_NewPlayer(Portion **param)
 Portion *GSM_NewSupport_Efg(Portion **param)
 {
   BaseEfg &E = * ((EfgPortion *) param[0])->Value();
-  Portion *p = new EfSupportValPortion(new EFSupport(E));
-
-  p->SetOwner( param[ 0 ]->Original() );
-  p->AddDependency();
-  return p;
+  Portion *por = new EfSupportValPortion(new EFSupport(E));
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
 }
 
 //----------------
@@ -939,8 +904,7 @@ Portion *GSM_NextSibling(Portion **param)
   //return new ErrorPortion("Node is the last sibling");
   
   Portion* por = new NodeValPortion(n);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -955,8 +919,7 @@ Portion *GSM_Nodes(Portion **param)
   Nodes(E, list);
 
   Portion *por = ArrayToList(list);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -964,15 +927,14 @@ Portion *GSM_Nodes(Portion **param)
 // NonterminalNodes
 //--------------------
 
-Portion* GSM_NonterminalNodes( Portion** param )
+Portion* GSM_NonterminalNodes(Portion** param)
 {
   BaseEfg& E = *((EfgPortion *) param[0])->Value();
   gList<Node *> list;
   NonTerminalNodes(E, list);
 
   Portion *por = ArrayToList(list);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;  
 }
 
@@ -990,8 +952,7 @@ Portion *GSM_NthChild(Portion **param)
   //return new ErrorPortion("Child number out of range");
 
   Portion* por = new NodeValPortion(n->GetChild(child));
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1092,8 +1053,7 @@ Portion *GSM_Outcome(Portion **param)
   //return new ErrorPortion("No outcome attached to node");
 
   Portion* por = new OutcomeValPortion(n->GetOutcome());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1106,8 +1066,7 @@ Portion *GSM_Outcomes(Portion **param)
   BaseEfg *E = ((EfgPortion*) param[0])->Value();
   
   Portion* por = ArrayToList(E->OutcomeList());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1123,8 +1082,7 @@ Portion *GSM_Parent(Portion **param)
   //return new ErrorPortion("Node has no parent");
 
   Portion* por = new NodeValPortion(n->GetParent());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1138,8 +1096,7 @@ Portion *GSM_Payoff_Float(Portion **param)
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
  
   Portion* por = ArrayToList((gArray<double> &) *c);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1149,8 +1106,7 @@ Portion *GSM_Payoff_Rational(Portion **param)
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
   
   Portion* por = ArrayToList((gArray<gRational> &) *c);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1163,8 +1119,7 @@ Portion *GSM_Player_Infoset(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
   Portion* por = new EfPlayerValPortion(s->GetPlayer());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1175,8 +1130,7 @@ Portion *GSM_Player_Node(Portion **param)
     return new ErrorPortion("Node is a terminal node");
 
   Portion* por = new EfPlayerValPortion(n->GetPlayer());
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1188,10 +1142,9 @@ Portion *GSM_Players_Efg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
-  Portion* p = ArrayToList(E.PlayerList());
-  p->SetOwner( param[ 0 ]->Original() );
-  p->AddDependency();
-  return p;
+  Portion* por = ArrayToList(E.PlayerList());
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
 }
 
 //----------------
@@ -1206,8 +1159,7 @@ Portion *GSM_PriorSibling(Portion **param)
   //return new ErrorPortion("Node is the first sibling");
   
   Portion* por = new NodeValPortion(n);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1302,13 +1254,12 @@ Portion *GSM_Reveal(Portion **param)
 
   gBlock<EFPlayer *> player(players->Length());
   for (int i = 1; i <= players->Length(); i++)
-    player[i] = ((EfPlayerPortion *) players->Subscript(i))->Value();
+    player[i] = ((EfPlayerPortion *) (*players)[i])->Value();
   
   s->BelongsTo()->Reveal(s, player);
 
   Portion *por = new InfosetValPortion(s);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1321,8 +1272,7 @@ Portion *GSM_RootNode(Portion **param)
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
   Portion* por = new NodeValPortion(E.RootNode());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1369,18 +1319,17 @@ Portion *GSM_SetChanceProbs(Portion **param)
     case porFLOAT:
       for (i = 1; i <= p->Length(); i++) 
 	((ChanceInfoset<double> *) s)->SetActionProb
-          (i, ((FloatPortion *) p->Subscript(i))->Value());
+          (i, ((FloatPortion *) (*p)[i])->Value());
       break;
     case porRATIONAL:
       for (i = 1; i <= p->Length(); i++)
 	((ChanceInfoset<gRational> *) s)->SetActionProb
-   	  (i, ((RationalPortion *) p->Subscript(i))->Value());
+   	  (i, ((RationalPortion *) (*p)[i])->Value());
       break;
   }
 
   Portion* por = new InfosetValPortion(s);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1435,11 +1384,10 @@ Portion *GSM_SetPayoff_Float(Portion **param)
     return new ErrorPortion("Wrong number of entries in payoff vector");
 
   for (int i = 1; i <= c->Length(); i++)
-    (*c)[i] = ((FloatPortion *) p->Subscript(i))->Value();
+    (*c)[i] = ((FloatPortion *) (*p)[i])->Value();
 
   Portion* por = new OutcomeValPortion(c);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1453,11 +1401,10 @@ Portion *GSM_SetPayoff_Rational(Portion **param)
     return new ErrorPortion("Wrong number of entries in payoff vector");
 
   for (int i = 1; i <= c->Length(); i++)
-    (*c)[i] = ((RationalPortion *) p->Subscript(i))->Value();
+    (*c)[i] = ((RationalPortion *) (*p)[i])->Value();
 
   Portion* por = new OutcomeValPortion(c);
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1472,8 +1419,7 @@ Portion *GSM_SubgameRoots(Portion **param)
   MarkedSubgameRoots(E, list);
 
   Portion *por = ArrayToList(list);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;  
 }  
 
@@ -1488,8 +1434,7 @@ Portion *GSM_TerminalNodes(Portion **param)
   TerminalNodes(E, list);
 
   Portion *por = ArrayToList(list);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;  
 }
 
@@ -1508,8 +1453,7 @@ Portion *GSM_UnmarkSubgames_Efg(Portion **param)
   MarkedSubgameRoots(E, roots);
 
   Portion *por = ArrayToList(roots);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1523,8 +1467,7 @@ Portion *GSM_UnmarkSubgames_Node(Portion **param)
   MarkedSubgameRoots(*n->BelongsTo(), roots);
   
   Portion *por = ArrayToList(roots);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1539,8 +1482,7 @@ Portion *GSM_UnmarkThisSubgame(Portion **param)
   n->BelongsTo()->RemoveSubgame(n);
   
   Portion *por = new NodeValPortion(n);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -2193,7 +2135,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_TerminalNodes,
 				       PortionSpec(porNODE, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
   
 
   FuncObj = new FuncDescObj("UnmarkSubgames", 2);

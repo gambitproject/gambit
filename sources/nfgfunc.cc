@@ -38,8 +38,7 @@ Portion *GSM_AddStrategy(Portion **param)
   S->GetNFStrategySet(s->nfp->GetNumber())->AddStrategy(s);
 
   Portion* por = new StrategyValPortion(s);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -89,7 +88,7 @@ Portion *GSM_ElimAllDom_NfSupport(Portion **param)
 
   NFSupport* new_T = S;
   NFSupport* old_T = S;
-  while( new_T )
+  while(new_T)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
@@ -98,16 +97,15 @@ Portion *GSM_ElimAllDom_NfSupport(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  Portion *por = new NfSupportValPortion( old_T );
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  Portion *por = new NfSupportValPortion(old_T);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_ElimAllDom_Nfg(Portion **param)
 {
-  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   
   gWatch watch;
@@ -117,7 +115,7 @@ Portion *GSM_ElimAllDom_Nfg(Portion **param)
 
   NFSupport* new_T = S;
   NFSupport* old_T = S;
-  while( new_T )
+  while(new_T)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
@@ -126,9 +124,8 @@ Portion *GSM_ElimAllDom_Nfg(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  Portion *por = new NfSupportValPortion( old_T );
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  Portion *por = new NfSupportValPortion(old_T);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -153,15 +150,14 @@ Portion *GSM_ElimDom_NfSupport(Portion **param)
   
   Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_ElimDom_Nfg(Portion **param)
 {
-  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   
   gWatch watch;
@@ -176,8 +172,7 @@ Portion *GSM_ElimDom_Nfg(Portion **param)
   
   Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -209,15 +204,14 @@ Portion *GSM_ElimMixedDom_NfSupport(Portion **param)
   
   Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_ElimMixedDom_Nfg(Portion **param)
 {
-  NFSupport *S = new NFSupport( * ((NfgPortion *) param[0])->Value() );
+  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
   
   gWatch watch;
@@ -232,8 +226,7 @@ Portion *GSM_ElimMixedDom_Nfg(Portion **param)
   
   Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
   
@@ -321,16 +314,16 @@ Portion *GSM_Name_Nfg(Portion **param)
   return new TextValPortion(N.GetTitle());
 }
 
-Portion* GSM_Name_NfPlayer( Portion** param )
+Portion* GSM_Name_NfPlayer(Portion** param)
 {
-  NFPlayer *p = ( (NfPlayerPortion*) param[ 0 ] )->Value();
-  return new TextValPortion( p->GetName() );
+  NFPlayer *p = ((NfPlayerPortion*) param[0])->Value();
+  return new TextValPortion(p->GetName());
 }
 
-Portion* GSM_Name_Strategy( Portion** param )
+Portion* GSM_Name_Strategy(Portion** param)
 {
-  Strategy *s = ( (StrategyPortion*) param[ 0 ] )->Value();
-  return new TextValPortion( s->name );
+  Strategy *s = ((StrategyPortion*) param[0])->Value();
+  return new TextValPortion(s->name);
 }
 
 //----------
@@ -346,10 +339,10 @@ Portion *GSM_NewNfg(Portion **param)
     d[i] = ((IntPortion *) (*dim)[i])->Value();
 
   BaseNfg* N;
-  if( !( (BoolPortion*) param[ 1 ] )->Value() )
-    N = new Nfg<double>( d );
+  if(!((BoolPortion*) param[1])->Value())
+    N = new Nfg<double>(d);
   else
-    N = new Nfg<gRational>( d );
+    N = new Nfg<gRational>(d);
   return new NfgValPortion(N);
 }
 
@@ -542,11 +535,10 @@ Portion* GSM_ListForm_NfgRational(Portion** param)
 Portion *GSM_NewSupport_Nfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
-  Portion *p = new NfSupportValPortion(new NFSupport(N));
+  Portion *por = new NfSupportValPortion(new NFSupport(N));
 
-  p->SetOwner( param[ 0 ]->Original() );
-  p->AddDependency();
-  return p;
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
 }
 
 //--------------
@@ -563,26 +555,26 @@ Portion *GSM_NumPlayers_Nfg(Portion **param)
 // NumStrats
 //-------------
 
-Portion *GSM_NumStrats( Portion** param )
+Portion *GSM_NumStrats(Portion** param)
 {
   int i;
   gArray< int > dim;
 
   NFPlayer* P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
+  NFSupport* s = ((NfSupportPortion*) param[1])->Value();
 
-  if( s == 0 )
-    return new IntValPortion( P->StrategyList().Length() );
+  if(s == 0)
+    return new IntValPortion(P->StrategyList().Length());
   else
   {
     dim = s->SupportDimensions();
-    for( i = 1; i <= dim.Length(); i++ )
+    for(i = 1; i <= dim.Length(); i++)
     {
-      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
-	return new IntValPortion( s->NumStrats( i ) );
+      if(&(s->GetNFStrategySet(i)->GetPlayer()) == P)
+	return new IntValPortion(s->NumStrats(i));
     }
   }
-  return new ErrorPortion( "Specified player is not found in the support" );
+  return new ErrorPortion("Specified player is not found in the support");
 }
 
 
@@ -594,10 +586,9 @@ Portion *GSM_Players_Nfg(Portion **param)
 {
   BaseNfg &N = *((NfgPortion*) param[0])->Value();
 
-  Portion* p = ArrayToList(N.PlayerList());
-  p->SetOwner( param[ 0 ]->Original() );
-  p->AddDependency();
-  return p;
+  Portion* por = ArrayToList(N.PlayerList());
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
 }
 
 //-------------
@@ -669,8 +660,7 @@ Portion *GSM_RemoveStrategy(Portion **param)
   S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
 
   Portion* por = new NfSupportValPortion(S);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -751,31 +741,30 @@ Portion *GSM_Strategies(Portion **param)
   Portion* por = 0;
 
   NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
+  NFSupport* s = ((NfSupportPortion*) param[1])->Value();
 
-  if( s == 0 )
+  if(s == 0)
     por = ArrayToList(P->StrategyList());
   else
   {
     dim = s->SupportDimensions();
-    for( i = 1; i <= dim.Length(); i++ )
+    for(i = 1; i <= dim.Length(); i++)
     {
-      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
+      if(&(s->GetNFStrategySet(i)->GetPlayer()) == P)
       {
-	por = ArrayToList( s->GetStrategy( i ) );
+	por = ArrayToList(s->GetStrategy(i));
 	break;
       }
     }
   }
 
-  if( por != 0 )
+  if(por != 0)
   {
-    por->SetOwner(param[0]->Owner());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   }
   else
   {
-    por = new ErrorPortion( "Specified player is not found in the support" );
+    por = new ErrorPortion("Specified player is not found in the support");
   }
   return por;
 }
@@ -993,7 +982,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumStrats, porINTEGER, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
-					    new NfSupportValPortion( 0 )));
+					    new NfSupportValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 
@@ -1108,7 +1097,7 @@ void Init_nfgfunc(GSM *gsm)
 				       PortionSpec(porSTRATEGY, 1), 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
-					    new NfSupportValPortion( 0 )));
+					    new NfSupportValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 

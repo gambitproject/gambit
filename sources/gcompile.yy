@@ -771,6 +771,7 @@ int GCLCompiler::Parse(void)
     else 
       while (program.Length() > 0)   delete program.Remove(1);
   }
+  gsm.Clear();
   return 1;
 }
 

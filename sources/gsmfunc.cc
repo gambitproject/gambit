@@ -613,7 +613,6 @@ bool FuncDescObj::Delete(FuncDescObj* newfunc)
   bool finalresult = true;
   bool same_params;
   int i;
-  int j;
   int f_index;
   int delete_index;
   int index;

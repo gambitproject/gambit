@@ -75,10 +75,12 @@ int main(int ,char **)
   signal(SIGFPE, (fptr)SigFPEHandler);
   
   _gsm = new GSM(256);
-
-  GCLCompiler C;
+  GCLCompiler *C = new GCLCompiler;
   
-  C.Parse();
+  C->Parse();
+
+  delete C;
+  delete _gsm;
   
   return 0;
 }

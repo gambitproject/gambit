@@ -39,14 +39,14 @@ Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedSolution<double> >
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedSolution<double>(list[i])));
+    Append(new MixedValPortion(new MixedSolution<double>(list[i])));
 }
 
 Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedSolution<gRational> > &list)
 {
   _DataType = porMIXED_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion( new MixedSolution<gRational>(list[i])));
+    Append(new MixedValPortion(new MixedSolution<gRational>(list[i])));
 }
 
 
@@ -61,7 +61,7 @@ Behav_ListPortion<double>::Behav_ListPortion(
 {
   _DataType = porBEHAV_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append( new BehavValPortion( new BehavSolution<double>(list[i])));
+    Append(new BehavValPortion(new BehavSolution<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(
@@ -69,7 +69,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 {
   _DataType = porBEHAV_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append( new BehavValPortion( new BehavSolution<gRational>(list[i])));
+    Append(new BehavValPortion(new BehavSolution<gRational>(list[i])));
 }
 
 
@@ -119,7 +119,7 @@ Portion *GSM_Behav_Float(Portion **param)
 
   BehavSolution<double>* bp;
 
-  if( AssociatedNfg( &E ) != &N )  
+  if(AssociatedNfg(&E) != &N)  
     return new ErrorPortion("Normal and extensive form games not associated");
   else
   {
@@ -128,8 +128,7 @@ Portion *GSM_Behav_Float(Portion **param)
   }
 
   Portion* por = new BehavValPortion(bp);
-  por->SetOwner( param[ 1 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[1]->Game(), param[1]->GameIsEfg());
   return por;
 }
 
@@ -142,7 +141,7 @@ Portion *GSM_Behav_Rational(Portion **param)
 
   BehavSolution<gRational>* bp;
 
-  if( AssociatedNfg( &E ) != &N )  
+  if(AssociatedNfg(&E) != &N)  
     return new ErrorPortion("Normal and extensive form games not associated");
   else
   {
@@ -151,8 +150,7 @@ Portion *GSM_Behav_Rational(Portion **param)
   }
 
   Portion* por = new BehavValPortion(bp);
-  por->SetOwner( param[ 1 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[1]->Game(), param[1]->GameIsEfg());
   return por;
 }
 
@@ -181,8 +179,7 @@ Portion *GSM_EnumMixed_NfgFloat(Portion **param)
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
   Portion* por = new Mixed_ListPortion<double>(EM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -205,16 +202,16 @@ Portion *GSM_EnumMixed_NfgRational(Portion **param)
   ((FloatPortion *) param[3])->Value() = EM.Time();
 
   Portion* por = new Mixed_ListPortion<gRational>(EM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
+
 }
 
 
 Portion *GSM_EnumMixed_Support(Portion **param)
 {
-  NFSupport* S = ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S->BelongsTo() );
+  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
   Portion* por = 0;
 
   EnumParams EP;
@@ -224,11 +221,11 @@ Portion *GSM_EnumMixed_Support(Portion **param)
   EP.tracefile = &((OutputPortion *) param[4])->Value();
   EP.trace = ((IntPortion *) param[5])->Value();
 
-  switch( N->Type() )
+  switch(N->Type())
   {
   case DOUBLE:
     {
-      EnumModule<double> EM( * (Nfg<double>*) N, EP, *S);
+      EnumModule<double> EM(* (Nfg<double>*) N, EP, *S);
       EM.Enum();
       ((IntPortion *) param[2])->Value() = EM.NumPivots();
       ((FloatPortion *) param[3])->Value() = EM.Time();
@@ -237,7 +234,7 @@ Portion *GSM_EnumMixed_Support(Portion **param)
     break;
   case RATIONAL:
     {
-      EnumModule<gRational> EM( * (Nfg<gRational>*) N, EP, *S);
+      EnumModule<gRational> EM(* (Nfg<gRational>*) N, EP, *S);
       EM.Enum();
       ((IntPortion *) param[2])->Value() = EM.NumPivots();
       ((FloatPortion *) param[3])->Value() = EM.Time();
@@ -245,12 +242,11 @@ Portion *GSM_EnumMixed_Support(Portion **param)
     }
     break;
   default:
-    assert( 0 );
+    assert(0);
   }
 
-  assert( por != 0 );
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  assert(por != 0);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -279,8 +275,7 @@ Portion *GSM_EnumMixed_EfgFloat(Portion **param)
   ((FloatPortion *) param[4])->Value() = EM.Time();
 
   Portion* por = new Behav_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -307,8 +302,7 @@ Portion *GSM_EnumMixed_EfgRational(Portion **param)
   ((FloatPortion *) param[4])->Value() = EM.Time();
 
   Portion* por = new Behav_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -331,8 +325,7 @@ Portion *GSM_EnumPure_NfgFloat(Portion **param)
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
   Portion* por = new Mixed_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -349,43 +342,41 @@ Portion *GSM_EnumPure_NfgRational(Portion **param)
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
   Portion* por = new Mixed_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 Portion *GSM_EnumPure_Support(Portion **param)
 {
-  NFSupport* S = ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S->BelongsTo() );
+  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
   Portion* por;
 
   gWatch watch;
 
-  switch( N->Type() )
+  switch(N->Type())
   {
   case DOUBLE:
     {
       gList<MixedSolution<double> > solns;
-      FindPureNash( * (Nfg<double>*) N, solns );
+      FindPureNash(* (Nfg<double>*) N, solns);
       por = new Mixed_ListPortion<double>(solns);
     }
     break;
   case RATIONAL:
     {
       gList<MixedSolution<gRational> > solns;
-      FindPureNash( * (Nfg<gRational>*) N, solns );
+      FindPureNash(* (Nfg<gRational>*) N, solns);
       por = new Mixed_ListPortion<gRational>(solns);
     }
     break;
   default:
-    assert( 0 );
+    assert(0);
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -411,8 +402,7 @@ Portion *GSM_EnumPure_EfgFloat(Portion **param)
   }
 
   Portion* por = new Behav_ListPortion<double>(solns);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -435,8 +425,7 @@ Portion *GSM_EnumPure_EfgRational(Portion **param)
   } 
  
   Portion* por = new Behav_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -479,21 +468,20 @@ Portion *GSM_GobitGrid_NfgFloat(Portion **param)
   if (GP.pxifile != &gnull)   delete GP.pxifile;
 
   Portion *por = new Mixed_ListPortion<double>(solns);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 Portion *GSM_GobitGrid_Support(Portion **param)
 {
-  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
   Portion* por = 0;
 
   GridParams<double> GP;
 
-  if( ((TextPortion*) param[1])->Value() != "" )
-    GP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+  if(((TextPortion*) param[1])->Value() != "")
+    GP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
   else
     GP.pxifile = &gnull;
   GP.minLam = ((FloatPortion *) param[2])->Value();
@@ -503,11 +491,11 @@ Portion *GSM_GobitGrid_Support(Portion **param)
   GP.delp = ((FloatPortion *) param[6])->Value();
   GP.tol = ((FloatPortion *) param[7])->Value();
 
-  switch( N->Type() )
+  switch(N->Type())
   {
   case DOUBLE:
     {
-      GridSolveModule<double> GM( * (Nfg<double>*) N, GP, S);
+      GridSolveModule<double> GM(* (Nfg<double>*) N, GP, S);
       GM.GridSolve();
       // ((IntPortion *) param[8])->Value() = GM.NumEvals();
       // ((FloatPortion *) param[9])->Value() = GM.Time();
@@ -516,15 +504,14 @@ Portion *GSM_GobitGrid_Support(Portion **param)
     }
     break;
   case RATIONAL:
-    return new ErrorPortion( "The rational version of GobitGridSolve is not implemented" );
+    return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
     break;
   default:
     assert(0);
   }
 
-  assert( por != 0 );
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  assert(por != 0);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -542,8 +529,8 @@ Portion *GSM_Gobit(Portion **param)
     MixedSolution<double> start(N);
   
     NFGobitParams NP;
-    if( ((TextPortion*) param[1])->Value() != "" )
-      NP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+    if(((TextPortion*) param[1])->Value() != "")
+      NP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
     else
       NP.pxifile = &gnull;
     NP.minLam = ((FloatPortion *) param[2])->Value();
@@ -555,7 +542,7 @@ Portion *GSM_Gobit(Portion **param)
     NP.maxitsN = ((IntPortion *) param[7])->Value();
     NP.tolN = ((FloatPortion *) param[8])->Value();
     NP.maxits1 = ((IntPortion *) param[9])->Value();
-    NP.tol1 = ((FloatPortion *) param[10] )->Value();
+    NP.tol1 = ((FloatPortion *) param[10])->Value();
 
     gWatch watch;
     gList<MixedSolution<double> > solutions;
@@ -568,8 +555,7 @@ Portion *GSM_Gobit(Portion **param)
     if (NP.pxifile != &gnull)  delete NP.pxifile;
 
     Portion *por = new Mixed_ListPortion<double>(solutions);
-    por->SetOwner(param[0]->Original());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else   {  // extensive form
@@ -577,8 +563,8 @@ Portion *GSM_Gobit(Portion **param)
     BehavSolution<double> start(E);
   
     EFGobitParams EP;
-    if( ((TextPortion*) param[1])->Value() != "" )
-      EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+    if(((TextPortion*) param[1])->Value() != "")
+      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
     else
       EP.pxifile = &gnull;
     EP.minLam = ((FloatPortion *) param[2])->Value();
@@ -607,8 +593,7 @@ Portion *GSM_Gobit(Portion **param)
     if (EP.pxifile != &gnull)  delete EP.pxifile;
 
     Portion *por = new Behav_ListPortion<double>(solutions);
-    por->SetOwner(param[0]->Original());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 }
@@ -645,18 +630,17 @@ Portion *GSM_Gobit_Start(Portion **param)
     ((FloatPortion *) param[11])->Value() = watch.Elapsed();
 
     Portion *por = new Mixed_ListPortion<double>(solutions);
-    por->SetOwner(param[0]->Owner());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {     // BEHAV_FLOAT  
     BehavSolution<double>& start = 
       * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-    Efg<double> &E = *( start.BelongsTo() );
+    Efg<double> &E = *(start.BelongsTo());
   
     EFGobitParams EP;
-    if( ((TextPortion*) param[1])->Value() != "" )
-      EP.pxifile = new gFileOutput( ((TextPortion*) param[1])->Value() );
+    if(((TextPortion*) param[1])->Value() != "")
+      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
     else
       EP.pxifile = &gnull;
     EP.minLam = ((FloatPortion *) param[2])->Value();
@@ -683,8 +667,7 @@ Portion *GSM_Gobit_Start(Portion **param)
     ((FloatPortion *) param[11])->Value() = watch.Elapsed();
     
     Portion * por = new Behav_ListPortion<double>(solutions);
-    por->SetOwner(param[0]->Owner());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 }
@@ -714,8 +697,7 @@ Portion *GSM_Lcp_NfgFloat(Portion **param)
   ((FloatPortion *) param[3])->Value() = LS.Time();
 
   Portion* por = new Mixed_ListPortion<double>(LS.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -737,15 +719,14 @@ Portion *GSM_Lcp_NfgRational(Portion **param)
   ((FloatPortion *) param[3])->Value() = LS.Time();
 
   Portion* por = new Mixed_ListPortion<gRational>(LS.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 Portion *GSM_Lcp_NFSupport(Portion **param)
 {
-  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
   Portion* por = 0;
 
   LemkeParams LP;
@@ -754,7 +735,7 @@ Portion *GSM_Lcp_NFSupport(Portion **param)
   LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
 
-  switch( N->Type() )
+  switch(N->Type())
   {
   case DOUBLE:
     {
@@ -775,11 +756,10 @@ Portion *GSM_Lcp_NFSupport(Portion **param)
     }
     break;
   default:
-    assert( 0 );
+    assert(0);
   }
-  assert( por != 0 );
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  assert(por != 0);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -840,8 +820,8 @@ Portion *GSM_Lcp_EfSupport(Portion **param)
   case DOUBLE:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
-      Efg<double>& E = 
-	*(Efg<double>*)((EfgPortion*) param[0]->Owner())->Value();
+      const Efg<double>& E = S.BelongsTo();
+	//*(Efg<double>*)((EfgPortion*) param[0]->Owner())->Value();
       gList<BehavSolution<double> > solns;
       
       SeqFormModule<double> SM(E, SP, S);
@@ -857,8 +837,8 @@ Portion *GSM_Lcp_EfSupport(Portion **param)
   case RATIONAL:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
-      Efg<gRational>& E = 
-	*(Efg<gRational>*)((EfgPortion*) param[0]->Owner())->Value();
+      const Efg<gRational>& E = S.BelongsTo();
+	//*(Efg<gRational>*)((EfgPortion*) param[0]->Owner())->Value();
       gList<BehavSolution<gRational> > solns;
       
       SeqFormModule<gRational> SM(E, SP, S);
@@ -875,8 +855,7 @@ Portion *GSM_Lcp_EfSupport(Portion **param)
     assert(0);
   }
 
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -921,9 +900,7 @@ Portion *GSM_Lcp_EfgFloat(Portion **param)
   }
 
   Portion *por = new Behav_ListPortion<double>(solns);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
-
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -967,9 +944,7 @@ Portion *GSM_Lcp_EfgRational(Portion **param)
   }
 
   Portion *por = new Behav_ListPortion<gRational>(solns);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
-
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1035,8 +1010,7 @@ Portion *GSM_Liap_EfgFloat(Portion **param)
   }
 
   Portion *por = new Behav_ListPortion<double>(solns);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1044,7 +1018,7 @@ Portion *GSM_Liap_BehavFloat(Portion **param)
 {
   BehavSolution<double> &start = 
     * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Efg<double> &E = *( start.BelongsTo() );
+  Efg<double> &E = *(start.BelongsTo());
   
   if (((BoolPortion *) param[1])->Value())   {
     return new ErrorPortion("This function not implemented yet");
@@ -1073,8 +1047,7 @@ Portion *GSM_Liap_BehavFloat(Portion **param)
     ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
     Portion *por = new Behav_ListPortion<double>(solutions);
-    por->SetOwner(param[0]->Owner());
-    por->AddDependency();
+    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 }
@@ -1106,8 +1079,7 @@ Portion *GSM_Liap_NfgFloat(Portion **param)
   ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
   Portion *por = new Mixed_ListPortion<double>(solutions);
-  por->SetOwner(param[0]->Original());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1137,8 +1109,7 @@ Portion *GSM_Liap_MixedFloat(Portion **param)
   ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
   Portion *por = new Mixed_ListPortion<double>(solutions);
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1171,8 +1142,7 @@ Portion *GSM_Lp_NfgFloat(Portion **param)
   ZM.GetSolutions(solns);
 
   Portion* por = new Mixed_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1199,15 +1169,14 @@ Portion *GSM_Lp_NfgRational(Portion **param)
   ZM.GetSolutions(solns);
 
   Portion* por = new Mixed_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 Portion *GSM_Lp_Support(Portion **param)
 {
-  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
   Portion* por = 0;
 
   if (N->NumPlayers() > 2 || !N->IsConstSum())
@@ -1218,10 +1187,10 @@ Portion *GSM_Lp_Support(Portion **param)
   ZP.tracefile = &((OutputPortion *) param[3])->Value();
   ZP.trace = ((IntPortion *) param[4])->Value();
 
-  switch( N->Type() )  {
+  switch(N->Type())  {
   case DOUBLE:
     {
-      ZSumModule<double> ZM( * (Nfg<double>*) N, ZP, S);
+      ZSumModule<double> ZM(* (Nfg<double>*) N, ZP, S);
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
       ((FloatPortion *) param[2])->Value() = ZM.Time();
@@ -1231,7 +1200,7 @@ Portion *GSM_Lp_Support(Portion **param)
     break;
   case RATIONAL:
     {
-      ZSumModule<gRational> ZM( *(Nfg<gRational>*) N, ZP, S);
+      ZSumModule<gRational> ZM(*(Nfg<gRational>*) N, ZP, S);
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
       ((FloatPortion *) param[2])->Value() = ZM.Time();
@@ -1240,12 +1209,11 @@ Portion *GSM_Lp_Support(Portion **param)
     }
     break;
   default:
-    assert( 0 );
+    assert(0);
   }
 
-  assert( por != 0 );
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  assert(por != 0);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1349,8 +1317,7 @@ Portion *GSM_Lp_EfgFloat(Portion **param)
   }
 
   Portion* por = new Behav_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1395,8 +1362,7 @@ Portion *GSM_Lp_EfgRational(Portion **param)
   }
 
   Portion* por = new Behav_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1439,108 +1405,108 @@ Portion *GSM_Nfg_Rational(Portion **param)
 // Payoff
 //----------
 
-Portion* GSM_Payoff_BehavFloat( Portion** param )
+Portion* GSM_Payoff_BehavFloat(Portion** param)
 {
   int i;
   Portion* por = new ListValPortion;
   BehavSolution<double>* bp = 
     (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
-  for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
+  for(i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++)
   {
-    ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
+    ((ListValPortion*) por)->Append(new FloatValPortion(bp->Payoff(i)));
   }
   return por;
 }
 
- Portion* GSM_Payoff_BehavRational( Portion** param )
+ Portion* GSM_Payoff_BehavRational(Portion** param)
 {
   int i;
   Portion* por = new ListValPortion;
   BehavSolution<gRational>* bp = 
     (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
-  for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
+  for(i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++)
   {
-    ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
+    ((ListValPortion*) por)->Append(new RationalValPortion(bp->Payoff(i)));
   }
   return por;
 }
 
 
-Portion* GSM_Payoff_MixedFloat( Portion** param )
+Portion* GSM_Payoff_MixedFloat(Portion** param)
 {
   int i;
   Portion* por = new ListValPortion;
   MixedSolution<double>* bp = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
+  for(i = 1; i <= bp->BelongsTo()->NumPlayers(); i++)
   {
-    ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
+    ((ListValPortion*) por)->Append(new FloatValPortion(bp->Payoff(i)));
   }
   return por;
 }
 
-Portion* GSM_Payoff_MixedRational( Portion** param )
+Portion* GSM_Payoff_MixedRational(Portion** param)
 {
   int i;
   Portion* por = new ListValPortion;
   MixedSolution<gRational>* bp = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-  for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
+  for(i = 1; i <= bp->BelongsTo()->NumPlayers(); i++)
   {
-    ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
+    ((ListValPortion*) por)->Append(new RationalValPortion(bp->Payoff(i)));
   }
   return por;
 }
 
 
-Portion* GSM_Payoff_NfgFloat( Portion** param )
+Portion* GSM_Payoff_NfgFloat(Portion** param)
 {
   int i;
   Portion* p;
   Portion* por = new ListValPortion;
-  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
+  Nfg<double>* nfg = (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
   
-  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"list\"");
   
-  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
   {
-    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Spec().Type == porINTEGER );
-    Solution[ i ] = ( (IntPortion*) p )->Value();
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
     delete p;
   }
-  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  for(i = 1; i <= nfg->NumPlayers(); i++)
   {
-    ( (ListValPortion*) por )->
-      Append( new FloatValPortion( nfg->Payoff( i, Solution ) ) );
+    ((ListValPortion*) por)->
+      Append(new FloatValPortion(nfg->Payoff(i, Solution)));
   }
   return por;
 }
 
-Portion* GSM_Payoff_NfgRational( Portion** param )
+Portion* GSM_Payoff_NfgRational(Portion** param)
 {
   int i;
   Portion* p;
   Portion* por = new ListValPortion;
-  Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
+  Nfg<gRational>* nfg = (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
   
-  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"list\"");
   
-  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
   {
-    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Spec().Type == porINTEGER );
-    Solution[ i ] = ( (IntPortion*) p )->Value();
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
     delete p;
   }
-  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  for(i = 1; i <= nfg->NumPlayers(); i++)
   {
-    ( (ListValPortion*) por )->
-      Append( new RationalValPortion( nfg->Payoff( i, Solution ) ) );
+    ((ListValPortion*) por)->
+      Append(new RationalValPortion(nfg->Payoff(i, Solution)));
   }
   return por;
 }
@@ -1550,62 +1516,62 @@ Portion* GSM_Payoff_NfgRational( Portion** param )
 // SetPayoff
 //------------
 
-Portion* GSM_SetPayoff_NfgFloat( Portion** param )
+Portion* GSM_SetPayoff_NfgFloat(Portion** param)
 {
   int i;
   Portion* p;
-  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
+  Nfg<double>* nfg = (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
   
-  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"list\"");
-  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[2])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"payoff\"");
   
-  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
   {
-    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Spec().Type == porINTEGER );
-    Solution[ i ] = ( (IntPortion*) p )->Value();
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
     delete p;
   }
-  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  for(i = 1; i <= nfg->NumPlayers(); i++)
   {
-    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
-    assert( p->Spec().Type == porFLOAT );
-    nfg->SetPayoff( i, Solution, ( (FloatPortion*) p )->Value() );
+    p = ((ListPortion*) param[2])->SubscriptCopy(i);
+    assert(p->Spec().Type == porFLOAT);
+    nfg->SetPayoff(i, Solution, ((FloatPortion*) p)->Value());
     delete p;
   }
-  return param[ 1 ]->ValCopy();
+  return param[1]->ValCopy();
 }
 
-Portion* GSM_SetPayoff_NfgRational( Portion** param )
+Portion* GSM_SetPayoff_NfgRational(Portion** param)
 {
   int i;
   Portion* p;
-  Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
+  Nfg<gRational>* nfg = (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  gArray<int> Solution(((ListPortion*) param[1])->Length());
   
-  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[1])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"list\"");
-  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
+  if(((ListPortion*) param[2])->Length() != nfg->NumPlayers())
     return new ErrorPortion("Invalid number of players specified in \"payoff\"");
   
-  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  for(i = 1; i <= nfg->NumPlayers() ; i++)
   {
-    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Spec().Type == porINTEGER );
-    Solution[ i ] = ( (IntPortion*) p )->Value();
+    p = ((ListPortion*) param[1])->SubscriptCopy(i);
+    assert(p->Spec().Type == porINTEGER);
+    Solution[i] = ((IntPortion*) p)->Value();
     delete p;
   }
-  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  for(i = 1; i <= nfg->NumPlayers(); i++)
   {
-    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
-    assert( p->Spec().Type == porRATIONAL );
-    nfg->SetPayoff( i, Solution, ( (RationalPortion*) p )->Value() );
+    p = ((ListPortion*) param[2])->SubscriptCopy(i);
+    assert(p->Spec().Type == porRATIONAL);
+    nfg->SetPayoff(i, Solution, ((RationalPortion*) p)->Value());
     delete p;
   }
-  return param[ 1 ]->ValCopy();
+  return param[1]->ValCopy();
 }
 
 
@@ -1731,8 +1697,7 @@ Portion *GSM_Simpdiv_NfgFloat(Portion **param)
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
   Portion* por = new Mixed_ListPortion<double>(SM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1756,16 +1721,15 @@ Portion *GSM_Simpdiv_NfgRational(Portion **param)
   ((FloatPortion *) param[5])->Value() = SM.Time();
   
   Portion* por = new Mixed_ListPortion<gRational>(SM.GetSolutions());
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 
 Portion *GSM_Simpdiv_Support(Portion **param)
 {
-  NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
-  BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
+  NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
   Portion* por = 0;
 
   SimpdivParams SP;
@@ -1776,11 +1740,11 @@ Portion *GSM_Simpdiv_Support(Portion **param)
   SP.tracefile = &((OutputPortion *) param[6])->Value();
   SP.trace = ((IntPortion *) param[7])->Value();
 
-  switch( N->Type() )
+  switch(N->Type())
   {
   case DOUBLE:
     {
-      SimpdivModule<double> SM( * (Nfg<double>*) N, SP, S);
+      SimpdivModule<double> SM(* (Nfg<double>*) N, SP, S);
       SM.Simpdiv();
       ((IntPortion *) param[4])->Value() = SM.NumEvals();
       ((FloatPortion *) param[5])->Value() = SM.Time();
@@ -1789,7 +1753,7 @@ Portion *GSM_Simpdiv_Support(Portion **param)
     break;
   case RATIONAL:
     {
-      SimpdivModule<gRational> SM( * (Nfg<gRational>*) N, SP, S);
+      SimpdivModule<gRational> SM(* (Nfg<gRational>*) N, SP, S);
       SM.Simpdiv();
       ((IntPortion *) param[4])->Value() = SM.NumEvals();
       ((FloatPortion *) param[5])->Value() = SM.Time();
@@ -1797,12 +1761,11 @@ Portion *GSM_Simpdiv_Support(Portion **param)
     }
     break;
   default:
-    assert( 0 );
+    assert(0);
   }
 
-  assert( por != 0 );
-  por->SetOwner( param[ 0 ]->Owner() );
-  por->AddDependency();
+  assert(por != 0);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1832,8 +1795,7 @@ Portion *GSM_Simpdiv_EfgFloat(Portion **param)
   ((FloatPortion *) param[6])->Value() = SM.Time();
   
   Portion* por = new Behav_ListPortion<double>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1862,8 +1824,7 @@ Portion *GSM_Simpdiv_EfgRational(Portion **param)
   ((FloatPortion *) param[6])->Value() = SM.Time();
   
   Portion* por = new Behav_ListPortion<gRational>(solns);
-  por->SetOwner( param[ 0 ]->Original() );
-  por->AddDependency();
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 

@@ -282,7 +282,7 @@ Portion *GSM_NthElement(Portion **param)
   if(n <= 0 || n > ((ListPortion *) param[0])->Length())
     return new ErrorPortion("Subscript out of range");
   else
-    return ((ListPortion *) param[0])->Subscript(n);
+    return ((ListPortion *) param[0])->SubscriptCopy(n);
 }
 
 Portion *GSM_Remove(Portion **param)
