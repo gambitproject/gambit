@@ -390,7 +390,7 @@ static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 
   nfgNashAlgorithm *algorithm = 0;
 
-  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+  if (AsPrecision(param[2]) == precDOUBLE) {
     algorithm = GSM_Lcp_Nfg_Double(AsNumber(param[1]));
   }
   else {
@@ -460,7 +460,7 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
   gsm.StartAlgorithmMonitor("LcpSolve Progress");
   gList<BehavSolution> solutions;
   try {
-    algorithm.Solve(support, gsm.GetStatusMonitor());
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
@@ -737,7 +737,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
   gsm.StartAlgorithmMonitor("LpSolve Progress");
   gList<BehavSolution> solutions;
   try {
-    algorithm.Solve(support, gsm.GetStatusMonitor());
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) { }
   catch (...) {
