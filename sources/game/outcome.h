@@ -57,8 +57,6 @@ public:
 gbtOutput &operator<<(gbtOutput &, const gbtGameOutcomeRep &);
 
 
-class gbtGameNullOutcome { };
-
 class gbtGameOutcome {
 private:
   gbtGameOutcomeRep *m_rep;
@@ -86,9 +84,9 @@ public:
   { return (m_rep != p_outcome.m_rep); }
 
   gbtGameOutcomeRep *operator->(void) 
-  { if (!m_rep) throw gbtGameNullOutcome(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameOutcomeRep *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullOutcome(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGameOutcomeRep *Get(void) const { return m_rep; }
 

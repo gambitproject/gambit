@@ -149,7 +149,8 @@ public:
   gbtBlock<gbtGameActionBase *> m_actions;
   gbtBlock<gbtNumber> m_chanceProbs;
   gbtBlock<gbtGameNodeBase *> m_members;
-  int m_flag, m_whichbranch;
+  bool m_flag;
+  int m_whichbranch;
 
   gbtGameInfosetBase(gbtGamePlayerBase *, int id, int br);
   virtual ~gbtGameInfosetBase();
@@ -157,7 +158,6 @@ public:
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   int GetId(void) const { return m_id; }
-  gbtGame GetGame(void) const;
 
   void DeleteInfoset(void);
 
@@ -181,12 +181,6 @@ public:
 
   void MergeInfoset(gbtGameInfoset from);
   void Reveal(gbtGamePlayer);
-
-  bool GetFlag(void) const;
-  void SetFlag(bool);
-
-  int GetWhichBranch(void) const;
-  void SetWhichBranch(int);
 
   void PrintActions(gbtOutput &) const;
 };

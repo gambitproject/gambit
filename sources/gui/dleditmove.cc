@@ -49,7 +49,8 @@ BEGIN_EVENT_TABLE(dialogEditMove, wxDialog)
   EVT_BUTTON(wxID_OK, dialogEditMove::OnOK)
 END_EVENT_TABLE()
 
-dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtGameInfoset p_infoset)
+dialogEditMove::dialogEditMove(wxWindow *p_parent,
+			       gbtGame p_game, gbtGameInfoset p_infoset)
   : wxDialog(p_parent, -1, _("Move properties"), wxDefaultPosition), 
     m_infoset(p_infoset)
 {
@@ -81,10 +82,10 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtGameInfoset p_infoset)
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 					(char *) 
-					p_infoset->GetGame()->GetPlayer(pl)->GetLabel()));
+					p_game->GetPlayer(pl)->GetLabel()));
     } 
     m_player->SetSelection(p_infoset->GetPlayer()->GetId() - 1);
   }

@@ -51,7 +51,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditMove(wxWindow *p_parent, gbtGameInfoset p_infoset);
+  dialogEditMove(wxWindow *p_parent, gbtGame p_game, gbtGameInfoset p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName(void) const { return m_infosetName->GetValue(); }

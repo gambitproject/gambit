@@ -1035,7 +1035,7 @@ void gbtEfgFrame::OnEditMove(wxCommandEvent &)
 {
   gbtGameInfoset infoset = m_doc->GetCursor()->GetInfoset();
 
-  dialogEditMove dialog(this, infoset);
+  dialogEditMove dialog(this, m_doc->GetGame(), infoset);
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->Submit(dialog.GetCommand());
   }

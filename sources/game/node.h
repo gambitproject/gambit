@@ -77,8 +77,6 @@ public:
   virtual gbtGameInfoset LeaveInfoset(void) = 0;
 };
 
-class gbtEfgNullNode { };
-
 class gbtGameNode {
 friend class gbtGame;
 private:
@@ -88,28 +86,28 @@ public:
   gbtGameNode(void) : m_rep(0) { }
   gbtGameNode(gbtGameNodeRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtGameNode(const gbtGameNode &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  gbtGameNode(const gbtGameNode &p_node)
+    : m_rep(p_node.m_rep) { if (m_rep) m_rep->Reference(); }
   ~gbtGameNode() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtGameNode &operator=(const gbtGameNode &p_player) {
-    if (this != &p_player) {
+  gbtGameNode &operator=(const gbtGameNode &p_node) {
+    if (this != &p_node) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
+      m_rep = p_node.m_rep;
       if (m_rep) m_rep->Reference();
     }
     return *this;
   }
 
-  bool operator==(const gbtGameNode &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtGameNode &p_player) const
-  { return (m_rep != p_player.m_rep); }
+  bool operator==(const gbtGameNode &p_node) const
+  { return (m_rep == p_node.m_rep); }
+  bool operator!=(const gbtGameNode &p_node) const
+  { return (m_rep != p_node.m_rep); }
 
   gbtGameNodeRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullNode(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameNodeRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullNode(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGameNodeRep *Get(void) const { return m_rep; }
 

@@ -45,15 +45,12 @@ public:
   virtual int GetId(void) const = 0;
 
   virtual gbtGameInfoset GetInfoset(void) const = 0;
-  //  virtual gbtGamePlayer GetPlayer(void) const = 0;
 
   virtual gbtNumber GetChanceProb(void) const = 0;
   virtual bool Precedes(gbtGameNode) const = 0;
 
   virtual void DeleteAction(void) = 0;
 };
-
-class gbtEfgNullAction { };
 
 class gbtGameAction {
 friend class gbtGame;
@@ -64,28 +61,28 @@ public:
   gbtGameAction(void) : m_rep(0) { }
   gbtGameAction(gbtGameActionRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtGameAction(const gbtGameAction &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  gbtGameAction(const gbtGameAction &p_action)
+    : m_rep(p_action.m_rep) { if (m_rep) m_rep->Reference(); }
   ~gbtGameAction() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtGameAction &operator=(const gbtGameAction &p_player) {
-    if (this != &p_player) {
+  gbtGameAction &operator=(const gbtGameAction &p_action) {
+    if (this != &p_action) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
+      m_rep = p_action.m_rep;
       if (m_rep) m_rep->Reference();
     }
     return *this;
   }
 
-  bool operator==(const gbtGameAction &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtGameAction &p_player) const
-  { return (m_rep != p_player.m_rep); }
+  bool operator==(const gbtGameAction &p_action) const
+  { return (m_rep == p_action.m_rep); }
+  bool operator!=(const gbtGameAction &p_action) const
+  { return (m_rep != p_action.m_rep); }
 
   gbtGameActionRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameActionRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGameActionRep *Get(void) const { return m_rep; }
 
@@ -104,7 +101,6 @@ public:
   virtual gbtText GetLabel(void) const = 0;
   virtual void SetLabel(const gbtText &) = 0;
   virtual int GetId(void) const = 0;
-  virtual gbtGame GetGame(void) const = 0;
 
   virtual void DeleteInfoset(void) = 0;
 
@@ -128,15 +124,8 @@ public:
 
   virtual void MergeInfoset(gbtGameInfoset from) = 0;
   virtual void Reveal(gbtGamePlayer) = 0;
-
-  virtual bool GetFlag(void) const = 0;
-  virtual void SetFlag(bool) = 0;
-
-  virtual int GetWhichBranch(void) const = 0;
-  virtual void SetWhichBranch(int) = 0;
 };
 
-class gbtEfgNullInfoset { };
 
 class gbtGameInfoset {
 friend class gbtGame;
@@ -147,28 +136,28 @@ public:
   gbtGameInfoset(void) : m_rep(0) { }
   gbtGameInfoset(gbtGameInfosetRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtGameInfoset(const gbtGameInfoset &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  gbtGameInfoset(const gbtGameInfoset &p_infoset)
+    : m_rep(p_infoset.m_rep) { if (m_rep) m_rep->Reference(); }
   ~gbtGameInfoset() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtGameInfoset &operator=(const gbtGameInfoset &p_player) {
-    if (this != &p_player) {
+  gbtGameInfoset &operator=(const gbtGameInfoset &p_infoset) {
+    if (this != &p_infoset) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
+      m_rep = p_infoset.m_rep;
       if (m_rep) m_rep->Reference();
     }
     return *this;
   }
 
-  bool operator==(const gbtGameInfoset &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtGameInfoset &p_player) const
-  { return (m_rep != p_player.m_rep); }
+  bool operator==(const gbtGameInfoset &p_infoset) const
+  { return (m_rep == p_infoset.m_rep); }
+  bool operator!=(const gbtGameInfoset &p_infoset) const
+  { return (m_rep != p_infoset.m_rep); }
 
   gbtGameInfosetRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameInfosetRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGameInfosetRep *Get(void) const { return m_rep; }
 

@@ -1515,8 +1515,8 @@ static void MakeStrategy(gbtGameBase *p_nfg, gbtGamePlayerBase *p_player)
 
   // FIXME: This is a rather lame labeling scheme.
   for (int iset = 1; iset <= p_player->NumInfosets(); iset++)  {
-    if (p_player->GetInfoset(iset)->GetFlag()) {
-      behav[iset] = p_player->GetInfoset(iset)->GetWhichBranch();
+    if (p_player->m_infosets[iset]->m_flag) {
+      behav[iset] = p_player->m_infosets[iset]->m_whichbranch;
       label += ToText(behav[iset]);
     }
     else {

@@ -280,16 +280,12 @@ int gbtEfgSupportBase::NumActions(const gbtGameInfoset &i) const
 
 int gbtEfgSupportBase::GetIndex(const gbtGameAction &a) const
 {
-  if (a->GetInfoset()->GetGame() != m_efg)  return 0;
   int pl = a->GetInfoset()->GetPlayer()->GetId();
   return m_players[pl]->Find(a);
 }
 
 bool gbtEfgSupportBase::Contains(const gbtGameAction &a) const
 {
-  if (a->GetInfoset()->GetGame() != m_efg)   
-    return false;
-
   int pl = a->GetInfoset()->GetPlayer()->GetId();
 
   if (pl == 0) return true; // Chance

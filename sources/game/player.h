@@ -55,8 +55,6 @@ public:
   virtual void SetLabel(const gbtText &) = 0;
 };
 
-class gbtEfgNullStrategy { };
-
 class gbtGameStrategy {
 friend class gbtGame;
 private:
@@ -66,28 +64,28 @@ public:
   gbtGameStrategy(void) : m_rep(0) { }
   gbtGameStrategy(gbtGameStrategyRep *p_rep)
     : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtGameStrategy(const gbtGameStrategy &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  gbtGameStrategy(const gbtGameStrategy &p_strategy)
+    : m_rep(p_strategy.m_rep) { if (m_rep) m_rep->Reference(); }
   ~gbtGameStrategy() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtGameStrategy &operator=(const gbtGameStrategy &p_player) {
-    if (this != &p_player) {
+  gbtGameStrategy &operator=(const gbtGameStrategy &p_strategy) {
+    if (this != &p_strategy) {
       if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
+      m_rep = p_strategy.m_rep;
       if (m_rep) m_rep->Reference();
     }
     return *this;
   }
 
-  bool operator==(const gbtGameStrategy &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtGameStrategy &p_player) const
-  { return (m_rep != p_player.m_rep); }
+  bool operator==(const gbtGameStrategy &p_strategy) const
+  { return (m_rep == p_strategy.m_rep); }
+  bool operator!=(const gbtGameStrategy &p_strategy) const
+  { return (m_rep != p_strategy.m_rep); }
 
   gbtGameStrategyRep *operator->(void) 
-  { if (!m_rep) throw gbtEfgNullStrategy(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGameStrategyRep *operator->(void) const 
-  { if (!m_rep) throw gbtEfgNullStrategy(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGameStrategyRep *Get(void) const { return m_rep; }
 
@@ -126,8 +124,6 @@ public:
   virtual gbtGameInfoset NewInfoset(int p_actions) = 0;
 };
 
-class gbtGameNullPlayer { };
-
 class gbtGamePlayer {
 private:
   gbtGamePlayerRep *m_rep;
@@ -155,14 +151,30 @@ public:
   { return (m_rep != p_player.m_rep); }
 
   gbtGamePlayerRep *operator->(void) 
-  { if (!m_rep) throw gbtGameNullPlayer(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   const gbtGamePlayerRep *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullPlayer(); return m_rep; }
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
   
   gbtGamePlayerRep *Get(void) const { return m_rep; }
 
   // Questionable whether this should be provided
   bool IsNull(void) const { return (m_rep == 0); }
 };
+
+class gbtGameInfosetIterator {
+private:
+  int m_index;
+  gbtGamePlayer m_player;
+
+public:
+  gbtGameInfosetIterator(const gbtGamePlayer &p_player);
+  
+  gbtGameInfoset operator*(void) const;
+  gbtGameInfosetIterator &operator++(int);
+
+  bool Begin(void);
+  bool End(void) const;
+};
+
 
 #endif  // PLAYER_H

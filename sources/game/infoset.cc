@@ -96,7 +96,7 @@ gbtGameInfosetBase::gbtGameInfosetBase(gbtGamePlayerBase *p_player,
   : m_id(p_id), m_player(p_player), m_deleted(false), 
     m_refCount(0), m_actions(p_br),
     m_chanceProbs((p_player->m_id == 0) ? p_br : 0),
-    m_flag(0), m_whichbranch(0)
+    m_flag(false), m_whichbranch(0)
 {
   for (int act = 1; act <= p_br; act++) {
     m_actions[act] = new gbtGameActionBase(this, act);
@@ -185,11 +185,6 @@ bool gbtGameInfosetBase::IsChanceInfoset(void) const
   return (m_player->m_id == 0);
 }
 
-gbtGame gbtGameInfosetBase::GetGame(void) const
-{
-  return m_player->m_efg;
-}
-
 bool gbtGameInfosetBase::Precedes(gbtGameNode p_node) const
 {
   gbtGameNodeBase *node = dynamic_cast<gbtGameNodeBase *>(p_node.Get());
@@ -247,26 +242,6 @@ void gbtGameInfosetBase::SetChanceProb(int p_action, const gbtNumber &p_value)
 gbtNumber gbtGameInfosetBase::GetChanceProb(int p_action) const
 {
   return m_chanceProbs[p_action];
-}
-
-bool gbtGameInfosetBase::GetFlag(void) const
-{ 
-  return m_flag;
-}
-
-void gbtGameInfosetBase::SetFlag(bool p_flag)
-{
-  m_flag = p_flag;
-}
-
-int gbtGameInfosetBase::GetWhichBranch(void) const
-{
-  return m_whichbranch;
-}
-
-void gbtGameInfosetBase::SetWhichBranch(int p_branch) 
-{
-  m_whichbranch = p_branch;
 }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtGameInfoset &)

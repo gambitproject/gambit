@@ -318,19 +318,4 @@ public:
   bool End(void) const;
 };
 
-class gbtGameInfosetIterator {
-private:
-  int m_index;
-  gbtGamePlayer m_player;
-
-public:
-  gbtGameInfosetIterator(const gbtGamePlayer &p_player);
-  
-  gbtGameInfoset operator*(void) const;
-  gbtGameInfosetIterator &operator++(int);
-
-  bool Begin(void);
-  bool End(void) const;
-};
-
 #endif   // GAME_H
