@@ -8,10 +8,10 @@
 #include "quiksolv.h"
 
 //template class gTree<gPoly<gDouble> >
-template class gPolyList<gDouble>; 
-template class gList<TreeOfPartials<gDouble> >; 
+//template class gPolyList<gDouble>; 
+//template class gList<TreeOfPartials<gDouble> >; 
 
-
+/*
 //---------------------------------------------------------------
 //                   class: TreeOfPartials
 //---------------------------------------------------------------
@@ -122,7 +122,7 @@ TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
 
 
 template <class T> gOutput& operator << (gOutput& output, 
-					 const TreeOfPartials<T>& /* x */)
+					 const TreeOfPartials<T>&)
 {
   output << "Error: you shouldn't be printing a TreeOfPartials.\n";
   exit(0);
@@ -163,6 +163,22 @@ template<class T> ListOfPartialTrees<T>::~ListOfPartialTrees()
 {
 }
 
+template <class T> bool 
+ListOfPartialTrees<T>::operator ==(const ListOfPartialTrees<T>& rhs) const
+{
+  if (Length() != rhs.Length()) return false;
+  for (int i = 1; i <= Length(); i++)
+    if ((*this)[i] != rhs[i])
+      return false;
+  return true;
+}
+
+template <class T> bool 
+ListOfPartialTrees<T>::operator !=(const ListOfPartialTrees<T>& rhs) const
+{
+  return !(*this == rhs);
+}
+
 template <class T> 
 gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
 {
@@ -198,6 +214,14 @@ ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point) const
   return answer;
 }
 
+
+template <class T> gOutput& operator << (gOutput& output, 
+					 const ListOfPartialTrees<T>&)
+{
+  output << "Error: you shouldn't be printing a ListOfPartialTrees.\n";
+  exit(0);
+}
+*/
 
 //---------------------------------------------------------------
 //                      class: QuikSolv

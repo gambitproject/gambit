@@ -13,6 +13,7 @@
 #include "gtree.h"
 #include "gpoly.h"
 #include "gpolylst.h"
+#include "gpartltr.h"
 
 /*
     The (optimistically named) class described in this file is a method
@@ -31,6 +32,7 @@ is necessary because the procedure will not terminate if there are
 singular roots.
 */
 
+/*
 // ****************************
 //      class TreeOfPartials
 // ****************************
@@ -93,6 +95,15 @@ public:
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();
 
+  inline operator =  (const ListOfPartialTrees&) const { 
+    gout << "We have not yet defined operator = in ListOfPartialTrees\n";
+    exit(0);
+  }
+
+  // operators
+  bool operator == (const ListOfPartialTrees&) const;
+  bool operator != (const ListOfPartialTrees&) const;
+
   inline const TreeOfPartials<T>& operator[](const int& i)        const 
     { return PartialTreeList[i]; }
 
@@ -104,7 +115,10 @@ public:
   gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
   gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
   gVector<T> ValuesOfRootPolys(const gVector<T>&)                 const;
+
+friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
 };
+*/
 
 /*
    The main constructor for this takes a gPolyList<T>.  The list must
