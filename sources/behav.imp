@@ -112,18 +112,44 @@ Action *PureBehavProfile<T>::Get(Infoset *infoset) const
   return (*profile[infoset->GetPlayer()->GetNumber()])[infoset->GetNumber()];
 }
 
+/*
 template <class T>
-void PureBehavProfile<T>::Payoff(Node *n, T prob, gArray<T> &payoff) const
+void PureBehavProfile<T>::Payoff(const Node *n, 
+				 const int &pl, 
+				 const T prob, 
+				       T &payoff) const
 {
-  if (n->GetOutcome())
-    for (int pl = 1; pl <= E->NumPlayers(); pl++)
+  if (n->IsTerminal())
+    payoff += prob * (*payoffs)(n->GetOutcome()->GetNumber(), pl);
+  
+  if (n->IsNonterminal() && n->GetPlayer()->IsChance())
+    for (int i = 1; i <= n->NumChildren(); i++) {
+      Payoff(n->GetChild(i), pl,
+	     prob * (T) E->GetChanceProb(n->GetInfoset(), i), payoff);
+    }
+  else if (n->IsNonterminal())
+    Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()), pl,
+	   prob, payoff);
+}
+*/
+
+// The following could be shortened by using the player-specific one above.
+// Whether this would be more efficient is unknown. - AMM 7.6.98
+
+template <class T>
+void PureBehavProfile<T>::Payoff(const Node *n, 
+				 const T prob, 
+				       gArray<T> &payoff) const
+{
+  if (n->IsTerminal())
+    for (int pl = 1; pl <= E->NumPlayers(); pl++) 
       payoff[pl] += prob * (*payoffs)(n->GetOutcome()->GetNumber(), pl);
   
-  if (n->GetInfoset() && n->GetPlayer()->IsChance())
+  if (n->IsNonterminal() && n->GetPlayer()->IsChance())
     for (int i = 1; i <= n->NumChildren(); i++)
       Payoff(n->GetChild(i),
 	     prob * (T) E->GetChanceProb(n->GetInfoset(), i), payoff);
-  else if (n->GetInfoset())
+  else if (n->IsNonterminal())
     Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
 	   prob, payoff);
 }
@@ -142,6 +168,23 @@ void PureBehavProfile<T>::InfosetProbs(Node *n, T prob, gPVector<T> &probs) cons
   }
 }
 
+/*
+template <class T> T
+PureBehavProfile<T>::Payoff(const Node *n, const int &pl) const
+{
+  T answer(0);
+  Payoff(n,pl,(T)1,answer);
+  return answer;
+}
+
+template <class T> T
+PureBehavProfile<T>::Payoff(const int &pl) const
+{
+  T answer(0);
+  Payoff(E->RootNode(),pl,(T)1,answer);
+  return answer;
+}
+*/
 
 template <class T>
 void PureBehavProfile<T>::Payoff(gArray<T> &payoff) const

@@ -31,17 +31,24 @@ template class gArray<gArray<Action *> *>;
 template class gArray<EFOutcome *>;
 template class gBlock<EFOutcome *>;
 
+template class gArray<gBlock<bool> >;
+template class gBlock<gBlock<bool> >;
+
+
 class EFActionSet;
-class EFActionArrays;
+class EFActionArray;
 
 template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
 template class gArray<EFActionSet *>;
-template class gArray<EFActionArrays *>;
+template class gArray<EFActionArray *>;
 //template class gArray<gBlock <Action *> *>;
 //template class gArray<gArray <Action *> *>;
 #include "glist.imp"
 
 template class gList<Node *>;
+template class gList<const Node *>;
+template gOutput &operator<<(gOutput &, const gList<const Node *> &);
+template class gList<Infoset *>;
 
 
 #ifdef __GNUG__
@@ -106,6 +113,14 @@ void Infoset::RemoveAction(int which)
   delete actions.Remove(which);
   for (; which <= actions.Length(); which++)
     actions[which]->number = which;
+}
+
+const gList<const Node *> Infoset::ListOfMembers(void) const
+{
+  gList<const Node *> answer;
+  for (int i = 1; i <= members.Length(); i++) 
+    answer += members[i];
+  return answer;
 }
 
 //------------------------------------------------------------------------
@@ -581,6 +596,27 @@ EFPlayer *Efg::NewPlayer(void)
   return ret;
 }
 
+Infoset* Efg::GetInfosetByIndex(const int &pl, const int &iset) const
+{
+  return GetInfosetByIndex(Players()[pl],iset);
+}
+
+gBlock<Infoset *> Efg::Infosets() const
+{
+  gBlock<Infoset *> answer;
+
+  gArray<EFPlayer *> p = Players();
+  int i;
+  for (i = 1; i <= p.Length(); i++) {
+    gArray<Infoset *> infosets_for_player = p[i]->Infosets();
+    int j;
+    for (j = 1; j <= infosets_for_player.Length(); j++)
+      answer += infosets_for_player[j];
+  }
+
+  return answer;
+}
+
 int Efg::NumOutcomes(void) const
 { return outcomes.Length(); }
 
@@ -687,6 +723,75 @@ bool Efg::IsPredecessor(const Node *n, const Node *of) const
   while (of && n != of)    of = of->parent;
 
   return (n == of);
+}
+
+gList<Node*> Efg::Children(const Node& n) const
+{
+  gList<Node*> answer;
+
+  int i;
+  for (i = 1; i <= n.NumChildren(); i++)
+    answer += n.GetChild(i);
+
+  return answer;
+}
+
+void Efg::DescendantNodesRECURSION(const Node* n, 
+				   const EFSupport& supp,
+				   gList<const Node*>& current) const
+{
+  current += n;
+  if (n->IsNonterminal()) {
+    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
+    for (int i = 1; i <= actions.Length(); i++) {
+      const Node* newn = n->GetChild(actions[i]);
+      DescendantNodesRECURSION(newn,supp,current);
+    }
+  }
+}
+
+void Efg::NonterminalDescendantsRECURSION(const Node* n, 
+					  const EFSupport& supp,
+					  gList<const Node*>& current) const
+{
+  if (n->IsNonterminal()) {
+    current += n;
+    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
+    for (int i = 1; i <= actions.Length(); i++) {
+      const Node* newn = n->GetChild(actions[i]);
+      DescendantNodesRECURSION(newn,supp,current);
+    }
+  }
+}
+
+gList<const Node*> 
+Efg::DescendantNodes(const Node& n, const EFSupport& supp) const
+{
+  gList<const Node*> answer;
+  DescendantNodesRECURSION(&n,supp,answer);
+  return answer;
+}
+
+gList<const Node*> 
+Efg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
+{
+  gList<const Node*> answer;
+  NonterminalDescendantsRECURSION(&n,supp,answer);
+  return answer;
+}
+
+gList<Infoset*> Efg::DescendantInfosets(const Node& n, 
+					const EFSupport& supp) const
+{
+  gList<Infoset*> answer;
+  gList<const Node*> nodelist = NonterminalDescendants(n,supp);
+  int i;
+  for (i = 1; i <= nodelist.Length(); i++) {
+      Infoset* iset = nodelist[i]->GetInfoset();
+      if (!answer.Contains(iset))
+	answer += iset;
+  }
+  return answer;
 }
 
 EFOutcome *Efg::NewOutcome(int index)

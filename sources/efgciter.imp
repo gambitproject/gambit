@@ -10,8 +10,43 @@ EfgContIter::EfgContIter(const EFSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
     _efg(&s.Game()), _support(s),
     _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
     _payoff(_efg->NumPlayers())
 {
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
+      active_for_pl[iset] = true;
+      _num_active_infosets[pl]++;
+    }
+    _is_active += active_for_pl;
+  }
+  First();
+}
+
+EfgContIter::EfgContIter(const EFSupport &s, const gList<Infoset *>& active)
+  : _frozen_pl(0), _frozen_iset(0),
+    _efg(&s.Game()), _support(s),
+    _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
+    _payoff(_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
+      if ( active.Contains(_efg->GetInfosetByIndex(pl,iset)) ) {
+	active_for_pl[iset] = true;
+	_num_active_infosets[pl]++;
+      }
+      else
+	active_for_pl[iset] = false;
+    }
+    _is_active += active_for_pl;
+  }
   First();
 }
 
@@ -66,44 +101,30 @@ void EfgContIter::Freeze(int pl, int iset)
 int EfgContIter::NextContingency(void)
 {
   int pl = _efg->NumPlayers();
-
-
-  while (pl > 0 && _efg->Players()[pl]->NumInfosets() == 0)
+  while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
-
   if (pl == 0)   return 0;
-
   int iset = _efg->Players()[pl]->NumInfosets();
     
-  while (true)   {
-    if (pl == _frozen_pl && iset == _frozen_iset)  {
-      if (iset == 1)  {
-	do  {
-	  --pl;
-	}  while (pl > 0 && _efg->Players()[pl]->NumInfosets() == 0);
+  while (true) {
 
-	if (pl == 0)   return 0;
-	iset = _efg->Players()[pl]->NumInfosets();
+    if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
+      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
+	_current(pl, iset) += 1;
+	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	return 1;
       }
-      else
-	iset--;
-    }
-
-    if (_current(pl, iset) < _support.NumActions(pl, iset))  {
-      _current(pl, iset) += 1;
-      _profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
-      return 1;
-    }
-
-    _current(pl, iset) = 1;
-    _profile.Set(_support.Actions(pl, iset)[1]);
-
+      else {
+	_current(pl, iset) = 1;
+	_profile.Set(_support.Actions(pl, iset)[1]);
+      }
+    
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
-      }  while (pl > 0 && _efg->Players()[pl]->NumInfosets() == 0);
-
+      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      
       if (pl == 0)   return 0;
       iset = _efg->Players()[pl]->NumInfosets();
     }
@@ -119,6 +140,148 @@ gNumber EfgContIter::Payoff(int pl) const
 }
 
 void EfgContIter::Dump(gOutput &f) const
+{
+  _current.Dump(f);
+}
+
+
+
+
+EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
+  : _frozen_pl(0), _frozen_iset(0),
+    _efg(&s.Game()), _support(s),
+    _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
+    _payoff(_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
+      active_for_pl[iset] = true;
+      _num_active_infosets[pl]++;
+    }
+    _is_active += active_for_pl;
+  }
+  First();
+}
+
+EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
+				   const gList<const Infoset *>& active)
+  : _frozen_pl(0), _frozen_iset(0),
+    _efg(&s.Game()), _support(s),
+    _profile(s.Game()), _current(s.Game().NumInfosets()),
+    _is_active(),
+    _num_active_infosets(_efg->NumPlayers()),
+    _payoff(_efg->NumPlayers())
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++) {
+    _num_active_infosets[pl] = 0;
+    gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
+      if ( active.Contains(_efg->GetInfosetByIndex(pl,iset)) ) {
+	active_for_pl[iset] = true;
+	_num_active_infosets[pl]++;
+      }
+      else
+	active_for_pl[iset] = false;
+    }
+    _is_active += active_for_pl;
+  }
+  First();
+}
+
+EfgConditionalContIter::~EfgConditionalContIter()
+{ }
+
+
+void EfgConditionalContIter::First(void)
+{
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
+      if (pl != _frozen_pl && iset != _frozen_iset)   {
+	      _current(pl, iset) = 1;
+      	_profile.Set(_support.Actions(pl, iset)[1]);
+      }
+  }
+}
+
+void EfgConditionalContIter::Set(int pl, int iset, int act)
+{
+  if (pl != _frozen_pl || iset != _frozen_iset)   return;
+
+  _current(pl, iset) = act;
+  _profile.Set(_support.Actions(pl, iset)[act]);
+}
+
+int EfgConditionalContIter::Next(int pl, int iset)
+{
+  if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
+
+  const gArray<Action *> &actions = _support.Actions(pl, iset);
+  
+  if (_current(pl, iset) == actions.Length())   {
+    _current(pl, iset) = 1;
+    _profile.Set(actions[1]);
+    return 0;
+  }
+
+  _current(pl, iset)++;
+  _profile.Set(actions[_current(pl, iset)]);
+  return 1;
+}
+  
+
+void EfgConditionalContIter::Freeze(int pl, int iset)
+{
+  _frozen_pl = pl;
+  _frozen_iset = iset;
+  First();
+}
+
+int EfgConditionalContIter::NextContingency(void)
+{
+  int pl = _efg->NumPlayers();
+  while (pl > 0 && _num_active_infosets[pl] == 0)
+    --pl;
+  if (pl == 0)   return 0;
+  int iset = _efg->Players()[pl]->NumInfosets();
+    
+  while (true) {
+
+    if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
+      if (_current(pl, iset) < _support.NumActions(pl, iset))  {
+	_current(pl, iset) += 1;
+	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
+	return 1;
+      }
+      else {
+	_current(pl, iset) = 1;
+	_profile.Set(_support.Actions(pl, iset)[1]);
+      }
+    
+    iset--;
+    if (iset == 0)  {
+      do  {
+	--pl;
+      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      
+      if (pl == 0)   return 0;
+      iset = _efg->Players()[pl]->NumInfosets();
+    }
+  }
+
+  return 0;
+}
+
+gNumber EfgConditionalContIter::Payoff(int pl) const
+{
+  _profile.Payoff(_payoff);
+  return _payoff[pl];
+}
+
+void EfgConditionalContIter::Dump(gOutput &f) const
 {
   _current.Dump(f);
 }

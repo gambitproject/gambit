@@ -9,8 +9,15 @@
 #include "rational.h"
 #include "gstatus.h"
 
+// With strong set to false, the following routine returns true 
+// if action a weakly dominates b.  With strong set to true, true is 
+// returned when a yields a strictly greater payoff, regardless of
+// others' behavior, which means that the infoset must be reached with
+// positive probability in every play of the game.
+
 bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,gStatus &status)
 {
+
   EfgContIter A(S), B(S);
     
     A.Freeze(pl, iset);
@@ -25,7 +32,6 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
 	if (ap <= bp)  return false;
 	A.NextContingency();
 			} while (B.NextContingency() && !status.Get());
-
 			return true;
 		}
 
@@ -40,6 +46,68 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
 		} while (B.NextContingency() && !status.Get());
 
 		return (!equal);
+}
+
+// With strong set to false, the following routine returns true 
+// if action a weakly dominates b.  This is the same as the routine 
+// above, but the procedure is more efficient.  With strong set to true,
+// the following returns true when, conditional on any node in the
+// infoset having been reached, a yields a strictly higher payoff.
+
+bool ConditionallyDominates(const EFSupport &S, 
+			    int pl, 
+			    int iset, 
+			    int a, int b, 
+			    bool strong,
+			    gStatus &status)
+{
+  const Action *aAct = S.Actions(pl,iset)[a];
+  const Action *bAct = S.Actions(pl,iset)[b];
+  const EFSupportWithActiveNodes SAct(S);
+
+  bool equal = true;
+
+  const Infoset *infoset = S.Game().GetInfosetByIndex(pl,iset);
+
+  gList<const Node *> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+
+  if (nodelist.Length() == 0)
+    nodelist = infoset->ListOfMembers();  // This may not be a good idea
+
+  for (int n = 1; n <= nodelist.Length(); n++) {
+    gList<const Infoset *> L = S.ReachableInfosets(nodelist[n],aAct);
+    L += S.ReachableInfosets(nodelist[n],bAct);
+    L.RemoveRedundancies();
+    // Get lists of descendant infosets, say LA and LB.  Let L be the union.
+    EfgConditionalContIter A(S,L), B(S,L);
+    
+    //    A.Freeze(pl, iset);  //  Should be unnecessary?
+    A.Set(pl, iset, a);
+    //    B.Freeze(pl, iset);
+    B.Set(pl, iset, b);
+    
+    if (strong)  {
+      do  {
+	gRational ap = A.Payoff(pl);  // Should be conditioned on the node?
+	gRational bp = B.Payoff(pl);
+	if (ap <= bp)  return false;
+	A.NextContingency();
+      } while (B.NextContingency() && !status.Get());
+      
+      return true;
+    }
+    
+    do   {
+      gRational ap = A.Payoff(pl);
+      gRational bp = B.Payoff(pl);
+      if (ap < bp)   return false;
+      else if (ap > bp)  equal = false;
+      A.NextContingency();
+    } while (B.NextContingency() && !status.Get());
+  }
+  
+  if (strong) return true;
+  else return (!equal);
 }
 
 
@@ -102,9 +170,11 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 }
 
 
-EFSupport *ComputeDominated(EFSupport &S, bool strong,
-					const gArray<int> &players,
-					gOutput & /* tracefile */, gStatus &status)
+EFSupport *ComputeDominated(EFSupport &S, 
+			    bool strong,
+			    const gArray<int> &players,
+			    gOutput & /* tracefile */, 
+			    gStatus &status)
 {
   EFSupport *T = new EFSupport(S);
   bool any = false;

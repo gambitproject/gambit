@@ -11,7 +11,7 @@ template class BehavNode<gRational>;
 template class BehavProfile<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
 
-void PureBehavProfile<gRational>::Payoff(Node *n, gRational prob, 
+void PureBehavProfile<gRational>::Payoff(const Node *n, const gRational prob, 
 					 gArray<gRational> &payoff) const
 {
   if (n->GetOutcome())
