@@ -4,7 +4,15 @@
 \newcommand{\ed}{\end{description}}
 \begin{document}
 
-\title{Gambit Command Language}
+\title{GAMBIT COMMAND LANGUAGE}
+
+\author{Richard D. McKelvey et al\\
+Division of Humanities \& Social Sciences\\
+California Institute of Technology}
+
+\date{\today\\ \time \jobname.tex}
+
+\maketitle
 
 \section*{General Overview}
 
@@ -604,7 +612,6 @@ StopWatch[] match.
 
 \item
 \begin{verbatim}
-
 ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
 	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
 \end{verbatim}
@@ -620,7 +627,7 @@ with an integer value one greater than that of the previous strategy
 set.  Therefore, if no dominated strategies are found, the return value
 is equal to 1.
 \item
-[Required paremeters:]
+[Required paremeters:]\hfil\null
 	
 \bd
 \item
@@ -1460,7 +1467,6 @@ the nodes from the first information set are to be moved.
 
 \item
 \begin{verbatim}
-
 MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
 \end{verbatim}
 
