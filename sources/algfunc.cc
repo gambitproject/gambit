@@ -916,9 +916,9 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  //------------------------- LCPSolve -------------------------//
+  //------------------------- LcpSolve -------------------------//
 
-  FuncObj = new FuncDescObj("LCPSolve");
+  FuncObj = new FuncDescObj("LcpSolve");
   FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);

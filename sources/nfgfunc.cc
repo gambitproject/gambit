@@ -257,7 +257,7 @@ Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRation
 
 
 
-//-------------------------- LPSolve -----------------------------//
+//-------------------------- LpSolve -----------------------------//
 
 #include "csum.h"
 
@@ -663,7 +663,7 @@ Portion *GSM_GridSolveRational(Portion **param)
 */
 
 
-//---------------------------- LCPSolve -------------------------//
+//---------------------------- LcpSolve -------------------------//
 
 #include "lemke.h"
 
@@ -1474,9 +1474,9 @@ void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  //------------------------ LPSolve -----------------------//
+  //------------------------ LpSolve -----------------------//
 
-  FuncObj = new FuncDescObj("LPSolve");
+  FuncObj = new FuncDescObj("LpSolve");
   FuncObj->SetFuncInfo(GSM_ConstSumFloat, 3);
   FuncObj->SetParamInfo(GSM_ConstSumFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
