@@ -42,6 +42,32 @@ Portion *GSM_AddStrategy(Portion **param)
   return por;
 }
 
+//---------------
+// CompressNfg
+//---------------
+
+template <class T> Nfg<T> *CompressNfg(const Nfg<T> &, const NFSupport &);
+
+Portion *GSM_CompressNfg_Float(Portion **param)
+{
+  Nfg<double> *N = (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
+  if (&S->BelongsTo() != N)  
+    return new ErrorPortion("Support must belong to normal form");
+
+  return new NfgValPortion(CompressNfg(*N, *S));
+}
+
+Portion *GSM_CompressNfg_Rational(Portion **param)
+{
+  Nfg<gRational> *N = (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
+  if (&S->BelongsTo() != N)  
+    return new ErrorPortion("Support must belong to normal form");
+
+  return new NfgValPortion(CompressNfg(*N, *S));
+}
+  
 extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
 				   const gArray<int> &players,
 				   gOutput &tracefile);
@@ -571,6 +597,20 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("CompressNfg", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressNfg_Float,
+				       porNFG_FLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_CompressNfg_Rational,
+				       porNFG_RATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("support", porNF_SUPPORT));
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("ElimAllDom", 2);
