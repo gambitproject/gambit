@@ -101,12 +101,8 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
     m_treeDisplay = 0;
   }
 
-  if (p_doc->GetGame()->NumPlayers() == 2) {
-    m_tablePanel = new gbtTableSchelling(this, p_doc);
-  }
-  else {
-    m_tablePanel = new gbtTableMatrix(this, p_doc);
-  }
+  m_matrixPanel = new gbtTableMatrix(this, p_doc);
+  m_schellingPanel = new gbtTableSchelling(this, p_doc);
 
   m_algorithmPanel = new gbtNashPanel(this, p_doc);
   m_qrePanel = new gbtQrePanel(this, p_doc);
@@ -115,8 +111,14 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   if (m_treeDisplay) {
     sizer->Add(m_treeDisplay, 1, wxEXPAND, 0);
   }
-  sizer->Add(m_tablePanel, 1, wxEXPAND, 0);
-  sizer->Show(m_tablePanel, !m_doc->GetGame()->HasTree());
+
+  sizer->Add(m_matrixPanel, 1, wxEXPAND, 0);
+  sizer->Show(m_matrixPanel, 
+	      !m_doc->GetGame()->HasTree() && m_doc->GetGame()->NumPlayers() > 2);
+
+  sizer->Add(m_schellingPanel, 1, wxEXPAND, 0);
+  sizer->Show(m_schellingPanel, 
+	      !m_doc->GetGame()->HasTree() && m_doc->GetGame()->NumPlayers() == 2);
 
   sizer->Add(m_algorithmPanel, 1, wxEXPAND, 0);
   sizer->Show(m_algorithmPanel, false);
@@ -549,7 +551,8 @@ void gbtGameFrame::OnViewEfg(wxCommandEvent &)
   }
   
   GetSizer()->Show(m_treeDisplay, true);
-  GetSizer()->Show(m_tablePanel, false);
+  GetSizer()->Show(m_schellingPanel, false);
+  GetSizer()->Show(m_matrixPanel, false);
   GetMenuBar()->Check(GBT_MENU_VIEW_NFG, false);
   Layout();
   OnUpdate();
@@ -557,14 +560,20 @@ void gbtGameFrame::OnViewEfg(wxCommandEvent &)
 
 void gbtGameFrame::OnViewNfg(wxCommandEvent &)
 {
-  if (GetSizer()->IsShown(m_tablePanel)) {
+  if (GetSizer()->IsShown(m_matrixPanel) ||
+      GetSizer()->IsShown(m_schellingPanel)) {
     GetMenuBar()->Check(GBT_MENU_VIEW_NFG, true);
     return;
   }
 
   // At this point, we know that there must be a tree view to hide
   GetSizer()->Show(m_treeDisplay, false);
-  GetSizer()->Show(m_tablePanel, true);
+  if (m_doc->GetGame()->NumPlayers() == 2) {
+    GetSizer()->Show(m_schellingPanel, true);
+  }
+  else {
+    GetSizer()->Show(m_matrixPanel, true);
+  }
   GetMenuBar()->Check(GBT_MENU_VIEW_EFG, false);
   Layout();
   OnUpdate();
@@ -627,6 +636,19 @@ void gbtGameFrame::OnUpdate(void)
 			      m_doc->GetGame()->GetLabel().c_str()));
   }
 
+  if (GetSizer()->IsShown(m_schellingPanel) && 
+      m_doc->GetGame()->NumPlayers() > 2) {
+    GetSizer()->Show(m_schellingPanel, false);
+    GetSizer()->Show(m_matrixPanel, true);
+    Layout();
+  }
+  else if (GetSizer()->IsShown(m_matrixPanel) &&
+	   m_doc->GetGame()->NumPlayers() == 2) {
+    GetSizer()->Show(m_matrixPanel, false);
+    GetSizer()->Show(m_schellingPanel, true);
+    Layout();
+  }
+
   GetMenuBar()->Enable(GBT_MENU_FILE_EXPORT,
 		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
   GetMenuBar()->Enable(wxID_PRINT_SETUP,
@@ -657,7 +679,8 @@ void gbtGameFrame::OnUpdate(void)
 		      m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
   GetMenuBar()->Enable(GBT_MENU_VIEW_EFG, m_doc->GetGame()->HasTree());
   GetMenuBar()->Check(GBT_MENU_VIEW_NFG, 
-		      GetSizer()->IsShown(m_tablePanel));
+		      GetSizer()->IsShown(m_matrixPanel) ||
+		      GetSizer()->IsShown(m_schellingPanel));
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN,
 		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT,

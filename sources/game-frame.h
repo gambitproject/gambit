@@ -35,7 +35,7 @@ class gbtTreeDisplay;
 
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
-  wxPanel *m_tablePanel, *m_algorithmPanel, *m_qrePanel;
+  wxPanel *m_matrixPanel, *m_schellingPanel, *m_algorithmPanel, *m_qrePanel;
   gbtTreeDisplay *m_treeDisplay;
 
   // Printing state... should be part of document instead?

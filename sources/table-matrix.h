@@ -39,7 +39,7 @@ private:
   gbtPlayerLabelCtrl *m_rowPlayer, *m_colPlayer;
   gbtTableChoiceCtrl *m_tableChoiceCtrl;
 
-  gbtArray<int> m_contingency;
+  gbtBlock<int> m_contingency;
 
   // Implementation of gbtGameView members
   void OnUpdate(void);
@@ -57,7 +57,7 @@ public:
   int GetRowPlayer(void) const { return m_rowPlayer->GetPlayer(); }
   int GetColPlayer(void) const { return m_colPlayer->GetPlayer(); }
   int GetTablePlayer(int index) const;
-  int GetStrategy(int pl) const { return m_contingency[pl]; }
+  int GetStrategy(int pl) const;
 
   void SetStrategy(int pl, int st);
 

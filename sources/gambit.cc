@@ -48,6 +48,12 @@ bool gbtApplication::OnInit(void)
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
   gbtGame nfg = NewNfg(dim);
   nfg->SetLabel("Untitled normal form game");
+  nfg->GetPlayer(1)->SetLabel("Player1");
+  nfg->GetPlayer(1)->GetStrategy(1)->SetLabel("Strategy1");
+  nfg->GetPlayer(1)->GetStrategy(2)->SetLabel("Strategy2");
+  nfg->GetPlayer(2)->SetLabel("Player2");
+  nfg->GetPlayer(2)->GetStrategy(1)->SetLabel("Strategy1");
+  nfg->GetPlayer(2)->GetStrategy(2)->SetLabel("Strategy2");
   (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
   return true;
 }

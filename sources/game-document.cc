@@ -158,10 +158,38 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
   UpdateViews(); 
 }
 
+
+void gbtGameDocument::NewPlayer(void)
+{
+  SaveUndo("adding player");
+  m_playerColors.Append(s_defaultColors[m_game->NumPlayers() % 8]);
+  gbtGamePlayer player = m_game->NewPlayer();
+  player->SetLabel(wxString::Format("Player%d", m_game->NumPlayers()).c_str());
+  if (!m_game->HasTree()) {
+    player->GetInfoset(1)->GetAction(1)->SetLabel("Strategy1");
+  }
+
+  m_modified = true;
+  UpdateViews();
+}
+
 void gbtGameDocument::InsertStrategy(int p_player, int p_where)
 {
   SaveUndo("adding strategy");
-  m_game->GetPlayer(p_player)->GetInfoset(1)->InsertAction(p_where);
+  gbtGamePlayer player = m_game->GetPlayer(p_player);
+  gbtGameAction action = player->GetInfoset(1)->InsertAction(p_where);
+  action->SetLabel(wxString::Format("Strategy%d",
+				    player->NumStrategies()).c_str());
+				    
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::SetStrategyLabel(gbtGameStrategy p_strategy,
+				       const std::string &p_label)
+{
+  SaveUndo("setting strategy label");
+  p_strategy->SetLabel(p_label);
   m_modified = true;
   UpdateViews();
 }

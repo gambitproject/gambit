@@ -73,7 +73,10 @@ public:
   void SetPayoff(gbtGameOutcome p_outcome,
 		 const gbtGamePlayer &p_player, const gbtRational &p_value);
 
+  void NewPlayer(void);
   void InsertStrategy(int player, int where);
+  void SetStrategyLabel(gbtGameStrategy p_strategy, 
+			const std::string &p_label);
 
 
   // Various properties of the document

@@ -144,6 +144,7 @@ class gbtTableChoiceCtrl : public wxPanel {
 private:
   gbtTableMatrix *m_parent;
   gbtTablePlayerCtrl **m_players;
+  int m_numPlayers;
 
   void OnPaint(wxPaintEvent &);
   void OnSize(wxSizeEvent &);
@@ -164,8 +165,9 @@ END_EVENT_TABLE()
 gbtTableChoiceCtrl::gbtTableChoiceCtrl(gbtTableMatrix *p_parent)
   : wxPanel(p_parent, -1), m_parent(p_parent)
 {
-  m_players = new gbtTablePlayerCtrl *[m_parent->GetDocument()->GetGame()->NumPlayers() - 2];
-  for (int pl = 0; pl < m_parent->GetDocument()->GetGame()->NumPlayers() - 2; pl++) {
+  m_numPlayers = m_parent->GetDocument()->GetGame()->NumPlayers();
+  m_players = new gbtTablePlayerCtrl *[m_numPlayers - 2];
+  for (int pl = 0; pl < m_numPlayers - 2; pl++) {
     m_players[pl] = new gbtTablePlayerCtrl(this, p_parent, pl + 1);
   }
   SetToolTip(_("Other players' choices determining the displayed table"));
@@ -202,7 +204,20 @@ void gbtTableChoiceCtrl::OnPaint(wxPaintEvent &)
 
 void gbtTableChoiceCtrl::OnSize(wxSizeEvent &)
 {
-  for (int pl = 0; pl < m_parent->GetDocument()->GetGame()->NumPlayers() - 2; pl++) {
+  if (m_numPlayers != m_parent->GetDocument()->GetGame()->NumPlayers()) {
+    for (int pl = 0; pl < m_numPlayers - 2; pl++) {
+      delete m_players[pl];
+    }
+    delete m_players;
+    
+    m_numPlayers = m_parent->GetDocument()->GetGame()->NumPlayers();
+    m_players = new gbtTablePlayerCtrl *[m_numPlayers - 2];
+    for (int pl = 0; pl < m_numPlayers - 2; pl++) {
+      m_players[pl] = new gbtTablePlayerCtrl(this, m_parent, pl + 1);
+    }
+  }
+
+  for (int pl = 0; pl < m_numPlayers - 2; pl++) {
     m_players[pl]->SetSize(100, (pl * 20) + 1, 
 			   GetClientSize().GetWidth() - 101, 20); 
   }
@@ -232,6 +247,7 @@ private:
 
   // Event handlers
   void OnLabelRightDown(wxSheetEvent &);
+  void OnMenuAddPlayer(wxCommandEvent &);
   void OnMenuRowStrategyBefore(wxCommandEvent &);
   void OnMenuRowStrategyAfter(wxCommandEvent &);
   void OnMenuColStrategyBefore(wxCommandEvent &);
@@ -246,6 +262,7 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+const int GBT_MENU_ADD_PLAYER = 2999;
 const int GBT_SHEET_MATRIX = 3000;
 const int GBT_MENU_ROW_STRATEGY_BEFORE = 3001;
 const int GBT_MENU_ROW_STRATEGY_AFTER = 4001;
@@ -255,6 +272,7 @@ const int GBT_MENU_COL_STRATEGY_AFTER = 6001;
 BEGIN_EVENT_TABLE(gbtMatrixSheet, wxSheet)
   EVT_SHEET_LABEL_RIGHT_DOWN(GBT_SHEET_MATRIX,
 			     gbtMatrixSheet::OnLabelRightDown)
+  EVT_MENU(GBT_MENU_ADD_PLAYER, gbtMatrixSheet::OnMenuAddPlayer)
   EVT_MENU_RANGE(GBT_MENU_ROW_STRATEGY_BEFORE,
 		 GBT_MENU_ROW_STRATEGY_BEFORE + 1000,
 		 gbtMatrixSheet::OnMenuRowStrategyBefore)
@@ -296,7 +314,10 @@ gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
 void gbtMatrixSheet::OnLabelRightDown(wxSheetEvent &p_event)
 {
   wxMenu *menu = new wxMenu;
-  if (IsRowLabelCell(p_event.GetCoords())) {
+  if (IsCornerLabelCell(p_event.GetCoords())) {
+    menu->Append(GBT_MENU_ADD_PLAYER, "Add a new player");
+  }
+  else if (IsRowLabelCell(p_event.GetCoords())) {
     menu->Append(GBT_MENU_ROW_STRATEGY_BEFORE + p_event.GetRow() + 1, 
 		 "Add strategy before");
     menu->Append(GBT_MENU_ROW_STRATEGY_AFTER + p_event.GetRow() + 1, 
@@ -312,6 +333,11 @@ void gbtMatrixSheet::OnLabelRightDown(wxSheetEvent &p_event)
   }
 
   PopupMenu(menu, p_event.GetPosition().x, p_event.GetPosition().y);
+}
+
+void gbtMatrixSheet::OnMenuAddPlayer(wxCommandEvent &)
+{
+  m_doc->NewPlayer();
 }
 
 void gbtMatrixSheet::OnMenuRowStrategyBefore(wxCommandEvent &p_event)
@@ -428,35 +454,59 @@ wxString gbtMatrixSheet::GetCellValue(const wxSheetCoords &p_coords)
 {
   const gbtGame &game = m_doc->GetGame();
 
-  if (IsRowLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() + 1)->GetLabel().c_str();
-  }
-  else if (IsColLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / m_doc->GetGame()->NumPlayers() + 1)->GetLabel().c_str();
-  }
-  else if (IsCornerLabelCell(p_coords)) {
-    return "";
-  }
+  try {
+    if (IsRowLabelCell(p_coords)) {
+      return m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() + 1)->GetLabel().c_str();
+    }
+    else if (IsColLabelCell(p_coords)) {
+      return m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / m_doc->GetGame()->NumPlayers() + 1)->GetLabel().c_str();
+    }
+    else if (IsCornerLabelCell(p_coords)) {
+      return "";
+    }
 
-  int rowStrat = p_coords.GetRow();
-  int colStrat = p_coords.GetCol() / m_doc->GetGame()->NumPlayers();
-  int player = p_coords.GetCol() % m_doc->GetGame()->NumPlayers() + 1;
+    int rowStrat = p_coords.GetRow();
+    int colStrat = p_coords.GetCol() / m_doc->GetGame()->NumPlayers();
+    int player = p_coords.GetCol() % m_doc->GetGame()->NumPlayers() + 1;
 
-  gbtGameContingency profile = game->NewContingency();
-  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    profile->SetStrategy(game->GetPlayer(pl)->GetStrategy(m_view->GetStrategy(pl)));
+    gbtGameContingency profile = game->NewContingency();
+    for (int pl = 1; pl <= game->NumPlayers(); pl++) {
+      profile->SetStrategy(game->GetPlayer(pl)->GetStrategy(m_view->GetStrategy(pl)));
+    }
+
+    profile->SetStrategy(game->GetPlayer(m_view->GetRowPlayer())->GetStrategy(rowStrat + 1));
+    profile->SetStrategy(game->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
+
+    return ToText(profile->GetPayoff(game->GetPlayer(player))).c_str();
   }
-
-  profile->SetStrategy(game->GetPlayer(m_view->GetRowPlayer())->GetStrategy(rowStrat + 1));
-  profile->SetStrategy(game->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
-
-  return ToText(profile->GetPayoff(game->GetPlayer(player))).c_str();
+  catch (gbtException &) {
+    printf("exception getting cell value %d %d\n", p_coords.GetRow(), p_coords.GetCol());
+    return wxT("");
+  }
 }
 
 void gbtMatrixSheet::SetCellValue(const wxSheetCoords &p_coords,
 			    const wxString &p_value)
 {
-  if (IsLabelCell(p_coords))  return;
+  if (IsCornerLabelCell(p_coords))  {
+    return;
+  }
+  else if (IsRowLabelCell(p_coords)) {
+    int rowStrat = p_coords.GetRow();
+    gbtGame game = m_doc->GetGame();
+    gbtGamePlayer player = game->GetPlayer(m_view->GetRowPlayer());
+    m_doc->SetStrategyLabel(player->GetStrategy(rowStrat + 1),
+			    p_value.c_str());
+    return;
+  }
+  else if (IsColLabelCell(p_coords)) {
+    gbtGame game = m_doc->GetGame();
+    int colStrat = p_coords.GetCol() / game->NumPlayers();
+    gbtGamePlayer player = game->GetPlayer(m_view->GetColPlayer());
+    m_doc->SetStrategyLabel(player->GetStrategy(colStrat + 1),
+			    p_value.c_str());
+    return;
+  }
 
   int rowStrat = p_coords.GetRow();
   int colStrat = p_coords.GetCol() / m_doc->GetGame()->NumPlayers();
@@ -535,11 +585,12 @@ void gbtMatrixSheet::OnUpdate(void)
 { 
   BeginBatch();
   int stratRows = GetNumberRows();
-  int stratCols = GetNumberCols() / m_doc->GetGame()->NumPlayers();
+  int stratCols = GetNumberCols();
 
   const gbtGame &game = m_doc->GetGame();
 
   int dim = game->GetPlayer(m_view->GetRowPlayer())->NumStrategies();
+	     
   if (dim < stratRows) {
     DeleteRows(0, stratRows - dim);
   }
@@ -547,12 +598,13 @@ void gbtMatrixSheet::OnUpdate(void)
     InsertRows(0, dim - stratRows); 
   }
 
-  dim = game->GetPlayer(m_view->GetColPlayer())->NumStrategies();
+  dim = (game->GetPlayer(m_view->GetColPlayer())->NumStrategies() *
+	 game->NumPlayers());
   if (dim < stratCols) {
-    DeleteCols(0, game->NumPlayers() * (stratCols - dim));
+    DeleteCols(0, stratCols - dim);
   }
   else if (dim > stratCols) {
-    InsertCols(0, game->NumPlayers() * (dim - stratCols));
+    InsertCols(0, dim - stratCols);
   }
 
   AutoSizeRows();
@@ -600,6 +652,15 @@ int gbtTableMatrix::GetTablePlayer(int index) const
     }
   }
   return pl;
+}
+
+int gbtTableMatrix::GetStrategy(int pl) const 
+{ 
+  while (m_contingency.Length() < m_doc->GetGame()->NumPlayers()) {
+    const_cast<gbtBlock<int> &>(m_contingency).Append(1);
+  }
+
+  return m_contingency[pl]; 
 }
 
 void gbtTableMatrix::SetStrategy(int pl, int st)

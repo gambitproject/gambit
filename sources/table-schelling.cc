@@ -50,6 +50,7 @@ private:
 
   // Event handlers
   void OnLabelRightDown(wxSheetEvent &);
+  void OnMenuAddPlayer(wxCommandEvent &);
   void OnMenuRowStrategyBefore(wxCommandEvent &);
   void OnMenuRowStrategyAfter(wxCommandEvent &);
   void OnMenuColStrategyBefore(wxCommandEvent &);
@@ -64,6 +65,7 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
+const int GBT_MENU_ADD_PLAYER = 2999;
 const int GBT_SHEET_SCHELLING = 3000;
 const int GBT_MENU_ROW_STRATEGY_BEFORE = 3001;
 const int GBT_MENU_ROW_STRATEGY_AFTER = 4001;
@@ -73,6 +75,7 @@ const int GBT_MENU_COL_STRATEGY_AFTER = 6001;
 BEGIN_EVENT_TABLE(gbtSchellingMatrix, wxSheet)
   EVT_SHEET_LABEL_RIGHT_DOWN(GBT_SHEET_SCHELLING,
 			     gbtSchellingMatrix::OnLabelRightDown)
+  EVT_MENU(GBT_MENU_ADD_PLAYER, gbtSchellingMatrix::OnMenuAddPlayer)
   EVT_MENU_RANGE(GBT_MENU_ROW_STRATEGY_BEFORE,
 		 GBT_MENU_ROW_STRATEGY_BEFORE + 1000,
 		 gbtSchellingMatrix::OnMenuRowStrategyBefore)
@@ -150,7 +153,10 @@ void gbtSchellingMatrix::OnUpdate(void)
 void gbtSchellingMatrix::OnLabelRightDown(wxSheetEvent &p_event)
 {
   wxMenu *menu = new wxMenu;
-  if (IsRowLabelCell(p_event.GetCoords())) {
+  if (IsCornerLabelCell(p_event.GetCoords())) {
+    menu->Append(GBT_MENU_ADD_PLAYER, "Add a new player");
+  }
+  else if (IsRowLabelCell(p_event.GetCoords())) {
     menu->Append(GBT_MENU_ROW_STRATEGY_BEFORE + (p_event.GetRow() / 2) + 1, 
 		 "Add strategy before");
     menu->Append(GBT_MENU_ROW_STRATEGY_AFTER + (p_event.GetRow() / 2) + 1, 
@@ -164,6 +170,11 @@ void gbtSchellingMatrix::OnLabelRightDown(wxSheetEvent &p_event)
   }
 
   PopupMenu(menu, p_event.GetPosition().x, p_event.GetPosition().y);
+}
+
+void gbtSchellingMatrix::OnMenuAddPlayer(wxCommandEvent &)
+{
+  m_doc->NewPlayer();
 }
 
 void gbtSchellingMatrix::OnMenuRowStrategyBefore(wxCommandEvent &p_event)
@@ -233,7 +244,25 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
 void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
 				      const wxString &p_value)
 {
-  if (IsLabelCell(p_coords))  return;
+  if (IsCornerLabelCell(p_coords))  {
+    return;
+  }
+  else if (IsRowLabelCell(p_coords)) {
+    int rowStrat = p_coords.GetRow() / 2;
+    gbtGame game = m_doc->GetGame();
+    gbtGamePlayer player = game->GetPlayer(m_view->GetRowPlayer());
+    m_doc->SetStrategyLabel(player->GetStrategy(rowStrat + 1),
+			    p_value.c_str());
+    return;
+  }
+  else if (IsColLabelCell(p_coords)) {
+    gbtGame game = m_doc->GetGame();
+    int colStrat = p_coords.GetCol() / 2;
+    gbtGamePlayer player = game->GetPlayer(m_view->GetColPlayer());
+    m_doc->SetStrategyLabel(player->GetStrategy(colStrat + 1),
+			    p_value.c_str());
+    return;
+  }
 
   int rowStrat = p_coords.GetRow() / 2;
   int colStrat = p_coords.GetCol() / 2;
