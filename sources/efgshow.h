@@ -168,7 +168,6 @@ public:
   // Solution routines
   void RemoveSolutions(void);
   void ChangeSolution(int soln);
-  BehavSolution CreateSolution(void);
   int CurrentSolution(void) const { return cur_soln; }
 
   void OnSelectedMoved(const Node *n);
@@ -177,10 +176,8 @@ public:
   void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
 
   // Solution interface to normal form
-  void SolutionToEfg(const BehavProfile<gNumber> &s, bool set = false);
-  const Efg *InterfaceObjectEfg(void) { return &m_efg; }
+  void AddSolution(const BehavProfile<gNumber> &, bool map);
   FullEfg *Game(void) { return &m_efg; }
-  wxFrame *Frame(void);
 
   gNumber ActionProb(const Node *n, int br);
 

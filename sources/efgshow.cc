@@ -308,18 +308,13 @@ void EfgShow::RemoveSolutions(void)
   OnSelectedMoved(0); // update the node inspect window if any
 }
 
-BehavSolution EfgShow::CreateSolution(void)
-{
-  return BehavSolution(BehavProfile<gNumber>(*m_currentSupport));
-}
-
 void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
   BehavSolution profile = BehavProfile<gNumber>(EFSupport(m_efg));
 
   dialogBehavEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    m_solutionTable->Append(dialog.GetProfile());
+    AddSolution(dialog.GetProfile(), true);
     ChangeSolution(m_solutionTable->Length());
   }
 }
@@ -330,7 +325,7 @@ void EfgShow::OnProfilesClone(wxCommandEvent &)
 
   dialogBehavEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    m_solutionTable->Append(dialog.GetProfile());
+    AddSolution(dialog.GetProfile(), true);
     ChangeSolution(m_solutionTable->Length());
   }
 }
@@ -372,20 +367,16 @@ void EfgShow::OnProfilesDelete(wxCommandEvent &)
 //                     ACTUAL SOLUTION FUNCTIONS
 //************************************************************************
 
-
-// SolutionToEfg: overrides the corresponding member of the EfgNfgInterface,
-// to allow the NormalForm to send its solutions here
-
-void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s, bool set)
+void EfgShow::AddSolution(const BehavProfile<gNumber> &p_profile, bool p_map)
 {
-  m_solutionTable->Append(s);
+  m_solutionTable->Append(p_profile);
 
-  if (set) {
-    cur_soln = m_solutionTable->VisibleLength();
-    wxClientDC dc(m_treeWindow);
-    m_treeWindow->PrepareDC(dc);
-    m_treeWindow->OnDraw(dc);
+  if (m_efg.AssociatedNfg() && p_map) {
+    m_parent->GetWindow(m_efg.AssociatedNfg())->AddSolution(MixedProfile<gNumber>(p_profile), false);
   }
+
+  m_solutionTable->UpdateValues();
+  UpdateMenus();
 }
 
 // Solution access for TreeWindow
@@ -462,21 +453,10 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action)
   return -1;
 }
 
-//************************************************************************
-//                     INTERFACE TO SOLUTION FUNCTIONS
-//************************************************************************
-
-
 const gText &EfgShow::Filename(void) const
 {
     return filename;
 }
-
-wxFrame *EfgShow::Frame(void)
-{
-    return (wxFrame *)this;
-}
-
 
 
 void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
@@ -1662,7 +1642,10 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
     else
       m_treeWindow->SubgameUnmarkAll();
 
-    *m_solutionTable += solver->Solve(*m_currentSupport);
+    gList<BehavSolution> solutions = solver->Solve(*m_currentSupport);
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -1758,7 +1741,10 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
       if (solver->MarkSubgames())
 	m_treeWindow->SubgameMarkAll();
       wxBeginBusyCursor();
-      *m_solutionTable += solver->Solve(*m_currentSupport);
+      gList<BehavSolution> solutions = solver->Solve(*m_currentSupport);
+      for (int soln = 1; soln <= solutions.Length(); soln++) {
+	AddSolution(solutions[soln], true);
+      }
       wxEndBusyCursor();
     }
   }
@@ -1793,7 +1779,12 @@ void EfgShow::OnSolveNormalReduced(wxCommandEvent &)
   Nfg *nfg = MakeReducedNfg(*m_currentSupport);
   if (nfg) {
     NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
+    nfgShow->SetFileName("");
     m_parent->AddGame(&m_efg, nfg, nfgShow);
+
+    for (int i = 1; i <= m_solutionTable->Length(); i++) {
+      nfgShow->AddSolution(MixedProfile<gNumber>((*m_solutionTable)[i]), false);
+    }
   }
   else {
     wxMessageBox("Could not create normal form game.\n",

@@ -122,6 +122,7 @@ public:
   const gList<MixedSolution> &Solutions(void) const;
 
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);
+  void AddSolution(const MixedSolution &, bool);
 
   void SetFileName(const gText &s);
   const gText &Filename(void) const { return m_fileName; }

@@ -80,6 +80,9 @@ public:
   void RemoveGame(Efg *);
   void RemoveGame(Nfg *);
 
+  EfgShow *GetWindow(const Efg *);
+  NfgShow *GetWindow(const Nfg *);
+
   void SetActiveWindow(EfgShow *);
   void SetActiveWindow(NfgShow *);
 

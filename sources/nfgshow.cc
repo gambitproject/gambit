@@ -19,6 +19,7 @@
 
 #include "efg.h"
 #include "efgutils.h"
+#include "behavsol.h"
 #include "nfplayer.h"
 #include "nfdom.h"
 #include "nfgciter.h"
@@ -27,6 +28,7 @@
 #include "nfgsolng.h"
 
 #include "gambit.h"
+#include "efgshow.h"
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgeditsupport.h"
@@ -833,7 +835,10 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
 
   try {
     NFSupport support = solver->Eliminate(*m_currentSupport);
-    *m_solutionTable += solver->Solve(support);
+    gList<MixedSolution> solutions = solver->Solve(support);
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -844,13 +849,6 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   delete solver;
 
   if (old_max_soln != m_solutionTable->Length()) {
-    // Now, transfer the NEW solutions to extensive form if requested
-    /*
-    if (NSD.GetExtensive()) {
-      for (int i = old_max_soln+1; i <= solns.Length(); i++) 
-    SolutionToExtensive(solns[i]);
-    }
-    */
     if (!m_table->ShowProbs()) {
       m_table->ToggleProbs();
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
@@ -912,7 +910,10 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
 
   try {
     NFSupport support = solver->Eliminate(*m_currentSupport);
-    *m_solutionTable += solver->Solve(support);
+    gList<MixedSolution> solutions = solver->Solve(support);
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -923,13 +924,6 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   delete solver;
 
   if (old_max_soln != m_solutionTable->Length()) {
-    // Now, transfer the NEW solutions to extensive form if requested
-    /*
-    if (NSD.GetExtensive()) {
-      for (int i = old_max_soln+1; i <= solns.Length(); i++) 
-    SolutionToExtensive(solns[i]);
-    }
-    */
     if (!m_table->ShowProbs()) {
       m_table->ToggleProbs();
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
@@ -997,7 +991,7 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
 
   dialogMixedEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    m_solutionTable->Append(dialog.GetProfile());
+    AddSolution(dialog.GetProfile(), true);
     ChangeSolution(m_solutionTable->Length());
     UpdateMenus();
   }
@@ -1009,7 +1003,7 @@ void NfgShow::OnProfilesClone(wxCommandEvent &)
   
   dialogMixedEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
-    m_solutionTable->Append(dialog.GetProfile());
+    AddSolution(dialog.GetProfile(), true);
     ChangeSolution(m_solutionTable->Length());
     UpdateMenus();
   }
@@ -1121,6 +1115,16 @@ void NfgShow::SetStrategy(int p_player, int p_strategy)
 void NfgShow::UpdateProfile(gArray<int> &profile)
 {
   //  m_table->OnChangeValues();
+}
+
+void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
+{
+  m_solutionTable->Append(p_profile);
+  if (m_nfg.AssociatedEfg() && p_map) {
+    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddSolution(BehavProfile<gNumber>(p_profile), false);
+  }
+  m_solutionTable->UpdateValues();
+  UpdateMenus();
 }
 
 void NfgShow::ChangeSolution(int sol)

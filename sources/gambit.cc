@@ -685,6 +685,26 @@ void GambitFrame::RemoveGame(Nfg *p_nfg)
   UpdateGameList();
 }
 
+EfgShow *GambitFrame::GetWindow(const Efg *p_efg)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_efg == p_efg) {
+      return m_gameList[i]->m_efgShow;
+    }
+  }
+  return 0;
+}
+
+NfgShow *GambitFrame::GetWindow(const Nfg *p_nfg)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_nfg == p_nfg) {
+      return m_gameList[i]->m_nfgShow;
+    }
+  }
+  return 0;
+}
+
 void GambitFrame::SetActiveWindow(EfgShow *p_efgShow)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
