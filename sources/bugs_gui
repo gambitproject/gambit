@@ -167,14 +167,6 @@ recall them now.
 
 //--------------------------------
 
-Bug D36: Formatting of floating point numbers very bad 
-
-On Liap and QRE algorithms, the formatting of the lambda and tolerance
-parameters is bad.  We agreed to change the tolerance to an integer,
-and the lambda parameters to text strings.
-
-//--------------------------------
-
 Bug D37:  Bug in interactive selection of subgame solutions
 
 The following causes a crash:
