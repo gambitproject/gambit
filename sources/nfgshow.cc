@@ -51,6 +51,11 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   nf.SetIsDirty(false);
 }
 
+NfgShow::~NfgShow()
+{ 
+
+}
+
 void NfgShow::UpdateVals(void)
 {
   if (!(nf_iter.Support() == *cur_sup)) 
@@ -453,6 +458,7 @@ void NfgShow::OnOk(void)
   }
 
   spread->Close();
+  draw_settings.SaveSettings();
   delete &nf;
 }
 
@@ -1052,33 +1058,6 @@ int NfgShow::SolveElimDom(void)
   return 0;
 }
 
-#ifdef UNUSED
-// Support Inspect
-void NfgShow::ChangeSupport(int what)
-{
-  if (what == CREATE_DIALOG && !support_dialog) {
-    int cur = supports.Find(cur_sup);
-    support_dialog = new dialogNfgSupportInspect(supports, cur,
-						 this, spread);
-  }
-  
-  if (what == DESTROY_DIALOG && support_dialog) {
-    delete support_dialog;
-    support_dialog = 0;
-  }
-
-  if (what == UPDATE_DIALOG) {
-    if (!support_dialog)  return;   // just ignore silently
-
-    if (supports[support_dialog->Current()] != cur_sup) {
-      ChangeSolution(0);  // chances are, the current solution will not work.
-      cur_sup = supports[support_dialog->Current()];
-      SetPlayers(pl1, pl2);
-    }
-  }
-}
-#endif  // UNUSED
-
 void NfgShow::SupportNew(void)
 {
   NFSupport newSupport(nf);
@@ -1403,40 +1382,20 @@ int NfgGUI::GetNFParams(gArray<int> &dimensionality, gArray<gText> &names, wxFra
 NormalDrawSettings::NormalDrawSettings(void)
   : output_precision(2)
 {
-  char *defaults_file = gambitApp.ResourceFile();
-  wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, defaults_file);
+  wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, 
+		gambitApp.ResourceFile());
 }
 
-
-void NormalDrawSettings::OutcomeOptions(void)
+NormalDrawSettings::~NormalDrawSettings()
 {
-  MyDialogBox *options_dialog = new MyDialogBox(0, "Outcome Display");
-  wxStringList *opt_list = new wxStringList("Payoff Values", "Outcome Name", 0);
-  char *opt_str = new char[25];
-    
-  if (opt_list->Nth(outcome_disp) == NULL) {
-    guiExceptionDialog("Invalid value for NFOutcome-Display; check \"gambit.ini\" file.\n",
-		       main_gambit_frame);
-  }
-  else {
-    strcpy(opt_str, (char *)opt_list->Nth(outcome_disp)->Data());
-    options_dialog->Add(wxMakeFormString("Display as", &opt_str, wxFORM_RADIOBOX,
-					 new wxList(wxMakeConstraintStrings(opt_list), 0)));
-    options_dialog->Go();
-    
-    if (options_dialog->Completed() == wxOK) {
-      char *defaults_file = gambitApp.ResourceFile();
-      outcome_disp = wxListFindString(opt_list, opt_str);
-      wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
-    }
-  }
-
-  delete options_dialog;
-  delete opt_str;
-  delete opt_list;
+  SaveSettings();
 }
 
-
+void NormalDrawSettings::SaveSettings(void) const
+{
+  wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp,
+		  gambitApp.ResourceFile());
+}
 
 //**********************************************************************
 //                       NORMAL SPREAD
@@ -1684,20 +1643,21 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 		     "Solve with a particular algorithm");
 
   
-  wxMenu *inspect_menu = new wxMenu;
-  inspect_menu->Append(NFG_INSPECT_SOLUTIONS, "&Solutions",
-		       "Inspect solutions");
-  inspect_menu->Append(NFG_INSPECT_DOMINANCE, "&Dominance",
-		       "Display dominance information", TRUE);
-  inspect_menu->Append(NFG_INSPECT_PROBABILITIES, "&Probabilities",
-		       "Display solution probabilities", TRUE);
-  inspect_menu->Append(NFG_INSPECT_VALUES, "&Values",
-		       "Display strategy values", TRUE);
-  inspect_menu->Append(NFG_INSPECT_GAMEINFO,  "Game&Info",
-		       "Display information about the game");
+  wxMenu *viewMenu = new wxMenu;
+  viewMenu->Append(NFG_VIEW_SOLUTIONS, "&Solutions",
+		   "Display solutions");
+  viewMenu->Append(NFG_VIEW_DOMINANCE, "&Dominance",
+		   "Display dominance information", TRUE);
+  viewMenu->Append(NFG_VIEW_PROBABILITIES, "&Probabilities",
+		   "Display solution probabilities", TRUE);
+  viewMenu->Append(NFG_VIEW_VALUES, "&Values",
+		   "Display strategy values", TRUE);
+  viewMenu->Append(NFG_VIEW_OUTCOMES, "&Outcomes",
+		   "Display outcome names", TRUE);
+  viewMenu->Append(NFG_VIEW_GAMEINFO, "Game&Info",
+		   "Display information about the game");
   
   wxMenu *prefs_menu = new wxMenu;
-  prefs_menu->Append(NFG_PREFS_OUTCOMES_MENU, "&Outcomes", "Configure outcome display");
   prefs_menu->Append(OPTIONS_MENU,            "&Display",  "Configure display options");
   prefs_menu->Append(NFG_DISPLAY_COLORS,      "Colors",    "Set Player Colors");
   prefs_menu->Append(NFG_DISPLAY_ACCELS,      "Accels",    "Edit Accelerators");
@@ -1711,9 +1671,16 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   tmp_menubar->Append(edit_menu,     "&Edit");
   tmp_menubar->Append(supports_menu, "S&upports");
   tmp_menubar->Append(solve_menu,    "&Solve");
-  tmp_menubar->Append(inspect_menu,  "&Inspect");
+  tmp_menubar->Append(viewMenu,  "&View");
   tmp_menubar->Append(prefs_menu,    "&Prefs");
   tmp_menubar->Append(help_menu,     "&Help");
+
+  if (parent->getNormalDrawSettings().OutcomeDisp()) {
+    viewMenu->Check(NFG_VIEW_OUTCOMES, TRUE);
+  }
+  else {
+    viewMenu->Check(NFG_VIEW_OUTCOMES, FALSE);
+  }
   
   return tmp_menubar;
 }
@@ -1732,8 +1699,8 @@ void NormalSpread::UpdateMenus(void)
   menu->Enable(NFG_SOLVE_CUSTOM_LP, nfg.NumPlayers() == 2 && IsConstSum(nfg));
   menu->Enable(NFG_SOLVE_CUSTOM_LCP, nfg.NumPlayers() == 2);
 
-  menu->Enable(NFG_INSPECT_PROBABILITIES, parent->NumSolutions() > 0);
-  menu->Enable(NFG_INSPECT_VALUES, parent->NumSolutions() > 0);
+  menu->Enable(NFG_VIEW_PROBABILITIES, parent->NumSolutions() > 0);
+  menu->Enable(NFG_VIEW_VALUES, parent->NumSolutions() > 0);
 }
 
 Bool NormalSpread::OnClose(void)
@@ -1828,7 +1795,7 @@ void NormalSpread::MakeProbDisp(void)
   SetLabelRow(row, "Prob");
   SetLabelCol(col, "Prob");
   features.prob = 1;
-  GetMenuBar()->Check(NFG_INSPECT_PROBABILITIES, TRUE);
+  GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, TRUE);
 }
 
 
@@ -1841,7 +1808,7 @@ void NormalSpread::RemoveProbDisp(void)
     DelCol(col);
     features.prob = 0;
   }
-  GetMenuBar()->Check(NFG_INSPECT_PROBABILITIES, FALSE);
+  GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, FALSE);
 }
 
 
@@ -1863,7 +1830,7 @@ void NormalSpread::MakeDomDisp(void)
   SetLabelCol(col, "Domin");
   features.dom = 1;
 
-  GetMenuBar()->Check(NFG_INSPECT_DOMINANCE, TRUE);
+  GetMenuBar()->Check(NFG_VIEW_DOMINANCE, TRUE);
 }
 
 
@@ -1876,7 +1843,7 @@ void NormalSpread::RemoveDomDisp(void)
     DelCol(col);
     features.dom = 0;
   }
-  GetMenuBar()->Check(NFG_INSPECT_DOMINANCE, FALSE);
+  GetMenuBar()->Check(NFG_VIEW_DOMINANCE, FALSE);
 }
 
 
@@ -1897,7 +1864,7 @@ void NormalSpread::MakeValDisp(void)
   SetLabelRow(row, "Value");
   SetLabelCol(col, "Value");
   features.val = 1;
-  GetMenuBar()->Check(NFG_INSPECT_VALUES, TRUE);
+  GetMenuBar()->Check(NFG_VIEW_VALUES, TRUE);
 }
 
 
@@ -1910,7 +1877,7 @@ void NormalSpread::RemoveValDisp(void)
     DelCol(col);
     features.val = 0;
   }
-  GetMenuBar()->Check(NFG_INSPECT_VALUES, FALSE);
+  GetMenuBar()->Check(NFG_VIEW_VALUES, FALSE);
 }
 
 
@@ -1948,10 +1915,6 @@ void NormalSpread::OnMenuCommand(int id)
 {
   try {
     switch (id) {
-    case NFG_PREFS_OUTCOMES_MENU: 
-      parent->OutcomeOptions();
-      break;
-
     case NFG_SOLVE_CUSTOM_ENUMPURE:
     case NFG_SOLVE_CUSTOM_ENUMMIXED:
     case NFG_SOLVE_CUSTOM_LCP:
@@ -1972,10 +1935,10 @@ void NormalSpread::OnMenuCommand(int id)
       parent->EditAccelerators();
       break;
 
-    case NFG_INSPECT_SOLUTIONS:
+    case NFG_VIEW_SOLUTIONS:
       parent->InspectSolutions(CREATE_DIALOG);
       break;
-    case NFG_INSPECT_DOMINANCE:
+    case NFG_VIEW_DOMINANCE:
       if (HaveDom()) {
 	RemoveDomDisp();
       }
@@ -1985,7 +1948,7 @@ void NormalSpread::OnMenuCommand(int id)
       parent->UpdateVals();
       Redraw();
       break;
-    case NFG_INSPECT_PROBABILITIES:
+    case NFG_VIEW_PROBABILITIES:
       if (HaveProbs()) {
 	RemoveProbDisp();
       }
@@ -1996,7 +1959,7 @@ void NormalSpread::OnMenuCommand(int id)
       parent->UpdateSoln();
       Redraw();
       break;
-    case NFG_INSPECT_VALUES:
+    case NFG_VIEW_VALUES:
       if (HaveVal()) {
 	RemoveValDisp();
       }
@@ -2007,7 +1970,16 @@ void NormalSpread::OnMenuCommand(int id)
       parent->UpdateSoln();
       Redraw();
       break;
-    case NFG_INSPECT_GAMEINFO:
+    case NFG_VIEW_OUTCOMES:
+      parent->OutcomeOptions();
+      if (parent->getNormalDrawSettings().OutcomeDisp()) {
+	GetMenuBar()->Check(NFG_VIEW_OUTCOMES, TRUE);
+      }
+      else {
+	GetMenuBar()->Check(NFG_VIEW_OUTCOMES, FALSE);
+      }
+      break;
+    case NFG_VIEW_GAMEINFO:
       parent->ShowGameInfo();
       break;
 
@@ -2155,7 +2127,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_STANDARD, ToolbarSolveBitmap);
-    AddTool(NFG_INSPECT_SOLUTIONS, ToolbarInspectBitmap);
+    AddTool(NFG_VIEW_SOLUTIONS, ToolbarInspectBitmap);
     AddSeparator();
     AddTool(OPTIONS_MENU, ToolbarOptionsBitmap);
     AddSeparator();

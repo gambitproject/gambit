@@ -29,6 +29,7 @@ protected:
 public:
     // Constructor
     GambitDrawSettings(void);
+    virtual ~GambitDrawSettings() { }
 
     // Controls the color each player gets
     void    SetPlayerColor(int pl, int cl);

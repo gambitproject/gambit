@@ -85,6 +85,8 @@ private:
 public:
   // Constructor
   NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
+  virtual ~NfgShow();
+
   void SetPlayers(int _pl1, int _pl2, bool first_time = false);
 
   // Print takes care of ALL output needs.  Currently it supports
@@ -116,11 +118,8 @@ public:
   void OutcomeDetach(void);
   void OutcomeLabel(void);
   void OutcomePayoffs(int st1, int st2, bool next = false);
-
-
   void OutcomeOptions(void)
-    {
-      draw_settings.OutcomeOptions();
+    { draw_settings.SetOutcomeDisp(1 - draw_settings.OutcomeDisp());
       UpdateVals();
     }
 

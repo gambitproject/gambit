@@ -39,13 +39,12 @@
 #define NFG_SOLVE_CUSTOM_QRE            507
 #define NFG_SOLVE_CUSTOM_QREGRID        508
 
-#define NFG_INSPECT_SOLUTIONS           101
-#define NFG_INSPECT_DOMINANCE           103
-#define NFG_INSPECT_PROBABILITIES       104
-#define NFG_INSPECT_VALUES              105
-#define NFG_INSPECT_GAMEINFO            155
-
-#define NFG_PREFS_OUTCOMES_MENU         350
+#define NFG_VIEW_SOLUTIONS              101
+#define NFG_VIEW_DOMINANCE              103
+#define NFG_VIEW_PROBABILITIES          104
+#define NFG_VIEW_VALUES                 105
+#define NFG_VIEW_OUTCOMES               350
+#define NFG_VIEW_GAMEINFO               155
 
 #define NFG_DISPLAY_COLORS              200
 #define NFG_DISPLAY_ACCELS              202
