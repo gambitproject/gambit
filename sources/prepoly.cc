@@ -177,7 +177,7 @@ exp_vect::exp_vect(const gSpace* p)
   for (int i = 1; i <= p->Dmnsn(); i++) components[i] = 0;
 }
 
-exp_vect::exp_vect(const gSpace* p, int& var, int& exp)
+exp_vect::exp_vect(const gSpace* p, const int& var, const int& exp)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = 0;

@@ -90,7 +90,7 @@ private:
 
 public:
   exp_vect(const gSpace*);
-  exp_vect(const gSpace*, int&, int&);   // x_i^j
+  exp_vect(const gSpace*, const int&, const int&);   // x_i^j
   exp_vect(const gSpace*, int*);
   exp_vect(const gSpace*, gVector<int>);
   exp_vect(const gSpace*, gArray<int>);
