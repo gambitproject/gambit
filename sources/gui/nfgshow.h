@@ -36,7 +36,7 @@ private:
   Nfg &m_nfg;
 
   NfgTable *m_table;
-  NfgProfileList *m_solutionTable;
+  NfgProfileList *m_profileTable;
   wxNotebook *m_infoNotebook;
 
   wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;
@@ -46,7 +46,7 @@ private:
 
   gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
-  int m_currentSolution;
+  int m_currentProfile;
 
   wxString m_filename;
 
@@ -123,7 +123,7 @@ private:
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
   void OnSetFocus(wxFocusEvent &);
-  void OnSolutionSelected(wxListEvent &);
+  void OnProfileSelected(wxListEvent &);
 
 public:
   NfgShow(Nfg &N, wxWindow *p_window);
@@ -135,12 +135,10 @@ public:
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
   
-  void ChangeSolution(int sol);
-
-  int CurrentSolution(void) const { return m_currentSolution; }
-  const gList<MixedSolution> &Solutions(void) const;
-
-  void AddSolution(const MixedSolution &, bool);
+  void ChangeProfile(int sol);
+  int CurrentProfile(void) const { return m_currentProfile; }
+  const gList<MixedSolution> &Profiles(void) const;
+  void AddProfile(const MixedSolution &, bool);
 
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
@@ -152,7 +150,7 @@ public:
 
   void SetPlayers(int, int);
   void SetProfile(const gArray<int> &);
-  gArray<int> GetProfile(void) const;
+  gArray<int> GetContingency(void) const;
 
   void OnOutcomesEdited(void);
 

@@ -161,12 +161,7 @@ public:
 
 void guiLcpEfg::SelectSolutions(int, const FullEfg &p_efg,
 				gList<BehavSolution> &p_solutions)
-{
-  if (m_selectSolutions) {
-    wxMessageBox("Someday, you'll be able to select solutions.\n"
-		 "For now, you just get them all!");
-  }
-}
+{ }
 
 class guiLcpNfg : public efgLcpNfgSolve {
 private:
@@ -186,12 +181,7 @@ public:
 
 void guiLcpNfg::SelectSolutions(int, const FullEfg &p_efg,
 				gList<BehavSolution> &p_solutions)
-{
-  if (m_selectSolutions) {
-    wxMessageBox("Someday, you'll be able to select solutions.\n"
-		 "For now, you just get them all!");
-  }
-}
+{ }
 
 //========================================================================
 //                         Top-level functions

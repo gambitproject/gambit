@@ -140,7 +140,7 @@ void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game().SetOutcome(m_parent->GetProfile(),
+    m_parent->Game().SetOutcome(m_parent->GetContingency(),
 				m_parent->Game().GetOutcome(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
@@ -148,7 +148,7 @@ void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 
 void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_parent->Game().SetOutcome(m_parent->GetProfile(), 0);
+  m_parent->Game().SetOutcome(m_parent->GetContingency(), 0);
   m_parent->OnOutcomesEdited();
 }
 

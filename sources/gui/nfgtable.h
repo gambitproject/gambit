@@ -17,7 +17,7 @@ private:
   bool m_editable, m_cursorMoving;
   int m_rowPlayer, m_colPlayer;
   NFSupport m_support;
-  MixedSolution *m_solution;
+  MixedSolution *m_profile;
 
   int m_showProb, m_showDom, m_showValue;
 
@@ -51,8 +51,8 @@ public:
   NfgTable(Nfg &, wxWindow *);
   virtual ~NfgTable() { }
 
-  void SetProfile(const gArray<int> &profile);
-  gArray<int> GetProfile(void) const;
+  void SetContingency(const gArray<int> &profile);
+  gArray<int> GetContingency(void) const;
 
   void SetStrategy(int p_player, int p_strategy);
   void SetPlayers(int p_rowPlayer, int p_colPlayer);
@@ -88,9 +88,9 @@ public:
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }
 
-  void SetSolution(const MixedSolution &);
-  const MixedSolution &GetSolution(void) const { return *m_solution; }
-  void ClearSolution(void);
+  void SetProfile(const MixedSolution &);
+  const MixedSolution &GetProfile(void) const { return *m_profile; }
+  void ClearProfile(void);
   
   void RefreshTable(void);
 

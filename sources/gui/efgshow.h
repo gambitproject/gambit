@@ -133,6 +133,7 @@ private:
   void OnProfilesRename(wxCommandEvent &);
   void OnProfilesEdit(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
+  void OnProfileSelected(wxListEvent &);
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 

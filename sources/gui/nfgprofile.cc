@@ -40,7 +40,6 @@ NfgProfileList::NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent)
   InsertColumn(3, "Perfect");
   InsertColumn(4, "Liap Value");
   InsertColumn(5, "Qre Lambda");
-  InsertColumn(6, "Qre Value");
 
   UpdateValues();
 }
@@ -52,26 +51,24 @@ void NfgProfileList::UpdateValues(void)
 {
   DeleteAllItems();
   for (int i = 1; i <= Length(); i++) {
-    const MixedSolution &solution = (*this)[i];
-    InsertItem(i - 1, (char *) solution.GetName());
-    SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
-    SetItem(i - 1, 2, (char *) ToText(solution.IsNash()));
-    SetItem(i - 1, 3, (char *) ToText(solution.IsPerfect()));
-    SetItem(i - 1, 4, (char *) ToText(solution.LiapValue()));
-    if (solution.Creator() == algorithmNfg_QRE) {
-      SetItem(i - 1, 5, (char *) ToText(solution.QreLambda()));
-      SetItem(i - 1, 6, (char *) ToText(solution.QreValue()));
+    const MixedSolution &profile = (*this)[i];
+    InsertItem(i - 1, (char *) profile.GetName());
+    SetItem(i - 1, 1, (char *) ToText(profile.Creator()));
+    SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
+    SetItem(i - 1, 3, (char *) ToText(profile.IsPerfect()));
+    SetItem(i - 1, 4, (char *) ToText(profile.LiapValue()));
+    if (profile.Creator() == algorithmNfg_QRE) {
+      SetItem(i - 1, 5, (char *) ToText(profile.QreLambda()));
     }
     else {
-      SetItem(i - 1, 5, "N/A");
-      SetItem(i - 1, 6, "N/A");
+      SetItem(i - 1, 5, "--");
     }
   }
 
   if (Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_parent->CurrentSolution() - 1;
+    item.m_itemId = m_parent->CurrentProfile() - 1;
     item.m_state = wxLIST_STATE_SELECTED;
     item.m_stateMask = wxLIST_STATE_SELECTED;
     SetItem(item);
@@ -102,10 +99,10 @@ int NfgProfileList::Append(const MixedSolution &p_solution)
 
 void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(NFG_PROFILES_CLONE, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(NFG_PROFILES_RENAME, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(NFG_PROFILES_EDIT, m_parent->CurrentSolution() > 0);
-  m_menu->Enable(NFG_PROFILES_DELETE, m_parent->CurrentSolution() > 0);
+  m_menu->Enable(NFG_PROFILES_CLONE, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(NFG_PROFILES_RENAME, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(NFG_PROFILES_EDIT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(NFG_PROFILES_DELETE, m_parent->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 

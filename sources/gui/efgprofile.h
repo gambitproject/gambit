@@ -1,39 +1,28 @@
 //
-// FILE: efgprofile.h -- Declaration of extensive form profile list
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Extensive form behavior profile window
 //
 
 #ifndef EFGPROFILE_H
 #define EFGPROFILE_H
 
-#include "wx/grid.h"
+#include "wx/listctrl.h"
 #include "efgshow.h"
-#include "behavfilter.h"
 
-class EfgProfileList : public wxGrid, public gList<BehavSolution> {
+class EfgProfileList : public wxListCtrl, public gList<BehavSolution> {
 private:
   EfgShow *m_parent;
   wxMenu *m_menu;
-  gBlock<int> m_displayOrder;
-
-protected:
-  BehavListFilter m_options;
-
-  // Private members
-  void Resort(void);
 
   // Event handlers
   void OnSortFilter(wxCommandEvent &);
-  void OnSelectCell(wxGridEvent &);
-  void OnLeftClick(wxGridEvent &);
-  void OnRightClick(wxGridEvent &);
-  void OnColumnClick(wxGridEvent &);
-  void OnColumnDoubleClick(wxGridEvent &);
+  void OnRightClick(wxMouseEvent &);
+  void OnColumnClick(wxListEvent &);
   
-  // Overriding this to turn off cell highlight
-  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
-
 public:
   EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~EfgProfileList();

@@ -153,12 +153,7 @@ public:
 
 void guiPolEnumEfg::SelectSolutions(int, const FullEfg &p_efg,
 				     gList<BehavSolution> &p_solutions)
-{
-  if (m_selectSolutions) {
-    wxMessageBox("Someday, you'll be able to select solutions.\n"
-		 "For now, you just get them all!");
-  }
-}
+{ }
 
 class guiPolEnumNfg : public efgPolEnumNfgSolve {
 private:
@@ -178,12 +173,7 @@ public:
 
 void guiPolEnumNfg::SelectSolutions(int, const FullEfg &p_efg,
 				     gList<BehavSolution> &p_solutions)
-{
-  if (m_selectSolutions) {
-    wxMessageBox("Someday, you'll be able to select solutions.\n"
-		 "For now, you just get them all!");
-  }
-}
+{ }
 
 //========================================================================
 //                         Top-level functions

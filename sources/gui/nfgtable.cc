@@ -103,7 +103,7 @@ wxString NfgGridTable::GetValue(int row, int col)
   int numColStrats = support.NumStrats(colPlayer);
 
   if (row < numRowStrats && col < numColStrats) {
-    gArray<int> strategy(m_table->GetProfile());
+    gArray<int> strategy(m_table->GetContingency());
     strategy[m_table->GetRowPlayer()] = row + 1;
     strategy[m_table->GetColPlayer()] = col + 1;
     
@@ -168,22 +168,22 @@ wxString NfgGridTable::GetValue(int row, int col)
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
     Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetSolution()(strategy)));
+    return ((char *) ToText(m_table->GetProfile()(strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
     Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetSolution()(strategy)));
+    return ((char *) ToText(m_table->GetProfile()(strategy)));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetSolution().Payoff(strategy->Player(), strategy)));
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->Player(), strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetSolution().Payoff(strategy->Player(), strategy)));
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->Player(), strategy)));
   }
 
   return "";
@@ -396,7 +396,7 @@ END_EVENT_TABLE()
 NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   : wxPanel(p_parent, -1), m_nfg(p_nfg), m_parent(p_parent), 
     m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
-    m_support(m_nfg), m_solution(0),
+    m_support(m_nfg), m_profile(0),
     m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
@@ -420,16 +420,16 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   Show(true);
 }
 
-void NfgTable::SetProfile(const gArray<int> &p_profile)
+void NfgTable::SetContingency(const gArray<int> &p_profile)
 {
   m_grid->SetGridCursor(p_profile[GetRowPlayer()] - 1,
 			p_profile[GetColPlayer()] - 1);
   m_grid->Refresh();
 }
 
-gArray<int> NfgTable::GetProfile(void) const
+gArray<int> NfgTable::GetContingency(void) const
 {
-  return ((NfgShow *) m_parent)->GetProfile();
+  return ((NfgShow *) m_parent)->GetContingency();
 }
 
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
@@ -558,23 +558,24 @@ void NfgTable::SetSupport(const NFSupport &p_support)
 {
   m_support = p_support;
   SetPlayers(m_rowPlayer, m_colPlayer);
-  m_grid->Refresh();
+  RefreshTable();
 }
 
-void NfgTable::SetSolution(const MixedSolution &p_solution)
+void NfgTable::SetProfile(const MixedSolution &p_solution)
 {
-  if (m_solution) {
-    delete m_solution;
+  if (m_profile) {
+    delete m_profile;
   }
-  m_solution = new MixedSolution(p_solution);
-  m_grid->Refresh();
+  m_profile = new MixedSolution(p_solution);
+  RefreshTable();
 }
 
-void NfgTable::ClearSolution(void)
+void NfgTable::ClearProfile(void)
 {
-  if (m_solution) {
-    delete m_solution;
-    m_solution = 0;
+  if (m_profile) {
+    delete m_profile;
+    m_profile = 0;
+    RefreshTable();
   }
 }
 

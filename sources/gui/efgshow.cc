@@ -155,6 +155,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPROFILES_EDIT, EfgShow::OnProfilesEdit)
   EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesEdit)
   EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
+  EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnProfileSelected)
   EVT_SET_FOCUS(EfgShow::OnFocus)
   EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
@@ -239,7 +240,7 @@ EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
 
   m_profileTable = new EfgProfileList(this, m_solutionSashWindow);
-  m_profileTable->Show(true);
+  m_profileTable->Show(false);
   m_solutionSashWindow->Show(false);
 
   m_efg.SetIsDirty(false);
@@ -296,7 +297,7 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   m_profileTable->Append(p_profile);
 
   if (m_efg.AssociatedNfg() && p_map) {
-    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddSolution(MixedProfile<gNumber>(p_profile), false);
+    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(MixedProfile<gNumber>(p_profile), false);
   }
 
   m_profileTable->UpdateValues();
@@ -1672,8 +1673,8 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &)
     }
     
     ChangeProfile(m_profileTable->Length());
-    UpdateMenus();
-    if (!m_solutionSashWindow->IsShown())  {
+    if (!m_solutionSashWindow->IsShown()) {
+      UpdateMenus();
       m_profileTable->Show(true);
       m_solutionSashWindow->Show(true);
       GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
@@ -1838,7 +1839,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     wxGetApp().AddGame(&m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_profileTable->Length(); i++) {
-      nfgShow->AddSolution(MixedProfile<gNumber>((*m_profileTable)[i]), false);
+      nfgShow->AddProfile(MixedProfile<gNumber>((*m_profileTable)[i]), false);
     }
   }
   else {
@@ -1963,6 +1964,14 @@ void EfgShow::OnProfilesDelete(wxCommandEvent &)
   ChangeProfile(m_currentProfile);
 }
 
+void EfgShow::OnProfileSelected(wxListEvent &p_event)
+{
+  m_currentProfile = p_event.GetIndex() + 1;
+  m_treeWindow->RefreshLabels();
+  if (m_navigateWindow) {
+    m_navigateWindow->Set(m_cursor);
+  }
+}
 
 //----------------------------------------------------------------------
 //                  EfgShow: Non-menu event handlers
