@@ -108,7 +108,7 @@ void PureBehavProfile<T>::Set(const EFPlayer *player,
 }
 
 template <class T>
-Action *PureBehavProfile<T>::GetAction(Infoset *infoset) const
+const Action *PureBehavProfile<T>::GetAction(const Infoset *infoset) const
 {
   return (*profile[infoset->GetPlayer()->GetNumber()])[infoset->GetNumber()];
 }
@@ -143,22 +143,37 @@ void PureBehavProfile<T>::IndPayoff(const Node *n,
 // Whether this would be more efficient in fact is unknown. - AMM 7.6.98
 
 template <class T>
+const T PureBehavProfile<T>::Payoff(const EFOutcome *o, const int &pl) const
+{
+  return (*payoffs)(o->GetNumber(), pl);
+}
+
+template <class T>
+const T PureBehavProfile<T>::Payoff(const Node *n, const int &pl) const
+{
+  gArray<T> payoff(E->NumPlayers());
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    payoff[i] = (T)0;
+  Payoff(n, (T)1, payoff);
+  return payoff[pl];
+}
+
+template <class T>
 void PureBehavProfile<T>::Payoff(const Node *n, 
 				 const T prob, 
 				       gArray<T> &payoff) const
 {
   if (n->IsTerminal())
     for (int pl = 1; pl <= E->NumPlayers(); pl++) 
-      payoff[pl] += prob * (*payoffs)(n->GetOutcome()->GetNumber(), pl);
+      payoff[pl] += prob * Payoff(n->GetOutcome(),pl);
   
   else
-    for (int i = 1; i <= n->NumChildren(); i++)
-      if (n->GetPlayer()->IsChance())
+    if (n->GetPlayer()->IsChance())	
+      for (int i = 1; i <= n->NumChildren(); i++)
 	Payoff(n->GetChild(i),
 	       prob * (T) E->GetChanceProb(n->GetInfoset(), i), payoff);
-      else
-	Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
-	       prob, payoff);
+    else
+      Payoff(n->GetChild(GetAction(n->GetInfoset())), prob, payoff);
 }
 
 template <class T>

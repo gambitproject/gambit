@@ -270,9 +270,11 @@ template <class T> class PureBehavProfile   {
     void Set(const EFPlayer *, const gArray<Action *> &);
 
     // Information
-    Action *GetAction(Infoset *) const;
-
-  //    T    Payoff(const Node *, const int &pl) const;
+    const Action *GetAction(const Infoset *) const;
+    
+    const T Payoff(const EFOutcome *, const int &pl) const;
+    
+    const T Payoff(const Node *, const int &pl) const;
   //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;

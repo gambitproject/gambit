@@ -77,39 +77,30 @@ bool ConditionallyDominates(const EFSupport &S,
     nodelist = infoset->ListOfMembers();  // This may not be a good idea
 
   for (int n = 1; n <= nodelist.Length(); n++) {
-    gList<const Infoset *> L = S.ReachableInfosets(nodelist[n],aAct);
+
+    gList<const Infoset *> L;
+    L += S.ReachableInfosets(nodelist[n],aAct);
     L += S.ReachableInfosets(nodelist[n],bAct);
     L.RemoveRedundancies();
-    // Get lists of descendant infosets, say LA and LB.  Let L be the union.
+
     EfgConditionalContIter A(S,L), B(S,L);
-    
-    //    A.Freeze(pl, iset);  //  Should be unnecessary?
     A.Set(pl, iset, a);
-    //    B.Freeze(pl, iset);
     B.Set(pl, iset, b);
     
-    if (strong)  {
-      do  {
-	status.Get();
-	gRational ap = A.Payoff(pl);  // Should be conditioned on the node?
-	gRational bp = B.Payoff(pl);
-	if (ap <= bp)  return false;
-	A.NextContingency();
-      } while (B.NextContingency());
-      
-      return true;
-    }
-    
-    do   {
+    do  {
       status.Get();
-      gRational ap = A.Payoff(pl);
-      gRational bp = B.Payoff(pl);
-      if (ap < bp)   return false;
-      else if (ap > bp)  equal = false;
-      A.NextContingency();
-    } while (B.NextContingency());
+      gRational ap = A.Payoff(nodelist[n],pl);  
+      gRational bp = B.Payoff(nodelist[n],pl);
+      // gRational ap = A.Payoff(pl);  
+      // gRational bp = B.Payoff(pl);
+      if (strong)
+	{ if (ap <= bp)  return false; }
+      else
+	if (ap < bp)   return false;
+	else if (ap > bp)  equal = false;
+    } while (A.NextContingency() && B.NextContingency());
   }
-  
+    
   if (strong) return true;
   else return (!equal);
 }
