@@ -196,6 +196,10 @@ template <class T> class ExtForm : public BaseExtForm   {
 		    gPVector<T> &probs) const;
 };
 
+#include "rational.h"
+#include "gametree.h"
+#include "efgyacc.h"
+
 
 #endif   //# EXTFORM_H
 
