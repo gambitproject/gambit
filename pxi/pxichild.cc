@@ -16,6 +16,8 @@
 #include "wx/colordlg.h"
 #include "wx/printdlg.h"
 
+#include "gui/valinteger.h"
+
 #include "pxichild.h"
 #include "dlgpxi.h"
 
@@ -174,6 +176,15 @@ void PxiChild::MakeToolbar(void)
 }
 
 //=========================================================================
+//              class PxiChild: General private members
+//=========================================================================
+
+PxiCanvas *PxiChild::GetShownCanvas(void) const
+{
+  return ((PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection()));
+}
+
+//=========================================================================
 //                class PxiChild: Menu event handlers
 //=========================================================================
 
@@ -197,8 +208,7 @@ void PxiChild::OnFilePageSetup(wxCommandEvent &)
 
 void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 {
-  PxiCanvas *canvas =
-    (PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection());
+  PxiCanvas *canvas = GetShownCanvas();
 
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview 
@@ -220,8 +230,7 @@ void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 
 void PxiChild::OnFilePrint(wxCommandEvent &)
 {
-  PxiCanvas *canvas =
-    (PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection());
+  PxiCanvas *canvas = GetShownCanvas();
 
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
@@ -279,40 +288,83 @@ void PxiChild::OnViewDetail(wxCommandEvent &)
   dialog.ShowModal();
 }
 
-void PxiChild::OnViewZoomOut(wxCommandEvent &event)
+void PxiChild::OnViewZoomIn(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
+  PxiCanvas *canvas = GetShownCanvas();
   double scale = canvas->GetScale();
-  int i=1;
-  while(scale > scaleValues[i] && i< scaleValues.Length()) {i++;}
-  if(i>1)i--;
-  canvas->SetScale(scaleValues[i]);
-  MarkScaleMenu();
-  canvas->Render();
-#endif  // NOT_PORTED_YET
-}
-
-void PxiChild::OnViewZoomIn(wxCommandEvent &event)
-{
-#ifdef NOT_PORTED_YET
-  double scale = canvas->GetScale();
-  int i=scaleValues.Length();
-  while(scale < scaleValues[i] && i>1) {i--;}
-  if(i<scaleValues.Length())i++;
-  canvas->SetScale(scaleValues[i]);
-  MarkScaleMenu();
-  canvas->Render()
-#endif // NOT_PORTED_YET
-}
-
-void PxiChild::OnViewZoom(wxCommandEvent &event)
-{
-#ifdef NOT_PORTED_YET
-  double scale = scaleValues[event.GetSelection() - PXI_PREFS_SCALE_1+1];
+  scale += 0.1;
+  if (scale > 2.0) {
+    scale = 2.0;
+  }
   canvas->SetScale(scale);
-  MarkScaleMenu();
   canvas->Render();
-#endif  // NOT_PORTED_YET
+}
+
+void PxiChild::OnViewZoomOut(wxCommandEvent &)
+{
+  PxiCanvas *canvas = GetShownCanvas();
+  double scale = canvas->GetScale();
+  scale -= 0.1;
+  if (scale < 0.1) {
+    scale = 0.1;
+  }
+  canvas->SetScale(scale);
+  canvas->Render();
+}
+
+class dialogZoom : public wxDialog {
+private:
+  wxTextCtrl *m_data;
+  wxString m_value;
+
+public:
+  dialogZoom(wxWindow *p_parent, int p_default, int p_min, int p_max);
+  
+  int GetValue(void) const { return atoi(m_data->GetValue()); }
+};
+
+dialogZoom::dialogZoom(wxWindow *p_parent, int p_default, int p_min, int p_max)
+  : wxDialog(p_parent, -1, "Set zoom")
+{
+  wxBoxSizer *dataSizer = new wxBoxSizer(wxHORIZONTAL);
+  dataSizer->Add(new wxStaticText(this, wxID_STATIC, "Zoom factor (10-200)"),
+		 0, wxALL, 5);
+  m_value = wxString::Format("%d", p_default);
+  m_data = new wxTextCtrl(this, -1, m_value,
+			  wxDefaultPosition, wxDefaultSize, 0,
+			  gIntegerValidator(&m_value, p_min, p_max),
+			  "zoom factor");
+  dataSizer->Add(m_data, 0, wxALL, 5);
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
+
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(cancelButton, 0, wxALL, 5);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(dataSizer, 0, wxALL | wxCENTER, 0);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 0);
+
+  SetAutoLayout(true);
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+}
+
+void PxiChild::OnViewZoom(wxCommandEvent &)
+{
+  PxiCanvas *canvas = GetShownCanvas();
+  double scale = canvas->GetScale();
+  
+  dialogZoom dialog(this, (int) (scale * 100), 10, 200);
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->SetScale((double) dialog.GetValue() / 100.0);
+    canvas->Render();
+  }
 }
 
 void PxiChild::OnViewOptions(wxCommandEvent &)

@@ -52,6 +52,8 @@ private:
   void MakeMenus(void);
   void MakeToolbar(void);
 
+  PxiCanvas *GetShownCanvas(void) const;
+
 public:
   PxiChild(PxiFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);

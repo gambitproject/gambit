@@ -687,6 +687,7 @@ void PxiCanvas::Render(void)
   m_dc->BeginDrawing();
   Update(*m_dc, PXI_UPDATE_SCREEN);
   m_dc->EndDrawing();
+  Refresh();
 }
 
 void PxiCanvas::SetScale(double x) 
