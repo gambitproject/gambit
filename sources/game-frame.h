@@ -35,6 +35,10 @@ private:
   void MakeMenu(void);
 
   // Menu command handlers
+  void OnFileNew(wxCommandEvent &);
+  void OnFileOpen(wxCommandEvent &);
+  void OnFileClose(wxCommandEvent &);
+  void OnFileSave(wxCommandEvent &);
   void OnFileExit(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);

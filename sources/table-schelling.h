@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of main application class
+// Declaration of view of normal form with Schelling-style payoffs
 //
 // This file is part of Gambit
 // Copyright (c) 2004, The Gambit Project
@@ -24,25 +24,20 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif  // WX_PRECOMP
+#ifndef TABLE_SCHELLING_H
+#define TABLE_SCHELLING_H
 
-#include "gambit.h"
-#include "game-frame.h"
+#include "game-document.h"
 
-gbtApplication::gbtApplication(void)
-{ }
+class gbtTableSchelling : public wxPanel, public gbtGameView {
+private:
+  // Implementation of gbtGameView members
+  void OnUpdate(void);
 
-bool gbtApplication::OnInit(void)
-{
-  gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
-  (void) new gbtGameFrame(0, new gbtGameDocument(NewNfg(dim)));
-  return true;
-}
+public:
+  gbtTableSchelling(wxWindow *p_parent, gbtGameDocument *p_doc);
+};
 
-gbtApplication::~gbtApplication()
-{ }
+#endif  // DLABOUT_H
 
-IMPLEMENT_APP(gbtApplication)
+

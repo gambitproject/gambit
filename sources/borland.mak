@@ -21,7 +21,12 @@ gambit_SOURCES = \
 	"dialog-about.cc" \
 	"gambit.cc" \
 	"game-document.cc" \
-	"game-frame.cc"
+	"game-frame.cc" \
+	"sheet.cc" \
+	"sheetctl.cc" \
+	"sheetsel.cc" \
+	"sheetspt.cc" \
+	"table-schelling.cc"
 
 OBJECTS = $(gambit_SOURCES:.cc=.obj)
 

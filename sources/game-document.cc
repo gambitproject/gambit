@@ -40,6 +40,11 @@ void gbtGameDocument::RemoveView(gbtGameView *p_view)
   if (m_views.Length() == 0) delete this;
 }
 
+void gbtGameDocument::UpdateViews(void)
+{
+  for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate());
+}
+
 
 gbtGameView::gbtGameView(gbtGameDocument *p_doc)
   : m_doc(p_doc)

@@ -46,11 +46,18 @@ public:
   gbtGameDocument(const gbtGame &);
 
   const gbtGame &GetGame(void) const { return m_game; }
+
+  // non-const member access to control updating of views;
+  gbtGameOutcome NewOutcome(void) 
+    { gbtGameOutcome r = m_game->NewOutcome(); UpdateViews(); return r; }
+  void SetPayoff(gbtGameOutcome p_outcome,
+		 const gbtGamePlayer &p_player, const gbtRational &p_value)
+    { p_outcome->SetPayoff(p_player, p_value); UpdateViews(); }
 };
 
 
 class gbtGameView {
-private:
+protected:
   gbtGameDocument *m_doc;
 
 public:

@@ -12,7 +12,19 @@ gambit_SOURCES = \
 	game-document.cc \
 	game-document.h \
 	game-frame.cc \
-	game-frame.h
+	game-frame.h \
+	pairarr.h \
+	sheet.cc \
+	sheet.h \
+	sheetctl.cc \
+	sheetctl.h \
+	sheetsel.cc \
+	sheetsel.h \
+	sheetspt.cc \
+	sheetspt.h \
+	table-schelling.cc \
+	table-schelling.h \
+	wx24defs.h
 
 gambit_LDADD = -lgambit
 
