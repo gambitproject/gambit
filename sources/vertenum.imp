@@ -35,7 +35,8 @@ template <class T> void VertEnum<T>::Enum()
   assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
-  int i,mult_opt=0;
+  int i;
+  mult_opt=0;
 
   for(i=b.First();i<=b.Last();i++)
     if(b[i]==(T)0)
