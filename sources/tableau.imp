@@ -181,7 +181,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T>
 Tableau<T>::Tableau(const Tableau<T> &orig)
-  : eps2(orig.eps2), npivots(0), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
+  : npivots(0), eps2(orig.eps2), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
     basis(orig.basis), B(orig.B), solution(orig.solution)
 { }
 
