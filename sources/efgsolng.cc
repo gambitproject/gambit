@@ -682,7 +682,7 @@ long nevals,nits;
 gList<BehavSolution<double> > solns;
 Gobit(ef,P,start,solns,nevals,nits);
 if (!solns[1].IsSequential())
-  wxMessageBox("The algorithm failed to converge.\nReturning last solution.");
+  wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\nReturning last value.\n");
 GSPD.RunPxi();
 return solns;
 }
