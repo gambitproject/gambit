@@ -1,8 +1,8 @@
-//#
-//# FILE: gdpvect.h -- Doubly-partitioned vector class
-//#
-//# $Id$
-//#
+//
+// FILE: gdpvect.h -- Doubly-partitioned vector class
+//
+// $Id$
+//
 
 #ifndef GDPVECT_H
 #define GDPVECT_H
@@ -47,16 +47,16 @@ template <class T> class gDPVector : public gPVector<T>  {
     gDPVector<T> &operator*=(const T &c);
     gDPVector<T> operator/(const T &c) const;
     
-    int operator==(const gDPVector<T> &v) const;
-    int operator!=(const gDPVector<T> &v) const;
+    bool operator==(const gDPVector<T> &v) const;
+    bool operator!=(const gDPVector<T> &v) const;
 
     const gArray<int> &DPLengths(void) const;
 
     void Dump(gOutput &) const;
 };
-#ifndef __BORLANDC__
+
 template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
-#endif
+
 #endif   // GDPVECTOR_H
 
 

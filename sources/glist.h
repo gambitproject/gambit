@@ -7,6 +7,7 @@
 #ifndef GLIST_H
 #define GLIST_H
 
+#include "gmisc.h"
 #include "gambitio.h"
 
 template <class T> class gList;
@@ -35,6 +36,14 @@ template <class T> class gList  {
     int InsertAt(const T &t, int where);
 
   public:
+#ifdef USE_EXCEPTIONS
+    class BadIndex : public gException   {
+      public:
+        virtual ~BadIndex()   { }
+        gText Description(void) const;
+    };
+#endif   // USE_EXCEPTIONS
+
     gList(void);
     gList(const gList<T> &);
     virtual ~gList();
@@ -56,8 +65,8 @@ template <class T> class gList  {
     gList<T> &Combine(gList<T> &b);
 
     virtual int Append(const T &);
-		int Insert(const T &, int);
-		virtual T Remove(int);
+    int Insert(const T &, int);
+    virtual T Remove(int);
 
     int Find(const T &) const;
     bool Contains(const T &t) const;

@@ -15,10 +15,18 @@
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:
+#ifdef USE_EXCEPTIONS
+    class DivideByZero : public gException  {
+      public:
+        virtual ~DivideByZero()   { }
+        gText Description(void) const;
+    };
+#endif   // USE_EXCEPTIONS
+
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gMatrix(void);
-    gMatrix(int rows, int cols);
-    gMatrix(int rows, int cols, int minrows);
+    gMatrix(unsigned int rows, unsigned int cols);
+    gMatrix(unsigned int rows, unsigned int cols, int minrows);
     gMatrix(int rl, int rh, int cl, int ch);
     gMatrix(const gMatrix<T> &);
     virtual ~gMatrix();

@@ -35,9 +35,6 @@ class gText   {
         virtual ~BadIndex()  { }
         gText Description(void) const;
      };
-
-    // ALLOCATION FAILURE HANDLER CLASS
-    class AllocFail { };
 #endif   // USE_EXCEPTIONS
 
     // CONSTRUCTORS, DESTRUCTORS, AND CONSTRUCTIVE OPERATORS

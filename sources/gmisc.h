@@ -97,6 +97,13 @@ class gException   {
   public:
     virtual gText Description(void) const = 0;
 };
+
+class gNewFailed : public gException   {
+  public:
+    virtual ~gNewFailed()   { }
+    gText Description(void) const;
+}; 
+
 #endif   // USE_EXCEPTIONS
 
 #endif    // GMISC_H

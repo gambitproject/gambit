@@ -20,7 +20,6 @@ template <class T> class gArray  {
   public:
 #ifdef USE_EXCEPTIONS
     class BadIndex { };
-    class AllocFail { };
     class BadRange { };
 #endif    // USE_EXCEPTIONS
 //

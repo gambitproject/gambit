@@ -1,7 +1,7 @@
 //
-// FILE: gtext.cc -- Implementation of String class
+// FILE: gtext.cc -- Implementation of Text class
 //
-// $Id$ %G5
+// $Id$
 //
 
 #ifdef __GNUG__
@@ -22,22 +22,12 @@ gText gText::BadIndex::Description(void) const
 gText::gText(void)
 {
   storage = new char[1];
-#ifdef USE_EXCEPTIONS
-  if (!storage)   throw AllocFail();
-#else
-  assert(storage != 0);
-#endif   // USE_EXCEPTIONS
   *storage = '\0';
 }
 
 gText::gText(char c)
 {
   storage = new char[2];
-#ifdef USE_EXCEPTIONS
-  if (!storage)   throw AllocFail();
-#else
-  assert(storage != 0);
-#endif   // USE_EXCEPTIONS
   storage[0] = c;
   storage[1] = '\0';
 }
@@ -46,20 +36,10 @@ gText::gText(const char *s)
 {
   if (s != 0)   {
     storage = new char[strlen(s) + 1];
-#ifdef USE_EXCEPTIONS
-    if (!storage)   throw AllocFail();
-#else
-    assert(storage != 0);
-#endif  // USE_EXCEPTIONS
     strcpy(storage, s);
   }
   else  {
     storage = new char[1];
-#ifdef USE_EXCEPTIONS
-    if (!storage)   throw AllocFail();
-#else
-    assert(storage != 0);
-#endif   // USE_EXCEPTIONS
     storage[0] = '\0';
   }
 }
@@ -67,22 +47,12 @@ gText::gText(const char *s)
 gText::gText(const gText &s)
 {
   storage = new char[strlen(s.storage) + 1];
-#ifdef USE_EXCEPTIONS
-  if (!storage)   throw AllocFail();
-#else
-  assert(storage != 0);
-#endif   // USE_EXCEPTIONS
   strcpy(storage, s.storage);
 }
 
 gText::gText(int len)
 {
   storage = new char[len + 1];
-#ifdef USE_EXCEPTIONS
-  if (!storage)   throw AllocFail();
-#else
-  assert(storage != 0);
-#endif   // USE_EXCEPTIONS
   memset(storage, 0, len + 1);
 }
 
@@ -92,20 +62,10 @@ gText &gText::operator=(const char *s)
   delete [] storage;
   if (s != 0)   {
     storage = new char[strlen(s) + 1];
-#ifdef USE_EXCEPTIONS
-    if (!storage)   throw AllocFail();
-#else
-    assert(storage != 0);
-#endif   // USE_EXCEPTIONS 
     strcpy(storage, s);
   }
   else  {
     storage = new char[1];
-#ifdef USE_EXCEPTIONS
-    if (!storage)   throw AllocFail();
-#else
-    assert(storage != 0);
-#endif   // USE_EXCEPTIONS
     storage[0] = '\0';
   }
   return *this;
@@ -114,11 +74,6 @@ gText &gText::operator=(const char *s)
 gText &gText::operator+=(char c)
 {
   char *sp = new char[strlen(storage) + 2];
-#ifdef USE_EXCEPTIONS
-  if (!sp)    throw AllocFail();
-#else
-  assert (sp != 0);
-#endif   // USE_EXCEPTIONS
   strcpy(sp, storage);
   sp[strlen(storage)] = c;
   sp[strlen(storage) + 1] = '\0';
@@ -130,11 +85,6 @@ gText &gText::operator+=(char c)
 gText &gText::operator+=(const char *s)
 {
   char *sp = new char[strlen(storage) + strlen(s) + 1];
-#ifdef USE_EXCEPTIONS
-  if (!sp)  throw AllocFail();
-#else
-  assert (sp != 0);
-#endif   // USE_EXCEPTIONS
   strcpy(sp, storage);
   strcat(sp, s);
   delete [] storage;
@@ -202,12 +152,6 @@ void gText::Insert(char c, unsigned int n)
 #endif   // USE_EXCEPTIONS
 
   char *temp = new char[strlen(storage)+2];
-#ifdef USE_EXCEPTIONS
-  if (!temp)  throw AllocFail();
-#else
-  assert(temp);
-#endif   // USE_EXCEPTIONS
-
   strncpy(temp, storage, n);
   temp[n] = c;
   strcpy(temp + n + 1, storage + n);
@@ -223,14 +167,8 @@ void gText::Remove(unsigned int n)
 #else
   if (n > strlen(storage) - 1)  return;
 #endif  // USE_EXCEPTIONS
+
   char *temp = new char[strlen(storage)];
-
-#ifdef USE_EXCEPTIONS
-  if (!temp)   throw AllocFail();
-#else
-  assert(temp);
-#endif  // USE_EXCEPTIONS
-
   strncpy(temp, storage, n);
   strcpy(temp + n, storage + n + 1);
 

@@ -1,17 +1,28 @@
-//#
-//# FILE: gvector.imp -- Implementation of vector class
-//#
-//# $Id$
-//#
+//
+// FILE: gvector.imp -- Implementation of vector class
+//
+// $Id$
+//
 
 #include "gvector.h"
 #include <assert.h>
+
+#ifdef USE_EXCEPTIONS
+
+#include "gtext.h"
+
+template <class T>
+gText gVector<T>::BadDim::Description(void) const
+{
+  return "Mismatched vector lengths";
+}
+#endif   // USE_EXCEPTIONS
 
 //------------------------------------------------------------------------
 //     gVector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> gVector<T>::gVector(int len) : gArray<T>(len) 
+template <class T> gVector<T>::gVector(unsigned int len) : gArray<T>(len) 
 { }
 
 template <class T> gVector<T>::gVector(int low, int high) 
@@ -26,7 +37,11 @@ template <class T> gVector<T>::~gVector()   { }
 
 template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert(Check(V));
+#endif   // USE_EXCEPTIONS
   gArray<T>::operator=(V);
   return *this;
 }
@@ -36,20 +51,16 @@ template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 // inline arithmetic operators
 //------------------------------------------------------------------------
 
-template <class T> int gVector<T>::operator!=(const gVector<T> &V) const
+template <class T> bool gVector<T>::operator!=(const gVector<T> &V) const
 { return !(*this == V); }
 
-template <class T> int gVector<T>::operator!=(T c) const
+template <class T> bool gVector<T>::operator!=(T c) const
 { return !(*this == c); }
 
 
 //------------------------------------------------------------------------
 // inline internal functions
 //------------------------------------------------------------------------
-/*
-template <class T> int gVector<T>::Check(int index) const
-{ return( mindex<=index && index<=maxdex ); }
-*/
 
 template <class T> bool gVector<T>::Check(const gVector<T> &v) const
 { return( v.mindex == mindex && v.maxdex == maxdex ); }
@@ -59,8 +70,7 @@ template <class T> bool gVector<T>::Check(const gVector<T> &v) const
 //	gVector: arithmetic operators
 //------------------------------------------------------------------------
 
-template<class T> gVector<T>&
-gVector<T>::operator=(T c)
+template<class T> gVector<T>& gVector<T>::operator=(T c)
 {
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i]= c;
@@ -71,7 +81,12 @@ gVector<T>::operator=(T c)
 template <class T> gVector<T>
 gVector<T>::operator+(const gVector<T>& V) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert( Check(V) );
+#endif   // USE_EXCEPTIONS
+
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
     tmp[i]= (*this)[i] + V[i];
@@ -81,7 +96,12 @@ gVector<T>::operator+(const gVector<T>& V) const
 template <class T> gVector<T>
 gVector<T>::operator-(const gVector<T>& V) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert( Check(V) );
+#endif   // USE_EXCEPTIONS
+
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
     tmp[i]= (*this)[i] - V[i];
@@ -91,7 +111,12 @@ gVector<T>::operator-(const gVector<T>& V) const
 template <class T> gVector<T>&
 gVector<T>::operator+=(const gVector<T>& V)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert( Check(V) );
+#endif    // USE_EXCEPTIONS
+
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] += V[i];
   return (*this);
@@ -100,14 +125,18 @@ gVector<T>::operator+=(const gVector<T>& V)
 template <class T> gVector<T>&
 gVector<T>::operator-=(const gVector<T>& V)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))    throw BadDim();
+#else
   assert( Check(V) );
+#endif    // USE_EXCEPTIONS
+
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] -= V[i];
   return (*this);
 }
 
-template <class T> gVector<T>
-gVector<T>::operator-(void)
+template <class T> gVector<T> gVector<T>::operator-(void)
 {
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -115,8 +144,7 @@ gVector<T>::operator-(void)
   return tmp;
 }
 
-template <class T> gVector<T>
-gVector<T>::operator*(T c) const
+template <class T> gVector<T> gVector<T>::operator*(T c) const
 {
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -124,18 +152,21 @@ gVector<T>::operator*(T c) const
   return tmp;
 }
 
-template <class T> gVector<T>&
-gVector<T>::operator*=(T c)
+template <class T> gVector<T> &gVector<T>::operator*=(T c)
 {
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] *= c;
   return (*this);
 }
 
-template <class T> T
-gVector<T>::operator*(const gVector<T>& V) const
+template <class T> T gVector<T>::operator*(const gVector<T>& V) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert( Check(V) );
+#endif   // USE_EXCEPTIONS
+
   T sum= (T)0;
   for(int i=mindex; i<=maxdex; i++)
     sum += (*this)[i] * V[i];
@@ -143,8 +174,7 @@ gVector<T>::operator*(const gVector<T>& V) const
 }
 
 
-template <class T> gVector<T>
-gVector<T>::operator/(T c) const
+template <class T> gVector<T> gVector<T>::operator/(T c) const
 {
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -153,26 +183,31 @@ gVector<T>::operator/(T c) const
 }
 
 
-template <class T> int
-gVector<T>::operator==(const gVector<T>& V) const
+template <class T> bool gVector<T>::operator==(const gVector<T>& V) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(V))   throw BadDim();
+#else
   assert( Check(V) );
+#endif   // USE_EXCEPTIONS
+
   for(int i=mindex; i<=maxdex; i++)
     if( (*this)[i] != V[i] )
-      return 0;
-  return 1;
+      return false;
+  return true;
 }
 
-template <class T> int
-gVector<T>::operator==(T c) const
+template <class T> bool gVector<T>::operator==(T c) const
 {
   for(int i=mindex; i<=maxdex; i++)
     if( (*this)[i] != c )
-      return 0;
-  return 1;
+      return false;
+  return true;
 }
 
 
 
 template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
 { V.Dump(f);  return f; }
+
+

@@ -1,7 +1,7 @@
 //
 // FILE: garray.imp - Implementation of gArray data type
 //
-// @(#)garray.imp	2.2 02/06/98
+// $Id$
 //
 
 #include <stdlib.h>
@@ -12,13 +12,7 @@
 
 template <class T> gArray<T>::gArray(unsigned int len) 
   : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0)   
-{
-#ifdef USE_EXCEPTIONS
-  if (len > 0 && !data)   throw AllocFail();
-#else
-  assert(len == 0 || data);
-#endif   // USE_EXCEPTIONS
-}
+{ }
 
 template <class T> gArray<T>::gArray(int lo, int hi)
   : mindex(lo), maxdex(hi)
@@ -30,24 +24,12 @@ template <class T> gArray<T>::gArray(int lo, int hi)
 #endif   // USE_EXCEPTIONS
    
   data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
-
-#ifdef USE_EXCEPTIONS
-  if (maxdex >= mindex && !data)   throw AllocFail();
-#else
-  assert(maxdex < mindex || data);
-#endif   // USE_EXCEPTIONS
 }
 
 template <class T> gArray<T>::gArray(const gArray<T> &a) 
   : mindex(a.mindex), maxdex(a.maxdex),
     data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
 {
-#ifdef USE_EXCEPTIONS
-  if (maxdex >= mindex && !data)   throw AllocFail();
-#else
-  assert(maxdex < mindex || data);
-#endif    // USE_EXCEPTIONS
-
   for (int i = mindex; i <= maxdex; i++)
     data[i] = a.data[i];
 }
@@ -69,11 +51,6 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
       if (data)   delete [] (data + mindex);
       mindex = a.mindex;   maxdex = a.maxdex;
       data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
-#ifdef USE_EXCEPTIONS
-      if (maxdex >= mindex && !data)    throw AllocFail();
-#else
-      assert(maxdex < mindex || data);
-#endif   // USE_EXCEPTIONS
     }
 
     for (int i = mindex; i <= maxdex; i++)

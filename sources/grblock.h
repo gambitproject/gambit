@@ -1,19 +1,18 @@
-//#
-//# FILE: grblock.h -- resizable 2-D array class
-//#
-//# $Id$
-//#
+//
+// FILE: grblock.h -- resizable 2-D array class
+//
+// $Id$
+//
 
 #ifndef GRBLOCK_H
 #define GRBLOCK_H
 
 #include "grarray.h"
 
-template <class T> class gRectBlock: public gRectArray<T>  
-{
+template <class T> class gRectBlock: public gRectArray<T>  { 
  public:
   gRectBlock(void);
-  gRectBlock(int nrows, int ncols);
+  gRectBlock(unsigned int nrows, unsigned int ncols);
   gRectBlock(int minr, int maxr, int minc, int maxc);
   gRectBlock(const gRectBlock<T> &);
   virtual ~gRectBlock();
@@ -29,4 +28,4 @@ template <class T> class gRectBlock: public gRectArray<T>
   void InsertColumn(int, const gArray<T> &);
 };
 
-#endif   //GRBLOCK_H
+#endif   // GRBLOCK_H

@@ -1,8 +1,8 @@
-//#
-//# FILE: gdpvect.imp -- Implementation of doubly-partitioned vector class
-//#
-//# $Id$
-//#
+//
+// FILE: gdpvect.imp -- Implementation of doubly-partitioned vector class
+//
+// $Id$
+//
 
 #include "gdpvect.h"
 #include <assert.h>
@@ -91,7 +91,12 @@ template <class T> gDPVector<T>::~gDPVector()
 
 template <class T> gDPVector<T> &gDPVector<T>::operator=(const gDPVector<T> &v)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   gPVector<T>::operator=(v);
   return *this;
 }
@@ -122,24 +127,43 @@ template <class T> gDPVector<T> &gDPVector<T>::operator=(T c)
 
 template <class T> T &gDPVector<T>::operator()(int a, int b, int c)
 {
+#ifdef USE_EXCEPTIONS
+  if (dvlen.First() > a || a > dvlen.Last())   throw BadIndex();
+  if (1 > b || b > dvlen[a])                 throw BadIndex();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])  throw BadIndex();
+#else
   assert(dvlen.First() <= a && a <= dvlen.Last());
   assert(1 <= b && b <= dvlen[a]);
   assert(1 <= c && c <= svlen[dvidx[a] + b - 1]);
+#endif   // USE_EXCEPTIONS
+
   return dvptr[a][b][c];
 }
 
 template <class T> const T &gDPVector<T>::operator()(int a, int b, int c) const
 {
+#ifdef USE_EXCEPTIONS
+  if (dvlen.First() > a || a > dvlen.Last())   throw BadIndex();
+  if (1 > b || b > dvlen[a])                 throw BadIndex();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])  throw BadIndex();
+#else
   assert(dvlen.First() <= a && a <= dvlen.Last());
   assert(1 <= b && b <= dvlen[a]);
   assert(1 <= c && c <= svlen[dvidx[a] + b - 1]);
+#endif   // USE_EXCEPTIONS
+
   return dvptr[a][b][c];
 }
 
 template <class T>
 gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator+=(v);
   return tmp;
@@ -148,7 +172,12 @@ gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator+=(const gDPVector<T> &v)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   gPVector<T>::operator+=(v);
   return *this;
 }
@@ -164,7 +193,12 @@ template <class T> gDPVector<T> gDPVector<T>::operator-(void) const
 template <class T>
 gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator-=(v);
   return tmp;
@@ -173,14 +207,23 @@ gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   gPVector<T>::operator-=(v);
   return *this;
 }
 
 template <class T> T gDPVector<T>::operator*(const gDPVector<T> &v) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
   return (*this).gPVector<T>::operator*(v);
 }
 
@@ -197,13 +240,18 @@ template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
   return tmp;
 }
 
-template <class T> int gDPVector<T>::operator==(const gDPVector<T> &v) const
+template <class T> bool gDPVector<T>::operator==(const gDPVector<T> &v) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+#else
   assert(Check(v));
+#endif   // USE_EXCEPTIONS
+
   return gPVector<T>::operator==(v);
 }
 
-template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
+template <class T> bool gDPVector<T>::operator!=(const gDPVector<T> &v) const
 {
   return !(*this == v);
 }
@@ -215,9 +263,15 @@ template <class T> int gDPVector<T>::operator!=(const gDPVector<T> &v) const
 template <class T>
 void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 {
+#ifdef USE_EXCEPTIONS
+  if (!Check(v))   throw BadDim();
+  if (dvlen.First() > row || row > dvlen.Last())   throw BadIndex();
+  if (1 > col || col > dvlen[row])   throw BadIndex();
+#else
   assert(Check(v));
   assert(dvlen.First() <= row && row <= dvlen.Last());
   assert(1 <= col && col <= dvlen[row]);
+#endif   // USE_EXCEPTIONS
 
   for (int i = 1; i <= svlen[dvidx[row]+col-1]; i++)
     dvptr[row][col][i] = v.dvptr[row][col][i];

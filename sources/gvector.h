@@ -1,8 +1,8 @@
-//#
-//# FILE: gvector.h -- Implementation of vector classes
-//#
-//# $Id$
-//#
+//
+// FILE: gvector.h -- Implementation of vector classes
+//
+// $Id$
+//
 
 #ifndef GVECTOR_H
 #define GVECTOR_H
@@ -23,9 +23,16 @@ template <class T> class gMatrix;
 template <class T> class gVector : public gArray<T>   {
   friend class gMatrix<T>;
   public:
+#ifdef USE_EXCEPTIONS
+    class BadDim : public gException  {
+      public:
+        virtual ~BadDim()   { }
+        gText Description(void) const;
+    };
+#endif   // USE_EXCEPTIONS
         //# CONSTRUCTORS
         // Create a vector of length len, starting at 1
-    gVector(int len = 0);
+    gVector(unsigned int len = 0);
         // Create a vector indexed from low to high
     gVector(int low, int high);
         // Copy constructor
@@ -54,19 +61,19 @@ template <class T> class gVector : public gArray<T>   {
     gVector<T> operator/(T c) const;
 
         // comparison operators
-    int operator==(const gVector<T>& V) const;
-    int operator!=(const gVector<T>& V) const;
+    bool operator==(const gVector<T>& V) const;
+    bool operator!=(const gVector<T>& V) const;
 
         // Tests if all components of the vector are equal to a constant c
-    int operator==(T c) const;
-    int operator!=(T c) const;
+    bool operator==(T c) const;
+    bool operator!=(T c) const;
 
         // check vector for identical boundaries
     bool Check(const gVector<T> &v) const;
 };
-#ifndef __BORLANDC__
+
 template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
-#endif
+
 #endif   //# GVECTOR_H
 
 

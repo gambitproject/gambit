@@ -66,11 +66,6 @@ template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 {
   assert(mindex <=n && n <=maxdex+1);
   T *new_data = new T[++maxdex - mindex + 1] - mindex;
-#ifdef USE_EXCEPTIONS
-  if (!new_data)    throw AllocFail();
-#else
-  assert(new_data);
-#endif   // USE_EXCEPTIONS
 
   int i;
   for (i = mindex; i <= n - 1; i++)       new_data[i] = data[i];
@@ -103,12 +98,6 @@ template <class T> T gBlock<T>::Remove(int n)
 
   T ret(data[n]);
   T *new_data = (--maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
-
-#ifdef USE_EXCEPTIONS
-  if (!new_data)   throw AllocFail();
-#else
-  assert(new_data);
-#endif   // USE_EXCEPTIONS
 
   int i;
   for (i = mindex; i < n; i++)      new_data[i] = data[i];

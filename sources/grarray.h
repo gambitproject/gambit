@@ -1,12 +1,13 @@
-//#
-//# FILE: grarray.h -- Rectangular array base class
-//#
-//# $Id$
-//#
+//
+// FILE: grarray.h -- Rectangular array base class
+//
+// $Id$
+//
 
 #ifndef GRARRAY_H
 #define GRARRAY_H
 
+#include "gmisc.h"
 #include "gambitio.h"
 
 template <class T> class gArray;
@@ -17,9 +18,23 @@ template <class T> class gRectArray    {
     T **data;
 
   public:
+#ifdef USE_EXCEPTIONS
+    class BadIndex : public gException  { 
+      public:
+        virtual ~BadIndex()  { }
+        gText Description(void) const;
+    };
+
+    class BadDim : public gException  {
+      public:
+        virtual ~BadDim()   { }
+	gText Description(void) const;
+    };
+#endif   // USE_EXCEPTIONS
+
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gRectArray(void);
-    gRectArray(int nrows, int ncols);
+    gRectArray(unsigned int nrows, unsigned int ncols);
     gRectArray(int minr, int maxr, int minc, int maxc);
     gRectArray(const gRectArray<T> &);
     virtual ~gRectArray();

@@ -1,7 +1,7 @@
 //
 // FILE: gmisc.cc -- Miscellaneous generally-useful functions
 //
-// @(#)gmisc.cc	2.11 02/07/98
+// $Id$
 //
 
 #include "gmisc.h"
@@ -370,12 +370,20 @@ void gEpsilon(gNumber &n, int i)
 
 double pow(int x, long n)
 {
-return pow((double)x,(double)n);
+  return pow((double)x,(double)n);
 }
 
 double pow(double x, long n)
 {
-return pow((double)x,(double)n);
+  return pow((double)x,(double)n);
 }
 
+
+
+#ifdef USE_EXCEPTIONS
+gText gNewFailed::Description(void) const
+{
+  return "Memory exhausted in call to new";
+}
+#endif   // USE_EXCEPTIONS
 

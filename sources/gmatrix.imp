@@ -1,10 +1,20 @@
 //
 // FILE: gmatrix.imp -- Implementation of gMatrix method functions
 //
-// @(#)gmatrix.imp	2.1 3/24/97
+// $Id$
 //
 
 #include "gmatrix.h"
+
+#ifdef USE_EXCEPTIONS
+#include "gtext.h"
+
+template <class T> gText gMatrix<T>::DivideByZero::Description(void) const
+{
+  return "Divide by zero attempted in gMatrix";
+}
+#endif   // USE_EXCEPTIONS
+
 
 //-------------------------------------------------------------------------
 //       gMatrix<T>: Constructors, destructors, constructive operators
@@ -13,11 +23,12 @@
 template <class T> gMatrix<T>::gMatrix(void)
 { }
 
-template <class T> gMatrix<T>::gMatrix(int rows, int cols)
+template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols)
   : gRectArray<T>(rows, cols)
 { }
 
-template <class T> gMatrix<T>::gMatrix(int rows, int cols, int minrows)
+template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols,
+				       int minrows)
   : gRectArray<T>(minrows, minrows + rows - 1, 1, cols)
 { }
 
@@ -46,25 +57,14 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const T &c)
   return *this;
 }
 
-
-
-
 template <class T> gMatrix<T> gMatrix<T>::operator-(void)
 {
-  gMatrix<T> tmp(minrow,maxrow,mincol,maxcol);
-  for(int i=minrow; i<=maxrow; i++)
-    for(int j=mincol; j<=maxcol; j++)
+  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxcol; j++)
       tmp(i,j)= -(*this)(i,j);
   return tmp;
 }
-
-
-
-
-
-
-
-
 
 
 //-------------------------------------------------------------------------
@@ -73,7 +73,12 @@ template <class T> gMatrix<T> gMatrix<T>::operator-(void)
 
 template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckBounds(M))   throw BadDim();
+#else
   assert(CheckBounds(M));
+#endif   // USE_EXCEPTIONS
+
   gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)  {
     T *src1 = data[i] + mincol;
@@ -89,7 +94,12 @@ template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
 
 template <class T> gMatrix<T> gMatrix<T>::operator-(const gMatrix<T> &M) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckBounds(M))  throw BadDim();
+#else
   assert(CheckBounds(M));
+#endif   // USE_EXCEPTIONS
+
   gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)   {
     T *src1 = data[i] + mincol;
@@ -105,7 +115,12 @@ template <class T> gMatrix<T> gMatrix<T>::operator-(const gMatrix<T> &M) const
 
 template <class T> gMatrix<T> &gMatrix<T>::operator+=(const gMatrix<T> &M)
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckBounds(M))   throw BadDim();
+#else
   assert(CheckBounds(M));
+#endif   // USE_EXCEPTIONS
+
   for (int i = minrow; i <= maxrow; i++)   {
     T *src = M.data[i] + mincol;
     T *dst = data[i] + mincol;
@@ -119,7 +134,12 @@ template <class T> gMatrix<T> &gMatrix<T>::operator+=(const gMatrix<T> &M)
 
 template <class T> gMatrix<T> &gMatrix<T>::operator-=(const gMatrix<T> &M)
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckBounds(M))  throw BadDim();
+#else
   assert(CheckBounds(M));
+#endif   // USE_EXCEPTIONS
+
   for (int i = minrow; i <= maxrow; i++)  {
     T *src = M.data[i] + mincol;
     T *dst = data[i] + mincol;
@@ -138,7 +158,12 @@ template <class T> gMatrix<T> &gMatrix<T>::operator-=(const gMatrix<T> &M)
 template <class T>
 void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckRow(in) || !CheckColumn(out))   throw BadDim();
+#else
   assert(CheckRow(in) && CheckColumn(out));
+#endif   // USE_EXCEPTIONS
+
   for (int i = minrow; i <= maxrow; i++)   {
     T sum = (T)0;
 
@@ -155,7 +180,12 @@ void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
 
 template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
 {
-  assert(mincol == M.minrow && maxcol == M.maxrow );
+#ifdef USE_EXCEPTIONS
+  if (mincol != M.minrow || maxcol != M.maxrow)   throw BadDim();
+#else
+  assert(mincol == M.minrow && maxcol == M.maxrow);
+#endif   // USE_EXCEPTIONS
+
   gMatrix<T> tmp(minrow, maxrow, M.mincol, M.maxcol);
   gVector<T> column(M.minrow, M.maxrow);
   gVector<T> result(minrow, maxrow);
@@ -169,7 +199,11 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
 
 template <class T> gVector<T> gMatrix<T>::operator*(const gVector<T> &v) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckRow(v))  throw BadDim();
+#else
   assert(CheckRow(v));
+#endif   // USE_EXCEPTIONS
   gVector<T> tmp(minrow, maxrow);
   CMultiply(v, tmp);
   return tmp;
@@ -178,9 +212,14 @@ template <class T> gVector<T> gMatrix<T>::operator*(const gVector<T> &v) const
 template <class T>
 void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckColumn(in) || !CheckRow(out))   throw BadDim();
+#else
   assert(CheckColumn(in) && CheckRow(out));
+#endif   // USE_EXCEPTIONS
+
   out= (T)0;
-  for(int i = minrow; i <= maxrow; i++)  {
+  for (int i = minrow; i <= maxrow; i++)  {
     T k = in[i];
 
     T *src = data[i] + mincol;
@@ -197,7 +236,11 @@ void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 template <class T>
 gVector<T> operator*(const gVector<T> &v, const gMatrix<T> &M)
 {
+#ifdef USE_EXCEPTIONS
+  if (!M.CheckColumn(v))   throw gRectArray<T>::BadDim();
+#else
   assert(M.CheckColumn(v));
+#endif   // USE_EXCEPTIONS
   gVector<T> tmp(M.mincol, M.maxcol);
   M.RMultiply(v, tmp);
   return tmp;
@@ -220,8 +263,14 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const T &s) const
 // in-place multiplication by square matrix
 template <class T> gMatrix<T> &gMatrix<T>::operator*=(const gMatrix<T> &M)
 {
+#ifdef USE_EXCEPTIONS
+  if (mincol != M.minrow || maxcol != M.maxrow)  throw BadDim();
+  if (M.minrow != M.mincol || M.maxrow != M.maxcol)  throw BadDim();
+#else
   assert(mincol == M.minrow && maxcol == M.maxrow);
   assert(M.minrow == M.mincol && M.maxrow == M.maxcol);
+#endif   // USE_EXCEPTIONS
+
   gVector<T> row(mincol, maxcol);
   gVector<T> result(mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)  {
@@ -246,7 +295,12 @@ template <class T> gMatrix<T> &gMatrix<T>::operator*=(const T &s)
 
 template <class T> gMatrix<T> gMatrix<T>::operator/(const T &s) const
 {
+#ifdef USE_EXCEPTIONS
+  if (s == (T) 0)   throw DivideByZero();
+#else
   assert(s != (T) 0);
+#endif   // USE_EXCEPTIONS
+
   gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)   {
     T *src = data[i] + mincol;
@@ -261,7 +315,11 @@ template <class T> gMatrix<T> gMatrix<T>::operator/(const T &s) const
 
 template <class T> gMatrix<T> &gMatrix<T>::operator/=(const T &s)
 {
+#ifdef USE_EXCEPTIONS
+  if (s == (T) 0)   throw DivideByZero();
+#else
   assert(s != (T) 0);
+#endif   // USE_EXCEPTIONS
   for (int i = minrow; i <= maxrow; i++)  {
     T *dst = data[i] + mincol;
     int j = maxcol - mincol + 1;
@@ -313,7 +371,11 @@ template <class T> gMatrix<T> gMatrix<T>::Transpose() const
 
 template <class T> bool gMatrix<T>::operator==(const gMatrix<T> &M) const
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckBounds(M))  throw BadDim();
+#else
   assert(CheckBounds(M));
+#endif   // USE_EXCEPTIONS
   for (int i = minrow; i <= maxrow; i++)   {
     // inner loop
     T *src1 = M.data[i] + mincol;
@@ -347,12 +409,11 @@ template <class T> bool gMatrix<T>::operator!=(const T &s) const
 
 // more complex functions
 
-template <class T> void
-gMatrix<T>::MakeIdent(void)
+template <class T> void gMatrix<T>::MakeIdent(void)
 {
-  for(int i=minrow;i<=maxrow;i++) 
-    for(int j=mincol;j<=maxcol;j++) {
-      if(i==j) (*this)(i,j) = (T) 1;
+  for (int i = minrow; i <= maxrow; i++) 
+    for (int j = mincol; j <= maxcol; j++) {
+      if (i == j) (*this)(i,j) = (T) 1;
       else (*this)(i,j)=(T) 0;
     }
 }
@@ -395,11 +456,15 @@ gMatrix<T>::ExternalPivot(int row, int col) const
 }
 #endif    // UNUSED
 
-template<class T> void
-gMatrix<T>::Pivot(int row, int col)
+template<class T> void gMatrix<T>::Pivot(int row, int col)
 {
+#ifdef USE_EXCEPTIONS
+  if (!CheckRow(row) || !CheckColumn(col))  throw BadIndex();
+  if (data[row][col] == (T) 0)  throw DivideByZero();
+#else
   assert( CheckRow(row) && CheckColumn(col) );
   assert( data[row][col]!=(T)0 );
+#endif   // USE_EXCEPTIONS
 
   T mult= (T)1/data[row][col];
   for(int j=mincol; j<=maxcol; j++)
@@ -409,10 +474,7 @@ gMatrix<T>::Pivot(int row, int col)
       if(i!=row)
 	{
 	  mult= data[i][col];
-/*
-	  for(j=mincol; j<=maxcol; j++)
-	    data[i][j]-= data[row][j]*mult;
-*/
+
 	  // inner loop
 	  T* src= data[row] + mincol;
 	  T* dst= data[i] + mincol;
