@@ -23,7 +23,7 @@
 //=========================================================================
 
 dialogNfgPayoffs::dialogNfgPayoffs(const Nfg &p_nfg, NFOutcome *p_outcome,
-				   bool p_solutions, wxWindow *p_parent)
+				   wxWindow *p_parent)
   : guiPagedDialog(p_parent, "Change Payoffs", p_nfg.NumPlayers()),
     m_outcome(p_outcome), m_nfg(p_nfg)
 {

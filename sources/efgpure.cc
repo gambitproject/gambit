@@ -16,7 +16,6 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 			     gList<BehavSolution> &p_solutions,
 			     int p_stopAfter, gStatus &p_status)
 {
-  int index;
   EfgContIter citer(p_support);
   gPVector<gNumber> probs(p_support.Game().NumInfosets());
 
@@ -67,8 +66,7 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 				 Infosets()[iset])->GetNumber()) = 1;
       }
 
-      index = p_solutions.Append(BehavSolution(temp, 
-					       algorithmEfg_ENUMPURE_EFG));
+      p_solutions.Append(BehavSolution(temp, algorithmEfg_ENUMPURE_EFG));
     }
     contNumber++;
   }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&

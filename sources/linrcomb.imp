@@ -114,13 +114,6 @@ LinearCombination<T>::LinearCombination(const LinearCombination<T> &L)
 template <class T> LinearCombination<T>::~LinearCombination()
 { }
 
-template <class T> LinearCombination<T>& 
-LinearCombination<T>::operator=(const LinearCombination<T>& /* L */)
-{
-  gout << "We don't copy LinearCombinations.\n";
-  exit(0);
-}
-
 //-------------------------------------------------------------------------
 //                    LinearCombination<T>: Comparison operators
 //-------------------------------------------------------------------------

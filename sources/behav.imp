@@ -799,9 +799,9 @@ BehavProfile<T>::DeviationInfosets(const EFSupport & big_supp,
 template <class T>  const gList<const EFSupport> 
 BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
 				   const gList<const Infoset *> & isetlist,
-				   const EFPlayer *pl,
-				   const Infoset *iset,
-				   const Action *act) const 
+				   const EFPlayer */*pl*/,
+				   const Infoset */*iset*/,
+				   const Action */*act*/) const 
 {
   gList<const EFSupport> answer;
 
@@ -872,7 +872,7 @@ BehavProfile<T>::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 				         const EFSupport &dsupp,
 				         const gList<gList<int> > &var_index,
 				         const Node *tempnode,
-					 const EFPlayer *pl,
+					 const EFPlayer */*pl*/,
 				         const Infoset *iset,
 				         const Action *act) const 
 {

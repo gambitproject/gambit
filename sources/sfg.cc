@@ -264,6 +264,13 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
     }
   return b;
 }
+
+gNumber Sfg::Payoff(const gArray<int> & index,int pl) const 
+{
+  return Payoffs(index)[pl];
+}
+
+
 template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);

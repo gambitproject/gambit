@@ -51,8 +51,7 @@ public:
      { return !(*this == rhs); }
    inline int Dmnsn()                                    const 
      { return RootNode()->GetData().Dmnsn(); }
-   inline T EvaluateRootPoly(const gVector<T>& point)    const 
-     { return RootNode()->GetData().Evaluate(point); }
+   T EvaluateRootPoly(const gVector<T>& point)    const; 
 
 
    T MaximalNonconstantContribution(const gVector<T>&, 
@@ -65,8 +64,7 @@ public:
      { return PartialTree.RootNode(); }
    inline gPoly<T> RootPoly()                                  const 
      { return RootNode()->GetData(); }
-   inline T ValueOfRootPoly(const gVector<T>& point)           const 
-     { return RootPoly().Evaluate(point); }
+   T ValueOfRootPoly(const gVector<T>& point)           const;
    T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
    gVector<T> VectorOfPartials(const gVector<T>&)              const;
    bool      PolyHasNoRootsIn(const gRectangle<T>&)            const;

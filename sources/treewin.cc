@@ -1721,7 +1721,7 @@ void TreeWindow::node_goto_mark(void)
 
 void TreeWindow::EditOutcomePayoffs(void)
 {
-  dialogEfgPayoffs dialog(ef, Cursor()->GetOutcome(), false, pframe);
+  dialogEfgPayoffs dialog(ef, Cursor()->GetOutcome(), pframe);
 
   if (dialog.Completed() == wxOK) {
     EFOutcome *outc = Cursor()->GetOutcome();
@@ -1787,7 +1787,7 @@ void TreeWindow::EditOutcomeLabel(void)
 
 void TreeWindow::EditOutcomeNew(void)
 {
-  dialogEfgPayoffs dialog(ef, 0, false, pframe);
+  dialogEfgPayoffs dialog(ef, 0, pframe);
 
   if (dialog.Completed() == wxOK) {
     try {

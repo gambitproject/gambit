@@ -123,10 +123,9 @@ static Portion *GSM_IsProfileDominated_Nfg(Portion **param)
   gPrecision prec = (((MixedPortion *) param[0])->Value())->Precision();
 
   gWatch watch;
-  bool ret = false;
 
-  ret = IsMixedDominated(pr,strong, prec, 
-			   ((OutputPortion *) param[4])->Value());
+  bool ret = IsMixedDominated(pr,strong, prec, 
+			      ((OutputPortion *) param[4])->Value());
 
   ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   

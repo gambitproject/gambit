@@ -396,7 +396,6 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
 template <class T> int SimpdivModule<T>::Simpdiv(void)
 {
   int qf,soln,i,j,k,ii;
-  int index;
 
   gWatch watch;
 
@@ -435,7 +434,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
     *params.tracefile << " maxz = " << maxz; 
     
     MixedProfile<T> profile(y);
-    index=solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
+    solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
     //    solutions[index].SetEpsilon(TOL);
   }
 

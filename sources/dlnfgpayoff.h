@@ -16,7 +16,7 @@ private:
   const char *HelpString(void) const { return "Outcome Menu"; }
 
 public:
-  dialogNfgPayoffs(const Nfg &, NFOutcome *, bool, wxWindow *parent);
+  dialogNfgPayoffs(const Nfg &, NFOutcome *, wxWindow *parent);
   virtual ~dialogNfgPayoffs() { }
 
   gArray<gNumber> Payoffs(void) const;

@@ -16,7 +16,7 @@ EFQreParams::EFQreParams(gStatus &s)
     fullGraph(false), pxifile(&gnull)
 { }
 
-EFQreParams::EFQreParams(gOutput &out, gOutput &pxi,gStatus &s)
+EFQreParams::EFQreParams(gOutput &, gOutput &pxi,gStatus &s)
   : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }

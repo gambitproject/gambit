@@ -205,7 +205,6 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 				      const gStatus &status)
 { 
   bool abort = false;
-  bool no_deletions = true;
   bool add_support = true;
 
   bool check_domination = false;
@@ -231,7 +230,6 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 	      delete_this_action = true;
 	  }
     if (delete_this_action) {
-      no_deletions = false;
       if (c->IsSubsequentTo(this_action)) 
 	abort = true;
       else 

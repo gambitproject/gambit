@@ -26,7 +26,7 @@ void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
   delete N;
 }
 
-efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &p_support,
+efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &,
 					 int p_stopAfter, gStatus &p_status)
   : SubgameSolver(0), m_stopAfter(p_stopAfter), m_status(p_status)
 { }

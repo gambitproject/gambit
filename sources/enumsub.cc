@@ -31,7 +31,7 @@ void EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   delete N;
 }
 
-EnumBySubgame::EnumBySubgame(const EFSupport &S, const EnumParams &p, int max)
+EnumBySubgame::EnumBySubgame(const EFSupport &, const EnumParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 

@@ -35,6 +35,9 @@ template <class T> class LinearCombination  {
 				 const int& j, 
 				 const T& scalar,
 				 gMatrix<T>& B);
+
+  // This function is left unimplemented to avoid copying
+    LinearCombination<T>& operator=(const LinearCombination<T> &);
   
   public:
        // Constructors, Destructor, Constructive Operators
@@ -43,7 +46,6 @@ template <class T> class LinearCombination  {
 
     virtual ~LinearCombination();
 
-    LinearCombination<T>& operator=(const LinearCombination<T> &);
 
        // Comparison Operators
     bool operator==(const LinearCombination<T> &) const;

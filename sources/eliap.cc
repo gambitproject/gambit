@@ -109,7 +109,7 @@ static void PickRandomProfile(BehavProfile<double> &p)
 
 static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
-		        double value, double epsilon)
+		        double /*value*/, double epsilon)
 {
   int index = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
   solutions[index].SetEpsilon(epsilon);

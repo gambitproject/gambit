@@ -16,7 +16,7 @@ NFQreParams::NFQreParams(gStatus &s)
     fullGraph(false), pxifile(&gnull)
 { }
 
-NFQreParams::NFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
+NFQreParams::NFQreParams(gOutput &, gOutput &pxi, gStatus &s)
   : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }

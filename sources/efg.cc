@@ -1511,15 +1511,10 @@ gPVector<int> Efg::NumActions(void) const
 
 int Efg::NumPlayerActions(void) const
 {
-  int answer(0);
-
-  int num_players_infosets(0);
-  int i;
-  for (i = 1; i <= players.Length(); i++)
-    num_players_infosets += players[i]->infosets.Length();
+  int answer = 0;
 
   gPVector<int> nums_actions = NumActions();
-  for (i = 1; i <= NumPlayers(); i++)
+  for (int i = 1; i <= NumPlayers(); i++)
     answer += nums_actions[i];
   return answer;
 }

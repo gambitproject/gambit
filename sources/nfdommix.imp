@@ -198,7 +198,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
   Nfg nfg = str->Player()->Game();
   int whichstrat = str->Number();
   int strats = S.NumStrats(pl);
-  bool dom;
 
   NfgContIter s(S);
   s.Freeze(pl);
@@ -258,8 +257,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
     // tracefile << " x = " << Tab.OptimumVector();
     // tracefile << " Obj = " << COpt;
     
-    dom = false;
-    
     if (Tab.IsFeasible() && COpt > eps) {
       tracefile << " Strongly Dominated by ";
       gVector<T> xx(Tab.OptimumVector());
@@ -272,7 +269,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
       }
       tracefile << dominator;
       ret = true;
-      dom = true;
     }
     // tracefile << "\n";
     
@@ -325,8 +321,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
     // tracefile << " x = " << Tab.OptimumVector();
     // tracefile << " Obj = " << COpt;
     
-    dom = false;
-    
     if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
       tracefile << " Duplicated strategy? ";
     else if (Tab.IsFeasible() && COpt > C0+eps) {
@@ -341,7 +335,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
       }
       tracefile << dominator;
       ret = true;
-      dom = true;
     }
     // else  tracefile << "\n\n";
     // tracefile << "\n";
@@ -365,8 +358,6 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
   int strats = S.NumStrats(pl);
   gVector<T> prob = pr.GetRow(pl);
   assert( prob.Length() == strats);
-
-  bool dom;
 
   NfgContIter s(S);
   s.Freeze(pl);
@@ -427,8 +418,6 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     // tracefile << " x = " << Tab.OptimumVector();
     // tracefile << " Obj = " << COpt;
     
-    dom = false;
-    
     if (Tab.IsFeasible() && COpt > eps) {
       tracefile << " Strongly Dominated by ";
       gVector<T> xx(Tab.OptimumVector());
@@ -438,7 +427,6 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       }
       tracefile << dominator;
       ret = true;
-      dom = true;
     }
     // tracefile << "\n";
     
@@ -493,8 +481,6 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     // tracefile << " x = " << Tab.OptimumVector();
     // tracefile << " Obj = " << COpt;
     
-    dom = false;
-    
     //if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
     //  tracefile << " Duplicated strategy? ";
     // else 
@@ -507,7 +493,6 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       }
       tracefile << dominator;
       ret = true;
-      dom = true;
     }
     // else  tracefile << "\n\n";
     // tracefile << "\n";

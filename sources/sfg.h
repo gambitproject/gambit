@@ -42,7 +42,7 @@ public:
   inline int NumPlayers() const {return EF.NumPlayers();}
   
   inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}
-  /*inline*/ gNumber Payoff(const gArray<int> & index,int pl) const {return Payoffs(index)[pl];}
+  gNumber Payoff(const gArray<int> & index,int pl) const;
 
   gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;

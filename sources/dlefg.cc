@@ -356,7 +356,7 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
 //=========================================================================
 
 dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
-				   bool p_solutions, wxWindow *p_parent)
+				   wxWindow *p_parent)
   : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
     m_outcome(p_outcome), m_efg(p_efg)
 {

@@ -894,8 +894,7 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
   nf_iter.Set(pl1, st1);
   nf_iter.Set(pl2, st2);
 
-  dialogNfgPayoffs dialog(nf, nf.GetOutcome(profile), solns.Length() > 0,
-			  spread);
+  dialogNfgPayoffs dialog(nf, nf.GetOutcome(profile), spread);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.GetOutcome(profile);
@@ -939,7 +938,7 @@ void NfgShow::OutcomeDetach(void)
 
 void NfgShow::OutcomeNew(void)
 {
-  dialogNfgPayoffs dialog(nf, 0, solns.Length() > 0, pframe);
+  dialogNfgPayoffs dialog(nf, 0, pframe);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.NewOutcome();

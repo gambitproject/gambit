@@ -51,7 +51,7 @@ void efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
   npivots += npiv;
 }
 
-efgLpSolve::efgLpSolve(const EFSupport &S, const CSSeqFormParams &p, int max)
+efgLpSolve::efgLpSolve(const EFSupport &, const CSSeqFormParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 

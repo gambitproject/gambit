@@ -232,6 +232,19 @@ TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
 }
 
 
+template <class T>
+T TreeOfPartials<T>::EvaluateRootPoly(const gVector<T>& point) const 
+{
+  return RootNode()->GetData().Evaluate(point); 
+}
+
+template <class T>
+T TreeOfPartials<T>::ValueOfRootPoly(const gVector<T>& point) const 
+{ 
+  return RootPoly().Evaluate(point); 
+}
+
+
 template <class T> gOutput& operator << (gOutput& output, 
 					 const TreeOfPartials<T>& /* x */)
 {

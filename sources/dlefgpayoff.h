@@ -15,7 +15,7 @@ private:
   wxText *m_outcomeName;
 
 public:
-  dialogEfgPayoffs(const Efg &, EFOutcome *, bool, wxWindow *parent);
+  dialogEfgPayoffs(const Efg &, EFOutcome *, wxWindow *parent);
   virtual ~dialogEfgPayoffs() { }
 
   gArray<gNumber> Payoffs(void) const;
