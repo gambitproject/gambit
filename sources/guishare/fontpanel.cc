@@ -7,9 +7,9 @@
 // Implementation of a panel to select fonts
 //
 
-#include "wx/wx.h"
-#ifndef WX_PRECOMP
 #include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "wx/fontdlg.h"
 

@@ -7,9 +7,9 @@
 // Dialog for viewing and editing experimental data
 //
 
-#include "wx/wx.h"
-#ifndef WX_PRECOMP
 #include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
 #endif  // WX_PRECOMP
 
 #include "dleditdata.h"
