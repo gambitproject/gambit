@@ -228,27 +228,16 @@ leads to the following
   Include["loglike.gcl"]
   GCL2:= << EQre["bhg3"]
 
-On mill, a similar problem with a different script:
+Here is a much simpler example that crashes on mill:
 
-  44 mill:/home/mill/rdm/exper/pldark newgcl
-  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << Include["bad.gcl"]
-  True
-  EXCEPTION: Memory exhausted in call to new
+  GCL1:= << For[j:=1,j>0,j:=j+1, << j;];
 
-The script is basically a maximum likelihood grid search.  It never
-goes into any game or algorithm code.  The parameter that sets the
-stepsize for one of the dimensions is "gridDel".  If I set it to .01,
-then the program works fine.  If I set it to .005, I get the above
-message.  If I set it to .002, then I get a segfault:
+If you run this, and then on a separate xterm, watch top on mill, you
+will see that the SIZE and RES columns gradually grow as the program
+continues, eventually reaching about 800M, at which point, the GCL
+segfaults.  The same thing happens with 
 
-  46 mill:/home/mill/rdm/exper/pldark newgcl
-  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << Include["bad.gcl"]
-  True
-  Segmentation fault
+  GCL1:= << While[True,<< True]
 
 
 //---------------  These are not bugs but suggested improvements ------------
