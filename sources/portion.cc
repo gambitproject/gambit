@@ -531,20 +531,8 @@ void gString_Portion::Output( gOutput& s ) const
 template <class T> 
   Mixed_Portion<T>::Mixed_Portion( const MixedProfile<T>& value )
     : _Value( value )
-{
-  _Owner = 0;
-}
+{ }
 
-
-template <class T> bool Mixed_Portion<T>::SetOwner( NormalForm<T>* owner )
-{
-  if( owner != 0 )
-  {
-    _Owner = owner;
-    return true;
-  }
-  return false;
-}
 
 template <class T> MixedProfile<T>& Mixed_Portion<T>::Value( void )
 { return _Value; }
@@ -570,20 +558,8 @@ template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
 template <class T> 
   Behav_Portion<T>::Behav_Portion( const BehavProfile<T>& value )
     : _Value( value )
-{
-  _Owner = 0;
-}
+{ }
 
-
-template <class T> bool Behav_Portion<T>::SetOwner( ExtForm<T>* owner )
-{
-  if( owner != 0 )
-  {
-    _Owner = owner;
-    return true;
-  }
-  return false;
-}
 
 template <class T> BehavProfile<T>& Behav_Portion<T>::Value( void )
 { return _Value; }
@@ -606,30 +582,22 @@ template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
 //                        Reference type
 //---------------------------------------------------------------------
 Reference_Portion::Reference_Portion( const gString& value )
-     : _Value( value ), _SubValue( "" )
-{ }
-
-Reference_Portion::Reference_Portion( const gString& value, 
-				      const gString& subvalue )
-     : _Value( value ), _SubValue( subvalue )
+     : _Value( value )
 { }
 
 
 gString& Reference_Portion::Value( void )
 { return _Value; }
 
-gString& Reference_Portion::SubValue( void )
-{ return _SubValue; }
-
 PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
 
 Portion* Reference_Portion::Copy( bool new_data ) const
-{ return new Reference_Portion( _Value, _SubValue ); }
+{ return new Reference_Portion( _Value ); }
 
 void Reference_Portion::Output( gOutput& s ) const
 {
-  s << "(Reference) \"" << _Value << "\", \"" << _SubValue << "\"";
+  s << "(Reference) \"" << _Value << "\"";
 }
 
 
@@ -915,60 +883,6 @@ template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 
 
 
-
-
-template <class T> 
-  bool Nfg_Portion<T>::Assign( const gString& ref, Portion *p )
-{
-#ifndef NDEBUG
-  if( p->Type() == porREFERENCE )
-  {
-    gerr << "Portion Error:\n";
-    gerr << "  Attempted to Assign a Reference_Portion as the\n";
-    gerr << "  value of a sub-reference in a Nfg_Portion type\n";
-  }
-  assert( p->Type() != porREFERENCE );
-#endif // NDEBUG
-
-  _RefTable->Define( ref, p );
-
-  return true;
-}
-
-
-template <class T> bool Nfg_Portion<T>::UnAssign( const gString& ref )
-{
-  if( _RefTable->IsDefined( ref ) )
-  {
-    _RefTable->Remove( ref );
-  }
-  return true;
-}
-
-
-template <class T> bool Nfg_Portion<T>::IsDefined( const gString& ref ) const
-{
-  return _RefTable->IsDefined( ref );
-}
-
-
-template <class T> 
-  Portion* Nfg_Portion<T>::operator()( const gString& ref ) const
-{
-  Portion* result = 0;
-
-  if( _RefTable->IsDefined( ref ) )
-  {
-    result = (*_RefTable)( ref );
-  }
-
-  return result;
-}
-
-
-
-
-
 //---------------------------------------------------------------------
 //                            Efg type
 //---------------------------------------------------------------------
@@ -1043,58 +957,6 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
 { s << "ExtForm[ "; _Value->GetTitle(); s << ']'; }
-
-
-
-template <class T> 
-  bool Efg_Portion<T>::Assign( const gString& ref, Portion *p )
-{
-#ifndef NDEBUG
-  if( p->Type() == porREFERENCE )
-  {
-    gerr << "Portion Error:\n";
-    gerr << "  Attempted to Assign a Reference_Portion as the\n";
-    gerr << "  value of a sub-reference in a Efg_Portion type\n";
-  }
-  assert( p->Type() != porREFERENCE );
-#endif // NDEBUG
-
-  _RefTable->Define( ref, p );
-
-  return true;
-}
-
-
-template <class T> bool Efg_Portion<T>::UnAssign( const gString& ref )
-{
-  if( _RefTable->IsDefined( ref ) )
-  {
-    _RefTable->Remove( ref );
-  }
-  return true;
-}
-
-
-template <class T> bool Efg_Portion<T>::IsDefined( const gString& ref ) const
-{
-  return _RefTable->IsDefined( ref );
-}
-
-
-template <class T> 
-  Portion* Efg_Portion<T>::operator()( const gString& ref ) const
-{
-  Portion* result = 0;
-
-  if( _RefTable->IsDefined( ref ) )
-  {
-    result = (*_RefTable)( ref );
-  }
-
-  return result;
-}
-
-
 
 
 

@@ -17,12 +17,12 @@
 #include "basic.h"
 #include "integer.h"
 #include "rational.h"
+
 #include "gstring.h"
 
 #include "gblock.h"
 #include "mixed.h"
 #include "behav.h"
-
 
 
 class List_Portion;
@@ -148,14 +148,11 @@ class Reference_Portion : public Portion
 {
  private:
   gString _Value;
-  gString _SubValue;
 
  public:
   Reference_Portion( const gString& value );
-  Reference_Portion( const gString& value, const gString& subvalue );
 
   gString&    Value    ( void );
-  gString&    SubValue ( void );
   Portion*    Copy     ( bool new_data ) const;
   PortionType Type     ( void ) const;
   void        Output   ( gOutput& s ) const;
@@ -202,12 +199,9 @@ template <class T> class Mixed_Portion : public Portion
 {
  private:
   MixedProfile<T> _Value;
-  NormalForm<T>*  _Owner;
 
  public:
   Mixed_Portion( const MixedProfile<T>& value );
-
-  bool SetOwner( NormalForm<T>* owner );
 
   MixedProfile<T>& Value     ( void );
   Portion*         Copy      ( bool new_data ) const;
@@ -222,12 +216,9 @@ template <class T> class Behav_Portion : public Portion
 {
  private:
   BehavProfile<T> _Value;
-  ExtForm<T>*     _Owner;
 
  public:
   Behav_Portion( const BehavProfile<T>& value );
-
-  bool SetOwner( ExtForm<T>* owner );
 
   BehavProfile<T>& Value     ( void );
   Portion*         Copy      ( bool new_data ) const;
@@ -256,11 +247,6 @@ template <class T> class Nfg_Portion : public Portion
   Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
   void           Output         ( gOutput& s ) const;
-
-  bool        Assign     ( const gString& ref, Portion* data );
-  bool        UnAssign   ( const gString& ref );
-  bool        IsDefined  ( const gString& ref ) const;
-  Portion*    operator() ( const gString& ref ) const;
 };
 
 
@@ -285,11 +271,6 @@ template <class T> class Efg_Portion : public Portion
   Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
   void           Output         ( gOutput& s ) const;
-
-  bool        Assign     ( const gString& ref, Portion* data );
-  bool        UnAssign   ( const gString& ref );
-  bool        IsDefined  ( const gString& ref ) const;
-  Portion*    operator() ( const gString& ref ) const;
 };
 
 

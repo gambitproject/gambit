@@ -106,44 +106,6 @@ bool GSM::Push( const gString& data )
 }
 
 
-/* These are commented out because the don't seem to be necessary */
-#if 0
-bool GSM::Push( Outcome* data )
-{
-  _Stack->Push( Outcome_Portion( data ) );
-  return true;
-}
-
-
-bool GSM::Push( Player* data )
-{
-  _Stack->Push( new Player_Portion( data ) );
-  return true;
-}
-
-
-bool GSM::Push( Infoset* data )
-{
-  _Stack->Push( new Infoset_Portion( data ) );
-  return true;
-}
-
-
-bool GSM::Push( Action* data )
-{
-  _Stack->Push( new Action_Portion( data ) );
-  return true;
-}
-
-
-bool GSM::Push( Node* data )
-{
-  _Stack->Push( new Node_Portion( data ) );
-  return true;
-}
-#endif
-
-
 bool GSM::PushStream( const gString& data )
 {
   gOutput* g;
@@ -268,9 +230,9 @@ Portion* GSM::_VarValue( const gString& var_name ) const
 //---------------------------------------------------------------------
 
 
-bool GSM::PushRef( const gString& ref, const gString& subref )
+bool GSM::PushRef( const gString& ref )
 {
-  _Stack->Push( new Reference_Portion( ref, subref ) );
+  _Stack->Push( new Reference_Portion( ref ) );
   return true;
 }
 
@@ -281,7 +243,6 @@ bool GSM::Assign( void )
   Portion*  p2;
   Portion*  p1;
   Portion*  primary_ref;
-  gString   p1_subvalue;
   Portion*  por_result;
   bool      result = true;
 
@@ -295,78 +256,17 @@ bool GSM::Assign( void )
 
   if ( p1->Type() == porREFERENCE )
   {
-    p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
-
-    if( p1_subvalue == "" )
+    if( p2->Type() == porREFERENCE )
     {
-      if( p2->Type() == porREFERENCE )
-      {
-	p2 = _ResolveRef( (Reference_Portion*) p2 );
-	p2_copy = p2->Copy( true );
-      }
-      else
-      {
-	p2_copy = p2->Copy();
-      }
-      _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
-      delete p1;
+      p2 = _ResolveRef( (Reference_Portion*) p2 );
+      p2_copy = p2->Copy( true );
     }
-
-    else // ( p1_subvalue != "" )
+    else
     {
-      primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
-
-      if( primary_ref->Type() & porALLOWS_SUBVARIABLES )
-      {
-	if( p2->Type() == porREFERENCE )
-	{
-	  p2 = _ResolveRef( (Reference_Portion*) p2 );
-	  p2_copy = p2->Copy( true );
-	}
-	else
-	{
-	  p2_copy = p2->Copy();
-	}
-
-	switch( primary_ref->Type() )
-	{
-	case porNFG_DOUBLE:
-	  ( (Nfg_Portion<double>*) primary_ref )->
-	    Assign( p1_subvalue, p2_copy );
-	  break;
-	case porNFG_RATIONAL:
-	  ( (Nfg_Portion<gRational>*) primary_ref )->
-	    Assign( p1_subvalue, p2_copy );
-	  break;
-
-	case porEFG_DOUBLE:
-	  ( (Efg_Portion<double>*) primary_ref )->
-	    Assign( p1_subvalue, p2_copy );
-	  break;
-	case porEFG_RATIONAL:
-	  ( (Efg_Portion<gRational>*) primary_ref )->
-	    Assign( p1_subvalue, p2_copy );
-	  break;
-	  
-	default:
-	  _ErrorMessage( _StdErr, 5 );
-	}
-
-	delete p1;
-      }
-      else // ( !( primary_ref->Type() & porALLOWS_SUBVARIABLES ) )
-      {
-	_ErrorMessage( _StdErr, 6 );
-	if( primary_ref->Type() == porERROR )
-	{
-	  delete primary_ref;
-	}
-	delete p2;
-	delete p1;
-	p2 = new Error_Portion;
-      }
+      p2_copy = p2->Copy();
     }
-
+    _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
+    delete p1;
     _Stack->Push( p2 );
   }
 
@@ -405,155 +305,23 @@ bool GSM::Assign( void )
 
 
 
-#if 0
-bool GSM::UnAssign( void )
-{
-  Portion*  p1;
-  Portion*  primary_ref;
-  gString   ref;
-  gString   p1_subvalue;
-  bool      result = true;
-
-#ifndef NDEBUG
-  if( _Stack->Depth() < 1 )
-    _ErrorMessage( _StdErr, 8 );
-#endif // NDEBUG
-
-  p1 = _Stack->Pop();
-
-  if ( p1->Type() == porREFERENCE )
-  {
-    ref = ( (Reference_Portion*) p1 )->Value();
-    p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
-    if( p1_subvalue == "" )
-    {
-      if( _VarIsDefined( ref ) )
-      {
-	_RefTableStack->Peek()->Remove( ref );
-      }
-    }
-
-    else // ( p1_subvalue != "" )
-    {
-      primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
-
-      if( primary_ref->Type() & porALLOWS_SUBVARIABLES )
-      {
-	switch( primary_ref->Type() )
-	{
-	case porNFG_DOUBLE:
-	  ( (Nfg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
-	  break;
-	case porNFG_RATIONAL:
-	  ( (Nfg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
-	  break;
-	  
-	case porEFG_DOUBLE:
-	  ( (Efg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
-	  break;
-	case porEFG_RATIONAL:
-	  ( (Efg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
-	  break;
-	  
-	default:
-	  _ErrorMessage( _StdErr, 9 );
-	}
-      }
-      else
-      {
-	_ErrorMessage( _StdErr, 10 );
-	if( primary_ref->Type() == porERROR )
-	{
-	  delete primary_ref;
-	}
-	delete p1;
-	p1 = new Error_Portion;
-      }
-    }
-    delete p1;
-  }
-  else // ( p1->Type() != porREFERENCE )
-  {
-    _ErrorMessage( _StdErr, 11 );
-    result = false;
-  }
-  return result;
-}
-#endif
-
-
-
-//---------------------------------------------------------------------
+//-----------------------------------------------------------------------
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
 Portion* GSM::_ResolveRef( Reference_Portion* p )
 {
   Portion*  result = 0;
-  gString   ref = p->Value();
-
-  result = _ResolveRefWithoutError( p );
-  if( result == 0 )
-  {
-    _ErrorMessage( _StdErr, 13, 0, 0, ref );
-    result = new Error_Portion;
-  }
-  return result;
-}
-
-
-Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
-{
-  Portion*  primary_ref;
-  Portion*  result = 0;
   gString&  ref = p->Value();
-  gString&  subvalue = p->SubValue();
-
-  Reference_Portion*  new_ref;
-  RefHashTable*  ref_table;
 
   if( _VarIsDefined( ref ) )
   {
-    if( subvalue == "" )
-    {
-      result = _VarValue( ref )->Copy();
-    }
-    else
-    {
-      primary_ref = _VarValue( ref );
-      switch( primary_ref->Type() )
-      {
-      case porNFG_DOUBLE:
-	result = ((Nfg_Portion<double>*) primary_ref )->
-	  operator()( subvalue );
-	if( result != 0 )
-	  result = result->Copy();
-	break;
-      case porNFG_RATIONAL:
-	result = ((Nfg_Portion<gRational>*) primary_ref )->
-	  operator()( subvalue );
-	if( result != 0 )
-	  result = result->Copy();
-	break;
-
-      case porEFG_DOUBLE:
-	result = ((Efg_Portion<double>*) primary_ref )->
-	  operator()( subvalue );
-	if( result != 0 )
-	  result = result->Copy();
-	break;
-      case porEFG_RATIONAL:
-	result = ((Efg_Portion<gRational>*) primary_ref )->
-	  operator()( subvalue );
-	if( result != 0 )
-	  result = result->Copy();
-	break;
-
-      default:
-	_ErrorMessage( _StdErr, 14 );
-	result = new Error_Portion;
-      }
-    }
+    result = _VarValue( ref )->Copy();
+  }
+  else
+  {
+    _ErrorMessage( _StdErr, 13, 0, 0, ref );
+    result = new Error_Portion;
   }
   delete p;
 
@@ -561,24 +329,16 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 }
 
 
-
-Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
+Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 {
   Portion*  result = 0;
   gString&  ref = p->Value();
 
-  Reference_Portion*  new_ref;
-  RefHashTable*  ref_table;
-
   if( _VarIsDefined( ref ) )
   {
-    result = _VarValue( ref );
+    result = _VarValue( ref )->Copy();
   }
-  else
-  {
-    _ErrorMessage( _StdErr, 15, 0, 0, ref );
-    result = new Error_Portion;
-  }
+  delete p;
 
   return result;
 }
@@ -1097,48 +857,7 @@ bool GSM::CallFunction( void )
 
       if( refp != 0 && param[ index ] != 0 )
       {
-	if( refp->SubValue() == "" )
-	{
-	  _VarDefine( refp->Value(), param[ index ] );
-	}
-	else // ( refp->SubValue != "" )
-	{
-	  if( _VarIsDefined( refp->Value() ) )
-	  {
-	    p = _VarValue( refp->Value() );
-	    switch( p->Type() )
-	    {
-	    case porNFG_DOUBLE:
-	      ( (Nfg_Portion<double>*) p )->
-		Assign( refp->SubValue(), param[ index ]->Copy() );
-	      break;
-	    case porNFG_RATIONAL:
-	      ( (Nfg_Portion<gRational>*) p )->
-		Assign( refp->SubValue(), param[ index ]->Copy() );
-	      break;
-
-	    case porEFG_DOUBLE:
-	      ( (Efg_Portion<double>*) p )->
-		Assign( refp->SubValue(), param[ index ]->Copy() );
-	      break;
-	    case porEFG_RATIONAL:
-	      ( (Efg_Portion<gRational>*) p )->
-		Assign( refp->SubValue(), param[ index ]->Copy() );
-	      break;
-
-	    default:
-	      _ErrorMessage( _StdErr, 28 );
-	      result = false;
-	    }
-	    delete param[ index ];
-	  }
-	  else // ( !_VarIsDefined( refp->Value() ) )
-	  {
-	    _ErrorMessage( _StdErr, 29 );
-	    delete param[ index ];
-	    result = false;
-	  }
-	}
+	_VarDefine( refp->Value(), param[ index ] );
 	delete refp;
       }
       else // ( !( refp != 0 && param[ index ] != 0 ) )
@@ -1286,25 +1005,6 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
 //----------------------------------------------------------------------------
 
 
-bool GSM::Pop( void )
-{
-  Portion* p;
-  bool result = false;
-
-  if( _Stack->Depth() > 0 )
-  {
-    p = _Stack->Pop();
-    delete p;
-    result = true;
-  }
-  else
-  {
-    _ErrorMessage( _StdErr, 34 );
-  }
-  return result;
-}
-
-
 void GSM::Output( void )
 {
   Portion*  p;
@@ -1351,15 +1051,36 @@ void GSM::Dump( void )
 }
 
 
+bool GSM::Pop( void )
+{
+  Portion* p;
+  bool result = false;
+
+  if( _Stack->Depth() > 0 )
+  {
+    p = _Stack->Pop();
+    delete p;
+    result = true;
+  }
+  else
+  {
+    _ErrorMessage( _StdErr, 34 );
+  }
+  return result;
+}
+
+
 void GSM::Flush( void )
 {
   int       i;
   Portion*  p;
+  bool = result;
 
+  assert( _Stack->Depth() >= 0 );
   for( i = _Stack->Depth() - 1; i >= 0; i-- )
   {
-    p = _Stack->Pop();
-    delete p;
+    result = Pop();
+    assert( result == true );
   }
 
   assert( _Stack->Depth() == 0 );

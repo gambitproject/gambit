@@ -44,7 +44,6 @@ private:
 
   Portion* _ResolveRef             ( Reference_Portion* p );
   Portion* _ResolveRefWithoutError ( Reference_Portion* p );
-  Portion* _ResolvePrimaryRefOnly  ( Reference_Portion* p );
 
   bool _UnaryOperation  ( OperationMode mode );
   bool _BinaryOperation ( OperationMode mode );
@@ -86,25 +85,13 @@ public:
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
-  /* These are commented out because they don't seem to be necessary */
-#if 0
-  bool Push ( Outcome* data );
-  bool Push ( Player*  data );
-  bool Push ( Infoset* data );
-  bool Push ( Action*  data );
-  bool Push ( Node*    data );
-#endif
-
   bool PushStream( const gString& data );
 
   bool PushList ( const int num_of_elements );
 
-  bool PushRef  ( const gString& ref, const gString& subref = "" );
+  bool PushRef  ( const gString& ref );
   bool Assign   ( void );
 
-#if 0
-  bool UnAssign ( void );
-#endif
 
   bool Add      ( void );
   bool Subtract ( void );
@@ -143,10 +130,10 @@ public:
   GSM_ReturnCode Execute( gList<Instruction*>& program, 
 			 bool user_func = false );
   
-  bool Pop ( void );
-
   void Output ( void );
   void Dump   ( void );
+
+  bool Pop    ( void );
   void Flush  ( void );
 };
 

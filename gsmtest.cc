@@ -1230,15 +1230,8 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
-  gout << "assigned sub\n";
-  machine->PushRef( "x", "a" );
-  machine->Push( (double) 1 );
-  machine->Assign();
-  machine->Dump();
-
 
   machine->PushRef( "x" );
-  machine->PushRef( "x", "a" );
   machine->Dump();
 
 
@@ -1247,13 +1240,6 @@ int main( void )
   machine->Push( (double) 10 );
   machine->Assign();
   machine->Dump();
-
-#ifdef CRASHTEST
-  machine->PushRef( "x", "a" );
-  machine->Push( (double) 1 );
-  machine->Assign();
-  machine->Dump();
-#endif  // CRASHTEST
 
 
 #ifdef INTERACTIVE
@@ -1281,22 +1267,6 @@ int main( void )
   gout << "assigned primary ref\n";
 
 
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x", "a" );
-  machine->Bind();
-  machine->Push( (double) 1 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->PushRef( "x", "b" );
-  machine->Push( (double) 2 );
-  machine->Assign();
-
-  gout << "Assigned subrefs; now display:\n";
-
-  machine->PushRef( "x", "b" );
-  machine->PushRef( "x", "a" );
   machine->PushRef( "x" );
   machine->Dump();
 
@@ -1314,19 +1284,6 @@ int main( void )
 
   gout << "assigned primary ref\n";
 
-
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x", "a" );
-  machine->Bind();
-  machine->Push( (double) 1 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-
-  gout << "Assigned subrefs; now display:\n";
-
-  machine->PushRef( "x", "a" );
   machine->PushRef( "x" );
   machine->Dump();
 #endif
