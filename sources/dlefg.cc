@@ -312,7 +312,8 @@ dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
 				     s_actionsPerDialog)];
   for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
        act++) {
-    m_actionLabels[act-1] = new wxText(this, 0, ToText(act));
+    m_actionLabels[act-1] = new wxText(this, 0, ToText(act) + "  ", "",
+				       -1, -1, -1, -1, wxFIXED_LENGTH);
     m_actionLabels[act-1]->SetValue(m_infoset->Actions()[act]->GetName());
     NewLine();
   }
