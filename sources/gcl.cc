@@ -8,6 +8,7 @@
 #include <values.h>
 #include <math.h>
 #include <stdlib.h>
+#include <new.h>
 
 #include "rational.h"
 #include "gtext.h"

@@ -309,6 +309,7 @@ NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_, wxWindow
     delete [] new_payoffs;
 }
 
+#undef ENTRIES_PER_ROW
 
 void NFChangePayoffs::OnOutcome(void)
 {

@@ -81,9 +81,8 @@ PortionSpecTextType _PortionSpecText[] =
 
 gText PortionSpecToText(const PortionSpec& spec)
 {
-  int i;
   gText result;
-  for(i=0; i<NUM_PortionSpecs; i++)
+  for (unsigned int i=0; i<NUM_PortionSpecs; i++)
     if(spec.Type == _PortionSpecText[i].Type)
     {
       if(result == "")
@@ -95,15 +94,15 @@ gText PortionSpecToText(const PortionSpec& spec)
     }
 
   if(result == "")
-    for(i=0; i<NUM_PortionSpecs-NUM_CompositePortionSpecs; i++)
+    for(unsigned int i=0; i<NUM_PortionSpecs-NUM_CompositePortionSpecs; i++)
       if(spec.Type & _PortionSpecText[i].Type)
 	if(result == "")
 	  result = _PortionSpecText[i].Text;
 	else
 	  result = result + " " + _PortionSpecText[i].Text;
   
-  if(spec.ListDepth != NLIST)
-    for(i=0; i<spec.ListDepth; i++)
+  if (spec.ListDepth != NLIST)
+    for (unsigned int i = 0; i < spec.ListDepth; i++)
       result = (gText) "LIST(" + result + ")";
   else
     result = (gText) "NLIST(" + result + ")";
