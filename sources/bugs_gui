@@ -81,66 +81,6 @@ We should either fix this, or deliver a more informative error messsage
 
 //------------------------------
 
-GUI Bug 4: Changing payoffs to a normal form game.   
-
-RDM: This bug seems to be fixed (9/3/98) testing on Linux:
-
-On Fri, 16 May 1997, Richard McKelvey wrote:
-
-> Could you please send the file?  Also could you tell us which algorithm
-> you were using (To find out, go to the menu Solve->Custom->Algorithm, and
-> tell me which boxes are checked.) 
-> 
-> On Fri, 16 May 1997, John Morgan wrote:
-> 
-> > I was running a 2 person 4x4 game when the follwoing error message
-> > appeared:
-> > 	Internal error in GAMBIT
-> > 	Assert: num>=1&&num<=length
-> > 	in file GLIST.INP, line=162.
-> > 
-> > I can send the offending nfg file if this is a help.
-> > 
-> > John Morgan
-> > Asst Professor
-> > Woodrow Wilson School
-> > Princeton
-
-I had solve mode set to "standard" and had the following boxes checked
-under "Opt": Update dynamically, save default, equ value and Nash.
-
-Attached is the file generating the error.  Specifically, I was able to
-get it to solve correctly on the first try, then I changed the payoof
-for player 1 in cell 3,4 from 1 to zero (or vice-versa).  I re-ran solve
-and generated the error.
-
-NFG 1 D "" { "1" "2" }
-
-{ { "1" "2" "3" "4" }
-{ "1" "2" "3" "4" }
-}
-
-1.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 0.000000 1.000000 0.000000 0.000000 1.000000 
-
-
-//------------------------------
-
-GUI Bug 5.1
-
-RDM: Seems to be fixed (testing on Linux 9/3/98)
-
-On Thu, 27 Mar 1997, Karatsobanis John wrote:
-
-> I received the new release of gambit on 26 March. The solving speed is
-> impresive relative to that of the previous release. The functionality is
-> getting better and better. Some bugs for the extensive form mode:
-> 1. When I've tried to delete a solution there was a message error: 
-> "Assert : num>=1&&num<=length
-> in file : GLIST.IMP,line=147"
-
-
-//------------------------------
-
 GUI Bug 5.2
 
 > 2. Why the solution list window does not vanish from the upper right
@@ -149,16 +89,6 @@ GUI Bug 5.2
 RDM: Problem still exists (9/3/98).  Also, the Label->Strats dialog
 box (and perhaps others as well) can not be gotten rid of in any way,
 even after the main Gambit window has been dismissed (on Linux).
-
-//------------------------------
-
-GUI Bug 5.3
-
-RDM: fixed in checked in versions of file 9/3/98
-
-> 3. The examples Cs.efg and holdout.efg furnish the following message
-> error
-> "Readfaild::check the file" when one tries to open them.
 
 //------------------------------
 
@@ -186,19 +116,6 @@ consuming to move around a large gaem.
 
 //------------------------------
 
-GUI Bug 5.5
-
-RDM: Ted fixed these, 9/3/98
-
-> 5. When I've tried to solve a game without assigning any output I had
-> the following message error:
-> "Assert:support.lsValid() 
-> in file EFG.CC,line=1058"
-> The same message when outputs are assigned but the number of players is
-> 1.
-
-//------------------------------
-
 GUI Bug 5.6
 
 > 6. In the edit behav Solution window the ? button seems to do nothing.
@@ -220,24 +137,6 @@ remember what the game is supposed to look like (or bring up two
 copies, one for comparison). Then hit +Magnify three times.  Now move
 around the tree with the cursor, and eventually you will see this.
 
-
-//------------------------------
-
-GUI Bug 6.1
-
-RDM: Now fixed (Same bug as above)
-
-1.
-> When I accidently hit the "start solution algorithm" button without any
-> payoffs specified in the extensive form I get the following error
-> message:
-> 
-> assert:index>=mindex&&index<=maxdex in file:
-> GARRAY.IMP, line 74
-> 
-> I have run into the same message when I accidentally attempt to delete a
-> terminal node.
-> 
 
 //------------------------------
 
@@ -271,16 +170,6 @@ GUI Bug 7.1
 
 RDM: Still a problem.  This may be related to similar problems in EF
 GUI (See above GUI Bugs 5.4 and 5.7)
-
-//------------------------------
-
-GUI Bug 7.2
-
-RDM: Fixed: Ted just added this. 
-
-> 
-> 2. The cursor doesn't change to an egg timer while Gambit is working.
-
 
 //------------------------------
 
@@ -338,52 +227,6 @@ GUI Bug 7.6
 
 RDM: Let's not worry about this one, except to give a general warning
 in he documentation that there may be conflicts with other programs.
-
-//------------------------------
-
-GUI Bug 7.7
-
-> I'm interested mainly in symmetric equilibria of these large (symmetric)
-> games.  As far as I can see there is no way of restricting the search to
-> such equilibria.  Am I right?
-
-RDM: Move this one to "enhancements for the future" section.  
-
-//------------------------------
-
-GUI Bug 7.8
-
-> 
-> Hi Richard.  I attach the game that led to the Gambit error.  The crash
-> occurred after the events:
-> 	Get into Gambit GUI
-> 	Load 4005.nfg (from a directory other than GAMBIT)
-> 	Solve | Custom | Algorithm, choose LCP and set parameter: Max Ttl
-> Solns equal to 2
-> 	Solve | Solve
-> 
-> After a few seconds the error appears.  I believe the error does not occur
-> if Max Ttl Solns is set to 1.
-> 
-> [I created the .nfg file (I wrote a C program to do so); one possibility
-> is that I have committed a formatting error, though for some other
-> parameters I don't get the error.  (If indeed the error is my fault,
-> sorry!!).]
->
- 
-RDM: This error also occurs in the GCL. I am going to move it to that
-list, where it will be easier to track down:
-
-  222 mill:/home/mill/rdm/gambit/test !n
-  newgcl
-  Include["gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << n:=LoadNfg["../nfg/osborne.nfg"]
-  (Nfg) "4 actions; minimal action 0.00; maximal action 0.50"
-  GCL2:= << LcpSolve[n]
-  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
-  A segmentation fault has occurred
-
 
 //------------------------------
 

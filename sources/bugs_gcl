@@ -18,7 +18,22 @@ Bug C5: Incorrect solutions, and crashing with large integers:
   gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
   A segmentation fault has occurred
 
-This looks like an algorithm bug.  I'll see if I can track it down (rdm).  
+This looks like an algorithm bug.  I'll see if I can track it down
+(rdm).  The following bug looks like the same thing: 
+
+RDM: This was moved here from the GUI bug list (9/3/98).  The file is
+in ~rdm/gambit/nfg/osborne.nfg
+
+  222 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << n:=LoadNfg["../nfg/osborne.nfg"]
+  (Nfg) "4 actions; minimal action 0.00; maximal action 0.50"
+  GCL2:= << LcpSolve[n]
+  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
+  A segmentation fault has occurred
+
+
 
 //------------------------------
 
@@ -109,7 +124,8 @@ Bug C21: Algorithms producing nonsense on games of imperfect recall
   { Maybe }
 
 
----------------  These are not bugs but suggested improvements ------------
+
+//---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
 have a -Ifilename flag to include a file?
@@ -124,4 +140,5 @@ On Mon, 11 May 1998, Olson Collin K wrote:
 > I prefer to code using my own text editor, and this feature would make it
 > much easier to do my own coding from outside the gcl command console and
 > allow me to write software that calls gcl iteratively, for example.
+
 
