@@ -57,6 +57,9 @@ public:
   /// Returns true if the profiles are not equal
   bool operator!=(const gbtMixedProfileRep<T> &p_profile) const
     { return !(*this == p_profile); }
+
+  /// Returns the equivalent behavior profile for the game
+  virtual gbtBehavProfile<T> GetBehavior(void) const = 0;
   //@}
 
   //!

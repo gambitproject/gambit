@@ -4,6 +4,29 @@
 <para>
 </para>
 
+<sect2 id="apiref.mixed.getbehavior">
+<title>GetBehavior</title>
+<indexterm><primary>GetBehavior</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtBehavProfile &lt;T&gt; gbtMixedProfile&lt;T&gt;::GetBehavior(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetBehavior</function> returns the behavior strategy profile
+corresponding to this mixed strategy profile.  The conversion is done
+using the calculations in Kuhn's Theorem, which assumes the game is
+of perfect recall.  The output in the case of games which are not
+of perfect recall is not well-defined and may be unpredictable.   
+</para>
+
+</sect2>
+
 <sect2 id="apiref.mixed.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>

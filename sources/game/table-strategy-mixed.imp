@@ -91,6 +91,12 @@ gbtTableMixedProfileRep<T>::operator==(const gbtMixedProfileRep<T> &mp) const
   return (m_game == profile->m_game && m_profile == profile->m_profile);
 }
 
+template <class T> 
+gbtBehavProfile<T> gbtTableMixedProfileRep<T>::GetBehavior(void) const
+{
+  throw gbtGameUndefinedException();
+}
+
 //----------------------------------------------------------------------
 //  class gbtTableMixedProfileRep<T>: Accessing profile probabilities
 //----------------------------------------------------------------------

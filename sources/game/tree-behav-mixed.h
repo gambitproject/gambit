@@ -54,7 +54,7 @@ public:
   //@{
   gbtTreeBehavProfileRep(const gbtTreeGameRep *);
   gbtTreeBehavProfileRep(const gbtTreeBehavProfileRep<T> &);
-  gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T> &);
+  gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T> *);
   virtual ~gbtTreeBehavProfileRep();
 
   gbtBehavProfileRep<T> *Copy(void) const;

@@ -114,6 +114,12 @@ gbtTreeMixedProfileRep<T>::operator==(const gbtMixedProfileRep<T> &mp) const
   return (m_game == profile->m_game && m_profile == profile->m_profile);
 }
 
+template <class T>
+gbtBehavProfile<T> gbtTreeMixedProfileRep<T>::GetBehavior(void) const
+{
+  return new gbtTreeBehavProfileRep<T>(this);
+}
+
 //----------------------------------------------------------------------
 //  class gbtTreeMixedProfileRep<T>: Accessing profile probabilities
 //----------------------------------------------------------------------
@@ -164,7 +170,7 @@ T gbtTreeMixedProfileRep<T>::GetPayoff(const gbtGamePlayer &p_player) const
   gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
   if (!player || player->m_efg != m_game)  throw gbtGameMismatchException();
 
-  return gbtTreeBehavProfileRep<T>(*this).GetPayoff(player);
+  return gbtTreeBehavProfileRep<T>(this).GetPayoff(player);
 }
 
 template <class T> T
@@ -185,7 +191,7 @@ gbtTreeMixedProfileRep<T>::GetPayoffDeriv(const gbtGamePlayer &p_player,
   for (int st = 1; st <= strategy->GetPlayer()->NumStrategies();
        foo.SetStrategyProb(strategy->GetPlayer()->GetStrategy(st++), 0));
   foo.SetStrategyProb(strategy, 1);
-  return gbtTreeBehavProfileRep<T>(foo).GetPayoff(player);
+  return gbtTreeBehavProfileRep<T>(&foo).GetPayoff(player);
 }
 
 template <class T> T
@@ -217,7 +223,7 @@ gbtTreeMixedProfileRep<T>::GetPayoffDeriv(const gbtGamePlayer &p_player,
        foo(s2->GetPlayer()->GetId(), st++) = 0);
   foo.SetStrategyProb(s1, 1);
   foo.SetStrategyProb(s2, 1);
-  return gbtTreeBehavProfileRep<T>(foo).GetPayoff(player);
+  return gbtTreeBehavProfileRep<T>(&foo).GetPayoff(player);
 }
 
 template <class T> 

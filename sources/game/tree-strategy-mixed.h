@@ -57,6 +57,8 @@ public:
   bool IsDeleted(void) const { return false; }
 
   bool operator==(const gbtMixedProfileRep<T> &) const;
+
+  gbtBehavProfile<T> GetBehavior(void) const;
   //@}
  
   /// @name Accessing the profile probabilities

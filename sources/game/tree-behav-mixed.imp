@@ -69,8 +69,8 @@ gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeBehavProfileRep<T
 { }
 
 template <class T>
-gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T> &p_profile)
-  : m_refCount(0), m_efg(p_profile.m_game),
+gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T> *p_profile)
+  : m_refCount(0), m_efg(p_profile->m_game),
     m_profile(m_efg->NumActions()),
     m_cachedData(false),
     m_realizProbs(NumNodes(const_cast<gbtTreeGameRep *>(m_efg))),
@@ -92,11 +92,11 @@ gbtTreeBehavProfileRep<T>::gbtTreeBehavProfileRep(const gbtTreeMixedProfileRep<T
 
     gbtTreePlayerRep *player = m_efg->m_players[pl];
     for (int st = 1; st <= player->NumStrategies(); st++)  {
-      if (p_profile(pl, st) > (T) 0)  {
+      if ((*p_profile)(pl, st) > (T) 0)  {
 	const gbtArray<int> &actions = player->m_strategies[st]->m_behav;
-	m_bvals[n->GetId()] = p_profile(pl, st);
+	m_bvals[n->GetId()] = (*p_profile)(pl, st);
 
-	RealizationProbs(p_profile, pl, actions, m_efg->m_root);
+	RealizationProbs(*p_profile, pl, actions, m_efg->m_root);
       }
     }
  

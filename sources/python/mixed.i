@@ -20,6 +20,8 @@ public:
   int StrategyProfileLength(void) const
     { return (*self)->StrategyProfileLength(); }
   bool IsRational(void) const { return false; }  
+  gbtBehavProfileDouble GetBehavior(void) const 
+    { return (*self)->GetBehavior(); }
 
   //--------------------------------------------------------------------
   //              Accessing the profile probabilities
@@ -57,6 +59,8 @@ public:
   int StrategyProfileLength(void) const
     { return (*self)->StrategyProfileLength(); }
   bool IsRational(void) const { return true; }
+  gbtBehavProfileRational GetBehavior(void) const 
+    { return (*self)->GetBehavior(); }
   
   //--------------------------------------------------------------------
   //              Accessing the profile probabilities
