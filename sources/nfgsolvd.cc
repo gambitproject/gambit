@@ -121,12 +121,10 @@ void dialogNfgSolveStandard::OnChanged(void)
       }
       else {
 	m_description->SetValue("SimpdivSolve");
-	m_precision->Enable(FALSE);
-	m_precision->SetSelection(0);
+	m_precision->Enable(TRUE);
       }
       break;
     case 1:
-    case 2:
       if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("EnumMixedSolve");
 	m_precision->Enable(TRUE);
@@ -134,6 +132,17 @@ void dialogNfgSolveStandard::OnChanged(void)
       else {
 	m_description->SetValue("LiapSolve");
 	m_precision->SetSelection(0);
+	m_precision->Enable(FALSE);
+      }
+      break;
+    case 2:
+      if (m_nfg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve");
+	m_precision->Enable(TRUE);
+      }
+      else {
+	m_description->SetValue("PolEnumSolve");
+	m_precision->SetSelection(1);
 	m_precision->Enable(FALSE);
       }
       break;

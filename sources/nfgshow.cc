@@ -584,8 +584,6 @@ void NfgShow::SolveStandard(void)
   if (dialog.Completed() != wxOK)
     return;
 
-  NFSupport support(nf);
-
   int old_max_soln = solns.Length();  // used for extensive update
 
   guiNfgSolution *solver = 0;
@@ -595,19 +593,20 @@ void NfgShow::SolveStandard(void)
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2) {
 	if (IsConstSum(nf))
-	  solver = new guinfgLp(support, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLp(*cur_sup, this, 1, dialog.Precision(), true);
 	else
-	  solver = new guinfgLcp(support, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLcp(*cur_sup, this, 1, dialog.Precision(), true);
       }
       else
-	solver = new guinfgSimpdiv(support, this, 1, dialog.Precision(), true);
+	solver = new guinfgSimpdiv(*cur_sup, this, 1, dialog.Precision(), true);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(support, this, 1, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*cur_sup, this, 1, dialog.Precision(), true);
       }
       else {
-	wxMessageBox("One-Perfect not implemented", "Standard Solution");
+	wxMessageBox("One-Perfect only implemented for 2-player games",
+		     "Standard Solution");
 	return;
       }
     }
@@ -616,13 +615,13 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_TWO:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(support, this, 2, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(*cur_sup, this, 2, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(support, this, 2, 10, false);
+	solver = new guinfgLiap(*cur_sup, this, 2, 10, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(support, this, 2, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*cur_sup, this, 2, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
       }
       else {
@@ -635,19 +634,19 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_ALL:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(support, this, 0, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(*cur_sup, this, 0, dialog.Precision(), false);
       else {
-	solver = new guinfgLiap(support, this, 0, 0, false);
-	wxMessageBox("Not guaranteed to find all solutions", "Warning");
+	solver = new guinfgPolEnum(*cur_sup, this, 0, false);
       }
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(support, this, 0, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(*cur_sup, this, 0, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
       }
       else {
-	wxMessageBox("All-Perfect not implemented", "Standard Solution");
+	wxMessageBox("All-Perfect only implemented for 2-player games",
+		     "Standard Solution");
 	return;
       }
     }

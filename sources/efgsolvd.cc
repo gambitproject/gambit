@@ -108,6 +108,47 @@ void dialogEfgSolveStandard::OnChanged(void)
 {
   switch (m_standardType->GetSelection()) {
   case 0:
+    switch (m_standardNum->GetSelection()) {
+    case 0:
+      if (IsPerfectRecall(m_efg)) {
+	if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
+	  m_description->SetValue("LpSolve[EFG]");
+	  m_precision->Enable(TRUE);
+	}
+	else if (m_efg.NumPlayers() == 2) {
+	  m_description->SetValue("LcpSolve[EFG]");
+	  m_precision->Enable(TRUE);
+	}
+	else {
+	  m_description->SetValue("SimpdivSolve[NFG]");
+	  m_precision->SetSelection(0);
+	  m_precision->Enable(FALSE);
+	}
+      }
+      else {
+	m_description->SetValue("QreSolve[EFG]");
+	m_precision->SetSelection(0);
+	m_precision->Enable(FALSE);
+      }
+      break;
+    case 1:
+      if (m_efg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve[NFG]");
+	m_precision->Enable(TRUE);
+      }
+      else {
+	m_description->SetValue("LiapSolve[EFG]");
+	m_precision->SetSelection(0);
+	m_precision->Enable(FALSE);
+      }
+      break;
+    case 2:
+      m_description->SetValue("PolEnumSolve[EFG]");
+      m_precision->SetSelection(1);
+      m_precision->Enable(FALSE);
+      break;
+    }
+    break;
   case 1:
     switch (m_standardNum->GetSelection()) {
     case 0:

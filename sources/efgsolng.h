@@ -215,8 +215,13 @@ public:
 //-----------
 
 class guiefgPolEnumEfg : public guiEfgSolution {
+private:
+  int m_stopAfter;
+
 public:
   guiefgPolEnumEfg(const EFSupport &, EfgShowInterface *);
+  guiefgPolEnumEfg(const EFSupport &, EfgShowInterface *,
+		   int p_stopAfter);
   virtual ~guiefgPolEnumEfg() { }
 
   virtual gList<BehavSolution> Solve(void) const;

@@ -132,6 +132,8 @@ private:
 
 public:
   guinfgPolEnum(const NFSupport &, NfgShowInterface *);
+  guinfgPolEnum(const NFSupport &, NfgShowInterface *,
+		int p_stopAfter, bool p_eliminateWeak);
   virtual ~guinfgPolEnum() { }
 
   virtual gList<MixedSolution> Solve(void);

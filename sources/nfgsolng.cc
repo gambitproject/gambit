@@ -409,7 +409,7 @@ guinfgSimpdiv::guinfgSimpdiv(const NFSupport &p_support,
 			     int p_stopAfter, gPrecision p_precision, 
 			     bool p_eliminateWeak)
   : guiNfgSolution(p_support, p_parent),
-    m_stopAfter(p_stopAfter), m_nRestarts(20), m_leashLength(0),
+    m_stopAfter(p_stopAfter), m_nRestarts(36), m_leashLength(0),
     m_precision(p_precision)
 {
   m_eliminate = true;
@@ -474,6 +474,17 @@ guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
 			     NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
 { }
+
+guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
+			     NfgShowInterface *p_parent,
+			     int p_stopAfter, bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+{
+  m_eliminate = true;
+  m_eliminateAll = true;
+  m_eliminateWeak = p_eliminateWeak;
+  m_eliminateMixed = false;
+}
 
 gList<MixedSolution> guinfgPolEnum::Solve(void)
 {
