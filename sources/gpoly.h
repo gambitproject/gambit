@@ -40,6 +40,7 @@ private:
   //----------------------
 
 #ifndef MINI_POLY
+
     // Information
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
