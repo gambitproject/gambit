@@ -1071,71 +1071,76 @@ Node *TreeWindow::IsetDragger::EndNode(void)
 //
 // A dialog box to select the player
 //
-class BranchDraggerDialog : public MyDialogBox {
+class BranchDraggerDialog : public wxDialogBox {
 private:
-  Efg &ef;
-  char *player_name;
-  wxChoice *name_item;
+  Efg &m_efg;
+  int m_playerSelected, m_completed;
+  wxListBox *m_playerNameList;
+
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((BranchDraggerDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((BranchDraggerDialog *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &, wxEvent &)
+    { wxHelpContents(EFG_TREE_HELP); }
+
+  void OnOK(void);
+  void OnCancel(void);
 
 public:
   BranchDraggerDialog(Efg &, wxWindow * = 0);
   virtual ~BranchDraggerDialog();
+
+  int Completed(void) const { return m_completed; }
   EFPlayer *GetPlayer(void);
 };
 
-BranchDraggerDialog::BranchDraggerDialog(Efg &ef_, wxWindow *parent)
-  : MyDialogBox(parent, "Select Player", EFG_TREE_HELP), ef(ef_)
+BranchDraggerDialog::BranchDraggerDialog(Efg &p_efg, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select Player", TRUE), m_efg(p_efg)
 {
-  wxStringList *player_list = new wxStringList;
-  player_name = new char[20];
-  player_list->Add(ef.GetChance()->GetName()); 
-  if (ef.NumPlayers() != 0) {
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-      player_list->Add(ToText(i) + ": " + ef.Players()[i]->GetName());
-    strcpy(player_name,ef.Players()[1]->GetName());
+  m_playerNameList = new wxListBox(this, 0, "Player");
+  m_playerNameList->Append("Chance");
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_playerNameList->Append(m_efg.Players()[pl]->GetName());
   }
-  else
-    strcpy(player_name, ef.GetChance()->GetName());
 
-  wxFormItem *name_fitem = Add(wxMakeFormString("Player", &player_name,
-						wxFORM_CHOICE,
-						new wxList(wxMakeConstraintStrings(player_list),0),
-						NULL, wxVERTICAL));
-  AssociatePanel();
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+				      "Help");
+  helpButton->SetClientData((char *) this);
 
-  name_item = (wxChoice *)name_fitem->GetPanelItem();
-
-  // Init the first entry
-  wxCommandEvent ev(wxEVENT_TYPE_CHOICE_COMMAND);
-  ev.commandInt=0;
-  name_item->Command(ev);
-
-  Go1();
+  Fit();
+  Show(TRUE);
 }
 
 BranchDraggerDialog::~BranchDraggerDialog()
+{ }
+
+void BranchDraggerDialog::OnOK(void)
 {
-  delete [] player_name;
+  m_playerSelected = m_playerNameList->GetSelection();
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void BranchDraggerDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
 }
 
 EFPlayer *BranchDraggerDialog::GetPlayer(void)
 {
-  if (Completed() != wxOK)
-    return 0;
-
-  if (!strcmp(player_name, "Chance"))
-    return ef.GetChance();
-
-  char tmp[20];
-  strncpy(tmp, player_name, 20);
-  for (int i = 0; ; i++) {
-    if (tmp[i] == ':') {
-      tmp[i] = '\0';
-      break;
-    }
-  }
-
-  return ef.Players()[(int) ToDouble(tmp)];
+  if (m_playerSelected == 0)
+    return m_efg.GetChance();
+  else
+    return m_efg.Players()[m_playerSelected];
 }
 
 
