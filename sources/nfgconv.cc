@@ -15,7 +15,7 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
 {
   Nfg<gRational> *N = new Nfg<gRational>(orig.NumStrats());
   
-  N->SetTitle(orig.GetTitle());
+  N->GameForm().SetTitle(orig.GameForm().GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     NFPlayer *p1 = orig.Players()[pl];
@@ -35,8 +35,8 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
       N->SetPayoff(outcome, pl, gRational(orig.Payoff(orig.Outcomes()[outc], pl)));
   }
 		       
-  NFSupport S1(orig);
-  NFSupport S2(*N);
+  NFSupport S1(orig.GameForm());
+  NFSupport S2(N->GameForm());
 
   NfgContIter C1(S1);
   NfgContIter C2(S2);
@@ -56,7 +56,7 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
 {
   Nfg<double> *N = new Nfg<double>(orig.NumStrats());
   
-  N->SetTitle(orig.GetTitle());
+  N->GameForm().SetTitle(orig.GameForm().GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     NFPlayer *p1 = orig.Players()[pl];
@@ -76,8 +76,8 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
       N->SetPayoff(outcome, pl, (double) orig.Payoff(orig.Outcomes()[outc], pl));
   }
 
-  NFSupport S1(orig);
-  NFSupport S2(*N);
+  NFSupport S1(orig.GameForm());
+  NFSupport S2(N->GameForm());
 
   NfgContIter C1(S1);
   NfgContIter C2(S2);

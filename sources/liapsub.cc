@@ -31,7 +31,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 
   Nfg<double> *N = MakeReducedNfg((Efg<double> &) E, EFSupport(E));
 
-  NFSupport *S=new NFSupport(*N);
+  NFSupport *S = new NFSupport(N->GameForm());
 
   ViewNormal(*N, S);
 

@@ -127,7 +127,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
     dim[i] = L->strategies[i].Length();
 
   L->MakeLink(&E, new Nfg<T>(dim));
-  L->N->SetTitle(E.GetTitle());
+  L->N->GameForm().SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
     L->N->Players()[i]->SetName(E.PlayerList()[i]->GetName());
@@ -142,7 +142,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
     }
   }
   
-  NFSupport S(*L->N);
+  NFSupport S(L->N->GameForm());
   NfgContIter iter(S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<int> corrs(E.NumPlayers());
@@ -311,19 +311,19 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
   if (!afg)   return 0;
 
   E.afg = afg;
-  afg->SetTitle(E.GetTitle() + " (Agent Form)");
+  afg->GameForm().SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {
     for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)  {
       Infoset *s = E.PlayerList()[epl]->InfosetList()[iset];
       for (int act = 1; act <= s->NumActions(); act++)  {
-	Strategy *st = afg->Strategies(npl)[act];
+	Strategy *st = afg->GameForm().Strategies(npl)[act];
 	st->name = ToString(act);
       }
     }
   }
 
-  NfgIter iter(*afg);
+  NfgIter iter(afg->GameForm());
   int pl = afg->NumPlayers();
 
   gArray<int> dim(E.NumPlayers());

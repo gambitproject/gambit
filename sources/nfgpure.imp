@@ -17,7 +17,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 				    gList<MixedSolution<T> > &eqs)
 {
   int index;
-  NFSupport S(N);
+  NFSupport S(N.GameForm());
   NfgContIter citer(S);
   
   do  {

@@ -232,9 +232,9 @@ static Portion* GSM_Name_Nfg_Elements( Portion** param )
   switch( param[0]->Spec().Type )
   {
   case porNFG_FLOAT:
-    return new TextValPortion(((NfgPortion<double>*) param[0])->Value()->GetTitle());
+    return new TextValPortion(((NfgPortion<double>*) param[0])->Value()->GameForm().GetTitle());
   case porNFG_RATIONAL:
-    return new TextValPortion(((NfgPortion<gRational>*) param[0])->Value()->GetTitle());
+    return new TextValPortion(((NfgPortion<gRational>*) param[0])->Value()->GameForm().GetTitle());
     break;
   case porNFPLAYER:
     return new TextValPortion(((NfPlayerPortion*) param[0])->Value()->
@@ -666,13 +666,13 @@ static Portion *GSM_SetName_Nfg(Portion **param)
   if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
     gString name = ((TextPortion *) param[1])->Value();
-    N.SetTitle(name);
+    N.GameForm().SetTitle(name);
     return param[0]->ValCopy();
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
     gString name = ((TextPortion *) param[1])->Value();
-    N.SetTitle(name);
+    N.GameForm().SetTitle(name);
     return param[0]->ValCopy();
   }
 }
@@ -777,14 +777,14 @@ static Portion *GSM_Support_Nfg(Portion **param)
 {
   if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N), &N, DOUBLE);
+    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N, DOUBLE);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N), &N, RATIONAL);
+    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N, RATIONAL);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;

@@ -112,7 +112,7 @@ template <class T> class NfgFile;
 
 #include "grblock.h"
 
-template <class T> class Nfg : public BaseNfg {
+template <class T> class Nfg : private BaseNfg {
 
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
@@ -134,6 +134,19 @@ public:
   bool IsConstSum(void) const;
   T MinPayoff(int pl = 0) const;
   T MaxPayoff(int pl = 0) const;
+
+  BaseNfg &GameForm(void) const   { return (BaseNfg &) *this; }
+
+  int NumPlayers(void) const   { return BaseNfg::NumPlayers(); }
+  const gArray<NFPlayer *> &Players(void) const
+    { return BaseNfg::Players(); }
+
+  int NumStrats(int pl) const  { return BaseNfg::NumStrats(pl); }
+  const gArray<int> &NumStrats(void) const  { return BaseNfg::NumStrats(); }
+
+  const gList<NFOutcome *> &Outcomes(void) const 
+    { return BaseNfg::Outcomes(); }
+  int NumOutcomes(void) const   { return BaseNfg::NumOutcomes(); }
 
   NFOutcome *NewOutcome(void);
 

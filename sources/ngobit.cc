@@ -146,7 +146,7 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
   pxifile << "\n" << params.maxLam << "\n" << params.delLam;
   pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
   
-  int numcols = N.ProfileLength() + 2;
+  int numcols = N.GameForm().ProfileLength() + 2;
 
   pxifile << "DataFormat:\n" << numcols;
   

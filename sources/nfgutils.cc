@@ -15,7 +15,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 {
   Nfg<T> *N = new Nfg<T>(S.NumStrats());
   
-  N->SetTitle(nfg.GetTitle());
+  N->GameForm().SetTitle(nfg.GameForm().GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     NFPlayer *player = N->Players()[pl];
@@ -35,7 +35,7 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
   }
 
   NfgContIter oiter(S);
-  NFSupport newS(*N);
+  NFSupport newS(N->GameForm());
   NfgContIter niter(newS);
   
   do   {

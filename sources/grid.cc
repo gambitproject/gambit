@@ -265,8 +265,8 @@ void GridSolveModule::OutputHeader(gOutput &out)
       for (int i=1;i<=N.NumStrats(1);i++)  {
 	for (int j=1;j<=N.NumStrats(2);j++) {
 	  profile[1]=i;profile[2]=j;
-	  out << N.Payoff(N.GetOutcome(profile), 1) << ' ' <<
-	         N.Payoff(N.GetOutcome(profile), 2) << ' ';
+	  out << N.Payoff(N.GameForm().GetOutcome(profile), 1) << ' ' <<
+	         N.Payoff(N.GameForm().GetOutcome(profile), 2) << ' ';
 	}
 	out<<'\n';
       }
@@ -279,7 +279,7 @@ void GridSolveModule::OutputHeader(gOutput &out)
   out<<1<<'\n'<<params.tol1<<'\n'<<params.delp1<<'\n';
 
   out<<"DataFormat:\n";
-  int numcols = N.ProfileLength() + 2;
+  int numcols = N.GameForm().ProfileLength() + 2;
   out << numcols<<' '; // Format: Lambda, ObjFunc, Prob1,0..1,n1 , Prob2,0..2,n2 , ...
   for (int i = 1; i <= numcols; i++) out << i << ' ';
 

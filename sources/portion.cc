@@ -1862,7 +1862,7 @@ void NfgPortion<double>::Output(gOutput& s) const
 {
   Portion::Output(s);
   assert(*_Value);
-  s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
+  s << "(Nfg) \"" << (*_Value)->GameForm().GetTitle() << "\""; 
 }
 
 gString NfgPortion<double>::OutputString( void ) const
@@ -1944,7 +1944,7 @@ void NfgPortion<gRational>::Output(gOutput& s) const
 {
   Portion::Output(s);
   assert(*_Value);
-  s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
+  s << "(Nfg) \"" << (*_Value)->GameForm().GetTitle() << "\""; 
 }
 
 gString NfgPortion<gRational>::OutputString( void ) const
