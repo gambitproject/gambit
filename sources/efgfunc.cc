@@ -633,6 +633,19 @@ Portion *GSM_MarkSubgames_Node(Portion **param)
   return por;
 }
 
+
+
+//---------------
+// IsLegalSubgame
+//---------------
+
+Portion *GSM_IsLegalSubgame_Node(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  return new BoolValPortion(n->BelongsTo()->IsLegalSubgame(n));
+}
+
+
 //--------------------
 // MarkThisSubgame
 //--------------------
@@ -1949,6 +1962,11 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_UnmarkSubgames_Node, 1);
   FuncObj->SetParamInfo(GSM_UnmarkSubgames_Node, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsLegalSubgame");
+  FuncObj->SetFuncInfo(GSM_IsLegalSubgame_Node, 1);
+  FuncObj->SetParamInfo(GSM_IsLegalSubgame_Node, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("UnmarkThisSubgame");
