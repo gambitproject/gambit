@@ -165,6 +165,9 @@ on MSWin.
 the number.  There were other dialogs with similar problems.  Can't
 recall them now.
 
+TLT: 9/8/99, this is fine on my display.  Must experiment on various
+computers to figure out what causes this.
+
 //--------------------------------
 
 Bug D37:  Bug in interactive selection of subgame solutions
@@ -200,6 +203,12 @@ after this window has been created, the main Gambit window can be
 dismissed and the child windows do not get dismissed.  (this is on
 Linux) N.B. the "close" button here refers to the window manager close
 button.
+
+TLT: 9/8/99.  Mixed strategy edit window should now be fixed (works on
+Windows, untested on unix.)  There is no such dialog as Edit->Strats->Label;
+all the dialogs on the Edit menu on the normal form seem just fine to me.
+This sounds like it might be an outdated problem; I replaced a spreadsheet
+version of that dialog months ago which did have a similar problem.
 
 //------------------------------
 
