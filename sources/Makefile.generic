@@ -25,6 +25,63 @@
 # Note: If files are moved or renamed, this makefile can get "stuck".  
 #       In this case do 'rm *.d' or 'make clean'
 
+#
+# Configuration options
+#
+# These defines list all the customizable configuration options
+# These should be altered to fit the target system's setup
+#
+
+#
+# define the names of the executables created
+#
+GCLBINARY = gcl_linux
+WXGCLBINARY = wxgcl_gtk_linux
+GUIBINARY = gambit_gtk_linux
+
+# Generic WxWin information:
+# 
+#   WXINCDIR = location of wxwin include files
+#   WXLIBDIR = location of wxwin libraries
+#   WXLIB    = any wx libraries used
+
+WXDIR = /home/gambit/wxGTK
+WXLIBDIR = -L$(WXDIR)/lib
+WXINCDIR = -I$(WXDIR)/include -D__WXGTK__
+WXLIB = -lwx_gtk
+
+# Motif defines
+#WXDIR = /home/gambit/wxwin
+#WXLIBDIR = -L$(WXDIR)/lib
+#WXINCDIR = -I$(WXDIR)/include -D__WXMOTIF__
+#WXLIB = -lwx_motif
+
+
+# Site Specific information:
+#
+#   DEFINES = any compiler defines needed 
+#   XINCDIR = location of X include files
+#   XLIBDIR = location of X libraries
+#   XLIB    = any X libraries used
+
+#ifeq ($(SYSNAME), SunOS_5.6)
+#XINCDIR = -I/usr/openwin/include -I/usr/dt/include
+#XLIBDIR = -L/usr/openwin/lib -L/usr/dt/lib
+#XLIB = -lXm -lXmu -lXt -lX11 -lsocket -lnsl -lgen -lm
+#else 
+#ifeq ($(SYSNAME), HP-UX)
+#DEFINES = -D_HPUX_SOURCE -DSVR4
+#XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
+#XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
+#XLIB = -lXm -lXt -lX11 -lc -lm -lg++
+
+XINCDIR = -I/usr/X11R6/include
+XLIBDIR = -L/usr/X11R6/lib 
+XLIB = -lgtk -lgdk -lpthread
+#Linux motif libraries
+#XLIB = -lX11 -lXm -lXp -lXpm -lXmu -lXext -lXt -lpthread -ldl -lm
+
+
 # define compiler and flags
 
 CC = g++
@@ -33,17 +90,11 @@ CFLAGS = -Wall $(DEFINES) \
 OBJECT_SUFFIX = .o
  
 #
-# Default system variables, which should be overwritten if necessary.
-#
-
-SYSNAME = linux
-GUI     = gtk
-
 # define directory where object files are put
-
-
-OBJDIR = obj_$(GUI)_$(SYSNAME)
+#
+OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
+
 
 # rule for creating .o (object) files from .cc files
 
@@ -57,52 +108,6 @@ vpath %.o  $(OBJDIR)
 	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $(INCDIR) $< \
 		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
 		[ -s $@ ] || rm -f $@'
-
-# Generic WxWin information:
-# 
-#   WXINCDIR = location of wxwin include files
-#   WXLIBDIR = location of wxwin libraries
-#   WXLIB    = any wx libraries used
-
-ifeq ($(GUI), gtk)
-WXDIR = /home/gambit/wxGTK
-WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/include -D__WXGTK__
-WXLIB = -lwx_gtk
-else # motif
-WXDIR = /home/gambit/wxwin
-WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/include -D__WXMOTIF__
-WXLIB = -lwx_motif
-endif
-
-# Site Specific information:
-#
-#   DEFINES = any compiler defines needed 
-#   XINCDIR = location of X include files
-#   XLIBDIR = location of X libraries
-#   XLIB    = any X libraries used
-
-ifeq ($(SYSNAME), SunOS_5.6)
-XINCDIR = -I/usr/openwin/include -I/usr/dt/include
-XLIBDIR = -L/usr/openwin/lib -L/usr/dt/lib
-XLIB = -lXm -lXmu -lXt -lX11 -lsocket -lnsl -lgen -lm
-else 
-ifeq ($(SYSNAME), HP-UX)
-DEFINES = -D_HPUX_SOURCE -DSVR4
-XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
-XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
-XLIB = -lXm -lXt -lX11 -lc -lm -lg++
-else # Linux
-XINCDIR = -I/usr/X11R6/include
-XLIBDIR = -L/usr/X11R6/lib 
-ifeq ($(GUI), gtk)
-XLIB = -lgtk -lgdk -lpthread
-else # motif
-XLIB = -lX11 -lXm -lXp -lXpm -lXmu -lXext -lXt -lpthread -ldl -lm
-endif # GUI=gtk
-endif
-endif
 
 # Combine the site dependent and independent data
 
@@ -127,52 +132,20 @@ include	$(SOURCES:.cc=.d)
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-gcl_$(SYSNAME):	$(OBJDIR) $(TTYGCL_OBJECTS)
-	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../gcl_$(SYSNAME) -L../base -L../math -lgambit_base -lgambit_math -lm; cd ..
+all:	gcl wxgcl gui
 
-gcl:	
-ifndef SYSNAME
-	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a SYSNAME e.g. linux, solaris, hp
-	@exit 1
-endif
-	$(MAKE) gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
+gcl:	$(OBJDIR) $(TTYGCL_OBJECTS)
+	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../$(GCLBINARY) -L../base -L../math -lgambit_base -lgambit_math -lm; cd ..
 
-gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
-	cd $(OBJDIR); \
-	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../gui_$(GUI)_$(SYSNAME) -L../base -L../math -lgambit_base -lgambit_math; cd ..
-
-gui:
-ifndef SYSNAME
-	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a SYSNAME e.g. linux, solaris, hp
-	@exit 1
-endif
-ifndef GUI
-	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a GUI e.g. gtk, motif
-	@exit 1
-endif
-	$(MAKE) gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
-
-wxgcl_$(GUI)_$(SYSNAME):	$(OBJDIR) $(WXGCL_OBJECTS)
+wxgcl:	$(OBJDIR) $(WXGCL_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(WXGCL_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../wxgcl_$(GUI)_$(SYSNAME) -L../base -L../math -lgambit_base -lgambit_math; cd ..
+	    -o ../$(WXGCLBINARY) -L../base -L../math -lgambit_base -lgambit_math; cd ..
 
-wxgcl:
-ifndef SYSNAME
-	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a SYSNAME e.g. linux, solaris, hp
-	@exit 1
-endif
-ifndef GUI
-	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
-	@echo Must specify a GUI e.g. gtk, motif
-	@exit 1
-endif
-	$(MAKE) wxgcl_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
+gui:	$(OBJDIR) $(ALLGUI_OBJECTS)
+	cd $(OBJDIR); \
+	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
+	    -o ../$(GUIBINARY) -L../base -L../math -lgambit_base -lgambit_math; cd ..
 
 readefg.cc:  readefg.yy
 	bison -p efg_yy -o readefg.cc readefg.yy
@@ -184,7 +157,7 @@ gcompile.cc: gcompile.yy
 	bison -p gcl_yy -o gcompile.cc gcompile.yy
 
 clean:	
-	rm -f $(OBJDIR)/*.o
+	rm -f $(OBJDIR)/*.o $(GCLBINARY) $(WXGCLBINARY) $(GUIBINARY)
 
 manifest:
 	g++ -MM -MG $(SOURCES) | sed 'y/\ / \n/' | sort | uniq | \
