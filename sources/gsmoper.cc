@@ -2840,9 +2840,9 @@ Portion* GSM_Date(Portion**)
 Portion* GSM_CallFunction( Portion** param )
 {
   _gsm->InitCallFunction( ( (TextPortion*) param[0] )->Value() );
-  _gsm->Push( param[1] );
+  _gsm->Push( param[1]->ValCopy() );
   _gsm->BindVal();
-  _gsm->Push( param[2] );
+  _gsm->Push( param[2]->ValCopy() );
   _gsm->BindVal();
   _gsm->CallFunction();
   return _gsm->PopValue();
