@@ -56,3 +56,32 @@ template <class T> INLINE gLPTableau3<T>::gLPTableau3(const gMatrix<T> &A,
             - Tableau0.OptimumVector()[j + C.Length()];
   cost = Tableau0.OptimumCost();
 }   
+
+
+template <class T> T gLPTableau3<T>::OptimumCost(void) const
+{
+  return cost;
+}
+
+template <class T> const gVector<T> &gLPTableau3<T>::OptimumVector(void) const
+{
+  return optimum;
+}
+
+template <class T> int gLPTableau3<T>::IsFeasible(void) const
+{
+  return feasible;
+}
+
+template <class T> int gLPTableau3<T>::IsBounded(void) const
+{
+  return bounded;
+}
+
+template <class T> int gLPTableau3<T>::IsWellFormed(void) const
+{
+  return well_formed;
+}
+
+template <class T> gLPTableau3<T>::~gLPTableau3()
+{ }
