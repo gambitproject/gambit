@@ -1789,35 +1789,34 @@ void NormalSpread::SetPlayerLabels(const NFSupport *cur_sup)
 // Probability display
 void NormalSpread::MakeProbDisp(void)
 {
-    int row = dimensionality[pl1] + 1;
-    int col = dimensionality[pl2] + 1;
+  int row = dimensionality[pl1] + 1;
+  int col = dimensionality[pl2] + 1;
 
-    if (!features.prob)
-    {
-        AddRow(row);
-        AddCol(col);
-        DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
-    }
+  if (!features.prob) {
+    AddRow(row);
+    SetSelectableRow(row, FALSE);
+    AddCol(col);
+    SetSelectableCol(col, FALSE);
+    DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
+  }
 
-    // Note: this insures that Prob is always the FIRST extra after the
-    // regular data, and Domin is AFTER the prob.
-    SetLabelRow(row, "Prob");
-    SetLabelCol(col, "Prob");
-    features.prob = 1;
+  // Note: this insures that Prob is always the FIRST extra after the
+  // regular data, and Domin is AFTER the prob.
+  SetLabelRow(row, "Prob");
+  SetLabelCol(col, "Prob");
+  features.prob = 1;
 }
 
 
 void NormalSpread::RemoveProbDisp(void)
 {
-
-    if (features.prob)
-    {
-        int row = dimensionality[pl1] + 1;
-        int col = dimensionality[pl2] + 1;
-        DelRow(row);
-        DelCol(col);
-        features.prob = 0;
-    }
+  if (features.prob) {
+    int row = dimensionality[pl1] + 1;
+    int col = dimensionality[pl2] + 1;
+    DelRow(row);
+    DelCol(col);
+    features.prob = 0;
+  }
 }
 
 
@@ -1829,7 +1828,9 @@ void NormalSpread::MakeDomDisp(void)
 
   if (!features.dom) {
     AddRow(row);
+    SetSelectableRow(row, FALSE);
     AddCol(col);
+    SetSelectableCol(col, FALSE);
     DrawSettings()->SetColWidth(5, col);
   }
 
@@ -1841,47 +1842,45 @@ void NormalSpread::MakeDomDisp(void)
 
 void NormalSpread::RemoveDomDisp(void)
 {
-
-    if (features.dom)
-    {
-        int row = dimensionality[pl1] + features.prob + 1;
-        int col = dimensionality[pl2] + features.prob + 1;
-        DelRow(row);
-        DelCol(col);
-        features.dom = 0;
-    }
+  if (features.dom) {
+    int row = dimensionality[pl1] + features.prob + 1;
+    int col = dimensionality[pl2] + features.prob + 1;
+    DelRow(row);
+    DelCol(col);
+    features.dom = 0;
+  }
 }
 
 
 // Value display
 void NormalSpread::MakeValDisp(void)
 {
-    int row = dimensionality[pl1] + features.prob + features.dom + 1;
-    int col = dimensionality[pl2] + features.prob + features.dom + 1;
+  int row = dimensionality[pl1] + features.prob + features.dom + 1;
+  int col = dimensionality[pl2] + features.prob + features.dom + 1;
 
-    if (!features.val)
-    {
-        AddRow(row);
-        AddCol(col);
-        DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
-    }
-
-    SetLabelRow(row, "Value");
-    SetLabelCol(col, "Value");
-    features.val = 1;
+  if (!features.val) {
+    AddRow(row);
+    SetSelectableRow(row, FALSE);
+    AddCol(col);
+    SetSelectableCol(col, FALSE);
+    DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
+  }
+  
+  SetLabelRow(row, "Value");
+  SetLabelCol(col, "Value");
+  features.val = 1;
 }
 
 
 void NormalSpread::RemoveValDisp(void)
 {
-    if (features.val)
-    {
-        int row = dimensionality[pl1] + features.prob + features.dom + 1;
-        int col = dimensionality[pl2] + features.prob + features.dom + 1;
-        DelRow(row);
-        DelCol(col);
-        features.val = 0;
-    }
+  if (features.val) {
+    int row = dimensionality[pl1] + features.prob + features.dom + 1;
+    int col = dimensionality[pl2] + features.prob + features.dom + 1;
+    DelRow(row);
+    DelCol(col);
+    features.val = 0;
+  }
 }
 
 

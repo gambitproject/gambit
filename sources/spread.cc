@@ -401,17 +401,15 @@ int SpreadSheetC::MaxY(int row)
 
 Bool SpreadSheetC::XYtoRowCol(int x, int y, int *row, int *col)
 {
-    if (x < MaxX(0) || y < MaxY(0) || x > MaxX() || y > MaxY())
-    {
-        /**row = -1; *col = -1; */
-        return FALSE;
-    }
+  if (x < MaxX(0) || y < MaxY(0) || x > MaxX() || y > MaxY()) {
+    return FALSE;
+  }
 
-    *row = (y-draw_settings->YStart()) / draw_settings->GetRowHeight()+1;
-    *col = 0;
-    int i = 1;
+  *row = (y-draw_settings->YStart()) / draw_settings->GetRowHeight()+1;
+  *col = 0;
+  int i = 1;
 
-    while (*col == 0 && i <= sheet->GetCols())
+  while (*col == 0 && i <= sheet->GetCols())
     {
         if (x < MaxX(i)) 
             *col = i;
@@ -529,7 +527,7 @@ void SpreadSheetC::OnEvent(wxMouseEvent &ev)
         float x, y;
         ev.Position(&x, &y);
         
-        if (XYtoRowCol(x, y, &cell.row, &cell.col) == FALSE) 
+        if (sheet->XYtoRowCol(x, y, &cell.row, &cell.col) == FALSE) 
             return;
         
         if (ev.LeftDown() && !ev.ControlDown()) 
@@ -1251,80 +1249,99 @@ void SpreadSheet::Clear(void)
 
 void SpreadSheet::SetDimensions(int rows_, int cols_)
 {
-    assert(rows_ > 0 && cols_ > 0 && "SpreadSheet::Invalid Dimensions");
-    rows = rows_;
-    cols = cols_;
-    data = gRectBlock<SpreadDataCell> (rows, cols);
-    row_labels = gBlock<gText>(rows);
-    col_labels = gBlock<gText>(cols);
+  assert(rows_ > 0 && cols_ > 0 && "SpreadSheet::Invalid Dimensions");
+  rows = rows_;
+  cols = cols_;
+  data = gRectBlock<SpreadDataCell> (rows, cols);
+  row_labels = gBlock<gText>(rows);
+  col_labels = gBlock<gText>(cols);
+  row_selectable = gBlock<bool>(rows);
+  for (int i = 1; i <= rows; row_selectable[i++] = true);
+  col_selectable = gBlock<bool>(cols);
+  for (int i = 1; i <= cols; col_selectable[i++] = true);
 }
 
 
 void SpreadSheet::AddRow(int row)
 {
-    if (row == 0) 
-        row = rows + 1;
+  if (row == 0) 
+    row = rows + 1;
 
-    // add a new row to the matrix
-    data.InsertRow(row, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
+  // add a new row to the matrix
+  data.InsertRow(row, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
 
-    // Copy the cell types from the previous row
-    for (int i = 1; i <= cols; i++) 
-        data(rows+1, i).SetType(data(rows, i).GetType());
+  // Copy the cell types from the previous row
+  for (int i = 1; i <= cols; i++) 
+    data(rows+1, i).SetType(data(rows, i).GetType());
 
-    // add a new entry to the row_labels
-    row_labels.Insert((const gText)gText(), row);
-    rows++;
+  row_labels.Insert("", row);
+  row_selectable.Insert(true, row);
+  rows++;
 }
 
 
 void SpreadSheet::AddCol(int col)
 {
-    if (col == 0) 
-        col = cols + 1;
+  if (col == 0) 
+    col = cols + 1;
 
-    // add a new column to the matrix
-    data.InsertColumn(col, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
+  // add a new column to the matrix
+  data.InsertColumn(col, (const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
 
-    // add a new entry to the col_labels
-    col_labels.Insert((const gText)gText(), col);
-    cols++;
+  col_labels.Insert("", col);
+  col_selectable.Insert(true, col);
+  cols++;
 }
 
 
 void SpreadSheet::DelRow(int row)
 {
-    if (rows < 2) 
-        return;
+  if (rows < 2) 
+    return;
     
-    if (row == 0) 
-        row = rows;
+  if (row == 0) 
+    row = rows;
 
-    // remove a row from the matrix
-    data.RemoveRow(row);
+  // remove a row from the matrix
+  data.RemoveRow(row);
 
-    // remove an entry from the row_labels;
-    row_labels.Remove(row);
-    rows--;
+  row_labels.Remove(row);
+  row_selectable.Remove(row);
+  rows--;
 }
 
 
 void SpreadSheet::DelCol(int col)
 {
-    if (cols < 2) 
-        return;
+  if (cols < 2) 
+    return;
     
-    if (col == 0) 
-        col = cols;
+  if (col == 0) 
+    col = cols;
 
-    // remove a column from the matrix
-    data.RemoveColumn(col);
+  // remove a column from the matrix
+  data.RemoveColumn(col);
 
-    // remove an entry from the col_labels
-    col_labels.Remove(col);
-    cols--;
+  col_labels.Remove(col);
+  col_selectable.Remove(col);
+  cols--;
 }
 
+
+Bool SpreadSheet::XYtoRowCol(int x, int y, int *row, int *col) 
+{ 
+  int orig_row = *row, orig_col = *col;
+  if (!sheet->XYtoRowCol(x, y, row, col))
+    return FALSE;
+
+  if (row_selectable[*row] && col_selectable[*col])
+    return TRUE;
+  else {
+    *row = orig_row;
+    *col = orig_col;
+    return FALSE;
+  }
+}
 
 void SpreadSheet::SetSize(int xs, int ys, int xe, int ye)
 {
@@ -2123,3 +2140,14 @@ void SpreadSheet3D::DelCol(int p_col /*= 0*/)
   DrawSettings()->DelCol(p_col);
 }
 
+void SpreadSheet3D::SetSelectableRow(int p_row, Bool p_selectable)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].SetSelectableRow(p_row, p_selectable);
+}
+
+void SpreadSheet3D::SetSelectableCol(int p_col, Bool p_selectable)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].SetSelectableCol(p_col, p_selectable);
+}

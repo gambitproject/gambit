@@ -494,8 +494,8 @@ class SpreadSheet
 private:
     SpreadSheetC    *sheet;
     gRectBlock<SpreadDataCell> data;
-    gBlock<gText>    row_labels;
-    gBlock<gText>    col_labels;
+    gBlock<gText>    row_labels, col_labels;
+    gBlock<bool>     row_selectable, col_selectable;
     int              rows, cols, level;
     gText            label;
     Bool             active;
@@ -537,8 +537,7 @@ public:
     { sheet->GetDataExtent(x, y, str); }
 
     // Low level access
-    Bool XYtoRowCol(int x, int y, int *row, int *col) 
-    { return sheet->XYtoRowCol(x, y, row, col); }
+    Bool XYtoRowCol(int x, int y, int *row, int *col); 
     SpreadSheetC *GetSheet(void) { return sheet; } // Use with caution!
 
     // Row/Col manipulation
@@ -602,11 +601,16 @@ public:
     gText       GetLabelRow(int row)                 { return row_labels[row]; }
     gText      GetLabelCol(int col)                  { return col_labels[col]; }
 
+  void SetSelectableRow(int row, Bool sel) { row_selectable[row] = sel; }
+  void SetSelectableCol(int col, Bool sel) { col_selectable[col] = sel; }
+
     // Accessing the currently hilighted cell
     int         CurRow(void)      { return sheet->Row(); }
     int         CurCol(void)      { return sheet->Col(); }
-    void        SetCurRow(int r)  { sheet->SetRow(r);    }
-    void        SetCurCol(int c)  { sheet->SetCol(c);    }
+    void        SetCurRow(int r)
+    { if (row_selectable[r])  sheet->SetRow(r);    }
+    void        SetCurCol(int c) 
+    { if (col_selectable[c])  sheet->SetCol(c);    }
 
     // Equality operators to allow this class to be used in a gList
     int         operator==(const SpreadSheet &) { return 0; }
@@ -813,6 +817,9 @@ public:
     // Row/Column labeling
     void  SetLabelRow(int row, const gText &s, int level = 0);
     void  SetLabelCol(int col, const gText &s, int level = 0);
+
+    void SetSelectableRow(int, Bool);
+    void SetSelectableCol(int, Bool);
 
     void  SetLabelLevel(const gText &s, int level = 0)
     {
