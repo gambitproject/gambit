@@ -64,13 +64,29 @@ gOutput &wxStatus::operator<<(const void *x)
 
 void wxStatus::SetProgress(double p_value)
 {
-  m_value = (int) (p_value * 100);
-  Update((int) p_value * 100);
+  if (p_value >= 1.0) {
+    m_value = 100;
+  }
+  else if (p_value <= 0.0) {
+    m_value = 0;
+  }
+  else {
+    m_value = (int) (p_value * 100.0);
+  }
+  Update(m_value);
 }
 
 void wxStatus::SetProgress(double p_value, const gText &p_message)
 {
-  m_value = (int) (p_value * 100);
-  Update((int) (p_value * 100), (const char *) p_message);
+  if (p_value >= 1.0) {
+    m_value = 100;
+  }
+  else if (p_value <= 0.0) {
+    m_value = 0;
+  }
+  else {
+    m_value = (int) (p_value * 100.0);
+  }
+  Update(m_value, (const char *) p_message);
 }
 
