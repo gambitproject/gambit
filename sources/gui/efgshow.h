@@ -163,6 +163,7 @@ private:
   void OnToolsEquilibriumCustomNfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgLp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomNfgSimpdiv(wxCommandEvent &);
 
   void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);

@@ -1320,7 +1320,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
   gList<BehavSolution> solutions;
   gsm.StartAlgorithmMonitor("SimpDivSolve Progress");
   try {
-    efgSimpDivNfgSolve algorithm(support, params);
+    efgSimpDivNfgSolve algorithm(params);
     solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     ((NumberPortion *) param[7])->SetValue(algorithm.Time());

@@ -66,6 +66,7 @@
 #include "alglcp.h"
 #include "alglp.h"
 #include "algqre.h"
+#include "algsimpdiv.h"
 
 #include "behavedit.h"
 
@@ -185,14 +186,14 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
 	   EfgShow::OnToolsEquilibriumCustomNfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP,
 	   EfgShow::OnToolsEquilibriumCustom)
-  EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_SIMPDIV, 
-	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM, 
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QRE,
 	   EfgShow::OnToolsEquilibriumCustomNfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID,
 	   EfgShow::OnToolsEquilibriumCustom)
+  EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_SIMPDIV, 
+	   EfgShow::OnToolsEquilibriumCustomNfgSimpdiv)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
   EVT_MENU(efgmenuTOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
   EVT_MENU(wxID_HELP_CONTENTS, EfgShow::OnHelpContents)
@@ -2233,9 +2234,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP: 
     solver = new guiefgLiapNfg(this);
     break;
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_SIMPDIV:
-    solver = new guiefgSimpdivNfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM:
     solver = new guiefgPolEnumNfg(this);
     break;
@@ -2435,6 +2433,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgQre(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (QreNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgSimpdiv(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (SimpdivNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

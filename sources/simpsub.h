@@ -20,7 +20,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_SIMPDIV_NFG; }    
 
 public:
-  efgSimpDivNfgSolve(const EFSupport &, const SimpdivParams &, int max = 0);
+  efgSimpDivNfgSolve(const SimpdivParams &, int max = 0);
   virtual ~efgSimpDivNfgSolve();
 
   int NumEvals(void) const    { return nevals; }

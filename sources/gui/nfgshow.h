@@ -109,6 +109,7 @@ private:
   void OnToolsEquilibriumCustomLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomLp(wxCommandEvent &);
   void OnToolsEquilibriumCustomQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &);
 
   void OnHelpContents(wxCommandEvent &);
   void OnHelpIndex(wxCommandEvent &);

@@ -29,8 +29,7 @@ void efgSimpDivNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   delete N;
 }
 
-efgSimpDivNfgSolve::efgSimpDivNfgSolve(const EFSupport &, 
-				       const SimpdivParams &p, int max)
+efgSimpDivNfgSolve::efgSimpDivNfgSolve(const SimpdivParams &p, int max)
   : SubgameSolver(max), params(p)
 { }
 

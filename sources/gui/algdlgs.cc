@@ -22,7 +22,6 @@
 #include "nfgconst.h"
 
 #include "dlliap.h"
-#include "dlsimpdiv.h"
 #include "dlpolenum.h"
 #include "dlqregrid.h"
 
@@ -421,72 +420,6 @@ void dialogLiap::AlgorithmFields(void)
 }
 
 int dialogLiap::StopAfter(void) const
-{
-  if (m_findAll->GetValue())
-    return 0;
-  else
-    return ToNumber(m_stopAfter->GetValue().c_str());
-}
-
-//=======================================================================
-//                    dialogSimpdiv: Member functions
-//=======================================================================
-
-dialogSimpdiv::dialogSimpdiv(wxWindow *p_parent, bool p_subgames)
-  : dialogAlgorithm("SimpdivSolve Parameters", true, p_parent)
-{
-  MakeCommonFields(true, p_subgames, true);
-}
-
-dialogSimpdiv::~dialogSimpdiv()
-{
-  if (GetReturnCode() == wxID_OK) {
-    wxConfig config("Gambit");
-    config.Write("Solutions/Simpdiv-nRestarts", (long) NumRestarts());
-    config.Write("Solutions/Simpdiv-leashLength", (long) LeashLength());
-  }
-}
-
-void dialogSimpdiv::AlgorithmFields(void)
-{
-  wxConfig config("Gambit");
-
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  StopAfterField();
-  PrecisionField();
-
-  long nRestarts = 0;
-  config.Read("Solutions/Simpdiv-nRestarts", &nRestarts);
-  m_nRestartsValue = (char *) ToText(nRestarts);
-
-  wxBoxSizer *restartSizer = new wxBoxSizer(wxHORIZONTAL);
-  restartSizer->Add(new wxStaticText(this, -1, "# restarts"),
-		    0, wxALL | wxCENTER, 5);
-  m_nRestarts = new wxTextCtrl(this, -1, "",
-			       wxDefaultPosition, wxDefaultSize, 0,
-			       gIntegerValidator(&m_nRestartsValue, 0),
-			       "# restarts");
-  restartSizer->Add(m_nRestarts, 0, wxALL, 5);
-  m_algorithmBox->Add(restartSizer, 0, wxALL, 5);
-
-  long leashLength = 0;
-  config.Read("Solutions/Simpdiv-leashLength", &leashLength);
-  m_leashLengthValue = (char *) ToText(leashLength);
-
-  wxBoxSizer *leashSizer = new wxBoxSizer(wxHORIZONTAL);
-  leashSizer->Add(new wxStaticText(this, -1, "Leash length"),
-		  0, wxALL | wxCENTER, 5);
-  m_leashLength = new wxTextCtrl(this, -1, "",
-				 wxDefaultPosition, wxDefaultSize, 0,
-				 gIntegerValidator(&m_leashLengthValue, 0),
-				 "Leash length");
-  leashSizer->Add(m_leashLength, 0, wxALL, 5);
-  m_algorithmBox->Add(leashSizer, 0, wxALL, 5);
-}
-
-int dialogSimpdiv::StopAfter(void) const
 {
   if (m_findAll->GetValue())
     return 0;
