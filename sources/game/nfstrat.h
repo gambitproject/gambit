@@ -37,8 +37,8 @@ class gbtNfgContingency   {
 friend class gbtNfgGame;
 private:
   gbtNfgGame m_nfg; 
-  long index;
-  gbtArray<gbtNfgStrategy> profile;
+  long m_index;
+  gbtArray<gbtNfgStrategy> m_profile;
   
 public:
   gbtNfgContingency(const gbtNfgGame &);
@@ -48,13 +48,17 @@ public:
   ~gbtNfgContingency();
   
   gbtNfgContingency &operator=(const gbtNfgContingency &);
-  
+
+  bool operator==(const gbtNfgContingency &p_cont) const;
+  bool operator!=(const gbtNfgContingency &p_cont) const
+    { return !(*this == p_cont); }
+
   bool IsValid(void) const; 
   long GetIndex(void) const;
   
-  gbtNfgStrategy operator[](int p) const;
-  gbtNfgStrategy Get(int p) const;
-  void Set(int p, gbtNfgStrategy);
+  gbtNfgStrategy GetStrategy(int p_player) const
+    { return m_profile[p_player]; }
+  void SetStrategy(gbtNfgStrategy);
 
   void SetOutcome(const gbtNfgOutcome &);
   gbtNfgOutcome GetOutcome(void) const;

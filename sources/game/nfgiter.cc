@@ -79,7 +79,7 @@ void gbtNfgIterator::First(void)
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
     gbtNfgStrategy s = support.GetStrategy(i, 1);
-    profile.Set(i, s);
+    profile.SetStrategy(s);
     current_strat[i] = 1;
   }
 }
@@ -88,12 +88,12 @@ int gbtNfgIterator::Next(int p)
 {
   if (current_strat[p] < support.NumStrats(p))  {
     gbtNfgStrategy s = support.GetStrategy(p, ++(current_strat[p]));
-    profile.Set(p, s);
+    profile.SetStrategy(s);
     return 1;
   }
   else {
     gbtNfgStrategy s = support.GetStrategy(p, 1);
-    profile.Set(p, s);
+    profile.SetStrategy(s);
     current_strat[p] = 1;
     return 0;
   }
@@ -105,21 +105,21 @@ int gbtNfgIterator::Set(int p, int s)
       s <= 0 || s > support.NumStrats(p))
     return 0;
   
-  profile.Set(p, support.GetStrategy(p, s));
+  profile.SetStrategy(support.GetStrategy(p, s));
   return 1;
 }
 
 void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
-    t[i] = profile[i].GetId();
+    t[i] = profile.GetStrategy(i).GetId();
   }
 }
 
 void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++){
-    profile.Set(i, support.GetStrategy(i, t[i]));
+    profile.SetStrategy(support.GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
 }
@@ -161,7 +161,7 @@ gbtNfgContIterator::~gbtNfgContIterator()
 void gbtNfgContIterator::First(void)
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
-    m_profile.Set(m_thawed[i], m_support.GetStrategy(m_thawed[i], 1));
+    m_profile.SetStrategy(m_support.GetStrategy(m_thawed[i], 1));
     m_current[m_thawed[i]] = 1;
   }	
 }
@@ -174,7 +174,7 @@ void gbtNfgContIterator::Freeze(gbtNfgStrategy p_strategy)
     m_thawed.Remove(m_thawed.Find(player));
   }
 
-  m_profile.Set(player, p_strategy);
+  m_profile.SetStrategy(p_strategy);
   m_current[player] = p_strategy.GetId();
   First();
 }
@@ -201,13 +201,13 @@ int gbtNfgContIterator::Next(gbtNfgPlayer p_player)
 
   if (m_current[p] < m_support.NumStrats(p))  {
     gbtNfgStrategy s = m_support.GetStrategy(p, ++(m_current[p]));
-    m_profile.Set(p, s);
+    m_profile.SetStrategy(s);
     First();
     return 1;
   }
   else {
     gbtNfgStrategy s = m_support.GetStrategy(p, 1);
-    m_profile.Set(p, s);
+    m_profile.SetStrategy(s);
     m_current[p] = 1;
     First();
     return 0;
@@ -223,10 +223,10 @@ int gbtNfgContIterator::NextContingency(void)
     int pl = m_thawed[j];
     if (m_current[pl] < m_support.NumStrats(pl)) {
       gbtNfgStrategy s = m_support.GetStrategy(pl, ++(m_current[pl]));
-      m_profile.Set(pl, s);
+      m_profile.SetStrategy(s);
       return 1;
     }
-    m_profile.Set(pl, m_support.GetStrategy(pl, 1));
+    m_profile.SetStrategy(m_support.GetStrategy(pl, 1));
     m_current[pl] = 1;
     j--;
     if (j == 0) {

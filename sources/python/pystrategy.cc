@@ -143,7 +143,7 @@ strategy_getattr(strategyobject *self, char *name)
 static int
 strategy_compare(strategyobject *obj1, strategyobject *obj2)
 {
-  // Implementation: If outcomes are the game underlying object, return
+  // Implementation: If strategies are the game underlying object, return
   // equal; otherwise, order by their Python pointer addresses.
   if (*obj1->m_strategy == *obj2->m_strategy) {
     return 0;
@@ -163,6 +163,172 @@ strategy_str(strategyobject *self)
 			     (char *) self->m_strategy->GetLabel());
 }
 
+/*************************************************************************
+ * NFGCONTINGENCY: TYPE DESCRIPTOR
+ *************************************************************************/
+
+staticforward void nfgcontingency_dealloc(nfgcontingencyobject *);
+staticforward PyObject *nfgcontingency_getattr(nfgcontingencyobject *, char *);
+staticforward int nfgcontingency_compare(nfgcontingencyobject *, nfgcontingencyobject *); 
+staticforward PyObject *nfgcontingency_str(nfgcontingencyobject *);
+
+PyTypeObject Nfgcontingencytype = {      /* main python type-descriptor */
+  /* type header */                    /* shared by all instances */
+  PyObject_HEAD_INIT(0)
+  0,                               /* ob_size */
+  "nfgcontingency",                           /* tp_name */
+  sizeof(nfgcontingencyobject),               /* tp_basicsize */
+  0,                               /* tp_itemsize */
+
+  /* standard methods */
+  (destructor)  nfgcontingency_dealloc,       /* tp_dealloc  ref-count==0  */
+  (printfunc)   0,         /* tp_print    "print x"     */
+  (getattrfunc) nfgcontingency_getattr,       /* tp_getattr  "x.attr"      */
+  (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
+  (cmpfunc)     nfgcontingency_compare,      /* tp_compare  "x > y"       */
+  (reprfunc)    0,                 /* tp_repr     `x`, print x  */
+
+  /* type categories */
+  0,                               /* tp_as_number   +,-,*,/,%,&,>>,pow...*/
+  0,                               /* tp_as_sequence +,[i],[i:j],len, ...*/
+  0,                               /* tp_as_mapping  [key], len, ...*/
+
+  /* more methods */
+  (hashfunc)     0,                /* tp_hash    "dict[x]" */
+  (ternaryfunc)  0,                /* tp_call    "x()"     */
+  (reprfunc)     nfgcontingency_str,                /* tp_str     "str(x)"  */
+};  /* plus others: see Include/object.h */
+
+
+/*****************************************************************************
+ * INSTANCE METHODS
+ *****************************************************************************/
+
+static PyObject *
+nfgcontingency_getoutcome(nfgcontingencyobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nfoutcomeobject *outcome = newnfoutcomeobject();
+  *outcome->m_nfoutcome = self->m_contingency->GetOutcome();
+  return (PyObject *) outcome;
+}
+
+static PyObject *
+nfgcontingency_getstrategy(nfgcontingencyobject *self, PyObject *args)
+{
+  PyObject *player;
+
+  if (!PyArg_ParseTuple(args, "O", &player)) {
+    return NULL;
+  }
+
+  if (!is_nfplayerobject(player)) {
+    return NULL;
+  }
+
+  strategyobject *strategy = newstrategyobject();
+  *strategy->m_strategy = self->m_contingency->GetStrategy(((nfplayerobject *) player)->m_nfplayer->GetId());
+  return (PyObject *) strategy;
+}
+
+static PyObject *
+nfgcontingency_setoutcome(nfgcontingencyobject *self, PyObject *args)
+{
+  PyObject *outcome;
+
+  if (!PyArg_ParseTuple(args, "O", &outcome)) {
+    return NULL;
+  }
+
+  if (!is_nfoutcomeobject(outcome)) {
+    return NULL;
+  }
+
+  self->m_contingency->SetOutcome(*((nfoutcomeobject *) outcome)->m_nfoutcome);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
+nfgcontingency_setstrategy(nfgcontingencyobject *self, PyObject *args)
+{
+  PyObject *strategy;
+
+  if (!PyArg_ParseTuple(args, "O", &strategy)) {
+    return NULL;
+  }
+
+  if (!is_strategyobject(strategy)) {
+    return NULL;
+  }
+
+  self->m_contingency->SetStrategy(*((strategyobject *) strategy)->m_strategy);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static struct PyMethodDef nfgcontingency_methods[] = {
+  { "GetOutcome", (PyCFunction) nfgcontingency_getoutcome, 1 },
+  { "GetStrategy", (PyCFunction) nfgcontingency_getstrategy, 1 },
+  { "SetOutcome", (PyCFunction) nfgcontingency_setoutcome, 1 },
+  { "SetStrategy", (PyCFunction) nfgcontingency_setstrategy, 1 },
+  { NULL, NULL }
+};
+
+
+/*****************************************************************************
+ * BASIC TYPE-OPERATIONS
+ *****************************************************************************/
+
+nfgcontingencyobject *
+newnfgcontingencyobject(void)
+{
+  nfgcontingencyobject *self;
+  self = PyObject_NEW(nfgcontingencyobject, &Nfgcontingencytype);
+  if (self == NULL) {
+    return NULL;
+  }
+  self->m_contingency = 0;
+  return self;
+}
+
+static void                   
+nfgcontingency_dealloc(nfgcontingencyobject *self) 
+{                            
+  PyMem_DEL(self);           
+}
+
+static PyObject *
+nfgcontingency_getattr(nfgcontingencyobject *self, char *name)
+{
+  return Py_FindMethod(nfgcontingency_methods, (PyObject *) self, name);
+}
+
+static int
+nfgcontingency_compare(nfgcontingencyobject *obj1, nfgcontingencyobject *obj2)
+{
+  // Implementation: If contingencies are the game underlying object, return
+  // equal; otherwise, order by their Python pointer addresses.
+  if (*obj1->m_contingency == *obj2->m_contingency) {
+    return 0;
+  }
+  else if (obj1->m_contingency < obj2->m_contingency) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+static PyObject *
+nfgcontingency_str(nfgcontingencyobject *self)
+{
+  return PyString_FromFormat("<{nfgcontingency}>");
+}
+
 /************************************************************************
  * MODULE METHODS
  ************************************************************************/
@@ -171,4 +337,5 @@ void
 initstrategy(void)
 {
   Strategytype.ob_type = &PyType_Type;
+  Nfgcontingencytype.ob_type = &PyType_Type;
 }

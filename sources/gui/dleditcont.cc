@@ -44,7 +44,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 
   gbtNfgContingency profile(p_nfg);
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    profile.Set(pl, p_nfg.GetPlayer(pl).GetStrategy(p_cont[pl]));
+    profile.SetStrategy(p_nfg.GetPlayer(pl).GetStrategy(p_cont[pl]));
   }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);

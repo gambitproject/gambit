@@ -361,7 +361,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
     
     gbtNfgContingency profile(m_doc->GetNfg());
     for (int pl = 1; pl <= strategy.Length(); pl++) {
-      profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
+      profile.SetStrategy(support.GetStrategy(pl, strategy[pl]));
     }
 
     if (m_doc->HasEfg() ||

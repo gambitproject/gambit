@@ -136,6 +136,18 @@ nfg_isconstsum(nfgobject *self, PyObject *args)
 }
 
 static PyObject *
+nfg_newcontingency(nfgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  nfgcontingencyobject *contingency = newnfgcontingencyobject();
+  contingency->m_contingency = new gbtNfgContingency(*self->m_nfg);
+  return (PyObject *) contingency;
+}
+
+static PyObject *
 nfg_newoutcome(nfgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -224,6 +236,7 @@ static struct PyMethodDef nfg_methods[] = {
   { "GetOutcome", (PyCFunction) nfg_getoutcome, 1 },
   { "GetPlayer", (PyCFunction) nfg_getplayer, 1 },
   { "IsConstSum", (PyCFunction) nfg_isconstsum, 1 },
+  { "NewContingency", (PyCFunction) nfg_newcontingency, 1 },
   { "NewOutcome", (PyCFunction) nfg_newoutcome, 1 },
   { "NewSupport", (PyCFunction) nfg_newsupport, 1 },
   { "NumOutcomes", (PyCFunction) nfg_numoutcomes, 1 },

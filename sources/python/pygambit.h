@@ -204,6 +204,20 @@ extern PyTypeObject Nfsupporttype;
 nfsupportobject *newnfsupportobject(void);
 
 /*************************************************************************
+ * NFGCONTINGENCY OBJECT
+ *************************************************************************/
+
+typedef struct {
+  PyObject_HEAD
+  gbtNfgContingency *m_contingency;
+} nfgcontingencyobject;
+
+extern PyTypeObject Nfgcontingencytype;
+#define is_nfgcontingencyobject(v)  ((v)->ob_type == &Nfgcontingencytype)
+
+nfgcontingencyobject *newnfgcontingencyobject(void);
+
+/*************************************************************************
  * MIXED PROFILE OBJECT
  *************************************************************************/
 

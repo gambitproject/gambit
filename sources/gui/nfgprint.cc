@@ -52,7 +52,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
 
 	theHtml += 
 	  wxString::Format(wxT("<center><b>Player %d: Strategy %d</b></center>"),
-			   pl, profile[pl].GetId());
+			   pl, profile.GetStrategy(pl).GetId());
       }
     }
     
@@ -65,12 +65,12 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
     } 
     theHtml += wxT("</tr>");
     for (int st1 = 1; st1 <= p_nfg.NumStrats(p_rowPlayer); st1++) {
-      profile[p_rowPlayer] = p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1);
+      profile.SetStrategy(p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1));
       theHtml += wxT("<tr>");
       theHtml += wxString::Format(wxT("<td align=center><b>%s</b></td>"),
 				  (char *) p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1).GetLabel());
       for (int st2 = 1; st2 <= p_nfg.NumStrats(p_colPlayer); st2++) {
-	profile[p_colPlayer] = p_nfg.GetPlayer(p_colPlayer).GetStrategy(st2);
+	profile.SetStrategy(p_nfg.GetPlayer(p_colPlayer).GetStrategy(st2));
 	theHtml += wxT("<td align=center>");
 	for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
 	  theHtml += wxString::Format(wxT("%s"), (char *) ToText(profile.GetOutcome().GetPayoff(p_nfg.GetPlayer(pl))));

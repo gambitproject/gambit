@@ -243,7 +243,7 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
     int k;
     for(k=1;k<=m_nfg.NumPlayers();k++) 
       if(i!=k) 
-	term*=Prob(k,support.GetIndex(profile[k]));
+	term*=Prob(k,support.GetIndex(profile.GetStrategy(k)));
     gbtDouble coeff,ap,bp;
     ap = (double) A.GetPayoff(m_nfg.GetPlayer(i));
     bp = (double) B.GetPayoff(m_nfg.GetPlayer(i));

@@ -35,16 +35,16 @@
 //--------------------------------------------------------
 
 gbtNfgContingency::gbtNfgContingency(const gbtNfgGame &p_nfg)
-  : m_nfg(p_nfg), index(0L), profile(m_nfg.NumPlayers())
+  : m_nfg(p_nfg), m_index(0L), m_profile(m_nfg.NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)   {
-    profile[pl] = m_nfg.GetPlayer(pl).GetStrategy(1);
-    index += profile[pl].GetIndex();
+    m_profile[pl] = m_nfg.GetPlayer(pl).GetStrategy(1);
+    m_index += m_profile[pl].GetIndex();
   }
 }
 
 gbtNfgContingency::gbtNfgContingency(const gbtNfgContingency &p)
-  : m_nfg(p.m_nfg), index(p.index), profile(p.profile)
+  : m_nfg(p.m_nfg), m_index(p.m_index), m_profile(p.m_profile)
 { }
 
 gbtNfgContingency::~gbtNfgContingency()
@@ -54,8 +54,8 @@ gbtNfgContingency &gbtNfgContingency::operator=(const gbtNfgContingency &p)
 {
   if (this != &p) {
     m_nfg = p.m_nfg;
-    index = p.index;
-    profile = p.profile;
+    m_index = p.m_index;
+    m_profile = p.m_profile;
   }
   return *this;  
 }
@@ -64,56 +64,60 @@ gbtNfgContingency &gbtNfgContingency::operator=(const gbtNfgContingency &p)
 // gbtNfgContingency: Members
 //-----------------------------------------
 
+bool gbtNfgContingency::operator==(const gbtNfgContingency &p_cont) const
+{
+  if (m_nfg != p_cont.m_nfg) {
+    return false;
+  }
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    if (m_profile[pl] != p_cont.m_profile[pl]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool gbtNfgContingency::IsValid(void) const
 {
   int i;
-  for (i = profile.Length(); i > 0 && profile[i] != 0; i--);
+  for (i = m_profile.Length(); i > 0 && !m_profile[i].IsNull(); i--);
   return i;
 }
 
 long gbtNfgContingency::GetIndex(void) const 
 { 
-  return index; 
+  return m_index; 
 }
 
-gbtNfgStrategy gbtNfgContingency::operator[](int p) const 
-{ 
-  return profile[p];
-}
-
-gbtNfgStrategy gbtNfgContingency::Get(int p) const 
-{ 
-  return profile[p];
-}
-
-void gbtNfgContingency::Set(int p, gbtNfgStrategy s)
+void gbtNfgContingency::SetStrategy(gbtNfgStrategy p_strategy)
 {
-  index += s.GetIndex() - profile[p].GetIndex();
-  profile[p] = s;
+  int pl = p_strategy.GetPlayer().GetId();
+  m_index += p_strategy.GetIndex() - m_profile[pl].GetIndex();
+  m_profile[pl] = p_strategy;
 }
 
 void gbtNfgContingency::SetOutcome(const gbtNfgOutcome &outcome)
 {
-  m_nfg.rep->m_results[index + 1] = outcome.rep;
+  m_nfg.rep->m_results[m_index + 1] = outcome.rep;
   m_nfg.rep->m_revision++;
   m_nfg.BreakLink();
 }
 
 gbtNfgOutcome gbtNfgContingency::GetOutcome(void) const
 {
-  return m_nfg.rep->m_results[index + 1];
+  return m_nfg.rep->m_results[m_index + 1];
 }
 
 gbtNumber gbtNfgContingency::GetPayoff(const gbtNfgPlayer &p_player) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
-    return m_nfg.rep->m_results[index + 1]->m_payoffs[p_player.GetId()];
+    return m_nfg.rep->m_results[m_index + 1]->m_payoffs[p_player.GetId()];
   }
   else {
     gbtArray<gbtArray<int> *> behav(m_nfg.NumPlayers());
     for (int pl = 1; pl <= behav.Length(); pl++) {
       // Casting away const -- sloppy
-      behav[pl] = (gbtArray<int> *) profile[pl].GetBehavior();
+      behav[pl] = (gbtArray<int> *) m_profile[pl].GetBehavior();
     }
     gbtVector<gbtNumber> payoff(m_nfg.NumPlayers());
     gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);

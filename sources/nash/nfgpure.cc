@@ -67,7 +67,7 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
       ((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
       MixedSolution soln(temp, "EnumPure[NFG]");
       for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-	soln.SetStrategyProb(citer.GetProfile().Get(pl), 1);
+	soln.SetStrategyProb(citer.GetProfile().GetStrategy(pl), 1);
       }
       solutions.Append(soln);
     }

@@ -542,7 +542,7 @@ void gbtNfgFrame::OnEditContingency(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     gbtNfgContingency profile(m_doc->GetNfg());
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-      profile.Set(pl, m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
+      profile.SetStrategy(m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
     }
 
     if (dialog.GetOutcome() == 0) { 
