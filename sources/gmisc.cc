@@ -125,8 +125,14 @@ gString ToString(const gInteger &i)
   return gString(Itoa(i));
 }
 
+// Note: when converting a double to a gRational, the num & den often turn out
+// to be VERY large numbers due to an inherent imprecision of floating point.
+// I.e. 0.50 can become 50001/100000.  This may cause serious display problems.
+// However, since the main point of using rationals is to have PRECISE answers,
+// no attempt will be made to 'approx reduce' the fractions.
 gString ToString(const gRational &r, bool approx)
 {
+/*
   if (approx)   {
     // This might be quite slow, but it does allow one to have reasonable
     // looking fractions.  I.e. .2500001 =1/4 not xxxxxxxxxxxxxx/yyyyyyyy
@@ -156,7 +162,9 @@ gString ToString(const gRational &r, bool approx)
 	      GCONVERT_BUFFER_LENGTH / 2 - 1);
     }
   }
-  else   {
+  else
+*/
+  {
     strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
     strcat(gconvert_buffer, "/");
     strncat(gconvert_buffer, Itoa(r.denominator()), GCONVERT_BUFFER_LENGTH);
