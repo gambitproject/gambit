@@ -293,13 +293,13 @@ play an important role in the GCL.
 
 The data types ({\tt INTEGER}, 
 %{\tt ASSESSMENT}),  
-and {\tt EFBASIS} are not true data types, but are {\bindex subtypes}
+and {\tt EFBASIS} are {\bindex subtypes}
 of another, parent type.  They are indicated in the table as the
 indented entries following their parent type.  A subtype is a data
 type which has all of the properties of its parent type, plus some
 additional characteristics.  For example, an integer is a rational
-number, with the additional restriction that it's denominator is one.
-\marginpar{Do we need to say more about subtypes?}
+number, with the additional restriction that its denominator is one.
+
 \begin{table}[htp]
 \begin{center}
 \begin{tabular} {|l||l|} \hline
@@ -574,14 +574,19 @@ Here \verb+T+ could be any data type except \verb+LIST+
 
 
 \section{\rindex{Expressions}}
-\marginpar{Ted:  you'de better reword this to your taste}
 A GCL program consists of a series of expressions.  An expression is
-typically a GCL command built up out of function calls.  An expression
-is terminated by a linefeed or by a semicolon.  Expressions can be
+typically a GCL command built up out of function calls. 
+Expressions can be
 entered interactively, at the command prompt, or can be entered from
 files, via the \verb+Include["filename"]+ directive (see the section
-on including files).  Statements can be continued for more than one
-line by using the continuation character, \verb+\+.  Comments can be
+on including files).  
+
+Expressions are terminated by an end-of-line character (the carriage
+return) at a point where all brackets, braces, and quotes are matched
+(cloed).  Expressions can be explicitly continued on additional lines
+by using the continuation character, \verb+\+.
+
+Comments can be
 included in GCL statements by preceeding the comments with the
 characters \verb+//+.  Anything after the \verb+//+ and before a
 linefeed is ignored by the GCL interpreter.
@@ -942,22 +947,18 @@ anonymously just like a value parameter, subject to the usual rules.
 It is a run-time error to attempt to pass a value to a reference
 parameter, or vice versa.
 
-Finally, a note about deciding which function signature matches a particular
-call in cases where subtype values are involved.  It is permitted to 
-specify as a function parameter a datatype which is a subtype of another
-type (the most common example is \verb+INTEGER+ being a subtype of
-\verb+NUMBER+; see the section on typing for the complete list).  In this case,
-you might have these two signatures for a function:
+In the case where functions have parameters which are subtypes, 
+it is preferred to match to the subtype over the parent type.  For example,
+suppose the following two signatures have been defined:
 
 \begin{verbatim}
 Foo[x->INTEGER] =: INTEGER
 Foo[x->NUMBER] =: NUMBER
 \end{verbatim}
 
-Then, a call of \verb+Foo[3]+ resolves to the first signture (since the
+Then, a call of \verb+Foo[3]+ resolves to the first signature (since the
 value passed is an integer), and \verb+Foo[3.5]+ resolves to the second
-(since it's a number, but not specifically an integer).
-\marginpar{Give complete specification of the rules for this}
+(since it is a number, but not specifically an integer).
 
 \subsection{\rindex{User defined functions}}\index{Functions!User Defined}
 
@@ -1723,9 +1724,7 @@ before they work correctly.}
 
 \section{\rindex{Orphan variables} and memory management}
 
-\marginpar{Mention conventions for games}
-One feature of the GCL which is not encountered in other computing
-environments is the notion of ``orphan variables''.  In the GCL, you
+In the GCL, you
 can create variables to represent objects which may be deleted or
 invalidated because of subsequent things you do. For example, suppose
 you define a variable to represent an element (node, information set,
