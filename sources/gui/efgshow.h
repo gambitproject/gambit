@@ -35,7 +35,6 @@
 #include "gambit.h"
 #include "nash/behavsol.h"
 
-class EfgNavigateWindow;
 class EfgOutcomeWindow;
 class EfgSupportWindow;
 class TreeWindow;
@@ -47,7 +46,6 @@ private:
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow;
 
   wxNotebook *m_infoNotebook;
-  EfgNavigateWindow *m_navigateWindow;
   EfgOutcomeWindow *m_outcomeWindow;
   EfgSupportWindow *m_supportWindow;
 

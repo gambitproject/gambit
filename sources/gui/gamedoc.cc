@@ -45,6 +45,7 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_showNfg(false), m_showOutcomes(false), 
     m_showProfiles(false), m_showNfgSupports(false),
+    m_showEfgNavigate(false),
     m_efg(new gbtEfgGame(p_efg)), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0),
@@ -74,6 +75,7 @@ gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
     m_showNfg(true), m_showOutcomes(false), 
     m_showProfiles(false), m_showNfgSupports(false),
+    m_showEfgNavigate(false),
     m_efg(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0), 
@@ -634,6 +636,12 @@ void gbtGameDocument::SetShowNfgSupports(bool p_show)
 {
   m_showNfgSupports = p_show;
   UpdateViews(0, false, true);
+}
+
+void gbtGameDocument::SetShowEfgNavigate(bool p_show)
+{
+  m_showEfgNavigate = p_show;
+  UpdateViews(0, true, false);
 }
 
 void gbtGameDocument::Submit(gbtGameCommand *p_command)

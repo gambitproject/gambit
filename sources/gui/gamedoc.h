@@ -46,7 +46,8 @@ private:
   // Management of views
   gBlock<gbtGameView *> m_views;
   bool m_showNfg, m_showOutcomes, m_showProfiles, m_showNfgSupports;
-
+  bool m_showEfgNavigate;
+  
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);
 
@@ -107,6 +108,9 @@ public:
 
   bool ShowNfgSupports(void) const { return m_showNfgSupports; }
   void SetShowNfgSupports(bool p_show);
+
+  bool ShowEfgNavigate(void) const { return m_showEfgNavigate; }
+  void SetShowEfgNavigate(bool p_show);
 
   // MARKED NODES
   void SetCursor(gbtEfgNode m_node);

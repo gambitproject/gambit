@@ -33,7 +33,7 @@
 EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
 				     wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_doc)
+    m_doc(p_doc)
 {
   CreateGrid(10, 1);
   SetEditable(false);
@@ -52,12 +52,27 @@ EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
 
   SetLabelSize(wxHORIZONTAL, 0);
   SetLabelSize(wxVERTICAL, 150);
+
+  EnableGridLines(false);
+  for (int row = 0; row < 10; row++) {
+    if (row % 2 == 0) {
+      SetCellBackgroundColour(row, 0, wxColour(200, 200, 200));
+    }
+    else {
+      SetCellBackgroundColour(row, 0, wxColour(225, 225, 225));
+    }
+  }
+
   AdjustScrollbars();
   Show(true);
 }
 
-void EfgNavigateWindow::OnUpdate(gbtGameView *)
+void EfgNavigateWindow::OnUpdate(void)
 {
+  SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  SetLabelFont(m_doc->GetPreferences().GetLabelFont());
+
   gbtEfgNode cursor = m_doc->GetCursor();
   
   if (cursor.IsNull()) { // no data available
@@ -109,4 +124,76 @@ void EfgNavigateWindow::OnUpdate(gbtGameView *)
   }	
   catch (gException &) { }
 }
+
+//-------------------------------------------------------------------------
+//                      class gbtEfgNavigateFrame
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtEfgNavigateFrame, wxFrame)
+  EVT_CLOSE(gbtEfgNavigateFrame::OnClose)
+  EVT_MENU(wxID_CLOSE, gbtEfgNavigateFrame::Close)
+END_EVENT_TABLE()
+
+gbtEfgNavigateFrame::gbtEfgNavigateFrame(gbtGameDocument *p_doc,
+					 wxWindow *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+    gbtGameView(p_doc)
+{
+  m_grid = new EfgNavigateWindow(p_doc, this);
+
+  wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+
+  wxMenu *editMenu = new wxMenu;
+
+  wxMenu *viewMenu = new wxMenu;
+
+  wxMenu *formatMenu = new wxMenu;
+
+  wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(fileMenu, "&File");
+  menuBar->Append(editMenu, "&Edit");
+  menuBar->Append(viewMenu, "&View");
+  menuBar->Append(formatMenu, "&Format");
+  SetMenuBar(menuBar);
+
+  Show(false);
+}
+
+gbtEfgNavigateFrame::~gbtEfgNavigateFrame()
+{ }
+
+//--------------------------------------------------------------------------
+//                  gbtEfgNavigateFrame: Event handlers
+//--------------------------------------------------------------------------
+
+void gbtEfgNavigateFrame::OnClose(wxCloseEvent &p_event)
+{
+  m_doc->SetShowEfgNavigate(false);
+  // Frame is now hidden; leave it that way, don't actually close
+  p_event.Veto();
+}
+
+void gbtEfgNavigateFrame::OnUpdate(gbtGameView *p_sender)
+{
+  if (m_doc->ShowEfgNavigate()) {
+    m_grid->OnUpdate();
+    wxSize size = m_grid->GetBestSize();
+    SetClientSize(size);
+    m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
+    m_grid->SetScrollRate(0, 0);
+
+    if (m_doc->GetFilename() != "") {
+      SetTitle(wxString::Format("Gambit - Node View: [%s] %s", 
+				m_doc->GetFilename().c_str(), 
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+    else {
+      SetTitle(wxString::Format("Gambit - Node View: %s",
+				(char *) m_doc->GetNfg().GetTitle()));
+    }
+  }
+  Show(m_doc->ShowEfgNavigate());
+}
+
 

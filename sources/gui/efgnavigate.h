@@ -31,17 +31,37 @@
 #include "efgshow.h"
 #include "gamedoc.h"
 
-class EfgNavigateWindow : public wxGrid, public gbtGameView {
+class EfgNavigateWindow : public wxGrid {
 private:
-  void OnEditorShown(wxGridEvent &);
+  gbtGameDocument *m_doc;
 
+  bool IsEfgView(void) const { return true; }
+  bool IsNfgView(void) const { return false; }
+
+public:
+  EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~EfgNavigateWindow() { }
+
+  void OnUpdate(void);
+};
+
+class gbtEfgNavigateFrame : public wxFrame, public gbtGameView {
+private:
+  EfgNavigateWindow *m_grid;
+
+  // Event handlers
+  void OnClose(wxCloseEvent &);
+
+  // Overriding view members
   bool IsEfgView(void) const { return true; }
   bool IsNfgView(void) const { return false; }
   void OnUpdate(gbtGameView *);
 
 public:
-  EfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~EfgNavigateWindow() { }
+  gbtEfgNavigateFrame(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtEfgNavigateFrame();
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // EFGNAVIGATE_H
