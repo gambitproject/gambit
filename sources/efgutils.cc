@@ -167,7 +167,8 @@ bool IsPerfectRecall(const BaseEfg &efg, Infoset *&s1, Infoset *&s2)
 	  int n;
 	  for (n = 1; n <= iset1->NumMembers(); n++)  {
 	    if (efg.IsPredecessor(iset1->GetMemberList()[n],
-				  iset2->GetMemberList()[m]))  {
+				  iset2->GetMemberList()[m]) &&
+	        iset1->GetMemberList()[n] != iset2->GetMemberList()[m])  {
 	      precedes = true;
 	      for (int act = 1; act <= iset1->NumActions(); act++)  {
 		if (efg.IsPredecessor(iset1->GetMemberList()[n]->GetChild(act),
