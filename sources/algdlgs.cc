@@ -1140,8 +1140,6 @@ dialogQreGrid::~dialogQreGrid()
 		    (float) m_tol1->GetNumber(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-tol2",
 		    (float) m_tol2->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-startOption",
-		    m_startOption->GetSelection(), gambitApp.ResourceFile());
     wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
 		    m_multiGrid->GetValue(), gambitApp.ResourceFile());
   }
@@ -1150,6 +1148,7 @@ dialogQreGrid::~dialogQreGrid()
 void dialogQreGrid::AlgorithmFields(void)
 {
   gText minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
+
   wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, gambitApp.ResourceFile());
@@ -1214,7 +1213,7 @@ void dialogQreGrid::AlgorithmFields(void)
   m_tol2->GetConstraints()->width.AsIs();
   m_tol2->GetConstraints()->height.AsIs();
 
-  Bool multiGrid;
+  Bool multiGrid = true;
   wxGetResource("Algorithm Params", "QreGrid-multiGrid",
 		&multiGrid, gambitApp.ResourceFile());
   m_multiGrid = new wxCheckBox(this, 0, "Use MultiGrid");
@@ -1225,30 +1224,39 @@ void dialogQreGrid::AlgorithmFields(void)
   m_multiGrid->GetConstraints()->width.AsIs();
   m_multiGrid->GetConstraints()->height.AsIs();
 
-  int startOption;
-  wxGetResource("Algorithm Params", "Qre-GridstartOption",
-		&startOption, gambitApp.ResourceFile());
-  char *startOptions[] = { "Default", "Saved", "Prompt" };
-  m_startOption = new wxRadioBox(this, 0, "Start", -1, -1, -1, -1,
-				 3, startOptions);
-  if (startOption >= 0 && startOption <= 2)
-    m_startOption->SetSelection(startOption);
-  m_multiGrid->SetValue(multiGrid);
-  m_startOption->SetConstraints(new wxLayoutConstraints);
-  m_startOption->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
-  m_startOption->GetConstraints()->left.SameAs(m_minLam, wxLeft);
-  m_startOption->GetConstraints()->width.AsIs();
-  m_startOption->GetConstraints()->height.AsIs();
+  int plotType = 0;
+  wxGetResource("Algorithm Params", "Pxi-Plot-Type", &plotType, gambitApp.ResourceFile());
+  char *plotTypeChoices[] = { "Log", "Linear" };
+  m_plotType = new wxRadioBox(this, 0, "Plot type", -1, -1, -1, -1,
+			      2, plotTypeChoices);
+  if (plotType == 0 || plotType == 1)
+    m_plotType->SetSelection(plotType);
+#ifdef wx_motif
   NewLine();
+#endif  // wx_motif
 
-  PxiFields();
-  NewLine();
+  m_plotType->SetConstraints(new wxLayoutConstraints);
+#ifdef wx_motif
+  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxBottom, 10);
+  m_plotType->GetConstraints()->left.SameAs(m_minLam, wxLeft);
+#else
+  m_plotType->GetConstraints()->top.SameAs(m_tol2, wxTop);
+  m_plotType->GetConstraints()->left.SameAs(m_minLam, wxRight, 10);
+#endif  // wx_motif
+  m_plotType->GetConstraints()->width.AsIs();
+  m_plotType->GetConstraints()->height.AsIs();
 
   m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
   m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
   m_algorithmGroup->GetConstraints()->left.SameAs(m_dominanceGroup, wxLeft);
   m_algorithmGroup->GetConstraints()->right.SameAs(m_delp1, wxRight, -10);
-  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_startOption, wxBottom, -10);
+  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_plotType, wxBottom, -10);
 
+  NewLine();
+
+  PxiFields();
+  NewLine();
 }
+
+
 

@@ -633,13 +633,12 @@ gList<MixedSolution> guinfgQreAll::Solve(void)
     GridSolve(m_support, params, solutions);
   }
   catch (gSignalBreak &) { }
-
+  
   if (m_runPxi) {
     if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
       wxMessageBox("Unable to launch PXI successfully");
     }
   }
-
   return solutions;
 }
 
@@ -653,7 +652,6 @@ bool guinfgQreAll::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
 
-    m_startOption = dialog.StartOption();
     m_minLam = dialog.MinLam();
     m_maxLam = dialog.MaxLam();
     m_delLam = dialog.DelLam();

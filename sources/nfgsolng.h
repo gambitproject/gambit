@@ -158,7 +158,7 @@ public:
 
 class guinfgQreAll : public guiNfgSolution  {
 private:
-  int m_startOption, m_powLam;
+  int m_powLam;
   double m_minLam, m_maxLam, m_delLam, m_delp1, m_delp2, m_tol1, m_tol2;
   gOutput *m_pxiFile;
   bool m_runPxi, m_multiGrid;
