@@ -117,7 +117,6 @@ int NfgOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
             outcome = parent->OutcomeNum();
             ret = DRAG_START;
         }
-
     }
 
     if (ev.LeftUp() && drag_now)
@@ -125,16 +124,25 @@ int NfgOutcomeDialogC::OutcomeDragger::OnEvent(wxMouseEvent &ev)
         drag_now = 0;
         parent->GetSheet()->SetCursor(wxSTANDARD_CURSOR);
         parent->GetSheet()->ReleaseMouse();
+
         float x, y;
         ev.Position(&x, &y);
 
+        /* MCV: I have no idea why these lines are here,
+         * so I removed them.  For what it's worth, there are situations
+         * where x is (legitimately) > 2000.
         if (x > 2000) 
             x -= 65536.0;
 
         if (y > 2000) 
             y -= 65536.0; // negative integer overflow
+        */
 
-        int xi = (int)x, yi = (int)y;
+        // Convert from logical units to device units.
+        int mouse_x = (int)(parent->GetSheet()->GetDC()->LogicalToDeviceX(x));
+        int mouse_y = (int)(parent->GetSheet()->GetDC()->LogicalToDeviceY(y));
+
+        int xi = (int)mouse_x, yi = (int)mouse_y;
         parent->GetSheet()->ClientToScreen(&xi, &yi);
         ret = DRAG_STOP;
         ns->SetOutcome(outcome, xi, yi);

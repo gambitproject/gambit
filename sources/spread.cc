@@ -690,7 +690,14 @@ void SpreadSheetC::ProcessCursor(int ch)
 
     cell.Reset(sheet->GetValue(cell.row, cell.col));
     UpdateCell(*(GetDC()), cell);
-    top_frame->OnSelectedMoved(cell.row, cell.col, how);
+
+    // MCV: commented this out; it shouldn't do anything anyway
+    // but for some reason if it's uncommented it makes the
+    // spreadsheet do weird things when you select the 
+    // bottommost cell after scrolling (it jumps the view
+    // back to the top and adds an extra row to the SS).
+
+    //top_frame->OnSelectedMoved(cell.row, cell.col, how);
     top_frame->SetStatusText(gPlainText(cell.str));
 
     // Make sure the cursor is visible.  Note, do not if this was a mouse
@@ -715,9 +722,11 @@ void SpreadSheetC::ProcessCursor(int ch)
 
         int cx, cy;
         ViewStart(&cx, &cy);
-        
+      
         if (cx != x_scroll || cy != y_scroll) 
+        {
             Scroll(x_scroll, y_scroll);
+        }
     }
 }
 

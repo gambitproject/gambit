@@ -20,6 +20,9 @@ Windows '95 the default is that the window with the focus is raised above
 all other windows except its children, as I understand it.  I don't know if
 this can be emulated on Unix systems. ]
 
+[ Note: this may be doable within X: look up WindowGroup().  Also
+check the fvwm man pages. ]
+
 For the normal form, there are two outcome windows, one accessed by
 Edit->Outcomes, and the other by double click (Ctrl click on Linux).
 Why are there two different interfaces?  We should ditch the Ctrl-click
@@ -94,21 +97,6 @@ by effectively putting the infinite loop at the top.  I thought this
 should deal with the first problem too (games with no proper subgames.) 
 But I will have to look at the code to see what this actually does. 
 Perhaps it is not implemented correctly. 
-
-//------------------------------
-
-Bug D10: Drag and drop of outcomes don't always work in NFG
-
-E.g. try 8x8.nfg.  There are two bugs here:
-
-1) When dragging an outcome to a part of the NFG that can only be reached
-   by the scrollbars, the outcome is placed (incorrectly) on the location
-   in the NFG that corresponds to where we would have been if the
-   scrollbars were in their initial position.  In other words, the
-   scrollbar offset is not taken into account.
-
-2) When there are so many outcomes that you have to scroll to select
-   the desired one, dragging and dropping of the outcome doesn't work.
 
 //------------------------------
 

@@ -12,7 +12,7 @@
 #include "nfgoutcd.h"
 
 extern Bool LongStringConstraint(int type, char *value, char *label,
-				 char *msg_buffer);
+                 char *msg_buffer);
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -435,8 +435,8 @@ void NfgShow::Save(void)
   static int s_nDecimals = 6;
   gText filename = Filename();
   gText s = wxFileSelector("Save data file", wxPathOnly(filename), 
-			   wxFileNameFromPath(filename), ".nfg", "*.nfg", 
-			   wxSAVE | wxOVERWRITE_PROMPT);
+               wxFileNameFromPath(filename), ".nfg", "*.nfg", 
+               wxSAVE | wxOVERWRITE_PROMPT);
 
   if (s != "") {
     // Change description if saving under a different filename
@@ -445,18 +445,18 @@ void NfgShow::Save(void)
 
       strcpy(label, nf.GetTitle());
       MyDialogBox *nfg_edit_dialog = 
-	new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
+    new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
       nfg_edit_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-					    new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
+                        new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
       nfg_edit_dialog->Add(wxMakeFormNewLine());
       nfg_edit_dialog->Add(wxMakeFormShort("Decimals", &s_nDecimals,
-					   wxFORM_DEFAULT,
-					   new wxList(wxMakeConstraintRange(0, 25), 0)));
+                       wxFORM_DEFAULT,
+                       new wxList(wxMakeConstraintRange(0, 25), 0)));
       nfg_edit_dialog->Go();
       
       if (nfg_edit_dialog->Completed() == wxOK) {
-	nf.SetTitle(label);
-	SetFileName(Filename()); // updates the title
+    nf.SetTitle(label);
+    SetFileName(Filename()); // updates the title
       }
 
       delete nfg_edit_dialog;
@@ -1176,14 +1176,21 @@ void NfgShow::SetOutcome(int out, int x, int y)
 
         if (x != -1)    // dropped an outcome at the coordinates (x,y)
         {
-            spread->GetSheet()->ScreenToClient(&x, &y);  // x,y are absolute screen coordinates
+            spread->GetSheet()->ScreenToClient(&x, &y);  
+			// Convert to logical coordinates.
+			// This takes into account the current scrollbar position.
+			x = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalX((float)x));
+			y = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalY((float)y));
+
             int row, col;
 
             if (spread->XYtoRowCol(x, y, &row, &col))
             {
                 cur_profile[pl1] = row;
                 cur_profile[pl2] = col;
-                spread->SetProfile(cur_profile);
+				// MCV: commented this out because it makes the cursor
+				// jump around unnecessarily.
+                //spread->SetProfile(cur_profile);
             }
             else
             {
