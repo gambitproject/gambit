@@ -77,11 +77,13 @@ Sfg::~Sfg()
     delete (*SF)[index.CurrentIndices()];
   delete SF;
 
-  for(int i=1;i<=EF.NumPlayers();i++) 
+  int i;
+
+  for(i=1;i<=EF.NumPlayers();i++)
     delete (*E)[i];
   delete E;
 
-  for(int i=1;i<=EF.NumPlayers();i++)
+  for(i=1;i<=EF.NumPlayers();i++)
     delete (*sequences)[i];
   delete sequences;
 }
@@ -224,7 +226,7 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 //  BehavProfile<gNumber> b(efsupp);
   BehavProfile<gNumber> b(EF);
 
-  b.gDPVector::operator=((gNumber)0);
+  b.gDPVector<gNumber>::operator=((gNumber)0);
 
   Sequence *sij;
   const Sequence *parent;
