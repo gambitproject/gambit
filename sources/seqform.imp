@@ -57,7 +57,6 @@ SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p)
   ns2=S.NumSequences(2);
   ni1=EF.Players()[1]->NumInfosets()+1;
   ni2=EF.Players()[2]->NumInfosets()+1;
-  //* gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
 
   ntot = ns1+ns2+ni1+ni2;
 
@@ -83,17 +82,9 @@ SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p)
   (*A)(ns1+ns2+ni1+1,ns1+1) = -(T)1;
   (*b)[ns1+ns2+1] = -(T)1;
   (*b)[ns1+ns2+ni1+1] = -(T)1;
-  //* gout.SetWidth(4).SetPrec(1);
-  //* gout << "\nA:\n";
-  //* A->Dump(gout);
-  //* gout << "\nb:\n";
-  //* b->Dump(gout);
 
   tab = new LTableau<T>(*A,*b);
   eps = tab->Epsilon();
-//  tab->Refactor();  // not necessary?
-  //* gout << "\ntab:\n";
-  //* tab->Dump(gout);
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -130,14 +121,11 @@ template <class T> int SeqFormModule<T>::Lemke(void)
 
     Add_BFS(*tab);
     tab->BasisVector(sol);
-    //  gout << "\nsol = " << sol;
     GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
-    //  gout << "\nprofile = " << profile << "\n";
     solutions.Flush();
     solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG));
   }
 
-  //* gout << "\n";  
   if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
       List[i].Dump(*params.tracefile);
@@ -148,7 +136,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   // if(params.trace >= 1)
   //   (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
 
-  npivots=tab->NumPivots();
+  npivots =tab->NumPivots();
   time = watch.Elapsed();
   return List.Length();
 }
@@ -170,6 +158,11 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
   //  tableau.Dump(*params.tracefile);
   //  (*params.tracefile)  << "\ncbfs = ";
   //  cbfs.Dump(*params.tracefile );
+  // gout << "\nFound CBFS";
+  // gout << "\nB = ";
+  // tableau.Dump(gout);
+  // gout << "\ncbfs = ";
+  // cbfs.Dump(gout);
   List.Append(cbfs);
   return 1;
 }
@@ -194,8 +187,6 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
   EFSupport sup(EF);
   BehavProfile<T> profile(sup);
 
-  //* gout << "\nIn All_Lemke() depth: " << depth;
-  
   newsol =0;
   for (i = B.MinRow(); 
        i <= B.MaxRow()  && newsol == 0 &&
@@ -223,27 +214,19 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	missing = BCopy.SF_PivotIn(0);
 
       assert(missing);
-      // gout << "\nafter Pivot, missing: " << missing << "\n";
-      // BCopy.Dump(gout);
-
-      // gout << "\nDepth: " << depth << " Path: " << i;
       newsol=0;
 
       if(BCopy.SF_LCPPath(-missing,params.status)==1) {
-	// gout << "\nafter LCPPath\n";
-	// BCopy.Dump(gout);
-	
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	// gout << "\nsol = " << sol;
 	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
 	if(newsol) {
 	  solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG)); 
-	  // gout << "\nprofile = " << profile;
 	}
       }
-      else 
+      else {
 	// gout << ": Dead End";
+      }
       
       (*A)(i,0)=-(T)1;
       if(newsol) {
@@ -282,8 +265,6 @@ template <class T>
 void SeqFormModule<T>::FillTableau(const Node *n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
-//  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
-//  gout << " prob = " << prob;
   int i,snew;
   if(n->GetOutcome()) {
     (*A)(s1,ns1+s2) = gNumber((*A)(s1,ns1+s2)) +
@@ -303,27 +284,27 @@ void SeqFormModule<T>::FillTableau(const Node *n, T prob,
       i1=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
 
       (*A)(s1,ns1+ns2+i1+1) = -(T)1;
       (*A)(ns1+ns2+i1+1,s1) = (T)1;
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(snew+i,ns1+ns2+i1+1) = (T)1;
 	(*A)(ns1+ns2+i1+1,snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
       i2=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
       (*A)(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       (*A)(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
 	(*A)(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
       }
     }
     
@@ -336,9 +317,6 @@ template <class T> void SeqFormModule<T>
 	       const Node *n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
-//  T eps;
-//  eps = tab->Epsilon();
-//  gout << "\nv = " << v;
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
@@ -346,62 +324,48 @@ template <class T> void SeqFormModule<T>
     }
     pl = n->GetPlayer()->GetNumber();
     inf= n->GetInfoset()->GetNumber();
-//    gout << "\niset: (" << pl << "," << inf << ")"; 
     if(pl==1) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
-      for(i=1;i<=n->NumChildren();i++) {
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
-//	gout << "\npl1 ";
-//	gout << "\n  v = " << v;
 	if(tab.Member(s1)) {
 	  ind = tab.Find(s1);
-//	  if(sol[ind]!=(T)0) {
-//*	  if(sol[ind]<-eps) {
 	  if(sol[ind]>eps) {
 	    if(tab.Member(snew+i)) {
 	      ind2 = tab.Find(snew+i);
 	      if(sol[ind2]>eps)
-//*	      if(sol[ind2]<-eps)
 		v(pl,inf,i) = sol[ind2]/sol[ind];
-//	      gout << "\nind: " << ind << " " << sol[ind] << " ";
-//	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
-//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
-	GetProfile(tab, v,sol,n->GetChild(i),snew+i,s2);
+	GetProfile(tab, v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
       }
     }
     if(pl==2) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
-      for(i=1;i<=n->NumChildren();i++) {
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
-//	gout << "\npl2 ";
-//	gout << "\n  v = " << v;
 	if(tab.Member(ns1+s2)) {
 	  ind = tab.Find(ns1+s2);
-//	  if(sol[ind]!=(T)0) {
-//*	  if(sol[ind]<-eps) {
 	  if(sol[ind]>eps) {
 	    if(tab.Member(ns1+snew+i)) {
 	      ind2 = tab.Find(ns1+snew+i);
-//*	      if(sol[ind2]<-eps)
 	      if(sol[ind2]>eps)
 		v(pl,inf,i) = sol[ind2]/sol[ind];
-//	      gout << "\nind: " << ind << " " << sol[ind] << " ";
-//	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
-//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
-	GetProfile(tab, v,sol,n->GetChild(i),s1,snew+i);
+	GetProfile(tab, v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
       }
     }
   }
 }
 
   
+
+
+
