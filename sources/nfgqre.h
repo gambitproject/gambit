@@ -24,20 +24,18 @@ public:
   int powLam;
   double minLam, maxLam, delLam;
   bool fullGraph;
-  gOutput *pxifile;
-  
+
   NFQreParams(void);
-  NFQreParams(gOutput &out, gOutput &pxi);
 };
 
 
-void Qre(const Nfg &, NFQreParams &,
+void Qre(const Nfg &, NFQreParams &, gOutput &,
 	 const MixedProfile<gNumber> &,
 	 Correspondence<double, MixedSolution> &, gStatus &,
 	 long &nevals, long &nits);
 
 
-void KQre(const Nfg &N, NFQreParams &params,
+void KQre(const Nfg &N, NFQreParams &params, gOutput &,
 	    const MixedProfile<gNumber> &start,
 	    gList<MixedSolution> &solutions, gStatus &,
 	    long &nevals, long &nits);

@@ -386,17 +386,16 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 
 static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 {
+  gOutput *pxiFile = 0;
+  if (((TextPortion *) param[1])->Value() != "") {
+    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
+  }
+
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
     NFQreParams NP;
-    if (((TextPortion *) param[1])->Value() != "") {
-      NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
-    }
-    else {
-      NP.pxifile = &gnull;
-    }
     NP.minLam = ((NumberPortion *) param[2])->Value();
     NP.maxLam = ((NumberPortion *) param[3])->Value();
     NP.delLam = ((NumberPortion *) param[4])->Value();
@@ -414,7 +413,8 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     try {
       long nevals, niters;
       gWatch watch;
-      Qre(N, NP, MixedProfile<gNumber>(start), qreCorresp,
+      Qre(N, NP, (pxiFile) ? *pxiFile : gnull,
+	  MixedProfile<gNumber>(start), qreCorresp,
 	  gsm.GetStatusMonitor(), nevals, niters);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
@@ -423,12 +423,12 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     }
     catch (gSignalBreak &) { }
     catch (...) {
-      if (NP.pxifile != &gnull)  delete NP.pxifile;
+      if (pxiFile) delete pxiFile;  
       gsm.EndAlgorithmMonitor();
       throw;
     }
 
-    if (NP.pxifile != &gnull)  delete NP.pxifile;
+    if (pxiFile) delete pxiFile;
     gsm.EndAlgorithmMonitor();
 
     gList<MixedSolution> solutions;
@@ -446,10 +446,12 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     }
 
     EFQreParams EP;
-    if(((TextPortion*) param[1])->Value() != "")
-      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
-    else
+    if (pxiFile) {
+      EP.pxifile = pxiFile;
+    }
+    else {
       EP.pxifile = &gnull;
+    }
     EP.minLam = ((NumberPortion *) param[2])->Value();
     EP.maxLam = ((NumberPortion *) param[3])->Value();
     EP.delLam = ((NumberPortion *) param[4])->Value();
@@ -476,12 +478,12 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     }
     catch (gSignalBreak &) { }
     catch (...) {
-      if (EP.pxifile != &gnull)  delete EP.pxifile;
+      if (pxiFile) delete pxiFile;
       gsm.EndAlgorithmMonitor();
       throw;
     }
 
-    if (EP.pxifile != &gnull)   delete EP.pxifile;
+    if (pxiFile) delete pxiFile;
     gsm.EndAlgorithmMonitor();
 
     return new Behav_ListPortion(solutions);
