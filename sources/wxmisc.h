@@ -1,7 +1,7 @@
 //
 // FILE: wxmisc.h -- Defines some generic stuff that should be in wxWin
 //
-// $Id$
+// @(#)wxmisc.h	1.1 6/6/94
 //
 
 #ifndef WXMISC_H
@@ -19,11 +19,14 @@ public:
 
 class MyDialogBox: public wxDialogBox
 {
-public:
+private:
 	MyForm *form;
+public:
 	MyDialogBox(wxFrame *parent,char *title):wxDialogBox(parent,title,TRUE)
 	{ form=new MyForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);}
   ~MyDialogBox(void){delete form;}
-	int		Completed(void) {return form->Completed();}
+	int			Completed(void) {return form->Completed();}
+	MyForm 	*Form(void) {return form;}
+	void	  Go(void)	{form->AssociatePanel(this);Fit();Show(TRUE);}
 };
 #endif //WXMISC_H

@@ -1,6 +1,6 @@
 
 %{
-/* $Id$ */
+/* @(#)efg.y	1.4 7/12/94 */
 #include <stdlib.h>
 #include <ctype.h>
 #include <malloc.h>
@@ -23,7 +23,7 @@ int efg_set_input(const gString &s)
 {
   input_stream = new input((const char *) s);
 
-  if (*input_stream == input(0))  {
+  if (*input_stream == input((FILE *)0))  {
     delete input_stream;
     return 0;
   }
@@ -57,6 +57,12 @@ int efg_yylex(void);
 #define yyerror   efg_yyerror
 #define yylex     efg_yylex
 #define yyparse   efg_yyparse
+#define yynerrs   efg_yynerrs
+#define yyval     efg_yyval
+#define yylval    efg_yylval
+#define yyerrflag efg_yyerrflag
+#define yychar    efg_yychar
+#define yydebug   efg_yydebug
 
 %}
 

@@ -90,21 +90,8 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 
 void GambitFrame::file_load(void)
 {
-	char *s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.out");
-
-/*
- * The following features aren't implemented in ExtForm yet...
- *
-
-  if (fileOpen->completed())  {
-    FILE *f = fopen(fileOpen->name(), "r");
-    if (f != NULL)  {
-      ExtensiveFrame *ef = new ExtensiveFrame(this,
-			   new ExtForm(f, fileOpen->name()));
-      ef->show();
-    }
-  }
-*/
+char *s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.efg");
+if (s) ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME,s);
 }
 
 //*******************************************************************
@@ -119,7 +106,7 @@ void GambitFrame::OnMenuCommand(int id)
 			delete this;
       break;
     case FILE_LOAD:
-      file_load();
+			file_load();
       break;
 		case FILE_NEW:
 			ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME);
