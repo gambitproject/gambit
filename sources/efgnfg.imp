@@ -149,6 +149,8 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 
   if (!E.lexicon || (const Nfg<T> *)E.lexicon->N != &N)   return;
 
+  ((gVector<T> &) bp).operator=((T)0); 
+
   Node *n = E.RootNode();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
