@@ -285,10 +285,23 @@ template <class T>
 gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
 {
   gMatrix<T> answer(Length(),Dmnsn());
-  int ii;
-  for (ii = 1; ii <= Length(); ii++)
+  int i;
+  for (i = 1; i <= Length(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
+      answer(i,j) = (*this)[i].ValueOfPartialOfRootPoly(j,p);
+  
+  return answer;
+}
+
+template <class T> gMatrix<T> 
+ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p,
+					const int& NoEquations) const
+{
+  gMatrix<T> answer(NoEquations,Dmnsn());
+  int i;
+  for (i = 1; i <= NoEquations; i++)
+    for (int j = 1; j <= Dmnsn(); j++)
+      answer(i,j) = (*this)[i].ValueOfPartialOfRootPoly(j,p);
   
   return answer;
 }
@@ -298,10 +311,10 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 {
   assert (Length() >= Dmnsn());
   gSquareMatrix<T> answer(Dmnsn());
-  int ii;
-  for (ii = 1; ii <= Dmnsn(); ii++)
+  int i;
+  for (i = 1; i <= Dmnsn(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
+      answer(i,j) = (*this)[i].ValueOfPartialOfRootPoly(j,p);
  
   return answer;
 }

@@ -104,6 +104,7 @@ public:
   inline int Dmnsn()                                              const
     { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
   gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
+  gMatrix<T> DerivativeMatrix(const gVector<T>&, const int&)      const; 
   gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
   gVector<T> ValuesOfRootPolys(const gVector<T>&, const int&)     const;
 
