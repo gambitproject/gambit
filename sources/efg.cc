@@ -210,7 +210,22 @@ Node ExtForm::MoveTree(Node src, Node dest)
 
 Node ExtForm::CopyTree(Node src, Node dest)
 {
-      // this function is currently unimplemented
+  if (!nodes.IsMember(src) || !nodes.IsMember(dest))
+    return Node(efg_no, dummy, 1, 1);
+  if (!nodes.IsTerminal(dest) || nodes.IsTerminal(src))  return src;
+
+  if (nodes.IsPredecessor(src, dest))   return src;
+
+  Node foo(efg_no, src[1], src[2], 0);
+
+  if (nodes.MoveNode(dest, foo))  
+    players.RemoveInfoset(dest[1], dest[0], dest[2]);
+  
+  for (int i = 1; i <= nodes.NumChildren(src); i++)   {
+    nodes.CreateNode(dummy, CreateInfoset(dummy, efg_no, 0), foo);
+    CopyTree(nodes.GetChildNumber(src, i), nodes.GetChildNumber(foo, i));
+  }
+
   return src;
 }
 

@@ -91,6 +91,10 @@ class ExtForm    {
       { return nodes.GetNextSibling(n); }
     int HasSuccessorGame(const Node &n) const
       { return nodes.HasSuccessorGame(n); }
+    int IsSuccessor(const Node &n, const Node &from) const
+      { return nodes.IsPredecessor(from, n); }
+    int IsPredecessor(const Node &n, const Node &of) const
+      { return nodes.IsPredecessor(n, of); }
 
 	// GENERAL INFORMATION
     int NumNodes(void) const
