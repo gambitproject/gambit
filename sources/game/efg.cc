@@ -830,6 +830,11 @@ gbtEfgOutcome gbtEfgGame::GetOutcome(int p_index) const
   return rep->outcomes[p_index];
 }
 
+gbtEfgSupport gbtEfgGame::NewSupport(void) const
+{
+  return gbtEfgSupport(*this);
+}
+
 bool gbtEfgGame::IsConstSum(void) const
 {
   int pl, index;

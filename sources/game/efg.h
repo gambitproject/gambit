@@ -146,6 +146,9 @@ public:
   gbtEfgOutcome GetOutcome(int p_id) const;
   gbtEfgOutcome NewOutcome(void);
 
+  // DATA ACCESS -- SUPPORTS
+  gbtEfgSupport NewSupport(void) const;
+
   // EDITING OPERATIONS
   void DeleteEmptyInfosets(void);
 

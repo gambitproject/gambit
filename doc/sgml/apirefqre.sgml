@@ -4,6 +4,82 @@
 <para>
 </para>
 
+<sect2 id="apiref.qre.logitsolve">
+<title>LogitSolve</title>
+<indexterm><primary>LogitSolve</primary></indexterm>
+<indexterm><primary>QreSolve (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>Python usage</title>
+<para>
+<synopsis>
+gList&lt;MixedSolution&gt; LogitSolve(gbtNfgSupport p_support,
+                                double p_maxLam,
+                                double p_stepSize,
+                                bool p_fullGraph)
+gList&lt;BehavSolution&gt; LogitSolve(gbtEfgSupport p_support,
+                                double p_maxLam,
+                                double p_stepSize,
+                                bool p_fullGraph)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+QreSolve[support->NFSUPPORT, {pxifile->""}, {maxLam->1000},
+         {stepSize->0.0001}, {fullGraph->False}] =: LIST(MIXED) 
+QreSolve[support->EFSUPPORT, {pxifile->""}, {maxLam->1000},
+         {stepSize->0.0001}, {fullGraph->False}] =: LIST(BEHAV)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LogitSolve</function> (<function>QreSolve</function> in the
+GCL) traces
+the principal branch of the logistic quantal response equilibrium
+correspondence for a game, using the algorithm described in
+<citation><xref linkend="Tur02"></citation>.
+</para>
+
+<para>
+The behavior of the algorithm is controlled by the following
+parameters, which are optional in the GCL:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>maxLam</parameter>: Sets the maximum value of lambda.  The
+default value is 1000.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stepSize</parameter>: Sets the step size for the homotopy.
+The default value is 0.0001.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>fullGraph</parameter>: If <literal>True</literal>, the list of behavior strategy profiles
+returned contains the full sequence of profiles computed from each successive
+value of lambda.  The default value is <literal>False</literal>, in which case only
+the profile for the last value of lambda computed is returned.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+Note that the extensive form version disregards any marked
+subgames.
+</para>
+
+</sect2>
+
+
 <sect2 id="apiref.qre.qregridsolve">
 <title>QreGridSolve</title>
 <indexterm><primary>QreGridSolve</primary></indexterm>
@@ -94,69 +170,6 @@ created by one of these algorithms have a null lambda value.
 
 </sect2>
 
-
-<sect2 id="apiref.qre.qresolve">
-<title>QreSolve</title>
-<indexterm><primary>QreSolve</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
-         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
-         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-         {traceLevel->0}] =: LIST(MIXED),
-QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
-         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
-         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-         {traceLevel->0}] =: LIST(BEHAV),
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>QreSolve</function> 
-the principal branch of the logistic quantal response equilibrium
-correspondence for a game, using the algorithm described in
-<citation><xref linkend="Tur02"></citation>.
-</para>
-
-<para>
-The behavior of the algorithm may be modified by specifying some of the
-following optional parameters:
-<itemizedlist>
-<listitem>
-<para>
-<parameter>minLam</parameter>: Sets the minimum value of lambda.  The 
-default value is 0.001.
-</para>
-</listitem>
-<listitem>
-<para>
-<parameter>maxLam</parameter>: Sets the maximum value of lambda.  The
-default value is 500.0.
-</para>
-</listitem>
-<listitem>
-<para>
-<parameter>fullGraph</parameter>: If <literal>True</literal>, the list of behavior strategy profiles
-returned contains the full sequence of profiles computed from each successive
-value of lambda.  The default value is <literal>False</literal>, in which case only
-the profile for the last value of lambda computed is returned.
-</para>
-</listitem>
-</itemizedlist>
-</para>
-
-<para>
-Note that the extensive form version disregards any marked
-subgames.
-</para>
-
-</sect2>
 
 </sect1>
 

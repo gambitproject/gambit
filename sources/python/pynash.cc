@@ -26,6 +26,7 @@
 
 #include <Python.h>
 #include "base/gnullstatus.h"
+#include "nash/efglogit.h"
 #include "nash/nfglogit.h"
 #include "pygambit.h"
 
@@ -34,34 +35,56 @@
  ************************************************************************/
 
 PyObject *
-gbt_nash_logit_nfg(PyObject */*self*/, PyObject *args)
+gbt_nash_logit(PyObject */*self*/, PyObject *args)
 {
-  PyObject *nfg;
+  PyObject *support;
+  double maxLam, stepSize;
+  int fullGraph;
 
-  if (!PyArg_ParseTuple(args, "O", &nfg)) {
+  if (!PyArg_ParseTuple(args, "Oddi",
+			&support, &maxLam, &stepSize, &fullGraph)) {
     return NULL;
   }
 
-  if (!is_nfgobject(nfg)) {
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashLogit algorithm;
+    algorithm.SetMaxLambda(maxLam);
+    algorithm.SetStepSize(stepSize);
+    algorithm.SetFullGraph(fullGraph);
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashLogit algorithm;
+    algorithm.SetMaxLambda(maxLam);
+    algorithm.SetStepSize(stepSize);
+    algorithm.SetFullGraph(fullGraph);
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else {
     return NULL;
   }
-
-  gbtNfgSupport support(*((nfgobject *) nfg)->m_nfg);
-  gbtNfgNashLogit algorithm;
-  algorithm.SetFullGraph(true);
-  gNullStatus status;
-  gList<MixedSolution> solutions = algorithm.Solve(support, status);
-  printf("%d\n", solutions.Length());
-
-  PyObject *list = PyList_New(0);
-
-  for (int i = 1; i <= solutions.Length(); i++) {
-    mixedobject *p = newmixedobject();
-    p->m_profile = new MixedSolution(solutions[i]);
-    PyList_Append(list, (PyObject *) p);
-  }  
-
-  return list;
 }
 
 void

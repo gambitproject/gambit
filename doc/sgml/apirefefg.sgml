@@ -440,7 +440,38 @@ Returns the newly created player.
 </sect2>
 
 
-<sect2 id ="apiref.efg.nfg">
+<sect2 id="apiref.efg.newsupport">
+<title>NewSupport</title>
+<indexterm><primary>NewSupport</primary></indexterm>
+<indexterm><primary>Support (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtEfgSupport gbtEfgGame::NewSupport(void)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Support[efg->EFG] =: EFSUPPORT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NewSupport</function> (<function>Support</function> in the
+GCL) creates a new support object on the extensive form game.  The
+support contains all actions at all information sets for all players.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.nfg">
 <title>Nfg (GCL only)</title>
 <indexterm><primary>Nfg</primary></indexterm>
 

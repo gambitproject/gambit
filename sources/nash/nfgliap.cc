@@ -238,6 +238,7 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
     for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
 		     (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
 	 i++) { 
+      PickRandomProfile(p);
       p_status.Get();
       p_status.SetProgress((double) i / (double) m_numTries,
 			   gText("Attempt ") + ToText(i) + 
@@ -254,9 +255,21 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	    p_status.Get();
 	  }
 	  
+	  MixedProfile<double> q(p);
 	  if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
 	    break;
 	  }
+
+	  double dist = 0.0;
+	  for (int i = 1; i <= p.Length(); i++) {
+	    dist += fabs(p[i] - q[i]);
+	  }
+	  if (dist <= 1.0e-8) {
+	    break;
+	  }
+
+	  gStandardOutput gout;
+	  gout << iter << ": (" << p.LiapValue() << ") " << p << '\n';
 
 	  if (sqrt(gradient.NormSquared()) < .001 &&
 	      fval < 1.0e-8) {
@@ -266,7 +279,6 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	}
       }
       catch (gFuncMinException &) { }
-      PickRandomProfile(p);
     }
   }
   catch (gSignalBreak &) {

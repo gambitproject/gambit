@@ -903,26 +903,27 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 // QreSolve
 //---------------
 
-static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
+static Portion *GSM_Qre(GSM &gsm, Portion **param)
 {
   gOutput *pxiFile = 0;
-  if (((TextPortion *) param[1])->Value() != "") {
-    pxiFile = new gFileOutput(((TextPortion *) param[1])->Value());
+  if (AsText(param[1]) != "") {
+    pxiFile = new gFileOutput(AsText(param[1]));
   }
   else {
     pxiFile = new gNullOutput;
   }
 
-  if (param[0]->Spec().Type == porMIXED)  {
-    const MixedSolution &start = AsMixed(param[0]);
+  if (param[0]->Spec().Type == porNFSUPPORT)  {
+    gbtNfgSupport support = AsNfgSupport(param[0]);
     gbtNfgNashLogit algorithm;
-    algorithm.SetMaxLambda(AsNumber(param[3]));
-    algorithm.SetFullGraph(AsBool(param[6]));
+    algorithm.SetMaxLambda(AsNumber(param[2]));
+    algorithm.SetStepSize(AsNumber(param[3]));
+    algorithm.SetFullGraph(AsBool(param[4]));
 
     gList<MixedSolution> solutions;
     gsm.StartAlgorithmMonitor("QreSolve Progress");
     try {
-      solutions = algorithm.Solve(start.Support(), gsm.GetStatusMonitor());
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     }
     catch (gSignalBreak &) { }
     catch (...) {
@@ -936,21 +937,22 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     return new Mixed_ListPortion(solutions);
   }
   else  {     // BEHAV
-    const BehavSolution &start = AsBehav(param[0]);
-    gbtEfgGame efg = start.GetGame();
+    gbtEfgSupport support = AsEfgSupport(param[0]);
+    gbtEfgGame efg = support.GetGame();
   
     if (!efg.IsPerfectRecall()) {
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
     gbtEfgNashLogit algorithm;
-    algorithm.SetMaxLambda(AsNumber(param[3]));
-    algorithm.SetFullGraph(AsNumber(param[6]));
+    algorithm.SetMaxLambda(AsNumber(param[2]));
+    algorithm.SetStepSize(AsNumber(param[3]));
+    algorithm.SetFullGraph(AsBool(param[4]));
     
     gList<BehavSolution> solutions;
     gsm.StartAlgorithmMonitor("QreSolve Progress");
     try {
-      solutions = algorithm.Solve(start.Support(), gsm.GetStatusMonitor());
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     }
     catch (gSignalBreak &) { }
     catch (...) {
@@ -1280,38 +1282,20 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction(*gsm, "QreSolve", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
-				       PortionSpec(porMIXED | porBEHAV, 1), 14));
+  FuncObj->SetFuncInfo(0,
+		       gclSignature(GSM_Qre, 
+				    PortionSpec(porEFSUPPORT | porNFSUPPORT,
+						1), 5));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, gclParameter("minLam", porNUMBER,
-					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("maxLam", porNUMBER,
-					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, gclParameter("delLam", porNUMBER,
-					    new NumberPortion(0.02)));
-  FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porINTEGER,
-					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
+  FuncObj->SetParamInfo(0, 2, gclParameter("maxLam", porNUMBER,
+					    new NumberPortion(1000.0)));
+  FuncObj->SetParamInfo(0, 3, gclParameter("stepSize", porNUMBER,
+					    new NumberPortion(0.0001)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("fullGraph", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
-					    new NumberPortion(1.0e-8)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
-					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
-					     new OutputPortion(*new gNullOutput), 
-					     BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
-					     new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 13, gclParameter("method", porINTEGER,
-					    new NumberPortion(0)));
-
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction(*gsm, "LcpSolve", 3);

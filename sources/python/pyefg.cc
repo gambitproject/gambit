@@ -194,6 +194,18 @@ efg_newplayer(efgobject *self, PyObject *args)
 }
 
 static PyObject *
+efg_newsupport(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efsupportobject *support = newefsupportobject();
+  support->m_support = new gbtEfgSupport(*self->m_efg);
+  return (PyObject *) support;
+}
+
+static PyObject *
 efg_numoutcomes(efgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -277,6 +289,7 @@ static struct PyMethodDef efg_methods[] = {
   { "IsPerfectRecall", (PyCFunction) efg_isperfectrecall, 1 }, 
   { "NewOutcome", (PyCFunction) efg_newoutcome, 1 },
   { "NewPlayer", (PyCFunction) efg_newplayer, 1 },
+  { "NewSupport", (PyCFunction) efg_newsupport, 1 },
   { "NumOutcomes", (PyCFunction) efg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) efg_numplayers, 1 },
   { "SetComment", (PyCFunction) efg_setcomment, 1 },

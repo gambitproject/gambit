@@ -471,6 +471,11 @@ void gbtNfgGame::SetOutcomeIndex(int p_index, const gbtNfgOutcome &p_outcome)
   rep->m_results[p_index] = p_outcome.rep;
 }
 
+gbtNfgSupport gbtNfgGame::NewSupport(void) const
+{
+  return gbtNfgSupport(*this);
+}
+
 // ---------------------------------------
 // gbtNfgGame: Private member functions
 // ---------------------------------------

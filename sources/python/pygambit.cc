@@ -30,10 +30,10 @@ extern PyObject *gbt_new_efg(PyObject *, PyObject *);
 extern PyObject *gbt_read_efg(PyObject *, PyObject *); 
 extern PyObject *gbt_new_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_read_nfg(PyObject *, PyObject *);
-extern PyObject *gbt_nash_logit_nfg(PyObject *, PyObject *);
+extern PyObject *gbt_nash_logit(PyObject *, PyObject *);
 
 static struct PyMethodDef gambit_methods[] = {
-  { "LogitSolve", gbt_nash_logit_nfg, 1 },
+  { "LogitSolve", gbt_nash_logit, 1 },
   { "NewEfg", gbt_new_efg, 1 },
   { "NewNfg", gbt_new_nfg, 1 },
   { "ReadEfg", gbt_read_efg, 1 },

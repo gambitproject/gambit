@@ -37,6 +37,7 @@ class StrategyProfile;
 class Lexicon;
 class gbtEfgGame;
 class gbtEfgSupport;
+class gbtNfgSupport;
 template <class T> class MixedProfile;
 
 struct gbt_nfg_game_rep;
@@ -98,6 +99,9 @@ public:
   gbtNfgOutcome GetOutcomeIndex(int index) const;
 
   void InitPayoffs(void) const;
+
+  // SUPPORTS
+  gbtNfgSupport NewSupport(void) const;
 
     // defined in nfgutils.cc
   friend void RandomNfg(gbtNfgGame);

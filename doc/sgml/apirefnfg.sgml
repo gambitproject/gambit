@@ -231,6 +231,37 @@ created outcome.
 </sect2>
 
 
+<sect2 id="apiref.nfg.newsupport">
+<title>NewSupport</title>
+<indexterm><primary>NewSupport</primary></indexterm>
+<indexterm><primary>Support (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtNfgSupport gbtNfgGame::NewSupport(void)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Support[nfg->NFG] =: NFSUPPORT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NewSupport</function> (<function>Support</function> in the
+GCL) creates a new support object on the normal form game.  The
+support contains all strategies for all players.
+</para>
+
+</sect2>
+
 <sect2 id="apiref.nfg.numplayers">
 <title>NumPlayers</title>
 <indexterm><primary>NumPlayers</primary></indexterm>
