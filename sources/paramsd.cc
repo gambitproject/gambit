@@ -33,9 +33,10 @@ public:
 };
 
 ParameterDialogC::ParameterDialogC(gSpace *space_,ParameterSetList &params_,
-											  wxFrame *parent,ParametrizedGame *game_):
+				   wxFrame *parent,ParametrizedGame *game_):
 		SpreadSheet3D(space_->Dmnsn(),2,1,params_.Name(),parent,ANY_BUTTON),
-      space(space_),params(params_),cur_set(params_.CurSetNum()),game(game_)
+                space(space_), params(params_), game(game_),
+                cur_set(params_.CurSetNum())
 {
 AddButton("Create Set",(wxFunction)add_set_func);
 char **set_names=new char *[params.Length()];
@@ -120,7 +121,7 @@ if (s)
 CanvasFocus();
 }
 
-void ParameterDialogC::OnSelectedMoved(int row,int col,SpreadMoveDir how)
+void ParameterDialogC::OnSelectedMoved(int /*row*/,int col,SpreadMoveDir /*how*/)
 {
 if (col==1) SetCurCol(2);
 CheckVals();
@@ -169,4 +170,7 @@ ParameterDialog::~ParameterDialog()
 
 
 #include "glist.imp"
+gOutput &operator <<(gOutput &o,const ParameterSet &) {return o;}
+// @@ For gcc's benefit only.  Avoids ambiguity in == operator 
+int gList<ParameterSet>::Find(const ParameterSet &) const {return 0;} 
 template class gList<ParameterSet>;
