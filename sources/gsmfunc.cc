@@ -391,14 +391,17 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	}
 	else
 	{
-	  _StdErr << "CallFuncObj Error: parameter type mismatch\n";
+	  _StdErr << "CallFuncObj Error: parameter #" << _CurrParamIndex;
+	  _StdErr << " type mismatch while calling\n";
+	  _StdErr << "                   function \"" << _FuncName << "\"\n";
 	  result = false;
 	}
       }
       else
       {
-	_StdErr << "CalFuncObj Error: multiple definitions found for parameter ";
-	_StdErr << "\"" << _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
+	_StdErr << "CalFuncObj Error: multiple definitions found for ";
+	_StdErr << "parameter \"";
+	_StdErr <<  _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
 	_StdErr << "\"\n";
 	_StdErr << "                  while executing CallFunction() on\n";
 	_StdErr << "                  function \"" << _FuncName << "\" )\n";
@@ -544,6 +547,26 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       _ErrorOccurred = true;
     }
   }
+  else // ( _FuncIndex != -1 )
+  {
+    for( index = 0; 
+	index < _FuncInfo[ _FuncIndex ].NumParams; 
+	index++ )
+    {
+      if( _Param[ index ] != 0 )
+      {
+	if( !( _Param[ index ]->Type() & 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ) )
+	{
+	  _StdErr << "CallFuncObj Error: parameter #" << index;
+	  _StdErr << " type mismatch while calling\n";
+	  _StdErr << "                   function \"" << _FuncName << "\"\n";
+	  _ErrorOccurred = true;
+	}	  
+      }
+    }
+  }
+
  
   if( !_ErrorOccurred )
   { 
