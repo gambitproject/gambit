@@ -261,7 +261,7 @@ template class NFLiapModule<double>;
 template class NFLiapModule<gRational>;
 #elif defined __BORLANDC__
 #pragma option -Jgd
-class LiapSolver<double>;
-class LiapSolver<gRational>;
+class NFLiapModule<double>;
+class NFLiapModule<gRational>;
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
