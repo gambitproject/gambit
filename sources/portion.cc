@@ -8,16 +8,10 @@
 
 #include <assert.h>
 
-class Portion;
-
-#include "garray.imp"
-#include "gblock.imp"
-
 #include "portion.h"
 #include "gsmhash.h"
 
 #include "gstream.h"
-
 #include "gsm.h"
 
 #include "nfg.h"
@@ -2135,10 +2129,4 @@ bool PortionEqual(Portion* p1, Portion* p2, bool &type_found)
 }
 
 
-
-template class gArray< NfgPortion* >;
-template class gBlock< NfgPortion* >;
-
-template class gArray< EfgPortion* >;
-template class gBlock< EfgPortion* >;
 

@@ -9,9 +9,6 @@
 
 #include "gsminstr.h"
 #include "gstream.h"
-
-#include "glist.imp"
-
 #include "gcmdline.h"
 
 PortionSpec gclQuitExpression::Type(void) const

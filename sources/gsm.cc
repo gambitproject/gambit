@@ -8,37 +8,11 @@
 class Portion;
 class CallFuncObj;
 class RefHashTable;
-template <class T> class gStack;
-
-//-----------------------------------------------------------------------
-//                       Template instantiations
-//-----------------------------------------------------------------------
-
-#include "gstack.imp"
-
-template class gStack< Portion* >;
-template class gStack< gStack< Portion* >* >;
-template class gStack< CallFuncObj* >;
-template class gStack< RefHashTable* >;
-
-#include "garray.imp"
-#include "gslist.imp"
-class FuncDescObj;
-template class gSortList<FuncDescObj*>;
-template class gListSorter<FuncDescObj*>;
-#include "gtext.h"
-template class gSortList<gText>;
-template class gListSorter<gText>;
-
 
 
 #include "gsm.h"
-
-#include <assert.h>
-
 #include "glist.h"
 #include "gstack.h"
-
 #include "portion.h"
 #include "gsmhash.h"
 #include "gsmfunc.h"
@@ -47,7 +21,6 @@ template class gListSorter<gText>;
 #include "gblock.h"
 
 #include "nfg.h"
-#include "rational.h"
 #include "mixedsol.h"
 #include "behavsol.h"
 
@@ -115,21 +88,13 @@ public:
 int GSM::_NumObj = 0;
 
 GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
-:_Verbose(true), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
+  :_Verbose(true), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
-#ifndef NDEBUG
-  if(size <= 0)
-  {
-    gerr << "  Illegal stack size specified during initialization\n";
-  }
-  assert(size > 0);
-#endif // NDEBUG
-  
   // global function default variables initialization
   // these should be done before InitFunctions() is called
 
   _StackStack    = new gStack< gStack< Portion* >* >(1);
-  _StackStack->Push(new gStack< Portion* >(size));
+  _StackStack->Push(new gStack< Portion* >(gmax(size, 0)));
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
   _FuncNameStack = new gStack< gText >;
@@ -147,30 +112,22 @@ GSM::~GSM()
 
   delete _FuncTable;
 
-  assert(_RefTableStack->Depth() == 1);
-  delete _RefTableStack->Pop();
+  while (_RefTableStack->Depth()) 
+    delete _RefTableStack->Pop();
   delete _RefTableStack;
 
-  assert(_StackStack->Depth() == 1);
-  delete _StackStack->Pop();
+  while (_StackStack->Depth())
+    delete _StackStack->Pop();
   delete _StackStack;
 
   delete _FuncNameStack;
-
 }
-
-
-
-
-//--------------------------------------------------------------------
-//        Stack access related functions
-//--------------------------------------------------------------------
-
 
 
 bool GSM::VarIsDefined(const gText& var_name) const
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Tried to see if empty variable name defined");
 
   return _RefTableStack->Peek()->IsDefined(var_name);
 }
@@ -178,52 +135,46 @@ bool GSM::VarIsDefined(const gText& var_name) const
 
 bool GSM::VarDefine(const gText& var_name, Portion* p)
 {
-  Portion* old_value = 0;
   bool type_match = true;
   bool result = true;
+  Portion *old_value;
 
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Tried to define empty variable name");
 
-  _ResolveRef( p );
+  _ResolveRef(p);
 
-  if(_RefTableStack->Peek()->IsDefined(var_name))
-  {
+  if (_RefTableStack->Peek()->IsDefined(var_name)) {
     old_value = (*_RefTableStack->Peek())(var_name);
-    if(p->Spec().ListDepth > 0)
-    {
-      assert(old_value->Spec().ListDepth > 0);
-      if(((ListPortion*) old_value)->Spec().Type != 
-	 ((ListPortion*) p)->Spec().Type)
-      {
-	if(((ListPortion*) p)->Spec().Type == porUNDEFINED)
-	  ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
-	else if(old_value->Spec().Type != porUNDEFINED)
+    if (p->Spec().ListDepth > 0) {
+      if (((ListPortion*) old_value)->Spec().Type != 
+	  ((ListPortion*) p)->Spec().Type)  {
+	if (((ListPortion*) p)->Spec().Type == porUNDEFINED)
+	    ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
+	else if (old_value->Spec().Type != porUNDEFINED)
 	  type_match = false;
       }
     }
-    else
-    {      
+    else {
       PortionSpec ospec = old_value->Spec();
       PortionSpec pspec = p->Spec();
-      if(ospec.Type == porNULL)
+      if (ospec.Type == porNULL)
 	ospec = ((NullPortion*) old_value)->DataType();
-      if(pspec.Type == porNULL)
+      if (pspec.Type == porNULL)
 	pspec = ((NullPortion*) p)->DataType();
-      if(ospec.Type != pspec.Type)
-	if(!PortionSpecMatch(ospec, pspec))
+      if (ospec.Type != pspec.Type)
+	if (!PortionSpecMatch(ospec, pspec))
 	  type_match = false;
     }
   }
 
-  if(!type_match)
-  {
+  if (!type_match) {
     _ErrorMessage(_StdErr, 42, 0, 0, var_name);
     delete p;
     result = false;
   }
-  else
-  {
-    if(old_value)
+  else {
+    if (old_value)
       delete _VarRemove(var_name);
     _RefTableStack->Peek()->Define(var_name, p);
   }
@@ -233,20 +184,18 @@ bool GSM::VarDefine(const gText& var_name, Portion* p)
 
 Portion* GSM::VarValue(const gText& var_name) const
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Tried to get value of empty variable name");
   return (*_RefTableStack->Peek())(var_name);
 }
 
 
 Portion* GSM::_VarRemove(const gText& var_name)
 {
-  Portion* p;
+  if (var_name == "")
+    throw gclRuntimeError("Tried to remove empty variable name");
 
-  assert(var_name != "");
-
-  p = _RefTableStack->Peek()->Remove(var_name);
-  assert(p);
-  return p;
+  return _RefTableStack->Peek()->Remove(var_name);
 }
 
 //---------------------------------------------------------------------
@@ -364,7 +313,6 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 
       default:
 	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
-	assert(0);
       }
 
       delete p2;
@@ -432,7 +380,6 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
     throw gclRuntimeError("Must assign to a variable");
   }
 
-  assert( result );
   return result;
 }
 
@@ -546,7 +493,7 @@ bool GSM::AddFunction(FuncDescObj* func)
 {
   FuncDescObj *old_func;
   bool result;
-  assert(func != 0);
+  if (func == 0)  return false;
   if(!_FuncTable->IsDefined(func->FuncName()))
   {
     _FuncTable->Define(func->FuncName(), func);
@@ -567,7 +514,7 @@ bool GSM::DeleteFunction(FuncDescObj* func)
 {
   FuncDescObj *old_func = 0;
   bool result;
-  assert(func != 0);
+  if (func == 0)  return 0;
   if(!_FuncTable->IsDefined(func->FuncName()))
   {
     _ErrorMessage(_StdErr, 73, 0, 0, old_func->FuncName());
@@ -625,8 +572,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
       if( VarDefine(func_info.ParamInfo[i].Name, param[i]) )
 	param[i] = param[i]->RefCopy();
       else
-//	param[i] = new ErrorPortion;
-       throw gclRuntimeError("Param matching error");
+	throw gclRuntimeError("Param matching error");
     }
   }
 
@@ -648,7 +594,6 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 	  {
 	    if(VarIsDefined(func_info.ParamInfo[i].Name))
 	      {
-		assert(VarValue(func_info.ParamInfo[i].Name) != 0);
 		delete param[i];
 		param[i] = _VarRemove(func_info.ParamInfo[i].Name);
 	      }
@@ -683,11 +628,10 @@ gText GSM::UserFuncName( void ) const
 
 void GSM::Clear(void)
 {
-  assert(_RefTableStack->Depth() > 0);
-  delete _RefTableStack->Pop();
+  while (_RefTableStack->Depth() > 0)
+    delete _RefTableStack->Pop();
 
   _RefTableStack->Push(new RefHashTable);
-
 }
 
 
@@ -941,8 +885,8 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 
 void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 {
-  assert( spec.ListDepth == 0 );
-
+  if (spec.ListDepth > 0)
+    return;
 
   gStack< RefHashTable* > tempRefTableStack;
 
@@ -964,7 +908,6 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
       {
 	if( varslist[i]->Game() == game )
 	{
-	  assert( varslist[i]->GameIsEfg() == IsEfg );
 	  if( varslist[i]->Spec().Type & spec.Type )
 	  {
 	    _RefTableStack->Peek()->Remove( varslist[i] );
@@ -1001,8 +944,6 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 
 void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 {
-  assert( spec.ListDepth == 0 );
-
   gStack< RefHashTable* > tempRefTableStack;
 
   while( _RefTableStack->Depth() > 0 )
@@ -1012,14 +953,6 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
     gList<Portion*> varslist;
     int i = 0;
     int j = 0;
-    
-    assert( ( spec.Type & porEFSUPPORT) ||
-	   ( spec.Type & porEFPLAYER ) ||
-	   ( spec.Type & porINFOSET ) ||
-	   ( spec.Type & porNODE ) ||
-	   ( spec.Type & porEFBASIS ) ||
-	   ( spec.Type & porACTION ) ||
-	   ( spec.Type & porEFOUTCOME ) );
     
     for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
       for(j=1; j<=vars[i].Length(); j++)
@@ -1031,7 +964,6 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
       {
 	if( varslist[i]->Game() == game )
 	{
-	  assert( varslist[i]->GameIsEfg() );
 	  if( spec.Type & porEFSUPPORT )
 	  {
 	    if( ((EfSupportPortion*) varslist[i])->Value() == data )
@@ -1091,10 +1023,7 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 
 void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
 {
-  assert( game );
-  assert( infoset );
-  int i = 0;
-  for( i = 1; i <= infoset->NumActions(); i++ )
+  for (int i = 1; i <= infoset->NumActions(); i++ )
     UnAssignEfgElement( game, porACTION, infoset->Actions()[ i ] );
   UnAssignEfgElement( game, porINFOSET, infoset );  
 }
@@ -1102,17 +1031,11 @@ void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )
 
 void GSM::UnAssignEfgSubTree( Efg* game, Node* node )
 {
-  assert( game );
-  assert( node );
-  int i = 0;
-  int j = 0;
-  for( i = 1; i <= node->NumChildren(); i++ )
-  {
+  for (int i = 1; i <= node->NumChildren(); i++)  {
     Infoset* infoset = node->GetInfoset();
-    if( infoset != NULL )
-    {
+    if (infoset) {
       const gArray<Action *>& actions = infoset->Actions();
-      for( j = actions.First(); j <= actions.Last(); j++ )
+      for (int j = actions.First(); j <= actions.Last(); j++ )
 	UnAssignEfgElement( game, porACTION, actions[j] );
       UnAssignEfgElement( game, porINFOSET, infoset );
     }
@@ -1222,24 +1145,31 @@ void GSM::_ErrorMessage
 
 void GSM::GlobalVarDefine     ( const gText& var_name, Portion* p )
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Attempted to define empty variable name");
   if( GlobalVarIsDefined( var_name ) )
     GlobalVarRemove( var_name );
   _GlobalRefTable.Define(var_name, p);
 }
+
 bool GSM::GlobalVarIsDefined  ( const gText& var_name ) const
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Attempted to define empty variable name");
   return _GlobalRefTable.IsDefined(var_name);
 }
+
 Portion* GSM::GlobalVarValue  ( const gText& var_name ) const
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Attempted to get value of empty variable name");
   return _GlobalRefTable(var_name);
 }
+
 void GSM::GlobalVarRemove     ( const gText& var_name )
 {
-  assert(var_name != "");
+  if (var_name == "")
+    throw gclRuntimeError("Attempted to remove empty variable name");
   delete _GlobalRefTable.Remove(var_name);
 }
 
