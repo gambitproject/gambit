@@ -61,9 +61,8 @@ double EFLiapFunc::Value(const gVector<double> &v)
     EFPlayer *player = _efg.PlayerList()[i];
     for (int j = 1; j <= player->NumInfosets(); j++) {
       avg = sum = 0.0;
-      Infoset *s = player->InfosetList()[j];
       int k;
-      for (k = 1; k <= s->NumActions(); k++) {
+      for (k = 1; k <= _p.GetEFSupport().NumActions(i, j); k++) {
 	x = _p(i, j, k); 
 	avg += x * _cpay(i, j, k);
 	sum += x;
@@ -71,7 +70,7 @@ double EFLiapFunc::Value(const gVector<double> &v)
 	result += BIG1 * x * x;         // add penalty for neg probabilities
       }
 
-      for (k = 1; k <= s->NumActions(); k++) {
+      for (k = 1; k <= _p.GetEFSupport().NumActions(i, j); k++) {
 	x = _cpay(i, j, k) - avg;
 	if (x < 0.0) x = 0.0;
 	result += x * x;          // add penalty if not best response

@@ -89,17 +89,16 @@ double EFGobitFunc::Value(const gVector<double> &v)
       prob = 0.0;
       psum = 0.0;
 
-      Infoset *s = player->InfosetList()[iset];
       int act;
       
-      for (act = 1; act <= s->NumActions(); act++)  {
+      for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
 	z = _Lambda * _cpay(pl, iset, act);
 	z = exp(z);
 	psum += z;
 	_cpay(pl, iset, act) = z;
       }
       
-      for (act = 1; act <= s->NumActions(); act++)  {
+      for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
 	z = _p(pl, iset, act);
 	prob += z;
 	if (z < 0.0)
