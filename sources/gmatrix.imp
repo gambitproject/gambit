@@ -406,6 +406,24 @@ template <class T> bool gMatrix<T>::operator==(const T &s) const
 template <class T> bool gMatrix<T>::operator!=(const T &s) const
 { return !(*this == s);  }
 
+// Information
+
+template <class T> gVector<T> gMatrix<T>::Row(const int& i) const
+{
+  gVector<T> answer(maxcol - mincol);
+  for (int j = mincol; j <= maxcol; j++)
+    answer[j] = (*this)(i,j);
+  return answer;
+}
+
+template <class T> gVector<T> gMatrix<T>::Column(const int& j) const
+{
+  gVector<T> answer(maxrow - minrow);
+  for (int i = minrow; i <= maxrow; i++)
+    answer[i] = (*this)(i,j);
+  return answer;
+}
+
 
 // more complex functions
 

@@ -67,6 +67,10 @@ template <class T> class gMatrix : public gRectArray<T>  {
     bool operator==(const T &) const;
     bool operator!=(const T &) const;
 
+       // INFORMATION
+    gVector<T> Row   (const int&) const;
+    gVector<T> Column(const int&) const;
+
   void MakeIdent(void);  // set matrix to identity matrix
   void Pivot(int, int);
 };
