@@ -26,9 +26,6 @@ class NfgIter<gRational>;
 template <class T> class NfgContIter;
 class NfgContIter<gRational>;
 
-template <class T> class MixedSolution;
-gOutput &operator<<(gOutput &, const MixedSolution<double> &);
-
 
 #define TEMPLATE
 #pragma option -Jgd
@@ -38,6 +35,7 @@ gOutput &operator<<(gOutput &, const MixedSolution<double> &);
 #include "nfgiter.imp"
 #include "nfgciter.imp"
 #include "readnfg.imp"
+#include "mixedsol.imp"
 
 TEMPLATE class Nfg<double>;
 DataType Nfg<double>::Type(void) const { return DOUBLE; }
@@ -51,6 +49,9 @@ TEMPLATE class NfgIter<double>;
 TEMPLATE class MixedProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<double> &);
 
+TEMPLATE class MixedSolution<double>;
+TEMPLATE gOutput &operator<<(gOutput &, const MixedSolution<double> &);
+
 #include "garray.imp"
 
 TEMPLATE class gArray<double *>;
@@ -59,8 +60,6 @@ TEMPLATE class gArray<double *>;
 
 TEMPLATE class gList<MixedProfile<double> >;
 TEMPLATE class gNode<MixedProfile<double> >;
-
-#include "mixedsol.h"
 
 TEMPLATE class gList<MixedSolution<double> >;
 TEMPLATE class gNode<MixedSolution<double> >;

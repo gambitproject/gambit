@@ -1,12 +1,11 @@
-//#
-//# FILE: mixedsol.cc -- Mixed strategy solution classes
-//#
-//# $Id$
-//#
+//
+// FILE: mixedsol.cc -- Mixed strategy solution classes
+//
+// $Id$
+//
 
 
-
-#include "mixedsol.imp"
+#include "mixedsol.h"
 
 
 gString NameNfgAlgType(NfgAlgType i)
@@ -44,18 +43,3 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i)
   o << NameNfgAlgType(i);
 }
 
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-#include "rational.h"
-TEMPLATE class MixedSolution<double>;
-TEMPLATE class MixedSolution<gRational>;
-
-TEMPLATE gOutput &operator<<(gOutput &, const MixedSolution<double> &);
-TEMPLATE gOutput &operator<<(gOutput &, const MixedSolution<gRational> &);
