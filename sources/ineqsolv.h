@@ -54,8 +54,8 @@ template <class T> class IneqSolv {
   bool SystemHasNoSolutionIn(const gRectangle<T>& r, gArray<int>&) const;
 
   const bool ASolutionExistsRecursion(const gRectangle<T>&, 
-				      gVector<T>&,
-				      gArray<int>&)                const;
+				            gVector<T>&,
+				            gArray<int>&)          const;
 
  public:
    IneqSolv(const gPolyList<T> &, gStatus &);  

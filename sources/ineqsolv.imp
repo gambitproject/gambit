@@ -19,7 +19,8 @@ template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
 					 gStatus &p_status) 
   : System(given), 
     TreesOfPartials(given),
-    Epsilon((T)0),
+    Epsilon((T)1/(T)1000000),
+    //    Epsilon((T)0),
     //    HasBeenSolved(false), 
     //    HasASolution(triUNKNOWN), 
     //    Sample(given.Dmnsn()),
@@ -114,9 +115,18 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 
 template <class T> const bool
 IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
-				      gVector<T>& sample,
-				      gArray<int>& precedence)    const
+				            gVector<T>& sample,
+				            gArray<int>& precedence) const
 {
+  /*
+  //DEBUG
+  gout << "The rectangle is\n";
+  for (int i = 1; i <= r.Dmnsn() - 1; i++)
+    gout << r.CartesianFactor(i) << "x";
+  if (r.Dmnsn() > 0) 
+    gout << r.CartesianFactor(r.Dmnsn()) << "\n";
+  */
+
   // Check for user interrupt
   m_status.SetProgress(50.0);
   m_status.Get();
@@ -142,6 +152,11 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
      // precedence orders search for everywhere negative poly
   gArray<int> precedence(System.Length());  
   for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
+
+  /*
+  //DEBUG
+  gout << "The system is\n" << System << "\n";
+  */
 
   bool answer = ASolutionExistsRecursion(r, sample, precedence);
 
