@@ -139,12 +139,10 @@ const gArray<bool> &MSolnSortFilterOptions::FilterProper(void) const
 
 MSolnSorterFilter::MSolnSorterFilter(gSortList<MixedSolution> &solns, 
                                      MSolnSortFilterOptions &options_)
-    : gListSorter<MixedSolution>(solns), 
-      gListFilter<MixedSolution >(solns),
-      options(options_)
+  : options(options_)
 {
-    Filter();
-    Sort();
+    Filter(solns);
+    Sort(solns);
 }
 
 

@@ -60,9 +60,7 @@ protected:
     return (a->FuncName() > b->FuncName());
   }
 public:
-  gFuncListSorter(gSortList<gclFunction*>& list)
-    : gListSorter<gclFunction*>(list)
-    {}
+  gFuncListSorter(void) { }
 };
 
 class gTextListSorter : public gListSorter<gText>
@@ -73,9 +71,7 @@ protected:
     return (a > b);
   }
 public:
-  gTextListSorter(gSortList<gText>& list)
-    : gListSorter<gText>(list)
-    {}
+  gTextListSorter(void) { }
 };
 
 
@@ -739,7 +735,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
       }      
     }
 
-    gFuncListSorter sorter(funcslist);
+    gFuncListSorter sorter;
     if(found==1)
     {
       gList<gText> list = func->FuncList( udf, bif, getdesc );
@@ -749,7 +745,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
     }
     else
     {
-      sorter.Sort();
+      sorter.Sort(funcslist);
       result = new ListPortion();
       for(i=1; i<=funcslist.Length(); i++)
 	((ListPortion*) result)->
@@ -835,8 +831,8 @@ Portion* GSM::HelpVars(gText varname)
       }      
     }
 
-    gTextListSorter sorter(varslist);
-    sorter.Sort();
+    gTextListSorter sorter;
+    sorter.Sort(varslist);
     result = new ListPortion();
     for(i=1; i<=varslist.Length(); i++)
       ((ListPortion*) result)->Append(new TextPortion(varslist[i] + ":" + 

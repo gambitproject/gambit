@@ -108,13 +108,13 @@ template <class T> void gSortList<T>::Flush(void)
 //                  gListSorter<T>: Member functions
 //--------------------------------------------------------------------
 
-template <class T> gListSorter<T>::gListSorter(gSortList<T> &l) : list(l)
+template <class T> gListSorter<T>::gListSorter(void)
 { }
 
 template <class T> gListSorter<T>::~gListSorter()  
 { }
 
-template <class T> void gListSorter<T>::Sort(void)
+template <class T> void gListSorter<T>::Sort(gSortList<T> &list)
 {
   // this uses a bubble sort algorithm
 
@@ -137,12 +137,12 @@ template <class T> void gListSorter<T>::Sort(void)
 //                  gListFilter<T>: Member functions
 //--------------------------------------------------------------------
 
-template <class T> gListFilter<T>::gListFilter(gSortList<T> &l) : list(l)
+template <class T> gListFilter<T>::gListFilter(void)
 { }
 
 template <class T> gListFilter<T>::~gListFilter()  { }
 
-template <class T> void gListFilter<T>::Filter(void)
+template <class T> void gListFilter<T>::Filter(gSortList<T> &list)
 {
   list.vis_length = list.Length();
   int nodes_rejected = 0, i = 1;

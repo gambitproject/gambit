@@ -137,12 +137,10 @@ const gArray<bool> &BSolnSortFilterOptions::FilterSeq(void) const
 
 BSolnSorterFilter::BSolnSorterFilter(gSortList<BehavSolution> &solns, 
                                      BSolnSortFilterOptions &options_)
-    : gListSorter<BehavSolution>(solns), 
-      gListFilter<BehavSolution> (solns),
-      options(options_)
+  : options(options_)
 {
-    Filter();
-    Sort();
+  Filter(solns);
+  Sort(solns);
 }
 
 

@@ -36,24 +36,24 @@ public:
 
 template <class T> class gListSorter  {
 protected:
-  gSortList<T> &list;
   virtual bool LessThan(const T &a, const T &b) const = 0;
 
 public:
-  gListSorter(gSortList<T> &list);
+  gListSorter(void);
   virtual ~gListSorter();
-  void Sort(void);
+
+  void Sort(gSortList<T> &);
 };
 
 template <class T> class gListFilter  {
 protected:
-  gSortList<T> &list;
   virtual bool Passes(const T &a) const = 0;
 
 public:
-  gListFilter(gSortList<T> &list);
+  gListFilter(void);
   virtual ~gListFilter();
-  void Filter(void);
+
+  void Filter(gSortList<T> &);
 };
 
 #endif
