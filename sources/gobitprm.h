@@ -34,9 +34,9 @@ wxGetResource(PARAMS_SECTION,"Func-tolBrent",&tolBrent,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-maxitsBrent",&maxitsBrent,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-maxitsOpt",&maxitsOpt,defaults_file);
 
-Form()->Add(wxMakeFormFloat("L Start",&minLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-Form()->Add(wxMakeFormFloat("L Stop",&maxLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-Form()->Add(wxMakeFormFloat("L Step",&delLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("minLam",&minLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("maxLam",&maxLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("delLam",&delLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormNewLine());
 Form()->Add(wxMakeFormFloat("Tolerance n-D",&tolOpt,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("Tolerance 1-D",&tolBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));

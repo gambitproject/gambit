@@ -26,11 +26,11 @@ wxGetResource(PARAMS_SECTION,"Grid-delLam",&delLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-delp",&delp,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-tol",&tol,defaults_file);
 
-Form()->Add(wxMakeFormFloat("L Start",&minLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
-Form()->Add(wxMakeFormFloat("L Stop",&maxLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
-Form()->Add(wxMakeFormFloat("L Step",&delLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("minLam",&minLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("maxLam",&maxLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("delLam",&delLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormFloat("P Step",&delp,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("del P",&delp,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("Tolerance",&tol,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 
 // Now add the basic stuff

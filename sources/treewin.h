@@ -95,7 +95,7 @@ private:
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
-	Bool		infosets_changed;			// is needed
+	Bool		infosets_changed,must_recalc;			// is needed
 	Bool		need_clear;						// Do we need to clear the screen?
 	gOutput	*log;									// Are we saving each action to a file?
 	Infoset *hilight_infoset;			// Hilight infoset from the solution disp
