@@ -1,8 +1,8 @@
-//#
-//# FILE: double.cc -- Implementation of gDouble: double with generous ==
-//#
-//# @(#)double.cc	1.0  2/18/96
-//#
+//
+// FILE: double.cc -- Implementation of gDouble: double with generous ==
+//
+// $Id$
+// 
 
 #ifdef __GNUG__
 #pragma implementation
@@ -12,7 +12,11 @@
 #include "gnulib.h"
 #include "gvector.imp"
 #include "garray.imp"
+#include "grarray.imp"
+#include "gmatrix.imp"
+#include "gsmatrix.imp"
 #include "gblock.imp"
+#include "monomial.imp"
 #include "glist.imp"
 #include <math.h>
 #include <values.h>
@@ -74,7 +78,7 @@ gDouble& gDouble::operator =  (const gDouble& y)
 
 bool gDouble::operator == (const gDouble& y) const
 {
-  const double epsilon = 0.000001;  // This, and entire routine, are malleable
+  const double epsilon = 0.000000001;  // This, and entire routine, are malleable
 
   if (dbl == 0) {
     if (fabs(y.dbl) < epsilon) return true;
@@ -208,6 +212,11 @@ gDouble sqr(const gDouble& x)
   return gDouble(sqr(x.dbl));
 }
 
+gDouble sqrt(const gDouble& x)
+{
+  return gDouble(sqrt(x.dbl));
+}
+
 gDouble pow(const gDouble& x, const long y)
 {
   return gDouble(pow(x.dbl, y));
@@ -241,22 +250,33 @@ gDouble TOgDouble(const gString &s)
   return answer; 
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+template class gVector<gDouble>;
+template class gArray<gDouble>;
+template class gBlock<gDouble>;
+template class gRectArray<gDouble>;
+template class gMatrix<gDouble>;
+template class gSquareMatrix<gDouble>;
+template gOutput & operator<< (gOutput&, const gVector<gDouble>&);
 
-TEMPLATE class gVector<gDouble>;
-TEMPLATE class gArray<gDouble>;
-TEMPLATE class gBlock<gDouble>;
-TEMPLATE gOutput & operator<< (gOutput&, const gVector<gDouble>&);
-TEMPLATE class gList<gDouble>;
-TEMPLATE class gNode<gDouble>;
+#ifndef GDOUBLE
+
+template class gMono<gDouble>;
+template gOutput & operator<< (gOutput&, const gMono<gDouble>&);
+
+template class gList<gMono<gDouble> >;
+template class gNode<gMono<gDouble> >;
+#endif  // ! GDouble
 
 /*
 #include "gmisc.cc"
-TEMPLATE gDouble gmin(const gDouble &a, const gDouble &b);
-TEMPLATE gDouble gmax(const gDouble &a, const gDouble &b);
+template gDouble gmin(const gDouble &a, const gDouble &b);
+template gDouble gmax(const gDouble &a, const gDouble &b);
+*/
+
+/*
+#include "objcount.imp"
+
+class gDouble;
+template class Counted<gDouble>;
+int Counted<gDouble>::numObjects = 0;
 */

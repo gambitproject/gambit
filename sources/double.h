@@ -1,8 +1,8 @@
-//#
-//# FILE: double.h -- Declaration of class gDouble: double with tolerant ==
-//#
-//# @(#)double.h	1.0  2/17/96
-//#
+//
+// FILE: double.h -- Declaration of class gDouble: double with tolerant ==
+//
+// $Id$
+//
 
 /*
 
@@ -22,10 +22,12 @@ is different from zero.
 #endif
 #define _Double_h 1
 
-#include "gambitio.h"
 #include <math.h>
+#include "gambitio.h"
+// #include "objcount.h"
 
 class gDouble
+// : private Counted<gDouble>
 {
 protected:
   double dbl;
@@ -65,8 +67,9 @@ public:
   void       operator *= (const gDouble& y);
   void       operator /= (const gDouble& y);
 
-// error reporting
+// error reporting and object counting
   void    error(const char* msg) const;
+//  inline  int static Count() { return Counted<gDouble>::objCount(); }
 
 // printing
   friend gInput&    operator >> (gInput& s, gDouble& y);
@@ -76,6 +79,7 @@ public:
   friend int      sign(const gDouble& x);             // -1, 0, or +1
   friend gDouble  fabs(const gDouble& x);              
   friend gDouble  sqr(const gDouble& x);              
+  friend gDouble  sqrt(const gDouble& x);              
   friend gDouble  pow(const gDouble& x, const long y);
   friend gDouble  pow(const gDouble& x, const gDouble& y);
 };
