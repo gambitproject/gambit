@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h	1.19 7/4/95
+// $Id$
 //
 
 #ifndef TREEWINDOW_H
@@ -19,7 +19,8 @@ typedef struct NODEENTRY {
 		int nums;				// sum of infosets previous to this level
 		int has_children;	// how many children this node has
 		int child_number;	// what branch # is this node from the parent
-    bool in_sup;			// is this node in disp_sup
+		bool in_sup;			// is this node in disp_sup
+		bool expanded;		// is this subgame root expanded or collapsed
 		const Node *n;
 		NODEENTRY *parent;
 		void Translate(int ox,int oy) {x+=ox;y+=oy;if (infoset_y!=-1) infoset_y+=oy;}
@@ -27,7 +28,8 @@ typedef struct NODEENTRY {
 		NODEENTRY(const NODEENTRY &e): x(e.x),y(e.y),level(e.level),color(e.color),
 																	 infoset_y(e.infoset_y),num(e.num),
 																	 nums(e.nums),has_children(e.has_children),
-																	 child_number(e.child_number),in_sup(e.in_sup), n(e.n) { }
+																	 child_number(e.child_number),in_sup(e.in_sup),
+																	 n(e.n),expanded(e.expanded) { }
 } NodeEntry;
 
 class BaseExtensiveShow;
@@ -89,13 +91,25 @@ public:
 class BaseTreeWindow: public TreeRender
 {
 friend class ExtensivePrintout;
-
+public:
+typedef struct SUBGAMEENTRY {
+					const Node *root;
+					bool expanded;
+					SUBGAMEENTRY(void):root(0),expanded(false) { }
+					SUBGAMEENTRY(const Node *r,bool e=false):root(r),expanded(e) { }
+					SUBGAMEENTRY(const SUBGAMEENTRY &s):root(s.root),expanded(s.expanded) { }
+					// need these to make a list
+					int operator==(const SUBGAMEENTRY &s) {return (s.root==root);}
+					int operator!=(const SUBGAMEENTRY &s) {return (s.root!=root);}
+					friend gOutput &operator<<(gOutput &,const SUBGAMEENTRY &);
+					} SubgameEntry;
 private:
 	BaseEfg		&ef;
 	EFSupport * &disp_sup;	// we only need to know the displayed sup
 	BaseExtensiveShow	*frame;
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
+	gList<SubgameEntry> subgame_list; // Keeps track of collapsed/expanded subgames
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
 	Bool		infosets_changed,must_recalc;			// is needed
 	Bool		need_clear;						// Do we need to clear the screen?
@@ -115,7 +129,6 @@ private:
 	void	Log(const gString &s);
 	int PlayerNum(const EFPlayer *p) const ;
 	int IsetNum(const Infoset *i) const ;
-	// These functions are type dependent and are defined in TreeWindow
 protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
 	Bool		outcomes_changed;
@@ -132,7 +145,7 @@ public:
 	~BaseTreeWindow(void);
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
-	// Menu event handlers (these are mostly in treewin1.cc)
+	// Menu event handlers (these are mostly in btreewn1.cc)
 	void node_add(void);
 	void node_game(void);
 	void node_label(void);
@@ -140,9 +153,6 @@ public:
 	void node_set_mark(void);
 	void node_goto_mark(void);
 	void node_outcome(int out);
-#ifdef SUBGAMES
-	void node_subgame(int _game);
-#endif
 
 	void action_label(void);
 	void action_insert(void);
@@ -155,19 +165,23 @@ public:
 	void tree_label(void);
 	void tree_players(void);
 	virtual void tree_outcomes(const gString out_name=gString(),int save_num=0) =0;
-#ifdef SUBGAMES
-	void tree_subgames(void);
-	void tree_subgame_make(void);
-	void tree_subgame_open(int _game);
-	void tree_subgame_delete(int _game);
-	void tree_subgame_name(int _game,gString _label);
-#endif
 
 	void infoset_merge(void);
 	void infoset_break(void);
 	void infoset_join(void);
 	void infoset_label(void);
 	void infoset_switch_player(void);
+	void infoset_reveal(void);
+
+	void subgame_clear_one(void);
+	void subgame_clear_all(void);
+	void subgame_solve(void);
+	void subgame_collapse_one(void);
+	void subgame_collapse_all(void);
+	void subgame_expand_one(void);
+	void subgame_expand_all(void);
+	void subgame_toggle(void);
+   void subgame_set(void);
 
 	void edit_outcome(void);
 	void display_legends(void);
