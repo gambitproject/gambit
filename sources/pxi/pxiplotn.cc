@@ -248,7 +248,9 @@ void PxiPlotN::DoPlot(wxDC& dc,
   // The .05 used to be the stepsize from PXI file
   PlotAxis(dc, x0, y0, cw, ch, m_lambdaAxisProp, m_probAxisProp, .05);
   for (int i = 1; i <= m_qreFiles.Length(); i++) {
-    PlotData(dc, x0, y0, cw, ch, *(m_qreFiles[i]));
+    if (m_qreFiles[i]->IsShown()) {  
+      PlotData(dc, x0, y0, cw, ch, *(m_qreFiles[i]));
+    }
   }
 }
 

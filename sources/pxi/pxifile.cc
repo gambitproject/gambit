@@ -16,6 +16,7 @@ int FindStringInFile(gInput &, const char *);
 //=========================================================================
 
 PxiFile::PxiFile(void)
+  : m_shown(true)
 { }
 
 PxiFile::~PxiFile()

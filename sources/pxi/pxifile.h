@@ -47,7 +47,8 @@ private:
   int m_powLambda;
   double m_error, m_qStep;
   int m_numColumns, m_lambdaColumn, m_deltaColumn;
-
+  bool m_shown;
+  
   gBlock< gBlock<int> > m_columns;
   gList<DataLine *> m_data;
 
@@ -78,8 +79,11 @@ public:
     { return (m_powLambda) ? 1.0 + m_delLambda : m_delLambda; }
   int PowLambda(void) const { return m_powLambda; }
 
-  double MError(void) const { return m_error;}
-  double QStep(void) const { return m_qStep;}
+  double MError(void) const { return m_error; }
+  double QStep(void) const { return m_qStep; }
+
+  bool IsShown(void) const { return m_shown; }
+  void Show(bool p_shown) { m_shown = p_shown; }
 
   const gList<DataLine *> &GetData(void) const { return m_data; }
 };

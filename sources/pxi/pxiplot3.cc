@@ -235,7 +235,9 @@ void PxiPlot3::DoPlot(wxDC& dc,
   dc.SetPen(*wxBLACK_PEN);
   PlotAxis_3(dc,x0,y0,cw,ch,labels);
   for (int i = 1; i <= m_qreFiles.Length(); i++) {
-    PlotData_3(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+    if (m_qreFiles[i]->IsShown()) {
+      PlotData_3(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+    }
   }
 }
 

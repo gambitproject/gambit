@@ -48,6 +48,7 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_VIEW_ZOOM_OUT, PxiChild::OnViewZoomOut)
   EVT_MENU(PXI_VIEW_ZOOM, PxiChild::OnViewZoom)
   EVT_MENU(PXI_SERIES_OVERLAY, PxiChild::OnSeriesOverlay)
+  EVT_MENU(PXI_SERIES_SHOW, PxiChild::OnSeriesShow)
   EVT_MENU(PXI_DATA_LOAD, PxiChild::OnDataLoad)
   EVT_MENU(PXI_DATA_SAVE, PxiChild::OnDataSave)
   EVT_MENU(PXI_DATA_EDIT, PxiChild::OnDataEdit)
@@ -147,6 +148,7 @@ void PxiChild::MakeMenus(void)
   
   wxMenu *seriesMenu = new wxMenu;
   seriesMenu->Append(PXI_SERIES_OVERLAY, "&Overlay", "Overlay another file");
+  seriesMenu->Append(PXI_SERIES_SHOW, "&Show", "Show/hide series");
 
   wxMenu *dataMenu = new wxMenu;
   dataMenu->Append(PXI_DATA_LOAD, "&Load", "Load experimental data");
@@ -450,6 +452,65 @@ void PxiChild::OnSeriesOverlay(wxCommandEvent &)
     catch (...) {
       if (pxifile) delete pxifile;
       return;
+    }
+  }
+}
+
+class dialogSeriesShow : public wxDialog {
+private:
+  wxListBox *m_seriesList;
+
+public:
+  dialogSeriesShow(wxWindow *p_parent, const gArray<PxiFile *> &);
+
+  bool SeriesSelected(int p_series) const 
+  { return m_seriesList->Selected(p_series - 1); }
+};
+
+dialogSeriesShow::dialogSeriesShow(wxWindow *p_parent,
+				   const gArray<PxiFile *> &p_files)
+  : wxDialog(p_parent, -1, "Show/Hide Series")
+{
+  m_seriesList = new wxListBox(this, -1, wxDefaultPosition, wxDefaultSize,
+			       0, 0, wxLB_MULTIPLE);
+  for (int i = 1; i <= p_files.Length(); i++) {
+    m_seriesList->Append(wxString::Format("Series %d", i));
+  }
+
+  for (int i = 1; i <= p_files.Length(); i++) {
+    m_seriesList->SetSelection(i - 1, p_files[i]->IsShown());
+  }
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
+
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(cancelButton, 0, wxALL, 5);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_seriesList, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
+
+  SetAutoLayout(true);
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+}
+
+void PxiChild::OnSeriesShow(wxCommandEvent &)
+{
+  dialogSeriesShow dialog(this, m_qreFiles);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    for (int i = 1; i <= m_qreFiles.Length(); i++) {
+      m_qreFiles[i]->Show(dialog.SeriesSelected(i));
+    }
+
+    for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
+      ((PxiPlot *) m_plotBook->GetPage(i))->Render();
     }
   }
 }

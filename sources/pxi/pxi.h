@@ -47,6 +47,7 @@ const int PXI_DATA_EDIT = 217;
 const int PXI_DATA_FIT = 218;
 
 const int PXI_SERIES_OVERLAY = 220;
+const int PXI_SERIES_SHOW = 221;
 
 const int PXI_FORMAT_LAMBDA_AXIS = 130;
 const int PXI_FORMAT_PROFILE_AXIS = 131;

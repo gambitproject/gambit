@@ -38,6 +38,7 @@ private:
   void OnViewZoom(wxCommandEvent &);
 
   void OnSeriesOverlay(wxCommandEvent &);
+  void OnSeriesShow(wxCommandEvent &);
 
   void OnDataLoad(wxCommandEvent &);
   void OnDataSave(wxCommandEvent &);

@@ -188,7 +188,9 @@ void PxiPlot2::DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level)
 {
   PlotAxis_2(dc, x0, y0, cw, ch);
   for (int i = 1; i <= m_qreFiles.Length(); i++) {
-    PlotData_2(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+    if (m_qreFiles[i]->IsShown()) {
+      PlotData_2(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+    }
   }
 }
 
