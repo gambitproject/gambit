@@ -146,9 +146,18 @@ template <class T>
 void Basis<T>::Mark(int col )
 {
   if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
-    rowBlocked[-col] = !rowBlocked[-col];
+    rowBlocked[-col] = true;
   else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
-    colBlocked[col] = !colBlocked[col];
+    colBlocked[col] = true;
+}
+
+template <class T>
+void Basis<T>::UnMark(int col )
+{
+  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+    rowBlocked[-col] = false;
+  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+    colBlocked[col] = false;
 }
 
 template <class T>

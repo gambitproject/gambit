@@ -95,6 +95,7 @@ public:
 
   // marks/unmarks label to block it from entering basis
   void Mark(int label);
+  void UnMark(int label);
 
   // returns true if label is blocked from entering basis
   bool IsBlocked(int label) const;

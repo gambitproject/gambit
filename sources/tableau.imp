@@ -157,9 +157,10 @@ template <class T> long &Tableau<T>::NumPivots()
 { return npivots; }
 
 template <class T> void Tableau<T>::Mark(int label)
-{
-  basis.Mark(label);
-}
+{basis.Mark(label);}
+
+template <class T> void Tableau<T>::UnMark(int label)
+{basis.UnMark(label);}
 
 template <class T> bool Tableau<T>::IsBlocked(int label) const
 {
