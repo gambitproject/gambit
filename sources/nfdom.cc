@@ -66,8 +66,8 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
 {
   //DEBUG
-  bool answer = Dominates(S.Game(),S,s->Player()->GetNumber(), 
-			  S.GetNumber(s), S.GetNumber(t),strong);
+  //  bool answer = Dominates(S.Game(),S,s->Player()->GetNumber(), 
+  //			  S.GetNumber(s), S.GetNumber(t),strong);
 
   const Nfg* n = S.GamePtr();
 
@@ -90,13 +90,13 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
       gNumber bp = (B.GetOutcome()) ? 
       n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
 
-      if (ap <= bp)  { if (answer) { gout << "E1.\n"; exit(0);}
+      if (ap <= bp)  { // if (answer) { gout << "E1.\n"; exit(0);}
       return false;
       }
       A.NextContingency();
     } while (B.NextContingency());
 	
-    if (!answer) {gout << "E2.\n"; exit(0);}
+    //    if (!answer) {gout << "E2.\n"; exit(0);}
     return true;
   }
 
@@ -108,14 +108,14 @@ bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
     gNumber bp = (B.GetOutcome()) ? 
     n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
 
-    if (ap < bp)   {if (answer) {gout << "E3.\n"; exit(0);}
+    if (ap < bp)   { // if (answer) {gout << "E3.\n"; exit(0);}
     return false;
     }
     else if (ap > bp)  equal = false;
     A.NextContingency();
   } while (B.NextContingency());
 
-  if (answer == equal) {gout << "E4.\n"; exit(0);}
+  //  if (answer == equal) {gout << "E4.\n"; exit(0);}
   return (!equal);
 }
 
