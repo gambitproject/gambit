@@ -499,6 +499,7 @@ template <class T> gOutput& operator <<
 	if (t >= 2) output << "^" << t;
 	if (t < x.Degree()) output << " + "; }
   }
+  return output;
 }
 
 //--------------------------------------------------------------------------
@@ -831,6 +832,7 @@ gOutput& operator << (gOutput& output, const complexpoly& x)
 	if (t >= 2) output << "^" << t;
 	if (t < x.Degree()) output << " + "; }
   }
+  return output;
 }
 
 
