@@ -32,6 +32,7 @@
 #include "game/efg.h"
 #include "game/nfg.h"
 #include "nash/mixedsol.h"
+#include "nash/behavsol.h"
 
 /*************************************************************************
  * EFG OBJECT
@@ -192,5 +193,25 @@ extern PyTypeObject Mixedtype;
 #define is_mixedobject(v)  ((v)->ob_type == &Mixedtype)
 
 mixedobject *newmixedobject(void);
+
+/*************************************************************************
+ * BEHAV PROFILE OBJECT
+ *************************************************************************/
+
+//
+// Following the GCL implementation, behav profiles are actually implemented
+// as BehavSolution.  This probably should be streamlined in a future
+// version.
+//
+
+typedef struct {
+  PyObject_HEAD
+  BehavSolution *m_profile;
+} behavobject;
+
+extern PyTypeObject Behavtype;
+#define is_behavobject(v)  ((v)->ob_type == &Behavtype)
+
+behavobject *newbehavobject(void);
 
 #endif  // PYGAMBIT_H

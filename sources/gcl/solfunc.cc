@@ -61,10 +61,10 @@ static Portion *GSM_ActionProb(GSM &, Portion **param)
   gbtEfgPlayer player = infoset.GetPlayer();
   
   if (player.IsChance()) {
-    return new NumberPortion(profile->ActionProb(action));
+    return new NumberPortion(profile->GetActionProb(action));
   }
   else if (profile->Support().Contains(action)) {
-    return new NumberPortion(profile->ActionProb(action));
+    return new NumberPortion(profile->GetActionProb(action));
   }
   else {
     return new NumberPortion(0.0);
@@ -84,10 +84,12 @@ static Portion *GSM_ActionValue(GSM &, Portion **param)
   if (infoset.GetPlayer().IsChance())
     return new NullPortion(porNUMBER);
   else if (profile->Support().Contains(action))  {
-    if(profile->IsetProb(infoset)>gNumber(0.0))
-      return new NumberPortion(profile->ActionValue(action));
-    else
+    if (profile->GetInfosetProb(infoset) > gNumber(0.0)) {
+      return new NumberPortion(profile->GetActionValue(action));
+    }
+    else {
       return new NullPortion(porNUMBER);
+    }
   }
   else
     return new NullPortion(porNUMBER);
@@ -115,7 +117,7 @@ static Portion *GSM_Belief(GSM &, Portion **param)
   if (s.IsNull()) {
     return new NullPortion(porNUMBER);
   }
-  return new NumberPortion(bp->BeliefProb(n));
+  return new NumberPortion(bp->GetBelief(n));
 }
 
 //-------
@@ -154,7 +156,7 @@ static Portion *GSM_Game_EfgTypes(GSM &, Portion** param)
 static Portion *GSM_Creator_Behav(GSM &, Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  return new TextPortion(bs->Creator());
+  return new TextPortion(bs->GetCreator());
 }
 
 static Portion *GSM_Creator_Mixed(GSM &, Portion** param)
@@ -170,7 +172,7 @@ static Portion *GSM_Creator_Mixed(GSM &, Portion** param)
 static Portion *GSM_QreLambda_Behav(GSM &, Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if (bs->Creator() != "Qre[EFG]" && bs->Creator() != "Qre[NFG]") {
+  if (bs->GetCreator() != "Qre[EFG]" && bs->GetCreator() != "Qre[NFG]") {
     return new NullPortion(porNUMBER);
   }
   return new NumberPortion(bs->QreLambda());
@@ -196,10 +198,8 @@ static Portion *GSM_InfosetProb(GSM &, Portion **param)
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gbtEfgInfoset s = AsEfgInfoset(param[1]);
-  //  if (s->IsChanceInfoset())
-  //    throw gclRuntimeError("Not implemented for chance infosets");
 
-  return new NumberPortion(bp->IsetProb(s));
+  return new NumberPortion(bp->GetInfosetProb(s));
 }
 
 //---------
@@ -234,10 +234,11 @@ static Portion *GSM_InfosetValue(GSM &, Portion **param)
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gbtEfgInfoset s = AsEfgInfoset(param[1]);
-  if (s.IsChanceInfoset())
-    return new NullPortion( porNUMBER );
+  if (s.IsChanceInfoset()) {
+    return new NullPortion(porNUMBER);
+  }
 
-  return new NumberPortion(bp->IsetValue(s));
+  return new NumberPortion(bp->GetInfosetValue(s));
 }
 
 //---------
@@ -311,7 +312,7 @@ static Portion *GSM_IsSubgamePerfect(GSM &, Portion **param)
 static Portion *GSM_LiapValue_Behav(GSM &, Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new NumberPortion(P->LiapValue());
+  return new NumberPortion(P->GetLiapValue());
 }
 
 static Portion *GSM_LiapValue_Mixed(GSM &, Portion **param)
@@ -368,7 +369,7 @@ static Portion *GSM_RealizProb(GSM &, Portion **param)
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   gbtEfgNode n = AsEfgNode(param[1]);
   
-  return new NumberPortion(bp->RealizProb(n)); 
+  return new NumberPortion(bp->GetRealizProb(n)); 
 }  
 
 //-----------
@@ -397,7 +398,7 @@ static Portion *GSM_Regret_Behav(GSM &, Portion **param)
     return new NullPortion(porNUMBER);
   }
     
-  return new NumberPortion(P->Regret(action));
+  return new NumberPortion(P->GetRegret(action));
 }
 
 //------------
@@ -506,8 +507,8 @@ static Portion *GSM_SetActionProbs(GSM &, Portion **param)
     }
 
     assert(p3->Spec().Type == porNUMBER);
-    P->Set((efg.GetPlayer(PlayerNum).GetInfoset(InfosetNum).GetAction(k)),
-	   ((NumberPortion*) p3)->Value());
+    P->SetActionProb((efg.GetPlayer(PlayerNum).GetInfoset(InfosetNum).GetAction(k)),
+		     ((NumberPortion*) p3)->Value());
 
     delete p3;
   }

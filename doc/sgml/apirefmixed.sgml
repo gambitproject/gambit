@@ -444,8 +444,7 @@ This function is not available in the GCL.
 </formalpara>
 
 <para>
-<function>SetLabel</function> 
-sets the text label of the profile.  The GCL version returns the profile.
+<function>SetLabel</function> sets the text label of the profile.
 </para>
 
 </sect2>

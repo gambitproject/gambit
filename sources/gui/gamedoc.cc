@@ -311,7 +311,7 @@ gText gbtGameDocument::UniqueBehavProfileName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_behavProfiles.Length(); i++) {
-      if (m_behavProfiles[i].GetName() == "Profile" + ToText(number)) {
+      if (m_behavProfiles[i].GetLabel() == "Profile" + ToText(number)) {
 	break;
       }
     }
@@ -325,9 +325,9 @@ gText gbtGameDocument::UniqueBehavProfileName(void) const
 
 void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
 {
-  if (p_profile.GetName() == "") {
+  if (p_profile.GetLabel() == "") {
     BehavSolution tmp(p_profile);
-    tmp.SetName(UniqueBehavProfileName());
+    tmp.SetLabel(UniqueBehavProfileName());
     m_behavProfiles.Append(tmp);
   }
   else {
@@ -335,7 +335,7 @@ void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
   }
 
   MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
-		      p_profile.Creator());
+		      p_profile.GetCreator());
   m_mixedProfiles.Append(mixed);
 
   UpdateViews();
@@ -384,7 +384,7 @@ gText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
   if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curProfile].RealizProb(p_node),
+  return ToText(m_behavProfiles[m_curProfile].GetRealizProb(p_node),
 		m_prefs.NumDecimals());
 }
 
@@ -394,7 +394,7 @@ gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curProfile].BeliefProb(p_node),
+  return ToText(m_behavProfiles[m_curProfile].GetBelief(p_node),
 		m_prefs.NumDecimals());
 }
 
@@ -423,7 +423,7 @@ gText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
       p_node.GetPlayer().IsNull()) {
     return "";
   }
-  return ToText(m_behavProfiles[m_curProfile].IsetProb(p_node.GetInfoset()),
+  return ToText(m_behavProfiles[m_curProfile].GetInfosetProb(p_node.GetInfoset()),
 		m_prefs.NumDecimals());
 }
 
@@ -433,8 +433,8 @@ gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
     return "";
   }
-  if (GetBehavProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
-    return ToText(GetBehavProfile().IsetValue(p_node.GetInfoset()),
+  if (GetBehavProfile().GetInfosetProb(p_node.GetInfoset()) > gNumber(0)) {
+    return ToText(GetBehavProfile().GetInfosetValue(p_node.GetInfoset()),
 		  m_prefs.NumDecimals());
   }
   else {
@@ -454,7 +454,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
     return "";
   }
 
-  return ToText(GetBehavProfile().ActionProb(p_node.GetInfoset().GetAction(p_act)),
+  return ToText(GetBehavProfile().GetActionProb(p_node.GetInfoset().GetAction(p_act)),
 		m_prefs.NumDecimals());
 }
 
@@ -465,8 +465,8 @@ gText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
     return "";
   }
 
-  if (GetBehavProfile().IsetProb(p_node.GetInfoset()) > gNumber(0)) {
-    return ToText(GetBehavProfile().ActionValue(p_node.GetInfoset().GetAction(p_act)),
+  if (GetBehavProfile().GetInfosetProb(p_node.GetInfoset()) > gNumber(0)) {
+    return ToText(GetBehavProfile().GetActionValue(p_node.GetInfoset().GetAction(p_act)),
 		  m_prefs.NumDecimals());
   }
   else  {

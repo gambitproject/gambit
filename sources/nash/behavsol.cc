@@ -155,7 +155,7 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
     m_rnfRegret(p_solution.m_rnfRegret), 
-    m_name(p_solution.m_name),
+    m_label(p_solution.m_label),
     m_revision(p_solution.m_revision)
 { }
 
@@ -181,7 +181,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_qreValue = p_solution.m_qreValue;
     m_liapValue = p_solution.m_liapValue;
     m_rnfRegret = p_solution.m_rnfRegret;
-    m_name = p_solution.m_name;
+    m_label = p_solution.m_label;
     m_revision = p_solution.m_revision;
   }
 
@@ -300,7 +300,7 @@ gTriState BehavSolution::GetSequential(void) const
     // probability to all actions, and hence will be approximations to 
     // sequential equilibria.  But we should add code to check up on these 
     // algorithms
-    if (Creator() == "Liap[EFG]" || Creator() == "Qre[EFG]")
+    if (GetCreator() == "Liap[EFG]" || GetCreator() == "Qre[EFG]")
       return triTRUE;
     else {
       // check if game is perfect info
@@ -375,7 +375,8 @@ bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
 bool BehavSolution::operator==(const BehavSolution &p_solution) const
 { return (*m_profile == *p_solution.m_profile); }
 
-void BehavSolution::Set(const gbtEfgAction &p_action, const gNumber &p_prob)
+void BehavSolution::SetActionProb(const gbtEfgAction &p_action,
+				  const gNumber &p_prob)
 {
   Invalidate();
 
@@ -506,7 +507,7 @@ const gTriState &BehavSolution::IsSequential(void) const
   return m_Sequential.Answer();
 }
 
-const gNumber &BehavSolution::LiapValue(void) const
+const gNumber &BehavSolution::GetLiapValue(void) const
 { 
   CheckIsValid();
   if(!m_liapValue.Checked())
@@ -604,12 +605,12 @@ void BehavSolution::Dump(gOutput &p_file) const
 
 void BehavSolution::DumpInfo(gOutput &p_file) const
 {
-  p_file << " Creator:" << Creator();
+  p_file << " Creator:" << GetCreator();
   p_file << " IsNash:" << IsNash();
   p_file << " IsSubgamePerfect:" << IsSubgamePerfect();
   p_file << " IsSequential:" << IsSequential();
-  p_file << " LiapValue:" << LiapValue();
-  if (Creator() == "Qre[EFG]" || Creator() == "Qre[NFG]") {
+  p_file << " LiapValue:" << GetLiapValue();
+  if (GetCreator() == "Qre[EFG]" || GetCreator() == "Qre[NFG]") {
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;
   }

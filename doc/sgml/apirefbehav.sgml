@@ -4,65 +4,10 @@
 <para>
 </para>
 
-<sect2 id="apiref.behav.actionprob">
-<title>ActionProb</title>
-<indexterm><primary>ActionProb</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-ActionProb[profile->BEHAV, action->ACTION] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>ActionProb</function> returns the probability that
-<parameter>action</parameter> is chosen at its information set when
-all players are following <parameter>profile</parameter>.  If
-<parameter>action</parameter> is a chance action, the probability of
-chance selecting the action is returned.  If the probability is not
-specified by the profile, the null value is returned.  It is an error
-if <parameter>profile</parameter> and <parameter>action</parameter>
-are not from the same extensive form game.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.actionvalue">
-<title>ActionValue</title>
-<indexterm><primary>ActionValue</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-ActionValue[profile->BEHAV, action->ACTION] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>ActionValue</function> returns the expected payoff to a 
-player (who is in control of the
-information set including <parameter>action</parameter>) 
-of choosing <parameter>action</parameter> when
-all players are following <parameter>profile</parameter>.  If the value is not
-well-defined, the null value is returned.  It is an error if
-<parameter>profile</parameter> and <parameter>action</parameter> 
-are not from the same extensive form
-game, or if <parameter>action</parameter> is an action at an information set owned by
-the chance player.
-</para>
-
-</sect2>
-
 
 <sect2 id="apiref.behav.behav">
-<title>Behav</title>
-<indexterm><primary>Behav</primary></indexterm>
+<title>Behav (GCL only)</title>
+<indexterm><primary>Behav (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>GCL usage</title>
@@ -88,8 +33,8 @@ be a valid profile.
 
 
 <sect2 id="apiref.behav.newbehav">
-<title>Behav</title>
-<indexterm><primary>Behav</primary></indexterm>
+<title>Behav (GCL only)</title>
+<indexterm><primary>Behav (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>GCL usage</title>
@@ -109,9 +54,110 @@ in each same information set.
 </sect2>
 
 
-<sect2 id="apiref.behav.belief">
-<title>Belief</title>
-<indexterm><primary>Belief</primary></indexterm>
+
+<sect2 id="apiref.behav.getactionprob">
+<title>GetActionProb</title>
+<indexterm><primary>GetActionProb</primary></indexterm>
+<indexterm><primary>ActionProb (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetActionProb(gbtEfgAction p_action) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+ActionProb[profile->BEHAV, action->ACTION] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetActionProb</function>
+(<function>ActionProb</function> in the GCL) returns the probability that
+<parameter>action</parameter> is chosen at its information set when
+all players are following <parameter>profile</parameter>.  If
+<parameter>action</parameter> is a chance action, the probability of
+chance selecting the action is returned.  If the probability is not
+specified by the profile, the null value is returned.  It is an error
+if <parameter>profile</parameter> and <parameter>action</parameter>
+are not from the same extensive form game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if the probability specified in the profile is rational.
+</para>
+</note>
+
+</sect2>
+
+
+<sect2 id="apiref.behav.getactionvalue">
+<title>GetActionValue</title>
+<indexterm><primary>GetActionValue</primary></indexterm>
+<indexterm><primary>ActionValue (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetActionValue(gbtEfgAction) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+ActionValue[profile->BEHAV, action->ACTION] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetActionValue</function> (<function>ActionValue</function>
+in the GCL) returns the expected payoff to a player (who is in control
+of the information set including <parameter>action</parameter>) of
+choosing <parameter>action</parameter> when all players are following
+<parameter>profile</parameter>.  If the value is not well-defined, the
+null value is returned.  It is an error if
+<parameter>profile</parameter> and <parameter>action</parameter> are
+not from the same extensive form game, or if
+<parameter>action</parameter> is an action at an information set owned
+by the chance player.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="apiref.behav.getbelief">
+<title>GetBelief</title>
+<indexterm><primary>GetBelief</primary></indexterm>
+<indexterm><primary>Belief (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetBelief(gbtEfgNode) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -123,7 +169,8 @@ Belief[profile->BEHAV, node->NODE] =: NUMBER
 </formalpara>
 
 <para>
-<function>Belief</function> returns the probability of being at
+<function>GetBelief</function>
+(<function>Belief</function> in the GCL) returns the probability of being at
 <parameter>node</parameter>, conditional on the
 player who chooses at <parameter>node</parameter> knowing she is in
 <parameter>node</parameter>'s
@@ -135,11 +182,28 @@ It is an error if <parameter>profile</parameter> and <parameter>node</parameter>
 are not from the same extensive form game.
 </para>
 
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
 </sect2>
 
-<sect2 id="apiref.behav.creator">
-<title>Creator</title>
-<indexterm><primary>Creator</primary></indexterm>
+<sect2 id="apiref.behav.getcreator">
+<title>GetCreator</title>
+<indexterm><primary>GetCreator</primary></indexterm>
+<indexterm><primary>Creator (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText BehavSolution::GetCreator(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -151,15 +215,14 @@ Creator[profile->BEHAV] =: TEXT
 </formalpara>
 
 <para>
-<function>Creator</function> returns the GCL function name 
-(excluding the <literal>Solve</literal> suffix) of
-the algorithm that was called to create the profile. For
-behavior profiles, the string includes an indication of whether the
+<function>GetCreator</function> (<function>Creator</function> in the
+GCL) returns a text string identifying the algorithm used to create
+the profile.  The string includes an indication of whether the
 extensive or normal form version of the algorithm was used.  Thus,
-<literal>Liap[EFG]</literal> and <literal>Liap[NFG]</literal> are used to 
-identify the
-extensive and normal form versions of the algorithm.  A profile
-created by the user is identified by <literal>User</literal>.  
+<literal>Liap[EFG]</literal> and <literal>Liap[NFG]</literal> are used
+to identify the extensive and normal form versions of the
+<function>LiapSolve</function> algorithm.  A profile created or modified 
+by the user is identified by <literal>User</literal>.
 </para>
 
 </sect2>
@@ -173,7 +236,7 @@ created by the user is identified by <literal>User</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-template &lt;class T&gt; gbtEfgGame BehavProfile&lt;T&gt;::GetGame(void) const
+gbtEfgGame BehavSolution::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -195,9 +258,19 @@ returns the extensive form game to which the profile belongs.
 </sect2>
 
 
-<sect2 id="apiref.behav.infosetprob">
-<title>InfosetProb</title>
-<indexterm><primary>InfosetProb</primary></indexterm>
+<sect2 id="apiref.behav.getinfosetprob">
+<title>GetInfosetProb</title>
+<indexterm><primary>GetInfosetProb</primary></indexterm>
+<indexterm><primary>InfosetProb (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetInfosetProb(gbtEfgInfoset) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -209,22 +282,37 @@ InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER
 </formalpara>
 
 <para>
-<function>InfosetProb</function>
-returns the probability of reaching <parameter>infoset</parameter> when
-all players
-follow <parameter>profile</parameter>. 
-The probability of reaching the null information
-set is defined to be null.  It is an error if <parameter>profile</parameter>
-and
-<parameter>infoset</parameter> are not defined on the same extensive form game.
+<function>GetInfosetProb</function> (<function>InfosetProb</function>
+in the GCL) returns the probability of reaching
+<parameter>infoset</parameter> when all players follow
+<parameter>profile</parameter>.  The probability of reaching the null
+information set is defined to be null.  It is an error if
+<parameter>profile</parameter> and <parameter>infoset</parameter> are
+not defined on the same extensive form game.
 </para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
 
 </sect2>
 
+<sect2 id="apiref.behav.getinfosetvalue">
+<title>GetInfosetValue</title>
+<indexterm><primary>GetInfosetValue</primary></indexterm>
+<indexterm><primary>InfosetValue (GCL function)</primary></indexterm>
 
-<sect2 id="apiref.behav.infosetvalue">
-<title>InfosetValue</title>
-<indexterm><primary>InfosetValue</primary></indexterm>
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetInfosetValue(gbtEfgInfoset) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -246,11 +334,261 @@ are not defined on the same
 extensive form game.
 </para>
 
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
 </sect2>
+
+
+<sect2 id="apiref.behav.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText BehavSolution::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+This function is not available in the GCL.
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function>
+returns the text label of the profile.  
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.behav.getliapvalue">
+<title>GetLiapValue</title>
+<indexterm><primary>GetLiapValue</primary></indexterm>
+<indexterm><primary>LiapValue (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetLiapValue(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LiapValue[profile->BEHAV] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLiapValue</function> (<function>LiapValue</function> in
+the GCL) returns the Lyapunov function value for
+<parameter>profile</parameter>.  This is a nonnegative value which is
+zero exactly when the profile is a Nash equilibrium.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="apiref.behav.getnodevalue">
+<title>GetNodeValue</title>
+<indexterm><primary>GetNodeValue</primary></indexterm>
+<indexterm><primary>NodeValue (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetNodeValue(gbtEfgNode, gbtEfgPlayer) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetNodeValue</function>
+(<function>NodeValue</function> in the GCL)
+returns the expected payoff to <parameter>player</parameter> at
+<parameter>node</parameter>, given
+that all players are following <parameter>profile</parameter>.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="apiref.behav.getpayoff">
+<title>GetPayoff</title>
+<indexterm><primary>GetPayoff</primary></indexterm>
+<indexterm><primary>Payoff</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetPayoff(gbtEfgPlayer p_player) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Payoff[profile->BEHAV, player->EFPLAYER] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPayoff</function> (<function>Payoff</function> in the
+GCL) returns the expected payoff to player
+<parameter>player</parameter>, when all players play according to
+<parameter>profile</parameter>.  An error occurs if the parameters are
+not from the same game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+
+<sect2 id="apiref.behav.getrealizprob">
+<title>GetRealizProb</title>
+<indexterm><primary>GetRealizProb</primary></indexterm>
+<indexterm><primary>RealizProb (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetRealizProb(gbtEfgNode) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+RealizProb[profile->BEHAV, node->NODE] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetRealizProb</function>
+(<function>RealizProb</function> in the GCL)
+returns the realization probability for <parameter>node</parameter>
+given that all players
+are following <parameter>profile</parameter>.  It is an error if
+<parameter>profile</parameter> and
+<parameter>node</parameter> are not from the same extensive form game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="apiref.behav.getregret">
+<title>GetRegret</title>
+<indexterm><primary>GetRegret</primary></indexterm>
+<indexterm><primary>Regret (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber BehavSolution::GetRegret(gbtEfgAction p_action) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Regret[profile->BEHAV, action->ACTION] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetRegret</function> (<function>Regret</function> in the
+GCL) returns the gain to a player for deviating to
+<parameter>action</parameter> assuming all players are following
+<parameter>profile</parameter>.  A strategy profile is a Nash
+equilibrium if and only if the regrets of all actions or strategies
+are zero.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
 
 <sect2 id="apiref.behav.isnash">
 <title>IsNash</title>
 <indexterm><primary>IsNash</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState BehavSolution::IsNash(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -265,7 +603,7 @@ IsNash[profile->BEHAV] =: BOOLEAN
 <function>IsNash</function>
 returns <literal>True</literal> when <parameter>profile</parameter>
 is known by Gambit to be a
-Nash equilibrium of the corresponding game, and <parameter>False</parameter>
+Nash equilibrium of the corresponding game, and <literal>False</literal>
 if <parameter>profile</parameter> is known to not be Nash.
 Otherwise, the return value
 is <literal>Unknown</literal>. 
@@ -278,12 +616,29 @@ all completions of the profile) may be Nash, but is not known by
 Gambit to be Nash.
 </para>
 
+<note>
+<para>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
+</para>
+</note>
+
 </sect2>
 
 
 <sect2 id="apiref.behav.issequential">
 <title>IsSequential</title>
 <indexterm><primary>IsSequential</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState BehavSolution::IsSequential(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -298,13 +653,21 @@ IsSequential[profile->BEHAV] =: BOOLEAN
 <function>IsSequential</function>
 returns <literal>True</literal> if <parameter>profile</parameter>
 is known by Gambit to be an approximation to a
-sequential Nash equilibrium, <parameter>False</parameter> if it is not,
-and <parameter>Unknown</parameter> if the answer is not known.  There is
+sequential Nash equilibrium, <literal>False</literal> if it is not,
+and <literal>Unknown</literal> if the answer is not known.  There is
 currently no definitive test in Gambit for whether an arbitrary
 profile is sequential.  However any Nash equilibrium of an extensive
 form game which is computed via the <function>LiapSolve</function> or
 <function>QreSolve</function> algorithms is sequential.
 </para>
+
+<note>
+<para>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
+</para>
+</note>
 
 </sect2>
 
@@ -312,6 +675,15 @@ form game which is computed via the <function>LiapSolve</function> or
 <sect2 id="apiref.behav.issubgameperfect">
 <title>IsSubgamePerfect</title>
 <indexterm><primary>IsSubgamePerfect</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState BehavSolution::IsSequential(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -326,8 +698,8 @@ IsSubgamePerfect[profile->BEHAV] =: BOOLEAN
 <function>IsSubgamePerfect</function>
 returns <literal>True</literal> if <parameter>profile</parameter>
 is known by Gambit to be a subgame perfect Nash
-equilibrium, <parameter>False</parameter> if it is known not to be a 
-subgame perfect equilibrium, and <parameter>Unknown</parameter> otherwise.
+equilibrium, <literal>False</literal> if it is known not to be a 
+subgame perfect equilibrium, and <literal>Unknown</literal> otherwise.
 There is currently no
 definitive test in Gambit for whether an arbitrary profile is subgame
 perfect.  However, any Nash equilibrium of an extensive form game which
@@ -335,158 +707,28 @@ is computed when all subgames are marked will only return a subgame
 perfect equilibrium.  
 </para>
 
-</sect2>
-
-
-<sect2 id="apiref.behav.liapvalue">
-<title>LiapValue</title>
-<indexterm><primary>LiapValue</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
+<note>
 <para>
-<synopsis>
-LiapValue[profile->BEHAV] =: NUMBER 
-</synopsis>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
 </para>
-</formalpara>
-
-<para>
-<function>LiapValue</function>
-returns the Lyapunov function value for <parameter>profile</parameter>.
-This is a nonnegative value which is zero exactly when the
-profile is a Nash equilibrium.
-</para>
-
-</sect2>
-
-<sect2 id="apiref.behav.getlabel">
-<title>GetLabel</title>
-<indexterm><primary>GetLabel</primary></indexterm>
-<indexterm><primary>Name (GCL function)</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-template &lt;class T&gt; BehavProfile&lt;T&gt;::GetLabel(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Name[x->BEHAV] =: TEXT
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> (<function>Name</function> in the GCL)
-returns the text label of the profile.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.nodevalue">
-<title>NodeValue</title>
-<indexterm><primary>NodeValue</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>NodeValue</function>
-returns the expected payoff to <parameter>player</parameter> at
-<parameter>node</parameter>, given
-that all players are following <parameter>profile</parameter>.
-</para>
-
-</sect2>
-
-<sect2 id="apiref.behav.payoff">
-<title>Payoff</title>
-<indexterm><primary>Payoff</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Payoff[profile->BEHAV, player->EFPLAYER] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Payoff</function> returns the expected payoff to player
-<parameter>player</parameter>, when all players play according to
-<parameter>profile</parameter>.
-An error occurs if the parameters are not from the
-same game.
-</para>
-
-</sect2>
-
-<sect2 id="apiref.behav.realizprob">
-<title>RealizProb</title>
-<indexterm><primary>RealizProb</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-RealizProb[profile->BEHAV, node->NODE] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>RealizProb</function> 
-returns the realization probability for <parameter>node</parameter>
-given that all players
-are following <parameter>profile</parameter>.  It is an error if
-<parameter>profile</parameter> and
-<parameter>node</parameter> are not from the same extensive form game.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.regret">
-<title>Regret</title>
-<indexterm><primary>Regret</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Regret[profile->BEHAV, action->ACTION] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Regret</function> returns the gain to a player for deviating
-to <parameter>action</parameter> assuming all players are following
-<parameter>profile</parameter>.  A strategy profile is a Nash
-equilibrium if and only if the regrets of all actions or strategies
-are zero.
-</para>
+</note>
 
 </sect2>
 
 <sect2 id="apiref.behav.setactionprob">
 <title>SetActionProb</title>
 <indexterm><primary>SetActionProb</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void BehavSolution::SetStrategyProb(gbtEfgAction, gNumber)
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -509,8 +751,16 @@ are not from the same extensive form game.
 </sect2>
 
 <sect2 id="apiref.behav.setactionprobs">
-<title>SetActionProbs</title>
-<indexterm><primary>SetActionProbs</primary></indexterm>
+<title>SetActionProbs (GCL only)</title>
+<indexterm><primary>SetActionProbs (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This function is not available in C++ or Python.  Use
+<function>SetActionProb</function> instead.
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -546,7 +796,7 @@ support at <parameter>infoset</parameter>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-template &lt;class T&gt; BehavProfile&lt;T&gt;::SetLabel(const gText &amp;p_label)
+void BehavSolution::SetLabel(const gText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -554,15 +804,12 @@ template &lt;class T&gt; BehavProfile&lt;T&gt;::SetLabel(const gText &amp;p_labe
 <formalpara>
 <title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->BEHAV, name->TEXT] =: BEHAV
-</synopsis>
+This function is not available in the GCL.
 </para>
 </formalpara>
 
 <para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the profile.  The GCL version returns the profile.
+<function>SetLabel</function> sets the text label of the profile.
 </para>
 
 </sect2>

@@ -57,14 +57,14 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   wxBoxSizer *nameSizer = new wxBoxSizer(wxHORIZONTAL);
   nameSizer->Add(new wxStaticText(this, wxID_STATIC, "Profile name"),
 		 0, wxALL, 5);
-  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetName());
+  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetLabel());
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nameSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_infosetTree = new wxTreeCtrl(this, idINFOSET_TREE,
 				 wxDefaultPosition, wxSize(200, 200));
-  m_infosetTree->AddRoot((char *) p_profile.GetName());
+  m_infosetTree->AddRoot((char *) p_profile.GetLabel());
 
   for (int pl = 1; ; pl++) {
     if (p_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
@@ -172,8 +172,8 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 
   if (!m_lastInfoset.IsNull()) {
     for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
-      m_profile.Set(m_lastInfoset.GetAction(act),
-		    ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
+      m_profile.SetActionProb(m_lastInfoset.GetAction(act),
+			      ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
     }
   }
 
@@ -222,8 +222,8 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
   }
 
   for (int act = 1; act <= infoset.NumActions(); act++) {
-    m_profile.Set(infoset.GetAction(act),
-		  ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
+    m_profile.SetActionProb(infoset.GetAction(act),
+			    ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
   }
 
   p_event.Skip();
@@ -231,7 +231,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
 const BehavSolution &dialogEditBehav::GetProfile(void) const
 {
-  m_profile.SetName(m_profileName->GetValue().c_str());
+  m_profile.SetLabel(m_profileName->GetValue().c_str());
   return m_profile;
 }
 

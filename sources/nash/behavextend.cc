@@ -203,7 +203,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	    if (last_action.GetInfoset().GetPlayer() !=
 		act.GetInfoset().GetPlayer() ||
 		!act.Precedes(tempnode) )
-	    node_prob *= (gDouble) p_solution.ActionProb(last_action);
+	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
 	  }
 	  else {
 	    return false;
@@ -402,7 +402,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 	}
 	else
 	  if (big_supp.Contains(last_action))
-	    node_prob *= (gDouble) p_solution.ActionProb(last_action);
+	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
 	  else 
 	    return false;
       }

@@ -43,7 +43,7 @@ protected:
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   mutable gFact<gNumber> m_liapValue;
   mutable gFact<gPVector<gNumber> > m_rnfRegret;
-  gText m_name;
+  gText m_label;
   mutable long m_revision;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
@@ -71,9 +71,12 @@ public:
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
 
-  void Set(const gbtEfgAction &, const gNumber &);
+  void SetActionProb(const gbtEfgAction &, const gNumber &);
   void Set(int, int, int, const gNumber &);
   const gNumber &operator()(const gbtEfgAction &) const;
+  const gNumber &GetActionProb(const gbtEfgAction &p_action) const
+    { return (*this)(p_action); }
+
   gNumber operator[](const gbtEfgAction &) const;
   gNumber &operator[](const gbtEfgAction &);
 
@@ -89,8 +92,10 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
-  const gText &GetName(void) const { return m_name; }
-  const gText &Creator(void) const { CheckIsValid(); return m_creator; }
+  const gText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gText &p_label) { m_label = p_label; }
+
+  const gText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   EFSupport Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   BehavSolution PolishEq(void) const;
@@ -100,12 +105,11 @@ public:
   const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
   const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
   const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
-  const gNumber &LiapValue(void) const;
+  const gNumber &GetLiapValue(void) const;
   const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
   const gNumber MaxRegret(void) const;
   const gNumber MaxRNFRegret(void) const;
 
-  void SetName(const gText &p_name) { m_name = p_name; }
   void SetCreator(const gText &p_creator) { m_creator = p_creator; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
@@ -117,24 +121,29 @@ public:
   bool IsValid(void) const {return (m_revision == GetGame().RevisionNumber());}
 
   // COMPUTATION OF INTERESTING QUANTITIES
+  // Obsolescent version
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
+
+  gNumber GetPayoff(gbtEfgPlayer p_player) const
+    { return m_profile->Payoff(p_player.GetId()); }
   
   // DATA ACCESS
-  gNumber RealizProb(const gbtEfgNode &node) const
+  gNumber GetRealizProb(const gbtEfgNode &node) const
     { return m_profile->GetRealizProb(node); }
-  gNumber BeliefProb(const gbtEfgNode &node) const
+  gNumber GetBelief(const gbtEfgNode &node) const
     { return m_profile->GetBeliefProb(node); }
+  gNumber GetNodeValue(const gbtEfgNode &p_node,
+		       const gbtEfgPlayer &p_player) const
+    { return m_profile->GetNodeValue(p_node)[p_player.GetId()]; }
   gVector<gNumber> NodeValue(const gbtEfgNode &node) const
     { return m_profile->GetNodeValue(node); }
-  gNumber IsetProb(const gbtEfgInfoset &iset) const
+  gNumber GetInfosetProb(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetProb(iset); }
-  gNumber IsetValue(const gbtEfgInfoset &iset) const
+  gNumber GetInfosetValue(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetValue(iset); }
-  gNumber ActionProb(const gbtEfgAction &act) const
-    { return m_profile->GetActionProb(act); }
-  gNumber ActionValue(const gbtEfgAction &act) const
+  gNumber GetActionValue(const gbtEfgAction &act) const
     { return m_profile->GetActionValue(act); }
-  gNumber Regret(const gbtEfgAction &act) const
+  gNumber GetRegret(const gbtEfgAction &act) const
     { return m_profile->GetRegret(act); }
 
   // OUTPUT

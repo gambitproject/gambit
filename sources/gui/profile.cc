@@ -247,7 +247,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
     }
   case 5:
     if (behav) {
-      return (char *) ToText(behav->LiapValue(),
+      return (char *) ToText(behav->GetLiapValue(),
 			     m_doc->GetPreferences().NumDecimals());
     }
     else {

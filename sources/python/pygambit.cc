@@ -39,6 +39,7 @@ static struct PyMethodDef gambit_methods[] = {
   { NULL, NULL }
 };
 
+extern void initbehav(void);
 extern void initefg(void);
 extern void initinfoset(void);
 extern void initmixed(void);
@@ -54,6 +55,7 @@ initgambit(void)
 {
   PyObject *m;
 
+  initbehav();
   initefg();
   initinfoset();
   initmixed();
