@@ -82,10 +82,10 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), 
-    m_checkedNash(false), m_checkedSubgamePerfect(false),
-    m_checkedSequential(false), 
+    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN),
+    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
+    m_checkedANFNash(false), m_checkedNash(false),
+    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
@@ -112,10 +112,10 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), 
-    m_checkedNash(false), m_checkedSubgamePerfect(false),
-    m_checkedSequential(false), 
+    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN), 
+    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
+    m_checkedANFNash(false), m_checkedNash(false),
+    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -140,10 +140,10 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
-    m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), 
-    m_checkedNash(false), m_checkedSubgamePerfect(false),
-    m_checkedSequential(false), 
+    m_isANFNash(triUNKNOWN), m_isNash(triUNKNOWN),
+    m_isSubgamePerfect(triUNKNOWN), m_isSequential(triUNKNOWN), 
+    m_checkedANFNash(false), m_checkedNash(false),
+    m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -174,9 +174,11 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
   : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
     m_precision(p_solution.m_precision), 
     m_support(p_solution.m_support), m_creator(p_solution.m_creator),
+    m_isANFNash(p_solution.m_isANFNash),
     m_isNash(p_solution.m_isNash),
     m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
     m_isSequential(p_solution.m_isSequential), 
+    m_checkedANFNash(p_solution.m_checkedANFNash),
     m_checkedNash(p_solution.m_checkedNash),
     m_checkedSubgamePerfect(p_solution.m_checkedSubgamePerfect),
     m_checkedSequential(p_solution.m_checkedSequential), 
@@ -209,9 +211,11 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_precision = p_solution.m_precision;
     m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
+    m_isANFNash = p_solution.m_isANFNash;
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
     m_isSequential = p_solution.m_isSequential;
+    m_checkedANFNash = p_solution.m_checkedANFNash;
     m_checkedNash = p_solution.m_checkedNash;
     m_checkedSubgamePerfect = p_solution.m_checkedSubgamePerfect;
     m_checkedSequential = p_solution.m_checkedSequential;
@@ -243,24 +247,34 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 void BehavSolution::CheckIsNash(void) const
 {
   if (m_checkedNash == false) {
-    if (IsPerfectRecall(m_profile->Game()))
-      if(IsComplete() 
-	 // For now, we trust the following algorithms if profile is incomplete:
-	 || m_creator == algorithmEfg_LCP_EFG 
-	 || m_creator == algorithmEfg_LP_EFG 
-	 || m_creator == algorithmEfg_ENUMPURE_EFG 
-	 || m_creator == algorithmEfg_POLENUM_EFG)
-	// This is how it was, but this needs rewriting to allow for 
-	// simultaneous deviations at multiple isets of same player. 
-	// As written, the test may mark some profiles as Nash that are not. 
-	// Hopefully, none of our algs would return such profiles(??), but a 
-	// user defined profile could get marked incorrectly.  (rdm 9/26/99):
-	m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
+    if (IsPerfectRecall(m_profile->Game())) {
+      gStatus &m_status = gstatus;
+      m_isNash = (m_profile->ExtendsToNash(Support(),Support(),m_status)) ? 
+		     triTRUE:triFALSE;
+    }
     if (m_isNash == triFALSE) {
       m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
       m_isSequential = triFALSE; m_checkedSequential = true;
     }
+    if (m_isNash == triTRUE) {
+      m_isANFNash = triTRUE; m_checkedANFNash = true;
+    }
     m_checkedNash = true;
+  }
+}
+
+void BehavSolution::CheckIsANFNash(void) const
+{
+  if (m_checkedANFNash == false) {
+      gStatus &m_status = gstatus;
+    m_isANFNash = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
+                        triTRUE:triFALSE;
+    if (m_isANFNash == triFALSE) {
+      m_isNash = triFALSE; m_checkedNash = true;
+      m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
+      m_isSequential = triFALSE; m_checkedSequential = true;
+    }
+    m_checkedANFNash = true;
   }
 }
 
@@ -399,6 +413,12 @@ gTriState BehavSolution::IsNash(void) const
   return m_isNash;
 }
 
+gTriState BehavSolution::IsANFNash(void) const
+{
+  CheckIsANFNash();
+  return m_isANFNash;
+}
+
 gTriState BehavSolution::IsSubgamePerfect(void) const
 {
   CheckIsNash();
@@ -458,10 +478,10 @@ void BehavSolution::Invalidate(void) const
 {
   m_support = EFSupport(m_profile->Game());
   m_creator = algorithmEfg_USER;
-  m_isNash = triUNKNOWN;
+  m_isANFNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;
-  m_checkedNash = false;
+  m_checkedANFNash = false;
   m_checkedSubgamePerfect = false;
   m_checkedSequential = false;
   m_qreLambda = -1;
@@ -508,6 +528,7 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 gPolyList<gDouble> 
 BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace, 
 					const term_order &Lex,
+					const EFSupport &big_supp,
 					const gList<gList<int> > &var_index) 
   const
 {
@@ -517,7 +538,7 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
   for (pl = 1; pl <= Game().NumPlayers(); pl++) 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
-      if ( !Support().HasActiveActionAt(current_infoset) ) {
+      if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
@@ -528,20 +549,16 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
   return answer;
 }
 
-bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
-					const gSpace &BehavStratSpace, 
-					const term_order &Lex,
-					const gList<gList<int> > &var_index,
-					const Node *tempnode,
-					const int &pl,
-					const int &i,
-					const int &j) const
+bool BehavSolution::ANFNodeProbabilityPoly(gPoly<gDouble> & node_prob,
+					   const gSpace &BehavStratSpace, 
+					   const term_order &Lex,
+					  const EFSupport &big_supp,
+					   const gList<gList<int> > &var_index,
+					   const Node *tempnode,
+					   const int &pl,
+					   const int &i,
+					   const int &j) const
 {
-  /*
-  //DEBUG
-  gout << "pl = " << pl << " while infoset = " << i << " and action = " << j << ".\n";
-  */
-
   while (tempnode != Game().RootNode()) {
 
     const Action *last_action = tempnode->GetAction();
@@ -550,36 +567,382 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (Support().HasActiveActionAt(last_infoset)) {
+      if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
-	  if (j != last_action->GetNumber()) {
+	  if (j != last_action->GetNumber()) 
+	    return false;
+	}
+	else
+	  if (big_supp.ActionIsActive((Action *)last_action))
+	    node_prob *= (gDouble)Profile()->GetValue(last_action);
+	  else 
+	    return false;
+      }
+      else {
+	int initial_var_no = 
+ var_index[last_infoset->GetPlayer()->GetNumber()][last_infoset->GetNumber()];
+	if (last_action->GetNumber() < last_infoset->NumActions()){
+	  int varno = initial_var_no + last_action->GetNumber();
+	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	}
+	else {
+	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  int k;
+	  for (k = 1; k < last_infoset->NumActions(); k++)
+	    factor -= gPoly<gDouble>(&BehavStratSpace,
+				     initial_var_no + k, 1, &Lex);
+	  node_prob *= factor;
+	}
+      } 
+    tempnode = tempnode->GetParent();
+  }
+  return true;
+}
 
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because wrong deviation.\n";
-	    */
-	    
+gPolyList<gDouble> 
+BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace, 
+					  const term_order &Lex,
+					  const EFSupport &little_supp,
+					  const EFSupport &big_supp,
+					  const gList<gList<int> > &var_index) 
+  const
+{
+  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+
+  gList<const Node *> terminal_nodes = Game().TerminalNodes();
+
+  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      Infoset *infoset = Game().GetInfosetByIndex(pl,i);
+      if (little_supp.MayReach(infoset)) 
+	for (int j = 1; j <= infoset->NumActions(); j++)
+	  if (!little_supp.ActionIsActive(pl,i,j)) {
+	
+	    // This will be the utility difference between the
+	    // payoff resulting from the profile and deviation to 
+	    // action j
+	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+
+	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
+	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+	      if (ANFNodeProbabilityPoly(node_prob,
+					 BehavStratSpace,
+					 Lex,
+					 big_supp,
+					 var_index,
+					 terminal_nodes[n],
+					 pl,i,j)) {
+		node_prob *= 
+		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		next_poly += node_prob;
+	      }
+	    }
+	    answer += -next_poly + (gDouble)Payoff(pl);
+	  }
+    }
+  return answer;
+}
+
+gPolyList<gDouble> 
+BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace, 
+				     const term_order &Lex,
+				     const EFSupport &little_supp,
+				     const EFSupport &big_supp,
+				     const gList<gList<int> > &var_index) const
+{
+  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
+				     Lex, 
+				     big_supp, 
+				     var_index);
+  answer += ANFExpectedPayoffDiffPolys(BehavStratSpace, 
+				       Lex, 
+				       little_supp,
+				       big_supp,
+				       var_index);
+  return answer;
+}
+
+bool BehavSolution::ExtendsToNash(const EFSupport &little_supp,
+				  const EFSupport &big_supp,
+				        gStatus &m_status) const
+{
+  // This asks whether there is a Nash extension of the BehavSolution to 
+  // all information sets at which the behavioral probabilities are not
+  // specified.  The assumption is that the support has active actions
+  // at infosets at which the behavioral probabilities are defined, and
+  // no others.
+  
+  // First we compute the number of variables, and indexing information
+  int num_vars(0);
+  gList<gList<int> > var_index;
+  int pl;
+  for (pl = 1; pl <= Game().NumPlayers(); pl++) {
+
+    gList<int> list_for_pl;
+
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      list_for_pl += num_vars;
+      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
+	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
+      }
+    }
+    var_index += list_for_pl;
+  }
+
+  // We establish the space
+  gSpace BehavStratSpace(num_vars);
+  ORD_PTR ptr = &lex;
+  term_order Lex(&BehavStratSpace, ptr);
+
+  num_vars = BehavStratSpace.Dmnsn();
+
+  gPolyList<gDouble> inequalities = ExtendsToNashIneqs(BehavStratSpace,
+						       Lex,
+						       little_supp,
+						       big_supp,
+						       var_index);
+  // set up the rectangle of search
+  gVector<gDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gDouble)0;
+  tops = (gDouble)1;
+  gRectangle<gDouble> Cube(bottoms, tops); 
+
+  // Set up the test and do it
+  IneqSolv<gDouble> extension_tester(inequalities,m_status);
+  gVector<gDouble> sample(num_vars);
+  bool answer = extension_tester.ASolutionExists(Cube,sample); 
+  
+  assert (answer == m_profile->ExtendsToNash(little_supp, big_supp, m_status));
+
+  return answer;
+}
+
+bool BehavSolution::ExtendsToANFNash(const EFSupport &little_supp,
+				     const EFSupport &big_supp,
+				           gStatus &m_status) const
+{
+  // This asks whether there is an ANF Nash extension of the BehavSolution to 
+  // all information sets at which the behavioral probabilities are not
+  // specified.  The assumption is that the support has active actions
+  // at infosets at which the behavioral probabilities are defined, and
+  // no others.
+  
+  // First we compute the number of variables, and indexing information
+  int num_vars(0);
+  gList<gList<int> > var_index;
+  int pl;
+  for (pl = 1; pl <= Game().NumPlayers(); pl++) {
+
+    gList<int> list_for_pl;
+
+    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+      list_for_pl += num_vars;
+      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
+	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
+      }
+    }
+    var_index += list_for_pl;
+  }
+
+  // We establish the space
+  gSpace BehavStratSpace(num_vars);
+  ORD_PTR ptr = &lex;
+  term_order Lex(&BehavStratSpace, ptr);
+
+  num_vars = BehavStratSpace.Dmnsn();
+  gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
+							  Lex,
+							  little_supp,
+							  big_supp,
+							  var_index);
+
+  // set up the rectangle of search
+  gVector<gDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gDouble)0;
+  tops = (gDouble)1;
+  gRectangle<gDouble> Cube(bottoms, tops); 
+
+  // Set up the test and do it
+  IneqSolv<gDouble> extension_tester(inequalities,m_status);
+  gVector<gDouble> sample(num_vars);
+
+  // Temporarily, we check the old set up vs. the new
+  bool ANFanswer = extension_tester.ASolutionExists(Cube,sample); 
+  assert (ANFanswer == m_profile->ExtendsToANFNash(little_supp,
+						   big_supp,
+						   m_status));
+
+  /* 
+  bool NASHanswer = m_profile->ExtendsToNash(Support(),Support(),m_status);
+
+  //DEBUG
+  if (ANFanswer && !NASHanswer)
+    gout << 
+      "The following should be extendable to an ANF Nash, but not to a Nash:\n"
+	 << *m_profile << "\n\n";
+  if (NASHanswer && !ANFanswer)
+    gout << 
+      "ERROR: said to be extendable to a Nash, but not to an ANF Nash:\n"
+	 << *m_profile << "\n\n";
+	  */
+  return ANFanswer;
+}
+
+
+//------------------------------------------------------------------------
+//         BehavSolution: Used in test of extendability to Nash
+//------------------------------------------------------------------------
+
+void
+BehavSolution::DeviationInfosetsRECURSION(    gList<const Infoset *> &answer,
+					    const EFSupport & big_supp,
+					    const EFPlayer *pl,
+					    const Node* node,
+					    const Action *act) const 
+{
+  Node *child  = node->GetChild(act);
+  if ( child->IsNonterminal() ) {
+    const Infoset *iset = child->GetInfoset();
+    if ( iset->GetPlayer() == pl ) {
+      int insert = 0;
+      bool done = false;
+      while (!done) {
+	insert ++;
+	if (insert > answer.Length() ||
+	    iset->Precedes(answer[insert]->GetMember(1)))
+	  done = true;
+      }
+      answer.Insert(iset,insert);
+    }
+    gList<Action *> action_list = iset->ListOfActions();
+    for (int j = 1; j <= action_list.Length(); j++)
+      DeviationInfosetsRECURSION(answer,big_supp,pl,child,action_list[j]);
+  }
+  return;
+}
+
+const gList<const Infoset *> 
+BehavSolution::DeviationInfosets(const EFSupport & big_supp,
+				   const EFPlayer *pl,
+				   const Infoset *iset,
+				   const Action *act) const 
+{
+  gList<const Infoset *> answer;
+  
+  gList<const Node *> node_list = iset->ListOfMembers();
+  for (int i = 1; i <= node_list.Length(); i++) {
+    DeviationInfosetsRECURSION(answer,big_supp,pl,node_list[i],act);
+  }
+
+  return answer;
+}
+
+const gList<const EFSupport> 
+BehavSolution::DeviationSupports(const EFSupport & big_supp,
+				   const gList<const Infoset *> & isetlist,
+				   const EFPlayer */*pl*/,
+				   const Infoset */*iset*/,
+				   const Action */*act*/) const 
+{
+  gList<const EFSupport> answer;
+
+  gArray<int> active_act_no(isetlist.Length());
+
+  for (int k = 1; k <= active_act_no.Length(); k++)
+    active_act_no[k] = 0;
+ 
+  EFSupport new_supp(big_supp);
+
+  for (int i = 1; i <= isetlist.Length(); i++) {
+    for (int j = 1; j < isetlist[i]->NumActions(); j++)
+      new_supp.RemoveAction(isetlist[i]->GetAction(j));
+    new_supp.AddAction(isetlist[i]->GetAction(1));
+
+    active_act_no[i] = 1;
+    for (int k = 1; k < i; k++)
+      if (isetlist[k]->Precedes(isetlist[i]->GetMember(1)))
+	if (isetlist[k]->GetAction(1)->Precedes(isetlist[i]->GetMember(1))) {
+	  new_supp.RemoveAction(isetlist[i]->GetAction(1));
+	  active_act_no[i] = 0;
+	}
+  }
+  answer += new_supp;
+
+  int iset_cursor = isetlist.Length();
+  while (iset_cursor > 0) {
+    if ( active_act_no[iset_cursor] == 0 || 
+	 active_act_no[iset_cursor] == isetlist[iset_cursor]->NumActions() )
+      iset_cursor--;
+    else {
+      new_supp.RemoveAction(isetlist[iset_cursor]->
+			    GetAction(active_act_no[iset_cursor]));
+      active_act_no[iset_cursor]++;
+      new_supp.AddAction(isetlist[iset_cursor]->
+			 GetAction(active_act_no[iset_cursor]));
+      for (int k = iset_cursor + 1; k <= isetlist.Length(); k++) {
+	if (active_act_no[k] > 0)
+	  new_supp.RemoveAction(isetlist[k]->GetAction(1));
+	int h = 1;
+	bool active = true;
+	while (active && h < k) {
+	  if (isetlist[h]->Precedes(isetlist[k]->GetMember(1)))
+	    if (active_act_no[h] == 0 || 
+		!isetlist[h]->GetAction(active_act_no[h])->
+	              Precedes(isetlist[k]->GetMember(1))) {
+	      active = false;
+	      if (active_act_no[k] > 0) {
+		new_supp.RemoveAction(isetlist[k]->
+				      GetAction(active_act_no[k]));
+		active_act_no[k] = 0;
+	      }
+	    }
+	  h++;
+	}
+	if (active){
+	  new_supp.AddAction(isetlist[k]->GetAction(1));
+	  active_act_no[k] = 1;
+	}
+      }
+      answer += new_supp;
+    }
+  }
+  return answer;
+}
+
+bool 
+BehavSolution::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
+		          	         const gSpace &BehavStratSpace, 
+				         const term_order &Lex,
+				         const EFSupport &dsupp,
+				         const gList<gList<int> > &var_index,
+				         const Node *tempnode,
+					 const EFPlayer */*pl*/,
+				         const Infoset *iset,
+				         const Action *act) const 
+{
+  while (tempnode != Game().RootNode()) {
+
+    const Action *last_action = tempnode->GetAction();
+    Infoset *last_infoset = last_action->BelongsTo();
+    
+    if (last_infoset->IsChanceInfoset()) 
+      node_prob *= (gDouble)Game().GetChanceProb(last_action);
+    else 
+      if (dsupp.HasActiveActionAt(last_infoset)) {
+	if (last_infoset == iset) {
+	  if (act != last_action) {
 	    return false;
 	  }
 	}
 	else
-	  if (Support().ActionIsActive((Action *)last_action))
-	    node_prob *= (gDouble)Profile()->GetValue(last_action);
+	  if (dsupp.ActionIsActive((Action *)last_action)) {
+	    if ( last_action->BelongsTo()->GetPlayer() !=
+		         act->BelongsTo()->GetPlayer()     ||
+		 !act->Precedes(tempnode) )
+	    node_prob *= (gDouble)m_profile->GetValue(last_action);
+	  }
 	  else {
-
-	    /*
-	    //DEBUG
-	    gout << "Eliminated (pl,i,j) = (" <<
-	      last_infoset->GetPlayer()->GetNumber() << "," <<
-	      last_infoset->GetNumber() << "," <<
-	      last_action->GetNumber() 
-		 << ") because action is inactive.\n";
-	    */
-	    
 	    return false;
 	  }
       }
@@ -604,155 +967,87 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
   return true;
 }
 
+
 gPolyList<gDouble> 
-BehavSolution::ExpectedPayoffDiffPolys(const gSpace &BehavStratSpace, 
-				       const term_order &Lex,
-				       const gList<gList<int> > &var_index) 
+BehavSolution::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace, 
+				          const term_order &Lex,
+					  const EFSupport &little_supp,
+					  const EFSupport &big_supp,
+				          const gList<gList<int> > &var_index) 
   const
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
 
-  for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
-      Infoset *infoset = Game().GetInfosetByIndex(pl,i);
-      if (Support().MayReach(infoset)) 
-	for (int j = 1; j <= infoset->NumActions(); j++)
-	  if (!Support().ActionIsActive(pl,i,j)) {
-	
+  const gArray<EFPlayer *> players = Game().Players();
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    const gArray<Infoset *> isets_for_pl = players[pl]->Infosets();
+    for (int i = 1; i <= isets_for_pl.Length(); i++) {
+      if (little_supp.MayReach(isets_for_pl[i])) {
+	const gArray<Action *> acts_for_iset = isets_for_pl[i]->Actions();
+	for (int j = 1; j <= acts_for_iset.Length(); j++)
+	  if ( !little_supp.ActionIsActive(acts_for_iset[j]) ) {
+	    gList<const Infoset *> isetlist = DeviationInfosets(big_supp, 
+							     players[pl],
+				         		     isets_for_pl[i],
+							     acts_for_iset[j]);
+	    gList<const EFSupport> dsupps = DeviationSupports(big_supp, 
+							     isetlist, 
+							     players[pl],
+				         		     isets_for_pl[i],
+							     acts_for_iset[j]);
+	    for (int k = 1; k <= dsupps.Length(); k++) {
+
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 
-	    // action j
-	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	    // the strategy for pl specified by dsupp[k]
 
-	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
+	      gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
 
-	      /*
-	      //DEBUG
-	      gout << "\nTerminal node " << n << " with outcome " <<
-	    	terminal_nodes[n]->GetOutcome()->GetName();
-	      gout << " has payoff " << 
-		Game().Payoff(terminal_nodes[n]->GetOutcome(),pl) << ".\n";
-	      */
-
-	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
-	      if (NodeProbabilityPoly(node_prob,
-				      BehavStratSpace,
-				      Lex,
-				      var_index,
-				      terminal_nodes[n],
-				      pl,i,j)) {
-		node_prob *= 
-		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
-		next_poly += node_prob;
-		/*
-		//DEBUG
-		gout << "It's contribution is " << node_prob << ".\n";
-		*/
+	      for (int n = 1; n <= terminal_nodes.Length(); n++) {
+		gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+		if (NashNodeProbabilityPoly(node_prob,
+					    BehavStratSpace,
+					    Lex,
+					    dsupps[k],
+					    var_index,
+					    terminal_nodes[n],
+					    players[pl],
+					    isets_for_pl[i],
+					    acts_for_iset[j])) {
+		  node_prob *= 
+		    (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		  next_poly += node_prob;
+		}
 	      }
+	      answer += -next_poly + (gDouble)Payoff(pl);
 	    }
-
-	    /*
-	    //DEBUG
-	    gout << "The player's payoff is " 
-		 << (gDouble)Payoff(pl) << ".\n\n";
-	    */
-
-	    answer += -next_poly + (gDouble)Payoff(pl);
 	  }
+      }
     }
-
-  /*
-  //DEBUG
-  gout << "The original no-deviation inequalities are\n" << answer << "\n";
-  */
-
+  }
   return answer;
 }
 
 gPolyList<gDouble> 
-BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace, 
-				  const term_order &Lex,
-				  const gList<gList<int> > &var_index) const
+BehavSolution::ExtendsToNashIneqs(const gSpace &BehavStratSpace, 
+				    const term_order &Lex,
+				    const EFSupport &little_supp,
+				    const EFSupport &big_supp,
+				    const gList<gList<int> > &var_index) const
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
-  answer += ActionProbsSumToOneIneqs(BehavStratSpace, Lex, var_index);
+  answer += ActionProbsSumToOneIneqs(BehavStratSpace, 
+				     Lex, 
+				     big_supp, 
+				     var_index);
 
-  /*
-  //DEBUG
-  gout << "The original sum-to-one inequalities are\n" << answer;
-  */
-
-  answer += ExpectedPayoffDiffPolys(BehavStratSpace, Lex, var_index);
-  return answer;
-}
-
-bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
-{
-  // This asks whether there is a Nash extension of the BehavSolution to 
-  // all information sets at which the behavioral probabilities are not
-  // specified.  The assumption is that the support has active actions
-  // at infosets at which the behavioral probabilities are defined, and
-  // no others.
-  
-  // First we compute the number of variables, and indexing information
-  int num_vars(0);
-  gList<gList<int> > var_index;
-  int pl;
-  for (pl = 1; pl <= Game().NumPlayers(); pl++) {
-
-    gList<int> list_for_pl;
-
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
-      list_for_pl += num_vars;
-      if ( !Support().HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
-	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
-      }
-    }
-    var_index += list_for_pl;
-  }
-
-  // We establish the space
-  gSpace BehavStratSpace(num_vars);
-  ORD_PTR ptr = &lex;
-  term_order Lex(&BehavStratSpace, ptr);
-
-  num_vars = BehavStratSpace.Dmnsn();
-
-  /*
-  //DEBUG
-  gout << "The original dimension is " << num_vars << ".\n";
-  */
-
-  gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
-							  Lex,
-							  var_index);
-
-  /*
-  //DEBUG
-  gout << "The behav_profile is\n" << *(this->Profile()) << "\n"
-       << "with support\n" << Support() << "\n";
-
-  gout << "The dimension is " << inequalities.Dmnsn()
-       << " and the system is\n" << inequalities << "\n";
-  */
-
-  // set up the rectangle of search
-  gVector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
-
-  // Set up the test and do it
-  IneqSolv<gDouble> extension_tester(inequalities,m_status);
-  gVector<gDouble> sample(num_vars);
-
-  // Temporarily, we check the old set up vs. the new
-  bool answer = extension_tester.ASolutionExists(Cube,sample); 
-  assert (answer == m_profile->ExtendsToANFNash(Support(),
-						Support(),
-						m_status));
+  answer += NashExpectedPayoffDiffPolys(BehavStratSpace, 
+				    Lex, 
+				    little_supp,
+				    big_supp,
+				    var_index);
   return answer;
 }
 
