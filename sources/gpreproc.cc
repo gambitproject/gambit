@@ -195,9 +195,10 @@ gText gPreprocessor::GetLine(void)
 	if (!EOL(c))
 	  line += c;
 	else {
-	  if (bracket > 0) {
-	    if (line.Right(1) == '\\')
-	      line = line.Left(line.Length() - 1);
+	  if (line.Right(1) == '\\') {
+	    break;
+	  }
+	  else if (bracket > 0) {
 	    line += '\n';
 	  }
 	  else {
