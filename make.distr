@@ -1,0 +1,34 @@
+# edit these!
+WXDIR=/home/ironbark/gambit/wxwin
+GUI=none
+
+all:
+	@echo Specify a target: gcl, gui, source.
+	@echo If specifying gui, make sure to add GUI=ol/motif
+gui:
+	@echo Updating gambit_$(GUI)_$(HOSTTYPE) on hss
+	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOSTTYPE) ./wxhelp
+	strip gambgui
+	strip wxhelp
+	zip gambit_$(GUI)_$(HOSTTYPE) gambgui wxhelp gambit.xlp \
+		./efg/*.efg ./nfg/*.nfg
+	rcp gambit_$(GUI)_$(HOSTTYPE).zip ftp@hss:~ftp/pub/gambit
+	rm gambit_$(GUI)_$(HOSTTYPE).zip
+
+gcll:	
+	@echo Updating gcl_$(HOSTTYPE) on hss
+	strip gcl
+	zip gcl_$(HOSTTYPE) gcl ./efg/*.efg ./nfg/*.nfg
+	rcp gcl_$(HOSTTYPE).zip ftp@hss:~ftp/pub/gambit
+	rm gcl_$(HOSTTYPE).zip
+source:
+	@echo Updating source code on hss
+	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
+		Makefile ./manual/*
+	rcp gambsrc.zip ftp@hss:~ftp/pub/gambit
+
+
+
+
+
+
