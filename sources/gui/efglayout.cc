@@ -355,15 +355,16 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
   case NODE_ABOVE_LABEL:
     return (const char *) n->GetName();
   case NODE_ABOVE_PLAYER:
-    return (const char *) ((n->GetPlayer()) ? n->GetPlayer()->GetName() : "");
+    return ((const char *) 
+	    ((n->GetPlayer()) ? n->GetPlayer()->GetName() : gText("")));
   case NODE_ABOVE_ISETLABEL:
     return ((const char *)
-	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : ""));
+	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
   case NODE_ABOVE_ISETID:
     return ((const char *)
 	    ((n->GetInfoset()) ?
 	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
-	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : ""));
+	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
   case NODE_ABOVE_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_ABOVE_REALIZPROB:
@@ -387,15 +388,16 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
   case NODE_BELOW_LABEL:
     return (const char *) n->GetName();
   case NODE_BELOW_PLAYER:
-    return (const char *) ((n->GetPlayer()) ? n->GetPlayer()->GetName() : "");
+    return ((const char *)
+	    ((n->GetPlayer()) ? n->GetPlayer()->GetName() : gText("")));
   case NODE_BELOW_ISETLABEL:
     return ((const char *)
-	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : ""));
+	    ((n->GetInfoset()) ? n->GetInfoset()->GetName() : gText("")));
   case NODE_BELOW_ISETID:
     return ((const char *)
 	    ((n->GetInfoset()) ?
 	     ("(" + ToText(n->GetPlayer()->GetNumber()) +
-	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : ""));
+	      "," + ToText(n->GetInfoset()->GetNumber()) + ")") : gText("")));
   case NODE_BELOW_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(n);
   case NODE_BELOW_REALIZPROB:
