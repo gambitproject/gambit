@@ -904,7 +904,7 @@ Portion *GSM_Nfg_Float(Portion **param)
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  Nfg<double> *N = MakeReducedNfg(E);
+  Nfg<double> *N = MakeReducedNfg(E, EFSupport(E));
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
   
@@ -919,7 +919,7 @@ Portion *GSM_Nfg_Rational(Portion **param)
   Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
   gWatch watch;
 
-  Nfg<gRational> *N = MakeReducedNfg(E);
+  Nfg<gRational> *N = MakeReducedNfg(E, EFSupport(E));
   
   ((FloatPortion *) param[1])->Value() = watch.Elapsed();
 
@@ -1358,8 +1358,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumMixed_EfgFloat, 
 				       PortionSpec(porBEHAV_FLOAT, 1), 7));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1376,8 +1375,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_EnumMixed_EfgRational, 
 				       PortionSpec(porBEHAV_RATIONAL, 1), 7));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1410,8 +1408,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EnumPure_EfgFloat, 
 				       PortionSpec(porBEHAV_FLOAT, 1), 6));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1426,8 +1423,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_EnumPure_EfgRational, 
 				       PortionSpec(porBEHAV_RATIONAL, 1), 6));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1440,8 +1436,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(2, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
-
-
 
 
   FuncObj = new FuncDescObj("GobitGridSolve", 1);
@@ -1478,7 +1472,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj = new FuncDescObj("GobitSolve", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Gobit_Start, 
 				       PortionSpec(porMIXED_FLOAT |
-						   porBEHAV_FLOAT), 16));
+						   porBEHAV_FLOAT, 1), 16));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("start",
 					    porMIXED_FLOAT | porBEHAV_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
@@ -1547,7 +1541,7 @@ void Init_algfunc(GSM *gsm)
 					    REQUIRED, BYVAL));
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Lcp_EfSupport, 
-				       PortionSpec(porBEHAV_FLOAT, 1), 7));
+				       PortionSpec(porBEHAV, 1), 7));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEF_SUPPORT));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
@@ -1638,8 +1632,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Lp_EfgFloat, 
 				       PortionSpec(porBEHAV_FLOAT, 1), 6));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("nPivots", porINTEGER,
@@ -1654,8 +1647,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lp_EfgRational, 
 				       PortionSpec(porBEHAV_RATIONAL, 1), 6));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("nPivots", porINTEGER,
@@ -1702,14 +1694,12 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Nfg", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nfg_Float, porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("time", porFLOAT,
 					    new FloatValPortion(0), BYREF));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Nfg_Rational, porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("time", porFLOAT,
 					    new FloatValPortion(0), BYREF));
   gsm->AddFunction(FuncObj);
@@ -1745,8 +1735,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(5, 1, ParamInfoType("list", 
 					    PortionSpec(porINTEGER,1)));
   gsm->AddFunction(FuncObj);
-
-
 
 
   FuncObj = new FuncDescObj("SetPayoff", 4);
@@ -1808,8 +1796,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Simpdiv_EfgFloat, 
 				       PortionSpec(porBEHAV_FLOAT, 1), 9));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_FLOAT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1830,8 +1817,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Simpdiv_EfgRational, 
 				       PortionSpec(porBEHAV_RATIONAL, 1), 9));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("efg", porEFG_RATIONAL));	
   FuncObj->SetParamInfo(2, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("stopAfter", porINTEGER,
