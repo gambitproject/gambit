@@ -57,11 +57,10 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     }
 
     for (k = 1; k <= strats; k++)	{
-      LPSolve<T> Tab(A, B, C, 1);
-
       tracefile << '\n' << (gRectArray<T> &)A << '\n';
       tracefile << B << '\n';
-			tracefile << C << '\n';
+      tracefile << C << '\n';
+      LPSolve<T> Tab(A, B, C, 1);
 
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -127,10 +126,10 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     }
 
     for (k = 1; k <= strats; k++)	{
-      LPSolve<T> Tab(A, B, C, 1);
       tracefile << '\n' << (gRectArray<T> &)A << '\n';
       tracefile << B << '\n';
       tracefile << C << '\n';
+      LPSolve<T> Tab(A, B, C, 1);
 
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
