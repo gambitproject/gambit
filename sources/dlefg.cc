@@ -1295,11 +1295,11 @@ dialogEfgSave::dialogEfgSave(const gText &p_name,
   m_treeLabel->GetConstraints()->height.AsIs();
 
   m_numDecimals = new wxSlider(this, 0, "Decimal places:",
-			       p_decimals, 0, 25, 100, 1, 1);
+			       p_decimals, 0, 25, -1, 1, 1);
   m_numDecimals->SetConstraints(new wxLayoutConstraints);
   m_numDecimals->GetConstraints()->top.SameAs(m_treeLabel, wxBottom, 10);
   m_numDecimals->GetConstraints()->left.SameAs(m_treeLabel, wxLeft);
-  m_numDecimals->GetConstraints()->width.AsIs();
+  m_numDecimals->GetConstraints()->right.SameAs(browseButton, wxRight);
   m_numDecimals->GetConstraints()->height.AsIs();
 
   m_okButton->GetConstraints()->top.SameAs(m_numDecimals, wxBottom, 10);
