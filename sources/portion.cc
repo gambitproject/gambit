@@ -1726,15 +1726,22 @@ gBlock< Portion* >& ListPortion::Value( void ) const
 
 bool ListPortion::IsValid( void ) const
 {
-  bool result = false;
+  bool result;
   int i;
-  int length;
+  int length = _Value->Length();
 
   // Portion::AddDependency();
-  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  if( length > 0 )
   {
-    result = result || (*_Value)[ i ]->IsValid();
+    result = false;
+    for( i = 1; i <= length; i++ )
+    {
+      result = result || (*_Value)[ i ]->IsValid();
+    }
   }
+  else
+    result = true;
+  
   return result && Portion::IsValid();
 }
 
@@ -2035,9 +2042,13 @@ Portion* ListPortion::Subscript( int index )
   if( index >= 1 && index <= _Value->Length() )
   {
     assert( (*_Value)[ index ] != 0 );
-    p = (*_Value)[ index ]->RefCopy();
-    if( !(*_Value)[ index ]->IsValid() )
-      p->SetIsValid( false );
+
+    if( IsReference() )
+      p = (*_Value)[ index ]->RefCopy();
+    else
+      p = (*_Value)[ index ]->ValCopy();
+      
+    p->SetIsValid( (*_Value)[ index ]->IsValid() );
     return p;
   }
   else

@@ -785,7 +785,6 @@ bool GSM::Subscript ( void )
 {
   Portion* p2;
   Portion* p1;
-  Portion* real_list;
   Portion* element;
 
   gString  old_string;
@@ -818,8 +817,7 @@ bool GSM::Subscript ( void )
 
   if( p1->Type() == porLIST )
   {
-    real_list = p1;
-    element = ( (ListPortion* ) real_list )->Subscript( subscript );
+    element = ( (ListPortion* ) p1 )->Subscript( subscript );
     if( element != 0 )
     {
       _Push( element );

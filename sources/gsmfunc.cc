@@ -1071,12 +1071,12 @@ void CallFuncObj::_ErrorMessage
     s << "  No matching parameter list found for function " + str1 + "[]\n";
     break;
   case 9:
-    s << "  Required parameter \"" << str1 << "\" not found while executing\n";
-    s << "  function " << str2 << "[]\n";
+    s << "  Required parameter \"" << str1 << "\" not found\n";
+    s << "  while executing function " << str2 << "[]\n";
     break;
   case 10:
-    s << "  Required parameter \"" << str1 << "\" undefined while executing\n";
-    s << "  function " << str2 << "[]\n";
+    s << "  Undefined variable passed for parameter \"" << str1 << "\"\n";
+    s << "  while executing function " << str2 << "[]\n";
     break;
   default:
     s << "  General error\n";

@@ -61,8 +61,6 @@ typedef unsigned int PortionType;
 #define  porOUTCOME_RATIONAL ( 0x800000 )
 #define  porOUTCOME          ( porOUTCOME_FLOAT | porOUTCOME_RATIONAL )
 
-#define  porEF_PLAYER   porPLAYER_EFG
-
 #define  porPLAYER_EFG  ( 0x8000 )
 #define  porPLAYER_NFG  ( 0x01000000 )
 #define  porPLAYER      ( porPLAYER_EFG | porPLAYER_NFG ) 
