@@ -1,18 +1,15 @@
 #include "wx/wx.h"
 #include "wx/dc.h"
-//#include "wx_form.h"
-//#include "wx_mf.h"
-//#include "wx_clipb.h"
+
 #include <math.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #pragma hdrstop
 #include "gmisc.h"
 #include "wxmisc.h"
-#include "general.h"
-#include "gambitio.h"
 #include "arrays.h"
 #include "expdata.h"
 #include "equtrac.h"

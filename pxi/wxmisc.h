@@ -1,7 +1,5 @@
 //
 // FILE: wxmisc.h -- Defines some generic stuff that should be in wxWin
-// Right now its a dialog box with a built in form, a font selector, and
-// a wxListFindString function... More to come
 //
 // @(#)wxmisc.h	1.1 6/6/94
 //

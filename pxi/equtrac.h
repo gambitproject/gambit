@@ -1,10 +1,14 @@
+//
 // File: equtrac.h -- definition of the equilibrium tracker class
+//
+
 #ifndef  EQUTRAC_H
 #define	 EQUTRAC_H
+
 #include <math.h>
+
 #include "gambitio.h"
 #include "gtuple.h"
-#include "general.h"
 #include "equdata.h"
 
 #define	LARGE_NUMBER	100.00

@@ -34,7 +34,7 @@ int EquTracker::Closest(const DataLine &this_line)
     }
   }
   if (least_so_far<merror)
-    return least_pos;
+    return (int)least_pos;
   else
     return 0;
 }

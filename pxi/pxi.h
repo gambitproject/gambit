@@ -1,6 +1,7 @@
 //
-// Program: PXI.  [Plot X V2.0]
+// File: pxi.h -- declarations of main classes for PXI.  [Plot X V2.0]
 //
+
 // This program is designed to plot data from simulations/experiments on
 // normal form games [support for other types of generic infoset/player games
 // is now being implemented].  The basic structure of the file contains the
@@ -23,6 +24,7 @@
 #include "wx/dcps.h"
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
+#include "expdata.h"
 
 #define PXI_QUIT              100
 #define PXI_OUTPUT             101

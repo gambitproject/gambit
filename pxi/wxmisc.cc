@@ -1,9 +1,10 @@
 #include "wx/wx.h"
 #include "wx/help.h"  // for help
 #include "wx/config.h"  // for config
+
 #pragma hdr_stop
 #include "wxmisc.h"
-#include "general.h"
+
 //***************************************************************************
 //                       RANDOM USEFUL FUNCTIONS
 // These will hopefully be a part of wxwin some day.  These all belong in

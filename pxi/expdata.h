@@ -1,4 +1,6 @@
+//
 // File: expdata.h, header file for expdata.cc
+//
 // The class will read in a file with experimental data, in the following
 // format:
 // 	#_of_players  #_of_strategies_for_player_1 #_of_strategies_for_player_2
@@ -26,12 +28,18 @@
 
 #ifndef	EXPDATA_H
 #define	EXPDATA_H
+
 #include <math.h>
 #include <stdio.h>
-#include "general.h"
 #include "gambitio.h"
 #include "gblockm.h"
 #include "equdata.h"
+
+#ifndef	BOOL_DEFINED
+#define Bool int
+#endif
+#define	TRUE 1
+#define	FALSE 0
 
 
 typedef struct EXPDATASTRUCT

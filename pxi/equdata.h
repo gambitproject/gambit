@@ -12,7 +12,7 @@
 #define EQUDATA_H
 
 #include <stdio.h>
-#include "general.h"
+
 #include "gambitio.h"
 #include "wx/wx.h"
 #include "gblock.h"
