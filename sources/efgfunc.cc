@@ -67,13 +67,13 @@ static Portion *GSM_AddAction(Portion **param)
 }
 
 //------------------
-// AppendNode
+// AddMove
 //------------------
 
-static Portion *GSM_AppendNode(Portion **param)
+static Portion *GSM_AddMove(Portion **param)
 {
-  Node *n = ((NodePortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Node *n = ((NodePortion *) param[1])->Value();
 
   n->BelongsTo()->AppendNode(n, s);
 
@@ -233,10 +233,10 @@ static Portion *GSM_DeleteEmptyInfoset(Portion **param)
 }
 
 //----------------
-// DeleteNode
+// DeleteMove
 //----------------
 
-static Portion *GSM_DeleteNode(Portion **param)
+static Portion *GSM_DeleteMove(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   Node *keep = ((NodePortion *) param[1])->Value();
@@ -463,13 +463,13 @@ static Portion *GSM_InsertActionAt(Portion **param)
 }
 
 //--------------
-// InsertNode
+// InsertMove
 //--------------
 
-static Portion *GSM_InsertNode(Portion **param)
+static Portion *GSM_InsertMove(Portion **param)
 {
-  Node *n = ((NodePortion *) param[0])->Value();
-  Infoset *s = ((InfosetPortion *) param[1])->Value();
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Node *n = ((NodePortion *) param[1])->Value();
 
   n->BelongsTo()->InsertNode(n, s);
 
@@ -1290,11 +1290,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("AppendNode", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AppendNode, porNODE, 2,
+  FuncObj = new FuncDescObj("AddMove", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddMove, porNODE, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 
@@ -1352,8 +1352,8 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("DeleteNode", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteNode, porNODE, 2, 
+  FuncObj = new FuncDescObj("DeleteMove", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteMove, porNODE, 2, 
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("keep", porNODE));
@@ -1441,11 +1441,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("InsertNode", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InsertNode, porNODE, 2,
+  FuncObj = new FuncDescObj("InsertMove", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InsertMove, porNODE, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 
