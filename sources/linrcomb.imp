@@ -107,15 +107,15 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
 template <class T> 
 LinearCombination<T>::LinearCombination(const LinearCombination<T> &L)
 : scrambled(L.scrambled), 
-  last_row_is_spanned(L.last_row_is_spanned), 
-  weights(L.weights)
+  weights(L.weights),
+  last_row_is_spanned(L.last_row_is_spanned)
 { }
  
 template <class T> LinearCombination<T>::~LinearCombination()
 { }
 
 template <class T> LinearCombination<T>& 
-LinearCombination<T>::operator=(const LinearCombination<T> &L)
+LinearCombination<T>::operator=(const LinearCombination<T>& /* L */)
 {
   gout << "We don't copy LinearCombinations.\n";
   exit(0);

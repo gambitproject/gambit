@@ -25,8 +25,8 @@ independent.
 template <class T> class LinearCombination  {
   private:
     gMatrix<T> scrambled;
-    bool       last_row_is_spanned;
     gVector<T> weights;
+    bool       last_row_is_spanned;
 
     void AddMultipleOfRowiToRowj(const int& i, 
 				 const int& j, 
@@ -43,7 +43,7 @@ template <class T> class LinearCombination  {
 
     virtual ~LinearCombination();
 
-    LinearCombination<T> &operator=(const LinearCombination<T> &);
+    LinearCombination<T>& operator=(const LinearCombination<T> &);
 
        // Comparison Operators
     bool operator==(const LinearCombination<T> &) const;
