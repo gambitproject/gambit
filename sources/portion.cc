@@ -5,9 +5,6 @@
 // $Id$
 //
 
-
-#include <assert.h>
-
 #include "portion.h"
 #include "gsmhash.h"
 
@@ -104,9 +101,8 @@ void Portion::SetOriginal(const Portion* p)
 
 Portion *Portion::Original(void) const
 { 
-  if (!IsReference()){
-    assert(!_Original);
-    return (Portion*) this;
+  if (!IsReference()) {
+    return (Portion *) this;
   }
   else  {
     return _Original; 
@@ -1541,10 +1537,7 @@ NfgPortion::NfgPortion(Nfg *&value, bool ref)
 NfgPortion::~NfgPortion()
 { 
   // for games, only call SetGame for ValPortions, not RefPortions!
-  if( _ref )
-    assert( !Game() );
-  if (!_ref)
-  {
+  if (!_ref) {
     delete _Value; 
   }
 }
@@ -1567,7 +1560,6 @@ PortionSpec NfgPortion::Spec(void) const
 void NfgPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  assert(*_Value);
   s << "(Nfg) \"" << (*_Value)->GetTitle() << "\"";
 }
 
@@ -1615,11 +1607,7 @@ EfgPortion::EfgPortion(Efg *&value, bool ref)
 
 EfgPortion::~EfgPortion()
 { 
-  // for games, only call SetGame for ValPortions, not RefPortions!
-  if( _ref )
-    assert( !Game() );
-  if (!_ref)
-  {
+  if (!_ref) {
     delete _Value; 
   }
 }
@@ -1642,7 +1630,6 @@ PortionSpec EfgPortion::Spec(void) const
 void EfgPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  assert(*_Value);
   s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
 }
 
@@ -1927,18 +1914,12 @@ void ListPortion::AssignFrom(Portion* p)
   int result;
   gList <Portion *>& value = *(((ListPortion*) p)->rep->value);
 
-  assert(p->Spec() == Spec());
-  assert(PortionSpecMatch(((ListPortion*) p)->rep->_DataType, rep->_DataType)
-	 || rep->_DataType == porUNDEFINED || 
-	 ((ListPortion*) p)->rep->_DataType == porUNDEFINED);
-
-
   Flush();
 
-  for(i = 1, length = value.Length(); i <= length; i++)
-  {
+  for(i = 1, length = value.Length(); i <= length; i++) {
     result = Insert(value[i]->ValCopy(), i);
-    assert(result != 0);
+    if (!result)
+      throw gclRuntimeError("Internal error in ListPortion");
   }
   if (rep->_DataType == porUNDEFINED)
     rep->_DataType = ((ListPortion*) p)->rep->_DataType;
@@ -2092,7 +2073,8 @@ int ListPortion::Insert(Portion* item, int index)
     }
     else if (item_type.Type == porUNDEFINED) { // inserting an empty list
       result = rep->value->Insert(item, index);
-      assert(item->Spec().ListDepth > 0);
+      if (item->Spec().ListDepth <= 0)
+	throw gclRuntimeError("Internal error in ListPortion");
       ((ListPortion*) item)->rep->_DataType = rep->_DataType;
     }
     else {
@@ -2174,19 +2156,17 @@ int ListPortion::Length(void) const
 void ListPortion::Flush(void)
 {
   int i, length;
-  for(i = 1, length = rep->value->Length(); i <= length; i++)
-  {
+  for (i = 1, length = rep->value->Length(); i <= length; i++) {
     delete Remove(1);
   }
-  assert(rep->value->Length() == 0);
 }
 
 
 Portion* ListPortion::operator[](int index) const
 {
-  if(index >= 1 && index <= rep->value->Length())
-  {
-    assert((*rep->value)[index] != 0);
+  if (index >= 1 && index <= rep->value->Length()) {
+    if (!(*rep->value)[index])
+      throw gclRuntimeError("Internal error in ListPortion");
     return (*rep->value)[index];
   }
   else
@@ -2198,9 +2178,9 @@ Portion* ListPortion::operator[](int index) const
 Portion* ListPortion::SubscriptCopy(int index) const
 {
   Portion* p;
-  if(index >= 1 && index <= rep->value->Length())
-  {
-    assert((*rep->value)[index] != 0);
+  if (index >= 1 && index <= rep->value->Length()) {
+    if (!(*rep->value)[index])  
+      throw gclRuntimeError("Internal error in ListPortion");
 
     if(IsReference())
       p = (*rep->value)[index]->RefCopy();
@@ -2290,7 +2270,7 @@ bool PortionEqual(Portion* p1, Portion* p2, bool &type_found)
 
   else  {
     type_found = false;
-    assert( 0 );
+    throw gclRuntimeError("Internal error in PortionEqual()"); 
   }
   return b;
 }

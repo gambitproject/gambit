@@ -4,8 +4,6 @@
 // $Id$
 //
 
-#include <assert.h>
-
 #include "gsm.h"
 #include "portion.h"
 #include "gsmfunc.h"
@@ -66,17 +64,18 @@ void GSM_Flatten_Top(ListPortion* list, int levels, int depth,
 {
   int Length = list->Length();
   int i;
-  assert(levels >= 0);
-  if(levels == 0)
-  {
-    for(i=1; i<=Length; i++)
+  if (levels < 0) {
+    throw gclRuntimeError("Internal error in Flatten[]");
+  }
+
+  if(levels == 0) {
+    for (i=1; i<=Length; i++)
       if((*list)[i]->Spec().ListDepth == 0)
 	result->Append((*list)[i]->ValCopy());
       else
 	GSM_Flatten_Top((ListPortion*)(*list)[i], levels, depth+1, result);
   }
-  else if(levels > 0)
-  {
+  else if(levels > 0) {
     if(depth >= levels)
       for(i=1; i<=Length; i++)
 	result->Append((*list)[i]->ValCopy());
@@ -94,10 +93,10 @@ void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth,
 {
   int Length = result->Length();
   int i;
-  assert(levels > 0);
-  assert(list == 0);
-  if(depth >= levels-1)
-  {
+  if (levels <= 0 || list != 0) {
+    throw gclRuntimeError("Internal error in Flatten[]");
+  }
+  if(depth >= levels-1) {
     for(i=1; i<=Length; i++)
       if((*result)[i]->Spec().ListDepth == 0)
 	;
@@ -144,8 +143,9 @@ bool ListDimCheck(ListPortion* p0, ListPortion* p1)
 {
   int i;
   int Length;
-  assert(p0->Spec().ListDepth > 0);
-  assert(p1->Spec().ListDepth > 0);
+  if (p0->Spec().ListDepth <= 0 || p1->Spec().ListDepth <= 0) {
+    throw gclRuntimeError("Internal error in ListDimCheck()");
+  }
   Length = p0->Length();
   if(Length != p1->Length())
     return false;
@@ -166,9 +166,10 @@ ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
   int Length = p0->Length();
   ListPortion* list = new ListPortion();
   for(i=1; i<=Length; i++)
-    if((*p0)[i]->Spec().ListDepth == 0)
-    {
-      assert((*p1)[i]->Spec().Type == porBOOLEAN);
+    if((*p0)[i]->Spec().ListDepth == 0) {
+      if ((*p1)[i]->Spec().Type != porBOOLEAN) {
+	throw gclRuntimeError("Internal error in Filter[]");
+      }
       if(((BoolPortion*) (*p1)[i])->Value())
 	list->Append((*p0)[i]->ValCopy());
     }
@@ -196,9 +197,12 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*),
 
   unsigned long n = ((ListPortion*) param[0])->Length();
   
-  assert(param[0]);
-  if(altsort)
-    assert(param[1]);
+  if (!param[0]) {
+    throw gclRuntimeError("Internal error in Sort[]");
+  }
+  if (altsort && !param[1]) {
+    throw gclRuntimeError("Internal error in Sort[]");
+  }
 
   if(altsort)
     if(n != (unsigned) ((ListPortion*) param[1])->Length())
@@ -548,7 +552,11 @@ Portion* GSM_ArgMax( Portion** param )
   gRational max = 0;
   int index = 0;
   int i;
-  assert( param[0]->Spec().ListDepth > 0 );
+
+  if (param[0]->Spec().ListDepth <= 0) {
+    throw gclRuntimeError("Internal error in ArgMax[]");
+  }
+
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
@@ -578,7 +586,11 @@ Portion* GSM_Transpose( Portion** param )
   int width = 0;
   ListPortion* p;
   ListPortion* s;
-  assert( param[0]->Spec().ListDepth > 0 );
+
+  if (param[0]->Spec().ListDepth <= 0) {
+    throw gclRuntimeError("Internal error in Transpose[]");
+  }
+
   Length = ((ListPortion*) param[0])->Length();
   for( i = 1; i <= Length; i++ )
   {
@@ -610,7 +622,11 @@ Portion* GSM_Inverse( Portion** param )
   int width = 0;
   ListPortion *p;
   ListPortion *s;
-  assert( param[0]->Spec().ListDepth > 0 );
+
+  if (param[0]->Spec().ListDepth <= 0) {
+    throw gclRuntimeError("Internal error in Inverse[]");
+  }
+
   Length = ((ListPortion*) param[0])->Length();
   for( i = 1; i <= Length; i++ )
   {
