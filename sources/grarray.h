@@ -16,20 +16,6 @@ template <class T> class gRectArray    {
     int minrow, maxrow, mincol, maxcol;
     T **data;
 
-      // RANGE CHECKING FUNCTIONS
-      // check for correct row index
-    bool CheckRow(int row) const;
-      // check row vector for correct column boundaries
-    bool CheckRow(const gArray<T> &) const;
-      // check for correct column index
-    bool CheckColumn(int col) const;
-      // check column vector for correct row boundaries
-    bool CheckColumn(const gArray<T> &) const;
-      // check row and column indices
-    bool Check(int row, int col) const;
-      // check matrix for same row and column boundaries
-    bool CheckBounds(const gRectArray<T> &) const;
-
   public:
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gRectArray(void);
@@ -70,6 +56,27 @@ template <class T> class gRectArray    {
     void SwitchColumns(int, int);
     void GetColumn(int, gArray<T> &) const;
     void SetColumn(int, const gArray<T> &);
+
+
+
+    // originally protected functions, moved to permit compilation
+    // should be moved back eventually
+
+      // RANGE CHECKING FUNCTIONS
+      // check for correct row index
+    bool CheckRow(int row) const;
+      // check row vector for correct column boundaries
+    bool CheckRow(const gArray<T> &) const;
+      // check for correct column index
+    bool CheckColumn(int col) const;
+      // check column vector for correct row boundaries
+    bool CheckColumn(const gArray<T> &) const;
+      // check row and column indices
+    bool Check(int row, int col) const;
+      // check matrix for same row and column boundaries
+    bool CheckBounds(const gRectArray<T> &) const;
+
+
 };
 
 template <class T> gOutput &operator<<(gOutput &, const gRectArray<T> &);
