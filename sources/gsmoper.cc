@@ -15,6 +15,7 @@ Portion* GSM_Assign( Portion** param )
     delete param[ 0 ];
   }
   param[ 0 ] = param[ 1 ]->Copy();
+  param[ 0 ]->MakeCopyOfData( param[ 1 ] );
   result = param[ 1 ]->Copy();
   delete param[ 1 ];
   return result;

@@ -481,23 +481,23 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       }
     }
     result = _FuncPtr( _Param );
-    
-    for( index = 0; index < _NumParams; index++ )
-    {
-      param[ index ] = _Param[ index ];
-    }    
   }
   else
   {
     for( index = 0; index < _NumParams; index++ )
     {
-      if( _Param[ index ] == 0 )
-      {
-	delete _Param[ index ];
-      }
+      delete _Param[ index ];
+      _Param[ index ] = 0;
+      delete _RunTimeParamInfo[ index ].Ref;
+      _RunTimeParamInfo[ index ].Ref = 0;
     }
-    result = new Error_Portion;
+    result = 0;
   }
+
+  for( index = 0; index < _NumParams; index++ )
+  {
+    param[ index ] = _Param[ index ];
+  }    
 
   return result;
 }

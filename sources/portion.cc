@@ -413,7 +413,7 @@ PortionType Reference_Portion::Type( void ) const
 { return porREFERENCE; }
 
 Portion* Reference_Portion::Copy( void ) const
-{ return new Reference_Portion( _Value ); }
+{ return new Reference_Portion( _Value, _SubValue ); }
 
 void Reference_Portion::Output( gOutput& s ) const
 {
@@ -727,6 +727,12 @@ bool Nfg_Portion::UnAssign( const gString& ref )
     _RefTable->Remove( ref );
   }
   return true;
+}
+
+
+bool Nfg_Portion::IsDefined( const gString& ref ) const
+{
+  return _RefTable->IsDefined( ref );
 }
 
 

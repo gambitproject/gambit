@@ -231,6 +231,7 @@ bool GSM::Assign( void )
   if ( p1->Type() == porREFERENCE )
   {
     p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
+
     if( p1_subvalue == "" )
     {
       if( p2->Type() == porREFERENCE )
@@ -256,31 +257,37 @@ bool GSM::Assign( void )
     {
       primary_ref = _ResolvePrimaryRefOnly( (Reference_Portion*) p1 );
 
-#ifndef NDEBUG
-      if( primary_ref->Type() != porNFG )
+      if( primary_ref->Type() == porNFG )
       {
-	gerr << "GSM Error: attempted to assign a sub-reference to a type\n";
-	gerr << "           that doesn't support such structures\n";
-      }
-      assert( primary_ref->Type() == porNFG );
-#endif // NDEBUG
-      
-      if( p2->Type() == porREFERENCE )
-      {
-	p2 = _ResolveRef( (Reference_Portion*) p2 );
-	p2_copy = p2->Copy();
-	p2_copy->MakeCopyOfData( p2 );
+	if( p2->Type() == porREFERENCE )
+	{
+	  p2 = _ResolveRef( (Reference_Portion*) p2 );
+	  p2_copy = p2->Copy();
+	  p2_copy->MakeCopyOfData( p2 );
+	}
+	else
+	{
+	  p2_copy = p2->Copy();
+	}
+	p2_copy->Temporary() = false;
+	p2->Temporary() = true;
+	( (Nfg_Portion*) primary_ref )->Assign( p1_subvalue, p2_copy );
+	delete p2;
+	
+	p1 = _ResolveRef( (Reference_Portion*) p1 );
       }
       else
       {
-	p2_copy = p2->Copy();
+	gerr << "GSM Error: attempted to assign a sub-reference to a type\n";
+	gerr << "           that doesn't support such structures\n";
+	if( primary_ref->Type() == porERROR )
+	{
+	  delete primary_ref;
+	}
+	delete p2;
+	delete p1;
+	p1 = new Error_Portion;
       }
-      p2_copy->Temporary() = false;
-      p2->Temporary() = true;
-      ( (Nfg_Portion*) primary_ref )->Assign( p1_subvalue, p2_copy );
-      delete p2;
-
-      p1 = _ResolveRef( (Reference_Portion*) p1 );
       _Stack->Push( p1 );
     }
   }
@@ -369,11 +376,11 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
   Portion*  result = 0;
   Portion*  temp;
   gString&  ref = p->Value();
-  gString   subvalue;
+  gString&  subvalue = p->SubValue();
+
 
   if( _RefTable->IsDefined( ref ) )
   {
-    subvalue = ( (Reference_Portion*) p )->SubValue();
     if( subvalue == "" )
     {
       result = (*_RefTable)( ref )->Copy();
@@ -381,13 +388,22 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
     else
     {
       result = (*_RefTable)( ref );
-      result = ((Nfg_Portion*) result )->operator()( subvalue );
-      if( result != 0 )
+      switch( result->Type() )
       {
-	result = result->Copy();
-      }
-      else
-      {
+      case porNFG:
+	result = ((Nfg_Portion*) result )->operator()( subvalue );
+	if( result != 0 )
+	{
+	  result = result->Copy();
+	}
+	else
+	{
+	  result = new Error_Portion;
+	}
+	break;
+      default:
+	gerr << "GSM Error: attempted to resolve a subvariable of a type\n";
+	gerr << "           that does not support subvariables\n";
 	result = new Error_Portion;
       }
     }
@@ -397,6 +413,52 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
     gerr << "GSM Error: attempted to resolve an undefined reference\n";
     gerr << "           \"" << ref << "\"\n";
     result = new Error_Portion;
+  }
+  delete p;
+
+  return result;
+}
+
+
+Portion* GSM::_ResolveRefWithoutCopy( Reference_Portion* p )
+{
+  Portion*  result = 0;
+  Portion*  temp;
+  gString&  ref = p->Value();
+  gString&  subvalue = p->SubValue();
+
+  if( _RefTable->IsDefined( ref ) )
+  {
+    if( subvalue == "" )
+    {
+      result = (*_RefTable)( ref )->Copy();
+    }
+    else
+    {
+      result = (*_RefTable)( ref );
+      switch( result->Type() )
+      {
+      case porNFG:
+	if( ((Nfg_Portion*) result )->IsDefined( subvalue ) )
+	{
+	  result = ((Nfg_Portion*) result )->operator()( subvalue )->Copy();
+	}
+	else
+	{
+	  result = 0;
+	}
+	break;
+
+      default:
+	gerr << "GSM Error: attempted to resolve the subvariable of a type\n";
+	gerr << "           that does not support subvariables\n";
+	result = new Error_Portion;
+      }
+    }
+  }
+  else
+  {
+    result = 0;
   }
   delete p;
 
@@ -789,6 +851,7 @@ bool GSM::BindRef( void )
   CallFuncObj*  func;
   PortionType          curr_param_type;
   Portion*             param;
+  Portion*             subparam;
   gString              funcname;
   int                  i;
   int                  type_match;
@@ -809,51 +872,32 @@ bool GSM::BindRef( void )
     {
       ref = ( (Reference_Portion*) param )->Value();
       subref = ( (Reference_Portion*) param )->SubValue();
-      func->SetCurrParamRef( (Reference_Portion*) param );
-      if( _RefTable->IsDefined( ref ) )
-      {
-	if( subref == "" )
+      func->SetCurrParamRef( (Reference_Portion*)( param->Copy() ) );
+      param = _ResolveRefWithoutCopy( (Reference_Portion*) param );
+      if( param != 0 )
+	if( param->Type() == porERROR )
 	{
-	  param = (*_RefTable)( ref )->Copy();
+	  delete param;
+	  result = false;
 	}
-	else
-	{
-	  param = _ResolvePrimaryRefOnly( (Reference_Portion*) param );
-	  switch( param->Type() )
-	  {
-	  case porNFG:
-	    ( (Nfg_Portion*) param )->UnAssign( subref );
-	    param = 0;
-	    break;
-	  default:
-	    gerr << "GSM Error: attempted to bind the subvariable of a\n";
-	    gerr << "           type that does not support subvariables\n";
-/*
-	    delete param;
-	    param = 0;
-	    result = false;
-*/
-	  }
-	}
-      }
-      else
-      {
-	param = 0;
-      }
     }
     else // ( param->Type() != porREFERENCE )
     {
       gerr << "GSM Error: called BindRef() on a non-Reference type\n";
-      delete param;
-      result = false;
+      _CallFuncStack->Push( func );
+      _Stack->Push( param );
+      result = BindVal();
+      return false;
     }
   }
   else // ( !func->GetCurrParamPassByRef() )
   {
     gerr << "GSM Error: called BindRef() on a parameter that is specified\n";
     gerr << "           to be passed by value only\n";
-    delete param;
-    result = false;
+    _CallFuncStack->Push( func );
+    _Stack->Push( param );
+    result = BindVal();
+    return false;
   }
 
   if( result == false )
@@ -864,16 +908,16 @@ bool GSM::BindRef( void )
   if( result == true && param != 0 )
   {
     result = _FuncParamCheck( func, param->Type() );
-  }
-
-  if( result == true )
-  {
-    result = func->SetCurrParam( param ); 
+    if( result == true )
+    {
+      result = func->SetCurrParam( param ); 
+    }
   }
   else
   {
     func->SetCurrParam( 0 ); 
   }
+
 
   _CallFuncStack->Push( func );
   return result;
@@ -964,9 +1008,8 @@ bool GSM::CallFunction( void )
       func->SetCurrParamIndex( index );
       refp = func->GetCurrParamRef();
 
-      if( refp != 0 )
+      if( refp != 0 && param[ index ] != 0 )
       {
-	assert( param[ index ] != 0 );
 	if( refp->SubValue() == "" )
 	{
 	  _RefTable->Define( refp->Value(), param[ index ] );
@@ -979,7 +1022,8 @@ bool GSM::CallFunction( void )
 	    switch( p->Type() )
 	    {
 	    case porNFG:
-	      ( (Nfg_Portion*) p )->Assign( refp->SubValue(), param[ index ] );
+	      ( (Nfg_Portion*) p )->Assign( refp->SubValue(), param[ index ]->Copy() );
+	      delete param[ index ];
 	      break;
 	    default:
 	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
@@ -997,6 +1041,13 @@ bool GSM::CallFunction( void )
 	  }
 	}
 	delete refp;
+      }
+      else
+      {
+	if( ( refp == 0 ) && ( param[ index ] != 0 ) )
+	  delete param[ index ];
+	else
+	  assert(0);
       }
     }
   }

@@ -215,6 +215,7 @@ class Nfg_Portion : public Portion
 
   bool        Assign     ( const gString& ref, Portion* data );
   bool        UnAssign   ( const gString& ref );
+  bool        IsDefined  ( const gString& ref ) const;
   Portion*    operator() ( const gString& ref ) const;
 };
 

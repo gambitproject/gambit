@@ -8,7 +8,7 @@
 
 
 
-#undef CRASHTEST
+#define CRASHTEST
 
 
 
@@ -604,165 +604,6 @@ int main( void )
 
 
 
-/*
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 100 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "y" );
-  machine->PushRef( "x" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "z" );
-  machine->GenerateNfg( 200 );
-  machine->Assign();
-
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->Dump();
-
- 
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-
-
-  machine->GenerateNfg( 100 );
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 1 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 2 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "y" );
-  machine->PushRef( "x" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "z" );
-  machine->PushRef( "y" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->PushRef( "z" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->PushRef( "x" );
-  machine->Assign();
-  machine->Dump();
-
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 1 );
-  machine->Assign();
-  machine->Dump();
-  
-  machine->PushRef( "x", "1" );
-  machine->Push( (double) 1 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x", "2" );
-  machine->PushRef( "y" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x", "1" );
-  machine->PushRef( "x", "2" );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x", "1" );
-  machine->PushRef( "x", "2" );
-  machine->Dump();
-
-
-
-  machine->PushRef( "x" );
-  machine->Push( (double) 1 );
-  machine->Assign();
-  machine->Dump();
-  
-  machine->PushRef( "x" );
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->UnAssign();
-  machine->Dump();
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 10 );
-  machine->Assign();
-  machine->PushRef( "x", "a" );
-  machine->Push( (double) 11 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->PushRef( "x", "a" );
-  machine->Dump();
-
-  machine->PushRef( "x", "a" );
-  machine->UnAssign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->Dump();
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-  machine->PushRef( "x" );
-  machine->GenerateNfg( 10 );
-  machine->Assign();
-  machine->PushRef( "x", "a" );
-  machine->Push( (double) 11 );
-  machine->Assign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->PushRef( "x", "a" );
-  machine->Dump();
-
-  machine->PushRef( "x", "a" );
-  machine->UnAssign();
-  machine->Dump();
-
-  machine->PushRef( "x" );
-  machine->Dump();
-*/
-
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-
-
   gout << "Negate\n";
   machine->Push( (double) 10 );
   machine->InitCallFunction( "Negate" );
@@ -1180,104 +1021,6 @@ int main( void )
   machine->Execute( program );
 
 
-/*
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "z" );
-  machine->Bind();
-  machine->GenerateNfg( 100 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "z", "a" );
-  machine->Bind();
-  machine->Push( (double) 111 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->PushRef( "z" );
-  machine->PushRef( "z", "a" );
-  machine->Dump();
-
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "q" );
-  machine->Bind();
-  machine->PushRef( "z" );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-#ifdef CRASHTEST
-  machine->PushRef( "q" );
-  machine->PushRef( "q", "a" );
-  machine->Dump();
-#endif
-
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "q", "b" );
-  machine->Bind();
-  machine->PushRef( "z", "a" );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->PushRef( "q" );
-  machine->PushRef( "q", "b" );
-  machine->Dump();
-
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "z", "a" );
-  machine->Bind();
-  machine->PushRef( "q" );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  program.Append( new InitCallFunction( "Assign" ) );
-  program.Append( new PushRef( "z", "a" ) );
-  program.Append( new Bind );
-  program.Append( new PushRef( "y" ) );
-  program.Append( new Bind );
-  program.Append( new CallFunction );
-  program.Append( new Dump );
-  machine->Execute( program );
-
-
-#ifdef CRASHTEST
-  gout << "fatal error coming up!\n";
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x", "a" );
-  machine->Bind();
-  machine->Push( (double) 10 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-#endif
-
-
-
-#ifdef CRASHTEST
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x" );
-  machine->Bind();
-  machine->Push( (double) 10 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x", "a" );
-  machine->Bind();
-  machine->Push( (double) 11 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-#endif
-*/
-
-
   machine->Push( (gInteger) 0 );
   machine->Push( (gInteger) 0 );
   machine->Divide();
@@ -1318,7 +1061,6 @@ int main( void )
   machine->BindRef();
   machine->CallFunction();
   machine->Dump();
-
 
   machine->InitCallFunction( "Assign" );
   machine->Push( (double) 10 );
@@ -1348,6 +1090,7 @@ int main( void )
   machine->Dump();
 
 
+#ifdef CRASHTEST
   machine->InitCallFunction( "Divide" );
   machine->Push( (double) 0 );
   machine->Bind();
@@ -1368,6 +1111,7 @@ int main( void )
   machine->Push( (gRational) 0 );
   machine->Bind();
   machine->CallFunction();
+#endif
 
   machine->InitCallFunction( "Divide" );
   machine->Push( (gInteger) 5 );
@@ -1378,11 +1122,83 @@ int main( void )
 
   machine->Dump();
 
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+
+
+  machine->PushRef( "x" );
+  machine->InitCallFunction( "ReadNfgFile" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+
+  machine->PushRef( "x", "a" );
+  machine->Push( (double) 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "x", "a" );
+  machine->Dump();
+
+
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 10 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x", "a" );
+  machine->Push( (double) 1 );
+  machine->Assign();
+  machine->Dump();
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Bind();
+
+
+
+  machine->InitCallFunction( "ReadNfgFile" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  gout << "assigned primary ref\n";
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x", "a" );
+  machine->Bind();
+  machine->Push( (double) 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  gout << "Assigned subrefs; now display:\n";
+
+  machine->PushRef( "x", "a" );
+  machine->PushRef( "x" );
+  machine->Dump();
+
   gout << "Deleting machine\n";
   delete machine;
 
   return 0;
 }
-
-
-
