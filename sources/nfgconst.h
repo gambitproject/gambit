@@ -44,6 +44,7 @@
 #define NFG_SOLVE_CUSTOM_POLENUM        506
 #define NFG_SOLVE_CUSTOM_QRE            507
 #define NFG_SOLVE_CUSTOM_QREGRID        508
+#define NFG_SOLVE_CUSTOM_YAMAMOTO       509
 
 #define NFG_VIEW_SOLUTIONS              101
 #define NFG_VIEW_DOMINANCE              103
