@@ -28,18 +28,23 @@
 #define GAMBIT_H
 
 #include <gambit/base/base.h>
+#include <wx/docview.h>      // for wxFileHistory
 
 class gbtGameFrame;
 
 class gbtApplication : public wxApp {
 private:
+  wxFileHistory *m_fileHistory;
   gbtBlock<gbtGameFrame *> m_windows;
 
   bool OnInit(void);
+  int OnExit(void);
 
 public:
   gbtApplication(void);
   virtual ~gbtApplication();
+
+  wxFileHistory *GetFileHistory(void) { return m_fileHistory; }
 
   int NumWindows(void) const  { return m_windows.Length(); }
   gbtGameFrame *GetWindow(int i) const { return m_windows[i]; }

@@ -28,6 +28,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include <wx/config.h>
 
 #include "gambit.h"
 #include "game-frame.h"
@@ -37,11 +38,23 @@ gbtApplication::gbtApplication(void)
 
 bool gbtApplication::OnInit(void)
 {
+  m_fileHistory = new wxFileHistory;
+  wxConfig config("GambitDev");
+  m_fileHistory->Load(config);
+
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
   gbtGame nfg = NewNfg(dim);
   nfg->SetLabel("Untitled normal form game");
   (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
   return true;
+}
+
+int gbtApplication::OnExit(void)
+{
+  wxConfig config("GambitDev");
+  m_fileHistory->Save(config);
+  delete m_fileHistory;
+  return 0;
 }
 
 gbtApplication::~gbtApplication()

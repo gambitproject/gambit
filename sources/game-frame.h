@@ -44,6 +44,7 @@ private:
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
   void OnFileExit(wxCommandEvent &);
+  void OnFileMRU(wxCommandEvent &);
 
   void OnToolsEquilibrium(wxCommandEvent &);
 

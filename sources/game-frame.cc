@@ -48,6 +48,7 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
   EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
   EVT_CLOSE(gbtGameFrame::OnCloseWindow)
@@ -87,6 +88,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 
 gbtGameFrame::~gbtGameFrame()
 {
+  wxGetApp().GetFileHistory()->RemoveMenu(GetMenuBar()->GetMenu(0));
   wxGetApp().RemoveWindow(this);
 }
 
@@ -116,6 +118,9 @@ void gbtGameFrame::MakeMenu(void)
   menuBar->Append(fileMenu, _("&File"));
   menuBar->Append(toolsMenu, _("&Tools"));
   menuBar->Append(helpMenu, _("&Help"));
+
+  wxGetApp().GetFileHistory()->UseMenu(fileMenu);
+  wxGetApp().GetFileHistory()->AddFilesToMenu(fileMenu);
 
   SetMenuBar(menuBar);
 }
@@ -165,6 +170,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 	else {
 	  gbtGameDocument *doc = new gbtGameDocument(nfg);
 	  doc->SetFilename(dialog.GetPath());
+	  wxGetApp().GetFileHistory()->AddFileToHistory(dialog.GetPath());
 	  (void) new gbtGameFrame(0, doc);
 	}
       }
@@ -183,7 +189,41 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileClose(wxCommandEvent &p_event)
+void gbtGameFrame::OnFileMRU(wxCommandEvent &p_event)
+{
+  wxString filename(wxGetApp().GetFileHistory()->GetHistoryFile(p_event.GetId() - wxID_FILE1));
+
+  std::ifstream file(filename.mb_str());
+  try {
+    if (file.is_open()) {
+      gbtGame nfg = ReadNfg(file);
+      if (file.bad()) {
+	wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				      (const char *) filename.mb_str()),
+		     _("Error"), wxOK, 0);
+      }
+      else {
+	gbtGameDocument *doc = new gbtGameDocument(nfg);
+	doc->SetFilename(filename);
+	wxGetApp().GetFileHistory()->AddFileToHistory(filename);
+	(void) new gbtGameFrame(0, doc);
+      }
+    }
+    else {
+      wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				    (const char *) filename.mb_str()),
+		   _("Error"), wxOK, 0);
+    }
+  }
+  catch (gbtNfgParserException &) {
+    wxMessageBox(wxString::Format(_("File '%s' not in a recognized format"),
+				  (const char *) filename.mb_str()),
+		 _("Error"), wxOK, 0);
+    
+  }
+}
+
+void gbtGameFrame::OnFileClose(wxCommandEvent &)
 {
   Close();
 }
