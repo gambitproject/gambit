@@ -12,6 +12,9 @@
 #include "treedraw.h"
 #include "efgconst.h"
 
+extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
+			       long p_style = wxOK | wxCENTRE);
+
 typedef struct NODEENTRY 
 {
     int x, y, level, color;
@@ -200,7 +203,6 @@ private:
     void  CheckInfosetEntry(NodeEntry *e);
     void  UpdateTableInfosets(void);
     void  UpdateTableParents(void);
-    void  Log(const gText &s);
     int PlayerNum(const EFPlayer *p) const ;
     int IsetNum(const Infoset *i) const ;
     static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
@@ -289,10 +291,10 @@ public:
     // copy to clipboard (WIN3.1 only)
     void  print_mf(wxOutputOption fit,bool save_mf=false);
     
-    Bool  logging(void);
-    
     gText Title(void) const;
     
+    wxFrame *Parent(void) const { return pframe; }
+
     virtual void Render(wxDC &dc);
     void HilightInfoset(int pl,int iset);
 

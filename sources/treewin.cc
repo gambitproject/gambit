@@ -886,14 +886,18 @@ int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev, Bool &nodes_changed)
         end_node = parent->GotObject(x, y, DRAG_NODE_END);
         ev.Position(&x, &y); c = ev.ControlDown();
         ret = DRAG_STOP;
-        if (start_node && end_node && start_node != end_node)
-        {
-            if (c)
-                ef.MoveTree(start_node, end_node);    // move
-            else
-                ef.CopyTree(start_node, end_node);    // copy
-            nodes_changed = TRUE;
-            parent->OnPaint();
+        if (start_node && end_node && start_node != end_node) {
+	  try {
+	    if (c)
+	      ef.MoveTree(start_node, end_node);    // move
+	    else
+	      ef.CopyTree(start_node, end_node);    // copy
+	    nodes_changed = TRUE;
+	  }
+	  catch (gException &E) {
+	    guiExceptionDialog(E.Description(), parent->Parent());
+	  }
+	  parent->OnPaint();
         }
     }
     return ret;

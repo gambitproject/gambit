@@ -322,10 +322,6 @@ void EfgShow::OnMenuCommand(int id)
         Close();
         break;
 
-    case FILE_LOG:
-        GetMenuBar()->Check(log_item, tw->logging());
-        break;
-
         // Inspect menu
     case INSPECT_FEATURES:
         SetOptions();
