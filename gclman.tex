@@ -10,18 +10,29 @@ program, read into the program from external files, or created in extensive
 form using the language.  Games created or contained in the extensive form can
 be transformed into the normal form using a procedure within the program.
 
-The language consists of a series of statements, each ending in a semi-colon.
-The user has the option of creating a text file containing a series of
-commands which can then be run together, as a program, by the language.  The
-output of such a program can be directed either to the screen or to a file
-specified by the user.  A text file can be read by the language as a program
-by placing an input file command "<" followed by the name of the file, 
-following the command which enters the command language.  By using an output
-file command ">" followed by the name of a previously non-existent file, the
-user can direct the output of the command language to an external text file.
-For example:
+The language consists of a series of statements, each ending in a semi-colon
+or carriage return.  A carriage return will not be interpreted as the end of a
+statement, however, if there are unmatched parentheses or brackets.  For
+example, the following two lines are interpreted as one statement:
 
-> gcl_sun < input.gcl > output.out
+	Output[1,
+	2]
+
+If both lines are followed by a carriage return, the statement will generate
+the line of output: 
+
+	1, 2
+
+The user has the option of creating a text file containing a series of commands
+which can then be run together, as a program, by the language.  The output of 
+such a program can be directed either to the screen or to a file specified by 
+the user.  A text file can be read by the language as a program by placing an 
+input file command "<" followed by the name of the file, following the command 
+which enters the command language.  By using an output file command ">" 
+followed by the name of a previously non-existent file, the user can direct the
+output of the command language to an external text file.  For example:
+
+	> gcl_sun < input.gcl > output.out
 
 
 Output
@@ -99,6 +110,8 @@ If[BOOLEAN, {series of commands}];	Evaluates the BOOLEAN expression once.
 		TRUE.
 
 
+Procedures
+
 The following is a list of procedures with the operations that they perform
 in the Gambit Command Language:
 
@@ -111,8 +124,36 @@ value (if any exists) produced by the procedure.
 Paremeters enclosed in brackets "{ }" represent optional parameters which
 are not necessary for the procedure to function.
 
+----------
 
-ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}] =: INTEGER
+AllLemke[N->NORFORM] =: NORFORM
+
+	Searches for all solutions of the specified normal form game using the
+Lemke-Howson algorithm.  Returns the same problem in normal form.
+
+----------
+
+AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
+
+	Appends the number of branches specified by 'br' to the terminal node 
+indicated by 'n' and places the node in a new information set for player 'pl'.
+If the player specified is not already defined in the game, the player is 
+created automatically.  Returns the node to which new branches have been
+appended.
+
+----------
+
+AttachOutcome[n->NODE, outc->INTEGER] =: NODE
+
+	Attaches the outcome with the indicated number to the specified node.
+If no outcome with the indicated number exists, no action is taken.  Note that
+the node need not be terminal in order to have an outcome attached.
+
+----------
+
+ElimAllDom[N->NORFORM, {strong->BOOLEAN}, {time<->RATIONAL}, {output->TEXT}] 
+	=: INTEGER
+
 	Iteratively eliminates dominated strategies for all players.  The 
 optional `strong` parameter determines the type or dominance used.  The
 default value is False, which signifies that weak dominance is used.  If 
@@ -121,12 +162,15 @@ number of the new strategy set.  (The original full strategy set is
 numbered 1.  Each iteration creates a new strategy set with an integer value
 one greater than that of the previous strategy set.  Therefore, if no
 dominated strategies are found, ElimAllDom returns a value of 1.)  The
-optional parameter 'time' returns the elapsed time for the operation.
+optional parameter 'time' returns the elapsed time for the operation.  The 
+optional parameter `output` can be used to redirect the output of this 
+procedure to a file.  Directing output to ``/dev/null'' under Unix turns output
+off.  By default, it directs output to the screen.
 
 ----------
 
-ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL}] 
-	=: INTEGER
+ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
+	{output->TEXT}] =: INTEGER
 
 	Performs one iteration of eliminating dominated strategies for the
 list of players specified.  If unspecified, the optional parameter 'pl'
@@ -138,7 +182,10 @@ original full strategy set is numbered 1.  Each iteration creates a new
 strategy set with an integer value one greater than that of the previous 
 strategy set.  Therefore, if no dominated strategies are found, ElimDom 
 returns a  value of 1.)  The optional parameter 'time' returns the elapsed
-time for the operation.
+time for the operation.  The optional parameter `output` can be used to 
+redirect the output of this procedure to a file.  Directing output to ``/dev/
+null'' under Unix turns output off.  By default, it directs output to the 
+screen.
 
 ----------
 
@@ -153,10 +200,22 @@ returns the elapsed time for the operation.
 Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsDFP->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
-	{tolBrent}->RATIONAL}, {time<->RATIONAL}] =: INTEGER
+	{tolBrent}->RATIONAL}, {time<->RATIONAL}, {output->TEXT}] =: INTEGER
 
 	Computes the Gobit solution for the specified normal form game.  The
-optional parameter `nequilib` . . . .
+optional parameter `nequilib` sets the number of equilibria to find and has a
+default value of 1.  The optional parameter 'type'  XXXX.  The optional 
+parameter 'maxitsDFP' XXXX and has a default value of XXXX.  The optional
+parameter 'maxitsBrent` sets the maximum number of iterations in Brent and has
+a default value of XXXX.  The optional parameters `minLam` and `maxLam` set the
+minimum and maximum values of Lambda and have default values of .01 and 30,
+respectively.  The optional parameter `delLam` specifies the change in the 
+value of Lambda and has a default value of `1.01`.  The optional parameter
+`tolDFP` XXXX and has a default value of 1.0E-10.  The optional parameter
+`tolBrent` XXXX and has a default value of XXXX.  The optional parameter `time`
+returns the elapsed time for the operation.  The optional parameter `output`
+can be used to redirect the output of this procedure to a file.  Directing output to ``/dev/null'' under Unix turns output off.  By default, it
+directs output to the screen.
 
 
 ----------
@@ -167,13 +226,58 @@ IsWatchRunning[] =: BOOLEAN
 
 ----------
 
-PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}] =: INTEGER
+Lemke[N->NORFORM] =: NORFORM
 
-	Finds the pure strategy Nash equilibria in the specified normal form
-game.  Returns the number of equilibria found.  The optional parameter 'num'
-allows the user to set the maximum number of Nash equilibria to find and has
-a default value of 1.  The optional parameter 'time' returns the elapsed 
-time for the operation.
+	Searches for one solution of the normal form game specified using the
+Lemke-Howson algorithm.  Returns the same problem in normal form.	
+
+----------
+
+Length[l->BOOLLIST] =: INTEGER
+Length[l->INTLIST] =: INTEGER
+Length[l->RATLIST] =: INTEGER
+Length[l->TEXTLIST] =: INTEGER
+
+	Returns the number of elements in the specified list.
+
+----------
+
+MergeInfosets[n->NODE, to->NODE] =: NODE
+
+	Moves all the nodes from the information set to which the node
+specified by 'n' belongs to the information to which the node indicated by 'to'
+belongs.
+
+----------
+
+NewEfg[] =: EXTFORM
+
+	Allocates and returns a new extensive form game.
+
+----------
+
+NewOutcome[E->EXTFORM, {outc->INTEGER}] =: INTEGER
+
+	Creates and assigns a number to a new outcome within the specified 
+problem in extensive form.  Returns the number of the newly created outcome.
+The optional parameter 'outc' allows the user to specify the number given to 
+the new outcome created.  If `outc` is not specified, the new outcome is
+assigned the lowest positive number for which no game is defined.  If the 
+number specified by `outc` already exists as an outcome, no action is taken and
+the procedure returns a value of zero.
+
+----------
+PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
+	 =: INTEGER
+
+	Finds the weak pure strategy Nash equilibria in the specified normal 
+form game.  Returns the number of equilibria found.  The optional parameter 
+'num' allows the user to set the maximum number of Nash equilibria to find and 
+has a default value of 1.  The optional parameter 'time' returns the elapsed 
+time for the operation.  The optional parameter `output` can be used to
+redirect the output of this procedure to a file.  Directing output to ``/dev/
+null'' under Unix turns output off.  By default, it directs output to the
+screen.
 
 ----------
 
@@ -206,6 +310,57 @@ otherwise specified by the user.
 
 ----------
 
+RootNode[E->EXTFORM, {game->INTEGER}] =: NODE
+
+	Returns, as a variable of type NODE, the root node of game number 
+`game` in the specified problem.  If 'game' is not specified, the first game is
+used by default.
+
+----------
+
+Run[TEXT]
+
+	Includes the commands in the file specified by the string TEXT as
+commands in the running GCL program.  TEXT may be any legal expression
+evaluating to type TEXT.  The program treats the command as if it were
+replaced by the contents of the file.
+
+----------
+
+SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
+
+	Sets the name of the branch number specified by 'br' of the indicated 
+node to the name given.
+
+----------
+
+SetOutcome[E->EXTFORM, outc->INTEGER, value->INTLIST] =: EXTFORM
+SetOutcome[E->EXTFORM, outc->INTEGER, value->RATLIST] =: EXTFORM
+
+	Sets the value of the outcome indicated by `outc` in the give problem 
+in extensive form, to the vector specified by the parameter 'value'.  The 
+length of `value` must match the number of players defined in the problem.  If
+no outcome with the given number exists, then it is created.  Returns the 
+modified problem in extensive form.
+
+
+SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->INTEGER] =: EXTFORM
+SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EXTFORM
+
+	Sets the payoff to the player indicated by 'pl' of the outcome whose 
+number is indicated by `outc` in the given problem in extensive form to the
+given value.  If no outcome with the given number exists, no action is 
+performed. 
+
+----------
+
+SetOutcomeName[E->EXTFORM, outc->INTEGER, name->TEXT] =: EXTFORM
+
+	Assigns the outcome with the specified number the title given by 
+'name'.  Returns the original extensive form problem with the outcome name 
+assigned.
+
+----------
 StartWatch[] =: INTEGER
 
 	Starts the system stopwatch.  The return value is uninteresting.
