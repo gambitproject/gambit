@@ -3168,6 +3168,22 @@ Portion* GSM_Date(Portion**)
 
 
 
+Portion* GSM_CallFunction( Portion** param )
+{
+  _gsm->InitCallFunction( ( (TextPortion*) param[0] )->Value() );
+  _gsm->Push( param[1] );
+  _gsm->BindVal();
+  _gsm->Push( param[2] );
+  _gsm->BindVal();
+  _gsm->CallFunction();
+  return _gsm->PopValue();
+}
+
+
+
+
+
+
 
 
 void Init_gsmoper(GSM* gsm)
@@ -4167,6 +4183,20 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
+
+
+  // ------------------- CallFunction -----------------------
+
+  FuncObj = new FuncDescObj("CallFunction", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CallFunction, porSTRATEGY, 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("func", porTEXT ) );
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("n", porNFG ) );
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("h", 
+					    PortionSpec( porSTRATEGY, 2 )));
+  gsm->AddFunction(FuncObj);
+
+
+
 }
 
 
