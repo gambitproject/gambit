@@ -37,8 +37,9 @@ Portion *GSM_Actions(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
 
-  Portion *por = ArrayToList(sup->ActionList(s->GetPlayer()->GetNumber(),
-					     s->GetNumber()));
+  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->GetActionList()) :
+                ArrayToList(sup->ActionList(s->GetPlayer()->GetNumber(),
+					    s->GetNumber()));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -647,7 +648,8 @@ Portion *GSM_Name_EfgElements(Portion **param)
       return new TextValPortion(((OutcomePortion *) param[0])->Value()->GetName());
     case porPLAYER_EFG:
       return new TextValPortion(((EfPlayerPortion *) param[0])->Value()->GetName());
-    case porEFG:
+    case porEFG_FLOAT:
+    case porEFG_RATIONAL:
       return new TextValPortion(((EfgPortion *) param[0])->Value()->GetTitle());
     default:
       assert(0);
@@ -1101,7 +1103,8 @@ Portion *GSM_SetName_EfgElements(Portion **param)
     case porPLAYER_EFG:
       ((EfPlayerPortion *) param[0])->Value()->SetName(name);
       break;
-    case porEFG:
+    case porEFG_FLOAT:
+    case porEFG_RATIONAL:
       ((EfgPortion *) param[0])->Value()->SetTitle(name);
       break;
     default:
@@ -1349,13 +1352,15 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Game", 3);
+  FuncObj = new FuncDescObj("Game", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_EFG));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porOUTCOME));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Infoset", 2);
