@@ -49,7 +49,6 @@ private:
   TreeWindow *m_treeWindow;
 
   EfgProfileList *m_profileTable;
-  wxString m_filename;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
@@ -152,9 +151,6 @@ public:
 
   // SUPPORT ACCESS AND MANIPULATION
   void SetSupportNumber(int p_number);
-
-  void SetFilename(const wxString &s);
-  const wxString &Filename(void) const { return m_filename; }
 
   void SetCursor(gbtEfgNode m_node);
 

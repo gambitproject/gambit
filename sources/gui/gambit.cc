@@ -72,18 +72,18 @@ bool GambitApp::OnInit(void)
 #endif  // !__WXMSW__
 
   // Process command line arguments, if any.
-  for (int i = 1; i < argc; i++) {
-    LoadFile(argv[i]);
+  if (argc > 1) {
+    for (int i = 1; i < argc; i++) {
+      LoadFile(argv[i]);
+    }
   }
-
-  if (m_gameList.Length() == 0) {
+  else {
     gbtEfgGame efg;
     efg.NewPlayer().SetLabel("Player 1");
     efg.NewPlayer().SetLabel("Player 2");
     efg.SetTitle("Untitled Extensive Form Game");
-
-    EfgShow *efgShow = AddGame(efg);
-    efgShow->SetFilename("");
+    gbtGameDocument *doc = new gbtGameDocument(efg);
+    (void) new EfgShow(doc, 0);
   }
 
   // Set up the help system.
@@ -96,16 +96,6 @@ GambitApp::~GambitApp()
 {
   wxConfig config("Gambit");
   m_fileHistory.Save(config);
-
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_nfg != 0) {
-      delete m_gameList[i]->m_nfg;
-    }
-    if (m_gameList[i]->m_efg != 0) {
-      delete m_gameList[i]->m_efg;
-    }
-    delete m_gameList[i];
-  }
 }
 
 void GambitApp::OnFileNew(wxWindow *p_parent)
@@ -119,8 +109,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
 	efg.NewPlayer().SetLabel(gText("Player") + ToText(pl));
       }
-      EfgShow *efgShow = AddGame(efg);
-      efgShow->SetFilename("");
+      (void) new EfgShow(new gbtGameDocument(efg), 0);
     }
     else {
       gbtNfgGame nfg(dialog.NumStrategies());
@@ -142,8 +131,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	  nfg.SetOutcome(iter.Profile(), outcome);
 	} while (iter.NextContingency());
       }
-      NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
-      nfgShow->SetFilename("");
+      (void) new NfgShow(new gbtGameDocument(nfg), 0);
     }
   }
 }
@@ -179,9 +167,7 @@ void GambitApp::OnFileImportComLab(wxWindow *p_parent)
     try {
       gFileInput infile(dialog.GetPath().c_str());
       gbtNfgGame nfg = ReadComLabSfg(infile);
-      NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
-      nfgShow->SetFilename(dialog.GetPath().c_str());
-      AddGame(nfg, nfgShow);
+      (void) new NfgShow(new gbtGameDocument(nfg), 0);
     }
     catch (gFileInput::OpenFailed &) {
       wxMessageBox(wxString::Format("Could not open '%s' for reading",
@@ -214,9 +200,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gFileInput infile(p_filename);
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    NfgShow *nfgShow = new NfgShow(new gbtGameDocument(nfg), 0);
-    nfgShow->SetFilename(p_filename);
-    SetFilename(nfgShow, p_filename);
+    (void) new NfgShow(new gbtGameDocument(nfg), 0);
     return;
   }
   catch (gFileInput::OpenFailed &) {
@@ -233,9 +217,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
     gFileInput infile(p_filename);
     gbtEfgGame efg = ReadEfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
-    EfgShow *efgShow = AddGame(efg);
-    efgShow->SetFilename(p_filename);
-    SetFilename(efgShow, p_filename);
+    (void) new EfgShow(new gbtGameDocument(efg), 0);
   }
   catch (gFileInput::OpenFailed &) { 
     wxMessageBox(wxString::Format("Could not open '%s' for reading",
@@ -255,98 +237,6 @@ void GambitApp::LoadFile(const wxString &p_filename)
 
 IMPLEMENT_APP(GambitApp)
 
-EfgShow *GambitApp::AddGame(gbtEfgGame p_efg)
-{
-  gbtGameDocument *game = new gbtGameDocument(p_efg);
-  game->m_efgShow = new EfgShow(game, 0);
-  m_gameList.Append(game);
-  m_fileHistory.UseMenu(game->m_efgShow->GetMenuBar()->GetMenu(0));
-  m_fileHistory.AddFilesToMenu(game->m_efgShow->GetMenuBar()->GetMenu(0));
-  return game->m_efgShow;
-}
-
-void GambitApp::AddGame(gbtNfgGame p_nfg, NfgShow *p_nfgShow)
-{
-  gbtGameDocument *game = new gbtGameDocument(p_nfg);
-  game->m_nfgShow = p_nfgShow;
-  m_gameList.Append(game);
-  m_fileHistory.UseMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
-  m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
-}
-
-void GambitApp::RemoveGame(gbtEfgGame p_efg)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (*m_gameList[i]->m_efg == p_efg) {
-      m_fileHistory.RemoveMenu(m_gameList[i]->m_efgShow->GetMenuBar()->GetMenu(0));
-      if (m_gameList[i]->m_nfg) {
-	m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
-	m_gameList[i]->m_nfgShow->Close();
-	delete m_gameList[i]->m_nfg;
-      }
-      delete m_gameList.Remove(i);
-      break;
-    }
-  }
-}
-
-void GambitApp::RemoveGame(gbtNfgGame p_nfg)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (*m_gameList[i]->m_nfg == p_nfg) {
-      m_fileHistory.RemoveMenu(m_gameList[i]->m_nfgShow->GetMenuBar()->GetMenu(0));
-      if (m_gameList[i]->m_efg == 0) {
-	delete m_gameList.Remove(i);
-      }
-      else {
-	m_gameList[i]->m_nfg = 0;
-	m_gameList[i]->m_nfgShow = 0;
-      }
-    }
-  }
-}
-
-EfgShow *GambitApp::GetWindow(gbtEfgGame p_efg)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (*m_gameList[i]->m_efg == p_efg) {
-      return m_gameList[i]->m_efgShow;
-    }
-  }
-  return 0;
-}
-
-NfgShow *GambitApp::GetWindow(gbtNfgGame p_nfg)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (*m_gameList[i]->m_nfg == p_nfg) {
-      return m_gameList[i]->m_nfgShow;
-    }
-  }
-  return 0;
-}
-
-void GambitApp::SetFilename(EfgShow *p_efgShow, const wxString &p_file)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_efgShow == p_efgShow) {
-      m_gameList[i]->m_fileName = p_file;
-      return;
-    }
-  }
-}
-
-void GambitApp::SetFilename(NfgShow *p_nfgShow, const wxString &p_file)
-{
-  for (int i = 1; i <= m_gameList.Length(); i++) {
-    if (m_gameList[i]->m_nfgShow == p_nfgShow) {
-      m_gameList[i]->m_fileName = p_file;
-      return;
-    }
-  }
-}
-
-
 //
 // A general-purpose dialog box to display the description of the exception
 //
@@ -357,8 +247,3 @@ void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
   wxMessageBox((char *) message, "Gambit Error", p_style, p_parent);
 }
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
-template class gArray<gbtGameDocument *>;
-template class gBlock<gbtGameDocument *>;

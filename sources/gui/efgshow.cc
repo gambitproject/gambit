@@ -233,9 +233,7 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 }
 
 EfgShow::~EfgShow()
-{
-  wxGetApp().RemoveGame(*m_doc->m_efg);
-}
+{ }
 
 //---------------------------------------------------------------------
 //            EfgShow: Coordinating updates of child windows
@@ -277,19 +275,16 @@ void EfgShow::OnUpdate(gbtGameView *)
     menuBar->Check(GBT_EFG_MENU_VIEW_SUPPORT_REACHABLE,
 		   m_treeWindow->DrawSettings().RootReachable());
   }
-}
 
-void EfgShow::SetFilename(const wxString &p_name)
-{
-  m_filename = p_name;
-  if (m_filename != "") {
-    SetTitle(wxString::Format("Gambit - [%s] %s", m_filename.c_str(), 
-			      (char *) m_doc->m_efg->GetTitle()));
+  if (m_doc->GetFilename() != "") {
+    SetTitle(wxString::Format("Gambit - [%s] %s", 
+			      m_doc->GetFilename().c_str(), 
+			      (char *) m_doc->GetEfg().GetTitle()));
   }
   else {
-    SetTitle(wxString::Format("Gambit - %s", (char *) m_doc->m_efg->GetTitle()));
+    SetTitle(wxString::Format("Gambit - %s", 
+			      (char *) m_doc->GetEfg().GetTitle()));
   }
-  wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 void EfgShow::SetSupportNumber(int p_number)
@@ -520,14 +515,15 @@ void EfgShow::OnFileOpen(wxCommandEvent &)
 
 void EfgShow::OnFileSave(wxCommandEvent &p_event)
 {
-  if (p_event.GetId() == wxID_SAVEAS || m_filename == "") {
-    wxFileDialog dialog(this, "Choose file", wxPathOnly(m_filename),
-			wxFileNameFromPath(m_filename), "*.efg",
-			wxSAVE | wxOVERWRITE_PROMPT);
+  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == "") {
+    wxFileDialog dialog(this, "Choose file", 
+			wxPathOnly(m_doc->GetFilename()),
+			wxFileNameFromPath(m_doc->GetFilename()),
+			"*.efg", wxSAVE | wxOVERWRITE_PROMPT);
 
     switch (dialog.ShowModal()) {
     case wxID_OK:
-      SetFilename(dialog.GetPath());
+      m_doc->SetFilename(dialog.GetPath());
       break;
     case wxID_CANCEL:
     default:
@@ -536,19 +532,19 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 
   try {
-    gFileOutput file(m_filename);
+    gFileOutput file(m_doc->GetFilename().c_str());
     gbtEfgGame efg = CompressEfg(*m_doc->m_efg, *m_doc->GetEfgSupport());
     efg.WriteEfgFile(file, 6);
     m_doc->m_efg->SetIsDirty(false);
   }
   catch (gFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format("Could not open %s for writing.",
-				  m_filename.c_str()),
+				  m_doc->GetFilename().c_str()),
 		 "Error", wxOK, this);
   }
   catch (gFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
-				  m_filename.c_str()),
+				  m_doc->GetFilename().c_str()),
 		 "Error", wxOK, this);
   }
   catch (gbtEfgException &) {
@@ -958,10 +954,9 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
 void EfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogEditEfg dialog(this, *m_doc->m_efg, m_filename);
+  dialogEditEfg dialog(this, *m_doc->m_efg, m_doc->GetFilename());
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->m_efg->SetTitle(dialog.GetGameTitle().c_str());
-    SetFilename(Filename());
     m_doc->m_efg->SetComment(dialog.GetComment().c_str());
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
       if (pl > m_doc->m_efg->NumPlayers()) {

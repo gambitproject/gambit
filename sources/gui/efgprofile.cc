@@ -142,7 +142,7 @@ wxString EfgProfileList::GetReport(void) const
 
   report += wxString::Format("Behavior strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) efg.GetTitle(),
-			     m_doc->m_efgShow->Filename().c_str());
+			     m_doc->GetFilename().c_str());
 
   report += wxString::Format("Number of profiles: %d\n", profiles.Length());
 

@@ -42,6 +42,9 @@ class gbtGameCommand;
 class gbtGameDocument {
 friend class gbtGameView;
 private:
+  wxString m_filename;
+  bool m_modified;
+
   gBlock<gbtGameView *> m_views;
 
   void AddView(gbtGameView *);
@@ -65,13 +68,17 @@ public:
   gbtNfgSupport *m_curNfgSupport;
   gList<gbtNfgSupport *> m_nfgSupports;
 
-  gText m_fileName;
-
   gbtGameDocument(gbtEfgGame);
   gbtGameDocument(gbtNfgGame);
   ~gbtGameDocument();
 
   gbtEfgGame GetEfg(void) const { return *m_efg; }
+
+  const wxString &GetFilename(void) const { return m_filename; }
+  void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
+
+  bool IsModified(void) const { return m_modified; }
+  void SetIsModified(bool p_modified) { m_modified = p_modified; }
 
   void Submit(gbtGameCommand *);
   void UpdateViews(gbtGameView *, bool, bool);

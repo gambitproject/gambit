@@ -1243,7 +1243,6 @@ void NfgShow::SetFilename(const wxString &p_name)
   else {
     SetTitle(wxString::Format("Gambit - %s", (char *) m_doc->m_nfg->GetTitle()));
   }
-  wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 void NfgShow::SetSupportNumber(int p_number)

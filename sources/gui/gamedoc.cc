@@ -24,6 +24,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "wx/wxprec.h"
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif  // WX_PRECOMP
+
 #include "base/base.h"
 #include "gamedoc.h"
 #include "game/efg.h"
@@ -33,12 +38,12 @@
 // FIXME: It would be nice not to have these dependencies...
 // once all data manipulation is moved into this class, they should
 // be removable.
-#include "wx/wx.h"
 #include "efgshow.h"
 #include "nfgshow.h"
 
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
-  : m_curProfile(0),
+  : m_modified(false),
+    m_curProfile(0),
     m_efg(new gbtEfgGame(p_efg)), m_efgShow(0),
     m_curEfgSupport(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
@@ -56,7 +61,8 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg)
 }
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg)
-  : m_curProfile(0),
+  : m_modified(false),
+    m_curProfile(0),
     m_efg(0), m_efgShow(0),
     m_curEfgSupport(0), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),

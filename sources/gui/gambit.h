@@ -44,8 +44,6 @@ private:
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory;
 
-  gBlock<gbtGameDocument *> m_gameList;
-
   bool OnInit(void);
 
 public:
@@ -56,16 +54,6 @@ public:
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 
   wxFileHistory &GetFileHistory(void) { return m_fileHistory; }
-
-  EfgShow *AddGame(gbtEfgGame);
-  void AddGame(gbtNfgGame, NfgShow *);
-  void RemoveGame(gbtEfgGame);
-  void RemoveGame(gbtNfgGame);
-  void SetFilename(EfgShow *, const wxString &);
-  void SetFilename(NfgShow *, const wxString &);
-
-  EfgShow *GetWindow(gbtEfgGame);
-  NfgShow *GetWindow(gbtNfgGame);
 
   void LoadFile(const wxString &);
 
