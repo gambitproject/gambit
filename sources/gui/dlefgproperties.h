@@ -10,14 +10,15 @@
 #ifndef DLEFGPROPERTIES_H
 #define DLEFGPROPERTIES_H
 
-class panelEfgGeneral;
-class panelEfgPlayers;
+#include "wx/notebook.h"
 
 class dialogEfgProperties : public wxDialog {
 private:
   FullEfg &m_efg;
-  panelEfgGeneral *m_generalPanel;
-  panelEfgPlayers *m_playersPanel;
+  wxNotebook *m_notebook;
+
+  // Event handlers
+  void OnOK(wxCommandEvent &);
 
 public:
   // Lifecycle
@@ -29,6 +30,8 @@ public:
 
   int NumPlayers(void) const;
   wxString GetPlayerName(int pl) const;
+
+  DECLARE_EVENT_TABLE()
 };
 
 

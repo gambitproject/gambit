@@ -15,6 +15,10 @@
 #include "efg.h"
 #include "dlefgproperties.h"
 
+//========================================================================
+//                        class panelEfgGeneral
+//========================================================================
+
 class panelEfgGeneral : public wxPanel {
 private:
   FullEfg &m_efg;
@@ -70,11 +74,15 @@ panelEfgGeneral::panelEfgGeneral(wxWindow *p_parent, FullEfg &p_efg,
 		0, wxALL, 5);
 
   SetSizer(topSizer);
-  //  topSizer->Fit(this);
-  //  topSizer->SetSizeHints(this);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
   Layout();
 }
+
+//========================================================================
+//                        class panelEfgPlayers
+//========================================================================
 
 const int idLIST_PLAYER = 1000;
 const int idBUTTON_NEWPLAYER = 1001;
@@ -91,6 +99,8 @@ private:
 
 public:
   panelEfgPlayers(wxWindow *p_parent, FullEfg &p_efg);
+
+  virtual bool Validate(void);
 
   int NumPlayers(void) const { return m_playerList->Number(); }
   wxString GetPlayerName(int pl) const
@@ -120,25 +130,25 @@ panelEfgPlayers::panelEfgPlayers(wxWindow *p_parent, FullEfg &p_efg)
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxVERTICAL);
   editSizer->Add(new wxStaticText(this, wxID_STATIC, "Player name"),
-		 0, wxALL, 5);
+		 0, wxTOP | wxCENTER, 5);
   m_playerName = new wxTextCtrl(this, -1, "");
   if (p_efg.NumPlayers() > 0) {
     // should always be the case; can't be too careful though!
     m_playerList->SetSelection(0);
     m_playerName->SetValue((const char *) p_efg.Players()[1]->GetName());
   }
-  editSizer->Add(m_playerName, 0, wxALL, 5);
+  editSizer->Add(m_playerName, 0, wxALL | wxCENTER, 5);
 
   editSizer->Add(new wxButton(this, idBUTTON_NEWPLAYER, "Add Player"),
-		 0, wxALL, 5);
+		 0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(playerSizer, 0, wxALL, 5);
   topSizer->Add(editSizer, 0, wxALL, 5);
 
   SetSizer(topSizer);
-  // topSizer->Fit(this);
-  // topSizer->SetSizeHints(this);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
 
   Layout();
 }
@@ -160,32 +170,45 @@ void panelEfgPlayers::OnNewPlayer(wxCommandEvent &)
   m_playerName->SetValue(m_playerList->GetStringSelection());
 }
 
+//
+// Validate() is overriden to transfer any player name edits to
+// the name listbox, to be sure they are captured
+//
+bool panelEfgPlayers::Validate(void)
+{
+  m_playerList->SetString(m_lastSelection, m_playerName->GetValue());
+  return wxWindow::Validate();
+}
+
+//========================================================================
+//                      class dialogEfgProperties
+//========================================================================
+
+BEGIN_EVENT_TABLE(dialogEfgProperties, wxDialog)
+  EVT_BUTTON(wxID_OK, dialogEfgProperties::OnOK)
+END_EVENT_TABLE()
+
 dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
 					 const wxString &p_filename)
   : wxDialog(p_parent, -1, "Extensive form properties"), m_efg(p_efg)
 {
   SetAutoLayout(true);
 
-  wxNotebook *notebook = new wxNotebook(this, -1, wxDefaultPosition,
-					wxSize(300, 300));
-  (void) new wxNotebookSizer(notebook);
-  m_generalPanel = new panelEfgGeneral(notebook, m_efg, p_filename);
-  notebook->AddPage(m_generalPanel, "General");
-  m_playersPanel = new panelEfgPlayers(notebook, m_efg);
-  notebook->AddPage(m_playersPanel, "Players");
-
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
-  wxButton *helpButton = new wxButton(this, wxID_HELP, "Help");
+  m_notebook = new wxNotebook(this, -1);
+  wxNotebookSizer *notebookSizer = new wxNotebookSizer(m_notebook);
+  m_notebook->AddPage(new panelEfgGeneral(m_notebook, m_efg, p_filename),
+		      "General");
+  m_notebook->AddPage(new panelEfgPlayers(m_notebook, m_efg), "Players");
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(cancelButton, 0, wxALL, 5);
-  buttonSizer->Add(helpButton, 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(notebook, 0, wxALL, 5);
+  topSizer->Add(notebookSizer, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
@@ -195,22 +218,32 @@ dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
   Layout();
 }
 
+void dialogEfgProperties::OnOK(wxCommandEvent &)
+{
+  if (!m_notebook->GetPage(0)->Validate() ||
+      !m_notebook->GetPage(1)->Validate()) {
+    return;
+  }
+
+  EndModal(wxID_OK);
+}
+
 wxString dialogEfgProperties::GetGameTitle(void) const
 {
-  return m_generalPanel->GetGameTitle();
+  return ((panelEfgGeneral *) m_notebook->GetPage(0))->GetGameTitle();
 }
 
 wxString dialogEfgProperties::GetComment(void) const
 {
-  return m_generalPanel->GetComment();
+  return ((panelEfgGeneral *) m_notebook->GetPage(0))->GetComment();
 }
 
 int dialogEfgProperties::NumPlayers(void) const
 {
-  return m_playersPanel->NumPlayers();
+  return ((panelEfgPlayers *) m_notebook->GetPage(1))->NumPlayers();
 }
 
 wxString dialogEfgProperties::GetPlayerName(int pl) const
 {
-  return m_playersPanel->GetPlayerName(pl);
+  return ((panelEfgPlayers *) m_notebook->GetPage(1))->GetPlayerName(pl);
 }
