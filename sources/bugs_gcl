@@ -54,31 +54,6 @@ RS6k and catching exceptions.
 
 //------------------------------
 
-Bug C16a: Concat is not running listably any more. 
-
-  GCL1:= a:="a"
-  GCL2:= bc:={"b","c"}
-  GCL3:= << a&bc
-  ERROR: Concat[]: Type mismatch on parameter #2, "y"; expected TEXT, got LIST(TEXT)
-  GCL4:= << Help["concat",udf->False]
-  { Concat[x->TEXT, y->TEXT] =: TEXT,
-    Concat[x->NLIST(ANYTYPE), y->NLIST(ANYTYPE)] =: LIST(ANYTYPE) }
-
-Is this a side effect of the change you made to get rid of bug C16, now fixed, but reproduced here for reference:
-
-Bug C16  Ambiguous BIFS.  No way to concatenate lists of TEXT
-
-  111 mill:/home/mill/rdm/gambit/nfg newgcl
-  Include["gclini.gcl"]
-  GCL1:= << {"a"}&{"b"}
-  ERROR: Concat[] called with ambiguous parameter(s)
-  GCL2:= << Help["concat"]           
-  { Concat[x->TEXT, y->TEXT] =: TEXT,
-    Concat[x->NLIST(ANYTYPE), y->NLIST(ANYTYPE)] =: LIST(ANYTYPE) }
-
-8/27/98 The above bug is fixed. 
-
-
 Bug C17  Bad line numbers for parse errors.  
 
   148 mill:/home/mill/rdm/gambit/test newgcl
@@ -89,6 +64,8 @@ Bug C17  Bad line numbers for parse errors.
   parse error at line 56 in file bcp.gcl: identifier size
 
 but line 56 is a comment.  
+
+//------------------------------
 
 Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
 
@@ -105,20 +82,6 @@ Bug C18: Bug in LPSolve[] (or use the script gambit/test/csumsolve.gcl):
 
 //--------------------------------------
 
-Bug C19: LiapSolve is giving incorrect solutions, and in the wrong
-precision.  It just retruns the centroid, in Rational precision. 
-
-  GCL1:= << e:=LoadEfg["../efg/e01.efg"]
-  (Efg) "Selten, Figure 1"
-  GCL2:= << LiapSolve[e,True,0,5]
-  { (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } },
-    (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } },
-    (Behav) { { 1/2 1/2 } }{ { 1/2 1/2 } }{ { 1/2 1/2 } } }
-
-FIXED:  8/29/98, magyar
-
-//--------------------------------------
-
 Bug C20: Read[StdIn,x] hangs the machine (it had to be killed remotely)
 
   GCL1:= << Read[StdIn,x]
@@ -128,6 +91,22 @@ Bug C20: Read[StdIn,x] hangs the machine (it had to be killed remotely)
   GCL3:= << Read[StdIn,x]
   Killed
 
+//------------------------------
+
+Bug C21: Algorithms producing nonsense on games of imperfect recall
+
+  GCL1:= << e:=LoadEfg["myerson.efg"]
+  (Efg) "Myerson - Game with no solution in behavioral strategies"
+  GCL2:= << IsPerfectRecall[e]       
+  False
+  GCL3:= << b:=LcpSolve[e]              
+  { (Behav) { { 0.000000 1.000000 }{ 0.250000 0.750000 } }{ { 0.500000 0.500000 } } }
+  GCL4:= << IsNash[b]
+  { False }
+  GCL5:= << OneNash[e]   
+  { (Behav) { { 0.500000 0.500000 }{ 1.000000 1.000000 } }{ { 0.500000 0.500000 } } }
+  GCL6:= << IsNash[GCL5] 
+  { Maybe }
 
 
 ---------------  These are not bugs but suggested improvements ------------
