@@ -105,6 +105,10 @@ template class gArray<EFActionArray *>;
 template class gList<Node *>;
 template class gList<const Node *>;
 template gOutput &operator<<(gOutput &, const gList<const Node *> &);
+
+template class gList<Action *>;
+template class gList<const Action *>;
+
 template class gList<Infoset *>;
 
 template class gList<BehavSolution>;

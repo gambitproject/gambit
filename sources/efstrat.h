@@ -48,6 +48,7 @@ public:
   const gArray<Action *> &Actions(int pl, int iset) const;
   const gArray<Action *> &Actions(const Infoset &) const;
   const gArray<Action *> &Actions(const Infoset *) const;
+        gList<const Action *> ListOfActions(const Infoset *) const;
   const EFActionArray    *ActionArray(const Infoset *) const;
 
   // Action editing functions

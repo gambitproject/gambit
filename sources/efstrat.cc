@@ -331,6 +331,15 @@ const gArray<Action *>& EFSupport::Actions(const Infoset *i) const
   return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
+gList<const Action *> EFSupport::ListOfActions(const Infoset *i) const
+{
+  gArray<Action *> actions = Actions(i);
+  gList<const Action *> answer;
+  for (int i = 1; i <= actions.Length(); i++)
+    answer += actions[i];
+  return answer;
+}
+
 const EFActionArray* EFSupport::ActionArray(const Infoset *i) const
 {
   return sets[i->GetPlayer()->GetNumber()]->ActionArray(i);
@@ -624,10 +633,18 @@ EFSupportWithActiveNodes::EFSupportWithActiveNodes(const Efg &E)
 EFSupportWithActiveNodes::EFSupportWithActiveNodes(const EFSupport& given)
   : EFSupport(given), reachable_nt_nodes(), reachable_nonterminal_nodes()
 {
+
+  //DEBUG
+  //  gout << "Got into the EFSupportWithActiveNodes ctor...\n";
+
   const gArray<int> nos_infosets(given.Game().NumInfosets());
   for (int pl = 1; pl <= given.Game().NumPlayers(); pl++) {
     gBlock<gList<const Node *> > new_big_list;
-    for (int j = 1; nos_infosets[pl]; j++) {
+    for (int j = 1; j <= nos_infosets[pl]; j++) {
+
+  //DEBUG
+      //  gout << "Got into inner loop of the EFSupportWithActiveNodes ctor...\n";
+
       gList<const Node *> new_list;
       new_big_list += new_list;
     }

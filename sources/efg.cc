@@ -6,6 +6,7 @@
 
 #include "garray.h"
 #include "rational.h"
+#include "glist.h"
 
 #ifdef __GNUG__
 #pragma implementation "outcome.h"
@@ -69,6 +70,14 @@ void Infoset::RemoveAction(int which)
   delete actions.Remove(which);
   for (; which <= actions.Length(); which++)
     actions[which]->number = which;
+}
+
+const gList<const Action *> Infoset::ListOfActions(void) const
+{
+  gList<const Action *> answer;
+  for (int i = 1; i <= actions.Length(); i++) 
+    answer += actions[i];
+  return answer;
 }
 
 const gList<const Node *> Infoset::ListOfMembers(void) const
