@@ -129,7 +129,7 @@ template <class T>
 T LPTableau<T>::TotalCost()
 {
   gVector<T> tmpcol(MinRow(),MaxRow());
-  basis.BasisSelect(unitcost,cost,tmpcol);
+  BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
 
@@ -177,7 +177,7 @@ template <class T>
 void LPTableau<T>::SolveDual()
 {
   gVector<T> tmpcol1(MinRow(),MaxRow());
-  basis.BasisSelect(unitcost,cost,tmpcol1);
+  BasisSelect(unitcost,cost,tmpcol1);
   SolveT(tmpcol1,dual);
 }
 
@@ -701,5 +701,29 @@ void LPTableau<T>::BigDump(gOutput &to)
   to << "\nCost vector: " << GetCost();
   to << "\nUnit Cost  : " << GetUnitCost();
   to << "\nTotal Cost: " << TotalCost();
+}
+
+template <class T>
+void LPTableau<T>::BasisSelect(const gBlock<T> &rowv, gVector<T> &colv) const
+{
+  for(int i=basis.First(); i<=basis.Last(); i++) {
+    if(basis.Label(i)<0)
+      colv[i]= 0;
+    else
+      colv[i]= rowv[basis.Label(i)];
+  }
+}
+
+template <class T>
+void LPTableau<T>::BasisSelect(const gBlock<T> &unitv,
+			   const gBlock<T> &rowv,
+			   gVector<T> &colv ) const
+{
+  for(int i=basis.First(); i<=basis.Last(); i++) {
+    if(basis.Label(i)<0)
+      colv[i]= unitv[-basis.Label(i)];
+    else
+      colv[i]= rowv[basis.Label(i)];
+  }
 }
 

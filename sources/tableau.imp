@@ -127,9 +127,19 @@ bool TableauInterface<T>::IsBlocked(int label) const
 }
 
 template <class T>
-void TableauInterface<T>::GetColumn(int col, gVector<T> &out) const
+void TableauInterface<T>::GetColumn(int col, gVector<T> &ret) const
 {
-  basis.GetColumn(col,out);
+  //   basis.GetColumn(col,out);
+  if(basis.IsRegColumn(col))
+    A->GetColumn(col, ret);
+  else if (basis.IsSlackColumn(col)) {
+    ret = (T) 0;
+    ret[-col] = (T) 1;
+  }
+  else if (basis.IsArtifColumn(col)) {
+    ret = (T) 0;
+    ret[basis.UnitEntry(col)] = (T) 1;
+  }
 }
 
 template <class T>

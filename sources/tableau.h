@@ -1,5 +1,5 @@
 //
-// FILE: tableau1.h:  new Tableau classes  
+// FILE: tableau.h:  new Tableau classes  
 //
 // $Id$
 //

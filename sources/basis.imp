@@ -68,25 +68,25 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
 // -------------------------
 
 template <class T>
-int Basis<T>::First()
+int Basis<T>::First() const
 {
   return label.First();
 }
 
 template <class T>
-int Basis<T>::Last()
+int Basis<T>::Last() const
 {
   return label.Last();
 }
 
 template <class T>
-int Basis<T>::FirstLabel()
+int Basis<T>::FirstLabel() const
 {
   return cols.First();
 }
 
 template <class T>
-int Basis<T>::LastLabel()
+int Basis<T>::LastLabel() const
 {
   return cols.Last();
 }
@@ -165,35 +165,6 @@ bool Basis<T>::IsBlocked(int col) const
   if (IsSlackColumn(col)) return rowBlocked[-col];
   else if (IsRegColumn(col)) return colBlocked[col];
   return false;
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gBlock<T> &rowv, gVector<T> &colv) const
-{
-  assert(A->CheckColumn(colv) && A->CheckRow(rowv));
-
-  for(int i=label.First(); i<=label.Last(); i++) {
-    if(label[i]<0)
-      colv[i]= 0;
-    else
-      colv[i]= rowv[label[i]];
-  }
-}
-
-template <class T>
-void Basis<T>::BasisSelect(const gBlock<T> &unitv,
-			   const gBlock<T> &rowv,
-			   gVector<T> &colv ) const
-{
-  // assert(A->CheckColumn(colv) && A->CheckColumn(unitv)
-  //	 && A->CheckRow(rowv) );
-  
-  for(int i=label.First(); i<=label.Last(); i++) {
-    if(label[i]<0)
-      colv[i]= unitv[-label[i]];
-    else
-      colv[i]= rowv[label[i]];
-  }
 }
 
 template <class T>

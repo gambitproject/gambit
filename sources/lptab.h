@@ -53,6 +53,13 @@ public:
   // returns the label of the index of the last artificial variable
   int LastLabel( void );
 
+  // select Basis elements according to Tableau rows and cols
+  void BasisSelect(const gBlock<T>&rowv, gVector<T> &colv) const;
+
+  // as above, but unit column elements nonzero
+  void BasisSelect(const gBlock<T>&unitv, const gBlock<T>&rowv,
+		   gVector<T>&colv) const; 
+
   void BigDump(gOutput &);
 };
 

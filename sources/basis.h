@@ -15,12 +15,8 @@
 // Class Basis
 //---------------------------------------------------------------------------
 
-//template <class T> class LUdecomp;
-
 template <class T> class Basis {
 
-  //friend class LUdecomp<T>;
-  
 protected:
 
   const gMatrix<T> *A;
@@ -31,18 +27,6 @@ protected:
   gArray<bool> colBlocked;  
   gArray<bool> rowBlocked;
   bool IsBasisIdent;
-
-  // returns true if the column is slack
-  inline bool IsSlackColumn( int col ) const 
-    {return  -col >= label.First() && -col <= label.Last();} 
-  
-  // returns true if the column is a regular column
-  inline bool IsRegColumn( int col ) const
-    {return col >= cols.First() && col <= cols.Last();} 
-  
-  // returns true if the column is artificial
-  inline bool IsArtifColumn( int col ) const
-    {return col > (*A).MaxCol() && col <= cols.Last();} 
 
 public:
     class BadIndex : public gException  {
@@ -67,10 +51,25 @@ public:
   // Public Members
   //------------------------------
   
-  int First();         // First basis index
-  int Last();          // Last  basis index
-  int FirstLabel();    // First Column label
-  int LastLabel();     // Last Column label
+  int First() const;         // First basis index
+  int Last() const;          // Last  basis index
+  int FirstLabel() const;    // First Column label
+  int LastLabel() const;     // Last Column label
+
+  // returns true if the column is slack
+  inline bool IsSlackColumn( int col ) const 
+    {return  -col >= label.First() && -col <= label.Last();} 
+  
+  // returns true if the column is a regular column
+  inline bool IsRegColumn( int col ) const
+    {return col >= cols.First() && col <= cols.Last();} 
+  
+  // returns true if the column is artificial
+  inline bool IsArtifColumn( int col ) const
+    {return col > (*A).MaxCol() && col <= cols.Last();} 
+
+  inline int UnitEntry(int col ) const
+    {assert(IsArtifColumn(col)); return artUnitEntry[col]; }
 
   //remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col); 
@@ -91,16 +90,6 @@ public:
 
   // returns true if label is blocked from entering basis
   bool IsBlocked(int label) const;
-
-  // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gBlock<T>&rowv, gVector<T> &colv) const;
-
-  // as above, but unit column elements nonzero
-  void BasisSelect(const gBlock<T>&unitv,
-		   const gBlock<T>&rowv,
-		   gVector<T>&colv
-		   ) const; 
-  
 
   // returns whether the basis is the identity matrix
   bool IsIdent();
