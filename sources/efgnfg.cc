@@ -13,7 +13,22 @@
 #include "contiter.h"
 #include "nfgiter.h"
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
 typedef gArray<int> Correspondence;
+#include "glist.imp"
+#include "garray.imp"
+
+TEMPLATE class gList<Correspondence *>;
+TEMPLATE class gNode<Correspondence *>;
+TEMPLATE class gListIter<Correspondence *>;
+TEMPLATE gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
+TEMPLATE class gArray<gList<Correspondence *> >;
+TEMPLATE class gArray<gListIter<Correspondence *> *>;
 
 class Lexicon   {
   public:
@@ -297,12 +312,3 @@ TEMPLATE void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp
 TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &);
 TEMPLATE Nfg<gRational> *MakeReducedNfg(Efg<gRational> &);
 
-#include "glist.imp"
-#include "garray.imp"
-
-TEMPLATE class gList<Correspondence *>;
-TEMPLATE class gNode<Correspondence *>;
-TEMPLATE class gListIter<Correspondence *>;
-TEMPLATE gOutput &operator<<(gOutput &, const gList<Correspondence *> &);
-TEMPLATE class gArray<gList<Correspondence *> >;
-TEMPLATE class gArray<gListIter<Correspondence *> *>;

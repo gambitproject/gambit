@@ -15,6 +15,7 @@ class Outcome;
 #define TEMPLATE template
 #elif defined __BORLANDC__
 class gArray<int>;
+class gArray<gArray<int> *>;
 class gArray<double>;
 class gArray<gRational>;
 template <class T> class gBlock;
