@@ -117,13 +117,14 @@ outcomes:  outcome
 outcome:   INTEGER { j = 1;}
            outvector 
            NAME    { strncpy(oo->outname, (char *) last_name, NAMESIZE);} 
-           EOLN    {oo = oo->nextoutcome; cOutcomes++; 
-                    if ( (j-1) != numPlayers) YYERROR;}
+           EOLN    { oo = oo->nextoutcome; cOutcomes++; }
+                    
 
 outvector: outvalue
          | outvector outvalue
 
-outvalue:  FLOAT   { oo->component[j] = last_double;  j++;}
+outvalue:  FLOAT   { if (j > whichpblm->nplayers)  YYERROR;
+                     oo->component[j++] = last_double; }
 
 %%
 

@@ -1,11 +1,11 @@
 //
 //  dt1toefg, .dt1 to .efg converter front end
 //     converts old gambit save files to the newer format
-//  June 29, 1994
+// 
+// $Id$
 //
 
 #include <assert.h>
-#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "gstring.h"
@@ -16,6 +16,8 @@
 #endif // !__GNUG__
 
 extern void dt1toefg(FILE *, FILE *);
+
+output cout(stdout);
 
 void doConversion(gString fIn, gString fOut)
 {
@@ -70,12 +72,12 @@ gString replaceSuffix(gString fName, gString newSuffix)
   return result;
 }
 
-void helpInst(void)
+void helpInst(const gString &program_name)
 {
-    cout << "convert help \n";
-    cout << "Syntax:  convert [infile] [infile] [infile] ... \n";
-    cout << "  -or-   convert [infile] [-o outfile] \n";
-    cout << "\n       Convert will expect the suffixes .dt1 for input files and\n";
+    cout << program_name << " help \n";
+    cout << "Syntax:  " << program_name << " [infile] [infile] [infile] ... \n";
+    cout << "  -or-   " << program_name << " [infile] [-o outfile] \n";
+    cout << "\n       " << program_name << " will expect the suffixes .dt1 for input files and\n";
     cout << "       .efg for output files.  It will supply them if they are not\n";
     cout << "       present.\n";
     cout << "Switch: \n";
@@ -91,7 +93,7 @@ void main(int argc, char *argv[])
   if (argc == 1)
     {
       //check name and do help screen;
-      helpInst();
+      helpInst(argv[0]);
     }
   if (argc > 1)
     {

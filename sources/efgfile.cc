@@ -238,7 +238,7 @@ void write_infosets(FILE *f, int game)
     if (n->game == game && n->player == 0)  {
       if (n->iset != 1)
 	fprintf(f, "\n      ");
-      fprintf(f, "{ \"\" 1 { ");
+      fprintf(f, "{ \"\" { ");
       for (struct node *m = n->firstbranch; m != NULLnode;
 	   m = m->nextbranch)
 	fprintf(f, "\"%s\" ", m->branchname);
@@ -260,11 +260,8 @@ void write_infosets(FILE *f, int game)
 	else
 	  flag = 1;
 	fprintf(f, " { \"%s\" ", s->isetname);
-	int foo = 0;
-	for (struct node *m = s->firstmember; m != NULLnode;
-	     m = m->nextmember, foo++);
-	fprintf(f, "%d { ", foo);
-	for (m = s->firstmember->firstbranch; m != NULLnode;
+	fprintf(f, "{ ");
+	for (struct node *m = s->firstmember->firstbranch; m != NULLnode;
 	     m = m->nextbranch)
 	  fprintf(f, "\"%s\" ", m->branchname);
 	fprintf(f, "} }");
