@@ -42,9 +42,9 @@ template <class T> class LemkeTableau
   : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
     const NFRep<T> &rep;
-    int num_strats;
+    int num_strats,num_pivots;
     BFS_List List;
-    
+   
     int Lemke_Step(int);
     int At_CBFS(void) const;
     int All_Lemke(BFS_List &List, int j);
@@ -86,10 +86,12 @@ template <class T> void LemkeTableau<T>::Pivot(int row, int col)
   if (printlevel >= 3)
     Dump(output);
 
+
      // Now switch the col column and the Num_Strat + 1 (scratch) column,
      // then set the row'th entry to 0, making the whole column zero.
   Tableau.SwitchColumns(col, num_strats + 1);
   Tableau(row, num_strats + 1) = 0;
+  num_pivots++;
 }
 
 //
@@ -115,12 +117,14 @@ template <class T> int LemkeTableau<T>::Lemke(int Duplicate_Label)
     List.Append(cbfs);
   }
 
-  if (printlevel >= 1)  {
+  if (printlevel >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
       List[i].Dump(output);
       output << "\n";
     }
+
   }
+  if(printlevel >= 1)output << "\nN Pivots = " << num_pivots << "\n";
 
   return List.Length();
 }
@@ -334,7 +338,8 @@ LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
 		   0, r.NumStrats(1) + r.NumStrats(2) + 1,
 		   r.NumStrats(1) + r.NumStrats(2)), 
        SolutionModule(ofile, efile, plev), rep(r),
-       num_strats(r.NumStrats(1) + r.NumStrats(2))
+       num_strats(r.NumStrats(1) + r.NumStrats(2)),
+       num_pivots(0)
 {
   NormalIter<T> iter(r);
   T min = (T) 0, x;
