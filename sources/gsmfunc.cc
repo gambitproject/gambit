@@ -738,8 +738,10 @@ gList<gString> FuncDescObj::FuncList( bool udf, bool bif, bool getdesc ) const
       f += "] =: ";
       f += PortionSpecToText(_FuncInfo[i].ReturnSpec);
 
+      /*
       if( getdesc && _FuncInfo[i].UserDefined )
 	f += '\n';
+	*/
 
       if( getdesc && _FuncInfo[i].Desc.length() > 0 )
       {

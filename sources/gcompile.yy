@@ -58,6 +58,8 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   gInteger ival; \
   double dval; \
   gString tval, formal, funcname, funcdesc,  paramtype, functype;  \
+  gString funcbody; \
+  bool record_funcbody; \
   gList<NewInstr*> program, *function, *optparam; \
   gList<gString> formals, types; \
   gList<bool> refs; \
@@ -82,9 +84,10 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   \
   int Parse(void); \
   void Execute(void); \
-  void LoadInputs( void ); 
+  void LoadInputs( const char* name ); 
 
-%define CONSTRUCTOR_INIT     : function(0), \
+%define CONSTRUCTOR_INIT     : record_funcbody(false), \
+                               function(0), \
                                optparam(0), \
                                formalstack(4), \
                                labels(4), \
@@ -92,7 +95,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
                                filenames(4), lines(4), \
                                gsm(*_gsm), quit(false)
 
-%define CONSTRUCTOR_CODE       LoadInputs();
+%define CONSTRUCTOR_CODE       LoadInputs( "gclini.gcl" );
 
 %token LOR
 %token LAND
@@ -178,7 +181,13 @@ sep:          SEMI    { semi = true; }
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
-              LBRACK formallist RBRACK TYPEopt COMMA statements
+              LBRACK formallist RBRACK TYPEopt COMMA 
+              { funcbody = ""; record_funcbody = true; }
+              statements 
+              { record_funcbody = false; 
+                if( funcbody.length() > 0 )
+                  funcbody.remove( funcbody.length() - 1 );
+              }
               optfuncdesc
               RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
 			 if (!DefineFunction())  YYERROR; } 
@@ -253,7 +262,10 @@ statement:    { triv = true; statementcount++; }
 
 
 include:      INCLUDE LBRACK TEXT RBRACK
-              { inputs.Push(new gFileInput(tval));
+              { 
+                LoadInputs( tval );
+                /*
+                inputs.Push(new gFileInput(tval));
 		if (!inputs.Peek()->IsValid())   {
 		  gerr << "include file " << tval << " not found\n";
 		  delete inputs.Pop();
@@ -263,6 +275,7 @@ include:      INCLUDE LBRACK TEXT RBRACK
 		  filenames.Push(tval);
 		  lines.Push(1);
 		}
+                */
 	      }
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
@@ -484,6 +497,9 @@ char GCLCompiler::nextchar(void)
   if (c == CR)
     lines.Peek()++;
 
+  if( record_funcbody )
+    funcbody += c;
+
   return c;
 }
 
@@ -496,6 +512,10 @@ void GCLCompiler::ungetchar(char c)
 
   if (c == CR)
     lines.Peek()--;
+
+  if( record_funcbody )
+    if( funcbody.length() > 0 )
+      funcbody.remove( funcbody.length() - 1 );
 }
 
 typedef struct tokens  { long tok; char *name; };
@@ -843,7 +863,9 @@ bool GCLCompiler::DefineFunction(void)
   if (funcspec.Type != porERROR) {
     FuncInfoType funcinfo = 
       FuncInfoType(function, funcspec, formals.Length());
-    funcinfo.Desc = funcdesc;
+    funcinfo.Desc = funcbody;
+    if( funcdesc.length() > 0 )
+      funcinfo.Desc += "\n\n" + funcdesc;
     funcdesc = "";
     func->SetFuncInfo(0, funcinfo);
   }
@@ -960,26 +982,28 @@ void GCLCompiler::Execute(void)
 }
 
 
-void GCLCompiler::LoadInputs( void )
+void GCLCompiler::LoadInputs( const char* name )
 {
   filenames.Push("stdin");
   lines.Push(1);
 
-  const char INI_FILE[] = "gclini.gcl";
+  extern char* _SourceDir;
+  const char* SOURCE = _SourceDir; 
+  assert( SOURCE );
+
 #ifdef __GNUG__
   const char SLASH = '/';
-  const char SOURCE[] = "/usr/local/lib/gambit";
 #elif defined __BORLANDC__
   const char * SLASH = "\\";
-  extern char* _SourceDir;
-  const char* SOURCE = _SourceDir;
 #endif   // __GNUG__
 
+  bool search = false;
+  if( strchr( name, SLASH ) == NULL )
+    search = true;
   gString IniFileName;
 
-
   assert( inputs.Depth() == 0 );
-  IniFileName = (gString) INI_FILE;
+  IniFileName = (gString) name;
   inputs.Push( new gFileInput( IniFileName ) );
   if (!inputs.Peek()->IsValid())
     delete inputs.Pop();
@@ -987,40 +1011,43 @@ void GCLCompiler::LoadInputs( void )
     filenames.Push( IniFileName );
 
 
-
-  if( (inputs.Depth() == 0) && (System::GetEnv( "HOME" ) != NULL) )
+  if( search )
   {
-    IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + INI_FILE;
-    inputs.Push( new gFileInput( IniFileName ) );
-    if (!inputs.Peek()->IsValid())
-      delete inputs.Pop();
-    else  
-      filenames.Push( IniFileName );
-  }
 
-  if( (inputs.Depth() == 0) && (System::GetEnv( "GCLLIB" ) != NULL) )
-  {
-    IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + INI_FILE;
-    inputs.Push( new gFileInput( IniFileName ) );
-    if (!inputs.Peek()->IsValid())
-      delete inputs.Pop();
-    else  
-      filenames.Push( IniFileName );
-  }
+    if( (inputs.Depth() == 0) && (System::GetEnv( "HOME" ) != NULL) )
+    {
+      IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      inputs.Push( new gFileInput( IniFileName ) );
+      if (!inputs.Peek()->IsValid())
+        delete inputs.Pop();
+      else  
+        filenames.Push( IniFileName );
+    }
 
-  if( (inputs.Depth() == 0) && (SOURCE != NULL) )
-  {
-    IniFileName = (gString) SOURCE + SLASH + INI_FILE;
-    inputs.Push( new gFileInput( IniFileName ) );
-    if (!inputs.Peek()->IsValid())
-      delete inputs.Pop();
-    else  
-      filenames.Push( IniFileName );
-  }
+    if( (inputs.Depth() == 0) && (System::GetEnv( "GCLLIB" ) != NULL) )
+    {
+      IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      inputs.Push( new gFileInput( IniFileName ) );
+      if (!inputs.Peek()->IsValid())
+        delete inputs.Pop();
+      else  
+        filenames.Push( IniFileName );
+    }
 
+    if( (inputs.Depth() == 0) && (SOURCE != NULL) )
+    {
+      IniFileName = (gString) SOURCE + SLASH + name;
+      inputs.Push( new gFileInput( IniFileName ) );
+      if (!inputs.Peek()->IsValid())
+        delete inputs.Pop();
+      else  
+        filenames.Push( IniFileName );
+    }
+
+  }
 
   if( inputs.Depth() > 0 )
     lines.Push(1);
   else
-    gerr << "GCL Warning: " << INI_FILE << " not found.\n";
+    gerr << "GCL Warning: " << name << " not found.\n";
 }

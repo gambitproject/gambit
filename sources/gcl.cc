@@ -4,15 +4,19 @@
 // $Id$
 //
 
+#include <signal.h>
+#include <values.h>
+#include <math.h>
+#include <assert.h>
+
 #include "rational.h"
 #include "gstring.h"
 #include "glist.h"
 #include "gsm.h"
 #include "gstack.h"
 #include "gcompile.h"
-#include <signal.h>
-#include <values.h>
-#include <math.h>
+
+
 
 typedef void (*fptr)(int);
 
@@ -72,12 +76,27 @@ char* _SourceDir = NULL;
 
 int main( int /*argc*/, char* argv[] )
 {
+
+#ifdef __GNUG__
+  const char SLASH = '/';
+#elif defined __BORLANDC__
+  const char * SLASH = "\\";
+#endif   // __GNUG__
+
+
   char* c = NULL;
-  c = strrchr( argv[0], '\\' );
+  c = strrchr( argv[0], SLASH );
+
+  _SourceDir = new char[ 256 ];
   if( c != NULL )
   {
-    _SourceDir = new char[ 256 ];
-    strcpy( _SourceDir, c+1 );
+    int len = strlen( argv[0] ) - strlen( c );
+    assert( len < 256 );
+    strncpy( _SourceDir, argv[0], len );
+  }
+  else
+  {
+    strcpy( _SourceDir, "" );
   }
     
   

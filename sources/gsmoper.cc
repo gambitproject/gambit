@@ -1364,7 +1364,6 @@ Portion* GSM_Write_Nfg(Portion** param)
   BaseNfg* nfg = ((NfgPortion*) param[1])->Value();
   // nfg->DisplayNfg(s);
 
-  s << "Temporary hack; still waiting for DisplayNfg() to finish\n";
   nfg->WriteNfgFile(s);
 
   return param[0]->RefCopy();
@@ -1379,7 +1378,6 @@ Portion* GSM_Write_Efg(Portion** param)
   BaseEfg* efg = ((EfgPortion*) param[1])->Value();
   // efg->DisplayEfg(s);
 
-  s << "Temporary hack; still waiting for DisplayEfg() to finish\n";
   efg->WriteEfgFile(s);
 
   return param[0]->RefCopy();
@@ -2418,8 +2416,8 @@ Portion* GSM_Manual(Portion** param)
   while(f.IsValid() && !f.eof() && !found)
   {
     line = GetLine(f);
-    if(line.length() >= txt.length())
-      if(line.left(txt.length())==txt)
+    if(line.length() > txt.length())
+      if(line.left(txt.length() + 1)==txt + '[')
 	found = true;
   }
   if(found)
@@ -2496,12 +2494,14 @@ Portion* GSM_Manual(Portion** param)
     }
   }
 
+  /*
   if(!found)
   {
     s << '\n';
     s << "  " << "Manual not found\n";
     s << '\n';
   }
+  */
   return new BoolValPortion(found);
 }
 
