@@ -9,8 +9,7 @@
 #include "wx_form.h"
 #include "wx_help.h"
 #include "extform.h"
-#include "display.h"
-#include "problem.h"
+#pragma hdrstop
 #include "treewin.h"
 #include "const.h"
 #include "gambit.h"
@@ -90,8 +89,13 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 
 void GambitFrame::file_load(void)
 {
-char *s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.efg");
-if (s) ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME,s);
+char *s=copystring(wxFileSelector("Load data file", NULL, NULL, NULL, "*.efg"));
+if (s)
+{
+	ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME,s);
+	ef->Show(TRUE);
+	delete [] s;
+}
 }
 
 //*******************************************************************
@@ -110,6 +114,7 @@ void GambitFrame::OnMenuCommand(int id)
       break;
 		case FILE_NEW:
 			ExtensiveFrame *ef = new ExtensiveFrame(gambit_frame,"NEW",50,50,700,400,wxDEFAULT_FRAME);
+			ef->Show(TRUE);
 			break;
 		case HELP_ABOUT:
 			(void)wxMessageBox("Gambit Front End\nAuthor: Eugene Grayver egrayver@cco.caltech.edu\n(c) Caltech EPS, 1994", "About Gambit");

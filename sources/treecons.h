@@ -1,17 +1,20 @@
-//
-// FILE: treecons.h
-//
-// $Id$
-//
-
+#ifndef TREECONS_H
+#define TREECONS_H
 #define	BRANCH_LENGTH_DEFAULT			120
 #define	BRANCH_LENGTH_MIN					60
 #define	BRANCH_LENGTH_MAX					200
 #define	NODE_LENGTH_DEFAULT				60
 #define	NODE_LENGTH_MIN						20
 #define	NODE_LENGTH_MAX						100
+#define OUTCOME_LENGTH_DEFAULT		50
 #define	Y_SPACING_DEFAULT					30
 #define	Y_SPACING_MIN							15
 #define	Y_SPACING_MAX							60
-#define	CURSOR_COLOR_DEFAULT			"BLACK"
-#define	CHANCE_COLOR_DEFAULT			"GREEN"
+#define	CURSOR_COLOR_DEFAULT			10
+#define	CHANCE_COLOR_DEFAULT			0
+#define	SHOW_INFOSETS_DEFAULT			TRUE
+#define	FLASHING_CURSOR_DEFAULT		TRUE
+
+#define GAMBIT_COLOR_LIST_LENGTH	11
+
+#endif

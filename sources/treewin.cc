@@ -1,37 +1,40 @@
-
 #include <stdlib.h>
 #include <string.h>
+#include <iostream.h>
+#include <strstream.h>
 #include "wx.h"
 #include "wx_form.h"
+#define PROBLEM_C
+#include "extform.h"
+#include "outcome.h"
 #include "problem.h"
+#pragma hdrstop
 #include "const.h"
 #include "gambit.h"
 #include "treewin.h"
 #include "legendc.h"
 
 // To do:
-// Graphical representation of infosets
-// Graphical representation of outcomes				DONE-
+// Graphical representation of infosets				DONE
+// Graphical representation of outcomes				DONE
 // Accelerators																DONE
 // Help system																DONE
 // Pretty dialog boxes
 // Fix the zoom scrolling bug
 // Add save/load functionality
 #define BAD_NODE Node(-1,-1,-1,-1)
-#define MAX_LABEL_LENGTH	25
 
 #define INFOSET_SPACING	10
 extern GambitFrame *gambit_frame;
 extern char *gambit_color_list[GAMBIT_COLOR_LIST_LENGTH];
 
-wxFont *node_above_font;
-wxFont *node_below_font;
-wxFont *branch_above_font;
-wxFont *branch_below_font;
 wxFont *outcome_font;
 wxFont *fixed_font;
+wxBrush *white_brush;
 
 char tempstr[20];
+
+gOutput& operator<<(gOutput &op,const TreeWindow::SUBGAMESTRUCT &S){return op;}
 
 //###
 //Draw Line.  A quick and dirty way of easily drawing lines w/ set color
@@ -40,6 +43,14 @@ void DrawLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
 if (color>-1)
 	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
 dc.DrawLine(x_s,y_s,x_e,y_e);
+}
+//###
+//Draw Rectangle.  A quick and dirty way of easily drawing rectangles w/ set color
+void DrawRectangle(wxDC &dc,int x_s,int y_s,int w,int h,int color=0)
+{
+if (color>-1)
+	dc.SetPen(wxThePenList->FindOrCreatePen(gambit_color_list[color],2,wxSOLID));
+dc.DrawRectangle(x_s,y_s,w,h);
 }
 //###
 //Draw Thin Line.  A quick and dirty way of easily drawing lines w/ set color
@@ -65,6 +76,7 @@ void DrawCircle(wxDC &dc,int x,int y,int r,int color=0)
 }
 
 
+
 //=====================================================================
 //                   EXTENSIVEFRAME MEMBER FUNCTIONS
 //=====================================================================
@@ -73,9 +85,11 @@ void DrawCircle(wxDC &dc,int x,int y,int r,int color=0)
 //             EXTENSIVEFRAME: CONSTRUCTOR AND DESTRUCTOR
 //---------------------------------------------------------------------
 
-ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type,char *filename):
+ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y,
+							int w, int h, int type,char *filename,Problem *_p,int _subgame):
 	wxFrame(frame, title, x, y, w, h, type)
 {
+	parent=frame;
 	//--------------Define all the menus----------------------------
 	//Note: to insure greatest possible portability we will avoid using
 	//      resource files which are inherently non-portable.
@@ -84,8 +98,9 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 		file_menu->Append(FILE_LOAD,"&Load");
 		file_menu->Append(FILE_SAVE,"&Save");
 		file_menu->Append(FILE_PRINT,"&Print");
-    file_menu->Append(FILE_PRINT_EPS,"Print to &EPS");
-		file_menu->Append(FILE_COPY_MF,"&Copy to MF");
+		file_menu->Append(FILE_CLOSE,"&Close");
+		file_menu->Append(FILE_PRINT_EPS,"Print to &EPS");
+		file_menu->Append(FILE_COPY_MF,"Copy to &MF");
 		file_menu->AppendSeparator();
 		file_menu->Append(FILE_QUIT,"&Quit");
 	wxMenu *node_menu=new wxMenu;
@@ -108,7 +123,8 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 		tree_menu->Append(TREE_DELETE, "&Delete");
 		tree_menu->Append(TREE_LABEL, "&Label");
 		tree_menu->Append(TREE_OUTCOMES, "&Outcomes");
-    tree_menu->Append(TREE_PLAYERS, "&Players");
+		tree_menu->Append(TREE_PLAYERS, "&Players");
+		tree_menu->Append(TREE_SUBGAMES,"&Subgames");
 	wxMenu *infoset_menu=new wxMenu;
 		infoset_menu->Append(INFOSET_MERGE, "&Merge");
 		infoset_menu->Append(INFOSET_BREAK, "&Break");
@@ -119,7 +135,12 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 	wxMenu *display_menu=new wxMenu;
 		display_menu->Append(DISPLAY_SET_ZOOM,"&Zoom...");
 		display_menu->Append(DISPLAY_SET_OPTIONS,"&Options...");
-    display_menu->Append(DISPLAY_LEGENDS,"&Legend...");
+		display_menu->Append(DISPLAY_LEGENDS,"&Legend...");
+		display_menu->AppendSeparator();
+		display_menu->Append(DISPLAY_SAVE_DEFAULT,"Save Default");
+		display_menu->Append(DISPLAY_LOAD_DEFAULT,"Load Default");
+		display_menu->Append(DISPLAY_SAVE_CUSTOM,"Save Custom");
+		display_menu->Append(DISPLAY_LOAD_CUSTOM,"Load Custom");
 	wxMenu *help_menu = new wxMenu;
 		help_menu->Append(HELP_GAMBIT,"&Contents",					"Table of contents");
 		help_menu->Append(HELP_ABOUT,"&About",							"About this program");
@@ -131,45 +152,40 @@ ExtensiveFrame::ExtensiveFrame(wxFrame *frame, char *title, int x, int y, int w,
 	menu_bar->Append(tree_menu,"&Tree");
 	menu_bar->Append(infoset_menu,"&Infoset");
 	menu_bar->Append(solve_menu,"&Solve");
-  menu_bar->Append(display_menu,"&Display");
+	menu_bar->Append(display_menu,"&Display");
 	menu_bar->Append(help_menu,	"&Help");
 
 	SetMenuBar(menu_bar);
 	// Create the accelerators (to add an accelerator, see const.h)
-  accelerators=MakeAccelerators();
+	accelerators=MakeAccelerators();
 	// Load the tree from a datafile if necessary
-  Problem *p;
-	if (filename!=NULL)
+	Problem *p;
+	if (_p==NULL)	// if starting from scratch
 	{
-		p=new Problem;
-    p->ReadEfgFile(filename);
-		SetTitle(filename);
+		if (filename!=NULL)
+		{
+			p=new Problem;
+			p->ReadEfgFile(filename);
+			SetTitle(filename);
+		}
+		else
+		{
+			p=NULL;
+			SetTitle("Untitled");
+		}
 	}
-	else
+	else			// if starting from an existing problem, probably a subgame
 	{
-  	p=NULL;
-		SetTitle("Untitled");
-  }
+		p=_p;
+		gString tmp=p->GetTitle();
+		if (_subgame>1) tmp=tmp+':'+p->GetGameName(_subgame);
+		SetTitle(tmp);
+	}
 	// Create the canvas(TreeWindow) on which to draw the tree
-	tw = new TreeWindow(this, 0, 0, w, h,p);
+	tw = new TreeWindow(this,0,0,w,h,p,_subgame);
 	// Give it scrollbars
-  tw->SetScrollbars(20, 20, 60, 60, 4, 4);
-
-	if (filename!=NULL)
-	{
-		p=new Problem;
-    p->ReadEfgFile(filename);
-		SetTitle(filename);
-	}
-	else
-	{
-  	p=NULL;
-		SetTitle("Untitled");
-  }
-
-	this->Show(TRUE);
+	tw->SetScrollbars(20, 20, 60, 60, 4, 4);
 }
-
 
 ExtensiveFrame::~ExtensiveFrame()
 {
@@ -220,7 +236,7 @@ void ExtensiveFrame::OnMenuCommand(int id)
     case BRANCH_INSERT:
       tw->branch_insert();
 			break;
-    case BRANCH_LABEL:
+		case BRANCH_LABEL:
       tw->branch_label();
 			break;
 
@@ -242,9 +258,12 @@ void ExtensiveFrame::OnMenuCommand(int id)
 			break;
 		case TREE_PLAYERS:
 			tw->tree_players();
-      break;
+			break;
+		case TREE_SUBGAMES:
+			tw->tree_subgames();
+			break;
 
-    case INFOSET_MERGE:
+		case INFOSET_MERGE:
       tw->infoset_merge();
 			break;
     case INFOSET_BREAK:
@@ -267,7 +286,10 @@ void ExtensiveFrame::OnMenuCommand(int id)
 #endif
 		case FILE_SAVE:
 			tw->file_save();
-      break;
+			break;
+		case FILE_CLOSE:
+			delete this;
+			break;
 
 		case DISPLAY_SET_ZOOM:
 			#define ZOOM_DELTA	.2
@@ -283,17 +305,25 @@ void ExtensiveFrame::OnMenuCommand(int id)
 			tw->display_legends();
 			break;
 		case DISPLAY_SET_OPTIONS:
-			wxDialogBox *form_dialog = new wxDialogBox(this, "Edit Draw Settings", TRUE);
-	    DisplayOptionsForm *display_options_form = new DisplayOptionsForm;
-			display_options_form->EditForm(tw,form_dialog);
-	    form_dialog->Fit();
-			form_dialog->Show(TRUE);
+			tw->display_options();
 			break;
+		case DISPLAY_SAVE_DEFAULT:
+			tw->display_save_options();
+			break;
+		case DISPLAY_LOAD_DEFAULT:
+			tw->display_load_options();
+      break;
+		case DISPLAY_SAVE_CUSTOM:
+			tw->display_save_options(FALSE);
+			break;
+		case DISPLAY_LOAD_CUSTOM:
+			tw->display_load_options(FALSE);
+      break;
 		default:
 			gambit_frame->OnMenuCommand(id);
-  	  break;
+			break;
 	}
-	if (id!=FILE_QUIT) tw->OnPaint();
+	if (id!=FILE_QUIT && id!=FILE_CLOSE) tw->OnPaint();
 }
 
 //=====================================================================
@@ -304,39 +334,38 @@ void ExtensiveFrame::OnMenuCommand(int id)
 //                TREEWINDOW: CONSTRUCTOR AND DESTRUCTOR
 //---------------------------------------------------------------------
 
-TreeWindow::TreeWindow(ExtensiveFrame *_frame,int x,int y,int w,int h,Problem *p,int style):
+TreeWindow::TreeWindow(ExtensiveFrame *_frame,int x,int y,int w,int h,Problem *p,int _subgame,int style):
 								wxCanvas(_frame, x, y, w, h, style)
 {
 	frame=_frame;				// store the parent frame
-
-  if (p)
-    the_problem = p;
-  else
-    the_problem = new Problem;	// create the problem
+	if (p) the_problem = p; else the_problem=new Problem;	// create the problem
+	subgame=_subgame;		// which subgame I AM
 // $$$
 	node_list = new wxList;
 // $$$  node_list->DeleteContents(TRUE);	// make sure the client data is also deleted
-	zoom_factor=1.0;
 
-  // Create the iterator to process cursor movement
-	iterator=new TreeWinIter(the_problem);
-  // Create the flasher to flash the cursor
-	flasher=new TreeNodeFlasher(GetDC());
+	// Create the iterator to process cursor movement
+	iterator=new TreeWinIter(the_problem,subgame);
+	// Create the flasher to flash the cursor or just a steady cursor
+	if (draw_settings.FlashingCursor())
+		flasher=new TreeNodeFlasher(GetDC());
+	else
+		flasher=new TreeNodeCursor(GetDC());
 	// No node has been marked yet--mark_node is invalid
 	mark_node=BAD_NODE;
 
-	outcome_font=new wxFont(9,wxSWISS,wxNORMAL,wxNORMAL);
-	fixed_font=new wxFont(12,wxMODERN,wxNORMAL,wxNORMAL);
-	node_above_font=new wxFont(9,wxSWISS,wxNORMAL,wxNORMAL);
-	node_below_font=new wxFont(9,wxSWISS,wxNORMAL,wxNORMAL);
-	branch_above_font=new wxFont(9,wxSWISS,wxNORMAL,wxNORMAL);
-	branch_below_font=new wxFont(9,wxSWISS,wxNORMAL,wxNORMAL);
+	outcome_font=wxTheFontList->FindOrCreateFont(9,wxSWISS,wxNORMAL,wxNORMAL);
+	fixed_font=wxTheFontList->FindOrCreateFont(12,wxMODERN,wxNORMAL,wxNORMAL);
+	white_brush=wxTheBrushList->FindOrCreateBrush("WHITE",wxSOLID);
 	GetDC()->SetBackgroundMode(wxTRANSPARENT);
 }
 
 TreeWindow::~TreeWindow()
 {
-	delete the_problem;
+	if (subgame!=1)		// if I am a subgame, notify parent of my death
+	 ((ExtensiveFrame *)frame->parent)->tw->CloseSubgame(subgame);
+  else
+		delete the_problem;
 }
 
 //---------------------------------------------------------------------
@@ -385,8 +414,17 @@ if (ch.ShiftDown()==FALSE)
 		}
     case WXK_RIGHT:
 		{
-			iterator->GoFirstChild();
-			ProcessCursor();
+			if (!ch.ControlDown())
+      {
+				iterator->GoFirstChild();
+				ProcessCursor();
+			}
+			else		// if node has a subgame, open it by pressing Ctrl-Right
+			{
+				if (the_problem->NumChildren(iterator->Cursor())==0)	// if terminal
+					if (the_problem->HasSuccessorGame(iterator->Cursor()))
+						tree_subgame_open(the_problem->GetNextGame(iterator->Cursor())+1);
+      }
 			break;
 		}
     case WXK_UP:
@@ -438,6 +476,7 @@ void TreeWindow::OnEvent(wxMouseEvent& event)
 //*************************************************************************
 // TREE RENDERING FUNCTIONS.  MOVED HERE FORM EXTFORM.CC
 //**************************************************************************
+#define PIXELS_PER_SCROLL	20
 NodeEntry *TreeWindow::GetNodeEntry(const Node &n)
 {
 for (int i=0;i<node_list->Number();i++)
@@ -602,14 +641,28 @@ delete [] nums;
 // settings in draw_settings.  Currently takes care of:labels node/branch,
 // outcomes.  Note: this function is getting damn long, but I see no real
 // reason to split it at this point...
+char *gTupleToString(const gTuple<gNumber> &v)
+{
+static gString gvts;
+gvts="";
+for (int i=v.First();i<=v.Last();i++)
+{
+ 	gvts+=(i==1) ? '(' : ',';
+	sprintf(tempstr,"%2.2f",(double)v[i]);
+	gvts+=tempstr;
+}
+gvts+=')';
+
+return (char *)gvts;
+}
+
+
 void TreeWindow::RenderLabels(wxDC &dc,const Node &n)
 {
 gString 		label;		// temporary to hold the label 
-float				tw,th;		// text width/height
+float tw,th;
 NodeEntry 	*entry=GetNodeEntry(n);
 // First take care of labeling the node on top
-dc.SetFont(node_above_font);
-dc.GetTextExtent("0",&tw,&th);
 switch (draw_settings.LabelNodeAbove())
 {
 	case NODE_ABOVE_NOTHING:
@@ -625,14 +678,23 @@ switch (draw_settings.LabelNodeAbove())
 		sprintf(tempstr,"(%d,%d)",n[1],n[2]);
 		label=tempstr;
 		break;
+	case NODE_ABOVE_OUTCOME:
+		if (the_problem->IsOutcomeDefined(the_problem->GetOutcome(n)))
+			label=gTupleToString(the_problem->GetOutcomeValues(the_problem->GetOutcome(n)));
+		else
+    	label="";
+		break;
 	default:
 		label="Undef";
 		break;
 }
-::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING,entry->y-th-5);
+if (label!="")
+{
+	dc.SetFont(draw_settings.NodeAboveFont());
+	dc.GetTextExtent("0",&tw,&th);
+	::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING,entry->y-th-5);
+}
 // Take care of labeling the node on the bottom
-dc.SetFont(node_below_font);
-dc.GetTextExtent("0",&tw,&th);
 switch (draw_settings.LabelNodeBelow())
 {
 	case NODE_BELOW_NOTHING:
@@ -648,18 +710,26 @@ switch (draw_settings.LabelNodeBelow())
 		sprintf(tempstr,"(%d,%d)",n[1],n[2]);
 		label=tempstr;
 		break;
+	case NODE_BELOW_OUTCOME:
+		if (the_problem->IsOutcomeDefined(the_problem->GetOutcome(n)))
+			label=gTupleToString(the_problem->GetOutcomeValues(the_problem->GetOutcome(n)));
+		else
+			label="";
+		break;
 	default:
 		label="Undef";
 		break;
 }
-::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING,entry->y+3);
+if (label!="")
+{
+	dc.SetFont(draw_settings.NodeBelowFont());
+	::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING,entry->y+3);
+}
 // Now take care of branches....
 Node child_node;NodeEntry *child_entry;
 int	i;
 // Take care of labeling the branch on the top
-dc.SetFont(branch_above_font);
-dc.GetTextExtent("0",&tw,&th);
-	// have to label each branch on this node
+// have to label each branch on this node
 for (i=1;i<=the_problem->NumChildren(n);i++)
 {
 	switch (draw_settings.LabelBranchAbove())
@@ -668,7 +738,10 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 			label="";
 			break;
 		case BRANCH_ABOVE_LABEL:
-//	  	label=the_problem->GetBranchLabel(n,i);
+      if (the_problem->NumChildren(n)!=0)
+				label=the_problem->GetActionLabel(n,i);
+			else
+				label="";
 			break;
 		case BRANCH_ABOVE_PLAYER:
 			label=the_problem->GetPlayerName(n[1]);
@@ -680,7 +753,7 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 		case BRANCH_ABOVE_PROBS:
 			if (n[1]==0)	// if this is in fact a chance player ....
 			{
-				sprintf(tempstr,"%2.2f",the_problem->GetBranchProb(n,i));
+				sprintf(tempstr,"%2.2f",(double)the_problem->GetActionProb(n,i));
 				label=tempstr;
 			}
 			else
@@ -691,12 +764,15 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 			break;
 	}
 	child_node=the_problem->GetChildNumber(n,i);
-  child_entry=GetNodeEntry(child_node);
-	::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.BranchLength()/2+draw_settings.NodeLength(),child_entry->y-th);
+	child_entry=GetNodeEntry(child_node);
+	if (label!="")
+  {
+		dc.SetFont(draw_settings.BranchAboveFont());
+		dc.GetTextExtent("0",&tw,&th);
+		::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.BranchLength()/2+draw_settings.NodeLength(),child_entry->y-th);
+  }
 }
 // Take care of labeling the branch on the bottom
-dc.SetFont(branch_below_font);
-dc.GetTextExtent("0",&tw,&th);
 	// have to label each branch on this node
 for (i=1;i<=the_problem->NumChildren(n);i++)
 {
@@ -706,7 +782,10 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 			label="";
 			break;
 		case BRANCH_BELOW_LABEL:
-//	  	label=the_problem->GetBranchLabel(n,i);
+			if (the_problem->NumChildren(n)!=0)
+				label=the_problem->GetActionLabel(n,i);
+			else
+				label="";
 			break;
 		case BRANCH_BELOW_PLAYER:
 			label=the_problem->GetPlayerName(n[1]);
@@ -718,7 +797,7 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 		case BRANCH_BELOW_PROBS:
 			if (n[1]==0)	// if this is in fact a chance player ....
 			{
-				sprintf(tempstr,"%2.2f",the_problem->GetBranchProb(n,i));
+				sprintf(tempstr,"%2.2f",(double)the_problem->GetActionProb(n,i));
 				label=tempstr;
 			}
 			else
@@ -729,30 +808,39 @@ for (i=1;i<=the_problem->NumChildren(n);i++)
 			break;
 	}
 	child_node=the_problem->GetChildNumber(n,i);
-  child_entry=GetNodeEntry(child_node);
-	::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.BranchLength()/2+draw_settings.NodeLength(),child_entry->y+3);
+	child_entry=GetNodeEntry(child_node);
+	if (label!="")
+  {
+		dc.SetFont(draw_settings.BranchBelowFont());
+		::DrawText(dc,label,entry->x+entry->nums*INFOSET_SPACING+draw_settings.BranchLength()/2+draw_settings.NodeLength(),child_entry->y+3);
+  }
 }
-// Now take care of displaying the outcomes
-if (draw_settings.ShowOutcomes())
+// Now take care of displaying the terminal node labels
+if (the_problem->NumChildren(n)==0)	// if the node is terminal
 {
-	if (the_problem->NumChildren(n)==0)	// if the node is terminal
+	switch (draw_settings.LabelNodeTerminal())
 	{
-   	int outcome_num=the_problem->GetOutcome(n);
-		if (the_problem->IsOutcomeDefined(outcome_num))
-		{
-			gVector<double> outcome_vector=the_problem->GetOutcomeValues(outcome_num);
-      gString outcome_str;
-			for (int i=1;i<=outcome_vector.Length();i++)
-			{
-       	outcome_str+=(i==1) ? '(' : ',';
-				sprintf(tempstr,"%3.3f",outcome_vector[i]);
-				outcome_str+=tempstr;
-			}
-			outcome_str+=')';
-      dc.SetFont(outcome_font);
-			::DrawText(dc,outcome_str,entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING+10,entry->y-12,entry->color);
-		}
+		case NODE_TERMINAL_NOTHING:
+			label="";
+      break;
+		case NODE_TERMINAL_OUTCOME:
+			if (the_problem->IsOutcomeDefined(the_problem->GetOutcome(n)))
+				label=gTupleToString(the_problem->GetOutcomeValues(the_problem->GetOutcome(n)));
+			else
+				label="";
+			break;
+		case NODE_TERMINAL_NAME:
+			label=the_problem->GetOutcomeName(the_problem->GetOutcome(n));
+			break;
+		default:
+			label="Undef";
+			break;
 	}
+	if (label!="")
+  {
+		dc.SetFont(draw_settings.NodeTerminalFont());
+		::DrawText(dc,label,entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING+10,entry->y-12,entry->color);
+  }
 }
 
 }
@@ -777,7 +865,10 @@ void TreeWindow::RenderSubtree(wxDC &dc,const Node &n)
 		}
 	// Draw a circle to show the marked node
 	if (n==mark_node)
-		::DrawCircle(dc,entry->x,entry->y,4,draw_settings.CursorColor());
+		::DrawCircle(dc,entry->x+entry->nums*INFOSET_SPACING,entry->y,4,draw_settings.CursorColor());
+	// Draw a square if this node has a subgame outcome
+	if (the_problem->HasSuccessorGame(n))
+		::DrawRectangle(dc,entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-4,entry->y-4,8,8,draw_settings.CursorColor());
 	// draw the 'branches'
 	for (int i = 1;i<=the_problem->NumChildren(n);i++)
 	{
@@ -822,14 +913,15 @@ void TreeWindow::Render(wxDC &dc)
   // $$$ Check for memory dealocation!!!!
 	node_list->Clear();
 	maxlev = miny = maxy = 0;
-  int width,height;
-	GetParent()->GetClientSize(&width,&height);
+  int width,height,x_start,y_start;
+	ViewStart(&x_start,&y_start);
+	((wxWindow *)this)->GetClientSize(&width,&height);
 	ycoord = height/2;
 
-	FillTable(the_problem->RootNode(), 0);
+	FillTable(the_problem->RootNode(subgame), 0);
 	if (draw_settings.ShowInfosets())
 	{
-		FillInfosetTable(the_problem->RootNode());
+		FillInfosetTable(the_problem->RootNode(subgame));
 		UpdateTableInfosets();
 	}
 	if (dc.__type==wxTYPE_DC)	// if drawing to screen
@@ -843,23 +935,33 @@ void TreeWindow::Render(wxDC &dc)
 					iterator->Cursor()[0],iterator->Cursor()[1],iterator->Cursor()[2],
 					iterator->Cursor()[3]);
 				DumpNodeList(node_list);
-				iterator->SetCursor(the_problem->RootNode());
+				iterator->SetCursor(the_problem->RootNode(subgame));
 				wxMessageBox("Error: Entry=NULL!");
 				NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 			}
-			flasher->SetFlashNode(entry->x+(entry->num+1)*INFOSET_SPACING,entry->y-4,
+			flasher->SetFlashNode(entry->x+(entry->num+1)*INFOSET_SPACING+5,entry->y-4,
 													entry->x+entry->num*INFOSET_SPACING+draw_settings.NodeLength(),entry->y-4);
 		}
-  }
+			dc.Clear();
+			dc.SetClippingRegion(x_start*PIXELS_PER_SCROLL,y_start*PIXELS_PER_SCROLL,width,height);
+			dc.BeginDrawing();
+	}
 	else
 	{
 		flasher->SetFlashing(FALSE);
+//		dc.SetBackground(white_brush);
+//    dc.Clear();
+			dc.SetTextBackground(wxLIGHT_GREY);
 	}
-	dc.Clear();
-	dc.BeginDrawing();
-	RenderSubtree(dc,the_problem->RootNode());
-	if (dc.__type!=wxTYPE_DC) flasher->SetFlashing(TRUE);
-  dc.EndDrawing();
+	RenderSubtree(dc,the_problem->RootNode(subgame));
+	if (dc.__type!=wxTYPE_DC)
+		flasher->SetFlashing(TRUE);
+	else
+	{
+		dc.EndDrawing();
+		dc.DestroyClippingRegion();
+	}
+  flasher->Flash();
 }
 
 void TreeWindow::ProcessCursor(void)
@@ -874,7 +976,6 @@ int width,height;
 int virt_width,y_size;
 int	x_scroll,y_scroll;
 int xs,xe,ys,ye;
-#define PIXELS_PER_SCROLL	20
 
 ViewStart(&x_start,&y_start);
 GetParent()->GetClientSize(&width,&height);
@@ -886,19 +987,19 @@ if (iterator != NULL)
 {
 	NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 	// check if in the visible x-dimention
-	xs=(entry->x-draw_settings.XOrigin())*zoom_factor;
-	xe=(entry->x-draw_settings.XOrigin()+draw_settings.NodeLength()/2)*zoom_factor;
-	if (xs<x_start*PIXELS_PER_SCROLL || xe > x_start*PIXELS_PER_SCROLL+width)
-		x_start=entry->x*zoom_factor/(PIXELS_PER_SCROLL*zoom_factor)-1;
+	xs=(entry->x)*draw_settings.Zoom();
+	xe=(entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom();
+	if (xs<x_start*PIXELS_PER_SCROLL*draw_settings.Zoom() || xe > x_start*PIXELS_PER_SCROLL+width)
+		x_start=entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1;
 	if (x_start<0) x_start=0;
 	// check if in the visible y-dimention
-	ys=(entry->y-draw_settings.YOrigin())*zoom_factor;
-	ye=(entry->y-draw_settings.YOrigin())*zoom_factor;
-	if (ys< y_start*PIXELS_PER_SCROLL || ye > y_start*PIXELS_PER_SCROLL+height*3/4)
-			y_start=(entry->y*zoom_factor-height/2)/(PIXELS_PER_SCROLL*zoom_factor)-1;
+	ys=(entry->y)*draw_settings.Zoom();
+	ye=ys;
+	if (ys<=y_start*PIXELS_PER_SCROLL*draw_settings.Zoom() || ye>y_start*PIXELS_PER_SCROLL+height*3/4)
+			y_start=(entry->y*draw_settings.Zoom()-height/2)/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1;
 			if (y_start<0) y_start=0;
 	// now update the flasher
-		flasher->SetFlashNode(entry->x+(entry->num+1)*INFOSET_SPACING,entry->y-4,
+		flasher->SetFlashNode(entry->x+(entry->num+1)*INFOSET_SPACING+5,entry->y-4,
 													entry->x+draw_settings.NodeLength()+entry->num*INFOSET_SPACING,entry->y-4);
 		flasher->Flash();
 }
@@ -924,7 +1025,7 @@ for (int i=0;i<node_list->Number();i++)
 //------------check if clicked on an outcome
 	 if(the_problem->NumChildren(entry->n)==0 && // if this is a terminal node
 			the_problem->IsOutcomeDefined(the_problem->GetOutcome(entry->n)) &&	// and the outcome is set
-			draw_settings.ShowOutcomes()==TRUE)		// and the outcomes are displayed
+			draw_settings.LabelNodeTerminal()==NODE_TERMINAL_OUTCOME)		// and the outcomes are displayed
 	 { 
 		 if(x>entry->x+draw_settings.NodeLength()+10 &&
 		 		x<x+draw_settings.NodeLength()+10+draw_settings.OutcomeLength() &&
@@ -933,30 +1034,6 @@ for (int i=0;i<node_list->Number();i++)
    }
 	 n=n->Next();
 }
-}
-
-
-
-//
-void DisplayOptionsForm::EditForm(TreeWindow *object,wxPanel *panel)
-{
-char	temp_str[40];
-Add(wxMakeFormMessage("Size Settings"));
-Add(wxMakeFormNewLine());
-
-Add(wxMakeFormShort("Branch Length",&((object->draw_settings).branch_length),wxFORM_SLIDER,
-											 new wxList(wxMakeConstraintRange(BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX), 0)));
-Add(wxMakeFormNewLine());
-Add(wxMakeFormShort("Node Length",&(object->draw_settings.node_length),wxFORM_SLIDER,
-											 new wxList(wxMakeConstraintRange(NODE_LENGTH_MIN,NODE_LENGTH_MAX), 0)));
-Add(wxMakeFormNewLine());
-Add(wxMakeFormShort("Y Spacing",&(object->draw_settings.y_spacing),wxFORM_SLIDER,
-											 new wxList(wxMakeConstraintRange(Y_SPACING_MIN, Y_SPACING_MAX), 0)));
-Add(wxMakeFormNewLine());
-Add(wxMakeFormBool("Show Outcomes",&(object->draw_settings.show_outcomes),wxFORM_CHECKBOX));
-Add(wxMakeFormBool("Show Infosets",&(object->draw_settings.show_infosets),wxFORM_CHECKBOX));
-Add(wxMakeFormNewLine());
-AssociatePanel(panel);
 }
 
 wxList *ExtensiveFrame::MakeAccelerators(void)
