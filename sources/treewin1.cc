@@ -139,6 +139,7 @@ void TreeWindow::node_insert(void)
       else
 	ef.InsertNode(Cursor(), infoset);
 
+      SetCursorPosition(Cursor()->GetParent());
       if (set_names) {
 	node_label();
 	infoset_label();
