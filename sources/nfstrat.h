@@ -10,6 +10,7 @@
 #include "gtext.h"
 #include "gblock.h"
 #include "gstream.h"
+#include "nfplayer.h"
 
 class NFPlayer;
 class Nfg;
@@ -35,7 +36,7 @@ public:
   
   Strategy *const operator[](int p) const;
   Strategy *const Get(int p) const;
-  void Set(int p, Strategy  *const s);
+  void Set(int p, const Strategy  *const s);
 };
 
 
@@ -57,10 +58,13 @@ public:
   bool operator!=(const NFSupport &s) const;
 
   const Nfg &Game(void) const   { return *bnfg; }
+  const Nfg *GamePtr(void) const { return bnfg; }
   
   const gBlock<Strategy *> &Strategies(int pl) const;
 
   int NumStrats(int pl) const;
+  inline int NumStrats(const NFPlayer* p) const 
+    { return NumStrats(p->GetNumber()); }
   const gArray<int> NumStrats(void) const;
   int TotalNumStrats(void) const;
 
