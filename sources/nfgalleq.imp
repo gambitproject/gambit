@@ -9,7 +9,7 @@
 template <class T> class NfgAllNashModule  {
 private:
   const Nfg &NF;
-  const NFSupport &fullsupport;
+  const NFSupport fullsupport;
   gList<const NFSupport> possiblenashsupports;
   PolEnumParams params;
   long count,nevals;
@@ -34,7 +34,10 @@ public:
 
 template <class T>
 NfgAllNashModule<T>::NfgAllNashModule(const Nfg &N, const PolEnumParams &p)
-  : NF(N), fullsupport(N), possiblenashsupports(), params(p), 
+  : NF(N), 
+    fullsupport(N), 
+    possiblenashsupports(), 
+    params(p), 
     count(0), nevals(0)
 { 
   possiblenashsupports += PossibleNashSubsupports(fullsupport,params.status);
@@ -48,7 +51,9 @@ template <class T> void NfgAllNashModule<T>::NashEnum(void)
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
     PolEnum(possiblenashsupports[i], params, newsolns, newevals, newtime);
-    solutions += newsolns;
+    for (int j = 1; j <= newsolns.Length(); j++)
+      if (newsolns[j].IsNash()) 
+	solutions += newsolns[j];
     nevals += newevals;
     time += newtime;
   }
