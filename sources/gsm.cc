@@ -66,7 +66,11 @@ int GSM::MaxDepth( void ) const
 }
 
 
-
+void GSM::_StackPush( Portion* p )
+{
+  p->SetGSM( this );
+  _Stack->Push( p );
+}
 
 
 //------------------------------------------------------------------------
@@ -78,8 +82,7 @@ bool GSM::Push( const bool& data )
   Portion*  p;
   
   p = new bool_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -90,8 +93,7 @@ bool GSM::Push( const double& data )
   Portion*  p;
   
   p = new numerical_Portion<double>( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -102,8 +104,7 @@ bool GSM::Push( const gInteger& data )
   Portion*  p;
 
   p = new numerical_Portion<gInteger>( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -114,8 +115,7 @@ bool GSM::Push( const gRational& data )
   Portion*  p;
 
   p = new numerical_Portion<gRational>( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -126,20 +126,20 @@ bool GSM::Push( const gString& data )
   Portion*  p;
 
   p = new gString_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
 
 
+/* These are commented out because the don't seem to be necessary */
+#if 0
 bool GSM::Push( Outcome* data )
 {
   Portion*  p;
 
   p = new Outcome_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -150,8 +150,7 @@ bool GSM::Push( Player* data )
   Portion*  p;
 
   p = new Player_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -162,8 +161,7 @@ bool GSM::Push( Infoset* data )
   Portion*  p;
 
   p = new Infoset_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -174,8 +172,7 @@ bool GSM::Push( Action* data )
   Portion*  p;
 
   p = new Action_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -186,11 +183,11 @@ bool GSM::Push( Node* data )
   Portion*  p;
 
   p = new Node_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
+#endif
 
 
 bool GSM::PushStream( const gString& data )
@@ -198,8 +195,7 @@ bool GSM::PushStream( const gString& data )
   Portion*  p;
 
   p = new Stream_Portion( data );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -241,7 +237,7 @@ bool GSM::PushList( const int num_of_elements )
       result = false;
     }
   }
-  _Stack->Push( list );
+  _StackPush( list );
 
   return result;
 }
@@ -257,8 +253,7 @@ bool GSM::PushRef( const gString& ref )
   Portion*  p;
   
   p = new Reference_Portion( ref );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -269,8 +264,7 @@ bool GSM::PushRef( const gString& ref, const gString& subref )
   Portion*  p;
   
   p = new Reference_Portion( ref, subref );
-  p->SetGSM( this );
-  _Stack->Push( p );
+  _StackPush( p );
 
   return true;
 }
@@ -320,8 +314,7 @@ bool GSM::Assign( void )
       delete p2;
       
       p1 = _ResolveRef( (Reference_Portion*) p1 );
-      p1->SetGSM( this );
-      _Stack->Push( p1 );
+      _StackPush( p1 );
     }
 
     else // ( p1_subvalue != "" )
@@ -374,8 +367,7 @@ bool GSM::Assign( void )
 	delete p1;
 	p1 = new Error_Portion;
       }
-      p1->SetGSM( this );
-      _Stack->Push( p1 );
+      _StackPush( p1 );
     }
   }
   else // ( p1->Type() != porREFERENCE )
@@ -391,8 +383,7 @@ bool GSM::Assign( void )
       p1->ShadowOf()->ParentList()->SetSubscript( index, p2 );
       delete p1;
       p2_copy = p2->Copy();
-      p2_copy->SetGSM( this );
-      _Stack->Push( p2_copy );
+      _StackPush( p2_copy );
       result = true;
     }
     else
@@ -401,13 +392,13 @@ bool GSM::Assign( void )
       delete p1;
       delete p2;
       p = new Error_Portion;
-      p->SetGSM( this );
-      _Stack->Push( p );
+      _StackPush( p );
       result = false;
     }
   }
   return result;
 }
+
 
 
 bool GSM::UnAssign( void )
@@ -716,8 +707,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
     result = false;
   }
 
-  p1->SetGSM( this );
-  _Stack->Push( p1 );
+  _StackPush( p1 );
 
   return result;
 }
@@ -742,8 +732,7 @@ bool GSM::_UnaryOperation( OperationMode mode )
       p1 = _ResolveRef( (Reference_Portion*) p1 );
 
     p1->Operation( 0, mode );
-    p1->SetGSM( this );
-    _Stack->Push( p1 );
+    _StackPush( p1 );
   }
   else
   {
@@ -868,14 +857,12 @@ bool GSM::Subscript ( void )
       {
 	shadow = element->Copy();
 	shadow->ShadowOf() = element;
-	shadow->SetGSM( this );
-	_Stack->Push( shadow );
+	_StackPush( shadow );
       }
       else
       {
 	p = new Error_Portion;
-	p->SetGSM( this );
-	_Stack->Push( p );
+	_StackPush( p );
       }
     }
     else
@@ -883,8 +870,7 @@ bool GSM::Subscript ( void )
       _StdErr << "GSM Error: a non-integer element number passed as the\n";
       _StdErr << "           subscript of a List\n";
       p = new Error_Portion;
-      p->SetGSM( this );
-      _Stack->Push( p );
+      _StackPush( p );
       result = false;
     }
   }
@@ -894,8 +880,7 @@ bool GSM::Subscript ( void )
     _StdErr << "           Portion type\n";
     delete p1;
     p = new Error_Portion;
-    p->SetGSM( this );
-    _Stack->Push( p );
+    _StackPush( p );
     result = false;
   }
 
@@ -1070,8 +1055,7 @@ bool GSM::BindRef( void )
     if( param->ShadowOf() == 0 )
     {
       _CallFuncStack->Push( func );
-      param->SetGSM( this );
-      _Stack->Push( param );
+      _StackPush( param );
       result = BindVal();
       return result;
     }
@@ -1170,8 +1154,7 @@ bool GSM::CallFunction( void )
   }
 
 
-  return_value->SetGSM( this );
-  _Stack->Push( return_value );
+  _StackPush( return_value );
 
 
   for( index = 0; index < num_params; index++ )
@@ -1240,8 +1223,8 @@ bool GSM::CallFunction( void )
 	    else
 	    {
 	      _StdErr << "GSM Fatal Error:\n";
-	      _StdErr << "          returning function parameter information\n";
-	      _StdErr << "          (regarding lists) is invalid\n";
+	      _StdErr << "         returning function parameter information\n";
+	      _StdErr << "         (regarding lists) is invalid\n";
 	      assert(0);
 	    }
 #endif // NDEBUG
@@ -1314,8 +1297,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
       else
       {
 	_StdErr << "GSM Error: IfGoto called on a unsupported data type\n";
-	p->SetGSM( this );
-	_Stack->Push( p );
+	_StackPush( p );
 	program_counter++;
 	instr_success = false;
       }

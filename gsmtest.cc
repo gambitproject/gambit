@@ -29,8 +29,10 @@ int main( void )
   gString *name;
   GSM *machine;
 
+  gOutput* sout = new gFileOutput( "sout" );
+  gOutput* serr = new gFileOutput( "serr" );
 
-  machine = new GSM( 32, gout, gout );
+  machine = new GSM( 32, *sout, *serr );
 
   gList< Instruction* > program;
 
@@ -1662,7 +1664,7 @@ int main( void )
 
 
 
- s machine->PushRef( "N" );
+  machine->PushRef( "N" );
   machine->InitCallFunction( "ReadNfg" );
   machine->Push( "e02.nfg" );
   machine->Bind();
@@ -1792,6 +1794,8 @@ int main( void )
   gout << "\nDeleting machine\n";
   delete machine;
 
+  delete sout;
+  delete serr;
 
   return 0;
 }

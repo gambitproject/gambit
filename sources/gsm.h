@@ -48,6 +48,7 @@ class GSM
   void _BindCheck ( void ) const;
   bool _BindCheck ( const gString& param_name ) const;
 
+  void _StackPush ( Portion* p );
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
@@ -69,11 +70,14 @@ class GSM
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
+/* These are commented out because the don't seem to be necessary */
+#if 0
   bool Push ( Outcome* data );
   bool Push ( Player*  data );
   bool Push ( Infoset* data );
   bool Push ( Action*  data );
   bool Push ( Node*    data );
+#endif
 
   bool PushStream( const gString& data );
 
@@ -83,7 +87,6 @@ class GSM
   bool PushRef  ( const gString& ref, const gString& subref );
   bool Assign   ( void );
   bool UnAssign ( void );
-
 
   bool Add      ( void );
   bool Subtract ( void );
