@@ -12,13 +12,13 @@ main()
   Nfg<double> *N = 0;
   ReadNfgFile(gin, N);
   ZSumParams P;
-//  P.trace=2;
-//  P.tracefile=&gout;
+  P.trace=3;
+  P.tracefile=&gout;
 //  P.nequilib=1;
   NFSupport S(*N);
   ZSumModule<double> M(*N, P,S);
   M.ZSum();
-  gList<MixedProfile<double> > list;
+  gList<MixedSolution<double> > list;
   M.GetSolutions(list);
   list.Dump(gout);
   gout << "\nNum Pivots = " << M.NumPivots();
