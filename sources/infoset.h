@@ -7,7 +7,6 @@
 #ifndef INFOSET_H
 #define INFOSET_H
 
-#include "glist.h"
 #include "rational.h"
 #include "gvector.h"
 
@@ -42,7 +41,7 @@ class Infoset   {
     gString name;
     Player *player;
     gBlock<Action *> actions;
-    gList<Node *> members;
+    gBlock<Node *> members;
     
     Infoset(int n, Player *p, int br) : number(n), player(p), actions(br) 
       { while (br)  { actions[br] = new Action(ToString(br)); br--; } }
@@ -74,9 +73,11 @@ class Infoset   {
 	return 0;
       }
 
-    const gArray<Action *> &GetActionList(void) const  { return actions; }
+    const gArray<Action *> &GetActionList(void) const  { return actions; }  
 
     int NumActions(void) const   { return actions.Length(); }
+
+    const gArray<Node *> &GetMemberList(void) const   { return members; }
 
 // This function exists only to facilitate the current version of efg2nfg
 // and is not guaranteed to exist in the future, so do not depend on it!
