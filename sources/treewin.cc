@@ -34,10 +34,6 @@ extern void DrawSubgamePickIcon(wxDC &, const NodeEntry &);
 #define MIN_WINDOW_WIDTH   600  // at least 12 buttons
 #define MIN_WINDOW_HEIGHT  300
 
-
-wxFont   *outcome_font;
-
-
 //----------------------------------------------------------------------
 //                      TreeWindow: Member functions
 //----------------------------------------------------------------------
@@ -80,12 +76,11 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   mark_node = 0; 
   // No isets are being hilighted
   hilight_infoset = 0; hilight_infoset1 = 0;
-  // No zoom window or outcome dialog
-  //  zoom_window = 0;
-  outcome_font = wxTheFontList->FindOrCreateFont(9, wxSWISS, wxNORMAL, wxNORMAL);
 
+  SetBackgroundColour(*wxWHITE);
   MakeMenus();
   RefreshLayout();
+  EnsureCursorVisible();
 }
 
 TreeWindow::~TreeWindow()
@@ -340,24 +335,16 @@ void TreeWindow::OnDraw(wxDC &dc)
     UpdateCursor();
   }
     
-  dc.SetBrush(*wxWHITE_BRUSH);
-  dc.SetBackground(*wxWHITE_BRUSH);
-  dc.Clear();
-
   dc.BeginDrawing();
+  dc.Clear();
   m_layout.Render(dc);
   flasher->Flash(dc);
   dc.EndDrawing();
 }
 
-void TreeWindow::ProcessCursor(void)
+void TreeWindow::EnsureCursorVisible(void)
 {
   NodeEntry *entry = m_layout.GetNodeEntry(Cursor()); 
-  if (!entry) {
-    SetCursorPosition(ef.RootNode());
-    entry = m_layout.GetNodeEntry(Cursor());
-  }
-    
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
   int width, height;
@@ -394,8 +381,19 @@ void TreeWindow::ProcessCursor(void)
     yScroll = ySteps;
   }
 
-  UpdateCursor();
   Scroll(xScroll, yScroll);
+}
+
+void TreeWindow::ProcessCursor(void)
+{
+  NodeEntry *entry = m_layout.GetNodeEntry(Cursor()); 
+  if (!entry) {
+    SetCursorPosition(ef.RootNode());
+    entry = m_layout.GetNodeEntry(Cursor());
+  }
+    
+  UpdateCursor();
+  EnsureCursorVisible();
   m_parent->OnSelectedMoved(Cursor());
 }
 

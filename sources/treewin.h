@@ -48,8 +48,9 @@ private:
   void FitZoom(void);
   void MakeFlasher(void);
   void UpdateCursor(void);
-
   void ProcessCursor(void);
+  void EnsureCursorVisible(void);
+
   bool ProcessShift(wxMouseEvent &ev);
   void MakeMenus(void);
   void AdjustScrollbarSteps(void);
@@ -121,7 +122,7 @@ public:
   Node *GotObject(long &mx, long &my, int what);
   float GetZoom(void) const { return m_zoom; }
   void SetZoom(float p_zoom);
-  
+
   // Access to the numeric values from the renderer
   gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
   gText OutcomeAsString(const Node *n, bool &hilight) const;

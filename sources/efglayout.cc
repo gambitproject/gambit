@@ -1007,8 +1007,6 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
 
 void efgTreeLayout::Render(wxDC &p_dc) const
 { 
-  p_dc.SetBackground(*wxWHITE_BRUSH);
-  p_dc.Clear();
   RenderSubtree(p_dc);
 }
 
