@@ -10,6 +10,7 @@
 #include "gambitio.h"
 #include "gnumber.h"
 #include "gnulib.h"
+#include "gmisc.h"
 #include <math.h>
 #include <values.h>
 #include <float.h>
@@ -137,31 +138,51 @@ gPrecision& gNumber::GetRep() const
   return *r;
 }
 
-int operator == (const gNumber& x, const gNumber& y)
+bool operator == (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval == y.dval;
   else if (x.rep == RATIONAL && y.rep == RATIONAL)
     return *(x.rval) == *(y.rval);
   else if (x.rep == RATIONAL && y.rep == DOUBLE)
-    return y.dval == double(*(x.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return (   (y.dval <= double(*(x.rval)) + eps)
+            && (y.dval >= double(*(x.rval)) - eps) );
+  }
   else // (x.rep == DOUBLE && y.rep == RATIONAL)
-    return x.dval == double(*(y.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return (   (x.dval <= double(*(y.rval)) + eps)
+            && (x.dval >= double(*(y.rval)) - eps) );
+  }
 }
 
-int operator != (const gNumber& x, const gNumber& y)
+bool operator != (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval != y.dval;
   else if (x.rep == RATIONAL && y.rep == RATIONAL)
     return *(x.rval) != *(y.rval);
   else if (x.rep == RATIONAL && y.rep == DOUBLE)
-    return y.dval != double(*(x.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return (   (y.dval >= double(*(x.rval)) + eps)
+            || (y.dval <= double(*(x.rval)) - eps) );
+  }
   else // (x.rep == DOUBLE && y.rep == RATIONAL)
-    return x.dval != double(*(y.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return (   (x.dval >= double(*(y.rval)) + eps)
+            || (x.dval <= double(*(y.rval)) - eps) );
+  }
 }
 
-int operator <  (const gNumber& x, const gNumber& y)
+bool operator <  (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval < y.dval;
@@ -173,19 +194,27 @@ int operator <  (const gNumber& x, const gNumber& y)
     return x.dval < double(*(y.rval));
 }
 
-int operator <= (const gNumber& x, const gNumber& y)
+bool operator <= (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval <= y.dval;
   else if (x.rep == RATIONAL && y.rep == RATIONAL)
     return *(x.rval) <= *(y.rval);
   else if (x.rep == RATIONAL && y.rep == DOUBLE)
-    return y.dval >= double(*(x.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return y.dval <= (double(*(x.rval)) + eps);
+  }
   else // (x.rep == DOUBLE && y.rep == RATIONAL)
-    return x.dval <= double(*(y.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return x.dval <= (double(*(y.rval)) + eps);
+  }
 }
 
-int operator >  (const gNumber& x, const gNumber& y)
+bool operator >  (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval > y.dval;
@@ -197,16 +226,24 @@ int operator >  (const gNumber& x, const gNumber& y)
     return x.dval > double(*(y.rval));
 }
 
-int operator >= (const gNumber& x, const gNumber& y)
+bool operator >= (const gNumber& x, const gNumber& y)
 {
   if (x.rep == DOUBLE && y.rep == DOUBLE)
     return x.dval >= y.dval;
   else if (x.rep == RATIONAL && y.rep == RATIONAL)
     return *(x.rval) >= *(y.rval);
   else if (x.rep == RATIONAL && y.rep == DOUBLE)
-    return y.dval <= double(*(x.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return y.dval >= (double(*(x.rval)) - eps);
+  }
   else // (x.rep == DOUBLE && y.rep == RATIONAL)
-    return x.dval >= double(*(y.rval));
+  {
+    double eps;
+    gEpsilon(eps, 8);
+    return x.dval >= (double(*(y.rval)) - eps);
+  }
 }
 
 void gNumber::operator += (const gNumber& y) 
