@@ -61,7 +61,7 @@ public:
   virtual Node *RootNode(void) const = 0;
   virtual bool IsSuccessor(const Node *n, const Node *from) const = 0;
   virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
-  virtual gArray<Node *> Children(const Node *n) const = 0;
+  virtual const gArray<Node *> &Children(const Node *n) const = 0;
   virtual int  NumChildren(const Node *n) const = 0;
   virtual gList<const Node*> TerminalNodes(void) const = 0;  
 
@@ -190,7 +190,7 @@ public:
 					 const EFSupport&) const;
   gList<const Node*> TerminalNodes(void) const;
   gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
-  gArray<Node *> Children(const Node *n) const;
+  const gArray<Node *> &Children(const Node *n) const;
   int NumChildren(const Node *n) const;
 
   // DATA ACCESS -- PLAYERS

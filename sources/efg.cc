@@ -834,7 +834,7 @@ gList<Infoset*> FullEfg::DescendantInfosets(const Node& n,
   return answer;
 }
 
-gArray<Node *> FullEfg::Children(const Node *n) const
+const gArray<Node *> &FullEfg::Children(const Node *n) const
 { return n->children; }
 
 int FullEfg::NumChildren(const Node *n) const
