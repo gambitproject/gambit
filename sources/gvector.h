@@ -8,6 +8,7 @@
 #define GVECTOR_H
 
 #include "gmisc.h"
+#include "double.h"
 #include "gstream.h"
 #include "garray.h"
 
@@ -79,8 +80,9 @@ template <class T> class gVector : public gArray<T>   {
 template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
 #endif
 
-#endif   //# GVECTOR_H
+template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
 
+#endif   //# GVECTOR_H
 
 
 

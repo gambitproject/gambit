@@ -218,4 +218,10 @@ template <class T> T gVector<T>::NormSquared() const
 template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
 { V.Dump(f);  return f; }
 
-
+template <class T> gVector<gDouble> TogDouble(const gVector<T>& V)
+{
+  gVector<gDouble> answer(V.Length());
+  for (int i = 1; i <= V.Length(); i++)
+    answer[i] = (gDouble)V[i];
+  return answer;
+}

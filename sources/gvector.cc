@@ -21,6 +21,10 @@ template gOutput & operator<< (gOutput&, const gVector<gInteger>&);
 template gOutput & operator<< (gOutput&, const gVector<gRational>&);
 template gOutput & operator<< (gOutput&, const gVector<gNumber>&);
 
+template gVector<gDouble> TogDouble(const gVector<gRational>&);
+template gVector<gDouble> TogDouble(const gVector<double>&);
+template gVector<gDouble> TogDouble(const gVector<gDouble>&);
+
 #include "glist.imp"
 
 template class gList<gVector<double> >;
