@@ -37,25 +37,27 @@ template <class T>
 class gbtMixedProfileRep : public gbtConstNfgRep {
 friend class gbtMixedProfile<T>;
 public:
+  // Some non-virtual generic implementations of operations
+  void SetCentroid(void);
+  T GetMaxRegret(void) const;
+  void GetRegret(gbtPVector<T> &value) const;
+  T GetLiapValue(void) const;
+
   virtual ~gbtMixedProfileRep() { }
 
+  // The abstract interface begins here
   virtual gbtMixedProfileRep<T> *Copy(void) const = 0;
    
+  virtual bool operator==(const gbtMixedProfileRep<T> &) const = 0;
+
   virtual gbtGame GetGame(void) const = 0;
-  
-  virtual T LiapValue(void) const = 0;
-  virtual void Regret(gbtPVector<T> &value) const = 0;
-  virtual T MaxRegret(void) const = 0;
-  virtual void Centroid(void) = 0;
+  virtual const gbtNfgSupport &GetSupport(void) const = 0;
 
   virtual T Payoff(int pl) const = 0;
   virtual T Payoff(int pl, gbtGameStrategy) const = 0;
+
   virtual T Payoff(int pl, int player1, int strat1, int player2, int strat2) const = 0;
   virtual void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const = 0;
-
-  virtual bool operator==(const gbtMixedProfileRep<T> &) const = 0;
-
-  virtual const gbtNfgSupport &GetSupport(void) const = 0;
 
   // The following implement the necessary gPVector-style operations
   // traditionally permitted on mixed profiles.

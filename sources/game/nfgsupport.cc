@@ -205,19 +205,34 @@ gbtNfgContingency gbtNfgSupportBase::NewContingency(void) const
 
 gbtMixedProfile<double> gbtNfgSupportBase::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileBase<double>(const_cast<gbtNfgSupportBase *>(this));
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<double>(const_cast<gbtNfgSupportBase *>(this));
+  }
+  else {
+    return new gbtMixedProfileTree<double>(const_cast<gbtNfgSupportBase *>(this));
+  }
 }
 
 gbtMixedProfile<gbtRational> 
 gbtNfgSupportBase::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileBase<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+  }
+  else {
+    return new gbtMixedProfileTree<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+  }
 }
 
 gbtMixedProfile<gbtNumber>
 gbtNfgSupportBase::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileBase<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
+  }
+  else {
+    return new gbtMixedProfileTree<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
+  }
 }
 
 gbtOutput& operator<<(gbtOutput &p_stream, const gbtNfgSupport &p_support)

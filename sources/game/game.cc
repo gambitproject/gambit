@@ -1451,19 +1451,34 @@ gbtNfgContingency gbtGameBase::NewContingency(void) const
 
 gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileBase<double>(NewNfgSupport());
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<double>(NewNfgSupport());
+  }
+  else {
+    return new gbtMixedProfileTree<double>(NewNfgSupport());
+  }
 }
 
 gbtMixedProfile<gbtRational> 
 gbtGameBase::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileBase<gbtRational>(NewNfgSupport());
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<gbtRational>(NewNfgSupport());
+  }
+  else {
+    return new gbtMixedProfileTree<gbtRational>(NewNfgSupport());
+  }
 }
 
 gbtMixedProfile<gbtNumber>
 gbtGameBase::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileBase<gbtNumber>(NewNfgSupport());
+  if (IsMatrix()) {
+    return new gbtMixedProfileTable<gbtNumber>(NewNfgSupport());
+  }
+  else {
+    return new gbtMixedProfileTree<gbtNumber>(NewNfgSupport());
+  }
 }
 
 

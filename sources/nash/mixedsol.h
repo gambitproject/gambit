@@ -104,7 +104,8 @@ public:
   bool IsValid(void) const {return (m_revision == GetGame()->RevisionNumber());}
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
-  gbtNumber Payoff(int p_player) const { return m_profile->Payoff(p_player); }
+  gbtNumber Payoff(int p_player) const 
+  { return m_profile->Payoff(p_player); }
   const gbtArray<int> &Lengths(void) const { return m_profile->Lengths(); }
   
   // PAYOFF COMPUTATION

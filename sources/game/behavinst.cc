@@ -85,22 +85,29 @@ template class gbtList<gbtBehavProfile<double> >;
 template class gbtList<gbtBehavProfile<gbtRational> >;
 template class gbtList<gbtBehavProfile<gbtNumber> >;
 
-
 template class gbtMixedProfileRep<double>;
-template gbtOutput &operator<<(gbtOutput &, 
-			       const gbtMixedProfile<double> &);
-
 template class gbtMixedProfileRep<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &,
-			       const gbtMixedProfile<gbtRational> &);
-
 template class gbtMixedProfileRep<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &,
-			       const gbtMixedProfile<gbtNumber> &);
+
+template class gbtMixedProfileTable<double>;
+template class gbtMixedProfileTable<gbtRational>;
+template class gbtMixedProfileTable<gbtNumber>;
+
+template class gbtMixedProfileTree<double>;
+template class gbtMixedProfileTree<gbtRational>;
+template class gbtMixedProfileTree<gbtNumber>;
 
 template class gbtMixedProfile<double>;
 template class gbtMixedProfile<gbtRational>;
 template class gbtMixedProfile<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &, 
+			       const gbtMixedProfile<double> &);
+
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtMixedProfile<gbtRational> &);
+
+template gbtOutput &operator<<(gbtOutput &,
+			       const gbtMixedProfile<gbtNumber> &);
 
 
 template class gbtList<gbtMixedProfile<double> >;

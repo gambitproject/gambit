@@ -29,78 +29,44 @@
 #include "mixed.h"
 #include "gamebase.h"
 
-//---------------------------------------------------------------------------
-//                    gbtMixedProfileBase<T> member functions
-//---------------------------------------------------------------------------
-
-template <class T>
-gbtMixedProfileBase<T>::gbtMixedProfileBase(const gbtNfgSupport &p_support)
-  : m_profile(p_support->NumStrategies()), m_support(p_support)
+template <class T> void gbtMixedProfileRep<T>::SetCentroid(void) 
 {
-  Centroid();
-}
-
-template <class T> 
-gbtMixedProfileBase<T>::gbtMixedProfileBase(const gbtMixedProfileBase<T> &p_profile)
-  : m_profile(p_profile.m_profile), m_support(p_profile.m_support)
-{ }
-
-template <class T> gbtMixedProfileBase<T>::~gbtMixedProfileBase()
-{
-}
-
-template <class T>
-gbtMixedProfileBase<T> &gbtMixedProfileBase<T>::operator=(const gbtMixedProfileBase<T> &p)
-{
-  if (this != &p && m_support == p.m_support)   {
-    // note that a dimensionality change will trigger a failed assertion
-    // in the gbtPVector assignment operator
-    m_support = p.m_support;
-    gbtPVector<T>::operator=(p);
-  }
-  return *this;
-}
-
-template <class T> void gbtMixedProfileBase<T>::Centroid(void) 
-{
-  T center;
-  
-  for (int i = 1; i <= m_support->NumPlayers(); i++)  {
-    gbtGamePlayer player = m_support->GetPlayer(i);
-    center = ((T) 1) / ((T) player->NumStrategies());
-    for (int j = 1; j <= player->NumStrategies(); j++)
-      m_profile(i, j) = center;
+  for (int pl = 1; pl <= NumPlayers(); pl++)  {
+    gbtGamePlayer player = GetPlayer(pl);
+    T center = ((T) 1) / ((T) player->NumStrategies());
+    for (int st = 1; st <= player->NumStrategies(); 
+	 (*this)(pl, st++) = center);
   }
 }
 
-template <class T> T gbtMixedProfileBase<T>::LiapValue(void) const
+template <class T> T gbtMixedProfileRep<T>::GetLiapValue(void) const
 {
   static const T BIG1 = (T) 100;
   static const T BIG2 = (T) 100;
 
-  gbtMixedProfileBase<T> p(*this);
-  gbtMixedProfileBase<T> tmp(p);
-  gbtPVector<T> payoff(m_profile);
+  gbtMixedProfile<T> p(Copy());
+  gbtMixedProfile<T> tmp(p->Copy());
+  gbtPVector<T> payoff(NumStrategies());
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
 
-  for (int i = 1; i <= m_support->NumPlayers(); i++) {
-    gbtGamePlayer player = m_support->GetPlayer(i);
-    tmp.m_profile.CopyRow(i, payoff);
+  for (int i = 1; i <= NumPlayers(); i++) {
+    gbtGamePlayer player = GetPlayer(i);
+    tmp->CopyRow(i, payoff);
     avg = sum = (T) 0;
     // then for each strategy for that player set it to 1 and evaluate
     int j;
     for (j = 1; j <= player->NumStrategies(); j++) {
       tmp(i, j) = (T) 1;
       x = p(i, j);
-      payoff(i, j) = tmp.Payoff(i);
+      payoff(i, j) = tmp->Payoff(i);
       avg += x * payoff(i, j);
       sum += x;
       if (x>(T)0) x=0;
       result += BIG1*x*x;         // add penalty for neg probabilities
       tmp(i,j) = (T) 0;
     }
-    tmp.m_profile.CopyRow(i, p.m_profile);
+    tmp->CopyRow(i, p);
     for (j = 1; j <= player->NumStrategies(); j++) {
       x=payoff(i,j)-avg;
       if (x<=(T)0) x=(T)0;
@@ -112,117 +78,98 @@ template <class T> T gbtMixedProfileBase<T>::LiapValue(void) const
   return result;
 }
 
-template <class T> void gbtMixedProfileBase<T>::Regret(gbtPVector<T> &value) const
+template <class T> 
+void gbtMixedProfileRep<T>::GetRegret(gbtPVector<T> &value) const
 {
-  int i, j;
-  T pay,x;
-  
-  for (i = 1; i <= m_support->NumPlayers(); i++) {
-    pay = Payoff(i);
-    for (j = 1; j <= m_support->GetPlayer(i)->NumStrategies(); j++) {
-      x = Payoff(i, m_support->GetPlayer(i)->GetStrategy(j));
-      if(x > pay)
+  for (int i = 1; i <= NumPlayers(); i++) {
+    T pay = Payoff(i);
+    for (int j = 1; j <= GetPlayer(i)->NumStrategies(); j++) {
+      T x = Payoff(i, GetPlayer(i)->GetStrategy(j));
+      if (x > pay) {
 	value(i, j) = x - pay;
-      // use pay - pay instead of zero for correct precision
-      else value(i,j) = pay - pay; 
+      }
+      else {
+	// use pay - pay instead of zero for correct precision
+	value(i,j) = pay - pay; 
+      }
     }
   }
 }
 
-template <class T> T gbtMixedProfileBase<T>::MaxRegret(void) const
+template <class T> T gbtMixedProfileRep<T>::GetMaxRegret(void) const
 {
-  int i;
-  T maxgripe = (T)0;
+  T maxgripe = (T) 0;
+  gbtPVector<T> v(NumStrategies());
+  GetRegret(v);
 
-  gbtPVector<T> v(m_support->GetGame()->NumStrategies());
-  Regret(v);
-  for(i=v.First(); i<=v.Last(); i++)
-    if(v[i] > maxgripe) maxgripe = v[i];
+  for (int i = v.First(); i <= v.Last(); i++) {
+    if (v[i] > maxgripe) {
+      maxgripe = v[i];
+    }
+  }
   return maxgripe;
 }
 
-template <class T> T gbtMixedProfileBase<T>::Payoff(int pl) const
-{
-  if (dynamic_cast<gbtGameBase *>(m_support->GetGame().Get())->m_results.Length() > 0) {
-    return PPayoff(pl, 1, 1);
-  }
-  else {
-    return gbtBehavProfile<T>(gbtMixedProfile<T>(const_cast<gbtMixedProfileBase<T> *>(this))).Payoff(pl);
-  }
-}
+//---------------------------------------------------------------------------
+//                    gbtMixedProfileTable<T> member functions
+//---------------------------------------------------------------------------
 
-template <class T> T
-gbtMixedProfileBase<T>::Payoff(int pl, gbtGameStrategy strategy) const
+template <class T>
+gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtNfgSupport &p_support)
+  : m_profile(p_support->NumStrategies()), m_support(p_support)
 {
-  if (dynamic_cast<gbtGameBase *>(m_support->GetGame().Get())->m_results.Length() > 0) {
-    T value = (T) 0;
-    PPayoff(pl, strategy->GetPlayer()->GetId(), strategy->GetId(), 1,
-	    strategy->GetIndex() + 1, (T) 1, value);
-    return value;
-  }
-  else {
-    gbtMixedProfile<T> foo = NewMixedProfile((T) 0);
-    gbtGamePlayer player = m_support->GetPlayer(strategy->GetPlayer()->GetId());
-    for (int st = 1; st <= player->NumStrategies();
-	 foo(strategy->GetPlayer()->GetId(), st++) = 0);
-    foo(strategy->GetPlayer()->GetId(), m_support->GetIndex(strategy)) = 1;
-    return gbtBehavProfile<T>(foo).Payoff(pl);
-  }
-}
-
-template <class T> T
-gbtMixedProfileBase<T>::Payoff(int pl, 
-			int player1, int strat1, 
-			int player2, int strat2) const
-{
-  if (player1 == player2) return (T) 0;
-  if (dynamic_cast<gbtGameBase *>(m_support->GetGame().Get())->m_results.Length() > 0) {
-    T value = (T) 0;
-    PPayoff(pl, player1, strat1, player2, strat2, 1,
-	    m_support->GetStrategy(player1, strat1)->GetIndex() +
-	    m_support->GetStrategy(player2, strat2)->GetIndex() + 1,
-	    (T) 1, value);
-    return value;
-  }
-  else {
-    gbtMixedProfile<T> foo = NewMixedProfile((T) 0);
-    for (int st = 1; st <= m_support->GetPlayer(player1)->NumStrategies();
-	 foo(player1, st++) = 0);
-    for (int st = 1; st <= m_support->GetPlayer(player2)->NumStrategies();
-	 foo(player2, st++) = 0);
-    foo(player1, strat1) = 1;
-    foo(player2, strat2) = 1;
-    return gbtBehavProfile<T>(foo).Payoff(pl);
-  }
+  SetCentroid();
 }
 
 template <class T> 
-void gbtMixedProfileBase<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
+gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtMixedProfileTable<T> &p_profile)
+  : m_profile(p_profile.m_profile), m_support(p_profile.m_support)
+{ }
+
+
+template <class T> T gbtMixedProfileTable<T>::Payoff(int pl) const
 {
-  if (dynamic_cast<gbtGameBase *>(m_support->GetGame().Get())->m_results.Length() > 0) {
-    value = (T) 0;
-    PPayoff(pl, player1, 1, 1, (T) 1, value);
-  }
-  else {
-    gbtGamePlayer player = GetSupport()->GetPlayer(player1);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      value[st] = Payoff(pl, player->GetStrategy(st));
-    }
-  }
+  return PPayoff(pl, 1, 1);
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::Payoff(int pl, gbtGameStrategy strategy) const
+{
+  T value = (T) 0;
+  PPayoff(pl, strategy->GetPlayer()->GetId(), strategy->GetId(), 1,
+	  strategy->GetIndex() + 1, (T) 1, value);
+  return value;
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::Payoff(int pl, 
+				int player1, int strat1, 
+				int player2, int strat2) const
+{
+  if (player1 == player2) return (T) 0;
+  T value = (T) 0;
+  PPayoff(pl, player1, strat1, player2, strat2, 1,
+	  m_support->GetStrategy(player1, strat1)->GetIndex() +
+	  m_support->GetStrategy(player2, strat2)->GetIndex() + 1,
+	  (T) 1, value);
+  return value;
+}
+
+template <class T> 
+void gbtMixedProfileTable<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
+{
+  value = (T) 0;
+  PPayoff(pl, player1, 1, 1, (T) 1, value);
 }
 
 template <class T>
-bool gbtMixedProfileBase<T>::operator==(const gbtMixedProfileRep<T> &mp) const
+bool gbtMixedProfileTable<T>::operator==(const gbtMixedProfileRep<T> &mp) const
 {
   return (m_support ==
-	  dynamic_cast<const gbtMixedProfileBase<T> &>(mp).m_support &&
+	  dynamic_cast<const gbtMixedProfileTable<T> &>(mp).m_support &&
 	  m_profile == 
-	  dynamic_cast<const gbtMixedProfileBase<T> &>(mp).m_profile);
+	  dynamic_cast<const gbtMixedProfileTable<T> &>(mp).m_profile);
 }
-
-template <class T> gbtOutput &operator<<(gbtOutput &f, 
-					 const gbtMixedProfile<T> &p)
-{ return f; }
 
 
 //-------------------------------------- 
@@ -230,7 +177,7 @@ template <class T> gbtOutput &operator<<(gbtOutput &f,
 //--------------------------------------
 
 template <class T>
-T gbtMixedProfileBase<T>::PPayoff(int pl, int index, int i) const
+T gbtMixedProfileTable<T>::PPayoff(int pl, int index, int i) const
 {
   int pindex = 0;
 
@@ -256,7 +203,7 @@ T gbtMixedProfileBase<T>::PPayoff(int pl, int index, int i) const
 }
 
 template <class T>
-void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl, int const_st,
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int const_st,
 				int cur_pl, long index, T prob, T &value) const
 {
   if (cur_pl == const_pl)
@@ -280,7 +227,7 @@ void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl, int const_st,
 
 
 template <class T>
-void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl1, int const_st1,
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl1, int const_st1,
 				int const_pl2, int const_st2,
 				int cur_pl, long index, T prob, T &value) const
 {
@@ -305,7 +252,7 @@ void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl1, int const_st1,
 }
 
 template <class T>
-void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
 			   T prob, gbtVector<T> &value) const
 {
   if (cur_pl == const_pl)
@@ -332,7 +279,7 @@ void gbtMixedProfileBase<T>::PPayoff(int pl, int const_pl, int cur_pl, long inde
 }
 
 template <class T>
-gbtMixedProfileBase<T>::gbtMixedProfileBase(const gbtBehavProfile<T> &p_profile)
+gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtBehavProfile<T> &p_profile)
   : m_profile(p_profile.GetGame()->NumStrategies()),
     m_support(p_profile.GetGame()->NewNfgSupport())
 {
@@ -353,7 +300,7 @@ gbtMixedProfileBase<T>::gbtMixedProfileBase(const gbtBehavProfile<T> &p_profile)
 }
 
 template <class T>
-T gbtMixedProfileBase<T>::Payoff(const gbtGameOutcome &p_outcome,
+T gbtMixedProfileTable<T>::Payoff(const gbtGameOutcome &p_outcome,
 				int pl) const
 { 
   return p_outcome->GetPayoff(m_support->GetPlayer(pl));
@@ -361,34 +308,162 @@ T gbtMixedProfileBase<T>::Payoff(const gbtGameOutcome &p_outcome,
 
 
 template <class T>
-gbtNfgContingency gbtMixedProfileBase<T>::NewContingency(void) const
+gbtNfgContingency gbtMixedProfileTable<T>::NewContingency(void) const
 {
   return m_support->NewContingency(); 
 }
 
 template <class T>
-gbtMixedProfileBase<T> *gbtMixedProfileBase<T>::Copy(void) const
+gbtMixedProfileTable<T> *gbtMixedProfileTable<T>::Copy(void) const
 {
-  return new gbtMixedProfileBase<T>(*this);
+  return new gbtMixedProfileTable<T>(*this);
 }
 
 
 // FIXME: Semantics of these should be "copy-like", in that the returned
 // profile should be the same, up to the precision change
 template <class T> gbtMixedProfile<double> 
-gbtMixedProfileBase<T>::NewMixedProfile(double) const
+gbtMixedProfileTable<T>::NewMixedProfile(double) const
 {
-  return new gbtMixedProfileBase<double>(m_support);
+  return new gbtMixedProfileTable<double>(m_support);
 }
 
 template <class T> gbtMixedProfile<gbtRational>
-gbtMixedProfileBase<T>::NewMixedProfile(const gbtRational &) const
+gbtMixedProfileTable<T>::NewMixedProfile(const gbtRational &) const
 {
-  return new gbtMixedProfileBase<gbtRational>(m_support);
+  return new gbtMixedProfileTable<gbtRational>(m_support);
 }
 
 template <class T> gbtMixedProfile<gbtNumber>
-gbtMixedProfileBase<T>::NewMixedProfile(const gbtNumber &) const
+gbtMixedProfileTable<T>::NewMixedProfile(const gbtNumber &) const
 {
-  return new gbtMixedProfileBase<gbtNumber>(m_support);
+  return new gbtMixedProfileTable<gbtNumber>(m_support);
 }
+
+
+//---------------------------------------------------------------------------
+//                    gbtMixedProfileTree<T> member functions
+//---------------------------------------------------------------------------
+
+template <class T>
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtNfgSupport &p_support)
+  : m_profile(p_support->NumStrategies()), m_support(p_support)
+{
+  SetCentroid();
+}
+
+template <class T> 
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtMixedProfileTree<T> &p_profile)
+  : m_profile(p_profile.m_profile), m_support(p_profile.m_support)
+{ }
+
+
+template <class T> T gbtMixedProfileTree<T>::Payoff(int pl) const
+{
+  return gbtBehavProfile<T>(gbtMixedProfile<T>(const_cast<gbtMixedProfileTree<T> *>(this))).Payoff(pl);
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::Payoff(int pl, gbtGameStrategy strategy) const
+{
+  gbtMixedProfile<T> foo = NewMixedProfile((T) 0);
+  gbtGamePlayer player = m_support->GetPlayer(strategy->GetPlayer()->GetId());
+  for (int st = 1; st <= player->NumStrategies();
+       foo(strategy->GetPlayer()->GetId(), st++) = 0);
+  foo(strategy->GetPlayer()->GetId(), m_support->GetIndex(strategy)) = 1;
+  return gbtBehavProfile<T>(foo).Payoff(pl);
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::Payoff(int pl, 
+			int player1, int strat1, 
+			int player2, int strat2) const
+{
+  if (player1 == player2) return (T) 0;
+  gbtMixedProfile<T> foo = NewMixedProfile((T) 0);
+  for (int st = 1; st <= m_support->GetPlayer(player1)->NumStrategies();
+       foo(player1, st++) = 0);
+  for (int st = 1; st <= m_support->GetPlayer(player2)->NumStrategies();
+       foo(player2, st++) = 0);
+  foo(player1, strat1) = 1;
+  foo(player2, strat2) = 1;
+  return gbtBehavProfile<T>(foo).Payoff(pl);
+}
+
+template <class T> 
+void gbtMixedProfileTree<T>::Payoff(int pl, int player1, gbtVector<T> &value) const
+{
+  gbtGamePlayer player = GetSupport()->GetPlayer(player1);
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    value[st] = Payoff(pl, player->GetStrategy(st));
+  }
+}
+
+template <class T>
+bool gbtMixedProfileTree<T>::operator==(const gbtMixedProfileRep<T> &mp) const
+{
+  return (m_support ==
+	  dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_support &&
+	  m_profile == 
+	  dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_profile);
+}
+
+template <class T>
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfile<T> &p_profile)
+  : m_profile(p_profile.GetGame()->NumStrategies()),
+    m_support(p_profile.GetGame()->NewNfgSupport())
+{
+  gbtGame efg = p_profile.GetGame();
+  for (int pl = 1; pl <= m_support->NumPlayers(); pl++)  {
+    gbtGamePlayer player = m_support->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++)  {
+      T prob = (T) 1;
+      const gbtArray<int> &behav = player->GetStrategy(st)->GetBehavior();
+
+      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
+	if (behav[iset] > 0)
+	  prob *= p_profile(pl, iset, behav[iset]);
+      }
+      (*this)(pl, st) = prob;
+    }
+  }
+}
+
+template <class T>
+gbtNfgContingency gbtMixedProfileTree<T>::NewContingency(void) const
+{
+  return m_support->NewContingency(); 
+}
+
+template <class T>
+gbtMixedProfileTree<T> *gbtMixedProfileTree<T>::Copy(void) const
+{
+  return new gbtMixedProfileTree<T>(*this);
+}
+
+
+// FIXME: Semantics of these should be "copy-like", in that the returned
+// profile should be the same, up to the precision change
+template <class T> gbtMixedProfile<double> 
+gbtMixedProfileTree<T>::NewMixedProfile(double) const
+{
+  return new gbtMixedProfileTree<double>(m_support);
+}
+
+template <class T> gbtMixedProfile<gbtRational>
+gbtMixedProfileTree<T>::NewMixedProfile(const gbtRational &) const
+{
+  return new gbtMixedProfileTree<gbtRational>(m_support);
+}
+
+template <class T> gbtMixedProfile<gbtNumber>
+gbtMixedProfileTree<T>::NewMixedProfile(const gbtNumber &) const
+{
+  return new gbtMixedProfileTree<gbtNumber>(m_support);
+}
+
+template <class T> gbtOutput &operator<<(gbtOutput &f, 
+					 const gbtMixedProfile<T> &p)
+{ return f; }
+
+

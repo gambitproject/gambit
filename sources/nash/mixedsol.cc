@@ -172,8 +172,9 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 gbtTriState MixedSolution::GetNash(void) const
 {
   gbtTriState answer;
-  if(IsComplete())
-    answer = (m_profile->MaxRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE;
+  if (IsComplete()) {
+    answer = (m_profile->GetMaxRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE;
+  }
   else
     answer =  GBT_TRISTATE_FALSE;
   if (answer == GBT_TRISTATE_FALSE) {
@@ -310,7 +311,7 @@ const gbtNumber &MixedSolution::GetLiapValue(void) const
 { 
   CheckIsValid();
   if(!m_liapValue.Checked())
-    m_liapValue.Set(m_profile->LiapValue());
+    m_liapValue.Set(m_profile->GetLiapValue());
   return m_liapValue.Answer();
 }
 

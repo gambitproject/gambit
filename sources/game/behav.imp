@@ -736,7 +736,7 @@ T gbtBehavProfile<T>::MaxRegret(void)
 template <class T>
 gbtBehavProfile<T>::operator gbtMixedProfile<T>(void) const
 {
-  return gbtMixedProfile<T>(new gbtMixedProfileBase<T>(*this));
+  return gbtMixedProfile<T>(new gbtMixedProfileTree<T>(*this));
 }
 
 
