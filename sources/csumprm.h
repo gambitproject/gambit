@@ -1,4 +1,4 @@
-// @(#)csumprm.h	1.2 9/11/95
+// $Id$
 #ifndef ZSUMPRM_H
 #define ZSUMPRM_H
 
@@ -15,7 +15,7 @@ public:
 	void GetParams(ZSumParams &P);
 };
 
-
+#ifdef CSUM_PRM_INST   // instantiate only once
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("LP Params",parent,LP_HELP)
 
@@ -46,5 +46,6 @@ P.stopAfter=stopAfter;
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
+#endif
 
 #endif

@@ -1,6 +1,6 @@
 // File: seqfprm.h -- definition of params dialog for the sequence form
 // algorithm
-// @(#)seqfprm.h	1.1 8/7/95
+// $Id$
 #ifndef SEQFPRM_H
 #define SEQFPRM_H
 
@@ -18,7 +18,7 @@ public:
 	int	DupStrat(void);
 };
 
-
+#ifdef SEQF_PRM_INST // instantiate only once
 SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Lemke Params",parent)
 
@@ -57,4 +57,6 @@ P.nequilib=nequilib;P.maxdepth=maxdepth;
 // Output stuff
 P.plev=TraceLevel();P.output=OutFile();
 }
+#endif
+
 #endif

@@ -1,11 +1,10 @@
 // File: liapprm.h -- definition of the parameter dialog for the liap
 // algorithm
-// @(#)liapprm.h	1.8 8/7/95
+// $Id$
 #ifndef LIAPPRM_H
 #define LIAPPRM_H
 #include "algdlgs.h"
 
-template <class T>
 class LiapSolveParamsDialog : public OutputParamsDialog
 {
 private:
@@ -15,13 +14,13 @@ private:
 public:
 	LiapSolveParamsDialog(wxWindow *parent);
 	~LiapSolveParamsDialog(void);
-	void GetParams(LiapParams<T> &P);
+	void GetParams(LiapParams &P);
 };
 
+#ifdef LIAP_PRM_INST 			// instantiate only once
 
 //******************************** Constructor/main ************************
-template <class T>
-LiapSolveParamsDialog<T>::LiapSolveParamsDialog(wxWindow *parent)
+LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *parent)
 												:OutputParamsDialog("Liap Params",parent)
 {
 tolOpt=Funct_tolN;tolBrent=Funct_tolBrent;maxitsBrent=Funct_maxitsBrent;maxitsOpt=Funct_maxitsN;
@@ -48,8 +47,7 @@ MakeOutputFields();
 Go();
 }
 
-template <class T>
-void LiapSolveParamsDialog<T>::SaveDefaults(void)
+void LiapSolveParamsDialog::SaveDefaults(void)
 {
 if (!Default()) return;
 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
@@ -59,29 +57,18 @@ wxWriteResource(PARAMS_SECTION,"Func-tolBrent",tolBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsOpt",maxitsOpt,defaults_file);
 }
-template <class T>
-LiapSolveParamsDialog<T>::~LiapSolveParamsDialog(void)
+
+LiapSolveParamsDialog::~LiapSolveParamsDialog(void)
 {SaveDefaults();}
 
-template <class T>
-void LiapSolveParamsDialog<T>::GetParams(LiapParams<T> &P)
+void LiapSolveParamsDialog::GetParams(LiapParams &P)
 {
 Funct_tolBrent=tolBrent;Funct_maxitsBrent=maxitsBrent;
 P.stopAfter=stopAfter;P.nTries=nTries;
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
-#ifdef LIAP_INST 			// need this so we only create this once
-	#ifdef __GNUG__
-		#define TEMPLATE template
-	#elif defined __BORLANDC__
-		#pragma option -Jgd
-		#define TEMPLATE
-	#endif   // __GNUG__, __BORLANDC__
-	TEMPLATE class LiapSolveParamsDialog<double> ;
-	#ifdef __BORLANDC__
-		#pragma option -Jgx
-	#endif
+
 #endif
 
 #endif

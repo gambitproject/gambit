@@ -1,3 +1,4 @@
+// $Id$
 #ifndef LEMKEPRM_H
 #define LEMKEPRM_H
 
@@ -14,7 +15,7 @@ public:
 	void GetParams(LemkeParams &P);
 };
 
-
+#ifdef LEMKE_PRM_INST  // instantiate only once
 LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Lemke Params",parent,LCP_HELP)
 
@@ -45,6 +46,8 @@ void LemkeSolveParamsDialog::GetParams(LemkeParams &P)
 P.stopAfter=stopAfter;P.maxDepth=maxDepth;
 // Output stuff
 P.trace=TraceLevel();P.output=OutFile();
-
 }
+
+#endif
+
 #endif

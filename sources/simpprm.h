@@ -1,3 +1,4 @@
+// $Id$
 #ifndef SIMPPRM_H
 #define SIMPPRM_H
 
@@ -14,7 +15,7 @@ public:
 	void GetParams(SimpdivParams &P);
 };
 
-
+#ifdef SIMP_PRM_INST // instantiate only once
 SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("SimpDiv Params",parent,SIMPDIV_HELP)
 
@@ -50,5 +51,5 @@ P.nRestarts=nRestarts;P.leashLength=leashLength;P.stopAfter=stopAfter;
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
-
+#endif
 #endif

@@ -1,3 +1,4 @@
+// $Id$
 #ifndef GOBITPRM_H
 #define GOBITPRM_H
 
@@ -17,7 +18,7 @@ public:
 	void GetParams(GobitParams<T> &P);
 };
 
-
+#ifdef GOBIT_PRM_INST    // instantiate only once
 //******************************** Constructor/main ************************
 template <class T>
 GobitSolveParamsDialog<T>::GobitSolveParamsDialog(wxWindow *parent)
@@ -79,17 +80,17 @@ P.powLam=PxiType();P.pxifile=PxiFile();
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
-#ifdef GOBIT_INST		// need this so we only create this once
-	#ifdef __GNUG__
-		#define TEMPLATE template
-	#elif defined __BORLANDC__
-		#pragma option -Jgd
-		#define TEMPLATE
-	#endif   // __GNUG__, __BORLANDC__
-	TEMPLATE class GobitSolveParamsDialog<double> ;
-	#ifdef __BORLANDC__
-		#pragma option -Jgx
-	#endif
+#ifdef __GNUG__
+	#define TEMPLATE template
+#elif defined __BORLANDC__
+	#pragma option -Jgd
+	#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+TEMPLATE class GobitSolveParamsDialog<double> ;
+#ifdef __BORLANDC__
+	#pragma option -Jgx
+#endif
+
 #endif
 
 #endif

@@ -1,4 +1,4 @@
-// @(#)enumprm.h	1.7 9/11/95
+// $Id$
 #ifndef ENUMPRM_H
 #define ENUMPRM_H
 
@@ -15,7 +15,7 @@ public:
 	void GetParams(EnumParams &P);
 };
 
-
+#ifdef ENUM_PRM_INST  // instantiate only once
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Enum Params",parent,ENUMMIXED_HELP)
 
@@ -46,5 +46,5 @@ P.stopAfter=stopAfter;
 // Output stuff
 P.trace=TraceLevel();P.tracefile=OutFile();
 }
-
+#endif
 #endif
