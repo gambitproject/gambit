@@ -79,7 +79,7 @@ protected:
 	void StandardSettings(void)
 	{
 	int stopAfter,dom_type;
-	bool use_elimdom,all,subg;
+	bool use_elimdom,all;
 	// a separate case for each of the possible alg/num/game combinations
 	// One Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
@@ -129,9 +129,9 @@ protected:
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
 }
 virtual void Warn(const char *warning) // only warn when solving
-{if (solving) wxMessageBox(warning,"Standard Solution");}
+{if (solving) wxMessageBox((char *)warning,"Standard Solution");}
 public:
-	NfgSolveSettings(const BaseNfg &nf_,bool solving_=true):nf(nf_),solving(solving_)
+	NfgSolveSettings(const BaseNfg &nf_,bool solving_=true):solving(solving_),nf(nf_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -181,7 +181,7 @@ private:
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
 	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SOLVE_HELP);}
-	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &)
+	static void nfg_algorithm_box_func(wxRadioBox &,wxEvent &)
 	{/*((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);*/}
 	// Event handlers: high level
 	void OnEvent(int event)
