@@ -42,9 +42,9 @@ class Node    {
     Efg *Game(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
+    const gArray<Node *> &Children(void) const { return children; }
     Infoset *GetInfoset(void) const   { return infoset; }
-    bool IsTerminal(void) const { if (children.Length() == 0) return true; 
-                                  else return false; }
+    bool IsTerminal(void) const { return (children.Length() == 0); }
     bool IsNonterminal(void) const { return !IsTerminal(); }
     EFPlayer *GetPlayer(void) const
       { if (!infoset)   return 0;

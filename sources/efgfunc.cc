@@ -195,11 +195,7 @@ static Portion *GSM_ChanceProb(Portion **param)
 static Portion *GSM_Children(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  int child;
-  Portion* por = new ListPortion();
-  for(child=1; child <= n->NumChildren(); child++)
-    ((ListPortion*) por)->Append(new NodePortion(n->GetChild(child)));
-  return por;
+  return ArrayToList(n->Children());
 }
 
 //---------------
