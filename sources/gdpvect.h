@@ -45,8 +45,6 @@ template <class T> class gDPVector : public gPVector<T>  {
     T operator*(const gDPVector<T> &v) const;
     gDPVector<T> &operator*=(const T &c);
     gDPVector<T> operator/(const T &c) const;
-    gDPVector<T> operator/(const gDPVector<T> &v) const;
-    gDPVector<T> &operator/=(const gDPVector<T> &v);
     
     int operator==(const gDPVector<T> &v) const;
     int operator!=(const gDPVector<T> &v) const;
@@ -56,7 +54,7 @@ template <class T> class gDPVector : public gPVector<T>  {
     void Dump(gOutput &) const;
 };
 
-//template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
+template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
 
 #endif   // GDPVECTOR_H
 

@@ -169,22 +169,6 @@ template <class T> gPVector<T> gPVector<T>::operator/(T c)
   return tmp;
 }
 
-template <class T>
-gPVector<T> gPVector<T>::operator/(const gPVector<T> &v) const
-{
-  assert( svlen==v.svlen );
-  gPVector<T> tmp(*this);
-  tmp.gVector<T>::operator/=(v);
-  return tmp;
-}
-
-template <class T> gPVector<T>& gPVector<T>::operator/=(const gPVector<T> &v)
-{
-  assert( svlen==v.svlen );
-  gVector<T>::operator/=(v);
-  return (*this);
-}
-
 template <class T> int gPVector<T>::operator==(const gPVector<T> &v) const
 {
   assert( svlen==v.svlen );

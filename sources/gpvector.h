@@ -8,6 +8,7 @@
 #define GPVECTOR_H
 
 #include "gvector.h"
+#include "gtuple.h"
 
 template <class T> class gPVector : public gVector<T> {
  private:
@@ -55,8 +56,6 @@ template <class T> class gPVector : public gVector<T> {
   T operator*(const gPVector<T> &v) const;
   gPVector<T>& operator*=(const T c);
   gPVector<T> operator/(T c);
-  gPVector<T> operator/(const gPVector<T> &v) const;
-  gPVector<T>& operator/=(const gPVector<T> &v);
 
   int operator==(const gPVector<T> &v) const;
   int operator!=(const gPVector<T> &v) const;
@@ -67,7 +66,7 @@ template <class T> class gPVector : public gVector<T> {
   void Dump(gOutput &) const;
 };
 
-//template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
+template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
 
 #endif   //# GPVECTOR_H
 

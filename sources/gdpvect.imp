@@ -201,23 +201,6 @@ template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
   return tmp;
 }
 
-template <class T>
-gDPVector<T> gDPVector<T>::operator/(const gDPVector<T> &v) const
-{
-  assert(dvlen == v.dvlen);
-  gDPVector<T> tmp(*this);
-  tmp.gPVector<T>::operator/=(v);
-  return tmp;
-}
-
-template <class T>
-gDPVector<T> &gDPVector<T>::operator/=(const gDPVector<T> &v)
-{
-  assert(dvlen == v.dvlen);
-  gPVector<T>::operator/=(v);
-  return *this;
-}
-
 template <class T> int gDPVector<T>::operator==(const gDPVector<T> &v) const
 {
   assert(dvlen == v.dvlen);
