@@ -154,11 +154,21 @@ template <class T> void NFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 
 template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 {
-  if(format) {
+      // Header information
+  if(format==3) {
+    N.WriteNfgFile(f);
+  }
+  else if(format==2) {
+    int numcols = 2+N.ProfileLength();
+    f << "\n" << numcols;
+    for(int i=1;i<=numcols;i++) f << " " << i;
+    }
+      // PXI output
+  else if(format==1) {
     f<< " ";
     for (int pl = 1; pl <= N.NumPlayers(); pl++)  
       for (int strat = 1; strat <= N.NumStrats(pl); strat++)  
-	  f << pp(pl,strat) << " ";
+	f << pp(pl,strat) << " ";
   }
   else  f << " pp = " << pp;
 }

@@ -127,11 +127,31 @@ template <class T> void EFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 template <class T> void EFGobitFunc<T>
 ::Output(gOutput &f, int format = 0) const
 {
-  if(format) {
+  int pl, iset, act,nisets;
+
+      // Header information
+  if(format==3) {
+    nisets=0;
+    for (pl = 1; pl <= E.NumPlayers(); pl++)  
+      for (iset = 1; iset <= E.NumInfosets(1, pl); iset++)
+	nisets++;
+    f << nisets;
+    for (pl = 1; pl <= E.NumPlayers(); pl++)  
+      for (iset = 1; iset <= E.NumInfosets(1, pl); iset++)  
+	f << " " << E.NumActions(1,pl,iset);
+    f << "\n";
+  }
+  else if(format==2) {
+    int numcols = 2+E.ProfileLength();
+    f << "\n" << numcols;
+    for(int i=1;i<=numcols;i++) f << " " << i;
+  }
+      // PXI output
+  else if(format==1) {
     f<< " ";
-    for (int pl = 1; pl <= E.NumPlayers(); pl++)  
-      for (int iset = 1; iset <= E.NumInfosets(1, pl); iset++)  
-	for(int act = 1;act <= E.NumActions(1,pl,iset);act++)
+    for (pl = 1; pl <= E.NumPlayers(); pl++)  
+      for (iset = 1; iset <= E.NumInfosets(1, pl); iset++)  
+	for(act = 1;act <= E.NumActions(1,pl,iset);act++)
 	  f << pp(pl,iset,act) << " ";
   }
   else  f << " pp = " << pp;
