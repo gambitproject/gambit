@@ -99,6 +99,10 @@ class ExtForm    {
       { return nodes.NumNodes(pl); }
     int NumNodes(int pl, int iset) const
       { return nodes.NumNodes(pl, iset); }
+    int NumPlayers(void) const
+      { return nodes.NumPlayers(); }
+    int NumInfosets(int pl) const
+      { return nodes.NumInfosets(pl); }
 
     gString GetNodeLabel(const Node &n) const
       { return nodes.GetNodeName(n); }

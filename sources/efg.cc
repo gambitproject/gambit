@@ -280,6 +280,26 @@ void ExtForm::WriteToFile(output &f) const
 
 int ExtForm::yyparse(void)
 {
-  return nodes.yyparse();
+  for (int i = 1; i <= players.NumPlayers(); i++)
+    nodes.AddPlayer(i);
+
+  if (nodes.yyparse())  return 1;
+
+      // explicitly create infosets for dummy nodes
+  for (i = 1; i <= nodes.NumInfosets(-1); i++)
+    players.CreateInfoset(-1, efg_no, 0);
+
+      // here, we do some checking for semantic-type errors in the file
+  if (nodes.NumPlayers() != players.NumPlayers())  return 1;
+
+  for (i = -1; i <= nodes.NumPlayers(); i++)  {
+    if (nodes.NumInfosets(i) != players.NumInfosets(i, efg_no))  return 1;
+    for (int j = 1; j <= nodes.NumInfosets(i); j++)
+      for (int k = 1; k <= nodes.NumNodes(i, j); k++)
+	if (nodes.NumChildren(Node(efg_no, i, j, k)) !=
+	    players.NumBranches(i, efg_no, j))  return 1;
+  }
+
+  return 0;
 }
 

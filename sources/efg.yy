@@ -8,26 +8,28 @@
 #include "problem.h"
 
 Problem *the_problem;
-gString last_name;
+gString *last_name;
 int last_int;
 double last_double;
 
 /* Here are some scratch variables... */
 
-int foo, bar, bletch;
+int foo, bar;
 
 
 input *input_stream;
 
 void efg_set_input(const gString &s)
 {
-  input_stream = new input((char *) s);
+  input_stream = new input((const char *) s);
+  last_name = new gString;
 }
 
 void efg_close_input(void)
 {
   delete input_stream;
   input_stream = 0;
+  delete last_name;
 }
 
 void efg_set_problem(Problem *p)
@@ -64,20 +66,18 @@ int efg_yylex(void);
 
 %%
 
-efgfile:    LBRACE NAME   { the_problem->SetTitle(last_name); }
-            players 
-            outcomes games RBRACE  
-            { return 0; }
+efgfile:    LBRACE NAME { the_problem->SetTitle(*last_name); }
+            players outcomes games RBRACE  { return 0; }
 
 /* Parsing the player list */
 
 players:    LBRACE chance_name RBRACE
        |    LBRACE chance_name player_names RBRACE
 
-chance_name:  NAME   { the_problem->SetPlayerName(0, last_name); }
+chance_name:  NAME   { the_problem->SetPlayerName(0, *last_name); }
 
-player_names: NAME   { the_problem->AppendPlayer(last_name); }
-            | player_names NAME   { the_problem->AppendPlayer(last_name); }
+player_names: NAME   { the_problem->AppendPlayer(*last_name); }
+            | player_names NAME   { the_problem->AppendPlayer(*last_name); }
 
 /* Parsing the outcome list */
            
@@ -89,7 +89,7 @@ outcome_list:  outcome
 
 outcome:    LBRACE INTEGER  { the_problem->CreateOutcome(bar = last_int); }
             outcome_vector
-            NAME { the_problem->SetOutcomeName(bar, last_name); }
+            NAME { the_problem->SetOutcomeName(bar, *last_name); }
             RBRACE
 
 outcome_vector:  LBRACE RBRACE
@@ -112,7 +112,7 @@ games:      game
 
 game:       LBRACE INTEGER
             NAME   { the_problem->CreateGame(last_int, 1);
-                     the_problem->SetGameName(last_int, last_name);
+                     the_problem->SetGameName(last_int, *last_name);
                      if (the_problem->ReadExtForm(last_int))  return 1;  }
             RBRACE
 
@@ -157,7 +157,7 @@ int yylex(void)
   
   if (isalpha(c) || c == '"')  {
     input_stream->unget(c);
-    *input_stream >> last_name;
+    *input_stream >> *last_name;
 
     return NAME;
   }
@@ -183,12 +183,12 @@ int yylex(void)
 	*input_stream >> c;
       }
       input_stream->unget(c);
-      last_double = atof((char *) s);
+      last_double = atof((const char *) s);
       return FLOAT;
     }
     else   {   // integer number
       input_stream->unget(c);
-      last_int = atoi((char *) s);
+      last_int = atoi((const char *) s);
       return INTEGER;
     }
   }
