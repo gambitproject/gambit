@@ -7,30 +7,34 @@
 #include "glist.h"
 #include "rational.h"
 #include "nfg.h"
+#include "nfplayer.h"
+#include "nfstrat.h"
+
 
 %}
 
 %name NfgFileReader
 
 %define MEMBERS      gInput &infile;  \
-                     gString last_name;  gRational last_rational; \
+                     gString last_name;  gNumber last_number; \
                      gString title; \
-                     Nfg *& Nrat; \
+                     Nfg *& N; \
                      int ncont, pl, cont; \
                      gList<gString> names; \
-                     gList<gRational> numbers; \
+                     gList<gNumber> numbers; \
                      gList<gString> stratnames; \
                      \
-                     virtual bool CreateNfg(const gList<gString> &, \
-					    const gList<gRational> &, \
-					    const gList<gString> &) = 0; \
-                     virtual void SetPayoff(int cont, int pl, \
-					    const gRational &) = 0; \
+                     bool CreateNfg(const gList<gString> &, \
+					    const gList<gNumber> &, \
+					    const gList<gString> &); \
+                     void SetPayoff(int cont, int pl, \
+					    const gNumber &); \
+		     int Parse(void); \
                      virtual ~NfgFileReader();
 
-%define CONSTRUCTOR_PARAM     gInput &f, Nfg *& Nr
+%define CONSTRUCTOR_PARAM     gInput &f, Nfg *& nfg
 
-%define CONSTRUCTOR_INIT      : infile(f), Nrat(Nr)
+%define CONSTRUCTOR_INIT      : infile(f), N(nfg)
 
 %token LBRACE
 %token RBRACE
@@ -43,7 +47,7 @@
 nfgfile:      header 
               { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
-	        Nrat->SetTitle(title);
+	        N->SetTitle(title);
               }              
               body  { return 0; }
 
@@ -77,7 +81,7 @@ dimensionality:   LBRACE intlist RBRACE
 intlist:      integer
        |      intlist integer
 
-integer:      NUMBER  { numbers.Append(last_rational); }
+integer:      NUMBER  { numbers.Append(last_number); }
 
 
 body:         { cont = 1;
@@ -88,12 +92,12 @@ payofflist:   payoff
           |   payofflist payoff
 
 payoff:       NUMBER
-                {  if (pl > Nrat->NumPlayers())   {
+                {  if (pl > N->NumPlayers())   {
 		    cont++;
 		    pl = 1;
 		  }	
 		if (cont > ncont)  YYERROR;
-		SetPayoff(cont, pl, last_rational);
+		SetPayoff(cont, pl, last_number);
 		pl++;
 	      }
 
@@ -146,7 +150,7 @@ int NfgFileReader::yylex(void)
   }
   else if (isdigit(c) || c == '-')   {
     infile.unget(c);
-    infile >> last_rational;
+    infile >> last_number;
     return NUMBER;
   }
   
@@ -160,33 +164,10 @@ int NfgFileReader::yylex(void)
 
 NfgFileReader::~NfgFileReader()   { }
 
-#include "nfplayer.h"
-#include "nfstrat.h"
 
-class NfgFile : public NfgFileReader   {
-  private:
-    Nfg *fooR;
-
-  public:
-    NfgFile(gInput &, Nfg *&);
-    virtual ~NfgFile();
-
-    int Parse(void);
-    bool CreateNfg(const gList<gString> &, const gList<gRational> &,
-		   const gList<gString> &);
-    void SetPayoff(int cont, int pl, const gRational &);
-};
-
-NfgFile::NfgFile(gInput &f, Nfg *& N)
-  : NfgFileReader(f, N), fooR(N)
-{ }
-
-NfgFile::~NfgFile()
-{ }
-
-bool NfgFile::CreateNfg(const gList<gString> &players,
-			const gList<gRational> &dims,
-			const gList<gString> &strats)
+bool NfgFileReader::CreateNfg(const gList<gString> &players,
+			      const gList<gNumber> &dims,
+			      const gList<gString> &strats)
 {
   if (players.Length() != dims.Length())   return false;
 
@@ -201,29 +182,28 @@ bool NfgFile::CreateNfg(const gList<gString> &players,
   
   ORD_PTR ord = &lex;
   gSpace *space = new gSpace;
-  Nrat = new Nfg(dim, space, new term_order(space, ord));
+  N = new Nfg(dim, space, new term_order(space, ord));
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
-    Nrat->Players()[i]->SetName(players[i]);
+    N->Players()[i]->SetName(players[i]);
     if (strats.Length() > 0)
       for (int j = 1; j <= dim[i]; j++)
-	Nrat->Strategies(i)[j]->name = strats[strat++];
+	N->Strategies(i)[j]->name = strats[strat++];
   }
 
   return true;
 }
 
-void NfgFile::SetPayoff(int cont, int pl,
-			const gRational &value)
+void NfgFileReader::SetPayoff(int cont, int pl, const gNumber &value)
 {
   if (pl == 1)
-    Nrat->SetOutcome(cont, Nrat->NewOutcome());
-  Nrat->SetPayoff(Nrat->GetOutcome(cont), pl, 
-		  gPoly<gNumber>(Nrat->Parameters(), value, Nrat->ParamOrder()));
+    N->SetOutcome(cont, N->NewOutcome());
+  N->SetPayoff(N->GetOutcome(cont), pl, 
+		  gPoly<gNumber>(N->Parameters(), value, N->ParamOrder()));
 }
 
 
-int NfgFile::Parse(void)
+int NfgFileReader::Parse(void)
 {
   infile.seekp(0);
   static char *prologue = { "NFG 1 " };
@@ -250,7 +230,7 @@ int ReadNfgFile(gInput &f, Nfg *& Nrat)
 {
   assert(!Nrat);
 
-  NfgFile R(f, Nrat);
+  NfgFileReader R(f, Nrat);
 
   if (R.Parse())   {
     if (Nrat)   { delete Nrat;  Nrat = 0; }
