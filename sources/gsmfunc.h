@@ -217,6 +217,7 @@ class CallFuncObj : public FuncDescObj
 
   static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
   static int _ListNestedLevel( ListPortion* p );
+  static bool _ListNestedCheck( Portion* p, const ParamInfoType& info );
 
   static void _ErrorMessage
     (

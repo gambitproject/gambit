@@ -251,9 +251,111 @@ Portion* GSM_Dot_Rational(Portion **param)
 }
 
 
+//--------------------------- ArgMax -------------------------
+
+Portion* GSM_ArgMax_Integer( Portion** param )
+{
+  Portion* p;
+  long max = 0;
+  int index = 0;
+  int i;
+  assert( param[0]->Type() == porLIST );
+  for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
+  {
+    p = (*(ListPortion*) param[0])[i];
+    if( p->Type() == porINTEGER )
+    {
+      if( ((IntPortion*) p)->Value() >= max )
+      {
+	max = ((IntPortion*) p)->Value();
+	index = i;
+      }
+    }
+    else
+      return new ErrorPortion( "Bad dimensionality" );
+  }
+  return new IntValPortion( index );
+}
+
+Portion* GSM_ArgMax_Float( Portion** param )
+{
+  Portion* p;
+  double max = 0;
+  int index = 0;
+  int i;
+  assert( param[0]->Type() == porLIST );
+  for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
+  {
+    p = (*(ListPortion*) param[0])[i];
+    if( p->Type() == porFLOAT )
+    {
+      if( ((FloatPortion*) p)->Value() >= max )
+      {
+	max = ((FloatPortion*) p)->Value();
+	index = i;
+      }
+    }
+    else
+      return new ErrorPortion( "Bad dimensionality" );
+  }
+  return new IntValPortion( index );
+}
+
+Portion* GSM_ArgMax_Rational( Portion** param )
+{
+  Portion* p;
+  gRational max = 0;
+  int index = 0;
+  int i;
+  assert( param[0]->Type() == porLIST );
+  for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
+  {
+    p = (*(ListPortion*) param[0])[i];
+    if( p->Type() == porRATIONAL )
+    {
+      if( ((RationalPortion*) p)->Value() >= max )
+      {
+	max = ((RationalPortion*) p)->Value();
+	index = i;
+      }
+    }
+    else
+      return new ErrorPortion( "Bad dimensionality" );
+  }
+  return new IntValPortion( index );
+}
 
 
+//--------------------------- Transpose -------------------------
 
+Portion* GSM_Transpose_Integer( Portion** param )
+{
+  int i;
+  int j;
+  int size = 0;
+  ListPortion* p;
+  ListPortion* s;
+  assert( param[0]->Type() == porLIST );
+  size = ((ListPortion*) param[0])->Length();
+  for( i = 1; i <= size; i++ )
+  {
+    if( (*(ListPortion*) param[0])[i]->Type() != porLIST )
+      return new ErrorPortion( "Bad dimensionality" );
+    if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != size )
+      return new ErrorPortion( "Bad dimensionality" );
+  }
+  p = new ListValPortion();
+  for( i = 1; i <= size; i++ )
+  {
+    s = new ListValPortion();
+    for( j = 1; j <= size; j++ )
+    {
+      s->Append( (*(ListPortion*)(*(ListPortion*) param[0])[j])[i]->ValCopy());
+    }
+    p->Append( s );
+  }
+  return p;
+}
 
 
 
@@ -388,6 +490,24 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_Dot_Rational, 2);
   FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", porLIST | porRATIONAL);
   FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", porLIST | porRATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  //----------------------- ArgMax ------------------------
+  FuncObj = new FuncDescObj( "ArgMax" );
+  FuncObj->SetFuncInfo(GSM_ArgMax_Integer, 1);
+  FuncObj->SetParamInfo(GSM_ArgMax_Integer, 0, "x", porLIST | porINTEGER );
+  FuncObj->SetFuncInfo(GSM_ArgMax_Float, 1);
+  FuncObj->SetParamInfo(GSM_ArgMax_Float, 0, "x", porLIST | porFLOAT );
+  FuncObj->SetFuncInfo(GSM_ArgMax_Rational, 1);
+  FuncObj->SetParamInfo(GSM_ArgMax_Rational, 0, "x", porLIST | porRATIONAL );
+  gsm->AddFunction(FuncObj);
+
+  //------------------ Transpose -----------------------
+  FuncObj = new FuncDescObj( "Transpose" );
+  FuncObj->SetFuncInfo(GSM_Transpose_Integer, 1);
+  FuncObj->SetParamInfo(GSM_Transpose_Integer,
+			0, "x", porLIST | porINTEGER, 
+			NO_DEFAULT_VALUE, PASS_BY_VALUE, 2 );
   gsm->AddFunction(FuncObj);
 
 }
