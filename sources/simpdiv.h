@@ -10,15 +10,15 @@
 #include "normal.h"
 #include "glist.h"
 #include "grarray.h"
-#include "gsignal.h"
+#include "gstatus.h"
 
 class SimpdivParams     {
-  public:
-    int plev, number, ndivs, leash;
-    gOutput *output;
-    gSignal &sig;
-    
-    SimpdivParams(void);
+	public:
+		int plev, number, ndivs, leash;
+		gOutput *output;
+		gStatus &status;
+
+    SimpdivParams(gStatus &status_=gstatus);
 };
 
 template <class T> class SimpdivModule  {

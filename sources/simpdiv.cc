@@ -22,8 +22,8 @@
 #include "gwatch.h"
 #include "simpdiv.h"
 
-SimpdivParams::SimpdivParams(void) 
-  : number(1), plev(0), ndivs(20), leash(0), output(&gnull), sig(gbreak)
+SimpdivParams::SimpdivParams(gStatus &status_)
+  : number(1), plev(0), ndivs(20), leash(0), output(&gnull), status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -280,7 +280,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
     jj=pi(t,1);
     hh=pi(t,2);
     if(jj==j) {
-      k=get_c(jj,hh);
+			k=get_c(jj,hh);
       while(f) {
 	if(k==hh)f=0;
 	ab(j,k)= ab(j,k)-((T)(1));
@@ -344,7 +344,7 @@ template <class T> int SimpdivModule<T>::get_c(int j, int h)
   int hh;
   
   hh=get_b(j,h);
-  hh++;
+	hh++;
   if(hh>nstrats[j])hh=1;
   return hh;
 }
@@ -376,7 +376,7 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
       maxz=maxval-payoff;
       ylabel[1]=i;
       ylabel[2]=jj;
-    }
+		}
   }
   if(maxz<bestz) {
     bestz=maxz;
@@ -412,7 +412,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 //  *params.output << "\ny = " << y;
   
   solutions.Flush();
-  for(soln=0;soln<params.number && !params.sig.Get();soln++)
+  for(soln=0;soln<params.number && !params.status.Get();soln++)
     {
       k=1;
       d=(T) 1.0 / (T) k;
@@ -424,7 +424,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 	    if(j>1)y(i,j)=(T)(0);
 	}
       
-      for(qf=0;qf!=1 && d > mingrid && !params.sig.Get();)
+      for(qf=0;qf!=1 && d > mingrid && !params.status.Get();)
 	{
 	  ii=0;
 	  d=(T)(d/(T)2.0);
@@ -440,7 +440,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
       *params.output << " maxz = " << maxz; 
       solutions.Append(y);
     }
-  if(params.sig.Get()) params.sig.Reset();
+	if(params.status.Get()) params.status.Reset();
 }
 
 
