@@ -2,12 +2,14 @@
     <title>Introduction</title>
     <para>An introduction to Gambit</para>
 
-    <sect1><title>History and acknowledgements</title>
+<sect1 id="intro.history">
+<title>History and acknowledgements</title>
       <para>
 The Gambit Project is a project for the development of computer code
 for the solution of extensive and normal form games.  The software
-developed under the project is public domain. The Gambit Project has been
-funded in part by National Science Foundation grants SBR-9308637 and
+developed under the project is distributed under the GNU General Public
+License.  The Gambit Project has been
+funded in the past by National Science Foundation grants SBR-9308637 and
 SBR-9617854 to the California Institute of Technology and SBR-9308862
 to the University of Minnesota.</para>
 
@@ -62,120 +64,207 @@ equilibrium components in two person games.
       </para>
 
       <para>
-This manual documents version 0.97 of Gambit.  With this version,
-the goal is to move Gambit towards the development and release practices
-of other Open Source software projects.  Therefore, releases will take
-place more frequently, with unstable releases being made publicly
-available for testing.  The goal will be to provide two stable releases
-a year, roughly coinciding with university semesters.
-	</para>
+Version 0.97.0.1 of Gambit was released on September 1, 2002.  This
+release featured
+<itemizedlist>
+<listitem>
+<para>
+A completely redesigned graphical user interface, built with the
+wxWindows 2.3.2 cross-platform toolkit.  Previous releases of 
+Gambit used the older 1.xx series of wxWindows.  The new version provides
+substantially greater functionality and stability.  The interface
+redesign should make many game creation tasks easier.
+</para>
+</listitem>
+<listitem>
+<para>
+An implementation of a new algorithm for computing the logistic
+quantal response equilibrium correspondence, as described in
+<citation><xref linkend="Tur02"></citation>.  This algorithm is now
+essentially unlimited in the size of lambda it can compute, and is
+much faster than the previous implementation provided by Gambit.  This
+algorithm is now recommended for computing one Nash equilibrium, especially
+in games with more than two players.
+</para>
+</listitem>
+<listitem>
+<para>
+A new function minimization implementation, derived from that available
+in the GNU Scientific Library, is used in the Lyapunov function minimization
+algorithm (<function>LiapSolve</function>).  It appears this implementation
+is at least somewhat superior to that provided in previous versions.
+</para>
+</listitem>
+<listitem>
+<para>
+The command language interface for Windows has been replaced with a new
+one built with wxWindows.  Additionally, this windowed interface is also
+available under *nix (called <application>wxgcl</application>).
+</para>
+</listitem>
+</itemizedlist>
 
-      <para>
-Beginning with version 0.97, Gambit releases will be numbered
-0.x.y.z, with x denoting the major version, y the minor version, and
-z the patchlevel.  For historical reasons, the version number will
-always be preceded by the zero.  Whether a release is considered
-stable will be indicated on the Gambit website, and in the 
-<guimenuitem>About</guimenuitem> menu item on the 
-<guimenu>Help</guimenu> menu in the graphical interface.
-      </para>
+</para>
 
-      <para>
-The initial release of version 0.97 improves upon 0.96 in two main
-ways.  First, the graphical interface has been reimplemented in
-version 2.2 of the wxWindows library.  This redesigned library offers
-more functionality than the 1.xx series used in previous releases,
-and therefore the graphical interface has been updated to reflect
-modern practices in user interface, menu layout, and so forth.  These
-changes should eliminate many of the misfeatures of the earlier versions
-of the graphical interface.  Secondly, the structure of the project
-files has been reorganized to bring it more in line with the practices
-of most Open Source projects, a process which will continue over the
-next several releases.  The goal is to make the internal API accessible
-enough for use in developing new tools for game theoretic analysis.
-For version 0.97, there are no significant changes to the command language
-itself.  A console-based binary can now be built under Windows for
-better scripting support on that platform, and a new cross-platform
-window interface is provided, replacing the MFC-based interface for
-Windows in version 0.96.
-      </para>
 </sect1>
 
-    <sect1><title>Getting and installing Gambit</title>
-      <para>
+<sect1 id="intro.versioning">
+<title>Gambit versions and version numbers</title>
+
+<para>
+Beginning with version 0.97, Gambit versions will be numbered in the form
+<literal>0.x.y.z</literal>, where <literal>x</literal> is the 
+&quot;major&quot; version number, <literal>y</literal> is the
+&quot;minor&quot; version number, and <literal>z</literal> is the
+&quot;micro&quot; (or &quot;patch&quot;) version number.  The initial
+zero in the version number is there for historical reasons.  Gambit
+follows the Linux kernel numbering style: releases deemed
+&quot;stable&quot; will have even minor version numbers, and releases
+deemed &quot;unstable&quot; will have odd minor version numbers.  So,
+version 0.97.0.1 is the first release in the stable 0.97.0 series;
+version 0.97.1.1 will be the first release in the unstable 0.97.1 series.
+</para>
+
+<para>
+The goal is to release a new initial stable version in a series on
+a schedule roughly corresponding to the academic year (at least, for those
+on the semester system), for the benefit of those who like to use Gambit
+for instructional purposes.  So, for example, version 0.97.0.1 was released
+on September 1, 2002; this is a stable release, and any future releases of
+0.97.0.z will correspond to bug fixes and patches.
+At some point in the fall, releases numbered 0.97.1.z will begin to appear;
+these will contain relatively major innovations and changes relative
+to the 0.97.0 series.  Finally, when the 0.97.1 series stabilizes, it
+will be released, hopefully over the holidays, as version 0.97.2.0.
+</para>
+
+<para>
+Which version of Gambit you should use depends on your needs.  For classroom
+use, we'd certainly recommend the current stable version, since nothing
+will frustrate your students faster than having the program crash on them
+in the middle of their homework.  For research use, you may find either
+of them appropriate; while the &quot;unstable&quot; series might be a bit
+buggy, it may also have some features you'll find useful.  Finally, if
+you're interested in contributing to Gambit, you'll definitely want to
+work with the unstable series, since that represents the latest-and-greatest
+on the bleeding edge of computational game theory development.
+</para>
+
+</sect1>
+
+
+<sect1 id="intro.revisionhistory">
+<title>Gambit release history</title>
+
+<para>
+This is an outline of the release history of Gambit (at least in the
+&quot;postmodern&quot; era beginning with release 0.97.0.1).
+<itemizedlist>
+<listitem>
+<para>Version 0.97.0.1, released September 1, 2002:  Initial public release,
+with rebuilt graphical interface, new implementations of 
+<function>QreSolve</function> and <function>LiapSolve</function>, and
+a new windowed interface for the command language.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+
+<sect1 id="intro.getting">
+<title>Getting and installing Gambit</title>
+<para>
 The development and testing of Gambit takes place primarily
 on the following platforms:
-	<itemizedlist>
-	  <listitem>
-	    <para>
-	      Microsoft Windows 95, 98 and NT, using the free Borland C++ 5.5
-	      compiler.  The binary distributions for Windows should work on
-	      other versions of Windows, but may not be tested.
-	      </para>
-	    </listitem>
-	  <listitem>
-	    <para>
-	      RedHat Linux 6.x and 7.x, using the GTK toolkit and the latest
-	      version of <application>gcc</application>.  The wxWindows library
-	      also supports Motif/Lesstif, and the code should compile
-	      on other flavors of Linux and Unix; again, however, these
-	      may not be tested.
-	      </para>
-	    </listitem>
-	</itemizedlist>
-      </para>
+<itemizedlist>
+<listitem>
+<para>
+Microsoft Windows 95, 98 and NT, using the free Borland C++ 5.5
+compiler.  The binary distributions for Windows should work on
+other versions of Windows, but may not be tested.  Reports are
+always welcome.
+</para>
+</listitem>
+<listitem>
+<para>
+RedHat Linux 6.x and 7.x, using wxWindows, the GTK toolkit and
+<application>gcc</application>.  The wxWindows library
+also supports Motif/Lesstif, and the code should compile
+on other flavors of Linux and Unix; again, however, these
+may not be tested.  Again, reports are always welcome.
+</para>
+</listitem>
+</itemizedlist>
+</para>
 
-      <para>
-	The latest stable and unstable releases of Gambit can always
-	be found at the Gambit website at
-	<ulink url="http://www.hss.caltech.edu/gambit">http://www.hss.caltech.edu/gambit</ulink>.
-      </para>
-    </sect1>
+<para>
+The latest stable and unstable releases of Gambit can always
+be found at the Gambit website at
+<ulink url="http://www.hss.caltech.edu/gambit">http://www.hss.caltech.edu/gambit</ulink>.
+You can build Gambit from source, in which case you will need one
+of the compilers mentioned above, and the appropriate version of 
+wxWindows.  Build instructions are found in the file INSTALL in the
+main directory of the source distribution.  Gambit is also distributed
+in binary form for Windows, in which case you don't need the compiler
+or wxWindows installed.  There currently are not any prebuilt binaries
+for *nix.
+</para>
+</sect1>
 
-    <sect1><title>Contacting or contributing to the Gambit Project</title>
-      <para>
-	All email correspondence to the Gambit Project can be addressed to
-	<email>gambit@hss.caltech.edu</email>.  We welcome all manner of
-	suggestions, including feature requests, documentation improvements,
-	bug reports, bug fixes, and interest in contributing new code to
-	the Gambit library.
-      </para>
+<sect1 id="intro.contact">
+<title>Contacting or contributing to the Gambit Project</title>
+<para>
+All email correspondence to the Gambit Project can be addressed to
+<literal>gambit (at) hss (dot) caltech (dot) edu</literal>.
+We welcome all manner of
+suggestions, including feature requests, documentation improvements,
+bug reports, bug fixes, and interest in contributing new code to
+the Gambit library.
+</para>
 
-      <para>
-	If you encounter a bug in Gambit, we want to hear about it.
-	It will be most helpful if, in reporting your problem, you
-	include the following information:
-	<orderedlist>
-	  <listitem>
-	    <para>The version number</para>
-	  </listitem>
-	  <listitem>
-	    <para>The platform(s) on which you experienced the problem</para>
-	  </listitem>
-	  <listitem>
-	    <para>As complete a description of the circumstances of the
-	      problem as possible.  It is especially helpful if you can
-	      provide a sequence of steps which reproduces the problem.</para>
-	  </listitem>
-	</orderedlist>
-	</para>
+<para>
+If you encounter a bug in Gambit, we want to hear about it.
+It will be most helpful if, in reporting your problem, you
+include the following information:
+<orderedlist>
+<listitem>
+<para>The version number</para>
+</listitem>
+<listitem>
+<para>The platform(s) on which you experienced the problem</para>
+</listitem>
+<listitem>
+<para>
+As complete a description of the circumstances of the
+problem as possible.  It is especially helpful if you can
+provide a sequence of steps which reproduces the problem.</para>
+</listitem>
+</orderedlist>
+</para>
 
-      <para>
-	Currently, there is no formal techincal support for Gambit.
-	However, the developers try very hard to respond to user comments
-	and suggestions, and will make every effort to answer any questions
-	regarding the program and its documentation.
-	</para>
+<para>
+Mailing lists also exist for getting information about Gambit.
+See the Gambit website for details.
+</para>
 
-      <para>
-	We hope you will find Gambit to be a useful tool for research and
-	instruction.
-      </para>
+<para>
+Should you need to contact the Gambit developers by physical mail,
+send your correspondence to
+<address>
+The Gambit Project
+c/o Prof. Theodore Turocy
+Department of Economics
+Texas A&amp;M University
+<city>College Station</city>, <state>TX</state> <postcode>77843</postcode>
+</address>
+</para>
 
-    </sect1>
+</sect1>
 
 
-<sect1>
+<sect1 id="intro.about">
 <title>About this manual</title>
 
 <para>
