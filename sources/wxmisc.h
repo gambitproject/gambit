@@ -15,6 +15,8 @@
 #include "wx_timer.h"
 #include "wx_form.h"
 
+#include "garray.h"
+
 #define WX_COLOR_LIST_LENGTH 11
 
 #ifndef WXMISC_C
@@ -120,7 +122,7 @@ protected:
 
   virtual const char *HelpString(void) const { return ""; }
 
-  void OnOk(void);
+  virtual void OnOk(void);
   void OnCancel(void);
   void OnHelp(void);
 
@@ -132,7 +134,34 @@ public:
   int Completed(void) const { return m_completed; }
 };
 
+/**
+ * A "paged" dialog class (i.e., with "back" and "next" buttons)
+ */
+class guiPagedDialog : public guiAutoDialog {
+private:
+  static void CallbackNext(wxButton &p_object, wxEvent &)
+    { ((guiPagedDialog *) p_object.GetClientData())->OnNext(); }
+  static void CallbackBack(wxButton &p_object, wxEvent &)
+    { ((guiPagedDialog *) p_object.GetClientData())->OnBack(); }
 
+  void OnOk(void);
+  void OnNext(void);
+  void OnBack(void);
+
+protected:
+  int m_pageNumber, m_numFields;
+  static int s_itemsPerPage;
+  wxText **m_dataFields;
+  wxButton *m_backButton, *m_nextButton;
+  gArray<gText> m_dataValues;
+
+public:
+  guiPagedDialog(wxWindow *p_parent, char *p_title, int p_numItems);
+  virtual ~guiPagedDialog();
+
+  const gText &GetValue(int p_index) const { return m_dataValues[p_index]; }
+  void SetValue(int p_index, const gText &p_value);
+};
 
 class FontDialogBox: public MyDialogBox
 {
