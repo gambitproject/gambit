@@ -33,14 +33,14 @@
 //--------------------------------------------------------------------------
 
 gbtNfgIterator::gbtNfgIterator(gbtGame p_nfg)
-  : support(p_nfg),
+  : support(p_nfg->NewNfgSupport()),
     m_nfg(p_nfg), current_strat(p_nfg->NumPlayers()), profile(p_nfg)
 {
   First();
 }
 
 gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &s) 
-  : support(s), m_nfg(s.GetGame()),
+  : support(s), m_nfg(s->GetGame()),
     current_strat(m_nfg->NumPlayers()), profile(m_nfg)
 {
   First();
@@ -77,7 +77,7 @@ gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 void gbtNfgIterator::First(void)
 {
   for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
-    gbtGameStrategy s = support.GetStrategy(i, 1);
+    gbtGameStrategy s = support->GetStrategy(i, 1);
     profile.SetStrategy(s);
     current_strat[i] = 1;
   }
@@ -85,13 +85,13 @@ void gbtNfgIterator::First(void)
 
 int gbtNfgIterator::Next(int p)
 {
-  if (current_strat[p] < support.NumStrats(p))  {
-    gbtGameStrategy s = support.GetStrategy(p, ++(current_strat[p]));
+  if (current_strat[p] < support->NumStrats(p))  {
+    gbtGameStrategy s = support->GetStrategy(p, ++(current_strat[p]));
     profile.SetStrategy(s);
     return 1;
   }
   else {
-    gbtGameStrategy s = support.GetStrategy(p, 1);
+    gbtGameStrategy s = support->GetStrategy(p, 1);
     profile.SetStrategy(s);
     current_strat[p] = 1;
     return 0;
@@ -101,10 +101,10 @@ int gbtNfgIterator::Next(int p)
 int gbtNfgIterator::Set(int p, int s)
 {
   if (p <= 0 || p > m_nfg->NumPlayers() ||
-      s <= 0 || s > support.NumStrats(p))
+      s <= 0 || s > support->NumStrats(p))
     return 0;
   
-  profile.SetStrategy(support.GetStrategy(p, s));
+  profile.SetStrategy(support->GetStrategy(p, s));
   return 1;
 }
 
@@ -118,7 +118,7 @@ void gbtNfgIterator::Get(gbtArray<int> &t) const
 void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
   for (int i = 1; i <= m_nfg->NumPlayers(); i++){
-    profile.SetStrategy(support.GetStrategy(i, t[i]));
+    profile.SetStrategy(support->GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
 }
@@ -140,8 +140,8 @@ void gbtNfgIterator::SetOutcome(gbtGameOutcome outcome)
 
 gbtNfgContIterator::gbtNfgContIterator(const gbtNfgSupport &p_support)
   : m_support(p_support), 
-    m_current(m_support.GetGame()->NumPlayers()),
-    m_nfg(m_support.GetGame()), m_profile(m_nfg), m_thawed(m_nfg->NumPlayers())
+    m_current(m_support->GetGame()->NumPlayers()),
+    m_nfg(m_support->GetGame()), m_profile(m_nfg), m_thawed(m_nfg->NumPlayers())
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
     m_thawed[i] = i;
@@ -160,7 +160,7 @@ gbtNfgContIterator::~gbtNfgContIterator()
 void gbtNfgContIterator::First(void)
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
-    m_profile.SetStrategy(m_support.GetStrategy(m_thawed[i], 1));
+    m_profile.SetStrategy(m_support->GetStrategy(m_thawed[i], 1));
     m_current[m_thawed[i]] = 1;
   }	
 }
@@ -198,14 +198,14 @@ int gbtNfgContIterator::Next(gbtGamePlayer p_player)
     return 0;
   }
 
-  if (m_current[p] < m_support.NumStrats(p))  {
-    gbtGameStrategy s = m_support.GetStrategy(p, ++(m_current[p]));
+  if (m_current[p] < m_support->NumStrats(p))  {
+    gbtGameStrategy s = m_support->GetStrategy(p, ++(m_current[p]));
     m_profile.SetStrategy(s);
     First();
     return 1;
   }
   else {
-    gbtGameStrategy s = m_support.GetStrategy(p, 1);
+    gbtGameStrategy s = m_support->GetStrategy(p, 1);
     m_profile.SetStrategy(s);
     m_current[p] = 1;
     First();
@@ -220,12 +220,12 @@ int gbtNfgContIterator::NextContingency(void)
 
   while (1)   {
     int pl = m_thawed[j];
-    if (m_current[pl] < m_support.NumStrats(pl)) {
-      gbtGameStrategy s = m_support.GetStrategy(pl, ++(m_current[pl]));
+    if (m_current[pl] < m_support->NumStrats(pl)) {
+      gbtGameStrategy s = m_support->GetStrategy(pl, ++(m_current[pl]));
       m_profile.SetStrategy(s);
       return 1;
     }
-    m_profile.SetStrategy(m_support.GetStrategy(pl, 1));
+    m_profile.SetStrategy(m_support->GetStrategy(pl, 1));
     m_current[pl] = 1;
     j--;
     if (j == 0) {

@@ -35,18 +35,19 @@
 
 #include "nfdommix.imp"
 
-gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gbtPrecision precision,
-				      const gbtArray<int> &players,
-				      gbtOutput &tracefile,
-				      gbtStatus &status) const
+gbtNfgSupport 
+gbtNfgSupportRep::MixedUndominated(bool strong, gbtPrecision precision,
+				   const gbtArray<int> &players,
+				   gbtOutput &tracefile,
+				   gbtStatus &status) const
 {
-  gbtNfgSupport newS(*this);
+  gbtNfgSupport newS(Copy());
   
   if (precision == GBT_PREC_RATIONAL) {
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
-      ComputeMixedDominated(*this, newS, pl, strong,
+      ComputeMixedDominated(Copy(), newS, pl, strong,
 			    (gbtRational)0, tracefile, status);
     }
   }
@@ -54,7 +55,7 @@ gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gbtPrecision precisio
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
-      ComputeMixedDominated(*this, newS, pl, strong,
+      ComputeMixedDominated(Copy(), newS, pl, strong,
 			    (double)0, tracefile, status);
     }
   }

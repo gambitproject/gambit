@@ -26,8 +26,8 @@
 
 // Declaration of game API
 #include "game.h"
+#include "nfgsupport.h"
 
-// Declaration of internal game form classes
 #include "gamebase.h"
 
 //

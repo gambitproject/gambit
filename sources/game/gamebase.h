@@ -396,4 +396,87 @@ public:
 			    gbtPVector<gbtNumber> &prob) const;
 };
 
+class gbtNfgSupportBase : public gbtNfgSupportRep {
+protected:
+  gbtGame m_nfg;
+  // This really could be a gbtPVector<bool> probably, but we'll keep
+  // it this way for now to placate possibly older compilers.
+  gbtPVector<int> m_strategies;
+  gbtText m_label;
+  
+  bool Undominated(gbtNfgSupportBase &newS, int pl, bool strong,
+		   gbtOutput &tracefile, gbtStatus &status) const;
+
+public:
+  // LIFECYCLE
+  gbtNfgSupportBase(const gbtGame &);
+  ~gbtNfgSupportBase() { }
+
+  // OPERATORS
+  // This acts as the assignment operator and copy constructor
+  virtual gbtNfgSupportRep *Copy(void) const;
+  
+  bool operator==(const gbtNfgSupportRep &) const;
+  bool operator!=(const gbtNfgSupportRep &p_support) const
+  { return !(*this == p_support); }
+
+  // DATA ACCESS: GENERAL
+  gbtGame GetGame(void) const { return m_nfg; }
+
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  
+  // DATA ACCESS: STRATEGIES
+  int NumStrats(int pl) const;
+  int NumStrats(const gbtGamePlayer &p_player) const 
+    { return NumStrats(p_player->GetId()); }
+  gbtArray<int> NumStrategies(void) const;
+  int MixedProfileLength(void) const;
+
+  gbtGameStrategy GetStrategy(int pl, int st) const;
+  int GetIndex(gbtGameStrategy) const;
+  bool Contains(gbtGameStrategy) const;
+
+  // MANIPULATION
+  void AddStrategy(gbtGameStrategy);
+  void RemoveStrategy(gbtGameStrategy);
+  
+  // DATA ACCESS: PROPERTIES
+  bool IsSubset(const gbtNfgSupportBase &s) const;
+  bool IsValid(void) const;
+
+  // DOMINANCE AND ELIMINATION OF STRATEGIES
+  bool Dominates(gbtGameStrategy, gbtGameStrategy, bool strong) const;
+  bool IsDominated(gbtGameStrategy, bool strong) const; 
+
+  gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
+			    gbtOutput &tracefile, gbtStatus &status) const;
+  gbtNfgSupport MixedUndominated(bool strong, gbtPrecision precision,
+				 const gbtArray<int> &players,
+				 gbtOutput &, gbtStatus &status) const;
+
+  // OUTPUT
+  void Output(gbtOutput &) const;
+
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return m_nfg->IsTree(); }
+  bool IsMatrix(void) const { return m_nfg->IsMatrix(); }
+  
+  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_nfg->GetPlayer(index); }
+  
+  int NumOutcomes(void) const { return m_nfg->NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_nfg->GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_nfg->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_nfg->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_nfg->MinPayoff(pl); }
+
+  // The following are just echoed from the base game.  In the future,
+  // derivation from gbtGame will handle these.
+  gbtText GetComment(void) const { return m_nfg->GetComment(); }
+  void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
+};
+
 #endif  // GAMEBASE_H

@@ -58,11 +58,11 @@ bool gbtStrategyIterator::operator==(const gbtStrategyIterator &p_iter) const
 
 bool gbtStrategyIterator::GoToNext(void)
 {
-  if (st != m_support.NumStrats(pl)) {
+  if (st != m_support->NumStrats(pl)) {
     st++; 
     return true;
   }
-  else if (pl != m_support.GetGame()->NumPlayers()) {
+  else if (pl != m_support->NumPlayers()) {
     pl++; 
     st = 1; 
     return true;
@@ -78,18 +78,18 @@ bool gbtStrategyIterator::GoToNext(void)
 
 gbtGameStrategy gbtStrategyIterator::GetStrategy(void) const
 {
-  return m_support.GetStrategy(pl, st);
+  return m_support->GetStrategy(pl, st);
 }
 
 gbtGamePlayer gbtStrategyIterator::GetPlayer(void) const
 {
-  return m_support.GetGame()->GetPlayer(pl);
+  return m_support->GetPlayer(pl);
 }
 
 bool gbtStrategyIterator::IsLast(void) const
 {
-  return (pl == m_support.GetGame()->NumPlayers() &&
-	  st == m_support.NumStrats(pl)); 
+  return (pl == m_support->NumPlayers() &&
+	  st == m_support->NumStrats(pl)); 
 }
 
 bool gbtStrategyIterator::IsSubsequentTo(gbtGameStrategy p_strategy) const

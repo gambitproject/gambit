@@ -31,12 +31,12 @@
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
-			     gbtNfgSupport *sact,
+void AllSubsupportsRECURSIVE(const gbtNfgSupport &s,
+			     gbtNfgSupport &sact,
 			     gbtStrategyIterator *c,
 			     gbtList<gbtNfgSupport> *list)
 { 
-  (*list) += *sact;
+  (*list) += sact;
 
   gbtStrategyIterator c_copy(*c);
 
@@ -56,7 +56,7 @@ gbtList<gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
   gbtNfgSupport SAct(S);
   gbtStrategyIterator cursor(S);
 
-  AllSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
+  AllSubsupportsRECURSIVE(S, SAct,&cursor,&answer);
 
   return answer;
 }
@@ -64,12 +64,12 @@ gbtList<gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 // In the next two routines we only output subsupports that
 // have at least one active strategy for each agent.
 
-void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
-				  gbtNfgSupport *sact,
+void AllValidSubsupportsRECURSIVE(const gbtNfgSupport &s,
+				  gbtNfgSupport &sact,
 				  gbtStrategyIterator *c,
 				  gbtList<gbtNfgSupport> *list)
 { 
-  (*list) += *sact;
+  (*list) += sact;
 
   gbtStrategyIterator c_copy(*c);
 
@@ -89,13 +89,13 @@ gbtList<gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
   gbtNfgSupport SAct(S);
   gbtStrategyIterator cursor(S);
 
-  AllValidSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
+  AllValidSubsupportsRECURSIVE(S,SAct,&cursor,&answer);
 
   return answer;
 }
 
-void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
-					gbtNfgSupport *sact,
+void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport &s,
+					gbtNfgSupport &sact,
 					gbtStrategyIterator *c,
 					bool strong,
 					bool conditional,
@@ -107,7 +107,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 
 
   gbtList<gbtGameStrategy> deletion_list;
-  gbtStrategyIterator scanner(*s);
+  gbtStrategyIterator scanner(s);
 
   // First we collect all the strategies that can be deleted.
   do {
@@ -150,7 +150,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 
   // If there are no deletions, we ask if it is consistent, then recurse.
   if (!abort && no_deletions) {
-    (*list) += *sact;
+    (*list) += sact;
     
     gbtStrategyIterator c_copy(*c);
     
@@ -183,8 +183,8 @@ gbtList<gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
   gbtNfgSupport sact(S);
   gbtStrategyIterator cursor(S);
 
-  AllUndominatedSubsupportsRECURSIVE(&S,
-				     &sact,
+  AllUndominatedSubsupportsRECURSIVE(S,
+				     sact,
 				     &cursor,
 				     strong,
 				     conditional,
@@ -195,8 +195,8 @@ gbtList<gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 }
 
 
-void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
-				      gbtNfgSupport *sact,
+void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport &s,
+				      gbtNfgSupport &sact,
 				      gbtStrategyIterator *c,
 				      gbtList<gbtNfgSupport> *list,
 				      gbtStatus &status)
@@ -207,7 +207,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   bool no_deletions = true;
 
   gbtList<gbtGameStrategy> deletion_list;
-  gbtStrategyIterator scanner(*s);
+  gbtStrategyIterator scanner(s);
 
   do {
     gbtGameStrategy this_strategy = scanner.GetStrategy();
@@ -239,7 +239,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
       sact->AddStrategy(actual_deletions[i]);
   }
   if (!abort && no_deletions) {
-    (*list) += *sact;
+    (*list) += sact;
     
     gbtStrategyIterator c_copy(*c);
     do {
@@ -258,7 +258,7 @@ gbtList<gbtNfgSupport> SortSupportsBySize(gbtList<gbtNfgSupport> &list)
 {
   gbtArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++) {
-    sizes[i] = list[i].MixedProfileLength();
+    sizes[i] = list[i]->MixedProfileLength();
   }
 
   gbtArray<int> listproxy(list.Length());
@@ -306,7 +306,7 @@ gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
   gbtNfgSupport sact(S);
   gbtStrategyIterator cursor(S);
   status.SetProgress(0);
-  PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
+  PossibleNashSubsupportsRECURSIVE(S,sact,&cursor,&answer,status);
   status.SetProgress(.5);
 
   // At this point answer has all consistent subsupports without
@@ -322,20 +322,20 @@ gbtList<gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
     bool remove = false;
     do {
       gbtGameStrategy strat = crsr.GetStrategy();
-      if (current.Contains(strat)) 
+      if (current->Contains(strat)) 
 	for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
 	  gbtGameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
 	  if (other_strat != strat)
-	    if (current.Contains(other_strat)) {
-	      if (current.Dominates(other_strat,strat,false)) 
+	    if (current->Contains(other_strat)) {
+	      if (current->Dominates(other_strat,strat,false)) 
 		remove = true;
 	    }
 	    else { 
-	      current.AddStrategy(other_strat);
-	      if (current.Dominates(other_strat,strat,false)) {
+	      current->AddStrategy(other_strat);
+	      if (current->Dominates(other_strat,strat,false)) {
 		remove = true;
 	      }
-	      current.RemoveStrategy(other_strat);
+	      current->RemoveStrategy(other_strat);
 	    }
       }
     } while (crsr.GoToNext() && !remove);

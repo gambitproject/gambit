@@ -718,12 +718,12 @@ void gbtNfgFrame::OnFormatAutosize(wxCommandEvent &)
   // the narrowest width which fits all the entries
   int max = 0, colPlayer = m_doc->GetColPlayer();
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
-  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
+  for (int col = 0; col < support->NumStrats(colPlayer); col++) {
     if (m_table->GetColSize(col) > max) {
       max = m_table->GetColSize(col);
     }
   }
-  for (int col = 0; col < support.NumStrats(colPlayer); col++) {
+  for (int col = 0; col < support->NumStrats(colPlayer); col++) {
     m_table->SetColSize(col, max);
   }
 }
@@ -750,22 +750,22 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
       while (true) {
 	gbtNullOutput gnull;
 	if (dialog.DomMixed()) {
-	  newSupport = support.MixedUndominated(dialog.DomStrong(),
-						GBT_PREC_RATIONAL,
-						dialog.Players(),
-						gnull, status);
+	  newSupport = support->MixedUndominated(dialog.DomStrong(),
+						 GBT_PREC_RATIONAL,
+						 dialog.Players(),
+						 gnull, status);
 	}
 	else {
-	  newSupport = support.Undominated(dialog.DomStrong(), 
-					   dialog.Players(),
-					   gnull, status);
+	  newSupport = support->Undominated(dialog.DomStrong(), 
+					    dialog.Players(),
+					    gnull, status);
 	}
 
 	if (newSupport == support) {
 	  break;
 	}
 	else {
-	  newSupport.SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
+	  newSupport->SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
 	  m_doc->Submit(new gbtCmdAddNfgSupport(newSupport));
 	  support = newSupport;
 	}
@@ -926,7 +926,7 @@ void gbtNfgFrame::OnHelpAbout(wxCommandEvent &)
 void gbtNfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
   gbtNfgSupport newSupport(m_doc->GetNfgSupportList().GetCurrent());
-  newSupport.SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
+  newSupport->SetLabel(m_doc->GetNfgSupportList().GenerateUniqueLabel());
   m_doc->Submit(new gbtCmdAddNfgSupport(newSupport));
 }
 
@@ -941,7 +941,7 @@ void gbtNfgFrame::OnSupportDelete(wxCommandEvent &)
 
 void gbtNfgFrame::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = gbtMixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetGame()));
+  MixedSolution profile = gbtMixedProfile<gbtNumber>(m_doc->GetGame()->NewNfgSupport());
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

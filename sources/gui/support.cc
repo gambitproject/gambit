@@ -109,8 +109,8 @@ gbtNfgSupportList::~gbtNfgSupportList()
 
 void gbtNfgSupportList::BuildDefaultSupport(void)
 {
-  m_supports.Append(gbtNfgSupport(m_doc->GetGame()));
-  m_supports[1].SetLabel("Full Support");
+  m_supports.Append(m_doc->GetGame()->NewNfgSupport());
+  m_supports[1]->SetLabel("Full Support");
   m_current = 1;
 }
 
@@ -143,7 +143,7 @@ gbtText gbtNfgSupportList::GenerateUniqueLabel(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_supports.Length(); i++) {
-      if (m_supports[i].GetLabel() == "Support" + ToText(number)) {
+      if (m_supports[i]->GetLabel() == "Support" + ToText(number)) {
 	break;
       }
     }

@@ -67,18 +67,18 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   x = 0.0;
   for (i = 1; i <= m_nfg->NumPlayers(); i++)  {
     psum = 0.0;
-    for (j = 1; j <= p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= p.GetSupport()->NumStrats(i); j++)  {
       psum += p(i,j);
-      x1 = p.Payoff(i, p.GetSupport().GetStrategy(i, j)) - p.Payoff(i);
+      x1 = p.Payoff(i, p.GetSupport()->GetStrategy(i, j)) - p.Payoff(i);
       if (i1 == i) {
 	if (x1 > 0.0) {
-	  x -= x1 * p.Payoff(i, p.GetSupport().GetStrategy(i1, j1));
+	  x -= x1 * p.Payoff(i, p.GetSupport()->GetStrategy(i1, j1));
 	}
       }
       else {
 	if (x1 > 0.0) {
 	  x += x1 * (p.Payoff(i, i, j, i1, j1) - 
-		     p.Payoff(i, p.GetSupport().GetStrategy(i1, j1)));
+		     p.Payoff(i, p.GetSupport()->GetStrategy(i1, j1)));
 	}
       }
     }
@@ -130,7 +130,7 @@ bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) cons
   int i1, j1, ii;
   
   for (i1 = 1, ii = 1; i1 <= m_nfg->NumPlayers(); i1++) {
-    for (j1 = 1; j1 <= _p.GetSupport().NumStrats(i1); j1++) {
+    for (j1 = 1; j1 <= _p.GetSupport()->NumStrats(i1); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
@@ -163,7 +163,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
     // deviating to that strategy
 
     int j;
-    for (j = 1; j <= _p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= _p.GetSupport()->NumStrats(i); j++)  {
       tmp(i, j) = 1.0;
       x = _p(i, j);
       payoff(i, j) = tmp.Payoff(i);
@@ -175,7 +175,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
     }
 
     tmp.CopyRow(i, _p);
-    for (j = 1; j <= _p.GetSupport().NumStrats(i); j++)  {
+    for (j = 1; j <= _p.GetSupport()->NumStrats(i); j++)  {
       x = payoff(i, j) - avg;
       if (x < 0.0)  x = 0.0;
       result += x * x;        // penalty for not best response
@@ -195,7 +195,7 @@ static void PickRandomProfile(gbtMixedProfile<double> &p)
     sum = 0.0;
     int st;
     
-    for (st = 1; st < p.GetSupport().NumStrats(pl); st++)  {
+    for (st = 1; st < p.GetSupport()->NumStrats(pl); st++)  {
       do
 	tmp = Uniform();
       while (tmp + sum > 1.0);

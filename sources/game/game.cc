@@ -1401,8 +1401,7 @@ void gbtGameBase::WriteNfg(gbtOutput &p_file) const
     p_file << "\n";
   }
   else {
-    gbtNfgSupport support(const_cast<gbtGameBase *>(this));
-    gbtNfgIterator iter(support);
+    gbtNfgIterator iter(NewNfgSupport());
     ::WriteNfg(const_cast<gbtGameBase *>(this), iter, NumPlayers(), p_file);
   }
 }
@@ -1442,7 +1441,7 @@ void gbtGameBase::SetOutcomeIndex(int p_index, const gbtGameOutcome &p_outcome)
 
 gbtNfgSupport gbtGameBase::NewNfgSupport(void) const
 {
-  return gbtNfgSupport(const_cast<gbtGameBase *>(this));
+  return new gbtNfgSupportBase(const_cast<gbtGameBase *>(this));
 }
 
 // ---------------------------------------
@@ -1583,14 +1582,14 @@ gbtGame NewNfg(const gbtArray<int> &p_dim)
 
 gbtGame CompressNfg(const gbtGame &nfg, const gbtNfgSupport &S)
 {
-  gbtGame N = NewNfg(S.NumStrategies());
+  gbtGame N = NewNfg(S->NumStrategies());
   N->SetLabel(nfg->GetLabel());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
     gbtGamePlayer player = N->GetPlayer(pl);
     player->SetLabel(nfg->GetPlayer(pl)->GetLabel());
     for (int st = 1; st <= N->NumStrats(pl); st++) {
-      player->GetStrategy(st)->SetLabel(S.GetStrategy(pl, st)->GetLabel());
+      player->GetStrategy(st)->SetLabel(S->GetStrategy(pl, st)->GetLabel());
     }
   }
 
@@ -1606,7 +1605,7 @@ gbtGame CompressNfg(const gbtGame &nfg, const gbtNfgSupport &S)
   }
 
   gbtNfgContIterator oiter(S);
-  gbtNfgSupport newS(N);
+  gbtNfgSupport newS(N->NewNfgSupport());
   gbtNfgContIterator niter(newS);
   
   do   {

@@ -26,46 +26,52 @@
 
 #include "game.h"
 #include "nfgsupport.h"
-//#include "gamebase.h"
+#include "gamebase.h"
 
 //==========================================================================
-//                         class gbtNfgSupport
+//                         class gbtNfgSupportBase
 //==========================================================================
 
 //--------------------------------------------------------------------------
-//                   class gbtNfgSupport: Lifecycle
+//                   class gbtNfgSupportBase: Lifecycle
 //--------------------------------------------------------------------------
 
-gbtNfgSupport::gbtNfgSupport(const gbtGame &p_nfg)
+gbtNfgSupportBase::gbtNfgSupportBase(const gbtGame &p_nfg)
   : m_nfg(p_nfg), m_strategies(p_nfg->NumStrategies())
 { 
   // Initially, all strategies are contained in the support
   m_strategies = 1;
 }
 
-gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &p_support)
+gbtNfgSupportRep *gbtNfgSupportBase::Copy(void) const
 {
-  if (this != &p_support && m_nfg == p_support.m_nfg) {
-    m_label = p_support.m_label;
-    m_strategies = p_support.m_strategies;
-  }
-  return *this;
+  return new gbtNfgSupportBase(*this);
 }
 
 //--------------------------------------------------------------------------
-//                   class gbtNfgSupport: Operators
+//                   class gbtNfgSupportBase: Operators
 //--------------------------------------------------------------------------
 
-bool gbtNfgSupport::operator==(const gbtNfgSupport &p_support) const
+bool gbtNfgSupportBase::operator==(const gbtNfgSupportRep &p_support) const
 {
-  return (m_nfg == p_support.m_nfg && m_strategies == p_support.m_strategies);
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    for (int st = 1; st <= NumStrats(pl); st++) {
+      bool term1 = m_strategies(pl, st);
+      bool term2 = p_support.Contains(m_nfg->GetPlayer(pl)->GetStrategy(st));
+
+      if (term1 != term2) {
+	return false;
+      }
+    }
+  }
+  return true;
 }
   
 //--------------------------------------------------------------------------
-//            class gbtNfgSupport: Data access -- strategies
+//            class gbtNfgSupportBase: Data access -- strategies
 //--------------------------------------------------------------------------
 
-int gbtNfgSupport::NumStrats(int pl) const
+int gbtNfgSupportBase::NumStrats(int pl) const
 {
   int total = 0;
   for (int st = 1; st <= m_strategies.Lengths()[pl]; st++) {
@@ -74,7 +80,7 @@ int gbtNfgSupport::NumStrats(int pl) const
   return total;
 }
 
-gbtArray<int> gbtNfgSupport::NumStrategies(void) const
+gbtArray<int> gbtNfgSupportBase::NumStrategies(void) const
 {
   gbtArray<int> ret(m_nfg->NumPlayers());
 
@@ -84,7 +90,7 @@ gbtArray<int> gbtNfgSupport::NumStrategies(void) const
   return ret;
 }
 
-int gbtNfgSupport::MixedProfileLength(void) const
+int gbtNfgSupportBase::MixedProfileLength(void) const
 {
   int total = 0;
   for (int i = 1; i <= m_strategies.Length(); i++) {
@@ -93,7 +99,7 @@ int gbtNfgSupport::MixedProfileLength(void) const
   return total;
 }
 
-gbtGameStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
+gbtGameStrategy gbtNfgSupportBase::GetStrategy(int pl, int st) const
 {
   int index = 0;
   for (int i = 1; i <= m_nfg->NumStrats(pl); i++) {
@@ -107,7 +113,7 @@ gbtGameStrategy gbtNfgSupport::GetStrategy(int pl, int st) const
   return 0;
 }
 
-int gbtNfgSupport::GetIndex(gbtGameStrategy p_strategy) const
+int gbtNfgSupportBase::GetIndex(gbtGameStrategy p_strategy) const
 {
   int pl = p_strategy->GetPlayer()->GetId();
   for (int st = 1; st <= NumStrats(pl); st++) {
@@ -118,30 +124,30 @@ int gbtNfgSupport::GetIndex(gbtGameStrategy p_strategy) const
   return 0;
 }
 
-bool gbtNfgSupport::Contains(gbtGameStrategy p_strategy) const
+bool gbtNfgSupportBase::Contains(gbtGameStrategy p_strategy) const
 {
   return m_strategies(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
 }
 
 //--------------------------------------------------------------------------
-//                  class gbtNfgSupport: Manipulation
+//                  class gbtNfgSupportBase: Manipulation
 //--------------------------------------------------------------------------
 
-void gbtNfgSupport::AddStrategy(gbtGameStrategy s)
+void gbtNfgSupportBase::AddStrategy(gbtGameStrategy s)
 {
   m_strategies(s->GetPlayer()->GetId(), s->GetId()) = 1;
 }
 
-void gbtNfgSupport::RemoveStrategy(gbtGameStrategy s)
+void gbtNfgSupportBase::RemoveStrategy(gbtGameStrategy s)
 {
   m_strategies(s->GetPlayer()->GetId(), s->GetId()) = 0;
 }
 
 //--------------------------------------------------------------------------
-//           class gbtNfgSupport: Data access -- properties
+//           class gbtNfgSupportBase: Data access -- properties
 //--------------------------------------------------------------------------
 
-bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
+bool gbtNfgSupportBase::IsSubset(const gbtNfgSupportBase &s) const
 {
   if (m_nfg != s.m_nfg)  return false;
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
@@ -158,7 +164,7 @@ bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
   return true;
 }
 
-bool gbtNfgSupport::IsValid(void) const
+bool gbtNfgSupportBase::IsValid(void) const
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     if (NumStrats(pl) == 0) {
@@ -168,21 +174,7 @@ bool gbtNfgSupport::IsValid(void) const
   return true;
 }
 
-void gbtNfgSupport::Output(gbtOutput &p_output) const
-{
-  p_output << '"' << m_label << "\" { ";
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-    p_output << "{ ";
-    for (int st = 1; st <= NumStrats(pl); st++) {
-      p_output << "\"" << GetStrategy(pl, st)->GetLabel() << "\" ";
-    }
-    p_output << "} ";
-  }
-  p_output << "} ";
-}
-
 gbtOutput& operator<<(gbtOutput &p_stream, const gbtNfgSupport &p_support)
 {
-  p_support.Output(p_stream);
   return p_stream;
 }

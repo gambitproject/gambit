@@ -90,19 +90,19 @@ template<>
 gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
 					     int pl) const
 { 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
 }
 
 template<>
 double gbtMixedProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
 }
 
 template class gbtMixedProfile<double>;

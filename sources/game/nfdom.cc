@@ -27,10 +27,11 @@
 #include "nfdom.h"
 #include "nfgciter.h"
 
-bool gbtNfgSupport::Dominates(gbtGameStrategy s, gbtGameStrategy t,
-			      bool strong) const
+bool gbtNfgSupportRep::Dominates(gbtGameStrategy s, gbtGameStrategy t,
+				 bool strong) const
 {
-  gbtNfgContIterator A(*this), B(*this);
+  gbtNfgContIterator A(const_cast<gbtNfgSupportRep *>(this));
+  gbtNfgContIterator B(const_cast<gbtNfgSupportRep *>(this));
 
   A.Freeze(s);
   B.Freeze(t);  
@@ -66,7 +67,7 @@ bool gbtNfgSupport::Dominates(gbtGameStrategy s, gbtGameStrategy t,
   return (!equal);
 }
 
-bool gbtNfgSupport::IsDominated(gbtGameStrategy s, bool strong) const
+bool gbtNfgSupportRep::IsDominated(gbtGameStrategy s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer()->GetId()); i++) {
     if (i != s->GetId()) {
@@ -78,8 +79,9 @@ bool gbtNfgSupport::IsDominated(gbtGameStrategy s, bool strong) const
   return false;
 }
 
-bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
-				gbtOutput &tracefile, gbtStatus &status) const
+bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
+				   gbtOutput &tracefile, 
+				   gbtStatus &status) const
 {
   gbtArray<int> set(NumStrats(pl));
   int i;
@@ -133,7 +135,7 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
     
   if (min + 1 <= NumStrats(pl))   {
     for (i = min + 1; i <= NumStrats(pl); i++) {
-      newS.RemoveStrategy(GetStrategy(pl, set[i]));
+      newS->RemoveStrategy(GetStrategy(pl, set[i]));
     }
     
     return true;
@@ -142,12 +144,12 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
     return false;
 }
 
-gbtNfgSupport gbtNfgSupport::Undominated(bool strong,
-					 const gbtArray<int> &players,
-					 gbtOutput &tracefile, 
-					 gbtStatus &status) const
+gbtNfgSupport gbtNfgSupportRep::Undominated(bool strong,
+					    const gbtArray<int> &players,
+					    gbtOutput &tracefile, 
+					    gbtStatus &status) const
 {
-  gbtNfgSupport newS(*this);
+  gbtNfgSupport newS(this->Copy());
   
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();

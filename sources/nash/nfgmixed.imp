@@ -37,15 +37,14 @@ template <class T> gbtNfgNashEnumMixed<T>::gbtNfgNashEnumMixed(void)
   : m_stopAfter(0), m_cliques(false)
 { }
 
-template <class T> 
-gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
-					    gbtStatus &p_status)
+template <class T> gbtList<MixedSolution> 
+gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
+			      gbtStatus &p_status)
 {
-  gbtGame nfg = p_support.GetGame();
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
-  if (nfg->NumPlayers() != 2) {
+  if (p_support->NumPlayers() != 2) {
     return gbtList<MixedSolution>();
   }
   
@@ -53,18 +52,18 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 
   gbtNfgIterator iter(p_support); 
 
-  T min = nfg->MinPayoff() - gbtNumber(1);
-  T max = nfg->MaxPayoff();
+  T min = p_support->MinPayoff() - gbtNumber(1);
+  T max = p_support->MaxPayoff();
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2
-  gbtMatrix<T> A1(1, p_support.NumStrats(1), 1, p_support.NumStrats(2));
-  gbtMatrix<T> A2(1, p_support.NumStrats(2), 1, p_support.NumStrats(1));
+  gbtMatrix<T> A1(1, p_support->NumStrats(1), 1, p_support->NumStrats(2));
+  gbtMatrix<T> A2(1, p_support->NumStrats(2), 1, p_support->NumStrats(1));
 
-  for (int i = 1; i <= p_support.NumStrats(1); i++) {
-    for (int j = 1; j <= p_support.NumStrats(2); j++) {
-      A1(i, j) = iter.GetPayoff(nfg->GetPlayer(1)) - gbtNumber(min);
-      A2(j, i) = iter.GetPayoff(nfg->GetPlayer(2)) - gbtNumber(min);
+  for (int i = 1; i <= p_support->NumStrats(1); i++) {
+    for (int j = 1; j <= p_support->NumStrats(2); j++) {
+      A1(i, j) = iter.GetPayoff(p_support->GetPlayer(1)) - gbtNumber(min);
+      A2(j, i) = iter.GetPayoff(p_support->GetPlayer(2)) - gbtNumber(min);
       A1(i, j) *= fac;
       A2(j, i) *= fac;
       iter.Next(2);
@@ -73,7 +72,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
   }
 
   // Construct vectors b1, b2
-  gbtVector<T> b1(1, p_support.NumStrats(1)), b2(1, p_support.NumStrats(2));
+  gbtVector<T> b1(1, p_support->NumStrats(1)), b2(1, p_support->NumStrats(2));
   b1 = (T) -1;
   b2 = (T) -1;
 
@@ -122,13 +121,13 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 	// check if solution is nash 
 	// need only check complementarity, since it is feasible
 	bool nash = true;
-	for (int k = 1; nash && k <= p_support.NumStrats(1); k++) {
+	for (int k = 1; nash && k <= p_support->NumStrats(1); k++) {
 	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
 	  }
 	}
 	
-	for (int k = 1; nash && k <= p_support.NumStrats(2); k++) {
+	for (int k = 1; nash && k <= p_support->NumStrats(2); k++) {
 	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
 	  }
@@ -137,7 +136,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 	if (nash) {
 	  gbtMixedProfile<T> profile(p_support);
 	  T sum = (T) 0;
-	  for (int k = 1; k <= p_support.NumStrats(1); k++) {
+	  for (int k = 1; k <= p_support->NumStrats(1); k++) {
 	    profile(1, k) = (T) 0;
 	    if (bfs1.IsDefined(k)) {
 	      profile(1,k) = -bfs1(k);
@@ -145,14 +144,14 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 	    }
 	  } 
 	  
-	  for (int k = 1; k <= p_support.NumStrats(1); k++) {
+	  for (int k = 1; k <= p_support->NumStrats(1); k++) {
 	    if (bfs1.IsDefined(k)) { 
 	      profile(1,k) /= sum;
 	    }
 	  }
 
 	  sum = (T) 0;
-	  for (int k = 1; k <= p_support.NumStrats(2); k++) {
+	  for (int k = 1; k <= p_support->NumStrats(2); k++) {
 	    profile(2,k) = (T) 0;
 	    if (bfs2.IsDefined(k)) {
 	      profile(2,k) =-bfs2(k);
@@ -160,7 +159,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 	    }
 	  } 
 	
-	  for (int k = 1; k <= p_support.NumStrats(2); k++) {
+	  for (int k = 1; k <= p_support->NumStrats(2); k++) {
 	    if (bfs2.IsDefined(k)) { 
 	      profile(2,k) /= sum;
 	    }

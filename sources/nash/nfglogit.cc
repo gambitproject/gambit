@@ -161,18 +161,18 @@ static void QreLHS(const gbtNfgSupport &p_support,
   p_lhs = (T) 0.0;
   int rowno = 0;
 
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_support->GetGame()->NumPlayers(); pl++) {
     rowno++;
-    for (int st = 1; st <= p_support.NumStrats(pl); st++) {
+    for (int st = 1; st <= p_support->NumStrats(pl); st++) {
       p_lhs[rowno] += profile(pl, st);
     }
     p_lhs[rowno] -= 1.0;
 
-    for (int st = 2; st <= p_support.NumStrats(pl); st++) {
+    for (int st = 2; st <= p_support->NumStrats(pl); st++) {
       p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
-		       (profile.Payoff(pl, p_support.GetStrategy(pl, st)) -
-			profile.Payoff(pl, p_support.GetStrategy(pl, 1))));
+		       (profile.Payoff(pl, p_support->GetStrategy(pl, st)) -
+			profile.Payoff(pl, p_support->GetStrategy(pl, 1))));
       p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
@@ -191,7 +191,6 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 			const gbtVector<T> &p_point,
 			gbtMatrix<T> &p_matrix)
 {
-  gbtGame nfg = p_support.GetGame();
   gbtMixedProfile<T> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
@@ -199,12 +198,12 @@ static void QreJacobian(const gbtNfgSupport &p_support,
   double lambda = p_point[p_point.Length()];
 
   int rowno = 0;
-  for (int pl1 = 1; pl1 <= nfg->NumPlayers(); pl1++) {
+  for (int pl1 = 1; pl1 <= p_support->NumPlayers(); pl1++) {
     rowno++;
     // First, do the "sum to one" equation
     int colno = 0;
-    for (int pl2 = 1; pl2 <= nfg->NumPlayers(); pl2++) {
-      for (int st2 = 1; st2 <= p_support.NumStrats(pl2); st2++) {
+    for (int pl2 = 1; pl2 <= p_support->NumPlayers(); pl2++) {
+      for (int st2 = 1; st2 <= p_support->NumStrats(pl2); st2++) {
 	colno++;
 	if (pl1 == pl2) {
 	  p_matrix(colno, rowno) = 1.0;
@@ -216,12 +215,12 @@ static void QreJacobian(const gbtNfgSupport &p_support,
     }
     p_matrix(p_matrix.NumRows(), rowno) = 0.0;
 
-    for (int st1 = 2; st1 <= p_support.NumStrats(pl1); st1++) {
+    for (int st1 = 2; st1 <= p_support->NumStrats(pl1); st1++) {
       rowno++;
       int colno = 0;
 
-      for (int pl2 = 1; pl2 <= nfg->NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_support.NumStrats(pl2); st2++) {
+      for (int pl2 = 1; pl2 <= p_support->NumPlayers(); pl2++) {
+	for (int st2 = 1; st2 <= p_support->NumStrats(pl2); st2++) {
 	  colno++;
 	  if (pl1 == pl2) {
 	    if (st2 == 1) {
@@ -241,8 +240,8 @@ static void QreJacobian(const gbtNfgSupport &p_support,
       }
 
       p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) *
-	(profile.Payoff(pl1, p_support.GetStrategy(pl1, st1)) -
-	 profile.Payoff(pl1, p_support.GetStrategy(pl1, 1)));
+	(profile.Payoff(pl1, p_support->GetStrategy(pl1, st1)) -
+	 profile.Payoff(pl1, p_support->GetStrategy(pl1, 1)));
     }
   }
 }
@@ -421,10 +420,10 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 	// to continue tracing
 	gbtNfgSupport newSupport(p_start.GetSupport());
 	int index = 1;
-	for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
-	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {
+	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
+	  for (int st = 1; st <= newSupport->NumStrats(pl); st++) {
 	    if (index++ == i) {
-	      newSupport.RemoveStrategy(newSupport.GetStrategy(pl, st));
+	      newSupport->RemoveStrategy(newSupport->GetStrategy(pl, st));
 	    }
 	  }
 	}

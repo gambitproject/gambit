@@ -25,6 +25,7 @@
 //
 
 #include "nfgcont.h"
+#include "nfgsupport.h"
 #include "gamebase.h"
 
 //-------------------------------------------------------------------------

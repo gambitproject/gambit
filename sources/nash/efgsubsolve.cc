@@ -140,7 +140,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	CompressEfgInPlace(foo, subsupport);
 	subsupport = gbtEfgSupport(foo);
 	gbtGame nfg = foo;
-	gbtNfgSupport support(nfg);
+	gbtNfgSupport support(nfg->NewNfgSupport());
 
 	gbtList<MixedSolution> nfgSolutions;
 

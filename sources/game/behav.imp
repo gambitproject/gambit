@@ -99,7 +99,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (int st = 1; st <= support.NumStrats(pl); st++)  {
+    for (int st = 1; st <= support->NumStrats(pl); st++)  {
       if (p_profile(pl, st) > (T) 0)  {
 	const gbtArray<int> &actions = nfg->GetPlayer(pl)->GetStrategy(st)->GetBehavior();
 

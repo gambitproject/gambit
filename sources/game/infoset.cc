@@ -24,10 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "game.h"
-
 // Declaration of game API
 #include "game.h"
+#include "nfgsupport.h"
 
 // Declaration of internal game form classes
 #include "gamebase.h"

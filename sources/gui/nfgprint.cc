@@ -33,7 +33,7 @@ wxString gbtBuildHtml(const gbtGame &p_nfg,
 		      int p_rowPlayer, int p_colPlayer)
 {
   wxString theHtml;
-  gbtNfgSupport support(p_nfg);
+  gbtNfgSupport support(p_nfg->NewNfgSupport());
   gbtNfgContIterator iter(support);
   iter.First();
 

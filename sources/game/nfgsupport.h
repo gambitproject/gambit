@@ -30,94 +30,93 @@
 #include "base/gstatus.h"
 #include "game.h"
 
-//
-// We are in the process of migrating supports so they act like
-// "views" on a game -- they should support (no pun intended) all the
-// usual members of the underlying game (such as NumPlayers()) as well
-// as extra editing features to show/hide actions
-// 
-// This will eventually derive from gbtGame, providing the usual
-// normal form operations
-//
-class gbtNfgSupport : public gbtConstGameRep, public gbtConstNfgRep {
-protected:
-  gbtGame m_nfg;
-  // This really could be a gbtPVector<bool> probably, but we'll keep
-  // it this way for now to placate possibly older compilers.
-  gbtPVector<int> m_strategies;
-  gbtText m_label;
-  
-  bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
-		   gbtOutput &tracefile, gbtStatus &status) const;
+class gbtNfgSupport;
 
+class gbtNfgSupportRep : public gbtConstGameRep, public gbtConstNfgRep {
+friend class gbtNfgSupport;
+private:
+  bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
+				     gbtOutput &tracefile, 
+				     gbtStatus &status) const;
 public:
-  // LIFECYCLE
-  gbtNfgSupport(const gbtGame &);
-  ~gbtNfgSupport() { }
-  gbtNfgSupport &operator=(const gbtNfgSupport &);
-
-  // OPERATORS
-  bool operator==(const gbtNfgSupport &) const;
-  bool operator!=(const gbtNfgSupport &p_support) const
-  { return !(*this == p_support); }
-
   // DATA ACCESS: GENERAL
-  gbtGame GetGame(void) const { return m_nfg; }
+  virtual gbtGame GetGame(void) const = 0;
 
-  gbtText GetLabel(void) const { return m_label; }
-  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
   
-  // DATA ACCESS: STRATEGIES
-  int NumStrats(int pl) const;
-  int NumStrats(const gbtGamePlayer &p_player) const 
-    { return NumStrats(p_player->GetId()); }
-  gbtArray<int> NumStrategies(void) const;
-  int MixedProfileLength(void) const;
+  virtual gbtNfgSupportRep *Copy(void) const = 0;
 
-  gbtGameStrategy GetStrategy(int pl, int st) const;
-  int GetIndex(gbtGameStrategy) const;
-  bool Contains(gbtGameStrategy) const;
+  virtual bool operator==(const gbtNfgSupportRep &) const = 0;
+  virtual bool operator!=(const gbtNfgSupportRep &) const = 0;
+
+  // DATA ACCESS: STRATEGIES
+  virtual int NumStrats(int pl) const = 0;
+  virtual int NumStrats(const gbtGamePlayer &p_player) const = 0; 
+
+  virtual gbtGameStrategy GetStrategy(int pl, int st) const = 0;
+  virtual int GetIndex(gbtGameStrategy) const = 0;
+  virtual bool Contains(gbtGameStrategy) const = 0;
 
   // MANIPULATION
-  void AddStrategy(gbtGameStrategy);
-  void RemoveStrategy(gbtGameStrategy);
+  virtual void AddStrategy(gbtGameStrategy) = 0;
+  virtual void RemoveStrategy(gbtGameStrategy) = 0;
   
   // DATA ACCESS: PROPERTIES
-  bool IsSubset(const gbtNfgSupport &s) const;
-  bool IsValid(void) const;
+  //  virtual bool IsSubset(const gbtNfgSupport &s) const = 0;
+  virtual bool IsValid(void) const = 0;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES
+  // Not declared virtual; implementation of functions is generic already
   bool Dominates(gbtGameStrategy, gbtGameStrategy, bool strong) const;
-  bool IsDominated(gbtGameStrategy, bool strong) const; 
+  bool IsDominated(gbtGameStrategy, bool strong) const;
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
-			    gbtOutput &tracefile, gbtStatus &status) const;
+			    gbtOutput &tracefile,
+			    gbtStatus &status) const;
   gbtNfgSupport MixedUndominated(bool strong, gbtPrecision precision,
 				 const gbtArray<int> &players,
-				 gbtOutput &, gbtStatus &status) const;
+				 gbtOutput &,
+				 gbtStatus &status) const;
+};
 
-  // OUTPUT
-  void Output(gbtOutput &) const;
+class gbtNfgSupport {
+private:
+  gbtNfgSupportRep *m_rep;
 
-  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
-  bool IsTree(void) const { return m_nfg->IsTree(); }
-  bool IsMatrix(void) const { return m_nfg->IsMatrix(); }
+public:
+  gbtNfgSupport(void) : m_rep(0) { }
+  gbtNfgSupport(gbtNfgSupportRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgSupport(const gbtNfgSupport &p_support)
+    : m_rep(p_support.m_rep->Copy()) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgSupport() { if (m_rep && m_rep->Dereference()) delete m_rep; }
   
-  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
-  gbtGamePlayer GetPlayer(int index) const { return m_nfg->GetPlayer(index); }
+  gbtNfgSupport &operator=(const gbtNfgSupport &p_support) {
+    if (this != &p_support) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_support.m_rep->Copy();
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  // Equality semantics are defined as having the same support, not
+  // the same underlying object.
+  bool operator==(const gbtNfgSupport &p_support) const
+  { return (*m_rep == *p_support.m_rep); }
+  bool operator!=(const gbtNfgSupport &p_support) const
+  { return (*m_rep != *p_support.m_rep); }
   
-  int NumOutcomes(void) const { return m_nfg->NumOutcomes(); }
-  gbtGameOutcome GetOutcome(int index) const 
-  { return m_nfg->GetOutcome(index); }
+  gbtNfgSupportRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  const gbtNfgSupportRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
 
-  bool IsConstSum(void) const { return m_nfg->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_nfg->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_nfg->MinPayoff(pl); }
-
-  // The following are just echoed from the base game.  In the future,
-  // derivation from gbtGame will handle these.
-  gbtText GetComment(void) const { return m_nfg->GetComment(); }
-  void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
+  //  gbtNfgSupportRep *Get(void) const { return m_rep; }
+  
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtNfgSupport &);

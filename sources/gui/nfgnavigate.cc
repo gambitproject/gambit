@@ -101,8 +101,8 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
 				  (char *) ToText(m_doc->GetContingency()[pl])));
     SetCellValue(pl - 1, 3, 
 		 wxString::Format(wxT("%s"),
-				  (char *) support.GetStrategy(pl,
-							       m_doc->GetContingency()[pl])->GetLabel()));
+				  (char *) support->GetStrategy(pl,
+								m_doc->GetContingency()[pl])->GetLabel()));
     SetCellValue(pl - 1, 4, wxT("+"));
     SetCellValue(pl - 1, 5, wxT("-"));
   }
@@ -135,7 +135,7 @@ void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
   }
   else if (p_event.GetCol() == 4) {
     gbtArray<int> cont = m_doc->GetContingency();
-    if (cont[player] < m_doc->GetNfgSupportList().GetCurrent().NumStrats(player)) {
+    if (cont[player] < m_doc->GetNfgSupportList().GetCurrent()->NumStrats(player)) {
       cont[player]++;
     }
     m_doc->SetContingency(cont);

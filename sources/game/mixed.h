@@ -59,7 +59,7 @@ public:
 
   gbtMixedProfile<T> &operator=(const gbtMixedProfile<T> &);
 
-  gbtGame GetGame(void) const  { return m_support.GetGame(); }
+  gbtGame GetGame(void) const  { return m_support->GetGame(); }
   
   T LiapValue(void) const;
   void Regret(gbtPVector<T> &value) const;
@@ -81,25 +81,25 @@ public:
   void SetLabel(const gbtText &) { }
 
   // IMPLEMENTATION OF gbtConstGameRep INTERFACE
-  bool IsTree(void) const { return m_support.IsTree(); }
-  bool IsMatrix(void) const { return m_support.IsMatrix(); }
+  bool IsTree(void) const { return m_support->IsTree(); }
+  bool IsMatrix(void) const { return m_support->IsMatrix(); }
   
-  int NumPlayers(void) const { return m_support.NumPlayers(); }
-  gbtGamePlayer GetPlayer(int index) const { return m_support.GetPlayer(index); }
+  int NumPlayers(void) const { return m_support->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_support->GetPlayer(index); }
   
-  int NumOutcomes(void) const { return m_support.NumOutcomes(); }
+  int NumOutcomes(void) const { return m_support->NumOutcomes(); }
   gbtGameOutcome GetOutcome(int index) const 
-  { return m_support.GetOutcome(index); }
+  { return m_support->GetOutcome(index); }
 
-  bool IsConstSum(void) const { return m_support.IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_support.MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_support.MinPayoff(pl); }
+  bool IsConstSum(void) const { return m_support->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
 
   // IMPLEMENTATION OF gbtConstNfgRep INTERFACE
   virtual gbtArray<int> NumStrategies(void) const 
-  { return m_support.NumStrategies(); }
+  { return m_support->NumStrategies(); }
   virtual int MixedProfileLength(void) const
-  { return m_support.MixedProfileLength(); }
+  { return m_support->MixedProfileLength(); }
 
 };
 

@@ -55,7 +55,7 @@ public:
 
 void gbtCmdAddStrategy::Do(gbtGameDocument *p_doc)
 {
-  p_doc->GetNfgSupportList().GetCurrent().AddStrategy(m_strategy);
+  p_doc->GetNfgSupportList().GetCurrent()->AddStrategy(m_strategy);
 }
 
 //==========================================================================
@@ -81,7 +81,7 @@ public:
 
 void gbtCmdRemoveStrategy::Do(gbtGameDocument *p_doc)
 {
-  p_doc->GetNfgSupportList().GetCurrent().RemoveStrategy(m_strategy);
+  p_doc->GetNfgSupportList().GetCurrent()->RemoveStrategy(m_strategy);
 }
 
 //==========================================================================
@@ -127,9 +127,9 @@ gbtNfgSupportWidget::gbtNfgSupportWidget(wxWindow *p_parent,
 void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
 {
   DeleteAllItems();
-  AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    gbtGamePlayer player = p_support.GetGame()->GetPlayer(pl);
+  AddRoot(wxString::Format(wxT("%s"), (char *) p_support->GetLabel()));
+  for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_support->GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
@@ -141,7 +141,7 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
       wxTreeItemId stratID = AppendItem(id, 
 					wxString::Format(wxT("%s"),
 							 (char *) strategy->GetLabel()));
-      if (p_support.Contains(strategy)) {
+      if (p_support->Contains(strategy)) {
 	SetItemTextColour(stratID, *wxBLACK);
       }
       else {
@@ -250,7 +250,7 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append(wxString::Format(wxT("%d: %s"), i,
-					   (char *) supports.Get(i).GetLabel()));
+					   (char *) supports.Get(i)->GetLabel()));
   }
 
   int supportIndex = m_doc->GetNfgSupportList().GetCurrentIndex();
@@ -297,8 +297,8 @@ void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
   }
 
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
-  if (support.Contains(strategy) &&
-      support.NumStrats(strategy->GetPlayer()) > 1) {
+  if (support->Contains(strategy) &&
+      support->NumStrats(strategy->GetPlayer()) > 1) {
     m_doc->Submit(new gbtCmdRemoveStrategy(strategy));
   }
   else {
