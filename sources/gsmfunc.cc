@@ -716,8 +716,10 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int param_sets_matched;
   Portion* result = 0;
 
+
   if( _FuncIndex == -1 && _NumFuncs == 1 )
     _FuncIndex = 0;
+
 
   if( _FuncIndex == -1 )
   {
@@ -800,7 +802,27 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	{
 	  _ErrorMessage( _StdErr, 7, index, _FuncName );
 	  _ErrorOccurred = true;
-	}	  
+	}
+      }
+      else
+      {
+	switch( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Option )
+	{
+	case DEFAULT_NFG:
+	  if( gsm->DefaultNfg()->Type() == 
+	     _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
+	  {
+	    _Param[ index ] = gsm->DefaultNfg()->ValCopy();
+	  }
+	  break;
+	case DEFAULT_EFG:
+	  if( gsm->DefaultEfg()->Type() == 
+	     _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type )
+	  {
+	    _Param[ index ] = gsm->DefaultEfg()->ValCopy();
+	  }
+	  break;
+	}
       }
     }
   }

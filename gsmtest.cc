@@ -20,7 +20,7 @@
 
 
 #define CRASHTEST
-#define INTERACTIVE
+// #define INTERACTIVE
 
 
 int main( void )
@@ -67,7 +67,7 @@ int main( void )
   gin >> cont;
 
 
-
+/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -3327,8 +3327,90 @@ int main( void )
   machine->CallFunction();
   machine->Push( (long) 1 );
   machine->Subscript();
+  machine->Assign();
   machine->Output();
   machine->Pop();
+
+  machine->PushRef( "E" );
+  machine->UnAssign();
+  machine->Dump();
+
+  machine->PushRef( "p" );
+  machine->Dump();
+
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "L" );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->PushList( 2 );
+  machine->Assign();
+  machine->Dump();
+  
+  machine->PushRef( "L" );
+  machine->PushRef( "L" );
+  machine->PushRef( "L" );
+  machine->Add();
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "L" );
+  machine->Dump();
+
+*/
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "N" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind();
+  machine->PushRef( "NULL" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "NULL" );
+  machine->Bind( "pxifile" );
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "GobitNfg" );
+  machine->CallFunction();
+  machine->Dump();
+  
+
+
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;

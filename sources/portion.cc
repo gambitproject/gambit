@@ -1169,10 +1169,13 @@ void OutputPortion::Output( gOutput& s ) const
 
 Portion* OutputPortion::ValCopy( void ) const
 {
+  return RefCopy();
+/*
   return new ErrorPortion
     ( (gString)
      "OutputPortion::ValCopy() not available due to lack of copy\n" +
      "constructor in class gOutput\n" );
+*/
   // return new OutputValPortion( *_Value ); 
 }
 
@@ -1241,10 +1244,13 @@ void InputPortion::Output( gOutput& s ) const
 
 Portion* InputPortion::ValCopy( void ) const
 { 
+  return RefCopy();
+/*
   return new ErrorPortion
     ( (gString)
      "InputPortion::ValCopy() not available due to lack of copy\n" +
      "constructor in class gInput\n" );
+*/
   // return new InputValPortion( *_Value ); 
 }
 
