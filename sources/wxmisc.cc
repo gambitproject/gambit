@@ -311,7 +311,7 @@ return ((ev.KeyCode()==WXK_DELETE) ||
 // gDrawTextGetNum will scan the string, starting at position i,
 // for a number.  It will stop at the first non-digit character.
 #include <ctype.h>
-int atoi(const char *s);
+#include <stdlib.h>
 int gDrawTextGetNum(const gString &s,int *i)
 {
 gString tmp;
