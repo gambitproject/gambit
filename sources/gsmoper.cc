@@ -1117,174 +1117,37 @@ Portion *GSM_Print(Portion **param)
 }
 
 
-Portion* GSM_Write_numerical(Portion** param)
+Portion* GSM_Write(Portion** param)
 {
-  assert(param[1]->Spec().Type & (porINTEGER|porNUMBER));
   gOutput& s = ((OutputPortion*) param[0])->Value();
   s << param[1];
 
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
+  return param[0]->ValCopy();
 }
-
-
-Portion* GSM_Write_gString(Portion** param)
-{
-  assert(param[1]->Spec().Type == porTEXT);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-
-Portion* GSM_Write_Mixed(Portion** param)
-{
-  assert(param[1]->Spec().Type & porMIXED);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-
-Portion* GSM_Write_Behav(Portion** param)
-{
-  assert(param[1]->Spec().Type & porBEHAV);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-
-Portion* GSM_Write_NfSupport(Portion** param)
-{
-  assert(param[1]->Spec().Type & porNFSUPPORT);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-Portion* GSM_Write_EfSupport(Portion** param)
-{
-  assert(param[1]->Spec().Type & porEFSUPPORT);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-Portion* GSM_Write_Strategy(Portion** param)
-{
-  assert(param[1]->Spec().Type & porSTRATEGY);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
 
 Portion* GSM_Write_Nfg(Portion** param)
 {
-  assert(param[1]->Spec().Type & porNFG);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
+  gOutput &s = ((OutputPortion*) param[0])->Value();
   Nfg *nfg = ((NfgPortion *) param[1])->Value();
 
   nfg->WriteNfgFile(s);
 
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
+  return param[0]->ValCopy();
 }
 
 
 Portion* GSM_Write_Efg(Portion** param)
 {
-  assert(param[1]->Spec().Type & porEFG);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-
+  gOutput &s = ((OutputPortion*) param[0])->Value();
   Efg *efg = ((EfgPortion*) param[1])->Value();
 
   efg->WriteEfgFile(s);
 
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
+  return param[0]->ValCopy();
 }
-
-Portion* GSM_Write_EfgRational(Portion** param)
-{
-  assert(param[1]->Spec().Type & porEFG);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-
-  Efg *efg = ((EfgPortion*) param[1])->Value();
-
-  efg->WriteEfgFile(s);
-
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
-
-
-
-Portion* GSM_Write_list(Portion** param)
-{
-  assert(param[1]->Spec().ListDepth > 0);
-  gOutput& s = ((OutputPortion*) param[0])->Value();
-  s << param[1];
-
-  // swap the first parameter with the return value, so things like
-  //   Output["..."] << x << y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
-
 
 
 //------------------------------ Read --------------------------//
-
-
-
 
 
 Portion* GSM_Read_Bool(Portion** param)
@@ -2583,26 +2446,26 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("Write", 10);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType
 			("x", porBOOL | porINTEGER | porNUMBER));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write_gString, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("x", porTEXT));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Write_Mixed, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porMIXED));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write_Behav,
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
@@ -2621,7 +2484,7 @@ void Init_gsmoper(GSM* gsm)
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG));
 
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list,
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
@@ -2629,19 +2492,19 @@ void Init_gsmoper(GSM* gsm)
 			("x", PortionSpec(porBOOL | porINTEGER | porNUMBER |
 					  porTEXT | porMIXED | porBEHAV, 1)));
 
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write_NfSupport,
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(7, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(7, 1, ParamInfoType("x", porNFSUPPORT));
 
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write_EfSupport,
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(8, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porEFSUPPORT));
 
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write_Strategy,
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Write,
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
