@@ -286,7 +286,7 @@ void GSM::UnAssign( const gString& ref )
 
 Portion *GSM::resolve_ref( Reference_Portion *p )
 {
-  Portion *data, *result;
+  Portion *result = 0;
   gString ref;
 
   ref = p->Value();
@@ -299,7 +299,6 @@ Portion *GSM::resolve_ref( Reference_Portion *p )
   {
     gerr << "** GSM Error: attempted to operate with an undefined variable\n";
     assert(0);
-    result = 0;
   }
   return result;
 }
@@ -312,7 +311,7 @@ Portion *GSM::resolve_ref( Reference_Portion *p )
 
 void GSM::binary_operation( OperationMode mode )
 {
-  int result;
+  int result = 0;
   Portion *p2, *p1;
   if( stack->Depth() > 1 )
   {
@@ -469,7 +468,6 @@ void GSM::Flush( void )
     p = stack->Pop();
     delete p;
   }
-  RefTable->Flush();
   assert( stack->Depth() == 0 );
 }
 
@@ -496,4 +494,3 @@ template class gNode<FuncDescObj *>;
 #include "gstack.imp"
 
 template class gStack<Portion *>;
-
