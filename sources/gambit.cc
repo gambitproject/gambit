@@ -206,7 +206,7 @@ gambit_frame->CreateStatusLine();
 new GambitToolBar(gambit_frame);
 
 // Set up the help system
-wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.93\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1996.\nFunding provided by the National Science Foundation");
+wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.94\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1996.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
 // Set up the error handling functions:
@@ -266,7 +266,7 @@ void GambitFrame::OnMenuCommand(int id)
 {
 	switch (id)
 	{
-		case FILE_QUIT: OnClose(); delete this;	break;
+		case FILE_QUIT: Close();	break;
 		case FILE_LOAD:	LoadFile(); break;
 #ifndef EFG_ONLY
 		case FILE_NEW_NFG: NfgGUI(0,gString(),0,this);	break;

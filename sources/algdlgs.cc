@@ -1,7 +1,7 @@
 //****************************************************************************
 // Classes that are often used for the algorithm params dialogs.
 //****************************************************************************
-// @(#)algdlgs.cc	1.15 5/15/96
+// $Id$
 //
 
 #include "gambitio.h"
@@ -51,6 +51,7 @@ wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
 gOutput *OutputParamsSettings::MakeOutputFile(const char *s,gOutput *&outp)
 {
 if (!s) return &gnull;
+if (strcmp(s,"gnull")==0) return &gnull;
 if (strcmp(s,gWXOUT)==0)
 {
 	if (!wout) wout=new gWxOutput(gWXOUT);

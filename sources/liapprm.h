@@ -90,7 +90,7 @@ wxStringList *start_option_list=new wxStringList("Default","Saved","Prompt",0);
 char *start_option_str=new char[20];
 strcpy(start_option_str,(char *)start_option_list->Nth(start_option)->Data());
 Add(wxMakeFormString("Start",&start_option_str,wxFORM_RADIOBOX,
-			 new wxList(wxMakeConstraintStrings(start_option_list), 0)));
+			 new wxList(wxMakeConstraintStrings(start_option_list), 0),0,wxVERTICAL));
 // Now add the basic stuff
 MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
 Go();

@@ -1,7 +1,7 @@
 // File: nfgsolng.h -- defines a class to take care of the normal form
 // solution algorithms.  It is also used for the NF solution mode in the
 // extensive form.  The actual code in in normshow.cc
-// $Id$
+// @(#)nfgsolng.h	1.1 8/5/96
 #ifndef NFGSOLNG_H
 #define NFGSOLNG_H
 #include "gmisc.h"
