@@ -212,14 +212,17 @@ NFSupport::NFSupport(const NFSupport &s)
 NFSupport::~NFSupport()
 { 
   for (int i = 1; i <= sups.Length(); i++)
-		delete sups[i];
+    delete sups[i];
 }
 
 NFSupport &NFSupport::operator=(const NFSupport &s)
 {
-  if (this != &s) {
+  if (this != &s && bnfg == s.bnfg) {
     name = s.name; 
-    sups = s.sups;
+    for (int i = 1; i <= sups.Length(); i++)  {
+      delete sups[i];
+      sups[i] = new NFStrategySet(*s.sups[i]);
+    }
   }
   return (*this);
 }
