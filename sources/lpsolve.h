@@ -13,12 +13,14 @@
 
 //
 // This class implements a LP solver.  Its constructor takes as input a
-// LP problem of the form maximize c x subject to A x<=b, x >= 0, and computes
-// the optimum values of x and c x.  These can be accessed using the
-// member functions provided.
+// LP problem of the form maximize c x subject to A x<=b, x >= 0. 
+// The last k equations can represent equalities (indicated by the 
+// parameter "nequals").  
 //
 // All computation is done in the class constructor; when the constructor
-// returns the computation has completed.
+// returns the computation has completed.  OptimumVector() returns the 
+// solution.  The components are indexed by the columns of A, with the 
+// excess columns representing the artificial and slack variables.   
 //
 
 template <class T> class LPSolve {

@@ -16,8 +16,10 @@ template <class T>
 NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 				     int pl, bool strong, gOutput &tracefile)
 {
+  T eps;
   NfgContIter<T> s(&S);
   s.Freeze(pl);
+  gEpsilon(eps);
 
   NFStrategySet *newS = new NFStrategySet(*S.GetNFStrategySet(pl));
   gArray<bool> dom(S.NumStrats(pl));
@@ -70,7 +72,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
       dom[k] = false;
 
-      if (Tab.IsFeasible() && COpt > (T) 0) {
+      if (Tab.IsFeasible() && COpt > eps) {
 	tracefile << " Strongly Dominated";
 	ret = true;
 	dom[k] = true;
@@ -139,9 +141,9 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
       dom[k] = false;
 
-      if (Tab.IsFeasible() && COpt == C0)
+      if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
 	tracefile << " Duplicated strategy?\n\n";
-      else if (Tab.IsFeasible() && COpt > C0) {
+      else if (Tab.IsFeasible() && COpt > C0+eps) {
 	tracefile << " Weakly Dominated\n\n";
 	ret = true;
 	dom[k] = true;

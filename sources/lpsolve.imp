@@ -6,17 +6,6 @@
 
 #include "lpsolve.h"
 
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
-void Epsilon(double &v, int i) 
-{
-  if(i==1)v=(double)1.0e-5;
-  if(i==2)v=(double)1.0e-8;
-  if(i==3)v=(double)1.0e-6;
-}
-
-void Epsilon(gRational &v, int) { v=(gRational)0;}
-
 template <class T>
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 		    const gVector<T> &c, int nequals, gStatus &s) 
@@ -26,9 +15,11 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
      UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
      y(b.Length()),x(b.Length()),d(b.Length()), status(s)
 {
-  Epsilon(eps1,1);
-  Epsilon(eps2,2);
-  Epsilon(eps3,3);
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
+  gEpsilon(eps1,5);
+  gEpsilon(eps2,8);
+  gEpsilon(eps3,6);
   
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
@@ -160,11 +151,12 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
    // gout << "\n--- End Phase I ---\n";
   
   if(!bounded) {
-      gout << "\nPhase 1 Unbounded\n";
+      // gout << "\nPhase 1 Unbounded\n";
   }
   assert(bounded);
-
-  if(total_cost < (T)0) {
+  
+  // which eps should be used here?  
+  if(total_cost < -eps1) {   
     feasible = 0;
      // gout << "\nProblem Infeasible\n\n";
     return;
@@ -176,8 +168,9 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
    // gout << "\nxx: " << (*xx);
 
-  for(i=num_inequals + 1;i<= neqns;i++) (*UB)[nvars+i] = 1;
-  for(i = 1;i<= neqns;i++) {
+  for(i=num_inequals+1;i<=neqns;i++) 
+    (*UB)[nvars+i] = 1;
+  for(i=1;i<=neqns;i++) {
     if(b[i] < (T)0) (*LB)[nvars+i] = 1;
   }
   
@@ -296,7 +289,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
     }
     while(outlab==in && outlab !=0 && !status.Get()); 
     if(in) {
-    // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
+     // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
       tab->Pivot(out,in);       // step5b: Pivot new variable into basis
       
       npiv=(double)tab->NumPivots();
@@ -322,7 +315,7 @@ template <class T> int LPSolve<T>::Enter()
 
   in = 0;
 
-  T test = (T)0+eps1;
+  T test = (T)0;
   for(i=1;i<=nvars+neqns;i++) {
     int lab = i;
     if(i>nvars)lab=nvars-i;
@@ -334,12 +327,12 @@ template <class T> int LPSolve<T>::Enter()
       else 
 	z = y[i-nvars];
       // gout << "\n i = " << i << " cost: " << (*cost)[i] << " z: " << z << " test: " << test;
-      if((*cost)[i]-z > test) 
+      if((*cost)[i]-z > test+eps1) 
 	if((*UB)[i]==0 || ((*UB)[i]==1 && (*xx)[i] - (*ub)[i] < -eps1)) {
 	  {test=(*cost)[i]-z;in = lab;flag = -1;}
 	  // gout << "\nflag: -1  in: " << in << " test: " << test;
 	}
-      if(z - (*cost)[i] > test) 
+      if(z - (*cost)[i] > test+eps1) 
 	if((*LB)[i]==0 || ((*LB)[i]==1 && (*xx)[i] - (*lb)[i] > eps1)) {
 	  {test=z-(*cost)[i];in=lab;flag = 1;}
 	  // gout << "\nflag: +1  in: " << in << " test: " << test;
@@ -369,7 +362,7 @@ template <class T> int LPSolve<T>::Exit(int in)
       if (d[j] < -eps2 && (*UB)[col]==1) { 
 	t = ((*xx)[col]-(*ub)[col])/d[j];
       }
-      if(t>=(T)0 && t < tmin) {
+      if(t>=-eps2 && t < tmin-eps2) {
 	tmin = t;
 	out = j;
       }
@@ -384,7 +377,7 @@ template <class T> int LPSolve<T>::Exit(int in)
       if (d[j] < -eps2 && (*LB)[col]==1) { 
 	t = ((*lb)[col]-(*xx)[col])/d[j];
       }
-      if(t >= (T)0 && t < tmin) {
+      if(t >= -eps2 && t < tmin-eps2) {
 	tmin = t;
 	out = j;
       }
@@ -399,7 +392,7 @@ template <class T> int LPSolve<T>::Exit(int in)
     t = (*ub)[col]-(*xx)[col];
   if(flag == 1 && (*LB)[col]) 
     t = (*xx)[col]-(*lb)[col];
-  if(t > eps2 && t < tmin) {
+  if(t > eps2 && t < tmin-eps2) {
     tmin = t;
     out = -1;
   }
