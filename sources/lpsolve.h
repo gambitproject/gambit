@@ -9,6 +9,7 @@
 
 #include "tableau.h"
 #include "bfs.h"
+#include "gstatus.h"
 
 //
 // This class implements a LP solver.  Its constructor takes as input a
@@ -22,7 +23,7 @@
 
 template <class T> class LPSolve {
 private:
-  int  well_formed, feasible, bounded, flag, nvars, neqns;
+  int  well_formed, feasible, bounded, aborted, flag, nvars, neqns;
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   const gMatrix<T> &A;   // needed?
@@ -32,13 +33,14 @@ private:
   gVector<int> *UB, *LB;
   gVector<T> *ub, *lb, *xx, *cost; 
   gVector<T> y, x, d;
+  gStatus &status;
   
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
-	  int nequals = 0);   // nequals = number of equalies (last nequals rows)
+	  int nequals = 0, gStatus &s = gstatus );   // nequals = number of equalies (last nequals rows)
 //  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
 //	  const gVector<T> &C,  const gVector<int> &sense, 
 //	  const gVector<int> &LB,  const gVector<T> &lb, 
@@ -48,9 +50,10 @@ public:
   T OptimumCost(void) const;
   const gVector<T> &OptimumVector(void) const;
   
+  int IsAborted(void) const;
+  int IsWellFormed(void) const;
   int IsFeasible(void) const;
   int IsBounded(void) const;
-  int IsWellFormed(void) const;
   long NumPivots(void) const;
   void OptBFS(BFS<T> &b) const;
 };

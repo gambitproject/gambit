@@ -19,12 +19,12 @@ void Epsilon(gRational &v, int) { v=(gRational)0;}
 
 template <class T>
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
-		    const gVector<T> &c, int nequals) 
-  : well_formed(1), feasible(1), bounded(1), 
+		    const gVector<T> &c, int nequals, gStatus &s) 
+  : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), total_cost(0),tmin(0),
      opt_bfs((T)0),  dual_bfs((T)0) ,A(A), b(b), c(c), AA(0),tab(0), 
      UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
-     y(b.Length()),x(b.Length()),d(b.Length())
+     y(b.Length()),x(b.Length()),d(b.Length()), status(s)
 {
   Epsilon(eps1,1);
   Epsilon(eps2,2);
@@ -50,6 +50,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   for(i=b.First();i<=b.Last();i++)
     if(b[i]<(T)0) num_artific++; 
   nvars+=num_artific;
+  status.SetProgress(0.0);
   
    // gout << "\n--- Begin Phase I ---\n";
   
@@ -145,6 +146,12 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
   Solve(1);
   
+  if(status.Get()) {
+    aborted=1;
+    status.Reset();
+    return;
+  }
+    
    // gout << "\nFinal tableau: ";
    // tab->Dump(gout); 
   total_cost = tab->TotalCost();
@@ -192,6 +199,12 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
   Solve(2);
   
+  if(status.Get()) {
+    aborted=1;
+    status.Reset();
+    return;
+  }
+    
    // gout << "\n--- End Phase II ---\n";
 
   if(!bounded) {
@@ -240,7 +253,9 @@ template <class T> void LPSolve<T>::Solve(int phase)
   int i, out,in,outlab,xlab;
   outlab = 0;
   gVector<T> a(neqns);
+  double npiv;
   
+  if(status.Get()) return;
   do { 
     tab->DualVector(y);         // step 1: Solve y B = c_B
     // gout << "\nstep 1, y: " << y;
@@ -279,11 +294,13 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	// gout << "\nstep 5a, xx: " << (*xx);
       }
     }
-    while(outlab==in && outlab !=0); 
+    while(outlab==in && outlab !=0 && !status.Get()); 
     if(in) {
     // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
       tab->Pivot(out,in);       // step5b: Pivot new variable into basis
       
+      npiv=(double)tab->NumPivots();
+      status.SetProgress(npiv/(npiv+1));
       tab->BasisVector(x);
       // gout << "\n tab = ";
       // tab->Dump(gout);
@@ -413,6 +430,11 @@ template <class T> int LPSolve<T>::IsBounded(void) const
 template <class T> int LPSolve<T>::IsWellFormed(void) const
 {
   return well_formed;
+}
+
+template <class T> int LPSolve<T>::IsAborted(void) const
+{
+  return aborted;
 }
 
 template <class T> long LPSolve<T>::NumPivots(void) const

@@ -6,6 +6,7 @@
 
 #include "gwatch.h"
 #include "gpvector.h"
+#include "efgutils.h"
 
 #include "efgcsum.h"
 
@@ -65,14 +66,17 @@ template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
   BFS<T> cbfs((T) 0);
   
   if (EF.NumPlayers() != 2 || !params.tracefile)   return 0;
-  if(!IsConstSum()) return 0;;
+  if(!IsConstSum()) return 0;
+  Infoset *bad1, *bad2;
+  if(!IsPerfectRecall(EF,bad1,bad2)) return 0;
   gWatch watch;
   
   List.Flush();
   
   Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,ni2);
-  Add_BFS(LP); 
+  LPSolve<T> LP(*A,*b,*c,ni2,params.status);
+  if(!LP.IsAborted()) 
+    Add_BFS(LP); 
   
   npivots = LP.NumPivots();
   time = watch.Elapsed();

@@ -77,8 +77,9 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
   List.Flush();
   
   Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,1);
-  Add_BFS(LP); 
+  LPSolve<T> LP(*A,*b,*c,1,params.status);
+  if(!LP.IsAborted())
+    Add_BFS(LP); 
   
   npivots = LP.NumPivots();
   time = watch.Elapsed();
