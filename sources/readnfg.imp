@@ -69,17 +69,19 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
 template <class T> void NfgFile<T>::SetPayoff(int cont, int pl,
 					      const gRational &value)
 {
-  if (type == DOUBLE)  {
+  if (Ndbl)   {
     if (pl == 1)
-      Ndbl->GameForm().SetOutcome(cont, Ndbl->Outcomes()[cont]);
-    Ndbl->payoffs(cont, pl) = (T) value;
+      Ndbl->GameForm().SetOutcome(cont, Ndbl->GameForm().NewOutcome());
+    Ndbl->SetPayoff(Ndbl->GameForm().GetOutcome(cont), pl, (double) value);
   }
   else  {
     if (pl == 1)
-      Nrat->GameForm().SetOutcome(cont, Nrat->Outcomes()[cont]);
-    Nrat->payoffs(cont, pl) = (T) value;
+      Nrat->GameForm().SetOutcome(cont, Nrat->GameForm().NewOutcome());
+    Nrat->SetPayoff(Nrat->GameForm().GetOutcome(cont), pl, value);
   }
 }
+
+
 
 template <class T> int NfgFile<T>::Parse(void)
 {

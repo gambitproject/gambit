@@ -95,18 +95,14 @@ payoff:       NUMBER
               { if (Ndbl)   {
                   if (pl > Ndbl->NumPlayers())   {
 		    cont++;
-		    if (cont <= ncont)  
-	              Ndbl->GameForm().NewOutcome();
 		    pl = 1;
                   }
                 }
                 else  {
                   if (pl > Nrat->NumPlayers())   {
 		    cont++;
-		    if (cont <= ncont)  
-	              Nrat->GameForm().NewOutcome();
 		    pl = 1;
-		  }
+		  }	
                 } 
 		if (cont > ncont)  YYERROR;
 		SetPayoff(cont, pl, last_rational);

@@ -11,9 +11,9 @@
 #include "nfplayer.h"
 
 
-// ---------------------------------------------
+//----------------------------------------------------
 // NFGameForm: Constructors, Destructors, Operators
-// ---------------------------------------------
+//----------------------------------------------------
 
 
 int NFGameForm::Product(const gArray<int> &dim)
@@ -35,38 +35,48 @@ NFGameForm::NFGameForm(const NFPayoffs &pay, const gArray<int> &dim)
   }
   IndexStrategies();
 
-  outcomes.Append(new NFOutcome(1, this));
   for (int cont = 1; cont <= results.Length();
-       results[cont++] = outcomes[1]);
+       results[cont++] = (NFOutcome *) 0);
 }
 
-NFGameForm::NFGameForm (const NFGameForm &b)
+NFGameForm::NFGameForm(const NFGameForm &b)
   : title(b.title), dimensions(b.dimensions),
-    players(b.players.Length()), paytable(b.paytable)
+    players(b.players.Length()), outcomes(b.outcomes.Length()),
+    results(b.results.Length()), paytable(b.paytable)
 {
-  for (int i = 1; i <= players.Length(); i++){
-    players[i] = new NFPlayer(i, this, dimensions[i]);
-    players[i]->name = b.players[i]->name;
-    for (int j = 1; j <= players[i]->NumStrats(); j++)  {
-      *(players[i]->strategies[j]) = *(b.players[i]->strategies[j]);
-      players[i]->strategies[j]->nfp = players[i];
+  for (int pl = 1; pl <= players.Length(); pl++)  {
+    players[pl] = new NFPlayer(pl, this, dimensions[pl]);
+    players[pl]->name = b.players[pl]->name;
+    for (int st = 1; st <= players[pl]->NumStrats(); st++)  {
+      *(players[pl]->strategies[st]) = *(b.players[pl]->strategies[st]);
+      players[pl]->strategies[st]->nfp = players[pl];
     }
   }
   IndexStrategies();
+  
+  for (int outc = 1; outc <= outcomes.Length(); outc++)  {
+    outcomes[outc] = new NFOutcome(outc, this);
+    outcomes[outc]->SetName(b.outcomes[outc]->GetName());
+  }
+
+  for (int cont = 1; cont <= results.Length(); cont++)    
+    results[cont] = (b.results[cont]) ?
+                     outcomes[b.results[cont]->GetNumber()] : (NFOutcome *) 0;
 }
 
-#include "efg.h"
 
 NFGameForm::~NFGameForm()
 {
-  for (int i = 1; i <= players.Length(); i++)
-    delete players[i];
+  for (int pl = 1; pl <= players.Length(); pl++)
+    delete players[pl];
+  for (int outc = 1; outc <= outcomes.Length(); outc++)
+    delete outcomes[outc];
 }
 
 
-//-------------------------
-//NFGameForm: Member Functions
-//-------------------------
+//-------------------------------
+// NFGameForm: Member Functions
+//-------------------------------
 
 
 NFOutcome *NFGameForm::NewOutcome(void)

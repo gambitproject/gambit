@@ -39,15 +39,6 @@ NfgFile<double>::NfgFile(gInput &f, Nfg<double> *& N)
   : NfgFileReader(f, N, fooR), type(DOUBLE), fooR(0)
 { }
 
-void NfgFile<double>::SetPayoff(int cont, int pl,
-				const gRational &value)
-{
-  if (pl == 1)
-    Ndbl->GameForm().SetOutcome(cont, Ndbl->Outcomes()[cont]);
-  Ndbl->payoffs(cont, pl) = (double) value;
-}
-
-
 TEMPLATE class MixedProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<double> &);
 

@@ -1,5 +1,5 @@
 //
-// FILE: nfg.imp -- Implementation of typed normal form
+// FILE: nfg.imp -- Implementation of normal form
 //
 // $Id$
 //
@@ -9,21 +9,17 @@
 #include "nfstrat.h"
 
 
-//---------------------------------------------------------------
-// NFG: Constructors, Destructor, Operators
-//---------------------------------------------------------------
+//---------------------------------------------
+// Nfg: Constructors, Destructor, Operators
+//---------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
   : gameform(new NFGameForm(*this, dim)),
 #ifndef NFG_ONLY
     efg(0),
 #endif   // NFG_ONLY
-    payoffs(1, dim.Length())
-{
-  gVector<T> zeroes(dim.Length());
-  zeroes = (T) 0;
-  payoffs.SetRow(1, zeroes);
-}
+    payoffs(0, dim.Length())
+{ }
 
 template <class T> Nfg<T>::Nfg(const Nfg<T> &N)
   : gameform(new NFGameForm(*N.gameform)),
@@ -139,12 +135,12 @@ template <class T> void Nfg<T>::DeleteOutcome(int outc)
 template <class T> void Nfg<T>::SetPayoff(NFOutcome *outcome,
 					  int pl, const T &value)
 {
-  payoffs(outcome->GetNumber(), pl) = value;
+  if (outcome)   payoffs(outcome->GetNumber(), pl) = value;
 }
 
 template <class T> const T &Nfg<T>::Payoff(NFOutcome *outcome, int pl) const
 {
-  return payoffs(outcome->GetNumber(), pl);
+  return ((outcome) ? payoffs(outcome->GetNumber(), pl) : (T) 0);
 }
 
 
@@ -167,7 +163,7 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
     NFPlayer *player = gameform->Players()[i];
     f << "{ ";
     for (int j = 1; j <= player->NumStrats(); j++)
-      f << '"' << player->Strategies()[i]->name << "\" ";
+      f << '"' << player->Strategies()[j]->name << "\" ";
     f << "}\n";
   }
   
@@ -179,8 +175,11 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
     ncont *= gameform->NumStrats(i);
 
   for (i = 1; i <= ncont; i++)
-    for (int j = 1; j <= gameform->NumPlayers(); j++)
-      f << payoffs(gameform->GetOutcome(i)->GetNumber(), j) << ' ';
+    for (int j = 1; j <= gameform->NumPlayers(); j++)   
+      if (gameform->GetOutcome(i)) 
+	f << payoffs(gameform->GetOutcome(i)->GetNumber(), j) << ' ';
+      else
+	f << ((T) 0) << ' ';
 
   f << '\n';
 }
@@ -402,9 +401,13 @@ T MixedProfile<T>::PPayoff(int pl, int index,
 {
   Strategy *s;
   int pindex = 0;
-
-  if (i > N->NumPlayers())
-    return ((Nfg<T> *) N)->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
+  
+  if (i > N->NumPlayers())  {
+    if (N->GameForm().GetOutcome(index))
+      return N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl);
+    else
+      return (T) 0;
+  }
   T sum = (T) 0;
   for (int j = 1; j <= support.NumStrats(i); j++) {
     s = support.Strategies(i)[j];
@@ -429,7 +432,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())
     value += prob *
-       ((Nfg<T> *) N)->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl); 
+        ((N->GameForm().GetOutcome(index)) ?
+	N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl) : (T) 0); 
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
       s = support.Strategies(cur_pl)[j];
@@ -453,7 +457,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
 	   cur_pl + 1, index,prob, value);
   else if (cur_pl > N->NumPlayers())
     value += prob * 
-       ((Nfg<T> *) N)->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl); 
+        ((N->GameForm().GetOutcome(index)) ?
+	 N->payoffs(N->GameForm().GetOutcome(index)->GetNumber(), pl) :(T) 0); 
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
       s = support.Strategies(cur_pl)[j];
@@ -478,7 +483,8 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       s = support.Strategies(const_pl)[j];
       value[j] += prob * 
-         ((Nfg<T> *) N)->payoffs(N->GameForm().GetOutcome(index + s->index)->GetNumber(), pl); 
+	((N->GameForm().GetOutcome(index + s->index)) ?
+	 N->payoffs(N->GameForm().GetOutcome(index + s->index)->GetNumber(), pl) : (T) 0); 
     }
   }
   else   {
