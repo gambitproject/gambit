@@ -383,7 +383,7 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
   case NODE_RIGHT_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(node);
   case NODE_RIGHT_NAME:
-    if (!node->Game()->GetOutcome(node).IsNull()) {
+    if (node->Game()->GetOutcome(node)) {
       return (const char *) m_efg.GetOutcomeName(node->Game()->GetOutcome(node));
     }
     else {

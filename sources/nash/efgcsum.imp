@@ -16,7 +16,7 @@
 
 template <class T> class CSSeqFormModule  {
 private:
-  const Efg::Game &EF;
+  const FullEfg &EF;
   const CSSeqFormParams &params;
   const EFSupport &support;
   gMatrix<T> *A;
@@ -221,7 +221,7 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
 				     int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (!EF.GetOutcome(n).IsNull()) {
+  if (EF.GetOutcome(n)) {
     (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
        gNumber(prob) * EF.Payoff(n, EF.Players()[1]) - gNumber(minpay);
   }

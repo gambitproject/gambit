@@ -6,7 +6,6 @@
 
 #include "math/gvector.h"
 #include "efg.h"
-#include "fullefgoutcome.h"
 #include "efgutils.h"
 #include "behav.h"
 
@@ -18,7 +17,7 @@
 //                    PureBehavProfile<T> member functions
 //-------------------------------------------------------------------------
 
-template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg::Game &efg)
+template <class T> PureBehavProfile<T>::PureBehavProfile(const FullEfg &efg)
   : E(&efg), profile(efg.NumPlayers())
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
@@ -171,10 +170,10 @@ void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 }
 
 template <class T>
-const T PureBehavProfile<T>::Payoff(const Efg::Outcome &p_outcome,
+const T PureBehavProfile<T>::Payoff(efgOutcome *p_outcome,
 				    const int &pl) const
 {
-  if (!p_outcome.IsNull()) {
+  if (p_outcome) {
     return E->Payoff(p_outcome)[pl];
   }
   else {
@@ -706,7 +705,7 @@ void BehavProfile<T>::ComputeSolutionData(void)
 }
 
 template <class T>
-void BehavProfile<T>::BehaviorStrat(const Efg::Game &E, int pl,
+void BehavProfile<T>::BehaviorStrat(const FullEfg &E, int pl,
 				    Node *n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
@@ -725,7 +724,7 @@ void BehavProfile<T>::BehaviorStrat(const Efg::Game &E, int pl,
 
 template <class T>
 void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
-				       const Efg::Game &E, int pl,
+				       const FullEfg &E, int pl,
 				       const gArray<int> *const actions,
 				       Node *node)
 {

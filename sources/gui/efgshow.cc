@@ -763,7 +763,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
 		 "Error", wxOK, this);
     if (efg)  delete efg;
   }
-  catch (Efg::Game::Exception &) {
+  catch (FullEfg::Exception &) {
     wxMessageBox("Internal exception in extensive form", "Error",
 		 wxOK, this);
     if (efg)  delete efg;

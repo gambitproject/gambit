@@ -35,14 +35,14 @@ class Node    {
     gText name;
     Infoset *infoset;
     Node *parent;
-    FullEfgNamespace::Outcome *outcome;
+    efgOutcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
 
     Node(FullEfg *e, Node *p);
     ~Node();
 
-    void DeleteOutcome(FullEfgNamespace::Outcome *outc);
+    void DeleteOutcome(efgOutcome *outc);
 
   public:
     FullEfg *Game(void) const   { return E; }

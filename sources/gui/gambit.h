@@ -20,9 +20,7 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
-namespace Efg {
-  class Game;
-}
+class FullEfg;
 class EfgShow;
 class Nfg;
 class NfgShow;
@@ -51,15 +49,15 @@ public:
 
   UserPreferences &GetPreferences(void) { return m_prefs; }
 
-  void AddGame(Efg::Game *, EfgShow *);
+  void AddGame(FullEfg *, EfgShow *);
   void AddGame(Nfg *, NfgShow *);
-  void AddGame(Efg::Game *, Nfg *, NfgShow *);
-  void RemoveGame(Efg::Game *);
+  void AddGame(FullEfg *, Nfg *, NfgShow *);
+  void RemoveGame(FullEfg *);
   void RemoveGame(Nfg *);
   void SetFilename(EfgShow *, const wxString &);
   void SetFilename(NfgShow *, const wxString &);
 
-  EfgShow *GetWindow(const Efg::Game *);
+  EfgShow *GetWindow(const FullEfg *);
   NfgShow *GetWindow(const Nfg *);
 
   void LoadFile(const wxString &);

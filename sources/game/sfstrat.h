@@ -20,7 +20,7 @@ class Infoset;
 
 struct Sequence {
 friend class Sfg;
-friend class Efg::Game;
+friend class FullEfg;
 friend class SFSequenceSet;
 private:
   int number;

@@ -85,7 +85,7 @@ void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
 //                  dialogInfosetReveal: Member functions
 //=========================================================================
 
-dialogInfosetReveal::dialogInfosetReveal(const Efg::Game &p_efg, wxWindow *p_parent)
+dialogInfosetReveal::dialogInfosetReveal(const FullEfg &p_efg, wxWindow *p_parent)
   : guiAutoDialog(p_parent, "Reveal to Players"), m_efg(p_efg)
 {
 #ifdef __WXGTK__

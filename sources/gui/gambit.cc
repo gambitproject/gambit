@@ -31,13 +31,13 @@
 
 class Game {
 public:
-  Efg::Game *m_efg;
+  FullEfg *m_efg;
   EfgShow *m_efgShow;
   Nfg *m_nfg;
   NfgShow *m_nfgShow;
   gText m_fileName;
 
-  Game(Efg::Game *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
+  Game(FullEfg *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
   Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
 };
 
@@ -234,7 +234,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
 
 IMPLEMENT_APP(GambitApp)
 
-void GambitApp::AddGame(Efg::Game *p_efg, EfgShow *p_efgShow)
+void GambitApp::AddGame(FullEfg *p_efg, EfgShow *p_efgShow)
 {
   Game *game = new Game(p_efg);
   game->m_efgShow = p_efgShow;
@@ -252,7 +252,7 @@ void GambitApp::AddGame(Nfg *p_nfg, NfgShow *p_nfgShow)
   m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
 }
 
-void GambitApp::AddGame(Efg::Game *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
+void GambitApp::AddGame(FullEfg *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {
@@ -265,7 +265,7 @@ void GambitApp::AddGame(Efg::Game *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
   m_fileHistory.AddFilesToMenu(p_nfgShow->GetMenuBar()->GetMenu(0));
 }
 
-void GambitApp::RemoveGame(Efg::Game *p_efg)
+void GambitApp::RemoveGame(FullEfg *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {
@@ -299,7 +299,7 @@ void GambitApp::RemoveGame(Nfg *p_nfg)
   }
 }
 
-EfgShow *GambitApp::GetWindow(const Efg::Game *p_efg)
+EfgShow *GambitApp::GetWindow(const FullEfg *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efg == p_efg) {

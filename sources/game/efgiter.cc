@@ -7,7 +7,7 @@
 #include "efgciter.h"
 #include "efgiter.h"
 
-EfgIter::EfgIter(Efg::Game &efg)
+EfgIter::EfgIter(FullEfg &efg)
   : _efg(&efg), _support(efg),
     _profile(efg), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
@@ -16,7 +16,7 @@ EfgIter::EfgIter(Efg::Game &efg)
 }
 
 EfgIter::EfgIter(const EFSupport &s)
-  : _efg((Efg::Game *) &s.GetGame()), _support(s),
+  : _efg(&s.GetGame()), _support(s),
     _profile(s.GetGame()), _current(_efg->NumInfosets()),
     _payoff(_efg->NumPlayers())
 {

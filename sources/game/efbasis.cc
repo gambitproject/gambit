@@ -248,7 +248,7 @@ bool EFNodeSet::IsValid(void) const
 // EFBasis: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFBasis::EFBasis(const Efg::Game &E) : EFSupport(E), nodes(E.NumPlayers())
+EFBasis::EFBasis(const FullEfg &E) : EFSupport(E), nodes(E.NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++)
     nodes[i] = new EFNodeSet(*(E.Players()[i]));

@@ -27,7 +27,7 @@ class EfgContIter    {
   friend class EfgIter;
   private:
     int _frozen_pl, _frozen_iset;
-    const Efg::Game *_efg;
+    const FullEfg *_efg;
     EFSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
@@ -65,7 +65,7 @@ class EfgContIter    {
 class EfgConditionalContIter    {
   friend class EfgIter;
   private:
-    const Efg::Game *_efg;
+    const FullEfg *_efg;
     EFSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;

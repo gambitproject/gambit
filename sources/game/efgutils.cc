@@ -9,28 +9,28 @@
 
 // recursive functions
 
-static void NDoChild(const Efg::Game &e, Node *n, gList <Node *> &list)
+static void NDoChild(const FullEfg &e, Node *n, gList <Node *> &list)
 { 
   list.Append(n);
   for (int i = 1; i <= e.NumChildren(n); i++)
     NDoChild (e, n->GetChild(i), list);
 }
 
-static void MSRDoChild(const Efg::Game &e, Node *n, gList<Node *> &list)
+static void MSRDoChild(const FullEfg &e, Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= e.NumChildren(n); i++)
     MSRDoChild(e, n->GetChild(i), list);
   if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
-static void LSRDoChild(const Efg::Game &e, Node *n, gList<Node *> &list)
+static void LSRDoChild(const FullEfg &e, Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= e.NumChildren(n); i++)
     LSRDoChild(e, n->GetChild(i), list);
   if (n->Game()->IsLegalSubgame(n))   list.Append(n);
 }
 
-static void CSDoChild(const Efg::Game &e, Node *n, gList<Node *> &list)
+static void CSDoChild(const FullEfg &e, Node *n, gList<Node *> &list)
 {
   if (n->GetSubgameRoot() == n)
     list.Append(n);
@@ -41,7 +41,7 @@ static void CSDoChild(const Efg::Game &e, Node *n, gList<Node *> &list)
 
 // Public Functions
  
-int CountNodes (const Efg::Game &e, Node *n)
+int CountNodes (const FullEfg &e, Node *n)
 {
   int num = 1;
   for (int i = 1; i <= e.NumChildren(n); i++)
@@ -49,44 +49,44 @@ int CountNodes (const Efg::Game &e, Node *n)
   return num;
 }
 
-void Nodes (const Efg::Game &befg, gList <Node *> &list)
+void Nodes (const FullEfg &befg, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(befg, befg.RootNode(), list); 
 }
 
-void Nodes (const Efg::Game &efg, Node *n, gList <Node *> &list)
+void Nodes (const FullEfg &efg, Node *n, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(efg,n, list);
 }
 
-void MarkedSubgameRoots(const Efg::Game &efg, gList<Node *> &list)
+void MarkedSubgameRoots(const FullEfg &efg, gList<Node *> &list)
 {
   list.Flush();
   MSRDoChild(efg, efg.RootNode(), list);
 }
 
-void LegalSubgameRoots(const Efg::Game &efg, gList<Node *> &list)
+void LegalSubgameRoots(const FullEfg &efg, gList<Node *> &list)
 {
   list.Flush();
   LSRDoChild(efg, efg.RootNode(), list);
 }
 
-void LegalSubgameRoots(const Efg::Game &efg, Node *n, gList<Node *> &list)
+void LegalSubgameRoots(const FullEfg &efg, Node *n, gList<Node *> &list)
 {
   list.Flush();
   LSRDoChild(efg, n, list);
 }
 
-bool HasSubgames(const Efg::Game &efg)
+bool HasSubgames(const FullEfg &efg)
 {
   gList<Node *> list;
   LegalSubgameRoots(efg, list);
   return list.Length()>1;
 }
 
-bool HasSubgames(const Efg::Game &e, Node * n)
+bool HasSubgames(const FullEfg &e, Node * n)
 {
   gList<Node *> list;
   LegalSubgameRoots(e, n, list);
@@ -95,7 +95,7 @@ bool HasSubgames(const Efg::Game &e, Node * n)
   return list.Length()>0;
 }
 
-bool AllSubgamesMarked(const Efg::Game &efg)
+bool AllSubgamesMarked(const FullEfg &efg)
 {
   gList<Node *> marked, valid;
 
@@ -106,19 +106,19 @@ bool AllSubgamesMarked(const Efg::Game &efg)
 }
 
 
-void ChildSubgames(const Efg::Game &efg, Node *n, gList<Node *> &list)
+void ChildSubgames(const FullEfg &efg, Node *n, gList<Node *> &list)
 {
   list.Flush();
   for (int i = 1; i <= efg.NumChildren(n); i++)
     CSDoChild(efg, n->GetChild(i), list);
 }
 
-int NumNodes (const Efg::Game &befg)
+int NumNodes (const FullEfg &befg)
 {
   return (CountNodes(befg, befg.RootNode()));
 }
 
-Action *LastAction(const Efg::Game &e, Node *node)
+Action *LastAction(const FullEfg &e, Node *node)
 {
   Node *parent = node->GetParent();
   if (parent == 0)  return 0;
@@ -128,13 +128,13 @@ Action *LastAction(const Efg::Game &e, Node *node)
   return 0;
 }
 
-bool IsPerfectRecall(const Efg::Game &p_efg)
+bool IsPerfectRecall(const FullEfg &p_efg)
 {
   Infoset *s1, *s2;
   return IsPerfectRecall(p_efg, s1, s2);
 }
 
-bool IsPerfectRecall(const Efg::Game &efg, Infoset *&s1, Infoset *&s2)
+bool IsPerfectRecall(const FullEfg &efg, Infoset *&s1, Infoset *&s2)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)   {
     EFPlayer *player = efg.Players()[pl];

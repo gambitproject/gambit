@@ -15,7 +15,7 @@
 
 class Sfg  {
 private:
-  const Efg::Game &EF;
+  const FullEfg &EF;
   const EFSupport &efsupp;
   gArray<SFSequenceSet *> *sequences;
   gNArray<gArray<gNumber> *> *SF;  // sequence form
@@ -47,7 +47,7 @@ public:
   int ActionNumber(int pl, int sequence) const;
   const Infoset* GetInfoset(int pl, int sequence) const;
   const Action*  GetAction(int pl, int sequence) const;
-  const Efg::Game &GetEfg(void) const {return EF;}
+  const FullEfg &GetEfg(void) const {return EF;}
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   

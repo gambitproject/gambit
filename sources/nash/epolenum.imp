@@ -18,7 +18,7 @@
 template <class T> class EfgPolEnumModule  {
 private:
   T eps;
-  const Efg::Game &EF;
+  const FullEfg &EF;
   const EFSupport &support;
   EfgPolEnumParams params;
   gSpace *Space;

@@ -26,7 +26,7 @@ private:
   gArray<gArray<Infoset *> *> infosets;
 
   void FindSubgames(const EFSupport &, gStatus &, 
-		    Node *, gList<BehavSolution> &, gList<Efg::Outcome> &);
+		    Node *, gList<BehavSolution> &, gList<efgOutcome *> &);
   
 public:
   SubgameSolver(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }

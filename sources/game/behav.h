@@ -31,7 +31,7 @@ template <class T> class gRectArray;
 
 template <class T> class BehavProfile : private gDPVector<T>  {
 protected:
-  const Efg::Game *m_efg;
+  const FullEfg *m_efg;
   EFSupport m_support;
   mutable bool m_cached_data;
 
@@ -91,14 +91,14 @@ protected:
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
   void Payoff(Node *, T, int, T &) const;
-  T Payoff(FullEfgNamespace::Outcome *, int pl) const;
+  T Payoff(efgOutcome *, int pl) const;
   
   void ComputeSolutionDataPass2(const Node *node);
   void ComputeSolutionDataPass1(const Node *node);
   void ComputeSolutionData(void);
 
-  void BehaviorStrat(const Efg::Game &, int, Node *);
-  void RealizationProbs(const MixedProfile<T> &, const Efg::Game &,
+  void BehaviorStrat(const FullEfg &, int, Node *);
+  void RealizationProbs(const MixedProfile<T> &, const FullEfg &,
 			int pl, const gArray<int> *const, Node *);
 
 public:
@@ -132,7 +132,7 @@ public:
 
   // GENERAL DATA ACCESS
 
-  Efg::Game &GetGame(void) const   { return const_cast<Efg::Game &>(*m_efg); }
+  FullEfg &GetGame(void) const   { return const_cast<FullEfg &>(*m_efg); }
   const EFSupport &Support(void) const   { return m_support; }
   
   const T &GetRealizProb(const Node *node);

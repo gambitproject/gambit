@@ -13,7 +13,7 @@
 template <class T> class SequentialEquilibModule  {
 private:
   T eps;
-  const Efg::Game &EF;
+  const FullEfg &EF;
   const EFBasis &basis;
   const EFSupport &support;
   SeqEquilibParams params;
@@ -418,7 +418,7 @@ Payoff(Node *n, EFPlayer *p) const
   int iset = (n->GetInfoset()) ? n->GetInfoset()->GetNumber() : 0;
   gPoly<T> value(Space,Lex);
   
-  if (!EF.GetOutcome(n).IsNull()) {
+  if (EF.GetOutcome(n)) {
     gPoly<T> term(Space,(double)EF.Payoff(n, p),Lex);
     value+=term;
   }

@@ -146,9 +146,9 @@ Infoset *PlayerData::GetInfoset(int p_number)
 class DefinedOutcomeData {
 public:
   int m_fileID;
-  Efg::Outcome m_outcome;
+  efgOutcome *m_outcome;
 
-  DefinedOutcomeData(int p_number, const Efg::Outcome &p_outcome)
+  DefinedOutcomeData(int p_number, efgOutcome *p_outcome)
     : m_fileID(p_number), m_outcome(p_outcome) { }
 };
 
@@ -165,7 +165,7 @@ public:
 
   void AddPlayer(const gText &);
   NodeData *AddNode(const gText &, int, int);
-  Efg::Outcome *GetOutcome(int p_number) const;
+  efgOutcome *GetOutcome(int p_number) const;
 };
 
 TreeData::TreeData(void)
@@ -237,11 +237,11 @@ NodeData *TreeData::AddNode(const gText &p_name, int p_player, int p_infoset)
 // been created, returns a pointer to the outcome;
 // otherwise, returns a null outcome
 //
-Efg::Outcome *TreeData::GetOutcome(int p_number) const
+efgOutcome *TreeData::GetOutcome(int p_number) const
 {
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     if (m_outcomes[outc]->m_fileID == p_number) {
-      return &(m_outcomes[outc]->m_outcome);
+      return m_outcomes[outc]->m_outcome;
     }
   }
   return 0;
@@ -627,10 +627,10 @@ static void BuildSubtree(FullEfg *p_efg, Node *p_node,
 
   if ((*p_nodeData)->m_outcome > 0) {
     if (p_treeData.GetOutcome((*p_nodeData)->m_outcome)) {
-      p_efg->SetOutcome(p_node, *p_treeData.GetOutcome((*p_nodeData)->m_outcome));
+      p_efg->SetOutcome(p_node, p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      Efg::Outcome outcome = p_efg->NewOutcome();
+      efgOutcome *outcome = p_efg->NewOutcome();
       p_efg->SetOutcomeName(outcome, (*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));

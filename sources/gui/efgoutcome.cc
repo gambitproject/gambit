@@ -88,7 +88,7 @@ void EfgOutcomeWindow::UpdateValues(void)
   }
 
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    Efg::Outcome outcome = efg.GetOutcome(outc);
+    efgOutcome *outcome = efg.GetOutcome(outc);
 
     SetCellValue((char *) efg.GetOutcomeName(outcome), outc - 1, 0);
 
@@ -194,8 +194,7 @@ void EfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 
 void EfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_parent->Game()->SetOutcome(m_parent->Cursor(),
-			       m_parent->Game()->GetNullOutcome());
+  m_parent->Game()->SetOutcome(m_parent->Cursor(), 0);
   m_parent->OnOutcomesEdited();
 }
 

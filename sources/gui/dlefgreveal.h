@@ -9,14 +9,14 @@
 
 class dialogInfosetReveal : public guiAutoDialog {
 private:
-  const Efg::Game &m_efg;
+  const FullEfg &m_efg;
 
   wxListBox *m_playerNameList;
 
   const char *HelpString(void) const { return "Edit Menu (efg)"; }
 
 public:
-  dialogInfosetReveal(const Efg::Game &, wxWindow *);
+  dialogInfosetReveal(const FullEfg &, wxWindow *);
   virtual ~dialogInfosetReveal() { } 
 
   gArray<EFPlayer *> GetPlayers(void) const;

@@ -39,15 +39,12 @@ public:
 
 class StrategyProfile;
 class Lexicon;
-
-namespace Efg {
-  class Game;
-}
+class FullEfg;
 
 class Nfg  {
 friend class Lexicon;
 friend class NfgFileReader;
-friend void SetEfg(Nfg *, const Efg::Game *);
+friend void SetEfg(Nfg *, const FullEfg *);
 protected:
   mutable bool m_dirty;
   mutable long m_revision;
@@ -60,7 +57,7 @@ protected:
 
   gArray<NFOutcome *> results;
 
-  const Efg::Game *efg;
+  const FullEfg *efg;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
   void IndexStrategies(void);
@@ -127,7 +124,7 @@ public:
   friend gNumber MinPayoff(const Nfg &, int pl = 0);
   friend gNumber MaxPayoff(const Nfg &, int pl = 0);
 
-  const Efg::Game *AssociatedEfg(void) const   { return efg; }
+  const FullEfg *AssociatedEfg(void) const   { return efg; }
 };
 
 int ReadNfgFile(gInput &, Nfg *&);

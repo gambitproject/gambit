@@ -16,7 +16,7 @@
 
 #include "lexicon.h"
 
-Lexicon::Lexicon(const Efg::Game &E)
+Lexicon::Lexicon(const FullEfg &E)
   : N(0), strategies(E.NumPlayers())
 { }
 
@@ -28,12 +28,12 @@ Lexicon::~Lexicon()
     N->efg = 0;
 }
 
-void SetEfg(Nfg *nfg, const Efg::Game *efg)
+void SetEfg(Nfg *nfg, const FullEfg *efg)
 {
   nfg->efg = efg;
 }
 
-void Lexicon::MakeLink(const Efg::Game *efg, Nfg *nfg)
+void Lexicon::MakeLink(const FullEfg *efg, Nfg *nfg)
 {
   nfg->efg = efg;
   N = nfg;
@@ -114,12 +114,10 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
 // declarations in class FullEfg work correctly.
 //
 
-namespace FullEfgNamespace {
-
 Nfg *MakeReducedNfg(const EFSupport &support)
 {
   int i;
-  const Efg::Game &E = support.GetGame();
+  const FullEfg &E = support.GetGame();
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)
     L->MakeReducedStrats(support, E.Players()[i], E.RootNode(), NULL);
@@ -184,7 +182,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   return ((FullEfg &) E).lexicon->N;
 }
 
-Nfg *MakeAfg(const Efg::Game &E)
+Nfg *MakeAfg(const FullEfg &E)
 {
   Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
 
@@ -242,8 +240,6 @@ Nfg *MakeAfg(const Efg::Game &E)
 
   return afg;
 }
-
-} // namespace FullEfgNamespace
 
 
 #include "base/glist.imp"

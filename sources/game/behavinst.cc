@@ -10,21 +10,21 @@
 class ChanceInfoset;
 
 TEMPLATE_SPECIALIZATION()
-gNumber BehavProfile<gNumber>::Payoff(FullEfgNamespace::Outcome *p_outcome,
+gNumber BehavProfile<gNumber>::Payoff(efgOutcome *p_outcome,
 				      int pl) const
 { 
   return p_outcome->m_payoffs[pl];
 }
 
 TEMPLATE_SPECIALIZATION()
-gRational BehavProfile<gRational>::Payoff(FullEfgNamespace::Outcome *p_outcome,
+gRational BehavProfile<gRational>::Payoff(efgOutcome *p_outcome,
 					  int pl) const
 { 
   return p_outcome->m_payoffs[pl];
 }
 
 TEMPLATE_SPECIALIZATION()
-double BehavProfile<double>::Payoff(FullEfgNamespace::Outcome *p_outcome, int pl) const
+double BehavProfile<double>::Payoff(efgOutcome *p_outcome, int pl) const
 { 
   return p_outcome->m_doublePayoffs[pl];
 }
