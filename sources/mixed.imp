@@ -76,7 +76,9 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
   f << "}\n\n";
 
 
-  int ncont = ProfileLength();
+  int ncont = 1;
+  for (i = 1; i <= players.Length(); i++)
+    ncont *= players[i]->strategies.Length();
 
   for (i = 0; i < ncont; i++)
     for (int j = 1; j <= players.Length(); j++)
@@ -258,9 +260,8 @@ void MixedProfile<T>::Payoff(int pl, int const_pl1, int const_st1,
   else if (cur_pl > Nf->NumPlayers())
     value += prob * (Nf->payoffs[pl][index]);
   else   {
-    int j = 1;
-    for ( ; j <= (*N)(cur_pl).Length(); j++ ) {
-      s = N->GetStrategy(cur_pl,1);
+    for (int j = 1; j <= (*N)(cur_pl).Length(); j++ ) {
+      s = N->GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	Payoff(pl, const_pl1, const_st1, const_pl2, const_st2,
 	       cur_pl + 1, index + s->index, prob * (*this)(cur_pl, j), 
@@ -279,16 +280,14 @@ void MixedProfile<T>::Payoff(int pl, int const_pl, int cur_pl, long index,
     Payoff(pl, const_pl, cur_pl + 1, index,
 	   prob, value);
   else if (cur_pl > N->NumPlayers())  {
-    int j = 1;
-    for ( ; j <= (*N)(const_pl).Length(); j++ ){ 
+    for (int j = 1; j <= (*N)(const_pl).Length(); j++ ){ 
       s = N->GetStrategy(const_pl,j);
-      value[j] += prob * (Nf->payoffs[pl][s->index]);
+      value[j] += prob * (Nf->payoffs[pl][index + s->index]);
     }
   }
   else   {
-    int j = 1;
-    for ( ; j <= (*N)(const_pl).Length(); j++ ) {
-      s = N->GetStrategy(const_pl,j);
+    for (int j = 1; j <= (*N)(cur_pl).Length(); j++) {
+      s = N->GetStrategy(cur_pl,j);
       if ((*this)(cur_pl, j) > (T) 0)
 	Payoff(pl, const_pl, cur_pl + 1,
 	       index + s->index, prob * (*this)(cur_pl, j), value);

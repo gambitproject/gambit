@@ -84,9 +84,9 @@ int BaseNfg::NumStrats(int pl) const
 
 int BaseNfg::ProfileLength(void) const
 {
-  int nprof = 1;
+  int nprof = 0;
   for (int i = 1; i <= players.Length(); i++)
-    nprof *= players[i]->strategies.Length();
+    nprof += players[i]->strategies.Length();
   return nprof;
 }
 
