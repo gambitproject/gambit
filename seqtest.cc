@@ -16,7 +16,9 @@ main()
 //  P.trace=2;
 //  P.tracefile=&gout;
 //  P.nequilib=1;
-  SeqFormModule<double> M(*E, P);
+//  gout << "\nNumPlayers = " << E->NumPlayers();
+  EFSupport S(*E);
+  SeqFormModule<double> M(*E, P, S);
   M.Lemke();
   M.GetSolutions().Dump(gout);
   gout << "\nNum Pivots = " << M.NumPivots();

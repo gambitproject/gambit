@@ -14,10 +14,14 @@ main()
   ReadNfgFile(gin, N);
   NFGobitParams<double> P;
   P.trace=2;
-//  P.tracefile=&gout;
+  P.tracefile=&gout;
 //  P.nequilib=1;
-  MixedProfile<double> S(*N);
-  NFGobitModule<double> M( *N, P, S);
+  NFSupport S(*N);
+//  NFStrategySet *S1(S.GetNFStrategySet(1));
+//  S1->RemoveStrategy(2);
+//  S.SetNFStrategySet(1,S1);
+  MixedProfile<double> MP(*N,S);
+  NFGobitModule<double> M( *N, P, MP);
   M.Gobit(1);
   M.GetSolutions().Dump(gout);
   gout << "\nNum Evals = " << M.NumEvals();

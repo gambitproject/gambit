@@ -13,11 +13,13 @@ main()
   Efg<double> *E = 0;
   ReadEfgFile(gin, E);
   EFGobitParams<double> P;
-//  P.trace=2;
-//  P.tracefile=&gout;
+  P.trace=2;
+  P.tracefile=&gout;
   gFileOutput pxi("pxi.out");
   P.pxifile = &pxi;
-  BehavProfile<double> B(*E);
+  EFSupport S(*E);
+//  S.RemoveAction(1,1,1);
+  BehavProfile<double> B(S);
   EFGobitModule<double> M( *E, P, B);
   M.Gobit(1);
   M.GetSolutions().Dump(gout);
