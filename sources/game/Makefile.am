@@ -21,8 +21,6 @@ libgame_a_SOURCES = \
 	efgiter.h \
 	efgsupport.cc \
 	efgsupport.h \
-	efgutils.cc \
-	efgutils.h \
 	game.cc \
 	game.h \
 	gamebase.h \

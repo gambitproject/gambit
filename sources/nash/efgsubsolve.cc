@@ -93,8 +93,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     // by convention, we will just put the payoffs in the parent subgame
     foo->GetRoot()->SetOutcome(0);
 
-    gbtList<gbtGameNode> nodes;
-    Nodes(p_support->GetTree(), n, nodes);
+    gbtList<gbtGameNode> nodes = p_support->GetNodes();
     
     gbtEfgSupport subsupport = foo->NewEfgSupport();
     // here, we build the support for the subgame
@@ -139,7 +138,6 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	sol = m_efgAlgorithm->Solve(subsupport, p_status);
       }
       else if (m_nfgAlgorithm) {
-	CompressEfgInPlace(foo, subsupport);
 	subsupport = foo->NewEfgSupport();
 	gbtGame nfg = foo;
 	gbtNfgSupport support(nfg->NewNfgSupport());

@@ -27,7 +27,6 @@
 
 #include "math/gvector.h"
 #include "game.h"
-#include "efgutils.h"
 #include "behav.h"
 #include "actiter.h"
 #include "efgcont.h"

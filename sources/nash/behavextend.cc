@@ -240,8 +240,7 @@ NashExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 {
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution->GetRoot(), terminal_nodes);
+  gbtList<gbtGameNode> terminal_nodes = p_solution->GetTerminalNodes();
 
   for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
     gbtGamePlayer player = p_solution->GetPlayer(pl);
@@ -437,8 +436,7 @@ ANFExpectedPayoffDiffPolys(const gbtBehavProfile<gbtNumber> &p_solution,
 {
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
-  gbtList<gbtGameNode> terminal_nodes;
-  TerminalNodes(p_solution->GetRoot(), terminal_nodes);
+  gbtList<gbtGameNode> terminal_nodes = p_solution->GetTerminalNodes();
 
   for (int pl = 1; pl <= p_solution->NumPlayers(); pl++) {
     gbtGamePlayer player = p_solution->GetPlayer(pl);

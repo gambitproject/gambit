@@ -244,6 +244,26 @@ bool gbtGameNodeBase::IsSubgameRoot(void) const
   return m_efg->CheckTree(this, this);
 }
 
+void gbtGameNodeBase::GetNodes(gbtList<gbtGameNode> &p_list) const
+{
+  for (int child = 1; child <= NumChildren(); child++) {
+    m_children[child]->GetNodes(p_list);
+  }
+  p_list.Append(const_cast<gbtGameNodeBase *>(this));
+}
+
+void gbtGameNodeBase::GetTerminalNodes(gbtList<gbtGameNode> &p_list) const
+{
+  if (NumChildren() == 0) {
+    p_list.Append(const_cast<gbtGameNodeBase *>(this));
+  }
+  else {
+    for (int child = 1; child <= NumChildren(); child++) {
+      m_children[child]->GetTerminalNodes(p_list);
+    }
+  }
+}
+
 gbtGameNode gbtGameNodeBase::InsertMove(gbtGameInfoset p_infoset)
 {
   if (p_infoset.IsNull()) {

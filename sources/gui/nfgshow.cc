@@ -44,7 +44,6 @@
 #include "id.h"
 
 #include "game/game.h"
-#include "game/efgutils.h"
 #include "game/nfgciter.h"
 
 #include "gambit.h"

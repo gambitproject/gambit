@@ -207,6 +207,8 @@ public:
   int NumChildren(void) const;
   gbtGameNode GetChild(int i) const;
   gbtGameNode GetChild(const gbtGameAction &) const; 
+  void GetNodes(gbtList<gbtGameNode> &) const;
+  void GetTerminalNodes(gbtList<gbtGameNode> &) const;
 
   bool IsRoot(void) const { return (m_parent != 0); }
   bool IsPredecessorOf(const gbtGameNode &) const;
@@ -259,6 +261,7 @@ public:
 class gbtGameBase : public gbtConstGameBase, public gbtGameRep {
 public:
   bool sortisets;
+  int m_numNodes;
   gbtBlock<gbtGameOutcomeBase *> m_results;
   gbtGameNodeBase *root;
   gbtGamePlayerBase *chance;
@@ -344,7 +347,9 @@ public:
   // DATA ACCESS -- NODES
   int NumNodes(void) const;
   gbtGameNode GetRoot(void) const;
-  
+  gbtList<gbtGameNode> GetNodes(void) const;
+  gbtList<gbtGameNode> GetTerminalNodes(void) const;
+
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
   gbtGamePlayer GetChance(void) const;
@@ -839,6 +844,10 @@ public:
   // DATA ACCESS -- NODES
   int NumNodes(void) const { return m_efg->NumNodes(); }
   gbtGameNode GetRoot(void) const { return m_efg->GetRoot(); }
+  gbtList<gbtGameNode> GetNodes(void) const
+  { return m_efg->GetNodes(); }
+  gbtList<gbtGameNode> GetTerminalNodes(void) const
+  { return m_efg->GetTerminalNodes(); }
 
   // DATA ACCESS -- ACTIONS
   gbtPVector<int> NumActions(void) const;
@@ -1051,6 +1060,10 @@ public:
   // DATA ACCESS -- NODES
   int NumNodes(void) const { return m_support->NumNodes(); }
   gbtGameNode GetRoot(void) const { return m_support->GetRoot(); }
+  gbtList<gbtGameNode> GetNodes(void) const
+  { return m_support->GetNodes(); }
+  gbtList<gbtGameNode> GetTerminalNodes(void) const
+  { return m_support->GetTerminalNodes(); }
 
   // DATA ACCESS -- ACTIONS
   gbtPVector<int> NumActions(void) const { return m_support->NumActions(); }

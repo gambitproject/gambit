@@ -28,7 +28,6 @@
 #include "math/rational.h"
 
 #include "game.h"
-#include "efgutils.h"
 #include "efgsupport.h"
 #include "actiter.h"
 #include "nfgiter.h"
@@ -44,7 +43,7 @@
 //----------------------------------------------------------------------
 
 gbtGameBase::gbtGameBase(void)
-  : sortisets(true), chance(new gbtGamePlayerBase(this, 0))
+  : sortisets(true), m_numNodes(1), chance(new gbtGamePlayerBase(this, 0))
 {
   root = new gbtGameNodeBase(this, 0);
   SortInfosets();
@@ -63,6 +62,7 @@ gbtGameBase::~gbtGameBase()
 void gbtGameBase::NumberNodes(gbtGameNodeBase *n, int &index)
 {
   n->m_id = index++;
+  m_numNodes++;
   for (int child = 1; child <= n->m_children.Length();
        NumberNodes(n->m_children[child++], index));
 } 
@@ -74,9 +74,7 @@ void gbtGameBase::SortInfosets(void)
   int pl;
 
   for (pl = 0; pl <= m_players.Length(); pl++)  {
-    gbtList<gbtGameNode> nodes;
-
-    Nodes(gbtGame(this), nodes);
+    gbtList<gbtGameNode> nodes = GetNodes();
 
     gbtGamePlayerBase *player = (pl) ? m_players[pl] : chance;
 
@@ -115,8 +113,7 @@ void gbtGameBase::SortInfosets(void)
 
   // Now, we sort the nodes within the infosets
   
-  gbtList<gbtGameNode> nodes;
-  Nodes(gbtGame(this), nodes);
+  gbtList<gbtGameNode> nodes = GetNodes();
 
   for (pl = 0; pl <= m_players.Length(); pl++)  {
     gbtGamePlayerBase *player = (pl) ? m_players[pl] : chance;
@@ -134,6 +131,20 @@ void gbtGameBase::SortInfosets(void)
 
   int nodeindex = 1;
   NumberNodes(root, nodeindex);
+}
+
+gbtList<gbtGameNode> gbtGameBase::GetNodes(void) const
+{
+  gbtList<gbtGameNode> ret;
+  root->GetNodes(ret);
+  return ret;
+}
+
+gbtList<gbtGameNode> gbtGameBase::GetTerminalNodes(void) const
+{
+  gbtList<gbtGameNode> ret;
+  root->GetTerminalNodes(ret);
+  return ret;
 }
 
 //
@@ -852,7 +863,7 @@ gbtGameNode gbtGameBase::GetRoot(void) const
 { return root; }
 
 int gbtGameBase::NumNodes(void) const
-{ return ::NumNodes(gbtGame(const_cast<gbtGameBase *>(this))); }
+{ return m_numNodes; }
 
 gbtGameOutcome gbtGameBase::NewOutcome(int index)
 {
@@ -1197,7 +1208,8 @@ static int Product(const gbtArray<int> &p_dim)
 //----------------------------------------------------
 
 gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
-  : sortisets(false), m_results(Product(p_dim)), root(0), chance(0)
+  : sortisets(false), m_numNodes(0), 
+    m_results(Product(p_dim)), root(0), chance(0)
 {
   for (int pl = 1; pl <= p_dim.Length(); pl++)  {
     m_players.Append(new gbtGamePlayerBase(this, pl));

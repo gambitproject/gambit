@@ -22,7 +22,6 @@ libgame_a_SOURCES = \
 	efgensup.cc \
 	efgiter.cc \
 	efgsupport.cc \
-	efgutils.cc \
 	game.cc \
 	gameinst.cc \
         infoset.cc \

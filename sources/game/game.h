@@ -176,6 +176,8 @@ public:
   // DATA ACCESS -- NODES
   virtual int NumNodes(void) const = 0;
   virtual gbtGameNode GetRoot(void) const = 0;
+  virtual gbtList<gbtGameNode> GetNodes(void) const = 0;
+  virtual gbtList<gbtGameNode> GetTerminalNodes(void) const = 0;
 
   // DATA ACCESS -- ACTIONS
   virtual gbtPVector<int> NumActions(void) const = 0;
@@ -325,8 +327,6 @@ gbtGame ReadNfg(gbtInput &);
 #include "player.h"
 #include "infoset.h"
 #include "node.h"
-
-#include "efgutils.h"
 
 //
 // Stuff below here needs to have everything defined before we can

@@ -37,7 +37,6 @@
 #include "id.h"
 #include "gambit.h"
 
-#include "game/efgutils.h"
 #include "base/glist.imp"
 
 

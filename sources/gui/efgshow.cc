@@ -39,7 +39,6 @@
 
 #include "math/gmath.h"
 #include "game/game.h"
-#include "game/efgutils.h"
 #include "nash/efglogit.h"
 
 #include "id.h"
@@ -633,9 +632,7 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtGame efg = CompressEfg(m_doc->GetGame(), 
-				 m_doc->GetEfgSupportList().GetCurrent());
-    efg->WriteEfg(file);
+    m_doc->GetGame()->WriteEfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gbtFileOutput::OpenFailed &) {
