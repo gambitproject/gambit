@@ -34,8 +34,9 @@
 
 #define ACTION_DELETE                       1205
 #define ACTION_INSERT                       1206
-#define ACTION_LABEL                        1207
-#define ACTION_PROBS                        1208
+#define ACTION_APPEND                       1207
+#define ACTION_LABEL                        1208
+#define ACTION_PROBS                        1209
 
 #define TREE_LABEL_LABEL                    1300
 #define TREE_LABEL_DIALOG                   1301
@@ -56,16 +57,15 @@
 #define TREE_OUTCOMES_DELETE                1325
 #define TREE_OUTCOMES_NEW                   1326
 
-#define SUBGAME_SOLVE                       1350
-#define SUBGAME_CLEARALL                    1352
-#define SUBGAME_CLEARONE                    1354
-#define SUBGAME_COLLAPSEONE                 1356
+#define SUBGAME_MARKALL                     1350
+#define SUBGAME_MARK                        1351
+#define SUBGAME_UNMARKALL                   1352
+#define SUBGAME_UNMARK                      1354
+#define SUBGAME_COLLAPSE                    1356
 #define SUBGAME_COLLAPSEALL                 1358
-#define SUBGAME_EXPANDONE                   1360
+#define SUBGAME_EXPAND                      1360
 #define SUBGAME_EXPANDBRANCH                1361
 #define SUBGAME_EXPANDALL                   1362
-//#define SUBGAME_TOGGLE                      1364
-#define SUBGAME_SET                         1366
 
 #define INFOSET_MERGE                       1400
 #define INFOSET_BREAK                       1401

@@ -276,10 +276,11 @@ void EfgShow::SolveStandard(void)
   }
 
   try {
-    if (ESS.MarkSubgames())
-      tw->subgame_solve();
+    if (ESS.MarkSubgames())  
+      tw->SubgameMarkAll();
     else
-      tw->subgame_clear_all();
+      tw->SubgameUnmarkAll();
+
     solns += solver->Solve();
     wxEndBusyCursor();
   }
@@ -377,7 +378,7 @@ void EfgShow::Solve(int p_algorithm)
   try {
     if (go) {
       if (solver->MarkSubgames())
-	tw->subgame_solve();
+	tw->SubgameMarkAll();
       wxBeginBusyCursor();
       solns += solver->Solve();
       wxEndBusyCursor();
@@ -708,10 +709,11 @@ void EfgShow::MakeMenus(void)
   nodeMenu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
 
   wxMenu *action_menu = new wxMenu;
-  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
-  action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
-  action_menu->Append(ACTION_LABEL,  "&Label");
-  action_menu->Append(ACTION_PROBS,  "&Probs",  "Set the chance player probs");
+  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
+  action_menu->Append(ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
+  action_menu->Append(ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
+  action_menu->Append(ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
+  action_menu->Append(ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
 
   wxMenu *infoset_menu = new wxMenu;
   infoset_menu->Append(INFOSET_MERGE,  "&Merge",  "Merge cursor iset w/ marked");
@@ -751,15 +753,24 @@ void EfgShow::MakeMenus(void)
   edit_menu->Append(EDIT_TREE,    "&Tree",     tree_menu,    "Edit the tree");
 
   wxMenu *subgame_menu = new wxMenu;
-  subgame_menu->Append(SUBGAME_SOLVE,        "Mark &All",       "Scan tree for subgames");
-  subgame_menu->Append(SUBGAME_SET,          "&Mark",           "Set node subgame root");
-  subgame_menu->Append(SUBGAME_CLEARALL,     "Unmark &All",     "Clear all subgame info");
-  subgame_menu->Append(SUBGAME_CLEARONE,     "&Unmark",         "Unmark node subgame");
-  subgame_menu->Append(SUBGAME_COLLAPSEONE,  "&Collapse Level", "Collapse node subgame");
-  subgame_menu->Append(SUBGAME_COLLAPSEALL,  "&Collapse All",   "Collapse all subgames");
-  subgame_menu->Append(SUBGAME_EXPANDONE,    "&Expand Level",   "Expand node subgame");
-  subgame_menu->Append(SUBGAME_EXPANDBRANCH, "&Expand Branch",  "Expand entire branch");
-  subgame_menu->Append(SUBGAME_EXPANDALL,    "&Expand All",     "Expand all subgames");
+  subgame_menu->Append(SUBGAME_MARKALL, "Mark &All",
+		       "Scan tree for subgames");
+  subgame_menu->Append(SUBGAME_MARK, "&Mark",
+		       "Set node subgame root");
+  subgame_menu->Append(SUBGAME_UNMARKALL, "Unmark &All",
+		       "Clear all subgame info");
+  subgame_menu->Append(SUBGAME_UNMARK, "&Unmark",
+		       "Unmark node subgame");
+  subgame_menu->Append(SUBGAME_COLLAPSE, "Collapse &Level",
+		       "Collapse node subgame");
+  subgame_menu->Append(SUBGAME_COLLAPSEALL, "&Collapse All", 
+		       "Collapse all subgames");
+  subgame_menu->Append(SUBGAME_EXPAND, "&Expand Level",
+		       "Expand node subgame");
+  subgame_menu->Append(SUBGAME_EXPANDBRANCH, "&Expand Branch", 
+		       "Expand entire branch");
+  subgame_menu->Append(SUBGAME_EXPANDALL, "&Expand All",
+		       "Expand all subgames");
   
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(SUPPORTS_ELIMDOM,  "&ElimDom",  "Dominated strategies");
@@ -779,7 +790,7 @@ void EfgShow::MakeMenus(void)
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
 			     "Liapunov function minimization");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
-			     "Enumeration by systems of polynomials", TRUE);
+			     "Enumeration by systems of polynomials");
   // FIXME: This item currently disabled since algorithm not implemented yet
   solveCustomEfgMenu->Enable(SOLVE_CUSTOM_EFG_POLENUM, FALSE);
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_QRE, "QRE",
@@ -925,6 +936,9 @@ void EfgShow::OnMenuCommand(int id)
     case ACTION_INSERT:
       tw->action_insert();
       break;
+    case ACTION_APPEND:
+      tw->action_append();
+      break;
     case ACTION_LABEL:
       tw->action_label();
       break;
@@ -1010,32 +1024,32 @@ void EfgShow::OnMenuCommand(int id)
       SolveElimDom();
       break;
 
-    case SUBGAME_SOLVE:
-      tw->subgame_solve();
+    case SUBGAME_MARKALL:
+      tw->SubgameMarkAll();
       break;
-    case SUBGAME_CLEARALL:
-      tw->subgame_clear_all();
+    case SUBGAME_MARK:
+      tw->SubgameMark();
       break;
-    case SUBGAME_CLEARONE:
-      tw->subgame_clear_one();
+    case SUBGAME_UNMARKALL:
+      tw->SubgameUnmarkAll();
+      break;
+    case SUBGAME_UNMARK:
+      tw->SubgameUnmark();
       break;
     case SUBGAME_COLLAPSEALL:
-      tw->subgame_collapse_all();
+      tw->SubgameCollapseAll();
       break;
-    case SUBGAME_COLLAPSEONE:
-      tw->subgame_collapse_one();
+    case SUBGAME_COLLAPSE:
+      tw->SubgameCollapse();
       break;
     case SUBGAME_EXPANDALL:
-      tw->subgame_expand_all();
+      tw->SubgameExpandAll();
       break;
     case SUBGAME_EXPANDBRANCH:
-      tw->subgame_expand_branch();
+      tw->SubgameExpandBranch();
       break;
-    case SUBGAME_EXPANDONE:
-      tw->subgame_expand_one();
-      break;
-    case SUBGAME_SET:
-      tw->subgame_set();
+    case SUBGAME_EXPAND:
+      tw->SubgameExpand();
       break;
 
     case INSPECT_SOLUTIONS: 
@@ -1431,6 +1445,7 @@ void EfgShow::UpdateMenus(Node *p_cursor, Node *p_markNode)
 		  (p_cursor->GetInfoset() &&
 		   p_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
   menuBar->Enable(ACTION_INSERT, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  menuBar->Enable(ACTION_APPEND, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
   menuBar->Enable(ACTION_DELETE, (p_cursor->NumChildren() > 0) ? TRUE : FALSE);
   menuBar->Enable(ACTION_PROBS,
 		  (p_cursor->GetInfoset() &&

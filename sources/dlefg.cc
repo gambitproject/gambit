@@ -13,6 +13,9 @@
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
 #include "dlnodedelete.h"
+#include "dlactionlabel.h"
+#include "dlactionselect.h"
+#include "dlactionprobs.h"
 #include "dlefgreveal.h"
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
@@ -287,6 +290,181 @@ Bool dialogNodeDelete::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+//=========================================================================
+//                   dialogActionLabel: Member functions
+//=========================================================================
+
+dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
+    m_lastSelection(0), m_actionNames(p_infoset->NumActions())
+{
+  SetLabelPosition(wxVERTICAL);
+  m_actionList = new wxListBox(this, (wxFunction) CallbackAction, "Actions");
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    m_actionList->Append(ToText(act) + ": " +
+			 p_infoset->Actions()[act]->GetName());
+    m_actionNames[act] = p_infoset->Actions()[act]->GetName();
+  }
+  m_actionList->SetClientData(0, (char *) this);
+  m_actionList->SetSelection(0);
+
+  m_actionName = new wxText(this, (wxFunction) 0, "Name");
+  m_actionName->SetValue(p_infoset->Actions()[1]->GetName());
+  
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void dialogActionLabel::OnOK(void)
+{
+  m_completed = wxOK;
+  m_actionNames[m_actionList->GetSelection() + 1] = m_actionName->GetValue();
+  Show(FALSE);
+}
+
+void dialogActionLabel::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogActionLabel::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void dialogActionLabel::OnAction(void)
+{
+  int selected = m_actionList->GetSelection();
+
+  if (selected == m_lastSelection)  return;
+  m_actionNames[m_lastSelection + 1] = m_actionName->GetValue();
+  m_actionName->SetValue(m_actionNames[selected + 1]);
+  m_actionList->SetString(m_lastSelection,
+			  ToText(m_lastSelection + 1) + ": " +
+			  m_actionNames[m_lastSelection + 1]);
+  m_lastSelection = selected;
+}
+
+//=========================================================================
+//                   dialogActionSelect: Member functions
+//=========================================================================
+
+dialogActionSelect::dialogActionSelect(Infoset *p_infoset, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select actions", TRUE), m_infoset(p_infoset)
+{
+  SetLabelPosition(wxVERTICAL);
+  m_actionList = new wxListBox(this, 0, "Actions");
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    m_actionList->Append(ToText(act) + ": " +
+			 p_infoset->Actions()[act]->GetName());
+  }
+  m_actionList->SetSelection(0);
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void dialogActionSelect::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogActionSelect::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogActionSelect::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+//=========================================================================
+//                   dialogActionProbs: Member functions
+//=========================================================================
+
+dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
+    m_lastSelection(0), m_actionProbs(p_infoset->NumActions())
+{
+  SetLabelPosition(wxVERTICAL);
+  m_actionList = new wxListBox(this, (wxFunction) CallbackAction, "Actions");
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+    m_actionList->Append(ToText(act) + ": " +
+			 p_infoset->Actions()[act]->GetName());
+    m_actionProbs[act] = p_infoset->Game()->GetChanceProb(p_infoset, act);
+  }
+  m_actionList->SetClientData(0, (char *) this);
+  m_actionList->SetSelection(0);
+
+  m_actionProb = new wxText(this, (wxFunction) 0, "Probability");
+  m_actionProb->SetValue(ToText(m_actionProbs[1]));
+  
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void dialogActionProbs::OnOK(void)
+{
+  m_completed = wxOK;
+  m_actionProbs[m_actionList->GetSelection() + 1] = ToDouble(m_actionProb->GetValue());
+  Show(FALSE);
+}
+
+void dialogActionProbs::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogActionProbs::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void dialogActionProbs::OnAction(void)
+{
+  int selected = m_actionList->GetSelection();
+
+  if (selected == m_lastSelection)  return;
+  m_actionProbs[m_lastSelection + 1] = ToDouble(m_actionProb->GetValue());
+  m_actionProb->SetValue(ToText(m_actionProbs[selected + 1]));
+  m_lastSelection = selected;
 }
 
 //=========================================================================

@@ -22,6 +22,9 @@
 #include "infosetd.h"
 #include "dlefgsave.h"
 #include "dlnodedelete.h"
+#include "dlactionlabel.h"
+#include "dlactionselect.h"
+#include "dlactionprobs.h"
 #include "dlefgreveal.h"
 #include "dlefgplayer.h"
 #include "dlefgpayoff.h"
@@ -140,10 +143,11 @@ void TreeWindow::MakeMenus(void)
   node_menu->Append(NODE_GOTO_MARK, "Go&to Mark", "Goto marked node");
     
   wxMenu *action_menu = new wxMenu;
-  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor iset");
-  action_menu->Append(ACTION_INSERT, "&Insert", "Delete an action to cursor iset");
-  action_menu->Append(ACTION_LABEL, "&Label");
-  action_menu->Append(ACTION_PROBS, "&Probs", "Set the chance player probs");
+  action_menu->Append(ACTION_DELETE, "&Delete", "Delete an action from cursor information set");
+  action_menu->Append(ACTION_INSERT, "&Insert", "Insert an action in the cursor's information set");
+  action_menu->Append(ACTION_APPEND, "&Append", "Append an action to the cursor's information set");
+  action_menu->Append(ACTION_LABEL, "&Label", "Label the actions of the cursor's information set");
+  action_menu->Append(ACTION_PROBS, "&Probabilities", "Set chance probabilities for the cursor's information set");
     
   wxMenu *infoset_menu = new wxMenu;
   infoset_menu->Append(INFOSET_MERGE, "&Merge", "Merge cursor iset w/ marked");
@@ -1494,6 +1498,7 @@ void TreeWindow::UpdateMenus(void)
 		    (m_cursor->GetInfoset() &&
 		     m_cursor->GetInfoset()->NumActions() > 0) ? TRUE : FALSE);
   edit_menu->Enable(ACTION_INSERT, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
+  edit_menu->Enable(ACTION_APPEND, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
   edit_menu->Enable(ACTION_DELETE, (m_cursor->NumChildren() > 0) ? TRUE : FALSE);
   edit_menu->Enable(ACTION_PROBS,
 		    (m_cursor->GetInfoset() &&
@@ -1926,230 +1931,102 @@ void TreeWindow::infoset_reveal(void)
 //                    ACTION MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-//***********************************************************************
-//                      ACTION-LABEL MENU HANDLER
-//***********************************************************************
-
-// The text input fields are stacked vertically up to ENTRIES_PER_DIALOG.
-// If there are more than ENTRIES_PER_DIALOG actions for this infoset,
-// consequtive dialogs will be created.
-
-#define ENTRIES_PER_DIALOG 10
+//------------------------
+// Edit->Action->Label
+//------------------------
 
 void TreeWindow::action_label(void)
 {
-  int num_actions = Cursor()->GetInfoset()->NumActions();
-  int num_d = num_actions / ENTRIES_PER_DIALOG -
-        ((num_actions % ENTRIES_PER_DIALOG) ? 0 : 1);
-  char **action_names = 0;
-  MyDialogBox *branch_label_dialog = 0;
-
-  try {
-    for (int d = 0; d <= num_d; d++) {
-      branch_label_dialog = new MyDialogBox(pframe, "Action Label",
-					    EFG_ACTION_HELP);
-      int actions_now = gmin(num_actions-d*ENTRIES_PER_DIALOG, ENTRIES_PER_DIALOG);
-      action_names = new char *[actions_now];
-    
-      int i;
-      for (i = 1; i <= actions_now; i++) {
-	action_names[i-1] = new char[MAX_LABEL_LENGTH];
-	strcpy(action_names[i-1], 
-	       Cursor()->GetInfoset()->GetActionName(i+d*ENTRIES_PER_DIALOG));
-	branch_label_dialog->Add(wxMakeFormString(
-		"Action " + ToText(i + d * ENTRIES_PER_DIALOG), 
-                &action_names[i-1], 
-                wxFORM_DEFAULT,
-                new wxList(wxMakeConstraintFunction(StringConstraint), 0), 0, 0, 220));
-	branch_label_dialog->Add(wxMakeFormNewLine());
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionLabel dialog(infoset, this);
+  
+  if (dialog.Completed() == wxOK) {
+    try {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	infoset->Actions()[act]->SetName(dialog.GetActionLabel(act));
       }
-      
-      if (num_actions-(d+1)*ENTRIES_PER_DIALOG > 0)
-	branch_label_dialog->Add(wxMakeFormMessage("Continued..."));
-
-      branch_label_dialog->Go();
-
-      if (branch_label_dialog->Completed() == wxOK) {
-	for (i = 1; i <= actions_now; i++)
-	  Cursor()->GetInfoset()->SetActionName(i+d*ENTRIES_PER_DIALOG, 
-					      action_names[i-1]);
-      }
-      
-      delete branch_label_dialog;
-      
-      for (i = 1; i <= actions_now; i++)
-	delete [] action_names[i-1];
-      
-      delete [] action_names;
+      infosets_changed = true;
     }
-  }
-  catch (gException &E) {
-    if (action_names)
-      delete [] action_names;
-    if (branch_label_dialog)
-      delete branch_label_dialog;
-    
-    guiExceptionDialog(E.Description(), pframe);
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
 }
 
-//***********************************************************************
-//                     ACTION-INSERT MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Action->Insert
+//------------------------
 
 void TreeWindow::action_insert(void)
 {
-  MyDialogBox *branch_insert_dialog = 0;
-  char *action_str = 0;
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionSelect dialog(infoset, pframe);
 
-  try {
-    branch_insert_dialog = new MyDialogBox(pframe, "Insert Branch",
-					   EFG_ACTION_HELP);
-    Infoset *iset = Cursor()->GetInfoset();
-    wxStringList *action_list = new wxStringList;
-    action_str = new char[30];
-
-    for (int i = 1; i <= iset->NumActions(); i++) 
-      action_list->Add(iset->GetActionName(i));
-
-    branch_insert_dialog->Add(wxMakeFormString(
-        "Where", &action_str,
-        wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(action_list), 0)));
-    branch_insert_dialog->Go();
-
-    if (branch_insert_dialog->Completed() == wxOK) {
-      nodes_changed = TRUE;
-      
-      for (int act = 1; act <= iset->NumActions(); act++) {
-	if (iset->Actions()[act]->GetName() == action_str)
-	  ef.InsertAction(iset, iset->Actions()[act]);
-      }
+  if (dialog.Completed() == wxOK) {
+    try {
+      ef.InsertAction(infoset, dialog.GetAction());
+      nodes_changed = true;
     }
-    
-    delete branch_insert_dialog;
-    delete [] action_str;
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
-  catch (gException &E) {
-    if (action_str)
-      delete [] action_str;
-
-    if (branch_insert_dialog)
-      delete branch_insert_dialog;
-
-    guiExceptionDialog(E.Description(), pframe);
-  }    
 }
 
-//***********************************************************************
-//                       ACTION-DELETE MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Action->Append
+//------------------------
+
+void TreeWindow::action_append(void)
+{
+  try {
+    ef.InsertAction(Cursor()->GetInfoset());
+    nodes_changed = true;
+  }
+  catch (gException &E) {
+    guiExceptionDialog(E.Description(), pframe);
+  }
+}
+
+//------------------------
+// Edit->Action->Delete
+//------------------------
 
 void TreeWindow::action_delete(void)
 {
-  MyDialogBox *branch_delete_dialog = 0;
-  char *action_str = 0;
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionSelect dialog(infoset, pframe);
 
-  try {
-    branch_delete_dialog = 
-      new MyDialogBox(pframe, "Delete Branch", EFG_ACTION_HELP);
-    Infoset *iset = Cursor()->GetInfoset();
-    wxStringList *action_list = new wxStringList;
-    action_str = new char[30];
-
-    for (int i = 1; i <= iset->NumActions(); i++) 
-      action_list->Add(iset->GetActionName(i));
-
-    branch_delete_dialog->Add(wxMakeFormString(
-        "Which", &action_str,
-        wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(action_list), 0)));
-    branch_delete_dialog->Go();
-
-    if (branch_delete_dialog->Completed() == wxOK) {
-      nodes_changed = TRUE;
-      for (int act = 1; act <= iset->NumActions(); act++)
-	if (iset->Actions()[act]->GetName() == action_str)
-	  ef.DeleteAction(iset, iset->Actions()[act]);
+  if (dialog.Completed() == wxOK) {
+    try {
+      ef.DeleteAction(infoset, dialog.GetAction());
+      nodes_changed = true;
     }
-
-    delete branch_delete_dialog;
-    delete [] action_str;
-  }
-  catch (gException &E) {
-    if (branch_delete_dialog)
-      delete branch_delete_dialog;
-
-    if (action_str)
-      delete [] action_str;
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
 }
 
-//***********************************************************************
-//                      NODE-PROBS MENU HANDLER
-//***********************************************************************
-
-// The text input fields are stacked vertically up to ENTRIES_PER_DIALOG.
-// If there are more than ENTRIES_PER_DIALOG actions for this infoset,
-// consecutive dialogs will be created.
-
-#define ENTRIES_PER_DIALOG  10
+//-------------------------------
+// Edit->Action->Probabilities
+//-------------------------------
 
 void TreeWindow::action_probs(void)
 {
-  int i;
-    
-  int num_actions = Cursor()->NumChildren();
-  int num_d = num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);
+  Infoset *infoset = Cursor()->GetInfoset();
+  dialogActionProbs dialog(infoset, pframe);
 
-  MyDialogBox *node_probs_dialog = 0;
-  char **prob_vector = 0;
-  Node *n = Cursor();
-
-  try {
-    for (int d = 0; d <= num_d; d++) {
-      node_probs_dialog = new MyDialogBox(pframe, "Node Probabilities");
-      int actions_now = gmin(num_actions-d*ENTRIES_PER_DIALOG, ENTRIES_PER_DIALOG);
-      prob_vector = new char *[actions_now+1];
-    
-      for (i = 1; i <= actions_now; i++) {
-	gNumber temp_p = ef.GetChanceProb(n->GetInfoset(),
-					  i + d * ENTRIES_PER_DIALOG);
-	gText temp_s = ToText(temp_p);
-	prob_vector[i] = new char[temp_s.Length()+1];
-	strcpy(prob_vector[i], temp_s);
-	node_probs_dialog->Add(wxMakeFormString(
-                "", &(prob_vector[i]), wxFORM_TEXT, NULL, NULL, wxVERTICAL, 80));
-	node_probs_dialog->Add(wxMakeFormNewLine());
+  if (dialog.Completed() == wxOK) {
+    try {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	ef.SetChanceProb(infoset, act, dialog.GetActionProb(act));
       }
-
-      if (num_actions-(d+1)*ENTRIES_PER_DIALOG > 0)
-	node_probs_dialog->Add(wxMakeFormMessage("Continued..."));
-        
-      node_probs_dialog->Go();
-
-      if (node_probs_dialog->Completed() == wxOK) {
-	gNumber dummy;
-	for (i = 1; i <= actions_now; i++)
-	  ef.SetChanceProb(n->GetInfoset(),
-			   i + d * ENTRIES_PER_DIALOG,
-			   FromText(prob_vector[i], dummy));
-	outcomes_changed = TRUE;  // game changed -- delete solutions, etc
-      }
-
-      for (i = 1; i <= actions_now; i++) 
-	delete [] prob_vector[i];
-      delete [] prob_vector;
-      delete node_probs_dialog;
+      infosets_changed = true;
     }
-  }
-  catch (gException &E) {
-    if (node_probs_dialog)
-      delete node_probs_dialog;
-    if (prob_vector)
-      delete [] prob_vector;
-    
-    guiExceptionDialog(E.Description(), pframe);
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), pframe);
+    }
   }
 }
 
@@ -2158,9 +2035,9 @@ void TreeWindow::action_probs(void)
 //                     TREE MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-//***********************************************************************
-//                       TREE-LABEL MENU HANDLER
-//***********************************************************************
+//---------------------
+// Edit->Tree->Label
+//---------------------
 
 void TreeWindow::tree_label(void)
 {
@@ -2170,17 +2047,17 @@ void TreeWindow::tree_label(void)
     ef.SetTitle(label);
 }
 
-//***********************************************************************
-//                      TREE-DELETE MENU HANDLER
-//***********************************************************************
+//-----------------------
+// Edit->Tree->Delete
+//-----------------------
 
 void TreeWindow::tree_delete(void)
 {
   try {
     if (MyMessageBox("Are you sure?", "Delete Tree",
 		     EFG_TREE_HELP, pframe).Completed() == wxOK) {
-      nodes_changed = true;
       ef.DeleteTree(Cursor());
+      nodes_changed = true;
     }
   }
   catch (gException &E) {
@@ -2188,24 +2065,24 @@ void TreeWindow::tree_delete(void)
   }
 }
 
-//***********************************************************************
-//                       TREE-COPY MENU HANDLER
-//***********************************************************************
+//---------------------
+// Edit->Tree->Copy
+//---------------------
 
 void TreeWindow::tree_copy(void)
 {
-  nodes_changed = true; 
   try {
     ef.CopyTree(mark_node, Cursor());
+    nodes_changed = true; 
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), pframe);
   }
 }
 
-//***********************************************************************
-//                       TREE-MOVE MENU HANDLER
-//***********************************************************************
+//--------------------
+// Edit->Tree->Move
+//--------------------
 
 void TreeWindow::tree_move(void)
 {
@@ -2218,10 +2095,9 @@ void TreeWindow::tree_move(void)
   }
 }
 
-
-//***********************************************************************
-//                      TREE-PLAYERS MENU HANDLER
-//***********************************************************************
+//-----------------------
+// Edit->Tree->Players
+//-----------------------
 
 #define PLAYERSD_INST // instantiate the players display dialog
 #include "playersd.h"
@@ -2231,9 +2107,9 @@ void TreeWindow::tree_players(void)
   PlayerNamesDialog player_names(ef, pframe);
 }
 
-//***********************************************************************
-//                      TREE-INFOSETS MENU HANDLER
-//***********************************************************************
+//------------------------
+// Edit->Tree->Infosets
+//------------------------
 
 void TreeWindow::tree_infosets(void)
 {
@@ -2243,15 +2119,18 @@ void TreeWindow::tree_infosets(void)
     infosets_changed = true;
 }
 
-
 //-----------------------------------------------------------------------
 //                     SUBGAME MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 
-void TreeWindow::subgame_solve(void)
+//----------------------
+// Subgames->Mark All
+//----------------------
+
+void TreeWindow::SubgameMarkAll(void)
 {
   subgame_list.Flush();
-  subgame_list.Append(SubgameEntry(ef.RootNode())); // Add the first subgame -- root subgame
+  subgame_list.Append(SubgameEntry(ef.RootNode()));
   gList<Node *> subgame_roots;
   LegalSubgameRoots(ef, subgame_roots);
   ef.MarkSubgames(subgame_roots);
@@ -2264,7 +2143,7 @@ void TreeWindow::subgame_solve(void)
   must_recalc = true;
 }
 
-void TreeWindow::subgame_set(void)
+void TreeWindow::SubgameMark(void)
 {
   if (Cursor()->GetSubgameRoot() == Cursor()) {
     // ignore silently
@@ -2281,17 +2160,11 @@ void TreeWindow::subgame_set(void)
   must_recalc = true;
 }
 
-void TreeWindow::subgame_clear_one(void)
+void TreeWindow::SubgameUnmark(void)
 {
-  if (Cursor()->GetSubgameRoot() != Cursor()) {
-    wxMessageBox("This node is not a subgame root");
+  if (Cursor()->GetSubgameRoot() != Cursor() ||
+      Cursor()->GetSubgameRoot() == ef.RootNode())
     return;
-  }
-  
-  if (Cursor()->GetSubgameRoot() == ef.RootNode()) {
-    wxMessageBox("Root node is always a subgame root");
-    return;
-  }
     
   ef.RemoveSubgame(Cursor());
 
@@ -2303,15 +2176,15 @@ void TreeWindow::subgame_clear_one(void)
   must_recalc = true;
 }
 
-void TreeWindow::subgame_clear_all(void)
+void TreeWindow::SubgameUnmarkAll(void)
 {
   ef.UnmarkSubgames(ef.RootNode());
   subgame_list.Flush();
-  subgame_list.Append(SubgameEntry(ef.RootNode())); // Add the first subgame -- root subgame
+  subgame_list.Append(SubgameEntry(ef.RootNode()));
   must_recalc = true;
 }
 
-void TreeWindow::subgame_collapse_one(void)
+void TreeWindow::SubgameCollapse(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
     if (subgame_list[i].root == Cursor()) {
@@ -2320,11 +2193,9 @@ void TreeWindow::subgame_collapse_one(void)
       return;
     }
   }
-
-  wxMessageBox("This node is not a subgame root");
 }
 
-void TreeWindow::subgame_collapse_all(void)
+void TreeWindow::SubgameCollapseAll(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++)
     subgame_list[i].expanded = false;
@@ -2332,7 +2203,7 @@ void TreeWindow::subgame_collapse_all(void)
   must_recalc = true;
 }
 
-void TreeWindow::subgame_expand_one(void)
+void TreeWindow::SubgameExpand(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
     if (subgame_list[i].root == Cursor()) {
@@ -2341,11 +2212,9 @@ void TreeWindow::subgame_expand_one(void)
       return;
     }
   }
-
-  wxMessageBox("This node is not a subgame root");
 }
 
-void TreeWindow::subgame_expand_branch(void)
+void TreeWindow::SubgameExpandBranch(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++) {
     if (subgame_list[i].root == Cursor()) {
@@ -2359,12 +2228,9 @@ void TreeWindow::subgame_expand_branch(void)
       return;
     }
   }
-  
-  wxMessageBox("This node is not a subgame root");
 }
 
-
-void TreeWindow::subgame_expand_all(void)
+void TreeWindow::SubgameExpandAll(void)
 {
   for (int i = 1; i <= subgame_list.Length(); i++)
     subgame_list[i].expanded = true;
@@ -2381,8 +2247,6 @@ void TreeWindow::subgame_toggle(void)
       return;
     }
   }
-
-  wxMessageBox("This node is not a subgame root");
 }
 
 

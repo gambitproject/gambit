@@ -226,6 +226,7 @@ public:
       
   void action_label(void);
   void action_insert(void);
+  void action_append(void);
   void action_delete(void);
   void action_probs(void);
     
@@ -244,16 +245,17 @@ public:
   void infoset_switch_player(void);
   void infoset_reveal(void);
     
-  void subgame_clear_one(void);
-  void subgame_clear_all(void);
-  void subgame_solve(void);
-  void subgame_collapse_one(void);
-  void subgame_collapse_all(void);
-  void subgame_expand_one(void);
-  void subgame_expand_branch(void);
-  void subgame_expand_all(void);
+  void SubgameMarkAll(void);
+  void SubgameMark(void);
+  void SubgameUnmarkAll(void);
+  void SubgameUnmark(void);
+  void SubgameCollapse(void);
+  void SubgameCollapseAll(void);
+  void SubgameExpand(void);
+  void SubgameExpandBranch(void);
+  void SubgameExpandAll(void);
+
   void subgame_toggle(void);
-  void subgame_set(void);
     
   void display_legends(void);
   void display_options(void);
