@@ -1,7 +1,7 @@
 //#
 //# FILE: contiter.h -- Normal form contingency iterator class
 //#
-//# @(#)contiter.h	1.2 1/17/95
+//# $Id$
 //#
 
 #ifndef CONTITER_H
@@ -24,35 +24,40 @@ class StrategyProfile;
 // the total number of possible contingencies in increments of 1.
 //
 template <class T> class ContIter    {
+  friend class NormalIter<T>;
   private:
+    int sset;
     NormalForm<T> *N;
-		StrategyProfile *profile;
+    StrategyProfile *profile;
     gBlock<int> frozen, thawed;
 
-	public:
-		ContIter(NormalForm<T> &);
-		ContIter(NormalForm<T> *);
-		~ContIter();
+  public:
+    ContIter(NormalForm<T> &n);
+    ContIter(NormalForm<T> &n, int sset);
+    ContIter(NormalForm<T> *n);
+    ContIter(NormalForm<T> *n, int sset);
+    ~ContIter();
 
-		void First(void);
+    void First(void);
 
-		void Freeze(const gBlock<int> &);
-		void Freeze(int);
-		void Thaw(int);
+    void Freeze(const gBlock<int> &);
+    void Freeze(int);
+    void Thaw(int);
 
 // These next two only work on frozen strategies
-		void Set(int pl, int num);
-		int Next(int pl);
+    void Set(int pl, int num);
+    int Next(int pl);
 
+    gTuple<int> Get(void) const;
     void Get(gTuple<int> &t) const;
 
-		int NextContingency(void);
+    int NextContingency(void);
 
-		long GetIndex(void) const;
+    long GetIndex(void) const;
 
-		const T &Payoff(int pl) const;
-		T &Payoff(int pl);
-		void Payoff(gVector<T> &) const;
+    const T &Payoff(int pl) const;
+    T &Payoff(int pl);
+    void Payoff(gVector<T> &) const;
 
     void Dump(void) const;
 };
