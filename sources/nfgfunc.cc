@@ -354,7 +354,7 @@ Portion *GSM_NewNfg(Portion **param)
 }
 
 
-Portion* GSM_NewNfg_List(Portion** param)
+Portion* GSM_NewNfg_Payoff(Portion** param, bool rational)
 {
   int dim = param[0]->Spec().ListDepth - 1;
   int players = 0;
@@ -377,7 +377,12 @@ Portion* GSM_NewNfg_List(Portion** param)
   
 
   // create new Nfg and call SetPayoff()
-  Nfg<double>* nfg = new Nfg<double>(dmax);
+  BaseNfg* nfg;
+  if(!rational)
+    nfg = new Nfg<double>(dmax);
+  else
+    nfg = new Nfg<gRational>(dmax);
+
   int length = dmax.Length();
   gArray<int> d(length);
   int ci;
@@ -427,45 +432,108 @@ Portion* GSM_NewNfg_List(Portion** param)
     
     // now we have the list; call SetPayoff() for each player
     for(pl=1; pl<=players; pl++)
-      nfg->SetPayoff(pl, d, 
-		     ((FloatPortion*) (*((ListPortion*) list))[pl])->Value());
-      
+      if(!rational)
+	((Nfg<double>*) nfg)->SetPayoff(pl, d, ((FloatPortion*) 
+           (*((ListPortion*) list))[pl])->Value());
+      else
+	((Nfg<gRational>*) nfg)->SetPayoff(pl, d, ((RationalPortion*) 
+           (*((ListPortion*) list))[pl])->Value());
+
     // end valid index region
   }
   
   return new NfgValPortion(nfg);
 }
 
-/*
-Portion* GSM_SetPayoff_NfgFloat( Portion** param )
+
+Portion* GSM_NewNfg_Float(Portion** param)
 {
-  int i;
-  Portion* p;
-  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
-  gArray<int> Solution( ( (ListPortion*) param[ 1 ] )->Length() );
-  
-  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
-    return new ErrorPortion("Invalid number of players specified in \"list\"");
-  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
-    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
-  
-  for( i = 1; i <= nfg->NumPlayers() ; i++ )
-  {
-    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
-    assert( p->Spec().Type == porINTEGER );
-    Solution[ i ] = ( (IntPortion*) p )->Value();
-    delete p;
-  }
-  for( i = 1; i <= nfg->NumPlayers(); i++ )
-  {
-    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
-    assert( p->Spec().Type == porFLOAT );
-    nfg->SetPayoff( i, Solution, ( (FloatPortion*) p )->Value() );
-    delete p;
-  }
-  return param[ 1 ]->ValCopy();
+  return GSM_NewNfg_Payoff(param, false);
 }
-*/
+
+Portion* GSM_NewNfg_Rational(Portion** param)
+{
+  return GSM_NewNfg_Payoff(param, true);
+}
+
+
+//--------------
+// ListForm
+//--------------
+
+Portion* GSM_ListForm_Nfg(Portion** param, bool rational)
+{
+  BaseNfg* nfg = ((NfgPortion*) param[0])->Value();
+  gArray<int> dmax(nfg->Dimensionality());
+  ListPortion* result = new ListValPortion();
+  ListPortion* list;
+  int ci;
+  int i;
+  int pl;
+  int length = dmax.Length();
+  int players = length;
+  gArray<int> d(length);
+  for(i=1; i<=length; i++)
+    d[i] = 1;
+  d[length] = 0;
+  // gout << "dmax: " << dmax << '\n';
+  while(d != dmax)
+  {
+    // increment indices
+    ci = length;
+    d[ci]++;
+    while(d[ci] > dmax[ci])
+    {
+      d[ci] = 1;
+      ci--;
+      if(ci == 0)
+	break;
+      d[ci]++;
+    }
+
+    // begin valid index region
+    // now extract the list with the payoffs at each position
+    list = result;
+    ci = length;
+    while(ci > 0)
+    {
+      //assert(list->Spec().ListDepth > 1);
+      if(((ListPortion*) list)->Length() != dmax[ci])
+	list->Append(new ListValPortion());
+      list = (ListPortion*) (*((ListPortion*) list))[d[ci]];
+      ci--;
+    }
+    assert(list->Spec().ListDepth == 1);
+
+    // now we have the list; call SetPayoff() for each player
+    for(pl=1; pl<=players; pl++)
+      if(!rational)
+	list->Append(new FloatValPortion(((Nfg<double>*) nfg)->Payoff(pl, d)));
+      else
+	list->Append(new RationalValPortion(((Nfg<gRational>*) nfg)->Payoff(pl, d)));
+
+    // gout << "Payoff[n, " << d << "] = " << list << '\n';
+    
+    // end valid index region
+  }
+
+  if(!rational)
+    result->SetDataType(porFLOAT);
+  else
+    result->SetDataType(porRATIONAL);
+  return result;
+}
+
+Portion* GSM_ListForm_NfgFloat(Portion** param)
+{
+  return GSM_ListForm_Nfg(param, false);
+}
+
+Portion* GSM_ListForm_NfgRational(Portion** param)
+{
+  return GSM_ListForm_Nfg(param, true);
+}
+
 
 //--------------
 // NewSupport
@@ -853,20 +921,37 @@ void Init_nfgfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("NewNfg", 1);
+  FuncObj = new FuncDescObj("NewNfg", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
 					    new BoolValPortion(false)));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("NewNfgList", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg_List, porNFG, 1, 0, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewNfg_Float, 
+				       porNFG_FLOAT, 1, 0, 
 				       NON_LISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("payoffs", 
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("payoffs", 
 					    PortionSpec(porFLOAT,1)));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NewNfg_Rational, 
+				       porNFG_RATIONAL, 1, 0, 
+				       NON_LISTABLE));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("payoffs", 
+					    PortionSpec(porRATIONAL,1)));
   gsm->AddFunction(FuncObj);
+
+
+
+  FuncObj = new FuncDescObj("ListForm", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListForm_NfgFloat, 
+				       porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT,
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ListForm_NfgFloat, 
+				       porANYTYPE, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+
 
 
 

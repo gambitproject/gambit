@@ -298,7 +298,8 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
 }
 
 
-bool GSM::_VarDefine( const gString& var_name, Portion* p )
+// note that p may be changed after a call to _VarDefine()
+bool GSM::_VarDefine( const gString& var_name, Portion*& p )
 {
   Portion* old_value;
   bool type_match = true;
@@ -343,7 +344,16 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
   }
   else
   {
-    _RefTableStack->Peek()->Define( var_name, p );
+    Portion* p_old;
+    if(p->IsReference())
+    {
+      p_old = p;
+      p = p->ValCopy();
+      delete p_old;
+    }
+    if(old_value)
+      delete _VarRemove(var_name);
+    _RefTableStack->Peek()->Define(var_name, p);
   }
   return result;
 }

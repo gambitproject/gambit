@@ -2255,7 +2255,7 @@ int ListPortion::Insert(Portion* item, int index)
   }
   else  // inserting into an existing list
   {
-    if(PortionSpecMatch(item_type, _DataType))
+    if(PortionSpecMatch(item_type.Type, _DataType))
     {
       if(_Value->Length() == 0)
 	_Owner = item->Original()->Owner();

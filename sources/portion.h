@@ -18,6 +18,8 @@
 
 #include "glist.h"
 #include "gstring.h"
+#include "rational.h"
+
 
 //#include "gambitio.h"
 

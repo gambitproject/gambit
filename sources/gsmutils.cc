@@ -10,6 +10,14 @@
 #include "gdpvect.h"
 #include "gmatrix.h"
 
+Portion *ArrayToList(const gArray<int> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new IntValPortion(A[i]));
+  return ret;
+}
+
 Portion *ArrayToList(const gArray<double> &A)
 {
   ListPortion *ret = new ListValPortion;
