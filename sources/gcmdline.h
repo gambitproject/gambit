@@ -38,6 +38,7 @@ private:
   
   // the maximum history size
   int m_HistoryDepth;
+  int m_NumInvoke;
 
   // the last command being executed
   gString m_CmdExec;
@@ -74,6 +75,10 @@ private:
   // this will eat up the given number of characters
   //   from the start of m_CmdExec
   void EatSpace( int num );
+
+  // this function strips old commands of their original
+  //   prompt numbers and puts in the current one
+  const gString& UpdatePromptNum( gString cmdBuf ) const;
 
 
 public:

@@ -74,6 +74,7 @@ gStack<gString> GCL_InputFileNames(4);
   gStack<char> matching; \
   gStack<gInput *> inputs; \
   gStack<int> lines; \
+  int fakeCRLFs; \
   GSM& gsm; \
   bool quit; \
   bool in_funcdecl; \
@@ -98,6 +99,7 @@ gStack<gString> GCL_InputFileNames(4);
                                labels(4), \
                                listlen(4), matching(4), \
                                lines(4), \
+                               fakeCRLFs(0), \
                                gsm(*_gsm), quit(false), in_funcdecl(false)
 
 %define CONSTRUCTOR_CODE       GCL_InputFileNames.Push("stdin"); \
@@ -264,7 +266,7 @@ statement:    |  expression { triv = false; }
 
 
 include:      INCLUDE LBRACK TEXT RBRACK
-              { LoadInputs(tval); }
+              { ++fakeCRLFs; LoadInputs(tval); }
 
 
 conditional:  IF { gcmdline.SetPrompt( false ); }
@@ -494,18 +496,26 @@ char GCLCompiler::nextchar(void)
     lines.Pop();
   }
 
-  if (inputs.Depth() == 0)
-    // gin >> c;
-    gcmdline >> c;
+  if( fakeCRLFs > 0 )
+  {
+    --fakeCRLFs;
+    c = '\n';
+  }
   else
-    *inputs.Peek() >> c;
+  {
+    if (inputs.Depth() == 0)
+      // gin >> c;
+      gcmdline >> c;
+    else
+      *inputs.Peek() >> c;
 
-  if (c == CR)
-    lines.Peek()++;
+    if (c == CR)
+      lines.Peek()++;
 
-  if( record_funcbody )
-    funcbody += c;
+    if( record_funcbody )
+      funcbody += c;
 
+  }
   return c;
 }
 
