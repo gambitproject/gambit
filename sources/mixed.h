@@ -44,6 +44,8 @@ template <class T> class MixedProfile
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
+    NormalForm<T> *BelongsTo(void) const  { return (NormalForm<T> *) N; }
+
     bool IsPure(void) const;
     bool IsPure(int pl) const;
 };
