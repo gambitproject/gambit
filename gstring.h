@@ -1,8 +1,8 @@
-//#
-//# FILE: gstring.h -- Definition of gString class
-//#
-//# $Id$
-//#
+//
+// FILE: gstring.h -- Definition of gString class
+//
+// $Id$
+//
 
 #ifndef GSTRING_H
 #define GSTRING_H
@@ -12,6 +12,7 @@
 #endif    // __GNUG__
 
 #include <string.h>
+#include <assert.h>
 
 class gInput;
 class gOutput;
@@ -78,8 +79,10 @@ class gString   {
     int operator>=(const char *s) const     { return strcmp(storage, s) >= 0; }
 
 	// SUBSCRIPTORS
-    char& operator[](int n)       { return *(storage + n); }
-    char operator[](int n) const  { return *(storage + n); }
+    char& operator[](unsigned int n)    
+     { assert(n <= strlen(storage));  return *(storage + n); }
+    char operator[](unsigned int n) const 
+     { assert(n <= strlen(storage));  return *(storage + n); }
     char* operator+(int n)       { return storage + n; }
 
 	// CONVERSIONS
