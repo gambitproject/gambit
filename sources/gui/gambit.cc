@@ -178,7 +178,7 @@ void GambitApp::OnHelpAbout(wxWindow *p_parent)
 {
   dialogAbout dialog(p_parent, "About Gambit...",
 		     "Gambit Graphical User Interface",
-		     "Version 0.97.0.0 (special for CBMS conference)");
+		     "Version " VERSION);
   dialog.ShowModal();
 }
 

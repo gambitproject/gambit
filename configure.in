@@ -4,21 +4,14 @@ AM_INIT_AUTOMAKE(gambit, 0.97.0.1)
 dnl AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs.
-AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
+AC_PROG_YACC
 
 dnl A number of the following checks are currently commented out.
 dnl These are checks for functions and headers we do actually use,
 dnl but for which we don't have any workarounds should they be missing.
-
-dnl AC_DEFINE(__WXGTK__, 1, use GTK version of wxWindows)
-CPPFLAGS="$(CPPFLAGS) -fno-implicit-templates -DNEWSTYLE_TEMPLATES -D__WXGTK__"
-
-dnl Checks for libraries.
-dnl Replace `main' with a function in -lwx_gtk:
-AC_CHECK_LIB(wx_gtk, main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -35,6 +28,40 @@ dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
+
+dnl------------------------
+dnl Checking for wxWindows
+dnl------------------------
+
+dnl Check for wx-related options (--wx-prefix, --wx-exec-prefix, --wx-config)
+AM_OPTIONS_WXCONFIG
+
+dnl check for wx-config and wxWindows version
+AM_PATH_WXCONFIG(2.3.2, WX232=1)
+
+if test "$WX232" != 1; then
+   AC_MSG_ERROR([
+	   Gambit requires wxWindows to be installed on your system,
+	   but a new enough version could not be found.
+
+	   Please check that wx-config is in path, the directory
+	   where wxWindows libraries are installed (returned by
+	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
+	   equivalent variable and wxWindows version is 2.3.2 or above.
+
+           wxWindows can be obtained at http://www.wxwindows.org.
+   ])
+fi
+
+dnl Set all flags; remove -fno-exceptions if present
+CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+CPPFLAGS=`echo $CPPFLAGS | sed 's/-fno-exceptions//g'`
+CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+CXXFLAGS=`echo $CXXFLAGS | sed 's/-fno-exceptions//g'`
+CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+
+GUI_LIBS="$WX_LIBS"
+AC_SUBST(GUI_LIBS)
 
 AC_OUTPUT(Makefile sources/Makefile \
           sources/base/Makefile \

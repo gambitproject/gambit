@@ -14,7 +14,8 @@ gambit_LDADD = \
 	$(top_builddir)/sources/pelican/libpelican.a \
 	$(top_builddir)/sources/numerical/libnumerical.a \
 	$(top_builddir)/sources/math/libmath.a \
-	$(top_builddir)/sources/base/libbase.a
+	$(top_builddir)/sources/base/libbase.a \
+        $(GUI_LIBS)
 
 
 
