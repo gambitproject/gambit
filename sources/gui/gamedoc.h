@@ -43,48 +43,55 @@ private:
   wxString m_filename;
   bool m_modified;
 
+  // Management of views
   gBlock<gbtGameView *> m_views;
+  bool m_showOutcomes, m_showProfiles, m_showNfgSupports;
 
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);
 
+  // Extensive-form related state information
+  gbtEfgGame *m_efg;
+  gbtEfgNode m_cursor, m_copyNode, m_cutNode;
+  EFSupport *m_curEfgSupport;
+  gList<EFSupport *> m_efgSupports;
+
+  // Normal-form related state information
+  gbtNfgGame *m_nfg;
+  int m_rowPlayer, m_colPlayer;
+  gArray<int> m_contingency;
+  gbtNfgSupport *m_curNfgSupport;
+  gList<gbtNfgSupport *> m_nfgSupports;
+
+  // The list of computed profiles (refactor into own class?)
   int m_curProfile;
   gList<BehavSolution> m_behavProfiles;
   gList<MixedSolution> m_mixedProfiles;
 
+  // Preferences for colors, layout, and so forth
   gbtPreferences m_prefs;
-  bool m_showOutcomes, m_showProfiles, m_showNfgSupports;
 
-  int m_rowPlayer, m_colPlayer;
-  gArray<int> m_contingency;
-  
 public:
-  gbtEfgGame *m_efg;
-
-  EFSupport *m_curEfgSupport;
-  gList<EFSupport *> m_efgSupports;
-
-  gbtEfgNode m_cursor, m_copyNode, m_cutNode;
-
-  gbtNfgGame *m_nfg;
-  gbtNfgSupport *m_curNfgSupport;
-  gList<gbtNfgSupport *> m_nfgSupports;
-
+  // Lifecycle
   gbtGameDocument(gbtEfgGame, wxString = "");
   gbtGameDocument(gbtNfgGame, wxString = "");
   ~gbtGameDocument();
 
-  gbtEfgGame GetEfg(void) const { return *m_efg; }
-
+  // General information about game
   const wxString &GetFilename(void) const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
   bool IsModified(void) const { return m_modified; }
   void SetIsModified(bool p_modified) { m_modified = p_modified; }
 
+  // Management of commands
   void Submit(gbtGameCommand *);
   void UpdateViews(gbtGameView *, bool, bool);
   void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
+
+  // Extensive-form related state information
+  gbtEfgGame GetEfg(void) const { return *m_efg; }
+
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }
@@ -101,7 +108,9 @@ public:
   // MARKED NODES
   void SetCursor(gbtEfgNode m_node);
   gbtEfgNode GetCursor(void) const { return m_cursor; }
+  void SetCopyNode(gbtEfgNode);
   gbtEfgNode GetCopyNode(void) const { return m_copyNode; }
+  void SetCutNode(gbtEfgNode);
   gbtEfgNode GetCutNode(void) const { return m_cutNode; }
   
   // OUTCOMES
@@ -112,13 +121,27 @@ public:
   gText UniqueEfgSupportName(void) const;
   gText UniqueNfgSupportName(void) const;
 
-  void AddSupport(EFSupport *);
-  EFSupport *GetEfgSupport(void) const { return m_curEfgSupport; }
+  const EFSupport &GetEfgSupport(void) const { return *m_curEfgSupport; }
+  int GetEfgSupportIndex(void) const
+    { return m_efgSupports.Find(m_curEfgSupport); }
   const gList<EFSupport *> &AllEfgSupports(void) const
     { return m_efgSupports; }
-
   void SetEfgSupport(int p_index);
+  void AddEfgSupport(EFSupport *);
+  void DeleteEfgSupport(void);
+  void AddAction(gbtEfgAction);
+  void RemoveAction(gbtEfgAction);
+
+  const gbtNfgSupport &GetNfgSupport(void) const { return *m_curNfgSupport; }
+  int GetNfgSupportIndex(void) const
+    { return m_nfgSupports.Find(m_curNfgSupport); }
+  const gList<gbtNfgSupport *> &AllNfgSupports(void) const
+    { return m_nfgSupports; }
   void SetNfgSupport(int p_index);
+  void AddNfgSupport(gbtNfgSupport *);
+  void DeleteNfgSupport(void);
+  void AddStrategy(gbtNfgStrategy);
+  void RemoveStrategy(gbtNfgStrategy);
 
   // PROFILES
   gText UniqueBehavProfileName(void) const;
@@ -142,7 +165,6 @@ public:
   void SetCurrentProfile(const MixedSolution &);
   void RemoveProfile(int p_index);
 
-
   // LABELS
   gText GetRealizProb(const gbtEfgNode &) const;
   gText GetBeliefProb(const gbtEfgNode &) const;
@@ -164,9 +186,6 @@ public:
   void SetRowPlayer(int p_player);
   void SetColPlayer(int p_player);
 
-  gbtNfgSupport *GetNfgSupport(void) const { return m_curNfgSupport; }
-  const gList<gbtNfgSupport *> &AllNfgSupports(void) const
-    { return m_nfgSupports; }
 };
 
 //

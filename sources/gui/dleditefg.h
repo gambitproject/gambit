@@ -39,7 +39,7 @@ private:
 
 public:
   // Lifecycle
-  dialogEditEfg(wxWindow *p_parent, gbtEfgGame &p_efg, const wxString &);
+  dialogEditEfg(wxWindow *p_parent, gbtEfgGame p_efg, const wxString &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetGameTitle(void) const;

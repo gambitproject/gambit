@@ -145,14 +145,14 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_doc->GetNfgSupport());
+  int supportIndex = m_doc->GetNfgSupportIndex();
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_strategyTree->DeleteAllItems();
 
-  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport()->GetName());
+  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport().GetName());
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 
@@ -164,7 +164,7 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
 						       (char *) strategy.GetLabel());
-      if (m_doc->GetNfgSupport()->Contains(strategy)) {
+      if (m_doc->GetNfgSupport().Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
       else {
@@ -207,13 +207,13 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->GetNfgSupport()->Contains(strategy) &&
-      m_doc->GetNfgSupport()->NumStrats(strategy.GetPlayer()) > 1) {
-    m_doc->GetNfgSupport()->RemoveStrategy(strategy);
+  if (m_doc->GetNfgSupport().Contains(strategy) &&
+      m_doc->GetNfgSupport().NumStrats(strategy.GetPlayer()) > 1) {
+    m_doc->RemoveStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_doc->GetNfgSupport()->AddStrategy(strategy);
+    m_doc->AddStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxBLACK);
   }
 

@@ -148,14 +148,14 @@ void EfgSupportWindow::OnUpdate(gbtGameView *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_doc->GetEfgSupport());
+  int supportIndex = m_doc->GetEfgSupportIndex();
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport()->GetName());
+  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport().GetName());
   for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
     gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
 
@@ -170,7 +170,7 @@ void EfgSupportWindow::OnUpdate(gbtGameView *)
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action.GetLabel());
-	if (m_doc->GetEfgSupport()->Contains(action)) {
+	if (m_doc->GetEfgSupport().Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -217,13 +217,13 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_doc->GetEfgSupport()->Contains(action) &&
-      m_doc->GetEfgSupport()->NumActions(action.GetInfoset()) > 1) {
-    m_doc->GetEfgSupport()->RemoveAction(action);
+  if (m_doc->GetEfgSupport().Contains(action) &&
+      m_doc->GetEfgSupport().NumActions(action.GetInfoset()) > 1) {
+    m_doc->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_doc->GetEfgSupport()->AddAction(action);
+    m_doc->AddAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxBLACK);
   }
 

@@ -202,8 +202,8 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
 
 void TreeWindow::OnUpdate(gbtGameView *)
 {
-  m_layout.BuildNodeList(*m_doc->GetEfgSupport());
-  m_layout.Layout(*m_doc->GetEfgSupport());
+  m_layout.BuildNodeList(m_doc->GetEfgSupport());
+  m_layout.Layout(m_doc->GetEfgSupport());
   if (!m_doc->GetCutNode().IsNull()) {
     m_layout.SetCutNode(m_doc->GetCutNode());
   }
@@ -525,7 +525,7 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 void TreeWindow::OnSize(wxSizeEvent &p_event)
 {
   if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
-    m_layout.Layout(*m_doc->GetEfgSupport());
+    m_layout.Layout(m_doc->GetEfgSupport());
   }
 
   // This extra check because wxMSW seems to generate OnSize events

@@ -43,14 +43,14 @@
 
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_curProfile(0),
     m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
-    m_rowPlayer(1), m_colPlayer(2),
     m_efg(new gbtEfgGame(p_efg)), 
-    m_curEfgSupport(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
+    m_curEfgSupport(0),
     m_nfg(0),
-    m_curNfgSupport(0)
+    m_rowPlayer(1), m_colPlayer(2),
+    m_curNfgSupport(0),
+    m_curProfile(0)
 {
   // Make sure that Chance player has a name
   if (m_efg->GetChance().GetLabel() == "") {
@@ -64,17 +64,21 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_curProfile(0),
     m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
+    m_efg(0),
+    m_cursor(0), m_copyNode(0), m_cutNode(0),
+    m_curEfgSupport(0), 
+    m_nfg(new gbtNfgGame(p_nfg)),
     m_rowPlayer(1), m_colPlayer(2),
     m_contingency(p_nfg.NumPlayers()),
-    m_efg(0),
-    m_curEfgSupport(0), 
-    m_cursor(0), m_copyNode(0), m_cutNode(0),
-    m_nfg(new gbtNfgGame(p_nfg)),
-    m_curNfgSupport(0)
+    m_curNfgSupport(0),
+    m_curProfile(0)
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
+
+  m_curNfgSupport = new gbtNfgSupport(*m_nfg);
+  m_curNfgSupport->SetName("Full Support");
+  m_nfgSupports.Append(m_curNfgSupport);
 }
 
 gbtGameDocument::~gbtGameDocument()
@@ -112,6 +116,20 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
 void gbtGameDocument::SetCursor(gbtEfgNode p_node)
 {
   m_cursor = p_node;
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::SetCopyNode(gbtEfgNode p_node)
+{
+  m_copyNode = p_node;
+  m_cutNode = 0;
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::SetCutNode(gbtEfgNode p_node)
+{
+  m_cutNode = 0;
+  m_copyNode = p_node;
   UpdateViews(0, true, false);
 }
 
@@ -197,11 +215,6 @@ gText gbtGameDocument::UniqueNfgSupportName(void) const
   }
 }
 
-void gbtGameDocument::AddSupport(EFSupport *p_support)
-{
-  m_efgSupports.Append(p_support);
-}
-
 void gbtGameDocument::SetEfgSupport(int p_index)
 {
   if (p_index >= 1 && p_index <= m_efgSupports.Length()) {
@@ -210,12 +223,62 @@ void gbtGameDocument::SetEfgSupport(int p_index)
   }
 }
 
+void gbtGameDocument::AddEfgSupport(EFSupport *p_support)
+{
+  m_efgSupports.Append(p_support);
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::DeleteEfgSupport(void)
+{
+  delete m_efgSupports.Remove(m_efgSupports.Find(m_curEfgSupport));
+  m_curEfgSupport = m_efgSupports[1];
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::AddAction(gbtEfgAction p_action)
+{
+  m_curEfgSupport->AddAction(p_action);
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::RemoveAction(gbtEfgAction p_action)
+{
+  m_curEfgSupport->RemoveAction(p_action);
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::DeleteNfgSupport(void)
+{
+  delete m_nfgSupports.Remove(m_nfgSupports.Find(m_curNfgSupport));
+  m_curNfgSupport = m_nfgSupports[1];
+  UpdateViews(0, false, true);
+}
+
+void gbtGameDocument::AddNfgSupport(gbtNfgSupport *p_support)
+{
+  m_nfgSupports.Append(p_support);
+  UpdateViews(0, false, true);
+}
+
 void gbtGameDocument::SetNfgSupport(int p_index)
 {
   if (p_index >= 1 && p_index <= m_nfgSupports.Length()) {
     m_curNfgSupport = m_nfgSupports[p_index];
     UpdateViews(0, false, true);
   }
+}
+
+void gbtGameDocument::AddStrategy(gbtNfgStrategy p_strategy)
+{
+  m_curNfgSupport->AddStrategy(p_strategy);
+  UpdateViews(0, true, false);
+}
+
+void gbtGameDocument::RemoveStrategy(gbtNfgStrategy p_strategy)
+{
+  m_curNfgSupport->RemoveStrategy(p_strategy);
+  UpdateViews(0, true, false);
 }
 
 
@@ -417,6 +480,10 @@ void gbtGameDocument::MakeReducedNfg(void)
   m_nfg = new gbtNfgGame(m_efg->GetReducedNfg(*m_curEfgSupport));
   m_contingency = gArray<int>(m_nfg->NumPlayers());
   for (int pl = 1; pl <= m_nfg->NumPlayers(); m_contingency[pl++] = 1);
+
+  m_curNfgSupport = new gbtNfgSupport(*m_nfg);
+  m_curNfgSupport->SetName("Full Support");
+  m_nfgSupports.Append(m_curNfgSupport);
   (void) new NfgShow(this, 0);
 
   m_mixedProfiles.Flush();

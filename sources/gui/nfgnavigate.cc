@@ -45,7 +45,7 @@ NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
   : wxPanel(p_parent, -1), gbtGameView(p_doc),
     m_rowPlayer(1), m_colPlayer(2)
 {
-  gbtNfgGame nfg = *m_doc->m_nfg;
+  gbtNfgGame nfg = m_doc->GetNfg();
 
   wxStaticBoxSizer *playerViewSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "View players"),
@@ -127,13 +127,13 @@ NfgNavigateWindow::~NfgNavigateWindow()
 
 void NfgNavigateWindow::OnUpdate(gbtGameView *)
 {
-  gbtNfgSupport *support = m_doc->GetNfgSupport();
+  const gbtNfgSupport &support = m_doc->GetNfgSupport();
 
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     m_stratProfile[pl-1]->Clear();
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      if (support->Contains(player.GetStrategy(st))) {
+      if (support.Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
 					       player.GetStrategy(st).GetLabel()));
       }
