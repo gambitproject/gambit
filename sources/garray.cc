@@ -9,6 +9,7 @@
 #include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"
+#include "complex.h"
 #include "glist.h"
 
 template class gArray<bool>;
@@ -18,6 +19,7 @@ template class gArray<float>;
 template class gArray<double>;
 template class gArray<gInteger>;
 template class gArray<gRational>;
+template class gArray<gComplex>;
 template class gArray<gNumber>;
 template class gArray<gText>;
 template class gArray<gArray<int> >;
