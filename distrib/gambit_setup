@@ -17,13 +17,14 @@ echo
 echo The current binaries are:
 echo `ls bin/gambit_*`
 echo `ls bin/gcl_*`
-echo `ls bin/wxhelp_*`
+echo `ls bin/wxhelp2_*`
 echo
 echo Making symbolic links to gambit, gui, and wxhelp.
 cd bin
 ln -s `echo gambit_*` gambit
 ln -s `echo gcl_*` gcl
-ln -s `echo wxhelp_*` wxhelp
+ln -s `echo pxi_*` pxi
+ln -s `echo wxhelp2_*` wxhelp
 cd ..
 
 echo 
@@ -34,9 +35,6 @@ cd ..
 
 #
 # Set up the appropriate environment variables.
-# E.g. WXHELPFILES
-# Q: where do we put gambit.xlp file?
-#
-# Are there environment variables for where to put efg/nfg files?
+# E.g. WXHELPFILES specifies where the help files reside.
 #
 

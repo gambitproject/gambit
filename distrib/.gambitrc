@@ -1,101 +1,132 @@
-NodeSolnShow.NodeValue:	1
-NodeSolnShow.BeliefProb:	1
+NodeSolnShow.BranchProb:	1
 NodeSolnShow.BranchValue:	1
 NodeSolnShow.IsetProb:	1
-NodeSolnShow.BranchProb:	1
-NodeSolnShow.Infoset:	1
-NodeSolnShow.IsetValue:	1
 NodeSolnShow.RealizProb:	1
-Behav-Soln-Show.Liap Value:	1
-Behav-Soln-Show.QRE Value:	1
-Behav-Soln-Show.Nash:	1
-Behav-Soln-Show.Equ Values:	1
-Behav-Soln-Show.QRE Lambda:	1
-Behav-Soln-Show.Creator:	1
-Behav-Soln-Show.Sequential:	1
-Behav-Soln-Show.SubgPerf:	1
-Behav-Soln-Show.Update Dynamically:	1
+NodeSolnShow.BeliefProb:	1
+NodeSolnShow.NodeValue:	1
+NodeSolnShow.IsetValue:	1
+NodeSolnShow.Infoset:	1
+NfgAccelerators.Num-Accells:	0
+NfgAccelerators.Num-Accels:	2
+NfgAccelerators.Accel1:	2 2 9 410
+NfgAccelerators.Accel2:	2 2 13 400
 EfgAccelerators.Num-Accells:	0
-Gambit.Branch-Length:	60
-Gambit.Branch-Below-Label:	3
-Gambit.Player-Color-2:	3
-Gambit.Node-Above-Font:	12 74 90 90 0
-Gambit.Branch-Below-Font:	12 74 90 90 0
-Gambit.Gambit-Version:	96
-Gambit.Y-Spacing:	42
-Gambit.NFOutcome-Display:	0
-Gambit.Player-Color-4:	0
-Gambit.Node-Below-Label:	4
-Gambit.Node-Right-Font:	12 74 90 90 0
-Gambit.Player-Color-3:	1
-Gambit.Outcome-Length:	50
-Gambit.Branch-Above-Font:	12 74 90 90 0
-Gambit.Show-Infosets:	2
-Gambit.Fork-Length:	60
-Gambit.Node-Right-Label:	1
-Gambit.Root-Reachable:	1
-Gambit.Node-Length:	60
-Gambit.Color-Outcomes:	1
-Gambit.Output-Precision:	5
-Gambit.Chance-Color:	0
-Gambit.Cursor-Color:	10
-Gambit.Node-Below-Font:	12 74 90 90 0
-Gambit.Flashing-Cursor:	0
-Gambit.Num-Player-Colors:	4
-Gambit.Player-Color-1:	5
-Gambit.Branch-Above-Label:	1
-Gambit.Node-Above-Label:	1
-Mixed-Soln-Show.QRE Value:	1
-Mixed-Soln-Show.Nash:	1
-Mixed-Soln-Show.Equ Values:	1
-Mixed-Soln-Show.Liap Value:	1
-Mixed-Soln-Show.QRE Lambda:	1
-Mixed-Soln-Show.Perfect:	1
-Mixed-Soln-Show.Creator:	1
-Mixed-Soln-Show.Proper:	1
-Mixed-Soln-Show.Zero Prob:	1
-Mixed-Soln-Show.Update Dynamically:	1
-SpreadSheet3D.SpreadSheet3D-Version:	2
-SpreadSheet3D.Row-Height:	30
-SpreadSheet3D.Col-Dim-Char:	1
-SpreadSheet3D.Fit-Text-Vert:	1
-SpreadSheet3D.Use-GText:	1
-SpreadSheet3D.Show-Labels:	0
-SpreadSheet3D.Default-Column-Width:	6
-SpreadSheet3D.Fit-Text-Horiz:	0
-SpreadSheet3D.Data-Font:	11 75 90 90 0
-SpreadSheet3D.Label-Font:	12 75 90 90 0
-Algorithm Params.Precision:	0
-Algorithm Params.Pxi-Command:	pxi
-Algorithm Params.Qre-delLam:	.02
-Algorithm Params.Func-tolND:	10
-Algorithm Params.Qre-maxLam:	500
-Algorithm Params.Simpdiv-nRestarts:	16
-Algorithm Params.Qre-startOption:	0
-Algorithm Params.Liap-nTries:	10
-Algorithm Params.Simpdiv-leashLength:	0
-Algorithm Params.Func-tol1D:	10
-Algorithm Params.Run-Pxi:	1
-Algorithm Params.Pxi-Plot-Type:	0
-Algorithm Params.Func-maxitsND:	200
-Algorithm Params.StopAfter:	1
-Algorithm Params.Qre-minLam:	.001
-Algorithm Params.Func-maxits1D:	200
-Soln-Defaults.Efg-Standard-Num:	0
-Soln-Defaults.Efg-Standard-Precision:	0
-Soln-Defaults.Efg-Interactive-Solns-All:	0
-Soln-Defaults.Nfg-Standard-Precision:	0
-Soln-Defaults.Nfg-Standard-Type:	0
-Soln-Defaults.Nfg-ElimDom-Depth:	2
-Soln-Defaults.Efg-Interactive-Solns:	0
-Soln-Defaults.Efg-Standard-Type:	0
+EfgAccelerators.Num-Accels:	2
+EfgAccelerators.Accel1:	1 2 83 1602
+EfgAccelerators.Accel2:	1 2 66 1601
 Soln-Defaults.ElimDom-Precision:	0
+Soln-Defaults.Efg-Standard-Precision:	1
+Soln-Defaults.ElimDom-Mixed-All:	1
 Soln-Defaults.Nfg-ElimDom-Type:	0
 Soln-Defaults.Nfg-ElimDom-Method:	0
-Soln-Defaults.ElimDom-All:	76
+Soln-Defaults.ElimDom-Mixed-Precision:	0
+Soln-Defaults.ElimDom-Behav-All:	1
+Soln-Defaults.ElimDom-Mixed-Type:	1
+Soln-Defaults.Efg-Interactive-Solns-All:	0
+Soln-Defaults.Nfg-ElimDom-Depth:	0
+Soln-Defaults.ElimDom-Method:	1
 Soln-Defaults.Efg-Mark-Subgames:	0
+Soln-Defaults.Nfg-Standard-Precision:	1
+Soln-Defaults.ElimDom-Behav-Conditional:	0
+Soln-Defaults.Nfg-Standard-Type:	0
+Soln-Defaults.ElimDom-Behav-Type:	0
+Soln-Defaults.Nfg-Standard-Num:	2
 Soln-Defaults.ElimDom-Type:	0
-Soln-Defaults.ElimDom-Method:	0
+Soln-Defaults.Efg-Standard-Type:	0
+Soln-Defaults.Efg-Interactive-Solns:	0
+Soln-Defaults.Efg-ElimDom-Type:	0
+Soln-Defaults.ElimDom-All:	1
+Soln-Defaults.ElimDom-Mixed-Method:	1
 Soln-Defaults.Efg-ElimDom-Depth:	0
-Soln-Defaults.Nfg-Standard-Num:	0
-NfgAccelerators.Num-Accells:	0
+Soln-Defaults.Efg-Standard-Num:	0
+Install.Root-Dir:	/export/home/rdm/
+Install.Help-Dir:	/export/home/rdm/gambit/html
+Gambit.file3:	/export/home/rdm/gambit/efg/bcp2.efg
+Gambit.Node-Below-Font:	12 74 90 90 0
+Gambit.Player-Color-4:	0
+Gambit.Nfg-Data-Font:	12 74 90 90 56
+Gambit.Nfg-Decimals:	4
+Gambit.NFOutcome-Display:	0
+Gambit.Node-Below-Label:	4
+Gambit.Cursor-Color:	10
+Gambit.file1:	loopback.nfg
+Gambit.Node-Above-Label:	1
+Gambit.Branch-Length:	60
+Gambit.file4:	/export/home/rdm/gambit/sources/untitled.nfg
+Gambit.Node-Right-Font:	12 74 90 90 0
+Gambit.Flashing-Cursor:	1
+Gambit.Root-Reachable:	1
+Gambit.Output-Precision:	5
+Gambit.Fork-Length:	60
+Gambit.Outcome-Length:	50
+Gambit.Player-Color-1:	5
+Gambit.Node-Right-Label:	1
+Gambit.Y-Spacing:	42
+Gambit.Branch-Above-Font:	12 74 90 90 0
+Gambit.Branch-Below-Label:	3
+Gambit.Branch-Above-Label:	1
+Gambit.Player-Color-2:	3
+Gambit.file5:	my_2-4.efg
+Gambit.Branch-Below-Font:	12 74 90 90 0
+Gambit.Node-Above-Font:	12 74 90 90 0
+Gambit.Player-Color-3:	1
+Gambit.file2:	/export/home/rdm/gambit/efg/poker.efg
+Gambit.Chance-Color:	0
+Gambit.Show-Infosets:	2
+Gambit.Num-Player-Colors:	4
+Gambit.Gambit-Version:	96
+Gambit.Node-Length:	60
+Gambit.Color-Outcomes:	1
+Mixed-Soln-Show.Perfect:	1
+Mixed-Soln-Show.Equ Values:	1
+Mixed-Soln-Show.QRE Lambda:	1
+Mixed-Soln-Show.Zero Prob:	1
+Mixed-Soln-Show.Proper:	1
+Mixed-Soln-Show.Nash:	1
+Mixed-Soln-Show.Liap Value:	1
+Mixed-Soln-Show.QRE Value:	1
+Mixed-Soln-Show.Creator:	1
+Mixed-Soln-Show.Update Dynamically:	1
+Behav-Soln-Show.Equ Values:	1
+Behav-Soln-Show.QRE Lambda:	1
+Behav-Soln-Show.Nash:	1
+Behav-Soln-Show.Sequential:	1
+Behav-Soln-Show.QRE Value:	0
+Behav-Soln-Show.Update Dynamically:	1
+Behav-Soln-Show.Liap Value:	0
+Behav-Soln-Show.SubgPerf:	1
+Behav-Soln-Show.Creator:	1
+SpreadSheet3D.Fit-Text-Vert:	1
+SpreadSheet3D.SpreadSheet3D-Version:	2
+SpreadSheet3D.Col-Dim-Char:	1
+SpreadSheet3D.Use-GText:	1
+SpreadSheet3D.Default-Column-Width:	6
+SpreadSheet3D.Data-Font:	11 75 90 90 0
+SpreadSheet3D.Fit-Text-Horiz:	1
+SpreadSheet3D.Row-Height:	30
+SpreadSheet3D.Label-Font:	12 75 90 90 0
+SpreadSheet3D.Show-Labels:	0
+Algorithm Parmas.QreGrid-delp1:	0.05
+Algorithm Params.QreGrid-startOption:	0
+Algorithm Params.QreGrid-tol1:	0.05
+Algorithm Params.Simpdiv-leashLength:	0
+Algorithm Params.QreGrid-tol2:	0.002
+Algorithm Params.Qre-minLam:	.001
+Algorithm Params.QreGrid-minLam:	0.001
+Algorithm Params.QreGrid-delLam:	0.01
+Algorithm Params.QreGrid-multiGrid:	1
+Algorithm Params.QreGrid-delp1:	0.1
+Algorithm Params.Qre-maxLam:	500
+Algorithm Params.StopAfter:	0
+Algorithm Params.QreGrid-delp2:	0.002
+Algorithm Params.Qre-startOption:	0
+Algorithm Params.Qre-delLam:	.02
+Algorithm Params.Simpdiv-nRestarts:	16
+Algorithm Params.Liap-nTries:	0
+Algorithm Params.Pxi-Plot-Type:	0
+Algorithm Params.Liap-accuracy:	8
+Algorithm Params.Run-Pxi:	1
+Algorithm Params.Precision:	0
+Algorithm Params.Qre-accuracy:	8
+Algorithm Params.QreGrid-maxLam:	500
+Algorithm Params.Pxi-Command:	/export/home/rdm/gambit/bin/pxi_motif_Linux

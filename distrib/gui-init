@@ -16,6 +16,8 @@ if ($status) then
 	echo "Install.Root-Dir:       " $gambit_install_dir >> ~/.gambitrc
 	echo Setting the local help dir to : $gambit_install_dir/doc
 	echo "Install.Help-Dir:       " $gambit_install_dir/doc >> ~/.gambitrc
+	echo Setting the pxi command : $gambit_install_dir/bin/pxi
+	echo "Algorithm Params.Pxi-Command:     " $gambit_install_dir/bin/pxi >> ~/.gambitrc
 else
 	echo Local dir variables already set, no changes made
 endif

@@ -36,6 +36,7 @@ gambit:
 
 	if [ ! -d ../bin ]; then mkdir ../bin; fi 
 	if [ ! -d ../misc ]; then mkdir ../misc; fi 
+	if [ ! -d ../doc ]; then mkdir ../doc; fi 
 
 	@# Make sure gui-init and gambit_setup are executable.
 	chmod +x ./gui-init ./gambit_setup
@@ -62,8 +63,8 @@ gambit:
 	make -f $(GMAKEFILE) gui GUI=$(GUI) SYSNAME=$(SYSNAME); \
 	mv gui_$(GUI)_$(SYSNAME) ../bin/gambit_$(GUI)_$(SYSNAME); \
 	strip ../bin/gambit_$(GUI)_$(SYSNAME); \
-	cp $(WXWINDIR)/bin/wxhelp_$(SYSNAME)_$(GUI) ../bin/wxhelp_$(GUI)_$(SYSNAME); \
-	cp $(WXWINDIR)/bin/gambit.xlp ../bin/gambit.xlp; \
+	cp $(WXWINDIR)/bin/wxhelp2_$(SYSNAME)_$(GUI) ../bin/wxhelp2_$(GUI)_$(SYSNAME); \
+#	cp $(WXWINDIR)/bin/gambit.xlp ../bin/gambit.xlp; \
 	cd ../distrib
 
 	@# Copy the setup and initialization files to ../misc
@@ -85,13 +86,14 @@ gambit:
 	  ./bin/*.gcl \
 	  ./bin/gcl.man \
 	  ./bin/gambit_$(GUI)_$(SYSNAME) \
-	  ./bin/wxhelp_$(GUI)_$(SYSNAME) \
+	  ./bin/wxhelp2_$(GUI)_$(SYSNAME) \
 	  ./bin/gambit.xlp \
 	  ./efg/*.efg \
 	  ./nfg/*.nfg \
 	  ./gcl/*.gcl \
 	  ./misc/.gambitrc \
 	  ./misc/* \
+	  ./doc/html/* \
 	  ./gambit_setup
 
 	mv ../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
@@ -133,6 +135,7 @@ winsrc:
 	if [ -f gwinsrc.zip ]; then rm gwinsrc.zip; fi; \
 	zip -l gwinsrc.zip $(SRCDIR)/*.yy \
 	$(SRCDIR)/*.h $(SRCDIR)/*.cc $(SRCDIR)/*.imp \
+	$(SRCDIR)/*.mak $(SRCDIR)/*.cfg \
 	$(WSRCDIR)/*.h $(WSRCDIR)/*.cc $(WSRCDIR)/*.def \
 	$(WSRCDIR)/res/*.rc* \
 	$(WSRCDIR)/bison.cc $(WSRCDIR)/bison.h \
@@ -141,8 +144,24 @@ winsrc:
 	$(WSRCDIR)/res/*.ico $(WSRCDIR)/res/*.bmp \
 	$(WSRCDIR)/obj bisondos/bison.exe 
 
-#	cd ..; ftp_put gwinsrc.zip
-	mv ../gwinsrc.zip $(FTPDIR)
+	cd ..; ftp_put gwinsrc.zip
+#	mv ../gwinsrc.zip $(FTPDIR)
+
+winmisc:
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating gambit miscellaneous files on rdms machine
+	@echo ------------------------------------------------------
+	@echo
+
+
+	cd ..; \
+	if [ -f gwinmisc.zip ]; then rm gwinmisc.zip; fi; \
+	zip -l gwinmisc.zip efg/*.efg nfg/*.nfg gcl/*.gcl \
+	gcl/*.efg gcl/*.nfg  gcl/*.agg gcl/*.prm misc/*.* \
+	bin/gclini.gcl bin/stdudfs.gcl bin/gcl.man
+
+	cd ..; ftp_put gwinmisc.zip
 
 wxwin:
 	@echo
