@@ -53,7 +53,7 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
   
   NewLine();
 
-  m_description = new wxText(this, 0, "Using algorithm");
+  m_description = new wxText(this, 0, "Using algorithm", "", -1, -1, 250, -1);
   m_description->Enable(FALSE);
 
   NewLine();
