@@ -223,7 +223,7 @@ void Tableau<gRational>::MySolveColumn(int in_col, gVector<gRational> &out)
 
 void Tableau<gRational>::GetColumn(int col, gVector<gRational> &out) const
 {
-  basis.GetColumn(col,out);
+  GetColumn(col,out);
   if(col>=0) out*=gRational(totdenom);
 
 }
