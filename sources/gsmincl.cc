@@ -6,6 +6,51 @@
 
 #include "gsmincl.h"
 
+gString NameID(int i)
+{
+	switch(i)
+	{
+	case id_USER:
+		return "User"; 
+	case id_GOBIT: // GobitSolve
+		return "Gobit"; 
+	case id_LIAP: // LiapSolve
+		return "Liap"; 
+	case id_LEMKE: // LcpSolve
+		return "LCP(Lemke)"; 
+	case id_ZSUM: // LpSolve
+		return "LP(ZSum)"; 
+	case id_ENUM: // EnumMixedSolve
+		return "Enum"; 
+	case id_GOBITGRID: // GobitGridSOlve
+		return "GobitGrid"; 
+	case id_SIMPDIV:  // SimpDivSolve
+		return "SimpDiv"; 
+	case id_PURENASH: // EnumPureSolve
+		return "PureNash"; 
+	case id_LEMKESUB: // LcpSolve
+		return "LCP(Lemke*)"; 
+	case id_SEQFORM: // LcpSolve
+		return "LCP(Seq)"; 
+	case id_SIMPDIVSUB: // SimpDivSolve
+		return "SimpDiv*"; 
+	case id_ZSUMSUB: // LpSolve
+		return "LP(ZSum*)"; 
+	case id_PURENASHSUB: // EnumPureSolve
+		return "PureNash*"; 
+	case id_SEQFORMSUB: // LcpSolve
+		return "LCP(Seq*)"; 
+	case id_ELIAPSUB:
+		return "EFLiap*"; 
+	case id_NLIAPSUB:
+		return "NFLiap*"; 
+	case id_ENUMSUB:
+		return "Enum*"; 
+	default:
+		return "ERROR" ;
+	}
+}
+
 
 void DisplayID(gOutput& o, int i)
 {
@@ -52,18 +97,22 @@ void DisplayID(gOutput& o, int i)
   }
 }
 
+gString NameTriState(int i)
+{
+	switch(i)
+	{
+	case T_DONTKNOW:
+		return "DK"; 
+	case T_YES:
+		return "Y"; 
+	case T_NO:
+		return "N"; 
+	default:
+		return "ERROR";
+	}
+}
 
 void DisplayTriState(gOutput& o, int i)
 {
-  switch(i)
-  {
-  case T_DONTKNOW:
-    o << "DK"; break;
-  case T_YES:
-    o << "Y"; break;
-  case T_NO:
-    o << "N"; break;
-  default:
-    o << "ERROR"; break;
-  }
+o<<NameTriState(i);
 }

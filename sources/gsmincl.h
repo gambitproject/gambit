@@ -58,7 +58,8 @@ typedef enum
 #define T_NO 0
 
 #include "gambitio.h"
-
+gString NameID(int i);
+gString NameTriState(int i);
 void DisplayID(gOutput& o, int i);
 void DisplayTriState(gOutput& o, int i);
 
