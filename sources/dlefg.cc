@@ -599,11 +599,17 @@ void dialogActionProbs::OnNext(void)
 //                    dialogEfgPayoffs: Member functions
 //=========================================================================
 
+int dialogEfgPayoffs::s_payoffsPerDialog = 8;
+
 dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 				   bool p_solutions, wxWindow *p_parent)
   : wxDialogBox(p_parent, "Change Payoffs", TRUE),
-    m_outcome(p_outcome), m_efg(p_efg), m_payoffs(p_efg.NumPlayers())
+    m_outcome(p_outcome), m_efg(p_efg), m_pageNumber(0),
+    m_payoffs(p_efg.NumPlayers())
 {
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
+    m_payoffs[pl] = m_efg.Payoff(p_outcome, pl);
+
   (void) new wxMessage(this, "Change payoffs for outcome:");
   NewLine();
 
@@ -619,15 +625,14 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
     NewLine();
   }
 
-  m_outcomePayoffs = new wxText *[m_efg.NumPlayers()];
+  m_outcomePayoffs = new wxNumberItem *[m_efg.NumPlayers()];
 
-  const int ENTRIES_PER_ROW = 3;
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_outcomePayoffs[pl - 1] = new wxText(this, 0, "");
-    m_outcomePayoffs[pl - 1]->SetValue(ToText(m_efg.Payoff(p_outcome, pl)));
-    if (pl % ENTRIES_PER_ROW == 0)
-      NewLine();
+  for (int pl = 1; pl <= gmin(m_efg.NumPlayers(),
+			      s_payoffsPerDialog); pl++) {
+    m_outcomePayoffs[pl-1] = new wxNumberItem(this,
+					      ToText(pl) + "  ",
+					      m_payoffs[pl]);
+    NewLine();
   }
 
   m_outcomePayoffs[0]->SetFocus();
@@ -636,12 +641,22 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 #endif
 
   NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+  if (m_efg.NumPlayers() >= s_payoffsPerDialog) {
+    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
+					"<< Back");
+    m_backButton->SetClientData((char *) this);
+    m_backButton->Enable(FALSE);
+    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
+					"Next >>");
+    m_nextButton->SetClientData((char *) this);
+  }
+
+  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  m_okButton->SetClientData((char *) this);
+  m_okButton->SetDefault();
+  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_cancelButton->SetClientData((char *) this);
 
   Fit();
   Show(TRUE);
@@ -649,11 +664,12 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 
 void dialogEfgPayoffs::OnOK(void)
 {
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
-    FromText(m_outcomePayoffs[pl - 1]->GetValue(), m_payoffs[pl]);
-  m_name = m_outcomeName->GetValue();
-
   m_completed = wxOK;
+  int entry = 0;
+  for (int pl = m_pageNumber * s_payoffsPerDialog;
+       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
+		 m_efg.NumPlayers()); pl++, entry++)
+    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
   Show(FALSE);
 }
 
@@ -668,6 +684,67 @@ Bool dialogEfgPayoffs::OnClose(void)
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
+}
+
+void dialogEfgPayoffs::OnBack(void)
+{
+  int entry = 0;
+  for (int pl = m_pageNumber * s_payoffsPerDialog;
+       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
+		 m_efg.NumPlayers()); pl++, entry++)
+    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
+
+  m_pageNumber--;
+  entry = 0;
+  for (int pl = m_pageNumber * s_payoffsPerDialog;
+       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
+    m_outcomePayoffs[entry]->Show(FALSE);
+    m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
+    m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
+    m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
+  }
+  m_backButton->Show(FALSE);
+  m_nextButton->Show(FALSE);
+  m_okButton->Show(FALSE);
+  m_cancelButton->Show(FALSE);
+  
+  // This gyration ensures the tabbing order remains the same
+  m_cancelButton->Show(TRUE);
+  m_okButton->Show(TRUE);
+  m_nextButton->Show(TRUE);
+  m_backButton->Show(TRUE);
+  for (entry = s_payoffsPerDialog - 1; entry >= 0; entry--)
+    m_outcomePayoffs[entry]->Show(TRUE);
+  
+  m_outcomePayoffs[0]->SetFocus();
+  m_backButton->Enable(m_pageNumber > 0);
+  m_nextButton->Enable(TRUE);
+}
+
+void dialogEfgPayoffs::OnNext(void)
+{
+  int entry = 0;
+  for (int pl = m_pageNumber * s_payoffsPerDialog;
+       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++)
+    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
+
+  m_pageNumber++;
+  entry = 0;
+  for (int pl = m_pageNumber * s_payoffsPerDialog;
+       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
+    if (pl < m_efg.NumPlayers()) {
+      m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
+      m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
+      m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
+    }
+    else
+      m_outcomePayoffs[entry]->Show(FALSE);
+  }
+
+  m_outcomePayoffs[0]->SetFocus();
+  m_backButton->Enable(TRUE);
+  m_nextButton->Enable((m_pageNumber + 1) * s_payoffsPerDialog <=
+		       m_efg.NumPlayers());
 }
 
 //=========================================================================
