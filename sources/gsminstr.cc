@@ -414,6 +414,9 @@ Portion *gclConditional::Evaluate(void)
   Portion *guardval = guard->Evaluate();
   if (guardval->Spec().Type == porERROR)
     return guardval;
+  if (guardval->Spec().Type != porBOOL ||
+      guardval->Spec().ListDepth > 0)
+    return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
 
   Portion *ret;
   if (((BoolPortion *) guardval)->Value())
@@ -442,6 +445,9 @@ Portion *gclWhileExpr::Evaluate(void)
     Portion *guardval = guard->Evaluate();
     if (guardval->Spec().Type == porERROR)
       return guardval;
+    if (guardval->Spec().Type != porBOOL ||
+	guardval->Spec().ListDepth > 0)
+      return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
 
     if (!((BoolPortion *) guardval)->Value())  {
       delete guardval;
@@ -482,13 +488,18 @@ Portion *gclForExpr::Evaluate(void)
 
   while (1)   {
     Portion *guardval = guard->Evaluate();
+
+    if (guardval->Spec().Type == porERROR)
+      return guardval;
+
+    if (guardval->Spec().Type != porBOOL ||
+	guardval->Spec().ListDepth > 0)
+      return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
+
     if (!((BoolPortion *) guardval)->Value())  {
       delete guardval;
       return ret;
     }
-
-    if (guardval->Spec().Type == porERROR)
-      return guardval;
 
     delete guardval;
     delete ret;
