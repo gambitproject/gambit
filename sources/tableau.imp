@@ -5,64 +5,12 @@
 //
 
 #include "tableau.h"
+#include "tableau2.imp"
 
-//
-// Tableau method definitions
-//
+// ---------------------------------------------------------------------------
+//                BaseTableau method definitions
+// ---------------------------------------------------------------------------
 
-// Constructors and Destructor
-
-template <class T>
-Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
-  : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
-    basis(A),  B(basis),
-    solution(A.MinRow(),A.MaxRow()) 
-{
-    // These are the values recommended by Murtagh (1981) for 15 digit 
-    // accuracy in LP problems 
-  gEpsilon(eps1,5);
-  gEpsilon(eps2);
-//  gout << "\nA = " << A << "\ndim A: " << A.MinRow() << " " << A.MaxRow();
-//  gout << " " << A.MinCol() << " " << A.MaxCol();
-//  gout << "\nbasis = ";
-//  basis.Dump(gout);
-//  B.refactor(A, basis.label);
-  B.solve(b, solution);
-};
-
-
-template <class T> 
-Tableau<T>::Tableau(const Tableau<T> &orig) 
-  : npivots(0), eps1(orig.eps1), eps2(orig.eps2), tmpcol(orig.tmpcol),
-    A(orig.A),b(orig.b), basis(orig.basis), B(orig.B, basis),
-    solution(orig.solution) 
-{ }
-
-template <class T> Tableau<T>::~Tableau()
-{ }
-
-template <class T>
-Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
-{
-//  assert( A==orig.A );
-  if(this!= &orig) {
-    tmpcol = orig.tmpcol;
-    A = orig.A;
-    b = orig.b;
-    basis= orig.basis;
-    B.Copy( orig.B, basis );
-    solution= orig.solution;
-    npivots = orig.npivots;
-  }
-  return *this;
-}
-
-//
-// checking functions
-//
-
-// template <class T> BaseTableau<T>::~BaseTableau()
-// { }
 
 template <class T>
 bool BaseTableau<T>::ColIndex(int x) const
@@ -83,215 +31,121 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
   Pivot(Find(-col),-outlabel);
 }
 
-template <class T>
-int Tableau<T>::MinRow() const { return A->MinRow(); }
+
+// ---------------------------------------------------------------------------
+//            TableauInterface method definitions
+// ---------------------------------------------------------------------------
+
+// Constructors and Destructor
+ 
+template <class T> 
+TableauInterface<T>::TableauInterface(const gMatrix<T> &A, const gVector<T> &b)
+  : A(&A), b(&b), basis(A), solution(A.MinRow(),A.MaxRow()), npivots(0)
+{ 
+  // These are the values recommended by Murtagh (1981) for 15 digit 
+  // accuracy in LP problems 
+  // Note: for gRational, eps1 and eps2 resolve to 0
+  gEpsilon(eps1,5);
+  gEpsilon(eps2);
+}
 
 template <class T>
-int Tableau<T>::MaxRow() const { return A->MaxRow(); }
+TableauInterface<T>::TableauInterface(const TableauInterface<T> &orig) 
+  : A(orig.A), b(orig.b), basis(orig.basis), solution(orig.solution),
+    npivots(orig.npivots), eps1(orig.eps1), eps2(orig.eps2)
+{ }
 
 template <class T>
-int Tableau<T>::MinCol() const { return A->MinCol(); }
+TableauInterface<T>::~TableauInterface()
+{ }
 
 template <class T>
-int Tableau<T>::MaxCol() const { return A->MaxCol(); }
+TableauInterface<T>& TableauInterface<T>::operator=(const TableauInterface<T> &orig)
+{
+  if(this!= &orig) {
+    A = orig.A;
+    b = orig.b;
+    basis= orig.basis;
+    solution= orig.solution;
+    npivots = orig.npivots;
+  }
+  return *this;
+}
+
+// getting information
 
 template <class T>
-const gMatrix<T> & Tableau<T>::Get_A(void) const {return *A; }
+int TableauInterface<T>::MinRow() const { return A->MinRow(); }
 
 template <class T>
-const gVector<T> & Tableau<T>::Get_b(void) const {return *b;}
+int TableauInterface<T>::MaxRow() const { return A->MaxRow(); }
 
 template <class T>
-bool Tableau<T>::Member(int i) const
+int TableauInterface<T>::MinCol() const { return A->MinCol(); }
+
+template <class T>
+int TableauInterface<T>::MaxCol() const { return A->MaxCol(); }
+
+template <class T>
+const gMatrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
+
+template <class T>
+const gVector<T> & TableauInterface<T>::Get_b(void) const {return *b;}
+
+template <class T>
+bool TableauInterface<T>::Member(int i) const
 { return basis.Member(i);}
 
 template <class T>
-int Tableau<T>::Label(int i) const
+int TableauInterface<T>::Label(int i) const
 { return basis.Label(i);}
 
 template <class T>
-int Tableau<T>::Find(int i) const
+int TableauInterface<T>::Find(int i) const
 { return basis.Find(i);}
 
-
-//
-// pivoting operations
-//
-
 template <class T>
-int Tableau<T>::CanPivot(int outlabel, int col)
-{
-//  gVector<T> tmpcol(MinRow(),MaxRow());
-//  gout << "\ndim tmpcol = " << tmpcol.First() << " " << tmpcol.Last();
-//  gout << "\ntmpcol = " << tmpcol;
-  SolveColumn(col,tmpcol);
-  T val = tmpcol[basis.Find(outlabel)];
-  if(val <=eps2 && val >= -eps2) return 0;
-  return 1;  
-}
-
-template <class T>
-void Tableau<T>::Pivot(int outrow,int col)
-{
-  assert( RowIndex(outrow) );
-  assert( ValidIndex(col) );
-  basis.Pivot(outrow,col);
-
-  /*
-  if( col<0 )
-    { tmpcol=(T)0; tmpcol[-col]=(T)1; }
-  else
-    A->GetColumn(col, tmpcol);
-  B.update(outrow, tmpcol);
-  */
-  
-  B.update(outrow, col);
-  B.solve(*b, solution);
-  npivots++;
-}
-
-template <class T> long Tableau<T>::NumPivots() const
+long TableauInterface<T>::NumPivots() const
 { return npivots; }
 
-template <class T> long &Tableau<T>::NumPivots()
+template <class T>
+long &TableauInterface<T>::NumPivots()
 { return npivots; }
 
-template <class T> void Tableau<T>::Mark(int label)
+template <class T>
+void TableauInterface<T>::Mark(int label)
 {basis.Mark(label);}
 
-template <class T> void Tableau<T>::UnMark(int label)
+template <class T>
+void TableauInterface<T>::UnMark(int label)
 {basis.UnMark(label);}
 
-template <class T> bool Tableau<T>::IsBlocked(int label) const
+template <class T>
+bool TableauInterface<T>::IsBlocked(int label) const
 {
   return basis.IsBlocked(label);
 }
 
-//
-// raw Tableau functions
-//
-
-template <class T> void Tableau<T>::Refactor()
-{
-  B.refactor();
-  //** is re-solve necessary here?
-  B.solve(*b, solution);
-}
-
 template <class T>
-void Tableau<T>::BasisVector(gVector<T> &out) const
+void TableauInterface<T>::BasisVector(gVector<T> &out) const
 {
   out= solution;
 }
 
 template <class T>
-void Tableau<T>::SolveColumn(int col, gVector<T> &out)
-{
-//  gout << "\nTableau<T>::SolveColumn  " << MinRow() << " " << MaxRow(); 
-//  gout << " col: " << col;
-  gVector<T> tmpcol2(MinRow(),MaxRow());
-  basis.GetColumn(col,tmpcol2);
-/*
-  if( col<0 ) {
-    tmpcol2= (T)0;
-    tmpcol2[-col]=1;
-  }
-  else
-    A->GetColumn(col,tmpcol2);
-*/
-  B.solve(tmpcol2,out);
-}
-
-
-template <class T>
-void Tableau<T>::GetColumn(int col, gVector<T> &out) const
+void TableauInterface<T>::GetColumn(int col, gVector<T> &out) const
 {
   basis.GetColumn(col,out);
 }
 
-
 template <class T>
-void Tableau<T>::SetConst(const gVector<T> &bnew)
-{
-  assert(bnew.First()==b->First() && bnew.Last()==b->Last());
-  b=&bnew;
-  B.solve(*b, solution);
-}
-
-
-template <class T>
-void Tableau<T>::SetBasis(const Basis<T> &in)
-{
-  basis= in;
-  B.refactor();
-  B.solve(*b, solution);
-}
-
-
-template <class T>
-void Tableau<T>::GetBasis(Basis<T> &out) const
+void TableauInterface<T>::GetBasis(Basis<T> &out) const
 {
   out= basis;
 }
 
-// miscellaneous functions
-
-template <class T> bool Tableau<T>::EqZero(T x) const
-{ 
-  return (LeZero(x) && GeZero(x));
-}
-
-template <class T> bool Tableau<T>::LtZero(T x) const
-{ 
-  return !GeZero(x);
-}
-
-template <class T> bool Tableau<T>::GtZero(T x) const
-{ 
-  return !LeZero(x);
-}
-
-template <class T> bool Tableau<T>::LeZero(T x) const
-{ 
-  if(x <=eps2) return 1;
-  return 0;
-}
-
-template <class T> bool Tableau<T>::GeZero(T x) const
-{ 
-  if(x >= -eps2) return 1;
-  return 0;
-}
-
-template <class T> T Tableau<T>::Epsilon(int i) const
-{
-  assert(i==1 || i==2);
-  if(i==1) return eps1;
-  return eps2;
-}
-
-template <class T> bool Tableau<T>::IsFeasible()
-{
-  B.solve(*b, solution);
-  for(int i=solution.First();i<=solution.Last();i++)
-    if(solution[i]>=eps2) return false;
-  return true;
-}
-
-template <class T> bool Tableau<T>::IsLexMin()
-{
-  int i,j;
-  for(i=MinRow();i<=MaxRow();i++)
-    if(EqZero(solution[i]))
-      for(j=-MaxRow();j<Label(i);j++) if(j!=0){
-	SolveColumn(j,tmpcol);
-	if(LtZero(tmpcol[i]))
-	  return 0;
-      }
-  return 1;
-}
-
-template <class T> BFS<T> Tableau<T>::GetBFS() const
+template <class T>
+BFS<T> TableauInterface<T>::GetBFS() const
 {
   BFS<T> cbfs((T) 0);
   for(int i=MinCol();i<=MaxCol();i++) {
@@ -301,7 +155,8 @@ template <class T> BFS<T> Tableau<T>::GetBFS() const
   return cbfs;
 }
 
-template <class T> BFS<T> Tableau<T>::GetBFS1() const
+template <class T>
+BFS<T> TableauInterface<T>::GetBFS1() const
 {
   BFS<T> cbfs((T) 0);
 int i;
@@ -316,39 +171,217 @@ int i;
   return cbfs;
 }
 
-template <class T> gOutput &operator<<(gOutput &to, const Tableau<T> &v)
-{
-  v.Dump(to); return to;
-}
+template <class T>
+void TableauInterface<T>::Dump(gOutput &to) const
+{ basis.Dump(to);to << "\n";solution.Dump(to);}
 
 template <class T>
-void Tableau<T>::Dump(gOutput &to) const
-{ basis.Dump(to);to << "\n";solution.Dump(to); }
-
-template <class T>
-void Tableau<T>::BigDump(gOutput &to)
+void TableauInterface<T>::BigDump(gOutput &to)
 { 
   to << "\nBasis:\n";
-  Dump(to);
-  gMatrix<T> AA(*A);
-  gVector<T> bb(*b);
-  for(int j=AA.MinCol();j<=AA.MaxCol();j++) {
+  basis.Dump(to);
+  gMatrix<T> AA(MinRow(),MaxRow(),MinCol(),MaxCol()+(*A).NumRows());
+  gVector<T> bb(MinRow(), MaxRow());
+
+  BasisVector(bb);
+  to << "\nBasisVector:\n" << bb;
+
+  for(int j=MinCol();j<=MaxCol();j++) {
     SolveColumn(j, bb);
     for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
       AA(i,j) = bb[i];
   }
+  for(int j=MinRow();j<=MaxRow();j++) {
+    SolveColumn(-j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,MaxCol()+j) = bb[i];
+  }
   to << "\nTableau:\n" << AA;
 }
 
+// miscellaneous functions
+
+template <class T>
+bool TableauInterface<T>::EqZero(T x) const
+{ 
+  return (LeZero(x) && GeZero(x));
+}
+
+template <class T>
+bool TableauInterface<T>::LtZero(T x) const
+{ 
+  return !GeZero(x);
+}
+
+template <class T>
+bool TableauInterface<T>::GtZero(T x) const
+{ 
+  return !LeZero(x);
+}
+
+template <class T>
+bool TableauInterface<T>::LeZero(T x) const
+{ 
+  if(x <=eps2) return 1;
+  return 0;
+}
+
+template <class T>
+bool TableauInterface<T>::GeZero(T x) const
+{ 
+  if(x >= -eps2) return 1;
+  return 0;
+}
+
+template <class T>
+T TableauInterface<T>::Epsilon(int i) const
+{
+  assert(i==1 || i==2);
+  if(i==1) return eps1;
+  return eps2;
+}
+
+// ---------------------------------------------------------------------------
+//                   Tableau<double> method definitions
+// ---------------------------------------------------------------------------
+
+// Constructors and Destructor
+ 
+Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
+  : TableauInterface(A,b), B(basis), tmpcol(b.First(),b.Last())
+{
+  Solve(b, solution);
+};
+
+
+Tableau<double>::Tableau(const Tableau<double> &orig) 
+  : TableauInterface(orig), B(orig.B,basis), tmpcol(orig.tmpcol)
+{ }
+
+Tableau<double>::~Tableau()
+{ }
+
+Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
+{
+  TableauInterface<double>::operator=(orig);
+  if(this!= &orig) {
+    B.Copy(orig.B,basis);
+    tmpcol = orig.tmpcol;
+  }
+  return *this;
+}
 
 //
-// LP Tableau member definitions 
-// 
+// pivoting operations
+//
 
+int Tableau<double>::CanPivot(int outlabel, int col)
+{
+  SolveColumn(col,tmpcol);
+  double val = tmpcol[basis.Find(outlabel)];
+  if(val <=eps2 && val >= -eps2) return 0;
+  return 1;  
+}
 
-// template <class T> LPTableau<T>::LPTableau(void)
-// : Tableau() , 
-// { }
+void Tableau<double>::Pivot(int outrow,int col)
+{
+  assert( RowIndex(outrow) );
+  assert( ValidIndex(col) );
+
+  // int outlabel = Label(outrow);
+  // gout << "\noutrow:" << outrow;
+  // gout << " outlabel: " << outlabel;
+  // gout << " inlabel: " << col;
+  // BigDump(gout);
+  basis.Pivot(outrow,col);
+  
+  B.update(outrow, col);
+  Solve(*b, solution);
+  npivots++;
+  // BigDump(gout);
+}
+
+void Tableau<double>::SolveColumn(int col, gVector<double> &out)
+{
+  //** can we use tmpcol here, instead of allocating new vector?
+  gVector<double> tmpcol2(MinRow(),MaxRow());
+  basis.GetColumn(col,tmpcol2);
+  Solve(tmpcol2,out);
+}
+
+//
+// raw Tableau functions
+//
+
+void Tableau<double>::Refactor()
+{
+  B.refactor();
+  //** is re-solve necessary here?
+  Solve(*b, solution);
+}
+
+void Tableau<double>::SetRefactor(int n)
+{
+  B.SetRefactor(n);
+}
+
+void Tableau<double>::SetConst(const gVector<double> &bnew)
+{
+  assert(bnew.First()==b->First() && bnew.Last()==b->Last());
+  b=&bnew;
+  Solve(*b, solution);
+}
+
+//** this function is not currently used.  Drop it?
+void Tableau<double>::SetBasis(const Basis<double> &in)
+{
+  basis= in;
+  B.refactor();
+  Solve(*b, solution);
+}
+
+void Tableau<double>::Solve(const gVector<double> &b, gVector<double> &x)
+{
+  B.solve(b,x);
+}
+
+void Tableau<double>::SolveT(const gVector<double> &c, gVector<double> &y)
+{
+  B.solveT(c,y);
+  //** gout << "\nTableau<double>::SolveT(), y: " << y;
+  //   gout << "\nc: " << c;
+}
+
+bool Tableau<double>::IsFeasible()
+{
+  //** is it really necessary to solve first here?
+  Solve(*b, solution);
+  for(int i=solution.First();i<=solution.Last();i++)
+    if(solution[i]>=eps2) return false;
+  return true;
+}
+
+bool Tableau<double>::IsLexMin()
+{
+  int i,j;
+  for(i=MinRow();i<=MaxRow();i++)
+    if(EqZero(solution[i]))
+      for(j=-MaxRow();j<Label(i);j++) if(j!=0){
+	SolveColumn(j,tmpcol);
+	if(LtZero(tmpcol[i]))
+	  return 0;
+      }
+  return 1;
+}
+
+gOutput &operator<<(gOutput &to, const Tableau<double> &v)
+{
+  v.Dump(to); return to;
+}
+
+// ---------------------------------------------------------------------------
+//                   LPTableau member definitions 
+// ---------------------------------------------------------------------------
 
 
 template <class T>
@@ -357,8 +390,9 @@ LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
     unitcost(A.MinRow(),A.MaxRow()),
     cost(A.MinCol(),A.MaxCol())
 {
-//  B.refactor(A, basis.label);
-  B.solve(b, solution);
+  // the following is already done in Tableau constructor.  Should be able to delete.
+  //  B.refactor(A, basis.label);
+  //  Solve(b, solution);
 };
 
 
@@ -368,14 +402,14 @@ LPTableau<T>::LPTableau(const LPTableau<T> &orig)
     cost(orig.cost)
 { }
 
-template <class T> LPTableau<T>::~LPTableau()
+template <class T>
+LPTableau<T>::~LPTableau()
 { }
 
 
 template <class T>
 LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 {
-//  assert( A==orig.A );
   Tableau<T>::operator=(orig);
   if(this!= &orig) {
     dual=orig.dual;
@@ -394,16 +428,22 @@ void LPTableau<T>::SetCost(const gVector<T>& c)
   if(cost.Check(c)) {
     unitcost= (T)0;
     cost= c;
+    //** added for gRational
+    Refactor();
     SolveDual();
     return;
   }
   assert(c.First()==cost.First());
+  gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
+  gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
+  gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
   assert(c.Last()==(cost.Last()+unitcost.Length()));
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
     unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
-
+  //** added for gRational
+  Refactor();
   SolveDual();
 }
 
@@ -423,19 +463,22 @@ gVector<T> LPTableau<T>::GetCost(void) const
   return cost; 
 }
 
+
 template <class T>
 gVector<T> LPTableau<T>::GetUnitCost(void) const
 {
   return unitcost; 
 }
 
+
 template <class T>
 T LPTableau<T>::TotalCost()
 {
-//  gVector<T> tmpcol(MinRow(),MaxRow());
+  gVector<T> tmpcol(MinRow(),MaxRow());
   basis.BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
+
 
 template <class T>
 void LPTableau<T>::DualVector(gVector<T> &L) const
@@ -446,17 +489,18 @@ void LPTableau<T>::DualVector(gVector<T> &L) const
 template <class T>
 T LPTableau<T>::RelativeCost(int col) const
 {
+  gVector<T> tmpcol(MinRow(),MaxRow());
   if( col<0 ) {
     return unitcost[-col] - dual[-col];
   }
   else {
-//      gVector<T> tmpcol(MinRow(),MaxRow());
-//    A->GetColumn(col, (gArray<T> &)tmpcol);
-    basis.GetColumn(col, (gVector<T> &)tmpcol);
+    GetColumn(col, (gVector<T> &)tmpcol);
     return cost[col] - dual*tmpcol;
   }
 }
+
 /*
+
 template <class T>
 void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 				      gVector<T> &relcost) const
@@ -469,20 +513,19 @@ void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 }
 */
 
+
 template <class T>
 void LPTableau<T>::SolveDual()
 {
   gVector<T> tmpcol1(MinRow(),MaxRow());
   basis.BasisSelect(unitcost,cost,tmpcol1);
-  // gout << "\nIn SolveDual() tab = \n";
-  // Dump(gout);
-  // gout << "\n tmpcol1: " << tmpcol1;
-  B.solveT(tmpcol1,dual);
-  // gout << "\n dual: " << dual;
+  SolveT(tmpcol1,dual);
 }
 
-    // Redefined functions
-template <class T> void LPTableau<T>::Refactor()
+// Redefined functions
+
+template <class T>
+void LPTableau<T>::Refactor()
 {
   Tableau<T>::Refactor();
   SolveDual();
@@ -495,29 +538,23 @@ void LPTableau<T>::Pivot(int outrow,int col)
   SolveDual();
 }
 
-    // solve A x = b 
-template <class T>
-void LPTableau<T>::Solve(const gVector<T> &b, gVector<T> &x) const
-{
-  B.solve(b,x);
-}
-
-    // solve y A = c 
-template <class T>
-void LPTableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
-{
-  B.solveT(c,y);
-}
-
 template <class T>
 void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 {
+  gVector<T> tmpcol(MinRow(),MaxRow());
+  // gout << "\nIn LPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
   gList<int> BestSet;
   gArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
+
+  // BigDump(gout);
+  // gout << "\ncost: " << GetCost();
+  // gout << "\nunitcost: " << GetUnitCost() << "\n";
+  // for(i=MinCol();i<=MaxCol();i++) gout << " " << RelativeCost(i);
+  // for(i=MinRow();i<=MaxRow();i++) gout << " " << RelativeCost(-i);
 
   for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)  && !IsBlocked(j)) {
     SolveColumn(j,tmpcol);
@@ -589,15 +626,18 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
       
       tmpcol = (T)0;
       tmpcol[BestSet[i]]=(T)1;
-      B.solveT(tmpcol,tmpdual);
+      // gout << "\ntmpcol, loc 1: " << tmpcol;
+      SolveT(tmpcol,tmpdual);
+      // gout << "\ntmpcol, loc 2: " << tmpcol;
+      // gout << "\ntmpdual, loc 1: " << tmpdual;
       
 /*      if( j<0 )
 	{ tmpcol=(T)0; tmpcol[-j]=(T)1; }
       else
 	A->GetColumn(j,tmpcol);
 */
-      basis.GetColumn(j,tmpcol);      
-      // gout << "\ncol j = " << tmpcol;
+      GetColumn(j,tmpcol);      
+      // gout << "\ncol " << j << ": " << tmpcol;
       a_ij = tmpdual*tmpcol;
       c_j = RelativeCost(j);
       if(EqZero(a_ij)) {
@@ -607,10 +647,11 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
       }
       else {
 	ratio = c_j/a_ij;
+	// gout << " ratio: " << ratio;
 	if(enter<0) 
 	  a_ik = tmpdual[-enter];
 	else {
-	  basis.GetColumn(enter,tmpcol);
+	  GetColumn(enter,tmpcol);
 //	  A->GetColumn(enter,tmpcol);
 	  a_ik = tmpdual*tmpcol;
 	}
@@ -634,7 +675,7 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	      a_ik=tmpdual[-k];
 	    else {
 //	      A->GetColumn(k,tmpcol);
-	      basis.GetColumn(k,tmpcol);
+	      GetColumn(k,tmpcol);
 	      a_ik = tmpdual*tmpcol;
 	    }
 	    c_k = RelativeCost(k);
@@ -665,6 +706,8 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 template <class T>
 bool LPTableau<T>::IsReversePivot(int i, int j)
 {
+  gVector<T> tmpcol(MinRow(),MaxRow());
+
   // first check that pivot preserves primal feasibility
   
   // gout << "\nin IsReversePivot, i= " << i << " j = "<< j;
@@ -720,7 +763,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   gVector<T> tmpdual(MinRow(),MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
-  B.solveT(tmpcol,tmpdual);
+  SolveT(tmpcol,tmpdual);
 
 /*
   if( j<0 )
@@ -728,7 +771,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   else
     A->GetColumn(j,tmpcol);
 */
-    basis.GetColumn(j,tmpcol);
+    GetColumn(j,tmpcol);
   
   // gout << "\ncol j = " << tmpcol;
   a_ij = tmpdual*tmpcol;
@@ -744,7 +787,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
     a_ik = tmpdual[-enter];
   else {
 //    A->GetColumn(enter,tmpcol);
-    basis.GetColumn(enter,tmpcol);
+    GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   c_k = RelativeCost(enter);
@@ -760,7 +803,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //      A->GetColumn(k,tmpcol);
-      basis.GetColumn(k,tmpcol);
+      GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
@@ -789,10 +832,11 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   // gout << "\nin IsDualReversePivot, i= " << i << " j = "<< j;
 
   int k;
+  gVector<T> tmpcol(MinRow(),MaxRow());
   gVector<T> tmpdual(MinRow(),MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
-  B.solveT(tmpcol,tmpdual);
+  SolveT(tmpcol,tmpdual);
 
   T a_ij,a_ik,c_j,c_k,ratio;
 
@@ -802,7 +846,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     A->GetColumn(j,tmpcol);
   */
 
-    basis.GetColumn(j,tmpcol);
+    GetColumn(j,tmpcol);
   
   a_ij = tmpdual*tmpcol;
   c_j = RelativeCost(j);
@@ -818,7 +862,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //      A->GetColumn(k,tmpcol);
-      basis.GetColumn(k,tmpcol);
+      GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
@@ -839,7 +883,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     a_ik = tmpdual[-enter];
   else {
 //    A->GetColumn(enter,tmpcol);
-    basis.GetColumn(enter,tmpcol);
+    GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   a_ik = a_ik/a_ij;
@@ -858,7 +902,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
       a_ik=tmpdual[-k];
     else {
 //    A->GetColumn(k,tmpcol);
-    basis.GetColumn(k,tmpcol);
+    GetColumn(k,tmpcol);
     a_ik = tmpdual*tmpcol;
     }
     a_ik = a_ik/a_ij;
@@ -922,11 +966,13 @@ void LPTableau<T>::InsertArtificial( int art, int col )
   basis.InsertArtificial( art, col );
 }
 
+
 template <class T>
 int LPTableau<T>::AppendArtificial( int art )
 {
   return basis.AppendArtificial( art );
 }
+
 
 template <class T>
 void LPTableau<T>::RemoveArtificial( int col )
@@ -934,11 +980,13 @@ void LPTableau<T>::RemoveArtificial( int col )
   basis.RemoveArtificial( col );
 }
 
+
 template <class T>
 int LPTableau<T>::LastArtificial( void )
 {
   return basis.LastArtificial();
 }
+
 
 template <class T>
 void LPTableau<T>::FlushArtificial( void )
