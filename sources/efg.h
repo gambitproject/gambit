@@ -49,6 +49,9 @@ class ExtForm    {
     void InsertBranch(const Node &n, int where, int number);
     Node DeleteBranch(const Node &n, int which);
     void LabelBranch(const Node &n, int br, const gString &label)  { }
+    gVector<double> GetBranchProbs(const Node &n) const;
+    double GetBranchProb(const Node &n, int br) const;
+    void SetBranchProbs(const Node &n, const gVector<double> &probs);
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }

@@ -10,6 +10,7 @@
 #include "basic.h"
 #include "gstring.h"
 #include "gset.h"
+#include "gvector.h"
 
 class Branch   {
   private:
@@ -66,6 +67,16 @@ class Infoset   {
 	// return a branch's name
     gString GetBranchName(int br) const
       { return branches[br]->GetBranchName(); }
+
+	// get a branch's probability
+    double GetBranchProb(int br) const
+      { return branches[br]->GetBranchProb(); }
+
+	// get the vector of probabilities for the branches
+    gVector<double> GetBranchProbs(void) const;
+
+	// set the probabilities of the branches
+    void SetBranchProbs(const gVector<double> &probs);
 
 	// remove a branch from the infoset
     void RemoveBranch(int br)

@@ -88,6 +88,18 @@ class Player   {
     gString GetBranchName(int game, int iset, int br) const
       { return infosets(game, iset)->GetBranchName(br); }
 
+	// set the probabilities of branches in an infoset
+    void SetBranchProbs(int game, int iset, const gVector<double> &probs)
+      { infosets(game, iset)->SetBranchProbs(probs); }
+
+	// get the probabilities of branches in an infoset
+    gVector<double> GetBranchProbs(int game, int iset) const
+      { return infosets(game, iset)->GetBranchProbs(); }
+
+	// get the probability associated with one branch of an infoset
+    double GetBranchProb(int game, int iset, int br) const
+      { return infosets(game, iset)->GetBranchProb(br); }
+
 	// remove a branch from an infoset
     void RemoveBranch(int game, int iset, int br)
       { infosets(game, iset)->RemoveBranch(br); }
@@ -199,6 +211,21 @@ class PlayerSet   {
 	// returns the name of a branch
     gString GetBranchName(int p, int game, int iset, int br) const
       { return players[p + 2]->GetBranchName(game, iset, br); }
+
+	// set the probabilities at an infoset
+	//  Note: this is only available for the chance player
+    void SetBranchProbs(int game, int iset, const gVector<double> &probs)
+      { players[2]->SetBranchProbs(game, iset, probs); }
+
+	// get the probabilities at an infoset
+	//  Note: this is only available for the chance player
+    gVector<double> GetBranchProbs(int game, int iset) const
+      { return players[2]->GetBranchProbs(game, iset); }
+
+	// get the probability of a branch in an infoset
+	//  Note: this is only available for the chance player
+    double GetBranchProb(int game, int iset, int br) const
+      { return players[2]->GetBranchProb(game, iset, br); }
 
 	// remove a branch from an infoset
     void RemoveBranch(int p, int game, int iset, int br)

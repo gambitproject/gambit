@@ -166,6 +166,25 @@ Node ExtForm::DeleteBranch(const Node &n, int which)
   return ret;
 }
 
+gVector<double> ExtForm::GetBranchProbs(const Node &n) const
+{
+  if (!nodes.IsMember(n) || n[1] != 0)   return gVector<double>(1, 0);
+  return players.GetBranchProbs(n[0], n[2]);
+}
+
+double ExtForm::GetBranchProb(const Node &n, int br) const
+{
+  if (!nodes.IsMember(n) || n[1] != 0)   return -1.0;
+  return players.GetBranchProb(n[0], n[2], br);
+}
+
+void ExtForm::SetBranchProbs(const Node &n, const gVector<double> &probs)
+{
+  if (!nodes.IsMember(n) || n[1] != 0)   return;
+  return players.SetBranchProbs(n[0], n[2], probs);
+}
+
+
 Node ExtForm::MoveTree(Node src, Node dest)
 {
   if (!nodes.IsMember(src) || !nodes.IsMember(dest)) 
