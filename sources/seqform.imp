@@ -211,7 +211,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       params.status.SetProgress(p1+aa*(p2-p1));
       
       LTableau<T> BCopy(B);
-      (*A)(i,0)=-small_num;
+      (*A)(i,0)=-small_num; 
 
       if(depth==0) {
 	BCopy.Pivot(j,0);
@@ -219,6 +219,8 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       }
       else
 	missing = BCopy.SF_PivotIn(0);
+
+      // BCopy.Dump(gout);
 
       assert(missing);
       // gout << "\nafter Pivot, missing: " << missing << "\n";
@@ -240,7 +242,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	// gout << "\nprofile = " << profile;
       }
       else 
-	//* gout << ": Dead End";
+        // gout << ": Dead End\n";
       
       (*A)(i,0)=-(T)1;
       if(newsol)

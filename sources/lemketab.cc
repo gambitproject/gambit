@@ -66,7 +66,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   gVector<T> col(MinRow(), MaxRow());
   
   SolveColumn(inlabel,incol);
-  //* gout << "\nincol = " << incol;
+  
+  gout << "\nincol = " << incol << '\n';;
       // Find all row indices for which column col has positive entries.
   for (i = MinRow(); i <= MaxRow(); i++)
     if (incol[i] > eps2)
