@@ -1,7 +1,7 @@
 # Makefile to create distribution time items.
-# @(#)make.distr	1.21 2/14/97
+# $Id$
 # edit these!
-WXDIR=/home/ironbark/gambit/wxwin
+WXDIR=/home/gostek/gambit/wxwin
 GUI=none
 
 all:
