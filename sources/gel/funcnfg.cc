@@ -23,6 +23,10 @@ DECLARE_BINARY(gelfuncAddStrategy, NFSupport *, Strategy *, NFSupport *)
 
 NFSupport *gelfuncAddStrategy::EvalItem(NFSupport *S, Strategy *s) const
 {
+  if (!S || !s)   return 0;
+  if (&S->Game() != &s->nfp->Game())
+    throw gelGameMismatchError("AddStrategy");
+
   NFSupport *T = new NFSupport(*S);
   T->AddStrategy(s);
   return T;
@@ -36,6 +40,7 @@ DECLARE_UNARY(gelfuncDeleteOutcomeNfg, NFOutcome *, gTriState)
 
 gTriState gelfuncDeleteOutcomeNfg::EvalItem(NFOutcome *c) const
 {
+  if (!c)  return triFALSE;
   c->Game()->DeleteOutcome(c);
   return triTRUE;
 }
@@ -48,21 +53,21 @@ DECLARE_UNARY(gelfuncGameNFPlayer, NFPlayer *, Nfg *)
 
 Nfg *gelfuncGameNFPlayer::EvalItem(NFPlayer *p) const
 {
-  return &p->Game();
+  return (p) ? &p->Game() : 0;
 }
 
 DECLARE_UNARY(gelfuncGameStrategy, Strategy *, Nfg *)
 
 Nfg *gelfuncGameStrategy::EvalItem(Strategy *s) const
 {
-  return &s->nfp->Game();
+  return (s) ? &s->nfp->Game() : 0;
 }
 
 DECLARE_UNARY(gelfuncGameNFOutcome, NFOutcome *, Nfg *)
 
 Nfg *gelfuncGameNFOutcome::EvalItem(NFOutcome *c) const
 {
-  return c->Game();
+  return (c) ? c->Game() : 0;
 }
 
 
@@ -74,7 +79,7 @@ DECLARE_UNARY(gelfuncIsConstSumNfg, Nfg *, gTriState)
 
 gTriState gelfuncIsConstSumNfg::EvalItem(Nfg *N) const
 {
-  return (IsConstSum(*N)) ? triTRUE : triFALSE;
+  return (N) ? ((IsConstSum(*N)) ? triTRUE : triFALSE) : triFALSE;
 }
 
 //------------
@@ -85,10 +90,18 @@ DECLARE_UNARY(gelfuncLoadNfg, gText, Nfg *)
 
 Nfg *gelfuncLoadNfg::EvalItem(gText filename) const
 {
-  gFileInput f(filename);
-  Nfg *N = 0;
-  ReadNfgFile(f, N);
-  return N;
+  try  {
+    gFileInput f(filename);
+    Nfg *N = 0;
+    ReadNfgFile(f, N);
+    if (N)
+      return N;
+    else
+      throw gelRuntimeError(filename + " not a valid .nfg file in LoadNfg");
+  }
+  catch (gFileInput::OpenFailed &)  {
+    throw gelRuntimeError("Could not open " + filename + "in LoadNfg");
+  }
 }
 
 //--------
@@ -99,28 +112,40 @@ DECLARE_UNARY(gelfuncNameNfg, Nfg *, gText)
 
 gText gelfuncNameNfg::EvalItem(Nfg *N) const
 {
-  return N->GetTitle();
+  if (N)
+    return N->GetTitle();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameNFPlayer, NFPlayer *, gText)
 
 gText gelfuncNameNFPlayer::EvalItem(NFPlayer *p) const
 {
-  return p->GetName();
+  if (p)
+    return p->GetName();
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameStrategy, Strategy *, gText)
 
 gText gelfuncNameStrategy::EvalItem(Strategy *s) const
 {
-  return s->name;
+  if (s)
+    return s->name;
+  else
+    return "";
 }
 
 DECLARE_UNARY(gelfuncNameNFOutcome, NFOutcome *, gText)
 
 gText gelfuncNameNFOutcome::EvalItem(NFOutcome *c) const
 {
-  return c->GetName();
+  if (c)
+    return c->GetName();
+  else
+    return "";
 }
 
 
@@ -132,7 +157,7 @@ DECLARE_UNARY(gelfuncNewOutcomeNfg, Nfg *, NFOutcome *)
 
 NFOutcome *gelfuncNewOutcomeNfg::EvalItem(Nfg *N) const
 {
-  return N->NewOutcome();
+  return (N) ? N->NewOutcome() : 0;
 }
 
 
@@ -144,6 +169,9 @@ DECLARE_BINARY(gelfuncPayoffNFOutcome, NFOutcome *, NFPlayer *, gNumber)
 
 gNumber gelfuncPayoffNFOutcome::EvalItem(NFOutcome *c, NFPlayer *p) const
 {
+  if (!c || !p)  return 0.0;
+  if (c->Game() != &p->Game())
+    throw gelGameMismatchError("Payoff");
   return c->Game()->Payoff(c, p->GetNumber());
 }
 
@@ -156,7 +184,7 @@ DECLARE_UNARY(gelfuncPlayerStrategy, Strategy *, NFPlayer *)
 
 NFPlayer *gelfuncPlayerStrategy::EvalItem(Strategy *s) const
 {
-  return s->nfp;
+  return (s) ? s->nfp : 0;
 }
 
 
@@ -168,6 +196,10 @@ DECLARE_BINARY(gelfuncRemoveStrategy, NFSupport *, Strategy *, NFSupport *)
 
 NFSupport *gelfuncRemoveStrategy::EvalItem(NFSupport *S, Strategy *s) const
 {
+  if (!S || !s)  return 0;
+  if (&S->Game() != &s->nfp->Game())
+    throw gelGameMismatchError("RemoveStrategy");
+
   NFSupport *T = new NFSupport(*S);
   T->RemoveStrategy(s);
   return T;
@@ -181,9 +213,15 @@ DECLARE_BINARY(gelfuncSaveNfg, Nfg *, gText, Nfg *)
 
 Nfg *gelfuncSaveNfg::EvalItem(Nfg *N, gText filename) const
 {
-  gFileOutput f(filename);
-  N->WriteNfgFile(f);
-  return N;
+  if (!N)   return 0;
+  try   {
+    gFileOutput f(filename);
+    N->WriteNfgFile(f);
+    return N;
+  }
+  catch (gFileOutput::OpenFailed &)   {
+    throw gelRuntimeError("Cannot open " + filename + " for writing in SaveNfg");
+  }
 }
 
 //-----------
@@ -194,6 +232,7 @@ DECLARE_BINARY(gelfuncSetNameNfg, Nfg *, gText, Nfg *)
 
 Nfg *gelfuncSetNameNfg::EvalItem(Nfg *N, gText name) const
 {
+  if (!N)  return 0;
   N->SetTitle(name);
   return N;
 }
@@ -202,6 +241,7 @@ DECLARE_BINARY(gelfuncSetNameNFPlayer, NFPlayer *, gText, NFPlayer *)
 
 NFPlayer *gelfuncSetNameNFPlayer::EvalItem(NFPlayer *p, gText name) const
 {
+  if (!p)  return 0;
   p->SetName(name);
   return p;
 }
@@ -210,6 +250,7 @@ DECLARE_BINARY(gelfuncSetNameStrategy, Strategy *, gText, Strategy *)
 
 Strategy *gelfuncSetNameStrategy::EvalItem(Strategy *s, gText name) const
 {
+  if (!s)  return 0;
   s->name = name;
   return s;
 }
@@ -218,6 +259,7 @@ DECLARE_BINARY(gelfuncSetNameNFOutcome, NFOutcome *, gText, NFOutcome *)
 
 NFOutcome *gelfuncSetNameNFOutcome::EvalItem(NFOutcome *c, gText name) const
 {
+  if (!c)  return 0;
   c->SetName(name);
   return c;
 }
@@ -230,7 +272,7 @@ DECLARE_UNARY(gelfuncSupportNfg, Nfg *, NFSupport *)
 
 NFSupport *gelfuncSupportNfg::EvalItem(Nfg *N) const
 {
-  return new NFSupport(*N);
+  return (N) ? new NFSupport(*N) : 0;
 }
 
 
