@@ -1,0 +1,12 @@
+# Setup the information needed for the gui compilation using MOTIF on SUN4
+# Edit the following where appropriate
+# WxWin information
+WXDIR = /root/wxxt-1.66
+
+WXGUI = -Dwx_xt -D_LINUX
+GUISUFFIX = _xt
+
+# XWindows information
+XINCDIR = -I/usr/include/X11
+XLIBDIR = -L/usr/X11/lib -L/usr/Motif-2.0/lib
+XLIB = -lwx_xtwidgets -lXaw -lXmu -lXt -lXpm -lX11 -lXext
