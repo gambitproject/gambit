@@ -41,8 +41,8 @@ bool EtaMatrix<T>::operator!=(const EtaMatrix<T> &a) const
 template <class T> 
 LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Basis<T> &bas)
 : basis( bas ), 
-  scratch1(basis.label.First(), basis.label.Last()), 
-  scratch2(basis.label.First(), basis.label.Last()),
+  scratch1(basis.First(), basis.Last()), 
+  scratch2(basis.First(), basis.Last()),
   refactor_number( a.refactor_number ), iterations(a.iterations),
   total_operations( a.total_operations),
   parent(&a), copycount(0)
@@ -57,11 +57,11 @@ template <class T>
 LUdecomp<T>::LUdecomp( Basis<T> &bas,
 		      int rfac = 0 )	
 : basis(bas),  
-  scratch1(basis.label.First(), basis.label.Last()), 
-  scratch2(basis.label.First(), basis.label.Last()),
+  scratch1(basis.First(), basis.Last()), 
+  scratch2(basis.First(), basis.Last()),
   refactor_number(rfac), iterations(0), parent(NULL), copycount(0)
 {
-  int m = basis.label.Length();
+  int m = basis.Last() - basis.First() +1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
 }
 
@@ -108,6 +108,7 @@ void LUdecomp<T>::update( int col, int matcol )
 {
 
   assert( copycount == 0 );
+  int m = basis.Last() - basis.First() + 1;
 
   iterations++;
   if (( refactor_number > 0 && iterations >= refactor_number ) ||
@@ -119,8 +120,7 @@ void LUdecomp<T>::update( int col, int matcol )
     assert ( scratch1[col] != (T) 0 );
     E.Append( EtaMatrix<T>( col, scratch1 ) );
     
-    total_operations += iterations * basis.label.Length() +  
-      2 * basis.label.Length() * basis.label.Length();    
+    total_operations += iterations * m + 2 * m * m;    
   }
   
 }
@@ -138,7 +138,7 @@ void LUdecomp<T>::refactor( )
   if ( !basis.IsIdent() ) FactorBasis();
 
   iterations = 0;
-  int m = basis.label.Length();
+  int m = basis.Last() - basis.First() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
   if (parent != NULL) ((LUdecomp<T> &)*parent).copycount--;
   parent = NULL;
@@ -150,17 +150,13 @@ void LUdecomp<T>::solveT( const gVector<T> &c, gVector<T> &y ) const
 {
 
   assert ( c.First() == y.First() && c.Last() == y.Last() );
-  assert ( c.First() == (*(basis.A)).MinRow() 
-	  && c.Last() == (*(basis.A)).MaxRow());
+  assert ( c.First() == basis.First() && c.Last() == basis.Last());
 
   y = c;
   if ( basis.IsIdent() != true ) {
-
     BTransE( y );
-
-    if ( parent != NULL ) { 
+    if ( parent != NULL ) 
       (*parent).solveT( y, y );
-    }
     else {
       FTransU( y );
       yLP_Trans( y );
@@ -173,21 +169,16 @@ void LUdecomp<T>::solve( const gVector<T> &a, gVector<T> &d ) const
 {
 
   assert ( a.First() == d.First() && a.Last() == d.Last() );
-  assert ( a.First() == (*(basis.A)).MinRow() 
-	  && a.Last() == (*(basis.A)).MaxRow() );
+  assert ( a.First() == basis.First() && a.Last() == basis.Last());
   
   d = a;
   if ( basis.IsIdent() != true ) {
-    
-    if ( parent != NULL ) {
+    if ( parent != NULL ) 
       (*parent).solve(a,d);
-    }
-    
     else {
       LPd_Trans( d );
       BTransU( d );
     }
-    
     FTransE( d );
   }
 }
@@ -209,12 +200,11 @@ void LUdecomp<T>::FactorBasis()
   int i, j, piv;
   T pivVal;
 
-  gMatrix<T> B((*(basis.A)).MinRow(), (*(basis.A)).MaxRow(), 
-	       basis.label.First(), basis.label.Last());
+  gMatrix<T> B(basis.First(), basis.Last(), 
+	       basis.First(), basis.Last());
 
-  for( i = basis.label.First(); i <= basis.label.Last(); i++ ) {
-    
-    basis.GetColumn( basis.label[i], scratch2 );
+  for( i = basis.First(); i <= basis.Last(); i++ ) {
+    basis.GetColumn( basis.Label(i), scratch2 );
     basis.CheckBasis();
     B.SetColumn( i, scratch2 );
   }
@@ -240,7 +230,6 @@ void LUdecomp<T>::FactorBasis()
     GaussElem(B, i, i);
 
   }
-  
   for ( j = B.MinCol(); j <= B.MaxCol(); j++ ) {
     B.GetColumn( j, scratch2 );
     U.Append( EtaMatrix<T>( j, scratch2 ));
@@ -439,9 +428,9 @@ bool LUdecomp<T>::CheckBasis()
   int i;
   bool ret = true;
 
-  for ( i = basis.label.First(); i <= basis.label.Last() && ret != false; 
+  for ( i = basis.First(); i <= basis.Last() && ret != false; 
        i++){
-    ret = ret && ( basis.label[i] == -i );
+    ret = ret && ( basis.Label(i) == -i );
   }
 
   return ret;
@@ -450,7 +439,7 @@ bool LUdecomp<T>::CheckBasis()
 template<class T>
 bool LUdecomp<T>::RefactorCheck()
 {
-  int m = basis.label.Length();
+  int m = basis.Last() - basis.First() + 1;
   int i = iterations * (iterations * m + 2 * m * m );
   int k = total_operations + iterations * m + 2 * m * m;
 

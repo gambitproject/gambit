@@ -15,11 +15,11 @@
 // Class Basis
 //---------------------------------------------------------------------------
 
-template <class T> class LUdecomp;
+//template <class T> class LUdecomp;
 
 template <class T> class Basis {
 
-friend class LUdecomp<T>;
+  //friend class LUdecomp<T>;
   
 protected:
 
@@ -67,6 +67,11 @@ public:
   // Public Members
   //------------------------------
   
+  int First();         // First basis index
+  int Last();          // Last  basis index
+  int FirstLabel();    // First Column label
+  int LastLabel();     // Last Column label
+
   //remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col); 
 
@@ -111,9 +116,6 @@ public:
   // was removed.
   void RemoveArtificial( int col );
   
-  // Returns the index of the last artificial variable
-  int LastLabel();
-
   void Dump(gOutput &) const;
 
   // ----------------

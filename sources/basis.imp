@@ -68,6 +68,30 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
 // -------------------------
 
 template <class T>
+int Basis<T>::First()
+{
+  return label.First();
+}
+
+template <class T>
+int Basis<T>::Last()
+{
+  return label.Last();
+}
+
+template <class T>
+int Basis<T>::FirstLabel()
+{
+  return cols.First();
+}
+
+template <class T>
+int Basis<T>::LastLabel()
+{
+  return cols.Last();
+}
+
+template <class T>
 int Basis<T>::Pivot(int outindex, int col)
 {
   int outlabel = label[outindex];
@@ -201,12 +225,6 @@ void Basis<T>::RemoveArtificial( int col )
   assert(cols[col]==0); // can only remove non basic columns
   cols.Remove(col);
   artUnitEntry.Remove( col);
-}
-
-template <class T>
-int Basis<T>::LastLabel()
-{
-  return cols.Last();
 }
 
 template <class T> 
