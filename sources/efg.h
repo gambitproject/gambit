@@ -160,6 +160,7 @@ class ExtForm    {
     void RemoveNodeVariable(const gString &name);
 
         //# PAYOFF INFORMATION
+    int ProfileLength(void) const;
     gPVector<int> Dimensionality(void) const;
     double Payoff(int pl, const gDPVector<double> &) const;
 };

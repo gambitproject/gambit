@@ -1177,3 +1177,14 @@ gPVector<int> ExtForm::Dimensionality(void) const
 
   return bar;
 }
+
+int ExtForm::ProfileLength(void) const
+{
+  int sum = 0;
+
+  for (int i = 1; i <= NumPlayers(); i++)
+    for (int j = 1; j <= NumInfosets(1, i); j++)
+      sum += NumActions(1, i, j);
+
+  return sum;
+}
