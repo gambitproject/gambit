@@ -84,6 +84,9 @@
 %token DBLARROW
 %token COMMA
 %token HASH
+%token DOT
+%token CARET
+%token AMPER
 
 %token PERCENT
 %token DIV
@@ -97,6 +100,7 @@
 %token DEFFUNC
 %token INCLUDE
 %token UNASSIGN
+%token CLEAR
 
 %token NAME
 %token BOOLEAN
@@ -119,6 +123,7 @@ program:      toplevel EOC
 toplevel:     statements
         |     include toplevel
         |     funcdecl toplevel
+        |     clearstmt toplevel
 
 statements:   statement
           |   statements sep statement
@@ -126,6 +131,9 @@ statements:   statement
 sep:          SEMI    { semi = true; }
    |          CRLF    { semi = false; 
                         if (!triv)  { emit(new Display); } }
+
+clearstmt:    CLEAR LBRACK RBRACK  { emit(new Clear); }
+
 
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
@@ -278,6 +286,7 @@ E3:           E4
 E4:           E5
   |           E4 PLUS E5   { emit(new Add); }
   |           E4 MINUS E5  { emit(new Sub); }
+/*  |           E4 AMPER E5  { emit(new Concat); } */
   ;
 
 E5:           E6
@@ -285,6 +294,8 @@ E5:           E6
   |           E5 SLASH E6   { emit(new Div); }
   |           E5 PERCENT E6 { emit(new Mod); }
   |           E5 DIV E6     { emit(new IntDiv); }
+/*  |           E5 DOT E6     { emit(new Dot); } */
+  |           E5 CARET E6   { emit(new Power); } 
   ;
 
 E6:           PLUS E7
@@ -385,8 +396,10 @@ static struct tokens toktable[] =
     { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
+    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, 
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
+    { CLEAR, "Clear" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
 };
@@ -497,6 +510,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "Include")   return INCLUDE;
     else if (s == "UnAssign")  return UNASSIGN;
+    else if (s == "Clear")   return CLEAR;
     else  { tval = s; return NAME; }
   }
 
@@ -539,6 +553,7 @@ I_dont_believe_Im_doing_this:
 
   switch (c)  {
     case ',':   return COMMA;
+    case '.':   return DOT;
     case ';':   return SEMI;
     case '(':   matching.Push('(');  return LPAREN;
     case ')':   if (matching.Depth() > 0 && matching.Peek() == '(')
@@ -557,6 +572,7 @@ I_dont_believe_Im_doing_this:
     case '%':   return PERCENT;
     case '=':   return EQU;
     case '#':   return HASH;
+    case '^':   return CARET;
     case '[':   matching.Push('[');
                 c = nextchar();
                 if (c == '[')   {
@@ -590,7 +606,7 @@ I_dont_believe_Im_doing_this:
                 else   { ungetchar(c);  return GTN; }
     case '&':   c = nextchar();
                 if (c == '&')  return LAND;
-                else   { ungetchar(c);  return '&'; }
+                else   { ungetchar(c);  return AMPER; }
     case '|':   c = nextchar();
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
