@@ -1272,6 +1272,39 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
 }
 
 
+Portion* GSM_Mixed_NFSupport( Portion** param )
+{
+  Portion* old_param0 = param[ 0 ];
+  param[ 0 ] = param[ 0 ]->Owner();
+  Portion* result;
+
+  switch( param[ 0 ]->Type() )
+  {
+  case porNFG_FLOAT:
+    if( ( (ListPortion*) param[ 1 ] )->DataType() != porFLOAT )
+    {
+      param[ 0 ] = old_param0;
+      return new ErrorPortion( "Normal form type and list type mismatch" );
+    }
+    result = GSM_Mixed_NfgFloat( param );
+    break;
+  case porNFG_RATIONAL:
+    if( ( (ListPortion*) param[ 1 ] )->DataType() != porRATIONAL )
+    {
+      param[ 0 ] = old_param0;
+      return new ErrorPortion( "Normal form type and list type mismatch" );
+    }
+    result = GSM_Mixed_NfgRational( param );
+    break;
+  default:
+    assert( 0 );
+  }
+
+  param[ 0 ] = old_param0;
+  return result;
+}
+
+
 //----------------------- SetComponent ---------------------------//
 
 Portion *GSM_SetComponent_MixedFloat(Portion **param)
@@ -1710,6 +1743,11 @@ void Init_nfgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
 			1, "list", porLIST | porRATIONAL);
+
+  FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 
+			1, "list", porLIST | porFLOAT | porRATIONAL );
   gsm->AddFunction( FuncObj );
 
   
