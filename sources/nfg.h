@@ -27,6 +27,8 @@ protected:
   gArray<int> dimensions;
   void IndexStrategies(void);
 
+  void BreakLink(void);
+
 public:
   
   // ------------------------------------

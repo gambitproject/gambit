@@ -46,7 +46,7 @@ BaseNfg::BaseNfg (const BaseNfg &b)
 #include "efg.h"
 #include "lexicon.h"
 
-BaseNfg::~BaseNfg()
+void BaseNfg::BreakLink(void)
 {
   if (efg)  {
     BaseEfg *tmp = efg;
@@ -55,7 +55,11 @@ BaseNfg::~BaseNfg()
     delete efg->lexicon;
     tmp->lexicon = 0;
   }
+}
 
+BaseNfg::~BaseNfg()
+{
+  BreakLink();
   for (int i = 1; i <= players.Length(); i++)
     delete players[i];
 }

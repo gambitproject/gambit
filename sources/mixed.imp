@@ -115,7 +115,7 @@ template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   payoffs[pl][index] = value;
-  efg = 0;
+  BreakLink();
 }
 
 
@@ -123,7 +123,7 @@ template <class T> void Nfg<T>::SetPayoff(int pl, const StrategyProfile *p,
 					   const T &value)
 {
   payoffs[pl][p->index] = value;
-  efg = 0;
+  BreakLink();
 }
 
 template <class T> 
