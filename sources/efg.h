@@ -21,6 +21,7 @@ class Node;
 class Action;
 class Lexicon;
 class BaseNfg;
+class EFSupport;
 
 class BaseEfg     {
   
