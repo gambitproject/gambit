@@ -274,6 +274,16 @@ const gArray<int> NFSupport::SupportDimensions(void) const
 	return a;
 }
 
+int NFSupport::Contains(const Strategy *s) const
+{
+  const gBlock<Strategy *> &strats =
+    sups[s->nfp->GetNumber()]->GetNFStrategySet();
+
+  return strats.Find((Strategy *const) s);
+}
+
+
+
 // Returns true if all strategies in _THIS_ belong to _S_
 bool NFSupport::IsSubset(const NFSupport &s) const
 {

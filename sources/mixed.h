@@ -62,14 +62,15 @@ template <class T> class MixedProfile
     Nfg<T> *BelongsTo(void) const  { return (Nfg<T> *) N; }
 
     T LiapValue(void) const;
-    void Gripe(gPVector<T> &value) const;
-    T MaxGripe(void) const;
+    void Regret(gPVector<T> &value) const;
+    T MaxRegret(void) const;
     bool IsPure(void) const;
     bool IsPure(int pl) const;
     void Centroid(void);
 
     T Payoff(int pl) const;
     T Payoff(int pl, int player1, int strat1) const;
+    T Payoff(int pl, Strategy *) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gVector<T> &payoff) const;
 

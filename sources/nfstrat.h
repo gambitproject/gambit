@@ -104,7 +104,7 @@ public:
   int NumStrats(void) const;
 
   //  return the entire strategy set in a const gArray
-	const gBlock<Strategy *> &GetNFStrategySet(void) const;
+  const gBlock<Strategy *> &GetNFStrategySet(void) const;
 
   // return the NFPlayer of this NFStrategySet
   NFPlayer &GetPlayer(void) const;
@@ -144,7 +144,7 @@ public:
   //---------
 
   void SetNFStrategySet(int pl, NFStrategySet *s);   
-	NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
+  NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
 
   Strategy *GetStrategy(int pl, int num) const;
   const gBlock<Strategy *> &GetStrategy(int pl) const;
@@ -154,6 +154,10 @@ public:
   const gArray<int> SupportDimensions(void) const;
   
   bool IsSubset(const NFSupport &s) const;
+
+  // returns the index of the strategy in the support if it exists,
+  // otherwise returns zero
+  int Contains(const Strategy *s) const; 
 
   void Dump(gOutput&s) const;
 };

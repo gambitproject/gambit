@@ -97,7 +97,7 @@ template <class T> T Nfg<T>::MaxPayoff(int pl) const
   for (index = 1; index < NumPayPerPlayer; index++)  {
     for (p = p1; p <= p2; p++)
       if (payoffs[p][index] > maxpay)
-	maxpay = payoffs[pl][index];
+	maxpay = payoffs[p][index];
   }
   return maxpay;
 }
@@ -267,29 +267,29 @@ template <class T> T MixedProfile<T>::LiapValue(void) const
   return result;
 }
 
-template <class T> void MixedProfile<T>::Gripe(gPVector<T> &value) const
+template <class T> void MixedProfile<T>::Regret(gPVector<T> &value) const
 {
   int i, j;
   T pay,x;
   
   for (i = 1; i <= N->NumPlayers(); i++) {
     pay = Payoff(i);
-    for (j = 1; j <= GetNFSupport().NumStrats(i); j++) {
-      x = Payoff(i , i ,j);
-      if(x>pay)
-	value(i, j) = x-pay;
-      else value(i,j) = (T)0;
+    for (j = 1; j <= N->NumStrats(i); j++) {
+      x = Payoff(i, N->GetStrategy(i, j));
+      if(x > pay)
+	value(i, j) = x - pay;
+      else value(i,j) = (T) 0;
     }
   }
 }
 
-template <class T> T MixedProfile<T>::MaxGripe(void) const
+template <class T> T MixedProfile<T>::MaxRegret(void) const
 {
   int i;
-  T maxgripe = (T)0;;
+  T maxgripe = (T)0;
 
   gPVector<T> v(*this);
-  Gripe(v);
+  Regret(v);
   for(i=v.First(); i<=v.Last(); i++)
     if(v[i] > maxgripe) maxgripe = v[i];
   return maxgripe;
@@ -318,12 +318,21 @@ template <class T> T MixedProfile<T>::Payoff(int pl) const
   return PPayoff(pl, 0, 1);
 }
 
-template <class T> T 
-MixedProfile<T>::Payoff( int pl, int player1, int strat1 ) const
+template <class T>
+T MixedProfile<T>::Payoff(int pl, int player1, int strat1) const
 {
   T value = (T) 0;
   PPayoff(pl, player1, strat1, 1,
 	 support.GetStrategy(player1,strat1)->index, (T) 1.0, value);
+  return value;
+}
+
+template <class T> T
+MixedProfile<T>::Payoff(int pl, Strategy *strategy) const
+{
+  T value = (T) 0;
+  PPayoff(pl, strategy->nfp->GetNumber(), strategy->number, 1,
+	  strategy->index, (T) 1.0, value);
   return value;
 }
 

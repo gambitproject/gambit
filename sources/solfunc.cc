@@ -893,52 +893,28 @@ Portion *GSM_Regret_MixedFloat(Portion **param)
 {
   MixedSolution<double> *P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  gPVector<double> v(*P);
-  P->Gripe(v);
-
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
   BaseNfg* n = p->BelongsTo();
   
-  int i = 0;
-  int player = 0;
-  int strategy = 0;
-  for(i=1; i<=p->NumStrats(); i++)
-    if(p->StrategyList()[i] == s)
-      strategy = i;
-  for(i=1; i<=n->NumPlayers(); i++)
-    if(n->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(strategy > 0);
+  gPVector<double> v(n->Dimensionality());
+  P->Regret(v);
 
-  return new FloatValPortion(v(player, strategy));
+  return new FloatValPortion(v(p->GetNumber(), s->number));
 }
 
 Portion *GSM_Regret_MixedRational(Portion **param)
 {
   MixedSolution<gRational> *P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-  gPVector<gRational> v(*P);
-  P->Gripe(v);
-
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
   BaseNfg* n = p->BelongsTo();
   
-  int i = 0;
-  int player = 0;
-  int strategy = 0;
-  for(i=1; i<=p->NumStrats(); i++)
-    if(p->StrategyList()[i] == s)
-      strategy = i;
-  for(i=1; i<=n->NumPlayers(); i++)
-    if(n->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(strategy > 0);
+  gPVector<gRational> v(n->Dimensionality());
+  P->Regret(v);
 
-  return new RationalValPortion(v(player, strategy));
+  return new RationalValPortion(v(p->GetNumber(), s->number));
 }
 
 

@@ -88,17 +88,17 @@ template <class T> MixedSolution<T>::~MixedSolution() {}
 
 template <class T> void MixedSolution<T>::EvalEquilibria()
 {
-	if(IsComplete())
-		if(_IsNash == T_DONTKNOW)
-			if(MaxGripe() <= _Epsilon)
+  if(IsComplete())
+    if(_IsNash == T_DONTKNOW)
+      if(MaxRegret() <= _Epsilon)
 	_IsNash = T_YES;
-			else
+      else
 	_IsNash = T_NO;
-	if( _IsNash == T_NO )
-		{
-			_IsPerfect = T_NO;
-			_IsProper = T_NO;
-		}
+  if( _IsNash == T_NO )
+    {
+      _IsPerfect = T_NO;
+      _IsProper = T_NO;
+    }
 }
 
 template <class T> unsigned int MixedSolution<T>::Id(void) const
