@@ -2,7 +2,7 @@
 // File: quiksolv.imp  
 //        -- Implementation of class gPolyList
 // 
-// $Id$
+// @(#)quiksolv.imp	1.6 01/24/98
 //
 
 #include "quiksolv.h"
@@ -611,6 +611,8 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
     return true; 
   }
 
+  return false;
+
 //DEBUG
 //else { gout << "We are quitting.\n"; exit(0); }
 
@@ -666,7 +668,8 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
   gIndexOdometer topbottoms(zeros,ones);
   while (topbottoms.Turn() && 
                  (max_no_roots == 0 || *roots_found < max_no_roots)) {
-    if (iterations < max_iterations) {
+    if (iterations >= max_iterations) return;
+    else {
       iterations++;
       FindRootsRecursion(rootlistptr,
 			 r.Orthant(topbottoms.CurrentIndices()),
