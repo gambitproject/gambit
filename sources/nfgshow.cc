@@ -1051,7 +1051,8 @@ void NfgShow::ChangeSupport(int what)
 
 void NfgShow::SupportNew(void)
 {
-  dialogNfgEditSupport dialog(NFSupport(nf), spread);
+  NFSupport newSupport(nf);
+  dialogNfgEditSupport dialog(newSupport, spread);
 
   if (dialog.Completed() == wxOK) {
     try {
