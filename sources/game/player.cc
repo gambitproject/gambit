@@ -39,16 +39,15 @@
 //
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_player_rep: Member functions
+//           struct gbtEfgPlayerBase: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_player_rep::gbt_efg_player_rep(gbt_efg_game_rep *p_efg, int p_id)
-  : m_id(p_id), m_efg(p_efg), m_deleted(false), 
-    m_refCount(0)
+gbtEfgPlayerBase::gbtEfgPlayerBase(gbt_efg_game_rep *p_efg, int p_id)
+  : m_id(p_id), m_efg(p_efg)
 { }
 
 
-gbt_efg_player_rep::~gbt_efg_player_rep()
+gbtEfgPlayerBase::~gbtEfgPlayerBase()
 {
   // Temporarily we will leak these information sets while API is in
   // transition.
@@ -59,186 +58,12 @@ gbt_efg_player_rep::~gbt_efg_player_rep()
   */
 }
 
-//----------------------------------------------------------------------
-//               class gbtEfgPlayer: Member functions
-//----------------------------------------------------------------------
-
-gbtEfgPlayer::gbtEfgPlayer(void)
-  : rep(0)
-{ }
-
-gbtEfgPlayer::gbtEfgPlayer(gbt_efg_player_rep *p_rep)
-  : rep(p_rep)
+gbtEfgInfoset gbtEfgPlayerBase::NewInfoset(int p_actions)
 {
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgPlayer::gbtEfgPlayer(const gbtEfgPlayer &p_outcome)
-  : rep(p_outcome.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgPlayer::~gbtEfgPlayer()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_efg->m_refCount == 0) {
-      delete rep->m_efg;
-    }
-  }
-}
-
-gbtEfgPlayer &gbtEfgPlayer::operator=(const gbtEfgPlayer &p_player)
-{
-  if (this == &p_player) {
-    return *this;
-  }
-
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_efg->m_refCount == 0) {
-      delete rep->m_efg;
-    }
-  }
-
-  if ((rep = p_player.rep) != 0) {
-    rep->m_refCount++;
-    rep->m_efg->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtEfgPlayer::operator==(const gbtEfgPlayer &p_player) const
-{
-  return (rep == p_player.rep);
-} 
-
-bool gbtEfgPlayer::operator!=(const gbtEfgPlayer &p_player) const
-{
-  return (rep != p_player.rep);
-} 
-
-bool gbtEfgPlayer::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-bool gbtEfgPlayer::IsDeleted(void) const
-{
-  return (rep && rep->m_deleted);
-}
-
-gbtEfgGame gbtEfgPlayer::GetGame(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep) ? rep->m_efg : 0;
-  }
-}
-
-int gbtEfgPlayer::GetId(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep) ? rep->m_id : -1;
-  }
-}
-
-gbtText gbtEfgPlayer::GetLabel(void) const
-{
-  if (rep) {
-    if (rep->m_deleted) {
-      throw gbtGameObjectDeleted();
-    }
-    else {
-      return rep->m_label;
-    }
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtEfgPlayer::SetLabel(const gbtText &p_label)
-{
-  if (rep) {
-    if (rep->m_deleted) {
-      throw gbtGameObjectDeleted();
-    }
-    else {
-      rep->m_label = p_label;
-    }
-  }
-}
-
-int gbtEfgPlayer::NumInfosets(void) const
-{
-  if (rep) {
-    if (rep->m_deleted) {
-      throw gbtGameObjectDeleted();
-    }
-    else {
-      return rep->m_infosets.Length();
-    }
-  }
-  else {
-    return 0;
-  }
-}
-
-gbtEfgInfoset gbtEfgPlayer::GetInfoset(int p_index) const
-{
-  if (rep) {
-    if (rep->m_deleted) {
-      throw gbtGameObjectDeleted();
-    }
-    else {
-      return rep->m_infosets[p_index];
-    }
-  }
-  else {
-    return 0;
-  }
-}
-
-
-bool gbtEfgPlayer::IsChance(void) const
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep && rep->m_id == 0);
-  }
-}
-
-gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
-{
-  if (rep && rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  if (IsNull())  {
-    throw gbtEfgNullObject();
-  }
   if (p_actions <= 0) {
     throw gbtEfgbtException();
   }
-  return rep->m_efg->NewInfoset(rep, rep->m_infosets.Length() + 1, p_actions);
+  return m_efg->NewInfoset(this, this->m_infosets.Length() + 1, p_actions);
 }
 
 
@@ -277,7 +102,7 @@ gbtEfgInfosetIterator::gbtEfgInfosetIterator(const gbtEfgPlayer &p_player)
 { }
 
 gbtEfgInfoset gbtEfgInfosetIterator::operator*(void) const
-{ return m_player.GetInfoset(m_index); }
+{ return m_player->GetInfoset(m_index); }
 
 gbtEfgInfosetIterator &gbtEfgInfosetIterator::operator++(int)
 { m_index++; return *this; }
@@ -286,7 +111,7 @@ bool gbtEfgInfosetIterator::Begin(void)
 { m_index = 1; return true; }
 
 bool gbtEfgInfosetIterator::End(void) const
-{ return m_index > m_player.NumInfosets(); }
+{ return m_index > m_player->NumInfosets(); }
 
 
 //----------------------------------------------------------------------

@@ -340,7 +340,7 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
       T prob = (T) 1;
       const gbtArray<int> *const behav = player.GetStrategy(st).GetBehavior();
 
-      for (int iset = 1; iset <= efg.GetPlayer(pl).NumInfosets(); iset++) {
+      for (int iset = 1; iset <= efg.GetPlayer(pl)->NumInfosets(); iset++) {
 	if ((*behav)[iset] > 0)
 	  prob *= p_profile(pl, iset, (*behav)[iset]);
       }

@@ -121,13 +121,13 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
       (*(*SF)[seq])[pl] += prob * n.GetOutcome()->GetPayoff(m_efg.GetPlayer(pl));
   }
   if (!n.GetInfoset().IsNull()) {
-    if (n.GetPlayer().IsChance()) {
+    if (n.GetPlayer()->IsChance()) {
       for(i=1;i<=n.NumChildren();i++)
 	MakeSequenceForm(n.GetChild(i),
 		     prob * n.GetInfoset().GetChanceProb(i), seq,iset,parent);
     }
     else {
-      int pl = n.GetPlayer().GetId();
+      int pl = n.GetPlayer()->GetId();
       iset[pl]=n.GetInfoset();
       int isetnum = iset[pl].GetId();
       gbtArray<int> snew(seq);
@@ -170,12 +170,12 @@ void gbtSfgGame::GetSequenceDims(const gbtEfgNode &n)
   int i;
 
   if (!n.GetInfoset().IsNull()) {
-    if (n.GetPlayer().IsChance()) {
+    if (n.GetPlayer()->IsChance()) {
       for(i=1;i<=n.NumChildren();i++)
 	GetSequenceDims(n.GetChild(i));
     }
     else {
-      int pl = n.GetPlayer().GetId();
+      int pl = n.GetPlayer()->GetId();
       int isetnum = n.GetInfoset().GetId();
     
       bool flag = false;

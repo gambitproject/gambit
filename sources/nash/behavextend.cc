@@ -211,7 +211,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
       }
       else {
 	int initial_var_no = 
-	  var_index[last_infoset.GetPlayer().GetId()][last_infoset.GetId()];
+	  var_index[last_infoset.GetPlayer()->GetId()][last_infoset.GetId()];
 	if (last_action.GetId() < last_infoset.NumActions()) {
 	  int varno = initial_var_no + last_action.GetId();
 	  node_prob *= gbtPolyMulti<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
@@ -396,7 +396,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
       node_prob *= (gbtDouble) last_action.GetChanceProb();
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
-	if (last_infoset == p_solution.GetGame().GetPlayer(pl).GetInfoset(i)) {
+	if (last_infoset == p_solution.GetGame().GetPlayer(pl)->GetInfoset(i)) {
 	  if (j != last_action.GetId()) 
 	    return false;
 	}
@@ -408,7 +408,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
       }
       else {
 	int initial_var_no = 
-	  var_index[last_infoset.GetPlayer().GetId()][last_infoset.GetId()];
+	  var_index[last_infoset.GetPlayer()->GetId()][last_infoset.GetId()];
 	if (last_action.GetId() < last_infoset.NumActions()) {
 	  int varno = initial_var_no + last_action.GetId();
 	  node_prob *= gbtPolyMulti<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
@@ -445,7 +445,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
     for (gbtEfgInfosetIterator infoset(*player); !infoset.End(); infoset++) {
       if (little_supp.MayReach(*infoset)) 
 	for (int j = 1; j <= (*infoset).NumActions(); j++)
-	  if (!little_supp.Contains((*player).GetId(),
+	  if (!little_supp.Contains((*player)->GetId(),
 				    (*infoset).GetId(), j)) {
 	
 	    // This will be the utility difference between the
@@ -461,14 +461,14 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					 big_supp,
 					 var_index,
 					 terminal_nodes[n],
-					 (*player).GetId(),
+					 (*player)->GetId(),
 					 (*infoset).GetId(), j)) {
 		node_prob *= 
 		  (gbtDouble) terminal_nodes[n].GetOutcome()->GetPayoff(*player);
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gbtDouble) p_solution.Payoff((*player).GetId());
+	    answer += -next_poly + (gbtDouble) p_solution.Payoff((*player)->GetId());
 	  }
     }
   }

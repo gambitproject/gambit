@@ -53,7 +53,7 @@ void gbtSfgSequence::Dump(gbtOutput &out) const
   int a = 0, p = 0;
   if (!action.IsNull()) a = action.GetId();
   if(parent) p = parent->GetNumber();
-  out << "\nPl#: " << player.GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
+  out << "\nPl#: " << player->GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }
 
 gbtOutput& operator<<(gbtOutput& s, const gbtSfgSequence& seq)
@@ -239,17 +239,17 @@ int gbtSfgSupport::TotalNumSequences(void) const
 
 int gbtSfgSupport::Find(gbtSfgSequence *s) const
 {
-  return sups[s->Player().GetId()]->GetSFSequenceSet().Find(s);
+  return sups[s->Player()->GetId()]->GetSFSequenceSet().Find(s);
 }
 
 void gbtSfgSupport::AddSequence(gbtSfgSequence *s)
 {
-  sups[s->Player().GetId()]->AddSequence(s);
+  sups[s->Player()->GetId()]->AddSequence(s);
 }
 
 bool gbtSfgSupport::RemoveSequence(gbtSfgSequence *s)
 {
-  return sups[s->Player().GetId()]->RemoveSequence(s);
+  return sups[s->Player()->GetId()]->RemoveSequence(s);
 }
 
 

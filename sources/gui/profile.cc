@@ -128,10 +128,10 @@ int gbtProfileTable::GetPlayerNumber(int p_col) const
     for (int pl = 1, col = GetInfoColumns(); 
 	 pl <= m_doc->GetEfg().NumPlayers();
 	 pl++) {
-      for (int iset = 1; iset <= m_doc->GetEfg().GetPlayer(pl).NumInfosets();
+      for (int iset = 1; iset <= m_doc->GetEfg().GetPlayer(pl)->NumInfosets();
 	   iset++) {
 	if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	  if ((col += m_doc->GetEfg().GetPlayer(pl).GetInfoset(iset).NumActions()) > p_col) {
+	  if ((col += m_doc->GetEfg().GetPlayer(pl)->GetInfoset(iset).NumActions()) > p_col) {
 	    return pl;
 	  }
 	}
@@ -179,12 +179,12 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	 pl <= m_doc->GetEfg().NumPlayers(); pl++) {
       gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-	  gbtEfgInfoset infoset = player.GetInfoset(iset);
+	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	  gbtEfgInfoset infoset = player->GetInfoset(iset);
 	  for (int act = 1; act <= infoset.NumActions(); col++, act++) {
 	    if (col == p_col) {
 	      return wxString::Format(wxT("%s:%s:%s"),
-				      (char *) player.GetLabel(),
+				      (char *) player->GetLabel(),
 				      (char *) infoset.GetLabel(),
 				      (char *) infoset.GetAction(act).GetLabel());
 	    }
@@ -192,11 +192,11 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	}
       }
       else {
-	for (int iset = 1; iset <= player.NumInfosets(); col++, iset++) {
+	for (int iset = 1; iset <= player->NumInfosets(); col++, iset++) {
 	  if (col == p_col) {
 	    return wxString::Format(wxT("%s:%s"),
-				    (char *) player.GetLabel(),
-				    (char *) player.GetInfoset(iset).GetLabel());
+				    (char *) player->GetLabel(),
+				    (char *) player->GetInfoset(iset).GetLabel());
 	  }
 	}
       }
@@ -306,9 +306,9 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	for (int pl = 1, col = GetInfoColumns();
 	     pl <= m_doc->GetEfg().NumPlayers(); pl++) {
 	  gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
-	  for (int iset = 1; iset <= player.NumInfosets(); iset++, col++) {
+	  for (int iset = 1; iset <= player->NumInfosets(); iset++, col++) {
 	    if (col == p_col) {
-	      gbtEfgInfoset infoset = player.GetInfoset(iset);
+	      gbtEfgInfoset infoset = player->GetInfoset(iset);
 	      wxString ret;
 	      for (int act = 1; act <= infoset.NumActions(); act++) {
 		if ((*behav)(infoset.GetAction(act)) > gbtNumber(0)) {

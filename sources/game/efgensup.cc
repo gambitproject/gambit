@@ -40,15 +40,15 @@ DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
     gbtEfgInfoset infoset = (*infosetlist)[i];
-    if (infoset.GetPlayer().GetId() < cursor.GetPlayerId() ||
-	( infoset.GetPlayer().GetId() == cursor.GetPlayerId() &&
+    if (infoset.GetPlayer()->GetId() < cursor.GetPlayerId() ||
+	( infoset.GetPlayer()->GetId() == cursor.GetPlayerId() &&
 	  infoset.GetId() < cursor.GetInfosetId()) )
       if (S->NumActions(infoset) > 0)
 	return true;
-    if (infoset.GetPlayer().GetId() == cursor.GetPlayerId() &&
+    if (infoset.GetPlayer()->GetId() == cursor.GetPlayerId() &&
 	infoset.GetId() == cursor.GetInfosetId() )
       for (int act = 1; act < cursor.GetActionId(); act++)
-	if ( S->Contains(infoset.GetPlayer().GetId(),
+	if ( S->Contains(infoset.GetPlayer()->GetId(),
 			 infoset.GetId(),
 			 act) )
 	  return true;

@@ -98,10 +98,10 @@ void gbtEfgNavigateWindow::OnUpdate(void)
       tmpstr = "TERMINAL";
     }
     else {
-      if (cursor.GetPlayer().IsChance())
+      if (cursor.GetPlayer()->IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(cursor.GetPlayer().GetId()) + "," +
+	tmpstr = ("(" + ToText(cursor.GetPlayer()->GetId()) + "," +
 		  ToText(cursor.GetInfoset().GetId()) + ")");
     }
 	  

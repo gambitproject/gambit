@@ -75,7 +75,7 @@ void gbtEfgIterator::First(void)
   _current = 1;
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
       _profile.Set(_support.GetAction(pl, iset, 1));
     }
   }
@@ -97,7 +97,7 @@ int gbtEfgIterator::Next(int pl, int iset)
 int gbtEfgIterator::Set(int pl, int iset, int act)
 {
   if (pl <= 0 || pl > m_efg.NumPlayers() ||
-      iset <= 0 || iset > m_efg.GetPlayer(pl).NumInfosets() ||
+      iset <= 0 || iset > m_efg.GetPlayer(pl)->NumInfosets() ||
       act <= 0 || act > _support.NumActions(pl, iset))
     return 0;
 
@@ -134,9 +134,9 @@ gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
-      active_for_pl[iset] = s.MayReach(m_efg.GetPlayer(pl).GetInfoset(iset));
+    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
+      active_for_pl[iset] = s.MayReach(m_efg.GetPlayer(pl)->GetInfoset(iset));
       _num_active_infosets[pl]++;
     }
     _is_active += active_for_pl;
@@ -155,9 +155,9 @@ gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s,
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
-      if ( active.Contains(m_efg.GetPlayer(pl).GetInfoset(iset)) ) {
+    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
+      if ( active.Contains(m_efg.GetPlayer(pl)->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -176,7 +176,7 @@ gbtEfgContIterator::~gbtEfgContIterator()
 void gbtEfgContIterator::First(void)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++)
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
 	_current(pl, iset) = 1;
 	if (_is_active[pl][iset])      
@@ -196,7 +196,7 @@ void gbtEfgContIterator::Set(int pl, int iset, int act)
 
 void gbtEfgContIterator::Set(const gbtEfgAction &a)
 {
-  if (a.GetInfoset().GetPlayer().GetId() != _frozen_pl ||
+  if (a.GetInfoset().GetPlayer()->GetId() != _frozen_pl ||
       a.GetInfoset().GetId() != _frozen_iset) return;
   _profile.Set(a);
 }
@@ -230,7 +230,7 @@ int gbtEfgContIterator::NextContingency(void)
   while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
   if (pl == 0)   return 0;
-  int iset = m_efg.GetPlayer(pl).NumInfosets();
+  int iset = m_efg.GetPlayer(pl)->NumInfosets();
     
   while (true) {
     if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
@@ -251,7 +251,7 @@ int gbtEfgContIterator::NextContingency(void)
       }  while (pl > 0 && _num_active_infosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = m_efg.GetPlayer(pl).NumInfosets();
+      iset = m_efg.GetPlayer(pl)->NumInfosets();
     }
   }
 }
@@ -279,8 +279,8 @@ gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
       active_for_pl[iset] = true;
       _num_active_infosets[pl]++;
     }
@@ -299,9 +299,9 @@ gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl).NumInfosets());
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
-      if ( active.Contains(m_efg.GetPlayer(pl).GetInfoset(iset)) ) {
+    gbtBlock<bool> active_for_pl(m_efg.GetPlayer(pl)->NumInfosets());
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
+      if ( active.Contains(m_efg.GetPlayer(pl)->GetInfoset(iset)) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -320,7 +320,7 @@ gbtEfgConditionalContIterator::~gbtEfgConditionalContIterator()
 void gbtEfgConditionalContIterator::First(void)
 {
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg.GetPlayer(pl).NumInfosets(); iset++) {
+    for (int iset = 1; iset <= m_efg.GetPlayer(pl)->NumInfosets(); iset++) {
       _current(pl, iset) = 1;
       if (_is_active[pl][iset])
 	_profile.Set(_support.GetAction(pl, iset, 1));
@@ -358,7 +358,7 @@ int gbtEfgConditionalContIterator::NextContingency(void)
   while (pl > 0 && _num_active_infosets[pl] == 0)
     --pl;
   if (pl == 0)   return 0;
-  int iset = m_efg.GetPlayer(pl).NumInfosets();
+  int iset = m_efg.GetPlayer(pl)->NumInfosets();
     
   while (true) {
 
@@ -380,7 +380,7 @@ int gbtEfgConditionalContIterator::NextContingency(void)
       }  while (pl > 0 && _num_active_infosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = m_efg.GetPlayer(pl).NumInfosets();
+      iset = m_efg.GetPlayer(pl)->NumInfosets();
     }
   }
 }

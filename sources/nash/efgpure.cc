@@ -43,7 +43,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
   int ncont = 1;
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       ncont *= p_support.NumActions(pl, iset);
     }
   }
@@ -62,7 +62,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
       for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
 	gbtNumber current = citer.Payoff(pl);
 	for (int iset = 1;
-	     flag && iset <= p_support.GetGame().GetPlayer(pl).NumInfosets();
+	     flag && iset <= p_support.GetGame().GetPlayer(pl)->NumInfosets();
 	     iset++)  {
 	  if (probs(pl, iset) == gbtNumber(0))   continue;
 	  for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
@@ -84,7 +84,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 	     !player.End(); player++) {
 	  for (gbtEfgInfosetIterator infoset(*player);
 	       !infoset.End(); infoset++) {
-	    temp((*player).GetId(),
+	    temp((*player)->GetId(),
 		 (*infoset).GetId(),
 		 profile.GetAction(*infoset).GetId()) = 1;
 	  }

@@ -433,8 +433,8 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = m_efg.GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) )
 	numvars += support.NumActions(infoset) - 1;
     }
@@ -445,8 +445,8 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = m_efg.GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       if ( support.MayReach(infoset) ) {
 	for (int act = 1; act <= support.NumActions(infoset) - 1; act++) {
 	  count++;

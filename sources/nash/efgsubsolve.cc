@@ -108,22 +108,22 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 
       int base;
 	
-      for (base = 1; base <= efg.GetPlayer(pl).NumInfosets(); base++)
-	if (efg.GetPlayer(pl).GetInfoset(base) ==
+      for (base = 1; base <= efg.GetPlayer(pl)->NumInfosets(); base++)
+	if (efg.GetPlayer(pl)->GetInfoset(base) ==
 	    nodes[index].GetInfoset())  break;
 	
-      assert(base <= efg.GetPlayer(pl).NumInfosets());
+      assert(base <= efg.GetPlayer(pl)->NumInfosets());
 	
-      for (int iset = 1; iset <= p.NumInfosets(); iset++)  {
+      for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
 	for (index = 1; index <= infosets[pl]->Length(); index++)
-	  if ((*infosets[pl])[index] == efg.GetPlayer(pl).GetInfoset(iset + base - 1))
+	  if ((*infosets[pl])[index] == efg.GetPlayer(pl)->GetInfoset(iset + base - 1))
 	    break;
 	  
 	assert(index <= infosets[pl]->Length());
-	for (int act = 1; act <= p.GetInfoset(iset).NumActions();
+	for (int act = 1; act <= p->GetInfoset(iset).NumActions();
 	     act++)  {
           if (!p_support.Contains((*infosets[pl])[index].GetAction(act))) {
-            subsupport.RemoveAction(p.GetInfoset(iset).GetAction(act));
+            subsupport.RemoveAction(p->GetInfoset(iset).GetAction(act));
 	  }
 	}
       }
@@ -183,15 +183,15 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 
 	int base;
 	
-	for (base = 1; base <= efg.GetPlayer(pl).NumInfosets(); base++)
-	  if (efg.GetPlayer(pl).GetInfoset(base) ==
+	for (base = 1; base <= efg.GetPlayer(pl)->NumInfosets(); base++)
+	  if (efg.GetPlayer(pl)->GetInfoset(base) ==
 	      nodes[index].GetInfoset())  break;
 	
-	assert(base <= efg.GetPlayer(pl).NumInfosets());
+	assert(base <= efg.GetPlayer(pl)->NumInfosets());
 	
-	for (int iset = 1; iset <= p.NumInfosets(); iset++)  {
+	for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
 	  for (index = 1; index <= infosets[pl]->Length(); index++)
-	    if ((*infosets[pl])[index] == efg.GetPlayer(pl).GetInfoset(iset + base - 1))
+	    if ((*infosets[pl])[index] == efg.GetPlayer(pl)->GetInfoset(iset + base - 1))
 	      break;
 	  
 	  assert(index <= infosets[pl]->Length());
@@ -267,9 +267,9 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
   infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++) {
-    infosets[i] = new gbtArray<gbtEfgInfoset>(efg.GetPlayer(i).NumInfosets());
-    for (int j = 1; j <= efg.GetPlayer(i).NumInfosets(); j++) {
-      (*infosets[i])[j] = efg.GetPlayer(i).GetInfoset(j);
+    infosets[i] = new gbtArray<gbtEfgInfoset>(efg.GetPlayer(i)->NumInfosets());
+    for (int j = 1; j <= efg.GetPlayer(i)->NumInfosets(); j++) {
+      (*infosets[i])[j] = efg.GetPlayer(i)->GetInfoset(j);
     }
   }
 
@@ -277,11 +277,11 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++)  {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset.NumActions(); act++) { 
 	if (!p_support.Contains(infoset.GetAction(act))) {
-	  support.RemoveAction(efg.GetPlayer(pl).GetInfoset(iset).GetAction(act));
+	  support.RemoveAction(efg.GetPlayer(pl)->GetInfoset(iset).GetAction(act));
 	}
       }
     }

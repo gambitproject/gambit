@@ -72,8 +72,8 @@ bool gbtApplication::OnInit(void)
   }
   else {
     gbtEfgGame efg = NewEfg();
-    efg.NewPlayer().SetLabel("Player 1");
-    efg.NewPlayer().SetLabel("Player 2");
+    efg.NewPlayer()->SetLabel("Player 1");
+    efg.NewPlayer()->SetLabel("Player 2");
     efg.SetLabel("Untitled Extensive Form Game");
     (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
   }
@@ -99,7 +99,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
       gbtEfgGame efg = NewEfg();
       efg.SetLabel("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-	efg.NewPlayer().SetLabel(gbtText("Player") + ToText(pl));
+	efg.NewPlayer()->SetLabel(gbtText("Player") + ToText(pl));
       }
       (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
     }

@@ -215,7 +215,7 @@ gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgAction &)
 //           struct gbt_efg_infoset_rep: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbt_efg_player_rep *p_player,
+gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbtEfgPlayerBase *p_player,
 					 int p_id, int p_br)
   : m_id(p_id), m_player(p_player), m_deleted(false), 
     m_refCount(0), m_actions(p_br),
@@ -420,7 +420,7 @@ void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
   if (IsNull() || p_player.IsNull()) {
     throw gbtEfgNullObject();
   }
-  if (GetPlayer().IsChance() || p_player.IsChance()) {
+  if (GetPlayer()->IsChance() || p_player->IsChance()) {
     throw gbtEfgbtException();
   }
   
@@ -428,7 +428,7 @@ void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
     return;
   }
 
-  rep->m_player->m_efg->SetPlayer(rep, p_player.rep);
+  rep->m_player->m_efg->SetPlayer(rep, dynamic_cast<gbtEfgPlayerBase *>(p_player.Get()));
 }
 
 bool gbtEfgInfoset::IsChanceInfoset(void) const
@@ -465,7 +465,8 @@ void gbtEfgInfoset::Reveal(gbtEfgPlayer p_who)
     return;
   }
 
-  rep->m_player->m_efg->Reveal(rep, p_who.rep);
+  rep->m_player->m_efg->Reveal(rep,
+			       dynamic_cast<gbtEfgPlayerBase *>(p_who.Get()));
 }
 
 void gbtEfgInfoset::MergeInfoset(gbtEfgInfoset p_from)

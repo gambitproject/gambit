@@ -71,8 +71,8 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 					  (char *) p_profile.GetLabel()));
 
   for (int pl = 1; ; pl++) {
-    if (p_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
-      m_lastInfoset = p_profile.GetGame().GetPlayer(pl).GetInfoset(1);
+    if (p_profile.GetGame().GetPlayer(pl)->NumInfosets() > 0) {
+      m_lastInfoset = p_profile.GetGame().GetPlayer(pl)->GetInfoset(1);
       break;
     }
   }
@@ -81,18 +81,18 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = p_profile.GetGame().GetPlayer(pl);
     wxTreeItemId id;
-    if (player.GetLabel() != "") {
+    if (player->GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
 				     wxString::Format(wxT("%s"),
-						      (char *) player.GetLabel()));
+						      (char *) player->GetLabel()));
     }
     else {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
 				     wxString::Format(wxT("Player %d"), pl));
     }
     m_infosetTree->SetItemBold(id, true);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID;
       if (infoset.GetLabel() != "") {
 	isetID = m_infosetTree->AppendItem(id,
@@ -104,8 +104,8 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 					   wxString::Format(wxT("(%d,%d)"),
 							    pl, iset));
       }
-      m_map.Define(isetID, player.GetInfoset(iset));
-      if (player.GetInfoset(iset) == m_lastInfoset) {
+      m_map.Define(isetID, player->GetInfoset(iset));
+      if (player->GetInfoset(iset) == m_lastInfoset) {
 	firstID = isetID;
       }
     }
@@ -237,8 +237,8 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
   if (infoset.IsNull()) {
     for (int pl = 1; ; pl++) {
-      if (m_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
-	m_lastInfoset = m_profile.GetGame().GetPlayer(pl).GetInfoset(1);
+      if (m_profile.GetGame().GetPlayer(pl)->NumInfosets() > 0) {
+	m_lastInfoset = m_profile.GetGame().GetPlayer(pl)->GetInfoset(1);
 	break;
       }
     }

@@ -66,8 +66,8 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   int ntot;
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame().GetPlayer(1).NumInfosets()+1;
-  ni2 = p_support.GetGame().GetPlayer(2).NumInfosets()+1;
+  ni1 = p_support.GetGame().GetPlayer(1)->NumInfosets()+1;
+  ni2 = p_support.GetGame().GetPlayer(2)->NumInfosets()+1;
 
   ntot = ns1+ns2+ni1+ni2;
 
@@ -231,14 +231,14 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
       gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetGame().GetPlayer(2)) - gbtNumber(maxpay));
   }
   if (!n.GetInfoset().IsNull()) {
-    if (n.GetPlayer().IsChance()) {
+    if (n.GetPlayer()->IsChance()) {
       for (int i = 1; i <= n.NumChildren(); i++) {
 	FillTableau(p_support, A, n.GetChild(i),
 		    gbtNumber(prob) * n.GetInfoset().GetChanceProb(i),
 		    s1,s2,i1,i2);
       }
     }
-    int pl = n.GetPlayer().GetId();
+    int pl = n.GetPlayer()->GetId();
     if (pl==1) {
       i1=isets1.Find(n.GetInfoset());
       snew=1;
@@ -280,11 +280,11 @@ void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 {
   int i,pl,inf,snew,ind,ind2;
   if (!n.GetInfoset().IsNull()) {
-    if (n.GetPlayer().IsChance()) {
+    if (n.GetPlayer()->IsChance()) {
       for (i = 1; i <= n.NumChildren();i++)
 	GetProfile(p_support, tab, v, sol, n.GetChild(i), s1, s2);
     }
-    pl = n.GetPlayer().GetId();
+    pl = n.GetPlayer()->GetId();
     if(pl==1) {
       inf = isets1.Find(n.GetInfoset());
       snew=1;

@@ -39,13 +39,13 @@
 
 static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
 {
-  gbtArray<int> *behav = new gbtArray<int>(p_player.NumInfosets());
+  gbtArray<int> *behav = new gbtArray<int>(p_player->NumInfosets());
   gbtText label = "";
 
   // FIXME: This is a rather lame labeling scheme.
-  for (int iset = 1; iset <= p_player.NumInfosets(); iset++)  {
-    if (p_player.GetInfoset(iset).GetFlag()) {
-      (*behav)[iset] = p_player.GetInfoset(iset).GetWhichBranch();
+  for (int iset = 1; iset <= p_player->NumInfosets(); iset++)  {
+    if (p_player->GetInfoset(iset).GetFlag()) {
+      (*behav)[iset] = p_player->GetInfoset(iset).GetWhichBranch();
       label += ToText((*behav)[iset]);
     }
     else {
@@ -54,7 +54,7 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
     }
   }
 
-  gbt_nfg_player_rep *player = p_nfg->m_players[p_player.GetId()];
+  gbt_nfg_player_rep *player = p_nfg->m_players[p_player->GetId()];
   gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
   strategy->m_behav = behav;
   strategy->m_label = label;
@@ -62,7 +62,7 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
 }
 
 static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
-			      gbt_efg_player_rep *p,
+			      gbtEfgPlayerBase *p,
 			      gbt_efg_node_rep *n,
 			      gbt_efg_node_rep *nn)
 {
@@ -147,8 +147,8 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
   afg.SetLabel(p_efg.GetLabel() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)   {
-    for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)  {
-      gbtEfgInfoset s = p_efg.GetPlayer(epl).GetInfoset(iset);
+    for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)  {
+      gbtEfgInfoset s = p_efg.GetPlayer(epl)->GetInfoset(iset);
       for (int act = 1; act <= s.NumActions(); act++)  {
 	afg.GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
       }
@@ -160,7 +160,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
 
   gbtArray<int> dim(p_efg.NumPlayers());
   for (int i = 1; i <= dim.Length(); i++) {
-    dim[i] = p_efg.GetPlayer(i).NumInfosets();
+    dim[i] = p_efg.GetPlayer(i)->NumInfosets();
   }
   gbtPVector<int> profile(dim);
   ((gbtVector<int> &) profile).operator=(1);
@@ -173,7 +173,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
     iter.SetOutcome(afg.NewOutcome());
 
     for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)
-      for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)
+      for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)
 	iter.GetOutcome()->SetPayoff(afg.GetPlayer(npl), payoff[epl]);
 
     

@@ -293,10 +293,10 @@ void gbtOutcomeWindow::OnUpdate(void)
     }
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      if (efg.GetPlayer(pl).GetLabel() != "") {
+      if (efg.GetPlayer(pl)->GetLabel() != "") {
 	SetLabelValue(wxHORIZONTAL,
 		      wxString::Format(wxT("%s"),
-				       (char *) efg.GetPlayer(pl).GetLabel()),
+				       (char *) efg.GetPlayer(pl)->GetLabel()),
 		      pl);
       }
       else {

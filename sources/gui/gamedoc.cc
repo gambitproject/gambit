@@ -51,8 +51,8 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
     m_curProfile(0)
 {
   // Make sure that Chance player has a name
-  if (m_efg->GetChance().GetLabel() == "") {
-    m_efg->GetChance().SetLabel("Chance");
+  if (m_efg->GetChance()->GetLabel() == "") {
+    m_efg->GetChance()->SetLabel("Chance");
   }
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
@@ -276,7 +276,7 @@ gbtText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
+      p_node.GetPlayer().IsNull() || p_node.GetPlayer()->IsChance()) {
     return "";
   }
   if (GetBehavProfile().GetInfosetProb(p_node.GetInfoset()) > gbtNumber(0)) {
@@ -291,7 +291,7 @@ gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 
 gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
+  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer()->IsChance()) {
     return ToText(p_node.GetInfoset().GetChanceProb(p_act),
 		  m_prefs.NumDecimals());
   }
@@ -307,7 +307,7 @@ gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) cons
 gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
-      p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
+      p_node.GetPlayer().IsNull() || p_node.GetPlayer()->IsChance()) {
     return "";
   }
 
@@ -323,7 +323,7 @@ gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) con
 
 gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) const
 {
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
+  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer()->IsChance()) {
     return p_node.GetInfoset().GetChanceProb(p_action);
   }
 

@@ -42,7 +42,7 @@ class gbtEfgGame;
 struct gbt_efg_action_rep;
 struct gbt_efg_infoset_rep;
 struct gbt_efg_node_rep;
-struct gbt_efg_player_rep;
+struct gbtEfgPlayerBase;
 struct gbt_efg_game_rep;
 
 class gbtEfgOutcomeBase : public gbtEfgOutcomeRep {
@@ -61,25 +61,35 @@ public:
 
   gbtArray<gbtNumber> GetPayoff(void) const { return m_payoffs; }
   gbtNumber GetPayoff(const gbtEfgPlayer &p_player) const
-  { return m_payoffs[p_player.GetId()]; }
+  { return m_payoffs[p_player->GetId()]; }
   double GetPayoffDouble(int p_playerId) const 
   { return m_doublePayoffs[p_playerId]; }
   void SetPayoff(const gbtEfgPlayer &p_player, const gbtNumber &p_value)
-  { m_payoffs[p_player.GetId()] = p_value; m_doublePayoffs[p_player.GetId()] = p_value; } 
+  { m_payoffs[p_player->GetId()] = p_value; m_doublePayoffs[p_player->GetId()] = p_value; } 
 
   void DeleteOutcome(void);
 };
 
-struct gbt_efg_player_rep {
+class gbtEfgPlayerBase : public gbtEfgPlayerRep {
+public:
   int m_id;
   gbt_efg_game_rep *m_efg;
-  bool m_deleted;
   gbtText m_label;
   gbtBlock<gbt_efg_infoset_rep *> m_infosets;
-  int m_refCount;
 
-  gbt_efg_player_rep(gbt_efg_game_rep *, int);
-  ~gbt_efg_player_rep();
+  gbtEfgPlayerBase(gbt_efg_game_rep *, int);
+  ~gbtEfgPlayerBase();
+
+  gbtEfgGame GetGame(void) const { return m_efg; }
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return m_id; }
+
+  bool IsChance(void) const { return (m_id == 0); }
+
+  int NumInfosets(void) const { return m_infosets.Length(); }
+  gbtEfgInfoset NewInfoset(int p_actions);
+  gbtEfgInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
 };
 
 struct gbt_efg_action_rep {
@@ -94,7 +104,7 @@ struct gbt_efg_action_rep {
 
 struct gbt_efg_infoset_rep {
   int m_id;
-  gbt_efg_player_rep *m_player;
+  gbtEfgPlayerBase *m_player;
   bool m_deleted;
   gbtText m_label;
   int m_refCount;
@@ -103,7 +113,7 @@ struct gbt_efg_infoset_rep {
   gbtBlock<gbt_efg_node_rep *> m_members;
   int m_flag, m_whichbranch;
 
-  gbt_efg_infoset_rep(gbt_efg_player_rep *, int id, int br);
+  gbt_efg_infoset_rep(gbtEfgPlayerBase *, int id, int br);
   ~gbt_efg_infoset_rep();
 
   void PrintActions(gbtOutput &) const;
@@ -144,10 +154,10 @@ struct gbt_efg_game_rep {
   mutable long m_revision;
   mutable long m_outcome_revision;
   gbtText m_label, comment;
-  gbtBlock<gbt_efg_player_rep *> players;
+  gbtBlock<gbtEfgPlayerBase *> players;
   gbtBlock<gbtEfgOutcomeBase *> outcomes;
   gbt_efg_node_rep *root;
-  gbt_efg_player_rep *chance;
+  gbtEfgPlayerBase *chance;
   gbtNfgGame afg;
   gbt_nfg_game_rep *m_reducedNfg;
 
@@ -162,14 +172,14 @@ struct gbt_efg_game_rep {
   void DeleteMove(gbt_efg_node_rep *);
   void DeleteTree(gbt_efg_node_rep *);
 
-  gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,
+  gbt_efg_infoset_rep *NewInfoset(gbtEfgPlayerBase *,
 				  int p_id, int p_actions);
   void DeleteInfoset(gbt_efg_infoset_rep *);
   void JoinInfoset(gbt_efg_infoset_rep *, gbt_efg_node_rep *); 
   gbt_efg_infoset_rep *LeaveInfoset(gbt_efg_node_rep *);
   void MergeInfoset(gbt_efg_infoset_rep *, gbt_efg_infoset_rep *);
-  void Reveal(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
-  void SetPlayer(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
+  void Reveal(gbt_efg_infoset_rep *, gbtEfgPlayerBase *);
+  void SetPlayer(gbt_efg_infoset_rep *, gbtEfgPlayerBase *);
 
   void DeleteAction(gbt_efg_infoset_rep *, gbt_efg_action_rep *);
 

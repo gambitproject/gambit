@@ -50,13 +50,13 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 
   const gbtEfgSupportWithActiveInfo SAct(*this);
   gbtEfgPlayer player = infoset.GetPlayer();
-  int pl = player.GetId();
+  int pl = player->GetId();
   bool equal = true;
 
   if (!conditional) {
     gbtEfgContIterator A(*this), B(*this);
-    A.Freeze(player.GetId(), infoset.GetId()); 
-    B.Freeze(player.GetId(), infoset.GetId());
+    A.Freeze(player->GetId(), infoset.GetId()); 
+    B.Freeze(player->GetId(), infoset.GetId());
     A.Set(a);
     B.Set(b);
 
@@ -203,7 +203,7 @@ bool ElimDominatedForPlayer(const gbtEfgSupport &S, gbtEfgSupport &T,
 {
   bool action_was_eliminated = false;
 
-  for (int iset = 1; iset <= S.GetGame().GetPlayer(pl).NumInfosets();
+  for (int iset = 1; iset <= S.GetGame().GetPlayer(pl)->NumInfosets();
        iset++, cumiset++) {
     status.SetProgress((double) cumiset /
 		       (double) S.GetGame().NumPlayerInfosets());

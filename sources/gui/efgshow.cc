@@ -1231,7 +1231,7 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 {
   gbtArray<gbtText> playerNames(m_doc->GetEfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_doc->GetEfg().GetPlayer(pl).GetLabel();
+    playerNames[pl] = m_doc->GetEfg().GetPlayer(pl)->GetLabel();
   }
   dialogElimBehav dialog(this, playerNames);
 

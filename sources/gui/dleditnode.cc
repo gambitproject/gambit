@@ -66,7 +66,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
 	    (*infoset).NumActions() == p_node.NumChildren()) {
 	  m_infosetList.Append(*infoset);
 	  m_infoset->Append(wxString::Format(wxT("Player %d, Infoset %d"),
-					     (*infoset).GetPlayer().GetId(),
+					     (*infoset).GetPlayer()->GetId(),
 					     (*infoset).GetId()));
 	  if (*infoset == p_node.GetInfoset()) {
 	    selection = m_infoset->GetCount() - 1;

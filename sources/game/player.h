@@ -35,42 +35,65 @@
 // two.
 //
 
-struct gbt_efg_player_rep;
+struct gbtEfgPlayerBase;
 class gbtEfgGame;
 class gbtEfgInfoset;
 
-class gbtEfgPlayer : public gbtGamePlayer {
+class gbtEfgPlayerRep : public gbtGameObject {
+friend class gbtEfgPlayer;
 friend class gbtEfgGame;
 friend class gbtEfgInfoset;
-protected:
-  struct gbt_efg_player_rep *rep;
-
 public:
-  gbtEfgPlayer(void);
-  gbtEfgPlayer(gbt_efg_player_rep *);
-  gbtEfgPlayer(const gbtEfgPlayer &);
-  ~gbtEfgPlayer();
+  virtual gbtEfgGame GetGame(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
 
-  gbtEfgPlayer &operator=(const gbtEfgPlayer &);
+  virtual bool IsChance(void) const = 0;
 
-  bool operator==(const gbtEfgPlayer &) const;
-  bool operator!=(const gbtEfgPlayer &) const;
-
-  bool IsNull(void) const;
-  bool IsDeleted(void) const;
-
-  gbtEfgGame GetGame(void) const;
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
-  int GetId(void) const;
-
-  bool IsChance(void) const;
-
-  int NumInfosets(void) const;
-  gbtEfgInfoset NewInfoset(int p_actions);
-  gbtEfgInfoset GetInfoset(int p_index) const;
+  virtual int NumInfosets(void) const = 0;
+  virtual gbtEfgInfoset NewInfoset(int p_actions) = 0;
+  virtual gbtEfgInfoset GetInfoset(int p_index) const = 0;
 };
 
+class gbtEfgNullPlayer { };
+
+class gbtEfgPlayer {
+private:
+  gbtEfgPlayerRep *m_rep;
+
+public:
+  gbtEfgPlayer(void) : m_rep(0) { }
+  gbtEfgPlayer(gbtEfgPlayerRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgPlayer(const gbtEfgPlayer &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgPlayer() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+
+  gbtEfgPlayer &operator=(const gbtEfgPlayer &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtEfgPlayer &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtEfgPlayer &p_player) const
+  { return (m_rep != p_player.m_rep); }
+
+  gbtEfgPlayerRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullPlayer(); return m_rep; }
+  const gbtEfgPlayerRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullPlayer(); return m_rep; }
+  
+  gbtEfgPlayerRep *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
+};
 
 struct gbt_nfg_player_rep;
 class gbtNfgGame;

@@ -84,9 +84,9 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
     for (int pl = 1; pl <= p_infoset.GetGame().NumPlayers(); pl++) {
       m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 					(char *) 
-					p_infoset.GetGame().GetPlayer(pl).GetLabel()));
+					p_infoset.GetGame().GetPlayer(pl)->GetLabel()));
     } 
-    m_player->SetSelection(p_infoset.GetPlayer().GetId() - 1);
+    m_player->SetSelection(p_infoset.GetPlayer()->GetId() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
@@ -353,7 +353,7 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
   m_infoset.SetLabel(m_infosetLabel);
     
   if (!m_infoset.IsChanceInfoset() && 
-      m_infosetPlayer != m_infoset.GetPlayer().GetId()) {
+      m_infosetPlayer != m_infoset.GetPlayer()->GetId()) {
     m_infoset.SetPlayer(p_doc->GetEfg().GetPlayer(m_infosetPlayer));
   }
 

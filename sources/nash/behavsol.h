@@ -125,7 +125,7 @@ public:
   gbtNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
 
   gbtNumber GetPayoff(const gbtEfgPlayer &p_player) const
-    { return m_profile->Payoff(p_player.GetId()); }
+    { return m_profile->Payoff(p_player->GetId()); }
   
   // DATA ACCESS
   gbtNumber GetRealizProb(const gbtEfgNode &node) const

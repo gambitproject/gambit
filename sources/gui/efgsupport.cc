@@ -131,10 +131,10 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
-						  (char *) player.GetLabel()));
+						  (char *) player->GetLabel()));
     
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID = AppendItem(id, 
 				       wxString::Format(wxT("%s"), (char *) infoset.GetLabel()));
       for (int act = 1; act <= infoset.NumActions(); act++) {

@@ -153,12 +153,12 @@ public:
 //--------------------------------------------------
 
 gbtEfgNodeSet::gbtEfgNodeSet(const gbtEfgPlayer &p)
-  : efp(p), infosets(p.NumInfosets())
+  : efp(p), infosets(p->NumInfosets())
 {
-  for (int i = 1; i <= p.NumInfosets(); i++) {
-    gbtArray<gbtEfgNode> members(p.GetInfoset(i).NumMembers());
+  for (int i = 1; i <= p->NumInfosets(); i++) {
+    gbtArray<gbtEfgNode> members(p->GetInfoset(i).NumMembers());
     for (int j = 1; j <= members.Length(); j++) {
-      members[j] = p.GetInfoset(i).GetMember(j);
+      members[j] = p->GetInfoset(i).GetMember(j);
     }
     infosets[i] = new gbtEfgNodeArrays(members);
   }
@@ -260,7 +260,7 @@ int gbtEfgNodeSet::Find(const gbtEfgNode &n) const
 // checks for a valid gbtEfgNodeSet
 bool gbtEfgNodeSet::IsValid(void) const
 {
-  if (infosets.Length() != efp.NumInfosets())   return false;
+  if (infosets.Length() != efp->NumInfosets())   return false;
 
   for (int i = 1; i <= infosets.Length(); i++)
     if (infosets[i]->nodes.Length() == 0)   return false;
@@ -321,7 +321,7 @@ bool gbtEfgBasis::operator!=(const gbtEfgBasis &b) const
 
 int gbtEfgBasis::NumNodes(const gbtEfgInfoset &infoset) const
 {
-  return nodes[infoset.GetPlayer().GetId()]->NumNodes(infoset.GetId());
+  return nodes[infoset.GetPlayer()->GetId()]->NumNodes(infoset.GetId());
 }
 
 int gbtEfgBasis::NumNodes(int pl, int iset) const
@@ -336,14 +336,14 @@ const gbtArray<gbtEfgNode> &gbtEfgBasis::Nodes(int pl, int iset) const
 
 gbtEfgNode gbtEfgBasis::GetNode(const gbtEfgInfoset &infoset, int index) const
 {
-  return nodes[infoset.GetPlayer().GetId()]->GetNode(infoset.GetId(), index);
+  return nodes[infoset.GetPlayer()->GetId()]->GetNode(infoset.GetId(), index);
 }
 
 int gbtEfgBasis::Find(const gbtEfgNode &n) const
 {
   if (n.GetInfoset().GetGame() != m_efg)   return 0;
 
-  int pl = n.GetInfoset().GetPlayer().GetId();
+  int pl = n.GetInfoset().GetPlayer()->GetId();
 
   return nodes[pl]->Find(n);
 }
@@ -363,11 +363,11 @@ gbtPVector<int> gbtEfgBasis::NumNodes(void) const
   gbtArray<int> foo(m_efg.NumPlayers());
   int i;
   for (i = 1; i <= m_efg.NumPlayers(); i++)
-    foo[i] = nodes[i]->GetPlayer().NumInfosets();
+    foo[i] = nodes[i]->GetPlayer()->NumInfosets();
 
   gbtPVector<int> bar(foo);
   for (i = 1; i <= m_efg.NumPlayers(); i++)
-    for (int j = 1; j <= nodes[i]->GetPlayer().NumInfosets(); j++)
+    for (int j = 1; j <= nodes[i]->GetPlayer()->NumInfosets(); j++)
       bar(i, j) = NumNodes(i,j);
 
   return bar;
@@ -378,7 +378,7 @@ bool gbtEfgBasis::RemoveNode(const gbtEfgNode &n)
   gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
 
-  return nodes[player.GetId()]->RemoveNode(infoset.GetId(), n);
+  return nodes[player->GetId()]->RemoveNode(infoset.GetId(), n);
 }
 
 bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
@@ -403,7 +403,7 @@ void gbtEfgBasis::AddNode(const gbtEfgNode &n)
   gbtEfgInfoset infoset = n.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
 
-  nodes[player.GetId()]->AddNode(infoset.GetId(), n);
+  nodes[player->GetId()]->AddNode(infoset.GetId(), n);
 }
 
 bool gbtEfgBasis::IsConsistent(void) const
@@ -555,14 +555,14 @@ void gbtEfgBasis::MakeAb(void) const
 int gbtEfgBasis::Col(const gbtEfgAction &p_action) const
 {
   gbtEfgInfoset iset = p_action.GetInfoset();
-  return (*actIndex)(iset.GetPlayer().GetId(), iset.GetId(),
+  return (*actIndex)(iset.GetPlayer()->GetId(), iset.GetId(),
 		     (*bigbasis).gbtEfgSupport::GetIndex(p_action));
 }
 
 int gbtEfgBasis::Col(const gbtEfgNode &n) const
 {
   gbtEfgInfoset iset = n.GetInfoset();
-  return (*nodeIndex)(iset.GetPlayer().GetId(), iset.GetId(),
+  return (*nodeIndex)(iset.GetPlayer()->GetId(), iset.GetId(),
 		      (*bigbasis).Find(n));
 }
 
@@ -643,9 +643,9 @@ void gbtEfgBasis::Dump(gbtOutput& s) const
   numplayers = m_efg.NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
     gbtEfgPlayer player = nodes[i]->GetPlayer();
-    s << '"' << player.GetLabel() << "\" { ";
-    for (j = 1; j <= player.NumInfosets(); j++)  {
-      gbtEfgInfoset infoset = player.GetInfoset(j);
+    s << '"' << player->GetLabel() << "\" { ";
+    for (j = 1; j <= player->NumInfosets(); j++)  {
+      gbtEfgInfoset infoset = player->GetInfoset(j);
       s << '"' << infoset.GetLabel() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
 	gbtEfgNode node = nodes[i]->NodeList(j)[k];

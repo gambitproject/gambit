@@ -33,8 +33,8 @@ class ChanceInfoset;
 #include "base/gblock.imp"
 #include "base/glist.imp"
 
-template class gbtArray<gbt_efg_player_rep *>;
-template class gbtBlock<gbt_efg_player_rep *>;
+template class gbtArray<gbtEfgPlayerBase *>;
+template class gbtBlock<gbtEfgPlayerBase *>;
 
 template class gbtArray<gbt_efg_infoset_rep *>;
 template class gbtBlock<gbt_efg_infoset_rep *>;

@@ -792,8 +792,8 @@ void gbtEfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
     for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
       gbtEfgPlayer player = m_support.GetGame().GetPlayer(pl);
 
-      for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-	gbtEfgInfoset infoset = player.GetInfoset(iset);
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	gbtEfgInfoset infoset = player->GetInfoset(iset);
 
 	for (int act = 1; act <= infoset.NumActions(); act++) {
 	  GetCorrespondence()->ShowDimension(index++, 

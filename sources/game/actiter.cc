@@ -60,7 +60,7 @@ bool gbtAllActionIterator::operator==(const gbtAllActionIterator &p_iter) const
 
 bool gbtAllActionIterator::GoToNext(void)
 {
-  while (iset > m_support.GetGame().GetPlayer(pl).NumInfosets()) {
+  while (iset > m_support.GetGame().GetPlayer(pl)->NumInfosets()) {
     pl++;
     iset = 1;
     if (pl > m_support.GetGame().NumPlayers()) {
@@ -77,7 +77,7 @@ bool gbtAllActionIterator::GoToNext(void)
   int tempiset = iset + 1;
 
   while (temppl <= m_support.GetGame().NumPlayers()) {
-    while (tempiset <= m_support.GetGame().GetPlayer(temppl).NumInfosets()) {
+    while (tempiset <= m_support.GetGame().GetPlayer(temppl)->NumInfosets()) {
       if (m_support.NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
@@ -105,7 +105,7 @@ gbtEfgAction gbtAllActionIterator::GetAction(void) const
 
 gbtEfgInfoset gbtAllActionIterator::GetInfoset(void) const
 {
-  return m_support.GetGame().GetPlayer(pl).GetInfoset(iset);
+  return m_support.GetGame().GetPlayer(pl)->GetInfoset(iset);
 }
 
 gbtEfgPlayer gbtAllActionIterator::GetPlayer(void) const
@@ -116,16 +116,16 @@ gbtEfgPlayer gbtAllActionIterator::GetPlayer(void) const
 bool gbtAllActionIterator::IsLast(void) const
 {
   return (pl == m_support.GetGame().NumPlayers() &&
-	  iset == m_support.GetGame().GetPlayer(pl).NumInfosets() &&
+	  iset == m_support.GetGame().GetPlayer(pl)->NumInfosets() &&
 	  act == m_support.NumActions(pl, iset));
 }
 
 bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 {
-  if (pl > p_action.GetInfoset().GetPlayer().GetId()) {
+  if (pl > p_action.GetInfoset().GetPlayer()->GetId()) {
     return true; 
   }
-  else if (pl < p_action.GetInfoset().GetPlayer().GetId()) {
+  else if (pl < p_action.GetInfoset().GetPlayer()->GetId()) {
     return false;
   }
   else {
@@ -147,7 +147,7 @@ bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 
 gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
 				     gbtEfgInfoset p_infoset)
-  : m_support(p_support), pl(p_infoset.GetPlayer().GetId()),
+  : m_support(p_support), pl(p_infoset.GetPlayer()->GetId()),
     iset(p_infoset.GetId()), act(1)
 { }
 

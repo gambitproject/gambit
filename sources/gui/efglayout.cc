@@ -376,7 +376,7 @@ wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
     }
     else {
       return wxString::Format(wxT("%s"),
-			      (const char *) n.GetPlayer().GetLabel());
+			      (const char *) n.GetPlayer()->GetLabel());
     }
   case GBT_NODE_LABEL_ISETLABEL:
     if (n.GetInfoset().IsNull()) {
@@ -392,7 +392,7 @@ wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
     }
     else {
       return wxString::Format(wxT("(%d,%d)"),
-			      n.GetPlayer().GetId(), n.GetInfoset().GetId());
+			      n.GetPlayer()->GetId(), n.GetInfoset().GetId());
     }
   case GBT_NODE_LABEL_OUTCOME:
     return OutcomeAsString(n, m_doc->GetPreferences().NumDecimals());
@@ -498,7 +498,7 @@ int gbtEfgLayout::LayoutSubtree(const gbtEfgNode &p_node,
 	y1 = yn;
       }
 
-      if (!p_node.GetPlayer().IsChance() &&
+      if (!p_node.GetPlayer()->IsChance() &&
 	  !p_support.Contains(p_node.GetInfoset().GetAction(i))) {
 	m_nodeList[p_node.GetChild(i).GetId()]->SetInSupport(false);
       }
@@ -520,12 +520,12 @@ int gbtEfgLayout::LayoutSubtree(const gbtEfgNode &p_node,
 						    prefs.TineLength()));
   }
 
-  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
+  if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer()->IsChance()) {
     entry->SetColor(prefs.ChanceColor());
     entry->SetToken(prefs.ChanceToken());
   }
   else if (!p_node.GetPlayer().IsNull()) {
-    entry->SetColor(prefs.PlayerColor(p_node.GetPlayer().GetId()));
+    entry->SetColor(prefs.PlayerColor(p_node.GetPlayer()->GetId()));
     entry->SetToken(prefs.PlayerToken());
   }
   else {
@@ -633,7 +633,7 @@ void gbtEfgLayout::FillInfosetTable(const gbtEfgNode &n,
   if (n.NumChildren() > 0) {
     for (int i = 1; i <= n.NumChildren(); i++) {
       bool in_sup = true;
-      if (n.GetPlayer().GetId()) {
+      if (n.GetPlayer()->GetId()) {
 	in_sup = cur_sup.Contains(n.GetInfoset().GetAction(i));
       }
             

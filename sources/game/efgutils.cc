@@ -193,11 +193,11 @@ CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
 
   for (int pl = 1; pl <= newefg.NumPlayers(); pl++) {
     gbtEfgPlayer player = newefg.GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset.NumActions(); act >= 1; act--) {
         gbtEfgAction oldact =
-          efg.GetPlayer(pl).GetInfoset(iset).GetAction(act);
+          efg.GetPlayer(pl)->GetInfoset(iset).GetAction(act);
         if (!S.Contains(oldact)) {
           infoset.GetAction(act).DeleteAction();
         }
@@ -216,8 +216,8 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
   support = 0;
   for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = p_efg.GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset.NumActions(); act++) {
 	if (p_support.Contains(infoset.GetAction(act))) {
 	  support(pl, iset, act) = 1;
@@ -228,8 +228,8 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
 
   for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = p_efg.GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset.NumActions(); act >= 1; act--) {
 	if (!support(pl, iset, act)) {
           infoset.GetAction(act).DeleteAction();
