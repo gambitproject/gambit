@@ -537,10 +537,7 @@ void NfgShow::SolveStandard(void)
   if (dialog.Completed() != wxOK)
     return;
 
-  NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
-
-  if (!sup)
-    sup = MakeSolnSupport();
+  NFSupport support(nf);
 
   int old_max_soln = solns.Length();  // used for extensive update
 
@@ -551,16 +548,16 @@ void NfgShow::SolveStandard(void)
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2) {
 	if (IsConstSum(nf))
-	  solver = new guinfgLp(*sup, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLp(support, this, 1, dialog.Precision(), true);
 	else
-	  solver = new guinfgLcp(*sup, this, 1, dialog.Precision(), true);
+	  solver = new guinfgLcp(support, this, 1, dialog.Precision(), true);
       }
       else
-	solver = new guinfgSimpdiv(*sup, this, 1, dialog.Precision(), true);
+	solver = new guinfgSimpdiv(support, this, 1, dialog.Precision(), true);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*sup, this, 1, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(support, this, 1, dialog.Precision(), true);
       }
       else {
 	wxMessageBox("One-Perfect not implemented", "Standard Solution");
@@ -572,13 +569,13 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_TWO:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(support, this, 2, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*sup, this, 2, 10, false);
+	solver = new guinfgLiap(support, this, 2, 10, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(support, this, 2, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
       }
       else {
@@ -591,15 +588,15 @@ void NfgShow::SolveStandard(void)
   case nfgSTANDARD_ALL:
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), false);
+	solver = new guinfgEnumMixed(support, this, 0, dialog.Precision(), false);
       else {
-	solver = new guinfgLiap(*sup, this, 0, 0, false);
+	solver = new guinfgLiap(support, this, 0, 0, false);
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
       }
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), true);
+	solver = new guinfgEnumMixed(support, this, 0, dialog.Precision(), true);
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
       }
       else {
@@ -692,35 +689,6 @@ MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 
   return start;
 }
-
-#include "gstatus.h"
-NFSupport *NfgShow::MakeSolnSupport(void)
-{
-  NFSupport *sup = new NFSupport(nf);
-  DominanceSettings DS;  // reads in dominance defaults
-  gArray<int> players(nf.NumPlayers());
-
-  for (int i = 1; i <= nf.NumPlayers(); i++) 
-    players[i] = i;
-
-  if (DS.UseElimDom()) {
-    NFSupport *temp_sup;
-
-    if (DS.FindAll()) {
-      while ((temp_sup = ComputeDominated(sup->Game(), *sup, DS.DomStrong(), 
-					  players, gnull, gstatus)) != 0)
-	sup = temp_sup;
-    }
-    else {
-      if ((temp_sup = ComputeDominated(sup->Game(), *sup, DS.DomStrong(),
-				       players, gnull, gstatus)) != 0)
-	sup = temp_sup;
-    }
-  }
-
-  return sup;
-}
-
 
 
 // Solution To Extensive

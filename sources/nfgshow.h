@@ -82,9 +82,6 @@ private:
   void UpdateContingencyProb(const gArray<int> &profile);
   void DumpAscii(Bool all_cont);
 
-  // Make a support based on the elimdom options
-  NFSupport *MakeSolnSupport(void);
-
   // process accelerators
   gArray<AccelEvent> MakeEventNames(void);
 
