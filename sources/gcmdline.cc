@@ -177,39 +177,9 @@ void gCmdLineInput::GetCmdExec( void )
 		break;
 
 
-	 if( c == 27 ||
-		  c == VK_LEFT || c == VK_RIGHT ||
-		  c == VK_DOWN || c == VK_UP ||
-		  c == VK_DELETE ) // escape sequences
+	 if( c == 27 ) // escape sequences
 	 {
-		EscapeCode code = ESC_ERROR;
-		if( c == 27 )
-		  code = GetEscapeSequence();
-		else
-		{
-		  switch( c )
-		  {
-		  case VK_LEFT:
-			 code = ESC_LEFT;
-			 break;
-		  case VK_RIGHT:
-			 code = ESC_RIGHT;
-			 break;
-		  case VK_UP:
-			 code = ESC_UP;
-			 break;
-		  case VK_DOWN:
-			 code = ESC_DOWN;
-			 break;
-		  case VK_DELETE:
-			 code = ESC_DELETE;
-          break;
-
-		  default:
-			 // do nothing
-          ;
-		  }
-		}
+		EscapeCode code = GetEscapeSequence();
 
 		switch( code )
 		{

@@ -1360,12 +1360,42 @@ long winio_wmkeydown(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	int hSB, vSB;
 
-  	WINIO_HWND whWnd = (WINIO_HWND) GetWindowLong(hwnd, 4);
-	char far *lpchKeybd = whWnd->fpKeyboard;
-	unsigned pchSave = whWnd->pchKbIn;
 
 
-	if( wParam != VK_DELETE )
+
+	// VT100 emulation for arrow keys
+	if( wParam == VK_LEFT )
+	{
+	  winio_wmchar(hwnd, message, 27, lParam);
+	  winio_wmchar(hwnd, message, '[', lParam);
+	  winio_wmchar(hwnd, message, 68, lParam);
+	}
+	else if( wParam == VK_RIGHT )
+	{
+	  winio_wmchar(hwnd, message, 27, lParam);
+	  winio_wmchar(hwnd, message, '[', lParam);
+	  winio_wmchar(hwnd, message, 67, lParam);
+	}
+	else if( wParam == VK_UP )
+	{
+	  winio_wmchar(hwnd, message, 27, lParam);
+	  winio_wmchar(hwnd, message, '[', lParam);
+	  winio_wmchar(hwnd, message, 65, lParam);
+	}
+	else if( wParam == VK_DOWN )
+	{
+	  winio_wmchar(hwnd, message, 27, lParam);
+	  winio_wmchar(hwnd, message, '[', lParam);
+	  winio_wmchar(hwnd, message, 66, lParam);
+	}
+	else if( wParam == VK_DELETE )
+	{
+	  winio_wmchar(hwnd, message, 27, lParam);
+	  winio_wmchar(hwnd, message, '[', lParam);
+	  winio_wmchar(hwnd, message, 51, lParam);
+	  winio_wmchar(hwnd, message, 126, lParam);
+	}
+	else
 	{
 	  if ((wParam < VK_PRIOR) || (wParam > VK_DOWN))
 		 return 0;
@@ -1377,20 +1407,8 @@ long winio_wmkeydown(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	  if (vSB != DO_NOTHING)
 		 SendMessage(hwnd, WM_VSCROLL, vSB, 0L);
 	  if( hSB != DO_NOTHING || vSB != DO_NOTHING )
-	    return 0;  
-	//	return 0;
+		 return 0;
 	}
-
-	whWnd->pchKbIn++;
-	if (whWnd->pchKbIn == TYPE_AHEAD)
-		whWnd->pchKbIn = 0;
-	if (whWnd->pchKbIn == whWnd->pchKbOut)
-		{
-		MessageBeep(0);
-		whWnd->pchKbIn = pchSave;
-		}
-	else
-		*(lpchKeybd + pchSave) = LOBYTE(wParam);
 
 	return 0;
 
