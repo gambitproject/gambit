@@ -129,6 +129,7 @@ template <class T> class gMatrix: public gBaseMatrix<T>
   void AddColumn(const gVector<T> &);
   void RemoveColumn(int);
   gVector<T> GetColumn(int) const;
+  void SwitchColumnWithVector(int, gVector<T> &);
   void SwitchColumn(int, const gVector<T> &);
   void SwitchColumns(int, int);
 
@@ -302,6 +303,17 @@ gMatrix<T>::RemoveColumn(int col)
 	}
       data[i] = newrow;
     }
+}
+
+template <class T> void
+gMatrix<T>::SwitchColumnWithVector(int col, gVector<T> &V)
+{
+  assert(CheckCol(col));
+  assert(V.First() == MinIndex() && V.Last() == Height());
+  T x;
+  for(int i = data.First(); i <= data.Last(); i++) {
+    x = data[i][col]; data[i][col] = V[i]; V[i] = x;
+  }
 }
 
 template <class T> void
