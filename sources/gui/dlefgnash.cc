@@ -224,9 +224,21 @@ efgNashAlgorithm *dialogEfgNash::GetAlgorithm(void) const
   if (m_algorithms(m_algorithmTree->GetSelection())) {
     return m_algorithms(m_algorithmTree->GetSelection())->GetAlgorithm();
   }
+  else {
+    return 0;
+  }
 }
 
+
+#ifdef __BCC55__
+// Need to provide an explicit output operator to silence a BC 5.5
+// compilation ambiguity for operator<<
+static gOutput &operator<<(gOutput &p_stream, wxTreeItemId)
+{ return p_stream; }
+#endif  // __BCC55__
 
 #include "base/gmap.imp"
 template class gBaseMap<wxTreeItemId, panelEfgNashAlgorithm *>;
 template class gOrdMap<wxTreeItemId, panelEfgNashAlgorithm *>;
+
+

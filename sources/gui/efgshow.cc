@@ -14,8 +14,8 @@
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
-#include "guishare/dlspinctrl.h"
-#include "guishare/wxstatus.h"
+#include "dlspinctrl.h"
+#include "wxstatus.h"
 
 #include "math/gmath.h"
 #include "game/efg.h"

@@ -1,35 +1,35 @@
-gambit_icn ICON bitmaps\gambit.ico
-efg_icn    ICON bitmaps\efg.ico
-nfg_icn    ICON bitmaps\nfg.ico
+gambit_icn ICON ..\bitmaps\gambit.ico
+efg_icn    ICON ..\bitmaps\efg.ico
+nfg_icn    ICON ..\bitmaps\nfg.ico
 
 rcinclude wx\msw\wx.rc
 rcinclude wx\html\msw\wxhtml.rc
 
-SCISSORCUR	CURSOR	 bitmaps\scissor.cur
-OUTCOMECUR	CURSOR	 bitmaps\outcome.cur
+SCISSORCUR	CURSOR	 ..\bitmaps\scissor.cur
+OUTCOMECUR	CURSOR	 ..\bitmaps\outcome.cur
 
-gambit         BITMAP bitmaps\gambit.bmp
-new            BITMAP bitmaps\new.bmp
-open           BITMAP bitmaps\open.bmp
-save           BITMAP bitmaps\save.bmp
-print          BITMAP bitmaps\print.bmp
-preview        BITMAP bitmaps\preview.bmp
-zoomin         BITMAP bitmaps\zoomin.bmp
-zoomout        BITMAP bitmaps\zoomout.bmp
-table          BITMAP bitmaps\table.bmp
-help           BITMAP bitmaps\help.bmp
+gambit         BITMAP ..\bitmaps\gambit.bmp
+new            BITMAP ..\bitmaps\new.bmp
+open           BITMAP ..\bitmaps\open.bmp
+save           BITMAP ..\bitmaps\save.bmp
+print          BITMAP ..\bitmaps\print.bmp
+preview        BITMAP ..\bitmaps\preview.bmp
+zoomin         BITMAP ..\bitmaps\zoomin.bmp
+zoomout        BITMAP ..\bitmaps\zoomout.bmp
+table          BITMAP ..\bitmaps\table.bmp
+help           BITMAP ..\bitmaps\help.bmp
 
-ADD_BITMAP     BITMAP bitmaps\add.bmp
-DELETE_BITMAP  BITMAP bitmaps\delete.bmp
-EFG_BITMAP     BITMAP bitmaps\efg.bmp
-HELP_BITMAP    BITMAP bitmaps\help.bmp
-INSPECT_BITMAP BITMAP bitmaps\inspect.bmp
-NFG_BITMAP     BITMAP bitmaps\makenf.bmp
-OPTIONS_BITMAP BITMAP bitmaps\options.bmp
-PAYOFF_BITMAP  BITMAP bitmaps\payoff.bmp
-SOLVE_BITMAP   BITMAP bitmaps\solve.bmp
-ZOOMIN_BITMAP  BITMAP bitmaps\zoomin.bmp
-ZOOMOUT_BITMAP BITMAP bitmaps\zoomout.bmp
+ADD_BITMAP     BITMAP ..\bitmaps\add.bmp
+DELETE_BITMAP  BITMAP ..\bitmaps\delete.bmp
+EFG_BITMAP     BITMAP ..\bitmaps\efg.bmp
+HELP_BITMAP    BITMAP ..\bitmaps\help.bmp
+INSPECT_BITMAP BITMAP ..\bitmaps\inspect.bmp
+NFG_BITMAP     BITMAP ..\bitmaps\makenf.bmp
+OPTIONS_BITMAP BITMAP ..\bitmaps\options.bmp
+PAYOFF_BITMAP  BITMAP ..\bitmaps\payoff.bmp
+SOLVE_BITMAP   BITMAP ..\bitmaps\solve.bmp
+ZOOMIN_BITMAP  BITMAP ..\bitmaps\zoomin.bmp
+ZOOMOUT_BITMAP BITMAP ..\bitmaps\zoomout.bmp
 
 COPY_BITMAP BITMAP 
 {

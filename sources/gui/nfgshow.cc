@@ -14,8 +14,8 @@
 #include "wx/notebook.h"
 #include "wx/grid.h"
 #include "wx/fontdlg.h"
-#include "guishare/dlspinctrl.h"
-#include "guishare/wxstatus.h"
+#include "dlspinctrl.h"
+#include "wxstatus.h"
 
 #include "nfgshow.h"
 #include "nfgtable.h"

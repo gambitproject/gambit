@@ -1,0 +1,45 @@
+gambit_SOURCES = \
+        dlabout.cc \
+	dleditbehav.cc \
+	dleditcont.cc \
+	dleditefg.cc \
+	dleditmixed.cc \
+	dleditmove.cc \
+	dleditnode.cc \
+	dlefgdelete.cc \
+	dlefgnash.cc \
+	dlefgreveal.cc \
+	dlelimbehav.cc \
+	dlelimmixed.cc \
+	dlinsertmove.cc \
+	dlnewgame.cc \
+	dlnfgnash.cc \
+	dlnfgproperties.cc \
+	dlnfgstrategies.cc \
+	dlspinctrl.cc \
+	efglayout.cc \
+	efgnavigate.cc \
+	efgoutcome.cc \
+	efgprint.cc \
+	efgprofile.cc \
+	efgshow.cc \
+	efgsupport.cc \
+	gambit.cc \
+	nfgnavigate.cc \
+	nfgoutcome.cc \
+	nfgprofile.cc \
+	nfgprint.cc \
+	nfgshow.cc \
+	nfgsupport.cc \
+	nfgtable.cc \
+        numberedit.cc \
+	splash.cc \
+	treedraw.cc \
+	treewin.cc \
+	userprefs.cc \
+        valinteger.cc \
+        valnumber.cc \
+	wxio.cc \
+        wxstatus.cc 
+
+

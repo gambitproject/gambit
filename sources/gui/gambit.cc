@@ -9,6 +9,8 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
+#include <math.h>
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
@@ -19,14 +21,13 @@
 #include "game/nfg.h"
 #include "game/nfstrat.h"
 #include "game/nfgciter.h"
+
 #include "gambit.h"
-#include "guishare/dlabout.h"
+#include "dlabout.h"
 #include "splash.h"
 #include "dlnewgame.h"
 #include "efgshow.h"
 #include "nfgshow.h"
-#include <signal.h>
-#include <math.h>
 
 class Game {
 public:

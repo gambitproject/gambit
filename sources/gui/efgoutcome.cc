@@ -12,7 +12,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "efgoutcome.h"
-#include "guishare/numberedit.h"
+#include "numberedit.h"
 
 const int idPOPUP_NEW = 2001;
 const int idPOPUP_DELETE = 2002;

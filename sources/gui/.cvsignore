@@ -1,0 +1,11 @@
+*~
+*.lib
+*.obj
+*.o
+*.exe
+*.ilc
+*.ild
+*.ilf
+*.ils
+*.res
+*.tds

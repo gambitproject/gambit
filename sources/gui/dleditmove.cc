@@ -11,8 +11,8 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "guishare/valnumber.h"
 #include "game/efg.h"
+#include "valnumber.h"
 #include "dleditmove.h"
 
 //======================================================================
