@@ -132,7 +132,8 @@ for (int d=0;d<=num_d;d++)
 	char **prob_vector=new char *[actions_now+1];
 	for (i=1;i<=actions_now;i++)
 	{
-		T temp_p=((ChanceInfoset<T> *)(n->GetInfoset()))->GetActionProb(i+d*ENTRIES_PER_DIALOG);
+		T temp_p=ef.GetChanceProb(n->GetInfoset(),
+					  i + d * ENTRIES_PER_DIALOG);
 		gString temp_s=ToString(temp_p);
 		prob_vector[i]=new char[temp_s.length()+1];
 		strcpy(prob_vector[i],temp_s);
@@ -147,7 +148,9 @@ for (int d=0;d<=num_d;d++)
 	{
 		T dummy;
 		for (i=1;i<=actions_now;i++)
-			((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i+d*ENTRIES_PER_DIALOG,FromString(prob_vector[i],dummy));
+		  ef.SetChanceProb(n->GetInfoset(),
+				   i + d * ENTRIES_PER_DIALOG,
+				   FromString(prob_vector[i], dummy));
 		outcomes_changed=TRUE;  // game changed -- delete solutions, etc
 	}
 	for (i=1;i<=actions_now;i++) delete [] prob_vector[i];delete [] prob_vector;
