@@ -634,6 +634,7 @@ bool GSM::Subscript ( void )
   gString  new_string;
   int      subscript;
   bool     result = true;
+  bool     was_ref = false;
 
   assert( _StackStack->Peek()->Depth() >= 2 );
   p2 = _StackStack->Peek()->Pop();
@@ -641,6 +642,7 @@ bool GSM::Subscript ( void )
 
   if( p1->Type() == porREFERENCE )
   {
+    was_ref = true;
     refp = p1;
 
     if( _VarIsDefined( ( (Reference_Portion*) refp )->Value() ) )
@@ -680,7 +682,7 @@ bool GSM::Subscript ( void )
   else
   {
     _ErrorMessage( _StdErr, 37 );
-    if( p1->Type() != porLIST )
+    if( p1->Type() != porLIST || !was_ref )
       delete p1;
     delete p2;
     _StackStack->Peek()->Push( new Error_Portion );
@@ -698,7 +700,6 @@ bool GSM::Subscript ( void )
     else
     {
       real_list = p1->ShadowOf();
-      delete p1;
     }
     element = ( (List_Portion* ) real_list )->GetSubscript( subscript );
     assert( element != 0 );
@@ -714,6 +715,7 @@ bool GSM::Subscript ( void )
       delete element;
       _StackStack->Peek()->Push( new Error_Portion );
     }
+    delete p1;
   }
   else if( p1->Type() == porSTRING )
   {

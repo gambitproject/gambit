@@ -66,10 +66,7 @@ List_Portion*& Portion::ParentList( void )
 
 Portion* Portion::Operation( Portion* p, OperationMode mode )
 {
-  if( p !=0 )
-  {
-    delete p;
-  }
+  delete p;
   return new Error_Portion( _ErrorMessage( 1 ) );
 }
 
@@ -190,7 +187,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
       *_Value = - *_Value;
       break;
     default:
-      result = Portion::Operation( p, mode );      
+      result = Portion::Operation( 0, mode );      
     }
   }
   else               // binary operations
@@ -228,7 +225,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 	}
 	else
 	{
-	  result = Portion::Operation( p, mode );
+	  result = Portion::Operation( 0, mode );
 	}
       }
       else
@@ -251,7 +248,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 	}
 	else
 	{
-	  result = Portion::Operation( p, mode );
+	  result = Portion::Operation( 0, mode );
 	}
       }
       else
@@ -280,7 +277,7 @@ Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
       result = new bool_Portion( *_Value <= p_value );
       break;
     default:
-      result = Portion::Operation( p, mode );
+      result = Portion::Operation( 0, mode );
     }
     delete p;
   }
@@ -368,7 +365,7 @@ Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
       *_Value = ! *_Value;
       break;
     default:
-      result = Portion::Operation( p, mode );      
+      result = Portion::Operation( 0, mode );      
     }
   }
   else               // binary operations
@@ -391,7 +388,7 @@ Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
       *_Value = *_Value || p_value;
       break;
     default:
-      result = Portion::Operation( p, mode );
+      result = Portion::Operation( 0, mode );
     }
     delete p;
   }
@@ -478,7 +475,7 @@ Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
     switch( mode )
     {
     default:
-      result = Portion::Operation( p, mode );      
+      result = Portion::Operation( 0, mode );      
     }
   }
   else               // binary operations
@@ -508,7 +505,7 @@ Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
       result = new bool_Portion( *_Value <= p_value );
       break;
     default:
-      result = Portion::Operation( p, mode );
+      result = Portion::Operation( 0, mode );
     }
     delete p;
   }
@@ -688,7 +685,7 @@ Portion* List_Portion::Operation( Portion* p, OperationMode mode )
     switch( mode )
     {
     default:
-      result = Portion::Operation( p, mode );      
+      result = Portion::Operation( 0, mode );      
     }
   }
   else               // binary operations
@@ -708,7 +705,7 @@ Portion* List_Portion::Operation( Portion* p, OperationMode mode )
       }
       break;
     default:
-      result = Portion::Operation( p, mode );
+      result = Portion::Operation( 0, mode );
     }
     delete p;
   }
