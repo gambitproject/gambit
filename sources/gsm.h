@@ -42,6 +42,9 @@ class GSM
   // This function is located in gsmfunc.cc
   static void InitFunctions( void );
 
+  static int FuncParamCheck( const PortionType stack_param_type, 
+			    const PortionType func_param_type );
+
 
  public:
   GSM( int size );
@@ -49,6 +52,7 @@ class GSM
 
   int Depth    ( void ) const;
   int MaxDepth ( void ) const;
+
 
   void Push ( const bool&      data );
   void Push ( const double&    data );
@@ -58,11 +62,9 @@ class GSM
 
   void PushList ( const int num_of_elements );
 
-
   void PushRef  ( const gString& data );
   void Assign   ( void );
   void UnAssign ( const gString& ref );
-
 
 
   void Add      ( void );
@@ -86,8 +88,6 @@ class GSM
 
   
   static void AddFunction(const gString& funcname, FuncDescObj* func );
-  static int FunctionParamCheck(const PortionType stack_param_type, 
-				const PortionType func_param_type );
   void CallFunction( const gString& funcname );
 
   void CallFunction3
@@ -103,6 +103,7 @@ class GSM
      const int       num_of_params_passed,
      const gString*  name
      );
+
      
   void Output ( void );
   void Dump   ( void );

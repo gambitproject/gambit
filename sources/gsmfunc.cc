@@ -50,6 +50,8 @@
 // Specifying a parameter type as porNUMERICAL means that the parameter
 // can be any of porDOUBLE, porINTEGER, or porRATIONAL types.  It is then
 // up to the function implementation to explicitly type cast those parameters.
+// Specifying a parameter type as porNUMERICAL also means that that parameter
+// cannot have a default value associated with it.
 //
 // If a function returns 0 (null pointer), GSM will halt and give a general
 // error message.  So it may be a good idea to initialize the return value
@@ -171,14 +173,14 @@ int FuncDescObj::FindParamName( const gString& name ) const
 
 void FuncDescObj::SetParamInfo
   ( 
-   const int index, 
-   const gString& name, 
-   const PortionType type, 
-   Portion* default_value
+   const int          index, 
+   const gString&     name, 
+   const PortionType  type, 
+   Portion*           default_value
    )
 {
   int i;
-  int repeated = false;
+  int repeated_variable_declaration = false;
 
   assert( index >= 0 && index < num_of_params );
 
@@ -186,21 +188,24 @@ void FuncDescObj::SetParamInfo
   {
     if( ParamInfo[ i ].Name == name )
     {
-      repeated = true;
+      repeated_variable_declaration = true;
       break;
     }
   }
 
-  if( !repeated )
+#ifndef NDEBUG
+  if( repeated_variable_declaration )
   {
-    ParamInfo[ index ].Type = type;
-    ParamInfo[ index ].Name = name;
-    ParamInfo[ index ].DefaultValue = default_value;
+    gerr << "FuncDescObj Error: multiple parameters of a functions were\n";
+    gerr << "                   declared with the same formal name \"";
+    gerr << name << "\"\n";
+    gerr << "                   during initialization\n";
   }
-  else
-  {
-    gerr << "FuncDescObj Error: multiple variables declared with the same formal name\n";
-    assert(0);
-  }
+  assert( !repeated_variable_declaration );
+#endif // NDEBUG
+  
+  ParamInfo[ index ].Type = type;
+  ParamInfo[ index ].Name = name;
+  ParamInfo[ index ].DefaultValue = default_value;
 }
 

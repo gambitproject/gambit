@@ -12,7 +12,7 @@
 
 
 //--------------------------------------------------------------------
-  // hash tables used by GSM
+//                     hash tables used by GSM
 //-------------------------------------------------------------------
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
@@ -87,271 +87,11 @@ class RefHashTable : public HashTable<gString, Portion*>
 };
 
 
-//-------------------------------------------------------------------
-  // definable function functions
-//-------------------------------------------------------------------
-
-void GSM::AddFunction( const gString& funcname, FuncDescObj* func )
-{
-  FuncTable->Define( funcname, func );
-}
-
-
-int GSM::FunctionParamCheck( const PortionType stack_param_type, 
-			     const PortionType func_param_type )
-{
-  int result = false;
-
-  if( stack_param_type == func_param_type )
-  {
-    result = true;
-  }
-  else if(func_param_type == porNUMERICAL &&
-          (stack_param_type == porDOUBLE ||
-           stack_param_type == porINTEGER ||
-           stack_param_type == porRATIONAL ) )
-  {
-    result = true;
-  }
-  return result;
-}
-
-
-void GSM::CallFunction( const gString& funcname )
-{
-  FuncDescObj*  func;
-  Portion**     param;
-  Portion*      p;
-  int           i;
-  int           num_of_params;
-  int           type_match;
-
-  if( FuncTable->IsDefined( funcname ) )
-  {
-    func = (*FuncTable)( funcname );
-    num_of_params = func->NumParams();
-    param = new Portion* [ num_of_params ];
-    for( i = num_of_params - 1; i >= 0; i-- )
-    {
-      param[ i ] = stack->Pop();
-
-      if( param[ i ]->Type() == porREFERENCE )
-	param[ i ] = resolve_ref( (Reference_Portion *)param[ i ] );
-
-      type_match = FunctionParamCheck( param[ i ]->Type(), 
-				       func->ParamType( i ) );
-      if( !type_match )
-      {
-        gerr << "GSM Error: mismatched parameter type found while executing\n";
-        gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
-        gerr << "    Error at Parameter #: " << i << "\n";
-        gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-        gerr << "           Type found:    " << param[i]->Type() << "\n";
-        assert(0);
-      }
-    }
-
-    p = func->CallFunction( param );
-
-    if( p == 0 )
-    {
-      gerr << "GSM Error: an error occurred while attempting to execute\n";
-      gerr << "           CallFunction( \"" << funcname << "\" )\n";
-      assert(0);
-    }
-    stack->Push( p );
-  }
-  else
-  {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-  }
-}
-
-
-void GSM::CallFunction3
-  ( 
-   const gString& funcname,    // name of the function to be called
-   const gString* name,        // the formal names of all parameters passed in
-   const int num_of_names      // the number of parameters passed in
-   )
-{
-  FuncDescObj*  func;          // Function Descriptor Object
-  Portion*      result;        // stores the function return value
-  Portion**     param;         // parameter list to pass to the function
-  int           i;             // index to the parameter list
-  int           name_i;        // index to the formal names passed in
-  int           num_of_params; // actual number of parameters of the function
-  int           type_match;    // status variable
-
-  if( !FuncTable->IsDefined( funcname ) )
-  {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-    assert(0);
-  }
-  
-  func = (*FuncTable)( funcname );
-  num_of_params = func->NumParams();
-  param = new Portion* [ num_of_params ];
-  
-  for( i = num_of_params - 1; i >= 0; i-- )
-  {
-    param[ i ] = func->ParamDefaultValue( i );
-  }
-  
-  for( name_i = num_of_names - 1; name_i >= 0; name_i-- )
-  {
-    i = func->FindParamName( name[ name_i ] );
-    if( i == -1 )
-    {
-      gerr << "FuncDescObj Error: parameter \"" << name[ name_i ] << "\" is not defined for\n";
-      gerr << "                   the function \"" << funcname << "\"\n"; 
-      assert(0);
-    }
-    
-    param[ i ] = stack->Pop();
-    
-    if( param[ i ]->Type() == porREFERENCE )
-    {
-      param[ i ] = resolve_ref( (Reference_Portion*) param[ i ] );
-    }
-    
-    type_match = FunctionParamCheck( param[ i ]->Type(), 
-				    func->ParamType( i ) );
-    if( !type_match )
-    {
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
-      gerr << "    Error at Parameter #: " << i << "\n";
-      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
-      assert(0);
-    }
-  }
-  
-  for( i = num_of_params - 1; i >= 0; i-- )
-  {
-    if( param[ i ] == 0 )
-    {
-      gerr << "GSM Error: CallFunction() called with a required parameter missing\n";
-      gerr << "           while executing CallFunction( \"" << funcname << "\" )\n";
-      assert(0);
-    }
-  }
-  
-  result = func->CallFunction( param );
-  
-  if( result == 0 )
-  {
-    gerr << "GSM Error: an error occurred while attempting to execute\n";
-    gerr << "           CallFunction( \"" << funcname << "\" )\n";
-    assert(0);
-  }
-  stack->Push( result );
-}
-
-
-void GSM::CallFunction4
-  ( 
-   const gString&  funcname,             // name of the function to be called
-   const int       num_of_params_passed, // number of parameters passed in
-   const gString*  name                  // the correponding formal names
-   )
-{
-  FuncDescObj*  func;          // Function Descriptor Object
-  Portion*      result;        // stores the function return value
-  Portion**     param;         // parameter list to pass to the function
-  int           i;             // index to the parameter list
-  Portion**     passed_param;  // parameter list received
-  int           passed_i;      // index to the parameter list received
-  int           num_of_params; // actual number of paramater of the function
-  int           type_match;    // status variable
-
-  func = (*FuncTable)( funcname );
-  num_of_params = func->NumParams();
-
-  if( !FuncTable->IsDefined( funcname ) )
-  {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-    assert(0);
-  }
-
-  param = new Portion* [ num_of_params ];
-  for( i = num_of_params - 1; i >= 0; i-- )
-  {
-    param[ i ] = func->ParamDefaultValue( i );
-  }
-
-  passed_param = new Portion* [ num_of_params_passed ];
-  for( passed_i = num_of_params_passed - 1; passed_i >= 0; passed_i-- )
-  {
-    passed_param[ passed_i ] = stack->Pop();
-  }
-
-  // Maps the parameters into their correct positions in the parameter list
-  i = 0;
-  passed_i = 0;
-  while( ( i < num_of_params ) && ( passed_i < num_of_params_passed ) )
-  {
-    if(( func->ParamName( i ) != name[ passed_i ] ) &&
-       ( name[ passed_i ] != "" ) )
-    {
-      i = func->FindParamName( name[ passed_i ] );
-      if( i == -1 )
-      {
-	gerr << "FuncDescObj Error: parameter \"" << name[ passed_i ] << "\" is not defined for\n";
-	gerr << "                   the function \"" << funcname << "\"\n"; 
-	assert(0);
-      }
-    }
-    param[ i ] = passed_param[ passed_i ];
-    i++;
-    passed_i++;
-  }
-
-
-  for( i = 0; i < num_of_params; i++ )
-  {
-    if( param[ i ] == 0 )
-    {
-      gerr << "GSM Error: CallFunction() called with a required parameter missing\n";
-      gerr << "           while executing CallFunction( \"" << funcname << "\" )\n";
-      assert(0);
-    }
-
-    if( param[ i ]->Type() == porREFERENCE )
-    {
-      param[ i ] = resolve_ref( (Reference_Portion *)param[ i ] );
-    }
-    
-    type_match = FunctionParamCheck( param[ i ]->Type(), func->ParamType( i ) );
-    if( !type_match )
-    {
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
-      gerr << "    Error at Parameter #: " << i << "\n";
-      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
-      assert(0);
-    }
-  }
-  
-  
-  result = func->CallFunction( param );
-  
-  if( result == 0 )
-  {
-    gerr << "GSM Error: an error occurred while attempting to execute\n";
-    gerr << "           CallFunction( \"" << funcname << "\" )\n";
-    assert(0);
-  }
-  stack->Push( result );
-}
-
 
 
 
 //--------------------------------------------------------------------
-// implementation of GSM (stack machine)
+//              implementation of GSM (stack machine)
 //--------------------------------------------------------------------
 
 GSM::GSM( int size )
@@ -366,8 +106,6 @@ GSM::GSM( int size )
     InitFunctions();           // This function is located in gsmfunc.cc
     FunctionsInitialized = true;
   }
-
-  assert( stack != 0 );
 }
 
 
@@ -395,7 +133,7 @@ int GSM::MaxDepth( void ) const
 
 
 //------------------------------------------------------------------------
-  // Push() functions
+//                           Push() functions
 //------------------------------------------------------------------------
 
 void GSM::Push( const bool& data )
@@ -452,28 +190,29 @@ void GSM::PushList( const int num_of_elements )
   assert( num_of_elements > 0 );
 
   list = new List_Portion;
-  if( num_of_elements <= stack->Depth() )
-  {
-    for( i = 1; i <= num_of_elements; i++ )
-    {
-      p = stack->Pop();
-      list->Insert( p, 1 );
-    }
-    stack->Push( list );
-  }
-  else
+
+#ifndef NDEBUG
+  if( num_of_elements > stack->Depth() )
   {
     gerr << "GSM Error: not enough elements in GSM to PushList()\n";
     gerr << "           elements requested: " << num_of_elements << "\n";
     gerr << "           elements available: " << stack->Depth() << "\n";
-    assert(0);
   }
+  assert( num_of_elements <= stack->Depth() );
+#endif // NDEBUG
+
+  for( i = 1; i <= num_of_elements; i++ )
+  {
+    p = stack->Pop();
+    list->Insert( p, 1 );
+  }
+  stack->Push( list );
 }
 
 
 
 //----------------------------------------------------------------------
-  // Reference related functions: PushRef(), Assign(), UnAssign()
+//     Reference related functions: PushRef(), Assign(), UnAssign()
 //---------------------------------------------------------------------
 
 void GSM::PushRef( const gString& data )
@@ -486,36 +225,38 @@ void GSM::PushRef( const gString& data )
 
 
 
-
 void GSM::Assign( void )
 {
   Portion*  p2;
   Portion*  p1;
-  gString   ref;
 
-  if( stack->Depth() > 1 )
+#ifndef NDEBUG
+  if( stack->Depth() < 2 )
   {
-    p2 = stack->Pop();
-    p1 = stack->Pop();
-
-    if( ( p2->Type() != porREFERENCE ) && ( p1->Type() == porREFERENCE ) )
-    {
-      ref = ( (Reference_Portion*) p1 )->Value();
-      RefTable->Define( ref, p2->Copy() );
-      delete p2;
-
-      p1 = resolve_ref( (Reference_Portion*) p1 );
-      stack->Push( p1 );
-    }
-    else
-    {
-      if( p2->Type() == porREFERENCE )
-        gerr << "GSM Error: no value found to assign to a reference\n";
-      if ( p1->Type() != porREFERENCE )
-        gerr << "GSM Error: no reference found to be assigned\n";
-      assert(0);
-    }
+    gerr << "GSM Error: not enough operands to execute Assign()\n";
   }
+  assert( stack->Depth() >= 2 );
+#endif // NDEBUG
+
+  p2 = stack->Pop();
+  p1 = stack->Pop();
+
+#ifndef NDEBUG
+  if ( p1->Type() != porREFERENCE )
+  {
+    gerr << "GSM Error: no reference found to be assigned\n";
+  }
+  assert( p1->Type() == porREFERENCE );
+#endif // NDEBUG
+
+  if( p2->Type() == porREFERENCE )
+    p2 = resolve_ref( (Reference_Portion*) p2 );
+  
+  RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
+  delete p2;
+  
+  p1 = resolve_ref( (Reference_Portion*) p1 );
+  stack->Push( p1 );
 }
 
 
@@ -532,45 +273,48 @@ void GSM::UnAssign( const gString& ref )
 
 
 //---------------------------------------------------------------------
-  // operation functions
+//                        operation functions
 //-----------------------------------------------------------------------
 
 Portion* GSM::resolve_ref( Reference_Portion* p )
 {
   Portion*  result = 0;
-  gString   ref;
+  gString&  ref = p->Value();
 
-  ref = p->Value();
-  if( RefTable->IsDefined( ref ) )
+#ifndef NDEBUG
+  if( !RefTable->IsDefined( ref ) )
   {
-    result = (*RefTable)( ref )->Copy();
-    delete p;
+    gerr << "GSM Error: attempted to resolve an undefined reference\n";
+    gerr << "           \"" << ref << "\"\n";
   }
-  else
-  {
-    gerr << "GSM Error: attempted to operate with an undefined variable\n";
-    assert(0);
-  }
+  assert( RefTable->IsDefined( ref ) );
+#endif // NDEBUG
+
+  result = (*RefTable)( ref )->Copy();
+  delete p;
+
   return result;
 }
 
 
 
 //------------------------------------------------------------------------
-  // binary operations
+//                       binary operations
 //------------------------------------------------------------------------
 
 void GSM::binary_operation( OperationMode mode )
 {
-  int result = 0;
-  Portion*  p2;
-  Portion*  p1;
+  Portion*   p2;
+  Portion*   p1;
+  int        result = 0;
 
+#ifndef NDEBUG
   if( stack->Depth() < 2 )
   {
     gerr << "GSM Error: not enough operands to perform binary operation\n";
-    assert(0);
-  }  
+  }
+  assert( stack->Depth() >= 2 );
+#endif // NDEBUG
 
   p2 = stack->Pop();
   p1 = stack->Pop();
@@ -579,44 +323,49 @@ void GSM::binary_operation( OperationMode mode )
     p2 = resolve_ref( (Reference_Portion*) p2 );
   if( p1->Type() == porREFERENCE )
     p1 = resolve_ref( (Reference_Portion*) p1 );
-  
-  if( p1->Type() == p2->Type() )
+
+#ifndef NDEBUG
+  if( p1->Type() != p2->Type() )
   {
-    result = p1->Operation( p2, mode );
-    if(mode == opEQUAL_TO ||
-       mode == opNOT_EQUAL_TO ||
-       mode == opGREATER_THAN ||
-       mode == opLESS_THAN ||
-       mode == opGREATER_THAN_OR_EQUAL_TO ||
-       mode == opLESS_THAN_OR_EQUAL_TO )
-    {
-      delete p1;
-      p1 = new bool_Portion( (bool) result );
-    }
-    stack->Push( p1 );
-  }
-  else
-  {  
-    stack->Push( p1 );
-    stack->Push( p2 );
     gerr << "GSM Error: attempted operating on different types\n";
+    gerr << "           Type of Operand 1: " << p1->Type() << "\n";
+    gerr << "           Type of Operand 2: " << p2->Type() << "\n";
   }
+  assert( p1->Type() == p2->Type() );
+#endif // NDEBUG
+
+  result = p1->Operation( p2, mode );
+  if(mode == opEQUAL_TO ||
+     mode == opNOT_EQUAL_TO ||
+     mode == opGREATER_THAN ||
+     mode == opLESS_THAN ||
+     mode == opGREATER_THAN_OR_EQUAL_TO ||
+     mode == opLESS_THAN_OR_EQUAL_TO )
+  {
+    delete p1;
+    p1 = new bool_Portion( (bool) result );
+  }
+  stack->Push( p1 );
 }
 
 
+
+
 //-----------------------------------------------------------------------
-  // Unary operations
+//                        unary operations
 //-----------------------------------------------------------------------
 
 void GSM::unary_operation( OperationMode mode )
 {
   Portion*  p1;
 
-  if( stack->Depth() < 0 )
+#ifndef NDEBUG
+  if( stack->Depth() < 1 )
   {
     gerr << "GSM Error: not enough operands to perform unary operation\n";
-    assert(0);
   }
+  assert( stack->Depth() >= 1 );
+#endif // NDEBUG
 
   p1 = stack->Pop();
   
@@ -631,7 +380,7 @@ void GSM::unary_operation( OperationMode mode )
 
 
 //-----------------------------------------------------------------
-  // built-in operations
+//                      built-in operations
 //-----------------------------------------------------------------
 
 void GSM::Add ( void )
@@ -684,6 +433,326 @@ void GSM::Concatenate( void )
 { binary_operation( opCONCATENATE ); }
 
 
+
+
+
+
+
+//-------------------------------------------------------------------
+//               CallFunction() related functions
+//-------------------------------------------------------------------
+
+void GSM::AddFunction( const gString& funcname, FuncDescObj* func )
+{
+  FuncTable->Define( funcname, func );
+}
+
+
+int GSM::FuncParamCheck( const PortionType stack_param_type, 
+			const PortionType func_param_type )
+{
+  int result = true;
+
+  if( stack_param_type != func_param_type )
+  {
+    if( func_param_type != porNUMERICAL ||
+       !( stack_param_type == porDOUBLE ||
+	 stack_param_type == porINTEGER ||
+	 stack_param_type == porRATIONAL ) )
+    {
+      result = false;
+    }
+  }
+  return result;
+}
+
+
+void GSM::CallFunction( const gString& funcname )
+{
+  FuncDescObj*  func;
+  Portion**     param;
+  Portion*      result;
+  int           i;
+  int           num_of_params;
+  int           type_match;
+
+#ifndef NDEBUG
+  if( !FuncTable->IsDefined( funcname ) )
+  {
+    gerr << "GSM Error: CallFunction() called with an undefined function\n";
+    gerr << "           CallFunction( \"" << funcname << "\" )\n";
+  }
+  assert( FuncTable->IsDefined( funcname ) );
+#endif // NDEBUG
+
+  func = (*FuncTable)( funcname );
+  num_of_params = func->NumParams();
+  param = new Portion* [ num_of_params ];
+
+  for( i = num_of_params - 1; i >= 0; i-- )
+  {
+    param[ i ] = stack->Pop();
+    
+    if( param[ i ]->Type() == porREFERENCE )
+      param[ i ] = resolve_ref( (Reference_Portion*) param[ i ] );
+
+#ifndef NDEBUG
+    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
+    if( !type_match )
+    {
+      gerr << "GSM Error: mismatched parameter type found while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
+      gerr << "    Error at Parameter #: " << i << "\n";
+      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
+      gerr << "           Type found:    " << param[i]->Type() << "\n";
+    }
+    assert( type_match );
+#endif // NDEBUG
+  }
+  
+  result = func->CallFunction( param );
+  
+#ifndef NDEBUG
+  if( result == 0 )
+  {
+    gerr << "GSM Error: an error occurred while attempting to execute\n";
+    gerr << "           CallFunction( \"" << funcname << "\" )\n";
+  }
+  assert( result != 0 );
+#endif // NDEBUG
+
+  stack->Push( result );
+}
+
+
+void GSM::CallFunction3
+  ( 
+   const gString& funcname,    // name of the function to be called
+   const gString* name,        // the formal names of all parameters passed in
+   const int num_of_names      // the number of parameters passed in
+   )
+{
+  FuncDescObj*  func;          // Function Descriptor Object
+  Portion*      result;        // stores the function return value
+  Portion**     param;         // parameter list to pass to the function
+  int           i;             // index to the parameter list
+  int           name_i;        // index to the formal names passed in
+  int           num_of_params; // actual number of parameters of the function
+  int           type_match;    // status variable
+
+#ifndef NDEBUG
+  if( !FuncTable->IsDefined( funcname ) )
+  {
+    gerr << "GSM Error: CallFunction() called with an undefined function\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+  }
+  assert( FuncTable->IsDefined( funcname ) );
+#endif // NDEBUG
+
+  func = (*FuncTable)( funcname );
+  num_of_params = func->NumParams();
+  param = new Portion* [ num_of_params ];
+  
+  for( i = 0; i < num_of_params; i++ )
+  {
+    param[ i ] = func->ParamDefaultValue( i );
+  }
+  
+  for( name_i = num_of_names - 1; name_i >= 0; name_i-- )
+  {
+    i = func->FindParamName( name[ name_i ] );
+
+#ifndef NDEBUG
+    if( i == -1 )
+    {
+      gerr << "FuncDescObj Error: parameter \"" << name[ name_i ];
+      gerr << "\" is not defined for\n";
+      gerr << "                   the function \"" << funcname << "\"\n"; 
+    }
+    assert( i >= 0 );
+#endif // NDEBUG
+    
+    param[ i ] = stack->Pop();
+    
+    if( param[ i ]->Type() == porREFERENCE )
+      param[ i ] = resolve_ref( (Reference_Portion*) param[ i ] );
+    
+#ifndef NDEBUG
+    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
+    if( !type_match )
+    {
+      gerr << "GSM Error: mismatched parameter type found while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
+      gerr << "    Error at Parameter #: " << i << "\n";
+      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
+      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
+    }
+    assert( type_match );
+#endif // NDEBUG
+  }
+  
+#ifndef NDEBUG
+  for( i = 0; i < num_of_params; i++ )
+  {
+    if( param[ i ] == 0 )
+    {
+      gerr << "GSM Error: required parameter found missing while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
+      gerr << "   Missing Parameter: \"" << func->ParamName( i ) << "\"\n";
+    }
+    assert( param[ i ] != 0 );
+  }
+#endif // NDEBUG
+  
+  result = func->CallFunction( param );
+
+#ifndef NDEBUG
+  if( result == 0 )
+  {
+    gerr << "GSM Error: an error occurred while attempting to execute\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+  }
+  assert( result != 0 );
+#endif // NDEBUG
+
+  stack->Push( result );
+}
+
+
+void GSM::CallFunction4
+  ( 
+   const gString&  funcname,             // name of the function to be called
+   const int       num_of_params_passed, // number of parameters passed in
+   const gString*  name                  // the correponding formal names
+   )
+{
+  FuncDescObj*  func;          // Function Descriptor Object
+  Portion*      result;        // stores the function return value
+  Portion**     param;         // parameter list to pass to the function
+  int           i;             // index to the parameter list
+  int           old_i;         // used to check parameter redefinitions
+  Portion**     passed_param;  // parameter list received
+  int           passed_i;      // index to the parameter list received
+  int           num_of_params; // actual number of paramater of the function
+  int           type_match;    // status variable
+
+  func = (*FuncTable)( funcname );
+  num_of_params = func->NumParams();
+
+#ifndef NDEBUG
+  if( !FuncTable->IsDefined( funcname ) )
+  {
+    gerr << "GSM Error: CallFunction() called with an undefined function\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+  }
+  assert( FuncTable->IsDefined( funcname ) );
+#endif // NDEBUG
+
+  param = new Portion* [ num_of_params ];
+  for( i = 0; i < num_of_params; i++ )
+  {
+    param[ i ] = func->ParamDefaultValue( i );
+  }
+
+  passed_param = new Portion* [ num_of_params_passed ];
+  for( passed_i = num_of_params_passed - 1; passed_i >= 0; passed_i-- )
+  {
+    passed_param[ passed_i ] = stack->Pop();
+  }
+
+  // Maps the parameters into their correct positions in the parameter list
+  i = 0;
+  for( passed_i = 0; passed_i < num_of_params_passed; passed_i++ )
+  {
+#ifndef NDEBUG
+    if( i >= num_of_params )
+    {
+      gerr << "FuncDescObj Error: CallFunction( \"" << funcname;
+      gerr << "\", ... ) executed with\n";
+      gerr << "                   too many function parameters\n"; 
+    }
+    assert( i < num_of_params );
+#endif // NDEBUG
+
+    if( ( func->ParamName( i ) != name[ passed_i ] ) &&
+       ( name[ passed_i ] != "" ) )
+    {
+      old_i = i;
+      i = func->FindParamName( name[ passed_i ] );
+
+#ifndef NDEBUG
+      if( i <= old_i )
+      {
+	gerr << "GSM Error: multiple definitions found for parameter \"";
+	gerr << name[ passed_i ] << "\" while executing\n";
+	gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+      }
+      assert( i > old_i );
+
+      if( i == -1 )
+      {
+	gerr << "FuncDescObj Error: parameter \"" << name[ passed_i ];
+	gerr << "\" is not defined for\n";
+	gerr << "                   the function \"" << funcname << "\"\n"; 
+      }
+      assert( i >= 0 );
+#endif // NDEBUG
+    }
+
+    param[ i ] = passed_param[ passed_i ];
+    i++;
+  }
+
+  for( i = 0; i < num_of_params; i++ )
+  {
+#ifndef NDEBUG
+    if( param[ i ] == 0 )
+    {
+      gerr << "GSM Error: required parameter found missing while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+      gerr << "   Missing Parameter: \"" << func->ParamName( i ) << "\"\n";
+    }
+    assert( param[ i ] != 0 );
+#endif // NDEBUG
+
+    if( param[ i ]->Type() == porREFERENCE )
+      param[ i ] = resolve_ref( (Reference_Portion *)param[ i ] );
+    
+#ifndef NDEBUG
+    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
+    if( !type_match )
+    {
+      gerr << "GSM Error: mismatched parameter type found while executing\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
+      gerr << "    Error at Parameter #: " << i << "\n";
+      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
+      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
+    }
+    assert( type_match );
+#endif // NDEBUG
+  }
+  
+  result = func->CallFunction( param );
+  
+#ifndef NDEBUG
+  if( result == 0 )
+  {
+    gerr << "GSM Error: an error occurred while attempting to execute\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+  }
+  assert( result != 0 );
+#endif // NDEBUG
+
+  stack->Push( result );
+}
+
+
+
+
+
+
+//----------------------------------------------------------------------------
+//                   miscellaneous functions
 //----------------------------------------------------------------------------
 
 void GSM::Output( void )
@@ -728,6 +797,9 @@ void GSM::Flush( void )
 
   assert( stack->Depth() == 0 );
 }
+
+
+
 
 //-----------------------------------------------------------------------
 //                       Template instantiations
