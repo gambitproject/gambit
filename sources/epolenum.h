@@ -9,10 +9,10 @@
 #define EPOLENUM_H
 
 #include "base/base.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "algutils.h"
-#include "behav.h"
-#include "behavsol.h"
+#include "game/behav.h"
+#include "game/behavsol.h"
 
 class EfgPolEnumParams : public AlgParams {
 public:

@@ -7,9 +7,9 @@
 #ifndef SUBSOLVE_H
 #define SUBSOLVE_H
 
-#include "efg.h"
-#include "nfg.h"
-#include "behavsol.h"
+#include "game/efg.h"
+#include "game/nfg.h"
+#include "game/behavsol.h"
 
 class efgAlgorithm {
 public:

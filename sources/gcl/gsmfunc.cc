@@ -15,10 +15,10 @@
 #include "gsmhash.h"
 #include "gsminstr.h"
 
-#include "nfg.h"
-#include "efg.h"
-#include "nfstrat.h"
-#include "efstrat.h"
+#include "game/nfg.h"
+#include "game/efg.h"
+#include "game/nfstrat.h"
+#include "game/efstrat.h"
 
 // This function is called once at the first instance of GSM.
 // The Init function of each module should be placed in this function:

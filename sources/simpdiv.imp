@@ -15,7 +15,7 @@
 #define MAXIT 10000
 
 #include "base/base.h"
-#include "nfg.h"
+#include "game/nfg.h"
 #include "simpdiv.h"
 
 //-------------------------------------------------------------------------

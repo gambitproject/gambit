@@ -8,10 +8,10 @@
 #define NFGALLEQ_H
 
 #include "base/base.h"
-#include "nfg.h"
+#include "game/nfg.h"
 #include "gstatus.h"
-#include "mixed.h"
-#include "mixedsol.h"
+#include "game/mixed.h"
+#include "game/mixedsol.h"
 #include "polenum.h" 
 #include "nfgensup.h"
 

@@ -6,9 +6,9 @@
 
 #include "base/base.h"
 
-#include "nfg.h"
-#include "nfgiter.h"
-#include "nfgciter.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
+#include "game/nfgciter.h"
 
 #include "polenum.h"
 #include "quiksolv.h"

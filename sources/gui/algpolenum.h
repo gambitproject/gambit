@@ -10,10 +10,10 @@
 #ifndef ALGPOLENUM_H
 #define ALGPOLENUM_H
 
-#include "efg.h"
-#include "behavsol.h"
-#include "nfg.h"
-#include "mixedsol.h"
+#include "game/efg.h"
+#include "game/behavsol.h"
+#include "game/nfg.h"
+#include "game/mixedsol.h"
 
 bool PolEnumEfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);
 bool PolEnumNfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);

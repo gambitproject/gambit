@@ -6,10 +6,10 @@
 
 #include "base/base.h"
 #include "gsignal.h"
-#include "efg.h"
-#include "efgutils.h"
-#include "nfg.h"
-#include "nfstrat.h"
+#include "game/efg.h"
+#include "game/efgutils.h"
+#include "game/nfg.h"
+#include "game/nfstrat.h"
 #include "math/rational.h"
 
 #include "subsolve.h"

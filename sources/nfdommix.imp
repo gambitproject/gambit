@@ -352,7 +352,7 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
   
 }
 
-#include "mixed.h"
+#include "game/mixed.h"
 
 template <class T>
 bool IsMixedDominated(const MixedProfile<T> &pr, int pl,

@@ -6,7 +6,7 @@
 
 #include "base/base.h"
 #include "math/gpvector.h"
-#include "efgutils.h"
+#include "game/efgutils.h"
 
 #include "efgcsum.h"
 

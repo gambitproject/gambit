@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 void Yamamoto(const NFSupport &, gStatus &, gList<MixedSolution> &);
 

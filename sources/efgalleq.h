@@ -8,10 +8,10 @@
 #define EFGALLEQ_H
 
 #include "base/base.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "gstatus.h"
-#include "behav.h"
-#include "behavsol.h"
+#include "game/behav.h"
+#include "game/behavsol.h"
 #include "epolenum.h" 
 #include "efgensup.h"
 #include "subsolve.h"

@@ -7,10 +7,10 @@
 #include "sfg.h"
 #include "sfstrat.h"
 #include "base/garray.imp"
-#include "gnarray.imp"
+#include "game/gnarray.imp"
 #include "base/grarray.imp"
 #include "base/glist.imp"
-#include "behav.h"
+#include "game/behav.h"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators

@@ -700,7 +700,7 @@ public:
 // Mixed
 //---------
 
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 class MixedPortion : public Portion  {
 protected:
@@ -745,7 +745,7 @@ public:
 // Behav
 //--------
 
-#include "behavsol.h"
+#include "game/behavsol.h"
 
 class BehavPortion : public Portion  {
 protected:

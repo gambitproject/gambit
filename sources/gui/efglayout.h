@@ -13,7 +13,7 @@
 #include "base/base.h"
 #include "treedraw.h"
 #include "efgconst.h"
-#include "efg.h"
+#include "game/efg.h"
 
 class NodeEntry {
 private:

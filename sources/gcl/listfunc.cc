@@ -13,8 +13,8 @@
 #include "math/rational.h"
 #include "math/gsmatrix.h"
 
-#include "nfg.h"
-#include "efg.h"
+#include "game/nfg.h"
+#include "game/efg.h"
 
 
 

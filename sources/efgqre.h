@@ -12,8 +12,8 @@
 
 #include "base/base.h"
 
-#include "efg.h"
-#include "behavsol.h"
+#include "game/efg.h"
+#include "game/behavsol.h"
 
 //
 // Computes a branch of the agent logistic quantal response equilibrium 

@@ -95,7 +95,7 @@ OBJECT_SUFFIX = .o
 #
 OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
-vpath %.cc  base:math:gcl:guishare:gui:pxi
+vpath %.cc  base:math:game:gcl:guishare:gui:pxi
 
 # rule for creating .o (object) files from .cc files
 
@@ -159,8 +159,8 @@ pxi:	$(OBJDIR) $(ALLPXI_OBJECTS)
 	$(CC) $(ALLPXI_OBJECTS) $(LIBDIR) $(GUILIBS) \
 	    -o ../$(PXIBINARY); cd ..
 
-readnfg.cc:  readnfg.yy
-	bison -p nfg_yy -o readnfg.cc readnfg.yy
+game/readnfg.cc:  game/readnfg.yy
+	bison -p nfg_yy -o game/readnfg.cc game/readnfg.yy
 
 gcl/gcompile.cc: gcl/gcompile.yy
 	bison -p gcl_yy -o gcl/gcompile.cc gcl/gcompile.yy

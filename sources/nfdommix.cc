@@ -5,10 +5,10 @@
 //
 
 #include "base/gstream.h"
-#include "nfg.h"
-#include "nfgiter.h"
-#include "nfgciter.h"
-#include "nfstrat.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
+#include "game/nfgciter.h"
+#include "game/nfstrat.h"
 #include "lpsolve.h"
 #include "gstatus.h"
 #include "nfdom.h"
@@ -66,7 +66,7 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
   return ret;
 }
 
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 bool IsMixedDominated(const MixedProfile<gNumber> &sol,
 		 bool strong, gPrecision precision, gOutput &tracefile)

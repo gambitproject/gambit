@@ -7,10 +7,10 @@
 #include "nfgpure.h"
 
 #include "base/base.h"
-#include "nfg.h"
-#include "nfgiter.h"
-#include "nfgciter.h"
-#include "mixed.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
+#include "game/nfgciter.h"
+#include "game/mixed.h"
 
 void nfgEnumPure::Solve(const NFSupport &p_support,
 			gStatus &p_status, gList<MixedSolution> &p_solutions)

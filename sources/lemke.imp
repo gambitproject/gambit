@@ -7,7 +7,7 @@
 #include "base/base.h"
 #include "math/gpvector.h"
 
-#include "nfg.h"
+#include "game/nfg.h"
 
 #include "lemke.h"
 #include "lhtab.h"

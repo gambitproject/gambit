@@ -5,11 +5,11 @@
 //
 
 #include "base/base.h"
-#include "nfg.h"
+#include "game/nfg.h"
 #include "math/rational.h"
 #include "gstatus.h"
 #include "nfdom.h"
-#include "nfgciter.h"
+#include "game/nfgciter.h"
 
 class StrategyCursorForSupport;
 

@@ -12,8 +12,8 @@
 
 #include "gsm.h"
 
-#include "nfg.h"
-#include "efg.h"
+#include "game/nfg.h"
+#include "game/efg.h"
 
 
 //-----------
@@ -560,7 +560,7 @@ bool EfOutcomePortion::IsReference(void) const
 // NfPlayer
 //-----------
 
-#include "nfplayer.h"
+#include "game/nfplayer.h"
 
 gPool NfPlayerPortion::pool(sizeof(NfPlayerPortion));
 
@@ -951,7 +951,7 @@ bool EfSupportPortion::IsReference(void) const
 // EfBasis
 //----------
 
-#include "efbasis.h"
+#include "game/efbasis.h"
 
 gPool EfBasisPortion::pool(sizeof(EfBasisPortion));
 

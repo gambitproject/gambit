@@ -5,7 +5,7 @@
 //
 
 #include "efdom.h"
-#include "efgciter.h"
+#include "game/efgciter.h"
 
 efgDominanceException::efgDominanceException(const gText &p_description)
   : m_description(p_description)

@@ -7,8 +7,8 @@
 #include "base/base.h"
 #include "math/gpvector.h"
 
-#include "nfg.h"
-#include "nfgiter.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
 
 #include "nfgcsum.h"
 #include "lpsolve.h"

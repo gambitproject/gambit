@@ -15,9 +15,9 @@
 
 #include "base/gmisc.h"
 
-#include "nfg.h"
-#include "nfgiter.h"
-#include "mixedsol.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
+#include "game/mixedsol.h"
 
 #include "gambit.h"
 

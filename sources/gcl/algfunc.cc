@@ -12,11 +12,11 @@
 
 #include "math/rational.h"
 
-#include "mixedsol.h"
-#include "behavsol.h"
-#include "nfg.h"
-#include "nfplayer.h"
-#include "efg.h"
+#include "game/mixedsol.h"
+#include "game/behavsol.h"
+#include "game/nfg.h"
+#include "game/nfplayer.h"
+#include "game/efg.h"
 
 #include "vertenum.h"
 

@@ -8,8 +8,8 @@
 #define LEMKE_H
 
 #include "base/base.h"
-#include "nfg.h"
-#include "mixedsol.h"
+#include "game/nfg.h"
+#include "game/mixedsol.h"
 #include "algutils.h"
 
 class LemkeParams : public AlgParams    {

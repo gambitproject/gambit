@@ -17,11 +17,11 @@ class RefHashTable;
 #include "gsmfunc.h"
 #include "gsminstr.h"
 
-#include "nfg.h"
-#include "mixedsol.h"
-#include "behavsol.h"
+#include "game/nfg.h"
+#include "game/mixedsol.h"
+#include "game/behavsol.h"
 
-#include "efbasis.h"
+#include "game/efbasis.h"
 
 
 //----------------------------------------------------------------

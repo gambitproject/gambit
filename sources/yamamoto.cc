@@ -8,7 +8,7 @@
 #include "gstatus.h"
 #include "math/gmatrix.h"
 #include "math/gsmatrix.h"
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 int NumPartitions(const gMatrix<int> &p_partition)
 {

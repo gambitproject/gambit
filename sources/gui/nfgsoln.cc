@@ -14,7 +14,7 @@
 #include "nfgconst.h"
 #include "nfgshow.h"
 #include "nfgsoln.h"
-#include "nfplayer.h"
+#include "game/nfplayer.h"
 
 #ifdef NOT_PORTED_YET
 

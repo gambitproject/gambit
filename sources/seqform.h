@@ -9,7 +9,7 @@
 
 #include "base/base.h"
 #include "algutils.h"
-#include "behavsol.h"
+#include "game/behavsol.h"
 
 class SeqFormParams : public AlgParams {
 public:

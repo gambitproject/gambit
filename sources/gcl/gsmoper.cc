@@ -20,11 +20,11 @@
 
 #include "math/rational.h"
 
-#include "mixedsol.h"
-#include "behavsol.h"
+#include "game/mixedsol.h"
+#include "game/behavsol.h"
 
-#include "nfg.h"
-#include "efg.h"
+#include "game/nfg.h"
+#include "game/efg.h"
 
 #include "system.h"
 #include "base/base.h"

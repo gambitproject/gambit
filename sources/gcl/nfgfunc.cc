@@ -10,11 +10,11 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "nfg.h"
-#include "nfplayer.h"
+#include "game/nfg.h"
+#include "game/nfplayer.h"
 #include "nfdom.h"
 
-#include "mixed.h"
+#include "game/mixed.h"
 
 #include "gstatus.h"
 

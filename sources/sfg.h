@@ -8,9 +8,9 @@
 #define SFG_H
 
 #include "base/base.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "odometer.h"
-#include "gnarray.h"
+#include "game/gnarray.h"
 #include "sfstrat.h"
 
 class Sfg  {

@@ -15,10 +15,10 @@
 #define ENUM_H
 
 #include "base/base.h"
-#include "nfg.h"
+#include "game/nfg.h"
 #include "algutils.h"
-#include "mixed.h"
-#include "mixedsol.h"
+#include "game/mixed.h"
+#include "game/mixedsol.h"
 #include "vertenum.h"
 
 class EnumParams : public AlgParams {

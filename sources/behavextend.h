@@ -8,7 +8,7 @@
 #ifndef BEHAVEXTEND_H
 #define BEHAVEXTEND_H
 
-#include "behavsol.h"
+#include "game/behavsol.h"
 
 class algExtendsToNash {
 public:

@@ -9,8 +9,8 @@
 
 #include "base/base.h"
 #include "math/gdpvect.h"
-#include "efg.h"
-#include "efstrat.h"
+#include "game/efg.h"
+#include "game/efstrat.h"
 
 class EFNodeSet;
 

@@ -10,7 +10,7 @@
 #endif  // WX_PRECOMP
 #include "guishare/wxmisc.h"
 
-#include "nfg.h"
+#include "game/nfg.h"
 #include "gambit.h"
 #include "nfgsolvd.h"
 

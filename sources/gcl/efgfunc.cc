@@ -12,10 +12,10 @@
 
 #include "gstatus.h"
 
-#include "efg.h"
-#include "efgutils.h"
+#include "game/efg.h"
+#include "game/efgutils.h"
 
-#include "efbasis.h"
+#include "game/efbasis.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc

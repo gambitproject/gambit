@@ -8,9 +8,9 @@
 #define NFGCSUM_H
 
 #include "base/base.h"
-#include "nfg.h"
+#include "game/nfg.h"
 #include "algutils.h"
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 class ZSumParams : public AlgParams    {
 public:

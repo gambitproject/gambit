@@ -10,7 +10,7 @@
 #endif  // WX_PRECOMP
 #include "guishare/wxmisc.h"
 
-#include "efstrat.h"
+#include "game/efstrat.h"
 #include "base/base.h"
 #include "gambit.h"
 #include "nfgshow.h"

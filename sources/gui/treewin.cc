@@ -17,11 +17,11 @@
 
 #include "base/gmisc.h"
 #include "math/math.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "treewin.h"
 #include "efgshow.h"
 
-#include "efgutils.h"
+#include "game/efgutils.h"
 #include "base/glist.imp"
 
 

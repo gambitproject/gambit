@@ -10,10 +10,10 @@
 #ifndef ALGLP_H
 #define ALGLP_H
 
-#include "efg.h"
-#include "behavsol.h"
-#include "nfg.h"
-#include "mixedsol.h"
+#include "game/efg.h"
+#include "game/behavsol.h"
+#include "game/nfg.h"
+#include "game/mixedsol.h"
 
 bool LpEfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);
 bool LpNfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);

@@ -5,8 +5,8 @@
 //
 
 #include "base/base.h"
-#include "efg.h"
-#include "efgutils.h"
+#include "game/efg.h"
+#include "game/efgutils.h"
 
 #include "seqeq.h"
 #include "quiksolv.h"

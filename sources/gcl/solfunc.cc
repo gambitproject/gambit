@@ -8,14 +8,14 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "efg.h"
-#include "nfg.h"
-#include "behavsol.h"
-#include "mixedsol.h"
+#include "game/efg.h"
+#include "game/nfg.h"
+#include "game/behavsol.h"
+#include "game/mixedsol.h"
 
-#include "nfplayer.h"
+#include "game/nfplayer.h"
 
-#include "efgutils.h"
+#include "game/efgutils.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc

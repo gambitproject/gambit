@@ -4,8 +4,8 @@
 // $Id: efgensup.h
 //
 
-#include "efg.h"
-#include "efgciter.h"
+#include "game/efg.h"
+#include "game/efgciter.h"
 #include "math/rational.h"
 #include "gstatus.h"
 #include "efdom.h"

@@ -10,9 +10,9 @@
 #include "base/base.h"
 #include "algutils.h"
 
-#include "nfg.h"
-#include "mixed.h"
-#include "mixedsol.h"
+#include "game/nfg.h"
+#include "game/mixed.h"
+#include "game/mixedsol.h"
 
 class NFLiapParams : public FuncMinParams  {
 public:

@@ -10,9 +10,9 @@
 #endif  // WX_PRECOMP
 #include "guishare/wxmisc.h"
 
-#include "nfg.h"
-#include "nfplayer.h"
-#include "nfstrat.h"
+#include "game/nfg.h"
+#include "game/nfplayer.h"
+#include "game/nfstrat.h"
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"

@@ -10,7 +10,7 @@
 #include "wx/wx.h"
 
 #include "base/base.h"
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 
 class MixedListFilter : public gListSorter<MixedSolution>,
                         public gListFilter<MixedSolution> {

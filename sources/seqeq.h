@@ -7,11 +7,11 @@
 #ifndef SEQEQ_H
 #define SEQEQ_H
 
-#include "efg.h"
+#include "game/efg.h"
 #include "algutils.h"
-#include "efstrat.h"
-#include "efbasis.h"
-#include "behavsol.h"
+#include "game/efstrat.h"
+#include "game/efbasis.h"
+#include "game/behavsol.h"
 
 class SeqEquilibParams : public AlgParams {
 public:

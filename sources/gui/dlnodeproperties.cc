@@ -12,7 +12,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "wx/notebook.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "dlnodeproperties.h"
 
 //======================================================================

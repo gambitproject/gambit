@@ -16,8 +16,8 @@
 
 #include "efgconst.h"
 
-#include "efg.h"
-#include "efstrat.h"
+#include "game/efg.h"
+#include "game/efstrat.h"
 
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"

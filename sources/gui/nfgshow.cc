@@ -25,12 +25,12 @@
 #include "mixededit.h"
 #include "nfgconst.h"
 
-#include "efg.h"
-#include "efgutils.h"
-#include "behavsol.h"
-#include "nfplayer.h"
+#include "game/efg.h"
+#include "game/efgutils.h"
+#include "game/behavsol.h"
+#include "game/nfplayer.h"
 #include "nfdom.h"
-#include "nfgciter.h"
+#include "game/nfgciter.h"
 
 #include "nfgsolvd.h"
 

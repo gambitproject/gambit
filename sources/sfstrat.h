@@ -8,7 +8,7 @@
 #define SFSTRAT_H
 
 #include "base/base.h"
-#include "efg.h"
+#include "game/efg.h"
 
 /*
 class EFPlayer;

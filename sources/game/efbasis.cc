@@ -11,7 +11,7 @@
 #include "math/gdpvect.imp"
 #include "math/gmatrix.h"
 #include "gnullstatus.h"
-#include "efgutils.h"
+#include "game/efgutils.h"
 #include "lpsolve.h"
 
 class EFNodeArrays   {

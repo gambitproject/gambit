@@ -4,9 +4,9 @@
 //
 
 #include "lhtab.h"
-#include "nfg.h"
-#include "nfgiter.h"
-#include "nfstrat.h"
+#include "game/nfg.h"
+#include "game/nfgiter.h"
+#include "game/nfstrat.h"
 
 //---------------------------------------------------------------------------
 //                        LemkeHowson Tableau: member functions

@@ -8,7 +8,7 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "mixedsol.h"
+#include "game/mixedsol.h"
 #include "mixededit.h"
 
 //-------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 //
 
 #include "base/base.h"
-#include "efg.h"
+#include "game/efg.h"
 #include "sfg.h"
 
 #include "epolenum.h"

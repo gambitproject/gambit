@@ -50,9 +50,9 @@ that this technique is easily extended to n steps.
 #include "base/base.h"
 #include "math/math.h"
 #include "math/gsmatrix.h"
-#include "mixed.h"
+#include "game/mixed.h"
 #include "nfgqregrid.h"
-#include "nfg.h"
+#include "game/nfg.h"
 
 //==========================================================================
 //                    class MixedProfileIterator

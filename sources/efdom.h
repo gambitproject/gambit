@@ -7,7 +7,7 @@
 #ifndef EFDOM_H
 #define EFDOM_H
 
-#include "efg.h"
+#include "game/efg.h"
 #include "gstatus.h"
 
 class efgDominanceException : public gException {
