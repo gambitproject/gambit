@@ -546,7 +546,7 @@ gInput& gCmdLineInput::operator >> (char *x)
 
 
 
-const gString& gCmdLineInput::UpdatePromptNum( gString cmdBuf ) const
+gString gCmdLineInput::UpdatePromptNum( gString cmdBuf ) const
 {
   char buf[512] = "";
   int val0 = 0;

@@ -78,7 +78,7 @@ private:
 
   // this function strips old commands of their original
   //   prompt numbers and puts in the current one
-  const gString& UpdatePromptNum( gString cmdBuf ) const;
+  gString UpdatePromptNum( gString cmdBuf ) const;
 
 
 public:
