@@ -166,7 +166,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 void GambitApp::OnFileOpen(wxWindow *p_parent)
 {
   wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "", 
-		      "Games (*.efg, *.nfg)|*.[en]fg|"
+		      "Games (*.?fg)|*.?fg|"
 		      "Extensive form games (*.efg)|*.efg|"
 		      "Normal form games (*.nfg)|*.nfg|"
 		      "All files|*.*");
