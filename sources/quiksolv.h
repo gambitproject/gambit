@@ -138,6 +138,11 @@ template <class T> class QuikSolv {
    inline const bool                     IsMultiaffine()             const
      { return isMultiaffine; }
 
+  // Refines the accuracy of roots obtained from other algorithms
+  gVector<gDouble> NewtonPolishOnce(const gVector<gDouble> &)        const;
+  gVector<gDouble> SlowNewtonPolishOnce(const gVector<gDouble> &)    const;
+  gVector<gDouble> NewtonPolishedRoot(const gVector<gDouble> &)      const;
+
   // Checks for complex singular roots
    bool     MightHaveSingularRoots()                                 const;
 

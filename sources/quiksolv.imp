@@ -128,12 +128,12 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 
   gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
 
-  gVector<gDouble> Del(Dmnsn());
+  //  gVector<gDouble> Del(Dmnsn());
+  gVector<gDouble> newpoint(Dmnsn());
 
   while (true) {
     try {
-    gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
-    Del = - (Df.Inverse() * oldevals);
+      newpoint = NewtonPolishOnce(point);
     }
     catch (gSquareMatrix<gDouble>::MatrixSingular &) {
       bool nonsingular = false;
@@ -149,9 +149,8 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 	nonsingular = true;
 
 	try {
-	  gSquareMatrix<gDouble> Df = 
-	    TreesOfPartials.SquareDerivativeMatrix(perturbed_point);
-	  Del = - (Df.Inverse() * oldevals);
+	  newpoint = point + 
+	    (NewtonPolishOnce(perturbed_point) - perturbed_point);
 	}
 	catch (gSquareMatrix<gDouble>::MatrixSingular &) {
 	  nonsingular = false;
@@ -166,28 +165,24 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 	else
 	  perturbed_point[direction] += 
 	    (r.LowerBoundOfCoord(direction) - point[direction])/10;
-	gSquareMatrix<gDouble> Df = 
-	  TreesOfPartials.SquareDerivativeMatrix(perturbed_point);
-	Del = - (Df.Inverse() * oldevals);
+	newpoint = point + 
+	  (NewtonPolishOnce(perturbed_point) - perturbed_point);
       }
-      gVector<gDouble> perturbed_point(point);
-      if (r.UpperBoundOfCoord(direction) > point[direction])
-	perturbed_point[direction] += 
-	  (r.UpperBoundOfCoord(direction) - point[direction])/10;
-      else
-	perturbed_point[direction] += 
-	  (r.LowerBoundOfCoord(direction) - point[direction])/10;
     }
 
-    if ( !bigr.Contains(point + Del) ) return false;
-    point += Del;
-
+    if ( !bigr.Contains(newpoint) ) return false;
+    point = newpoint;
+    
     gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point,
 								  NoEquations);
 
     if (newevals * newevals > oldevals * oldevals) return false;
     if ( newevals == zero )
-      if (r.Contains(point)) return true;
+      if (r.Contains(point)) {
+	point = SlowNewtonPolishOnce(point);
+	point = SlowNewtonPolishOnce(point);
+	return true;
+      }
       else                   return false;                
 
     oldevals = newevals;
@@ -211,24 +206,10 @@ bool QuikSolv<T>::NewtonRootNearRectangle(const gRectangle<gDouble>& r,
     else                      return false;
 
   while (true) {
-    gMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
-    gSquareMatrix<gDouble> M(Df * Df.Transpose());
-
-    gVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
-
-    if ( !bigr.Contains(point + Del) ) return false;
-
-    bool done = false;
-    while (!done) {
-      gVector<gDouble> 
-	newevals(TreesOfPartials.ValuesOfRootPolys(point + Del,NoEquations));
-      if (newevals * newevals == (gDouble)0) done = true;
-      if (newevals * newevals < oldevals * oldevals) done = true;
-      else for (int i = 1; i <= Del.Length(); i++) Del[i] /= 2;
-    }
-
-    point += Del;
-
+    gVector<gDouble> newpoint = SlowNewtonPolishOnce(point);
+    if ( !bigr.Contains(newpoint) ) 
+      return false;
+    point = newpoint;
     gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point,
 								  NoEquations);
     if ( newevals == zero )
@@ -344,6 +325,62 @@ template<class T>
 bool QuikSolv<T>::operator!=(const QuikSolv<T> & rhs) const
 {
   return !(*this == rhs);
+}
+
+//-------------------------------------------
+//          Improve Accuracy of Root
+//-------------------------------------------
+
+template <class T> gVector<gDouble> 
+QuikSolv<T>::NewtonPolishOnce(const gVector<gDouble>& point) const
+{
+  gVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
+								NoEquations);
+  gMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
+  gSquareMatrix<gDouble> M(Df * Df.Transpose());
+  
+  gVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
+
+  return point + Del;
+}
+
+template <class T> gVector<gDouble> 
+QuikSolv<T>::SlowNewtonPolishOnce(const gVector<gDouble>& point) const
+{
+  gVector<gDouble> oldevals = TreesOfPartials.ValuesOfRootPolys(point,
+								NoEquations);
+  gMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
+  gSquareMatrix<gDouble> M(Df * Df.Transpose());
+  
+  gVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
+
+  bool done = false;
+  while (!done) {
+    gVector<gDouble> 
+      newevals(TreesOfPartials.ValuesOfRootPolys(point + Del,NoEquations));
+    if (newevals * newevals <= oldevals * oldevals) done = true;
+    else for (int i = 1; i <= Del.Length(); i++) Del[i] /= 2;
+  }
+
+  return point + Del;
+}
+
+#include "gsm.h"
+
+template<class T>   gVector<gDouble> 
+QuikSolv<T>::NewtonPolishedRoot(const gVector<gDouble> &initial) const
+{
+  gList<gInterval<gDouble> > interval_list;
+  for (int i = 1; i <= Dmnsn(); i++) 
+    interval_list += gInterval<gDouble>(initial[i] - (gDouble)1, 
+					initial[i] + (gDouble)1);
+  gRectangle<gDouble> box(interval_list);
+  gVector<gDouble> point(initial);
+  if (!NewtonRootInRectangle(box,point))
+    throw gclRuntimeError("Newton method failed to polish approximate root");
+  point = SlowNewtonPolishOnce(point);
+  point = SlowNewtonPolishOnce(point);
+  return point;
 }
 
 //-------------------------------------------
