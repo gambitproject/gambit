@@ -9,8 +9,6 @@
 #ifndef TWFLASH_H
 #define TWFLASH_H
 
-class TreeRender;
-
 typedef enum {
   myFlasher, myCursor
 } FlashType;
@@ -20,10 +18,11 @@ typedef enum {
   nodeCursor, subgameCursor
 } CursorType;
 
+class TreeWindow;
 
 class TreeNodeCursor {
 private:
-  TreeRender *m_parent;
+  TreeWindow *m_parent;
   FlashType __mytype;
   CursorType cursor_type, old_cursor_type;
   bool flashing;
@@ -32,7 +31,7 @@ private:
   void DrawCursor(wxDC &, int xs, int ys, int xe, int ye, CursorType type);
 
 public:
-  TreeNodeCursor(TreeRender *);
+  TreeNodeCursor(TreeWindow *);
   virtual ~TreeNodeCursor();
 
   void SetFlashNode(int x_s, int y_s, int x_e, int y_e, CursorType   type);
@@ -47,7 +46,7 @@ public:
 
 class TreeNodeFlasher : public wxTimer, public TreeNodeCursor {
 public:
-  TreeNodeFlasher(TreeRender *);
+  TreeNodeFlasher(TreeWindow *);
   virtual ~TreeNodeFlasher();
 
   void  Notify(void) { Flash(); }

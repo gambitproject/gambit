@@ -36,14 +36,13 @@ extern void DrawSubgamePickIcon(wxDC &, const NodeEntry &);
 
 
 wxFont   *outcome_font;
-wxCursor *scissor_cursor;
 
 
 //----------------------------------------------------------------------
 //                      TreeWindow: Member functions
 //----------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(TreeWindow, TreeRender)
+BEGIN_EVENT_TABLE(TreeWindow, wxScrolledWindow)
   EVT_SIZE(TreeWindow::OnSize)
   EVT_MOTION(TreeWindow::OnMouseMotion)
   EVT_LEFT_DOWN(TreeWindow::OnLeftClick)
@@ -58,9 +57,9 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
-  : TreeRender(p_parent, this),
+  : wxScrolledWindow(p_parent),
     ef(*p_efgShow->Game()), m_parent(p_efgShow),
-    node_list(ef, this), m_zoom(1.0), m_needsLayout(true)
+    m_layout(ef, this), m_zoom(1.0)
 {
   // Set the cursor to the root node
   m_cursor = ef.RootNode();
@@ -68,7 +67,7 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   ef.GetChance()->SetName("Chance");
 
   // Create the flasher to flash the cursor or just a steady cursor
-  MakeFlasher();
+  flasher = new TreeNodeCursor(this);
   // Create provision for drag'n dropping nodes
   node_drag = new NodeDragger(this, ef);
   // Create provision for merging isets by drag'n dropping
@@ -85,18 +84,8 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   //  zoom_window = 0;
   outcome_font = wxTheFontList->FindOrCreateFont(9, wxSWISS, wxNORMAL, wxNORMAL);
 
-#ifdef NOT_PORTED_YET
-#ifdef wx_msw
-  scissor_cursor = new wxCursor("SCISSORCUR");
-#else
-#include "bitmaps/scissor.xbm"
-  scissor_cursor = new wxCursor(scissor_bits, scissor_width, scissor_height,
-				-1, -1, scissor_bits);
-#endif // wx_msw
-#endif   // NOT_PORTED_YET
-
-  // Create a popup menu
   MakeMenus();
+  RefreshLayout();
 }
 
 TreeWindow::~TreeWindow()
@@ -236,19 +225,19 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
       if (Cursor()->GetParent()) {
-	SetCursorPosition(NodeList().GetValidParent(Cursor())->n);
+	SetCursorPosition(m_layout.GetValidParent(Cursor())->n);
 	c = true;
       }
       break;
     case WXK_RIGHT:
-      if (NodeList().GetValidChild(Cursor())) {
-	SetCursorPosition(NodeList().GetValidChild(Cursor())->n);
+      if (m_layout.GetValidChild(Cursor())) {
+	SetCursorPosition(m_layout.GetValidChild(Cursor())->n);
 	c = true;
       }
       break;
     case WXK_UP: {
       Node *prior = ((!p_event.ControlDown()) ? 
-		     node_list.PriorSameLevel(Cursor()) :
+		     m_layout.PriorSameLevel(Cursor()) :
 		     PriorSameIset(Cursor()));
       if (prior) {
 	SetCursorPosition(prior);
@@ -258,7 +247,7 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
     }
     case WXK_DOWN: {
       Node *next = ((!p_event.ControlDown()) ?
-		    node_list.NextSameLevel(Cursor()) :
+		    m_layout.NextSameLevel(Cursor()) :
 		    NextSameIset(Cursor()));
       if (next) {
 	SetCursorPosition(next);
@@ -280,12 +269,12 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
     if (c && p_event.ControlDown()) {
       if (hilight_infoset1 != Cursor()->GetInfoset()) {
 	hilight_infoset1 = Cursor()->GetInfoset();
-	Render();
+	Refresh();
       }
     }
     if (!p_event.ControlDown() && hilight_infoset1) {
       hilight_infoset1 = 0;
-      Render();
+      Refresh();
     }
   }
   else {
@@ -293,65 +282,35 @@ void TreeWindow::OnKeyEvent(wxKeyEvent &p_event)
   }
 }
 
-//
-// OnEvent -- handle mouse events
-// Currently we support selecting a node by clicking on it
-//
-void TreeWindow::OnEvent(wxMouseEvent& ev)
-{
-  // Implements the 'cutting' behavior
-  if (ProcessShift(ev)) return;
-    
-  // Double clicking hilights iset and toggles subgames
-  /*
-  if (ev.LeftDClick() || (ev.LeftDown() && ev.ControlDown()))
-    ProcessDClick(ev);
-
-  // Clicking on a node will move the cursor there
-  if (ev.LeftDown()) {
-    const Node *old_cursor = Cursor();
-    ProcessClick(ev);
-    if (Cursor() != old_cursor) 
-      ProcessCursor();
-    SetFocus(); // click on the canvas to restore keyboard focus
-  }
-    
-  // Right click implements a popup menu (edit), legend display
-  if (ev.RightDown()) ProcessRClick(ev);
-    
-  // Right double click implements legend modification
-  if (ev.RightDClick() || (ev.RightDown() && ev.ControlDown()))
-    ProcessRDClick(ev);
-  */
-}
-
 //---------------------------------------------------------------------
 //                   TreeWindow: Drawing functions
 //---------------------------------------------------------------------
+
+void TreeWindow::RefreshLayout(void)
+{
+  m_layout.Layout(*m_parent->GetSupport());
+  FitZoom();
+}
 
 void TreeWindow::FitZoom(void)
 {
   int width, height;
   GetClientSize(&width, &height);
     
-  double zoomx = (double) width / (double) node_list.MaxX();
-  double zoomy = (double) height / (double) node_list.MaxY();
+  double zoomx = (double) width / (double) m_layout.MaxX();
+  double zoomy = (double) height / (double) m_layout.MaxY();
     
   zoomx = gmin(zoomx, 1.0); 
   zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
   m_zoom = gmin(zoomx, zoomy);
 }
 
-void TreeWindow::Render(wxDC &dc)
+void TreeWindow::OnDraw(wxDC &dc)
 {
-  if (m_needsLayout) {
-    node_list.Layout(*m_parent->GetSupport());
-    FitZoom();
-  }
   dc.SetUserScale(m_zoom, m_zoom);
     
   if (Cursor()) {
-    if (!NodeList().GetNodeEntry(Cursor())) {
+    if (!m_layout.GetNodeEntry(Cursor())) {
       SetCursorPosition(ef.RootNode());
     }
     
@@ -363,7 +322,7 @@ void TreeWindow::Render(wxDC &dc)
   dc.Clear();
 
   dc.BeginDrawing();
-  TreeRender::Render(dc);
+  m_layout.Render(dc);
   dc.EndDrawing();
 
   flasher->Flash();
@@ -371,14 +330,68 @@ void TreeWindow::Render(wxDC &dc)
 
 void TreeWindow::ProcessCursor(void)
 {
-  NodeEntry *entry = NodeList().GetNodeEntry(Cursor()); 
+  NodeEntry *entry = m_layout.GetNodeEntry(Cursor()); 
   if (!entry) {
     SetCursorPosition(ef.RootNode());
-    entry = NodeList().GetNodeEntry(Cursor());
+    entry = m_layout.GetNodeEntry(Cursor());
   }
     
   UpdateCursor();
   m_parent->OnSelectedMoved(Cursor());
+}
+
+void TreeWindow::UpdateCursor(void)
+{
+  NodeEntry *entry = m_layout.GetNodeEntry(Cursor());
+
+  if (!entry) {
+    return;
+  }
+
+  if (entry->n->GetSubgameRoot() == entry->n && !entry->expanded) {
+    flasher->SetFlashNode(entry->x + DrawSettings().NodeLength() +
+			  entry->nums*INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE,
+			  entry->y,
+			  entry->x + DrawSettings().NodeLength() +
+			  entry->nums*INFOSET_SPACING,
+			  entry->y, subgameCursor);
+  }
+  else {
+    flasher->SetFlashNode(entry->x + entry->nums*INFOSET_SPACING, entry->y,
+			  entry->x + DrawSettings().NodeLength() + 
+			  entry->nums*INFOSET_SPACING - 8,
+			  entry->y, nodeCursor);
+  }
+
+  flasher->Flash();
+}
+
+gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
+{
+  if (n->GetOutcome()) {
+    EFOutcome *tv = n->GetOutcome();
+    const gArray<gNumber> &v = n->Game()->Payoff(tv);
+    gText tmp = "(";
+
+    for (int i = v.First(); i <= v.Last(); i++) {
+      if (i != 1) 
+	tmp += ",";
+      /*      
+      if (DrawSettings().ColorCodedOutcomes())
+	tmp += ("\\C{"+ToText(DrawSettings().GetPlayerColor(i))+"}");
+      */
+      tmp += ToText(v[i], NumDecimals());
+    }
+    /*
+    if (DrawSettings().ColorCodedOutcomes()) 
+      tmp += ("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
+    */
+    tmp += ")";
+        
+    return tmp;
+  }
+  else
+    return "";
 }
 
 void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
@@ -407,6 +420,10 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 
 void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
 {
+  if (ProcessShift(p_event))  {
+    return;
+  }   
+ 
   // Check all the draggers.  Note that they are mutually exclusive
   if (!iset_drag->Dragging() && !branch_drag->Dragging() &&
       !outcome_drag->Dragging()) {
@@ -430,10 +447,10 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
     
   int x = p_event.GetX(), y = p_event.GetY();
 
-  Node *node = node_list.NodeHitTest(x, y, draw_settings.NodeLength());
+  Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
     SetCursorPosition(node);
-    Render();
+    Refresh();
     ProcessCursor();
   }
 }
@@ -442,162 +459,69 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
   long x, y;
   p_event.GetPosition(&x, &y);
-  int id = -1;
-  for (int i = 1; i <= node_list.Length(); i++) {
-    NodeEntry *entry = node_list[i];
-    // Check if double clicked on a node
-    if (x > entry->x+entry->nums*INFOSET_SPACING &&
-	x < entry->x+entry->nums*INFOSET_SPACING+
-	draw_settings.NodeLength()-SUBGAME_LARGE_ICON_SIZE &&
-	y > entry->y-DELTA && y < entry->y+DELTA) {
-      SetCursorPosition((Node *) entry->n);
-      if (Cursor()->GetInfoset()) // implement iset hilighting
-	m_parent->HilightInfoset(Cursor()->GetPlayer()->GetNumber(),
-				 Cursor()->GetInfoset()->GetNumber(), 1);
-      Render();
-      return;
+
+  Node *node = m_layout.NodeHitTest(x, y);
+  if (node) {
+    SetCursorPosition(node);
+    if (Cursor()->GetInfoset()) {
+      m_parent->HilightInfoset(Cursor()->GetPlayer()->GetNumber(),
+			       Cursor()->GetInfoset()->GetNumber(), 1);
     }
-    // implement subgame toggle (different for collapsed and expanded)
-    if (entry->n->GetSubgameRoot() == entry->n) {
-      if (entry->expanded) {
-	if (x > entry->x && x < entry->x+SUBGAME_SMALL_ICON_SIZE &&
-	    y > entry->y-SUBGAME_SMALL_ICON_SIZE/2 &&
-	    y < entry->y+SUBGAME_SMALL_ICON_SIZE/2) {
-	  SetCursorPosition((Node *) entry->n);
-	  subgame_toggle();
-	  Render();
-	  return;
-	}
-      }
-      else {
-	if (x > entry->x+draw_settings.NodeLength()+
-	    entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE &&
-	    x < entry->x+draw_settings.NodeLength()+
-	    entry->nums*INFOSET_SPACING+SUBGAME_LARGE_ICON_SIZE &&
-	    y > entry->y-SUBGAME_LARGE_ICON_SIZE/2 &&
-	    y < entry->y+SUBGAME_LARGE_ICON_SIZE/2) {
-	  SetCursorPosition((Node *) entry->n);
-	  subgame_toggle();
-	  Render();
-	  return;
-	}
-      }
-        
-      // Check if clicked on a Node Above/Below
-      if(x > entry->x+entry->nums*INFOSET_SPACING+3 && x < entry->x+MAX_TW) {
-	if (y > entry->y-MAX_TH && y < entry->y+DELTA)
-	  id = draw_settings.LabelNodeAbove();
-	if (y > entry->y+DELTA && y < entry->y+MAX_TH+DELTA)
-	  id = draw_settings.LabelNodeBelow();
-      }
-      if (id != -1) {
-	SetCursorPosition((Node *) entry->n);
-	switch (id) {
-	case NODE_ABOVE_NOTHING: break;
-	  //	case NODE_ABOVE_LABEL: node_label(); break;
-	  //	case NODE_ABOVE_PLAYER: tree_players(); break;
-	  //	case NODE_ABOVE_ISETLABEL: infoset_switch_player(); break;
-	  //   case NODE_ABOVE_ISETID:  infoset_switch_player(); break;
-	  //	case NODE_ABOVE_OUTCOME: EditOutcomePayoffs(); break;
-	case NODE_ABOVE_REALIZPROB: break;
-	case NODE_ABOVE_BELIEFPROB: break;
-	case NODE_ABOVE_VALUE: break;
-	}
-	Render();
-	return;
-      }
-        
-      // Check if clicked on a branch Above/Below
-      if (entry->parent) {  // no branches for root
-	if(x > entry->x-draw_settings.BranchLength() &&
-	   x < entry->x-draw_settings.BranchLength()+MAX_TW) {
-	  if (y > entry->y-MAX_TH && y < entry->y+DELTA)
-	    id = draw_settings.LabelBranchAbove();
-	  if (y > entry->y+DELTA && y < entry->y+MAX_TH)
-	    id = draw_settings.LabelBranchBelow();
-	}
-      }
-      if (id != -1) {
-	SetCursorPosition((Node *) entry->parent->n);
-	switch (id) {
-	case BRANCH_ABOVE_NOTHING: break;
-	  //	case BRANCH_ABOVE_LABEL: action_label(); break;
-	  //	case BRANCH_ABOVE_PLAYER: tree_players(); break;
-	  //case BRANCH_ABOVE_PROBS: action_probs(); break;
-	case BRANCH_ABOVE_VALUE: break;
-	}
-	Render();
-	return;
-      }
-        
-      // Check if clicked to the right of a node
-      if(x > entry->x+draw_settings.NodeLength()+10 &&
-	 x < entry->x+draw_settings.NodeLength()+10+
-	 draw_settings.OutcomeLength()*ef.NumPlayers() &&
-	 y > entry->y-DELTA && y < entry->y+DELTA) {
-	id = draw_settings.LabelNodeRight();
-      }
-      if (id != -1) {
-	SetCursorPosition((Node *) entry->n);
-	switch (id) {
-	case NODE_RIGHT_NOTHING:
-	  break;
-	case NODE_RIGHT_OUTCOME:
-	case NODE_RIGHT_NAME:
-	  //	  EditOutcomePayoffs();
-	  break;
-	}
-	Render();
-	return;
+    Refresh();
+    return;
+  }
+
+  node = m_layout.SubgameHitTest(x, y);
+  if (node) {
+    SetCursorPosition(node);
+    for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
+      if (m_layout.SubgameList()[i].root == Cursor()) {
+	m_layout.SubgameList()[i].expanded = !m_layout.SubgameList()[i].expanded; 
+	RefreshLayout();
       }
     }
+    Refresh();
+    return;
+  }
+
+  node = m_layout.NodeAboveHitTest(x, y);
+  if (node) {
+    // Action for clicking on node label -- currently undefined
+    return;
+  }
+
+  node = m_layout.NodeBelowHitTest(x, y);
+  if (node) {
+    // Action for clicking on node label -- currently undefined
+    return;
+  }
+
+  node = m_layout.NodeRightHitTest(x, y);
+  if (node) {
+    SetCursorPosition(node);
+    // Action for clicking on right label -- currently undefined
+  }
+
+  node = m_layout.BranchAboveHitTest(x, y);
+  if (node) {
+    SetCursorPosition(node->GetParent());
+    // Action for clicking on branch label -- currently undefined
+    return;
+  }
+
+  node = m_layout.BranchBelowHitTest(x, y);
+  if (node) {
+    SetCursorPosition(node->GetParent());
+    // Action for clicking on branch label -- currently undefined
+    return;
   }
 }
 
-//
-// Right Clicking on a label will tell you what the label is refering to
-// If the click was not on top of a text label, a popup menu (Buid) is created
-//
 void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 {
-  long x, y;
+  int x, y;
   p_event.GetPosition(&x, &y);
-  NodeEntry *entry;
-  char *s = 0;
-  for (int i = 1; i <= node_list.Length(); i++) {
-    entry = node_list[i];
-    // Check if clicked on a Node Above/Below
-    if(x > entry->x+entry->nums*INFOSET_SPACING+3 && x < entry->x+MAX_TW) {
-      if (y > entry->y-MAX_TH && y < entry->y+DELTA)
-	s = node_above_src[draw_settings.LabelNodeAbove()].l_name;
-      if (y > entry->y+DELTA && y < entry->y+MAX_TH+DELTA)
-	s = node_below_src[draw_settings.LabelNodeBelow()].l_name;
-    }
-    // Check if clicked on a branch Above/Below
-    if (entry->parent) {  // no branches for root
-      if(x > entry->x-draw_settings.BranchLength() &&
-	 x < entry->x-draw_settings.BranchLength()+MAX_TW) {
-	if (y > entry->y-MAX_TH && y < entry->y+DELTA)
-	  s = branch_above_src[draw_settings.LabelBranchAbove()].l_name;
-	if (y > entry->y+DELTA && y < entry->y+MAX_TH)
-	  s = branch_below_src[draw_settings.LabelBranchBelow()].l_name;
-      }
-    }
-    // Check if clicked to the right of a node
-    if (x > entry->x+draw_settings.NodeLength()+10 &&
-	x < entry->x+draw_settings.NodeLength()+10+
-	draw_settings.OutcomeLength()*ef.NumPlayers() &&
-	y > entry->y-DELTA && y < entry->y+DELTA) {
-      s = node_right_src[draw_settings.LabelNodeRight()].l_name;
-    }
-    if (s) {
-      m_parent->SetStatusText(s);
-      return;
-    }
-  }
-  m_parent->SetStatusText("");
 
-  // If we got here, the click was NOT on top of a text label, do the menu
   int x_start, y_start;
   ViewStart(&x_start, &y_start);
   wxClientDC dc(this);
@@ -606,202 +530,47 @@ void TreeWindow::OnRightClick(wxMouseEvent &p_event)
 	    dc.LogicalToDeviceY(y-y_start*PIXELS_PER_SCROLL));
 }
 
-void TreeWindow::OnRightDoubleClick(wxMouseEvent &p_event)
-{
-  long x, y;
-  p_event.GetPosition(&x, &y);
-  NodeEntry *entry;
-  int id = -1;
-  for (int i = 1; i <= node_list.Length(); i++) {
-    entry = node_list[i];
-    // Check if clicked on a Node Above/Below
-    if(x > entry->x+entry->nums*INFOSET_SPACING+3 && x < entry->x+MAX_TW) {
-      if (y > entry->y-MAX_TH && y < entry->y+DELTA)
-	id = NODE_ABOVE_LEGEND;
-      if (y > entry->y+DELTA && y < entry->y+MAX_TH+DELTA) 
-	id = NODE_BELOW_LEGEND;
-    }
-    // Check if clicked on a branch Above/Below
-    if (entry->parent)  { // no branches for root
-      if (x > entry->x-draw_settings.BranchLength() && 
-	  x < entry->x-draw_settings.BranchLength()+MAX_TW) {
-	if (y > entry->y-MAX_TH && y < entry->y+DELTA) 
-	  id = BRANCH_ABOVE_LEGEND;
-	if (y > entry->y+DELTA && y < entry->y+MAX_TH)
-	  id = BRANCH_BELOW_LEGEND;
-      }
-    }
-    // Check if clicked to the right of a node
-    if (x > entry->x+draw_settings.NodeLength()+10 &&
-	x < entry->x+draw_settings.NodeLength()+10+
-	draw_settings.OutcomeLength()*ef.NumPlayers() &&
-	y > entry->y-DELTA && y < entry->y+DELTA) {
-      id = NODE_RIGHT_LEGEND;
-    }
-    if (id != -1) {
-      //      draw_settings.SetLegends();
-      Render();
-      return;
-    }
-  }
-}
-
-//
-// Process Shift
-// In Gambit, holding down shift initiates a 'cut' function.  If the cursor
-// is located over a 'cuttable' object (node, branch, iset line), it will change
-// to a 'scissors.'  Pressing the left mouse button while the cursor is
-// 'scissors' will cut the object under the cursor. Returns true if an actual
-// cut took place.
-//
 bool TreeWindow::ProcessShift(wxMouseEvent &ev)
 {
-#ifdef NOT_PORTED_YET
-    if (!ev.ShiftDown())
-    {
-#ifndef LINUX_WXXT
-        if (wx_cursor == scissor_cursor)
-            SetCursor(wxSTANDARD_CURSOR);
-#else
-        // wxxt doesn't have a wx_cursor field; this is a hack.
-        SetCursor(wxSTANDARD_CURSOR);
-#endif
-        return false;
-    }
-    
-    float x, y;
-    ev.Position(&x, &y);
-    NodeEntry *iset_cut_entry = 0, *node_cut_entry = 0, *branch_cut_entry = 0,
-        *outcome_cut_entry = 0;
-    bool cut_cursor = false;
-
-    for (int i = 1; i <= node_list.Length() && !iset_cut_entry; i++)
-    {
-        NodeEntry *entry = node_list[i];
-        // Check if the cursor is on top of a infoset line
-        if (entry->infoset.y != -1 && entry->n->GetInfoset())
-            if (x > entry->x+entry->num*INFOSET_SPACING-2 &&
-                x < entry->x+entry->num*INFOSET_SPACING+2)
-                if (y > entry->y && y < entry->infoset.y)
-                {
-                    // next iset is below this one
-                    iset_cut_entry = entry;
-                    cut_cursor = true;
-                    break;
-                }
-                else if (y > entry->infoset.y && y < entry->y)
-                {
-                    // next iset is above this one
-                    iset_cut_entry = entry;
-                    cut_cursor = true;
-                    break;
-                }
-
-        // Check if the cursor is on top of a node
-        if (x > entry->x+entry->num*INFOSET_SPACING+10 && 
-            x < entry->x+draw_settings.NodeLength()+entry->num*INFOSET_SPACING &&
-            y > entry->y-2 && y < entry->y+2)
-        {
-            node_cut_entry = entry;
-            cut_cursor = true;
-            break;
-        }
-
-        // Check if the cursor is on top of an outcome
-        if (entry->has_children == 0 && entry->n->GetOutcome())
-        {
-            if (x > entry->x+entry->num*INFOSET_SPACING+10+draw_settings.NodeLength() &&
-                x < entry->x+draw_settings.NodeLength()+
-                entry->num*INFOSET_SPACING+draw_settings.OutcomeLength() &&
-                y > entry->y-2 && y < entry->y+2)
-            {
-                outcome_cut_entry = entry;
-                cut_cursor = true;
-                break;
-            }
-        }
-        
-        // Check if the cursor is on top of a branch
-        NodeEntry *parent_entry = GetNodeEntry(entry->n->GetParent());
-        if (parent_entry)
-        {
-            if (x > parent_entry->x+draw_settings.NodeLength()+
-                parent_entry->num*INFOSET_SPACING+10 &&
-                x < parent_entry->x+draw_settings.NodeLength()+
-                draw_settings.ForkLength()+parent_entry->num*INFOSET_SPACING)
-            {
-                // Good old slope/intercept method for finding a point on a line
-                int y0 = parent_entry->y + 
-                    (int) (x - parent_entry->x - 
-                           draw_settings.NodeLength() -
-                           parent_entry->nums*INFOSET_SPACING) *
-                    (entry->y-parent_entry->y)/draw_settings.ForkLength();
-
-                if (y > y0-2 && y < y0+2)
-                {
-                    branch_cut_entry = entry;
-                    cut_cursor = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (ev.LeftDown() && cut_cursor)
-    {
-        // clicking the left mouse button will ...
-        if (iset_cut_entry)  // cut an infoset
-        {
-            Infoset *siset = ef.SplitInfoset((Node *)iset_cut_entry->n);
-            siset->SetName("Infoset"+ToText(siset->GetPlayer()->NumInfosets()));
-            infosets_changed = true;
-            OnPaint();
-            return true;
-        }
-
-        if (node_cut_entry)  // cut a node
-        {
-            ef.DeleteTree((Node *)node_cut_entry->n);
-            nodes_changed = true;
-            OnPaint();
-            return true;
-        }
-
-        if (outcome_cut_entry)
-        {
-            ((Node *) outcome_cut_entry->n)->SetOutcome(0);
-            outcomes_changed = true;
-            OnPaint();
-            return true;
-        }
-
-        if (branch_cut_entry)  // cut a branch
-        {
-            ef.DeleteAction(branch_cut_entry->n->GetParent()->GetInfoset(),
-                            LastAction(ef, (Node *)branch_cut_entry->n));
-            nodes_changed = true;
-            OnPaint();
-            return true;
-        }
-    }
-    
-#ifndef LINUX_WXXT
-    if (!cut_cursor && wx_cursor == scissor_cursor)
-        SetCursor(wxSTANDARD_CURSOR);
-
-    if (cut_cursor && wx_cursor != scissor_cursor) 
-        SetCursor(scissor_cursor);
-#else
-    // wxxt doesn't have a wx_cursor field; this is a hack.
-    if (!cut_cursor)
-        SetCursor(wxSTANDARD_CURSOR);
-
-    if (cut_cursor) 
-        SetCursor(scissor_cursor);
-#endif // LINUX_WXXT
-#endif  // NOT_PORTED_YET
-    
+  if (!ev.ShiftDown()) {
     return false;
+  }
+
+  long x, y;
+  ev.GetPosition(&x, &y);
+
+  Node *node = m_layout.NodeHitTest(x, y);
+  if (node) {
+    ef.DeleteTree(node);
+    Refresh();
+    return true;
+  }
+
+  node = m_layout.NodeRightHitTest(x, y);
+  if (node && node->GetOutcome()) {
+    node->SetOutcome(0);
+    outcomes_changed = true;
+    Refresh();
+    return true;
+  }
+
+  node = m_layout.BranchHitTest(x, y);
+  if (node) {
+    ef.DeleteAction(node->GetParent()->GetInfoset(),
+		    LastAction(ef, node));
+    Refresh();
+    return true;
+  }
+
+  node = m_layout.InfosetHitTest(x, y);
+  if (node) {
+    Infoset *iset = ef.SplitInfoset(node);
+    iset->SetName("Infoset" + ToText(iset->GetPlayer()->NumInfosets()));
+    Refresh();
+    return true;
+  }
+
+  return false;
 }
 
 void TreeWindow::HilightInfoset(int pl, int iset)
@@ -814,7 +583,7 @@ void TreeWindow::HilightInfoset(int pl, int iset)
       hilight_infoset = p->Infosets()[iset];
   }
 
-  Render();
+  Refresh();
 }
 
 //
@@ -824,14 +593,14 @@ void TreeWindow::HilightInfoset(int pl, int iset)
 void TreeWindow::SupportChanged(void)
 {
   // Check if the cursor is still valid
-  NodeEntry *ne = NodeList().GetNodeEntry(Cursor());
+  NodeEntry *ne = m_layout.GetNodeEntry(Cursor());
   if (ne->child_number) {
     if (!m_parent->GetSupport()->Find(Cursor()->GetInfoset()->Actions()[ne->child_number]))
       SetCursorPosition(ef.RootNode());
   }
 
-  ForceRecalc();
-  Render();
+  RefreshLayout();
+  Refresh();
 }
 
 void TreeWindow::SetSubgamePickNode(Node *n)
@@ -842,7 +611,7 @@ void TreeWindow::SetSubgamePickNode(Node *n)
     Node *cur_cursor = Cursor();
     SetCursorPosition((Node *) n);
     ProcessCursor();
-    NodeEntry *ne = NodeList().GetNodeEntry(n);
+    NodeEntry *ne = m_layout.GetNodeEntry(n);
     wxClientDC dc(this);
     dc.SetUserScale(m_zoom, m_zoom);
     DrawSubgamePickIcon(dc, *ne);
@@ -851,17 +620,11 @@ void TreeWindow::SetSubgamePickNode(Node *n)
   subgame_node = n;
 }
 
-void TreeWindow::Render(void)
-{
-  wxClientDC dc(this);
-  dc.SetUserScale(m_zoom, m_zoom);
-  Render(dc);
-}
-
 Node *TreeWindow::GotObject(long &x, long &y, int what)
 {
-  for (int i = 1; i <= node_list.Length(); i++) {
-    NodeEntry *entry = node_list[i];
+#ifdef NOT_PORTED_YET
+  for (int i = 1; i <= m_layout.Length(); i++) {
+    NodeEntry *entry = m_layout[i];
         
     if (what == DRAG_NODE_START) // check if clicked a non terminal node
       if (entry->n->Game()->NumChildren(entry->n) != 0)
@@ -917,7 +680,7 @@ Node *TreeWindow::GotObject(long &x, long &y, int what)
         
     if (what == DRAG_BRANCH_END) {
       // check if released in a valid position
-      NodeEntry *start_entry = NodeList().GetNodeEntry(branch_drag->StartNode());
+      NodeEntry *start_entry = m_layout.GetNodeEntry(branch_drag->StartNode());
       int xs = start_entry->x+draw_settings.NodeLength()+
 	draw_settings.ForkLength()+start_entry->nums*INFOSET_SPACING;
       if (x > xs && x < xs+draw_settings.BranchLength() &&
@@ -927,13 +690,13 @@ Node *TreeWindow::GotObject(long &x, long &y, int what)
 	int br = 1;
 	NodeEntry *child_entry, *child_entry1;
 	for (int ii = 1; ii <= start_entry->n->Game()->NumChildren(start_entry->n)-1; ii++) {
-	  child_entry = NodeList().GetNodeEntry(start_entry->n->GetChild(ii));
+	  child_entry = m_layout.GetNodeEntry(start_entry->n->GetChild(ii));
 	  if (ii == 1) 
 	    if (y < child_entry->y) {
 	      br = 1;
 	      break;
 	    }
-	  child_entry1 = NodeList().GetNodeEntry(start_entry->n->GetChild(ii+1));
+	  child_entry1 = m_layout.GetNodeEntry(start_entry->n->GetChild(ii+1));
 	  if (y > child_entry->y && y < child_entry1->y) {
 	    br = ii+1;
 	    break;
@@ -950,7 +713,7 @@ Node *TreeWindow::GotObject(long &x, long &y, int what)
 	return 0;
     }
   }
-
+#endif // NOT_PORTED_YET
   return 0;
 }
 
@@ -1057,18 +820,18 @@ void TreeWindow::node_goto_mark(void)
 
 void TreeWindow::SubgameMarkAll(void)
 {
-  node_list.SubgameList().Flush();
-  node_list.SubgameList().Append(SubgameEntry(ef.RootNode()));
+  m_layout.SubgameList().Flush();
+  m_layout.SubgameList().Append(SubgameEntry(ef.RootNode()));
   gList<Node *> subgame_roots;
   LegalSubgameRoots(ef, subgame_roots);
   ef.MarkSubgames(subgame_roots);
 
   for (int i = 1; i <= subgame_roots.Length(); i++) {
     if (subgame_roots[i] != ef.RootNode())
-      node_list.SubgameList().Append(SubgameEntry(subgame_roots[i], true));
+      m_layout.SubgameList().Append(SubgameEntry(subgame_roots[i], true));
   }
   
-  ForceRecalc();
+  RefreshLayout();
 }
 
 void TreeWindow::SubgameMark(void)
@@ -1084,8 +847,8 @@ void TreeWindow::SubgameMark(void)
   }
 
   ef.MarkSubgame(Cursor());
-  node_list.SubgameList().Append(SubgameEntry(Cursor(), true)); // collapse
-  ForceRecalc();
+  m_layout.SubgameList().Append(SubgameEntry(Cursor(), true)); // collapse
+  RefreshLayout();
 }
 
 void TreeWindow::SubgameUnmark(void)
@@ -1096,28 +859,28 @@ void TreeWindow::SubgameUnmark(void)
     
   ef.UnmarkSubgame(Cursor());
 
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++) {
-    if (node_list.SubgameList()[i].root == Cursor())
-      node_list.SubgameList().Remove(i);
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
+    if (m_layout.SubgameList()[i].root == Cursor())
+      m_layout.SubgameList().Remove(i);
   }
 
-  ForceRecalc();
+  RefreshLayout();
 }
 
 void TreeWindow::SubgameUnmarkAll(void)
 {
   ef.UnmarkSubgames(ef.RootNode());
-  node_list.SubgameList().Flush();
-  node_list.SubgameList().Append(SubgameEntry(ef.RootNode()));
-  ForceRecalc();
+  m_layout.SubgameList().Flush();
+  m_layout.SubgameList().Append(SubgameEntry(ef.RootNode()));
+  RefreshLayout();
 }
 
 void TreeWindow::SubgameCollapse(void)
 {
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++) {
-    if (node_list.SubgameList()[i].root == Cursor()) {
-      node_list.SubgameList()[i].expanded = false;
-      ForceRecalc();
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
+    if (m_layout.SubgameList()[i].root == Cursor()) {
+      m_layout.SubgameList()[i].expanded = false;
+      RefreshLayout();
       return;
     }
   }
@@ -1125,18 +888,18 @@ void TreeWindow::SubgameCollapse(void)
 
 void TreeWindow::SubgameCollapseAll(void)
 {
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++)
-    node_list.SubgameList()[i].expanded = false;
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++)
+    m_layout.SubgameList()[i].expanded = false;
 
-  ForceRecalc();
+  RefreshLayout();
 }
 
 void TreeWindow::SubgameExpand(void)
 {
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++) {
-    if (node_list.SubgameList()[i].root == Cursor()) {
-      node_list.SubgameList()[i].expanded = true;
-      ForceRecalc();
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
+    if (m_layout.SubgameList()[i].root == Cursor()) {
+      m_layout.SubgameList()[i].expanded = true;
+      RefreshLayout();
       return;
     }
   }
@@ -1144,12 +907,12 @@ void TreeWindow::SubgameExpand(void)
 
 void TreeWindow::SubgameExpandBranch(void)
 {
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++) {
-    if (node_list.SubgameList()[i].root == Cursor()) {
-      for (int j = 1; j <= node_list.SubgameList().Length(); j++) {
-	if (ef.IsSuccessor(node_list.SubgameList()[j].root, Cursor())) {
-	  node_list.SubgameList()[j].expanded = true;
-	  ForceRecalc();
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
+    if (m_layout.SubgameList()[i].root == Cursor()) {
+      for (int j = 1; j <= m_layout.SubgameList().Length(); j++) {
+	if (ef.IsSuccessor(m_layout.SubgameList()[j].root, Cursor())) {
+	  m_layout.SubgameList()[j].expanded = true;
+	  RefreshLayout();
 	}
       }
 
@@ -1160,81 +923,11 @@ void TreeWindow::SubgameExpandBranch(void)
 
 void TreeWindow::SubgameExpandAll(void)
 {
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++)
-    node_list.SubgameList()[i].expanded = true;
+  for (int i = 1; i <= m_layout.SubgameList().Length(); i++)
+    m_layout.SubgameList()[i].expanded = true;
   
-  ForceRecalc();
+  RefreshLayout();
 }
-
-void TreeWindow::subgame_toggle(void)
-{
-  for (int i = 1; i <= node_list.SubgameList().Length(); i++) {
-    if (node_list.SubgameList()[i].root == Cursor()) {
-      node_list.SubgameList()[i].expanded = !node_list.SubgameList()[i].expanded; 
-      ForceRecalc();
-      return;
-    }
-  }
-}
-
-//***********************************************************************
-//                      TREE-PRINT MF MENU HANDLER
-//***********************************************************************
-
-#ifdef NOT_PORTED_YET
-
-#ifdef wx_msw
-void TreeWindow::print_mf(wxOutputOption fit, bool save_mf)
-{
-  char *metafile_name = 0;
-
-  if (save_mf)
-    metafile_name = copystring(wxFileSelector("Save Metafile", 0, 0, ".wmf", "*.wmf"));
-
-  wxMetaFileDC dc_mf(metafile_name);
-
-  if (dc_mf.Ok()) {
-    dc_mf.SetBackgroundMode(wxTRANSPARENT);
-    float old_zoom;
-
-    if (fit == wxFITTOPAGE) {
-      old_zoom = draw_settings.Zoom();
-      int w, h;
-      GetSize(&w, &h);
-      draw_settings.SetZoom(gmin((float)w/(float)node_list.MaxX(),
-				 (float)h/(float)node_list.MaxY()), true);
-    }
-
-    if (!save_mf) 
-      dc_mf.SetUserScale(2.0, 2.0);
-
-    Render(dc_mf);
-
-    if (fit == wxFITTOPAGE) 
-      draw_settings.SetZoom(old_zoom);
-        
-    wxMetaFile *mf = dc_mf.Close();
-    
-    if (mf) {
-      Bool success = mf->SetClipboard((int)(dc_mf.MaxX()+10), (int)(dc_mf.MaxY()+10));
-      if (!success) 
-	wxMessageBox("Copy Failed", "Error", wxOK | wxCENTRE, pframe);
-      delete mf;
-    }
-
-    if (save_mf)
-      wxMakeMetaFilePlaceable(
-	  metafile_name, 0, 0, (int)(dc_mf.MaxX()+10), (int)(dc_mf.MaxY()+10));
-  }
-}
-#else
-void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
-{
-  wxMessageBox("Metafiles are not supported under X");
-}
-#endif
-
-#endif // NOT_PORTED_YET
 
 //-----------------------------------------------------------------------
 //                     DISPLAY MENU HANDLER FUNCTIONS
@@ -1242,8 +935,8 @@ void TreeWindow::print_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 
 void TreeWindow::OnSize(wxSizeEvent &p_event)
 {
-  if (node_list.MaxX() == 0 || node_list.MaxY() == 0) {
-    Render();
+  if (m_layout.MaxX() == 0 || m_layout.MaxY() == 0) {
+    Refresh();
   }
 
   // This extra check because wxMSW seems to generate OnSize events
@@ -1254,14 +947,14 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
   }
 
   double zoomx = ((double) p_event.GetSize().GetWidth() /
-		  (double) node_list.MaxX());
+		  (double) m_layout.MaxX());
   double zoomy = ((double) p_event.GetSize().GetHeight() /
-		  (double) node_list.MaxY());
+		  (double) m_layout.MaxY());
     
   zoomx = gmin(zoomx, 1.0);
   zoomy = gmin(zoomy, 1.0);
   m_zoom = gmin(zoomx, zoomy); 
-  Render();
+  Refresh();
 }
 
 void TreeWindow::prefs_display_flashing(void)
@@ -1278,7 +971,7 @@ void TreeWindow::prefs_display_flashing(void)
   }
 
   ProcessCursor();
-  ForceRecalc();
+  RefreshLayout();
 }
 
 

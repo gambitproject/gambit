@@ -32,8 +32,8 @@ bool EfgPrintout::OnPrintPage(int)
   float pageScaleY = (float)h/pageHeight;
   
   if (true) { // fit to page
-    int maxX = tree->node_list.MaxX();
-    int maxY = tree->node_list.MaxY();
+    int maxX = tree->m_layout.MaxX();
+    int maxY = tree->m_layout.MaxY();
     // Figure out the 'fake' window zoom
     float zoom_x = (float)win_w/(float)maxX, zoom_y = (float)win_h/(float)maxY;
     float real_zoom = gmin(zoom_x, zoom_y);
@@ -83,7 +83,7 @@ bool EfgPrintout::OnPrintPage(int)
     dc->SetUserScale(real_zoom, real_zoom);
   }
     
-  tree->Render(*dc);
+  tree->OnDraw(*dc);
     
   return true;
 }

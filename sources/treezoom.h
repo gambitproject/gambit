@@ -7,6 +7,8 @@
 #ifndef TREEZOOM_H
 #define TREEZOOM_H
 
+#ifdef ZOOM_WINDOW
+
 #include "treerender.h"
 
 class TreeZoomWindow : public TreeRender {
@@ -41,5 +43,7 @@ public:
   void SetZoom(float zoom);
   float GetZoom(void) const;
 };
+
+#endif  // ZOOM_WINDOW
 
 #endif  // TREEZOOM_H

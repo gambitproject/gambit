@@ -102,7 +102,7 @@ int TreeWindow::NodeDragger::OnEvent(wxMouseEvent &ev)
       catch (gException &E) {
         guiExceptionDialog(E.Description(), parent->Parent());
       }
-      parent->Render();
+      parent->Refresh();
     }
   }
   return ret;
@@ -164,7 +164,7 @@ int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev)
 	  gText iset_name = from->GetName();
 	  Infoset *miset = ef.MergeInfoset(to, from);
 	  miset->SetName(iset_name+":1");
-	  parent->Render();
+	  parent->Refresh();
 	}
       }
     }
@@ -240,7 +240,7 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev)
 	  if (player) ef.AppendNode(start_node, player, 1);
 	}
       }
-      parent->Render();
+      parent->Refresh();
     }
   }
   return ret;
@@ -292,7 +292,7 @@ int TreeWindow::OutcomeDragger::OnEvent(wxMouseEvent &ev,
       end_node->SetOutcome(outcome);
       if (c) start_node->SetOutcome(0); // move
       outcomes_changed = 1;
-      parent->Render();
+      parent->Refresh();
     }
     drag_now = 0;
   }

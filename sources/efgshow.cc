@@ -326,9 +326,10 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
 
   m_efg.SetIsDirty(false);
 
+#ifdef ZOOM_WINDOW
   m_treeZoomWindow = new TreeZoomWindow(this, m_treeWindow);
+#endif  // ZOOM_WINDOW
 
-  m_treeWindow->UpdateCursor();
   Show(true);
 }
 
@@ -343,7 +344,9 @@ void EfgShow::OnSelectedMoved(const Node *n)
   if (m_cursorWindow) {
     m_cursorWindow->Set(n);
   }
+#ifdef ZOOM_WINDOW
   m_treeZoomWindow->UpdateCursor();
+#endif  // ZOOM_WINDOW
   UpdateMenus();
 }
 
@@ -354,7 +357,7 @@ void EfgShow::OnSelectedMoved(const Node *n)
 void EfgShow::OnSolutionSelected(wxListEvent &p_event)
 {
   cur_soln = p_event.m_itemIndex + 1;
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
   if (m_cursorWindow) {
     m_cursorWindow->Set(m_treeWindow->Cursor());
   }
@@ -363,7 +366,7 @@ void EfgShow::OnSolutionSelected(wxListEvent &p_event)
 void EfgShow::ChangeSolution(int sol)
 {
   cur_soln = sol;
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
   if (m_cursorWindow) {
     m_cursorWindow->Set(m_treeWindow->Cursor());
   }
@@ -456,7 +459,8 @@ void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s, bool set)
   if (set) {
     cur_soln = m_solutionTable->VisibleLength();
     wxClientDC dc(m_treeWindow);
-    m_treeWindow->Render(dc);
+    m_treeWindow->PrepareDC(dc);
+    m_treeWindow->OnDraw(dc);
   }
 }
 
@@ -1067,14 +1071,14 @@ void EfgShow::OnEditNodeLabel(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetName(dialog.GetValue().c_str());
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
   }
 }
 
 void EfgShow::OnEditNodeSetMark(wxCommandEvent &)
 {
   m_treeWindow->node_set_mark();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnEditNodeGotoMark(wxCommandEvent &)
@@ -1165,7 +1169,7 @@ void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->SetOutcome(dialog.GetOutcome());
     m_treeWindow->OutcomeChange();
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
     UpdateMenus();
   }
 }
@@ -1174,7 +1178,7 @@ void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
 {
   Cursor()->SetOutcome(0);
   m_treeWindow->OutcomeChange();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
   UpdateMenus();
 }
 
@@ -1186,7 +1190,7 @@ void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     Cursor()->GetOutcome()->SetName(dialog.GetValue().c_str());
     m_treeWindow->OutcomeChange();
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -1209,7 +1213,7 @@ void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
     outc->SetName(dialog.Name());
 
     m_treeWindow->OutcomeChange();
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
     UpdateMenus();
   }
 }
@@ -1229,7 +1233,7 @@ void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
       outc->SetName(dialog.Name());
       
       m_treeWindow->OutcomeChange();
-      m_treeWindow->Render();
+      m_treeWindow->Refresh();
       UpdateMenus();
     }
     catch (gException &ex) {
@@ -1246,7 +1250,7 @@ void EfgShow::OnEditOutcomesDelete(wxCommandEvent &)
     try {
       m_efg.DeleteOutcome(dialog.GetOutcome());
       m_treeWindow->OutcomeChange();
-      m_treeWindow->Render();
+      m_treeWindow->Refresh();
       UpdateMenus();
     }
     catch (gException &ex) {
@@ -1304,7 +1308,7 @@ void EfgShow::OnEditInfosetLabel(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     infoset->SetName(dialog.GetValue().c_str());
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -1398,55 +1402,55 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 void EfgShow::OnSubgamesMarkAll(wxCommandEvent &)
 {
   m_treeWindow->SubgameMarkAll();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesMark(wxCommandEvent &)
 {
   m_treeWindow->SubgameMark();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesUnMarkAll(wxCommandEvent &)
 {
   m_treeWindow->SubgameUnmarkAll();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesUnMark(wxCommandEvent &)
 {
   m_treeWindow->SubgameUnmark();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesCollapseAll(wxCommandEvent &)
 {
   m_treeWindow->SubgameCollapseAll();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesCollapse(wxCommandEvent &)
 {
   m_treeWindow->SubgameCollapse();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesExpandAll(wxCommandEvent &)
 {
   m_treeWindow->SubgameExpandAll();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesExpand(wxCommandEvent &)
 {
   m_treeWindow->SubgameExpand();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSubgamesExpandBranch(wxCommandEvent &)
 {
   m_treeWindow->SubgameExpandBranch();
-  m_treeWindow->Render();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSupportNew(wxCommandEvent &)
@@ -1588,8 +1592,8 @@ void EfgShow::OnSupportUndominated(wxCommandEvent &)
 void EfgShow::OnSupportReachable(wxCommandEvent &)
 {
   m_treeWindow->DrawSettings().SetRootReachable(!m_treeWindow->DrawSettings().RootReachable());
-  m_treeWindow->ForceRecalc();
-  m_treeWindow->Render();
+  m_treeWindow->RefreshLayout();
+  m_treeWindow->Refresh();
 }
 
 void EfgShow::OnSolveStandard(wxCommandEvent &)
@@ -1939,22 +1943,26 @@ const float ZOOM_MIN = .2;
 
 void EfgShow::OnPrefsZoomIn(wxCommandEvent &)
 {
+#ifdef ZOOM_WINDOW
   float zoom = m_treeZoomWindow->GetZoom();
   zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
   m_treeZoomWindow->SetZoom(zoom);
 
   //  m_treeZoomWindow->Show(true);
   GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
+#endif  // ZOOM_WINDOW
 }
 
 void EfgShow::OnPrefsZoomOut(wxCommandEvent &)
 {
+#ifdef ZOOM_WINDOW
   float zoom = m_treeZoomWindow->GetZoom();
   zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
   m_treeZoomWindow->SetZoom(zoom);
   
   // m_treeZoomWindow->Show(true);
   GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, true);
+#endif  // ZOOM_WINDOW
 }
 
 void EfgShow::OnPrefsLegend(wxCommandEvent &)
@@ -1977,7 +1985,7 @@ void EfgShow::OnPrefsFontsAboveNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -1988,7 +1996,7 @@ void EfgShow::OnPrefsFontsBelowNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -1999,7 +2007,7 @@ void EfgShow::OnPrefsFontsAfterNode(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNodeRightFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2010,7 +2018,7 @@ void EfgShow::OnPrefsFontsAboveBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchAboveFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2021,7 +2029,7 @@ void EfgShow::OnPrefsFontsBelowBranch(wxCommandEvent &)
   
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetBranchBelowFont(dialog.GetFontData().GetChosenFont());
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2041,7 +2049,8 @@ void EfgShow::OnPrefsDisplayLayout(wxCommandEvent &)
     settings.SetYSpacing(dialog.YSpacing());
     settings.SetShowInfosets(dialog.InfosetStyle());
 
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->RefreshLayout();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2059,8 +2068,7 @@ void EfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
-    m_treeWindow->ForceRecalc();
-    m_treeWindow->Render();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2078,7 +2086,7 @@ void EfgShow::OnPrefsColors(wxCommandEvent &)
       m_treeWindow->DrawSettings().SetPlayerColor(-1,
 						  dialog.GetColourData().GetColour());
     }
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->Refresh();
   }
 }
 
@@ -2166,8 +2174,7 @@ void EfgShow::AdjustSizes(void)
     height -= m_solutionSashWindow->GetRect().height;
   }
 
-  if ((m_cursorWindow && m_nodeSashWindow->IsShown()) ||
-      (m_treeZoomWindow && m_treeZoomWindow->IsShown())) {
+  if ((m_cursorWindow && m_nodeSashWindow->IsShown())) {
     if (m_treeWindow) {
       m_treeWindow->SetSize(250, toolbarHeight,
 			    width - 250, height - toolbarHeight);
@@ -2178,19 +2185,8 @@ void EfgShow::AdjustSizes(void)
   }
 
   if (m_cursorWindow && m_nodeSashWindow->IsShown()) {
-    if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
-      m_nodeSashWindow->SetSize(0, toolbarHeight,
-				250, height - toolbarHeight - 200);
-      m_treeZoomWindow->SetSize(0, height - 200,
-				250, 200);
-    }
-    else {
-      m_nodeSashWindow->SetSize(0, toolbarHeight,
-				250, height - toolbarHeight);
-    }
-  }
-  else if (m_treeZoomWindow && m_treeZoomWindow->IsShown()) {
-    m_treeZoomWindow->SetSize(0, toolbarHeight, 250, height - toolbarHeight);
+    m_nodeSashWindow->SetSize(0, toolbarHeight,
+			      250, height - toolbarHeight);
   }
 
   if (m_treeWindow) {
@@ -2232,7 +2228,7 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
 
   UpdateMenus();
   if (p_nodesChanged || p_infosetsChanged) {
-    m_treeWindow->ForceRecalc();
+    m_treeWindow->RefreshLayout();
   }
 }
 

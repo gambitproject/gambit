@@ -12,7 +12,7 @@
 //                         class TreeNodeCursor
 //-----------------------------------------------------------------------
 
-TreeNodeCursor::TreeNodeCursor(TreeRender *p_parent)
+TreeNodeCursor::TreeNodeCursor(TreeWindow *p_parent)
   : m_parent(p_parent)
 {
   SetType(myCursor);
@@ -115,7 +115,7 @@ void TreeNodeCursor::Flash(wxDC &p_dc)
 //                         class TreeNodeFlasher
 //-----------------------------------------------------------------------
 
-TreeNodeFlasher::TreeNodeFlasher(TreeRender *p_parent)
+TreeNodeFlasher::TreeNodeFlasher(TreeWindow *p_parent)
   : TreeNodeCursor(p_parent)
 {
   SetType(myFlasher);

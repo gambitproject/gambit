@@ -7,10 +7,13 @@
 #ifndef TREEWIN_H
 #define TREEWIN_H
 
-#include "treerender.h"
+#include "efglayout.h"
+#include "twflash.h"
 #include "wxmisc.h"
 
-class TreeWindow : public TreeRender {
+class EfgShow;
+
+class TreeWindow : public wxScrolledWindow {
 friend class EfgPrintout;
 
 private:
@@ -19,7 +22,7 @@ private:
   
   Node  *mark_node;                 // Used in mark/goto node operations
   const Node    *subgame_node;      // Used to mark the 'picking' subgame root
-  guiNodeList node_list;     // Data for display coordinates of nodes
+  efgTreeLayout m_layout;
 
   Infoset *hilight_infoset;       // Hilight infoset from the solution disp
   Infoset *hilight_infoset1;      // Hilight infoset by pressing control
@@ -37,11 +40,14 @@ private:
   class OutcomeDragger;           // Class to take care of outcome copy/move
   OutcomeDragger *outcome_drag;   // by drag and dropping
 
+  TreeNodeCursor *flasher;                // Used to flash/display the cursor
+
   float m_zoom;
-  bool m_needsLayout;
 
   // Private Functions
   void FitZoom(void);
+  void MakeFlasher(void);
+  void UpdateCursor(void);
 
   void  ProcessCursor(void);
   bool  ProcessShift(wxMouseEvent &ev);
@@ -53,7 +59,6 @@ private:
   void OnLeftClick(wxMouseEvent &);
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
-  void OnRightDoubleClick(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
     
 protected:
@@ -64,9 +69,6 @@ protected:
 public:
   TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~TreeWindow();
-    
-  // EVENT HANDLERS
-  void OnEvent(wxMouseEvent& event);
     
   // MENU EVENT HANDLERS
   void node_set_mark(void);
@@ -82,20 +84,14 @@ public:
   void SubgameExpandBranch(void);
   void SubgameExpandAll(void);
 
-  void subgame_toggle(void);
-    
   void prefs_display_flashing(void);
 
-  // copy to clipboard (WIN3.1 only)
-  //  void  print_mf(wxOutputOption fit,bool save_mf=false);
-  
   EfgShow *Parent(void) const { return m_parent; }
   
-  void Render(void);
-  virtual void Render(wxDC &dc);
+  virtual void OnDraw(wxDC &dc);
   void HilightInfoset(int pl,int iset);
 
-  void ForceRecalc(void) { m_needsLayout = true; }
+  void RefreshLayout(void);
   void OutcomeChange(void) { outcomes_changed = true; }
   
   // Used by parent EfgShow when cur_sup changes
@@ -115,7 +111,6 @@ public:
 
   Node *SubgameNode(void) const { return (Node *) subgame_node; }
 
-  guiNodeList &NodeList(void) { return node_list; }
   const TreeDrawSettings &DrawSettings(void) const { return draw_settings; }
 
   void UpdateMenus(void);
@@ -129,6 +124,7 @@ public:
   
   // Access to the numeric values from the renderer
   gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
+  gText OutcomeAsString(const Node *n, bool &hilight) const;
 
   DECLARE_EVENT_TABLE()
 };
