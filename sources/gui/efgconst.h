@@ -17,7 +17,6 @@ typedef enum {
   efgmenuEDIT_NODE = 900,
   efgmenuEDIT_NODE_ADD = 1105,
   efgmenuEDIT_NODE_INSERT = 1109,
-  efgmenuEDIT_NODE_LABEL = 1110,
   efgmenuEDIT_NODE_SET_MARK = 1112,
   efgmenuEDIT_NODE_GOTO_MARK = 1113,
 
@@ -25,23 +24,17 @@ typedef enum {
   efgmenuEDIT_ACTION_DELETE = 1205,
   efgmenuEDIT_ACTION_INSERT = 1206,
   efgmenuEDIT_ACTION_APPEND = 1207,
-  efgmenuEDIT_ACTION_LABEL = 1208,
   efgmenuEDIT_ACTION_PROBS = 1209,
 
   efgmenuEDIT_INFOSET = 920,
   efgmenuEDIT_INFOSET_MERGE = 1400,
   efgmenuEDIT_INFOSET_BREAK = 1401,
   efgmenuEDIT_INFOSET_JOIN = 1402,
-  efgmenuEDIT_INFOSET_LABEL = 1403,
   efgmenuEDIT_INFOSET_PLAYER = 1405,
   efgmenuEDIT_INFOSET_REVEAL = 1407,
   efgmenuEDIT_INFOSET_SPLIT = 1410,
 
   efgmenuEDIT_OUTCOMES = 1319,
-  efgmenuEDIT_OUTCOMES_ATTACH = 1321,
-  efgmenuEDIT_OUTCOMES_DETACH = 1322,
-  efgmenuEDIT_OUTCOMES_LABEL = 1323,
-  efgmenuEDIT_OUTCOMES_PAYOFFS = 1324,
   efgmenuEDIT_OUTCOMES_DELETE = 1325,
   efgmenuEDIT_OUTCOMES_NEW = 1326,
 
@@ -129,5 +122,12 @@ typedef enum {
 
 
 #endif // EFGCONST_H
+
+
+
+
+
+
+
 
 

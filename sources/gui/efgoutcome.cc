@@ -113,6 +113,8 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
 void EfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
 {
+  m_menu->Enable(idPOPUP_ATTACH, m_parent->Cursor());
+  m_menu->Enable(idPOPUP_DETACH, m_parent->Cursor());
   PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 

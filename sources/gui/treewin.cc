@@ -71,7 +71,6 @@ void TreeWindow::MakeMenus(void)
   m_nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "Insert Move", 
 		     "Insert a move before this node");
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(efgmenuEDIT_NODE_LABEL, "Label Node", "Label this node");
   m_nodeMenu->Append(efgmenuEDIT_PROPERTIES, "Properties",
 		     "View and change node properties");
 

@@ -22,7 +22,6 @@
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
 #include "dlefgdelete.h"
-#include "dlactionlabel.h"
 #include "dlactionselect.h"
 #include "dlactionprobs.h"
 #include "dlefgreveal.h"
@@ -284,29 +283,6 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
 void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
 {
   m_branchList->Enable(m_deleteTree->GetSelection() == 1);
-}
-
-//=========================================================================
-//                   dialogActionLabel: Member functions
-//=========================================================================
-
-dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
-  : guiPagedDialog(p_parent, "Label Actions", p_infoset->NumActions()),
-    m_infoset(p_infoset)
-{
-  for (int act = 1; act <= m_infoset->NumActions(); act++) {
-    SetValue(act, m_infoset->Actions()[act]->GetName());
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_grid, 0, wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
 }
 
 //=========================================================================

@@ -45,11 +45,11 @@
 #include "dlefgpayoff.h"
 #include "dlefgreveal.h"
 #include "dlactionselect.h"
-#include "dlactionlabel.h"
 #include "dlactionprobs.h"
 #include "dlinfosets.h"
 #include "dlsubgames.h"
 #include "dlefgproperties.h"
+#include "dlnodeproperties.h"
 
 #include "dllayout.h"
 #include "dllegends.h"
@@ -95,25 +95,18 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
   EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
-  EVT_MENU(efgmenuEDIT_NODE_LABEL, EfgShow::OnEditNodeLabel)
   EVT_MENU(efgmenuEDIT_NODE_SET_MARK, EfgShow::OnEditNodeSetMark)
   EVT_MENU(efgmenuEDIT_NODE_GOTO_MARK, EfgShow::OnEditNodeGotoMark)
   EVT_MENU(efgmenuEDIT_ACTION_DELETE, EfgShow::OnEditActionDelete)
   EVT_MENU(efgmenuEDIT_ACTION_INSERT, EfgShow::OnEditActionInsert)
   EVT_MENU(efgmenuEDIT_ACTION_APPEND, EfgShow::OnEditActionAppend)
-  EVT_MENU(efgmenuEDIT_ACTION_LABEL, EfgShow::OnEditActionLabel)
   EVT_MENU(efgmenuEDIT_ACTION_PROBS, EfgShow::OnEditActionProbs)
   EVT_MENU(efgmenuEDIT_INFOSET_MERGE, EfgShow::OnEditInfosetMerge)
   EVT_MENU(efgmenuEDIT_INFOSET_BREAK, EfgShow::OnEditInfosetBreak)
   EVT_MENU(efgmenuEDIT_INFOSET_SPLIT, EfgShow::OnEditInfosetSplit)
   EVT_MENU(efgmenuEDIT_INFOSET_JOIN, EfgShow::OnEditInfosetJoin)
-  EVT_MENU(efgmenuEDIT_INFOSET_LABEL, EfgShow::OnEditInfosetLabel)
   EVT_MENU(efgmenuEDIT_INFOSET_PLAYER, EfgShow::OnEditInfosetPlayer)
   EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_ATTACH, EfgShow::OnEditOutcomesAttach)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_DETACH, EfgShow::OnEditOutcomesDetach)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_LABEL, EfgShow::OnEditOutcomesLabel)
-  EVT_MENU(efgmenuEDIT_OUTCOMES_PAYOFFS, EfgShow::OnEditOutcomesPayoffs)
   EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
   EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
   EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
@@ -588,7 +581,6 @@ void EfgShow::MakeMenus(void)
   nodeMenu->Append(efgmenuEDIT_NODE_ADD, "&Add Move", "Add a move");
   nodeMenu->Append(efgmenuEDIT_NODE_INSERT, "&Insert Move",
 		   "Insert move at cursor");
-  nodeMenu->Append(efgmenuEDIT_NODE_LABEL, "&Label", "Label cursor node");
   nodeMenu->AppendSeparator();
   nodeMenu->Append(efgmenuEDIT_NODE_SET_MARK, "Set &Mark", "Mark cursor node");
   nodeMenu->Append(efgmenuEDIT_NODE_GOTO_MARK, "Go&to Mark", 
@@ -601,8 +593,6 @@ void EfgShow::MakeMenus(void)
 		     "Insert an action in the cursor's information set");
   actionMenu->Append(efgmenuEDIT_ACTION_APPEND, "&Append",
 		     "Append an action to the cursor's information set");
-  actionMenu->Append(efgmenuEDIT_ACTION_LABEL, "&Label",
-		     "Label the actions of the cursor's information set");
   actionMenu->Append(efgmenuEDIT_ACTION_PROBS, "&Probabilities",
 		     "Set chance probabilities for the cursor's information set");
 
@@ -615,8 +605,6 @@ void EfgShow::MakeMenus(void)
 		      "Split information set at cursor");
   infosetMenu->Append(efgmenuEDIT_INFOSET_JOIN, "&Join",
 		      "Join cursor to marked information set");
-  infosetMenu->Append(efgmenuEDIT_INFOSET_LABEL, "&Label",
-		      "Label cursor information set");
   infosetMenu->Append(efgmenuEDIT_INFOSET_PLAYER, "&Player",
 		      "Change player at cursor information set");
   infosetMenu->Append(efgmenuEDIT_INFOSET_REVEAL, "&Reveal", 
@@ -627,14 +615,6 @@ void EfgShow::MakeMenus(void)
 		      "Create a new outcome");
   outcomeMenu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
 		      "Delete an outcome");
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_ATTACH, "&Attach",
-		      "Attach an outcome to the node at cursor");
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_DETACH, "&Detach",
-		      "Detach the outcome from the node at cursor");
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_LABEL, "&Label",
-		      "Label the outcome at the node at cursor");
-  outcomeMenu->Append(efgmenuEDIT_OUTCOMES_PAYOFFS, "&Payoffs",
-		      "Set the payoffs for the outcome at the cursor");
 
   wxMenu *treeMenu = new wxMenu;
   treeMenu->Append(efgmenuEDIT_TREE_COPY, "&Copy",
@@ -850,7 +830,6 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_NODE_ADD,
 		  (!cursor || m_efg.NumChildren(cursor) > 0) ? false : true);
   menuBar->Enable(efgmenuEDIT_NODE_INSERT, (cursor) ? true : false);
-  menuBar->Enable(efgmenuEDIT_NODE_LABEL, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_SET_MARK, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_NODE_GOTO_MARK, (markNode) ? true : false);
 
@@ -867,17 +846,12 @@ void EfgShow::UpdateMenus(void)
 		  (markNode && markNode->GetInfoset() &&
 		   cursor && cursor->GetInfoset() &&
 		   markNode->GetSubgameRoot() == cursor->GetSubgameRoot()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_INFOSET_LABEL,
-		  (cursor && cursor->GetInfoset()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_PLAYER,
 		  (cursor && cursor->GetInfoset() &&
 		   !cursor->GetPlayer()->IsChance()) ? true : false);
   menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_ACTION_LABEL,
-		  (cursor && cursor->GetInfoset() &&
-		   cursor->GetInfoset()->NumActions() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
 		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
@@ -895,16 +869,8 @@ void EfgShow::UpdateMenus(void)
 		  (markNode && cursor &&
 		   cursor->GetSubgameRoot() == markNode->GetSubgameRoot()) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
-		  (m_efg.NumOutcomes() > 0) ? true : false);
-  menuBar->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
-  menuBar->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
-  menuBar->Enable(efgmenuEDIT_OUTCOMES_PAYOFFS,
-		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_PROPERTIES, (cursor) ? true : false);
   
@@ -1196,17 +1162,6 @@ void EfgShow::OnEditNodeInsert(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditNodeLabel(wxCommandEvent &)
-{
-  wxTextEntryDialog dialog(this, "Label node", "Label of node",
-			   (char *) Cursor()->GetName());
-
-  if (dialog.ShowModal() == wxID_OK) {
-    Cursor()->SetName(dialog.GetValue().c_str());
-    m_treeWindow->Refresh();
-  }
-}
-
 void EfgShow::OnEditNodeSetMark(wxCommandEvent &)
 {
   m_treeWindow->node_set_mark();
@@ -1264,24 +1219,6 @@ void EfgShow::OnEditActionAppend(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditActionLabel(wxCommandEvent &)
-{
-  Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionLabel dialog(infoset, this);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->Actions()[act]->SetName(dialog.GetActionLabel(act));
-      }
-      OnSupportsEdited();
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
 void EfgShow::OnEditActionProbs(wxCommandEvent &)
 {
   Infoset *infoset = Cursor()->GetInfoset();
@@ -1302,61 +1239,6 @@ void EfgShow::OnEditActionProbs(wxCommandEvent &)
 //----------------------------------------------------------------------
 //           EfgShow: Menu handlers - Edit->Outcomes menu
 //----------------------------------------------------------------------
-
-void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
-{
-  dialogEfgOutcomeSelect dialog(m_efg, this);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    m_efg.SetOutcome(Cursor(), dialog.GetOutcome());
-    m_treeWindow->Refresh();
-    UpdateMenus();
-  }
-}
-
-void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
-{
-  m_efg.SetOutcome(Cursor(), m_efg.GetNullOutcome());
-  m_treeWindow->Refresh();
-  UpdateMenus();
-}
-
-void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
-{
-  Efg::Outcome outcome = m_efg.GetOutcome(Cursor());
-
-  wxTextEntryDialog dialog(this, "New outcome label", "Label outcome",
-			   (char *) m_efg.GetOutcomeName(outcome));
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_efg.SetOutcomeName(outcome, dialog.GetValue().c_str());
-    OnOutcomesEdited();
-  }
-}
-
-void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
-{
-  dialogEfgPayoffs dialog(m_efg, m_efg.GetOutcome(Cursor()), this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    Efg::Outcome outcome = m_efg.GetOutcome(Cursor());
-    gArray<gNumber> payoffs(dialog.Payoffs());
-
-    if (!outcome.IsNull()) {
-      outcome = m_efg.NewOutcome();
-      m_efg.SetOutcome(Cursor(), outcome);
-    }
-
-    for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-      m_efg.SetPayoff(outcome, pl, payoffs[pl]);
-    }
-    m_efg.SetOutcomeName(outcome, dialog.Name());
-
-    m_treeWindow->Refresh();
-    m_outcomeWindow->UpdateValues();
-    UpdateMenus();
-  }
-}
 
 void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
 {
@@ -1443,19 +1325,6 @@ void EfgShow::OnEditInfosetJoin(wxCommandEvent &)
   }
 }
 
-void EfgShow::OnEditInfosetLabel(wxCommandEvent &)
-{
-  Infoset *infoset = Cursor()->GetInfoset();
-  wxTextEntryDialog dialog(this, "New label for information set ",
-			   "Label Infoset", (char *) infoset->GetName());
-
-  if (dialog.ShowModal() == wxID_OK) {
-    infoset->SetName(dialog.GetValue().c_str());
-    OnSupportsEdited();
-    m_treeWindow->Refresh();
-  }
-}
-
 void EfgShow::OnEditInfosetPlayer(wxCommandEvent &)
 {
   try {
@@ -1536,6 +1405,23 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 
 void EfgShow::OnEditProperties(wxCommandEvent &)
 {
+  dialogNodeProperties dialog(this, Cursor());
+  if (dialog.ShowModal() == wxID_OK) {
+    Cursor()->SetName(dialog.GetNodeName().c_str());
+    m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+
+    if (Cursor()->GetInfoset()) {
+      Infoset *infoset = Cursor()->GetInfoset();
+      infoset->SetName(dialog.GetInfosetName().c_str());
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	infoset->Actions()[act]->SetName(dialog.GetActionName(act));
+      }
+    }
+
+    m_treeWindow->RefreshTree();
+    m_treeWindow->Refresh();
+    UpdateMenus();
+  }
 }
 
 //----------------------------------------------------------------------

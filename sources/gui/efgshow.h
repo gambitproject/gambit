@@ -77,28 +77,21 @@ private:
 
   void OnEditNodeAdd(wxCommandEvent &);
   void OnEditNodeInsert(wxCommandEvent &);
-  void OnEditNodeLabel(wxCommandEvent &);
   void OnEditNodeSetMark(wxCommandEvent &);
   void OnEditNodeGotoMark(wxCommandEvent &);
 
   void OnEditActionDelete(wxCommandEvent &);
   void OnEditActionInsert(wxCommandEvent &);
   void OnEditActionAppend(wxCommandEvent &);
-  void OnEditActionLabel(wxCommandEvent &);
   void OnEditActionProbs(wxCommandEvent &);
 
   void OnEditInfosetMerge(wxCommandEvent &);
   void OnEditInfosetBreak(wxCommandEvent &);
   void OnEditInfosetSplit(wxCommandEvent &);
   void OnEditInfosetJoin(wxCommandEvent &);
-  void OnEditInfosetLabel(wxCommandEvent &);
   void OnEditInfosetPlayer(wxCommandEvent &);
   void OnEditInfosetReveal(wxCommandEvent &);
 
-  void OnEditOutcomesAttach(wxCommandEvent &);
-  void OnEditOutcomesDetach(wxCommandEvent &);
-  void OnEditOutcomesLabel(wxCommandEvent &);
-  void OnEditOutcomesPayoffs(wxCommandEvent &);
   void OnEditOutcomesNew(wxCommandEvent &);
   void OnEditOutcomesDelete(wxCommandEvent &);
 
