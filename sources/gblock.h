@@ -1,13 +1,14 @@
 //#
 //# FILE: gblock.h -- Implementation of a generic array container class
 //#
-//# @(#)gblock.h	1.7 9/26/94
+//# $Id$
 //#
 
 #ifndef GBLOCK_H
 #define GBLOCK_H
 
 #include <stdlib.h>
+#include <assert.h>
 #include "gambitio.h"
 
 //
