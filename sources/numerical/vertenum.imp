@@ -1,0 +1,439 @@
+//
+// FILE: vertenum.imp -- Implementation of Vertex Enumerator
+//
+//   $Id$
+//
+
+#include "vertenum.h"
+
+template <class T>
+VertEnum<T>::VertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
+		      gStatus &status_)
+  : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
+    c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0), status(status_) 
+{
+  Enum();
+}
+
+template <class T>
+VertEnum<T>::VertEnum(LPTableau<T> &tab, gStatus &status_)
+  : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
+    btemp(tab.Get_b()), c(tab.GetCost()), 
+    npivots(0), nodes(0), status(status_) 
+{
+
+  gout << "\nin VertEnum(tab)\n";
+  tab.Dump(gout);
+
+  int i;
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  gout << "\nb: " << b;
+
+  // Is this stuff right?
+  btemp = -(T)1;
+
+  gVector<T> uc(tab.MinRow(),tab.MaxRow());
+  c = (T)1;
+  uc = (T)1;
+  
+  for(i=-tab.MaxRow();i<=-tab.MinRow();i++)
+    if(tab.Member(i)) uc[-i]=(T)0;
+
+  for(i=tab.MinCol();i<=tab.MaxCol();i++)
+    if(tab.Member(i)) c[i]=(T)0;
+
+  gout << "\nc: " << c;
+  gout << "\nuc: " << uc;
+
+  tab.SetCost(uc,c);
+  DualSearch(tab);
+}
+
+template <class T> VertEnum<T>::~VertEnum()
+{ }
+
+
+template <class T> void VertEnum<T>::Enum()
+{
+      // Check dimensions
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
+  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+
+      // Initialize the tableau
+  int i;
+
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  btemp = -(T)1;
+  c = (T)1;
+
+  LPTableau<T> tab(A,b);
+  tab.SetCost(c);
+  
+  // gout << "\nInitial Tableau = \n";
+  // tab.Dump(gout);
+
+  DualSearch(tab);
+}
+  
+
+template <class T> void VertEnum<T>::Report()
+{
+  int i = 1;
+  double x, estNodes;
+
+  estNodes=x=(double)1;
+  
+  while(i<=visits.Length()) {
+    if(visits[i]) {
+      x*=(double)branches[i]/(double)visits[i];
+      estNodes+=x;
+    }
+    i++;
+  }
+  status.SetProgress((double)nodes/estNodes);
+}
+
+template <class T> void VertEnum<T>::Deeper()
+{
+  depth++;
+  if(visits.Length()<depth) {
+    visits.Append(0);
+    branches.Append(0);
+  }
+  visits[depth]+=1;
+  nodes++;
+}
+
+template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
+{
+  int k;
+  Deeper();
+  gList<gArray<int> > PivotList;
+  gArray<int> pivot(2);
+  if(tab.IsLexMin()) {
+    List.Append(tab.GetBFS1());
+    DualList.Append(tab.DualBFS());
+  }
+  if(PivotList.Length()!=0) throw BadDim();
+  //  assert(PivotList.Length()==0);
+  tab.ReversePivots(PivotList);  // get list of reverse pivots
+  if(PivotList.Length()) {
+    branches[depth]+=PivotList.Length();
+    LPTableau<T> tab2(tab);
+    for(k=1;k<=PivotList.Length();k++) {
+      status.Get();
+      pivot = PivotList[k];
+      npivots++;
+      tab2=tab;
+      tab2.Pivot(pivot[1],pivot[2]);
+      Search(tab2);
+    }
+  }
+  else Report();  // Report progress at terminal leafs
+  depth--;
+}
+  
+template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
+{
+  int i,j;
+  Deeper();
+  branches[depth]+=1;
+
+//  gList<gArray<int> > PivotList;
+//  gArray<int> pivot(2);
+
+  // gout << "\nin DualSearch";
+  if(mult_opt) {
+    tab.SetConst(btemp);    // install artifical constraint vector
+    LPTableau<T> tab2(tab);
+    for (i=b.First();i<=b.Last(); i++) {
+      status.Get();
+      if(b[i]==(T)0)
+	for(j=-b.Last();j<=c.Last();j++) {
+	  status.Get();
+	  if(j && !tab.Member(j) && !tab.IsBlocked(j))
+	    if(tab.IsDualReversePivot(i,j)) {
+	      branches[depth]+=1;
+	      npivots++;
+	      tab2=tab;
+	      tab2.Pivot(i,j);
+	      DualSearch(tab2);
+	    }
+	}
+    }
+  }
+  tab.SetConst(b);     // install original constraint vector
+  Search(tab);         // do primal search
+  depth--;
+}
+  
+template <class T> const gList<BFS<T> > &VertEnum<T>::VertexList() const
+{ 
+  return List;
+}
+
+template <class T> const gList<BFS<T> > &VertEnum<T>::DualVertexList() const
+{ 
+  return DualList;
+}
+
+template <class T> void VertEnum<T>::Vertices(gList<gVector<T> > &verts) const
+{ 
+  for(int i=1;i<=List.Length();i++) {
+    gVector<T> vert(A.NumColumns());
+    vert = (T)0;
+    for(int j=1;j<=vert.Length();j++) 
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    verts.Append(vert);
+  }
+}
+
+template <class T> long VertEnum<T>::NumPivots() const
+{
+  return npivots;
+}
+
+template <class T> void VertEnum<T>::Dump(gOutput &to) const
+{
+  // gout << "\nin VertEnum::Dump()";
+  for(int i=1;i<=List.Length();i++) {
+    to << "\n";
+    List[i].Dump(to);
+  }
+}
+
+
+template <class T>
+DoubleVertEnum<T>::DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
+				  const gMatrix<T> &_A2, const gVector<T> &_b2,
+		      gStatus &status_)
+  : mult_opt(0), depth(0), A(_A), A2(_A2), b(_b), b2(_b2), 
+    btemp(_b), c(_A.MinCol(),_A.MaxCol()), npivots(0), 
+    nodes(0), status(status_) 
+{
+  Enum();
+}
+
+template <class T> DoubleVertEnum<T>::~DoubleVertEnum()
+{ }
+
+template <class T> void DoubleVertEnum<T>::Enum()
+{
+      // Check dimensions
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
+  if(A2.NumRows() != b2.Length()) throw BadDim();
+  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+  //  assert(A2.NumRows() == b2.Length());
+
+      // Initialize the tableau
+  int i;
+
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  btemp = -(T)1;
+  c = (T)1;
+
+  LPTableau<T> tab(A,b);
+  tab.SetCost(c);
+  Tableau<T> tab2(A2,b2);
+  
+  // gout << "\nInitial Tableau = \n";
+  // tab.Dump(gout);
+
+  DualSearch(tab,tab2);
+}
+  
+template <class T> void DoubleVertEnum<T>::Report()
+{
+  int i = 1;
+  double x, estNodes;
+
+  estNodes=x=(double)1;
+  
+  while(i<=visits.Length()) {
+    if(visits[i]) {
+      x*=(double)branches[i]/(double)visits[i];
+      estNodes+=x;
+    }
+    i++;
+  }
+  status.SetProgress((double)nodes/estNodes);
+}
+
+template <class T> void DoubleVertEnum<T>::Deeper()
+{
+  depth++;
+  if(visits.Length()<depth) {
+    visits.Append(0);
+    branches.Append(0);
+  }
+  visits[depth]+=1;
+  nodes++;
+}
+
+template <class T> void DoubleVertEnum<T>::
+EnumerateComplementaryFace(LPTableau<T> &tab, Tableau<T> &tab2)
+{
+  int i;
+  gout << "\ntab:";
+  tab.Dump(gout);
+  gout << "\ntab2:";
+  tab2.Dump(gout);
+  gVector<T> x(tab.MinRow(),tab.MaxRow());
+  tab.BasisVector(x);
+  for(i=tab.MinRow();i<=tab.MaxRow();i++)
+    if(x[i]>tab.Epsilon(2)) tab2.Mark(tab.Label(i));
+
+  if(tab2.IsFeasible()) {
+    List.Append(tab.GetBFS1());
+    List2.Append(tab2.GetBFS1());
+  }
+
+  for(i=tab.MinRow();i<=tab.MaxRow();i++)
+    if(x[i]>tab.Epsilon(2)) tab2.UnMark(tab.Label(i));
+}
+
+template <class T> void DoubleVertEnum<T>::
+Search(LPTableau<T> &tab, Tableau<T> &tab2)
+{
+  int k;
+  Deeper();
+  gList<gArray<int> > PivotList;
+  gArray<int> pivot(2);
+  if(tab.IsLexMin())
+    EnumerateComplementaryFace(tab,tab2);
+  assert(PivotList.Length()==0);
+  tab.ReversePivots(PivotList);  // get list of reverse pivots
+  if(PivotList.Length()) {
+    branches[depth]+=PivotList.Length();
+    LPTableau<T> tabb(tab);
+    Tableau<T> tabb2(tab2);
+    for(k=1;k<=PivotList.Length();k++) {
+      status.Get();
+      pivot = PivotList[k];
+      npivots++;
+      tabb=tab;
+      tabb2=tab2;
+      // gout << "\nPivot on i,j: " << pivot[1] << " " << pivot[2];
+      // tabb.Dump(gout);
+      int outlabel = tabb.Label(pivot[1]);
+      tabb.Pivot(pivot[1],pivot[2]);
+      // gout << "\nPivot on j, i: " << pivot[2] << " " << pivot[1];
+      // tabb2.Dump(gout);
+      tabb2.Pivot(tabb2.Find(-pivot[2]),-outlabel);
+      Search(tabb,tabb2);
+    }
+  }
+  else Report();  // Report progress at terminal leafs
+  depth--;
+}
+  
+template <class T> void DoubleVertEnum<T>::DualSearch(LPTableau<T> &tab, Tableau<T> &tab2)
+{
+  int i,j;
+  Deeper();
+  branches[depth]+=1;
+
+//  gList<gArray<int> > PivotList;
+//  gArray<int> pivot(2);
+
+  // gout << "\nin DoubleVertEnum::DualSearch";
+  if(mult_opt) {
+    tab.SetConst(btemp);    // install artifical constraint vector
+    LPTableau<T> tabb(tab);
+    Tableau<T> tabb2(tab2);
+    for(i=b.First();i<=b.Last();i++) {
+      status.Get();
+      if(b[i]==(T)0)
+	for(j=-b.Last();j<=c.Last();j++) {
+	  status.Get();
+	  if(j && !tab.Member(j))
+	    if(tab.IsDualReversePivot(i,j)) {
+	      branches[depth]+=1;
+	      npivots++;
+	      tabb=tab;
+	      tabb2=tab2;
+	      tabb.Pivot(i,j);
+	      tabb2.Pivot(j,i);
+	      DualSearch(tabb,tabb2);
+	    }
+	}
+    }
+  }
+  tab.SetConst(b);     // install original constraint vector
+  Search(tab,tab2);         // do primal search
+  depth--;
+}
+  
+template <class T> const gList<BFS<T> > &DoubleVertEnum<T>::VertexList() const
+{ 
+  return List;
+}
+
+template <class T> const gList<BFS<T> > &DoubleVertEnum<T>::VertexList2() const
+{ 
+  return List2;
+}
+
+template <class T> void DoubleVertEnum<T>::
+Vertices(gList<gVector<T> > &verts, gList<gVector<T> > &verts2) const
+{ 
+  if(List.Length() != List2.Length()) throw BadDim();
+  //  assert(List.Length() == List2.Length());
+  for(int i=1;i<=List.Length();i++) {
+    gVector<T> vert(A.NumColumns());
+    gVector<T> vert2(A2.NumColumns());
+    vert = (T)0;
+    int j = 0;
+    for( j=1;j<=vert.Length();j++)
+      if(List[i].IsDefined(j)) vert[j]=-List[i](j);
+    verts.Append(vert);
+    for( j=1;j<=vert2.Length();j++)
+      if(List2[i].IsDefined(j)) vert2[j]=-List2[i](j);
+    verts2.Append(vert2);
+  }
+}
+
+template <class T> long DoubleVertEnum<T>::NumPivots() const
+{
+  return npivots;
+}
+
+template <class T> void DoubleVertEnum<T>::Dump(gOutput &to) const
+{
+  if(List.Length() != List2.Length()) throw BadDim();
+  //  assert(List.Length() == List2.Length());
+  // gout << "\nin VertEnum::Dump()";
+  for(int i=1;i<=List.Length();i++) {
+    to << "\nvert1: ";
+    List[i].Dump(to);
+    to << "\nvert2: ";
+    List2[i].Dump(to);
+  }
+}
+
+template <class T> VertEnum<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText VertEnum<T>::BadDim::Description(void) const
+{
+  return "Bad Dimension in VertEnum";
+}
+
+template <class T> DoubleVertEnum<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText DoubleVertEnum<T>::BadDim::Description(void) const
+{
+  return "Bad Pivot in DoubleVertEnum";
+}
+
+

@@ -1,0 +1,136 @@
+//
+// FILE: interval.imp -- Implementation of univariate intervalmials
+//
+// $Id$
+//
+
+#include "interval.h"
+
+
+//--------------------------------------------------------------------------
+//                   interval -- constructors and destructor
+//--------------------------------------------------------------------------
+
+template<class T> gInterval<T>::gInterval(const gInterval<T>& given) 
+: lower_bd(given.lower_bd), upper_bd(given.upper_bd)
+{
+}
+
+template<class T> gInterval<T>::gInterval(const T low, const T high) 
+: lower_bd(low), upper_bd(high)
+{ 
+  assert (low <= high);
+}
+
+template<class T> gInterval<T>::~gInterval() 
+{
+}
+
+//--------------------------------------------------------------------------
+//                          interval -- operators
+//--------------------------------------------------------------------------
+
+template <class T> 
+gInterval<T> &gInterval<T>::operator=(const gInterval<T> &)
+{
+  gout << "For const'ness, operator = not allowed for gIntervals\n";
+  assert(0);
+  return *this;
+/*
+  if (*this == rhs) return *this;
+  lower_bd = rhs.lower_bd;
+  upper_bd = rhs.upper_bd;
+  return *this;
+*/
+}
+
+
+template<class T> bool gInterval<T>::operator == (const gInterval<T>& rhs)
+     const
+{
+  return (lower_bd == rhs.lower_bd && upper_bd == rhs.upper_bd);
+}
+
+template<class T> bool gInterval<T>::operator != (const gInterval<T>& rhs)
+     const
+{
+  return !(*this == rhs);
+}
+
+//--------------------------------------------------------------------------
+//                             interval -- information
+//--------------------------------------------------------------------------
+
+template<class T> const T gInterval<T>::LowerBound() const 
+{ 
+  return lower_bd; 
+}
+
+template<class T> const T gInterval<T>::UpperBound() const 
+{ 
+  return upper_bd; 
+}
+
+template<class T> const bool gInterval<T>::Contains(const T& number) const 
+{ 
+  return (lower_bd <= number && number <= upper_bd);
+}
+
+template<class T> 
+const bool gInterval<T>::Contains(const gInterval<T>& I) const 
+{ 
+  return (lower_bd <= I.lower_bd && I.upper_bd <= upper_bd);
+}
+
+template<class T> const bool gInterval<T>::LiesBelow(const T& number) const 
+{ 
+  return (upper_bd <= number);
+}
+
+template<class T> const bool gInterval<T>::LiesAbove(const T& number) const 
+{ 
+  return (number <= lower_bd);
+}
+
+template<class T> const T gInterval<T>::Length() const 
+{ 
+  return (upper_bd - lower_bd); 
+}
+
+template<class T> const T gInterval<T>::Midpoint() const 
+{ 
+  return (upper_bd + lower_bd)/(T)2; 
+}
+
+template<class T> const gInterval<T> gInterval<T>::LeftHalf() const 
+{ 
+  return gInterval<T>(LowerBound(),Midpoint()); 
+}
+
+template<class T> const gInterval<T> gInterval<T>::RightHalf() const 
+{ 
+  return gInterval<T>(Midpoint(),UpperBound()); 
+}
+
+template<class T> 
+const gInterval<T> gInterval<T>::SameCenterTwiceLength() const 
+{ 
+  return gInterval<T>((T)2 * LowerBound() - Midpoint(),
+		      (T)2 * UpperBound() - Midpoint()); 
+}
+
+template<class T> 
+const gInterval<T> gInterval<T>::SameCenterWithNewLength(const T& L) const 
+{ 
+  return gInterval<T>(Midpoint() - L/(T)2,Midpoint() + L/(T)2); 
+}
+
+//--------------------------------------------------------------------------
+//                        interval -- printing
+//--------------------------------------------------------------------------
+
+template<class T> gOutput& operator << (gOutput& output, const gInterval<T>& x)
+{
+  output << "[" << x.LowerBound() << "," << x.UpperBound() << "]";
+  return output;
+}

@@ -1,0 +1,181 @@
+//
+// FILE: ineqsolv.imp  
+//        -- Implementation of class gPolyList
+// 
+// $Id$
+//
+
+#include "ineqsolv.h"
+
+//---------------------------------------------------------------
+//                      class: IneqSolv
+//---------------------------------------------------------------
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
+					 gStatus &p_status) 
+  : System(given), 
+    TreesOfPartials(given),
+    Epsilon((T)1/(T)1000000),
+    //    Epsilon((T)0),
+    //    HasBeenSolved(false), 
+    //    HasASolution(triUNKNOWN), 
+    //    Sample(given.Dmnsn()),
+    m_status(p_status)
+{ }
+
+template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
+  : System(qs.System), 
+    TreesOfPartials(qs.TreesOfPartials), 
+    Epsilon(qs.Epsilon),
+    //    HasBeenSolved(qs.HasBeenSolved), 
+    //    HasASolution(qs.HasASolution), 
+    //    Sample(qs.Sample),
+    m_status(qs.m_status)
+{ }
+
+template<class T> IneqSolv<T>::~IneqSolv()
+{ }
+
+//----------------------------------
+//        Operators
+//----------------------------------
+
+template<class T> 
+IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
+{
+  assert (System == rhs.System);
+
+  if (*this != rhs) {
+    Epsilon = rhs.Epsilon;
+  }
+  return *this;
+}
+
+template<class T>  
+bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
+{
+    if (System  != rhs.System || Epsilon != rhs.Epsilon)
+         return false;
+    else return true;
+}
+
+template<class T>  
+bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
+{
+  return !(*this == rhs);
+}
+
+
+//---------------------------
+//      Calculations
+//---------------------------
+
+template<class T> 
+bool IneqSolv<T>::IsASolution(const gVector<T>& v) const
+{
+  bool answer(true);
+  for (int i = 1; i <= System.Length() && answer; i++)
+    if ( System[i].Evaluate(v) < -Epsilon )
+      answer = false;
+  return answer;
+}
+
+template<class T> 
+bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
+					      gArray<int>& precedence) const
+{
+  for (int i = 1; i <= System.Length(); i++) {
+
+    if ( TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r) ) {
+
+      /*
+      //DEBUG
+      gout << "The polynomial " << System[precedence[i]] 
+	   << " has no roots in ";
+      gRectangle<T> newrect(r);
+      gout << newrect;
+      gout << ".\n";
+      */
+
+      if (i != 1) { // We have found a new "most likely to never be positive"
+	int tmp = precedence[i];
+	for (int j = 1; j <= i-1; j++) 
+	  precedence[i - j + 1] = precedence[i - j];
+	precedence[1] = tmp;
+      }
+      return true; 
+    }
+  }
+  return false;
+}
+
+template <class T> const bool
+IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
+				            gVector<T>& sample,
+				            gArray<int>& precedence) const
+{
+  /*
+  //DEBUG
+  gout << "The rectangle is\n";
+  for (int i = 1; i <= r.Dmnsn() - 1; i++)
+    gout << r.CartesianFactor(i) << "x";
+  if (r.Dmnsn() > 0) 
+    gout << r.CartesianFactor(r.Dmnsn()) << "\n";
+  */
+
+  // Check for user interrupt
+  m_status.SetProgress(50.0);
+  m_status.Get();
+
+  if ( IsASolution(r.Center()) )
+    return true;
+
+  if ( SystemHasNoSolutionIn(r, precedence) ) 
+    return false;
+
+  int N = r.NumberOfCellsInSubdivision();
+  for (int i = 1; i <= N; i++) 
+    if (ASolutionExistsRecursion(r.SubdivisionCell(i),
+				 sample,
+				 precedence))
+      return true;
+  return false; 
+}
+
+template <class T> const bool
+IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
+{
+     // precedence orders search for everywhere negative poly
+  gArray<int> precedence(System.Length());  
+  for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
+
+  /*
+  //DEBUG
+  gout << "The system is\n" << System << "\n";
+  */
+
+  bool answer = ASolutionExistsRecursion(r, sample, precedence);
+
+  return answer;
+}
+
+//----------------------------------
+//           Printing
+//----------------------------------
+
+template <class T> void IneqSolv<T>::Output(gOutput &output) const
+{
+  output << "The system is\n" << System << "\nwith error tolerance " <<
+    Epsilon << ".\n";
+}
+
+template <class T> gOutput &operator<<(gOutput &p_file,
+				       const IneqSolv<T> &p_solver)
+{
+  p_solver.Output(p_file);
+  return p_file;
+}

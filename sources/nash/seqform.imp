@@ -1,0 +1,377 @@
+//
+// FILE: seqform.imp -- Sequence Form module
+//
+// $Id$ 
+//
+
+#include "base/base.h"
+#include "seqform.h"
+#include "lhtab.h"
+
+template <class T> class SeqFormModule  {
+private:
+  const Efg::Game &EF;
+  const EFSupport &support;
+  const SeqFormParams &params;
+  gMatrix<T> *A;
+  gVector<T> *b;
+  LTableau<T> *tab;
+  int ns1,ns2,ni1,ni2;
+  T maxpay,eps;
+  long npivots;
+  double time;
+  gList<BFS<T> > List;
+  gList<BehavSolution> solutions;
+  gList<Infoset *> isets1, isets2;
+
+public:
+  SeqFormModule(const EFSupport &, const SeqFormParams &p);
+  virtual ~SeqFormModule();
+  
+  int Lemke(gStatus &);
+  int All_Lemke(int dup, LTableau<T> &B, long &np, int depth, gStatus &);
+  
+  int Add_BFS(const LTableau<T> &tab);
+  long NumPivots(void) const;
+  double Time(void) const;
+  
+  void FillTableau(const Node *n,T prob,int s1,int s2,int i1,int i2);
+  void GetProfile(const LTableau<T> &tab, gDPVector<T> &, const gVector<T> &, 
+		  const Node *n, int,int);
+
+  void AddSolutions(void);
+  const gList<BehavSolution> &GetSolutions() const;
+  gMatrix<T> GetA(void);
+};
+
+
+//---------------------------------------------------------------------------
+//                        SeqFormModule: member functions
+//---------------------------------------------------------------------------
+
+template <class T>
+SeqFormModule<T>::SeqFormModule(const EFSupport &S, const SeqFormParams &p) 
+  : EF(S.GetGame()), support(S), params(p), A(0), b(0), maxpay((T) 0), 
+    npivots(0), isets1(S.ReachableInfosets(EF.Players()[1])),
+    isets2(S.ReachableInfosets(EF.Players()[2])) 
+{ 
+  int ntot;
+  ns1=S.NumSequences(1);
+  ns2=S.NumSequences(2);
+  ni1=EF.Players()[1]->NumInfosets()+1;
+  ni2=EF.Players()[2]->NumInfosets()+1;
+
+  ntot = ns1+ns2+ni1+ni2;
+
+  A = new gMatrix<T>(1,ntot,0,ntot);
+  b = new gVector<T>(1,ntot);
+  int i,j;
+
+  maxpay = EF.MaxPayoff() + gNumber(1);
+
+  T prob = (T)1;
+  for(i=A->MinRow();i<=A->MaxRow();i++) {
+    (*b)[i] = (T)0;
+    for(j=A->MinCol();j<=A->MaxCol();j++)
+      (*A)(i,j) = (T)0; 
+  }
+
+  FillTableau(EF.RootNode(),prob,1,1,0,0);
+  for(i=A->MinRow();i<=A->MaxRow();i++) 
+    (*A)(i,0) = -(T)1;
+  (*A)(1,ns1+ns2+1) = (T)1;
+  (*A)(ns1+ns2+1,1) = -(T)1;
+  (*A)(ns1+1,ns1+ns2+ni1+1) = (T)1;
+  (*A)(ns1+ns2+ni1+1,ns1+1) = -(T)1;
+  (*b)[ns1+ns2+1] = -(T)1;
+  (*b)[ns1+ns2+ni1+1] = -(T)1;
+
+  tab = new LTableau<T>(*A,*b);
+  eps = tab->Epsilon();
+}
+
+template <class T> SeqFormModule<T>::~SeqFormModule()
+{ if(A) delete A; if(b) delete b; if(tab) delete tab;}
+
+//
+// Lemke implements the Lemke's algorithm (as refined by Eaves 
+// for degenerate problems) for  Linear Complementarity
+// problems, starting from the primary ray.  
+//
+
+template <class T> int SeqFormModule<T>::Lemke(gStatus &p_status)
+{
+  BFS<T> cbfs((T) 0);
+  int i;
+  
+  if (EF.NumPlayers() != 2)   return 0;
+  
+  gWatch watch;
+
+  BehavProfile<T> profile(support);
+  gVector<T> sol(tab->MinRow(),tab->MaxRow());
+    
+  solutions.Flush();
+  List.Flush();
+
+  if (params.stopAfter != 1) {
+    All_Lemke(ns1+ns2+1, *tab, npivots, 0, p_status);
+  }
+  else {
+    tab->Pivot(ns1+ns2+1,0);
+    tab->SF_LCPPath(ns1+ns2+1, p_status);
+
+    Add_BFS(*tab);
+    tab->BasisVector(sol);
+    GetProfile(*tab, profile.GetDPVector(),sol,EF.RootNode(),1,1);
+    solutions.Flush();
+    solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG));
+  }
+
+  if (params.trace >= 2)  {
+    for (i = 1; i <= List.Length(); i++)   {
+      List[i].Dump(*params.tracefile);
+      (*params.tracefile) << "\n";
+    }
+  }
+  
+  // if(params.trace >= 1)
+  //   (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
+
+  npivots =tab->NumPivots();
+  time = watch.Elapsed();
+  return List.Length();
+}
+
+template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
+{
+  BFS<T> cbfs((T) 0);
+  gVector<T> v(tableau.MinRow(), tableau.MaxRow());
+  tableau.BasisVector(v);
+
+  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
+    if (tableau.Member(i)) {
+      cbfs.Define(i, v[tableau.Find(i)]);
+    }
+
+  if (List.Contains(cbfs))  return 0;
+  //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
+  //  (*params.tracefile)  << "\nB = ";
+  //  tableau.Dump(*params.tracefile);
+  //  (*params.tracefile)  << "\ncbfs = ";
+  //  cbfs.Dump(*params.tracefile );
+  // gout << "\nFound CBFS";
+  // gout << "\nB = ";
+  // tableau.Dump(gout);
+  // gout << "\ncbfs = ";
+  // cbfs.Dump(gout);
+  List.Append(cbfs);
+  return 1;
+}
+
+//
+// All_Lemke finds all accessible Nash equilibria by recursively 
+// calling itself.  List maintains the list of basic variables 
+// for the equilibria that have already been found.  
+// From each new accessible equilibrium, it follows
+// all possible paths, adding any new equilibria to the List.  
+//
+template <class T> int 
+SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth,
+			    gStatus &p_status)
+{
+  if(params.maxdepth!=0 && depth>params.maxdepth) return 1;
+  int i,len,newsol,missing;
+  T p1,p2,aa;
+  T small_num = (T)1/(T)1000;
+
+  np+=B.NumPivots();
+  gVector<T> sol(tab->MinRow(),tab->MaxRow());
+  BehavProfile<T> profile(support);
+
+  newsol =0;
+  for (i = B.MinRow(); 
+       i <= B.MaxRow()  && newsol == 0 &&
+       (params.stopAfter==0 || solutions.Length() < params.stopAfter);
+       i++) {
+    p_status.Get();
+    
+    if (i != j)  {
+      len=List.Length();  
+      p1=(double)len/(double)(len+1);
+      p2=(double)(len+1)/(double)(len+2);
+      int num_strats = B.MaxCol()-B.MinCol()-1;
+      aa=(double)(i)/(double)num_strats;
+      p_status.SetProgress(p1+aa*(p2-p1));
+      
+      LTableau<T> BCopy(B);
+      (*A)(i,0)=-small_num;
+      BCopy.Refactor();
+
+      if(depth==0) {
+	BCopy.Pivot(j,0);
+	missing = -j;
+      }
+      else
+	missing = BCopy.SF_PivotIn(0);
+
+      assert(missing);
+      newsol=0;
+
+      if(BCopy.SF_LCPPath(-missing,p_status)==1) {
+	newsol = Add_BFS(BCopy);
+	BCopy.BasisVector(sol);
+	GetProfile(BCopy, profile.GetDPVector(),sol,EF.RootNode(),1,1);
+	if(newsol) {
+	  solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG)); 
+	}
+      }
+      else {
+	// gout << ": Dead End";
+      }
+      
+      (*A)(i,0)=-(T)1;
+      if(newsol) {
+	BCopy.Refactor();
+	All_Lemke(i,BCopy,npivots,depth+1, p_status);
+      }
+    }
+  }
+  
+  return 1;
+}
+
+//-------------------------------------------------------------------------
+//                   SeqFormModule<T>: Returning solutions
+//-------------------------------------------------------------------------
+
+template <class T> 
+const gList<BehavSolution> &SeqFormModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
+
+template <class T> long SeqFormModule<T>::NumPivots(void) const
+{
+  return npivots;
+}
+
+template <class T> double SeqFormModule<T>::Time(void) const
+{
+  return time;
+}
+
+
+template <class T>
+void SeqFormModule<T>::FillTableau(const Node *n, T prob,
+				   int s1, int s2, int i1, int i2)
+{
+  int i,snew;
+  if (!EF.GetOutcome(n).IsNull()) {
+    (*A)(s1,ns1+s2) = gNumber((*A)(s1,ns1+s2)) +
+       gNumber(prob) * (EF.Payoff(n, EF.Players()[1]) - gNumber(maxpay));
+    (*A)(ns1+s2,s1) = gNumber((*A)(ns1+s2,s1)) +
+       gNumber(prob) * (EF.Payoff(n, EF.Players()[2]) - gNumber(maxpay));
+  }
+  if(n->GetInfoset()) {
+    if(n->GetPlayer()->IsChance()) {
+      for(i=1;i<=EF.NumChildren(n);i++)
+	FillTableau(n->GetChild(i),
+		    gNumber(prob) * EF.GetChanceProb(n->GetInfoset(), i),
+		    s1,s2,i1,i2);
+    }
+    int pl = n->GetPlayer()->GetNumber();
+    if(pl==1) {
+      i1=isets1.Find(n->GetInfoset());
+      snew=1;
+      for(i=1;i<i1;i++)
+	snew+=support.NumActions(isets1[i]);
+      (*A)(s1,ns1+ns2+i1+1) = -(T)1;
+      (*A)(ns1+ns2+i1+1,s1) = (T)1;
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	(*A)(snew+i,ns1+ns2+i1+1) = (T)1;
+	(*A)(ns1+ns2+i1+1,snew+i) = -(T)1;
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
+      }
+    }
+    if(pl==2) {
+      i2=isets2.Find(n->GetInfoset());
+      snew=1;
+      for(i=1;i<i2;i++)
+	snew+=support.NumActions(isets2[i]);
+      (*A)(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
+      (*A)(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	(*A)(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
+	(*A)(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
+      }
+    }
+    
+  }
+}
+
+
+template <class T> void SeqFormModule<T>
+::GetProfile(const LTableau<T> &tab, gDPVector<T> &v, const gVector<T> &sol,
+	       const Node *n, int s1,int s2)
+{
+  int i,pl,inf,snew,ind,ind2;
+  if(n->GetInfoset()) {
+    if(n->GetPlayer()->IsChance()) {
+      for(i=1;i<=EF.NumChildren(n);i++)
+	GetProfile(tab, v,sol,n->GetChild(i),s1,s2);
+    }
+    pl = n->GetPlayer()->GetNumber();
+    if(pl==1) {
+      inf= isets1.Find(n->GetInfoset());
+      snew=1;
+      for(i=1;i<inf;i++)
+	snew+=support.NumActions(isets1[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	v(pl,inf,i) = (T)0;
+	if(tab.Member(s1)) {
+	  ind = tab.Find(s1);
+	  if(sol[ind]>eps) {
+	    if(tab.Member(snew+i)) {
+	      ind2 = tab.Find(snew+i);
+	      if(sol[ind2]>eps)
+		v(pl,inf,i) = sol[ind2]/sol[ind];
+	    }
+	  } 
+	} 
+	GetProfile(tab, v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
+      }
+    }
+    if(pl==2) {
+      inf= isets2.Find(n->GetInfoset());
+      snew=1;
+      for(i=1;i<inf;i++)
+	snew+=support.NumActions(isets2[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
+	v(pl,inf,i) = (T)0;
+	if(tab.Member(ns1+s2)) {
+	  ind = tab.Find(ns1+s2);
+	  if(sol[ind]>eps) {
+	    if(tab.Member(ns1+snew+i)) {
+	      ind2 = tab.Find(ns1+snew+i);
+	      if(sol[ind2]>eps)
+		v(pl,inf,i) = sol[ind2]/sol[ind];
+	    }
+	  } 
+	} 
+	GetProfile(tab, v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
+      }
+    }
+  }
+}
+
+template <class T> gMatrix<T> SeqFormModule<T>::GetA(void)
+{
+return *A;
+}
+  
+
+
+
