@@ -28,7 +28,7 @@
   bool bval, triv, semi; \
   gInteger ival; \
   double dval; \
-  gString tval, formal, funcname;  \
+  gString tval, formal, funcname, paramtype;  \
   gList<Instruction *> program, *function; \
   gList<gString> formals, types; \
   gList<bool> refs; \
@@ -136,7 +136,13 @@ formalparams: formalparam
             | formalparams COMMA formalparam
 
 formalparam:  NAME { formals.Append(tval); } binding 
-              NAME { types.Append(tval); } 
+              { paramtype = ""; } typename { types.Append(paramtype); } 
+
+typename:     NAME { paramtype += tval; } optparen
+
+optparen:
+        |     LPAREN { paramtype += '('; }  typename
+              RPAREN { paramtype += ')'; }
 
 binding:      RARROW    { refs.Append(false); }
        |      DBLARROW  { refs.Append(true); }
