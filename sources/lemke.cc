@@ -280,10 +280,6 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &n
   if (List.Contains(cbfs))  return 1;
   List.Append(cbfs);
 
-  len=List.Length();
-  p1=(double)len/(double)(len+1);
-  p2=(double)(len+1)/(double)(len+2);
-
   if (printlevel >= 2)
     cbfs.Dump(output);
 
@@ -301,8 +297,13 @@ template <class T> int LemkeTableau<T>::All_Lemke(BFS_List &List, int j, long &n
 
   for (i = 1; i <= num_strats  && !status.Get(); i++)
     if (i != j)  {
-      aa=(double)(i-1)/(double)num_strats;
+      len=List.Length()-1;
+      p1=(double)len/(double)(len+1);
+      p2=(double)(len+1)/(double)(len+2);
+      aa=(double)(i)/(double)num_strats;
       status.SetProgress(p1+aa*(p2-p1));
+      gout << "\n " << p1+aa*(p2-p1);
+
       LemkeTableau<T> Tcopy(*this);
       Tcopy.NumPivots()= 0;
       Tcopy.Lemke_Step(i);
