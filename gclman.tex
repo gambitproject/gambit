@@ -23,7 +23,7 @@ Minnesota
 Theodore Turocy\\Northwestern University
 }
 
-\date{Version 0.9\\ \today\\ \jobname.tex}
+\date{Version 0.91\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -1129,8 +1129,8 @@ Output[file->TEXT] =: OUTPUT
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
-SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER, 
-          expmode->BOOL, quote->BOOL] =: OUTPUT
+SetFormat[{width->INTEGER}, {precis->INTEGER}, 
+          {expmode->BOOL}, {quoted->BOOL}] =: OUTPUT
 Write[output->OUTPUT, x->BEHAV] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
 Write[output->OUTPUT, x<->EFG] =: OUTPUT
@@ -1270,6 +1270,8 @@ SetPayoff[list->LIST(INTEGER), payoffs->LIST(RATIONAL)] =: LIST(INTEGER)
 Float[x->INTEGER] =: FLOAT
 Float[x->FLOAT] =: FLOAT
 Float[x->RATIONAL] =: FLOAT
+List[mixed->MIXED] =: LIST(LIST(T))
+List[behav->BEHAV] =: LIST(LIST(LIST(T)))
 Nfg[efg<->EFG, {time<->FLOAT}] =: NFG
 Rational[x->INTEGER] =: RATIONAL
 Rational[x->FLOAT] =: RATIONAL
@@ -2456,6 +2458,23 @@ Default is 2.0e-10.
 
 \item
 \protect \large \begin{verbatim}
+List[mixed->MIXED] =: LIST(LIST(T))
+List[behav->BEHAV] =: LIST(LIST(LIST(T)))
+\end{verbatim}\normalsize
+
+\bd 
+Returns the probabilities of each strategy for each player for a
+mixed strategy profile, or the probabilities of each action at each
+information of each player for a behavior strategy profile.  The
+ordering of information sets is in indexed traversal order.  The type
+\verb+T+ of the list is the same as the type of \verb+behav+ or
+\verb+mixed+.
+\item
+[See also:] {\tt Behav, Mixed}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
 LoadEfg[file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -3395,17 +3414,17 @@ player.  Returns \verb+infoset+.
 
 \item
 \protect \large \begin{verbatim}
-SetFormat[output->OUTPUT, {width->INTEGER}, {precis->INTEGER}, 
-          {expmode->BOOL}, {quote->BOOL} ] =: OUTPUT
+SetFormat[{width->INTEGER}, {precis->INTEGER}, 
+          {expmode->BOOL}, {quoted->BOOL} ] =: BOOL
 \end{verbatim}\normalsize
 
-\bd
-Sets the formatting style for output on the stream
-\verb+output+.  \verb+width+ sets the width of the field for floating
-point numbers, \verb+precis+ sets the number of decimal places shown
-for floating point numbers, and \verb+expmode+ sets whether output is
-in exponential format or not.  Finally, \verb+quote+ determines
-whether quotes are printed before and after text strings.   
+\bd 
+Sets the formatting style for output on output streams.
+\verb+width+ sets the width of the field for floating point numbers,
+\verb+precis+ sets the number of decimal places shown for floating
+point numbers, and \verb+expmode+ sets whether output is in
+exponential format or not.  Finally, \verb+quoted+ determines whether
+quotes are printed before and after text strings.
 \item
 [See also:] {\tt Write}.
 \ed
