@@ -40,16 +40,22 @@ protected:
   EfgShowInterface *m_parent;
   Bool m_pickSoln;
   gList<Node *> m_subgameRoots;
+  bool m_eliminate, m_iterative, m_strong;
   
   void BaseSelectSolutions(int, const Efg &, gList<BehavSolution> &);
   void BaseViewNormal(const Nfg &, NFSupport *&);
 
 public:
-  BaseBySubgameG(EfgShowInterface *, const Efg &);
+  BaseBySubgameG(EfgShowInterface *, const Efg &,
+		 bool p_eliminate = false, bool p_iterative = false,
+		 bool p_strong = false);
 };
 
-BaseBySubgameG::BaseBySubgameG(EfgShowInterface *p_parent, const Efg &p_efg)
-    : m_parent(p_parent)
+BaseBySubgameG::BaseBySubgameG(EfgShowInterface *p_parent, const Efg &p_efg,
+			       bool p_eliminate, bool p_iterative,
+			       bool p_strong)
+    : m_parent(p_parent), m_eliminate(p_eliminate), m_iterative(p_iterative),
+      m_strong(p_strong)
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
   wxGetResource(SOLN_SECT, "Efg-Interactive-Solns", &m_pickSoln, "gambit.ini");
@@ -85,15 +91,11 @@ extern NFSupport *ComputeDominated(const Nfg &, NFSupport &, bool strong,
 				   const gArray<int> &players,
 				   gOutput &tracefile, gStatus &gstatus);
 
-#include "elimdomd.h"
 #include "nfstrat.h"
 
 void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 {
-  DominanceSettings DS;
-
-  if (!DS.UseElimDom()) 
-    return;
+  if (!m_eliminate)  return;
 
   gArray<int> players(p_nfg.NumPlayers());
   for (int i = 1; i <= p_nfg.NumPlayers(); i++) 
@@ -101,9 +103,9 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 
   NFSupport *temp_sup = p_support, *temp_sup1 = 0;
 
-  if (DS.FindAll()) {
+  if (m_iterative) {
     while ((temp_sup = ComputeDominated(temp_sup->Game(), 
-					*temp_sup, DS.DomStrong(), 
+					*temp_sup, m_strong,
 					players, gnull, gstatus))) {
       if (temp_sup1) 
 	delete temp_sup1;
@@ -116,7 +118,7 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
   }
   else {
     if ((temp_sup = ComputeDominated(temp_sup->Game(), 
-				     *temp_sup, DS.DomStrong(), 
+				     *temp_sup, m_strong,
 				     players, gnull, gstatus))) {
       p_support = temp_sup;
     }
@@ -130,8 +132,95 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 #include "nliap.h"
 #include "eliap.h"
 #include "liapsub.h"
-#define LIAP_PRM_INST
 #include "liapprm.h"
+
+LiapParamsSettings::LiapParamsSettings(void)
+{
+  wxGetResource(PARAMS_SECTION,"Liap-Ntries",&nTries,defaults_file);
+  wxGetResource(PARAMS_SECTION,"Func-tolN",&tolN,defaults_file);
+  wxGetResource(PARAMS_SECTION,"Func-tol1",&tol1,defaults_file);
+  wxGetResource(PARAMS_SECTION,"Func-maxitsN",&maxitsN,defaults_file);
+  wxGetResource(PARAMS_SECTION,"Func-maxits1",&maxits1,defaults_file);
+  wxGetResource(PARAMS_SECTION,"Start-Option",&start_option,defaults_file);
+}
+
+void LiapParamsSettings::SaveDefaults(void)
+{
+  wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
+  wxWriteResource(PARAMS_SECTION,"Func-tolN",tolN,defaults_file);
+  wxWriteResource(PARAMS_SECTION,"Func-tol1",tol1,defaults_file);
+  wxWriteResource(PARAMS_SECTION,"Func-maxitsN",maxitsN,defaults_file);
+  wxWriteResource(PARAMS_SECTION,"Func-maxits1",maxits1,defaults_file);
+  wxWriteResource(PARAMS_SECTION,"Start-Option",start_option,defaults_file);
+}
+
+LiapParamsSettings::~LiapParamsSettings(void)
+{ SaveDefaults(); }
+
+void LiapParamsSettings::GetParams(EFLiapParams &p_params)
+{
+  p_params.tol1 = tol1;
+  p_params.tolN = tolN;
+  p_params.maxits1 = maxits1;
+  p_params.maxitsN = maxitsN;
+  p_params.stopAfter = StopAfter();
+  p_params.nTries = nTries;
+
+  p_params.trace = TraceLevel();
+  p_params.tracefile = OutFile();
+}
+
+void LiapParamsSettings::GetParams(NFLiapParams &p_params)
+{
+  p_params.tol1 = tol1;
+  p_params.tolN = tolN;
+  p_params.maxits1 = maxits1;
+  p_params.maxitsN = maxitsN;
+  p_params.stopAfter = StopAfter();
+  p_params.nTries = nTries;
+
+  p_params.trace = TraceLevel();
+  p_params.tracefile = OutFile();
+}
+
+LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
+					     bool p_subgames)
+  : OutputParamsDialog("LiapSolve Parameters", p_parent)
+{
+  MakeDominanceFields();
+
+  Add(wxMakeFormShort("Max # Tries", &nTries, wxFORM_DEFAULT, NULL, NULL,
+		      wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormFloat("Tolerance n-D", &tolN, wxFORM_DEFAULT, NULL, NULL,
+		      wxVERTICAL, 100));
+  Add(wxMakeFormFloat("Tolerance 1-D", &tol1, wxFORM_DEFAULT, NULL, NULL,
+		      wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormShort("Iterations n-D", &maxitsN, wxFORM_DEFAULT, NULL, NULL,
+		      wxVERTICAL, 100));
+  Add(wxMakeFormShort("Iterations 1-D", &maxits1, wxFORM_DEFAULT, NULL, NULL,
+		      wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
+  wxStringList *start_option_list=new wxStringList("Default", "Saved",
+						   "Prompt", 0);
+  char *start_option_str = new char[20];
+  strcpy(start_option_str,
+	 (char *) start_option_list->Nth(start_option)->Data());
+  Add(wxMakeFormString("Start", &start_option_str, wxFORM_RADIOBOX, 
+		       new wxList(wxMakeConstraintStrings(start_option_list),
+				  0), 0, wxVERTICAL));
+  Add(wxMakeFormNewLine());
+
+  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
+		   ((p_subgames) ? SPS_FIELD : 0));
+  Go();
+
+  start_option = wxListFindString(start_option_list, start_option_str);
+  delete [] start_option_str;
+  delete start_option_list;
+}
+
 
 //---------------------
 // Liapunov on efg
@@ -145,26 +234,26 @@ protected:
 
 public:
   EFLiapBySubgameG(const Efg &p_efg, const EFLiapParams &p_params,
-		   const BehavSolution &p_solution, int p_max = 0,
+		   const BehavSolution &p_start, int p_max = 0,
 		   EfgShowInterface *p_parent = 0)
     : EFLiapBySubgame(p_efg, p_params, 
-		      BehavProfile<gNumber>(p_solution), p_max),
+		      BehavProfile<gNumber>(p_start), p_max),
       BaseBySubgameG(p_parent, p_efg)
     { Solve(); }
 };
 
-EfgELiapG::EfgELiapG(const Efg &p_efg, const EFSupport &p_support,
-		     EfgShowInterface *p_parent)
+guiEfgSolveLiap::guiEfgSolveLiap(const Efg &p_efg, const EFSupport &p_support,
+				 EfgShowInterface *p_parent)
   : guiEfgSolution(p_efg, p_support, p_parent)
 { }
 
-gList<BehavSolution> EfgELiapG::Solve(void) const
+gList<BehavSolution> guiEfgSolveLiap::Solve(void) const
 {
   LiapParamsSettings LPS;
-  wxStatus status(parent->Frame(), "Liap Algorithm");
+  wxStatus status(parent->Frame(), "LiapSolve");
   BehavProfile<gNumber> start = parent->CreateStartProfile(LPS.StartOption());
   EFLiapParams P(status);
-  LPS.GetParams(&P);
+  LPS.GetParams(P);
   try {
     EFLiapBySubgameG M(ef, P, start, LPS.MaxSolns(), parent);
     return M.GetSolutions();
@@ -174,9 +263,16 @@ gList<BehavSolution> EfgELiapG::Solve(void) const
   }
 }
 
-void EfgELiapG::SolveSetup(void) const
+void guiEfgSolveLiap::SolveSetup(void) const
 { 
   LiapSolveParamsDialog LSPD(parent->Frame(), true);
+
+  eliminate = LSPD.Eliminate();
+  all = LSPD.EliminateAll();
+  domType = LSPD.DominanceType();
+  domMethod = LSPD.DominanceMethod();
+
+  markSubgames = LSPD.MarkSubgames();
 }
 
 //---------------------
@@ -193,11 +289,13 @@ protected:
 
 public:
   NFLiapBySubgameG(const Efg &p_efg, const NFLiapParams &p_params,
-		   const BehavSolution &p_solution, int p_max = 0, 
+		   const BehavSolution &p_start,
+		   bool p_eliminate, bool p_iterative, bool p_strong,
+		   int p_max = 0, 
 		   EfgShowInterface *p_parent = 0)
     : NFLiapBySubgame(p_efg, p_params,
-		      BehavProfile<gNumber>(p_solution), p_max),
-      BaseBySubgameG(p_parent, p_efg)
+		      BehavProfile<gNumber>(p_start), p_max),
+      BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { Solve(); }
 };
 
@@ -212,9 +310,10 @@ gList<BehavSolution> EfgNLiapG::Solve(void) const
   wxStatus status(parent->Frame(), "Liap Algorithm");
   BehavProfile<gNumber> start = parent->CreateStartProfile(LPS.StartOption());
   NFLiapParams P(status);
-  LPS.GetParams(&P);
+  LPS.GetParams(P);
   try {
-    NFLiapBySubgameG M(ef, P, start, LPS.MaxSolns(), parent);
+    NFLiapBySubgameG M(ef, P, start, Eliminate(), EliminateAll(),
+		       DominanceType(), LPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {
@@ -225,6 +324,13 @@ gList<BehavSolution> EfgNLiapG::Solve(void) const
 void EfgNLiapG::SolveSetup(void) const
 {
   LiapSolveParamsDialog LSPD(parent->Frame(), true);
+
+  eliminate = LSPD.Eliminate();
+  all = LSPD.EliminateAll();
+  domType = LSPD.DominanceType();
+  domMethod = LSPD.DominanceMethod();
+
+  markSubgames = LSPD.MarkSubgames();
 }
 
 //========================================================================
@@ -268,9 +374,11 @@ SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
 					 bool p_subgames /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent)
 {
-  Form()->Add(wxMakeFormBool("All Solutions", &dup_strat));
-  Form()->Add(wxMakeFormNewLine());
-  Form()->Add(wxMakeFormShort("Max depth", &maxdepth));
+  MakeDominanceFields();
+
+  Add(wxMakeFormBool("All Solutions", &dup_strat));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormShort("Max depth", &maxdepth));
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
@@ -315,6 +423,13 @@ gList<BehavSolution> EfgSeqFormG::Solve(void) const
 void EfgSeqFormG::SolveSetup(void) const
 { 
   SeqFormParamsDialog SFPD(parent->Frame(), true);
+
+  eliminate = SFPD.Eliminate();
+  all = SFPD.EliminateAll();
+  domType = SFPD.DominanceType();
+  domMethod = SFPD.DominanceMethod();
+
+  markSubgames = SFPD.MarkSubgames();
 }
 
 
@@ -343,6 +458,8 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *p_parent /* = 0 */,
 					       bool p_subgames /* = false */)
   : OutputParamsDialog("LcpSolve Params", p_parent, LCP_HELP)
 {
+  MakeDominanceFields();
+
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
@@ -358,10 +475,11 @@ protected:
 
 public:
   LemkeBySubgameG(const Efg &p_efg, const EFSupport &p_support,
-		  const LemkeParams &p_params, int p_max = 0,
+		  const LemkeParams &p_params, bool p_eliminate,
+		  bool p_iterative, bool p_strong, int p_max = 0,
 		  EfgShowInterface *p_parent = 0)
     : LemkeBySubgame(p_support, p_params, p_max), 
-      BaseBySubgameG(p_parent, p_efg)
+      BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { Solve(); }
 };
 
@@ -384,7 +502,8 @@ gList<BehavSolution> EfgLemkeG::Solve(void) const
   LemkeParams P(status);
   LPS.GetParams(P);
   try {
-    LemkeBySubgameG M(ef, sup, P, LPS.MaxSolns(), parent);
+    LemkeBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
+		      LPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &)  {
@@ -395,6 +514,13 @@ gList<BehavSolution> EfgLemkeG::Solve(void) const
 void EfgLemkeG::SolveSetup(void) const
 {
   LemkeSolveParamsDialog LSPD(parent->Frame(), true); 
+
+  eliminate = LSPD.Eliminate();
+  all = LSPD.EliminateAll();
+  domType = LSPD.DominanceType();
+  domMethod = LSPD.DominanceMethod();
+
+  markSubgames = LSPD.MarkSubgames();
 }
 
 
@@ -413,6 +539,8 @@ PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						     bool p_subgames/*=false*/)
   : OutputParamsDialog("EnumPureSolve Params", p_parent)
 {
+  MakeDominanceFields();
+
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
@@ -428,9 +556,10 @@ protected:
 
 public:
   PureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
+		     bool p_eliminate, bool p_iterative, bool p_strong,
 		     int p_max = 0, EfgShowInterface *p_parent = 0)
     : PureNashBySubgame(p_support, gstatus, p_max),
-      BaseBySubgameG(p_parent, p_efg)
+      BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { Solve(); }
 };
 
@@ -446,7 +575,8 @@ gList<BehavSolution> EfgPureNashG::Solve(void) const
   status << "Progress not implemented\n" << "Cancel button disabled\n";
 
   try {
-    PureNashBySubgameG M(ef, sup, PNPS.MaxSolns(), parent);
+    PureNashBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
+			 DominanceType(), PNPS.MaxSolns(), parent);
     return M.GetSolutions();
   }
   catch (gSignalBreak &) {
@@ -457,6 +587,13 @@ gList<BehavSolution> EfgPureNashG::Solve(void) const
 void EfgPureNashG::SolveSetup(void) const
 {
   PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
+
+  eliminate = PNPD.Eliminate();
+  all = PNPD.EliminateAll();
+  domType = PNPD.DominanceType();
+  domMethod = PNPD.DominanceMethod();
+
+  markSubgames = PNPD.MarkSubgames();
 }
 
 
@@ -502,6 +639,13 @@ gList<BehavSolution> EfgEPureNashG::Solve(void) const
 void EfgEPureNashG::SolveSetup(void) const
 {
   PureNashSolveParamsDialog PNPD(parent->Frame(), true); 
+
+  eliminate = PNPD.Eliminate();
+  all = PNPD.EliminateAll();
+  domType = PNPD.DominanceType();
+  domMethod = PNPD.DominanceMethod();
+
+  markSubgames = PNPD.MarkSubgames();
 }
 
 //========================================================================
@@ -528,6 +672,8 @@ EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames)
   : OutputParamsDialog("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
 {
+  MakeDominanceFields();
+
   Add(wxMakeFormNewLine());
 
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
@@ -599,6 +745,13 @@ gList<BehavSolution> EfgEnumG::Solve(void) const
 void EfgEnumG::SolveSetup(void) const
 {
   EnumSolveParamsDialog ESPD(parent->Frame(), true); 
+
+  eliminate = ESPD.Eliminate();
+  all = ESPD.EliminateAll();
+  domType = ESPD.DominanceType();
+  domMethod = ESPD.DominanceMethod();
+
+  markSubgames = ESPD.MarkSubgames();
 }
 
 
@@ -635,7 +788,9 @@ void LPParamsSettings::GetParams(CSSeqFormParams &p_params)
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames)
   : OutputParamsDialog("LpSolve Params", p_parent, LP_HELP)
 {
+  MakeDominanceFields();
   Add(wxMakeFormNewLine());
+
   MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD | PRECISION_FIELD |
 		   ((p_subgames) ? SPS_FIELD : 0));
   Go();
@@ -693,6 +848,13 @@ gList<BehavSolution> EfgZSumG::Solve(void) const
 void EfgZSumG::SolveSetup(void) const
 {
   LPSolveParamsDialog ZSPD(parent->Frame(), true); 
+
+  eliminate = ZSPD.Eliminate();
+  all = ZSPD.EliminateAll();
+  domType = ZSPD.DominanceType();
+  domMethod = ZSPD.DominanceMethod();
+
+  markSubgames = ZSPD.MarkSubgames();
 }
 
 //---------------------
@@ -744,6 +906,13 @@ gList<BehavSolution> EfgCSumG::Solve(void) const
 void EfgCSumG::SolveSetup(void) const
 {
   LPSolveParamsDialog ZSPD(parent->Frame(), true);
+
+  eliminate = ZSPD.Eliminate();
+  all = ZSPD.EliminateAll();
+  domType = ZSPD.DominanceType();
+  domMethod = ZSPD.DominanceMethod();
+
+  markSubgames = ZSPD.MarkSubgames();
 }
 
 //========================================================================
@@ -787,6 +956,8 @@ SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
   : OutputParamsDialog("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
 {
+  MakeDominanceFields();
+
   Add(wxMakeFormNewLine());
   Add(wxMakeFormShort("# Restarts", &nRestarts));
   Add(wxMakeFormShort("Leash", &leashLength));
@@ -837,6 +1008,13 @@ gList<BehavSolution> EfgSimpdivG::Solve(void) const
 void EfgSimpdivG::SolveSetup(void) const
 {
   SimpdivSolveParamsDialog SDPD(parent->Frame(), true); 
+
+  eliminate = SDPD.Eliminate();
+  all = SDPD.EliminateAll();
+  domType = SDPD.DominanceType();
+  domMethod = SDPD.DominanceMethod();
+
+  markSubgames = SDPD.MarkSubgames();
 }
 
 //========================================================================
@@ -916,23 +1094,25 @@ GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *p_parent,
 		    GOBIT_HELP),
     GobitParamsSettings(p_filename), PxiParamsSettings("Gobit", p_filename)
 {
-  Form()->Add(wxMakeFormFloat("minLam", &minLam, wxFORM_DEFAULT,
+  MakeDominanceFields();
+
+  Add(wxMakeFormFloat("minLam", &minLam, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormFloat("maxLam", &maxLam, wxFORM_DEFAULT,
 			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormFloat("maxLam", &maxLam, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormFloat("delLam", &delLam, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormNewLine());
-  Form()->Add(wxMakeFormFloat("Tolerance n-D", &tolN, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormFloat("Tolerance 1-D", &tol1, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormNewLine());
-  Form()->Add(wxMakeFormShort("Iterations n-D", &maxitsN, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormShort("Iterations 1-D", &maxits1, wxFORM_DEFAULT,
-			      NULL, NULL, wxVERTICAL, 100));
-  Form()->Add(wxMakeFormNewLine());
+  Add(wxMakeFormFloat("delLam", &delLam, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormFloat("Tolerance n-D", &tolN, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormFloat("Tolerance 1-D", &tol1, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormShort("Iterations n-D", &maxitsN, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormShort("Iterations 1-D", &maxits1, wxFORM_DEFAULT,
+		      NULL, NULL, wxVERTICAL, 100));
+  Add(wxMakeFormNewLine());
 
   wxStringList *start_option_list = new wxStringList("Default", "Saved",
 						     "Prompt", 0);
@@ -1028,6 +1208,13 @@ gList<BehavSolution> EfgNGobitG::Solve(void) const
 void EfgNGobitG::SolveSetup(void) const
 {
   GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+
+  eliminate = GSPD.Eliminate();
+  all = GSPD.EliminateAll();
+  domType = GSPD.DominanceType();
+  domMethod = GSPD.DominanceMethod();
+
+  markSubgames = GSPD.MarkSubgames();
 }
 
 //---------------------
@@ -1066,6 +1253,13 @@ gList<BehavSolution> EfgEGobitG::Solve(void) const
 void EfgEGobitG::SolveSetup(void) const
 { 
   GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
+
+  eliminate = GSPD.Eliminate();
+  all = GSPD.EliminateAll();
+  domType = GSPD.DominanceType();
+  domMethod = GSPD.DominanceMethod();
+
+  markSubgames = GSPD.MarkSubgames();
 }
 
 //========================================================================
@@ -1260,4 +1454,11 @@ gList<BehavSolution> EfgGobitAllG::Solve(void) const
 void EfgGobitAllG::SolveSetup(void) const
 {
   GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename()); 
+
+  eliminate = GSPD.Eliminate();
+  all = GSPD.EliminateAll();
+  domType = GSPD.DominanceType();
+  domMethod = GSPD.DominanceMethod();
+
+  markSubgames = GSPD.MarkSubgames();
 }

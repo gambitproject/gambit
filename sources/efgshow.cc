@@ -131,31 +131,15 @@ void EfgShow::OnSelectedMoved(const Node *n)
 
 #include "efgsolvd.h"
 
-
-void EfgShow::SubgamesSetup(void)
-{
-    char *defaults_file = "gambit.ini";
-    Bool subg;
-    wxGetResource(SOLN_SECT, "Efg-Mark-Subgames", &subg, defaults_file);
-    MyDialogBox *subgame_setup_dialog = new MyDialogBox(this, "Subgames Defaults");
-    subgame_setup_dialog->Add(wxMakeFormBool("Mark subgames before solving", &subg));
-    subgame_setup_dialog->Go();
-    if (subgame_setup_dialog->Completed() == wxOK)
-        wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", subg, defaults_file);
-    delete subgame_setup_dialog;
-}
-
 void EfgShow::SolveStandard(void)
 {
-  EfgSolveStandardDialog(ef, this);
-
-  EfgSolveSettings ESS(ef);
+  EfgSolveStandardDialog ESS(ef, this);
 
   guiEfgSolution *solver;
 
   Enable(FALSE);
 
-  if (!ESS.UseNF()) {
+  if (!ESS.ViaNfg()) {
     switch (ESS.GetEfgAlgorithm()) {
     case EFG_PURENASH_SOLUTION:
       solver = new EfgEPureNashG(ef, *cur_sup, this);
@@ -167,7 +151,7 @@ void EfgShow::SolveStandard(void)
       solver = new EfgCSumG(ef, *cur_sup, this);
       break;
     case EFG_LIAP_SOLUTION:
-      solver = new EfgELiapG(ef, *cur_sup, this);
+      solver = new guiEfgSolveLiap(ef, *cur_sup, this);
       break;
     case EFG_GOBIT_SOLUTION:
       solver = new EfgEGobitG(ef, *cur_sup, this);
@@ -245,14 +229,6 @@ void EfgShow::Solve(int p_algorithm)
   Enable(FALSE);
   wxBeginBusyCursor();
 
-  /*
-  if (ESS.MarkSubgames()) 
-    tw->subgame_solve();
-
-  if (!ESS.MarkSubgames() && ESS.UseStandard()) 
-    tw->subgame_clear_all(); // for standard if not mark, must clear
-  */
-
   guiEfgSolution *solver = 0;
 
   switch (p_algorithm) {
@@ -266,7 +242,7 @@ void EfgShow::Solve(int p_algorithm)
     solver = new EfgCSumG(ef, *cur_sup, this);
     break;
   case SOLVE_CUSTOM_EFG_LIAP:
-    solver = new EfgELiapG(ef, *cur_sup, this);
+    solver = new guiEfgSolveLiap(ef, *cur_sup, this);
     break;
   case SOLVE_CUSTOM_EFG_GOBIT:
     solver = new EfgEGobitG(ef, *cur_sup, this);
@@ -303,6 +279,8 @@ void EfgShow::Solve(int p_algorithm)
 
   try {
     solver->SolveSetup();
+    if (solver->MarkSubgames())
+      tw->subgame_solve();
     solns += solver->Solve();
     wxEndBusyCursor();
   }
@@ -315,7 +293,7 @@ void EfgShow::Solve(int p_algorithm)
  
   ChangeSolution(solns.VisibleLength());
   Enable(TRUE);
-  //  if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
+  InspectSolutions(CREATE_DIALOG);
 }
 
 

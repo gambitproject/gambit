@@ -30,6 +30,8 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 //            OutputParamsSettings: Member function definitions
 //========================================================================
 
+#define	SOLN_SECT			"Soln-Defaults"
+
 OutputParamsSettings::OutputParamsSettings(void)
 {
   defaults_file = "gambit.ini";
@@ -52,6 +54,13 @@ OutputParamsSettings::OutputParamsSettings(void)
   m_precisionList->Add("Rational");
   outfile = 0;
   errfile = 0;
+
+  wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
+  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
+  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Method",&dom_method,defaults_file);
+  wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
+
+  wxGetResource(SOLN_SECT, "Efg-Mark-Subgames", &markSubgames, defaults_file);
 }
 
 OutputParamsSettings::~OutputParamsSettings(void)
@@ -80,6 +89,14 @@ void OutputParamsSettings::SaveDefaults(void)
   wxWriteResource(PARAMS_SECTION, "Stop-After", m_stopAfter, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Max-Solns", m_maxSolns, defaults_file);
   wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr, defaults_file);
+
+  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
+  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Method",dom_method,defaults_file);
+  wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+
+  wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", markSubgames,
+		  defaults_file);
 }
 
 //
@@ -148,8 +165,42 @@ OutputParamsDialog::OutputParamsDialog(const char *label,
 OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
+void OutputParamsDialog::MakeDominanceFields(void)
+{
+  Add(wxMakeFormMessage("Dominance elimination:"));
+  Add(wxMakeFormNewLine());
+
+  Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
+  Add(wxMakeFormBool("Iterative Eliminate",&all));
+  Add(wxMakeFormNewLine());
+
+  dom_type_list = new wxStringList("Weak", "Strong", 0);
+  dom_type_str = new char[20];
+  strcpy(dom_type_str, (char *) dom_type_list->Nth(dom_type)->Data());
+  Add(wxMakeFormString("Type", &dom_type_str, wxFORM_RADIOBOX,
+		       new wxList(wxMakeConstraintStrings(dom_type_list), 0),
+		       0, wxVERTICAL));
+  
+  dom_method_list = new wxStringList("Pure", "Mixed", 0);
+  dom_method_str = new char[20];
+  strcpy(dom_method_str, (char *) dom_method_list->Nth(dom_method)->Data());
+  Add(wxMakeFormString("Method", &dom_method_str, wxFORM_RADIOBOX,
+		       new wxList(wxMakeConstraintStrings(dom_method_list), 0),
+		       0, wxVERTICAL));
+  
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormMessage("Subgames:"));
+  Add(wxMakeFormNewLine());
+  Add(wxMakeFormBool("Mark subgames before solving", &markSubgames));
+  Add(wxMakeFormNewLine());
+
+  Add(wxMakeFormMessage("Algorithm behavior:"));
+  Add(wxMakeFormNewLine());
+}  
+
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
+  Add(wxMakeFormNewLine());
   if (fields & PRECISION_FIELD) {
     Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
 			 new wxList(wxMakeConstraintStrings(m_precisionList),

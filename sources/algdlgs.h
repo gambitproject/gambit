@@ -41,6 +41,14 @@ protected:
   char *defaults_file;
   gPrecision m_precision;
 
+  Bool use_elimdom,all;
+  int	dom_type,dom_method;
+
+  Bool markSubgames;
+
+  char *dom_type_str,*dom_method_str;
+  wxStringList *dom_type_list,*dom_method_list;
+
   gOutput *MakeOutputFile(const char *s, gOutput *&outp) const;
   void SaveDefaults(void); // Called automatically in the destructor
 
@@ -56,6 +64,14 @@ public:
 
   int StopAfter(void) const { return m_stopAfter; }
   int MaxSolns(void) const { return m_maxSolns; }
+
+  Bool Eliminate(void) const { return use_elimdom; }
+  Bool EliminateAll(void) const { return all; }
+
+  int DominanceType(void) const { return dom_type; }
+  int DominanceMethod(void) const { return dom_method; }
+
+  Bool MarkSubgames(void) const { return markSubgames; }
 
   gPrecision Precision(void) const;
 };
@@ -75,6 +91,7 @@ public:
   virtual ~OutputParamsDialog(void);
 
   // Create the fields
+  void MakeDominanceFields(void);
   void MakeOutputFields(unsigned int fields = OUTPUT_FIELD);
 };
 

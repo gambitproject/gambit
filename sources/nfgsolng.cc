@@ -160,7 +160,7 @@ gList<MixedSolution> NfgLiapG::Solve(void) const
     wxStatus status(parent->Frame(), "Liap Algorithm");
     LiapParamsSettings LPS;
     NFLiapParams P(status);
-    LPS.GetParams(&P);
+    LPS.GetParams(P);
     MixedProfile<gNumber> start(parent->CreateStartProfile(LPS.StartOption()));
     gList<MixedSolution> temp_solns;
     long nevals, nits;

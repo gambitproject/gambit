@@ -161,9 +161,6 @@ void EfgShow::MakeMenus(void)
                "Generate agent normal form");
   solve_menu->Append(SOLVE_NFG, "Normal form", solveNfgMenu,
              "Create a normal form representation of this game");
-  solve_menu->AppendSeparator();
-  solve_menu->Append(SOLVE_DOMINANCE, "&Dominance", "Set ElimDom options");
-  solve_menu->Append(SOLVE_SUBGAMES,  "&Subgames",  "Set subgames options");
   
   wxMenu *inspect_menu = new wxMenu;
   inspect_menu->Append(INSPECT_SOLUTIONS,  "&Solutions", "Inspect existing solutions");
@@ -444,16 +441,6 @@ void EfgShow::OnMenuCommand(int id)
     case SOLVE_STANDARD:
       SolveStandard();
       break;
-
-    case SOLVE_DOMINANCE: {
-      DominanceSettingsDialog EDPD(this);
-      break;
-    }
-
-    case SOLVE_SUBGAMES: 
-        SubgamesSetup();
-        break;
-
 
         // Display menu
 #define ZOOM_DELTA  .2

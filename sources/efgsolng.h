@@ -31,22 +31,35 @@ protected:
   EfgShowInterface *parent;
   gList<BehavSolution> solns;
 
+  mutable bool eliminate, all;
+  mutable int domType, domMethod;
+  mutable bool markSubgames;
+
 public:
   guiEfgSolution(const Efg &E, const EFSupport &S, EfgShowInterface *parent);
   virtual ~guiEfgSolution()  { }
   virtual gList<BehavSolution> Solve(void) const = 0;
   virtual void SolveSetup(void) const = 0;
+
+  bool Eliminate(void) const { return eliminate; }
+  bool EliminateAll(void) const { return all; }
+  int DominanceType(void) const { return domType; }
+  int DominanceMethod(void) const { return domMethod; }
+
+  bool MarkSubgames(void) const { return markSubgames; }
 };
 
 
-// Extensive Form Liap
-class EfgELiapG : public guiEfgSolution
-{
+//-------------------------------------------------------------------------
+//                              LiapSolve
+//-------------------------------------------------------------------------
+
+class guiEfgSolveLiap : public guiEfgSolution  {
 public:
-    EfgELiapG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
-    virtual ~EfgELiapG()  { }
-    virtual gList<BehavSolution> Solve(void) const;
-    virtual void SolveSetup(void) const;
+  guiEfgSolveLiap(const Efg &, const EFSupport &, EfgShowInterface *);
+  virtual ~guiEfgSolveLiap()  { }
+  virtual gList<BehavSolution> Solve(void) const;
+  virtual void SolveSetup(void) const;
 };
 
 

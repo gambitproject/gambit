@@ -89,8 +89,6 @@
 #define SOLVE_NFG_AGENT                     1519
 #define SOLVE_NFG                           1521
 
-#define SOLVE_DOMINANCE                     1524
-#define SOLVE_SUBGAMES                      1526
 #define SOLVE_STANDARD                      1540
 
 #define DISPLAY_SET_ZOOM                    1600
