@@ -167,7 +167,7 @@ are not necessary for the procedure to function.
 
 \begin{itemize}
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 \end{verbatim}
 \normalsize
@@ -198,7 +198,7 @@ is created automatically.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
@@ -225,7 +225,7 @@ with the indicated number exists, no action is taken.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Car[l->LIST(T)] =: T	
 \end{verbatim}\normalsize
 
@@ -251,7 +251,7 @@ of the list.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Cdr[l->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
@@ -276,7 +276,7 @@ first element.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
@@ -304,7 +304,7 @@ combination of the two given lists.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Contains[e->T, l->LIST(T)] =: BOOLEAN
 \end{verbatim}\normalsize
 
@@ -332,7 +332,7 @@ contained in the indicated list of type T.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 CopyTree[n->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -357,7 +357,7 @@ indicated node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 CrunchNfg[N->NFG] =: NFG
 \end{verbatim}\normalsize
 
@@ -383,7 +383,7 @@ problem is to be created.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DeleteAction[n->NODE, br->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
@@ -407,7 +407,7 @@ is to be deleted.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DeleteNode[n->NODE, keep->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
@@ -434,7 +434,7 @@ deleted node are deleted.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DeleteTree[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -457,7 +457,7 @@ This node then becomes a terminal node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DetachOutcome[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -480,7 +480,7 @@ null outcome.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DisplayEfg[E->EFG]
 \end{verbatim}\normalsize
 
@@ -503,7 +503,7 @@ problem in outline form.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 DisplayNfg[N->NFG, {sset->INTEGER}]
 \end{verbatim}\normalsize
 
@@ -534,7 +534,7 @@ specified, the last (smallest) strategy set is used.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
 \end{verbatim}\normalsize
 
@@ -562,7 +562,7 @@ in the corresponding agent normal form.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
 \end{verbatim}\normalsize
 
@@ -591,7 +591,7 @@ as a reduced normal form game.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 ElapsedTime[] =: RATIONAL
 \end{verbatim}\normalsize
 
@@ -610,10 +610,11 @@ StopWatch[] match.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
+\protect \large \begin{verbatim}
+ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL}, 
 	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
-\end{verbatim}\normalsize
+\end{verbatim}
+\normalsize
 
 \bd
 \item
@@ -659,7 +660,7 @@ that all dominated strategies are iteratively deleted.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
 \end{verbatim}\normalsize
 
@@ -689,7 +690,7 @@ equality.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetActionName[n->NODE, br->INTEGER] =: TEXT
 \end{verbatim}\normalsize
 
@@ -714,7 +715,7 @@ the indicated branch of the specified node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetActionProbs[n->NODE] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
 
@@ -738,7 +739,7 @@ belonging to the player representing chance (player 0).
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -771,7 +772,7 @@ indicated player which is to be tested for domination.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetInfosetName[n->NODE] =: TEXT
 \end{verbatim}\normalsize
 
@@ -794,7 +795,7 @@ specified node belongs.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetNextSibling[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -817,7 +818,7 @@ node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
 \end{verbatim}\normalsize
 
@@ -846,7 +847,7 @@ vector will be returned.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
 \end{verbatim}\normalsize
 
@@ -876,7 +877,7 @@ will be returned.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
 \end{verbatim}\normalsize
 
@@ -905,7 +906,7 @@ returned.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetPriorSibling[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -927,7 +928,7 @@ GetPriorSibling[n->NODE] =: NODE
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
 \end{verbatim}\normalsize
 
@@ -958,7 +959,7 @@ player for which the name is to be found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 GetTitle[E->EFG] =: TEXT
 \end{verbatim}\normalsize
 
@@ -981,10 +982,11 @@ the title has not been assigned, the empty string is returned.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
-	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
-	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolOpt->RATIONAL},
+\protect \large \begin{verbatim}
+Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER}, 
+	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, 
+	{minLam->RATIONAL}, {maxLam->RATIONAL}, 
+	{delLam->RATIONAL}, {tolOpt->RATIONAL}, 
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
 	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
 \end{verbatim}\normalsize
@@ -1055,11 +1057,11 @@ compatible for input to pxi
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
+\protect \large \begin{verbatim}
+GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
 	{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL}, 
-	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}, {time<->RATIONAL}]
-	 =: INTEGER
+	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}, 
+	{time<->RATIONAL}] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -1107,7 +1109,7 @@ Has a default value of XXXX .
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 InsertAction[n->NODE, as->1, br->3] =: NODE
 \end{verbatim}\normalsize
 
@@ -1135,7 +1137,7 @@ actions inserted into it.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
@@ -1167,7 +1169,7 @@ game, the player is created automatically.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
 \end{verbatim}\normalsize
 
@@ -1200,7 +1202,7 @@ indicated player which is to be tested for domination.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 IsPredecessor[n->NODE, of->NODE] =: BOOLEAN
 \end{verbatim}\normalsize
 
@@ -1228,7 +1230,7 @@ result in the return value being True.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 IsSuccessor[n->NODE, from->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1255,7 +1257,7 @@ result in the return value being True.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 IsWatchRunning[] =: BOOLEAN
 \end{verbatim}\normalsize
 
@@ -1273,7 +1275,7 @@ Returns False otherwise.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 JoinInfoset[n->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1302,7 +1304,7 @@ node specified will be transfered.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 LeaveInfoset[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1327,8 +1329,9 @@ currently belongs to.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
+\protect \large \begin{verbatim}
+Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] 
+=: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -1360,7 +1363,7 @@ equilibria are to be found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Length[l->LIST(T)] =: INTEGER
 \end{verbatim}\normalsize
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
@@ -1384,10 +1387,11 @@ type T.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
-	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsOpt->RATIONAL},
-	{maxitsBrent->RATIONAL}, {tolOpt->RATIONAL}, {tolBrent->RATIONAL},
+	{ntries->INTEGER}, {nequilib->INTEGER}, 
+	{maxitsOpt->RATIONAL},{maxitsBrent->RATIONAL}, 
+	{tolOpt->RATIONAL}, {tolBrent->RATIONAL}, 
 	{time<->RATIONAL}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -1437,7 +1441,7 @@ value of XXXX .
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 MergeInfosets[n->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1465,7 +1469,7 @@ the nodes from the first information set are to be moved.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
 \end{verbatim}\normalsize
 
@@ -1492,7 +1496,7 @@ profile.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
@@ -1519,7 +1523,7 @@ vector of behavioral profiles.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 MoveTree[n->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1544,7 +1548,7 @@ the second given node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NameOf[n->NODE] =: TEXT
 \end{verbatim}\normalsize
 
@@ -1566,7 +1570,7 @@ NameOf[n->NODE] =: TEXT
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NewEfg[{type->DATATYPE}] =: EFG
 \end{verbatim}\normalsize
 
@@ -1588,7 +1592,7 @@ form problem.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1631,7 +1635,7 @@ procedure returns a value of zero.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NthChild[n->NODE, child->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
@@ -1659,7 +1663,7 @@ node which is to be found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumChildren[n->NODE] := INTEGER
 \end{verbatim}\normalsize
 
@@ -1681,7 +1685,7 @@ NumChildren[n->NODE] := INTEGER
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1709,7 +1713,7 @@ of information sets are to be counted.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumNodes[E->EFG] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1724,7 +1728,7 @@ the specified problem in extensive form.
 
 \bd
 \item
-[ E:] The problem in extensive form in which the number of nodes are
+[E:] The problem in extensive form in which the number of nodes are
 to be counted.
 \ed
 
@@ -1733,9 +1737,11 @@ to be counted.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumOutcomes[E->EFG] =: INTEGER
-\end{verbatim}\normalsize
+\end{verbatim}
+
+\normalsize
 
 \bd
 \item
@@ -1744,11 +1750,11 @@ extensive form.
 \item
 [Return value:] Returns the number of outcomes found.
 \item
-[Required parameters:]\hfil\null	  
+[Required parameters:] \hfil\null	  
 
 \bd
 \item
-[ E:] The problem in extensive form in which the number of outcomes
+[E:] The problem in extensive form in which the number of outcomes
 is to be found.
 \ed
 
@@ -1757,7 +1763,7 @@ is to be found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumOutcomes[N->NFG] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1780,9 +1786,10 @@ to be found.
 [Optional parameters:] None.
 \ed
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumPlayers[E->EFG] =: INTEGER
-\end{verbatim}\normalsize
+\end{verbatim}
+\normalsize
 
 \bd
 \item
@@ -1804,7 +1811,7 @@ is to be found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 NumStrats[N->NFG, pl->INTEGER, {sset->INTEGER}] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1842,7 +1849,7 @@ strategy set is used.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 OutcomeOf[n->NODE] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1869,7 +1876,7 @@ a value of zero is returned.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 ParentOf[n->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1892,7 +1899,7 @@ node.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 PlayerOf[n->NODE] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -1916,9 +1923,9 @@ found.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-PureNash[N->NFG, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
-	 =: INTEGER
+\protect \large \begin{verbatim}
+PureNash[N->NFG, {num->INTEGER}, {time<->RATIONAL}, 
+	{output->TEXT}] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -1956,7 +1963,7 @@ output off.  By default, output is directed to the screen.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Quit
 \end{verbatim}\normalsize
 
@@ -1974,8 +1981,9 @@ Quit
 
 \item
 
-\protect \Large{\begin{verbatim}
-RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, {type->DATATYPE}] =: NFG
+\protect \large \begin{verbatim}
+RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, 
+{type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -2006,7 +2014,7 @@ form problem.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 ReadEfgFile[file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -2032,7 +2040,7 @@ message is returned.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
@@ -2067,7 +2075,7 @@ the default value is floating-point.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
 \end{verbatim}\normalsize
 
@@ -2098,7 +2106,7 @@ exists in the problem, no action is taken.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 RootNode[E->EFG, {game->INTEGER}] =: NODE
 \end{verbatim}\normalsize
 
@@ -2130,7 +2138,7 @@ If not given, the first game is used by default.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 Run[TEXT]
 \end{verbatim}\normalsize
 
@@ -2156,7 +2164,7 @@ valid filename.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
 \end{verbatim}\normalsize
 
@@ -2186,7 +2194,7 @@ which is to be assigned a name.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetActionProbs[n->NODE, probs->LIST(RATIONAL)] =: NODE
 \end{verbatim}\normalsize
 
@@ -2215,7 +2223,7 @@ which will be assigned to the actions at the indicated node.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetInfosetName[n->NODE, name->TEXT] =: NODE
 \end{verbatim}\normalsize
 
@@ -2242,7 +2250,7 @@ assigned a name.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetNodeName[n->NODE, name->TEXT] =: NODE
 \end{verbatim}\normalsize
 
@@ -2266,8 +2274,9 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
-SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
+\protect \large \begin{verbatim}
+SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] 
+=: EFG
 \end{verbatim}\normalsize
    
 \bd
@@ -2300,7 +2309,7 @@ match the number of players defined in the problem.
 
 \item
 
-\protect \Large{\begin{verbatim} 
+\protect \large \begin{verbatim} 
 SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
 \end{verbatim}\normalsize
 
@@ -2332,7 +2341,7 @@ given outcome for the specified player.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -2362,7 +2371,7 @@ assigned a title.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -2391,7 +2400,7 @@ assigned a name.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetStratName[N->NFG, pl->INTEGER, st->INTEGER, name->TEXT] =: NFG
 \end{verbatim}\normalsize
 
@@ -2423,7 +2432,7 @@ player to which the given name is to be assigned.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SetTitle[E->EFG, title->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -2449,7 +2458,7 @@ extensive form.
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 	{number->INTEGER}, {ndivs->INTEGER}, {leash->INTEGER}, 
 	{nevals->INTEGER}, {time<->RATIONAL}] =: INTEGER
@@ -2495,7 +2504,7 @@ output off.  By default, output is directed to the screen.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 StartWatch[] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -2511,7 +2520,7 @@ StartWatch[] =: INTEGER
 \ed
 
 \item
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 StopWatch[] =: INTEGER
 \end{verbatim}\normalsize
 
@@ -2528,7 +2537,7 @@ StopWatch[] =: INTEGER
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
@@ -2556,7 +2565,7 @@ to be written.
 
 \item
 
-\protect \Large{\begin{verbatim}
+\protect \large \begin{verbatim}
 WriteNfgFile[N->NFG, file->TEXT] =: NFG
 \end{verbatim}\normalsize
 
