@@ -846,10 +846,10 @@ case 47:
 #line 159 "readnfg.yy"
 { if (cont > ncont)  YYERROR;
                   if (last_number != gNumber(0)) {
-                    N->SetOutcome(cont++, N->GetOutcomeId(last_number)); 
+                    N->SetOutcomeIndex(cont++, N->GetOutcomeId(last_number)); 
                   }
                   else  {
-                    N->SetOutcome(cont++, 0);
+                    N->SetOutcomeIndex(cont++, 0);
                   }
                 ;
     break;}
