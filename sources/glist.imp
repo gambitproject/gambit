@@ -43,23 +43,6 @@ template <class T> class gNode   {
 //                 gNode<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> int gList<T>::InsertAt(const T &t, int num)
-{
-  gNode<T> *n = First();
-  if (n)  {
-    for (int i = 1; i < num - 1; i++)  n = n->Next();
-    gNode<T> *temp = new gNode<T>(t, n, n->Next());
-    n->SetNext(temp);
-//  n->Next()->SetPrev(temp);
-    length++;
-  }
-  else 	{
-    head = new gNode<T>(t, 0, 0);
-    length++;
-  }
-  return num;
-}
-
 template <class T> gNode<T>::gNode(void)
   : prev(0), next(0)
 { }
@@ -135,6 +118,23 @@ template <class T> void gNode<T>::SetPrev(gNode<T> *_prev)
 //--------------------------------------------------------------------------
 //                 gList<T>: Member function implementations
 //--------------------------------------------------------------------------
+
+template <class T> int gList<T>::InsertAt(const T &t, int num)
+{
+  gNode<T> *n = First();
+  if (n)  {
+    for (int i = 1; i < num - 1; i++)  n = n->Next();
+    gNode<T> *temp = new gNode<T>(t, n, n->Next());
+    n->SetNext(temp);
+//  n->Next()->SetPrev(temp);
+    length++;
+  }
+  else 	{
+    head = new gNode<T>(t, 0, 0);
+    length++;
+  }
+  return num;
+}
 
 template <class T> gList<T>::gList(int len) : head(0), length(0)
 {
@@ -228,7 +228,7 @@ template <class T> gList<T> gList<T>::operator+(const T &e) const
   return result;
 }
 
-template <class T. gList<T> &gList<T>::operator+=(const T &e)
+template <class T> gList<T> &gList<T>::operator+=(const T &e)
 {
   Append(e);
   return *this;
@@ -295,7 +295,7 @@ template <class T> int gList<T>::Length(void) const
   return length;
 }
 
-template <class T> gNode<T> *gList<T>::First(void) const
+template <class T> gNode<T> *const gList<T>::First(void) const
 {
   return head;
 }
