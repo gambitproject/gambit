@@ -132,13 +132,8 @@ public:
 
 template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M);
 
-
-#ifdef __BORLANDC__
-#include "gmatrix.imp"
-#endif   // __BORLANDC__
-
-
 #endif     // GMATRIX_H
+
 
 
 

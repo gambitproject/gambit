@@ -4,35 +4,25 @@
 //# $Id$
 //#
 
-#ifdef __GNUG__
-// this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
-// #pragma implementation "gmatrix.h"
-#elif defined(__BORLANDC__)
-#pragma option -Jgd
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
 #include "gvector.imp"
 #include "rational.h"
 
-
 #ifdef __GNUG__
-// explicitly instantiate classes and non-member functions
-template class gVector<int>;
-template class gVector<long>;
-template class gVector<double>;
-template class gVector<gInteger>;
-template class gVector<gRational>;
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
 
-template gOutput & operator<< (gOutput&, const gVector<int>&);
-template gOutput & operator<< (gOutput&, const gVector<long>&);
-template gOutput & operator<< (gOutput&, const gVector<double>&);
-template gOutput & operator<< (gOutput&, const gVector<gInteger>&);
-template gOutput & operator<< (gOutput&, const gVector<gRational>&);
-#elif defined(__BORLANDC__)
-// whatever
-#error Explicit instantiation needs to be done for Borland C++
-#else
-#error Unsupported compiler type.
-#endif
+
+TEMPLATE class gVector<int>;
+TEMPLATE class gVector<long>;
+TEMPLATE class gVector<double>;
+TEMPLATE class gVector<gInteger>;
+TEMPLATE class gVector<gRational>;
+
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<int>&);
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<long>&);
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<double>&);
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<gInteger>&);
+TEMPLATE gOutput & operator<< (gOutput&, const gVector<gRational>&);

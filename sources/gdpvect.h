@@ -52,8 +52,4 @@ template <class T> class gDPVector : public gPVector<T>  {
 
 template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
 
-#ifdef __BORLANDC__
-#include "gdpvect.imp"
-#endif   // __BORLANDC__
-
 #endif   // GDPVECTOR_H

@@ -69,9 +69,5 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
 };
 #endif   // UNUSED
 
-#ifdef __BORLANDC__
-#include "gnarray.imp"
-#endif   // __BORLANDC__
-
 #endif    // GNARRAY_H
 

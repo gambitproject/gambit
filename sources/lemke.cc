@@ -19,23 +19,6 @@
 
 LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
 { }
-/*
-//
-// Here is the LemkeSolution class.  To be used, it needs to have private
-// members added to store whatever information is interesting, beyond just
-// the mixed strategy profile
-//
-template <class T> class LemkeSolution : public MixedSolution<T>   {
-  public:
-    LemkeSolution(const MixedProfile<T> &mp) : MixedSolution<T>(mp)   { }
-    LemkeSolution(const LemkeSolution<T> &s) : MixedSolution<T>(s)   { }
-    virtual ~LemkeSolution()  { }
-
-    SolutionType Type(void) const   { return sLEMKE; }
-    void Output(gOutput &f) const
-      { f << "Lemke solution: " << p << '\n'; }
-};
-*/
 
 class BaseLemke    {
   protected:
@@ -396,6 +379,11 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
 #ifdef __GNUG__
 template class LemkeTableau<double>;
 template class LemkeTableau<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class LemkeTableau<double>;
+class LemkeTableau<gRational>;
+#pragma option -Jgx
 #endif   // __GNUG__
 
 int LemkeSolver::Lemke(void)

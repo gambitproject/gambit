@@ -146,10 +146,5 @@ template <class T> class gList  {
 //
 template <class T> gOutput &operator<<(gOutput &f, const gList<T> &b);
 
-#ifdef __BORLANDC__
-#include "glist.imp"
-#endif   // __BORLANDC__
-
-
 #endif    //# GLIST_H
 

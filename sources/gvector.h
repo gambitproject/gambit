@@ -101,10 +101,4 @@ public:
 template <class T>
 gOutput& operator<<(gOutput &to, const gVector<T> &);
 
-
-#ifdef __BORLANDC__
-#include "gvector.imp"
-#endif   // __BORLANDC__
-
-
 #endif   //# GVECTOR_H
