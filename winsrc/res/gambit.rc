@@ -1,0 +1,9 @@
+gambit_icn ICON gambit.ico
+efg_icn    ICON efg.ico
+nfg_icn    ICON nfg.ico
+
+SCISSORCUR	CURSOR	 bitmaps\scissor.cur
+OUTCOMECUR	CURSOR	 bitmaps\outcome.cur
+
+rcinclude wx.rc
+
