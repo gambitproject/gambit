@@ -207,35 +207,35 @@ bool GSM::Push(Portion* p)
 
 bool GSM::Push(const bool& data)
 {
-  _Push(new BoolValPortion(data));
+  _Push(new BoolPortion(data));
   return true;
 }
 
 
 bool GSM::Push(const long& data)
 {
-  _Push(new IntValPortion(data));
+  _Push(new IntPortion(data));
   return true;
 }
 
 
 bool GSM::Push(const double& data)
 {
-  _Push(new FloatValPortion(data));
+  _Push(new FloatPortion(data));
   return true;
 }
 
 
 bool GSM::Push(const gRational& data)
 {
-  _Push(new RationalValPortion(data));
+  _Push(new RationalPortion(data));
   return true;
 }
 
 
 bool GSM::Push(const gString& data)
 {
-  _Push(new TextValPortion(data));
+  _Push(new TextPortion(data));
   return true;
 }
 
@@ -1025,7 +1025,7 @@ bool GSM::Divide (void)
     if(p->Spec().Type==porINTEGER && ((IntPortion*) p2)->Value() != 0)
     {
       delete p;
-      p = new RationalValPortion(((IntPortion*) p1)->Value());
+      p = new RationalPortion(((IntPortion*) p1)->Value());
       ((RationalPortion*) p)->Value() /= ((IntPortion*) p2)->Value();
     }
     else if(p->Spec().Type==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
@@ -1160,7 +1160,7 @@ bool GSM::EqualTo (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("Equal"); }
   return result;
@@ -1185,7 +1185,7 @@ bool GSM::NotEqualTo (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("NotEqual"); }
   return result;
@@ -1219,7 +1219,7 @@ bool GSM::GreaterThan (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("Greater"); }
   return result;
@@ -1253,7 +1253,7 @@ bool GSM::LessThan (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("Less"); }
   return result;
@@ -1287,7 +1287,7 @@ bool GSM::GreaterThanOrEqualTo (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("GreaterEqual"); }
   return result;
@@ -1321,7 +1321,7 @@ bool GSM::LessThanOrEqualTo (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("LessEqual"); }
   return result;
@@ -1350,7 +1350,7 @@ bool GSM::AND (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("And"); }
   return result;
@@ -1378,7 +1378,7 @@ bool GSM::OR (void)
   }
 
   if(result)
-  { delete p2; delete p1; _Push(new BoolValPortion(b)); }
+  { delete p2; delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); _Push(p2); result = _BinaryOperation("Or"); }
   return result;
@@ -1403,7 +1403,7 @@ bool GSM::NOT (void)
   }
 
   if(result)
-  { delete p1; _Push(new BoolValPortion(b)); }
+  { delete p1; _Push(new BoolPortion(b)); }
   else
   { _Push(p1); result = _UnaryOperation("Not"); }
   return result;
@@ -1461,7 +1461,7 @@ bool GSM::Subscript (void)
     }
     else
     {
-      _Push(new TextValPortion(text[n-1]));
+      _Push(new TextPortion(text[n-1]));
       return true;
     }
   }
@@ -1817,20 +1817,20 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	break;
 
       case iPUSH_BOOL:
-	_Push(new BoolValPortion(instr->BoolVal));
+	_Push(new BoolPortion(instr->BoolVal));
 	instr_success = true;
 	break;
       case iPUSH_INTEGER:
-	_Push(new IntValPortion(instr->IntVal));
+	_Push(new IntPortion(instr->IntVal));
 	instr_success = true;
 	break;
       case iPUSH_FLOAT:
-	_Push(new FloatValPortion(instr->FloatVal));
+	_Push(new FloatPortion(instr->FloatVal));
 	instr_success = true;
 	break;
 
       case iPUSH_TEXT:
-	_Push(new TextValPortion(instr->TextVal));
+	_Push(new TextPortion(instr->TextVal));
 	instr_success = true;
 	break;
 
@@ -2283,7 +2283,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
     gList<gString> list = func->FuncList( udf, bif, getdesc );
     result = new ListValPortion();
     for(i=1; i<=list.Length(); i++)
-      ((ListPortion*) result)->Append(new TextValPortion(list[i]));
+      ((ListPortion*) result)->Append(new TextPortion(list[i]));
   }
   else
   {
@@ -2348,7 +2348,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
       gList<gString> list = func->FuncList( udf, bif, getdesc );
       result = new ListValPortion();
       for(i=1; i<=list.Length(); i++)
-	((ListPortion*) result)->Append(new TextValPortion(list[i]));
+	((ListPortion*) result)->Append(new TextPortion(list[i]));
     }
     else
     {
@@ -2356,7 +2356,7 @@ Portion* GSM::Help(gString funcname, bool udf, bool bif, bool getdesc)
       result = new ListValPortion();
       for(i=1; i<=funcslist.Length(); i++)
 	((ListPortion*) result)->
-	  Append(new TextValPortion(funcslist[i]->FuncName()));
+	  Append(new TextPortion(funcslist[i]->FuncName()));
     }
   }
 
@@ -2385,7 +2385,7 @@ Portion* GSM::HelpVars(gString varname)
   if(_RefTableStack->Peek()->IsDefined(varname))
   {
     result = new ListValPortion();
-    ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + 
+    ((ListPortion*) result)->Append(new TextPortion(varname + ":" + 
       PortionSpecToText((*(_RefTableStack->Peek()))(varname)->Spec())));
   }
   else
@@ -2445,7 +2445,7 @@ Portion* GSM::HelpVars(gString varname)
     sorter.Sort();
     result = new ListValPortion();
     for(i=1; i<=varslist.Length(); i++)
-      ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + 
+      ((ListPortion*) result)->Append(new TextPortion(varslist[i] + ":" + 
 	PortionSpecToText((*(_RefTableStack->Peek()))(varslist[i])->Spec())));
   }
 

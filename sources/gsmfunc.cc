@@ -1310,23 +1310,23 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	      switch(_FuncInfo[_FuncIndex].ParamInfo[index].Spec.Type)
 	      {
 	      case porBOOL:
-		_Param[index] = new BoolValPortion(false);
+		_Param[index] = new BoolPortion(false);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porINTEGER:
-		_Param[index] = new IntValPortion(0);
+		_Param[index] = new IntPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porFLOAT:
-		_Param[index] = new FloatValPortion(0);
+		_Param[index] = new FloatPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porRATIONAL:
-		_Param[index] = new RationalValPortion(0);
+		_Param[index] = new RationalPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porTEXT:
-		_Param[index] = new TextValPortion("");
+		_Param[index] = new TextPortion("");
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      default:

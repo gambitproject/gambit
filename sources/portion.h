@@ -173,9 +173,11 @@ class IntPortion : public Portion
 {
 protected:
   long* _Value;
-  IntPortion(void);
+  bool _ref;
 
 public:
+  IntPortion(long);
+  IntPortion(long &, bool);
   virtual ~IntPortion();
 
   long& Value(void) const;
@@ -186,21 +188,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class IntValPortion : public IntPortion
-{
-public:
-  IntValPortion(long value);
-  virtual ~IntValPortion();
-  bool IsReference(void) const;
-};
-
-class IntRefPortion : public IntPortion
-{
-public:
-  IntRefPortion(long& value);
-  virtual ~IntRefPortion();
   bool IsReference(void) const;
 };
 
@@ -213,9 +201,12 @@ class FloatPortion : public Portion
 {
 protected:
   double* _Value;
-  FloatPortion(void);
+  bool _ref;
+
+  FloatPortion(double &, bool);
 
 public:
+  FloatPortion(double);
   virtual ~FloatPortion();
 
   double& Value(void) const;
@@ -226,24 +217,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class FloatValPortion : public FloatPortion
-{
-public:
-  FloatValPortion(double value);
-  virtual ~FloatValPortion();
   bool IsReference(void) const;
 };
-
-class FloatRefPortion : public FloatPortion
-{
-public:
-  FloatRefPortion(double& value);
-  virtual ~FloatRefPortion();
-  bool IsReference(void) const;
-};
-
 
 
 //---------------------------------------------------------------------
@@ -254,9 +230,12 @@ class RationalPortion : public Portion
 {
 protected:
   gRational* _Value;
-  RationalPortion(void);
+  bool _ref;
+
+  RationalPortion(gRational &, bool);
 
 public:
+  RationalPortion(const gRational &);
   virtual ~RationalPortion();
 
   gRational& Value(void) const;
@@ -267,26 +246,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class RationalValPortion : public RationalPortion
-{
-public:
-  RationalValPortion(gRational value);
-  virtual ~RationalValPortion();
   bool IsReference(void) const;
 };
-
-class RationalRefPortion : public RationalPortion
-{
-public:
-  RationalRefPortion(gRational& value);
-  virtual ~RationalRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
 
 
 //---------------------------------------------------------------------
@@ -297,9 +259,11 @@ class TextPortion : public Portion
 {
 protected:
   gString* _Value;
-  TextPortion(void);
+  bool _ref;
 
 public:
+  TextPortion(const gString &);
+  TextPortion(gString &, bool);
   virtual ~TextPortion();
 
   gString& Value(void) const;
@@ -310,24 +274,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class TextValPortion : public TextPortion
-{
-public:
-  TextValPortion(gString value);
-  virtual ~TextValPortion();
   bool IsReference(void) const;
 };
-
-class TextRefPortion : public TextPortion
-{
-public:
-  TextRefPortion(gString& value);
-  virtual ~TextRefPortion();
-  bool IsReference(void) const;
-};
-
 
 
 //---------------------------------------------------------------------
@@ -338,9 +287,12 @@ class BoolPortion : public Portion
 {
 protected:
   bool* _Value;
-  BoolPortion(void);
+  bool _ref;
+
 
 public:
+  BoolPortion(bool);
+  BoolPortion(bool &, bool);
   virtual ~BoolPortion();
 
   bool& Value(void) const;
@@ -351,36 +303,13 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class BoolValPortion : public BoolPortion
-{
-public:
-  BoolValPortion(bool value);
-  virtual ~BoolValPortion();
   bool IsReference(void) const;
 };
-
-class BoolRefPortion : public BoolPortion
-{
-public:
-  BoolRefPortion(bool& value);
-  virtual ~BoolRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
-
-
-
-
-
-
 
 
 //---------------------------------------------------------------------
-//                          Outcome class
+//                          EFOutcome class
 //---------------------------------------------------------------------
 
 class EFOutcome;
@@ -389,36 +318,25 @@ class EfOutcomePortion : public Portion
 {
 protected:
   EFOutcome** _Value;
-  EfOutcomePortion(void);
+  bool _ref;
+
+  EfOutcomePortion(EFOutcome *&, bool);
 
 public:
+  EfOutcomePortion(EFOutcome *);
   virtual ~EfOutcomePortion();
 
   EFOutcome *Value(void) const;
   void SetValue(EFOutcome *);
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class EfOutcomeValPortion : public EfOutcomePortion
-{
-public:
-  EfOutcomeValPortion(EFOutcome* value);
-  virtual ~EfOutcomeValPortion();
-  bool IsReference(void) const;
-};
-
-class EfOutcomeRefPortion : public EfOutcomePortion
-{
-public:
-  EfOutcomeRefPortion(EFOutcome*& value);
-  virtual ~EfOutcomeRefPortion();
   bool IsReference(void) const;
 };
 
@@ -433,9 +351,12 @@ class NfPlayerPortion : public Portion
 {
 protected:
   NFPlayer** _Value;
-  NfPlayerPortion(void);
+  bool _ref;
+
+  NfPlayerPortion(NFPlayer *&, bool);
 
 public:
+  NfPlayerPortion(NFPlayer *); 
   virtual ~NfPlayerPortion();
 
   NFPlayer *Value(void) const;
@@ -447,28 +368,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class NfPlayerValPortion : public NfPlayerPortion
-{
-public:
-  NfPlayerValPortion(NFPlayer* value);
-  virtual ~NfPlayerValPortion();
   bool IsReference(void) const;
 };
-
-class NfPlayerRefPortion : public NfPlayerPortion
-{
-public:
-  NfPlayerRefPortion(NFPlayer*& value);
-  virtual ~NfPlayerRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
-
-
 
 //---------------------------------------------------------------------
 //                          Strategy class
@@ -480,9 +382,12 @@ class StrategyPortion : public Portion
 {
 protected:
   Strategy** _Value;
-  StrategyPortion(void);
+  bool _ref;
+
+  StrategyPortion(Strategy *&, bool);
 
 public:
+  StrategyPortion(Strategy *);
   virtual ~StrategyPortion();
 
   Strategy *Value(void) const;
@@ -494,24 +399,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class StrategyValPortion : public StrategyPortion
-{
-public:
-  StrategyValPortion(Strategy* value);
-  virtual ~StrategyValPortion();
   bool IsReference(void) const;
 };
-
-class StrategyRefPortion : public StrategyPortion
-{
-public:
-  StrategyRefPortion(Strategy*& value);
-  virtual ~StrategyRefPortion();
-  bool IsReference(void) const;
-};
-
 
 
 //---------------------------------------------------------------------
@@ -524,9 +414,12 @@ class NfOutcomePortion : public Portion
 {
 protected:
   NFOutcome** _Value;
-  NfOutcomePortion(void);
+  bool _ref;
+
+  NfOutcomePortion(NFOutcome *&, bool);
 
 public:
+  NfOutcomePortion(NFOutcome *); 
   virtual ~NfOutcomePortion();
 
   NFOutcome *Value(void) const;
@@ -538,21 +431,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class NfOutcomeValPortion : public NfOutcomePortion
-{
-public:
-  NfOutcomeValPortion(NFOutcome* value);
-  virtual ~NfOutcomeValPortion();
-  bool IsReference(void) const;
-};
-
-class NfOutcomeRefPortion : public NfOutcomePortion
-{
-public:
-  NfOutcomeRefPortion(NFOutcome*& value);
-  virtual ~NfOutcomeRefPortion();
   bool IsReference(void) const;
 };
 
@@ -568,11 +447,13 @@ class NFPayoffs;
 class NfSupportPortion : public Portion   {
 protected:
   NFSupport** _Value;
+  bool _ref;
   NFPayoffs *paytable;
 
-  NfSupportPortion(void);
+  NfSupportPortion(NFSupport *&, NFPayoffs *, bool);
 
 public:
+  NfSupportPortion(NFSupport *, NFPayoffs *);
   virtual ~NfSupportPortion();
 
   NFSupport *Value(void) const;
@@ -587,21 +468,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class NfSupportValPortion : public NfSupportPortion
-{
-public:
-  NfSupportValPortion(NFSupport* value, NFPayoffs *pay);
-  virtual ~NfSupportValPortion();
-  bool IsReference(void) const;
-};
-
-class NfSupportRefPortion : public NfSupportPortion
-{
-public:
-  NfSupportRefPortion(NFSupport*& value, NFPayoffs *pay);
-  virtual ~NfSupportRefPortion();
   bool IsReference(void) const;
 };
 
@@ -617,9 +484,12 @@ class EfSupportPortion : public Portion
 {
 protected:
   EFSupport** _Value;
-  EfSupportPortion(void);
+  bool _ref;
+
+  EfSupportPortion(EFSupport *&, bool);
 
 public:
+  EfSupportPortion(EFSupport *);
   virtual ~EfSupportPortion();
 
   EFSupport *Value(void) const;
@@ -632,21 +502,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class EfSupportValPortion : public EfSupportPortion
-{
-public:
-  EfSupportValPortion(EFSupport* value);
-  virtual ~EfSupportValPortion();
-  bool IsReference(void) const;
-};
-
-class EfSupportRefPortion : public EfSupportPortion
-{
-public:
-  EfSupportRefPortion(EFSupport*& value);
-  virtual ~EfSupportRefPortion();
   bool IsReference(void) const;
 };
 
@@ -662,9 +518,12 @@ class EfPlayerPortion : public Portion
 {
 protected:
   EFPlayer** _Value;
-  EfPlayerPortion(void);
+  bool _ref;
+
+  EfPlayerPortion(EFPlayer *&, bool);
 
 public:
+  EfPlayerPortion(EFPlayer *);
   virtual ~EfPlayerPortion();
 
   EFPlayer *Value(void) const;
@@ -676,25 +535,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class EfPlayerValPortion : public EfPlayerPortion
-{
-public:
-  EfPlayerValPortion(EFPlayer* value);
-  virtual ~EfPlayerValPortion();
   bool IsReference(void) const;
 };
-
-class EfPlayerRefPortion : public EfPlayerPortion
-{
-public:
-  EfPlayerRefPortion(EFPlayer*& value);
-  virtual ~EfPlayerRefPortion();
-  bool IsReference(void) const;
-};
-
-
 
 
 //---------------------------------------------------------------------
@@ -707,9 +550,12 @@ class InfosetPortion : public Portion
 {
 protected:
   Infoset** _Value;
-  InfosetPortion(void);
+  bool _ref;
+
+  InfosetPortion(Infoset *&, bool);
 
 public:
+  InfosetPortion(Infoset *);
   virtual ~InfosetPortion();
 
   Infoset *Value(void) const;
@@ -722,21 +568,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class InfosetValPortion : public InfosetPortion
-{
-public:
-  InfosetValPortion(Infoset* value);
-  virtual ~InfosetValPortion();
-  bool IsReference(void) const;
-};
-
-class InfosetRefPortion : public InfosetPortion
-{
-public:
-  InfosetRefPortion(Infoset*& value);
-  virtual ~InfosetRefPortion();
   bool IsReference(void) const;
 };
 
@@ -752,9 +584,12 @@ class NodePortion : public Portion
 {
 protected:
   Node** _Value;
-  NodePortion(void);
+  bool _ref;  
+
+  NodePortion(Node *&, bool);
 
 public:
+  NodePortion(Node *);
   virtual ~NodePortion();
 
   Node *Value(void) const;
@@ -766,21 +601,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class NodeValPortion : public NodePortion
-{
-public:
-  NodeValPortion(Node* value);
-  virtual ~NodeValPortion();
-  bool IsReference(void) const;
-};
-
-class NodeRefPortion : public NodePortion
-{
-public:
-  NodeRefPortion(Node*& value);
-  virtual ~NodeRefPortion();
   bool IsReference(void) const;
 };
 
@@ -796,9 +617,12 @@ class ActionPortion : public Portion
 {
 protected:
   Action** _Value;
-  ActionPortion(void);
+  bool _ref;
+
+  ActionPortion(Action *&, bool); 
 
 public:
+  ActionPortion(Action *);
   virtual ~ActionPortion();
 
   Action *Value(void) const;
@@ -810,27 +634,9 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-class ActionValPortion : public ActionPortion
-{
-public:
-  ActionValPortion(Action* value);
-  virtual ~ActionValPortion();
   bool IsReference(void) const;
 };
-
-class ActionRefPortion : public ActionPortion
-{
-public:
-  ActionRefPortion(Action*& value);
-  virtual ~ActionRefPortion();
-  bool IsReference(void) const;
-};
-
-
-
-
 
 //---------------------------------------------------------------------
 //                          new Mixed class

@@ -77,7 +77,7 @@ static Portion *GSM_DeleteOutcome_Nfg(Portion **param)
 
   outc->BelongsTo()->DeleteOutcome(outc);
 
-  return new BoolValPortion(true);
+  return new BoolPortion(true);
 }
 
 
@@ -118,8 +118,8 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
       T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
-    por = (T) ? new NfSupportValPortion(T, N) :
-                new NfSupportValPortion(new NFSupport(*S), N);
+    por = (T) ? new NfSupportPortion(T, N) :
+                new NfSupportPortion(new NFSupport(*S), N);
   }
   else  {
     Nfg<gRational> *N = (Nfg<gRational> *) ((NfSupportPortion *) param[0])->PayoffTable();
@@ -130,8 +130,8 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
       T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
-    por = (T) ? new NfSupportValPortion(T, N) :
-                new NfSupportValPortion(new NFSupport(*S), N);
+    por = (T) ? new NfSupportPortion(T, N) :
+                new NfSupportPortion(new NFSupport(*S), N);
   }
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
@@ -190,11 +190,11 @@ static Portion *GSM_IsConstSum_Nfg(Portion **param)
 {
   if (param[0]->Spec().Type == porNFG_FLOAT)   {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    return new BoolValPortion(IsConstSum(N));
+    return new BoolPortion(IsConstSum(N));
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    return new BoolValPortion(IsConstSum(N));
+    return new BoolPortion(IsConstSum(N));
   }
 }
 
@@ -235,22 +235,22 @@ static Portion* GSM_Name_Nfg_Elements( Portion** param )
 {
   if( param[0]->Spec().Type == porNULL )
   {
-    return new TextValPortion( "" );
+    return new TextPortion( "" );
   }
 
   switch( param[0]->Spec().Type )
   {
   case porNFG_FLOAT:
-    return new TextValPortion(((NfgPortion<double>*) param[0])->Value()->GameForm().GetTitle());
+    return new TextPortion(((NfgPortion<double>*) param[0])->Value()->GameForm().GetTitle());
   case porNFG_RATIONAL:
-    return new TextValPortion(((NfgPortion<gRational>*) param[0])->Value()->GameForm().GetTitle());
+    return new TextPortion(((NfgPortion<gRational>*) param[0])->Value()->GameForm().GetTitle());
     break;
   case porNFPLAYER:
-    return new TextValPortion(((NfPlayerPortion*) param[0])->Value()->
+    return new TextPortion(((NfPlayerPortion*) param[0])->Value()->
 			      GetName());
     break;
   case porSTRATEGY:
-    return new TextValPortion(((StrategyPortion*) param[0])->Value()->name);
+    return new TextPortion(((StrategyPortion*) param[0])->Value()->name);
     break;
   default:
     assert( 0 );
@@ -395,13 +395,13 @@ Portion* GSM_NewNfg_Rational(Portion** param)
 
 static Portion *GSM_NewOutcome_Nfg_Float(Portion **param)
 {
-  Portion *por = new NfOutcomeValPortion(((NfgPortion<double> *) param[0])->Value()->GameForm().NewOutcome());
+  Portion *por = new NfOutcomePortion(((NfgPortion<double> *) param[0])->Value()->GameForm().NewOutcome());
   return por;
 }
 
 static Portion *GSM_NewOutcome_Nfg_Rational(Portion **param)
 {
-  Portion *por = new NfOutcomeValPortion(((NfgPortion<gRational> *) param[0])->Value()->GameForm().NewOutcome());
+  Portion *por = new NfOutcomePortion(((NfgPortion<gRational> *) param[0])->Value()->GameForm().NewOutcome());
   return por;
 }
 
@@ -459,9 +459,9 @@ Portion* GSM_ListForm_Nfg(Portion** param, bool rational)
     // now we have the list; call SetPayoff() for each player
     for(pl=1; pl<=players; pl++)
       if(!rational)
-	list->Append(new FloatValPortion(((Nfg<double> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
+	list->Append(new FloatPortion(((Nfg<double> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
       else
-	list->Append(new RationalValPortion(((Nfg<gRational> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
+	list->Append(new RationalPortion(((Nfg<gRational> *) nfg)->Payoff(nfg->GetOutcome(d), pl)));
 
     // gout << "Payoff[n, " << d << "] = " << list << '\n';
     
@@ -510,7 +510,7 @@ static Portion* GSM_Outcome_Nfg(Portion** param)
     profile.Set(i, strat);
   }
   
-  Portion *por = new NfOutcomeValPortion(nfg.GetOutcome(profile));
+  Portion *por = new NfOutcomePortion(nfg.GetOutcome(profile));
   return por;
 }
 
@@ -544,7 +544,7 @@ static Portion* GSM_Payoff_NFOutcome_Float(Portion** param)
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
   
-  return new FloatValPortion(nfg->Payoff(outcome, player->GetNumber()));
+  return new FloatPortion(nfg->Payoff(outcome, player->GetNumber()));
 }
 
 static Portion* GSM_Payoff_NFOutcome_Rational(Portion** param)
@@ -553,7 +553,7 @@ static Portion* GSM_Payoff_NFOutcome_Rational(Portion** param)
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
   
-  return new RationalValPortion(nfg->Payoff(outcome, player->GetNumber()));
+  return new RationalPortion(nfg->Payoff(outcome, player->GetNumber()));
 }
 
 
@@ -568,7 +568,7 @@ static Portion *GSM_Player(Portion **param)
 
   Strategy *s = ((StrategyPortion *) param[0])->Value();
 
-  Portion* por = new NfPlayerValPortion(s->nfp);
+  Portion* por = new NfPlayerPortion(s->nfp);
   return por;
 }
 
@@ -815,12 +815,12 @@ static Portion *GSM_Support_Nfg(Portion **param)
 {
   if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
+    Portion *por = new NfSupportPortion(new NFSupport(N.GameForm()), &N);
     return por;
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
+    Portion *por = new NfSupportPortion(new NFSupport(N.GameForm()), &N);
     return por;
   }
 
@@ -857,16 +857,16 @@ void Init_nfgfunc(GSM *gsm)
 				       porNFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
+					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("mixed", porBOOL,
-					    new BoolValPortion(false)));
+					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
+					    new FloatPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputRefPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
+					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Float", 1);
@@ -904,7 +904,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
-					    new BoolValPortion(false)));
+					    new BoolPortion(false)));
 
   /* commented out for now; don't forget to change
      the # of functions back if these are reenabled!

@@ -14,7 +14,7 @@ Portion *ArrayToList(const gArray<int> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new IntValPortion(A[i]));
+    ret->Append(new IntPortion(A[i]));
   return ret;
 }
 
@@ -22,7 +22,7 @@ Portion *ArrayToList(const gArray<double> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new FloatValPortion(A[i]));
+    ret->Append(new FloatPortion(A[i]));
   return ret;
 }
 
@@ -30,7 +30,7 @@ Portion *ArrayToList(const gArray<gRational> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new RationalValPortion(A[i]));
+    ret->Append(new RationalPortion(A[i]));
   return ret;
 }
 
@@ -38,7 +38,7 @@ Portion *ArrayToList(const gArray<Action *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new ActionValPortion(A[i]));
+    ret->Append(new ActionPortion(A[i]));
   return ret;
 }
 
@@ -46,7 +46,7 @@ Portion *ArrayToList(const gArray<EFPlayer *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new EfPlayerValPortion(A[i]));
+    ret->Append(new EfPlayerPortion(A[i]));
   return ret;
 }
 
@@ -54,7 +54,7 @@ Portion *ArrayToList(const gArray<Infoset *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new InfosetValPortion(A[i]));
+    ret->Append(new InfosetPortion(A[i]));
   return ret;
 }
 
@@ -62,7 +62,7 @@ Portion *ArrayToList(const gArray<EFOutcome *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new EfOutcomeValPortion(A[i]));
+    ret->Append(new EfOutcomePortion(A[i]));
   return ret;
 }
 
@@ -70,7 +70,7 @@ Portion *ArrayToList(const gArray<Node *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NodeValPortion(A[i]));
+    ret->Append(new NodePortion(A[i]));
   return ret;
 }
 
@@ -78,7 +78,7 @@ Portion *ArrayToList(const gArray<NFPlayer *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NfPlayerValPortion(A[i]));
+    ret->Append(new NfPlayerPortion(A[i]));
   return ret;
 }
 
@@ -86,7 +86,7 @@ Portion *ArrayToList(const gArray<NFOutcome *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NfOutcomeValPortion(A[i]));
+    ret->Append(new NfOutcomePortion(A[i]));
   return ret;
 }
 
@@ -94,7 +94,7 @@ Portion *ArrayToList(const gArray<Strategy *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new StrategyValPortion(A[i]));
+    ret->Append(new StrategyPortion(A[i]));
   return ret;
 }
 
@@ -102,7 +102,7 @@ Portion *ArrayToList(const gList<Node *> &A)
 {
   ListPortion *ret = new ListValPortion;
   for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NodeValPortion(A[i]));
+    ret->Append(new NodePortion(A[i]));
   return ret;
 }
 
@@ -118,7 +118,7 @@ Portion *gDPVectorToList(const gDPVector<double> &A)
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
       s2 = new ListValPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
-	s2->Append(new FloatValPortion(A(i, j, k)));
+	s2->Append(new FloatPortion(A(i, j, k)));
       l++;
       s1->Append(s2);
     }
@@ -139,7 +139,7 @@ Portion* gDPVectorToList(const gDPVector<gRational> &A)
     for (int j = 1; j <= A.DPLengths()[i]; j++)  {
       s2 = new ListValPortion();
       for (int k = 1; k <= A.Lengths()[l]; k++)
-	s2->Append(new RationalValPortion(A(i, j, k)));
+	s2->Append(new RationalPortion(A(i, j, k)));
       l++;
       s1->Append(s2);
     }

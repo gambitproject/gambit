@@ -1,8 +1,8 @@
-//#
-//# FILE: listfunc.cc -- List and text oriented function implementations
-//#
-//# $Id$
-//#
+//
+// FILE: listfunc.cc -- List and text oriented function implementations
+//
+// $Id$
+//
 
 #include <assert.h>
 
@@ -32,7 +32,7 @@ Portion* GSM_Index( Portion** param )
   for( i = 1; i <= list.Length(); i++ )
   {
     if( PortionEqual( list[i], param[1], type_found ) ) 
-      result->Append( new IntValPortion( i ) );
+      result->Append( new IntPortion( i ) );
   }
   return result;
 }
@@ -325,22 +325,22 @@ Portion *GSM_Remove(Portion **param)
 
 Portion *GSM_Contains(Portion **param)
 {
-  return new BoolValPortion(((ListPortion *) param[0])->Contains(param[1]));
+  return new BoolPortion(((ListPortion *) param[0])->Contains(param[1]));
 }
 
 Portion *GSM_NumElements(Portion **param)
 {
-  return new IntValPortion(((ListPortion *) param[0])->Length());
+  return new IntPortion(((ListPortion *) param[0])->Length());
 }
 
 Portion *GSM_LengthList(Portion **param)
 {
-  return new IntValPortion(((ListPortion *) param[0])->Length());
+  return new IntPortion(((ListPortion *) param[0])->Length());
 }
 
 Portion *GSM_LengthText(Portion **param)
 {
-  return new IntValPortion(((TextPortion *) param[0])->Value().length());
+  return new IntPortion(((TextPortion *) param[0])->Value().length());
 }
 
 Portion *GSM_NthChar(Portion **param)
@@ -349,7 +349,7 @@ Portion *GSM_NthChar(Portion **param)
   int n = ((IntPortion *) param[1])->Value();
   if (n <= 0 || n > text.length())
     return 0;
-  return new TextValPortion(text[n-1]);
+  return new TextPortion(text[n-1]);
 }
 
 
@@ -357,17 +357,17 @@ Portion *GSM_NthChar(Portion **param)
 
 Portion *GSM_TextInt(Portion **param)
 {
-  return new TextValPortion(ToString(((IntPortion *) param[0])->Value()));
+  return new TextPortion(ToString(((IntPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextFloat(Portion **param)
 {
-  return new TextValPortion(ToString(((FloatPortion *) param[0])->Value()));
+  return new TextPortion(ToString(((FloatPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextRat(Portion **param)
 {
-  return new TextValPortion(ToString(((RationalPortion *) param[0])->Value()));
+  return new TextPortion(ToString(((RationalPortion *) param[0])->Value()));
 }
 
 Portion *GSM_TextText(Portion **param)
@@ -380,7 +380,7 @@ Portion *GSM_TextText(Portion **param)
 
 Portion *GSM_IntegerRational(Portion **param)
 {
-  return new IntValPortion((long) ((RationalPortion *) param[0])->Value());
+  return new IntPortion((long) ((RationalPortion *) param[0])->Value());
 }
 
 Portion *GSM_IntegerInteger(Portion **param)
@@ -390,7 +390,7 @@ Portion *GSM_IntegerInteger(Portion **param)
 
 Portion *GSM_IntegerFloat(Portion **param)
 {
-  return new IntValPortion((long) ((FloatPortion *) param[0])->Value());
+  return new IntPortion((long) ((FloatPortion *) param[0])->Value());
 }
 
 
@@ -398,12 +398,12 @@ Portion *GSM_IntegerFloat(Portion **param)
 
 Portion *GSM_FloatRational(Portion **param)
 {
-  return new FloatValPortion((double) ((RationalPortion *) param[0])->Value());
+  return new FloatPortion((double) ((RationalPortion *) param[0])->Value());
 }
 
 Portion *GSM_FloatInteger(Portion **param)
 {
-  return new FloatValPortion((double) ((IntPortion *) param[0])->Value());
+  return new FloatPortion((double) ((IntPortion *) param[0])->Value());
 }
 
 Portion *GSM_FloatFloat(Portion **param)
@@ -415,12 +415,12 @@ Portion *GSM_FloatFloat(Portion **param)
 
 Portion *GSM_RationalFloat(Portion **param)
 {
-  return new RationalValPortion(((FloatPortion *) param[0])->Value());
+  return new RationalPortion(((FloatPortion *) param[0])->Value());
 }
 
 Portion *GSM_RationalInteger(Portion **param)
 {
-  return new RationalValPortion(((IntPortion *) param[0])->Value());
+  return new RationalPortion(((IntPortion *) param[0])->Value());
 }
 
 Portion *GSM_RationalRational(Portion **param)
@@ -439,23 +439,23 @@ gWatch _gcl_watch(0);
 Portion *GSM_StartWatch(Portion **)
 {
   _gcl_watch.Start();
-  return new FloatValPortion(0.0);
+  return new FloatPortion(0.0);
 }
 
 Portion *GSM_StopWatch(Portion **)
 {
   _gcl_watch.Stop();
-  return new FloatValPortion(_gcl_watch.Elapsed());
+  return new FloatPortion(_gcl_watch.Elapsed());
 }
 
 Portion *GSM_ElapsedTime(Portion **)
 {
-  return new FloatValPortion(_gcl_watch.Elapsed());
+  return new FloatPortion(_gcl_watch.Elapsed());
 }
 
 Portion *GSM_IsWatchRunning(Portion **)
 {
-  return new BoolValPortion(_gcl_watch.IsRunning());
+  return new BoolPortion(_gcl_watch.IsRunning());
 }
 
 //--------------------------- List ------------------------------
@@ -504,7 +504,7 @@ Portion* GSM_List_Integer( Portion** param )
   p = new ListValPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-    p->Append( new IntValPortion( ((IntPortion*) param[0])->Value()+ 
+    p->Append( new IntPortion( ((IntPortion*) param[0])->Value()+ 
 				 (i-1)*((IntPortion*) param[2])->Value() ));
   return p;
 }
@@ -520,7 +520,7 @@ Portion* GSM_List_Float( Portion** param )
   p = new ListValPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-    p->Append( new FloatValPortion( ((FloatPortion*) param[0])->Value()+ 
+    p->Append( new FloatPortion( ((FloatPortion*) param[0])->Value()+ 
 				   (i-1)*((FloatPortion*) param[2])->Value()));
   return p;
 }
@@ -536,7 +536,7 @@ Portion* GSM_List_Rational( Portion** param )
   p = new ListValPortion();
   p->SetDataType( param[0]->Spec().Type );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
-    p->Append( new RationalValPortion( ((RationalPortion*) param[0])->Value()+ 
+    p->Append( new RationalPortion( ((RationalPortion*) param[0])->Value()+ 
 				      (gRational)(i-1)*
 				      ((RationalPortion*) param[2])->Value()));
   return p;
@@ -640,7 +640,7 @@ Portion* GSM_Dot_Integer(Portion **param)
   if( p != 0 )
     return p;
 
-  p = new IntValPortion( (long) 0 );
+  p = new IntPortion( (long) 0 );
   for( i = 1; i <= p1->Length(); i++ )
   {
     ((IntPortion*) p)->Value() += 
@@ -661,7 +661,7 @@ Portion* GSM_Dot_Float(Portion **param)
   if( p != 0 )
     return p;
 
-  p = new FloatValPortion( (double) 0 );
+  p = new FloatPortion( (double) 0 );
   for( i = 1; i <= p1->Length(); i++ )
   {
     ((FloatPortion*) p)->Value() += 
@@ -682,7 +682,7 @@ Portion* GSM_Dot_Rational(Portion **param)
   if( p != 0 )
     return p;
 
-  p = new RationalValPortion( (gRational) 0 );
+  p = new RationalPortion( (gRational) 0 );
   for( i = 1; i <= p1->Length(); i++ )
   {
     ((RationalPortion*) p)->Value() += 
@@ -717,7 +717,7 @@ Portion* GSM_ArgMax_Integer( Portion** param )
     else
       return new ErrorPortion( "Bad dimensionality" );
   }
-  return new IntValPortion( index );
+  return new IntPortion( index );
 }
 
 Portion* GSM_ArgMax_Float( Portion** param )
@@ -742,7 +742,7 @@ Portion* GSM_ArgMax_Float( Portion** param )
     else
       return new ErrorPortion( "Bad dimensionality" );
   }
-  return new IntValPortion( index );
+  return new IntPortion( index );
 }
 
 Portion* GSM_ArgMax_Rational( Portion** param )
@@ -767,7 +767,7 @@ Portion* GSM_ArgMax_Rational( Portion** param )
     else
       return new ErrorPortion( "Bad dimensionality" );
   }
-  return new IntValPortion( index );
+  return new IntPortion( index );
 }
 
 
@@ -976,55 +976,55 @@ void Init_listfunc(GSM *gsm)
 					      porRATIONAL | 
 					      porNFG | porEFG )));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_List_List, 
 				       PortionSpec(porANYTYPE, 2), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_List_Integer, 
 				       PortionSpec(porINTEGER, 1), 
 				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porINTEGER));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("delta", porINTEGER, 
-					    new IntValPortion(0)));
+					    new IntPortion(0)));
 
   FuncObj->SetFuncInfo(3, FuncInfoType(GSM_List_Float, 
 				       PortionSpec(porFLOAT, 1), 
 				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porFLOAT));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
   FuncObj->SetParamInfo(3, 2, ParamInfoType("delta", porFLOAT, 
-					    new FloatValPortion(0)));
+					    new FloatPortion(0)));
 
   FuncObj->SetFuncInfo(4, FuncInfoType(GSM_List_Rational, 
 				       PortionSpec(porRATIONAL, 1), 
 				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porRATIONAL));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
   FuncObj->SetParamInfo(4, 2, ParamInfoType("delta", porRATIONAL, 
-					    new RationalValPortion(0)));
+					    new RationalPortion(0)));
 
   FuncObj->SetFuncInfo(5, FuncInfoType(GSM_List_Nfg, 
 				       PortionSpec(porNFG, 1), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porNFG));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
 
   FuncObj->SetFuncInfo(6, FuncInfoType(GSM_List_Efg, 
 				       PortionSpec(porEFG, 1), 
 				       2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(6, 0, ParamInfoType("x", porEFG));
   FuncObj->SetParamInfo(6, 1, ParamInfoType("length", porINTEGER, 
-					    new IntValPortion(1)));
+					    new IntPortion(1)));
 
   gsm->AddFunction(FuncObj);
 
@@ -1113,7 +1113,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
                               PortionSpec(porANYTYPE, NLIST, porNULLSPEC )));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("levels", porINTEGER,
-					    new IntValPortion(0)));
+					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
 }
