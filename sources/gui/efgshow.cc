@@ -10,7 +10,6 @@
 #endif  // WX_PRECOMP
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
-#include "wx/colordlg.h"
 #include "wx/printdlg.h"
 #include "wx/wizard.h"
 #include "wxmisc.h"
@@ -166,7 +165,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPREFS_FONTS_BELOWBRANCH, EfgShow::OnPrefsFontsBelowBranch)
   EVT_MENU(efgmenuPREFS_DISPLAY_LAYOUT, EfgShow::OnPrefsDisplayLayout)
   EVT_MENU(efgmenuPREFS_DISPLAY_DECIMALS, EfgShow::OnPrefsDisplayDecimals)
-  EVT_MENU(efgmenuPREFS_COLORS, EfgShow::OnPrefsColors)
   EVT_MENU(efgmenuPREFS_SAVE, EfgShow::OnPrefsSave)
   EVT_MENU(efgmenuPREFS_LOAD, EfgShow::OnPrefsLoad)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
@@ -731,8 +729,6 @@ void EfgShow::MakeMenus(void)
   prefsMenu->Append(efgmenuPREFS_FONTS, "&Fonts", prefsFontsMenu,
 		     "Set display fonts");
 
-  prefsMenu->Append(efgmenuPREFS_COLORS, "&Colors",
-		     "Set player colors");
   prefsMenu->AppendSeparator();
   prefsMenu->Append(efgmenuPREFS_ZOOMIN, "Zoom &in\t+",
 		    "Increase display magnification");
@@ -1676,9 +1672,10 @@ void EfgShow::OnSolveStandard(wxCommandEvent &)
   // Most of the GUI code assumes information sets exist.
   if (m_efg.NumPlayerInfosets() == 0)  return;
 
-  bool isPerfectRecall;
+  bool isPerfectRecall = IsPerfectRecall(m_efg);
 
-  if ((isPerfectRecall = IsPerfectRecall(m_efg)) == false) {
+  if (!isPerfectRecall &&
+      wxGetApp().GetPreferences().WarnOnSolveImperfectRecall()) {
     if (wxMessageBox("This game is not perfect recall\n"
 		     "Do you wish to continue?", 
 		     "Solve Warning", 
@@ -1822,7 +1819,8 @@ void EfgShow::OnSolveCustom(wxCommandEvent &p_event)
   if (m_efg.NumPlayerInfosets() == 0)  return;
 
   // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_efg)) {
+  if (!IsPerfectRecall(m_efg) && 
+      wxGetApp().GetPreferences().WarnOnSolveImperfectRecall()) {
     if (wxMessageBox("This game is not perfect recall\n"
 		     "Do you wish to continue?", 
 		     "Solve Warning", 
@@ -2236,6 +2234,7 @@ void EfgShow::OnPrefsLegend(wxCommandEvent &)
 void EfgShow::OnPrefsFontsAboveNode(wxCommandEvent &)
 {
   wxFontData data;
+  data.SetInitialFont(m_treeWindow->DrawSettings().NodeAboveFont());
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
@@ -2316,24 +2315,6 @@ void EfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
-    m_treeWindow->Refresh();
-  }
-}
-
-void EfgShow::OnPrefsColors(wxCommandEvent &)
-{
-  wxColourData data;
-  wxColourDialog dialog(this, &data);
- 
-  if (dialog.ShowModal() == wxID_OK) {
-    if (Cursor()->GetPlayer()) {
-      m_treeWindow->DrawSettings().SetPlayerColor(Cursor()->GetPlayer()->GetNumber(),
-						  dialog.GetColourData().GetColour());
-    }
-    else {
-      m_treeWindow->DrawSettings().SetPlayerColor(-1,
-						  dialog.GetColourData().GetColour());
-    }
     m_treeWindow->Refresh();
   }
 }

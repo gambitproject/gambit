@@ -119,7 +119,6 @@ typedef enum {
   efgmenuPREFS_ZOOMIN = 1601,
   efgmenuPREFS_ZOOMOUT = 1602,
   efgmenuPREFS_LEGEND = 1604,
-  efgmenuPREFS_COLORS = 1609,
   efgmenuPREFS_SAVE = 1605,
   efgmenuPREFS_LOAD = 1606,
   efgmenuPREFS_REDRAW = 1611,  // accelerator only (?)

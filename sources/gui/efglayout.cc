@@ -426,11 +426,14 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   entry->x = level * 
     (draw_settings.NodeLength() + draw_settings.BranchLength() +
      draw_settings.ForkLength());
-  if (n->GetPlayer()) {
-    entry->color = draw_settings.GetPlayerColor(n->GetPlayer()->GetNumber());
+  if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
+    entry->color = wxGetApp().GetPreferences().GetChanceColor();
+  }
+  else if (n->GetPlayer()) {
+    entry->color = wxGetApp().GetPreferences().GetPlayerColor(n->GetPlayer()->GetNumber());
   }
   else {
-    entry->color = draw_settings.GetPlayerColor(-1);
+    entry->color = wxGetApp().GetPreferences().GetTerminalColor();
   }  
   
   entry->expanded = subgame_entry.expanded;
@@ -943,7 +946,7 @@ void efgTreeLayout::RenderSubtree(wxDC &dc) const
       ::DrawLine(dc, xe, ye, 
 		 xe + m_parent->DrawSettings().NodeLength() + 
 		 child_entry.nums * INFOSET_SPACING, 
-		 ye, m_parent->DrawSettings().GetPlayerColor(-1));
+		 ye, wxGetApp().GetPreferences().GetTerminalColor());
       
       // Collapsed subgame: subgame icon is drawn at this terminal node.
       if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 

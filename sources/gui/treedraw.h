@@ -9,12 +9,12 @@
 
 #include "wx/font.h"
 #include "wx/button.h"
+#include "wx/config.h"
 
 #include "base/base.h"
 #include "treecons.h"
-#include "gambdraw.h"
 
-class TreeDrawSettings : public GambitDrawSettings {
+class TreeDrawSettings {
 private:
   int branch_length, node_length, fork_length, y_spacing;
   int outcome_length;
@@ -30,8 +30,8 @@ private:
   int num_prec;
   
   // Fonts for labels.
-  wxFont node_above_font, node_below_font, node_right_font;
-  wxFont branch_above_font, branch_below_font;
+  wxFont m_nodeAboveFont, m_nodeBelowFont, m_nodeRightFont;
+  wxFont m_branchAboveFont, m_branchBelowFont;
 
   // Cursor stuff.
   bool    flashing_cursor;
@@ -39,6 +39,9 @@ private:
   // Display only those nodes in the support that are reachable from root.
   bool root_reachable;
 
+  static void LoadFont(const wxString &, const wxConfig &, wxFont &);
+  static void SaveFont(const wxString &, wxConfig &, const wxFont &);
+  
 public:
   TreeDrawSettings(void);
   
@@ -75,21 +78,16 @@ public:
   int     LabelBranchBelow(void) const  { return branch_below_label;  }
 
   // Fonts 
-  void SetNodeAboveFont(const wxFont &f)
-    { node_above_font = f; }
-  const wxFont &NodeAboveFont(void) const { return node_above_font; }
-  void SetNodeRightFont(const wxFont &f)
-    { node_right_font = f; }
-  const wxFont &NodeRightFont(void) const { return node_right_font; }
-  void SetNodeBelowFont(const wxFont &f)
-    { node_below_font = f; }
-  const wxFont &NodeBelowFont(void) const { return node_below_font; }
-  void SetBranchAboveFont(const wxFont &f)
-    { branch_above_font = f; }
-  const wxFont &BranchAboveFont(void) const { return branch_above_font; }
-  void SetBranchBelowFont(const wxFont &f)
-    { branch_below_font = f; }
-  const wxFont &BranchBelowFont(void) const { return branch_below_font; }
+  void SetNodeAboveFont(const wxFont &p_font) { m_nodeAboveFont = p_font; }
+  const wxFont &NodeAboveFont(void) const { return m_nodeAboveFont; }
+  void SetNodeRightFont(const wxFont &p_font) { m_nodeRightFont = p_font; }
+  const wxFont &NodeRightFont(void) const { return m_nodeRightFont; }
+  void SetNodeBelowFont(const wxFont &p_font) { m_nodeBelowFont = p_font; }
+  const wxFont &NodeBelowFont(void) const { return m_nodeBelowFont; }
+  void SetBranchAboveFont(const wxFont &p_font) { m_branchAboveFont = p_font; }
+  const wxFont &BranchAboveFont(void) const { return m_branchAboveFont; }
+  void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
+  const wxFont &BranchBelowFont(void) const { return m_branchBelowFont; }
 
   // Control the cursor style [flashing or non-flashing].
   void    SetFlashingCursor(bool f)  { flashing_cursor = f;    }

@@ -14,6 +14,8 @@
 #include "wx/wxhtml.h"    // for wxHtmlHelpController
 #include "wx/listctrl.h"
 
+#include "userprefs.h"
+
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
@@ -22,6 +24,7 @@ class GambitApp : public wxApp {
 private:
   gText m_currentDir; /* Current position in directory tree. */
   wxHtmlHelpController m_help;
+  UserPreferences m_prefs;
 
   bool OnInit(void);
 
@@ -32,6 +35,8 @@ public:
   void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
 
   wxHtmlHelpController &HelpController(void) { return m_help; }
+
+  UserPreferences &GetPreferences(void) { return m_prefs; }
 };
 
 DECLARE_APP(GambitApp)
@@ -58,6 +63,8 @@ private:
   void OnNew(wxCommandEvent &);
   void OnLoad(wxCommandEvent &);
   void OnMRUFile(wxCommandEvent &);
+
+  void OnOptions(wxCommandEvent &);
 
   void OnHelpContents(wxCommandEvent &);
   void OnHelpIndex(wxCommandEvent &);

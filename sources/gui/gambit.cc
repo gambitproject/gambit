@@ -150,6 +150,7 @@ IMPLEMENT_APP(GambitApp)
 //=====================================================================
 
 const int idGAMELISTCTRL = 1300;
+const int menuOPTIONS = 2500;
 
 class Game {
 public:
@@ -186,6 +187,10 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   m_fileHistory.UseMenu(fileMenu);
   m_fileHistory.AddFilesToMenu();
 
+  wxMenu *optionsMenu = new wxMenu;
+  optionsMenu->Append(menuOPTIONS, "&Options",
+		      "Configure Gambit to your tastes");
+
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
   helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
@@ -194,6 +199,7 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
+  menuBar->Append(optionsMenu, "&Options");
   menuBar->Append(helpMenu, "&Help");
 
   SetMenuBar(menuBar);
@@ -279,6 +285,7 @@ BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GambitFrame::OnLoad)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
+  EVT_MENU(menuOPTIONS, GambitFrame::OnOptions)
   EVT_MENU(wxID_HELP_CONTENTS, GambitFrame::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, GambitFrame::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, GambitFrame::OnHelpAbout)
@@ -563,6 +570,11 @@ void GambitFrame::OnMRUFile(wxCommandEvent &p_event)
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
 }
 
+void GambitFrame::OnOptions(wxCommandEvent &)
+{
+  wxGetApp().GetPreferences().EditOptions(this);
+}
+
 void GambitFrame::OnHelpAbout(wxCommandEvent &)
 {
   dialogAbout dialog(this, "About Gambit...",
@@ -745,8 +757,9 @@ void GambitFrame::RemoveGame(Nfg *p_nfg)
 void GambitFrame::OnGameSelected(wxListEvent &p_event)
 {
   if (m_gameList[p_event.GetSelection()+1]->m_efgShow) {
-    wxActivateEvent event;
-    m_gameList[p_event.GetSelection()+1]->m_efgShow->AddPendingEvent(event);
+    //    wxActivateEvent event;
+    // m_gameList[p_event.GetSelection()+1]->m_efgShow->AddPendingEvent(event);
+    m_gameList[p_event.GetSelection()+1]->m_efgShow->Raise();
   }
 }
 

@@ -160,7 +160,6 @@ private:
   void OnPrefsFontsBelowBranch(wxCommandEvent &);
   void OnPrefsDisplayLayout(wxCommandEvent &);
   void OnPrefsDisplayDecimals(wxCommandEvent &);
-  void OnPrefsColors(wxCommandEvent &);
   void OnPrefsSave(wxCommandEvent &);
   void OnPrefsLoad(wxCommandEvent &);
 

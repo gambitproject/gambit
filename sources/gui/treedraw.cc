@@ -18,9 +18,9 @@
 #include "dllegends.h"
 
 TreeDrawSettings::TreeDrawSettings(void)
-  : node_above_font(*wxNORMAL_FONT), node_below_font(*wxNORMAL_FONT),
-    node_right_font(*wxNORMAL_FONT), branch_above_font(*wxNORMAL_FONT),
-    branch_below_font(*wxNORMAL_FONT)
+  : m_nodeAboveFont(*wxNORMAL_FONT), m_nodeBelowFont(*wxNORMAL_FONT),
+    m_nodeRightFont(*wxNORMAL_FONT), m_branchAboveFont(*wxNORMAL_FONT),
+    m_branchBelowFont(*wxNORMAL_FONT)
 {
   LoadOptions();
 }
@@ -176,54 +176,92 @@ dialogLegends::dialogLegends(wxWindow *p_parent,
   Layout();
 }
 
+void TreeDrawSettings::SaveFont(const wxString &p_prefix, 
+				wxConfig &p_config, const wxFont &p_font)
+{
+  p_config.Write(p_prefix + "Size", (long) p_font.GetPointSize());
+  p_config.Write(p_prefix + "Family", (long) p_font.GetFamily());
+  p_config.Write(p_prefix + "Face", p_font.GetFaceName());
+  p_config.Write(p_prefix + "Style", (long) p_font.GetStyle());
+  p_config.Write(p_prefix + "Weight", (long) p_font.GetWeight());
+}
+
+void TreeDrawSettings::LoadFont(const wxString &p_prefix,
+				const wxConfig &p_config, wxFont &p_font)
+{
+  int size, family, style, weight;
+  wxString face;
+  p_config.Read(p_prefix + "Size", &size, 10);
+  p_config.Read(p_prefix + "Family", &family, wxMODERN);
+  p_config.Read(p_prefix + "Face", &face, "");
+  p_config.Read(p_prefix + "Style", &style, wxNORMAL);
+  p_config.Read(p_prefix + "Weight", &weight, wxNORMAL);
+  p_font.SetPointSize(size);
+  p_font.SetFamily(family);
+  p_font.SetStyle(style);
+  p_font.SetWeight(weight);
+  if (face != "") {
+    p_font.SetFaceName(face);
+  }
+}
+
 void TreeDrawSettings::SaveOptions(void)
 {
   wxConfig config("Gambit");
-  config.Write("TreeDisplay/Branch-Length", (long) branch_length);
-  config.Write("TreeDisplay/Fork-Length", (long) fork_length);
-  config.Write("TreeDisplay/Outcome-Length", (long) outcome_length);
-  config.Write("TreeDisplay/Y-Spacing", (long) y_spacing);
+  config.Write("/TreeDisplay/BranchLength", (long) branch_length);
+  config.Write("/TreeDisplay/ForkLength", (long) fork_length);
+  config.Write("/TreeDisplay/OutcomeLength", (long) outcome_length);
+  config.Write("/TreeDisplay/YSpacing", (long) y_spacing);
 
-  config.Write("TreeDisplay/Chance-Color", (long) chance_color);
-  config.Write("TreeDisplay/Cursor-Color", (long) cursor_color);
-  config.Write("TreeDisplay/Show-Infosets", (long) show_infosets);
-  config.Write("TreeDisplay/Node-Above-Label", (long) node_above_label);
-  config.Write("TreeDisplay/Node-Below-Label", (long) node_below_label);
-  config.Write("TreeDisplay/Node-Right-Label", (long) node_right_label);
-  config.Write("TreeDisplay/Branch-Above-Label", (long) branch_above_label);
-  config.Write("TreeDisplay/Branch-Below-Label", (long) branch_below_label);
+  config.Write("/TreeDisplay/ChanceColor", (long) chance_color);
+  config.Write("/TreeDisplay/CursorColor", (long) cursor_color);
+  config.Write("/TreeDisplay/ShowInfosets", (long) show_infosets);
+  config.Write("/TreeDisplay/NodeAboveLabel", (long) node_above_label);
+  config.Write("/TreeDisplay/NodeBelowLabel", (long) node_below_label);
+  config.Write("/TreeDisplay/NodeRightLabel", (long) node_right_label);
+  config.Write("/TreeDisplay/BranchAboveLabel", (long) branch_above_label);
+  config.Write("/TreeDisplay/BranchBelowLabel", (long) branch_below_label);
 
-  config.Write("TreeDisplay/Flashing-Cursor",  (long) flashing_cursor);
-  config.Write("TreeDisplay/Color-Outcomes", (long) color_coded_outcomes);
-  config.Write("TreeDisplay/Root-Reachable", (long) root_reachable);
+  SaveFont("/TreeDisplay/NodeAboveFont", config, m_nodeAboveFont);
+  SaveFont("/TreeDisplay/NodeBelowFont", config, m_nodeBelowFont);
+  SaveFont("/TreeDisplay/NodeRightFont", config, m_nodeRightFont);
+  SaveFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
+  SaveFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
 
-  GambitDrawSettings::SaveOptions();
+  config.Write("/TreeDisplay/FlashingCursor",  (long) flashing_cursor);
+  config.Write("/TreeDisplay/ColorOutcomes", (long) color_coded_outcomes);
+  config.Write("/TreeDisplay/RootReachable", (long) root_reachable);
 }
 
 void TreeDrawSettings::LoadOptions(void)
 {
   wxConfig config("Gambit");
-  config.Read("TreeDisplay/Branch-Length", &branch_length, 60);
-  config.Read("TreeDisplay/Node-Length", &node_length, 60);
-  config.Read("TreeDisplay/Fork-Length", &fork_length, 60);
-  config.Read("TreeDisplay/Outcome-Length", &outcome_length, 60);
-  config.Read("TreeDisplay/Y-Spacing", &y_spacing, 30);
 
-  config.Read("TreeDisplay/Display-Precision", &num_prec, 2);
+  config.Read("/TreeDisplay/BranchLength", &branch_length, 60);
+  config.Read("/TreeDisplay/NodeLength", &node_length, 60);
+  config.Read("/TreeDisplay/ForkLength", &fork_length, 60);
+  config.Read("/TreeDisplay/OutcomeLength", &outcome_length, 60);
+  config.Read("/TreeDisplay/YSpacing", &y_spacing, 30);
 
-  config.Read("TreeDisplay/Chance-Color", &chance_color, 0);
-  config.Read("TreeDisplay/Cursor-Color", &cursor_color, 10);
-  config.Read("TreeDisplay/Show-Infosets", &show_infosets, 2);
-  config.Read("TreeDisplay/Node-Above-Label", &node_above_label, 1);
-  config.Read("TreeDisplay/Node-Below-Label", &node_below_label, 4);
-  config.Read("TreeDisplay/Branch-Above-Label", &branch_above_label, 1);
-  config.Read("TreeDisplay/Branch-Below-Label", &branch_below_label, 3);
-  config.Read("TreeDisplay/Node-Right-Label", &node_right_label, 1);
+  config.Read("/TreeDisplay/DisplayPrecision", &num_prec, 2);
+
+  config.Read("/TreeDisplay/ChanceColor", &chance_color, 0);
+  config.Read("/TreeDisplay/CursorColor", &cursor_color, 10);
+  config.Read("/TreeDisplay/ShowInfosets", &show_infosets, 2);
+  config.Read("/TreeDisplay/NodeAboveLabel", &node_above_label, 1);
+  config.Read("/TreeDisplay/NodeBelowLabel", &node_below_label, 4);
+  config.Read("/TreeDisplay/BranchAboveLabel", &branch_above_label, 1);
+  config.Read("/TreeDisplay/BranchBelowLabel", &branch_below_label, 3);
+  config.Read("/TreeDisplay/NodeRightLabel", &node_right_label, 1);
   
-  config.Read("TreeDisplay/Flashing-Cursor", &flashing_cursor, 1);
-  config.Read("TreeDisplay/Color-Outcomes", &color_coded_outcomes, 1);
-  config.Read("TreeDisplay/Root-Reachable", &root_reachable, 0);
+  LoadFont("/TreeDisplay/NodeAboveFont", config, m_nodeAboveFont);
+  LoadFont("/TreeDisplay/NodeBelowFont", config, m_nodeBelowFont);
+  LoadFont("/TreeDisplay/NodeRightFont", config, m_nodeRightFont);
+  LoadFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
+  LoadFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
 
-  GambitDrawSettings::LoadOptions();
+  config.Read("/TreeDisplay/FlashingCursor", &flashing_cursor, 1);
+  config.Read("/TreeDisplay/ColorOutcomes", &color_coded_outcomes, 1);
+  config.Read("/TreeDisplay/RootReachable", &root_reachable, 0);
 }
 
