@@ -230,13 +230,19 @@ Gui should display nfg.ico.
 
 //------------------------------
 
-Bug D29: .efg and .nfg files not recognized in wxxt port of gambit
+Bug D29: .efg and .nfg files not recognized in Linux/wxxt port of gambit
 
 When you start up the gambit gui compiled with wxxt and try to load
 either an nfg or an efg, you get an error window that says "Unknown
 file type".  On the other hand, if you load the file from the command
 line ("gui foo.efg") it works.
 
+//------------------------------
+
+Bug D30: "Inspect node" window comes up transiently in Linux/wxxt when
+         efg is loaded.
+
+This is a cosmetic bug only, but it's irritating.
 
 -------------  older bugs that still remain ---------------
 
