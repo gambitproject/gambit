@@ -1,0 +1,2 @@
+*.d obj_* gcl_* gui_* readnfg.cc readnfg.h readefg.cc readefg.h 
+gcompile.cc gcompile.h
