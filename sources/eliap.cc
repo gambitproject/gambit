@@ -19,6 +19,11 @@
 #include "player.h"
 #include "infoset.h"
 
+#include "glist.imp"
+template class gList<gDPVector<double> >;
+template class gList<gDPVector<gRational> >;
+template class gNode<gDPVector<double> >;
+template class gNode<gDPVector<gRational> >;
 
 //-------------------------------------------------------------------------
 //                     EFLiapParams<T>: Member functions
@@ -233,6 +238,5 @@ TEMPLATE class EFLiapModule<double>;
 TEMPLATE class EFLiapModule<gRational>;
 TEMPLATE class EFLiapFunc<double>;
 TEMPLATE class EFLiapFunc<gRational>;
-
 
 

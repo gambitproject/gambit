@@ -11,7 +11,7 @@
 #include "liap.h"
 #include "glist.h"
 #include "rational.h"
-//#include "gdpvect.h"
+#include "gdpvect.h"
 
 template <class T> class EFLiapParams : public LiapParams<T>  {
 public:
