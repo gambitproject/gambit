@@ -74,6 +74,24 @@ before solving, so the user is aware of the possible pitfalls.
 
 ---------------
 
+ITEM 0006:  Infinite loop in LcpSolve[nfg]
+
+DATE:     9/8/1999 by TLT (was Bug C28 in bugs_gcl)
+AFFECTS:  GCL (all platforms?)
+STATUS:   CLOSED 9/13/99 by RDM
+SEVERITY: MAJOR
+DETAILS:
+
+The following hangs the GCL:
+
+  GCL1:= << k:=10;
+  GCL2:= << n:=Randomize[NewNfg[{k,k},True],seed->142];
+  GCL3:= << LcpSolve[n]
+
+RDM: 9/13/99: This bug was inadvertently fixed by implementing scaling to fix ITEM 0001
+
+---------------
+
 ITEM 0007:  Include file names not printable
 
 DATE:     9/8/1999 by TLT (was Bug C31 in bugs_gcl)
