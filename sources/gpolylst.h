@@ -64,6 +64,10 @@ template <class T> class gPolyList
    // Transform to canonical basis for associated ideal
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
 
+  // New Coordinate Systems
+   gPolyList<T> TranslateOfSystem(const gVector<T>&)            const;
+   gPolyList<T> SystemInNewCoordinates(const gSquareMatrix<T>&) const;
+
    // Information
    const gSpace*            AmbientSpace()                            const;
    const term_order*        TermOrder()                               const;
@@ -85,9 +89,6 @@ template <class T> class gPolyList
 
 friend gOutput& operator << (gOutput& output, const gPolyList<T>& x);
 };  
-
-// The following utility class belongs in gmisc.h, but not yet to 
-// avoid cluttering everything at Caltech up.
 
 #endif GPOLYLST_H
 

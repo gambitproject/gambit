@@ -82,9 +82,9 @@ bool gPolyList<T>::operator==(const gPolyList<T> & rhs) const
   if (Space != rhs.Space || Order != rhs.Order) return false;
   if (List.Length() != rhs.List.Length()) return false;
   for (int j = 1; j <= List.Length(); j++)
-    if (List[j] != rhs.List[j]) 
+    if (*List[j] != *(rhs.List[j]))
       return false;
-  return false;
+  return true;
 }
 
 template<class T>  
@@ -355,6 +355,35 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 
   return *this;
 }
+
+//------------------------------------------
+//           New Coordinate Systems
+//------------------------------------------
+
+template<class T> gPolyList<T> 
+gPolyList<T>::TranslateOfSystem(const gVector<T>& new_origin) const
+{
+  gList<gPoly<T> > new_polys;
+  for (int i = 1; i <= Length(); i++) {
+    new_polys += (*this)[i].TranslateOfPoly(new_origin);
+    //    assert (TranslateOfPoly((*this)[i],new_origin) == 
+    //	    (*this)[i].TranslateOfPoly(new_origin));
+  }
+  return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
+}
+
+template<class T> gPolyList<T> 
+gPolyList<T>::SystemInNewCoordinates(const gSquareMatrix<T>& M) const
+{
+  gList<gPoly<T> > new_polys;
+  for (int i = 1; i <= Length(); i++) {
+    //    assert ( (*this)[i].PolyInNewCoordinates(M) == 
+    //     	     gPoly<T>( PolyInNewCoordinates((*this)[i],M) ) );
+    new_polys += (*this)[i].PolyInNewCoordinates(M);
+  }
+  return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
+}
+
 
 //----------------------------------
 //           Information
