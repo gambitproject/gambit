@@ -15,6 +15,7 @@
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgnewsupport.h"
+#include "dlnfgplayers.h"
 #include "dlstrategies.h"
 #include "dlnfgsave.h"
 
@@ -1092,33 +1093,7 @@ void NfgShow::SetStrategyLabels(void)
 
 void NfgShow::SetPlayerLabels(void)
 {
-  int num_players = nf.NumPlayers();
-  
-  MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
-  char **player_labels = new char *[num_players+1];
-  int i;
-
-  for (i = 1; i <= num_players; i++) {
-    player_labels[i] = new char[LABEL_LENGTH];
-    strcpy(player_labels[i], nf.Players()[i]->GetName());
-    labels->Add(wxMakeFormString(ToText(i), &player_labels[i]));
-      
-    if (i % ENTRIES_PER_ROW == 0) 
-      labels->Add(wxMakeFormNewLine());
-  }
-
-  labels->Go();
-
-  if (labels->Completed() == wxOK) {
-    for (i = 1; i <= num_players; i++) 
-      nf.Players()[i]->SetName(player_labels[i]);
-  }
-
-  for (i = 1; i <= num_players; i++) 
-    delete [] player_labels[i];
-
-  delete [] player_labels;
-
+  dialogNfgPlayers dialog(nf, spread);
   spread->SetPlayerLabels(cur_sup);
   UpdateVals();
 }

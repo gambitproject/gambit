@@ -14,156 +14,51 @@
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgsave.h"
+#include "dlnfgplayers.h"
+#include "dlstrategies.h"
 #include "dlnfgnewsupport.h"
 
 //=========================================================================
 //                 class dialogNfgPayoffs: Member functions 
 //=========================================================================
 
-int dialogNfgPayoffs::s_payoffsPerDialog = 8;
-
 dialogNfgPayoffs::dialogNfgPayoffs(const Nfg &p_nfg, NFOutcome *p_outcome,
 				   bool p_solutions, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Change Payoffs", TRUE),
-    m_outcome(p_outcome), m_nfg(p_nfg), m_pageNumber(0),
-    m_payoffs(p_nfg.NumPlayers())
+  : guiPagedDialog(p_parent, "Change Payoffs", p_nfg.NumPlayers()),
+    m_outcome(p_outcome), m_nfg(p_nfg)
 {
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)
-    m_payoffs[pl] = m_nfg.Payoff(p_outcome, pl);
+    SetValue(pl, ToText(m_nfg.Payoff(p_outcome, pl)));
 
-  (void) new wxMessage(this, "Change payoffs for outcome:");
-  NewLine();
-
-  m_outcomeName = new wxText(this, 0, "Outcome");
+  m_outcomeName = new wxText(this, 0, "Outcome", "", 1, 1);
   if (p_outcome)
     m_outcomeName->SetValue(p_outcome->GetName());
   else
     m_outcomeName->SetValue("Outcome" + ToText(p_nfg.NumOutcomes() + 1));
-  NewLine();
 
-  if (p_solutions) {
-    (void) new wxMessage(this, "Pressing OK will delete computed solutions");
-    NewLine();
-  }
+  m_outcomeName->SetConstraints(new wxLayoutConstraints);
+  m_outcomeName->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_outcomeName->GetConstraints()->left.SameAs(m_dataFields[0], wxLeft);
+  m_outcomeName->GetConstraints()->right.SameAs(m_dataFields[0], wxRight);
+  m_outcomeName->GetConstraints()->height.AsIs();
 
-  m_outcomePayoffs = new wxNumberItem *[m_nfg.NumPlayers()];
+  m_dataFields[0]->GetConstraints()->top.SameAs(m_outcomeName, wxBottom, 10);
 
-  for (int pl = 1; pl <= gmin(m_nfg.NumPlayers(),
-			      s_payoffsPerDialog); pl++) {
-    m_outcomePayoffs[pl-1] = new wxNumberItem(this,
-					      ToText(pl) + "  ",
-					      ToText(m_payoffs[pl]));
-    NewLine();
-  }
-
-  m_outcomePayoffs[0]->SetFocus();
-#ifndef LINUX_WXXT
-  m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
-#endif
-
-  NewLine();
-  if (m_nfg.NumPlayers() > s_payoffsPerDialog) {
-    m_backButton = new wxButton(this, (wxFunction) CallbackBack, "<< Back");
-    m_backButton->SetClientData((char *) this);
-    m_backButton->Enable(FALSE);
-    m_nextButton = new wxButton(this, (wxFunction) CallbackNext, "Next >>");
-    m_nextButton->SetClientData((char *) this);
-  }
-
-  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  m_okButton->SetClientData((char *) this);
-  m_okButton->SetDefault();
-  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-				"Cancel");
-  m_cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
+  Go();
 }
 
-void dialogNfgPayoffs::OnOK(void)
+gArray<gNumber> dialogNfgPayoffs::Payoffs(void) const
 {
-  m_completed = wxOK;
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
-		 m_nfg.NumPlayers()); pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-  Show(FALSE);
-}
-
-void dialogNfgPayoffs::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogNfgPayoffs::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogNfgPayoffs::OnBack(void)
-{
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < gmin((m_pageNumber + 1) * s_payoffsPerDialog,
-		 m_nfg.NumPlayers()); pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-
-  m_pageNumber--;
-  entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
-    m_outcomePayoffs[entry]->Show(FALSE);
-    m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
-    m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
-    m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
+  gArray<gNumber> ret(m_nfg.NumPlayers());
+  for (int pl = 1; pl <= ret.Length(); pl++) {
+    ret[pl] = ToNumber(GetValue(pl));
   }
-  m_backButton->Show(FALSE);
-  m_nextButton->Show(FALSE);
-  m_okButton->Show(FALSE);
-  m_cancelButton->Show(FALSE);
-  
-  // This gyration ensures the tabbing order remains the same
-  m_cancelButton->Show(TRUE);
-  m_okButton->Show(TRUE);
-  m_nextButton->Show(TRUE);
-  m_backButton->Show(TRUE);
-  for (entry = s_payoffsPerDialog - 1; entry >= 0; entry--)
-    m_outcomePayoffs[entry]->Show(TRUE);
-  
-  m_outcomePayoffs[0]->SetFocus();
-  m_backButton->Enable(m_pageNumber > 0);
-  m_nextButton->Enable(TRUE);
+  return ret;
 }
 
-void dialogNfgPayoffs::OnNext(void)
+gText dialogNfgPayoffs::Name(void) const
 {
-  int entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++)
-    m_payoffs[pl + 1] = m_outcomePayoffs[entry]->GetNumber();
-
-  m_pageNumber++;
-  entry = 0;
-  for (int pl = m_pageNumber * s_payoffsPerDialog;
-       pl < (m_pageNumber + 1) * s_payoffsPerDialog; pl++, entry++) {
-    if (pl < m_nfg.NumPlayers()) {
-      m_outcomePayoffs[entry]->SetNumber(m_payoffs[pl + 1]);
-      m_outcomePayoffs[entry]->SetValue(ToText(m_payoffs[pl + 1]));
-      m_outcomePayoffs[entry]->SetLabel(ToText(pl + 1) + "  ");
-    }
-    else
-      m_outcomePayoffs[entry]->Show(FALSE);
-  }
-
-  m_outcomePayoffs[0]->SetFocus();
-  m_backButton->Enable(TRUE);
-  m_nextButton->Enable((m_pageNumber + 1) * s_payoffsPerDialog <=
-		       m_nfg.NumPlayers());
+  return m_outcomeName->GetValue();
 }
 
 //=========================================================================
@@ -171,13 +66,13 @@ void dialogNfgPayoffs::OnNext(void)
 //=========================================================================
 
 dialogNfgOutcomeSelect::dialogNfgOutcomeSelect(Nfg &p_nfg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Outcome", TRUE), m_nfg(p_nfg)
+  : guiAutoDialog(p_parent, "Select Outcome"), m_nfg(p_nfg)
 {
-  m_outcomeList = new wxListBox(this, 0, "Outcome");
+  m_outcomeList = new wxListBox(this, 0, "Outcome", wxSINGLE, 1, 1);
   
   for (int outc = 1; outc <= m_nfg.NumOutcomes(); outc++) {
     NFOutcome *outcome = m_nfg.Outcomes()[outc];
-    gText item = outcome->GetName();
+    gText item = ToText(outc) + ": " + outcome->GetName();
     if (item == "")
       item = "Outcome" + ToText(outc);
 
@@ -197,49 +92,94 @@ dialogNfgOutcomeSelect::dialogNfgOutcomeSelect(Nfg &p_nfg, wxWindow *p_parent)
   }
 
   m_outcomeList->SetSelection(0);
+  m_outcomeList->SetConstraints(new wxLayoutConstraints);
+  m_outcomeList->GetConstraints()->left.SameAs(m_okButton, wxLeft);
+  m_outcomeList->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_outcomeList->GetConstraints()->right.SameAs(m_helpButton, wxRight);
+  m_outcomeList->GetConstraints()->height.AsIs();
 
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-  
-  Fit();
-  Show(TRUE);
-}
+  m_okButton->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_okButton->GetConstraints()->top.SameAs(m_outcomeList, wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-void dialogNfgOutcomeSelect::OnOK(void)
-{
-  m_outcomeSelected = m_outcomeList->GetSelection();
-  m_completed = wxOK;
-  Show(FALSE);
-}
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-void dialogNfgOutcomeSelect::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
 
-Bool dialogNfgOutcomeSelect::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
+  Go();
 }
 
 NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 {
-  return m_nfg.Outcomes()[m_outcomeSelected + 1];
+  return m_nfg.Outcomes()[m_outcomeList->GetSelection() + 1];
+}
+
+//=========================================================================
+//                   dialogNfgPlayers: Member functions
+//=========================================================================
+
+dialogNfgPlayers::dialogNfgPlayers(Nfg &p_nfg, wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Player Names"), m_nfg(p_nfg)
+{
+  m_playerNameList = new wxListBox(this, 0, "Player", wxSINGLE);
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    m_playerNameList->Append(ToText(pl) + ": " + m_nfg.Players()[pl]->GetName());
+  }
+  m_playerNameList->SetSelection(0);
+  m_lastSelection = 0;
+
+  m_playerNameList->SetConstraints(new wxLayoutConstraints);
+  m_playerNameList->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerNameList->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerNameList->GetConstraints()->width.AsIs();
+  m_playerNameList->GetConstraints()->height.AsIs();
+
+  wxButton *editPlayer = new wxButton(this, (wxFunction) CallbackEdit, "Edit...");
+  editPlayer->SetClientData((char *) this);
+
+  editPlayer->SetConstraints(new wxLayoutConstraints);
+  editPlayer->GetConstraints()->left.SameAs(m_playerNameList, wxRight, 10);
+  editPlayer->GetConstraints()->top.SameAs(m_playerNameList, wxTop);
+  editPlayer->GetConstraints()->width.AsIs();
+  editPlayer->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_helpButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->Show(FALSE);
+
+  Go();
+}
+
+void dialogNfgPlayers::OnEdit(void)
+{
+  int selection = m_playerNameList->GetSelection();
+  gText defaultName = m_nfg.Players()[selection + 1]->GetName();
+
+  char *newName = wxGetTextFromUser("Name", "Enter Name", defaultName, this);
+  if (newName) {
+    m_nfg.Players()[selection + 1]->SetName(newName);
+    m_playerNameList->SetString(selection, ToText(selection + 1) + ": " + newName);
+  }
 }
 
 //=========================================================================
 //                    dialogStrategies: Member functions
 //=========================================================================
-
-#include "dlstrategies.h"
 
 dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
   : wxDialogBox(p_parent, "Strategy Information", TRUE), m_nfg(p_nfg),
@@ -427,52 +367,58 @@ NFSupport *dialogNfgNewSupport::CreateSupport(void) const
 dialogNfgSave::dialogNfgSave(const gText &p_name,
 			     const gText &p_label, int p_decimals,
 			     wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Save File", TRUE)
+  : guiAutoDialog(p_parent, "Save File")
 {
-  m_fileName = new wxText(this, 0, "Path:");
+  m_fileName = new wxText(this, 0, "Path:", "", 1, 1);
   m_fileName->SetValue(p_name);
+  m_fileName->SetConstraints(new wxLayoutConstraints);
+  m_fileName->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_fileName->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_fileName->GetConstraints()->width.AsIs();
+  m_fileName->GetConstraints()->height.AsIs();
 
   wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
-					"Browse...");
+					"Browse...", 1, 1);
   browseButton->SetClientData((char *) this);
-  NewLine();
+  browseButton->SetConstraints(new wxLayoutConstraints);
+  browseButton->GetConstraints()->top.SameAs(m_fileName, wxTop);
+  browseButton->GetConstraints()->left.SameAs(m_fileName, wxRight, 10);
+  browseButton->GetConstraints()->width.AsIs();
+  browseButton->GetConstraints()->height.AsIs();
 
-  m_treeLabel = new wxText(this, 0, "Description:", p_label, -1, -1, 300);
+  m_treeLabel = new wxText(this, 0, "Description:", "", 1, 1);
   m_treeLabel->SetValue(p_label);
-  NewLine();
+  m_treeLabel->SetConstraints(new wxLayoutConstraints);
+  m_treeLabel->GetConstraints()->top.SameAs(m_fileName, wxBottom, 10);
+  m_treeLabel->GetConstraints()->left.SameAs(m_fileName, wxLeft);
+  m_treeLabel->GetConstraints()->right.SameAs(browseButton, wxRight);
+  m_treeLabel->GetConstraints()->height.AsIs();
 
   m_numDecimals = new wxSlider(this, 0, "Decimal places:",
-			       p_decimals, 0, 25, 100);
-  NewLine();
+			       p_decimals, 0, 25, -1, 1, 1);
+  m_numDecimals->SetConstraints(new wxLayoutConstraints);
+  m_numDecimals->GetConstraints()->top.SameAs(m_treeLabel, wxBottom, 10);
+  m_numDecimals->GetConstraints()->left.SameAs(m_treeLabel, wxLeft);
+  m_numDecimals->GetConstraints()->right.SameAs(browseButton, wxRight);
+  m_numDecimals->GetConstraints()->height.AsIs();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_okButton->GetConstraints()->top.SameAs(m_numDecimals, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-  Fit();
-  Show(TRUE);
-}
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-void dialogNfgSave::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
+  m_helpButton->GetConstraints()->top.AsIs();
+  m_helpButton->GetConstraints()->left.AsIs();
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->Show(FALSE);
 
-void dialogNfgSave::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogNfgSave::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
+  Go();
 }
 
 void dialogNfgSave::OnBrowse(void)
