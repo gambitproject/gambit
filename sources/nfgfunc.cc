@@ -854,7 +854,7 @@ Portion *GSM_LiapNfg_NfgFloat(Portion **param)
   Nfg<double> &E = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
   MixedProfile<double> start(E);
 
-  NFLiapParams<double> LP;
+  NFLiapParams LP;
 
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   LP.nTries = ((IntPortion *) param[2])->Value();
@@ -892,7 +892,7 @@ Portion *GSM_LiapNfg_MixedFloat(Portion **param)
     * (MixedProfile<double> *) ((MixedPortion *) param[0])->Value();
   Nfg<double> &E = *( start.BelongsTo() );
 
-  NFLiapParams<double> LP;
+  NFLiapParams LP;
 
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   LP.nTries = ((IntPortion *) param[2])->Value();

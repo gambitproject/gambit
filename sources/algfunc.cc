@@ -428,7 +428,7 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
   BehavProfile<double> start(E);
 
   if (((BoolPortion *) param[1])->Value())   {
-    NFLiapParams<double> LP;
+    NFLiapParams LP;
 
     LP.stopAfter = ((IntPortion *) param[2])->Value();
     LP.nTries = ((IntPortion *) param[3])->Value();
@@ -440,7 +440,7 @@ Portion *GSM_LiapEfg_EfgFloat(Portion **param)
     ((IntPortion *) param[9])->Value() = LM.NumEvals();
   }
   else  {
-    EFLiapParams<double> LP;
+    EFLiapParams LP;
 
     LP.stopAfter = ((IntPortion *) param[2])->Value();
     LP.nTries = ((IntPortion *) param[3])->Value();
@@ -474,7 +474,7 @@ Portion *GSM_LiapEfg_BehavFloat(Portion **param)
     * (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
   Efg<double> &E = *( start.BelongsTo() );
 
-  EFLiapParams<double> LP;
+  EFLiapParams LP;
 
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   LP.nTries = ((IntPortion *) param[2])->Value();
