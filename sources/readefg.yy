@@ -16,12 +16,13 @@
 
 %define MEMBERS    gInput &infile; \
                    gString last_name;  gRational last_rational;  \
+                   int last_int, iset_idx; \
                    BaseExtForm *& E; \
                    gGrowableStack<Node *> path; \
                    gList<gString> actions; \
                    gList<gRational> values; \
                    Player *player; Infoset *infoset; Outcome *outcome; \
-                   int i;  gString iset_name; \
+                   int i;  gString iset_name, outc_name; \
                    virtual ~EfgFileReader(); \
                    virtual Outcome *NewOutcome(void) = 0; \
                    virtual Outcome *GetOutcome(const gString &) = 0; \
@@ -30,7 +31,9 @@
                    virtual void SetActionProbs(Infoset *, \
 					       const gList<gRational> &) = 0; \
                    virtual bool CheckActionProbs(Infoset *, \
-						 const gList<gRational> &) = 0;
+						 const gList<gRational> &)=0;\
+                   virtual bool CheckOutcome(Outcome *, \
+					     const gList<gRational> &) = 0;
 
 
 %define CONSTRUCTOR_PARAM    gInput &f, BaseExtForm *& e
@@ -46,115 +49,167 @@
 
 %%
 
-efgfile:    header { path.Push(E->RootNode()); } body  { return 0; }
+efgfile:           header  { path.Push(E->RootNode()); }
+                   body    { E->Reindex();  return 0; }
+       ;
 
-header:     NAME { E->SetTitle(last_name); } playerlist
+header:            NAME  { E->SetTitle(last_name); }  playerlist
+      ;
 
-playerlist:   LBRACE RBRACE
-          |   LBRACE players RBRACE
+playerlist:        LBRACE RBRACE
+          |        LBRACE players RBRACE
+          ;
+players:           player
+       |           players player
+       ;
 
-players:      NAME  { E->NewPlayer()->SetName(last_name); }
-       |      players NAME  { E->NewPlayer()->SetName(last_name); }
+player:            NAME   { E->NewPlayer()->SetName(last_name); }
+      ;
 
-body:       node
-    |       body node
+body:              node
+    |              body node
+    ;
 
-node:       person_node | chance_node | terminal_node
+node:              person_node | chance_node | terminal_node
+    ;
 
-person_node:
-            'p' NAME  { path.Peek()->SetName(last_name); }
-                NAME  { player = E->GetPlayer(last_name);
-			if (!player)   YYERROR; }
-                NAME  { infoset = player->GetInfoset(iset_name = last_name);
-		        actions.Flush(); }
-                actionlistopt 
-                      { if (!infoset)   {
-			  if (actions.Length() == 0)   YYERROR;
-			  infoset = E->AppendNode(path.Peek(),
-						  player, actions.Length());
-			  infoset->SetName(iset_name);
-			  for (i = 1; i <= actions.Length(); i++)
-			    infoset->SetActionName(i, actions[i]);
-			}
-			else   {
-			  if (actions.Length() > 0 && actions.Length() != infoset->NumActions())
-			    YYERROR;
-			  for (i = 1; i <= actions.Length(); i++)
-			    if (actions[i] != infoset->GetActionName(i))
-			      YYERROR;
-			  E->AppendNode(path.Peek(), infoset);
-			}
-		      }
-                outcome   { path.Push(path.Peek()->GetChild(1)); }
+person_node:       'p' node_name player_number infoset_number infoset_info
+                   outcome_number outcome_info
+                   { path.Push(path.Peek()->GetChild(1)); }
+           ;
 
-actionlistopt:  { if (!infoset)   YYERROR; }
-          | LBRACE actionlist RBRACE
+chance_node:       'c' node_name { player = E->GetChance(); }
+                   infoset_number chance_infoset_info
+                   outcome_number outcome_info
+                   { path.Push(path.Peek()->GetChild(1)); }
+           ;
 
-actionlist:  NAME   { actions.Append(last_name); }
-          |  actionlist NAME  { actions.Append(last_name); }
+terminal_node:     't' node_name outcome_number outcome_info
+                   { path.Push(path.Pop()->NextSibling());
+		     while (path.Depth() > 1 && !path.Peek())  {
+		       path.Pop();
+		       path.Push(path.Pop()->NextSibling());
+		     }
+		   }
+             ;
 
-chance_node: 'c' NAME  { path.Peek()->SetName(last_name); }
-                 NAME  { player = E->GetChance();
-			 infoset = player->GetInfoset(iset_name = last_name);
-			 actions.Flush();  values.Flush();
-		       }
-                 actionproblistopt 
-                       { if (!infoset)   {
+node_name:         NAME     { path.Peek()->SetName(last_name); }
+         ;
+
+player_number:     NUMBER
+                   { if (last_rational.denominator() != 1)  YYERROR;
+		     last_int = last_rational.numerator().as_long();
+		     if (last_int <= 0 || last_int > E->NumPlayers()) YYERROR;
+		     player = E->PlayerList()[last_int];
+		   }
+             ;
+
+infoset_number:    NUMBER
+                   { if (last_rational.denominator() != 1)  YYERROR;
+		     iset_idx = last_rational.numerator().as_long();
+		     infoset = E->GetInfosetByIndex(player, iset_idx);
+		   }
+              ; 
+
+infoset_info:      { if (!infoset)   YYERROR; }
+            |      infoset_name LBRACE { actions.Flush(); } actionlist RBRACE
+                   { if (!infoset)   {
+		       if (actions.Length() == 0)   YYERROR;
+		       infoset = E->CreateInfoset(iset_idx, player,
+						  actions.Length());
+		       infoset->SetName(iset_name);
+		       for (i = 1; i <= actions.Length(); i++)
+			 infoset->SetActionName(i, actions[i]);
+		     }
+		     else   {
+		       if (infoset->NumActions() != actions.Length())
+			 YYERROR;
+		       for (i = 1; i <= actions.Length(); i++)
+			 if (actions[i] != infoset->GetActionName(i))
+			   YYERROR;
+		     }
+		     E->AppendNode(path.Peek(), infoset);
+		   }
+            ;
+
+infoset_name:      NAME
+                   { if (infoset && infoset->GetName() != last_name) YYERROR;
+		     else if (!infoset)   iset_name = last_name;
+                   }
+            ;
+
+actionlist:        action
+          |        actionlist action
+          ;
+
+action:            NAME   { actions.Append(last_name); }
+      ;
+
+chance_infoset_info:   { if (!infoset)  YYERROR; }
+                   |   infoset_name LBRACE
+                       { actions.Flush(); values.Flush(); }
+                       actionproblist RBRACE
+                       { if (!infoset)  {
 			   if (actions.Length() == 0)  YYERROR;
-			   infoset = E->AppendNode(path.Peek(),
-						   player, actions.Length());
+			   infoset = E->CreateInfoset(iset_idx, player,
+						      actions.Length());
 			   infoset->SetName(iset_name);
-			   for (i = 1; i <= actions.Length(); i++) 
+			   for (i = 1; i <= actions.Length(); i++)
 			     infoset->SetActionName(i, actions[i]);
 			   SetActionProbs(infoset, values);
 			 }
-			 else   {
-			   if (actions.Length() > 0 && actions.Length() != infoset->NumActions())
+			 else  {
+			   if (infoset->NumActions() != actions.Length())
 			     YYERROR;
-			   for (i = 1; i <= actions.Length(); i++) 
+			   for (i = 1; i <= actions.Length(); i++)
 			     if (actions[i] != infoset->GetActionName(i))
 			       YYERROR;
-			   if (!CheckActionProbs(infoset, values))   YYERROR;
-			   E->AppendNode(path.Peek(), infoset);
+			   if (!CheckActionProbs(infoset, values))  YYERROR;
 			 }
+			 E->AppendNode(path.Peek(), infoset);
 		       }
-               outcome  { path.Push(path.Peek()->GetChild(1)); }
+                   ;
 
-actionproblistopt:   { if (!infoset)  YYERROR; }
-          | LBRACE actionproblist RBRACE
+actionproblist:    actionprob
+              |    actionproblist actionprob
+              ;
 
-actionproblist:   actionprob
-              |   actionproblist actionprob
+actionprob:        NAME NUMBER
+                   { actions.Append(last_name); values.Append(last_rational); }
+          ;
+ 
+outcome_number:    NUMBER
+                   { if (last_rational.denominator() != 1)  YYERROR;
+		     last_int = last_rational.numerator().as_long();
+		     if (last_int > 0)  
+		       outcome = E->GetOutcomeByIndex(last_int);
+		   }
+              ;
 
-actionprob:     NAME NUMBER   { actions.Append(last_name);
-				values.Append(last_rational); }
+outcome_info:      { if (!outcome && last_int != 0)  YYERROR; }
+            |      outcome_name LBRACE { values.Flush(); } payofflist RBRACE
+                   { if (values.Length() != E->NumPlayers())   YYERROR;
+		     if (!outcome)   {
+		       outcome = E->CreateOutcomeByIndex(last_int);
+		       outcome->SetName(outc_name);
+		       SetOutcome(outcome, values);
+		     }
+		     else if (!CheckOutcome(outcome, values))  YYERROR;
 
-terminal_node:
-             't' NAME  { path.Peek()->SetName(last_name); }
-                 outcome
-              { path.Push(path.Pop()->NextSibling());
-		while (path.Depth() > 1 && !path.Peek())   {
-		  path.Pop();
-		  path.Push(path.Pop()->NextSibling());
-		}
-	      }
+		     path.Peek()->SetOutcome(outcome);
+		   }
+            ;
 
-outcome:     NAME   {
-               outcome = GetOutcome(last_name);
-	       if (!outcome && last_name != "")
-		 (outcome = NewOutcome())->SetName(last_name);
-	       path.Peek()->SetOutcome(outcome);
-	     }
-             payofflistopt
+outcome_name:      NAME
+                   { if (outcome && outcome->GetName() != last_name) YYERROR;
+		     else if (!outcome)   outc_name = last_name; }
 
-payofflistopt:
-             | LBRACE  { values.Flush(); } payofflist RBRACE
-             { if (values.Length() != E->NumPlayers())   YYERROR;
-	       SetOutcome(outcome, values);
-	     }
+payofflist:        payoff
+          |        payofflist payoff
+          ;
 
-payofflist:    NUMBER   { values.Append(last_rational); }
-          |    payofflist NUMBER  { values.Append(last_rational); }
+payoff:            NUMBER  { values.Append(last_rational); }   
+      ;
 
 %%
 
@@ -206,7 +261,6 @@ int EfgFileReader::yylex(void)
   else if (isdigit(c) || c == '-')   {
     infile.unget(c);
     infile >> last_rational;
-
     return NUMBER;
   }
   
@@ -222,7 +276,7 @@ EfgFileReader::~EfgFileReader()   { }
 void EfgFileType(gInput &f, bool &valid, DataType &type)
 {
   f.seekp(0);
-  static char *prologue = { "EFG 1 " };
+  static char *prologue = { "EFG 2 " };
   char c;
   for (int i = 0; i < strlen(prologue); i++)  {
     f.get(c);
@@ -270,3 +324,5 @@ TEMPLATE class gNode<gString>;
 
 TEMPLATE class gList<gRational>;
 TEMPLATE class gNode<gRational>;
+
+
