@@ -46,12 +46,12 @@ endif
 
 GLIB_SOURCES = gmisc.cc gambitio.cc garray.cc gblock.cc gstring.cc integer.cc \
 		rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc \
-		grarray.cc gmatrix.cc gclsig.cc glpsolve.cc bfs.cc gwatch.cc \
+		grarray.cc gmatrix.cc gclsig.cc bfs.cc gwatch.cc \
 		gfunc.cc gclstats.cc glist.cc subsolve.cc gfuncmin.cc
 
 GLIB_OBJECTS = gmisc.o gambitio.o garray.o gblock.o gstring.o integer.o \
 		rational.o gnulib.o gvector.o gpvector.o gdpvect.o \
-		grarray.o gmatrix.o glpsolve.o bfs.o gwatch.o \
+		grarray.o gmatrix.o bfs.o gwatch.o \
 		gfunc.o gclstats.o glist.o subsolve.o gfuncmin.o
 
 GAME_SOURCES = readnfg.cc readefg.cc nfg.cc nfgdbl.cc nfgrat.cc nfgutils.cc \
