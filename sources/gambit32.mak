@@ -94,8 +94,8 @@ pxi.res :      pxi\pxi.rc
 # SET BISON_SIMPLE=c:\gambit\bisondos\bison.simple
 #
 
-gcompile.cc:     gcompile.yy
-   $(BISON) -p gcl_yy -o gcompile.cc gcompile.yy
+gcompile.cc:     gcl\gcompile.yy
+   $(BISON) -p gcl_yy -o gcl\gcompile.cc gcl\gcompile.yy
 
 readefg.cc:      readefg.yy
    $(BISON) -p efg_yy -o readefg.cc readefg.yy

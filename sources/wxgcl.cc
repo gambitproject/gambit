@@ -17,10 +17,10 @@
 #include "guishare/dlabout.h"
 
 #include "math/math.h"
-#include "gsm.h"
+#include "gcl/gsm.h"
 #include "gnullstatus.h"
-#include "command.h"
-#include "gpreproc.h"
+#include "gcl/command.h"
+#include "gcl/gpreproc.h"
 
 char *_SourceDir = 0;
 char *_ExePath = 0;
