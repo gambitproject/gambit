@@ -1,0 +1,175 @@
+//#
+//# FILE: gblock.imp -- Implementation of gBlock type
+//#
+//# $Id$
+//#
+
+#include <stdlib.h>
+#include <assert.h>
+#include "gblock.h"
+
+template <class T> gBlock<T>::gBlock(void)
+  : length(0), data(0)
+{ }
+
+template <class T> gBlock<T>::gBlock(int len)
+  : length(len), data((len) ? new T[len] : 0)
+{ }
+
+template <class T> gBlock<T>::gBlock(const gBlock<T> &b)
+ : length(b.length)
+{
+  if (length)   {
+    data = new T[length];
+    for (int i = 0; i < length; i++)
+      data[i] = b.data[i];
+  }
+  else
+    data = 0;
+}
+
+template <class T> gBlock<T>::~gBlock()
+{ 
+  if (data)  delete [] data;
+}
+
+template <class T> gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
+{
+  if (this != &b)   {
+    if (data)   delete [] data;
+  
+    length = b.length;
+    if (length)   {
+      data = new T[length];
+      for (int i = 0; i < length; i++)
+	data[i] = b.data[i];
+    }
+    else
+      data = 0;
+  }
+  return *this;
+}
+
+template <class T> int gBlock<T>::operator==(const gBlock<T> &b) const
+{
+  if (length != b.length) return 0;
+  for (int i = 1; i < length; i++) 
+    if (data[i] != b.data[i]) return 0;
+  return 1;
+}
+
+template <class T> int gBlock<T>::operator!=(const gBlock<T> &b) const
+{
+  return !(*this == b);
+}
+
+template <class T> const T &gBlock<T>::operator[](int n) const
+{
+  assert(n >= 1 && n <= length);
+  return data[--n];
+}
+
+template <class T> T &gBlock<T>::operator[](int n)
+{
+  assert(n >= 1 && n <= length);
+  return data[--n];
+}
+
+template <class T> gBlock<T> gBlock<T>::operator+(const gBlock<T>& b) const
+{
+  gBlock<T> result(*this);
+  for (int i = 1; i <= b.length; i++)
+    result.Append(b[i]);
+  return result;
+}
+
+template <class T> gBlock<T> gBlock<T>::operator+(const T &e) const
+{
+  gBlock<T> result(*this);
+  result.Append(e);
+  return result;
+}
+
+template <class T> gBlock<T> &gBlock<T>::operator+=(const T &e)
+{
+  Append(e);
+  return *this;
+}
+
+template <class T> gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
+{
+  *this = *this + b;
+  return *this;
+}
+
+template <class T> int gBlock<T>::InsertAt(const T &t, int n)
+{
+  T *new_data = new T[++length];
+
+  for (int i = 0; i < n - 1; i++)       new_data[i] = data[i];
+  new_data[i++] = t;
+  for (; i < length; i++)       new_data[i] = data[i - 1];
+
+  if (data)   delete [] data;
+  data = new_data;
+
+  return n;
+}
+
+template <class T> int gBlock<T>::Append(const T &t)
+{
+  return InsertAt(t, length + 1);
+}
+
+template <class T> int gBlock<T>::Insert(const T &t, int n)
+{
+  return InsertAt(t, (n < 1) ? 1 : ((n > length + 1) ? length + 1 : n));
+}
+
+template <class T> T gBlock<T>::Remove(int n)
+{
+  assert(n >= 1 && n <= length);
+
+  T ret(data[--n]);
+
+  T *new_data = (--length) ? new T[length] : 0;
+
+  for (int i = 0; i < n; i++)     new_data[i] = data[i];
+  for (; i < length; i++)         new_data[i] = data[i + 1];
+
+  delete [] data;
+  data = new_data;
+
+  return ret;
+}
+
+template <class T> int gBlock<T>::Find(const T &t) const
+{
+  for (int i = 0; i < length && data[i] != t; i++);
+  return (i < length) ? ++i : 0;
+}
+
+template <class T> int gBlock<T>::Contains(const T &t) const
+{ return Find(t); }
+
+template <class T> int gBlock<T>::Length(void) const
+{ return length; }
+
+template <class T> void gBlock<T>::Flush(void)
+{ length = 0;  delete [] data;  data = 0; }
+
+template <class T> void gBlock<T>::Dump(gOutput &f) const
+{
+  f << "gBlock " << this << " contents\n";
+  for (int i = 0; i < length; i++)
+    f << i + 1 << ": " << data[i] << '\n';
+}
+
+//
+// Uses the Dump function to output the gBlock.  Uses the << operator
+// overload to use output streams, gout.
+//
+template <class T> gOutput &operator<<(gOutput &f, const gBlock<T> &b)
+{
+  b.Dump(f);   return f;
+}
