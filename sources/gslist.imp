@@ -1,6 +1,10 @@
-// File: gslist.imp -- code to implement a sortable gList and classes to
+//
+// FILE: gslist.imp -- code to implement a sortable gList and classes to
 // Sort/Filter it.
+//
 // $Id$
+//
+
 #include "gslist.h"
 #include <assert.h>
 // gSortList member functions
@@ -24,7 +28,7 @@ int i;
 for (i = 1, na = head; i < a; i++, na = na->next);
 for (i = 1, nb = head; i < b; i++, nb = nb->next);
 
-gNode<T> nb1=*nb,na1=*na;
+gNode<T> /* nb1=*nb, */ na1=*na;
 
 if (na->next==nb || nb->next==na) // adjacent
 {
