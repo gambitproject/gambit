@@ -100,7 +100,7 @@ char VanillaCommandLine::GetNextChar(void)
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
-int main( int /*argc*/, char* argv[] )
+int main(int argc, char *argv[])
 {
   set_new_handler(gclNewHandler);
 
@@ -138,8 +138,9 @@ int main( int /*argc*/, char* argv[] )
     }
 
     GSM *gsm = new gsmConsole(gin, gout, gerr);
-    // Set up the error handling functions:
+
 #ifndef __BORLANDC__
+    // Set up the error handling functions:
     signal(SIGFPE, (fptr) SigFPEHandler);
 
     signal(SIGTSTP, SIG_IGN);
@@ -159,7 +160,14 @@ int main( int /*argc*/, char* argv[] )
     gCmdLineInput gcmdline(20);
 #endif   // __BORLANDC__
 
-    gPreprocessor P(*gsm, &gcmdline, "Include[\"gclini.gcl\"]");
+    gText initString = "Include[\"gclini.gcl\"]\n";
+    for (int i = 1; i < argc; i++) {
+      initString += "Include[\"";
+      initString += argv[i];
+      initString += "\"]\n";
+    }
+
+    gPreprocessor P(*gsm, &gcmdline, initString);
     
     while (!P.eof()) {
       gText line = P.GetLine();
