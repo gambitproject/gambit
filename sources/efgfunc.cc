@@ -1006,11 +1006,9 @@ void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index
       por->Append(p);
     }
   else {
-    ListPortion *p2 = new ListPortion;
     index.Turn();
     for (int i = 1; i <= sfg.NumPlayers(); i++) 
-      p2->Append(new NumberPortion(sfg.Payoff(index.CurrentIndices(),i)));
-    por->Append(p2);
+      por->Append(new NumberPortion(sfg.Payoff(index.CurrentIndices(),i)));
   }
 }
 
