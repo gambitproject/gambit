@@ -46,7 +46,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   gVector<T> b2(Make_b2(NF, support));
   LHTableau<T> B(A1,A2,b1,b2);
   epsilon = B.Epsilon();
-   if (dup == 0)
+  if ( params.stopAfter!=1 || dup==0)
     All_Lemke(0,B,npivots);
   else  {
     B.LemkePath(dup);
@@ -62,6 +62,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 //  if(params.trace >= 1)
 //    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
   
+  if(params.status.Get()) params.status.Reset();
   AddSolutions();
   time = watch.Elapsed();
   return List.Length();
@@ -70,17 +71,10 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 template <class T> int LemkeModule<T>::Add_BFS(LHTableau<T> &B)
 {
   BFS<T> cbfs((T) 0);
-/*
-  gVector<T> v(B.MinRow(), B.MaxRow());
-  B.BasisVector(v);
-
-  for (int i = B.MinCol(); i <= B.MaxCol(); i++)
-    if (B.Member(i)) {
-      cbfs.Define(i, v[B.Find(i)]);
-    }
-*/
   cbfs = B.GetBFS();
-  if (List.Contains(cbfs))  return 0;
+  if ( (params.stopAfter>0 && List.Length()>params.stopAfter) 
+       || List.Contains(cbfs))  
+    return 0;
   if(params.trace >=2) {
     (*params.tracefile) << "\nFound CBFS";
     (*params.tracefile)  << "\nB = ";
@@ -103,12 +97,22 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
 {
 //  BFS<T> cbfs((T) 0);
   int i;
+  int len;
+  T p1,p2,aa;
 
   np+=B.NumPivots();
   if(!Add_BFS(B)) return 1;
   
-  for (i = B.MinCol(); i <= B.MaxCol(); i++)
+  for (i = B.MinCol(); 
+       i <= B.MaxCol()  && !params.status.Get() &&
+       (params.stopAfter==0 || (List.Length()-1) < params.stopAfter);
+       i++)
     if (i != j)  {
+      len=List.Length()-1;
+      p1=(double)len/(double)(len+1);
+      p2=(double)(len+1)/(double)(len+2);
+      aa=(double)(i)/(double)num_strats;
+      params.status.SetProgress(p1+aa*(p2-p1));
 //      gout << "\n i = " << i;
       LHTableau<T> Bcopy(B);
 //      Bcopy.NumPivots();
@@ -190,7 +194,8 @@ template <class T> long LemkeModule<T>::NumPivots(void) const
 template <class T>
 LemkeModule<T>::LemkeModule(const Nfg<T> &N, const LemkeParams &p,
 			    const NFSupport &S)
-  : NF(N), support(S), params(p), npivots(0), epsilon(0)
+  : NF(N), support(S), params(p), npivots(0), epsilon(0),
+    num_strats(S.NumStrats(1) + S.NumStrats(2))
 { }
 
 template <class T> LemkeModule<T>::~LemkeModule()

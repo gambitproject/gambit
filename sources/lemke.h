@@ -15,11 +15,11 @@
 
 class LemkeParams     {
   public:
-    int dup_strat, trace, stopAfter, maxdepth;
+    int dup_strat, trace, stopAfter;
     gOutput *tracefile;
     gStatus &status;
     
-    LemkeParams(gStatus &status_=gstatus);
+    LemkeParams(gStatus & = gstatus);
 };
 
 //
@@ -34,6 +34,7 @@ private:
   long npivots;
   double time;
   T epsilon;
+  int num_strats;
   gList<BFS<T> > List;
   gList<MixedSolution<T> > solutions;
 

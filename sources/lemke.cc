@@ -10,8 +10,9 @@
 //                        LemkeParams: member functions
 //---------------------------------------------------------------------------
 
-LemkeParams::LemkeParams(gStatus &status_) 
-  : dup_strat(0), trace(0), stopAfter(0), tracefile(&gnull), status(status_)
+LemkeParams::LemkeParams(gStatus &s) 
+  : dup_strat(0), trace(0), stopAfter(0), maxdepth(0), 
+    tracefile(&gnull), status(s)
 { }
 
 
