@@ -2322,9 +2322,11 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
   else if(p1->Spec().Type==porSTRATEGY)
     b = (((StrategyPortion*) p1)->Value() == ((StrategyPortion*) p2)->Value());
   else if(p1->Spec().Type==porNF_SUPPORT)
-    b = (((NfSupportPortion*) p1)->Value()==((NfSupportPortion*) p2)->Value());
+    b = (*(((NfSupportPortion*) p1)->Value()) ==
+	 *(((NfSupportPortion*) p2)->Value()));
   else if(p1->Spec().Type==porEF_SUPPORT)
-    b = (((EfSupportPortion*) p1)->Value()==((EfSupportPortion*) p2)->Value());
+    b = (*(((EfSupportPortion*) p1)->Value()) ==
+	 *(((EfSupportPortion*) p2)->Value()));
   
   else if(p1->Spec().Type==porMIXED_FLOAT)
     b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
