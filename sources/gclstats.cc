@@ -1,4 +1,5 @@
-// File: gclstats.cc -- gStatus definition for the CommandLine gambit.
+//
+// FILE: gclstats.cc -- gStatus definition for the CommandLine gambit.
 //
 // $Id$
 //
@@ -40,7 +41,7 @@ public:
 	gOutput &operator<<(const void *x);
 	bool IsValid(void) const {return true;}
 	// functions for gProgress
-	void	SetProgress(double p) {gout<<(int)(p*100)<<"% Done\n";}
+	void	SetProgress(double p) {/*gout<<(int)(p*100)<<"% Done\n";*/}
 	// functions for gSignal
 	bool Get(void) const {return sig;}
 	void Reset(void) {sig=false;}
@@ -49,15 +50,15 @@ public:
 
 //****************************** gGclProgress stuff ********************
 gOutput &gGCLStatus::operator<<(int x)
-{sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(unsigned int x)
-{sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(long x)
-{sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(char x)
-{sprintf(tmp_str, "%c", x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%c", x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(double x)
-{
+  {/*
 	switch (Represent) {
 	case 'f':
 		sprintf(tmp_str, "%*.*lf", Width, Prec, x);
@@ -66,11 +67,11 @@ gOutput &gGCLStatus::operator<<(double x)
 	case 'e':
 		sprintf(tmp_str, "%*.*le", Width, Prec, x);
 		gout<<tmp_str;
-}
+	      }*/
 return *this;
 }
 gOutput &gGCLStatus::operator<<(float x)
-{
+  {/*
 	switch (Represent) {
 	case 'f':
 		sprintf(tmp_str, "%*.*lf", Width, Prec, x);
@@ -79,13 +80,13 @@ gOutput &gGCLStatus::operator<<(float x)
 	case 'e':
 		sprintf(tmp_str, "%*.*le", Width, Prec, x);
 		gout<<tmp_str;
-}
+	      }*/
 return *this;
 }
 gOutput &gGCLStatus::operator<<(const char *x)
-{sprintf(tmp_str, "%s", x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%s", x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(const void *x)
-{sprintf(tmp_str, "%p", x);gout<<tmp_str;return *this;}
+{/*sprintf(tmp_str, "%p", x);gout<<tmp_str;*/return *this;}
 
 gGCLStatus _gstatus;
 gStatus &gstatus=_gstatus;
