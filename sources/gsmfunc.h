@@ -185,6 +185,7 @@ public:
 
   gString FuncName ( void ) const;
 
+  void Dump(gOutput& f, int i) const;
   void Dump(gOutput& f) const;
 };
 
@@ -247,6 +248,8 @@ class CallFuncObj : public FuncDescObj
 
   Portion* CallFunction      ( GSM*, Portion** param );
   Portion* CallListFunction  ( GSM*, Portion** ParamIn );
+
+  void Dump(gOutput& f) const;
 };
 
 

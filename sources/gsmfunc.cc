@@ -766,28 +766,31 @@ gString FuncDescObj::FuncName( void ) const
   return _FuncName;
 }
 
+void FuncDescObj::Dump(gOutput& f, int i) const
+{
+  int j;
+  f << _FuncName << '[';
+  for(j = 0; j < _FuncInfo[i].NumParams; j++)
+  {
+    if(j != 0) f << ", ";
+    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
+    f << _FuncInfo[i].ParamInfo[j].Name;
+    if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
+    f << "->";
+    if(_FuncInfo[i].ParamInfo[j].DefaultValue)
+      f << _FuncInfo[i].ParamInfo[j].DefaultValue;
+    else
+      f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+    if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
+  }
+  f << "]\n";  
+}
+
 void FuncDescObj::Dump(gOutput& f) const
 {
   int i;
-  int j;
   for(i = 0; i < _NumFuncs; i++)
-  {
-    f << _FuncName << '[';
-    for(j = 0; j < _FuncInfo[i].NumParams; j++)
-    {
-      if(j != 0) f << ", ";
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
-      f << _FuncInfo[i].ParamInfo[j].Name;
-      if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
-      f << "->";
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue)
-	f << _FuncInfo[i].ParamInfo[j].DefaultValue;
-      else
-	f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
-      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
-    }
-    f << "]\n";
-  }
+    Dump(f, i);
 }
 
 
@@ -1543,6 +1546,39 @@ gString CallFuncObj::_ParamName( const int index ) const
     return "";
 }
 
+
+void CallFuncObj::Dump(gOutput& f) const
+{
+  int i;
+  int j;
+  bool first = true;
+
+  if(_FuncIndex < 0)
+    f << FuncName() << "[]\n";
+  else
+  {
+    i = _FuncIndex;
+    f << _FuncName << '[';
+    for(j = 0; j < _FuncInfo[i].NumParams; j++)
+    {
+      if(_RunTimeParamInfo[j].Defined)
+      {
+	if(!first) f << ", ";
+	first = false;      
+	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
+	f << _FuncInfo[i].ParamInfo[j].Name;
+	if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
+	f << "->";
+	// if(_FuncInfo[i].ParamInfo[j].DefaultValue)
+	//   f << _FuncInfo[i].ParamInfo[j].DefaultValue;
+	// else
+	f << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
+      }
+    }
+    f << "]\n";  
+  }
+}
 
 
 

@@ -1442,6 +1442,7 @@ bool GSM::CallFunction( void )
   if( return_value->Type() == porERROR )
     result = false;
 
+
   _Push( return_value );
   
 
@@ -1460,6 +1461,11 @@ bool GSM::CallFunction( void )
     }
   }
 
+  if(result==false)
+  {
+    _StdErr << "Function call stack: " << _CallFuncStack->Depth() << ": ";
+    func->Dump(_StdErr);
+  }
 
   delete func;
 
@@ -1484,6 +1490,7 @@ int GSM::Execute( gList< Instruction* >& program, bool user_func )
   int             program_length  = program.Length();
   int             initial_num_of_funcs = _CallFuncStack->Depth();
   int             i;
+  CallFuncObj*    funcobj;
 
   while( ( program_counter <= program_length ) && ( !done ) )
   {
@@ -1546,7 +1553,8 @@ int GSM::Execute( gList< Instruction* >& program, bool user_func )
 
   for( i = _CallFuncStack->Depth(); i > initial_num_of_funcs; i-- )
   {
-    delete _CallFuncStack->Pop();
+    funcobj = _CallFuncStack->Pop();
+    delete funcobj;
   }
   assert( _CallFuncStack->Depth() == initial_num_of_funcs );
 
@@ -1719,8 +1727,7 @@ void GSM::Dump( void )
       Pop();
     }
   }
-  //_StdOut << "\n";
-  
+
   assert( _Depth() == 0 );
 }
 
