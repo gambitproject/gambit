@@ -240,6 +240,8 @@ constant:        FLOAT    { $$ = new gelConstant<gNumber *>(new gNumber(dval)); 
         |        INTEGER  { $$ = new gelConstant<gNumber *>(new gNumber(ival)); }
         |        BOOLEAN  { $$ = new gelConstant<gTriState *>(new gTriState(bval)); }
         |        TEXT     { $$ = new gelConstant<gText *>(new gText(tval)); }
+	|        STDOUT   { $$ = new gelConstant<gOutput *>(&gout); }
+        |        gNULL    { $$ = new gelConstant<gOutput *>(&gnull); }
         |        NAME     { $$ = LookupVar(tval); }
         |        QUIT     { $$ = new gelQuitExpr(); }
         |        LBRACE   { dlist.Flush(); tlist.Flush(); blist.Flush(); 
