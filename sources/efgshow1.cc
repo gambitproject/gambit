@@ -24,9 +24,9 @@
 
 // GUI recorder.
 
-#include "guirecorder.h"
-#include "guirecorder_db.h"
-#include "guiplayback.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
 
 
 class EfgShowToolBar:
@@ -822,19 +822,19 @@ EfgGUI::EfgGUI(Efg *ef, const gText infile_name,
         }
         else                        // from data file
         {
-			try 
-			{ 
-				gFileInput infile(infile_name);
-				ReadEfgFile(infile, ef);
-				
-				if (!ef) 
-					wxMessageBox("ReadFailed::Check the file");
-			}
-			catch(gFileInput::OpenFailed &) 
-			{
-				wxMessageBox("ReadFailed::Check the file");
-				return;
-			}
+            try 
+            { 
+                gFileInput infile(infile_name);
+                ReadEfgFile(infile, ef);
+                
+                if (!ef) 
+                    wxMessageBox("ReadFailed::Check the file");
+            }
+            catch(gFileInput::OpenFailed &) 
+            {
+                wxMessageBox("ReadFailed::Check the file");
+                return;
+            }
         }
     }
 

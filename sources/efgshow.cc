@@ -17,9 +17,9 @@
 
 // GUI recorder.
 
-#include "guirecorder.h"
-#include "guirecorder_db.h"
-#include "guiplayback.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
 
 // ----------------------------------------
 // For GUI logging:
@@ -66,7 +66,7 @@ EfgShow::EfgShow(Efg &ef_, EfgNfgInterface *nfg, int , wxFrame *frame,
       EfgNfgInterface(gEFG, nfg), parent(frame), ef(ef_), tw(0)
 {
     // Give the object a unique name usable by the GUI playback system,
-	// and add it to the database.
+    // and add it to the database.
   
     GuiLogName = gText(GuiLogRootName) + ToText(GuiLogNameCount);
     GuiLogNameCount++;
@@ -697,6 +697,6 @@ bool EfgShow::is_EfgShow() const
 void EfgShow::EfgShow_hello() const
 {
     printf("instance of class EfgShow accessed at %x\n", (unsigned int)this);
-	printf("Log name: %s\n", (char *)GuiLogName);
+    printf("Log name: %s\n", (char *)GuiLogName);
 }
 

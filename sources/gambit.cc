@@ -34,9 +34,9 @@
 
 // GUI recorder.
 
-#include "guirecorder.h"
-#include "guirecorder_db.h"
-#include "guiplayback.h"
+#include "guirec.h"
+#include "guirecdb.h"
+#include "guipb.h"
 
 #ifndef wx_msw
 #include "bitmaps/gambi.xpm"
@@ -45,10 +45,6 @@
 #ifdef _AIX
 extern wxApp *wxTheApp = 1;
 #endif
-
-#undef  DEBUG
-// Uncomment the next line to run with debugging statements:
-//#define DEBUG
 
 
 GambitApp gambitApp;
@@ -351,7 +347,7 @@ wxFrame *GambitApp::OnInit(void)
     // If playing back a log file, read in the log file and
     // execute the log file commands one by one.
 
-#ifdef DEBUG
+#ifdef GUIPB_DEBUG
     gambit_frame->GambitFrame_hello();
 #endif
 
