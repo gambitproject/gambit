@@ -4196,8 +4196,7 @@ the stopwatch was running.
 ElimDom[support->NFSUPPORT, {strong->False}, 
         {mixed->False}, {precision->Rational}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-ElimDom[support->EFSUPPORT, {strong->False}, 
-        {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+ElimDom[support->EFSUPPORT, {strong->False}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -7541,12 +7540,26 @@ Runs a child process to display the game \verb+n+ in the Gambit GUI.
 
 \item\lex{ElimAllDom}
 \protect \large \begin{verbatim}
+ElimAllDom[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+Successively eliminates dominated strategies in \verb+s+. See
+\verb+ElimDom+ for description of parameters.  
+\begin{verbatim}
+  While[s!=(ss:=ElimDom[s,strong,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+\end{verbatim} 
+\ed
+
+\item\lex{ElimAllDom}
+\protect \large \begin{verbatim}
 ElimAllDom[s->NFSUPPORT, {strong->False}, {mixed->False}, 
            {precision->Rational}, {time<->0.000000}, 
            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-ElimAllDom[s->EFSUPPORT, {strong->False}, {mixed->False}, 
-           {precision->Rational}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7577,8 +7590,7 @@ Successively eliminates dominated strategies in \verb+nfg+.  See
 
 \item\lex{ElimAllDom}
 \protect \large \begin{verbatim}
-ElimAllDom[efg->EFG, {strong->False}, {mixed->False}, 
-           {precision->Rational}, {time<->0.000000}, 
+ElimAllDom[efg->EFG, {strong->False}, {time<->0.000000}, 
            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -7586,7 +7598,7 @@ ElimAllDom[efg->EFG, {strong->False}, {mixed->False},
 Successively eliminates dominated strategies in \verb+nfg+. See
 \verb+ElimDom+ for description of parameters.  
 \begin{verbatim}
-  ElimAllDom[Support[efg],strong,mixed,precision,time,traceFile,traceLevel];
+  ElimAllDom[Support[efg],strong,time,traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
@@ -7608,8 +7620,7 @@ description of the parameters.
 
 \item\lex{ElimDom}
 \protect \large \begin{verbatim}
-ElimDom[efg->EFG, {strong->False}, {mixed->False}, 
-        {precision->Rational}, {time<->0.000000}, 
+ElimDom[efg->EFG, {strong->False}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -7618,7 +7629,7 @@ A version of \verb+ElimDom+ that takes an extensive form game instead
 of a support.  See the built-in function, \verb+ElimDom+ for a
 description of the parameters.
 \begin{verbatim}
-  ElimDom[Support[efg],strong,mixed,precision,time,traceFile,traceLevel]
+  ElimDom[Support[efg],strong,time,traceFile,traceLevel]
 \end{verbatim} 
 \ed
 
