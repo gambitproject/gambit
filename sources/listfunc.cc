@@ -392,6 +392,9 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_LengthList, 1, NO_PREDEFINED_PARAMS);
   FuncObj->SetParamInfo(GSM_LengthList, 0, "list", porANYLIST | porLIST,
 			NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NumChars");
   FuncObj->SetFuncInfo(GSM_LengthText, 1);
   FuncObj->SetParamInfo(GSM_LengthText, 0, "text", porTEXT);
   gsm->AddFunction(FuncObj);

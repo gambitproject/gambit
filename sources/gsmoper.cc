@@ -1418,28 +1418,45 @@ Portion* GSM_Write_list( Portion** param )
   return new OutputRefPortion( s );
 }
 
+
+Portion* GSM_Write_list_Text( Portion** param );
+
 Portion* GSM_Write_list_Text( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 1 ] )->Value();
   ListPortion* list = ( (ListPortion*) param[ 0 ] );
   int i;
-  TextPortion* p;
+  Portion* p;
   int length = list->Length();
+  Portion** subparam;
 
   s << "{";
   if( length >= 1 )
   {
     for( i = 1; i <= length; i++ )
     {
-      p = (TextPortion*) list->Subscript( i );
+      p = (*list)[i];
       if( i > 1 )
 	s << ",";
       if( p->IsValid() )
       {
-	if( _WriteQuoted )
-	  s << " \"" << p->Value() << "\"";
+	assert( p->Type() == porTEXT || p->Type() == porLIST );
+	if( p->Type() == porTEXT )
+	{
+	  if( _WriteQuoted )
+	    s << " \"" << ((TextPortion*)p)->Value() << "\"";
+	  else
+	    s << " " << ((TextPortion*)p)->Value();
+	}
 	else
-	  s << " " << p->Value();
+	{
+	  s << ' ';
+	  subparam = new Portion*[2];
+	  subparam[0] = p;
+	  subparam[1] = param[1];
+	  GSM_Write_list_Text( subparam );
+	  delete[] subparam;
+	}
       }
       else
 	s << " (undefined)";
