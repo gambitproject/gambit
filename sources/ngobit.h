@@ -1,5 +1,5 @@
 //#
-//# FILE: gobit.h -- Interface to Gobit solution module
+//# FILE: ngobit.h -- Interface to normal form Gobit solution module
 //#
 //# $Id$
 //#
@@ -7,40 +7,30 @@
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "normal.h"
+#include "gobit.h"
 
-class GobitParams     {
+template <class T> class NFGobitParams : public GobitParams<T>   {
   public:
-    int plev, nequilib, type, maxitsDFP, maxitsBrent;
-    gRational minLam, maxLam, delLam, tolDFP, tolBrent;
-    gString outfile, errfile;
-    
-    GobitParams(void);
+    int maxitsDFP;
+    T tolDFP;
+
+    NFGobitParams(void);
 };
 
-class GobitSolver  {
-  private:
-    const BaseNormalForm &nf;
-    GobitParams params;
-    int nevals;
-    gRational time;
+
+template <class T> class NFGobitModule : public GobitModule<T>   {
+  protected:
+    const NormalForm<T> &N;
+
+    GobitFunc<T> *CreateFunc(void);
 
   public:
-    GobitSolver(const BaseNormalForm &N, const GobitParams &p) 
-      : nf(N), params(p)   { }
-    ~GobitSolver()   { }
-
-    int Gobit(void);
-    
-    int NumEvals(void) const    { return nevals; }
-    gRational Time(void) const   { return time; }
-
-    GobitParams &Parameters(void)   { return params; }
+    NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p);
+    virtual ~NFGobitModule();
 };
+
+
 
 #endif    // NGOBIT_H
 
