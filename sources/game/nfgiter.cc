@@ -128,11 +128,12 @@ gbtGameOutcome gbtNfgIterator::GetOutcome(void) const
   return profile.GetOutcome();
 }
 
+/*
 void gbtNfgIterator::SetOutcome(gbtGameOutcome outcome)
 {
   profile.SetOutcome(outcome);
 }
-
+*/
 
 //-------------------------------------
 // gbtNfgContIterator: Constructor, Destructor

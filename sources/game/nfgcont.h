@@ -38,9 +38,7 @@ private:
   
 public:
   gbtNfgContingency(const gbtGame &);
-  gbtNfgContingency(const gbtGame &, const gbtArray<int> &);
   gbtNfgContingency(const gbtNfgContingency &p);
-
   ~gbtNfgContingency();
   
   gbtNfgContingency &operator=(const gbtNfgContingency &);
@@ -49,14 +47,11 @@ public:
   bool operator!=(const gbtNfgContingency &p_cont) const
     { return !(*this == p_cont); }
 
-  bool IsValid(void) const; 
-  long GetIndex(void) const;
-  
   gbtGameStrategy GetStrategy(int p_player) const
     { return m_profile[p_player]; }
   void SetStrategy(gbtGameStrategy);
 
-  void SetOutcome(const gbtGameOutcome &);
+  void SetOutcome(const gbtGameOutcome &) const;
   gbtGameOutcome GetOutcome(void) const;
 
   gbtNumber GetPayoff(const gbtGamePlayer &) const;

@@ -242,7 +242,6 @@ gbtGame ReadNfg(gbtInput &);
 #include "node.h"
 
 #include "efgutils.h"
-gbtGame CompressNfg(const gbtGame &, const gbtNfgSupport &);
 
 //
 // Stuff below here needs to have everything defined before we can

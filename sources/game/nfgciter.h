@@ -61,12 +61,12 @@ public:
   // This only has an effect if the player is currently frozen
   int Next(gbtGamePlayer);
   
-  const gbtNfgContingency &GetProfile(void) const { return m_profile; }
+  const gbtNfgContingency &GetContingency(void) const { return m_profile; }
 
   int NextContingency(void);
   
   gbtGameOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
-  void SetOutcome(gbtGameOutcome p_outcome) { m_profile.SetOutcome(p_outcome); }
+
 
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return m_profile.GetPayoff(p_player); }

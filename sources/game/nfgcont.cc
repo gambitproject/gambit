@@ -71,18 +71,6 @@ bool gbtNfgContingency::operator==(const gbtNfgContingency &p_cont) const
   return true;
 }
 
-bool gbtNfgContingency::IsValid(void) const
-{
-  int i;
-  for (i = m_profile.Length(); i > 0 && !m_profile[i].IsNull(); i--);
-  return i;
-}
-
-long gbtNfgContingency::GetIndex(void) const 
-{ 
-  return m_index; 
-}
-
 void gbtNfgContingency::SetStrategy(gbtGameStrategy p_strategy)
 {
   int pl = p_strategy->GetPlayer()->GetId();
@@ -90,7 +78,7 @@ void gbtNfgContingency::SetStrategy(gbtGameStrategy p_strategy)
   m_profile[pl] = p_strategy;
 }
 
-void gbtNfgContingency::SetOutcome(const gbtGameOutcome &p_outcome)
+void gbtNfgContingency::SetOutcome(const gbtGameOutcome &p_outcome) const
 {
   dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_results[m_index + 1] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
   dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_revision++;

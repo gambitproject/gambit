@@ -448,9 +448,7 @@ void gbtNfgFrame::OnFileSave(wxCommandEvent &p_event)
 
   try {
     gbtFileOutput file(m_doc->GetFilename().mb_str());
-    gbtGame nfg = CompressNfg(m_doc->GetGame(),
-			      m_doc->GetNfgSupportList().GetCurrent());
-    nfg->WriteNfg(file);
+    m_doc->GetGame()->WriteNfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gbtFileOutput::OpenFailed &) {

@@ -62,7 +62,6 @@ public:
   void Set(const gbtArray<int> &t);
 
   gbtGameOutcome GetOutcome(void) const;
-  void SetOutcome(gbtGameOutcome);
 
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return profile.GetPayoff(p_player); }

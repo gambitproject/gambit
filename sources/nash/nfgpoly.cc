@@ -232,7 +232,7 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
   gbtPolyMulti<gbtDouble> equation(&Space,&Lex);
   do {
     gbtPolyMulti<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
-    profile = A.GetProfile();
+    profile = A.GetContingency();
     int k;
     for(k=1;k<=m_nfg->NumPlayers();k++) 
       if(i!=k) 
