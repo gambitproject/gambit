@@ -49,7 +49,7 @@ END_EVENT_TABLE()
 
 dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
   : wxDialog(p_parent, -1, "Strategies"), 
-    m_nfg(p_nfg), m_lastStrategy(0)
+    m_nfg(p_nfg), m_lastPlayer(0), m_lastStrategy(0)
 {
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -104,10 +104,13 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 
   Layout();
+  CenterOnParent();
 }
 
 void dialogStrategies::OnPlayerChanged(wxCommandEvent &)
 {
+  m_strategyNames[m_lastPlayer+1][m_lastStrategy+1] =
+    m_strategyName->GetValue().c_str();
   m_strategyList->Clear();
   int player = m_player->GetSelection() + 1;
   for (int st = 1; st <= m_strategyNames[player].Length(); st++) {
@@ -116,6 +119,7 @@ void dialogStrategies::OnPlayerChanged(wxCommandEvent &)
   }
   m_strategyList->SetSelection(0);
   m_strategyName->SetValue((char *) m_strategyNames[player][1]);
+  m_lastPlayer = m_player->GetSelection();
   m_lastStrategy = 0;
 }
 

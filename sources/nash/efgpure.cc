@@ -87,7 +87,7 @@ gList<BehavSolution> efgEnumPure::Solve(const EFSupport &p_support,
 				 Infosets()[iset])->GetNumber()) = 1;
       }
 
-      solutions.Append(BehavSolution(temp, algorithmEfg_ENUMPURE_EFG));
+      solutions.Append(BehavSolution(temp, "EnumPure[EFG]"));
     }
     contNumber++;
   }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&

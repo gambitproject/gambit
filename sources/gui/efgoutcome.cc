@@ -69,12 +69,13 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   AdjustScrollbars();
 
   m_menu = new wxMenu("Outcomes");
-  m_menu->Append(idPOPUP_NEW, "New", "Create a new outcome");
-  m_menu->Append(idPOPUP_DELETE, "Delete", "Delete this outcome");
+  m_menu->Append(idPOPUP_NEW, "New outcome", "Create a new outcome");
+  m_menu->Append(idPOPUP_DELETE, "Delete outcome", "Delete this outcome");
   m_menu->AppendSeparator();
-  m_menu->Append(idPOPUP_ATTACH, "Attach",
+  m_menu->Append(idPOPUP_ATTACH, "Attach outcome",
 		 "Attach this outcome at the cursor");
-  m_menu->Append(idPOPUP_DETACH, "Detach", "Detach the outcome at the cursor");
+  m_menu->Append(idPOPUP_DETACH, "Detach outcome",
+		 "Detach the outcome at the cursor");
 
   Show(true);
 }
@@ -140,7 +141,13 @@ void EfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
       SaveEditControlValue();
       HideCellEditControl();
     }
-    m_parent->Game()->NewOutcome();
+    gText outcomeName = m_parent->UniqueOutcomeName();
+    gbtEfgOutcome outcome = m_parent->Game()->NewOutcome();
+    m_parent->Game()->SetLabel(outcome, outcomeName);
+    for (int pl = 1; pl <= m_parent->Game()->NumPlayers(); pl++) {
+      m_parent->Game()->SetPayoff(outcome, pl, gNumber(0));
+      SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+    }
     AppendRows();
     m_parent->OnOutcomesEdited();
     UpdateValues();
@@ -186,10 +193,17 @@ void EfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 
 void EfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
-  m_parent->Game()->NewOutcome();
+  gText outcomeName = m_parent->UniqueOutcomeName();
+  gbtEfgOutcome outcome = m_parent->Game()->NewOutcome();
+  m_parent->Game()->SetLabel(outcome, outcomeName);
   // Appending the row here keeps currently selected row selected
   AppendRows();
+  for (int pl = 1; pl <= m_parent->Game()->NumPlayers(); pl++) {
+    m_parent->Game()->SetPayoff(outcome, pl, gNumber(0));
+    SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+  }
   m_parent->OnOutcomesEdited();
+  UpdateValues();
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
@@ -199,6 +213,7 @@ void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
     m_parent->Game()->DeleteOutcome(outcome);
     m_parent->OnOutcomesEdited();
   }
+  UpdateValues();
 }
 
 void EfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)

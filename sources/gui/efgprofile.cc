@@ -44,13 +44,15 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
     m_parent(p_efgShow)
 {
   m_menu = new wxMenu("Profiles");
-  m_menu->Append(efgmenuPROFILES_NEW, "New", "Create a new profile");
-  m_menu->Append(efgmenuPROFILES_DUPLICATE, "Duplicate",
+  m_menu->Append(efgmenuPROFILES_NEW, "New profile", "Create a new profile");
+  m_menu->Append(efgmenuPROFILES_DUPLICATE, "Duplicate profile",
 		 "Duplicate this profile");
-  m_menu->Append(efgmenuPROFILES_DELETE, "Delete", "Delete this profile");
+  m_menu->Append(efgmenuPROFILES_DELETE, "Delete profile", 
+		 "Delete this profile");
   m_menu->Append(efgmenuPROFILES_PROPERTIES, "Properties",
 		 "View and edit properties of this profile");
-
+  m_menu->Append(efgmenuPROFILES_REPORT, "Report",
+		 "Generate a report with information on profiles");
   UpdateValues();
 }
 
@@ -85,13 +87,12 @@ void EfgProfileList::UpdateValues(void)
   for (int i = 1; i <= m_parent->Profiles().Length(); i++) {
     const BehavSolution &profile = m_parent->Profiles()[i];
     InsertItem(i - 1, (char *) profile.GetName());
-    SetItem(i - 1, 1, (char *) ToText(profile.Creator()));
+    SetItem(i - 1, 1, (char *) profile.Creator());
     SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
     SetItem(i - 1, 3, (char *) ToText(profile.IsSubgamePerfect()));
     SetItem(i - 1, 4, (char *) ToText(profile.IsSequential()));
     SetItem(i - 1, 5, (char *) ToText(profile.LiapValue()));
-    if (profile.Creator() == algorithmEfg_QRE_EFG ||
-	profile.Creator() == algorithmEfg_QRE_NFG) {
+    if (profile.Creator() == "Qre[EFG]" || profile.Creator() == "Qre[NFG]") {
       SetItem(i - 1, 6, (char *) ToText(profile.QreLambda()));
     }
     else {
@@ -126,7 +127,93 @@ void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
   m_menu->Enable(efgmenuPROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
   m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentProfile() > 0);
   m_menu->Enable(efgmenuPROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(efgmenuPROFILES_REPORT, m_parent->CurrentProfile() > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 
+wxString EfgProfileList::GetReport(void) const
+{
+  wxString report;
+  const gList<BehavSolution> &profiles = m_parent->Profiles();
+  const efgGame &efg = *m_parent->Game();
+
+  report += wxString::Format("Behavior strategy profiles on game '%s' [%s]\n\n",
+			     (const char *) efg.GetTitle(),
+			     m_parent->Filename().c_str());
+
+  report += wxString::Format("Number of profiles: %d\n", profiles.Length());
+
+  for (int i = 1; i <= profiles.Length(); i += 4) {
+    report += "\n----------\n\n";
+
+    report += "          ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += wxString::Format("%-15s ", 
+				 (const char *) profiles[i+j].GetName());
+    }
+    report += "\n";
+
+    report += "          ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += ("--------------- "); 
+    }
+    report += "\n";
+
+    report += "Creator:  ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += wxString::Format("%-15s ",
+				 (const char *) profiles[i+j].Creator());
+    }
+    report += "\n";
+
+    report += "Nash?     ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += wxString::Format("%-15s ",
+				 (const char *) ToText(profiles[i+j].IsNash()));
+    }
+    report += "\n";
+
+    report += "Perfect?  ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += wxString::Format("%-15s ",
+				 (const char *) ToText(profiles[i+j].IsSubgamePerfect()));
+    }
+    report += "\n";
+
+    report += "Liap:     ";
+    for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+      report += wxString::Format("%-15s ",
+				 (const char *) ToText(profiles[i+j].LiapValue()));
+    }
+    report += "\n\n";
+
+    for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
+      EFPlayer *player = efg.Players()[pl];
+      report += wxString::Format("%s\n", (const char *) player->GetName());
+
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	Infoset *infoset = player->Infosets()[iset];
+
+	report += wxString::Format("%s\n", (const char *) infoset->GetName());
+
+	for (int act = 1; act <= infoset->NumActions(); act++) {
+	  report += wxString::Format("%2d: %-6s", act,
+				     (const char *) infoset->Actions()[act]->GetName());
+
+	  for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
+	    report += wxString::Format("%-15s ", 
+				       (const char *) ToText((*profiles[i+j].Profile())(pl, iset, act)));
+	  }
+	  report += "\n";
+
+	}
+	report += "\n";
+      }
+
+      report += "\n";
+    }
+  }
+
+  return report;
+}
 

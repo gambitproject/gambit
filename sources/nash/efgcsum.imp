@@ -205,7 +205,7 @@ void efgLp<T>::GetSolutions(const EFSupport &p_support,
   for (int i = 1; i <= List.Length(); i++)    {
     BehavProfile<T> profile(p_support);
     GetProfile(p_support, profile.GetDPVector(),List[i],p_support.GetGame().RootNode(),1,1);
-    solutions.Append(BehavSolution(profile, algorithmEfg_LP_EFG));
+    solutions.Append(BehavSolution(profile, "Lp[EFG]"));
   }
 
 }

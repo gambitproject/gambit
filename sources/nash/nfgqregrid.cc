@@ -472,8 +472,7 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
 
 	      if (newsoln) {
 		OutputResult(p_pxifile, candidate, lambda, 0.0);
-		int i = cursolns.Append(MixedSolution(candidate,
-						      algorithmNfg_QREALL));
+		int i = cursolns.Append(MixedSolution(candidate, "QreGrid[NFG]"));
 		cursolns[i].SetQre(lambda, 0.0);
 	      }
 	    }

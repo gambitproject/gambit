@@ -145,6 +145,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }
 
 Infoset *dialogEditNode::GetInfoset(void) const

@@ -353,7 +353,7 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list,
   for (int k = 1; k <= list.Length(); k++) {
     gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-    BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
+    BehavSolution sol(SF.ToBehav(y), "PolEnum[EFG]");
 
     if (ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
@@ -380,7 +380,7 @@ EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list,
   for (int k = 1; k <= list.Length(); k++) {
     gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-    BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
+    BehavSolution sol(SF.ToBehav(y), "PolEnum[EFG]");
 
     if(ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
@@ -579,7 +579,7 @@ EfgPolEnumModule<T>::ReturnPolishedSolution(const gVector<gDouble> &root) const
     for(int j=1;j<=SF.NumSequences()[i];j++) 
       x(i,j) = NumProbOfSequence(i,j,root);
 
-  BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLISH_NASH);
+  BehavSolution sol(SF.ToBehav(x), "Polish");
   return sol;
 }
 

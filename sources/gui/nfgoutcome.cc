@@ -69,12 +69,13 @@ NfgOutcomeWindow::NfgOutcomeWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   AdjustScrollbars();
 
   m_menu = new wxMenu("Outcomes");
-  m_menu->Append(idPOPUP_NEW, "New", "Create a new outcome");
-  m_menu->Append(idPOPUP_DELETE, "Delete", "Delete this outcome");
+  m_menu->Append(idPOPUP_NEW, "New outcome", "Create a new outcome");
+  m_menu->Append(idPOPUP_DELETE, "Delete outcome", "Delete this outcome");
   m_menu->AppendSeparator();
-  m_menu->Append(idPOPUP_ATTACH, "Attach",
+  m_menu->Append(idPOPUP_ATTACH, "Attach outcome",
 		 "Attach this outcome at the cursor");
-  m_menu->Append(idPOPUP_DETACH, "Detach", "Detach the outcome at the cursor");
+  m_menu->Append(idPOPUP_DETACH, "Detach outcome",
+		 "Detach the outcome at the cursor");
 
   Show(true);
 }
@@ -130,7 +131,13 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
       SaveEditControlValue();
       HideCellEditControl();
     }
-    m_parent->Game().NewOutcome();
+    gText outcomeName = m_parent->UniqueOutcomeName();
+    gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
+    m_parent->Game().SetLabel(outcome, outcomeName);
+    for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
+      m_parent->Game().SetPayoff(outcome, pl, gNumber(0));
+      SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+    }
     AppendRows();
     m_parent->OnOutcomesEdited();
     UpdateValues();
@@ -172,10 +179,17 @@ void NfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 
 void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
-  m_parent->Game().NewOutcome();
+  gText outcomeName = m_parent->UniqueOutcomeName();
+  gbtNfgOutcome outcome = m_parent->Game().NewOutcome();
+  m_parent->Game().SetLabel(outcome, outcomeName);
   // Appending the row here keeps currently selected row selected
   AppendRows();
+  for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
+    m_parent->Game().SetPayoff(outcome, pl, gNumber(0));
+    SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+  }
   m_parent->OnOutcomesEdited();
+  UpdateValues();
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
@@ -184,6 +198,7 @@ void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
     m_parent->Game().DeleteOutcome(m_parent->Game().GetOutcomeId(GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
+  UpdateValues();
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)

@@ -48,7 +48,7 @@ class EfgShow : public wxFrame {
 private:
   efgGame &m_efg;
   TreeWindow *m_treeWindow;
-  Node *m_cursor;
+  Node *m_cursor, *m_copyNode, *m_cutNode;
 
   int m_currentProfile;
   gList<BehavSolution> m_profiles;
@@ -89,6 +89,10 @@ private:
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
+  void OnEditCut(wxCommandEvent &);
+  void OnEditCopy(wxCommandEvent &);
+  void OnEditPaste(wxCommandEvent &);
+  
   void OnEditInsert(wxCommandEvent &);
   void OnEditDelete(wxCommandEvent &);
   void OnEditReveal(wxCommandEvent &);
@@ -133,6 +137,7 @@ private:
   void OnProfilesDuplicate(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
   void OnProfilesProperties(wxCommandEvent &);
+  void OnProfilesReport(wxCommandEvent &);
   void OnProfileSelected(wxListEvent &);
 
   void OnInfoNotebookPage(wxNotebookEvent &);
@@ -144,6 +149,7 @@ public:
 
   // PROFILE ACCESS AND MANIPULATION
   void AddProfile(const BehavSolution &, bool map);
+  void RemoveProfile(int);
   void RemoveProfiles(void);
   void ChangeProfile(int);
   int CurrentProfile(void) const { return m_currentProfile; }
@@ -169,17 +175,19 @@ public:
 
   efgGame *Game(void) { return &m_efg; }
 
-
   void UpdateMenus(void);
   int NumDecimals(void) const;
 
   void OnOutcomesEdited(void);
+  gText UniqueOutcomeName(void) const;
 
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
   void SetCursor(Node *m_node);
   Node *Cursor(void) const { return m_cursor; }
+  Node *CopyNode(void) const { return m_copyNode; }
+  Node *CutNode(void) const { return m_cutNode; }
 
   void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

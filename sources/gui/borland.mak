@@ -14,7 +14,7 @@
 WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 tiff jpeg winpng zlib
 
-EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.0.1\"
+EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.0.2\"
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
@@ -40,6 +40,7 @@ gambit_SOURCES = \
 	dlnfgqre.cc \
 	dlnfgstrategies.cc \
 	dlqrefile.cc \
+	dlreport.cc \
 	dlspinctrl.cc \
 	efglayout.cc \
 	efgnavigate.cc \

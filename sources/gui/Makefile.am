@@ -49,6 +49,8 @@ gambit_SOURCES = \
 	dlnfgstrategies.h \
 	dlqrefile.cc \
 	dlqrefile.h \
+	dlreport.cc \
+	dlreport.h \
 	dlspinctrl.cc \
 	dlspinctrl.h \
 	efgconst.h \

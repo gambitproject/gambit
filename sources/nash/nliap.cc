@@ -217,39 +217,44 @@ gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
 
   gList<MixedSolution> solutions;
 
-  for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
-		   (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
-       i++) { 
-    p_status.Get();
-    p_status.SetProgress((double) i / (double) m_numTries,
-			 gText("Attempt ") + ToText(i) + 
-			 gText(", equilibria so far: ") +
-			 ToText(solutions.Length())); 
-    gConjugatePR minimizer(p.Length());
-    gVector<double> gradient(p.Length()), dx(p.Length());
-    double fval;
-    minimizer.Set(F, p, fval, gradient, .01, .0001);
+  try {
+    for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
+		     (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
+	 i++) { 
+      p_status.Get();
+      p_status.SetProgress((double) i / (double) m_numTries,
+			   gText("Attempt ") + ToText(i) + 
+			   gText(", equilibria so far: ") +
+			   ToText(solutions.Length())); 
+      gConjugatePR minimizer(p.Length());
+      gVector<double> gradient(p.Length()), dx(p.Length());
+      double fval;
+      minimizer.Set(F, p, fval, gradient, .01, .0001);
 
-    try {
-      for (int iter = 1; iter <= m_maxitsN; iter++) {
-	if (iter % 20 == 0) {
-	  p_status.Get();
-	}
+      try {
+	for (int iter = 1; iter <= m_maxitsN; iter++) {
+	  if (iter % 20 == 0) {
+	    p_status.Get();
+	  }
+	  
+	  if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
+	    break;
+	  }
 
-	if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
-	  break;
-	}
-
-	if (sqrt(gradient.NormSquared()) < .001) {
-	  solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
-	  break;
+	  if (sqrt(gradient.NormSquared()) < .001) {
+	    solutions.Append(MixedSolution(p, "Liap[NFG]"));
+	    break;
+	  }
 	}
       }
+      catch (gFuncMinException &) { }
     }
-    catch (gFuncMinException &) { }
-
     PickRandomProfile(p);
   }
+  catch (gSignalBreak &) {
+    // Just stop and return any solutions found so far
+  }
+  // Any other exceptions propagate out, assuming something Real Bad happened
 
   return solutions;
 }

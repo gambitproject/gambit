@@ -59,6 +59,7 @@
 #include "dlnfgnash.h"
 #include "dlnfgqre.h"
 #include "dlqrefile.h"
+#include "dlreport.h"
 #include "nash/nfgqre.h"
 #include "nash/nfgqregrid.h"
 
@@ -105,6 +106,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_PROFILES_DUPLICATE, NfgShow::OnProfilesDuplicate)
   EVT_MENU(NFG_PROFILES_DELETE, NfgShow::OnProfilesDelete)
   EVT_MENU(NFG_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
+  EVT_MENU(NFG_PROFILES_REPORT, NfgShow::OnProfilesReport)
   EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnProfileSelected)
   EVT_SIZE(NfgShow::OnSize)
@@ -224,15 +226,52 @@ void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
   UpdateMenus();
 }
 
+void NfgShow::RemoveProfile(int p_profile)
+{
+  m_profiles.Remove(p_profile);
+  if (m_currentProfile == p_profile) {
+    m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
+  }
+  else if (m_currentProfile > p_profile) {
+    m_currentProfile--;
+  }
+  if (m_currentProfile > 0) {
+    m_table->SetProfile(m_profiles[m_currentProfile]);
+  }
+  else {
+    m_table->ClearProfile();
+    if (m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+    }
+    if (m_table->ShowValues()) {
+      m_table->ToggleValues();
+    }
+  }
+  m_profileTable->UpdateValues();
+  UpdateMenus();
+}
+
 void NfgShow::ChangeProfile(int sol)
 {
   m_currentProfile = sol;
 
   if (sol > 0) {
     m_table->SetProfile(m_profiles[m_currentProfile]);
-    if (m_profileTable) {
-      m_profileTable->UpdateValues();
+  }
+  else if (sol == 0)  {
+    if (m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, false);
     }
+    if (m_table->ShowValues()) {
+      m_table->ToggleValues();
+      GetMenuBar()->Check(NFG_VIEW_VALUES, false);
+    }
+  }
+
+
+  if (m_profileTable) {
+    m_profileTable->UpdateValues();
   }
 }
 
@@ -306,6 +345,25 @@ void NfgShow::OnOutcomesEdited(void)
   }
   m_table->RefreshTable();
   m_profileTable->UpdateValues();
+}
+
+gText NfgShow::UniqueOutcomeName(void) const
+{
+  int number = m_nfg.NumOutcomes() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_nfg.NumOutcomes(); i++) {
+      if (m_nfg.GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_nfg.NumOutcomes()) {
+      return "Outcome" + ToText(number);
+    }
+    
+    number++;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -445,6 +503,8 @@ void NfgShow::UpdateMenus(void)
   gArray<int> profile(GetContingency());
   menu->Enable(NFG_VIEW_PROBABILITIES, m_profiles.Length() > 0);
   menu->Enable(NFG_VIEW_VALUES, m_profiles.Length() > 0);
+  menu->Check(NFG_VIEW_OUTCOME_LABELS, 
+	      !m_table->GetSettings().OutcomeValues());
 }
 
 //----------------------------------------------------------------------
@@ -727,8 +787,7 @@ void NfgShow::OnViewValues(wxCommandEvent &)
 
 void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
-  m_table->GetSettings().SetOutcomeValues(1 - m_table->GetSettings().OutcomeValues());
-  m_table->GetSettings().SaveSettings();
+  m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
   m_table->RefreshTable();
 }
 
@@ -982,6 +1041,9 @@ void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
   m_profiles.Remove(m_currentProfile);
+  if (m_nfg.AssociatedEfg()) {
+    wxGetApp().GetWindow(m_nfg.AssociatedEfg())->RemoveProfile(m_currentProfile);
+  }
   m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
   ChangeProfile(m_currentProfile);
   UpdateMenus();
@@ -997,6 +1059,12 @@ void NfgShow::OnProfilesProperties(wxCommandEvent &)
       ChangeProfile(m_currentProfile);
     }
   }
+}
+
+void NfgShow::OnProfilesReport(wxCommandEvent &)
+{
+  dialogReport dialog(this, m_profileTable->GetReport());
+  dialog.ShowModal();
 }
 
 //----------------------------------------------------------------------
@@ -1140,6 +1208,7 @@ void NfgShow::SetSupportNumber(int p_number)
 
 void NfgShow::OnSupportsEdited(void)
 {
+  m_navigateWindow->SetSupport(*m_currentSupport);
   m_table->SetSupport(*m_currentSupport);
   m_supportWindow->UpdateValues();
 }

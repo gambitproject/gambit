@@ -414,7 +414,7 @@ static void TracePath(const BehavProfile<double> &p_start,
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(BehavSolution(foo, algorithmEfg_QRE_EFG));
+    p_solutions.Append(BehavSolution(foo, "Qre[EFG]"));
     p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
     
     gVector<double> newT(t);

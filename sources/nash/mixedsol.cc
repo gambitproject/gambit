@@ -29,50 +29,12 @@
 #include "game/nfdom.h"
 #include "nash/polenum.h"  
 
-
-gText ToText(NfgAlgType p_algorithm)
-{
-  switch (p_algorithm) {
-  case algorithmNfg_USER:
-    return "User"; 
-  case algorithmNfg_ENUMPURE:
-    return "EnumPure";
-  case algorithmNfg_ENUMMIXED:
-    return "EnumMixed";
-  case algorithmNfg_LCP:
-    return "Lcp";
-  case algorithmNfg_LP:
-    return "Lp";
-  case algorithmNfg_LIAP:
-    return "Liap";
-  case algorithmNfg_SIMPDIV:
-    return "Simpdiv";
-  case algorithmNfg_POLENUM:
-    return "PolEnum";
-  case algorithmNfg_QRE:
-    return "Qre";
-  case algorithmNfg_QREALL:
-    return "QreAll";
-  case algorithmNfg_YAMAMOTO:
-    return "Yamamoto";
-  default:
-    return "None";
-  }
-}
-
-gOutput &operator<<(gOutput &p_file, NfgAlgType p_algorithm)
-{
-  p_file << ToText(p_algorithm);
-  return p_file;
-}
-
-
 //----------------------------------------------------
 // Constructors, Destructor, Constructive Operators
 //----------------------------------------------------
 
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
-			     NfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -92,7 +54,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
-			     NfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -112,7 +74,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
-			     NfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -356,7 +318,7 @@ const gNumber &MixedSolution::LiapValue(void) const
 void MixedSolution::Invalidate(void) const
 {
   m_support = NFSupport(m_profile.Game());
-  m_creator = algorithmNfg_USER;
+  m_creator = "User";
   m_Nash.Invalidate();
   m_Perfect.Invalidate();
   m_Proper.Invalidate();
@@ -391,7 +353,7 @@ void MixedSolution::DumpInfo(gOutput &p_file) const
   p_file << " IsPerfect:" << IsPerfect();
   p_file << " IsProper:" << IsProper();
   p_file << " LiapValue:" << LiapValue();
-  if(m_creator == algorithmNfg_QRE || m_creator == algorithmNfg_QREALL) {
+  if (m_creator == "Qre[NFG]" || m_creator == "QreGrid[NFG]") {
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;
   }

@@ -30,7 +30,7 @@
 	</affiliation>
       </author>
     </authorgroup>
-    <edition>Version 0.97.0.1</edition>
+    <edition>Version 0.97.0</edition>
     <pubdate>2002</pubdate>
     <copyright>
       <year>2002</year>
@@ -39,25 +39,17 @@
   </bookinfo>
 
 &intro;
-
-<chapter>
-    <title>Getting Started with the Graphical Interface</title>
-    <para>Some GUI docs</para>
-
-    &guistart
-  </chapter>
-
-
+&guistart;
 
 <chapter id="gui.ref">
-    <title>Graphical Interface Reference</title>
-    <para>Formal reference here</para>
+<title>Graphical Interface Reference</title>
+<para>This chapter covers the graphical interface in some detail.</para>
 
-    &guiconv;
-    &guiefg;
-    &guinfg;
+&guiconv;
+&guiefg;
+&guinfg;
 
-  </chapter>
+</chapter>
 
 <chapter>
     <title>The Gambit Command Language</title>

@@ -40,7 +40,7 @@ public:
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  gText GetAlgorithm(void) const { return "PolEnum"; }
+  gText GetAlgorithm(void) const { return "PolEnum[EFG]"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
   

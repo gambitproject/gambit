@@ -91,7 +91,9 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
   wxStaticBoxSizer *actionBoxSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Actions"), wxHORIZONTAL);
  
-  m_actionList = new wxListBox(this, idLISTBOX_ACTIONS);
+  m_actionList = new wxListBox(this, idLISTBOX_ACTIONS,
+			       wxDefaultPosition, wxDefaultSize,
+			       0, 0, wxLB_SINGLE);
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     m_actionList->Append((const char *)
 			 (ToText(act) + ": " + 
@@ -161,6 +163,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, Infoset *p_infoset)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 void dialogEditMove::OnActionChanged(wxCommandEvent &)
@@ -195,21 +198,33 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(m_actionProb->GetValue().c_str());
   }
-  m_actionList->SetString(m_lastSelection,
-			  (const char *) ((ToText(m_lastSelection+1) + ": " +
-					   m_actionName->GetValue().c_str())));
-  
-  m_actionNames.Insert("NewAction", m_actionList->GetSelection() + 1);
-  if (m_infoset->IsChanceInfoset()) {
-    m_actionProbs.Insert(0, m_actionList->GetSelection() + 1);
+  Action *action = m_actions[m_lastSelection+1];
+  if (action) {
+    m_actionList->SetString(m_lastSelection,
+			    (const char *) ((ToText(action->GetNumber()) + ": " +
+					     m_actionName->GetValue().c_str())));
   }
-  m_actions.Insert(0, m_actionList->GetSelection() + 1);
+  else {
+    m_actionList->SetString(m_lastSelection, m_actionName->GetValue());
+  }
+  
+  m_actionNames.Insert("NewAction", m_lastSelection + 1);
+  if (m_infoset->IsChanceInfoset()) {
+    m_actionProbs.Insert(0, m_lastSelection + 1);
+  }
+  m_actions.Insert(0, m_lastSelection + 1);
   wxArrayString labels;
   labels.Add("NewAction");
-  m_actionList->InsertItems(labels, m_actionList->GetSelection());
+  m_actionList->InsertItems(labels, m_lastSelection);
+  // Even though this is a single-choice listbox, need to explicitly
+  // deselect old item -- at least under GTK with wx2.3.3
+  m_actionList->SetSelection(m_lastSelection + 1, false);
   m_actionList->SetSelection(m_lastSelection);
-  m_actionName->SetValue((const char *)
-			 m_actionNames[m_actionList->GetSelection() + 1]);
+  m_actionName->SetValue((const char *) m_actionNames[m_lastSelection + 1]);
+  if (m_infoset->IsChanceInfoset()) {
+    m_actionProb->SetValue((const char *) 
+			   ToText(m_actionProbs[m_lastSelection + 1]));
+  }
   m_deleteButton->Enable(true);
 }
 
@@ -220,22 +235,34 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(m_actionProb->GetValue().c_str());
   }
-  m_actionList->SetString(m_lastSelection,
-			  (const char *) ((ToText(m_lastSelection+1) + ": " +
-					   m_actionName->GetValue().c_str())));
-  
-  m_actionNames.Insert("NewAction", m_actionList->GetSelection() + 2);
-  if (m_infoset->IsChanceInfoset()) {
-    m_actionProbs.Insert(0, m_actionList->GetSelection() + 2);
+  Action *action = m_actions[m_lastSelection+1];
+  if (action) {
+    m_actionList->SetString(m_lastSelection,
+			    (const char *) ((ToText(action->GetNumber()) + ": " +
+					     m_actionName->GetValue().c_str())));
   }
-  m_actions.Insert(0, m_actionList->GetSelection() + 2);
+  else {
+    m_actionList->SetString(m_lastSelection, m_actionName->GetValue());
+  }
+  
+  m_actionNames.Insert("NewAction", m_lastSelection + 2);
+  if (m_infoset->IsChanceInfoset()) {
+    m_actionProbs.Insert(0, m_lastSelection + 2);
+  }
+  m_actions.Insert(0, m_lastSelection + 2);
   wxArrayString labels;
   labels.Add("NewAction");
-  m_actionList->InsertItems(labels, m_actionList->GetSelection() + 1);
-  m_lastSelection++;
-  m_actionList->SetSelection(m_lastSelection);
+  m_actionList->InsertItems(labels, m_lastSelection + 1);
+  // Even though this is a single-choice listbox, need to explicitly
+  // deselect old item -- at least under GTK with wx2.3.3
+  m_actionList->SetSelection(m_lastSelection, false);
+  m_actionList->SetSelection(++m_lastSelection);
   m_actionName->SetValue((const char *)
-			 m_actionNames[m_actionList->GetSelection() + 1]);
+			 m_actionNames[m_lastSelection + 1]);
+  if (m_infoset->IsChanceInfoset()) {
+    m_actionProb->SetValue((const char *) 
+			   ToText(m_actionProbs[m_lastSelection + 1]));
+  }
   m_deleteButton->Enable(true);
 }
 
@@ -253,6 +280,10 @@ void dialogEditMove::OnDeleteAction(wxCommandEvent &)
   m_actionList->SetSelection(m_lastSelection);
   m_actionName->SetValue((const char *)
 			 m_actionNames[m_actionList->GetSelection() + 1]);
+  if (m_infoset->IsChanceInfoset()) {
+    m_actionProb->SetValue((const char *) 
+			   ToText(m_actionProbs[m_lastSelection + 1]));
+  }
   m_deleteButton->Enable(m_actionList->GetCount() > 1);
 }
 

@@ -102,6 +102,7 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent, efgGame &p_efg)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 
   Layout();
+  CenterOnParent();
 }
 
 void dialogInsertMove::OnPlayer(wxCommandEvent &)

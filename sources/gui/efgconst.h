@@ -73,7 +73,8 @@ typedef enum {
   efgmenuPROFILES_NEW = 2001,
   efgmenuPROFILES_DUPLICATE = 2002,
   efgmenuPROFILES_DELETE = 2003,
-  efgmenuPROFILES_PROPERTIES = 2004
+  efgmenuPROFILES_PROPERTIES = 2004,
+  efgmenuPROFILES_REPORT = 2005
 } guiEfgMenuItems;
 
 

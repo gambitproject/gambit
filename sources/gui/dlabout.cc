@@ -79,4 +79,5 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }

@@ -58,5 +58,6 @@ dialogSpinCtrl::dialogSpinCtrl(wxWindow *p_parent, const wxString &p_caption,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 

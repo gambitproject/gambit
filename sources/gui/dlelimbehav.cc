@@ -100,6 +100,7 @@ dialogElimBehav::dialogElimBehav(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 dialogElimBehav::~dialogElimBehav()

@@ -1,6 +1,14 @@
+<chapter id="gui.start">
+<title>Getting Started with the Graphical Interface</title>
+<para>
+This section gives a quick overview of the graphical interface,
+using a simplified game of poker to illustrate the main features and
+concepts.
+</para>
+
 <sect1 id="gui.poker">
 <title>A simple game of poker</title>
-  <para>
+<para>
 This chapter takes a high-level tour of the Gambit graphical interface using
 as an example the simple one-card poker game appearing in
 <citation><xref linkend="Mye91"></citation>.
@@ -177,7 +185,8 @@ next sections.
 </para>
 </sect1>
 
-<sect1><title>Finding Nash equilibria using the extensive form</title>
+<sect1 id="gui.start.efgnash">
+<title>Finding Nash equilibria using the extensive form</title>
 <para>
 The analysis begins by searching for actions which might be dominated
 by other actions at the same move.  The <guimenuitem>Dominance</guimenuitem>
@@ -262,18 +271,184 @@ to its original form, and the &quot;Fold&quot; action in Fred's first
 information set will appear in black in the schematic display.
 </para>
 
+<para>
+To compute Nash equilibria for the game, use the 
+<guimenuitem>Equilibrium</guimenuitem> item on the <guimenu>Tools</guimenu>
+menu.  This menu item shows a dialog box listing the available algorithms
+for computing equilibria.  The list of algorithms will vary depending on
+the game, as some algorithms apply only to constant-sum games, or to
+games with two players.  In this case, since the poker game is a
+two-person constant-sum game, all the available algorithms are shown.
+</para>
+
+<para>
+Algorithms are divided into two groups:
+<itemizedlist>
+<listitem>
+<para>
+Standard algorithms.  These are algorithms and parameter settings 
+chosen as being recommended for computing the given number and type of
+equilibria shown.
+</para>
+</listitem>
+<listitem>
+<para>
+Custom algorithms.  These are the actual algorithms implemented in
+Gambit.  Selecting these displays a corresponding panel presenting the
+options available to configure the algorithm's behavior.
+</para>
+</listitem>
+</itemizedlist>
+For this example, select &quot;one Nash equilibrium&quot; which uses
+the sequence form formulation (the custom algorithm 
+<function>LcpSolve</function>) of Koller, Megiddo, and von Stengel
+<citation><xref linkend="KolMegSte94"></citation> to compute one Nash
+equilibrium on the extensive form.
+</para>
+
+<para>
+After clicking <guilabel>OK</guilabel>, a progress box briefly appears.
+When the algorithm completes, the profiles panel is now shown at the
+bottom of the tree window, with one profile shown.  The profile is also
+displayed schematically on the game tree.  The profiles panel presents
+information about the profile:
+<itemizedlist>
+<listitem>
+<para>
+<guilabel>Name</guilabel>: A label for the profile.  This is automatically
+generated, and can be changed by double-clicking the profile's entry in
+the profile list to display the <guilabel>Properties</guilabel> dialog.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Creator</guilabel>: The algorithm which created the profile, or
+<guilabel>User</guilabel> if the profile was created or modified by the user.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Nash</guilabel>: Indicates if the profile is a Nash equilibrium; 
+in this case, this field displays <guilabel>Y</guilabel> to indicate it is.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Perfect</guilabel>: Indicates if the profile is a subgame perfect
+Nash equilibrium; 
+in this case, this field displays <guilabel>Y</guilabel> to indicate it is.
+(Since there are no proper subgames in this game, any Nash equilibrium must
+be subgame perfect.)
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Sequential</guilabel>: Indicates if the profile is a sequential
+Nash equilibrium; 
+in this case, this field displays <guilabel>DK</guilabel> to indicate 
+this is unknown.  Some algorithms can be shown to compute only sequential
+equilibria, but there is no implemented test for whether a given profile
+is sequential.
+</para>
+</listitem>
+<listitem>
+<para>
+<guilabel>Liap value</guilabel>: Displays the Lyapunov value (see
+<citation><xref linkend="McK91"></citation>) of the profile.  The
+Lyapunov value is zero exactly when the profile is a Nash equilibrium.
+</para>
+</listitem>
+</itemizedlist>
+The remaining fields in the profile list display the probabilities
+assigned to each action by the profile.  These are labeled in the format
+<guilabel>(x,y):z</guilabel>, where <guilabel>x</guilabel> gives the
+player number, <guilabel>y</guilabel> gives the information set number
+for the player, and <guilabel>z</guilabel> gives the action number at
+the information set.
+</para>
+
+<para>
+In this case, the equilibrium involves Player 1, raising
+with probability one at his first information set, which follows his
+drawing the Red card.  At his second information set, following a draw
+of a black card, he raises with probability one-third, and folds with
+probability two-thirds.  Player 2, at her only information set, meets 
+Player 1's 
+raise with probability two-thirds, and passes with probability one-third.
+</para>
+
+<para>
+These probabilities are represented schematically on the tree.  At each
+information set, black segments proportional to the probability each
+action is played are plotted along the branch for each action.  Additionally,
+by default, action probabilities are shown below each branch.  (Which
+labels are shown at nodes and actions can be customized using the
+dialog accessed from the <guimenuitem>Legends</guimenuitem> item on
+the <guisubmenu>Display</guisubmenu> submenu on the <guimenu>Format</guimenu>
+menu.
+</para>
+
+<para>
+Additional information about profiles is displayed on the navigation panel.
+This is displayed using the <guimenuitem>Navigation</guimenuitem> item
+on the <guimenu>View</guimenu> menu.  When a node is selected in the
+tree (by clicking on it, or by using arrow keys to navigate to it), this
+panel displays the following information computed from the profile:
+<itemizedlist>
+<listitem>
+<para>
+The node value: A vector of payoffs showing the expected payoff to
+each player, conditional on having reached this node in the play of the
+game.
+</para>
+</listitem>
+<listitem>
+<para>
+The probability the information set to which this node belongs is reached.
+</para>
+</listitem>
+<listitem>
+<para>
+The belief: the probability the choosing player assigns to being at this node,
+conditional on finding out he is at this information set.
+</para>
+</listitem>
+<listitem>
+<para>
+The expected payoff of the choosing player, conditional on reaching this
+information set.
+</para>
+</listitem>
+<listitem>
+<para>
+The expected payoff of choosing the action which leads to this node, 
+evaluated from the perspective of the player who chooses that action.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+The custom algorithms available in the Nash equilibrium algorithm dialog
+give the option, where appropriate, of using the extensive form or
+normal form for computing equilibria.  Therefore, one can compute equilibria
+using normal-form based algorithms without having to explicitly create
+and display the normal form of the game.  The next section will cover how
+to view the normal form of the game, and how to compute Nash equilibria in
+mixed profiles.
+</para>
+
 </sect1>
 
-<sect1><title>Finding Nash equilibria using the normal form</title>
+<sect1 id="gui.start.nfgnash">
+<title>Finding Nash equilibria using the normal form</title>
 <para>
-You can compute Nash equilibria on the normal form.
-  </para>
+Given an extensive form game, the (reduced) normal form is computed and
+displayed using the <guimenuitem>Reduced</guimenuitem> item on the
+<guisubmenu>Normal form</guisubmenu> submenu of the <guimenu>Tools</guimenu>
+menu.
+</para>
 </sect1>
 
-<sect1><title>Viewing normal forms</title>
-<para>
-You can have Gambit show you the normal form of the game, both
-reduced and agent.
-  </para>
-</sect1>
-    
+
+</chapter>

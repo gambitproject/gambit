@@ -233,6 +233,7 @@ dialogEditEfg::dialogEditEfg(wxWindow *p_parent, efgGame &p_efg,
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }
 
 void dialogEditEfg::OnOK(wxCommandEvent &)

@@ -78,6 +78,11 @@ void TreeWindow::MakeMenus(void)
 {
   m_nodeMenu = new wxMenu;
 
+  m_nodeMenu->Append(wxID_CUT, "Cut subtree", "Cut subtree to clipboard");
+  m_nodeMenu->Append(wxID_COPY, "Copy subtree", "Copy subtree to clipboard");
+  m_nodeMenu->Append(wxID_PASTE, "Paste subtree",
+		     "Paste subtree from clipboard");
+  m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
   m_nodeMenu->Append(efgmenuEDIT_REVEAL, "Reveal move",
 		     "Reveal this move");
@@ -215,6 +220,11 @@ void TreeWindow::RefreshLabels(void)
 {
   m_layout.GenerateLabels();
   Refresh();
+}
+
+void TreeWindow::SetCutNode(Node *p_node, bool p_cut)
+{
+  m_layout.SetCutNode(p_node, p_cut);
 }
 
 void TreeWindow::AdjustScrollbarSteps(void)
@@ -546,6 +556,10 @@ void TreeWindow::UpdateMenus(void)
 {
   Node *cursor = m_parent->Cursor();
 
+  m_nodeMenu->Enable(wxID_COPY, (cursor) ? true : false);
+  m_nodeMenu->Enable(wxID_CUT, (cursor) ? true : false);
+  m_nodeMenu->Enable(wxID_PASTE, (m_parent->CopyNode() || 
+				  m_parent->CutNode()) ? true : false);
   m_nodeMenu->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
   m_nodeMenu->Enable(efgmenuEDIT_REVEAL,
 		     (cursor && cursor->GetInfoset()));

@@ -2,57 +2,28 @@
 // A gcl script to test the solution algorithms.  
 // 
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
-NewFunction[AlgTest[n->NFG,t->TEXT,{out->StdOut},{precision->Float}],
-  StdOut << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
-  out << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
-  out << "\n";
-  out << "\nOneNash\n" << OneNash[n,precision];
-  out << "\nAllNash\n" << AllNash[n,0,10,precision];
-  If[NumPlayers[n]<=2,
-    out << "\nOnePerfect\n" << OnePerfect[n,precision];
-    out << "\nAllPerfect\n" << AllPerfect[n,0,10,precision];
-  ];
-  out << "\n";
-];
-
-NewFunction[AlgTest[e->EFG,t->TEXT,{out->StdOut},{precision->Float}],
-  StdOut << "\nFile: " << t << ".efg ; " << Name[e] << "; n = " << NumPlayers[e] << "; CSum: " << IsConstSum[e];
-  out << "\nFile: " << t << ".efg ; " << Name[e] << "; n = " << NumPlayers[e] << "; CSum: " << IsConstSum[e];
-  out << "\n";
-  out << "\nOneNash\n" << OneNash[e,precision];
-  out << "\nAllNash\n" << AllNash[e,0,10,precision];
-  out << "\nOneSubgamePerfect\n" << OneSubgamePerfect[e,precision];
-  out << "\nAllSubgamePerfect\n" << AllSubgamePerfect[e,0,10,precision];
-  b:=OneSequential[e];
-  out << "\nOneSequential\n" << b << "\nBeliefs\n:" << Beliefs[b];
-  b:=AllSequential[e,0,10];
-  out << "\nAllSequential\n" << b << "\nBeliefs\n:" << Beliefs[b];
-  out << "\n";
-];
-
-//out:=StdOut;
-out:=Output["algtest.out"];
-SetListFormat[lf->1];
-SetNumericFormat[decimals->4];
-SetSolutionFormat[True];
-
 time:=StartWatch[];
 
 gamelist:={"wink3","winkels","deg1","deg2","sh3","todd2","oneill","coord3","8x8","g1","g2","g3"}
-r:=Rational;m:=Float;
-prec:={r,m,r,r,m,m,r,m,m,m,m,m}
-g:=LoadNfg["../nfg/"+gamelist+".nfg"]
-AlgTest[g,gamelist,out,prec];
+gamelist := { "wink3", "winkels" }
+g := LoadNfg["../nfg/"+gamelist+".nfg"]
+<< LcpSolve[Support[Filter[g, Length[Players[g]] = 2]], precision->Float]
+<< LcpSolve[Support[Filter[g, Length[Players[g]] = 2]], precision->Rational]
+
+<< ElapsedTime[]
+
+<< LiapSolve[Mixed[Support[g]]]
+
+<< ElapsedTime[]
 g:=
-time:=StopWatch[];
-out << "\n\nTime = " << time;
-time:=StartWatch[];
+
 
 gamelist:={"e01","e02","e03","e04","e05","e06","e07","cent3","g1","g2","g3","coord3","coord4","coord2ts"};
 g:=LoadEfg["../efg/"+gamelist+".efg"]
-AlgTest[g,gamelist,out];
-time:=StopWatch[];
-out << "\n\nTime = " << time;
-<< "Finished algtest.gcl";
+<< LcpSolve[Support[Filter[g, Length[Players[g]] = 2]], precision->Float]
+<< LcpSolve[Support[Filter[g, Length[Players[g]] = 2]], precision->Rational]
+g:=
+
+<< ElapsedTime[]
+
+Quit

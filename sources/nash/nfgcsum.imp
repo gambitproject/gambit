@@ -125,7 +125,7 @@ void nfgLp<T>::GetSolutions(const NFSupport &p_support,
       else
 	profile(2, j) = (T) 0;
 
-    index = solutions.Append(MixedSolution(profile, algorithmNfg_LP));
+    index = solutions.Append(MixedSolution(profile, "Lp[NFG]"));
     solutions[index].SetEpsilon(p_epsilon);
   }
 }

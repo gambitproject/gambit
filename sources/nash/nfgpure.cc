@@ -70,7 +70,7 @@ gList<MixedSolution> nfgEnumPure::Solve(const NFSupport &p_support,
 	temp(pl, profile[pl]) = 1;
       }
       
-      solutions.Append(MixedSolution(temp, algorithmNfg_ENUMPURE));
+      solutions.Append(MixedSolution(temp, "EnumPure[NFG]"));
     }
     contNumber++;
   }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&

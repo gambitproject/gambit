@@ -83,6 +83,7 @@ public:
   const TreeDrawSettings &DrawSettings(void) const { return m_drawSettings; }
   
   void SetCursorPosition(Node *p_cursor);
+  void SetCutNode(Node *, bool);
     
   void UpdateMenus(void);
   

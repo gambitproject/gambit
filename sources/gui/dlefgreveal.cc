@@ -81,6 +81,7 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 dialogInfosetReveal::~dialogInfosetReveal()

@@ -1,0 +1,72 @@
+2002-09-24  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/?fgprofile.cc, gui/?fgoutcome.cc: Changed context menu items to
+	include words "outcome" and "profile"; improves clarity, avoids GTK
+	problem where CTL-N was displayed as shortcut for "New".
+
+2002-09-22  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/efgshow.cc; gui/dleditmove.cc: Bug fixes to adding and removing
+	actions in edit move dialog.
+
+2002-09-14  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/dl?fgnash.(cc,h): Improving formatting and presentation of
+	Nash equilibrium algorithm dialogs; also, changed stopping lambda for
+	QreSolve to 1000000000.
+
+	* gui/efgshow.(cc,h), gui/efglayout.(cc,h), gui/treewin.(cc,h):
+	Implemented simple cut-and-paste operations for subtrees.
+
+2002-09-12  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/?fgoutcome.cc, gui/numberedit.cc: Added NumberEditor to payoffs
+	for new outcomes; modified NumberEditor to select text on editing.
+
+	* gui/nfgshow.cc: Update strategy lists in contingency choice 
+	dropdowns in navigation window when support edited.
+
+2002-09-10  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* nash/*, gcl/solfunc.cc, gui/efgprofile.cc, gui/nfgprofile.cc: 
+	Replaced algorithm enum with text identifiers; fixes bug in which some
+	profiles' creators were not correctly identified (labeled as "User" instead).
+
+	* gui/?fgshow.*: Keep profile lists synchronized on profile delete.
+
+	* gui/nfgtable.(cc,h), gui/nfgshow.cc: Various largely cosmetic
+	changes to improve display of normal form.
+	
+2002-09-09  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/dl*.cc: Center all dialogs on parent.
+
+2002-09-08  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/gambit.cc: Remember working directory from last file load;
+	added informative wildcards to open dialog.
+
+	* nash/eliap.cc, nash/nliap.cc, gui/dlefgnash.cc, gui/dlnfgnash.cc:
+	Added try/catch block to catch user-break and return computed
+	equilibria; updated parameters and default settings in GUI.
+
+	* gui/efgprofile.(cc,h), gui/nfgprofile.(cc,h), gui/efgshow.(cc,h),
+	gui/nfgshow.(cc,h), gui/dlreport.(cc,h), gui/efgconst.h,
+	gui/nfgconst.h: Added basic report functionality for profiles.
+
+2002-09-05  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/nfgshow.cc: Fixed failure to refresh profile window after
+	deleting profile.  Caused particularly bad things when deleting
+	last profile.
+
+	* gui/dlnfgnash.(cc,h): Last strategy name edit was lost when
+	changing the player dropdown.
+
+	* gui/efgshow.(cc,h), gui/efgoutcome.cc, gui/nfgshow.(cc,h),
+	gui/nfgoutcome.cc: Cosmetic fix so that new outcomes have displayed
+	payoffs; added automatic generation of unique outcome labels.
+
+	* gui/gambit.cc: Uncommented code to load files off command line;
+	extended to load any number of files, not just one.
+

@@ -66,6 +66,7 @@
 #include "dlelimbehav.h"
 #include "dlefgnash.h"
 #include "dlqrefile.h"
+#include "dlreport.h"
 #include "dleditbehav.h"
 
 
@@ -90,6 +91,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
   EVT_MENU(wxID_EXIT, EfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
+  EVT_MENU(wxID_CUT, EfgShow::OnEditCut)
+  EVT_MENU(wxID_COPY, EfgShow::OnEditCopy)
+  EVT_MENU(wxID_PASTE, EfgShow::OnEditPaste)
   EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
   EVT_MENU(efgmenuEDIT_REVEAL, EfgShow::OnEditReveal)
@@ -127,6 +131,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPROFILES_DUPLICATE, EfgShow::OnProfilesDuplicate)
   EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
   EVT_MENU(efgmenuPROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
+  EVT_MENU(efgmenuPROFILES_REPORT, EfgShow::OnProfilesReport)
   EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnProfileSelected)
   EVT_SET_FOCUS(EfgShow::OnFocus)
@@ -142,7 +147,8 @@ END_EVENT_TABLE()
 
 EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    m_efg(p_efg), m_treeWindow(0), m_cursor(0),
+    m_efg(p_efg), m_treeWindow(0), 
+    m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_currentProfile(0), m_profileTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
@@ -158,13 +164,15 @@ EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
 
   CreateStatusBar();
 
-  wxAcceleratorEntry entries[5];
+  wxAcceleratorEntry entries[7];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
   entries[2].Set(wxACCEL_CTRL, (int) 'S', wxID_SAVE);
   entries[3].Set(wxACCEL_CTRL, (int) 'P', wxID_PRINT);
-  entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
-  wxAcceleratorTable accel(5, entries);
+  entries[4].Set(wxACCEL_CTRL, (int) 'C', wxID_COPY);
+  entries[5].Set(wxACCEL_CTRL, (int) 'V', wxID_PASTE);
+  entries[6].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
+  wxAcceleratorTable accel(7, entries);
   SetAcceleratorTable(accel);
 
   MakeMenus();
@@ -247,6 +255,25 @@ void EfgShow::ChangeProfile(int sol)
   }
 }
 
+void EfgShow::RemoveProfile(int p_profile)
+{
+  m_profiles.Remove(p_profile);
+  if (m_currentProfile == p_profile) {
+    m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
+  }
+  else if (m_currentProfile > p_profile) {
+    m_currentProfile--;
+  }
+
+  m_treeWindow->RefreshLabels();
+  
+  if (m_navigateWindow) {
+    m_navigateWindow->Set(m_cursor);
+  }
+  if (m_profileTable) {
+    m_profileTable->UpdateValues();
+  }
+}
 
 void EfgShow::RemoveProfiles(void)
 {
@@ -274,7 +301,9 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   }
 
   if (m_efg.AssociatedNfg() && p_map) {
-    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(MixedProfile<gNumber>(*p_profile.Profile()), false);
+    MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
+			p_profile.Creator());
+    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(mixed, false);
   }
 
   m_profileTable->UpdateValues();
@@ -420,6 +449,25 @@ void EfgShow::OnOutcomesEdited(void)
   m_profileTable->UpdateValues();
 }
 
+gText EfgShow::UniqueOutcomeName(void) const
+{
+  int number = m_efg.NumOutcomes() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_efg.NumOutcomes(); i++) {
+      if (m_efg.GetOutcome(i).GetLabel() == "Outcome" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_efg.NumOutcomes()) {
+      return "Outcome" + ToText(number);
+    }
+    
+    number++;
+  }
+}
+
 void EfgShow::OnSupportsEdited(void)
 {
   m_treeWindow->SupportChanged();
@@ -489,6 +537,12 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
   }
 
   if (p_infosetsChanged || p_nodesChanged) {
+    // It would be nice to relax this, but be conservative for now
+    m_copyNode = 0;
+    if (m_cutNode) {
+      m_treeWindow->SetCutNode(m_cutNode, false);
+      m_cutNode = 0;
+    }
     m_treeWindow->RefreshTree();
     m_treeWindow->Refresh();
   }
@@ -535,10 +589,6 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
   editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
   editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
-  // For the moment, these are not implemented -- leave disabled
-  editMenu->Enable(wxID_CUT, false);
-  editMenu->Enable(wxID_COPY, false);
-  editMenu->Enable(wxID_PASTE, false);
   editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_INSERT, "&Insert", "Insert a move");
   editMenu->Append(efgmenuEDIT_DELETE, "&Delete...", "Delete an object");
@@ -647,6 +697,10 @@ void EfgShow::UpdateMenus(void)
 {
   Node *cursor = Cursor();
   wxMenuBar *menuBar = GetMenuBar();
+
+  menuBar->Enable(wxID_COPY, (cursor) ? true : false);
+  menuBar->Enable(wxID_CUT, (cursor) ? true : false);
+  menuBar->Enable(wxID_PASTE, (m_cutNode || m_copyNode) ? true : false);
 
   menuBar->Enable(efgmenuEDIT_INSERT, (cursor) ? true : false);
   menuBar->Enable(efgmenuEDIT_DELETE,
@@ -844,6 +898,43 @@ void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 //                EfgShow: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
+void EfgShow::OnEditCut(wxCommandEvent &)
+{
+  if (m_cutNode) {
+    m_treeWindow->SetCutNode(m_cutNode, false);
+  }
+  m_cutNode = Cursor();
+  m_treeWindow->SetCutNode(m_cutNode, true);
+  m_copyNode = 0;
+  m_treeWindow->Refresh();
+}
+
+void EfgShow::OnEditCopy(wxCommandEvent &)
+{
+  m_copyNode = Cursor();
+  if (m_cutNode) {
+    m_treeWindow->SetCutNode(m_cutNode, false);
+    m_cutNode = 0;
+  }
+  m_treeWindow->Refresh();
+}
+
+void EfgShow::OnEditPaste(wxCommandEvent &)
+{
+  try {
+    if (m_copyNode) {
+      m_efg.CopyTree(m_copyNode, Cursor());
+    }
+    else {
+      m_efg.MoveTree(m_cutNode, Cursor());
+    }
+    OnTreeChanged(true, true);
+  }
+  catch (gException &ex) {
+    guiExceptionDialog(ex.Description(), this);
+  }
+}
+
 void EfgShow::OnEditInsert(wxCommandEvent &)
 { 
   dialogInsertMove dialog(this, m_efg);
@@ -989,6 +1080,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
     for (int act = 1; act <= infoset->NumActions(); act++) {
       if (!dialog.GetActions().Find(infoset->Actions()[act])) {
 	m_efg.DeleteAction(infoset, infoset->Actions()[act]);
+	act--;
       }
     }
 
@@ -1416,7 +1508,13 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     wxGetApp().AddGame(&m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_profiles.Length(); i++) {
-      nfgShow->AddProfile(MixedProfile<gNumber>(*m_profiles[i].Profile()), false);
+      BehavProfile<gNumber> profile(*m_profiles[i].Profile());
+      MixedProfile<gNumber> mixed(profile);
+      nfgShow->AddProfile(MixedSolution(mixed, m_profiles[i].Creator()), false);
+    }
+
+    if (m_profiles.Length() > 0) {
+      nfgShow->ChangeProfile(m_currentProfile);
     }
   }
   else {
@@ -1501,6 +1599,9 @@ void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
   m_profiles.Remove(m_currentProfile);
+  if (m_efg.AssociatedNfg()) {
+    wxGetApp().GetWindow(m_efg.AssociatedNfg())->RemoveProfile(m_currentProfile);
+  }
   m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
   ChangeProfile(m_currentProfile);
 }
@@ -1515,6 +1616,12 @@ void EfgShow::OnProfilesProperties(wxCommandEvent &)
       ChangeProfile(m_currentProfile);
     }
   }
+}
+
+void EfgShow::OnProfilesReport(wxCommandEvent &)
+{
+  dialogReport dialog(this, m_profileTable->GetReport());
+  dialog.ShowModal();
 }
 
 void EfgShow::OnProfileSelected(wxListEvent &p_event)

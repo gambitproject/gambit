@@ -176,38 +176,12 @@ static Portion *GSM_AgentForm(GSM &, Portion **param)
 // Behav
 //------------
 
-EfgAlgType NfgAlgType2EfgAlgType(NfgAlgType algtype)
-{
-  switch (algtype) {
-  case algorithmNfg_ENUMPURE:
-    return algorithmEfg_ENUMPURE_NFG;
-  case algorithmNfg_ENUMMIXED:
-    return algorithmEfg_ENUMMIXED_NFG;
-  case algorithmNfg_LCP:
-    return algorithmEfg_LCP_NFG;
-  case algorithmNfg_LP:
-    return algorithmEfg_LP_NFG;
-  case algorithmNfg_LIAP:
-    return algorithmEfg_LIAP_NFG;
-  case algorithmNfg_SIMPDIV:
-    return algorithmEfg_SIMPDIV_NFG;
-  case algorithmNfg_POLENUM:
-    return algorithmEfg_POLENUM_NFG;
-  case algorithmNfg_QRE:
-    return algorithmEfg_QRE_NFG;
-  case algorithmNfg_QREALL:
-    return algorithmEfg_QREALL_NFG;
-  default:
-    return algorithmEfg_USER;
-  }
-}
-
 static Portion *GSM_Behav(GSM &, Portion **param)
 {
   MixedSolution &mp = *((MixedPortion*) param[0])->Value();
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(*mp.Profile()));
   BehavSolution *bs = new BehavSolution(*bp);
-  bs->SetCreator(NfgAlgType2EfgAlgType(mp.Creator()));
+  bs->SetCreator(mp.Creator());
   bs->SetEpsilon(mp.Epsilon());
     
   return new BehavPortion(bs);

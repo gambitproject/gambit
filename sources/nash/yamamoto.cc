@@ -397,7 +397,7 @@ gList<MixedSolution> nfgYamamoto::Solve(const NFSupport &p_support,
     } 
   }
 
-  solutions.Append(MixedSolution(profile, algorithmNfg_YAMAMOTO));
+  solutions.Append(MixedSolution(profile, "Yamamoto[NFG]"));
 
   return solutions;
 }

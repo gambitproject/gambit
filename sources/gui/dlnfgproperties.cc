@@ -214,6 +214,7 @@ dialogNfgProperties::dialogNfgProperties(wxWindow *p_parent, Nfg &p_nfg,
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }
 
 void dialogNfgProperties::OnOK(wxCommandEvent &)

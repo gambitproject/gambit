@@ -50,7 +50,7 @@ public:
   int MaxDepth(void) const { return m_maxDepth; }
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
-  gText GetAlgorithm(void) const { return "Lcp"; }
+  gText GetAlgorithm(void) const { return "Lcp[NFG]"; }
   gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 

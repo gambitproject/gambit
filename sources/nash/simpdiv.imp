@@ -453,7 +453,7 @@ gList<MixedSolution> nfgSimpdiv<T>::Solve(const NFSupport &p_support,
   }
     
   MixedProfile<T> profile(y);
-  solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
+  solutions.Append(MixedSolution(profile, "Simpdiv[NFG]"));
 
   return solutions;
 }

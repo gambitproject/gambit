@@ -96,6 +96,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 dialogEditMixed::~dialogEditMixed()

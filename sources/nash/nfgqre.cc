@@ -394,7 +394,7 @@ static void TracePath(const MixedProfile<double> &p_start,
     for (int i = 1; i <= foo.Length(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(MixedSolution(foo, algorithmNfg_QRE));
+    p_solutions.Append(MixedSolution(foo, "Qre[NFG]"));
     p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
     
     gVector<double> newT(t);

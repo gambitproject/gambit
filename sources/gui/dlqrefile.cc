@@ -89,6 +89,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
@@ -140,6 +141,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 //

@@ -293,6 +293,7 @@ dialogLayout::dialogLayout(wxWindow *p_parent,
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }
 
 void dialogLayout::GetSettings(TreeDrawSettings &p_settings)

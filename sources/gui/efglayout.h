@@ -39,9 +39,9 @@ private:
   int m_x, m_y;        // Cartesian coordinates of node
   NodeEntry *m_nextMember;  // entry of next information set member 
   bool m_inSupport;    // true if node reachable in current support
-
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
+  bool m_cut;         // true if node is in a 'cut' subtree
   bool m_subgameRoot, m_subgameMarked;
   int m_size;         // horizontal size of the node
   int m_token;        // token to draw for node
@@ -90,6 +90,9 @@ public:
 
   bool IsSelected(void) const { return m_selected; }
   void SetSelected(bool p_selected) { m_selected = p_selected; }
+
+  bool IsCut(void) const { return m_cut; }
+  void SetCut(bool p_cut) { m_cut = p_cut; }
 
   bool IsSubgameRoot(void) const { return m_subgameRoot; }
   void SetSubgameRoot(bool p_root) { m_subgameRoot = p_root; }
@@ -207,6 +210,8 @@ public:
   void Layout(const EFSupport &);
   void GenerateLabels(void);
 
+  void SetCutNode(Node *, bool);
+
   // The following member functions are for temporary compatibility only
   NodeEntry *GetNodeEntry(Node *p_node) const
     { return GetEntry(p_node); }
@@ -224,3 +229,4 @@ public:
 };
 
 #endif  // EFGLAYOUT_H
+

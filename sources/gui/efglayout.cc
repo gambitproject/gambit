@@ -43,7 +43,7 @@
 NodeEntry::NodeEntry(Node *p_node)
   : m_node(p_node), m_parent(0),
     m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
-    m_selected(false), m_cursor(false),
+    m_selected(false), m_cursor(false), m_cut(false),
     m_subgameRoot(false), m_subgameMarked(false), m_size(20),
     m_token(NODE_TOKEN_CIRCLE),
     m_branchStyle(BRANCH_STYLE_LINE), m_branchLabel(BRANCH_LABEL_HORIZONTAL),
@@ -79,8 +79,13 @@ void NodeEntry::Draw(wxDC &p_dc) const
     DrawIncomingBranch(p_dc);
   }
 
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, (IsSelected()) ? 4 : 2,
-					     wxSOLID));
+  if (m_cut) {
+    p_dc.SetPen(*wxLIGHT_GREY_PEN);
+  }
+  else {
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, (IsSelected()) ? 4 : 2,
+					       wxSOLID));
+  }
   if (m_token == NODE_TOKEN_LINE) {
     p_dc.DrawLine(m_x, m_y, m_x + m_size, m_y);
     if (m_branchStyle == BRANCH_STYLE_FORKTINE) {
@@ -142,7 +147,13 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
   int yStart = m_parent->m_y;
   int yEnd = m_y;
 
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color, 2, wxSOLID)); 
+  if (m_parent->m_cut) {
+    p_dc.SetPen(*wxLIGHT_GREY_PEN);
+  }
+  else {
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color,
+					       2, wxSOLID)); 
+  }
   if (m_branchStyle == BRANCH_STYLE_LINE) {
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
@@ -885,3 +896,11 @@ void efgTreeLayout::Render(wxDC &p_dc) const
   RenderSubtree(p_dc);
 }
 
+void efgTreeLayout::SetCutNode(Node *p_node, bool p_cut)
+{
+  for (int i = 1; i <= m_nodeList.Length(); i++) {
+    if (m_efg.IsPredecessor(p_node, m_nodeList[i]->GetNode())) {
+      m_nodeList[i]->SetCut(p_cut);
+    }
+  }
+}

@@ -50,7 +50,7 @@ public:
   efgLp(void);
   virtual ~efgLp() { }
 
-  gText GetAlgorithm(void) const { return "Lp"; }
+  gText GetAlgorithm(void) const { return "Lp[EFG]"; }
   gList<BehavSolution> Solve(const EFSupport &, gStatus &);
 };
 

@@ -83,6 +83,7 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 
   Layout();
+  CenterOnParent();
 }
 
 void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)

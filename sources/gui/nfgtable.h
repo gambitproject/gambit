@@ -98,10 +98,11 @@ public:
   const NfgTableSettings &GetSettings(void) const { return m_settings; }
   NfgTableSettings &GetSettings(void) { return m_settings; }
 
-  void SetDataFont(const wxFont &p_font) 
-    { m_settings.SetDataFont(p_font); m_grid->SetDefaultCellFont(p_font); }
-  void SetLabelFont(const wxFont &p_font) 
-    { m_settings.SetLabelFont(p_font); m_grid->SetLabelFont(p_font); }
+  void SetDataFont(const wxFont &p_font);
+  void SetLabelFont(const wxFont &p_font);
+
+  void SetOutcomeValues(bool);
+  bool OutcomeValues(void) const { return m_settings.OutcomeValues(); }
 
   void SetSupport(const NFSupport &);
   const NFSupport &GetSupport(void) const { return m_support; }

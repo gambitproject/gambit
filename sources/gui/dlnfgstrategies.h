@@ -34,7 +34,7 @@ private:
   wxListBox *m_strategyList;
   wxTextCtrl *m_strategyName;
   gBlock<gArray<gText> > m_strategyNames;
-  int m_lastStrategy;
+  int m_lastPlayer, m_lastStrategy;
 
   // Event handlers
   void OnPlayerChanged(wxCommandEvent &);

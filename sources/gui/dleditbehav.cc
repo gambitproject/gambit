@@ -160,6 +160,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 dialogEditBehav::~dialogEditBehav()

@@ -36,14 +36,16 @@ class panelNfgNashAlgorithm;
 class dialogNfgNash : public wxDialog {
 private:
   wxTreeCtrl *m_algorithmTree;
-  wxPanel *m_fooPanel, *m_currentPanel;
+  wxPanel *m_currentPanel;
+  wxBoxSizer *m_algPanelSizer;
   gOrdMap<wxTreeItemId, panelNfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
-  void LoadAlgorithms(const Nfg &);
+  int LoadAlgorithms(const Nfg &);
 
   // Event handlers
-  void OnSelectionChanged(wxTreeEvent &);
+  void OnSelectionChanging(wxTreeEvent &);
+  void OnItemCollapsing(wxTreeEvent &);
 
 public:
   // Lifecycle

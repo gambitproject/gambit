@@ -483,10 +483,14 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   m_grid->SetTable(new NfgGridTable(this, &m_nfg), true);
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
-  m_grid->DisableDragRowSize();
-  m_grid->AdjustScrollbars();
   m_grid->SetDefaultCellFont(m_settings.GetDataFont());
   m_grid->SetLabelFont(m_settings.GetLabelFont());
+  m_grid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_grid->DisableDragRowSize();
+  m_grid->DisableDragColSize();
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
+  m_grid->AdjustScrollbars();
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_grid, 1, wxALL | wxEXPAND | wxALIGN_RIGHT, 5);
@@ -535,6 +539,8 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 
   ((NfgShow *) m_parent)->SetStrategy(m_rowPlayer, 1);
   ((NfgShow *) m_parent)->SetStrategy(m_colPlayer, 1);
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
   m_grid->EndBatch();
   m_grid->AdjustScrollbars();
   RefreshTable();
@@ -564,6 +570,8 @@ void NfgTable::ToggleProbs(void)
     m_grid->DeleteCols();
     m_grid->DeleteRows();
   }
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
 }
@@ -579,6 +587,8 @@ void NfgTable::ToggleDominance(void)
     m_grid->DeleteCols();
     m_grid->DeleteRows();
   }
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
 }
@@ -594,8 +604,36 @@ void NfgTable::ToggleValues(void)
     m_grid->DeleteCols();
     m_grid->DeleteRows();
   }
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
+}
+
+void NfgTable::SetDataFont(const wxFont &p_font)
+{ 
+  m_settings.SetDataFont(p_font);
+  m_settings.SaveSettings();
+  m_grid->SetDefaultCellFont(p_font);
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
+}
+
+void NfgTable::SetLabelFont(const wxFont &p_font) 
+{ 
+  m_settings.SetLabelFont(p_font); 
+  m_settings.SaveSettings();
+  m_grid->SetLabelFont(p_font);
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
+}
+
+void NfgTable::SetOutcomeValues(bool p_values)
+{
+  m_settings.SetOutcomeValues(p_values);
+  m_settings.SaveSettings();
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
 }
 
 void NfgTable::OnCellSelect(wxGridEvent &p_event)
@@ -657,19 +695,9 @@ void NfgTable::ClearProfile(void)
 
 void NfgTable::RefreshTable(void)
 {
-  // This is a crude but effective way to get the table to refresh
-  for (int row = 0; row < m_grid->GetRows(); row++) {
-    for (int col = 0; col < m_grid->GetCols(); col++) {
-      m_grid->SetCellValue("", row, col);
-    }
-  }
-
-  for (int row = 0; row < m_grid->GetRows(); row++) {
-    m_grid->SetRowLabelValue(row, "");
-  }
-  for (int col = 0; col < m_grid->GetCols(); col++) {
-    m_grid->SetColLabelValue(col, "");
-  }
+  m_grid->ForceRefresh();
+  m_grid->AutoSizeRows();
+  m_grid->AutoSizeColumns();
 }
 
 

@@ -113,6 +113,7 @@ dialogNewGame::dialogNewGame(wxWindow *p_parent)
   topSizer->SetSizeHints(this);
 
   Layout();
+  CenterOnParent();
 }
 
 void dialogNewGame::OnGameType(wxCommandEvent &)

@@ -155,7 +155,7 @@ int PolEnumModule::SaveSolutions(const gList<gVector<gDouble> > &list)
       profile(i,j) = (double)1.0 - sum;
       kk+=(support.NumStrats(i)-1);
     }
-    index = solutions.Append(MixedSolution(profile, algorithmNfg_POLENUM));
+    index = solutions.Append(MixedSolution(profile, "PolEnum[NFG]"));
     gNumber eps = (gNumber)0.0;
     gEpsilon(eps);
     solutions[index].SetEpsilon(eps);
@@ -455,7 +455,7 @@ PolEnumModule::ReturnPolishedSolution(const gVector<gDouble> &root) const
     kk+=(support.NumStrats(pl)-1);
   }
        
-  MixedSolution sol(profile, algorithmNfg_POLISH_NASH);
+  MixedSolution sol(profile, "Polish[NFG]");
   return sol;
 }
 

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiation of common LP solvers
+// Dialog to display a text report
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -24,15 +24,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lpsolve.imp"
-#include "math/rational.h"
+#ifndef DLREPORT_H
+#define DLREPORT_H
+
+class dialogReport : public wxDialog {
+private:
+  wxTextCtrl *m_text;
+
+  // Private event handlers
+  void OnFile(wxCommandEvent &);
+
+public:
+  dialogReport(wxWindow *, const wxString &);
+
+  DECLARE_EVENT_TABLE()
+};
+
+#endif   // DLREPORT_H
 
 
-template class LPSolve<double>;
-template class LPSolve<gRational>;
-
-#ifndef __BCC55__
-template gBlock<int> Artificials(const gVector<double> &);
-template gBlock<int> Artificials(const gVector<gRational> &);
-#endif  // __BCC55__
 

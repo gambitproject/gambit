@@ -34,24 +34,12 @@
 #include "game/nfg.h"
 #include "algutils.h"  // needed for gFact
 
-typedef enum {
-  algorithmNfg_USER,
-  algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
-  algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
-  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
-  algorithmNfg_QRE, algorithmNfg_QREALL,
-  algorithmNfg_POLISH_NASH, algorithmNfg_YAMAMOTO
-} NfgAlgType;
-
-gText ToText(NfgAlgType);
-gOutput &operator<<(gOutput &, NfgAlgType);
-
 class MixedSolution   {
 protected:
   MixedProfile<gNumber> m_profile;
   gPrecision m_precision;
   mutable NFSupport m_support;
-  mutable NfgAlgType m_creator;
+  mutable gText m_creator;
   mutable gFact<gTriState> m_Nash, m_Perfect, m_Proper;
   mutable gFact<gNumber> m_liapValue;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
@@ -67,10 +55,9 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  MixedSolution(const MixedProfile<double> &, NfgAlgType = algorithmNfg_USER);
-  MixedSolution(const MixedProfile<gRational> &,
-		NfgAlgType = algorithmNfg_USER);
-  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType = algorithmNfg_USER);
+  MixedSolution(const MixedProfile<double> &, const gText & = "User");
+  MixedSolution(const MixedProfile<gRational> &, const gText & = "User");
+  MixedSolution(const MixedProfile<gNumber> &, const gText & = "User");
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 
@@ -97,7 +84,7 @@ public:
   bool IsComplete(void) const;
 
   const gText &GetName(void) const { return m_name; }
-  NfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
+  const gText &Creator(void) const { CheckIsValid(); return m_creator; }
   const NFSupport &Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   const gTriState &IsPerfect(void) const;

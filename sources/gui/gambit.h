@@ -70,7 +70,5 @@ DECLARE_APP(GambitApp)
 
 const int wxID_HELP_INDEX = 1310;
 
-const int GAMBIT_VERSION = 97;
-
 #endif // GAMBIT_H
 

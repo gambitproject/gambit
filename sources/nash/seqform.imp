@@ -113,7 +113,7 @@ gList<BehavSolution> efgLcp<T>::Solve(const EFSupport &p_support,
     Add_BFS(tab);
     tab.BasisVector(sol);
     GetProfile(p_support, tab, profile.GetDPVector(),sol,p_support.GetGame().RootNode(),1,1);
-    solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG));
+    solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
   }
 
   return solutions;
@@ -193,7 +193,7 @@ efgLcp<T>::All_Lemke(const EFSupport &p_support,
 	BCopy.BasisVector(sol);
 	GetProfile(p_support, BCopy, profile.GetDPVector(),sol,p_support.GetGame().RootNode(),1,1);
 	if(newsol) {
-	  p_solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG)); 
+	  p_solutions.Append(BehavSolution(profile, "Lcp[EFG]")); 
 	}
       }
       else {

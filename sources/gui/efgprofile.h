@@ -45,6 +45,8 @@ public:
 
   void UpdateValues(void);
 
+  wxString GetReport(void) const;
+
   DECLARE_EVENT_TABLE()
 };
 

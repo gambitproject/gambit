@@ -40,7 +40,7 @@ public:
   nfgLp(void);
   virtual ~nfgLp() { }
 
-  gText GetAlgorithm(void) const { return "Lp"; }
+  gText GetAlgorithm(void) const { return "Lp[NFG]"; }
   gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 

@@ -65,9 +65,9 @@ GambitApp::GambitApp(void)
 bool GambitApp::OnInit(void)
 {
 #include "bitmaps/gambit.xpm"
-
   wxConfig config("Gambit");
   m_fileHistory.Load(config);
+  config.Read("/General/CurrentDirectory", &m_currentDir, "");
 
   wxBitmap bitmap(wxBITMAP(gambit));
   wxSplashScreen *splash =
@@ -83,27 +83,24 @@ bool GambitApp::OnInit(void)
   }
 #endif  // !__WXMSW__
 
-  efgGame *efg = new efgGame;
-  efg->NewPlayer()->SetName("Player 1");
-  efg->NewPlayer()->SetName("Player 2");
-  efg->SetTitle("Untitled Extensive Form Game");
+  // Process command line arguments, if any.
+  for (int i = 1; i < argc; i++) {
+    LoadFile(argv[i]);
+  }
 
-  EfgShow *efgShow = new EfgShow(*efg, 0);
-  efgShow->SetFilename("");
-  AddGame(efg, efgShow);
+  if (m_gameList.Length() == 0) {
+    efgGame *efg = new efgGame;
+    efg->NewPlayer()->SetName("Player 1");
+    efg->NewPlayer()->SetName("Player 2");
+    efg->SetTitle("Untitled Extensive Form Game");
+
+    EfgShow *efgShow = new EfgShow(*efg, 0);
+    efgShow->SetFilename("");
+    AddGame(efg, efgShow);
+  }
 
   // Set up the help system.
   wxInitAllImageHandlers();
-
-  // Process command line arguments, if any.
-#ifdef UNUSED
-  if (argc > 1) { 
-    gambitFrame->LoadFile(argv[1]);
-  }
-#endif  // UNUSED
-
-  // Set current directory.
-  SetCurrentDir(wxGetWorkingDirectory());
 
   return true;
 }
@@ -168,10 +165,14 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 
 void GambitApp::OnFileOpen(wxWindow *p_parent)
 {
-  wxFileDialog dialog(p_parent, "Choose file", "", "", "*.?fg");
+  wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "", 
+		      "Extensive form games (*.efg)|*.efg|"
+		      "Normal form games (*.nfg)|*.nfg");
 
   if (dialog.ShowModal() == wxID_OK) {
     SetCurrentDir(wxPathOnly(dialog.GetPath()));
+    wxConfig config("Gambit");
+    config.Write("/General/CurrentDirectory", wxPathOnly(dialog.GetPath()));
     LoadFile(dialog.GetPath());
   }
 }

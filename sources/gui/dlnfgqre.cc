@@ -145,6 +145,7 @@ dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const NFSupport &p_support)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 void dialogNfgQre::OnSolveUsing(wxCommandEvent &)

@@ -157,8 +157,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
 
 	delete nfg;
       }
-      //      SolveSubgame(foo, subsupport, sol, p_status);
-      //      SelectSolutions(subgame_number, foo, sol);
     }
     catch (gSignalBreak &) {
       interrupted = true;
@@ -207,7 +205,12 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       }
       
       int j = solns.Length();
-      //      solns[j].SetCreator((EfgAlgType) AlgorithmID());
+      if (m_efgAlgorithm) {
+	solns[j].SetCreator(m_efgAlgorithm->GetAlgorithm());
+      }
+      else {
+	solns[j].SetCreator(m_nfgAlgorithm->GetAlgorithm());
+      }
 
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {

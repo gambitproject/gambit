@@ -120,6 +120,7 @@ private:
   void OnProfilesDuplicate(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
   void OnProfilesProperties(wxCommandEvent &);
+  void OnProfilesReport(wxCommandEvent &);
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 
@@ -137,6 +138,7 @@ public:
 
   // PROFILE ACCESS AND MANIPULATION
   void AddProfile(const MixedSolution &, bool);
+  void RemoveProfile(int);
   void ChangeProfile(int);
   int CurrentProfile(void) const { return m_currentProfile; }
   const gList<MixedSolution> &Profiles(void) const { return m_profiles; }
@@ -165,6 +167,7 @@ public:
   gArray<int> GetContingency(void) const;
 
   void OnOutcomesEdited(void);
+  gText UniqueOutcomeName(void) const;
 
   DECLARE_EVENT_TABLE()
 };

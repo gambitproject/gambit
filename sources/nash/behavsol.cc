@@ -45,7 +45,6 @@ private:
   
   void SolveSubgame(const efgGame &, const EFSupport &,
 		    gList<BehavSolution> &, gStatus &);
-  EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
   
 public:
   SubgamePerfectChecker(const efgGame &, const BehavProfile<gNumber> &, const gNumber & epsilon);
@@ -53,58 +52,12 @@ public:
   gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
 
-gText ToText(EfgAlgType p_algorithm)
-{
-  switch (p_algorithm) {
-  case algorithmEfg_USER:
-    return "User"; 
-  case algorithmEfg_ENUMPURE_EFG:
-    return "EnumPure[EFG]";
-  case algorithmEfg_ENUMPURE_NFG:
-    return "EnumPure[NFG]";
-  case algorithmEfg_ENUMMIXED_NFG:
-    return "EnumMixed[NFG]";
-  case algorithmEfg_LCP_EFG:
-    return "Lcp[EFG]";
-  case algorithmEfg_LCP_NFG:
-    return "Lcp[NFG]";
-  case algorithmEfg_LP_EFG:
-    return "Lp[EFG]";
-  case algorithmEfg_LP_NFG:
-    return "Lp[NFG]";
-  case algorithmEfg_LIAP_EFG:
-    return "Liap[EFG]";
-  case algorithmEfg_LIAP_NFG:
-    return "Liap[NFG]";
-  case algorithmEfg_SIMPDIV_NFG:
-    return "Simpdiv[NFG]";
-  case algorithmEfg_POLENUM_EFG:
-    return "PolEnum[EFG]";
-  case algorithmEfg_POLENUM_NFG:
-    return "PolEnum[NFG]";
-  case algorithmEfg_QRE_EFG:
-    return "Qre[EFG]";
-  case algorithmEfg_QRE_NFG:
-    return "Qre[NFG]";
-  case algorithmEfg_QREALL_NFG:
-    return "QreAll[NFG]";
-  default:
-    return "None";
-  }
-}
-
-gOutput &operator<<(gOutput &p_file, EfgAlgType p_algorithm)
-{
-  p_file << ToText(p_algorithm);
-  return p_file;
-}
-
 //----------------------------------------------------
 // Constructors, Destructor, Constructive Operators
 //----------------------------------------------------
 
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
-			     EfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -131,7 +84,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 
 
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
-			     EfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -156,7 +109,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 }
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
-			     EfgAlgType p_creator)
+			     const gText &p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -341,7 +294,7 @@ gTriState BehavSolution::GetSequential(void) const
     // probability to all actions, and hence will be approximations to 
     // sequential equilibria.  But we should add code to check up on these 
     // algorithms
-    if(Creator() == algorithmEfg_LIAP_EFG || Creator() == algorithmEfg_QRE_EFG)
+    if (Creator() == "Liap[EFG]" || Creator() == "Qre[EFG]")
       return triTRUE;
     else {
       // check if game is perfect info
@@ -562,7 +515,7 @@ void BehavSolution::Invalidate(void) const
   // m_profile, and changes to outcome payoffs or chance probs of m_efg
   m_profile->Invalidate();
   m_support = EFSupport(m_profile->GetGame());
-  m_creator = algorithmEfg_USER;
+  m_creator = "User";
   m_ANFNash.Invalidate();
   m_Nash.Invalidate();
   m_SubgamePerfect.Invalidate();
@@ -656,7 +609,7 @@ void BehavSolution::DumpInfo(gOutput &p_file) const
   p_file << " IsSubgamePerfect:" << IsSubgamePerfect();
   p_file << " IsSequential:" << IsSequential();
   p_file << " LiapValue:" << LiapValue();
-  if(Creator() == algorithmEfg_QRE_EFG || Creator() == algorithmEfg_QRE_NFG) {
+  if (Creator() == "Qre[EFG]" || Creator() == "Qre[NFG]") {
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;
   }
@@ -731,7 +684,7 @@ void SubgamePerfectChecker::SolveSubgame(const efgGame &E,
   else 
     isSubgamePerfect = triUNKNOWN;
   
-  int index = solns.Append(BehavSolution(bp,AlgorithmID()));
+  int index = solns.Append(BehavSolution(bp, "User"));
   solns[index].SetEpsilon(eps);
 }
 

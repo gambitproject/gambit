@@ -49,6 +49,7 @@ void NumberEditor::BeginEdit(int row, int col, wxGrid* grid)
   m_valueOld = table->GetValue(row, col);
 
   DoBeginEdit(GetString());
+  ((wxTextCtrl *) GetControl())->SetSelection(0, 1000);
 }
 
 bool NumberEditor::EndEdit(int row, int col, wxGrid* grid)

@@ -144,53 +144,57 @@ gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
-  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
-  if(kk<=p.Length()) {
+  for (int kk = 1; kk <= p.Length() && p[kk] > ALPHA; kk++);
+  if (kk <= p.Length()) {
     BehavProfile<double> c(p_support);
-    for(int k=1;k<=p.Length();k++)
+    for (int k = 1; k <= p.Length(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+    }
   }
 
   gMatrix<double> xi(p.Length(), p.Length());
 
-  double value;
-  int iter;
-
   gList<BehavSolution> solutions;
   
-  for (int i = 1; (m_numTries == 0 || i <= m_numTries) &&
-       (m_stopAfter == 0 || solutions.Length() < m_stopAfter); 
-       i++)   {
-    p_status.Get();
-    p_status.SetProgress((double) i / (double) m_numTries,
-			 gText("Attempt ") + ToText(i) + 
-			 gText(", equilibria so far: ") +
-			 ToText(solutions.Length())); 
-    gConjugatePR minimizer(p.Length());
-    gVector<double> gradient(p.Length()), dx(p.Length());
-    double fval;
-    minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
+  try {
+    for (int i = 1; (m_numTries == 0 || i <= m_numTries) &&
+	   (m_stopAfter == 0 || solutions.Length() < m_stopAfter); 
+	 i++)   {
+      p_status.Get();
+      p_status.SetProgress((double) i / (double) m_numTries,
+			   gText("Attempt ") + ToText(i) + 
+			   gText(", equilibria so far: ") +
+			   ToText(solutions.Length())); 
+      gConjugatePR minimizer(p.Length());
+      gVector<double> gradient(p.Length()), dx(p.Length());
+      double fval;
+      minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
 
-    try {
-      for (int iter = 1; iter <= m_maxitsN; iter++) {
-	if (iter % 20 == 0) {
-	  p_status.Get();
-	}
+      try {
+	for (int iter = 1; iter <= m_maxitsN; iter++) {
+	  if (iter % 20 == 0) {
+	    p_status.Get();
+	  }
+	  
+	  if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	    break;
+	  }
 
-	if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
-	  break;
-	}
-
-	if (sqrt(gradient.NormSquared()) < .001) {
-	  solutions.Append(BehavSolution(p, algorithmEfg_LIAP_EFG));
-	  break;
+	  if (sqrt(gradient.NormSquared()) < .001) {
+	    solutions.Append(BehavSolution(p, "Liap[EFG]"));
+	    break;
+	  }
 	}
       }
+      catch (gFuncMinException &) { }
     }
-    catch (gFuncMinException &) { }
 
     PickRandomProfile(p);
   }
+  catch (gSignalBreak &) {
+    // Just stop and return any solutions found so far
+  }
+  // Any other exceptions propagate out, assuming something Real Bad happened
 
   return solutions;
 }

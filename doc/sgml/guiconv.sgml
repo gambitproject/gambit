@@ -98,19 +98,22 @@ Clicking with the right mouse button within the profile table
 accesses a popup menu with the following items:
 <itemizedlist>
 <listitem>
-<para><guimenuitem>Sort</guimenuitem></para>
-</listitem>
-<listitem>
 <para><guimenuitem>New</guimenuitem> creates a new profile and opens
 a dialog to edit its properties.  All profiles created with the
 <guimenuitem>New</guimenuitem> command are tagged with a creator
 field of <guilabel>User</guilabel>.</para>
 </listitem>
 <listitem>
-<para><guimenuitem>Duplicate</guimenuitem></para>
+<para>
+<guimenuitem>Duplicate</guimenuitem> creates a copy of the currently
+selected profile.
+</para>
 </listitem>
 <listitem>
-<para><guimenuitem>Delete</guimenuitem></para>
+<para>
+<guimenuitem>Delete</guimenuitem> deletes the currently selected profile
+from the list of profiles.
+</para>
 </listitem>
 <listitem>
 <para><guimenuitem>Properties</guimenuitem> displays a dialog to view
@@ -126,12 +129,21 @@ entry in the table is double-clicked.
 <para>
 When both the extensive and normal form representations of a game are
 displayed, the profile lists in the two windows are coordinated.
+Corresponding profiles are listed in the same order in the two windows,
+and operations such as changing the currently-selected profile, or
+deleting a profile, change the profile list accordingly in both windows.
+The mapping from normal form mixed strategies to extensive form behavior
+strategies is done using Kuhn's Theorem; as such, the results are
+unpredictable if the extensive form game is not of perfect recall.
 </para>
 
 <para>
 When a game is edited and payoffs are changed, the equilibrium
-fields such as <guilabel>Nash</guilabel> will reset to 
-<guilabel>DK</guilabel>.  When a game is edited to change the number
+fields such as <guilabel>Nash</guilabel> will be reset.
+In some cases, these will be updated to yes or no answers; in others
+for which no definitive test is available, the fields will reset to
+<guilabel>DK</guilabel> (for &quot;don't know&quot;).
+When a game is edited to change the number
 of information sets, actions, or strategies, all profiles are deleted.
 </para>
 
@@ -152,50 +164,177 @@ the two solution lists were separate.
 <sect2 id="gui.conv.supports">
 <title>Working with supports</title>
 <para>
-This dialog is used to create a new support or edit an existing
-support.  It is accessed through the {\bf Supports->New} or {\bf
-Supports->Edit} menu item.  Only the normal form version is shown, as
-the functionality for the extensive form is similar.
+A support is a subset of the actions (for extensive forms) or strategies
+(for normal forms) of a game.  Supports are most commonly generated as the
+result of computing the dominated actions or strategies in a game, but
+may also be manually edited for specific purposes.
+</para>
 
-The hilighted strategies are those that are included in the support.
-A new support starts with the default of the {\em full support},
-editing a support starts with the selected support as the default.  To
-deselect a player's strategy, click on it in the appropriate listbox.
-The strategy will no longer be hilighted.  When the dialog is
-dismissed, the newly created support will be added to the support
-list.
+<para>
+The supports currently defined on a game are accessible via the
+<guimenuitem>Supports</guimenuitem> menu item on the <guimenu>View</guimenu>
+menu.  The support panel is in the same notebook window as the outcome
+and navigation panels.
+</para>
 
-This dialog is used to compute undominated strategies for a normal or
-extensive form games, and return a new support consisting of
-undominated strategies.  It is accessed via the {\bf 
-Supports->UnDominated} menu item.
+<para>
+The main body of the support panel shows, in tree form, the actions or
+strategies in the currently selected support.  In extensive form games,
+the window is organized hierarchically by player, then information set;
+in normal form games, by player.  Strategies or actions not present in
+the current support are shown in light grey.
+</para>
 
-The following parameters can be selected:
+<para>
+At the top of the support panel is a drop-down list of all supports
+currently defined.  The first support is always the &quot;full support&quot;,
+which cannot be edited.  Selecting a support from this list makes the
+support the new current support, and changes the display of the game
+accordingly.  The arrow buttons next to the drop-down change the current
+support to the previous or next support in the list, respectively.
+</para>
 
-\begin{description}
-\item[Eliminate Iteratively:] Select this checkbox to iteratively
-eliminate dominated strategies. The result will be a nested sequence
-of supports, with the last one consisting of strategies that are
-undominated in the final support.
-\item[Type:] You can select the type of domination to use: weak or
-strong domination.  
-\item[Method:] You can select whether to eliminate only strategies
-that are dominated by a single (pure) strategy or by a combination of
-some strategies (mixed).  Elimination by mixed strategies is only
-available for normal form games.  For extensive form games this
-choicebox will also allow selection of {\bf Conditional} domination,
-which means that dominance computations are done using payoffs that
-are conditional on reaching the information set of the strategy,
-rather than on the payoff at the root node.
-\item[Precision:] This option is only available for mixed elimination,
-and determines whether the resulting computations are done in Rational
-or Floating point.  
-\item[Players:] You may select which players to eliminate dominated
-strategies for. The default is all players, meaning that dominated
-strategies for each player are computed over the initial support, and
-then eliminated simultaneously to create the new support.
-\end{description}
+<para>
+The <guimenuitem>Dominance</guimenuitem> item on the <guimenu>Tools</guimenu>
+is used to identify actions or strategies which are dominated.  For each
+iteration of elimination of dominated strategies this algorithm performs,
+the corresponding support is added to the list of supports.  Therefore,
+using the arrow keys to scroll through the supports after finding dominated
+actions or strategies is a useful way of seeing which actions or strategies
+were removed at each iteration.
+</para>
 
+<para>
+Supports may be constructed and edited by hand as well.  Right-clicking
+in the support panel displays a menu with the following options:
+<itemizedlist>
+<listitem>
+<para>
+<guimenuitem>Duplicate support</guimenuitem> creates a new support with
+the same actions or strategies as the current support.  The new support
+becomes the current support.
+</para>
+</listitem>
+<listitem>
+<para>
+<guimenuitem>Delete support</guimenuitem> deletes the current support from
+the support list.  Note that the &quot;full support&quot; cannot be
+deleted.
+</para>
+</listitem>
+</itemizedlist>
+The actions or strategies in any support other than the 
+&quot;full support&quot; may be edited by left-clicking on the entry
+in the tree for the action or strategy, and pressing the space bar.
+</para>
+
+<para>
+The algorithms in the <guimenuitem>Equilibrium</guimenuitem> dialog on
+the <guimenu>Tools</guimenu> menu compute Nash equilibria on the
+currently selected support.  This is useful, since cutting down on the
+number of actions or strategies the algorithm must consider can help
+substantially in efficiency.  So long as the current support differs
+from the full support only in the (possibly iterative) removal of
+strictly dominated actions or strategies, algorithms will be able to
+find all Nash equilibria.  So long as the current support differs from
+the full support only in the (possibly iterative) removal of weakly
+dominated actions or strategies, algorithms will find only Nash
+equilibria (but can possibly miss equilibria involving weakly
+dominated actions or strategies).  For any other support, algorithms
+may return profiles which are not Nash equilibria on the whole game,
+but which are Nash equilibria on the game defined by restricting the
+original game to actions or strategies found in the current support.
+Note that such profiles will be indicated in the profiles window with an
+<guilabel>N</guilabel> in the <guilabel>Nash</guilabel> column.
+</para>
+
+
+</sect2>
+
+<sect2 id="gui.conv.outcomes">
+<title>Working with outcomes</title>
+<para>
+Gambit has a flexible interpretation of outcomes, particularly in
+extensive form games.  Gambit permits outcomes to appear in more than
+one place in a tree or normal form.  Additionally, outcomes may appear
+at nonterminal nodes in a game tree, in which case payoffs are interpreted
+as the incremental payoffs of reaching that point in the tree.
+</para>
+
+<para>
+Each game has a predefined &quot;null&quot; outcome.  The payoff to all
+players at a null outcome is defined to be zero.  New extensive form games
+are created with only the null outcome; when creating a normal form game,
+the New Game dialog box offers by default to create one outcome per
+contingency in the normal form game.
+</para>
+
+<para>
+Outcomes are manipulated using a grid interface accessible by the
+<guimenuitem>Outcomes</guimenuitem> item on the <guimenu>View</guimenu>
+menu.  The outcomes grid functions similar to a spreadsheet.
+<note>
+<para>
+There is some variance in the grid behavior between the GTK and Windows
+versions of Gambit, due to variance in the wxWindows implementation.  
+Hopefully this will standardize in future versions.
+</para>
+</note>
+</para>
+
+<para>
+A new outcome is automatically created whenever the <keycap>Enter</keycap>
+key is pressed while on the last row of the outcomes table.  Alternately,
+a new outcome can be created by right-clicking in the grid, which generates
+a context menu for the outcomes window, and select 
+<guimenuitem>New</guimenuitem>.
+<note>
+<para>For GTK users: A quirk in GTK causes a <keycap>CTRL</keycap>-<keycap>N</keycap> shortcut to appear on this menu item.  The shortcut does not create
+an outcome, but rather a new game.
+</para>
+</note>
+</para>
+
+<para>
+Editing outcome payoffs and labels is done in-place in the grid.  Note that
+editing payoffs may cause computed profiles to cease being Nash equilibria
+(or, perhaps, cause them to become Nash equilibria); these changes will
+occur automatically in the Profiles window, if displayed.  Strategy,
+action, and node values similarly will recompute after any payoff change.
+</para>
+
+<para>
+Outcomes may be deleted using the <guimenuitem>Delete</guimenuitem> on
+the context menu.  Deleting an outcome results in any nodes (in the
+extensive form) or contingencies (in the normal form) with that outcome
+having their outcome reset to the null outcome, with zero payoffs.
+</para>
+
+<para>
+Outcomes are attached to nodes or contingencies in one of two ways.
+In either case, first select the node or contingency where the outcome
+will go.
+<itemizedlist>
+<listitem>
+<para>
+Using the <guimenu>Edit</guimenu> menu, select <guimenuitem>Node</guimenuitem>
+or <guimenuitem>Contingency</guimenuitem>, as appropriate.  The presented
+dialogs have a drop-down choice listing all outcomes and their payoffs;
+select the desired outcome, and press OK to dismiss the dialog.
+</para>
+</listitem>
+<listitem>
+<para>
+Using the outcomes window, select the outcome and right-click to get the
+context menu.  Select <guimenuitem>Attach</guimenuitem>, and the outcome
+will be attached to the selected node or contingency.
+</para>
+</listitem>
+</itemizedlist>
+In a similar way, outcomes may be detached from nodes or contingencies,
+either by selecting the null outcome when editing the node or contingency,
+or by selecting <guimenuitem>Detach</guimenuitem> from the context menu
+in the outcomes window.
 </para>
 </sect2>
 
@@ -241,3 +380,4 @@ equilibrium in a normal form game is currently planned for release
 </sect2>
 
 </sect1>
+

@@ -108,6 +108,7 @@ dialogEfgColor::dialogEfgColor(wxWindow *p_parent,
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
 }
 
 void dialogEfgColor::OnTerminalColor(wxCommandEvent &)

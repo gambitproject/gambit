@@ -33,29 +33,12 @@
 #include "game/efg.h"
 #include "algutils.h"  // needed for gFact
 
-typedef enum {
-  algorithmEfg_USER,
-  algorithmEfg_ENUMPURE_EFG, algorithmEfg_ENUMPURE_NFG,
-  algorithmEfg_ENUMMIXED_NFG,
-  algorithmEfg_LCP_EFG, algorithmEfg_LCP_NFG,
-  algorithmEfg_LP_EFG, algorithmEfg_LP_NFG,
-  algorithmEfg_LIAP_EFG, algorithmEfg_LIAP_NFG,
-  algorithmEfg_SIMPDIV_NFG,
-  algorithmEfg_POLENUM_EFG, algorithmEfg_POLENUM_NFG,
-  algorithmEfg_QRE_EFG, algorithmEfg_QRE_NFG,
-  algorithmEfg_QREALL_NFG,
-  algorithmEfg_POLISH_NASH
-} EfgAlgType;
-
-gText ToText(EfgAlgType);
-gOutput &operator<<(gOutput &, EfgAlgType);
-
 class BehavSolution {
 protected:
   BehavProfile<gNumber> *m_profile;
   gPrecision m_precision;
   mutable EFSupport m_support;
-  mutable EfgAlgType m_creator;
+  mutable gText m_creator;
   mutable gFact<gTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   mutable gFact<gNumber> m_liapValue;
@@ -74,10 +57,9 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavSolution(const BehavProfile<double> &, EfgAlgType = algorithmEfg_USER);
-  BehavSolution(const BehavProfile<gRational> &,
-		EfgAlgType = algorithmEfg_USER);
-  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType = algorithmEfg_USER);
+  BehavSolution(const BehavProfile<double> &, const gText & = "User");
+  BehavSolution(const BehavProfile<gRational> &, const gText & = "User");
+  BehavSolution(const BehavProfile<gNumber> &, const gText & = "User");
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
@@ -108,7 +90,7 @@ public:
   bool IsComplete(void) const;
 
   const gText &GetName(void) const { return m_name; }
-  EfgAlgType Creator(void) const { CheckIsValid(); return m_creator; }
+  const gText &Creator(void) const { CheckIsValid(); return m_creator; }
   EFSupport Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   BehavSolution PolishEq(void) const;
@@ -124,7 +106,7 @@ public:
   const gNumber MaxRNFRegret(void) const;
 
   void SetName(const gText &p_name) { m_name = p_name; }
-  void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
+  void SetCreator(const gText &p_creator) { m_creator = p_creator; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }

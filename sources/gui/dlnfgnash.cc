@@ -113,11 +113,18 @@ panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "OneNashSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find one Nash equilibrium"),
+		   0, wxALL | wxCENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -199,11 +206,18 @@ panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "TwoNashSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find two Nash equilibria"),
+		   0, wxALL | wxCENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -287,9 +301,15 @@ panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "AllNashSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find all Nash equilibria"),
+		   0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -355,9 +375,16 @@ panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC,
+					   "OnePerfectSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find one perfect Nash equilibrium"),
+		   0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -423,9 +450,16 @@ panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC,
+					   "TwoPerfectSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find two perfect Nash equilibria"),
+		   0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -491,9 +525,16 @@ panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC,
+					   "AllPerfectSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find all perfect Nash equilibria"),
+		   0, wxALL | wxCENTER, 5);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -537,7 +578,14 @@ panelNfgEnumPure::panelNfgEnumPure(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "EnumPureSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria by enumerating "
+				    "pure strategies"),
+		   0, wxALL | wxCENTER, 5);
 
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
 					      "Number to find");
@@ -552,7 +600,8 @@ panelNfgEnumPure::panelNfgEnumPure(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -605,13 +654,21 @@ panelNfgEnumMixed::panelNfgEnumMixed(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC,
+					   "EnumMixedSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria by enumerating "
+				    "mixed strategies"),
+		   0, wxALL | wxCENTER, 5);
 
   wxString precisionChoices[] = { "Floating point", "Rational" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
 			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
-  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
 					      "Number to find");
@@ -626,7 +683,8 @@ panelNfgEnumMixed::panelNfgEnumMixed(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -693,13 +751,20 @@ panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "LcpSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria via linear "
+				    "complementarity program"),
+		   0, wxALL | wxCENTER, 5);
 
   wxString precisionChoices[] = { "Floating point", "Rational" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
 			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
-  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
 					      "Number to find");
@@ -714,7 +779,7 @@ panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *depthBox = new wxStaticBox(this, wxID_STATIC, 
 					  "Algorithm behavior");
@@ -731,7 +796,8 @@ panelNfgLcp::panelNfgLcp(wxWindow *p_parent)
 			      wxSP_ARROW_KEYS, 1, 1000);
   m_maxDepth->Enable(false);
   depthSizer->Add(m_maxDepth, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(depthSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(depthSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -811,13 +877,20 @@ panelNfgLp::panelNfgLp(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "LpSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria via linear "
+				    "program"),
+		   0, wxALL | wxCENTER, 5);
 
   wxString precisionChoices[] = { "Floating point", "Rational" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
 			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
-  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
 
   // The "find all" feature of LpSolve currently does not work;
   // therefore, the controls are disabled in this version
@@ -836,7 +909,8 @@ panelNfgLp::panelNfgLp(wxWindow *p_parent)
 			       wxSP_ARROW_KEYS, 1, 10000);
   m_stopAfter->Enable(false);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -871,7 +945,7 @@ class panelNfgLiap : public panelNfgNashAlgorithm {
 private:
   wxCheckBox *m_findAll;
   wxSpinCtrl *m_stopAfter, *m_numTries;
-  wxSpinCtrl *m_maxits1, *m_tol1, *m_maxitsN, *m_tolN;
+  wxSpinCtrl *m_maxits;
 
   // Private event handlers
   void OnFindAll(wxCommandEvent &);
@@ -893,13 +967,20 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "LiapSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria using "
+				    "Lyapunov function minimization"),
+		   0, wxALL | wxCENTER, 5);
 
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
 					      "Number to find");
   wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
 							  wxHORIZONTAL);
-  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "No limit");
   m_findAll->SetValue(false);
   stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
   stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
@@ -908,61 +989,32 @@ panelNfgLiap::panelNfgLiap(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *algorithmBox = new wxStaticBox(this, wxID_STATIC,
 					      "Algorithm behavior");
   wxStaticBoxSizer *algorithmSizer = new wxStaticBoxSizer(algorithmBox,
 							  wxHORIZONTAL);
-  algorithmSizer->Add(new wxStaticText(this, wxID_STATIC,
-				       "Number of restarts"),
-		      0, wxALL | wxCENTER, 5);
-  m_numTries = new wxSpinCtrl(this, -1, "20",
+
+  wxFlexGridSizer *paramSizer = new wxFlexGridSizer(2);
+  paramSizer->Add(new wxStaticText(this, wxID_STATIC, "Number of restarts"),
+		  0, wxALL | wxCENTER, 5);
+  m_numTries = new wxSpinCtrl(this, -1, "100",
 			      wxDefaultPosition, wxDefaultSize,
 			      wxSP_ARROW_KEYS, 1, 10000);
-  algorithmSizer->Add(m_numTries, 0, wxALL, 5);
-  topSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
-
-  wxStaticBox *funcminBox = new wxStaticBox(this, wxID_STATIC,
-					    "Function minimization behavior");
-  wxStaticBoxSizer *funcminSizer = new wxStaticBoxSizer(funcminBox,
-							wxVERTICAL);
-  wxFlexGridSizer *paramSizer = new wxFlexGridSizer(2);
-  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   "Maximum iterations for line search"),
-		  0, wxALL | wxCENTER, 5);
-  m_maxits1 = new wxSpinCtrl(this, -1, "100",
-			     wxDefaultPosition, wxDefaultSize,
-			     wxSP_ARROW_KEYS, 10, 10000);
-  paramSizer->Add(m_maxits1, 0, wxALL | wxCENTER, 5);
-  
-  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   "Tolerance for line search (in digits)"),
-		  0, wxALL | wxCENTER, 5);
-  m_tol1 = new wxSpinCtrl(this, -1, "10",
-			  wxDefaultPosition, wxDefaultSize,
-			  wxSP_ARROW_KEYS, 2, 20);
-  paramSizer->Add(m_tol1, 0, wxALL | wxCENTER, 5);
+  paramSizer->Add(m_numTries, 0, wxALL, 5);
 
   paramSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   "Maximum iterations in minimization"),
 		  0, wxALL | wxCENTER, 5);
-  m_maxitsN = new wxSpinCtrl(this, -1, "20",
-			     wxDefaultPosition, wxDefaultSize,
-			     wxSP_ARROW_KEYS, 10, 1000);
-  paramSizer->Add(m_maxitsN, 0, wxALL | wxCENTER, 5);
-  
-  paramSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   "Tolerance in minimization (in digits)"),
-		  0, wxALL | wxCENTER, 5);
-  m_tolN = new wxSpinCtrl(this, -1, "10",
-			  wxDefaultPosition, wxDefaultSize,
-			  wxSP_ARROW_KEYS, 2, 20);
-  paramSizer->Add(m_tolN, 0, wxALL | wxCENTER, 5);
+  m_maxits = new wxSpinCtrl(this, -1, "500",
+			    wxDefaultPosition, wxDefaultSize,
+			    wxSP_ARROW_KEYS, 10, 1000);
+  paramSizer->Add(m_maxits, 0, wxALL | wxCENTER, 5);
+  algorithmSizer->Add(paramSizer, 0, wxALL, 5);
 
-  funcminSizer->Add(paramSizer, 0, wxALL, 5);
-  
-  topSizer->Add(funcminSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -983,10 +1035,7 @@ nfgNashAlgorithm *panelNfgLiap::GetAlgorithm(void) const
   algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			  0 : m_stopAfter->GetValue());
   algorithm->SetNumTries(m_numTries->GetValue());
-  algorithm->SetMaxits1(m_maxits1->GetValue());
-  algorithm->SetTol1(pow(10.0, (double) -m_tol1->GetValue()));
-  algorithm->SetMaxitsN(m_maxitsN->GetValue());
-  algorithm->SetTolN(pow(10.0, (double) -m_tolN->GetValue()));
+  algorithm->SetMaxitsN(m_maxits->GetValue());
   return algorithm;
 }
 
@@ -1019,7 +1068,15 @@ panelNfgPolEnum::panelNfgPolEnum(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "PolEnumSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria via solving "
+				    "polynomial equations"),
+		   0, wxALL | wxCENTER, 5);
+
   wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
 					      "Number to find");
   wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
@@ -1033,7 +1090,8 @@ panelNfgPolEnum::panelNfgPolEnum(wxWindow *p_parent)
 			       wxDefaultPosition, wxDefaultSize,
 			       wxSP_ARROW_KEYS, 1, 10000);
   stopAfterSizer->Add(m_stopAfter, 0, wxALL, 5);
-  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -1072,11 +1130,19 @@ panelNfgQre::panelNfgQre(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 "This algorithm requires no parameters"),
-		0, wxALL | wxCENTER, 5);
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "QreSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria via tracing "
+				    "logit equilibria"),
+		   0, wxALL | wxCENTER, 5);
+
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "This algorithm requires no parameters"),
+		   0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -1090,7 +1156,7 @@ nfgNashAlgorithm *panelNfgQre::GetAlgorithm(void) const
 {
   nfgQre *algorithm = new nfgQre;
   algorithm->SetFullGraph(false);
-  algorithm->SetMaxLambda(1000);
+  algorithm->SetMaxLambda(1000000000);
   return algorithm;
 }
 
@@ -1127,13 +1193,20 @@ panelNfgSimpdiv::panelNfgSimpdiv(wxWindow *p_parent)
 {
   SetAutoLayout(true);
 
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxStaticBox *centerBox = new wxStaticBox(this, wxID_STATIC, "SimpdivSolve");
+  wxStaticBoxSizer *centerSizer = new wxStaticBoxSizer(centerBox, wxVERTICAL);
+  centerSizer->Add(new wxStaticText(this, wxID_STATIC,
+				    "Find Nash equilibria via simplicial "
+				    "subdivision"),
+		   0, wxALL | wxCENTER, 5);
 
   wxString precisionChoices[] = { "Floating point", "Rational" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
 			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
-  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
 
   wxStaticBox *algorithmBox = new wxStaticBox(this, wxID_STATIC,
 					      "Algorithm behavior");
@@ -1162,7 +1235,8 @@ panelNfgSimpdiv::panelNfgSimpdiv(wxWindow *p_parent)
   restartSizer->Add(m_numRestarts, 0, wxALL | wxCENTER, 5);
   algorithmSizer->Add(restartSizer, 0, wxALL | wxCENTER, 5);
 
-  topSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
+  centerSizer->Add(algorithmSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(centerSizer, 1, wxALL | wxCENTER, 0);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -1237,8 +1311,10 @@ nfgNashAlgorithm *panelNfgYamamoto::GetAlgorithm(void) const
 const int idTREECTRL_ALGORITHMS = 2000;
 
 BEGIN_EVENT_TABLE(dialogNfgNash, wxDialog)
-  EVT_TREE_SEL_CHANGED(idTREECTRL_ALGORITHMS,
-		       dialogNfgNash::OnSelectionChanged)
+  EVT_TREE_SEL_CHANGING(idTREECTRL_ALGORITHMS,
+			dialogNfgNash::OnSelectionChanging)
+  EVT_TREE_ITEM_COLLAPSING(idTREECTRL_ALGORITHMS,
+			   dialogNfgNash::OnItemCollapsing)
 END_EVENT_TABLE()
 
 dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const NFSupport &p_support)
@@ -1249,16 +1325,16 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const NFSupport &p_support)
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *algPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+  m_algPanelSizer = new wxBoxSizer(wxHORIZONTAL);
   m_algorithmTree = new wxTreeCtrl(this, idTREECTRL_ALGORITHMS,
-				   wxDefaultPosition, wxSize(200, 400));
-  LoadAlgorithms(p_support.Game());
-  algPanelSizer->Add(m_algorithmTree, 1, wxALL | wxEXPAND, 5);
-
-  m_fooPanel = new wxPanel(this, -1, wxDefaultPosition, wxSize(400, 400));
-  m_currentPanel = m_fooPanel;
-  algPanelSizer->Add(m_fooPanel, 0, wxALL, 5);
-  topSizer->Add(algPanelSizer, 1, wxALL | wxEXPAND, 5);
+				   wxDefaultPosition, wxSize(200, 400),
+				   wxTR_NO_BUTTONS | wxTR_HIDE_ROOT |
+				   wxTR_NO_LINES | wxTR_ROW_LINES);
+  wxTreeItemId init = LoadAlgorithms(p_support.Game());
+  m_algPanelSizer->Add(m_algorithmTree, 1, wxALL, 5);
+  m_currentPanel = m_algorithms(init);
+  m_algPanelSizer->Add(m_currentPanel, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(m_algPanelSizer, 1, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
@@ -1273,9 +1349,11 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const NFSupport &p_support)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   Layout();
+  CenterOnParent();
+  m_algorithmTree->SelectItem(init);
 }
 
-void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
+int dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
 {
   wxTreeItemId id;
 
@@ -1284,10 +1362,12 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
   wxTreeItemId root = m_algorithmTree->AddRoot("Algorithms");
   wxTreeItemId standard = m_algorithmTree->AppendItem(root,
 						      "Standard algorithms");
+  m_algorithmTree->SetItemBold(standard);
   // This is added to silence some BC warnings
   panelNfgNashAlgorithm *panel;
   id = m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
   m_algorithms.Define(id, panel = new panelNfgOneNash(this));
+  wxTreeItemId init = id;
   
   id = m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
   m_algorithms.Define(id, panel = new panelNfgTwoNash(this));
@@ -1307,6 +1387,7 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
   }
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
+  m_algorithmTree->SetItemBold(custom);
 
   id = m_algorithmTree->AppendItem(custom, "EnumPureSolve");
   m_algorithms.Define(id, panel = new panelNfgEnumPure(this));
@@ -1342,22 +1423,35 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
   m_algorithmTree->Expand(standard);
   m_algorithmTree->Expand(custom);
   m_algorithmTree->Expand(root);
+
+  return init;
 }
 
-void dialogNfgNash::OnSelectionChanged(wxTreeEvent &)
+void dialogNfgNash::OnSelectionChanging(wxTreeEvent &p_event)
 {
-  wxPanel *panel = m_algorithms(m_algorithmTree->GetSelection());
-  m_currentPanel->Show(false);
-  if (panel) {
-    m_currentPanel = panel;
-    panel->Move(m_fooPanel->GetPosition());
-    panel->SetSize(m_fooPanel->GetSize());
-    panel->Show(true);
+  wxPanel *panel = m_algorithms(p_event.GetItem());
+  if (!panel) {
+    p_event.Veto();
+    return;
   }
-  else {
-    m_currentPanel = m_fooPanel;
-    m_fooPanel->Show(true);
+
+  if (m_currentPanel) {
+    m_currentPanel->Show(false);
   }
+
+  m_currentPanel = panel;
+  panel->Show(true);
+  m_algPanelSizer->Remove(1);
+  m_algPanelSizer->Add(panel, 0, wxALL | wxCENTER, 5);
+  m_algPanelSizer->Layout();
+  GetSizer()->Layout();
+  GetSizer()->Fit(this);
+  CenterOnParent();
+}
+
+void dialogNfgNash::OnItemCollapsing(wxTreeEvent &p_event)
+{
+  p_event.Veto();
 }
 
 nfgNashAlgorithm *dialogNfgNash::GetAlgorithm(void) const
