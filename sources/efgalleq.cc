@@ -78,11 +78,13 @@ void AllEFNashSolveModule::NashEnum(void)
     double newtime = 0.0;
     gList<BehavSolution> newsolns;
     bool is_singular = false;
-    EfgPolEnum(possiblenashsubsupports[i], params, newsolns, 
-	       newevals, newtime, is_singular);
-    //    EfgPolEnum(possiblenashsubsupports[i], params, newsolns, newevals, 
-    //	       newtime);
-    for (int j = 1; j <= newsolns.Length(); j++)
+    EfgPolEnum(possiblenashsubsupports[i], 
+	       params, 
+	       newsolns, 
+	       newevals, 
+	       newtime, 
+	       is_singular);
+    for (int j = 1; j <= newsolns.Length(); j++) 
       if (newsolns[j].IsNash()) 
 	solutions += newsolns[j];
     if (is_singular) 
