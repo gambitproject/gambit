@@ -555,6 +555,10 @@ static Portion *GSM_KQre_Start(Portion **param)
 static Portion *GSM_Lcp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
+  const Nfg *N = &S.Game();
+
+  if (N->NumPlayers() > 2)
+    throw gclRuntimeError("Only valid for two-person games");
 
   LemkeParams params;
   params.stopAfter = ((NumberPortion *) param[1])->Value();
@@ -583,6 +587,10 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
 static Portion *GSM_Lcp_Efg(Portion **param)
 {
   EFSupport &support = *((EfSupportPortion*) param[0])->Value();
+  const Efg *E = &support.Game();
+
+  if (E->NumPlayers() > 2)
+    throw gclRuntimeError("Only valid for two-person games");
 
   if (!IsPerfectRecall(support.Game())) {
     gout << "WARNING: Solving game of imperfect recall with Lcp; results not guaranteed\n";
@@ -805,14 +813,14 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
 
+  if (N->NumPlayers() > 2 || !IsConstSum(*N))
+    throw gclRuntimeError("Only valid for two-person zero-sum games");
+
   ZSumParams params;
   params.stopAfter = 1;
   params.precision = ((PrecisionPortion *) param[1])->Value();
   params.tracefile = &((OutputPortion *) param[4])->Value();
   params.trace = ((NumberPortion *) param[5])->Value();
-
-  if (N->NumPlayers() > 2 || !IsConstSum(*N))
-    throw gclRuntimeError("Only valid for two-person zero-sum games");
 
   gList<MixedSolution> solutions;
  
