@@ -36,6 +36,9 @@
 
 gString gPreprocessor::GetLine( void )
 {
+  
+  m_RawLine = "";
+
 
   // If no more input available, return nothing.
   if( eof() )

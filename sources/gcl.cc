@@ -133,7 +133,8 @@ int main( int /*argc*/, char* argv[] )
   gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
 
   while (!P.eof()) 
-    C.Parse(P.GetLine(), P.GetFileName(), P.GetLineNumber());
+    C.Parse(P.GetLine(), P.GetFileName(), P.GetLineNumber(),
+	    P.GetRawLine() );
 
   delete[] _SourceDir;
   delete _gsm;

@@ -55,7 +55,7 @@ gStack<gString> GCL_InputFileNames(4);
   GSM& gsm; \
   bool record_funcbody, in_funcdecl; \
   int current_char, current_line; \
-  gString current_expr, current_file; \
+  gString current_expr, current_file, current_rawline; \
   gString funcbody, funcname, funcdesc, paramtype, functype; \
   gList<gString> formals, types; \
   gList<Portion *> portions; \
@@ -74,7 +74,8 @@ gStack<gString> GCL_InputFileNames(4);
   bool DeleteFunction(void); \
   void RecoverFromError(void); \
   \
-  int Parse(const gString &line, const gString &file, int lineno); \
+  int Parse(const gString& line, const gString &file, int lineno, \
+            const gString& rawline); \
   int Execute(void); 
 
 %define CONSTRUCTOR_INIT     : gsm(*_gsm), \
@@ -367,8 +368,6 @@ char GCLCompiler::nextchar(void)
   char c = current_expr[current_char];
   if( c == 'r' || c == '\n' )
     ++current_line;
-  if( record_funcbody )
-    funcbody += c;
   ++current_char;
   return c;
 }
@@ -378,8 +377,6 @@ void GCLCompiler::ungetchar(char /*c*/)
   char c = current_expr[current_char-1];
   if( (current_char > 0) && (c == 'r' || c == '\n') )
     --current_line;
-  if( record_funcbody && funcbody.length() > 0 )
-    funcbody = funcbody.left( funcbody.length() - 1 );
   --current_char;
 }
 
@@ -662,12 +659,14 @@ int GCLCompiler::yylex(void)
   }
 }
 
-int GCLCompiler::Parse(const gString &line, const gString &file, int lineno)
+int GCLCompiler::Parse(const gString& line, const gString &file, int lineno,
+                       const gString& rawline )
 {
   current_expr = line;
   current_char = 0;
   current_file = file;
   current_line = lineno;
+  current_rawline = rawline;
 
   for (int i = 0; i < line.length(); i++)   {
     if (!isspace(line[i]))  {	
@@ -705,11 +704,17 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
   if (funcspec.Type != porERROR) {
     FuncInfoType funcinfo = 
       FuncInfoType(expr, funcspec, formals.Length());
+
+    funcbody = current_rawline;
     if( !strstr( funcbody, "/*Private*/" ) )
       funcinfo.Desc = funcbody;
+    else
+      funcinfo.Desc = "/*Private*/";
+
     if( funcdesc.length() > 0 )
       funcinfo.Desc += "\n\n" + funcdesc;
     funcdesc = "";
+
     func->SetFuncInfo(0, funcinfo);
   }
   else {

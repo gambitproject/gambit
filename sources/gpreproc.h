@@ -28,11 +28,12 @@ private:
   gStack< int >     m_LineNumberStack;
   gStack< gString > m_FileNameStack;
 
+  gString           m_RawLine;
   gString           m_PrevFileName;
   int               m_PrevLineNumber;
 
   gString           m_StartupString;
-
+  
 
 
   gInput* LoadInput( gString& name );
@@ -60,6 +61,8 @@ private:
       if( EOL( c ) )
 	++m_LineNumberStack.Peek();
     }
+
+    m_RawLine += c;
   }
 
   bool IsQuoteEscapeSequence( const gString& line ) const
@@ -118,6 +121,15 @@ public:
   //   gpreproc.cc for details.
   //----------------------------------------------
   gString GetLine( void );
+
+
+  //---------------------------------------------
+  // GetRawLine
+  //   Returns the un-preprocessed line corresponding to
+  //   the previous GetLine() call.
+  //----------------------------------------------
+  const gString& GetRawLine( void ) const
+  { return m_RawLine; }
 
 
 
