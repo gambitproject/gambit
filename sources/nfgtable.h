@@ -12,14 +12,7 @@
 class NfgTable : public wxGrid {
 private:
   NfgShow *m_parent;
-
-  struct ns_features_struct {
-    int prob, dom, val; /* these are actually int, not bool 0 or 1 */
-    bool verbose;
-    ns_features_struct(void) :prob(0), dom(0), val(0), verbose(TRUE) { }
-    ns_features_struct(const ns_features_struct &s): prob(s.prob), dom(s.dom),
-      val(s.val), verbose(s.verbose) { }
-  } features;
+  int m_showProb, m_showDom, m_showValue;
 
   // Event handlers
   void OnLeftClick(wxGridEvent &);
@@ -34,23 +27,25 @@ public:
 
   void SetPlayers(int p_rowPlayer, int p_colPlayer);
 
-  // Functions to create an extra row&col to display probs, dominators, values
-  void MakeProbDisp(void);
-  void RemoveProbDisp(void);
-  int  HaveProbs(void) const { return features.prob; }
-  void MakeDomDisp(void);
-  void RemoveDomDisp(void);
-  int  HaveDom(void) const { return features.dom; }
-  void MakeValDisp(void);
-  void RemoveValDisp(void);
-  int  HaveVal(void) const { return features.val; }
+  void ToggleProbs(void);
+  int ShowProbs(void) const { return m_showProb; }
+  void ToggleDominance(void);
+  int ShowDominance(void) const { return m_showDom; }
+  void ToggleValues(void);
+  int ShowValues(void) const { return m_showValue; }
   
   int GetDecimals(void) const { return m_parent->GetDecimals(); }
 
   void OnChangeValues(void);
-  virtual void OnChangeLabels(void);
+  void OnChangeLabels(void);
 
   DECLARE_EVENT_TABLE()
 };
 
 #endif  // NFGTABLE_H
+
+
+
+
+
+

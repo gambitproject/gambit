@@ -40,17 +40,17 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
   const NFSupport &support = *m_parent->CurrentSupport();
 
   if (support.NumStrats(p_rowPlayer) > GetRows()) {
-    InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() + features.dom);
+    InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() + m_showDom);
   }
   else if (support.NumStrats(p_rowPlayer) < GetRows()) {
-    DeleteRows(0, GetRows() - support.NumStrats(p_rowPlayer) - features.dom);
+    DeleteRows(0, GetRows() - support.NumStrats(p_rowPlayer) - m_showDom);
   }
 
   if (support.NumStrats(p_colPlayer) > GetCols()) {
-    InsertCols(0, support.NumStrats(p_colPlayer) - GetCols() + features.dom);
+    InsertCols(0, support.NumStrats(p_colPlayer) - GetCols() + m_showDom);
   }
   else if (support.NumStrats(p_colPlayer) < GetCols()) {
-    DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - features.dom);
+    DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - m_showDom);
   }
 
   AdjustScrollbars();
@@ -87,23 +87,23 @@ void NfgTable::OnChangeLabels(void)
 		  i - 1);
   }
 
-  if (features.prob) {
+  if (m_showProb) {
     SetLabelValue(wxHORIZONTAL, "Prob", support->NumStrats(colPlayer));
     SetLabelValue(wxVERTICAL, "Prob", support->NumStrats(rowPlayer));
   }
 
-  if (features.dom) {
+  if (m_showDom) {
     SetLabelValue(wxHORIZONTAL, "Domin",
-		  support->NumStrats(colPlayer) + features.prob);
+		  support->NumStrats(colPlayer) + m_showProb);
     SetLabelValue(wxVERTICAL, "Domin",
-		  support->NumStrats(rowPlayer) + features.prob);
+		  support->NumStrats(rowPlayer) + m_showProb);
   }
 
-  if (features.val) {
+  if (m_showValue) {
     SetLabelValue(wxHORIZONTAL, "Value", support->NumStrats(colPlayer) + 
-		  features.prob + features.dom);
+		  m_showProb + m_showDom);
     SetLabelValue(wxVERTICAL, "Value", support->NumStrats(rowPlayer) +
-		  features.prob + features.dom);
+		  m_showProb + m_showDom);
   }
 }
 
@@ -149,8 +149,8 @@ void NfgTable::OnChangeValues(void)
       SetCellValue((char *) pay_str, i - 1, j - 1);
     }
 
-    if (HaveDom()) { 
-      int dom_pos = GetCols() - HaveVal();
+    if (ShowDominance()) { 
+      int dom_pos = GetCols() - ShowValues();
       Strategy *strategy = support.Strategies(m_parent->GetRowPlayer())[i];
       if (support.IsDominated(strategy, true)) {
 	SetCellValue("S", i - 1, dom_pos - 1);
@@ -164,9 +164,9 @@ void NfgTable::OnChangeValues(void)
     }
   }
    
-  if (HaveDom()) {
+  if (ShowDominance()) {
     for (int j = 1; j <= support.NumStrats(m_parent->GetColPlayer()); j++) {
-      int dom_pos = GetRows() - HaveVal();
+      int dom_pos = GetRows() - ShowValues();
       Strategy *strategy = support.Strategies(m_parent->GetColPlayer())[j];
       if (support.IsDominated(strategy, true)) { 
 	SetCellValue("S", dom_pos - 1, j - 1);
@@ -202,7 +202,7 @@ void NfgTable::OnChangeValues(void)
     }
   }
 
-  if (HaveProbs()) {
+  if (ShowProbs()) {
     gNumber cont_prob(1);
 
     for (int i = 1; i <= nfg.NumPlayers(); i++) {
@@ -224,7 +224,7 @@ void NfgTable::OnChangeValues(void)
   gNumber eps;
   gEpsilon(eps, GetDecimals());
  
-  if (HaveProbs()) {
+  if (ShowProbs()) {
     for (int i = 1; i <= support.NumStrats(rowPlayer); i++)
       SetCellValue((char *) ToText(soln(support.Strategies(rowPlayer)[i]),
 				   GetDecimals()),
@@ -236,105 +236,76 @@ void NfgTable::OnChangeValues(void)
 		   support.NumStrats(rowPlayer), i-1);
   }
 
-  if (HaveVal()) {
+  if (ShowValues()) {
     for (int i = 1; i <= support.NumStrats(rowPlayer); i++) {
       SetCellValue((char *) ToText(soln.Payoff(nfg.Players()[rowPlayer],
 					       support.Strategies(rowPlayer)[i]),
 					   GetDecimals()),
-			   i-1, support.NumStrats(colPlayer)+HaveProbs()+HaveDom());
+			   i-1, support.NumStrats(colPlayer)+ShowProbs()+ShowDominance());
     }
     
     for (int j = 1; j <= support.NumStrats(colPlayer); j++) {
       SetCellValue((char *) ToText(soln.Payoff(nfg.Players()[colPlayer],
 					       support.Strategies(colPlayer)[j]),
 				   GetDecimals()),
-		   support.NumStrats(rowPlayer)+HaveProbs()+HaveDom(), j-1);
+		   support.NumStrats(rowPlayer)+ShowProbs()+ShowDominance(), j-1);
     }
   }
 }
 
-
-
-//************ extra features for displaying dominance, probs, vals **********
-// these features each create an extra row and columns.  They always go in
-// order: 1. Prob, 2. Domin, 3. Value.  Make sure to update the labels if a
-// feature is turned on/off.  Note that if you turn on a feature that is
-// already on, no new rows/cols will be created, but the labels will be
-// updated.
-
-void NfgTable::MakeProbDisp(void)
+void NfgTable::ToggleProbs(void)
 {
-  if (!features.prob) {
+  if (m_showProb) {
+    DeleteRows();
+    DeleteCols();
+    m_showProb = 0;
+  }
+  else {
     InsertRows();
     InsertCols();
-    features.prob = 1;
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
+    m_showProb = 1;
   }
+
+  AdjustScrollbars();
+  OnChangeLabels();
+  OnChangeValues();
 }
 
-
-void NfgTable::RemoveProbDisp(void)
+void NfgTable::ToggleDominance(void)
 {
-  if (features.prob) {
+  if (m_showDom) {
     DeleteRows();
     DeleteCols();
-    features.prob = 0;
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
+    m_showDom = 0;
   }
-}
-
-void NfgTable::MakeDomDisp(void)
-{
-  if (!features.dom) {
-    features.dom = 1;
-    AppendRows();
-    AppendCols();
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
-  }
-}
-
-
-void NfgTable::RemoveDomDisp(void)
-{
-  if (features.dom) {
-    features.dom = 0;
-    DeleteRows();
-    DeleteCols();
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
-  }
-}
-
-void NfgTable::MakeValDisp(void)
-{
-  if (!features.val) {
+  else {
     InsertRows();
     InsertCols();
-    features.val = 1;
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
+    m_showDom = 1;
   }
+
+  AdjustScrollbars();
+  OnChangeLabels();
+  OnChangeValues();
 }
 
 
-void NfgTable::RemoveValDisp(void)
+void NfgTable::ToggleValues(void)
 {
-  if (features.val) {
+  if (m_showValue) {
     DeleteRows();
     DeleteCols();
-    features.val = 0;
-    AdjustScrollbars();
-    OnChangeLabels();
-    OnChangeValues();
+    m_showValue = 0;
   }
+  else {
+    InsertRows();
+    InsertCols();
+    m_showValue = 1;
+  }
+
+  AdjustScrollbars();
+  OnChangeLabels();
+  OnChangeValues();
 }
 
 void NfgTable::OnLeftClick(wxGridEvent &p_event)

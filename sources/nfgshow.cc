@@ -677,11 +677,10 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
       m_currentSupport = m_supports[m_supports.Length()];
       SetPlayers(m_rowPlayer, m_colPlayer);
     }
-    else {
-      m_table->MakeDomDisp();
+    else if (!m_table->ShowDominance()) {
+      m_table->ToggleDominance();
+      GetMenuBar()->Check(NFG_VIEW_DOMINANCE, true);
     }
-
-    m_table->OnChangeValues();
   }
 }
 
@@ -885,8 +884,9 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
     SolutionToExtensive(solns[i]);
     }
     */
-    if (!m_table->HaveProbs()) {
-      m_table->MakeProbDisp();
+    if (!m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
     ChangeSolution(m_solutionTable->VisibleLength());
@@ -963,8 +963,9 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
     SolutionToExtensive(solns[i]);
     }
     */
-    if (!m_table->HaveProbs()) {
-      m_table->MakeProbDisp();
+    if (!m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
     ChangeSolution(m_solutionTable->VisibleLength());
@@ -991,38 +992,17 @@ void NfgShow::OnViewSolutions(wxCommandEvent &)
 
 void NfgShow::OnViewDominance(wxCommandEvent &)
 {
-  if (m_table->HaveDom()) {
-    m_table->RemoveDomDisp();
-  }
-  else {
-    m_table->MakeDomDisp();
-  }
+  m_table->ToggleDominance();
 }
 
 void NfgShow::OnViewProbabilities(wxCommandEvent &)
 {
-  if (m_table->HaveProbs()) {
-    m_table->RemoveProbDisp();
-    GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, false);
-  }
-  else {
-    m_table->MakeProbDisp();
-    GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-  }
-  m_table->OnChangeValues();
+  m_table->ToggleProbs();
 }
 
 void NfgShow::OnViewValues(wxCommandEvent &)
 {
-  if (m_table->HaveVal()) {
-    m_table->RemoveValDisp();
-    GetMenuBar()->Check(NFG_VIEW_VALUES, false);
-  }
-  else {
-    m_table->MakeValDisp();
-    GetMenuBar()->Check(NFG_VIEW_VALUES, true);
-  }
-  m_table->OnChangeValues();
+  m_table->ToggleValues();
 }
 
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
