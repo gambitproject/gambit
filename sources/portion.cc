@@ -2759,6 +2759,8 @@ gString PortionTypeToText( const PortionType& type )
 
   if( result == "" )
     result = (gString) " " + _PortionTypeText[ 0 ].Text;
+
+  result.remove(0);
   return result;
 }
 

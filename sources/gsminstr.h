@@ -43,7 +43,8 @@ typedef enum
 
   iINIT_CALL_FUNCTION, iBIND, iBINDREF, iBINDVAL, iCALL_FUNCTION,
 
-  iPOP, iOUTPUT, iDUMP, iFLUSH
+  iPOP, iOUTPUT, iDUMP, iFLUSH,
+  iHELP
 } Opcode;
 
 //--------------------------------------------------------------------
@@ -494,7 +495,13 @@ class Flush : public Instruction
   void Output( gOutput& s ) const;
 };
 
-
+class Help : public Instruction
+{
+public:
+  Opcode Type(void) const;
+  bool Execute(GSM& gsm) const;
+  void Output(gOutput& s) const;
+};
 
 
 gOutput& operator << ( gOutput& s, Instruction* p );

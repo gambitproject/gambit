@@ -184,6 +184,8 @@ public:
   bool Combine( FuncDescObj* newfunc );
 
   gString FuncName ( void ) const;
+
+  void Dump(gOutput& f) const;
 };
 
 

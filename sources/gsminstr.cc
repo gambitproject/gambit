@@ -460,6 +460,17 @@ void Flush::Output( gOutput& s ) const
 { s << "Flush"; }
 
 
+Opcode Help::Type( void ) const
+{ return iHELP; }
+bool Help::Execute( GSM& gsm ) const
+{ 
+  gsm.Help();
+  return true;
+}
+void Help::Output( gOutput& s ) const
+{ s << "Help"; }
+
+
 //--------------------------------------------------------------------------
 
 

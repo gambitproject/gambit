@@ -107,6 +107,7 @@
 %token INCLUDE
 %token UNASSIGN
 %token CLEAR
+%token HELP
 
 %token NAME
 %token BOOLEAN
@@ -171,11 +172,17 @@ statement:    { triv = true; }
          |    whileloop { triv = false; }
          |    forloop   { triv = false; }
          |    unassignment
+         |    helpstmt
          |    QUIT     { triv = false; quit = true; emit(new Quit); }
 
 unassignment: UNASSIGN LBRACK NAME RBRACK
               { emit(new PushRef(tval));
 		emit(new UnAssign);
+	      }
+
+helpstmt:     HELP LBRACK NAME RBRACK
+              { emit(new PushRef(tval));
+		emit(new Help);
 	      }
 
 include:      INCLUDE LBRACK TEXT RBRACK
@@ -410,7 +417,7 @@ static struct tokens toktable[] =
     { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
-    { CLEAR, "Clear" },
+    { CLEAR, "Clear" }, { HELP, "Help" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
 };
@@ -521,6 +528,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "Include")   return INCLUDE;
     else if (s == "UnAssign")  return UNASSIGN;
+    else if (s == "Help") return HELP;
     else if (s == "Clear")   return CLEAR;
     else  { tval = s; return NAME; }
   }

@@ -764,6 +764,28 @@ gString FuncDescObj::FuncName( void ) const
   return _FuncName;
 }
 
+void FuncDescObj::Dump(gOutput& f) const
+{
+  int i;
+  int j;
+  for(i = 0; i < _NumFuncs; i++)
+  {
+    f << _FuncName << '[';
+    for(j = 0; j < _FuncInfo[i].NumParams; j++)
+    {
+      if(j != 0) f << ", ";
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '{';
+      f << _FuncInfo[i].ParamInfo[j].Name;
+      if(_FuncInfo[i].ParamInfo[j].PassByReference) f << '<';
+      f << "->" << PortionTypeToText(_FuncInfo[i].ParamInfo[j].Type);
+      if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
+    }
+    f << "]\n";
+  }
+}
+
+
+
 
 
 //---------------------------------------------------------------------
@@ -1517,6 +1539,7 @@ gString CallFuncObj::_ParamName( const int index ) const
 
 
 
+
 void CallFuncObj::_ErrorMessage
 ( 
  gOutput& s,
@@ -1596,7 +1619,7 @@ void CallFuncObj::_ErrorMessage
     break;
   case 26:
     s << str1 << "[]: Type mismatch on parameter #" << num1 << ", \"";
-    s << str2 << "\"; expected" << str3 << ", got" << str4 << "\n";
+    s << str2 << "\"; expected " << str3 << ", got " << str4 << "\n";
     break;
   case 27:
     s <<  str1 << "[]: Cannot match function call to the given parameters\n";

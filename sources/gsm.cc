@@ -1132,6 +1132,23 @@ void GSM::Clear( void )
 
 }
 
+
+void GSM::Help(void)
+{
+  Portion* p = _Pop();
+  assert(p->Type() == porREFERENCE);
+  gString funcname = ((ReferencePortion*) p)->Value();
+
+  FuncDescObj *func;
+  if( _FuncTable->IsDefined( funcname ) )
+  {
+    func = (*_FuncTable)( funcname );
+    func->Dump(_StdOut);
+  }
+  else
+    _StdOut << "Function " << funcname << "[] not found\n";
+}
+
 //-----------------------------------------------------------------------
 //                         _ErrorMessage
 //-----------------------------------------------------------------------
