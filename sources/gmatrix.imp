@@ -264,6 +264,21 @@ template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
   return tmp;
 }
 
+//-------------------------------------------------------------------------
+//                          gMatrix<T>: Transpose
+//-------------------------------------------------------------------------
+
+template <class T> gMatrix<T> gMatrix<T>::Transpose() const
+{
+  gMatrix<T> tmp(mincol, maxcol, minrow, maxrow);
+ 
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxrow; j++)
+      tmp(j,i) = (*this)(i,j);
+
+  return tmp;
+}
+
 
 //-------------------------------------------------------------------------
 //                    gMatrix<T>: Comparison operators
