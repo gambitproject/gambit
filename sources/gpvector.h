@@ -53,19 +53,25 @@ template <class T> class gPVector: public gVector<T> {
   // constructors
 
   gPVector(void)
-    : gVector(), svptr(), svlen()
+    : gVector<T>(), svptr(), svlen()
     { }
 
-  gPVector(const gTuple<int> sig)
-    : gVector(sum(sig)), svptr(sig.First(),sig.Last()), svlen(sig)
+  gPVector(const gTuple<int> &sig)
+    : gVector<T>(sum(sig)), svptr(sig.First(),sig.Last()), svlen(sig)
     {
       setindex();
     }
 
-  gPVector(const gVector<T> val, const gTuple<int> sig)
-    : gVector( val ), svptr(sig.First(),sig.Last()), svlen(sig)
+  gPVector(const gVector<T> &val, const gTuple<int> &sig)
+    : gVector<T>( val ), svptr(sig.First(),sig.Last()), svlen(sig)
     {
-      assert( sum(svlen)==Length(val) );
+      assert( sum(svlen)==val.Length() );
+      setindex();
+    }
+
+  gPVector(const gPVector<T> &v)
+    : gVector<T>(v), svptr(v.svlen.First(),v.svlen.Last()), svlen(v.svlen)
+    {
       setindex();
     }
 
@@ -96,12 +102,12 @@ template <class T> class gPVector: public gVector<T> {
       assert( svlen.First()<=row && row<=svlen.Last() );
       gVector<T> v(1, svlen[row]);
 
-      for(int i=v.First(); i<=v.Last; i++)
+      for(int i=v.First(); i<=v.Last(); i++)
 	v[i]= (*this)(row,i);
       return v;
     }
 
-  void GetRow(int row, gVector<T>&v) const
+  void GetRow(int row, gVector<T> &v) const
     {
       assert( svlen.First()<=row && row<=svlen.Last() );
       assert( v.First()==1 && v.Last()== svlen[row] );
@@ -110,7 +116,7 @@ template <class T> class gPVector: public gVector<T> {
 	v[i]= (*this)(row,i);
     }
 
-  void SetRow(int row, const gVector<T>&)
+  void SetRow(int row, const gVector<T> &v)
     {
       assert( svlen.First()<=row && row<=svlen.Last() );
       assert( v.First()==1 && v.Last()== svlen[row] );
@@ -125,28 +131,35 @@ template <class T> class gPVector: public gVector<T> {
   gPVector<T>& operator=(const gPVector<T> &v)
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator=(v);
+      gVector<T>::operator=(v);
+      return (*this);
     }
 
   gPVector<T> operator+(const gPVector<T> &v) const
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator+(v);
+      gPVector<T> tmp(*this);
+      tmp.gVector<T>::operator+=(v);
+      return tmp;
     }
   gPVector<T>& operator+=(const gPVector<T> &v)
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator+=(v);
+      gVector<T>::operator+=(v);
+      return (*this);
     }
   gPVector<T> operator-(const gPVector<T> &v) const
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator-(v);
+      gPVector<T> tmp(*this);
+      tmp.gVector<T>::operator-=(v);
+      return tmp;
     }
   gPVector<T>& operator-=(const gPVector<T> &v)
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator-=(v);
+      gVector<T>::operator-=(v);
+      return (*this);
     }
   T operator*(const gPVector<T> &v) const
     {
@@ -156,23 +169,31 @@ template <class T> class gPVector: public gVector<T> {
   gPVector<T> operator/(const gPVector<T> &v) const
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator/(v);
+      gPVector<T> tmp(*this);
+      tmp.gVector<T>::operator/=(v);
+      return tmp;
     }
   gPVector<T>& operator/=(const gPVector<T> &v)
     {
       assert( svlen==v.svlen );
-      return (*this).gVector<T>::operator/=(v);
+      gVector<T>::operator/=(v);
+      return (*this);
     }
 
-  int operator==()
-  int operator!=()
+  int operator==(const gPVector<T> &v)
+    {
+      assert( svlen==v.svlen );
+      return (*this).gVector<T>::operator==(v);
+    }
+  int operator!=(const gPVector<T> &v)
+    { return ! ((*this)==v); }
 
   // parameter access functions
   gTuple<int> Lengths()
     { return svlen; }
 
   void Dump(gOutput &) const;
-}
+};
 
 
 // method implementations
@@ -186,7 +207,7 @@ operator<<(gOutput &to, const gPVector<T> &v)
 }
 
 template <class T> void
-gPVector::Dump(gOutput &to) const
+gPVector<T>::Dump(gOutput &to) const
 {
   for(int i=svlen.First(); i<=svlen.Last(); i++)
     {
