@@ -3,6 +3,42 @@
 //
 // $Id$
 //
+gMatrix<gInteger> IntCast(const gMatrix<gRational> &mat)
+{
+  int i,j;
+  gMatrix<gInteger> ret(mat.MinRow(),mat.MaxRow(),mat.MinCol(),mat.MaxCol());
+  for (i=mat.MinRow();i<=mat.MaxRow();++i){
+    for(j=mat.MinCol();j<=mat.MaxCol();++j){
+      ret(i,j)=mat(i,j).numerator();
+    }
+  }
+  return(ret);
+}
+
+gVector<gInteger> IntCast(const gVector<gRational> &vec)
+{
+  int i;
+  gVector<gInteger> ret(vec.First(),vec.Last());
+  for (i=vec.First();i<=vec.Last();++i){
+    assert(vec[i].denominator()==1);
+      ret[i]=vec[i].numerator();
+  }
+  return(ret);
+}
+
+gMatrix<gRational> RatCast(const gMatrix<gInteger> &mat)
+{
+  int i,j;
+  gMatrix<gRational> ret(mat.MinRow(),mat.MaxRow(),mat.MinCol(),mat.MaxCol());
+  for (i=mat.MinRow();i<=mat.MaxRow();++i){
+    for(j=mat.MinCol();j<=mat.MaxCol();++j){
+      ret(i,j)=gRational(mat(i,j));
+    }
+  }
+  return(ret);
+}      
+
+
 gInteger find_lcd(const gMatrix<gRational> &mat)
 {
   gInteger lcd(1);
@@ -32,7 +68,7 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
 {
   //   gout << "\nMY CODE\n";
   totdenom = lcm(find_lcd(A),find_lcd(b));
-  assert(totdenom>(gRational)0);
+  assert(totdenom>0);
   InvDat.MakeIdent();
   InvDat = InvDat * totdenom;
   solution = b;
@@ -77,19 +113,36 @@ int Tableau<gRational>::CanPivot(int outlabel, int col)
   //   if(val <=eps2 && val >= -eps2) return 0;
   return 1;  
 }
+
+#ifdef TEMPO
+void Tableau<gRational>::Reduce()
+{
+  int i,j;
+  gInteger temp_gcd(Det.numerator());
+  for(i=InvDat.MinRow();i<=InvDat.MaxRow();++i){
+    for(j=InvDat.MinCol();j<=InvDat.MaxCol();++j){
+      temp_gcd=gcd(temp_gcd,InvDat(i,j).numerator());
+    }
+  }
+  InvDat/=temp_gcd;
+  Det/=temp_gcd;
+  if (temp_gcd!=1) gout << "\nREDUCE: " << temp_gcd << '\n';
+  gout << "InvDat /n" << InvDat << '\n';
+}
+#endif //TEMPO
+
+
 void Tableau<gRational>::Pivot(int outrow, int in_col)
 {
-  int i;
+  int i,j;
+  //if (npivots%4 == 0){Reduce();}
   //int outlabel = Label(outrow);
   //gout << "\noutrow:" << outrow;
   //gout << " outlabel: " << outlabel;
   //gout << " inlabel: " << in_col;
   // This is the Pivot Column, calculated here
   gVector<gRational> Lambda((*A).MinRow(),(*A).MaxRow());
-  gVector<gRational> LambdaPrime((*A).MinRow(),(*A).MaxRow());
-
-  // This is the multiplier for newInverse=k*multiplier*OldInverse
-  gMatrix<gRational> TempMatrix((*A).MinRow(),(*A).MaxRow(),(*A).MinRow(),(*A).MaxRow());
+  gVector<gInteger> LambdaPrime((*A).MinRow(),(*A).MaxRow());
 
   // pivot in the new basis
   basis.Pivot(outrow,in_col);
@@ -107,19 +160,25 @@ void Tableau<gRational>::Pivot(int outrow, int in_col)
   else{
     (*A).GetColumn(in_col,Lambda);
   }
-  LambdaPrime=InvDat*Lambda;
-  Lambda=LambdaPrime/Det;
+  LambdaPrime=IntCast(RatCast(InvDat)*Lambda);
 
   // gout << "\nLAMBDA: \n" << Lambda << '\n';
 
-  // Check here too
-  for (i=TempMatrix.MinRow();i<=TempMatrix.MaxRow();++i){
-    TempMatrix(i,i)= LambdaPrime[outrow];
-    TempMatrix(i,outrow)=-LambdaPrime[i];
+  // Multiplication without TempMatrix
+  for(i=InvDat.MinRow();i<=InvDat.MaxRow();++i){
+    for(j=InvDat.MinCol();j<=InvDat.MaxCol();++j){
+      if(i!=outrow){
+	InvDat(i,j)=LambdaPrime[outrow]*InvDat(i,j)-LambdaPrime[i]*InvDat(outrow,j);
+	InvDat(i,j)/=Det;
+      }
+    }
   }
-  TempMatrix(outrow,outrow)=Det;
 
-  InvDat= (TempMatrix*InvDat)/Det;
+  // for(j=InvDat.MinCol();j<=InvDat.MaxCol();++j){
+  //   InvDat(outrow,j)*=Det;
+  // }
+  // InvDat/=Det;
+
   Det = LambdaPrime[outrow];
 
   //gout << "\nDet: \n" << Det << '\n';
@@ -127,15 +186,15 @@ void Tableau<gRational>::Pivot(int outrow, int in_col)
   //gout << "\nInvDat: \n" << InvDat << '\n'; 
 
   // Update solution
-  solution=(InvDat*(*b))/Det;
+  solution=(RatCast(InvDat)*(*b))/gRational(Det);
 
 
-  // gout << solution << '\n';
+  //gout << solution << '\n';
   //gout << "\nDET: \n" << Det << '\n';
   //gout << "PIVOT:" << '\n';
   //gout << InvDat << '\n';
   ++npivots;
-  // BigDump(gout);
+  //BigDump(gout);
 }
 
 
@@ -155,15 +214,15 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
   // gout << "SOLVECOLUMN:" << '\n';
   // gout << InvDat << '\n';
 
-  out = (InvDat*out)/Det;
+  out = (RatCast(InvDat)*out)/gRational(Det);
 
 }
 
 void Tableau<gRational>::Refactor()
 { 
-  gRational old_denom = totdenom;
+  gInteger old_denom(totdenom);
   totdenom = lcm(find_lcd(*A),find_lcd(*b));
-  InvDat = InvDat * (totdenom/old_denom);
+  InvDat = (InvDat * totdenom)/old_denom;
 
 }
 
@@ -196,7 +255,7 @@ void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do x = V * b
   // B.solve(b,x);
-  x=(InvDat*b)/Det;
+  x=(RatCast(InvDat)*b)/gRational(Det);
 }
 
  // solve y M = c
@@ -206,7 +265,7 @@ void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> 
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do y = b * V
   // B.solveT(c,y);
-  y=(c*InvDat)/Det;
+  y=(c*RatCast(InvDat))/gRational(Det);
 }
 
 bool Tableau<gRational>::IsFeasible()
