@@ -37,16 +37,14 @@ int _SeqForm(const EFSupport &support, const SeqFormParams &params,
   return 1;
 }
 
-int efgLcpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-			      gList<BehavSolution> &solns)
+void efgLcpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			       gList<BehavSolution> &solns)
 {
   int npiv;
   double time;
   _SeqForm(sup, params, solns, npiv, time);
 
   npivots += npiv;
-
-  return 1;
 }
 
 efgLcpSolve::efgLcpSolve(const EFSupport &S,

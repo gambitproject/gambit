@@ -7,8 +7,8 @@
 #include "psnesub.h"
 #include "nfgpure.h"
 
-int efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
-				      gList<BehavSolution> &solns)
+void efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+				       gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -27,7 +27,6 @@ int efgEnumPureNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  return 0;
 }
 
 efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &p_support,

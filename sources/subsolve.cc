@@ -18,7 +18,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 				 gList<EFOutcome *> &values)
 {
   int i;
-  int failed;
   Efg &efg = (Efg &) p_support.Game();
   bool marked = AllSubgamesMarked(efg);
   
@@ -125,7 +124,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       }
     }
 
-    failed = SolveSubgame(foo, subsupport, sol);
+    SolveSubgame(foo, subsupport, sol);
     
     SelectSolutions(subgame_number, foo, sol);
     
@@ -167,18 +166,17 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	    solns[solns.Length()].Set(((*infosets[pl])[index]->Actions()[act]),
               sol[solno](subsupport.Actions(pl, iset)[act]));
 	}
-	int j=solns.Length();
-	solns[j].SetCreator( (EfgAlgType) AlgorithmID());
-	if(failed == 0) {
-	  solns[j].SetIsNash(triTRUE);
-	  if(marked)
-	    solns[j].SetIsSubgamePerfect(triTRUE); 
-	  if(solns[j].Creator() == EfgAlg_ELIAPSUB) {
-	    solns[j].SetLiap(solns[j].LiapValue());
-	    solns[j].SetIsSequential(triTRUE);      // even if marked = false
-	    solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
-	  }
 
+	int j = solns.Length();
+	solns[j].SetCreator((EfgAlgType) AlgorithmID());
+	
+	solns[j].SetIsNash(triTRUE);
+	if (marked)
+	  solns[j].SetIsSubgamePerfect(triTRUE); 
+	if (solns[j].Creator() == EfgAlg_ELIAPSUB) {
+	  solns[j].SetLiap(solns[j].LiapValue());
+	  solns[j].SetIsSequential(triTRUE);      // even if marked = false
+	  solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
 	}
       }
       

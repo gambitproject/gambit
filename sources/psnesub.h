@@ -14,8 +14,7 @@ class efgEnumPureNfgSolve : public SubgameSolver  {
 private:
   gStatus &m_status;
 
-  int SolveSubgame(const Efg &, const EFSupport &,
-		   gList<BehavSolution> &);
+  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
   
 public:

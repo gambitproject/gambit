@@ -7,8 +7,8 @@
 #include "csumsub.h"
 #include "nfgcsum.h"
 
-int efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
-				gList<BehavSolution> &solns)
+void efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -31,8 +31,6 @@ int efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  // return params.status.Get();
-  return 0;
 }
 
 efgLpNfgSolve::efgLpNfgSolve(const EFSupport &S, const ZSumParams &p,

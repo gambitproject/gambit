@@ -29,8 +29,7 @@ private:
   SeqFormParams params;
   gArray<gNumber> values;
 
-  int SolveSubgame(const Efg &, const EFSupport &,
-		   gList<BehavSolution> &);
+  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
 public:

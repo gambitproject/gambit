@@ -17,7 +17,7 @@ private:
   NFLiapParams params;
   BehavProfile<gNumber> start;
 
-  int SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID() const { return EfgAlg_NLIAPSUB; }    
 
 public:

@@ -6,8 +6,8 @@
 
 #include "enumsub.h"
 
-int EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
-				gList<BehavSolution> &solns)
+void EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -32,8 +32,6 @@ int EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-
-  return 0;
 }
 
 EnumBySubgame::EnumBySubgame(const EFSupport &S, const EnumParams &p, int max)

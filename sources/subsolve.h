@@ -32,8 +32,8 @@ private:
 		    gList<EFOutcome *> &);
   
 protected:
-  virtual int SolveSubgame(const Efg &, const EFSupport &,
-			   gList<BehavSolution> &) = 0;
+  virtual void SolveSubgame(const Efg &, const EFSupport &,
+			    gList<BehavSolution> &) = 0;
   virtual void ViewSubgame(int, const Efg &);
 
   virtual void ViewNormal(const Nfg &, NFSupport *&);

@@ -6,8 +6,8 @@
 
 #include "lemkesub.h"
 
-int efgLcpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
-				 gList<BehavSolution> &solns)
+void efgLcpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+				  gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -32,7 +32,6 @@ int efgLcpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  return 0;
 }
 
 efgLcpNfgSolve::efgLcpNfgSolve(const EFSupport &S, const LemkeParams &p,

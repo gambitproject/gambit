@@ -43,14 +43,13 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   return 1;
 }    
 
-int efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-			     gList<BehavSolution> &solns)
+void efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			      gList<BehavSolution> &solns)
 {
   int npiv;
   double time;
   _CSSeqForm(sup, params, solns, npiv, time);
   npivots += npiv;
-  return 1;
 }
 
 efgLpSolve::efgLpSolve(const EFSupport &S, const CSSeqFormParams &p, int max)

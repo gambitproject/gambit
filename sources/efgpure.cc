@@ -60,12 +60,10 @@ static int FindPureNash(const EFSupport &p_support,
   return p_solutions.Length();
 }
 
-int efgEnumPure::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-			      gList<BehavSolution> &solns)
+void efgEnumPure::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			       gList<BehavSolution> &solns)
 {
   FindPureNash(sup, solns);
-
-  return 0;
 }
 
 efgEnumPure::efgEnumPure(int max)

@@ -11,19 +11,18 @@
 #include "enum.h"
 
 class EnumBySubgame : public SubgameSolver  {
-  private:
-    int npivots;
-    EnumParams params;
+private:
+  int npivots;
+  EnumParams params;
 
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
+  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
 
-  public:
-    EnumBySubgame(const EFSupport &, const EnumParams &, int max = 0);
-    virtual ~EnumBySubgame();
+public:
+  EnumBySubgame(const EFSupport &, const EnumParams &, int max = 0);
+  virtual ~EnumBySubgame();
 
-    int NumPivots(void) const   { return npivots; }
+  int NumPivots(void) const   { return npivots; }
 };
 
 int Enum(const EFSupport &, const EnumParams &,
