@@ -1,8 +1,8 @@
-//#
-//# FILE: complex.cc -- Implementation of gComplex
-//#
-//# @(#)complex.cc	1.0  5/21/97
-//#
+//
+// FILE: complex.cc -- Implementation of gComplex
+//
+// $Id$
+//
 
 #ifdef __GNUG__
 #pragma implementation

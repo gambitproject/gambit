@@ -1,6 +1,8 @@
-// MainFrm.h : interface of the CMainFrame class
 //
-/////////////////////////////////////////////////////////////////////////////
+// FILE: mainfrm.h -- interface of the CMainFrame class
+//
+// $Id$
+//
 
 #if !defined(AFX_MAINFRM_H__51F1F61A_9928_11D1_BCE8_006008049675__INCLUDED_)
 #define AFX_MAINFRM_H__51F1F61A_9928_11D1_BCE8_006008049675__INCLUDED_

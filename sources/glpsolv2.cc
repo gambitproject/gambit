@@ -1,8 +1,8 @@
-//#
-//# FILE: glpsolv2.cc -- Instantiation of a specialized LP solvers
-//#
-//# @(#)glpsolve.cc	1.0 10/26/95
-//#
+//
+// FILE: glpsolv2.cc -- Instantiation of a specialized LP solvers
+//
+// $Id$
+//
 
 #include "glpsolv2.imp"
 #include "rational.h"

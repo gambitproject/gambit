@@ -1,8 +1,8 @@
-//#
-//# FILE: gsmatrix.h -- Implementation of square matrices
-//#
-//# @(#)gsmatrix.h	2.1 3/24/97
-//#
+//
+// FILE: gsmatrix.h -- Implementation of square matrices
+//
+// $Id$
+//
 
 #ifndef GSMATRIX_H
 #define GSMATRIX_H

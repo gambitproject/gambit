@@ -1,4 +1,8 @@
+//
 // test file for the class polylist
+//
+// $Id$
+//
 
 #include "equisolv.h"
 #include "gwatch.h"

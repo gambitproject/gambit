@@ -2,7 +2,7 @@
 // File: gsolver.cc  
 //        -- Instantiations of class gSolver
 // 
-// @(#)gsolver.cc	1.2 01/07/98 
+// $Id$
 //
 
 #include "gsolver.imp"

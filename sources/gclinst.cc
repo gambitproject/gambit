@@ -1,6 +1,8 @@
 //
 // FILE: gclinst.cc -- Instantiations for GCL
 //
+// $Id$
+//
 
 #include "gtext.h"
 

@@ -1,4 +1,9 @@
-// File: gambdraw.cc 
+//
+// FILE: gambdraw.cc 
+//
+// $Id$
+//
+
 
 #include "wx.h"
 #include "wxmisc.h"

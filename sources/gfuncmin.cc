@@ -1,7 +1,7 @@
 //
 // FILE: gfuncmin.cc -- Function minimization routines
 //
-// @(#)gfuncmin.cc	2.3 09/17/97
+// $Id$
 //
 
 

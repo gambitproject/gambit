@@ -1,6 +1,8 @@
 //
 // FILE: gpool.h -- Memory pool
 //
+// $Id$
+//
 
 class gPool   {
 private:

@@ -1,8 +1,8 @@
-//#
-//# FILE: glpsolv3.h -- Linear program solution module
-//#
-//# @(#)glpsolv3.h	1.6 1/16/95
-//#
+//
+// FILE: glpsolv3.h -- Linear program solution module
+//
+// $Id$
+//
 
 #ifndef GLPSOLV3_H
 #define GLPSOLV3_H

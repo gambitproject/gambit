@@ -1,4 +1,8 @@
-//@(#)poly.h	1.11 11/13/95
+//
+// FILE: poly.h	
+//
+// $Id$
+//
 
 #include <assert.h>
 #include "rational.h"

@@ -1,4 +1,9 @@
+//
 // test file for the class polylist
+//
+// $Id$
+//
+
 
 #include <time.h>
 #include "gsolver.h"

@@ -2,7 +2,7 @@
 // File: quiksolv.cc  
 //        -- Instantiations of classes 
 // 
-// @(#)quiksolv.cc	1.1 1/7/98
+// $Id$
 //
 
 #include "quiksolv.imp"

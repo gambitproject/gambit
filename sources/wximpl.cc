@@ -1,3 +1,7 @@
+//
+// $Id$
+//
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__

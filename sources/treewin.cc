@@ -1,7 +1,7 @@
 //
 // FILE: treewin.cc -- Drawing functions for TreeWindow
 //
-// @(#)treewin.cc   2.12 02/17/98
+// $Id$
 //
 
 #include "wx.h"

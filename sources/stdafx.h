@@ -1,6 +1,9 @@
-// stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
+//
+// FILE: stdafx.h -- include file for standard system include files,
+//                   or project specific include files that are used 
+//                   frequently, but are changed infrequently.
+//
+// $Id$
 //
 
 #if !defined(AFX_STDAFX_H__51F1F618_9928_11D1_BCE8_006008049675__INCLUDED_)

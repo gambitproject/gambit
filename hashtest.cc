@@ -1,4 +1,6 @@
-
+//
+// $Id$
+//
 
 #include "gambitio.h"
 #include "hash.imp"

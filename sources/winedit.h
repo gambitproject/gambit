@@ -1,4 +1,7 @@
-// WinEdit.h : main header file for the WINEDIT application
+//
+// FILE: WinEdit.h -- main header file for the WINEDIT application
+//
+// $Id$
 //
 
 #if !defined(AFX_WINEDIT_H__51F1F616_9928_11D1_BCE8_006008049675__INCLUDED_)

@@ -1,7 +1,7 @@
 //
 // FILE: gsimplex.cc -- Instantiation of gInterval class
 // 
-// @(#)gsimplex.cc	1.1 01/07/98 
+// $Id$
 //
 
 #include <assert.h>

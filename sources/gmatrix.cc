@@ -1,8 +1,8 @@
-//#
-//# FILE: gmatrix.cc -- Instantiation of common matrix types
-//#
-//# @(#)gmatrix.cc	2.2 6/22/97
-//#
+//
+// FILE: gmatrix.cc -- Instantiation of common matrix types
+//
+// $Id$
+//
 
 #include "gmatrix.imp"
 #include "rational.h"

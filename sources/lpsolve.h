@@ -1,8 +1,8 @@
-//#
-//# FILE: lpsolve.h -- Linear program solution module
-//#
-//# @(#)lpsolve.h	2.1 3/24/97
-//#
+//
+// FILE: lpsolve.h -- Linear program solution module
+//
+// $Id$
+//
 
 #ifndef LPSOLVE_H
 #define LPSOLVE_H

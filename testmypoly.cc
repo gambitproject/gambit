@@ -1,4 +1,8 @@
+//
 // test file for gPoly1
+//
+// $Id$
+//
 
 #include "gpoly.h"
 #include "rational.h"

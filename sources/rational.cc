@@ -1,3 +1,9 @@
+//
+// FILE: rational.cc
+//
+// $Id$
+//
+
 /* 
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)

@@ -1,8 +1,8 @@
-//#
-//# FILE: glpsolv3.cc -- Instantiation of common LP solvers
-//#
-//# @(#)glpsolv3.cc	1.4 5/3/95
-//#
+//
+// FILE: glpsolv3.cc -- Instantiation of common LP solvers
+//
+// $Id$
+//
 
 #include "glpsolv3.imp"
 #include "rational.h"

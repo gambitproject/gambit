@@ -1,7 +1,7 @@
 //
 // File: gpolylst.h  --  Declaration of gpolylst data type
 // 
-// @(#)gpolylst.h	1.4 1/14/98
+// $Id$
 //
 
 #ifndef GPOLYLST_H

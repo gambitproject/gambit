@@ -1,6 +1,8 @@
-// WinEditView.h : interface of the CWinEditView class
 //
-/////////////////////////////////////////////////////////////////////////////
+// FILE: wineditview.h -- interface of the CWinEditView class
+//
+// $Id$
+//
 
 #if !defined(AFX_WINEDITVIEW_H__51F1F61E_9928_11D1_BCE8_006008049675__INCLUDED_)
 #define AFX_WINEDITVIEW_H__51F1F61E_9928_11D1_BCE8_006008049675__INCLUDED_

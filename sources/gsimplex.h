@@ -1,7 +1,7 @@
 //
 // FILE: gsimplex.h -- gSimplex class
 //
-// @(#)gsimplex.h	1.4 02/14/98 
+// $Id$
 //
 
 #ifndef GSIMPLEX_H

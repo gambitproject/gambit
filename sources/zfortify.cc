@@ -1,4 +1,9 @@
-// ZFortify.cpp - A fortified shell for new and delete.
+//
+// FILE: ZFortify.cpp - A fortified shell for new and delete.
+//
+// $Id$
+//
+
 
 //     The  minimum  you  need  to  do for ZFortify is to define the symbol
 // ZFORTIFY,  and  link  zfortify.o.   Each source file should also include

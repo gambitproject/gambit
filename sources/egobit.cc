@@ -1,7 +1,7 @@
 //
 // FILE: egobit.cc -- Implementation of gobit on extensive form games
 //
-// @(#)egobit.cc	2.9 09/18/97
+// $Id$
 //
 
 #include <math.h>

@@ -1,6 +1,8 @@
-// WinEditDoc.h : interface of the CWinEditDoc class
 //
-/////////////////////////////////////////////////////////////////////////////
+// FILE: wineditdoc.h -- interface of the CWinEditDoc class
+//
+// $Id$
+//
 
 #if !defined(AFX_WINEDITDOC_H__51F1F61C_9928_11D1_BCE8_006008049675__INCLUDED_)
 #define AFX_WINEDITDOC_H__51F1F61C_9928_11D1_BCE8_006008049675__INCLUDED_

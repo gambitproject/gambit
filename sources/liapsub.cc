@@ -1,7 +1,7 @@
 //
 // FILE: liapsub.cc -- Solve efg by liap on nfg
 //
-// 
+// $Id$
 //
 
 #include "liapsub.h"

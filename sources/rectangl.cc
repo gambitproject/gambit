@@ -1,7 +1,7 @@
 //
 // FILE: interval.cc -- Instantiation of gInterval class
 // 
-// @(#)rectangl.cc	1.1 01/07/98 
+// $Id$
 //
 
 #include <assert.h>

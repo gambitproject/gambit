@@ -1,8 +1,8 @@
-//#
-//# FILE: mygmisc.h -- Miscellaneous generally-useful functions (for AMM)
-//#
-//# @(#)mygmisc.h	1.0 8/15/96
-//#
+//
+// FILE: mygmisc.h -- Miscellaneous generally-useful functions (for AMM)
+//
+// $Id$
+//
 
 #ifndef MYGMISC_H
 #define MYGMISC_H

@@ -1,3 +1,9 @@
+//
+// FILE: treecons.h
+//
+// $Id$
+//
+
 #ifndef TREECONS_H
 #define TREECONS_H
 #define	BRANCH_LENGTH_DEFAULT			60

@@ -1,7 +1,8 @@
-//#
-//# File: gpoly1.h  --  Declaration of gPoly data type
-//# @(#)gpoly1.h	1.6 12/12/95
-//#
+//
+// FILE: gpoly1.h  --  Declaration of gPoly data type
+// 
+// $Id$
+//
 
 #ifndef GPOLY1_H
 #define GPOLY1_H

@@ -2,6 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
+// $Id$
 //
 
 #include <stdlib.h>

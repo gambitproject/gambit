@@ -1,7 +1,7 @@
 //
 // FILE: gsmpltpe.h -- gSimpletope class
 //
-// @(#)gsmpltpe.h	1.4 02/14/98 
+// $Id$
 //
 
 #ifndef GSMPLTPE_H

@@ -1,3 +1,9 @@
+//
+// FILE: rational.h
+//
+// $Id$
+//
+
 // This may look like C code, but it is really -*- C++ -*-
 
 /* 

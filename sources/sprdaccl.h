@@ -1,5 +1,9 @@
-// File: sprdaccl.h -- gives names to various SpreadSheet3D events.
-// @(#)sprdaccl.h	1.1 7/5/95
+//
+// FILE: sprdaccl.h -- gives names to various SpreadSheet3D events.
+//
+// $Id$
+//
+
 #ifndef SPRDACCL_H
 #define SPRDACCL_H
 

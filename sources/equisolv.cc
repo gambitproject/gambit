@@ -2,7 +2,7 @@
 // File: equisolv.cc  
 //        -- Instantiations of classes 
 // 
-// @(#)equisolv.cc	1.1 1/7/98
+// $Id$
 //
 
 #include "equisolv.imp"

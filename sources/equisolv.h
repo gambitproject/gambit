@@ -1,7 +1,7 @@
 //
 // File: equisolv.h  --  
 // 
-// @(#)equisolv.h	1.5 01/24/98
+// $Id$
 //
 
 #ifndef EQUISOLV_H

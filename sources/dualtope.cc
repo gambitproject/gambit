@@ -1,7 +1,7 @@
 //
 // FILE: polytope.cc -- Instantiation of gPolytope class
 //
-// @(#)polytope.cc	1.27 06/13/97
+// $Id$
 //
 
 #include "rational.h"

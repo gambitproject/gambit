@@ -1,5 +1,9 @@
-// File: gambdraw.h -- declaration of the generic display parameter class
+//
+// FILE: gambdraw.h -- declaration of the generic display parameter class
 // for gambit.  Currently only the player colors are set here.
+//
+// $Id$
+//
 
 #ifndef GAMBDRAW_H
 #define GAMBDRAW_H

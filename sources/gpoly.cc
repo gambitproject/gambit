@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// @(#)gpoly.cc	2.13 02/06/98
+// $Id$
 //
 
 #include "gpoly.imp"

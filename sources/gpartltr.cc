@@ -1,8 +1,8 @@
 //
-// File: gpartltr.cc  
+// FILE: gpartltr.cc  
 //        -- Instantiations of classes 
 // 
-// @(#)gpartltr.cc	1.1 1/7/98
+// $Id$
 //
 
 #include "glist.imp"

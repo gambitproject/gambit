@@ -1,8 +1,8 @@
-//#
-//# FILE: gtableau.h -- Implementation of tableau type
-//#
-//# @(#)gtableau.h	1.19 8/13/95
-//#
+//
+// FILE: gtableau.h -- Implementation of tableau type
+//
+// $Id$
+//
 
 
 #ifndef GTABLEAU_H

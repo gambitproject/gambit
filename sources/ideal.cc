@@ -1,8 +1,8 @@
 //
-// File: ideal.cc  
+// FILE: ideal.cc  
 //        -- Instantiations of classes gBasis and gIdeal
 // 
-// @(#)ideal.cc	1.1 01/07/98
+// $Id$
 //
 
 #include "ideal.imp"

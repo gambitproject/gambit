@@ -1,7 +1,8 @@
-//#
-//# FILE: interval.cc -- Instantiation of gInterval class
-//# @(#) interval.cc	1.0 2/8/96
-//#
+//
+// FILE: interval.cc -- Instantiation of gInterval class
+// 
+// $Id$
+//
 
 #include <assert.h>
 #include "interval.imp"

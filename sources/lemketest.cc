@@ -1,8 +1,8 @@
-//#
-//# FILE: lemketest.cc -- Lemke test program
-//#
-//# @(#)lemketest.cc	1.3 12 Sep 1995
-//#
+//
+// FILE: lemketest.cc -- Lemke test program
+//
+// $Id$
+//
 
 #include "nfg.h"
 #include "lemke.h"

@@ -1,7 +1,8 @@
-//#
-//# FILE: poly.cc -- Instantiation of polynomial classes
-//# @(#) poly.cc	1.0 11/8/95
-//#
+//
+// FILE: poly.cc -- Instantiation of polynomial classes
+//
+// $Id$
+//
 
 #include "poly.imp"
 #include "double.h"

@@ -1,7 +1,7 @@
 //
 // FILE: NfgShow.cc -- normal form GUI
 //
-// @(#)nfgshow.cc   1.9 02/16/98
+// $Id$
 //
 
 #include "wx.h"

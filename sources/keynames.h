@@ -1,5 +1,9 @@
-// File: keynames.h--This defines verbal descriptions of various extended keys.  This
-// is highly dependent on ~wx/include/base/common.h
+//
+// FILE: keynames.h -- This defines verbal descriptions of various extended keys.  This
+//                     is highly dependent on ~wx/include/base/common.h
+//
+// $Id$
+//
 
 #define NUM_KEYS	74		// total # of keys defined here
 #define BLANK_STR "      " 	// just a blank string of 7 spaces--maps to 0 key

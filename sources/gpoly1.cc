@@ -1,8 +1,8 @@
-
-//#
-//# FILE: gpoly1.cc -- Instantiation of gPoly class
-//# @(#) gpoly1.cc	1.5 9/7/95
-//#
+//
+// FILE: gpoly1.cc -- Instantiation of gPoly class
+//
+// $Id$
+//
 
 #include "glist.imp"
 #include "garray.imp"

@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h    2.7 02/11/98
+// $Id$
 //
 
 #ifndef TREEWIN_H

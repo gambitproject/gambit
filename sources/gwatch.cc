@@ -1,7 +1,7 @@
 //
 // FILE: gwatch.cc -- Implementation of portable stopwatch class
 //
-// 
+// $Id$
 //
 
 #include "gwatch.h"

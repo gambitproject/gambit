@@ -1,8 +1,8 @@
-//#
-//# FILE: gsmatrix.cc -- Instantiation of common squarematrix types
-//#
-//# @(#)gsmatrix.cc	2.5 07/01/97 
-//#
+//
+// FILE: gsmatrix.cc -- Instantiation of common squarematrix types
+//
+// $Id$
+//
 
 #include "gsmatrix.imp"
 #include "rational.h"

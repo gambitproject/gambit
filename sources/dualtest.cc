@@ -1,3 +1,9 @@
+//
+// FILE: dualtest.cc
+//
+// $Id$
+//
+
 #include <stdio.h>
 #include <iostream.h>
 #include <fstream.h>
