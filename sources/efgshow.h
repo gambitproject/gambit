@@ -75,12 +75,12 @@ private:
     BSolnSortFilterOptions sf_options;
     gList<Accel>    accelerators;
     gText   filename;
-    int zoom_win_item;    // menu items of checkable menus
+    // checkable menu items 
+    int zoom_win_item, m_inspectCursorItem, m_inspectInfosetsItem;
     guiEfgShowToolBar *toolbar;
 
     // Private functions
     gArray<AccelEvent> MakeEventNames(void);
-    void SetOptions(void);
     NodeSolnShow *node_inspect;
 
     bool SolveNormalReduced(void);

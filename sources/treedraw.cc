@@ -28,9 +28,7 @@ TreeDrawSettings::TreeDrawSettings(void)
 
 void TreeDrawSettings::SetOptions(void)
 {
-    wxFont fixed_font(12, wxMODERN, wxNORMAL, wxNORMAL);
     MyDialogBox *tree_options_dialog = new MyDialogBox(NULL, "Draw Options");
-    tree_options_dialog->SetLabelFont(&fixed_font);
     tree_options_dialog->Form()->Add(wxMakeFormMessage("Size Settings"));
     tree_options_dialog->Form()->Add(wxMakeFormNewLine());
     tree_options_dialog->Form()->Add(wxMakeFormShort("Branch Length", 

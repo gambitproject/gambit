@@ -150,15 +150,22 @@ void EfgShow::MakeMenus(void)
              "Create a normal form representation of this game");
   
   wxMenu *inspect_menu = new wxMenu;
-  inspect_menu->Append(INSPECT_SOLUTIONS,  "&Solutions", "Inspect existing solutions");
-  inspect_menu->Append(INSPECT_FEATURES,   "In&fo",      "Advanced solution features");
+  inspect_menu->Append(INSPECT_SOLUTIONS, "&Solutions",
+		       "Inspect existing solutions");
+  inspect_menu->Append(INSPECT_CURSOR, "&Cursor",
+		       "Inspect node at cursor", TRUE);
+  inspect_menu->Append(INSPECT_INFOSETS, "&Infosets",
+		       "Inspect information sets", TRUE);
+  inspect_menu->Append(INSPECT_ZOOM_WIN, "Zoom &Window",
+		       "Open zoom-in window", TRUE);
   inspect_menu->AppendSeparator();
   inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
                "Information about this game");
+  m_inspectCursorItem = inspect_menu->FindItem("&Cursor");
+  m_inspectInfosetsItem = inspect_menu->FindItem("&Infosets");
   
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
-  prefs_menu->Append(DISPLAY_ZOOM_WIN,    "Zoom &Window", "Open zoom-in window", TRUE);
   prefs_menu->Append(DISPLAY_SET_OPTIONS, "&Display",     "Set display options");
   prefs_menu->Append(DISPLAY_LEGENDS,     "&Legend",      "Set legends");
   prefs_menu->Append(DISPLAY_COLORS,      "&Colors",      "Set player colors");
@@ -301,9 +308,6 @@ void EfgShow::OnMenuCommand(int id)
       Close();
       break;
 
-    case INSPECT_FEATURES:
-      SetOptions();
-      break;
     case SUPPORTS_SUPPORTS: 
       ChangeSupport(CREATE_DIALOG);
       break;
@@ -342,6 +346,22 @@ void EfgShow::OnMenuCommand(int id)
     case INSPECT_SOLUTIONS: 
       InspectSolutions(CREATE_DIALOG);
       break;
+    case INSPECT_CURSOR:
+      features.node_inspect = !features.node_inspect;
+      NodeInspect(features.node_inspect);
+      GetMenuBar()->Check(m_inspectCursorItem, features.node_inspect);
+      break;
+    case INSPECT_INFOSETS:
+      features.iset_hilight = !features.iset_hilight;
+      if (!features.iset_hilight) {
+	HilightInfoset(0, 0, 1);
+	HilightInfoset(0, 0, 2);
+      }
+      GetMenuBar()->Check(m_inspectInfosetsItem, features.iset_hilight);
+      break;
+    case INSPECT_ZOOM_WIN:
+      GetMenuBar()->Check(zoom_win_item, tw->display_zoom_win());
+      break;
     case INSPECT_GAMEINFO: 
       ShowGameInfo();
       break;
@@ -377,9 +397,6 @@ void EfgShow::OnMenuCommand(int id)
 #define ZOOM_DELTA  .2
     case DISPLAY_SET_ZOOM:
       tw->display_set_zoom();
-      break;
-    case DISPLAY_ZOOM_WIN:
-      GetMenuBar()->Check(zoom_win_item, tw->display_zoom_win());
       break;
     case DISPLAY_INC_ZOOM:
       tw->display_set_zoom(tw->display_get_zoom()+ZOOM_DELTA);
@@ -462,36 +479,6 @@ int EfgShow::CheckAccelerators(wxKeyEvent &ev)
 
     return id;
 }
-
-
-void EfgShow::SetOptions(void)
-{
-    struct es_features old_features = features;
-    MyDialogBox *options_dialog = new MyDialogBox(this, "Solution features");
-    options_dialog->Add(wxMakeFormBool("Hilight infosets", &features.iset_hilight));
-    options_dialog->Add(wxMakeFormNewLine());
-    options_dialog->Add(wxMakeFormBool("Inspect cursor", &features.node_inspect));
-    options_dialog->Go();
-
-    if (options_dialog->Completed() == wxOK)
-    {
-        if (old_features.iset_hilight && !features.iset_hilight)
-        {
-            HilightInfoset(0, 0, 1);
-            HilightInfoset(0, 0, 2);
-        }
-
-        if (old_features.node_inspect && !features.node_inspect)
-            NodeInspect(false);
-
-        if (!old_features.node_inspect && features.node_inspect)
-            NodeInspect(true);
-    }
-
-    delete options_dialog;
-}
-
-
 
 // if who == 2, hilight in the tree display
 // if who == 1, hilight in the solution window display

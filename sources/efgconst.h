@@ -105,14 +105,16 @@
 #define DISPLAY_SAVE_CUSTOM                 1607
 #define DISPLAY_LOAD_CUSTOM                 1608
 #define DISPLAY_REDRAW                      1611
-#define DISPLAY_ZOOM_WIN                    1613
 
 #define SUPPORTS_SUPPORTS                   1800
 #define SUPPORTS_ELIMDOM                    1810
 
 #define INSPECT_SOLUTIONS                   1850
-#define INSPECT_FEATURES                    1860
+#define INSPECT_CURSOR                      1860
+#define INSPECT_INFOSETS                    1865
 #define INSPECT_GAMEINFO                    1870
+#define INSPECT_ZOOM_WIN                    1880
+
 
 #define GAMBIT_HELP_CONTENTS                1700
 #define GAMBIT_HELP_ABOUT                   1701
