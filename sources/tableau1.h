@@ -12,7 +12,6 @@
 #include "ludecomp.h"
 #include "bfs.h"
 // This is the rational to Integer conversion routine
-#include "gcdr.h"
 
 template <class T> class Tableau;
 template <class T> class LPTableau;
@@ -82,8 +81,8 @@ protected:
   gVector<T> Coeff;
   gVector<int> nonbasic;
 
-  gRational totdenom;  // This carries the denominator for Q data or 1 for Z
-  gRational denom;  // This is the denominator for the simplex
+  gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
+  gInteger denom;  // This is the denominator for the simplex
 
 public:
       // constructors and destructors
@@ -144,7 +143,7 @@ public:
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void) const;  // used in lpsolve for some reason
   void Dump(gOutput &) const;
-  void BigDump(gOutput &) const;
+  void BigDump(gOutput &);
 };
 
 template <class T> class LPTableau : public Tableau<T> {

@@ -360,7 +360,7 @@ void Tableau<T>::Dump(gOutput &to) const
 // { }
 
 template <class T>
-void Tableau<T>::BigDump(gOutput &to) const
+void Tableau<T>::BigDump(gOutput &to)
 { 
   to << "\nBasis:\n";
   basis.Dump(to);

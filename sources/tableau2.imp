@@ -4,39 +4,22 @@
 // $Id$
 //
 
-#include "tableau.h"
-#include "gcdr.imp"
-
-// function that turns the matrix and vector into integers
-double Integerize(gMatrix<gRational> &stuff, gVector<gRational> &vec)
+gInteger find_lcd(const gMatrix<gRational> &mat)
 {
-  int i, j;
-  int jdex2,idex,jdex;
-  double real_lcm;
-  int len(stuff.NumRows()*stuff.NumColumns()+vec.Length());
-  gInteger darray[len];
-  
-  jdex2=stuff.NumRows();  
-  for(i=stuff.MinRow();i<=stuff.MaxRow();++i){
-    idex=i-stuff.MinRow(); 
-    for(j=stuff.MinCol();j<=stuff.MaxCol();++j){
-      jdex=j-stuff.MinCol();  
-      darray[jdex*jdex2+idex]=gRational(stuff(i,j)).denominator();
-    }
-    jdex=stuff.NumColumns();
-    darray[jdex*jdex2+idex]=gRational(vec[i]).denominator();
-  }
-
-  real_lcm = find_lcm(len,darray);
-  for(i=stuff.MinRow(); i<=stuff.MaxRow();++i){
-    for(j=stuff.MinCol(); j<=stuff.MaxCol();++j){
-      stuff(i,j)=update(real_lcm,stuff(i,j));
-    }
-    vec[i]=update(real_lcm,vec[i]);
-  }
-  return(real_lcm);
+  gInteger lcd(1);
+  for(int i=mat.MinRow();i<=mat.MaxRow();i++)
+    for(int j=mat.MinCol();j<=mat.MaxCol();j++) 
+      lcd = lcm(mat(i,j).denominator(),lcd);
+  return lcd;
 }
 
+gInteger find_lcd(const gVector<gRational> &vec)
+{
+  gInteger lcd(1);
+  for(int i=vec.First();i<=vec.Last();i++)
+    lcd = lcm(vec[i].denominator(),lcd);
+  return lcd;
+}
 
 //
 // Tableau method definitions 
@@ -55,7 +38,9 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
   for(j=A.MinCol();j<=A.MaxCol();j++) 
     nonbasic[j] = j;
 
-  totdenom = Integerize(Tabdat,Coeff);
+  totdenom = lcm(find_lcd(Tabdat),find_lcd(Coeff));
+  Tabdat*=totdenom;
+  Coeff*=totdenom;
   solution = Coeff;
 }
 
@@ -69,26 +54,6 @@ int Tableau<gRational>::remap(int col_index) const
   assert(i <= nonbasic.Last());
   return i;
 }
-
-// Are these two needed anymore?        
-
-/*
-void Tableau<gRational>::reintden() const
-{
-  gRational div(denom*totdenom);
-
-  Tabdat /= div;
-  Coeff  = Coeff/div;
-}
-
-void Tableau<gRational>::unintden() const
-{
-  gRational div(denom*totdenom);
-  
-  Tabdat *= div;
-  Coeff *= div;
-}
-*/
 
 //
 // pivoting operations
@@ -154,6 +119,7 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   gRational old_denom = denom;
   denom=Tabdat(row,col);
   Tabdat(row,col)=old_denom;
+
   // BigDump(gout);
   npivots++;
   basis.Pivot(outrow,in_col);
@@ -176,12 +142,12 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
   
   if(Member(in_col)) {
     out = (gRational)0;
-    out[Find(in_col)] = denom*(gRational)sign(denom*totdenom);
+    out[Find(in_col)] = denom*sign(denom*totdenom);
   }
   else {
     col = remap(in_col);
     Tabdat.GetColumn(col,out);
-    out *= (gRational)sign(denom*totdenom);
+    out *= sign(denom*totdenom);
   }
 }
 
