@@ -219,7 +219,7 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
     if (spot != 0) {
       int ii;
       for (ii = 1; ii < no_polys; ii++) 
-	if (ii != ell) 
+	if (ii != ell && spot != 0) 
 	  if ( uncomputed.Contains(index_pair(ii,ell)) ||
 	       computed.Contains(index_pair(ii,ell)) )
 	    if (uncomputed.Contains(index_pair(ii,no_polys)))  {
@@ -227,8 +227,10 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
 	      exp_vect lpp_ell      = List[ell]->LeadingPowerProduct(order);
 	      exp_vect lpp_no_polys = List[no_polys]->
 		LeadingPowerProduct(order);
-	      if ( lpp_ell.Divides(lpp_i.LCM(lpp_no_polys)) )
-		uncomputed.Remove[spot];
+	      if ( lpp_ell.Divides(lpp_i.LCM(lpp_no_polys)) ) {
+		uncomputed.Remove(spot); 
+		spot = 0;
+	      }
 	    }
     }
   }
@@ -243,7 +245,7 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
 	      exp_vect lpp_no_polys = List[no_polys]->
 		                               LeadingPowerProduct(order);
 	      if ( lpp_no_polys.Divides(lpp_i.LCM(lpp_j)) )
-		uncomputed.Remove[spot];
+		uncomputed.Remove(spot);
 	    }
       }
   }
