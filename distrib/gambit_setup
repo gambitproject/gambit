@@ -13,7 +13,7 @@ echo Please add this to your PATH environment variable
 echo in your .cshrc file.
 
 echo 
-echo Now executing gambit GUI startup script (gui-init).
+echo Now executing gambit GUI startup script \(gui-init\).
 ./$GAMBIT/misc/gui-init
 
 

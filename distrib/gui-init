@@ -1,7 +1,6 @@
-#/bin/sh
-# SCCS Version $Id$ 
+#! /bin/csh
 
-echo This program will check and possibly update you Gambit GUI configuration
+echo This program will check and possibly update your Gambit GUI configuration
 echo file: ~/.gambit.ini
 if (-f ~/.gambit.ini) then
 	echo Previous Gambit GUI init file found.
@@ -9,6 +8,7 @@ else
 	echo Creating a new Gambit GUI init file
 	cp ./gambit.ini ~/.gambit.ini
 endif
+
 grep -s "Root-Dir" ~/.gambit.ini
 if ($status) then
 	echo Setting the local install dir to : `pwd`
@@ -18,3 +18,4 @@ if ($status) then
 else
 	echo Local dir variables already set, no changes made
 endif
+
