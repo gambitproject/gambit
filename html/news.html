@@ -51,6 +51,42 @@
 </td>
 
 <td ALIGN=LEFT VALIGN=TOP>
+<h3>March 2002: Plans for Gambit 0.97</h3>
+Version 0.97 of Gambit has been under (irregular) development for almost
+two years, and is nearing release.  Our current target release date is 
+sometime in Summer 2002.  Some features of the new version:
+<ul>
+<li><b>Algorithms:</b> These algorithm enhancements will provide new, more
+useful tools for computing Nash equilibria in games with three or more players.
+<ul>
+<li>A new path-following algorithm for computing quantal response equilibria,
+based on a paper which can be downloaded from
+<a href="http://econweb.tamu.edu/turocy">Ted's homepage</a>.  This algorithm
+is capable of tracing the quantal response correspondence for much greater
+values of lambda than before, making it possible to identify the limiting
+point of the principal branch of the correspondence for most games.
+<li>Implementation of Yamamoto's algorithm (IJGT, 1993)
+for finding a proper equilibrium in a normal form game.
+</ul>
+<li><b>Interface:</b> The graphical interface has been completely reimplemented, moving from wxWindows version 1.68 to the current version of
+<a href="http://www.wxwindows.org">wxWindows</a> 2.xx.  The interface has
+been reorganized to be more standardized.  Versions are under development
+for both Microsoft Windows and Linux (using either the GTK+ or the Motif/Lesstif libraries).
+<li><b>Command language:</b> The command language is largely unchanged
+from the previous version.  A new graphical window interface to the
+command language will be available on all platforms, replacing the
+MFC-based Microsoft Windows interface in 0.96.  Additionally, a command-line
+interface is available under Windows now for better batch-file support.
+<li><b>PXI:</b> The PXI program for plotting and analyzing quantal
+response equilibria has also been reimplemented with wxWindows 2.xx, with
+a more modern and clean interface.  Improved features for experimental
+data entry and manipulation are included.
+<li>Additionally, many minor bugs have been squashed, and new features
+added based upon feedback from users.
+</ul>
+
+Watch this space for more details on the release date.
+
 <h3>November 28, 2000: Gambit 0.96.3 released</h3>
 Bug fixes:
 <ul>
@@ -65,6 +101,8 @@ GUI when editing the extensive form.</li>
 <li>The Unix Makefile has been modified to use $(MAKE) for its recursive 
 calls.</li> 
 <li>All parsers have been changed to work with bison, instead of bison++.</li>
+<li>Linux binary now linked statically.  So motif need not be
+installed locally to run the GUI.</li>
 </ul>
 
 <h3>
