@@ -454,6 +454,7 @@ Node *BaseExtForm::DeleteTree(Node *n)
       dead_infosets.Append(n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset)));
     for (int j = 1; j <= n->infoset->player->infosets.Length(); j++)
       n->infoset->player->infosets[j]->number = j;
+    n->infoset = 0;
   }
 
   n->outcome = 0;
