@@ -17,7 +17,7 @@
 template <class T> int BuildReducedNormal(const ExtForm<T> &,
 					  NormalForm<T> *&);
 
-Portion *GSM_EfgToNfg(Portion **param)
+Portion *GSM_Nfg(Portion **param)
 {
   ExtForm<double> &E = ((EfgPortion<double> *) param[0])->Value();
   NormalForm<double> *N = 0;
@@ -219,9 +219,9 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetIntegerOptions, 2, "value", porINTEGER);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("EfgToNfg");
-  FuncObj->SetFuncInfo(GSM_EfgToNfg, 1);
-  FuncObj->SetParamInfo(GSM_EfgToNfg, 0, "efg", porEFG_FLOAT,
+  FuncObj = new FuncDescObj("Nfg");
+  FuncObj->SetFuncInfo(GSM_Nfg, 1);
+  FuncObj->SetParamInfo(GSM_Nfg, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE,
 			PASS_BY_VALUE, DEFAULT_EFG );
   gsm->AddFunction(FuncObj);
