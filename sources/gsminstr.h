@@ -29,7 +29,7 @@ typedef enum
   iIF_GOTO, iGOTO,
 
   iPUSH, iPUSHLIST, iPUSHREF,
-  iASSIGN, iUNASSIGN,
+  iASSIGN, iUNASSIGN, iSUBSCRIPT,
 
   iADD, iSUB, iMUL, iDIV, iNEG,
   iINT_DIV, iMOD,
@@ -163,6 +163,13 @@ class UnAssign : public Instruction
   void Output( gOutput& s ) const;
 };
 
+class Subscript : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
 
 //--------------------------- math operations ---------------------------
 
