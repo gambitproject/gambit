@@ -9,6 +9,9 @@
 #include "gstring.h"
 #include "rational.h"
 
+#include "garray.h"
+#include "gblock.h"
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -21,4 +24,13 @@ TEMPLATE class gNode<gRational>;
 
 TEMPLATE class gList<gString>;
 TEMPLATE class gNode<gString>;
+
+TEMPLATE class gList<gBlock<int> >;
+TEMPLATE class gNode<gBlock<int> >;
+
+TEMPLATE class gList<gArray<int> >;
+TEMPLATE class gListIter<gArray<int> >;
+TEMPLATE class gNode<gArray<int> >;
+
+
 
