@@ -9,6 +9,8 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
+#include "gwatch.h"
+
 #include "efg.h"
 #include "efgutils.h"
 
@@ -247,6 +249,115 @@ Portion *GSM_DetachOutcome(Portion **param)
 
   Portion* por = new NodeValPortion(n);
   por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+extern EFSupport *ComputeDominated(EFSupport &S, bool strong, 
+				   const gArray<int> &players,
+				   gOutput &tracefile);
+
+//--------------
+// ElimAllDom
+//--------------
+
+Portion *GSM_ElimAllDom_EfSupport(Portion **param)
+{
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport* new_T = S;
+  EFSupport* old_T = S;
+  while( new_T )
+  {
+    old_T = new_T;
+    new_T = ComputeDominated(*old_T, strong, players, gout);
+  }
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = new EfSupportValPortion( old_T );
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_ElimAllDom_Efg(Portion **param)
+{
+  EFSupport *S = new EFSupport( * ((EfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport* new_T = S;
+  EFSupport* old_T = S;
+  while( new_T )
+  {
+    old_T = new_T;
+    new_T = ComputeDominated(*old_T, strong, players, gout);
+  }
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = new EfSupportValPortion( old_T );
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+//--------------
+// ElimDom
+//--------------
+
+Portion *GSM_ElimDom_EfSupport(Portion **param)
+{
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport *T = ComputeDominated(*S, strong, players, gout);
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_ElimDom_Efg(Portion **param)
+{
+  EFSupport *S = new EFSupport( * ((EfgPortion *) param[0])->Value() );
+  bool strong = ((BoolPortion *) param[1])->Value();
+  
+  gWatch watch;
+  gBlock<int> players(S->BelongsTo().NumPlayers());
+  int i;
+  for (i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport *T = ComputeDominated(*S, strong, players, gout);
+
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
   por->AddDependency();
   return por;
 }
@@ -1409,6 +1520,40 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("DetachOutcome");
   FuncObj->SetFuncInfo(GSM_DetachOutcome, 1);
   FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ElimAllDom");
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_EfSupport, 3);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 0, "support", porEF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimAllDom_EfSupport, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ElimAllDom_Efg, 3);
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimAllDom_Efg, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("ElimDom");
+  FuncObj->SetFuncInfo(GSM_ElimDom_EfSupport, 3);
+  FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 0, "support", porEF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimDom_EfSupport, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ElimDom_Efg, 3);
+  FuncObj->SetParamInfo(GSM_ElimDom_Efg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ElimDom_Efg, 1, "strong", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_ElimDom_Efg, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Float");
