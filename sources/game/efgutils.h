@@ -63,11 +63,6 @@ bool AllSubgamesMarked(const gbtEfgGame &efg);
 void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &, 
 		   gList<gbtEfgNode> &);
 
-// determines if a game is perfect recall.  
-// if not, returns a pair of infosets violating the definition
-bool IsPerfectRecall(const gbtEfgGame &);
-bool IsPerfectRecall(const gbtEfgGame &, gbtEfgInfoset &, gbtEfgInfoset &);
-
 void RandomEfg(const gbtEfgGame &);
 
 gbtEfgGame CompressEfg(const gbtEfgGame &, const EFSupport &);

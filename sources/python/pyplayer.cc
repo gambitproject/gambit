@@ -356,7 +356,7 @@ static struct PyMethodDef nfplayer_methods[] = {
   { "GetGame", (PyCFunction) nfplayer_getgame, 1 }, 
   { "GetLabel", (PyCFunction) nfplayer_getlabel, 1 },
   { "GetStrategy", (PyCFunction) nfplayer_getstrategy, 1 }, 
-  { "IsNull", (PyCFunction) nfplayer_isnull, 1 }
+  { "IsNull", (PyCFunction) nfplayer_isnull, 1 },
   { "NumStrategies", (PyCFunction) nfplayer_numstrategies, 1 },
   { "SetLabel", (PyCFunction) nfplayer_setlabel, 1 },
   { NULL, NULL }

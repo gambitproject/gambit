@@ -383,11 +383,11 @@ bool EFBasis::RemoveNode(const gbtEfgNode &n)
 
 bool EFBasis::IsReachable(gbtEfgNode n) const
 {
-  if (n == m_efg.RootNode()) {
+  if (n == m_efg.GetRoot()) {
     return true;
   }
 
-  while (n != m_efg.RootNode()) {
+  while (n != m_efg.GetRoot()) {
     if (!n.GetParent().GetInfoset().IsChanceInfoset()) {
       if (!EFSupport::Contains(LastAction(m_efg, n))) {
 	return false;
@@ -577,11 +577,11 @@ void EFBasis::AddEquation2(int row, gbtEfgNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
-  if(n!=m_efg.RootNode()) {
+  if(n!=m_efg.GetRoot()) {
     gbtEfgAction act = LastAction(m_efg,n);
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
-    while(n.GetParent() != m_efg.RootNode()) {
+    while(n.GetParent() != m_efg.GetRoot()) {
       n = n.GetParent();
       act = LastAction(m_efg,n);
       if(Col(act))

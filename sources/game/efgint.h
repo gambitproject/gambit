@@ -123,7 +123,7 @@ struct gbt_efg_game_rep {
   bool sortisets;
   mutable long m_revision;
   mutable long m_outcome_revision;
-  gText title, comment;
+  gText m_label, comment;
   gBlock<gbt_efg_player_rep *> players;
   gBlock<gbt_efg_outcome_rep *> outcomes;
   gbt_efg_node_rep *root;

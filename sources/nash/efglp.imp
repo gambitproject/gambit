@@ -49,7 +49,7 @@ gList<BehavSolution> gbtEfgNashLp<T>::Solve(const EFSupport &p_support,
 
   if (p_support.GetGame().NumPlayers() != 2 ||
       !p_support.GetGame().IsConstSum() ||
-      !IsPerfectRecall(p_support.GetGame())) {
+      !p_support.GetGame().IsPerfectRecall()) {
     return gList<BehavSolution>();
   }
   
@@ -64,7 +64,7 @@ gList<BehavSolution> gbtEfgNashLp<T>::Solve(const EFSupport &p_support,
 
   A = (T)0;
   T prob = (T)1;
-  FillTableau(p_support, A, p_support.GetGame().RootNode(),prob,1,1,0,0);
+  FillTableau(p_support, A, p_support.GetGame().GetRoot(),prob,1,1,0,0);
   A(1,ns2+1) = -(T)1;
   A(ns1+1,1) = (T)1;
 
@@ -204,7 +204,8 @@ void gbtEfgNashLp<T>::GetSolutions(const EFSupport &p_support,
 {
   for (int i = 1; i <= List.Length(); i++)    {
     BehavProfile<T> profile(p_support);
-    GetProfile(p_support, profile.GetDPVector(),List[i],p_support.GetGame().RootNode(),1,1);
+    GetProfile(p_support, profile.GetDPVector(), List[i],
+	       p_support.GetGame().GetRoot(), 1, 1);
     solutions.Append(BehavSolution(profile, "Lp[EFG]"));
   }
 

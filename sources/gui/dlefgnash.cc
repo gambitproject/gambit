@@ -186,7 +186,7 @@ gList<BehavSolution> efgTwoNash::Solve(const EFSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
+    p_support.GetGame().UnmarkSubgames(p_support.GetGame().GetRoot());
 
     if (p_support.GetGame().NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -284,7 +284,7 @@ gList<BehavSolution> efgAllNash::Solve(const EFSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
+    p_support.GetGame().UnmarkSubgames(p_support.GetGame().GetRoot());
 
     if (p_support.GetGame().NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;

@@ -278,7 +278,7 @@ gbtEfgNode gbtEfgNode::PriorSibling(void) const
 
 gbtEfgAction gbtEfgNode::GetAction(void) const
 {
-  if (*this == GetGame().RootNode()) {
+  if (*this == GetGame().GetRoot()) {
     return gbtEfgAction();
   }
   

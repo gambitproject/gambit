@@ -241,11 +241,11 @@ void EfgShow::OnUpdate(gbtGameView *)
   if (m_doc->GetFilename() != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", 
 			      m_doc->GetFilename().c_str(), 
-			      (char *) m_doc->GetEfg().GetTitle()));
+			      (char *) m_doc->GetEfg().GetLabel()));
   }
   else {
     SetTitle(wxString::Format("Gambit - %s", 
-			      (char *) m_doc->GetEfg().GetTitle()));
+			      (char *) m_doc->GetEfg().GetLabel()));
   }
 }
 
@@ -469,7 +469,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
   try {
     gFileOutput file(m_doc->GetFilename().c_str());
     gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), m_doc->GetEfgSupport());
-    efg.WriteEfgFile(file, 6);
+    efg.WriteEfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gFileOutput::OpenFailed &) {
@@ -502,9 +502,9 @@ void EfgShow::OnFilePrintPreview(wxCommandEvent &)
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview = 
     new wxPrintPreview(new EfgPrintout(m_treeWindow,
-				       (char *) m_doc->GetEfg().GetTitle()),
+				       (char *) m_doc->GetEfg().GetLabel()),
 		       new EfgPrintout(m_treeWindow,
-				       (char *) m_doc->GetEfg().GetTitle()),
+				       (char *) m_doc->GetEfg().GetLabel()),
 		       &data);
 
   if (!preview->Ok()) {
@@ -524,7 +524,7 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  EfgPrintout printout(m_treeWindow, (char *) m_doc->GetEfg().GetTitle());
+  EfgPrintout printout(m_treeWindow, (char *) m_doc->GetEfg().GetLabel());
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {

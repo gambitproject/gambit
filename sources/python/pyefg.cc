@@ -82,13 +82,23 @@ efg_getchance(efgobject *self, PyObject *args)
 }
 
 static PyObject *
+efg_getcomment(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("s", (char *) self->m_efg->GetComment());
+}
+
+static PyObject *
 efg_getlabel(efgobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
     return NULL;
   }
 
-  return Py_BuildValue("s", (char *) self->m_efg->GetTitle());
+  return Py_BuildValue("s", (char *) self->m_efg->GetLabel());
 }
 
 static PyObject *
@@ -135,8 +145,52 @@ efg_getroot(efgobject *self, PyObject *args)
   }
 
   nodeobject *node = newnodeobject();
-  *node->m_node = self->m_efg->RootNode();
+  *node->m_node = self->m_efg->GetRoot();
   return (PyObject *) node;
+}
+
+static PyObject *
+efg_isconstsum(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", self->m_efg->IsConstSum());
+}
+
+static PyObject *
+efg_isperfectrecall(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  return Py_BuildValue("b", self->m_efg->IsPerfectRecall());
+}
+
+static PyObject *
+efg_newoutcome(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efoutcomeobject *outcome = newefoutcomeobject();
+  *outcome->m_efoutcome = self->m_efg->NewOutcome();
+  return (PyObject *) outcome;
+}
+
+static PyObject *
+efg_newplayer(efgobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efplayerobject *player = newefplayerobject();
+  *player->m_efplayer = self->m_efg->NewPlayer();
+  return (PyObject *) player;
 }
 
 static PyObject *
@@ -160,6 +214,20 @@ efg_numplayers(efgobject *self, PyObject *args)
 }
 
 static PyObject *
+efg_setcomment(efgobject *self, PyObject *args)
+{
+  char *comment;
+
+  if (!PyArg_ParseTuple(args, "s", &comment)) {
+    return NULL;
+  }
+
+  self->m_efg->SetComment(comment);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
 efg_setlabel(efgobject *self, PyObject *args)
 {
   char *label;
@@ -168,7 +236,7 @@ efg_setlabel(efgobject *self, PyObject *args)
     return NULL;
   }
 
-  self->m_efg->SetTitle(label);
+  self->m_efg->SetLabel(label);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -184,7 +252,7 @@ efg_writeefg(efgobject *self, PyObject *args)
 
   try {
     gFileOutput file(filename);
-    self->m_efg->WriteEfgFile(file, 6);
+    self->m_efg->WriteEfg(file);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -203,12 +271,18 @@ efg_writeefg(efgobject *self, PyObject *args)
 
 static struct PyMethodDef efg_methods[] = {
   { "GetChance", (PyCFunction) efg_getchance, 1 },
+  { "GetComment", (PyCFunction) efg_getcomment, 1 },
   { "GetLabel", (PyCFunction) efg_getlabel, 1 },
   { "GetOutcome", (PyCFunction) efg_getoutcome, 1 },
   { "GetPlayer", (PyCFunction) efg_getplayer, 1 },
   { "GetRoot", (PyCFunction) efg_getroot, 1 },
+  { "IsConstSum", (PyCFunction) efg_isconstsum, 1 },
+  { "IsPerfectRecall", (PyCFunction) efg_isperfectrecall, 1 }, 
+  { "NewOutcome", (PyCFunction) efg_newoutcome, 1 },
+  { "NewPlayer", (PyCFunction) efg_newplayer, 1 },
   { "NumOutcomes", (PyCFunction) efg_numoutcomes, 1 },
   { "NumPlayers", (PyCFunction) efg_numplayers, 1 },
+  { "SetComment", (PyCFunction) efg_setcomment, 1 },
   { "SetLabel", (PyCFunction) efg_setlabel, 1 },
   { "WriteEfg", (PyCFunction) efg_writeefg, 1 },
   { NULL, NULL }
@@ -261,13 +335,25 @@ efg_compare(efgobject *obj1, efgobject *obj2)
 static int
 efg_print(efgobject *self, FILE *fp, int flags)
 {
-  fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg->GetTitle());
+  fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg->GetLabel());
   return 0;
 }
 
 /************************************************************************
  * MODULE METHODS
  ************************************************************************/
+
+PyObject *
+gbt_new_efg(PyObject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  efgobject *efg = newefgobject();
+  efg->m_efg = new gbtEfgGame(NewEfg());
+  return (PyObject *) efg;
+}
 
 PyObject *
 gbt_read_efg(PyObject *self, PyObject *args)
@@ -281,7 +367,7 @@ gbt_read_efg(PyObject *self, PyObject *args)
   efgobject *efg = newefgobject();
   try {
     gFileInput file(filename);
-    efg->m_efg = new gbtEfgGame(ReadEfgFile(file));
+    efg->m_efg = new gbtEfgGame(ReadEfg(file));
     return (PyObject *) efg;
   }
   catch (const gFileInput::OpenFailed &) {

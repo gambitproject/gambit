@@ -57,7 +57,7 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 		  0, wxALL | wxCENTER, 5);
   if (m_doc->HasEfg()) {
     m_title = new wxTextCtrl(this, -1, 
-			     (const char *) m_doc->GetEfg().GetTitle());
+			     (const char *) m_doc->GetEfg().GetLabel());
   }
   else {
     m_title = new wxTextCtrl(this, -1, 
@@ -93,7 +93,7 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format("Perfect recall: %s",
-						     (IsPerfectRecall(m_doc->GetEfg())) ?
+						     (m_doc->GetEfg().IsPerfectRecall()) ?
 						     "YES" : "NO")),
 		   0, wxALL, 5);
   }
@@ -247,7 +247,7 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
 {
   if (p_doc->HasEfg()) {
     gbtEfgGame efg = p_doc->GetEfg();
-    efg.SetTitle(m_title);
+    efg.SetLabel(m_title);
     efg.SetComment(m_comment);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       if (pl > efg.NumPlayers()) {

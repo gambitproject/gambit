@@ -92,7 +92,7 @@ protected:
 
   gbtEfgOutcome NewOutcome(int index);
 
-  void WriteEfgFile(gOutput &, gbt_efg_node_rep *) const;
+  void WriteEfg(gOutput &, gbt_efg_node_rep *) const;
 
   void Payoff(gbt_efg_node_rep *n, gNumber,
 	      const gPVector<int> &, gVector<gNumber> &) const;
@@ -107,6 +107,7 @@ protected:
   void MarkTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
   bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
   void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
+
 
 public:
   gbtEfgGame(void);
@@ -123,22 +124,24 @@ public:
   gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const;
   
   // TITLE ACCESS AND MANIPULATION
-  void SetTitle(const gText &s);
-  const gText &GetTitle(void) const;
+  void SetLabel(const gText &s);
+  const gText &GetLabel(void) const;
   
   void SetComment(const gText &);
   const gText &GetComment(void) const;
 
   // WRITING DATA FILES
-  void WriteEfgFile(gOutput &p_file, int p_nDecimals) const;
+  void WriteEfg(gOutput &p_file) const;
 
   // DATA ACCESS -- GENERAL INFORMATION
   bool IsConstSum(void) const; 
+  bool IsPerfectRecall(void) const;
+  bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const;
   long RevisionNumber(void) const;
   gNumber MinPayoff(int pl = 0) const;
   gNumber MaxPayoff(int pl = 0) const;
   
-  gbtEfgNode RootNode(void) const;
+  gbtEfgNode GetRoot(void) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
@@ -203,7 +206,8 @@ public:
   friend gbtNfgGame MakeAfg(const gbtEfgGame &);
 };
 
-gbtEfgGame ReadEfgFile(gInput &);
+gbtEfgGame NewEfg(void);
+gbtEfgGame ReadEfg(gInput &);
 
 template <class T> class PureBehavProfile   {
   protected:

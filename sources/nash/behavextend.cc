@@ -185,7 +185,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const gbtEfgInfoset &iset,
 			const gbtEfgAction &act)
 {
-  while (tempnode != p_solution.GetGame().RootNode()) {
+  while (tempnode != p_solution.GetGame().GetRoot()) {
     gbtEfgAction last_action = tempnode.GetAction();
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
@@ -241,7 +241,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<gbtEfgNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame().RootNode(), terminal_nodes);
+  TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
 
   for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = p_solution.GetGame().GetPlayer(pl);
@@ -388,7 +388,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const int &i,
 				   const int &j)
 {
-  while (tempnode != p_solution.GetGame().RootNode()) {
+  while (tempnode != p_solution.GetGame().GetRoot()) {
     gbtEfgAction last_action = tempnode.GetAction();
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
@@ -438,7 +438,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
   gList<gbtEfgNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame().RootNode(), terminal_nodes);
+  TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame());
        !player.End(); player++) { 

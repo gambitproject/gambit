@@ -283,7 +283,7 @@ void TreeWindow::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-      m_doc->SetCursor(m_doc->GetEfg().RootNode());
+      m_doc->SetCursor(m_doc->GetEfg().GetRoot());
     }
     
     UpdateCursor();
@@ -363,7 +363,7 @@ void TreeWindow::ProcessCursor(void)
   if (!m_doc->GetCursor().IsNull()) {
     NodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
     if (!entry) {
-      m_doc->SetCursor(m_doc->GetEfg().RootNode());
+      m_doc->SetCursor(m_doc->GetEfg().GetRoot());
       entry = m_layout.GetNodeEntry(m_doc->GetCursor());
     }
     

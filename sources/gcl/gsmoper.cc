@@ -1539,7 +1539,7 @@ static Portion *GSM_Write_Efg(GSM &, Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
   gbtEfgGame efg = AsEfg(param[1]);
-  efg.WriteEfgFile(s, _WriteGameDecimals.Value());
+  efg.WriteEfg(s);
   return param[0]->ValCopy();
 }
 

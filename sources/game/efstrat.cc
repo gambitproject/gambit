@@ -439,7 +439,7 @@ int EFSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gList<gbtEfgInfoset > active_infosets = ReachableInfosets(GetGame().RootNode());
+  gList<gbtEfgInfoset> active_infosets = ReachableInfosets(GetGame().GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
@@ -568,7 +568,7 @@ gList<gbtEfgInfoset> EFSupport::ReachableInfosets(const gbtEfgNode &n,
 
 bool EFSupport::AlwaysReaches(const gbtEfgInfoset &i) const
 {
-  return AlwaysReachesFrom(i, m_efg.RootNode());
+  return AlwaysReachesFrom(i, m_efg.GetRoot());
 }
 
 bool EFSupport::AlwaysReachesFrom(const gbtEfgInfoset &i, 
@@ -600,7 +600,7 @@ bool EFSupport::MayReach(const gbtEfgInfoset &infoset) const
 
 bool EFSupport::MayReach(const gbtEfgNode &n) const
 {
-  if (n == m_efg.RootNode())
+  if (n == m_efg.GetRoot())
     return true;
   else {
     if (!Contains(n.GetAction())) {
@@ -794,7 +794,7 @@ void EFSupportWithActiveInfo::InitializeActiveLists()
 {
   InitializeActiveListsToAllInactive();
 
-  activate_this_and_lower_nodes(GetGame().RootNode());
+  activate_this_and_lower_nodes(GetGame().GetRoot());
 }
 
 // Constructors and Destructor

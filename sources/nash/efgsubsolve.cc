@@ -90,7 +90,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
     gbtEfgGame foo = efg.Copy(n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo.RootNode().SetOutcome(0);
+    foo.GetRoot().SetOutcome(0);
 
     gList<gbtEfgNode> nodes;
     Nodes(efg, n, nodes);
@@ -289,10 +289,10 @@ gList<BehavSolution> gbtEfgNashSubgames::Solve(const EFSupport &p_support,
     }
   }
 
-  m_isPerfectRecall = IsPerfectRecall(efg);
+  m_isPerfectRecall = efg.IsPerfectRecall();
 
   try {
-    FindSubgames(support, p_status, efg.RootNode(), solutions, values);
+    FindSubgames(support, p_status, efg.GetRoot(), solutions, values);
   }
   catch (gSignalBreak &) { }
 

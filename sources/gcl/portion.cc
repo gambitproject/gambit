@@ -1467,7 +1467,7 @@ PortionSpec EfgPortion::Spec(void) const
 void EfgPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(Efg) \"" << (*m_value).GetTitle() << "\"";
+  s << "(Efg) \"" << (*m_value).GetLabel() << "\"";
 }
 
 gText EfgPortion::OutputString(void) const

@@ -57,7 +57,7 @@ Sfg::Sfg(const EFSupport &S)
   isetFlag = 0;
   isetRow = 0;
 
-  GetSequenceDims(m_efg.RootNode());
+  GetSequenceDims(m_efg.GetRoot());
 
   isetFlag = 0;
 
@@ -88,7 +88,7 @@ Sfg::Sfg(const EFSupport &S)
   for(i=1;i<=m_efg.NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
-  MakeSequenceForm(m_efg.RootNode(),(gNumber)1,one,zero,parent);
+  MakeSequenceForm(m_efg.GetRoot(),(gNumber)1,one,zero,parent);
 }
 
 Sfg::~Sfg()

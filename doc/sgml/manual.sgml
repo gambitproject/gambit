@@ -93,13 +93,7 @@ econometric analysis of games.
 
 </chapter>
 
-<chapter id="apiref">
-<title>Gambit API Reference Manual</title>
-<para></para>
-
 &apiref;
-      
-  </chapter>
 
 <appendix id="app.alg">
     <title>Reference: Algorithms to Compute Nash Equilibria</title>

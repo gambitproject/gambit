@@ -64,14 +64,16 @@ InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
 {
   for (int i = 1; i <= infoset.NumMembers(); i++) {
     gbtEfgNode current = infoset.GetMember(i);
-    if ( current == S->GetGame().RootNode() )
+    if (current == S->GetGame().GetRoot()) {
       return true;
+    }
     else
       while ( S->Contains(current.GetAction()) &&
 	      cursor.IsSubsequentTo(current.GetAction()) ) {
 	current = current.GetParent();
-	if ( current == S->GetGame().RootNode() )
+	if (current == S->GetGame().GetRoot()) {
 	  return true;
+	}
       }
   }
   return false;

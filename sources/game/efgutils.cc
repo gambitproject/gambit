@@ -84,7 +84,7 @@ void
 Nodes(const gbtEfgGame & befg, gList < gbtEfgNode > &list)
 {
   list.Flush();
-  NDoChild(befg, befg.RootNode(), list);
+  NDoChild(befg, befg.GetRoot(), list);
 }
 
 void
@@ -111,14 +111,14 @@ void
 MarkedSubgameRoots(const gbtEfgGame & efg, gList < gbtEfgNode > &list)
 {
   list.Flush();
-  MSRDoChild(efg, efg.RootNode(), list);
+  MSRDoChild(efg, efg.GetRoot(), list);
 }
 
 void
 LegalSubgameRoots(const gbtEfgGame & efg, gList < gbtEfgNode > &list)
 {
   list.Flush();
-  LSRDoChild(efg, efg.RootNode(), list);
+  LSRDoChild(efg, efg.GetRoot(), list);
 }
 
 void
@@ -171,7 +171,7 @@ ChildSubgames(const gbtEfgGame & efg, const gbtEfgNode &n,
 int
 NumNodes(const gbtEfgGame & befg)
 {
-  return (CountNodes(befg, befg.RootNode()));
+  return (CountNodes(befg, befg.GetRoot()));
 }
 
 gbtEfgAction
@@ -184,69 +184,6 @@ LastAction(const gbtEfgGame & e, const gbtEfgNode &node)
     if (parent.GetChild(i) == node)
       return parent.GetInfoset().GetAction(i);
   return 0;
-}
-
-bool
-IsPerfectRecall(const gbtEfgGame & p_efg)
-{
-  gbtEfgInfoset s1, s2;
-  return IsPerfectRecall(p_efg, s1, s2);
-}
-
-bool
-IsPerfectRecall(const gbtEfgGame & efg, gbtEfgInfoset & s1, gbtEfgInfoset & s2)
-{
-  for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-    gbtEfgPlayer player = efg.GetPlayer(pl);
-
-    for (int i = 1; i <= player.NumInfosets(); i++) {
-      gbtEfgInfoset iset1 = player.GetInfoset(i);
-      for (int j = 1; j <= player.NumInfosets(); j++) {
-        gbtEfgInfoset iset2 = player.GetInfoset(j);
-
-        bool precedes = false;
-        int action = 0;
-
-        for (int m = 1; m <= iset2.NumMembers(); m++) {
-          int n;
-          for (n = 1; n <= iset1.NumMembers(); n++) {
-            if (iset1.GetMember(n).IsPredecessor(iset2.GetMember(m))
-                && iset1.GetMember(n) != iset2.GetMember(m)) {
-              precedes = true;
-              for (int act = 1; act <= iset1.NumActions(); act++) {
-                if (iset1.GetMember(n).GetChild(act).
-                    IsPredecessor(iset2.GetMember(m))) {
-                  if (action != 0 && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
-
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-
-          if (n > iset1.NumMembers() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-        }
-
-
-      }
-    }
-  }
-
-  return true;
 }
 
 gbtEfgGame

@@ -176,7 +176,7 @@ bool gbtEfgAction::Precedes(gbtEfgNode n) const
     return false;
   }
 
-  while (n != n.GetGame().RootNode() ) {
+  while (n != n.GetGame().GetRoot() ) {
     if (n.GetAction().rep == rep) {
       return true;
     }
@@ -388,7 +388,7 @@ gbtEfgGame gbtEfgInfoset::GetGame(void) const
 
 bool gbtEfgInfoset::Precedes(gbtEfgNode p_node) const
 {
-  while (p_node != p_node.GetGame().RootNode()) {
+  while (p_node != p_node.GetGame().GetRoot()) {
     if (p_node.GetInfoset() == *this) {
       return true;
     }

@@ -191,14 +191,14 @@ template <class T>
 void PureBehavProfile<T>::Payoff(gArray<T> &payoff) const
 {
   for (int pl = 1; pl <= payoff.Length(); payoff[pl++] = (T) 0);
-  Payoff(m_efg.RootNode(), (T) 1, payoff);
+  Payoff(m_efg.GetRoot(), (T) 1, payoff);
 }
 
 template <class T>
 void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 {
   ((gVector<T> &) probs).operator=((T) 0);
-  InfosetProbs(m_efg.RootNode(), (T) 1, probs);
+  InfosetProbs(m_efg.GetRoot(), (T) 1, probs);
 }
 
 template <class T>
@@ -278,7 +278,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
   ((gVector<T> &) *this).operator=((T)0); 
 
-  gbtEfgNode n = m_efg.RootNode();
+  gbtEfgNode n = m_efg.GetRoot();
   const gbtNfgSupport &support = p_profile.Support();
   gbtNfgGame nfg = p_profile.GetGame();
 
@@ -292,7 +292,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
 	m_bvals[n.GetId()] = p_profile(pl, st);
 
-	RealizationProbs(p_profile, m_efg, pl, actions, m_efg.RootNode());
+	RealizationProbs(p_profile, m_efg, pl, actions, m_efg.GetRoot());
       }
     }
  
@@ -538,7 +538,7 @@ void BehavProfile<T>::Payoff(const gbtEfgNode &node,
 template <class T> T BehavProfile<T>::Payoff(int player) const
 {
   T value = (T) 0;
-  Payoff(m_efg.RootNode(), (T) 1, player, value);
+  Payoff(m_efg.GetRoot(), (T) 1, player, value);
   return value;
 }
 
@@ -714,8 +714,8 @@ void BehavProfile<T>::ComputeSolutionData(void)
     m_nodeValues = (T) 0;
     m_infosetValues = (T) 0;
     m_gripe = (T) 0;
-    ComputeSolutionDataPass1(m_efg.RootNode());
-    ComputeSolutionDataPass2(m_efg.RootNode());
+    ComputeSolutionDataPass1(m_efg.GetRoot());
+    ComputeSolutionDataPass2(m_efg.GetRoot());
 
     for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
       for (int iset = 1; iset <= m_efg.NumInfosets()[pl]; iset++) {
@@ -1082,7 +1082,7 @@ void BehavAssessment<T>::CondPayoff(gDPVector<T> &p_payoff,
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     m_nodeValues(1, pl) = (T) 0;
   }
-  CondPayoff(m_efg.RootNode(), (T) 1, p_probs, p_payoff);
+  CondPayoff(m_efg.GetRoot(), (T) 1, p_probs, p_payoff);
 
   // We can dispense with the normalization step found in the analogous
   // place in BehavProfile<T> since the beliefs are assumed to be 

@@ -1,35 +1,54 @@
-
-<sect1 id="apiref.efg">
-<title>Extensive form games</title>
+<chapter id="apiref">
+<title>Gambit API Reference Manual</title>
 
 <para>
+This chapter documents the interface to the libraries which represent
+and manipulate games in Gambit.
 </para>
 
-&bifagentform;
-&bifbasis;
-&bifchance;
-&bifcomment;
-&bifcompressefg;
-&bifisconstsum;
-&bifisperfectrecall;
-&bifloadefg;
-&bifname;
-&bifnewefg;
-&bifnewoutcome;
-&bifnewplayer;
-&bifnfg;
-&bifnodes;
-&bifoutcomes;
-&bifplayers;
-&bifrootnode;
-&bifsaveefg;
-&bifsetcomment;
-&bifsetname;
-&bifsubgames;
-&bifunmarksubgame;
+<para>
+Currently, this codebase can be used three ways in programs:
+<itemizedlist>
+<listitem>
+<para>
+The underlying C++ library can be called by other programs written
+in C++, or which understand C++ calling conventions;
+</para>
+</listitem>
+<listitem>
+<para>
+Many functions are now present in the Gambit
+Python extension module.
+(New for version 0.97.1, support still incomplete)
+</para>
+</listitem>
+<listitem>
+<para>
+Using the Gambit Command Language.  (Beginning with 0.97.1, the
+GCL is deprecated; users are encouraged to begin using Python for 
+scripting applications of Gambit.) 
+</para>
+</listitem>
+</itemizedlist>
+Other languages supported by SWIG are also possibilities for future
+API availability; please contact the Gambit development team if you
+have interest in using Gambit in conjunction with another language.
+</para>
 
-</sect1>
+<para>
+Some parts of the C++ and Python APIs are in flux.  In these cases, only
+the GCL function is listed in this documentation.  Consult the source
+code or the Gambit development team for information about the C++ and/or
+Python versions of such functions should you need them.   We are hoping
+to continue to stabilize the API so it will be more possible to use
+the Gambit code in other applications; however, there are still no
+guarantees any particular feature will remain unchanged from version
+to version.  Again, if you're using Gambit code directly, keep in touch
+with the Gambit team directly or via the mailing lists for the latest
+information and plans.
+</para>
 
+&apirefefg;
 
 <sect1 id="apiref.nfg">
 <title>Normal form games</title>
@@ -101,6 +120,7 @@
 &bifpriorsibling;
 &bifsetname;
 &bifsetoutcome;
+&bifunmarksubgame;
 
 </sect1>
 
@@ -388,4 +408,4 @@ are predefined in the command language.
 </sect1>
 
 
-
+</chapter>

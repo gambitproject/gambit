@@ -715,14 +715,14 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
 
 static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 {
-  p_efg.SetTitle(p_treeData.m_title);
+  p_efg.SetLabel(p_treeData.m_title);
   p_efg.SetComment(p_treeData.m_comment);
   for (PlayerData *player = p_treeData.m_firstPlayer; player;
        player = player->m_next) {
     p_efg.NewPlayer().SetLabel(player->m_name);
   }
   NodeData *node = p_treeData.m_firstNode;
-  BuildSubtree(p_efg, p_efg.RootNode(), p_treeData, &node);
+  BuildSubtree(p_efg, p_efg.GetRoot(), p_treeData, &node);
 }
 
 
@@ -730,12 +730,12 @@ static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 // ReadEfgFile: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame ReadEfgFile(gInput &p_file)
+gbtEfgGame ReadEfg(gInput &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
 
-  gbtEfgGame efg;
+  gbtEfgGame efg = NewEfg();
 
   try {
     Parse(parser, treeData);

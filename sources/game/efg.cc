@@ -44,10 +44,11 @@
 gbt_efg_game_rep::gbt_efg_game_rep(void)
   : m_refCount(1),
     sortisets(true), m_revision(0), 
-    m_outcome_revision(-1), title("UNTITLED"),
+    m_outcome_revision(-1), m_label("UNTITLED"),
     chance(new gbt_efg_player_rep(this, 0)), afg(0), m_reducedNfg(0)
 {
   root = new gbt_efg_node_rep(this, 0);
+  SortInfosets();
 }
 
 gbt_efg_game_rep::~gbt_efg_game_rep()
@@ -239,16 +240,14 @@ void gbt_efg_game_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
 //------------------------------------------------------------------------
 
 gbtEfgGame::gbtEfgGame(void)
-  : rep(new gbt_efg_game_rep)
-{
-  rep->SortInfosets();
-}
+  : rep(0)
+{ }
 
 gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
 {
   gbtEfgGame efg;
   efg.rep->sortisets = false;
-  efg.rep->title = rep->title;
+  efg.rep->m_label = rep->m_label;
   efg.rep->comment = rep->comment;
   efg.rep->players = gBlock<gbt_efg_player_rep *>(rep->players.Length());
   efg.rep->outcomes = gBlock<gbt_efg_outcome_rep *>(rep->outcomes.Length());
@@ -387,14 +386,14 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
 //               Efg: Title access and manipulation
 //------------------------------------------------------------------------
 
-void gbtEfgGame::SetTitle(const gText &s)
+void gbtEfgGame::SetLabel(const gText &p_label)
 {
-  rep->title = s; 
+  rep->m_label = p_label; 
   rep->m_revision++;
 }
 
-const gText &gbtEfgGame::GetTitle(void) const
-{ return rep->title; }
+const gText &gbtEfgGame::GetLabel(void) const
+{ return rep->m_label; }
 
 void gbtEfgGame::SetComment(const gText &s)
 {
@@ -410,7 +409,7 @@ const gText &gbtEfgGame::GetComment(void) const
 //                    Efg: Writing data files
 //------------------------------------------------------------------------
 
-void gbtEfgGame::WriteEfgFile(gOutput &f, gbt_efg_node_rep *n) const
+void gbtEfgGame::WriteEfg(gOutput &f, gbt_efg_node_rep *n) const
 {
   if (n->m_children.Length() == 0)   {
     f << "t \"" << EscapeQuotes(n->m_label) << "\" ";
@@ -475,32 +474,22 @@ void gbtEfgGame::WriteEfgFile(gOutput &f, gbt_efg_node_rep *n) const
       f << "0\n";
   }
 
-  for (int i = 1; i <= n->m_children.Length(); i++)
-    WriteEfgFile(f, n->m_children[i]);
+  for (int i = 1; i <= n->m_children.Length(); i++) {
+    WriteEfg(f, n->m_children[i]);
+  }
 }
 
-void gbtEfgGame::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
+void gbtEfgGame::WriteEfg(gOutput &p_file) const
 {
-  int oldPrecision = p_file.GetPrec();
-  p_file.SetPrec(p_nDecimals);
-
-  try {
-    p_file << "EFG 2 R";
-    p_file << " \"" << EscapeQuotes(rep->title) << "\" { ";
-    for (int i = 1; i <= rep->players.Length(); i++) {
-      p_file << '"' << EscapeQuotes(rep->players[i]->m_label) << "\" ";
-    }
-    p_file << "}\n";
-    p_file << "\"" << EscapeQuotes(rep->comment) << "\"\n\n";
-
-    WriteEfgFile(p_file, rep->root);
-    p_file.SetPrec(oldPrecision);
-    rep->m_revision++;
+  p_file << "EFG 2 R";
+  p_file << " \"" << EscapeQuotes(rep->m_label) << "\" { ";
+  for (int i = 1; i <= rep->players.Length(); i++) {
+    p_file << '"' << EscapeQuotes(rep->players[i]->m_label) << "\" ";
   }
-  catch (...) {
-    p_file.SetPrec(oldPrecision);
-    throw;
-  }
+  p_file << "}\n";
+  p_file << "\"" << EscapeQuotes(rep->comment) << "\"\n\n";
+
+  WriteEfg(p_file, rep->root);
 }
 
 
@@ -577,6 +566,67 @@ bool gbtEfgGame::IsConstSum(void) const
   return true;
 }
 
+bool gbtEfgGame::IsPerfectRecall(void) const
+{
+  gbtEfgInfoset s1, s2;
+  return IsPerfectRecall(s1, s2);
+}
+
+bool gbtEfgGame::IsPerfectRecall(gbtEfgInfoset &s1, gbtEfgInfoset &s2) const
+{
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    gbtEfgPlayer player = GetPlayer(pl);
+
+    for (int i = 1; i <= player.NumInfosets(); i++) {
+      gbtEfgInfoset iset1 = player.GetInfoset(i);
+      for (int j = 1; j <= player.NumInfosets(); j++) {
+        gbtEfgInfoset iset2 = player.GetInfoset(j);
+
+        bool precedes = false;
+        int action = 0;
+
+        for (int m = 1; m <= iset2.NumMembers(); m++) {
+          int n;
+          for (n = 1; n <= iset1.NumMembers(); n++) {
+            if (iset1.GetMember(n).IsPredecessor(iset2.GetMember(m))
+                && iset1.GetMember(n) != iset2.GetMember(m)) {
+              precedes = true;
+              for (int act = 1; act <= iset1.NumActions(); act++) {
+                if (iset1.GetMember(n).GetChild(act).
+                    IsPredecessor(iset2.GetMember(m))) {
+                  if (action != 0 && action != act) {
+                    s1 = iset1;
+                    s2 = iset2;
+                    return false;
+                  }
+                  action = act;
+                }
+              }
+              break;
+            }
+          }
+
+          if (i == j && precedes) {
+            s1 = iset1;
+            s2 = iset2;
+            return false;
+          }
+
+          if (n > iset1.NumMembers() && precedes) {
+            s1 = iset1;
+            s2 = iset2;
+            return false;
+          }
+        }
+
+
+      }
+    }
+  }
+
+  return true;
+}
+
 gNumber gbtEfgGame::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
@@ -617,7 +667,7 @@ gNumber gbtEfgGame::MaxPayoff(int pl) const
   return maxpay;
 }
 
-gbtEfgNode gbtEfgGame::RootNode(void) const
+gbtEfgNode gbtEfgGame::GetRoot(void) const
 { return rep->root; }
 
 gbtEfgOutcome gbtEfgGame::NewOutcome(int index)
@@ -1317,3 +1367,15 @@ gbtNfgGame gbtEfgGame::AssociatedAfg(void) const
   return rep->afg;
 }
 
+
+//-------------------------------------------------------------------------
+//                           Global functions 
+//-------------------------------------------------------------------------
+
+//
+// Returns a new trivial extensive form game
+//
+gbtEfgGame NewEfg(void)
+{
+  return gbtEfgGame(new gbt_efg_game_rep);
+}

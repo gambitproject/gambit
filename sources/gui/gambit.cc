@@ -78,10 +78,10 @@ bool GambitApp::OnInit(void)
     }
   }
   else {
-    gbtEfgGame efg;
+    gbtEfgGame efg = NewEfg();
     efg.NewPlayer().SetLabel("Player 1");
     efg.NewPlayer().SetLabel("Player 2");
-    efg.SetTitle("Untitled Extensive Form Game");
+    efg.SetLabel("Untitled Extensive Form Game");
     (void) new EfgShow(new gbtGameDocument(efg), 0);
   }
 
@@ -103,8 +103,8 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.CreateEfg()) {
-      gbtEfgGame efg;
-      efg.SetTitle("Untitled Extensive Form Game");
+      gbtEfgGame efg = NewEfg();
+      efg.SetLabel("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
 	efg.NewPlayer().SetLabel(gText("Player") + ToText(pl));
       }
@@ -214,7 +214,7 @@ void GambitApp::LoadFile(const wxString &p_filename)
 
   try {
     gFileInput infile(p_filename);
-    gbtEfgGame efg = ReadEfgFile(infile);
+    gbtEfgGame efg = ReadEfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new EfgShow(new gbtGameDocument(efg, p_filename), 0);
   }

@@ -84,7 +84,7 @@ gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const EFSupport &p_support,
     }
   }
 
-  FillTableau(p_support, A, p_support.GetGame().RootNode(), prob, 1, 1, 0, 0);
+  FillTableau(p_support, A, p_support.GetGame().GetRoot(), prob, 1, 1, 0, 0);
   for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
     A(i,0) = -(T) 1;
   }
@@ -112,7 +112,8 @@ gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const EFSupport &p_support,
 
     Add_BFS(tab);
     tab.BasisVector(sol);
-    GetProfile(p_support, tab, profile.GetDPVector(),sol,p_support.GetGame().RootNode(),1,1);
+    GetProfile(p_support, tab, profile.GetDPVector(), sol,
+	       p_support.GetGame().GetRoot(), 1, 1);
     solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
   }
 
@@ -191,7 +192,8 @@ gbtEfgNashLcp<T>::All_Lemke(const EFSupport &p_support,
       if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile.GetDPVector(),sol,p_support.GetGame().RootNode(),1,1);
+	GetProfile(p_support, BCopy, profile.GetDPVector(),
+		   sol, p_support.GetGame().GetRoot(), 1, 1);
 	if(newsol) {
 	  p_solutions.Append(BehavSolution(profile, "Lcp[EFG]")); 
 	}

@@ -284,7 +284,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 					      AsBool(param[8]));
   }
 
-  if (!IsPerfectRecall(support.GetGame())) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumMixed; results not guaranteed\n";
   }
 
@@ -340,7 +340,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 {
   const EFSupport &support = AsEfgSupport(param[0]);
 
-  if (!IsPerfectRecall(support.GetGame())) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
   }
 
@@ -723,7 +723,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
     throw gclRuntimeError("Only valid for two-person zero-sum games");
   }
 
-  if (!IsPerfectRecall(efg)) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Lp; results not guaranteed\n";
   }
 
@@ -790,7 +790,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 {
   const EFSupport &support = AsEfgSupport(param[0]);
 
-  if (!IsPerfectRecall(support.GetGame())) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with PolEnum; results not guaranteed\n";
   }
 
@@ -939,7 +939,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     const BehavSolution &start = AsBehav(param[0]);
     gbtEfgGame efg = start.GetGame();
   
-    if (!IsPerfectRecall(efg)) {
+    if (!efg.IsPerfectRecall()) {
       gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Qre; results not guaranteed\n";
     }
 
@@ -1034,7 +1034,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
     throw gclRuntimeError("algorithm not implemented for extensive forms");
   }
 
-  if (!IsPerfectRecall(support.GetGame())) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 
@@ -1051,7 +1051,7 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
 					    AsNumber(param[4]));
   }
 
-  if (!IsPerfectRecall(support.GetGame())) {
+  if (!support.GetGame().IsPerfectRecall()) {
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with Simpdiv; results not guaranteed\n";
   }
 

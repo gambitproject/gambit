@@ -227,7 +227,7 @@ gTriState BehavSolution::GetNash(void) const
     else {
       //  else let Andy figure it out
       // Is perfect recall needed here, Andy?
-      if (IsPerfectRecall(m_profile->GetGame())) { 
+      if (m_profile->GetGame().IsPerfectRecall()) { 
 	// not sure MaxRegret does the right thing here
 	gNullStatus status;
 	algExtendsToNash algorithm;
@@ -692,7 +692,7 @@ void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
 }
 
 SubgamePerfectChecker::~SubgamePerfectChecker() { 
-  (start.GetGame()).UnmarkSubgames((start.GetGame()).RootNode());
+  (start.GetGame()).UnmarkSubgames(start.GetGame().GetRoot());
   for (int i = 1; i <= oldroots.Length(); i++) {
     start.GetGame().MarkSubgame(oldroots[i]);
   }

@@ -506,7 +506,7 @@ static Portion *GSM_LoadEfg(GSM &, Portion **param)
   
   try  {
     gFileInput f(file);
-    gbtEfgGame efg = ReadEfgFile(f);
+    gbtEfgGame efg = ReadEfg(f);
     return new EfgPortion(efg);
   }
   catch (gFileInput::OpenFailed &)  {
@@ -520,7 +520,7 @@ static Portion *GSM_LoadEfg(GSM &, Portion **param)
 
 static Portion *GSM_IsPerfectRecall(GSM &, Portion **param)
 {
-  return new BoolPortion(IsPerfectRecall(AsEfg(param[0])));
+  return new BoolPortion(AsEfg(param[0]).IsPerfectRecall());
 }
 
 //-----------------
@@ -619,7 +619,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
   case porEFSUPPORT:
     return new TextPortion(AsEfgSupport(param[0]).GetName());
   case porEFG:
-    return new TextPortion(AsEfg(param[0]).GetTitle());
+    return new TextPortion(AsEfg(param[0]).GetLabel());
   default:
     throw gclRuntimeError("Unknown type passed to Name[]");
   }
@@ -632,7 +632,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
 
 static Portion *GSM_NewEfg(GSM &, Portion **param)
 {
-  gbtEfgGame efg;
+  gbtEfgGame efg = NewEfg();
   ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++) {
     efg.NewPlayer().SetLabel(AsText((*players)[i]));
@@ -924,7 +924,7 @@ static Portion *GSM_Reveal(GSM &gsm, Portion **param)
 
 static Portion *GSM_RootNode(GSM &, Portion **param)
 {
-  return new NodePortion(AsEfg(param[0]).RootNode());
+  return new NodePortion(AsEfg(param[0]).GetRoot());
 }
 
 //-------------
@@ -939,7 +939,7 @@ static Portion *GSM_SaveEfg(GSM &, Portion **param)
 
   try { 
     gFileOutput f(text);
-    AsEfg(param[0]).WriteEfgFile(f, _WriteGameDecimals.Value());
+    AsEfg(param[0]).WriteEfg(f);
   }
   catch (gFileOutput::OpenFailed &)  {
     throw gclRuntimeError("Cannot open file " + text + " for writing");
@@ -956,7 +956,7 @@ static Portion *GSM_WriteSfg(GSM &, Portion **param)
 {
   gOutput &out = ((OutputPortion*) param[0])->Value();
   gbtEfgGame efg = AsEfg(param[1]);
-  if (!IsPerfectRecall(efg)) 
+  if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
   EFSupport efs(efg);
@@ -987,7 +987,7 @@ void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index
 static Portion *GSM_Sfg(GSM &, Portion **param)
 {
   gbtEfgGame efg = AsEfg(param[0]);
-  if (!IsPerfectRecall(efg)) 
+  if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
 
   EFSupport efs(efg);
@@ -1004,7 +1004,7 @@ static Portion *GSM_Sfg(GSM &, Portion **param)
 static Portion *GSM_SfgStrats(GSM &, Portion **param)
 {
   gbtEfgGame efg = AsEfg(param[0]);
-  if (!IsPerfectRecall(efg)) 
+  if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
   int p = player.GetId();
@@ -1026,7 +1026,7 @@ static Portion *GSM_SfgStrats(GSM &, Portion **param)
 static Portion *GSM_SfgConstraints(GSM &, Portion **param)
 {
   gbtEfgGame efg = AsEfg(param[0]);
-  if (!IsPerfectRecall(efg)) 
+  if (!efg.IsPerfectRecall()) 
     throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
   int p = player.GetId();
@@ -1104,7 +1104,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     AsEfgSupport(param[0]).SetName(name);
     break;
   case porEFG:
-    AsEfg(param[0]).SetTitle(name);
+    AsEfg(param[0]).SetLabel(name);
     break;
   default:
     throw gclRuntimeError("Bad type passed to SetName[]");

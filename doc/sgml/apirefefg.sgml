@@ -1,0 +1,671 @@
+<sect1 id="apiref.efg">
+<title>Extensive form games</title>
+
+<para>
+An extensive form game object represents a game tree.  Objects included
+in an extensive form game include players, outcomes, nodes, information
+sets, and actions.   
+</para>
+
+<para>
+Extensive form games may be built and modified, though care should be
+taken when modifying them if any supports or behavior strategy profiles
+are already computed.  Note that many operations on extensive form games
+are methods (in C++ and Python) defined on the component types listed
+above; consult those sections of the documentation for more information.
+</para>
+
+
+<sect2 id="apiref.efg.agentform">
+<title>AgentForm (GCL only)</title>
+<indexterm><primary>AgentForm</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+AgentForm[efg->EFG, {time<->0}] =: NFG 
+</synopsis>
+</formalpara>
+
+<para>
+<function>AgentForm</function> creates and returns the agent normal
+form representation of <parameter>efg</parameter>.  The optional
+parameter <parameter>time</parameter>, if specified, returns the
+amount of time consumed by the conversion.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.basis">
+<title>Basis (GCL only)</title>
+<indexterm><primary>Basis (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Basis[efg->EFG] =: EFBASIS
+</synopsis>
+</formalpara>
+
+<para>
+<function>Basis</function> creates and returns a new basis for
+the game <parameter>efg</parameter>.  The basis contains all nodes and
+all actions in the game.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.compressefg">
+<title>CompressEfg (GCL only)</title>
+<indexterm><primary>CompressEfg (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+CompressEfg[support->EFSUPPORT] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<para>
+<function>CompressEfg</function> creates a copy of the 
+extensive form game on which <parameter>support</parameter> is
+defined, where all actions not present in <parameter>support</parameter>
+have been removed.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.getchance">
+<title>GetChance</title>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtEfgPlayer gbtEfgGame::GetChance(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Chance[efg->EFG] =: EFPLAYER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetChance</function> (<function>Chance</function> in the GCL)
+returns the chance, or nature, player 
+defined on the extensive form.
+Each extensive form has exactly one
+chance player predefined, and it is not possible to define any additional
+chance players.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.getcomment">
+<title>GetComment</title>
+<indexterm><primary>GetComment</primary></indexterm>
+<indexterm><primary>Comment (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gText gbtEfgGame::GetComment(void) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Comment[efg->EFG] =: TEXT
+</synopsis>
+</formalpara>
+
+<para>
+<function>Comment</function> returns the comment associated with the game
+<parameter>efg</parameter>.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gText gbtEfgGame::GetLabel(void) const
+</synopsis>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Name[x->EFG*] =: TEXT
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the game.  
+The empty string is returned if the game object is null.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.getoutcome">
+<title>GetOutcome</title>
+<indexterm><primary>GetOutcome</primary></indexterm>
+<indexterm><primary>Outcomes (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgOutcome gbtEfgGame::GetOutcome(int p_index) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetOutcome</function> returns the outcome numbered
+<parameter>p_index</parameter> from the list of outcomes for the game.
+Each game's outcomes are numbered sequentially beginning at one.
+An exception is thrown if the index is out of range.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Outcomes[efg->EFG] =: LIST(EFOUTCOME) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Outcomes</function>
+returns the list of outcomes defined on the game <parameter>efg</parameter>.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.getplayer">
+<title>GetPlayer</title>
+<indexterm><primary>GetPlayer</primary></indexterm>
+<indexterm><primary>Players (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgPlayer gbtEfgGame::GetPlayer(int p_index) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>GetPlayer</function> returns the player numbered
+<parameter>p_index</parameter> from the list of players in the
+game.  Each game's players are numbered sequentially beginning
+at one.  An exception is thown if the index is out of range.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Players[efg->EFG] =: LIST(EFPLAYER) 
+Players[nfg->NFG] =: LIST(NFPLAYER) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Players</function>
+returns the list of players defined on the game <parameter>efg</parameter>.
+</para>
+
+</sect2>
+
+</refentry>
+
+
+
+<sect2 id="apiref.efg.isconstsum">
+<title>IsConstSum</title>
+<indexterm><primary>IsConstSum</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+bool gbtEfgGame::IsConstSum(void) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+IsConstSum[efg->EFG] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<para>
+<function>IsConstSum</function>
+returns <literal>True</literal> (nonzero) when the extensive form game 
+is constant sum and <literal>False</literal> (zero) otherwise.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.isperfectrecall">
+<title>IsPerfectRecall</title>
+<indexterm><primary>IsPerfectRecall</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+bool gbtEfgGame::IsPerfectRecall(void) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+IsPerfectRecall[efg->EFG] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<para>
+<function>IsPerfectRecall</function>
+returns <literal>True</literal> (nonzero) if <parameter>efg</parameter>
+is a game of perfect recall, and
+<literal>False</literal> (zero) otherwise.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.newefg">
+<title>NewEfg</title>
+<indexterm><primary>NewEfg</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgGame ::NewEfg(void)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+NewEfg[{players->{}}] =: EFG 
+</synopsis>
+</formalpara>
+
+<para>
+<function>NewEfg</function>
+creates a new trivial extensive form game, consisting of only a root
+node.  The default extensive form
+game has no players (other than the chance player) defined on it.
+The optional parameter <parameter>players</parameter> to the GCL 
+specifies a list of players to be
+created and the names to be assigned to them; C++ and Python users should
+call <function>NewPlayer</function> as appropriate to create new players.
+Returns the newly created game.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.newoutcome">
+<title>NewOutcome</title>
+<indexterm><primary>NewOutcome</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgOutcome gbtEfgGame::NewOutcome(void)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+NewOutcome[efg->EFG] =: EFOUTCOME 
+</synopsis>
+</formalpara>
+
+<para>
+<function>NewOutcome</function>
+defines a new outcome in the extensive form game <parameter>efg</parameter>.
+The new
+outcome specifies payoffs of zero for all players.  Returns the newly
+created outcome.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.newplayer">
+<title>NewPlayer</title>
+<indexterm><primary>NewPlayer</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+gbtEfgPlayer gbtEfgGame::NewPlayer(void)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+NewPlayer[efg->EFG] =: EFPLAYER
+</synopsis>
+</formalpara>
+
+<para>
+<function>NewPlayer</function>
+defines a new player in the extensive form game <parameter>efg</parameter>.
+Returns the newly created player.
+</para>
+
+</sect2>
+
+
+<sect2 id ="apiref.efg.nfg">
+<title>Nfg (GCL only)</title>
+<indexterm><primary>Nfg</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</formalpara>
+
+<formalpara>
+<title>GCL usage<?title>
+<synopsis>
+Nfg[efg->EFG, {time<->0}] =: NFG 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Nfg</function>
+creates and returns the (structural) reduced normal form game equivalent
+to the extensive form game <parameter>efg</parameter>.
+The optional parameter <parameter>time</parameter>,
+if specified, contains upon completion the amount of time consumed by
+the transformation.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.nodes">
+<title>Nodes (GCL only)</title>
+<indexterm><primary>Nodes (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+There is no direct analog to <function>Nodes</function> provided in
+the C++ or Python APIs.  Programs should use <function>GetRoot</function>
+and member functions of <type>Node</type> objects to iterate the tree
+efficiently and extract the nodes of interest.
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Nodes[efg->EFG] =: LIST(NODE) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Nodes</function>
+returns a list of nodes of the extensive form game <parameter>efg</parameter>.
+The list is in prefix traversal order; each node appears in the list
+prior to any of its descendants.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.numoutcomes">
+<title>NumOutcomes</title>
+<indexterm><primary>NumOutcomes</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+int gbtEfgGame::NumOutcomes(void) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>NumOutcomes</function> returns how many outcomes are defined
+on the game.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<function>NumOutcomes</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[NumOutcomes[efg->EFG] =: INTEGER,
+  Length[Outcomes[efg]]
+];
+</programlisting>
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.numplayers">
+<title>NumPlayers</title>
+<indexterm><primary>NumPlayers</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+int gbtEfgGame::NumPlayers(void) const
+</synopsis>
+</formalpara>
+
+<para>
+<function>NumPlayers</function> returns how many players are defined
+on the game.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<function>NumPlayers</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[NumPlayers[efg->EFG] =: INTEGER,
+  Length[Players[efg]]
+];
+</programlisting>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.readefg">
+<title>ReadEfg</title>
+<indexterm><primary>ReadEfg</primary></indexterm>
+<indexterm><primary>LoadEfg (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++ usage</title>
+<synopsis>
+gbtEfgGame ::ReadEfg(gInput &amp;p_file)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>Python usage</title>
+<synopsis>
+efg = gambit.ReadEfg(filename)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+LoadEfg[file->TEXT] =: EFG 
+</synopsis>
+</formalpara>
+
+<para>
+<function>ReadEfg</function> (<function>LoadEfg</function> in the GCL)
+reads an extensive form game from the file <parameter>file</parameter>.
+C++ users should pass a stream represented by a <type>gInput</type> object;
+Python and GCL users should pass the filename of the file to be read.
+An error occurs if the file cannot be opened, or if the file does
+not contain a valid extensive form savefile.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.setcomment">
+<title>SetComment</title>
+<indexterm><primary>SetComment</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+void gbtEfgGame::SetComment(const gText &amp;p_comment)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+SetComment[efg->EFG, comment->TEXT] =: EFG
+SetComment[nfg->NFG, comment->TEXT] =: NFG
+</synopsis>
+</formalpara>
+
+<para>
+<function>SetComment</function> 
+sets the comment associated with the game <parameter>efg</parameter>.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efg.setlabel">
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<synopsis>
+void gbtEfgGame::SetLabel(const gText &amp;p_label)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+SetName[x->EFG, name->TEXT] =: EFG
+</synopsis>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the game.  The GCL version returns the game.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.subgames">
+<title>Subgames (GCL only)</title>
+<indexterm><primary>Subgames</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+This part of the interface is currently in flux in C++ and Python.
+Consult the source code or the Gambit development team for information
+if you require this function.
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+Subgames[efg->EFG] =: LIST(NODE) 
+</synopsis>
+</formalpara>
+
+<para>
+<function>Subgames</function>
+returns the list of nodes which are roots of subgames in <parameter>efg</parameter>.
+The ordering of the list is such that
+all children of a node are listed before the node.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efg.writeefg">
+<title>WriteEfg</title>
+<indexterm><primary>WriteEfg</primary></indexterm>
+<indexterm><primary>SaveEfg (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++ usage</title>
+<synopsis>
+void gbtEfgGame::WriteEfg(gOutput &amp;p_file) const
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>Python usage</title>
+<synopsis>
+efg.WriteEfg(filename)
+</synopsis>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<synopsis>
+SaveEfg[efg->EFG, file->TEXT] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<para>
+<function>WriteEfg</function>
+(<function>SaveEfg</function> in the GCL) writes an extensive form
+game to an external savefile.  In C, this file is given as a 
+<type>gOutput</type> stream object; in Python and the GCL, the filename
+to be written is passed.
+The GCL version returns <parameter>efg</parameter>.
+</para>
+
+</sect2>
+
+</sect1>
+
+
