@@ -2110,12 +2110,11 @@ void TreeWindow::tree_move(void)
 // Edit->Tree->Players
 //-----------------------
 
-#define PLAYERSD_INST // instantiate the players display dialog
-#include "playersd.h"
+#include "dlefgplayers.h"
 
 void TreeWindow::tree_players(void)
 {
-  PlayerNamesDialog player_names(ef, pframe);
+  dialogEfgPlayers player_names(ef, pframe);
 }
 
 //------------------------

@@ -20,6 +20,7 @@
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
 #include "dlefgsave.h"
+#include "dlefgplayers.h"
 
 
 //=========================================================================
@@ -1245,6 +1246,102 @@ void dialogInfosets::CallbackOk(wxButton &p_object, wxCommandEvent &)
 void dialogInfosets::CallbackHelp(wxButton &p_object, wxCommandEvent &)
 {
   ((dialogInfosets *) p_object.GetClientData())->OnHelp();
+}
+
+
+//=========================================================================
+//                   dialogEfgPlayers: Member functions
+//=========================================================================
+
+dialogEfgPlayers::dialogEfgPlayers(Efg &p_efg, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Player Names", TRUE), m_efg(p_efg)
+{
+  SetAutoLayout(TRUE);
+
+  m_playerNameList = new wxListBox(this, 0, "Player", wxSINGLE);
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_playerNameList->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
+  }
+  m_playerNameList->SetSelection(0);
+  m_lastSelection = 0;
+
+  wxButton *editPlayer = new wxButton(this, (wxFunction) CallbackEdit, "Edit...");
+  editPlayer->SetClientData((char *) this);
+
+  wxButton *newPlayer = new wxButton(this, (wxFunction) CallbackNew, "New player...");
+  newPlayer->SetClientData((char *) this);
+
+  editPlayer->SetConstraints(new wxLayoutConstraints);
+  editPlayer->GetConstraints()->left.SameAs(m_playerNameList, wxRight, 10);
+  editPlayer->GetConstraints()->top.SameAs(m_playerNameList, wxTop);
+  editPlayer->GetConstraints()->width.SameAs(newPlayer, wxWidth);
+  editPlayer->GetConstraints()->height.AsIs();
+
+  newPlayer->SetConstraints(new wxLayoutConstraints);
+  newPlayer->GetConstraints()->left.SameAs(editPlayer, wxLeft);
+  newPlayer->GetConstraints()->top.SameAs(editPlayer, wxBottom, 10);
+  newPlayer->GetConstraints()->width.AsIs();
+  newPlayer->GetConstraints()->height.AsIs();
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
+  okButton->SetClientData((char *) this);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  helpButton->SetClientData((char *) this);
+
+  okButton->SetConstraints(new wxLayoutConstraints);
+  okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  okButton->GetConstraints()->top.SameAs(m_playerNameList, wxBottom, 10);
+  okButton->GetConstraints()->width.SameAs(helpButton, wxWidth);
+  okButton->GetConstraints()->height.AsIs();
+
+  helpButton->SetConstraints(new wxLayoutConstraints);
+  helpButton->GetConstraints()->left.SameAs(this, wxCentreX, 5);
+  helpButton->GetConstraints()->centreY.SameAs(okButton, wxCentreY);
+  helpButton->GetConstraints()->width.AsIs();
+  helpButton->GetConstraints()->height.AsIs();
+
+  okButton->SetDefault();
+  Layout();
+  Fit();
+  Show(TRUE);
+}
+
+void dialogEfgPlayers::OnEdit(void)
+{
+  int selection = m_playerNameList->GetSelection();
+  gText defaultName = m_efg.Players()[selection + 1]->GetName();
+
+  char *newName = wxGetTextFromUser("Name", "Enter Name", defaultName, this);
+  if (newName) {
+	m_efg.Players()[selection + 1]->SetName(newName);
+	m_playerNameList->SetString(selection, ToText(selection + 1) + ": " + newName);
+  }
+}
+
+void dialogEfgPlayers::OnNew(void)
+{
+  gText defaultName = "Player " + ToText(m_efg.NumPlayers() + 1);
+  char *newName = wxGetTextFromUser("New Player's name", "Enter Name",
+                                    defaultName, this);
+  if (newName) {
+	EFPlayer *newPlayer = m_efg.NewPlayer();
+	newPlayer->SetName(newName);
+	m_playerNameList->Append(ToText(m_efg.NumPlayers()) + ": " + newName);
+	m_playerNameList->SetSelection(m_efg.NumPlayers() - 1);
+  }
+}
+
+void dialogEfgPlayers::OnOK(void)
+{
+  Show(FALSE);
+}
+
+Bool dialogEfgPlayers::OnClose(void)
+{
+  Show(FALSE);
+  return FALSE;
 }
 
 
