@@ -212,11 +212,14 @@ helpstmt:     HELP LBRACK NAME RBRACK
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));
 		if (!inputs.Peek()->IsValid())   {
+		  gerr << "include file " << tval << " not found\n";
 		  delete inputs.Pop();
 		  YYERROR;
 		}
-		filenames.Push(tval);
-		lines.Push(1);
+		else { // not sure if making this part an else clause is right
+		  filenames.Push(tval);
+		  lines.Push(1);
+		}
 	      }
 
 conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
@@ -392,6 +395,15 @@ named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                            { emit(new BindVal(formalstack.Pop())); }
          |    NAME DBLARROW  { formalstack.Push(tval); } NAME
                            { emit(new PushRef(tval));
+                             emit(new BindRef(formalstack.Pop())); }
+         |    NAME DBLARROW  { formalstack.Push(tval); } STDIN
+                           { emit(new PushInput(gin));
+                             emit(new BindRef(formalstack.Pop())); }
+         |    NAME DBLARROW  { formalstack.Push(tval); } STDOUT
+                           { emit(new PushOutput(gout));
+                             emit(new BindRef(formalstack.Pop())); }
+         |    NAME DBLARROW  { formalstack.Push(tval); } gNULL
+                           { emit(new PushOutput(gnull));
                              emit(new BindRef(formalstack.Pop())); }
 
 list:         LBRACE CRLFopt  { listlen.Push(0); } listels CRLFopt RBRACE
@@ -760,6 +772,7 @@ void GCLCompiler::RecoverFromError(void)
 
   while (inputs.Depth())   {
     delete inputs.Pop();
+    filenames.Pop();
     lines.Pop();
   }
 }
