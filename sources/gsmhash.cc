@@ -29,9 +29,6 @@ TEMPLATE class gListIter< gString >;
 
 #include "glist.imp"
 
-TEMPLATE class gNode< int >;
-TEMPLATE class gList< int >;
-
 TEMPLATE class gList< Portion* >;
 TEMPLATE class gNode< Portion* >;
 
