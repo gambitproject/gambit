@@ -217,8 +217,18 @@ gArray<int> NormalSpread::GetProfile(void)
 {
   gArray<int> profile(strat_profile.Length());
   
-  for (int i = 1; i <= strat_profile.Length(); i++)
-    profile[i] = strat_profile[i]->GetSelection()+1;
+  for (int i = 1; i <= strat_profile.Length(); i++) {
+    // Moving about the normal form table by clicking cells does not
+    // update the selection dropdown lists.  We must explicitly
+    // check the location of the selected cell to figure out the
+    // (current) row and column players' strategies
+    if (i == pl1)
+      profile[i] = CurRow();
+    else if (i == pl2)
+      profile[i] = CurCol();
+    else
+      profile[i] = strat_profile[i]->GetSelection()+1;
+  }
 
   return profile;
 }
@@ -563,14 +573,6 @@ void NormalSpread::OnMenuCommand(int id)
 
     case NFG_FILE_SAVE:
       parent->Save();
-      break;
-
-    case NFG_ACCL_PAYOFF: 
-      parent->ChangePayoffs(CurRow(), CurCol());
-      break;
-
-    case NFG_ACCL_NEXT_PAYOFF: 
-      parent->ChangePayoffs(CurRow(), CurCol(), true);
       break;
 
     default: 

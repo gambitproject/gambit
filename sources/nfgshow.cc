@@ -210,209 +210,6 @@ void NfgShow::UpdateProfile(gArray<int> &profile)
 }
 
 
-#define ENTRIES_PER_ROW 5
-
-class NFChangePayoffs: public MyDialogBox
-{
-    const gArray<int> &profile;
-    Nfg &nf;
-
-    wxText **payoff_items;
-    wxChoice *outcome_item;
-
-    static void outcome_func(wxChoice &ob, wxEvent &)
-    { ((NFChangePayoffs *)ob.GetClientData())->OnOutcome(); }
-
-    void OnOutcome(void);
-
-public:
-    NFChangePayoffs(Nfg &nf, const gArray<int> &profile, wxWindow *parent);
-    int OutcomeNum(void);
-    gArray<gNumber> Payoffs(void);
-};
-
-
-
-NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_, wxWindow *parent)
-    : MyDialogBox(parent, "ChangePayoffs"), profile(profile_), nf(nf_)
-{
-    int i;
-    Add(wxMakeFormMessage("This invalidates all solutions!"));
-    Add(wxMakeFormNewLine());
-    Add(wxMakeFormMessage("Change payoffs for profile:"));
-    gText profile_str = "(";
-
-    for (i = 1; i <= profile.Length(); i++)
-        profile_str += ToText(profile[i])+((i == profile.Length()) ? ")" : ",");
-
-    Add(wxMakeFormMessage(profile_str));
-    Add(wxMakeFormNewLine());
-
-    // Outcome item
-    wxStringList *outcome_list = new wxStringList;
-    char *outcome_name = new char[20];
-    NFOutcome *outc = nf.GetOutcome(profile);
-
-    for (i = 1; i <= nf.NumOutcomes(); i++)
-    {
-        NFOutcome *outc_tmp = nf.Outcomes()[i];
-        gText outc_name;
-
-        if (outc_tmp->GetName() != "")
-            outc_name = outc_tmp->GetName();
-        else
-            outc_name = "Outcome "+ToText(i);
-
-        outcome_list->Add(outc_name);
-
-        if (outc_tmp == outc)
-            strcpy(outcome_name, outc_name);
-    }
-
-    outcome_list->Add("New Outcome");
-
-    if (outc == 0)
-        strcpy(outcome_name, "New Outcome");
-
-    wxFormItem *outcome_fitem = 
-        Add(wxMakeFormString("Outcome", &outcome_name,
-                             wxFORM_CHOICE, 
-                             new wxList(wxMakeConstraintStrings(outcome_list), 0)));
-
-    Add(wxMakeFormNewLine());
-
-    // Payoff items
-    char **new_payoffs = new char *[profile.Length()+1];
-    wxFormItem **payoff_fitems = new wxFormItem *[profile.Length()+1];
-    payoff_items = new wxText *[profile.Length()+1];
-
-    for (i = 1; i <= nf.NumPlayers(); i++)
-    {
-        new_payoffs[i] = new char[40];
-        payoff_fitems[i] = Add(wxMakeFormString("", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
-
-        if (i % ENTRIES_PER_ROW == 0)
-            Add(wxMakeFormNewLine());
-    }
-
-    AssociatePanel();
-
-    for (i = 1; i <= nf.NumPlayers(); i++)
-        payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
-
-    outcome_item = (wxChoice *)outcome_fitem->GetPanelItem();
-    outcome_item->Callback((wxFunction)outcome_func);
-    outcome_item->SetClientData((char *)this);
-    OnOutcome(); // update the outcome values
-    Go1();
-
-    for (i = 1; i <= profile.Length(); i++) 
-        delete [] new_payoffs[i];
-
-    delete [] new_payoffs;
-}
-
-#undef ENTRIES_PER_ROW
-
-void NFChangePayoffs::OnOutcome(void)
-{
-    int outc_num = outcome_item->GetSelection()+1;
-    NFOutcome *outc = 0;
-
-    if (outc_num <= nf.NumOutcomes())
-        outc = nf.Outcomes()[outc_num];
-
-    for (int i = 1; i <= nf.NumPlayers(); i++)
-    {
-        gNumber payoff = 0;
-
-        if (outc)
-            payoff = nf.Payoff(outc, i);
-
-        payoff_items[i]->SetValue(ToText(payoff));
-    }
-    payoff_items[1]->SetFocus();
-}
-
-
-int NFChangePayoffs::OutcomeNum(void)
-{
-    return outcome_item->GetSelection()+1;
-}
-
-
-gArray<gNumber> NFChangePayoffs::Payoffs(void)
-{
-    gArray<gNumber> payoffs(nf.NumPlayers());
-
-    for (int i = 1; i <= nf.NumPlayers(); i++)
-        FromText(payoff_items[i]->GetValue(), payoffs[i]);
-
-    return payoffs;
-}
-
-
-void NfgShow::ChangePayoffs(int st1, int st2, bool next)
-{
-    if (st1 > rows || st2 > cols)
-        return;
-
-    if (next) // facilitates quickly editing the nf -> automatically moves to next cell
-    {
-        if (st2 < cols)
-        {
-            st2++;
-        }
-        else
-        {
-            if (st1 < rows)
-            {
-                st1++;
-                st2 = 1;
-            }
-            else
-            {
-                st1 = 1;
-                st2 = 1;
-            }
-        }
-
-        spread->SetCurRow(st1);
-        spread->SetCurCol(st2);
-    }
-
-    gArray<int> profile(spread->GetProfile());
-    profile[pl1] = st1;
-    profile[pl2] = st2;
-    nf_iter.Set(pl1, st1);
-    nf_iter.Set(pl2, st2);
-
-    NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, profile, spread);
-
-    if (payoffs_dialog->Completed() == wxOK)
-    {
-        NFOutcome *outc;
-        int outc_num = payoffs_dialog->OutcomeNum();
-        gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
-
-        if (outc_num > nf.NumOutcomes())
-            outc = nf.NewOutcome();
-        else
-            outc = nf.Outcomes()[outc_num];
-
-        for (int i = 1; i <= nf.NumPlayers(); i++)
-            nf.SetPayoff(outc, i, payoffs[i]);
-
-        nf.SetOutcome(profile, outc);
-        UpdateVals();
-        RemoveSolutions();
-        InterfaceDied();
-    }
-
-    delete payoffs_dialog;
-}
-
-
 void NfgShow::ChangeOutcomes(int what)
 {
     if (what == CREATE_DIALOG && !outcome_dialog)
@@ -1168,49 +965,44 @@ NFSupport *NfgShow::MakeSupport(void)
 
 void NfgShow::SetOutcome(int out, int x, int y)
 {
-    if (out > nf.NumOutcomes())
-    {
-        MyMessageBox("This outcome is not defined yet", 
-                     "Outcome", NFG_OUTCOME_HELP, spread);
+  if (out > nf.NumOutcomes()) {
+    MyMessageBox("This outcome is not defined yet", 
+		 "Outcome", NFG_OUTCOME_HELP, spread);
+  }
+  else {
+    gArray<int> cur_profile(spread->GetProfile());
+
+    if (x != -1) {    // dropped an outcome at the coordinates (x,y)
+      spread->GetSheet()->ScreenToClient(&x, &y);  
+      // Convert to logical coordinates.
+      // This takes into account the current scrollbar position.
+      x = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalX((float)x));
+      y = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalY((float)y));
+
+      int row, col;
+
+      if (spread->XYtoRowCol(x, y, &row, &col)) {
+	cur_profile[pl1] = row;
+	cur_profile[pl2] = col;
+	// MCV: commented this out because it makes the cursor
+	// jump around unnecessarily.
+        // spread->SetProfile(cur_profile);
+      }
+      else  {
+	return;
+      }
     }
-    else
-    {
-        gArray<int> cur_profile(spread->GetProfile());
 
-        if (x != -1)    // dropped an outcome at the coordinates (x,y)
-        {
-            spread->GetSheet()->ScreenToClient(&x, &y);  
-			// Convert to logical coordinates.
-			// This takes into account the current scrollbar position.
-			x = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalX((float)x));
-			y = (int)(spread->GetSheet()->GetDC()->DeviceToLogicalY((float)y));
-
-            int row, col;
-
-            if (spread->XYtoRowCol(x, y, &row, &col))
-            {
-                cur_profile[pl1] = row;
-                cur_profile[pl2] = col;
-				// MCV: commented this out because it makes the cursor
-				// jump around unnecessarily.
-                //spread->SetProfile(cur_profile);
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        if (out > 0)
-            nf.SetOutcome(cur_profile, nf.Outcomes()[out]);
-
-        if (out == 0)
-            nf.SetOutcome(cur_profile, 0);
-
-        if (out == -1) ; // just update all outcomes
-
-        UpdateVals();
+    if (out > 0) {
+      nf.SetOutcome(cur_profile, nf.Outcomes()[out]);
     }
+    else if (out == 0) {
+      nf.SetOutcome(cur_profile, 0);
+    }
+    else if (out == -1) { } // just update all outcomes
+
+    UpdateVals();
+  }
 }
 
 

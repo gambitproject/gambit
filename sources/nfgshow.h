@@ -237,10 +237,10 @@ public:
   void EnableInspect(Bool enable) 
     { GetMenuBar()->Enable(inspect_item, enable); }
 
-  // Callback for double clicking on a cell.  Currently this edits the cell
-  void OnDoubleClick(int row, int col, int , const gText &) 
+  // Callback for double clicking on a cell.
+  void OnDoubleClick(int /*row*/, int /*col*/, int, const gText &) 
     { 
-        parent->ChangePayoffs(row, col); 
+        parent->ChangeOutcomes(CREATE_DIALOG); 
     }
 
   // Callback for moving the selected cell.  Currently this updates the pl1, pl2 choice boxes
