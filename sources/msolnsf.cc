@@ -1,8 +1,8 @@
 // File: msolnsf.cc -- Actual code to implement sorting and filtering of
 // mixed solutions
+// $Id$
 
 #include "msolnsf.h"
-#include "gsmincl.h"
 /****************************************************************************
 												MIXED SOLUTION SORTER FILTER OPTIONS
 ****************************************************************************/
@@ -90,6 +90,8 @@ CompareResult MSolnSorterFilter<T>::Compare(const MixedSolution<T> &a,const Mixe
 switch (options.SortBy())
 {
 case MSORT_BY_ID:
+			if (a.Id()>b.Id()) return GreaterThan;
+      if (a.Id()<b.Id()) return LessThan;
 			return Equal;
 case MSORT_BY_CREATOR:
 			if (NameNfgAlgType(a.Creator())>NameNfgAlgType(b.Creator())) return GreaterThan;
