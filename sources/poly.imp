@@ -321,7 +321,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   for (int i = 2; i <= Degree(); i++) derivs += derivs[i-1].Derivative();
 
   T val = EvaluationAt(I.LowerBound());
-  if (val < 0) val = -val;            
+  if (val < (T)0) val = -val;            
 
   // find max |c_0/Degree()*c_i|^(1/i)
   int max_index = 0;
@@ -364,7 +364,7 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 
     gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
 
-    if      ( EvaluationAt(in_process.LowerBound()) == 0 ) {
+    if      ( EvaluationAt(in_process.LowerBound()) == (T)0 ) {
 
       if (Df.CannotHaveRootsIn(in_process)) {
 	answer += in_process;
@@ -375,7 +375,7 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
       }
     }
 
-    else if ( EvaluationAt(in_process.UpperBound()) == 0 ) {
+    else if ( EvaluationAt(in_process.UpperBound()) == (T)0 ) {
       if (Df.CannotHaveRootsIn(in_process))  {
 	if (in_process.UpperBound() == I.UpperBound()) {
 	  answer += in_process;
@@ -389,10 +389,10 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 
     else if (!CannotHaveRootsIn(in_process)) {
       if (Df.CannotHaveRootsIn(in_process)) {
-	if ( (EvaluationAt(in_process.LowerBound()) < 0 &&
-	      EvaluationAt(in_process.UpperBound()) > 0) ||
-	     (EvaluationAt(in_process.LowerBound()) > 0 &&
-	      EvaluationAt(in_process.UpperBound()) < 0) ) {
+	if ( (EvaluationAt(in_process.LowerBound()) < (T)0 &&
+	      EvaluationAt(in_process.UpperBound()) > (T)0) ||
+	     (EvaluationAt(in_process.LowerBound()) > (T)0 &&
+	      EvaluationAt(in_process.UpperBound()) < (T)0) ) {
 	  answer += in_process;
 	}
       }
@@ -412,18 +412,18 @@ polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
 {
   gList< gInterval<T> > intrvls; intrvls += I;
   while (intrvls[intrvls.Length()].Length() >= error) {
-    if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == 0) 
+    if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) 
       intrvls += gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
 			      intrvls[intrvls.Length()].LowerBound());
 
-    else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == 0) 
+    else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == (T)0) 
       intrvls += gInterval<T>(intrvls[intrvls.Length()].UpperBound(),
 			      intrvls[intrvls.Length()].UpperBound());
 
-    else if ( (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= 0 &&
-	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) <= 0)   ||
-              (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) <= 0 &&
-	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) >= 0) )
+    else if ( (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= (T)0 &&
+	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) <= (T)0)   ||
+              (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) <= (T)0 &&
+	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) >= (T)0) )
          intrvls += intrvls[intrvls.Length()].LeftHalf(); 
 
     else intrvls += intrvls[intrvls.Length()].RightHalf(); 
