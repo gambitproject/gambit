@@ -655,6 +655,7 @@ term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
 
 TEMPLATE class gList<exp_vect>;
 TEMPLATE class gNode<exp_vect>;
+TEMPLATE gOutput& operator << (gOutput& output, const gList<exp_vect>&);
 
 TEMPLATE class gList<exp_vect*>;
 TEMPLATE class gNode<exp_vect*>;
