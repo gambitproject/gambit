@@ -10,6 +10,19 @@
 #include "glist.h"
 #include "efg.h"
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "gstack.imp"
+
+TEMPLATE class gStack<Node *>;
+#ifdef __BORLANDC__
+#pragma option -Jgx
+#endif
 %}
 
 %name EfgFileReader
@@ -302,14 +315,4 @@ void EfgFileType(gInput &f, bool &valid, DataType &type)
 }
 
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-#include "gstack.imp"
-
-TEMPLATE class gStack<Node *>;
 
