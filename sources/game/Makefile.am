@@ -25,7 +25,6 @@ libgame_a_SOURCES = \
 	efgnfg.cc \
 	efgutils.cc \
 	efgutils.h \
-	efplayer.h \
 	efstrat.cc \
 	efstrat.h \
 	game.h \
@@ -33,7 +32,6 @@ libgame_a_SOURCES = \
 	gnarray.imp \
 	infoset.cc \
 	infoset.h \
-	lexicon.h \
 	mixed.h \
 	mixed.imp \
 	nfdom.cc \
