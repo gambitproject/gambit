@@ -1,0 +1,73 @@
+//
+// A gcl program to construct a multi stage holdout game
+//
+
+NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
+            out->LIST(EFOUTCOME), stages->NUMBER, disc->NUMBER],
+  // build tree
+  i1:=isets_1;
+  i2:=isets_2;
+  AddMove[i1,node];
+  AddMove[i2,node#1];
+  If[NumActions[i1]>1, AddMove[i2, node#2] ];
+    // attach outcomes
+  SetOutcome[node#1#1, out_1 ]; 
+  If[NumActions[i2]>1, SetOutcome[node#1#2, out_2 ] ];
+  If[NumActions[i1]>1, 
+    SetOutcome[node#2#1, out_3 ];
+    If[NumActions[i2]>1, SetOutcome[node#2#2, out_4 ] ]
+    ];
+    // recurse to next stage
+  If[NumActions[i1]>1 || NumActions[i2]>1,
+    If[stages>1,
+      stages;
+      diset := NewInfoset[Chance[efg], {"",""} , "Discount"];
+      SetChanceProbs[diset,{1.0-disc,disc}];
+      AddMove[diset, node#1#1];
+      MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc]
+    ]
+  ]
+];
+
+NewFunction[HoldoutGame[ stages->NUMBER,
+            prob1->NUMBER, prob2->NUMBER, disc->NUMBER, b->NUMBER],
+  e := NewEfg[];
+  n := RootNode[e];
+    // create chance moves
+  ciset1 := NewInfoset[Chance[e], {"High", "Low"} , "Choose 1's type"];
+  ciset2 := NewInfoset[Chance[e], {"High", "Low"} , "Choose 2's type"];
+  SetChanceProbs[ciset1,{prob1,1.0-prob1}];
+  SetChanceProbs[ciset2,{prob2,1.0-prob2}];
+  AddMove[ciset1, n];
+  AddMove[ciset2, n#1];
+  AddMove[ciset2, n#2 ];
+    // Define players, actions, and outcomes
+  pl1 := NewPlayer[e,"Player 1"];
+  pl2 := NewPlayer[e,"Player 2"];
+  is1w := NewInfoset[ pl1 , {"H", "G"} ];
+  is1s := NewInfoset[ pl1 , {"H"} ];
+  is2w := NewInfoset[ pl2 , {"H", "G"} ];
+  is2s := NewInfoset[ pl2 , {"H"} ];
+  out1:= SetPayoffs[NewOutcome[e],{0.0, 0.0}];
+  out2:= SetPayoffs[NewOutcome[e],{1.0, b}];
+  out3:= SetPayoffs[NewOutcome[e],{b, 1.0}];
+  out4:= SetPayoffs[NewOutcome[e],{b,b}];
+  outs:={out1,out2,out3,out4};
+
+    // Create multi stage games
+  MultiStageHoldout[ e, n#1#1, {is1w,is2w}, outs, stages, disc];
+  MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
+  MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
+  MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
+  nonterm:=NonterminalNodes[e];
+
+    // Make perfect recall 
+  For[i:=1,i<=Length[nonterm],i:=i+1,
+    p:=Player[Infoset[nonterm_i ] ];
+    If[p!=Chance[e],
+      Reveal[Infoset[nonterm_i ],{p}] ]
+    ];	
+  e
+]
+
+
