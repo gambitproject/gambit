@@ -3375,6 +3375,7 @@ appreciate getting feedback on this.
 # SetSolutionFormat 
 # SetTextFormat 
   Write   
+  WriteSequenceForm
 \end{verbatim}
 \end{multicols}
 
@@ -3413,6 +3414,9 @@ appreciate getting feedback on this.
   RemoveAction 
   RemoveNode
   Reveal 
+  SequenceForm
+  SequenceFormConstraints
+  SequenceFormStrats
   SetChanceProbs 
   SetComment
   SetName 
@@ -6684,6 +6688,48 @@ error if \verb+file+ cannot be opened for writing.  Returns \verb+nfg+.
 
 %\marginpar{Put in {\tt SeqEquilibSolve}}
 
+\item\lex{SequenceForm}
+\protect \large \begin{verbatim} 
+SequenceForm[support->EFSUPPORT] =: NLIST(NUMBER)
+\end{verbatim}\normalsize
+
+\bd
+Returns the sequence form of an extensive form game over
+\verb+support+, where the sequence form is as defined in Koller,
+Megiddo and von Stengel (\cite{KolMegSte:94}.
+\item [See also:] \verb+SequenceFormStrats+,
+\verb+SequenceFormConstraints+, \verb+WriteSequenceForm+.
+\ed
+
+\item\lex{SequenceFormConstraints}
+\protect \large \begin{verbatim} 
+SequenceFormConstraints[support->EFSUPPORT, 
+                        player->EFPLAYER] =: LIST(LIST(NUMBER))
+\end{verbatim}\normalsize
+
+\bd Returns the matrix of constraints on the strategies for
+\verb+player+ in the sequence form game over \verb+support+.  Each row
+represents a separate constraint, and each column represents the
+corresponding sequence for that player.
+\item [See also:] \verb+SequenceForm+,
+\verb+SequenceFormStrats+, \verb+WriteSequenceForm+.
+\ed
+
+\item\lex{SequenceFormStrats}
+\protect \large \begin{verbatim} 
+SequenceFormStrats[support->EFSUPPORT, 
+                   player->EFPLAYER] =: LIST(LIST(ACTION))
+\end{verbatim}\normalsize
+
+\bd 
+Returns the sequence form strategies (or sequences) for
+\verb+player+ for the sequence form game over \verb+support+. Each
+sequence form strategy is represented by a row in the matrix, which is
+a list of actions for that player corresponding to the sequence.  
+\item [See also:] \verb+SequenceForm+,
+\verb+SequenceFormConstraints+, \verb+WriteSequenceForm+.
+\ed
+
 \item\lex{SetActionProb}
 \protect \large \begin{verbatim} 
 SetActionProb[profile<->BEHAV, action->ACTION, 
@@ -7213,6 +7259,17 @@ NFG, NFSUPPORT, MIXED, NUMBER, STRATEGY, TEXT}
 Does a formatted write of \verb+x+ to \verb+output+.
 \item [Short form:] \verb+output << x+
 \item [See also:] \verb+Format+, \verb+ListFormat+, \verb+Output+, \verb+Read+
+\ed
+
+\item\lex{WriteSequenceForm}
+\protect \large \begin{verbatim} 
+WriteSequenceForm[output<->OUTPUT, support->EFSUPPORT] =: OUTPUT
+\end{verbatim}\normalsize
+
+\bd 
+Writes the sequence form game over \verb+support+ to output.  
+\item [See also:] \verb+SequenceForm+,
+\verb+SequenceFormConstraints+, \verb+SequenceFormStrats+.
 \ed
 
 %--X--

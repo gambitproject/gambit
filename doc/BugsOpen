@@ -790,17 +790,29 @@ Perfect.
 
 ---------------
 
+ITEM 0032:  Perfect equilibrium test for 2-player games
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GUI, GCL; all platforms
+STATUS:   CLOSED 9/9/1999 by RDM
+SEVERITY: CRUCIAL
+
+---------------
+
 ITEM 0033:  Need capability to output sequence form
 
 DATE:     9/8/1999 by TLT/RDM
 AFFECTS:  GUI, GCL; all platforms
-STATUS:   OPEN
+STATUS:   CLOSED 9/10/99 by RDM
 SEVERITY: CRUCIAL
 DETAILS:
 
-Should be able to generate the sequence form for a game.  The code
-exists for n-player games, but at a minimum needs to be made available
-to the user for 2-player games.
+Added the following functions on 9/10/99:
+
+  SequenceForm[support->EFSUPPORT] =: NLIST(NUMBER)
+  SequenceFormConstraints[support->EFSUPPORT, player->EFPLAYER] =: LIST(LIST(NUMBER))
+  SequenceFormStrats[support->EFSUPPORT, player->EFPLAYER] =: LIST(LIST(ACTION))
+  WriteSequenceForm[output<->OUTPUT, support->EFSUPPORT] =: OUTPUT
 
 ---------------
 

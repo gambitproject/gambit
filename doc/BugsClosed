@@ -198,3 +198,18 @@ COMMENTS:
 TLT 9/9/1999.  Turned out to be incorrect setting of m_epsilon when 
 constructing a solution from a BehavProfile<gNumber>.  Still leaves unresolved
 what a good setting of m_epsilon is.
+
+---------------
+
+ITEM 0033:  Need capability to output sequence form
+
+DATE:     9/8/1999 by TLT/RDM
+AFFECTS:  GUI, GCL; all platforms
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Should be able to generate the sequence form for a game.  The code
+exists for n-player games, but at a minimum needs to be made available
+to the user for 2-player games.
+
