@@ -1453,6 +1453,50 @@ dominated strategies are iteratively deleted.
 \ed
 \ed
 
+
+\item
+\protect \large \begin{verbatim}
+Enum[N->NFG, {nequilib->INTEGER},{trace->INTEGER}
+{time<->RATIONAL},{output->TEXT}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Finds all Nash equilibria for a two person game.  More
+precisely, it finds the set of extreme points of the components
+of the set of Nash equilibria.  The procedure is to enumerate the set
+of complementary basic feasible solutions.
+\item
+[Return value:] The list of equilibria found.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[N:] The game in normal form for which the solutions are to be found.  
+\ed
+
+\item
+[Optional parameters:]\hfil\null
+
+\bd
+\item
+[nequilib:] Specifies the maximum number of equilibria to find.  If
+not specified, the default value is zero, which means that all
+equilibria are found.  To check if there is a unique Nash equilibrium,
+one could set this parameter to 2.
+\item
+[time:] Returns the elapsed time for the operation.
+\item
+[trace:] Sets the print level.  Higher values generate more output.
+The default value is 0.
+\item
+[output:] Can be used to redirect the output of this procedure to a
+file.  Directing output to ``/dev/null'' under Unix turns output off.
+By default, output is directed to the screen.
+\ed
+\ed
+
 \item
 \protect \large \begin{verbatim}
 Equal[x->T, y->T] =: BOOLEAN
