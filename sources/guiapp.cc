@@ -95,7 +95,7 @@ void gambitFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 
 void gambitFrame::OnNewEfg(wxCommandEvent &)
 {
-  Efg *efg = new Efg;
+  FullEfg *efg = new FullEfg;
 
   int width, height;
   GetClientSize(&width, &height);
@@ -118,11 +118,11 @@ void gambitFrame::OnOpenEfg(wxCommandEvent &)
   wxFileDialog dialog(this, "Open extensive form...");
   dialog.SetWildcard("*.efg");
   if (dialog.ShowModal() == wxID_OK) {
-    Efg *efg = 0;
+    FullEfg *efg = 0;
 
     try {
       gFileInput infile(dialog.GetPath());
-      ReadEfgFile(infile, efg);
+      efg = ReadEfgFile(infile);
 
       if (!efg) {
 	wxMessageBox(dialog.GetPath() + " is not a valid .efg file");

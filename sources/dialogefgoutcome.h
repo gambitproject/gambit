@@ -12,12 +12,12 @@
 class dialogEfgOutcome : public guiPagedDialog {
 private:
   EFOutcome *m_outcome;
-  const Efg &m_efg;
+  const FullEfg &m_efg;
   gText m_name;
   wxTextCtrl *m_outcomeName;
 
 public:
-  dialogEfgOutcome(wxWindow *, const Efg &, EFOutcome *);
+  dialogEfgOutcome(wxWindow *, const FullEfg &, EFOutcome *);
   virtual ~dialogEfgOutcome() { }
 
   gArray<gNumber> Payoffs(void) const;

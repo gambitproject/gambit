@@ -34,9 +34,8 @@ BEGIN_EVENT_TABLE(guiNfgInfoPanel, wxPanel)
   EVT_CHOICE(idSUPPORT_CHOICE, guiNfgInfoPanel::OnSupport)
 END_EVENT_TABLE()
 
-guiNfgInfoPanel::guiNfgInfoPanel(guiNfgView *p_parent, wxWindow *p_window,
-				 Nfg &p_nfg)
-  : wxPanel(p_window, -1),
+guiNfgInfoPanel::guiNfgInfoPanel(guiNfgView *p_parent, Nfg &p_nfg)
+  : wxPanel(p_parent, -1),
     m_nfg(p_nfg), m_parent(p_parent),
     m_strategy(p_nfg.NumPlayers()), m_playerNames(p_nfg.NumPlayers()),
     m_payoffs(p_nfg.NumPlayers())

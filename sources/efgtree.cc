@@ -386,9 +386,8 @@ BEGIN_EVENT_TABLE(guiEfgTree, wxScrolledWindow)
   EVT_MOTION(OnMouseMotion)
 END_EVENT_TABLE()
 
-guiEfgTree::guiEfgTree(guiEfgView *p_parent, wxWindow *p_window,
-		       Efg &p_efg)
-  : wxScrolledWindow(p_window, -1, wxDefaultPosition, wxDefaultSize,
+guiEfgTree::guiEfgTree(guiEfgView *p_parent, Efg &p_efg)
+  : wxScrolledWindow(p_parent, -1, wxDefaultPosition, wxDefaultSize,
 		     wxVSCROLL | wxHSCROLL), m_efg(p_efg), m_parent(p_parent),
     m_selection(0), m_zoomFactor(1.0)
 {

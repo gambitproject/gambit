@@ -84,14 +84,20 @@ BEGIN_EVENT_TABLE(guiEfgFrame, gambitGameView)
   EVT_MENU(EFG_VIEW_NFG, OnSolveEfgNfg)
 END_EVENT_TABLE()
 
-guiEfgFrame::guiEfgFrame(wxMDIParentFrame *p_parent, Efg *p_efg,
+guiEfgFrame::guiEfgFrame(wxMDIParentFrame *p_parent, FullEfg *p_efg,
 			 const wxPoint &p_position, const wxSize &p_size)
   : gambitGameView(p_parent, p_efg, p_position, p_size),
     m_nfgView(0)
 {
-  m_efgView = new guiEfgView(this, p_efg, m_solutionSplitter, m_infoSplitter);
+  m_efgView = new guiEfgView(this, p_efg, m_solutionSplitter);
   m_solutionView = new guiEfgSolutions(this, m_solutionSplitter, *p_efg);
   m_solutionView->Show(FALSE);
+
+  m_solutionSplitter->Initialize(m_efgView);
+  int width, height;
+  GetClientSize(&width, &height);
+  m_efgView->SetSize(width, height);
+  m_efgView->Show(TRUE);
 
   wxMenu *fileMenu = new wxMenu;
   wxMenu *fileNewMenu = new wxMenu;
@@ -274,26 +280,21 @@ void guiEfgFrame::OnSolveCustomNfgEnumMixed(wxCommandEvent &)
 void guiEfgFrame::OnSolveEfgNfg(wxCommandEvent &)
 {
   if (!GetMenuBar()->IsChecked(EFG_VIEW_NFG)) {
-    m_nfgView->ShowWindows(FALSE);
-    m_infoSplitter->ReplaceWindow(m_infoSplitter->GetWindow1(),
-				  m_efgView->InfoPanel());
+    m_nfgView->Show(false);
     m_solutionSplitter->ReplaceWindow(m_solutionSplitter->GetWindow1(),
-				      m_efgView->TreeWindow());
-    m_efgView->ShowWindows(TRUE);
+				      m_efgView);
+    m_efgView->Show(true);
   }
   else {
-    m_efgView->ShowWindows(FALSE);
+    m_efgView->Show(false);
     if (!m_nfgView) {
       Nfg *nfg = MakeReducedNfg(EFSupport(*m_efgView->GetEfg()));
-      m_nfgView = new guiNfgView(nfg, m_solutionSplitter, m_infoSplitter);
+      m_nfgView = new guiNfgView(nfg, m_solutionSplitter);
     }
-    else {
-      m_infoSplitter->ReplaceWindow(m_infoSplitter->GetWindow1(),
-				    m_nfgView->InfoPanel());
-      m_solutionSplitter->ReplaceWindow(m_solutionSplitter->GetWindow1(),
-					m_nfgView->GridWindow());
-      m_nfgView->ShowWindows(TRUE);
-    }
+
+    m_solutionSplitter->ReplaceWindow(m_solutionSplitter->GetWindow1(),
+				      m_nfgView);
+    m_nfgView->Show(true);
   }
 }
 

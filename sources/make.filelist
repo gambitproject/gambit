@@ -79,7 +79,7 @@ NEWGUI_SOURCES = $(GAME_SOURCES) $(EALG_SOURCES) $(GLIB_SOURCES) \
                  dialogalgorithm.cc dialogefgsave.cc dialogenumpure.cc dialogenummixed.cc dialoglcp.cc dialogliap.cc dialoglp.cc dialogsupportselect.cc \
                  efgframe.cc efginfopanel.cc efgsolutions.cc efgtree.cc efgview.cc \
                  gameview.cc gclstats.cc guiapp.cc guistatus.cc \
-                 nfggrid.cc nfginfopanel.cc nfgsolutions.cc nfgview.cc
+                 nfgframe.cc nfggrid.cc nfginfopanel.cc nfgsolutions.cc nfgview.cc
 
 NEWGUI_OBJECTS = $(NEWGUI_SOURCES:.cc=.o) 
 

@@ -21,7 +21,7 @@ class guiEfgTree;
 
 class gambitGameView : public wxMDIChildFrame {
 protected:
-  wxSplitterWindow *m_infoSplitter, *m_solutionSplitter;
+  wxSplitterWindow *m_solutionSplitter;
 
 public:
   gambitGameView(wxMDIParentFrame *p_parent, Nfg *p_nfg,

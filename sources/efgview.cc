@@ -27,18 +27,42 @@
 #include "efginfopanel.h"
 #include "efgsolutions.h"
 
-guiEfgView::guiEfgView(guiEfgFrame *p_parent, Efg *p_efg,
-		       wxSplitterWindow *p_solutionSplitter,
-		       wxSplitterWindow *p_infoSplitter)
-  : m_parent(p_parent), m_efg(p_efg), m_copyNode(0), m_copyOutcome(0)
-{
-  m_tree = new guiEfgTree(this, p_solutionSplitter, *p_efg);
-  m_infoPanel = new guiEfgInfoPanel(this, p_infoSplitter, *p_efg);
+BEGIN_EVENT_TABLE(guiEfgView, wxWindow)
+  EVT_SIZE(OnSize)
+END_EVENT_TABLE()
 
-  p_infoSplitter->SplitVertically(m_infoPanel,
-				  p_solutionSplitter, 300);
-  p_solutionSplitter->Initialize(m_tree);
+guiEfgView::guiEfgView(guiEfgFrame *p_parent, FullEfg *p_efg,
+		       wxWindow *p_solutionSplitter)
+  : wxPanel(p_solutionSplitter, -1),
+    m_parent(p_parent), m_efg(p_efg), m_copyNode(0), m_copyOutcome(0)
+{
+  m_tree = new guiEfgTree(this, *p_efg);
   m_tree->Show(TRUE);
+  m_infoPanel = new guiEfgInfoPanel(this, *p_efg);
+  m_infoPanel->Show(TRUE);
+  /*
+  m_infoPanel->SetConstraints(new wxLayoutConstraints);
+  m_infoPanel->GetConstraints()->left.SameAs(this, wxLeft);
+  m_infoPanel->GetConstraints()->top.SameAs(this, wxTop);
+  m_infoPanel->GetConstraints()->width.Absolute(200);
+  m_infoPanel->GetConstraints()->height.SameAs(this, wxHeight);
+
+  m_tree->SetConstraints(new wxLayoutConstraints);
+  m_tree->GetConstraints()->left.SameAs(m_infoPanel, wxRight);
+  m_tree->GetConstraints()->top.SameAs(this, wxTop);
+  m_tree->GetConstraints()->right.SameAs(this, wxRight);
+  m_tree->GetConstraints()->height.SameAs(this, wxHeight);
+  */
+  Show(TRUE);
+  //  Layout();
+}
+
+void guiEfgView::OnSize(wxSizeEvent &p_event)
+{
+  int width, height;
+  GetClientSize(&width, &height);
+  m_infoPanel->SetSize(0, 0, 200, height);
+  m_tree->SetSize(200, 0, width - 200, height);
 }
 
 void guiEfgView::OnCopy(void)

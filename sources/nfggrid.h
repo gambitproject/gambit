@@ -20,7 +20,7 @@ private:
   const MixedSolution *m_solution;
 
 public:
-  guiNfgGrid(guiNfgView *m_parent, wxWindow *p_window, Nfg &p_nfg);
+  guiNfgGrid(guiNfgView *m_parent, Nfg &p_nfg);
   virtual ~guiNfgGrid();
 
   void OnSelectCell(int row, int col);

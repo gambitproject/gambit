@@ -23,9 +23,8 @@ BEGIN_EVENT_TABLE(guiNfgGrid, wxGrid)
   EVT_CHAR(guiNfgGrid::OnChar)
 END_EVENT_TABLE()
 
-guiNfgGrid::guiNfgGrid(guiNfgView *p_parent, wxWindow *p_window,
-		       Nfg &p_nfg)
-  : wxGrid(p_window, -1, wxPoint(-1, -1), wxDefaultSize),
+guiNfgGrid::guiNfgGrid(guiNfgView *p_parent, Nfg &p_nfg)
+  : wxGrid(p_parent, -1, wxPoint(-1, -1), wxDefaultSize),
     m_nfg(p_nfg), m_support(p_nfg), m_parent(p_parent),
     m_rowPlayer(1), m_colPlayer(2),
     m_profile(p_nfg.NumPlayers()), m_showProbs(false),

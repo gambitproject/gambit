@@ -23,7 +23,7 @@
 //=========================================================================
 
 dialogEfgOutcome::dialogEfgOutcome(wxWindow *p_parent,
-				   const Efg &p_efg, EFOutcome *p_outcome)
+				   const FullEfg &p_efg, EFOutcome *p_outcome)
   : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
     m_outcome(p_outcome), m_efg(p_efg)
 {

@@ -24,7 +24,7 @@ private:
   void OnSupport(wxCommandEvent &);
   
 public:
-  guiNfgInfoPanel(guiNfgView *p_parent, wxWindow *p_window, Nfg &p_nfg);
+  guiNfgInfoPanel(guiNfgView *p_parent, Nfg &p_nfg);
   virtual ~guiNfgInfoPanel() { }
 
   void SetProfile(const gArray<int> &p_profile);

@@ -34,7 +34,7 @@ private:
   void OnSolveCustomNfgEnumMixed(wxCommandEvent &);
 
 public:
-  guiEfgFrame(wxMDIParentFrame *p_parent, Efg *p_efg,
+  guiEfgFrame(wxMDIParentFrame *p_parent, FullEfg *p_efg,
 	      const wxPoint &p_position, const wxSize &p_size);
   virtual ~guiEfgFrame() { }
 

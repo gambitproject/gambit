@@ -37,7 +37,7 @@ private:
   void ComputeScrollbars(void);
 
 public:
-  guiEfgTree(guiEfgView *p_parent, wxWindow *p_window, Efg &p_efg);
+  guiEfgTree(guiEfgView *p_parent, Efg &p_efg);
   virtual ~guiEfgTree();
 
   Node *SelectedNode(void) const;

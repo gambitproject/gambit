@@ -46,13 +46,8 @@ gambitGameView::gambitGameView(wxMDIParentFrame *p_parent, Nfg *p_nfg,
 {
   SetTitle((char *) p_nfg->GetTitle());
   
-  m_infoSplitter = new wxSplitterWindow(this, -1,
-					wxPoint(0, 0), p_size);
-  m_solutionSplitter = new wxSplitterWindow(m_infoSplitter, -1);
-					    
-  //  m_solutionGrid = new guiNfgSolutions(this, m_solutionSplitter,
-  //				       *p_nfg, MixedProfiles());
-  // m_solutionGrid->Show(FALSE);
+  m_solutionSplitter = new wxSplitterWindow(this, -1,
+					    wxPoint(0, 0), p_size);
 }
 
 gambitGameView::gambitGameView(wxMDIParentFrame *p_parent, Efg *p_efg,
@@ -62,10 +57,8 @@ gambitGameView::gambitGameView(wxMDIParentFrame *p_parent, Efg *p_efg,
 {
   SetTitle((char *) p_efg->GetTitle());
 
-  m_infoSplitter = new wxSplitterWindow(this, -1,
-					wxPoint(0, 0), p_size);
-  m_solutionSplitter = new wxSplitterWindow(m_infoSplitter, -1);
-					    
+  m_solutionSplitter = new wxSplitterWindow(this, -1,
+					    wxPoint(0, 0), p_size);
 }
 
 gambitGameView::~gambitGameView(void)

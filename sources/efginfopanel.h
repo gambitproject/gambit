@@ -15,7 +15,7 @@ private:
   guiEfgView *m_parent;
 
 public:
-  guiEfgInfoPanel(guiEfgView *p_parent, wxWindow *p_window, Efg &p_efg);
+  guiEfgInfoPanel(guiEfgView *p_parent, Efg &p_efg);
   virtual ~guiEfgInfoPanel();
 };
 

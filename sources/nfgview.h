@@ -13,7 +13,7 @@ class guiNfgGrid;
 class guiNfgInfoPanel;
 class guiNfgFrame;
 
-class guiNfgView {
+class guiNfgView : public wxWindow {
 private:
   guiNfgGrid *m_grid;
   guiNfgInfoPanel *m_infoPanel;
@@ -23,9 +23,7 @@ private:
   gList<NFSupport *> m_supports;
 
 public:
-  guiNfgView(Nfg *p_nfg,
-	     wxSplitterWindow *p_solutionSplitter,
-	     wxSplitterWindow *p_infoSplitter);
+  guiNfgView(Nfg *p_nfg, wxWindow *p_solutionSplitter);
 
   Nfg *GetNfg(void) const { return m_nfg; }
   wxWindow *GridWindow(void) const;
@@ -48,11 +46,16 @@ public:
   NFSupport *CurrentSupport(void) const 
     { return m_supports[m_currentSupport]; }
   int CurrentSupportIndex(void) const { return m_currentSupport; }
+  gText UniqueSupportName(void) const;
 
   void AddSupport(NFSupport *);
   void DeleteSupport(int p_support);
   void SetCurrentSupport(int p_support);
   void EditCurrentSupport(const NFSupport &);
+
+  void OnSize(wxSizeEvent &);
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // NFGVIEW_H

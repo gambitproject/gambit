@@ -11,22 +11,20 @@ class guiEfgFrame;
 class guiEfgTree;
 class guiEfgInfoPanel;
 
-class guiEfgView {
+class guiEfgView : public wxPanel {
 private:
   guiEfgTree *m_tree;
   guiEfgInfoPanel *m_infoPanel;
   guiEfgFrame *m_parent;
 
-  Efg *m_efg;
+  FullEfg *m_efg;
   Node *m_copyNode;
   EFOutcome *m_copyOutcome;
 
 public:
-  guiEfgView(guiEfgFrame *p_parent, Efg *p_efg,
-	     wxSplitterWindow *p_solutionSplitter,
-	     wxSplitterWindow *p_infoSplitter);
+  guiEfgView(guiEfgFrame *p_parent, FullEfg *p_efg, wxWindow *);
 
-  Efg *GetEfg(void) const { return m_efg; }
+  FullEfg *GetEfg(void) const { return m_efg; }
   guiEfgTree *TreeWindow(void) const { return m_tree; }
   guiEfgInfoPanel *InfoPanel(void) const { return m_infoPanel; }
 
@@ -39,6 +37,10 @@ public:
   
   double GetZoom(void) const;
   void SetZoom(double);
+
+  void OnSize(wxSizeEvent &);
+    
+  DECLARE_EVENT_TABLE()
 };
 
 #endif // EFGVIEW_H

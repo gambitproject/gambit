@@ -15,13 +15,14 @@
 #include "wx/mdi.h"
 #endif
 
+#include "efg.h"
+
 #include "guiapp.h"
-#include "gameview.h"
+#include "efgview.h"
 #include "efginfopanel.h"
 
-guiEfgInfoPanel::guiEfgInfoPanel(guiEfgView *p_parent, wxWindow *p_window,
-				 Efg &p_efg)
-  : wxPanel(p_window, -1), m_efg(p_efg), m_parent(p_parent)
+guiEfgInfoPanel::guiEfgInfoPanel(guiEfgView *p_parent, Efg &p_efg)
+  : wxPanel(p_parent, -1), m_efg(p_efg), m_parent(p_parent)
 {
   Show(TRUE);
 }
