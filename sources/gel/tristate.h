@@ -7,7 +7,24 @@
 #ifndef TRISTATE_H
 #define TRISTATE_H
 
+#include "gstream.h"
+
 typedef enum  { triFALSE = 0, triTRUE = 1, triMAYBE = 2 }  gTriState;
+
+
+
+inline gOutput& gTriState_Output( gOutput& out, gTriState s )
+{
+  switch( s )
+  {
+  case triFALSE: out << "False"; break;
+  case triTRUE:  out << "True";  break;
+  case triMAYBE: out << "Maybe"; break;
+  }
+  return out;
+}
+
+
 
 inline gTriState TriStateAnd(gTriState x, gTriState y)
 {

@@ -18,13 +18,13 @@ class gelVariableTable
 {
 private:
   gList<gText> m_NumberNames;
-  gList< gList<gNumber> > m_NumberValues;
+  gList< gNestedList<gNumber> > m_NumberValues;
   
   gList<gText> m_BooleanNames;
-  gList< gList<gTriState> > m_BooleanValues;
+  gList< gNestedList<gTriState> > m_BooleanValues;
   
   gList<gText> m_TextNames;
-  gList< gList<gText> > m_TextValues;
+  gList< gNestedList<gText> > m_TextValues;
   
 public:
   gelVariableTable(void);
@@ -33,12 +33,12 @@ public:
   void Define(const gText& name, gelType type);
   gelType Type(const gText& name) const;
   
-  void Value(const gText& name, gList<gNumber>&) const;
-  void Value(const gText& name, gList<gTriState>&) const;
-  void Value(const gText& name, gList<gText>&) const;
-  void SetValue(const gText& name, const gList<gNumber>& value);
-  void SetValue(const gText& name, const gList<gTriState>& value);
-  void SetValue(const gText& name, const gList<gText>& value);
+  void Value(const gText& name, gNestedList<gNumber>&) const;
+  void Value(const gText& name, gNestedList<gTriState>&) const;
+  void Value(const gText& name, gNestedList<gText>&) const;
+  void SetValue(const gText& name, const gNestedList<gNumber>& value);
+  void SetValue(const gText& name, const gNestedList<gTriState>& value);
+  void SetValue(const gText& name, const gNestedList<gText>& value);
 };
 
 

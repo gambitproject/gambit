@@ -19,10 +19,11 @@ typedef enum
 
 #include <assert.h>
 
+#include "gnlist.h"
+
 #include "tristate.h"
 #include "gtext.h"
 #include "funcmisc.h"
-
 
 
 
@@ -44,7 +45,7 @@ public:
   virtual ~gelExpression();
   gelType Type(void) const;
   void Execute(gelVariableTable *) const;
-  virtual gList<T> Evaluate(gelVariableTable *) const = 0;
+  virtual gNestedList<T> Evaluate(gelVariableTable *) const = 0;
 };
  
 template <class T> class gelAssignment : public gelExpression<T>   
@@ -56,19 +57,19 @@ private:
 public:
   gelAssignment(const gText &, gelExpression<T> *);
   virtual ~gelAssignment();
-  virtual gList<T> Evaluate(gelVariableTable *) const;
+  virtual gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 template <class T> class gelConstant : public gelExpression<T>  
 {
 private:
-  gList<T> m_Value;
+  gNestedList<T> m_Value;
   
 public:
   gelConstant(const T &);
-  gelConstant(const gList<T> &);
+  gelConstant(const gNestedList<T> &);
   virtual ~gelConstant();
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 template <class T> class gelVariable : public gelExpression<T>  
@@ -81,7 +82,7 @@ public:
   virtual ~gelVariable();
   
   const gText &Name(void) const { return m_Name; }
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 template <class T> class gelConditional : public gelExpression<T>  
@@ -97,7 +98,7 @@ public:
 		 gelExpression<T> *iftrue, gelExpression<T> *iffalse);
   virtual ~gelConditional();
   
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 template <class T> class gelWhileLoop : public gelExpression<T>  
@@ -110,7 +111,7 @@ public:
   gelWhileLoop(gelExpression<gTriState> *, gelExpression<T> *);
   virtual ~gelWhileLoop();
   
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 template <class T> class gelForLoop : public gelExpression<T>  
@@ -126,7 +127,7 @@ public:
 	     gelExpression<T> *);
   virtual ~gelForLoop();
   
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 
@@ -138,7 +139,7 @@ public:
   gelQuitExpr(void)  { }
   virtual ~gelQuitExpr()   { }
   
-  gList<gTriState> Evaluate(gelVariableTable *) const;
+  gNestedList<gTriState> Evaluate(gelVariableTable *) const;
 };
 
 
@@ -156,10 +157,11 @@ class funcclass : public gelExpression<T>             \
 public:                                               \
   funcclass(void) {}                                  \
   virtual ~funcclass() {}                             \
-  gList<T> Evaluate(gelVariableTable *) const;        \
+  gNestedList<T> Evaluate(gelVariableTable *) const;  \
 };
 
 
+// This one is for listed functions
 #define DECLARE_UNARY( funcclass, type1, T )          \
 class funcclass : public gelExpression<T>             \
 {                                                     \
@@ -171,10 +173,10 @@ private:                                              \
 public:                                               \
   funcclass( gelExpression<type1>* x ) : op1(x) {}    \
   virtual ~funcclass() { delete op1; }                \
-  gList<T> Evaluate( gelVariableTable *vt ) const     \
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const     \
   {                                                   \
-    gList<T> ret;                                     \
-    gList<type1> arg1 = op1->Evaluate( vt );          \
+    gNestedList<type1> arg1 = op1->Evaluate( vt );    \
+    gNestedList<T> ret( arg1.Dim() );                 \
     int i = 0;                                        \
     for( i = 1; i <= arg1.Length(); ++i )             \
       ret += EvalItem( arg1[i] );                     \
@@ -183,6 +185,23 @@ public:                                               \
 };
 
 
+// This one is for non-listed functions
+#define DECLARE_UNARY_LIST( funcclass, type1, T )     \
+class funcclass : public gelExpression<T>             \
+{                                                     \
+private:                                              \
+  gelExpression<type1>* op1;                          \
+                                                      \
+public:                                               \
+  funcclass( gelExpression<type1>* x ) : op1(x) {}    \
+  virtual ~funcclass() { delete op1; }                \
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const;    \
+};
+
+
+
+
+// This one is for listed functions
 #define DECLARE_BINARY( funcclass, type1, type2, T )  \
 class funcclass : public gelExpression<T>             \
 {                                                     \
@@ -197,17 +216,35 @@ public:                                               \
              gelExpression<type2>* x2 )               \
     : op1(x1), op2(x2) {}                             \
   virtual ~funcclass() { delete op1; delete op2; }    \
-  gList<T> Evaluate( gelVariableTable *vt ) const     \
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const     \
   {                                                   \
-    gList<T> ret;                                     \
-    gList<type1> arg1 = op1->Evaluate( vt );          \
-    gList<type2> arg2 = op2->Evaluate( vt );          \
+    gNestedList<type1> arg1 = op1->Evaluate( vt );    \
+    gNestedList<type2> arg2 = op2->Evaluate( vt );    \
+    gNestedList<T> ret( arg1.Dim() );                 \
     assert( arg1.Length() == arg2.Length() );         \
+    assert( arg1.Dim() == arg2.Dim() );               \
     int i = 0;                                        \
     for( i = 1; i <= arg1.Length(); ++i )             \
       ret += EvalItem( arg1[i], arg2[i] );            \
     return ret;                                       \
   }                                                   \
+};
+
+
+// This one is for non-listed functions
+#define DECLARE_BINARY_LIST( funcclass, type1, type2, T )  \
+class funcclass : public gelExpression<T>             \
+{                                                     \
+private:                                              \
+  gelExpression<type1>* op1;                          \
+  gelExpression<type2>* op2;                          \
+                                                      \
+public:                                               \
+  funcclass( gelExpression<type1>* x1,                \
+             gelExpression<type2>* x2 )               \
+    : op1(x1), op2(x2) {}                             \
+  virtual ~funcclass() { delete op1; delete op2; }    \
+  gNestedList<T> Evaluate( gelVariableTable *vt ) const;  \
 };
 
 
@@ -226,7 +263,7 @@ public:
 	 const gelExpression<T>* exp );
   virtual ~gelUDF();
 
-  gList<T> Evaluate(gelVariableTable *) const;
+  gNestedList<T> Evaluate(gelVariableTable *) const;
 };
 
 

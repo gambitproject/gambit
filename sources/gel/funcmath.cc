@@ -12,39 +12,53 @@
 
 
 
-DECLARE_UNARY(gelfuncPrintNumber, gNumber, gNumber)
-DECLARE_UNARY(gelfuncPrintBoolean, gTriState, gTriState)
-DECLARE_UNARY(gelfuncPrintText, gText, gText)
+DECLARE_UNARY_LIST(gelfuncPrintNumber, gNumber, gNumber)
+DECLARE_UNARY_LIST(gelfuncPrintBoolean, gTriState, gTriState)
+DECLARE_UNARY_LIST(gelfuncPrintText, gText, gText)
 
 DECLARE_UNARY(gelfuncNot, gTriState, gTriState)
+DECLARE_UNARY(gelfuncNegate, gNumber, gNumber)
 
-gNumber gelfuncPrintNumber::EvalItem( gNumber x1 ) const
+
+
+gNestedList<gNumber> 
+gelfuncPrintNumber::Evaluate( gelVariableTable *vt ) const
 {
-  gout << x1;
-  return x1;
+  gNestedList<gNumber> ret = op1->Evaluate( vt );
+  gout << ret;
+  return ret;
 }
 
-gTriState gelfuncPrintBoolean::EvalItem( gTriState x1 ) const
+gNestedList<gText> 
+gelfuncPrintText::Evaluate( gelVariableTable *vt ) const
 {
-  switch( x1 )
-  {
-    case triTRUE:  gout << "True";  break;
-    case triFALSE: gout << "False"; break;
-    case triMAYBE: gout << "Maybe"; break;
-  }
-  return x1;
+  gNestedList<gText> ret = op1->Evaluate( vt );
+  gout << ret;
+  return ret;
 }
 
-gText gelfuncPrintText::EvalItem( gText x1 ) const
+
+
+gNestedList<gTriState> 
+gelfuncPrintBoolean::Evaluate( gelVariableTable *vt ) const
 {
-  gout << x1;
-  return x1;
+  gNestedList<gTriState> ret = op1->Evaluate( vt );
+  ret.Output( gout, gTriState_Output );
+  return ret;
 }
+
 
 gTriState gelfuncNot::EvalItem( gTriState x1 ) const
 {
   return TriStateNot( x1 );
 }
+
+gNumber gelfuncNegate::EvalItem( gNumber x1 ) const
+{
+  return -x1;
+}
+
+
 
 DECLARE_BINARY(gelfuncDivide, gNumber, gNumber, gNumber)
 DECLARE_BINARY(gelfuncMinus, gNumber, gNumber, gNumber)
@@ -215,7 +229,7 @@ public:
   gelfuncSemi(gelExpr *, gelExpression<T> *);
   ~gelfuncSemi();
   
-  gList<T> Evaluate(gelVariableTable *vt) const;
+  gNestedList<T> Evaluate(gelVariableTable *vt) const;
 };
 
 template <class T>
@@ -227,7 +241,7 @@ template <class T> gelfuncSemi<T>::~gelfuncSemi()
 { delete op1;  delete op2; }
 
 template <class T> 
-gList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
+gNestedList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
 {
   op1->Execute(vt);
   return op2->Evaluate(vt);
@@ -244,10 +258,10 @@ gWatch _gelStopwatch;
 
 DECLARE_NOPARAM(gelfuncStartWatch, gNumber);
 
-gList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
+gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
-  gList<gNumber> ret;
+  gNestedList<gNumber> ret;
   ret += 0;
   return ret;
 }
@@ -336,6 +350,11 @@ gelExpr *GEL_Minus(const gArray<gelExpr *> &params)
 {
   return new gelfuncMinus((gelExpression<gNumber> *) params[1],
 			  (gelExpression<gNumber> *) params[2]);
+}
+
+gelExpr *GEL_Negate(const gArray<gelExpr *> &params)
+{
+  return new gelfuncNegate((gelExpression<gNumber> *) params[1]);
 }
 
 gelExpr *GEL_Not(const gArray<gelExpr *> &params)
@@ -447,6 +466,7 @@ void gelMathInit(gelEnvironment *env)
     { GEL_LessEqualNumber, "LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN" },
     { GEL_LessEqualText, "LessEqual[x->TEXT, y->TEXT] =: BOOLEAN" },
     { GEL_Minus, "Minus[x->NUMBER, y->NUMBER] =: NUMBER" },
+    { GEL_Negate, "Negate[x->NUMBER] =: BOOLEAN" },
     { GEL_Not, "Not[x->BOOLEAN] =: BOOLEAN" },
     { GEL_NotEqualBoolean, "NotEqual[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN" },
     { GEL_NotEqualNumber, "NotEqual[x->NUMBER, y->NUMBER] =: BOOLEAN" },

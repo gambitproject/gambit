@@ -352,10 +352,12 @@ void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
 
 
 extern void gelMathInit(gelEnvironment *);
+extern void gelListInit(gelEnvironment *);
 
 gelEnvironment::gelEnvironment(void)
 {
   gelMathInit(this);
+  gelListInit(this);
 }
 
 gelEnvironment::~gelEnvironment()
