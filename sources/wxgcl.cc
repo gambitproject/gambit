@@ -526,16 +526,22 @@ void GclFrame::OnSashDrag(wxSashEvent &p_event)
 
 void GclFrame::OnTextEnter(wxCommandEvent &)
 {
-  m_outputWindow->AppendText(m_inputWindow->GetValue());
-  m_history.Append(m_inputWindow->GetValue().c_str());
+  gText input(m_inputWindow->GetValue().c_str());
+  if (input.Right(2)[1] == '\\') {
+    // continuation character
+    m_inputWindow->AppendText("\n");
+    return;
+  }
+
+  m_outputWindow->AppendText((char *) input);
+  m_history.Append(input);
   m_outputWindow->AppendText("\n");
 
   m_inputWindow->Enable(false);
   m_cancelButton->Enable(true);
 
   wxCommandLine cmdline(20);
-  gPreprocessor preproc(*m_environment, &cmdline,
-			gText(m_inputWindow->GetValue().c_str()) + "\n");
+  gPreprocessor preproc(*m_environment, &cmdline, input + "\n");
   m_inputWindow->SetValue("");
 
   wxBusyCursor cursor;
