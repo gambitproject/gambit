@@ -90,6 +90,28 @@ static Portion *GSM_ActionProbs(Portion **param)
 
 
 //------------------
+// StrategyValue
+//------------------
+
+static Portion *GSM_StrategyValue(Portion **param)
+{
+  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
+  Strategy* strategy = ((StrategyPortion*) param[1])->Value();
+  Nfg *nfg = &profile->Game();
+
+  const gArray<NFPlayer *> &player = nfg->Players();
+
+  for(int i = 1; i <= nfg->NumPlayers(); i++)  
+    if (profile->Support().Strategies(player[i]->GetNumber()).Find(strategy))
+      return new NumberPortion(profile->Payoff(player[i]->GetNumber(),strategy));
+      
+  return new NullPortion(porNUMBER);
+}
+
+
+
+
+//------------------
 // ActionValue
 //------------------
 
@@ -774,6 +796,13 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new FuncDescObj("StrategyValue", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyValue, porNUMBER, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ActionValue", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValue, porNUMBER, 2,
