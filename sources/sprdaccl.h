@@ -8,7 +8,7 @@
 #define SPRDACCL_H
 
 #include "accels.h"
-#include "sprconst.h"
+#include "spreadconfig.h"
 
 #define 	NUM_SPREAD_EVENTS	5
 AccelEvent spread_events[NUM_SPREAD_EVENTS]=
