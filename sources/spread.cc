@@ -538,6 +538,7 @@ void SpreadSheetC::OnEvent(wxMouseEvent &ev)
             top_frame->OnDoubleClick(cell.row, cell.col, 
                                      sheet->GetLevel(), 
                                      sheet->GetValue(cell.row, cell.col));
+	top_frame->CanvasFocus();
     }
 }
 
@@ -746,6 +747,7 @@ void SpreadSheetC::ProcessCursor(int ch)
             Scroll(x_scroll, y_scroll);
         }
     }
+    top_frame->CanvasFocus();
 }
 
 
