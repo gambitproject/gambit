@@ -278,21 +278,24 @@ int NfgFileReader::Parse(void)
     default:
       return 1;
   }
-  return yyparse();
+
+  int ret = yyparse();
+  N->m_dirty = false;
+  return ret;	
 }
 
 
-int ReadNfgFile(gInput &f, Nfg *& Nrat)
+int ReadNfgFile(gInput &p_file, Nfg *&p_nfg)
 {
-  assert(!Nrat);
+  assert(!p_nfg);
 
-  NfgFileReader R(f, Nrat);
+  NfgFileReader R(p_file, p_nfg);
 
   if (R.Parse())   {
-    if (Nrat)   { delete Nrat;  Nrat = 0; }
+    if (p_nfg)   { delete p_nfg;  p_nfg = 0; }
     return 0;
   }
-   
+
   return 1;
 }
 

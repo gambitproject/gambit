@@ -360,7 +360,10 @@ int EfgFileReader::Parse(void)
 
   infile.get(c);
   if (c != 'D' && c != 'R')   return 1;
-  return yyparse();
+
+  int ret = yyparse();
+  E->m_dirty = false;
+  return ret;
 }
 
 void EfgFileReader::CreateEfg(void)
