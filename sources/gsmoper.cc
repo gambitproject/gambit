@@ -612,9 +612,11 @@ static Portion* GSM_NotEqual_EfSupport(Portion** param)
 
 static Portion* GSM_NotEqual_Behav(Portion** param)
 {
-  return new BoolPortion
-    (*((BehavPortion *) param[0])->Value() !=
-     *((BehavPortion *) param[1])->Value());
+  if (*((BehavPortion *) param[0])->Value() !=
+      *((BehavPortion *) param[1])->Value())
+    return new BoolPortion(T_YES);
+  else
+    return new BoolPortion(T_NO);
 }
 
 static Portion* GSM_NotEqual_NfPlayer(Portion** param)
@@ -632,8 +634,7 @@ static Portion* GSM_NotEqual_Strategy(Portion** param)
 static Portion* GSM_NotEqual_Nfg(Portion** param)
 {
   if ((param[0]->Spec().Type == porNULL) || 
-      (param[1]->Spec().Type == porNULL) )
-  {
+      (param[1]->Spec().Type == porNULL) )  {
     return new BoolPortion( param[0]->Spec().Type != 
  			       param[1]->Spec().Type );
   }
@@ -656,11 +657,12 @@ static Portion* GSM_NotEqual_NfOutcome(Portion** param)
 
 static Portion* GSM_NotEqual_Mixed(Portion** param)
 {
-  return new BoolPortion
-    (*((MixedPortion *) param[0])->Value() !=
-     *((MixedPortion *) param[1])->Value());
+  if (*((MixedPortion *) param[0])->Value() !=
+      *((MixedPortion *) param[1])->Value())
+    return new BoolPortion(T_YES);
+  else
+    return new BoolPortion(T_NO);
 }
-
 
 //------------
 // Greater
@@ -838,10 +840,10 @@ Portion* GSM_NewInputStream(Portion** param)
 
 long _WriteWidth = 0;
 long _WritePrecis = 6;
-bool _WriteExpmode = false;
-bool _WriteQuoted = true;
-bool _WriteListBraces = true;
-bool _WriteListCommas = true;
+TriState _WriteExpmode = T_NO;
+TriState _WriteQuoted = T_YES;
+TriState _WriteListBraces = T_YES;
+TriState _WriteListCommas = T_YES;
 long _WriteListLF = 0;
 long _WriteListIndent = 2;
 long _WriteSolutionInfo = 1;
@@ -882,8 +884,8 @@ Portion* GSM_ListFormat(Portion** param)
 
 Portion* GSM_GetListFormat(Portion** param)
 {
-  ((BoolPortion*) param[0])->Value() = _WriteListBraces;
-  ((BoolPortion*) param[1])->Value() = _WriteListCommas;
+  ((BoolPortion*) param[0])->Value() = (_WriteListBraces) ? T_YES : T_NO;
+  ((BoolPortion*) param[1])->Value() = (_WriteListCommas) ? T_YES : T_NO;
   ((IntPortion*) param[2])->Value() = _WriteListLF;
   ((IntPortion*) param[3])->Value() = _WriteListIndent;
 
@@ -921,7 +923,7 @@ Portion* GSM_GetFloatFormat(Portion** param)
 {
   ((IntPortion*) param[1])->Value() = _WriteWidth;
   ((IntPortion*) param[2])->Value() = _WritePrecis;
-  ((BoolPortion*) param[3])->Value() = _WriteExpmode;
+  ((BoolPortion*) param[3])->Value() = (_WriteExpmode) ? T_YES : T_NO;
 
   return param[0]->RefCopy();
 }
@@ -937,7 +939,7 @@ Portion* GSM_TextFormat(Portion** param)
 
 Portion* GSM_GetTextFormat(Portion** param)
 {
-  ((BoolPortion*) param[1])->Value() = _WriteQuoted;
+  ((BoolPortion*) param[1])->Value() = (_WriteQuoted) ? T_YES : T_NO;
 
   return param[0]->RefCopy();
 }
@@ -1005,7 +1007,7 @@ Portion* GSM_Read_Bool(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
-  bool value = false;
+  TriState value = T_DONTKNOW;
   bool error = false;
   char c = ' ';
 
@@ -1016,20 +1018,25 @@ Portion* GSM_Read_Bool(Portion** param)
   }
   while(!input.eof() && isspace(c))
     input.get(c);
-  if(c == 'T')
-  {
+  if (c == 'T')  {
     if(!input.eof()) input.get(c); if(c != 'r') error = true;
     if(!input.eof()) input.get(c); if(c != 'u') error = true;
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = true;
+    value = T_YES;
   }
-  else if(c == 'F')
-  {
+  else if (c == 'F')  {
     if(!input.eof()) input.get(c); if(c != 'a') error = true;
     if(!input.eof()) input.get(c); if(c != 'l') error = true;
     if(!input.eof()) input.get(c); if(c != 's') error = true;
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = false;
+    value = T_NO;
+  }
+  else if (c == 'M')  {
+    if(!input.eof()) input.get(c); if(c != 'a') error = true;
+    if(!input.eof()) input.get(c); if(c != 'y') error = true;
+    if(!input.eof()) input.get(c); if(c != 'b') error = true;
+    if(!input.eof()) input.get(c); if(c != 'e') error = true;
+    value = T_DONTKNOW;
   }
   else
     error = true;

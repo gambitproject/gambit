@@ -39,10 +39,10 @@ protected:
 
   static long _WriteWidth;
   static long _WritePrecis;
-  static bool _WriteExpmode;
-  static bool _WriteQuoted;
-  static bool _WriteListBraces;
-  static bool _WriteListCommas;
+  static TriState _WriteExpmode;
+  static TriState _WriteQuoted;
+  static TriState _WriteListBraces;
+  static TriState _WriteListCommas;
   static long _WriteListLF;
   static long _WriteListIndent;
   static long _WriteSolutionInfo;
@@ -60,7 +60,6 @@ public:
   static void _SetWriteListLF(long);
   static void _SetWriteListIndent(long);
   static void _SetWriteSolutionInfo(long);
-
 
   virtual ~Portion();
 
@@ -304,17 +303,18 @@ public:
 
 class BoolPortion : public Portion  {
 protected:
-  bool* _Value;
+  TriState *_Value;
   bool _ref;
 
   static gPool pool;
 
 public:
   BoolPortion(bool);
-  BoolPortion(bool &, bool);
+  BoolPortion(TriState);
+  BoolPortion(TriState &, bool);
   virtual ~BoolPortion();
 
-  bool& Value(void) const;
+  TriState &Value(void);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

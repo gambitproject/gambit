@@ -348,103 +348,57 @@ static Portion *GSM_InfosetProbs(Portion **param)
 }
 
 
-//----------------
-// IsKnownNash
-//----------------
+//---------
+// IsNash
+//---------
 
-static Portion *GSM_IsKnownNash_Behav(Portion **param)
+static Portion *GSM_IsNash_Behav(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsNash() == T_YES);
+  return new BoolPortion(P->IsNash());
 }
 
-static Portion *GSM_IsKnownNash_Mixed(Portion **param)
+static Portion *GSM_IsNash_Mixed(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
-  return new BoolPortion(P->IsNash() == T_YES);
+  return new BoolPortion(P->IsNash());
 }
 
 
-//-----------------
-// IsKnownNotNash
-//-----------------
+//-------------
+// IsPerfect
+//-------------
 
-static Portion *GSM_IsKnownNotNash_Behav(Portion **param)
-{
-  BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsNash() == T_NO);
-}
-
-static Portion *GSM_IsKnownNotNash_Mixed(Portion **param)
-{
-  MixedSolution *P = ((MixedPortion *) param[0])->Value();
-  return new BoolPortion(P->IsNash() == T_NO);
-}
-
-//--------------------
-// IsKnownNotPerfect
-//--------------------
-
-static Portion *GSM_IsKnownNotPerfect(Portion **param)
+static Portion *GSM_IsPerfect(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
-  return new BoolPortion(P->IsPerfect() == T_NO);
+  return new BoolPortion(P->IsPerfect());
 }
 
-//-----------------------
-// IsKnownNotSequential
-//-----------------------
+//---------------
+// IsSequential
+//---------------
 
-static Portion *GSM_IsKnownNotSequential(Portion **param)
+static Portion *GSM_IsSequential(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsSequential() == T_NO);
+  return new BoolPortion(P->IsSequential());
 }
 
-//---------------------------
-// IsKnownNotSubgamePerfect
-//---------------------------
-
-static Portion *GSM_IsKnownNotSubgamePerfect(Portion **param)
-{
-  BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsSubgamePerfect() == T_NO);
-}
-
-//-------------------
-// IsKnownPerfect
-//-------------------
-
-static Portion *GSM_IsKnownPerfect(Portion **param)
-{
-  MixedSolution *P = ((MixedPortion*) param[0])->Value();
-  return new BoolPortion(P->IsPerfect() == T_YES);
-}
 
 //--------------------
-// IsKnownSequential
+// IsSubgamePerfect
 //--------------------
 
-static Portion *GSM_IsKnownSequential(Portion **param)
+static Portion *GSM_IsSubgamePerfect(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsSequential() == T_YES);
+  return new BoolPortion(P->IsSubgamePerfect());
 }
 
-
-//------------------------
-// IsKnownSubgamePerfect
-//------------------------
-
-static Portion *GSM_IsKnownSubgamePerfect(Portion **param)
-{
-  BehavSolution *P = ((BehavPortion *) param[0])->Value();
-  return new BoolPortion(P->IsSubgamePerfect() == T_YES);
-}
-
-//----------------
+//-------------
 // LiapValue
-//----------------
+//-------------
 
 static Portion *GSM_LiapValue_Behav(Portion **param)
 {
@@ -848,23 +802,11 @@ void Init_solfunc(GSM *gsm)
 	GSM_InfosetProb },
       { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
 	GSM_InfosetProbs },
-      { "IsKnownNash[profile->BEHAV] =: BOOLEAN", GSM_IsKnownNash_Behav },
-      { "IsKnownNash[profile->MIXED] =: BOOLEAN", GSM_IsKnownNash_Mixed },
-      { "IsKnownNotNash[profile->BEHAV] =: BOOLEAN", 
-	GSM_IsKnownNotNash_Behav },
-      { "IsKnownNotNash[profile->MIXED] =: BOOLEAN",
-	GSM_IsKnownNotNash_Mixed },
-      { "IsKnownNotPerfect[profile->MIXED] =: BOOLEAN", 
-	GSM_IsKnownNotPerfect },
-      { "IsKnownNotSequential[profile->BEHAV] =: BOOLEAN",
-	GSM_IsKnownNotSequential },
-      { "IsKnownNotSubgamePerfect[profile->BEHAV] =: BOOLEAN",
-	GSM_IsKnownNotSubgamePerfect },
-      { "IsKnownPerfect[profile->MIXED] =: BOOLEAN", GSM_IsKnownPerfect },
-      { "IsKnownSequential[profile->BEHAV] =: BOOLEAN",
-	GSM_IsKnownSequential },
-      { "IsKnownSubgamePerfect[profile->BEHAV] =: BOOLEAN",
-	GSM_IsKnownSubgamePerfect },
+      { "IsNash[profile->BEHAV] =: BOOLEAN", GSM_IsNash_Behav },
+      { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
+      { "IsPerfect[profile->MIXED] =: BOOLEAN", GSM_IsPerfect },
+      { "IsSequential[profile->BEHAV] =: BOOLEAN", GSM_IsSequential },
+      { "IsSubgamePerfect[profile->BEHAV] =: BOOLEAN", GSM_IsSubgamePerfect },
       { "LiapValue[profile->BEHAV] =: NUMBER", GSM_LiapValue_Behav },
       { "LiapValue[profile->MIXED] =: NUMBER", GSM_LiapValue_Mixed },
       { "Mixed[support->NFSUPPORT] =: MIXED", GSM_Mixed },

@@ -34,10 +34,10 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 
 long Portion::_WriteWidth = 0;
 long Portion::_WritePrecis = 6;
-bool Portion::_WriteExpmode = false;
-bool Portion::_WriteQuoted = true;
-bool Portion::_WriteListBraces = true;
-bool Portion::_WriteListCommas = true;
+TriState Portion::_WriteExpmode = T_NO;
+TriState Portion::_WriteQuoted = T_YES;
+TriState Portion::_WriteListBraces = T_YES;
+TriState Portion::_WriteListCommas = T_YES;
 long Portion::_WriteListLF = 0;
 long Portion::_WriteListIndent = 2;
 long Portion::_WriteSolutionInfo = 1;
@@ -47,13 +47,13 @@ void Portion::_SetWriteWidth(long x)
 void Portion::_SetWritePrecis(long x)
 { _WritePrecis = x; }
 void Portion::_SetWriteExpmode(bool x)
-{ _WriteExpmode = x; }
+{ _WriteExpmode = (x) ? T_YES : T_NO; }
 void Portion::_SetWriteQuoted(bool x)
-{ _WriteQuoted = x; }
+{ _WriteQuoted = (x) ? T_YES : T_NO; }
 void Portion::_SetWriteListBraces(bool x)
-{ _WriteListBraces = x; }
+{ _WriteListBraces = (x) ? T_YES : T_NO; }
 void Portion::_SetWriteListCommas(bool x)
-{ _WriteListCommas = x; }
+{ _WriteListCommas = (x) ? T_YES : T_NO; }
 void Portion::_SetWriteListLF(long x)
 { _WriteListLF = x; }
 void Portion::_SetWriteListIndent(long x)
@@ -505,17 +505,21 @@ bool TextPortion::IsReference(void) const
 gPool BoolPortion::pool(sizeof(BoolPortion));
 
 BoolPortion::BoolPortion(bool value)
-  : _Value(new bool(value)), _ref(false)
+  : _Value(new TriState((value) ? T_YES : T_NO)), _ref(false)
 { }
 
-BoolPortion::BoolPortion(bool &value, bool ref)
+BoolPortion::BoolPortion(TriState value)
+  : _Value(new TriState(value)), _ref(false)
+{ }
+
+BoolPortion::BoolPortion(TriState &value, bool ref)
   : _Value(&value), _ref(ref)
 { }
 
 BoolPortion::~BoolPortion()
 { }
 
-bool& BoolPortion::Value(void) const
+TriState &BoolPortion::Value(void)
 { return *_Value; }
 
 PortionSpec BoolPortion::Spec(void) const
@@ -529,7 +533,12 @@ void BoolPortion::Output(gOutput& s) const
 
 gText BoolPortion::OutputString(void) const
 {
-  return (*_Value ? "True" : "False");  
+  if (*_Value == T_YES)
+    return "True";
+  else if (*_Value == T_NO)
+    return "False";
+  else /* (*_Value == T_DONTKNOW) */
+    return "Maybe";
 }
 
 Portion* BoolPortion::ValCopy(void) const
