@@ -26,32 +26,24 @@ class EFLiapParams  {
     EFLiapParams(gStatus & = gstatus);
 };
 
-
-bool Liap(const Efg &, EFLiapParams &,
-	  const BehavProfile<double> &, gList<BehavSolution> &,
-	  long &nevals, long &niters);
-
-
-class EFLiapBySubgame : public SubgameSolver  {
-  private:
-    int nevals, subgame_number;
-    gPVector<int> infoset_subgames;
-    EFLiapParams params;
-    BehavProfile<gNumber> start;
+class efgLiapSolve : public SubgameSolver  {
+private:
+  int nevals, subgame_number;
+  gPVector<int> infoset_subgames;
+  EFLiapParams params;
+  BehavProfile<gNumber> start;
     
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_ELIAPSUB; }    
+  int SolveSubgame(const Efg &, const EFSupport &,
+		   gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_ELIAPSUB; }    
 
-  public:
-    EFLiapBySubgame(const Efg &E, const EFLiapParams &,
-		    const BehavProfile<gNumber> &, int max = 0);
-    virtual ~EFLiapBySubgame();
-
-    int NumEvals(void) const   { return nevals; }
+public:
+  efgLiapSolve(const Efg &, const EFLiapParams &,
+	       const BehavProfile<gNumber> &, int max = 0);
+  virtual ~efgLiapSolve();
+  
+  int NumEvals(void) const   { return nevals; }
 };
-
-
 
 #endif    // ELIAP_H
 

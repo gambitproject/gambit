@@ -6,7 +6,7 @@
 
 #include "lemkesub.h"
 
-int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+int efgLcpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
@@ -35,21 +35,10 @@ int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   return 0;
 }
 
-LemkeBySubgame::LemkeBySubgame(const EFSupport &S, const LemkeParams &p,
+efgLcpNfgSolve::efgLcpNfgSolve(const EFSupport &S, const LemkeParams &p,
 			       int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 
-LemkeBySubgame::~LemkeBySubgame()   { }
+efgLcpNfgSolve::~efgLcpNfgSolve()   { }
 
-
-int Lemke(const EFSupport &support, const LemkeParams &params,
-	  gList<BehavSolution> &solutions, int &npivots, double &time)
-{
-  LemkeBySubgame module(support, params);
-  module.Solve(support);
-  npivots = module.NumPivots();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  return 1;
-}

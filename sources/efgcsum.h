@@ -23,27 +23,22 @@ class CSSeqFormParams     {
     CSSeqFormParams(gStatus &status_ = gstatus);
 };
 
-int CSSeqForm(const EFSupport &, const CSSeqFormParams &,
-	      gList<BehavSolution> &, int &npivots, double &time);
-
-
 #include "subsolve.h"
 
-class CSSeqFormBySubgame : public SubgameSolver  {
-  private:
-    long npivots;
-    CSSeqFormParams params;
+class efgLpSolve : public SubgameSolver  {
+private:
+  long npivots;
+  CSSeqFormParams params;
 
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
+  int SolveSubgame(const Efg &, const EFSupport &,
+		   gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
-  public:
-    CSSeqFormBySubgame(const EFSupport &,
-		       const CSSeqFormParams &, int max = 0);
-    virtual ~CSSeqFormBySubgame();
-
-    long NumPivots(void) const  { return npivots; }
+public:
+  efgLpSolve(const EFSupport &, const CSSeqFormParams &, int max = 0);
+  virtual ~efgLpSolve();
+  
+  long NumPivots(void) const  { return npivots; }
 };
 
 

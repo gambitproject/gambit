@@ -225,7 +225,7 @@ LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
 // Liapunov on efg
 //---------------------
 
-class EFLiapBySubgameG : public EFLiapBySubgame, public BaseBySubgameG {
+class EFLiapBySubgameG : public efgLiapSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -235,10 +235,10 @@ public:
   EFLiapBySubgameG(const Efg &p_efg, const EFLiapParams &p_params,
 		   const BehavSolution &p_start, int p_max = 0,
 		   EfgShowInterface *p_parent = 0)
-    : EFLiapBySubgame(p_efg, p_params, 
-		      BehavProfile<gNumber>(p_start), p_max),
+    : efgLiapSolve(p_efg, p_params, 
+		   BehavProfile<gNumber>(p_start), p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(EFSupport(p_efg)); }
+    { }
 };
 
 guiEfgSolveLiap::guiEfgSolveLiap(const Efg &p_efg, const EFSupport &p_support,
@@ -255,7 +255,7 @@ gList<BehavSolution> guiEfgSolveLiap::Solve(void) const
   LPS.GetParams(P);
   try {
     EFLiapBySubgameG M(ef, P, start, LPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(EFSupport(ef));
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -283,7 +283,7 @@ bool guiEfgSolveLiap::SolveSetup(void) const
 // Liapunov on nfg
 //---------------------
 
-class NFLiapBySubgameG : public NFLiapBySubgame, public BaseBySubgameG {
+class NFLiapBySubgameG : public efgLiapNfgSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 			gList<BehavSolution> &p_solutions)
@@ -297,10 +297,10 @@ public:
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   int p_max = 0, 
 		   EfgShowInterface *p_parent = 0)
-    : NFLiapBySubgame(p_efg, p_params,
+    : efgLiapNfgSolve(p_efg, p_params,
 		      BehavProfile<gNumber>(p_start), p_max),
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(EFSupport(p_efg)); }
+    { }
 };
 
 EfgNLiapG::EfgNLiapG(const Efg &p_efg, const EFSupport &p_support, 
@@ -318,7 +318,7 @@ gList<BehavSolution> EfgNLiapG::Solve(void) const
   try {
     NFLiapBySubgameG M(ef, P, start, Eliminate(), EliminateAll(),
 		       DominanceType(), LPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(EFSupport(ef));
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -394,7 +394,7 @@ SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *p_parent /* =0 */,
   Go();
 }
 
-class SeqFormBySubgameG : public SeqFormBySubgame, public BaseBySubgameG {
+class SeqFormBySubgameG : public efgLcpSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -404,9 +404,9 @@ public:
   SeqFormBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		    const SeqFormParams &p_params, int p_max = 0,
 		    EfgShowInterface *p_parent = 0)
-    : SeqFormBySubgame(p_support, p_params, p_max),
+    : efgLcpSolve(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(p_support); }
+    { }
 };
 
 EfgSeqFormG::EfgSeqFormG(const Efg &p_efg, const EFSupport &p_support, 
@@ -422,7 +422,7 @@ gList<BehavSolution> EfgSeqFormG::Solve(void) const
   SFPS.GetParams(P);
   try {
     SeqFormBySubgameG M(ef, sup, P, SFPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -478,7 +478,7 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *p_parent /* = 0 */,
   Go();
 }
 
-class LemkeBySubgameG : public LemkeBySubgame, public BaseBySubgameG {
+class LemkeBySubgameG : public efgLcpNfgSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -491,9 +491,9 @@ public:
 		  const LemkeParams &p_params, bool p_eliminate,
 		  bool p_iterative, bool p_strong, int p_max = 0,
 		  EfgShowInterface *p_parent = 0)
-    : LemkeBySubgame(p_support, p_params, p_max), 
+    : efgLcpNfgSolve(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(p_support); }
+    { }
 };
 
 EfgLemkeG::EfgLemkeG(const Efg &p_efg, const EFSupport &p_support, 
@@ -517,7 +517,7 @@ gList<BehavSolution> EfgLemkeG::Solve(void) const
   try {
     LemkeBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
 		      LPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &)  {
     return gList<BehavSolution>();
@@ -563,7 +563,7 @@ PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
   Go();
 }
 
-class PureNashBySubgameG : public PureNashBySubgame, public BaseBySubgameG {
+class PureNashBySubgameG : public efgEnumPureNfgSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -575,9 +575,9 @@ public:
   PureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		     bool p_eliminate, bool p_iterative, bool p_strong,
 		     int p_max = 0, EfgShowInterface *p_parent = 0)
-    : PureNashBySubgame(p_support, gstatus, p_max),
+    : efgEnumPureNfgSolve(p_support, gstatus, p_max),
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(p_support); }
+    { }
 };
 
 EfgPureNashG::EfgPureNashG(const Efg &p_efg, const EFSupport &p_support, 
@@ -594,7 +594,7 @@ gList<BehavSolution> EfgPureNashG::Solve(void) const
   try {
     PureNashBySubgameG M(ef, sup, Eliminate(), EliminateAll(),
 			 DominanceType(), PNPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -634,7 +634,7 @@ public:
   EPureNashBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		      int p_max = 0, EfgShowInterface *p_parent = 0)
     : efgEnumPure(p_max), BaseBySubgameG(p_parent, p_efg)
-    { Solve(p_support); }
+    { }
 };
 
 EfgEPureNashG::EfgEPureNashG(const Efg &p_efg, const EFSupport &p_support, 
@@ -650,7 +650,7 @@ gList<BehavSolution> EfgEPureNashG::Solve(void) const
 
   try {
     EPureNashBySubgameG M(ef, sup, PNPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -744,7 +744,7 @@ public:
 		 int p_max = 0, EfgShowInterface *p_parent = 0)
     : EnumBySubgame(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(p_support); }
+    { }
 };
 
 EfgEnumG::EfgEnumG(const Efg &p_efg, const EFSupport &p_support,
@@ -762,7 +762,7 @@ gList<BehavSolution> EfgEnumG::Solve(void) const
   try {
     EnumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
 		     DominanceType(), EPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -832,7 +832,7 @@ LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames)
 //---------------------
 
 
-class ZSumBySubgameG : public ZSumBySubgame, public BaseBySubgameG {
+class ZSumBySubgameG : public efgLpNfgSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_number, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -845,9 +845,9 @@ public:
 		 const ZSumParams &p_params, bool p_eliminate,
 		 bool p_iterative, bool p_strong, int p_max = 0,
 		 EfgShowInterface *p_parent = 0)
-    : ZSumBySubgame(p_support, p_params, p_max), 
+    : efgLpNfgSolve(p_support, p_params, p_max), 
       BaseBySubgameG(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { Solve(p_support); }
+    { }
 };
 
 EfgZSumG::EfgZSumG(const Efg &p_efg, const EFSupport &p_support,
@@ -871,7 +871,7 @@ gList<BehavSolution> EfgZSumG::Solve(void) const
   try {
     ZSumBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(), DominanceType(),
 		     LPPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -898,7 +898,7 @@ bool EfgZSumG::SolveSetup(void) const
 // Lp on efg
 //---------------------
 
-class EfgCSumBySubgameG : public CSSeqFormBySubgame, public BaseBySubgameG {
+class EfgCSumBySubgameG : public efgLpSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_number, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -908,9 +908,9 @@ public:
   EfgCSumBySubgameG(const Efg &p_efg, const EFSupport &p_support,
 		    const CSSeqFormParams &p_params, int p_max = 0,
 		    EfgShowInterface *p_parent = 0)
-    : CSSeqFormBySubgame(p_support, p_params, p_max),
+    : efgLpSolve(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(p_support); }
+    { }
 };
 
 EfgCSumG::EfgCSumG(const Efg &p_efg, const EFSupport &p_support,
@@ -933,7 +933,7 @@ gList<BehavSolution> EfgCSumG::Solve(void) const
  
   try {
     EfgCSumBySubgameG M(ef, sup, P, LPPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -1008,7 +1008,7 @@ SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
   Go();
 }
 
-class SimpdivBySubgameG : public SimpdivBySubgame, public BaseBySubgameG {
+class SimpdivBySubgameG : public efgSimpDivNfgSolve, public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
 		       gList<BehavSolution> &p_solutions)
@@ -1021,9 +1021,9 @@ public:
 		    const SimpdivParams &p_params, bool p_eliminate,
 		    bool p_iterative, bool p_strong, int p_max = 0,
 		    EfgShowInterface *p_parent = 0)
-    : SimpdivBySubgame(p_support, p_params, p_max),
+    : efgSimpDivNfgSolve(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(p_support); }
+    { }
 };
 
 EfgSimpdivG::EfgSimpdivG(const Efg &p_efg, const EFSupport &p_support, 
@@ -1041,7 +1041,7 @@ gList<BehavSolution> EfgSimpdivG::Solve(void) const
   try {
     SimpdivBySubgameG M(ef, sup, P, Eliminate(), EliminateAll(),
 			DominanceType(), SPS.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
@@ -1101,7 +1101,7 @@ guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
 // PolEnum on nfg
 //------------------
 
-class guiPolEnumEfgByNfgSubgame : public PolEnumBySubgame,
+class guiPolEnumEfgByNfgSubgame : public efgPolEnumNfgSolve,
 				  public BaseBySubgameG {
 protected:
   void SelectSolutions(int p_subgame, const Efg &p_efg,
@@ -1112,9 +1112,9 @@ public:
   guiPolEnumEfgByNfgSubgame(const Efg &p_efg, const EFSupport &p_support,
 			    const PolEnumParams &p_params, int p_max = 0,
 			    EfgShowInterface *p_parent = 0)
-    : PolEnumBySubgame(p_support, p_params, p_max),
+    : efgPolEnumNfgSolve(p_support, p_params, p_max),
       BaseBySubgameG(p_parent, p_efg)
-    { Solve(p_support); }
+    { }
 };
 
 guiPolEnumEfgNfg::guiPolEnumEfgNfg(const EFSupport &p_support, 
@@ -1131,7 +1131,7 @@ gList<BehavSolution> guiPolEnumEfgNfg::Solve(void) const
 
   try {
     guiPolEnumEfgByNfgSubgame M(ef, sup, P, PES.MaxSolns(), parent);
-    return M.GetSolutions();
+    return M.Solve(sup);
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();

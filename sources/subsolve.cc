@@ -236,7 +236,7 @@ SubgameSolver::SubgameSolver(int max)
 SubgameSolver::~SubgameSolver()  
 { }
 
-void SubgameSolver::Solve(const EFSupport &p_support)
+gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
 {
   gWatch watch;
 
@@ -274,6 +274,7 @@ void SubgameSolver::Solve(const EFSupport &p_support)
   delete solution;
 
   time = watch.Elapsed();
+  return solutions;
 }
 
 

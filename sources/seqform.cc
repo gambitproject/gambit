@@ -37,20 +37,8 @@ int _SeqForm(const EFSupport &support, const SeqFormParams &params,
   return 1;
 }
 
-int SeqForm(const EFSupport &support,
-	    const SeqFormParams &params, gList<BehavSolution> &solutions,
-	    int &npivots, double &time)
-{
-  SeqFormBySubgame module(support, params);
-  module.Solve(support);
-  solutions = module.GetSolutions();
-  npivots = module.NumPivots();
-  time = module.Time();
-  return 1;
-}
-
-int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-				   gList<BehavSolution> &solns)
+int efgLcpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			      gList<BehavSolution> &solns)
 {
   int npiv;
   double time;
@@ -61,12 +49,12 @@ int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
   return 1;
 }
 
-SeqFormBySubgame::SeqFormBySubgame(const EFSupport &S,
-				   const SeqFormParams &p, int max)
+efgLcpSolve::efgLcpSolve(const EFSupport &S,
+			 const SeqFormParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 
-SeqFormBySubgame::~SeqFormBySubgame()   { }
+efgLcpSolve::~efgLcpSolve()   { }
 
 
 template class SeqFormModule<double>;

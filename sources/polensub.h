@@ -11,24 +11,20 @@
 #include "behavsol.h"
 #include "subsolve.h"
 
-class PolEnumBySubgame : public SubgameSolver  {
-  private:
-    int nevals;
-    PolEnumParams params;
+class efgPolEnumNfgSolve : public SubgameSolver  {
+private:
+  int nevals;
+  PolEnumParams params;
 
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_POLENSUB; }    
+  int SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_POLENSUB; }    
 
-  public:
-    PolEnumBySubgame(const EFSupport &, const PolEnumParams &, int max = 0);
-    virtual ~PolEnumBySubgame();
+public:
+  efgPolEnumNfgSolve(const EFSupport &, const PolEnumParams &, int max = 0);
+  virtual ~efgPolEnumNfgSolve();
 
-    int NumEvals(void) const   { return nevals; }
+  int NumEvals(void) const   { return nevals; }
 };
-
-int PolEnum(const EFSupport &, const PolEnumParams &,
-	    gList<BehavSolution> &, long &nevals, double &time);
 
 #endif   // POLENSUB_H
 

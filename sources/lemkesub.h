@@ -10,24 +10,19 @@
 #include "subsolve.h"
 #include "lemke.h"
 
-class LemkeBySubgame : public SubgameSolver  {
-  private:
-    int npivots;
-    LemkeParams params;
+class efgLcpNfgSolve : public SubgameSolver  {
+private:
+  int npivots;
+  LemkeParams params;
 
-    int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution> &);
-    EfgAlgType AlgorithmID() const { return EfgAlg_LEMKESUB; }    
+  int SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  EfgAlgType AlgorithmID() const { return EfgAlg_LEMKESUB; }    
 
-  public:
-    LemkeBySubgame(const EFSupport &, const LemkeParams &, int max = 0);
-    virtual ~LemkeBySubgame();
+public:
+  efgLcpNfgSolve(const EFSupport &, const LemkeParams &, int max = 0);
+  virtual ~efgLcpNfgSolve();
 
-    int NumPivots(void) const   { return npivots; }
+  int NumPivots(void) const   { return npivots; }
 };
-
-
-int Lemke(const EFSupport &, const LemkeParams &,
-	  gList<BehavSolution> &, int &npivots, double &time);
 
 #endif   // LEMKESUB_H

@@ -46,10 +46,9 @@ int Enum(const EFSupport &support, const EnumParams &params,
 	 gList<BehavSolution> &solutions, long &npivots, double &time)
 {
   EnumBySubgame module(support, params);
-  module.Solve(support);
+  solutions = module.Solve(support);
   npivots = module.NumPivots();
   time = module.Time();
-  solutions = module.GetSolutions();
   return 1;
 }
 

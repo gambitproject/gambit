@@ -1,5 +1,5 @@
 //
-// FILE: psnesub.h -- Solve efg by subgames in pure nfg strategies
+// FILE: psnesub.h -- Solve efg by subgames in pure mixed strategies
 //
 // $Id$
 //
@@ -10,7 +10,7 @@
 #include "gstatus.h"
 #include "subsolve.h"
 
-class PureNashBySubgame : public SubgameSolver  {
+class efgEnumPureNfgSolve : public SubgameSolver  {
 private:
   gStatus &m_status;
 
@@ -19,12 +19,9 @@ private:
   EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
   
 public:
-  PureNashBySubgame(const EFSupport &, gStatus &, int max = 0);
-  virtual ~PureNashBySubgame();
+  efgEnumPureNfgSolve(const EFSupport &, gStatus &, int max = 0);
+  virtual ~efgEnumPureNfgSolve();
 };
 
-int EnumPureNfg(const EFSupport &, int, gStatus &,
-		gList<BehavSolution> &, double &time);
-	     
 #endif   // PSNESUB_H
 

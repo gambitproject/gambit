@@ -15,42 +15,38 @@ class efgAlgorithm {
 public:
   virtual ~efgAlgorithm();
 
-  virtual void Solve(const EFSupport &) = 0;
+  virtual gList<BehavSolution> Solve(const EFSupport &) = 0;
 };
 
 class NFSupport;
 class SubgameSolver   {
-  private:
-    int max_solns, subgame_number;
-    double time;
-    BehavProfile<gNumber> *solution;
-    gList<BehavSolution> solutions;
+private:
+  int max_solns, subgame_number;
+  double time;
+  BehavProfile<gNumber> *solution;
+  gList<BehavSolution> solutions;
 
-    gArray<gArray<Infoset *> *> infosets;
+  gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(const EFSupport &, Node *, gList<BehavSolution> &,
-		      gList<EFOutcome *> &);
+  void FindSubgames(const EFSupport &, Node *, gList<BehavSolution> &,
+		    gList<EFOutcome *> &);
+  
+protected:
+  virtual int SolveSubgame(const Efg &, const EFSupport &,
+			   gList<BehavSolution> &) = 0;
+  virtual void ViewSubgame(int, const Efg &);
 
-  protected:
-    virtual int SolveSubgame(const Efg &, const EFSupport &,
-			     gList<BehavSolution> &) = 0;
-    // changed to return int = status.Get()
+  virtual void ViewNormal(const Nfg &, NFSupport *&);
+  virtual void SelectSolutions(int, const Efg &, gList<BehavSolution> &);
+  virtual EfgAlgType AlgorithmID() const = 0;
 
-    virtual void ViewSubgame(int, const Efg &);
-
-    virtual void ViewNormal(const Nfg &, NFSupport *&);
-    virtual void SelectSolutions(int, const Efg &, gList<BehavSolution> &);
-    virtual EfgAlgType AlgorithmID() const = 0;
-
-  public:
-    SubgameSolver(int maxsol = 0);
-    virtual ~SubgameSolver();
+public:
+  SubgameSolver(int maxsol = 0);
+  virtual ~SubgameSolver();
     
-    void Solve(const EFSupport &);
-
-    double Time(void) const   { return time; }
-    const gList<BehavSolution> &GetSolutions(void) const
-      { return solutions; }
+  gList<BehavSolution> Solve(const EFSupport &);
+  
+  double Time(void) const   { return time; }
 };
 
 

@@ -6,8 +6,8 @@
 
 #include "simpsub.h"
 
-int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
-				   gList<BehavSolution> &solns)
+int efgSimpDivNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+				     gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -34,22 +34,9 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   return 0;
 }
 
-SimpdivBySubgame::SimpdivBySubgame(const EFSupport &S, 
-				   const SimpdivParams &p, int max)
+efgSimpDivNfgSolve::efgSimpDivNfgSolve(const EFSupport &S, 
+				       const SimpdivParams &p, int max)
   : SubgameSolver(max), params(p)
 { }
 
-SimpdivBySubgame::~SimpdivBySubgame()   { }
-
-int Simpdiv(const EFSupport &support, const SimpdivParams &params,
-	    gList<BehavSolution> &solutions,
-	    int &nevals, int &/*niters*/, double &time)
-{
-  SimpdivBySubgame module(support, params);
-  module.Solve(support);
-  
-  solutions = module.GetSolutions();
-  nevals = module.NumEvals();
-  time = module.Time();
-  return 1;
-}
+efgSimpDivNfgSolve::~efgSimpDivNfgSolve()   { }

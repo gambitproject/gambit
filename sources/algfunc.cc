@@ -199,9 +199,9 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      double time;
-      EnumPureNfg(support, 0, gstatus, solutions, time);
-      ((NumberPortion *) param[4])->SetValue(time);
+      efgEnumPureNfgSolve algorithm(support, gstatus);
+      algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       gstatus.Reset();
@@ -214,8 +214,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     try {
       gWatch watch;
       efgEnumPure algorithm;
-      algorithm.Solve(support);
-      solutions = algorithm.GetSolutions(); 
+      solutions = algorithm.Solve(support);
       ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
@@ -508,7 +507,7 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
 
 static Portion *GSM_Lcp_Efg(Portion **param)
 {
-  EFSupport& S = *((EfSupportPortion*) param[0])->Value();
+  EFSupport &support = *((EfSupportPortion*) param[0])->Value();
 
   if (((BoolPortion *) param[1])->Value())   {
     LemkeParams params;
@@ -520,12 +519,10 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
     gList<BehavSolution> solutions;
     try {
-      double time;
-      int npivots;
-      
-      Lemke(S, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
-      ((NumberPortion *) param[5])->SetValue(time);
+      efgLcpNfgSolve algorithm(support, params);
+      solutions = algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -543,12 +540,10 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
     gList<BehavSolution> solutions;
     try {
-      double time;
-      int npivots;
-
-      SeqForm(S, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
-      ((NumberPortion *) param[5])->SetValue(time);
+      efgLcpSolve algorithm(support, params);
+      solutions = algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -625,12 +620,10 @@ static Portion *GSM_Liap_Behav(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      NFLiapBySubgame M(E, LP, start);
-      M.Solve(EFSupport(E));
-      solutions = M.GetSolutions();
-
+      efgLiapNfgSolve algorithm(E, LP, start);
+      solutions = algorithm.Solve(EFSupport(E));
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+      ((NumberPortion *) param[9])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       LP.status.Reset();
@@ -657,12 +650,10 @@ static Portion *GSM_Liap_Behav(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      EFLiapBySubgame M(E, LP, start);
-      M.Solve(EFSupport(E));
-      solutions = M.GetSolutions();
-
+      efgLiapSolve algorithm(E, LP, start);
+      solutions = algorithm.Solve(EFSupport(E));
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(M.NumEvals());
+      ((NumberPortion *) param[9])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       LP.status.Reset();
@@ -818,11 +809,10 @@ static Portion *GSM_Lp_Efg(Portion **param)
 
     gList<BehavSolution> solutions;
     try {
-      double time;
-      int npivots;
-      ZSum(support, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
-      ((NumberPortion *) param[5])->SetValue(time);
+      efgLpNfgSolve algorithm(support, params);
+      solutions = algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -840,11 +830,10 @@ static Portion *GSM_Lp_Efg(Portion **param)
     gList<BehavSolution> solutions;
 
     try {
-      double time;
-      int npivots;
-      CSSeqForm(support, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
-      ((NumberPortion *) param[5])->SetValue(time);
+      efgLpSolve algorithm(support, params);
+      solutions = algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
+      ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -899,7 +888,7 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
   double time;
   gList<BehavSolution> solutions;
   
-  if ( ((BoolPortion *) param[1])->Value() ) {
+  if (((BoolPortion *) param[1])->Value()) {
     PolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
     params.precision = ((PrecisionPortion *) param[3])->Value();
@@ -907,9 +896,9 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
     params.trace = ((NumberPortion *) param[7])->Value();
 
     try {
-      long npivots;
-      PolEnum(support, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
+      efgPolEnumNfgSolve algorithm(support, params);
+      solutions = algorithm.Solve(support);
+      ((NumberPortion *) param[4])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -1081,12 +1070,10 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
 
   gList<BehavSolution> solutions;
   try {
-    int nevals, niters;
-    double time;
-    Simpdiv(support, params, solutions, nevals, niters, time);
-
-    ((NumberPortion *) param[6])->SetValue(nevals);
-    ((NumberPortion *) param[7])->SetValue(time);
+    efgSimpDivNfgSolve algorithm(support, params);
+    solutions = algorithm.Solve(support);
+    ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
+    ((NumberPortion *) param[7])->SetValue(algorithm.Time());
   }
   catch (gSignalBreak &) { 
     params.status.Reset();

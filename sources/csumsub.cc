@@ -7,7 +7,7 @@
 #include "csumsub.h"
 #include "nfgcsum.h"
 
-int ZSumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+int efgLpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
 				gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
@@ -35,22 +35,9 @@ int ZSumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   return 0;
 }
 
-ZSumBySubgame::ZSumBySubgame(const EFSupport &S, const ZSumParams &p,
+efgLpNfgSolve::efgLpNfgSolve(const EFSupport &S, const ZSumParams &p,
 			     int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 
-ZSumBySubgame::~ZSumBySubgame()   { }
-
-
-int ZSum(const EFSupport &support, const ZSumParams &params,
-	 gList<BehavSolution> &solutions, int &npivots, double &time)
-{
-  ZSumBySubgame module(support, params);
-  module.Solve(support);
-  npivots = module.NumPivots();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  return 1;
-}
-
+efgLpNfgSolve::~efgLpNfgSolve()   { }

@@ -204,10 +204,8 @@ bool Liap(const Efg &E, EFLiapParams &params,
 // Interfacing to solve-by-subgame code
 //------------------------------------------
 
-
-
-int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
-				  gList<BehavSolution> &solns)
+int efgLiapSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+			       gList<BehavSolution> &solns)
 {
   BehavProfile<double> bp(sup);
   
@@ -236,8 +234,8 @@ int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
 extern void MarkedSubgameRoots(const Efg &, gList<Node *> &);
 
-EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
-				 const BehavProfile<gNumber> &s, int max)
+efgLiapSolve::efgLiapSolve(const Efg &E, const EFLiapParams &p,
+			   const BehavProfile<gNumber> &s, int max)
   : SubgameSolver(max), nevals(0), subgame_number(0),
     infoset_subgames(E.NumInfosets()), params(p), start(s)
 {
@@ -261,6 +259,6 @@ EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
 
 }
 
-EFLiapBySubgame::~EFLiapBySubgame()   { }
+efgLiapSolve::~efgLiapSolve()   { }
 
 

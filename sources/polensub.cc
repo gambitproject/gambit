@@ -6,8 +6,8 @@
 
 #include "polensub.h"
 
-int PolEnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
-				   gList<BehavSolution> &solns)
+int efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+				     gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
 
@@ -36,21 +36,10 @@ int PolEnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   return 0;
 }
 
-PolEnumBySubgame::PolEnumBySubgame(const EFSupport &S,
-				   const PolEnumParams &p, int max)
+efgPolEnumNfgSolve::efgPolEnumNfgSolve(const EFSupport &S,
+				       const PolEnumParams &p, int max)
   : SubgameSolver(max), nevals(0), params(p)
 { }
 
-PolEnumBySubgame::~PolEnumBySubgame()   { }
-
-int PolEnum(const EFSupport &support, const PolEnumParams &params,
-	    gList<BehavSolution> &solutions, long &nevals, double &time)
-{
-  PolEnumBySubgame module(support, params);
-  module.Solve(support);
-  nevals = module.NumEvals();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  return 1;
-}
+efgPolEnumNfgSolve::~efgPolEnumNfgSolve()   { }
 

@@ -24,8 +24,8 @@ CSSeqFormParams::CSSeqFormParams(gStatus &status_)
 int _CSSeqForm(const EFSupport &, const CSSeqFormParams &,
 	       gList<BehavSolution> &, int &npivots, double &time);
 
-int CSSeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
-				     gList<BehavSolution> &solns)
+int efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+			     gList<BehavSolution> &solns)
 {
   int npiv;
   double time;
@@ -34,16 +34,14 @@ int CSSeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
   return 1;
 }
 
-CSSeqFormBySubgame::CSSeqFormBySubgame(const EFSupport &S,
-				       const CSSeqFormParams &p,
-				       int max)
+efgLpSolve::efgLpSolve(const EFSupport &S, const CSSeqFormParams &p, int max)
   : SubgameSolver(max), npivots(0), params(p)
 { }
 
-CSSeqFormBySubgame::~CSSeqFormBySubgame()   { }
+efgLpSolve::~efgLpSolve()   { }
 
-int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
-	       gList<BehavSolution> &solutions, int &npivots, double &time)
+static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
+		      gList<BehavSolution> &solutions, int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)   {
     CSSeqFormModule<double> module(support, params);
@@ -63,17 +61,6 @@ int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   }
   return 1;
 }    
-
-int CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
-	      gList<BehavSolution> &solutions, int &npivots, double &time)
-{
-  CSSeqFormBySubgame module(support, params);
-  module.Solve(support);
-  npivots = module.NumPivots();
-  time = module.Time();
-  solutions = module.GetSolutions();
-  return 1;
-}
 
 template class CSSeqFormModule<double>;
 template class CSSeqFormModule<gRational>;
