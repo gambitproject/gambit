@@ -31,17 +31,29 @@ extern PyObject *gbt_read_efg(PyObject *, PyObject *);
 extern PyObject *gbt_new_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_read_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_nash_enummixed(PyObject *, PyObject *);
+extern PyObject *gbt_nash_enumpoly(PyObject *, PyObject *);
+extern PyObject *gbt_nash_enumpure(PyObject *, PyObject *);
+extern PyObject *gbt_nash_lcp(PyObject *, PyObject *);
 extern PyObject *gbt_nash_liap(PyObject *, PyObject *);
 extern PyObject *gbt_nash_logit(PyObject *, PyObject *);
+extern PyObject *gbt_nash_lp(PyObject *, PyObject *);
+extern PyObject *gbt_nash_simpdiv(PyObject *, PyObject *);
+extern PyObject *gbt_nash_yamamoto(PyObject *, PyObject *);
 
 static struct PyMethodDef gambit_methods[] = {
   { "EnumMixedSolve", gbt_nash_enummixed, 1 },
+  { "EnumPolySolve", gbt_nash_enumpoly, 1 },
+  { "EnumPureSolve", gbt_nash_enumpure, 1 },
+  { "LcpSolve", gbt_nash_lcp, 1 },
   { "LiapSolve", gbt_nash_liap, 1 },
   { "LogitSolve", gbt_nash_logit, 1 },
+  { "LpSolve", gbt_nash_lp, 1 },
   { "NewEfg", gbt_new_efg, 1 },
   { "NewNfg", gbt_new_nfg, 1 },
   { "ReadEfg", gbt_read_efg, 1 },
   { "ReadNfg", gbt_read_nfg, 1 },
+  { "SimpDivSolve", gbt_nash_simpdiv, 1 },
+  { "YamamotoSolve", gbt_nash_yamamoto, 1 },
   { NULL, NULL }
 };
 

@@ -27,10 +27,20 @@
 #include <Python.h>
 #include "base/gnullstatus.h"
 #include "nash/nfgmixed.h"
+#include "nash/efgpoly.h"
+#include "nash/nfgpoly.h"
+#include "nash/efgpure.h"
+#include "nash/nfgpure.h"
+#include "nash/efglcp.h"
+#include "nash/nfglcp.h"
 #include "nash/efgliap.h"
-#include "nash/efglogit.h"
 #include "nash/nfgliap.h"
+#include "nash/efglogit.h"
 #include "nash/nfglogit.h"
+#include "nash/efglp.h"
+#include "nash/nfglp.h"
+#include "nash/nfgsimpdiv.h"
+#include "nash/nfgyamamoto.h"
 #include "pygambit.h"
 
 /************************************************************************
@@ -65,6 +75,142 @@ gbt_nash_enummixed(PyObject */*self*/, PyObject *args)
   else if (is_efsupportobject(support)) {
     Py_INCREF(Py_None);
     return Py_None;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_enumpoly(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashEnumPoly algorithm;
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashEnumPoly algorithm;
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_enumpure(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashEnumPure algorithm;
+    algorithm.SetStopAfter(0);
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashEnumPure algorithm;
+    algorithm.SetStopAfter(0);
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_lcp(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashLcp<double> algorithm;
+    algorithm.SetStopAfter(0);
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashLcp<double> algorithm;
+    algorithm.SetStopAfter(0);
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
   }
   else {
     return NULL;
@@ -170,6 +316,116 @@ gbt_nash_logit(PyObject */*self*/, PyObject *args)
     }  
 
     return list;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_lp(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashLp<double> algorithm;
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashLp<double> algorithm;
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_simpdiv(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashSimpdiv<double> algorithm;
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  else {
+    return NULL;
+  }
+}
+
+PyObject *
+gbt_nash_yamamoto(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashYamamoto algorithm;
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    Py_INCREF(Py_None);
+    return Py_None;
   }
   else {
     return NULL;
