@@ -131,7 +131,7 @@ public:
 
   // Now come the solution functions
   void Solve(int);
-  void SolveSetup(int what);
+  void SolveStandard(void);
   void InspectSolutions(int what);
   void ClearSolutions(void);
   void RemoveSolutions(void);

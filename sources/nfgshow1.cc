@@ -188,11 +188,6 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     SetEditable(FALSE);
     SetMenuBar(MakeMenuBar(0));
 
-    // Now check/uncheck all of the checkable menu items
-    Bool use_standard;
-    char *defaults_file = "gambit.ini";
-    wxGetResource(SOLN_SECT, "Nfg-Use-Standard", &use_standard, defaults_file);
-    GetMenuBar()->Check(NFG_SOLVE_STANDARD_MENU, use_standard);
     Redraw();
     Show(TRUE);
 }
@@ -270,19 +265,11 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   solve_menu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
 		     "Solve with a particular algorithm");
 
-  solve_menu->AppendSeparator();
-
-  wxMenu *solve_settings_menu = new wxMenu;
-  solve_settings_menu->Append(NFG_SOLVE_ALGORITHM_MENU, "&Algorithm", 
-			      "Choose current algorithm");
-  solve_settings_menu->Append(NFG_SOLVE_DOMINANCE_MENU, "&Dominance", "ElimDom options");
-  solve_menu->Append(NFG_SOLVE_SETTINGS_MENU,  "&Custom", solve_settings_menu, 
-		     "Control default options");
-  solve_menu->Append(NFG_SOLVE_GAMEINFO_MENU,  "Game&Info", "Display some game info");
   
   wxMenu *inspect_menu = new wxMenu;
   inspect_menu->Append(NFG_SOLVE_INSPECT_MENU,   "&Solutions", "Inspect existing solutions");
   inspect_menu->Append(NFG_SOLVE_FEATURES_MENU,  "In&fo",      "Advanced solution features");
+  inspect_menu->Append(NFG_SOLVE_GAMEINFO_MENU,  "Game&Info", "Display some game info");
   
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(NFG_PREFS_OUTCOMES_MENU, "&Outcomes", "Configure outcome display");
@@ -501,9 +488,6 @@ void NormalSpread::OnPrint(void)
 //****************************WINDOW EVENT HANDLERS************************
 // OnMenuCommand
 
-#define     SOLVE_SETUP_CUSTOM      0
-#define     SOLVE_SETUP_STANDARD    1
-
 void NormalSpread::OnMenuCommand(int id)
 {
   switch (id) {
@@ -546,12 +530,8 @@ void NormalSpread::OnMenuCommand(int id)
     parent->ChangeSupport(CREATE_DIALOG);
     break;
 
-  case NFG_SOLVE_ALGORITHM_MENU: 
-    parent->SolveSetup(SOLVE_SETUP_CUSTOM);
-    break;
-
   case NFG_SOLVE_STANDARD_MENU: 
-    parent->SolveSetup(SOLVE_SETUP_STANDARD);
+    parent->SolveStandard();
     break;
 
   case NFG_SOLVE_DOMINANCE_MENU: 

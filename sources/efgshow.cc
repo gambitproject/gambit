@@ -133,9 +133,14 @@ void EfgShow::OnSelectedMoved(const Node *n)
 
 void EfgShow::SolveStandard(void)
 {
-  EfgSolveStandardDialog ESS(ef, this);
+  EfgSolveStandardDialog *ESSD = new EfgSolveStandardDialog(ef, this);
+  if (ESSD->Completed() != wxOK)  {
+    delete ESSD;
+    return;
+  }
+  delete ESSD;
 
-  if (ESS.Completed() != wxOK)  return;
+  EfgSolveSettings ESS(ef);
 
   guiEfgSolution *solver;
 

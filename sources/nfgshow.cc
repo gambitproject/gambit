@@ -770,69 +770,87 @@ void NfgShow::Solve(int id)
 }
 
 
-#define     SOLVE_SETUP_CUSTOM      0
-#define     SOLVE_SETUP_STANDARD    1
+void NfgShow::SolveStandard(void)
+{ 
+  NfgSolveStandardDialog *NSSD = new NfgSolveStandardDialog(nf, (wxWindow *) spread);
+  if (NSSD->Completed() != wxOK)  return;
+  delete NSSD;
 
-void NfgShow::SolveSetup(int what)
-{
-    if (what == SOLVE_SETUP_CUSTOM)
-    {
-        NfgSolveParamsDialog NSD(nf, InterfaceOk(), (wxWindow *)spread);
-        //   bool from_efg = 0;
+  NfgSolveSettings NSD(nf);
 
-        if (NSD.GetResult() == SD_PARAMS)
-        {
-            switch (NSD.GetAlgorithm())
-            {
-            case NFG_ENUMPURE_SOLUTION: 
-                NfgEnumPureG(nf, *cur_sup, this).SolveSetup();
-                break;
+  NFSupport *sup = (supports.Length() > 1) ? cur_sup : 0;
 
-            case NFG_LCP_SOLUTION:       
-                NfgLemkeG(nf, *cur_sup, this).SolveSetup();
-                break;
+  if (!sup)
+    sup = MakeSolnSupport();
 
-            case NFG_LIAP_SOLUTION:      
-                NfgLiapG(nf, *cur_sup, this).SolveSetup();
-                break;
+  int old_max_soln = solns.Length();  // used for extensive update
 
-            case NFG_QREALL_SOLUTION: 
-                NfgQreAllG(nf, *cur_sup, this).SolveSetup();
-                break;
+  wxBeginBusyCursor();
 
-            case NFG_QRE_SOLUTION:     
-                NfgQreG(nf, *cur_sup, this).SolveSetup();
-                break;
+  NfgSolutionG *solver;
 
-            case NFG_SIMPDIV_SOLUTION:   
-                NfgSimpdivG(nf, *cur_sup, this).SolveSetup();
-                break;
+  switch (NSD.GetAlgorithm()) {
+  case NFG_ENUMPURE_SOLUTION:
+    solver = new NfgEnumPureG(nf, *sup, this);
+    break;
+  case NFG_ENUMMIXED_SOLUTION:
+    solver = new NfgEnumG(nf, *sup, this);
+    break;
+  case NFG_LCP_SOLUTION:
+    solver = new NfgLemkeG(nf, *sup, this);
+    break;
+  case NFG_LP_SOLUTION:
+    solver = new NfgZSumG(nf, *sup, this);
+    break;
+  case NFG_LIAP_SOLUTION:
+    solver = new NfgLiapG(nf, *sup, this);
+    break;
+  case NFG_SIMPDIV_SOLUTION:
+    solver = new NfgSimpdivG(nf, *sup, this);
+    break;
+  case NFG_QRE_SOLUTION:
+    solver = new NfgQreG(nf, *sup, this);
+    break;
+  case NFG_QREALL_SOLUTION:
+    solver = new NfgQreAllG(nf, *sup, this);
+    break;
+  default:
+    // shouldn't happen.  we'll ignore silently
+    return;
+  }
 
-            case NFG_ENUMMIXED_SOLUTION:
-                NfgEnumG(nf, *cur_sup, this).SolveSetup();
-                break;
+  wxBeginBusyCursor();
 
-            case NFG_LP_SOLUTION:        
-                NfgLiapG(nf, *cur_sup, this).SolveSetup();
-                break;
+  try {
+    solns += solver->Solve();
+    wxEndBusyCursor();
+  }
+  catch (gException &E) {
+    guiExceptionDialog(E.Description(), Frame());
+    wxEndBusyCursor();
+  }
+    
+  delete solver;
 
-            default:                    
-                assert(0 && "Unknown NFG algorithm");
-                break;
-            }
-        }
-
-        if (NSD.GetResult() != SD_CANCEL)
-            spread->GetMenuBar()->Check(NFG_SOLVE_STANDARD_MENU, FALSE);
+  if (old_max_soln != solns.Length()) {
+    // Now, transfer the NEW solutions to extensive form if requested
+    if (NSD.GetExtensive()) {
+      for (int i = old_max_soln+1; i <= solns.Length(); i++) 
+	SolutionToExtensive(solns[i]);
     }
-    else    // SOLVE_SETUP_STANDARD
-    {
-        NfgSolveStandardDialog(nf, (wxWindow *)spread);
-        spread->GetMenuBar()->Check(NFG_SOLVE_STANDARD_MENU, TRUE); // using standard now
+
+    if (!spread->HaveProbs()) {
+      spread->MakeProbDisp();
+      spread->Redraw();
     }
+
+    ChangeSolution(solns.VisibleLength());
+    spread->EnableInspect(TRUE);
+    
+    InspectSolutions(CREATE_DIALOG);
+  }  
+
 }
-
-
 
 void NfgShow::SetFileName(const gText &s)
 {
