@@ -36,17 +36,14 @@ enum {
   GBT_NODE_TOKEN_LINE = 0,
   GBT_NODE_TOKEN_BOX = 1,
   GBT_NODE_TOKEN_CIRCLE = 2,
-  GBT_NODE_TOKEN_DIAMOND = 3
+  GBT_NODE_TOKEN_DOT = 3,
+  GBT_NODE_TOKEN_DIAMOND = 4
 };
 
 enum {
-  GBT_BRANCH_STYLE_LINE = 0,
-  GBT_BRANCH_STYLE_FORKTINE = 1
-};
-
-enum {
-  GBT_BRANCH_LABEL_HORIZONTAL = 0,
-  GBT_BRANCH_LABEL_ROTATED = 1
+  GBT_BRANCH_STYLE_FORKTINE = 0,
+  GBT_BRANCH_STYLE_HORIZONTAL = 1,
+  GBT_BRANCH_STYLE_ROTATED = 2
 };
 
 enum {
@@ -80,27 +77,62 @@ enum {
 };
 
 class gbtTreeLayoutOptions {
+private:
+  int m_nodeSize, m_terminalSpacing;
+
+  int m_branchStyle;
+  int m_branchLength, m_tineLength;
+
+  int m_nodeAboveLabel, m_nodeBelowLabel;
+  int m_outcomeLabel;
+  int m_branchAboveLabel, m_branchBelowLabel;
+
+  int m_chanceToken, m_playerToken, m_terminalToken;
+
 public:
-  int GetNodeSize(void) const { return 20; }
-  int GetTerminalSpacing(void) const { return 45; }
-  int GetBranchLength(void) const { return 60; }
-  int GetTineLength(void) const { return 20; }
+  gbtTreeLayoutOptions(void);
 
-  int GetNodeAboveLabel(void) const { return GBT_LABEL_NODE_LABEL; }
-  int GetNodeBelowLabel(void) const { return GBT_LABEL_NODE_INFOSETID; }
-  int GetBranchAboveLabel(void) const { return GBT_LABEL_BRANCH_LABEL; }
-  int GetBranchBelowLabel(void) const { return GBT_LABEL_BRANCH_PROB; }
-  int GetOutcomeLabel(void) const { return GBT_LABEL_OUTCOME_PAYOFFS; }
+  int GetNodeSize(void) const { return m_nodeSize; }
+  void SetNodeSize(int p_value) { m_nodeSize = p_value; }
 
-  int GetBranchStyle(void) const { return GBT_BRANCH_STYLE_LINE; }
-  int GetBranchLabelStyle(void) const { return GBT_BRANCH_LABEL_ROTATED; }
+  int GetTerminalSpacing(void) const { return m_terminalSpacing; }
+  void SetTerminalSpacing(int p_value) { m_terminalSpacing = p_value; }
+
+  int GetBranchLength(void) const { return m_branchLength; }
+  void SetBranchLength(int p_value) { m_branchLength = p_value; }
+
+  int GetTineLength(void) const { return m_tineLength; }
+  void SetTineLength(int p_value) { m_tineLength = p_value; }
+
+  int GetNodeAboveLabel(void) const { return m_nodeAboveLabel; }
+  void SetNodeAboveLabel(int p_value) { m_nodeAboveLabel = p_value; }
+
+  int GetNodeBelowLabel(void) const { return m_nodeBelowLabel; }
+  void SetNodeBelowLabel(int p_value) { m_nodeBelowLabel = p_value; }
+
+  int GetOutcomeLabel(void) const { return m_outcomeLabel; }
+  void SetOutcomeLabel(int p_value) { m_outcomeLabel = p_value; }
+
+  int GetBranchAboveLabel(void) const { return m_branchAboveLabel; }
+  void SetBranchAboveLabel(int p_value) { m_branchAboveLabel = p_value; }
+
+  int GetBranchBelowLabel(void) const { return m_branchBelowLabel; }
+  void SetBranchBelowLabel(int p_value) { m_branchBelowLabel = p_value; }
+
+  int GetBranchStyle(void) const { return m_branchStyle; }
+  void SetBranchStyle(int p_value) { m_branchStyle = p_value; }
 
   int GetInfosetStyle(void) const { return GBT_INFOSET_CONNECT_ALL; }
   int GetInfosetJoin(void) const { return GBT_INFOSET_JOIN_CIRCLES; }
 
-  int GetChanceToken(void) const { return GBT_NODE_TOKEN_CIRCLE; }
-  int GetPlayerToken(int) const { return GBT_NODE_TOKEN_CIRCLE; }
-  int GetTerminalToken(void) const { return GBT_NODE_TOKEN_CIRCLE; }
+  int GetChanceToken(void) const { return m_chanceToken; }
+  void SetChanceToken(int p_value) { m_chanceToken = p_value; }
+
+  int GetPlayerToken(void) const { return m_playerToken; }
+  void SetPlayerToken(int p_value) { m_playerToken = p_value; }
+
+  int GetTerminalToken(void) const { return m_terminalToken; }
+  void SetTerminalToken(int p_value) { m_terminalToken = p_value; }
 
   wxFont GetTreeLabelFont(void) const
     { return wxFont(10, wxSWISS, wxNORMAL, wxBOLD); }

@@ -34,6 +34,8 @@
 #include "gambit.h"
 #include "game-frame.h"
 
+#include "dialog-tree-layout.h"  // for tree layout dialog
+#include "dialog-tree-label.h"   // for tree label dialog
 #include "dialog-about.h"        // for "About..." dialog
 
 #include "tree-display.h"
@@ -43,19 +45,25 @@
 #include "panel-nash.h"
 #include "panel-qre.h"
 
-const int GBT_MENU_FILE_EXPORT = 970;
-const int GBT_MENU_FILE_EXPORT_BMP = 971;
-const int GBT_MENU_FILE_EXPORT_JPG = 972;
-const int GBT_MENU_FILE_EXPORT_PNG = 973;
+enum {
+  GBT_MENU_FILE_EXPORT = 970,
+  GBT_MENU_FILE_EXPORT_BMP = 971,
+  GBT_MENU_FILE_EXPORT_JPG = 972,
+  GBT_MENU_FILE_EXPORT_PNG = 973,
 
-const int GBT_MENU_VIEW_EFG = 998;
-const int GBT_MENU_VIEW_NFG = 999;
+  GBT_MENU_VIEW_EFG = 998,
+  GBT_MENU_VIEW_NFG = 999,
+  
+  GBT_MENU_VIEW_ZOOMIN = 997,
+  GBT_MENU_VIEW_ZOOMOUT = 996,
 
-const int GBT_MENU_VIEW_ZOOMIN = 997;
-const int GBT_MENU_VIEW_ZOOMOUT = 996;
+  GBT_MENU_FORMAT_LAYOUT = 960,
+  GBT_MENU_FORMAT_LABELS = 961,
+  GBT_MENU_FORMAT_FONT = 962,
 
-const int GBT_MENU_TOOLS_EQM = 1000;
-const int GBT_MENU_TOOLS_QRE = 1001;
+  GBT_MENU_TOOLS_EQM = 1000,
+  GBT_MENU_TOOLS_QRE = 1001
+};
 
 BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_NEW, gbtGameFrame::OnFileNew)
@@ -76,6 +84,9 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(GBT_MENU_VIEW_NFG, gbtGameFrame::OnViewNfg)
   EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtGameFrame::OnViewZoomIn)
   EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtGameFrame::OnViewZoomOut)
+  EVT_MENU(GBT_MENU_FORMAT_LAYOUT, gbtGameFrame::OnFormatLayout)
+  EVT_MENU(GBT_MENU_FORMAT_LABELS, gbtGameFrame::OnFormatLabels)
+  EVT_MENU(GBT_MENU_FORMAT_FONT, gbtGameFrame::OnFormatFont)
   EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
   EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
@@ -189,6 +200,14 @@ void gbtGameFrame::MakeMenu(void)
   viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out"),
 		   _("Decrease magnification of tree"));
 
+  wxMenu *formatMenu = new wxMenu;
+  formatMenu->Append(GBT_MENU_FORMAT_LAYOUT, _("Tree la&yout"),
+		     _("Settings for automatic layout of extensive forms"));
+  formatMenu->Append(GBT_MENU_FORMAT_LABELS, _("Tree &labels"),
+		     _("Displaying of labels on extensive form objects"));
+  formatMenu->Append(GBT_MENU_FORMAT_FONT, _("&Font"),
+		     _("Configuring display fonts for game objects"));
+
   wxMenu *toolsMenu = new wxMenu;	
   toolsMenu->Append(GBT_MENU_TOOLS_EQM, _("&Equilibrium"),
 		    _("Compute Nash equilibria of the game"), true);
@@ -203,6 +222,7 @@ void gbtGameFrame::MakeMenu(void)
   menuBar->Append(fileMenu, _("&File"));
   menuBar->Append(editMenu, _("&Edit"));
   menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   menuBar->Append(toolsMenu, _("&Tools"));
   menuBar->Append(helpMenu, _("&Help"));
 
@@ -603,6 +623,48 @@ void gbtGameFrame::OnViewZoomOut(wxCommandEvent &)
 {
   m_doc->SetTreeZoom(m_doc->GetTreeZoom() / 1.1);
 }
+
+void gbtGameFrame::OnFormatLayout(wxCommandEvent &)
+{
+  gbtTreeLayoutDialog dialog(this, m_doc->GetTreeOptions());
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    gbtTreeLayoutOptions options = m_doc->GetTreeOptions();
+    options.SetChanceToken(dialog.GetChanceToken());
+    options.SetPlayerToken(dialog.GetPlayerToken());
+    options.SetTerminalToken(dialog.GetTerminalToken());
+
+    options.SetNodeSize(dialog.GetNodeSize());
+    options.SetTerminalSpacing(dialog.GetTerminalSpacing());
+
+    options.SetBranchStyle(dialog.GetBranchStyle());
+    options.SetBranchLength(dialog.GetBranchLength());
+    options.SetTineLength(dialog.GetTineLength());
+
+    m_doc->SetTreeOptions(options);
+  }
+}
+
+void gbtGameFrame::OnFormatLabels(wxCommandEvent &)
+{
+  gbtTreeLabelDialog dialog(this, m_doc->GetTreeOptions());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    gbtTreeLayoutOptions options = m_doc->GetTreeOptions();
+    options.SetNodeAboveLabel(dialog.GetNodeAboveLabel());
+    options.SetNodeBelowLabel(dialog.GetNodeBelowLabel());
+    options.SetOutcomeLabel(dialog.GetOutcomeLabel());
+    options.SetBranchAboveLabel(dialog.GetBranchAboveLabel());
+    options.SetBranchBelowLabel(dialog.GetBranchBelowLabel());
+    m_doc->SetTreeOptions(options);
+  }
+}
+
+void gbtGameFrame::OnFormatFont(wxCommandEvent &)
+{
+
+}
+
 
 void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {

@@ -70,6 +70,10 @@ private:
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
 
+  void OnFormatLayout(wxCommandEvent &);
+  void OnFormatLabels(wxCommandEvent &);
+  void OnFormatFont(wxCommandEvent &);
+
   void OnToolsEquilibrium(wxCommandEvent &);
   void OnToolsQre(wxCommandEvent &);
 

@@ -20,6 +20,8 @@ EXTRALINKFLAGS =
 gambit_SOURCES = \
 	"control-player.cc" \
 	"dialog-about.cc" \
+	"dialog-tree-label.cc" \
+	"dialog-tree-layout.cc" \
 	"gambit.cc" \
 	"game-document.cc" \
 	"game-frame.cc" \

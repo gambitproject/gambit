@@ -33,6 +33,25 @@
 #include "game-document.h"
 
 //--------------------------------------------------------------------------
+//                      class gbtTreeLayoutOptions
+//--------------------------------------------------------------------------
+
+gbtTreeLayoutOptions::gbtTreeLayoutOptions(void)
+  : m_nodeSize(20), m_terminalSpacing(60),
+    m_branchStyle(GBT_BRANCH_STYLE_FORKTINE),
+    m_branchLength(60), m_tineLength(20),
+    m_nodeAboveLabel(GBT_LABEL_NODE_LABEL),
+    m_nodeBelowLabel(GBT_LABEL_NODE_INFOSETID),
+    m_outcomeLabel(GBT_LABEL_OUTCOME_PAYOFFS),
+    m_branchAboveLabel(GBT_LABEL_BRANCH_LABEL),
+    m_branchBelowLabel(GBT_LABEL_BRANCH_PROB),
+    m_chanceToken(GBT_NODE_TOKEN_CIRCLE),
+    m_playerToken(GBT_NODE_TOKEN_CIRCLE),
+    m_terminalToken(GBT_NODE_TOKEN_CIRCLE)
+{ }
+
+
+//--------------------------------------------------------------------------
 //                          class gbtNodeEntry
 //--------------------------------------------------------------------------
 
@@ -53,8 +72,7 @@ private:
   int m_token;        // token to draw for node
   wxColour m_color;   // color of node
 
-  int m_branchStyle;  // lines or fork-tine
-  int m_branchLabel;  // horizontal or rotated
+  int m_branchStyle;  // fork-tine, horizontal labels, or rotated labels
   int m_branchLength; // length of branch (exclusive of tine, if present)
 
   int m_level;        // depth of the node in tree
@@ -105,9 +123,6 @@ public:
 
   int GetBranchStyle(void) const { return m_branchStyle; }
   void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
-
-  int GetBranchLabelStyle(void) const { return m_branchLabel; }
-  void SetBranchLabelStyle(int p_style) { m_branchLabel = p_style; }
 
   int GetBranchLength(void) const { return m_branchLength; }
   void SetBranchLength(int p_length) { m_branchLength = p_length; }
@@ -170,8 +185,7 @@ gbtNodeEntry::gbtNodeEntry(gbtGameNode p_node)
     m_selected(false), m_cursor(false), m_cut(false),
     m_size(20),
     m_token(GBT_NODE_TOKEN_CIRCLE),
-    m_branchStyle(GBT_BRANCH_STYLE_LINE), 
-    m_branchLabel(GBT_BRANCH_LABEL_HORIZONTAL),
+    m_branchStyle(GBT_BRANCH_STYLE_FORKTINE), 
     m_branchLength(0),
     m_sublevel(0), m_actionProb("")
 { }
@@ -231,9 +245,12 @@ void gbtNodeEntry::Draw(wxDC &p_dc) const
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawPolygon(4, points);
   }
-  else {
-    // Default: draw circles
+  else if (m_token == GBT_NODE_TOKEN_CIRCLE) {
     p_dc.SetBrush(*wxWHITE_BRUSH);
+    p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size); 
+  }
+  else if (m_token == GBT_NODE_TOKEN_DOT) {
+    p_dc.SetBrush(wxBrush(m_color, wxSOLID));
     p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size); 
   }
 
@@ -267,7 +284,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color,
 					       4, wxSOLID)); 
   }
-  if (m_branchStyle == GBT_BRANCH_STYLE_LINE) {
+  if (m_branchStyle != GBT_BRANCH_STYLE_FORKTINE) {
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
     /*
@@ -292,7 +309,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     int xbar = (xStart + xEnd) / 2;
     int ybar = (yStart + yEnd) / 2;
 
-    if (m_branchLabel == GBT_BRANCH_LABEL_HORIZONTAL) {
+    if (m_branchStyle == GBT_BRANCH_STYLE_HORIZONTAL) {
       if (yStart >= yEnd) {
 	p_dc.DrawText(m_branchAboveLabel, xbar - textWidth / 2, 
 		      ybar - textHeight + 
@@ -319,7 +336,7 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.SetFont(m_branchBelowFont);
     p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
 
-    if (m_branchLabel == GBT_BRANCH_LABEL_HORIZONTAL) {
+    if (m_branchStyle == GBT_BRANCH_STYLE_HORIZONTAL) {
       if (yStart >= yEnd) {
 	p_dc.DrawText(m_branchBelowLabel, xbar - textWidth / 2,
 		      ybar - textWidth/2 * (yEnd - yStart) / (xEnd - xStart));
@@ -480,7 +497,7 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
     }
   case GBT_LABEL_NODE_INFOSETID:
     if (!n->GetInfoset().IsNull()) {
-      return wxString::Format(_T("%d,%d"),
+      return wxString::Format(_T("<%d,%d>"),
 			      n->GetPlayer()->GetId(),
 			      n->GetInfoset()->GetId());
     }
@@ -597,16 +614,16 @@ int gbtTreeLayout::LayoutSubtree(gbtGameNode p_node,
     p_ycoord += m_doc->GetTreeOptions().GetTerminalSpacing();
   }
     
-  if (m_doc->GetTreeOptions().GetBranchStyle() == GBT_BRANCH_STYLE_LINE) {
-    entry->SetX(c_leftMargin + 
-		entry->GetLevel() * (m_doc->GetTreeOptions().GetNodeSize() +
-				     m_doc->GetTreeOptions().GetBranchLength()));
-  }
-  else {
+  if (m_doc->GetTreeOptions().GetBranchStyle() == GBT_BRANCH_STYLE_FORKTINE) {
     entry->SetX(c_leftMargin + 
 		entry->GetLevel() * (m_doc->GetTreeOptions().GetNodeSize() +
 				     m_doc->GetTreeOptions().GetBranchLength() +
 				     m_doc->GetTreeOptions().GetTineLength()));
+  }
+  else {
+    entry->SetX(c_leftMargin + 
+		entry->GetLevel() * (m_doc->GetTreeOptions().GetNodeSize() +
+				     m_doc->GetTreeOptions().GetBranchLength()));
   }
 
   if (!p_node->GetPlayer().IsNull() && p_node->GetPlayer()->IsChance()) {
@@ -615,7 +632,7 @@ int gbtTreeLayout::LayoutSubtree(gbtGameNode p_node,
   }
   else if (!p_node->GetPlayer().IsNull()) {
     entry->SetColor(m_doc->GetPlayerColor(p_node->GetPlayer()->GetId()));
-    entry->SetToken(m_doc->GetTreeOptions().GetPlayerToken(p_node->GetPlayer()->GetId()));
+    entry->SetToken(m_doc->GetTreeOptions().GetPlayerToken());
   }
   else {
     entry->SetColor(*wxBLACK);
@@ -624,9 +641,6 @@ int gbtTreeLayout::LayoutSubtree(gbtGameNode p_node,
   
   entry->SetSize(m_doc->GetTreeOptions().GetNodeSize());
   entry->SetBranchStyle(m_doc->GetTreeOptions().GetBranchStyle());
-  if (m_doc->GetTreeOptions().GetBranchStyle() == GBT_BRANCH_STYLE_LINE) {
-    entry->SetBranchLabelStyle(m_doc->GetTreeOptions().GetBranchLabelStyle());
-  }
   entry->SetBranchLength(m_doc->GetTreeOptions().GetBranchLength());
 
   p_maxy = gmax(entry->Y(), p_maxy);
