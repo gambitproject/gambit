@@ -197,13 +197,13 @@ bool QreNfg(wxWindow *p_parent,
     algorithm.SetMaxLambda(dialog.FiniteLambda() ? dialog.MaxLambda() : 10000);
 
     wxStatus status(p_parent, "QreSolve Progress");
-    Correspondence<double, MixedSolution> correspondence;
+    gList<MixedSolution> correspondence;
     try {
       Nfg *N = MakeReducedNfg(EFSupport(p_support.GetGame()));
       algorithm.Solve(*N,
 		      (dialog.GeneratePxiFile()) ? *dialog.PxiFile() : gnull,
 		      status, correspondence);
-      p_solutions.Append(BehavSolution(BehavProfile<gNumber>(correspondence.GetPoint(1, 1))));
+      p_solutions.Append(BehavSolution(BehavProfile<gNumber>(correspondence[1])));
       delete N;
     }
     catch (gSignalBreak &) { }
@@ -224,12 +224,12 @@ bool QreNfg(wxWindow *p_parent,
     algorithm.SetMaxLambda(dialog.FiniteLambda() ? dialog.MaxLambda() : 10000);
 
     wxStatus status(p_parent, "QreSolve Progress");
-    Correspondence<double, MixedSolution> correspondence;
+    gList<MixedSolution> correspondence;
     try {
       algorithm.Solve(p_support.Game(),
 		      (dialog.GeneratePxiFile()) ? *dialog.PxiFile() : gnull,
 		      status, correspondence);
-      p_solutions.Append(correspondence.GetPoint(1, 1));
+      p_solutions.Append(correspondence[1]);
     }
     catch (gSignalBreak &) { }
     return true;

@@ -259,6 +259,7 @@ void QreNfgGrid::OutputResult(gOutput &p_file,
   }
   p_file << '\n';
 
+#ifdef UNUSED
   gMatrix<double> J(p_profile.Length(), p_profile.Length() + 1);
   QreJacobian(p_profile.Game(), p_profile, 
 	      p_lambda / (1.0 + p_lambda), J);
@@ -277,7 +278,7 @@ void QreNfgGrid::OutputResult(gOutput &p_file,
       p_file << "IMAGINARY\n";
     }
   }
-
+#endif  // UNUSED
 }
 
 double QreNfgGrid::Distance(const gVector<double> &a,

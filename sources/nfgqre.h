@@ -11,7 +11,6 @@
 #define NFGQRE_H
 
 #include "base/base.h"
-#include "corresp.h"
 
 #include "game/nfg.h"
 #include "game/mixedsol.h"
@@ -48,22 +47,9 @@ public:
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
   // RUN THE ALGORITHM
-  void Solve(const Nfg &p_nfg, gOutput &p_pxifile,
-	     gStatus &p_status, 
-	     Correspondence<double, MixedSolution> &p_solutions);
-
-  void Solve(const MixedProfile<double> &p_startProfile,
-	     double p_startLambda,
-	     gOutput &p_pxifile, gStatus &p_status,
-	     Correspondence<double, MixedSolution> &p_solutions);
+  void Solve(const NFSupport &p_support, gOutput &p_pxifile,
+	     gStatus &p_status, gList<MixedSolution> &);
 };  
-
-#ifdef WITH_KQRE
-void KQre(const Nfg &N, NFQreParams &params, gOutput &,
-	    const MixedProfile<gNumber> &start,
-	    gList<MixedSolution> &solutions, gStatus &,
-	    long &nevals, long &nits);
-#endif // WITH_KQRE
 
 #endif  // NFGQRE_H
 

@@ -67,7 +67,3 @@ template class gList<Strategy *>;
 template class gList<const NFSupport>;
 
 
-#include "corresp.imp"
-
-template class Correspondence<double, MixedSolution>;
-

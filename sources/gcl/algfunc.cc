@@ -415,12 +415,11 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     qre.SetMaxLambda(((NumberPortion *) param[3])->Value());
     qre.SetFullGraph(((BoolPortion *) param[6])->Value());
 
-    Correspondence<double, MixedSolution> qreCorresp;
+    gList<MixedSolution> qreCorresp;
     gsm.StartAlgorithmMonitor("QreSolve Progress");
     try {
       gWatch watch;
-      qre.Solve(MixedProfile<double>(start), 
-		((NumberPortion *) param[2])->Value(),
+      qre.Solve(start.Support(),
 		(pxiFile) ? *pxiFile : gnull,
 		gsm.GetStatusMonitor(), qreCorresp);
 
@@ -435,13 +434,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 
     if (pxiFile) delete pxiFile;
     gsm.EndAlgorithmMonitor();
-
-    gList<MixedSolution> solutions;
-    for (int i = 1; i <= qreCorresp.NumPoints(1); i++) {
-      solutions.Append(qreCorresp.GetPoint(1, i));
-      solutions[solutions.Length()].SetQre(qreCorresp.GetParameter(1, i), 0);
-    }
-    return new Mixed_ListPortion(solutions);
+    return new Mixed_ListPortion(qreCorresp);
   }
   else  {     // BEHAV
     BehavSolution &start = *((BehavPortion *) param[0])->Value();

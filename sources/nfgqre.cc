@@ -45,97 +45,318 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N)
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
 
-void QreJacobian(const Nfg &p_nfg,
-		 const MixedProfile<double> &p_profile,
-		 const double &p_nu, gMatrix<double> &p_matrix)
+//
+// The following code implements a homotopy approach to computing
+// the logistic QRE correspondence.  This implementation is a basic
+// Euler-Newton approach with adaptive step size, based upon the
+// ideas and codes presented in Allgower and Georg's
+// _Numerical Continuation Methods_.
+//
+
+inline double sqr(double x) { return x*x; }
+
+static void Givens(gMatrix<double> &b, gMatrix<double> &q,
+		   double &c1, double &c2, int l1, int l2, int l3)
 {
-  p_matrix = (double) 0;
+  if (fabs(c1) + fabs(c2) == 0.0) {
+    return;
+  }
 
-  int rowno = 0;   // indexes the row number in the Jacobian matrix
-  for (int pl1 = 1; pl1 <= p_nfg.NumPlayers(); pl1++) {
-    for (int st1 = 1; st1 <= p_profile.Support().NumStrats(pl1); st1++) {
-      rowno++;
+  double sn;
+  if (fabs(c2) >= fabs(c1)) {
+    sn = sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
+  }
+  else {
+    sn = sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
+  }
+  double s1 = c1/sn;
+  double s2 = c2/sn;
 
-      int colno = 0;
-      for (int pl2 = 1; pl2 <= p_nfg.NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
-	  colno++;
+  for (int k = 1; k <= q.NumColumns(); k++) {
+    double sv1 = q(l1, k);
+    double sv2 = q(l2, k);
+    q(l1, k) = s1 * sv1 + s2 * sv2;
+    q(l2, k) = -s2 * sv1 + s1 * sv2;
+  }
 
-	  if (pl1 == pl2) {
-	    if (st1 == st2) {
-	      p_matrix(rowno, colno) = (1.0 - p_nu) * (1.0 - p_nu);
-	    }
-	    else {
-	      p_matrix(rowno, colno) = 0.0;
-	    }
-	  } 
-	  else {  // pl1 != pl2
-	    for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	      p_matrix(rowno, colno) += (p_profile.Payoff(pl1, pl1, k, pl2, st2) - p_profile.Payoff(pl1, pl1, st1, pl2, st2)) * p_profile(pl1, k);
-	    }
-	    p_matrix(rowno, colno) *= p_nu * (1.0-p_nu) * p_profile(pl1, st1);
-	  }
-	}
-      }
+  for (int k = l3; k <= b.NumColumns(); k++) {
+    double sv1 = b(l1, k);
+    double sv2 = b(l2, k);
+    b(l1, k) = s1 * sv1 + s2 * sv2;
+    b(l2, k) = -s2 * sv1 + s1 * sv2;
+  }
 
-      // Now for the column wrt lambda
-      for (int k = 1; k <= p_profile.Support().NumStrats(pl1); k++) {
-	p_matrix(rowno, p_matrix.NumColumns()) += (p_profile.Payoff(pl1, pl1, k) - p_profile.Payoff(pl1, pl1, st1)) * p_profile(pl1, k);
-      } 
-      p_matrix(rowno, p_matrix.NumColumns()) *= p_profile(pl1, st1);
+  c1 = sn;
+  c2 = 0.0;
+}
+
+static void QRDecomp(gMatrix<double> &b, gMatrix<double> &q)
+{
+  q.MakeIdent();
+  for (int m = 1; m <= b.NumColumns(); m++) {
+    for (int k = m + 1; k <= b.NumRows(); k++) {
+      Givens(b, q, b(m, m), b(k, m), m, k, m + 1);
     }
   }
 }
 
-static void QreComputeStep(const Nfg &p_nfg,
-			   const MixedProfile<double> &p_profile,
-			   const gMatrix<double> &p_matrix,
-			   gPVector<double> &p_delta, double &p_nuinc,
-			   double p_initialsign, double p_stepsize)
+#ifdef USE_CORRECTOR
+static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
+		       gVector<double> &u, gVector<double> y,
+		       double &d)
 {
-  double sign = p_initialsign;
-  int rowno = 0; 
-
-  gSquareMatrix<double> M(p_matrix.NumRows());
-
-  for (int row = 1; row <= M.NumRows(); row++) {
-    for (int col = 1; col <= M.NumColumns(); col++) {
-      M(row, col) = p_matrix(row, col + 1);
+  for (int k = 1; k <= b.NumColumns(); k++) {
+    for (int l = 1; l <= k - 1; l++) {
+      y[k] -= b(l, k) * y[l];
     }
+    y[k] /= b(k, k);
   }
 
-  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
-      rowno++;
-      p_delta(pl, st) = sign * M.Determinant();   
-      sign *= -1.0;
-
-      for (int row = 1; row <= M.NumRows(); row++) {
-	M(row, rowno) = p_matrix(row, rowno);
-	if (rowno < M.NumColumns()) {
-	  M(row, rowno + 1) = p_matrix(row, rowno + 2);
-	}
-      } 
+  d = 0.0;
+  for (int k = 1; k <= b.NumRows(); k++) {
+    double s = 0.0;
+    for (int l = 1; l <= b.NumColumns(); l++) {
+      s += q(l, k) * y[l];
     }
-  }   
-
-  p_nuinc = sign * M.Determinant();
-
-  double norm = 0.0;
-  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
-      norm += p_delta(pl, st) * p_delta(pl, st);
-    }
+    u[k] -= s;
+    d += s * s;
   }
-  norm += p_nuinc * p_nuinc; 
+  d = sqrt(d);
+}
+
+static void QreLHS(const Nfg &p_nfg, const gVector<double> &p_point,
+		   gVector<double> &p_lhs)
+{
+  MixedProfile<double> profile(p_nfg);
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile[i] = p_point[i];
+  }
+  double lambda = p_point[p_point.Length()];
   
+  p_lhs = 0.0;
+  int rowno = 0;
+
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
-      p_delta(pl, st) /= sqrt(norm / p_stepsize);
+    rowno++;
+    for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+      p_lhs[rowno] += profile(pl, st);
+    }
+    p_lhs[rowno] -= 1.0;
+
+    for (int st = 2; st <= profile.Support().NumStrats(pl); st++) {
+      // Experimental: try fabs() to avoid sign problems, and hope that
+      // jacobian will keep things OK...
+      p_lhs[++rowno] = log(fabs(profile(pl, st) / profile(pl, 1)));
+      p_lhs[rowno] -= (lambda * 
+		       (profile.Payoff(pl, pl, st) -
+			profile.Payoff(pl, pl, 1)));
+      p_lhs[rowno] *= fabs(profile(pl, 1) * profile(pl, st));
     }
   }
+}
+#endif  // USE_CORRECTOR
 
-  p_nuinc /= sqrt(norm / p_stepsize);
+static void QreJacobian(const NFSupport &p_support,
+			const gVector<double> &p_point,
+			gMatrix<double> &p_matrix)
+{
+  const Nfg &nfg = p_support.Game();
+  MixedProfile<double> profile(p_support);
+  for (int i = 1; i <= profile.Length(); i++) {
+    profile[i] = p_point[i];
+  }
+  double lambda = p_point[p_point.Length()];
+
+  int rowno = 0;
+  for (int pl1 = 1; pl1 <= nfg.NumPlayers(); pl1++) {
+    rowno++;
+    // First, do the "sum to one" equation
+    int colno = 0;
+    for (int pl2 = 1; pl2 <= nfg.NumPlayers(); pl2++) {
+      for (int st2 = 1; st2 <= p_support.NumStrats(pl2); st2++) {
+	colno++;
+	if (pl1 == pl2) {
+	  p_matrix(colno, rowno) = 1.0;
+	}
+	else {
+	  p_matrix(colno, rowno) = 0.0;
+	}
+      }
+    }
+    p_matrix(p_matrix.NumRows(), rowno) = 0.0;
+
+    for (int st1 = 2; st1 <= p_support.NumStrats(pl1); st1++) {
+      rowno++;
+      int colno = 0;
+
+      for (int pl2 = 1; pl2 <= nfg.NumPlayers(); pl2++) {
+	for (int st2 = 1; st2 <= p_support.NumStrats(pl2); st2++) {
+	  colno++;
+	  if (pl1 == pl2) {
+	    if (st2 == 1) {
+	      p_matrix(colno, rowno) = -profile(pl1, st1);
+	    }
+	    else if (st1 == st2) {
+	      p_matrix(colno, rowno) = profile(pl1, 1);
+	    }
+	    else {
+	      p_matrix(colno, rowno) = 0.0;
+	    }
+	  }
+	  else {
+	    p_matrix(colno, rowno) = -lambda * profile(pl1, 1) * profile(pl1, st1) * (profile.Payoff(pl1, pl1, st1, pl2, st2) - profile.Payoff(pl1, pl1, 1, pl2, st2));
+	  }
+	}
+      }
+
+      p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) * (profile.Payoff(pl1, pl1, st1) - profile.Payoff(pl1, pl1, 1));
+    }
+  }
+}
+
+void TracePath(const MixedProfile<double> &p_start,
+	       double p_startLambda, double p_maxLambda)
+{
+#ifdef USE_CORRECTOR
+  const double c_tol = 1.0e-4;     // tolerance for corrector iteration
+  const double c_maxDecel = 2.0;   // maximal deceleration factor
+  const double c_maxDist = 0.4;    // maximal distance to curve
+  const double c_maxContr = 0.6;   // maximal contraction rate in corrector
+  const double c_eta = 0.1;        // perturbation to avoid cancellation
+                                   // in calculating contraction rate
+#endif  // USE_CORRECTOR
+  double h = .1;                   // initial stepsize
+  const double c_hmin = 1.0e-8;    // minimal stepsize
+
+  gVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  for (int i = 1; i <= p_start.Length(); i++) {
+    x[i] = p_start[i];
+  }
+  x[x.Length()] = p_startLambda;
+  gVector<double> t(p_start.Length() + 1);
+  gVector<double> y(p_start.Length());
+
+  gMatrix<double> b(p_start.Length() + 1, p_start.Length());
+  gSquareMatrix<double> q(p_start.Length() + 1);
+  QreJacobian(p_start.Game(), x, b);
+  QRDecomp(b, q);
+  q.GetRow(q.NumRows(), t);
+  
+  double omega = 1.0;     // orientation along the curve
+  
+  while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
+    gout << "Point: " << x << '\n';
+#ifdef USE_CORRECTOR
+    bool accept = true;
+
+    if (fabs(h) <= c_hmin) {
+      gout << "Failure at minimal stepsize\n";
+      return;
+    }
+#endif  // USE_CORRECTOR
+
+    // Predictor step
+    for (int k = 1; k <= x.Length(); k++) {
+      u[k] = x[k] + h * omega * t[k];
+    }
+
+#ifdef USE_CORRECTOR
+    double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
+#endif  // USE_CORRECTOR
+    QreJacobian(p_start.Game(), u, b);
+    QRDecomp(b, q);
+
+#ifdef USE_CORRECTOR
+    int iter = 1;
+    double disto = 0.0;
+    while (true) {
+      double dist;
+
+      QreLHS(p_nfg, u, y);
+      NewtonStep(q, b, u, y, dist); 
+      if (dist >= c_maxDist) {
+	accept = false;
+	break;
+      }
+      for (int i = 1; i < u.Length(); i++) {
+	if (u[i] < 0.0) {
+	  // don't go negative
+	  accept = false;
+	  break;
+	}
+      }
+      if (!accept) {
+	break;
+      }
+      
+      decel = gmax(decel, sqrt(dist / c_maxDist) * c_maxDecel);
+      if (iter >= 2) {
+	double contr = dist / (disto + c_tol * c_eta);
+	if (contr > c_maxContr) {
+	  accept = false;
+	  break;
+	}
+	decel = gmax(decel, sqrt(contr / c_maxContr) * c_maxDecel);
+      }
+
+      if (dist <= c_tol) {
+	// Success; break out of iteration
+	break;
+      }
+      disto = dist;
+      iter++;
+    }
+
+    if (!accept) {
+      h /= c_maxDecel;   // PC not accepted; change stepsize and retry
+      continue;
+    }
+
+    // Determine new stepsize
+    if (decel > c_maxDecel) {
+      decel = c_maxDecel;
+    }
+    h = fabs(h / decel);
+#endif   // USE_CORRECTOR
+
+    gout << x[x.Last()] << ": ";
+    for (int i = 1; i < x.Length(); i++) {
+      gout << (x[x.Last()] * (u[i] - x[i]) / h) << ' ';
+    }
+    gout << '\n';
+
+    gout << x[x.Last()] << ": ";
+    for (int i = 1; i < x.Length(); i++) {
+      gout << ((u[i] - x[i]) / h) << ' ';
+    }
+    gout << '\n';
+
+    MixedProfile<double> foo(p_start), bar(p_start);
+    for (int i = 1; i <= foo.Length(); i++) {
+      foo[i] = x[i];
+      bar[i] = u[i];
+    }
+    gout << x[x.Last()] << ": ";
+    for (int pl = 1; pl <= p_start.Game().NumPlayers(); pl++) {
+      for (int st = 1; st <= p_start.Support().NumStrats(pl); st++) {
+	gout << (foo(pl, st) * 
+		 (foo.Payoff(pl, pl, st) - foo.Payoff(pl, pl, 1)));
+	gout << ' ';
+      }
+    }
+    gout << '\n';
+
+    // PC step was successful; update and iterate
+    for (int i = 1; i <= x.Length(); i++) {
+      if (u[i] < 1.0e-25) {
+	x[i] = 1.0e-25;
+      }
+      else {
+	x[i] = u[i];
+      }
+    }
+    q.GetRow(q.NumRows(), t);  // new tangent
+  }
 }
 
 QreNfg::QreNfg(void)
@@ -145,50 +366,18 @@ QreNfg::QreNfg(void)
 void QreNfg::SolveStep(MixedProfile<double> &p_profile, double &p_nu,
 		       double p_initialSign, double p_stepsize) const
 {
-  // This is a (primitive) first-order Runge-Kutta style method
-  gMatrix<double> H(p_profile.Length(), p_profile.Length() + 1);
-  gPVector<double> delta1(p_profile), delta2(p_profile);
-  double nuinc1, nuinc2;
-      
-  QreJacobian(p_profile.Game(), p_profile, p_nu, H);
-  QreComputeStep(p_profile.Game(), p_profile, H,
-		 delta1, nuinc1, p_initialSign, p_stepsize);
-    
-  MixedProfile<double> profile2(p_profile);
-  profile2 += delta1 * 0.5; 
-  QreJacobian(p_profile.Game(), profile2, p_nu + nuinc1 * 0.5, H);
-  QreComputeStep(p_profile.Game(), p_profile, H,
-		 delta2, nuinc2, p_initialSign, p_stepsize);
-
-  p_profile += delta1 * 0.5;
-  p_profile += delta2 * 0.5; 
-  p_nu += 0.5 * (nuinc1 + nuinc2);
 }
 
-void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
-		   gStatus &p_status,
-		   Correspondence<double, MixedSolution> &p_corresp)
+void QreNfg::Solve(const NFSupport &p_support, gOutput &p_pxiFile,
+		   gStatus &p_status, gList<MixedSolution> &p_solutions)
 {
-  MixedProfile<double> profile(p_nfg);
-  double nu = 0.0;
-  double stepsize = 0.0001;
-
-  WritePXIHeader(p_pxiFile, p_nfg);
-
-  // Pick the direction to follow the path so that nu starts out
-  // increasing
-  double initialsign = (p_nfg.ProfileLength() % 2 == 0) ? 1.0 : -1.0;
+  MixedProfile<double> profile(p_support);
+  WritePXIHeader(p_pxiFile, p_support.Game());
 
   try {
-    while (nu / (1.0-nu) <= m_maxLam) {
-      SolveStep(profile, nu, initialsign, stepsize);
+    TracePath(profile, 0.0, m_maxLam);
 
-      if (nu < 0.0 || nu > 1.0) {
-	// negative nu is probably numerical instability;
-	// nu > 1.0 runs past valid region...
-	return;
-      }
-
+#ifdef UNUSED
       // Write out the QreValue as 0 in the PXI file; not generally
       // going to be the case, but QreValue is suspect for large lambda 
       p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
@@ -206,290 +395,15 @@ void QreNfg::Solve(const Nfg &p_nfg, gOutput &p_pxiFile,
       p_status.Get();
       p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
 			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
-    }
+#endif // UNUSED
   }
   catch (...) {
-    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
+    //    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
     throw;
   }
   
   if (!m_fullGraph) { 
-    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
+    //    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
   }
 }
 
-void QreNfg::Solve(const MixedProfile<double> &p_startProfile,
-		   double p_startLambda,
-		   gOutput &p_pxiFile, gStatus &p_status,
-		   Correspondence<double, MixedSolution> &p_corresp)
-{
-  double stepsize = 0.00001;
-
-  WritePXIHeader(p_pxiFile, p_startProfile.Game());
-
-  // Pick the direction to follow the path so that nu starts out
-  // increasing
-  double initialsign = (p_startProfile.Length() % 2 == 0) ? 1.0 : -1.0;
-
-  for (int dir = 1; dir <= 2; dir++) {
-    MixedProfile<double> profile(p_startProfile), lastProfile(p_startProfile);
-    double nu = p_startLambda / (p_startLambda + 1.0), lastNu = nu;
-
-    try {
-      while (nu / (1.0-nu) <= m_maxLam) {
-	SolveStep(profile, nu, initialsign, stepsize);
-
-	if (nu < 0.0 || nu > 1.0) {
-	  break;
-	}
-
-	p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
-	for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
-	  for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
-	    p_pxiFile << profile(pl, st) << " ";
-	  }
-	}
- 
-	if (m_fullGraph) { 
-	  p_corresp.Append(1, nu / (1.0-nu),
-			   MixedSolution(profile, algorithmNfg_QRE));
-	}
-
-	p_status.Get();
-	p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
-			     gText("Current lambda: ") + ToText(nu / (1.0-nu)));
-	lastProfile = profile;
-	lastNu = nu;
-      }
-      if (!m_fullGraph) {
-	p_corresp.Append(1, lastNu / (1.0-lastNu),
-			 MixedSolution(lastProfile, algorithmNfg_QRE));
-      }
-    }
-    catch (gSignalBreak &) {
-      if (!m_fullGraph) {
-	p_corresp.Append(1, lastNu / (1.0-lastNu),
-			 MixedSolution(lastProfile, algorithmNfg_QRE));
-      }
-      throw;
-    }
-
-    initialsign *= -1.0;
-  }
-}
-
-
-#ifdef WITH_KQRE
-
-// DFP routine from Numerical Recipies (with modifications)
-// p = starting vector
-// func = a gC2Function representing the QRE function for which we need 
-//        to find the zeros
-// fret = function return value (should be close to zero after return)
-// iter = number of iterations to complete
-// maxits1 = maximum number of iterations in line search
-// tol1    = tolerance in line search
-// maxitsN = maximum number of iterations in DFP
-// tolN    = tolerance in DFP
-// tracefile  = output stream for debugging output
-// tracelevel = level of debugging output
-// interior   = true restricts from hitting boundary
-
-
-extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
-		double &fret, int &iter,
-	        int maxits1, double tol1, int maxitsN, double tolN,
-		gOutput &tracefile, int tracelevel, bool interior,
-		gStatus &status);
-
-
-// all of the below is for KQRE computations
-
-class NFKQreFunc : public gFunction<double>   {
-private:
-  long _nevals;
-  bool _domain_err;
-  const Nfg &_nfg;
-  double _K;
-  gVector<double> **_scratch;
-  MixedProfile<double> _p;
-  NFQreFunc F;
-  const NFQreParams & params;
-  
-public:
-  NFKQreFunc(const Nfg &, const MixedProfile<gNumber> &, 
-		  const NFQreParams & params);
-  virtual ~NFKQreFunc();
-  
-  double Value(const gVector<double> &);
-  
-  void SetK(double k)   { _K = k; }
-  void Get_p(MixedProfile<double> &p) const {p = _p;}
-  long NumEvals(void) const   { return _nevals; }
-  bool DomainErr(void) const { return _domain_err;}
-};
-
-
-NFKQreFunc::NFKQreFunc(const Nfg &N,
-				 const MixedProfile<gNumber> &start, 
-				 const NFQreParams & p)
-  :_nevals(0L), _domain_err(false), _nfg(N), _K(1.0),
-   _p(start.Support()), F(N,start), params(p)
-{
-  for (int i = 1; i <= _p.Length(); i++)
-    _p[i] = start[i];
-
-  _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
-  for (int i = 1; i <= _nfg.NumPlayers(); i++)
-    _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
-}
-
-NFKQreFunc::~NFKQreFunc()
-{
-  for (int i = 1; i <= _nfg.NumPlayers(); i++) 
-    delete _scratch[i];
-
-  delete [] (_scratch + 1);
-}
-
-double NFKQreFunc::Value(const gVector<double> &lambda)
-{
-  int iter = 0;
-  double value = 0.0;
-
-  F.SetLambda(lambda);
-
-  if(params.trace > 3) {
-//    _p(1,1)= .5709;_p(1,2)= 1.0-_p(1,1);
-//    _p(2,1)= .1227;_p(2,2)= 1.0-_p(2,1);
-    *params.tracefile << "\n   NFKGobFunc start: " << _p << " Lambda = " << F.GetLambda();
-  }
-  
-  // first find Qre solution of p for given lambda vector
-  
-  gNullStatus status;
-  DFP(_p, F, value, iter,
-      params.maxits1, params.tol1, params.maxitsN, params.tolN,
-      *params.tracefile,params.trace-4,true,status);
-
-  _nevals = F.NumEvals();
-
- // now compute objective function for KQre 
-
-  value = 0.0;
-  for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    gVector<double> &payoff = *_scratch[pl];
-    _p.Payoff(pl, pl, payoff);
-    double vij = 0.0;
-    for( int j = 1;j<=(_p.Support().NumStrats(pl));j++)
-      for(int k = 1;k<=(_p.Support().NumStrats(pl));k++)
-	vij+=_p(pl,j)*_p(pl,k)*payoff[j]*(payoff[j]-payoff[k]);
-    value += pow(vij -lambda[pl]*_K,2.0);
-  }
-  if(params.trace > 3) {
-    (*params.tracefile).SetExpMode().SetPrec(4) << "\n   NFKGobFunc val: " << value;
-    *params.tracefile << " K = " << _K;
-    *params.tracefile << " lambda = " << lambda;
-    (*params.tracefile).SetFloatMode().SetPrec(6) << " p = " << _p;
-  }
-  return value;
-}
-
-extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
-		   gFunction<double> &func, double &fret, int &iter,
-		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel,  gStatus &status);
-
-// This is for computation of the KQRE correspondence.  
-
-void KQre(const Nfg &N, NFQreParams &params, gOutput &p_pxiFile,
-	   const MixedProfile<gNumber> &start,
-	   gList<MixedSolution> &solutions, gStatus &p_status,
-	   long &nevals, long &nits)
-{
-  NFKQreFunc F(N, start, params);
-  int i;
-  int iter = 0, nit;
-  double K, K_old = 0.0, value = 0.0;
-  gVector<double> lambda(N.NumPlayers());
-  lambda = (double).0001;
-  gVector<double> lam_old(lambda);
-
-  WritePXIHeader(p_pxiFile, N, params);
-
-  K = (params.delLam < 0.0) ? params.maxLam : params.minLam;
-  int num_steps, step = 0;
-  if (params.powLam == 0)
-    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
-  else
-    num_steps = (int) (log(params.maxLam / params.minLam) /
-		       log(params.delLam + 1.0));
-
-  MixedProfile<double> p(start.Support());
-  MixedProfile<double> p_old(p);
-
-  gMatrix<double> xi(lambda.Length(), lambda.Length());
-  xi.MakeIdent();
-
-  if (params.trace> 0 )  {
-    *params.tracefile << "\nin NFKQre";
-    *params.tracefile << " traceLevel: " << params.trace;
-    *params.tracefile << "\np: " << p << "\nxi: " << xi;
-  }
-
-  bool powell = true;
-  for (nit = 1; powell && !F.DomainErr() &&
-       K <= params.maxLam && K >= params.minLam &&
-       value < 10.0; nit++)   {
-    p_status.Get();
-
-    F.SetK(K);
-    
-   powell =  OldPowell(lambda, xi, F, value, iter,
-		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		     *params.tracefile, params.trace-1,p_status);
-
-    F.Get_p(p);
-
-    if(powell && !F.DomainErr()) {
-      if (params.trace>0)  {
-	*params.tracefile << "\nKQre iter: " << nit << " val = ";
-	(*params.tracefile).SetExpMode() << value;
-	(*params.tracefile).SetFloatMode() << " K: " << K << " lambda: " << lambda << " val: ";
-	*params.tracefile << " p: " << p;
-      }
-      
-      p_pxiFile << "\n" << K << " " << value;
-      p_pxiFile << " ";
-      for (int pl = 1; pl <= N.NumPlayers(); pl++)
-	for (int strat = 1;
-	     strat <= p.Support().NumStrats(pl);
-	     strat++)
-	  p_pxiFile << p(pl, strat) << " ";
-      
-      if (params.fullGraph) {
-	i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
-	solutions[i].SetQre(K, value);
-	solutions[i].SetEpsilon(params.Accuracy());
-      }
-      K_old=K;                              // keep last good solution
-      lam_old=lambda;                            
-      p_old=p;                             
-    }
-    K += params.delLam * pow(K, (long)params.powLam);
-    p_status.SetProgress((double) step / (double) num_steps);
-    step++;
-  }
-
-  if (!params.fullGraph)
-  {
-    i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
-    solutions[i].SetQre(K_old, value);
-    solutions[i].SetEpsilon(params.Accuracy());
-  }
-
-  nevals = F.NumEvals();
-  nits = 0;
-}
-
-#endif  // WITH_KQRE
