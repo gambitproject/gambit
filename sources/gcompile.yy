@@ -45,7 +45,7 @@
   void ungetchar(char c); \
   \
   void emit(Instruction *); \
-  void DefineFunction(void); \
+  bool DefineFunction(void); \
   void RecoverFromError(void); \
   int ProgLength(void); \
   \
@@ -126,7 +126,7 @@ sep:          SEMI    { semi = true; }
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<Instruction *>; }
               LBRACK formallist RBRACK COMMA statements
-              RBRACK   { DefineFunction(); } 
+              RBRACK   { if (!DefineFunction())  YYERROR; } 
 		
 formallist:
           |   formalparams
@@ -634,12 +634,13 @@ void GCLCompiler::RecoverFromError(void)
 }
     
 
-void GCLCompiler::DefineFunction(void)
+bool GCLCompiler::DefineFunction(void)
 {
   FuncDescObj *func = new FuncDescObj(funcname);
   func->SetFuncInfo(function, formals.Length());
 //  function->Dump(gout);
 
+  bool error = false;
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionType type = TextToPortionType(types[i]);
 
@@ -650,13 +651,17 @@ void GCLCompiler::DefineFunction(void)
       else
 	func->SetParamInfo(function, i - 1, formals[i], type);
     }
-    else
+    else   {
+      error = true;
+      gerr << "Error: Unknown type " << types[i] << " for parameter " << formals[i] << " in declaration of " << funcname << '\n';
       break;
+    }
   }
 
-  gsm.AddFunction(func);
+  if (!error)  gsm.AddFunction(func);
   formals.Flush();   types.Flush();  refs.Flush();
   function = 0;
+  return !error;
 }
 
 void GCLCompiler::Execute(void)
