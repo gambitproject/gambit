@@ -1,9 +1,11 @@
+# Makefile to create distribution time items.
+# $Id$
 # edit these!
 WXDIR=/home/ironbark/gambit/wxwin
 GUI=none
 
 all:
-	@echo Specify a target: gcl, gui, source.
+	@echo Specify a target: gcll, gui, source.
 	@echo If specifying gui, make sure to add GUI=ol/motif
 gui:
 	@echo Updating gambit_$(GUI)_$(HOSTTYPE) on hss
@@ -24,7 +26,7 @@ gcll:
 source:
 	@echo Updating source code on hss
 	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
-		Makefile ./manual/*
+		Makefile ./manual/* ../bisondos/* 
 	rcp gambsrc.zip ftp@hss:~ftp/pub/gambit
 
 
