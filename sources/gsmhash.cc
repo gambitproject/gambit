@@ -56,7 +56,7 @@ TEMPLATE class HashTable< gString, Portion* >;
 TEMPLATE class HashTable< gString, FuncDescObj* >;
 
 #include "gsmhash.h"
-TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
+
 
 #pragma option -Jgx
 #include "portion.h"
@@ -122,3 +122,4 @@ template <class T> RefCountHashTable<T>::~RefCountHashTable()
 { Flush(); }
 
 
+TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
