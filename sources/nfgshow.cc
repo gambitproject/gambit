@@ -564,8 +564,10 @@ void NfgShow::SolveStandard(void)
 	else
 	  solver = new guinfgLcp(*sup, this, 1, dialog.Precision(), true);
       }
-      else
-	solver = new guinfgSimpdiv(*sup, this, 1, dialog.Precision(), true);
+      else {
+	wxMessageBox("One-Perfect not implemented", "Standard Solution");
+	return;
+      }
     }
     break;
 
@@ -595,8 +597,10 @@ void NfgShow::SolveStandard(void)
     if (dialog.Type() == nfgSTANDARD_NASH) {
       if (nf.NumPlayers() == 2)
 	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), false);
-      else
+      else {
 	solver = new guinfgLiap(*sup, this, 0, 0, false);
+	wxMessageBox("Not guaranteed to find all solutions", "Warning");
+      }
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {

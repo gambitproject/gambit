@@ -158,15 +158,9 @@ void dialogEfgSolveStandard::OnChanged(void)
       break;
     case 1:
     case 2:
-      if (m_efg.NumPlayers() == 2) {
-	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(TRUE);
-      }
-      else {
-	m_description->SetValue("LiapSolve[EFG]");
-	m_precision->SetSelection(0);
-	m_precision->Enable(FALSE);
-      }
+      m_description->SetValue("LiapSolve[EFG]");
+      m_precision->SetSelection(0);
+      m_precision->Enable(FALSE);
       break;
     }
   }

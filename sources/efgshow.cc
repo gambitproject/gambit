@@ -219,6 +219,7 @@ void EfgShow::SolveStandard(void)
   case efgSTANDARD_NASH:
     switch (dialog.Number()) {
     case efgSTANDARD_ONE:
+      markSubgames = true;
       if (ef.NumPlayers() == 2 && isPerfectRecall) {
 	if (ef.IsConstSum()) 
 	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision(),

@@ -33,7 +33,8 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
   char *typeChoices[] = { "Nash", "Perfect" };
   m_standardType = new wxRadioBox(this, (wxFunction) CallbackChanged,
 				  "Type", -1, -1, -1, -1,
-				  2, typeChoices, 0, wxVERTICAL);
+				  (m_nfg.NumPlayers() == 2) ? 2 : 1,
+				  typeChoices, 0, wxVERTICAL);
   m_standardType->SetClientData((char *) this);
   m_standardType->SetSelection(standardType);
 
@@ -110,7 +111,7 @@ void dialogNfgSolveStandard::OnChanged(void)
 	m_description->SetValue("LpSolve");
 	m_precision->Enable(TRUE);
       }
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
+      else if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("LcpSolve");
 	m_precision->Enable(TRUE);
       }
@@ -142,22 +143,19 @@ void dialogNfgSolveStandard::OnChanged(void)
 	m_description->SetValue("LpSolve");
 	m_precision->Enable(TRUE);
       }
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
+      else if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("LcpSolve");
 	m_precision->Enable(TRUE);
       }
-      else {
-	m_description->SetValue("SimpdivSolve");
-	m_precision->Enable(FALSE);
-	m_precision->SetSelection(0);
-      }
+      else 
+	m_description->SetValue("NOT IMPLEMENTED");
       break;
     case 1:
       if (m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg)) {
 	m_description->SetValue("LpSolve");
 	m_precision->Enable(TRUE);
       }
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
+      else if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("LcpSolve");
 	m_precision->Enable(TRUE);
       }
@@ -169,7 +167,7 @@ void dialogNfgSolveStandard::OnChanged(void)
 	m_description->SetValue("LpSolve");
 	m_precision->Enable(TRUE);
       }
-      else if (m_nfg.NumPlayers() == 2 && !IsConstSum(m_nfg)) {
+      else if (m_nfg.NumPlayers() == 2) {
 	m_description->SetValue("LcpSolve");
 	m_precision->Enable(TRUE);
       }
