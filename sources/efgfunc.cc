@@ -613,6 +613,74 @@ Portion *GSM_SetPayoffRational(Portion **param)
   return por;
 }
 
+
+Portion *GSM_SetPayoff_NodeFloat(Portion **param)
+{
+  Portion* element;
+  Node* node = ( (NodePortion*) param[ 0 ] )->Value();
+  if (node->GetOutcome())
+    return new ErrorPortion("An outcome is already attached to the node");
+
+  BaseEfg* efg = ( (EfgPortion*) param[ 0 ]->Owner() )->Value();
+  if( efg->Type() != DOUBLE )
+    return new ErrorPortion( "Type mismatch between node and list" );
+
+  ListPortion *p = (ListPortion *) param[1];
+  if (efg->NumPlayers() != p->Length())
+    return new ErrorPortion("Wrong number of entries in payoff vector");
+
+  OutcomeVector<double>* c = ( (Efg<double>*) efg )->NewOutcome();
+
+  for (int i = 1; i <= c->Length(); i++)
+  {
+    element = p->Subscript(i);
+    (*c)[i] = ((FloatPortion *) element)->Value();
+    delete element;
+  }
+
+  node->SetOutcome( c );
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+Portion *GSM_SetPayoff_NodeRational(Portion **param)
+{
+  Portion* element;
+  Node* node = ( (NodePortion*) param[ 0 ] )->Value();
+  if (node->GetOutcome())
+    return new ErrorPortion("An outcome is already attached to the node");
+
+  BaseEfg* efg = ( (EfgPortion*) param[ 0 ]->Owner() )->Value();
+  if( efg->Type() != RATIONAL )
+    return new ErrorPortion( "Type mismatch between node and list" );
+
+  ListPortion *p = (ListPortion *) param[1];
+  if (efg->NumPlayers() != p->Length())
+    return new ErrorPortion("Wrong number of entries in payoff vector");
+
+  OutcomeVector<gRational>* c = ( (Efg<gRational>*) efg )->NewOutcome();
+
+  for (int i = 1; i <= c->Length(); i++)
+  {
+    element = p->Subscript(i);
+    (*c)[i] = ((RationalPortion *) element)->Value();
+    delete element;
+  }
+
+  node->SetOutcome( c );
+
+  Portion* por = new OutcomeValPortion(c);
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+
 //
 // Implementation of extensive form query functions, in alpha order
 //
@@ -1560,6 +1628,17 @@ void Init_efgfunc(GSM *gsm)
 			porOUTCOME_RATIONAL);
   FuncObj->SetParamInfo(GSM_SetPayoffRational, 1, "payoff",
 			porLIST | porRATIONAL);
+
+  FuncObj->SetFuncInfo( GSM_SetPayoff_NodeFloat, 2 );
+  FuncObj->SetParamInfo( GSM_SetPayoff_NodeFloat, 0, "node", porNODE );
+  FuncObj->SetParamInfo(GSM_SetPayoff_NodeFloat, 
+			1, "payoff", porLIST | porFLOAT);
+
+  FuncObj->SetFuncInfo( GSM_SetPayoff_NodeRational, 2 );
+  FuncObj->SetParamInfo( GSM_SetPayoff_NodeRational, 0, "node", porNODE );
+  FuncObj->SetParamInfo(GSM_SetPayoff_NodeRational, 
+			1, "payoff", porLIST | porRATIONAL);
+
   gsm->AddFunction(FuncObj);
 
   //-----------------------------------------------------------// 
