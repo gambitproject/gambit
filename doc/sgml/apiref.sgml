@@ -62,18 +62,7 @@ information and plans.
 
 &apirefaction;
 
-<sect1 id="apiref.strategy">
-<title>Strategies</title>
-
-<para>
-</para>
-
-&bifgame;
-&bifisdominated;
-&bifname;
-&bifsetname;
-
-</sect1>
+&apirefstrategy;
 
 <sect1 id="apiref.efsupport">
 <title>Supports on extensive forms</title>
@@ -105,20 +94,7 @@ information and plans.
 </sect1>
 
 
-<sect1 id="apiref.nfsupport">
-<title>Supports on normal forms</title>
-
-<para>
-</para>
-
-&bifaddstrategy;
-&bifname;
-&bifremovestrategy;
-&bifsetname;
-&bifundominated;
-
-</sect1>
-
+&apirefnfgsupport;
 
 <sect1 id="apiref.nash">
 <title>Computing Nash equilibria</title>

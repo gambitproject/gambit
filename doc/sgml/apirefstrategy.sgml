@@ -1,0 +1,101 @@
+<sect1 id="apiref.strategy">
+<title>Strategies</title>
+
+<para>
+</para>
+
+<sect2 id="apiref.strategy.getgame">
+<title>GetGame</title>
+<indexterm><primary>GetGame</primary></indexterm>
+<indexterm><primary>Game (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtNfgGame gbtNfgStrategy::GetGame(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Game[strategy->STRATEGY] =: NFG
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetGame</function> (or <function>Game</function> in the GCL)
+returns the normal form game to which the strategy belongs.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.strategy.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtNfgStrategy::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->STRATEGY*] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the strategy.
+The empty string is returned if the strategy object is null.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.strategy.setlabel">
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtNfgStrategy::SetLabel(const gText &amp;p_label)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetName[x->STRATEGY, name->TEXT] =: STRATEGY
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the strategy.  The GCL version returns the 
+strategy.
+</para>
+
+</sect2>
+
+</sect1>
+

@@ -1,0 +1,171 @@
+<sect1 id="apiref.nfgsupport">
+<title>Supports of normal form strategies</title>
+
+<para>
+</para>
+
+<sect2 id="apiref.nfgsupport.addstrategy">
+<title>AddStrategy</title>
+<indexterm><primary>AddStrategy</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>AddStrategy</function> adds <parameter>strategy</parameter>
+to the <parameter>support</parameter>.  If the strategy is already in
+the support, no change is made.  A copy of the modified support is
+returned.  It is an error if <parameter>support</parameter> and
+<parameter>strategy</parameter> are not from the same normal form
+game.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nfgsupport.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtNfgSupport::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->NFSUPPORT] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the support.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nfgsupport.removestrategy">
+<title>RemoveStrategy</title>
+<indexterm><primary>RemoveStrategy</primary></indexterm>
+
+<formalpara>
+<title>RemoveStrategy</title>
+<para>
+<synopsis>
+RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>RemoveStrategy</function> 
+removes <parameter>strategy</parameter> from <parameter>support</parameter>.
+If <parameter>strategy</parameter> is not in
+the support, there is no effect.  A copy of the modified support is
+returned.  It is an error if <parameter>support</parameter> and 
+<parameter>strategy</parameter> are
+not from the same normal form game, or if removing <parameter>strategy</parameter> would result in the support containing no strategies for a player.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.nfgsupport.setlabel">
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtNfgSupport::SetLabel(const gText &amp;p_label)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetName[x->NFSUPPORT, name->TEXT] =: NFSUPPORT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the support.  The GCL version returns the player.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.nfgsupport.undominated">
+<title>UnDominated</title>
+<indexterm><primary>UnDominated</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+UnDominated[support->NFSUPPORT, {strong->False}, 
+            {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>UnDominated</function>
+finds dominated strategies in the 
+<parameter>support</parameter>. 
+The returned support contains only the undominated
+strategies or actions; if this support is identical to the input support,
+no strategies were found to be dominated.  The following
+optional parameters may be specified to modify the behavior of
+the elimination:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>strong</parameter> By default, all weakly dominated
+strategies are eliminated.  If this is specified
+<literal>True</literal>, elimination is based on strict dominance.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>mixed</parameter>: By default, elimination is done in pure
+strategies.  If this is specified <literal>True</literal>,
+elimination is done by examining mixtures over other strategies.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Default precision is rational.  Note
+that the precision parameter is only applicable for mixed domination.
+Pure strategy domination always uses rational precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+</sect1>
+
