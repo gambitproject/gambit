@@ -48,6 +48,9 @@ void ChildSubgames(Node *, gList<Node *> &);
 // if not, returns a pair of infosets violating the definition
 bool IsPerfectRecall(const BaseEfg &, Infoset *&, Infoset *&);
 
+
+template <class T> Efg<T> *CompressEfg(const Efg<T> &, const EFSupport &);
+
 #endif // EFGUTILS_H
 
 
