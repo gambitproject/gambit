@@ -197,7 +197,7 @@ if (strcmp(s,"")!=0)
 #endif
 #ifndef NFG_ONLY
 	if (strstr(filename,".efg"))		// This must be an extensive form
-		{printf("EFG");fflush(stdout);ExtensiveFormGUI(0,s,0,this);printf("EFG-done");fflush(stdout);return;}
+		{ExtensiveFormGUI(0,s,0,this);return;}
 #endif
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 }
