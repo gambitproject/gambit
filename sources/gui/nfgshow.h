@@ -23,6 +23,7 @@
 
 const int idNFG_SOLUTION_LIST = 1900;
 
+class NfgNavigateWindow;
 class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
@@ -36,7 +37,8 @@ private:
   NfgProfileList *m_solutionTable;
   wxNotebook *m_infoNotebook;
 
-  wxSashWindow *m_solutionSashWindow;
+  wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;
+  NfgNavigateWindow *m_navigateWindow;
 
   gList<NFSupport *> m_supports;
   NFSupport *m_currentSupport;
@@ -135,6 +137,10 @@ public:
   const Nfg &Game(void) const { return m_nfg; }  
 
   bool GameIsDirty(void) const { return m_nfg.IsDirty(); }
+
+  void SetPlayers(int, int);
+  void SetProfile(const gArray<int> &);
+  gArray<int> GetProfile(void) const;
 
   DECLARE_EVENT_TABLE()
 };

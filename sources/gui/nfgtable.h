@@ -14,8 +14,7 @@ private:
   Nfg &m_nfg;
   wxWindow *m_parent;
   wxGrid *m_grid;
-  wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
-  bool m_editable;
+  bool m_editable, m_cursorMoving;
   int m_rowPlayer, m_colPlayer;
   NFSupport m_support;
   MixedSolution *m_solution;
@@ -44,13 +43,9 @@ private:
 
 
   // Event handlers
-  void OnLeftClick(wxGridEvent &);
+  void OnCellSelect(wxGridEvent &);
   void OnLeftDoubleClick(wxGridEvent &);
   void OnLabelLeftClick(wxGridEvent &);
-
-  void OnStrategyChange(wxCommandEvent &);
-  void OnRowPlayerChange(wxCommandEvent &);
-  void OnColPlayerChange(wxCommandEvent &);
 
 public:
   NfgTable(Nfg &, wxWindow *);

@@ -376,77 +376,18 @@ void ColoredStringRenderer::Draw(wxGrid& grid,
 //======================================================================
 
 BEGIN_EVENT_TABLE(NfgTable, wxPanel)
-  EVT_GRID_CELL_LEFT_CLICK(NfgTable::OnLeftClick)
+  EVT_GRID_SELECT_CELL(NfgTable::OnCellSelect)
   EVT_GRID_CELL_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
   EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
-  EVT_CHOICE(idSTRATEGY_CHOICE, NfgTable::OnStrategyChange)
-  EVT_CHOICE(idROWPLAYER_CHOICE, NfgTable::OnRowPlayerChange)
-  EVT_CHOICE(idCOLPLAYER_CHOICE, NfgTable::OnColPlayerChange)
 END_EVENT_TABLE()
 
 NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   : wxPanel(p_parent, -1), m_nfg(p_nfg), m_parent(p_parent), 
-    m_editable(true), m_rowPlayer(1), m_colPlayer(2),
+    m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
     m_support(m_nfg), m_solution(0),
     m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
-
-  wxStaticBoxSizer *playerViewSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "View players"),
-			 wxVERTICAL);
-
-  wxBoxSizer *rowChoiceSizer = new wxBoxSizer(wxHORIZONTAL);
-  rowChoiceSizer->Add(new wxStaticText(this, -1, "Row player"),
-		      1, wxALIGN_LEFT | wxRIGHT, 5);
-  m_rowChoice = new wxChoice(this, idROWPLAYER_CHOICE);
-  rowChoiceSizer->Add(m_rowChoice, 0, wxALL, 0);
-
-  wxBoxSizer *colChoiceSizer = new wxBoxSizer(wxHORIZONTAL);
-  colChoiceSizer->Add(new wxStaticText(this, -1, "Column player"),
-		      1, wxALIGN_LEFT | wxRIGHT, 5);
-  m_colChoice = new wxChoice(this, idCOLPLAYER_CHOICE);
-  colChoiceSizer->Add(m_colChoice, 0, wxALL, 0);
-
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    wxString playerName = (char *) (ToText(pl) + ": " +
-				    m_nfg.Players()[pl]->GetName());
-    m_rowChoice->Append(playerName);
-    m_colChoice->Append(playerName);
-  }
-
-  m_rowChoice->SetSelection(0);
-  m_colChoice->SetSelection(1);
-
-  playerViewSizer->Add(rowChoiceSizer, 0, wxALL | wxEXPAND, 5);
-  playerViewSizer->Add(colChoiceSizer, 0, wxALL | wxEXPAND, 5);
-
-  wxStaticBoxSizer *contViewSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Current contingency"),
-			 wxVERTICAL);
-
-  m_stratProfile = new wxChoice *[m_nfg.NumPlayers()];
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_stratProfile[pl-1] = new wxChoice(this, idSTRATEGY_CHOICE);
-    
-    NFPlayer *player = m_nfg.Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					     player->Strategies()[st]->Name()));
-    }
-    m_stratProfile[pl-1]->SetSelection(0);
-
-    wxBoxSizer *stratSizer = new wxBoxSizer(wxHORIZONTAL);
-    stratSizer->Add(new wxStaticText(this, -1,
-				     (char *) ("Player " + ToText(pl))),
-		    1, wxALIGN_LEFT | wxRIGHT, 5);
-    stratSizer->Add(m_stratProfile[pl-1], 0, wxALL, 0);
-    contViewSizer->Add(stratSizer, 0, wxALL | wxEXPAND, 5);
-  }
-
-  wxBoxSizer *navPanelSizer = new wxBoxSizer(wxVERTICAL);
-  navPanelSizer->Add(playerViewSizer, 0, wxALL | wxEXPAND, 10);
-  navPanelSizer->Add(contViewSizer, 0, wxALL | wxEXPAND, 10);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
   m_grid->SetTable(new NfgGridTable(this, &m_nfg), true);
@@ -457,7 +398,6 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   //  m_grid->SetDefaultRenderer(new ColoredStringRenderer);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  topSizer->Add(navPanelSizer, 0, wxALL, 5);
   topSizer->Add(m_grid, 1, wxALL | wxEXPAND | wxALIGN_RIGHT, 5);
 
   SetSizer(topSizer);
@@ -470,10 +410,6 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
 
 void NfgTable::SetProfile(const gArray<int> &p_profile)
 {
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    m_stratProfile[i-1]->SetSelection(p_profile[i] - 1);
-  }
-
   m_grid->SetGridCursor(p_profile[GetRowPlayer()] - 1,
 			p_profile[GetColPlayer()] - 1);
   m_grid->Refresh();
@@ -481,11 +417,7 @@ void NfgTable::SetProfile(const gArray<int> &p_profile)
 
 gArray<int> NfgTable::GetProfile(void) const
 {
-  gArray<int> profile(m_nfg.NumPlayers());
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = m_stratProfile[i-1]->GetSelection() + 1;
-  }
-  return profile;
+  return ((NfgShow *) m_parent)->GetProfile();
 }
 
 void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
@@ -519,8 +451,8 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 		       m_nfg.NumStrats(oldColPlayer));
   }
 
-  SetStrategy(m_rowPlayer, 1);
-  SetStrategy(m_colPlayer, 1);
+  ((NfgShow *) m_parent)->SetStrategy(m_rowPlayer, 1);
+  ((NfgShow *) m_parent)->SetStrategy(m_colPlayer, 1);
   m_grid->EndBatch();
   m_grid->AdjustScrollbars();
   m_grid->Refresh();
@@ -528,13 +460,14 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 
 void NfgTable::SetStrategy(int p_player, int p_strategy)
 {
-  m_stratProfile[p_player-1]->SetSelection(p_strategy-1);
-
-  if (p_player == GetRowPlayer()) {
-    m_grid->SetGridCursor(p_strategy - 1, m_grid->GetCursorColumn());
-  }
-  else if (p_player == GetColPlayer()) {
-    m_grid->SetGridCursor(m_grid->GetCursorRow(), p_strategy - 1);
+  if (!m_cursorMoving) {
+    // prevents reentry
+    if (p_player == GetRowPlayer()) {
+      m_grid->SetGridCursor(p_strategy - 1, m_grid->GetCursorColumn());
+    }
+    else if (p_player == GetColPlayer()) {
+      m_grid->SetGridCursor(m_grid->GetCursorRow(), p_strategy - 1);
+    }
   }
 }
 
@@ -583,15 +516,19 @@ void NfgTable::ToggleValues(void)
   m_grid->Refresh();
 }
 
-void NfgTable::OnLeftClick(wxGridEvent &p_event)
+void NfgTable::OnCellSelect(wxGridEvent &p_event)
 {
   if (p_event.GetRow() >= m_support.NumStrats(GetRowPlayer()) ||
       p_event.GetCol() >= m_support.NumStrats(GetColPlayer())) {
     p_event.Veto();
   }
   else {
-    SetStrategy(GetRowPlayer(), p_event.GetRow() + 1);
-    SetStrategy(GetColPlayer(), p_event.GetCol() + 1);
+    m_cursorMoving = true;  // this prevents re-entry
+    ((NfgShow *) m_parent)->SetStrategy(GetRowPlayer(), p_event.GetRow() + 1);
+    ((NfgShow *) m_parent)->SetStrategy(GetColPlayer(), p_event.GetCol() + 1);
+    m_cursorMoving = false;
+    // now continue with the default behavior (i.e., highlight the new cell)
+    p_event.Skip(); 
   }
 }
 
@@ -612,65 +549,9 @@ void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
   p_event.Veto();
 }
 
-void NfgTable::OnStrategyChange(wxCommandEvent &)
-{
-  SetProfile(GetProfile());
-  m_grid->Refresh();
-}
-
-void NfgTable::OnRowPlayerChange(wxCommandEvent &)
-{
-  int oldRowPlayer = GetRowPlayer();
-  int newRowPlayer = m_rowChoice->GetSelection() + 1;
-
-  if (newRowPlayer == oldRowPlayer) {
-    return;
-  }
-
-  if (newRowPlayer == m_colChoice->GetSelection() + 1) {
-    m_colChoice->SetSelection(oldRowPlayer - 1);
-    SetPlayers(newRowPlayer, oldRowPlayer);
-  }
-  else {
-    SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
-  }
-  m_grid->Refresh();
-}
-
-void NfgTable::OnColPlayerChange(wxCommandEvent &)
-{
-  int oldColPlayer = GetColPlayer();
-  int newColPlayer = m_colChoice->GetSelection() + 1;
-
-  if (newColPlayer == oldColPlayer) {
-    return;
-  }
-
-  if (newColPlayer == m_rowChoice->GetSelection() + 1) {
-    m_rowChoice->SetSelection(oldColPlayer - 1);
-    SetPlayers(oldColPlayer, newColPlayer);
-  }
-  else {
-    SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
-  }
-  m_grid->Refresh();
-}
-
 void NfgTable::SetSupport(const NFSupport &p_support)
 {
   m_support = p_support;
-
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_stratProfile[pl-1]->Clear();
-    NFPlayer *player = m_nfg.Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      if (m_support.Find(player->Strategies()[st])) {
-	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					       player->Strategies()[st]->Name()));
-      }
-    }
-    m_stratProfile[pl-1]->SetSelection(0);
-  }
   SetPlayers(m_rowPlayer, m_colPlayer);
   m_grid->Refresh();
 }

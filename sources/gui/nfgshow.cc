@@ -8,6 +8,7 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
+#include "wx/notebook.h"
 #include "wx/grid.h"
 #include "wx/fontdlg.h"
 #include "wx/wizard.h"
@@ -18,6 +19,7 @@
 #include "nfgsoln.h"
 #include "nfgprint.h"
 #include "nfgprofile.h"
+#include "nfgnavigate.h"
 #include "mixededit.h"
 #include "nfgconst.h"
 
@@ -47,6 +49,8 @@
 #include "dlsupportselect.h"
 
 const int idSOLUTIONWINDOW = 3002;
+const int idINFONOTEBOOK = 3003;
+const int idINFOWINDOW = 3004;
 
 //----------------------------------------------------------------------
 //                   class NfgShow: Member functions
@@ -118,7 +122,8 @@ END_EVENT_TABLE()
 NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
     m_parent(p_parent), m_nfg(p_nfg),
-    m_table(0), m_solutionTable(0), m_solutionSashWindow(0)
+    m_table(0), m_solutionTable(0),
+    m_solutionSashWindow(0), m_infoSashWindow(0), m_navigateWindow(0)
 {
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
@@ -147,9 +152,6 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   CreateStatusBar(3);
   MakeToolbar();
 
-  m_table = new NfgTable(m_nfg, this);
-  m_table->SetSize(0, 0, 200, 200);
-
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
 					  wxDefaultPosition,
 					  wxSize(600, 100));
@@ -159,10 +161,29 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   m_solutionTable->Show(true);
   m_solutionSashWindow->Show(false);
 
+  m_infoSashWindow = new wxSashWindow(this, idINFOWINDOW,
+				      wxPoint(0, 40), wxSize(200, 200),
+				      wxNO_BORDER | wxSW_3D);
+  m_infoSashWindow->SetSashVisible(wxSASH_RIGHT, true);
+  m_infoSashWindow->Show(true);
+  m_infoSashWindow->SetSashVisible(wxSASH_LEFT, false);
+
+  m_infoNotebook = new wxNotebook(m_infoSashWindow, idINFONOTEBOOK);
+  m_infoNotebook->Show(true);
+
+  m_navigateWindow = new NfgNavigateWindow(this, m_infoNotebook);
+  m_navigateWindow->SetSize(200, 200);
+  m_infoNotebook->AddPage(m_navigateWindow, "Navigation");
+
+  m_table = new NfgTable(m_nfg, this);
+  m_table->SetSize(0, 0, 200, 200);
+
   m_nfg.SetIsDirty(false);
   GetMenuBar()->Check(NFG_VIEW_OUTCOMES, !m_table->OutcomeValues());
   UpdateMenus();
   m_table->SetFocus();
+
+  AdjustSizes();
   Show(true);
 }
 
@@ -352,7 +373,7 @@ void NfgShow::MakeToolbar(void)
 void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
-  gArray<int> profile(m_table->GetProfile());
+  gArray<int> profile(GetProfile());
 
   menu->Enable(NFG_EDIT_OUTCOMES_DELETE, m_nfg.NumOutcomes() > 0);
   menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, m_nfg.NumOutcomes() > 0);
@@ -430,9 +451,22 @@ void NfgShow::AdjustSizes(void)
 				  width, m_solutionSashWindow->GetRect().height);
     height -= m_solutionSashWindow->GetRect().height;
   }
+
+  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
+    if (m_table) {
+      m_table->SetSize(250, 0, width - 250, height);
+    }
+  }
+  else if (m_table) {
+    m_table->SetSize(0, 0, width, height);
+  }
+
+  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->SetSize(0, 0, 250, height);
+  }
+
   if (m_table) {
-    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
-		     width - m_table->GetRect().x, height);
+    m_table->SetFocus();
   }
 }
 
@@ -448,10 +482,24 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
   GetClientSize(&clientWidth, &clientHeight);
 
   switch (p_event.GetId()) {
+  case idINFOWINDOW:
+    m_table->SetSize(p_event.GetDragRect().width,
+		     m_table->GetRect().y,
+		     clientWidth - p_event.GetDragRect().width,
+		     m_table->GetRect().height);
+    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
+			      m_infoSashWindow->GetRect().y,
+			      p_event.GetDragRect().width,
+			      m_infoSashWindow->GetRect().height);
+    break;
   case idSOLUTIONWINDOW:
     m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
 		     m_table->GetRect().width,
 		     clientHeight - p_event.GetDragRect().height - 40);
+    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
+			      m_infoSashWindow->GetRect().y,
+			      m_infoSashWindow->GetRect().width,
+			      clientHeight - p_event.GetDragRect().height);
     m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
 				  clientWidth, p_event.GetDragRect().height);
     break;
@@ -594,14 +642,14 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
   dialogNfgOutcomeSelect dialog(m_nfg, this);
     
   if (dialog.ShowModal() == wxID_OK) {
-    m_nfg.SetOutcome(m_table->GetProfile(), dialog.GetOutcome());
+    m_nfg.SetOutcome(GetProfile(), dialog.GetOutcome());
     m_table->Refresh();
   }
 }
 
 void NfgShow::OnEditOutcomeDetach(wxCommandEvent &)
 {
-  m_nfg.SetOutcome(m_table->GetProfile(), 0);
+  m_nfg.SetOutcome(GetProfile(), 0);
   m_table->Refresh();
 }
 
@@ -1322,9 +1370,33 @@ void NfgShow::OnFormatLoad(wxCommandEvent &)
 //                class NfgShow: Public member functions
 //----------------------------------------------------------------------
 
+void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
+{
+  if (m_navigateWindow) {
+    m_navigateWindow->SetPlayers(p_rowPlayer, p_colPlayer);
+  }
+  m_table->SetPlayers(p_rowPlayer, p_colPlayer);
+}
+
 void NfgShow::SetStrategy(int p_player, int p_strategy)
 {
-  m_table->SetStrategy(p_player, p_strategy);
+  if (m_navigateWindow)  {
+    m_navigateWindow->SetStrategy(p_player, p_strategy);
+  }
+  if (m_table) {
+    m_table->SetStrategy(p_player, p_strategy);
+  }
+}
+
+void NfgShow::SetProfile(const gArray<int> &p_profile)
+{
+  m_navigateWindow->SetProfile(p_profile);
+  m_table->SetProfile(p_profile);
+}
+
+gArray<int> NfgShow::GetProfile(void) const
+{
+  return m_navigateWindow->GetProfile();
 }
 
 void NfgShow::UpdateProfile(gArray<int> &profile)
@@ -1396,7 +1468,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 {
-  gArray<int> profile(m_table->GetProfile());
+  gArray<int> profile(GetProfile());
   profile[m_table->GetRowPlayer()] = st1;
   profile[m_table->GetColPlayer()] = st2;
 
