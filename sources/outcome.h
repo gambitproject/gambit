@@ -28,7 +28,7 @@ class Outcome    {
     // Return a vector containing the values of outcomes for each player
     // from (1..num_players).  If a player's value has not been set, it
     // is assumed to be 0.
-    gVector<gNumber> GetOutcomeVector(int num_players) const;
+    gTuple<gNumber> GetOutcomeVector(int num_players) const;
 
     // Return the value of the outcome for player p
     gNumber operator[](int p) const;
@@ -37,7 +37,7 @@ class Outcome    {
     void SetOutcome(int p, gNumber value);
 
     // Set players' values according to a vector
-    void SetOutcome(const gVector<gNumber> &v);
+    void SetOutcome(const gTuple<gNumber> &v);
 };
 
   

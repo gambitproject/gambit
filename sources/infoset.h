@@ -12,7 +12,7 @@
 #include "gblock.h"
 #include "gvector.h"
 #include "gnumber.h"
-#include "node.h"
+#include "noderep.h"
 
 //
 // <category lib=glib sect="Extensive Form">
@@ -109,11 +109,11 @@ class Infoset   {
 	//
 	// get the vector of probabilities for the actions
 	//
-    gVector<gNumber> GetActionProbs(void) const;
+    gTuple<gNumber> GetActionProbs(void) const;
 	//
 	// set the probabilities of the actions
 	//
-    void SetActionProbs(const gVector<gNumber> &probs);
+    void SetActionProbs(const gTuple<gNumber> &probs);
 	//
 	// remove an action from the infoset
 	//

@@ -57,8 +57,7 @@ class PlayerSet   {
 	// add player number p to the set
 	//
     void AddPlayer(int p)
-      { while(players.Length() < p+2)
-	  int pl = players.Append(gString()); }
+      { while (players.Length() < p+2)  players.Append(gString()); }
 
 	//
 	// append a player to the player set, with name name

@@ -22,7 +22,7 @@ class ExtForm    {
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
     ExtForm(int number, int numPlayers, int from_file = 0) : 
-    efg_no(number), nodes(numPlayers, from_file)   { }
+    efg_no(number), nodes(number, numPlayers, from_file)   { }
 //# numPlayers above may need +/- 2
 //#    ExtForm(const ExtForm &ef) : nodes(ef.nodes)   { }
     ~ExtForm()  { }
@@ -53,10 +53,10 @@ class ExtForm    {
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
     void LabelAction(const Node &n, int br, const gString &label)  { }
-    gVector<gNumber> GetActionProbs(const Node &n) const;
+    gTuple<gNumber> GetActionProbs(const Node &n) const;
     gNumber GetActionProb(const Node &n, int br) const;
-    void SetActionProbs(const Node &n, const gVector<gNumber> &probs);
-    void SetActionProbs(int pl, int iset, const gVector<gNumber> &probs);
+    void SetActionProbs(const Node &n, const gTuple<gNumber> &probs);
+    void SetActionProbs(int pl, int iset, const gTuple<gNumber> &probs);
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
@@ -120,7 +120,7 @@ class ExtForm    {
     void AddPlayer(int);
 
 	//# FILE OPERATIONS
-//#    void WriteToFile(gOutput &f) const;
+    void WriteToFile(gOutput &f) const;
 };
 
 

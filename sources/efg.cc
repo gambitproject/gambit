@@ -47,8 +47,9 @@ Node ExtForm::AddNode(const Node &n, int player, int child_count)
 //#old code  if (nodes.MoveNode(n, ret))  
 //#old code    players.RemoveInfoset(n[1], n[0], n[2]);
   
-  for (int i = 1; i <= child_count; i++)   
+  for (int i = 1; i <= child_count; i++)  
     nodes.CreateNode(dummy, CreateInfoset(dummy, efg_no, 0), ret);
+
   return ret;
 }
 
@@ -181,9 +182,9 @@ Node ExtForm::DeleteAction(const Node &n, int which)
   return ret;
 }
 
-gVector<gNumber> ExtForm::GetActionProbs(const Node &n) const
+gTuple<gNumber> ExtForm::GetActionProbs(const Node &n) const
 {
-  if (!nodes.IsMember(n) || n[1] != 0)   return gVector<gNumber>(1, 0);
+  if (!nodes.IsMember(n) || n[1] != 0)   return gTuple<gNumber>(1, 0);
   return nodes.GetActionProbs(n[1], n[2]);
 //#old code  return players.GetActionProbs(n[0], n[2]);
 }
@@ -195,14 +196,14 @@ gNumber ExtForm::GetActionProb(const Node &n, int br) const
 //#old code  return players.GetActionProb(n[0], n[2], br);
 }
 
-void ExtForm::SetActionProbs(const Node &n, const gVector<gNumber> &probs)
+void ExtForm::SetActionProbs(const Node &n, const gTuple<gNumber> &probs)
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return;
   nodes.SetActionProbs(n[1], n[2], probs);
 //#old code  players.SetActionProbs(n[0], n[2], probs);
 }
 
-void ExtForm::SetActionProbs(int pl, int iset, const gVector<gNumber> &probs)
+void ExtForm::SetActionProbs(int pl, int iset, const gTuple<gNumber> &probs)
 {
   Node n;
   n[0] = efg_no;
@@ -291,24 +292,23 @@ Node ExtForm::DeleteTree(const Node &n)
   return ret;
 }
 
-/*
 void ExtForm::WriteToFile(gOutput &f) const
 {
   f << "{ " << efg_no << " \"" << name << '"' << '\n';
   f << "  {";
   for (int i = 0; i <= nodes.NumPlayers(); i++)   {
     f << ((i == 0) ? " {" : "    {");
-    for (int j = 1; j <= nodes.NumInfosets(i, efg_no); j++)  {
+    for (int j = 1; j <= nodes.NumInfosets(i); j++)  {
       f << ((j == 1) ? " " : "\n      ");
-      f << "{ \"" << nodes.GetInfosetName(i, efg_no, j) << "\" {";
-      for (int k = 1; k <= nodes.NumActions(i, efg_no, j); k++)
-	f << " \"" << nodes.GetActionName(i, efg_no, j, k) << '"';
+      f << "{ \"" << nodes.GetInfosetName(i, j) << "\" {";
+      for (int k = 1; k <= nodes.NumActions(i, j); k++)
+	f << " \"" << nodes.GetActionName(i, j, k) << '"';
       f << " }";
       
       if (i == 0)   { // chance player, print branch probs
 	f << " { ";
-	for (k = 1; k <= nodes.NumActions(i, efg_no, j); k++)
-	  f << nodes.GetActionProb(efg_no, j, k) << ' ';
+	for (k = 1; k <= nodes.NumActions(i, j); k++)
+	  f << nodes.GetActionProb(0, j, k) << ' ';
 	f << '}';
       }
 
@@ -322,7 +322,6 @@ void ExtForm::WriteToFile(gOutput &f) const
   
   f << "}\n";
 }
-*/
 
 /*
 int ExtForm::yyparse(void)
