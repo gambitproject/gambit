@@ -639,15 +639,18 @@ public:
 };
 
 //---------------------------------------------------------------------
-//                          new Mixed class
+//                           Mixed class
 //---------------------------------------------------------------------
 
 template <class T> class MixedPortion : public Portion  {
 protected:
   MixedProfile<T> ** _Value;
-  MixedPortion(void);
+  bool _ref;
+
+  MixedPortion(MixedProfile<T> *&, bool);
 
 public:
+  MixedPortion(MixedProfile<T> *);
   virtual ~MixedPortion();
 
   MixedProfile<T> *Value(void) const;
@@ -660,37 +663,25 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-
-template <class T> class MixedValPortion : public MixedPortion<T>  {
-public:
-  MixedValPortion(MixedProfile<T> *value);
-  virtual ~MixedValPortion();
   bool IsReference(void) const;
 };
-
-template <class T> class MixedRefPortion : public MixedPortion<T>  {
-public:
-  MixedRefPortion(MixedProfile<T> *& value);
-  virtual ~MixedRefPortion();
-  bool IsReference(void) const;
-};
-
-
 
 
 
 //---------------------------------------------------------------------
-//                          new Behav class
+//                            Behav class
 //---------------------------------------------------------------------
 
 template <class T> class BehavPortion : public Portion  {
 protected:
   BehavProfile<T> ** _Value;
-  BehavPortion(void);
+  bool _ref;
+
+  BehavPortion(BehavProfile<T> *&, bool);
 
 public:
+  BehavPortion(BehavProfile<T> *);
   virtual ~BehavPortion();
 
   BehavProfile<T> *Value(void) const;
@@ -703,20 +694,7 @@ public:
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
-};
 
-
-template <class T> class BehavValPortion : public BehavPortion<T>  {
-public:
-  BehavValPortion(BehavProfile<T> *value);
-  virtual ~BehavValPortion();
-  bool IsReference(void) const;
-};
-
-template <class T> class BehavRefPortion : public BehavPortion<T>  {
-public:
-  BehavRefPortion(BehavProfile<T> *& value);
-  virtual ~BehavRefPortion();
   bool IsReference(void) const;
 };
 

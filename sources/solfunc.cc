@@ -362,7 +362,7 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
       }
       delete p1;
     }
-    por = new BehavValPortion<double>(P);
+    por = new BehavPortion<double>(P);
 
 
   }
@@ -432,7 +432,7 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
       delete p1;
     }
 
-    por = new BehavValPortion<gRational>(P);
+    por = new BehavPortion<gRational>(P);
   }
 
   if(por == 0)
@@ -499,31 +499,25 @@ static Portion *GSM_Beliefs_Rational(Portion **param)
 // Centroid
 //--------------
  
-static Portion *GSM_CentroidEFSupport(Portion **param)
+static Portion *GSM_Centroid_EFSupport(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
-  Portion *por;
 
   if (S->BelongsTo().Type() == DOUBLE)
-    por = new BehavValPortion<double>(new BehavSolution<double>((Efg<double> &) S->BelongsTo(), *S));
+    return new BehavPortion<double>(new BehavSolution<double>((Efg<double> &) S->BelongsTo(), *S));
   else
-    por = new BehavValPortion<double>(new BehavSolution<double>((Efg<double> &) S->BelongsTo(), *S));
-
-  return por;
+    return new BehavPortion<gRational>(new BehavSolution<gRational>((Efg<gRational> &) S->BelongsTo(), *S));
 }
 
-static Portion *GSM_CentroidNFSupport(Portion **param)
+static Portion *GSM_Centroid_NFSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
-  Portion *por;
 
   if (N->Type() == DOUBLE)
-    por = new MixedValPortion<double>(new MixedSolution<double>((Nfg<double> &) *N, *S));
+    return new MixedPortion<double>(new MixedSolution<double>((Nfg<double> &) *N, *S));
   else
-    por = new MixedValPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) *N, *S));
-
-  return por;
+    return new MixedPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) *N, *S));
 }
 
 
@@ -914,7 +908,6 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   gArray<int> dim = S->NumStrats();
-  Portion* por;
   MixedSolution<double> *Pd = 0;
   MixedSolution<gRational> *Pr = 0;
   unsigned long datatype;
@@ -993,11 +986,9 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
   }
 
   if (datatype == porFLOAT)
-    por = new MixedValPortion<double>(Pd);
+    return new MixedPortion<double>(Pd);
   else
-    por = new MixedValPortion<gRational>(Pr);
-
-  return por;
+    return new MixedPortion<gRational>(Pr);
 }
 
 
@@ -1665,12 +1656,10 @@ void Init_solfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Centroid", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CentroidEFSupport, 
-				       porBEHAV, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Centroid_EFSupport, porBEHAV, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEFSUPPORT));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_CentroidNFSupport,
-				       porMIXED, 1));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Centroid_NFSupport, porMIXED, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porNFSUPPORT));
   gsm->AddFunction(FuncObj);
 

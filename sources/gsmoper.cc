@@ -2224,9 +2224,7 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
     delete p1;
   }
 
-
-  Portion* por = new MixedValPortion<double>(P);
-  return por;
+  return new MixedPortion<double>(P);
 }
 
 
@@ -2281,9 +2279,7 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
     delete p1;
   }
 
-
-  Portion* por = new MixedValPortion<gRational>(P);
-  return por;
+  return new MixedPortion<gRational>(P);
 }
 
 Portion *GSM_Behav_EfgFloat(Portion **param)
@@ -2360,9 +2356,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
     delete p1;
   }
 
-  Portion* por = new BehavValPortion<double>(P);
-  return por;
-
+  return new BehavPortion<double>(P);
 }
 
 Portion *GSM_Behav_EfgRational(Portion **param)
@@ -2439,8 +2433,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
     delete p1;
   }
 
-  Portion* por = new BehavValPortion<gRational>(P);
-  return por;
+  return new BehavPortion<gRational>(P);
 }
 
 

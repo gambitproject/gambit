@@ -40,14 +40,14 @@ Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedSolution<double> >
 {
   _DataType = porMIXED_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion<double>(new MixedSolution<double>(list[i])));
+    Append(new MixedPortion<double>(new MixedSolution<double>(list[i])));
 }
 
 Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedSolution<gRational> > &list)
 {
   _DataType = porMIXED_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedValPortion<gRational>(new MixedSolution<gRational>(list[i])));
+    Append(new MixedPortion<gRational>(new MixedSolution<gRational>(list[i])));
 }
 
 
@@ -62,7 +62,7 @@ Behav_ListPortion<double>::Behav_ListPortion(
 {
   _DataType = porBEHAV_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavValPortion<double>(new BehavSolution<double>(list[i])));
+    Append(new BehavPortion<double>(new BehavSolution<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(
@@ -70,7 +70,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 {
   _DataType = porBEHAV_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavValPortion<gRational>(new BehavSolution<gRational>(list[i])));
+    Append(new BehavPortion<gRational>(new BehavSolution<gRational>(list[i])));
 }
 
 
@@ -122,8 +122,7 @@ static Portion *GSM_Behav_Float(Portion **param)
   BehavSolution<double> *bp = new BehavSolution<double>(E);
   MixedToBehav(N, mp, E, *bp);
 
-  Portion* por = new BehavValPortion<double>(bp);
-  return por;
+  return new BehavPortion<double>(bp);
 }
 
 static Portion *GSM_Behav_Rational(Portion **param)
@@ -137,8 +136,7 @@ static Portion *GSM_Behav_Rational(Portion **param)
   BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
   MixedToBehav(N, mp, E, *bp);
 
-  Portion* por = new BehavValPortion<gRational>(bp);
-  return por;
+  return new BehavPortion<gRational>(bp);
 }
 
 //------------------
