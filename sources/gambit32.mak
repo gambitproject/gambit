@@ -15,7 +15,7 @@ SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
 # Define __BCC55__ if using Borland 5.5
-EXTRACPPFLAGS = -D__BCC55__ -I$(BCCDIR)\include -I..\include -Ibase -Imath
+EXTRACPPFLAGS = -D__BCC55__ -I$(BCCDIR)\include 
 EXTRALINKFLAGS = 
 
 !include make.filelist
