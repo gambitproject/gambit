@@ -73,6 +73,7 @@ public:
 
   // GENERAL DATA ACCESS
   Efg &Game(void) const { return m_profile->Game(); }
+  const BehavProfile<gNumber> *Profile(void) const { return m_profile; }
   gPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?
@@ -115,6 +116,28 @@ public:
     { return m_profile->NodeRealizProbs(); }
   const gNumber &GetValue(Infoset *s, int act) const
     { return m_profile->GetValue(s, act); }
+
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
+					      const term_order&,
+					      const gList<gList<int> > &) 
+    const;
+  bool NodeProbabilityPoly(      gPoly<gDouble> &,
+			   const gSpace &, 
+			   const term_order&,
+			   const gList<gList<int> > &,
+			   const Node *,
+			   const int &pl,
+			   const int &i,
+			   const int &j) const;
+  gPolyList<gDouble> ExpectedPayoffDiffPolys(const gSpace &, 
+					     const term_order&,
+					     const gList<gList<int> > &) const;
+  gPolyList<gDouble> ExtendsToNashIneqs(const gSpace &, 
+					const term_order&,
+					const gList<gList<int> > &) const;
+  // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+  bool ExtendsToNash(gStatus &) const;
 
   // OUTPUT
   void Dump(gOutput &) const;
