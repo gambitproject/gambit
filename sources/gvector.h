@@ -188,10 +188,16 @@ template <class T> INLINE gVector<T> gVector<T>::operator*(T c) const
 
 template <class T> INLINE T gVector<T>::operator*(const gVector<T>& V) const
 {
-  T result = 0;
+  T result = (T) 0;
 
   for (int i = First(); i <= Last(); i++)
-    result = result +  (*this)[i] * V[i];
+// The explicit cast to T is necessary for when T is another gVector.
+// Note that this merely gets this to compile, and does not produce
+// sensible output, and certainly not the product of two matrices.
+// This is a bit of a shortcoming, and we should think about the derivation
+// structure of Vector to see if we can have two versions, one with and
+// one without...
+    result = result + ((T) ((*this)[i] * V[i]));
 
   return result;
 }
@@ -200,7 +206,7 @@ template <class T> INLINE gVector<T> gVector<T>::operator/(T c) const
 {
   gVector result(First(), Last());
 
-  assert(c != 0);
+  assert(c != (T) 0);
   for (int i = First(); i <= Last(); i++)
     result[i] = (*this)[i] / c;
 
@@ -214,7 +220,7 @@ template <class T> INLINE
   gVector result(First(), Last());
 
   for (int i = First(); i <= Last(); i++)  {
-    assert(V[i] != 0);
+    assert(V[i] != (T) 0);
     result[i] = (*this)[i] / V[i];
   }
 
