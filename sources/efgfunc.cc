@@ -731,13 +731,11 @@ static Portion *GSM_NewInfoset(Portion **param)
 {
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
   int n = ((IntPortion *) param[1])->Value();
-  gString name = ((TextPortion *) param[2])->Value();
 
   if (n <= 0)
     return new ErrorPortion("Information sets must have at least one action");
 
   Infoset *s = p->BelongsTo()->CreateInfoset(p, n);
-  s->SetName(name);
 
   _gsm->UnAssignGameElement(p->BelongsTo(), true, porBEHAV | porEFSUPPORT);
 
@@ -753,14 +751,11 @@ static Portion *GSM_NewInfoset(Portion **param)
 static Portion *GSM_NewOutcome(Portion **param)
 {
   Outcome *c;
-  gString name = ((TextPortion *) param[1])->Value();
 
   if (param[0]->Spec().Type == porEFG_FLOAT)
     c = ((Efg<double> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
   else
     c = ((Efg<gRational> *) ((EfgPortion *) param[0])->Value())->NewOutcome();
-
-  c->SetName(name);
 
   Portion *por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -774,10 +769,7 @@ static Portion *GSM_NewOutcome(Portion **param)
 static Portion *GSM_NewPlayer(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  gString name = ((TextPortion *) param[1])->Value();
-
   EFPlayer *p = E.NewPlayer();
-  p->SetName(name);
 
   _gsm->UnAssignGameElement(&E, true, porBEHAV | porEFSUPPORT);
 
@@ -1543,28 +1535,22 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewInfoset", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInfoset, porINFOSET, 3,
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInfoset, porINFOSET, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("actions", porINTEGER));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("name", porTEXT,
-					    new TextValPortion("")));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NewOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome, porOUTCOME, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome, porOUTCOME, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT,
-					    new TextValPortion("")));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NewPlayer", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewPlayer, porEFPLAYER, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewPlayer, porEFPLAYER, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT,
-					    new TextValPortion("")));
   gsm->AddFunction(FuncObj);
 
 
