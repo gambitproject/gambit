@@ -1321,6 +1321,13 @@ Portion* GSM_SetFormat( Portion** param )
 }
 
 
+Portion* GSM_Write_list( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  s << param[ 1 ];
+  return new OutputRefPortion( s );
+}
+
 
 
 
@@ -1744,6 +1751,11 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT );
   FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo( GSM_Write_list, 2 );
+  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_list, 1, "x", 
+			porLIST | porBOOL | porINTEGER | porFLOAT |
+			porRATIONAL | porTEXT | porMIXED | porBEHAV );
   gsm->AddFunction( FuncObj );
 
 
