@@ -2060,6 +2060,7 @@ Portion *GSM_Version(Portion **)
 }
 
 
+/*
 extern GSM& _gsm;
 
 Portion* GSM_Help(Portion** param)
@@ -2072,6 +2073,7 @@ Portion* GSM_Clear(Portion**)
   _gsm.Clear();
   return new BoolValPortion(true);
 }
+*/
 
 
 void Init_gsmoper( GSM* gsm )
@@ -2708,6 +2710,7 @@ void Init_gsmoper( GSM* gsm )
 
   //---------------- faked functions -----------------//
 
+/*
   FuncObj = new FuncDescObj( (gString) "Help" );
   FuncObj->SetFuncInfo( GSM_Help, 1 );
   FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
@@ -2716,6 +2719,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Clear" );
   FuncObj->SetFuncInfo( GSM_Clear, 0 );
   gsm->AddFunction( FuncObj );
+*/
 
 
   FuncObj = new FuncDescObj( (gString) "Assign" );
