@@ -32,7 +32,7 @@
 # define compiler and flags
 
 CC = g++
-CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES $(DEFINES) -Dwx_motif \
+CFLAGS = -Wall -DGDOUBLE -D__NO_MATH_INLINES $(DEFINES) -Dwx_motif \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
 
 #
