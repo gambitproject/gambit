@@ -1,7 +1,7 @@
 //
 // FILE: gmatrix.h -- Implementation of matrix classes
 //
-// @(#)gmatrix.h	2.1 3/24/97
+// $Id$
 //
 
 #ifndef GMATRIX_H
@@ -65,7 +65,9 @@ template <class T> class gMatrix : public gRectArray<T>  {
   void Pivot(int, int);
 };
 
+#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &, const gMatrix<T> &);
+#endif    // __BORLANDC__
 
 #endif     // GMATRIX_H
 
