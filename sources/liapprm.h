@@ -5,7 +5,7 @@
 #define LIAPPRM_H
 #include "algdlgs.h"
 
-class LiapParamsSettings: public OutputParamsSettings
+class LiapParamsSettings: public virtual OutputParamsSettings
 {
 protected:
 	float tolOpt, tolBrent;

@@ -1,10 +1,10 @@
-// @(#)csumprm.h	1.5 4/16/96
+// $Id$
 #ifndef ZSUMPRM_H
 #define ZSUMPRM_H
 
 #include "algdlgs.h"
 
-class LPParamsSettings: public OutputParamsSettings
+class LPParamsSettings: public virtual OutputParamsSettings
 {
 protected:
 	void SaveDefaults(void);

@@ -32,7 +32,7 @@ protected:
 	void SaveDefaults(void);// Called automatically in the destructor
 public:
 	OutputParamsSettings(void);
-	~OutputParamsSettings(void);
+	virtual ~OutputParamsSettings(void);
 	// Return the results...
 	gOutput *OutFile(void);
 	gOutput *ErrFile(void);
@@ -49,7 +49,7 @@ public:
 // Constructor
 	OutputParamsDialog(const char *label=0,wxWindow *parent=0,const char *help_str=0);
 // Destructor
-	~OutputParamsDialog(void);
+	virtual ~OutputParamsDialog(void);
 // Create the fields
 	void MakeOutputFields(unsigned int fields=OUTPUT_FIELD);
 };
@@ -60,7 +60,7 @@ public:
 // one to run PXI right after the algorithm is done (call RunPxi).
 // Note that PxiParamsSettings will prompt for a new filename iff it is created by
 // itself (not a part of PxiParamsDialog) and the naming option is set to "Prompt"
-class PxiParamsSettings: public OutputParamsSettings
+class PxiParamsSettings: public virtual OutputParamsSettings
 {
 protected:
 	char *pxi_command,*pxiname,*algname,*filename;
@@ -72,7 +72,7 @@ protected:
 	static int naming_option; // 0-default,1-saved,2-query
 public:
 	PxiParamsSettings(const char *alg,const char *fn);
-	~PxiParamsSettings();
+	virtual ~PxiParamsSettings();
 	// Return the results...
 	gOutput *PxiFile(void);
 	int	PxiType(void);
@@ -89,7 +89,7 @@ public:
 // Constructor
 	PxiParamsDialog(const char *alg="Pxi",const char *label=0,const char *filename="pxi.out",wxWindow *parent=0,const char *help_str=0);
 // Destructor
-	~PxiParamsDialog(void);
+	virtual ~PxiParamsDialog(void);
 // Create Fields
 	void MakePxiFields(void);
 	virtual bool FromDialog(void) {return true;}

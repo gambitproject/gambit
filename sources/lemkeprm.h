@@ -4,7 +4,7 @@
 
 #include "algdlgs.h"
 
-class LemkeParamsSettings : public OutputParamsSettings
+class LemkeParamsSettings : public virtual OutputParamsSettings
 {
 protected:
 	int maxDepth;

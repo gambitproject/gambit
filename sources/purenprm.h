@@ -5,7 +5,7 @@
 
 #include "algdlgs.h"
 
-class PureNashParamsSettings : public OutputParamsSettings
+class PureNashParamsSettings : public virtual OutputParamsSettings
 {
 protected:
 	void SaveDefaults(void) { };

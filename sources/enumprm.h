@@ -4,7 +4,7 @@
 
 #include "algdlgs.h"
 
-class EnumParamsSettings:public OutputParamsSettings
+class EnumParamsSettings:public virtual OutputParamsSettings
 {
 protected:
 	void SaveDefaults(void);

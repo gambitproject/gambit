@@ -4,7 +4,7 @@
 
 #include "algdlgs.h"
 
-class SimpdivParamsSettings:public OutputParamsSettings
+class SimpdivParamsSettings:public virtual OutputParamsSettings
 {
 protected:
 	int nRestarts, leashLength;
