@@ -1419,7 +1419,6 @@ Read[input->INPUT, x<->T] =: INPUT
       for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
-SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
 SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
                 {quote->BOOL}, {listBraces->BOOL},
                 {listCommas->BOOL}, {listLF->INTEGER},
@@ -4072,18 +4071,6 @@ SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 \bd
 Writes the normal form game \verb+nfg+ to an external
 save file.  Returns \verb+nfg+.
-\item
-[See also:] {\tt LoadNfg}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
-\end{verbatim}\normalsize
-
-\bd
-Writes a normal form game using the strategies in \verb+support+ as the full support
-of the game.  Returns \verb+support+.
 \item
 [See also:] {\tt LoadNfg}.
 \ed
