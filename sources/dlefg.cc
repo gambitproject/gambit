@@ -1307,11 +1307,15 @@ dialogEfgSave::dialogEfgSave(const gText &p_name,
   m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
   m_okButton->GetConstraints()->height.AsIs();
 
-  m_cancelButton->GetConstraints()->top.SameAs(m_numDecimals, wxBottom, 10);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
   m_cancelButton->GetConstraints()->width.AsIs();
   m_cancelButton->GetConstraints()->height.AsIs();
 
+  m_helpButton->GetConstraints()->top.AsIs();
+  m_helpButton->GetConstraints()->left.AsIs();
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
   m_helpButton->Show(FALSE);
 
   Go();
