@@ -1,0 +1,51 @@
+<refentry id="bif.ReadText" xreflabel="ReadText">
+
+<refmeta>
+<indexterm>
+<primary>ReadText</primary>
+</indexterm>
+
+<refentrytitle>ReadText</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ReadText</refname>
+<refpurpose>
+Reads data from an input stream as text
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ReadText[input<->INPUT, {x<->}, until->TEXT] =: INPUT
+ReadText[input<->INPUT, {x<->}, n->INTEGER] =: INPUT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ReadText</function> 
+reads data of type <type>TEXT</type> from the input stream and assigns it to
+<parameter>x</parameter>.  The first signature reads from <parameter>input</parameter> until the
+string <parameter>until</parameter> is reached.  For example, setting
+<parameter>until</parameter><literal>-&gt;"\n"</literal>
+will read a line of text from <parameter>input</parameter>.  The
+second signature reads <parameter>n</parameter> characters from 
+<parameter>input</parameter>.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Input">,
+<xref linkend="bif.IsEof">,
+<xref linkend="bif.Read">,
+<xref linkend="bif.Write">.
+</para>
+</refsect1>
+
+</refentry>
+
+

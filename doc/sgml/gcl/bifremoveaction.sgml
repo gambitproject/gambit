@@ -1,0 +1,53 @@
+<refentry id="bif.RemoveAction" xreflabel="RemoveAction">
+
+<refmeta>
+<indexterm>
+<primary>RemoveAction</primary>
+</indexterm>
+
+<refentrytitle>RemoveAction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>RemoveAction</refname>
+<refpurpose>
+Removes an action from a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
+RemoveAction[basis->EFBASIS, action->ACTION] =: EFBASIS 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>RemoveAction</function> 
+removes <parameter>action</parameter> from <parameter>support</parameter>
+(or <parameter>basis</parameter>).
+If <parameter>action</parameter> is not in <parameter>support</parameter>
+(or <parameter>basis</parameter>).
+there is no
+effect.  A copy of the modified support is returned.  It is an error
+if <parameter>support</parameter> (or <parameter>basis</parameter>)
+and <parameter>action</parameter>
+are not from the same extensive
+form game, or if removing <parameter>action</parameter> would result in the support
+containing no actions at an information set.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddAction">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
+</refentry>
+
+

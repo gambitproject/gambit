@@ -1,0 +1,37 @@
+<refentry id="bif.Reveal" xreflabel="Reveal">
+
+<refmeta>
+<indexterm>
+<primary>Reveal</primary>
+</indexterm>
+
+<refentrytitle>Reveal</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Reveal</refname>
+<refpurpose>
+Reveals the actions at an information set to specified players
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Reveal[infoset->INFOSET, who->LIST(EFPLAYER)] =: INFOSET 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Reveal</function> 
+reveals the list of actions at <parameter>infoset</parameter> to the players
+in <parameter>who</parameter>,
+refining their information partitions at
+all information sets in the extensive form game accordingly.  
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -125,6 +125,14 @@ noncooperative n-person games</title>
 </biblioset>
 </biblioentry>
 
+<biblioentry id="Tur02" xreflabel="Tur02">
+<biblioset relation="article">
+<author><firstname>Theodore</firstname><surname>Turocy</surname></author>
+<title>A computational approach to quantal response equilibrium properties</title>
+<copyright><year>2002</year></copyright>
+</biblioset>
+</biblioentry>
+
 <biblioentry id="VTH87" xreflabel="VTH87">
 <biblioset relation="article">
 <authorgroup>

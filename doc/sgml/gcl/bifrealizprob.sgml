@@ -1,0 +1,48 @@
+<refentry id="bif.RealizProb" xreflabel="RealizProb">
+
+<refmeta>
+<indexterm>
+<primary>RealizProb</primary>
+</indexterm>
+
+<refentrytitle>RealizProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>RealizProb</refname>
+<refpurpose>
+Returns the probability a node is reached
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+RealizProb[profile->BEHAV, node->NODE] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>RealizProb</function> 
+returns the realization probability for <parameter>node</parameter>
+given that all players
+are following <parameter>profile</parameter>.  It is an error if
+<parameter>profile</parameter> and
+<parameter>node</parameter> are not from the same extensive form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionValue">,
+<xref linkend="bif.Belief">,
+<xref linkend="bif.InfosetProb">,
+<xref linkend="bif.NodeValue">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,36 @@
+<refentry id="bif.Quit" xreflabel="Quit">
+
+<refmeta>
+<indexterm>
+<primary>Quit</primary>
+</indexterm>
+
+<refentrytitle>Quit</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Quit</refname>
+<refpurpose>
+Exits the command language
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Quit
+Quit[{value->INTEGER:=0}] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Quit</function> 
+exits the command language, returning <parameter>value</parameter>
+to the operating system.
+</para>
+</refsect1>
+
+</refentry>
+
+

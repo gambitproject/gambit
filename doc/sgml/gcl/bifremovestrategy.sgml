@@ -1,0 +1,47 @@
+<refentry id="bif.RemoveStrategy" xreflabel="RemoveStrategy">
+
+<refmeta>
+<indexterm>
+<primary>RemoveStrategy</primary>
+</indexterm>
+
+<refentrytitle>RemoveStrategy</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>RemoveStrategy</refname>
+<refpurpose>
+Removes a strategy from a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>RemoveStrategy</function> 
+removes <parameter>strategy</parameter> from <parameter>support</parameter>.
+If <parameter>strategy</parameter> is not in
+the support, there is no effect.  A copy of the modified support is
+returned.  It is an error if <parameter>support</parameter> and 
+<parameter>strategy</parameter> are
+not from the same normal form game, or if removing <parameter>strategy</parameter> would result in the support containing no strategies for a player.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddStrategy">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
+</refentry>
+
+

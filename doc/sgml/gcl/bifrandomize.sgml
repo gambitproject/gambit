@@ -1,0 +1,37 @@
+<refentry id="bif.Randomize" xreflabel="Randomize">
+
+<refmeta>
+<indexterm>
+<primary>Randomize</primary>
+</indexterm>
+
+<refentrytitle>Randomize</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Randomize</refname>
+<refpurpose>
+Returns a random number
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Randomize[x->NUMBER, {seed->0}] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Randomize</function> 
+returns a random number distributed uniformly between zero and
+one.  The result is of rational precision.  The
+denominator is equal to the maximum machine integer, and the numerator is
+a uniformly distributed integer between zero and the maximum integer.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,40 @@
+<refentry id="bif.Regret" xreflabel="Regret">
+
+<refmeta>
+<indexterm>
+<primary>Regret</primary>
+</indexterm>
+
+<refentrytitle>Regret</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Regret</refname>
+<refpurpose>
+Returns the gain from deviating to an action or strategy
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Regret[profile->BEHAV, action->ACTION] =: NUMBER 
+Regret[profile->MIXED, strategy->STRATEGY] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Regret</function> 
+returns the gain to a player for deviating to <parameter>action</parameter>
+or <parameter>strategy</parameter>, respectively, assuming
+all players are following <parameter>profile</parameter>.
+A strategy profile is
+a Nash equilibrium if and only if the regrets of all actions or strategies
+are zero.
+</para>
+</refsect1>
+
+</refentry>
+
+

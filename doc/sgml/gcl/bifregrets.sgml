@@ -1,0 +1,36 @@
+<refentry id="bif.Regrets" xreflabel="Regrets">
+
+<refmeta>
+<indexterm>
+<primary>Regrets</primary>
+</indexterm>
+
+<refentrytitle>Regrets</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Regrets</refname>
+<refpurpose>
+Returns the gain from deviating to an action or strategy
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Regrets[profile->MIXED] =: LIST(LIST(NUMBER)) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Regrets</function> 
+returns a nested list of the regrets generated for each strategy by
+<parameter>profile</parameter>.  The (i,j)th entry is the regret for player
+i, strategy j.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,74 @@
+<refentry id="bif.Read" xreflabel="Read">
+
+<refmeta>
+<indexterm>
+<primary>Read</primary>
+</indexterm>
+
+<refentrytitle>Read</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Read</refname>
+<refpurpose>
+Reads a value from an input stream
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Read[input<->INPUT, x<->BOOLEAN] =: INPUT
+Read[input<->INPUT, x<->NUMBER] =: INPUT
+Read[input<->INPUT, x<->TEXT] =: INPUT 
+Read[input<->INPUT, x<->LIST(BOOLEAN)] =: INPUT
+Read[input<->INPUT, x<->LIST(NUMBER)] =: INPUT
+Read[input<->INPUT, x<->LIST(TEXT)] =: INPUT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Read</function> 
+reads data from the input stream and assigns it to
+<parameter>x</parameter>.  If <parameter>x</parameter> is undefined, then its data type is determined
+from the exposed data in the input stream.  If <parameter>x</parameter> is previously
+defined, then the <function>Read</function> function will expect to find the
+corresponding data type in the input stream, and a file read error
+will be generated if the exposed data is of the wrong data type.  If
+<parameter>x</parameter> is previously defined to be a <type>LIST</type>,
+then <literal>Read[in,x]</literal>
+will successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.
+</para>
+
+<para>
+The &quot;exposed data&quot; in the input stream consists of the following: If
+first character is a double quote (<literal>"</literal>), then the exposed data
+consists of all characters up until the next double quote.  If the
+first character is a <literal>{</literal>, then the exposed data consists of all
+the characters up until the next matching <literal>}</literal>.  Otherwise, the
+exposed data consists of all characters until the next whitespace.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>input >> x</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Input">,
+<xref linkend="bif.IsEof">,
+<xref linkend="bif.ReadText">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,45 @@
+<refentry id="bif.RemoveNode" xreflabel="RemoveNode">
+
+<refmeta>
+<indexterm>
+<primary>RemoveNode</primary>
+</indexterm>
+
+<refentrytitle>RemoveNode</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>RemoveNode</refname>
+<refpurpose>
+Removes a node from a basis
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+RemoveNode[support->EFBASIS, node->NODE] =: EFBASIS 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>RemoveNode</function> 
+removes <parameter>node</parameter> from <parameter>support</parameter>.
+If <parameter>node</parameter> is not in
+the basis, there is no effect.  A copy of the modified basis is
+returned.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddNode">,
+<xref linkend="bif.Basis">.
+</para>
+</refsect1>
+
+</refentry>
+
+

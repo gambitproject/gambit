@@ -1,0 +1,36 @@
+<refentry id="bif.Remove" xreflabel="Remove">
+
+<refmeta>
+<indexterm>
+<primary>Remove</primary>
+</indexterm>
+
+<refentrytitle>Remove</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Remove</refname>
+<refpurpose>
+Removes an element from a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Remove[list->NLIST(T), n->INTEGER] =: LIST(T) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Remove</function> 
+removes the <parameter>n</parameter>th element from <parameter>list</parameter>.  A copy of the list
+with the element removed is returned.  It is an error if <parameter>n</parameter>
+is nonpositive, or if <parameter>n</parameter> is greater than the length of <parameter>list</parameter>.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.QreLambda" xreflabel="QreLambda">
+
+<refmeta>
+<indexterm>
+<primary>QreLambda</primary>
+</indexterm>
+
+<refentrytitle>QreLambda</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>QreLambda</refname>
+<refpurpose>
+Returns the value of lambda for which a profile is a QRE
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+QreLambda[profile->MIXED] =: NUMBER 
+QreLambda[profile->BEHAV] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>QreLambda</function> 
+returns the value of lambda for mixed or behavior profiles
+computed by <function>QreSolve</function> or <function>QreGridSolve</function>.
+Profiles not
+created by one of these algorithms have a null lambda value.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.QreGridSolve">,
+<xref linkend="bif.QreSolve">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -151,6 +151,23 @@ for a listing of functions by category.
 &bifprint;
 &bifprioraction;
 &bifpriorsibling;
+&bifqregridsolve;
+&bifqrelambda;
+&bifqresolve;
+&bifquit;
+&bifrandomize;
+&bifrational;
+&bifread;
+&bifreadtext;
+&bifrealizprob;
+&bifregret;
+&bifregrets;
+&bifremove;
+&bifremoveaction;
+&bifremovenode;
+&bifremovestrategy;
+&bifreveal;
+&bifrootnode;
 
 </sect1>
 

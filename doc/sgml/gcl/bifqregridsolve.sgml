@@ -1,0 +1,87 @@
+<refentry id="bif.QreGridSolve" xreflabel="QreGridSolve">
+
+<refmeta>
+<indexterm>
+<primary>QreGridSolve</primary>
+</indexterm>
+
+<refentrytitle>QreGridSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>QreGridSolve</refname>
+<refpurpose>
+Computes quantal response equilibria via a grid search
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+QreGridSolve[support->NFSUPPORT, {pxifile->}, 
+             {minLam->0.001000}, {maxLam->500.000000}, 
+             {delLam->0.020000}, {powLam->1}, {fullGraph->False}, 
+             {delp1->0.100000}, {tol1->0.100000}, 
+             {delp2->0.010000}, {tol2->0.010000}, 
+             {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>QreGridSolve</function> 
+computes the complete logistic quantal response correspondence for
+a (small) normal form game on the <parameter>support</parameter>, for values of
+lambda between <parameter>minLam</parameter> and <parameter>maxLam</parameter>.
+Returns
+the list of mixed profiles computed.
+</para>
+
+<para>
+The operation of the algorithm may be modified by specifying optional
+parameters.  See <function>QreSolve</function> for a description of parameters
+not listed here:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>delp1</parameter>: Grid size for course search over probability space.  Default
+is 0.1.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>tol1</parameter>: The tolerance on the objective function for course search.
+Values of p for which the objective function is less this value are
+searched further on a finer grid.  The default is 0.1.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>delp2</parameter>: Grid size for fine search over probability space.  Default is
+0.01.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>tol2</parameter>: The tolerance on the objective function for fine search.
+Values of p for which the objective function is less this value are
+kept.  The default is 0.01.  
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.QreLambda">,
+<xref linkend="bif.QreSolve">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,41 @@
+<refentry id="bif.Rational" xreflabel="Rational">
+
+<refmeta>
+<indexterm>
+<primary>Rational</primary>
+</indexterm>
+
+<refentrytitle>Rational</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Rational</refname>
+<refpurpose>
+Converts a number to rational precision
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Rational[x->NUMBER] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Rational</function> 
+converts <parameter>x</parameter> to a number with rational precision.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Float">.
+</para>
+</refsect1>
+
+</refentry>
+
+

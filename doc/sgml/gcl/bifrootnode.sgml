@@ -1,0 +1,34 @@
+<refentry id="bif.RootNode" xreflabel="RootNode">
+
+<refmeta>
+<indexterm>
+<primary>RootNode</primary>
+</indexterm>
+
+<refentrytitle>RootNode</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>RootNode</refname>
+<refpurpose>
+Returns the root node of an extensive form
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+RootNode[efg->EFG] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>RootNode</function> 
+returns the root node of <parameter>efg</parameter>.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,85 @@
+<refentry id="bif.QreSolve" xreflabel="QreSolve">
+
+<refmeta>
+<indexterm>
+<primary>QreSolve</primary>
+</indexterm>
+
+<refentrytitle>QreSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>QreSolve</refname>
+<refpurpose>
+Computes quantal response equilibria via homotopy path following
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
+         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
+         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(MIXED),
+QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
+         {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+         {fullGraph->False}, {accuracy->0.000000}, {time<->0}, 
+         {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(BEHAV),
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>QreSolve</function> 
+the principal branch of the logistic quantal response equilibrium
+correspondence for a game, using the algorithm described in
+<citation><xref linkend="Tur02"></citation>.
+</para>
+
+<para>
+The behavior of the algorithm may be modified by specifying some of the
+following optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>minLam</parameter>: Sets the minimum value of lambda.  The 
+default value is 0.001.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>maxLam</parameter>: Sets the maximum value of lambda.  The
+default value is 500.0.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>fullGraph</parameter>: If <literal>True</literal>, the list of behavior strategy profiles
+returned contains the full sequence of profiles computed from each successive
+value of lambda.  The default value is <literal>False</literal>, in which case only
+the profile for the last value of lambda computed is returned.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+Note that the extensive form version disregards any marked
+subgames.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.QreGridSolve">,
+<xref linkend="bif.QreLambda">.
+</para>
+</refsect1>
+
+</refentry>
+
+
