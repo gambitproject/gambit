@@ -32,7 +32,7 @@ typedef enum
   iQUIT, iIF_GOTO, iGOTO,
 
   iPUSH, iPUSHLIST, iPUSHREF,
-  iASSIGN, iSUBSCRIPT, iCHILD,
+  iASSIGN, iUNASSIGN, iSUBSCRIPT, iCHILD,
 
   iADD, iSUB, iMUL, iDIV, iINTDIV, iNEG,
   iMOD,
@@ -158,6 +158,15 @@ class PushRef : public Instruction
 
 
 class Assign : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+
+class UnAssign : public Instruction
 {
  public:
   Opcode Type( void ) const;

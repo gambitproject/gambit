@@ -139,6 +139,14 @@ void Assign::Output( gOutput& s ) const
 { s << "Assign"; }
 
 
+Opcode UnAssign::Type( void ) const
+{ return iUNASSIGN; }
+bool UnAssign::Execute( GSM& gsm ) const
+{ return gsm.UnAssign(); }
+void UnAssign::Output( gOutput& s ) const
+{ s << "UnAssign"; }
+
+
 Opcode Subscript::Type( void ) const
 { return iSUBSCRIPT; }
 bool Subscript::Execute( GSM& gsm ) const
