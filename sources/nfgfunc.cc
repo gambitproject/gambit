@@ -86,6 +86,7 @@ static Portion *GSM_DeleteOutcome(Portion **param)
   return new BoolPortion(true);
 }
 
+#include "nfdom.h"
 
 //-------------
 // ElimDom

@@ -93,25 +93,6 @@ public:
 gOutput &operator<<(gOutput &f, const NFSupport &);
 
 
-//
-// Computation of dominated strategies
-//
-class gStatus;
-
-NFSupport *ComputeDominated(const Nfg &, NFSupport &, bool strong,
-			    const gArray<int> &players,
-			    gOutput &, gStatus &gstatus);
-NFSupport *ComputeMixedDominated(NFSupport &, bool strong,
-				 gPrecision precision,
-				 const gArray<int> &players,
-				 gOutput &, gStatus &status);
-bool IsMixedDominated(const NFSupport &S,Strategy *str,
-			   bool strong, gPrecision precision,
-			   gOutput &tracefile);
-
-bool IsDominated(const NFSupport &S, Strategy *s, bool strong, 
-		 const gStatus &status);
-
 #endif    // NFSTRAT_H
 
 
