@@ -1,15 +1,27 @@
+// File: accels.cc -- functions for working with accelerators
+// $Id$
+//
+
 #include "wx.h"
 #include "wxmisc.h"
 #include "keynames.h"
 #include "gconvert.h"
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
 #pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+
 #include "glist.imp"
 #include "accels.h"
-class gList<Accel>;
+TEMPLATE class gList<Accel>;
 #include "garray.imp"
-class gArray<AccelEvent>;
+TEMPLATE class gArray<AccelEvent>;
+#ifdef __BORLANDC__
 #pragma option -Jgx
+#endif
 
 gOutput &operator<<(gOutput &o,const AccelEvent &p)
 {o<<p.name<<' '<<p.id<<'\n'; return o;}
