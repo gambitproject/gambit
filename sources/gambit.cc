@@ -374,9 +374,7 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 //********************************************************************
 
 void GambitFrame::LoadFile(char *s)
-{
-    Enable(FALSE); // do not want to allow anything while the dialog is up
-    
+{    
     if (!s)
     {
         if (GUI_PLAYBACK)
@@ -386,23 +384,33 @@ void GambitFrame::LoadFile(char *s)
         }
         else
         {
+            Enable(FALSE); // Don't allow anything while the dialog is up.
+
+            //s = wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+
             // Load current directory into default path.
+			// NOTE: it might be better to store the default path somewhere
+			//       else e.g. as a field in the GambitFrame object.
+
             static char path[1024] = "";
             if (strcmp(path, "") == 0)
                 strcpy(path, wxGetWorkingDirectory());
 
             s = wxFileSelector("Load data file", path, NULL, NULL, "*.?fg");
 
+            Enable(TRUE);
+
+            if (!s) 
+                return;
+
             // Save the current directory.
             strcpy(path, wxPathOnly(s));
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
+
+            s = copystring(s);
         }
     }
-
-    Enable(TRUE);
-    if (!s) return;
-    s = copystring(s);
     
     if (strcmp(s, "") != 0)
     {
