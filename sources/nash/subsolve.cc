@@ -309,7 +309,6 @@ template gOutput &operator<<(gOutput &, const gArray<efgOutcome *> &);
 
 #include "base/glist.imp"
 
-template class gArray<efgOutcome *>;
 template class gList<gArray<efgOutcome *> >;
 
 
