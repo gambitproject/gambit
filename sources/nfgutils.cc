@@ -1,7 +1,7 @@
 //
 // FILE: nfgutils.cc -- useful utilities for the normal form
 //
-// @(#)nfgutils.cc	2.15 23 Jul 1997
+// $Id$
 //
 
 #include "gmisc.h"
@@ -13,7 +13,7 @@
 
 Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
 {
-  Nfg *N = new Nfg(S.NumStrats());
+  Nfg *N = new Nfg(S.NumStrats(), nfg.Parameters(), nfg.ParamOrder());
   
   N->SetTitle(nfg.GetTitle());
 

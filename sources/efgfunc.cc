@@ -1,7 +1,7 @@
 //
 // FILE: efgfunc.cc -- Extensive form editing builtins
 //
-// @(#)efgfunc.cc	2.17 20 Jul 1997
+// $Id$
 //
 
 
@@ -571,7 +571,9 @@ static Portion *GSM_Name_EfgElements(Portion **param)
 
 static Portion *GSM_NewEfg(Portion **param)
 {
-  Efg *E = new Efg;
+  gSpace *space = new gSpace;
+  ORD_PTR ord = &lex;
+  Efg *E = new Efg(space, new term_order(space, ord));
   ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++)
     E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());

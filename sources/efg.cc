@@ -211,13 +211,10 @@ void Node::DeleteOutcome(EFOutcome *outc)
 int Efg::_NumObj = 0;
 #endif // MEMCHECK
 
-Efg::Efg(void)
+Efg::Efg(gSpace *space, term_order *order)
   : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
-    parameters(new gSpace),
-    lexicon(0)
+    parameters(space), paramorder(order), afg(0), lexicon(0)
 {
-  ORD_PTR ord = &lex;
-  paramorder = new term_order(parameters, ord);
   root = new Node(this, 0);
 #ifdef MEMCHECK
   _NumObj++;
@@ -230,7 +227,7 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
     players(E.players.Length()), outcomes(E.outcomes.Length()),
     chance(new EFPlayer(this, 0)),
     parameters(E.parameters), paramorder(E.paramorder),
-    lexicon(0)
+    afg(0), lexicon(0)
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;

@@ -57,7 +57,7 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  Nfg(const gArray<int> &dim);
+  Nfg(const gArray<int> &dim, gSpace *, term_order *);
   Nfg(const Nfg &b);
   ~Nfg();
     

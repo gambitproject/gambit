@@ -354,7 +354,9 @@ int ReadEfgFile(gInput &f, Efg *& E)
 {
   assert(!E);
 
-  E = new Efg;
+  gSpace *space = new gSpace;
+  ORD_PTR ord = &lex;
+  E = new Efg(space, new term_order(space, ord));
 
   EfgFile R(f, E);
   

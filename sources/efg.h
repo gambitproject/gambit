@@ -93,7 +93,7 @@ protected:
     void MarkSubgame(Node *, Node *);
 
   public:
-    Efg(void);
+    Efg(gSpace *, term_order *);
     Efg(const Efg &, Node * = 0);
 
        //# DESTRUCTOR

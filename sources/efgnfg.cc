@@ -1,7 +1,7 @@
 //
 // FILE: efgnfg.cc -- efg<->nfg conversion routines
 //
-// @(#)efgnfg.cc	2.7 21 Jul 1997
+// $Id$
 //
 
 #include "efg.h"
@@ -119,7 +119,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
   for (i = 1; i <= E.NumPlayers(); i++)
     dim[i] = L->strategies[i].Length();
 
-  L->MakeLink(&E, new Nfg(dim));
+  L->MakeLink(&E, new Nfg(dim, E.Parameters(), E.ParamOrder()));
   L->N->SetTitle(E.GetTitle());
 
   for (i = 1; i <= E.NumPlayers(); i++)   {
@@ -178,7 +178,7 @@ Nfg *MakeReducedNfg(const Efg &E, const EFSupport &support)
 
 Nfg *MakeAfg(const Efg &E)
 {
-  Nfg *afg = new Nfg(gArray<int>(E.NumActions()));
+  Nfg *afg = new Nfg(gArray<int>(E.NumActions()), E.Parameters(), E.ParamOrder());
 
   if (!afg)   return 0;
 

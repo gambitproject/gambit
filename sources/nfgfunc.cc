@@ -214,7 +214,9 @@ static Portion *GSM_NewNfg(Portion **param)
   for (int i = 1; i <= dim->Length(); i++)
     d[i] = ((IntPortion *) (*dim)[i])->Value();
 
-  return new NfgValPortion(new Nfg(d));
+  gSpace *space = new gSpace;
+  ORD_PTR ord = &lex;
+  return new NfgValPortion(new Nfg(d, space, new term_order(space, ord)));
 }
 
 /*

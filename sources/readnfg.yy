@@ -199,7 +199,9 @@ bool NfgFile::CreateNfg(const gList<gString> &players,
     if (dim[i] <= 0)   return false;
   }
   
-  Nrat = new Nfg(dim);
+  ORD_PTR ord = &lex;
+  gSpace *space = new gSpace;
+  Nrat = new Nfg(dim, space, new term_order(space, ord));
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
     Nrat->Players()[i]->SetName(players[i]);

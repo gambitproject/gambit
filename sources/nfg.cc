@@ -24,12 +24,11 @@ int Nfg::Product(const gArray<int> &dim)
   return accum;
 }
   
-Nfg::Nfg(const gArray<int> &dim)
+Nfg::Nfg(const gArray<int> &dim,
+	 gSpace *space, term_order *order)
   : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    parameters(new gSpace)
+    parameters(space), paramorder(order), efg(0)
 {
-  ORD_PTR ord = &lex;
-  paramorder = new term_order(parameters, ord);
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
 	  players[pl]->name = ToString(pl);
@@ -46,7 +45,7 @@ Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
     results(b.results.Length()),
-    parameters(b.parameters), paramorder(b.paramorder)
+    parameters(b.parameters), paramorder(b.paramorder), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dimensions[pl]);
