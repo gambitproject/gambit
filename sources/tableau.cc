@@ -16,11 +16,14 @@
 #error Unsupported compiler type
 #endif // __GNUG__, __BORLANDC__
 
+TEMPLATE class Basis<double>;
+TEMPLATE class Basis<gRational>;
+
 TEMPLATE class Tableau<double>;
 TEMPLATE class Tableau<gRational>;
 
-TEMPLATE class Basis<double>;
-TEMPLATE class Basis<gRational>;
+TEMPLATE class LPTableau<double>;
+TEMPLATE class LPTableau<gRational>;
 
 /*
 TEMPLATE gOutput & operator<< {gOutput&, const Basis<double>&);

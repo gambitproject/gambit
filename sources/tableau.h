@@ -7,31 +7,28 @@
 #ifndef TABLEAU_H
 #define TABLEAU_H
 
-// includes
-
 #include "rational.h"
 #include "ludecomp.h"
-#include "gtableau.h"
+#include "bfs.h"
 
 template <class T> class Basis;
 template <class T> class Tableau;
+template <class T> class LPTableau;
 
 template <class T> class Basis {
 friend class Tableau<T>;
+friend class LPTableau<T>;
 protected:
   const gMatrix<T> *A;
   gBlock<int> label;    
 public:
-//  Basis(void);
   Basis(const gMatrix<T> &A);
   Basis(const Basis<T> &);
   ~Basis();
 
   Basis<T>& operator=(const Basis<T>&);
   
-//  void NewBasis();
 //  void NewBasis(const gBlock<int> &);
-
   void Change(int index, int label);
       // change Basis member index to label
   void Swap(int,int); // switch two Basis elements
@@ -54,26 +51,25 @@ public:
 
 template <class T> class Tableau {
 private:
-  gVector<T> tmpcol; // temporary column vector, to avoid allocation
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   long npivots;
 protected:
+  gVector<T> tmpcol; // temporary column vector, to avoid allocation
   const gMatrix<T> *A;
   const gVector<T> *b;
   Basis<T> basis;
   LUdecomp<T> B;
   gVector<T> solution;
 public:
-// constructors and destructors
-//  Tableau(void);
+      // constructors and destructors
   Tableau(const gMatrix<T> &A, const gVector<T> &b); 
   Tableau(const Tableau<T>&);
   virtual ~Tableau();
   
   Tableau<T>& operator=(const Tableau<T>&);
 
-// information
+      // information
   int MinRow() const;
   int MaxRow() const;
   int MinCol() const;
@@ -83,16 +79,16 @@ public:
   int Label(int i) const;   // return variable in i'th position of Tableau
   int Find(int i) const;  // return Tableau position of variable i
 
-// pivoting
+      // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int inlabel);
-  // perform pivot operation -- outgoing is row, incoming is column
+      // perform pivot operation -- outgoing is row, incoming is column
   void CompPivot(int outlabel,int inlabel);
   long NumPivots() const;
   long &NumPivots();
 
 
-// raw Tableau functions
+      // raw Tableau functions
   void Refactor();
   void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
   void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
@@ -103,7 +99,7 @@ public:
 //  void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
-// miscellaneous functions
+      // miscellaneous functions
   bool IsNash(void) const;
   BFS<T> GetBFS(void) const;
   void Dump(gOutput &) const;
@@ -117,7 +113,6 @@ private:
 
   void SolveDual();
 public:
-//  LPTableau(void);
   LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
@@ -127,9 +122,9 @@ public:
   void SetCost(const gVector<T>& ); // unit column cost := 0
   void SetCost(const gVector<T>&, const gVector<T>& );
   void GetCost(gVector<T>&, gVector<T>& ) const;
-  T TotalCost() const; // cost of current solution
+  T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(gVector<T> &, gVector<T> &) const; 
+  void RelativeCostVector(gVector<T> &, gVector<T> &); 
       // DumbTableau row
   void DualVector(gVector<T> &) const; // column vector
 };

@@ -11,10 +11,6 @@
 
 // Basis method definitions
 
-// template <class T> Basis<T>::Basis(void)
-// :  A(0)
-// { }
-
 template <class T> 
 Basis<T>::Basis(const gMatrix<T> &A)
   :  A(&A), label(A.MinRow(), A.MaxRow())
@@ -44,12 +40,6 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &code)
 
 
 /*
-template <class T> void Basis<T>::NewBasis()
-{
-  for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= -i;
-}
-
 template <class T>
 void Basis<T>::NewBasis(const gBlock<int> &v)
 {
@@ -142,7 +132,7 @@ void Basis<T>::BasisSelect(const gVector<T> &unitv,
   
   for(int i=label.First(); i<=label.Last(); i++) {
     if(label[i]<0)
-      colv[i]= unitv[label[i]];
+      colv[i]= unitv[-label[i]];
     else
       colv[i]= rowv[label[i]];
   }
@@ -169,14 +159,9 @@ void Basis<T>::Dump(gOutput &to) const
 
 // Constructors and Destructor
 
-// template <class T> Tableau<T>::Tableau(void)
-// : npivots(0), A(0), b(0),  B(1)
-// { }
-
-
 template <class T>
 Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
-  : tmpcol(A.MinRow(),A.MaxRow()), npivots(0), A(&A), b(&b), 
+  : npivots(0), tmpcol(A.MinRow(),A.MaxRow()), A(&A), b(&b), 
     basis(A),  B(A.MinRow(), A.MaxRow()),
     solution(A.MinRow(),A.MaxRow()) 
 {
@@ -187,7 +172,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T>
 Tableau<T>::Tableau(const Tableau<T> &orig)
-  : tmpcol(orig.tmpcol), npivots(0), A(orig.A),b(orig.b), 
+  : npivots(0), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
     basis(orig.basis), B(orig.B), solution(orig.solution)
 { }
 
@@ -435,9 +420,9 @@ void Tableau<T>::Dump(gOutput &to) const
 
 template <class T>
 LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
-  : Tableau(A,b), dual(A.MinRow(),A.MaxRow()),
-    unitcost(tab.MinRow(),tab.MaxRow()),
-    cost(tab.MinCol(),tab.MaxCol())
+  : Tableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
+    unitcost(A.MinRow(),A.MaxRow()),
+    cost(A.MinCol(),A.MaxCol())
 {
   B.refactor(A, basis.label);
   B.solve(b, solution);
@@ -446,7 +431,7 @@ LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T>
 LPTableau<T>::LPTableau(const LPTableau<T> &orig)
-  : Tableau(orig), dual(orig.dual),  unitcost(orig.unitcost),
+  : Tableau<T>(orig), dual(orig.dual),  unitcost(orig.unitcost),
     cost(orig.cost)
 { }
 
@@ -477,6 +462,7 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 template <class T>
 void LPTableau<T>::SetCost(const gVector<T>& c)
 {
+  assert(cost.Check(c));
   unitcost= (T)0;
   cost= c;
 //   costdefined= 1;
@@ -487,6 +473,7 @@ void LPTableau<T>::SetCost(const gVector<T>& c)
 template <class T>
 void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 {
+  assert(unitcost.Check(uc) && cost.Check(c));
   unitcost= uc;
   cost= c;
 //  costdefined= 1;
@@ -504,7 +491,7 @@ void LPTableau<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
 }
 
 template <class T>
-T LPTableau<T>::TotalCost() const
+T LPTableau<T>::TotalCost()
 {
 //  assert(costdefined);
 //  gVector<T> tmpcol(MinRow(),MaxRow());
@@ -520,7 +507,7 @@ void LPTableau<T>::DualVector(gVector<T> &L) const
 }
 
 template <class T>
-T LPTableau<T>::RelativeCost(int col) const
+T LPTableau<T>::RelativeCost(int col)
 {
 //  assert(costdefined);
   
@@ -535,7 +522,7 @@ T LPTableau<T>::RelativeCost(int col) const
       return cost[col] - dual*tmpcol;
     }
 }
-
+/*
 template <class T>
 void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 				      gVector<T> &relcost) const
@@ -545,8 +532,9 @@ void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
   assert(A->CheckRow(relcost));
   
   relunitcost= unitcost - dual;
-  relcost= cost - dual*A;
+  relcost= cost - dual*A;  // pre multiplication not defined?  
 }
+*/
 
 template <class T>
 void LPTableau<T>::SolveDual()
