@@ -271,10 +271,10 @@ behav_isnash(behavobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsNash() == triTRUE) {
+  if (self->m_profile->IsNash() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsNash() == triFALSE) {
+  else if (self->m_profile->IsNash() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -289,10 +289,10 @@ behav_issequential(behavobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsSequential() == triTRUE) {
+  if (self->m_profile->IsSequential() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsSequential() == triFALSE) {
+  else if (self->m_profile->IsSequential() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -307,10 +307,10 @@ behav_issubgameperfect(behavobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsSubgamePerfect() == triTRUE) {
+  if (self->m_profile->IsSubgamePerfect() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsSubgamePerfect() == triFALSE) {
+  else if (self->m_profile->IsSubgamePerfect() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -416,4 +416,3 @@ initbehav(void)
 {
   Behavtype.ob_type = &PyType_Type;
 }
-

@@ -168,10 +168,10 @@ mixed_isnash(mixedobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsNash() == triTRUE) {
+  if (self->m_profile->IsNash() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsNash() == triFALSE) {
+  else if (self->m_profile->IsNash() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -186,10 +186,10 @@ mixed_isperfect(mixedobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsPerfect() == triTRUE) {
+  if (self->m_profile->IsPerfect() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsPerfect() == triFALSE) {
+  else if (self->m_profile->IsPerfect() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -204,10 +204,10 @@ mixed_isproper(mixedobject *self, PyObject *args)
     return NULL;
   }
 
-  if (self->m_profile->IsProper() == triTRUE) {
+  if (self->m_profile->IsProper() == GBT_TRISTATE_TRUE) {
     return Py_BuildValue("i", 1);
   }
-  else if (self->m_profile->IsProper() == triFALSE) {
+  else if (self->m_profile->IsProper() == GBT_TRISTATE_FALSE) {
     return Py_BuildValue("i", 0);
   }
   else {
@@ -306,4 +306,3 @@ initmixed(void)
 {
   Mixedtype.ob_type = &PyType_Type;
 }
-

@@ -131,14 +131,14 @@ public:
   void setpos(long x) const;
 };
 
-class gNullInput : public gbtInput  {
+class gbtNullInput : public gbtInput  {
   private:
-    gNullInput(const gNullInput &);
-    gNullInput &operator=(const gNullInput &);
+    gbtNullInput(const gbtNullInput &);
+    gbtNullInput &operator=(const gbtNullInput &);
 
   public:
-    gNullInput(void);
-    virtual ~gNullInput();
+    gbtNullInput(void);
+    virtual ~gbtNullInput();
 
     gbtInput &operator>>(int &x);
     gbtInput &operator>>(unsigned int &x);
@@ -278,14 +278,14 @@ class gbtFileOutput : public gbtOutput  {
     gbtOutput &operator<<(const void *x);
 };
 
-class gNullOutput : public gbtOutput  {
+class gbtNullOutput : public gbtOutput  {
   private:
-    gNullOutput(const gNullOutput &);
-    gNullOutput &operator=(const gNullOutput &);
+    gbtNullOutput(const gbtNullOutput &);
+    gbtNullOutput &operator=(const gbtNullOutput &);
 
   public:
-    gNullOutput(void);
-    virtual ~gNullOutput();
+    gbtNullOutput(void);
+    virtual ~gbtNullOutput();
 
     int GetWidth(void) const;
     gbtOutput &SetWidth(int w);

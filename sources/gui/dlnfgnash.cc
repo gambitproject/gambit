@@ -72,7 +72,7 @@ gbtList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
@@ -163,7 +163,7 @@ gbtList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
       
@@ -257,7 +257,7 @@ gbtList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
       
@@ -347,7 +347,7 @@ gbtList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
@@ -422,7 +422,7 @@ gbtList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
@@ -497,7 +497,7 @@ gbtList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 

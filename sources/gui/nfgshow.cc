@@ -699,7 +699,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
       gbtNfgSupport newSupport(support);
 
       while (true) {
-	gNullOutput gnull;
+	gbtNullOutput gnull;
 	if (dialog.DomMixed()) {
 	  newSupport = support.MixedUndominated(dialog.DomStrong(),
 						GBT_PREC_RATIONAL,
@@ -793,7 +793,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 	algorithm.SetTol2(dialog.Tol2());
 
 	wxStatus status(this, "QreGridSolve Progress");
-	gNullOutput gnull;
+	gbtNullOutput gnull;
 	algorithm.Solve(m_doc->GetNfgSupport(), gnull, status, solutions);
       }
       else {
@@ -839,7 +839,7 @@ void NfgShow::OnToolsCH(wxCommandEvent &)
       algorithm.SetStepTau(dialog.StepTau());
 
       wxStatus status(this, "CHSolve Progress");
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       solutions = algorithm.Solve(m_doc->GetNfgSupport(), status);
     }
     catch (gbtSignalBreak &) { }

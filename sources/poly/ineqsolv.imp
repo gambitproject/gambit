@@ -41,7 +41,7 @@ template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
     Epsilon((T)1/(T)1000000),
     //    Epsilon((T)0),
     //    HasBeenSolved(false), 
-    //    HasASolution(triUNKNOWN), 
+    //    HasASolution(GBT_TRISTATE_UNKNOWN), 
     //    Sample(given.Dmnsn()),
     m_status(p_status)
 { }

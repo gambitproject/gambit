@@ -79,7 +79,7 @@ gbtList<BehavSolution> efgOneNash::Solve(const gbtEfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtEfgSupport support = p_support.Undominated(false, true,
 					      players, gnull, status);
@@ -174,7 +174,7 @@ gbtList<BehavSolution> efgTwoNash::Solve(const gbtEfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
       
@@ -273,7 +273,7 @@ gbtList<BehavSolution> efgAllNash::Solve(const gbtEfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
       
@@ -368,7 +368,7 @@ gbtList<BehavSolution> efgOnePerfect::Solve(const gbtEfgSupport &p_support,
 
   try {
     gbtNullStatus status;
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtEfgSupport support = p_support.Undominated(false, true,
 					      players, gnull, status);
@@ -462,7 +462,7 @@ gbtList<BehavSolution> efgTwoPerfect::Solve(const gbtEfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
       
@@ -560,7 +560,7 @@ gbtList<BehavSolution> efgAllPerfect::Solve(const gbtEfgSupport &p_support,
 
     while (true) {
       gbtNullStatus status;
-      gNullOutput gnull;
+      gbtNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
       

@@ -199,19 +199,19 @@ gbtTriState BehavSolution::GetANFNash(void) const
   gbtTriState answer = ((algorithm.ExtendsToAgentNash(*this,
 						    Support(), Support(),
 						    status)) ?
-		      triTRUE : triFALSE);
-  if (answer == triFALSE) {
-    m_Nash.Set(triFALSE);
-    m_SubgamePerfect.Set(triFALSE);
-    m_Sequential.Set(triFALSE);
+		      GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE);
+  if (answer == GBT_TRISTATE_FALSE) {
+    m_Nash.Set(GBT_TRISTATE_FALSE);
+    m_SubgamePerfect.Set(GBT_TRISTATE_FALSE);
+    m_Sequential.Set(GBT_TRISTATE_FALSE);
   }
   return answer;
-  return triUNKNOWN;
+  return GBT_TRISTATE_UNKNOWN;
 }
 
 gbtTriState BehavSolution::GetNash(void) const
 {
-  gbtTriState answer = triUNKNOWN;
+  gbtTriState answer = GBT_TRISTATE_UNKNOWN;
   bool decomposes = HasSubgames(GetGame());
   // check subgame perfection if game decomposes (its faster)
   if(decomposes) 
@@ -222,7 +222,7 @@ gbtTriState BehavSolution::GetNash(void) const
   else {
     // use reduced normal form regrets for complete profiles
     if (IsComplete()) {
-      answer = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
+      answer = (MaxRNFRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE:GBT_TRISTATE_FALSE;
     }
     else {
       //  else let Andy figure it out
@@ -233,23 +233,23 @@ gbtTriState BehavSolution::GetNash(void) const
 	algExtendsToNash algorithm;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
 		  algorithm.ExtendsToNash(*this,Support(),Support(),status)) 
-	  ? triTRUE:triFALSE;
+	  ? GBT_TRISTATE_TRUE:GBT_TRISTATE_FALSE;
       }
       else {
-	answer = triUNKNOWN;
+	answer = GBT_TRISTATE_UNKNOWN;
       }
     }
   }
   // Done.  Now mark other obvious inferences 
   
-  if (answer == triFALSE) {
-    m_SubgamePerfect.Set(triFALSE);
-    m_Sequential.Set(triFALSE);
+  if (answer == GBT_TRISTATE_FALSE) {
+    m_SubgamePerfect.Set(GBT_TRISTATE_FALSE);
+    m_Sequential.Set(GBT_TRISTATE_FALSE);
   }
-  if (answer == triTRUE) {
-    m_ANFNash.Set(triTRUE);
+  if (answer == GBT_TRISTATE_TRUE) {
+    m_ANFNash.Set(GBT_TRISTATE_TRUE);
     if(!decomposes) 
-      m_SubgamePerfect.Set(triTRUE);
+      m_SubgamePerfect.Set(GBT_TRISTATE_TRUE);
   }
   return answer;
 }
@@ -275,19 +275,19 @@ gbtTriState BehavSolution::GetSubgamePerfect(void) const
     // else, for now, we require complete profiles for subgame perfection.  
     // but we may want to turn over to Andy here. 
     else {
-      answer = triUNKNOWN;
+      answer = GBT_TRISTATE_UNKNOWN;
     }
   }
   // Done.  Now mark other obvious inferences 
   
-  if (answer == triTRUE) {
-    m_Nash.Set(triTRUE);
-    m_ANFNash.Set(triTRUE);
+  if (answer == GBT_TRISTATE_TRUE) {
+    m_Nash.Set(GBT_TRISTATE_TRUE);
+    m_ANFNash.Set(GBT_TRISTATE_TRUE);
   }
-  else if (answer == triFALSE) {
-    m_Sequential.Set(triFALSE);
+  else if (answer == GBT_TRISTATE_FALSE) {
+    m_Sequential.Set(GBT_TRISTATE_FALSE);
     if (!decomposes) {
-      m_Nash.Set(triFALSE);
+      m_Nash.Set(GBT_TRISTATE_FALSE);
     }
   }
   return answer;
@@ -295,13 +295,13 @@ gbtTriState BehavSolution::GetSubgamePerfect(void) const
 
 gbtTriState BehavSolution::GetSequential(void) const
 {
-  if(IsSubgamePerfect()==triTRUE) {
+  if(IsSubgamePerfect()==GBT_TRISTATE_TRUE) {
     // Liap and QRE should be returning Nash solutions that give positive 
     // probability to all actions, and hence will be approximations to 
     // sequential equilibria.  But we should add code to check up on these 
     // algorithms
     if (GetCreator() == "Liap[EFG]" || GetCreator() == "Qre[EFG]")
-      return triTRUE;
+      return GBT_TRISTATE_TRUE;
     else {
       // check if game is perfect info
       // this should be in efg.h
@@ -309,9 +309,9 @@ gbtTriState BehavSolution::GetSequential(void) const
       gbtPVector<int> v((GetGame()).NumMembers());
       for(int i=v.First();flag == true && i<=v.Last();i++)
 	if(v[i]>1) flag = false;
-      if(flag==true) return triTRUE;
+      if(flag==true) return GBT_TRISTATE_TRUE;
     }
-    return triUNKNOWN;
+    return GBT_TRISTATE_UNKNOWN;
   }
   else 
     return IsSubgamePerfect();
@@ -628,7 +628,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
 					     const BehavProfile<gbtNumber> &s,
 					     const gbtNumber & epsilon)
   : subgame_number(0), eps(epsilon),  
-    isSubgamePerfect(triTRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
+    isSubgamePerfect(GBT_TRISTATE_TRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(p_efg, oldroots);
   gbtList<gbtEfgNode> subroots;
@@ -678,17 +678,17 @@ void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
   //  gbtTriState x = IsNashOnSubgame(E,bp,eps);
   // for now, we do the following, which may give wrong answer if player can deviate at
   // multiple isets simultaneously.  :
-  gbtTriState x = triFALSE;
+  gbtTriState x = GBT_TRISTATE_FALSE;
   BehavSolution bs(bp);
   
-  if(bs.MaxRNFRegret() <= eps) x = triTRUE;
+  if(bs.MaxRNFRegret() <= eps) x = GBT_TRISTATE_TRUE;
   
-  if(isSubgamePerfect == triTRUE &&  x == triTRUE) 
-    isSubgamePerfect = triTRUE;
-  else if(isSubgamePerfect == triFALSE ||  x == triFALSE) 
-    isSubgamePerfect = triFALSE;
+  if(isSubgamePerfect == GBT_TRISTATE_TRUE &&  x == GBT_TRISTATE_TRUE) 
+    isSubgamePerfect = GBT_TRISTATE_TRUE;
+  else if(isSubgamePerfect == GBT_TRISTATE_FALSE ||  x == GBT_TRISTATE_FALSE) 
+    isSubgamePerfect = GBT_TRISTATE_FALSE;
   else 
-    isSubgamePerfect = triUNKNOWN;
+    isSubgamePerfect = GBT_TRISTATE_UNKNOWN;
   
   int index = solns.Append(BehavSolution(bp, "User"));
   solns[index].SetEpsilon(eps);

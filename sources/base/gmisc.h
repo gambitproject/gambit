@@ -27,15 +27,9 @@
 #ifndef GMISC_H
 #define GMISC_H
 
-//
-// Defining shorthand names for some types
-//
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned short ushort;
 
-
-typedef enum { triFALSE = 0, triTRUE = 1, triUNKNOWN = 2 } gbtTriState;
+typedef enum { GBT_TRISTATE_FALSE = 0, GBT_TRISTATE_TRUE = 1, 
+	           GBT_TRISTATE_UNKNOWN = 2 } gbtTriState;
 
 class gbtText;
 class gbtOutput;
@@ -118,10 +112,5 @@ public:
   virtual gbtText Description(void) const = 0;
 };
 
-class gNewFailed : public gbtException   {
-public:
-  virtual ~gNewFailed()   { }
-  gbtText Description(void) const;
-}; 
 
 #endif    // GMISC_H

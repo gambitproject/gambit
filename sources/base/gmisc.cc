@@ -177,9 +177,9 @@ gbtText EscapeQuotes(const gbtText &s)
 gbtText ToText(gbtTriState b)
 {
   switch (b) {
-  case triTRUE:
+  case GBT_TRISTATE_TRUE:
     return "Y";
-  case triFALSE:
+  case GBT_TRISTATE_FALSE:
     return "N"; 
   default:
     return "DK";
@@ -252,13 +252,6 @@ gbtOutput &operator<<(gbtOutput &p_output, const gbtIndexPair &p_indexPair)
 {
   p_output << "(" << p_indexPair.first << "," << p_indexPair.second << ")";
   return p_output;
-}
-
-//--------------------Exceptions Related Stuff---------------------
-
-gbtText gNewFailed::Description(void) const
-{
-  return "Memory exhausted in call to new";
 }
 
 gbtException::~gbtException()

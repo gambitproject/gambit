@@ -143,12 +143,12 @@ gbtTriState MixedSolution::GetNash(void) const
 {
   gbtTriState answer;
   if(IsComplete())
-    answer = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
+    answer = (m_profile.MaxRegret() <= m_epsilon) ? GBT_TRISTATE_TRUE : GBT_TRISTATE_FALSE;
   else
-    answer =  triFALSE;
-  if (answer == triFALSE) {
-    m_Perfect.Set(triFALSE);
-    m_Proper.Set(triFALSE);
+    answer =  GBT_TRISTATE_FALSE;
+  if (answer == GBT_TRISTATE_FALSE) {
+    m_Perfect.Set(GBT_TRISTATE_FALSE);
+    m_Proper.Set(GBT_TRISTATE_FALSE);
   }
   return answer;
 }
@@ -156,20 +156,20 @@ gbtTriState MixedSolution::GetNash(void) const
 gbtTriState MixedSolution::GetPerfect(void) const
 {
   if (IsNash()) {
-    gNullOutput gnull;
+    gbtNullOutput gnull;
     if (IsMixedDominated(m_profile,false,m_precision,gnull)) {
-      return triFALSE;
+      return GBT_TRISTATE_FALSE;
     }
     else if (GetGame().NumPlayers()==2) {
-      return triTRUE;
+      return GBT_TRISTATE_TRUE;
     }
   }
-  return triUNKNOWN;
+  return GBT_TRISTATE_UNKNOWN;
 }
 
 gbtTriState MixedSolution::GetProper(void) const
 {
-  return triUNKNOWN;
+  return GBT_TRISTATE_UNKNOWN;
 }
 
 void MixedSolution::LevelPrecision(void)

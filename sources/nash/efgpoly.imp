@@ -365,7 +365,7 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gbtList<gbtVector<gbtDouble> > &
     if (ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
-      //    solutions[index].SetIsNash(triTRUE);
+      //    solutions[index].SetIsNash(GBT_TRISTATE_TRUE);
     }
   }
   return index;

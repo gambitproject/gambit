@@ -229,66 +229,66 @@ void gbtStandardInput::setpos(long x) const
 
 
 //--------------------------------------------------------------------------
-//                         gNullInput member functions
+//                         gbtNullInput member functions
 //--------------------------------------------------------------------------
 
-gNullInput::gNullInput(void)    { }
+gbtNullInput::gbtNullInput(void)    { }
 
-gNullInput::~gNullInput()    { }
+gbtNullInput::~gbtNullInput()    { }
 
-gbtInput &gNullInput::operator>>(int &x)
+gbtInput &gbtNullInput::operator>>(int &x)
 {
   x = 0;
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(unsigned int &x)
+gbtInput &gbtNullInput::operator>>(unsigned int &x)
 {
   x = 0;
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(long &x)
+gbtInput &gbtNullInput::operator>>(long &x)
 {
   x = 0L;
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(char &x)
+gbtInput &gbtNullInput::operator>>(char &x)
 {
   x = '\0';
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(double &x)
+gbtInput &gbtNullInput::operator>>(double &x)
 {
   x = 0.0;
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(float &x)
+gbtInput &gbtNullInput::operator>>(float &x)
 {
   x = 0.0;
   return *this;
 }
 
-gbtInput &gNullInput::operator>>(char *x)
+gbtInput &gbtNullInput::operator>>(char *x)
 {
   if (x)   *x = '\0';
   return *this;
 }
 
-int gNullInput::get(char &)   { return 0; }
+int gbtNullInput::get(char &)   { return 0; }
 
-void gNullInput::unget(char)  { }
+void gbtNullInput::unget(char)  { }
 
-bool gNullInput::eof(void) const   { return true; }
+bool gbtNullInput::eof(void) const   { return true; }
 
-void gNullInput::seekp(long) const   { }
+void gbtNullInput::seekp(long) const   { }
 
-long gNullInput::getpos(void) const { return 0; }
+long gbtNullInput::getpos(void) const { return 0; }
 
-void gNullInput::setpos(long) const { }
+void gbtNullInput::setpos(long) const { }
 
 
 //--------------------------------------------------------------------------
@@ -623,43 +623,43 @@ gbtOutput &gbtFileOutput::operator<<(const void *x)
 
 
 //--------------------------------------------------------------------------
-//                         gNullOutput member functions
+//                         gbtNullOutput member functions
 //--------------------------------------------------------------------------
 
-gNullOutput::gNullOutput(void)   { }
+gbtNullOutput::gbtNullOutput(void)   { }
 
-gNullOutput::~gNullOutput()   { }
+gbtNullOutput::~gbtNullOutput()   { }
 
-int gNullOutput::GetWidth(void) const  { return 0; }
+int gbtNullOutput::GetWidth(void) const  { return 0; }
 
-gbtOutput &gNullOutput::SetWidth(int) { return *this; }
+gbtOutput &gbtNullOutput::SetWidth(int) { return *this; }
 
-int gNullOutput::GetPrec(void) const { return 6; }
+int gbtNullOutput::GetPrec(void) const { return 6; }
 
-gbtOutput &gNullOutput::SetPrec(int) { return *this; }
+gbtOutput &gbtNullOutput::SetPrec(int) { return *this; }
 
-gbtOutput &gNullOutput::SetExpMode(void) { return *this; }
+gbtOutput &gbtNullOutput::SetExpMode(void) { return *this; }
 
-gbtOutput &gNullOutput::SetFloatMode(void) { return *this; }
+gbtOutput &gbtNullOutput::SetFloatMode(void) { return *this; }
 
-char gNullOutput::GetRepMode(void) const { return 'f'; }
+char gbtNullOutput::GetRepMode(void) const { return 'f'; }
 
-gbtOutput &gNullOutput::operator<<(int)    { return *this; }
+gbtOutput &gbtNullOutput::operator<<(int)    { return *this; }
 
-gbtOutput &gNullOutput::operator<<(unsigned int)   { return *this; }
+gbtOutput &gbtNullOutput::operator<<(unsigned int)   { return *this; }
 
-gbtOutput &gNullOutput::operator<<(bool)    { return *this; }
+gbtOutput &gbtNullOutput::operator<<(bool)    { return *this; }
 
-gbtOutput &gNullOutput::operator<<(long)   { return *this; }
+gbtOutput &gbtNullOutput::operator<<(long)   { return *this; }
 
-gbtOutput &gNullOutput::operator<<(char)   { return *this; }
+gbtOutput &gbtNullOutput::operator<<(char)   { return *this; }
 
-gbtOutput &gNullOutput::operator<<(double)   { return *this; }
+gbtOutput &gbtNullOutput::operator<<(double)   { return *this; }
 
-gbtOutput &gNullOutput::operator<<(long double) { return *this; }
+gbtOutput &gbtNullOutput::operator<<(long double) { return *this; }
 
-gbtOutput &gNullOutput::operator<<(float)    { return *this; }
+gbtOutput &gbtNullOutput::operator<<(float)    { return *this; }
 
-gbtOutput &gNullOutput::operator<<(const char *)  { return *this; }
+gbtOutput &gbtNullOutput::operator<<(const char *)  { return *this; }
 
-gbtOutput &gNullOutput::operator<<(const void *)  { return *this; }
+gbtOutput &gbtNullOutput::operator<<(const void *)  { return *this; }
