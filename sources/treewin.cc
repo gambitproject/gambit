@@ -114,7 +114,7 @@ TreeWindow::TreeWindow(FullEfg &ef_, EFSupport * &disp, EfgShow *frame_)
     log = FALSE;
 
     // Create scrollbars
-    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 4, 4);
+    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 1, 1);
     draw_settings.set_x_steps(60);
     draw_settings.set_y_steps(60);
     
@@ -695,10 +695,9 @@ void TreeWindow::Render(wxDC &dc)
                               draw_settings.OutcomeLength());
         draw_settings.SetMaxY(maxy+25);
 
-        if (must_recalc)
-        {
-            must_recalc = FALSE;
-            need_clear = TRUE;
+        if (must_recalc) {
+	  must_recalc = FALSE;
+	  need_clear = TRUE;
         }
     }
 
@@ -755,46 +754,41 @@ void TreeWindow::Render(wxDC &dc)
 // Adjust number of scrollbar steps if necessary.
 void TreeWindow::AdjustScrollbarSteps(void)
 {
-    int width, height;
-    int x_steps, y_steps;
-    float zoom = draw_settings.Zoom();
+  int width, height;
+  int x_steps, y_steps;
+  float zoom = draw_settings.Zoom();
 
-    GetParent()->GetClientSize(&width, &height);
-    // width and height are the dimensions of the visible canvas.
-    height -= 50; // This compensates for a bug in GetClientSize().
-    height = int(height / zoom);
-    width  = int(width  / zoom);
+  GetParent()->GetClientSize(&width, &height);
+  // width and height are the dimensions of the visible canvas.
+  height -= 50; // This compensates for a bug in GetClientSize().
+  height = int((float) height / zoom);
+  width  = int((float) width  / zoom);
 
-    // x_steps and y_steps are the maximum number of scrollbar
-    // steps in the x and y directions.
-    if (draw_settings.MaxX() < width)
-    {
-        x_steps = 1;
-    }
-    else
-    {
-        //x_steps = draw_settings.MaxX() / PIXELS_PER_SCROLL + 1;
-        x_steps = int((draw_settings.MaxX() * zoom) / PIXELS_PER_SCROLL) + 1;
-    }
+  // x_steps and y_steps are the maximum number of scrollbar
+  // steps in the x and y directions.
+  if (draw_settings.MaxX() < width) {
+    x_steps = 1;
+  }
+  else {
+    //x_steps = draw_settings.MaxX() / PIXELS_PER_SCROLL + 1;
+    x_steps = int((zoom * draw_settings.MaxX()) / PIXELS_PER_SCROLL) + 1;
+  }
 
-    if (draw_settings.MaxX() < height)
-    {
-        y_steps = 1;
-    }
-    else
-    {
-        //y_steps = draw_settings.MaxY() / PIXELS_PER_SCROLL + 1;
-        y_steps = int((draw_settings.MaxY() * zoom) / PIXELS_PER_SCROLL) + 1;
-    }
+  if (draw_settings.MaxY() < height) {
+    y_steps = 1;
+  }
+  else {
+    //y_steps = draw_settings.MaxY() / PIXELS_PER_SCROLL + 1;
+    y_steps = int((zoom * draw_settings.MaxY()) / PIXELS_PER_SCROLL) + 1;
+  }
 
-    if ((x_steps != draw_settings.x_steps()) ||
-        (y_steps != draw_settings.y_steps()))
-    {
-        draw_settings.set_x_steps(x_steps);
-        draw_settings.set_y_steps(y_steps);
-        SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 
-                    x_steps, y_steps, 4, 4);
-    }
+  if ((x_steps != draw_settings.x_steps()) ||
+      (y_steps != draw_settings.y_steps())) {
+    draw_settings.set_x_steps(x_steps);
+    draw_settings.set_y_steps(y_steps);
+    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 
+		  x_steps, y_steps, 1, 1);
+  }
 }
 
 
@@ -1551,21 +1545,6 @@ void TreeWindow::UpdateMenus(void)
   edit_menu->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		    (ef.NumOutcomes() > 0) ? TRUE : FALSE);
   frame->UpdateMenus(m_cursor, mark_node);
-}
-
-// This function used to be in the ef and is used frequently
-EFPlayer *EfgGetPlayer(const Efg &ef, const gText &name)
-{
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-    {
-        if (ef.Players()[i]->GetName() == name) 
-            return ef.Players()[i];
-    }
-
-    if (ef.GetChance()->GetName() == name) 
-        return ef.GetChance();
-
-    return 0;
 }
 
 //-----------------------------------------------------------------------
