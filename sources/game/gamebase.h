@@ -250,14 +250,24 @@ public:
   void MarkSubtree(bool p_mark);
 };
 
-class gbtGameBase : public gbtGameRep {
+//
+// Need to think more carefully about this factoring:
+// goal is to eventually again have a normal form game where
+// outcomes are identified one-to-one with contingencies,
+// and where explicit outcome representations are not needed internally.
+//
+class gbtConstGameBase : public virtual gbtGameObject {
+public:
+  gbtText m_label, m_comment;
+  gbtBlock<gbtGamePlayerBase *> m_players;
+  gbtBlock<gbtGameOutcomeBase *> m_outcomes;
+};
+
+class gbtGameBase : public gbtConstGameBase, public gbtGameRep {
 public:
   bool sortisets;
   mutable long m_revision;
   mutable long m_outcomeRevision;
-  gbtText m_label, comment;
-  gbtBlock<gbtGamePlayerBase *> players;
-  gbtBlock<gbtGameOutcomeBase *> outcomes;
   gbtBlock<gbtGameOutcomeBase *> m_results;
   gbtGameNodeBase *root;
   gbtGamePlayerBase *chance;

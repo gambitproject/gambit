@@ -45,8 +45,7 @@
 
 gbtGameBase::gbtGameBase(void)
   : sortisets(true), m_revision(0), 
-    m_outcomeRevision(-1), m_label("UNTITLED"),
-    chance(new gbtGamePlayerBase(this, 0))
+    m_outcomeRevision(-1), chance(new gbtGamePlayerBase(this, 0))
 {
   root = new gbtGameNodeBase(this, 0);
   SortInfosets();
@@ -58,8 +57,8 @@ gbtGameBase::~gbtGameBase()
   delete root;
   delete chance;
 
-  for (int i = 1; i <= players.Length(); delete players[i++]);
-  for (int i = 1; i <= outcomes.Last(); delete outcomes[i++]);
+  for (int i = 1; i <= m_players.Length(); delete m_players[i++]);
+  for (int i = 1; i <= m_outcomes.Length(); delete m_outcomes[i++]);
 }
 
 void gbtGameBase::NumberNodes(gbtGameNodeBase *n, int &index)
@@ -75,12 +74,12 @@ void gbtGameBase::SortInfosets(void)
 
   int pl;
 
-  for (pl = 0; pl <= players.Length(); pl++)  {
+  for (pl = 0; pl <= m_players.Length(); pl++)  {
     gbtList<gbtGameNode> nodes;
 
     Nodes(gbtGame(this), nodes);
 
-    gbtGamePlayerBase *player = (pl) ? players[pl] : chance;
+    gbtGamePlayerBase *player = (pl) ? m_players[pl] : chance;
 
     int i, isets = 0;
 
@@ -120,8 +119,8 @@ void gbtGameBase::SortInfosets(void)
   gbtList<gbtGameNode> nodes;
   Nodes(gbtGame(this), nodes);
 
-  for (pl = 0; pl <= players.Length(); pl++)  {
-    gbtGamePlayerBase *player = (pl) ? players[pl] : chance;
+  for (pl = 0; pl <= m_players.Length(); pl++)  {
+    gbtGamePlayerBase *player = (pl) ? m_players[pl] : chance;
 
     for (int iset = 1; iset <= player->m_infosets.Length(); iset++)  {
       gbtGameInfosetBase *s = player->m_infosets[iset];
@@ -277,11 +276,11 @@ void gbtGameBase::DeleteOutcome(gbtGameOutcomeBase *p_outcome)
   }
 
   // Remove the outcome from the list of defined outcomes
-  outcomes.Remove(outcomes.Find(p_outcome));
+  m_outcomes.Remove(m_outcomes.Find(p_outcome));
 
   // Renumber the remaining outcomes
-  for (int outc = 1; outc <= outcomes.Length(); outc++) {
-    outcomes[outc]->m_id = outc;
+  for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
+    m_outcomes[outc]->m_id = outc;
   }
 
   m_revision++;
@@ -504,27 +503,27 @@ gbtGame gbtGameBase::Copy(gbtGameNode n) const
   gbtGameBase *efg = new gbtGameBase();
   efg->sortisets = false;
   efg->m_label = m_label;
-  efg->comment = comment;
-  efg->players = gbtBlock<gbtGamePlayerBase *>(players.Length());
-  efg->outcomes = gbtBlock<gbtGameOutcomeBase *>(outcomes.Length());
+  efg->m_comment = m_comment;
+  efg->m_players = gbtBlock<gbtGamePlayerBase *>(m_players.Length());
+  efg->m_outcomes = gbtBlock<gbtGameOutcomeBase *>(m_outcomes.Length());
   
-  for (int i = 1; i <= players.Length(); i++)  {
-    (efg->players[i] = new gbtGamePlayerBase(efg, i))->m_label = players[i]->m_label;
-    for (int j = 1; j <= players[i]->m_infosets.Length(); j++)   {
-      gbtGameInfosetBase *s = new gbtGameInfosetBase(efg->players[i], j,
-						       players[i]->m_infosets[j]->m_actions.Length());
-      s->m_label = players[i]->m_infosets[j]->m_label;
+  for (int i = 1; i <= m_players.Length(); i++)  {
+    (efg->m_players[i] = new gbtGamePlayerBase(efg, i))->m_label = m_players[i]->m_label;
+    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++)   {
+      gbtGameInfosetBase *s = new gbtGameInfosetBase(efg->m_players[i], j,
+						     m_players[i]->m_infosets[j]->m_actions.Length());
+      s->m_label = m_players[i]->m_infosets[j]->m_label;
       for (int k = 1; k <= s->m_actions.Length(); k++) {
-	s->m_actions[k]->m_label = players[i]->m_infosets[j]->m_actions[k]->m_label;
+	s->m_actions[k]->m_label = m_players[i]->m_infosets[j]->m_actions[k]->m_label;
       }
-      efg->players[i]->m_infosets.Append(s);
+      efg->m_players[i]->m_infosets.Append(s);
     }
   }
 
   for (int i = 1; i <= GetChance()->NumInfosets(); i++)   {
     gbtGameInfosetBase *t = chance->m_infosets[i];
     gbtGameInfosetBase *s = new gbtGameInfosetBase(efg->chance, i, 
-						     t->m_actions.Length());
+						   t->m_actions.Length());
     s->m_label = t->m_label;
     for (int act = 1; act <= s->m_chanceProbs.Length(); act++) {
       s->m_chanceProbs[act] = t->m_chanceProbs[act];
@@ -534,9 +533,9 @@ gbtGame gbtGameBase::Copy(gbtGameNode n) const
   }
 
   for (int outc = 1; outc <= NumOutcomes(); outc++)  {
-    efg->outcomes[outc] = new gbtGameOutcomeBase(efg, outc);
-    efg->outcomes[outc]->m_label = outcomes[outc]->m_label;
-    efg->outcomes[outc]->m_payoffs = outcomes[outc]->m_payoffs;
+    efg->m_outcomes[outc] = new gbtGameOutcomeBase(efg, outc);
+    efg->m_outcomes[outc]->m_label = m_outcomes[outc]->m_label;
+    efg->m_outcomes[outc]->m_payoffs = m_outcomes[outc]->m_payoffs;
   }
 
   if (n.IsNull()) {
@@ -548,10 +547,10 @@ gbtGame gbtGameBase::Copy(gbtGameNode n) const
   }
 
   if (!n.IsNull())   {
-    for (int pl = 1; pl <= efg->players.Length(); pl++)  {
-      for (int i = 1; i <= efg->players[pl]->m_infosets.Length(); i++)  {
-	if (efg->players[pl]->m_infosets[i]->m_members.Length() == 0) {
-	  delete efg->players[pl]->m_infosets.Remove(i--);
+    for (int pl = 1; pl <= efg->m_players.Length(); pl++)  {
+      for (int i = 1; i <= efg->m_players[pl]->m_infosets.Length(); i++)  {
+	if (efg->m_players[pl]->m_infosets[i]->m_members.Length() == 0) {
+	  delete efg->m_players[pl]->m_infosets.Remove(i--);
 	}
       }
     }
@@ -572,7 +571,7 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
   if (m->m_infoset)   {
     gbtGamePlayerBase *p;
     if (m->m_infoset->m_player->m_id) {
-      p = p_newEfg->players[m->m_infoset->m_player->m_id];
+      p = p_newEfg->m_players[m->m_infoset->m_player->m_id];
     }
     else {
       p = p_newEfg->chance;
@@ -593,7 +592,7 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
     }
 
     if (m->m_outcome) {
-      newParent->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
+      newParent->m_outcome = p_newEfg->m_outcomes[m->m_outcome->m_id];
     }
 
     for (int i = 1; i <= m->m_children.Length(); i++) {
@@ -604,7 +603,7 @@ void gbtGameBase::CopySubtree(gbtGameBase *p_newEfg,
     n->m_label = m->m_label;
     n->m_gameroot = 0;
     if (m->m_outcome) {
-      n->m_outcome = p_newEfg->outcomes[m->m_outcome->m_id];
+      n->m_outcome = p_newEfg->m_outcomes[m->m_outcome->m_id];
     }
   }
 }
@@ -624,12 +623,12 @@ gbtText gbtGameBase::GetLabel(void) const
 
 void gbtGameBase::SetComment(const gbtText &s)
 {
-  comment = s;
+  m_comment = s;
   m_revision++;
 }
 
 gbtText gbtGameBase::GetComment(void) const
-{ return comment; }
+{ return m_comment; }
   
 
 //------------------------------------------------------------------------
@@ -710,11 +709,11 @@ void gbtGameBase::WriteEfg(gbtOutput &p_file) const
 {
   p_file << "EFG 2 R";
   p_file << " \"" << EscapeQuotes(m_label) << "\" { ";
-  for (int i = 1; i <= players.Length(); i++) {
-    p_file << '"' << EscapeQuotes(players[i]->m_label) << "\" ";
+  for (int i = 1; i <= m_players.Length(); i++) {
+    p_file << '"' << EscapeQuotes(m_players[i]->m_label) << "\" ";
   }
   p_file << "}\n";
-  p_file << "\"" << EscapeQuotes(comment) << "\"\n\n";
+  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
 
   WriteEfg(p_file, root);
 }
@@ -728,17 +727,17 @@ long gbtGameBase::RevisionNumber(void) const
 { return m_revision; }
 
 int gbtGameBase::NumPlayers(void) const
-{ return players.Length(); }
+{ return m_players.Length(); }
 
 gbtGamePlayer gbtGameBase::NewPlayer(void)
 {
   m_revision++;
 
-  gbtGamePlayerBase *ret = new gbtGamePlayerBase(this, players.Length() + 1);
-  players.Append(ret);
+  gbtGamePlayerBase *ret = new gbtGamePlayerBase(this, m_players.Length() + 1);
+  m_players.Append(ret);
 
-  for (int outc = 1; outc <= outcomes.Last();
-       outcomes[outc++]->m_payoffs.Append(0));
+  for (int outc = 1; outc <= m_outcomes.Length();
+       m_outcomes[outc++]->m_payoffs.Append(0));
   ComputeReducedStrategies();
   return ret;
 }
@@ -749,22 +748,22 @@ gbtGamePlayer gbtGameBase::GetPlayer(int p_player) const
     return chance;
   }
   else {
-    return players[p_player];
+    return m_players[p_player];
   }
 }
 
 int gbtGameBase::NumOutcomes(void) const
-{ return outcomes.Last(); }
+{ return m_outcomes.Length(); }
 
 gbtGameOutcome gbtGameBase::NewOutcome(void)
 {
   m_revision++;
-  return NewOutcome(outcomes.Last() + 1);
+  return NewOutcome(m_outcomes.Length() + 1);
 }
 
 gbtGameOutcome gbtGameBase::GetOutcome(int p_index) const
 {
-  return outcomes[p_index];
+  return m_outcomes[p_index];
 }
 
 gbtEfgSupport gbtGameBase::NewEfgSupport(void) const
@@ -777,16 +776,16 @@ bool gbtGameBase::IsConstSum(void) const
   int pl, index;
   gbtNumber cvalue = (gbtNumber) 0;
 
-  if (outcomes.Last() == 0)  return true;
+  if (m_outcomes.Last() == 0)  return true;
 
-  for (pl = 1; pl <= players.Length(); pl++)
-    cvalue += outcomes[1]->m_payoffs[pl];
+  for (pl = 1; pl <= m_players.Length(); pl++)
+    cvalue += m_outcomes[1]->m_payoffs[pl];
 
-  for (index = 2; index <= outcomes.Last(); index++)  {
+  for (index = 2; index <= m_outcomes.Last(); index++)  {
     gbtNumber thisvalue(0);
 
-    for (pl = 1; pl <= players.Length(); pl++)
-      thisvalue += outcomes[index]->m_payoffs[pl];
+    for (pl = 1; pl <= m_players.Length(); pl++)
+      thisvalue += m_outcomes[index]->m_payoffs[pl];
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -863,15 +862,20 @@ gbtNumber gbtGameBase::MinPayoff(int pl) const
 
   if (NumOutcomes() == 0)  return 0;
 
-  if(pl) { p1=p2=pl;}
-  else {p1=1;p2=players.Length();}
+  if (pl) { 
+    p1 = p2 = pl;
+  }
+  else {
+    p1 = 1;
+    p2 = m_players.Length();
+  }
 
-  minpay = outcomes[1]->m_payoffs[p1];
+  minpay = m_outcomes[1]->m_payoffs[p1];
 
-  for (index = 1; index <= outcomes.Last(); index++)  {
+  for (index = 1; index <= m_outcomes.Last(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->m_payoffs[p] < minpay)
-	minpay = outcomes[index]->m_payoffs[p];
+      if (m_outcomes[index]->m_payoffs[p] < minpay)
+	minpay = m_outcomes[index]->m_payoffs[p];
   }
   return minpay;
 }
@@ -883,15 +887,20 @@ gbtNumber gbtGameBase::MaxPayoff(int pl) const
 
   if (NumOutcomes() == 0)  return 0;
 
-  if(pl) { p1=p2=pl;}
-  else {p1=1;p2=players.Length();}
+  if (pl) { 
+    p1 = p2 = pl;
+  }
+  else {
+    p1 = 1;
+    p2 = m_players.Length();
+  }
 
-  maxpay = outcomes[1]->m_payoffs[p1];
+  maxpay = m_outcomes[1]->m_payoffs[p1];
 
-  for (index = 1; index <= outcomes.Last(); index++)  {
+  for (index = 1; index <= m_outcomes.Last(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (outcomes[index]->m_payoffs[p] > maxpay)
-	maxpay = outcomes[index]->m_payoffs[p];
+      if (m_outcomes[index]->m_payoffs[p] > maxpay)
+	maxpay = m_outcomes[index]->m_payoffs[p];
   }
   return maxpay;
 }
@@ -905,8 +914,8 @@ int gbtGameBase::NumNodes(void) const
 gbtGameOutcome gbtGameBase::NewOutcome(int index)
 {
   m_revision++;
-  outcomes.Append(new gbtGameOutcomeBase(this, index));
-  return outcomes[outcomes.Last()];
+  m_outcomes.Append(new gbtGameOutcomeBase(this, index));
+  return m_outcomes[m_outcomes.Last()];
 } 
 
 //------------------------------------------------------------------------
@@ -922,7 +931,7 @@ void gbtGameBase::DeleteEmptyInfosets(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     for (int iset = 1; iset <= NumInfosets()[pl]; iset++) {
-      gbtGameInfosetBase *infoset = players[pl]->m_infosets[iset];
+      gbtGameInfosetBase *infoset = m_players[pl]->m_infosets[iset];
       if (infoset->m_members.Length() == 0) {
 	DeleteInfoset(infoset);
         iset--;
@@ -1127,9 +1136,9 @@ int gbtGameBase::BehavProfileLength(void) const
 {
   int sum = 0;
 
-  for (int i = 1; i <= players.Length(); i++) {
-    for (int j = 1; j <= players[i]->m_infosets.Length(); j++) {
-      sum += players[i]->m_infosets[j]->m_actions.Length();
+  for (int i = 1; i <= m_players.Length(); i++) {
+    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++) {
+      sum += m_players[i]->m_infosets[j]->m_actions.Length();
     }
   }
 
@@ -1138,10 +1147,10 @@ int gbtGameBase::BehavProfileLength(void) const
 
 gbtArray<int> gbtGameBase::NumInfosets(void) const
 {
-  gbtArray<int> foo(players.Length());
+  gbtArray<int> foo(m_players.Length());
   
   for (int i = 1; i <= foo.Length(); i++) {
-    foo[i] = players[i]->m_infosets.Length();
+    foo[i] = m_players[i]->m_infosets.Length();
   }
 
   return foo;
@@ -1151,7 +1160,7 @@ int gbtGameBase::NumPlayerInfosets(void) const
 {
   int answer(0);
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    answer += players[pl]->m_infosets.Length();
+    answer += m_players[pl]->m_infosets.Length();
   }
   return answer;
 }
@@ -1163,15 +1172,15 @@ int gbtGameBase::TotalNumInfosets(void) const
 
 gbtPVector<int> gbtGameBase::NumActions(void) const
 {
-  gbtArray<int> foo(players.Length());
-  for (int i = 1; i <= players.Length(); i++) {
-    foo[i] = players[i]->m_infosets.Length();
+  gbtArray<int> foo(m_players.Length());
+  for (int i = 1; i <= m_players.Length(); i++) {
+    foo[i] = m_players[i]->m_infosets.Length();
   }
 
   gbtPVector<int> bar(foo);
-  for (int i = 1; i <= players.Length(); i++) {
-    for (int j = 1; j <= players[i]->m_infosets.Length(); j++) {
-      bar(i, j) = players[i]->m_infosets[j]->m_actions.Length();
+  for (int i = 1; i <= m_players.Length(); i++) {
+    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++) {
+      bar(i, j) = m_players[i]->m_infosets[j]->m_actions.Length();
     }
   }
 
@@ -1190,16 +1199,16 @@ int gbtGameBase::NumPlayerActions(void) const
 
 gbtPVector<int> gbtGameBase::NumMembers(void) const
 {
-  gbtArray<int> foo(players.Length());
+  gbtArray<int> foo(m_players.Length());
 
-  for (int i = 1; i <= players.Length(); i++) {
-    foo[i] = players[i]->m_infosets.Length();
+  for (int i = 1; i <= m_players.Length(); i++) {
+    foo[i] = m_players[i]->m_infosets.Length();
   }
 
   gbtPVector<int> bar(foo);
-  for (int i = 1; i <= players.Length(); i++) {
-    for (int j = 1; j <= players[i]->m_infosets.Length(); j++) {
-      bar(i, j) = players[i]->m_infosets[j]->m_members.Length();
+  for (int i = 1; i <= m_players.Length(); i++) {
+    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++) {
+      bar(i, j) = m_players[i]->m_infosets[j]->m_members.Length();
     }
   }
 
@@ -1215,7 +1224,7 @@ void gbtGameBase::Payoff(gbtGameNodeBase *n, gbtNumber prob,
 			gbtVector<gbtNumber> &payoff) const
 {
   if (n->m_outcome)  {
-    for (int i = 1; i <= players.Length(); i++)
+    for (int i = 1; i <= m_players.Length(); i++)
       payoff[i] += prob * n->m_outcome->m_payoffs[i];
   }
 
@@ -1270,7 +1279,7 @@ void gbtGameBase::Payoff(gbtGameNodeBase *n, gbtNumber prob,
 			gbtArray<gbtNumber> &payoff) const
 {
   if (n->m_outcome)   {
-    for (int i = 1; i <= players.Length(); i++)
+    for (int i = 1; i <= m_players.Length(); i++)
       payoff[i] += prob * n->m_outcome->m_payoffs[i];
   }
   
@@ -1314,20 +1323,20 @@ static int Product(const gbtArray<int> &p_dim)
 
 gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
   : sortisets(false), m_revision(0), m_outcomeRevision(-1),
-    m_label("UNTITLED"),
-    players(p_dim.Length()), m_results(Product(p_dim)),
-    root(0), chance(0)
+    m_results(Product(p_dim)), root(0), chance(0)
 {
-  for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new gbtGamePlayerBase(this, pl);
-    players[pl]->m_label = ToText(pl);
-    players[pl]->m_infosets.Append(new gbtGameInfosetBase(players[pl], 1, p_dim[pl]));
+  for (int pl = 1; pl <= m_players.Length(); pl++)  {
+    m_players.Append(new gbtGamePlayerBase(this, pl));
+    m_players[pl]->m_label = ToText(pl);
+    m_players[pl]->m_infosets.Append(new gbtGameInfosetBase(m_players[pl],
+							    1, p_dim[pl]));
     for (int st = 1; st <= p_dim[pl]; st++) {
-      players[pl]->m_infosets[1]->m_actions[st]->m_label = ToText(st);
+      m_players[pl]->m_infosets[1]->m_actions[st]->m_label = ToText(st);
       gbtArray<int> actions(1);
       actions[1] = st;
-      players[pl]->m_strategies.Append(new gbtGameStrategyBase(st, players[pl],
-							       actions));
+      m_players[pl]->m_strategies.Append(new gbtGameStrategyBase(st, 
+								 m_players[pl],
+								 actions));
     }
   }
   IndexStrategies();
@@ -1378,19 +1387,19 @@ void gbtGameBase::WriteNfg(gbtOutput &p_file) const
   
   p_file << "}\n";
 
-  p_file << "\"" << EscapeQuotes(comment) << "\"\n\n";
+  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
 
   int ncont = 1;
   for (int i = 1; i <= NumPlayers(); i++)
     ncont *= GetPlayer(i)->NumStrategies();
 
-  if (outcomes.Length() > 0) {
+  if (m_outcomes.Length() > 0) {
     p_file << "{\n";
-    for (int outc = 1; outc <= outcomes.Length(); outc++)   {
-      p_file << "{ \"" << EscapeQuotes(outcomes[outc]->m_label) << "\" ";
-      for (int pl = 1; pl <= players.Length(); pl++)  {
-	p_file << outcomes[outc]->m_payoffs[pl];
-	if (pl < players.Length()) {
+    for (int outc = 1; outc <= m_outcomes.Length(); outc++)   {
+      p_file << "{ \"" << EscapeQuotes(m_outcomes[outc]->m_label) << "\" ";
+      for (int pl = 1; pl <= m_players.Length(); pl++)  {
+	p_file << m_outcomes[outc]->m_payoffs[pl];
+	if (pl < m_players.Length()) {
 	  p_file << ", ";
 	}
 	else {
@@ -1416,9 +1425,9 @@ void gbtGameBase::WriteNfg(gbtOutput &p_file) const
 
 gbtArray<int> gbtGameBase::NumStrategies(void) const
 {
-  gbtArray<int> dim(players.Length());
-  for (int pl = 1; pl <= players.Length(); pl++) {
-    dim[pl] = players[pl]->m_strategies.Length();
+  gbtArray<int> dim(m_players.Length());
+  for (int pl = 1; pl <= m_players.Length(); pl++) {
+    dim[pl] = m_players[pl]->m_strategies.Length();
   }
   return dim;
 }
@@ -1426,8 +1435,8 @@ gbtArray<int> gbtGameBase::NumStrategies(void) const
 int gbtGameBase::MixedProfileLength(void) const
 {
   int nprof = 0;
-  for (int i = 1; i <= players.Length(); i++)
-    nprof += players[i]->m_strategies.Length();
+  for (int i = 1; i <= m_players.Length(); i++)
+    nprof += m_players[i]->m_strategies.Length();
   return nprof;
 }
 
@@ -1508,7 +1517,7 @@ void gbtGameBase::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= GetPlayer(i)->NumStrategies(); j++)  {
-      gbtGameStrategyBase *s = players[i]->m_strategies[j];
+      gbtGameStrategyBase *s = m_players[i]->m_strategies[j];
       s->m_id = j;
       s->m_index = (j - 1) * offset;
     }
@@ -1605,10 +1614,10 @@ static void MakeReducedStrats(gbtGameBase *p_nfg,
 void gbtGameBase::ComputeReducedStrategies(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    while (players[pl]->m_strategies.Length() > 0) {
-      delete players[pl]->m_strategies.Remove(1);
+    while (m_players[pl]->m_strategies.Length() > 0) {
+      delete m_players[pl]->m_strategies.Remove(1);
     }
-    MakeReducedStrats(this, players[pl], root, NULL);
+    MakeReducedStrats(this, m_players[pl], root, NULL);
   }
 }
 

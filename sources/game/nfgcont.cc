@@ -36,7 +36,7 @@ gbtNfgContingencyTree::gbtNfgContingencyTree(gbtGameBase *p_nfg)
   : m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->players[pl]->GetStrategy(1);
+    m_profile[pl] = m_nfg->m_players[pl]->GetStrategy(1);
   }
 }
 
@@ -83,7 +83,7 @@ gbtNfgContingencyTable::gbtNfgContingencyTable(gbtGameBase *p_nfg)
   : m_nfg(p_nfg), m_index(0L), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->players[pl]->GetStrategy(1);
+    m_profile[pl] = m_nfg->m_players[pl]->GetStrategy(1);
     m_index += m_profile[pl]->GetIndex();
   }
 }

@@ -478,7 +478,7 @@ static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtGameBase *p_nfg)
       throw gbtNfgParserError();
     }
 
-    p_nfg->m_results[cont++] = p_nfg->outcomes[p_parser.GetLastInteger().as_long()];
+    p_nfg->m_results[cont++] = p_nfg->m_outcomes[p_parser.GetLastInteger().as_long()];
     p_parser.GetNextSymbol();
   }
 }
@@ -488,7 +488,7 @@ static void SetPayoff(gbtGameBase *p_nfg,
 {
   if (p_pl == 1)  {
     p_nfg->NewOutcome();
-    p_nfg->m_results[p_cont] = p_nfg->outcomes[p_nfg->outcomes.Length()];
+    p_nfg->m_results[p_cont] = p_nfg->m_outcomes[p_nfg->m_outcomes.Length()];
   }
   p_nfg->m_results[p_cont]->SetPayoff(p_nfg->GetPlayer(p_pl), p_value);
 }
