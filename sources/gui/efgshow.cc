@@ -25,6 +25,7 @@
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
 #include "game/nfg.h"
+#include "nash/efgqre.h"
 
 #include "efgconst.h"
 #include "treewin.h"
@@ -47,6 +48,7 @@
 #include "dlefgcolor.h"
 #include "dlelimbehav.h"
 #include "dlefgnash.h"
+#include "dlqrefile.h"
 #include "dleditbehav.h"
 
 
@@ -98,6 +100,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFORMAT_DISPLAY_DECIMALS, EfgShow::OnFormatDisplayDecimals)
   EVT_MENU(efgmenuTOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
+  EVT_MENU(efgmenuTOOLS_QRE, EfgShow::OnToolsQre)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
   EVT_MENU(efgmenuTOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
   EVT_MENU(wxID_HELP_CONTENTS, EfgShow::OnHelpContents)
@@ -549,6 +552,9 @@ void EfgShow::MakeMenus(void)
 		    "Find undominated actions");
   toolsMenu->Append(efgmenuTOOLS_EQUILIBRIUM, "&Equilibrium",
 		    "Compute Nash equilibria and refinements");
+  toolsMenu->Append(efgmenuTOOLS_QRE, "&Qre",
+		    "Compute quantal response equilibria");
+
   wxMenu *toolsNfgMenu = new wxMenu;
   toolsNfgMenu->Append(efgmenuTOOLS_NFG_REDUCED, "Reduced",
 		       "Generate reduced normal form");
@@ -1348,6 +1354,28 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 
     delete algorithm;
   }
+}
+
+void EfgShow::OnToolsQre(wxCommandEvent &)
+{
+  try {
+    efgQre algorithm;
+    algorithm.SetFullGraph(true);
+
+    wxStatus status(this, "QreSolve Progress");
+    gList<BehavSolution> solutions = algorithm.Solve(*m_currentSupport,
+						     status);
+
+    if (solutions.Length() > 0) {
+      dialogQreFile fileDialog(this, solutions);
+      if (fileDialog.ShowModal() == wxID_OK) {
+
+      }
+    }
+  }
+  catch (...) {
+  }
+
 }
 
 void EfgShow::OnToolsNormalReduced(wxCommandEvent &)

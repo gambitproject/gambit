@@ -102,7 +102,7 @@ private:
 
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);
-
+  void OnToolsQre(wxCommandEvent &);
   void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);
 

@@ -43,7 +43,7 @@ typedef enum {
 
   efgmenuTOOLS_DOMINANCE = 1800,
   efgmenuTOOLS_EQUILIBRIUM = 1801,
-
+  efgmenuTOOLS_QRE = 1802,
   efgmenuTOOLS_NFG = 1521,
   efgmenuTOOLS_NFG_REDUCED = 1504,
   efgmenuTOOLS_NFG_AGENT = 1519,
