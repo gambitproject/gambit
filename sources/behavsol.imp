@@ -163,7 +163,7 @@ bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
       break;
     i++;
   }
-  return (i <= p_profile.Length());
+  return (i > p_profile.Length());
 }
 
 bool BehavSolution::operator==(const BehavSolution &p_solution) const

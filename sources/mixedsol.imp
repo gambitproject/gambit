@@ -130,7 +130,7 @@ bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
       break;
     i++;
   }
-  return (i <= p_profile.Length());
+  return (i > p_profile.Length());
 }
 
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
