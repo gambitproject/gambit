@@ -107,7 +107,6 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
 
 template <class T> T gSquareMatrix<T>::Determinant(void) const
 {
-  T factor;
   gSquareMatrix<T> M(*this);
 
   for (int row = minrow; row <= maxrow; row++)  {
