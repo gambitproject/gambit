@@ -148,7 +148,7 @@ class gFileOutput : public gOutput  {
 
   public:
     gFileOutput(void);
-    gFileOutput(const char *);
+    gFileOutput(const char *, bool append = false);
     gFileOutput(FILE *);
     virtual ~gFileOutput();
 

@@ -256,10 +256,10 @@ gFileOutput::gFileOutput(void)
   Represent='f';
 }
 
-gFileOutput::gFileOutput(const char *out)
+gFileOutput::gFileOutput(const char *out, bool append /* = false */)
 {
-  f = fopen(out, "w");
-	valid=(f==NULL) ? 0 : 1;
+  f = fopen(out, (append) ? "w" : "a");
+  valid = (f != NULL);
   Width=0;
   Prec=6;
   Represent='f';
@@ -268,7 +268,7 @@ gFileOutput::gFileOutput(const char *out)
 gFileOutput::gFileOutput(FILE *out)
 {
   f = out;
-	valid=(f==NULL) ? 0 : 1;
+  valid = (f != NULL);
   Width=0;
   Prec=6;
   Represent='f';
