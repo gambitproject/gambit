@@ -1416,7 +1416,7 @@ ReferencePortion* CallFuncObj::GetParamRef(int index) const
 // overloaded versions.
 void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 {
-  int curr_f_index;
+  int curr_f_index = 0;
 
   if (m_funcIndex == -1 && _NumFuncs == 1)
     m_funcIndex = 0;
@@ -1648,6 +1648,7 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
   else if (!TypeMatch(result, _FuncInfo[m_funcIndex].ReturnSpec, 
 		      list_op && (_FuncInfo[m_funcIndex].Flag & funcLISTABLE),
 		      true)) {
+    PortionSpec actualSpec = result->Spec();
     delete result;
     for (index = 0; index < m_numParams; index++)    {
       delete m_params[index];
@@ -1659,7 +1660,7 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 			  "[] return type does not match declaration;\n" +
 			  "Expected " +  
 			  PortionSpecToText(_FuncInfo[m_funcIndex].ReturnSpec) +
-			  ", got " + PortionSpecToText(result->Spec())); 
+			  ", got " + PortionSpecToText(actualSpec));
   }
 
   for (index = 0; index < m_numParams; index++) {
