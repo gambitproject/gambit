@@ -16,11 +16,18 @@
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
   : BaseNfg(dim), payoffs(dim.Length())
 {
-  int accum = 1,i;
+  int accum = 1;
+  int i = 0;
+  int j = 0;
   for (i = 1; i <= dim.Length(); i++)
     accum *= dim[i];
   for (i = 1; i <= dim.Length(); i++)
+  {
     payoffs[i] = new T[accum];
+    // initialize all elements to zero
+    for( j = 0; j < accum; ++j )
+      payoffs[i][j] = (T) 0;
+  }
   NumPayPerPlayer = accum;
 }
 
