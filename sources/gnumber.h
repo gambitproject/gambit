@@ -58,6 +58,7 @@ public:
   gNumber &        operator /= (const gNumber& y);
 
   friend gNumber  operator - (const gNumber& x);
+  friend gNumber pow(const gNumber&,long);
 
   friend gOutput&    operator << (gOutput& s, const gNumber& y);
   friend gInput&     operator >> (gInput& s, gNumber& y);

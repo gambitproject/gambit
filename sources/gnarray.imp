@@ -1,7 +1,7 @@
 //#
 //# FILE: gnarray.imp -- Implementation of n-dimensional arrays
 //#
-//# $Id$
+//# @(#)gnarray.imp	2.2 01/28/98
 //#
 
 #include "gnarray.h"
@@ -27,7 +27,7 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
       storage_size *= dim[i];
     }
     
-    storage = new GHUGE T[storage_size];
+    storage = new  T[storage_size];
     for (int i = 0; i < storage_size; storage[i++] = 0);
   }
 }
@@ -35,7 +35,7 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
 template <class T> gNArray<T>::gNArray(const gNArray<T> &a)
   : storage_size(a.storage_size), dim(a.dim)
 {
-  storage = (storage_size > 0) ? new GHUGE T[storage_size] : 0;
+  storage = (storage_size > 0) ? new  T[storage_size] : 0;
   for (int i = 0; i < storage_size; i++)
     storage[i] = a.storage[i];
 }
@@ -52,7 +52,7 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
     if (storage)    delete [] storage;
     dim = a.dim;
     storage_size = a.storage_size;
-    storage = (storage_size > 0) ? new GHUGE T[storage_size] : 0;
+    storage = (storage_size > 0) ? new T[storage_size] : 0;
     for (int i = 0; i < storage_size; i++)
       storage[i] = a.storage[i];
   }

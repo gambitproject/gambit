@@ -11,27 +11,20 @@
 #include "grarray.imp"
 #include "gmatrix.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+//template class gPolyList<int>;
+//template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);
 
-//TEMPLATE class gPolyList<int>;
-//TEMPLATE gOutput &operator<<(gOutput &f, const gPolyList<int> &y);
+template class gPolyList<gRational>;
+template gOutput &operator<<(gOutput &f, const gPolyList<gRational> &y);
 
-TEMPLATE class gPolyList<gRational>;
-TEMPLATE gOutput &operator<<(gOutput &f, const gPolyList<gRational> &y);
+template class gPolyList<double>;
+template gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
 
-TEMPLATE class gPolyList<double>;
-TEMPLATE gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
+template class gPolyList<gDouble>;
+template gOutput &operator<<(gOutput &f, const gPolyList<gDouble> &y);
 
-TEMPLATE class gPolyList<gDouble>;
-TEMPLATE gOutput &operator<<(gOutput &f, const gPolyList<gDouble> &y);
-
-TEMPLATE class gList<index_pair>;
-TEMPLATE class gNode<index_pair>;
+template class gList<index_pair>;
+template class gNode<index_pair>;
 
 /*
 #include "objcount.imp"
@@ -46,14 +39,14 @@ template class Counted<gPolyList<gRational> >;
 int Counted<gPolyList<gRational> >::numObjects = 0;
 */
 
-TEMPLATE class gRectArray<gPoly<gDouble>*>;
-TEMPLATE class gArray<gPoly<gDouble>*>;
+template class gRectArray<gPoly<gDouble>*>;
+template class gArray<gPoly<gDouble>*>;
 
-TEMPLATE class gRectArray<gPoly<gRational>*>;
-//TEMPLATE class gArray<gPoly<gRational>*>;
+template class gRectArray<gPoly<gRational>*>;
+//template class gArray<gPoly<gRational>*>;
 
-TEMPLATE class gRectArray<gPoly<double>*>;
-//TEMPLATE class gArray<gPoly<double>*>;
+template class gRectArray<gPoly<double>*>;
+//template class gArray<gPoly<double>*>;
 
 
 

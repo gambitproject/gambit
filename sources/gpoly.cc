@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// $Id$
+// @(#)gpoly.cc	2.13 02/06/98
 //
 
 #include "gpoly.imp"
@@ -43,8 +43,8 @@ template gText &operator<<(gText &, const gPoly<double> &);
 
 #ifdef GDOUBLE
 template class gPoly<gDouble>;
-template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> poly);
-template gPoly<gDouble> operator*(const gPoly<gDouble> poly, const gDouble val);
+template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> &poly);
+template gPoly<gDouble> operator*(const gPoly<gDouble> &poly, const gDouble val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);

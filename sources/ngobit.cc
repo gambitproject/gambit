@@ -1,7 +1,7 @@
 //
 // FILE: ngobit.cc -- Implementation of gobit on normal form games
 //
-// $Id$
+// @(#)ngobit.cc	2.9 09/17/97
 //
 
 #include <math.h>
@@ -225,7 +225,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
       solutions[i].SetGobit(Lambda, value);
     }
 
-    Lambda += params.delLam * pow(Lambda, params.powLam);
+    Lambda += params.delLam * pow(Lambda, (double)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }
@@ -321,7 +321,7 @@ double NFKGobitFunc::Value(const gVector<double> &lambda)
     for( int j = 1;j<=(_p.Support().NumStrats(pl));j++)
       for(int k = 1;k<=(_p.Support().NumStrats(pl));k++)
 	vij+=_p(pl,j)*_p(pl,k)*payoff[j]*(payoff[j]-payoff[k]);
-    value += pow(vij -lambda[pl]*_K,2);
+    value += pow(vij -lambda[pl]*_K,2.0);
   }
   if(params.trace > 3) {
     (params.tracefile->SetExpMode()).SetPrec(4);
@@ -426,7 +426,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
       lam_old=lambda;                            
       p_old=p;                             
     }
-    K += params.delLam * pow(K, params.powLam);
+    K += params.delLam * pow(K, (double)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }

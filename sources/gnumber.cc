@@ -18,8 +18,10 @@
 
 #include "gtext.h"
 
+#ifdef USE_EXCEPTIONS
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
+#endif   // USE_EXCEPTIONS
 
 
 gNumber::gNumber(void) 
@@ -437,4 +439,12 @@ bool gNumber::IsInteger(void) const
 {
   return ((rep == precDOUBLE && fmod(dval, 1.0) == 0.0) ||
 	  (rep == precRATIONAL && rval->denominator() == 1));
+}
+
+gNumber pow(const gNumber &x, long n)
+{
+if(x.rep==precDOUBLE)
+  return pow(x.dval,n);
+else
+  return pow(*x.rval,n);
 }

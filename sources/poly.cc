@@ -7,52 +7,45 @@
 #include "double.h"
 #include "gnumber.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class polynomial<gRational>;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class polynomial<gRational>;
+template gOutput& operator << (gOutput& output, 
 			       const polynomial<gRational>& x);
 
-TEMPLATE class polynomial<int>;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class polynomial<int>;
+template gOutput& operator << (gOutput& output,
 			       const polynomial<int>& x);
 
-TEMPLATE class polynomial<double>;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class polynomial<double>;
+template gOutput& operator << (gOutput& output, 
 			       const polynomial<double>& x);
 
-TEMPLATE class polynomial<gDouble>;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class polynomial<gDouble>;
+template gOutput& operator << (gOutput& output, 
 			       const polynomial<gDouble>& x);
 
-TEMPLATE class polynomial<gNumber>;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class polynomial<gNumber>;
+template gOutput& operator << (gOutput& output, 
 			       const polynomial<gNumber>& x);
 
 #include "glist.imp"
-TEMPLATE class gNode< polynomial<gRational> >;
-TEMPLATE class gList< polynomial<gRational> >;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class gNode< polynomial<gRational> >;
+template class gList< polynomial<gRational> >;
+template gOutput& operator << (gOutput& output, 
 			       const gList<polynomial<gRational> >&);
 
-TEMPLATE class gNode< polynomial<int> >;
-TEMPLATE class gList< polynomial<int> >;
+template class gNode< polynomial<int> >;
+template class gList< polynomial<int> >;
 
-TEMPLATE class gNode< polynomial<double> >;
-TEMPLATE class gList< polynomial<double> >;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class gNode< polynomial<double> >;
+template class gList< polynomial<double> >;
+template gOutput& operator << (gOutput& output, 
 			       const gList<polynomial<double> >&);
 
-TEMPLATE class gNode< polynomial<gDouble> >;
-TEMPLATE class gList< polynomial<gDouble> >;
+template class gNode< polynomial<gDouble> >;
+template class gList< polynomial<gDouble> >;
 
-TEMPLATE class gNode< polynomial<gNumber> >;
-TEMPLATE class gList< polynomial<gNumber> >;
-TEMPLATE gOutput& operator << (gOutput& output, 
+template class gNode< polynomial<gNumber> >;
+template class gList< polynomial<gNumber> >;
+template gOutput& operator << (gOutput& output, 
 			       const gList<polynomial<gNumber> >&);
 

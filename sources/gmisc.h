@@ -89,6 +89,8 @@ void gEpsilon(double &v, int i = 8);
 void gEpsilon(gRational &v, int i = 8);
 void gEpsilon(gNumber &v, int i=8);
 
+double pow(int,long);
+double pow(double,long);
 
 #ifdef USE_EXCEPTIONS
 class gException   {
@@ -98,25 +100,3 @@ class gException   {
 #endif   // USE_EXCEPTIONS
 
 #endif    // GMISC_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

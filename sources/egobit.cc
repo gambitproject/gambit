@@ -1,7 +1,7 @@
 //
 // FILE: egobit.cc -- Implementation of gobit on extensive form games
 //
-// $Id$
+// @(#)egobit.cc	2.9 09/18/97
 //
 
 #include <math.h>
@@ -260,7 +260,7 @@ void Gobit(const Efg &E, EFGobitParams &params,
       pold=p;                              // pold is last good solution
     }
 
-    Lambda += params.delLam * pow(Lambda, params.powLam);
+    Lambda += params.delLam * pow(Lambda, (double)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }
@@ -369,7 +369,7 @@ double EFKGobitFunc::Value(const gVector<double> &lambda)
       for( int j = 1;j<=(_p.Support().NumActions(pl,iset));j++)
 	for(int k = 1;k<=(_p.Support().NumActions(pl,iset));k++)
 	  vij+=_p(pl,iset,j)*_p(pl,iset,k)*_cpay(pl,iset,j)*(_cpay(pl,iset,j)-_cpay(pl,iset,k));
-      value += pow(vij -lambda[pl]*_K,2);
+      value += pow(vij -lambda[pl]*_K,2.0);
     }
   }
   if(params.trace > 3) {
@@ -476,7 +476,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
       lam_old=lambda;                            
       p_old=p;                             
     }
-    K += params.delLam * pow(K, params.powLam);
+    K += params.delLam * pow(K, (double)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }

@@ -9,34 +9,27 @@
 #include "double.h"
 #include "gnumber.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+template class gInterval<gRational>;
+template class gList< gInterval<gRational> >;
+template class gNode< gInterval<gRational> >;
+template gOutput& operator << (gOutput& output, const gInterval<gRational>& x);
 
-TEMPLATE class gInterval<gRational>;
-TEMPLATE class gList< gInterval<gRational> >;
-TEMPLATE class gNode< gInterval<gRational> >;
-TEMPLATE gOutput& operator << (gOutput& output, const gInterval<gRational>& x);
+template class gInterval<int>;
+template class gList< gInterval<int> >;
+template class gNode< gInterval<int> >;
+template gOutput& operator << (gOutput& output, const gInterval<int>& x);
 
-TEMPLATE class gInterval<int>;
-TEMPLATE class gList< gInterval<int> >;
-TEMPLATE class gNode< gInterval<int> >;
-TEMPLATE gOutput& operator << (gOutput& output, const gInterval<int>& x);
+template class gInterval<double>;
+template class gList< gInterval<double> >;
+template class gNode< gInterval<double> >;
+template gOutput& operator << (gOutput& output, const gInterval<double>& x);
 
-TEMPLATE class gInterval<double>;
-TEMPLATE class gList< gInterval<double> >;
-TEMPLATE class gNode< gInterval<double> >;
-TEMPLATE gOutput& operator << (gOutput& output, const gInterval<double>& x);
+template class gInterval<gDouble>;
+template class gList< gInterval<gDouble> >;
+template class gNode< gInterval<gDouble> >;
+template gOutput& operator << (gOutput& output, const gInterval<gDouble>& x);
 
-TEMPLATE class gInterval<gDouble>;
-TEMPLATE class gList< gInterval<gDouble> >;
-TEMPLATE class gNode< gInterval<gDouble> >;
-TEMPLATE gOutput& operator << (gOutput& output, const gInterval<gDouble>& x);
-
-TEMPLATE class gInterval<gNumber>;
-TEMPLATE class gList< gInterval<gNumber> >;
-TEMPLATE class gNode< gInterval<gNumber> >;
-TEMPLATE gOutput& operator << (gOutput& output, const gInterval<gNumber>& x);
+template class gInterval<gNumber>;
+template class gList< gInterval<gNumber> >;
+template class gNode< gInterval<gNumber> >;
+template gOutput& operator << (gOutput& output, const gInterval<gNumber>& x);

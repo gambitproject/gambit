@@ -1,7 +1,7 @@
 //
 // FILE: gfuncmin.cc -- Function minimization routines
 //
-// $Id$
+// @(#)gfuncmin.cc	2.3 09/17/97
 //
 
 
@@ -513,7 +513,7 @@ bool Powell(gPVector<double> &p,
     
     fptt=func.Value(ptt);
     if (fptt < fp) {
-      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2.0)-del*pow(fp-fptt,2.0);
       if (t < 0.0) {
 	Project(xit, p.Lengths());
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,interior);
@@ -606,7 +606,7 @@ bool OldPowell(gVector<double> &p,
     
     fptt=func.Value(ptt);
     if (fptt < fp) {
-      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
+      t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2.0)-del*pow(fp-fptt,2.0);
       if (t < 0.0) {
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,true);
 //	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);

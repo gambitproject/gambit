@@ -1,7 +1,7 @@
 //
 // FILE: garray.imp - Implementation of gArray data type
 //
-// $Id$
+// @(#)garray.imp	2.2 02/06/98
 //
 
 #include <stdlib.h>
@@ -128,7 +128,6 @@ template <class T> void gArray<T>::Dump(gOutput &f) const
   f << '}';
 }
 
-#ifndef __BORLANDC__
 template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
 {
   if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
@@ -141,7 +140,6 @@ template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
 {
   return !(a == b);
 }
-#endif   // __BORLANDC__
 
 template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
 {

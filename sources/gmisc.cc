@@ -1,7 +1,7 @@
 //
 // FILE: gmisc.cc -- Miscellaneous generally-useful functions
 //
-// $Id$
+// @(#)gmisc.cc	2.11 02/07/98
 //
 
 #include "gmisc.h"
@@ -354,7 +354,7 @@ void DisplayTriState(gOutput& o, TriState i)
 //------------------------ Type dependent epsilon -----------------//
 
 void gEpsilon(double &v, int i)
-{ v=pow(10.0,-i); }
+{ v=pow(10.0,(double)-i); }
 
 
 void gEpsilon(gRational &v, int /* i */)
@@ -365,6 +365,17 @@ void gEpsilon(gNumber &n, int i)
   if (n.GetPrecision() == precRATIONAL)
     n = (gRational)0;
   else
-    n = pow(10.0,-i);
+    n = pow(10.0,(double)-i);
 }
+
+double pow(int x, long n)
+{
+return pow((double)x,(double)n);
+}
+
+double pow(double x, long n)
+{
+return pow((double)x,(double)n);
+}
+
 

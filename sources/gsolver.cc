@@ -2,21 +2,14 @@
 // File: gsolver.cc  
 //        -- Instantiations of class gSolver
 // 
-// $Id$ 
+// @(#)gsolver.cc	1.2 01/07/98 
 //
 
 #include "gsolver.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE class gSolver<gRational>;
-TEMPLATE class gSolver<double>;
-TEMPLATE class gSolver<gDouble>;
+template class gSolver<gRational>;
+template class gSolver<double>;
+template class gSolver<gDouble>;
 
 #include "gvector.imp"
 #include "glist.imp"

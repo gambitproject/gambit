@@ -2,7 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// $Id$
+// @(#)gsmoper.cc	2.52 02/07/98
 //
 
 #include <stdlib.h>
@@ -279,7 +279,9 @@ static Portion *GSM_Power(Portion** param)
 {
   gNumber base = ((NumberPortion*) param[0])->Value();
   gNumber exponent = ((NumberPortion*) param[1])->Value();
-  return new NumberPortion(pow(base, exponent));
+  // Note, the below should eventually be corrected to do rational exponentiation
+  // correctly
+  return new NumberPortion(pow((double)base, (double)exponent));
 }
 
 

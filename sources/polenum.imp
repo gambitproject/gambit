@@ -1,7 +1,7 @@
 //
 // FILE: polenum.imp -- Polynomial Nash Enum module
 //
-// $Id$ 
+// @(#)polenum.imp	1.9 02/07/98 
 //
 
 #include "gwatch.h"
@@ -33,7 +33,7 @@ private:
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
-  gPoly<T> Equation(int i, int strat2, int strat2) const;
+  gPoly<T> Equation(int i, int strat1, int strat2) const;
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
