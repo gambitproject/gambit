@@ -14,11 +14,22 @@
 // In certain cases it is desirable to overload the fscanf/fprintf functions to
 // allow input in GUI/window based enviroments.  This is easily done by linking
 // in a file that redefines these functions and uses vfscanf/vfprintf for all
-// file IO and vsscanf/vsprintf for cin/cout/cerr.  
+// file IO and vsscanf/vsprintf for cin/cout/cerr.
 // Another way to overload these functions is to create gin/gout/gerr classes
 // based on classes other than gFile* (see wxgclio.cc).  In order to avoid
-// duplicate symbols, define NO_GIO to prevent the default gin/gout/gerr 
+// duplicate symbols, define NO_GIO to prevent the default gin/gout/gerr
 // classes from being created.
+
+
+static void gio_error(FILE *f)
+{
+if (f) return;
+#ifndef GIO_ERROR_FATAL
+fprintf(stderr,"\nAn error occured during a file operation\nFile was invalid\n");
+#else
+assert(0 && "\nAn error occured during a file operation\nFile was invalid\n");
+#endif
+}
 
 //--------------------------------------------------------------------------
 //                         gInput member functions
@@ -40,12 +51,12 @@ gFileInput::gFileInput(void)
 
 gFileInput::gFileInput(const char *in)
 {
-  f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
+	f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
 }
 
 gFileInput::gFileInput(FILE *in)
 {
-  f = in;valid=(f==NULL) ? 0 : 1;
+	f = in;valid=(f==NULL) ? 0 : 1;
 }
 
 gFileInput::~gFileInput()
@@ -56,100 +67,100 @@ gFileInput::~gFileInput()
 gFileInput &gFileInput::operator=(FILE *in)
 {
   if (f)  fclose(f);
-  f = in;valid=(f==NULL) ? 0 : 1;
+	f = in;valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gFileInput &gFileInput::operator=(const char *in)
 {
   if (f)  fclose(f);
-  f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
+	f = fopen(in, "r");valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gInput &gFileInput::operator>>(int &x)
 {
-  assert(f);
-  int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(unsigned int &x)
 {
-  assert(f);
-  int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%d", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(long &x)
 {
-  assert(f);
-  int c=fscanf(f, "%ld", &x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%ld", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(char &x)
 {
-  assert(f);
+  gio_error(f);
 //  int c=fscanf(f, "%c", &x);valid=(c==1) ? 1 : 0;
-  x = fgetc(f);
+	x = fgetc(f);
   return *this;
 }
 
 gInput &gFileInput::operator>>(double &x)
 {
-  assert(f);
-  int c=fscanf(f, "%lf", &x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%lf", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(float &x)
 {
-  assert(f);
-  int c=fscanf(f, "%f", &x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%f", &x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gInput &gFileInput::operator>>(char *x)
 {
-  assert(f);
-  int c=fscanf(f, "%s", x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fscanf(f, "%s", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 int gFileInput::get(char &c)
 {
-  assert(f);
-  c = fgetc(f);
+  gio_error(f);
+	c = fgetc(f);
   return (!feof(f));
 }
 
 void gFileInput::unget(char c)
 {
-  assert(f);
+  gio_error(f);
   ::ungetc(c, f);
 }
 
 bool gFileInput::eof(void) const
 {
-  return feof(f);
+	return feof(f);
 }
 
 void gFileInput::seekp(long pos) const
 {
-  assert(f);
+  gio_error(f);
   fseek(f, pos, 0);
 }
 
 long gFileInput::getpos(void) const
 {
-  assert(f);
+  gio_error(f);
   return ftell(f);
 }
 
 void gFileInput::setpos(long x) const
 {
-  assert(f);
+  gio_error(f);
   fseek(f, x, 0);
 }
 
@@ -248,7 +259,7 @@ gFileOutput::gFileOutput(void)
 gFileOutput::gFileOutput(const char *out)
 {
   f = fopen(out, "w");
-  valid=(f==NULL) ? 0 : 1;
+	valid=(f==NULL) ? 0 : 1;
   Width=0;
   Prec=6;
   Represent='f';
@@ -257,7 +268,7 @@ gFileOutput::gFileOutput(const char *out)
 gFileOutput::gFileOutput(FILE *out)
 {
   f = out;
-  valid=(f==NULL) ? 0 : 1;
+	valid=(f==NULL) ? 0 : 1;
   Width=0;
   Prec=6;
   Represent='f';
@@ -310,42 +321,42 @@ char gFileOutput::GetRepMode(void)
 gFileOutput &gFileOutput::operator=(FILE *out)
 {
   if (f)   fclose(f);
-  f = out;valid=(f==NULL) ? 0 : 1;
+	f = out;valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gFileOutput &gFileOutput::operator=(const char *out)
 {
   if (f)   fclose(f);
-  f = fopen(out, "w");valid=(f==NULL) ? 0 : 1;
+	f = fopen(out, "w");valid=(f==NULL) ? 0 : 1;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(int x)
 {
-  assert(f);
-  int c=fprintf(f, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
+  gio_error(f);
+	int c=fprintf(f, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(unsigned int x)
 {
-  assert(f);
-  int c=fprintf(f, "%*d", Width,  x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fprintf(f, "%*d", Width,  x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(long x)
 {
-  assert(f);
-  int c=fprintf(f, "%*ld", Width, x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fprintf(f, "%*ld", Width, x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(char x)
 {
-  assert(f);
-  int c=fprintf(f, "%c", x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fprintf(f, "%c", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
@@ -353,7 +364,7 @@ gOutput &gFileOutput::operator<<(double x)
 {
   int c = 0;
 
-  assert(f);
+  gio_error(f);
   switch (Represent) { 
     case 'f':
       c = fprintf(f, "%*.*f", Width, Prec, x);
@@ -362,7 +373,7 @@ gOutput &gFileOutput::operator<<(double x)
       c = fprintf(f, "%*.*e", Width, Prec, x);
       break;
     }
-  valid=(c==1) ? 1 : 0;
+	valid=(c==1) ? 1 : 0;
   return *this;
 }
 
@@ -370,7 +381,7 @@ gOutput &gFileOutput::operator<<(float x)
 {
   int c;
 
-  assert(f);
+  gio_error(f);
   switch (Represent) {
     case 'f':
       c=fprintf(f, "%*.*f", Width, Prec, x);
@@ -379,20 +390,20 @@ gOutput &gFileOutput::operator<<(float x)
       c=fprintf(f, "%*.*e", Width, Prec, x);
       break;
     }
-  valid=(c==1) ? 1 : 0;
+	valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const char *x)
 {
-  assert(f);
-  int c=fprintf(f, "%s", x);valid=(c==1) ? 1 : 0;
+  gio_error(f);
+	int c=fprintf(f, "%s", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
 
 gOutput &gFileOutput::operator<<(const void *x)
 {
-  assert(f);
+	gio_error(f);
   int c=fprintf(f, "%p", x);valid=(c==1) ? 1 : 0;
   return *this;
 }
