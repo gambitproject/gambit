@@ -697,7 +697,7 @@ template <class T> class gSparseSet : public gOrdMap<int, T>  {
 // Return the least integer greater than zero for which no mapping is defined
 //
     int FirstVacancy(void) const    {
-      for (int v = 0; v < length && keys[v] != v + 1; v++);
+      for (int v = 0; v < length && keys[v] == v + 1; v++);
       return ++v;
     }
 };
