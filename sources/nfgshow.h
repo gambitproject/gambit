@@ -108,9 +108,12 @@ public:
   void SupportNew(void);
   void SupportEdit(void);
   void SupportDelete(void);
-  void SupportSelect(void);
+  void SupportSelectFromList(void);
+  void SupportSelectPrevious(void);
+  void SupportSelectNext(void);
   NFSupport *MakeSupport(void);
   NFSupport *CurrentSupport(void) const { return cur_sup; }
+  int NumSupports(void) const { return supports.Length(); }
   
   void OutcomeNew(void);
   void OutcomeDelete(void);

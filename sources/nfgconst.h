@@ -26,6 +26,9 @@
 #define NFG_SUPPORT_EDIT                162
 #define NFG_SUPPORT_DELETE              163
 #define NFG_SUPPORT_SELECT              164
+#define NFG_SUPPORT_SELECT_FROMLIST     165
+#define NFG_SUPPORT_SELECT_PREVIOUS     166
+#define NFG_SUPPORT_SELECT_NEXT         167
 
 #define NFG_SOLVE_STANDARD              145
 #define NFG_SOLVE_CUSTOM                499

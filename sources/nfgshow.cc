@@ -1094,7 +1094,7 @@ void NfgShow::SupportDelete(void)
   }
 }
 
-void NfgShow::SupportSelect(void)
+void NfgShow::SupportSelectFromList(void)
 {
   dialogNfgSupportSelect dialog(supports, cur_sup, "Select Support", spread);
 
@@ -1102,12 +1102,35 @@ void NfgShow::SupportSelect(void)
     try {
       cur_sup = supports[dialog.Selected()];
       SetPlayers(pl1, pl2);
-      ChangeSolution(0); 
     }
     catch (gException &E) {
       guiExceptionDialog(E.Description(), spread);
     }
   }
+}
+
+void NfgShow::SupportSelectPrevious(void)
+{
+  int index = supports.Find(cur_sup);
+  if (index == 1) {
+    cur_sup = supports[supports.Length()];
+  }
+  else {
+    cur_sup = supports[index - 1];
+  }
+  SetPlayers(pl1, pl2);
+}
+
+void NfgShow::SupportSelectNext(void)
+{
+  int index = supports.Find(cur_sup);
+  if (index == supports.Length()) {
+    cur_sup = supports[1];
+  }
+  else {
+    cur_sup = supports[index + 1];
+  }
+  SetPlayers(pl1, pl2);
 }
 
 void NfgShow::PrefsDisplayColumns(void)
@@ -1619,7 +1642,14 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			"Edit the currently displayed support");
   supports_menu->Append(NFG_SUPPORT_DELETE, "&Delete",
 			"Delete a support");
-  supports_menu->Append(NFG_SUPPORT_SELECT, "&Select",
+  wxMenu *supportsSelectMenu = new wxMenu;
+  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_FROMLIST, "From &List...",
+			     "Select a support from the list of defined supports");
+  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_PREVIOUS, "&Previous",
+			     "Select the previous support from the list");
+  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_NEXT, "&Next",
+			     "Select the next support from the list");
+  supports_menu->Append(NFG_SUPPORT_SELECT, "&Select", supportsSelectMenu,
 			"Change the current support");
 
   wxMenu *solve_menu = new wxMenu;
@@ -1709,6 +1739,10 @@ void NormalSpread::UpdateMenus(void)
   menu->Enable(NFG_EDIT_OUTCOMES_ATTACH, nfg.NumOutcomes() > 0);
   menu->Enable(NFG_EDIT_OUTCOMES_DETACH, nfg.GetOutcome(profile) != 0);
   menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, nfg.GetOutcome(profile) != 0);
+
+  menu->Enable(NFG_SUPPORT_SELECT_FROMLIST, parent->NumSupports() > 1);
+  menu->Enable(NFG_SUPPORT_SELECT_PREVIOUS, parent->NumSupports() > 1);
+  menu->Enable(NFG_SUPPORT_SELECT_NEXT, parent->NumSupports() > 1);
 
   menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, nfg.NumPlayers() == 2);
   menu->Enable(NFG_SOLVE_CUSTOM_LP, nfg.NumPlayers() == 2 && IsConstSum(nfg));
@@ -2013,10 +2047,16 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_SUPPORT_DELETE:
       parent->SupportDelete();
       break;
-    case NFG_SUPPORT_SELECT:
-      parent->SupportSelect();
+    case NFG_SUPPORT_SELECT_FROMLIST:
+      parent->SupportSelectFromList();
       break;
-      
+    case NFG_SUPPORT_SELECT_PREVIOUS:
+      parent->SupportSelectPrevious();
+      break;
+    case NFG_SUPPORT_SELECT_NEXT:
+      parent->SupportSelectNext();
+      break;
+
     case NFG_SOLVE_STANDARD: 
       parent->SolveStandard();
       break;
