@@ -172,6 +172,7 @@ public:
   /// @name Accessing the sequences of the player
   //@{
   int NumSequences(void) const;
+  gbtGameSequence GetSequence(int) const { throw gbtGameUndefinedException(); }
   //@}
 
   /// @name Accessing the strategies of the player

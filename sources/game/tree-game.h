@@ -49,7 +49,7 @@ class gbtTreePlayerRep;
 class gbtTreeGameRep : public gbtGameRep {
 public:
   int m_refCount;
-  mutable bool m_hasStrategies;
+  mutable bool m_hasComputed;
   std::string m_label, m_comment;
   gbtBlock<gbtTreePlayerRep *> m_players;
   gbtBlock<gbtTreeOutcomeRep *> m_outcomes;
@@ -145,10 +145,17 @@ public:
   void WriteNfg(std::ostream &) const { throw gbtGameUndefinedException(); }
   //@}
 
+  /// @name Managing computed elements of the game
+  //@{
+  /// Clears out computed elements
+  void ClearComputedElements(void) const;
+  /// Generates computed elements
+  void BuildComputedElements(void) const;
+  //@}
+
   /// @name Member functions private to the implementation
   //@{
   void NumberNodes(gbtTreeNodeRep *);
-  void OnStrategiesChanged(void);
 
   gbtRational GetPayoff(gbtTreePlayerRep *, gbtTreeNodeRep *n, 
 			const gbtArray<gbtTreeStrategyRep *> &profile) const;
@@ -156,8 +163,6 @@ public:
 			const gbtArray<gbtTreeStrategyRep *> &) const; 
 
   bool IsPerfectRecall(gbtGameInfoset &, gbtGameInfoset &) const;
-
-  void BuildReducedNfg(void) const;
   //@}
 };
 

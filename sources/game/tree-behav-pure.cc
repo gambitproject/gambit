@@ -147,6 +147,33 @@ gbtTreeBehavContingencyRep::GetPayoff(const gbtGamePlayer &p_player) const
   return GetPayoff(m_efg->m_root, player);
 }
 
+gbtRational
+gbtTreeBehavContingencyRep::GetRealizProb(const gbtGameNode &p_node) const
+{
+  if (p_node.IsNull())  throw gbtGameNullException();
+  gbtTreeNodeRep *node = dynamic_cast<gbtTreeNodeRep *>(p_node.Get());
+  if (!node || node->m_efg != m_efg) throw gbtGameMismatchException();
+  
+  gbtRational prob(1);
+  while (node->m_parent) {
+    int childNumber = node->m_parent->m_children.Find(node);
+    int parentPlayer = node->m_parent->m_infoset->m_player->m_id;
+    if (parentPlayer == 0) {
+      // The parent is a chance move
+      prob *= node->m_parent->m_infoset->m_chanceProbs[childNumber];
+    }
+    else {
+      // The parent is a player move
+      if (m_profile[parentPlayer][node->m_parent->m_infoset->m_id]->m_id !=
+	  childNumber) {
+	// We can terminate as soon as we find out we're off the play path
+	return 0;
+      }
+    }
+  }
+
+  return prob;
+}
 
 //======================================================================
 //      Implementation of class gbtTreeBehavProfileIteratorRep
@@ -256,4 +283,10 @@ gbtRational
 gbtTreeBehavProfileIteratorRep::GetPayoff(const gbtGamePlayer &p_player) const
 {
   return m_profile.GetPayoff(p_player);
+}
+
+gbtRational
+gbtTreeBehavProfileIteratorRep::GetRealizProb(const gbtGameNode &p_node) const
+{
+  return m_profile.GetRealizProb(p_node);
 }

@@ -175,6 +175,9 @@ typedef gbtGameObjectHandle<gbtGameNodeRep> gbtGameNode;
 class gbtGameStrategyRep;
 typedef gbtGameObjectHandle<gbtGameStrategyRep> gbtGameStrategy;
 
+class gbtGameSequenceRep;
+typedef gbtGameObjectHandle<gbtGameSequenceRep> gbtGameSequence;
+
 class gbtGameBehavContingencyRep;
 typedef gbtGameSingleHandle<gbtGameBehavContingencyRep> gbtGameBehavContingency;
 
@@ -342,6 +345,7 @@ typedef gbtGameObjectHandle<gbtGameRep> gbtGame;
 #include "game-player.h"
 #include "game-node.h"
 #include "game-strategy.h"
+#include "game-sequence.h"
 #include "game-contingency.h"
 #include "game-behav-mixed.h"
 #include "game-behav-pure.h"

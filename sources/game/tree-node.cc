@@ -228,7 +228,7 @@ gbtGameNode gbtTreeNodeRep::InsertMove(gbtGameInfoset p_infoset)
     node->m_children.Append(new gbtTreeNodeRep(m_efg, node));
   }
 
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
 
   return m_parent;
 }
@@ -254,7 +254,7 @@ void gbtTreeNodeRep::DeleteMove(void)
 
   m_parent->Delete();
 
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
 }
 
 //!
@@ -280,7 +280,7 @@ void gbtTreeNodeRep::DeleteSubtree(void)
 void gbtTreeNodeRep::DeleteTree(void)
 {
   DeleteSubtree();
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
 }
 
 //!
@@ -324,7 +324,7 @@ gbtGameNode gbtTreeNodeRep::CopyTree(gbtGameNode p_src)
 				      dest->m_parent);
     }
     
-    m_efg->OnStrategiesChanged();
+    m_efg->ClearComputedElements();
   }
 
   return dest;
@@ -358,7 +358,7 @@ gbtGameNode gbtTreeNodeRep::MoveTree(gbtGameNode p_src)
   dest->m_label = "";
   dest->m_outcome = 0;
   
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
   return dest;
 }
 
@@ -377,7 +377,7 @@ void gbtTreeNodeRep::JoinInfoset(const gbtGameInfoset &p_infoset)
   infoset->m_members.Append(this);
   m_infoset = infoset;
 
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
 }
 
 
@@ -396,7 +396,7 @@ gbtGameInfoset gbtTreeNodeRep::LeaveInfoset(void)
     m_infoset->m_actions[i]->m_label = oldInfoset->m_actions[i]->m_label;
   }
 
-  m_efg->OnStrategiesChanged();
+  m_efg->ClearComputedElements();
   return m_infoset;
 }
 

@@ -33,25 +33,6 @@
 //======================================================================
 
 //----------------------------------------------------------------------
-//        class gbtTreeStrategyRep: Constructor and destructor
-//----------------------------------------------------------------------
-
-gbtGamePlayer gbtTreeStrategyRep::GetPlayer(void) const
-{ return m_player; }
-
-gbtGameAction 
-gbtTreeStrategyRep::GetBehavior(const gbtGameInfoset &p_infoset) const
-{
-  if (p_infoset.IsNull())  throw gbtGameNullException();
-  gbtTreeInfosetRep *infoset = 
-    dynamic_cast<gbtTreeInfosetRep *>(p_infoset.Get());
-  if (!infoset || infoset->m_player != m_player) {
-    throw gbtGameMismatchException();
-  }
-  return infoset->m_actions[m_behav[infoset->m_id]];
-}
-
-//----------------------------------------------------------------------
 //     class gbtTreeStrategyRep: Mechanism for reference counting
 //----------------------------------------------------------------------
 
@@ -70,6 +51,25 @@ bool gbtTreeStrategyRep::Dereference(void)
     delete m_player->m_efg;
   }
   return (--m_refCount == 0 && m_deleted); 
+}
+
+//----------------------------------------------------------------------
+//  class gbtTreeStrategyRep: Accessing information about the player
+//----------------------------------------------------------------------
+
+gbtGamePlayer gbtTreeStrategyRep::GetPlayer(void) const
+{ return m_player; }
+
+gbtGameAction 
+gbtTreeStrategyRep::GetBehavior(const gbtGameInfoset &p_infoset) const
+{
+  if (p_infoset.IsNull())  throw gbtGameNullException();
+  gbtTreeInfosetRep *infoset = 
+    dynamic_cast<gbtTreeInfosetRep *>(p_infoset.Get());
+  if (!infoset || infoset->m_player != m_player) {
+    throw gbtGameMismatchException();
+  }
+  return infoset->m_actions[m_behav[infoset->m_id]];
 }
 
 //----------------------------------------------------------------------
@@ -128,6 +128,72 @@ bool gbtTreeStrategyRep::IsDominated(bool p_strict) const
       }
     }
   }
+  return false;
+}
+
+//======================================================================
+//            Implementation of class gbtTreeSequenceRep
+//======================================================================
+
+//----------------------------------------------------------------------
+//        class gbtTreeSequenceRep: Constructor and destructor
+//----------------------------------------------------------------------
+
+gbtTreeSequenceRep::gbtTreeSequenceRep(gbtTreePlayerRep *p_player,
+				       gbtTreeActionRep *p_action,
+				       gbtTreeSequenceRep *p_parent,
+				       int p_id)
+  : m_refCount(0), m_id(p_id), 
+    m_player(p_player), m_action(p_action), m_parent(p_parent), 
+    m_deleted(false)
+{ }
+
+//----------------------------------------------------------------------
+//     class gbtTreeSequenceRep: Mechanism for reference counting
+//----------------------------------------------------------------------
+
+void gbtTreeSequenceRep::Reference(void)
+{
+  m_refCount++;
+  if (!m_deleted) m_player->m_efg->m_refCount++;
+}
+
+bool gbtTreeSequenceRep::Dereference(void)
+{
+  if (!m_deleted && --m_player->m_efg->m_refCount == 0) {
+    // Note that as a side effect, deleting the game will cause
+    // the strategy to be marked as deleted (since by definition,
+    // at this point the reference count must be at least one)
+    delete m_player->m_efg;
+  }
+  return (--m_refCount == 0 && m_deleted); 
+}
+
+//----------------------------------------------------------------------
+//   class gbtTreeSequenceRep: Accessing information about the player
+//----------------------------------------------------------------------
+
+gbtGamePlayer gbtTreeSequenceRep::GetPlayer(void) const
+{ return m_player; }
+
+gbtGameAction gbtTreeSequenceRep::GetAction(void) const
+{ return m_action; }
+
+gbtGameSequence gbtTreeSequenceRep::GetParent(void) const
+{ return m_parent; }
+
+bool gbtTreeSequenceRep::ContainsAction(const gbtGameAction &p_action) const
+{
+  if (p_action.IsNull()) throw gbtGameNullException();
+  gbtTreeActionRep *action = dynamic_cast<gbtTreeActionRep *>(p_action.Get());
+  if (!action || action->m_infoset->m_player != m_player) {
+    throw gbtGameMismatchException();
+  }
+
+  for (const gbtTreeSequenceRep *seq = this; seq->m_action; seq = seq->m_parent) {
+    if (seq->m_action == action)  return true;
+  }
+
   return false;
 }
 
@@ -219,10 +285,14 @@ gbtGameInfoset gbtTreePlayerRep::NewInfoset(int p_actions)
 
 int gbtTreePlayerRep::NumSequences(void) const
 {
-  int count = 1;
-  for (int iset = 1; iset <= m_infosets.Length(); 
-       count += m_infosets[iset++]->NumActions());
-  return count;
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
+  return m_sequences.Length();
+}
+
+gbtGameSequence gbtTreePlayerRep::GetSequence(int p_index) const
+{
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
+  return m_sequences[p_index];
 }
 
 //----------------------------------------------------------------------
@@ -231,13 +301,13 @@ int gbtTreePlayerRep::NumSequences(void) const
 
 int gbtTreePlayerRep::NumStrategies(void) const
 {
-  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
   return m_strategies.Length();
 }
 
 gbtGameStrategy gbtTreePlayerRep::GetStrategy(int p_index) const
 {
-  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
   return m_strategies[p_index];
 }
 

@@ -58,6 +58,7 @@ public:
 
   gbtRational GetPayoff(gbtTreeNodeRep *, gbtTreePlayerRep *) const;
   gbtRational GetPayoff(const gbtGamePlayer &) const;
+  gbtRational GetRealizProb(const gbtGameNode &) const;
   //@}
 };
 
@@ -92,6 +93,7 @@ public:
   //@{
   gbtGameAction GetAction(const gbtGameInfoset &) const;
   gbtRational GetPayoff(const gbtGamePlayer &) const;
+  gbtRational GetRealizProb(const gbtGameNode &) const;
   //@}
 };
 

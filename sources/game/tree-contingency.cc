@@ -38,7 +38,7 @@
 gbtTreeContingencyRep::gbtTreeContingencyRep(gbtTreeGameRep *p_efg)
   : m_refCount(0), m_efg(p_efg), m_profile(m_efg->NumPlayers())
 {
-  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
 
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)   {
     m_profile[pl] = m_efg->m_players[pl]->m_strategies[1];
@@ -187,7 +187,7 @@ bool gbtTreeContingencyIteratorRep::Dereference(void)
 
 void gbtTreeContingencyIteratorRep::First(void)
 {
-  if (!m_efg->m_hasStrategies)  m_efg->BuildReducedNfg();
+  if (!m_efg->m_hasComputed)  m_efg->BuildComputedElements();
 
   for (int pl = 1; pl <= m_efg->m_players.Length(); pl++) {
     if (pl != m_frozen) {

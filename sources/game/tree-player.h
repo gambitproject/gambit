@@ -71,6 +71,48 @@ public:
   //@}
 };
 
+class gbtTreeSequenceRep : public gbtGameSequenceRep {
+public:
+  int m_refCount, m_id;
+  gbtTreePlayerRep *m_player;
+  gbtTreeActionRep *m_action;
+  gbtTreeSequenceRep *m_parent;
+  std::string m_label;
+  bool m_deleted;
+
+  /// @name Constructor and destructor
+  //@{
+  gbtTreeSequenceRep(gbtTreePlayerRep *p_player,
+		     gbtTreeActionRep *p_action,
+		     gbtTreeSequenceRep *p_parent, int p_id);
+  virtual ~gbtTreeSequenceRep() { }
+  //@}
+
+  /// @name Mechanism for reference counting
+  //@{
+  void Reference(void);
+  bool Dereference(void);
+  void Delete(void)
+    { if (m_refCount == 0) delete this; else m_deleted = true; }
+  //@}
+
+  /// @name General information about the sequence
+  //@{
+  int GetId(void) const { return m_id; }
+  void SetLabel(const std::string &s) { m_label = s; }
+  std::string GetLabel(void) const { return m_label; }
+  bool IsDeleted(void) const { return m_deleted; }
+  //@}
+
+  /// @name Accessing information about the player
+  //@{
+  gbtGamePlayer GetPlayer(void) const;
+  gbtGameAction GetAction(void) const;
+  gbtGameSequence GetParent(void) const;
+  bool ContainsAction(const gbtGameAction &) const;
+  //@}
+};
+
 class gbtTreePlayerRep : public gbtGamePlayerRep {
 public:
   int m_refCount, m_id;
@@ -79,6 +121,7 @@ public:
   std::string m_label;
   gbtBlock<gbtTreeInfosetRep *> m_infosets;
   gbtBlock<gbtTreeStrategyRep *> m_strategies;
+  gbtBlock<gbtTreeSequenceRep *> m_sequences;
 
   /// @name Constructor and destructor
   //@{
@@ -113,6 +156,7 @@ public:
   /// @name Accessing the sequences of the player
   //@{
   int NumSequences(void) const;
+  gbtGameSequence GetSequence(int) const;
   //@}
 
   /// @name Accessing the strategies of the player

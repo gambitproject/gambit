@@ -36,6 +36,33 @@ public:
   bool IsDominated(bool strict) const { return (*self)->IsDominated(strict); }
 };
 
+%nodefault;
+class gbtGameSequence {
+public:
+  ~gbtGameSequence(); 
+};
+
+%extend gbtGameSequence {
+  //--------------------------------------------------------------------
+  //             General information about the sequence
+  //--------------------------------------------------------------------
+  bool IsNull(void) const { return self->IsNull(); }
+  int GetId(void) const { return (*self)->GetId(); }
+  void SetLabel(const std::string &s) { (*self)->SetLabel(s); }
+  std::string GetLabel(void) const  { return (*self)->GetLabel(); }
+  bool IsDeleted(void) const { return (*self)->IsDeleted(); }
+
+  //--------------------------------------------------------------------
+  //              Accessing information about the player
+  //--------------------------------------------------------------------
+  gbtGamePlayer GetPlayer(void) const { return (*self)->GetPlayer(); }
+  gbtGameAction GetAction(void) const { return (*self)->GetAction(); }
+  gbtGameSequence GetParent(void) const { return (*self)->GetParent(); }
+  bool ContainsAction(const gbtGameAction &a) const
+    { return (*self)->ContainsAction(a); }
+};
+
+
 %exception GetInfoset {
   try {
     $action
@@ -94,6 +121,7 @@ public:
   //                Accessing sequences of the player
   //--------------------------------------------------------------------
   int NumSequences(void) const { return (*self)->NumSequences(); }
+  gbtGameSequence GetSequence(int i) const { return (*self)->GetSequence(i); }
 
   //--------------------------------------------------------------------
   //                Accessing strategies of the player

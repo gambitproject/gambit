@@ -53,6 +53,9 @@ public:
 
   /// Returns the payoff to a player at the contingency
   virtual gbtRational GetPayoff(const gbtGamePlayer &) const = 0;
+  /// Compute the probability the node is reached, given the contingency
+  virtual gbtRational GetRealizProb(const gbtGameNode &) const = 0;
+
   //@}
 
 };
@@ -92,8 +95,11 @@ public:
   //@{
   /// Get the action at the information set for the current contingency
   virtual gbtGameAction GetAction(const gbtGameInfoset &) const = 0;
+
   /// Get the payoff to the player at the current contingency
   virtual gbtRational GetPayoff(const gbtGamePlayer &) const = 0;
+  /// Compute the probability the node is reached, given the contingency
+  virtual gbtRational GetRealizProb(const gbtGameNode &) const = 0;
   //@}
 };
 

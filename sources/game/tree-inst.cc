@@ -47,6 +47,9 @@ template class gbtArray<gbtArray<gbtTreeActionRep *> >;
 template class gbtArray<gbtTreeStrategyRep *>;
 template class gbtBlock<gbtTreeStrategyRep *>;
 
+template class gbtArray<gbtTreeSequenceRep *>;
+template class gbtBlock<gbtTreeSequenceRep *>;
+
 template class gbtArray<gbtTreeOutcomeRep *>;
 template class gbtBlock<gbtTreeOutcomeRep *>;
 

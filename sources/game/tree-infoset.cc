@@ -143,7 +143,7 @@ void gbtTreeActionRep::DeleteAction(void)
 
   m_deleted = true;
 
-  m_infoset->m_player->m_efg->OnStrategiesChanged();
+  m_infoset->m_player->m_efg->ClearComputedElements();
 }
 
 //======================================================================
@@ -233,7 +233,7 @@ void gbtTreeInfosetRep::SetPlayer(const gbtGamePlayer &p_player)
   m_player = player;
   m_player->m_infosets.Append(this);
 
-  m_player->m_efg->OnStrategiesChanged();
+  m_player->m_efg->ClearComputedElements();
 }
 
 //----------------------------------------------------------------------
@@ -291,7 +291,7 @@ void gbtTreeInfosetRep::MergeInfoset(const gbtGameInfoset &p_from)
 
   from->m_members.Flush();
 
-  m_player->m_efg->OnStrategiesChanged();
+  m_player->m_efg->ClearComputedElements();
 }
 
 void gbtTreeInfosetRep::DeleteInfoset(void)
@@ -301,7 +301,7 @@ void gbtTreeInfosetRep::DeleteInfoset(void)
   m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
   m_deleted = true;
   
-  m_player->m_efg->OnStrategiesChanged();
+  m_player->m_efg->ClearComputedElements();
 }
 
 gbtGameAction gbtTreeInfosetRep::InsertAction(int where)
@@ -320,7 +320,7 @@ gbtGameAction gbtTreeInfosetRep::InsertAction(int where)
 				    where);
 
   }
-  m_player->m_efg->OnStrategiesChanged();
+  m_player->m_efg->ClearComputedElements();
   return action;
 }
 
@@ -356,6 +356,6 @@ void gbtTreeInfosetRep::Reveal(const gbtGamePlayer &p_player)
     }
   }
 
-  m_player->m_efg->OnStrategiesChanged();
+  m_player->m_efg->ClearComputedElements();
 }
 
