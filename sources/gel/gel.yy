@@ -22,6 +22,8 @@
 %name GELCompiler
 
 %define MEMBERS   \
+  gText m_Signature; \
+  gText m_TypeName; \
   gTriState bval; \
   int ival; \
   double dval; \
@@ -29,7 +31,9 @@
   int current_char, current_line; \
   gText current_expr, current_file, current_rawline; \
   gelEnvironment environment; \
-  gelVariableTable *vartable; \
+  gelVariableTable* m_GlobalVarTable; \
+  gelVariableTable* m_FuncVarTable; \
+  gelSignature* m_SigObj; \
   gStack<gText> funcnames; \
   gelExpr *compiled_expr; \
   gelExpr *Compile(const gText &line, const gText &file, int lineno, \
@@ -39,6 +43,7 @@
   gelExpr *MatchFor(gelExpr *, gelExpr *, gelExpr *, gelExpr *); \
   gelExpr *MatchConditional(gelExpr *, gelExpr *); \
   gelExpr *MatchConditional(gelExpr *, gelExpr *, gelExpr *); \
+  gelExpr *DefineFunction( gelSignature* sig ); \
   gelExpr *LookupVar(const gText &); \
   virtual ~GELCompiler(); \
   void RecoverFromError(void); \
@@ -47,7 +52,7 @@
 
 %define CONSTRUCTOR_PARAM      gelVariableTable *vt
 
-%define CONSTRUCTOR_INIT       : vartable(vt), compiled_expr(0)
+%define CONSTRUCTOR_INIT       : m_GlobalVarTable( vt ), m_FuncVarTable( NULL ), m_SigObj( NULL ), compiled_expr(0)
 
 %union  {
   gelExpr *eval;
@@ -55,7 +60,8 @@
   gBlock<gelExpr *> *exprlist;
 }
 
-%type <eval> expression constant whileloop forloop conditional function
+%type <eval> expression constant whileloop forloop conditional function 
+%type <eval> funcdecl
 %type <lval> lvalue
 %type <exprlist> parameterlist paramlist
 
@@ -116,6 +122,9 @@
 %token MACHINEPREC
 %token RATIONALPREC
 
+%token DEFFUNC
+
+
 %token CRLF
 %token EOC
 
@@ -145,6 +154,7 @@ expression:      constant
           |      forloop 
 	  |      conditional
           |      function
+          |      funcdecl
           |      LPAREN expression RPAREN   { $$ = $2; }
           |      expression SEMI expression
               { $$ = environment.Match("Semi", $1, $3); }
@@ -232,8 +242,8 @@ lvalue:          NAME     { $$ = new gelVariable<gNumber>(tval); }
 
 function:        NAME  { funcnames.Push(tval); }  LBRACK
                  parameterlist RBRACK
-              { $$ = environment.Match(funcnames.Pop(), *$4);
-                delete $4; }  
+                 { $$ = environment.Match(funcnames.Pop(), *$4);
+                   delete $4; }  
 
 parameterlist:   { $$ = new gBlock<gelExpr *>; }
              |   paramlist
@@ -244,6 +254,63 @@ paramlist:       expression    { $$ = new gBlock<gelExpr *>;
          |       paramlist COMMA expression
                   { $$ = $1;  $$->Append($3); }
          ; 
+
+
+
+funcdecl:        DEFFUNC { if (m_FuncVarTable) YYERROR;  
+                           m_FuncVarTable = new gelVariableTable; }
+                 LBRACK 
+                 signature { assert( !m_SigObj );
+                             m_SigObj = new gelSignature( m_Signature ); 
+                             m_SigObj->DefineParams( m_FuncVarTable ); }
+                 COMMA 
+                 expression 
+                 RBRACK
+                 { delete m_FuncVarTable; m_FuncVarTable = NULL; 
+                   if( $7 == NULL ) YYERROR;
+                   m_SigObj->SetUdf( $7 );
+                   $$ = DefineFunction( m_SigObj ); 
+                   m_SigObj = NULL; /* do not delete m_SigObj! */ }
+
+
+signature:       NAME       { m_Signature = tval; }   
+                 LBRACK     { m_Signature += '['; }
+                 formalparams
+                 RBRACK     { m_Signature += ']'; }
+                 typeOpt
+
+typeOpt:         { m_Signature += "=:ANYTYPE"; }
+       |         TYPEDEF  { m_Signature += "=:"; m_TypeName = ""; } 
+                 typename { m_Signature += m_TypeName; }
+
+typename:        NAME   { m_TypeName += tval; }
+        |        NAME   { m_TypeName += tval; } 
+                 STAR   { m_TypeName += '*'; }
+        |        NAME   { m_TypeName += tval; }
+                 LPAREN { m_TypeName += '('; }
+                 typename
+                 RPAREN { m_TypeName += ')'; }
+
+formalparams:    
+            |    formalparam 
+            |    formalparams 
+                 COMMA        { m_Signature += ','; }
+                 formalparam
+
+formalparam:     NAME     { m_Signature += tval; }  
+                 binding  { m_TypeName = ""; }
+                 typename { m_Signature += m_TypeName; }
+           |     LBRACE   { m_Signature += '{'; }
+                 NAME     { m_Signature += tval; }
+                 binding  { m_TypeName = ""; }
+                 typename { m_Signature += m_TypeName; }
+                 RBRACE   { m_Signature += '}'; }
+
+binding:         RARROW    { m_Signature += "->";  }
+       |         DBLARROW  { m_Signature += "<->"; }
+
+
+
 
 %%
 
@@ -519,6 +586,10 @@ gelExpr *GELCompiler::Compile(const gText& line, const gText &file, int lineno,
 
 void GELCompiler::RecoverFromError(void)
 {
+  delete m_FuncVarTable;
+  m_FuncVarTable = NULL;
+  delete m_SigObj;
+  m_SigObj = NULL;
 }
 
 gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
@@ -528,6 +599,10 @@ gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
     if (rhs)   delete rhs;
     return 0;
   }
+
+  gelVariableTable* vartable = m_GlobalVarTable;
+  if( m_FuncVarTable )
+    vartable = m_FuncVarTable;
 
   switch (rhs->Type())   {
     case gelBOOLEAN:
@@ -698,8 +773,24 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard, gelExpr *iftrue)
   }
 }
 
+
+
+gelExpr* GELCompiler::DefineFunction( gelSignature* sig )
+{
+  environment.Register( sig );
+  return new gelConstant< gNumber >( 0 );
+}
+
+
+
 gelExpr *GELCompiler::LookupVar(const gText &name)
 { 
+
+  gelVariableTable* vartable = m_GlobalVarTable;
+  if( m_FuncVarTable )
+    vartable = m_FuncVarTable;
+
+
   if (!vartable->IsDefined(name))  return 0;
 
   switch (vartable->Type(name))   {

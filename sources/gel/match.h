@@ -17,16 +17,13 @@ class gelEnvironment   {
   private:
 // Implementation of function table
     gList<gelSignature *> signatures;
-    gList<gelAdapter *> functions;
-
-// Implementation of variables
-    gelVariableTable variables;
 
   public:
     gelEnvironment(void);
     ~gelEnvironment();
 
-    void Register(gelAdapter *, const gText &);
+    void Register( gelAdapter*, const gText& );
+    void Register( gelSignature* sig );
     gelExpr *Match(const gText &, gelExpr *);
     gelExpr *Match(const gText &, gelExpr *, gelExpr *);
     gelExpr *Match(const gText &, const gArray<gelExpr *> &);

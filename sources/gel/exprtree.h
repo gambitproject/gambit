@@ -7,9 +7,26 @@
 #ifndef EXPRTREE_H
 #define EXPRTREE_H
 
-typedef enum  { gelBOOLEAN, gelNUMBER, gelTEXT }  gelType;
+
+typedef enum  
+{
+  gelUNDEFINED, 
+  gelBOOLEAN, 
+  gelNUMBER, 
+  gelTEXT 
+} gelType;
+
+
+#include "tristate.h"
+#include "gtext.h"
+#include "funcmisc.h"
+
+
+
+
 
 class gelVariableTable;
+class gelSignature;
 
 class gelExpr   {
   public:
@@ -61,8 +78,8 @@ template <class T> class gelVariable : public gelExpression<T>  {
 
 template <class T> class gelConditional : public gelExpression<T>  {
   private:
-    gelExpression<gTriState> *guard;
-    gelExpression<T> *truebr, *falsebr;
+    gelExpression< gTriState > *guard;
+    gelExpression< T > *truebr, *falsebr;
 
   public:
     gelConditional(gelExpression<gTriState> *guard,
@@ -111,6 +128,29 @@ class gelQuitExpr : public gelExpression<gTriState>  {
 
     gTriState Evaluate(gelVariableTable *) const;
 };
+
+
+
+#include "funcmisc.h"
+
+template <class T> class gelUDF : public gelExpression<T>  
+{
+private:
+  const gelSignature& m_Signature;
+  gArray<gelExpr*> m_Params;
+  const gelExpression<T>* m_Body;
+  
+public:
+  gelUDF(const gelSignature& sig, 
+	 const gArray<gelExpr *>& params, 
+	 const gelExpression<T>* exp );
+  virtual ~gelUDF();
+
+  T Evaluate(gelVariableTable *) const;
+};
+
+
+
 
 #endif   // EXPRTREE_H
 

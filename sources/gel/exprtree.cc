@@ -9,6 +9,7 @@
 #include "gnumber.h"
 #include "gtext.h"
 
+
 gelExpr::~gelExpr()  { }
 template <class T> gelExpression<T>::~gelExpression()   { }
 template <class T> void gelExpression<T>::Execute(gelVariableTable *vt) const
@@ -210,4 +211,32 @@ gTriState gelQuitExpr::Evaluate(gelVariableTable *) const
 }
 
 
+
+template <class T> gelUDF<T>::gelUDF(const gelSignature& sig, 
+				     const gArray<gelExpr *>& params, 
+				     const gelExpression<T>* exp )
+: m_Signature( sig ), m_Params( params ), m_Body( exp )
+{ 
+  assert( m_Body );
+}
+
+template <class T> gelUDF<T>::~gelUDF()
+{
+  // do not delete m_Body!
+}
+
+template <class T> T gelUDF<T>::Evaluate( gelVariableTable* vt ) const
+{
+  assert( m_Body );
+
+  gelVariableTable subvt;
+  m_Signature.AssignParams( &subvt, vt, m_Params );
+  return m_Body->Evaluate( &subvt );
+}
+
+
+
+template class gelUDF<gNumber>;
+template class gelUDF<gTriState>;
+template class gelUDF<gText>;
 

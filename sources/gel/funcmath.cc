@@ -4,9 +4,11 @@
 // $Id$
 //
 
+#include "gmisc.h"
 #include "funcmisc.h"
 #include "glist.h"
 #include "tristate.h"
+
 
 #define DECLARE_NOPARAM(funcclass,typer)   class funcclass : public gelExpression<typer>  {  \
   public: \
@@ -223,17 +225,24 @@ gNumber gelfuncNumChars::Evaluate(gelVariableTable *vt) const
 DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
 
      
+#ifdef USE_EXCEPTIONS
 class gelExceptionNonInteger : public gException  { 
   public:
     virtual ~gelExceptionNonInteger()   { }
     gText Description(void) const  { return "Expected integer index"; }
 };
+#endif   // USE_EXCEPTIONS
 
 gText gelfuncNthElement::Evaluate(gelVariableTable *vt) const
 {
   gText lhs = op1->Evaluate(vt);
   gNumber index = op2->Evaluate(vt);
-  if (!index.IsInteger())   throw gelExceptionNonInteger();
+#ifdef USE_EXCEPTIONS
+  if (!index.IsInteger())   
+    throw gelExceptionNonInteger();
+#else
+  assert( index.IsInteger() );
+#endif   // USE_EXCEPTIONS
   return lhs[index - gNumber(1)];
 }
 

@@ -78,6 +78,8 @@ gelParamInfo::gelParamInfo(const gText &s)
       m_Type = gelBOOLEAN;
     else if (word == "TEXT")
       m_Type = gelTEXT;
+    else
+      m_Type = gelUNDEFINED;
   }
   
 }
@@ -89,7 +91,35 @@ gelParamInfo::gelParamInfo(const gText &s)
 
 
 gOutput &operator<<(gOutput &f, const gelSignature &)  { return f; }
-gelSignature::gelSignature(const gText &s)
+
+gelSignature::gelSignature( const gText& s, gelAdapter* bif )
+: m_IsUdf( false ), m_Bif( bif )
+{
+  assert( m_Bif );
+  ParseSignature( s );
+}
+
+gelSignature::gelSignature( const gText& s )
+: m_IsUdf( true ), m_Udf( NULL )
+{
+  ParseSignature( s );
+}
+
+void gelSignature::SetUdf( gelExpr* udf )
+{
+  assert( m_IsUdf );
+  assert( m_Udf == NULL );
+
+  m_Udf = udf;
+  assert( m_Udf );
+  if( m_Type == gelUNDEFINED )
+    m_Type = m_Udf->Type();
+  assert( m_Type == m_Udf->Type() );
+  assert( m_Type != gelUNDEFINED );  
+}
+
+
+void gelSignature::ParseSignature( const gText &s )
 { 
 
   gText word;
@@ -182,18 +212,21 @@ gelSignature::gelSignature(const gText &s)
     m_Type = gelBOOLEAN;
   else if (word == "TEXT")
     m_Type = gelTEXT;
-
+  else
+    m_Type = gelUNDEFINED;
 }
 
 gelSignature::~gelSignature()
 {
+  if( m_IsUdf )
+    delete m_Udf;
+
   for (int i = 1; i <= m_Parameters.Length(); i++)
     delete m_Parameters[i];
 }
 
-bool
-gelSignature::Matches(const gText &n,
-		      const gArray<gelExpr *> &actuals) const
+bool gelSignature::Matches(const gText &n,
+			   const gArray<gelExpr *> &actuals) const
 {
   if (n != m_Name ||
       actuals.Length() != m_Parameters.Length())
@@ -207,6 +240,116 @@ gelSignature::Matches(const gText &n,
   return true;
 }
 
+gelExpr* gelSignature::Evaluate( const gArray<gelExpr *>& actuals ) const
+{
+  if( m_IsUdf )
+  {
+    switch( m_Type )
+    {
+    case gelNUMBER:
+      return new gelUDF< gNumber >( *this, actuals,
+				   (gelExpression< gNumber >*) m_Udf );
+    case gelBOOLEAN:
+      return new gelUDF< gTriState >( *this, actuals,
+				     (gelExpression< gTriState >*) m_Udf );
+    case gelTEXT:
+      return new gelUDF< gText >( *this, actuals,
+				 (gelExpression< gText >*) m_Udf );
+    case gelUNDEFINED:
+      assert( 0 );
+      break;
+
+    default:
+      return 0;      
+    }
+  }
+  else
+  {
+    return m_Bif( actuals );
+  }
+}
+
+
+
+  //-----------------------------------------------------------
+  // DefineParams
+  //   Only defines the parameters; don't assign them
+  //   subvt - the inner, function scope
+  //-----------------------------------------------------------
+void gelSignature::DefineParams( gelVariableTable* subvt ) const
+{
+  assert( subvt );
+  int i = 0;
+  for( i = 1; i <= m_Parameters.Length(); ++i )
+  {
+    assert( m_Parameters[i] );
+    gText name = m_Parameters[i]->Name();
+    switch( m_Parameters[i]->Type() )
+    {
+    case gelBOOLEAN:
+      subvt->Define( name, gelBOOLEAN );
+      break;
+    case gelNUMBER:
+      subvt->Define( name, gelNUMBER );
+      break;
+    case gelTEXT:
+      subvt->Define( name, gelTEXT );
+      break;
+    case gelUNDEFINED:
+      assert( 0 );
+      break;
+    }
+  }
+}
+
+  //-----------------------------------------------------------
+  // AssignParams
+  //   Both defines and assigns the parameters
+  //   subvt - the inner, function scope
+  //   vt    - the outer, global scope
+  //-----------------------------------------------------------
+void gelSignature::AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
+				const gArray<gelExpr *>& params ) const
+{
+  assert( subvt );
+  assert( vt );
+  assert( m_Parameters.Length() == params.Length() );
+
+  DefineParams( subvt );
+
+  int i = 0;
+  for( i = 1; i <= m_Parameters.Length(); ++i )
+  {
+    assert( m_Parameters[i] );
+    assert( params[i] );
+    assert( m_Parameters[i]->Type() == params[i]->Type() );
+    
+    gText name = m_Parameters[i]->Name();
+    switch( m_Parameters[i]->Type() )
+    {
+    case gelBOOLEAN:
+      subvt->SetValue( name, 
+		       ((gelExpression<gTriState>*) params[i])->Evaluate( vt));
+      break;
+    case gelNUMBER:
+      subvt->SetValue( name, 
+		       ((gelExpression<gNumber>*) params[i])->Evaluate(vt));
+      break;
+    case gelTEXT:
+      subvt->SetValue( name, 
+		       ((gelExpression<gText>*) params[i])->Evaluate(vt));
+      break;
+    case gelUNDEFINED:
+      assert( 0 );
+      break;
+    }
+  }
+}
+
+
+
+
+
 extern void gelMathInit(gelEnvironment *);
 
 gelEnvironment::gelEnvironment(void)
@@ -219,21 +362,24 @@ gelEnvironment::~gelEnvironment()
 
 void gelEnvironment::Register(gelAdapter *func, const gText &sig)
 {
-  signatures.Append(new gelSignature(sig));
-  functions.Append(func);
+  signatures.Append( new gelSignature( sig, func ) );
+}
+
+void gelEnvironment::Register( gelSignature* sig )
+{
+  signatures.Append( sig );
 }
 
 gelExpr *gelEnvironment::Match(const gText &name, 
 			       const gArray<gelExpr *> &actuals)
 {
-  for (int i = 1; i <= actuals.Length(); i++)   {
-    if (!actuals[i])  return 0;
-  }
+  for (int i = 1; i <= actuals.Length(); i++)
+    if (!actuals[i])  
+      return 0;
 
-  for (int i = 1; i <= signatures.Length(); i++)  {
-    if (signatures[i]->Matches(name, actuals))
-      return (*functions[i])(actuals);
-  }
+  for (int i = 1; i <= signatures.Length(); i++) 
+    if( signatures[i]->Matches( name, actuals ) ) 
+      return signatures[i]->Evaluate( actuals );
 
   return 0;
 }
@@ -243,30 +389,14 @@ gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op1, gelExpr *op2)
   gArray<gelExpr *> actuals(2);
   actuals[1] = op1;
   actuals[2] = op2;
-
-  if (!op1 || !op2)  return 0;
-
-  for (int i = 1; i <= signatures.Length(); i++)  {
-    if (signatures[i]->Matches(name, actuals))
-      return (*functions[i])(actuals);
-  }
-  
-  return 0;
+  return Match( name, actuals );
 }
 
 gelExpr *gelEnvironment::Match(const gText &name, gelExpr *op)
 {
   gArray<gelExpr *> actuals(1);
   actuals[1] = op;
-
-  if (!op)  return 0;
-
-  for (int i = 1; i <= signatures.Length(); i++)  {
-    if (signatures[i]->Matches(name, actuals))
-      return (*functions[i])(actuals);
-  }
-
-  return 0;
+  return Match( name, actuals );
 }
   
 

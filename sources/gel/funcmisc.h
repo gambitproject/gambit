@@ -13,6 +13,9 @@
 #include "garray.h"
 #include "exprtree.h"
 
+class gelExpr;
+class gelVariableTable;
+
 typedef gelExpr *gelAdapter(const gArray<gelExpr *> &); 
 
 class gelParamInfo  {
@@ -25,7 +28,8 @@ private:
   
 public:
   gelParamInfo(const gText &fn);
-  gelType Type(void) const   { return m_Type; }
+  const gText& Name( void ) const { return m_Name; }
+  gelType Type( void ) const { return m_Type; }
 };
 
 class gelSignature   
@@ -35,9 +39,23 @@ private:
   gelType m_Type;
   gList<gelParamInfo *> m_Parameters;
 
+  bool m_IsUdf;
+  union
+  {
+    gelAdapter* m_Bif;
+    gelExpr*    m_Udf;
+  };
+
+  void ParseSignature( const gText& s );  // All constructors call this!
+
 public:
-  gelSignature(const gText &gelSignature);
+  gelSignature( const gText& s, gelAdapter* bif );
+  gelSignature( const gText& s );  
+  void SetUdf( gelExpr* exp );
+
   ~gelSignature();
+
+  
 
   bool Matches(const gText &,
 	       const gArray<gelExpr *> &) const;
@@ -45,6 +63,26 @@ public:
   bool operator!=(const gelSignature &) const  { return false; }
   
   const gText &Name(void) const   { return m_Name; }
+
+  gelExpr* Evaluate( const gArray<gelExpr *>& ) const;
+
+
+  //-----------------------------------------------------------
+  // DefineParams
+  //   Only defines the parameters; don't assign them
+  //   subvt - the inner, function scope
+  //-----------------------------------------------------------
+  void DefineParams( gelVariableTable* subvt ) const;
+
+  //-----------------------------------------------------------
+  // AssignParams
+  //   Both defines and assigns the parameters
+  //   subvt - the inner, function scope
+  //   vt    - the outer, global scope
+  //-----------------------------------------------------------
+  void AssignParams( gelVariableTable* subvt, gelVariableTable* vt,
+		    const gArray<gelExpr *>& params ) const;
+
 };
 
 
