@@ -40,7 +40,7 @@ struct PortionSpecTextType
 
 PortionSpecTextType _PortionSpecText[] =
 {
-  { porBOOL,               "BOOLEAN" },
+  { porBOOLEAN,            "BOOLEAN" },
   { porINTEGER,            "INTEGER" }, 
   { porNUMBER,             "NUMBER" },
   { porTEXT,               "TEXT" },

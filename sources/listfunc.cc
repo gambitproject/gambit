@@ -168,7 +168,7 @@ ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
   for(i=1; i<=Length; i++)
     if((*p0)[i]->Spec().ListDepth == 0)
     {
-      assert((*p1)[i]->Spec().Type == porBOOL);
+      assert((*p1)[i]->Spec().Type == porBOOLEAN);
       if(((BoolPortion*) (*p1)[i])->Value())
 	list->Append((*p0)[i]->ValCopy());
     }
@@ -736,13 +736,13 @@ void Init_listfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("Contains", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Contains, porBOOL, 2,
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Contains, porBOOLEAN, 2,
 				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, gclParameter("x", porANYTYPE));
 
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_Contains, porBOOL, 2,
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_Contains, porBOOLEAN, 2,
 				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(1, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
@@ -803,7 +803,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsWatchRunning", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsWatchRunning, porBOOL, 0));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsWatchRunning, porBOOLEAN, 0));
   gsm->AddFunction(FuncObj);
 
 
@@ -911,7 +911,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 
                               PortionSpec(porANYTYPE, NLIST, porNULLSPEC )));
   FuncObj->SetParamInfo(0, 1, gclParameter("y", 
-					    PortionSpec(porBOOL, NLIST)));
+					    PortionSpec(porBOOLEAN, NLIST)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Flatten", 1);

@@ -256,7 +256,7 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       case porTEXT:
 	((TextPortion*) p1)->SetValue(((TextPortion*) p2)->Value());
 	break;
-      case porBOOL:
+      case porBOOLEAN:
 	((BoolPortion*) p1)->SetValue(((BoolPortion*) p2)->Value());
 	break;
       case porEFOUTCOME:

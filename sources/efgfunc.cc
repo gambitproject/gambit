@@ -1236,9 +1236,9 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, 
 				       porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOL,
+  FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("mixed", porBOOL,
+  FuncObj->SetParamInfo(0, 2, gclParameter("mixed", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));

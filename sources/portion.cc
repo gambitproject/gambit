@@ -441,7 +441,7 @@ void BoolPortion::SetValue(gTriState v)
 { *_Value = v; }
 
 PortionSpec BoolPortion::Spec(void) const
-{ return PortionSpec(porBOOL); }
+{ return PortionSpec(porBOOLEAN); }
 
 void BoolPortion::Output(gOutput& s) const
 {
@@ -2097,7 +2097,7 @@ bool PortionEqual(Portion* p1, Portion* p2, bool &type_found)
 
   type_found = true;
 
-  if(p1->Spec().Type & porBOOL)   
+  if(p1->Spec().Type & porBOOLEAN)   
     b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
   else if(p1->Spec().Type & porNUMBER)
     b = (((NumberPortion*) p1)->Value()==((NumberPortion*) p2)->Value());

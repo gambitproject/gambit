@@ -21,7 +21,7 @@ class gOutput;
 
 #define  porNULLSPEC  true
 
-#define  porBOOL               ( 0x00000001 )
+#define  porBOOLEAN            ( 0x00000001 )
 #define  porPRECISION          ( 0x00000002 )
 #define  porINTEGER            ( 0x00000004 )
 #define  porNUMBER             ( 0x00000008 )

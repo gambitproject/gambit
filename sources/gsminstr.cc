@@ -34,7 +34,7 @@ gclExpression::gclExpression(int p_line, const gText &p_file)
 
 PortionSpec gclQuitExpression::Type(void) const
 {
-  return porBOOL;
+  return porBOOLEAN;
 }
 
 Portion *gclQuitExpression::Evaluate(void)
@@ -434,7 +434,7 @@ Portion *gclConditional::Evaluate(void)
 {
   Portion *guardval = guard->Evaluate();
   _gsm._ResolveRef(guardval);
-  if (guardval->Spec().Type != porBOOL ||
+  if (guardval->Spec().Type != porBOOLEAN ||
       guardval->Spec().ListDepth > 0)
     throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
@@ -491,7 +491,7 @@ Portion *gclWhileExpr::Evaluate(void)
       throw;
     }
     
-    if (guardval->Spec().Type != porBOOL ||
+    if (guardval->Spec().Type != porBOOLEAN ||
         guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN");
 
@@ -556,7 +556,7 @@ Portion *gclForExpr::Evaluate(void)
       throw;
     }
 
-    if (guardval->Spec().Type != porBOOL ||
+    if (guardval->Spec().Type != porBOOLEAN ||
 	      guardval->Spec().ListDepth > 0)
       throw gclRuntimeError("Guard must evaluate to BOOLEAN"); 
 

@@ -1013,13 +1013,13 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("cliques", porBOOL,
+  FuncObj->SetParamInfo(0, 7, gclParameter("cliques", porBOOLEAN,
 					    new BoolPortion(false)));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumMixed_Efg, 
 				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1034,7 +1034,7 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 8, gclParameter("cliques", porBOOL,
+  FuncObj->SetParamInfo(1, 8, gclParameter("cliques", porBOOLEAN,
 					    new BoolPortion(false)));
 
   gsm->AddFunction(FuncObj);
@@ -1059,7 +1059,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumPure_Efg, 
 				       PortionSpec(porBEHAV, 1), 7));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1125,7 +1125,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0.02)));
   FuncObj->SetParamInfo(0, 5, gclParameter("powLam", porINTEGER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOL,
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porINTEGER,
 					    new NumberPortion(20)));
@@ -1165,7 +1165,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(-0.1)));
   FuncObj->SetParamInfo(0, 5, gclParameter("powK", porINTEGER,
 					    new NumberPortion(1)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOL,
+  FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porINTEGER,
 					    new NumberPortion(20)));
@@ -1211,7 +1211,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Lcp_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1243,7 +1243,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Liap_Behav,
 				       PortionSpec(porBEHAV, 1), 12));
   FuncObj->SetParamInfo(0, 0, gclParameter("start", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(0, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(1)));
@@ -1316,7 +1316,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Lp_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(1)));
@@ -1340,9 +1340,9 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(2, 3, gclParameter("nEqualities", porNUMBER));
   FuncObj->SetParamInfo(2, 4, gclParameter("precision", porPRECISION,
 					    new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(2, 5, gclParameter("isFeasible", porBOOL,
+  FuncObj->SetParamInfo(2, 5, gclParameter("isFeasible", porBOOLEAN,
 					    new BoolPortion(false), BYREF));
-  FuncObj->SetParamInfo(2, 6, gclParameter("isBounded", porBOOL,
+  FuncObj->SetParamInfo(2, 6, gclParameter("isBounded", porBOOLEAN,
 					    new BoolPortion(false), BYREF));
 
   gsm->AddFunction(FuncObj);
@@ -1378,7 +1378,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnum_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1457,7 +1457,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Simpdiv_Efg,
 				       PortionSpec(porBEHAV, 1), 10));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
-  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
+  FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(1)));
