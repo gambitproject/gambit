@@ -37,9 +37,6 @@
 #include <ctype.h>
 #include "base/gstream.h"
 #include "math/rational.h"
-#ifndef USE_GNU_MP
-#include "gnulib.h"
-#endif  // USE_GNU_MP
 
 //------------------------------------------------------------------------
 //                 gRational: Private member functions
