@@ -126,12 +126,7 @@ bool gbtEfgOutcome::operator!=(const gbtEfgOutcome &p_outcome) const
 
 bool gbtEfgOutcome::IsNull(void) const
 {
-  if (rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep == 0);
-  }
+  return (rep == 0);
 }
 
 bool gbtEfgOutcome::IsDeleted(void) const
@@ -316,12 +311,7 @@ int gbtNfgOutcome::GetId(void) const
 
 bool gbtNfgOutcome::IsNull(void) const
 {
-  if (rep->m_deleted) {
-    throw gbtGameObjectDeleted();
-  }
-  else {
-    return (rep == 0);
-  }
+  return (rep == 0);
 }
 
 bool gbtNfgOutcome::IsDeleted(void) const
