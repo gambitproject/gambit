@@ -1,9 +1,9 @@
-//#
-//# FILE: gsmoper.cc -- implementations for GSM operator functions
-//#                     companion to GSM
-//#
-//# $Id$
-//#
+//
+// FILE: gsmoper.cc -- implementations for GSM operator functions
+//                     companion to GSM
+//
+// $Id$
+//
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -666,367 +666,238 @@ Portion* GSM_Modulus_int( Portion** param )
 //                      relational operators
 //------------------------------------------------------------------
 
-//---------------------- GSM_EqualTo --------------------------
+//-----------
+// Equal
+//-----------
 
-Portion* GSM_EqualTo_double( Portion** param )
+Portion* GSM_Equal_Float(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (FloatPortion*) param[ 0 ] )->Value() ==
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((FloatPortion *) param[0])->Value() ==
+			    ((FloatPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_int( Portion** param )
+Portion* GSM_Equal_Integer(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (IntPortion*) param[ 0 ] )->Value() ==
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((IntPortion *) param[0])->Value() ==
+			    ((IntPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_gRational( Portion** param )
+Portion* GSM_Equal_Rational(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (RationalPortion*) param[ 0 ] )->Value() ==
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((RationalPortion *) param[0])->Value() ==
+			    ((RationalPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_gString( Portion** param )
+Portion* GSM_Equal_Text(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (TextPortion*) param[ 0 ] )->Value() ==
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((TextPortion *) param[0])->Value() ==
+			    ((TextPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_bool( Portion** param )
+Portion* GSM_Equal_Boolean(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (BoolPortion*) param[ 0 ] )->Value() ==
-     ( (BoolPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((BoolPortion *) param[0])->Value() ==
+			    ((BoolPortion *) param[1])->Value());
 }
 
-
-
-
-
-
-Portion* GSM_EqualTo_EfPlayer( Portion** param )
+Portion* GSM_Equal_EfPlayer(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (EfPlayerPortion*) param[ 0 ] )->Value() ==
-     ( (EfPlayerPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((EfPlayerPortion *) param[0])->Value() ==
+			    ((EfPlayerPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_Node( Portion** param )
+Portion* GSM_Equal_Node(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (NodePortion*) param[ 0 ] )->Value() ==
-     ( (NodePortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((NodePortion *) param[0])->Value() ==
+			    ((NodePortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_Infoset( Portion** param )
+Portion* GSM_Equal_Infoset(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (InfosetPortion*) param[ 0 ] )->Value() ==
-     ( (InfosetPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((InfosetPortion *) param[0])->Value() ==
+			    ((InfosetPortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_Outcome( Portion** param )
+Portion* GSM_Equal_Outcome(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (OutcomePortion*) param[ 0 ] )->Value() ==
-     ( (OutcomePortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((OutcomePortion *) param[0])->Value() ==
+			    ((OutcomePortion *) param[1])->Value());
 }
 
-Portion* GSM_EqualTo_Action( Portion** param )
+Portion* GSM_Equal_Action(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (ActionPortion*) param[ 0 ] )->Value() ==
-     ( (ActionPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((ActionPortion *) param[0])->Value() ==
+			    ((ActionPortion *) param[1])->Value());
 }
 
-
-
-Portion* GSM_EqualTo_MixedFloat( Portion** param )
+Portion* GSM_Equal_EfSupport(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = new BoolValPortion
-    (
-     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
-     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion((*((EfSupportPortion *) param[0])->Value()) ==
+			    (*((EfSupportPortion *) param[1])->Value()));
 }
 
-Portion* GSM_EqualTo_MixedRational( Portion** param )
+Portion* GSM_Equal_BehavFloat(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = new BoolValPortion
-    (
-     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) ==
-     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion
+    ((*(BehavSolution<double> *) ((BehavPortion *) param[0])->Value()) ==
+     (*(BehavSolution<double> *) ((BehavPortion *) param[1])->Value()));
 }
 
-
-Portion* GSM_EqualTo_BehavFloat( Portion** param )
+Portion* GSM_Equal_BehavRational(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
-  
-  result = new BoolValPortion
-    (
-     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
-     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion
+    ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) ==
+     (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
 }
 
-Portion* GSM_EqualTo_BehavRational( Portion** param )
+Portion* GSM_Equal_NfPlayer(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
-  
-  result = new BoolValPortion
-    (
-     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) ==
-     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion(((NfPlayerPortion *) param[0])->Value() ==
+			    ((NfPlayerPortion *) param[1])->Value());
 }
 
-
-
-//----------------------- GSM_NotEqualTo --------------------------
-
-Portion* GSM_NotEqualTo_double( Portion** param )
+Portion* GSM_Equal_Strategy(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (FloatPortion*) param[ 0 ] )->Value() !=
-     ( (FloatPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((StrategyPortion *) param[0])->Value() ==
+			    ((StrategyPortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_int( Portion** param )
+Portion* GSM_Equal_NfSupport(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (IntPortion*) param[ 0 ] )->Value() !=
-     ( (IntPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion((*((NfSupportPortion *) param[0])->Value()) ==
+			    (*((NfSupportPortion *) param[1])->Value()));
 }
 
-Portion* GSM_NotEqualTo_gRational( Portion** param )
+Portion* GSM_Equal_MixedFloat(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (RationalPortion*) param[ 0 ] )->Value() !=
-     ( (RationalPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion
+    ((*(MixedSolution<double> *) ((MixedPortion *) param[0])->Value()) ==
+     (*(MixedSolution<double> *) ((MixedPortion *) param[1])->Value()));
 }
 
-Portion* GSM_NotEqualTo_gString( Portion** param )
+Portion* GSM_Equal_MixedRational(Portion** param) 
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (TextPortion*) param[ 0 ] )->Value() !=
-     ( (TextPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion
+    ((*(MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value()) ==
+     (*(MixedSolution<gRational> *) ((MixedPortion *) param[1])->Value()));
 }
 
-Portion* GSM_NotEqualTo_bool( Portion** param )
+//------------
+// NotEqual
+//------------
+
+Portion* GSM_NotEqual_Float(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (BoolPortion*) param[ 0 ] )->Value() !=
-     ( (BoolPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((FloatPortion *) param[0])->Value() !=
+			    ((FloatPortion *) param[1])->Value());
 }
 
-
-
-
-
-
-Portion* GSM_NotEqualTo_EfPlayer( Portion** param )
+Portion* GSM_NotEqual_Integer(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (EfPlayerPortion*) param[ 0 ] )->Value() !=
-     ( (EfPlayerPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((IntPortion *) param[0])->Value() !=
+			    ((IntPortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_Node( Portion** param )
+Portion* GSM_NotEqual_Rational(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (NodePortion*) param[ 0 ] )->Value() !=
-     ( (NodePortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((RationalPortion *) param[0])->Value() !=
+			    ((RationalPortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_Infoset( Portion** param )
+Portion* GSM_NotEqual_Text(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (InfosetPortion*) param[ 0 ] )->Value() !=
-     ( (InfosetPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((TextPortion *) param[0])->Value() !=
+			    ((TextPortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_Outcome( Portion** param )
+Portion* GSM_NotEqual_Boolean(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (OutcomePortion*) param[ 0 ] )->Value() !=
-     ( (OutcomePortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((BoolPortion *) param[0])->Value() !=
+			    ((BoolPortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_Action( Portion** param )
+Portion* GSM_NotEqual_EfPlayer(Portion** param)
 {
-  Portion* result = 0;
-  result = new BoolValPortion
-    (
-     ( (ActionPortion*) param[ 0 ] )->Value() !=
-     ( (ActionPortion*) param[ 1 ] )->Value()
-     );
-  return result;
+  return new BoolValPortion(((EfPlayerPortion *) param[0])->Value() !=
+			    ((EfPlayerPortion *) param[1])->Value());
 }
 
-
-
-Portion* GSM_NotEqualTo_MixedFloat( Portion** param )
+Portion* GSM_NotEqual_Node(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = new BoolValPortion
-    (
-     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
-     ( * (MixedSolution<double>*) ( (MixedPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion(((NodePortion *) param[0])->Value() !=
+			    ((NodePortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_MixedRational( Portion** param )
+Portion* GSM_NotEqual_Infoset(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (MixedPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (MixedPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Mixed value" );
-  
-  result = new BoolValPortion
-    (
-     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value() ) !=
-     (* (MixedSolution<gRational>*) ( (MixedPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion(((InfosetPortion *) param[0])->Value() !=
+			    ((InfosetPortion *) param[1])->Value());
 }
 
-
-Portion* GSM_NotEqualTo_BehavFloat( Portion** param )
+Portion* GSM_NotEqual_Outcome(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
-  
-  result = new BoolValPortion
-    (
-     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
-     ( * (BehavSolution<double>*) ( (BehavPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion(((OutcomePortion *) param[0])->Value() !=
+			    ((OutcomePortion *) param[1])->Value());
 }
 
-Portion* GSM_NotEqualTo_BehavRational( Portion** param )
+Portion* GSM_NotEqual_Action(Portion** param)
 {
-  Portion* result = 0;
-  if( ( (BehavPortion*) param[ 0 ] )->Value() == 0 || 
-     ( (BehavPortion*) param[ 1 ] )->Value() == 0 )
-    return new ErrorPortion( "Cannot operate on a null Behav value" );
-  
-  result = new BoolValPortion
-    (
-     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value() ) !=
-     (* (BehavSolution<gRational>*) ( (BehavPortion*) param[ 1 ] )->Value() )
-     );
-  return result;
+  return new BoolValPortion(((ActionPortion *) param[0])->Value() !=
+			    ((ActionPortion *) param[1])->Value());
 }
+
+Portion* GSM_NotEqual_EfSupport(Portion** param)
+{
+  return new BoolValPortion((*((EfSupportPortion *) param[0])->Value()) !=
+			    (*((EfSupportPortion *) param[1])->Value()));
+}
+
+Portion* GSM_NotEqual_BehavFloat(Portion** param)
+{
+  return new BoolValPortion
+    ((*(BehavSolution<double> *) ((BehavPortion *) param[0])->Value()) !=
+     (*(BehavSolution<double> *) ((BehavPortion *) param[1])->Value()));
+}
+
+Portion* GSM_NotEqual_BehavRational(Portion** param)
+{
+  return new BoolValPortion
+    ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) !=
+     (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
+}
+
+Portion* GSM_NotEqual_NfPlayer(Portion** param)
+{
+  return new BoolValPortion(((NfPlayerPortion *) param[0])->Value() !=
+			    ((NfPlayerPortion *) param[1])->Value());
+}
+
+Portion* GSM_NotEqual_Strategy(Portion** param)
+{
+  return new BoolValPortion(((StrategyPortion *) param[0])->Value() !=
+			    ((StrategyPortion *) param[1])->Value());
+}
+
+Portion* GSM_NotEqual_NfSupport(Portion** param)
+{
+  return new BoolValPortion((*((NfSupportPortion *) param[0])->Value()) !=
+			    (*((NfSupportPortion *) param[1])->Value()));
+}
+
+Portion* GSM_NotEqual_MixedFloat(Portion** param)
+{
+  return new BoolValPortion
+    ((*(MixedSolution<double> *) ((MixedPortion *) param[0])->Value()) !=
+     (*(MixedSolution<double> *) ((MixedPortion *) param[1])->Value()));
+}
+
+Portion* GSM_NotEqual_MixedRational(Portion** param) 
+{
+  return new BoolValPortion
+    ((*(MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value()) !=
+     (*(MixedSolution<gRational> *) ((MixedPortion *) param[1])->Value()));
+}
+
 
 
 
@@ -2258,6 +2129,12 @@ void Init_gsmoper( GSM* gsm )
   };
 
 
+  ParamInfoType xy_NfSupport[] =
+  {
+    ParamInfoType( "x", porNF_SUPPORT ),
+    ParamInfoType( "y", porNF_SUPPORT )
+  };
+
   ParamInfoType xy_MixedFloat[] =
   {
     ParamInfoType( "x", porMIXED_FLOAT ),
@@ -2268,6 +2145,12 @@ void Init_gsmoper( GSM* gsm )
   {
     ParamInfoType( "x", porMIXED_RATIONAL ),
     ParamInfoType( "y", porMIXED_RATIONAL )
+  };
+
+  ParamInfoType xy_EfSupport[] =
+  {
+    ParamInfoType( "x", porEF_SUPPORT ),
+    ParamInfoType( "y", porEF_SUPPORT )
   };
 
   ParamInfoType xy_BehavFloat[] =
@@ -2287,6 +2170,12 @@ void Init_gsmoper( GSM* gsm )
   {
     ParamInfoType( "x", porPLAYER_EFG ),
     ParamInfoType( "y", porPLAYER_EFG )
+  };
+
+  ParamInfoType xy_NfPlayer[] =
+  {
+    ParamInfoType( "x", porPLAYER_NFG ),
+    ParamInfoType( "y", porPLAYER_NFG ),
   };
 
   ParamInfoType xy_Node[] =
@@ -2313,6 +2202,11 @@ void Init_gsmoper( GSM* gsm )
     ParamInfoType( "y", porACTION )
   };
 
+  ParamInfoType xy_Strategy[] =
+  {
+    ParamInfoType( "x", porSTRATEGY ),
+    ParamInfoType( "y", porSTRATEGY )
+  };
 
 
   ParamInfoType x_Float[] =
@@ -2512,77 +2406,91 @@ void Init_gsmoper( GSM* gsm )
 
   //-------------------------- Equal ---------------------------
 
-  FuncObj = new FuncDescObj("Equal", 14);
+  FuncObj = new FuncDescObj("Equal", 18);
 
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EqualTo_double, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Equal_Float, 
 				       porBOOL, 2, xy_Float));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EqualTo_int, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Equal_Integer, 
 				       porBOOL, 2, xy_Int));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_EqualTo_gRational, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Equal_Rational, 
 				       porBOOL, 2, xy_Rational));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_EqualTo_gString, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Equal_Text, 
 				       porBOOL, 2, xy_Text));
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_EqualTo_bool, 
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Equal_Boolean, 
 				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_EqualTo_EfPlayer, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Equal_EfPlayer, 
 				       porBOOL, 2, xy_EfPlayer));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_EqualTo_Node, 
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Equal_Node, 
 				       porBOOL, 2, xy_Node));
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_EqualTo_Infoset, 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Equal_Infoset, 
 				       porBOOL, 2, xy_Infoset));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_EqualTo_Outcome, 
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Equal_Outcome, 
 				       porBOOL, 2, xy_Outcome));
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_EqualTo_Action, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Action, 
 				       porBOOL, 2, xy_Action));
-
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_EqualTo_MixedFloat, 
-					porBOOL, 2, xy_MixedFloat));
-  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_EqualTo_MixedRational, 
-					porBOOL, 2, xy_MixedRational));
-  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_EqualTo_BehavFloat, 
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_EfSupport,
+					porBOOL, 2, xy_EfSupport));
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Equal_BehavFloat, 
 					porBOOL, 2, xy_BehavFloat));
-  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_EqualTo_BehavRational, 
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Equal_BehavRational, 
 					porBOOL, 2, xy_BehavRational));
 
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Equal_NfPlayer,
+					porBOOL, 2, xy_NfPlayer));
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Equal_Strategy,
+					porBOOL, 2, xy_Strategy));
+  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_Equal_NfSupport,
+					porBOOL, 2, xy_NfSupport));
+  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_Equal_MixedFloat, 
+					porBOOL, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_MixedRational, 
+					porBOOL, 2, xy_MixedRational));
   gsm->AddFunction(FuncObj);
 
 
   //-------------------------- NotEqual ---------------------------
 
-  FuncObj = new FuncDescObj("NotEqual", 14); 
+  FuncObj = new FuncDescObj("NotEqual", 18);
 
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NotEqualTo_double, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NotEqual_Float, 
 				       porBOOL, 2, xy_Float));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NotEqualTo_int, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NotEqual_Integer, 
 				       porBOOL, 2, xy_Int));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NotEqualTo_gRational, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NotEqual_Rational, 
 				       porBOOL, 2, xy_Rational));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_NotEqualTo_gString, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_NotEqual_Text, 
 				       porBOOL, 2, xy_Text));
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_NotEqualTo_bool, 
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_NotEqual_Boolean, 
 				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_NotEqualTo_EfPlayer, 
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_NotEqual_EfPlayer, 
 				       porBOOL, 2, xy_EfPlayer));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_NotEqualTo_Node, 
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_NotEqual_Node, 
 				       porBOOL, 2, xy_Node));
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_NotEqualTo_Infoset, 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_NotEqual_Infoset, 
 				       porBOOL, 2, xy_Infoset));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_NotEqualTo_Outcome,
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_NotEqual_Outcome, 
 				       porBOOL, 2, xy_Outcome));
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_NotEqualTo_Action, 
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_NotEqual_Action, 
 				       porBOOL, 2, xy_Action));
-
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_NotEqualTo_MixedFloat, 
-					porBOOL, 2, xy_MixedFloat));
-  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_NotEqualTo_MixedRational, 
-					porBOOL, 2, xy_MixedRational));
-  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_NotEqualTo_BehavFloat,
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_NotEqual_EfSupport,
+					porBOOL, 2, xy_EfSupport));
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_NotEqual_BehavFloat, 
 					porBOOL, 2, xy_BehavFloat));
-  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_NotEqualTo_BehavRational, 
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_NotEqual_BehavRational, 
 					porBOOL, 2, xy_BehavRational));
 
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_NotEqual_NfPlayer,
+					porBOOL, 2, xy_NfPlayer));
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_NotEqual_Strategy,
+					porBOOL, 2, xy_Strategy));
+  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_NotEqual_NfSupport,
+					porBOOL, 2, xy_NfSupport));
+  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_NotEqual_MixedFloat, 
+					porBOOL, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_NotEqual_MixedRational, 
+					porBOOL, 2, xy_MixedRational));
   gsm->AddFunction(FuncObj);
 
 
