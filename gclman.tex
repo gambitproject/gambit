@@ -1532,8 +1532,6 @@ SetName[x->OUTCOME, name->TEXT] =: OUTCOME
 SetName[x->PLAYER, name->TEXT] =: PLAYER
 SetPayoff[outcome->OUTCOME, payoff->LIST(FLOAT)] =: OUTCOME
 SetPayoff[outcome->OUTCOME, payoff->LIST(RATIONAL)] =: OUTCOME
-SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
-SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
 SubgameRoots[efg<->EFG] =: LIST(NODE)
 UnmarkSubgames[efg<->EFG] =: LIST(NODE)
 UnmarkSubgames[node->NODE] =: LIST(NODE)
@@ -4183,21 +4181,6 @@ Sets the name of the object \verb+x+ to \verb+name+.
 Returns the object \verb+x+.
 \item
 [See also:] {\tt Name}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-SetPayoff[node->NODE, payoff->LIST(FLOAT)] =: OUTCOME
-SetPayoff[node->NODE, payoff->LIST(RATIONAL)] =: OUTCOME
-\end{verbatim}\normalsize
-
-\bd
-Creates a new outcome, attaches it to the node \verb+node+, and sets
-the payoffs for this outcome to the values specified in list.  If
-there is already an outcome attached to the node, it is detatched, but
-not deleted.  Returns the new outcome attached to the node.  
-\item
-[See also:] {\tt Payoff}.
 \ed
 
 \item
