@@ -43,9 +43,19 @@ Portion *GSM_GobitEfg(Portion **param)
   gFileOutput f(((gString_Portion *) param[1])->Value());
 
   if (f.IsValid())    EP.pxifile = &f;
+
+  EP.minLam = ((numerical_Portion<double> *) param[2])->Value();
+  EP.maxLam = ((numerical_Portion<double> *) param[3])->Value();
+  EP.delLam = ((numerical_Portion<double> *) param[4])->Value();
+  EP.maxitsOpt = ((numerical_Portion<gInteger> *) param[5])->Value().as_long();
+  EP.maxitsBrent = ((numerical_Portion<gInteger> *) param[6])->Value().as_long();
+  EP.tolOpt = ((numerical_Portion<double> *) param[7])->Value();
+  EP.tolBrent = ((numerical_Portion<double> *) param[8])->Value();
   
   EFGobitModule<double> M(((Efg_Portion<double> *) param[0])->Value(), EP);
   M.Gobit(1);
+
+  ((numerical_Portion<double> *) param[9])->Value() = (double) M.Time();
 
   return new numerical_Portion<gInteger>(1);
 }
@@ -155,7 +165,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_GobitEfg, 4, "delLam", porDOUBLE,
 		        new numerical_Portion<double>(.01));
   FuncObj->SetParamInfo(GSM_GobitEfg, 5, "maxitsOpt", porINTEGER,
-		        new numerical_Portion<gInteger>(200));
+		        new numerical_Portion<gInteger>(20));
   FuncObj->SetParamInfo(GSM_GobitEfg, 6, "maxitsBrent", porINTEGER,
 		        new numerical_Portion<gInteger>(100));
   FuncObj->SetParamInfo(GSM_GobitEfg, 7, "tolOpt", porDOUBLE,
