@@ -67,7 +67,7 @@ int main( void )
   gin >> cont;
 
 
-/*
+
 
   gout << "\n";
   machine->Push( d_1 );
@@ -1232,6 +1232,7 @@ int main( void )
   machine->CallFunction();
 #endif
 
+
   machine->InitCallFunction( "Divide" );
   machine->Push( (long) 5 );
   machine->Bind();
@@ -1246,6 +1247,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 #endif
+
 
 
 
@@ -1717,18 +1719,29 @@ int main( void )
 
 
 
+
+#if 0
   machine->PushRef( "N" );
   machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "e02.nfg" );
   machine->Bind();
   machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
   machine->Assign();
-  machine->Output();
+  machine->Dump();
 
+
+  machine->PushRef( "N" );
+  machine->InitCallFunction( "NewNfg" );
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
 
   machine->InitCallFunction( "Lemke" );
   machine->PushRef( "N" );
-  machine->Bind( "N" );
+  machine->Bind( "nfg" );
   machine->PushRef( "time" );
   machine->Bind( "time" );
   machine->CallFunction();
@@ -1736,6 +1749,15 @@ int main( void )
 
   machine->PushRef( "time" );
   machine->Dump();
+
+
+  machine->InitCallFunction( "Lemke" );
+  machine->CallFunction();
+  machine->Dump();
+#endif // 0
+
+
+
 
 
 #ifdef CRASHTEST
@@ -2594,6 +2616,11 @@ int main( void )
   machine->Dump();
 
 
+
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+
+
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
@@ -2604,10 +2631,6 @@ int main( void )
 
 
   machine->InitCallFunction( "DefaultEfg" );
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->InitCallFunction( "TestDefEfg" );
   machine->CallFunction();
   machine->Dump();
 
@@ -2625,9 +2648,6 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "TestDefEfg" );
-  machine->CallFunction();
-  machine->Dump();
 
   machine->InitCallFunction( "ReadDefaultEfg" );
   machine->InitCallFunction( "Input" );
@@ -2642,9 +2662,6 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "TestDefEfg" );
-  machine->CallFunction();
-  machine->Dump();
 
 
   machine->PushRef( "test_efg" );
@@ -2668,20 +2685,6 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
-  machine->InitCallFunction( "TestDefEfg" );
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->InitCallFunction( "TestDefEfg" );
-  machine->InitCallFunction( "NewEfg" );
-  machine->CallFunction();
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  machine->InitCallFunction( "TestDefEfg" );
-  machine->CallFunction();
-  machine->Dump();
 
 
 
@@ -2879,7 +2882,10 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 #endif
-  
+
+
+
+
 
   prog = new gList< Instruction* >;
   prog->Append( new PushRef( "a" ) );
@@ -2917,6 +2923,17 @@ int main( void )
 
 
 
+  machine->PushRef( "I" );
+  machine->Push( (long) 1 );
+  machine->Assign();
+
+  machine->PushRef( "I" );
+  machine->Push( (long) 2 );
+  machine->Assign();
+
+  machine->Dump();
+
+
 
   machine->PushRef( "E" );
   machine->InitCallFunction( "ReadEfg" );
@@ -2928,7 +2945,11 @@ int main( void )
   machine->CallFunction();
   machine->Assign();
   machine->Output();
+  // machine->Pop();
 
+
+
+#if 0
   machine->PushRef( "E" );
   machine->InitCallFunction( "ReadEfg" );
   machine->InitCallFunction( "Input" );
@@ -2939,9 +2960,8 @@ int main( void )
   machine->CallFunction();
   machine->Assign();
   machine->Output();
-
-
-
+  // machine->Pop();
+#endif // 0
 
 
 
@@ -2963,8 +2983,10 @@ int main( void )
   machine->CallFunction();
 
   machine->Output();
-  
+
   machine->Dump();
+
+
 
 
 #ifdef INTERACTIVE
@@ -3364,8 +3386,6 @@ int main( void )
   machine->PushRef( "L" );
   machine->Dump();
 
-*/
-
 
 #ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
@@ -3373,6 +3393,7 @@ int main( void )
 #endif
 
 
+#if 0
   machine->PushRef( "N" );
   machine->InitCallFunction( "ReadNfg" );
   machine->InitCallFunction( "Input" );
@@ -3408,7 +3429,19 @@ int main( void )
   machine->InitCallFunction( "GobitNfg" );
   machine->CallFunction();
   machine->Dump();
+#endif // 0
+
+
   
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
 
 
 

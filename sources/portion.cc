@@ -487,7 +487,10 @@ PortionType OutcomePortion::Type( void ) const
 { return porOUTCOME; }
 
 void OutcomePortion::Output( gOutput& s ) const
-{ s << "(Outcome) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  s << "(Outcome) " << *_Value << " \"" << (*_Value)->GetName() << "\" ";
+  (*_Value)->PrintValues( s );
+}
 
 Portion* OutcomePortion::ValCopy( void ) const
 { return new OutcomeValPortion( *_Value ); }

@@ -881,6 +881,29 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
 
+
+
+
+
+  if( !_ErrorOccurred )
+  {
+    for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
+    {
+      if( _Param[ index ] != 0 &&
+	 _RunTimeParamInfo[ index ].Defined &&
+	 !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference &&
+	 _Param[ index ]->IsReference() )
+      {
+	Portion* old;
+	old = _Param[ index ];
+	_Param[ index ] = old->ValCopy();
+	delete old;
+      }
+    }
+  }
+
+
+
   /* This section makes the actual function call */
   if( !_ErrorOccurred )
   {
@@ -900,6 +923,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       _ErrorOccurred = true;
     }
   }
+
+
+
   
   if( !_ErrorOccurred )
   {
@@ -927,6 +953,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       _RunTimeParamInfo[ index ].Ref = 0;
     }
   }
+
 
   for( index = 0; index < _NumParams; index++ )
   {
