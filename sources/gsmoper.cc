@@ -1494,23 +1494,23 @@ Portion* GSM_Manual(Portion** param)
 	  char* s;
 	  int idx;
 	  int numchars = 0;
-	  if((s=strstr(line_out, "\\bd")) != 0)
+	  if((s=strstr((char *) line_out, "\\bd")) != 0)
 	    numchars = 3;
-	  else if((s=strstr(line_out, "\\ed")) != 0)
+	  else if((s=strstr((char *) line_out, "\\ed")) != 0)
 	    numchars = 3;
-	  else if((s=strstr(line_out, "\\item")) != 0)
+	  else if((s=strstr((char *) line_out, "\\item")) != 0)
 	    numchars = 5;
-	  else if((s=strstr(line_out, "\\tt")) != 0)
+	  else if((s=strstr((char *) line_out, "\\tt")) != 0)
 	    numchars = 4;
-	  else if((s=strstr(line_out, "\\em")) != 0)
+	  else if((s=strstr((char *) line_out, "\\em")) != 0)
 	    numchars = 4;
-	  else if((s=strstr(line_out, "$")) != 0)
+	  else if((s=strstr((char *) line_out, "$")) != 0)
 	  {
 	    idx = s - (char *) line_out;
 	    line_out[idx] = '\'';
 	    numchars = 0;
 	  }
-	  else if((s=strstr(line_out, "\\verb")) != 0)
+	  else if((s=strstr((char *) line_out, "\\verb")) != 0)
 	  {
 	    numchars = 5;
 	    idx = s - (char *) line_out;
