@@ -144,7 +144,7 @@ template <class T> void BehavSolution<T>::SetLiap(T value)
 
 template <class T> T BehavSolution<T>::LiapValue()
 { 
-  if(_LiapValue < 0)
+  if(_LiapValue < (T)0)
     _LiapValue = BehavProfile<T>::LiapValue();
   return _LiapValue; 
 }

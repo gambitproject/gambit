@@ -132,7 +132,7 @@ template <class T> void MixedSolution<T>::SetLiap(T value)
 
 template <class T> T MixedSolution<T>::LiapValue() 
 { 
-  if(_LiapValue < 0)
+  if(_LiapValue < (T)0)
     _LiapValue = MixedProfile<T>::LiapValue();
   return _LiapValue; 
 }
