@@ -66,7 +66,7 @@ NALG_SOURCES = lemke.cc nliap.cc ngobit.cc enum.cc simpdiv.cc tableau.cc \
 
 NALG_OBJECTS = lemke.o nliap.o ngobit.o enum.o simpdiv.o tableau.o ludecomp.o \
 		purenash.o lhtab.o lemketab.o grid.o csum.o lpsolve.o nfdom.o \
-		vertenum.cc
+		vertenum.o
 
 AGCL_SOURCES = gcompile.cc gsm.cc gsmfunc.cc gsmoper.cc gsmhash.cc gclmath.cc \
                gsminstr.cc portion.cc nfgfunc.cc efgfunc.cc listfunc.cc \
