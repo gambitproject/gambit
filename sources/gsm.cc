@@ -598,7 +598,19 @@ bool GSM::_BinaryOperation( const gString& funcname )
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
 
-  if( p1->Type() == p2->Type() )
+  if( p1->Type() == porREFERENCE || p2->Type() == porREFERENCE )
+  {
+    if( p1->Type() == porREFERENCE )
+      _ErrorMessage( _StdErr, 16, 0, 0, ( (ReferencePortion*) p1 )->Value() );
+    if( p2->Type() == porREFERENCE )
+      _ErrorMessage( _StdErr, 16, 0, 0, ( (ReferencePortion*) p2 )->Value() );
+    delete p1;
+    delete p2;
+    p1 = new ErrorPortion;
+    result = new ErrorPortion;
+  }
+
+  else if( p1->Type() == p2->Type() )
   {
     // SPECIAL CASE HANDLING - Integer division to produce gRationals
     if( funcname == "Divide" && p1->Type() == porINTEGER &&
@@ -634,10 +646,7 @@ bool GSM::_BinaryOperation( const gString& funcname )
 
   else // ( p1->Type() != p2->Type() )
   {
-    if( p1->Type() == porREFERENCE || p2->Type() == porREFERENCE )
-      _ErrorMessage( _StdErr, 16 );
-    else
-      _ErrorMessage( _StdErr, 17 );
+    _ErrorMessage( _StdErr, 17 );
     delete p1;
     delete p2;
     p1 = new ErrorPortion;
@@ -954,14 +963,8 @@ bool GSM::_BindCheck( const gString& param_name ) const
   {
     func->SetCurrParamIndex( new_index );
   }
-  else if ( new_index == PARAM_NOT_FOUND )
+  else
   {
-    _ErrorMessage( _StdErr, 23, 0, 0, param_name, func->FuncName() );
-    result = false;
-  }
-  else // ( new_index == PARAM_AMBIGUOUS )
-  {
-    _ErrorMessage( _StdErr, 24, 0, 0, param_name, func->FuncName() );
     result = false;
   }
   return result;
@@ -1050,15 +1053,23 @@ bool GSM::BindVal( const gString& param_name )
       delete org_param;
       
       func = _CallFuncStack->Pop();
-      
-      if( param->Type() == porREFERENCE )
+
+      if( param->Type() != porREFERENCE )
       {
-	delete param;
-	param = new ErrorPortion;
+	result = func->SetCurrParam( param );       
       }
-      
-      result = func->SetCurrParam( param ); 
-      
+      else
+      {
+	/*
+	_ErrorMessage( _StdErr, 61, 0, 0,
+		      ( (ReferencePortion*) param )->Value() );
+	func->SetErrorOccurred();
+	delete param;
+	result = false;
+	*/
+	result = func->SetCurrParam( 0 );
+      }
+
       _CallFuncStack->Push( func );
     }
     else
@@ -1142,7 +1153,6 @@ bool GSM::CallFunction( void )
 
   if( return_value == 0 )
   {
-    _ErrorMessage( _StdErr, 27, 0, 0, func->FuncName() );
     return_value = new ErrorPortion;
     result = false;
   }
@@ -1243,8 +1253,6 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
 
     if( !instr_success )
     {
-      if( user_func )
-	_ErrorMessage( _StdErr, 33, program_counter - 1 );
       result = rcFAIL;
       done = true;
       break;
@@ -1305,10 +1313,9 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
     switch( _Depth() )
     {
     case 0:
-      result = new ErrorPortion( (gString)
-				 "GSM Error 43 :\n" +
-				 "  User-defined function Error:\n" +
-				 "    No return value\n" );
+      result = 
+	new ErrorPortion( (gString)
+			 "User-defined function Error: No return value\n" );
       break;
 
     default:
@@ -1330,10 +1337,9 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
     result = 0;
     break;
   case rcQUIT:
-    result = new ErrorPortion( (gString)
-			       "GSM Error 45 :\n" + 
-			       "  User-defined function Error:\n" +
-			       "    Interruption by user\n" );
+    result = 
+      new ErrorPortion( (gString)
+		       "User-defined function Error: Interruption by user\n" );
     break;
   }
 
@@ -1476,109 +1482,93 @@ void GSM::_ErrorMessage
  const gString&  str2
  )
 {
+#if 0
   s << "GSM Error " << error_num << ":\n";
+#endif // 0
 
   switch( error_num )
   {
   case 13:
-    s << "  Attempted to resolve undefined reference \"" << str1 << "\"\n";
+    s << "Attempted to resolve undefined reference \"" << str1 << "\"\n";
     break;
   case 16:
-    s << "  Attempted binary operation on an undefined variable\n";
+    s << "Attempted operation on undefined variable \"" << str1 << "\"\n";
     break;
   case 17:
-    s << "  Attempted binary operation on incompatible types\n";
+    s << "Attempted binary operation on incompatible types\n";
     break;
   case 20:
-    s << "  Attempted to take the subscript of an unsupported type\n";
-    break;
-  case 23:
-    s << "  Parameter \"" << str1 << "\" is not defined for the function ";
-    s << str2 << "[]\n";
-    break;
-  case 24:
-    s << "  Parameter \"" << str1 << "\" is ambiguous in the function ";
-    s << str2 << "[]\n";
+    s << "Attempted to take the subscript of an unsupported type\n";
     break;
   case 25:
-    s << "  Undefined function " << str1 << "[]\n";
-    break;
-  case 27:
-    s << "  An error occurred while executing function " << str1 << "[]\n";
+    s << "Undefined function " << str1 << "[]\n";
     break;
   case 32:
-    s << "  Instruction IfGoto called on a non-boolean data type\n";
-    break;
-  case 33:
-    s << "  Instruction #" << num1 << " was not executed successfully\n";
-    s << "  Program abnormally terminated.\n";
+    s << "Instruction IfGoto called on a non-boolean data type\n";
     break;
   case 35:
-    s << "  Attempted to create a list of mixed types.\n";
+    s << "Attempted to create a list of mixed types.\n";
     break;
   case 36:
-    s << "  Subscript out of range\n";
+    s << "Subscript out of range\n";
     break;
   case 37:
-    s << "  A non-integer index specified\n";
+    s << "A non-integer index specified\n";
     break;
   case 38:
-    s << "  A non-integer child number specified for a Node\n";
+    s << "A non-integer child number specified for a Node\n";
     break;
   case 39:
-    s << "  Attempted to find the child of an unsupported type\n";
+    s << "Attempted to find the child of an unsupported type\n";
     break;
   case 40:
-    s << "  Node child number out of range\n";
+    s << "Node child number out of range\n";
     break;
   case 42:
-    s << "  Attempted to change the type of variable \"" << str1 << "\"\n";
-    break;
-  case 43:
-  case 45:
-    s << "  User-defined function error\n";
+    s << "Attempted to change the type of variable \"" << str1 << "\"\n";
     break;
   case 46:
-    s << "  Attempted to assign to read-only variable \"" << str1 <<"\"\n";
-    break;
-  case 47:
-    s << "  Mismatched InitCallFunction() and CallFunction() calls\n";
+    s << "Attempted to assign to read-only variable \"" << str1 <<"\"\n";
     break;
   case 48:
-    s << "  Attempted to change the type of a variable\n";
+    s << "Attempted to change the type of a variable\n";
     break;
   case 49:
-    s << "  Attempted to insert an undefined reference into a list\n";
+    s << "Attempted to insert an undefined reference into a list\n";
     break;
   case 52:
-    s << "  Cannot assign to a Output or Input variable\n";
+    s << "Cannot assign to a Output or Input variable\n";
     break;
   case 53:
-    s << "  Attempted calling UnAssign() on a non-reference value\n";
+    s << "Attempted calling UnAssign() on a non-reference value\n";
     break;
   case 54:
-    s << "  Attempted calling UnAssign() on a undefined reference\n";
+    s << "Attempted calling UnAssign() on a undefined reference\n";
     break;
   case 55:
-    s << "  Attempted to remove read-only variable \"" + str1 + "\"\n";
+    s << "Attempted to remove read-only variable \"" + str1 + "\"\n";
     break;
   case 56:
-    s << "  Attempted to change the type of a List\n";
+    s << "Attempted to change the type of a List\n";
     break;
   case 57:
-    s << "  Atttempted to assign to a non-reference type\n";
+    s << "Atttempted to assign to a non-reference type\n";
     break;
   case 58:
-    s << "  Attempted to resolve an undefined reference\n";
+    s << "Attempted to resolve an undefined reference\n";
     break;
   case 59:
-    s << "  Attempted to pass an undefined reference to a function\n";
+    s << "Attempted to pass an undefined reference to a function\n";
     break;
   case 60:
-    s << "  New function parameters are ambiguous with an existing function\n";
+    s << "New function parameters are ambiguous with an existing function\n";
+    break;
+  case 61:
+    s << "Attempted passing undefined reference \"" << str1 << "\" ";
+    s << "to a function by value\n";
     break;
   default:
-    s << "  General error\n";
+    s << "General error\n";
   }
 }
 

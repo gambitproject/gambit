@@ -727,11 +727,17 @@ int CallFuncObj::FindParamName( const gString& param_name )
     }
     else if( _FuncIndex != TempFuncIndex )
     {
-      _ErrorMessage( _StdErr, 1 );
+      _ErrorMessage( _StdErr, 2, 0, _FuncName );
       _FuncIndex = -1;
       _ErrorOccurred = true;
     }
   }
+
+  if( result == PARAM_NOT_FOUND )
+    _ErrorMessage( _StdErr, 23, 0, _FuncName, param_name );
+  else if( result == PARAM_AMBIGUOUS )
+    _ErrorMessage( _StdErr, 24, 0, _FuncName, param_name );
+  
   return result;
 }
 
@@ -779,7 +785,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
   }
 
 
-  if( param->Type() == porREFERENCE )
+  if( param != 0 && param->Type() == porREFERENCE )
   {
     ref_param = (ReferencePortion*) param;
     param = 0;
@@ -859,12 +865,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	    if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
 	      match_ok = false;
 	  }
-	  else
-	  {
-	    // no parameter specified
-	    if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
-	      match_ok = false;
-	  }
+
+	  if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
+	    match_ok = false;
 	}
       }
 
@@ -884,11 +887,13 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       if( param_sets_matched > 1 )
 	_ErrorMessage( _StdErr, 5, 0, _FuncName );
       else
-	_ErrorMessage( _StdErr, 11, 0, _FuncName );
+	_ErrorMessage( _StdErr, 8, 0, _FuncName );
       _ErrorOccurred = true;
     }
   }
-  else // ( _FuncIndex != -1 )
+
+  
+  if( _FuncIndex != -1 )
   {
     for( index = 0; 
 	index < _FuncInfo[ _FuncIndex ].NumParams; 
@@ -898,13 +903,15 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ]->Type() == porERROR )
 	{
-	  _ErrorMessage( _StdErr, 14, index, _FuncName );
+	  _ErrorMessage( _StdErr, 6, index, _FuncName,
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
 	else if( !_TypeMatch( _Param[ index ], 
 			     _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ))
 	{
-	  _ErrorMessage( _StdErr, 7, index, _FuncName );
+	  _ErrorMessage( _StdErr, 7, 0, _FuncName, 
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
       }
@@ -920,8 +927,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   {
     for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
     {
-      if( !_RunTimeParamInfo[ index ].Defined && _Param[ index ] == 0 )
+      if( !_RunTimeParamInfo[ index ].Defined )
       {
+	assert( _Param[ index ] == 0 );
 	if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
 	{
 	  _Param[ index ] = 
@@ -929,9 +937,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	}
 	else
 	{
-	  _ErrorMessage( _StdErr, 9, 0, 
-			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			_FuncName );
+	  _ErrorMessage( _StdErr, 9, 0, _FuncName, 
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
       }
@@ -941,29 +948,27 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	{
 	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue == 0 )
 	  {
-	    _ErrorMessage( _StdErr, 9, 0, 
-			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			  _FuncName );
+	    _ErrorMessage( _StdErr, 9, 0, _FuncName, 
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
 	  else if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference)
 	  {
-	    _ErrorMessage( _StdErr, 10, 0,
-			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			  _FuncName );
+	    _ErrorMessage( _StdErr, 10, 0, _FuncName, 
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
-	  else 
+	  else if( _RunTimeParamInfo[ index ].Ref == 0 )
 	  {
-	    if( _RunTimeParamInfo[ index ].Ref != 0 )
-	    {
-	      if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0)
-	      {
-		_Param[ index ] = 
-		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		    ValCopy();
-	      }	  
-	    }
+	    _ErrorMessage( _StdErr, 11, 0, _FuncName, 
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
+	    _ErrorOccurred = true;
+	  }
+	  else if( _RunTimeParamInfo[ index ].Ref != 0 )
+	  {
+	    _Param[ index ] = 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		ValCopy();
 	  }
 	}
       }
@@ -993,9 +998,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  }
 	  else
 	  {
-	    _ErrorMessage( _StdErr, 12, 0,
-			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			  _FuncName );
+	    _ErrorMessage( _StdErr, 12, 0, _FuncName, 
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
 	}
@@ -1003,9 +1007,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 		!_Param[ index ]->IsReference() && 
 		_RunTimeParamInfo[ index ].Ref == 0 )
 	{
-	  _ErrorMessage( _StdErr, 13, 0,
-			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
-			_FuncName );
+	  _ErrorMessage( _StdErr, 13, 0, _FuncName, 
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
       }
@@ -1026,7 +1029,10 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 				    _FuncInfo[ _FuncIndex ], _Param );
 
     if( result == 0 )
+    {
+      _ErrorMessage( _StdErr, 20, 0, _FuncName );
       _ErrorOccurred = true;
+    }
     else if( result->Type() == porERROR )
     {
       result->Output( _StdErr );
@@ -1089,54 +1095,59 @@ void CallFuncObj::_ErrorMessage
  const gString& str2
  )
 {
+#if 0
   s << "CallFuncObj Error " << error_num << " : \n";
+#endif // 0
+  
   switch( error_num )
   {
-  case 1:
-    s << "  Conflicting variable name specification\n";
+  case 2:
+    s << str1 << "[] called with conflicting parameters\n";
     break;
   case 3:
-    s << "  Repeated definition found for parameter #" << num1 << "\n";
-    s << "  while calling " << str1 << "[]\n";
+    s << str1 << "[] called with parameter #" << num1 << "multiply defined\n";
     break;
   case 4:
-    s << "  Too many parameters specified for function " << str1 << "[]\n";
+    s << str1 << "[] called with too many parameters\n";
     break;
   case 5:
-    s << "  Function " << str1 << "[] called with ambiguous parameters\n";
+    s << str1 << "[] called with ambiguous parameter(s)\n";
+    break;
+  case 6:
+    s << str1 << "[] parameter \"" << str2 << "\" undefined\n";
     break;
   case 7:
-    s << "  Function " << str1 << "[] parameter #" << num1;
-    s << " type mismatch\n";
+    s << str1 << "[] parameter \"" << str2 << "\" type mismatch\n";
     break;
   case 8:
-    s << "  No matching parameter list found for function " + str1 + "[]\n";
+    s << "No matching parameter specifications found for " + str1 + "[]\n";
     break;
   case 9:
-    s << "  Required parameter \"" << str1 << "\" not found\n";
-    s << "  while executing function " << str2 << "[]\n";
+    s << str1 << "[] required parameter \"" << str2 << "\" missing\n";
     break;
   case 10:
-    s << "  Undefined variable passed for parameter \"" << str1 << "\"\n";
-    s << "  while executing function " << str2 << "[]\n";
+    s << str1 << "[] value parameter \"" << str2 << "\" undefined\n";
     break;
   case 11:
-    s << "  Insufficient parameter type information given;\n";
-    s << "  function call ambiguous\n";
+    s << str1 << "[] undefined parameter \"" << str2 << "\" passed by value\n";
     break;
   case 12:
-    s << "  Attempted to pass value parameter \"" << str1 << "\"\n";
-    s << "  by reference while calling function " << str2 << "[]\n";
+    s << str1 << "[] value parameter \"" << str2 << "\" passed by reference\n";
     break;
   case 13:
-    s << "  Attempted to pass reference parameter \"" << str1 << "\"\n";
-    s << "  by value while calling function " << str2 << "[]\n";
+    s << str1 << "[] reference parameter \"" << str2 << "\" passed by value\n";
     break;
-  case 14:
-    s << "  Function " << str1 << "[] parameter #" << num1 << " undefined\n";
+  case 20:
+    s << "A general error occurred while executing " << str1 << "[]\n";
+    break;
+  case 23:
+    s << "Parameter \"" << str1 << "\" is not defined for " << str2 << "[]\n";
+    break;
+  case 24:
+    s << "Parameter \"" << str1 << "\" is ambiguous in "<< str2 << "[]\n";
     break;
   default:
-    s << "  General error\n";
+    s << "General error\n";
   }
 }
 

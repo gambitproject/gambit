@@ -858,7 +858,7 @@ void NfSupportPortion::Output( gOutput& s ) const
     }
     s << "} ";
   }
-  s << "}";
+  s << "} ";
 }
 
 Portion* NfSupportPortion::ValCopy( void ) const
@@ -1907,16 +1907,7 @@ void OutputPortion::Output( gOutput& s ) const
 { s << "(Output)"; }
 
 Portion* OutputPortion::ValCopy( void ) const
-{
-  return RefCopy();
-/*
-  return new ErrorPortion
-    ( (gString)
-     "OutputPortion::ValCopy() not available due to lack of copy\n" +
-     "constructor in class gOutput\n" );
-*/
-  // return new OutputValPortion( *_Value ); 
-}
+{ return RefCopy(); }
 
 Portion* OutputPortion::RefCopy( void ) const
 { 
@@ -1927,11 +1918,11 @@ Portion* OutputPortion::RefCopy( void ) const
 
 void OutputPortion::AssignFrom( Portion* p )
 {
-  assert( 0 );
 /*
   assert( p->Type() == Type() );
   *_Value = *( ( (OutputPortion*) p )->_Value );
 */
+  assert( 0 );
 }
 
 bool OutputPortion::operator == ( Portion *p ) const
@@ -1986,16 +1977,7 @@ void InputPortion::Output( gOutput& s ) const
 { s << "(Input)"; }
 
 Portion* InputPortion::ValCopy( void ) const
-{ 
-  return RefCopy();
-/*
-  return new ErrorPortion
-    ( (gString)
-     "InputPortion::ValCopy() not available due to lack of copy\n" +
-     "constructor in class gInput\n" );
-*/
-  // return new InputValPortion( *_Value ); 
-}
+{  return RefCopy(); }
 
 Portion* InputPortion::RefCopy( void ) const
 { 
@@ -2006,11 +1988,11 @@ Portion* InputPortion::RefCopy( void ) const
 
 void InputPortion::AssignFrom( Portion* p )
 {
-  assert( 0 );
 /*
   assert( p->Type() == Type() );
   *_Value = *( ( (InputPortion*) p )->_Value );
 */
+  assert( 0 );
 }
 
 bool InputPortion::operator == ( Portion *p ) const

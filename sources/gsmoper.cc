@@ -912,6 +912,64 @@ Portion* GSM_Write_gString( Portion** param )
 }
 
 
+Portion* GSM_Write_Mixed( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  BaseMixedProfile* mixed = ( (MixedPortion*) param[ 1 ] )->Value();
+  switch( mixed->Type() )
+  {
+  case DOUBLE:
+    s << * (MixedProfile<double>*) mixed; 
+    break;
+  case RATIONAL:
+    s << * (MixedProfile<gRational>*) mixed; 
+    break;
+  default:
+    assert( 0 );
+  }
+  return new OutputRefPortion( s );  
+}
+
+
+Portion* GSM_Write_Behav( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  BaseBehavProfile* behav = ( (BehavPortion*) param[ 1 ] )->Value();
+  switch( behav->Type() )
+  {
+  case DOUBLE:
+    s << * (BehavProfile<double>*) behav; 
+    break;
+  case RATIONAL:
+    s << * (BehavProfile<gRational>*) behav; 
+    break;
+  default:
+    assert( 0 );
+  }
+  return new OutputRefPortion( s );  
+}
+
+
+Portion* GSM_Write_Nfg( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  BaseNfg* nfg = ( (NfgPortion*) param[ 1 ] )->Value();
+  s << "Write[] is still waiting for DisplayNfg() and not yet completed\n";
+  // nfg->DisplayNfg( s );
+  return new OutputRefPortion( s );  
+}
+
+
+Portion* GSM_Write_Efg( Portion** param )
+{
+  gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  BaseEfg* efg = ( (EfgPortion*) param[ 1 ] )->Value();
+  s << "Write[] is still waiting for DisplayEfg() and not yet completed\n";
+  // efg->DisplayEfg( s );
+  return new OutputRefPortion( s );  
+}
+
+
 Portion* GSM_SetFormat( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
@@ -1255,6 +1313,18 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Write_gString, 1, "x", porTEXT );
   FuncObj->SetParamInfo( GSM_Write_gString, 2, "quoted", porBOOL, 
 			new BoolValPortion( false ) );
+  FuncObj->SetFuncInfo( GSM_Write_Mixed, 2 );
+  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_Mixed, 1, "x", porMIXED );
+  FuncObj->SetFuncInfo( GSM_Write_Behav, 2 );
+  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_Behav, 1, "x", porBEHAV );
+  FuncObj->SetFuncInfo( GSM_Write_Nfg, 2 );
+  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG );
+  FuncObj->SetFuncInfo( GSM_Write_Efg, 2 );
+  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT );
+  FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG );
   gsm->AddFunction( FuncObj );
 
 
