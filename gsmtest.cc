@@ -126,79 +126,6 @@ int main( void )
   machine->Add();
   machine->Dump();
 
-/*
-  gout << "Assigning x = (gInteger)5\n";
-  machine->Assign( x, (gInteger)5 );
-  gout << "Assigning y = (gInteger)7\n";
-  machine->Assign( y, (gInteger)7 );
-  gout << "Assigning z = (gInteger)11\n";
-  machine->Assign( z, (gInteger)11 );
-  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->Negate();
-  machine->Subtract();
-  machine->Multiply();
-  machine->Subtract();
-  machine->Divide();
-  machine->Add();
-  machine->Dump();
-
-  gout << "Assigning y = (gRational)7\n";
-  machine->Assign( y, (gRational)7 );
-  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->Negate();
-  machine->Subtract();
-  machine->Multiply();
-  machine->Subtract();
-  machine->Divide();
-  machine->Add();
-  machine->Dump();
-*/
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-/*
-  gout << "Testing PushVal()\n";
-  machine->UnAssign( x );
-  machine->UnAssign( y );
-  machine->UnAssign( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  gout << "PushVal (gRational)11 into z\n";
-  machine->PushVal( (gRational)11 );
-  gout << "PushVal (gRational)7 into y\n";
-  machine->PushVal( (gRational)7 );
-  gout << "PushVal (gRational)5 into x\n";
-  machine->PushVal( (gRational)5 );
-  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->Negate();
-  machine->Subtract();
-  machine->Multiply();
-  machine->Subtract();
-  machine->Divide();
-  machine->Add();
-  machine->Dump();
-
-  gout << "Attempt to do additional (illegal) PushVals\n";
-  machine->PushVal( (gRational)13 );
-*/
-
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
@@ -232,8 +159,8 @@ int main( void )
   gout << "Pushing \'Test2 \'\n";
   machine->Push( (gString)"Test1 " );
   machine->Push( (gString)"Test2 " );
-  gout << "Testing Add()\n";
-  machine->Add();
+  gout << "Testing Concatenate()\n";
+  machine->Concatenate();
   machine->Dump();
 
   gout << "*********************** press return to continue ************";

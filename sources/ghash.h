@@ -1,5 +1,11 @@
+//
+  //  FILE:  hash.h :  declaration of HashTable
+//
+//
 
 
+#ifndef HASH_H
+#define HASH_H
 
 #include "glist.h"
 
@@ -42,3 +48,4 @@ template <class K, class T> class HashTable
 };
 
 
+#endif  // HASH_H
