@@ -215,8 +215,8 @@ gFileOutput::gFileOutput(void)
 {
   f = 0;
   valid=0;
-  Width=8;
-  Prec=5;
+  Width=0;
+  Prec=6;
   Represent='f';
 }
 
@@ -224,8 +224,8 @@ gFileOutput::gFileOutput(const char *out)
 {
   f = fopen(out, "w");
   valid=(f==NULL) ? 0 : 1;
-  Width=8;
-  Prec=5;
+  Width=0;
+  Prec=6;
   Represent='f';
 }
 
@@ -233,8 +233,8 @@ gFileOutput::gFileOutput(FILE *out)
 {
   f = out;
   valid=(f==NULL) ? 0 : 1;
-  Width=8;
-  Prec=5;
+  Width=0;
+  Prec=6;
   Represent='f';
 }
 
