@@ -4,6 +4,49 @@
 //# $Id$
 //#
 
+class Node;
+class Player;
+class Infoset;
+class Action;
+class Outcome;
+#include "garray.h"
+#include "rational.h"
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+class gArray<int>;
+class gArray<double>;
+class gArray<gRational>;
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+#include "glist.imp"
+
+TEMPLATE class gList<Node *>;
+TEMPLATE class gNode<Node *>;
+
+#include "garray.imp"
+#include "gblock.imp"
+
+TEMPLATE class gArray<Player *>;
+TEMPLATE class gBlock<Player *>;
+
+TEMPLATE class gArray<Infoset *>;
+TEMPLATE class gBlock<Infoset *>;
+
+TEMPLATE class gArray<Node *>;
+TEMPLATE class gBlock<Node *>;
+
+TEMPLATE class gArray<Action *>;
+TEMPLATE class gBlock<Action *>;
+
+TEMPLATE class gArray<Outcome *>;
+TEMPLATE class gBlock<Outcome *>;
+
+#pragma -Jgx
+
+
 #include "extform.h"
 #include "player.h"
 #include "infoset.h"
@@ -296,37 +339,5 @@ const gString &BaseBehavProfile::GetActionName(int p, int iset, int act) const
 {
   return E->PlayerList()[p]->InfosetList()[iset]->GetActionName(act);
 }
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-#include "glist.imp"
-
-TEMPLATE class gList<Node *>;
-TEMPLATE class gNode<Node *>;
-
-#include "garray.imp"
-#include "gblock.imp"
-
-TEMPLATE class gArray<Player *>;
-TEMPLATE class gBlock<Player *>;
-
-TEMPLATE class gArray<Infoset *>;
-TEMPLATE class gBlock<Infoset *>;
-
-TEMPLATE class gArray<Node *>;
-TEMPLATE class gBlock<Node *>;
-
-TEMPLATE class gArray<Action *>;
-TEMPLATE class gBlock<Action *>;
-
-TEMPLATE class gArray<Outcome *>;
-TEMPLATE class gBlock<Outcome *>;
-
-
 
 

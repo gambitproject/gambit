@@ -135,7 +135,7 @@ void ExtForm<T>::Payoff(Node *n, T prob, int pl, T &value,
 		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
 	       pl, value, profile);
       }
-      Payoff(n->children[i], prob * (1 - p), pl, value, profile);
+      Payoff(n->children[i], prob * ((T)1 - p), pl, value, profile);
     }
     else  {
       for (int i = 1, npl = n->infoset->player->number,
