@@ -1218,7 +1218,7 @@ bool _WriteListBraces = true;
 bool _WriteListCommas = true;
 long _WriteListLF = 0;
 long _WriteListIndent = 2;
-long _WriteSolutionInfo = 2;
+long _WriteSolutionInfo = 1;
 
 
 void GSM_SetWriteOptions( void )

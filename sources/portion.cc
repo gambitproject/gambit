@@ -66,7 +66,7 @@ bool Portion::_WriteListBraces = true;
 bool Portion::_WriteListCommas = true;
 long Portion::_WriteListLF = 0;
 long Portion::_WriteListIndent = 2;
-long Portion::_WriteSolutionInfo = 2;
+long Portion::_WriteSolutionInfo = 1;
 
 void Portion::_SetWriteWidth(long x)
 { _WriteWidth = x; }
@@ -2153,7 +2153,10 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   int c;
   int length = _Value->Length();
   
-  if(_WriteListBraces) s << '{';
+  if(_WriteListBraces) 
+    s << '{';
+  else 
+    s << ' ';
   // if(_WriteListLF > ListLF) s << '\n';
   if(length >= 1)
   {
@@ -2161,7 +2164,10 @@ void ListPortion::Output(gOutput& s, long ListLF) const
     {
       if(i > 1)
       {
-	if(_WriteListCommas) s << ',';
+	if(_WriteListCommas) 
+	  s << ',';
+	else
+	  s << ' ';
 	if(_WriteListLF > ListLF) 
 	  s << '\n';
 	if(_WriteListLF > ListLF) 
@@ -2193,16 +2199,10 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   }
 
   s << ' ';
-  if(_WriteListLF > ListLF) 
-  {
-    /*
-    s << '\n';
-    for(c = 0; c < ListLF * _WriteListIndent; c++)
-      s << ' ';
-      */
-  }
-  if(_WriteListBraces)
+  if(_WriteListBraces) 
     s << '}';
+  else
+    s << ' ';
 }
 
 
