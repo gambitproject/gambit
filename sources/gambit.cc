@@ -245,16 +245,6 @@ wxFrame *GambitApp::OnInit(void)
   file_menu->Append(FILE_LOAD,   "&Open",                "Open a file");
   file_menu->Append(FILE_QUIT,   "&Quit",                "Quit program");
 
-  m_recentFiles = new wxFileHistory(5);
-  m_recentFiles->FileHistoryUseMenu(file_menu);
-  for (int i = 5; i >= 1; i--) {
-    gText fileName;
-    wxGetResourceStr("Gambit", "file" + ToText(i), fileName, m_resourceFile);
-    if (fileName != "") {
-      gambitApp.AddFileToHistory(fileName);
-    }
-  }
-
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents",   "Table of contents");
   help_menu->Append(GAMBIT_HELP_ABOUT,    "&About",      "About this program");
@@ -286,6 +276,16 @@ wxFrame *GambitApp::OnInit(void)
   
   gambit_frame->Show(TRUE);
   
+  m_recentFiles = new wxFileHistory(5);
+  m_recentFiles->FileHistoryUseMenu(file_menu);
+  for (int i = 5; i >= 1; i--) {
+    gText fileName;
+    wxGetResourceStr("Gambit", "file" + ToText(i), fileName, m_resourceFile);
+    if (fileName != "") {
+      gambitApp.AddFileToHistory(fileName);
+    }
+  }
+
   // Set up the error handling functions.
 #ifndef __BORLANDC__ // For some reason this does not work w/ BC++ (crash on exit)
   signal(SIGFPE, (fptr)SigFPEHandler);
