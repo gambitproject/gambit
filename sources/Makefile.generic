@@ -32,7 +32,7 @@
 
 CC = g++ 
 CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
-	-D__GNUG__ -fguiding-decls -fno-implicit-templates $(INCDIR) 
+	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
 
 # define variable for system name.  
 
@@ -94,7 +94,7 @@ XLIB = -lXm -lXt -lX11 -lc -lm -lg++
 else 
 XINCDIR = -I/usr/local/include/X11
 XLIBDIR = -L/usr/local/X11/lib -L/usr/X11/lib
-XLIB = -lX11 -lXm -lXp -lXext -lXt -lm
+XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
 endif
 endif
 
