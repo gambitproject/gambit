@@ -38,7 +38,7 @@ bool Dominates(const EFSupport &S,
       return false;
   }
 
-  const EFSupportWithActiveNodes SAct(S);
+  const EFSupportWithActiveInfo SAct(S);
   Action *aAct = S.Actions(pl,iset)[a];
   Action *bAct = S.Actions(pl,iset)[b];
 

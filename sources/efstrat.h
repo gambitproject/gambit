@@ -84,33 +84,12 @@ public:
 
 gOutput &operator<<(gOutput &f, const EFSupport &);
 
-class EFSupportWithActiveNodes : public EFSupport {
-protected:
-  gList<const Node *> reachable_nt_nodes;  // Old implementation, keep to debug
-  gBlock<gBlock<gList<const Node *> > > reachable_nonterminal_nodes;
 
-  void generate_nonterminal_nodes(const Node *);
-  void delete_this_and_lower_nonterminal_nodes(const Node *);
-
-public:
-  EFSupportWithActiveNodes ( const Efg &);
-  EFSupportWithActiveNodes ( const EFSupport &);
-  EFSupportWithActiveNodes ( const EFSupportWithActiveNodes &);
-  virtual ~EFSupportWithActiveNodes();
-  EFSupportWithActiveNodes &operator=(const EFSupportWithActiveNodes &);
-
-  bool operator==(const EFSupportWithActiveNodes &) const;
-  bool operator!=(const EFSupportWithActiveNodes &) const;
-
-  // Find the reachable nodes at an infoset
-  const gList<const Node *> *ReachableNonterminalNodes() const;
-  const gList<const Node *> ReachableNodesInInfoset(const Infoset *) const;
-
-  // Action editing functions
-  void AddAction(Action *);
-  bool RemoveAction(Action *);
-};
-
+// The following class keeps a record of which nodes and infosets are 
+// reached by sequences of actions in the support.  This record is
+// updated as actions are added and removed.
+// BUG - The interface above does not entirely agree with the one
+// below vis-a-vis common elements.
 
 class EFSupportWithActiveInfo : public EFSupport {
 protected:
