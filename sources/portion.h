@@ -634,10 +634,18 @@ public:
 
 class MixedPortion : public Portion  {
 protected:
-  MixedSolution ** _Value;
+  struct mixedrep  {
+    MixedSolution *value;
+    int nref;
+
+    mixedrep(MixedSolution *v) : value(v), nref(1)  { }
+    ~mixedrep()  { delete value; }
+  };
+  
+  struct mixedrep *rep; 
   bool _ref;
 
-  MixedPortion(MixedSolution *&, bool);
+  MixedPortion(const MixedPortion *, bool);
 
 public:
   MixedPortion(MixedSolution *);
@@ -666,10 +674,18 @@ public:
 
 class BehavPortion : public Portion  {
 protected:
-  BehavSolution ** _Value;
+  struct behavrep  {
+    BehavSolution *value;
+    int nref;
+
+    behavrep(BehavSolution *v) : value(v), nref(1)  { }
+    ~behavrep()  { delete value; }
+  };
+  
+  struct behavrep *rep; 
   bool _ref;
 
-  BehavPortion(BehavSolution *&, bool);
+  BehavPortion(const BehavPortion *, bool);
 
 public:
   BehavPortion(BehavSolution *);

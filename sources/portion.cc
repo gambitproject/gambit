@@ -26,17 +26,10 @@ class Portion;
 
 #include "gambitio.h"
 
+#include "gsm.h"
+
 #include "nfg.h"
 #include "efg.h"
-#include "nfplayer.h"
-#include "nfstrat.h"
-#include "efstrat.h"
-
-#include "mixedsol.h"
-#include "behavsol.h"
-
-
-#include "gsm.h"
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
 
@@ -603,6 +596,7 @@ bool EfOutcomePortion::IsReference(void) const
 //                          NfPlayer class
 //---------------------------------------------------------------------
 
+#include "nfplayer.h"
 
 NfPlayerPortion::NfPlayerPortion(NFPlayer *value)
   : _Value(new NFPlayer *(value)), _ref(false)
@@ -1174,33 +1168,37 @@ bool ActionPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 MixedPortion::MixedPortion(MixedSolution *value)
-  : _Value(new MixedSolution *(value)), _ref(false)
+  : rep(new struct mixedrep(value)), _ref(false)
 {
-  SetGame(&value->Game());
+  SetGame(&rep->value->Game());
 }
 
-MixedPortion::MixedPortion(MixedSolution *&value, bool ref)
-  : _Value(&value), _ref(ref)
+MixedPortion::MixedPortion(const MixedPortion *p, bool ref)
+  : rep(p->rep), _ref(ref)
 {
-  SetGame(&value->Game());
+  rep->nref++;
+  SetGame(&rep->value->Game());
 }
 
 MixedPortion::~MixedPortion()
 {
-  if (!_ref)  {
-    delete *_Value;
-    delete _Value;
-  }
+  if (--rep->nref == 0)   delete rep;
 }
 
 MixedSolution *MixedPortion::Value(void) const
-{ return *_Value; }
+{ return rep->value; }
 
 void MixedPortion::SetValue(MixedSolution *value)
 {
   SetGame(&value->Game());
-  delete *_Value;
-  *_Value = value;
+  if (_ref)   {
+    delete rep->value;
+    rep->value = value;
+  }
+  else  {
+    if (--rep->nref == 0)  delete rep;
+    rep = new mixedrep(value);
+  }
 }
 
 PortionSpec MixedPortion::Spec(void) const
@@ -1213,9 +1211,9 @@ void MixedPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Mixed) ";
   if (_WriteSolutionInfo>1)
-    (**_Value).Dump(s);
+    (*rep->value).Dump(s);
   else
-    (**_Value).MixedProfile<gNumber>::Dump(s);
+    (*rep->value).MixedProfile<gNumber>::Dump(s);
 }
 
 
@@ -1226,12 +1224,12 @@ gString MixedPortion::OutputString( void ) const
 
 Portion* MixedPortion::ValCopy(void) const
 { 
-  return new MixedPortion(new MixedSolution(**_Value));
+  return new MixedPortion(this, false);
 }
 
 Portion* MixedPortion::RefCopy(void) const
 { 
-  return new MixedPortion(*_Value, true);
+  return new MixedPortion(this, true);
 }
 
 bool MixedPortion::IsReference(void) const
@@ -1246,33 +1244,37 @@ bool MixedPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 BehavPortion::BehavPortion(BehavSolution *value)
-  : _Value(new BehavSolution *(value)), _ref(false)
+  : rep(new struct behavrep(value)), _ref(false)
 {
-  SetGame(&value->Game());
+  SetGame(&rep->value->Game());
 }
 
-BehavPortion::BehavPortion(BehavSolution *& value, bool ref)
-  : _Value(&value), _ref(ref)
+BehavPortion::BehavPortion(const BehavPortion *p, bool ref)
+  : rep(p->rep), _ref(ref)
 {
-  SetGame(&value->Game());
+  rep->nref++;
+  SetGame(&rep->value->Game());
 }
 
 BehavPortion::~BehavPortion()
 {
-  if (!_ref)   {
-    delete *_Value;
-    delete _Value;
-  }
+  if (--rep->nref == 0)   delete rep;
 }
 
 BehavSolution *BehavPortion::Value(void) const
-{ return *_Value; }
+{ return rep->value; }
 
 void BehavPortion::SetValue(BehavSolution *value)
 {
   SetGame(&value->Game());
-  delete *_Value;
-  *_Value = value;
+  if (_ref)   {
+    delete rep->value;
+    rep->value = value;
+  }
+  else  {
+    if (--rep->nref == 0)  delete rep;
+    rep = new behavrep(value);
+  }
 }
 
 PortionSpec BehavPortion::Spec(void) const
@@ -1285,9 +1287,9 @@ void BehavPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Behav) ";
   if (_WriteSolutionInfo>1)
-    (**_Value).Dump(s);
+    (*rep->value).Dump(s);
   else
-    (**_Value).BehavProfile<gNumber>::Dump(s);
+    (*rep->value).BehavProfile<gNumber>::Dump(s);
 }
 
 gString BehavPortion::OutputString( void ) const
@@ -1297,12 +1299,12 @@ gString BehavPortion::OutputString( void ) const
 
 Portion* BehavPortion::ValCopy(void) const
 { 
-  return new BehavPortion(new BehavSolution(**_Value));
+  return new BehavPortion(this, false);
 }
 
 Portion* BehavPortion::RefCopy(void) const
 { 
-  return new BehavPortion(*_Value, true); 
+  return new BehavPortion(this, true); 
 }
 
 bool BehavPortion::IsReference(void) const
@@ -1860,7 +1862,6 @@ int ListPortion::Insert(Portion* item, int index)
   if(_DataType == porUNDEFINED) // inserting into an empty list
   {
     _DataType = item_type.Type;
-//    ((ListPortion*) Original())->_DataType = _DataType;
     result = _Value->Insert(item, index);
   }
   else  // inserting into an existing list
