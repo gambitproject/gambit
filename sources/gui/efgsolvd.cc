@@ -39,7 +39,7 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(wxWindow *p_parent,
 			     "All sequential Nash equilibria" };
   m_equilibriumType = new wxRadioBox(this, idTYPE_CHOICE, "What to compute",
 				     wxDefaultPosition, wxDefaultSize,
-				     9, typeChoices, 1, wxRA_SPECIFY_COLS);
+				     9, typeChoices, 3, wxRA_SPECIFY_COLS);
 
   wxString precisionChoices[] = { "Use floating-point arithmetic (faster)",
 				  "Use rational numbers (more precise)" };
@@ -141,8 +141,7 @@ void dialogEfgSolveStandard::UpdateFields(void)
 			  "on the associated normal form.");
     }
     else {
-      // Query: Should this be LiapSolve[NFG]?
-      m_algorithm->SetValue("LiapSolve[EFG]");
+      m_algorithm->SetValue("LiapSolve[NFG]");
       m_precision->Show(false);
       m_details->SetValue("Uses Liapunov function minimization. "
 			  "Note: this algorithm is not guaranteed to find "
