@@ -150,6 +150,7 @@ gbtTableContingencyIteratorRep::gbtTableContingencyIteratorRep(gbtTableGameRep *
   : m_refCount(0), m_frozen(0), m_nfg(p_nfg), 
     m_index(0L), m_profile(m_nfg->NumPlayers())
 {
+  for (int pl = 1; pl <= m_profile.Length(); m_profile[pl++] = 0);
   First();
 }
 
@@ -157,6 +158,7 @@ gbtTableContingencyIteratorRep::gbtTableContingencyIteratorRep(gbtTableGameRep *
   : m_refCount(0), m_frozen(p_strategy->m_infoset->m_player->m_id),
     m_nfg(p_nfg), m_index(p_strategy->m_index), m_profile(m_nfg->NumPlayers())
 {
+  for (int pl = 1; pl <= m_profile.Length(); m_profile[pl++] = 0);
   m_profile[m_frozen] = p_strategy;
   First();
 }
@@ -217,8 +219,7 @@ bool gbtTableContingencyIteratorRep::NextContingency(void)
 
   while (1)   {
     if (pl == m_frozen) {
-      pl--;
-      continue;
+      if (--pl == 0) return false; else continue;
     }
 
     int st = m_profile[pl]->m_id;

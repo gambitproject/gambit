@@ -62,6 +62,12 @@ public:
   gbtGameAction GetBehavior(const gbtGameInfoset &) const
     { throw gbtGameUndefinedException(); }
   //@}
+
+  /// @name Dominance properties
+  //@{
+  bool Dominates(const gbtGameStrategy &, bool) const;
+  bool IsDominated(bool) const;
+  //@}
 };
 
 class gbtTableInfosetRep : public gbtGameInfosetRep {

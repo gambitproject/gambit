@@ -26,6 +26,7 @@
 
 #include "game.h"
 #include "tree-game.h"
+#include "tree-contingency.h"
 
 //======================================================================
 //            Implementation of class gbtTreeStrategyRep
@@ -69,6 +70,65 @@ bool gbtTreeStrategyRep::Dereference(void)
     delete m_player->m_efg;
   }
   return (--m_refCount == 0 && m_deleted); 
+}
+
+//----------------------------------------------------------------------
+//         class gbtTreeStrategyRep: Dominance properties
+//----------------------------------------------------------------------
+
+bool gbtTreeStrategyRep::Dominates(const gbtGameStrategy &p_strategy, 
+				   bool p_strict) const
+{
+  if (p_strategy.IsNull()) throw gbtGameNullException();
+  gbtTreeStrategyRep *strategy = 
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_player != m_player) {
+    throw gbtGameMismatchException();
+  }
+
+  gbtTreeContingencyIteratorRep A(m_player->m_efg, 
+				  const_cast<gbtTreeStrategyRep *>(this));
+  gbtTreeContingencyIteratorRep B(m_player->m_efg, strategy);
+
+  if (p_strict) {
+    do  {
+      if (A.GetPayoff(m_player) <= B.GetPayoff(m_player)) {
+	return false;
+      }
+      A.NextContingency();
+    } while (B.NextContingency());
+	
+    return true;
+  }
+  else {   // weak dominance
+    bool equal = true;
+  
+    do   {
+      gbtRational ap = A.GetPayoff(m_player);
+      gbtRational bp = B.GetPayoff(m_player);
+
+      if (ap < bp) { 
+	return false;
+      }
+      else if (ap > bp) {
+	equal = false;
+      }
+    } while (A.NextContingency() && B.NextContingency());
+    
+    return (!equal);
+  }
+}
+
+bool gbtTreeStrategyRep::IsDominated(bool p_strict) const
+{
+  for (int st = 1; st <= m_player->m_strategies.Length(); st++) {
+    if (st != m_id) {
+      if (m_player->m_strategies[st]->Dominates(const_cast<gbtTreeStrategyRep *>(this), p_strict)) {
+	return true;
+      }
+    }
+  }
+  return false;
 }
 
 //======================================================================

@@ -4,6 +4,33 @@
 <para>
 </para>
 
+<sect2 id="apiref.strategy.dominates">
+<title>Dominates</title>
+<indexterm><primary>Dominates</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameStrategy::Dominates(const gbtGameStrategy &amp;p_strategy, bool p_strict) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Dominates</function> returns <literal>True</literal> (nonzero)
+if the strategy dominates the strategy <parameter>p_strategy</parameter>.
+When the parameter <parameter>p_strict</parameter> is <literal>True</literal>,
+the function only returns <literal>True</literal> when the dominance is
+strict; when <parameter>p_strict</parameter> is <literal>False</literal>,
+the function returns <literal>True</literal> when the dominance is strict
+or weak. A <errorname>gbtGameMismatchException</errorname> exception (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if the strategies
+do not belong to the same player.
+</para>
+
+</sect2>
+
 <sect2 id="apiref.strategy.getbehavior">
 <title>GetBehavior</title>
 <indexterm><primary>GetBehavior</primary></indexterm>
@@ -86,6 +113,32 @@ bool gbtGameStrategy::IsDeleted(void) const
 if the strategy has been deleted from its game.  Any attempts to operate
 on a deleted object throw a <errorname>gbtGameDeletedException</errorname>
 (mapped to <errorname>RuntimeError</errorname> in Python).
+</para>
+
+</sect2>
+
+<sect2 id="apiref.strategy.isdominated">
+<title>IsDominated</title>
+<indexterm><primary>IsDominated</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameStrategy::IsDominated(bool p_strict) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDominated</function> returns <literal>True</literal> (nonzero)
+if the strategy is dominated by another strategy.
+When the parameter <parameter>p_strict</parameter> is <literal>True</literal>,
+the function only returns <literal>True</literal> when the dominance is
+strict; when <parameter>p_strict</parameter> is <literal>False</literal>,
+the function returns <literal>True</literal> when the dominance is strict
+or weak.  This function only checks dominance against other pure
+strategies of the player; mixed strategies are not considered.
 </para>
 
 </sect2>

@@ -57,6 +57,16 @@ public:
   /// Returns the action chosen at the information set in the strategy
   virtual gbtGameAction GetBehavior(const gbtGameInfoset &) const = 0;
   //@}
+
+  //!
+  //! @name Dominance properties
+  //!
+  //@{
+  /// Returns true if this strategy dominates the given strategy
+  virtual bool Dominates(const gbtGameStrategy &, bool p_strict) const = 0;
+  /// Returns true if this strategy is dominated by another pure strategy
+  virtual bool IsDominated(bool p_strict) const = 0;
+  //@}
 };
 
 

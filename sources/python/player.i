@@ -27,6 +27,13 @@ public:
   gbtGamePlayer GetPlayer(void) const { return (*self)->GetPlayer(); }
   gbtGameAction GetBehavior(const gbtGameInfoset &s) const
     { return (*self)->GetBehavior(s); }
+
+  //--------------------------------------------------------------------
+  //                     Dominance properties
+  //--------------------------------------------------------------------
+  bool Dominates(const gbtGameStrategy &s, bool strict) const
+    { return (*self)->Dominates(s, strict); }
+  bool IsDominated(bool strict) const { return (*self)->IsDominated(strict); }
 };
 
 %exception GetInfoset {

@@ -202,8 +202,7 @@ bool gbtTreeContingencyIteratorRep::NextContingency(void)
 
   while (1)   {
     if (pl == m_frozen) {
-      pl--;
-      continue;
+      if (--pl == 0) return false; else continue;
     }
 
     int st = m_profile[pl]->m_id;

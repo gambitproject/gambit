@@ -26,6 +26,7 @@
 
 #include "game.h"
 #include "table-game.h"
+#include "table-contingency.h"
 
 //======================================================================
 //            Implementation of class gbtTableStrategyRep
@@ -84,6 +85,67 @@ std::string gbtTableStrategyRep::GetLabel(void) const
 
 gbtGamePlayer gbtTableStrategyRep::GetPlayer(void) const
 { return m_infoset->m_player; }
+
+//----------------------------------------------------------------------
+//        class gbtTableStrategyRep: Dominance properties
+//----------------------------------------------------------------------
+
+bool gbtTableStrategyRep::Dominates(const gbtGameStrategy &p_strategy, 
+				    bool p_strict) const
+{
+  if (p_strategy.IsNull()) throw gbtGameNullException();
+  gbtTableStrategyRep *strategy = 
+    dynamic_cast<gbtTableStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_infoset != m_infoset) {
+    throw gbtGameMismatchException();
+  }
+
+  gbtTableContingencyIteratorRep A(m_infoset->m_player->m_nfg, 
+				   const_cast<gbtTableStrategyRep *>(this));
+  gbtTableContingencyIteratorRep B(m_infoset->m_player->m_nfg, strategy);
+
+  if (p_strict) {
+    do  {
+      if (A.GetPayoff(m_infoset->m_player) <= 
+	  B.GetPayoff(m_infoset->m_player)) {
+	return false;
+      }
+      A.NextContingency();
+    } while (B.NextContingency());
+	
+    return true;
+  }
+  else {   // weak dominance
+    bool equal = true;
+  
+    do   {
+      gbtRational ap = A.GetPayoff(m_infoset->m_player);
+      gbtRational bp = B.GetPayoff(m_infoset->m_player);
+
+      if (ap < bp) { 
+	return false;
+      }
+      else if (ap > bp) { 
+	equal = false;
+      }
+    } while (A.NextContingency() && B.NextContingency());
+    
+    return (!equal);
+  }
+}
+
+bool gbtTableStrategyRep::IsDominated(bool p_strict) const
+{
+  for (int st = 1; st <= m_infoset->m_actions.Length(); st++) {
+    if (st != m_id) {
+      if (m_infoset->m_actions[st]->Dominates(const_cast<gbtTableStrategyRep *>(this), p_strict)) {
+	return true;
+      }
+    }
+  }
+  return false;
+}
+
 
 //======================================================================
 //            Implementation of class gbtTableInfosetRep

@@ -63,6 +63,12 @@ public:
   gbtGamePlayer GetPlayer(void) const;
   gbtGameAction GetBehavior(const gbtGameInfoset &) const;
   //@}
+
+  /// @name Dominance properties
+  //@{
+  bool Dominates(const gbtGameStrategy &, bool) const;
+  bool IsDominated(bool) const;
+  //@}
 };
 
 class gbtTreePlayerRep : public gbtGamePlayerRep {
