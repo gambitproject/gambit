@@ -43,28 +43,29 @@ Portion *GSM_ActionProb_Float(Portion **param)
   BaseEfg* e = p->BelongsTo();
   
   int i = 0;
-  int player = 0;
-  int infoset = 0;
   int action = 0;
   for(i=1; i<=s->NumActions(); i++)
     if(s->GetActionList()[i] == a)
       action = i;
-  for(i=1; i<=p->NumInfosets(); i++)
-    if(p->InfosetList()[i] == s)
-      infoset = i;
-  for(i=1; i<=e->NumPlayers(); i++)
-    if(e->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(infoset > 0);
   assert(action > 0);
 
-  if(bp->GetEFSupport().Contains(a))
-    if (!s->GetPlayer()->IsChance()) 
-      por = new FloatValPortion((*bp)(player, infoset, action));
-    else
+  if (s->GetPlayer()->IsChance())
     por = new FloatValPortion(((ChanceInfoset<double> *) s)->
-			      GetActionProbs()[action]);
+			      GetActionProbs()[action]);  
+  else if(bp->GetEFSupport().Contains(a))
+  {
+    int player = 0;
+    for(i=1; i<=e->NumPlayers(); i++)
+      if(e->PlayerList()[i] == p)
+	player = i;
+    assert(player > 0);
+    int infoset = 0;
+    for(i=1; i<=p->NumInfosets(); i++)
+      if(p->InfosetList()[i] == s)
+	infoset = i;
+    assert(infoset > 0);
+    por = new FloatValPortion((*bp)(player, infoset, action));
+  }
   else
     por = new NullPortion(porFLOAT);
 
@@ -84,30 +85,31 @@ Portion *GSM_ActionProb_Rational(Portion **param)
   BaseEfg* e = p->BelongsTo();
   
   int i = 0;
-  int player = 0;
-  int infoset = 0;
   int action = 0;
   for(i=1; i<=s->NumActions(); i++)
     if(s->GetActionList()[i] == a)
       action = i;
-  for(i=1; i<=p->NumInfosets(); i++)
-    if(p->InfosetList()[i] == s)
-      infoset = i;
-  for(i=1; i<=e->NumPlayers(); i++)
-    if(e->PlayerList()[i] == p)
-      player = i;
-  assert(player > 0);
-  assert(infoset > 0);
   assert(action > 0);
 
-  if(bp->GetEFSupport().Contains(a))
-    if (!s->GetPlayer()->IsChance()) 
-      por = new RationalValPortion((*bp)(player, infoset, action));
-    else
-      por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->
-				   GetActionProbs()[action]);
+  if (s->GetPlayer()->IsChance())
+    por = new RationalValPortion(((ChanceInfoset<gRational> *) s)->
+			      GetActionProbs()[action]);  
+  else if(bp->GetEFSupport().Contains(a))
+  {
+    int player = 0;
+    for(i=1; i<=e->NumPlayers(); i++)
+      if(e->PlayerList()[i] == p)
+	player = i;
+    assert(player > 0);
+    int infoset = 0;
+    for(i=1; i<=p->NumInfosets(); i++)
+      if(p->InfosetList()[i] == s)
+	infoset = i;
+    assert(infoset > 0);
+    por = new RationalValPortion((*bp)(player, infoset, action));
+  }
   else
-    return new NullPortion(porRATIONAL);
+    por = new NullPortion(porFLOAT);
 
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
