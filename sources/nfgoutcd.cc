@@ -123,7 +123,7 @@ return ret;
 NfgOutcomeDialogC::NfgOutcomeDialogC(int rows,int cols,Nfg &nf_,
                ParameterSetList &params_,NfgShow *ns_,NfgOutcomeDialog *parent_)
 				:SpreadSheet3D(rows,cols,1,"Outcomes [S]",0/*(wxFrame *)ns_->GetParent()*/,ANY_BUTTON),
-             parent(parent_),nf(nf_),ns(ns_),params(params_),
+             parent(parent_), nf(nf_), params(params_), ns(ns_),
              polyval(params_.PolyVal())
 {
 MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
@@ -332,7 +332,7 @@ if (new_name!=tmp->GetName())
 if (outcomes_changed) ns->SetOutcome(-1);
 }
 
-void NfgOutcomeDialogC::OnDoubleClick(int row,int col,int level,const gString &)
+void NfgOutcomeDialogC::OnDoubleClick(int row,int col,int /* level*/,const gString &)
 {
 static bool busy=false;
 if (busy) return;

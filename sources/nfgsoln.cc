@@ -132,14 +132,14 @@ int	NfgSolnShow::feature_width[MSOLN_NUM_FEATURES]={0,0,-1,8,2,2,2,7,7,7};
 
 
 NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_,int num_players_,
-											int max_strats,int cur_soln_,
-											NormalDrawSettings	&ds,MSolnSortFilterOptions &sf_options_,
-											NfgShow *parent_,wxFrame *parent_frame,unsigned int opts):
-				parent(parent_),num_players(num_players_),cur_soln(cur_soln_),
-				num_solutions(solns_.Length()),solns(solns_),norm_draw_settings(ds),
-            features(0,MSOLN_NUM_FEATURES-1),sf_options(sf_options_),
-				SpreadSheet3D(1+num_players_*solns_.Length(),2+max_strats,1,"Solutions",parent_frame,ANY_BUTTON)
-
+                         int max_strats, int cur_soln_, NormalDrawSettings &ds,
+                         MSolnSortFilterOptions &sf_options_, NfgShow *parent_,
+                         wxFrame *parent_frame,unsigned int opts):
+                SpreadSheet3D(1+num_players_*solns_.Length(),2+max_strats,1,"Solutions",parent_frame,ANY_BUTTON),
+                parent(parent_), solns(solns_), num_players(num_players_),
+                cur_soln(cur_soln_), num_solutions(solns_.Length()),
+                norm_draw_settings(ds), features(0,MSOLN_NUM_FEATURES-1),
+                sf_options(sf_options_)
 {
 Show(FALSE);
 int i;
