@@ -495,9 +495,10 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
 
   long nevals;
   double time;
+  bool isSingular;
   gList<MixedSolution> solutions;
   try {
-    PolEnum(m_support, params, solutions, nevals, time);
+    PolEnum(m_support, params, solutions, nevals, time, isSingular);
   }
   catch (gSignalBreak &) { }
   return solutions;
