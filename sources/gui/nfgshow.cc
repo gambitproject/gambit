@@ -1190,9 +1190,6 @@ void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   case NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM:
     solver = new guinfgPolEnum(this);
     break;
-  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE:
-    solver = new guinfgQre(this);
-    break;
   case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID:
     solver = new guinfgQreAll(this);
     break;

@@ -2229,9 +2229,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_POLENUM:
     solver = new guiefgPolEnumEfg(this);
     break;
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_QRE:
-    solver = new guiefgQreEfg(this);
-    break;
 
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LIAP: 
     solver = new guiefgLiapNfg(this);
@@ -2241,9 +2238,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM:
     solver = new guiefgPolEnumNfg(this);
-    break;
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QRE:
-    solver = new guiefgQreNfg(this);
     break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID: 
     solver = new guiefgQreAllNfg(this);
