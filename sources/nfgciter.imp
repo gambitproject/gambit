@@ -100,6 +100,11 @@ long NfgContIter::GetIndex(void) const
   return profile.GetIndex();
 }
 
+StrategyProfile &NfgContIter::Profile(void) const
+{
+  return profile;
+}
+
 gArray<int> NfgContIter::Get(void) const
 {
   gArray<int> current(N->NumPlayers());
