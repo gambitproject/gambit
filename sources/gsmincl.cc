@@ -1,7 +1,7 @@
 //#
 //# FILE: gsmincl.cc   miscellaneous GSM functions
 //#
-//# $Id$
+//# @(#)gsmincl.cc	1.18 10/1/96
 //#
 
 #include "gsmincl.h"
