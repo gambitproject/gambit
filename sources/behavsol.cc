@@ -517,7 +517,7 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
   for (pl = 1; pl <= Game().NumPlayers(); pl++) 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
-      if (!Support().MayReach(current_infoset)) {
+      if ( !Support().IsValidAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
@@ -550,7 +550,7 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (Support().MayReach(last_infoset)) {
+      if (Support().IsValidAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
 	  if (j != last_action->GetNumber()) {
 
@@ -678,6 +678,12 @@ BehavSolution::ExtendsToANFNashIneqs(const gSpace &BehavStratSpace,
 
 bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
 {
+  // This asks whether there is a Nash extension of the BehavSolution to 
+  // all information sets at which the behavioral probabilities are not
+  // specified.  The assumption is that the support has active actions
+  // at infosets at which the behavioral probabilities are defined, and
+  // no others.
+  
   // First we compute the number of variables, and indexing information
   int num_vars(0);
   gList<gList<int> > var_index;
@@ -688,7 +694,7 @@ bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       list_for_pl += num_vars;
-      if (!Support().MayReach(Game().GetInfosetByIndex(pl,i))) {
+      if ( !Support().IsValidAt(Game().GetInfosetByIndex(pl,i)) ) {
 	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
       }
     }
@@ -700,10 +706,11 @@ bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
   ORD_PTR ptr = &lex;
   term_order Lex(&BehavStratSpace, ptr);
 
+  num_vars = BehavStratSpace.Dmnsn();
+
   gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(BehavStratSpace,
 							  Lex,
 							  var_index);
-  num_vars = inequalities.Dmnsn();
 
   /*
   //DEBUG
