@@ -21,6 +21,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e)
   _GobitValue(-1),
   _LiapValue(-1),
   _Beliefs(0),
+  _Regret(0),
   _Id(0)
 {
   gEpsilon(_Epsilon);
