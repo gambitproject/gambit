@@ -10,6 +10,127 @@
 #include "nfgtable.h"
 #include "nfgconst.h"
 
+class ColoredStringRenderer : public wxGridCellRenderer {
+public:
+  // draw the string
+  virtual void Draw(wxGrid& grid,
+		    wxGridCellAttr& attr,
+		    wxDC& dc,
+		    const wxRect& rect,
+		    int row, int col,
+		    bool isSelected);
+
+  // return the string extent
+  virtual wxSize GetBestSize(wxGrid& grid,
+			     wxGridCellAttr& attr,
+			     wxDC& dc,
+			     int row, int col);
+
+  virtual wxGridCellRenderer *Clone() const
+    { return new ColoredStringRenderer; }
+
+protected:
+  // set the text colours before drawing
+  void SetTextColoursAndFont(wxGrid& grid,
+			     wxGridCellAttr& attr,
+			     wxDC& dc,
+			     bool isSelected);
+
+  // calc the string extent for given string/font
+  wxSize DoGetBestSize(wxGridCellAttr& attr,
+		       wxDC& dc,
+		       const wxString& text);
+};
+
+void ColoredStringRenderer::SetTextColoursAndFont(wxGrid& grid,
+                                                     wxGridCellAttr& attr,
+                                                     wxDC& dc,
+                                                     bool isSelected)
+{
+    dc.SetBackgroundMode( wxTRANSPARENT );
+
+    // TODO some special colours for attr.IsReadOnly() case?
+
+    if ( isSelected )
+    {
+        dc.SetTextBackground( grid.GetSelectionBackground() );
+        dc.SetTextForeground( grid.GetSelectionForeground() );
+    }
+    else
+    {
+        dc.SetTextBackground( attr.GetBackgroundColour() );
+        dc.SetTextForeground( attr.GetTextColour() );
+    }
+
+    dc.SetFont( attr.GetFont() );
+}
+
+wxSize ColoredStringRenderer::DoGetBestSize(wxGridCellAttr& attr,
+					    wxDC& dc,
+					    const wxString& text)
+{
+  wxCoord x = 0, y = 0;
+  dc.SetFont(attr.GetFont());
+  dc.GetTextExtent(text, &x, &y);
+  return wxSize(x, y);
+}
+
+wxSize ColoredStringRenderer::GetBestSize(wxGrid& grid,
+                                             wxGridCellAttr& attr,
+                                             wxDC& dc,
+                                             int row, int col)
+{
+  return DoGetBestSize(attr, dc, grid.GetCellValue(row, col));
+}
+
+void ColoredStringRenderer::Draw(wxGrid& grid,
+                                    wxGridCellAttr& attr,
+                                    wxDC& dc,
+                                    const wxRect& rectCell,
+                                    int row, int col,
+                                    bool isSelected)
+{
+  wxGridCellRenderer::Draw(grid, attr, dc, rectCell, row, col, isSelected);
+
+  // now we only have to draw the text
+  SetTextColoursAndFont(grid, attr, dc, isSelected);
+
+  wxRect rect = rectCell;
+  rect.Inflate(-1);
+
+  wxCoord x, y;
+  grid.DrawTextRectangle(dc, "(", rect);
+  dc.GetTextExtent("(", &x, &y);
+  rect.x += x;
+
+  wxString text = grid.GetCellValue(row, col);
+  dc.SetTextForeground(*wxRED);
+  for (unsigned int i = 0; i < text.Length(); i++) {
+    if (text[i] == ',') {
+      wxColour color = dc.GetTextForeground();
+      dc.SetTextForeground(*wxBLACK);
+      grid.DrawTextRectangle(dc, ",", rect);
+      dc.GetTextExtent(",", &x, &y);
+      rect.x += x;
+
+      if (color == *wxRED) {
+	dc.SetTextForeground(*wxBLUE);
+      }
+      else {
+	dc.SetTextForeground(*wxRED);
+      }
+    }
+    else {
+      grid.DrawTextRectangle(dc, text[i], rect);
+      dc.GetTextExtent(text[i], &x, &y);
+      rect.x += x;
+    }
+  }
+  
+  dc.SetTextForeground(*wxBLACK);
+  grid.DrawTextRectangle(dc, ")", rect); 
+}
+
 //======================================================================
 //                   class NfgTable: Member functions
 //======================================================================
@@ -254,6 +375,7 @@ void NfgTable::OnChangeValues(void)
       }
 
       m_grid->SetCellValue((char *) pay_str, i - 1, j - 1);
+      m_grid->SetCellRenderer(i - 1, j - 1, new ColoredStringRenderer);
     }
 
     if (ShowDominance()) { 
