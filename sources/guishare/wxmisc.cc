@@ -154,9 +154,10 @@ int gDrawTextGetNum(const gText &s, int *i)
     gText tmp;
     (*i) += 2;  // skip the opening {
 
-    while (isdigit(s[*i]) && *i < s.Length() && s[*i] != '}')
+    while (isdigit(s[(unsigned int) *i]) && (unsigned int) *i < s.Length() && 
+	   s[(unsigned int) *i] != '}')
     {
-        tmp += s[*i];
+        tmp += s[(unsigned int) *i];
         (*i)++;
     }
 
@@ -174,7 +175,7 @@ gText gDrawTextPreParse(const gText &s)
 
     gText tmp;
 
-    for (int n = 0; n < s.Length(); n++)
+    for (unsigned int n = 0; n < s.Length(); n++)
     {
         if (s[n] != '^')
             tmp += s[n];
@@ -214,7 +215,8 @@ const char *wx_hilight_color_list[WX_COLOR_LIST_LENGTH] =
 // from the wx_color_list.  To print a \, use a \\.
 void gDrawText(wxDC &dc, const gText &s0, float x, float y)
 {
-  int i = 0, c;
+  unsigned int i = 0;
+  int c;
   long dx, dy;
   gText s = gDrawTextPreParse(s0);
   gText tmp;
@@ -248,7 +250,7 @@ void gDrawText(wxDC &dc, const gText &s0, float x, float y)
 	break;
 
       case 'C':
-	c = (gDrawTextGetNum(s, &i)%WX_COLOR_LIST_LENGTH);
+	c = (gDrawTextGetNum(s, (int *) &i)%WX_COLOR_LIST_LENGTH);
 	dc.SetTextForeground(*wxTheColourDatabase->FindColour(wx_color_list[c]));
 	break;
 
@@ -324,7 +326,8 @@ void gDrawText(wxDC &dc, const gText &s0, float x, float y)
 
 void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y)
 {
-  int i = 0, c;
+  unsigned int i = 0;
+  int c;
   long dx, dy;
   gText s = gDrawTextPreParse(s0);
   gText tmp;
@@ -359,7 +362,7 @@ void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y)
 	break;
 
       case 'C':
-	c = (gDrawTextGetNum(s, &i) % WX_COLOR_LIST_LENGTH);
+	c = (gDrawTextGetNum(s, (int *) &i) % WX_COLOR_LIST_LENGTH);
 	break;
 
       case '^':       // Start superscript

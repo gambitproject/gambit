@@ -591,7 +591,7 @@ void GclFrame::OnSashDrag(wxSashEvent &p_event)
 void GclFrame::OnTextEnter(wxCommandEvent &)
 {
   gText input(m_inputWindow->GetValue().c_str());
-  if (input.Right(2)[1] == '\\') {
+  if (input.Right(2)[1u] == '\\') {
     // continuation character
     m_inputWindow->AppendText("\n");
     return;
