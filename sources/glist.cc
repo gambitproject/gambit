@@ -24,4 +24,9 @@ template class gList<gText>;
 template class gList<gBlock<int> >;
 template class gList<gArray<int> >;
 
+template class gList<bool>;
+template gOutput &operator<<(gOutput &, const gList<bool> &);
+template class gList<gList<bool> >;
+template gOutput &operator<<(gOutput &, const gList<gList<bool> > &);
+template class gList<gList<gList<bool> > >;
 
