@@ -302,7 +302,7 @@ Portion *gclAssignment::Evaluate(void)
     if (rhs->Spec().Type == porREFERENCE)
       return new ErrorPortion("Undefined variable " +
                               ((ReferencePortion *) rhs)->Value());
-    _gsm.VarDefine(((ReferencePortion *) lhs)->Value(), rhs);
+    _gsm.VarDefine(((ReferencePortion *) lhs)->Value(), rhs->ValCopy());
   }
   else
     _gsm.Assign(lhs, rhs);
