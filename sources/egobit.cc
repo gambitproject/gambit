@@ -59,7 +59,7 @@ EFGobitFunc::EFGobitFunc(const Efg<double> &E,
     int nisets = (_efg.PlayerList()[pl])->NumInfosets();
     _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
     for (int iset = 1; iset <= nisets; iset++)
-      _scratch[pl][iset] = new gVector<double>(_p.GetEFSupport().NumActions(pl, iset));
+      _scratch[pl][iset] = new gVector<double>(_p.Support().NumActions(pl, iset));
   }
 }
 
@@ -95,7 +95,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 
       int act;
       
-      for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
+      for (act = 1; act <= _p.Support().NumActions(pl, iset); act++)  {
 	z = _Lambda * _cpay(pl, iset, act);
 	factor=1.0;
 	if(z>500.0) {factor+=z-500.0;z=500.0;_domain_err=true;}
@@ -105,7 +105,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
 	_cpay(pl, iset, act) = z;
       }
       
-      for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
+      for (act = 1; act <= _p.Support().NumActions(pl, iset); act++)  {
 	z = _p(pl, iset, act);
 	prob += z;
 	if (z < 0.0)

@@ -25,13 +25,7 @@ class Portion;
 #endif   // __GNUG__, __BORLANDC__
 
 #include "garray.imp"
-
-//TEMPLATE class gArray<Portion *>;
-
 #include "gblock.imp"
-
-//TEMPLATE class gBlock<Portion*>;
-
 
 #ifdef __BORLANDC__
 #pragma option -Jgx
@@ -1588,7 +1582,7 @@ MixedProfile<gRational> *& MixedPortion<gRational>::Value(void) const
 PortionSpec MixedPortion<gRational>::Spec(void) const
 { 
   unsigned long _DataType = porMIXED;
-  _DataType = porMIXED_FLOAT;
+  _DataType = porMIXED_RATIONAL;
   return PortionSpec(_DataType);
 }
 
@@ -1683,41 +1677,29 @@ bool MixedRefPortion<gRational>::IsReference(void) const
 
 
 
-BehavPortion::BehavPortion(void)
+BehavPortion<double>::BehavPortion(void)
+{}
+
+BehavPortion<double>::~BehavPortion()
 { }
 
-BehavPortion::~BehavPortion()
-{ }
-
-BaseBehavProfile*& BehavPortion::Value(void) const
+BehavProfile<double> *& BehavPortion<double>::Value(void) const
 { return *_Value; }
 
-PortionSpec BehavPortion::Spec(void) const
+PortionSpec BehavPortion<double>::Spec(void) const
 { 
-  unsigned int _DataType = porBEHAV;
-  if(*_Value)
-    switch((*_Value)->Type())
-    {
-    case DOUBLE:
-      _DataType = porBEHAV_FLOAT;
-      break;
-    case RATIONAL:
-      _DataType = porBEHAV_RATIONAL;
-      break;
-    default:
-      assert(0);
-    }
+  unsigned long _DataType = porBEHAV;
+  _DataType = porBEHAV_FLOAT;
   return PortionSpec(_DataType);
 }
 
-DataType BehavPortion::SubType( void ) const
+DataType BehavPortion<double>::SubType( void ) const
 {
   assert( Value() );
-  return Value()->Type();
+  return DOUBLE;
 }
 
-
-void BehavPortion::Output(gOutput& s) const
+void BehavPortion<double>::Output(gOutput& s) const
 {
   Portion::Output(s);
   if(!*_Value)
@@ -1727,95 +1709,159 @@ void BehavPortion::Output(gOutput& s) const
   else
   {
     s << "(Behav) ";
-    switch((*_Value)->Type())
-    {
-    case DOUBLE:
-      if(_WriteSolutionInfo>1)
-	s << (BehavSolution<double>) *(BehavSolution<double>*)(*_Value); 
-      else
-	s << (BehavProfile<double>) *(BehavSolution<double>*)(*_Value); 
-      break;
-    case RATIONAL:
-      if(_WriteSolutionInfo>1)
-	s << (BehavSolution<gRational>) *(BehavSolution<gRational>*)(*_Value); 
-      else
-	s << (BehavProfile<gRational>) *(BehavSolution<gRational>*)(*_Value); 
-      break;
-    default:
-      assert(0);
-    }
+    if (_WriteSolutionInfo>1)
+      s << (BehavSolution<double>) *(BehavSolution<double>*)(*_Value); 
+    else
+      s << (BehavProfile<double>) *(BehavSolution<double>*)(*_Value); 
   }
 }
 
-gString BehavPortion::OutputString( void ) const
+gString BehavPortion<double>::OutputString( void ) const
 {
   return "(Behav)";
 }
 
-Portion* BehavPortion::ValCopy(void) const
+Portion* BehavPortion<double>::ValCopy(void) const
 { 
-  Portion* p;
-
+  Portion* p = 0;
   if(!*_Value)
   {
-    p = new BehavValPortion(0);
+    p = new BehavValPortion<double>(0);
   }
   else
   {
-    switch((*_Value)->Type())
-    {
-    case DOUBLE:
-      p = new BehavValPortion
-	(new BehavSolution<double>
-	 (* (BehavSolution<double>*) (*_Value))); 
-      break;
-    case RATIONAL:
-      p = new BehavValPortion
-	(new BehavSolution<gRational>
-	 (* (BehavSolution<gRational>*) (*_Value))); 
-      break;
-    default:
-      assert(0);
-    }
+    p = new BehavValPortion<double>
+      (new BehavSolution<double>
+       (* (BehavSolution<double>*) (*_Value))); 
   }
   p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
-Portion* BehavPortion::RefCopy(void) const
+Portion* BehavPortion<double>::RefCopy(void) const
 { 
-  Portion* p = new BehavRefPortion(*_Value); 
+  Portion* p = new BehavRefPortion<double>(*_Value); 
   p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
-BehavValPortion::BehavValPortion(BaseBehavProfile* value)
-{ _Value = new BaseBehavProfile*(value); }
+BehavValPortion<double>::BehavValPortion(BehavProfile<double> * value)
+{ _Value = new BehavProfile<double> *(value); }
 
-BehavValPortion::~BehavValPortion()
+BehavValPortion<double>::~BehavValPortion()
 { 
   delete *_Value;
   delete _Value; 
 }
 
-bool BehavValPortion::IsReference(void) const
+bool BehavValPortion<double>::IsReference(void) const
 { return false; }
 
 
-BehavRefPortion::BehavRefPortion(BaseBehavProfile*& value)
+BehavRefPortion<double>::BehavRefPortion(BehavProfile<double> *& value)
 { _Value = &value; }
 
-BehavRefPortion::~BehavRefPortion()
+BehavRefPortion<double>::~BehavRefPortion()
 { }
 
-bool BehavRefPortion::IsReference(void) const
+bool BehavRefPortion<double>::IsReference(void) const
 { return true; }
 
 
 
+BehavPortion<gRational>::BehavPortion(void)
+{}
 
+BehavPortion<gRational>::~BehavPortion()
+{ }
+
+BehavProfile<gRational> *& BehavPortion<gRational>::Value(void) const
+{ return *_Value; }
+
+PortionSpec BehavPortion<gRational>::Spec(void) const
+{ 
+  unsigned long _DataType = porBEHAV;
+  _DataType = porBEHAV_RATIONAL;
+  return PortionSpec(_DataType);
+}
+
+DataType BehavPortion<gRational>::SubType( void ) const
+{
+  assert( Value() );
+  return RATIONAL;
+}
+
+void BehavPortion<gRational>::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  if(!*_Value)
+  {
+    s << "(Behav) NULL"; 
+  }
+  else
+  {
+    s << "(Behav) ";
+    if (_WriteSolutionInfo>1)
+      s << (BehavSolution<gRational>) *(BehavSolution<gRational>*)(*_Value); 
+    else
+      s << (BehavProfile<gRational>) *(BehavSolution<gRational>*)(*_Value); 
+  }
+}
+
+gString BehavPortion<gRational>::OutputString( void ) const
+{
+  return "(Behav)";
+}
+
+Portion* BehavPortion<gRational>::ValCopy(void) const
+{ 
+  Portion* p = 0;
+  if(!*_Value)
+  {
+    p = new BehavValPortion<gRational>(0);
+  }
+  else
+  {
+    p = new BehavValPortion<gRational>
+      (new BehavSolution<gRational>
+       (* (BehavSolution<gRational>*) (*_Value))); 
+  }
+  p->SetGame(Game(), GameIsEfg());
+  return p;
+}
+
+Portion* BehavPortion<gRational>::RefCopy(void) const
+{ 
+  Portion* p = new BehavRefPortion<gRational>(*_Value); 
+  p->SetGame(Game(), GameIsEfg());
+  p->SetOriginal(Original());
+  return p;
+}
+
+
+BehavValPortion<gRational>::BehavValPortion(BehavProfile<gRational> * value)
+{ _Value = new BehavProfile<gRational> *(value); }
+
+BehavValPortion<gRational>::~BehavValPortion()
+{ 
+  delete *_Value;
+  delete _Value; 
+}
+
+bool BehavValPortion<gRational>::IsReference(void) const
+{ return false; }
+
+
+BehavRefPortion<gRational>::BehavRefPortion(BehavProfile<gRational> *& value)
+{ _Value = &value; }
+
+BehavRefPortion<gRational>::~BehavRefPortion()
+{ }
+
+bool BehavRefPortion<gRational>::IsReference(void) const
+{ return true; }
 
 
 
@@ -2819,11 +2865,11 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
     b = ((*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) p1)->Value())) == 
 	 (*((MixedSolution<gRational>*) ((MixedPortion<gRational>*) p2)->Value())));
   else if(p1->Spec().Type & porBEHAV_FLOAT)
-    b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
-	 (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
+    b = ((*((BehavSolution<double>*) ((BehavPortion<double>*) p1)->Value())) == 
+	 (*((BehavSolution<double>*) ((BehavPortion<double>*) p2)->Value())));
   else if(p1->Spec().Type & porBEHAV_RATIONAL)
-    b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
-	 (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
+    b = ((*((BehavSolution<gRational>*) ((BehavPortion<gRational>*) p1)->Value())) == 
+	 (*((BehavSolution<gRational>*) ((BehavPortion<gRational>*) p2)->Value())));
 
   else if(p1->Spec().Type & porNFG)
     b = false;
@@ -2868,3 +2914,10 @@ TEMPLATE class NfgRefPortion<double>;
 TEMPLATE class NfgPortion<gRational>;
 TEMPLATE class NfgValPortion<gRational>;
 TEMPLATE class NfgRefPortion<gRational>;
+
+TEMPLATE class BehavPortion<double>;
+TEMPLATE class BehavValPortion<double>;
+TEMPLATE class BehavRefPortion<double>;
+TEMPLATE class BehavPortion<gRational>;
+TEMPLATE class BehavValPortion<gRational>;
+TEMPLATE class BehavRefPortion<gRational>;

@@ -11,38 +11,15 @@
 #include "gstring.h"
 #include "efstrat.h"
 
-class BaseEfg;
-
-class BaseBehavProfile   {
-  protected:
-    const BaseEfg *E;
-    EFSupport support;
-    BaseBehavProfile(const BaseEfg &);
-    BaseBehavProfile(const BaseBehavProfile &);
-    BaseBehavProfile(const BaseEfg &, const EFSupport &);
-    BaseBehavProfile &operator=(const BaseBehavProfile &);
-
-  public:
-    virtual ~BaseBehavProfile();
-
-    DataType Type(void) const;
-    virtual bool IsPure(void) const = 0;
-    virtual bool IsPure(int pl) const = 0;
-    const EFSupport &GetEFSupport(void) const;
-    const gString &GetPlayerName(int p) const;
-    const gString &GetInfosetName(int p, int iset) const;
-    const gString &GetActionName(int p, int iset, int act) const;
-};
-
-
 #include "gdpvect.h"
 
 template <class T> class Efg;
 class Infoset;
 
-template <class T> class BehavProfile
-  : public BaseBehavProfile, public gDPVector<T>  {
-  private:
+template <class T> class BehavProfile : public gDPVector<T>  {
+  protected:
+    const Efg<T> *E;
+    EFSupport support;
 
     void Payoff(Node *n, T prob, int pl, T &value) const;
     void NodeValues(Node *n, int pl, gArray<T> &valarray,
@@ -55,16 +32,13 @@ template <class T> class BehavProfile
   public:
     BehavProfile(const Efg<T> &);
     BehavProfile(const Efg<T> &, const gDPVector<T> &);
-    BehavProfile(const EFSupport &);
+    BehavProfile(const Efg<T> &, const EFSupport &);
     BehavProfile(const BehavProfile<T> &);
     virtual ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
 
-    bool IsPure(void) const;
-    bool IsPure(int pl) const;
-
-    Efg<T> *BelongsTo(void) const   { return (Efg<T> *) E; }
+    Efg<T> &BelongsTo(void) const   { return (Efg<T> &) E; }
 
     const T &GetValue(Infoset *s, int act) const;
 
@@ -83,7 +57,7 @@ template <class T> class BehavProfile
 
     bool operator==(const BehavProfile<T> &) const;
     
-
+    const EFSupport &Support(void) const   { return support; }
 };
 #ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p);

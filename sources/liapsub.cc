@@ -12,7 +12,7 @@ extern void BehavToMixed(const Efg<double> &, const BehavProfile<double> &,
 int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 				   gList<BehavSolution<double> > &solns)
 {
-  BehavProfile<double> bp(sup);
+  BehavProfile<double> bp(E, sup);
   
   subgame_number++;
 
@@ -22,7 +22,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
     int niset = 1;
     for (int iset = 1; iset <= infosets[pl]; iset++)  {
       if (infoset_subgames(pl, iset) == subgame_number)  {
-	for (int act = 1; act <= bp.GetEFSupport().NumActions(pl, niset); act++)
+	for (int act = 1; act <= bp.Support().NumActions(pl, niset); act++)
 	  bp(pl, niset, act) = start(pl, iset, act);
 	niset++;
       }
@@ -59,7 +59,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 
 NFLiapBySubgame::NFLiapBySubgame(const Efg<double> &E, const NFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
-  : SubgameSolver<double>(E, s.GetEFSupport(), max),
+  : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),
     infoset_subgames(E.PureDimensionality()), params(p), start(s)
 { }

@@ -62,7 +62,7 @@ double EFLiapFunc::Value(const gVector<double> &v)
     for (int j = 1; j <= player->NumInfosets(); j++) {
       avg = sum = 0.0;
       int k;
-      for (k = 1; k <= _p.GetEFSupport().NumActions(i, j); k++) {
+      for (k = 1; k <= _p.Support().NumActions(i, j); k++) {
 	x = _p(i, j, k); 
 	avg += x * _cpay(i, j, k);
 	sum += x;
@@ -70,7 +70,7 @@ double EFLiapFunc::Value(const gVector<double> &v)
 	result += BIG1 * x * x;         // add penalty for neg probabilities
       }
 
-      for (k = 1; k <= _p.GetEFSupport().NumActions(i, j); k++) {
+      for (k = 1; k <= _p.Support().NumActions(i, j); k++) {
 	x = _cpay(i, j, k) - avg;
 	if (x < 0.0) x = 0.0;
 	result += x * x;          // add penalty if not best response
@@ -89,13 +89,13 @@ static void PickRandomProfile(BehavProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.BelongsTo()->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= p.BelongsTo()->PlayerList()[pl]->NumInfosets();
+  for (int pl = 1; pl <= p.BelongsTo().NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= p.BelongsTo().PlayerList()[pl]->NumInfosets();
 	 iset++)  {
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p.GetEFSupport().NumActions(pl, iset); act++)  {
+      for (act = 1; act < p.Support().NumActions(pl, iset); act++)  {
 	do
 	  tmp = Uniform();
 	while (tmp + sum > 1.0);
@@ -212,7 +212,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 int EFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
 				  gList<BehavSolution<double> > &solns)
 {
-  BehavProfile<double> bp(sup);
+  BehavProfile<double> bp(E, sup);
   
   subgame_number++;
 
@@ -222,7 +222,7 @@ int EFLiapBySubgame::SolveSubgame(const Efg<double> &E, const EFSupport &sup,
     int niset = 1;
     for (int iset = 1; iset <= infosets[pl]; iset++)  {
       if (infoset_subgames(pl, iset) == subgame_number)  {
-	for (int act = 1; act <= bp.GetEFSupport().NumActions(pl, niset); act++)
+	for (int act = 1; act <= bp.Support().NumActions(pl, niset); act++)
 	  bp(pl, niset, act) = start(pl, iset, act);
 	niset++;
       }
@@ -241,7 +241,7 @@ extern void MarkedSubgameRoots(const BaseEfg &, gList<Node *> &);
 
 EFLiapBySubgame::EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &p,
 				 const BehavProfile<double> &s, int max)
-  : SubgameSolver<double>(E, s.GetEFSupport(), max),
+  : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),
     infoset_subgames(E.PureDimensionality()), params(p), start(s)
 {

@@ -438,22 +438,23 @@ void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
 //-------------------------------------------------------------------------
 
 template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF)
-  : BaseBehavProfile(EF), gDPVector<T>(EF.Dimensionality())
+  : gDPVector<T>(EF.Dimensionality()), E(&EF), support(EF)
 {
   Centroid();
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
 						 const gDPVector<T> &profile)
-  : BaseBehavProfile(EF), gDPVector<T>(profile)
+  : gDPVector<T>(profile), E(&EF), support(EF)
 { }
 
 template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
-  : BaseBehavProfile(p), gDPVector<T>(p)
+  : gDPVector<T>(p), E(p.E), support(p.support)
 { }
 
-template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s)
-  : BaseBehavProfile(s.BelongsTo(), s), gDPVector<T>(s.NumActions())
+template <class T> BehavProfile<T>::BehavProfile(const Efg<T> &EF,
+						 const EFSupport &s)
+  : gDPVector<T>(s.NumActions()), E(&EF), support(s)
 { 
   Centroid();
 }
@@ -463,8 +464,12 @@ template <class T> BehavProfile<T>::~BehavProfile()   { }
 template <class T>
 BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
 {
-  BaseBehavProfile::operator=(p);
-  gDPVector<T>::operator=(p);
+  if (this != &p && E == p.E)   {
+    // note that a dimensionality change will trigger a failed assertion
+    // in the gDPVector assignment operator
+    support = p.support;
+    gDPVector<T>::operator=(p);
+  }
   return *this;
 }
 
@@ -481,20 +486,6 @@ template <class T> void BehavProfile<T>::Centroid(void) const
       for (act = 1; act <= svlen[dvidx[pl] + iset - 1]; act++)
 	dvptr[pl][iset][act] = center;
     }
-}
-
-template <class T> bool BehavProfile<T>::IsPure(void) const
-{
-  // currently not implemented
-  assert(0);
-  return false;
-}
-
-template <class T> bool BehavProfile<T>::IsPure(int) const
-{
-  // currently not implemented
-  assert(0);
-  return false;
 }
 
 template <class T> T BehavProfile<T>::LiapValue(void) const
@@ -769,7 +760,7 @@ void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index,
 template <class T> 
 gArray<T> BehavProfile<T>::NodeRealizProbs(void) const
 {
-  int index = 1, maxindex = (NumNodes(*BelongsTo()));
+  int index = 1, maxindex = NumNodes(*E);
 
   gArray<T> NRProbs(maxindex);
   for (int ii = 1; ii <= maxindex; ii++) NRProbs[ii] = (T)0;
@@ -886,7 +877,7 @@ void BehavProfile<T>::NodeValues(Node *n, int pl,
 template <class T>
 gArray<T> BehavProfile<T>::NodeValues(int pl) const
 {
-  int index = 1, maxindex = NumNodes(*BelongsTo());
+  int index = 1, maxindex = NumNodes(*E);
 
   gArray<T> valarray(maxindex); 
   for (int i = 1; i <= maxindex; i++)  valarray[i] = (T) 0;

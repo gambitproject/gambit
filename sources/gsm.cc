@@ -2516,11 +2516,11 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 	  switch( ((BaseEfg*) game)->Type() )
 	  {
 	  case DOUBLE:
-	    ((BehavSolution<double>*) ((BehavPortion*) 
+	    ((BehavSolution<double>*) ((BehavPortion<double> *) 
 				       varslist[i])->Value())->Invalidate();
 	    break;
 	  case RATIONAL:
-	    ((BehavSolution<gRational>*) ((BehavPortion*) 
+	    ((BehavSolution<gRational>*) ((BehavPortion<gRational> *) 
 					  varslist[i])->Value())->Invalidate();
 	    break;
 	  default:

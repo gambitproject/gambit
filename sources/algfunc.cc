@@ -62,7 +62,7 @@ Behav_ListPortion<double>::Behav_ListPortion(
 {
   _DataType = porBEHAV_FLOAT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavValPortion(new BehavSolution<double>(list[i])));
+    Append(new BehavValPortion<double>(new BehavSolution<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(
@@ -70,7 +70,7 @@ Behav_ListPortion<gRational>::Behav_ListPortion(
 {
   _DataType = porBEHAV_RATIONAL;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavValPortion(new BehavSolution<gRational>(list[i])));
+    Append(new BehavValPortion<gRational>(new BehavSolution<gRational>(list[i])));
 }
 
 
@@ -122,7 +122,7 @@ static Portion *GSM_Behav_Float(Portion **param)
   BehavSolution<double> *bp = new BehavSolution<double>(E);
   MixedToBehav(N, mp, E, *bp);
 
-  Portion* por = new BehavValPortion(bp);
+  Portion* por = new BehavValPortion<double>(bp);
   por->SetGame((void *) &E, true);
   return por;
 }
@@ -138,7 +138,7 @@ static Portion *GSM_Behav_Rational(Portion **param)
   BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
   MixedToBehav(N, mp, E, *bp);
 
-  Portion* por = new BehavValPortion(bp);
+  Portion* por = new BehavValPortion<gRational>(bp);
   por->SetGame((void *) &E, true);
   return por;
 }
@@ -446,8 +446,8 @@ static Portion *GSM_Gobit_Start(Portion **param)
   }
   else  {     // BEHAV_FLOAT  
     BehavSolution<double>& start = 
-      * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-    Efg<double> &E = *(start.BelongsTo());
+      * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
+    Efg<double> &E = start.BelongsTo();
   
     EFGobitParams EP;
     if(((TextPortion*) param[1])->Value() != "")
@@ -636,8 +636,8 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 static Portion *GSM_Liap_BehavFloat(Portion **param)
 {
   BehavSolution<double> &start = 
-    * (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
-  Efg<double> &E = *(start.BelongsTo());
+    * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
+  Efg<double> &E = start.BelongsTo();
   
   if (((BoolPortion *) param[1])->Value())   {
     NFLiapParams LP;
@@ -979,7 +979,7 @@ static Portion *GSM_Nfg_Rational(Portion **param)
 Portion* GSM_Payoff_BehavFloat(Portion** param)
 {
   BehavSolution<double>* bp = 
-    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+    (BehavSolution<double>*) ((BehavPortion<double>*) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
   return new FloatValPortion(bp->Payoff(player->GetNumber()));
@@ -988,7 +988,7 @@ Portion* GSM_Payoff_BehavFloat(Portion** param)
 Portion* GSM_Payoff_BehavRational(Portion** param)
 {
   BehavSolution<gRational>* bp = 
-    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
+    (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
   return new RationalValPortion(bp->Payoff(player->GetNumber()));

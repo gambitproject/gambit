@@ -821,9 +821,6 @@ public:
 
 
 
-
-
-
 //---------------------------------------------------------------------
 //                          new Mixed class
 //---------------------------------------------------------------------
@@ -870,20 +867,17 @@ public:
 //                          new Behav class
 //---------------------------------------------------------------------
 
-class BaseBehavProfile;
-
-class BehavPortion : public Portion
-{
+template <class T> class BehavPortion : public Portion  {
 protected:
-  BaseBehavProfile** _Value;
+  BehavProfile<T> ** _Value;
   BehavPortion(void);
 
 public:
   virtual ~BehavPortion();
 
-  BaseBehavProfile*& Value(void) const;
+  BehavProfile<T> *& Value(void) const;
   PortionSpec Spec(void) const;
-  DataType SubType( void ) const;
+  DataType SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -893,24 +887,19 @@ public:
 };
 
 
-class BehavValPortion : public BehavPortion
-{
+template <class T> class BehavValPortion : public BehavPortion<T>  {
 public:
-  BehavValPortion(BaseBehavProfile* value);
+  BehavValPortion(BehavProfile<T> *value);
   virtual ~BehavValPortion();
   bool IsReference(void) const;
 };
 
-class BehavRefPortion : public BehavPortion
-{
+template <class T> class BehavRefPortion : public BehavPortion<T>  {
 public:
-  BehavRefPortion(BaseBehavProfile*& value);
+  BehavRefPortion(BehavProfile<T> *& value);
   virtual ~BehavRefPortion();
   bool IsReference(void) const;
 };
-
-
-
 
 
 

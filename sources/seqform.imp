@@ -316,7 +316,7 @@ template <class T>
 int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
 				      gList<BehavSolution<T> > &solns)
 {
-  BehavProfile<T> bp(sup);
+  BehavProfile<T> bp(E, sup);
 
   SeqFormModule<T> M(E, params, sup);
   

@@ -215,34 +215,34 @@ Portion* GSM_Add_MixedRational(Portion** param)
 Portion* GSM_Add_BehavFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0 ||
-     ((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<double>*) param[0])->Value() == 0 ||
+     ((BehavPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
 
-  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
-     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+  if(((BehavPortion<double>*) param[0])->Value()->Support() !=
+     ((BehavPortion<double>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) +=
-    (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
+  (* (BehavSolution<double>*) ((BehavPortion<double>*) result)->Value()) +=
+    (* (BehavSolution<double>*) ((BehavPortion<double>*) param[1])->Value());
   return result;
 }
 
 Portion* GSM_Add_BehavRational(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0 ||
-     ((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<gRational>*) param[0])->Value() == 0 ||
+     ((BehavPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
-     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+  if(((BehavPortion<gRational>*) param[0])->Value()->Support() !=
+     ((BehavPortion<gRational>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) +=
-    (* (BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value());
+  (* (BehavSolution<gRational>*) ((BehavPortion<gRational>*) result)->Value()) +=
+    (* (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[1])->Value());
   return result;
 }
 
@@ -359,34 +359,34 @@ Portion* GSM_Subtract_MixedRational(Portion** param)
 Portion* GSM_Subtract_BehavFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0 ||
-     ((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<double>*) param[0])->Value() == 0 ||
+     ((BehavPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
 
-  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
-     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+  if(((BehavPortion<double>*) param[0])->Value()->Support() !=
+     ((BehavPortion<double>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) -=
-    (* (BehavSolution<double>*) ((BehavPortion*) param[1])->Value());
+  (* (BehavSolution<double>*) ((BehavPortion<double>*) result)->Value()) -=
+    (* (BehavSolution<double>*) ((BehavPortion<double>*) param[1])->Value());
   return result;
 }
 
 Portion* GSM_Subtract_BehavRational(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[0])->Value() == 0 ||
-     ((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<gRational>*) param[0])->Value() == 0 ||
+     ((BehavPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((BehavPortion*) param[0])->Value()->GetEFSupport() !=
-     ((BehavPortion*) param[1])->Value()->GetEFSupport())
+  if(((BehavPortion<gRational>*) param[0])->Value()->Support() !=
+     ((BehavPortion<gRational>*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
-  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) -=
-    (* (BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value());
+  (* (BehavSolution<gRational>*) ((BehavPortion<gRational>*) result)->Value()) -=
+    (* (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[1])->Value());
   return result;
 }
 
@@ -455,11 +455,11 @@ Portion* GSM_Multiply_MixedRational(Portion** param)
 Portion* GSM_Multiply_BehavFloat(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<double>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
   
   result = param[1]->ValCopy();
-  (* (BehavSolution<double>*) ((BehavPortion*) result)->Value()) *=
+  (* (BehavSolution<double>*) ((BehavPortion<double>*) result)->Value()) *=
     ((FloatPortion*) param[0])->Value();
   return result;
 }
@@ -467,11 +467,11 @@ Portion* GSM_Multiply_BehavFloat(Portion** param)
 Portion* GSM_Multiply_BehavRational(Portion** param)
 {
   Portion* result = 0;
-  if(((BehavPortion*) param[1])->Value() == 0)
+  if(((BehavPortion<gRational>*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Behav value");
   
   result = param[1]->ValCopy();
-  (* (BehavSolution<gRational>*) ((BehavPortion*) result)->Value()) *=
+  (* (BehavSolution<gRational>*) ((BehavPortion<gRational>*) result)->Value()) *=
     ((RationalPortion*) param[0])->Value();
   return result;
 }
@@ -854,8 +854,8 @@ Portion* GSM_Equal_BehavFloat(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolValPortion
-    ((*(BehavSolution<double> *) ((BehavPortion *) param[0])->Value()) ==
-     (*(BehavSolution<double> *) ((BehavPortion *) param[1])->Value()));
+    ((*(BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value()) ==
+     (*(BehavSolution<double> *) ((BehavPortion<double> *) param[1])->Value()));
 }
 
 Portion* GSM_Equal_BehavRational(Portion** param)
@@ -867,8 +867,8 @@ Portion* GSM_Equal_BehavRational(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolValPortion
-    ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) ==
-     (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
+    ((*(BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value()) ==
+     (*(BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[1])->Value()));
 }
 
 Portion *GSM_Equal_Nfg(Portion** param)
@@ -1034,15 +1034,15 @@ Portion* GSM_NotEqual_EfSupport(Portion** param)
 Portion* GSM_NotEqual_BehavFloat(Portion** param)
 {
   return new BoolValPortion
-    ((*(BehavSolution<double> *) ((BehavPortion *) param[0])->Value()) !=
-     (*(BehavSolution<double> *) ((BehavPortion *) param[1])->Value()));
+    ((*(BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value()) !=
+     (*(BehavSolution<double> *) ((BehavPortion<double> *) param[1])->Value()));
 }
 
 Portion* GSM_NotEqual_BehavRational(Portion** param)
 {
   return new BoolValPortion
-    ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) !=
-     (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
+    ((*(BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[0])->Value()) !=
+     (*(BehavSolution<gRational> *) ((BehavPortion<gRational> *) param[1])->Value()));
 }
 
 Portion* GSM_NotEqual_NfPlayer(Portion** param)
@@ -2118,7 +2118,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 Portion *GSM_ListForm_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
-    (BehavSolution<double>*) ((BehavPortion*) param[0])->Value();
+    (BehavSolution<double>*) ((BehavPortion<double>*) param[0])->Value();
   return gDPVectorToList(* (gDPVector<double>*) P);
 }
 
@@ -2126,7 +2126,7 @@ Portion *GSM_ListForm_BehavFloat(Portion **param)
 Portion *GSM_ListForm_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
-    (BehavSolution<gRational>*) ((BehavPortion*) param[0])->Value();
+    (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[0])->Value();
   return gDPVectorToList(* (gDPVector<gRational>*) P);
 }
 
@@ -2377,7 +2377,7 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
     delete p1;
   }
 
-  Portion* por = new BehavValPortion(P);
+  Portion* por = new BehavValPortion<double>(P);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 
@@ -2457,7 +2457,7 @@ Portion *GSM_Behav_EfgRational(Portion **param)
     delete p1;
   }
 
-  Portion* por = new BehavValPortion(P);
+  Portion* por = new BehavValPortion<gRational>(P);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -2547,8 +2547,8 @@ Portion* GSM_Read_BehavFloat(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new EfgValPortion(((BehavSolution<double>*) 
-		       ((BehavPortion*) param[1])->Value())->BelongsTo());
+    new EfgValPortion(&((BehavSolution<double>*) 
+		       ((BehavPortion<double>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2567,8 +2567,8 @@ Portion* GSM_Read_BehavFloat(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Behav_EfgFloat(sub_param);
-  (*((BehavSolution<double>*) ((BehavPortion*) param[1])->Value())) = 
-    (*((BehavSolution<double>*) ((BehavPortion*) p)->Value()));
+  (*((BehavSolution<double>*) ((BehavPortion<double>*) param[1])->Value())) = 
+    (*((BehavSolution<double>*) ((BehavPortion<double>*) p)->Value()));
 
   delete owner;
   delete list;
@@ -2585,8 +2585,8 @@ Portion* GSM_Read_BehavRational(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new EfgValPortion(((BehavSolution<gRational>*) 
-		       ((BehavPortion*) param[1])->Value())->BelongsTo());
+    new EfgValPortion(&((BehavSolution<gRational>*) 
+		       ((BehavPortion<gRational>*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -2605,8 +2605,8 @@ Portion* GSM_Read_BehavRational(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Behav_EfgRational(sub_param);
-  (*((BehavSolution<gRational>*) ((BehavPortion*) param[1])->Value())) = 
-    (*((BehavSolution<gRational>*) ((BehavPortion*) p)->Value()));
+  (*((BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[1])->Value())) = 
+    (*((BehavSolution<gRational>*) ((BehavPortion<gRational>*) p)->Value()));
 
   delete owner;
   delete list;
