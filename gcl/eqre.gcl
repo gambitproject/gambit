@@ -5,11 +5,12 @@
 //  and computes 95% confidence intervals for each model. 
 //
 //  The extensive form is assumed to be in filename.efg
-//  and the data is in filename.agg.  The first line
-//  in the agg file should contain the bounds for lambda 
+//  the data is in filename.agg, and other parameters for the 
+//  estimation are in fileneme.prm  The first line
+//  in the prm file should contain the bounds for lambda 
 //  The second line should contain an equilibrium selection 
-//  to be used by the OSEM model. The third line gives 
-//  the number of data sets
+//  to be used by the OSEM model. 
+//  The first line of the .agg file gives the number of data sets
 //  for which the estimation is to be conducted.  This 
 //  should be followed by at least that many sets of data.
 //
@@ -29,15 +30,22 @@ NewFunction[EQre[filename->TEXT],
   GetListFormat[lf<->lf];
 
   e := LoadEfg[filename+".efg"];
-  in := Input[filename+".exp"];
+  in := Input[filename+".agg"];
+  prm := Input[filename+".prm"];
 
   // read in range of lambdas for QRE estimation
-  in >> min >> max >> del;
+  prm >> min >> max >> del;
 
   // read in nash equilibrium selection to be used for OSEM model
   nash :=Centroid[e];
   datlist := Integer[ListForm[nash]];
-  in >> nash;
+  prm >> nash;
+
+  // discard unused data
+  in >> nisets;
+  For[i := 1, i <= nisets, i := i+1, 
+    in >> junk;
+  ];
 
   //  Load data into dat
   in >> ndat;

@@ -1,0 +1,70 @@
+//
+//  FILE: binomial.gcl
+//
+// Some useful functions for computing binomial probabilities. 
+//
+
+NewFunction[Factorial[n->INTEGER]=:NUMBER,
+  If[n<=1,1/1,n*Factorial[n-1]];
+];
+
+NewFunction[BinCo[n->INTEGER,k->INTEGER]=:NUMBER,
+  Factorial[n]/(Factorial[k]*Factorial[n-k]);
+  ];
+  
+NewFunction[BinProb[k->INTEGER,n->INTEGER,p->NUMBER]=:NUMBER,
+  BinCo[n,k]*(p^k)*((1.0-p)^(n-k));
+];
+
+NewFunction[CumBinProb[k->INTEGER,n->INTEGER,p->NUMBER]=:NUMBER,
+  Sum[BinProb[List[0,k+1,1],n,p]];
+];
+
+// The following are needed for an alternate version of BinCo, that 
+// uses floating point instead of rational arithmetic.  
+// LogGamma and LogFactorial are from "Numerical Recipies".  
+
+NewFunction[LogGamma[xx->NUMBER]=:NUMBER,
+  cof:={76.18009173,-86.50532033,24.01409822,-1.231739516,\
+        0.00120858003,-0.00000536382};
+  x:=xx-1.0;
+  tmp:=x+5.5;
+  tmp:=tmp-(x+.5)*Log[tmp];
+  ser:=1.0;
+  For[j:=1,j<=6,j:=j+1,
+    x:=x+1.0;
+    ser:=ser+cof_j/x;
+  ];
+  -tmp+Log[2.5066287465*ser];
+];
+
+NewFunction[LogGamma[n->INTEGER]=:NUMBER,
+  LogGamma[Float[n]];
+];
+
+NewFunction[LogFactorial[n->INTEGER]=:NUMBER,
+  If[IsDefined[$a],a:=$a,a:=List[0.0,101];];
+  x:=0.0;
+  If[n<0, StdOut << "\nNegative Factorial"];
+  If[n<=1,
+    x:=0.0,
+    If[n<=100,
+      If[a_n > 0.0,
+        x:=a_n,
+        x:=a_n:=LogGamma[n+1];
+        $a:=a;
+      ];,
+      x:=LogGamma[n+1];
+    ];
+  ];
+  x;
+];
+
+// the following is faster for large n, but will overflow when result
+// is greater than MaxInt[]
+
+//NewFunction[BinCo[n->INTEGER,k->INTEGER]=:INTEGER,
+//  Integer[0.5+Exp[LogFactorial[n]-LogFactorial[k]-LogFactorial[n-k]]];
+//];
+      
+
