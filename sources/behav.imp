@@ -240,8 +240,10 @@ void Efg<T>::NodeValues(Node *n, T prob, int pl,
 			const BehavProfile<T> &profile, int &index) const
 {
   int tindex = index;
-  ((TypedNode<T> *) n)->nval = (n->parent) ? ((TypedNode<T> *) n->parent)->nval : 0.0;
-
+  if  (n->parent) 
+	((TypedNode<T> *) n)->nval = ((TypedNode<T> *) n->parent)->nval;
+else	
+	 ((TypedNode<T> *) n)->nval=(T)0.0;
   if (n->outcome)
     ((TypedNode<T> *) n)->nval += ((OutcomeVector<T> &) *n->outcome)[pl];
 
