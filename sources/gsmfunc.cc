@@ -687,7 +687,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
             cha = word[index2++];
         
             while (cha >= '0' && cha <= '9')   {
-              *num += ( ((float) (cha - '0')) / (pow((int)10, factor)) );
+              *num += ( ((float) (cha - '0')) / (pow((int)10, (long)factor)) );
               factor++;
               cha = word[index2++];
             }
