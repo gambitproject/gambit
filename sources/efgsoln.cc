@@ -25,7 +25,7 @@ private:
   int num_isets;
 
 public:
-  BehavSolnEdit(BehavSolution &soln, int iset_disp, wxFrame *parent);
+  BehavSolnEdit(BehavSolution &soln, int iset_disp, wxFrame *parent, int);
 
   void OnSelectedMoved(int row, int col, SpreadMoveDir how);
   void OnOk(void);
@@ -68,8 +68,8 @@ NodeSolnShow::NodeSolnShow(int num_players, const EfgShow *parent_)
       rows++;
   }
 
-  int width = ((features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
-	       (2+ToTextPrecision()));
+  int width = ((features[NODEVALUE]) ? 2+num_players*(4+parent->NumDecimals()) : 
+	       (2+parent->NumDecimals()));
 
   SetEditable(FALSE);
   SetDimensions(rows, 1);
@@ -385,8 +385,8 @@ void NodeSolnShow::OnOptionsChanged(unsigned int options)
 {
   if (options & S_PREC_CHANGED) {
     Set(cur_n);
-    int width = ((features[NODEVALUE]) ? 2+num_players*(4+ToTextPrecision()) : 
-		 (2+ToTextPrecision()));
+    int width = ((features[NODEVALUE]) ? 2+num_players*(4+parent->NumDecimals()) : 
+		 (2+parent->NumDecimals()));
     DrawSettings()->SetColWidth(width);
     Resize();
     Repaint();
@@ -599,7 +599,7 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
                 Bold(1, col, 0, TRUE);
 
                 if (feature_width[i] == -1) // precision dependent
-                    DrawSettings()->SetColWidth(2+ToTextPrecision(), col);
+                    DrawSettings()->SetColWidth(2+parent->NumDecimals(), col);
                 else                                            // precision independent
                     DrawSettings()->SetColWidth(feature_width[i], col);
             }
@@ -614,7 +614,7 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
     DrawSettings()->SetColWidth(4, FeaturePos(BSOLN_ID));      // Id # "Id" = 3 chars
     DrawSettings()->SetColWidth(8, FeaturePos(BSOLN_PLAYER));  // Player name "Player #" = 8 chars
     DrawSettings()->SetColWidth(5, FeaturePos(BSOLN_ISET));    // Iset name (assume 5 letters average);
-    DrawSettings()->SetColWidth(gmin(max_actions*(2+ToTextPrecision())+4, 
+    DrawSettings()->SetColWidth(gmin(max_actions*(2+parent->NumDecimals())+4, 
                                      MAX_SOLNSHOW_WIDTH), FeaturePos(BSOLN_DATA));
     SetCell(1, FeaturePos(BSOLN_ID), "ID");
     Bold(FeaturePos(BSOLN_ID), 1, 0, TRUE);
@@ -741,7 +741,7 @@ void EfgSolnShow::SetOptions(void)
 	  Bold(1, col, 0, TRUE);
 
 	  if (feature_width[i] == -1) // precision dependent
-	    DrawSettings()->SetColWidth(2+ToTextPrecision(), col);
+	    DrawSettings()->SetColWidth(2+parent->NumDecimals(), col);
 	  else                        // precision independent
 	    DrawSettings()->SetColWidth(feature_width[i], col);
 	}
@@ -770,7 +770,7 @@ void EfgSolnShow::OnOptionsChanged(unsigned int options)
             for (int j = 1; j <= dim.Lengths()[i]; j++) 
                 max_actions = gmax(dim(i, j), max_actions);
 
-        DrawSettings()->SetColWidth(gmin(max_actions*(2+ToTextPrecision())+4, 
+        DrawSettings()->SetColWidth(gmin(max_actions*(2+parent->NumDecimals())+4, 
                                          MAX_SOLNSHOW_WIDTH), FeaturePos(BSOLN_DATA));
         UpdateValues();
         Resize();
@@ -830,7 +830,7 @@ void EfgSolnShow::UpdateValues(void)
         if (features[BSOLN_GLAMBDA]) {
 	  if (cur.Creator() == algorithmEfg_QRE_EFG ||
 	      cur.Creator() == algorithmEfg_QRE_NFG)
-	    SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.QreLambda()));
+	    SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.QreLambda(), parent->NumDecimals()));
 	  else
 	    SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), "---------");
         }
@@ -838,13 +838,13 @@ void EfgSolnShow::UpdateValues(void)
         if (features[BSOLN_GVALUE]) {
 	  if (cur.Creator() == algorithmEfg_QRE_EFG ||
 	      cur.Creator() == algorithmEfg_QRE_NFG)
-	    SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.QreValue()));
+	    SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.QreValue(), parent->NumDecimals()));
 	  else
 	    SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), "---------");
         }
 
         if (features[BSOLN_LVALUE])
-            SetCell(cur_pos, FeaturePos(BSOLN_LVALUE), ToText(cur.LiapValue()));
+            SetCell(cur_pos, FeaturePos(BSOLN_LVALUE), ToText(cur.LiapValue(), parent->NumDecimals()));
 
         for (int j = 1; j <= num_players; j++) {
 	  if (dim.Lengths()[j] == 0) continue;
@@ -852,7 +852,7 @@ void EfgSolnShow::UpdateValues(void)
 		  cur.Game().Players()[j]->GetName()); // print the player 's
 
 	  if (features[BSOLN_EQUVALS])        // print equ values if requested
-	    SetCell(cur_pos, FeaturePos(BSOLN_EQUVALS), ToText(cur.Payoff(j)));
+	    SetCell(cur_pos, FeaturePos(BSOLN_EQUVALS), ToText(cur.Payoff(j), parent->NumDecimals()));
 	  
 	  for (int k = 1; k <= dim.Lengths()[j]; k++) {
 	    // Display ISET in the same format as that selected for the main tree
@@ -1186,7 +1186,7 @@ void EfgSolnShow::OnAdd(void)
     BehavSolnEdit *add_dialog =
         new BehavSolnEdit(temp_soln, 
                           parent->tw->DrawSettings().LabelNodeBelow(), 
-                          this);
+                          this, parent->NumDecimals());
 
     Enable(FALSE);  // disable this window until the edit window is closed
 
@@ -1229,7 +1229,7 @@ void EfgSolnShow::OnEdit(void)
     BehavSolnEdit *add_dialog = 
         new BehavSolnEdit(temp_soln, 
                           parent->tw->DrawSettings().LabelNodeBelow(), 
-                          this);
+                          this, parent->NumDecimals());
 
     Enable(FALSE);  // disable this window until the edit window is closed
 
@@ -1291,7 +1291,8 @@ void EfgSolnShow::delete_all_button(wxButton &ob, wxEvent &)
 // Constructor
 
 BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
-                             int iset_disp, wxFrame *parent)
+                             int iset_disp, wxFrame *parent,
+			     int p_decimals)
     : SpreadSheet3D(soln_.Game().TotalNumInfosets()+1,
                     gmax(EFSupport(soln_.Game()).NumActions())+2,
                     1, 2, "Edit Behav Solution", parent, ANY_BUTTON),
@@ -1333,7 +1334,7 @@ BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
       for (int l = 1; l <= dim(j, k); l++) {
 	// print actual values
 	Action *action = soln.Game().Players()[j]->Infosets()[k]->Actions()[l];
-	SetCell(cur_pos, 2+l, ToText(soln(action)));
+	SetCell(cur_pos, 2+l, ToText(soln(action), p_decimals));
 	SetType(cur_pos, 2+l, gSpreadStr);
       }
       for (int l = dim(j, k)+1; l <= max_dim; l++) 

@@ -130,6 +130,8 @@ public:
   void PrefsDisplayColumns(void);
   void PrefsDisplayDecimals(void);
   void PrefsFont(void);
+  void PrefsSave(void);
+  void PrefsLoad(void);
 
   void UpdateVals(void);
   void UpdateSoln(void);
@@ -163,6 +165,9 @@ public:
   // Display some inherent game properties
   void ShowGameInfo(void);
   bool GameIsDirty(void) const { return nf.IsDirty(); }
+
+  int GetDecimals(void) const { return draw_settings.GetDecimals(); }
+  void SetDecimals(int p_decimals) { draw_settings.SetDecimals(p_decimals); }
 
   // Process Accelerator Keys
   void EditAccelerators(void);
@@ -297,6 +302,8 @@ public:
       ns->UpdatePlayers();
       ns->CanvasFocus();
     }
+
+  int GetDecimals(void) const { return parent->GetDecimals(); }
 };
 
 #endif  // NFGSHOW_H

@@ -180,110 +180,103 @@ NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_, int num_players_,
       norm_draw_settings(ds), features(0, MSOLN_NUM_FEATURES - 1),
       sf_options(sf_options_)
 {
-    Show(FALSE);
-    int i;
-    SetEditable(FALSE);
+  Show(FALSE);
+  int i;
+  SetEditable(FALSE);
 
-    if (cur_soln)
-    {
-        HiLighted(SolnPos(cur_soln), 1, 0, TRUE);
-        SetCurRow(SolnPos(cur_soln));
-    }
+  if (cur_soln) {
+    HiLighted(SolnPos(cur_soln), 1, 0, TRUE);
+    SetCurRow(SolnPos(cur_soln));
+  }
 
-    // Give the frame an icon
-    wxIcon *frame_icon;
+  // Give the frame an icon
+  wxIcon *frame_icon;
 #ifdef wx_msw
-    frame_icon = new wxIcon("nfg_icn");
+  frame_icon = new wxIcon("nfg_icn");
 #else
 #include "nfg.xbm"
-    frame_icon = new wxIcon(nfg_bits, nfg_width, nfg_height);
+  frame_icon = new wxIcon(nfg_bits, nfg_width, nfg_height);
 #endif
-    SetIcon(frame_icon);
+  SetIcon(frame_icon);
 
-    // Read in the default features
-    char *defaults_file = gambitApp.ResourceFile();
+  // Read in the default features
+  char *defaults_file = gambitApp.ResourceFile();
 
-    if (opts&MSOLN_O_OPTIONS)
-    {
-        for (i = 0; i < MSOLN_NUM_FEATURES; i++)
-        {
-            features[i] = 0;
-            Bool tmp;
-            wxGetResource(MSOLN_SHOW_SECT, feature_names[i], &tmp, defaults_file);
+  if (opts&MSOLN_O_OPTIONS) {
+    for (i = 0; i < MSOLN_NUM_FEATURES; i++) {
+      features[i] = 0;
+      Bool tmp;
+      wxGetResource(MSOLN_SHOW_SECT, feature_names[i], &tmp, defaults_file);
 
-            if (tmp && feature_width[i])
-            {
-                int col = FeaturePos(i) + 1;
-                AddCol(col);
-                SetCell(1, col, feature_names[i]);
-                Bold(1, col, 0, TRUE);
-
-                if (feature_width[i] == -1) // precision dependent
-                    DrawSettings()->SetColWidth(2 + ToTextPrecision(), col);
-                else                        // precision independent
-                    DrawSettings()->SetColWidth(feature_width[i], col);
-            }
-
-            features[i] = tmp;
-        }
-    }
-    else
-    {
-        for (i = 0; i < MSOLN_NUM_FEATURES; i++) 
-            features[i] = 0;
-    }
-
-    DrawSettings()->SetColWidth(4, FeaturePos(MSOLN_ID));     // Id # "id" = 3 chars
-    DrawSettings()->SetColWidth(8, FeaturePos(MSOLN_PLAYER)); // Player number "Player #" = 8 chars
-
-    for (i = 1; i <= max_strats; i++) // strat, prob "#: #.###..."
-    {
-        DrawSettings()->SetColWidth(5 + ToTextPrecision(), 
-                                    FeaturePos(MSOLN_NUM_FEATURES - 1) + i);
-    }
-
-    SetCell(1, FeaturePos(MSOLN_ID), "Id");
-    Bold(1, FeaturePos(MSOLN_ID), 0, TRUE);
-    SetCell(1, FeaturePos(MSOLN_PLAYER), "Pl");
-    Bold(1, FeaturePos(MSOLN_PLAYER), 0, TRUE);
-
-    MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
-
-    if (opts&MSOLN_O_OPTIONS)
-        AddButton("Opt", (wxFunction)settings_button);
-
-    if (opts&MSOLN_O_EFGNFG) {
-      wxButton *extensive_button = AddButton("Mixed->Behav", 
-					     (wxFunction) NfgSolnShow::extensive_button);
-
-      if (parent) {
-	if (!parent->InterfaceOk()) 
-	  extensive_button->Enable(FALSE);
-	else if (parent->InterfaceObjectEfg()->AssociatedNfg() != 
-		 &solns_[1].Game())
-	  extensive_button->Enable(FALSE);
+      if (tmp && feature_width[i]) {
+	int col = FeaturePos(i) + 1;
+	AddCol(col);
+	SetCell(1, col, feature_names[i]);
+	Bold(1, col, 0, TRUE);
+	
+	if (feature_width[i] == -1) // precision dependent
+	  DrawSettings()->SetColWidth(2 + parent->GetDecimals(), col);
+	else                        // precision independent
+	  DrawSettings()->SetColWidth(feature_width[i], col);
       }
-      else {
+
+      features[i] = tmp;
+    }
+  }
+  else {
+    for (i = 0; i < MSOLN_NUM_FEATURES; i++) 
+      features[i] = 0;
+  }
+  
+  DrawSettings()->SetColWidth(4, FeaturePos(MSOLN_ID));     // Id # "id" = 3 chars
+  DrawSettings()->SetColWidth(8, FeaturePos(MSOLN_PLAYER)); // Player number "Player #" = 8 chars
+
+  for (i = 1; i <= max_strats; i++) { // strat, prob "#: #.###..."
+    DrawSettings()->SetColWidth(5 + parent->GetDecimals(),
+				FeaturePos(MSOLN_NUM_FEATURES - 1) + i);
+  }
+
+  SetCell(1, FeaturePos(MSOLN_ID), "Id");
+  Bold(1, FeaturePos(MSOLN_ID), 0, TRUE);
+  SetCell(1, FeaturePos(MSOLN_PLAYER), "Pl");
+  Bold(1, FeaturePos(MSOLN_PLAYER), 0, TRUE);
+
+  MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
+  
+  if (opts&MSOLN_O_OPTIONS)
+    AddButton("Opt", (wxFunction)settings_button);
+
+  if (opts&MSOLN_O_EFGNFG) {
+    wxButton *extensive_button = AddButton("Mixed->Behav", 
+					   (wxFunction) NfgSolnShow::extensive_button);
+
+    if (parent) {
+      if (!parent->InterfaceOk()) 
 	extensive_button->Enable(FALSE);
-      }
+      else if (parent->InterfaceObjectEfg()->AssociatedNfg() != 
+	       &solns_[1].Game())
+	extensive_button->Enable(FALSE);
     }
-
-    if (opts&MSOLN_O_SORTFILT)
-        AddButton("Sort/Filter", (wxFunction)NfgSolnShow::sortfilt_button);
-
-    if (opts&MSOLN_O_EDIT)
-    {
-        Panel()->NewLine();
-        AddButton("Add", (wxFunction)NfgSolnShow::add_button);
-        AddButton("Edit", (wxFunction)NfgSolnShow::edit_button);
-        AddButton("Delete", (wxFunction)NfgSolnShow::delete_button);
-        AddButton("Delete All", (wxFunction)NfgSolnShow::delete_all_button);
+    else {
+      extensive_button->Enable(FALSE);
     }
+  }
 
-    SortFilter(false);
-    UpdateValues();
-    Redraw();
-    Show(TRUE);
+  if (opts&MSOLN_O_SORTFILT)
+    AddButton("Sort/Filter", (wxFunction)NfgSolnShow::sortfilt_button);
+
+  if (opts&MSOLN_O_EDIT) {
+    Panel()->NewLine();
+    AddButton("Add", (wxFunction)NfgSolnShow::add_button);
+    AddButton("Edit", (wxFunction)NfgSolnShow::edit_button);
+    AddButton("Delete", (wxFunction)NfgSolnShow::delete_button);
+    AddButton("Delete All", (wxFunction)NfgSolnShow::delete_all_button);
+  }
+
+  SortFilter(false);
+  UpdateValues();
+  Redraw();
+  Show(TRUE);
 }
 
 
@@ -635,7 +628,7 @@ void NfgSolnShow::SetOptions(void)
 	  Bold(1, col, 0, TRUE);
 
 	  if (feature_width[i] == -1)  // precision dependent
-	    DrawSettings()->SetColWidth(2 + ToTextPrecision(), col);
+	    DrawSettings()->SetColWidth(2 + parent->GetDecimals(), col);
 	  else                         // precision independent
 	    DrawSettings()->SetColWidth(feature_width[i], col);
 	}
@@ -658,7 +651,7 @@ void NfgSolnShow::OnOptionsChanged(unsigned int options)
         for (int i = FeaturePos(MSOLN_NUM_FEATURES - 1) + 1; 
              i <= GetCols(); i++) // strat, prob "#: #.###..."
         {
-            DrawSettings()->SetColWidth(5 + ToTextPrecision(), i);
+            DrawSettings()->SetColWidth(5 + parent->GetDecimals(), i);
         }
 
         UpdateValues();
@@ -701,20 +694,20 @@ void NfgSolnShow::UpdateValues(void)
 
         if (features[MSOLN_GLAMBDA]) {
 	  if (cur_vector.Creator() == algorithmNfg_QRE)
-	    SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.QreLambda()));
+	    SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.QreLambda(), parent->GetDecimals()));
 	  else
 	    SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), "---------");
         }
 
         if (features[MSOLN_GVALUE]) {
 	  if (cur_vector.Creator() == algorithmNfg_QRE)
-	    SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.QreValue()));
+	    SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.QreValue(), parent->GetDecimals()));
 	  else
 	    SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), "---------");
         }
 
         if (features[MSOLN_LVALUE])
-            SetCell(cur_pos, FeaturePos(MSOLN_LVALUE), ToText(cur_vector.LiapValue()));
+            SetCell(cur_pos, FeaturePos(MSOLN_LVALUE), ToText(cur_vector.LiapValue(), parent->GetDecimals()));
 
         int j;
 
@@ -723,7 +716,7 @@ void NfgSolnShow::UpdateValues(void)
             for (j = 1; j <= num_players; j++)
             {
                 SetCell(cur_pos + (j - 1), FeaturePos(MSOLN_EQUVALS), 
-                        ToText(cur_vector.Payoff(j)));
+                        ToText(cur_vector.Payoff(j), parent->GetDecimals()));
             }
         }
 
@@ -912,20 +905,20 @@ void NfgSolnShow::OnRemove(bool all)
 
 
 
-class MixedSolnEdit : public SpreadSheet3D
-{
+class MixedSolnEdit : public SpreadSheet3D {
 private:
-    MixedSolution &soln;
-    gArray<int> dim;
+  MixedSolution &soln;
+  gArray<int> dim;
 
 public:
-  MixedSolnEdit(MixedSolution &soln_, wxFrame *parent);
+  MixedSolnEdit(MixedSolution &soln_, wxFrame *parent, int decimals);
   void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/);
   void OnOk(void);
   Bool OnClose(void);
 };
 
-MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
+MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent,
+			     int decimals)
   :  SpreadSheet3D(soln_.Game().NumPlayers() + 1,
 		   gmax(NFSupport(soln_.Game()).NumStrats()) + 1,
 		   1, 2, "Edit Mixed Solution", parent, ANY_BUTTON),
@@ -953,14 +946,14 @@ MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
   for (i = 1; i <= max_dim; i++) {  // label cols
     SetCell(1, i + 1, ToText(i));
     Bold(1, i + 1, 0, TRUE);
-    DrawSettings()->SetColWidth(2 + ToTextPrecision(), i + 1);
+    DrawSettings()->SetColWidth(2 + decimals, i + 1);
   }
 
   for (i = 1; i <= num_players; i++)  {
     // enter values
     for (j = 1; j <= dim[i]; j++) {
       Strategy *strategy = soln.Game().Players()[i]->Strategies()[j];
-      SetCell(i + 1, j + 1, ToText(soln(strategy)));
+      SetCell(i + 1, j + 1, ToText(soln(strategy), decimals));
       SetType(i + 1, j + 1, gSpreadStr);
     }
     
@@ -1013,7 +1006,8 @@ void MixedSolnEdit::OnOk(void)
 void NfgSolnShow::OnAdd(void)
 {
     MixedSolution temp_soln(parent->CreateSolution());
-    MixedSolnEdit *add_dialog = new MixedSolnEdit(temp_soln, this);
+    MixedSolnEdit *add_dialog = new MixedSolnEdit(temp_soln, this,
+						  parent->GetDecimals());
     Enable(FALSE);  // disable this window until the edit window is close
 
     while (add_dialog->Completed() == wxRUNNING) 
@@ -1054,7 +1048,8 @@ void NfgSolnShow::OnEdit(void)
     int soln_num = SolnNum(row);
 
     MixedSolution temp_soln = solns[soln_num];
-    MixedSolnEdit *add_dialog = new MixedSolnEdit(temp_soln, this);
+    MixedSolnEdit *add_dialog = new MixedSolnEdit(temp_soln, this,
+						  parent->GetDecimals());
     Enable(FALSE);  // disable this window until the edit window is close
 
     while (add_dialog->Completed() == wxRUNNING) 

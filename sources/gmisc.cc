@@ -194,6 +194,12 @@ gText ToText(double d)
   return gText(gconvert_buffer);
 }
 
+gText ToText(double p_number, int p_precision)
+{
+  sprintf(gconvert_buffer, "%*.*f", width, p_precision, p_number);
+  return gText(gconvert_buffer);
+}
+
 gText ToText(const gNumber &n)
 {
   if (n.Precision() == precDOUBLE)
@@ -202,6 +208,13 @@ gText ToText(const gNumber &n)
     return ToText(n.operator gRational());
 }
 
+gText ToText(const gNumber &p_number, int p_precision)
+{
+  if (p_number.Precision() == precDOUBLE)
+    return ToText((double) p_number, p_precision);
+  else
+    return ToText(p_number.operator gRational());
+}
 
 gText ToText(const gInteger &i)
 {

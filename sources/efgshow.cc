@@ -112,7 +112,7 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   AddSeparator();
   AddTool(efgmenuPREFS_INC_ZOOM, zoominBitmap);
   AddTool(efgmenuPREFS_DEC_ZOOM, zoomoutBitmap);
-  AddTool(efgmenuPREFS_DISPLAY, optionsBitmap);
+  AddTool(efgmenuPREFS_DISPLAY_LAYOUT, optionsBitmap);
   AddSeparator();
   AddTool(efgmenuHELP_CONTENTS, helpBitmap);
 
@@ -530,7 +530,8 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
     // Special case that does not fit in ANYWHERE: Chance nodes have probs w/out solutions
     if (what == tBranchProb && n->GetPlayer())
         if (n->GetPlayer()->IsChance())
-            return ToText(ef.GetChanceProb(n->GetInfoset(), br));
+            return ToText(ef.GetChanceProb(n->GetInfoset(), br),
+			  tw->NumDecimals());
     
     if (!n || !cur_soln) return "N/A";
     
@@ -540,7 +541,8 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
     switch (what)
     {
     case tRealizProb:           // terminal ok
-        return ToText(cur.NodeRealizProbs()[n_index]);
+        return ToText(cur.NodeRealizProbs()[n_index],
+		      tw->NumDecimals());
     case tBeliefProb: // terminal ok
     {
         if (!n->GetPlayer()) return "N/A";
@@ -550,13 +552,13 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
         for (memb_num = 1; n->GetInfoset()->Members()[memb_num] != n; memb_num++) ;
         
         return ToText((((BehavSolution &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
-                                                         n->GetInfoset()->GetNumber(), memb_num));
+                                                         n->GetInfoset()->GetNumber(), memb_num), tw->NumDecimals());
     }
     case tNodeValue:  // terminal ok
     {
         gText tmp = "(";
         for (i = 1; i <= ef.NumPlayers(); i++)
-            tmp += ToText(cur.NodeValues(i)[n_index])+((i == ef.NumPlayers()) ? ")" : ",");
+            tmp += ToText(cur.NodeValues(i)[n_index], tw->NumDecimals())+((i == ef.NumPlayers()) ? ")" : ",");
         return tmp;
     }
     case tIsetProb: // terminal not ok
@@ -566,7 +568,7 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
         gDPVector<gNumber> value(ef.NumActions());
         gPVector<gNumber> probs(ef.NumInfosets());
         cur.CondPayoff(value, probs);
-        return ToText(probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()));
+        return ToText(probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()), tw->NumDecimals());
     }
     case tBranchVal: // terminal not ok
     {
@@ -577,14 +579,15 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
         cur.CondPayoff(value, probs);
         if (probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()) > gNumber(0))
             return ToText(value(n->GetPlayer()->GetNumber(),
-                                n->GetInfoset()->GetNumber(), br));
+                                n->GetInfoset()->GetNumber(), br),
+			  tw->NumDecimals());
         else        // this is due to a bug in the value computation
             return "N/A";
     }
     case tBranchProb:   // terminal not ok
         if (!n->GetPlayer()) return "N/A";
         // For chance node prob, see first line of this function
-        return ToText(cur.GetValue(n->GetInfoset(), br));
+        return ToText(cur.GetValue(n->GetInfoset(), br), tw->NumDecimals());
     case tIsetValue:    // terminal not ok, not implemented
         return "N.I.";
     default:
@@ -956,10 +959,8 @@ void EfgShow::MakeMenus(void)
   prefs_menu->Append(efgmenuPREFS_ACCELS, "&Accels",
 		     "Edit accelerator keys");
   prefs_menu->AppendSeparator();
-  prefs_menu->Append(efgmenuPREFS_SAVE_DEFAULT, "Save Default");
-  prefs_menu->Append(efgmenuPREFS_LOAD_DEFAULT, "Load Default");
-  prefs_menu->Append(efgmenuPREFS_SAVE_CUSTOM,  "Save Custom");
-  prefs_menu->Append(efgmenuPREFS_LOAD_CUSTOM,  "Load Custom");
+  prefs_menu->Append(efgmenuPREFS_SAVE, "&Save");
+  prefs_menu->Append(efgmenuPREFS_LOAD, "&Load");
   
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(efgmenuHELP_CONTENTS, "&Contents", "Table of contents");
@@ -1259,17 +1260,11 @@ void EfgShow::OnMenuCommand(int id)
     case efgmenuPREFS_COLORS:
       tw->display_colors();
       break;
-    case efgmenuPREFS_SAVE_DEFAULT:
+    case efgmenuPREFS_SAVE:
       tw->display_save_options();
       break;
-    case efgmenuPREFS_LOAD_DEFAULT:
+    case efgmenuPREFS_LOAD:
       tw->display_load_options();
-      break;
-    case efgmenuPREFS_SAVE_CUSTOM:
-      tw->display_save_options(FALSE);
-      break;
-    case efgmenuPREFS_LOAD_CUSTOM:
-      tw->display_load_options(FALSE);
       break;
     case efgmenuPREFS_REDRAW: 
       /* redraws automatically after switch */ 
@@ -1552,6 +1547,11 @@ void EfgShow::ShowGameInfo(void)
 const EFSupport *EfgShow::GetSupport(void)
 {
   return cur_sup;
+}
+
+int EfgShow::NumDecimals(void) const
+{
+  return tw->NumDecimals();
 }
 
 

@@ -93,6 +93,8 @@ public:
     
     // This must be here since we do not have draw_settings at constructor time
     void MakeFlasher(void);
+
+  virtual int NumDecimals(void) const = 0;
 };
 
 
@@ -117,6 +119,7 @@ public:
   virtual void UpdateCursor(const NodeEntry *entry);
 
   void OnChar(wxKeyEvent &);
+  int NumDecimals(void) const;
 };
 
 class TreeWindow : public TreeRender   
@@ -301,6 +304,7 @@ public:
   
   // Gives access to the parent to the private draw_settings. Used for SolnShow
   TreeDrawSettings &DrawSettings(void) { return draw_settings; }
+  int NumDecimals(void) const { return draw_settings.NumDecimals(); }
   
   // Gives access to the parent to the current cursor node
   Node *Cursor(void) const { return m_cursor; }

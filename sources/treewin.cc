@@ -2751,3 +2751,5 @@ gOutput &operator<<(gOutput &o, const TreeWindow::SUBGAMEENTRY &)
     return o;
 }
 
+int TreeZoomWindow::NumDecimals(void) const
+{ return parent->NumDecimals(); }

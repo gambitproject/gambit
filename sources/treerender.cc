@@ -618,7 +618,7 @@ gText TreeRender::OutcomeAsString(const Node *n, bool &/*hilight*/) const
       if (draw_settings.ColorCodedOutcomes())
 	tmp += ("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
       
-      tmp += ToText(v[i]);
+      tmp += ToText(v[i], NumDecimals());
     }
 
     if (draw_settings.ColorCodedOutcomes()) 

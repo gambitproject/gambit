@@ -67,9 +67,11 @@ int  ToTextPrecision(void); // Get the current value of the above
 gText ToText(int);
 gText ToText(long);
 gText ToText(double);
+gText ToText(double p_number, int p_precision);
 gText ToText(const gInteger &);
 gText ToText(const gRational &, bool approx = true);
 gText ToText(const gNumber &);
+gText ToText(const gNumber &p_number, int p_precision);
 
 double FromText(const gText &, double &);
 gRational FromText(const gText &, gRational &);

@@ -110,10 +110,8 @@ typedef enum {
   efgmenuPREFS_LEGEND = 1604,
   efgmenuPREFS_COLORS = 1609,
   efgmenuPREFS_ACCELS = 1610,
-  efgmenuPREFS_SAVE_DEFAULT = 1605,
-  efgmenuPREFS_LOAD_DEFAULT = 1606,
-  efgmenuPREFS_SAVE_CUSTOM = 1607,
-  efgmenuPREFS_LOAD_CUSTOM = 1608,
+  efgmenuPREFS_SAVE = 1605,
+  efgmenuPREFS_LOAD = 1606,
   efgmenuPREFS_REDRAW = 1611,  // accelerator only (?)
   efgmenuPREFS_FONTS = 1612,
   efgmenuPREFS_FONTS_ABOVENODE = 1613,

@@ -55,6 +55,8 @@
 #define NFG_PREFS_FONT                  208
 #define NFG_PREFS_COLORS                200
 #define NFG_PREFS_ACCELS                202
+#define NFG_PREFS_SAVE                  209
+#define NFG_PREFS_LOAD                  210
 
 #define NFG_ACCL_PAYOFF                 400     // these are not real menus, just accels
 #define NFG_ACCL_NEXT_PAYOFF            410

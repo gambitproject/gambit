@@ -37,7 +37,8 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *p_frame)
   supports.Append(cur_sup);
   
   spread = new NormalSpread(cur_sup, pl1, pl2, this, m_frame);
-
+  spread->DrawSettings()->SetDataFont(draw_settings.GetDataFont());
+  
   soln_show      = 0;  // no solution inspect window yet.
   SetPlayers(pl1, pl2, true);
 
@@ -71,7 +72,7 @@ void NfgShow::UpdateVals(void)
       if (draw_settings.OutcomeDisp() == OUTCOME_VALUES) {
 	for (int k = 1; k <= nf.NumPlayers(); k++) {
 	  pay_str += ("\\C{"+ToText(draw_settings.GetPlayerColor(k))+"}");
-	  pay_str += ToText(nf.Payoff(outcome, k));
+	  pay_str += ToText(nf.Payoff(outcome, k), GetDecimals());
 	  
 	  if (k != nf.NumPlayers())
 	    pay_str += ',';
@@ -185,11 +186,11 @@ void NfgShow::UpdateSoln(void)
     // Print out the probability in the next column/row
     for (int i = 1; i <= rows; i++)
       spread->SetCell(i, cols+1,
-              ToText(soln(cur_sup->Strategies(pl1)[i])));
+              ToText(soln(cur_sup->Strategies(pl1)[i]), GetDecimals()));
 
     for (int i = 1; i <= cols; i++)
       spread->SetCell(rows+1, i, 
-              ToText(soln(cur_sup->Strategies(pl2)[i])));
+              ToText(soln(cur_sup->Strategies(pl2)[i]), GetDecimals()));
   }
 
   if (spread->HaveVal()) {
@@ -197,13 +198,13 @@ void NfgShow::UpdateSoln(void)
     for (int i = 1; i <= rows; i++) {
       spread->SetCell(i, cols+spread->HaveProbs()+spread->HaveDom()+1, 
               ToText(soln.Payoff(nf.Players()[pl1],
-                     cur_sup->Strategies(pl1)[i])));
+                     cur_sup->Strategies(pl1)[i]), GetDecimals()));
     }
     
     for (int j = 1; j <= cols; j++) {
       spread->SetCell(rows+spread->HaveProbs()+spread->HaveDom()+1, j, 
               ToText(soln.Payoff(nf.Players()[pl2],
-                     cur_sup->Strategies(pl2)[j])));
+                     cur_sup->Strategies(pl2)[j]), GetDecimals()));
     }
   }
 
@@ -230,7 +231,7 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
     }
   }
 
-  spread->SetCell(rows+1, cols+1, ToText(cont_prob));
+  spread->SetCell(rows+1, cols+1, ToText(cont_prob, GetDecimals()));
 }
 
 
@@ -457,7 +458,6 @@ void NfgShow::OnOk(void)
   }
 
   spread->Close();
-  draw_settings.SaveSettings();
   delete &nf;
 }
 
@@ -1166,10 +1166,10 @@ void NfgShow::PrefsDisplayColumns(void)
 
 void NfgShow::PrefsDisplayDecimals(void)
 {
-  guiSliderDialog dialog(spread, "Decimal places", 0, 25, ToTextPrecision());
+  guiSliderDialog dialog(spread, "Decimal places", 0, 25, GetDecimals());
 
   if (dialog.Completed() == wxOK) {
-    ToTextPrecision(dialog.GetValue());
+    SetDecimals(dialog.GetValue());
     UpdateVals();
   }
 }
@@ -1180,8 +1180,19 @@ void NfgShow::PrefsFont(void)
     
   if (dialog.Completed() == wxOK) {
     spread->DrawSettings()->SetDataFont(dialog.MakeFont());
+    draw_settings.SetDataFont(dialog.MakeFont());
     spread->Repaint();
   }
+}
+
+void NfgShow::PrefsSave(void)
+{
+  draw_settings.SaveSettings();
+}
+
+void NfgShow::PrefsLoad(void)
+{
+
 }
 
 void NfgShow::Print(void)
@@ -1409,21 +1420,29 @@ int NfgGUI::GetStrategies(gArray<int> &p_dimensionality, wxFrame *p_parent)
 //**********************************************************************
 
 NormalDrawSettings::NormalDrawSettings(void)
-  : output_precision(2)
+  : m_decimals(2)
 {
+  wxGetResource("Gambit", "Nfg-Decimals", &m_decimals,
+		gambitApp.ResourceFile());
   wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, 
 		gambitApp.ResourceFile());
+  char *tempstr = new char[100];
+  wxGetResource("Gambit", "Nfg-Data-Font", &tempstr, gambitApp.ResourceFile());
+  SetDataFont(wxStringToFont(tempstr));
+  delete [] tempstr;
 }
 
 NormalDrawSettings::~NormalDrawSettings()
-{
-  SaveSettings();
-}
+{ }
 
 void NormalDrawSettings::SaveSettings(void) const
 {
+  wxWriteResource("Gambit", "Nfg-Decimals", m_decimals,
+		  gambitApp.ResourceFile());
   wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp,
 		  gambitApp.ResourceFile());
+  wxWriteResource("Gambit", "Nfg-Data-Font",
+		  wxFontToString(m_dataFont), gambitApp.ResourceFile());
 }
 
 //**********************************************************************
@@ -1534,7 +1553,7 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     int num_players = dimensionality.Length();
 
     // column widths
-    DrawSettings()->SetColWidth(num_players*(3 + ToTextPrecision()));
+    DrawSettings()->SetColWidth(num_players*(3 + GetDecimals()));
     DrawSettings()->SetLabels(S_LABEL_ROW|S_LABEL_COL);
 
     //------------------take care of the frame/window stuff
@@ -1764,6 +1783,9 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   prefsMenu->Append(NFG_PREFS_FONT, "&Font", "Set font");
   prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
   prefsMenu->Append(NFG_PREFS_ACCELS, "&Accels", "Edit accelerators");
+  prefsMenu->AppendSeparator();
+  prefsMenu->Append(NFG_PREFS_SAVE, "&Save", "Save current configuration");
+  prefsMenu->Append(NFG_PREFS_LOAD, "&Load", "Load configuration");
 
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(HELP_MENU_ABOUT,    "&About");
@@ -1904,7 +1926,7 @@ void NormalSpread::MakeProbDisp(void)
     SetSelectableRow(row, FALSE);
     AddCol(col);
     SetSelectableCol(col, FALSE);
-    DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
+    DrawSettings()->SetColWidth((3 + GetDecimals()), col);
   }
 
   // Note: this insures that Prob is always the FIRST extra after the
@@ -1975,7 +1997,7 @@ void NormalSpread::MakeValDisp(void)
     SetSelectableRow(row, FALSE);
     AddCol(col);
     SetSelectableCol(col, FALSE);
-    DrawSettings()->SetColWidth((3 + ToTextPrecision()), col);
+    DrawSettings()->SetColWidth((3 + GetDecimals()), col);
   }
   
   SetLabelRow(row, "Value");
@@ -2155,6 +2177,12 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_PREFS_ACCELS: 
       parent->EditAccelerators();
       break;
+    case NFG_PREFS_SAVE:
+      parent->PrefsSave();
+      break;
+    case NFG_PREFS_LOAD:
+      parent->PrefsLoad();
+      break;
 
     case NFG_FILE_SAVE:
       parent->Save();
@@ -2204,7 +2232,7 @@ void NormalSpread::OnOptionsChanged(unsigned int options)
     if (options&S_PREC_CHANGED)
     {
         // column widths
-        DrawSettings()->SetColWidth(dimensionality.Length() * (3 + ToTextPrecision()));
+        DrawSettings()->SetColWidth(dimensionality.Length() * (3 + GetDecimals()));
         parent->UpdateVals();
         Redraw();
         Repaint();

@@ -146,14 +146,12 @@ public:
     const EFSupport *GetSupport(void);
 
   void UpdateMenus(Node *p_cursor, Node *p_markNode);
+  int NumDecimals(void) const;
 
     // File name
     void         SetFileName(void);
     void         SetFileName(const gText &s);
     const gText &Filename(void) const;
-
-	// Gui playback:
-    void ExecuteLoggedCommand(const class gText &, const class gList<gText> &);
 };
 
 
