@@ -17,7 +17,7 @@ GUI       = none
 GMAKEFILE = Makefile2.generic
 #FTPDIR    = /home/mill/ftp/pub/gambit/ver96
 FTPDIR    = /home/ftp/pub/gambit/ver96
-SRCDIR    = ./gambit/sources
+SRCDIR    = ./gambit0.96/sources
 
 all:
 	@echo Specify a target: gcl, gui, src.
@@ -61,7 +61,7 @@ gambit:
 	cp $(WXWINDIR)/bin/wxhelp_$(SYSNAME)_$(GUI) ../bin; \
 	cd ../distrib
 
-	@# Copy the setup and initialization files to gambit/misc
+	@# Copy the setup and initialization files to ../misc
 	cp ../sources/gambit.ini ./gambit_setup ../sources/*.gcl ../misc
 	cp ./gambit_setup ../..
 
@@ -75,13 +75,13 @@ gambit:
 	if [ -f gambit_$(SYSNAME)_$(GUI).zip ]; \
 	then rm gambit_$(SYSNAME)_$(GUI).zip; fi; \
 	zip gambit_$(SYSNAME)_$(GUI).zip \
-	  ./gambit/bin/gcl_$(SYSNAME) \
-	  ./gambit/bin/gambit_$(SYSNAME)_$(GUI) \
-	  ./gambit/bin/wxhelp_$(SYSNAME)_$(GUI) \
-	  ./gambit/efg/*.efg \
-	  ./gambit/nfg/*.nfg \
-	  ./gambit/gcl/*.gcl \
-	  ./gambit/misc/* \
+	  ./gambit0.96/bin/gcl_$(SYSNAME) \
+	  ./gambit0.96/bin/gambit_$(SYSNAME)_$(GUI) \
+	  ./gambit0.96/bin/wxhelp_$(SYSNAME)_$(GUI) \
+	  ./gambit0.96/efg/*.efg \
+	  ./gambit0.96/nfg/*.nfg \
+	  ./gambit0.96/gcl/*.gcl \
+	  ./gambit0.96/misc/* \
 	  ./gambit_setup
 
 	mv ../../gambit_$(SYSNAME)_$(GUI).zip $(FTPDIR) 
