@@ -54,7 +54,7 @@ protected:
   gBlock<gNumber> payoffs;
 
   Outcome(Efg *p_efg, int p_number)
-    : m_deleted(false), m_number(p_number), m_payoffs(p_efg->NumPlayers())
+    : m_deleted(false), m_number(p_number), payoffs(p_efg->NumPlayers())
     { }
   ~Outcome()  { }
 };
