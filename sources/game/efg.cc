@@ -1450,9 +1450,11 @@ Action *FullEfg::InsertAction(Infoset *s)
   m_revision++;
   m_dirty = true;
   Action *action = s->InsertAction(s->NumActions() + 1);
-  for (int i = 1; i <= s->members.Length(); i++)
+  for (int i = 1; i <= s->members.Length(); i++) {
     s->members[i]->children.Append(new Node(this, s->members[i]));
+  }
   DeleteLexicon();
+  SortInfosets();
   NotifyClients(true, true);
   return action;
 }
@@ -1473,6 +1475,7 @@ Action *FullEfg::InsertAction(Infoset *s, const Action *a)
     s->members[i]->children.Insert(new Node(this, s->members[i]), where);
 
   DeleteLexicon();
+  SortInfosets();
   NotifyClients(true, true);
   return action;
 }
@@ -1493,6 +1496,7 @@ Infoset *FullEfg::DeleteAction(Infoset *s, const Action *a)
     delete s->members[i]->children.Remove(where);
   }
   DeleteLexicon();
+  SortInfosets();
   NotifyClients(true, true);
   return s;
 }
