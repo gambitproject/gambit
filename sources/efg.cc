@@ -1,8 +1,8 @@
-//#
-//# FILE: efg.cc -- Implementation of extensive form data type
-//#
-//# $Id$
-//#
+//
+// FILE: efg.cc -- Implementation of extensive form data type
+//
+// $Id$
+//
 
 class Node;
 class EFPlayer;
@@ -197,7 +197,9 @@ void BaseEfg::SortInfosets(void)
 {
   if (!sortisets)  return;
 
-  for (int pl = 1; pl <= players.Length(); pl++)  {
+  int pl;
+
+  for (pl = 1; pl <= players.Length(); pl++)  {
     gList<Node *> nodes;
 
     Nodes(*this, nodes);
@@ -239,7 +241,20 @@ void BaseEfg::SortInfosets(void)
 //    assert(isets == players[pl]->infosets.Length());
   }
 
+  // Now, we sort the nodes within the infosets
   
+  gList<Node *> nodes;
+  Nodes(*this, nodes);
+
+  for (pl = 1; pl <= players.Length(); pl++)  {
+    for (int iset = 1; iset <= players[pl]->infosets.Length(); iset++)  {
+      Infoset *s = players[pl]->infosets[iset];
+      for (int i = 1, j = 1; i <= nodes.Length(); i++)  {
+	if (nodes[i]->infoset == s)
+	  s->members[j++] = nodes[i];
+      }
+    }
+  }
 
 }
   
