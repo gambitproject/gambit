@@ -75,9 +75,7 @@ private:
      const long& num1      = 0, 
      const long& num2      = 0,
      const gString&  str1      = "",
-     const gString&  str2      = "",
-     Portion*        por       = 0,
-     Instruction*    instr     = 0
+     const gString&  str2      = ""
      );
 
   // This function is located in gsmfunc.cc

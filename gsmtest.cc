@@ -13,6 +13,8 @@
 #include "glist.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"
+#include "portion.h"
+
 
 
 #include "assert.h"
@@ -67,7 +69,7 @@ int main( void )
   gin >> cont;
 
 
-
+/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -3528,9 +3530,30 @@ int main( void )
   machine->PushRef( "p" );
   machine->Dump();
 
+*/
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
+
+
+
+  gout << PortionTypeToText( porLIST ) << "\n";
+  gout << PortionTypeToText( porVALUE ) << "\n";
+  gout << PortionTypeToText( porLIST | porFLOAT ) << "\n";
+  gout << PortionTypeToText( porLIST | porEFG ) << "\n";
+  gout << PortionTypeToText( porLIST | porEFG_FLOAT ) << "\n";
+  gout << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST(FLOAT)" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST(EFG)" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST(EFG(FLOAT))" ) ) << "\n";
+  gout << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST(EFG) NFG" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST PLAYER(EFG) NFG" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "LIST" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "VALUE" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "NUMERICAL" ) ) << "\n";
+  gout << PortionTypeToText( TextToPortionType( "ALL" ) ) << "\n";
+  
 
 
 

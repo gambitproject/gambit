@@ -317,8 +317,7 @@ void FuncDescObj::_SetFuncInfo( const int f_index, const int num_params )
     gerr << "FuncDescObj Error:\n";
     gerr << "  Attempted to initialize the same function\n";
     gerr << "  multiple times as different overloaded\n";
-    gerr << "  versions while initializing function\n";
-    gerr << "  \"" << _FuncName << "\"\n";
+    gerr << "  versions while initializing function " << _FuncName << "[]\n";
     assert( 0 );
   }  
 #endif // NDEBUG
@@ -417,7 +416,7 @@ void FuncDescObj::_SetParamInfo
     gerr << "FuncDescObj Error:\n";
     gerr << "  An invalid parameter index specified\n";
     gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function \"" << _FuncName << "\" for\n";
+    gerr << "  the function " << _FuncName << "[] for\n";
     gerr << "  the parameter \"" << param_name << "\"\n";
     gerr << "  Index specified: " << param_index << "\n";
   }
@@ -428,7 +427,7 @@ void FuncDescObj::_SetParamInfo
     gerr << "FuncDescObj Error:\n";
     gerr << "  An undefined function pointer specified\n";
     gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function \"" << _FuncName << "\"\n";
+    gerr << "  the function " << _FuncName << "[]\n";
   }
   assert( f_index >= 0 && f_index < _NumFuncs );
 #endif // NDEBUG
@@ -456,7 +455,7 @@ void FuncDescObj::_SetParamInfo
   {
     gerr << "FuncDescObj Error:\n";
     gerr << "  Parameter #" << param_index << " of a\n";
-    gerr << "  function in \"" << _FuncName << "\" was\n";
+    gerr << "  function in " << _FuncName << "[] was\n";
     gerr << "  declared multiple times\n";
   }
   assert( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name == "" );
@@ -1054,41 +1053,30 @@ void CallFuncObj::_ErrorMessage
   case 1:
     s << "  Conflicting variable name specification\n";
     break;
-  case 2:
-    s << "  Parameter #" << num1 << " type mismatch while calling\n";
-    s << "  function \"" << str1 << "\"\n";
-    break;
   case 3:
-    s << "  Multiple definitions found for parameter \"" <<  str1 << "\"\n";
-    s << "  while executing CallFunction() on\n";
-    s << "  function \"" << str2 << "\"\n";
+    s << "  Repeated definition found for parameter \"" <<  str1 << "\"\n";
+    s << "  while calling " << str2 << "[]\n";
     break;
   case 4:
-    s << "  Too many parameters specified for\n";
-    s << "  function \"" << str1 << "\"\n";
+    s << "  Too many parameters specified for function " << str1 << "[]\n";
     break;
   case 5:
-    s << "  Function \"" << str1 << "\" called with ambiguous parameters\n";
-    break;
-  case 6:
-    s << "  No defined parameters;\n";
-    s << "  function call ambiguous for function \"" << str1 << "\"\n";
+    s << "  Function " << str1 << "[] called with ambiguous parameters\n";
     break;
   case 7:
-    s << "  Parameter #" << num1 << " type mismatch while calling\n";
-    s << "  function \"" << str1 << "\"\n";
+    s << "  Function " << str1 << "[] " << " parameter #" << num1;
+    s << " type mismatch\n";
     break;
   case 8:
-    s << "  No matching parameter list found for\n";
-    s << "  function \"" + str1 + "\"\n";
+    s << "  No matching parameter list found for function " + str1 + "[]\n";
     break;
   case 9:
     s << "  Required parameter \"" << str1 << "\" not found while executing\n";
-    s << "  CallFunction() on function \"" << str2 << "\"\n";
+    s << "  function " << str2 << "[]\n";
     break;
   case 10:
     s << "  Required parameter \"" << str1 << "\" undefined while executing\n";
-    s << "  CallFunction() on function \"" << str2 << "\"\n";
+    s << "  function " << str2 << "[]\n";
     break;
   default:
     s << "  General error\n";
@@ -1096,3 +1084,4 @@ void CallFuncObj::_ErrorMessage
 }
 
  
+

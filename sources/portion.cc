@@ -7,9 +7,10 @@
 
 
 #include <assert.h>
+#include <string.h>
+
 
 #include "portion.h"
-// #include "gsm.h"
 #include "gsmhash.h"
 
 #include "gambitio.h"
@@ -1767,7 +1768,7 @@ struct PortionTypeTextType
 };  
 
 
-#define NumPortionTypes 33
+#define NumPortionTypes 35
 
 PortionTypeTextType _PortionTypeText[] =
 {
@@ -1779,23 +1780,19 @@ PortionTypeTextType _PortionTypeText[] =
   { porRATIONAL,         "RATIONAL" },
   { porTEXT,             "TEXT" },
   { porLIST,             "LIST" },
-  { porNFG_FLOAT,        "NFG_FLOAT" },
-  { porNFG_RATIONAL,     "NFG_RATIONAL" },
-  { porNFG,              "NFG" },
-  { porEFG_FLOAT,        "EFG_FLOAT" },
-  { porEFG_RATIONAL,     "EFG_RATIONAL" },
-  { porEFG,              "EFG" },
-  { porMIXED_FLOAT,      "MIXED_FLOAT" },
-  { porMIXED_RATIONAL,   "MIXED_RATIONAL" },
-  { porMIXED,            "MIXED" },
-  { porBEHAV_FLOAT,      "BEHAV_FLOAT" },
-  { porBEHAV_RATIONAL,   "BEHAV_RATIONAL" },
-  { porBEHAV,            "BEHAV" },
+  { porNFG_FLOAT,        "NFG(FLOAT)" },
+  { porNFG_RATIONAL,     "NFG(RATIONAL)" },
+  { porEFG_FLOAT,        "EFG(FLOAT)" },
+  { porEFG_RATIONAL,     "EFG(RATIONAL)" },
+  { porMIXED_FLOAT,      "MIXED(FLOAT)" },
+  { porMIXED_RATIONAL,   "MIXED(RATIONAL)" },
+  { porBEHAV_FLOAT,      "BEHAV(FLOAT)" },
+  { porBEHAV_RATIONAL,   "BEHAV(RATIONAL)" },
 
-  { porOUTCOME_FLOAT,    "OUTCOME_FLOAT" },
-  { porOUTCOME_RATIONAL, "OUTCOME_RATIONAL" },
-  { porOUTCOME_RATIONAL, "OUTCOME" },
-  { porPLAYER_EFG,       "PLAYER_EFG" },
+  { porOUTCOME_FLOAT,    "OUTCOME(FLOAT)" },
+  { porOUTCOME_RATIONAL, "OUTCOME(RATIONAL)" },
+  { porPLAYER_NFG,       "PLAYER(NFG)" },
+  { porPLAYER_EFG,       "PLAYER(EFG)" },
   { porINFOSET,          "INFOSET" },
   { porNODE,             "NODE" },
   { porACTION,           "ACTION" },
@@ -1806,6 +1803,13 @@ PortionTypeTextType _PortionTypeText[] =
   { porINPUT,            "INPUT" },
 
   { porUNKNOWN,          "UNKNOWN" },
+
+  { porNFG,              "NFG" },
+  { porEFG,              "EFG" },
+  { porMIXED,            "MIXED" },
+  { porBEHAV,            "BEHAV" },
+  { porOUTCOME,          "OUTCOME" },
+  { porPLAYER,           "PLAYER" },
 
   { porNUMERICAL,        "NUMERICAL" },
   { porALL,              "ALL" },
@@ -1819,14 +1823,41 @@ gString PortionTypeToText( const PortionType& type )
 {
   int i;
   gString result = "";
-  for( i = 0; i < NumPortionTypes; i++ )
+
+
+  for( i = NumPortionTypes - 9; i < NumPortionTypes; i++ )
   {
-    if( _PortionTypeText[ i ].Type & type )
+    if( type == _PortionTypeText[ i ].Type )
+      result = (gString) " " + _PortionTypeText[ i ].Text;
+  }
+
+  if( result == "" )
+  {
+    if( type & porLIST )
     {
-      result = result + " " + _PortionTypeText[ i ].Text;
-      break;
+      for( i = 0; i < NumPortionTypes - 9; i++ )
+      {
+	if( ( _PortionTypeText[ i ].Type & type ) && 
+	   ( _PortionTypeText[ i ].Type != porLIST ) )
+	{
+	  result = result + " LIST(" + _PortionTypeText[ i ].Text + ")";
+	}
+      }
+      if( result == "" )
+	result = " LIST";
+    }
+    else
+    {
+      for( i = 0; i < NumPortionTypes; i++ )
+      {
+	if( _PortionTypeText[ i ].Type & type )
+	{
+	  result = result + " " + _PortionTypeText[ i ].Text;
+	}
+      }
     }
   }
+
   if( result == "" )
     result = (gString) " " + _PortionTypeText[ 0 ].Text;
   return result;
@@ -1836,15 +1867,23 @@ gString PortionTypeToText( const PortionType& type )
 PortionType TextToPortionType( const gString& text )
 {
   int i;
+  PortionType result = _PortionTypeText[ 0 ].Type;
+
   for( i = 0; i < NumPortionTypes; i++ )
   {
-    if( text == _PortionTypeText[ i ].Text )
+    if( strstr( text, _PortionTypeText[ i ].Text ) )
     {
-      return _PortionTypeText[ i ].Type;
-      break;
+      if( !strstr( text, (gString) "(" + _PortionTypeText[ i ].Text + ")" ) )
+      {
+	if( !( result & _PortionTypeText[ i ].Type ) )
+	  result = result | _PortionTypeText[ i ].Type;
+      }
+      else if( strstr( text, (gString) "LIST(" + 
+		      _PortionTypeText[ i ].Text + ")" ) )
+	result = result | _PortionTypeText[ i ].Type;	
     }
   }
-  return _PortionTypeText[ 0 ].Type;
+  return result;;
 }
 
 
