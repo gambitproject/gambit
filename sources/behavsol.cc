@@ -200,7 +200,7 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_regret = new gDPVector<gNumber>(*p_solution.m_regret);   
   }
   if (p_solution.m_rnf_regret) {
-    m_rnf_regret = new gPVector<gNumber>(*p_solution.m_regret);   
+    m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);   
   }
 }
 
