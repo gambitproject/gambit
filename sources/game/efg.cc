@@ -921,7 +921,11 @@ bool gbtEfgGame::DeleteEmptyInfoset(gbtEfgInfoset s)
 
   rep->m_revision++;
   s.rep->m_player->m_infosets.Remove(s.rep->m_player->m_infosets.Find(s.rep));
-  delete s.rep;
+  // Note that there's at least one reference to this infoset (namely, 's')
+  // at this point; just mark as deleted and let things take care of themselves
+  // later...
+  s.rep->m_deleted = true;
+
 
   return true;
 }
