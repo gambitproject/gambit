@@ -45,6 +45,7 @@ class NFGobitFunc : public gC2Function<double>  {
     NFGobitFunc(const Nfg &, const MixedProfile<gNumber> &);
     virtual ~NFGobitFunc();
     
+    gVector<double> GetLambda()   { return _Lambda; }
     void SetLambda(double l)   { _Lambda = l; }
     void SetLambda(const gVector<double> &l)   { _Lambda = l; }
     long NumEvals(void) const  { return _nevals; }
@@ -252,12 +253,12 @@ private:
   NFGobitFunc F;
   const NFGobitParams & params;
   
-  double Value(const gVector<double> &);
-  
 public:
   NFKGobitFunc(const Nfg &, const MixedProfile<gNumber> &, 
 		  const NFGobitParams & params);
   virtual ~NFKGobitFunc();
+  
+  double Value(const gVector<double> &);
   
   void SetK(double k)   { _K = k; }
   void Get_p(MixedProfile<double> &p) const {p = _p;}
@@ -293,27 +294,43 @@ double NFKGobitFunc::Value(const gVector<double> &lambda)
 {
   int iter = 0;
   double value = 0.0;
-  
+
   F.SetLambda(lambda);
-  // gout.SetExpMode().SetPrec(12);
-  // gout << "\nin NFKGobitFunc::Value, lambda = " << lambda;
+
+  if(params.trace > 3) {
+//    _p(1,1)= .5709;_p(1,2)= 1.0-_p(1,1);
+//    _p(2,1)= .1227;_p(2,2)= 1.0-_p(2,1);
+    *params.tracefile << "\n   NFKGobFunc start: " << _p << " Lambda = " << F.GetLambda();
+  }
+  
+  // first find Gobit solution of p for given lambda vector
 
   DFP(_p, F, value, iter,
       params.maxits1, params.tol1, params.maxitsN, params.tolN,
-      *params.tracefile,params.trace-1,true);
+      *params.tracefile,params.trace-4,true);
 
-  // gout << "\nin NFKGobitFunc::Value, after DFP, p = \n" << _p;
   _nevals = F.NumEvals();
 
+ // now compute objective function for KGobit 
+
+  value = 0.0;
   for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
     gVector<double> &payoff = *_scratch[pl];
     _p.Payoff(pl, pl, payoff);
-    // gout << "\npl: " << pl << " payoff: " << payoff;
+    double vij = 0.0;
     for( int j = 1;j<=(_p.Support().NumStrats(pl));j++)
       for(int k = 1;k<=(_p.Support().NumStrats(pl));k++)
-	value+=pow(_p(pl,j)*_p(pl,k)*payoff[j]*(payoff[j]-payoff[k])-lambda[pl]/_K,2);
+	vij+=_p(pl,j)*_p(pl,k)*payoff[j]*(payoff[j]-payoff[k]);
+    value += pow(vij -lambda[pl]*_K,2);
   }
-  // gout << "\nvalue: " << value;
+  if(params.trace > 3) {
+    (params.tracefile->SetExpMode()).SetPrec(4);
+    *params.tracefile << "\n   NFKGobFunc val: " << value;
+    *params.tracefile << " K = " << _K;
+    *params.tracefile << " lambda = " << lambda;
+    params.tracefile->SetFloatMode().SetPrec(6);
+    *params.tracefile << " p = " << _p;
+  }
   return value;
 }
 
@@ -332,7 +349,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
   int iter = 0, nit;
   double K, K_old = 0.0, value = 0.0;
   gVector<double> lambda(N.NumPlayers());
-  lambda = (double)1.0;
+  lambda = (double).0001;
   gVector<double> lam_old(lambda);
 
   if (params.pxifile) 
@@ -352,14 +369,9 @@ void KGobit(const Nfg &N, NFGobitParams &params,
   gMatrix<double> xi(lambda.Length(), lambda.Length());
   xi.MakeIdent();
 
-  if (params.trace>0)  {
-    gout << "\nin NFKGobit";
-    gout << " traceLevel: " << params.trace;
-    gout << "\np: " << p << "\nxi: " << xi;
-    gout << "\np: " << p << "\nxi: " << xi;
+  if (params.trace> 0 )  {
     *params.tracefile << "\nin NFKGobit";
     *params.tracefile << " traceLevel: " << params.trace;
-    *params.tracefile << "\np: " << p << "\nxi: " << xi;
     *params.tracefile << "\np: " << p << "\nxi: " << xi;
   }
 
@@ -367,36 +379,34 @@ void KGobit(const Nfg &N, NFGobitParams &params,
   for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
-    if (params.trace>0)  {
-      gout << "\nnit: " << nit << " K: " << K ;
-      *params.tracefile << "\nnit: " << nit << " K: " << K ;
-    }
-    F.SetK(K);
 
-    powell =  OldPowell(lambda, xi, F, value, iter,
+
+    F.SetK(K);
+    
+   powell =  OldPowell(lambda, xi, F, value, iter,
 		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		     *params.tracefile, params.trace-1);
 
     F.Get_p(p);
+/*
     if (params.trace>0)  {
-      gout << "\nafter powell " << powell << " iter = " << iter;
-      gout << " value = " << value;
-      gout << "\nlambda: " << lambda;
-      gout << "\np: " << p;
-      *params.tracefile << "\nafter powell " << powell << " iter = " << iter;
-      *params.tracefile << " value = " << value;
-      *params.tracefile << "\nlambda: " << lambda;
-      *params.tracefile << "\np: " << p;
-    }
-    if(powell && !F.DomainErr()) {
-      if (params.trace>0)  {
-	*params.tracefile << "\nK: " << K << " val: ";
-	*params.tracefile << "\nlambda: " << lambda << " val: ";
+	*params.tracefile << "\nKGobit iter: " << nit << " val = ";
 	params.tracefile->SetExpMode();
 	*params.tracefile << value;
 	params.tracefile->SetFloatMode();
+	*params.tracefile << " K: " << K << " lambda: " << lambda << " val: ";
 	*params.tracefile << " p: " << p;
-      } 
+    }
+*/
+    if(powell && !F.DomainErr()) {
+      if (params.trace>0)  {
+	*params.tracefile << "\nKGobit iter: " << nit << " val = ";
+	params.tracefile->SetExpMode();
+	*params.tracefile << value;
+	params.tracefile->SetFloatMode();
+	*params.tracefile << " K: " << K << " lambda: " << lambda << " val: ";
+	*params.tracefile << " p: " << p;
+      }
       
       if (params.pxifile)   {
 	*params.pxifile << "\n" << K << " " << value;
