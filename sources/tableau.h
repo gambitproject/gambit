@@ -98,7 +98,7 @@ public:
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void SolveColumn(int, gVector<T> &);
   void SetConst(const gVector<T> &bnew);
-//  void SetBasis( const Basis<T> &); // set new Tableau
+  void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
       // miscellaneous functions

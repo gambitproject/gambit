@@ -205,17 +205,15 @@ void Tableau<T>::SetConst(const gVector<T> &bnew)
   B.solve(*b, solution);
 }
 
-/*
+
 template <class T>
 void Tableau<T>::SetBasis(const Basis<T> &in)
 {
   basis= in;
-  B.refactor(template->A, code.basis);
-  B.solve(template->b, solution);
-  if( costdefined )
-    SolveDual();
+  B.refactor();
+  B.solve(*b, solution);
 }
-*/
+
 
 template <class T>
 void Tableau<T>::GetBasis(Basis<T> &out) const

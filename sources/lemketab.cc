@@ -29,12 +29,13 @@ template <class T> LTableau<T>::~LTableau(void)
 
 template <class T> int LTableau<T>::PivotIn(int inlabel)
 { 
-//  gout << "\n inlabel = " << inlabel;
+  gout << "\n inlabel = " << inlabel;
   int outindex = ExitIndex(inlabel);
+  gout << " outindex = " << outindex;
   int outlabel = Label(outindex);
-  if(outlabel==0)return 0;
-//  gout << "\n outlabel = " << outlabel;
-//  gout << " outindex = " << outindex << "\n\n";
+//  if(outlabel==0)return 0;
+  gout << " outlabel = " << outlabel;
+  gout << " outindex = " << outindex;
   Pivot(outindex,inlabel);
   return outlabel;
 }
@@ -56,7 +57,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   gVector<T> col(MinRow(), MaxRow());
   
   SolveColumn(inlabel,incol);
-//  gout << "\nincol = " << incol;
+  gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
   for (i = MinRow(); i <= MaxRow(); i++)
     if (incol[i] > eps2)
@@ -73,12 +74,12 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
       // a similar ratio, until only one candidate remains.
   c = MinRow()-1;
   BasisVector(col);
-//  gout << "\nLength = " <<  BestSet.Length() << "\n b = " << col;
+  gout << "\nLength = " <<  BestSet.Length() << "\n b = " << col;
   while (BestSet.Length() > 1)   {
     assert(c <= MaxRow());
     if(c>=MinRow()) {
       SolveColumn(-c,col);
-//      gout << "\n-c = " << -c << " col = " << col;
+      gout << "\n-c = " << -c << " col = " << col;
     }
 	// Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
@@ -109,6 +110,23 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 // Executes one step of the Lemke-Howson algorithm
 //
 
+template <class T> int LTableau<T>::LCPPath(int dup, gStatus &status)
+{
+  int enter, exit;
+  enter = dup;
+      // Central loop - pivot until another CBFS is found
+  long nits = 0;
+  do  {
+    // Talk about optimism! This is dumb, but better than nothing (I guess):
+    status.SetProgress((double)nits/(double)(nits+1)); 
+    nits++;
+    exit = PivotIn(enter);
+    
+    enter = -exit;
+  } while (exit != 0 && !status.Get());
+  return 1;
+}
+
 template <class T> int LTableau<T>::LemkePath(int dup)
 {
 //  if (!At_CBFS())  return 0;
@@ -117,8 +135,8 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 //    (*params.output) << "\nbegin path " << dup << "\n";
 //    Dump(*params.output); 
 //  }
-//    (gout) << "\nbegin path " << dup << "\n";
-//    Dump(gout); 
+    (gout) << "\nbegin path " << dup << "\n";
+    Dump(gout); 
   enter = dup;
   if (Member(dup))
     enter = -dup;
@@ -133,7 +151,7 @@ template <class T> int LTableau<T>::LemkePath(int dup)
   } while ((exit != dup) && (exit != -dup));
       // Quit when at a CBFS.
 //  if(params.plev >=2 ) (*params.output) << "\nend of path " << dup;
-//  gout << "\nend of path " << dup;
+  gout << "\nend of path " << dup;
   return 1;
 }
 

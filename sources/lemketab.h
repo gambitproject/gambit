@@ -9,6 +9,7 @@
 
 // includes
 #include "tableau.h"
+#include "gstatus.h"
 
 template <class T> class LTableau : public Tableau<T> {
 protected:
@@ -21,6 +22,7 @@ public:
 
   int PivotIn(int i);
   int ExitIndex(int i);
+  int LCPPath(int dup, gStatus &status_ = gstatus); // follow a path of ACBFS's from one CBFS to another
   int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
 };
 
