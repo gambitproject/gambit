@@ -681,6 +681,8 @@ GSPD.GetParams(&P);
 long nevals,nits;
 gList<BehavSolution<double> > solns;
 Gobit(ef,P,start,solns,nevals,nits);
+if (!solns[1].IsSequential())
+  wxMessageBox("The algorithm failed to converge.\nReturning last solution.");
 GSPD.RunPxi();
 return solns;
 }
