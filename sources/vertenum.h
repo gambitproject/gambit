@@ -49,6 +49,12 @@ private:
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
+  class BadDim : public gException  {
+  public:
+    virtual ~BadDim();
+    gText Description(void) const;
+  };
+
   VertEnum(const gMatrix<T> &, const gVector<T> &, gStatus &status_ = gstatus);
   VertEnum(LPTableau<T> &, gStatus &status_ = gstatus);
   virtual ~VertEnum();
@@ -83,6 +89,11 @@ private:
   void DualSearch(LPTableau<T> &, Tableau<T> &);
   void EnumerateComplementaryFace(LPTableau<T> &, Tableau<T> &);
 public:
+  class BadDim : public gException  {
+  public:
+    virtual ~BadDim();
+    gText Description(void) const;
+  };
   DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 		 const gMatrix<T> &_A2, const gVector<T> &_b2, 
 		 gStatus &status_ = gstatus);

@@ -59,7 +59,8 @@ template <class T> VertEnum<T>::~VertEnum()
 template <class T> void VertEnum<T>::Enum()
 {
       // Check dimensions
-  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
+  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
   int i;
@@ -119,7 +120,8 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
   }
-  assert(PivotList.Length()==0);
+  if(PivotList.Length()!=0) throw BadDim();
+  //  assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
     branches[depth]+=PivotList.Length();
@@ -224,8 +226,10 @@ template <class T> DoubleVertEnum<T>::~DoubleVertEnum()
 template <class T> void DoubleVertEnum<T>::Enum()
 {
       // Check dimensions
-  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
-  assert(A2.NumRows() == b2.Length());
+  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
+  if(A2.NumRows() != b2.Length()) throw BadDim();
+  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+  //  assert(A2.NumRows() == b2.Length());
 
       // Initialize the tableau
   int i;
@@ -382,7 +386,8 @@ template <class T> const gList<BFS<T> > &DoubleVertEnum<T>::VertexList2() const
 template <class T> void DoubleVertEnum<T>::
 Vertices(gList<gVector<T> > &verts, gList<gVector<T> > &verts2) const
 { 
-  assert(List.Length() == List2.Length());
+  if(List.Length() != List2.Length()) throw BadDim();
+  //  assert(List.Length() == List2.Length());
   for(int i=1;i<=List.Length();i++) {
     gVector<T> vert(A.NumColumns());
     gVector<T> vert2(A2.NumColumns());
@@ -404,7 +409,8 @@ template <class T> long DoubleVertEnum<T>::NumPivots() const
 
 template <class T> void DoubleVertEnum<T>::Dump(gOutput &to) const
 {
-  assert(List.Length() == List2.Length());
+  if(List.Length() != List2.Length()) throw BadDim();
+  //  assert(List.Length() == List2.Length());
   // gout << "\nin VertEnum::Dump()";
   for(int i=1;i<=List.Length();i++) {
     to << "\nvert1: ";
@@ -412,6 +418,22 @@ template <class T> void DoubleVertEnum<T>::Dump(gOutput &to) const
     to << "\nvert2: ";
     List2[i].Dump(to);
   }
+}
+
+template <class T> VertEnum<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText VertEnum<T>::BadDim::Description(void) const
+{
+  return "Bad Dimension in VertEnum";
+}
+
+template <class T> DoubleVertEnum<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText DoubleVertEnum<T>::BadDim::Description(void) const
+{
+  return "Bad Pivot in DoubleVertEnum";
 }
 
 
