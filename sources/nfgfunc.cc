@@ -1,7 +1,7 @@
 //
 // FILE: nfgfunc.cc -- Normal form command language builtins
 //
-// $Id$
+// @(#)nfgfunc.cc	2.35 02/11/98
 //
 
 
@@ -475,6 +475,17 @@ static Portion *GSM_Support(Portion **param)
 }
 
 
+#ifdef ANDY
+//--------------
+// AndyTest
+//--------------
+
+static Portion *GSM_AndyTest(Portion **param)
+{
+  return new TextPortion(" ** Done **");
+}
+#endif
+
 
 void Init_nfgfunc(GSM *gsm)
 {
@@ -517,6 +528,9 @@ void Init_nfgfunc(GSM *gsm)
       { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
       { "Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)",
 	GSM_Strategies },
+#ifdef ANDY
+      { "AndyTest[] =: TEXT", GSM_AndyTest },
+#endif
       { "Support[nfg->NFG] =: NFSUPPORT", GSM_Support },
       { 0, 0 }
     };
