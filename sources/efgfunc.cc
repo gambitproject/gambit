@@ -345,6 +345,7 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
+  //   gPrecision prec = ((PrecisionPortion *) param[3])->Value();
 
   if (mixed)
     throw gclRuntimeError("Elimination by mixed strategies not implemented");
@@ -354,10 +355,10 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
   // The following sets conditional = false.  Could be more general.
 
   EFSupport *T = DominanceTruncatedSupport(*S, strong, false,
-				  ((OutputPortion *) param[4])->Value(),
+				  ((OutputPortion *) param[5])->Value(),
 				  gstatus);
 
-  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
+  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
   
   Portion *por = (T) ? new EfSupportPortion(T) : new EfSupportPortion(new EFSupport(*S));
 
@@ -1269,18 +1270,20 @@ void Init_efgfunc(GSM *gsm)
 
   // Adding ElimDom
   FuncObj = new gclFunction("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 2, gclParameter("mixed", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("precision", porPRECISION,
+					   new PrecisionPortion(precRATIONAL)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 

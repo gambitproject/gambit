@@ -96,7 +96,8 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
-  
+  gPrecision prec = ((PrecisionPortion *) param[3])->Value();
+
   gWatch watch;
   gBlock<int> players(S->Game().NumPlayers());
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
@@ -106,7 +107,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
 
   Nfg *N = (Nfg *) &S->Game();
   if (mixed)
-    T = ComputeMixedDominated(*S, strong, precRATIONAL, players,
+    T = ComputeMixedDominated(*S, strong, prec, players,
 			      ((OutputPortion *) param[5])->Value(), gstatus);
   else   {
     T = ComputeDominated(*N, *S, strong, players,
