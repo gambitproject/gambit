@@ -83,21 +83,29 @@ template <class T> class LUdecomp {
   void permute(const gVector<T>&x, gVector<T>&y) const; // y <- P(x)
   void unpermute(const gVector<T>&x, gVector<T>&y) const; // y <- P^-1(x)
   void Lsolve(const gVector<T>&b, gVector<T>&x) const; // solve: L x = b
-  void apply(gVector<T> &) const; // apply updates factored into U
-  void unapply(gVector<T> &) const; // apply inverse of updates factored into U
+  void LsolveT(const gVector<T>&c, gVector<T>&y) const; // solve: y L = c
+  void apply(gVector<T> &) const; // apply updates factored into U (Z x)
+  void applyT(gVector<T> &) const; // apply updates to row vector (y Z)
+  void unapply(gVector<T> &) const; // apply inverse of updates (Z^-1 x)
   void Usolve(const gVector<T>&b, gVector<T>&x) const; // solve U x = b
+  void UsolveT(const gVector<T>&c, gVector<T>&y) const; // solve y U = c
+
  public:
   LUdecomp(int); // create identity matrix [1..length][1..length]
   LUdecomp(int,int); // create identity matrix [a..b][a..b]
   LUdecomp(const gMatrix<T>&); // decompose matrix
   LUdecomp(const gMatrix<T>&, const gTuple<int>&); // decompose select columns
+  LUdecomp(const gMatrix<T>&, const gTuple<bool>&, const gTuple<int>&);
+    // decompose select unit and matrix columns
 
   ~LUdecomp();
 
   void update(int, const gVector<T>&); // replace (update) column with vector
-  void refactor(gMatrix<T>&); // factor a new matrix
-  void refactor(gMatrix<T>&, gTuple<int>&); // reinitialize /w selected columns
-
+  void refactor(const gMatrix<T>&); // factor a new matrix
+  void refactor(const gMatrix<T>&, const gTuple<int>&);
+    // reinitialize /w selected columns
+  void refactor( const gMatrix<T>&, const gTuple<bool>&, const gTuple<int>&);
+    // reinitialize /w selected unit and matrix columns
   void solve(const gVector<T>&, gVector<T>&) const; // solve:  M x = b
   void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct
   void reconstruct(gMatrix<T>&) const; // reconstruct M from decomposition

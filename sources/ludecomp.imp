@@ -64,7 +64,7 @@ LUdecomp<T>::~LUdecomp()
 
 
 template <class T>
-void LUdecomp<T>::refactor(gMatrix<T> &M)
+void LUdecomp<T>::refactor(const gMatrix<T> &M)
 {
   mat= M;
   null_rpp();
@@ -73,7 +73,7 @@ void LUdecomp<T>::refactor(gMatrix<T> &M)
 }
 
 template<class T>
-void LUdecomp<T>::refactor(gMatrix<T> &M, gTuple<int> &basis)
+void LUdecomp<T>::refactor(const gMatrix<T> &M, const gTuple<int> &basis)
 {
   assert(mat.MinCol()==basis.First() && mat.MaxCol()==basis.Last());
 
@@ -82,6 +82,29 @@ void LUdecomp<T>::refactor(gMatrix<T> &M, gTuple<int> &basis)
     {
       M.GetColumn(basis[i], column);
       mat.SetColumn(i, column);
+    }
+  null_rpp();
+  updates.Flush();
+  factor();
+}
+
+template<class T>
+void LUdecomp<T>::refactor(
+  const gMatrix<T> &M,
+  const gTuple<bool> &unitflag,
+  const gTuple<int> &index)
+{
+  assert(mat.Mincol()==index.First() && mat.MaxCol()==index.Last());
+  assert(mat.Mincol()==unitflag.First() && mat.MaxCol()==unitflag.Last());
+
+  gVector<T> column(mat.MinRow(),mat.MaxRow());
+  for(int i=basis.First(); i<=basis.Last(); i++)
+    {
+      if(unitflag[i])
+	{ column=(T)0; column[index[i]]=(T)1; }
+      else
+	M.GetColumn(basis[i],column);
+      mat.SetColumn(i,column);
     }
   null_rpp();
   updates.Flush();
@@ -154,6 +177,25 @@ void LUdecomp<T>::Lsolve(const gVector<T> &b, gVector<T> &x) const
 } // end Lsolve
 
 template<class T>
+void LUdecomp<T>::LsolveT(const gVector&c, gvector<T> &y) const
+// solve y L = c
+{
+  assert( mat.CheckColumn(y) && mat.CheckColumn(c) );
+  assert( &c != &y );
+  int min=y.First(), max=y.Last();
+
+  T sum;
+  for(int col=max; col>=min; col++)
+    {
+      sum= c[col];
+      for(int row=max; row>min; row++)
+	sum-= mat(row,col)*y[row];
+      y[col]= sum;
+    }
+} // end LsolveT
+
+
+template<class T>
 void LUdecomp<T>::apply(gVector<T> &v) const
 // apply Z to column vector v
 // where Z is the update which was applied to U:
@@ -180,7 +222,36 @@ void LUdecomp<T>::apply(gVector<T> &v) const
 	  v[i+1]-= v[i]*update.alpha[i];
 	}
     }
-}
+} // end apply()
+
+template<class T>
+void LUdecomp<T>::applyT(gVector<T> &v) const
+// apply Z to row vector v
+// where Z is the update which was applied to U:
+// Z= (last applied) M P ... M P (first applied)
+// v Z is done in place
+{
+  assert( mat.CheckColumn(v) );
+
+  T tmp;
+  gListIter< LUupdate<T> > iter(updates);
+  for( iter.GoLast(); !iter.PastBeginning(); iter--)
+    {
+      LUupdate<T> update= iter.GetValue();
+      assert( v.First()<=update.First() && update.Last()=v.Last()-1 );
+
+      for(int i=update.Last(); i<=update.Last(); i--)
+	{
+	  v[i]-= v[i+1]*update.alpha[i];
+	  if(update.rowp[i])
+	    {
+	      tmp= v[i];
+	      v[i]= v[i+1];
+	      v[i+1]= tmp;
+	    }
+	}
+    }
+} // end applyT()
 
 template<class T>
 void LUdecomp<T>::unapply(gVector<T> &v) const
@@ -230,6 +301,23 @@ void LUdecomp<T>::Usolve(const gVector<T> &b, gVector<T> &x) const
     }
 } // end Usolve
 
+template<class T>
+void LUdecomp<T>::UsolveT(const gVector<T> &c, gVector<T> &y) const
+// solve y U = c
+{
+  assert( mat.CheckColumn(y) && mat.CheckColumn(c) );
+  assert( &c != &y );
+  int min=y.First(), max=y.Last();
+
+  T sum;
+  for(int col=min; col<=max; col++)
+    {
+      sum= c[col];
+      for(int row=min; row<col; row++)
+	sum-= mat(row,col)*y[row];
+      y[col]= sum/mat(col,col);
+    }
+} // end UsolveT
 
 template<class T>
 void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x) const
@@ -244,6 +332,22 @@ void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x) const
   Lsolve(x,tmp);
   apply(tmp);
   Usolve(tmp,x);
+}
+
+
+template<class T>
+void LUdecomp<T>::solveT(const gVector<T> &c, gVector<T> &y) const
+// solve y A  = c
+{
+  // &y can be the same as &c...
+  assert( mat.CheckColumn(x) && mat.CheckColumn(b) );
+  int min= mat.MinCol(), max= mat.MaxCol();
+  gVector<T> tmp(min,max);
+
+  UsolveT(b,x);
+  applyT(x);
+  LsolveT(x,tmp);
+  unpermute(tmp);
 }
 
 /* solveT isnt done yet
