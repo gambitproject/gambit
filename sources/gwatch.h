@@ -1,8 +1,8 @@
-//#
-//# FILE: gwatch.h -- Interface to a general stopwatch class
-//#
-//# $Id$
-//#
+//
+// FILE: gwatch.h -- Interface to a general stopwatch class
+//
+// $Id$
+//
 
 #ifndef GWATCH_H
 #define GWATCH_H
@@ -17,15 +17,15 @@
 //
 class gWatch    {
   private:
-    int running;
+    bool running;
     long start, stop;
     char *time_str;
 
   public:
-    gWatch(int run = 1);
+    gWatch(bool run = true);
     ~gWatch();
 
-    int IsRunning(void) const;
+    bool IsRunning(void) const;
 
     void Start(void);
     void Stop(void);
