@@ -154,7 +154,7 @@ Portion* GSM_Divide_double( Portion** param )
   }
   else
   {
-    gerr << "GSM_Divide Error: division by zero\n";
+    result = new Error_Portion( "GSM_Divide Error: division by zero" );
   }
   return result;
 }
@@ -172,7 +172,7 @@ Portion* GSM_Divide_gInteger( Portion** param )
   }
   else
   {
-    gerr << "GSM_Divide Error: division by zero\n";
+    result = new Error_Portion( "GSM_Divide Error: division by zero" );
   }
   return result;
 }
@@ -190,7 +190,7 @@ Portion* GSM_Divide_gRational( Portion** param )
   }
   else
   {
-    gerr << "GSM_Divide Error: division by zero\n";
+    result = new Error_Portion( "GSM_Divide Error: division by zero" );
   }
   return result;
 }
@@ -250,7 +250,7 @@ Portion* GSM_Modulus_gInteger( Portion** param )
   }
   else
   {
-    gerr << "GSM_Divide Error: division by zero\n";
+    result = new Error_Portion( "GSM_Divide Error: division by zero" );
   }
   return result;
 }

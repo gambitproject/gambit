@@ -562,11 +562,21 @@ Portion* CallFuncObj::CallFunction( Portion **param )
     }
   }
 
+  /* This section makes the actual fuunction call */
   if( !_ErrorOccurred )
   {
     result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
+
     if( result == 0 )
       _ErrorOccurred = true;
+    else if( result->Type() == porERROR )
+    {
+      result->Output( gerr );
+      gerr << "\n";
+      delete result;
+      result = 0;
+      _ErrorOccurred = true;
+    }
   }
 
   if( !_ErrorOccurred )

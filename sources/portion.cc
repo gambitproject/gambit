@@ -92,14 +92,33 @@ bool Portion::Operation( Portion* p, OperationMode mode )
 //                          error type 
 //-----------------------------------------------------------------------
 
+
+
+Error_Portion::Error_Portion( const gString& value )
+     : _Value( value )
+{ }
+
+
+gString Error_Portion::Value( void ) const
+{ return _Value; }
+
+gString& Error_Portion::Value( void )
+{ return _Value; }
+
 PortionType Error_Portion::Type( void ) const
 { return porERROR; }
 
 Portion* Error_Portion::Copy( void ) const
-{ return new Error_Portion; }
+{ return new Error_Portion( _Value ); }
 
 void Error_Portion::Output( gOutput& s ) const
-{ s << " Error"; }
+{
+  s << " Error";
+  if( _Value != "" )
+    s << ": " << _Value;
+}
+
+
 
 
 //-----------------------------------------------------------------------

@@ -100,13 +100,23 @@ class Portion
 
 
 
+
+
 class Error_Portion : public Portion
 {
+ private:
+  gString _Value;
+
  public:
-  PortionType Type         ( void ) const;
-  Portion*    Copy         ( void ) const;
-  void        Output       ( gOutput& s ) const;
+  Error_Portion( const gString& value = "" );
+
+  gString&    Value     ( void );
+  gString     Value     ( void ) const;
+  Portion*    Copy      ( void ) const;
+  PortionType Type      ( void ) const;
+  void        Output    ( gOutput& s ) const;
 };
+
 
 
 template <class T> class numerical_Portion : public Portion
