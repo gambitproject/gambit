@@ -18,6 +18,9 @@ private:
 
 public:
   static const char* GetEnv( const char* name );
+  static int SetEnv( const char* name, const char* value );
+  static int UnSetEnv( const char* name );
+
   static const char* GetCmdInterpreter( void );
   static int Shell( const char* command );
   static int Spawn( const char* command );

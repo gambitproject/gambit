@@ -1696,7 +1696,7 @@ bool GSM::CallFunction(void)
 
   param = new Portion*[func->NumParams()];
 
-  return_value = func->CallFunction(this, param);
+  return_value = func->CallFunction( this, param );
 
   assert(return_value != 0);
 
@@ -2536,11 +2536,11 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
   int i = 0;
   int j = 0;
   
-  assert( spec.Type == porEF_SUPPORT ||
-	  spec.Type == porPLAYER_EFG ||
-	  spec.Type == porINFOSET ||
-	  spec.Type == porNODE ||
-	  spec.Type == porACTION );
+  assert( ( spec.Type & porEF_SUPPORT) ||
+	  ( spec.Type & porPLAYER_EFG ) ||
+	  ( spec.Type & porINFOSET ) ||
+	  ( spec.Type & porNODE ) ||
+	  ( spec.Type & porACTION ) );
   
   for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
     for(j=1; j<=vars[i].Length(); j++)
@@ -2551,33 +2551,33 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
     if( varslist[i]->Game() == game )
     {
       assert( varslist[i]->GameIsEfg() );
-      if( varslist[i]->Spec() == spec )
+      if( ( varslist[i]->Spec().Type & spec.Type ) && spec.ListDepth == 0 )
       {
 	assert( spec.ListDepth == 0 );
-	switch( spec.Type )
+	if( spec.Type & porEF_SUPPORT )
 	{
-	case porEF_SUPPORT:
 	  if( ((EfSupportPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
-	  break;
-	case porPLAYER_EFG:	
+	}
+	if( spec.Type & porPLAYER_EFG )
+	{
 	  if( ((EfPlayerPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
-	  break;
-	case porINFOSET:
+	}
+	if( spec.Type & porINFOSET )
+	{
 	  if( ((InfosetPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
-	  break;
-	case porNODE:
+	}
+	if( spec.Type & porNODE )
+	{
 	  if( ((NodePortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
-	  break;
-	case porACTION:
+	}
+	if( spec.Type & porACTION )
+	{
 	  if( ((ActionPortion*) varslist[i])->Value() == data )
 	    _RefTableStack->Peek()->Remove( varslist[i] );
-	  break;
-	default:
-	  assert( 0 );
 	}
       }
     }

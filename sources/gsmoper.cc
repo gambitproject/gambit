@@ -2518,6 +2518,42 @@ Portion* GSM_Clear(Portion**)
 
 
 
+Portion* GSM_GetEnv( Portion** param )
+{
+  if( ((TextPortion*) param[0])->Value().length() == 0 )
+    return new ErrorPortion( "Invalid environment variable name" );
+
+  return 
+    new TextValPortion( System::GetEnv( ((TextPortion*) param[0])->Value() ) );
+}
+
+Portion* GSM_SetEnv( Portion** param )
+{
+  if( ((TextPortion*) param[0])->Value().length() == 0 )
+    return new ErrorPortion( "Invalid environment variable name" );
+
+  int result = 0;
+  result = System::SetEnv( ((TextPortion*) param[0])->Value(),
+			   ((TextPortion*) param[1])->Value() );
+  if( result == 0 )
+    return new BoolValPortion( true );
+  else
+    return new ErrorPortion( "Insufficient environment space" );
+}
+
+Portion* GSM_UnSetEnv( Portion** param )
+{
+  if( ((TextPortion*) param[0])->Value().length() == 0 )
+    return new ErrorPortion( "Invalid environment variable name" );
+
+  int result = 0;
+  result = System::UnSetEnv( ((TextPortion*) param[0])->Value() );
+  if( result == 0 )
+    return new BoolValPortion( true );
+  else
+    return new ErrorPortion( "Insufficient environment space" );
+}
+
 Portion* GSM_Shell( Portion** param )
 {
   gString str = ((TextPortion*) param[0])->Value();
@@ -3407,6 +3443,24 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("spawn", porBOOL, 
 					    new BoolValPortion(true)));
   gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("GetEnv", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetEnv, porTEXT, 1 ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetEnv", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetEnv, porBOOL, 2 ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("value", porTEXT ) );
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("UnSetEnv", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnSetEnv, porBOOL, 1 ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT ) );
+  gsm->AddFunction(FuncObj);
+
 
 }
 

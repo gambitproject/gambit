@@ -84,6 +84,7 @@ public:
   };
   PortionSpec          ReturnSpec;
   bool                 Listable;
+  bool                 GameMatch;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
 
@@ -95,7 +96,8 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE
+     bool listable = LISTABLE,
+     bool gamematch = false
      );
   FuncInfoType
     (
@@ -103,7 +105,8 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE
+     bool listable = LISTABLE,
+     bool gamematch = false
      );
   ~FuncInfoType();
 };
@@ -203,8 +206,9 @@ class CallFuncObj : public FuncDescObj
 
   ReferencePortion* GetParamRef ( int index ) const;
 
-  Portion* CallFunction      ( GSM*, Portion** param );
-  Portion* CallListFunction  ( GSM*, Portion** ParamIn );
+  Portion* CallFunction       ( GSM* gsm, Portion** param );
+  Portion* CallNormalFunction ( GSM* gsm, Portion** param );
+  Portion* CallListFunction   ( GSM* gsm, Portion** ParamIn );
 
   void Dump(gOutput& f) const;
 };

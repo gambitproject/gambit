@@ -21,18 +21,6 @@
 #include "rational.h"
 
 
-//#include "gambitio.h"
-
-//#include "mixedsol.h"
-//#include "behavsol.h"
-
-//#include "nfg.h"
-//#include "efg.h"
-//#include "nfplayer.h"
-//#include "nfstrat.h"
-//#include "efstrat.h"
-
-
 
 //---------------------------------------------------------------------
 //                          base class
@@ -78,6 +66,7 @@ public:
   Portion* Original(void) const;
 
   virtual PortionSpec Spec(void) const = 0;
+  virtual DataType SubType( void ) const { return DT_ERROR; }
 
   virtual void Output(gOutput& s) const;
   virtual gString OutputString( void ) const = 0;
@@ -86,7 +75,6 @@ public:
   virtual Portion* RefCopy(void) const = 0;
   virtual bool IsReference(void) const = 0;
 
-  //bool IsValid(void) const { return true; }
 
   void* Game(void) const;
   bool GameIsEfg(void) const;
@@ -406,6 +394,7 @@ public:
 
   Outcome*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -539,6 +528,7 @@ public:
 
   NFSupport*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -582,6 +572,7 @@ public:
 
   EFSupport*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -669,6 +660,7 @@ public:
 
   Infoset*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -803,6 +795,7 @@ public:
 
   BaseMixedProfile*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -849,6 +842,7 @@ public:
 
   BaseBehavProfile*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -896,6 +890,7 @@ public:
 
   BaseNfg*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -941,6 +936,7 @@ public:
 
   BaseEfg*& Value(void) const;
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -1082,6 +1078,7 @@ public:
   gList< Portion* >& Value(void) const;
   void SetDataType(unsigned long type);
   PortionSpec Spec(void) const;
+  DataType SubType( void ) const;
 
   void Output(gOutput& s) const;
   void Output(gOutput& s, long ListLF) const;

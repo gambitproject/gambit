@@ -671,8 +671,7 @@ Outcome*& OutcomePortion::Value(void) const
 
 PortionSpec OutcomePortion::Spec(void) const
 { 
-  assert((*_Value)->BelongsTo() != 0);
-  switch((*_Value)->BelongsTo()->Type())
+  switch( SubType() )
   {
   case DOUBLE:
     return PortionSpec(porOUTCOME_FLOAT);
@@ -683,6 +682,15 @@ PortionSpec OutcomePortion::Spec(void) const
   }
   return porUNDEFINED; 
 }
+
+
+DataType OutcomePortion::SubType( void ) const
+{
+  assert( Value() );
+  assert( Value()->BelongsTo() );
+  return Value()->BelongsTo()->Type();
+}
+
 
 void OutcomePortion::Output(gOutput& s) const
 {
@@ -914,6 +922,12 @@ NFSupport*& NfSupportPortion::Value(void) const
 PortionSpec NfSupportPortion::Spec(void) const
 { return PortionSpec(porNF_SUPPORT); }
 
+DataType NfSupportPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->BelongsTo().Type();
+}
+
 void NfSupportPortion::Output(gOutput& s) const
 { 
   Portion::Output(s);
@@ -984,6 +998,13 @@ EFSupport*& EfSupportPortion::Value(void) const
 
 PortionSpec EfSupportPortion::Spec(void) const
 { return PortionSpec(porEF_SUPPORT); }
+
+DataType EfSupportPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->BelongsTo().Type();
+}
+
 
 void EfSupportPortion::Output(gOutput& s) const
 { 
@@ -1128,6 +1149,14 @@ Infoset*& InfosetPortion::Value(void) const
 
 PortionSpec InfosetPortion::Spec(void) const
 { return PortionSpec(porINFOSET); }
+
+DataType InfosetPortion::SubType( void ) const
+{
+  assert( Value() );
+  assert( Value()->BelongsTo() );
+  return Value()->BelongsTo()->Type();
+}
+
 
 void InfosetPortion::Output(gOutput& s) const
 {
@@ -1362,6 +1391,12 @@ PortionSpec MixedPortion::Spec(void) const
   return PortionSpec(_DataType);
 }
 
+DataType MixedPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->Type();
+}
+
 void MixedPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
@@ -1495,6 +1530,13 @@ PortionSpec BehavPortion::Spec(void) const
     }
   return PortionSpec(_DataType);
 }
+
+DataType BehavPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->Type();
+}
+
 
 void BehavPortion::Output(gOutput& s) const
 {
@@ -1630,6 +1672,13 @@ PortionSpec NfgPortion::Spec(void) const
   return PortionSpec(porUNDEFINED);
 }
 
+DataType NfgPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->Type();
+}
+
+
 void NfgPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
@@ -1744,6 +1793,13 @@ PortionSpec EfgPortion::Spec(void) const
   }
   return PortionSpec(porUNDEFINED);
 }
+
+DataType EfgPortion::SubType( void ) const
+{
+  assert( Value() );
+  return Value()->Type();
+}
+
 
 void EfgPortion::Output(gOutput& s) const
 {
@@ -1978,6 +2034,25 @@ gList< Portion* >& ListPortion::Value(void) const
 
 PortionSpec ListPortion::Spec(void) const
 { return PortionSpec(_DataType, _ListDepth(), _IsNull()); }
+
+DataType ListPortion::SubType( void ) const
+{
+  DataType subtype = DT_ERROR;
+  int i = 0;
+  for( i = 1; i <= Length(); i++ )
+  {
+    DataType el_subtype = operator[]( i )->SubType();
+    if( el_subtype != DT_ERROR )
+    {
+      if( subtype == DT_ERROR )
+	subtype = el_subtype;
+      else if( subtype != el_subtype )
+	subtype = DT_MIXED;	
+    }
+  }
+  return subtype;
+}
+
 
 Portion* ListPortion::ValCopy(void) const
 { 

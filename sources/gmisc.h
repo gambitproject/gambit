@@ -20,7 +20,9 @@ typedef unsigned char bool;
 #define false    0
 #endif   // __BORLANDC__
 
-typedef enum { DOUBLE, RATIONAL }  DataType;
+typedef enum { DT_ERROR, DT_DOUBLE, DT_RATIONAL, DT_MIXED }  DataType;
+const DataType DOUBLE = DT_DOUBLE;
+const DataType RATIONAL = DT_RATIONAL;
 
 typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
 

@@ -33,9 +33,32 @@ System::System( void )
 
 const char* System::GetEnv( const char* name )
 {
+  assert( name != NULL );
+  assert( strlen( name ) > 0 );
   return getenv( name );
 }
 
+int System::SetEnv( const char* name, const char* value )
+{
+  int result = 0;
+  assert( name != NULL );
+  assert( strlen( name ) > 0 );
+  assert( value != NULL );
+  char* envstr = new char[ strlen(name) + strlen(value) + 2 ];
+  strcpy( envstr, name );
+  strcat( envstr, "=" );
+  strcat( envstr, value );
+  return putenv( envstr );
+}
+
+int System::UnSetEnv( const char* name )
+{
+  assert( name != NULL );
+  assert( strlen( name ) > 0 );  
+  char* envstr = new char[ strlen(name) + 1 ];
+  strcpy( envstr, name );
+  return putenv( envstr );
+}
 
 
 const char* System::GetCmdInterpreter( void )

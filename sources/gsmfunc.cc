@@ -18,6 +18,10 @@
 #include "gsminstr.h"
 #include "rational.h"
 
+#include "nfg.h"
+#include "efg.h"
+#include "nfstrat.h"
+#include "efstrat.h"
 
 // This function is called once at the first instance of GSM.
 // The Init function of each module should be placed in this function:
@@ -88,8 +92,24 @@ bool CallFuncObj::_ListNestedCheck(Portion* p, const ParamInfoType& info)
 }
 
 
-Portion* CallFuncObj::
-CallListFunction(GSM* gsm, Portion** ParamIn)
+
+
+Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
+{
+  Portion* result = 0;
+  if( !_ErrorOccurred )
+  {
+    if(!_FuncInfo[_FuncIndex].UserDefined)
+      result = _FuncInfo[_FuncIndex].FuncPtr( param );
+    else
+      result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
+				    _FuncInfo[_FuncIndex], param );
+  }
+  return result;
+}
+
+
+Portion* CallFuncObj::CallListFunction(GSM* gsm, Portion** ParamIn)
 {
   int i;
   int j;
@@ -176,11 +196,8 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
 	}
 
       if(!error_call && !null_call)
-	if(!_FuncInfo[_FuncIndex].UserDefined)
-	  result = _FuncInfo[_FuncIndex].FuncPtr(CurrParam);
-	else
-	  result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
-					_FuncInfo[_FuncIndex], CurrParam);
+	result = CallNormalFunction( gsm, CurrParam );
+
       else if(null_call)
       {
 	result = new ErrorPortion("Null argument encountered");
@@ -191,6 +208,9 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
       for(j = 0; j < NumParams; j++)
 	delete CurrParam[j];
     }
+
+    if( result == 0 )
+      result = new ErrorPortion;
 
     if(result->Spec().Type == porERROR)
     {
@@ -274,6 +294,7 @@ FuncInfoType::FuncInfoType(void)
  FuncPtr(0),
  ReturnSpec(PortionSpec(porERROR)),
  Listable(LISTABLE),
+ GameMatch( false ),
  NumParams(0),
  ParamInfo(0)
 {}
@@ -283,6 +304,7 @@ FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
  UserDefined(funcinfo.UserDefined),
  ReturnSpec(funcinfo.ReturnSpec),
  Listable(funcinfo.Listable),
+ GameMatch(funcinfo.GameMatch),
  NumParams(funcinfo.NumParams)
 {
   int i;
@@ -302,13 +324,15 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable
+ bool listable,
+ bool gamematch
 )
 :
  UserDefined(false),
  FuncPtr(funcptr),
  ReturnSpec(returnspec),
  Listable(listable),
+ GameMatch(gamematch), 
  NumParams(numparams)
 {
   int i;
@@ -324,13 +348,15 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable
+ bool listable,
+ bool gamematch
 )
 :
  UserDefined(true),
  FuncInstr(funcinstr),
  ReturnSpec(returnspec),
  Listable(listable),
+ GameMatch(gamematch),
  NumParams(numparams)
 {
   int i;
@@ -363,6 +389,7 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
   {
     _FuncInfo[f_index].UserDefined = func._FuncInfo[f_index].UserDefined;
     _FuncInfo[f_index].Listable    = func._FuncInfo[f_index].Listable;
+    _FuncInfo[f_index].GameMatch   = func._FuncInfo[f_index].GameMatch;
     _FuncInfo[f_index].ReturnSpec  = func._FuncInfo[f_index].ReturnSpec;
 
     if(!_FuncInfo[f_index].UserDefined)
@@ -1348,8 +1375,61 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
     }
   }
 
+  // now check to see that all parameters belong to the same game,
+  //   if so specified
+
+  if( !_ErrorOccurred && _FuncInfo[_FuncIndex].GameMatch )
+  {
+    void* game = NULL; 
+    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
+    {
+      if(_Param[index] != 0 &&
+	 _RunTimeParamInfo[index].Defined)
+      {
+	if( _Param[index]->Game() != NULL )
+	{
+	  if( game == NULL )
+	    game = _Param[index]->Game();
+	  else
+	    if( game != _Param[index]->Game() )
+	    {
+	      _ErrorMessage( _StdErr, 29, index + 1, _FuncName );
+	      _ErrorOccurred = true;
+	    }
+	}
+      }
+    }   
+  }
 
 
+  // now check that all parameters have the same subtype
+  if( !_ErrorOccurred )
+  {
+    DataType subtype = DT_ERROR;
+    for(index = 0; index < _FuncInfo[_FuncIndex].NumParams; index++)
+    {      
+      if(_Param[index] != 0 &&
+	 _RunTimeParamInfo[index].Defined)
+      {
+	if( _Param[index]->SubType() == DT_MIXED )
+	{
+	  _ErrorMessage( _StdErr, 31, index + 1, _FuncName );
+	  _ErrorOccurred = true;	  
+	}
+	if( _Param[index]->SubType() != DT_ERROR )
+	{
+	  if( subtype == DT_ERROR )
+	    subtype = _Param[index]->SubType();
+	  else if( subtype != _Param[index]->SubType() )
+	  {
+	    _ErrorMessage( _StdErr, 30, index + 1, _FuncName );
+	    _ErrorOccurred = true;
+	  }
+	}
+      }
+    }
+  }
+ 
   
 
   // This section makes the actual function call
@@ -1389,11 +1469,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
     }
     else if(!list_op || !_FuncInfo[_FuncIndex].Listable) // normal func call
     {
-      if(!_FuncInfo[_FuncIndex].UserDefined)
-	result = _FuncInfo[_FuncIndex].FuncPtr(_Param);
-      else
-	result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
-				      _FuncInfo[_FuncIndex], _Param);
+      result = CallNormalFunction( gsm, _Param );
     }
     else // listed function call
     {
@@ -1619,6 +1695,18 @@ void CallFuncObj::_ErrorMessage
   case 28:
     s << "Function " << str1 << "[] return type does not match declaration;\n";
     s << "Expected " << str2 << ", got " << str3 << "\n";
+    break;
+  case 29:
+    s << "Function " << str1 << "[] parameters do not belong to same game\n";
+    s << "Error at parameter #" << num1 << '\n';
+    break;
+  case 30:
+    s << "Function " << str1 << "[] parameters do not have the same subtype\n";
+    s << "Error at parameter #" << num1 << '\n';
+    break;
+  case 31:
+    s << "Function " << str1 << "[] called with a list of mixed types\n";
+    s << "Error at parameter #" << num1 << '\n';
     break;
   default:
     s << "General Error #" << error_num << '\n';
