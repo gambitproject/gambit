@@ -1,5 +1,7 @@
-// File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
+//
+// FILE: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
+//
 // $Id$
 //
 
@@ -2023,3 +2025,30 @@ void SpreadSheet3D::ExecuteLoggedCommand(const gText& command,
         throw InvalidCommand();
     }
 }
+
+void SpreadSheet3D::AddRow(int p_row /*= 0*/)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].AddRow(p_row);
+}
+
+void SpreadSheet3D::AddCol(int p_col /*= 0*/)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].AddCol(p_col);
+  DrawSettings()->AddCol(p_col);
+}
+
+void SpreadSheet3D::DelRow(int p_row /*= 0*/)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].DelRow(p_row);
+}
+
+void SpreadSheet3D::DelCol(int p_col /*= 0*/)
+{
+  for (int i = 1; i <= levels; i++)
+    data[i].DelCol(p_col);
+  DrawSettings()->DelCol(p_col);
+}
+

@@ -804,30 +804,11 @@ public:
     // Does nothing if current dimensions are given
     void SetDimensions(int rows, int cols, int levels = 0);  
 
-    void AddRow(int row = 0)
-    { for(int i = 1; i <= levels; i++) data[i].AddRow(row); }
-
-    void AddCol(int col = 0)
-    {
-        for(int i = 1; i <= levels; i++) 
-            data[i].AddCol(col);
-        DrawSettings()->AddCol(col);
-    }
-
+    void AddRow(int p_row = 0);
+    void AddCol(int p_col = 0);
     void AddLevel(int level = 0);
-    void DelRow(int row = 0)
-    {
-        for(int i = 1; i <= levels; i++) 
-            data[i].DelRow(row);
-    }
-
-    void DelCol(int col = 0)
-    {
-        for(int i = 1; i <= levels; i++) 
-            data[i].DelCol(col);
-        DrawSettings()->DelCol(col);
-    }
-
+    void DelRow(int row = 0);
+    void DelCol(int col = 0);
     void DelLevel(void);
 
     // Row/Column labeling
