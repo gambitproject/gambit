@@ -1273,9 +1273,9 @@ void EfgSolnShow::delete_all_button(wxButton &ob, wxEvent &)
 BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
                              int iset_disp, wxFrame *parent)
     : SpreadSheet3D(soln_.Game().TotalNumInfosets()+1,
-                    gmax(soln_.Support().NumActions())+2,
+                    gmax(EFSupport(soln_.Game()).NumActions())+2,
                     1, "Edit Behav Solution", parent, ANY_BUTTON),
-      soln(soln_), dim(soln_.Support().NumActions())
+      soln(soln_), dim(EFSupport(soln_.Game()).NumActions())
 {
   num_isets = soln.Game().TotalNumInfosets();
   Show(FALSE);

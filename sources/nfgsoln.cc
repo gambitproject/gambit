@@ -588,7 +588,8 @@ void NfgSolnShow::UpdateValues(void)
     {
         int cur_pos = 2 + (i - 1)*num_players;
         const MixedSolution &cur_vector = solns[i];
-        const NFSupport &sup = cur_vector.Support();
+	//        const NFSupport &sup = cur_vector.Support();
+	NFSupport sup(cur_vector.Game());
         SetCell(cur_pos, FeaturePos(MSOLN_ID), ToText((int)cur_vector.Id()));
 
         if (features[MSOLN_CREATOR])
@@ -836,13 +837,13 @@ public:
 
 MixedSolnEdit::MixedSolnEdit(MixedSolution &soln_, wxFrame *parent)
   :  SpreadSheet3D(soln_.Game().NumPlayers() + 1,
-		   gmax(soln_.Support().NumStrats()) + 1,
+		   gmax(NFSupport(soln_.Game()).NumStrats()) + 1,
 		   1, "Edit Mixed Solution", parent, ANY_BUTTON),
      soln(soln_)
 {
   Show(FALSE);
   int i, j;
-  const NFSupport &sup = soln.Support();
+  NFSupport sup(soln.Game());
   dim = sup.NumStrats();
   int max_dim = gmax(dim);
   int num_players = dim.Length();

@@ -386,26 +386,10 @@ void NfgShow::ChangeSolution(int sol)
   ClearSolutions();
 
   if (sol) {
-    if (solns[sol].Support().IsSubset(*cur_sup)) {
-      cur_soln = sol;
-
-      if (cur_soln)
-	UpdateSoln();
-    }
-    else {
-      int ok = wxMessageBox("This solution was created in a support that is not\n "
-			    "a subset of the currently displayed support.\n"
-			    "Displayed probabilities may not add up to 1.\n"
-			    "Are you sure you want to display this solution?", 
-			    "Not a subset", wxYES_NO | wxCENTRE);
-
-      if (ok == wxYES) {
-	cur_soln = sol;
-
-	if (cur_soln)
-	  UpdateSoln();
-      }
-    }
+    cur_soln = sol;
+    
+    if (cur_soln)
+      UpdateSoln();
   }
   else {
     cur_soln = 0;
