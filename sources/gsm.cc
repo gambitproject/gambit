@@ -1181,6 +1181,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
     {
       _ErrorMessage( _StdErr, 33, program_counter, 0, "", "", 0, instruction );
       result = rcFAIL;
+      done = true;
       break;
     }
   }
