@@ -220,7 +220,7 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     F.SetLambda(Lambda);
     Powell(p, xi, F, value, iter,
 	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	   gerr);
+	   (params.tracefile) ? *params.tracefile : gnull);
     
     // tracefile stuff omitted for now
 
