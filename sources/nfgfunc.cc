@@ -119,7 +119,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
     por = (T) ? new NfSupportValPortion(T, N) :
-                new NfSupportValPortion(S, N);
+                new NfSupportValPortion(new NFSupport(*S), N);
   }
   else  {
     Nfg<gRational> *N = (Nfg<gRational> *) ((NfSupportPortion *) param[0])->PayoffTable();
@@ -131,7 +131,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
     por = (T) ? new NfSupportValPortion(T, N) :
-                new NfSupportValPortion(S, N);
+                new NfSupportValPortion(new NFSupport(*S), N);
   }
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();

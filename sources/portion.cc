@@ -1029,7 +1029,7 @@ NFSupport *NfSupportPortion::Value(void) const
 void NfSupportPortion::SetValue(NFSupport *value)
 {
   SetGame(value->BelongsTo().PayoffTable(), false);
-//  delete *_Value;
+  delete *_Value;
   *_Value = value;
 }
 
@@ -1067,8 +1067,7 @@ gString NfSupportPortion::OutputString( void ) const
 
 Portion* NfSupportPortion::ValCopy(void) const
 {
-  Portion* p = new NfSupportValPortion(*_Value, paytable); 
-  return p;
+  return new NfSupportValPortion(new NFSupport(**_Value), paytable); 
 }
 
 Portion* NfSupportPortion::RefCopy(void) const
@@ -1091,6 +1090,7 @@ NfSupportValPortion::NfSupportValPortion(NFSupport* value, NFPayoffs *pay)
 
 NfSupportValPortion::~NfSupportValPortion()
 { 
+  delete *_Value;
   delete _Value; 
 }
 
@@ -1132,7 +1132,7 @@ EFSupport *EfSupportPortion::Value(void) const
 void EfSupportPortion::SetValue(EFSupport *value)
 {
   SetGame((BaseEfg *) &value->BelongsTo(), true);
-//  delete *_Value;
+  delete *_Value;
   *_Value = value;
 }
 
@@ -1172,8 +1172,7 @@ gString EfSupportPortion::OutputString( void ) const
 
 Portion* EfSupportPortion::ValCopy(void) const
 {
-  Portion* p = new EfSupportValPortion(*_Value); 
-  return p;
+  return new EfSupportValPortion(new EFSupport(**_Value)); 
 }
 
 Portion* EfSupportPortion::RefCopy(void) const
@@ -1192,6 +1191,7 @@ EfSupportValPortion::EfSupportValPortion(EFSupport* value)
 
 EfSupportValPortion::~EfSupportValPortion()
 { 
+  delete *_Value;
   delete _Value; 
 }
 

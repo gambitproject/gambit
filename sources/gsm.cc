@@ -512,12 +512,12 @@ bool GSM::Assign(void)
 
       case porNFSUPPORT_FLOAT:
       case porNFSUPPORT_RATIONAL:
-	((NfSupportPortion *) p1)->SetValue(((NfSupportPortion *) p2)->Value());
+	((NfSupportPortion *) p1)->SetValue(new NFSupport(*((NfSupportPortion *) p2)->Value()));
 	break;
 
       case porEFSUPPORT_FLOAT:
       case porEFSUPPORT_RATIONAL:
-	((EfSupportPortion *) p1)->SetValue(((EfSupportPortion *) p2)->Value());
+	((EfSupportPortion *) p1)->SetValue(new EFSupport(*((EfSupportPortion *) p2)->Value()));
 	break;
 
       case porINFOSET_FLOAT:
