@@ -21,9 +21,6 @@ template class Tableau<gRational>;
 template class LPTableau<double>;
 template class LPTableau<gRational>;
 
-template class gMatrix<gInteger>;
-template class gRectArray<gInteger>;
-
 /*
 template gOutput & operator<< {gOutput&, const Basis<double>&);
 template gOutput & operator<< {gOutput&, const Basis<gRational>&);

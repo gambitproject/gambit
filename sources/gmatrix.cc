@@ -10,12 +10,15 @@
 
 template class gMatrix<double>;
 template class gMatrix<gRational>;
+template class gMatrix<gInteger>;
 template class gMatrix<int>;
 
 template gVector<double> operator* (const gVector<double>&,
 				    const gMatrix<double>&);
 template gVector<gRational> operator* (const gVector<gRational>&,
 				    const gMatrix<gRational>&);
+template gVector<gRational> operator* (const gVector<gInteger>&,
+				    const gMatrix<gInteger>&);
 template gVector<int> operator* (const gVector<int>&,
 				    const gMatrix<int>&);
 
