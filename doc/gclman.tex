@@ -346,7 +346,7 @@ The \tindex{BOOLEAN} type is used to represent the boolean values.
 The \tindex{BOOLEAN} type is implemented in tri-state logic,
 and has the three values ``true'' and ``false'' and ``unknown''.  The
 command language predefines three constants to represent these,
-\tindex{True} and \tindex{False}, and \tindex{Maybe}
+\tindex{True} and \tindex{False}, and \tindex{Unknown}
 \marginpar{will this change to Unknown?}
 
 \subsection{Numeric Data types}
@@ -2700,11 +2700,11 @@ Optionally, the algorithm can be set to find the first \verb+k+
 equilibria.  This algorithm works only on two-person normal form
 games.
 
-\subsection{\tindex{Gobit}}
-\index{Algorithms!logistic quantal response!{\tt GobitSolve}}
-\index{Algorithms!logistic quantal response!{\tt GobitGridSolve}}
+\subsection{\tindex{Qre}}
+\index{Algorithms!logistic quantal response!{\tt QreSolve}}
+\index{Algorithms!logistic quantal response!{\tt QreGridSolve}}
 
-The \tindex{GobitSolve} function computes a branch of the logistic
+The \tindex{QreSolve} function computes a branch of the logistic
 quantal response equilibrium correspondence (as described in
 \cite{McKPal:95a} for normal form games, and in
 \cite{McKPal:95b} for extensive form games.  The branch is
@@ -2735,7 +2735,7 @@ set of sequential equilibria as $\lambda$ goes to infinity.  Hence, in
 extensive form games, this algorithm can be used to compute an
 approximation to a sequential equilibrium.
 
-The \tindex{GobitGridSolve} function performs a two stage grid search to
+The \tindex{QreGridSolve} function performs a two stage grid search to
 compute the {\em complete} logistic quantal response correspondence.
 Points are evaluated in terms of the value of an objective function,
 that measures the distance between the original point, and the best
@@ -2963,7 +2963,7 @@ AllSubgamePerfect &  Mark & Strong &  2-person    & NF/EnumMixed &\\ \cline{4-6}
                   &       &        &  n-person    & NF/Liap &Not guaranteed\\
 \hline
 \hline
-OneSequential &  Unmark & None &  2 or n-person   & EF/Gobit &\\ \cline{4-6}
+OneSequential &  Unmark & None &  2 or n-person   & EF/Qre &\\ \cline{4-6}
 \hline
 AllSequential &         &       &  2 or n-person   & EF/Liap &Not guaranteed\\
 \hline
@@ -3492,9 +3492,9 @@ appreciate getting feedback on this.
 # EnumMixedSolve 
   EnumPureSolve 
 # EnumPureSolve 
-  GobitGridSolve 
-  GobitSolve 
-# GobitSolve 
+  QreGridSolve 
+  QreSolve 
+# QreSolve 
   LcpSolve 
 # LcpSolve 
   LiapSolve 
@@ -3533,8 +3533,8 @@ appreciate getting feedback on this.
 # Behav 
   Belief 
   Beliefs 
-  GobitLambda 
-  GobitValue 
+  QreLambda 
+  QreValue 
   InfosetProb 
   InfosetProbs 
   IsKnownNash 
@@ -4558,9 +4558,9 @@ used to identify \verb+Include[]+ files.
 \item [See also:] \verb+ExePath+, \verb+Include+.
 \ed
 
-\item\lex{GobitGridSolve}
+\item\lex{QreGridSolve}
 \protect \large \begin{verbatim}
-GobitGridSolve[support->NFSUPPORT, {pxifile->}, 
+QreGridSolve[support->NFSUPPORT, {pxifile->}, 
                {minLam->0.001000}, {maxLam->500.000000}, 
                {delLam->0.020000}, {powLam->1}, 
                {delp1->0.100000}, {tol1->0.100000}, 
@@ -4578,7 +4578,7 @@ the list of mixed profiles computed, one profile for each value of
 $\lambda_t$ from lowest to highest.
 
 The operation of the algorithm may be modified by specifying optional
-parameters.  See \verb+GobitSolve+ for a description of parameters
+parameters.  See \verb+QreSolve+ for a description of parameters
 not listed here:
 \bd
 \item
@@ -4596,32 +4596,32 @@ $0.01$ .
 Values of $p$ for which the objective function is less this value are
 kept.  The default is $0.01$.  
 \ed
-\item [See also:] \verb+GobitSolve+.
+\item [See also:] \verb+QreSolve+.
 \ed
 
-\item\lex{GobitLambda}
+\item\lex{QreLambda}
 \protect \large \begin{verbatim}
-GobitLambda[profile->MIXED] =: NUMBER 
-GobitLambda[profile->BEHAV] =: NUMBER 
+QreLambda[profile->MIXED] =: NUMBER 
+QreLambda[profile->BEHAV] =: NUMBER 
 \end{verbatim}\normalsize
 
 \bd
 Returns the value of \verb+lambda+ for mixed or behavior profiles
-computed by \verb+GobitSolve+ or \verb+GobitGridSolve+.  Profiles not
+computed by \verb+QreSolve+ or \verb+QreGridSolve+.  Profiles not
 created by one of these algorithms have a null lambda value.
 \item
-[See also:] \verb+GobitGridSolve+, \verb+GobitSolve+, \verb+GobitValue+.
+[See also:] \verb+QreGridSolve+, \verb+QreSolve+, \verb+QreValue+.
 \ed
 
-\item\lex{GobitSolve}
+\item\lex{QreSolve}
 \protect \large \begin{verbatim}
-GobitSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
+QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
            {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
            {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
            {maxits1->100}, {tol1->0.000000}, {time<->0}, 
            {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
            {traceLevel->0}] =: LIST(MIXED) 
-GobitSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
+QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
            {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
            {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
            {maxits1->100}, {tol1->0.000000}, {time<->0}, 
@@ -4693,21 +4693,21 @@ no output at all.
 \item
 [Note:] The extensive form version disregards any marked
 subgames.
-\item [See also:] \verb+GobitGridSolve+.
+\item [See also:] \verb+QreGridSolve+.
 \ed
 
-\item\lex{GobitValue}
+\item\lex{QreValue}
 \protect \large \begin{verbatim}
-GobitValue[profile->MIXED] =: NUMBER 
-GobitValue[profile->BEHAV] =: NUMBER 
+QreValue[profile->MIXED] =: NUMBER 
+QreValue[profile->BEHAV] =: NUMBER 
 \end{verbatim}\normalsize
 
 \bd
-Returns the value of the Gobit objective function for mixed or behavior
-profiles computed by \verb+GobitSolve+ or \verb+GobitGridSolve+.  The Gobit
+Returns the value of the QRE objective function for mixed or behavior
+profiles computed by \verb+QreSolve+ or \verb+QreGridSolve+.  The QRE
 value for profiles not created by these algorithms is null.
 \item
-[See also:] \verb+GobitGridSolve+, \verb+GobitLambda+, \verb+GobitSolve+.
+[See also:] \verb+QreGridSolve+, \verb+QreLambda+, \verb+QreSolve+.
 \ed
 
 \item\lex{Greater}
@@ -5132,7 +5132,7 @@ sequential Nash equilibrium, and \verb+False+ otherwise.  There is
 currently no definitive test in Gambit for whether an arbitrary
 profile is sequential.  However any Nash equilibrium of an extensive
 form game which is computed via the \verb+LiapSolve+ or
-\verb+GobitSolve+ algorithms is sequential.
+\verb+QreSolve+ algorithms is sequential.
 \ed
 
 \item\lex{IsSubgamePerfect}
@@ -5178,7 +5178,7 @@ Returns \verb+True+ when the system stopwatch is currently running.
 
 %--K--
 
-\marginpar{Should we put \verb+KGobitSolve+ in?}
+\marginpar{Should we put \verb+KQreSolve+ in?}
 
 %--L--
 
@@ -7621,9 +7621,9 @@ True
 \end{verbatim} 
 \ed
 
-\item\lex{GobitSolve}
+\item\lex{QreSolve}
 \protect \large \begin{verbatim}
-GobitSolve[efg->EFG, {pxifile->}, {minLam->0.001000}, 
+QreSolve[efg->EFG, {pxifile->}, {minLam->0.001000}, 
            {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
            {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
            {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
@@ -7632,19 +7632,19 @@ GobitSolve[efg->EFG, {pxifile->}, {minLam->0.001000},
 \end{verbatim}\normalsize
 
 \bd 
-A version of \verb+GobitSolve+ that takes an extensive form
+A version of \verb+QreSolve+ that takes an extensive form
 game instead of a support.  See the built-in function,
-\verb+GobitSolve+ for a description of the parameters.
+\verb+QreSolve+ for a description of the parameters.
 \begin{verbatim}
-GobitSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
+QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 \end{verbatim} 
 \ed
 
-\item\lex{GobitSolve}
+\item\lex{QreSolve}
 \protect \large \begin{verbatim}
-GobitSolve[nfg->NFG, {pxifile->}, {minLam->0.001000}, 
+QreSolve[nfg->NFG, {pxifile->}, {minLam->0.001000}, 
            {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
            {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
            {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
@@ -7653,11 +7653,11 @@ GobitSolve[nfg->NFG, {pxifile->}, {minLam->0.001000},
 \end{verbatim}\normalsize
 
 \bd 
-A version of \verb+GobitSolve+ that takes a normal form
+A version of \verb+QreSolve+ that takes a normal form
 game instead of a support.  See the built-in function,
-\verb+GobitSolve+ for a description of the parameters.
+\verb+QreSolve+ for a description of the parameters.
 \begin{verbatim}
-GobitSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
+QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
   fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
   traceLevel]
 \end{verbatim} 
@@ -8334,7 +8334,7 @@ Finds one sequential Nash equilibrium of the extensive form game
 
 \begin{verbatim}
 ms:=MarkedSubgames[e];UnmarkSubgames[e];
-b:=GobitSolve[e,fullGraph->False];
+b:=QreSolve[e,fullGraph->False];
 If[!IsKnownSequential[b_1],
   << " Warning: Algorithm did not converge, returning last value"
 ];
@@ -9181,7 +9181,7 @@ experimental data to the quantal response equilibrium (QRE) and one
 sided error model (OSEM).  The following files define a GCL function 
 
 \begin{verbatim}
-  EGobit[filename->TEXT] 
+  EQre[filename->TEXT] 
 \end{verbatim}
 
 \noindent
@@ -9219,8 +9219,8 @@ The input data file ``bhg3.agg'' follows:
 The program is run by typing 
 
 \begin{verbatim}
-  Include["egobit.gcl"]
-  EGobit["bhg3"]
+  Include["eqre.gcl"]
+  EQre["bhg3"]
 \end{verbatim}
 
 \noindent
@@ -9264,7 +9264,7 @@ Figure 4 displays the pxi file, and the following output is in
 
 \noindent
 The program is contained in three files, whose contents follow.  First
-is the contents of ``egobit.gcl'':
+is the contents of ``eqre.gcl'':
 
 {\scriptsize
 \begin{verbatim}
@@ -9287,9 +9287,9 @@ is the contents of ``egobit.gcl'':
 //  filename.pxi
 //
 
-Include["egobitml.gcl"]
+Include["eqreml.gcl"]
 
-NewFunction[EGobit[filename->TEXT],
+NewFunction[EQre[filename->TEXT],
   //  Load efg and open agg file for reading
   width:=0;precis:=0;quote:=True;lf:=0;
   GetNumericFormat[width<->width,precis<->precis];
@@ -9320,7 +9320,7 @@ NewFunction[EGobit[filename->TEXT],
   pxi := filename&".pxi";
   out := filename&".out";
 
-  EGobitML[e,dat,min,max,del,out,pxi,nash];
+  EQreML[e,dat,min,max,del,out,pxi,nash];
   SetNumericFormat[width,precis];
   SetTextFormat[quote];
   SetListFormat[lf->lf];
@@ -9329,7 +9329,7 @@ NewFunction[EGobit[filename->TEXT],
 }
 
 \noindent
-Following is the contents of ``egobitml.gcl'':
+Following is the contents of ``eqreml.gcl'':
 
 {\scriptsize
 \begin{verbatim}
@@ -9347,9 +9347,9 @@ Following is the contents of ``egobitml.gcl'':
 //      element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
 //	used to indicate that player 1 chose the first action at the
 //	first information set 43 times, etc.  
-// min is the minimum value for Lambda used by GobitSolve[]
-// max is the maximum value for Lambda used by GobitSolve[]
-// del is the increment for Lambda used by GobitSolve[]
+// min is the minimum value for Lambda used by QreSolve[]
+// max is the maximum value for Lambda used by QreSolve[]
+// del is the increment for Lambda used by QreSolve[]
 // out is the name of a file in which the results will be written
 // pxi is the name of a file where the pxi file is written
 // nash is a Nash equilibrium selection that is passed for use
@@ -9357,23 +9357,23 @@ Following is the contents of ``egobitml.gcl'':
 
 Include["loglike.gcl"]
 
-NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max->NUMBER,\
+NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max->NUMBER,\
   del->NUMBER,out->TEXT,pxi->TEXT,nash->BEHAV],
   o := Output[out];
 
-  gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+  gob := QreSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
     pxifile->pxi];
 
   size := Length[gob];
 
   eps:=0.0000000001;
   For[i := size , i>=1 , i:=i-1,
-    If[GobitValue[gob_i] > eps, 
-      o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob_i];
+    If[QreValue[gob_i] > eps, 
+      o << "\nRemoved element: " << i << " lambda: " << QreLambda[gob_i];
       gob:=Remove[gob,i]; 
     ];
   ];
-  lamlist:=GobitLambda[gob];
+  lamlist:=QreLambda[gob];
   size := Length[gob];
 
   goblist := ListForm[gob];
@@ -9506,858 +9506,6 @@ NewFunction[LamHiLo[list->LIST(NUMBER),lam->LIST(NUMBER),range->NUMBER,llmaxind-
 \addcontentsline{toc}{chapter}{Bibliography}
 \input{gclman.ind}
 \end{document}
-
-\newpage
-\section{A GCL program to build the chain store game}
-
-The following GCL program, in the file ``cs.gcl'' defines a user
-defined function
-
-\begin{verbatim}
-CreateChainStore[num_stages->INTEGER,prob->NUMBER] =: EFG
-\end{verbatim}
-
-\noindent
-which can be used to create a chain store game with any number of
-stages (entrants) and any probability of the incumbent being tough.
-To use the function, include the file ``cs.gcl'' and they type
-\verb+CreateChainStore[n,p]+, where For \verb+n+ is the number of
-entrants, and \verb+p+ is the probability of the incumbent being
-tough. For example, 
-
-\begin{verbatim}
-Include["cs.gcl"]
-e:= CreateChainStore[2,0.5]
-SaveEfg[e,"cs2.efg"]
-e:= CreateChainStore[3,0.5]
-SaveEfg[e,"cs3.efg"]
-\end{verbatim}
-
-\noindent
-creates and saves a two stage chainstore game and a three stage
-chainstore game, with probability .5 of being tough. Figures 5 and 6
-display the resulting games, as displayed by the GUI. 
-
-\begin{verbatim}
-//
-// A gcl program to construct a n-stage chain store game
-//
-
-NewFunction[PlayerNumber[e<->EFG, p->EF_PLAYER],
-list:=Players[e];
-i:=1;
-While[i<=NumPlayers[e] && p != list[[i]],i:=i+1;];
-i;]
-
-NewFunction[MultiStageChainStore[ efg<->EFG, node->NODE, strong->BOOLEAN, list->LIST],
-// build tree
-inc_iset:=list[[1]];
-ent_iset:=list[[2]];
-incumbent:=Player[inc_iset];
-entrant:=Player[ent_iset];
-AddMove[ent_iset, node];
-AddMove[inc_iset, node#1];
-AddMove[NewInfoset[incumbent,{""} ],node#2 ];
-// attach outcomes 
-SetOutcome[node#1#1,NewOutcome[efg]];
-SetOutcome[node#1#2,NewOutcome[efg]];
-SetOutcome[node#2#1,NewOutcome[efg]];
-pay:=Payoffs[Outcome[node#1#1]];
-entnum:=PlayerNumber[efg,entrant];
-incnum:=PlayerNumber[efg,incumbent];
-a:=0.5;b:=0.5;
-pay[[ entnum ]]:=b-1.;
-pay[[ incnum ]]:=-1.;
-If[strong, pay[[ incnum ]] := 0.;];
-SetPayoffs[Outcome[node#1#1],pay];
-pay[[ entnum ]]:=b;
-pay[[ incnum ]]:=0.;
-If[strong, pay[[ incnum ]] := -1.;];
-SetPayoffs[Outcome[node#1#2],pay];
-pay[[ entnum ]]:=0.;
-pay[[ incnum ]]:=a;
-SetPayoffs[Outcome[node#2#1],pay];
-// recurse down the tree
-list:=Remove[list,2];
-If[Length[list] > 1,
-  MultiStageChainStore[efg, node#1#1, strong, list];
-  MultiStageChainStore[efg, node#1#2, strong, list];
-  MultiStageChainStore[efg, node#2#1, strong, list];
-  ];
-]
-
-NewFunction[CreateChainStore[ num_stages->INTEGER, prob -> NUMBER],
-e := NewEfg[];
-n := RootNode[e];
-iset := NewInfoset[Chance[e], {"Strong", "Weak"} , "Chance move"];
-AddMove[iset, n];
-inc := NewPlayer[e,"Incumbent"];
-isinc := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
-lpl := { inc };
-lisets := { isinc }; 
-For[i:=1,i<=num_stages,i:=i+1,
-  lpl := lpl & { NewPlayer[e,"Entrant"&Text[i]] };
-  lisets := lisets & {NewInfoset[lpl[[i+1]],  {"Enter", "Out"}] };
-  ];
-MultiStageChainStore[ e, n#1, True, lisets];
-MultiStageChainStore[ e, n#2, False, lisets];
-
-nonterm:=NonterminalNodes[e];
-For[i:=1,i<=Length[nonterm],i:=i+1,
-  If[Player[ nonterm[[i]] ]!=Chance[e],
-    Reveal[Infoset[nonterm[[i]] ],lpl]; ];
-  ];	
-Reveal[iset,{inc}];
-e;
-];
-
-\end{verbatim}
-
-\newpage
-\begin{figure}[h]
-\centerline{\psfig{figure=gclfig5.ps,height=4in}}
-\caption{Two stage chain store game}
-\end{figure}
-
-\newpage
-\begin{figure}[h]
-\centerline{\psfig{figure=gclfig6.ps,height=6in}}
-\caption{Three stage chain store game}
-\end{figure}
-
-
-\subsection{Boolean}
-
-The BOOLEAN data type is used for logical operations
-
-\begin{itemize}
-\item
-Variables:
-
-There are two built-in BOOLEAN variables, \verb+True+  and \verb+False+.  
-
-\bd
-\item
-\verb+True+ returns ``True.''
-
-\item
-\verb+False+ returns ``False.''
-\ed
-
-\item
-Operators:
-
-Let \verb+a+ and \verb+b+ be statements evaluating to BOOLEAN. Then  
-
-\bd
-\item
-\verb+And[a,b]+ is logical ``and.''  It returns \verb+True+ if
-both \verb+a+ and \verb+b+ evaluate to \verb+True+, and otherwise
-returns \verb+False+.  It has the short form \verb+a && b+, or
-\verb+a AND b+. 
-
-\item
-\verb+Or[a,b]+ is logical ``or.''  It returns \verb+True+ if
-at least one of \verb+a+ and \verb+b+ evaluate to \verb+True+, and otherwise
-returns \verb+False+. It has the short form \verb+a || b+, 
-or \verb+a OR b+
-
-\item
-\verb+Not[a]+ is logical negation.  It returns \verb+True+ if \verb+a+
-evaluates to \verb+False+, and \verb+False+ if \verb+a+ is evaluates
-to \verb+True+.  It has the short form \verb+!a+ or \verb+NOT a+.
-\ed 
-\end{itemize}
-
-\subsection{Integers}
-\begin{itemize}
-\item
-Variables:  
-There are two built-in INTEGER variables, \verb+Zero+, and \verb+One+.
-
-\bd
-\item
-\verb+Zero+ returns 0
-
-\item
-\verb+One+ returns 1
-\ed
-
-\item
-Operators:
-Let \verb+a+ and \verb+b+ be statements evaluating to INTEGER. Then
-
-\bd
-\item
-\verb+Plus[a,b]+ returns the sum of the values returned by
-\verb+a+ and \verb+b+.  It has the short form \verb&a + b&.  Also,
-any integer $n>1$ can be viewed as short form for \verb+Plus[n-1,1]+  
- 
-\item
-\verb+Neg[a]+ returns the integer which when added to \verb+a+ yields
-0.  It has the short form \verb&-a&.  
- 
-\item
-\verb+Minus[a,b]+ returns the sum of the values returned by
-\verb+a+ and \verb+Neg[b]+.  It has the short form \verb&a - b&.  
-
-\item
-\verb+Times[a,b]+ returns the product of the values returned by
-\verb+a+ and \verb+b+.  It has the short form \verb+a * b+.
-
-\item
-\verb+Divide[a,b]+ returns the largest integer which, when
-multiplied by \verb+b+ is less than or equal to \verb+a+.  It has the
-short form \verb+a DIV b+.
-
-\item
-\verb+Modulus[a,b]+ returns the remainder of \verb+a+ divided by
-\verb+b+.  This is the integer which, when added to
-\verb+Times[b,Div[a,b]]+, yields \verb+a+.  It has the short form 
-\verb+a MOD b+.
-\item
-\verb+Power[a,b]+ returns the \verb+a+ raised to the power \verb+b+.  
-It has the short form \verb+a ^ b+.
-
-\ed
-\item
-Relational operators take INTEGER arguments and
-return a BOOLEAN
-\bd
-\item
-\verb+GreaterThan[a,b]+ returns \verb+True+ if \verb+a+$>$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a > b+.
-
-\item
-\verb+LessThan[a,b]+ returns \verb+True+ if \verb+a+$<$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a < b+.
-
-\item
-\verb+GreaterEqual[a,b]+ returns \verb+True+ if \verb+a+$>=$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a >= b+.
-
-\item
-\verb+LessEqual[a,b]+ returns \verb+True+ if \verb+a+$<=$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a <= b+.
-
-\item
-\verb+Equal[a,b]+ returns \verb+True+ if \verb+a+$=$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a = b+.
-
-\item
-\verb+NotEqual[a,b]+ returns \verb+True+ if \verb+a+$!=$\verb+b+, and
-returns \verb+False+ otherwise.  It has the short form \verb+a != b+.
-\ed
-\end{itemize}
-
-\subsection{Rationals}
-
-A RATIONAL returns a pair of integers, called the numerator and the
-denominator, where the denominator is
-non-zero.  A statement evaluating to rational is represented in the
-form \verb+a/b+, where \verb+a+ is the numerator, and \verb+b+ is the
-denominator.  
-
-\begin{itemize}
-\item
-Variables:  
-There are two built-in RATIONAL variables, \verb+Zero+, and \verb+One+.
-
-\bd
-\item
-\verb+Zero+ returns \verb+0/1+
-
-\item
-\verb+One+ returns \verb+1/1+
-\ed
-
-\item
-Operators for rationals can all be defined in terms of the operators
-for integers.  Let \verb+a+ and \verb+b+ be statements evaluating to
-RATIONAL. Say \verb+a+ evaluates to \verb+w/x+ and \verb+b+ evaluates
-to \verb+y/z+
-
-\bd
-\item
-\verb+Plus[a,b]+ returns \verb&w * z + y * x / x * z&. It has the
-short form \verb&a + b&.  
- 
-\item
-\verb+Neg[a]+ returns \verb+-w / x+.  It has the short form \verb&-a&.  
- 
-\item
-\verb+Minus[a,b]+ returns \verb+w * z - y * x / x * z+.  
-It has the short form \verb&a - b&.  
-
-\item
-\verb+Times[a,b]+ returns \verb+w * y / x * z+.  It has the short form 
-\verb+a * b+.
-
-\item
-\verb+Divide[a,b]+ returns \verb+w * z / x * y+. It is only defined
-when \verb+b+ does not evaluate to \verb+0+.  It has the
-short form \verb+a / b+.
-\item 
-\verb+Power[a,b]+ is defined only when \verb+b+ is an INTEGER.  It 
-returns \verb+w ^ b / x ^ b+.  It has the short form \verb+a ^ b+.
-
-\ed
-\item
-Relational operators for RATIONAL can also be defined in terms of
-relational operators for INTEGER.  
-\bd
-\item
-\verb+GreaterThan[a,b]+ returns \verb+w * z +$>$\verb+ x * y+.
-It has the short form \verb+a > b+.
-
-\item
-\verb+LessThan[a,b]+ returns \verb+w * z +$<$\verb+ x * y+.
-It has the short form \verb+a < b+.
-
-\item
-\verb+GreaterEqual[a,b]+ returns \verb+w * z +$>=$\verb+ x * y+.
-It has the short form \verb+a >= b+.
-
-\item
-\verb+LessEqual[a,b]+ returns \verb+w * z +$<=$\verb+ x * y+.
-It has the short form \verb+a <= b+.
-
-\item
-\verb+Equal[a,b]+ returns \verb+w * z +$=$\verb+ x * y+.
-It has the short form \verb+a = b+.
-
-\item
-\verb+NotEqual[a,b]+ returns \verb+w * z +$!=$\verb+ x * y+.
-It has the short form \verb+a = b+.
-\ed
-\end{itemize}
-
-\subsection{Floats}
-
-A FLOAT returns a pair of integers, in the form \verb+a E b+, where
-\verb+a+ is called the mantissa, and \verb+b+ is called the exponent.
-The mantissa and exponent have restricted range, as follows:  
-\verb+| a | < FloatPrecis+, and \verb+| b - Mag[a] | < FloatMag+, where
-\verb+Mag[a]+ is the magnitude of \verb+a+ -- the largest power of ten 
-that is less than or equal to \verb+a+.  
-
-It is perhaps more natural to think of a FLOAT as consisting of the
-RATIONAL mantissa, \verb+a / 10^Mag[a]+, together with an integer
-exponent, \verb+e = | b - Mag[a] |+.  This is the engineering format
-in which floating point numbers are frequently expressed.  In this
-case, the rational mantissa is written in decimal notation, with one
-digit, followed by a decimal point, and followed by the other
-significant digits.
-
-From the point of view of speed, floating point numbers have nice
-characteristics.  Floating point numbers are tailored to fit in a
-fixed amount of storage space.  Hence floating point operations can be
-encoded in hardware, and be done in a few clock cycles, in contrast to
-the software implementation of arithmetic operations for arbitrary
-precision integers or rationals.  
-
-However, from the point of view of accuracy, the FLOAT data type has a
-number of undesirable properties which mean that it should be avoided
-whenever exact answers are required.  Unlike the INTEGER and RATIONAL
-data types, the FLOAT data type does not satisfy the basic axioms of
-an ordered field: The set of floating point numbers is not closed
-under addition or multiplication.  Neither addition or multiplication
-is associative (it is not always the case that
-\verb&(a+b)+c = a+(b+c)& or 
-\verb+(a*b)*c = a*(b*c)+).  Nor does multiplication
-distribute over addition (it is not always true that 
-\verb&a*(b+c) = a*b+a*c&.  Further, not all floating point numbers have
-multiplicative inverses.  This means that we can have such wonderful
-properties as \verb+b*(a/b) != a+ (if \verb+a = 1+ and
-\verb+b = 3+, for example), or \verb&a+b = a& and yet not \verb+ b = 0+.  In
-addition to these problems, the result of a floating poing operation
-can be machine dependent, since \verb+FloatPrecis+ and 
-\verb+FloatMag+ can differ from machine to machine.
-
-\begin{itemize}
-\item
-Variables:  
-There are two built-in FLOAT variables, \verb+Zero+, and \verb+One+.
-
-\bd
-\item
-\verb+Zero+ returns \verb+0 E 1+
-
-\item
-\verb+One+ returns \verb+1 E 1+
-\ed
-
-\item
-Operators for floats can all be defined in terms of the operators for
-integers.  Let \verb+a+ and \verb+b+ be statements
-evaluating to FLOAT. Say \verb+a+ evaluates to \verb+wEx+ and
-\verb+b+ evaluates to \verb+yEz+.  For any integer \verb+i+, let 
-\verb+Insig[i]+ be the number of insignificant digits of \verb+x+.  In
-other words, \verb+Insig[i]+ is the smallest integer such that 
-\verb+| x DIV 10 ^ m | +$<=$\verb+ FloatPrecis+.  In all of the following
-definitions, we write \verb+n = FloatMag+.
-
-\bd
-\item
-\verb+Plus[a,b]+ returns \verb&(x DIV 10^m)E(m-n)&, where 
-\verb&x = a*10^(b+n) + c*10^(d+n)&, 
-and \verb+m = Insig[x]+.  
-It has the short form \verb&a + b&.
- 
-\item
-\verb+Neg[a]+ returns \verb+-w E x+.  It has the short form \verb&-a&.  
- 
-\item
-\verb+Minus[a,b]+ returns \verb+Plus[a, -b]+
-It has the short form \verb&a - b&.  
-
-\item
-\verb+Times[a,b]+ returns \verb&(x DIV 10^m)E(m-n)&, where 
-\verb&x = a*10^(b+n) * c*10^(d+n)&, 
-and \verb+m = Insig[x]+.  
-It has the short form \verb&a * b&.
- 
-\item
-\verb+Divide[a,b]+ returns \verb&(x DIV 10^m)E(m-2*n)&, where 
-\verb&x = a*10^(b+2*n) DIV c*10^(d+n)&, 
-and \verb+m = Insig[x]+.  
-It has the short form \verb&a * b&.
- 
-\ed
-\item
-Relational operators for FLOAT can also be defined in terms of
-relational operators for INTEGER.  
-\bd
-\item
-\verb+GreaterThan[a,b]+ returns \verb&w*10^(x+n) > y*10^(z+n)&.
-It has the short form \verb+a > b+.
-
-\item 
-\verb+LessThan[a,b]+ returns \verb&w*10^(x+n) < y*10^(z+n)&.
-It has the short form \verb+a < b+.
-
-\item
-\verb+GreaterEqual[a,b]+ returns \verb&w*10^(x+n) >= y*10^(z+n)&.
-It has the short form \verb+a >= b+.
-
-\item 
-\verb+LessEqual[a,b]+ returns \verb&w*10^(x+n) <= y*10^(z+n)&.
-It has the short form \verb+a <= b+.
-
-\item 
-\verb+Equal[a,b]+ returns \verb&w*10^(x+n) = y*10^(z+n)&.
-It has the short form \verb+a = b+.
-
-\item 
-\verb+NotEqual[a,b]+ returns \verb&w*10^(x+n) != y*10^(z+n)&.
-It has the short form \verb+a != b+.
-
-\ed
-\end{itemize}
-
-\chapter{Language Description}
-
-\section{Grammar and syntax}
-
-The central pardigm of the GCL is that we can think of every legal
-statement as a function call.  The function may return a value, and
-may or may not have some special short form format.
-
-At any point in time, there is a set of ``visible functions.''
-Functions can be either built-in functions, or user created functions.
-Each function is identified by its \verb+FunctionName+, which is a
-unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
-case letters or numbers beginning with a letter.  The set of all
-built-in functions is listed in the Function Reference section of this
-manual.  The built-in functions are always visible, unless they are
-explicitly deleted.
-
-With a few exceptions, to be noted later, a statement in the GCL has the
-following syntax
-\begin{verbatim}
-FunctionName[ArgumentList]
-\end{verbatim}
-where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
-a sequence of arguments, separated by commas, each of which takes one
-of the following two forms:
-\begin{verbatim}
-ArgumentName->argval
-\end{verbatim}
-or
-\begin{verbatim}
-ArgumentName<->argref
-\end{verbatim}
-
-Each function, when originally created, is given a list of formal
-argument names, and each formal argument is assigned a data type,
-which is one of the allowable data types listed in the section below
-on data types.  For each of the built-in functions, the formal
-arguments and their data types are listed in the entry for that
-function in the Function Reference section.  In the above syntax,
-\verb+ArgumentName+, must be one of the list of possible formal
-arguments for the given function, and \verb+argval+ or \verb+argref+
-is any function that evaluates to the correct data type for the
-corresponding argument. 
-
-The arguments to a function can be either optional ar required.
-Required arguments must be specified in \verb+ArgumentList+ when the
-function is called.  Each optional argument has a default value, which
-is also determined when the function is created.  Optional arguments
-need only be specified when the default is to be changed.
-
-The arguments to a function can be specified in any order, as long as
-the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function can also be called with without specifying
-the prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as
-the arguments are specified in the correct order.  In fact a mixture
-is allowed in which the prefix is specified for some arguments and not
-sepecified for others as long as all of the arguments which do not
-include the prefix preceed those that do.  In this case, it is assumed
-that those that do not include a prefix are in the correct order.  
-
-Arguments can be passed in one of two ways, either by value or by
-reference.  To pass an argument by value, the syntax is
-\verb+ArgumentName->argval+.  If an argument is passed by value, then the
-function whose name is specified in \verb+argval+ cannot be be called
-or changed by the function \verb+FunctionName+ unless it is in some
-other way made visible to the function (specifically, if it is called
-by reference in a different argument to the same function, or if is a
-funcion of global scope -- described below).  To pass by reference,
-the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
-by reference, then the function whose name is specified in
-\verb+argref+ can be called and changed by the function
-\verb+FunctionName+.  
-
-Finally, a function with no required arguments can be called by just
-specifying the function name.  That function is then called with
-default values for all optional arguments (if there are any.)
-
-Summarizing, a rough description of the formal grammar of the GCL
-follows:
-
-\begin{verbatim}
-Name: [A-Za-z]([A-Za-z0-9])
-
-Statement: FunctionName
-        | FunctionName[ArgumentList]
-
-FunctionName: Name
-
-ArgumentList: Argument
-        | Argument, Argumentlist
-
-Argument: ArgumentName -> Statement
-        | ArgumentName <-> Statement
-        | Statement
-
-ArgumentName: Name
-\end{verbatim}
-
-\section{Variables and constants}
-
-The simplest kind of function is a ``variable''.  A ``variable'' is a
-constant function with no arguments.  A variable stores one object of
-the corresponding data type, and returns it when called.  To create a
-user defined variable, one can use the built-in function,
-\verb+Assign+, which has the syntax:
-\begin{verbatim}
-Assign[varname->TEXT, value<->T]
-\end{verbatim}
-where \verb+varname+ is a name that is different from any previously
-defined function name.  This creates a variable with name
-\verb+varname+ which stores the value returned by the expression
-\verb+value+.  The variable \verb+varname+ has the same return data
-type as \verb+value+.  On success, the \verb+Assign+ function adds the
-variable \verb+varname+ to the list of currently visible functions.
-
-If \verb+Assign+ is called with an argument \verb+varname+ which is a
-currently visible function or variable. it results in an error if the
-data type which \verb+expression+ evaluates to is different that the
-current data type of \verb+varname+.  On the other hand, if the data
-types match, then \verb+varname+ is ``modified:'' \verb+varname+ is
-first deleted from the list of visible functions and then
-\verb+Assign+ is executed.
-
-The Assign function is used so frequently, it has the following short form
-representation:
-\begin{verbatim}
-varname := statement
-\end{verbatim}
-
-It is important to note that in the short form of assign, varname must
-be an constant TEXT string without quotes (not a more complex
-expression that evaluates to TEXT).  The short form of \verb+Assign+
-is not listable (see the section on listability).  
-
-\section{User defined functions}
-
-\subsection{Creating functions}
-A user defined function can be created using the function
-\verb+NewFunction+, which has the following pseudo prototype:  
-
-\begin{verbatim}
-NewFunction[FunctionPrototype,FunctionBody,comments]
-\end{verbatim}
-
-\subsection{Using functions}
-
-When a user defined function is evaluated, the following things,
-happen, in order:
-
-\begin{enumerate}
-\item
-The current list of visible functions is 
-replaced with a new set of visible functions, consisting of the
-previous set of visible functions, but not any.
- 
-\item
-\begin{itemize}
-\item
-For each argument in the argument list which is called by
-value, a new variable of local scope is created, whose name is the
-corresponding \verb+ArgumentName+, and it is assigned the value
-which results from evaluating the argument \verb+argval+.  
-\item
-For each
-argument that is called by reference, the name \verb+ArgumentName+ is
-added to the list of visible functions, and this name is treated as a
-proxy (a reference) for the function name of \verb+argref+.  In other
-words, this function remains visible, but is given a different name by
-which it is referred to while in the function.  It is very important
-to note that this means that any changes to the function with name
-\verb+ArgumentName+ will result to the exact same change to
-\verb+argref+, once that function is again visible, since
-\verb+ArgumentName+ and \verb+argref+ are just different names for the
-same function.
-\end{itemize}
-
-\item
-The statements in the body of the function are evaluated, in
-order, until a \verb+Return+ function is encountered.  
-
-\item
-When a return function is evaluated, the list of visible
-functions is restored to what it was before the \verb+FunctionName+
-was evaluated, and the argument of the Return function is evaluated
-and returned as the evaluation of \verb+FunctionName+. 
-\end{enumerate}
-
-\section{Function Prototypes}\index{Function prototypes}
-
-The function prototype is a template used to describe the correct
-syntax for calling a GCL function.  A function prototype begins with 
-
-\begin{verbatim}
-FunctionName[param1->T, Param2->S, {Param3->R}] =: 
-\end{verbatim}
-
-
-The final chapter of this manual contains a description of every
-built-in function provided in the GCL, as well as a listing of all of
-the standard user defined functions.    
-
-----------------------
-
-\item\lex{Centroid}
-\protect \large \begin{verbatim} 
-Centroid[support->EFSUPPORT] =: BEHAV(T)
-\end{verbatim}\normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Returns a behavior profile over \verb+support+ initialized to the
-centroid, that is, the behavior profile in which all actions in the
-support at each information set are equally likely to be chosen, and
-all actions not in the support are chosen with probability zero.
-\item [See also:] \verb+Behav+.
-\ed
-
-\item\lex{Centroid}
-\protect \large \begin{verbatim}
-Centroid[support->NFSUPPORT] =: MIXED(T)
-\end{verbatim}\normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Returns a mixed profile over \verb+support+
-initialized to the centroid, that is, the mixed profile in which 
-all strategies in the support for each player are equally likely to be
-chosen, and all strategies not in the support are chosen with probability
-zero.
-\item [See also:] \verb+Mixed+.
-\ed
-
-\item\lex{Float}
-\protect \large \begin{verbatim}
-Float[x->T] =: T
-\end{verbatim} \normalsize
-
-{\it for} {\tt T = FLOAT, INTEGER, RATIONAL}
-\bd
-Returns the value of \verb+x+ as type \verb+FLOAT+.
-In the case where \verb+x+ is \verb+RATIONAL+ this may result in a loss
-of precision.
-\item [See also:] \verb+Integer+, \verb+Rational+.
-\ed
-
-\item\lex{Float}
-\protect \large \begin{verbatim}
-Float[nfg->NFG(RATIONAL)] =: NFG(FLOAT)
-Float[efg->EFG(RATIONAL)] =: EFG(FLOAT)
-\end{verbatim} \normalsize
-
-\bd
-Returns a copy of the game \verb+nfg+ or \verb+efg+ of data type 
-\verb+FLOAT+. Note that this may result in a loss of precision.  
-\item [See also:] \verb+Rational+.
-\ed
-
-\item\lex{ListForm}
-\protect \large \begin{verbatim}
-ListForm[nfg<->NFG(T)] =: NLIST(T)
-\end{verbatim}\normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Converts a normal form game to a nested list of type T.  
-\item [See also:] \verb+Nfg+.
-\ed
-
-\item\lex{Rational}
-\protect \large \begin{verbatim}
-Rational[x->T] =: RATIONAL
-\end{verbatim} \normalsize
-
-{\it for} {\tt T = FLOAT, INTEGER, RATIONAL}
-\bd
-Converts the value \verb+x+ to the equivalent value of
-type {\tt RATIONAL}.
-\item [See also:] \verb+Float+, \verb+Integer+.
-\ed
-
-\item\lex{Rational}
-\protect \large \begin{verbatim}
-Rational[nfg->NFG(FLOAT)] =: NFG(RATIONAL)
-Rational[efg->EFG(FLOAT)] =: EFG(RATIONAL)
-\end{verbatim} \normalsize
-
-\bd
-Returns a copy of the game \verb+nfg+ or \verb+efg+ of data type 
-{\tt RATIONAL}. 
-\item [See also:] \verb+Float+.
-\ed
-
-\item\lex{SetPayoff}
-\protect \large \begin{verbatim}
-SetPayoff[profile->LIST(STRATEGY), player->NFPLAYER,
-          payoff->T] =: LIST(STRATEGY)
-\end{verbatim}\normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Sets the payoff to \verb+player+ in the contingency specified by
-\verb+profile+.  It is an error if \verb+player+ and the elements
-of \verb+profile+ are not from the same normal form game.
-Returns \verb+profile+.
-\item [See also:] \verb+Payoff+.
-\ed
-
-\item\lex{SetVerbose}
-\protect \large \begin{verbatim}
-SetVerbose[x->BOOLEAN] =: BOOLEAN
-\end{verbatim}\normalsize
-
-\bd 
-Determines whether output is generated at the console when you
-type a command at the GCL prompt.  When \verb+x+ is \verb+True+,
-output is generated.  This is implemented by appending the unary
-operator \verb+<<+ (short form for Print[]) to every command line
-prompt, which then becomes part of your command.
-\item [See also:] \verb+Print+.  
-\ed
-
-\item\lex{StrategyProbs}
-\protect \large \begin{verbatim}
-StrategyProbs[profile->MIXED(T), player->NFPLAYER] =: T
-\end{verbatim} \normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL}
-\bd
-Returns a list of the probabilities with which \verb+player+ adopts
-each strategy.  It is an error if \verb+profile+
-and \verb+player+ are not from the same normal form game.
-\item [See also:] \verb+StrategyProb+, \verb+SetStrategyProbs+.
-\ed
-
-\item\lex{GetListFormat}
-\protect \large \begin{verbatim}
-GetListFormat[{braces<->BOOLEAN}, {commas<->BOOLEAN},
-              {lf<->INTEGER}, {indent<->INTEGER}] =: BOOLEAN
-\end{verbatim} \normalsize
-
-\bd
-Gets the current values of the formatting parameters for lists.  See
-\verb+ListFormat+ for definitions of the parameters. 
-\begin{verbatim}
-ListFormat[braces,commas,lf,indent];
-\end{verbatim} 
-\ed
-
-\item\lex{NodeValues}
-\protect \large \begin{verbatim}
-NodeValues[behav->BEHAV(T),player->EFPLAYER]=:LIST(T)
-\end{verbatim}\normalsize
-
-{\it for} {\tt T = FLOAT, RATIONAL} 
-\bd 
-Returns a nested list of values under \verb+behav+ to \verb+player+ of
-each node in the node tree.
-\begin{verbatim}
-NodeValue[behav,player,NodeTree[Game[behav]]];
-\end{verbatim} 
-\ed
-
-
-
-notes: 10/11/97
-
-1.   How is the type of a heterogeneous list determined?
-eg. {1,{2,3}} versus {{1,2},3}
-
-2. There are no functions Assign[] and Unassign[] anymore.  How can we
-rewrite this section.  
-
-3. Shouldn't second arg in second signature be NLIST(ANYTYPE):
-
-  Contains[list->NLIST(ANYTYPE), x->ANYTYPE] =: BOOLEAN 
-  Contains[list->NLIST(ANYTYPE), x->LIST(ANYTYPE)] =: BOOLEAN 
-
-4.  Equal[] should accept null arguments. 
-
-5.  NthElement[list<->NLIST(ANYTYPE), n->INTEGER] =: ANYTYPE 
-
-should be 
-
-  NthElement[list<->NLIST(ANYTYPE*), n->INTEGER] =: ANYTYPE 
-
-
-6.  In 
-
-MergeInfosets[infoset->INFOSET, infoset->INFOSET] =: INFOSET 
-
- Params should be infoset1 and infoset2.  
-
-7.  Pass by ref does not work in 
-
-NewFunction[Abs[n<->INTEGER],
-		 If[n > 0, n, If[n < 0, n := -n, 0]]]
-
-8.  What happened to the SetVerbose[] command?  It would still make
-sense to have it.  
-
-9.  Change section on Read so that implicit types are not allowed.  
-
-10.  Payoffs always come out in Float.  Why?  
 
 
 
