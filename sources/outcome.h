@@ -26,6 +26,7 @@ class Outcome   {
     const gString &GetName(void) const   { return name; }
     void SetName(const gString &s)       { name = s; }
 
+    virtual void Resize(int pl) = 0;
     virtual void PrintValues(gOutput &) const = 0;
 };
 
@@ -41,7 +42,7 @@ template <class T> class OutcomeVector : public Outcome, public gVector<T>   {
       : Outcome(E, v.number), gVector<T>(v)   { name = v.name; }
     ~OutcomeVector()    { }
 
-    void Resize(int pl)    { }
+    void Resize(int pl);    
 
     void PrintValues(gOutput &f) const
       { Dump(f); }

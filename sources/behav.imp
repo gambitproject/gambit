@@ -10,6 +10,19 @@
 #include "node.h"
 #include "outcome.h"
 
+
+template <class T> void OutcomeVector<T>::Resize(int pl)
+{
+  T *newdata = new T[pl] - 1;
+  int i;
+  for (i = 1; i <= pl; newdata[i++] = (T) 0.0);
+  for (i = 1; i <= gmin(pl, maxdex); i++)
+    newdata[i] = data[i];
+  delete [] (data + 1);
+  data = newdata;
+  maxdex = pl;
+}
+  
 //------------------------------------------------------------------------
 //                   TypedNode<T>: Class definition
 //------------------------------------------------------------------------
@@ -129,6 +142,7 @@ template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
 {
   OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
 					       players.Length());
+  for (int i = 1; i <= players.Length(); (*ret)[i++] = (T) 0);
   outcomes.Append(ret);
   return ret;
 }

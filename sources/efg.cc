@@ -278,6 +278,8 @@ Player *BaseExtForm::NewPlayer(void)
   Player *ret = new Player(this, players.Length() + 1);
   players.Append(ret);
   root->Resize(players.Length());
+  for (int i = 1; i <= outcomes.Length(); i++)
+    outcomes[i]->Resize(players.Length());
   return ret;
 }
 
