@@ -98,8 +98,12 @@ void RealizationProbs(const Nfg<T> &N, const MixedProfile<T> &mp,
 	else
 	  prob = tremble / (T) n->NumChildren();
       }
+      else if (bp.GetEFSupport().Find(n->GetPlayer()->GetNumber(),
+				      n->GetInfoset()->GetNumber(), i)) 
+	prob = (T) 1.0 / (T) bp.GetEFSupport().NumActions(n->GetPlayer()->GetNumber(),
+							  n->GetInfoset()->GetNumber());
       else
-	prob = (T) 1.0 / (T) n->NumChildren();
+	prob = (T) 0.0;
     }
     else  {   // n.GetPlayer() == 0
       prob = (T) ((ChanceInfoset<T> *) n->GetInfoset())->GetActionProb(i);
@@ -120,8 +124,11 @@ void BehaviorStrat(const Efg<T> &E, BehavProfile<T> &bp, int pl, Node *n)
   for (int i = 1; i <= n->NumChildren(); i++)   {
     Node *child = n->GetChild(i);
     if (n->GetPlayer() && n->GetPlayer()->GetNumber() == pl)
-      if (((TypedNode<T> *) n)->nval > (T) 0.0)  {
-	bp(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i) =
+      if (((TypedNode<T> *) n)->nval > (T) 0.0 &&
+	  ((TypedNode<T> *) child)->nval > (T) 0.0)  {
+	bp(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), 
+	   bp.GetEFSupport().Find(n->GetPlayer()->GetNumber(),
+				  n->GetInfoset()->GetNumber(), i)) =
 	  ((TypedNode<T> *) child)->nval / ((TypedNode<T> *) n)->nval;
       }
     BehaviorStrat(E, bp, pl, child);
