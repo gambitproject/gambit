@@ -8,8 +8,8 @@
 
 template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b) 
-  : A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0) ,
-    status(gstatus)
+  : depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0) ,
+    nodes(0), status(gstatus)
 {
   Enum();
 }	
@@ -18,8 +18,8 @@ VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b)
 template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b, 
 		      gStatus &status)
-  : A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0), 
-    status(status) 
+  : depth(0), A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0), 
+    nodes(0), status(status) 
 {
   Enum();
 }
@@ -53,15 +53,57 @@ template <class T> void VertEnum<T>::Enum()
   DualSearch(tab);
 }
   
+
+template <class T> void VertEnum<T>::Report()
+{
+  int i = 1;
+  double x, estNodes;
+
+  estNodes=x=(double)1;
+  
+  while(i<=visits.Length()) {
+    if(visits[i]) {
+      x*=(double)branches[i]/(double)visits[i];
+      estNodes+=x;
+    }
+    i++;
+  }
+  status.SetProgress((double)nodes/estNodes);
+
+/*
+  gout << "\ndepth = " << depth << " npivots = " << npivots;
+  gout << " nodes = " << nodes << " estnodes = " << estNodes;
+  gout << " progress = " << nodes/estNodes;
+
+  gout << "\nvisits = \n";
+  visits.Dump(gout);
+  gout << "\nbranches = \n";
+  branches.Dump(gout);
+  gout << "\n";
+*/
+}
+template <class T> void VertEnum<T>::Deeper()
+{
+  depth++;
+  if(visits.Length()<depth) {
+    visits.Append(0);
+    branches.Append(0);
+  }
+  visits[depth]+=1;
+  nodes++;
+}
+
 template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
 {
   int k;
+  Deeper();
   gList<gArray<int> > PivotList;
   gArray<int> pivot;
   if(tab.IsLexMin()) 
     List.Append(tab.GetBFS1());
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
+    branches[depth]+=PivotList.Length();
     LPTableau<T> tab2(tab);
     for(k=1;k<=PivotList.Length() && !status.Get();k++) {
       pivot = PivotList[k];
@@ -71,18 +113,20 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
       Search(tab2);
     }
   }
+  else Report();  // Report progress at terminal leafs
+  depth--;
 }
   
 template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
 {
   int i,j;
+  Deeper();
+  branches[depth]+=1;
 
 //  gList<gArray<int> > PivotList;
 //  gArray<int> pivot;
 
   // gout << "\nin DualSearch";
-  tab.SetConst(b);     // install original constraint vector
-  Search(tab);         // do primal search
   if(mult_opt) {
     tab.SetConst(btemp);    // install artifical constraint vector
     LPTableau<T> tab2(tab);
@@ -91,12 +135,16 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
 	for(j=-b.Last();j<=c.Last() && !status.Get();j++) 
 	  if(j && !tab.Member(j))
 	    if(tab.IsDualReversePivot(i,j)) {
+	      branches[depth]+=1;
 	      npivots++;
 	      tab2=tab;
 	      tab2.Pivot(i,j);
 	      DualSearch(tab2);
 	    }
   }
+  tab.SetConst(b);     // install original constraint vector
+  Search(tab);         // do primal search
+  depth--;
 }
   
 template <class T> BFS_List VertEnum<T>::VertexList() const

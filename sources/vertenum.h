@@ -26,15 +26,18 @@
 
 template <class T> class VertEnum {
 private:
-  int mult_opt;
+  int mult_opt,depth;
   const gMatrix<T> &A;   
   const gVector<T> &b;
   gVector<T> btemp,c;
   BFS_List List;
-  long npivots;
+  long npivots,nodes;
   gStatus &status;
+  gList<long> visits,branches;
 
   void Enum();
+  void Deeper();
+  void Report();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:

@@ -25,6 +25,12 @@ TEMPLATE class gNode<gRational>;
 TEMPLATE class gList<int>;
 TEMPLATE class gNode<int>;
 
+TEMPLATE class gList<long>;
+TEMPLATE class gNode<long>;
+
+TEMPLATE class gList<double>;
+TEMPLATE class gNode<double>;
+
 TEMPLATE class gList<gString>;
 TEMPLATE class gNode<gString>;
 

@@ -82,8 +82,13 @@ template <class T> int EnumModule<T>::Enum(void)
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
 
+  params.status.SetProgress((double)0);
+
   VertEnum<T> poly1(A1,b1,params.status);
+  params.status.SetProgress(-(double)(1));
+
   VertEnum<T> poly2(A2,b2,params.status);
+  params.status.SetProgress(-(double)1);
 
   v1=poly1.VertexList().Last();
   v2=poly2.VertexList().Last();
@@ -96,6 +101,7 @@ template <class T> int EnumModule<T>::Enum(void)
   bool nash;
 
   for(i=2;i<=v2 && !params.status.Get();i++) {
+    params.status.SetProgress((double)(i-2)/(double)v2);
     bfs1 = poly2.VertexList()[i];
     sum = (T)0;
     for(k=1;k<=n1;k++) {
@@ -138,22 +144,11 @@ template <class T> int EnumModule<T>::Enum(void)
 	  if(bfs2.IsDefined(k)) 
 	    profile(2,k)/=sum;
 	} 
-//	gout << "\nprofile " << i << ", " << j << " " << profile << ":";
-//	for(k=1;k<=n1;k++) {
-//	  if(bfs1.IsDefined(k)) gout << " " << k;
-//	  if(bfs2.IsDefined(-k)) gout << " " << -k;
-//	}
-//	gout << ";";
-//	for(k=1;k<=n2;k++) {
-//	  if(bfs2.IsDefined(k)) gout << " " << n1+k;
-//	  if(bfs1.IsDefined(-k)) gout << " " << -n1-k;
-//	}
-//	gout << " Nash";
 	solutions.Append(profile);
       }
     }
+
   }
-//  gout << "\n";
   npivots = poly1.NumPivots()+poly2.NumPivots();
 
   if(params.status.Get()) {
