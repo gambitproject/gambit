@@ -27,32 +27,32 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
       storage_size *= dim[i];
     }
 
-    storage = new T[storage_size];
-    for (i = 0; i < storage_size; storage[i++] = 0);
-  }
+		storage = new HUGE T[storage_size];
+		for (i = 0; i < storage_size; storage[i++] = 0);
+	}
 }
 
 template <class T> gNArray<T>::gNArray(const gNArray<T> &a)
-  : storage_size(a.storage_size), dim(a.dim)
+	: storage_size(a.storage_size), dim(a.dim)
 {
-  storage = (storage_size > 0) ? new T[storage_size] : 0;
-  for (int i = 0; i < storage_size; i++)
-    storage[i] = a.storage[i];
+	storage = (storage_size > 0) ? new HUGE T[storage_size] : 0;
+	for (int i = 0; i < storage_size; i++)
+		storage[i] = a.storage[i];
 }
 
 template <class T> gNArray<T>::~gNArray()
 {
-  if (storage)    delete [] storage;
+	if (storage)    delete [] storage;
 }
 
-template <class T> 
+template <class T>
 gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
 {
-  if (this != &a)   {
-    if (storage)    delete [] storage;
-    dim = a.dim;
-    storage_size = a.storage_size;
-    storage = (storage_size > 0) ? new T[storage_size] : 0;
+	if (this != &a)   {
+		if (storage)    delete [] storage;
+		dim = a.dim;
+		storage_size = a.storage_size;
+    storage = (storage_size > 0) ? new HUGE T[storage_size] : 0;
     for (int i = 0; i < storage_size; i++)
       storage[i] = a.storage[i];
   }
