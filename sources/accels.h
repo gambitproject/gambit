@@ -1,5 +1,5 @@
 //
-// FILE: accels.h
+// FILE: accels.h -- Definition of accelerator classes
 //
 // $Id$
 //
@@ -14,46 +14,29 @@
 // This structure describes an accelerator--key combination 
 // with event id to trigger.
 
-typedef enum { aOff = 0, aOn, aEither } AccelState;
+typedef enum { accelOff = 0, accelOn, accelEither } AccelState;
 
-typedef struct accel_struct
-{
-    // Data
-    AccelState ctrl;
-    AccelState shift;
-    long key;
-    long id;
+class Accel {
+private:
+  AccelState m_control, m_shift;
+  long m_key, m_id;
 
-    // Constructors
-    accel_struct(void):ctrl(aOff), shift(aOff), key(0), id(0) { }
-    accel_struct(AccelState c, AccelState s, long k, long i)
-        : ctrl(c), shift(s), key(k), id(i) { }
+public:
+  Accel(void);
+  Accel(AccelState p_control, AccelState p_shift, long p_key, long p_id);
 
-    // Operators
-    accel_struct &operator=(const accel_struct &a)
-    {
-        ctrl  = a.ctrl;
-        shift = a.shift;
-        key   = a.key;
-        id    = a.id;
-        return *this;
-    }
+  bool operator==(const Accel &) const;
+  bool operator!=(const Accel &p_accel) const
+    { return !this->operator==(p_accel); }
+  bool operator==(wxKeyEvent &) const; 
 
-    int operator==(const accel_struct &a) const
-    { return (ctrl == a.ctrl && shift == a.shift && key == a.key); }
+  AccelState Control(void) const { return m_control; }
+  AccelState Shift(void) const { return m_shift; }
+  long Key(void) const { return m_key; }
+  long Id(void) const { return m_id; }
+};
 
-    int operator!=(const accel_struct &a) const
-    { return !(ctrl == a.ctrl && shift == a.shift && key == a.key); }
-
-    int operator==(wxKeyEvent &a) const 
-    {
-        return ((ctrl == a.ControlDown() || ctrl == aEither) && 
-                (shift == a.ShiftDown() || shift == aEither) && 
-                key == a.KeyCode());
-    }
-} Accel;
-
-gOutput &operator<<(gOutput &o, const Accel &p);
+gOutput &operator<<(gOutput &, const Accel &);
 
 // This structure defines a possible accelerator event.
 typedef struct accelevent_struct
@@ -96,9 +79,7 @@ int     WriteAccelerators(const gList<Accel> &list,
                           const char *section,
                           const char *file);
 
-void    EditAccelerators(gList<Accel> &list, const gArray<AccelEvent> &events);
-
-#define ACCELERATORS_HELP   "Accelerator Keys"
+void EditAccelerators(gList<Accel> &list, const gArray<AccelEvent> &events);
 
 #endif // ACCELS_H 
 

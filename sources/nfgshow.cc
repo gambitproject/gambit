@@ -1674,7 +1674,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   file_menu->Append(CLOSE_MENU,    "&Close",   "Exit");
   
   wxMenu *edit_menu = new wxMenu;
-  edit_menu->Append(NFG_EDIT_GAME, "&Label", "Set the label of the game");
+  edit_menu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
   edit_menu->Append(NFG_EDIT_PLAYERS, "&Players", "Edit player names");
   edit_menu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
 
@@ -2115,7 +2115,7 @@ void NormalSpread::OnMenuCommand(int id)
       parent->SolveStandard();
       break;
 
-    case NFG_EDIT_GAME: 
+    case NFG_EDIT_LABEL: 
       parent->EditLabel();
       break;
     case NFG_EDIT_STRATS: 

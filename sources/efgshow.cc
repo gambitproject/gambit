@@ -1317,12 +1317,14 @@ gArray<AccelEvent> EfgShow::MakeEventNames(void)
 // Check Accelerators
 int EfgShow::CheckAccelerators(wxKeyEvent &ev)
 {
-    int id = ::CheckAccelerators(accelerators, ev);
-
-    if (id) 
-        OnMenuCommand(id);
-
-    return id;
+  int id = ::CheckAccelerators(accelerators, ev);
+  gout << id << '\n';
+  
+  if (id) { 
+    OnMenuCommand(id);
+  }
+   
+  return id;
 }
 
 // if who == 2, hilight in the tree display
