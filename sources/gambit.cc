@@ -16,6 +16,7 @@
 
 #include "gambit.h"
 #include "wxmisc.h"
+#include "splash.h"
 #include "efgshow.h"
 #include "nfgshow.h"
 #include "system.h"
@@ -105,6 +106,9 @@ int matherr(struct exception *e)
 bool GambitApp::OnInit(void)
 {
   wxConfig config("Gambit");
+
+  Splash *splash = new Splash(2);
+  splash->ShowModal();
 
   // Create the main frame window.
   GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", 

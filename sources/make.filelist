@@ -73,7 +73,7 @@ WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc wxstatus.cc gio.cc
 WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
-              efglayout.cc wxmisc.cc efgshow.cc \
+              efglayout.cc wxmisc.cc splash.cc efgshow.cc \
 	      efgsolvd.cc nfgsolvd.cc dlefg.cc dlnfg.cc \
               efgsolng.cc wxstatus.cc algdlgs.cc \
               behavfilter.cc efgsoln.cc nfgshow.cc \
