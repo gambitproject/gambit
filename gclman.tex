@@ -132,6 +132,7 @@ Type name	& Description \\ \hline
 {\tt INFOSET}	& an information set in an extensive form game \\
 {\tt ACTION}	& an action at an information set \\
 {\tt OUTCOME}	& an outcome in an extensive form game \\
+{\tt EFSUPPORT}	& a support of actions in an extensive form game \\
 {\tt BEHAV}	& a behavioral strategy profile for an extensive form game \\ \hline
 {\tt NFG}	& normal form game \\
 {\tt NFPLAYER}	& a player in a normal form game \\
@@ -1088,7 +1089,8 @@ Output[file->TEXT] =: OUTPUT
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
-SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
+SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER, 
+          expmode->BOOL, quote->BOOL] =: OUTPUT
 Write[output->OUTPUT, x->BEHAV] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
 Write[output->OUTPUT, x<->EFG] =: OUTPUT
@@ -1097,7 +1099,7 @@ Write[output->OUTPUT, x->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->MIXED] =: OUTPUT
 Write[output->OUTPUT, x<->NFG] =: OUTPUT
 Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
-Write[output->OUTPUT, x->TEXT, {quoted->BOOL}] =: OUTPUT
+Write[output->OUTPUT, x->TEXT] =: OUTPUT
 \end{verbatim}
 
 \subsection{Logic}
@@ -1186,6 +1188,7 @@ NewInfoset[player->EFPLAYER, actions->INTEGER,
            {name->TEXT}] =: INFOSET
 NewOutcome[efg<->EFG, {name->TEXT}] =: OUTCOME
 NewPlayer[efg<->EFG, {name->TEXT}] =: EFPLAYER 
+NewSupport[efg<->EFG] =: EFSUPPORT
 RandomEfg[efg<->EFG, {seed->INTEGER}] =: EFG
 Reveal[infoset->INFOSET, who->LIST(EFPLAYER))] =: INFOSET
 SetChanceProbs[infoset->INFOSET, probs->LIST(FLOAT)] =: INFOSET
@@ -1292,8 +1295,8 @@ SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
 
 \begin{verbatim}
 Actions[infoset->INFOSET] =: LIST(ACTION)
-Centroid[efg<->EFG] =: BEHAV
-Centroid[nfg<->NFG,support->NFSUPPORT] =: MIXED
+Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
+Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 Chance[efg<->EFG] =: EFPLAYER
 ChanceProbs[infoset->INFOSET] =: LIST(T)
 HasOutcome[node->NODE] =: BOOL
@@ -1523,30 +1526,20 @@ returned by {\tt Nodes}.
 
 \item
 \protect \large \begin{verbatim} 
-Centroid[efg<->EFG] =: BEHAV
+Centroid[efg<->EFG | support->EFSUPPORT] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd
 Returns a behavioral profile for the extensive form
-game \verb+efg+ initialized to the centroid, that is, the behavioral
+support \verb+efg+ initialized to the centroid, that is, the behavioral
 profile in which all actions at each information set are equally
-likely to be chosen.
+likely to be chosen.  If \verb+efg+ is specified, the support is the
+full support.  
 \ed
 
 \item
 \protect \large \begin{verbatim}
-Centroid[nfg<->NFG] =: MIXED
-\end{verbatim}\normalsize
-
-\bd
-Returns a mixed profile for the normal form game \verb+nfg+
-initialized to the centroid, that is, the mixed profile in which all
-strategies for each player are equally likely to be choen.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-Centroid[support->NFSUPPORT] =: MIXED
+Centroid[nfg<->NFG | support->NFSUPPORT] =: MIXED
 \end{verbatim}\normalsize
 
 \bd
@@ -1554,7 +1547,7 @@ Returns a mixed profile over the support \verb+support+
 initialized to the centroid, that is, the mixed profile in which 
 all strategies in the support for each player are equally likely to be
 chosen, and all strategies not in the support are chosen with probability
-zero.
+zero.  If \verb+nfg+ is specified, the support is the full support.  
 \ed
 
 \item
@@ -2210,7 +2203,7 @@ the root node of the tree and thus has no such action.
 
 \item
 \protect \large \begin{verbatim}
-LcpSolve[efg<->EFG, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG | support->EFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
@@ -2231,6 +2224,8 @@ searched.
 \item
 [efg:] The game in normal form for which the solution is to be
 searched.
+\item
+[support:] The support for which the game is to be solved. 
 \ed
 
 \item
@@ -2681,6 +2676,17 @@ Defines a new player in the extensive form game \verb+efg+.
 By default the player is named with the empty string; the optional parameter
 \verb+name+, if specified, gives the name of the new player.  Returns the
 newly created player.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+NewSupport[efg<->EFG] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd
+Creates and returns a new support on the extensive form
+game \verb+nfg+.  The support contains all actions at every
+information set for all players.
 \ed
 
 \item
@@ -3349,14 +3355,17 @@ player.  Returns \verb+infoset+.
 
 \item
 \protect \large \begin{verbatim}
-SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
+SetFormat[output->OUTPUT, {width->INTEGER}, {precis->INTEGER}, 
+          {expmode->BOOL}, {quote->BOOL} ] =: OUTPUT
 \end{verbatim}\normalsize
 
 \bd
 Sets the formatting style for output on the stream
 \verb+output+.  \verb+width+ sets the width of the field for floating
-point numbers, and \verb+precis+ sets the number of decimal places shown
-for floating point numbers.
+point numbers, \verb+precis+ sets the number of decimal places shown
+for floating point numbers, and \verb+expmode+ sets whether output is
+in exponential format or not.  Finally, \verb+quote+ determines
+whether quotes are printed before and after text strings.   
 \item
 [See also:] {\tt Write}.
 \ed
@@ -3600,15 +3609,12 @@ Write[output->OUTPUT, x->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->MIXED] =: OUTPUT
 Write[output->OUTPUT, x<->NFG] =: OUTPUT
 Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
-Write[output->OUTPUT, x->TEXT, {quoted->BOOL}] =: OUTPUT
+Write[output->OUTPUT, x->TEXT] =: OUTPUT
 \end{verbatim}\normalsize
 
 \bd
 Does a formatted write of the object \verb+x+ to the
-output stream \verb+output+.  The optional parameter \verb+quoted+ to
-the {\tt TEXT} version, if specified as \verb+True+, controls whether
-the text string is surronded by explicit double-quotes in the output
-file; the default is \verb+False+.
+output stream \verb+output+.  
 \item
 [See also:] {\tt Output}, {\tt SetFormat}
 \ed
