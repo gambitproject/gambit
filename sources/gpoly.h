@@ -119,6 +119,7 @@ public:
   void      operator -= (const gPoly<T> &);
   gPoly<T>  operator +  (const gPoly<T> &) const;
   void      operator += (const gPoly<T> &);
+  void      operator += (const T&);
   gPoly<T>  operator *  (const gPoly<T> &) const;
   void      operator *= (const gPoly<T> &);
   void      operator *= (const T&);
@@ -201,6 +202,10 @@ template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
+
+// global add to scalar operators
+template <class T> gPoly<T> operator+(const T val, const gPoly<T> &poly);
+template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T val);
 
 template <class T> gText ToText(const gPoly<T> &p);
 

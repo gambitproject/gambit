@@ -45,6 +45,8 @@ template gText &operator<<(gText &, const gPoly<double> &);
 template class gPoly<gDouble>;
 template gPoly<gDouble> operator*(const gDouble val, const gPoly<gDouble> &poly);
 template gPoly<gDouble> operator*(const gPoly<gDouble> &poly, const gDouble val);
+template gPoly<gDouble> operator+(const gDouble val, const gPoly<gDouble> &poly);
+template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val);
 
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
@@ -163,8 +165,12 @@ template class gList< gPoly<int> * >;
 template class gList< gPoly<gRational> * >;
 template class gList< gPoly<double> * >;
 template class gList<gPoly<gRational> >;
+template class gList<gPoly<gNumber> >;
+template class gList<gPoly<gNumber> * >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<gRational> >&);
+template gOutput& operator << (gOutput& output, 
+			       const gList<gPoly<gNumber> >&);
 
 template class gList<gPoly<double> >;
 template gOutput& operator << (gOutput& output, 

@@ -176,6 +176,11 @@ template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
   Terms = Adder(Terms,p.Terms); 
 }
 
+template<class T> void gPoly<T>::operator+=(const T& val)
+{
+  *this += gPoly<T>(Space,val,Order);
+}
+
 template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p) const
 {
   gPoly<T> prod(*this);
@@ -883,6 +888,18 @@ template<class T> gPoly<T> operator*(const T val, const gPoly<T> &poly)
 template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
 {
   return val * poly;
+}
+
+template<class T> gPoly<T> operator+(const T val, const gPoly<T> &poly)
+{
+  gPoly<T> prod(poly);
+  prod += val;
+  return prod;
+}
+
+template<class T> gPoly<T> operator+(const gPoly<T> &poly, const T val)
+{
+  return val + poly;
 }
 
 template <class T> gText &operator<<(gText &t, const gPoly<T> &p)
