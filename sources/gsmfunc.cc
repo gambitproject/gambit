@@ -789,7 +789,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
   // Repeated parameter defition
   if( _RunTimeParamInfo[ _CurrParamIndex ].Defined )
   {
-    _ErrorMessage( _StdErr, 3, _CurrParamIndex, _FuncName, 
+    _ErrorMessage( _StdErr, 3, _CurrParamIndex + 1, _FuncName, 
 		  _ParamName( _CurrParamIndex ) );
     delete param;
     _ErrorOccurred = true;
@@ -821,7 +821,7 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
     }
     else
     {
-      _ErrorMessage( _StdErr, 25, _CurrParamIndex, _FuncName, 
+      _ErrorMessage( _StdErr, 25, _CurrParamIndex + 1, _FuncName, 
 		    _ParamName( _CurrParamIndex ),
 		    ( (ReferencePortion*) param )->Value() );
       delete param;
@@ -875,8 +875,8 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 	if( !_TypeMatch
 	   ( param, _FuncInfo[ _FuncIndex ].ParamInfo[_CurrParamIndex].Type ) )
 	{
-	  _ErrorMessage( _StdErr, 26, _CurrParamIndex, _FuncName,
-			_FuncInfo[ _FuncIndex ].ParamInfo[_CurrParamIndex].Name,
+	  _ErrorMessage( _StdErr, 26, _CurrParamIndex + 1, _FuncName,
+			_FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
 			PortionTypeToText( _FuncInfo[ _FuncIndex ].
 					  ParamInfo[_CurrParamIndex].Type ),
 			PortionTypeToText( param->Type() ) );
@@ -1006,14 +1006,14 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ]->Type() == porERROR )
 	{
-	  _ErrorMessage( _StdErr, 6, index, _FuncName,
+	  _ErrorMessage( _StdErr, 6, index + 1, _FuncName,
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
 	else if( !_TypeMatch( _Param[ index ], 
 			     _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ))
 	{
-	  _ErrorMessage( _StdErr, 7, index, _FuncName, 
+	  _ErrorMessage( _StdErr, 7, index + 1, _FuncName, 
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
@@ -1040,7 +1040,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	}
 	else
 	{
-	  _ErrorMessage( _StdErr, 9, index, _FuncName, 
+	  _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
@@ -1051,19 +1051,19 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	{
 	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue == 0 )
 	  {
-	    _ErrorMessage( _StdErr, 9, index, _FuncName, 
+	    _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
 			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
 	  else if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference)
 	  {
-	    _ErrorMessage( _StdErr, 10, index, _FuncName, 
+	    _ErrorMessage( _StdErr, 10, index + 1, _FuncName, 
 			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
 	  else if( _RunTimeParamInfo[ index ].Ref == 0 )
 	  {
-	    _ErrorMessage( _StdErr, 11, index, _FuncName, 
+	    _ErrorMessage( _StdErr, 11, index + 1, _FuncName, 
 			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
@@ -1101,7 +1101,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	  }
 	  else
 	  {
-	    _ErrorMessage( _StdErr, 12, index, _FuncName, 
+	    _ErrorMessage( _StdErr, 12, index + 1, _FuncName, 
 			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	    _ErrorOccurred = true;
 	  }
@@ -1110,7 +1110,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 		!_Param[ index ]->IsReference() && 
 		_RunTimeParamInfo[ index ].Ref == 0 )
 	{
-	  _ErrorMessage( _StdErr, 13, index, _FuncName, 
+	  _ErrorMessage( _StdErr, 13, index + 1, _FuncName, 
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
 	  _ErrorOccurred = true;
 	}
