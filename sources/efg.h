@@ -129,7 +129,7 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(Node *n, T, const gArray<gArray<int> *> &, gVector<T> &) const;
     void Payoff(Node *n, T prob, int pl, T &value,
 		const BehavProfile<T> &profile) const;
-    void NodeValues(Node *n, T prob, int pl, T&value, gArray<T> &valarray,
+    void NodeValues(Node *n, T prob, int pl, gArray<T> &valarray,
 		    const BehavProfile<T> &profile, int &index) const;
     void CondPayoff(Node *n, T prob, const BehavProfile<T> &,
 		    gPVector<T> &, gDPVector<T> &) const;

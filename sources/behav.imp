@@ -235,17 +235,22 @@ T Efg<T>::Payoff(int pl, const BehavProfile<T> &profile) const
 }
 
 template <class T>
-void Efg<T>::NodeValues(Node *n, T prob, int pl, T &value, gArray<T> &valarray,
+void Efg<T>::NodeValues(Node *n, T prob, int pl, 
+			gArray<T> &valarray,
 			const BehavProfile<T> &profile, int &index) const
 {
-
   int tindex = index;
+  ((TypedNode<T> *) n)->nval = (n->parent) ? ((TypedNode<T> *) n->parent)->nval : 0.0;
 
   if (n->outcome)
-    value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
+    ((TypedNode<T> *) n)->nval += ((OutcomeVector<T> &) *n->outcome)[pl];
+
+  T value = (T) 0.0;
+
   if (n->children.Length())
     if (profile.IsTruncated())   {
       T p = (T) 0.0;
+ 
       for (int i = 1, npl = n->infoset->player->number,
 	   iset = n->infoset->number; i < n->children.Length(); i++)  {
 	p += ((npl) ? profile(npl, iset, i) :
@@ -253,31 +258,38 @@ void Efg<T>::NodeValues(Node *n, T prob, int pl, T &value, gArray<T> &valarray,
 	NodeValues(n->children[i],
 		   prob * ((npl) ? profile(npl, iset, i) :
 			   ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-		   pl, value, valarray, profile, ++index);
+		   pl, valarray, profile, ++index);
+	value += ((npl) ? profile(npl, iset, i) :
+		  ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
+		    ((TypedNode<T> *) n->children[i])->nval;
       }
-      NodeValues(n->children[i], prob * ((T)1 - p), pl, value, valarray,
+      NodeValues(n->children[i], prob * ((T)1 - p), pl, valarray,
 		 profile, ++index);
-      valarray[tindex] = value;
+      value += ((T) 1 - p) * ((TypedNode<T> *) n->children[i])->nval;
     }
     else  {
       for (int i = 1, npl = n->infoset->player->number,
-	   iset = n->infoset->number; i <= n->children.Length(); i++)
+	   iset = n->infoset->number; i <= n->children.Length(); i++)  {
 	NodeValues(n->children[i],
 		   prob * ((npl) ? profile(npl, iset, i) :
 			   ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-		   pl, value, valarray, profile, ++index);
-      valarray[tindex] = value;
+		   pl, valarray, profile, ++index);
+        value += ((npl) ? profile(npl, iset, i) :
+		  ((ChanceInfoset<T> *) n->infoset)->probs[i]) *
+		    ((TypedNode<T> *) n->children[i])->nval;
+      }
     }
-  
+
+  ((TypedNode<T> *) n)->nval += value;
+  valarray[tindex] = ((TypedNode<T> *) n)->nval;
 }
 
 template <class T>
 gArray<T> Efg<T>::NodeValues(int pl, const BehavProfile<T> &profile) const
 {
-  T value = (T) 0.0;
   int index = 1;
   gArray<T> valarray(NumNodes(*profile.BelongsTo())); 
-  NodeValues(root, (T) 1.0, pl, value, valarray, profile, index);
+  NodeValues(root, (T) 1.0, pl, valarray, profile, index);
   return valarray;
 }
 
