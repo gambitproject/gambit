@@ -15,5 +15,8 @@ rcinclude wx\html\msw\wxhtml.rc
 
 help     BITMAP ..\sources\bitmaps\help.bmp
 open     BITMAP ..\sources\bitmaps\open.bmp
+print    BITMAP ..\sources\bitmaps\print.bmp
+zoomin   BITMAP ..\sources\bitmaps\zoomin.bmp
+zoomout  BITMAP ..\sources\bitmaps\zoomout.bmp
 
 

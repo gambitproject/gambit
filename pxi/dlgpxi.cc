@@ -113,7 +113,7 @@ void dialogOverlayData::LoadNow(void)
 {
   if (likefile && load_now) {
     delete likefile;likefile=0;
-    frame->LoadFile(likename);
+    //    frame->LoadFile(likename);
     //    frame->MakeChild(likename);
   }
 }

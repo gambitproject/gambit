@@ -35,8 +35,17 @@
 // wxWindows does not provide this constant
 const int wxID_HELP_INDEX = 1310;
 
-const int PXI_FILE_OPEN = 116;
-const int PXI_FILE_CLOSE = 118;
+const int PXI_VIEW_OPTIONS = 128;
+const int PXI_VIEW_DETAIL = 123;
+const int PXI_VIEW_ZOOM = 137;
+const int PXI_VIEW_ZOOM_IN = 150;
+const int PXI_VIEW_ZOOM_OUT = 151;
+
+const int PXI_FORMAT_AXIS = 131;
+const int PXI_FORMAT_OVERLAY = 132;
+const int PXI_FORMAT_LABEL = 133;
+const int PXI_FORMAT_COLORS = 124;
+
 #define	PXI_NEW_WINDOW	      117
 #define	PXI_JUST_REPAINT      115
 #define	PXI_NEW_FILE_REPAINT  116
@@ -44,29 +53,9 @@ const int PXI_FILE_CLOSE = 118;
 #define	PXI_UPDATE_FILE       120
 #define	PXI_UPDATE_PRINTER    121
 #define	PXI_UPDATE_METAFILE   122
-#define	PXI_DISPLAY_DETAIL    123
-#define	PXI_PREFS_COLORS      124
-#define	PXI_PREFS_FONTS    125
-#define	PXI_PREFS_FONT_AXIS    131
-#define	PXI_PREFS_FONT_OVERLAY  132
-#define	PXI_PREFS_FONT_LABEL    133
-#define	PXI_PREFS_SCALE         137
-#define	PXI_PREFS_SCALE_1         138
-#define	PXI_PREFS_SCALE_2         139
-#define	PXI_PREFS_SCALE_3         140
-#define	PXI_PREFS_SCALE_4         141
-#define	PXI_PREFS_SCALE_5         142
-#define	PXI_PREFS_SCALE_6         143
-#define	PXI_PREFS_SCALE_7         144
-#define	PXI_PREFS_SCALE_8         145
-#define	PXI_PREFS_SCALE_9         146
-#define	PXI_PREFS_SCALE_10         147
-#define	PXI_PREFS_ZOOM_IN         150
-#define	PXI_PREFS_ZOOM_OUT         151
 
 #define	PXI_NO_SET_STOP      -1.0
 #define	PXI_SET_STOP          127
-#define	PXI_DISPLAY_OPTIONS   128
 
 #define PXI_DATA_OVERLAY_DATA 215
 #define PXI_DATA_OVERLAY_FILE 220
@@ -199,10 +188,8 @@ public:
   bool RangeY(double y) const {return (y>y_min && y<y_max);}
 };
 
-// Define a new frame
-
-class PxiFrame: public wxFrame
-{
+class PxiFrame : public wxFrame {
+  friend class PxiChild;
 private:
   wxFileHistory m_fileHistory;
 
@@ -210,8 +197,10 @@ private:
   void OnFileOpen(wxCommandEvent &);
   void OnMRUFile(wxCommandEvent &);
   void OnDataGridSolve(wxCommandEvent &);
-  void OnHelpAbout(wxCommandEvent &);
+
   void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);

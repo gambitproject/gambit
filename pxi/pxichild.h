@@ -15,33 +15,37 @@
 
 class PxiChild : public wxFrame {
 private:
-  PxiFrame *parent;
+  PxiFrame *m_parent;
   FileHeader m_fileHeader;
   wxNotebook *m_plotBook;
 
   wxPrintData m_printData;
   wxPageSetupData m_pageSetupData;
-  gBlock<double>  scaleValues;
 
+  void OnFileOpen(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);
   void OnFilePrint(wxCommandEvent &); 
+  void OnFileExit(wxCommandEvent &);
 
-  void OnOverlayData(wxCommandEvent &);
-  void OnOverlayFile(wxCommandEvent &);
-  void OnDisplayDetail(wxCommandEvent &);
-  void OnDisplayOptions(wxCommandEvent &);
-  void OnPrefsFontAxis(wxCommandEvent &);
-  void OnPrefsFontLabel(wxCommandEvent &);
-  void OnPrefsFontOverlay(wxCommandEvent &);
-  void OnPrefsScale(wxCommandEvent &);
-  void MarkScaleMenu(void);
-  void OnPrefsColors(wxCommandEvent &);
-  void OnPrefsZoomIn(wxCommandEvent &);
-  void OnPrefsZoomOut(wxCommandEvent &);
+  void OnViewDetail(wxCommandEvent &);
+  void OnViewOptions(wxCommandEvent &);
+  void OnViewZoomIn(wxCommandEvent &);
+  void OnViewZoomOut(wxCommandEvent &);
+  void OnViewZoom(wxCommandEvent &);
 
-  void OnHelpAbout(wxCommandEvent &);
+  void OnDataOverlayData(wxCommandEvent &);
+  void OnDataOverlayFile(wxCommandEvent &);
+
+  void OnFormatAxis(wxCommandEvent &);
+  void OnFormatLabel(wxCommandEvent &);
+  void OnFormatOverlay(wxCommandEvent &);
+  void OnFormatColors(wxCommandEvent &);
+
   void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+
   void OnChar(wxKeyEvent &ev) { /* canvas->OnChar(ev); */ }
   void OnEvent(wxMouseEvent &ev) { /* canvas->OnEvent(ev); */ }
 
@@ -51,8 +55,6 @@ private:
 public:
   PxiChild(PxiFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);
-
-  void LoadFile(const wxString &file) {parent->LoadFile(file);}
 
   DECLARE_EVENT_TABLE()
 };

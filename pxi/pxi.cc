@@ -109,7 +109,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
   SetIcon(wxICON(pxi));
     
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(PXI_FILE_OPEN, "&Open", "Load file");
+  fileMenu->Append(wxID_OPEN, "&Open", "Load file");
   fileMenu->Append(wxID_EXIT, "E&xit", "Exit PXI");
 
   wxMenu *helpMenu = new wxMenu;
@@ -140,11 +140,12 @@ PxiFrame::~PxiFrame()
 }
 
 BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
-  EVT_MENU(PXI_FILE_OPEN, PxiFrame::OnFileOpen) 
+  EVT_MENU(wxID_OPEN, PxiFrame::OnFileOpen) 
   EVT_MENU(wxID_EXIT, PxiFrame::OnCloseWindow)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, PxiFrame::OnMRUFile)
-  EVT_MENU(wxID_ABOUT, PxiFrame::OnHelpAbout)
   EVT_MENU(wxID_HELP_CONTENTS, PxiFrame::OnHelpContents)
+  EVT_MENU(wxID_HELP_INDEX, PxiFrame::OnHelpIndex)
+  EVT_MENU(wxID_ABOUT, PxiFrame::OnHelpAbout)
   EVT_CLOSE(PxiFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -165,16 +166,20 @@ void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
 }
 
+void PxiFrame::OnHelpContents(wxCommandEvent &)
+{
+}
+
+void PxiFrame::OnHelpIndex(wxCommandEvent &)
+{
+}
+
 void PxiFrame::OnHelpAbout(wxCommandEvent &)
 {
   dialogAbout dialog(this, "About PXI...",
 		     "PXI Quantal Response Plotting Program",
 		     "Version 0.97 (alpha)");
   dialog.ShowModal();
-}
-
-void PxiFrame::OnHelpContents(wxCommandEvent &)
-{
 }
 
 void PxiFrame::LoadFile(const wxString &p_filename)
@@ -204,7 +209,7 @@ void PxiFrame::MakeToolbar(void)
 
   toolBar->SetMargins(4, 4);
 
-  toolBar->AddTool(PXI_FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
+  toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open", "Open a saved datafile");
   toolBar->AddSeparator();
   toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
