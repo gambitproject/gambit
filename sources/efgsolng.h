@@ -171,7 +171,7 @@ private:
 public:
   guiefgLiapEfg(const EFSupport &, EfgShowInterface *);
   guiefgLiapEfg(const EFSupport &, EfgShowInterface *,
-		int p_stopAfter, bool m_eliminateWeak);
+		int p_stopAfter, int p_nTries, bool m_eliminateWeak);
   virtual ~guiefgLiapEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;

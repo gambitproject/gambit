@@ -104,7 +104,7 @@ private:
 public:
   guinfgLiap(const NFSupport &, NfgShowInterface *);
   guinfgLiap(const NFSupport &, NfgShowInterface *,
-	     int p_stopAfter, bool p_eliminateWeak);
+	     int p_stopAfter, int p_nTries, bool p_eliminateWeak);
   virtual ~guinfgLiap()   { }
 
   virtual gList<MixedSolution> Solve(void);

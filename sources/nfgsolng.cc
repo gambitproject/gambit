@@ -337,15 +337,15 @@ guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent)
 { }
 
 guinfgLiap::guinfgLiap(const NFSupport &p_support, NfgShowInterface *p_parent,
-		       int p_stopAfter, bool p_eliminateWeak)
-  : guiNfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+		       int p_stopAfter, int p_nTries, bool p_eliminateWeak)
+  : guiNfgSolution(p_support, p_parent),
+    m_nTries(p_nTries), m_stopAfter(p_stopAfter)
 {
   m_eliminate = true;
   m_eliminateAll = true;
   m_eliminateWeak = p_eliminateWeak;
   m_eliminateMixed = false;
 
-  m_nTries = 10;
   m_maxits1D = 100;
   m_maxitsND = 20;
   m_tol1D = 2.0e-10;

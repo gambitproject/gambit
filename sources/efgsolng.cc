@@ -229,8 +229,10 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
 
 guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
 			     EfgShowInterface *p_parent,
-			     int p_stopAfter, bool p_eliminateWeak)
-  : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter)
+			     int p_stopAfter, int p_nTries,
+			     bool p_eliminateWeak)
+  : guiEfgSolution(p_support, p_parent),
+    m_nTries(p_nTries), m_stopAfter(p_stopAfter)
 {
   m_eliminate = true;
   m_eliminateAll = true;
@@ -238,7 +240,6 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
   m_eliminateMixed = false;
   m_markSubgames = false;
 
-  m_nTries = 10;
   m_maxits1D = 100;
   m_maxitsND = 20;
   m_tol1D = 2.0e-10;

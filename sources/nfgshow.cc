@@ -574,7 +574,7 @@ void NfgShow::SolveStandard(void)
       if (nf.NumPlayers() == 2)
 	solver = new guinfgEnumMixed(*sup, this, 2, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*sup, this, 2, false);
+	solver = new guinfgLiap(*sup, this, 2, 10, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {
@@ -596,7 +596,7 @@ void NfgShow::SolveStandard(void)
       if (nf.NumPlayers() == 2)
 	solver = new guinfgEnumMixed(*sup, this, 0, dialog.Precision(), false);
       else
-	solver = new guinfgLiap(*sup, this, 0, false);
+	solver = new guinfgLiap(*sup, this, 0, 0, false);
     }
     else {  // nfgSTANDARD_PERFECT
       if (nf.NumPlayers() == 2) {

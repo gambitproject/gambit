@@ -239,7 +239,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, false);
       }
       break;
     case efgSTANDARD_ALL:
@@ -248,7 +248,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, false);
       }
       break;
     }
@@ -278,7 +278,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, false);
       }
       break;
     case efgSTANDARD_ALL:
@@ -287,7 +287,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 0, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, false);
       }
       break;
     }
@@ -300,11 +300,11 @@ void EfgShow::SolveStandard(void)
       break;
     case efgSTANDARD_TWO:
       wxMessageBox("Not guaranteed to find two solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 2, true);
+      solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, true);
       break;
     case efgSTANDARD_ALL:
       wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 0, true);
+      solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, true);
       return;
     }
   }
