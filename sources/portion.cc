@@ -43,8 +43,6 @@ int Portion::_NumObj = 0;
 
 Portion::Portion( void )
 {
-  _Owner = 0;
-
 #ifdef MEMCHECK
   _NumObj++;
   gout << "--- Portion Ctor, count: " << _NumObj << "\n";
@@ -58,13 +56,6 @@ Portion::~Portion()
   gout << "--- Portion Dtor, count: " << _NumObj << "\n";
 #endif
 }
-
-
-void Portion::SetOwner( Portion* p )
-{ _Owner = p; }
-
-Portion* Portion::Owner( void ) const
-{ return _Owner; }
 
 
 bool Portion::operator == ( Portion* p ) const
@@ -581,18 +572,10 @@ void EfPlayerPortion::Output( gOutput& s ) const
 { s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* EfPlayerPortion::ValCopy( void ) const
-{
-  Portion* p =new EfPlayerValPortion( *_Value ); 
-  p->SetOwner( _Owner );
-  return p;
-}
+{ return new EfPlayerValPortion( *_Value ); }
 
 Portion* EfPlayerPortion::RefCopy( void ) const
-{
-  Portion* p = new EfPlayerRefPortion( *_Value ); 
-  p->SetOwner( _Owner );
-  return p;
-}
+{ return new EfPlayerRefPortion( *_Value ); }
 
 void EfPlayerPortion::AssignFrom( Portion* p )
 {
@@ -1348,17 +1331,6 @@ ListPortion::~ListPortion()
 
 gBlock< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
-
-void ListPortion::SetOwner( Portion* p )
-{
-  int i;
-  int length = _Value->Length();
-  _Owner = p;
-  for( i = 1; i < length; i++ )
-  {
-    (*_Value)[ i ]->SetOwner( p );
-  }
-}
 
 PortionType ListPortion::Type( void ) const
 { return porLIST; }
