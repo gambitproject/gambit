@@ -184,11 +184,7 @@ public:
     {return !(*this == y);}
 };
 
-gOutput& operator << (gOutput& s, const edge& y)
-{
-  s << "\n( " << y.node1 << " " << y.node2 << " " << y.nextedge << " )";
-  return s;
-}
+gOutput& operator << (gOutput& s, const edge& y);
 
 class EnumCliques {
 private:

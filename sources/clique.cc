@@ -8,7 +8,11 @@
 #include "clique.h"
 #include "gtext.h"
 
+// to compile as standalone,compile with -DSTANDALONE
+
+#ifdef STANDALONE
 // =============== main =============== 
+
 int main()
 {
   gArray<edge> edgelist1(MAXEDGES);
@@ -27,11 +31,14 @@ int main()
   EnumCliques clique(edgelist,MAXINP1,MAXINP2);
   return 0 ;
 }
+
 // =============== end main =============== 
+#endif
 
 // -------------------------------------------------- 
 
-EnumCliques::EnumCliques(gArray<edge> &edgelist,int maxinp1,int maxinp2 ) : firstedge(MIN(maxinp1,maxinp2)+1), maxinp1(maxinp1), maxinp2(maxinp2)
+EnumCliques::EnumCliques(gArray<edge> &edgelist,int maxinp1,int maxinp2 ) 
+  : firstedge(MIN(maxinp1,maxinp2)+1), maxinp1(maxinp1), maxinp2(maxinp2)
 {
   int numco = getconnco(firstedge, edgelist);
   workonco(numco, firstedge, edgelist) ;
@@ -42,18 +49,19 @@ EnumCliques::~EnumCliques()
 {
 };
 
-void EnumCliques::candtry1 (int stk[], // stack 
-			    bool connected[MAXM][MAXN],
-			    int cand,  // the candidate from NODES1  to be added to CLIQUE 
-			    int poscand,  // its stack position 
-			    int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-			    int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-			    int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-			    int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-			    int tos,  // top of stack 
-			    int orignode1[MAXM],
-			    int orignode2[MAXN]
-			    )
+void EnumCliques::
+candtry1 (int stk[], // stack 
+	  bool connected[MAXM][MAXN],
+	  int cand,  // the candidate from NODES1  to be added to CLIQUE 
+	  int poscand,  // its stack position 
+	  int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+	  int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+	  int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+	  int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+	  int tos,  // top of stack 
+	  int orignode1[MAXM],
+	  int orignode2[MAXN]
+	  )
   /* recurses down by moving  cand  from  CAND1  to  clique1  and
      then to NOT1  after extension.
      clique1  is extended by  cand  where all points in  NOT2 and CAND2 
@@ -93,18 +101,19 @@ void EnumCliques::candtry1 (int stk[], // stack
 }
 
 // -------------------------------------------------- 
-void EnumCliques::candtry2 (int stk[], // stack 
-			    bool connected[MAXM][MAXN],
-			    int cand,  // the candidate from NODES2  to be added to CLIQUE 
-			    int poscand,  // its stack position 
-			    int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-			    int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-			    int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-			    int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-			    int tos,  // top of stack 
-			    int orignode1[MAXM],
-			    int orignode2[MAXN]
-			    )
+void EnumCliques::
+candtry2 (int stk[], // stack 
+	  bool connected[MAXM][MAXN],
+	  int cand,  // the candidate from NODES2  to be added to CLIQUE 
+	  int poscand,  // its stack position 
+	  int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+	  int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+	  int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+	  int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+	  int tos,  // top of stack 
+	  int orignode1[MAXM],
+	  int orignode2[MAXN]
+	  )
   // recurses down by moving  cand  from  CAND2  to  clique2  and
   // then to NOT2  after extension;
   // clique2  is extended by  cand  where all points in  NOT1 and CAND1 
@@ -144,16 +153,17 @@ void EnumCliques::candtry2 (int stk[], // stack
 }
 
 // -------------------------------------------------- 
-void EnumCliques::extend (int stk[], // stack 
-			  bool connected[MAXM][MAXN],
-			  int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-			  int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-			  int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-			  int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-			  int tos,   // top of stack,   tos >= ec1, ec2  
-			  int orignode1[MAXM],   // original node numbers as input 
-			  int orignode2[MAXN]
-			  )
+void EnumCliques::
+extend (int stk[], // stack 
+	bool connected[MAXM][MAXN],
+	int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
+	int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
+	int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
+	int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
+	int tos,   // top of stack,   tos >= ec1, ec2  
+	int orignode1[MAXM],   // original node numbers as input 
+	int orignode2[MAXN]
+	)
   /* extends the current set CLIQUE or outputs it if
      NOT and CAND are empty.
      
@@ -254,22 +264,23 @@ void EnumCliques::extend (int stk[], // stack
 } 
 
 // -------------------------------------------------- 
-void EnumCliques::findfixpoint(int stk[], // stack 
-			       bool connected[MAXM][MAXN],
-			       int *savelist,      // position of savelist on the stack 
-			       int *tmplist,       // position of tmplist on the stack 
-			       // might be swapped afterwards 
-			       int *minnod,        // currently lowest no. of disconnections 
-			       int sninspect, int ecinspect, /* range of stack positions
-								containing the nodes inspected 
-								as possible fixpoints */
-			       int scother, int ecother,
-			       // range of corresponding candidates on the other side  
-			       bool binspect1,  // inspected nodes are in class1, o/w class2 
-			       bool *bfound,  // a new lower no. of disconnections was found 
-			       int *fixp,     // the new fixpoint, if *bfound = true  
-			       int *posfix    // position of fixpoint on the stack, if *bfound 
-			       )
+void EnumCliques::
+findfixpoint(int stk[], // stack 
+	     bool connected[MAXM][MAXN],
+	     int *savelist,      // position of savelist on the stack 
+	     int *tmplist,       // position of tmplist on the stack 
+	     // might be swapped afterwards 
+	     int *minnod,        // currently lowest no. of disconnections 
+	     int sninspect, int ecinspect, /* range of stack positions
+					      containing the nodes inspected 
+					      as possible fixpoints */
+	     int scother, int ecother,
+	     // range of corresponding candidates on the other side  
+	     bool binspect1,  // inspected nodes are in class1, o/w class2 
+	     bool *bfound,  // a new lower no. of disconnections was found 
+	     int *fixp,     // the new fixpoint, if *bfound = true  
+	     int *posfix    // position of fixpoint on the stack, if *bfound 
+	     )
   /* pre:  enough space on stack for the two lists  savelist,  tmplist
      post: *minnod contains the new minimum no. of disconnections
      stk[*savelist, +*minnod] contains the candidates disconnected to
@@ -613,6 +624,12 @@ void EnumCliques::outgraph(
       printf("%2d",  connected[i][j]);
     printf("\n");
   }
+}
+
+gOutput& operator << (gOutput& s, const edge& y)
+{
+  s << "\n( " << y.node1 << " " << y.node2 << " " << y.nextedge << " )";
+  return s;
 }
 
 #include "garray.imp"
