@@ -10,7 +10,7 @@
 //                   gSortList<T>: Member functions
 //--------------------------------------------------------------------
 
-template <class T> gSortList<T>::gSortList(void) : vis_length(0)
+template <class T> gSortList<T>::gSortList(void) : vis_length(-1)
 { }
 
 template <class T> gSortList<T>::gSortList(const gList<T> &l)
@@ -82,7 +82,7 @@ template <class T> void gSortList<T>::Swap(int a, int b)
 
 template <class T> int gSortList<T>::VisibleLength(void) const
 {
-  return vis_length;
+  return (vis_length == -1) ? Length() : vis_length;
 }
 
 template <class T> T gSortList<T>::Remove(int a)
@@ -111,22 +111,20 @@ template <class T> gListSorter<T>::~gListSorter()
 
 template <class T> void gListSorter<T>::Sort(void)
 {
-    // this uses a bubble sort algorithm
-    bool changed = false;
+  // this uses a bubble sort algorithm
 
-    do   
-    {
-        changed = false;
+  bool changed;
 
-        for (int i = 1; i <= list.VisibleLength() - 1; i++)
-        {
-            if (LessThan(list[i], list[i+1]))   
-            {
-                list.Swap(i, i+1);
-                changed = true;
-            }
-        }
-    } while (changed);
+  do { 
+    changed = false;
+    
+    for (int i = 1; i <= list.VisibleLength() - 1; i++) {
+      if (LessThan(list[i], list[i+1])) { 
+	list.Swap(i, i+1);
+	changed = true;
+      }
+    }
+  } while (changed);
 }
 
 
