@@ -229,14 +229,13 @@ guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
 
 guiefgLiapEfg::guiefgLiapEfg(const EFSupport &p_support,
 			     EfgShowInterface *p_parent,
-			     int p_stopAfter, int p_nTries,
-			     bool p_eliminateWeak)
+			     int p_stopAfter, int p_nTries)
   : guiEfgSolution(p_support, p_parent),
     m_nTries(p_nTries), m_stopAfter(p_stopAfter)
 {
-  m_eliminate = true;
-  m_eliminateAll = true;
-  m_eliminateWeak = p_eliminateWeak;
+  m_eliminate = false;
+  m_eliminateAll = false;
+  m_eliminateWeak = false;
   m_eliminateMixed = false;
   m_markSubgames = false;
 
@@ -417,14 +416,13 @@ guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
 
 guiefgLcpEfg::guiefgLcpEfg(const EFSupport &p_support,
 			   EfgShowInterface *p_parent,
-			   int p_stopAfter, gPrecision p_precision,
-			   bool p_eliminateWeak)
+			   int p_stopAfter, gPrecision p_precision)
   : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
     m_precision(p_precision)
 {
-  m_eliminate = true;
-  m_eliminateAll = true;
-  m_eliminateWeak = p_eliminateWeak;
+  m_eliminate = false;
+  m_eliminateAll = false;
+  m_eliminateWeak = false;
   m_eliminateMixed = false;
   m_markSubgames = false;
 }
@@ -876,14 +874,13 @@ guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
 
 guiefgLpEfg::guiefgLpEfg(const EFSupport &p_support,
 			 EfgShowInterface *p_parent,
-			 int p_stopAfter, gPrecision p_precision,
-			 bool p_eliminateWeak)
+			 int p_stopAfter, gPrecision p_precision)
   : guiEfgSolution(p_support, p_parent), m_stopAfter(p_stopAfter),
     m_precision(p_precision)
 {
-  m_eliminate = true;
-  m_eliminateAll = true;
-  m_eliminateWeak = p_eliminateWeak;
+  m_eliminate = false;
+  m_eliminateAll = false;
+  m_eliminateWeak = false;
   m_eliminateMixed = false;
   m_markSubgames = false;
 }
@@ -1248,14 +1245,13 @@ guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
 { }
 
 guiefgQreEfg::guiefgQreEfg(const EFSupport &p_support,
-			   EfgShowInterface *p_parent,
-			   int p_stopAfter, bool p_eliminateWeak)
+			   EfgShowInterface *p_parent, int p_stopAfter)
   : guiEfgSolution(p_support, p_parent),
     m_stopAfter(p_stopAfter), m_pxiFile(0), m_runPxi(false)
 {
-  m_eliminate = true;
-  m_eliminateAll = true;
-  m_eliminateWeak = p_eliminateWeak;
+  m_eliminate = false;
+  m_eliminateAll = false;
+  m_eliminateWeak = false;
   m_eliminateMixed = false;
 
   m_minLam = 0.01;

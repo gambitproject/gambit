@@ -222,14 +222,12 @@ void EfgShow::SolveStandard(void)
       markSubgames = true;
       if (ef.NumPlayers() == 2 && isPerfectRecall) {
 	if (ef.IsConstSum()) 
-	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision(),
-				   true);
+	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision());
 	else
-	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision(),
-				    true);
+	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision());
       }
       else if (ef.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*cur_sup, this, 1, true);
+	solver = new guiefgQreEfg(*cur_sup, this, 1);
       else 
 	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
 				      true);
@@ -240,7 +238,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
       }
       break;
     case efgSTANDARD_ALL:
@@ -249,7 +247,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
       }
       break;
     }
@@ -261,14 +259,12 @@ void EfgShow::SolveStandard(void)
     case efgSTANDARD_ONE:
       if (ef.NumPlayers() == 2 && isPerfectRecall) {
 	if (ef.IsConstSum()) 
-	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision(),
-				   true);
+	  solver = new guiefgLpEfg(*cur_sup, this, 1, dialog.Precision());
 	else
-	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision(),
-				    true);
+	  solver = new guiefgLcpEfg(*cur_sup, this, 1, dialog.Precision());
       }
       else if (ef.NumPlayers() == 2 && !isPerfectRecall)
-	solver = new guiefgQreEfg(*cur_sup, this, 1, true);
+	solver = new guiefgQreEfg(*cur_sup, this, 1);
       else 
 	solver = new guiefgSimpdivNfg(*cur_sup, this, 1, dialog.Precision(),
 				      true);
@@ -279,7 +275,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find two solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
       }
       break;
     case efgSTANDARD_ALL:
@@ -288,7 +284,7 @@ void EfgShow::SolveStandard(void)
 					dialog.Precision(), false);
       else {
 	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, false);
+	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
       }
       break;
     }
@@ -297,15 +293,15 @@ void EfgShow::SolveStandard(void)
   case efgSTANDARD_SEQUENTIAL:
     switch (dialog.Number()) {
     case efgSTANDARD_ONE:
-      solver = new guiefgQreEfg(*cur_sup, this, 1, true);
+      solver = new guiefgQreEfg(*cur_sup, this, 1);
       break;
     case efgSTANDARD_TWO:
       wxMessageBox("Not guaranteed to find two solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 2, 10, true);
+      solver = new guiefgLiapEfg(*cur_sup, this, 2, 10);
       break;
     case efgSTANDARD_ALL:
       wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      solver = new guiefgLiapEfg(*cur_sup, this, 0, 0, true);
+      solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
       return;
     }
   }

@@ -104,7 +104,7 @@ private:
 public:
   guiefgLpEfg(const EFSupport &, EfgShowInterface *);
   guiefgLpEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
-	      gPrecision p_precision, bool p_eliminateWeak);
+	      gPrecision p_precision);
   virtual ~guiefgLpEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -138,7 +138,7 @@ private:
 public:
   guiefgLcpEfg(const EFSupport &, EfgShowInterface *);
   guiefgLcpEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
-	       gPrecision p_precision, bool p_eliminateWeak);
+	       gPrecision p_precision);
   virtual ~guiefgLcpEfg()   { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -171,7 +171,7 @@ private:
 public:
   guiefgLiapEfg(const EFSupport &, EfgShowInterface *);
   guiefgLiapEfg(const EFSupport &, EfgShowInterface *,
-		int p_stopAfter, int p_nTries, bool m_eliminateWeak);
+		int p_stopAfter, int p_nTries);
   virtual ~guiefgLiapEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
@@ -251,8 +251,7 @@ private:
 
 public:
   guiefgQreEfg(const EFSupport &, EfgShowInterface *);
-  guiefgQreEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter,
-	       bool p_eliminateWeak);
+  guiefgQreEfg(const EFSupport &, EfgShowInterface *, int p_stopAfter);
   virtual ~guiefgQreEfg()  { }
 
   virtual gList<BehavSolution> Solve(void) const;
