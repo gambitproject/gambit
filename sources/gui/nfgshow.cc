@@ -21,7 +21,6 @@
 #include "nfgnavigate.h"
 #include "nfgoutcome.h"
 #include "nfgsupport.h"
-#include "mixededit.h"
 #include "nfgconst.h"
 
 #include "game/efg.h"
@@ -37,6 +36,7 @@
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
 #include "dlnfgstandard.h"
+#include "dleditmixed.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
 #include "alglcp.h"
@@ -112,11 +112,10 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
   EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
   EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
-  EVT_MENU(NFG_PROFILES_CLONE, NfgShow::OnProfilesClone)
-  EVT_MENU(NFG_PROFILES_RENAME, NfgShow::OnProfilesRename)
-  EVT_MENU(NFG_PROFILES_EDIT, NfgShow::OnProfilesEdit)
-  EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesEdit)
+  EVT_MENU(NFG_PROFILES_DUPLICATE, NfgShow::OnProfilesDuplicate)
   EVT_MENU(NFG_PROFILES_DELETE, NfgShow::OnProfilesDelete)
+  EVT_MENU(NFG_PROFILES_PROPERTIES, NfgShow::OnProfilesProperties)
+  EVT_LIST_ITEM_ACTIVATED(idNFG_SOLUTION_LIST, NfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnProfileSelected)
   EVT_SIZE(NfgShow::OnSize)
   EVT_CLOSE(NfgShow::OnCloseWindow)
@@ -219,7 +218,15 @@ NfgShow::~NfgShow()
 
 void NfgShow::AddProfile(const MixedSolution &p_profile, bool p_map)
 {
-  m_profileTable->Append(p_profile);
+  if (p_profile.GetName() == "") {
+    MixedSolution tmp(p_profile);
+    tmp.SetName(UniqueProfileName());
+    m_profiles.Append(tmp);
+  }
+  else {
+    m_profiles.Append(p_profile);
+  }
+
   if (m_nfg.AssociatedEfg() && p_map) {
     wxGetApp().GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
   }
@@ -232,7 +239,7 @@ void NfgShow::ChangeProfile(int sol)
   m_currentProfile = sol;
 
   if (sol > 0) {
-    m_table->SetProfile((*m_profileTable)[m_currentProfile]);
+    m_table->SetProfile(m_profiles[m_currentProfile]);
     if (m_profileTable) {
       m_profileTable->UpdateValues();
     }
@@ -242,9 +249,28 @@ void NfgShow::ChangeProfile(int sol)
 void NfgShow::OnProfileSelected(wxListEvent &p_event)
 {
   m_currentProfile = p_event.GetIndex() + 1;
-  m_table->SetProfile((*m_profileTable)[m_currentProfile]);
+  m_table->SetProfile(m_profiles[m_currentProfile]);
 }
  
+gText NfgShow::UniqueProfileName(void) const
+{
+  int number = m_profiles.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_profiles.Length(); i++) {
+      if (m_profiles[i].GetName() == "Profile" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_profiles.Length()) {
+      return "Profile" + ToText(number);
+    }
+    
+    number++;
+  }
+}
+
 //----------------------------------------------------------------------
 //            NfgShow: Coordinating updates of child windows
 //----------------------------------------------------------------------
@@ -464,8 +490,8 @@ void NfgShow::UpdateMenus(void)
 	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
   menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
 
-  menu->Enable(NFG_VIEW_PROBABILITIES, m_profileTable->Length() > 0);
-  menu->Enable(NFG_VIEW_VALUES, m_profileTable->Length() > 0);
+  menu->Enable(NFG_VIEW_PROBABILITIES, m_profiles.Length() > 0);
+  menu->Enable(NFG_VIEW_VALUES, m_profiles.Length() > 0);
 }
 
 //----------------------------------------------------------------------
@@ -879,7 +905,7 @@ void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 
 #ifdef UNUSED
 
-  int old_max_soln = m_profileTable->Length();  // used for extensive update
+  int old_max_soln = m_profiles.Length();  // used for extensive update
 
   guiNfgSolution *solver = 0;
 
@@ -965,13 +991,13 @@ void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
     
   delete solver;
 
-  if (old_max_soln != m_profileTable->Length()) {
+  if (old_max_soln != m_profiles.Length()) {
     if (!m_table->ShowProbs()) {
       m_table->ToggleProbs();
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
     }
 
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
   }  
 
   UpdateMenus();
@@ -986,7 +1012,7 @@ void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1010,7 +1036,7 @@ void NfgShow::OnToolsEquilibriumCustomEnumMixed(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1034,7 +1060,7 @@ void NfgShow::OnToolsEquilibriumCustomLcp(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1058,7 +1084,7 @@ void NfgShow::OnToolsEquilibriumCustomLiap(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1082,7 +1108,7 @@ void NfgShow::OnToolsEquilibriumCustomLp(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1106,7 +1132,7 @@ void NfgShow::OnToolsEquilibriumCustomPolEnum(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1130,7 +1156,7 @@ void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1154,7 +1180,7 @@ void NfgShow::OnToolsEquilibriumCustomQreGrid(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1178,7 +1204,7 @@ void NfgShow::OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
@@ -1242,58 +1268,44 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
   MixedSolution profile = MixedProfile<gNumber>(NFSupport(m_nfg));
 
-  dialogMixedEditor dialog(this, profile);
+  dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
   }
 }
 
-void NfgShow::OnProfilesClone(wxCommandEvent &)
+void NfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  MixedSolution profile((*m_profileTable)[m_currentProfile]);
+  MixedSolution profile(m_profiles[m_currentProfile]);
   
-  dialogMixedEditor dialog(this, profile);
+  dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
-  }
-}
-
-void NfgShow::OnProfilesRename(wxCommandEvent &)
-{
-  if (m_currentProfile > 0) {
-    wxTextEntryDialog dialog(this, "Enter new name for profile",
-			     "Rename profile",
-			     (char *) (*m_profileTable)[m_currentProfile].GetName());
-
-    if (dialog.ShowModal() == wxID_OK) {
-      (*m_profileTable)[m_currentProfile].SetName(dialog.GetValue().c_str());
-      m_profileTable->UpdateValues();
-    }
-  }
-}
-
-void NfgShow::OnProfilesEdit(wxCommandEvent &)
-{
-  if (m_currentProfile > 0) {
-    dialogMixedEditor dialog(this, (*m_profileTable)[m_currentProfile]);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      (*m_profileTable)[m_currentProfile] = dialog.GetProfile();
-      ChangeProfile(m_currentProfile);
-    }
   }
 }
 
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_profileTable->Remove(m_currentProfile);
-  m_currentProfile = (m_profileTable->Length() > 0) ? 1 : 0;
+  m_profiles.Remove(m_currentProfile);
+  m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
   ChangeProfile(m_currentProfile);
   UpdateMenus();
+}
+
+void NfgShow::OnProfilesProperties(wxCommandEvent &)
+{
+  if (m_currentProfile > 0) {
+    dialogEditMixed dialog(this, m_profiles[m_currentProfile]);
+
+    if (dialog.ShowModal() == wxID_OK) {
+      m_profiles[m_currentProfile] = dialog.GetProfile();
+      ChangeProfile(m_currentProfile);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1424,11 +1436,6 @@ void NfgShow::SetFilename(const wxString &p_name)
     SetTitle(wxString::Format("Gambit - %s", (char *) m_nfg.GetTitle()));
   }
   wxGetApp().SetFilename(this, p_name.c_str());
-}
-
-const gList<MixedSolution> &NfgShow::Profiles(void) const
-{
-  return *m_profileTable;
 }
 
 void NfgShow::SetSupportNumber(int p_number)

@@ -13,13 +13,12 @@
 #include "wx/listctrl.h"
 #include "efgshow.h"
 
-class EfgProfileList : public wxListCtrl, public gList<BehavSolution> {
+class EfgProfileList : public wxListCtrl {
 private:
   EfgShow *m_parent;
   wxMenu *m_menu;
 
   // Event handlers
-  void OnSortFilter(wxCommandEvent &);
   void OnRightClick(wxMouseEvent &);
   void OnColumnClick(wxListEvent &);
   
@@ -28,9 +27,6 @@ public:
   virtual ~EfgProfileList();
 
   void UpdateValues(void);
-
-  // Overriding gSortList<T> member functions
-  virtual int Append(const BehavSolution &);  
 
   DECLARE_EVENT_TABLE()
 };

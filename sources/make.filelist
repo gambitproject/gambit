@@ -101,8 +101,8 @@ GUI_SOURCES = gambit.cc treewin.cc treedraw.cc \
               dlnfgstandard.cc dlefg.cc dlnfg.cc \
               behavfilter.cc nfgshow.cc mixedfilter.cc wxio.cc \
 	      dleditefg.cc dleditnode.cc dleditmove.cc dlinsertmove.cc \
-              efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
-              nfgtable.cc nfgnavigate.cc nfgprofile.cc mixededit.cc \
+              efgprofile.cc efgnavigate.cc dleditbehav.cc efgprint.cc \
+              nfgtable.cc nfgnavigate.cc nfgprofile.cc dleditmixed.cc \
               nfgprint.cc nfgoutcome.cc nfgsupport.cc \
               dlnfgproperties.cc userprefs.cc \
               algenumpure.cc algenummixed.cc alglcp.cc algliap.cc alglp.cc \

@@ -424,7 +424,7 @@ void NfgTable::SetContingency(const gArray<int> &p_profile)
 {
   m_grid->SetGridCursor(p_profile[GetRowPlayer()] - 1,
 			p_profile[GetColPlayer()] - 1);
-  m_grid->Refresh();
+  RefreshTable();
 }
 
 gArray<int> NfgTable::GetContingency(void) const
@@ -458,7 +458,7 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
   ((NfgShow *) m_parent)->SetStrategy(m_colPlayer, 1);
   m_grid->EndBatch();
   m_grid->AdjustScrollbars();
-  m_grid->Refresh();
+  RefreshTable();
 }
 
 void NfgTable::SetStrategy(int p_player, int p_strategy)

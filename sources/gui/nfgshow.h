@@ -44,9 +44,11 @@ private:
   NfgOutcomeWindow *m_outcomeWindow;
   NfgSupportWindow *m_supportWindow;
 
-  gList<NFSupport *> m_supports;
-  NFSupport *m_currentSupport;
   int m_currentProfile;
+  gList<MixedSolution> m_profiles;
+
+  NFSupport *m_currentSupport;
+  gList<NFSupport *> m_supports;
 
   wxString m_filename;
 
@@ -56,7 +58,6 @@ private:
   void MakeMenus(void);
   void MakeToolbar(void);
   void UpdateMenus(void);
-  gText UniqueSupportName(void) const;
   void AdjustSizes(void);
 
   // Menu event handlers
@@ -111,10 +112,9 @@ private:
   void OnSupportDelete(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
-  void OnProfilesClone(wxCommandEvent &);
-  void OnProfilesRename(wxCommandEvent &);
-  void OnProfilesEdit(wxCommandEvent &);
+  void OnProfilesDuplicate(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
+  void OnProfilesProperties(wxCommandEvent &);
 
   void OnInfoNotebookPage(wxNotebookEvent &);
 
@@ -126,20 +126,27 @@ private:
   void OnProfileSelected(wxListEvent &);
 
 public:
+  // CONSTRUCTOR AND DESTRUCTOR
   NfgShow(Nfg &N, wxWindow *p_window);
   virtual ~NfgShow();
 
-  NFSupport *CurrentSupport(void) const { return m_currentSupport; }
-  int NumSupports(void) const { return m_supports.Length(); }
+  // PROFILE ACCESS AND MANIPULATION
+  void AddProfile(const MixedSolution &, bool);
+  void ChangeProfile(int);
+  int CurrentProfile(void) const { return m_currentProfile; }
+  const gList<MixedSolution> &Profiles(void) const { return m_profiles; }
+  gText UniqueProfileName(void) const;
+
+  // SUPPORT ACCESS AND MANIPULATION
+  NFSupport *GetSupport(void) { return m_currentSupport; }
+  const gList<NFSupport *> &Supports(void) const { return m_supports; }
+  void SetSupportNumber(int p_number);
+  gText UniqueSupportName(void) const;
+  void OnSupportsEdited(void);
   
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
   
-  void ChangeProfile(int sol);
-  int CurrentProfile(void) const { return m_currentProfile; }
-  const gList<MixedSolution> &Profiles(void) const;
-  void AddProfile(const MixedSolution &, bool);
-
   void SetFilename(const wxString &s);
   const wxString &Filename(void) const { return m_filename; }
 
@@ -153,12 +160,6 @@ public:
   gArray<int> GetContingency(void) const;
 
   void OnOutcomesEdited(void);
-
-  // Currently used support
-  NFSupport *GetSupport(void) { return m_currentSupport; }
-  const gList<NFSupport *> &Supports(void) const { return m_supports; }
-  void SetSupportNumber(int p_number);
-  void OnSupportsEdited(void);
 
   DECLARE_EVENT_TABLE()
 };

@@ -33,8 +33,10 @@ private:
   Node *m_cursor;
 
   int m_currentProfile;
-  gList<EFSupport *> m_supports;
+  gList<BehavSolution> m_profiles;
+
   EFSupport *m_currentSupport;
+  gList<EFSupport *> m_supports;
 
   EfgProfileList *m_profileTable;
   wxString m_filename;
@@ -129,10 +131,9 @@ private:
   void OnSupportDelete(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
-  void OnProfilesClone(wxCommandEvent &);
-  void OnProfilesRename(wxCommandEvent &);
-  void OnProfilesEdit(wxCommandEvent &);
+  void OnProfilesDuplicate(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
+  void OnProfilesProperties(wxCommandEvent &);
   void OnProfileSelected(wxListEvent &);
 
   void OnInfoNotebookPage(wxNotebookEvent &);
@@ -143,10 +144,20 @@ public:
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
+  void AddProfile(const BehavSolution &, bool map);
   void RemoveProfiles(void);
-  void ChangeProfile(int soln);
+  void ChangeProfile(int);
   int CurrentProfile(void) const { return m_currentProfile; }
   const BehavSolution &GetCurrentProfile(void) const;
+  const gList<BehavSolution> &Profiles(void) const { return m_profiles; }
+  gText UniqueProfileName(void) const;
+
+  // SUPPORT ACCESS AND MANIPULATION
+  EFSupport *GetSupport(void);
+  const gList<EFSupport *> &Supports(void) const { return m_supports; }
+  void SetSupportNumber(int p_number);
+  gText UniqueSupportName(void) const;
+  void OnSupportsEdited(void);
 
   gText GetRealizProb(const Node *) const;
   gText GetBeliefProb(const Node *) const;
@@ -157,17 +168,8 @@ public:
   gText GetActionProb(const Node *, int act) const;
   gNumber ActionProb(const Node *n, int br) const;
 
-  // Solution interface to normal form
-  void AddProfile(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
 
-  gText UniqueSupportName(void) const;
-
-  // Currently used support
-  EFSupport *GetSupport(void);
-  const gList<EFSupport *> &Supports(void) const { return m_supports; }
-  void SetSupportNumber(int p_number);
-  void OnSupportsEdited(void);
 
   void UpdateMenus(void);
   int NumDecimals(void) const;

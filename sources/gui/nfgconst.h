@@ -51,12 +51,10 @@ const int NFG_TOOLS_DOMINANCE = 160;
 const int NFG_SUPPORT_DUPLICATE = 710;
 const int NFG_SUPPORT_DELETE = 711;
 
-#define NFG_PROFILES_FILTER             700
-#define NFG_PROFILES_NEW                701
-#define NFG_PROFILES_CLONE              702
-#define NFG_PROFILES_RENAME             703
-#define NFG_PROFILES_EDIT               704
-#define NFG_PROFILES_DELETE             705
+const int NFG_PROFILES_NEW = 701;
+const int NFG_PROFILES_DUPLICATE = 702;
+const int NFG_PROFILES_DELETE = 703;
+const int NFG_PROFILES_PROPERTIES = 704;
 
 #endif // NFGCONST_H
 

@@ -1,7 +1,7 @@
 //
-// FILE: mixededit.cc -- Dialog for editing mixed profiles
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
 //
 
 #include "wx/wxprec.h"
@@ -9,31 +9,43 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "game/mixedsol.h"
-#include "mixededit.h"
+#include "dleditmixed.h"
 
 //-------------------------------------------------------------------------
-//                class dialogMixedEditor: Member functions
+//                class dialogEditMixed: Member functions
 //-------------------------------------------------------------------------
 
 const int idPLAYER_LIST = 2001;
 const int idPROB_GRID = 2002;
 
-BEGIN_EVENT_TABLE(dialogMixedEditor, wxDialog)
-  EVT_LISTBOX(idPLAYER_LIST, dialogMixedEditor::OnSelChanged)
-  EVT_BUTTON(wxID_OK, dialogMixedEditor::OnOK)
+BEGIN_EVENT_TABLE(dialogEditMixed, wxDialog)
+  EVT_LISTBOX(idPLAYER_LIST, dialogEditMixed::OnSelChanged)
+  EVT_BUTTON(wxID_OK, dialogEditMixed::OnOK)
 END_EVENT_TABLE()
 
-dialogMixedEditor::dialogMixedEditor(wxWindow *p_parent,
-				     const MixedSolution &p_profile)
-  : wxDialog(p_parent, -1, "Edit mixed profile"),
+dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
+				 const MixedSolution &p_profile)
+  : wxDialog(p_parent, -1, "Mixed profile properties"),
     m_profile(p_profile), m_selection(1)
 {
+  SetAutoLayout(true);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *nameSizer = new wxBoxSizer(wxHORIZONTAL);
+  nameSizer->Add(new wxStaticText(this, wxID_STATIC, "Profile name"),
+		 0, wxALL, 5);
+  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetName());
+  nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(nameSizer, 1, wxALL | wxEXPAND, 5);
+
+  wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_playerList = new wxListBox(this, idPLAYER_LIST);
   for (int pl = 1; pl <= m_profile.Game().NumPlayers(); pl++) {
     m_playerList->Append((char *) (ToText(pl) + ": " +
 				   m_profile.Game().Players()[pl]->GetName()));
   }
   m_playerList->SetSelection(0);
+  editSizer->Add(m_playerList, 0, wxALL, 5);
 
   NFPlayer *firstPlayer = m_profile.Game().Players()[1];
   m_probGrid = new wxGrid(this, idPROB_GRID,
@@ -49,37 +61,27 @@ dialogMixedEditor::dialogMixedEditor(wxWindow *p_parent,
   }
   m_probGrid->UpdateDimensions();
   m_probGrid->Refresh();
-
-  wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
-  editSizer->Add(m_playerList, 0, wxALL, 5);
   editSizer->Add(m_probGrid, 0, wxALL, 5);
-
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
-  wxButton *helpButton = new wxButton(this, wxID_HELP, "Help");
+  topSizer->Add(editSizer, 0, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(cancelButton, 0, wxALL, 5);
-  buttonSizer->Add(helpButton, 0, wxALL, 5);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(editSizer, 0, wxEXPAND | wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
-  SetAutoLayout(true);
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-
   Layout();
 }
 
-dialogMixedEditor::~dialogMixedEditor()
+dialogEditMixed::~dialogEditMixed()
 { }
 
-void dialogMixedEditor::OnSelChanged(wxCommandEvent &p_event)
+void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 {
   if (m_probGrid->IsCellEditControlEnabled()) {
     m_probGrid->SaveEditControlValue();
@@ -115,7 +117,7 @@ void dialogMixedEditor::OnSelChanged(wxCommandEvent &p_event)
   m_selection = p_event.GetSelection() + 1;
 }
 
-void dialogMixedEditor::OnOK(wxCommandEvent &p_event)
+void dialogEditMixed::OnOK(wxCommandEvent &p_event)
 {
   if (m_probGrid->IsCellEditControlEnabled()) {
     m_probGrid->SaveEditControlValue();
@@ -130,4 +132,10 @@ void dialogMixedEditor::OnOK(wxCommandEvent &p_event)
   }
 
   p_event.Skip();
+}
+
+const MixedSolution &dialogEditMixed::GetProfile(void) const
+{
+  m_profile.SetName(m_profileName->GetValue().c_str());
+  return m_profile;
 }

@@ -47,6 +47,7 @@
 #include "dllegends.h"
 #include "dlelimbehav.h"
 #include "dlefgstandard.h"
+#include "dleditbehav.h"
 #include "algenumpure.h"
 #include "algenummixed.h"
 #include "alglcp.h"
@@ -56,8 +57,6 @@
 #include "algqre.h"
 #include "algqregrid.h"
 #include "algsimpdiv.h"
-
-#include "behavedit.h"
 
 //=====================================================================
 //                 Implementation of class EfgShow
@@ -147,11 +146,10 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSUPPORT_DUPLICATE, EfgShow::OnSupportDuplicate)
   EVT_MENU(efgmenuSUPPORT_DELETE, EfgShow::OnSupportDelete)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
-  EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
-  EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
-  EVT_MENU(efgmenuPROFILES_EDIT, EfgShow::OnProfilesEdit)
-  EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesEdit)
+  EVT_MENU(efgmenuPROFILES_DUPLICATE, EfgShow::OnProfilesDuplicate)
   EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
+  EVT_MENU(efgmenuPROFILES_PROPERTIES, EfgShow::OnProfilesProperties)
+  EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesProperties)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnProfileSelected)
   EVT_SET_FOCUS(EfgShow::OnFocus)
   EVT_SIZE(EfgShow::OnSize)
@@ -278,7 +276,7 @@ void EfgShow::ChangeProfile(int sol)
 void EfgShow::RemoveProfiles(void)
 {
   m_currentProfile = 0;
-  m_profileTable->Flush();
+  m_profiles.Flush();
   if (m_navigateWindow) {
     m_navigateWindow->Set(m_cursor);
   }
@@ -286,12 +284,19 @@ void EfgShow::RemoveProfiles(void)
 
 const BehavSolution &EfgShow::GetCurrentProfile(void) const
 {
-  return (*m_profileTable)[m_currentProfile];
+  return m_profiles[m_currentProfile];
 }
 
 void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
 {
-  m_profileTable->Append(p_profile);
+  if (p_profile.GetName() == "") {
+    BehavSolution tmp(p_profile);
+    tmp.SetName(UniqueProfileName());
+    m_profiles.Append(tmp);
+  }
+  else {
+    m_profiles.Append(p_profile);
+  }
 
   if (m_efg.AssociatedNfg() && p_map) {
     wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(MixedProfile<gNumber>(p_profile), false);
@@ -301,13 +306,30 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   UpdateMenus();
 }
 
+gText EfgShow::UniqueProfileName(void) const
+{
+  int number = m_profiles.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_profiles.Length(); i++) {
+      if (m_profiles[i].GetName() == "Profile" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_profiles.Length())
+      return "Profile" + ToText(number);
+    
+    number++;
+  }
+}
 
 gText EfgShow::GetRealizProb(const Node *p_node) const
 {
   if (m_currentProfile == 0 || !p_node) {
     return "";
   }
-  return ToText((*m_profileTable)[m_currentProfile].RealizProb(p_node),
+  return ToText(m_profiles[m_currentProfile].RealizProb(p_node),
 		NumDecimals());
 }
 
@@ -316,7 +338,7 @@ gText EfgShow::GetBeliefProb(const Node *p_node) const
   if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
     return "";
   }
-  return ToText((*m_profileTable)[m_currentProfile].BeliefProb(p_node),
+  return ToText(m_profiles[m_currentProfile].BeliefProb(p_node),
 		NumDecimals());
 }
 
@@ -327,7 +349,7 @@ gText EfgShow::GetNodeValue(const Node *p_node) const
   }
   gText tmp = "(";
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    tmp += ToText((*m_profileTable)[m_currentProfile].NodeValue(p_node)[pl], 
+    tmp += ToText(m_profiles[m_currentProfile].NodeValue(p_node)[pl], 
 		  NumDecimals());
     if (pl < m_efg.NumPlayers()) {
       tmp += ",";
@@ -344,7 +366,7 @@ gText EfgShow::GetInfosetProb(const Node *p_node) const
   if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
     return "";
   }
-  return ToText((*m_profileTable)[m_currentProfile].IsetProb(p_node->GetInfoset()),
+  return ToText(m_profiles[m_currentProfile].IsetProb(p_node->GetInfoset()),
 		NumDecimals());
 }
 
@@ -403,7 +425,7 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
   }
 
   if (m_currentProfile && p_node->GetInfoset()) {
-    return (*m_profileTable)[m_currentProfile](p_node->GetInfoset()->Actions()[p_action]);
+    return m_profiles[m_currentProfile](p_node->GetInfoset()->Actions()[p_action]);
   }
   return -1;
 }
@@ -1536,7 +1558,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1555,7 +1577,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgLcp(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1574,7 +1596,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgLiap(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1593,7 +1615,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgLp(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1612,7 +1634,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgPolEnum(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1631,7 +1653,7 @@ void EfgShow::OnToolsEquilibriumCustomEfgQre(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1650,7 +1672,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1669,7 +1691,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     if (!m_solutionSashWindow->IsShown()) {
       UpdateMenus();
       m_profileTable->Show(true);
@@ -1688,7 +1710,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgLcp(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1707,7 +1729,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgLiap(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1726,7 +1748,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgLp(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1745,7 +1767,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgPolEnum(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1764,7 +1786,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgQre(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1783,7 +1805,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgQreGrid(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1802,7 +1824,7 @@ void EfgShow::OnToolsEquilibriumCustomNfgSimpdiv(wxCommandEvent &)
       AddProfile(solutions[soln], true);
     }
     
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
     UpdateMenus();
     if (!m_solutionSashWindow->IsShown())  {
       m_profileTable->Show(true);
@@ -1835,8 +1857,8 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     nfgShow->SetFilename("");
     wxGetApp().AddGame(&m_efg, nfg, nfgShow);
 
-    for (int i = 1; i <= m_profileTable->Length(); i++) {
-      nfgShow->AddProfile(MixedProfile<gNumber>((*m_profileTable)[i]), false);
+    for (int i = 1; i <= m_profiles.Length(); i++) {
+      nfgShow->AddProfile(MixedProfile<gNumber>(m_profiles[i]), false);
     }
   }
   else {
@@ -1910,55 +1932,41 @@ void EfgShow::OnProfilesNew(wxCommandEvent &)
 {
   BehavSolution profile = BehavProfile<gNumber>(EFSupport(m_efg));
 
-  dialogBehavEditor dialog(this, profile);
+  dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profileTable->Length());
+    ChangeProfile(m_profiles.Length());
   }
 }
 
-void EfgShow::OnProfilesClone(wxCommandEvent &)
+void EfgShow::OnProfilesDuplicate(wxCommandEvent &)
 {
-  BehavSolution profile((*m_profileTable)[m_currentProfile]);
+  BehavSolution profile(m_profiles[m_currentProfile]);
 
-  dialogBehavEditor dialog(this, profile);
+  dialogEditBehav dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
     AddProfile(dialog.GetProfile(), true);
-    ChangeProfile(m_profileTable->Length());
-  }
-}
-
-void EfgShow::OnProfilesRename(wxCommandEvent &)
-{
-  if (m_currentProfile > 0) {
-    wxTextEntryDialog dialog(this, "Enter new name for profile",
-			     "Rename profile",
-			     (char *) (*m_profileTable)[m_currentProfile].GetName());
-
-    if (dialog.ShowModal() == wxID_OK) {
-      (*m_profileTable)[m_currentProfile].SetName(dialog.GetValue().c_str());
-      m_profileTable->UpdateValues();
-    }
-  }
-}
-
-void EfgShow::OnProfilesEdit(wxCommandEvent &)
-{
-  if (m_currentProfile > 0) {
-    dialogBehavEditor dialog(this, (*m_profileTable)[m_currentProfile]);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      (*m_profileTable)[m_currentProfile] = dialog.GetProfile();
-      ChangeProfile(m_currentProfile);
-    }
+    ChangeProfile(m_profiles.Length());
   }
 }
 
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_profileTable->Remove(m_currentProfile);
-  m_currentProfile = (m_profileTable->Length() > 0) ? 1 : 0;
+  m_profiles.Remove(m_currentProfile);
+  m_currentProfile = (m_profiles.Length() > 0) ? 1 : 0;
   ChangeProfile(m_currentProfile);
+}
+
+void EfgShow::OnProfilesProperties(wxCommandEvent &)
+{
+  if (m_currentProfile > 0) {
+    dialogEditBehav dialog(this, m_profiles[m_currentProfile]);
+
+    if (dialog.ShowModal() == wxID_OK) {
+      m_profiles[m_currentProfile] = dialog.GetProfile();
+      ChangeProfile(m_currentProfile);
+    }
+  }
 }
 
 void EfgShow::OnProfileSelected(wxListEvent &p_event)

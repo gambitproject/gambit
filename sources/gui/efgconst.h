@@ -74,13 +74,10 @@ typedef enum {
   efgmenuSUPPORT_DELETE = 2021,
   
   // Menu items for profiles window
-  efgmenuPROFILES_FILTER = 2000,
   efgmenuPROFILES_NEW = 2001,
-  efgmenuPROFILES_CLONE = 2002,
-  efgmenuPROFILES_RENAME = 2003,
-  efgmenuPROFILES_EDIT = 2004,
-  efgmenuPROFILES_DELETE = 2005
-
+  efgmenuPROFILES_DUPLICATE = 2002,
+  efgmenuPROFILES_DELETE = 2003,
+  efgmenuPROFILES_PROPERTIES = 2004
 } guiEfgMenuItems;
 
 
