@@ -14,12 +14,15 @@
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
 \input{psfig}
+\newcommand{\tindex}[1]{{\tt #1}\index{{\tt #1}}}
+\newcommand{\bindex}[1]{{\bf #1}\index{#1}}
+\newcommand{\rindex}[1]{{#1}\index{#1}}
 \makeindex
 
 % stuff for lex 
 % to put dictionary style headers in function ref sections
 
-\newcommand{\lex}[1]{\mark{#1}\index{#1}}
+\newcommand{\lex}[1]{\mark{#1}\index{{\tt #1}}}
 
 \makeatletter
 \def\ps@lexicon{\def\@oddhead{\slshape\mysectionname\hfil 
@@ -102,7 +105,7 @@ operations.  Thus the GCL is also suitable for certain types of
 econometric analysis of games.
 
 
-\section{Installation}
+\section{\rindex{Installation}}
 All of the gambit files can be found at the Gambit World Wide Web site
 at
 
@@ -132,7 +135,7 @@ GCL1:
 \noindent The interpreter is ready for your first command.
 
 
-\section{Technical support and bug reports}
+\section{\rindex{Technical support} and \rindex{bug reports}}
 
 User feedback is an important part of Gambit's development cycle.  Our
 design choices have been motivated in large part by our experiences
@@ -220,7 +223,7 @@ Almost every statement in the GCL is built up from function calls.
 Briefly, a function in the GCL is a procedure that takes objects of
 specified data types, and uses them to construct and return an object
 of a (possibly different) specified data type.  The GCL provides a set
-of {\bf Built-In Functions} (BIFs), which are documented in the
+of \bindex{Built-In Functions} (BIFs), which are documented in the
 function reference section of this manual.  
 
 The GCL provides functions that construct simple objects of any given
@@ -254,7 +257,7 @@ theoretic interest.  It also makes it easy to perform certain
 repetitive operations usually performed by flow control statements.
 \end{itemize}
 
-\section{Data Types}
+\section{\rindex{Data Types}}
 
 The built-in data types for the GCL are give in Table 1.  The Table is
 divided into four sections. The data types in the first section are
@@ -270,31 +273,31 @@ play an important role in the GCL.
 \begin{center}
 \begin{tabular} {|l||l|} \hline
 Type name	& Description \\ \hline
-{\tt BOOLEAN} 	& boolean \\
-{\tt INTEGER} 	& integer \\ 
-{\tt FLOAT} 	& floating-point number \\
-{\tt RATIONAL} 	& rational number with arbitrary precision \\
-{\tt TEXT}	& string of arbitrary length \\
-{\tt INPUT}	& output stream \\
-{\tt OUTPUT}	& output stream \\ 
+\tindex{BOOLEAN} 	& boolean \\
+\tindex{INTEGER} 	& integer \\ 
+\tindex{FLOAT} 	& floating-point number \\
+\tindex{RATIONAL} 	& rational number with arbitrary precision \\
+\tindex{TEXT}	& string of arbitrary length \\
+\tindex{INPUT}	& output stream \\
+\tindex{OUTPUT}	& output stream \\ 
 \hline
-{\tt NFG}	& normal form game \\
-{\tt NFPLAYER}	& a player in a normal form game \\
-{\tt STRATEGY}	& a strategy in a normal form game \\
-{\tt NFSUPPORT}	& a support of strategies in a normal form game \\
-{\tt MIXED}	& a mixed strategy profile for a normal form game \\ 
+\tindex{NFG}	& normal form game \\
+\tindex{NFPLAYER}	& a player in a normal form game \\
+\tindex{STRATEGY}	& a strategy in a normal form game \\
+\tindex{NFSUPPORT}	& a support of strategies in a normal form game \\
+\tindex{MIXED}	& a mixed strategy profile for a normal form game \\ 
 \hline
-{\tt EFG}	& extensive form game \\
-{\tt EFPLAYER}	& a player in an extensive form game \\
-{\tt NODE}	& a node in an extensive form game \\ 
-{\tt INFOSET}	& an information set in an extensive form game \\
-{\tt ACTION}	& an action at an information set \\
-{\tt OUTCOME}	& an outcome in an extensive form game \\
-{\tt EFSUPPORT}	& a support of actions in an extensive form game \\
-{\tt BEHAV}	& a behavior strategy profile for an extensive form
+\tindex{EFG}	& extensive form game \\
+\tindex{EFPLAYER}	& a player in an extensive form game \\
+\tindex{NODE}	& a node in an extensive form game \\ 
+\tindex{INFOSET}	& an information set in an extensive form game \\
+\tindex{ACTION}	& an action at an information set \\
+\tindex{OUTCOME}	& an outcome in an extensive form game \\
+\tindex{EFSUPPORT}	& a support of actions in an extensive form game \\
+\tindex{BEHAV}	& a behavior strategy profile for an extensive form
 game \\ 
 \hline
-{\tt LIST(T)}	& a list of objects of type T (T is any data type)\\ 
+\tindex{LIST(T)}	& a list of objects of type T (T is any data type)\\ 
 \hline
 \multicolumn{2}{c}{\ }\\
 \multicolumn{2}{c}{Table 1}\\
@@ -306,17 +309,17 @@ game \\
 
 The remainder of this section details the rules concerning the
 standard types
-{\tt BOOLEAN}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT},
-{\tt INPUT} and {\tt OUTPUT}, as well as general rules for typing.
+\tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{FLOAT}, \tindex{RATIONAL}, \tindex{TEXT},
+\tindex{INPUT} and \tindex{OUTPUT}, as well as general rules for typing.
 The extensive form and normal form types, and their related types, are
 detailed later in special sections.
 
 
 \subsection{Boolean}
 
-The {\tt BOOLEAN} type represents boolean values, that is to say,
+The \tindex{BOOLEAN} type represents boolean values, that is to say,
 ``true'' and ``false''.  The command language predefines two constants
-to represent these, {\tt True} and {\tt False}.
+to represent these, \tindex{True} and \tindex{False}.
 
 \subsection{Numeric Data types}
 
@@ -324,9 +327,9 @@ The GCL supports three numeric data types, \verb+INTEGER+,
 \verb+FLOAT+, and \verb+RATIONAL+.
 
 \begin{itemize}
-\item {\bf Integer}
+\item \bindex{Integer}
 
-The {\tt INTEGER} type may contain integer values.  Integer constants
+The \tindex{INTEGER} type may contain integer values.  Integer constants
 are represented in the GCL by a finite string of consecutive digits
 (where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+). Integer
 constants are assumed to be in base ten representation.  
@@ -334,14 +337,14 @@ constants are assumed to be in base ten representation.
 The \verb+INTEGER+ type is implemented as the machine's long integer
 type, which is typically at least 32 bits in modern machines.  Thus,
 there is a danger of overflow or underflow in computations involving
-these numbers.  The largest legal integer is given by \verb+Maxint[]+,
-and the smallest legal integer is \verb+-Maxint[]+.  Integer
-computations that exceed these limits are subject to truncation or
-wraparound, depending on the platform.  
+these numbers.  The largest legal integer is given by
+\verb+Maxint[]+\tindex{MaxInt}, and the smallest legal integer is
+\verb+-Maxint[]+.  Integer computations that exceed these limits are
+subject to truncation or wraparound, depending on the platform.
 
 \item {\bf Float}
 
-The {\tt FLOAT} type may contain floating point values.  Floating
+The \tindex{FLOAT} type may contain floating point values.  Floating
 point constants are represented in the GCL by any string of digits
 containing exactly one decimal point (\verb+.+).
 
@@ -356,7 +359,7 @@ type is frequently used when speed is important.
 
 \item {\bf Rational}
 
-The {\tt RATIONAL} type is used to represent rational numbers, which
+The \tindex{RATIONAL} type is used to represent rational numbers, which
 are ratios of two arbitrary-length integers.   
 
 This data type is capable of precisely representing any rational
@@ -367,7 +370,7 @@ them may be unreadably large.
 
 In the current implementation, rational constants are not supported.
 Instead, rational numbers can be formed from two integers using the
-{\tt /} (or \verb+Divide+) operator, described below.  (Note that at
+{\tt /} (or \tindex{Divide}) operator, described below.  (Note that at
 present, rational numbers whose numerator or denomerator exceed
 \verb+MaxInt[]+ must be built with GCL functions from smaller rational
 numbers.)
@@ -385,7 +388,7 @@ respectively.
 
 \subsection{Text}
 
-The {\tt TEXT} type is used to store text strings, typically labels
+The \tindex{TEXT} type is used to store text strings, typically labels
 for parts of games.  It is generally encouraged to label various
 elements of games in the command language for ease of identification;
 however it is not required.  To specify a {\tt TEXT} constant,
@@ -397,34 +400,34 @@ included in text constants using the \verb+C+ style notation of
 \subsection{Input and Output}
 
 \begin{itemize}
-\item{\bf Input}
+\item\bindex{Input}
 
-The {\tt INPUT} type is a reference to an input stream, generally a
+The \tindex{INPUT} type is a reference to an input stream, generally a
 file on disk.  Its principal use is to read in external data.  The
-constant, \verb+StdIn+, is used to refer to the standard input stream
+constant, \tindex{StdIn}, is used to refer to the standard input stream
 (generally the console).  New \verb+INPUT+ streams are created with
-the function \verb+Input+, documented in the Function Reference
+the function \tindex{Input}, documented in the Function Reference
 section.
 
-\item{\bf Output}
+\item {\bf Output}
 
-The {\tt OUTPUT} type is a reference to an output stream, generally a
+The \tindex{OUTPUT} type is a reference to an output stream, generally a
 file on disk.  Its principal use is as a logging file for writing
 formatting output from an extended command language job.  The
-constants \verb+StdOut+ and \verb+NullOut+ refer to the standard
+constants \tindex{StdOut} and \tindex{NullOut} refer to the standard
 output stream (generally the console) and the null output stream (the
 garbage can), respectively.
 \end{itemize}
 
 \subsection{Normal form data types}
 
-The data type \verb+NFG+ is used to represent a normal form games.  No
+The data type \tindex{NFG} is used to represent a normal form games.  No
 other normal form data type can exist independently of the normal form
-game to which it belongs.  The \verb+NFPLAYER+ and \verb+STRATEGY+
+game to which it belongs.  The \tindex{NFPLAYER} and \tindex{STRATEGY}
 data types are used to represent players and strategies in a normal
-form game.  An \verb+NFSUPPORT+ represents a support for a normal form
+form game.  An \tindex{NFSUPPORT} represents a support for a normal form
 game, which is a collection of sets of admissible strategies, one for
-each player.  Finally a \verb+MIXED+ is a mixed strategy profile over
+each player.  Finally a \tindex{MIXED} is a mixed strategy profile over
 an arbitrary support.
 
 There are no constants of any normal form data type.  Objects that are
@@ -434,15 +437,15 @@ until later.
 
 \subsection{Extensive form data types}
 
-The data type \verb+EFG+ is used to represent a normal form games.  As
+The data type \tindex{EFG} is used to represent a normal form games.  As
 with normal form games, no other extensive form data type can exist
 independently of the extensive form game to which it belongs.  The
-\verb+EFPLAYER+ represents a player in an extensive form game.  The
-types \verb+NODE+, \verb+ACTION+, \verb+INFOSET+, \verb+OUTCOME+
+\tindex{EFPLAYER} represents a player in an extensive form game.  The
+types \tindex{NODE}, \tindex{ACTION}, \tindex{INFOSET}, \tindex{OUTCOME}
 represent the corresponding parts of the extensive form representation
-of the game.  A \verb+EFSUPPORT+ represents a support for an extensive
+of the game.  A \tindex{EFSUPPORT} represents a support for an extensive
 form game, which is a collection of sets of admissible actions, one
-for each inofrmation set of each player.  Finally a \verb+BEHAV+ is a
+for each inofrmation set of each player.  Finally a \tindex{BEHAV} is a
 behavior strategy profile over an arbitrary support.
 
 As with normal form games, there are no constants of any extensive form
@@ -450,9 +453,9 @@ data type.  Objects that are of any of extensive form data types must
 be built up using functions in the GCL.  Hence, a more detailed
 discussion of them is deferred until later.
 
-\subsection{Lists}
+\subsection{\rindex{Lists}}
 
-The \verb+LIST(T)+ data type can be used to represent lists of any
+The \tindex{LIST(T)} data type can be used to represent lists of any
 data type \verb+T+ (including \verb+T=LIST(R)+, where \verb+R+ is any
 data type).  Lists are represented in GCL statements by including
 objects of a given data type in curly braces and separated by commas.
@@ -475,7 +478,7 @@ and subsequent elements of a \verb+LIST(LIST(T))+ can be of type
 \verb+T+.  
 
 We refer to the elements at the bottom levels of a nested list as the
-{\bf basic elements} of the list.  Then lists can be of heterogeneous
+\bindex{basic elements} of the list.  Then lists can be of heterogeneous
 depth.  However, lists must be of homogeneous type. In other words,
 all basic elements of the list must be of the same type.  Hence,
 
@@ -515,7 +518,7 @@ data types in the section on GCL data types.
 
 \medskip
 \noindent
-{\bf Conglomerate} types are not actually data types, but are names
+\bindex{Conglomerate types} are not actually data types, but are names
 used in GCL function prototypes to represent subsets of data types.
 Following is a list of the conglomerate data types along with the
 types they include:  
@@ -526,8 +529,8 @@ types they include:
 \hline 
 Conglomerate Type & Includes \\
 \hline
-\verb+ANYTYPE+ & Any type except \verb+LIST+ \\ 
-\verb+NLIST(T)+ & Nested \verb+LIST(T)+ of any depth \\ 
+\tindex{ANYTYPE} & Any type except \verb+LIST+ \\ 
+\tindex{NLIST(T)} & Nested \verb+LIST(T)+ of any depth \\ 
 & i. e., \verb+LIST(LIST( ... LIST(T) ...))+\\
 \verb+T*+ & \verb+T+, or Null value of type \verb+T+ \\ 
 \hline
@@ -541,7 +544,7 @@ Here \verb+T+ could be any data type except \verb+LIST+
 
 \medskip
 \noindent
-{\bf Qualified data types} represent objects of a specified type whose
+\bindex{Qualified data types} represent objects of a specified type whose
 numeric data is of a specific data type, \verb+T+.  They are
 represented by writing the sub-type in parentheses after the parent
 type.  Following are the qualified data types in the GCL.
@@ -552,11 +555,11 @@ type.  Following are the qualified data types in the GCL.
 \hline
 Parent Type & Qualified types\\
 \hline
-\verb+EFG+ & \verb+EFG(FLOAT)+, \verb+EFG(RATIONAL)+ \\ 
-\verb+NFG+ & \verb+NFG(FLOAT)+, \verb+NFG(RATIONAL)+ \\ 
-\verb+BEHAV+ & \verb+BEHAV(FLOAT)+, \verb+BEHAV(RATIONAL)+ \\ 
-\verb+MIXED+ & \verb+MIXED(FLOAT)+, \verb+MIXED(RATIONAL)+ \\ 
-\verb+OUTCOME+ & \verb+OUTCOME(FLOAT)+, \verb+OUTCOME(RATIONAL)+ \\ 
+\tindex{EFG} & \verb+EFG(FLOAT)+, \verb+EFG(RATIONAL)+ \\ 
+\tindex{NFG} & \verb+NFG(FLOAT)+, \verb+NFG(RATIONAL)+ \\ 
+\tindex{BEHAV} & \verb+BEHAV(FLOAT)+, \verb+BEHAV(RATIONAL)+ \\ 
+\tindex{MIXED} & \verb+MIXED(FLOAT)+, \verb+MIXED(RATIONAL)+ \\ 
+\tindex{OUTCOME} & \verb+OUTCOME(FLOAT)+, \verb+OUTCOME(RATIONAL)+ \\ 
 \hline
 \end{tabular}
 \end{center}
@@ -577,7 +580,7 @@ it matches the qualified types with that parent. Hence if a function
 parmeter is of type \verb+EFG+, then it is OK to pass it values of
 either type \verb+EFG(FLOAT)+ or \verb+EFG(RATIONAL)+.
 
-\section{Statements}
+\section{\rindex{Statements}}
 
 A GCL program consists of a series of statements.  A statement is
 typically an expression built up out of function calls.  A statement
@@ -599,7 +602,7 @@ execution of the GCL and return to the command prompt.  Note that the
 effect of a control-C may not always be immediate, as the control-C is
 only polled for at convenient stages during computation.
 
-\section{Functions}
+\section{\rindex{Functions}}
 
 Functions in the GCL are rules for taking objects of specified data
 types, and using them to construct and return an object of a (possibly
@@ -627,7 +630,7 @@ Variable & No & No \\
 User Defined Function (UDF) & No & Yes \\ 
 \end{tabular}
 
-\subsection{Constants}
+\subsection{\rindex{Constants}}
 
 The simplest type of a function in the GCL is a constant.  A constant
 is a built-in function that has no arguments, and returns the same
@@ -639,12 +642,12 @@ of constants follow:
 \begin{tabular} {ll} 
 Data Type & Constant \\ 
 \hline
-\verb+BOOLEAN+  & \verb+True+,  \verb+False+ \\
+\verb+BOOLEAN+  & \tindex{True},  \tindex{False} \\
 \verb+INTEGER+ & \verb+1+, \verb+-1234567+ \\
 \verb+FLOAT+  & \verb+1.+,  \verb+-1.234567+ \\
 \verb+TEXT+  & \verb+"Help"+ \\
-\verb+OUTPUT+  & \verb+StdOut+, \verb+NullOut+ \\
-\verb+INPUT+  & \verb+StdIn+ \\
+\verb+OUTPUT+  & \tindex{StdOut}, \tindex{NullOut} \\
+\verb+INPUT+  & \tindex{StdIn} \\
 \end{tabular}
 \medskip
 
@@ -667,7 +670,7 @@ have a data type, which is determined by the ``function name''.  If
 you try and use a \verb+INTEGER+ constant, say \verb+123+, where a
 \verb+FLOAT+ or other data type is expected, you will get an error.
 
-\subsection{Variables}
+\subsection{\rindex{Variables}}
 
 A variable is like a constant in that it has no arguments.  It stores
 one object of a particular data type, and returns it when called. The
@@ -675,14 +678,14 @@ difference between a constant and a variable is that a variable must
 be created before it can be used, and once it is created, it can be
 deleted or redefined if you want.  To create a new variable, or to
 redefine an existing variable, one can use the built-in function,
-\verb+Assign+, which has the prototype:
+\tindex{Assign}, which has the prototype:
 \begin{verbatim}
 Assign[name->TEXT, value<->T] =: T
 \end{verbatim}
 \noindent 
 for any type \verb+T+.  (How to read a function's prototype is
 described in more detail in the section of function calls.  For now,
-suffice it to say that {\tt Assign} takes two parameters, the first of
+suffice it to say that \tindex{Assign} takes two parameters, the first of
 which is the name of the variable, and the second of which is the
 value to be assigned to the variable.)  The variable name can be any
 string of alphanumeric characters (\verb+a-z+, \verb+A-Z+, or
@@ -697,7 +700,7 @@ GCL1: Assign["x",1]
 
 
 \noindent 
-The {\tt Assign} function also has an infix operator form, written
+The \tindex{Assign} function also has an infix operator form, written
 {\tt :=}.  In this form, the quotes are not needed around the variable
 name, and the function is not ``listable'' (see the section on Lists,
 later in this chapter).  So, equivalently, and more compactly,
@@ -726,7 +729,7 @@ error, since {\tt Assign} cannot be used to change the type of a
 variable.  To change the data type of a variable, it must first be
 deleted, and then reassigned.  
 
-An existing variable may be deleted by the use of the {\tt UnAssign}
+An existing variable may be deleted by the use of the \tindex{UnAssign}
 function
 
 \begin{verbatim}
@@ -745,7 +748,7 @@ y:=
 y:= 3.0
 \end{verbatim}  
 
-\subsection{Built-In Functions}
+\subsection{\rindex{Built-In Functions}}\index{Functions!Built-In}
 
 Built-in functions in the GCL are just like the mathematical notion of
 a function.  They are rules which associate with each point in the  
@@ -759,7 +762,7 @@ To execute a GCL function you write the function name, followed
 arguments, enclosed in square brackets.  
 
 All of the built-in functions in the GCL are listed in the Function
-Reference section of the manual.  For each function, the {\bf function
+Reference section of the manual.  For each function, the \bindex{function
 prototype} is listed.  The function prototype is a template that is
 used to remind you of the correct syntax for each function.  
 
@@ -774,7 +777,7 @@ A simple example of a function call is
 Plus[x->1, y->2]
 \end{verbatim}
 
-This calls the function named {\tt Plus}, with parameter \verb+x+ set
+This calls the function named \tindex{Plus}, with parameter \verb+x+ set
 to the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is
 the function for addition of two integers, the value returned would
 be, as you might expect, 3.
@@ -902,14 +905,14 @@ anonymously just like a value parameter, subject to the usual rules.
 It is a run-time error to attempt to pass a value to a reference
 parameter, or vice versa.
 
-\subsection{User defined functions}
+\subsection{\rindex{User defined functions}}\index{Functions!User Defined}
 
 As GCL programs become more and more complex, frequently there are
 complicated operations which must be performed repeatedly.  The
 command language therefore supports user-defined functions, which
 allow for defining sections of code which may be called later.
 
-A new function can be created using the function \verb+NewFunction+.
+A new function can be created using the function \tindex{NewFunction}.
 For example, one might define a function to compute the absolute value
 of an {\tt INTEGER} as such:
 
@@ -989,7 +992,7 @@ parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+
 is always 13, regardless of the value of \verb+i+ outside of the
 function.
 
-\section{Aliases for function calls}
+\section{Aliases for function calls}\index{Short forms}
 
 There are several functions which are so commonly used that special
 ``short'' forms are defined for them.  We already saw one example with
@@ -1094,7 +1097,7 @@ Times[Parentheses[Plus[a,b]],c]
 \end{verbatim}
 
 \noindent
-which, since \verb+Parentheses+ is just the identity mapping, is
+which, since \tindex{Parentheses} is just the identity mapping, is
 equivalent to
 \begin{verbatim}
 Times[Plus[a,b],c]
@@ -1102,9 +1105,9 @@ Times[Plus[a,b],c]
 
 \medskip
 
-\section{Lists}
+\section{\rindex{Lists}}
 
-\subsection{Building and modifying lists}
+\subsection{Building and modifying lists}\index{Lists!building}\index{Lists!modifying}
 Lists play a special role in the GCL.  Variables can be created to
 contain lists in the same fashion as for any other data type:  
 
@@ -1112,10 +1115,10 @@ contain lists in the same fashion as for any other data type:
 list:={1,{2,3},4}
 \end{verbatim}
 
-The built in function \verb+List[x,n]+ can be used to create a list of
-length \verb+n+ all of whose elements have the value \verb+x+.  For
-numeric data types, a third parameter for \verb+List+ allows each
-successive entry to be incremented.
+The built in function \verb+List[x,n]+\index{List} can be used to
+create a list of length \verb+n+ all of whose elements have the value
+\verb+x+.  For numeric data types, a third parameter for \verb+List+
+allows each successive entry to be incremented.
 
 \begin{verbatim}
 GCL1: List["Help",3]
@@ -1133,15 +1136,16 @@ Lists of any data type can be created with \verb+List+.  So if
 \verb+n+ is a normal form game, then \verb+List[n,5]+ is a list of $5$
 copies of \verb+n+.
 
-The function \verb+NthElement[list,n]+ can be used to get \verb+n+th
-element of the list, \verb+list+.  This function has two short forms,
-\verb+list[[n]]+ and \verb+list_n+.  Since the function returns the
-\verb+n+th element of the list, it can be used recursively to get the
-elements of nested lists.  So \verb+list_i_j+ returns the \verb+j+th
-element of the \verb+i+th element of \verb+list+.  Also, since
-\verb+list+ is passed by reference, the function can be used to modify
-the corresponding element of a list.  Thus, you can constuct your own
-$3\times 3$ identity matrix as follows:
+The function \verb+NthElement[list,n]+\tindex{NthElement} can be used
+to get \verb+n+th element of the list, \verb+list+.  This function has
+two short forms, \verb+list[[n]]+ and \verb+list_n+.  Since the
+function returns the \verb+n+th element of the list, it can be used
+recursively to get the elements of nested lists.  So \verb+list_i_j+
+returns the \verb+j+th element of the \verb+i+th element of
+\verb+list+.  Also, since \verb+list+ is passed by reference, the
+function can be used to modify the corresponding element of a list.
+Thus, you can constuct your own $3\times 3$ identity matrix as
+follows:
 
 \begin{verbatim}
 GCL1: list:=List[List[0,3],3];
@@ -1152,7 +1156,7 @@ GCL3: list
   { 0, 0, 1 } }
 \end{verbatim}
 
-\subsection{Listability of functions}
+\subsection{\rindex{Listability} of functions}\index{Functions!listability}
 
 Almost all of the functions in the GCL are ``listable''.  This means
 that if there is a version of the function which takes a type \verb+T+
@@ -1232,9 +1236,9 @@ faster than they would if flow control satements were used instead.
 This is because listable calls to functions are executed in compiled
 code, while flow control statements are executed in interpreted code.
 
-\section{Online documentation}
+\section{Online documentation}\index{Documentation}
 
-The functions \verb+Help+ and \verb+Manual+ are used to obtain online
+The functions \tindex{Help} and \tindex{Manual} are used to obtain online
 documentation of any function in the GCL, including user defined
 functions that you created with the \verb+NewFunction+ command. 
 
@@ -1284,15 +1288,16 @@ the function and its parameters is returned.
 
 \chapter{Advanced topics}
 
-\section{Including files}
+\section{\rindex{Including files}}
 
-The function {\tt Include[file->TEXT]} is used to insert the contents of the
-file given into the input stream, as if they had been typed directly
-by the user.  This can be particularly useful in conjunction with user
-defined functions, in that a library of useful functions can be
-constructed and included into the program asily.
+The function \verb+Include[file->TEXT]+\tindex{Include} is used to
+insert the contents of the file given into the input stream, as if
+they had been typed directly by the user.  This can be particularly
+useful in conjunction with user defined functions, in that a library
+of useful functions can be constructed and included into the program
+asily.
 
-The {\tt Include} directive may only appear at the ``top level'' of
+The \verb+Include+ directive may only appear at the ``top level'' of
 the program.  That is to say, it cannot be used inside a loop,
 function declaration, or expression.  However, files may be nested
 arbitrarily deep using {\tt Include}, so you can include a file which
@@ -1315,11 +1320,11 @@ by keeping a modified copy of it in the directory associated with that
 project.  
 
 It is good practice to have included files identify themselves when
-they are included. This can be done by using the \verb+GetPath[]+
-function, which returns the full pathname of the file from which the
-command is executed.  For example, if the following line is placed as
-the first line in an included file (say with filename
-\verb+path/myfile.gcl+)
+they are included. This can be done by using the
+\verb+GetPath[]+\tindex{GetPath} function, which returns the full
+pathname of the file from which the command is executed.  For example,
+if the following line is placed as the first line in an included file
+(say with filename \verb+path/myfile.gcl+)
 
 \begin{verbatim}
 StdOut << "Include["&GetPath[]&"]\n";
@@ -1334,7 +1339,7 @@ Include[path/myfile.gcl]
 \end{verbatim}
 
 
-\section{Flow control structures}
+\section{\rindex{Flow control} structures}
 
 The GCL contains three functions which allow flow control within a
 program.  These functions are ``special'' in that their parameters are
@@ -1342,7 +1347,7 @@ evaluated in a special way (since their parameters are expressions and
 sequences of statements); they also have no ``formal'' names for their
 parameters.
 
-\subsection{Conditional execution with {\tt If}}
+\subsection{Conditional execution with \tindex{If}}\index{Flow control!If}
 
 The function \verb+If[]+ allows execution of a sequence of statements
 only under certain conditions.  The syntax of the function is
@@ -1385,7 +1390,7 @@ example would leave \verb+j+ defined only if \verb+i+ was equal to
 is therefore necessary to be careful in constructing \verb+If+
 statements which result in the definition of new variables.
 
-\subsection{Repetitive execution with {\tt While}}
+\subsection{Repetitive execution with \tindex{While}}\index{Flow control!While}
 
 Often in writing programs it is necessary to execute a block of
 statements repeatedly, usually with different values for variables.
@@ -1417,7 +1422,7 @@ executed; so, if the \verb+boolean-expression+ is \verb+False+ the
 first time it is evaluated, the body of the loop never executes, and
 no variables which appear in the loop are considered to be defined.
 
-\subsection{Special looping with {\tt For}}
+\subsection{Special looping with \tindex{For}}\index{Flow control!For}
 
 The function \verb+For+ is a specialized looping construct, useful
 mostly in cases where some index variable is used to iterate a list or
@@ -1451,9 +1456,9 @@ For[i := 1, list := { }; i <= 10, list := list & {i^2}; i := i + 1;]
 more convenient to use the structure afforded by the \verb+For+
 function.
 
-\section{Input and Output}
+\section{\rindex{Input} and \rindex{Output}}
 
-Data can be read from an input stream by the \verb+Read[]+ function.
+Data can be read from an input stream by the \tindex{Read} function.
 So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then
 a successful call of \verb+Read[in,x]+ will read the exposed data (see
 function reference for definition of ``exposed data'') from the input
@@ -1516,7 +1521,7 @@ variables.  After the last statement,
 \verb+x+ is a \verb+LIST(INTEGER)+ with value \verb+{1,2,3,4,5}+.  
 
 Data can be written to an output stream by the use of the
-\verb+Write[]+ function.  Thus, the following commands
+\tindex{Write} function.  Thus, the following commands
 
 \begin{verbatim}
 out:=Output["file.out"]
@@ -1537,19 +1542,19 @@ above example could be written instead
 out << x << y
 \end{verbatim}
  
-A series of \verb+SetFormat+ functions (\verb+SetNumericFormat+,
-\verb+SetTextFormat+, \verb+SetListFormat+, \verb+SetSolutionFormat+)
+A series of \tindex{SetFormat} functions (\tindex{SetNumericFormat},
+\tindex{SetTextFormat}, \tindex{SetListFormat}, \tindex{SetSolutionFormat})
 can be used to control the formatting of data written to an output
-stream.  Note that the \verb+Read[]+ and \verb+Write[]+ functions are
+stream.  Note that the \tindex{Read} and \tindex{Write} functions are
 not listable.
 
 The \verb+Read[]+ and \verb+Write[]+ functions can only be used with
 certain data types (see function documentation).  Reading and writing
 of \verb+EFG+ and \verb+NFG+ from external files can be done with the
-\verb+LoadEfg[]+, \verb+SaveEfg[]+, \verb+LoadNfg[]+ and
-\verb+SaveNfg[]+ functions.
+\tindex{LoadEfg}, \tindex{SaveEfg}, \tindex{LoadNfg} and
+\tindex{SaveNfg} functions.
 
-\section{Null values}
+\section{\rindex{Null values}}
 
 Certain function calls in the GCL result in either invalid or
 undetermined values for the required data type. Examples would be
@@ -1575,7 +1580,7 @@ when encountering a Null value as a parameter, will abort with an
 error message.  Whether a function will accept Null values as valid
 values for an argument is indicated in the function prototype with an
 asterisk (\verb+*+) after the relevant parameter.  For example, the
-function prototype for \verb+IsNull+ is
+function prototype for \tindex{IsNull} is
 
 \begin{verbatim}
 IsNull[x->T*]=:BOOLEAN
@@ -1591,29 +1596,29 @@ Note that user defined functions  will accept Null values for
 arguments also, if the relevant parameter is designated with a
 \verb+*+, as above. 
 
-\section{System information and commands}
+\section{\rindex{System information} and commands}\index{System commands}
 
 There are several commands in the GCL that allow you to get
 information from or run processes on the host system.  
 
-A series of functions, \verb+StartWatch+, verb+StopWatch+,
-\verb+ElapsedTime+ provide informaion on the amount of cpu time
+A series of functions, \tindex{StartWatch}, \tindex{StopWatch},
+\tindex{ElapsedTime} provide informaion on the amount of cpu time
 used by the GCL, and can be used to time computation.  
 
-Another series of functions, \verb+GetEnv+, \verb+SetEnv+,
-\verb+UnSetEnv+, \verb+Platform+, allow you to set and check
+Another series of functions, \tindex{GetEnv}, \tindex{SetEnv},
+\tindex{UnSetEnv}, \tindex{Platform}, allow you to set and check
 environment variables, or check the operating system that the GCL is
 running on.
 
-A third series of functions, \verb+ExePath+, \verb+GetPath+, and the
-UDF, \verb+GambitExe+, provide path and filenames to files being used
+A third series of functions, \tindex{ExePath}, \tindex{GetPath}, and the
+UDF, \tindex{GambitExe}, provide path and filenames to files being used
 by or related to the GCL.
 
-Finally, the \verb+Shell+ command allows you to run a child process on
+Finally, the \tindex{Shell} command allows you to run a child process on
 the GCL.  
 
 The above system functions are also used in the user defined function
-\verb+Display+, which allows you to start a child process that brings
+\tindex{Display}, which allows you to start a child process that brings
 up the Gambit GUI to view a graphics display of an extensive or normal
 form game. If \verb+game+ is a variable of type \verb+NFG+ or
 \verb+EFG+, then the command \verb+Display[game]+ will display the
@@ -1623,17 +1628,17 @@ directories and filenames when you installed Gambit.  If you deviated
 from the standard installation, you may have to edit these UDFs
 before they work correctly.}
 
-\section{Orphan variables and memory management}
+\section{\rindex{Orphan variables} and memory management}
 
 One feature of the GCL which is not encountered in other computing
-environments is the notion of {\bf orphan variables}.  In the GCL, you
+environments is the notion of \bindex{orphan variables}.  In the GCL, you
 can create variables to represent objects which may be deleted or
 invalidated because of subsequent things you do. For example, suppose
 you define a variable to represent an element (node, information set,
 outcome, etc) of an extensive form game.  You may subsequently delete
 the part of the tree that contains that element.  The object that the
 variable originally referred to is no longer valid.  In such a case,
-we call the variable an {\bf orphan variable}.
+we call the variable an \bindex{orphan variable}.
 
 The basic rule in the GCL is that when a variable becomes an orphan,
 it is unassigned.  Thus, situations can arise when you have defined a
@@ -1668,7 +1673,7 @@ GCL4: t
 \end{verbatim}
 
 In this case, a variable \verb+t+ is defined to refer to the list of
-terminal nodes.  The \verb+DeleteTree+ command deletes some of the
+terminal nodes.  The \tindex{DeleteTree} command deletes some of the
 terminal nodes.  Even though some of the nodes in the list \verb+t+
 are still valid, the rule currently used by the GCL for orphan
 variables is that if any element of a list becomes an orphan, the
@@ -1692,7 +1697,7 @@ The game is subsequently edited, making the solution no longer valid
 for the changed game.  At this point the solution becomes an orphan,
 and the variable that refers to it is unassigned.  
 
-\section{Errors}
+\section{\rindex{Errors}}
 
 Sometimes, programs contain errors.  The interpreter is able to detect
 errors which violate rules of the language, and reports information
@@ -1724,11 +1729,11 @@ The whole point of the GCL is to provide an environment to enable
 building and doing computations on games.  This chapter describes how
 to build and solve normal and extensive form games in the GCL.  
 
-\section{Normal forms}
+\section{\rindex{Normal forms}}
 
-\subsection{Creating a normal form game}
+\subsection{Creating a normal form game}\index{Normal forms!creating}
 
-The function \verb+NewNfg[]+ is used to create a new normal form game.
+The function \tindex{NewNfg} is used to create a new normal form game.
 Thus, the command
 
 \begin{verbatim}
@@ -1753,7 +1758,7 @@ arguments.
 
 For example to create a random two person $2\times 2$ normal form
 game, with a seed of \verb+7+ for the random number generator, you can
-use the function \verb+Randomize+ to randomize the payoffs of the
+use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
 
 \begin{verbatim}
@@ -1762,7 +1767,7 @@ GCL2: Randomize[NewNfg[{2,2}],7];
 
 \noindent
 You can look at the payoffs of the game by using the standard UDF,
-\verb+Payoffs+:
+\tindex{Payoffs}:
 
 \begin{verbatim}
 GCL3: Payoffs[Randomize[NewNfg[{2,2}],7]]
@@ -1812,10 +1817,11 @@ typing is all implicit.  In other words, you never have to declare
 what data type a variable will be before it is used.  A variable takes
 on the data type of the object that is first assigned to it.    
 
-\subsection{Setting payoffs and modifying a normal form game}  
+\subsection{Setting payoffs and modifying a normal form
+game}\index{Normal forms!payoffs}  
 
 The payoffs in a normal form can be set to have specific values using
-the \verb+SetPayoff+ command.  The following sequence of statements
+the \tindex{SetPayoff} command.  The following sequence of statements
 illustrates how to build a simple prisoner's dilemma game, by first
 creating a normal form game of the correct dimension, and then
 modifying the payoffs one by one.  
@@ -1833,7 +1839,7 @@ GCL7: Payoffs[n]
 \end{verbatim}
 
 Note that the above can be done equivalently and more simply by using
-the standard UDF, \verb+Nfg+ to create the game directly from a payoff
+the standard UDF, \tindex{Nfg} to create the game directly from a payoff
 list:
 
 \begin{verbatim}
@@ -1844,8 +1850,8 @@ GCL2: Payoffs[n]
 \end{verbatim}
 
 \noindent
-You can name the strategies if you want by using \verb+Strategies+ to
-get a list of the strategies in the game, and \verb+SetName+ to name
+You can name the strategies if you want by using \tindex{Strategies} to
+get a list of the strategies in the game, and \tindex{SetName} to name
 them.
 
 \begin{verbatim}
@@ -1897,7 +1903,7 @@ to see the payoffs for the game via \verb+Payoffs[nfg]+ you will see
 an array just like \verb+pay+.  
 
 The fourth step in the above calculation illustrates a subtle but
-important point about listable functions.  The function \verb+Min+
+important point about listable functions.  The function \tindex{Min}
 requires an argument of type \verb+LIST(FLOAT)+ and returns type
 \verb+FLOAT+.  It is being called with an argument of type
 \verb+LIST(LIST(LIST(FLOAT)))+, and dimensionality $3\times 3\times
@@ -1957,7 +1963,8 @@ solution algorithms that can be applied to solve the game.  How to
 solve normal form games is discussed in the next chapter.  Until you
 get to that point, you might want to save your work:
 
-\subsection{Saving and loading normal forms}
+\subsection{Saving and loading normal forms}\index{Normal
+forms!saving}\index{Normal forms!loading}
 
 Once a normal form game has been constructed, it can be saved in a
 similar way to an extensive form game.  The command 
@@ -1972,7 +1979,7 @@ will save the normal form game \verb+n+ to the file
 \verb+.nfg+ be used when saving normal form games, as the Gambit
 Graphics user interface recognizes this extension as containing normal
 form games.  Once a normal form game has been saved to an external
-file, it can be loaded by the command \verb+LoadNfg+, as follows:
+file, it can be loaded by the command \tindex{LoadNfg}, as follows:
 
 \begin{verbatim}
 n := LoadNfg["filename.nfg" ]
@@ -1980,11 +1987,11 @@ n := LoadNfg["filename.nfg" ]
 
 
 
-\section{Extensive forms}
+\section{\rindex{Extensive forms}}
 
-\subsection{Creating a new extensive form}
+\subsection{Creating a new extensive form}\index{Extensive forms!creating}
 
-The function {\tt NewEfg[]} can be used to create a new extensive form
+The function \tindex{NewEfg} can be used to create a new extensive form
 game.  In order to do anything with it, a variable should be created
 to be the new extensive form game.  Thus, the command
 
@@ -2015,28 +2022,28 @@ functions are given in Table 2.
 \begin{tabular} {|l||l|} \hline
 Function Name	& Description \\ 
 \hline
-\verb+#Actions[i]+ & Actions at information set \verb+i+ \\
-\verb+#Actions[e]+ & Actions in the game \verb+e+ \\
-\verb+ Chance[e]+ & Chance player of \verb+e+ \\
-\verb+ Children[n]+ & Child nodes of node \verb+n+ \\
-\verb+#History[n]+ & History of actions preceeding node \verb+n+ \\
-\verb+ Infoset[n]+ & Information set that node \verb+n+ belongs to\\
-\verb+ Infoset[a]+ & Information set that action \verb+a+ belongs to\\
-\verb+ Infosets[e]+ & Information sets in the game \verb+e+\\
-\verb+ Members[i]+ & Member nodes of information set \verb+i+\\
-\verb+ Nodes[e]+ & Nodes in the game tree of the game \verb+e+\\
-\verb+#NonterminalNodes[e]+ & Nonterminal nodes of game \verb+e+\\
-\verb+ NthChild[n,j]+ & The \verb+j+th child of node \verb+n+ \\
-\verb+ Outcome[n]+ & Outcome attached to node \verb+n+ \\
-\verb+ Outcomes[e]+ & Outcomes for the game \verb+e+ \\
-\verb+ Parent[n]+ & Parent node of node \verb+n+ \\
-\verb+ Payoff[o,p]+ & Payoff  of outcome \verb+o+ for player \verb+p+ \\
-\verb+#Payoffs[o]+ & Payoff vector of outcome \verb+o+ \\
-\verb+ Player[i]+ & Player of information set \verb+i+ \\
-\verb+ Players[e]+ & Players of the game \verb+e+ \\
-\verb+ PriorAction[n]+ & Action preceeding node \verb+n+ \\
-\verb+ RootNode[e]+ & Root node of \verb+e+ \\
-\verb+#TerminalNodes[e]+ & Terminal nodes of game \verb+e+\\
+\verb+# Actions[i]+ & Actions at information set \verb+i+ \\
+\verb+# Actions[e]+ & Actions in the game \verb+e+ \\
+\verb+  Chance[e]+ & Chance player of \verb+e+ \\
+\verb+  Children[n]+ & Child nodes of node \verb+n+ \\
+\verb+# History[n]+ & History of actions preceeding node \verb+n+ \\
+\verb+  Infoset[n]+ & Information set that node \verb+n+ belongs to\\
+\verb+  Infoset[a]+ & Information set that action \verb+a+ belongs to\\
+\verb+  Infosets[e]+ & Information sets in the game \verb+e+\\
+\verb+  Members[i]+ & Member nodes of information set \verb+i+\\
+\verb+  Nodes[e]+ & Nodes in the game tree of the game \verb+e+\\
+\verb+# NonterminalNodes[e]+ & Nonterminal nodes of game \verb+e+\\
+\verb+  NthChild[n,j]+ & The \verb+j+th child of node \verb+n+ \\
+\verb+  Outcome[n]+ & Outcome attached to node \verb+n+ \\
+\verb+  Outcomes[e]+ & Outcomes for the game \verb+e+ \\
+\verb+  Parent[n]+ & Parent node of node \verb+n+ \\
+\verb+  Payoff[o,p]+ & Payoff  of outcome \verb+o+ for player \verb+p+ \\
+\verb+# Payoffs[o]+ & Payoff vector of outcome \verb+o+ \\
+\verb+  Player[i]+ & Player of information set \verb+i+ \\
+\verb+  Players[e]+ & Players of the game \verb+e+ \\
+\verb+  PriorAction[n]+ & Action preceeding node \verb+n+ \\
+\verb+  RootNode[e]+ & Root node of \verb+e+ \\
+\verb+# TerminalNodes[e]+ & Terminal nodes of game \verb+e+\\
 \hline
 \multicolumn{2}{c}{\ }\\
 \multicolumn{2}{c}{Table 2}\\
@@ -2046,11 +2053,12 @@ Function Name	& Description \\
 \end{table}
 \medskip
 
-The \verb+NthChild[n,j]+ function has a short form of \verb+n#j+.  So
-the second child of the third child of the root node of \verb+e+ can
-be accessed (if it exists) by the command \verb+RootNode[e]#3#2+.  
+The \verb+NthChild[n,j]+\tindex{NthChild} function has a short form of
+\verb+n#j+.  So the second child of the third child of the root node
+of \verb+e+ can be accessed (if it exists) by the command
+\verb+RootNode[e]#3#2+.
 
-\subsection{Modifying an extensive form}
+\subsection{Modifying an extensive form}\index{Extensive forms!modifying}
 
 A series of extensive form game editing functions are available for
 modifying an extensive form game. A complete list is given in the
@@ -2063,26 +2071,26 @@ building a game are given in Table 3.
 \begin{tabular} {|l||l|} \hline
 Function Name	& Description \\ 
 \hline
-\verb+ AddMove[i,n]+ &Adds a move from infoset \verb+i+ to node \verb+n+ \\
-\verb+#AddMove[i,a]+ &Adds a move from infoset \verb+i+ to action \verb+a+ \\
-\verb+#AttachNewOutcome[n]+ &Attaches a new outcome to node \verb+n+ \\
-\verb+ AttachOutcome[n,o]+ &Creates and attaches outcome \verb+o+ to node \verb+n+ \\
-\verb+ CopyTree[n1,n2]+ &Copies tree rooted at node \verb+n1+ to node \verb+n2+ \\
-\verb+ InsertAction[i]+ &Inserts an action into information set \verb+i+ \\
-\verb+ InsertMove[i,n]+ &Inserts a move from infoset \verb+i+ at node \verb+n+\\
-\verb+ MergeInfosets[i1,i2]+ &Moves nodes from infoset \verb+i1+ into \verb+i2+\\
-\verb+ MoveToInfosets[n,i]+ &Moves node \verb+n+ into infoset \verb+i+\\
-\verb+ NewInfoset[p,j]+ &Creates a new infoset for player \verb+p+ with \verb+j+ actions\\
-\verb+ NewInfoset[p,list]+ &Creates a new infoset for \verb+p+ with action names as in \verb+list+\\
-\verb+#NewOutcome[e,t]+ &Creates a new outcome for the game \verb+e+
+\verb+  AddMove[i,n]+ &Adds a move from infoset \verb+i+ to node \verb+n+ \\
+\verb+# AddMove[i,a]+ &Adds a move from infoset \verb+i+ to action \verb+a+ \\
+\verb+# AttachNewOutcome[n]+ &Attaches a new outcome to node \verb+n+ \\
+\verb+  AttachOutcome[n,o]+ &Creates and attaches outcome \verb+o+ to node \verb+n+ \\
+\verb+  CopyTree[n1,n2]+ &Copies tree rooted at node \verb+n1+ to node \verb+n2+ \\
+\verb+  InsertAction[i]+ &Inserts an action into information set \verb+i+ \\
+\verb+  InsertMove[i,n]+ &Inserts a move from infoset \verb+i+ at node \verb+n+\\
+\verb+  MergeInfosets[i1,i2]+ &Moves nodes from infoset \verb+i1+ into \verb+i2+\\
+\verb+  MoveToInfosets[n,i]+ &Moves node \verb+n+ into infoset \verb+i+\\
+\verb+  NewInfoset[p,j]+ &Creates a new infoset for player \verb+p+ with \verb+j+ actions\\
+\verb+  NewInfoset[p,list]+ &Creates a new infoset for \verb+p+ with action names as in \verb+list+\\
+\verb+# NewOutcome[e,t]+ &Creates a new outcome for the game \verb+e+
 with name \verb+t+\\
-\verb+#NewPlayer[e,t]+ &Creates a new player for the game \verb+e+
+\verb+# NewPlayer[e,t]+ &Creates a new player for the game \verb+e+
 with name \verb+t+\\
-\verb+ Randomize[e,j]+ &Randomizes the payoffs in \verb+e+ with seed \verb+j+\\
-\verb+ Reveal[i,list]+ &Reveals infoset \verb+i+ to players in \verb+list+\\
-\verb+ SetChanceProbs[i,list]+ &Sets chance probs in infoset \verb+i+ to values in \verb+list+\\
-\verb+ SetPayoff[o,p,v]+ &Sets payoff of outcome \verb+o+ for player \verb+o+ to value \verb+v+\\
-\verb+ SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
+\verb+  Randomize[e,j]+ &Randomizes the payoffs in \verb+e+ with seed \verb+j+\\
+\verb+  Reveal[i,list]+ &Reveals infoset \verb+i+ to players in \verb+list+\\
+\verb+  SetChanceProbs[i,list]+ &Sets chance probs in infoset \verb+i+ to values in \verb+list+\\
+\verb+  SetPayoff[o,p,v]+ &Sets payoff of outcome \verb+o+ for player \verb+o+ to value \verb+v+\\
+\verb+  SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
 \hline
 \multicolumn{2}{c}{\ }\\
 \multicolumn{2}{c}{Table 3}\\
@@ -2153,7 +2161,7 @@ Fred moves:
 \medskip
 
 To construct this game, first we create a new game, and the players.
-We create the players separately, using \verb+NewPlayer+ so that we
+We create the players separately, using \tindex{NewPlayer} so that we
 have variables to refer to them later:
 
 \begin{verbatim}
@@ -2180,7 +2188,7 @@ In the above, the first move, \verb+deal+, is a chance move. It is
 added at the root node of the game.  The second move is called
 \verb+fredmove+, and is added at the terminal nodes of the tree, since
 Fred gets to take this move for any draw of the card.  Since there are
-two terminal nodes the call to \verb+AddMove+  here is a listable call,
+two terminal nodes the call to \tindex{AddMove}  here is a listable call,
 and adds the move to both terminal nodes of the tree.  The third move
 is called \verb+alicemove+.  Alice only gets to move if Fred chooses
 to raise.  So the step computing \verb+fredraised+ identifies all of
@@ -2227,15 +2235,16 @@ AddMove[ fredblack, RootNode[e]#2];
 \end{verbatim}
 
 \noindent
-(Here, the short form \verb+n#j+ for \verb+NthChild[n,j]+ is used to
-refer to the \verb+j+th child of node \verb+n+).  A move from the
-information set \verb+fredred+ is added to the first child of the root
-node (which is the action for chance in which the red card is
-selected) and a move from the second information set \verb+fredblack+
-is added to the second child of the root node.  Now, since two
-separate information sets for Fred are created from the outset, there
-is no need to reveal the deal to Fred.  As with life in general, in
-the GCL there is usually more than one way to skin a cat.
+(Here, the short form \verb+n#j+ for
+\verb+NthChild[n,j]+\tindex{NthChild} is used to refer to the
+\verb+j+th child of node \verb+n+).  A move from the information set
+\verb+fredred+ is added to the first child of the root node (which is
+the action for chance in which the red card is selected) and a move
+from the second information set \verb+fredblack+ is added to the
+second child of the root node.  Now, since two separate information
+sets for Fred are created from the outset, there is no need to reveal
+the deal to Fred.  As with life in general, in the GCL there is
+usually more than one way to skin a cat.
 
 To complete construction of this game, we must now add payoffs. This
 can be done with the following sequence of commands. 
@@ -2257,7 +2266,7 @@ when the game is larger, or has some repetitive structure to it.  In
 Appendix A, part 1, we give an example showing how to construct a multi stage
 holdout game using user defined functions. 
 
-\subsection{Saving and loading extensive forms}
+\subsection{Saving and loading extensive forms}\index{Extensive forms!loading}\index{Extensive forms!saving}
 
 Once an extensive form game has been constructed, it can be saved by
 the command 
@@ -2272,13 +2281,14 @@ recommended that the filename extension \verb+.efg+ be used when
 saving extensive form games, as the Gambit graphics user interface
 recognizes this extension as containing extensive form games.  Once an
 extensive form game has been saved to an external file, it can be
-loaded by the command \verb+LoadEfg+, as follows:
+loaded by the command \tindex{LoadEfg}, as follows:
 
 \begin{verbatim}
 e := LoadEfg["filename.efg" ]
 \end{verbatim}
 
-\section{Creating a normal form from an extensive form}
+\section{Creating a normal form from an extensive form}\index{Normal
+forms!creating!from extensive form}
 
 A normal form game can also be created from an extensive form game.
 If \verb+e+ is an extensive form game, then the command 
@@ -2318,7 +2328,7 @@ game, the GCL will ``remember'' the extensive form game that \verb+n+
 is associated with, as long as neither the extensive or normal form
 game is edited.  Any mixed strategy solutions computed on the normal
 form game \verb+n+ can be converted back to a behavior strategy of the
-game \verb+e+ by using the command \verb+Behav+.  Thus
+game \verb+e+ by using the command \tindex{Behav}.  Thus
 
 \begin{verbatim}
 n := Nfg[e];
@@ -2328,7 +2338,7 @@ b := Behav[m]
 
 \noindent
 will convert the game \verb+e+ to reduced normal form, solve it using
-the \verb+LcpSolve+ algorithm, and then convert all mixed profiles found back
+the \tindex{LcpSolve} algorithm, and then convert all mixed profiles found back
 to behavior profiles, and display the list, \verb+b+ of behavior
 profiles found. The avove can also be done in one command without saving
 intermediate steps as follows:  
@@ -2337,39 +2347,39 @@ intermediate steps as follows:
 b := Behav[LcpSolve[Nfg[e]]]
 \end{verbatim}
 
-\chapter{Solving Games}
+\chapter{Solving Games}\index{Solving games}
 
-\section{Supports and dominance elimination}
+\section{\rindex{Supports} and dominance elimination}\index{Dominance elimination}
 
 The GCL data types \verb+NFSUPPORT+ and \verb+EFSUPPORT+ can be used
-to represent a {\bf support} in a normal or extensive form game.  A
+to represent a \bindex{support} in a normal or extensive form game.  A
 support for a normal form game is a selection of non-empty subsets of
 strategies for all players in the game.  A support for an extensive
 form game is a selection of non-empty subsets of actions for all
-information sets in the game.  
+information sets in the game.
 
 The main use of supports is to represent the sets of strategies that
 remain after dominated strategies have been eliminated from the game.
 All of the built-in functions for solution algorithms in the GCL take
-an \verb+NFSUPPORT+ or \verb+EFSUPPORT+ as their first parameter,
+an \tindex{NFSUPPORT} or \tindex{EFSUPPORT} as their first parameter,
 hence can be run on any support of the game.
 
-The command \verb+Support[g]+ returns the full support of the normal
-or extensive form game \verb+g+.  The full support is the support in
-which no strategies (or actions) have been eliminated.  The function
-\verb+ElimDom+ can be used to find the dominated strategies or
-strategies in a support of a game.  \verb+ElimDom+ returns a support
-containing the undominated strategies for each player (or actions for
-each information set, in the case of extensive for games).  By default
-weak domination is used, and only domination by pure strategies is
-considered. By setting one or both of the optional parameters
-\verb+strong+ and \verb+mixed+ to true, strong domination can be used,
-and domination by mixed strateies can be
-considered\footnote{Elimination by mixed strategies is only implemented
-for normal form games in this version.}  The following sequence of
-commands shows the computation of the full supports and the support
-resulting from weak dominance elimination in the extensive and reduced
-normal form of the poker example of the previous chapter.
+The command \verb+Support[g]+\tindex{Support} returns the full support
+of the normal or extensive form game \verb+g+.  The full support is
+the support in which no strategies (or actions) have been eliminated.
+The function \tindex{ElimDom} can be used to find the dominated
+strategies or strategies in a support of a game.  \tindex{ElimDom}
+returns a support containing the undominated strategies for each
+player (or actions for each information set, in the case of extensive
+for games).  By default weak domination is used, and only domination
+by pure strategies is considered. By setting one or both of the
+optional parameters \verb+strong+ and \verb+mixed+ to true, strong
+domination can be used, and domination by mixed strateies can be
+considered\footnote{Elimination by mixed strategies is only
+implemented for normal form games in this version.}  The following
+sequence of commands shows the computation of the full supports and
+the support resulting from weak dominance elimination in the extensive
+and reduced normal form of the poker example of the previous chapter.
 
 \begin{verbatim}
 GCL1: e:=LoadEfg["poker.efg"]
@@ -2396,7 +2406,7 @@ Correspondingly, in the reduced normal form game, the strategies in
 which the first player takes the second action at the first
 information set is eliminated.  
 
-A user defined function \verb+ElimAllDom+ can be used to iteratively
+A user defined function \tindex{ElimAllDom} can be used to iteratively
 eliminate dominated strategies in a game, until no further dominance
 elimination is possible.  This function returns the final support.  So
 the commands
@@ -2412,22 +2422,23 @@ the game \verb+n+.
 
 While the main use of supports is to represent strategies that
 remain after dominance elimination, you can also construct your own
-support for a game using the commands \verb+RemoveStrategy+ and
-\verb+AddStrategy+.
+support for a game using the commands \tindex{RemoveStrategy} and
+\tindex{AddStrategy}.
 
 \section{Mixed and Behavior strategy profiles}
+\index{Profiles!mixed}\index{Profiles!behav}
 
-The data types \verb+MIXED+ and \verb+BEHAV+ are used to represent
+The data types \tindex{MIXED} and \tindex{BEHAV} are used to represent
 mixed and behavior strategy profiles for normal and extensive form
 games, respectively.  Mixed and behavior strategy profiles can be
 defined on any support of the game.  A mixed strategy profile is a
 specification of a numeric value (usually interpreted as a
 probability) for each strategy in the support.  Similarly, a behavior
 strategy profile is a specification of a numeric value (usually
-interpreted as a probability) for each action in the support. 
+interpreted as a probability) for each action in the support.
 
 The simplest way of generating a mixed profile for a game is to use
-the built-in function \verb+Centroid+, which generates a mixed or
+the built-in function \tindex{Centroid}, which generates a mixed or
 behavior strategy profile in which every player adopts each of their
 strategies (or each action in an information set) with equal
 probability.  For example, if \verb+g+ is a variable representing an
@@ -2435,9 +2446,9 @@ extensive or normal form game, and \verb+s+ is a support for the game
 \verb+g+, then the commands \verb+Centroid[g]+ or \verb+Centroid[s]+
 generate mixed strategy profiles for the normal form game \verb+nfg+,
 and for the support, \verb+s+, respectively.  You can use the built-in
-function \verb+SetStrategyProbs+ or \verb+SetActionProbs+ to change
+function \tindex{SetStrategyProbs} or \tindex{SetActionProbs} to change
 the strategy probabilites for a mixed profile.  You can also use the
-standard user defined functions \verb+Mixed+ or \verb+Behav+ to
+standard user defined functions \tindex{Mixed} or \tindex{Behav} to
 generate a mixed profile from a nested list of numeric data, as long
 as the nested list is of the correct dimensions.
 
@@ -2478,14 +2489,14 @@ listed in section on ``information about solutions'' in the
 Categorical Function Reference chapter.  To view all of the
 information that is known about a mixed or behavior profile, you can
 change the format by which solutions are displayed using the
-\verb+SetSolutionFormat+ function.
+\tindex{SetSolutionFormat} function.
 
-\section{Subgames}
+\section{\rindex{Subgames}}
 
 For extensive form games, Gambit recognizes and supports the notion of
-a {\bf subgame}.  If \verb+efg+ is an extensive form game, the command
-\verb+Subgames[efg]+ returns a list of nodes representing the roots
-of valid subgames.  
+a \bindex{subgame}.  If \verb+efg+ is an extensive form game, the
+command \verb+Subgames[efg]+\tindex{Subgames} returns a list of nodes
+representing the roots of valid subgames.
 
 You can control the way the extensive form solution algorithms deal
 with subgames by ``marking'' or ``unmarking'' subgames.  All of the
@@ -2504,12 +2515,12 @@ When you first construct a game, the only subgame that is marked is
 the root node of the tree.  This node always represents a valid
 subgame, and it is not possible to unmark the root node.  If
 \verb+node+ is the root of a valid non-trivial subgame, then the
-built-in functions \verb+MarkSubgame+ and \verb+UnmarkSubgame+ can be
+built-in functions \tindex{MarkSubgame} and \tindex{UnmarkSubgame} can be
 used to mark and unmark the specific subgames starting at that node.
-\verb+MarkedSubgame+ can be used to check if the subgame is marked.
-The user defined functions \verb+MarkSubgames+ and
-\verb+UnmarkSubgames+ can be used to mark and unmark all valid
-subgames in the game.  \verb+MarkedSubgames+ returns a lsit of root
+\tindex{MarkedSubgame} can be used to check if the subgame is marked.
+The user defined functions \tindex{MarkSubgames} and
+\tindex{UnmarkSubgames} can be used to mark and unmark all valid
+subgames in the game.  \tindex{MarkedSubgames} returns a lsit of root
 nodes of all currently marked subgames.
 
 The technique of marking subgames can be used to control whether a
@@ -2521,14 +2532,73 @@ equilibria.
 
 \section{Solving games}
 
-\section{Solution Algorithms}
+\section{Solution Algorithms}\index{Solving games!Algorithms}
 
-\subsection{Enum}
+\begin{tabular}{|p{2cm}|p{2cm}|p{3cm}|p{2cm}|p{3cm}|l|}
+Type & Number & Game Type & ElimDom & Algorithm & Notes \\
+\hline
+Nash & One    & 2-person constant sum &Weak & LP-1 & \\
+     &        & 2-person general  sum &Weak & LCP-1& \\
+     &        & n person              &Weak & SimpDiv-1 & \\
+\hline
+Nash & Two    & 2 person              &Strong & EnumMixed-2 &\\ 
+     &        & n person              &Strong & Liap-2      & \\
+\hline
+Nash & All    & 2 person              &Strong & EnumMixed-0 &  \\
+     &        & n person              &Strong & Liap-0      & Not guaranteed\\
+\hline
+\hline
+Perfect & One    & 2 person           &Strong & LCP-1    & \\
+     &           & n person              &       &     &Not implemented  \\
+\hline
+Perfect & Two    & 2 person              &Strong & LCP-2 & Not guaranteed \\
+     &           & n person              &       &     & Not implemented \\
+\hline
+Perfect & All    & 2 person              &Strong & LCP-0 & Not guaranteed \\
+     &           & n person              &       &     & Not implemented\\
+\hline
+\end{tabular}
 
-The two {\tt Enum} functions can be used to enumerate the pure or
+\begin{tabular}{|p{2cm}|p{2cm}|p{3cm}|p{2cm}|p{2cm}|p{3cm}|l|}
+Type & Number & Game Type & Subgames & ElimDom & Algorithm & Notes\\
+\hline
+Nash & One &  2-person constant sum&  Mark & Weak & EF/LP-1 &\\
+     &     &  2-person general sum &  Mark & Weak & EF/LCP-1 &\\
+     &     &  n-person             &  Mark & Weak & NF/SimpDiv-1 &\\
+\hline
+Nash & Two &  2-person             &  Unmark & Strong & NF/EnumMixed-2 &\\
+     &     &  n-person             &  Unmark & Strong & EF/Liap-2 &Not guaranteed\\
+\hline
+Nash & All &  2-person             &  Unmark & Strong & NF/EnumMixed-0 &\\
+     &     &  n-person             &  Unmark & Strong & EF/Liap-0 &Not guaranteed\\
+\hline
+Subgame Perfect & One &  2-person constant sum&  Mark & Weak & EF/LP-1 &\\
+                &     &  2-person general sum &  Mark & Weak & EF/LCP-1 &\\
+                &     &  n-person             &  Mark & Weak & NF/SimpDiv-1 &\\
+\hline
+Subgame Perfect & Two &  2-person             &  Mark & Strong & NF/EnumMixed-2 &\\
+                &     &  n-person             &  Mark & Strong & NF/Liap-2 &Not guaranteed\\
+\hline
+Subgame Perfect & All &  2-person             &  Mark & Strong & NF/EnumMixed-0 &\\
+                &     &  n-person             &  Mark & Strong & EF/Liap-0 &Not guaranteed\\
+\hline
+Sequential & One &  2 or n-person          &  Unmark & None & EF/Gobit-1 &\\
+\hline
+Sequential & Two &  2 or n-person          &  Unmark & None & EF/Liap-2 &Not guaranteed\\
+\hline
+Sequential & All &  2 or n-person          &  Unmark & None & EF/Liap-0 &Not guaranteed\\
+\hline
+\end{tabular}
+
+
+\subsection{\tindex{Enum}}
+\index{Algorithms!enumeration!{\tt EnumMixedSolve}}
+\index{Algorithms!enumeration!{\tt EnumPureSolve}}
+
+The two \tindex{Enum} functions can be used to enumerate the pure or
 mixed Nash equilibria for a normal form game.
 
-The {\tt EnumPureSolve} function enumerates all pure strategy Nash
+The \tindex{EnumPureSolve} function enumerates all pure strategy Nash
 equilibria in the support of a normal form game.  This algorithm
 simply investigates all pure strategy profiles, checking each for the
 Nash equilibrium conditions.  By default, the algorithm finds all pure
@@ -2536,7 +2606,7 @@ strategy Nash equilibrium.  Optionally it can be set to find the first
 \verb+k+ Nash equilibria.  This algorithm will work on any normal form
 game.
 
-The {\tt EnumMixedSolve} function enumerates all Nash equilibria (pure
+The \tindex{EnumMixedSolve} function enumerates all Nash equilibria (pure
 and mixed) for a given support of a two person normal form game.  More
 precisely, it finds the set of extreme Nash equilibria, as defined in
 \cite[1964]{Man:64}.  For any normal form game, as shown in
@@ -2548,9 +2618,11 @@ Optionally, the algorithm can be set to find the first \verb+k+
 equilibria.  This algorithm works only on two-person normal form
 games.
 
-\subsection{Gobit}
+\subsection{\tindex{Gobit}}
+\index{Algorithms!logistic quantal response!{\tt GobitSolve}}
+\index{Algorithms!logistic quantal response!{\tt GobitGridSolve}}
 
-The {\tt GobitSolve} function computes a branch of the logistic
+The \tindex{GobitSolve} function computes a branch of the logistic
 quantal response equilibrium correspondence (as described in
 \cite{McKPal:95a} for normal form games, and in
 \cite{McKPal:95b} for extensive form games.  The branch is
@@ -2581,7 +2653,7 @@ set of sequential equilibria as $\lambda$ goes to infinity.  Hence, in
 extensive form games, this algorithm can be used to compute an
 approximation to a sequential equilibrium.
 
-The {\tt GobitGridSolve} function performs a two stage grid search to
+The \tindex{GobitGridSolve} function performs a two stage grid search to
 compute the {\em complete} logistic quantal response correspondence.
 Points are evaluated in terms of the value of an objective function,
 that measures the distance between the original point, and the best
@@ -2597,8 +2669,9 @@ This procedure is very computationally intensive, and is only feasible
 for small two-person normal form games.
 
 \subsection{Linear Complementarity Program}
+\index{Algorithms!linear complementarity!{\tt LcpSolve}}
 
-The {\tt LcpSolve} function formulates and solves the game as a linear
+The \tindex{LcpSolve} function formulates and solves the game as a linear
 complementarity problem.  This algorithm works for two person
 games in either extensive or normal form.  
  
@@ -2623,8 +2696,9 @@ complexity, as it only grows linearly in the size of the extensive
 form game.  
 
 \subsection{Lyapunov Function}
+\index{Algorithms!Lyapunov function!{\tt LiapSolve}}
 
-The {\tt LiapSolve} function finds Nash equilibria via the Lyapunov
+The \tindex{LiapSolve} function finds Nash equilibria via the Lyapunov
 function method described in \cite{McK:91}.  This method works on
 either the extensive or normal form.  This algorithm casts the problem
 as a function minimization problem by use of a Lyapunov function for
@@ -2638,27 +2712,30 @@ starting point.  The algorithm thus incorporates the capability of
 restarting.  The algorithm starts from the initial starting point
 determined by the parameter 'start'.  If a Nash equilibrium is not
 found, it will keep searching from new randomly chosen starting points
-until a Nash equilibrium has been found or the maximum number of tries
+until a Nash equilibrium has  been found or the maximum number of tries
 (parameter 'ntries') is exceeded, whichever comes first.
 
 \subsection{Linear Program}
+\index{Algorithms!linear programming!{\tt LpSolve}}
 
-Finds the minimax solution (a Nash equilibrium) for a two person
-constant-sum game in normal form, by solving it as a linear program.
+The \tindex{LpSolve} algorithm finds the minimax solution (a Nash
+equilibrium) for a two person constant-sum game in normal form, by
+solving it as a linear program.
 
 \subsection{Simpicial Subdivision}
+\index{Algorithms!simplicial subdivision!{\tt SimpDivSolve}}
 
-Computes a Nash equilibrium to a n-person normal form game based on a
-simplicial subdivision algorithm.  The algorithm implemented is that
-of \cite{VTH:1987}.  The algorithm is a simplicial subdivision
-algorithm which can start at any point in the simplex.  The algorithm
-starts with a given grid size, follows a path of almost completely
-labeled subsimplexes, and converges to a completely labeled
-sub-simplex that approximates the solution.  Additional accuracy is
-obtained by refining the grid size and restarting from the previously
-found point.  The idea is that by restarting at a close approximation
-to the solution, each successive increase in accuracy will yield a
-short path, and hence be quick.
+The \tindex{SimpDivSolve} algorithm computes a Nash equilibrium to a
+n-person normal form game based on a simplicial subdivision algorithm.
+The algorithm implemented is that of \cite{VTH:1987}.  The algorithm
+is a simplicial subdivision algorithm which can start at any point in
+the simplex.  The algorithm starts with a given grid size, follows a
+path of almost completely labeled subsimplexes, and converges to a
+completely labeled sub-simplex that approximates the solution.
+Additional accuracy is obtained by refining the grid size and
+restarting from the previously found point.  The idea is that by
+restarting at a close approximation to the solution, each successive
+increase in accuracy will yield a short path, and hence be quick.
 
 In its pure form, the algorithm is guaranteed to find at least one
 mixed strategy equilibrium to any n-person game.  Experience shows
@@ -7784,7 +7861,7 @@ creates and saves a one stage holdout game and a seven stage holdout
 game. These can be loaded by the GUI, and Figures 1 and 2 display the
 resulting games, as displayed by the GUI.  The subsequent file
 ``eaotest.gcl'' contains a GCL program that changes the parameters
-\verb+r1+ and \verb+r2+, and then solves for {\bf all} Nash equilibria
+\verb+r1+ and \verb+r2+, and then solves for {\em all} Nash equilibria
 of the resulting seven stage game to check various theoretical predictions.
 
 \begin{figure}[htp]
