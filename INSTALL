@@ -1,11 +1,79 @@
-In theory, the standard
+Building Gambit on un*ces:
+--------------------------
+
+On un*ces, Gambit is configured and built with the standard autotools
+mechanism:
 
 ./configure
 make
 su
 make install
 
-sequence should work on Unices.  However, this is not yet
-widely tested; feedback and patches are welcome in this area.
+Note that we do most of our development on Linux, so it is possible the
+configure script is not doing enough checking for things that happen 
+on other Linux flavors.  If you encounter compile problems, please report
+them to us at gambit (at) hss (dot) caltech (dot) edu, or the 
+gambit-devel mailing list, so we can address them.
+
+Command-line options are available to modify the configuration process;
+do `./configure --help` for information.  
+
+By default, Gambit is installed in /usr/local.  You can modify this by
+the --prefix option.  For example, if you wanted to install it in your
+user account, you might do
+
+./configure --prefix=/home/mylogin/gambit
+
+The graphical interface would then be in /home/mylogin/gambit/bin/gambit,
+and so forth.  (Obviously, you can omit the 'su' in this case.)
+
+Gambit requires wxWindows 2.3.2 to build.  If it isn't installed in
+a standard place (e.g., /usr or /usr/local), you'll need to tell
+configure where to find it with the --with-wx-prefix=PREFIX option, for
+example:
+
+./configure --with-wx-prefix=/home/mylogin/wx
+
+Technically, wxWindows 2.3.2 is "unstable"; however, the features used
+by Gambit seem to be stable enough to justify its use.  A new microversion
+of Gambit will be released when wxWindows goes to 2.4.x (stable).
+
+Finally, note that we work almost exclusively with the wxGTK version of
+wxWindows.  There's no reason why one couldn't use the Motif/Lesstif version
+in principle, but it is untested.  If you have success (or failure)
+with the wxMotif version, please also let us know.
+
+
+Building Gambit on Windows:
+---------------------------
+
+The Gambit distribution provides makefiles for Borland C++ 5.5.1.
+These are in borland.mak in the sources directory and its subdirectories.
+To build Gambit, you'll need to modify the file sources/makedef.bcc to
+point to your wxWindows installation and your Borland compiler installation.
+The default contents of this file are:
+
+WXDIR = C:\WX2
+BCCDIR = C:\BORLAND\BCC55
+
+Your system will doubtless vary; we do recommend installing both of these
+in paths that have no spaces in the directory names.  Additionally, you
+should make sure the compiler binary is in your PATH (e.g., $(BCCDIR)\BIN
+in the example above).
+
+Once you're set up, run
+
+make -f borland
+
+in the sources directory, which will recursively call the borland.mak
+makefiles in the subdirectories.  Assuming everything builds OK, the
+graphical interface will be in sources/gui/gambit.exe, and wxGCL will
+be in sources/wxgcl/wxgcl.exe.
+
+We don't know if Gambit will build with other compilers, though we
+would graciously accept a contribution of makefiles and/or fixes for
+other compilers.
+
+
 
  
