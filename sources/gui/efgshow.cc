@@ -1362,6 +1362,7 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
   try {
     efgQre algorithm;
     algorithm.SetFullGraph(true);
+    algorithm.SetMaxLambda(10000000);
 
     wxStatus status(this, "QreSolve Progress");
     gList<BehavSolution> solutions = algorithm.Solve(*m_currentSupport,
