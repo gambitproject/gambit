@@ -1181,13 +1181,14 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
   try {
     Qre(*N, params, startm, nfg_solns, nevals, nits);
-    if (m_runPxi) {
-      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
-	wxMessageBox("Unable to launch PXI successfully");
-      }
-    }
   }
   catch (gSignalBreak &) { }
+
+  if (m_runPxi) {
+    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+      wxMessageBox("Unable to launch PXI successfully");
+    }
+  }
 
   gList<BehavSolution> solutions;
 
@@ -1288,17 +1289,20 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
 
   try {
     Qre(m_efg, params, start, solns, nevals, nits);
-    if (!solns[1].IsSequential()) {
-      wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
-		   "Returning last value.\n");
-    }
-    if (m_runPxi) {
-      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
-	wxMessageBox("Unable to launch PXI successfully");
-      }
-    }
   }
   catch (gSignalBreak &) { }
+
+  if (solns.Length() == 0)  return solns;
+
+  if (!solns[1].IsSequential()) {
+    wxMessageBox("Warning:  Algorithm did not converge to sequential equilibrium.\n"
+		 "Returning last value.\n");
+  }
+  if (m_runPxi) {
+    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+      wxMessageBox("Unable to launch PXI successfully");
+    }
+  }
 
   return solns;
 }

@@ -556,13 +556,14 @@ gList<MixedSolution> guinfgQre::Solve(void)
   gList<MixedSolution> solutions;
   try {
     Qre(m_nfg, params, start, solutions, nevals, nits);
-    if (m_runPxi) {
-      if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
-	wxMessageBox("Unable to launch PXI successfully");
-      }
-    }
   }
   catch (gSignalBreak &) { }
+
+  if (m_runPxi) {
+    if (!wxExecute(m_pxiCommand + " " + m_pxiFilename)) {
+      wxMessageBox("Unable to launch PXI successfully");
+    }
+  }
 
   return solutions;
 }

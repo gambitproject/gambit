@@ -195,48 +195,54 @@ void Qre(const Nfg &N, NFQreParams &params,
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
 
-  for (/*nit = 1*/;
-       Lambda <= params.maxLam &&
-       Lambda >= params.minLam && value < 10.0; /*nit++*/)  {
-    params.status.Get();
-    F.SetLambda(Lambda);
-    DFP(p, F, value, iter,
-        params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	*params.tracefile,params.trace-1,true);
+  try {
+    for (/*nit = 1*/; Lambda <= params.maxLam &&
+		      Lambda >= params.minLam && value < 10.0; /*nit++*/)  {
+      params.status.Get();
+      F.SetLambda(Lambda);
+      DFP(p, F, value, iter,
+	  params.maxits1, params.tol1, params.maxitsN, params.tolN,
+	  *params.tracefile,params.trace-1,true);
+      
+      if (params.trace>0)  {
+	*params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
+      } 
 
-    if (params.trace>0)  {
-      *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
-    } 
+      if (params.pxifile)   {
+	*params.pxifile << "\n" << Lambda << " " << value;
+	*params.pxifile << " ";
+	for (int pl = 1; pl <= N.NumPlayers(); pl++)
+	  for (int strat = 1;
+	       strat <= p.Support().NumStrats(pl);
+	       strat++)
+	    *params.pxifile << p(pl, strat) << " ";
+      }
+      
+      if (params.fullGraph) {
+	int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
+	solutions[index].SetQre(Lambda, value);
+      }
 
-    if (params.pxifile)   {
-      *params.pxifile << "\n" << Lambda << " " << value;
-      *params.pxifile << " ";
-      for (int pl = 1; pl <= N.NumPlayers(); pl++)
-	for (int strat = 1;
-	     strat <= p.Support().NumStrats(pl);
-	     strat++)
-	  *params.pxifile << p(pl, strat) << " ";
+      Lambda += params.delLam * pow(Lambda, (long)params.powLam);
+      params.status.SetProgress((double) step / (double) num_steps);
+      step++;
     }
-    
-    if (params.fullGraph) 
-    {
-      i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
-      solutions[i].SetQre(Lambda, value);
+
+    if (!params.fullGraph) {
+      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
+      solutions[index].SetQre(Lambda, value);
     }
 
-    Lambda += params.delLam * pow(Lambda, (long)params.powLam);
-    params.status.SetProgress((double) step / (double) num_steps);
-    step++;
+    nevals = F.NumEvals();
+    nits = 0;
   }
-
-  if (!params.fullGraph)
-  {
-    i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
-    solutions[i].SetQre(Lambda, value);
+  catch (gSignalBreak &E) {
+    if (!params.fullGraph) {
+      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
+      solutions[index].SetQre(Lambda, value);
+    }
+    throw;
   }
-
-  nevals = F.NumEvals();
-  nits = 0;
 }
 
 class NFKQreFunc : public gFunction<double>   {

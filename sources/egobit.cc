@@ -223,52 +223,62 @@ void Qre(const Efg &E, EFQreParams &params,
   InitMatrix(xi, p.Lengths());
 
   bool powell = true;
-  for (/*nit = 1*/; powell && !F.DomainErr() &&
-       Lambda <= params.maxLam && Lambda >= params.minLam &&
-       value < 10.0; /*nit++*/)   {
-    params.status.Get();
-    F.SetLambda(Lambda);
-    powell = Powell(p, xi, F, value, iter,
-	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	   *params.tracefile, params.trace-1,true);
-    
-    if(powell && !F.DomainErr()) {
-      if (params.trace>0)  {
-	*params.tracefile << "\nLam: " << Lambda << " val: ";
-	params.tracefile->SetExpMode();
-	*params.tracefile << value;
-	params.tracefile->SetFloatMode();
-	*params.tracefile << " p: " << p;
-      } 
+  try {
+    for (/*nit = 1*/; powell && !F.DomainErr() &&
+		      Lambda <= params.maxLam && Lambda >= params.minLam &&
+		      value < 10.0; /*nit++*/)   {
+      params.status.Get();
+      F.SetLambda(Lambda);
+      powell = Powell(p, xi, F, value, iter,
+		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
+		      *params.tracefile, params.trace-1,true);
       
-      if (params.pxifile)  {
-	*params.pxifile << "\n" << Lambda << " " << value << " ";
-	for (int pl = 1; pl <= E.NumPlayers(); pl++)
-	  for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
-	       iset++)  {
-	    double prob = 0.0;
-	    for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
-		 prob += p(pl, iset, act++))
-	      *params.pxifile << p(pl, iset, act) << ' ';
-//	  *params.pxifile << (1.0 - prob) << ' ';
-	  }
-      } 
-      
-      if (params.fullGraph)
-	AddSolution(solutions, p, Lambda, value);
-      pold=p;                              // pold is last good solution
+      if(powell && !F.DomainErr()) {
+	if (params.trace>0)  {
+	  *params.tracefile << "\nLam: " << Lambda << " val: ";
+	  params.tracefile->SetExpMode();
+	  *params.tracefile << value;
+	  params.tracefile->SetFloatMode();
+	  *params.tracefile << " p: " << p;
+	} 
+	
+	if (params.pxifile)  {
+	  *params.pxifile << "\n" << Lambda << " " << value << " ";
+	  for (int pl = 1; pl <= E.NumPlayers(); pl++)
+	    for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
+		 iset++)  {
+	      double prob = 0.0;
+	      for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
+		   prob += p(pl, iset, act++))
+		*params.pxifile << p(pl, iset, act) << ' ';
+	      //	  *params.pxifile << (1.0 - prob) << ' ';
+	    }
+	} 
+	
+	if (params.fullGraph)
+	  AddSolution(solutions, p, Lambda, value);
+	pold=p;                              // pold is last good solution
+      }
+
+      Lambda += params.delLam * pow(Lambda, (long)params.powLam);
+      params.status.SetProgress((double) step / (double) num_steps);
+      step++;
     }
 
-    Lambda += params.delLam * pow(Lambda, (long)params.powLam);
-    params.status.SetProgress((double) step / (double) num_steps);
-    step++;
+    if (!params.fullGraph)
+      AddSolution(solutions, pold, Lambda, value);
+    
+    nevals = F.NumEvals();
+    nits = 0;
   }
+  catch (gSignalBreak &E) {
+    if (!params.fullGraph)
+      AddSolution(solutions, pold, Lambda, value);
 
-  if (!params.fullGraph)
-    AddSolution(solutions, pold, Lambda, value);
-
-  nevals = F.NumEvals();
-  nits = 0;
+    nevals = F.NumEvals();
+    nits = 0;
+    throw;
+  }
 }
 
 class EFKQreFunc : public gFunction<double>   {
