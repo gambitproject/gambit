@@ -14,7 +14,7 @@ VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b)
   assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
-  int i,j,mult_opt=0;
+  int i,mult_opt=0;
 
   for(i=b.First();i<=b.Last();i++)
     if(b[i]==(T)0)
@@ -45,7 +45,7 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
   // tab.GetBFS1().Dump(gout);
   if(tab.IsLexMin()) {
     // gout << " is LexMin";
-    List.Append(tab.GetBFS());
+    List.Append(tab.GetBFS1());
   }
   for(j=-b.Last();j<=c.Last();j++)
     if(j && !tab.Member(j))
