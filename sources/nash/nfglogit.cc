@@ -244,6 +244,7 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 		      gbtStatus &p_status,
 		      gbtList<MixedSolution> &p_solutions)
 {
+  const int c_maxIters = 5000;     // maximum number of iterations
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDecel = 1.1;   // maximal deceleration factor
   const double c_maxDist = 0.4;    // maximal distance to curve
@@ -271,6 +272,11 @@ static void TracePath(const gbtMixedProfile<double> &p_start,
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     p_status.Get();
+    if (niters > c_maxIters) {
+      // Give up
+      return;
+    }
+
     if (niters++ % 25 == 0) {
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
 			   gbtText("Lambda = ") + ToText(x[x.Length()]));
