@@ -27,6 +27,7 @@ public:
   EnumModule(const NFSupport &, const EnumParams &p);
   
   int Enum(void);
+  int DoubleEnum(void);
   
   long NumPivots(void) const;
   double Time(void) const;
@@ -48,6 +49,116 @@ EnumModule<T>::EnumModule(const NFSupport &S, const EnumParams &p)
   gEpsilon(eps,12);
 }
 
+
+template <class T> int EnumModule<T>::DoubleEnum(void)
+{
+  int index;
+  T min;
+
+  if (NF.NumPlayers() != 2)   return 0;  
+  int n1, n2,i,j;
+
+  gWatch watch;
+  n1=support.NumStrats(1);
+  n2=support.NumStrats(2);
+  NfgIter iter(support); 
+
+  gMatrix<T> A1(1,n1,1,n2);
+  gMatrix<T> A2(1,n2,1,n1);
+  gVector<T> b1(1,n1);
+  gVector<T> b2(1,n2);
+
+  min = MinPayoff(NF) - gNumber(1);
+
+   // construct A1,A2,b1,b2  
+
+  for (i=1; i<=n1; i++) {
+    for (j=1; j<=n2; j++)  {
+      A1(i, j) = NF.Payoff(iter.GetOutcome(), 1) - gNumber(min);
+      A2(j, i) = NF.Payoff(iter.GetOutcome(), 2) - gNumber(min);
+      iter.Next(2);
+    }
+    iter.Next(1);
+  }
+
+  b1 = -(T)1;
+  b2 = -(T)1;
+
+  // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
+
+  params.status.SetProgress((double)0);
+
+  time = watch.Elapsed();
+  double dt = (double)0;
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
+  
+  DoubleVertEnum<T> poly(A1,b1,A2,b2,params.status);
+
+  gout << "\nDoubleVertEnum finished:\n";
+  poly.Dump(gout);
+
+  BFS<T> bfs1,bfs2;
+  MixedProfile<T> profile(support);
+  T sum;
+  int k;
+  
+  const gList<BFS<T> > &verts1(poly.VertexList());
+  const gList<BFS<T> > &verts2(poly.VertexList2());
+
+  for( i=2; i<=verts1.Length() &&  !params.status.Get()
+       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+       i++ ) {
+    bfs1 = verts2[i];
+    bfs2 = verts1[i];
+    
+    sum = (T)0;
+    for(k=1;k<=n1;k++) {
+      profile(1,k) = (T)0;
+      if(bfs1.IsDefined(k)) {
+	profile(1,k) =-bfs1(k);
+	sum+=profile(1,k);
+      }
+    } 
+    for(k=1;k<=n1;k++) {
+      if(bfs1.IsDefined(k)) 
+	profile(1,k)/=sum;
+    }
+    sum = (T)0;
+    for(k=1;k<=n2;k++) {
+      profile(2,k) = (T)0;
+      if(bfs2.IsDefined(k)) {
+	profile(2,k) =-bfs2(k);
+	sum+=profile(2,k);
+      }
+    } 
+    for(k=1;k<=n2;k++) {
+      if(bfs2.IsDefined(k)) 
+	profile(2,k)/=sum;
+    } 
+  
+    index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
+    if(params.status.Get() != 1) {
+      solutions[index].SetEpsilon(eps);
+      solutions[index].SetIsNash(T_YES);
+    }
+  }
+  npivots = poly.NumPivots();
+
+  if(params.status.Get()) {
+    (*params.tracefile) << "\n User Break \n";
+    params.status.Reset();
+  }
+
+  
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) {
+    (*params.tracefile) << "\nafter loop,  dt = " << dt << " time = " << time;
+    (*params.tracefile) << "\n";
+  }
+  return 1;
+}
 
 template <class T> int EnumModule<T>::Enum(void)
 {
@@ -132,6 +243,7 @@ template <class T> int EnumModule<T>::Enum(void)
   i=0;
 
   int i1,i2;
+  (*params.tracefile) << "\n" << v2 << " " << v1 << "\n";
   for( i2=2; 
        i2<=v2 &&  !params.status.Get()
        && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
@@ -160,6 +272,7 @@ template <class T> int EnumModule<T>::Enum(void)
 
       if(nash) {
 	// gout << "\ni2,i1: " << i2 << " " << i1;
+	(*params.tracefile) << "\n" << i2 << " " << i1;
 	sum = (T)0;
 	for(k=1;k<=n1;k++) {
 	  profile(1,k) = (T)0;
@@ -218,7 +331,6 @@ template <class T> int EnumModule<T>::Enum(void)
   }
   return 1;
 }
-
 
 template <class T> bool EnumModule<T>::EqZero(T x) const
 {
