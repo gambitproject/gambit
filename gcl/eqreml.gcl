@@ -29,15 +29,6 @@ NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max-
   gob := QreSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
     pxifile->pxi];
 
-  size := Length[gob];
-
-  eps:=0.0000000001;
-  For[i := size , i>=1 , i:=i-1,
-    If[QreValue[gob_i] > eps, 
-      o << "\nRemoved element: " << i << " lambda: " << QreLambda[gob_i];
-      gob:=Remove[gob,i]; 
-    ];
-  ];
   lamlist:=QreLambda[gob];
   size := Length[gob];
 
@@ -51,8 +42,9 @@ NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max-
   o << "\nUsing Nash: " << nash << "\n";
   o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
 
-  delgam := .001;
-  o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
+  // decrease delgam for more accuracy on OSEM model
+  delgam := .01;
+  o << "\ndelGam: " << delgam << "\n\n";
 
   gamsize := Integer[1./delgam] - 1;
   gamlist := List[delgam, gamsize, delgam];

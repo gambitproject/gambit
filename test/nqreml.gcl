@@ -38,11 +38,6 @@ NewFunction[NQreML[n<->NFG,dat->LIST(MIXED),min->NUMBER,max->NUMBER,\
   size := Length[gob];
 
   lamlist := QreLambda[gob];
-//  lamlist := List[0.0, size];
-
-//  For[i:=1;lam := min, i <= size, i:=i+1;lam := lam + Times[del, lam],
-//    lamlist_i := lam;
-//  ];
 
   // compute maximum likelihoods and write to file
 
