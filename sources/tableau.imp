@@ -24,7 +24,7 @@ Basis<T>::Basis(const gMatrix<T> &A)
   :  A(&A), label(A.MinRow(), A.MaxRow())
 {
   for(int i=label.First(); i<=label.Last(); i++)
-    label[i]= -i;
+    label[i]= - i;
 }
 
 
@@ -47,48 +47,29 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &code)
 }
 
 
-/*
-template <class T>
-void Basis<T>::NewBasis(const gBlock<int> &v)
-{
-  assert( v.First()==label.First() && v.First()==label.First() );
-  
-  for(int i=v.First(); i<=v.Last(); i++) {
-    if( v[i]<0 ) {
-      assert( A->CheckRow(-v[i]) );
-      label[i]= v[i];
-    }
-    else {
-      assert( A->CheckColumn(v[i]) );
-      label[i]= v[i];
-    }
-  }
-}
-*/
-
 //
 // ordinary Basis methods:
 //
 
 template <class T>
-void Basis<T>::Change(int index, int col)
+int Basis<T>::Pivot(int outindex, int col)
 {
-  if( col<0 ) {
-    assert( A->CheckRow(-col) );
-    label[index]= col;
-  }
-  else {
+  if( col<0 ) 
+    assert(A->CheckRow(-col) );
+  else 
     assert( A->CheckColumn(col) );
-    label[index]= col;
-  }
-}
 
-template <class T>
-void Basis<T>::Swap(int a, int b)
-{
-  int tc= label[a];
-  label[a]=label[b];
-  label[b]= tc;
+//  label.Append(col);
+//  return label.Remove(outindex);
+//
+//     with gBlocks, the following is faster than the above
+
+  int i;
+  int outlabel = label[outindex];
+  for(i=outindex;i<label.Last();i++)
+    label[i]=label[i+1];
+  label[i]=col;
+  return outlabel;
 }
 
 template <class T>
@@ -175,6 +156,10 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 {
   Epsilon_T(eps1,1);
   Epsilon_T(eps2,2);
+//  gout << "\nA = " << A << "\ndim A: " << A.MinRow() << " " << A.MaxRow();
+//  gout << " " << A.MinCol() << " " << A.MaxCol();
+//  gout << "\nbasis = ";
+//  basis.Dump(gout);
   B.refactor(A, basis.label);
   B.solve(b, solution);
 };
@@ -210,13 +195,27 @@ Tableau<T>& Tableau<T>::operator=(const Tableau<T> &orig)
 // checking functions
 //
 
+// template <class T> BaseTableau<T>::~BaseTableau()
+// { }
+
 template <class T>
-bool Tableau<T>::ColIndex(int x) const
+bool BaseTableau<T>::ColIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
 
 template <class T>
-bool Tableau<T>::RowIndex(int x) const
-{ return MinCol()<=x && x<=MaxCol(); }
+bool BaseTableau<T>::RowIndex(int x) const
+{ return MinRow()<=x && x<=MaxRow(); }
+
+template <class T>
+bool BaseTableau<T>::ValidIndex(int x) const
+{ return (ColIndex(x) || RowIndex(-x)); }
+
+template <class T>
+void BaseTableau<T>::CompPivot(int outlabel, int col)
+{
+  Pivot(Find(outlabel),col);
+  Pivot(Find(-col),-outlabel);
+}
 
 template <class T>
 int Tableau<T>::MinRow() const { return A->MinRow(); }
@@ -249,42 +248,32 @@ int Tableau<T>::Find(int i) const
 //
 
 template <class T>
-int Tableau<T>::CanPivot(int outlabel, int inlabel)
+int Tableau<T>::CanPivot(int outlabel, int col)
 {
 //  gVector<T> tmpcol(MinRow(),MaxRow());
-  SolveColumn(inlabel,tmpcol);
+//  gout << "\ndim tmpcol = " << tmpcol.First() << " " << tmpcol.Last();
+//  gout << "\ntmpcol = " << tmpcol;
+  SolveColumn(col,tmpcol);
   T val = tmpcol[basis.Find(outlabel)];
   if(val <=eps2 && val >= -eps2) return 0;
   return 1;  
 }
 
 template <class T>
-void Tableau<T>::Pivot(int outrow,int inlabel)
+void Tableau<T>::Pivot(int outrow,int col)
 {
   assert( RowIndex(outrow) );
-  assert( (inlabel<0) ? RowIndex(-inlabel) : ColIndex(inlabel) );
-  
-//  gVector<T> tmpcol(MinRow(),MaxRow());
-  
-  for(int i=outrow; i<MaxRow(); i++)
-    basis.Swap(i,i+1);
-  basis.Change(MaxRow(), inlabel);
-  
-  if( inlabel<0 )
-    { tmpcol=(T)0; tmpcol[-inlabel]=(T)1; }
+  assert( ValidIndex(col) );
+  basis.Pivot(outrow,col);
+
+  if( col<0 )
+    { tmpcol=(T)0; tmpcol[-col]=(T)1; }
   else
-    A->GetColumn(inlabel, tmpcol);
+    A->GetColumn(col, tmpcol);
   B.update(outrow, tmpcol);
   
   B.solve(*b, solution);
   npivots++;
-}
-
-template <class T>
-void Tableau<T>::CompPivot(int outlabel, int inlabel)
-{
-  Pivot(basis.Find(outlabel),inlabel);
-  Pivot(basis.Find(-inlabel),-outlabel);
 }
 
 template <class T> long Tableau<T>::NumPivots() const
@@ -318,38 +307,6 @@ void Tableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
 }
 
 template <class T>
-void Tableau<T>::Multiply(const gVector<T> &in, gVector<T>&out)
-{
-  gVector<T> tmprow(MinCol(),MaxCol());
-//  gVector<T> tmpcol(MinRow(),MaxRow());
-  
-  for(int i=MinRow(); i<=MaxRow(); i++)
-    {
-      A->GetRow(i,tmprow);
-      basis.BasisSelect(tmprow,tmpcol);
-      out[i]=  tmpcol*in;
-      for(int j=MinRow(); j<=MaxRow(); j++)
-	if( basis.label[j]<0 && basis.label[j]==i )
-	  out[i]+= in[j];
-    }
-}
-
-template <class T>
-void Tableau<T>::MultiplyT(const gVector<T> &in, gVector<T> &out)
-{
-//  gVector<T> tmpcol(MinRow(),MaxRow());
-  for(int i=out.First(); i<=out.Last(); i++) {
-      if( basis.label[i]<0 ) {
-	tmpcol= (T)0; 
-	tmpcol[-basis.label[i]]=(T)0; // ? is this right ?
-      }
-      else {
-	A->GetColumn(basis.label[i],tmpcol); }
-      out[i]= in*tmpcol;
-    }
- }
-
-template <class T>
 void Tableau<T>::BasisVector(gVector<T> &out) const
 {
   out= solution;
@@ -358,6 +315,7 @@ void Tableau<T>::BasisVector(gVector<T> &out) const
 template <class T>
 void Tableau<T>::SolveColumn(int col, gVector<T> &out)
 {
+//  gout << "\nTableau<T>::SolveColumn  " << MinRow() << " " << MaxRow(); 
   gVector<T> tmpcol2(MinRow(),MaxRow());
   if( col<0 ) {
     tmpcol2= (T)0;
@@ -558,9 +516,9 @@ template <class T> void LPTableau<T>::Refactor()
 }
 
 template <class T>
-void LPTableau<T>::Pivot(int outrow,int inlabel)
+void LPTableau<T>::Pivot(int outrow,int col)
 {
-  Tableau<T>::Pivot(outrow,inlabel);
+  Tableau<T>::Pivot(outrow,col);
   SolveDual();
 }
 

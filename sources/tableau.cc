@@ -19,6 +19,9 @@
 TEMPLATE class Basis<double>;
 TEMPLATE class Basis<gRational>;
 
+TEMPLATE class BaseTableau<double>;
+TEMPLATE class BaseTableau<gRational>;
+
 TEMPLATE class Tableau<double>;
 TEMPLATE class Tableau<gRational>;
 

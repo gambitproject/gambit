@@ -28,11 +28,8 @@ public:
   
   Basis<T>& operator=(const Basis<T>&);
   
-//  void NewBasis(const gBlock<int> &);
-  void Change(int index, int label);
-      // change Basis member index to label
-  void Swap(int,int); // switch two Basis elements
-  
+  int Pivot(int outindex, int col); 
+    //remove outindex, insert label, return outlabel
   bool Member(int label) const;
       // return true iff label is a Basis member
   int Find(int label) const;
@@ -49,10 +46,41 @@ public:
   void Dump(gOutput &) const;
 };
 
-template <class T> class Tableau {
-private:
+template <class T> class BaseTableau {
+public:
+      // constructors and destructors
+//  virtual ~BaseTableau();
+  
+      // information
   bool ColIndex(int) const;
   bool RowIndex(int) const;
+  bool ValidIndex(int) const;
+  virtual int MinRow() const = 0;
+  virtual int MaxRow() const = 0;
+  virtual int MinCol() const = 0;
+  virtual int MaxCol() const = 0;
+
+  virtual bool Member(int i) const = 0;
+    // is variable i is a member of basis
+  virtual int Label(int i) const = 0;   
+    // return variable in i'th position of Tableau
+  virtual int Find(int i) const = 0;  
+    // return position of variable i
+  
+      // pivoting
+  virtual int CanPivot(int outgoing,int incoming) = 0;
+  virtual void Pivot(int outrow,int col) = 0;
+      // perform pivot operation -- outgoing is row, incoming is column
+  void CompPivot(int outlabel,int col);
+  virtual long NumPivots() const = 0;
+  
+  
+      // raw Tableau functions
+  virtual void Refactor() = 0;
+};
+
+template <class T> class Tableau : public BaseTableau<T>{
+private:
   long npivots;
 protected:
   T eps1,eps2;
@@ -82,9 +110,9 @@ public:
   
       // pivoting
   int CanPivot(int outgoing,int incoming);
-  void Pivot(int outrow,int inlabel);
+  void Pivot(int outrow,int col);
       // perform pivot operation -- outgoing is row, incoming is column
-  void CompPivot(int outlabel,int inlabel);
+//  void CompPivot(int outlabel,int col);
   long NumPivots() const;
   long &NumPivots();
   
@@ -93,8 +121,6 @@ public:
   void Refactor();
   void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
   void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
-  void Multiply(const gVector<T> &, gVector<T>& );
-  void MultiplyT(const gVector<T> &, gVector<T> &);
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void SolveColumn(int, gVector<T> &);
 //  void SetBasis( const Basis<T> &); // set new Tableau
@@ -130,7 +156,7 @@ public:
   void DualVector(gVector<T> &) const; // column vector
       // Redefined functions
   void Refactor();
-  void Pivot(int outrow,int inlabel);
+  void Pivot(int outrow,int col);
   BFS<T> DualBFS(void) const;
 };
 
