@@ -1034,19 +1034,18 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter, wxFrame
         }
         else  // from data file
         {
-            gFileInput infile(infile_name);
-            bool valid = infile.IsValid();
+	    try{
+		gFileInput infile(infile_name);
+		ReadNfgFile((gInput &) infile, nf);
 
-            if (!valid)
-            {
+		if (!nf)
+		    wxMessageBox("ReadFailed:FormatInvalid::Check the file");
+	    }
+	    catch(gFileInput::OpenFailed &) {
                 wxMessageBox("ReadFailed:FileInvalid::Check the file");
                 return;
             }
 
-            ReadNfgFile((gInput &) infile, nf);
-
-            if (!nf)
-                wxMessageBox("ReadFailed:FormatInvalid::Check the file");
         }
     }
 

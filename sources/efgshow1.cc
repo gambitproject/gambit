@@ -814,18 +814,18 @@ EfgGUI::EfgGUI(Efg *ef, const gText infile_name,
         }
         else                        // from data file
         {
+	  try { 
             gFileInput infile(infile_name);
-
-            if (!infile.IsValid())
-            {
-                wxMessageBox("ReadFailed::Check the file");
-                return;
-            }
-
             ReadEfgFile(infile, ef);
-
+	    
             if (!ef) 
-                wxMessageBox("ReadFailed::Check the file");
+	      wxMessageBox("ReadFailed::Check the file");
+	  }
+	  catch(gFileInput::OpenFailed &) {
+	    wxMessageBox("ReadFailed::Check the file");
+	    return;
+	  }
+	  
         }
     }
 
