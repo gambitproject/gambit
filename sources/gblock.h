@@ -87,7 +87,7 @@ template <class T> class gBlock    {
 // while += puts it in the first argument.
 //+grp
     gBlock<T> operator+(const gBlock<T>& b) const;
-    gBlock<T> operator+=(const gBlock<T>& b)
+    gBlock<T>& operator+=(const gBlock<T>& b)
       { *this = *this + b; return *this; }
 //-grp
 
@@ -179,25 +179,13 @@ template <class T> INLINE int gBlock<T>::operator==(const gBlock<T> &b) const
 
 template <class T> inline const T &gBlock<T>::operator[](int n) const
 {
-#ifndef NDEBUG
-  if (n < 1 || n > length)    {
-    gerr << "Range error: gBlock " << this << " index " << n 
-         << " length " << length << '\n';
-    exit(0);
-  }
-#endif   //# NDEBUG
+  assert(n >= 1 && n <= length);
   return data[--n];
 }
 
 template <class T> inline T &gBlock<T>::operator[](int n)
 {
-#ifndef NDEBUG
-  if (n < 1 || n > length)    {
-    gerr << "Range error: gBlock " << this << " index " << n 
-         << " length " << length << '\n';
-    exit(0);
-  }
-#endif   //# NDEBUG  
+  assert(n >= 1 && n <= length);
   return data[--n];
 }
 
@@ -236,13 +224,7 @@ template <class T> inline int gBlock<T>::Insert(const T &t, int n)
 
 template <class T> INLINE T gBlock<T>::Remove(int n)
 {
-#ifndef NDEBUG
-  if (n < 1 || n > length)    {
-    gerr << "Range error: gBlock::Remove " << this << " index << " << n 
-         << " length " << length << '\n';
-    exit(0);
-  }
-#endif   //# NDEBUG
+  assert(n >= 1 && n <= length);
 
   T ret(data[--n]);
   T *new_data = (--length) ? new T[length] : 0;
