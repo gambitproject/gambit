@@ -210,6 +210,8 @@ void Qre(const Efg &E, EFQreParams &params,
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
   BehavProfile<double> pold(p);
+  BehavProfile<double> pdiff(p);
+  pdiff-= pold;
   gMatrix<double> xi(p.Length(), p.Length());
 
   InitMatrix(xi, p.Lengths());
@@ -217,13 +219,19 @@ void Qre(const Efg &E, EFQreParams &params,
   bool FoundSolution = true;
   double delta, mindelta;
   delta = params.delLam;
-  mindelta = delta/100.0;
+  mindelta = delta/10000.0;
 
   try {
     while (delta>mindelta &&
 		      Lambda <= params.maxLam && Lambda >= params.minLam)   {
       params.status.Get();
       F.SetLambda(Lambda);
+
+      /*
+      gout << "\ndelta: " << delta;
+      gout << " Lam: " << Lambda;
+      */
+
       FoundSolution = Powell(p, xi, F, value, iter,
 		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		      *params.tracefile, params.trace-1,true);
@@ -234,7 +242,19 @@ void Qre(const Efg &E, EFQreParams &params,
 	if(xx>dist)dist=xx;
       }
 
-      if(FoundSolution && !derr && dist<params.delLam) {
+      /*
+      gout << " Found: " << FoundSolution;
+      gout << " Err: " << derr;
+      gout << " dist: " << dist;
+      gout << " val: ";
+      gout.SetExpMode();
+      gout << value;
+      gout.SetFloatMode();
+      gout << " p: " << p;
+      */
+
+
+      if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
 	if (params.trace>0)  {
 	  *params.tracefile << "\nLam: " << Lambda << " val: ";
 	  params.tracefile->SetExpMode();
@@ -258,16 +278,40 @@ void Qre(const Efg &E, EFQreParams &params,
 	
 	if (params.fullGraph)
 	  AddSolution(solutions, p, Lambda, value, params.Accuracy());
+
+	pdiff = p; pdiff-= pold;
 	pold=p;                              // pold is last good solution
-	if(delta < params.delLam && dist<params.delLam/2.0) delta*=2.0;
+	if(delta < params.delLam && dist<params.delLam/2.0) {
+	  delta*=2.0;
+	  pdiff*=2.0;
+	}
       }
 
       else {
 	Lambda = LambdaOld;
-	p = pold;
 	InitMatrix(xi, p.Lengths());
-	if(delta>mindelta) delta/=2.0;
+	if(delta>mindelta) { 
+	  delta/=2.0;
+	  pdiff*=0.5;
+	}
+	p = pold;
       }
+
+      for(int jj = p.First();jj<=p.Last();jj++)
+	assert (p[jj] > 0.0);
+      
+      bool flag = false;
+      int jj = p.First();
+      while(jj<=p.Last() && !flag) {
+	if(p[jj]+pdiff[jj]<0.0)flag = true;
+	jj++;
+      }
+      if(flag) {
+	//	gout << "\np negative: set pdiff to 0";
+	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
+	  pdiff[jj] = 0.0;
+      }
+      p+=pdiff;
 
       if (params.powLam == 0)
 	prog = abs(Lambda - LambdaStart);

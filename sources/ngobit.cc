@@ -219,21 +219,28 @@ void Qre(const Nfg &N, NFQreParams &params,
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
   MixedProfile<double> pold(p);
+  MixedProfile<double> pdiff(p);
+  pdiff-= pold;
 
   bool FoundSolution = true;
   double delta, mindelta;
   delta = params.delLam;
-  mindelta = delta/100.0;
-
+  mindelta = delta/1000000.0;
+  
   try {
     while (delta>mindelta && Lambda <= params.maxLam &&
-		      Lambda >= params.minLam)  {
+	   Lambda >= params.minLam)  {
       params.status.Get();
       F.SetLambda(Lambda);
       // enter Davidon Fletcher Powell routine.  
+      /*
+      gout << "\ndelta: " << delta;
+      gout << " Lam: " << Lambda;
+      */
+      
       FoundSolution = DFP(p, F, value, iter, 
-	  params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	  *params.tracefile,params.trace-1,true);
+			  params.maxits1, params.tol1, params.maxitsN, params.tolN,
+			  *params.tracefile,params.trace-1,true);
       
       bool derr = F.DomainErr();
       double dist = 0.0;
@@ -241,15 +248,29 @@ void Qre(const Nfg &N, NFQreParams &params,
 	double xx = abs(p[jj]-pold[jj]);
 	if(xx>dist)dist=xx;
       }
-
-      if(FoundSolution && !derr && dist<params.delLam) {
+      
+      /*
+      gout << " Found: " << FoundSolution;
+      gout << " Err: " << derr;
+      gout << " dist: " << dist;
+      gout << " val: ";
+      gout.SetExpMode();
+      gout << value;
+      gout.SetFloatMode();
+      gout << " p: " << p;
+      */
+      
+      if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
 	if (params.trace>0)  {
-	  *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
+	  *params.tracefile << "\nLam: " << Lambda << " val: ";
+	  params.tracefile->SetExpMode();
+	  *params.tracefile << value;
+	  params.tracefile->SetFloatMode();
+	  *params.tracefile << " p: " << p;
 	} 
-
+	
 	if (params.pxifile)   {
-	  *params.pxifile << "\n" << Lambda << " " << value;
-	  *params.pxifile << " ";
+	  *params.pxifile << "\n" << Lambda << " " << value << " ";
 	  for (int pl = 1; pl <= N.NumPlayers(); pl++)
 	    for (int strat = 1;
 		 strat <= p.Support().NumStrats(pl);
@@ -262,22 +283,46 @@ void Qre(const Nfg &N, NFQreParams &params,
 	  solutions[index].SetQre(Lambda, value);
 	  solutions[index].SetEpsilon(params.Accuracy());
 	}
+	
+	pdiff = p; pdiff-= pold;
 	pold=p;                              // pold is last good solution
-	if(delta < params.delLam && dist<params.delLam/2.0) delta*=2.0;
-
+	if(delta < params.delLam && dist<params.delLam/2.0) {
+	  delta*=2.0;
+	  pdiff*=2.0;
+	}
       }
       else {
 	Lambda = LambdaOld;
+	if(delta>mindelta) {
+	  delta/=2.0;
+	  pdiff*=0.5;
+	}
 	p = pold;
-	if(delta>mindelta) delta/=2.0;
       }
+      
+      for(int jj = p.First();jj<=p.Last();jj++)
+	assert (p[jj] > 0.0);
 
+      bool flag = false;
+      int jj = p.First();
+      while(jj<=p.Last() && !flag) {
+	if(p[jj]+pdiff[jj]<0.0)flag = true;
+	jj++;
+      }
+      if(flag) {
+	//	gout << "\np negative: set pdiff to 0";
+	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
+	  pdiff[jj] = 0.0;
+      }
+      
+      p+=pdiff;
+      
       if (params.powLam == 0)
 	prog = abs(Lambda - LambdaStart);
       else
 	prog = abs(log(Lambda/LambdaStart));
       params.status.SetProgress(prog/max_prog);
-
+      
       LambdaOld = Lambda;
       Lambda += delta * pow(Lambda, (long)params.powLam);
     }
