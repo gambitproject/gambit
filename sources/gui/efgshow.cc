@@ -44,7 +44,6 @@
 #include "dlefgoutcome.h"
 #include "dlefgpayoff.h"
 #include "dlefgreveal.h"
-#include "dlsubgames.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
 #include "dleditefg.h"
@@ -122,7 +121,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_SUBGAME_MARK, EfgShow::OnToolsSubgamesMark)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARKALL, EfgShow::OnToolsSubgamesUnMarkAll)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARK, EfgShow::OnToolsSubgamesUnMark)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_VIEW, EfgShow::OnToolsSubgamesView)
   EVT_MENU(efgmenuTOOLS_SUPPORT_UNDOMINATED,
 	   EfgShow::OnToolsSupportUndominated)
   EVT_MENU(efgmenuTOOLS_SUPPORT_NEW, EfgShow::OnToolsSupportNew)
@@ -609,9 +607,6 @@ void EfgShow::MakeMenus(void)
 			   "Clear all subgame info");
   toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_UNMARK, "&UnMark",
 			   "Unmark node subgame");
-  toolsSubgameMenu->AppendSeparator();
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_VIEW, "&View",
-			   "View all subgames");
   toolsMenu->Append(efgmenuTOOLS_SUBGAME, "&Subgame", toolsSubgameMenu,
 		    "Manipulate subgames");
 
@@ -1476,11 +1471,6 @@ void EfgShow::OnToolsSubgamesUnMark(wxCommandEvent &)
   m_treeWindow->Refresh();
 }
 
-void EfgShow::OnToolsSubgamesView(wxCommandEvent &)
-{
-  dialogSubgames dialog(this, m_efg);
-  dialog.ShowModal();
-}
 
 //----------------------------------------------------------------------
 //          EfgShow: Menu handlers - Tools->Support menu

@@ -107,7 +107,6 @@ private:
   void OnToolsSubgamesMark(wxCommandEvent &);
   void OnToolsSubgamesUnMarkAll(wxCommandEvent &);
   void OnToolsSubgamesUnMark(wxCommandEvent &);
-  void OnToolsSubgamesView(wxCommandEvent &);
 
   void OnToolsSupportUndominated(wxCommandEvent &);
   void OnToolsSupportNew(wxCommandEvent &);
