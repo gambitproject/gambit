@@ -13,6 +13,7 @@ wxgcl_SOURCES = \
 	wxstatus.h 
 
 wxgcl_LDADD = \
+	$(GUI_LIBS) \
 	$(top_builddir)/sources/gcl/libgcl.a \
 	$(top_builddir)/sources/nash/libnash.a \
 	$(top_builddir)/sources/numerical/libnumerical.a \
