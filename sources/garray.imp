@@ -54,19 +54,19 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
   return *this;
 }
 
-template <class T> int gArray<T>::Length(void)
+template <class T> int gArray<T>::Length(void) const
 {
-return max - min + 1;
+  return max - min + 1;
 }	
 
-template <class T> int gArray<T>::First(void)
+template <class T> int gArray<T>::First(void) const
 {
-return min;
+  return min;
 }	
 
-template <class T> int gArray<T>::Last(void)
+template <class T> int gArray<T>::Last(void) const
 {
-return max;
+  return max;
 }	
 
 template <class T> const T &gArray<T>::operator[](int index) const
@@ -87,6 +87,19 @@ template <class T> void gArray<T>::Dump(gOutput &f) const
   for (int i = min; i <= max; i++)
     f << data[i] << ' ';
   f << '}';
+}
+
+template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
+{
+  if (a.min != b.min || a.max != b.max)   return false;
+  for (int i = a.min; i <= a.max; i++)
+    if (a[i] != b[i])   return false;
+  return true;
+}
+
+template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
+{
+  return !(a == b);
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
