@@ -123,13 +123,14 @@ public:
   exp_vect  AfterDecrementingExpOfVariable(int&)     const;
 
 // Information
-  int  Dmnsn()              const;
-  bool IsPositive()         const;
-  bool IsNonnegative()      const;
-  bool IsConstant()         const;
-  bool IsUnivariate()       const;
-  int  SoleActiveVariable() const;
-  int  TotalDegree()        const;
+  int  Dmnsn()                  const;
+  bool IsPositive()             const;
+  bool IsNonnegative()          const;
+  bool IsConstant()             const;
+  bool IsUnivariate()           const;
+  int  SoleActiveVariable()     const;
+  int  TotalDegree()            const;
+  bool Divides(const exp_vect&) const;
 
 // Manipulation
   void SetExp(int varno, int pow);
