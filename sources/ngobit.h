@@ -4,8 +4,8 @@
 //# $Id$
 //#
 
-#ifndef GOBIT_H
-#define GOBIT_H
+#ifndef NGOBIT_H
+#define NGOBIT_H
 
 #ifdef __GNUG__
 #pragma interface
@@ -42,7 +42,7 @@ class GobitSolver  {
     GobitParams &Parameters(void)   { return params; }
 };
 
-#endif    // GOBIT_H
+#endif    // NGOBIT_H
 
 
 

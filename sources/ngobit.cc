@@ -5,7 +5,7 @@
 //#
 
 #ifdef __GNUG__
-#pragma implementation "gobit.h"
+#pragma implementation "ngobit.h"
 #endif   // __GNUG__
 
 #include "gambitio.h"
@@ -17,7 +17,7 @@
 #include "solution.h"
 #include "gfunct.h"
 #include "gwatch.h"
-#include "gobit.h"
+#include "ngobit.h"
 
 GobitParams::GobitParams(void) 
   : plev(0), nequilib(1), minLam(.01), maxLam(30),delLam(1.01), 
@@ -35,22 +35,23 @@ public:
 template <class T> class GobitModule
 : public gBC2FunctMin<T>, public BaseGobit, public SolutionModule {
 private:
-  const NormalForm<T> &rep;
+  const NormalForm<T> &N;
   T Lambda;
   gPVector<T> p;
+  gTuple<gVector<T> *> scratch;
   GobitParams params;
   int maxits;
   
 public:
-  GobitModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,
+  GobitModule(const NormalForm<T> &NF,gOutput &ofile,gOutput &efile,
 	      const GobitParams &params)
-    :  SolutionModule(ofile,efile,params.plev), rep(N), Lambda(0),
-  p(rep.Dimensionality()), params(params),
-  maxits(500), gBC2FunctMin<T>(N.ProfileLength()){ constrained=1;}
+    :  SolutionModule(ofile,efile,params.plev), N(NF), Lambda(0),
+  p(NF.Dimensionality()), params(params),
+  maxits(500), gBC2FunctMin<T>(NF.ProfileLength()),
+  scratch(NF.NumPlayers())  { constrained=1;}
   virtual ~GobitModule() {}
   
   T Value(const gVector<T> &x);
-  void Foo(void);
   int Deriv(const gVector<T> &p, gVector<T> &d);
   int Hess(const gVector<T> &p, gMatrix<T> &d) {return 1;}
   int Gobit(int);
@@ -63,13 +64,12 @@ public:
 
 template <class T> int GobitModule<T>::Gobit(int number)
 {
-  gPVector<T> pp(rep.Dimensionality());
+  gPVector<T> pp(N.Dimensionality());
+  N.Centroid(pp);
 
-  for(int i=1;i<=rep.NumPlayers();i++)
-    for(int j=1;j<=rep.NumStrats(i);j++)
-      pp(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)
+    scratch[pl] = new gVector<T>(N.NumStrats(pl));
 
-  
   int iter=0;
   
   Lambda=(T) (params.minLam);
@@ -79,37 +79,41 @@ template <class T> int GobitModule<T>::Gobit(int number)
   while(nit < maxits && Lambda<=(T)(params.maxLam)) {
     nit++;
     DFP(pp, (T)(params.tolDFP), iter, value);
-    gout << "\nLam = " << Lambda << " nits= " << iter;
-    gout << " val = " << value << " p = " << p;
-    gout << " evals = " << Nevals();
+    output << "\nLam = " << Lambda << " nits= " << iter;
+    output << " val = " << value << " p = " << p;
+    output << " evals = " << Nevals();
     if(value>=10.0)return nit;
-    Lambda = Lambda * ((T)(params.delLam));
+    Lambda *= ((T)(params.delLam));
   }
+
+  for (pl = 1; pl <= N.NumPlayers(); pl++)
+    delete scratch[pl];
+
   return nit;
 };
 
-
-#define BIG1 ((T) 100)
-#define BIG2 ((T) 100)
 
 template <class T> T GobitModule<T>::
 GobitDerivValue(int i1, int j1, const gPVector<T> &p) const
 {
   int i, j;
-  T x, x1,dv;
+  T x((T) 0), x1,dv;
   
-  x=(T)(0);
-//  gout << "\nGobitDerivValue(): p = " << p;
-  for(i=1;i<=rep.NumPlayers();i++) {
-    for(j=2;j<=rep.NumStrats(i);j++) {
+  for(i=1;i<=N.NumPlayers();i++) {
+    gVector<T> *payoffs = scratch[i];
+    N.Payoff(i, i, p, *payoffs);
+
+    for(j=2;j<=N.NumStrats(i);j++) {
       dv=log(p(i,1))-log(p(i,j))
-	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
+//	- Lambda*(N.Payoff(i, i, 1, p)-N.Payoff(i,i,j,p));
+	- Lambda * ((*payoffs)[1] - (*payoffs)[j]);
       if(i==i1) {
 	if(j1==1)  x+=dv/p(i,1);
 	if(j1==j)  x-=dv/p(i,j);
       }
       if(i!=i1)
-	x-=dv*Lambda*(rep.Payoff(i,i,1,i1,j1,p)-rep.Payoff(i,i,j,i1,j1,p));
+	x-=dv*Lambda*(N.Payoff(i,i,1,i1,j1,p)-N.Payoff(i,i,j,i1,j1,p));
+
     }
   }
 //  if(p(i1,j1)<(T)(0))x+=p(i1,j1);
@@ -118,23 +122,23 @@ GobitDerivValue(int i1, int j1, const gPVector<T> &p) const
 }
 
 
-template <class T> inline
-T GobitModule<T>::Value(const gVector<T> &v)
+template <class T> T GobitModule<T>::Value(const gVector<T> &v)
 {
-//  gout << " in GobitModule::Operator()";
-  assert(v.Length()==p.Length());
-  
   p=v;
   int i,j;
   T val,psum,z;
   
   val=(T)(0);
 //  gout << "\nValue(): p = " << p;
-  for(i=1;i<=rep.NumPlayers();i++) {
+  for(i=1;i<=N.NumPlayers();i++) {
 //    psum=p(i,1);
-    for(j=2;j<=rep.NumStrats(i);j++) {
+    gVector<T> *payoffs = scratch[i];
+    N.Payoff(i, i, p, *payoffs);
+
+    for(j=2;j<=N.NumStrats(i);j++) {
       z=log(p(i,1))-log(p(i,j))
-	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
+//	- Lambda*(N.Payoff(i,i,1,p)-N.Payoff(i,i,j,p));
+	- Lambda*((*payoffs)[1] - (*payoffs)[j]);
       val+=(z*z);
 //      if(p(i,j)<(double)0.0)v+=(p(i,j)*p(i,j));
 //      psum+=p(i,j);
@@ -145,33 +149,22 @@ T GobitModule<T>::Value(const gVector<T> &v)
   return val;
 };
 
-template <class T> inline int GobitModule<T>::
-Deriv(const gVector<T> &v, gVector<T> &d)
+template <class T>
+int GobitModule<T>::Deriv(const gVector<T> &v, gVector<T> &d)
 {
-  p=v;
-  int i1,j1,ii;
+  p = v;
+
   T avg;
   
-  for(i1=1,ii=1;i1<=rep.NumPlayers();i1++) {
-    avg=(T)(0);
-    for(j1=1;j1<=rep.NumStrats(i1);j1++) {
-      d[ii]=GobitDerivValue(i1,j1,p);
-      avg+=d[ii];
-      ii++;
-    }
-    avg/=(T)rep.NumStrats(i1);
-    
-    ii-=rep.NumStrats(i1);
-    for(j1=1;j1<=rep.NumStrats(i1);j1++) {
-      d[ii]-=avg;
-      ii++;
-    }
+  for (int pl = 1, index = 1; pl <= N.NumPlayers(); pl++)  {
+    avg = (T) 0;
+    int nstrats = N.NumStrats(pl);
+    for (int st = 1; st <= nstrats;
+	 avg += (d[index++] = GobitDerivValue(pl, st++, p)));
+    avg /= (T) nstrats;
+    for (st = 1, index -= nstrats; st <= nstrats;
+	 st++, d[index++] -= avg);
   }
-//  for(i=1;i<=rep.ProfileLength();i++)x[i]=dp[i];
-//  gout << "\n in Deriv()";
-//  gout << "\n p = " << p;
-//  gout << "\n d = " << d;
-  
   return 1;
 };
 
@@ -216,4 +209,8 @@ int GobitSolver::Gobit(void)
 }
 
 
+#include "gblock.imp"
+#include "gtuple.imp"
 
+template class gBlock<gVector<double> *>;
+template class gTuple<gVector<double> *>;
