@@ -50,9 +50,9 @@ class gString   {
     void operator+=(char c);
     void operator+=(const char *s);
     void operator+=(const gString& s)   { *this += s.storage; }
-    gString operator+(char c);
-    gString operator+(const char *s);
-    gString operator+(const gString& s)  { return *this + s.storage; }
+    gString operator+(char c) const;
+    gString operator+(const char *s) const;
+    gString operator+(const gString& s) const { return *this + s.storage; }
 
 	// RELATIONAL OPERATORS
     int operator==(const gString& s) const

@@ -14,14 +14,6 @@
 #include "purenash.h"
 #include "rational.h"
 
-#ifdef __GNUG__
-// This is a horrible kludge.  I need to figure out why this isn't getting
-// instantiated
-
-typedef gPVector<gRational> FooBarBletch;
-
-#endif   // __GNUG__
-
 PureNashParams::PureNashParams(void) : plev(0), number(1)  { }
 
 template <class T> class PureNashModule {
@@ -158,7 +150,8 @@ template <class T> void PureNashModule<T>::SingleNash(long i)
     }
 }
 
-typedef PureNashModule<double> Fred;
+template class PureNashModule<double>;
+template class PureNashModule<gRational>;
 
 int PureNashSolver::PureNash(void)
 {

@@ -20,11 +20,13 @@
 #ifdef __GNUG__
 // explicitly instantiate classes and non-member functions
 template class gVector<int>;
+template class gVector<long>;
 template class gVector<double>;
 template class gVector<gInteger>;
 template class gVector<gRational>;
 
 template gOutput & operator<< (gOutput&, const gVector<int>&);
+template gOutput & operator<< (gOutput&, const gVector<long>&);
 template gOutput & operator<< (gOutput&, const gVector<double>&);
 template gOutput & operator<< (gOutput&, const gVector<gInteger>&);
 template gOutput & operator<< (gOutput&, const gVector<gRational>&);

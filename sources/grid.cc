@@ -173,6 +173,12 @@ delete pv;
 return 1;
 }
 
+template class ProbVect<double>;
+template class ProbVect<gRational>;
+
+template class GridSolveModule<double>;
+template class GridSolveModule<gRational>;
+
 //
 // Note: reading from the parameter file is currently not available...
 // This will be reactivated soon, hopefully.

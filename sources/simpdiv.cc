@@ -464,6 +464,9 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
   return maxz;
 }
 
+template class SimpdivModule<double>;
+template class SimpdivModule<gRational>;
+
 int SimpdivSolver::Simpdiv(void)
 {
   BaseSimpdiv *T;

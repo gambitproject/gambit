@@ -94,14 +94,14 @@ void gString::operator+=(const char *s)
   storage = sp;
 }
 
-gString gString::operator+(char c)
+gString gString::operator+(char c) const
 {
   gString tmp(*this);
   tmp += c;
   return tmp;
 }
 
-gString gString::operator+(const char *s)
+gString gString::operator+(const char *s) const
 {
   gString tmp(*this);
   tmp += s;

@@ -391,6 +391,9 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
+template class LemkeTableau<double>;
+template class LemkeTableau<gRational>;
+
 int LemkeSolver::Lemke(void)
 {
   if (nf.NumPlayers() != 2)   return 0;

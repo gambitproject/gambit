@@ -1,13 +1,11 @@
-//
-// FILE: gstack.h -- Definition of gStack container type
-//
-// $Id$
-//
+//#
+//# FILE: gstack.h -- Definition of gStack container type
+//#
+//# $Id$
+//#
 
 #ifndef GSTACK_H
 #define GSTACK_H
-
-#include <assert.h>
 
 // gStack -- implements a stack
 // This implementation is designed for use with built-in or other simple
@@ -28,8 +26,8 @@ template <class T> class gStack   {
     ~gStack();            // destruct gStack
 
           // GENERAL DATA ACCESS
-    int Depth(void) const    { return depth; }
-    int MaxDepth(void) const   { return max_depth; }
+    int Depth(void) const;
+    int MaxDepth(void) const;
     
           // STACK OPERATIONS
           // Note: Push() assumes that depth < max_depth
@@ -49,48 +47,6 @@ template <class T> class gStack   {
 
     void Flush(void);       // empty the stack in one fell swoop
 };
-
-
-template <class T> inline gStack<T>::gStack(int md) : depth(0), max_depth(md)
-{
-  assert(md > 0);
-  contents = new T[md];
-  assert(contents != 0);
-}
-
-template <class T> inline gStack<T>::~gStack()
-{
-  delete [] contents;
-}
-
-template <class T> inline void gStack<T>::Push(T new_el)
-{
-  assert(depth < max_depth);
-  contents[depth++] = new_el;
-}
-
-template <class T> inline T gStack<T>::Pop(void)
-{
-  assert(depth > 0);
-  return contents[--depth];
-}
-
-template <class T> inline T& gStack<T>::Peek(void)
-{
-  assert(depth > 0);
-  return contents[depth - 1];
-}
-
-template <class T> inline T gStack<T>::Peek(void) const
-{
-  assert(depth > 0);
-  return contents[depth - 1];
-}
-
-template <class T> inline void gStack<T>::Flush(void)
-{
-  depth = 0;
-}
 
 
 #endif    // GSTACK_H

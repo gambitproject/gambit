@@ -1,5 +1,5 @@
 //#
-//# FILE: gmap.h -- Declaration of Map container type
+//# FILE: gmap.h -- Declaration of Map container types
 //#
 //# $Id$
 //#
@@ -7,20 +7,11 @@
 #ifndef GMAP_H
 #define GMAP_H
 
-#include <assert.h>
-#include <string.h>
 #include "basic.h"
 #include "gambitio.h"
 #include "gmessage.h"
 
-#ifdef __GNUC__
-#define INLINE inline
-#elif defined(__BORLANDC__)
-#define INLINE
-#else
-#error Unsupported compiler type
-#endif   // __GNUC__, __BORLANDC__
-
+typedef enum { DEFINE, REMOVE, FLUSH } gMapMessageType;
 //
 // <category lib=glib sect=Containers>
 //
@@ -32,7 +23,7 @@ template <class K, class T> class gBaseMapMessage : public gMessage  {
   friend class gBaseMapIter<K, T>;
 
   private:
-    enum MessageType { DEFINE, REMOVE, FLUSH } mod_type;
+    gMapMessageType mod_type;
     int mod_position;
 
        //
@@ -40,24 +31,18 @@ template <class K, class T> class gBaseMapMessage : public gMessage  {
        // <note> This is declared private since only a gBaseMap should
        //        create a message.
        //
-    gBaseMapMessage(int pos, MessageType t)
-      : mod_type(t), mod_position(pos)  { }
+    gBaseMapMessage(int pos, gMapMessageType t);
 
   public:
        //
        // Return the type of the update
        //
-    int Type(void) const    { return mod_type; }
+    int Type(void) const;
 
        //
        // Determine if two messages are equal (identical)
        //
-    int operator==(const gMessage &m) const
-      { if (Type() != m.Type())   return 0;
-	const gBaseMapMessage<K, T> &mm = (const gBaseMapMessage<K, T> &) m;
-	return (mod_position == mm.mod_position &&
-		mod_type == mm.mod_type);
-      }
+    int operator==(const gMessage &m) const;
 };
 
 template <class K, class T> class gBaseMapIter;
@@ -97,7 +82,7 @@ template <class K, class T> class gBaseMap : public gSender {
 // This is the basic map constructor.  It initializes the map to be the
 // empty map with no relations defined.
 //
-    gBaseMap(const T &d) : _default(d), length(0), keys(0), values(0)   { }
+    gBaseMap(const T &d);
 //
 // Construct a map to have the same set of relations as another map.
 // 
@@ -108,8 +93,7 @@ template <class K, class T> class gBaseMap : public gSender {
 // the destructors for the keys and values which remain in the map at the
 // time of its deallocation.
 //
-    virtual ~gBaseMap()  
-      { delete [] keys;  delete [] values; }
+    virtual ~gBaseMap(); 
 
 //
 // These implement the mapping function which maps a key to a value.  If
@@ -125,26 +109,28 @@ template <class K, class T> class gBaseMap : public gSender {
     virtual T operator()(const K &key) const = 0;
 //-grp
 
+    virtual T *const Lookup(const K &key) = 0;
+
 //
 // These are the equality and assignment operators for this and all derived
 // classes.
 //+grp
     int operator==(const gBaseMap &M) const;
-    int operator!=(const gBaseMap &M) const { return !(*this == M); }
+    int operator!=(const gBaseMap &M) const;
     gBaseMap<K, T> &operator=(const gBaseMap &M);
 //-grp
 
 //
 // Returns the default value for the map
 //+grp    
-    T &Default(void)     { return _default; }
-    const T &Default(void) const   { return _default; }
+    T &Default(void);
+    const T &Default(void) const;
 //-grp
 
 //
 // Returns the number of mappings defined in the map
 //
-    int Length(void) const   { return length; }
+    int Length(void) const;
 
 //
 // Returns nonzero if the key has a mapping defined in the map
@@ -163,135 +149,6 @@ template <class K, class T> class gBaseMap : public gSender {
 //
     void Dump(gOutput &) const;
 };
-
-template <class K, class T> INLINE 
-gBaseMap<K, T>::gBaseMap(const gBaseMap<K, T> &m) :
-length(m.length), _default(m._default)
-{
-  keys = new K[length];
-  values = new T[length];
-
-  for (int i = 0; i < length; i++)   {
-    keys[i] = m.keys[i];
-    values[i] = m.values[i];
-  }
-}
-
-template <class K, class T> INLINE
-int gBaseMap<K, T>::operator==(const gBaseMap<K,T> &M) const
-{
-  if (length != M.length) return 0;
-
-  for (int i = 0; i < length; i++)
-    if (keys[i] != M.keys[i] || values[i] != M.values[i])  return 0;
-
-  return (_default == M._default);
-}
-
-template <class K, class T> INLINE
-gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap<K,T> &M)
-{
-  if (this != &M)   {
-    Send(gBaseMapMessage<K, T>(-1, gBaseMapMessage<K, T>::FLUSH));
-
-    length = M.length;
-
-    if (keys) delete [] keys;
-    if (values) delete [] values;
-
-    if (M.length)   {
-      keys = new K[M.length];
-      values = new T[M.length];
-      for (int i = 0; i < length; i++)  {
-	keys[i] = M.keys[i];
-        values[i] = M.values[i];
-      }
-    }
-    else  {
-      keys = 0;
-      values = 0;
-    }
-     
-    _default = M._default;
-  }
-  return *this;
-}
-
-template <class K, class T> INLINE
-T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
-{
-  K *new_keys = new K[length + 1];
-  T *new_values = new T[length + 1];
-  
-  if (length > 0)   {
-    for (int i = 0; i < entry; i++)   {
-      new_keys[i] = keys[i];
-      new_values[i] = values[i];
-    }
-    for (i++; i <= length; i++)   {
-      new_keys[i] = keys[i - 1];
-      new_values[i] = values[i - 1];
-    }
-  }
-
-  new_keys[entry] = key;
-  new_values[entry] = value;
-
-  if (length > 0)   {
-    delete [] keys;
-    delete [] values;
-  }
-
-  keys = new_keys;
-  values = new_values;
-  length++;
-  return values[entry];
-}
-
-template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
-{
-  Send(gBaseMapMessage<K, T>(where, gBaseMapMessage<K, T>::REMOVE));
-
-  if (length == 1)  {
-    T ret = values[0];
-    delete [] keys;
-    delete [] values;
-    keys = 0;
-    values = 0;
-    length = 0;
-    return ret;
-  }
-
-  T ret = values[where];
-    
-  K *new_keys = new K[length - 1];
-  T *new_values = new T[length - 1];
-
-  for (int i = 0; i < where; i++)   {
-    new_keys[i] = keys[i];
-    new_values[i] = values[i];
-  }
-
-  for (i++; i < length; i++)  {
-    new_keys[i - 1] = keys[i];
-    new_values[i - 1] = values[i];
-  }
-
-  delete [] keys;
-  delete [] values;
-    
-  keys = new_keys;
-  values = new_values;
-
-  length--;
-  return ret;
-}
-
-template <class K, class T> INLINE void gBaseMap<K, T>::Dump(gOutput &f) const
-{
-  for (int i = 0; i < length; i++)
-    f << keys[i] << " --> " << values[i] << '\n';
-}
 
 template <class K, class T> class gOrdMapIter;
 //
@@ -312,12 +169,12 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
 //
 // Construct an ordered map with no mappings and the given default value.
 //
-    gOrdMap(const T &d) : gBaseMap<K, T>(d)   { }
+    gOrdMap(const T &d);
 //
 // Construct an ordered map with the same key-value mappings as another
 // ordered map.
 //
-    gOrdMap(const gOrdMap<K, T> &m) : gBaseMap<K, T>(m)  { }
+    gOrdMap(const gOrdMap<K, T> &m);
 
 //
 // These implement the mapping function which maps a key to a value.  If
@@ -332,6 +189,8 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
     T &operator()(const K &key);
     T operator()(const K &key) const;
 //-grp
+
+    T *const Lookup(const K &key);
 
 //
 // Return nonzero exactly when the key has a defined mapping in the map
@@ -353,69 +212,6 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
     T Remove(const K &key);
 };
 
-template <class K, class T> INLINE
-int gOrdMap<K, T>::Locate(const K &key) const
-{
-  int low = 0, high = length - 1, mid = 0;
-  
-  while (low <= high)   {
-    mid = (low + high) / 2;
-    if (key < keys[mid])     high = mid - 1;
-    else if (key > keys[mid])    low = mid + 1;
-    else    return mid;
-  }
-
-  return mid;
-}
-
-
-template <class K, class T> INLINE T &gOrdMap<K, T>::operator()(const K &key)
-{
-  int where = Locate(key);
-
-  if (length > 0 && keys[where] == key)    return values[where];
-  else return Insert(key, ((key < keys[where]) ? where : where + 1),
-		    _default);
-}
-
-template <class K, class T> INLINE
-T gOrdMap<K, T>::operator()(const K &key) const
-{
-  int where = Locate(key);
-
-  if (length > 0 && keys[where] == key)    return values[where];
-  else   return _default;
-}
-
-template <class K, class T> INLINE
-int gOrdMap<K, T>::IsDefined(const K &key) const
-{
-  if (length == 0)   return 0;
-  return (keys[Locate(key)] == key);
-}
-
-template <class K, class T> INLINE
-void gOrdMap<K, T>::Define(const K &key, const T &value)
-{
-  if (length == 0)  {
-    Insert(key, 0, value);
-    return;
-  }
-
-  int where = Locate(key);
-
-  if (keys[where] == key)   values[where] = value;
-  else Insert(key, ((key < keys[where]) ? where : where + 1), value);
-}
-
-template <class K, class T> INLINE T gOrdMap<K, T>::Remove(const K &key)
-{
-  int where = Locate(key);
-
-  if (where >= 0)    return Delete(where);
-  return _default;
-}
-
 //
 // <category lib=glib sect=Containers>
 //
@@ -431,19 +227,16 @@ template <class T> class gSparseSet : public gOrdMap<int, T>  {
 //
 // Construct a sparse set with no mappings defined.
 //
-    gSparseSet(const T &d) : gOrdMap<int, T>(d)  { }
+    gSparseSet(const T &d);
 //
 // Construct a sparse set with the same mappings as another sparse set
 //
-    gSparseSet(const gSparseSet<T> &s) : gOrdMap<int, T>(s)  { }
+    gSparseSet(const gSparseSet<T> &s);
 
 //
 // Return the least integer greater than zero for which no mapping is defined
 //
-    int FirstVacancy(void) const    {
-      for (int v = 0; v < length && keys[v] == v + 1; v++);
-      return ++v;
-    }
+    int FirstVacancy(void) const;
 };
 
 
@@ -453,18 +246,18 @@ template <class T> class gSparseSet : public gOrdMap<int, T>  {
 // The gUnordMap implements a map in which no ordering is defined on the
 // key class.  No uniqueness constraints are imposed on the keys; however,
 // if multiple identical keys exist in the map, the operations will only
-// locate and manipulate the first instance they locate.
+// locate and manipulate the first instance in the map
 //
 template <class K, class T> class gUnordMap : public gBaseMap<K, T>  {
   public:
 //
 // Construct an unordered map with no mappings
 //
-    gUnordMap(const T &d) : gBaseMap<K, T>(d)  { }
+    gUnordMap(const T &d);
 //
 // Construct an unordered map with the same mappings as another map
 //
-    gUnordMap(const gUnordMap<K, T> &m) : gBaseMap<K, T>(m)  { } 
+    gUnordMap(const gUnordMap<K, T> &m);
 
 //
 // These implement the mapping function which maps a key to a value.  If
@@ -479,6 +272,8 @@ template <class K, class T> class gUnordMap : public gBaseMap<K, T>  {
     T &operator()(const K &key);
     T operator()(const K &key) const;
 //-grp
+
+    T *const Lookup(const K &key);
 
 //
 // Return nonzero when there is a mapping defined for the key
@@ -501,42 +296,6 @@ template <class K, class T> class gUnordMap : public gBaseMap<K, T>  {
 //
     T Remove(const K &key);
 };
-
-template <class K, class T> INLINE T &gUnordMap<K, T>::operator()(const K &key)
-{
-  for (int i = 0; i < length; i++)
-    if (key == keys[i])    return values[i];
-  return Insert(key, length, _default);
-}
-
-template <class K, class T> INLINE
-T gUnordMap<K, T>::operator()(const K &key) const
-{
-  for (int i = 0; i < length; i++)
-    if (key == keys[i])    return values[i];
-  return _default;
-}
-
-template <class K, class T> INLINE
-int gUnordMap<K, T>::IsDefined(const K &key) const
-{
-  for (int i = 0; i < length; i++)
-    if (key == keys[i])    return 1;
-  return 0;
-}
-
-template <class K, class T> inline
-void gUnordMap<K, T>::Define(const K &key, const T &value)
-{
-  Insert(key, length, value);
-}
-
-template <class K, class T> INLINE T gUnordMap<K, T>::Remove(const K &key)
-{
-  for (int i = 0; i < length; i++)
-    if (key == keys[i])   return Delete(i);
-  return _default;
-}
 
 
 #endif   // GMAP_H
